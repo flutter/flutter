@@ -1202,7 +1202,7 @@ void main() {
       await tester.pumpAndSettle();
       final ConstrainedBox constrainedBox = tester.widget<ConstrainedBox>(find.descendant(of: findViewContent(), matching: find.byType(ConstrainedBox)).first);
       expect(constrainedBox.constraints.maxWidth, 360.0);
-      expect(constrainedBox.constraints.maxHeight, 400.0);
+      expect(constrainedBox.constraints.maxHeight, 384.0);
     }
   });
 
@@ -1375,8 +1375,8 @@ void main() {
     await tester.pumpWidget(buildAnchor());
     await tester.tap(find.widgetWithIcon(IconButton, Icons.search));
     await tester.pumpAndSettle();
-    // Default is a SliverList.
-    expect(find.byType(SliverList), findsOneWidget);
+    // Default is a ListView.
+    expect(find.byType(ListView), findsOneWidget);
 
     await tester.pumpWidget(Container());
     await tester.pumpWidget(buildAnchor(viewBuilder: (Iterable<Widget> suggestions)
@@ -1384,43 +1384,8 @@ void main() {
     ));
     await tester.tap(find.widgetWithIcon(IconButton, Icons.search));
     await tester.pumpAndSettle();
-    expect(find.byType(SliverList), findsNothing);
+    expect(find.byType(ListView), findsNothing);
     expect(find.byType(GridView), findsOneWidget);
-  });
-
-  testWidgets('SearchAnchor respects sliverViewBuilder property', (WidgetTester tester) async {
-    Widget buildAnchor({ViewBuilder? sliverViewBuilder}) {
-      return MaterialApp(
-        home: Material(
-          child: SearchAnchor(
-            sliverViewBuilder: sliverViewBuilder,
-            builder: (BuildContext context, SearchController controller) {
-              return IconButton(icon: const Icon(Icons.search), onPressed: () {
-                controller.openView();
-              },);
-            },
-            suggestionsBuilder: (BuildContext context, SearchController controller) {
-              return const <Widget>[ListTile(title: Text('test'))];
-            },
-          ),
-        ),
-      );
-    }
-
-    await tester.pumpWidget(buildAnchor());
-    await tester.tap(find.widgetWithIcon(IconButton, Icons.search));
-    await tester.pumpAndSettle();
-    // Default is a SliverList.
-    expect(find.byType(SliverList), findsOneWidget);
-
-    await tester.pumpWidget(Container());
-    await tester.pumpWidget(buildAnchor(sliverViewBuilder: (Iterable<Widget> suggestions)
-      => SliverGrid.count(crossAxisCount: 5, children: suggestions.toList())
-    ));
-    await tester.tap(find.widgetWithIcon(IconButton, Icons.search));
-    await tester.pumpAndSettle();
-    expect(find.byType(SliverList), findsNothing);
-    expect(find.byType(SliverGrid), findsOneWidget);
   });
 
   testWidgets('SearchAnchor respects viewLeading property', (WidgetTester tester) async {
@@ -1730,7 +1695,7 @@ void main() {
 
     final ConstrainedBox constrainedBox = tester.widget<ConstrainedBox>(find.descendant(of: findViewContent(), matching: find.byType(ConstrainedBox)).first);
     expect(constrainedBox.constraints.maxWidth, 280.0);
-    expect(constrainedBox.constraints.maxHeight, 390.0);
+    expect(constrainedBox.constraints.maxHeight, 374.0);
   });
 
   testWidgets('SearchAnchor respects builder property - LTR', (WidgetTester tester) async {

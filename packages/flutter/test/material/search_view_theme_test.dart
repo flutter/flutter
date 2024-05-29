@@ -71,6 +71,7 @@ void main() {
       headerTextStyle: TextStyle(fontSize: 24.0),
       headerHintStyle: TextStyle(fontSize: 16.0),
       constraints: BoxConstraints(minWidth: 350, minHeight: 240),
+      bottomPadding: 32.0,
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -87,6 +88,7 @@ void main() {
     expect(description[6], 'headerTextStyle: TextStyle(inherit: true, size: 24.0)');
     expect(description[7], 'headerHintStyle: TextStyle(inherit: true, size: 16.0)');
     expect(description[8], 'constraints: BoxConstraints(350.0<=w<=Infinity, 240.0<=h<=Infinity)');
+    expect(description[9], 'bottomPadding: 32.0');
   });
 
   group('[Theme, SearchViewTheme, SearchView properties overrides]', () {
@@ -190,7 +192,7 @@ void main() {
 
       final ConstrainedBox constrainedBox = tester.widget<ConstrainedBox>(find.descendant(of: findViewContent(), matching: find.byType(ConstrainedBox)).first);
       expect(constrainedBox.constraints.maxWidth, 250.0);
-      expect(constrainedBox.constraints.maxHeight, 450.0);
+      expect(constrainedBox.constraints.maxHeight, 434.0);
 
       final Text hintText = tester.widget(find.text('hint text'));
       expect(hintText.style?.color, headerHintStyle.color);
