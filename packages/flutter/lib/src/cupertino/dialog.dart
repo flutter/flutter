@@ -91,6 +91,7 @@ const double _kActionSheetEdgeVerticalPadding = 10.0;
 const double _kActionSheetContentHorizontalPadding = 16.0;
 const double _kActionSheetContentVerticalPadding = 12.0;
 const double _kActionSheetButtonHeight = 56.0;
+const double _kActionSheetBActionsSectionMinHeight = 84.0;
 
 // A translucent color that is painted on top of the blurred backdrop as the
 // dialog's background color
@@ -151,6 +152,14 @@ const Color _kActionSheetButtonDividerColor = _kActionSheetContentTextColor;
 // The following constant represents a division in text scale factor beyond which
 // we want to change how the dialog is laid out.
 const double _kMaxRegularTextScaleFactor = 1.4;
+
+// Returns the first element of the given list, or null if the list is empty.
+T? _maybeFirst<T>(List<T> l) {
+  if (l.isEmpty) {
+    return null;
+  }
+  return l.first;
+}
 
 // Accessibility mode on iOS is determined by the text scale factor that the
 // user has selected.
@@ -525,17 +534,49 @@ class _ActionSheetGestureDetectorState extends State<_ActionSheetGestureDetector
   }
 }
 
+// A region that responds to the "button dragging" gesture.
+//
+// While a button is usually triggered with a tap, several widgets, such as
+// Cupertino action sheets or dialogs, allow the user to "reselect buttons",
+// i.e. drag the pointer around after pressing, and select the button in which
+// the drag ends.
+//
+// This class must be provided to a `MetaData` widget as data, and is typically
+// implemented by a widget state class. When an eligible dragging gesture
+// enters, leaves, or ends in the region marked by the `MetaData` widget,
+// corresponding methods will be called.
+//
+// Multiple `_ActionSheetDragAvatar`s might be nested, which will be treated as
+// the same region, and any eligible method will apply to all avatars in the
+// nest. Since the differentiating algorithm simply checks whether inner-most
+// avatar has changed, all nested avatars must mark the exact same region. (This
+// simple rule is used because it's suffcient for our use cases for now.)
 abstract class _ActionSheetDragAvatar {
+  // A pointer has entered this region.
+  //
+  // This includes:
+  //
+  //  * The pointer has moved into this region from outside.
+  //  * The point has contacted the screen in this region. In this case, this
+  //    method is called as soon as the pointer down event occurs regardless of
+  //    whether the gesture wins the arena immediately.
   void didEnter();
-  void didLeave();
-  void didConfirm();
-}
 
-T? _maybeFirst<T>(List<T> l) {
-  if (l.isEmpty) {
-    return null;
-  }
-  return l.first;
+  // A pointer has exited this region.
+  //
+  // This includes:
+  //  * The pointer has moved out of this region.
+  //  * The pointer is no longer in contact with the screen.
+  //  * The pointer is canceled.
+  //  * The gesture loses the arena.
+  //  * The gesture is completed. In this case, this method is called immediately
+  //    before [didConfirm].
+  void didLeave();
+
+  // The drag gesture is completed in this region.
+  //
+  // This method is called immediately after a [didLeave].
+  void didConfirm();
 }
 
 /// An iOS-style action sheet.
@@ -703,7 +744,7 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
         ? _kActionSheetCancelButtonPadding : 0.0;
     return Padding(
       padding: EdgeInsets.only(top: cancelPadding),
-      child: _ActionSheetButtonListener(
+      child: _ActionSheetButtonBackground(
         isCancel: true,
         onStateChange: (_) {},
         child: widget.cancelButton!,
@@ -832,12 +873,17 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
   }
 }
 
-/// A button typically used in a [CupertinoActionSheet].
+/// The content of a typical button in a [CupertinoActionSheet].
+///
+/// This widget only works when used as [CupertinoActionSheet.actions] or
+/// [CupertinoActionSheet.cancelButton]. This widget draws the content of a
+/// button, i.e. the text, while the background of the button is drawn by
+/// [CupertinoActionSheet].
 ///
 /// See also:
 ///
-///  * [CupertinoActionSheet], an alert that presents the user with a set of two or
-///    more choices related to the current context.
+///  * [CupertinoActionSheet], an alert that presents the user with a set of two
+///    or more choices related to the current context.
 class CupertinoActionSheetAction extends StatefulWidget {
   /// Creates an action for an iOS-style action sheet.
   const CupertinoActionSheetAction({
@@ -845,11 +891,13 @@ class CupertinoActionSheetAction extends StatefulWidget {
     required this.onPressed,
     this.isDefaultAction = false,
     this.isDestructiveAction = false,
-    this.isCancel = false,
     required this.child,
   });
 
-  /// The callback that is called when the button is tapped.
+  /// The callback that is called when the button is triggered.
+  ///
+  /// While triggering a button usually means tapping on it, the user can also
+  /// drag on the action sheet, and wherever the drag ends is triggered.
   final VoidCallback onPressed;
 
   /// Whether this action is the default choice in the action sheet.
@@ -862,27 +910,24 @@ class CupertinoActionSheetAction extends StatefulWidget {
   /// Destructive buttons have red text.
   final bool isDestructiveAction;
 
-  final bool isCancel;
-
   /// The widget below this widget in the tree.
   ///
   /// Typically a [Text] widget.
   final Widget child;
 
   @override
-  CupertinoActionSheetActionState createState() => CupertinoActionSheetActionState();
+  State<CupertinoActionSheetAction> createState() => _CupertinoActionSheetActionState();
 }
 
-class CupertinoActionSheetActionState extends State<CupertinoActionSheetAction> implements _ActionSheetDragAvatar {
+class _CupertinoActionSheetActionState extends State<CupertinoActionSheetAction>
+    implements _ActionSheetDragAvatar {
   // |_ActionSheetDragAvatar|
   @override
-  void didEnter() {
-  }
+  void didEnter() {}
 
   // |_ActionSheetDragAvatar|
   @override
-  void didLeave() {
-  }
+  void didLeave() {}
 
   // |_ActionSheetDragAvatar|
   @override
@@ -902,16 +947,12 @@ class CupertinoActionSheetActionState extends State<CupertinoActionSheetAction> 
       style = style.copyWith(fontWeight: FontWeight.w600);
     }
 
-
     return MouseRegion(
       cursor: kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
-      hitTestBehavior: HitTestBehavior.opaque,
       child: MetaData(
         metaData: this,
+        behavior: HitTestBehavior.opaque,
         child: Container(
-          // This decoration makes the entire button to return true during hit
-          // testing.
-          decoration: const BoxDecoration(),
           constraints: const BoxConstraints(
             minHeight: _kActionSheetButtonHeight,
           ),
@@ -936,9 +977,10 @@ class CupertinoActionSheetActionState extends State<CupertinoActionSheetAction> 
   }
 }
 
-class _ActionSheetButtonListener extends StatefulWidget {
-  /// Creates an action for an iOS-style action sheet.
-  const _ActionSheetButtonListener({
+// This widget renders the background (pressed or not) of a button, and sends
+// whether the button is pressed to the parent.
+class _ActionSheetButtonBackground extends StatefulWidget {
+  const _ActionSheetButtonBackground({
     super.key,
     this.isCancel = false,
     required this.onStateChange,
@@ -956,10 +998,10 @@ class _ActionSheetButtonListener extends StatefulWidget {
   final Widget child;
 
   @override
-  _ActionSheetButtonListenerState createState() => _ActionSheetButtonListenerState();
+  _ActionSheetButtonBackgroundState createState() => _ActionSheetButtonBackgroundState();
 }
 
-class _ActionSheetButtonListenerState extends State<_ActionSheetButtonListener> implements _ActionSheetDragAvatar {
+class _ActionSheetButtonBackgroundState extends State<_ActionSheetButtonBackground> implements _ActionSheetDragAvatar {
   bool _pressed = false;
 
   // |_ActionSheetDragAvatar|
@@ -1087,7 +1129,7 @@ class _ActionSheetActionSection extends StatelessWidget {
           hidden: pressedIndex == actionIndex - 1 || pressedIndex == actionIndex,
         ));
       }
-      column.add(_ActionSheetButtonListener(
+      column.add(_ActionSheetButtonBackground(
         key: ValueKey<int>(actionIndex),
         onStateChange: (bool state) {
           onPressedUpdate(actionIndex, state);
@@ -1198,7 +1240,6 @@ class _ActionSheetMainSheetState extends State<_ActionSheetMainSheet> {
     // If both the content section and the action section overflow, the content
     // section takes priority but must leave at least `actionsMinHeight` for the
     // action section.
-    const double actionsMinHeight = 84;
     final Color backgroundColor = CupertinoDynamicColor.resolve(_kActionSheetBackgroundColor, context);
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
@@ -1207,7 +1248,7 @@ class _ActionSheetMainSheetState extends State<_ActionSheetMainSheet> {
           children: <Widget>[
             _buildContent(
               hasActions: _hasActions(),
-              maxHeight: constraints.maxHeight - actionsMinHeight - _kDividerThickness,
+              maxHeight: constraints.maxHeight - _kActionSheetBActionsSectionMinHeight - _kDividerThickness,
             ),
             if (widget.hasContent && _hasActions())
               _ActionSheetDivider(
