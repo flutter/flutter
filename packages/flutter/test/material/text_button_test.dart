@@ -2303,6 +2303,7 @@ void main() {
 
   testWidgets('treats a hovering stylus like a mouse', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
     final ThemeData theme = ThemeData(useMaterial3: true);
     bool hasBeenHovered = false;
 

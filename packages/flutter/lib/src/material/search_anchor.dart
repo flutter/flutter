@@ -792,9 +792,15 @@ class _ViewContentState extends State<_ViewContent> {
       _timer?.cancel();
       _timer = Timer(Duration.zero, () async {
         searchValue = _controller.text;
-        result = await widget.suggestionsBuilder(context, _controller);
+        final Iterable<Widget> suggestions =
+            await widget.suggestionsBuilder(context, _controller);
         _timer?.cancel();
         _timer = null;
+        if (mounted) {
+          setState(() {
+            result = suggestions;
+          });
+        }
       });
     }
   }
