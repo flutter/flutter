@@ -24,6 +24,13 @@
 namespace impeller {
 namespace skia_conversions {
 
+/// @brief Like SkRRect.isSimple, but allows the corners to differ by
+///        kEhCloseEnough.
+///
+///        An RRect is simple if all corner radii are approximately
+///        equal.
+bool IsNearlySimpleRRect(const SkRRect& rr);
+
 Rect ToRect(const SkRect& rect);
 
 std::optional<Rect> ToRect(const SkRect* rect);
