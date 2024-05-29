@@ -30,7 +30,6 @@ class _MyCascadingMenuState extends State<MyCascadingMenu> {
   @override
   Widget build(BuildContext context) {
     return MenuAnchor(
-      /// Sets the focus node for Menu Button.
       childFocusNode: _buttonFocusNode,
 
       /// Defines Menu Items
