@@ -50,6 +50,7 @@ class Wrapper extends StatelessWidget {
 
 void main() {
   testWidgets('Calling setState on a widget that moves into a LayoutBuilder in the same frame', (WidgetTester tester) async {
+    StatefulWrapperState statefulWrapper;
     final Widget inner = Wrapper(
       child: StatefulWrapper(
         key: GlobalKey(),
@@ -62,7 +63,7 @@ void main() {
       }),
       right: inner,
     ));
-    final StatefulWrapperState statefulWrapper = tester.state(find.byType(StatefulWrapper));
+    statefulWrapper = tester.state(find.byType(StatefulWrapper));
     expect(statefulWrapper.built, true);
     statefulWrapper.built = false;
 
