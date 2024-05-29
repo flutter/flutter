@@ -14,6 +14,7 @@ import 'colors.dart';
 import 'theme.dart';
 
 // Examples can assume:
+// bool _giveVerse = false;
 // bool _lights = false;
 // void setState(VoidCallback fn) { }
 
@@ -474,7 +475,8 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
       return CupertinoColors.black;
     });
   }
-    List<BoxShadow>? get thumbShadow => const <BoxShadow> [
+
+  List<BoxShadow>? get thumbShadow => const <BoxShadow> [
     BoxShadow(
       color: Color(0x26000000),
       offset: Offset(0, 3),
@@ -486,8 +488,6 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
       blurRadius: 1.0,
     ),
   ];
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -710,7 +710,6 @@ class _SwitchPainter extends ToggleablePainter {
   }
 
   CurvedAnimation? _colorAnimation;
-
 
   Icon? get activeIcon => _activeIcon;
   Icon? _activeIcon;
@@ -1102,7 +1101,6 @@ class _SwitchPainter extends ToggleablePainter {
       }
     }
 
-
     // The thumb contracts slightly during the animation.
     final double inset = thumbOffset == null ? 0 : 1.0 - (currentValue - thumbOffset!).abs() * 2.0;
     thumbSize = Size(thumbSize!.width - inset, thumbSize.height - inset);
@@ -1160,7 +1158,7 @@ class _SwitchPainter extends ToggleablePainter {
       };
 
       // Label sizes and padding taken from xcode inspector.
-      // See https://github.com/flutter/flutter/issues/4830#issuecomment-528495360
+      // See https://github.com/flutter/flutter/issues/4830#issuecomment-528495360.
       const double kOnLabelWidth = 1.0;
       const double kOnLabelHeight = 10.0;
       const double kOnLabelPaddingHorizontal = 11.0;
@@ -1217,7 +1215,7 @@ class _SwitchPainter extends ToggleablePainter {
     );
   }
 
-  /// Computes canvas offset for track's upper left corner
+  /// Computes canvas offset for track's upper left corner.
   Offset _computeTrackPaintOffset(Size canvasSize, double trackWidth, double trackHeight) {
     final double horizontalOffset = (canvasSize.width - trackWidth) / 2.0;
     final double verticalOffset = (canvasSize.height - trackHeight) / 2.0;
@@ -1226,7 +1224,7 @@ class _SwitchPainter extends ToggleablePainter {
   }
 
   /// Computes canvas offset for thumb's upper left corner as if it were a
-  /// square
+  /// square.
   Offset _computeThumbPaintOffset(Offset trackPaintOffset, Size thumbSize, double visualPosition) {
     // How much thumb radius extends beyond the track
     final double trackRadius = trackHeight / 2;
@@ -1268,28 +1266,28 @@ class _SwitchPainter extends ToggleablePainter {
       canvas.drawRRect(outlineTrackRRect, outlinePaint);
     }
 
-      if (isFocused) {
-        final RRect focusedOutline = trackRRect.inflate(1.75);
-        final Paint focusedPaint = Paint()
-          ..style = PaintingStyle.stroke
-          ..color = focusColor
-          ..strokeWidth = 3.5;
-        canvas.drawRRect(focusedOutline, focusedPaint);
-      }
-      canvas.clipRRect(trackRRect);
+    if (isFocused) {
+      final RRect focusedOutline = trackRRect.inflate(1.75);
+      final Paint focusedPaint = Paint()
+        ..style = PaintingStyle.stroke
+        ..color = focusColor
+        ..strokeWidth = 3.5;
+      canvas.drawRRect(focusedOutline, focusedPaint);
     }
+    canvas.clipRRect(trackRRect);
+  }
 
   void _paintThumbWith(
-      Offset thumbPaintOffset,
-      Canvas canvas,
-      double currentValue,
-      Color thumbColor,
-      ImageProvider? thumbImage,
-      ImageErrorListener? thumbErrorListener,
-      Icon? thumbIcon,
-      Size thumbSize,
-      double inset,
-      ) {
+    Offset thumbPaintOffset,
+    Canvas canvas,
+    double currentValue,
+    Color thumbColor,
+    ImageProvider? thumbImage,
+    ImageErrorListener? thumbErrorListener,
+    Icon? thumbIcon,
+    Size thumbSize,
+    double inset,
+    ) {
     try {
       _isPainting = true;
       if (_cachedThumbPainter == null || thumbColor != _cachedThumbColor || thumbImage != _cachedThumbImage || thumbErrorListener != _cachedThumbErrorListener) {
@@ -1351,7 +1349,7 @@ class _SwitchPainter extends ToggleablePainter {
     }
   }
 
-  void _paintCupertinoThumbShadowAndBorder(Canvas canvas, Offset thumbPaintOffset, Size thumbSize,) {
+  void _paintCupertinoThumbShadowAndBorder(Canvas canvas, Offset thumbPaintOffset, Size thumbSize) {
     final RRect thumbBounds = RRect.fromLTRBR(
       thumbPaintOffset.dx,
       thumbPaintOffset.dy,
