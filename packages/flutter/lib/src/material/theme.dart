@@ -137,9 +137,9 @@ class Theme extends StatelessWidget {
     return _InheritedTheme(
       theme: this,
       child: CupertinoTheme(
-        // We're using a MaterialBasedCupertinoThemeData here instead of a
-        // CupertinoThemeData because it defers some properties to the Material
-        // ThemeData.
+        // If a CupertinoThemeData doesn't exist, We're using a
+        // MaterialBasedCupertinoThemeData here instead of a CupertinoThemeData
+        // because it defers some properties to the Material ThemeData.
         data: _inheritedCupertinoThemeData(context),
         child: _wrapsWidgetThemes(context, child),
       ),
