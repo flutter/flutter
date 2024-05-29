@@ -6,7 +6,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   test('DataTableThemeData copyWith, ==, hashCode basics', () {
@@ -553,10 +552,7 @@ void main() {
   });
 
   // This is a regression test for https://github.com/flutter/flutter/issues/143340.
-  testWidgets('DataColumn label can be centered with DataTableTheme.headingRowAlignment',
-  // TODO(polina-c): remove when fixed https://github.com/flutter/flutter/issues/145600 [leak-tracking-opt-in]
-  experimentalLeakTesting: LeakTesting.settings.withTracked(classes: const <String>['CurvedAnimation']),
-  (WidgetTester tester) async {
+  testWidgets('DataColumn label can be centered with DataTableTheme.headingRowAlignment', (WidgetTester tester) async {
     const double horizontalMargin = 24.0;
 
     Widget buildTable({ MainAxisAlignment? headingRowAlignment, bool sortEnabled = false }) {
