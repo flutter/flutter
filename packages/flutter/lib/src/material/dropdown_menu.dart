@@ -550,6 +550,9 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
     if (searchText.isEmpty) {
       return null;
     }
+    if (currentHighlight != null && entries[currentHighlight!].label.toLowerCase().contains(searchText)) {
+      return currentHighlight;
+    }
     final int index = entries.indexWhere((DropdownMenuEntry<T> entry) => entry.label.toLowerCase().contains(searchText));
 
     return index != -1 ? index : null;

@@ -36,7 +36,7 @@
 /dev/devicelab/bin/tasks/cubic_bezier_perf_sksl_warmup__e2e_summary.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/cull_opacity_perf__e2e_summary.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/devtools_profile_start_test.dart @zanderso @flutter/tool
-/dev/devicelab/bin/tasks/engine_dependency_proxy_test.dart @godofredoc @flutter/engine
+/dev/devicelab/bin/tasks/engine_dependency_proxy_test.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/fast_scroll_heavy_gridview__memory.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/flutter_engine_group_performance.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/flutter_gallery__back_button_memory.dart @zanderso @flutter/engine
@@ -316,12 +316,12 @@
 # https://github.com/flutter/flutter/issues/82068
 #
 # analyze @HansMuller @flutter/framework
-# build_tests @eliasyishak @flutter/tool
-# ci_yaml flutter roller @caseyhillers @flutter/infra
-# coverage @godofredoc @flutter/infra
+# build_tests @andrewkolos @flutter/tool
+# ci_yaml flutter roller @keyonghan @flutter/infra
+# coverage @goderbauer @flutter/infra
 # customer_testing @HansMuller @flutter/framework
 # docs @HansMuller @flutter/framework
-# flutter_packaging @godofredoc @flutter/infra
+# flutter_packaging @christopherfujino @flutter/infra
 # flutter_plugins @stuartmorgan @flutter/plugin
 # framework_tests @HansMuller @flutter/framework
 # fuchsia_precache @christopherfujino @flutter/tool
@@ -331,10 +331,10 @@
 # tool_host_cross_arch_tests @andrewkolos @flutter/tool
 # tool_integration_tests @christopherfujino @flutter/tool
 # tool_tests @andrewkolos @flutter/tool
-# verify_binaries_codesigned @xilaizhang @flutter/releases
+# verify_binaries_codesigned @cbracken @flutter/releases
 # web_canvaskit_tests @yjbanov @flutter/web
 # web_integration_tests @yjbanov @flutter/web
 # web_long_running_tests @yjbanov @flutter/web
 # web_tests @yjbanov @flutter/web
 # web_skwasm_tests @eyebrowsoffire @flutter/web
-# web_tool_tests @eliasyishak @flutter/tool
+# web_tool_tests @yjbanov @flutter/tool

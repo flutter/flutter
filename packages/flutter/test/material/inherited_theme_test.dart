@@ -4,7 +4,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   testWidgets('Theme.wrap()', (WidgetTester tester) async {
@@ -146,10 +145,7 @@ void main() {
     await tester.pumpAndSettle(); // menu route animation
   });
 
-  testWidgets('Material3 - PopupMenuTheme.wrap()',
-    // TODO(polina-c): remove when fixed https://github.com/flutter/flutter/issues/145600 [leak-tracking-opt-in]
-    experimentalLeakTesting: LeakTesting.settings.withTracked(classes: <String>['CurvedAnimation']),
-    (WidgetTester tester) async {
+  testWidgets('Material3 - PopupMenuTheme.wrap()', (WidgetTester tester) async {
     const TextStyle textStyle = TextStyle(fontSize: 24.0, color: Color(0xFF0000FF));
 
     Widget buildFrame() {

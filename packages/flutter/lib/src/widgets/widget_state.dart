@@ -353,6 +353,43 @@ abstract class WidgetStateBorderSide extends BorderSide implements WidgetStatePr
   /// widget or theme.
   @override
   BorderSide? resolve(Set<WidgetState> states);
+
+  /// Linearly interpolate between two [WidgetStateProperty]s of [BorderSide].
+  static WidgetStateProperty<BorderSide?>? lerp(
+    WidgetStateProperty<BorderSide?>? a,
+    WidgetStateProperty<BorderSide?>? b,
+    double t,
+  ) {
+    // Avoid creating a _LerpSides object for a common case.
+    if (a == null && b == null) {
+      return null;
+    }
+    return _LerpSides(a, b, t);
+  }
+}
+
+class _LerpSides implements WidgetStateProperty<BorderSide?> {
+  const _LerpSides(this.a, this.b, this.t);
+
+  final WidgetStateProperty<BorderSide?>? a;
+  final WidgetStateProperty<BorderSide?>? b;
+  final double t;
+
+  @override
+  BorderSide? resolve(Set<WidgetState> states) {
+    final BorderSide? resolvedA = a?.resolve(states);
+    final BorderSide? resolvedB = b?.resolve(states);
+    if (resolvedA == null && resolvedB == null) {
+      return null;
+    }
+    if (resolvedA == null) {
+      return BorderSide.lerp(BorderSide(width: 0, color: resolvedB!.color.withAlpha(0)), resolvedB, t);
+    }
+    if (resolvedB == null) {
+      return BorderSide.lerp(resolvedA, BorderSide(width: 0, color: resolvedA.color.withAlpha(0)), t);
+    }
+    return BorderSide.lerp(resolvedA, resolvedB, t);
+  }
 }
 
 class _WidgetStateBorderSide extends WidgetStateBorderSide {
