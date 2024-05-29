@@ -23,8 +23,8 @@ class AnimatedSwitcherExampleApp extends StatelessWidget {
 
 class AnimatedSwitcherExample extends StatefulWidget {
   const AnimatedSwitcherExample({
-    required this.duration,
     super.key,
+    required this.duration,
   });
 
   final Duration duration;
