@@ -459,24 +459,83 @@ class CupertinoPopupSurface extends StatelessWidget {
   }
 }
 
+typedef _HitTester = HitTestResult Function(Offset location);
+
+// A panning gesture that finds `_ActionSheetDragAvatar`s at the pointer
+// and triggers their methods accordingly.
+class _ButtonDraggingGestureRecognizer extends PanGestureRecognizer {
+  _ButtonDraggingGestureRecognizer({
+    super.debugOwner,
+    required this.hitTest,
+  }) {
+    onDown = _onDown;
+    onUpdate = _onUpdate;
+    onEnd = _onEnd;
+    onCancel = _onCancel;
+  }
+
+  // Performs a hit test at the given global pointer location.
+  final _HitTester hitTest;
+
+  final List<_ActionSheetDragAvatar> _currentAvatars = <_ActionSheetDragAvatar>[];
+
+  // Collect the `_ActionSheetDragAvatar` that is currently hit by the pointer,
+  // checks whether the current avatars have changed, and invoke their methods
+  // if necessary.
+  void _updateDrag(Offset pointerPosition) {
+    final HitTestResult result = hitTest(pointerPosition);
+
+    final List<_ActionSheetDragAvatar> foundAvatars = <_ActionSheetDragAvatar>[];
+    for (final HitTestEntry entry in result.path) {
+      if (entry.target case final RenderMetaData target) {
+        if (target.metaData is _ActionSheetDragAvatar) {
+          foundAvatars.add(target.metaData as _ActionSheetDragAvatar);
+        }
+      }
+    }
+
+    if (_maybeFirst(_currentAvatars) != _maybeFirst(foundAvatars)) {
+      for (final _ActionSheetDragAvatar avatar in _currentAvatars) {
+        avatar.didLeave();
+      }
+      _currentAvatars
+        ..clear()
+        ..addAll(foundAvatars);
+      for (final _ActionSheetDragAvatar avatar in _currentAvatars) {
+        avatar.didEnter();
+      }
+    }
+  }
+
+  void _onDown(DragDownDetails details) {
+    _updateDrag(details.globalPosition);
+  }
+
+  void _onUpdate(DragUpdateDetails details) {
+    _updateDrag(details.globalPosition);
+  }
+
+  void _onEnd(DragEndDetails details) {
+    _updateDrag(details.globalPosition);
+    for (final _ActionSheetDragAvatar avatar in _currentAvatars) {
+      avatar.didConfirm();
+    }
+    _currentAvatars.clear();
+  }
+
+  void _onCancel() {
+    for (final _ActionSheetDragAvatar avatar in _currentAvatars) {
+      avatar.didLeave();
+    }
+    _currentAvatars.clear();
+  }
+}
+
 class _ActionSheetGestureDetector extends StatefulWidget {
   const _ActionSheetGestureDetector({
-    super.key,
-    this.onDown,
-    this.onPanUpdate,
-    this.onPanEnd,
-    this.onPanCancel,
     this.child,
   });
 
-  final GestureDragDownCallback? onDown;
-  final GestureDragUpdateCallback? onPanUpdate;
-  final GestureDragEndCallback? onPanEnd;
-  final GestureDragCancelCallback? onPanCancel;
-
-  /// The widget below this widget in the tree.
-  ///
-  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget? child;
 
   @override
@@ -507,18 +566,22 @@ class _ActionSheetGestureDetectorState extends State<_ActionSheetGestureDetector
     }
   }
 
+  HitTestResult _hitTest(Offset globalPosition) {
+    final int viewId = View.of(context).viewId;
+    final HitTestResult result = HitTestResult();
+    WidgetsBinding.instance.hitTestInView(result, globalPosition, viewId);
+    return result;
+  }
+
   @override
   Widget build(BuildContext context) {
     final Map<Type, GestureRecognizerFactory> gestures = <Type, GestureRecognizerFactory>{};
-    gestures[PanGestureRecognizer] = GestureRecognizerFactoryWithHandlers<PanGestureRecognizer>(
-      () => PanGestureRecognizer(debugOwner: this),
-      (PanGestureRecognizer instance) {
-        instance
-          ..onDown = widget.onDown
-          ..onUpdate = widget.onPanUpdate
-          ..onEnd = widget.onPanEnd
-          ..onCancel = widget.onPanCancel;
-      }
+    gestures[_ButtonDraggingGestureRecognizer] = GestureRecognizerFactoryWithHandlers<_ButtonDraggingGestureRecognizer>(
+      () => _ButtonDraggingGestureRecognizer(
+        debugOwner: this,
+        hitTest: _hitTest,
+      ),
+      (PanGestureRecognizer instance) {}
     );
 
     return Listener(
@@ -752,58 +815,6 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
     );
   }
 
-  final List<_ActionSheetDragAvatar> _currentAvatars = <_ActionSheetDragAvatar>[];
-
-  void _updateDrag(Offset pointerPosition) {
-    final int viewId = View.of(context).viewId;
-    final HitTestResult result = HitTestResult();
-    WidgetsBinding.instance.hitTestInView(result, pointerPosition, viewId);
-
-    final List<_ActionSheetDragAvatar> foundAvatars = <_ActionSheetDragAvatar>[];
-    for (final HitTestEntry entry in result.path) {
-      if (entry.target case final RenderMetaData target) {
-        if (target.metaData is _ActionSheetDragAvatar) {
-          foundAvatars.add(target.metaData as _ActionSheetDragAvatar);
-        }
-      }
-    }
-
-    if (_maybeFirst(_currentAvatars) != _maybeFirst(foundAvatars)) {
-      for (final _ActionSheetDragAvatar avatar in _currentAvatars) {
-        avatar.didLeave();
-      }
-      _currentAvatars
-        ..clear()
-        ..addAll(foundAvatars);
-      for (final _ActionSheetDragAvatar avatar in _currentAvatars) {
-        avatar.didEnter();
-      }
-    }
-  }
-
-  void _onGestureDown(DragDownDetails details) {
-    _updateDrag(details.globalPosition);
-  }
-
-  void _onGestureUpdate(DragUpdateDetails details) {
-    _updateDrag(details.globalPosition);
-  }
-
-  void _onGestureEnd(DragEndDetails details) {
-    _updateDrag(details.globalPosition);
-    for (final _ActionSheetDragAvatar avatar in _currentAvatars) {
-      avatar.didConfirm();
-    }
-    _currentAvatars.clear();
-  }
-
-  void _onGestureCancel() {
-    for (final _ActionSheetDragAvatar avatar in _currentAvatars) {
-      avatar.didLeave();
-    }
-    _currentAvatars.clear();
-  }
-
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
@@ -850,10 +861,6 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
               child: SizedBox(
                 width: actionSheetWidth - _kActionSheetEdgeHorizontalPadding * 2,
                 child: _ActionSheetGestureDetector(
-                  onDown: _onGestureDown,
-                  onPanUpdate: _onGestureUpdate,
-                  onPanEnd: _onGestureEnd,
-                  onPanCancel: _onGestureCancel,
                   child: Semantics(
                     explicitChildNodes: true,
                     child: Column(
@@ -1095,6 +1102,9 @@ class _DividerKey extends ValueKey<int> {
 
 typedef _PressedUpdateHandler = void Function(int actionIndex, bool state);
 
+// The list of actions in an action sheet.
+//
+// This excludes the divider between the action section and the content section.
 class _ActionSheetActionSection extends StatelessWidget {
   const _ActionSheetActionSection({
     required this.actions,
@@ -1237,9 +1247,9 @@ class _ActionSheetMainSheetState extends State<_ActionSheetMainSheet> {
 
   @override
   Widget build(BuildContext context) {
-    // If both the content section and the action section overflow, the content
+    // If both the content section and the actions section overflow, the content
     // section takes priority but must leave at least `actionsMinHeight` for the
-    // action section.
+    // actions section.
     final Color backgroundColor = CupertinoDynamicColor.resolve(_kActionSheetBackgroundColor, context);
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {

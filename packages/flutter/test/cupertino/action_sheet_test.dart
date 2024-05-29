@@ -264,12 +264,19 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
 
-    // Check that the title/message section is not displayed (the action section
-    // button is at the top of the action sheet + padding).
+    final Finder finder = find.byElementPredicate(
+      (Element element) {
+        return element.widget.runtimeType.toString() == '_ActionSheetActionSection';
+      },
+    );
+
+    // Check that the title/message section is not displayed (action section is
+    // at the top of the action sheet + padding).
     expect(
-      tester.getTopLeft(find.byType(CupertinoActionSheetAction).first),
+      tester.getTopLeft(finder),
       tester.getTopLeft(find.byType(CupertinoActionSheet)) + const Offset(8.0, 10.0),
     );
+
 
     expect(
       tester.getTopLeft(find.byType(CupertinoActionSheet)) + const Offset(8.0, 10.0),
