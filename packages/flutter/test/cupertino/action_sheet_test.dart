@@ -429,6 +429,60 @@ void main() {
     expect(scrollbars[0].controller != scrollbars[1].controller, isTrue);
   });
 
+  testWidgets('Actions section correctly renders overscrolls', (WidgetTester tester) async {
+    // Verifies that when the actions section overscrolls, the overscroll part
+    // is correctly covered with background.
+    final ScrollController actionScrollController = ScrollController();
+    addTearDown(actionScrollController.dispose);
+    await tester.pumpWidget(
+      createAppWithButtonThatLaunchesActionSheet(
+        Builder(builder: (BuildContext context) {
+          return CupertinoActionSheet(
+            actions: List<Widget>.generate(12, (int i) =>
+              CupertinoActionSheetAction(
+                onPressed: () {},
+                child: Text('Button ${'*' * i}'),
+              ),
+            ),
+          );
+        }),
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+    await tester.pumpAndSettle();
+
+    const Offset sheetPadding = Offset(8, 10);
+    expect(
+      tester.getTopLeft(find.byType(CupertinoActionSheetAction).first),
+      tester.getTopLeft(find.byType(CupertinoActionSheet)) + sheetPadding,
+    );
+
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('Button *')));
+    await tester.pumpAndSettle();
+    // The dragging gesture must be dispatched in at least two segments.
+    // After the first movement, the gesture is started, but the delta is still
+    // zero. The second movement gives the delta.
+    await gesture.moveBy(const Offset(0, 40));
+    await tester.pumpAndSettle();
+    await gesture.moveBy(const Offset(0, 100));
+    await tester.pumpAndSettle();
+    // Test the top overscroll.
+    await expectLater(
+      find.byType(CupertinoActionSheet),
+      matchesGoldenFile('cupertinoActionSheet.overscroll.0.png'),
+    );
+
+    await gesture.moveBy(const Offset(0, -300));
+    await tester.pumpAndSettle();
+    // Test the bottom overscroll.
+    await expectLater(
+      find.byType(CupertinoActionSheet),
+      matchesGoldenFile('cupertinoActionSheet.overscroll.1.png'),
+    );
+    await gesture.up();
+  });
+
   testWidgets('Tap on button calls onPressed', (WidgetTester tester) async {
     bool wasPressed = false;
     await tester.pumpWidget(
@@ -463,6 +517,135 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
 
+    expect(find.text('One'), findsNothing);
+  });
+
+  testWidgets('Tap at the padding of buttons calls onPressed', (WidgetTester tester) async {
+    // Ensures that the entire button responds to hit tests, not just the text
+    // part.
+    bool wasPressed = false;
+    await tester.pumpWidget(
+      createAppWithButtonThatLaunchesActionSheet(
+        Builder(builder: (BuildContext context) {
+          return CupertinoActionSheet(
+            actions: <Widget>[
+              CupertinoActionSheetAction(
+                child: const Text('One'),
+                onPressed: () {
+                  wasPressed = true;
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          );
+        }),
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(wasPressed, isFalse);
+
+    await tester.tapAt(
+      tester.getTopLeft(find.text('One')) - const Offset(20, 0),
+    );
+
+    expect(wasPressed, isTrue);
+
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(find.text('One'), findsNothing);
+  });
+
+  testWidgets('Tap on a button can be dragged to other buttons', (WidgetTester tester) async {
+    int? pressed;
+    await tester.pumpWidget(
+      createAppWithButtonThatLaunchesActionSheet(
+        Builder(builder: (BuildContext context) {
+          return CupertinoActionSheet(
+            actions: <Widget>[
+              CupertinoActionSheetAction(
+                child: const Text('One'),
+                onPressed: () {
+                  pressed = 1;
+                  Navigator.pop(context);
+                },
+              ),
+              CupertinoActionSheetAction(
+                child: const Text('Two'),
+                onPressed: () {
+                  pressed = 2;
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          );
+        }),
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+    await tester.pumpAndSettle();
+    expect(pressed, null);
+
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('One')));
+    await tester.pumpAndSettle();
+
+    await gesture.moveTo(tester.getCenter(find.text('Two')));
+    await tester.pumpAndSettle();
+    await expectLater(
+      find.byType(CupertinoActionSheet),
+      matchesGoldenFile('cupertinoActionSheet.press-drag.png'),
+    );
+
+    await gesture.up();
+    expect(pressed, 2);
+    await tester.pumpAndSettle();
+    expect(find.text('One'), findsNothing);
+  });
+
+  testWidgets('Tap on the content can be dragged to other buttons', (WidgetTester tester) async {
+    bool wasPressed = false;
+    await tester.pumpWidget(
+      createAppWithButtonThatLaunchesActionSheet(
+        Builder(builder: (BuildContext context) {
+          return CupertinoActionSheet(
+            title: const Text('The title'),
+            actions: <Widget>[
+              CupertinoActionSheetAction(
+                child: const Text('One'),
+                onPressed: () {
+                },
+              ),
+            ],
+            cancelButton: CupertinoActionSheetAction(
+              child: const Text('Cancel'),
+              onPressed: () {
+                wasPressed = true;
+                Navigator.pop(context);
+              },
+            ),
+          );
+        }),
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+    await tester.pumpAndSettle();
+    expect(wasPressed, false);
+
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('The title')));
+    await tester.pumpAndSettle();
+
+    await gesture.moveTo(tester.getCenter(find.text('Cancel')));
+    await tester.pumpAndSettle();
+    await gesture.up();
+    expect(wasPressed, true);
+    await tester.pumpAndSettle();
     expect(find.text('One'), findsNothing);
   });
 
@@ -789,6 +972,39 @@ void main() {
       moreOrLessEquals(469.7),
     );
     expect(tester.getBottomLeft(find.widgetWithText(CupertinoActionSheetAction, 'Two')).dy, 526.0);
+  });
+
+  testWidgets('Action buttons shows pressed color as soon as the pointer is down', (WidgetTester tester) async {
+    // Verifies that the the pressed color is not delayed for some milliseconds,
+    // a symptom if the color relies on a tap gesture timing out.
+    await tester.pumpWidget(
+      createAppWithButtonThatLaunchesActionSheet(
+        CupertinoActionSheet(
+          title: const Text('The title'),
+          actions: <Widget>[
+            CupertinoActionSheetAction(
+              child: const Text('One'),
+              onPressed: () { },
+            ),
+            CupertinoActionSheetAction(
+              child: const Text('Two'),
+              onPressed: () { },
+            ),
+          ],
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+    await tester.pumpAndSettle();
+
+    final TestGesture pointer = await tester.startGesture(tester.getCenter(find.text('One')));
+    await tester.pump();
+    await expectLater(
+      find.byType(CupertinoActionSheet),
+      matchesGoldenFile('cupertinoActionSheet.pressed.png'),
+    );
+    await pointer.up();
   });
 
   testWidgets('Enter/exit animation is correct', (WidgetTester tester) async {

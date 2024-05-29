@@ -531,6 +531,14 @@ class _ButtonDraggingGestureRecognizer extends PanGestureRecognizer {
   }
 }
 
+// The gesture detector used by action sheets.
+//
+// This gesture detector only responds to the first added pointer (called the
+// primary pointer). All later pointers are kept and ignored. If the primary
+// pointer ends, the next added pointer is considered the new primary pointer.
+//
+// This gesture detector only recognizes one gesture,
+// `_ButtonDraggingGestureRecognizer`.
 class _ActionSheetGestureDetector extends StatefulWidget {
   const _ActionSheetGestureDetector({
     this.child,
@@ -715,7 +723,7 @@ class CupertinoActionSheet extends StatefulWidget {
 
   /// The set of actions that are displayed for the user to select.
   ///
-  /// Typically this is a list of [CupertinoActionSheetAction] widgets.
+  /// This must be a list of [CupertinoActionSheetAction] widgets.
   final List<Widget>? actions;
 
   /// A scroll controller that can be used to control the scrolling of the
@@ -734,7 +742,7 @@ class CupertinoActionSheet extends StatefulWidget {
   /// The optional cancel button that is grouped separately from the other
   /// actions.
   ///
-  /// Typically this is an [CupertinoActionSheetAction] widget.
+  /// This must be a [CupertinoActionSheetAction] widget.
   final Widget? cancelButton;
 
   @override
@@ -882,7 +890,7 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
 
 /// The content of a typical button in a [CupertinoActionSheet].
 ///
-/// This widget only works when used as [CupertinoActionSheet.actions] or
+/// This widget only works when used in [CupertinoActionSheet.actions] or as
 /// [CupertinoActionSheet.cancelButton]. This widget draws the content of a
 /// button, i.e. the text, while the background of the button is drawn by
 /// [CupertinoActionSheet].
