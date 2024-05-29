@@ -21,7 +21,6 @@ class _MyCascadingMenuState extends State<MyCascadingMenu> {
 
   @override
   void dispose() {
-    /// Disposes the focus node when state is disposed.
     _buttonFocusNode.dispose();
     super.dispose();
   }
