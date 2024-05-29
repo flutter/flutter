@@ -199,6 +199,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
     this.actionsIconTheme,
     this.primary = true,
     this.centerTitle,
+    this.centerLeading = false,
     this.excludeHeaderSemantics = false,
     this.titleSpacing,
     this.toolbarOpacity = 1.0,
@@ -597,6 +598,10 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// adapted to the current [TargetPlatform].
   /// {@endtemplate}
   final bool? centerTitle;
+  /// {@template flutter.material.appbar.centerLeading}
+  /// Whether the leading widget should be centered.
+  /// {@endtemplate}
+  final bool? centerLeading;
 
   /// {@template flutter.material.appbar.excludeHeaderSemantics}
   /// Whether the title should be wrapped with header [Semantics].
@@ -851,7 +856,7 @@ class _AppBarState extends State<AppBar> {
       states,
       widget.backgroundColor,
       appBarTheme.backgroundColor,
-      defaults.backgroundColor!,
+      defaults.backgroundColor,
     );
 
     final Color scrolledUnderBackground = _resolveColor(
@@ -955,7 +960,7 @@ class _AppBarState extends State<AppBar> {
 
         leading = IconButtonTheme(
             data: effectiveIconButtonTheme,
-            child: leading is IconButton ? Center(child: leading) : leading,
+            child: leading is IconButton || centerLeading ? Center(child: leading) : leading,
         );
 
         // Based on the Material Design 3 specs, the leading IconButton should have
@@ -1185,6 +1190,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
     required this.actionsIconTheme,
     required this.primary,
     required this.centerTitle,
+    required this.centerLeading,
     required this.excludeHeaderSemantics,
     required this.titleSpacing,
     required this.expandedHeight,
@@ -1226,6 +1232,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   final IconThemeData? actionsIconTheme;
   final bool primary;
   final bool? centerTitle;
+  final bool? centerLeading;
   final bool excludeHeaderSemantics;
   final double? titleSpacing;
   final double? expandedHeight;
@@ -1485,6 +1492,7 @@ class SliverAppBar extends StatefulWidget {
     this.actionsIconTheme,
     this.primary = true,
     this.centerTitle,
+    this.centerLeading,
     this.excludeHeaderSemantics = false,
     this.titleSpacing,
     this.collapsedHeight,
@@ -1553,6 +1561,7 @@ class SliverAppBar extends StatefulWidget {
     this.actionsIconTheme,
     this.primary = true,
     this.centerTitle,
+    this.centerLeading,
     this.excludeHeaderSemantics = false,
     this.titleSpacing,
     this.collapsedHeight,
@@ -1621,6 +1630,7 @@ class SliverAppBar extends StatefulWidget {
     this.actionsIconTheme,
     this.primary = true,
     this.centerTitle,
+    this.centerLeading,
     this.excludeHeaderSemantics = false,
     this.titleSpacing,
     this.collapsedHeight,
@@ -1737,6 +1747,11 @@ class SliverAppBar extends StatefulWidget {
   ///
   /// This property is used to configure an [AppBar].
   final bool? centerTitle;
+
+  /// {@macro flutter.material.appbar.centerLeading}
+  ///
+  /// This property is used to configure an [AppBar].
+  final bool? centerLeading;
 
   /// {@macro flutter.material.appbar.excludeHeaderSemantics}
   ///
@@ -2026,6 +2041,7 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
           actionsIconTheme: widget.actionsIconTheme,
           primary: widget.primary,
           centerTitle: widget.centerTitle,
+          centerLeading: widget.centerLeading,
           excludeHeaderSemantics: widget.excludeHeaderSemantics,
           titleSpacing: widget.titleSpacing,
           expandedHeight: effectiveExpandedHeight,
