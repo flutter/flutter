@@ -78,7 +78,6 @@ class CupertinoSwitch extends StatefulWidget {
     this.activeColor,
     this.trackColor,
     this.thumbColor,
-    this.activeThumbColor,
     this.inactiveThumbColor,
     this.applyTheme,
     this.focusColor,
@@ -138,23 +137,15 @@ class CupertinoSwitch extends StatefulWidget {
   /// Defaults to [CupertinoColors.secondarySystemFill] when null.
   final Color? trackColor;
 
-  /// The color to use for the thumb of the switch.
+  /// The color to use for the thumb when the switch is on.
   ///
   /// Defaults to [CupertinoColors.white] when null.
   final Color? thumbColor;
 
-  /// The color to use on the thumb when this switch is on.
+  /// The color to use on the thumb when the switch is off.
   ///
-  /// Defaults to [CupertinoColors.white].
-  ///
-  /// If [thumbColor] is non-null, it will be used instead of this color.
-  final Color? activeThumbColor;
-
-  /// The color to use on the thumb when this switch is off.
-  ///
-  /// Defaults to [CupertinoColors.white].
-  ///
-  /// If [thumbColor] is non-null, it will be used instead of this color.
+  /// If null, defaults to [thumbColor]. If that is also null, then
+  /// [CupertinoColors.white] is used.
   final Color? inactiveThumbColor;
 
   /// The color to use for the focus highlight for keyboard interactions.
@@ -242,6 +233,9 @@ class CupertinoSwitch extends StatefulWidget {
   /// ```
   /// {@end-tool}
   ///
+  /// Since a [CupertinoSwitch] has no track outline by default, this parameter
+  /// is set only if [trackOutlineColor] is provided.
+  ///
   /// Defaults to 2.0.
   final WidgetStateProperty<double?>? trackOutlineWidth;
 
@@ -286,7 +280,9 @@ class CupertinoSwitch extends StatefulWidget {
   ///  * [WidgetState.focused].
   ///  * [WidgetState.disabled].
   ///
-  /// If null, then [MouseCursor.defer] is used.
+  /// If null, then [MouseCursor.defer] is used when the switch is disabled.
+  /// When the switch is enabled,[SystemMouseCursors.click] is used on Web, and
+  /// [MouseCursor.defer] is used on other platforms.
   ///
   /// See also:
   ///
@@ -389,7 +385,7 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
   WidgetStateProperty<Color?> get _widgetThumbColor {
     return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
       if (states.contains(WidgetState.selected)) {
-        return widget.activeThumbColor;
+        return widget.thumbColor;
       }
       return widget.inactiveThumbColor;
     });
@@ -509,19 +505,24 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
       context,
     );
 
-    double disabledOpacity = 0.5;
     final bool applyTheme = widget.applyTheme
       ?? false;
-    disabledOpacity = 0.5;
+
+    // Hand coded defaults based on the animation specs.
+    const double? thumbOffset = null;
+    const Size transitionalThumbSize = Size(28.0, 28.0);  // The thumb size at the middle of the track.
     reactionController.duration = const Duration(milliseconds: 166);
-    // Hand coded default by comparing with [CupertinoSwitch].
     positionController.duration = const Duration(milliseconds: 117);
+
+    // Hand coded defaults eyeballed from iOS simulator on Mac.
+    const double disabledOpacity = 0.5;
     const double activeThumbRadius = 14.0;
     const double inactiveThumbRadius = 14.0;
     const double pressedThumbRadius = 14.0;
     const double thumbRadiusWithIcon = 14.0;
     const double trackHeight = 31.0;
     const double trackWidth = 51.0;
+    const Size switchSize = Size(59.0, 39.0);
     const CupertinoDynamicColor kOffLabelColor = CupertinoDynamicColor.withBrightnessAndContrast(
       debugLabel: 'offSwitchLabel',
       // Source: https://github.com/flutter/flutter/pull/39993#discussion_r321946033
@@ -532,12 +533,6 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
       highContrastColor: Color.fromARGB(255, 255, 255, 255),
       darkHighContrastColor: Color.fromARGB(255, 255, 255, 255),
     );
-
-    // The thumb size at the middle of the track. Hand coded default based on the animation specs.
-    const Size transitionalThumbSize = Size(28.0, 28.0);
-
-    // Hand coded default based on the animation specs.
-    const double? thumbOffset = null;
 
     final (Color onLabelColor, Color offLabelColor)? onOffLabelColors =
       MediaQuery.onOffSwitchLabelsOf(context)
@@ -553,12 +548,12 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
             )
           : null;
 
-    final WidgetStateProperty<MouseCursor?> mouseCursor =
+    final WidgetStateProperty<MouseCursor> mouseCursor =
       WidgetStateProperty.resolveWith((Set<WidgetState> states) {
         if (states.contains(WidgetState.disabled)) {
-          return SystemMouseCursors.basic;
+          return MouseCursor.defer;
         }
-        return kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic;
+        return kIsWeb ? SystemMouseCursors.click : MouseCursor.defer;
       });
 
     Color? resolveTrackColor (Color? trackColor, Set<WidgetState> states){
@@ -584,9 +579,9 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
       ?? _widgetThumbColor.resolve(activeStates)
       ?? CupertinoColors.white;
 
-    final Color effectiveInactiveThumbColor = resolveThumbColor(widget.thumbColor, inactiveStates)
+    final Color effectiveInactiveThumbColor = resolveThumbColor(widget.inactiveThumbColor, inactiveStates)
       ?? _widgetThumbColor.resolve(inactiveStates)
-      ?? CupertinoColors.white;
+      ?? effectiveActiveThumbColor;
 
     final Color effectiveActiveTrackColor = _widgetTrackColor.resolve(activeStates)
       ?? (applyTheme ? theme.primaryColor : null)
@@ -621,8 +616,7 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
 
     final WidgetStateProperty<MouseCursor> effectiveMouseCursor = WidgetStateProperty.resolveWith<MouseCursor>((Set<WidgetState> states) {
       return WidgetStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states)
-        ?? mouseCursor.resolve(states)
-        ?? MouseCursor.defer;
+        ?? mouseCursor.resolve(states);
     });
 
     final double effectiveActiveThumbRadius = effectiveActiveIcon == null ? activeThumbRadius : thumbRadiusWithIcon;
@@ -644,7 +638,7 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
             focusNode: widget.focusNode,
             onFocusChange: widget.onFocusChange,
             autofocus: widget.autofocus,
-            size: const Size(59.0, 39.0),
+            size: switchSize,
             painter: _painter
               ..position = position
               ..reaction = reaction
