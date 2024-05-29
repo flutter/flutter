@@ -924,8 +924,8 @@ class _ModalScopeStatus extends InheritedModel<_ModalRouteAspect> {
   }
 
   @override
-  bool updateShouldNotifyDependent(covariant _ModalScopeStatus oldWidget, Set<Object> dependencies) {
-    return dependencies.any((Object dependency) => dependency is _ModalRouteAspect && switch (dependency) {
+  bool updateShouldNotifyDependent(covariant _ModalScopeStatus oldWidget, Set<_ModalRouteAspect> dependencies) {
+    return dependencies.any((_ModalRouteAspect dependency) => switch (dependency) {
       _ModalRouteAspect.isCurrent => isCurrent != oldWidget.isCurrent,
       _ModalRouteAspect.canPop    => canPop != oldWidget.canPop,
       _ModalRouteAspect.settings  => route.settings != oldWidget.route.settings,
@@ -1169,7 +1169,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   }
 
   static ModalRoute<T>? _of<T extends Object?>(BuildContext context, [_ModalRouteAspect? aspect]) {
-    return InheritedModel.inheritFrom<_ModalScopeStatus>(context, aspect: aspect)?.route  as ModalRoute<T>?;
+    return InheritedModel.inheritFrom<_ModalScopeStatus>(context, aspect: aspect)?.route as ModalRoute<T>?;
   }
 
   /// Returns [ModalRoute.isCurrent] for the modal route most closely associated
