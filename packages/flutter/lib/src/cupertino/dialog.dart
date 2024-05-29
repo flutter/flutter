@@ -104,13 +104,13 @@ const Color _kDialogColor = CupertinoDynamicColor.withBrightness(
 // background color of a pressed button.
 // Eyeballed from iOS 13 beta simulator.
 const Color _kPressedColor = CupertinoDynamicColor.withBrightness(
-  color: Color(0xCAE0E0E0),
+  color: Color(0xFFE1E1E1),
   darkColor: Color(0xFF2E2E2E),
 );
 
 const Color _kActionSheetCancelPressedColor = CupertinoDynamicColor.withBrightness(
   color: Color(0xFFECECEC),
-  darkColor: Color(0xFFECECEC),
+  darkColor: Color(0xFF49494B),
 );
 
 const Color _kActionSheetCancelColor = CupertinoDynamicColor.withBrightness(
@@ -136,7 +136,7 @@ const Color _kActionSheetContentTextColor = Color(0xFF8F8F8F);
 // areas between the content section and actions section, as well as between
 // buttons.
 // Eye-balled from iOS 13 beta simulator.
-const Color _kActionSheetButtonDividerColor = Color(0xFFD6D6D6);
+const Color _kActionSheetButtonDividerColor = _kActionSheetContentTextColor;
 
 // The alert dialog layout policy changes depending on whether the user is using
 // a "regular" font size vs a "large" font size. This is a spectrum. There are
