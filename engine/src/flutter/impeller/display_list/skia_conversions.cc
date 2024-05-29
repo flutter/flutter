@@ -9,6 +9,20 @@
 namespace impeller {
 namespace skia_conversions {
 
+bool IsNearlySimpleRRect(const SkRRect& rr) {
+  auto [a, b] = rr.radii(SkRRect::kUpperLeft_Corner);
+  auto [c, d] = rr.radii(SkRRect::kLowerLeft_Corner);
+  auto [e, f] = rr.radii(SkRRect::kUpperRight_Corner);
+  auto [g, h] = rr.radii(SkRRect::kLowerRight_Corner);
+  return SkScalarNearlyEqual(a, b, kEhCloseEnough) &&
+         SkScalarNearlyEqual(a, c, kEhCloseEnough) &&
+         SkScalarNearlyEqual(a, d, kEhCloseEnough) &&
+         SkScalarNearlyEqual(a, e, kEhCloseEnough) &&
+         SkScalarNearlyEqual(a, f, kEhCloseEnough) &&
+         SkScalarNearlyEqual(a, g, kEhCloseEnough) &&
+         SkScalarNearlyEqual(a, h, kEhCloseEnough);
+}
+
 Rect ToRect(const SkRect& rect) {
   return Rect::MakeLTRB(rect.fLeft, rect.fTop, rect.fRight, rect.fBottom);
 }

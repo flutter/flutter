@@ -7,6 +7,7 @@
 #include "flutter/testing/testing.h"
 #include "impeller/display_list/skia_conversions.h"
 #include "impeller/geometry/scalar.h"
+#include "include/core/SkRRect.h"
 
 namespace impeller {
 namespace testing {
@@ -172,6 +173,15 @@ TEST(SkiaConversionsTest, GradientConversionNonMonotonic) {
   ASSERT_TRUE(ScalarNearlyEqual(converted_stops[1], 0.5f));
   ASSERT_TRUE(ScalarNearlyEqual(converted_stops[2], 0.5f));
   ASSERT_TRUE(ScalarNearlyEqual(converted_stops[3], 1.0f));
+}
+
+TEST(SkiaConversionsTest, IsNearlySimpleRRect) {
+  EXPECT_TRUE(skia_conversions::IsNearlySimpleRRect(
+      SkRRect::MakeRectXY(SkRect::MakeLTRB(0, 0, 10, 10), 10, 10)));
+  EXPECT_TRUE(skia_conversions::IsNearlySimpleRRect(
+      SkRRect::MakeRectXY(SkRect::MakeLTRB(0, 0, 10, 10), 10, 9.999)));
+  EXPECT_FALSE(skia_conversions::IsNearlySimpleRRect(
+      SkRRect::MakeRectXY(SkRect::MakeLTRB(0, 0, 10, 10), 10, 9)));
 }
 
 }  // namespace testing
