@@ -33,7 +33,7 @@ with `gn format`.
 
 [code_of_conduct]: https://github.com/flutter/flutter/blob/master/CODE_OF_CONDUCT.md
 [contrib_guide]: https://github.com/flutter/flutter/blob/master/CONTRIBUTING.md
-[engine_dev_setup]: https://github.com/flutter/flutter/wiki/Setting-up-the-Engine-development-environment
+[engine_dev_setup]: https://github.com/flutter/flutter/blob/master/docs/engine/contributing/Setting-up-the-Engine-development-environment.md
 [objc_style]: https://google.github.io/styleguide/objcguide.html
 [objcc_style]: https://google.github.io/styleguide/objcguide.html#objective-c
 [java_style]: https://google.github.io/styleguide/javaguide.html
