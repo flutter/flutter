@@ -64,7 +64,7 @@ void main() {
   });
 
   tearDownAll(() async {
-    //tryToDelete(tempDir as FileSystemEntity);
+    tryToDelete(tempDir as FileSystemEntity);
   });
 
   Future<ProcessResult> buildFlutterApkWithSpecifiedDependencyVersions({
