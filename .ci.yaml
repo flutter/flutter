@@ -2814,7 +2814,6 @@ targets:
   # Mokey, Impeller (OpenGL)
   - name: Linux_mokey new_gallery_opengles_impeller__transition_perf
     recipe: devicelab/devicelab_drone
-    bringup: true # Device exists only in staging.
     presubmit: false
     timeout: 60
     properties:
