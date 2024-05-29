@@ -610,30 +610,32 @@ void DisplayListBuilder::Restore() {
 
       op->restore_index = op_index_;
       op->total_content_depth = depth_ - current_info.save_depth;
+    }
 
-      if (current_info.is_save_layer) {
-        RestoreLayer(current_info, parent_info(), op);
-      } else {
-        // No need to propagate bounds as we do with layers...
+    if (current_info.is_save_layer) {
+      RestoreLayer(current_info, parent_info());
+    } else {
+      // No need to propagate bounds as we do with layers...
 
-        // global accumulator is either the same object or both nullptr
-        FML_DCHECK(current_info.global_space_accumulator.get() ==
-                   parent_info().global_space_accumulator.get());
+      // global accumulator is either the same object or both nullptr
+      FML_DCHECK(current_info.global_space_accumulator.get() ==
+                 parent_info().global_space_accumulator.get());
 
-        // layer accumulators are both the same object
-        FML_DCHECK(current_info.layer_local_accumulator.get() ==
-                   parent_info().layer_local_accumulator.get());
-        FML_DCHECK(current_info.layer_local_accumulator.get() != nullptr);
+      // layer accumulators are both the same object
+      FML_DCHECK(current_info.layer_local_accumulator.get() ==
+                 parent_info().layer_local_accumulator.get());
+      FML_DCHECK(current_info.layer_local_accumulator.get() != nullptr);
 
-        // We only propagate these values through a regular save()
-        if (current_info.opacity_incompatible_op_detected) {
-          parent_info().opacity_incompatible_op_detected = true;
-        }
+      // We only propagate these values through a regular save()
+      if (current_info.opacity_incompatible_op_detected) {
+        parent_info().opacity_incompatible_op_detected = true;
       }
+    }
 
-      // Wait until all outgoing bounds information for the saveLayer is
-      // recorded before pushing the record to the buffer so that any rtree
-      // bounds will be attributed to the op_index of the restore op.
+    // Wait until all outgoing bounds information for the saveLayer is
+    // recorded before pushing the record to the buffer so that any rtree
+    // bounds will be attributed to the op_index of the restore op.
+    if (!current_info.has_deferred_save_op) {
       Push<RestoreOp>(0);
     } else {
       FML_DCHECK(!current_info.is_save_layer);
@@ -644,8 +646,7 @@ void DisplayListBuilder::Restore() {
 }
 
 void DisplayListBuilder::RestoreLayer(const SaveInfo& current_info,
-                                      SaveInfo& parent_info,
-                                      void* base_op) {
+                                      SaveInfo& parent_info) {
   FML_DCHECK(save_stack_.size() > 1);
   FML_DCHECK(!current_info.has_deferred_save_op);
 
@@ -656,7 +657,8 @@ void DisplayListBuilder::RestoreLayer(const SaveInfo& current_info,
 
   SkRect content_bounds = current_info.layer_local_accumulator->bounds();
 
-  SaveLayerOpBase* layer_op = reinterpret_cast<SaveLayerOpBase*>(base_op);
+  SaveLayerOpBase* layer_op = reinterpret_cast<SaveLayerOpBase*>(
+      storage_.get() + current_info.save_offset);
   FML_DCHECK(layer_op->type == DisplayListOpType::kSaveLayer ||
              layer_op->type == DisplayListOpType::kSaveLayerBackdrop);
 

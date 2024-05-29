@@ -665,8 +665,7 @@ class DisplayListBuilder final : public virtual DlCanvas,
   }
 
   void RestoreLayer(const SaveInfo& current_info,
-                    SaveInfo& parent_info,
-                    void* base_op);
+                    SaveInfo& parent_info);
   void TransferLayerBounds(const SaveInfo& current_info,
                            SaveInfo& parent_info,
                            const SkRect& content_bounds);
