@@ -53,8 +53,6 @@ class _MyCascadingMenuState extends State<MyCascadingMenu> {
               controller.open();
             }
           },
-
-          /// Displays Menu Button Icon.
           icon: const Icon(Icons.more_vert),
         );
       },
