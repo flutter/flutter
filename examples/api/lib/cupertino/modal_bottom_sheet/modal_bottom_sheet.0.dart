@@ -53,7 +53,7 @@ class MyHomePage extends StatelessWidget {
               TextButton(
                 onPressed: () {
                   Navigator.of(context).push(
-                  MaterialPageRoute(
+                  MaterialPageRoute<void>(
                     builder: (BuildContext context) {
                       return  const MyHomePage(title: 'Zoom Transition');
                     },
@@ -64,7 +64,7 @@ class MyHomePage extends StatelessWidget {
               TextButton(
                 onPressed: () {
                   Navigator.of(context).push(
-                  CupertinoPageRoute(
+                  CupertinoPageRoute<void>(
                     builder: (BuildContext context) {
                       return  const MyHomePage(title: 'Cupertino Transition');
                     }
@@ -75,7 +75,7 @@ class MyHomePage extends StatelessWidget {
               TextButton(
                 onPressed: () {
                   Navigator.of(context).push(
-                  MBSPageRoute(
+                  MBSPageRoute<void>(
                     context: context,
                     pageBuilder: (BuildContext buildContext) {
                       return  const MyHomePage(title: 'MBS Transition');
@@ -265,7 +265,7 @@ mixin MBSRouteTransitionMixin<T> on PageRoute<T> {
       parentNavigatorContext: context,
       initialRoute: '/',
       onGenerateRoute: (RouteSettings settings) {
-        return CupertinoPageRoute(
+        return CupertinoPageRoute<void>(
           builder: (BuildContext context) {
             return Semantics(
               scopesRoute: true,
