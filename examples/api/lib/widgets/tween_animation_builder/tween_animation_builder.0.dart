@@ -21,7 +21,7 @@ class TweenAnimationBuilderExampleApp extends StatelessWidget {
           title: const Text('TweenAnimationBuilder Sample'),
         ),
         body: const Center(
-          child: TweenAnimationBuilderExample(duration: duration),
+          child: TweenAnimationBuilderExample(),
         ),
       ),
     );
@@ -30,7 +30,7 @@ class TweenAnimationBuilderExampleApp extends StatelessWidget {
 
 class TweenAnimationBuilderExample extends StatefulWidget {
   const TweenAnimationBuilderExample({
-    required this.duration,
+    this.duration = TweenAnimationBuilderExampleApp.duration,
     super.key,
   });
 
