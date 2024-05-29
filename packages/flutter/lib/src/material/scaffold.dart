@@ -228,7 +228,7 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
       if (_isRoot(scaffold)) {
         scaffold._updateSnackBar();
         scaffold._updateMaterialBanner();
-
+      }
     }
   }
 
@@ -2650,8 +2650,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   // top. We implement this by looking up the primary scroll controller and
   // scrolling it to the top when tapped.
   void _handleStatusBarTap() {
-    if(onStatusBarTapped != null) {
-      onStatusBarTapped?.call();
+    if(widget.onStatusBarTapped != null) {
+      widget.onStatusBarTapped?.call();
       return;
     }
     final ScrollController? primaryScrollController = PrimaryScrollController.maybeOf(context);
