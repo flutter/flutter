@@ -1930,7 +1930,7 @@ class Scaffold extends StatefulWidget {
 
 
   /// Called when the status bar is tapped. (iOS only)
-  /// 
+  ///
   /// If this callback is null, default behavior is to scroll the primary scroll
   final VoidCallback? onStatusBarTapped;
 
@@ -2650,7 +2650,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   // top. We implement this by looking up the primary scroll controller and
   // scrolling it to the top when tapped.
   void _handleStatusBarTap() {
-    if(widget.onStatusBarTapped != null) {
+    if (widget.onStatusBarTapped != null) {
       widget.onStatusBarTapped?.call();
       return;
     }
