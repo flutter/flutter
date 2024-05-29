@@ -11,7 +11,7 @@ void main() {
     await tester.pumpWidget(
       const example.CarouselExampleApp(),
     );
-    expect(find.byType(Carousel), findsOneWidget);
+    expect(find.byType(CarouselView), findsOneWidget);
 
     expect(find.widgetWithText(example.UncontainedLayoutCard, 'Item 0'), findsOneWidget);
     expect(find.widgetWithText(example.UncontainedLayoutCard, 'Item 1'), findsOneWidget);

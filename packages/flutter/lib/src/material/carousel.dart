@@ -715,14 +715,14 @@ class CarouselController extends ScrollController {
   /// The item that expands to the maximum size when first creating the [CarouselView].
   final int initialItem;
 
-  _CarouselState? _carouselState;
+  _CarouselViewState? _carouselState;
 
   // ignore: use_setters_to_change_properties
-  void _attach(_CarouselState anchor) {
+  void _attach(_CarouselViewState anchor) {
     _carouselState = anchor;
   }
 
-  void _detach(_CarouselState anchor) {
+  void _detach(_CarouselViewState anchor) {
     if (_carouselState == anchor) {
       _carouselState = null;
     }

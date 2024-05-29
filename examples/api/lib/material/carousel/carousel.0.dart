@@ -38,7 +38,7 @@ class _CarouselExampleState extends State<CarouselExample> {
     return Center(
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxHeight: 200),
-        child: Carousel(
+        child: CarouselView(
           itemExtent: 330,
           shrinkExtent: 200,
           children: List<Widget>.generate(20, (int index) {
