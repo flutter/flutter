@@ -1334,7 +1334,7 @@ class _CupertinoDialogRenderWidget extends RenderObjectWidget {
 }
 
 class _CupertinoDialogRenderElement extends RenderObjectElement {
-  _CupertinoDialogRenderElement(super.widget, {this.allowMoveRenderObjectChild = false});
+  _CupertinoDialogRenderElement(_CupertinoDialogRenderWidget super.widget, {this.allowMoveRenderObjectChild = false});
 
   // Whether to allow overridden method moveRenderObjectChild call or default to super.
   // CupertinoActionSheet should default to [super] but CupertinoAlertDialog not.
@@ -2873,7 +2873,7 @@ class _RenderCupertinoDialogActions extends RenderBox
     }
 
     canvas.drawPath(backgroundFillPath, _buttonBackgroundPaint);
-    // canvas.drawPath(pressedBackgroundFillPath, _pressedButtonBackgroundPaint);
+    canvas.drawPath(pressedBackgroundFillPath, _pressedButtonBackgroundPaint);
     canvas.drawPath(dividersPath, _dividerPaint);
   }
 
