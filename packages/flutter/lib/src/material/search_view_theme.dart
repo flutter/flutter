@@ -40,6 +40,7 @@ class SearchViewThemeData with Diagnosticable {
     this.elevation,
     this.surfaceTintColor,
     this.constraints,
+    this.bottomPadding,
     this.side,
     this.shape,
     this.headerHeight,
@@ -74,6 +75,9 @@ class SearchViewThemeData with Diagnosticable {
 
   /// Overrides the value of size constraints for [SearchAnchor.viewConstraints].
   final BoxConstraints? constraints;
+
+  /// Overrides the value of the padding for [SearchAnchor.viewBottomPadding].
+  final double? bottomPadding;
 
   /// Overrides the value of the divider color for [SearchAnchor.dividerColor].
   final Color? dividerColor;

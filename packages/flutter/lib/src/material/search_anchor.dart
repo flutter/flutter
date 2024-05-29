@@ -129,6 +129,7 @@ class SearchAnchor extends StatefulWidget {
     this.headerHintStyle,
     this.dividerColor,
     this.viewConstraints,
+    this.viewBottomPadding,
     this.textCapitalization,
     this.viewOnChanged,
     this.viewOnSubmitted,
@@ -178,6 +179,7 @@ class SearchAnchor extends StatefulWidget {
     Color? dividerColor,
     BoxConstraints? constraints,
     BoxConstraints? viewConstraints,
+    double? viewBottomPadding,
     bool? isFullScreen,
     SearchController searchController,
     TextCapitalization textCapitalization,
@@ -308,6 +310,14 @@ class SearchAnchor extends StatefulWidget {
   /// ```
   final BoxConstraints? viewConstraints;
 
+  /// The bottom padding to use for the search view.
+  ///
+  /// Has no effect if the search view is full-screen.
+  ///
+  /// If null, the value of [SearchViewThemeData.bottomPadding] will be used. If this
+  /// is also null, then the padding defaults to `16.0`.
+  final double? viewBottomPadding;
+
   /// {@macro flutter.widgets.editableText.textCapitalization}
   final TextCapitalization? textCapitalization;
 
@@ -414,6 +424,7 @@ class _SearchAnchorState extends State<SearchAnchor> {
       viewHeaderHintStyle: widget.headerHintStyle,
       dividerColor: widget.dividerColor,
       viewConstraints: widget.viewConstraints,
+      viewBottomPadding: widget.viewBottomPadding,
       showFullScreenView: getShowFullScreenView(),
       toggleVisibility: toggleVisibility,
       textDirection: Directionality.of(context),
@@ -483,6 +494,7 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
     this.viewHeaderHintStyle,
     this.dividerColor,
     this.viewConstraints,
+    this.viewBottomPadding,
     this.textCapitalization,
     required this.showFullScreenView,
     required this.anchorKey,
@@ -511,6 +523,7 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
   final TextStyle? viewHeaderHintStyle;
   final Color? dividerColor;
   final BoxConstraints? viewConstraints;
+  final double? viewBottomPadding;
   final TextCapitalization? textCapitalization;
   final bool showFullScreenView;
   final GlobalKey anchorKey;
@@ -582,10 +595,13 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
     final Rect anchorRect = getRect() ?? Rect.zero;
 
     final BoxConstraints effectiveConstraints = viewConstraints ?? viewTheme.constraints ?? viewDefaults.constraints!;
+    final double effectiveBottomPadding = viewBottomPadding ?? viewTheme.bottomPadding ?? viewDefaults.bottomPadding!;
+
     _rectTween.begin = anchorRect;
 
     final double viewWidth = clampDouble(anchorRect.width, effectiveConstraints.minWidth, effectiveConstraints.maxWidth);
     final double viewHeight = clampDouble(screenSize.height * 2 / 3, effectiveConstraints.minHeight, effectiveConstraints.maxHeight);
+    final Size endSize = Size(viewWidth, viewHeight - effectiveBottomPadding);
 
     switch (textDirection ?? TextDirection.ltr) {
       case TextDirection.ltr:
@@ -602,7 +618,6 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
         if (viewTopToScreenBottom < viewHeight) {
           topLeft = Offset(topLeft.dx, screenSize.height - math.min(viewHeight, screenSize.height));
         }
-        final Size endSize = Size(viewWidth, viewHeight);
         _rectTween.end = showFullScreenView ? Offset.zero & screenSize : (topLeft & endSize);
         return;
       case TextDirection.rtl:
@@ -617,7 +632,6 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
         if (viewTopToScreenBottom < viewHeight) {
           topLeft = Offset(topLeft.dx, screenSize.height - math.min(viewHeight, screenSize.height));
         }
-        final Size endSize = Size(viewWidth, viewHeight);
         _rectTween.end = showFullScreenView ? Offset.zero & screenSize : (topLeft & endSize);
     }
   }
@@ -1023,6 +1037,7 @@ class _SearchAnchorWithSearchBar extends SearchAnchor {
     super.dividerColor,
     BoxConstraints? constraints,
     super.viewConstraints,
+    super.viewBottomPadding,
     super.isFullScreen,
     super.searchController,
     super.textCapitalization,
@@ -1594,6 +1609,9 @@ class _SearchViewDefaultsM3 extends SearchViewThemeData {
 
   @override
   BoxConstraints get constraints => const BoxConstraints(minWidth: 360.0, minHeight: 240.0);
+
+  @override
+  double get bottomPadding => 16.0;
 
   @override
   Color? get dividerColor => _colors.outline;
