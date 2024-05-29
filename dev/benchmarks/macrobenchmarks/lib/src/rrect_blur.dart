@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' show cos, sin;
 import 'dart:typed_data';
 import 'dart:ui';
-import 'dart:math' show sin;
 
 import 'package:flutter/material.dart';
 
@@ -76,7 +76,7 @@ class PointsPainter extends CustomPainter {
     const double freq = 0.25;
     for (int i = 0; i < size.width / 10; ++i) {
       final double radius =
-          25 * sin(i + (freq * 2.0 * 3.1415 * tick) / 60.0) +
+          25 * cos(i + (1.0 * 2.0 * 3.1415 * tick) / 60.0) +
               25;
       final Paint paint = Paint()
         ..style = PaintingStyle.fill
