@@ -80,23 +80,20 @@ class DependencyVersionChecker {
         }
 
         // The following versions define our support policy for Gradle, Java, AGP, and KGP.
-        // All "error" versions are currently set to 0 as this policy is new. They will be increased
-        // to match the current values of the "warn" versions in the next release.
         // Before updating any "error" version, ensure that you have updated the corresponding
         // "warn" version for a full release to provide advanced warning. See
         // flutter.dev/go/android-dependency-versions for more.
-        // TODO(gmackall): https://github.com/flutter/flutter/issues/142653.
         val warnGradleVersion: Version = Version(7, 0, 2)
-        val errorGradleVersion: Version = Version(0, 0, 0)
+        val errorGradleVersion: Version = Version(7, 0, 2)
 
         val warnJavaVersion: JavaVersion = JavaVersion.VERSION_11
         val errorJavaVersion: JavaVersion = JavaVersion.VERSION_1_1
 
         val warnAGPVersion: Version = Version(7, 0, 0)
-        val errorAGPVersion: Version = Version(0, 0, 0)
+        val errorAGPVersion: Version = Version(7, 0, 0)
 
-        val warnKGPVersion: Version = Version(1, 5, 0)
-        val errorKGPVersion: Version = Version(0, 0, 0)
+        val warnKGPVersion: Version = Version(1, 7, 0)
+        val errorKGPVersion: Version = Version(1, 7, 0)
 
         /**
          * Checks if the project's Android build time dependencies are each within the respective
