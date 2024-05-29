@@ -4047,5 +4047,30 @@ TEST_F(DisplayListTest, TransformingFilterSaveLayerFloodedContentBounds) {
   EXPECT_EQ(dl->bounds(), SkRect::MakeLTRB(100.0f, 100.0f, 200.0f, 200.0f));
 }
 
+TEST_F(DisplayListTest, OpacityIncompatibleRenderOpInsideDeferredSave) {
+  {
+    // Without deferred save
+    DisplayListBuilder builder;
+    builder.DrawRect(SkRect::MakeLTRB(0, 0, 10, 10),
+                     DlPaint().setBlendMode(DlBlendMode::kClear));
+    EXPECT_FALSE(builder.Build()->can_apply_group_opacity());
+  }
+
+  {
+    // With deferred save
+    DisplayListBuilder builder;
+    builder.Save();
+    {
+      // Nothing to trigger the deferred save...
+      builder.DrawRect(SkRect::MakeLTRB(0, 0, 10, 10),
+                       DlPaint().setBlendMode(DlBlendMode::kClear));
+    }
+    // Deferred save was not triggered, did it forward the incompatibility
+    // flags?
+    builder.Restore();
+    EXPECT_FALSE(builder.Build()->can_apply_group_opacity());
+  }
+}
+
 }  // namespace testing
 }  // namespace flutter
