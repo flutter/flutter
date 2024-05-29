@@ -48,8 +48,6 @@ class _MyCascadingMenuState extends State<MyCascadingMenu> {
       builder: (_, MenuController controller, Widget? child) {
         return IconButton(
           focusNode: _buttonFocusNode,
-
-          /// Opens or closes the menu based on its current state.
           onPressed: () {
             if (controller.isOpen) {
               controller.close();
