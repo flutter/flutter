@@ -451,11 +451,6 @@ class CupertinoPopupSurface extends StatelessWidget {
 }
 
 class _ActionSheetGestureDetector extends StatefulWidget {
-  /// Creates a widget that detects gestures.
-  ///
-  /// Gesture detectors can contribute semantic information to the tree that is
-  /// used by assistive technology. The behavior can be configured by
-  /// [semantics], or disabled with [excludeFromSemantics].
   const _ActionSheetGestureDetector({
     super.key,
     this.onDown,
@@ -521,12 +516,26 @@ class _ActionSheetGestureDetectorState extends State<_ActionSheetGestureDetector
       onPointerUp: _handlePointerUp,
       onPointerCancel: _handlePointerCancel,
       child: RawGestureDetector(
+        excludeFromSemantics: true,
         gestures: gestures,
         filterPointer: _filterPointer,
         child: widget.child,
       ),
     );
   }
+}
+
+abstract class _ActionSheetDragAvatar {
+  void didEnter();
+  void didLeave();
+  void didConfirm();
+}
+
+T? _maybeFirst<T>(List<T> l) {
+  if (l.isEmpty) {
+    return null;
+  }
+  return l.first;
 }
 
 /// An iOS-style action sheet.
@@ -626,19 +635,6 @@ class CupertinoActionSheet extends StatefulWidget {
 
   @override
   State<CupertinoActionSheet> createState() => _CupertinoActionSheetState();
-}
-
-abstract class _ActionSheetDragAvatar {
-  void didEnter();
-  void didLeave();
-  void didConfirm();
-}
-
-T? _maybeFirst<T>(List<T> l) {
-  if (l.isEmpty) {
-    return null;
-  }
-  return l.first;
 }
 
 class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
@@ -817,11 +813,14 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
                   onPanUpdate: _onGestureUpdate,
                   onPanEnd: _onGestureEnd,
                   onPanCancel: _onGestureCancel,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: children,
+                  child: Semantics(
+                    explicitChildNodes: true,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: children,
+                    ),
                   ),
                 ),
               ),
@@ -918,6 +917,7 @@ class CupertinoActionSheetActionState extends State<CupertinoActionSheetAction> 
           ),
           child: Semantics(
             button: true,
+            onTap: widget.onPressed,
             child: Padding(
               padding: const EdgeInsets.symmetric(
                 vertical: 16.0,
