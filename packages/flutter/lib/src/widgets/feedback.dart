@@ -20,9 +20,6 @@ import 'gesture_detector.dart';
 /// [wrapForTap] or [wrapForLongPress] to achieve the same (see example code
 /// below).
 ///
-/// Calling any of these methods is a no-op on iOS as actions on that platform
-/// typically don't provide haptic or acoustic feedback.
-///
 /// All methods in this class are usually called from within a
 /// [StatelessWidget.build] method or from a [State]'s methods as you have to
 /// provide a [BuildContext].
@@ -128,7 +125,7 @@ abstract final class Feedback {
   /// Provides platform-specific feedback for a long press.
   ///
   /// On Android the platform-typical vibration is triggered. On iOS a
-  /// heavy-impact haptic feedback is triggered, alongside the click system
+  /// heavy-impact haptic feedback is triggered alongside the click system
   /// sound, which was observed to be the default behavior on a physical iPhone
   /// 15 Pro running iOS version 17.5.
   ///
@@ -158,7 +155,7 @@ abstract final class Feedback {
   /// for a long press before the provided callback is executed.
   ///
   /// On Android the platform-typical vibration is triggered. On iOS a
-  /// heavy-impact haptic feedback is triggered, alongside the click system
+  /// heavy-impact haptic feedback is triggered alongside the click system
   /// sound, which was observed to be the default behavior on a physical iPhone
   /// 15 Pro running iOS version 17.5.
   ///
