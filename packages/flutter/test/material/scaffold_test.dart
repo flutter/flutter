@@ -540,7 +540,7 @@ void main() {
         child: Scaffold(
           onStatusBarTapped: () {
             controller.animateTo(
-              0.0,
+              300,
               duration: const Duration(milliseconds: 500),
               curve: Curves.easeOut,
             );
@@ -570,7 +570,7 @@ void main() {
     expect(scrollable.position.pixels, equals(500.0));
     await tester.tapAt(const Offset(100.0, 10.0));
     await tester.pumpAndSettle();
-    expect(scrollable.position.pixels, equals(0.0));
+    expect(scrollable.position.pixels, equals(300.0));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets('Tapping the status when onStatusBarTapped provided', (WidgetTester tester) async {
