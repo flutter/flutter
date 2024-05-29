@@ -6,6 +6,7 @@ import 'package:flutter/widgets.dart';
 
 import 'constants.dart';
 import 'expand_icon.dart';
+import 'icon_button.dart';
 import 'ink_well.dart';
 import 'material_localizations.dart';
 import 'mergeable_material.dart';
@@ -100,6 +101,10 @@ class ExpansionPanel {
   /// Defines the splash color of the panel if [canTapOnHeader] is true,
   /// or the splash color of the expand/collapse IconButton if [canTapOnHeader]
   /// is false.
+  ///
+  /// Note that if [canTapOnHeader] is false, and [ThemeData.useMaterial3] is
+  /// true, this field will be ignored, as [IconButton.splashColor]
+  /// will be ignored, and you should use [highlightColor] instead.
   ///
   /// If this is null, then the icon button will use its default splash color
   /// [ThemeData.splashColor], and the panel will use its default splash color

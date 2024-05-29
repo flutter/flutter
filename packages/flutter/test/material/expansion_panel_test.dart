@@ -1948,7 +1948,7 @@ void main() {
     }
   });
 
-  testWidgets('Ensure ExpandIcon splashColor and highlightColor are correctly set when canTapOnHeader is false', (WidgetTester tester) async {
+  testWidgets('Ensure IconButton splashColor and highlightColor are correctly set when canTapOnHeader is false', (WidgetTester tester) async {
     const Color expectedSplashColor = Colors.green;
     const Color expectedHighlightColor = Colors.yellow;
 
@@ -1972,9 +1972,9 @@ void main() {
     await tester.tap(find.text('Panel 1'));
     await tester.pumpAndSettle();
 
-    final ExpandIcon expandIcon = tester.widget(find.byType(ExpandIcon).first);
-    expect(expandIcon.splashColor, expectedSplashColor);
-    expect(expandIcon.highlightColor, expectedHighlightColor);
+    final IconButton iconButton = tester.widget(find.byType(IconButton).first);
+    expect(iconButton.splashColor, expectedSplashColor);
+    expect(iconButton.highlightColor, expectedHighlightColor);
   });
 
   testWidgets('Ensure InkWell splashColor and highlightColor are correctly set when canTapOnHeader is true', (WidgetTester tester) async {
