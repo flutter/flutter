@@ -31,8 +31,6 @@ class _MyCascadingMenuState extends State<MyCascadingMenu> {
   Widget build(BuildContext context) {
     return MenuAnchor(
       childFocusNode: _buttonFocusNode,
-
-      /// Defines Menu Items
       menuChildren: <Widget>[
         MenuItemButton(
           child: const Text('Revert'),
