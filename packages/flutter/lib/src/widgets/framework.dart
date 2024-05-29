@@ -3616,7 +3616,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// custom [BuildScope]s.
   ///
   /// Always return the same [BuildScope] instance if you override this getter.
-  /// Changing the value returned by this getter at runtime is currently not
+  /// Changing the value returned by this getter at runtime is not
   /// supported.
   ///
   /// The [updateChild] method ignores [buildScope]: if the parent [Element]
