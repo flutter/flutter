@@ -452,14 +452,14 @@ void main() {
     await tester.tap(find.text('Go'));
     await tester.pumpAndSettle();
 
-    const Offset sheetPadding = Offset(8, 10);
-    expect(
-      tester.getTopLeft(find.byType(CupertinoActionSheetAction).first),
-      tester.getTopLeft(find.byType(CupertinoActionSheet)) + sheetPadding,
-    );
-
     final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('Button *')));
     await tester.pumpAndSettle();
+    // The button should be pressed now, since the scrolling gesture has not
+    // taken over.
+    await expectLater(
+      find.byType(CupertinoActionSheet),
+      matchesGoldenFile('cupertinoActionSheet.overscroll.0.png'),
+    );
     // The dragging gesture must be dispatched in at least two segments.
     // After the first movement, the gesture is started, but the delta is still
     // zero. The second movement gives the delta.
@@ -470,7 +470,7 @@ void main() {
     // Test the top overscroll.
     await expectLater(
       find.byType(CupertinoActionSheet),
-      matchesGoldenFile('cupertinoActionSheet.overscroll.0.png'),
+      matchesGoldenFile('cupertinoActionSheet.overscroll.1.png'),
     );
 
     await gesture.moveBy(const Offset(0, -300));
@@ -478,7 +478,7 @@ void main() {
     // Test the bottom overscroll.
     await expectLater(
       find.byType(CupertinoActionSheet),
-      matchesGoldenFile('cupertinoActionSheet.overscroll.1.png'),
+      matchesGoldenFile('cupertinoActionSheet.overscroll.2.png'),
     );
     await gesture.up();
   });
