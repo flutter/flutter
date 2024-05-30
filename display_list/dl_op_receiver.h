@@ -191,6 +191,7 @@ class DlOpReceiver {
   virtual void saveLayer(const SkRect& bounds,
                          const SaveLayerOptions& options,
                          uint32_t total_content_depth,
+                         DlBlendMode max_content_blend_mode,
                          const DlImageFilter* backdrop = nullptr) {
     saveLayer(bounds, options, backdrop);
   }

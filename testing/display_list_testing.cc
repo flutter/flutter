@@ -35,6 +35,29 @@ bool DisplayListsNE_Verbose(const DisplayList* a, const DisplayList* b) {
   return true;
 }
 
+}  // namespace testing
+}  // namespace flutter
+
+namespace std {
+
+using DisplayList = flutter::DisplayList;
+using DlColor = flutter::DlColor;
+using DlPaint = flutter::DlPaint;
+using DlCanvas = flutter::DlCanvas;
+using DlImage = flutter::DlImage;
+using DlDrawStyle = flutter::DlDrawStyle;
+using DlBlendMode = flutter::DlBlendMode;
+using DlStrokeCap = flutter::DlStrokeCap;
+using DlStrokeJoin = flutter::DlStrokeJoin;
+using DlBlurStyle = flutter::DlBlurStyle;
+using DlFilterMode = flutter::DlFilterMode;
+using DlVertexMode = flutter::DlVertexMode;
+using DlTileMode = flutter::DlTileMode;
+using DlImageSampling = flutter::DlImageSampling;
+using SaveLayerOptions = flutter::SaveLayerOptions;
+
+using DisplayListStreamDispatcher = flutter::testing::DisplayListStreamDispatcher;
+
 std::ostream& operator<<(std::ostream& os,
                          const DisplayList& display_list) {
   DisplayListStreamDispatcher dispatcher(os);
@@ -116,9 +139,11 @@ std::ostream& operator<<(std::ostream& os, const DlBlendMode& mode) {
 
 std::ostream& operator<<(std::ostream& os, const SaveLayerOptions& options) {
   return os << "SaveLayerOptions("
+            << "renders_with_attributes: " << options.renders_with_attributes()
+            << ", "
             << "can_distribute_opacity: " << options.can_distribute_opacity()
             << ", "
-            << "renders_with_attributes: " << options.renders_with_attributes()
+            << "contains_backdrop: " << options.contains_backdrop_filter()
             << ")";
 }
 
@@ -329,6 +354,11 @@ std::ostream& operator<<(std::ostream& os, const DlImage* image) {
   }
   return os << "isTextureBacked: " << image->isTextureBacked() << ")";
 }
+
+}  // namespace std
+
+namespace flutter {
+namespace testing {
 
 std::ostream& DisplayListStreamDispatcher::startl() {
   for (int i = 0; i < cur_indent_; i++) {
