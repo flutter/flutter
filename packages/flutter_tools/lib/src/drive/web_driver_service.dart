@@ -268,7 +268,7 @@ enum Browser implements CliEnum {
   };
 
   @override
-  String get cliName => snakeCase(name, '-');
+  String get cliName => kebabCase(name);
 
   static Browser fromCliName(String? value) => Browser.values.singleWhere(
     (Browser element) => element.cliName == value,

@@ -568,7 +568,7 @@ class _CupertinoTextSelectionToolbarContentState extends State<_CupertinoTextSel
   }
 
   void _statusListener(AnimationStatus status) {
-    if (status != AnimationStatus.dismissed) {
+    if (!status.isDismissed) {
       return;
     }
 

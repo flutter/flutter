@@ -130,6 +130,9 @@ class ResidentWebRunner extends ResidentRunner {
   FlutterDevice? get device => flutterDevices.first;
   final FlutterProject flutterProject;
 
+  // Mapping from service name to service method.
+  final Map<String, String> _registeredMethodsForService = <String, String>{};
+
   // Used with the new compiler to generate a bootstrap file containing plugins
   // and platform initialization.
   Directory? _generatedEntrypointDirectory;
@@ -156,6 +159,7 @@ class ResidentWebRunner extends ResidentRunner {
   ConnectionResult? _connectionResult;
   StreamSubscription<vmservice.Event>? _stdOutSub;
   StreamSubscription<vmservice.Event>? _stdErrSub;
+  StreamSubscription<vmservice.Event>? _serviceSub;
   StreamSubscription<vmservice.Event>? _extensionEventSub;
   bool _exited = false;
   WipConnection? _wipConnection;
@@ -168,7 +172,7 @@ class ResidentWebRunner extends ResidentRunner {
     final vmservice.VmService? service = _connectionResult?.vmService;
     final Uri websocketUri = Uri.parse(_connectionResult!.debugConnection!.uri);
     final Uri httpUri = _httpUriFromWebsocketUri(websocketUri);
-    return _instance ??= FlutterVmService(service!, wsAddress: websocketUri, httpAddress: httpUri);
+    return _instance ??= FlutterVmService(service!, wsAddress: websocketUri, httpAddress: httpUri, logger: _logger);
   }
 
   FlutterVmService? _instance;
@@ -190,8 +194,10 @@ class ResidentWebRunner extends ResidentRunner {
     await residentDevtoolsHandler!.shutdown();
     await _stdOutSub?.cancel();
     await _stdErrSub?.cancel();
+    await _serviceSub?.cancel();
     await _extensionEventSub?.cancel();
     await device!.device!.stopApp(null);
+    _registeredMethodsForService.clear();
     try {
       _generatedEntrypointDirectory?.deleteSync(recursive: true);
     } on FileSystemException {
@@ -444,7 +450,11 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
       if (!deviceIsDebuggable) {
         _logger.printStatus('Recompile complete. Page requires refresh.');
       } else if (isRunningDebug) {
-        await _vmService.service.callMethod('hotRestart');
+        // If the hot-restart service extension method is registered, then use
+        // it. Otherwise, default to calling "hotRestart" without a namespace.
+        final String hotRestartMethod =
+            _registeredMethodsForService['hotRestart'] ?? 'hotRestart';
+        await _vmService.service.callMethod(hotRestartMethod);
       } else {
         // On non-debug builds, a hard refresh is required to ensure the
         // up to date sources are loaded.
@@ -615,17 +625,24 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
 
       _stdOutSub = _vmService.service.onStdoutEvent.listen(onLogEvent);
       _stdErrSub = _vmService.service.onStderrEvent.listen(onLogEvent);
+      _serviceSub = _vmService.service.onServiceEvent.listen(_onServiceEvent);
       try {
         await _vmService.service.streamListen(vmservice.EventStreams.kStdout);
       } on vmservice.RPCError {
         // It is safe to ignore this error because we expect an error to be
-        // thrown if we're not already subscribed.
+        // thrown if we're already subscribed.
       }
       try {
         await _vmService.service.streamListen(vmservice.EventStreams.kStderr);
       } on vmservice.RPCError {
         // It is safe to ignore this error because we expect an error to be
-        // thrown if we're not already subscribed.
+        // thrown if we're already subscribed.
+      }
+      try {
+        await _vmService.service.streamListen(vmservice.EventStreams.kService);
+      } on vmservice.RPCError {
+        // It is safe to ignore this error because we expect an error to be
+        // thrown if we're already subscribed.
       }
       try {
         await _vmService.service.streamListen(vmservice.EventStreams.kIsolate);
@@ -702,6 +719,18 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
   Future<void> exitApp() async {
     await device!.exitApps();
     appFinished();
+  }
+
+  void _onServiceEvent(vmservice.Event e) {
+    if (e.kind == vmservice.EventKind.kServiceRegistered) {
+      final String serviceName = e.service!;
+      _registeredMethodsForService[serviceName] = e.method!;
+    }
+
+    if (e.kind == vmservice.EventKind.kServiceUnregistered) {
+      final String serviceName = e.service!;
+      _registeredMethodsForService.remove(serviceName);
+    }
   }
 }
 

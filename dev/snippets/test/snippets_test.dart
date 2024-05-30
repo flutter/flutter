@@ -41,7 +41,6 @@ void main() {
     late FlutterRepoSnippetConfiguration configuration;
     late SnippetGenerator generator;
     late Directory tmpDir;
-    late File template;
 
     void writeSkeleton(String type) {
       switch (type) {
@@ -72,26 +71,14 @@ void main() {
           flutterRoot: memoryFileSystem
               .directory(path.join(tmpDir.absolute.path, 'flutter')),
           filesystem: memoryFileSystem);
-      configuration.templatesDirectory.createSync(recursive: true);
       configuration.skeletonsDirectory.createSync(recursive: true);
-      template = memoryFileSystem.file(
-          path.join(configuration.templatesDirectory.path, 'template.tmpl'));
-      template.writeAsStringSync('''
-// Flutter code sample for {{element}}
-
-{{description}}
-
-{{code-my-preamble}}
-
-{{code}}
-''');
       <String>['dartpad', 'sample', 'snippet'].forEach(writeSkeleton);
       FlutterInformation.instance =
           FakeFlutterInformation(configuration.flutterRoot);
       generator = SnippetGenerator(
           configuration: configuration,
           filesystem: memoryFileSystem,
-          flutterRoot: configuration.templatesDirectory.parent);
+          flutterRoot: configuration.skeletonsDirectory.parent);
     });
 
     test('generates samples', () async {
@@ -99,20 +86,24 @@ void main() {
           .file(path.join(tmpDir.absolute.path, 'snippet_in.txt'))
         ..createSync(recursive: true)
         ..writeAsStringSync(r'''
-A description of the snippet.
+A description of the sample.
 
 On several lines.
 
-```my-dart_language my-preamble
-const String name = 'snippet';
-```
-
-```dart
-void main() {
-  print('The actual $name.');
-}
-```
+** See code in examples/api/widgets/foo/foo_example.0.dart **
 ''');
+      final String examplePath = path.join(configuration.flutterRoot.path, 'examples/api/widgets/foo/foo_example.0.dart');
+      memoryFileSystem.file(examplePath)
+        ..create(recursive: true)
+        ..writeAsStringSync('''
+// Copyright
+
+// Flutter code sample for [MyElement].
+
+void main() {
+  runApp(MaterialApp(title: 'foo'));
+}\n'''
+        );
       final File outputFile = memoryFileSystem
           .file(path.join(tmpDir.absolute.path, 'snippet_out.txt'));
       final SnippetDartdocParser sampleParser =
@@ -135,27 +126,23 @@ void main() {
         element.samples.first,
         output: outputFile,
       );
-      expect(code, contains('// Flutter code sample for MyElement'));
+      expect(code, contains("runApp(MaterialApp(title: 'foo'));"));
       final String html = generator.generateHtml(
         element.samples.first,
       );
       expect(html, contains('<div>HTML Bits</div>'));
       expect(html, contains('<div>More HTML Bits</div>'));
-      expect(html, contains(r'print(&#39;The actual $name.&#39;);'));
-      expect(html, contains('A description of the snippet.\n'));
+      expect(html, contains(r'''runApp(MaterialApp(title: &#39;foo&#39;));'''));
       expect(html, isNot(contains('sample_channel=stable')));
       expect(
           html,
-          contains('A description of the snippet.\n'
+          contains('A description of the sample.\n'
               '\n'
               'On several lines.{@inject-html}</div>'));
       expect(html, contains('void main() {'));
 
       final String outputContents = outputFile.readAsStringSync();
-      expect(outputContents, contains('// Flutter code sample for MyElement'));
-      expect(outputContents, contains('A description of the snippet.'));
       expect(outputContents, contains('void main() {'));
-      expect(outputContents, contains("const String name = 'snippet';"));
     });
 
     test('generates snippets', () async {
@@ -212,12 +199,20 @@ A description of the snippet.
 
 On several lines.
 
-```code
-void main() {
-  print('The actual $name.');
-}
-```
+** See code in examples/api/widgets/foo/foo_example.0.dart **
 ''');
+      final String examplePath = path.join(configuration.flutterRoot.path, 'examples/api/widgets/foo/foo_example.0.dart');
+      memoryFileSystem.file(examplePath)
+        ..create(recursive: true)
+        ..writeAsStringSync('''
+// Copyright
+
+// Flutter code sample for [MyElement].
+
+void main() {
+  runApp(MaterialApp(title: 'foo'));
+}\n'''
+        );
 
       final SnippetDartdocParser sampleParser =
           SnippetDartdocParser(memoryFileSystem);
@@ -235,7 +230,7 @@ void main() {
         'channel': 'stable',
       });
       final String code = generator.generateCode(element.samples.first);
-      expect(code, contains('// Flutter code sample for MyElement'));
+      expect(code, contains("runApp(MaterialApp(title: 'foo'));"));
       final String html = generator.generateHtml(element.samples.first);
       expect(html, contains('<div>HTML Bits (DartPad-style)</div>'));
       expect(html, contains('<div>More HTML Bits</div>'));
@@ -350,7 +345,7 @@ void main() {
           .file(tmpDir.childFile('input.snippet'))
         ..writeAsString('/// Test file');
       snippets_main.main(
-          <String>['--input=${input.absolute.path}', '--template=template']);
+          <String>['--input=${input.absolute.path}']);
 
       final Map<String, dynamic> metadata =
           mockSnippetGenerator.sample.metadata;
@@ -393,7 +388,7 @@ void main() {
 
       input.deleteSync();
       snippets_main.main(
-          <String>['--input=${input.absolute.path}', '--template=template']);
+          <String>['--input=${input.absolute.path}']);
       expect(errorMessage,
           equals('The input file ${input.absolute.path} does not exist.'));
       errorMessage = '';

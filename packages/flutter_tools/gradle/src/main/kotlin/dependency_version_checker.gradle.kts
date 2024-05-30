@@ -104,11 +104,11 @@ class DependencyVersionChecker {
          * we treat it as within the range for the purpose of this check.
          */
         fun checkDependencyVersions(project: Project) {
-            var agpVersion: Version? = null
-            var kgpVersion: Version? = null
+            var agpVersion: Version?
+            var kgpVersion: Version?
 
             checkGradleVersion(getGradleVersion(project), project)
-            checkJavaVersion(getJavaVersion(project), project)
+            checkJavaVersion(getJavaVersion(), project)
             agpVersion = getAGPVersion(project)
             if (agpVersion != null) {
                 checkAGPVersion(agpVersion, project)
@@ -140,7 +140,7 @@ class DependencyVersionChecker {
         }
 
         // https://docs.gradle.org/current/kotlin-dsl/gradle/org.gradle.api/-java-version/index.html#-1790786897%2FFunctions%2F-1793262594
-        fun getJavaVersion(project: Project): JavaVersion {
+        fun getJavaVersion(): JavaVersion {
             return JavaVersion.current()
         }
 
@@ -149,7 +149,7 @@ class DependencyVersionChecker {
         fun getAGPVersion(project: Project): Version? {
             val agpPluginName: String = "com.android.base"
             val agpVersionFieldName: String = "ANDROID_GRADLE_PLUGIN_VERSION"
-            var agpVersion: Version? = null
+            var agpVersion: Version?
             try {
                 agpVersion =
                     Version.fromString(
@@ -161,6 +161,7 @@ class DependencyVersionChecker {
             } catch (ignored: ClassNotFoundException) {
                 // Use deprecated Version class as it exists in older AGP (com.android.Version) does
                 // not exist in those versions.
+                @Suppress("deprecation")
                 agpVersion =
                     Version.fromString(
                         project.plugins.getPlugin(agpPluginName)::class.java.classLoader.loadClass(
@@ -192,7 +193,7 @@ class DependencyVersionChecker {
             if (versionString == null) {
                 return null
             } else {
-                return Version.fromString(versionString!! as String)
+                return Version.fromString(versionString as String)
             }
         }
 
@@ -341,15 +342,15 @@ class Version(val major: Int, val minor: Int, val patch: Int) : Comparable<Versi
         }
     }
 
-    override fun compareTo(otherVersion: Version): Int {
-        if (major != otherVersion.major) {
-            return major - otherVersion.major
+    override fun compareTo(other: Version): Int {
+        if (major != other.major) {
+            return major - other.major
         }
-        if (minor != otherVersion.minor) {
-            return minor - otherVersion.minor
+        if (minor != other.minor) {
+            return minor - other.minor
         }
-        if (patch != otherVersion.patch) {
-            return patch - otherVersion.patch
+        if (patch != other.patch) {
+            return patch - other.patch
         }
         return 0
     }
