@@ -477,6 +477,19 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   // SelectableRegion.
   PointerDeviceKind? _lastPointerDeviceKind;
 
+  static bool _isPrecisePointerDevice(PointerDeviceKind pointerDeviceKind) {
+    switch (pointerDeviceKind) {
+      case PointerDeviceKind.mouse:
+        return true;
+      case PointerDeviceKind.trackpad:
+      case PointerDeviceKind.stylus:
+      case PointerDeviceKind.invertedStylus:
+      case PointerDeviceKind.touch:
+      case PointerDeviceKind.unknown:
+        return false;
+    }
+  }
+
   // Converts the details.consecutiveTapCount from a TapAndDrag*Details object,
   // which can grow to be infinitely large, to a value between 1 and the supported
   // max consecutive tap count. The value that the raw count is converted to is
@@ -592,13 +605,12 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
       case 2:
         switch (defaultTargetPlatform) {
           case TargetPlatform.iOS:
-            if (kIsWeb && details.kind != null && details.kind != PointerDeviceKind.mouse) {
+            if (kIsWeb && details.kind != null && !_isPrecisePointerDevice(details.kind!)) {
               // Double tap on iOS web is only enabled with a precise pointer device.
               break;
             }
             _selectWordAt(offset: details.globalPosition);
-            if (details.kind != null
-                && details.kind != PointerDeviceKind.mouse) {
+            if (details.kind != null && !_isPrecisePointerDevice(details.kind!)) {
               _showHandles();
             }
           case TargetPlatform.android:
@@ -613,7 +625,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
           case TargetPlatform.android:
           case TargetPlatform.fuchsia:
           case TargetPlatform.iOS:
-            if (details.kind != null && details.kind == PointerDeviceKind.mouse) {
+            if (details.kind != null && _isPrecisePointerDevice(details.kind!)) {
               // Triple tap on static text is only supported on mobile
               // platforms using a precise pointer device.
               _selectParagraphAt(offset: details.globalPosition);
@@ -630,7 +642,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   void _handleMouseDragStart(TapDragStartDetails details) {
     switch (_getEffectiveConsecutiveTapCount(details.consecutiveTapCount)) {
       case 1:
-        if (details.kind != null && details.kind != PointerDeviceKind.mouse) {
+        if (details.kind != null && !_isPrecisePointerDevice(details.kind!)) {
           // Drag to select is only enabled with a precise pointer device.
           return;
         }
@@ -642,7 +654,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   void _handleMouseDragUpdate(TapDragUpdateDetails details) {
     switch (_getEffectiveConsecutiveTapCount(details.consecutiveTapCount)) {
       case 1:
-        if (details.kind != null && details.kind != PointerDeviceKind.mouse) {
+        if (details.kind != null && !_isPrecisePointerDevice(details.kind!)) {
           // Drag to select is only enabled with a precise pointer device.
           return;
         }
@@ -653,17 +665,17 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
           case TargetPlatform.fuchsia:
             // Double tap + drag is only supported on Android when using a precise
             // pointer device or when not on the web.
-            if (!kIsWeb || details.kind != null && details.kind == PointerDeviceKind.mouse) {
+            if (!kIsWeb || details.kind != null && _isPrecisePointerDevice(details.kind!)) {
               _selectEndTo(offset: details.globalPosition, continuous: true, textGranularity: TextGranularity.word);
             }
           case TargetPlatform.iOS:
-            if (kIsWeb && details.kind != null && details.kind != PointerDeviceKind.mouse) {
+            if (kIsWeb && details.kind != null && _isPrecisePointerDevice(details.kind!)) {
               // Double tap + drag on iOS web is only enabled with a precise
               // pointer device.
               break;
             }
             _selectEndTo(offset: details.globalPosition, continuous: true, textGranularity: TextGranularity.word);
-            if (details.kind != null && details.kind != PointerDeviceKind.mouse) {
+            if (details.kind != null && !_isPrecisePointerDevice(details.kind!)) {
               _showHandles();
             }
           case TargetPlatform.macOS:
@@ -678,7 +690,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
           case TargetPlatform.iOS:
             // Triple tap + drag is only supported on mobile devices when using
             // a precise pointer device.
-            if (details.kind != null && details.kind == PointerDeviceKind.mouse) {
+            if (details.kind != null && _isPrecisePointerDevice(details.kind!)) {
               _selectEndTo(offset: details.globalPosition, continuous: true, textGranularity: TextGranularity.paragraph);
             }
           case TargetPlatform.macOS:
@@ -744,7 +756,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
             break;
         }
       case 2:
-        final bool isPointerPrecise = details.kind == PointerDeviceKind.mouse;
+        final bool isPointerPrecise = _isPrecisePointerDevice(details.kind);
         switch (defaultTargetPlatform) {
           case TargetPlatform.android:
           case TargetPlatform.fuchsia:
