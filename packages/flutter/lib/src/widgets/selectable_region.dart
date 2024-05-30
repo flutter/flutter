@@ -724,16 +724,14 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
             break;
         }
       case 2:
-        if (details.kind != null 
-            && details.kind != PointerDeviceKind.mouse 
+        if (details.kind != PointerDeviceKind.mouse 
             && defaultTargetPlatform == TargetPlatform.android) {
           // On Android, a double tap will only show the selection overlay after
           // the following tap up when the pointer device kind is not precise.
           _showHandles();
           _showToolbar();
         }
-        if (details.kind != null 
-            && details.kind != PointerDeviceKind.mouse 
+        if (details.kind != PointerDeviceKind.mouse 
             && defaultTargetPlatform == TargetPlatform.iOS) {
           // On iOS, a double tap will only show the selection toolbar after
           // the following tap up when the pointer device kind is not precise.
@@ -799,8 +797,8 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
       case TargetPlatform.windows:
         // If _lastSecondaryTapDownPosition is within the current selection then
         // keep the current selection, if not then collapse it.
-        final bool _lastSecondaryTapDownPositionWasOnActiveSelection = _positionIsOnActiveSelection(globalPosition: details.globalPosition);
-        if (!_lastSecondaryTapDownPositionWasOnActiveSelection) {
+        final bool lastSecondaryTapDownPositionWasOnActiveSelection = _positionIsOnActiveSelection(globalPosition: details.globalPosition);
+        if (!lastSecondaryTapDownPositionWasOnActiveSelection) {
           _collapseSelectionAt(offset: _lastSecondaryTapDownPosition!);
         }
         _showHandles();
@@ -824,8 +822,8 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
         }
         // If _lastSecondaryTapDownPosition is within the current selection then
         // keep the current selection, if not then collapse it.
-        final bool _lastSecondaryTapDownPositionWasOnActiveSelection = _positionIsOnActiveSelection(globalPosition: details.globalPosition);
-        if (!_lastSecondaryTapDownPositionWasOnActiveSelection) {
+        final bool lastSecondaryTapDownPositionWasOnActiveSelection = _positionIsOnActiveSelection(globalPosition: details.globalPosition);
+        if (!lastSecondaryTapDownPositionWasOnActiveSelection) {
           _collapseSelectionAt(offset: _lastSecondaryTapDownPosition!);
         }
         _showHandles();
