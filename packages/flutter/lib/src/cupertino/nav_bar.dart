@@ -525,10 +525,9 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
       : widget.border;
     final Border? effectiveBorder = widget.border == null ? null : Border.lerp(initialBorder, widget.border, _scrollAnimationValue,);
 
-    final Color initialBackgroundColor = widget.initiallyTransparent
-      ? parentPageScaffoldBackgroundColor ?? backgroundColor
+    final Color effectiveBackgroundColor = widget.initiallyTransparent
+      ? Color.lerp(parentPageScaffoldBackgroundColor ?? backgroundColor, backgroundColor, _scrollAnimationValue)!
       : backgroundColor;
-    final Color effectiveBackgroundColor = Color.lerp(initialBackgroundColor, backgroundColor, _scrollAnimationValue)!;
 
     final _NavigationBarStaticComponents components = _NavigationBarStaticComponents(
       keys: keys,
@@ -910,10 +909,9 @@ class _LargeTitleNavigationBarSliverDelegate
         : border;
     final Border? effectiveBorder = border == null ? null : Border.lerp(initialBorder, border, shrinkAnimationValue);
 
-    final Color initialBackgroundColor = initiallyTransparent
-        ? parentPageScaffoldBackgroundColor ?? backgroundColor
+    final Color effectiveBackgroundColor = initiallyTransparent
+        ? Color.lerp(parentPageScaffoldBackgroundColor ?? backgroundColor, backgroundColor, shrinkAnimationValue)!
         : backgroundColor;
-    final Color effectiveBackgroundColor = Color.lerp(initialBackgroundColor, backgroundColor, shrinkAnimationValue)!;
 
     final Widget navBar = _wrapWithBackground(
       border: effectiveBorder,
@@ -1004,6 +1002,7 @@ class _LargeTitleNavigationBarSliverDelegate
     return components != oldDelegate.components
         || userMiddle != oldDelegate.userMiddle
         || backgroundColor != oldDelegate.backgroundColor
+        || initiallyTransparent != oldDelegate.initiallyTransparent
         || border != oldDelegate.border
         || padding != oldDelegate.padding
         || actionsForegroundColor != oldDelegate.actionsForegroundColor
