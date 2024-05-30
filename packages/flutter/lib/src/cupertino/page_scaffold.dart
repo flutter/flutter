@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
@@ -232,6 +233,12 @@ class CupertinoPageScaffoldBackgroundColor extends InheritedWidget {
   static Color? maybeOf(BuildContext context) {
     final CupertinoPageScaffoldBackgroundColor? scaffoldBackgroundColor = context.dependOnInheritedWidgetOfExactType<CupertinoPageScaffoldBackgroundColor>();
     return scaffoldBackgroundColor?.color;
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(ColorProperty('page scaffold background color', color));
   }
 }
 
