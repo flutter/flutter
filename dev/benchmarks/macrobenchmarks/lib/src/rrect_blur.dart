@@ -11,10 +11,10 @@ class RRectBlur extends StatefulWidget {
   const RRectBlur({super.key});
 
   @override
-  State<RRectBlur> createState() => _DrawPointsPageState();
+  State<RRectBlur> createState() => _RRectBlurPageState();
 }
 
-class _DrawPointsPageState extends State<RRectBlur>
+class _RRectBlurPageState extends State<RRectBlur>
     with SingleTickerProviderStateMixin {
   late final AnimationController controller;
   double tick = 0.0;
@@ -73,7 +73,8 @@ class PointsPainter extends CustomPainter {
     }
     final double halfHeight = size.height / 2.0;
     const double freq = 0.25;
-    for (int i = 0; i < size.width / 10; ++i) {
+    const int circleCount = 40;
+    for (int i = 0; i < circleCount; ++i) {
       final double radius =
           25 * cos(i + (1.0 * 2.0 * 3.1415 * tick) / 60.0) +
               25;
@@ -84,8 +85,9 @@ class PointsPainter extends CustomPainter {
       final double yval =
           halfHeight * sin(i + (freq * 2.0 * 3.1415 * tick) / 60.0) +
               halfHeight;
+      final double xval = (i.toDouble() / circleCount) * size.width;
       canvas.drawCircle(
-        Offset(10.0 * i, yval),
+        Offset(xval, yval),
         50,
         paint..color = kColors[i % kColors.length],
       );
