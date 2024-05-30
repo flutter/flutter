@@ -700,7 +700,7 @@ void main() {
       await gesture.up();
     },
       variant: TargetPlatformVariant.mobile(),
-      skip: kIsWeb, // Double tap / double tap + drag gestures are not fully enabled on the web for mobile platforms.
+      skip: kIsWeb, // [intended] Double tap / double tap + drag gestures are not fully enabled on the web for mobile platforms.
     );
 
     testWidgets('touch can select multiple widgets on double tap drag on mobile platforms', (WidgetTester tester) async {
@@ -752,7 +752,7 @@ void main() {
       await gesture.up();
     },
       variant: TargetPlatformVariant.mobile(),
-      skip: kIsWeb, // Double tap / double tap + drag gestures are not fully enabled on the web for mobile platforms.
+      skip: kIsWeb, // [intended] Double tap / double tap + drag gestures are not fully enabled on the web for mobile platforms.
     );
 
     testWidgets('touch can select multiple widgets on double tap drag and return to origin word on mobile platforms', (WidgetTester tester) async {
@@ -816,7 +816,7 @@ void main() {
       await gesture.up();
     },
       variant: TargetPlatformVariant.mobile(),
-      skip: kIsWeb, // Double tap / double tap + drag gestures are not fully enabled on the web for mobile platforms.
+      skip: kIsWeb, // [intended] Double tap / double tap + drag gestures are not fully enabled on the web for mobile platforms.
     );
 
     testWidgets('touch can reverse selection across multiple widgets on double tap drag on mobile platforms', (WidgetTester tester) async {
@@ -867,7 +867,7 @@ void main() {
       await gesture.up();
     },
       variant: TargetPlatformVariant.mobile(),
-      skip: kIsWeb, // Double tap / double tap + drag gestures are not fully enabled on the web for mobile platforms.
+      skip: kIsWeb, // [intended] Double tap / double tap + drag gestures are not fully enabled on the web for mobile platforms.
     );
 
     testWidgets('touch cannot triple tap or triple tap drag on Android and iOS', (WidgetTester tester) async {
@@ -976,7 +976,7 @@ void main() {
       expect(paragraph.selections[0], defaultTargetPlatform == TargetPlatform.iOS ? const TextSelection(baseOffset: 0, extentOffset: 5) : const TextSelection.collapsed(offset: 2));
     },
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.iOS }),
-      skip: kIsWeb, // Double tap / double tap + drag gestures are not fully enabled on the web for mobile platforms.
+      skip: kIsWeb, // [intended] Double tap / double tap + drag gestures are not fully enabled on the web for mobile platforms.
     );
 
     testWidgets('touch cannot select word-by-word on double tap drag when on Android web', (WidgetTester tester) async {
@@ -1029,7 +1029,7 @@ void main() {
       await gesture.up();
       await tester.pumpAndSettle();
     },
-      skip: !kIsWeb, // This test verifies web behavior.
+      skip: !kIsWeb, // [intended] This test verifies web behavior.
     );
 
     testWidgets('touch cannot double tap or double tap drag when on iOS web', (WidgetTester tester) async {
@@ -1085,7 +1085,7 @@ void main() {
       await tester.pumpAndSettle();
     },
       variant: TargetPlatformVariant.only(TargetPlatform.iOS),
-      skip: !kIsWeb, // This test verifies web behavior.
+      skip: !kIsWeb, // [intended] This test verifies web behavior.
     );
 
     testWidgets('mouse can select single text on desktop platforms', (WidgetTester tester) async {
