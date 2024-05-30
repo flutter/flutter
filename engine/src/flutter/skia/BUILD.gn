@@ -426,6 +426,7 @@ optional("gpu") {
       if (defined(ndk_api) && ndk_api >= 26) {
         libs += [ "android" ]
       }
+      public_defines += [ "SK_EGL" ]
     } else if (skia_use_webgl) {
       sources += [
         "$_skia_root/src/gpu/ganesh/gl/webgl/GrGLMakeNativeInterface_webgl.cpp",
@@ -436,6 +437,15 @@ optional("gpu") {
         "$_skia_root/src/gpu/ganesh/gl/glx/GrGLMakeNativeInterface_glx.cpp",
       ]
       libs += [ "GL" ]
+      public_defines += [ "SK_GLX" ]
+    } else if (is_mac) {
+      sources += [
+        "$_skia_root/src/gpu/ganesh/gl/mac/GrGLMakeNativeInterface_mac.cpp",
+      ]
+    } else if (is_ios) {
+      sources += [
+        "$_skia_root/src/gpu/ganesh/gl/iOS/GrGLMakeNativeInterface_iOS.cpp",
+      ]
     } else if (is_win) {
       sources += [
         "$_skia_root/src/gpu/ganesh/gl/win/GrGLMakeNativeInterface_win.cpp",
