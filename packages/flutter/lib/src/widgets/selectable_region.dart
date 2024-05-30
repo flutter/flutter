@@ -372,36 +372,11 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     widget.focusNode.addListener(_handleFocusChanged);
     _initMouseGestureRecognizer();
     _initTouchGestureRecognizer();
-    // Taps and right clicks.
+    // Right clicks.
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
-        break;
       case TargetPlatform.iOS:
-        if (kIsWeb) {
-          // On iOS web, double tap gestures are not supported.
-          _gestureRecognizers[TapGestureRecognizer] = GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
-                () => TapGestureRecognizer(debugOwner: this),
-                (TapGestureRecognizer instance) {
-              instance.onTapUp = (TapUpDetails details) {
-                if (defaultTargetPlatform == TargetPlatform.iOS && _positionIsOnActiveSelection(globalPosition: details.globalPosition)) {
-                  // On iOS when the tap occurs on the previous selection, instead of
-                  // moving the selection, the context menu will be toggled.
-                  final bool toolbarIsVisible = _selectionOverlay?.toolbarIsVisible ?? false;
-                  if (toolbarIsVisible) {
-                    hideToolbar(false);
-                  } else {
-                    _showToolbar(location: details.globalPosition);
-                  }
-                } else {
-                  hideToolbar();
-                  _collapseSelectionAt(offset: details.globalPosition);
-                }
-              };
-              instance.onSecondaryTapDown = _handleRightClickDown;
-            },
-          );
-        }
       case TargetPlatform.macOS:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
@@ -545,29 +520,12 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
-        _gestureRecognizers[TapAndHorizontalDragGestureRecognizer] = GestureRecognizerFactoryWithHandlers<TapAndHorizontalDragGestureRecognizer>(
-              () => TapAndHorizontalDragGestureRecognizer(debugOwner:this),
-              (TapAndHorizontalDragGestureRecognizer instance) {
-            instance
-              ..onTapDown = _startNewMouseSelectionGesture
-              ..onTapUp = _handleMouseTapUp
-              ..onDragStart = _handleMouseDragStart
-              ..onDragUpdate = _handleMouseDragUpdate
-              ..onDragEnd = _handleMouseDragEnd
-              ..onCancel = _clearSelection
-              ..dragStartBehavior = DragStartBehavior.down;
-          },
-        );
       case TargetPlatform.iOS:
-        if (kIsWeb) {
-          // On iOS web, double tap gestures are not supported.
-          break;
-        }
         _gestureRecognizers[TapAndHorizontalDragGestureRecognizer] = GestureRecognizerFactoryWithHandlers<TapAndHorizontalDragGestureRecognizer>(
               () => TapAndHorizontalDragGestureRecognizer(debugOwner:this),
               (TapAndHorizontalDragGestureRecognizer instance) {
             instance
-              ..eagerVictoryOnDrag = false
+              ..eagerVictoryOnDrag = defaultTargetPlatform != TargetPlatform.iOS
               ..onTapDown = _startNewMouseSelectionGesture
               ..onTapUp = _handleMouseTapUp
               ..onDragStart = _handleMouseDragStart
@@ -627,20 +585,34 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
             _collapseSelectionAt(offset: details.globalPosition);
         }
       case 2:
-        _selectWordAt(offset: details.globalPosition);
-        if (defaultTargetPlatform == TargetPlatform.iOS) {
-          _showHandles();
+        switch (defaultTargetPlatform) {
+          case TargetPlatform.iOS:
+            if (kIsWeb && details.kind != null && details.kind != PointerDeviceKind.mouse) {
+              // Double tap on iOS web only works with a precise pointer device.
+              break;
+            }
+            _selectWordAt(offset: details.globalPosition);
+            if (details.kind != null
+                && details.kind != PointerDeviceKind.mouse) {
+              _showHandles();
+            }
+          case TargetPlatform.android:
+          case TargetPlatform.fuchsia:
+          case TargetPlatform.macOS:
+          case TargetPlatform.linux:
+          case TargetPlatform.windows:
+            _selectWordAt(offset: details.globalPosition);
         }
       case 3:
         switch (defaultTargetPlatform) {
           case TargetPlatform.android:
           case TargetPlatform.fuchsia:
+          case TargetPlatform.iOS:
             if (details.kind != null && details.kind == PointerDeviceKind.mouse) {
+              // Triple tap on static text is only supported on mobile
+              // platforms using a precise pointer device.
               _selectParagraphAt(offset: details.globalPosition);
             }
-          case TargetPlatform.iOS:
-            // Triple tap on static text is not supported on mobile platforms.
-            break;
           case TargetPlatform.macOS:
           case TargetPlatform.linux:
           case TargetPlatform.windows:
@@ -666,15 +638,18 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
         switch (defaultTargetPlatform) {
           case TargetPlatform.android:
           case TargetPlatform.fuchsia:
-            // Double tap + drag is only supported on Android when using a mouse
-            // or when not on the web.
+            // Double tap + drag is only supported on Android when using a precise
+            // pointer device or when not on the web.
             if (details.kind != null && details.kind == PointerDeviceKind.mouse || !kIsWeb) {
               _selectEndTo(offset: details.globalPosition, continuous: true, textGranularity: TextGranularity.word);
             }
           case TargetPlatform.iOS:
-            // Double tap + drag is only supported on native iOS.
-            if (!kIsWeb) {
-              _selectEndTo(offset: details.globalPosition, continuous: true, textGranularity: TextGranularity.word);
+            if (kIsWeb && details.kind != null && details.kind != PointerDeviceKind.mouse) {
+              // Double tap + drag on iOS web only works with a precise pointer device.
+              break;
+            }
+            _selectEndTo(offset: details.globalPosition, continuous: true, textGranularity: TextGranularity.word);
+            if (details.kind != null && details.kind != PointerDeviceKind.mouse) {
               _showHandles();
             }
           case TargetPlatform.macOS:
@@ -686,13 +661,12 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
         switch (defaultTargetPlatform) {
           case TargetPlatform.android:
           case TargetPlatform.fuchsia:
-            // Triple tap + drag is only supported on Android when using a mouse.
+          case TargetPlatform.iOS:
+            // Triple tap + drag is only supported on mobile devices when using
+            // a precise pointer device.
             if (details.kind != null && details.kind == PointerDeviceKind.mouse) {
               _selectEndTo(offset: details.globalPosition, continuous: true, textGranularity: TextGranularity.paragraph);
             }
-          case TargetPlatform.iOS:
-            // Triple tap + drag on static text is not supported on iOS.
-            break;
           case TargetPlatform.macOS:
           case TargetPlatform.linux:
           case TargetPlatform.windows:
@@ -714,7 +688,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     if (_lastPointerDeviceKind != null 
         && _lastPointerDeviceKind != PointerDeviceKind.mouse 
         && defaultTargetPlatform == TargetPlatform.iOS) {
-      // On iOS, a drag gesture will only show the selection overlay when
+      // On iOS, a drag gesture will only show the selection toolbar when
       // the drag has finished and the pointer device kind is not precise.
       _showToolbar();
     }
@@ -740,8 +714,8 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
           case TargetPlatform.android:
           case TargetPlatform.fuchsia:
           case TargetPlatform.iOS:
-            _collapseSelectionAt(offset: details.globalPosition);
             hideToolbar();
+            _collapseSelectionAt(offset: details.globalPosition);
           case TargetPlatform.macOS:
           case TargetPlatform.linux:
           case TargetPlatform.windows:
@@ -760,7 +734,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
         if (details.kind != null 
             && details.kind != PointerDeviceKind.mouse 
             && defaultTargetPlatform == TargetPlatform.iOS) {
-          // On iOS, a double tap will only show the selection overlay after
+          // On iOS, a double tap will only show the selection toolbar after
           // the following tap up when the pointer device kind is not precise.
           _showToolbar();
         }
