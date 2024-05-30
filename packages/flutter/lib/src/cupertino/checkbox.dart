@@ -513,7 +513,9 @@ class _CheckboxPainter extends ToggleablePainter {
 
   void _drawBox(Canvas canvas, Rect outer, Paint paint, BorderSide? side) {
     // Add dropshadow effect when unselected.
-    // The gradient colors were eyeballed from examples in the HIG docs.
+    //
+    // The gradient colors were eyeballed from a checkbox on a physical Macbook
+    // Pro running macOS version 14.5.
     //
     // Since the focus outline is drawn around the outer border,
     // only clip to the outer border when not in focus.
