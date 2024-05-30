@@ -4,7 +4,7 @@
 
 import 'dart:ui';
 
-import 'package:flutter/material.dart' show Tooltip;
+import 'package:flutter/material.dart' show IconButton, Icons, Tooltip;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -456,11 +456,35 @@ class CommonFinders {
     return _AncestorWidgetFinder(of, matching, matchLeaves: matchRoot);
   }
 
+  Finder materialButton(MaterialButtonType type) {
+    return switch (type) {
+      MaterialButtonType.backButton =>
+        descendant(
+          of: find.byType(IconButton),
+          matching: byWidgetPredicate((Widget widget) => widget is Icon &&
+            (widget.icon == Icons.arrow_back || widget.icon == Icons.arrow_back_ios_new_rounded),
+          ),
+        ),
+      MaterialButtonType.menuButton =>
+        descendant(
+          of: find.byType(IconButton),
+          matching: byWidgetPredicate((Widget widget) => widget is Icon && widget.icon == Icons.menu,
+          ),
+        ),
+      MaterialButtonType.closeButton =>
+        descendant(
+          of: find.byType(IconButton),
+          matching: byWidgetPredicate((Widget widget) => widget is Icon && widget.icon == Icons.close,
+          ),
+        ),
+      };
+  }
+
   /// Finds [Semantics] widgets matching the given `label`, either by
   /// [RegExp.hasMatch] or string equality.
   ///
   /// The framework may combine semantics labels in certain scenarios, such as
-  /// when multiple [Text] widgets are in a [MaterialButton] widget. In such a
+  /// when multiple [Text] widgets are in a [MaterialButtonType] widget. In such a
   /// case, it may be preferable to match by regular expression. Consumers of
   /// this API __must not__ introduce unsuitable content into the semantics tree
   /// for the purposes of testing; in particular, you should prefer matching by
@@ -501,6 +525,26 @@ class CommonFinders {
       skipOffstage: skipOffstage,
     );
   }
+}
+
+/// An enum used by [find.standardButton] to describe the type of standard
+/// button to find.
+///
+/// Standard buttons are buttons provided by the framework for Material or
+/// Cupertino widgets. The finder may also find custom buttons which are
+/// configured similarly to the standard buttons (have the same icon and
+/// tooltip).
+enum MaterialButtonType {
+  /// Finds the "back" button, if any. A back button typically has some kind
+  /// of backward pointing icon, and appropriate tooltip.
+  backButton,
+  /// Finds the "menu" button, if any. A menu button typically has some kind
+  /// of menu icon ("hamburger", "bars", or three dots), and an appropriate
+  /// tooltip.
+  menuButton,
+  /// Finds the "close" button, if any. A close button typically has some kind
+  /// of close icon (an "X", typically), and an appropriate tooltip.
+  closeButton,
 }
 
 
