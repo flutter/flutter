@@ -25,7 +25,7 @@ declare_args() {
 # value to specify the API level the packages produced from this repository
 # should be targeting, e.g. in their top-level //.gn file. A value of -1
 # means that no API level will be passed to the tools that consumes it.
-fuchsia_target_api_level = 17
+fuchsia_target_api_level = 18
 
 # The SDK manifest file. This is useful to include as a dependency
 # for some targets in order to cause a rebuild when the version of the
