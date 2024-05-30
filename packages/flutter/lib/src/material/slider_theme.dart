@@ -614,23 +614,23 @@ class SliderThemeData with Diagnosticable {
   /// the default gap size is 6 pixels.
   final double? trackGapSize;
 
-    /// A temporary flag that can be used to opt-in to the new 2024 slider shapes.
-    ///
-    /// This flag is inteded to migrate usuages, eventually this flag will be defaulted to
-    /// _true_ and then deprecated and removed.
-    ///
-    /// This flag is _false_ by default. If true, then the [Slider]'s will use the
-    /// new 2024 slider shape, track shape will be [GappedSliderTrackShape],
-    /// thumb shape will be [BarSliderThumbShape], and value indicator shape will be
-    /// [RoundedRectSliderValueIndicatorShape].
-    ///
-    /// {@tool dartpad}
-    /// This example shows how to use [SliderThemeData.use2024SliderShapes] to enable
-    /// the updated Slider appearance as described in:
-    /// https://m3.material.io/components/sliders/overview
-    ///
-    /// ** See code in examples/api/lib/material/slider/slider.3.dart **
-    /// {@end-tool}
+  /// A temporary flag that can be used to opt-in to the new 2024 slider shapes.
+  ///
+  /// This flag is intended to migrate usages, eventually this flag will be defaulted to
+  /// _true_ and then deprecated and removed.
+  ///
+  /// This flag is _false_ by default. If true, then the [Slider]'s will use the
+  /// new 2024 slider shape, track shape will be [GappedSliderTrackShape],
+  /// thumb shape will be [BarSliderThumbShape], and value indicator shape will be
+  /// [RoundedRectSliderValueIndicatorShape].
+  ///
+  /// {@tool dartpad}
+  /// This example shows how to use [SliderThemeData.use2024SliderShapes] to enable
+  /// the updated Slider appearance as described in:
+  /// https://m3.material.io/components/sliders/overview
+  ///
+  /// ** See code in examples/api/lib/material/slider/slider.3.dart **
+  /// {@end-tool}
   final bool? use2024SliderShapes;
 
   /// new values.
@@ -3614,8 +3614,8 @@ class _DropSliderValueIndicatorPathPainter {
 /// If [SliderThemeData.barThumbSize] is null, then the thumb size is 4 pixels for the width
 /// and 44 pixels for the height.
 ///
-/// This thumb shape was introduced in Dec, 2023. If the [SliderThemeData.use2024SliderShapes]
-/// flag is set to true then slider will use this shape for the thumb.
+/// This thumb shape was introduced in December 2023. If the [SliderThemeData.use2024SliderShapes]
+/// flag is set to true, then the slider will use this shape for the thumb.
 ///
 /// See also:
 ///
@@ -3672,22 +3672,22 @@ class BarSliderThumbShape extends SliderComponentShape {
 
 /// The gapped shape of a [Slider]'s track.
 ///
-/// The [GappedSliderTrackShape] consist of active and inactive
+/// The [GappedSliderTrackShape] consists of active and inactive
 /// tracks. The active track uses the [SliderThemeData.activeTrackColor] and the
 /// inactive track uses the [SliderThemeData.inactiveTrackColor].
 ///
-/// The track shape uses circular corner radius for the edge corners and corner radius
+/// The track shape uses circular corner radius for the edge corners and a corner radius
 /// of 2 pixels for the inside corners.
 ///
 /// Between the active and inactive tracks there is a gap of size [SliderThemeData.trackGapSize].
 /// If the [SliderThemeData.thumbShape] is [BarSliderThumbShape] and the thumb is pressed, the thumb's
-/// width is reduced as a result the track gap size in [GappedSliderTrackShape]
+/// width is reduced; as a result, the track gap size in [GappedSliderTrackShape]
 /// is also reduced.
 ///
 /// If [SliderThemeData.trackGapSize] is null, then the track gap size defaults to 6 pixels.
 ///
-/// This track shape was introduced in Dec, 2023. If the [SliderThemeData.use2024SliderShapes]
-/// flag is set to true then slider will use this shape for the track.
+/// This track shape was introduced in December 2023. If the [SliderThemeData.use2024SliderShapes]
+/// flag is set to true, then the slider will use this shape for the track.
 ///
 /// See also:
 ///
@@ -3847,8 +3847,8 @@ class GappedSliderTrackShape extends SliderTrackShape with BaseSliderTrackShape 
 /// If the [SliderThemeData.valueIndicatorStrokeColor] is provided, then the value indicator is drawn with a
 /// stroke border with the color provided.
 ///
-/// This value indicator shape was introduced in Dec, 2023. If the [SliderThemeData.use2024SliderShapes]
-/// flag is set to true then slider will use this shape for the value indicator.
+/// This value indicator shape was introduced in December 2023. If the [SliderThemeData.use2024SliderShapes]
+/// flag is set to true, then the slider will use this shape for the value indicator.
 ///
 /// See also:
 ///
