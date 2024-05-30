@@ -15,6 +15,9 @@ void main() {
       const example.TweenAnimationBuilderExampleApp(),
     );
 
+    // The animation duration defined in the example app.
+    const Duration animationDuration = Duration(seconds: 1);
+
     const double beginSize = 0.0;
     const double endSize = 24.0;
 
@@ -24,9 +27,7 @@ void main() {
     expect(iconButton.iconSize, equals(beginSize));
 
     // Advance animation to the middle.
-    await tester.pump(
-      example.TweenAnimationBuilderExampleApp.duration ~/ 2,
-    );
+    await tester.pump(animationDuration ~/ 2);
 
     iconButton = tester.widget(iconButtonFinder);
     expect(
@@ -35,9 +36,7 @@ void main() {
     );
 
     // Advance animation to the end.
-    await tester.pump(
-      example.TweenAnimationBuilderExampleApp.duration ~/ 2,
-    );
+    await tester.pump(animationDuration ~/ 2);
 
     iconButton = tester.widget(iconButtonFinder);
     expect(iconButton.iconSize, equals(endSize));
@@ -48,6 +47,9 @@ void main() {
       const example.TweenAnimationBuilderExampleApp(),
     );
     await tester.pumpAndSettle();
+
+    // The animation duration defined in the example app.
+    const Duration animationDuration = Duration(seconds: 1);
 
     const double beginSize = 24.0;
     const double endSize = 48.0;
@@ -65,9 +67,7 @@ void main() {
     expect(iconButton.iconSize, equals(beginSize));
 
     // Advance animation to the middle.
-    await tester.pump(
-      example.TweenAnimationBuilderExampleApp.duration ~/ 2,
-    );
+    await tester.pump(animationDuration ~/ 2);
 
     iconButton = tester.widget(iconButtonFinder);
     expect(
@@ -76,9 +76,7 @@ void main() {
     );
 
     // Advance animation to the end.
-    await tester.pump(
-      example.TweenAnimationBuilderExampleApp.duration ~/ 2,
-    );
+    await tester.pump(animationDuration ~/ 2);
 
     iconButton = tester.widget(iconButtonFinder);
     expect(iconButton.iconSize, equals(endSize));
@@ -91,9 +89,7 @@ void main() {
     expect(iconButton.iconSize, equals(endSize));
 
     // Advance animation to the middle.
-    await tester.pump(
-      example.TweenAnimationBuilderExampleApp.duration ~/ 2,
-    );
+    await tester.pump(animationDuration ~/ 2);
 
     iconButton = tester.widget(iconButtonFinder);
     expect(
@@ -102,9 +98,7 @@ void main() {
     );
 
     // Advance animation to the end.
-    await tester.pump(
-      example.TweenAnimationBuilderExampleApp.duration ~/ 2,
-    );
+    await tester.pump(animationDuration ~/ 2);
 
     iconButton = tester.widget(iconButtonFinder);
     expect(iconButton.iconSize, equals(beginSize));
@@ -115,6 +109,9 @@ void main() {
       const example.TweenAnimationBuilderExampleApp(),
     );
     await tester.pumpAndSettle();
+
+    // The animation duration defined in the example app.
+    const Duration animationDuration = Duration(seconds: 1);
 
     const double beginSize = 24.0;
     const double endSize = 48.0;
@@ -133,9 +130,7 @@ void main() {
     expect(iconButton.iconSize, equals(beginSize));
 
     // Advance animation to the middle.
-    await tester.pump(
-      example.TweenAnimationBuilderExampleApp.duration ~/ 2,
-    );
+    await tester.pump(animationDuration ~/ 2);
 
     iconButton = tester.widget(iconButtonFinder);
     expect(iconButton.iconSize, equals(middleSize));
@@ -148,9 +143,7 @@ void main() {
     expect(iconButton.iconSize, equals(middleSize));
 
     // Advance animation to the middle.
-    await tester.pump(
-      example.TweenAnimationBuilderExampleApp.duration ~/ 2,
-    );
+    await tester.pump(animationDuration ~/ 2);
 
     iconButton = tester.widget(iconButtonFinder);
     expect(
@@ -159,9 +152,7 @@ void main() {
     );
 
     // Advance animation to the end.
-    await tester.pump(
-      example.TweenAnimationBuilderExampleApp.duration ~/ 2,
-    );
+    await tester.pump(animationDuration ~/ 2);
 
     iconButton = tester.widget(iconButtonFinder);
     expect(iconButton.iconSize, equals(beginSize));

@@ -11,8 +11,6 @@ void main() => runApp(const TweenAnimationBuilderExampleApp());
 class TweenAnimationBuilderExampleApp extends StatelessWidget {
   const TweenAnimationBuilderExampleApp({super.key});
 
-  static const Duration duration = Duration(seconds: 1);
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -29,12 +27,7 @@ class TweenAnimationBuilderExampleApp extends StatelessWidget {
 }
 
 class TweenAnimationBuilderExample extends StatefulWidget {
-  const TweenAnimationBuilderExample({
-    this.duration = TweenAnimationBuilderExampleApp.duration,
-    super.key,
-  });
-
-  final Duration duration;
+  const TweenAnimationBuilderExample({super.key});
 
   @override
   State<TweenAnimationBuilderExample> createState() =>
@@ -49,7 +42,7 @@ class _TweenAnimationBuilderExampleState
   Widget build(BuildContext context) {
     return TweenAnimationBuilder<double>(
       tween: Tween<double>(begin: 0, end: _targetValue),
-      duration: widget.duration,
+      duration: const Duration(seconds: 1),
       builder: (BuildContext context, double size, Widget? child) {
         return IconButton(
           iconSize: size,
