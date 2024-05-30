@@ -491,7 +491,8 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
       case TargetPlatform.fuchsia:
         if (_lastPointerDeviceKind != null && _lastPointerDeviceKind != PointerDeviceKind.mouse) {
           // When the pointer device kind is not precise like a mouse,
-          // native Android resets the tap count at 2.
+          // native Android resets the tap count at 2. For example, this is so
+          // the selection can collapse on the third tap.
           maxConsecutiveTap = 2;
         }
         // From observation, these platforms reset their tap count to 0 when
@@ -512,7 +513,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
-        // From observation, these platforms either hold their tap count at the max
+        // From observation, these platforms hold their tap count at the max
         // consecutive tap supported. For example on macOS, when going past a triple
         // click, the selection should be retained at the paragraph that was first
         // selected on triple click.
