@@ -867,7 +867,7 @@ std::optional<Entity> BlendFilterContents::CreateFramebufferAdvancedBlend(
     }
     auto blit_pass = cmd_buffer->CreateBlitPass();
     auto buffer_view = renderer.GetTransientsBuffer().Emplace(
-        foreground_color->Premultiply().ToR8G8B8A8());
+        foreground_color->Premultiply().ToR8G8B8A8(), /*alignment=*/4);
 
     blit_pass->AddCopy(std::move(buffer_view), foreground_texture);
     if (!blit_pass->EncodeCommands(
