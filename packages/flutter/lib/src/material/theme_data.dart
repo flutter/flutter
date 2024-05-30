@@ -2220,7 +2220,6 @@ class MaterialBasedCupertinoThemeData extends CupertinoThemeData {
 /// [ThemeData], so if further customization is needed, it is best to manually
 /// add a Material [Theme] above the [CupertinoApp].
 class CupertinoBasedMaterialThemeData {
-
   /// Creates a Material theme with a color scheme based off of the colors from
   /// a [CupertinoThemeData].
   CupertinoBasedMaterialThemeData({
