@@ -401,6 +401,9 @@ void _defineTests() {
         case SemanticsAction.showOnScreen:
         case SemanticsAction.tap:
           semanticsOwner.performAction(expectedId, action);
+        // Add the default case temporarily to unblock engine roll.
+        default:
+          throw UnimplementedError();
       }
       expect(performedActions.length, expectedLength);
       expect(performedActions.last, action);
