@@ -653,7 +653,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
           case TargetPlatform.fuchsia:
             // Double tap + drag is only supported on Android when using a precise
             // pointer device or when not on the web.
-            if (details.kind != null && details.kind == PointerDeviceKind.mouse || !kIsWeb) {
+            if (!kIsWeb || details.kind != null && details.kind == PointerDeviceKind.mouse) {
               _selectEndTo(offset: details.globalPosition, continuous: true, textGranularity: TextGranularity.word);
             }
           case TargetPlatform.iOS:
