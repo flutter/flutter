@@ -623,8 +623,8 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
     assert(debugCheckHasMediaQuery(context));
 
     final List<Widget> children = <Widget>[
-      Flexible(child:
-        ClipRRect(
+      Flexible(
+        child: ClipRRect(
           borderRadius: const BorderRadius.all(Radius.circular(12.0)),
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: _kBlurAmount, sigmaY: _kBlurAmount),
