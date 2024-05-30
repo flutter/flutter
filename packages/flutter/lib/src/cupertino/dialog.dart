@@ -90,6 +90,7 @@ const double _kActionSheetEdgeVerticalPadding = 10.0;
 const double _kActionSheetContentHorizontalPadding = 16.0;
 const double _kActionSheetContentVerticalPadding = 12.0;
 const double _kActionSheetButtonHeight = 56.0;
+const double _kActionSheetBActionsSectionMinHeight = 84.0;
 
 // A translucent color that is painted on top of the blurred backdrop as the
 // dialog's background color
@@ -561,9 +562,11 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
     super.dispose();
   }
 
+  bool hasContent() => widget.title != null || widget.message != null;
+
   Widget _buildContent(BuildContext context) {
     final List<Widget> content = <Widget>[];
-    if (widget.title != null || widget.message != null) {
+    if (hasContent()) {
       final Widget titleSection = _CupertinoAlertContentSection(
         title: widget.title,
         message: widget.message,
@@ -601,28 +604,16 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
     );
   }
 
-  Widget _buildActions() {
-    if (widget.actions == null || widget.actions!.isEmpty) {
-      return const LimitedBox(
-        maxWidth: 0,
-        child: SizedBox(width: double.infinity, height: 0),
-      );
-    }
-    return _CupertinoAlertActionSection(
-      scrollController: _effectiveActionScrollController,
-      hasCancelButton: widget.cancelButton != null,
-      isActionSheet: true,
-      children: widget.actions!,
-    );
-  }
-
   Widget _buildCancelButton() {
+    assert(widget.cancelButton != null);
     final double cancelPadding = (widget.actions != null || widget.message != null || widget.title != null)
         ? _kActionSheetCancelButtonPadding : 0.0;
     return Padding(
       padding: EdgeInsets.only(top: cancelPadding),
-      child: _CupertinoActionSheetCancelButton(
-        child: widget.cancelButton,
+      child: _ActionSheetButtonBackground(
+        isCancel: true,
+        onStateChange: (_) {},
+        child: widget.cancelButton!,
       ),
     );
   }
@@ -632,15 +623,17 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
     assert(debugCheckHasMediaQuery(context));
 
     final List<Widget> children = <Widget>[
-      Flexible(child: ClipRRect(
+      Flexible(child:
+        ClipRRect(
           borderRadius: const BorderRadius.all(Radius.circular(12.0)),
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: _kBlurAmount, sigmaY: _kBlurAmount),
-            child: _CupertinoDialogRenderWidget(
+            child: _ActionSheetMainSheet(
+              scrollController: _effectiveActionScrollController,
+              hasContent: hasContent(),
               contentSection: Builder(builder: _buildContent),
-              actionsSection: _buildActions(),
+              actions: widget.actions,
               dividerColor: _kActionSheetButtonDividerColor,
-              isActionSheet: true,
             ),
           ),
         ),
@@ -670,10 +663,14 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
               ),
               child: SizedBox(
                 width: actionSheetWidth - _kActionSheetEdgeHorizontalPadding * 2,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: children,
+                child: Semantics(
+                  explicitChildNodes: true,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: children,
+                  ),
                 ),
               ),
             ),
@@ -684,7 +681,10 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
   }
 }
 
-/// A button typically used in a [CupertinoActionSheet].
+/// The content of a typical button in a [CupertinoActionSheet].
+///
+/// This widget draws the content of a button, i.e. the text, while the
+/// background of the button is drawn by [CupertinoActionSheet].
 ///
 /// See also:
 ///
@@ -759,37 +759,62 @@ class CupertinoActionSheetAction extends StatelessWidget {
   }
 }
 
-class _CupertinoActionSheetCancelButton extends StatefulWidget {
-  const _CupertinoActionSheetCancelButton({
-    this.child,
+// This widget renders the background (pressed or not) of a button, and sends
+// whether the button is pressed to the parent.
+class _ActionSheetButtonBackground extends StatefulWidget {
+  const _ActionSheetButtonBackground({
+    super.key,
+    this.isCancel = false,
+    required this.onStateChange,
+    required this.child,
   });
 
-  final Widget? child;
+  final bool isCancel;
+
+  /// The callback that is called when the button is tapped.
+  final ValueSetter<bool> onStateChange;
+
+  /// The widget below this widget in the tree.
+  ///
+  /// Typically a [Text] widget.
+  final Widget child;
 
   @override
-  _CupertinoActionSheetCancelButtonState createState() => _CupertinoActionSheetCancelButtonState();
+  _ActionSheetButtonBackgroundState createState() => _ActionSheetButtonBackgroundState();
 }
 
-class _CupertinoActionSheetCancelButtonState extends State<_CupertinoActionSheetCancelButton> {
+class _ActionSheetButtonBackgroundState extends State<_ActionSheetButtonBackground> {
   bool isBeingPressed = false;
 
   void _onTapDown(TapDownDetails event) {
     setState(() { isBeingPressed = true; });
+    widget.onStateChange(true);
   }
 
   void _onTapUp(TapUpDetails event) {
     setState(() { isBeingPressed = false; });
+    widget.onStateChange(false);
   }
 
   void _onTapCancel() {
     setState(() { isBeingPressed = false; });
+    widget.onStateChange(false);
   }
 
   @override
   Widget build(BuildContext context) {
-    final Color backgroundColor = isBeingPressed
-        ? _kActionSheetCancelPressedColor
+    late final Color backgroundColor;
+    BorderRadius? borderRadius;
+    if (!widget.isCancel) {
+      backgroundColor = isBeingPressed
+        ? _kPressedColor
+        : CupertinoDynamicColor.resolve(_kActionSheetBackgroundColor, context);
+    } else {
+      backgroundColor = isBeingPressed
+          ? _kActionSheetCancelPressedColor
         : CupertinoColors.secondarySystemGroupedBackground;
+      borderRadius = const BorderRadius.all(Radius.circular(_kCornerRadius));
+    }
     return GestureDetector(
       excludeFromSemantics: true,
       onTapDown: _onTapDown,
@@ -797,11 +822,238 @@ class _CupertinoActionSheetCancelButtonState extends State<_CupertinoActionSheet
       onTapCancel: _onTapCancel,
       child: Container(
         decoration: BoxDecoration(
-          color: CupertinoDynamicColor.resolve(backgroundColor, context),
-          borderRadius: const BorderRadius.all(Radius.circular(_kCornerRadius)),
+          color: backgroundColor,
+          borderRadius: borderRadius,
         ),
         child: widget.child,
+      )
+    );
+  }
+}
+
+// The divider of an action sheet.
+//
+// If the divider is not `hidden`, then it displays the `dividerColor`.
+// Otherwise it displays the background color. A divider is hidden when either
+// of its neighbor button is pressed.
+class _ActionSheetDivider extends StatelessWidget {
+  const _ActionSheetDivider({
+    super.key,
+    required this.dividerColor,
+    required this.hidden,
+  });
+
+  final Color dividerColor;
+  final bool hidden;
+
+  @override
+  Widget build(BuildContext context) {
+    final Color backgroundColor = CupertinoDynamicColor.resolve(_kActionSheetBackgroundColor, context);
+    return Container(
+      height: _kDividerThickness,
+      decoration: BoxDecoration(
+        color: hidden ? backgroundColor : dividerColor,
       ),
+    );
+  }
+}
+
+// The keys used by the dividers in the action section of an action sheet.
+//
+// The buttons and the dividers are placed alternately, both keyed by indexes.
+// Dividers use this special class so that their indexes can be told apart.
+class _DividerKey extends ValueKey<int> {
+  const _DividerKey(super.value);
+}
+
+typedef _PressedUpdateHandler = void Function(int actionIndex, bool state);
+
+// The list of actions in an action sheet.
+//
+// This excludes the divider between the action section and the content section.
+class _ActionSheetActionSection extends StatelessWidget {
+  const _ActionSheetActionSection({
+    required this.actions,
+    required this.pressedIndex,
+    required this.dividerColor,
+    required this.backgroundColor,
+    required this.onPressedUpdate,
+    required this.scrollController,
+  });
+
+  final List<Widget>? actions;
+  final _PressedUpdateHandler onPressedUpdate;
+  final int? pressedIndex;
+  final Color dividerColor;
+  final Color backgroundColor;
+  final ScrollController? scrollController;
+
+  @override
+  Widget build(BuildContext context) {
+    if (actions == null || actions!.isEmpty) {
+      return const LimitedBox(
+        maxWidth: 0,
+        child: SizedBox(width: double.infinity, height: 0),
+      );
+    }
+    final List<Widget> column = <Widget>[];
+    for (int actionIndex = 0; actionIndex < actions!.length; actionIndex += 1) {
+      if (actionIndex != 0) {
+        column.add(_ActionSheetDivider(
+          key: _DividerKey(actionIndex),
+          dividerColor: dividerColor,
+          hidden: pressedIndex == actionIndex - 1 || pressedIndex == actionIndex,
+        ));
+      }
+      column.add(_ActionSheetButtonBackground(
+        key: ValueKey<int>(actionIndex),
+        onStateChange: (bool state) {
+          onPressedUpdate(actionIndex, state);
+        },
+        child: actions![actionIndex],
+      ));
+    }
+    return CupertinoScrollbar(
+      controller: scrollController,
+      child: SingleChildScrollView(
+        controller: scrollController,
+        child: Column(
+          children: column,
+        ),
+      ),
+    );
+  }
+}
+
+// The part of an action sheet without the cancel button.
+class _ActionSheetMainSheet extends StatefulWidget {
+  const _ActionSheetMainSheet({
+    required this.scrollController,
+    required this.actions,
+    required this.hasContent,
+    required this.contentSection,
+    required this.dividerColor,
+  });
+
+  final ScrollController? scrollController;
+  final List<Widget>? actions;
+  final bool hasContent;
+  final Widget contentSection;
+  final Color dividerColor;
+
+  @override
+  _ActionSheetMainSheetState createState() => _ActionSheetMainSheetState();
+}
+
+class _ActionSheetMainSheetState extends State<_ActionSheetMainSheet> {
+  int? _pressedIndex;
+  double _topOverscroll = 0;
+  double _bottomOverscroll = 0;
+
+  // Fills the overscroll area at the top and bottom of the sheet. This is
+  // necessary because the action section's background is rendered by the
+  // buttons, so that a button's background can be _replaced_ by a different
+  // color when the button is pressed.
+  Widget _buildOverscroll() {
+    final Color backgroundColor = CupertinoDynamicColor.resolve(_kActionSheetBackgroundColor, context);
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: <Widget>[
+        Container(
+          color: backgroundColor,
+          height: _topOverscroll,
+        ),
+        Container(
+          color: backgroundColor,
+          height: _bottomOverscroll,
+        ),
+      ],
+    );
+  }
+
+  bool _onScrollUpdate(ScrollUpdateNotification notification) {
+    final ScrollMetrics metrics = notification.metrics;
+    setState(() {
+      _topOverscroll = math.max(metrics.minScrollExtent - metrics.pixels, 0);
+      _bottomOverscroll = math.max(metrics.pixels - metrics.maxScrollExtent, 0);
+    });
+    return false;
+  }
+
+  bool _hasActions() => (widget.actions?.length ?? 0) != 0;
+
+  Widget _buildContent({required bool hasActions, required double maxHeight}) {
+    if (!hasActions) {
+      return Flexible(
+        child: widget.contentSection,
+      );
+    }
+    return ConstrainedBox(
+      constraints: BoxConstraints(
+        maxHeight: maxHeight,
+      ),
+      child: widget.contentSection,
+    );
+  }
+
+  void _onPressedUpdate(int actionIndex, bool state) {
+    if (!state) {
+      if (_pressedIndex == actionIndex) {
+        setState(() {
+          _pressedIndex = null;
+        });
+      }
+    } else {
+      setState(() {
+        _pressedIndex = actionIndex;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // If both the content section and the actions section overflow, the content
+    // section takes priority but must leave at least `actionsMinHeight` for the
+    // actions section.
+    final Color backgroundColor = CupertinoDynamicColor.resolve(_kActionSheetBackgroundColor, context);
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            _buildContent(
+              hasActions: _hasActions(),
+              maxHeight: constraints.maxHeight - _kActionSheetBActionsSectionMinHeight - _kDividerThickness,
+            ),
+            if (widget.hasContent && _hasActions())
+              _ActionSheetDivider(
+                dividerColor: widget.dividerColor,
+                hidden: false,
+              ),
+            Flexible(
+              child: Stack(
+                children: <Widget>[
+                  Positioned.fill(
+                    child: _buildOverscroll(),
+                  ),
+                  NotificationListener<ScrollUpdateNotification>(
+                    onNotification: _onScrollUpdate,
+                    child: _ActionSheetActionSection(
+                      actions: widget.actions,
+                      scrollController: widget.scrollController,
+                      pressedIndex: _pressedIndex,
+                      dividerColor: widget.dividerColor,
+                      backgroundColor: backgroundColor,
+                      onPressedUpdate: _onPressedUpdate,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }
