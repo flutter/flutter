@@ -72,6 +72,7 @@ void main() {
       headerHintStyle: TextStyle(fontSize: 16.0),
       constraints: BoxConstraints(minWidth: 350, minHeight: 240),
       bottomPadding: 32.0,
+      shrinkWrap: true,
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -89,6 +90,7 @@ void main() {
     expect(description[7], 'headerHintStyle: TextStyle(inherit: true, size: 16.0)');
     expect(description[8], 'constraints: BoxConstraints(350.0<=w<=Infinity, 240.0<=h<=Infinity)');
     expect(description[9], 'bottomPadding: 32.0');
+    expect(description[10], 'shrinkWrap: true');
   });
 
   group('[Theme, SearchViewTheme, SearchView properties overrides]', () {

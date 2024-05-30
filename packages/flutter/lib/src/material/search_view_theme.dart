@@ -41,6 +41,7 @@ class SearchViewThemeData with Diagnosticable {
     this.surfaceTintColor,
     this.constraints,
     this.bottomPadding,
+    this.shrinkWrap,
     this.side,
     this.shape,
     this.headerHeight,
@@ -79,6 +80,9 @@ class SearchViewThemeData with Diagnosticable {
   /// Overrides the value of the padding for [SearchAnchor.viewBottomPadding].
   final double? bottomPadding;
 
+  /// Overrides the value of the shrink wrap for [SearchAnchor.viewShrinkWrap].
+  final bool? shrinkWrap;
+
   /// Overrides the value of the divider color for [SearchAnchor.dividerColor].
   final Color? dividerColor;
 
@@ -95,6 +99,7 @@ class SearchViewThemeData with Diagnosticable {
     TextStyle? headerHintStyle,
     BoxConstraints? constraints,
     double? bottomPadding,
+    bool? shrinkWrap,
     Color? dividerColor,
   }) {
     return SearchViewThemeData(
@@ -108,6 +113,7 @@ class SearchViewThemeData with Diagnosticable {
       headerHintStyle: headerHintStyle ?? this.headerHintStyle,
       constraints: constraints ?? this.constraints,
       bottomPadding: bottomPadding ?? this.bottomPadding,
+      shrinkWrap: shrinkWrap ?? this.shrinkWrap,
       dividerColor: dividerColor ?? this.dividerColor,
     );
   }
@@ -128,6 +134,7 @@ class SearchViewThemeData with Diagnosticable {
       headerHintStyle: TextStyle.lerp(a?.headerTextStyle, b?.headerTextStyle, t),
       constraints: BoxConstraints.lerp(a?.constraints, b?.constraints, t),
       bottomPadding: lerpDouble(a?.bottomPadding, b?.bottomPadding, t),
+      shrinkWrap: t < 0.5 ? a?.shrinkWrap : b?.shrinkWrap,
       dividerColor: Color.lerp(a?.dividerColor, b?.dividerColor, t),
     );
   }
@@ -144,6 +151,7 @@ class SearchViewThemeData with Diagnosticable {
     headerHintStyle,
     constraints,
     bottomPadding,
+    shrinkWrap,
     dividerColor,
   );
 
@@ -166,6 +174,7 @@ class SearchViewThemeData with Diagnosticable {
       && other.headerHintStyle == headerHintStyle
       && other.constraints == constraints
       && other.bottomPadding == bottomPadding
+      && other.shrinkWrap == shrinkWrap
       && other.dividerColor == dividerColor;
   }
 
@@ -182,6 +191,7 @@ class SearchViewThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<TextStyle?>('headerHintStyle', headerHintStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<BoxConstraints>('constraints', constraints, defaultValue: null));
     properties.add(DiagnosticsProperty<double?>('bottomPadding', bottomPadding, defaultValue: null));
+    properties.add(DiagnosticsProperty<bool?>('shrinkWrap', shrinkWrap, defaultValue: null));
     properties.add(DiagnosticsProperty<Color?>('dividerColor', dividerColor, defaultValue: null));
   }
 
