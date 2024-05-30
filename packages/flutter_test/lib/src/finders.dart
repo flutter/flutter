@@ -4,7 +4,8 @@
 
 import 'dart:ui';
 
-import 'package:flutter/material.dart' show IconButton, Icons, Tooltip;
+import 'package:flutter/material.dart' show IconButton, Icons,
+  MaterialLocalizations, PlatformAdaptiveIcons, Tooltip;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -365,13 +366,18 @@ class CommonFinders {
   ///
   /// ```dart
   /// expect(find.byTooltip('Back'), findsOneWidget);
+  /// expect(find.byTooltip(RegExp('Back.*')), findsNWidgets(2));
   /// ```
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
-  Finder byTooltip(String message, { bool skipOffstage = true }) {
+  Finder byTooltip(Pattern message, { bool skipOffstage = true }) {
     return byWidgetPredicate(
-      (Widget widget) => widget is Tooltip && widget.message == message,
+      (Widget widget) {
+        return widget is Tooltip && (message is RegExp
+            ? message.hasMatch(widget.message ?? '')
+            : message == widget.message);
+      },
       skipOffstage: skipOffstage,
     );
   }
@@ -456,28 +462,70 @@ class CommonFinders {
     return _AncestorWidgetFinder(of, matching, matchLeaves: matchRoot);
   }
 
+  /// Finds standard Material Design buttons.
+  ///
+  /// Material Design uses a set of standard icons and buttons for particular
+  /// purposes, such as back buttons, or menu buttons.
+  ///
+  /// It is useful in tests to be able to find these buttons, but not desirable
+  /// to hard code the icons and button types, so using this finder will allow
+  /// finding of the buttons without needing to know the exact icon, etc. used
+  /// for them.
+  ///
+  /// ## Sample code
+  ///
+  /// ```dart
+  /// expect(find.materialButton(MaterialButtonType.backButton), findsOneWidget);
+  /// ```
   Finder materialButton(MaterialButtonType type) {
+    // Finds an IconButton with the right icon and tooltip.
     return switch (type) {
-      MaterialButtonType.backButton =>
-        descendant(
-          of: find.byType(IconButton),
-          matching: byWidgetPredicate((Widget widget) => widget is Icon &&
-            (widget.icon == Icons.arrow_back || widget.icon == Icons.arrow_back_ios_new_rounded),
+      MaterialButtonType.backButton => ancestor(
+          of: byElementPredicate(
+            (Element element) =>
+                element.widget is Tooltip &&
+                (element.widget as Tooltip).message == MaterialLocalizations.of(element).backButtonTooltip,
+          ),
+          matching: ancestor(
+            of: byWidgetPredicate((Widget widget) => widget is Icon &&
+              (widget.icon == Icons.adaptive.arrow_back || widget.icon == Icons.arrow_back_ios_new_rounded)),
+            matching: byType(IconButton),
           ),
         ),
-      MaterialButtonType.menuButton =>
-        descendant(
-          of: find.byType(IconButton),
-          matching: byWidgetPredicate((Widget widget) => widget is Icon && widget.icon == Icons.menu,
+      MaterialButtonType.menuButton => ancestor(
+          of: byElementPredicate(
+            (Element element) =>
+                element.widget is Tooltip &&
+                (element.widget as Tooltip).message == MaterialLocalizations.of(element).showMenuTooltip,
+          ),
+          matching: ancestor(
+            of: byWidgetPredicate((Widget widget) => widget is Icon && widget.icon == Icons.menu),
+            matching: byType(IconButton),
           ),
         ),
-      MaterialButtonType.closeButton =>
-        descendant(
-          of: find.byType(IconButton),
-          matching: byWidgetPredicate((Widget widget) => widget is Icon && widget.icon == Icons.close,
+      MaterialButtonType.moreButton => ancestor(
+          of: byElementPredicate(
+            (Element element) =>
+                element.widget is Tooltip &&
+                (element.widget as Tooltip).message == MaterialLocalizations.of(element).moreButtonTooltip,
+          ),
+          matching: ancestor(
+            of: byWidgetPredicate((Widget widget) => widget is Icon && widget.icon == Icons.adaptive.more),
+            matching: byType(IconButton),
           ),
         ),
-      };
+      MaterialButtonType.closeButton => ancestor(
+          of: byElementPredicate(
+            (Element element) =>
+                element.widget is Tooltip &&
+                (element.widget as Tooltip).message == MaterialLocalizations.of(element).closeButtonTooltip,
+          ),
+          matching: ancestor(
+            of: byWidgetPredicate((Widget widget) => widget is Icon && widget.icon == Icons.close),
+            matching: byType(IconButton),
+          ),
+        ),
+    };
   }
 
   /// Finds [Semantics] widgets matching the given `label`, either by
@@ -527,7 +575,7 @@ class CommonFinders {
   }
 }
 
-/// An enum used by [find.standardButton] to describe the type of standard
+/// An enum used by `find.materialButton` to describe the type of material
 /// button to find.
 ///
 /// Standard buttons are buttons provided by the framework for Material or
@@ -542,6 +590,10 @@ enum MaterialButtonType {
   /// of menu icon ("hamburger", "bars", or three dots), and an appropriate
   /// tooltip.
   menuButton,
+  /// Finds the "menu" button, if any. A menu button typically has some kind
+  /// of menu icon ("hamburger", "bars", or three dots), and an appropriate
+  /// tooltip.
+  moreButton,
   /// Finds the "close" button, if any. A close button typically has some kind
   /// of close icon (an "X", typically), and an appropriate tooltip.
   closeButton,

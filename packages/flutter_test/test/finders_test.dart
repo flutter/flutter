@@ -7,6 +7,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:path/path.dart';
 
 const List<Widget> fooBarTexts = <Text>[
   Text('foo', textDirection: TextDirection.ltr),
@@ -298,6 +299,66 @@ void main() {
           .pumpWidget(_boilerplate(const SimpleCustomSemanticsWidget('Foo')));
       expect(find.bySemanticsLabel('Foo'), findsOneWidget);
       semanticsHandle.dispose();
+    });
+  });
+
+  group('byTooltip', () {
+    testWidgets('finds widgets by tooltip', (WidgetTester tester) async {
+      await tester.pumpWidget(_boilerplate(
+        const Tooltip(
+          message: 'Tooltip Message',
+          child: Text('+'),
+        ),
+      ));
+      expect(find.byTooltip('Tooltip Message'), findsOneWidget);
+    });
+
+    testWidgets('finds widgets with tooltipby RegExp', (WidgetTester tester) async {
+      await tester.pumpWidget(_boilerplate(
+        const Tooltip(
+          message: 'Tooltip Message',
+          child: Text('+'),
+        ),
+      ));
+      expect(find.byTooltip('Tooltip'), findsNothing);
+      expect(find.byTooltip(RegExp(r'^Tooltip')), findsOneWidget);
+    });
+  });
+
+  group('materialButton', () {
+    testWidgets('finds back button widgets', (WidgetTester tester) async {
+      for (final MaterialButtonType buttonType in MaterialButtonType.values) {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Builder(builder: (BuildContext context) {
+              return switch (buttonType) {
+                MaterialButtonType.closeButton => const CloseButton(),
+                MaterialButtonType.backButton => const BackButton(),
+                MaterialButtonType.moreButton => IconButton(
+                    tooltip: MaterialLocalizations.of(context).moreButtonTooltip,
+                    icon: Icon(Icons.adaptive.more),
+                    onPressed: null,
+                  ),
+                MaterialButtonType.menuButton => IconButton(
+                    tooltip: MaterialLocalizations.of(context).showMenuTooltip,
+                    icon: const Icon(Icons.menu),
+                    onPressed: null,
+                  ),
+              };
+            }),
+          ),
+        );
+        for (final MaterialButtonType expectedButtonType in MaterialButtonType.values) {
+          if (expectedButtonType == buttonType) {
+            expect(find.materialButton(expectedButtonType), findsOneWidget,
+                reason: "Expected to find a ${buttonType.name}, but didn't find one.");
+          } else {
+            expect(find.materialButton(expectedButtonType), findsNothing,
+                reason: 'Expected to not find a $expectedButtonType button type when '
+                    'only a $buttonType exists, but found one anyway.');
+          }
+        }
+      }
     });
   });
 
@@ -1354,9 +1415,16 @@ void main() {
 }
 
 Widget _boilerplate(Widget child) {
-  return Directionality(
-    textDirection: TextDirection.ltr,
-    child: child,
+  return Localizations(
+    locale: const Locale('en'),
+    delegates: const <LocalizationsDelegate<dynamic>>[
+      DefaultMaterialLocalizations.delegate,
+      DefaultWidgetsLocalizations.delegate,
+    ],
+    child: Directionality(
+      textDirection: TextDirection.ltr,
+      child: child,
+    ),
   );
 }
 
