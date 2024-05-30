@@ -17,12 +17,10 @@ class MyCascadingMenu extends StatefulWidget {
 }
 
 class _MyCascadingMenuState extends State<MyCascadingMenu> {
-  /// [FocusNode] for Menu Button.
   final FocusNode _buttonFocusNode = FocusNode(debugLabel: 'Menu Button');
 
   @override
   void dispose() {
-    /// Disposes the focus node when state is disposed.
     _buttonFocusNode.dispose();
     super.dispose();
   }
@@ -30,10 +28,7 @@ class _MyCascadingMenuState extends State<MyCascadingMenu> {
   @override
   Widget build(BuildContext context) {
     return MenuAnchor(
-      /// Sets the focus node for Menu Button.
       childFocusNode: _buttonFocusNode,
-
-      /// Defines Menu Items
       menuChildren: <Widget>[
         MenuItemButton(
           child: const Text('Revert'),
@@ -48,13 +43,9 @@ class _MyCascadingMenuState extends State<MyCascadingMenu> {
           onPressed: () {},
         ),
       ],
-
-      /// Builds the Menu Button.
       builder: (_, MenuController controller, Widget? child) {
         return IconButton(
           focusNode: _buttonFocusNode,
-
-          /// Opens or closes the menu based on its current state.
           onPressed: () {
             if (controller.isOpen) {
               controller.close();
@@ -62,8 +53,6 @@ class _MyCascadingMenuState extends State<MyCascadingMenu> {
               controller.open();
             }
           },
-
-          /// Displays Menu Button Icon.
           icon: const Icon(Icons.more_vert),
         );
       },
@@ -78,9 +67,6 @@ class SimpleCascadingMenuApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData(
-        useMaterial3: true,
-      ),
       home: Scaffold(
         appBar: AppBar(
           title: const Text('MenuAnchor Simple Example'),

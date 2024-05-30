@@ -14,7 +14,7 @@ This will produce a Flutter engine configured for AOT mode targeting the host. N
 
 ## Building the Architecture Specific `gen_snapshot`
 
-The binary that converts Dart code to architecture specific AOT instructions is called `gen_snapshot`. A successful invocation of `gen_snapshot` should produce four binary blobs. These are the Dart VM heap and instructions snapshots as well as the isolate heap and instruction snapshots. Refer to the [wiki article on engine operation in AOT mode](https://github.com/flutter/flutter/wiki/Flutter-engine-operation-in-AOT-Mode) for the purpose of these snapshots.
+The binary that converts Dart code to architecture specific AOT instructions is called `gen_snapshot`. A successful invocation of `gen_snapshot` should produce four binary blobs. These are the Dart VM heap and instructions snapshots as well as the isolate heap and instruction snapshots. Refer to the [wiki article on engine operation in AOT mode](Flutter-engine-operation-in-AOT-Mode.md) for the purpose of these snapshots.
 
 A specific `gen_snapshot` can only produce AOT instructions for one target architecture. To verify that the `gen_snapshot` you have is producing instructions for the architecture you care about, invoke the same with the `--version` flag. It should produce something like the following.
 
@@ -51,7 +51,7 @@ flutter --local-engine <local_engine_configuration> --local-engine-host <local_h
 ```
 
 **Note:** The `--local-engine` (and `--local-engine-host`) flag is technically optional. However, not specifying the flag will make the tools pick the released version on of the Flutter engine. This version may contain subtle version mismatches with the engine you are using to prepare the `gen_snapshot` binary. So it is safer to just make sure the version are the same.
-See [running with a local engine](https://github.com/flutter/flutter/wiki/Debugging-the-engine#running-a-flutter-app-with-a-local-engine) for more details.
+See [running with a local engine](Debugging-the-engine.md#running-a-flutter-app-with-a-local-engine) for more details.
 
 The result of the invocation will be the generation of the following binary blobs in the `build/aot directory`:
 

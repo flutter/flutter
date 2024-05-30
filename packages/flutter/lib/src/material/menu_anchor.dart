@@ -121,10 +121,8 @@ typedef MenuAnchorChildBuilder = Widget Function(
 /// {@end-tool}
 ///
 /// {@tool dartpad}
-/// This example demonstrates a simple cascading menu using the [MenuAnchor]
+/// This example demonstrates a simplified cascading menu using the [MenuAnchor]
 /// widget.
-/// An [IconButton] (with a "more_vert" icon) triggers the menu, which contains
-/// options like "Revert," "Setting," and "Send Feedback."
 ///
 /// ** See code in examples/api/lib/material/menu_anchor/menu_anchor.3.dart **
 /// {@end-tool}

@@ -10,6 +10,6 @@ ninja -C out/android_jit_release_x86
 ninja -C out/host_jit_release
 ```
 
-This can be used with the flutter tool [via the `--local-engine`](https://github.com/flutter/flutter/wiki/Debugging-the-engine#running-a-flutter-app-with-a-local-engine) flag to produce a bundle containing the jit release artifacts using the `flutter assemble` command. By default, flutter.gradle does not know how to package this artifacts so it requires custom integration into a build pipeline. Nevertheless, the artifact structure should be identical to a debug build, but with asserts disabled and product mode enabled.
+This can be used with the flutter tool [via the `--local-engine`](Debugging-the-engine.md#running-a-flutter-app-with-a-local-engine) flag to produce a bundle containing the jit release artifacts using the `flutter assemble` command. By default, flutter.gradle does not know how to package this artifacts so it requires custom integration into a build pipeline. Nevertheless, the artifact structure should be identical to a debug build, but with asserts disabled and product mode enabled.
 
 jit_release is not supported on iOS devices. Applications built in JIT mode cannot be distributed on the Apple App Store.
