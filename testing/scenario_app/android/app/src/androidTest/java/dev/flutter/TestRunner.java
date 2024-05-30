@@ -23,8 +23,6 @@ public class TestRunner extends AndroidJUnitRunner {
             "--enable-impeller=true",
             "--impeller-backend=" + arguments.getString("impeller-backend", "vulkan")
           };
-    } else {
-      engineArguments = new String[]{"--enable-impeller=false"};
     }
     FlutterRenderer.debugDisableSurfaceClear = true;
     if ("true".equals(arguments.getString("force-surface-producer-surface-texture"))) {

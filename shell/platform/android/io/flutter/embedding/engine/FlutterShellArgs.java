@@ -45,7 +45,7 @@ public class FlutterShellArgs {
   public static final String ARG_KEY_TRACE_TO_FILE = "trace-to-file";
   public static final String ARG_TRACE_TO_FILE = "--trace-to-file";
   public static final String ARG_KEY_ENABLE_IMPELLER = "enable-impeller";
-  public static final String ARG_DISABLE_IMPELLER = "--enable-impeller=false";
+  public static final String ARG_ENABLE_IMPELLER = "--enable-impeller";
   public static final String ARG_KEY_ENABLE_VULKAN_VALIDATION = "enable-vulkan-validation";
   public static final String ARG_ENABLE_VULKAN_VALIDATION = "--enable-vulkan-validation";
   public static final String ARG_KEY_DUMP_SHADER_SKP_ON_SHADER_COMPILATION =
@@ -123,8 +123,8 @@ public class FlutterShellArgs {
     if (intent.hasExtra(ARG_KEY_TRACE_TO_FILE)) {
       args.add(ARG_TRACE_TO_FILE + "=" + intent.getStringExtra(ARG_KEY_TRACE_TO_FILE));
     }
-    if (!intent.getBooleanExtra(ARG_KEY_ENABLE_IMPELLER, true)) {
-      args.add(ARG_DISABLE_IMPELLER);
+    if (intent.getBooleanExtra(ARG_KEY_ENABLE_IMPELLER, false)) {
+      args.add(ARG_ENABLE_IMPELLER);
     }
     if (intent.getBooleanExtra(ARG_KEY_ENABLE_VULKAN_VALIDATION, false)) {
       args.add(ARG_ENABLE_VULKAN_VALIDATION);
