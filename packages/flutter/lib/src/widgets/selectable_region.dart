@@ -669,7 +669,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
               _selectEndTo(offset: details.globalPosition, continuous: true, textGranularity: TextGranularity.word);
             }
           case TargetPlatform.iOS:
-            if (kIsWeb && details.kind != null && _isPrecisePointerDevice(details.kind!)) {
+            if (kIsWeb && details.kind != null && !_isPrecisePointerDevice(details.kind!)) {
               // Double tap + drag on iOS web is only enabled with a precise
               // pointer device.
               break;
