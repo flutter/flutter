@@ -732,11 +732,8 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
     final DropdownMenuThemeData defaults = _DropdownMenuDefaultsM3(context);
 
     if (_enableFilter) {
-      if (widget.filterCallback != null) {
-        filteredEntries = widget.filterCallback!.call(filteredEntries, _localTextEditingController!.text);
-      } else {
-        filteredEntries = filter(widget.dropdownMenuEntries, _localTextEditingController!);
-      }
+      filteredEntries = widget.filterCallback?.call(filteredEntries, _localTextEditingController!.text)
+        ?? filter(widget.dropdownMenuEntries, _localTextEditingController!);
     }
 
     if (widget.enableSearch) {
