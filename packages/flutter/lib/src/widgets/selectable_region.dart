@@ -484,11 +484,23 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   //
   // This method should be used in all instances when details.consecutiveTapCount
   // would be used.
-  static int _getEffectiveConsecutiveTapCount(int rawCount) {
-    const int maxConsecutiveTap = 3;
+  int _getEffectiveConsecutiveTapCount(int rawCount) {
+    int maxConsecutiveTap = 3;
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
+        if (_lastPointerDeviceKind != null && _lastPointerDeviceKind != PointerDeviceKind.mouse) {
+          // When the pointer device kind is not precise like a mouse,
+          // native Android resets the tap count at 2.
+          maxConsecutiveTap = 2;
+        }
+        // From observation, these platforms reset their tap count to 0 when
+        // the number of consecutive taps exceeds the max consecutive tap supported.
+        // For example on Debian Linux with GTK, when going past a triple click,
+        // on the fourth click the selection is moved to the precise click
+        // position, on the fifth click the word at the position is selected, and
+        // on the sixth click the paragraph at the position is selected.
+        return rawCount <= maxConsecutiveTap ? rawCount : (rawCount % maxConsecutiveTap == 0 ? maxConsecutiveTap : rawCount % maxConsecutiveTap);
       case TargetPlatform.linux:
         // From observation, these platforms reset their tap count to 0 when
         // the number of consecutive taps exceeds the max consecutive tap supported.

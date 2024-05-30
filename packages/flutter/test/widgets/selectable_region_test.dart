@@ -870,6 +870,227 @@ void main() {
       skip: kIsWeb, // https://github.com/flutter/flutter/issues/125582.
     );
 
+    testWidgets('touch cannot triple click or triple click drag on Android and iOS', (WidgetTester tester) async {
+      const String longText = 'Hello world this is some long piece of text '
+          'that will represent a long paragraph, when triple clicking this block '
+          'of text all of it will be selected.\n'
+          'This will be the start of a new line. When triple clicking this block '
+          'of text all of it should be selected.';
+
+      final FocusNode focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: SelectableRegion(
+            focusNode: focusNode,
+            selectionControls: materialTextSelectionControls,
+            child: const Center(
+              child: Text(longText),
+            ),
+          ),
+        ),
+      );
+      final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.descendant(of: find.text(longText), matching: find.byType(RichText)));
+      final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph, 2), kind: PointerDeviceKind.mouse);
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+
+      await gesture.down(textOffsetToPosition(paragraph, 2));
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+
+      await gesture.down(textOffsetToPosition(paragraph, 2));
+      await tester.pumpAndSettle();
+      expect(paragraph.selections[0], const TextSelection(baseOffset: 0, extentOffset: 150));
+
+      await gesture.moveTo(textOffsetToPosition(paragraph, 155));
+      await tester.pumpAndSettle();
+      expect(paragraph.selections[0], const TextSelection(baseOffset: 0, extentOffset: 257));
+
+      await gesture.moveTo(textOffsetToPosition(paragraph, 170));
+      await tester.pump();
+      expect(paragraph.selections[0], const TextSelection(baseOffset: 0, extentOffset: 257));
+
+      // Check backward selection.
+      await gesture.moveTo(textOffsetToPosition(paragraph, 1));
+      await tester.pump();
+      expect(paragraph.selections[0], const TextSelection(baseOffset: 0, extentOffset: 150));
+
+      // Start a new triple-click drag.
+      await gesture.up();
+      await tester.pumpAndSettle(kDoubleTapTimeout);
+      await gesture.down(textOffsetToPosition(paragraph, 151));
+      await tester.pumpAndSettle();
+      await gesture.up();
+      expect(paragraph.selections.isNotEmpty, isTrue);
+      expect(paragraph.selections.length, 1);
+      expect(paragraph.selections.first, const TextSelection.collapsed(offset: 151));
+      await tester.pump(kDoubleTapTimeout);
+
+      // Triple-click.
+      await gesture.down(textOffsetToPosition(paragraph, 151));
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+      await gesture.down(textOffsetToPosition(paragraph, 151));
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+      await gesture.down(textOffsetToPosition(paragraph, 151));
+      await tester.pumpAndSettle();
+      expect(paragraph.selections[0], const TextSelection(baseOffset: 150, extentOffset: 257));
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      // Reset selection.
+      await tester.tapAt(textOffsetToPosition(paragraph, 0));
+      await tester.pumpAndSettle(kDoubleTapTimeout);
+      expect(paragraph.selections[0], const TextSelection.collapsed(offset: 0));
+
+      // Trying to triple-click with a touch gesture should not work.
+      final TestGesture touchGesture = await tester.startGesture(textOffsetToPosition(paragraph, 2));
+      addTearDown(touchGesture.removePointer);
+      await tester.pump();
+      await touchGesture.up();
+      await tester.pump();
+
+      await touchGesture.down(textOffsetToPosition(paragraph, 2));
+      await tester.pump();
+      await touchGesture.up();
+      await tester.pump();
+
+      await touchGesture.down(textOffsetToPosition(paragraph, 2));
+      await tester.pump();
+      await touchGesture.up();
+      await tester.pumpAndSettle();
+      // The selection is collapsed on Android because the max consecutive tap count
+      // on native Android is 2 when the pointer device kind is not precise like
+      // for a touch.
+      //
+      // On iOS the selection is maintained because the tap occured on the active
+      // selection.
+      expect(paragraph.selections[0], defaultTargetPlatform == TargetPlatform.iOS ? const TextSelection(baseOffset: 0, extentOffset: 5) : const TextSelection.collapsed(offset: 2));
+    },
+      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.iOS }),
+      skip: kIsWeb, // https://github.com/flutter/flutter/issues/125582.
+    );
+
+    testWidgets('touch cannot select word-by-word on double click drag when on Android web', (WidgetTester tester) async {
+      if (!kIsWeb) {
+        // This test is verifying web behavior.
+        return;
+      }
+      final FocusNode focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: SelectableRegion(
+            focusNode: focusNode,
+            selectionControls: materialTextSelectionControls,
+            child: const Center(
+              child: Text('How are you'),
+            ),
+          ),
+        ),
+      );
+      final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you'), matching: find.byType(RichText)));
+      final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph, 2));
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+
+      await gesture.down(textOffsetToPosition(paragraph, 2));
+      await tester.pumpAndSettle();
+      expect(paragraph.selections[0], const TextSelection(baseOffset: 0, extentOffset: 3));
+
+      // Dragging should not change the selection.
+      await gesture.moveTo(textOffsetToPosition(paragraph, 3));
+      await tester.pumpAndSettle();
+      expect(paragraph.selections[0], const TextSelection(baseOffset: 0, extentOffset: 3));
+
+      await gesture.moveTo(textOffsetToPosition(paragraph, 4));
+      await tester.pump();
+      expect(paragraph.selections[0], const TextSelection(baseOffset: 0, extentOffset: 3));
+
+      await gesture.moveTo(textOffsetToPosition(paragraph, 7));
+      await tester.pump();
+      expect(paragraph.selections[0], const TextSelection(baseOffset: 0, extentOffset: 3));
+
+      await gesture.moveTo(textOffsetToPosition(paragraph, 8));
+      await tester.pump();
+      expect(paragraph.selections[0], const TextSelection(baseOffset: 0, extentOffset: 3));
+
+      // Check backward selection.
+      await gesture.moveTo(textOffsetToPosition(paragraph, 1));
+      await tester.pump();
+      expect(paragraph.selections[0], const TextSelection(baseOffset: 0, extentOffset: 3));
+      await gesture.up();
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('touch cannot double tap or double tap drag when on iOS web', (WidgetTester tester) async {
+      if (!kIsWeb) {
+        // This test is verifying web behavior.
+        return;
+      }
+      final FocusNode focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: SelectableRegion(
+            focusNode: focusNode,
+            selectionControls: materialTextSelectionControls,
+            child: const Center(
+              child: Text('How are you'),
+            ),
+          ),
+        ),
+      );
+      final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you'), matching: find.byType(RichText)));
+      final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph, 2));
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+      expect(paragraph.selections[0], const TextSelection.collapsed(offset: 2));
+
+      // A double tap should not change the selection.
+      await gesture.down(textOffsetToPosition(paragraph, 2));
+      await tester.pumpAndSettle();
+      expect(paragraph.selections[0], const TextSelection.collapsed(offset: 2));
+
+      // Dragging should not change the selection.
+      await gesture.moveTo(textOffsetToPosition(paragraph, 3));
+      await tester.pumpAndSettle();
+      expect(paragraph.selections[0], const TextSelection.collapsed(offset: 2));
+
+      await gesture.moveTo(textOffsetToPosition(paragraph, 4));
+      await tester.pump();
+      expect(paragraph.selections[0], const TextSelection.collapsed(offset: 2));
+
+      await gesture.moveTo(textOffsetToPosition(paragraph, 7));
+      await tester.pump();
+      expect(paragraph.selections[0], const TextSelection.collapsed(offset: 2));
+
+      await gesture.moveTo(textOffsetToPosition(paragraph, 8));
+      await tester.pump();
+      expect(paragraph.selections[0], const TextSelection.collapsed(offset: 2));
+
+      // Check backward selection.
+      await gesture.moveTo(textOffsetToPosition(paragraph, 1));
+      await tester.pump();
+      expect(paragraph.selections[0], const TextSelection.collapsed(offset: 2));
+      await gesture.up();
+      await tester.pumpAndSettle();
+    }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
+
     testWidgets('mouse can select single text on desktop platforms', (WidgetTester tester) async {
       final FocusNode focusNode = FocusNode();
       addTearDown(focusNode.dispose);
