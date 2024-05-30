@@ -331,6 +331,8 @@ void main() {
         await tester.pumpWidget(
           MaterialApp(
             home: Builder(builder: (BuildContext context) {
+              // Switch on the values in MaterialButtonType so that we know
+              // we've checked them all.
               return switch (buttonType) {
                 MaterialButtonType.closeButton => const CloseButton(),
                 MaterialButtonType.backButton => const BackButton(),
@@ -350,12 +352,18 @@ void main() {
         );
         for (final MaterialButtonType expectedButtonType in MaterialButtonType.values) {
           if (expectedButtonType == buttonType) {
-            expect(find.materialButton(expectedButtonType), findsOneWidget,
-                reason: "Expected to find a ${buttonType.name}, but didn't find one.");
+            expect(
+              find.materialButton(expectedButtonType),
+              findsOneWidget,
+              reason: "Expected to find a ${buttonType.name}, but didn't find one.",
+            );
           } else {
-            expect(find.materialButton(expectedButtonType), findsNothing,
-                reason: 'Expected to not find a $expectedButtonType button type when '
-                    'only a $buttonType exists, but found one anyway.');
+            expect(
+              find.materialButton(expectedButtonType),
+              findsNothing,
+              reason: 'Expected to not find a $expectedButtonType when '
+                'only a $buttonType exists, but found one anyway.',
+            );
           }
         }
       }
@@ -1415,16 +1423,9 @@ void main() {
 }
 
 Widget _boilerplate(Widget child) {
-  return Localizations(
-    locale: const Locale('en'),
-    delegates: const <LocalizationsDelegate<dynamic>>[
-      DefaultMaterialLocalizations.delegate,
-      DefaultWidgetsLocalizations.delegate,
-    ],
-    child: Directionality(
-      textDirection: TextDirection.ltr,
-      child: child,
-    ),
+  return Directionality(
+    textDirection: TextDirection.ltr,
+    child: child,
   );
 }
 

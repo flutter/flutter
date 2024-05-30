@@ -5,7 +5,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart' show IconButton, Icons,
-  MaterialLocalizations, PlatformAdaptiveIcons, Tooltip;
+  MaterialLocalizations, Tooltip;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -465,12 +465,12 @@ class CommonFinders {
   /// Finds standard Material Design buttons.
   ///
   /// Material Design uses a set of standard icons and buttons for particular
-  /// purposes, such as back buttons, or menu buttons.
+  /// purposes, such as back, close, more, or menu buttons.
   ///
-  /// It is useful in tests to be able to find these buttons, but not desirable
-  /// to hard code the icons and button types, so using this finder will allow
-  /// finding of the buttons without needing to know the exact icon, etc. used
-  /// for them.
+  /// It is useful in tests to be able to find these buttons, both for tapping
+  /// them or verifying their existence, but not desirable to hard code the
+  /// icons and button types, so using this finder will allow finding of the
+  /// buttons without needing to know the exact icon, etc. used for them.
   ///
   /// ## Sample code
   ///
@@ -506,8 +506,7 @@ class CommonFinders {
       MaterialButtonType.moreButton => ancestor(
           of: byElementPredicate(
             (Element element) =>
-                element.widget is Tooltip &&
-                (element.widget as Tooltip).message == MaterialLocalizations.of(element).moreButtonTooltip,
+                element.widget is Tooltip &&(element.widget as Tooltip).message == MaterialLocalizations.of(element).moreButtonTooltip,
           ),
           matching: ancestor(
             of: byWidgetPredicate((Widget widget) => widget is Icon && widget.icon == Icons.adaptive.more),

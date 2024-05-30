@@ -1532,7 +1532,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
       splashRadius: widget.splashRadius,
       iconSize: widget.iconSize ?? popupMenuTheme.iconSize ?? iconTheme.size,
       color: widget.iconColor ?? popupMenuTheme.iconColor ?? iconTheme.color,
-      tooltip: widget.tooltip ?? MaterialLocalizations.of(context).showMenuTooltip,
+      tooltip: widget.tooltip ?? MaterialLocalizations.of(context).moreButtonTooltip,
       onPressed: widget.enabled ? showButtonMenu : null,
       enableFeedback: enableFeedback,
       style: widget.style,
