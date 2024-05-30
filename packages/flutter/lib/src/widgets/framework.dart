@@ -2671,6 +2671,7 @@ final class BuildScope {
   @pragma('dart2js:tryInline')
   @pragma('vm:prefer-inline')
   @pragma('wasm:prefer-inline')
+  @pragma('vm:notify-debugger-on-exception')
   void _tryRebuild(Element element) {
     assert(element._inDirtyList);
     assert(identical(element.buildScope, this));
@@ -2738,6 +2739,7 @@ final class BuildScope {
     ]);
   }
 
+  @pragma('vm:notify-debugger-on-exception')
   void _flushDirtyElements({ required Element debugBuildRoot }) {
     assert(_dirtyElementsNeedsResorting == null, '_flushDirtyElements must be non-reentrant');
     _dirtyElements.sort(Element._sort);
