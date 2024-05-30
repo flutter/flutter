@@ -4386,11 +4386,9 @@ void main() {
   });
 
   testWidgets('Skip drawing ValueIndicator shape when label painter text is null', (WidgetTester tester) async {
-    debugDisableShadows = false;
     double sliderValue = 10;
 
-    try {
-      await tester.pumpWidget(
+    await tester.pumpWidget(
         MaterialApp(
           home: StatefulBuilder(
             builder: (BuildContext context, void Function(void Function()) setState) {
@@ -4422,14 +4420,11 @@ void main() {
       // Tap on the 25% position of the Slider.
       await tester.tapAt(tapPositionLeft);
       await tester.pumpAndSettle();
-      expect(valueIndicatorBox, paintsExactlyCountTimes(#drawPath, 1));
+      expect(valueIndicatorBox, paintsExactlyCountTimes(#drawPath, 2));
 
       // Tap on the 75% position of the Slider.
       await tester.tapAt(tapPositionRight);
       await tester.pumpAndSettle();
-      expect(valueIndicatorBox, paintsExactlyCountTimes(#drawPath, 0));
-    } finally {
-      debugDisableShadows = true;
-    }
+      expect(valueIndicatorBox, paintsExactlyCountTimes(#drawPath, 1));
   });
 }
