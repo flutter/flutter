@@ -1165,6 +1165,7 @@ void main() {
     expect(controller.text, 'Item');
     await tester.pumpAndSettle();
     expect(find.widgetWithText(MenuItemButton, 'Item 0').hitTestable(), findsOneWidget);
+    expect(find.widgetWithText(MenuItemButton, 'Menu 1').hitTestable(), findsNothing);
     expect(find.widgetWithText(MenuItemButton, 'Item 2').hitTestable(), findsOneWidget);
     expect(find.widgetWithText(MenuItemButton, 'Item 3').hitTestable(), findsOneWidget);
     expect(find.widgetWithText(MenuItemButton, 'Item 4').hitTestable(), findsOneWidget);
