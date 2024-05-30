@@ -4384,4 +4384,47 @@ void main() {
     await gesture.moveBy(const Offset(1.0, 0.0));
     expect(onChangeCallbackCount, 1);
   });
+
+  testWidgets('Skip drawing ValueIndicator shape when label painter text is null', (WidgetTester tester) async {
+    double sliderValue = 10;
+
+    await tester.pumpWidget(
+        MaterialApp(
+          home: StatefulBuilder(
+            builder: (BuildContext context, void Function(void Function()) setState) {
+              return Material(
+                child: Slider(
+                  value: sliderValue,
+                  max: 100,
+                  label: sliderValue > 50 ? null : sliderValue.toString(),
+                  divisions: 10,
+                  onChanged: (double value) {
+                    setState(() {
+                      sliderValue = value;
+                    });
+                  },
+                ),
+              );
+            },
+          ),
+        ),
+      );
+
+      final RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
+
+      // Calculate a specific position on the Slider.
+      final Rect sliderRect = tester.getRect(find.byType(Slider));
+      final Offset tapPositionLeft = Offset(sliderRect.left + sliderRect.width * 0.25, sliderRect.center.dy);
+      final Offset tapPositionRight = Offset(sliderRect.left + sliderRect.width * 0.75, sliderRect.center.dy);
+
+      // Tap on the 25% position of the Slider.
+      await tester.tapAt(tapPositionLeft);
+      await tester.pumpAndSettle();
+      expect(valueIndicatorBox, paintsExactlyCountTimes(#drawPath, 2));
+
+      // Tap on the 75% position of the Slider.
+      await tester.tapAt(tapPositionRight);
+      await tester.pumpAndSettle();
+      expect(valueIndicatorBox, paintsExactlyCountTimes(#drawPath, 1));
+  });
 }
