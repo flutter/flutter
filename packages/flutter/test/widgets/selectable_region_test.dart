@@ -627,7 +627,7 @@ void main() {
       expect(paragraph.selections[0], const TextSelection(baseOffset: 0, extentOffset: 3));
     }, variant: TargetPlatformVariant.desktop());
 
-    testWidgets('touch can select word-by-word on double click drag on mobile platforms', (WidgetTester tester) async {
+    testWidgets('touch can select word-by-word on double tap drag on mobile platforms', (WidgetTester tester) async {
       final FocusNode focusNode = FocusNode();
       addTearDown(focusNode.dispose);
 
@@ -700,10 +700,10 @@ void main() {
       await gesture.up();
     },
       variant: TargetPlatformVariant.mobile(),
-      skip: kIsWeb, // https://github.com/flutter/flutter/issues/125582.
+      skip: kIsWeb, // Double tap / double tap + drag gestures are not fully enabled on the web for mobile platforms.
     );
 
-    testWidgets('touch can select multiple widgets on double click drag on mobile platforms', (WidgetTester tester) async {
+    testWidgets('touch can select multiple widgets on double tap drag on mobile platforms', (WidgetTester tester) async {
       final FocusNode focusNode = FocusNode();
       addTearDown(focusNode.dispose);
 
@@ -752,10 +752,10 @@ void main() {
       await gesture.up();
     },
       variant: TargetPlatformVariant.mobile(),
-      skip: kIsWeb, // https://github.com/flutter/flutter/issues/125582.
+      skip: kIsWeb, // Double tap / double tap + drag gestures are not fully enabled on the web for mobile platforms.
     );
 
-    testWidgets('touch can select multiple widgets on double click drag and return to origin word on mobile platforms', (WidgetTester tester) async {
+    testWidgets('touch can select multiple widgets on double tap drag and return to origin word on mobile platforms', (WidgetTester tester) async {
       final FocusNode focusNode = FocusNode();
       addTearDown(focusNode.dispose);
 
@@ -816,10 +816,10 @@ void main() {
       await gesture.up();
     },
       variant: TargetPlatformVariant.mobile(),
-      skip: kIsWeb, // https://github.com/flutter/flutter/issues/125582.
+      skip: kIsWeb, // Double tap / double tap + drag gestures are not fully enabled on the web for mobile platforms.
     );
 
-    testWidgets('touch can reverse selection across multiple widgets on double click drag on mobile platforms', (WidgetTester tester) async {
+    testWidgets('touch can reverse selection across multiple widgets on double tap drag on mobile platforms', (WidgetTester tester) async {
       final FocusNode focusNode = FocusNode();
       addTearDown(focusNode.dispose);
 
@@ -867,10 +867,10 @@ void main() {
       await gesture.up();
     },
       variant: TargetPlatformVariant.mobile(),
-      skip: kIsWeb, // https://github.com/flutter/flutter/issues/125582.
+      skip: kIsWeb, // Double tap / double tap + drag gestures are not fully enabled on the web for mobile platforms.
     );
 
-    testWidgets('touch cannot triple click or triple click drag on Android and iOS', (WidgetTester tester) async {
+    testWidgets('touch cannot triple tap or triple tap drag on Android and iOS', (WidgetTester tester) async {
       const String longText = 'Hello world this is some long piece of text '
           'that will represent a long paragraph, when triple clicking this block '
           'of text all of it will be selected.\n'
@@ -976,10 +976,10 @@ void main() {
       expect(paragraph.selections[0], defaultTargetPlatform == TargetPlatform.iOS ? const TextSelection(baseOffset: 0, extentOffset: 5) : const TextSelection.collapsed(offset: 2));
     },
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.iOS }),
-      skip: kIsWeb, // https://github.com/flutter/flutter/issues/125582.
+      skip: kIsWeb, // Double tap / double tap + drag gestures are not fully enabled on the web for mobile platforms.
     );
 
-    testWidgets('touch cannot select word-by-word on double click drag when on Android web', (WidgetTester tester) async {
+    testWidgets('touch cannot select word-by-word on double tap drag when on Android web', (WidgetTester tester) async {
       final FocusNode focusNode = FocusNode();
       addTearDown(focusNode.dispose);
 
