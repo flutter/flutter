@@ -90,7 +90,7 @@ const double _kActionSheetEdgeVerticalPadding = 10.0;
 const double _kActionSheetContentHorizontalPadding = 16.0;
 const double _kActionSheetContentVerticalPadding = 12.0;
 const double _kActionSheetButtonHeight = 56.0;
-const double _kActionSheetBActionsSectionMinHeight = 84.0;
+const double _kActionSheetActionsSectionMinHeight = 84.0;
 
 // A translucent color that is painted on top of the blurred backdrop as the
 // dialog's background color
@@ -663,14 +663,10 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
               ),
               child: SizedBox(
                 width: actionSheetWidth - _kActionSheetEdgeHorizontalPadding * 2,
-                child: Semantics(
-                  explicitChildNodes: true,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: children,
-                  ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: children,
                 ),
               ),
             ),
@@ -861,7 +857,8 @@ class _ActionSheetDivider extends StatelessWidget {
 // The keys used by the dividers in the action section of an action sheet.
 //
 // The buttons and the dividers are placed alternately, both keyed by indexes.
-// Dividers use this special class so that their indexes can be told apart.
+// Dividers use this special class so that the two lists of indexes can be told
+// apart.
 class _DividerKey extends ValueKey<int> {
   const _DividerKey(super.value);
 }
@@ -1024,7 +1021,7 @@ class _ActionSheetMainSheetState extends State<_ActionSheetMainSheet> {
           children: <Widget>[
             _buildContent(
               hasActions: _hasActions(),
-              maxHeight: constraints.maxHeight - _kActionSheetBActionsSectionMinHeight - _kDividerThickness,
+              maxHeight: constraints.maxHeight - _kActionSheetActionsSectionMinHeight - _kDividerThickness,
             ),
             if (widget.hasContent && _hasActions())
               _ActionSheetDivider(
