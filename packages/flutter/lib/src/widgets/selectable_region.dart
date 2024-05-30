@@ -678,16 +678,16 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   }
 
   void _handleMouseDragEnd(TapDragEndDetails details) {
-    if (_lastPointerDeviceKind != null 
-        && _lastPointerDeviceKind != PointerDeviceKind.mouse 
+    if (_lastPointerDeviceKind != null
+        && _lastPointerDeviceKind != PointerDeviceKind.mouse
         && defaultTargetPlatform == TargetPlatform.android) {
       // On Android, a drag gesture will only show the selection overlay when
       // the drag has finished and the pointer device kind is not precise.
       _showHandles();
       _showToolbar();
     }
-    if (_lastPointerDeviceKind != null 
-        && _lastPointerDeviceKind != PointerDeviceKind.mouse 
+    if (_lastPointerDeviceKind != null
+        && _lastPointerDeviceKind != PointerDeviceKind.mouse
         && defaultTargetPlatform == TargetPlatform.iOS) {
       // On iOS, a drag gesture will only show the selection toolbar when
       // the drag has finished and the pointer device kind is not precise.
@@ -724,14 +724,14 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
             break;
         }
       case 2:
-        if (details.kind != PointerDeviceKind.mouse 
+        if (details.kind != PointerDeviceKind.mouse
             && defaultTargetPlatform == TargetPlatform.android) {
           // On Android, a double tap will only show the selection overlay after
           // the following tap up when the pointer device kind is not precise.
           _showHandles();
           _showToolbar();
         }
-        if (details.kind != PointerDeviceKind.mouse 
+        if (details.kind != PointerDeviceKind.mouse
             && defaultTargetPlatform == TargetPlatform.iOS) {
           // On iOS, a double tap will only show the selection toolbar after
           // the following tap up when the pointer device kind is not precise.

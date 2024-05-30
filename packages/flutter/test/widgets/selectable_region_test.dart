@@ -698,10 +698,10 @@ void main() {
       await tester.pump();
       expect(paragraph.selections[0], const TextSelection(baseOffset: 4, extentOffset: 11));
       await gesture.up();
-    }, 
+    },
       variant: TargetPlatformVariant.mobile(),
-      skip: kIsWeb,
-    ); // https://github.com/flutter/flutter/issues/125582.
+      skip: kIsWeb, // https://github.com/flutter/flutter/issues/125582.
+    );
 
     testWidgets('touch can select multiple widgets on double click drag on mobile platforms', (WidgetTester tester) async {
       final FocusNode focusNode = FocusNode();
@@ -750,10 +750,10 @@ void main() {
       expect(paragraph3.selections[0], const TextSelection(baseOffset: 0, extentOffset: 11));
 
       await gesture.up();
-    }, 
+    },
       variant: TargetPlatformVariant.mobile(),
-      skip: kIsWeb,
-    ); // https://github.com/flutter/flutter/issues/125582.
+      skip: kIsWeb, // https://github.com/flutter/flutter/issues/125582.
+    );
 
     testWidgets('touch can select multiple widgets on double click drag and return to origin word on mobile platforms', (WidgetTester tester) async {
       final FocusNode focusNode = FocusNode();
@@ -814,10 +814,10 @@ void main() {
       expect(paragraph3.selections.isEmpty, isTrue);
 
       await gesture.up();
-    }, 
+    },
       variant: TargetPlatformVariant.mobile(),
-      skip: kIsWeb,
-    ); // https://github.com/flutter/flutter/issues/125582.
+      skip: kIsWeb, // https://github.com/flutter/flutter/issues/125582.
+    );
 
     testWidgets('touch can reverse selection across multiple widgets on double click drag on mobile platforms', (WidgetTester tester) async {
       final FocusNode focusNode = FocusNode();
@@ -865,10 +865,10 @@ void main() {
       expect(paragraph1.selections[0], const TextSelection(baseOffset: 12, extentOffset: 4));
 
       await gesture.up();
-    }, 
+    },
       variant: TargetPlatformVariant.mobile(),
-      skip: kIsWeb,
-    ); // https://github.com/flutter/flutter/issues/125582.
+      skip: kIsWeb, // https://github.com/flutter/flutter/issues/125582.
+    );
 
     testWidgets('mouse can select single text on desktop platforms', (WidgetTester tester) async {
       final FocusNode focusNode = FocusNode();
