@@ -52,7 +52,7 @@ void main() {
   });
 
 
-  testUsingContext('symbolize exits when --debug-info argument is missing', () async {
+  testUsingContext('symbolize exits when --debug-info and --unit-id-debug-info arguments are missing', () async {
     final SymbolizeCommand command = SymbolizeCommand(
       stdio: stdio,
       fileSystem: fileSystem,
@@ -61,7 +61,7 @@ void main() {
     final Future<void> result = createTestCommandRunner(command)
       .run(const <String>['symbolize']);
 
-    expect(result, throwsToolExit(message: '"--debug-info" is required to symbolize stack traces.'));
+    expect(result, throwsToolExit(message: 'Either "--debug-info" or "--unit-id-debug-info" is required to symbolize stack traces.'));
   }, overrides: <Type, Generator>{
     OutputPreferences: () => OutputPreferences.test(),
   });
@@ -80,6 +80,34 @@ void main() {
     OutputPreferences: () => OutputPreferences.test(),
   });
 
+  testUsingContext('symbolize exits when --debug-info dwarf file is missing', () async {
+    final SymbolizeCommand command = SymbolizeCommand(
+      stdio: stdio,
+      fileSystem: fileSystem,
+      dwarfSymbolizationService: DwarfSymbolizationService.test(),
+    );
+    final Future<void> result = createTestCommandRunner(command)
+      .run(const <String>['symbolize', '--debug-info=app.debug']);
+
+    expect(result, throwsToolExit(message: 'app.debug does not exist.'));
+  }, overrides: <Type, Generator>{
+    OutputPreferences: () => OutputPreferences.test(),
+  });
+
+  testUsingContext('symbolize exits when --unit-id-debug-info dwarf file is missing', () async {
+    final SymbolizeCommand command = SymbolizeCommand(
+      stdio: stdio,
+      fileSystem: fileSystem,
+      dwarfSymbolizationService: DwarfSymbolizationService.test(),
+    );
+    final Future<void> result = createTestCommandRunner(command)
+      .run(const <String>['symbolize', '--unit-id-debug-info=$rootLoadingUnitId:app.debug']);
+
+    expect(result, throwsToolExit(message: 'app.debug does not exist.'));
+  }, overrides: <Type, Generator>{
+    OutputPreferences: () => OutputPreferences.test(),
+  });
+
   testUsingContext('symbolize exits when --debug-info dSYM is missing', () async {
     final SymbolizeCommand command = SymbolizeCommand(
       stdio: stdio,
@@ -88,6 +116,20 @@ void main() {
     );
     final Future<void> result = createTestCommandRunner(command)
       .run(const <String>['symbolize', '--debug-info=app.dSYM']);
+
+    expect(result, throwsToolExit(message: 'app.dSYM does not exist.'));
+  }, overrides: <Type, Generator>{
+    OutputPreferences: () => OutputPreferences.test(),
+  });
+
+  testUsingContext('symbolize exits when --unit-id-debug-info dSYM is missing', () async {
+    final SymbolizeCommand command = SymbolizeCommand(
+      stdio: stdio,
+      fileSystem: fileSystem,
+      dwarfSymbolizationService: DwarfSymbolizationService.test(),
+    );
+    final Future<void> result = createTestCommandRunner(command)
+      .run(const <String>['symbolize', '--unit-id-debug-info=$rootLoadingUnitId:app.dSYM']);
 
     expect(result, throwsToolExit(message: 'app.dSYM does not exist.'));
   }, overrides: <Type, Generator>{
@@ -109,6 +151,21 @@ void main() {
     OutputPreferences: () => OutputPreferences.test(),
   });
 
+  testUsingContext('symbolize exits when --debug-info argument is missing and --unit-id-debug-info is not provided for the root loading unit', () async {
+    final SymbolizeCommand command = SymbolizeCommand(
+      stdio: stdio,
+      fileSystem: fileSystem,
+      dwarfSymbolizationService: DwarfSymbolizationService.test(),
+    );
+    fileSystem.file('app.debug').createSync();
+    final Future<void> result = createTestCommandRunner(command)
+      .run(const <String>['symbolize', '--unit-id-debug-info=${rootLoadingUnitId+1}:app.debug']);
+
+    expect(result, throwsToolExit(message: 'Missing debug info for the root loading unit.'));
+  }, overrides: <Type, Generator>{
+    OutputPreferences: () => OutputPreferences.test(),
+  });
+
   testUsingContext('symbolize succeeds when DwarfSymbolizationService does not throw', () async {
     final SymbolizeCommand command = SymbolizeCommand(
       stdio: stdio,
@@ -120,6 +177,62 @@ void main() {
 
     await createTestCommandRunner(command)
       .run(const <String>['symbolize', '--debug-info=app.debug', '--input=foo.stack', '--output=results/foo.result']);
+
+    expect(fileSystem.file('results/foo.result'), exists);
+    expect(fileSystem.file('results/foo.result').readAsBytesSync(), <int>[104, 101, 108, 108, 111, 10]); // hello
+  }, overrides: <Type, Generator>{
+    OutputPreferences: () => OutputPreferences.test(),
+  });
+
+  testUsingContext('symbolize succeeds when DwarfSymbolizationService with a single --unit-id-debug-info argument for the root loading unit does not throw', () async {
+    final SymbolizeCommand command = SymbolizeCommand(
+      stdio: stdio,
+      fileSystem: fileSystem,
+      dwarfSymbolizationService: DwarfSymbolizationService.test(),
+    );
+    fileSystem.file('app.debug').writeAsBytesSync(<int>[1, 2, 3]);
+    fileSystem.file('foo.stack').writeAsStringSync('hello');
+
+    await createTestCommandRunner(command)
+      .run(const <String>['symbolize', '--unit-id-debug-info=$rootLoadingUnitId:app.debug', '--input=foo.stack', '--output=results/foo.result']);
+
+    expect(fileSystem.file('results/foo.result'), exists);
+    expect(fileSystem.file('results/foo.result').readAsBytesSync(), <int>[104, 101, 108, 108, 111, 10]); // hello
+  }, overrides: <Type, Generator>{
+    OutputPreferences: () => OutputPreferences.test(),
+  });
+
+  testUsingContext('symbolize succeeds when DwarfSymbolizationService with --debug-info and --unit-id-debug-info arguments does not throw', () async {
+    final SymbolizeCommand command = SymbolizeCommand(
+      stdio: stdio,
+      fileSystem: fileSystem,
+      dwarfSymbolizationService: DwarfSymbolizationService.test(),
+    );
+    fileSystem.file('app.debug').writeAsBytesSync(<int>[1, 2, 3]);
+    fileSystem.file('app.debug-2.part.so').writeAsBytesSync(<int>[1, 2, 3]);
+    fileSystem.file('foo.stack').writeAsStringSync('hello');
+
+    await createTestCommandRunner(command)
+      .run(const <String>['symbolize', '--debug-info=app.debug', '--unit-id-debug-info=${rootLoadingUnitId+1}:app.debug-2.part.so', '--input=foo.stack', '--output=results/foo.result']);
+
+    expect(fileSystem.file('results/foo.result'), exists);
+    expect(fileSystem.file('results/foo.result').readAsBytesSync(), <int>[104, 101, 108, 108, 111, 10]); // hello
+  }, overrides: <Type, Generator>{
+    OutputPreferences: () => OutputPreferences.test(),
+  });
+
+  testUsingContext('symbolize succeeds when DwarfSymbolizationService with multiple --unit-id-debug-info arguments does not throw', () async {
+    final SymbolizeCommand command = SymbolizeCommand(
+      stdio: stdio,
+      fileSystem: fileSystem,
+      dwarfSymbolizationService: DwarfSymbolizationService.test(),
+    );
+    fileSystem.file('app.debug').writeAsBytesSync(<int>[1, 2, 3]);
+    fileSystem.file('app.debug-2.part.so').writeAsBytesSync(<int>[1, 2, 3]);
+    fileSystem.file('foo.stack').writeAsStringSync('hello');
+
+    await createTestCommandRunner(command)
+      .run(const <String>['symbolize', '--unit-id-debug-info=$rootLoadingUnitId:app.debug', '--unit-id-debug-info=${rootLoadingUnitId+1}:app.debug-2.part.so', '--input=foo.stack', '--output=results/foo.result']);
 
     expect(fileSystem.file('results/foo.result'), exists);
     expect(fileSystem.file('results/foo.result').readAsBytesSync(), <int>[104, 101, 108, 108, 111, 10]); // hello
@@ -146,14 +259,76 @@ void main() {
   }, overrides: <Type, Generator>{
     OutputPreferences: () => OutputPreferences.test(),
   });
+
+  testUsingContext('symbolize throws when DwarfSymbolizationService with a single --unit-id-debug-info argument for the root loading unit throws', () async {
+    final SymbolizeCommand command = SymbolizeCommand(
+      stdio: stdio,
+      fileSystem: fileSystem,
+      dwarfSymbolizationService: ThrowingDwarfSymbolizationService(),
+    );
+
+    fileSystem.file('app.debug').writeAsBytesSync(<int>[1, 2, 3]);
+    fileSystem.file('foo.stack').writeAsStringSync('hello');
+
+    expect(
+      createTestCommandRunner(command).run(const <String>[
+        'symbolize', '--unit-id-debug-info=$rootLoadingUnitId:app.debug', '--input=foo.stack', '--output=results/foo.result',
+      ]),
+      throwsToolExit(message: 'test'),
+    );
+  }, overrides: <Type, Generator>{
+    OutputPreferences: () => OutputPreferences.test(),
+  });
+
+  testUsingContext('symbolize throws when DwarfSymbolizationService with --debug-info and --unit-id-debug-info arguments throws', () async {
+    final SymbolizeCommand command = SymbolizeCommand(
+      stdio: stdio,
+      fileSystem: fileSystem,
+      dwarfSymbolizationService: ThrowingDwarfSymbolizationService(),
+    );
+
+    fileSystem.file('app.debug').writeAsBytesSync(<int>[1, 2, 3]);
+    fileSystem.file('app.debug-2.part.so').writeAsBytesSync(<int>[1, 2, 3]);
+    fileSystem.file('foo.stack').writeAsStringSync('hello');
+
+    expect(
+      createTestCommandRunner(command).run(const <String>[
+        'symbolize', '--debug-info=app.debug', '--unit-id-debug-info=${rootLoadingUnitId+1}:app.debug-2.part.so', '--input=foo.stack', '--output=results/foo.result',
+      ]),
+      throwsToolExit(message: 'test'),
+    );
+  }, overrides: <Type, Generator>{
+    OutputPreferences: () => OutputPreferences.test(),
+  });
+
+  testUsingContext('symbolize throws when DwarfSymbolizationService with multiple --unit-id-debug-info arguments throws', () async {
+    final SymbolizeCommand command = SymbolizeCommand(
+      stdio: stdio,
+      fileSystem: fileSystem,
+      dwarfSymbolizationService: ThrowingDwarfSymbolizationService(),
+    );
+
+    fileSystem.file('app.debug').writeAsBytesSync(<int>[1, 2, 3]);
+    fileSystem.file('app.debug-2.part.so').writeAsBytesSync(<int>[1, 2, 3]);
+    fileSystem.file('foo.stack').writeAsStringSync('hello');
+
+    expect(
+      createTestCommandRunner(command).run(const <String>[
+        'symbolize', '--unit-id-debug-info=$rootLoadingUnitId:app.debug', '--unit-id-debug-info=${rootLoadingUnitId+1}:app.debug-2.part.so', '--input=foo.stack', '--output=results/foo.result',
+      ]),
+      throwsToolExit(message: 'test'),
+    );
+  }, overrides: <Type, Generator>{
+    OutputPreferences: () => OutputPreferences.test(),
+  });
 }
 
 class ThrowingDwarfSymbolizationService extends Fake implements DwarfSymbolizationService {
   @override
-  Future<void> decode({
+  Future<void> decodeWithUnits({
     required Stream<List<int>> input,
     required IOSink output,
-    required Uint8List symbols,
+    required Map<int, Uint8List> unitSymbols,
   }) async {
     throwToolExit('test');
   }
