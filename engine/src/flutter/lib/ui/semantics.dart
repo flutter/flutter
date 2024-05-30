@@ -44,8 +44,10 @@ class SemanticsAction {
   static const int _kMoveCursorForwardByWordIndex = 1 << 19;
   static const int _kMoveCursorBackwardByWordIndex = 1 << 20;
   static const int _kSetTextIndex = 1 << 21;
+  static const int _kFocusIndex = 1 << 22;
   // READ THIS: if you add an action here, you MUST update the
-  // numSemanticsActions value in testing/dart/semantics_test.dart, or tests
+  // numSemanticsActions value in testing/dart/semantics_test.dart and
+  // lib/web_ui/test/engine/semantics/semantics_api_test.dart, or tests
   // will fail.
 
   /// The equivalent of a user briefly tapping the screen with the finger
@@ -155,6 +157,10 @@ class SemanticsAction {
   /// The accessibility focus is different from the input focus. The input focus
   /// is usually held by the element that currently responds to keyboard inputs.
   /// Accessibility focus and input focus can be held by two different nodes!
+  ///
+  /// See also:
+  ///
+  ///    * [focus], which controls the input focus.
   static const SemanticsAction didGainAccessibilityFocus = SemanticsAction._(_kDidGainAccessibilityFocusIndex, 'didGainAccessibilityFocus');
 
   /// Indicates that the node has lost accessibility focus.
@@ -201,6 +207,50 @@ class SemanticsAction {
   /// movement should extend (or start) a selection.
   static const SemanticsAction moveCursorBackwardByWord = SemanticsAction._(_kMoveCursorBackwardByWordIndex, 'moveCursorBackwardByWord');
 
+  /// Move the input focus to the respective widget.
+  ///
+  /// Most commonly, the input focus determines what widget will receive
+  /// keyboard input. Semantics nodes that can receive this action are expected
+  /// to have [SemanticsFlag.isFocusable] set. Examples of such focusable
+  /// widgets include buttons, checkboxes, switches, and text fields.
+  ///
+  /// Upon receiving this action, the corresponding widget must move input focus
+  /// to itself. Doing otherwise is likely to lead to a poor user experience,
+  /// such as user input routed to a wrong widget. Text fields in particular,
+  /// must immediately become editable, opening a virtual keyboard, if needed.
+  /// Buttons must respond to tap/click events from the keyboard.
+  ///
+  /// Focus behavior is specific to the platform and to the assistive technology
+  /// used. Typically on desktop operating systems, such as Windows, macOS, and
+  /// Linux, moving accessibility focus will also move the input focus. On
+  /// mobile it is more common for the accessibility focus to be detached from
+  /// the input focus. In order to synchronize the two, a user takes an explicit
+  /// action (e.g. double-tap to activate). Sometimes this behavior is
+  /// configurable. For example, VoiceOver on macOS can be configured in the
+  /// global OS user settings to either move the input focus together with the
+  /// VoiceOver focus, or to keep the two detached. For this reason, widgets
+  /// should not expect to receive [didGainAccessibilityFocus] and [focus]
+  /// actions to be reported in any particular combination or order.
+  ///
+  /// On the web, the DOM "focus" event is equivalent to
+  /// [SemanticsAction.focus]. Accessibility focus is not observable from within
+  /// the browser. Instead, the browser, based on the platform features and user
+  /// preferences, makes the determination on whether input focus should be
+  /// moved to an element and, if so, fires a DOM "focus" event. This event is
+  /// forwarded to the framework as [SemanticsAction.focus]. For this reason, on
+  /// the web, the engine never sends [didGainAccessibilityFocus].
+  ///
+  /// On Android input focus is observable as `AccessibilityAction#ACTION_FOCUS`
+  /// and is separate from accessibility focus, which is observed as
+  /// `AccessibilityAction#ACTION_ACCESSIBILITY_FOCUS`.
+  ///
+  /// See also:
+  ///
+  ///    * [didGainAccessibilityFocus], which informs the framework about
+  ///      accessibility focus ring, such as the TalkBack (Android) and
+  ///      VoiceOver (iOS), moving which does not move the input focus.
+  static const SemanticsAction focus = SemanticsAction._(_kFocusIndex, 'focus');
+
   /// The possible semantics actions.
   ///
   /// The map's key is the [index] of the action and the value is the action
@@ -228,6 +278,7 @@ class SemanticsAction {
     _kMoveCursorForwardByWordIndex: moveCursorForwardByWord,
     _kMoveCursorBackwardByWordIndex: moveCursorBackwardByWord,
     _kSetTextIndex: setText,
+    _kFocusIndex: focus,
   };
 
   static List<SemanticsAction> get values => _kActionById.values.toList(growable: false);
@@ -285,8 +336,9 @@ class SemanticsFlag {
   static const int _kHasExpandedStateIndex = 1 << 26;
   static const int _kIsExpandedIndex = 1 << 27;
   // READ THIS: if you add a flag here, you MUST update the numSemanticsFlags
-  // value in testing/dart/semantics_test.dart, or tests will fail. Also,
-  // please update the Flag enum in
+  // value in testing/dart/semantics_test.dart and
+  // lib/web_ui/test/engine/semantics/semantics_api_test.dart, or tests will
+  // fail. Also, please update the Flag enum in
   // flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java,
   // and the SemanticsFlag class in lib/web_ui/lib/semantics.dart. If the new flag
   // affects the visibility of a [SemanticsNode] to accessibility services,
