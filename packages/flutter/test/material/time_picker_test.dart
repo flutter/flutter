@@ -1997,65 +1997,64 @@ void main() {
     expect(paragraph.text.style!.fontSize, 56.0);
   });
 
-  testWidgets('Material3 - Padding between apm and time textField - hourDialType == _HourDialType.twelveHour && timeOfDayFormat == TimeOfDayFormat.a_space_h_colon_mm',
+  testWidgets(
+      'Material3 - Padding between apm and time textField - hourDialType == _HourDialType.twelveHour && timeOfDayFormat == TimeOfDayFormat.a_space_h_colon_mm',
       (WidgetTester tester) async {
-        tester.view.physicalSize = const Size(540, 960);
-        tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(540, 960);
+    tester.view.devicePixelRatio = 1;
 
-        await tester.pumpWidget(
-          MaterialApp(
-            localizationsDelegates: const [
-              GlobalMaterialLocalizations.delegate,
-              GlobalWidgetsLocalizations.delegate,
-              GlobalCupertinoLocalizations.delegate,
-            ],
-            supportedLocales: const [
-              Locale('zh', 'CN'),
-            ],
-            theme: ThemeData(useMaterial3: true),
-            restorationScopeId: 'app',
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: const <LocalizationsDelegate<Object>>[
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: const <Locale>[
+          Locale('zh', 'CN'),
+        ],
+        theme: ThemeData(useMaterial3: true),
+        restorationScopeId: 'app',
+        home: Scaffold(
+          body: Builder(builder: (BuildContext context) {
+            return Center(
+              child: ElevatedButton(
+                onPressed: () {
+                  // 显示时间选择器
+                  showTimePicker(
+                    context: context,
+                    initialTime: const TimeOfDay(hour: 9, minute: 0),
+                    orientation: Orientation.portrait,
+                  );
+                },
+                child: const Text('Show Time Picker'),
+              ),
+            );
+          }),
+        ),
+      ),
+    );
 
-            home: Scaffold(
-              body: Builder(builder: (BuildContext context) {
-                return Center(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      // 显示时间选择器
-                      showTimePicker(
-                        context: context,
-                        initialTime: const TimeOfDay(hour: 9, minute: 0),
-                        orientation: Orientation.portrait,
-                      );
-                    },
-                    child: const Text('Show Time Picker'),
-                  ),
-                );
-              }),
-            ),
-          ),
-        );
+    await tester.tap(find.byType(ElevatedButton));
+    await tester.pumpAndSettle();
 
-        await tester.tap(find.byType(ElevatedButton));
-        await tester.pumpAndSettle();
+    final Finder text1Finder = find.text('上午');
+    final Finder parent1Finder = find.ancestor(
+      of: text1Finder,
+      matching: find.byType(Center),
+    );
 
-        final Finder text1Finder = find.text('上午');
-        final Finder parent1Finder = find.ancestor(
-          of: text1Finder,
-          matching: find.byType(Center),
-        );
+    final Finder text2Finder = find.text('9');
+    final Finder parent2Finder = find.ancestor(
+      of: text2Finder,
+      matching: find.byType(Center),
+    );
 
-        final Finder text2Finder = find.text('9');
-        final Finder parent2Finder = find.ancestor(
-          of: text2Finder,
-          matching: find.byType(Center),
-        );
+    final Offset parent1TopRight = tester.getTopRight(parent1Finder);
+    final Offset parent2TopLeft = tester.getTopLeft(parent2Finder);
 
-        final Offset parent1TopRight = tester.getTopRight(parent1Finder);
-        final Offset parent2TopLeft = tester.getTopLeft(parent2Finder);
-
-        expect(parent2TopLeft.dx - parent1TopRight.dx, 12.0);
-
-      });
+    expect(parent2TopLeft.dx - parent1TopRight.dx, 12.0);
+  });
 }
 
 final Finder findDialPaint = find.descendant(
