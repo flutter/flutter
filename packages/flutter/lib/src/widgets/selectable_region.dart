@@ -690,20 +690,27 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   }
 
   void _handleMouseDragEnd(TapDragEndDetails details) {
-    if (_lastPointerDeviceKind != null
-        && _lastPointerDeviceKind != PointerDeviceKind.mouse
-        && defaultTargetPlatform == TargetPlatform.android) {
-      // On Android, a drag gesture will only show the selection overlay when
-      // the drag has finished and the pointer device kind is not precise.
-      _showHandles();
-      _showToolbar();
-    }
-    if (_lastPointerDeviceKind != null
-        && _lastPointerDeviceKind != PointerDeviceKind.mouse
-        && defaultTargetPlatform == TargetPlatform.iOS) {
-      // On iOS, a drag gesture will only show the selection toolbar when
-      // the drag has finished and the pointer device kind is not precise.
-      _showToolbar();
+    final bool isPointerPrecise = _lastPointerDeviceKind != null && _lastPointerDeviceKind == PointerDeviceKind.mouse;
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+        if (!isPointerPrecise) {
+          // On Android, a drag gesture will only show the selection overlay when
+          // the drag has finished and the pointer device kind is not precise.
+          _showHandles();
+          _showToolbar();
+        }
+      case TargetPlatform.iOS:
+        if (!isPointerPrecise) {
+          // On iOS, a drag gesture will only show the selection toolbar when
+          // the drag has finished and the pointer device kind is not precise.
+          _showToolbar();
+        }
+      case TargetPlatform.macOS:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+          // The selection overlay is not shown on desktop platforms after a drag.
+          break;
     }
     _finalizeSelection();
     _updateSelectedContentIfNeeded();
@@ -736,18 +743,28 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
             break;
         }
       case 2:
-        if (details.kind != PointerDeviceKind.mouse
-            && defaultTargetPlatform == TargetPlatform.android) {
-          // On Android, a double tap will only show the selection overlay after
-          // the following tap up when the pointer device kind is not precise.
-          _showHandles();
-          _showToolbar();
-        }
-        if (details.kind != PointerDeviceKind.mouse
-            && defaultTargetPlatform == TargetPlatform.iOS) {
-          // On iOS, a double tap will only show the selection toolbar after
-          // the following tap up when the pointer device kind is not precise.
-          _showToolbar();
+        final bool isPointerPrecise = details.kind == PointerDeviceKind.mouse;
+        switch (defaultTargetPlatform) {
+          case TargetPlatform.android:
+          case TargetPlatform.fuchsia:
+            if (!isPointerPrecise) {
+              // On Android, a double tap will only show the selection overlay after
+              // the following tap up when the pointer device kind is not precise.
+              _showHandles();
+              _showToolbar();
+            }
+          case TargetPlatform.iOS:
+            if (!isPointerPrecise) {
+              // On iOS, a double tap will only show the selection toolbar after
+              // the following tap up when the pointer device kind is not precise.
+              _showToolbar();
+            }
+          case TargetPlatform.macOS:
+          case TargetPlatform.linux:
+          case TargetPlatform.windows:
+              // The selection overlay is not shown on desktop platforms
+              // on a double click.
+              break;
         }
     }
     _updateSelectedContentIfNeeded();
