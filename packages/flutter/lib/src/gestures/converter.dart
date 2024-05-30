@@ -283,7 +283,7 @@ abstract final class PointerEventConverter {
                 position: position,
                 scrollDelta: scrollDelta,
                 embedderId: datum.embedderId,
-                respond: datum.respond,
+                onRespond: datum.respond,
               );
             case ui.PointerSignalKind.scrollInertiaCancel:
               return PointerScrollInertiaCancelEvent(

@@ -1731,17 +1731,22 @@ abstract class PointerSignalEvent extends PointerEvent with _RespondablePointerE
   });
 }
 
-/// A function used to send information about a PointerEvent back to the engine.
-///
-/// This is used on the web to `preventDefault`.
-typedef RespondPointerEventFn = void Function({required bool allowPlatformDefault});
+/// A function that implements the [PointerSignalEvent.respond] method.
+typedef RespondPointerEventCallback = void Function({required bool allowPlatformDefault});
 
 mixin _RespondablePointerEvent on PointerEvent {
-  /// Responds the current [PointerSignalEvent] in the native embedder.
+  /// Sends a response to the native embedder for the [PointerSignalEvent].
   ///
-  /// Used to send information about the current event to the Flutter engine, for
-  /// example, if it should prevent the default behavior of the embedder
-  /// ([allowPlatformDefault] = `true`).
+  /// The parameter [allowPlatformDefault] allows the platform to perform the
+  /// default action associated with the native event when it's set to `true`.
+  ///
+  /// This method can be called any number of times, but once `allowPlatformDefault`
+  /// is set to `true`, it can't be set to `false` again.
+  ///
+  /// The implementation of this method is configured through the `onRespond`
+  /// parameter of the [PointerSignalEvent] constructor.
+  ///
+  /// See also [RespondPointerEventCallback].
   void respond({
     required bool allowPlatformDefault,
   }) {}
@@ -1776,7 +1781,7 @@ mixin _CopyPointerScrollEvent on PointerEvent {
     double? tilt,
     bool? synthesized,
     int? embedderId,
-    RespondPointerEventFn? respond,
+    RespondPointerEventCallback? onRespond,
   }) {
     return PointerScrollEvent(
       viewId: viewId ?? this.viewId,
@@ -1786,7 +1791,7 @@ mixin _CopyPointerScrollEvent on PointerEvent {
       position: position ?? this.position,
       scrollDelta: scrollDelta,
       embedderId: embedderId ?? this.embedderId,
-      respond: respond ?? (this as PointerScrollEvent).respond,
+      onRespond: onRespond ?? (this as PointerScrollEvent).respond,
     ).transformed(transform);
   }
 }
@@ -1812,8 +1817,8 @@ class PointerScrollEvent extends PointerSignalEvent with _PointerEventDescriptio
     super.position,
     this.scrollDelta = Offset.zero,
     super.embedderId,
-    required RespondPointerEventFn respond,
-  }) : _respond = respond;
+    RespondPointerEventCallback? onRespond,
+  }) : _onRespond = onRespond;
 
   @override
   final Offset scrollDelta;
@@ -1832,11 +1837,13 @@ class PointerScrollEvent extends PointerSignalEvent with _PointerEventDescriptio
     properties.add(DiagnosticsProperty<Offset>('scrollDelta', scrollDelta));
   }
 
-  final RespondPointerEventFn _respond;
+  final RespondPointerEventCallback? _onRespond;
 
   @override
   void respond({required bool allowPlatformDefault}) {
-    _respond(allowPlatformDefault: allowPlatformDefault);
+    if (_onRespond != null) {
+      _onRespond!(allowPlatformDefault: allowPlatformDefault);
+    }
   }
 }
 
@@ -1862,7 +1869,7 @@ class _TransformedPointerScrollEvent extends _TransformedPointerEvent with _Copy
   }
 
   @override
-  RespondPointerEventFn get _respond => original._respond;
+  RespondPointerEventCallback? get _onRespond => original._onRespond;
 
   @override
   void respond({required bool allowPlatformDefault}) {
