@@ -797,6 +797,92 @@ void main() {
     expect(editableTextWidget.onEditingComplete, onEditingComplete);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/127597.
+  testWidgets(
+    'The second TextField is clicked, triggers the onTapOutside callback of the previous TextField',
+        (WidgetTester tester) async {
+      final GlobalKey keyA = GlobalKey();
+      final GlobalKey keyB = GlobalKey();
+      final GlobalKey keyC = GlobalKey();
+      bool outsideClickA = false;
+      bool outsideClickB = false;
+      bool outsideClickC = false;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Align(
+            alignment: Alignment.topLeft,
+            child: Column(
+              children: <Widget>[
+                const Text('Outside'),
+                Material(
+                  child: TextField(
+                    key: keyA,
+                    groupId: 'Group A',
+                    onTapOutside: (PointerDownEvent event) {
+                      outsideClickA = true;
+                    },
+                  ),
+                ),
+                Material(
+                  child: TextField(
+                    key: keyB,
+                    groupId: 'Group B',
+                    onTapOutside: (PointerDownEvent event) {
+                      outsideClickB = true;
+                    },
+                  ),
+                ),
+                Material(
+                  child: TextField(
+                    key: keyC,
+                    groupId: 'Group C',
+                    onTapOutside: (PointerDownEvent event) {
+                      outsideClickC = true;
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump();
+
+      Future<void> click(Finder finder) async {
+        await tester.tap(finder);
+        await tester.enterText(finder, 'Hello');
+        await tester.pump();
+      }
+
+      expect(outsideClickA, false);
+      expect(outsideClickB, false);
+      expect(outsideClickC, false);
+
+      await click(find.byKey(keyA));
+      await tester.showKeyboard(find.byKey(keyA));
+      await tester.idle();
+      expect(outsideClickA, false);
+      expect(outsideClickB, false);
+      expect(outsideClickC, false);
+
+      await click(find.byKey(keyB));
+      expect(outsideClickA, true);
+      expect(outsideClickB, false);
+      expect(outsideClickC, false);
+
+      await click(find.byKey(keyC));
+      expect(outsideClickA, true);
+      expect(outsideClickB, true);
+      expect(outsideClickC, false);
+
+      await tester.tap(find.text('Outside'));
+      expect(outsideClickA, true);
+      expect(outsideClickB, true);
+      expect(outsideClickC, true);
+    },
+  );
+
   testWidgets('TextField has consistent size', (WidgetTester tester) async {
     final Key textFieldKey = UniqueKey();
     String? textFieldValue;

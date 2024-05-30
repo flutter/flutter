@@ -14,7 +14,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class _TestSliverPersistentHeaderDelegate extends SliverPersistentHeaderDelegate {
   _TestSliverPersistentHeaderDelegate({
@@ -2055,10 +2054,7 @@ void main() {
       expect(tester.getTopLeft(find.text('Item 9')).dy, 226.0);
     });
 
-    testWidgets('allows overscrolling on default platforms - vertical',
-    // TODO(polina-c): remove when fixed https://github.com/flutter/flutter/issues/145600 [leak-tracking-opt-in]
-    experimentalLeakTesting: LeakTesting.settings.withTracked(classes: const <String>['CurvedAnimation']),
-    (WidgetTester tester) async {
+    testWidgets('allows overscrolling on default platforms - vertical', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/10949
       // Scrollables should overscroll by default on iOS and macOS
       final  ScrollController controller = ScrollController();
