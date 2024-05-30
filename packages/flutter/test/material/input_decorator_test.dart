@@ -8885,6 +8885,29 @@ void main() {
       expect(tester.getTopRight(find.text('text')).dx, lessThanOrEqualTo(tester.getTopLeft(find.byIcon(Icons.satellite)).dx));
     });
 
+    testWidgets('Material2 - InputDecorator suffixIcon color in error state', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(useMaterial3: false),
+          home: Material(
+            child: TextField(
+              decoration: InputDecoration(
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: () {},
+                ),
+                errorText: 'Error state',
+                filled: true,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final ThemeData theme = Theme.of(tester.element(find.byType(TextField)));
+      expect(getIconStyle(tester, Icons.close)?.color, theme.colorScheme.error);
+    });
+
     testWidgets('InputDecorator prefixIconConstraints/suffixIconConstraints', (WidgetTester tester) async {
       await tester.pumpWidget(
         buildInputDecoratorM2(

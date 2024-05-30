@@ -666,6 +666,21 @@ TaskFunction createAnimatedAdvancedBlendPerfTest({
   ).run;
 }
 
+TaskFunction createRRectBlurPerfTest({
+  bool? enableImpeller,
+  bool? forceOpenGLES,
+}) {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test_driver/run_app.dart',
+    'rrect_blur_test',
+    enableImpeller: enableImpeller,
+    forceOpenGLES: forceOpenGLES,
+    testDriver: 'test_driver/rrect_blur_perf_test.dart',
+    saveTraceFile: true,
+  ).run;
+}
+
 TaskFunction createAnimatedBlurBackropFilterPerfTest({
   bool? enableImpeller,
   bool? forceOpenGLES,

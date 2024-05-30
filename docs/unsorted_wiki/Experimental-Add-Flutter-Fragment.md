@@ -1,1 +1,0 @@
-See [Add a Flutter Fragment to an Android App](https://www.google.com/url?q=https://docs.flutter.dev/add-to-app/android/add-flutter-fragment&sa=D&source=editors&ust=1715879907376746&usg=AOvVaw3G6E8LxUnKldq2WVx0CsZW)
