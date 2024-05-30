@@ -60,14 +60,14 @@ void main() {
       await tester.pumpAndSettle();
       renderSelectionSpy.events.clear();
 
-      await gesture.moveTo(const Offset(200.0, 100.0));
+      await gesture.moveTo(const Offset(100.0, 200.0));
       expect(renderSelectionSpy.events.length, 2);
       expect(renderSelectionSpy.events[0].type, SelectionEventType.startEdgeUpdate);
       final SelectionEdgeUpdateEvent startEdge = renderSelectionSpy.events[0] as SelectionEdgeUpdateEvent;
       expect(startEdge.globalPosition, const Offset(200.0, 200.0));
       expect(renderSelectionSpy.events[1].type, SelectionEventType.endEdgeUpdate);
       SelectionEdgeUpdateEvent endEdge = renderSelectionSpy.events[1] as SelectionEdgeUpdateEvent;
-      expect(endEdge.globalPosition, const Offset(200.0, 100.0));
+      expect(endEdge.globalPosition, const Offset(100.0, 200.0));
       renderSelectionSpy.events.clear();
 
       await gesture.moveTo(const Offset(100.0, 100.0));

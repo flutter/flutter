@@ -588,7 +588,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
         switch (defaultTargetPlatform) {
           case TargetPlatform.iOS:
             if (kIsWeb && details.kind != null && details.kind != PointerDeviceKind.mouse) {
-              // Double tap on iOS web only works with a precise pointer device.
+              // Double tap on iOS web is only enabled with a precise pointer device.
               break;
             }
             _selectWordAt(offset: details.globalPosition);
@@ -625,6 +625,10 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   void _handleMouseDragStart(TapDragStartDetails details) {
     switch (_getEffectiveConsecutiveTapCount(details.consecutiveTapCount)) {
       case 1:
+        if (details.kind != null && details.kind != PointerDeviceKind.mouse) {
+          // Drag to select is only enabled with a precise pointer device.
+          return;
+        }
         _selectStartTo(offset: details.globalPosition);
     }
     _updateSelectedContentIfNeeded();
@@ -633,6 +637,10 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   void _handleMouseDragUpdate(TapDragUpdateDetails details) {
     switch (_getEffectiveConsecutiveTapCount(details.consecutiveTapCount)) {
       case 1:
+        if (details.kind != null && details.kind != PointerDeviceKind.mouse) {
+          // Drag to select is only enabled with a precise pointer device.
+          return;
+        }
         _selectEndTo(offset: details.globalPosition, continuous: true);
       case 2:
         switch (defaultTargetPlatform) {
@@ -645,7 +653,8 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
             }
           case TargetPlatform.iOS:
             if (kIsWeb && details.kind != null && details.kind != PointerDeviceKind.mouse) {
-              // Double tap + drag on iOS web only works with a precise pointer device.
+              // Double tap + drag on iOS web is only enabled with a precise
+              // pointer device.
               break;
             }
             _selectEndTo(offset: details.globalPosition, continuous: true, textGranularity: TextGranularity.word);
