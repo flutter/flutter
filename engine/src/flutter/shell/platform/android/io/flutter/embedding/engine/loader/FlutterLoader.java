@@ -340,8 +340,10 @@ public class FlutterLoader {
       shellArgs.add("--prefetched-default-font-manager");
 
       if (metaData != null) {
-        if (metaData.getBoolean(ENABLE_IMPELLER_META_DATA_KEY, false)) {
+        if (metaData.getBoolean(ENABLE_IMPELLER_META_DATA_KEY, true)) {
           shellArgs.add("--enable-impeller");
+        } else {
+          shellArgs.add("--enable-impeller=false");
         }
         if (metaData.getBoolean(ENABLE_VULKAN_VALIDATION_META_DATA_KEY, false)) {
           shellArgs.add("--enable-vulkan-validation");
