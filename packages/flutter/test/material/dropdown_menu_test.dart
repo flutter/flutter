@@ -2293,6 +2293,29 @@ void main() {
     // One is layout for the _DropdownMenuBody, the other one is the real button item in the menu.
     expect(find.widgetWithText(MenuItemButton, labelText), findsNWidgets(2));
   });
+
+  testWidgets('DropdownMenu allows customizing text field text align', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(
+      home: Scaffold(
+        body: Column(
+          children: <DropdownMenu<int>>[
+            DropdownMenu<int>(
+              dropdownMenuEntries: <DropdownMenuEntry<int>>[],
+            ),
+             DropdownMenu<int>(
+              textAlign: TextAlign.center,
+              dropdownMenuEntries: <DropdownMenuEntry<int>>[],
+            ),
+          ],
+        ),
+      ),
+    ));
+
+    final List<TextField> fields = tester.widgetList<TextField>(find.byType(TextField)).toList();
+
+    expect(fields[0].textAlign, TextAlign.start);
+    expect(fields[1].textAlign, TextAlign.center);
+  });
 }
 
 enum TestMenu {
