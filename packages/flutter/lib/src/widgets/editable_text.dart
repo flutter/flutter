@@ -19,6 +19,7 @@ import 'automatic_keep_alive.dart';
 import 'basic.dart';
 import 'binding.dart';
 import 'constants.dart';
+import 'container.dart';
 import 'context_menu_button_item.dart';
 import 'debug.dart';
 import 'default_selection_style.dart';
@@ -5274,6 +5275,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                             },
                             child: _Scribe(
                               focusNode: widget.focusNode,
+                              editableKey: _editableKey,
                               child: SizeChangedLayoutNotifier(
                                 child: _Editable(
                                   key: _editableKey,
@@ -5714,16 +5716,20 @@ class _Scribe extends StatefulWidget {
   const _Scribe({
     required this.child,
     required this.focusNode,
+    required this.editableKey,
   });
 
   final Widget child;
   final FocusNode focusNode;
+  final GlobalKey editableKey;
 
   @override
   State<_Scribe> createState() => _ScribeState();
 }
 
 class _ScribeState extends State<_Scribe> implements ScribeClient {
+  RenderEditable get _renderEditable => widget.editableKey.currentContext!.findRenderObject()! as RenderEditable;
+
   @override
   void initState() {
     super.initState();
@@ -5738,6 +5744,9 @@ class _ScribeState extends State<_Scribe> implements ScribeClient {
 
   // Begin ScribeClient.
 
+  @override
+  double get devicePixelRatio => MediaQuery.devicePixelRatioOf(context);
+
   // TODO(justinmc): ScribbleClient does this in EditableText, setting the
   // active client on Scribble. Maybe that's better? Reconcile?
   @override
@@ -5745,8 +5754,15 @@ class _ScribeState extends State<_Scribe> implements ScribeClient {
 
   @override
   bool performSelectionGesture(Rect selectionArea) {
-    // TODO(justinmc): Find the text in the selectionArea and select it. Do I
-    // need to do this inside of EditableTextState?
+    // TODO(justinmc): Works, but selects even if only a tiny corner of a
+    // character is covered. I think by Android's definition, should have to
+    // cover the center of the granularity.
+    _renderEditable.selectPositionAt(
+      from: selectionArea.topLeft,
+      to: selectionArea.bottomRight,
+      // TODO(justinmc): Should this cause be generic or should there also be a scribe value?
+      cause: SelectionChangedCause.scribble,
+    );
     return true;
   }
 

@@ -66,15 +66,17 @@ class Scribe {
     );
   }
 
-  static Rect _selectionAreaFromArguments(List<dynamic> args) {
+  static Rect _getSelectionArea(List<dynamic> args, double devicePixelRatio) {
     final Map<dynamic, dynamic> argsMap = args.first as Map<dynamic, dynamic>;
     final Map<dynamic, dynamic> selectionAreaMap = argsMap['selectionArea'] as Map<dynamic, dynamic>;
     final Map<String, double> selectionAreaJson = selectionAreaMap.cast<String, double>();
     return Rect.fromLTRB(
-      selectionAreaJson['left']!,
-      selectionAreaJson['top']!,
-      selectionAreaJson['bottom']!,
-      selectionAreaJson['right']!,
+      // Flutter uses logical pixels while Android uses physical pixels, so we
+      // need to divide by the devicePixelRatio to convert.
+      selectionAreaJson['left']! / devicePixelRatio,
+      selectionAreaJson['top']! / devicePixelRatio,
+      selectionAreaJson['right']! / devicePixelRatio,
+      selectionAreaJson['bottom']! / devicePixelRatio,
     );
   }
 
@@ -117,7 +119,7 @@ class Scribe {
         assert(activeScribeClient != null);
         final List<dynamic> args = methodCall.arguments as List<dynamic>;
         assert(args.length == 1, 'ScribeClient.performSelectionGesture should send a single Rect as its args');
-        final Rect selectionArea = _selectionAreaFromArguments(args);
+        final Rect selectionArea = _getSelectionArea(args, activeScribeClient!.devicePixelRatio);
         return activeScribeClient!.performSelectionGesture(selectionArea);
     }
   }
@@ -131,4 +133,7 @@ mixin ScribeClient {
   // mixes this in must provide an implementation. Is that right, and is that
   // what we want here for avoiding breaking changes?
   bool performSelectionGesture(Rect selectionArea);
+
+  // TODO(justinmc): Is there a cleaner way to adjust for the device pixel ratio?
+  double get devicePixelRatio;
 }
