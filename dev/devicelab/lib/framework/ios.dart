@@ -179,18 +179,12 @@ Future<bool> runXcodeTests({
   required String destination,
   required String testName,
   String configuration = 'Release',
-  bool skipCodesign = false,
 }) async {
   final Map<String, String> environment = Platform.environment;
-  String? developmentTeam;
-  String? codeSignStyle;
-  String? provisioningProfile;
-  if (!skipCodesign) {
-    // If not running on CI, inject the Flutter team code signing properties.
-    developmentTeam = environment['FLUTTER_XCODE_DEVELOPMENT_TEAM'] ?? 'S8QB4VV633';
-    codeSignStyle = environment['FLUTTER_XCODE_CODE_SIGN_STYLE'];
-    provisioningProfile = environment['FLUTTER_XCODE_PROVISIONING_PROFILE_SPECIFIER'];
-  }
+  // Inject the Flutter team code signing properties.
+  final String developmentTeam = environment['FLUTTER_XCODE_DEVELOPMENT_TEAM'] ?? 'S8QB4VV633';
+  final String codeSignStyle = environment['FLUTTER_XCODE_CODE_SIGN_STYLE'] ?? 'Manual';
+  final String provisioningProfile = environment['FLUTTER_XCODE_PROVISIONING_PROFILE_SPECIFIER'] ?? 'match Development *';
   final String resultBundleTemp = Directory.systemTemp.createTempSync('flutter_xcresult.').path;
   final String resultBundlePath = path.join(resultBundleTemp, 'result');
   final int testResultExit = await exec(
@@ -208,12 +202,9 @@ Future<bool> runXcodeTests({
       resultBundlePath,
       'test',
       'COMPILER_INDEX_STORE_ENABLE=NO',
-      if (developmentTeam != null)
-        'DEVELOPMENT_TEAM=$developmentTeam',
-      if (codeSignStyle != null)
-        'CODE_SIGN_STYLE=$codeSignStyle',
-      if (provisioningProfile != null)
-        'PROVISIONING_PROFILE_SPECIFIER=$provisioningProfile',
+      'DEVELOPMENT_TEAM=$developmentTeam',
+      'CODE_SIGN_STYLE=$codeSignStyle',
+      'PROVISIONING_PROFILE_SPECIFIER=$provisioningProfile',
     ],
     workingDirectory: platformDirectory,
     canFail: true,

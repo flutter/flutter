@@ -308,7 +308,6 @@ public class $pluginClass: NSObject, FlutterPlugin {
               destination: 'id=$deviceId',
               configuration: 'Debug',
               testName: 'native_plugin_unit_tests_ios',
-              skipCodesign: true,
             )) {
               throw TaskResult.failure('Platform unit tests failed');
             }
@@ -330,7 +329,6 @@ public class $pluginClass: NSObject, FlutterPlugin {
           destination: 'platform=macOS',
           configuration: 'Debug',
           testName: 'native_plugin_unit_tests_macos',
-          skipCodesign: true,
         )) {
           throw TaskResult.failure('Platform unit tests failed');
         }
