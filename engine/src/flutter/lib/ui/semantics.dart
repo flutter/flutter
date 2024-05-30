@@ -209,7 +209,7 @@ class SemanticsAction {
 
   /// Move the input focus to the respective widget.
   ///
-  /// Most commonly, the input focus determines what widget will receive
+  /// Most commonly, the input focus determines which widget will receive
   /// keyboard input. Semantics nodes that can receive this action are expected
   /// to have [SemanticsFlag.isFocusable] set. Examples of such focusable
   /// widgets include buttons, checkboxes, switches, and text fields.
