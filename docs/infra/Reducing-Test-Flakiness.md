@@ -5,7 +5,7 @@ From [Flutter tree dashboard](https://flutter-dashboard.appspot.com/#/build), a 
 
 ![Task flakes](https://github.com/flutter/assets-for-api-docs/blob/main/assets/wiki/task_flake_multiple_builds.png)
 
-* A single run on the same commit and same task, but multiple reruns from test runner. For this case, check logs by clicking `stdout` of the test step: it shows data about failed or succeeded runs in the end ([example](https://logs.chromium.org/logs/flutter/buildbucket/cr-buildbucket.appspot.com/8841146512187805536/+/u/run_build_aar_module_test/stdout)). See https://github.com/flutter/flutter/wiki/Understanding-a-LUCI-build-failure for how to locate the test step and `stdout`.
+* A single run on the same commit and same task, but multiple reruns from test runner. For this case, check logs by clicking `stdout` of the test step: it shows data about failed or succeeded runs in the end ([example](https://logs.chromium.org/logs/flutter/buildbucket/cr-buildbucket.appspot.com/8841146512187805536/+/u/run_build_aar_module_test/stdout)). See [Understanding a LUCI build failure](Understanding-a-LUCI-build-failure.md) for how to locate the test step and `stdout`.
 
 ![Flake test runner](https://github.com/flutter/assets-for-api-docs/blob/main/assets/wiki/task_flake_test_runner.png)
 

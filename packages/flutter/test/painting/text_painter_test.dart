@@ -1696,6 +1696,17 @@ void main() {
     );
   });
 
+  test('kTextHeightNone unsets the text height multiplier', () {
+    final TextPainter painter = TextPainter(
+      textDirection: TextDirection.ltr,
+      text: const TextSpan(
+        style: TextStyle(fontSize: 10, height: 1000),
+        children: <TextSpan>[TextSpan(text: 'A', style: TextStyle(height: kTextHeightNone))],
+      ),
+    )..layout();
+    expect(painter.height, 10);
+  });
+
   test('TextPainter dispatches memory events', () async {
     await expectLater(
       await memoryEvents(() => TextPainter().dispose(), TextPainter),
