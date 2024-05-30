@@ -30,4 +30,4 @@ In [devicelab](https://github.com/flutter/flutter/tree/main/dev/devicelab) we ru
 
 ## Comparing AOT Snapshot Sizes
 
-A detailed comparison of AOT snapshot sizes can be performed using the [instructions documented here](https://github.com/flutter/flutter/wiki/Comparing-AOT-Snapshot-Sizes).
+A detailed comparison of AOT snapshot sizes can be performed using the [instructions documented here](./benchmarks/Comparing-AOT-Snapshot-Sizes.md).

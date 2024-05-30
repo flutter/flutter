@@ -5,7 +5,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   test('MaterialBannerThemeData copyWith, ==, hashCode basics', () {
@@ -325,10 +324,7 @@ void main() {
     expect(find.byType(Divider), findsNothing);
   });
 
-  testWidgets('MaterialBanner widget properties take priority over theme when presented by ScaffoldMessenger',
-    // TODO(polina-c): remove when fixed https://github.com/flutter/flutter/issues/145600 [leak-tracking-opt-in]
-    experimentalLeakTesting: LeakTesting.settings.withTracked(classes: const <String>['CurvedAnimation']),
-  (WidgetTester tester) async {
+  testWidgets('MaterialBanner widget properties take priority over theme when presented by ScaffoldMessenger', (WidgetTester tester) async {
     const Color backgroundColor = Colors.purple;
     const double elevation = 6.0;
     const TextStyle textStyle = TextStyle(color: Colors.green);
