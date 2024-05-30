@@ -490,9 +490,9 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
         if (_lastPointerDeviceKind != null && _lastPointerDeviceKind != PointerDeviceKind.mouse) {
-          // When the pointer device kind is not precise like a mouse,
-          // native Android resets the tap count at 2. For example, this is so
-          // the selection can collapse on the third tap.
+          // When the pointer device kind is not precise like a mouse, native
+          // Android resets the tap count at 2. For example, this is so the
+          // selection can collapse on the third tap.
           maxConsecutiveTap = 2;
         }
         // From observation, these platforms reset their tap count to 0 when
