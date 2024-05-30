@@ -980,10 +980,6 @@ void main() {
     );
 
     testWidgets('touch cannot select word-by-word on double click drag when on Android web', (WidgetTester tester) async {
-      if (!kIsWeb) {
-        // This test is verifying web behavior.
-        return;
-      }
       final FocusNode focusNode = FocusNode();
       addTearDown(focusNode.dispose);
 
@@ -1032,13 +1028,11 @@ void main() {
       expect(paragraph.selections[0], const TextSelection(baseOffset: 0, extentOffset: 3));
       await gesture.up();
       await tester.pumpAndSettle();
-    });
+    },
+      skip: !kIsWeb, // This test verifies web behavior.
+    );
 
     testWidgets('touch cannot double tap or double tap drag when on iOS web', (WidgetTester tester) async {
-      if (!kIsWeb) {
-        // This test is verifying web behavior.
-        return;
-      }
       final FocusNode focusNode = FocusNode();
       addTearDown(focusNode.dispose);
 
@@ -1089,7 +1083,10 @@ void main() {
       expect(paragraph.selections[0], const TextSelection.collapsed(offset: 2));
       await gesture.up();
       await tester.pumpAndSettle();
-    }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
+    },
+      variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+      skip: !kIsWeb, // This test verifies web behavior.
+    );
 
     testWidgets('mouse can select single text on desktop platforms', (WidgetTester tester) async {
       final FocusNode focusNode = FocusNode();
