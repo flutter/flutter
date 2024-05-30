@@ -105,7 +105,10 @@ class Theme extends StatelessWidget {
     final _InheritedTheme? inheritedTheme = context.dependOnInheritedWidgetOfExactType<_InheritedTheme>();
     final MaterialLocalizations? localizations = Localizations.of<MaterialLocalizations>(context, MaterialLocalizations);
     final ScriptCategory category = localizations?.scriptCategory ?? ScriptCategory.englishLike;
-    final ThemeData theme = inheritedTheme?.theme.data ?? _kFallbackTheme;
+    final InheritedCupertinoTheme? inheritedCupertinoTheme = context.dependOnInheritedWidgetOfExactType<InheritedCupertinoTheme>();
+    final ThemeData theme = inheritedTheme?.theme.data ?? (
+      inheritedCupertinoTheme != null ? CupertinoBasedMaterialThemeData(themeData: inheritedCupertinoTheme.theme.data).materialTheme : _kFallbackTheme
+    );
     return ThemeData.localize(theme, theme.typography.geometryThemeFor(category));
   }
 
@@ -124,17 +127,20 @@ class Theme extends StatelessWidget {
     );
   }
 
+  CupertinoThemeData _inheritedCupertinoThemeData(BuildContext context) {
+    final InheritedCupertinoTheme? inheritedTheme = context.dependOnInheritedWidgetOfExactType<InheritedCupertinoTheme>();
+    return (inheritedTheme?.theme.data ?? MaterialBasedCupertinoThemeData(materialTheme: data)).resolveFrom(context);
+  }
+
   @override
   Widget build(BuildContext context) {
     return _InheritedTheme(
       theme: this,
       child: CupertinoTheme(
-        // We're using a MaterialBasedCupertinoThemeData here instead of a
-        // CupertinoThemeData because it defers some properties to the Material
-        // ThemeData.
-        data: MaterialBasedCupertinoThemeData(
-          materialTheme: data,
-        ),
+        // If a CupertinoThemeData doesn't exist, we're using a
+        // MaterialBasedCupertinoThemeData here instead of a CupertinoThemeData
+        // because it defers some properties to the Material ThemeData.
+        data: _inheritedCupertinoThemeData(context),
         child: _wrapsWidgetThemes(context, child),
       ),
     );
