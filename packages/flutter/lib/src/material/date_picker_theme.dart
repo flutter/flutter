@@ -75,6 +75,7 @@ class DatePickerThemeData with Diagnosticable {
     this.inputDecorationTheme,
     this.cancelButtonStyle,
     this.confirmButtonStyle,
+    this.locale,
   });
 
   /// Overrides the default value of [Dialog.backgroundColor].
@@ -347,6 +348,10 @@ class DatePickerThemeData with Diagnosticable {
   /// Overrides the default style of the confirm (OK) button of a [DatePickerDialog].
   final ButtonStyle? confirmButtonStyle;
 
+  /// An optional [locale] argument can be used to set the locale for the date
+  /// picker. It defaults to the ambient locale provided by [Localizations].
+  final Locale? locale;
+
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   DatePickerThemeData copyWith({
@@ -387,6 +392,7 @@ class DatePickerThemeData with Diagnosticable {
     InputDecorationTheme? inputDecorationTheme,
     ButtonStyle? cancelButtonStyle,
     ButtonStyle? confirmButtonStyle,
+    Locale? locale,
   }) {
     return DatePickerThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
@@ -426,6 +432,7 @@ class DatePickerThemeData with Diagnosticable {
       inputDecorationTheme: inputDecorationTheme ?? this.inputDecorationTheme,
       cancelButtonStyle: cancelButtonStyle ?? this.cancelButtonStyle,
       confirmButtonStyle: confirmButtonStyle ?? this.confirmButtonStyle,
+      locale: locale ?? this.locale,
     );
   }
 
@@ -472,6 +479,7 @@ class DatePickerThemeData with Diagnosticable {
       inputDecorationTheme: t < 0.5 ? a?.inputDecorationTheme : b?.inputDecorationTheme,
       cancelButtonStyle: ButtonStyle.lerp(a?.cancelButtonStyle, b?.cancelButtonStyle, t),
       confirmButtonStyle: ButtonStyle.lerp(a?.confirmButtonStyle, b?.confirmButtonStyle, t),
+      locale: t < 0.5 ? a?.locale : b?.locale,
     );
   }
 
@@ -524,6 +532,7 @@ class DatePickerThemeData with Diagnosticable {
     inputDecorationTheme,
     cancelButtonStyle,
     confirmButtonStyle,
+    locale,
   ]);
 
   @override
@@ -568,7 +577,8 @@ class DatePickerThemeData with Diagnosticable {
       && other.dividerColor == dividerColor
       && other.inputDecorationTheme == inputDecorationTheme
       && other.cancelButtonStyle == cancelButtonStyle
-      && other.confirmButtonStyle == confirmButtonStyle;
+      && other.confirmButtonStyle == confirmButtonStyle
+      && other.locale == locale;
   }
 
   @override
@@ -611,6 +621,7 @@ class DatePickerThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<InputDecorationTheme>('inputDecorationTheme', inputDecorationTheme, defaultValue: null));
     properties.add(DiagnosticsProperty<ButtonStyle>('cancelButtonStyle', cancelButtonStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<ButtonStyle>('confirmButtonStyle', confirmButtonStyle, defaultValue: null));
+    properties.add(DiagnosticsProperty<Locale>('locale', locale, defaultValue: null));
   }
 }
 
