@@ -417,7 +417,9 @@ Future<void> _run({
         if (smokeTestFullPath != null)
           '-e class $smokeTestFullPath',
         if (enableImpeller)
-          '-e enable-impeller true',
+          '-e enable-impeller true'
+        else
+          '-e enable-impeller false',
         if (impellerBackend != null)
           '-e impeller-backend ${impellerBackend.name}',
         if (forceSurfaceProducerSurfaceTexture)
