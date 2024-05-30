@@ -812,7 +812,6 @@ class AlertDialog extends StatelessWidget {
           style: contentTextStyle ?? dialogTheme.contentTextStyle ?? defaults.contentTextStyle!,
           child: Semantics(
             container: true,
-            explicitChildNodes: true,
             child: content,
           ),
         ),
