@@ -136,6 +136,75 @@ void main() {
     OutputPreferences: () => OutputPreferences.test(),
   });
 
+  testUsingContext('symbolize exits if --unit-id-debug-info is just given a path', () async {
+    final SymbolizeCommand command = SymbolizeCommand(
+      stdio: stdio,
+      fileSystem: fileSystem,
+      dwarfSymbolizationService: DwarfSymbolizationService.test(),
+    );
+    fileSystem.file('app.debug').createSync();
+    final Future<void> result = createTestCommandRunner(command)
+      .run(const <String>['symbolize', '--unit-id-debug-info=app.debug']);
+
+    expect(result, throwsToolExit(message: 'The argument to "--unit-id-debug-info" must contain a unit ID and path,'
+            ' separated by ":": "app.debug".'));
+  }, overrides: <Type, Generator>{
+    OutputPreferences: () => OutputPreferences.test(),
+  });
+
+  testUsingContext('symbolize exits if the unit id for --unit-id-debug-info is not a valid integer', () async {
+    final SymbolizeCommand command = SymbolizeCommand(
+      stdio: stdio,
+      fileSystem: fileSystem,
+      dwarfSymbolizationService: DwarfSymbolizationService.test(),
+    );
+    fileSystem.file('app.debug').createSync();
+    final Future<void> result = createTestCommandRunner(command)
+      .run(const <String>['symbolize', '--unit-id-debug-info=foo:app.debug']);
+
+    expect(result, throwsToolExit(message: 'The argument to "--unit-id-debug-info" must begin with'
+            ' a unit ID: "foo" is not an integer.'));
+  }, overrides: <Type, Generator>{
+    OutputPreferences: () => OutputPreferences.test(),
+  });
+
+  testUsingContext('symbolize exits when different paths are given for the root loading unit via --debug-info and --unit-id-debug-info', () async {
+    final SymbolizeCommand command = SymbolizeCommand(
+      stdio: stdio,
+      fileSystem: fileSystem,
+      dwarfSymbolizationService: DwarfSymbolizationService.test(),
+    );
+    fileSystem.file('app.debug').createSync();
+    fileSystem.file('app2.debug').createSync();
+    final Future<void> result = createTestCommandRunner(command)
+      .run(const <String>['symbolize', '--debug-info=app.debug', '--unit-id-debug-info=$rootLoadingUnitId:app2.debug']);
+
+    expect(result, throwsToolExit(message: 'Different paths were given for'
+            ' the same loading unit $rootLoadingUnitId: "app.debug" and'
+            ' "app2.debug".'));
+  }, overrides: <Type, Generator>{
+    OutputPreferences: () => OutputPreferences.test(),
+  });
+
+  testUsingContext('symbolize exits when different paths are given for a non-root loading unit via --unit-id-debug-info', () async {
+    final SymbolizeCommand command = SymbolizeCommand(
+      stdio: stdio,
+      fileSystem: fileSystem,
+      dwarfSymbolizationService: DwarfSymbolizationService.test(),
+    );
+    fileSystem.file('app.debug').createSync();
+    fileSystem.file('app2.debug').createSync();
+    fileSystem.file('app3.debug').createSync();
+    final Future<void> result = createTestCommandRunner(command)
+      .run(const <String>['symbolize', '--debug-info=app.debug', '--unit-id-debug-info=${rootLoadingUnitId+1}:app2.debug', '--unit-id-debug-info=${rootLoadingUnitId+1}:app3.debug']);
+
+    expect(result, throwsToolExit(message: 'Different paths were given for'
+            ' the same loading unit ${rootLoadingUnitId+1}: "app2.debug" and'
+            ' "app3.debug".'));
+  }, overrides: <Type, Generator>{
+    OutputPreferences: () => OutputPreferences.test(),
+  });
+
   testUsingContext('symbolize exits when --input file is missing', () async {
     final SymbolizeCommand command = SymbolizeCommand(
       stdio: stdio,

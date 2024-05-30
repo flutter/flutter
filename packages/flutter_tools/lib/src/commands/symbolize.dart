@@ -81,19 +81,19 @@ class SymbolizeCommand extends FlutterCommand {
     for (final String arg in stringsArg('unit-id-debug-info')) {
       final int separatorIndex = arg.indexOf(':');
       if (separatorIndex == -1) {
-        throwToolExit('"--unit-id-debug-info must contain a unit ID and path,'
-            ' separated by \':\'."');
+        throwToolExit('The argument to "--unit-id-debug-info" must contain a unit ID and path,'
+            ' separated by ":": "$arg".');
       }
       final String unitIdString= arg.substring(0, separatorIndex);
       final int? unitId = int.tryParse(unitIdString);
       if (unitId == null) {
-        throwToolExit('"--unit-id-debug-info must begin with a unit id."');
+        throwToolExit('The argument to "--unit-id-debug-info" must begin with'
+            ' a unit ID: "$unitIdString" is not an integer.');
       }
       final String unitDebugPath = arg.substring(separatorIndex + 1);
       if (map.containsKey(unitId) && map[unitId] != unitDebugPath) {
-        throwToolExit('"--unit-id-debug-info was given different paths for'
-            " the same loading unit $unitId: '${map[unitId]}' and"
-            ' \'$unitDebugPath\'."');
+        throwToolExit('Different paths were given for the same loading unit'
+            ' $unitId: "${map[unitId]}" and "$unitDebugPath".');
       }
       map[unitId] = unitDebugPath;
     }
