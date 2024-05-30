@@ -223,7 +223,7 @@ struct Settings {
 
   // Enable the Impeller renderer on supported platforms. Ignored if Impeller is
   // not supported on the platform.
-#if FML_OS_IOS || FML_OS_IOS_SIMULATOR || FML_OS_ANDROID
+#if FML_OS_IOS || FML_OS_IOS_SIMULATOR
   bool enable_impeller = true;
 #else
   bool enable_impeller = false;
