@@ -571,6 +571,10 @@ void main() {
         case SemanticsAction.showOnScreen:
         case SemanticsAction.tap:
           semanticsOwner.performAction(expectedId, action);
+        // TODO(yjbanov): temporary adding default case until https://github.com/flutter/engine/pull/53094 rolls in (see https://github.com/flutter/flutter/issues/83809)
+        // ignore: no_default_cases
+        default:
+          throw UnimplementedError();
       }
       expect(performedActions.length, expectedLength);
       expect(performedActions.last, action);
