@@ -88,10 +88,6 @@ if (build_engine_artifacts && !is_android) {
           destination = "shader_lib"
         },
         {
-          source = "//flutter/lib/gpu"
-          destination = "flutter_gpu"
-        },
-        {
           source = "$root_out_dir/${lib_prefix}path_ops$dll"
           destination = "${lib_prefix}path_ops$dll"
         },

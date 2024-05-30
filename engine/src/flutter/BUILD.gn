@@ -283,7 +283,10 @@ if (build_engine_artifacts) {
 group("dist") {
   testonly = true
 
-  deps = [ "//flutter/sky/dist" ]
+  deps = [
+    "//flutter/lib/gpu/dist",
+    "//flutter/sky/dist",
+  ]
 }
 
 if (is_fuchsia && enable_unittests) {

@@ -68,7 +68,8 @@
                         "out/ci/android_debug/zip_archives/android-arm/symbols.zip",
                         "out/ci/android_debug/zip_archives/download.flutter.io",
                         "out/ci/android_debug/zip_archives/sky_engine.zip",
-                        "out/ci/android_debug/zip_archives/android-javadoc.zip"
+                        "out/ci/android_debug/zip_archives/android-javadoc.zip",
+                        "out/ci/android_debug/zip_archives/flutter_gpu.zip"
                     ],
                     "realm": "production"
                 }
@@ -96,6 +97,7 @@
                 "targets": [
                     "flutter",
                     "flutter/sky/dist:zip_old_location",
+                    "flutter/lib/gpu/dist:zip_old_location",
                     "flutter/shell/platform/android:embedding_jars",
                     "flutter/shell/platform/android:abi_jars",
                     "flutter/shell/platform/android:robolectric_tests"
