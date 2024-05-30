@@ -4,8 +4,7 @@
 
 import 'dart:ui';
 
-import 'package:flutter/material.dart' show IconButton, Icons,
-  MaterialLocalizations, Tooltip;
+import 'package:flutter/material.dart' show Tooltip;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -462,76 +461,11 @@ class CommonFinders {
     return _AncestorWidgetFinder(of, matching, matchLeaves: matchRoot);
   }
 
-  /// Finds standard Material Design buttons.
-  ///
-  /// Material Design uses a set of standard icons and buttons for particular
-  /// purposes, such as back, close, more, or menu buttons.
-  ///
-  /// It is useful in tests to be able to find these buttons, both for tapping
-  /// them or verifying their existence, but not desirable to hard code the
-  /// icons and button types, so using this finder will allow finding of the
-  /// buttons without needing to know the exact icon, etc. used for them.
-  ///
-  /// ## Sample code
-  ///
-  /// ```dart
-  /// expect(find.materialButton(MaterialButtonType.backButton), findsOneWidget);
-  /// ```
-  Finder materialButton(MaterialButtonType type) {
-    // Finds an IconButton with the right icon and tooltip.
-    return switch (type) {
-      MaterialButtonType.backButton => ancestor(
-          of: byElementPredicate(
-            (Element element) =>
-                element.widget is Tooltip &&
-                (element.widget as Tooltip).message == MaterialLocalizations.of(element).backButtonTooltip,
-          ),
-          matching: ancestor(
-            of: byWidgetPredicate((Widget widget) => widget is Icon &&
-              (widget.icon == Icons.adaptive.arrow_back || widget.icon == Icons.arrow_back_ios_new_rounded)),
-            matching: byType(IconButton),
-          ),
-        ),
-      MaterialButtonType.menuButton => ancestor(
-          of: byElementPredicate(
-            (Element element) =>
-                element.widget is Tooltip &&
-                (element.widget as Tooltip).message == MaterialLocalizations.of(element).showMenuTooltip,
-          ),
-          matching: ancestor(
-            of: byWidgetPredicate((Widget widget) => widget is Icon && widget.icon == Icons.menu),
-            matching: byType(IconButton),
-          ),
-        ),
-      MaterialButtonType.moreButton => ancestor(
-          of: byElementPredicate(
-            (Element element) =>
-                element.widget is Tooltip &&(element.widget as Tooltip).message == MaterialLocalizations.of(element).moreButtonTooltip,
-          ),
-          matching: ancestor(
-            of: byWidgetPredicate((Widget widget) => widget is Icon && widget.icon == Icons.adaptive.more),
-            matching: byType(IconButton),
-          ),
-        ),
-      MaterialButtonType.closeButton => ancestor(
-          of: byElementPredicate(
-            (Element element) =>
-                element.widget is Tooltip &&
-                (element.widget as Tooltip).message == MaterialLocalizations.of(element).closeButtonTooltip,
-          ),
-          matching: ancestor(
-            of: byWidgetPredicate((Widget widget) => widget is Icon && widget.icon == Icons.close),
-            matching: byType(IconButton),
-          ),
-        ),
-    };
-  }
-
   /// Finds [Semantics] widgets matching the given `label`, either by
   /// [RegExp.hasMatch] or string equality.
   ///
   /// The framework may combine semantics labels in certain scenarios, such as
-  /// when multiple [Text] widgets are in a [MaterialButtonType] widget. In such a
+  /// when multiple [Text] widgets are in a [MaterialButton] widget. In such a
   /// case, it may be preferable to match by regular expression. Consumers of
   /// this API __must not__ introduce unsuitable content into the semantics tree
   /// for the purposes of testing; in particular, you should prefer matching by
@@ -572,30 +506,6 @@ class CommonFinders {
       skipOffstage: skipOffstage,
     );
   }
-}
-
-/// An enum used by `find.materialButton` to describe the type of material
-/// button to find.
-///
-/// Standard buttons are buttons provided by the framework for Material or
-/// Cupertino widgets. The finder may also find custom buttons which are
-/// configured similarly to the standard buttons (have the same icon and
-/// tooltip).
-enum MaterialButtonType {
-  /// Finds the "back" button, if any. A back button typically has some kind
-  /// of backward pointing icon, and appropriate tooltip.
-  backButton,
-  /// Finds the "menu" button, if any. A menu button typically has some kind
-  /// of menu icon ("hamburger", "bars", or three dots), and an appropriate
-  /// tooltip.
-  menuButton,
-  /// Finds the "menu" button, if any. A menu button typically has some kind
-  /// of menu icon ("hamburger", "bars", or three dots), and an appropriate
-  /// tooltip.
-  moreButton,
-  /// Finds the "close" button, if any. A close button typically has some kind
-  /// of close icon (an "X", typically), and an appropriate tooltip.
-  closeButton,
 }
 
 

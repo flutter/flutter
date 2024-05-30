@@ -325,51 +325,6 @@ void main() {
     });
   });
 
-  group('materialButton', () {
-    testWidgets('finds back button widgets', (WidgetTester tester) async {
-      for (final MaterialButtonType buttonType in MaterialButtonType.values) {
-        await tester.pumpWidget(
-          MaterialApp(
-            home: Builder(builder: (BuildContext context) {
-              // Switch on the values in MaterialButtonType so that we know
-              // we've checked them all.
-              return switch (buttonType) {
-                MaterialButtonType.closeButton => const CloseButton(),
-                MaterialButtonType.backButton => const BackButton(),
-                MaterialButtonType.moreButton => IconButton(
-                    tooltip: MaterialLocalizations.of(context).moreButtonTooltip,
-                    icon: Icon(Icons.adaptive.more),
-                    onPressed: null,
-                  ),
-                MaterialButtonType.menuButton => IconButton(
-                    tooltip: MaterialLocalizations.of(context).showMenuTooltip,
-                    icon: const Icon(Icons.menu),
-                    onPressed: null,
-                  ),
-              };
-            }),
-          ),
-        );
-        for (final MaterialButtonType expectedButtonType in MaterialButtonType.values) {
-          if (expectedButtonType == buttonType) {
-            expect(
-              find.materialButton(expectedButtonType),
-              findsOneWidget,
-              reason: "Expected to find a ${buttonType.name}, but didn't find one.",
-            );
-          } else {
-            expect(
-              find.materialButton(expectedButtonType),
-              findsNothing,
-              reason: 'Expected to not find a $expectedButtonType when '
-                'only a $buttonType exists, but found one anyway.',
-            );
-          }
-        }
-      }
-    });
-  });
-
   group('hitTestable', () {
     testWidgets('excludes non-hit-testable widgets',
         (WidgetTester tester) async {
