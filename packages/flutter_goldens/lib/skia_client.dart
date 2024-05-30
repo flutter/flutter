@@ -52,10 +52,10 @@ class SkiaGoldClient {
     required this.fs,
     required this.process,
     required this.platform,
-    Abi? abi,
+    required this.abi,
     required this.httpClient,
     required this.log,
-  }) : abi = abi ?? Abi.current();
+  });
 
   /// The file system to use for storing the local clone of the repository.
   ///
@@ -78,8 +78,6 @@ class SkiaGoldClient {
   final io.HttpClient httpClient;
 
   /// The ABI of the current host platform.
-  ///
-  /// If not overridden for testing, defaults to [Abi.current];
   final Abi abi;
 
   /// The local [Directory] within the [comparisonRoot] for the current test
@@ -498,7 +496,7 @@ class SkiaGoldClient {
     final String? webRenderer = _webRendererValue;
     final Map<String, dynamic> keys = <String, dynamic>{
       'Platform' : platform.operatingSystem,
-      'Abi': abi.toString(),
+      'Abi': '$abi',
       'CI' : 'luci',
       if (_isImpeller)
         'impeller': 'swiftshader',
@@ -581,7 +579,7 @@ class SkiaGoldClient {
     final Map<String, Object?> parameters = <String, Object?>{
       if (_isBrowserTest)
         'Browser' : _browserKey,
-      'Abi': abi.toString(),
+      'Abi': '$abi',
       'CI' : 'luci',
       'Platform' : platform.operatingSystem,
       if (webRenderer != null)
