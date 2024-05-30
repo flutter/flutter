@@ -77,6 +77,8 @@ sk_sp<DisplayList> DisplayListBuilder::Build() {
   bool compatible = current_info().is_group_opacity_compatible();
   bool is_safe = is_ui_thread_safe_;
   bool affects_transparency = current_info().affects_transparent_layer;
+  bool root_has_backdrop_filter = current_info().contains_backdrop_filter;
+  DlBlendMode max_root_blend_mode = current_info().max_blend_mode;
 
   sk_sp<DlRTree> rtree;
   SkRect bounds;
@@ -112,10 +114,10 @@ sk_sp<DisplayList> DisplayListBuilder::Build() {
   }
 
   storage_.realloc(bytes);
-  return sk_sp<DisplayList>(
-      new DisplayList(std::move(storage_), bytes, count, nested_bytes,
-                      nested_count, total_depth, bounds, compatible, is_safe,
-                      affects_transparency, std::move(rtree)));
+  return sk_sp<DisplayList>(new DisplayList(
+      std::move(storage_), bytes, count, nested_bytes, nested_count,
+      total_depth, bounds, compatible, is_safe, affects_transparency,
+      max_root_blend_mode, root_has_backdrop_filter, std::move(rtree)));
 }
 
 static constexpr DlRect kEmpty = DlRect();
@@ -451,6 +453,10 @@ void DisplayListBuilder::saveLayer(const SkRect& bounds,
     return;
   }
 
+  if (backdrop != nullptr) {
+    current_info().contains_backdrop_filter = true;
+  }
+
   // Snapshot these values before we do any work as we need the values
   // from before the method was called, but some of the operations below
   // might update them.
@@ -468,8 +474,10 @@ void DisplayListBuilder::saveLayer(const SkRect& bounds,
     }
     filter = current_.getImageFilter();
     CheckLayerOpacityCompatibility(true);
+    UpdateLayerResult(result, true);
   } else {
     CheckLayerOpacityCompatibility(false);
+    UpdateLayerResult(result, false);
   }
 
   // The actual flood of the outer layer clip will occur after the
@@ -495,7 +503,7 @@ void DisplayListBuilder::saveLayer(const SkRect& bounds,
         rtree_data_.has_value() ? rtree_data_->rects.size() : 0u;
 
     save_stack_.emplace_back(&current_info(), filter, rtree_index);
-    current_info().is_nop = false;
+    FML_DCHECK(!current_info().is_nop);
     FML_DCHECK(!current_info().has_deferred_save_op);
     current_info().save_offset = save_offset;
     current_info().save_depth = save_depth;
@@ -569,8 +577,6 @@ void DisplayListBuilder::saveLayer(const SkRect& bounds,
       UpdateLayerOpacityCompatibility(false);
     }
   }
-  // REMIND: NEEDED?
-  UpdateLayerResult(result);
 }
 void DisplayListBuilder::SaveLayer(const SkRect* bounds,
                                    const DlPaint* paint,
@@ -597,39 +603,45 @@ void DisplayListBuilder::Restore() {
   }
 
   {
-    // The current_info will have a lifetime that does not extend past the
-    // pop_back() method below.
-    auto& current_info = this->current_info();
+    // The current_info and parent_info will have a lifetime that does not
+    // extend past the pop_back() method below.
+    const auto& current_info = this->current_info();
+    auto& parent_info = this->parent_info();
 
     if (!current_info.has_deferred_save_op) {
       SaveOpBase* op = reinterpret_cast<SaveOpBase*>(storage_.get() +
                                                      current_info.save_offset);
-      FML_DCHECK(op->type == DisplayListOpType::kSave ||
-                 op->type == DisplayListOpType::kSaveLayer ||
-                 op->type == DisplayListOpType::kSaveLayerBackdrop);
+      FML_CHECK(op->type == DisplayListOpType::kSave ||
+                op->type == DisplayListOpType::kSaveLayer ||
+                op->type == DisplayListOpType::kSaveLayerBackdrop);
 
       op->restore_index = op_index_;
       op->total_content_depth = depth_ - current_info.save_depth;
     }
 
     if (current_info.is_save_layer) {
-      RestoreLayer(current_info, parent_info());
+      RestoreLayer(current_info, parent_info);
     } else {
       // No need to propagate bounds as we do with layers...
 
       // global accumulator is either the same object or both nullptr
       FML_DCHECK(current_info.global_space_accumulator.get() ==
-                 parent_info().global_space_accumulator.get());
+                 parent_info.global_space_accumulator.get());
 
       // layer accumulators are both the same object
       FML_DCHECK(current_info.layer_local_accumulator.get() ==
-                 parent_info().layer_local_accumulator.get());
+                 parent_info.layer_local_accumulator.get());
       FML_DCHECK(current_info.layer_local_accumulator.get() != nullptr);
 
       // We only propagate these values through a regular save()
       if (current_info.opacity_incompatible_op_detected) {
-        parent_info().opacity_incompatible_op_detected = true;
+        parent_info.opacity_incompatible_op_detected = true;
       }
+
+      if (current_info.contains_backdrop_filter) {
+        parent_info.contains_backdrop_filter = true;
+      }
+      parent_info.update_blend_mode(current_info.max_blend_mode);
     }
 
     // Wait until all outgoing bounds information for the saveLayer is
@@ -659,30 +671,23 @@ void DisplayListBuilder::RestoreLayer(const SaveInfo& current_info,
 
   SaveLayerOpBase* layer_op = reinterpret_cast<SaveLayerOpBase*>(
       storage_.get() + current_info.save_offset);
-  FML_DCHECK(layer_op->type == DisplayListOpType::kSaveLayer ||
-             layer_op->type == DisplayListOpType::kSaveLayerBackdrop);
+  FML_CHECK(layer_op->type == DisplayListOpType::kSaveLayer ||
+            layer_op->type == DisplayListOpType::kSaveLayerBackdrop);
 
-  switch (layer_op->type) {
-    case DisplayListOpType::kSaveLayer:
-    case DisplayListOpType::kSaveLayerBackdrop: {
-      if (layer_op->options.bounds_from_caller()) {
-        if (!content_bounds.isEmpty() &&
-            !layer_op->rect.contains(content_bounds)) {
-          layer_op->options = layer_op->options.with_content_is_clipped();
-          content_bounds.intersect(layer_op->rect);
-        }
-      }
-      layer_op->rect = content_bounds;
-      break;
+  if (layer_op->options.bounds_from_caller()) {
+    if (!content_bounds.isEmpty() && !layer_op->rect.contains(content_bounds)) {
+      layer_op->options = layer_op->options.with_content_is_clipped();
+      content_bounds.intersect(layer_op->rect);
     }
-    default:
-      FML_UNREACHABLE();
+  }
+  layer_op->rect = content_bounds;
+  layer_op->max_blend_mode = current_info.max_blend_mode;
+
+  if (current_info.contains_backdrop_filter) {
+    layer_op->options = layer_op->options.with_contains_backdrop_filter();
   }
 
   if (current_info.is_group_opacity_compatible()) {
-    // We are now going to go back and modify the matching saveLayer
-    // call to add the option indicating it can distribute an opacity
-    // value to its children.
     layer_op->options = layer_op->options.with_can_distribute_opacity();
   }
 
@@ -1113,7 +1118,7 @@ void DisplayListBuilder::DrawColor(DlColor color, DlBlendMode mode) {
   if (result != OpResult::kNoEffect && AccumulateUnbounded()) {
     Push<DrawColorOp>(0, color, mode);
     CheckLayerOpacityCompatibility(mode);
-    UpdateLayerResult(result);
+    UpdateLayerResult(result, mode);
   }
 }
 void DisplayListBuilder::drawLine(const SkPoint& p0, const SkPoint& p1) {
@@ -1390,7 +1395,7 @@ void DisplayListBuilder::drawImage(const sk_sp<DlImage> image,
         ? Push<DrawImageWithAttrOp>(0, image, point, sampling)
         : Push<DrawImageOp>(0, image, point, sampling);
     CheckLayerOpacityCompatibility(render_with_attributes);
-    UpdateLayerResult(result);
+    UpdateLayerResult(result, render_with_attributes);
     is_ui_thread_safe_ = is_ui_thread_safe_ && image->isUIThreadSafe();
   }
 }
@@ -1420,7 +1425,7 @@ void DisplayListBuilder::drawImageRect(const sk_sp<DlImage> image,
     Push<DrawImageRectOp>(0, image, src, dst, sampling, render_with_attributes,
                           constraint);
     CheckLayerOpacityCompatibility(render_with_attributes);
-    UpdateLayerResult(result);
+    UpdateLayerResult(result, render_with_attributes);
     is_ui_thread_safe_ = is_ui_thread_safe_ && image->isUIThreadSafe();
   }
 }
@@ -1452,7 +1457,7 @@ void DisplayListBuilder::drawImageNine(const sk_sp<DlImage> image,
         ? Push<DrawImageNineWithAttrOp>(0, image, center, dst, filter)
         : Push<DrawImageNineOp>(0, image, center, dst, filter);
     CheckLayerOpacityCompatibility(render_with_attributes);
-    UpdateLayerResult(result);
+    UpdateLayerResult(result, render_with_attributes);
     is_ui_thread_safe_ = is_ui_thread_safe_ && image->isUIThreadSafe();
   }
 }
@@ -1540,7 +1545,7 @@ void DisplayListBuilder::drawAtlas(const sk_sp<DlImage> atlas,
   // on it to distribute the opacity without overlap without checking all
   // of the transforms and texture rectangles.
   UpdateLayerOpacityCompatibility(false);
-  UpdateLayerResult(result);
+  UpdateLayerResult(result, render_with_attributes);
   is_ui_thread_safe_ = is_ui_thread_safe_ && atlas->isUIThreadSafe();
 }
 void DisplayListBuilder::DrawAtlas(const sk_sp<DlImage>& atlas,
@@ -1625,7 +1630,11 @@ void DisplayListBuilder::DrawDisplayList(const sk_sp<DisplayList> display_list,
   // pixels or we do not. We should not have [kNoEffect].
   UpdateLayerResult(display_list->modifies_transparent_black()
                         ? OpResult::kAffectsAll
-                        : OpResult::kPreservesTransparency);
+                        : OpResult::kPreservesTransparency,
+                    display_list->max_root_blend_mode());
+  if (display_list->root_has_backdrop_filter()) {
+    current_info().contains_backdrop_filter = true;
+  }
 }
 void DisplayListBuilder::drawTextBlob(const sk_sp<SkTextBlob> blob,
                                       SkScalar x,
@@ -1718,7 +1727,7 @@ void DisplayListBuilder::DrawShadow(const SkPath& path,
                                                   dpr)
           : Push<DrawShadowOp>(0, path, color, elevation, dpr);
       UpdateLayerOpacityCompatibility(false);
-      UpdateLayerResult(result);
+      UpdateLayerResult(result, DlBlendMode::kSrcOver);
     }
   }
 }

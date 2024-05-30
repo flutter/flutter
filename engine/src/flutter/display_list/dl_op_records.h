@@ -316,7 +316,7 @@ struct SetSharedImageFilterOp : DLOp {
 };
 
 // The base struct for all save() and saveLayer() ops
-// 4 byte header + 8 byte payload packs into 16 bytes (4 bytes unused)
+// 4 byte header + 12 byte payload packs exactly into 16 bytes
 struct SaveOpBase : DLOp {
   static constexpr uint32_t kDepthInc = 0;
   static constexpr uint32_t kRenderOpInc = 1;
@@ -327,8 +327,9 @@ struct SaveOpBase : DLOp {
       : options(options), restore_index(0), total_content_depth(0) {}
 
   // options parameter is only used by saveLayer operations, but since
-  // it packs neatly into the empty space created by laying out the 64-bit
-  // offsets, it can be stored for free and defaulted to 0 for save operations.
+  // it packs neatly into the empty space created by laying out the rest
+  // of the data here, it can be stored for free and defaulted to 0 for
+  // save operations.
   SaveLayerOptions options;
   int restore_index;
   uint32_t total_content_depth;
@@ -353,14 +354,16 @@ struct SaveOp final : SaveOpBase {
   }
 };
 // The base struct for all saveLayer() ops
-// 16 byte SaveOpBase + 16 byte payload packs into 32 bytes (4 bytes unused)
+// 16 byte SaveOpBase + 20 byte payload packs into 36 bytes
 struct SaveLayerOpBase : SaveOpBase {
   SaveLayerOpBase(const SaveLayerOptions& options, const SkRect& rect)
       : SaveOpBase(options), rect(rect) {}
 
   SkRect rect;
+  DlBlendMode max_blend_mode = DlBlendMode::kClear;
 };
-// 32 byte SaveLayerOpBase with no additional data
+// 36 byte SaveLayerOpBase with no additional data packs into 40 bytes
+// of buffer storage with 4 bytes unused.
 struct SaveLayerOp final : SaveLayerOpBase {
   static constexpr auto kType = DisplayListOpType::kSaveLayer;
 
@@ -369,11 +372,13 @@ struct SaveLayerOp final : SaveLayerOpBase {
 
   void dispatch(DispatchContext& ctx) const {
     if (save_needed(ctx)) {
-      ctx.receiver.saveLayer(rect, options, total_content_depth);
+      ctx.receiver.saveLayer(rect, options, total_content_depth,
+                             max_blend_mode);
     }
   }
 };
-// 32 byte SaveLayerOpBase + 16 byte payload packs into minimum 48 bytes
+// 36 byte SaveLayerOpBase + 4 bytes for alignment + 16 byte payload packs
+// into minimum 56 bytes
 struct SaveLayerBackdropOp final : SaveLayerOpBase {
   static constexpr auto kType = DisplayListOpType::kSaveLayerBackdrop;
 
@@ -386,7 +391,7 @@ struct SaveLayerBackdropOp final : SaveLayerOpBase {
 
   void dispatch(DispatchContext& ctx) const {
     if (save_needed(ctx)) {
-      ctx.receiver.saveLayer(rect, options, total_content_depth,
+      ctx.receiver.saveLayer(rect, options, total_content_depth, max_blend_mode,
                              backdrop.get());
     }
   }
