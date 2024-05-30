@@ -373,20 +373,12 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     _initMouseGestureRecognizer();
     _initTouchGestureRecognizer();
     // Right clicks.
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.iOS:
-      case TargetPlatform.macOS:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        _gestureRecognizers[TapGestureRecognizer] = GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
-              () => TapGestureRecognizer(debugOwner: this),
-              (TapGestureRecognizer instance) {
-            instance.onSecondaryTapDown = _handleRightClickDown;
-          },
-        );
-    }
+    _gestureRecognizers[TapGestureRecognizer] = GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
+          () => TapGestureRecognizer(debugOwner: this),
+          (TapGestureRecognizer instance) {
+        instance.onSecondaryTapDown = _handleRightClickDown;
+      },
+    );
     _initProcessTextActions();
   }
 
