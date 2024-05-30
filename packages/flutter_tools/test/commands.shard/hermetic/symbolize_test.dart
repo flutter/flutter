@@ -161,7 +161,7 @@ void main() {
     final Future<void> result = createTestCommandRunner(command)
       .run(const <String>['symbolize', '--unit-id-debug-info=${rootLoadingUnitId+1}:app.debug']);
 
-    expect(result, throwsToolExit(message: 'Missing debug info for the root loading unit.'));
+    expect(result, throwsToolExit(message: 'Missing debug info for the root loading unit (id $rootLoadingUnitId).'));
   }, overrides: <Type, Generator>{
     OutputPreferences: () => OutputPreferences.test(),
   });

@@ -108,7 +108,7 @@ class SymbolizeCommand extends FlutterCommand {
     }
     final Map<int, String> debugInfoPathMap = _unitDebugInfoPathMap();
     if (!debugInfoPathMap.containsKey(rootLoadingUnitId)) {
-      throwToolExit('Missing debug info for the root loading unit.');
+      throwToolExit('Missing debug info for the root loading unit (id $rootLoadingUnitId).');
     }
     for (final String debugInfoPath in debugInfoPathMap.values) {
       if (debugInfoPath.endsWith('.dSYM')
@@ -205,7 +205,7 @@ StreamTransformer<String, String> _defaultUnitsTransformer(Map<int, Uint8List> u
     map[unitId] = dwarf;
   }
   if (!map.containsKey(rootLoadingUnitId)) {
-    throwToolExit('Missing symbols file for root loading unit (id 1)');
+    throwToolExit('Missing symbols file for root loading unit (id $rootLoadingUnitId)');
   }
   return DwarfStackTraceDecoder(
     map[rootLoadingUnitId]!,
