@@ -42,6 +42,7 @@ enum class SemanticsAction : int32_t {
   kMoveCursorForwardByWord = 1 << 19,
   kMoveCursorBackwardByWord = 1 << 20,
   kSetText = 1 << 21,
+  kFocus = 1 << 22,
 };
 
 const int kVerticalScrollSemanticsActions =
