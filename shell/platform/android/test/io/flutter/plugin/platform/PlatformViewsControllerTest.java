@@ -371,28 +371,21 @@ public class PlatformViewsControllerTest {
     // Construct a PlatformViewTouch.rawPointerPropertiesList by doing the inverse of
     // PlatformViewsController.parsePointerPropertiesList.
     List<List<Integer>> pointerProperties =
-            Arrays.asList(
-                    Arrays.asList(
-                            original.getPointerId(0),
-                            original.getToolType(0)
-                    )
-            );
+        Arrays.asList(Arrays.asList(original.getPointerId(0), original.getToolType(0)));
     // Construct a PlatformViewTouch.rawPointerCoords by doing the inverse of
     // PlatformViewsController.parsePointerCoordsList.
     List<List<Double>> pointerCoordinates =
+        Arrays.asList(
             Arrays.asList(
-                    Arrays.asList(
-                            (double) original.getOrientation(),
-                            (double) original.getPressure(),
-                            (double) original.getSize(),
-                            (double) original.getToolMajor(),
-                            (double) original.getToolMinor(),
-                            (double) original.getTouchMajor(),
-                            (double) original.getTouchMinor(),
-                            (double) original.getX(),
-                            (double) original.getY()
-                    )
-            );
+                (double) original.getOrientation(),
+                (double) original.getPressure(),
+                (double) original.getSize(),
+                (double) original.getToolMajor(),
+                (double) original.getToolMinor(),
+                (double) original.getTouchMajor(),
+                (double) original.getTouchMinor(),
+                (double) original.getX(),
+                (double) original.getY()));
     // Make a platform view touch from the motion event.
     PlatformViewTouch frameWorkTouchNonVd =
         new PlatformViewTouch(

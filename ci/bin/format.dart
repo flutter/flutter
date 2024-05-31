@@ -475,6 +475,7 @@ class JavaFormatChecker extends FormatChecker {
       path.absolute(
         path.join(
           srcDir.absolute.path,
+          'flutter',
           'third_party',
           'android_tools',
           'google-java-format',
