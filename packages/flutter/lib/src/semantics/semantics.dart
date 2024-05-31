@@ -943,6 +943,7 @@ class SemanticsProperties extends DiagnosticableTree {
     this.onSetText,
     this.onDidGainAccessibilityFocus,
     this.onDidLoseAccessibilityFocus,
+    this.onFocus,
     this.onDismiss,
     this.customSemanticsActions,
   }) : assert(label == null || attributedLabel == null, 'Only one of label or attributedLabel should be provided'),
@@ -1605,6 +1606,8 @@ class SemanticsProperties extends DiagnosticableTree {
   ///
   ///  * [onDidLoseAccessibilityFocus], which is invoked when the accessibility
   ///    focus is removed from the node.
+  ///  * [onFocus], which is invoked when the assistive technology requests that
+  ///    the input focus is gained by a widget.
   ///  * [FocusNode], [FocusScope], [FocusManager], which manage the input focus.
   final VoidCallback? onDidGainAccessibilityFocus;
 
@@ -1626,6 +1629,30 @@ class SemanticsProperties extends DiagnosticableTree {
   ///    accessibility focus.
   ///  * [FocusNode], [FocusScope], [FocusManager], which manage the input focus.
   final VoidCallback? onDidLoseAccessibilityFocus;
+
+  /// {@template flutter.semantics.SemanticsProperties.onFocus}
+  /// The handler for [SemanticsAction.focus].
+  ///
+  /// This handler is invoked when the assistive technology requests that the
+  /// focusable widget corresponding to this semantics node gain input focus.
+  /// The [FocusNode] that manages the focus of the widget must gain focus. The
+  /// widget must begin responding to relevant key events. For example:
+  ///
+  /// * Buttons must respond to tap/click events produced via keyboard shortcuts.
+  /// * Text fields must become focused and editable, showing an on-screen
+  ///   keyboard, if necessary.
+  /// * Checkboxes, switches, and radio buttons must become togglable using
+  ///   keyboard shortcuts.
+  ///
+  /// Focus behavior is specific to the platform and to the assistive technology
+  /// used. See the documentation of [SemanticsAction.focus] for more detail.
+  ///
+  /// See also:
+  ///
+  ///  * [onDidGainAccessibilityFocus], which is invoked when the node gains
+  ///    accessibility focus.
+  /// {@endtemplate}
+  final VoidCallback? onFocus;
 
   /// The handler for [SemanticsAction.dismiss].
   ///
@@ -4062,6 +4089,14 @@ class SemanticsConfiguration {
   set onDidLoseAccessibilityFocus(VoidCallback? value) {
     _addArgumentlessAction(SemanticsAction.didLoseAccessibilityFocus, value!);
     _onDidLoseAccessibilityFocus = value;
+  }
+
+  /// {@macro flutter.semantics.SemanticsProperties.onFocus}
+  VoidCallback? get onFocus => _onFocus;
+  VoidCallback? _onFocus;
+  set onFocus(VoidCallback? value) {
+    _addArgumentlessAction(SemanticsAction.focus, value!);
+    _onFocus = value;
   }
 
   /// A delegate that decides how to handle [SemanticsConfiguration]s produced
