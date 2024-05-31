@@ -546,7 +546,7 @@ void main() {
                             ),
                             TestSemantics(
                               flags: <SemanticsFlag>[SemanticsFlag.isButton],
-                              actions: <SemanticsAction>[SemanticsAction.tap],
+                              actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                               label: r'Show accounts',
                               textDirection: TextDirection.ltr,
                             ),

@@ -517,7 +517,7 @@ void main() {
             ),
             TestSemantics(
               label: 'Clickable',
-              actions: <SemanticsAction>[SemanticsAction.tap],
+              actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
               flags: <SemanticsFlag>[SemanticsFlag.isLink],
               textDirection: TextDirection.ltr,
             ),
@@ -571,7 +571,7 @@ void main() {
             TestSemantics(
               label: 'world',
               textDirection: TextDirection.ltr,
-              actions: <SemanticsAction>[SemanticsAction.tap],
+              actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
               flags: <SemanticsFlag>[SemanticsFlag.isLink],
             ),
             TestSemantics(
@@ -639,7 +639,7 @@ void main() {
                 TestSemantics(
                   label: offScreenText,
                   textDirection: TextDirection.ltr,
-                  actions: <SemanticsAction>[SemanticsAction.tap],
+                  actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                   flags: <SemanticsFlag>[SemanticsFlag.isLink, SemanticsFlag.isHidden],
                 ),
               ],
@@ -702,7 +702,7 @@ void main() {
             TestSemantics(
               label: 'world',
               textDirection: TextDirection.ltr,
-              actions: <SemanticsAction>[SemanticsAction.tap],
+              actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
               flags: <SemanticsFlag>[SemanticsFlag.isLink],
             ),
           ],
@@ -758,7 +758,7 @@ void main() {
             TestSemantics(
               label: 'world',
               textDirection: TextDirection.ltr,
-              actions: <SemanticsAction>[SemanticsAction.tap],
+              actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
               flags: <SemanticsFlag>[SemanticsFlag.isLink],
             ),
             TestSemantics(
@@ -845,7 +845,7 @@ void main() {
               rect: const Rect.fromLTRB(150.0, -4.0, 200.0, 18.0),
               label: 'SIR',
               textDirection: TextDirection.rtl,
-              actions: <SemanticsAction>[SemanticsAction.tap],
+              actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
               flags: <SemanticsFlag>[SemanticsFlag.isLink],
             ),
             TestSemantics(
@@ -895,7 +895,7 @@ void main() {
             TestSemantics(
               label: 'click me',
               textDirection: TextDirection.ltr,
-              actions: <SemanticsAction>[SemanticsAction.tap],
+              actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
               flags: <SemanticsFlag>[SemanticsFlag.isLink],
             ),
           ],
@@ -957,7 +957,7 @@ void main() {
             TestSemantics(
               label: 'pebble',
               textDirection: TextDirection.ltr,
-              actions: <SemanticsAction>[SemanticsAction.tap],
+              actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
               flags: <SemanticsFlag>[SemanticsFlag.isLink],
             ),
             TestSemantics(
@@ -1037,7 +1037,7 @@ void main() {
             TestSemantics(
               label: 'pebble',
               textDirection: TextDirection.ltr,
-              actions: <SemanticsAction>[SemanticsAction.tap],
+              actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
               flags: <SemanticsFlag>[SemanticsFlag.isLink],
               rect: const Rect.fromLTRB(52.0, 48.0, 228.0, 84.0),
             ),
@@ -1546,7 +1546,7 @@ void main() {
                 TestSemantics(
                   label: 'next WS is clipped',
                   flags: <SemanticsFlag>[SemanticsFlag.isLink],
-                  actions: <SemanticsAction>[SemanticsAction.tap],
+                  actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                 ),
               ],
             ),

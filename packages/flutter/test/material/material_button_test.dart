@@ -620,6 +620,7 @@ void main() {
             label: 'Button',
             actions: <SemanticsAction>[
               SemanticsAction.tap,
+              SemanticsAction.focus,
             ],
             flags: <SemanticsFlag>[
               SemanticsFlag.hasEnabledState,

@@ -6964,7 +6964,7 @@ void main() {
       ),
     );
 
-    expect(semantics, isNot(includesNodeWith(actions: <SemanticsAction>[SemanticsAction.tap])));
+    expect(semantics, isNot(includesNodeWith(actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus])));
     semantics.dispose();
   });
 
@@ -7005,7 +7005,7 @@ void main() {
       ),
     );
 
-    expect(semantics, isNot(includesNodeWith(actions: <SemanticsAction>[SemanticsAction.tap])));
+    expect(semantics, isNot(includesNodeWith(actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus])));
 
     semantics.dispose();
   });
@@ -8516,7 +8516,7 @@ void main() {
     expect(
         semantics,
         includesNodeWith(
-          actions: <SemanticsAction>[SemanticsAction.tap],
+          actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
           textDirection: TextDirection.ltr,
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
@@ -8533,7 +8533,7 @@ void main() {
     expect(
       semantics,
       includesNodeWith(
-        actions: <SemanticsAction>[SemanticsAction.tap],
+        actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
         textDirection: TextDirection.ltr,
         flags: <SemanticsFlag>[
           SemanticsFlag.isTextField,
@@ -8550,7 +8550,7 @@ void main() {
     expect(
         semantics,
         includesNodeWith(
-          actions: <SemanticsAction>[SemanticsAction.tap],
+          actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
           textDirection: TextDirection.ltr,
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
@@ -8835,7 +8835,7 @@ void main() {
           TestSemantics(
             id: inputFieldId,
             flags: <SemanticsFlag>[SemanticsFlag.isTextField, SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled],
-            actions: <SemanticsAction>[SemanticsAction.tap],
+            actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
             value: textInTextField,
             textDirection: TextDirection.ltr,
           ),
@@ -8910,7 +8910,7 @@ void main() {
           TestSemantics(
             id: inputFieldId,
             flags: <SemanticsFlag>[SemanticsFlag.isTextField, SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled],
-            actions: <SemanticsAction>[SemanticsAction.tap],
+            actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
             value: textInTextField,
             textDirection: TextDirection.ltr,
           ),
