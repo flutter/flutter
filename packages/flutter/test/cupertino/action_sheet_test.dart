@@ -749,7 +749,7 @@ void main() {
     await tester.tap(find.text('Go'));
     await tester.pump();
 
-    expect(findScrollableActionsSectionRenderBox(tester).size.height, moreOrLessEquals(84.0));
+    expect(findScrollableActionsSectionRenderBox(tester).size.height, moreOrLessEquals(84.3));
   });
 
   testWidgets('1 action button without cancel button', (WidgetTester tester) async {

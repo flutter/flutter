@@ -90,7 +90,7 @@ const double _kActionSheetEdgeVerticalPadding = 10.0;
 const double _kActionSheetContentHorizontalPadding = 16.0;
 const double _kActionSheetContentVerticalPadding = 12.0;
 const double _kActionSheetButtonHeight = 56.0;
-const double _kActionSheetActionsSectionMinHeight = 84.0;
+const double _kActionSheetActionsSectionMinHeight = 84.3;
 
 // A translucent color that is painted on top of the blurred backdrop as the
 // dialog's background color
