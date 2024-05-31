@@ -354,39 +354,44 @@ void main() {
       logs.clear();
     }, variant: KeySimulatorTransitModeVariant.all());
 
-    testWidgets(
-      'FocusManager ignores app lifecycle changes on Android and iOS.',
-      (WidgetTester tester) async {
-        Future<void> setAppLifecycleState(AppLifecycleState state) async {
-          final ByteData? message = const StringCodec().encodeMessage(state.toString());
-          await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-              .handlePlatformMessage('flutter/lifecycle', message, (_) {});
-        }
+    testWidgets('FocusManager ignores app lifecycle changes on Android.', (WidgetTester tester) async {
+      final bool shouldRespond = kIsWeb || defaultTargetPlatform != TargetPlatform.android;
+      if (shouldRespond) {
+        return;
+      }
 
-        final BuildContext context = await setupWidget(tester);
-        final FocusScopeNode scope = FocusScopeNode(debugLabel: 'Scope');
-        addTearDown(scope.dispose);
-        final FocusAttachment scopeAttachment = scope.attach(context);
-        final FocusNode focusNode = FocusNode(debugLabel: 'Focus Node');
-        addTearDown(focusNode.dispose);
-        final FocusAttachment focusNodeAttachment = focusNode.attach(context);
-        scopeAttachment.reparent(parent: tester.binding.focusManager.rootScope);
-        focusNodeAttachment.reparent(parent: scope);
-        focusNode.requestFocus();
-        await tester.pump();
-        expect(focusNode.hasPrimaryFocus, isTrue);
+      Future<void> setAppLifecycleState(AppLifecycleState state) async {
+        final ByteData? message = const StringCodec().encodeMessage(state.toString());
+        await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .handlePlatformMessage('flutter/lifecycle', message, (_) {});
+      }
 
-        await setAppLifecycleState(AppLifecycleState.paused);
-        expect(focusNode.hasPrimaryFocus, isTrue);
+      final BuildContext context = await setupWidget(tester);
+      final FocusScopeNode scope = FocusScopeNode(debugLabel: 'Scope');
+      addTearDown(scope.dispose);
+      final FocusAttachment scopeAttachment = scope.attach(context);
+      final FocusNode focusNode = FocusNode(debugLabel: 'Focus Node');
+      addTearDown(focusNode.dispose);
+      final FocusAttachment focusNodeAttachment = focusNode.attach(context);
+      scopeAttachment.reparent(parent: tester.binding.focusManager.rootScope);
+      focusNodeAttachment.reparent(parent: scope);
+      focusNode.requestFocus();
+      await tester.pump();
+      expect(focusNode.hasPrimaryFocus, isTrue);
 
-        await setAppLifecycleState(AppLifecycleState.resumed);
-        expect(focusNode.hasPrimaryFocus, isTrue);
-      },
-      skip: kIsWeb, // [intended]
-      variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.android, TargetPlatform.iOS}),
-    );
+      await setAppLifecycleState(AppLifecycleState.paused);
+      expect(focusNode.hasPrimaryFocus, isTrue);
+
+      await setAppLifecycleState(AppLifecycleState.resumed);
+      expect(focusNode.hasPrimaryFocus, isTrue);
+    });
 
     testWidgets('FocusManager responds to app lifecycle changes.', (WidgetTester tester) async {
+      final bool shouldRespond = kIsWeb || defaultTargetPlatform != TargetPlatform.android;
+      if (!shouldRespond) {
+        return;
+      }
+
       Future<void> setAppLifecycleState(AppLifecycleState state) async {
         final ByteData? message = const StringCodec().encodeMessage(state.toString());
         await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger

@@ -13,13 +13,14 @@ class RestorableValueExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('RestorableValue Sample'),
-        ),
-        body: const RestorableValueExample(restorationId: 'main'),
-      ),
+    return WidgetsApp(
+      title: 'RestorableValue Sample',
+      color: const Color(0xffffffff),
+      builder: (BuildContext context, Widget? child) {
+        return const Center(
+          child: RestorableValueExample(restorationId: 'main'),
+        );
+      },
     );
   }
 }
@@ -71,11 +72,9 @@ class _RestorableValueExampleState extends State<RestorableValueExample> with Re
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: OutlinedButton(
-        onPressed: _incrementAnswer,
-        child: Text('${_answer.value}'),
-      ),
+    return OutlinedButton(
+      onPressed: _incrementAnswer,
+      child: Text('${_answer.value}'),
     );
   }
 }

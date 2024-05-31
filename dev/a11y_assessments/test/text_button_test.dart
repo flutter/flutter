@@ -10,6 +10,7 @@ import 'test_utils.dart';
 void main() {
   testWidgets('text button can run', (WidgetTester tester) async {
     await pumpsUseCase(tester, TextButtonUseCase());
-    expect(find.text('Action'), findsExactly(2));
+    expect(find.text('Text button'), findsOneWidget);
+    expect(find.text('Text button disabled'), findsOneWidget);
   });
 }

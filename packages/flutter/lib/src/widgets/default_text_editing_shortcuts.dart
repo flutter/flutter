@@ -529,20 +529,7 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
 
   Map<ShortcutActivator, Intent>? _getDisablingShortcut() {
     if (kIsWeb) {
-      switch (defaultTargetPlatform) {
-        case TargetPlatform.linux:
-          return <ShortcutActivator, Intent>{
-            ..._webDisablingTextShortcuts,
-            for (final ShortcutActivator activator in _linuxNumpadShortcuts.keys)
-              activator as SingleActivator: const DoNothingAndStopPropagationTextIntent(),
-          };
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia:
-        case TargetPlatform.windows:
-        case TargetPlatform.iOS:
-        case TargetPlatform.macOS:
-          return _webDisablingTextShortcuts;
-      }
+      return _webDisablingTextShortcuts;
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:

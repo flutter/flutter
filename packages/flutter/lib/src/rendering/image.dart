@@ -43,7 +43,7 @@ class RenderImage extends RenderBox {
     TextDirection? textDirection,
     bool invertColors = false,
     bool isAntiAlias = false,
-    FilterQuality filterQuality = FilterQuality.medium,
+    FilterQuality filterQuality = FilterQuality.low,
   }) : _image = image,
        _width = width,
        _height = height,
@@ -188,7 +188,9 @@ class RenderImage extends RenderBox {
 
   /// Used to set the filterQuality of the image.
   ///
-  /// Defaults to [FilterQuality.medium].
+  /// Use the [FilterQuality.low] quality setting to scale the image, which corresponds to
+  /// bilinear interpolation, rather than the default [FilterQuality.none] which corresponds
+  /// to nearest-neighbor.
   FilterQuality get filterQuality => _filterQuality;
   FilterQuality _filterQuality;
   set filterQuality(FilterQuality value) {

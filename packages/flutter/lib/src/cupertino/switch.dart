@@ -504,8 +504,8 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
     // Hand coded defaults based on the animation specs.
     const double? thumbOffset = null;
     const Size transitionalThumbSize = Size(28.0, 28.0);  // The thumb size at the middle of the track.
-    reactionController.duration = const Duration(milliseconds: 166);
     positionController.duration = const Duration(milliseconds: 117);
+    reactionController.duration = const Duration(milliseconds: 200);
 
     // Hand coded defaults eyeballed from iOS simulator on Mac.
     const double disabledOpacity = 0.5;

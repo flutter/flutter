@@ -43,9 +43,16 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) {
 
   if (_isLeakTrackingEnabled()) {
     LeakTesting.enable();
+
     LeakTracking.warnForUnsupportedPlatforms = false;
+
     LeakTesting.settings = LeakTesting.settings.withIgnored(
       createdByTestHelpers: true,
+      allNotGCed: true,
+      classes: <String>[
+        // TODO(polina-c): CurvedAnimation is leaking, https://github.com/flutter/flutter/issues/145600 [leaks-to-clean]
+        'CurvedAnimation',
+      ],
     );
   }
 

@@ -15,7 +15,7 @@ enum ServiceWorkerStrategy implements CliEnum {
   none;
 
   @override
-  String get cliName => kebabCase(name);
+  String get cliName => snakeCase(name, '-');
 
   static ServiceWorkerStrategy fromCliName(String? value) => value == null
       ? ServiceWorkerStrategy.offlineFirst

@@ -817,11 +817,6 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
         ?? MaterialStateProperty.resolveAs<Color?>(defaults.overlayColor, states);
     }
 
-    TextStyle valueIndicatorTextStyle = sliderTheme.valueIndicatorTextStyle ?? defaults.valueIndicatorTextStyle!;
-    if (MediaQuery.boldTextOf(context)) {
-      valueIndicatorTextStyle = valueIndicatorTextStyle.merge(const TextStyle(fontWeight: FontWeight.bold));
-    }
-
     sliderTheme = sliderTheme.copyWith(
       trackHeight: sliderTheme.trackHeight ?? defaults.trackHeight,
       activeTrackColor: widget.activeColor ?? sliderTheme.activeTrackColor ?? defaults.activeTrackColor,
@@ -844,7 +839,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       overlayShape: sliderTheme.overlayShape ?? defaultOverlayShape,
       valueIndicatorShape: valueIndicatorShape,
       showValueIndicator: sliderTheme.showValueIndicator ?? defaultShowValueIndicator,
-      valueIndicatorTextStyle: valueIndicatorTextStyle,
+      valueIndicatorTextStyle: sliderTheme.valueIndicatorTextStyle ?? defaults.valueIndicatorTextStyle,
     );
     final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states)
       ?? sliderTheme.mouseCursor?.resolve(states)
@@ -1720,7 +1715,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     if (isInteractive && label != null && !_valueIndicatorAnimation.isDismissed) {
       if (showValueIndicator) {
         _state.paintValueIndicator = (PaintingContext context, Offset offset) {
-          if (attached && _labelPainter.text != null) {
+          if (attached) {
             _sliderTheme.valueIndicatorShape!.paint(
               context,
               offset + thumbCenter,

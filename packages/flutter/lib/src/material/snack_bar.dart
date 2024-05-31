@@ -5,6 +5,7 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+import 'button_style.dart';
 import 'color_scheme.dart';
 import 'colors.dart';
 import 'icon_button.dart';
@@ -203,11 +204,10 @@ class _SnackBarActionState extends State<SnackBarAction> {
     }
 
     return TextButton(
-      style: TextButton.styleFrom(overlayColor: resolveForegroundColor())
-        .copyWith(
-          foregroundColor: resolveForegroundColor(),
-          backgroundColor: resolveBackgroundColor(),
-        ),
+      style: ButtonStyle(
+        foregroundColor: resolveForegroundColor(),
+        backgroundColor: resolveBackgroundColor(),
+      ),
       onPressed: _haveTriggeredAction ? null : _handlePressed,
       child: Text(widget.label),
     );
@@ -387,8 +387,7 @@ class SnackBar extends StatefulWidget {
 
   /// Defines how the snack bar area, including margin, will behave during hit testing.
   ///
-  /// If this property is null, and [margin] is not null or [SnackBarThemeData.insetPadding] of
-  /// [ThemeData.snackBarTheme] is not null, then [HitTestBehavior.deferToChild] is used by default.
+  /// If this property is null and [margin] is not null, then [HitTestBehavior.deferToChild] is used by default.
   ///
   /// Please refer to [HitTestBehavior] for a detailed explanation of every behavior.
   final HitTestBehavior? hitTestBehavior;
@@ -672,6 +671,9 @@ class _SnackBarState extends State<SnackBar> {
     final double actionHorizontalMargin = (widget.padding?.resolve(TextDirection.ltr).right ?? horizontalPadding) / 2;
     final double iconHorizontalMargin = (widget.padding?.resolve(TextDirection.ltr).right ?? horizontalPadding) / 12.0;
 
+
+
+
     final IconButton? iconButton = showCloseIcon
         ? IconButton(
             icon: const Icon(Icons.close),
@@ -816,7 +818,7 @@ class _SnackBarState extends State<SnackBar> {
         key: const Key('dismissible'),
         direction: dismissDirection,
         resizeDuration: null,
-        behavior: widget.hitTestBehavior ?? (widget.margin != null || snackBarTheme.insetPadding != null ? HitTestBehavior.deferToChild : HitTestBehavior.opaque),
+        behavior: widget.hitTestBehavior ?? (widget.margin != null ? HitTestBehavior.deferToChild : HitTestBehavior.opaque),
         onDismissed: (DismissDirection direction) {
           ScaffoldMessenger.of(context).removeCurrentSnackBar(reason: SnackBarClosedReason.swipe);
         },

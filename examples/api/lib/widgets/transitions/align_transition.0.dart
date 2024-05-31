@@ -58,7 +58,7 @@ class _AlignTransitionExampleState extends State<AlignTransitionExample> with Ti
       child: AlignTransition(
         alignment: _animation,
         child: const Padding(
-          padding: EdgeInsets.all(8.0),
+          padding: EdgeInsets.all(8),
           child: FlutterLogo(size: 150.0),
         ),
       ),

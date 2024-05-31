@@ -1036,9 +1036,6 @@ class RenderCustomPaint extends RenderProxyBox {
     if (properties.onDidLoseAccessibilityFocus != null) {
       config.onDidLoseAccessibilityFocus = properties.onDidLoseAccessibilityFocus;
     }
-    if (properties.onFocus != null) {
-      config.onFocus = properties.onFocus;
-    }
     if (properties.onDismiss != null) {
       config.onDismiss = properties.onDismiss;
     }

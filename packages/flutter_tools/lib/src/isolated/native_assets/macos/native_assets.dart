@@ -52,25 +52,14 @@ Future<Iterable<KernelAsset>> dryRunNativeAssetsMacOSInternal(
   final Uri buildUri = nativeAssetsBuildUri(projectUri, targetOS);
 
   globals.logger.printTrace('Dry running native assets for $targetOS.');
-  final BuildDryRunResult buildDryRunResult = await buildRunner.buildDryRun(
+  final DryRunResult dryRunResult = await buildRunner.dryRun(
     linkModePreference: LinkModePreferenceImpl.dynamic,
     targetOS: targetOS,
     workingDirectory: projectUri,
     includeParentEnvironment: true,
   );
-  ensureNativeAssetsBuildDryRunSucceed(buildDryRunResult);
-  final LinkDryRunResult linkDryRunResult = await buildRunner.linkDryRun(
-    linkModePreference: LinkModePreferenceImpl.dynamic,
-    targetOS: targetOS,
-    workingDirectory: projectUri,
-    includeParentEnvironment: true,
-    buildDryRunResult: buildDryRunResult,
-  );
-  ensureNativeAssetsLinkDryRunSucceed(linkDryRunResult);
-  final List<AssetImpl> nativeAssets = <AssetImpl>[
-    ...buildDryRunResult.assets,
-    ...linkDryRunResult.assets,
-  ];
+  ensureNativeAssetsBuildSucceed(dryRunResult);
+  final List<AssetImpl> nativeAssets = dryRunResult.assets;
   ensureNoLinkModeStatic(nativeAssets);
   globals.logger.printTrace('Dry running native assets for $targetOS done.');
   final Uri? absolutePath = flutterTester ? buildUri : null;
@@ -121,7 +110,7 @@ Future<(Uri? nativeAssetsYaml, List<Uri> dependencies)> buildNativeAssetsMacOS({
   final List<AssetImpl> nativeAssets = <AssetImpl>[];
   final Set<Uri> dependencies = <Uri>{};
   for (final Target target in targets) {
-    final BuildResult buildResult = await buildRunner.build(
+    final BuildResult result = await buildRunner.build(
       linkModePreference: LinkModePreferenceImpl.dynamic,
       target: target,
       buildMode: buildModeCli,
@@ -129,21 +118,9 @@ Future<(Uri? nativeAssetsYaml, List<Uri> dependencies)> buildNativeAssetsMacOS({
       includeParentEnvironment: true,
       cCompilerConfig: await buildRunner.cCompilerConfig,
     );
-    ensureNativeAssetsBuildSucceed(buildResult);
-    nativeAssets.addAll(buildResult.assets);
-    dependencies.addAll(buildResult.dependencies);
-    final LinkResult linkResult = await buildRunner.link(
-      linkModePreference: LinkModePreferenceImpl.dynamic,
-      target: target,
-      buildMode: buildModeCli,
-      workingDirectory: projectUri,
-      includeParentEnvironment: true,
-      cCompilerConfig: await buildRunner.cCompilerConfig,
-      buildResult: buildResult,
-    );
-    ensureNativeAssetsLinkSucceed(linkResult);
-    nativeAssets.addAll(linkResult.assets);
-    dependencies.addAll(linkResult.dependencies);
+    ensureNativeAssetsBuildSucceed(result);
+    nativeAssets.addAll(result.assets);
+    dependencies.addAll(result.dependencies);
   }
   ensureNoLinkModeStatic(nativeAssets);
   globals.logger.printTrace('Building native assets for $targets done.');

@@ -30,18 +30,13 @@ String camelCase(String str) {
 
 /// Convert `fooBar` to `foo-bar`.
 String kebabCase(String str) {
-  return _reCase(str, '-');
+  return snakeCase(str, '-');
 }
 
 final RegExp _upperRegex = RegExp(r'[A-Z]');
 
 /// Convert `fooBar` to `foo_bar`.
-String snakeCase(String str) {
-  return _reCase(str, '_');
-}
-
-/// Convert `fooBar` to `foo[sep]bar`.
-String _reCase(String str, String sep) {
+String snakeCase(String str, [ String sep = '_' ]) {
   return str.replaceAllMapped(_upperRegex,
       (Match m) => '${m.start == 0 ? '' : sep}${m[0]!.toLowerCase()}');
 }

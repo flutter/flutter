@@ -300,7 +300,7 @@ class MouseTracker extends ChangeNotifier {
   /// The [updateWithEvent] is one of the two ways of updating mouse
   /// states, the other one being [updateAllDevices].
   void updateWithEvent(PointerEvent event, HitTestResult? hitTestResult) {
-    if (event.kind != PointerDeviceKind.mouse && event.kind != PointerDeviceKind.stylus) {
+    if (event.kind != PointerDeviceKind.mouse) {
       return;
     }
     if (event is PointerSignalEvent) {

@@ -12,13 +12,12 @@ Future<void> main() async {
   await task(() async {
     deviceOperatingSystem = DeviceOperatingSystem.ios;
     String? simulatorDeviceId;
-    TaskResult res = TaskResult.success(null);
     try {
       await testWithNewIOSSimulator(
         'TestNativeAssetsSim',
         (String deviceId) async {
           simulatorDeviceId = deviceId;
-          res = await createNativeAssetsTest(
+          await createNativeAssetsTest(
             deviceIdOverride: deviceId,
             isIosSimulator: true,
           )();
@@ -27,6 +26,6 @@ Future<void> main() async {
     } finally {
       await removeIOSSimulator(simulatorDeviceId);
     }
-    return res;
+    return TaskResult.success(null);
   });
 }

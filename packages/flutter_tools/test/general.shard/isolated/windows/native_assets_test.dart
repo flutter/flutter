@@ -135,26 +135,25 @@ void main() {
     final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
     await packageConfig.parent.create();
     await packageConfig.create();
-    final FakeNativeAssetsBuildRunner buildRunner = FakeNativeAssetsBuildRunner(
-      packagesWithNativeAssetsResult: <Package>[
-        Package('bar', projectUri),
-      ],
-      buildDryRunResult: FakeNativeAssetsBuilderResult(
-        assets: <AssetImpl>[
-          NativeCodeAssetImpl(
-            id: 'package:bar/bar.dart',
-            linkMode: DynamicLoadingBundledImpl(),
-            os: OSImpl.windows,
-            architecture: ArchitectureImpl.x64,
-            file: Uri.file('bar.dll'),
-          ),
-        ],
-      ),
-    );
     final Uri? nativeAssetsYaml = await dryRunNativeAssetsWindows(
       projectUri: projectUri,
       fileSystem: fileSystem,
-      buildRunner: buildRunner,
+      buildRunner: FakeNativeAssetsBuildRunner(
+        packagesWithNativeAssetsResult: <Package>[
+          Package('bar', projectUri),
+        ],
+        dryRunResult: FakeNativeAssetsBuilderResult(
+          assets: <AssetImpl>[
+            NativeCodeAssetImpl(
+              id: 'package:bar/bar.dart',
+              linkMode: DynamicLoadingBundledImpl(),
+              os: OSImpl.windows,
+              architecture: ArchitectureImpl.x64,
+              file: Uri.file('bar.dll'),
+            ),
+          ],
+        ),
+      ),
     );
     expect(
       (globals.logger as BufferLogger).traceText,
@@ -171,8 +170,6 @@ void main() {
       await fileSystem.file(nativeAssetsYaml).readAsString(),
       contains('package:bar/bar.dart'),
     );
-    expect(buildRunner.buildDryRunInvocations, 1);
-    expect(buildRunner.linkDryRunInvocations, 1);
   });
 
   testUsingContext('build with assets but not enabled', overrides: <Type, Generator>{
@@ -246,29 +243,28 @@ void main() {
       final File dylibAfterCompiling = fileSystem.file('bar.dll');
       // The mock doesn't create the file, so create it here.
       await dylibAfterCompiling.create();
-      final FakeNativeAssetsBuildRunner buildRunner = FakeNativeAssetsBuildRunner(
-        packagesWithNativeAssetsResult: <Package>[
-          Package('bar', projectUri),
-        ],
-        buildResult: FakeNativeAssetsBuilderResult(
-          assets: <AssetImpl>[
-            NativeCodeAssetImpl(
-              id: 'package:bar/bar.dart',
-              linkMode: DynamicLoadingBundledImpl(),
-              os: OSImpl.windows,
-              architecture: ArchitectureImpl.x64,
-              file: dylibAfterCompiling.uri,
-            ),
-          ],
-        ),
-      );
       final (Uri? nativeAssetsYaml, _) = await buildNativeAssetsWindows(
         targetPlatform: TargetPlatform.windows_x64,
         projectUri: projectUri,
         buildMode: BuildMode.debug,
         fileSystem: fileSystem,
         flutterTester: flutterTester,
-        buildRunner: buildRunner,
+        buildRunner: FakeNativeAssetsBuildRunner(
+          packagesWithNativeAssetsResult: <Package>[
+            Package('bar', projectUri),
+          ],
+          buildResult: FakeNativeAssetsBuilderResult(
+            assets: <AssetImpl>[
+              NativeCodeAssetImpl(
+                id: 'package:bar/bar.dart',
+                linkMode: DynamicLoadingBundledImpl(),
+                os: OSImpl.windows,
+                architecture: ArchitectureImpl.x64,
+                file: dylibAfterCompiling.uri,
+              ),
+            ],
+          ),
+        ),
       );
       expect(
         (globals.logger as BufferLogger).traceText,
@@ -293,8 +289,6 @@ void main() {
             '- bar.dll',
         ]),
       );
-      expect(buildRunner.buildInvocations, 1);
-      expect(buildRunner.linkInvocations, 1);
     });
   }
 
@@ -313,7 +307,7 @@ void main() {
           packagesWithNativeAssetsResult: <Package>[
             Package('bar', projectUri),
           ],
-          buildDryRunResult: FakeNativeAssetsBuilderResult(
+          dryRunResult: FakeNativeAssetsBuilderResult(
             assets: <AssetImpl>[
               NativeCodeAssetImpl(
                 id: 'package:bar/bar.dart',
@@ -344,29 +338,24 @@ void main() {
         environment.projectDir.childFile('.dart_tool/package_config.json');
     await packageConfig.parent.create();
     await packageConfig.create();
-    for (final String hook in <String>['Building', 'Linking']) {
-      expect(
-        () => dryRunNativeAssetsWindows(
-          projectUri: projectUri,
-          fileSystem: fileSystem,
-          buildRunner: FakeNativeAssetsBuildRunner(
-            packagesWithNativeAssetsResult: <Package>[
-              Package('bar', projectUri),
-            ],
-            buildDryRunResult: FakeNativeAssetsBuilderResult(
-              success: hook != 'Building',
-            ),
-            linkDryRunResult: FakeNativeAssetsBuilderResult(
-              success: hook != 'Linking',
-            ),
+    expect(
+      () => dryRunNativeAssetsWindows(
+        projectUri: projectUri,
+        fileSystem: fileSystem,
+        buildRunner: FakeNativeAssetsBuildRunner(
+          packagesWithNativeAssetsResult: <Package>[
+            Package('bar', projectUri),
+          ],
+          dryRunResult: const FakeNativeAssetsBuilderResult(
+            success: false,
           ),
         ),
-        throwsToolExit(
-          message:
-              '$hook (dry run) native assets failed. See the logs for more details.',
-        ),
-      );
-    }
+      ),
+      throwsToolExit(
+        message:
+            'Building native assets failed. See the logs for more details.',
+      ),
+    );
   });
 
   testUsingContext('Native assets build error', overrides: <Type, Generator>{
@@ -377,32 +366,27 @@ void main() {
         environment.projectDir.childFile('.dart_tool/package_config.json');
     await packageConfig.parent.create();
     await packageConfig.create();
-    for (final String hook in <String>['Building', 'Linking']) {
-      expect(
-        () => buildNativeAssetsWindows(
-          targetPlatform: TargetPlatform.windows_x64,
-          projectUri: projectUri,
-          buildMode: BuildMode.debug,
-          fileSystem: fileSystem,
-          yamlParentDirectory: environment.buildDir.uri,
-          buildRunner: FakeNativeAssetsBuildRunner(
-            packagesWithNativeAssetsResult: <Package>[
-              Package('bar', projectUri),
-            ],
-            buildResult: FakeNativeAssetsBuilderResult(
-              success: hook != 'Building',
-            ),
-            linkResult: FakeNativeAssetsBuilderResult(
-              success: hook != 'Linking',
-            ),
+    expect(
+      () => buildNativeAssetsWindows(
+        targetPlatform: TargetPlatform.windows_x64,
+        projectUri: projectUri,
+        buildMode: BuildMode.debug,
+        fileSystem: fileSystem,
+        yamlParentDirectory: environment.buildDir.uri,
+        buildRunner: FakeNativeAssetsBuildRunner(
+          packagesWithNativeAssetsResult: <Package>[
+            Package('bar', projectUri),
+          ],
+          buildResult: const FakeNativeAssetsBuilderResult(
+            success: false,
           ),
         ),
-        throwsToolExit(
-          message:
-              '$hook native assets failed. See the logs for more details.',
-        ),
-      );
-    }
+      ),
+      throwsToolExit(
+        message:
+            'Building native assets failed. See the logs for more details.',
+      ),
+    );
   });
 
   // This logic is mocked in the other tests to avoid having test order

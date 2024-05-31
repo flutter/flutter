@@ -1,4 +1,4 @@
-_See also: [Hybrid Composition|Hybrid Composition#Android](../Hybrid-Composition.md)_
+_See also: [Hybrid Composition|Hybrid Composition#Android](https://github.com/flutter/flutter/wiki/Hybrid-Composition)_
 
 # Background
 

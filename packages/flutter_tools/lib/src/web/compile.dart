@@ -196,7 +196,7 @@ enum WebRendererMode implements CliEnum {
   }
 
   @override
-  String get cliName => kebabCase(name);
+  String get cliName => snakeCase(name, '-');
 
   @override
   String get helpText => switch (this) {

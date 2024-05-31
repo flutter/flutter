@@ -39,25 +39,13 @@ class MainWidgetState extends State<MainWidget> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                const Text('This is a TextButton:'),
-                TextButton(
-                  onPressed: () {  },
-                  child: const Text('Action'),
-                ),
-              ],
+            TextButton(
+              onPressed: () {  },
+              child: const Text('Text button'),
             ),
-            const Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Text('This is a disabled TextButton:'),
-                TextButton(
-                  onPressed: null,
-                  child: Text('Action'),
-                ),
-              ],
+            const TextButton(
+              onPressed: null,
+              child: Text('Text button disabled'),
             ),
           ],
         ),

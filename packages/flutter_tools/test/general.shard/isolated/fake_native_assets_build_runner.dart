@@ -19,10 +19,8 @@ class FakeNativeAssetsBuildRunner implements NativeAssetsBuildRunner {
     this.hasPackageConfigResult = true,
     this.packagesWithNativeAssetsResult = const <Package>[],
     this.onBuild,
-    this.buildDryRunResult = const FakeNativeAssetsBuilderResult(),
+    this.dryRunResult = const FakeNativeAssetsBuilderResult(),
     this.buildResult = const FakeNativeAssetsBuilderResult(),
-    this.linkResult = const FakeNativeAssetsBuilderResult(),
-    this.linkDryRunResult = const FakeNativeAssetsBuilderResult(),
     CCompilerConfigImpl? cCompilerConfigResult,
     CCompilerConfigImpl? ndkCCompilerConfigImplResult,
   })  : cCompilerConfigResult = cCompilerConfigResult ?? CCompilerConfigImpl(),
@@ -31,18 +29,14 @@ class FakeNativeAssetsBuildRunner implements NativeAssetsBuildRunner {
 
   final native_assets_builder.BuildResult Function(Target)? onBuild;
   final native_assets_builder.BuildResult buildResult;
-  final native_assets_builder.LinkResult linkResult;
-  final native_assets_builder.BuildDryRunResult buildDryRunResult;
-  final native_assets_builder.LinkDryRunResult linkDryRunResult;
+  final native_assets_builder.DryRunResult dryRunResult;
   final bool hasPackageConfigResult;
   final List<Package> packagesWithNativeAssetsResult;
   final CCompilerConfigImpl cCompilerConfigResult;
   final CCompilerConfigImpl ndkCCompilerConfigImplResult;
 
   int buildInvocations = 0;
-  int buildDryRunInvocations = 0;
-  int linkInvocations = 0;
-  int linkDryRunInvocations = 0;
+  int dryRunInvocations = 0;
   int hasPackageConfigInvocations = 0;
   int packagesWithNativeAssetsInvocations = 0;
   BuildModeImpl? lastBuildMode;
@@ -64,43 +58,14 @@ class FakeNativeAssetsBuildRunner implements NativeAssetsBuildRunner {
   }
 
   @override
-  Future<native_assets_builder.LinkResult> link({
-    required bool includeParentEnvironment,
-    required BuildModeImpl buildMode,
-    required LinkModePreferenceImpl linkModePreference,
-    required Target target,
-    required Uri workingDirectory,
-    required native_assets_builder.BuildResult buildResult,
-    CCompilerConfigImpl? cCompilerConfig,
-    int? targetAndroidNdkApi,
-    IOSSdkImpl? targetIOSSdkImpl,
-  }) async {
-    linkInvocations++;
-    lastBuildMode = buildMode;
-    return linkResult;
-  }
-
-  @override
-  Future<native_assets_builder.BuildDryRunResult> buildDryRun({
+  Future<native_assets_builder.DryRunResult> dryRun({
     required bool includeParentEnvironment,
     required LinkModePreferenceImpl linkModePreference,
     required OSImpl targetOS,
     required Uri workingDirectory,
   }) async {
-    buildDryRunInvocations++;
-    return buildDryRunResult;
-  }
-
-  @override
-  Future<native_assets_builder.LinkDryRunResult> linkDryRun({
-    required bool includeParentEnvironment,
-    required LinkModePreferenceImpl linkModePreference,
-    required OSImpl targetOS,
-    required Uri workingDirectory,
-    required native_assets_builder.BuildDryRunResult buildDryRunResult,
-  }) async {
-    linkDryRunInvocations++;
-    return linkDryRunResult;
+    dryRunInvocations++;
+    return dryRunResult;
   }
 
   @override
@@ -125,23 +90,15 @@ class FakeNativeAssetsBuildRunner implements NativeAssetsBuildRunner {
 }
 
 final class FakeNativeAssetsBuilderResult
-    implements
-        native_assets_builder.BuildResult,
-        native_assets_builder.BuildDryRunResult,
-        native_assets_builder.LinkResult,
-        native_assets_builder.LinkDryRunResult {
+    implements native_assets_builder.BuildResult {
   const FakeNativeAssetsBuilderResult({
     this.assets = const <AssetImpl>[],
-    this.assetsForLinking = const <String, List<AssetImpl>>{},
     this.dependencies = const <Uri>[],
     this.success = true,
   });
 
   @override
   final List<AssetImpl> assets;
-
-  @override
-  final Map<String, List<AssetImpl>> assetsForLinking;
 
   @override
   final List<Uri> dependencies;
