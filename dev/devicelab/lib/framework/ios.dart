@@ -183,8 +183,6 @@ Future<bool> runXcodeTests({
   final Map<String, String> environment = Platform.environment;
   // Inject the Flutter team code signing properties.
   final String developmentTeam = environment['FLUTTER_XCODE_DEVELOPMENT_TEAM'] ?? 'S8QB4VV633';
-  final String codeSignStyle = environment['FLUTTER_XCODE_CODE_SIGN_STYLE'] ?? 'Manual';
-  final String provisioningProfile = environment['FLUTTER_XCODE_PROVISIONING_PROFILE_SPECIFIER'] ?? 'match Development *';
   final String resultBundleTemp = Directory.systemTemp.createTempSync('flutter_xcresult.').path;
   final String resultBundlePath = path.join(resultBundleTemp, 'result');
   final int testResultExit = await exec(
@@ -203,8 +201,9 @@ Future<bool> runXcodeTests({
       'test',
       'COMPILER_INDEX_STORE_ENABLE=NO',
       'DEVELOPMENT_TEAM=$developmentTeam',
-      'CODE_SIGN_STYLE=$codeSignStyle',
-      'PROVISIONING_PROFILE_SPECIFIER=$provisioningProfile',
+      // To run the test don't bother with provisioning profiles since this isn't being archived.
+      'CODE_SIGN_STYLE=Automatic',
+      'CODE_SIGN_IDENTITY=Apple Development',
     ],
     workingDirectory: platformDirectory,
     canFail: true,
