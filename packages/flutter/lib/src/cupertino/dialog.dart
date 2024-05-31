@@ -837,7 +837,6 @@ class _ActionSheetButtonBackgroundState extends State<_ActionSheetButtonBackgrou
 // of its neighbor button is pressed.
 class _ActionSheetDivider extends StatelessWidget {
   const _ActionSheetDivider({
-    super.key,
     required this.dividerColor,
     required this.hidden,
   });
@@ -855,15 +854,6 @@ class _ActionSheetDivider extends StatelessWidget {
       ),
     );
   }
-}
-
-// The keys used by the dividers in the action section of an action sheet.
-//
-// The buttons and the dividers are placed alternately, both keyed by indexes.
-// Dividers use this special class so that the two lists of indexes can be told
-// apart.
-class _DividerKey extends ValueKey<int> {
-  const _DividerKey(super.value);
 }
 
 typedef _PressedUpdateHandler = void Function(int actionIndex, bool state);
@@ -900,13 +890,11 @@ class _ActionSheetActionSection extends StatelessWidget {
     for (int actionIndex = 0; actionIndex < actions!.length; actionIndex += 1) {
       if (actionIndex != 0) {
         column.add(_ActionSheetDivider(
-          key: _DividerKey(actionIndex),
           dividerColor: dividerColor,
           hidden: pressedIndex == actionIndex - 1 || pressedIndex == actionIndex,
         ));
       }
       column.add(_ActionSheetButtonBackground(
-        key: ValueKey<int>(actionIndex),
         onPressStateChange: (bool state) {
           onPressedUpdate(actionIndex, state);
         },
