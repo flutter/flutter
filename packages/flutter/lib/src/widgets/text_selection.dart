@@ -749,7 +749,7 @@ class TextSelectionOverlay {
       return;
     }
     _selectionOverlay.hideMagnifier();
-    if (!_selection.isCollapsed) {
+    if (!_selection.isCollapsed && contextMenuBuilder != null) {
       _selectionOverlay.showToolbar(
         context: context,
         contextMenuBuilder: contextMenuBuilder!,
