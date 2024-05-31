@@ -174,7 +174,6 @@ class DropdownMenu<T> extends StatefulWidget {
     required this.dropdownMenuEntries,
     this.inputFormatters,
   }) :
-  /// Checks if [enableFilter] is true when [filterCallback] != null
         assert(filterCallback == null || enableFilter);
 
   /// Determine if the [DropdownMenu] is enabled.
@@ -423,7 +422,7 @@ class DropdownMenu<T> extends StatefulWidget {
   /// [DropdownMenu.enableFilter] property is set to true, the default behavior
   /// will return a filtered list. The filtered list will contain items
   /// that match the text provided by the input field, with a case-insensitive
-  /// comparison.
+  /// comparison. When this is not null, `enableFilter` must be set to true.
   final FilterCallback<T>? filterCallback;
 
   /// When [DropdownMenu.enableSearch] is true, this callback is used to compute
