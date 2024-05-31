@@ -136,7 +136,8 @@ String generateTestBootstrap({
   String languageVersionHeader = '',
   @Deprecated(
     'Stop specifying this parameter as it is now ignored. '
-    'Dart 3 and later only support sound null safety.',
+    'Dart 3 and later only support sound null safety. '
+    'This feature was deprecated after v3.10.0.',
   )
   bool nullSafety = true,
   bool flutterTestDep = true,
