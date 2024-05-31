@@ -94,16 +94,12 @@ void main() {
     expect(await error.future, isStateError);
   });
 
-  Future<Codec> decoder(ImmutableBuffer buffer, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) async {
-    return FakeCodec();
-  }
-
   test('File image sets tag', () async {
     final MemoryFileSystem fs = MemoryFileSystem();
     final File file = fs.file('/blue.png')..createSync(recursive: true)..writeAsBytesSync(kBlueSquarePng);
     final FileImage provider = FileImage(file);
 
-    final MultiFrameImageStreamCompleter completer = provider.loadBuffer(provider, decoder) as MultiFrameImageStreamCompleter;
+    final MultiFrameImageStreamCompleter completer = provider.loadBuffer(provider, fakeDecoder) as MultiFrameImageStreamCompleter;
 
     expect(completer.debugLabel, file.path);
   });
@@ -112,7 +108,7 @@ void main() {
     final Uint8List bytes = Uint8List.fromList(kBlueSquarePng);
     final MemoryImage provider = MemoryImage(bytes);
 
-    final MultiFrameImageStreamCompleter completer = provider.loadBuffer(provider, decoder) as MultiFrameImageStreamCompleter;
+    final MultiFrameImageStreamCompleter completer = provider.loadBuffer(provider, fakeDecoder) as MultiFrameImageStreamCompleter;
 
     expect(completer.debugLabel, 'MemoryImage(${describeIdentity(bytes)})');
   });
@@ -121,7 +117,7 @@ void main() {
     const String asset = 'images/blue.png';
     final ExactAssetImage provider = ExactAssetImage(asset, bundle: _TestAssetBundle());
     final AssetBundleImageKey key = await provider.obtainKey(ImageConfiguration.empty);
-    final MultiFrameImageStreamCompleter completer = provider.loadBuffer(key, decoder) as MultiFrameImageStreamCompleter;
+    final MultiFrameImageStreamCompleter completer = provider.loadBuffer(key, fakeDecoder) as MultiFrameImageStreamCompleter;
 
     expect(completer.debugLabel, asset);
   });
@@ -131,7 +127,7 @@ void main() {
     final ResizeImage provider = ResizeImage(MemoryImage(bytes), width: 40, height: 40);
     final MultiFrameImageStreamCompleter completer = provider.loadBuffer(
       await provider.obtainKey(ImageConfiguration.empty),
-      decoder,
+      fakeDecoder,
     ) as MultiFrameImageStreamCompleter;
 
     expect(completer.debugLabel, 'MemoryImage(${describeIdentity(bytes)}) - Resized(40×40)');
@@ -165,22 +161,6 @@ void main() {
     expect(const ExactAssetImage('test', scale: 1.21).toString(), 'ExactAssetImage(name: "test", scale: 1.2, bundle: null)');
     expect(MemoryImage(Uint8List(0), scale: 1.21).toString(), equalsIgnoringHashCodes('MemoryImage(Uint8List#00000, scale: 1.2)'));
   });
-}
-
-class FakeCodec implements Codec {
-  @override
-  void dispose() {}
-
-  @override
-  int get frameCount => throw UnimplementedError();
-
-  @override
-  Future<FrameInfo> getNextFrame() {
-    throw UnimplementedError();
-  }
-
-  @override
-  int get repetitionCount => throw UnimplementedError();
 }
 
 class _TestAssetBundle extends CachingAssetBundle {

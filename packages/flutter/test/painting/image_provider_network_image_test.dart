@@ -5,7 +5,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:math' as math;
-import 'dart:ui' show Codec, FrameInfo, ImmutableBuffer;
+import 'dart:ui' show Codec, ImmutableBuffer;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
@@ -227,10 +227,6 @@ void main() {
     debugNetworkImageHttpClientProvider = null;
   }, skip: isBrowser); // [intended] Browser does not resolve images this way.
 
-  Future<Codec> decoder(ImmutableBuffer buffer, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) async {
-    return FakeCodec();
-  }
-
   test('Network image sets tag', () async {
     const String url = 'http://test.png';
     const int chunkSize = 8;
@@ -245,7 +241,7 @@ void main() {
 
     const NetworkImage provider = NetworkImage(url);
 
-    final MultiFrameImageStreamCompleter completer = provider.loadBuffer(provider, decoder) as MultiFrameImageStreamCompleter;
+    final MultiFrameImageStreamCompleter completer = provider.loadBuffer(provider, fakeDecoder) as MultiFrameImageStreamCompleter;
 
     expect(completer.debugLabel, url);
   });
@@ -318,20 +314,4 @@ class _FakeHttpClientResponse extends Fake implements HttpClientResponse {
     drained = true;
     return futureValue ?? futureValue as E; // Mirrors the implementation in Stream.
   }
-}
-
-class FakeCodec implements Codec {
-  @override
-  void dispose() {}
-
-  @override
-  int get frameCount => throw UnimplementedError();
-
-  @override
-  Future<FrameInfo> getNextFrame() {
-    throw UnimplementedError();
-  }
-
-  @override
-  int get repetitionCount => throw UnimplementedError();
 }
