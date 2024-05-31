@@ -104,7 +104,7 @@ void main() {
     ]);
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
-        command: <String>['dart', '--enable-experiment=non-nullable', 'foo.test', '-rexpanded'],
+        command: <String>['dart', 'foo.test', '-rexpanded'],
         exitCode: 23,
         environment: <String, String>{
           'FOO': 'BAR',
@@ -129,7 +129,7 @@ void main() {
     ]);
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
-        command: <String>['dart', '--enable-experiment=non-nullable', 'foo.test', '-rexpanded'],
+        command: <String>['dart', 'foo.test', '-rexpanded'],
         exitCode: 23,
         environment: <String, String>{
           'FOO': 'BAR',
@@ -145,7 +145,7 @@ void main() {
     await driverService.start(BuildInfo.profile, device, DebuggingOptions.enabled(BuildInfo.profile), true);
     final int testResult = await driverService.startTest(
       'foo.test',
-      <String>['--enable-experiment=non-nullable'],
+      <String>[],
       <String, String>{'FOO': 'BAR'},
       PackageConfig(<Package>[Package('test', Uri.base)]),
     );
@@ -159,7 +159,7 @@ void main() {
     ]);
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
-        command: <String>['dart', '--enable-experiment=non-nullable', 'foo.test', '-rexpanded'],
+        command: <String>['dart', 'foo.test', '-rexpanded'],
         exitCode: 23,
         environment: <String, String>{
           'FOO': 'BAR',
@@ -176,7 +176,7 @@ void main() {
     await driverService.start(BuildInfo.profile, device, DebuggingOptions.enabled(BuildInfo.profile), true);
     final int testResult = await driverService.startTest(
       'foo.test',
-      <String>['--enable-experiment=non-nullable'],
+      <String>[],
       <String, String>{'FOO': 'BAR'},
       PackageConfig(<Package>[Package('test', Uri.base)]),
       profileMemory: 'devtools_memory.json',
@@ -192,7 +192,7 @@ void main() {
     ]);
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
-        command: <String>['dart', '--enable-experiment=non-nullable', 'foo.test', '-rexpanded'],
+        command: <String>['dart', 'foo.test', '-rexpanded'],
         exitCode: 23,
         environment: <String, String>{
           'FOO': 'BAR',
@@ -208,7 +208,7 @@ void main() {
     await driverService.start(BuildInfo.profile, device, DebuggingOptions.enabled(BuildInfo.profile), true);
     final int testResult = await driverService.startTest(
       'foo.test',
-      <String>['--enable-experiment=non-nullable'],
+      <String>[],
       <String, String>{'FOO': 'BAR'},
       PackageConfig.empty,
     );

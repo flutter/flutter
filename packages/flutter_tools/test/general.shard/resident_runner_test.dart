@@ -1635,37 +1635,6 @@ flutter:
       'build', '187ef4436122d1cc2f40dc2b92f0eba0.cache.dill')).readAsString(), 'ABC');
   }));
 
-  testUsingContext('HotRunner copies compiled app.dill to cache during startup with null safety', () => testbed.run(() async {
-    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
-      listViews,
-      listViews,
-    ], wsAddress: testUri);
-    globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
-    residentRunner = HotRunner(
-      <FlutterDevice>[
-        flutterDevice,
-      ],
-      stayResident: false,
-      debuggingOptions: DebuggingOptions.enabled(
-        const BuildInfo(
-          BuildMode.debug,
-          '',
-          treeShakeIcons: false,
-          extraFrontEndOptions: <String>['--enable-experiment=non-nullable']
-        )
-      ),
-      target: 'main.dart',
-      devtoolsHandler: createNoOpHandler,
-      analytics: fakeAnalytics,
-    );
-    residentRunner.artifactDirectory.childFile('app.dill').writeAsStringSync('ABC');
-
-    await residentRunner.run(enableDevTools: true);
-
-    expect(await globals.fs.file(globals.fs.path.join(
-      'build', 'cache.dill')).readAsString(), 'ABC');
-  }));
-
   testUsingContext('HotRunner copies compiled app.dill to cache during startup with track-widget-creation', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       listViews,
@@ -1818,37 +1787,6 @@ flutter:
         BuildMode.debug,
         '',
         treeShakeIcons: false,
-      ),
-      target: null,
-      platform: FakePlatform(),
-    )).generator as DefaultResidentCompiler?;
-
-    expect(residentCompiler!.initializeFromDill,
-      globals.fs.path.join(getBuildDirectory(), 'fbbe6a61fb7a1de317d381f8df4814e5.cache.dill'));
-    expect(residentCompiler.librariesSpec,
-      globals.fs.file(globals.artifacts!.getHostArtifact(HostArtifact.flutterWebLibrariesJson))
-        .uri.toString());
-    expect(residentCompiler.targetModel, TargetModel.dartdevc);
-    expect(residentCompiler.sdkRoot,
-      '${globals.artifacts!.getHostArtifact(HostArtifact.flutterWebSdk).path}/');
-    expect(residentCompiler.platformDill, 'file:///HostArtifact.webPlatformKernelFolder/ddc_outline_sound.dill');
-  }, overrides: <Type, Generator>{
-    Artifacts: () => Artifacts.test(),
-    FileSystem: () => MemoryFileSystem.test(),
-    ProcessManager: () => FakeProcessManager.any(),
-  });
-
-  testUsingContext('FlutterDevice uses dartdevc configuration when targeting web with null-safety autodetected', () async {
-    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
-    final FakeDevice device = FakeDevice(targetPlatform: TargetPlatform.web_javascript);
-
-    final DefaultResidentCompiler? residentCompiler = (await FlutterDevice.create(
-      device,
-      buildInfo: const BuildInfo(
-        BuildMode.debug,
-        '',
-        treeShakeIcons: false,
-        extraFrontEndOptions: <String>['--enable-experiment=non-nullable'],
       ),
       target: null,
       platform: FakePlatform(),
