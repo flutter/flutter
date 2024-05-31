@@ -1745,16 +1745,14 @@ Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and 
 
     if (commandPath != null) {
       // Until the GA4 migration is complete, we will continue to send to the GA3 instance
-      // as well as GA4. Once migration is complete, we will only make a call for GA4 values
-      final List<Object> pairOfUsageValues = await Future.wait<Object>(<Future<Object>>[
-        usageValues,
-        unifiedAnalyticsUsageValues(commandPath),
-      ]);
+      // as well as GA4. Once migration is complete, we will only make a call for GA4 values.
+      final (CustomDimensions customDimensions, Event unifiedAnalyticsUsageEvent) =
+          await (usageValues, unifiedAnalyticsUsageValues(commandPath)).wait;
 
       Usage.command(commandPath, parameters: CustomDimensions(
         commandHasTerminal: hasTerminal,
-      ).merge(pairOfUsageValues[0] as CustomDimensions));
-      analytics.send(pairOfUsageValues[1] as Event);
+      ).merge(customDimensions));
+      analytics.send(unifiedAnalyticsUsageEvent);
     }
 
     return runCommand();
