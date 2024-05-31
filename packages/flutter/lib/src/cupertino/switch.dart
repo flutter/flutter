@@ -351,13 +351,9 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
   void didUpdateWidget(CupertinoSwitch oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.value != widget.value) {
-      // During a drag we may have modified the curve, reset it if its possible
-      // to do without visual discontinuation.
-      if (position.value == 0.0 || position.value == 1.0) {
-        position
-          ..curve = Curves.linear
-          ..reverseCurve = Curves.linear;
-      }
+      position
+        ..curve = Curves.ease
+        ..reverseCurve = Curves.ease.flipped;
       animateToValue();
     }
   }
@@ -504,8 +500,8 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
     // Hand coded defaults based on the animation specs.
     const double? thumbOffset = null;
     const Size transitionalThumbSize = Size(28.0, 28.0);  // The thumb size at the middle of the track.
-    positionController.duration = const Duration(milliseconds: 117);
-    reactionController.duration = const Duration(milliseconds: 200);
+    positionController.duration = const Duration(milliseconds: 200);
+    reactionController.duration = const Duration(milliseconds: 300);
 
     // Hand coded defaults eyeballed from iOS simulator on Mac.
     const double disabledOpacity = 0.5;
@@ -1099,7 +1095,7 @@ class _SwitchPainter extends ToggleablePainter {
     thumbSize = Size(thumbSize!.width - inset, thumbSize.height - inset);
 
     final double colorValue = _colorAnimation!.value;
-    final Color trackColor = Color.lerp(inactiveTrackColor, activeTrackColor, colorValue)!;
+    final Color trackColor = Color.lerp(inactiveTrackColor, activeTrackColor, position.value)!;
     final Color? trackOutlineColor = inactiveTrackOutlineColor == null || activeTrackOutlineColor == null ? null
         : Color.lerp(inactiveTrackOutlineColor, activeTrackOutlineColor, colorValue);
     final double? trackOutlineWidth = lerpDouble(inactiveTrackOutlineWidth, activeTrackOutlineWidth, colorValue);
