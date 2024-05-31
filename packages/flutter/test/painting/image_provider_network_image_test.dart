@@ -13,6 +13,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../image_data.dart';
 import '../rendering/rendering_tester.dart';
+import 'noop_codec.dart';
 
 void main() {
   TestRenderingFlutterBinding.ensureInitialized();
@@ -241,7 +242,7 @@ void main() {
 
     const NetworkImage provider = NetworkImage(url);
 
-    final MultiFrameImageStreamCompleter completer = provider.loadBuffer(provider, fakeDecoder) as MultiFrameImageStreamCompleter;
+    final MultiFrameImageStreamCompleter completer = provider.loadBuffer(provider, noopCodec) as MultiFrameImageStreamCompleter;
 
     expect(completer.debugLabel, url);
   });

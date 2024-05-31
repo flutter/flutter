@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:ui' show Codec, FrameInfo, SemanticsUpdate;
+import 'dart:ui' show SemanticsUpdate;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -441,25 +441,3 @@ void expectNoFlutterErrors() {
 
 RenderConstrainedBox get box200x200 =>
     RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(height: 200.0, width: 200.0));
-
-class FakeCodec implements Codec {
-  @override
-  void dispose() {}
-
-  @override
-  int get frameCount => throw UnimplementedError();
-
-  @override
-  Future<FrameInfo> getNextFrame() => throw UnimplementedError();
-
-  @override
-  int get repetitionCount => throw UnimplementedError();
-}
-
-Future<Codec> fakeDecoder(
-  ImmutableBuffer buffer, {
-  int? cacheWidth,
-  int? cacheHeight,
-  bool? allowUpscaling,
-}) async =>
-    FakeCodec();
