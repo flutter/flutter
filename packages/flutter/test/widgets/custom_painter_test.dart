@@ -342,6 +342,7 @@ void _defineTests() {
             onSetText: (String text) => performedActions.add(SemanticsAction.setText),
             onDidGainAccessibilityFocus: () => performedActions.add(SemanticsAction.didGainAccessibilityFocus),
             onDidLoseAccessibilityFocus: () => performedActions.add(SemanticsAction.didLoseAccessibilityFocus),
+            onFocus: () => performedActions.add(SemanticsAction.focus),
           ),
         ),
       ),
@@ -400,11 +401,8 @@ void _defineTests() {
         case SemanticsAction.scrollUp:
         case SemanticsAction.showOnScreen:
         case SemanticsAction.tap:
+        case SemanticsAction.focus:
           semanticsOwner.performAction(expectedId, action);
-        // TODO(yjbanov): temporary adding default case until https://github.com/flutter/engine/pull/53094 rolls in (see https://github.com/flutter/flutter/issues/83809)
-        // ignore: no_default_cases
-        default:
-          throw UnimplementedError();
       }
       expect(performedActions.length, expectedLength);
       expect(performedActions.last, action);
@@ -412,7 +410,7 @@ void _defineTests() {
     }
 
     semantics.dispose();
-  }, skip: true); // TODO(yjbanov): temporary skip until https://github.com/flutter/engine/pull/53094 rolls in (see https://github.com/flutter/flutter/issues/83809)
+  });
 
   testWidgets('Supports all flags', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
