@@ -52,6 +52,7 @@ impeller_component("display_list") {
 template("display_list_unittests_component") {
   target_name = invoker.target_name
   predefined_sources = [
+    "aiks_dl_opacity_unittests.cc",
     "aiks_dl_path_unittests.cc",
     "dl_golden_unittests.cc",
     "dl_playground.cc",
