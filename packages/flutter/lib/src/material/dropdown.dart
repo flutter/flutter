@@ -785,9 +785,12 @@ class _DropdownMenuItemContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ConstrainedBox(
-      constraints: const BoxConstraints(minHeight: _kMenuItemHeight),
-      child: Align(alignment: alignment, child: child),
+    return Semantics(
+      button: true,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: _kMenuItemHeight),
+        child: Align(alignment: alignment, child: child),
+      ),
     );
   }
 }
