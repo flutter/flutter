@@ -51,7 +51,8 @@ bool SolidColorContents::Render(const ContentContext& renderer,
   using VS = SolidFillPipeline::VertexShader;
 
   VS::FrameInfo frame_info;
-  frame_info.color = GetColor().Premultiply();
+  frame_info.color =
+      GetColor().Premultiply() * GetGeometry()->ComputeAlphaCoverage(entity);
 
   PipelineBuilderCallback pipeline_callback =
       [&renderer](ContentContextOptions options) {

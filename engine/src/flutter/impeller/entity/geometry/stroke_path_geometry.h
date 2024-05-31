@@ -28,6 +28,8 @@ class StrokePathGeometry final : public Geometry {
 
   Join GetStrokeJoin() const;
 
+  Scalar ComputeAlphaCoverage(const Entity& entity) const override;
+
  private:
   // |Geometry|
   GeometryResult GetPositionBuffer(const ContentContext& renderer,

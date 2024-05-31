@@ -525,6 +525,18 @@ Join StrokePathGeometry::GetStrokeJoin() const {
   return stroke_join_;
 }
 
+Scalar StrokePathGeometry::ComputeAlphaCoverage(const Entity& entity) const {
+  Scalar scaled_stroke_width =
+      entity.GetTransform().GetMaxBasisLengthXY() * stroke_width_;
+  // If the stroke width is 0 or greater than kMinStrokeSizeMSAA, don't apply
+  // any additional alpha. This is intended to match Skia behavior.
+  if (scaled_stroke_width == 0.0 || scaled_stroke_width >= kMinStrokeSizeMSAA) {
+    return 1.0;
+  }
+  // This scalling is eyeballed from Skia.
+  return std::clamp(scaled_stroke_width * 20.0f, 0.f, 1.f);
+}
+
 GeometryResult StrokePathGeometry::GetPositionBuffer(
     const ContentContext& renderer,
     const Entity& entity,
@@ -568,8 +580,7 @@ GeometryResult StrokePathGeometry::GetPositionBuffer(
               .index_type = IndexType::kNone,
           },
       .transform = entity.GetShaderTransform(pass),
-      .mode = GeometryResult::Mode::kPreventOverdraw,
-  };
+      .mode = GeometryResult::Mode::kPreventOverdraw};
 }
 
 GeometryResult::Mode StrokePathGeometry::GetResultMode() const {

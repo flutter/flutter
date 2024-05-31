@@ -107,6 +107,10 @@ class Geometry {
 
   virtual bool CanApplyMaskFilter() const;
 
+  virtual Scalar ComputeAlphaCoverage(const Entity& entitys) const {
+    return 1.0;
+  }
+
  protected:
   static GeometryResult ComputePositionGeometry(
       const ContentContext& renderer,
