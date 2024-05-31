@@ -10,6 +10,7 @@ import 'package:engine_build_configs/src/build_config.dart';
 import 'package:engine_build_configs/src/build_config_runner.dart';
 import 'package:engine_repo_tools/engine_repo_tools.dart';
 import 'package:litetest/litetest.dart';
+import 'package:path/path.dart' as path;
 import 'package:platform/platform.dart';
 import 'package:process_fakes/process_fakes.dart';
 import 'package:process_runner/process_runner.dart';
@@ -576,6 +577,66 @@ void main() {
       caughtError = true;
     }
     expect(caughtError, isTrue);
+  });
+
+  test('GlobalBuildRunner trims RBE crud from compile_commands.json', () async {
+    final io.Directory emptyDir =
+        io.Directory.systemTemp.createTempSync('build_config_runner.test');
+    try {
+      final io.Directory srcDir = io.Directory(path.join(emptyDir.path, 'src'));
+      final io.Directory hostDebug =
+          io.Directory(path.join(srcDir.path, 'out', 'build_name'))
+            ..createSync(recursive: true);
+      final io.File file =
+          io.File(path.join(hostDebug.path, 'compile_commands.json'));
+      file.writeAsString(
+        r'''
+[
+  {
+    "file": "../../flutter/assets/asset_manager.cc",
+    "directory": "/Users/flutter/src/engine/src/out/host_debug_unopt_arm64",
+    "command": "/Users/flutter/src/engine/src/flutter/buildtools/mac-arm64/reclient/rewrapper --cfg=/Users/flutter/src/engine/src/flutter/build/rbe/rewrapper-mac-arm64.cfg --exec_root=/Users/flutter/src/engine/src/ --remote_wrapper=../../flutter/build/rbe/remote_wrapper.sh --local_wrapper=../../flutter/build/rbe/local_wrapper.sh --labels=type=compile,compiler=clang,lang=cpp ../../flutter/buildtools/mac-x64/clang/bin/clang++ -MMD -MF  obj/flutter/assets/assets.asset_manager.o.d  -DUSE_OPENSSL=1 -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D_FORTIFY_SOURCE=2 -D_LIBCPP_DISABLE_AVAILABILITY=1 -D_LIBCPP_DISABLE_VISIBILITY_ANNOTATIONS -D_LIBCPP_ENABLE_THREAD_SAFETY_ANNOTATIONS -D_DEBUG -DFLUTTER_RUNTIME_MODE_DEBUG=1 -DFLUTTER_RUNTIME_MODE_PROFILE=2 -DFLUTTER_RUNTIME_MODE_RELEASE=3 -DFLUTTER_RUNTIME_MODE_JIT_RELEASE=4 \"-DDART_LEGACY_API=[[deprecated]]\" -DFLUTTER_RUNTIME_MODE=1 -DFLUTTER_JIT_RUNTIME=1  -I../.. -Igen -I../../flutter/third_party/libcxx/include -I../../flutter/third_party/libcxxabi/include -I../../flutter/build/secondary/flutter/third_party/libcxx/config -I../../flutter  -fno-strict-aliasing -fstack-protector-all --target=arm64-apple-macos -arch arm64 -fcolor-diagnostics -Wall -Wextra -Wendif-labels -Werror -Wno-missing-field-initializers -Wno-unused-parameter -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-implicit-int-float-conversion -Wno-deprecated-copy -Wno-psabi -Wno-deprecated-literal-operator -Wno-unqualified-std-cast-call -Wno-non-c-typedef-for-linkage -Wno-range-loop-construct -Wunguarded-availability -Wno-deprecated-declarations -no-canonical-prefixes -fvisibility=hidden -Wstring-conversion -Wnewline-eof -O0 -g2 -Wunreachable-code  -fvisibility-inlines-hidden -std=c++17 -fno-rtti -nostdinc++ -nostdinc++ -fvisibility=hidden -fno-exceptions -stdlib=libc++ -isysroot ../../flutter/prebuilts/SDKs/MacOSX14.0.sdk -mmacosx-version-min=10.14.0  -c ../../flutter/assets/asset_manager.cc -o  obj/flutter/assets/assets.asset_manager.o"
+  },
+  {
+    "file": "../../flutter/assets/directory_asset_bundle.cc",
+    "directory": "/Users/flutter/src/engine/src/out/host_debug_unopt_arm64",
+    "command": "/Users/flutter/src/engine/src/flutter/buildtools/mac-arm64/reclient/rewrapper --cfg=/Users/flutter/src/engine/src/flutter/build/rbe/rewrapper-mac-arm64.cfg --exec_root=/Users/flutter/src/engine/src/ --remote_wrapper=../../flutter/build/rbe/remote_wrapper.sh --local_wrapper=../../flutter/build/rbe/local_wrapper.sh --labels=type=compile,compiler=clang,lang=cpp ../../flutter/buildtools/mac-x64/clang/bin/clang++ -MMD -MF  obj/flutter/assets/assets.directory_asset_bundle.o.d  -DUSE_OPENSSL=1 -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D_FORTIFY_SOURCE=2 -D_LIBCPP_DISABLE_AVAILABILITY=1 -D_LIBCPP_DISABLE_VISIBILITY_ANNOTATIONS -D_LIBCPP_ENABLE_THREAD_SAFETY_ANNOTATIONS -D_DEBUG -DFLUTTER_RUNTIME_MODE_DEBUG=1 -DFLUTTER_RUNTIME_MODE_PROFILE=2 -DFLUTTER_RUNTIME_MODE_RELEASE=3 -DFLUTTER_RUNTIME_MODE_JIT_RELEASE=4 \"-DDART_LEGACY_API=[[deprecated]]\" -DFLUTTER_RUNTIME_MODE=1 -DFLUTTER_JIT_RUNTIME=1  -I../.. -Igen -I../../flutter/third_party/libcxx/include -I../../flutter/third_party/libcxxabi/include -I../../flutter/build/secondary/flutter/third_party/libcxx/config -I../../flutter  -fno-strict-aliasing -fstack-protector-all --target=arm64-apple-macos -arch arm64 -fcolor-diagnostics -Wall -Wextra -Wendif-labels -Werror -Wno-missing-field-initializers -Wno-unused-parameter -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-implicit-int-float-conversion -Wno-deprecated-copy -Wno-psabi -Wno-deprecated-literal-operator -Wno-unqualified-std-cast-call -Wno-non-c-typedef-for-linkage -Wno-range-loop-construct -Wunguarded-availability -Wno-deprecated-declarations -no-canonical-prefixes -fvisibility=hidden -Wstring-conversion -Wnewline-eof -O0 -g2 -Wunreachable-code  -fvisibility-inlines-hidden -std=c++17 -fno-rtti -nostdinc++ -nostdinc++ -fvisibility=hidden -fno-exceptions -stdlib=libc++ -isysroot ../../flutter/prebuilts/SDKs/MacOSX14.0.sdk -mmacosx-version-min=10.14.0  -c ../../flutter/assets/directory_asset_bundle.cc -o  obj/flutter/assets/assets.directory_asset_bundle.o"
+  },
+]
+''',
+        flush: true,
+      );
+      final Build targetBuild = buildConfig.builds[0];
+      final BuildRunner buildRunner = BuildRunner(
+        platform: FakePlatform(operatingSystem: Platform.linux),
+        processRunner: ProcessRunner(
+          // dryRun should not try to spawn any processes.
+          processManager: _fakeProcessManager(),
+        ),
+        abi: ffi.Abi.linuxX64,
+        engineSrcDir: srcDir,
+        build: targetBuild,
+      );
+      final List<RunnerEvent> events = <RunnerEvent>[];
+      void handler(RunnerEvent event) => events.add(event);
+      await buildRunner.run(handler);
+      expect(file.readAsStringSync(), r'''
+[
+  {
+    "file": "../../flutter/assets/asset_manager.cc",
+    "directory": "/Users/flutter/src/engine/src/out/host_debug_unopt_arm64",
+    "command": "../../flutter/buildtools/mac-x64/clang/bin/clang++ -MMD -MF  obj/flutter/assets/assets.asset_manager.o.d  -DUSE_OPENSSL=1 -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D_FORTIFY_SOURCE=2 -D_LIBCPP_DISABLE_AVAILABILITY=1 -D_LIBCPP_DISABLE_VISIBILITY_ANNOTATIONS -D_LIBCPP_ENABLE_THREAD_SAFETY_ANNOTATIONS -D_DEBUG -DFLUTTER_RUNTIME_MODE_DEBUG=1 -DFLUTTER_RUNTIME_MODE_PROFILE=2 -DFLUTTER_RUNTIME_MODE_RELEASE=3 -DFLUTTER_RUNTIME_MODE_JIT_RELEASE=4 \"-DDART_LEGACY_API=[[deprecated]]\" -DFLUTTER_RUNTIME_MODE=1 -DFLUTTER_JIT_RUNTIME=1  -I../.. -Igen -I../../flutter/third_party/libcxx/include -I../../flutter/third_party/libcxxabi/include -I../../flutter/build/secondary/flutter/third_party/libcxx/config -I../../flutter  -fno-strict-aliasing -fstack-protector-all --target=arm64-apple-macos -arch arm64 -fcolor-diagnostics -Wall -Wextra -Wendif-labels -Werror -Wno-missing-field-initializers -Wno-unused-parameter -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-implicit-int-float-conversion -Wno-deprecated-copy -Wno-psabi -Wno-deprecated-literal-operator -Wno-unqualified-std-cast-call -Wno-non-c-typedef-for-linkage -Wno-range-loop-construct -Wunguarded-availability -Wno-deprecated-declarations -no-canonical-prefixes -fvisibility=hidden -Wstring-conversion -Wnewline-eof -O0 -g2 -Wunreachable-code  -fvisibility-inlines-hidden -std=c++17 -fno-rtti -nostdinc++ -nostdinc++ -fvisibility=hidden -fno-exceptions -stdlib=libc++ -isysroot ../../flutter/prebuilts/SDKs/MacOSX14.0.sdk -mmacosx-version-min=10.14.0  -c ../../flutter/assets/asset_manager.cc -o  obj/flutter/assets/assets.asset_manager.o"
+  },
+  {
+    "file": "../../flutter/assets/directory_asset_bundle.cc",
+    "directory": "/Users/flutter/src/engine/src/out/host_debug_unopt_arm64",
+    "command": "../../flutter/buildtools/mac-x64/clang/bin/clang++ -MMD -MF  obj/flutter/assets/assets.directory_asset_bundle.o.d  -DUSE_OPENSSL=1 -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D_FORTIFY_SOURCE=2 -D_LIBCPP_DISABLE_AVAILABILITY=1 -D_LIBCPP_DISABLE_VISIBILITY_ANNOTATIONS -D_LIBCPP_ENABLE_THREAD_SAFETY_ANNOTATIONS -D_DEBUG -DFLUTTER_RUNTIME_MODE_DEBUG=1 -DFLUTTER_RUNTIME_MODE_PROFILE=2 -DFLUTTER_RUNTIME_MODE_RELEASE=3 -DFLUTTER_RUNTIME_MODE_JIT_RELEASE=4 \"-DDART_LEGACY_API=[[deprecated]]\" -DFLUTTER_RUNTIME_MODE=1 -DFLUTTER_JIT_RUNTIME=1  -I../.. -Igen -I../../flutter/third_party/libcxx/include -I../../flutter/third_party/libcxxabi/include -I../../flutter/build/secondary/flutter/third_party/libcxx/config -I../../flutter  -fno-strict-aliasing -fstack-protector-all --target=arm64-apple-macos -arch arm64 -fcolor-diagnostics -Wall -Wextra -Wendif-labels -Werror -Wno-missing-field-initializers -Wno-unused-parameter -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-implicit-int-float-conversion -Wno-deprecated-copy -Wno-psabi -Wno-deprecated-literal-operator -Wno-unqualified-std-cast-call -Wno-non-c-typedef-for-linkage -Wno-range-loop-construct -Wunguarded-availability -Wno-deprecated-declarations -no-canonical-prefixes -fvisibility=hidden -Wstring-conversion -Wnewline-eof -O0 -g2 -Wunreachable-code  -fvisibility-inlines-hidden -std=c++17 -fno-rtti -nostdinc++ -nostdinc++ -fvisibility=hidden -fno-exceptions -stdlib=libc++ -isysroot ../../flutter/prebuilts/SDKs/MacOSX14.0.sdk -mmacosx-version-min=10.14.0  -c ../../flutter/assets/directory_asset_bundle.cc -o  obj/flutter/assets/assets.directory_asset_bundle.o"
+  },
+]
+''');
+    } finally {
+      emptyDir.deleteSync(recursive: true);
+    }
   });
 }
 
