@@ -60,7 +60,7 @@ class _MyCascadingMenuState extends State<MyCascadingMenu> {
   }
 }
 
-/// Top Level Application Widget
+/// Top Level Application Widget.
 class SimpleCascadingMenuApp extends StatelessWidget {
   const SimpleCascadingMenuApp({super.key});
 
