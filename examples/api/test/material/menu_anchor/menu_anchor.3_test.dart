@@ -99,5 +99,10 @@ void main() {
       await revertCompleter.future;
       expect(revertCompleter.isCompleted, isTrue);
     });
+
+    testWidgets('Does not show debug banner', (WidgetTester tester) async {
+      await tester.pumpWidget(const SimpleCascadingMenuApp());
+      expect(find.byType(CheckedModeBanner), findsNothing);
+    });
   });
 }
