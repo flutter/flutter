@@ -694,6 +694,7 @@ Matcher matchesSemantics({
   bool hasDidGainAccessibilityFocusAction = false,
   bool hasDidLoseAccessibilityFocusAction = false,
   bool hasDismissAction = false,
+  bool hasFocusAction = false,
   // Custom actions and overrides
   String? onTapHint,
   String? onLongPressHint,
@@ -773,6 +774,7 @@ Matcher matchesSemantics({
     hasDidGainAccessibilityFocusAction: hasDidGainAccessibilityFocusAction,
     hasDidLoseAccessibilityFocusAction: hasDidLoseAccessibilityFocusAction,
     hasDismissAction: hasDismissAction,
+    hasFocusAction: hasFocusAction,
     // Custom actions and overrides
     children: children,
     onLongPressHint: onLongPressHint,
@@ -880,6 +882,7 @@ Matcher containsSemantics({
   bool? hasDidGainAccessibilityFocusAction,
   bool? hasDidLoseAccessibilityFocusAction,
   bool? hasDismissAction,
+  bool? hasFocusAction,
   // Custom actions and overrides
   String? onTapHint,
   String? onLongPressHint,
@@ -959,6 +962,7 @@ Matcher containsSemantics({
     hasDidGainAccessibilityFocusAction: hasDidGainAccessibilityFocusAction,
     hasDidLoseAccessibilityFocusAction: hasDidLoseAccessibilityFocusAction,
     hasDismissAction: hasDismissAction,
+    hasFocusAction: hasFocusAction,
     // Custom actions and overrides
     children: children,
     onLongPressHint: onLongPressHint,
@@ -2279,6 +2283,7 @@ class _MatchesSemanticsData extends Matcher {
     required bool? hasDidGainAccessibilityFocusAction,
     required bool? hasDidLoseAccessibilityFocusAction,
     required bool? hasDismissAction,
+    required bool? hasFocusAction,
     // Custom actions and overrides
     required String? onTapHint,
     required String? onLongPressHint,
@@ -2335,6 +2340,7 @@ class _MatchesSemanticsData extends Matcher {
           if (hasDidLoseAccessibilityFocusAction != null) SemanticsAction.didLoseAccessibilityFocus: hasDidLoseAccessibilityFocusAction,
           if (customActions != null) SemanticsAction.customAction: customActions.isNotEmpty,
           if (hasDismissAction != null) SemanticsAction.dismiss: hasDismissAction,
+          if (hasFocusAction != null) SemanticsAction.focus: hasFocusAction,
           if (hasMoveCursorForwardByWordAction != null) SemanticsAction.moveCursorForwardByWord: hasMoveCursorForwardByWordAction,
           if (hasMoveCursorBackwardByWordAction != null) SemanticsAction.moveCursorBackwardByWord: hasMoveCursorBackwardByWordAction,
           if (hasSetTextAction != null) SemanticsAction.setText: hasSetTextAction,

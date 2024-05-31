@@ -2023,7 +2023,7 @@ void main() {
               TestSemantics(
                 id: 1,
                 flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
-                actions: <SemanticsAction>[SemanticsAction.didGainAccessibilityFocus],
+                actions: <SemanticsAction>[SemanticsAction.focus],
                 label: 'Test',
                 textDirection: TextDirection.rtl,
               ),
@@ -2035,7 +2035,7 @@ void main() {
       );
 
       expect(focusNode.hasFocus, isFalse);
-      semanticsOwner.performAction(1, SemanticsAction.didGainAccessibilityFocus);
+      semanticsOwner.performAction(1, SemanticsAction.focus);
       await tester.pumpAndSettle();
       expect(focusNode.hasFocus, isTrue);
       semantics.dispose();
