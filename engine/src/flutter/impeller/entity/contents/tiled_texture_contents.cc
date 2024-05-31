@@ -150,7 +150,7 @@ bool TiledTextureContents::Render(const ContentContext& renderer,
       };
   return ColorSourceContents::DrawGeometry<VS>(
       renderer, entity, pass, pipeline_callback, frame_info,
-      [this, &renderer, &is_external_texture](RenderPass& pass) {
+      [this, &renderer, &is_external_texture, &entity](RenderPass& pass) {
         auto& host_buffer = renderer.GetTransientsBuffer();
 
         pass.SetCommandLabel("TextureFill");
@@ -159,13 +159,15 @@ bool TiledTextureContents::Render(const ContentContext& renderer,
           FSExternal::FragInfo frag_info;
           frag_info.x_tile_mode = static_cast<Scalar>(x_tile_mode_);
           frag_info.y_tile_mode = static_cast<Scalar>(y_tile_mode_);
-          frag_info.alpha = GetOpacityFactor();
+          frag_info.alpha =
+              GetOpacityFactor() * GetGeometry()->ComputeAlphaCoverage(entity);
           FSExternal::BindFragInfo(pass, host_buffer.EmplaceUniform(frag_info));
         } else {
           FS::FragInfo frag_info;
           frag_info.x_tile_mode = static_cast<Scalar>(x_tile_mode_);
           frag_info.y_tile_mode = static_cast<Scalar>(y_tile_mode_);
-          frag_info.alpha = GetOpacityFactor();
+          frag_info.alpha =
+              GetOpacityFactor() * GetGeometry()->ComputeAlphaCoverage(entity);
           FS::BindFragInfo(pass, host_buffer.EmplaceUniform(frag_info));
         }
 

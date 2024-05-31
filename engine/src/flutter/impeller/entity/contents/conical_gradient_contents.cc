@@ -73,13 +73,14 @@ bool ConicalGradientContents::RenderSSBO(const ContentContext& renderer,
       };
   return ColorSourceContents::DrawGeometry<VS>(
       renderer, entity, pass, pipeline_callback, frame_info,
-      [this, &renderer](RenderPass& pass) {
+      [this, &renderer, &entity](RenderPass& pass) {
         FS::FragInfo frag_info;
         frag_info.center = center_;
         frag_info.radius = radius_;
         frag_info.tile_mode = static_cast<Scalar>(tile_mode_);
         frag_info.decal_border_color = decal_border_color_;
-        frag_info.alpha = GetOpacityFactor();
+        frag_info.alpha =
+            GetOpacityFactor() * GetGeometry()->ComputeAlphaCoverage(entity);
         if (focus_) {
           frag_info.focus = focus_.value();
           frag_info.focus_radius = focus_radius_;
@@ -127,7 +128,7 @@ bool ConicalGradientContents::RenderTexture(const ContentContext& renderer,
       };
   return ColorSourceContents::DrawGeometry<VS>(
       renderer, entity, pass, pipeline_callback, frame_info,
-      [this, &renderer, &gradient_texture](RenderPass& pass) {
+      [this, &renderer, &gradient_texture, &entity](RenderPass& pass) {
         FS::FragInfo frag_info;
         frag_info.center = center_;
         frag_info.radius = radius_;
@@ -135,7 +136,8 @@ bool ConicalGradientContents::RenderTexture(const ContentContext& renderer,
         frag_info.decal_border_color = decal_border_color_;
         frag_info.texture_sampler_y_coord_scale =
             gradient_texture->GetYCoordScale();
-        frag_info.alpha = GetOpacityFactor();
+        frag_info.alpha =
+            GetOpacityFactor() * GetGeometry()->ComputeAlphaCoverage(entity);
         frag_info.half_texel =
             Vector2(0.5 / gradient_texture->GetSize().width,
                     0.5 / gradient_texture->GetSize().height);

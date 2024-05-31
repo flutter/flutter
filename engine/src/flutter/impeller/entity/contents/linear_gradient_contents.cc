@@ -77,7 +77,7 @@ bool LinearGradientContents::RenderTexture(const ContentContext& renderer,
       };
   return ColorSourceContents::DrawGeometry<VS>(
       renderer, entity, pass, pipeline_callback, frame_info,
-      [this, &renderer](RenderPass& pass) {
+      [this, &renderer, &entity](RenderPass& pass) {
         auto gradient_data = CreateGradientBuffer(colors_, stops_);
         auto gradient_texture =
             CreateGradientTexture(gradient_data, renderer.GetContext());
@@ -92,7 +92,9 @@ bool LinearGradientContents::RenderTexture(const ContentContext& renderer,
         frag_info.decal_border_color = decal_border_color_;
         frag_info.texture_sampler_y_coord_scale =
             gradient_texture->GetYCoordScale();
-        frag_info.alpha = GetOpacityFactor();
+        frag_info.alpha =
+            GetOpacityFactor() * GetGeometry()->ComputeAlphaCoverage(entity);
+        ;
         frag_info.half_texel =
             Vector2(0.5 / gradient_texture->GetSize().width,
                     0.5 / gradient_texture->GetSize().height);
@@ -137,13 +139,14 @@ bool LinearGradientContents::RenderSSBO(const ContentContext& renderer,
       };
   return ColorSourceContents::DrawGeometry<VS>(
       renderer, entity, pass, pipeline_callback, frame_info,
-      [this, &renderer](RenderPass& pass) {
+      [this, &renderer, &entity](RenderPass& pass) {
         FS::FragInfo frag_info;
         frag_info.start_point = start_point_;
         frag_info.end_point = end_point_;
         frag_info.tile_mode = static_cast<Scalar>(tile_mode_);
         frag_info.decal_border_color = decal_border_color_;
-        frag_info.alpha = GetOpacityFactor();
+        frag_info.alpha =
+            GetOpacityFactor() * GetGeometry()->ComputeAlphaCoverage(entity);
         frag_info.start_to_end = end_point_ - start_point_;
         frag_info.inverse_dot_start_to_end =
             CalculateInverseDotStartToEnd(start_point_, end_point_);
