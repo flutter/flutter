@@ -1022,6 +1022,8 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
 
   @override
   Widget build(BuildContext context) {
+    // Only top most route can participate in focus traversal.
+    focusScopeNode.skipTraversal = !widget.route.isCurrent;
     return AnimatedBuilder(
       animation: widget.route.restorationScopeId,
       builder: (BuildContext context, Widget? child) {
@@ -1048,24 +1050,22 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
                   },
                   child: PrimaryScrollController(
                     controller: primaryScrollController,
-                    child: FocusScope(
-                      node: focusScopeNode, // immutable
-                      // Only top most route can participate in focus traversal.
-                      skipTraversal: !widget.route.isCurrent,
+                    child: FocusScope.withExternalFocusNode(
+                      focusScopeNode: focusScopeNode, // immutable
                       child: RepaintBoundary(
-                        child: AnimatedBuilder(
-                          animation: _listenable, // immutable
+                        child: ListenableBuilder(
+                          listenable: _listenable, // immutable
                           builder: (BuildContext context, Widget? child) {
                             return widget.route.buildTransitions(
                               context,
                               widget.route.animation!,
                               widget.route.secondaryAnimation!,
-                              // This additional AnimatedBuilder is include because if the
+                              // This additional ListenableBuilder is include because if the
                               // value of the userGestureInProgressNotifier changes, it's
                               // only necessary to rebuild the IgnorePointer widget and set
                               // the focus node's ability to focus.
-                              AnimatedBuilder(
-                                animation: widget.route.navigator?.userGestureInProgressNotifier ?? ValueNotifier<bool>(false),
+                              ListenableBuilder(
+                                listenable: widget.route.navigator?.userGestureInProgressNotifier ?? ValueNotifier<bool>(false),
                                 builder: (BuildContext context, Widget? child) {
                                   final bool ignoreEvents = _shouldIgnoreFocusRequest;
                                   focusScopeNode.canRequestFocus = !ignoreEvents;
