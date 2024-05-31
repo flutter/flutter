@@ -83,12 +83,12 @@ class _AnimatedListSeparatedSampleState extends State<AnimatedListSeparatedSampl
   /// have been removed from the list model by the time this builder is called.
   Widget _buildRemovedSeparator(BuildContext context, int index, Animation<double> animation) {
     return SizeTransition(
-                sizeFactor: animation,
-                child: ItemSeparator(
-                  animation: animation,
-                  item: null,
-                )
-              );
+      sizeFactor: animation,
+      child: ItemSeparator(
+        animation: animation,
+        item: null,
+      )
+    );
   }
 
   // Insert the "next item" into the list model.
