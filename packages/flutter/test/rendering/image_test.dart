@@ -40,7 +40,7 @@ Future<void> main() async {
         '   image: $squareImage\n'
         '   alignment: Alignment.center\n'
         '   invertColors: false\n'
-        '   filterQuality: low\n',
+        '   filterQuality: medium\n',
       ),
     );
 

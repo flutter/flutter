@@ -51,7 +51,7 @@ class DecorationImage {
     this.matchTextDirection = false,
     this.scale = 1.0,
     this.opacity = 1.0,
-    this.filterQuality = FilterQuality.low,
+    this.filterQuality = FilterQuality.medium,
     this.invertColors = false,
     this.isAntiAlias = false,
   });
@@ -148,8 +148,7 @@ class DecorationImage {
 
   /// Used to set the filterQuality of the image.
   ///
-  /// Defaults to [FilterQuality.low] to scale the image, which corresponds to
-  /// bilinear interpolation.
+  /// Defaults to [FilterQuality.medium].
   final FilterQuality filterQuality;
 
   /// Whether the colors of the image are inverted when drawn.
@@ -508,9 +507,7 @@ void debugFlushLastFrameImageSizeInfo() {
 ///    smart invert on iOS.
 ///
 ///  * `filterQuality`: Use this to change the quality when scaling an image.
-///     Use the [FilterQuality.low] quality setting to scale the image, which corresponds to
-///     bilinear interpolation, rather than the default [FilterQuality.none] which corresponds
-///     to nearest-neighbor.
+///     Defaults to [FilterQuality.medium].
 ///
 /// See also:
 ///
@@ -531,7 +528,7 @@ void paintImage({
   ImageRepeat repeat = ImageRepeat.noRepeat,
   bool flipHorizontally = false,
   bool invertColors = false,
-  FilterQuality filterQuality = FilterQuality.low,
+  FilterQuality filterQuality = FilterQuality.medium,
   bool isAntiAlias = false,
   BlendMode blendMode = BlendMode.srcOver,
 }) {

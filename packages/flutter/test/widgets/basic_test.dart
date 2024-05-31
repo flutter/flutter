@@ -47,7 +47,7 @@ void main() {
       expect(renderObject.centerSlice, null);
       expect(renderObject.matchTextDirection, false);
       expect(renderObject.invertColors, false);
-      expect(renderObject.filterQuality, FilterQuality.low);
+      expect(renderObject.filterQuality, FilterQuality.medium);
       expect(renderObject.isAntiAlias, false);
 
       final ui.Image image2 = (await tester.runAsync<ui.Image>(() => createTestImage(width: 2, height: 2)))!;
