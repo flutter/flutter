@@ -31,6 +31,15 @@ struct Paint {
       const Matrix& effect_transform)>;
   using ColorSourceProc = std::function<std::shared_ptr<ColorSourceContents>()>;
 
+  /// @brief Whether or not a save layer with the provided paint can perform the
+  ///        opacity peephole optimization.
+  static bool CanApplyOpacityPeephole(const Paint& paint) {
+    return paint.blend_mode == BlendMode::kSourceOver &&
+           paint.invert_colors == false &&
+           !paint.mask_blur_descriptor.has_value() &&
+           paint.image_filter == nullptr && paint.color_filter == nullptr;
+  }
+
   enum class Style {
     kFill,
     kStroke,

@@ -224,6 +224,7 @@ void Canvas::Save(bool create_subpass,
   entry.transform = transform_stack_.back().transform;
   entry.cull_rect = transform_stack_.back().cull_rect;
   entry.clip_height = transform_stack_.back().clip_height;
+  entry.distributed_opacity = transform_stack_.back().distributed_opacity;
   if (create_subpass) {
     entry.rendering_mode =
         Entity::RenderingMode::kSubpassAppendSnapshotTransform;
@@ -830,6 +831,7 @@ void Canvas::AddRenderEntityToCurrentPass(Entity entity, bool reuse_depth) {
     ++current_depth_;
   }
   entity.SetClipDepth(current_depth_);
+  entity.SetInheritedOpacity(transform_stack_.back().distributed_opacity);
   GetCurrentPass().AddEntity(std::move(entity));
 }
 
@@ -841,8 +843,16 @@ void Canvas::SaveLayer(const Paint& paint,
                        std::optional<Rect> bounds,
                        const std::shared_ptr<ImageFilter>& backdrop_filter,
                        ContentBoundsPromise bounds_promise,
-                       uint32_t total_content_depth) {
+                       uint32_t total_content_depth,
+                       bool can_distribute_opacity) {
+  if (can_distribute_opacity && !backdrop_filter &&
+      Paint::CanApplyOpacityPeephole(paint)) {
+    Save(false, total_content_depth, paint.blend_mode, backdrop_filter);
+    transform_stack_.back().distributed_opacity *= paint.color.alpha;
+    return;
+  }
   TRACE_EVENT0("flutter", "Canvas::saveLayer");
+
   Save(true, total_content_depth, paint.blend_mode, backdrop_filter);
 
   // The DisplayList bounds/rtree doesn't account for filters applied to parent
@@ -863,14 +873,12 @@ void Canvas::SaveLayer(const Paint& paint,
     paint.image_filter->Visit(mip_count_visitor);
     new_layer_pass.SetRequiredMipCount(mip_count_visitor.GetRequiredMipCount());
   }
+  // When applying a save layer, absorb any pending distributed opacity.
+  Paint paint_copy = paint;
+  paint_copy.color.alpha *= transform_stack_.back().distributed_opacity;
+  transform_stack_.back().distributed_opacity = 1.0;
 
-  // Only apply opacity peephole on default blending.
-  if (paint.blend_mode == BlendMode::kSourceOver) {
-    new_layer_pass.SetDelegate(
-        std::make_shared<OpacityPeepholePassDelegate>(paint));
-  } else {
-    new_layer_pass.SetDelegate(std::make_shared<PaintPassDelegate>(paint));
-  }
+  new_layer_pass.SetDelegate(std::make_shared<PaintPassDelegate>(paint_copy));
 }
 
 void Canvas::DrawTextFrame(const std::shared_ptr<TextFrame>& text_frame,
