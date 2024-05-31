@@ -470,16 +470,18 @@ void main() {
     await gesture.moveBy(const Offset(0, 40));
     await tester.pumpAndSettle();
     await gesture.moveBy(const Offset(0, 100));
-    await tester.pumpAndSettle();
-    // Test the top overscroll.
+    // Test the top overscroll. Use `pump` not `pumpAndSettle` to verify the
+    // rendering result of the immediate next frame.
+    await tester.pump();
     await expectLater(
       find.byType(CupertinoActionSheet),
       matchesGoldenFile('cupertinoActionSheet.overscroll.1.png'),
     );
 
     await gesture.moveBy(const Offset(0, -300));
-    await tester.pumpAndSettle();
-    // Test the bottom overscroll.
+    // Test the bottom overscroll. Use `pump` not `pumpAndSettle` to verify the
+    // rendering result of the immediate next frame.
+    await tester.pump();
     await expectLater(
       find.byType(CupertinoActionSheet),
       matchesGoldenFile('cupertinoActionSheet.overscroll.2.png'),

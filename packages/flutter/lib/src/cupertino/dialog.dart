@@ -562,11 +562,11 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
     super.dispose();
   }
 
-  bool hasContent() => widget.title != null || widget.message != null;
+  bool get hasContent => widget.title != null || widget.message != null;
 
   Widget _buildContent(BuildContext context) {
     final List<Widget> content = <Widget>[];
-    if (hasContent()) {
+    if (hasContent) {
       final Widget titleSection = _CupertinoAlertContentSection(
         title: widget.title,
         message: widget.message,
@@ -612,7 +612,7 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
       padding: EdgeInsets.only(top: cancelPadding),
       child: _ActionSheetButtonBackground(
         isCancel: true,
-        onStateChange: (_) {},
+        onPressStateChange: (_) {},
         child: widget.cancelButton!,
       ),
     );
@@ -630,7 +630,7 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
             filter: ImageFilter.blur(sigmaX: _kBlurAmount, sigmaY: _kBlurAmount),
             child: _ActionSheetMainSheet(
               scrollController: _effectiveActionScrollController,
-              hasContent: hasContent(),
+              hasContent: hasContent,
               contentSection: Builder(builder: _buildContent),
               actions: widget.actions,
               dividerColor: _kActionSheetButtonDividerColor,
@@ -677,7 +677,7 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
   }
 }
 
-/// The content of a typical button in a [CupertinoActionSheet].
+/// The content of a typical action button in a [CupertinoActionSheet].
 ///
 /// This widget draws the content of a button, i.e. the text, while the
 /// background of the button is drawn by [CupertinoActionSheet].
@@ -755,20 +755,22 @@ class CupertinoActionSheetAction extends StatelessWidget {
   }
 }
 
-// This widget renders the background (pressed or not) of a button, and sends
-// whether the button is pressed to the parent.
+// Renders the background of a button (both the pressed background and the idle
+// background) and reports its state to the parent with `onPressStateChange`.
 class _ActionSheetButtonBackground extends StatefulWidget {
   const _ActionSheetButtonBackground({
     super.key,
     this.isCancel = false,
-    required this.onStateChange,
+    this.onPressStateChange,
     required this.child,
   });
 
   final bool isCancel;
 
-  /// The callback that is called when the button is tapped.
-  final ValueSetter<bool> onStateChange;
+  /// Called when the user taps down or lifts up on the button.
+  ///
+  /// The boolean value is true if the user is tapping down on the button.
+  final ValueSetter<bool>? onPressStateChange;
 
   /// The widget below this widget in the tree.
   ///
@@ -784,17 +786,17 @@ class _ActionSheetButtonBackgroundState extends State<_ActionSheetButtonBackgrou
 
   void _onTapDown(TapDownDetails event) {
     setState(() { isBeingPressed = true; });
-    widget.onStateChange(true);
+    widget.onPressStateChange?.call(true);
   }
 
   void _onTapUp(TapUpDetails event) {
     setState(() { isBeingPressed = false; });
-    widget.onStateChange(false);
+    widget.onPressStateChange?.call(false);
   }
 
   void _onTapCancel() {
     setState(() { isBeingPressed = false; });
-    widget.onStateChange(false);
+    widget.onPressStateChange?.call(false);
   }
 
   @override
@@ -904,7 +906,7 @@ class _ActionSheetActionSection extends StatelessWidget {
       }
       column.add(_ActionSheetButtonBackground(
         key: ValueKey<int>(actionIndex),
-        onStateChange: (bool state) {
+        onPressStateChange: (bool state) {
           onPressedUpdate(actionIndex, state);
         },
         child: actions![actionIndex],
