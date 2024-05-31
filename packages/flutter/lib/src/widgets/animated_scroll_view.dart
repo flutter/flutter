@@ -843,6 +843,7 @@ abstract class _AnimatedScrollViewState<T extends _AnimatedScrollView> extends S
 
 /// Signature for the builder callback used by [AnimatedList], [AnimatedList.separated]
 /// & [AnimatedGrid] to build their animated children.
+///
 /// This signature is also used by [AnimatedList.separated] to build its separators and
 /// to animate their exit transition after their corresponding item has been removed.
 ///
