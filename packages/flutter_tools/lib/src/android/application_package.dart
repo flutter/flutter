@@ -98,7 +98,10 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
     String? packageId,
   ) {
     String? launchActivity;
-    for (final XmlElement activity in document.findAllElements('activity')) {
+
+    final Iterable<XmlElement> activities = document.findAllElements('activity');
+
+    for (final XmlElement activity in activities) {
       final String? enabled = activity.getAttribute('android:enabled');
       if (enabled != null && enabled == 'false') {
         continue;
@@ -127,6 +130,10 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
     }
 
     // Handle case when use activity-alias instead of activity as `android.intent.category.LAUNCHER`
+
+    // List all activities names so check for targetActivity
+    final Iterable<String?> activityNames = activities.map((XmlElement activity) => activity.getAttribute('android:name'));
+
     if (launchActivity == null) {
       for (final XmlElement activityAlias in document.findAllElements('activity-alias')) {
         final String? enabled = activityAlias.getAttribute('android:enabled');
@@ -150,8 +157,10 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
           }
           if (actionName != null && categoryName != null && actionName.isNotEmpty && categoryName.isNotEmpty) {
             final String? targetActivityName = activityAlias.getAttribute('android:targetActivity');
-            launchActivity = '$packageId/$targetActivityName';
-            break;
+            if (activityNames.contains(targetActivityName)) {
+              launchActivity = '$packageId/$targetActivityName';
+              break;
+            }
           }
         }
       }
@@ -305,10 +314,6 @@ class _Element extends _Entry {
   }
 
   Iterable<_Element> allElements(String name) {
-    return children.whereType<_Element>().where((_Element e) => e.name?.startsWith(name) ?? false);
-  }
-
-  Iterable<_Element> allElementsEqual(String name) {
     return children.whereType<_Element>().where((_Element e) => e.name == name);
   }
 }
@@ -390,7 +395,7 @@ class ApkManifestData {
       return null;
     }
 
-    final Iterable<_Element> activities = application.allElementsEqual('activity');
+    final Iterable<_Element> activities = application.allElements('activity');
 
     _Element? launchActivity;
     bool isActivityAlias = false;
@@ -426,7 +431,7 @@ class ApkManifestData {
 
     // Handle case when use activity-alias
     if (launchActivity == null) {
-      final Iterable<_Element> activityAliases = application.allElementsEqual('activity-alias');
+      final Iterable<_Element> activityAliases = application.allElements('activity-alias');
 
       for (final _Element activityAlias in activityAliases) {
         final _Attribute? enabled = activityAlias.firstAttribute('android:enabled');
