@@ -2835,10 +2835,8 @@ void main() {
           expect(getHintOpacity(tester), 1.0);
 
           final ThemeData theme = Theme.of(tester.element(findDecorator()));
-          // TODO(bleroux): from M3 specification, it should be theme.colorScheme.onSurface.
-          final Color expectedColor = theme.hintColor;
-          // TODO(bleroux): from M3 specification, it should be textTheme.bodyLarge.
-          final TextStyle expectedStyle = theme.textTheme.titleMedium!.copyWith(color: expectedColor);
+          final Color expectedColor = theme.colorScheme.onSurfaceVariant;
+          final TextStyle expectedStyle = theme.textTheme.bodyLarge!.copyWith(color: expectedColor);
           expect(getHintStyle(tester), expectedStyle);
         });
       });
@@ -2901,10 +2899,8 @@ void main() {
           expect(getHintOpacity(tester), 1.0);
 
           final ThemeData theme = Theme.of(tester.element(findDecorator()));
-          // TODO(bleroux): from M3 specification, it should be theme.colorScheme.onSurface.withOpacity(0.38).
-          final Color expectedColor = theme.disabledColor;
-          // TODO(bleroux): from M3 specification, it should be textTheme.bodyLarge.
-          final TextStyle expectedStyle = theme.textTheme.titleMedium!.copyWith(color: expectedColor);
+          final Color expectedColor = theme.colorScheme.onSurface.withOpacity(0.38);
+          final TextStyle expectedStyle = theme.textTheme.bodyLarge!.copyWith(color: expectedColor);
           expect(getHintStyle(tester), expectedStyle);
         });
       });
@@ -2967,10 +2963,8 @@ void main() {
           expect(getHintOpacity(tester), 1.0);
 
           final ThemeData theme = Theme.of(tester.element(findDecorator()));
-          // TODO(bleroux): from M3 specification, it should be theme.colorScheme.onSurface.
-          final Color expectedColor = theme.hintColor;
-          // TODO(bleroux): from M3 specification, it should be textTheme.bodyLarge.
-          final TextStyle expectedStyle = theme.textTheme.titleMedium!.copyWith(color: expectedColor);
+          final Color expectedColor = theme.colorScheme.onSurfaceVariant;
+          final TextStyle expectedStyle = theme.textTheme.bodyLarge!.copyWith(color: expectedColor);
           expect(getHintStyle(tester), expectedStyle);
         });
       });
@@ -3033,10 +3027,8 @@ void main() {
           expect(getHintOpacity(tester), 1.0);
 
           final ThemeData theme = Theme.of(tester.element(findDecorator()));
-          // TODO(bleroux): from M3 specification, it should be theme.colorScheme.onSurface.
-          final Color expectedColor = theme.hintColor;
-          // TODO(bleroux): from M3 specification, it should be textTheme.bodyLarge.
-          final TextStyle expectedStyle = theme.textTheme.titleMedium!.copyWith(color: expectedColor);
+          final Color expectedColor = theme.colorScheme.onSurfaceVariant;
+          final TextStyle expectedStyle = theme.textTheme.bodyLarge!.copyWith(color: expectedColor);
           expect(getHintStyle(tester), expectedStyle);
         });
       });
@@ -3099,10 +3091,8 @@ void main() {
           expect(getHintOpacity(tester), 1.0);
 
           final ThemeData theme = Theme.of(tester.element(findDecorator()));
-          // TODO(bleroux): from M3 specification, it should be theme.colorScheme.onSurface.
-          final Color expectedColor = theme.hintColor;
-          // TODO(bleroux): from M3 specification, it should be textTheme.bodyLarge.
-          final TextStyle expectedStyle = theme.textTheme.titleMedium!.copyWith(color: expectedColor);
+          final Color expectedColor = theme.colorScheme.onSurfaceVariant;
+          final TextStyle expectedStyle = theme.textTheme.bodyLarge!.copyWith(color: expectedColor);
           expect(getHintStyle(tester), expectedStyle);
         });
       });
@@ -3309,10 +3299,8 @@ void main() {
           expect(getHintOpacity(tester), 1.0);
 
           final ThemeData theme = Theme.of(tester.element(findDecorator()));
-          // TODO(bleroux): from M3 specification, it should be theme.colorScheme.onSurface.
-          final Color expectedColor = theme.hintColor;
-          // TODO(bleroux): from M3 specification, it should be textTheme.bodyLarge.
-          final TextStyle expectedStyle = theme.textTheme.titleMedium!.copyWith(color: expectedColor);
+          final Color expectedColor = theme.colorScheme.onSurfaceVariant;
+          final TextStyle expectedStyle = theme.textTheme.bodyLarge!.copyWith(color: expectedColor);
           expect(getHintStyle(tester), expectedStyle);
         });
       });
@@ -3423,10 +3411,8 @@ void main() {
           expect(getHintOpacity(tester), 1.0);
 
           final ThemeData theme = Theme.of(tester.element(findDecorator()));
-          // TODO(bleroux): from M3 specification, it should be theme.colorScheme.onSurface.
-          final Color expectedColor = theme.hintColor;
-          // TODO(bleroux): from M3 specification, it should be textTheme.bodyLarge.
-          final TextStyle expectedStyle = theme.textTheme.titleMedium!.copyWith(color: expectedColor);
+          final Color expectedColor = theme.colorScheme.onSurfaceVariant;
+          final TextStyle expectedStyle = theme.textTheme.bodyLarge!.copyWith(color: expectedColor);
           expect(getHintStyle(tester), expectedStyle);
         });
       });
@@ -3489,10 +3475,8 @@ void main() {
           expect(getHintOpacity(tester), 1.0);
 
           final ThemeData theme = Theme.of(tester.element(findDecorator()));
-          // TODO(bleroux): from M3 specification, it should be theme.colorScheme.onSurface.withOpacity(0.38).
-          final Color expectedColor = theme.disabledColor;
-          // TODO(bleroux): from M3 specification, it should be textTheme.bodyLarge.
-          final TextStyle expectedStyle = theme.textTheme.titleMedium!.copyWith(color: expectedColor);
+          final Color expectedColor = theme.colorScheme.onSurface.withOpacity(0.38);
+          final TextStyle expectedStyle = theme.textTheme.bodyLarge!.copyWith(color: expectedColor);
           expect(getHintStyle(tester), expectedStyle);
         });
       });
@@ -3555,10 +3539,8 @@ void main() {
           expect(getHintOpacity(tester), 1.0);
 
           final ThemeData theme = Theme.of(tester.element(findDecorator()));
-          // TODO(bleroux): from M3 specification, it should be theme.colorScheme.onSurface.
-          final Color expectedColor = theme.hintColor;
-          // TODO(bleroux): from M3 specification, it should be textTheme.bodyLarge.
-          final TextStyle expectedStyle = theme.textTheme.titleMedium!.copyWith(color: expectedColor);
+          final Color expectedColor = theme.colorScheme.onSurfaceVariant;
+          final TextStyle expectedStyle = theme.textTheme.bodyLarge!.copyWith(color: expectedColor);
           expect(getHintStyle(tester), expectedStyle);
         });
       });
@@ -3621,10 +3603,8 @@ void main() {
           expect(getHintOpacity(tester), 1.0);
 
           final ThemeData theme = Theme.of(tester.element(findDecorator()));
-          // TODO(bleroux): from M3 specification, it should be theme.colorScheme.onSurface.
-          final Color expectedColor = theme.hintColor;
-          // TODO(bleroux): from M3 specification, it should be textTheme.bodyLarge.
-          final TextStyle expectedStyle = theme.textTheme.titleMedium!.copyWith(color: expectedColor);
+          final Color expectedColor = theme.colorScheme.onSurfaceVariant;
+          final TextStyle expectedStyle = theme.textTheme.bodyLarge!.copyWith(color: expectedColor);
           expect(getHintStyle(tester), expectedStyle);
         });
       });
@@ -3687,10 +3667,8 @@ void main() {
           expect(getHintOpacity(tester), 1.0);
 
           final ThemeData theme = Theme.of(tester.element(findDecorator()));
-          // TODO(bleroux): from M3 specification, it should be theme.colorScheme.onSurface.
-          final Color expectedColor = theme.hintColor;
-          // TODO(bleroux): from M3 specification, it should be textTheme.bodyLarge.
-          final TextStyle expectedStyle = theme.textTheme.titleMedium!.copyWith(color: expectedColor);
+          final Color expectedColor = theme.colorScheme.onSurfaceVariant;
+          final TextStyle expectedStyle = theme.textTheme.bodyLarge!.copyWith(color: expectedColor);
           expect(getHintStyle(tester), expectedStyle);
         });
       });
@@ -3895,10 +3873,8 @@ void main() {
           expect(getHintOpacity(tester), 1.0);
 
           final ThemeData theme = Theme.of(tester.element(findDecorator()));
-          // TODO(bleroux): from M3 specification, it should be theme.colorScheme.onSurface.
-          final Color expectedColor = theme.hintColor;
-          // TODO(bleroux): from M3 specification, it should be textTheme.bodyLarge.
-          final TextStyle expectedStyle = theme.textTheme.titleMedium!.copyWith(color: expectedColor);
+          final Color expectedColor = theme.colorScheme.onSurfaceVariant;
+          final TextStyle expectedStyle = theme.textTheme.bodyLarge!.copyWith(color: expectedColor);
           expect(getHintStyle(tester), expectedStyle);
         });
       });
