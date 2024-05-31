@@ -401,6 +401,7 @@ class DropdownMenu<T> extends StatefulWidget {
   ///
   /// ```dart
   /// DropdownMenu<Text>(
+  ///   enableFilter: true,
   ///   filterCallback: (List<DropdownMenuEntry<Text>> entries, String filter) {
   ///     final String trimmedFilter = filter.trim().toLowerCase();
   ///       if (trimmedFilter.isEmpty) {
