@@ -377,12 +377,6 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
   @override
   bool? get value => widget.value;
 
-  void updateCurve() {
-      position
-        ..curve = Curves.easeIn
-        ..reverseCurve = Curves.easeOut;
-  }
-
   WidgetStateProperty<Color?> get _widgetThumbColor {
     return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
       if (states.contains(WidgetState.selected)) {
@@ -413,8 +407,8 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
   void _handleDragStart(DragStartDetails details) {
     if (isInteractive) {
       reactionController.forward();
+      _emitVibration();
     }
-    _emitVibration();
   }
 
   void _handleDragUpdate(DragUpdateDetails details) {
@@ -444,7 +438,6 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
       animateToValue();
     }
     reactionController.reverse();
-
   }
 
   void _handleChanged(bool? value) {
@@ -511,8 +504,8 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
     // Hand coded defaults based on the animation specs.
     const double? thumbOffset = null;
     const Size transitionalThumbSize = Size(28.0, 28.0);  // The thumb size at the middle of the track.
-    reactionController.duration = const Duration(milliseconds: 166);
     positionController.duration = const Duration(milliseconds: 117);
+    reactionController.duration = const Duration(milliseconds: 200);
 
     // Hand coded defaults eyeballed from iOS simulator on Mac.
     const double disabledOpacity = 0.5;
@@ -1146,6 +1139,7 @@ class _SwitchPainter extends ToggleablePainter {
     );
 
     final double currentReactionValue = reaction.value;
+    _paintTrackWith(canvas, paint, trackPaintOffset, trackOutlineColor, trackOutlineWidth, trackRect);
     if (_onOffLabelColors != null) {
       final (Color onLabelColor, Color offLabelColor) = onOffLabelColors!;
 
@@ -1200,8 +1194,6 @@ class _SwitchPainter extends ToggleablePainter {
         offLabelPaint,
       );
     }
-
-    _paintTrackWith(canvas, paint, trackPaintOffset, trackOutlineColor, trackOutlineWidth, trackRect);
     _paintThumbWith(
       thumbPaintOffset,
       canvas,
