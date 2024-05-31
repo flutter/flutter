@@ -31,16 +31,16 @@ class _MyCascadingMenuState extends State<MyCascadingMenu> {
       childFocusNode: _buttonFocusNode,
       menuChildren: <Widget>[
         MenuItemButton(
+          onPressed: () {},
           child: const Text('Revert'),
-          onPressed: () {},
         ),
         MenuItemButton(
+          onPressed: () {},
           child: const Text('Setting'),
-          onPressed: () {},
         ),
         MenuItemButton(
-          child: const Text('Send Feedback'),
           onPressed: () {},
+          child: const Text('Send Feedback'),
         ),
       ],
       builder: (_, MenuController controller, Widget? child) {
