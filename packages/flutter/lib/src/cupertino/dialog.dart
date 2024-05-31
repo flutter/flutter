@@ -760,7 +760,6 @@ class CupertinoActionSheetAction extends StatelessWidget {
 // background) and reports its state to the parent with `onPressStateChange`.
 class _ActionSheetButtonBackground extends StatefulWidget {
   const _ActionSheetButtonBackground({
-    super.key,
     this.isCancel = false,
     this.onPressStateChange,
     required this.child,
