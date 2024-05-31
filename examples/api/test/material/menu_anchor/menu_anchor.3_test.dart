@@ -10,8 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   group('SimpleCascadingMenu Tests', () {
     testWidgets('Menu button opens and closes the menu', (WidgetTester tester) async {
-      // Build the SimpleCascadingMenu widget.
-      await tester.pumpWidget(const MaterialApp(home: example.MyCascadingMenu()));
+      await tester.pumpWidget(const SimpleCascadingMenuApp());
 
       // Find the menu button.
       final Finder menuButton = find.byType(IconButton);
