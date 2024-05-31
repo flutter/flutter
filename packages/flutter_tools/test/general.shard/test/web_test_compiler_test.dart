@@ -61,7 +61,7 @@ void main() {
         '--filesystem-scheme',
         'org-dartlang-app',
         '--initialize-from-dill',
-        RegExp(r'^build\/(?:[a-z0-9]{32})\.cache\.dill$'),
+        RegExp(r'^build\/(?:[a-z0-9]{32}\.)?cache\.dill$'),
         '--platform',
         'file:///HostArtifact.webPlatformKernelFolder/ddc_outline_sound.dill',
         '--verbosity=error',

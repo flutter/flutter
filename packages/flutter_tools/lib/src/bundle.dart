@@ -36,9 +36,12 @@ String getDefaultCachedKernelPath({
      ..removeWhere((String arg) => arg.startsWith('--enable-experiment='));
   buffer.writeAll(dartDefines);
   buffer.writeAll(cacheFrontEndOptions);
-  final String output = buffer.toString();
-  final Digest digest = md5.convert(utf8.encode(output));
-  final String buildPrefix = '${hex.encode(digest.bytes)}.';
+  String buildPrefix = '';
+  if (buffer.isNotEmpty) {
+    final String output = buffer.toString();
+    final Digest digest = md5.convert(utf8.encode(output));
+    buildPrefix = '${hex.encode(digest.bytes)}.';
+  }
   return getKernelPathForTransformerOptions(
     (fileSystem ?? globals.fs).path.join(getBuildDirectory(
       config ?? globals.config,
