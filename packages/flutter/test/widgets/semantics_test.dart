@@ -582,7 +582,7 @@ void main() {
     }
 
     semantics.dispose();
-  }, skip: true); // TODO(yjbanov): temporary skip until https://github.com/flutter/engine/pull/53094 rolls in (see https://github.com/flutter/flutter/issues/83809)
+  });
 
   testWidgets('Semantics widget supports all flags', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
