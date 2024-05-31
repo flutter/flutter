@@ -84,7 +84,6 @@ class BuildLinuxCommand extends BuildSubCommand {
       throwToolExit(
           'Cross-build from Linux x64 host to Linux arm64 target is not currently supported.');
     }
-    displayNullSafetyMode(buildInfo);
     final Logger logger = globals.logger;
     await buildLinux(
       flutterProject.linux,

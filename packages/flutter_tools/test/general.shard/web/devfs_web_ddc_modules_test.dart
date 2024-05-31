@@ -127,7 +127,6 @@ void main() {
             InternetAddress.loopbackIPv4,
             <String, String>{},
             <String, String>{},
-            NullSafetyMode.unsound,
             usesDdcModuleSystem,
             webRenderer: WebRendererMode.canvaskit,
           );
@@ -411,7 +410,6 @@ void main() {
               InternetAddress.loopbackIPv4,
               <String, String>{},
               <String, String>{},
-              NullSafetyMode.unsound,
               usesDdcModuleSystem,
               webRenderer: WebRendererMode.canvaskit,
             );
@@ -434,7 +432,6 @@ void main() {
               InternetAddress.loopbackIPv4,
               <String, String>{},
               <String, String>{},
-              NullSafetyMode.unsound,
               usesDdcModuleSystem,
               webRenderer: WebRendererMode.canvaskit,
             );
@@ -459,7 +456,6 @@ void main() {
                 InternetAddress.loopbackIPv4,
                 <String, String>{},
                 <String, String>{},
-                NullSafetyMode.unsound,
                 usesDdcModuleSystem,
                 webRenderer: WebRendererMode.canvaskit,
               ),
@@ -483,7 +479,6 @@ void main() {
                 InternetAddress.loopbackIPv4,
                 <String, String>{},
                 <String, String>{},
-                NullSafetyMode.unsound,
                 usesDdcModuleSystem,
                 webRenderer: WebRendererMode.canvaskit,
               ),
@@ -915,7 +910,6 @@ void main() {
                 BuildMode.debug,
                 '',
                 treeShakeIcons: false,
-                nullSafetyMode: NullSafetyMode.unsound,
               ),
               enableDwds: false,
               enableDds: false,
@@ -925,7 +919,6 @@ void main() {
                   null, // ignore: avoid_redundant_argument_values
               extraHeaders: const <String, String>{},
               chromiumLauncher: null, // ignore: avoid_redundant_argument_values
-              nullSafetyMode: NullSafetyMode.unsound,
               ddcModuleSystem: usesDdcModuleSystem,
               webRenderer: WebRendererMode.html,
               isWasm: false,
@@ -1062,7 +1055,6 @@ void main() {
                   null, // ignore: avoid_redundant_argument_values
               extraHeaders: const <String, String>{},
               chromiumLauncher: null, // ignore: avoid_redundant_argument_values
-              nullSafetyMode: NullSafetyMode.sound,
               ddcModuleSystem: usesDdcModuleSystem,
               webRenderer: WebRendererMode.html,
               isWasm: false,
@@ -1199,7 +1191,6 @@ void main() {
                 expressionCompiler: null,
                 extraHeaders: const <String, String>{},
                 chromiumLauncher: null,
-                nullSafetyMode: NullSafetyMode.sound,
                 ddcModuleSystem: usesDdcModuleSystem,
                 webRenderer: WebRendererMode.canvaskit,
                 isWasm: false,
@@ -1273,7 +1264,6 @@ void main() {
               chromiumLauncher: null, // ignore: avoid_redundant_argument_values
               nullAssertions: true,
               nativeNullAssertions: true,
-              nullSafetyMode: NullSafetyMode.sound,
               ddcModuleSystem: usesDdcModuleSystem,
               webRenderer: WebRendererMode.canvaskit,
               isWasm: false,
@@ -1323,7 +1313,6 @@ void main() {
                   null, // ignore: avoid_redundant_argument_values
               extraHeaders: const <String, String>{},
               chromiumLauncher: null, // ignore: avoid_redundant_argument_values
-              nullSafetyMode: NullSafetyMode.sound,
               ddcModuleSystem: usesDdcModuleSystem,
               webRenderer: WebRendererMode.canvaskit,
               isWasm: false,
@@ -1375,7 +1364,6 @@ void main() {
                   null, // ignore: avoid_redundant_argument_values
               extraHeaders: const <String, String>{},
               chromiumLauncher: null, // ignore: avoid_redundant_argument_values
-              nullSafetyMode: NullSafetyMode.sound,
               ddcModuleSystem: usesDdcModuleSystem,
               webRenderer: WebRendererMode.auto,
               isWasm: false,
@@ -1429,7 +1417,6 @@ void main() {
                   null, // ignore: avoid_redundant_argument_values
               extraHeaders: const <String, String>{},
               chromiumLauncher: null, // ignore: avoid_redundant_argument_values
-              nullSafetyMode: NullSafetyMode.unsound,
               ddcModuleSystem: usesDdcModuleSystem,
               webRenderer: WebRendererMode.canvaskit,
               isWasm: false,
@@ -1469,7 +1456,6 @@ void main() {
         Uri.base,
         null,
         const <String, String>{},
-        NullSafetyMode.unsound,
         webRenderer: WebRendererMode.canvaskit,
         isWasm: false,
         testMode: true);
@@ -1503,7 +1489,6 @@ void main() {
         const <String, String>{
           extraHeaderKey: extraHeaderValue,
         },
-        NullSafetyMode.unsound,
         webRenderer: WebRendererMode.canvaskit,
         isWasm: false,
         testMode: true);
@@ -1548,7 +1533,6 @@ void main() {
               InternetAddress.anyIPv4,
               <String, String>{},
               <String, String>{},
-              NullSafetyMode.sound,
               usesDdcModuleSystem,
               webRenderer: WebRendererMode.canvaskit,
             );
@@ -1603,7 +1587,6 @@ void main() {
                   null, // ignore: avoid_redundant_argument_values
               extraHeaders: const <String, String>{},
               chromiumLauncher: null, // ignore: avoid_redundant_argument_values
-              nullSafetyMode: NullSafetyMode.unsound,
               ddcModuleSystem: usesDdcModuleSystem,
               webRenderer: WebRendererMode.canvaskit,
               isWasm: false,

@@ -71,7 +71,6 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
         globals.fs.directory(globals.fs.path.absolute(globals.fs.path.normalize(outputArgument)));
 
     final List<BuildInfo> buildInfos = await getBuildInfos();
-    displayNullSafetyMode(buildInfos.first);
 
     for (final BuildInfo buildInfo in buildInfos) {
       globals.printStatus('Building macOS frameworks in ${buildInfo.mode.cliName} mode...');

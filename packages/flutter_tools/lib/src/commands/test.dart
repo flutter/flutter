@@ -70,7 +70,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
   }) {
     requiresPubspecYaml();
     usesPubOption();
-    addNullSafetyModeOptions(hide: !verboseHelp);
+    addNullSafetyModeOptions();
     usesFrontendServerStarterPathOption(verboseHelp: verboseHelp);
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
     addEnableExperimentation(hide: !verboseHelp);

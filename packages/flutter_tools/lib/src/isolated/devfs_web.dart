@@ -117,7 +117,6 @@ class WebAssetServer implements AssetReader {
     this.internetAddress,
     this._modules,
     this._digests,
-    this._nullSafetyMode,
     this._ddcModuleSystem, {
     required this.webRenderer,
   }) : basePath = _getWebTemplate('index.html', _kDefaultIndex).getBaseHref();
@@ -177,8 +176,7 @@ class WebAssetServer implements AssetReader {
     bool enableDds,
     Uri entrypoint,
     ExpressionCompiler? expressionCompiler,
-    Map<String, String> extraHeaders,
-    NullSafetyMode nullSafetyMode, {
+    Map<String, String> extraHeaders, {
     required WebRendererMode webRenderer,
     required bool isWasm,
     bool testMode = false,
@@ -230,7 +228,6 @@ class WebAssetServer implements AssetReader {
       address,
       modules,
       digests,
-      nullSafetyMode,
       ddcModuleSystem,
       webRenderer: webRenderer,
     );
@@ -343,7 +340,6 @@ class WebAssetServer implements AssetReader {
     return server;
   }
 
-  final NullSafetyMode _nullSafetyMode;
   final bool _ddcModuleSystem;
   final HttpServer _httpServer;
   final WebMemoryFS _webMemoryFS = WebMemoryFS();
@@ -649,20 +645,19 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
   }
 
   File get _resolveDartSdkJsFile {
-    final Map<WebRendererMode, Map<NullSafetyMode, HostArtifact>>
-        dartSdkArtifactMap =
+    final Map<WebRendererMode, HostArtifact> dartSdkArtifactMap =
         _ddcModuleSystem ? kDdcDartSdkJsArtifactMap : kAmdDartSdkJsArtifactMap;
     return globals.fs.file(globals.artifacts!
-        .getHostArtifact(dartSdkArtifactMap[webRenderer]![_nullSafetyMode]!));
+        .getHostArtifact(dartSdkArtifactMap[webRenderer]!));
   }
 
   File get _resolveDartSdkJsMapFile {
-    final Map<WebRendererMode, Map<NullSafetyMode, HostArtifact>>
-        dartSdkArtifactMap = _ddcModuleSystem
+    final Map<WebRendererMode, HostArtifact> dartSdkArtifactMap =
+        _ddcModuleSystem
             ? kDdcDartSdkJsMapArtifactMap
             : kAmdDartSdkJsMapArtifactMap;
     return globals.fs.file(globals.artifacts!
-        .getHostArtifact(dartSdkArtifactMap[webRenderer]![_nullSafetyMode]!));
+        .getHostArtifact(dartSdkArtifactMap[webRenderer]!));
   }
 
   @override
@@ -736,7 +731,6 @@ class WebDevFS implements DevFS {
     required this.chromiumLauncher,
     required this.nullAssertions,
     required this.nativeNullAssertions,
-    required this.nullSafetyMode,
     required this.ddcModuleSystem,
     required this.webRenderer,
     required this.isWasm,
@@ -762,7 +756,6 @@ class WebDevFS implements DevFS {
   final bool nullAssertions;
   final bool nativeNullAssertions;
   final int _port;
-  final NullSafetyMode nullSafetyMode;
   final String? tlsCertPath;
   final String? tlsCertKeyPath;
   final WebRendererMode webRenderer;
@@ -865,7 +858,6 @@ class WebDevFS implements DevFS {
       entrypoint,
       expressionCompiler,
       extraHeaders,
-      nullSafetyMode,
       webRenderer: webRenderer,
       isWasm: isWasm,
       testMode: testMode,

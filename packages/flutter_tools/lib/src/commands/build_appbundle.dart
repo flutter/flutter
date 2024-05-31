@@ -38,7 +38,7 @@ class BuildAppBundleCommand extends BuildSubCommand {
     addBundleSkSLPathOption(hide: !verboseHelp);
     addBuildPerformanceFile(hide: !verboseHelp);
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
-    addNullSafetyModeOptions(hide: !verboseHelp);
+    addNullSafetyModeOptions();
     addEnableExperimentation(hide: !verboseHelp);
     usesAnalyzeSizeFlag();
     addAndroidSpecificBuildOptions(hide: !verboseHelp);
@@ -174,7 +174,6 @@ class BuildAppBundleCommand extends BuildSubCommand {
     }
 
     validateBuild(androidBuildInfo);
-    displayNullSafetyMode(androidBuildInfo.buildInfo);
     globals.terminal.usesTerminalUi = true;
     await androidBuilder?.buildAab(
       project: FlutterProject.current(),

@@ -423,7 +423,6 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     final BuildInfo buildInfo = await cachedBuildInfo;
-    displayNullSafetyMode(buildInfo);
     final FlutterCommandResult xcarchiveResult = await super.runCommand();
 
     final List<ValidationResult?> validationResults = <ValidationResult?>[];
@@ -598,7 +597,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
     addEnableExperimentation(hide: !verboseHelp);
     addBuildPerformanceFile(hide: !verboseHelp);
     addBundleSkSLPathOption(hide: !verboseHelp);
-    addNullSafetyModeOptions(hide: !verboseHelp);
+    addNullSafetyModeOptions();
     usesAnalyzeSizeFlag();
     argParser.addFlag('codesign',
       defaultsTo: true,

@@ -14,8 +14,8 @@ final RegExp _declarationEnd = RegExp('(import)|(library)|(part)');
 const String _blockCommentStart = '/*';
 const String _blockCommentEnd = '*/';
 
-/// The first language version where null safety was available by default.
-final LanguageVersion nullSafeVersion = LanguageVersion(2, 12);
+/// The earliest language version supported by Dart and Flutter tooling.
+final LanguageVersion earliestSupportedVersion = LanguageVersion(2, 12);
 
 LanguageVersion? _currentLanguageVersion;
 
@@ -28,7 +28,7 @@ LanguageVersion currentLanguageVersion(FileSystem fileSystem, String flutterRoot
   // let it crash so it shows up in crash logging.
   final File versionFile = fileSystem.file(fileSystem.path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'version'));
   if (!versionFile.existsSync() && _inUnitTest()) {
-    return LanguageVersion(2, 12);
+    return earliestSupportedVersion;
   }
   final Version version = Version.parse(versionFile.readAsStringSync())!;
   return _currentLanguageVersion = LanguageVersion(version.major, version.minor);

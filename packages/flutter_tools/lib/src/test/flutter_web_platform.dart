@@ -225,12 +225,6 @@ class FlutterWebPlatform extends PlatformPlugin {
 
   bool get _closed => _closeMemo.hasRun;
 
-  NullSafetyMode get _nullSafetyMode {
-    return buildInfo.nullSafetyMode == NullSafetyMode.sound
-      ? NullSafetyMode.sound
-      : NullSafetyMode.unsound;
-  }
-
   final Configuration _config;
   final shelf.Server _server;
   Uri get url => _server.url;
@@ -277,13 +271,13 @@ class FlutterWebPlatform extends PlatformPlugin {
   ));
 
   File get _dartSdk {
-    final Map<WebRendererMode, Map<NullSafetyMode, HostArtifact>> dartSdkArtifactMap = buildInfo.ddcModuleFormat == DdcModuleFormat.ddc ? kDdcDartSdkJsArtifactMap : kAmdDartSdkJsArtifactMap;
-    return _fileSystem.file(_artifacts!.getHostArtifact(dartSdkArtifactMap[webRenderer]![_nullSafetyMode]!));
+    final Map<WebRendererMode, HostArtifact> dartSdkArtifactMap = buildInfo.ddcModuleFormat == DdcModuleFormat.ddc ? kDdcDartSdkJsArtifactMap : kAmdDartSdkJsArtifactMap;
+    return _fileSystem.file(_artifacts!.getHostArtifact(dartSdkArtifactMap[webRenderer]!));
   }
 
   File get _dartSdkSourcemaps {
-      final Map<WebRendererMode, Map<NullSafetyMode, HostArtifact>>  dartSdkArtifactMap = buildInfo.ddcModuleFormat == DdcModuleFormat.ddc ? kDdcDartSdkJsMapArtifactMap : kAmdDartSdkJsMapArtifactMap;
-    return _fileSystem.file(_artifacts!.getHostArtifact(dartSdkArtifactMap[webRenderer]![_nullSafetyMode]!));
+      final Map<WebRendererMode, HostArtifact>  dartSdkArtifactMap = buildInfo.ddcModuleFormat == DdcModuleFormat.ddc ? kDdcDartSdkJsMapArtifactMap : kAmdDartSdkJsMapArtifactMap;
+    return _fileSystem.file(_artifacts!.getHostArtifact(dartSdkArtifactMap[webRenderer]!));
   }
 
   File _canvasKitFile(String relativePath) {

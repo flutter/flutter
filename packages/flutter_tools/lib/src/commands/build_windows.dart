@@ -62,7 +62,6 @@ class BuildWindowsCommand extends BuildSubCommand {
             'windows-arm64' : 'windows-x64';
     final TargetPlatform targetPlatform = getTargetPlatformForName(defaultTargetPlatform);
 
-    displayNullSafetyMode(buildInfo);
     await buildWindows(
       flutterProject.windows,
       buildInfo,

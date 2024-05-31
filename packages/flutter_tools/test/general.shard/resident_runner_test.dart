@@ -421,7 +421,7 @@ void main() {
     Usage: () => TestUsage(),
   }));
 
-  testUsingContext('ResidentRunner reports hot reload event with null safety analytics', () => testbed.run(() async {
+  testUsingContext('ResidentRunner reports hot reload event', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       listViews,
       listViews,
@@ -434,9 +434,8 @@ void main() {
       stayResident: false,
       target: 'main.dart',
       debuggingOptions: DebuggingOptions.enabled(const BuildInfo(
-        BuildMode.debug, '', treeShakeIcons: false, extraFrontEndOptions: <String>[
-        '--enable-experiment=non-nullable',
-        ],
+        BuildMode.debug, '',
+        treeShakeIcons: false,
       )),
       devtoolsHandler: createNoOpHandler,
       analytics: fakeAnalytics,
@@ -1819,7 +1818,6 @@ flutter:
         BuildMode.debug,
         '',
         treeShakeIcons: false,
-        nullSafetyMode: NullSafetyMode.unsound,
       ),
       target: null,
       platform: FakePlatform(),
@@ -1833,7 +1831,7 @@ flutter:
     expect(residentCompiler.targetModel, TargetModel.dartdevc);
     expect(residentCompiler.sdkRoot,
       '${globals.artifacts!.getHostArtifact(HostArtifact.flutterWebSdk).path}/');
-    expect(residentCompiler.platformDill, 'file:///HostArtifact.webPlatformKernelFolder/ddc_outline.dill');
+    expect(residentCompiler.platformDill, 'file:///HostArtifact.webPlatformKernelFolder/ddc_outline_sound.dill');
   }, overrides: <Type, Generator>{
     Artifacts: () => Artifacts.test(),
     FileSystem: () => MemoryFileSystem.test(),

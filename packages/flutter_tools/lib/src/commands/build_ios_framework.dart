@@ -46,7 +46,7 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
     addSplitDebugInfoOption();
     addDartObfuscationOption();
     usesExtraDartFlagOptions(verboseHelp: verboseHelp);
-    addNullSafetyModeOptions(hide: !verboseHelp);
+    addNullSafetyModeOptions();
     addEnableExperimentation(hide: !verboseHelp);
 
     argParser
@@ -104,9 +104,6 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
   @protected
   FlutterVersion get flutterVersion => _injectedFlutterVersion ?? globals.flutterVersion;
   final FlutterVersion? _injectedFlutterVersion;
-
-  @override
-  bool get reportNullSafety => false;
 
   @protected
   late final FlutterProject project = FlutterProject.current();
@@ -237,7 +234,6 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
 
     final Directory outputDirectory = globals.fs.directory(globals.fs.path.absolute(globals.fs.path.normalize(outputArgument)));
     final List<BuildInfo> buildInfos = await getBuildInfos();
-    displayNullSafetyMode(buildInfos.first);
     for (final BuildInfo buildInfo in buildInfos) {
       final String? productBundleIdentifier = await project.ios.productBundleIdentifier(buildInfo);
       globals.printStatus('Building frameworks for $productBundleIdentifier in ${buildInfo.mode.cliName} mode...');

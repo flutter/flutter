@@ -68,7 +68,7 @@ void main() {
       Logger: () => logger,
     });
 
-    testUsingContext('does not support --no-sound-null-safety by default', () async {
+    testUsingContext('does not support --no-sound-null-safety', () async {
       fileSystem.file('lib/main.dart').createSync(recursive: true);
       fileSystem.file('pubspec.yaml').createSync();
       fileSystem.file('.packages').createSync();
@@ -90,28 +90,6 @@ void main() {
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
       Logger: () => logger,
-    });
-
-    testUsingContext('supports --no-sound-null-safety with an overridden NonNullSafeBuilds', () async {
-      fileSystem.file('lib/main.dart').createSync(recursive: true);
-      fileSystem.file('pubspec.yaml').createSync();
-      fileSystem.file('.packages').createSync();
-
-      final FakeDevice device = FakeDevice(isLocalEmulator: true, platformType: PlatformType.android);
-
-      testDeviceManager.devices = <Device>[device];
-      final TestRunCommandThatOnlyValidates command = TestRunCommandThatOnlyValidates();
-      await createTestCommandRunner(command).run(const <String>[
-        'run',
-        '--use-application-binary=app/bar/faz',
-        '--no-sound-null-safety',
-      ]);
-    }, overrides: <Type, Generator>{
-      DeviceManager: () => testDeviceManager,
-      FileSystem: () => fileSystem,
-      Logger: () => logger,
-      NonNullSafeBuilds: () => NonNullSafeBuilds.allowed,
-      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('does not support "--use-application-binary" and "--fast-start"', () async {

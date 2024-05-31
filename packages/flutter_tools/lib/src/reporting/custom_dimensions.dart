@@ -57,9 +57,6 @@ class CustomDimensions {
     this.commandResultEventMaxRss,
     this.commandRunAndroidEmbeddingVersion,
     this.commandPackagesAndroidEmbeddingVersion,
-    this.nullSafety,
-    this.nullSafeMigratedLibraries,
-    this.nullSafeTotalLibraries,
     this.hotEventCompileTimeInMs,
     this.hotEventFindInvalidatedTimeInMs,
     this.hotEventScannedSourcesCount,
@@ -116,10 +113,9 @@ class CustomDimensions {
   final int? commandResultEventMaxRss;  // cd44
   final String? commandRunAndroidEmbeddingVersion;  // cd45
   final String? commandPackagesAndroidEmbeddingVersion;  // cd46
-  final bool? nullSafety;  // cd47
+  // cd47, cd49, cd50 were relevant for the null safety transition,
+  // but only sound null safety is supported now.
   // cd48 was fastReassemble but that feature was removed
-  final int? nullSafeMigratedLibraries;  // cd49
-  final int? nullSafeTotalLibraries;  // cd50
   final int? hotEventCompileTimeInMs;  // cd51
   final int? hotEventFindInvalidatedTimeInMs;  // cd52
   final int? hotEventScannedSourcesCount;  // cd53
@@ -177,9 +173,6 @@ class CustomDimensions {
       if (commandResultEventMaxRss != null) CustomDimensionsEnum.commandResultEventMaxRss.cdKey: commandResultEventMaxRss.toString(),
       if (commandRunAndroidEmbeddingVersion != null) CustomDimensionsEnum.commandRunAndroidEmbeddingVersion.cdKey: commandRunAndroidEmbeddingVersion.toString(),
       if (commandPackagesAndroidEmbeddingVersion != null) CustomDimensionsEnum.commandPackagesAndroidEmbeddingVersion.cdKey: commandPackagesAndroidEmbeddingVersion.toString(),
-      if (nullSafety != null) CustomDimensionsEnum.nullSafety.cdKey: nullSafety.toString(),
-      if (nullSafeMigratedLibraries != null) CustomDimensionsEnum.nullSafeMigratedLibraries.cdKey: nullSafeMigratedLibraries.toString(),
-      if (nullSafeTotalLibraries != null) CustomDimensionsEnum.nullSafeTotalLibraries.cdKey: nullSafeTotalLibraries.toString(),
       if (hotEventCompileTimeInMs != null) CustomDimensionsEnum.hotEventCompileTimeInMs.cdKey: hotEventCompileTimeInMs.toString(),
       if (hotEventFindInvalidatedTimeInMs != null) CustomDimensionsEnum.hotEventFindInvalidatedTimeInMs.cdKey: hotEventFindInvalidatedTimeInMs.toString(),
       if (hotEventScannedSourcesCount != null) CustomDimensionsEnum.hotEventScannedSourcesCount.cdKey: hotEventScannedSourcesCount.toString(),
@@ -244,9 +237,6 @@ class CustomDimensions {
       commandResultEventMaxRss: other.commandResultEventMaxRss ?? commandResultEventMaxRss,
       commandRunAndroidEmbeddingVersion: other.commandRunAndroidEmbeddingVersion ?? commandRunAndroidEmbeddingVersion,
       commandPackagesAndroidEmbeddingVersion: other.commandPackagesAndroidEmbeddingVersion ?? commandPackagesAndroidEmbeddingVersion,
-      nullSafety: other.nullSafety ?? nullSafety,
-      nullSafeMigratedLibraries: other.nullSafeMigratedLibraries ?? nullSafeMigratedLibraries,
-      nullSafeTotalLibraries: other.nullSafeTotalLibraries ?? nullSafeTotalLibraries,
       hotEventCompileTimeInMs: other.hotEventCompileTimeInMs ?? hotEventCompileTimeInMs,
       hotEventFindInvalidatedTimeInMs: other.hotEventFindInvalidatedTimeInMs ?? hotEventFindInvalidatedTimeInMs,
       hotEventScannedSourcesCount: other.hotEventScannedSourcesCount ?? hotEventScannedSourcesCount,
@@ -305,9 +295,6 @@ class CustomDimensions {
       commandResultEventMaxRss: _extractInt(map, CustomDimensionsEnum.commandResultEventMaxRss),
       commandRunAndroidEmbeddingVersion: _extractString(map, CustomDimensionsEnum.commandRunAndroidEmbeddingVersion),
       commandPackagesAndroidEmbeddingVersion: _extractString(map, CustomDimensionsEnum.commandPackagesAndroidEmbeddingVersion),
-      nullSafety: _extractBool(map, CustomDimensionsEnum.nullSafety),
-      nullSafeMigratedLibraries: _extractInt(map, CustomDimensionsEnum.nullSafeMigratedLibraries),
-      nullSafeTotalLibraries: _extractInt(map, CustomDimensionsEnum.nullSafeTotalLibraries),
       hotEventCompileTimeInMs: _extractInt(map, CustomDimensionsEnum.hotEventCompileTimeInMs),
       hotEventFindInvalidatedTimeInMs: _extractInt(map, CustomDimensionsEnum.hotEventFindInvalidatedTimeInMs),
       hotEventScannedSourcesCount: _extractInt(map, CustomDimensionsEnum.hotEventScannedSourcesCount),
@@ -392,10 +379,10 @@ enum CustomDimensionsEnum {
   commandResultEventMaxRss,  // cd44
   commandRunAndroidEmbeddingVersion,  // cd45
   commandPackagesAndroidEmbeddingVersion,  // cd46
-  nullSafety,  // cd47
+  obsolete0,  // cd47 (was nullSafety)
   obsolete1,  // cd48 (was fastReassemble)
-  nullSafeMigratedLibraries,  // cd49
-  nullSafeTotalLibraries,  // cd50
+  obsolete2,  // cd49 (was nullSafeMigratedLibraries)
+  obsolete3,  // cd50 (was nullSafeTotalLibraries)
   hotEventCompileTimeInMs,  // cd51
   hotEventFindInvalidatedTimeInMs,  // cd52
   hotEventScannedSourcesCount,  // cd53

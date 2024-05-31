@@ -757,9 +757,6 @@ abstract class FlutterCommand extends Command<void> {
   /// Whether it is safe for this command to use a cached pub invocation.
   bool get cachePubGet => true;
 
-  /// Whether this command should report null safety analytics.
-  bool get reportNullSafety => false;
-
   late final Duration? deviceDiscoveryTimeout = () {
     if ((argResults?.options.contains(FlutterOptions.kDeviceTimeout) ?? false)
         && (argResults?.wasParsed(FlutterOptions.kDeviceTimeout) ?? false)) {
@@ -882,7 +879,7 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
-  void addNullSafetyModeOptions({ required bool hide }) {
+  void addNullSafetyModeOptions() {
     argParser.addFlag(FlutterOptions.kNullSafety,
       help: 'This flag is deprecated as only null-safe code is supported.',
       defaultsTo: true,
@@ -1039,7 +1036,7 @@ abstract class FlutterCommand extends Command<void> {
     addBundleSkSLPathOption(hide: !verboseHelp);
     addDartObfuscationOption();
     addEnableExperimentation(hide: !verboseHelp);
-    addNullSafetyModeOptions(hide: !verboseHelp);
+    addNullSafetyModeOptions();
     addSplitDebugInfoOption();
     addTreeShakeIconsFlag();
     usesAnalyzeSizeFlag();
@@ -1209,22 +1206,6 @@ abstract class FlutterCommand extends Command<void> {
       codeSizeDirectory = directory.path;
     }
 
-    NullSafetyMode nullSafetyMode = NullSafetyMode.sound;
-    if (argParser.options.containsKey(FlutterOptions.kNullSafety)) {
-      final bool wasNullSafetyFlagParsed = argResults?.wasParsed(FlutterOptions.kNullSafety) ?? false;
-      // Extra frontend options are only provided if explicitly
-      // requested.
-      if (wasNullSafetyFlagParsed) {
-        if (boolArg(FlutterOptions.kNullSafety)) {
-          nullSafetyMode = NullSafetyMode.sound;
-          extraFrontEndOptions.add('--sound-null-safety');
-        } else {
-          nullSafetyMode = NullSafetyMode.unsound;
-          extraFrontEndOptions.add('--no-sound-null-safety');
-        }
-      }
-    }
-
     final bool dartObfuscation = argParser.options.containsKey(FlutterOptions.kDartObfuscationOption)
       && boolArg(FlutterOptions.kDartObfuscationOption);
 
@@ -1325,7 +1306,6 @@ abstract class FlutterCommand extends Command<void> {
       dartExperiments: experiments,
       performanceMeasurementFile: performanceMeasurementFile,
       packagesPath: packagesPath ?? globals.fs.path.absolute('.dart_tool', 'package_config.json'),
-      nullSafetyMode: nullSafetyMode,
       codeSizeDirectory: codeSizeDirectory,
       androidGradleDaemon: androidGradleDaemon,
       androidSkipBuildDependencyValidation: androidSkipBuildDependencyValidation,
@@ -1661,8 +1641,7 @@ abstract class FlutterCommand extends Command<void> {
   @mustCallSuper
   Future<FlutterCommandResult> verifyThenRunCommand(String? commandPath) async {
     if (argParser.options.containsKey(FlutterOptions.kNullSafety) &&
-        argResults![FlutterOptions.kNullSafety] == false &&
-        globals.nonNullSafeBuilds == NonNullSafeBuilds.notAllowed) {
+        argResults![FlutterOptions.kNullSafety] == false) {
       throwToolExit('''
 Could not find an option named "no-${FlutterOptions.kNullSafety}".
 
@@ -1736,9 +1715,6 @@ Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and 
         allowedPlugins = PreviewDevice.supportedPubPlugins;
       }
       await project.regeneratePlatformSpecificTooling(allowedPlugins: allowedPlugins);
-      if (reportNullSafety) {
-        await _sendNullSafetyAnalyticsEvents(project);
-      }
     }
 
     setupApplicationPackages();
@@ -1758,16 +1734,6 @@ Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and 
     }
 
     return runCommand();
-  }
-
-  Future<void> _sendNullSafetyAnalyticsEvents(FlutterProject project) async {
-    final BuildInfo buildInfo = await getBuildInfo();
-    NullSafetyAnalysisEvent(
-      buildInfo.packageConfig,
-      buildInfo.nullSafetyMode,
-      project.manifest.appName,
-      globals.flutterUsage,
-    ).send();
   }
 
   /// The set of development artifacts required for this command.
@@ -1968,12 +1934,3 @@ DevelopmentArtifact? artifactFromTargetPlatform(TargetPlatform targetPlatform) {
 
 /// Returns true if s is either null, empty or is solely made of whitespace characters (as defined by String.trim).
 bool _isBlank(String s) => s.trim().isEmpty;
-
-/// Whether the tool should allow non-null safe builds.
-///
-/// The Dart SDK no longer supports non-null safe builds, so this value in the
-/// tool's context should always be [NonNullSafeBuilds.notAllowed].
-enum NonNullSafeBuilds {
-  allowed,
-  notAllowed,
-}

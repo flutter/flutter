@@ -118,29 +118,11 @@ class FlutterDevice {
     // used to file a bug, but the compiler will still start up correctly.
     if (targetPlatform == TargetPlatform.web_javascript) {
       // TODO(zanderso): consistently provide these flags across platforms.
-      final String platformDillName;
       final List<String> extraFrontEndOptions = List<String>.of(buildInfo.extraFrontEndOptions);
-      switch (buildInfo.nullSafetyMode) {
-        case NullSafetyMode.unsound:
-          platformDillName = 'ddc_outline.dill';
-          if (!extraFrontEndOptions.contains('--no-sound-null-safety')) {
-            extraFrontEndOptions.add('--no-sound-null-safety');
-          }
-        case NullSafetyMode.sound:
-          platformDillName = 'ddc_outline_sound.dill';
-          if (!extraFrontEndOptions.contains('--sound-null-safety')) {
-            extraFrontEndOptions.add('--sound-null-safety');
-          }
-        case NullSafetyMode.autodetect:
-          throw StateError(
-            'Expected buildInfo.nullSafetyMode to be one of unsound or sound, '
-            'got NullSafetyMode.autodetect',
-          );
-      }
 
       final String platformDillPath = globals.fs.path.join(
         globals.artifacts!.getHostArtifact(HostArtifact.webPlatformKernelFolder).path,
-        platformDillName,
+        'ddc_outline_sound.dill',
       );
 
       generator = ResidentCompiler(
