@@ -762,7 +762,6 @@ void main() {
       kind: PointerDeviceKind.mouse,
     );
     await gesture.addPointer();
-    addTearDown(gesture.removePointer);
     await gesture.moveTo(center);
     await tester.pumpAndSettle();
 
@@ -810,7 +809,6 @@ void main() {
       kind: PointerDeviceKind.mouse,
     );
     await gesture.addPointer();
-    addTearDown(gesture.removePointer);
     await gesture.moveTo(center);
     await tester.pumpAndSettle();
 
@@ -1244,7 +1242,6 @@ void main() {
       expect(switchSize, const Size(60.0, 48.0));
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
       await gesture.addPointer(location: tester.getCenter(find.byType(Switch)));
-      addTearDown(gesture.removePointer);
       await tester.pump();
       await gesture.moveTo(tester.getCenter(find.byType(Switch)));
       expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
@@ -1935,7 +1932,6 @@ void main() {
     // Start hovering
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
-    addTearDown(gesture.removePointer);
     await gesture.moveTo(tester.getCenter(find.byType(Switch)));
 
     await tester.pumpWidget(buildApp());
@@ -2015,7 +2011,6 @@ void main() {
     // Start hovering
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
-    addTearDown(gesture.removePointer);
     await gesture.moveTo(tester.getCenter(find.byType(Switch)));
 
     await tester.pumpWidget(buildApp());
@@ -2111,7 +2106,6 @@ void main() {
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
     await gesture.addPointer(location: tester.getCenter(find.byType(Switch)));
-    addTearDown(gesture.removePointer);
 
     await tester.pump();
 
@@ -2516,7 +2510,6 @@ void main() {
     // Start hovering
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
-    addTearDown(gesture.removePointer);
     await gesture.moveTo(tester.getCenter(find.byType(Switch)));
     await tester.pumpAndSettle();
 
@@ -2597,7 +2590,6 @@ void main() {
     // Start hovering
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
-    addTearDown(gesture.removePointer);
     await gesture.moveTo(tester.getCenter(find.byType(Switch)));
     await tester.pumpAndSettle();
 
@@ -2854,7 +2846,6 @@ void main() {
     // Start hovering
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
-    addTearDown(gesture.removePointer);
     await gesture.moveTo(tester.getCenter(find.byType(Switch)));
     await tester.pumpAndSettle();
 
@@ -2927,7 +2918,6 @@ void main() {
     // Start hovering
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
-    addTearDown(gesture.removePointer);
     await gesture.moveTo(tester.getCenter(find.byType(Switch)));
     await tester.pumpAndSettle();
 
@@ -3182,7 +3172,6 @@ void main() {
     // Start hovering
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
-    addTearDown(gesture.removePointer);
     await gesture.moveTo(tester.getCenter(find.byType(Switch)));
     await tester.pumpAndSettle();
 
@@ -3742,7 +3731,6 @@ void main() {
       // Start hovering
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
       await gesture.addPointer();
-      addTearDown(gesture.removePointer);
       await gesture.moveTo(tester.getCenter(find.byType(Switch)));
       await tester.pumpAndSettle();
 
@@ -3880,7 +3868,6 @@ void main() {
       // Start hovering
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
       await gesture.addPointer();
-      addTearDown(gesture.removePointer);
       await gesture.moveTo(tester.getCenter(find.byType(Switch)));
       await tester.pumpAndSettle();
 
