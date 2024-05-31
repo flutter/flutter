@@ -7152,6 +7152,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     SetTextHandler? onSetText,
     VoidCallback? onDidGainAccessibilityFocus,
     VoidCallback? onDidLoseAccessibilityFocus,
+    VoidCallback? onFocus,
     Map<CustomSemanticsAction, VoidCallback>? customSemanticsActions,
   }) : this.fromProperties(
     key: key,
@@ -7216,6 +7217,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       onMoveCursorBackwardByCharacter: onMoveCursorBackwardByCharacter,
       onDidGainAccessibilityFocus: onDidGainAccessibilityFocus,
       onDidLoseAccessibilityFocus: onDidLoseAccessibilityFocus,
+      onFocus: onFocus,
       onDismiss: onDismiss,
       onSetSelection: onSetSelection,
       onSetText: onSetText,
