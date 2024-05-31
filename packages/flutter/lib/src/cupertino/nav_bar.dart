@@ -1852,7 +1852,6 @@ class _NavigationBarTransition extends StatelessWidget {
       AnimatedBuilder(
         animation: animation,
         builder: (BuildContext context, Widget? child) {
-
           return _wrapWithBackground(
             // Don't update the system status bar color mid-flight.
             updateSystemUiOverlay: false,
