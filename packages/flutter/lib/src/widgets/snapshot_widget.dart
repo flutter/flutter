@@ -381,7 +381,7 @@ class _RenderSnapshotWidget extends RenderProxyBox {
 ///   final Rect src = Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble());
 ///   final Rect dst = Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height);
 ///   final Paint paint = Paint()
-///     ..filterQuality = FilterQuality.low;
+///     ..filterQuality = FilterQuality.medium;
 ///   context.canvas.drawImageRect(image, src, dst, paint);
 /// }
 /// ```
@@ -414,7 +414,7 @@ abstract class SnapshotPainter extends ChangeNotifier {
   ///   final Rect src = Rect.fromLTWH(0, 0, sourceSize.width, sourceSize.height);
   ///   final Rect dst = Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height);
   ///   final Paint paint = Paint()
-  ///     ..filterQuality = FilterQuality.low;
+  ///     ..filterQuality = FilterQuality.medium;
   ///   context.canvas.drawImageRect(image, src, dst, paint);
   /// }
   /// ```
@@ -482,7 +482,7 @@ class _DefaultSnapshotPainter implements SnapshotPainter {
     final Rect src = Rect.fromLTWH(0, 0, sourceSize.width, sourceSize.height);
     final Rect dst = Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height);
     final Paint paint = Paint()
-      ..filterQuality = FilterQuality.low;
+      ..filterQuality = FilterQuality.medium;
     context.canvas.drawImageRect(image, src, dst, paint);
   }
 
