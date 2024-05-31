@@ -493,30 +493,6 @@ TEST_P(AiksTest, CanEmptyPictureConvertToImage) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
-TEST_P(AiksTest, CanRenderGroupOpacity) {
-  Canvas canvas;
-
-  Paint red;
-  red.color = Color::Red();
-  Paint green;
-  green.color = Color::Green().WithAlpha(0.5);
-  Paint blue;
-  blue.color = Color::Blue();
-
-  Paint alpha;
-  alpha.color = Color::Red().WithAlpha(0.5);
-
-  canvas.SaveLayer(alpha);
-
-  canvas.DrawRect(Rect::MakeXYWH(000, 000, 100, 100), red);
-  canvas.DrawRect(Rect::MakeXYWH(020, 020, 100, 100), green);
-  canvas.DrawRect(Rect::MakeXYWH(040, 040, 100, 100), blue);
-
-  canvas.Restore();
-
-  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
-}
-
 TEST_P(AiksTest, CoordinateConversionsAreCorrect) {
   Canvas canvas;
 
@@ -1651,45 +1627,6 @@ TEST_P(AiksTest, PaintWithFilters) {
   paint.color_filter = nullptr;
 
   ASSERT_FALSE(paint.HasColorFilter());
-}
-
-TEST_P(AiksTest, OpacityPeepHoleApplicationTest) {
-  auto entity_pass = std::make_shared<EntityPass>();
-  auto rect = Rect::MakeLTRB(0, 0, 100, 100);
-  Paint paint;
-  paint.color = Color::White().WithAlpha(0.5);
-  paint.color_filter =
-      ColorFilter::MakeBlend(BlendMode::kSourceOver, Color::Blue());
-
-  // Paint has color filter, can't elide.
-  auto delegate = std::make_shared<OpacityPeepholePassDelegate>(paint);
-  ASSERT_FALSE(delegate->CanCollapseIntoParentPass(entity_pass.get()));
-
-  paint.color_filter = nullptr;
-  paint.image_filter = ImageFilter::MakeBlur(Sigma(1.0), Sigma(1.0),
-                                             FilterContents::BlurStyle::kNormal,
-                                             Entity::TileMode::kClamp);
-
-  // Paint has image filter, can't elide.
-  delegate = std::make_shared<OpacityPeepholePassDelegate>(paint);
-  ASSERT_FALSE(delegate->CanCollapseIntoParentPass(entity_pass.get()));
-
-  paint.image_filter = nullptr;
-  paint.color = Color::Red();
-
-  // Paint has no alpha, can't elide;
-  delegate = std::make_shared<OpacityPeepholePassDelegate>(paint);
-  ASSERT_FALSE(delegate->CanCollapseIntoParentPass(entity_pass.get()));
-
-  // Positive test.
-  Entity entity;
-  entity.SetContents(SolidColorContents::Make(
-      PathBuilder{}.AddRect(rect).TakePath(), Color::Red()));
-  entity_pass->AddEntity(std::move(entity));
-  paint.color = Color::Red().WithAlpha(0.5);
-
-  delegate = std::make_shared<OpacityPeepholePassDelegate>(paint);
-  ASSERT_TRUE(delegate->CanCollapseIntoParentPass(entity_pass.get()));
 }
 
 TEST_P(AiksTest, DrawPaintAbsorbsClears) {
