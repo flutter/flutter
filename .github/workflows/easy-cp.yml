@@ -30,7 +30,7 @@ jobs:
         run: |
           echo "COMMIT_SHA=$(echo ${{ github.event.pull_request.merge_commit_sha }})" >> $GITHUB_ENV
       - name: Checkout Flutter Repo
-        uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633
+        uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29
         with:
           repository: flutteractionsbot/flutter
           path: flutter
@@ -53,7 +53,7 @@ jobs:
       # TODO(xilaizhang): remove this step once the template is available on release branches.
       - name: Get CP Template
         run: |
-          curl -o PULL_REQUEST_CP_TEMPLATE.md https://raw.githubusercontent.com/flutter/flutter/master/.github/PR_TEMPLATE/PULL_REQUEST_CP_TEMPLATE.md
+          curl -o PULL_REQUEST_CP_TEMPLATE.md https://raw.githubusercontent.com/flutter/flutter/main/.github/PR_TEMPLATE/PULL_REQUEST_CP_TEMPLATE.md
       - name: Create PR on CP success
         if: ${{ steps.attempt-cp.conclusion == 'success' }}
         working-directory: ./flutter

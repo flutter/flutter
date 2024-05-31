@@ -135,6 +135,7 @@ void main() {
       httpClient: FakeHttpClient.any(),
       processManager: FakeProcessManager.empty(),
       artifacts: Artifacts.test(),
+      buildMode: BuildMode.debug,
     );
     expect(() async => devFS.create(), throwsA(isA<DevFSException>()));
   });
@@ -160,6 +161,7 @@ void main() {
       httpClient: FakeHttpClient.any(),
       processManager: FakeProcessManager.empty(),
       artifacts: Artifacts.test(),
+      buildMode: BuildMode.debug,
     );
 
     expect(await devFS.create(), isNotNull);
@@ -210,6 +212,7 @@ void main() {
       uploadRetryThrottle: Duration.zero,
       processManager: FakeProcessManager.empty(),
       artifacts: Artifacts.test(),
+      buildMode: BuildMode.debug,
     );
     await devFS.create();
 
@@ -245,6 +248,7 @@ void main() {
       httpClient: FakeHttpClient.any(),
       processManager: FakeProcessManager.empty(),
       artifacts: Artifacts.test(),
+      buildMode: BuildMode.debug,
     );
 
     await devFS.create();
@@ -287,6 +291,7 @@ void main() {
       httpClient: FakeHttpClient.any(),
       processManager: FakeProcessManager.empty(),
       artifacts: Artifacts.test(),
+      buildMode: BuildMode.debug,
     );
 
     await devFS.create();
@@ -331,6 +336,7 @@ void main() {
       httpClient: HttpClient(),
       processManager: FakeProcessManager.empty(),
       artifacts: Artifacts.test(),
+      buildMode: BuildMode.debug,
     );
 
     await devFS.create();
@@ -382,6 +388,7 @@ void main() {
       httpClient: FakeHttpClient.any(),
       processManager: FakeProcessManager.empty(),
       artifacts: Artifacts.test(),
+      buildMode: BuildMode.debug,
     );
 
     await devFS.create();
@@ -461,6 +468,7 @@ void main() {
       }),
       processManager: FakeProcessManager.empty(),
       artifacts: Artifacts.test(),
+      buildMode: BuildMode.debug,
     );
 
     await devFS.create();
@@ -507,6 +515,7 @@ void main() {
       httpClient: FakeHttpClient.any(),
       processManager: FakeProcessManager.empty(),
       artifacts: Artifacts.test(),
+      buildMode: BuildMode.debug,
     );
 
     await devFS.create();
@@ -612,7 +621,8 @@ void main() {
         httpClient: FakeHttpClient.any(),
         config: Config.test(),
         processManager: FakeProcessManager.empty(),
-        artifacts: Artifacts.test(),
+      artifacts: Artifacts.test(),
+      buildMode: BuildMode.debug,
       );
 
       await devFS.create();
@@ -670,7 +680,8 @@ void main() {
         httpClient: FakeHttpClient.any(),
         config: Config.test(),
         processManager: FakeProcessManager.empty(),
-        artifacts: Artifacts.test(),
+      artifacts: Artifacts.test(),
+      buildMode: BuildMode.debug,
       );
 
       await devFS.create();
@@ -763,6 +774,7 @@ void main() {
         config: Config.test(),
         processManager: processManager,
         artifacts: artifacts,
+        buildMode: BuildMode.debug,
       );
 
       await devFS.create();
@@ -843,6 +855,7 @@ void main() {
         config: Config.test(),
         processManager: processManager,
         artifacts: artifacts,
+        buildMode: BuildMode.debug,
       );
 
       await devFS.create();

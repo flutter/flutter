@@ -210,6 +210,25 @@ class ButtonStyle with Diagnosticable {
   final MaterialStateProperty<double?>? elevation;
 
   /// The padding between the button's boundary and its child.
+  ///
+  /// The vertical aspect of the default or user-specified padding is adjusted
+  /// automatically based on [visualDensity].
+  ///
+  /// When the visual density is [VisualDensity.compact], the top and bottom insets
+  /// are reduced by 8 pixels or set to 0 pixels if the result of the reduced padding
+  /// is negative. For example: the visual density defaults to [VisualDensity.compact]
+  /// on desktop and web, so if the provided padding is 16 pixels on the top and bottom,
+  /// it will be reduced to 8 pixels on the top and bottom. If the provided padding
+  /// is 4 pixels, the result will be no padding on the top and bottom.
+  ///
+  /// When the visual density is [VisualDensity.comfortable], the top and bottom insets
+  /// are reduced by 4 pixels or set to 0 pixels if the result of the reduced padding
+  /// is negative.
+  ///
+  /// When the visual density is [VisualDensity.standard] the top and bottom insets
+  /// are not changed. The visual density defaults to [VisualDensity.standard] on mobile.
+  ///
+  /// See [ThemeData.visualDensity] for more details.
   final MaterialStateProperty<EdgeInsetsGeometry?>? padding;
 
   /// The minimum size of the button itself.
@@ -584,30 +603,6 @@ class ButtonStyle with Diagnosticable {
     if (a == null && b == null) {
       return null;
     }
-    return _LerpSides(a, b, t);
-  }
-}
-
-class _LerpSides implements MaterialStateProperty<BorderSide?> {
-  const _LerpSides(this.a, this.b, this.t);
-
-  final MaterialStateProperty<BorderSide?>? a;
-  final MaterialStateProperty<BorderSide?>? b;
-  final double t;
-
-  @override
-  BorderSide? resolve(Set<MaterialState> states) {
-    final BorderSide? resolvedA = a?.resolve(states);
-    final BorderSide? resolvedB = b?.resolve(states);
-    if (resolvedA == null && resolvedB == null) {
-      return null;
-    }
-    if (resolvedA == null) {
-      return BorderSide.lerp(BorderSide(width: 0, color: resolvedB!.color.withAlpha(0)), resolvedB, t);
-    }
-    if (resolvedB == null) {
-      return BorderSide.lerp(resolvedA, BorderSide(width: 0, color: resolvedA.color.withAlpha(0)), t);
-    }
-    return BorderSide.lerp(resolvedA, resolvedB, t);
+    return MaterialStateBorderSide.lerp(a, b, t);
   }
 }

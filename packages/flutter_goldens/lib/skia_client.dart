@@ -8,7 +8,6 @@ import 'dart:io' as io;
 
 import 'package:crypto/crypto.dart';
 import 'package:file/file.dart';
-import 'package:file/local.dart';
 import 'package:path/path.dart' as path;
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
@@ -44,20 +43,19 @@ class SkiaException implements Exception {
 /// A client for uploading image tests and making baseline requests to the
 /// Flutter Gold Dashboard.
 class SkiaGoldClient {
-  /// Creates a [SkiaGoldClient] with the given [workDirectory].
+  /// Creates a [SkiaGoldClient] with the given [workDirectory] and [Platform].
   ///
   /// All other parameters are optional. They may be provided in tests to
-  /// override the defaults for [fs], [process], [platform], and [httpClient].
+  /// override the defaults for [fs], [process], and [httpClient].
   SkiaGoldClient(
     this.workDirectory, {
-    this.fs = const LocalFileSystem(),
-    this.process = const LocalProcessManager(),
-    this.platform = const LocalPlatform(),
-    Abi? abi,
-    io.HttpClient? httpClient,
+    required this.fs,
+    required this.process,
+    required this.platform,
+    required this.abi,
+    required this.httpClient,
     required this.log,
-  }) : httpClient = httpClient ?? io.HttpClient(),
-       abi = abi ?? Abi.current();
+  });
 
   /// The file system to use for storing the local clone of the repository.
   ///
@@ -65,10 +63,8 @@ class SkiaGoldClient {
   /// replaced by a memory file system.
   final FileSystem fs;
 
-  /// A wrapper for the [dart:io.Platform] API.
-  ///
-  /// This is useful in tests, where the system platform (the default) can be
-  /// replaced by a mock platform instance.
+  /// The environment (current working directory, identity of the OS,
+  /// environment variables, etc).
   final Platform platform;
 
   /// A controller for launching sub-processes.
@@ -82,8 +78,6 @@ class SkiaGoldClient {
   final io.HttpClient httpClient;
 
   /// The ABI of the current host platform.
-  ///
-  /// If not overridden for testing, defaults to [Abi.current];
   final Abi abi;
 
   /// The local [Directory] within the [comparisonRoot] for the current test
@@ -502,7 +496,7 @@ class SkiaGoldClient {
     final String? webRenderer = _webRendererValue;
     final Map<String, dynamic> keys = <String, dynamic>{
       'Platform' : platform.operatingSystem,
-      'Abi': abi.toString(),
+      'Abi': '$abi',
       'CI' : 'luci',
       if (_isImpeller)
         'impeller': 'swiftshader',
@@ -582,20 +576,24 @@ class SkiaGoldClient {
   /// the image keys.
   String getTraceID(String testName) {
     final String? webRenderer = _webRendererValue;
-    final Map<String, Object?> keys = <String, Object?>{
+    final Map<String, Object?> parameters = <String, Object?>{
       if (_isBrowserTest)
         'Browser' : _browserKey,
-      if (webRenderer != null)
-        'WebRenderer' : webRenderer,
+      'Abi': '$abi',
       'CI' : 'luci',
       'Platform' : platform.operatingSystem,
-      'Abi': abi.toString(),
-      'name' : testName,
-      'source_type' : 'flutter',
+      if (webRenderer != null)
+        'WebRenderer' : webRenderer,
       if (_isImpeller)
         'impeller': 'swiftshader',
+      'name' : testName,
+      'source_type' : 'flutter',
     };
-    final String jsonTrace = json.encode(keys);
+    final Map<String, Object?> sorted = <String, Object?>{};
+    for (final String key in parameters.keys.toList()..sort()) {
+      sorted[key] = parameters[key];
+    }
+    final String jsonTrace = json.encode(sorted);
     final String md5Sum = md5.convert(utf8.encode(jsonTrace)).toString();
     return md5Sum;
   }

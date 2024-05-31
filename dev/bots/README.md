@@ -61,7 +61,7 @@ actions through `recipe_modules`. Searching the builder config in [infra](https:
 will indicate the recipe used for a test.
 
 Recipes are just Python with some limitations on what can be imported. They are
-[documented](https://github.com/luci/recipes-py/blob/master/doc/user_guide.md)
+[documented](https://github.com/luci/recipes-py/blob/main/doc/user_guide.md)
 by the [luci/recipes-py GitHub project](https://github.com/luci/recipes-py).
 
 The typical cycle for editing a recipe is:
@@ -165,15 +165,15 @@ For example To remove a published package corresponding to the git hash
 `d444a455de87a2e40b7f576dc12ffd9ab82fd491`, first do a dry run of the script to
 see what it will do:
 
-```
-$ dart ./unpublish_package.dart --temp_dir=/tmp/foo --revision d444a455de87a2e40b7f576dc12ffd9ab82fd491
+```sh
+dart ./unpublish_package.dart --temp_dir=/tmp/foo --revision d444a455de87a2e40b7f576dc12ffd9ab82fd491
 ```
 
 And once you've verified the output of the dry run to be sure it is what you
 want to do, run:
 
-```
-$ dart ./unpublish_package.dart --confirm --temp_dir=/tmp/foo --revision d444a455de87a2e40b7f576dc12ffd9ab82fd491
+```sh
+dart ./unpublish_package.dart --confirm --temp_dir=/tmp/foo --revision d444a455de87a2e40b7f576dc12ffd9ab82fd491
 ```
 
 and it will perform the actions. You will of course need to have access

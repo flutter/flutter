@@ -46,7 +46,7 @@ class WaterfallNotchedRectangle extends NotchedShape {
     // A detailed explanation and the derivation of the formulas below is
     // available at: https://goo.gl/Ufzrqn
 
-    // s1, s2 are the two knobs controlling the behavior of the bezzier curve.
+    // s1, s2 are the two knobs controlling the behavior of the bezier curve.
     const double s1 = 21.0;
     const double s2 = 6.0;
 

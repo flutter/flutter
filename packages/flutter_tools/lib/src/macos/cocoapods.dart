@@ -21,8 +21,8 @@ import '../cache.dart';
 import '../ios/xcodeproj.dart';
 import '../migrations/cocoapods_script_symlink.dart';
 import '../migrations/cocoapods_toolchain_directory_migration.dart';
+import '../project.dart';
 import '../reporting/reporting.dart';
-import '../xcode_project.dart';
 
 const String noCocoaPodsConsequence = '''
   CocoaPods is a package manager for iOS or macOS platform code.
@@ -166,6 +166,10 @@ class CocoaPods {
     bool dependenciesChanged = true,
   }) async {
     if (!xcodeProject.podfile.existsSync()) {
+      // Swift Package Manager doesn't need Podfile, so don't error.
+      if (xcodeProject.parent.usesSwiftPackageManager) {
+        return false;
+      }
       throwToolExit('Podfile missing');
     }
     _warnIfPodfileOutOfDate(xcodeProject);
@@ -258,6 +262,18 @@ class CocoaPods {
       addPodsDependencyToFlutterXcconfig(xcodeProject);
       return;
     }
+    final File podfileTemplate = await getPodfileTemplate(
+      xcodeProject,
+      runnerProject,
+    );
+    podfileTemplate.copySync(podfile.path);
+    addPodsDependencyToFlutterXcconfig(xcodeProject);
+  }
+
+  Future<File> getPodfileTemplate(
+    XcodeBasedProject xcodeProject,
+    Directory runnerProject,
+  ) async {
     String podfileTemplateName;
     if (xcodeProject is MacOSProject) {
       podfileTemplateName = 'Podfile-macos';
@@ -268,7 +284,7 @@ class CocoaPods {
       )).containsKey('SWIFT_VERSION');
       podfileTemplateName = isSwift ? 'Podfile-ios-swift' : 'Podfile-ios-objc';
     }
-    final File podfileTemplate = _fileSystem.file(_fileSystem.path.join(
+    return _fileSystem.file(_fileSystem.path.join(
       Cache.flutterRoot!,
       'packages',
       'flutter_tools',
@@ -276,8 +292,6 @@ class CocoaPods {
       'cocoapods',
       podfileTemplateName,
     ));
-    podfileTemplate.copySync(podfile.path);
-    addPodsDependencyToFlutterXcconfig(xcodeProject);
   }
 
   /// Ensures all `Flutter/Xxx.xcconfig` files for the given Xcode-based
@@ -287,12 +301,24 @@ class CocoaPods {
     _addPodsDependencyToFlutterXcconfig(xcodeProject, 'Release');
   }
 
+  String includePodsXcconfig(String mode) {
+    return 'Pods/Target Support Files/Pods-Runner/Pods-Runner.${mode
+        .toLowerCase()}.xcconfig';
+  }
+
+  bool xcconfigIncludesPods(File xcodeConfig) {
+    if (xcodeConfig.existsSync()) {
+      final String content = xcodeConfig.readAsStringSync();
+      return content.contains('Pods/Target Support Files/Pods-');
+    }
+    return false;
+  }
+
   void _addPodsDependencyToFlutterXcconfig(XcodeBasedProject xcodeProject, String mode) {
     final File file = xcodeProject.xcodeConfigFor(mode);
     if (file.existsSync()) {
       final String content = file.readAsStringSync();
-      final String includeFile = 'Pods/Target Support Files/Pods-Runner/Pods-Runner.${mode
-          .toLowerCase()}.xcconfig';
+      final String includeFile = includePodsXcconfig(mode);
       final String include = '#include? "$includeFile"';
       if (!content.contains('Pods/Target Support Files/Pods-')) {
         file.writeAsStringSync('$include\n$content', flush: true);
@@ -401,6 +427,24 @@ class CocoaPods {
       final ({String failingPod, String sourcePlugin, String podPluginSubdir})?
           podInfo = _parseMinDeploymentFailureInfo(stdout);
       if (podInfo != null) {
+        final Directory symlinksDir;
+        final String podPlatformString;
+        final String platformName;
+        final String docsLink;
+        if (xcodeProject is IosProject) {
+          symlinksDir = xcodeProject.symlinks;
+          podPlatformString = 'ios';
+          platformName = 'iOS';
+          docsLink = 'https://docs.flutter.dev/deployment/ios';
+        } else if (xcodeProject is MacOSProject) {
+          symlinksDir = xcodeProject.ephemeralDirectory.childDirectory('.symlinks');
+          podPlatformString = 'osx';
+          platformName = 'macOS';
+          docsLink = 'https://docs.flutter.dev/deployment/macos';
+        } else {
+          return;
+        }
+
         final String sourcePlugin = podInfo.sourcePlugin;
         // If the plugin's podfile has set its own minimum version correctly
         // based on the requirements of its dependencies the failing pod should
@@ -409,23 +453,6 @@ class CocoaPods {
         // with a minimum version of 12, then building for 11 will report that
         // pod as failing.)
         if (podInfo.failingPod == podInfo.sourcePlugin) {
-          final Directory symlinksDir;
-          final String podPlatformString;
-          final String platformName;
-          final String docsLink;
-          if (xcodeProject is IosProject) {
-            symlinksDir = xcodeProject.symlinks;
-            podPlatformString = 'ios';
-            platformName = 'iOS';
-            docsLink = 'https://docs.flutter.dev/deployment/ios';
-          } else if (xcodeProject is MacOSProject) {
-            symlinksDir = xcodeProject.ephemeralDirectory.childDirectory('.symlinks');
-            podPlatformString = 'osx';
-            platformName = 'macOS';
-            docsLink = 'https://docs.flutter.dev/deployment/macos';
-          } else {
-            return;
-          }
           final File podspec = symlinksDir
               .childDirectory('plugins')
               .childDirectory(sourcePlugin)
@@ -467,8 +494,8 @@ class CocoaPods {
           // with the plugin developer.
           _logger.printError(
             'Error: The pod "${podInfo.failingPod}" required by the plugin '
-            '"$sourcePlugin" requires a higher minimum iOS deployment version '
-            "than the plugin's reported minimum version.\n"
+            '"$sourcePlugin" requires a higher minimum $platformName deployment '
+            "version than the plugin's reported minimum version.\n"
             'To build, remove the plugin "$sourcePlugin", or contact the plugin\'s '
             'developers for assistance.',
             emphasis: true,

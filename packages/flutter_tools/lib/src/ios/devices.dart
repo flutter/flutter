@@ -496,7 +496,15 @@ class IOSDevice extends Device {
       );
       if (!buildResult.success) {
         _logger.printError('Could not build the precompiled application for the device.');
-        await diagnoseXcodeBuildFailure(buildResult, globals.flutterUsage, _logger, globals.analytics);
+        await diagnoseXcodeBuildFailure(
+          buildResult,
+          analytics: globals.analytics,
+          fileSystem: globals.fs,
+          flutterUsage: globals.flutterUsage,
+          logger: globals.logger,
+          platform: SupportedPlatform.ios,
+          project: package.project.parent,
+        );
         _logger.printError('');
         return LaunchResult.failed();
       }
@@ -774,14 +782,11 @@ class IOSDevice extends Device {
 
     final List<Future<Uri?>> discoveryOptions = <Future<Uri?>>[
       vmUrlFromMDns,
+      // vmServiceDiscovery uses device logs (`idevicesyslog`), which doesn't work
+      // on wireless devices.
+      if (vmServiceDiscovery != null && !isWirelesslyConnected)
+        vmServiceDiscovery.uri,
     ];
-
-    // vmServiceDiscovery uses device logs (`idevicesyslog`), which doesn't work
-    // on wireless devices.
-    if (vmServiceDiscovery != null && !isWirelesslyConnected) {
-      final Future<Uri?> vmUrlFromLogs = vmServiceDiscovery.uri;
-      discoveryOptions.add(vmUrlFromLogs);
-    }
 
     Uri? localUri = await Future.any(
       <Future<Uri?>>[...discoveryOptions, cancelCompleter.future],

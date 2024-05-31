@@ -521,7 +521,7 @@ void main() {
     expect(chipTopLeft.dx, avatarCenter.dx - (labelSize.width / 2) - padding - border);
     expect(chipTopLeft.dy, avatarCenter.dy - (labelSize.width / 2) - padding - border);
 
-    // Calculate the distnance between avatar and label.
+    // Calculate the distance between avatar and label.
     Offset labelTopLeft = tester.getTopLeft(find.byType(Container));
     expect(labelTopLeft.dx, avatarCenter.dx + (labelSize.width / 2) + labelPadding);
 
@@ -537,7 +537,7 @@ void main() {
     expect(chipTopLeft.dx, avatarCenter.dx - (iconSize / 2) - padding - border);
     expect(chipTopLeft.dy, avatarCenter.dy - (labelSize.width / 2) - padding - border);
 
-    // Calculate the distnance between avatar and label.
+    // Calculate the distance between avatar and label.
     labelTopLeft = tester.getTopLeft(find.byType(Container));
     expect(labelTopLeft.dx, avatarCenter.dx + (iconSize / 2) + labelPadding);
   });

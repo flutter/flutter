@@ -454,7 +454,16 @@ class SelectableRegionState extends State<SelectableRegion> implements Selection
       if (kIsWeb) {
         PlatformSelectableRegionContextMenu.detach(_selectionDelegate);
       }
-      _clearSelection();
+      if (SchedulerBinding.instance.lifecycleState == AppLifecycleState.resumed) {
+        // We should only clear the selection when this SelectableRegion loses
+        // focus while the application is currently running. It is possible
+        // that the application is not currently running, for example on desktop
+        // platforms, clicking on a different window switches the focus to
+        // the new window causing the Flutter application to go inactive. In this
+        // case we want to retain the selection so it remains when we return to
+        // the Flutter application.
+        _clearSelection();
+      }
     }
     if (kIsWeb) {
       PlatformSelectableRegionContextMenu.attach(_selectionDelegate);
@@ -1678,14 +1687,12 @@ class _SelectableRegionContainerDelegate extends MultiSelectableSelectionContain
   }
 }
 
-/// An abstract base class for updating multiple [Selectable] children.
+/// A delegate that handles events and updates for multiple [Selectable]
+/// children.
 ///
-/// This class provide basic [SelectionEvent] handling and child [Selectable]
-/// updating. The subclass needs to implement [ensureChildUpdated] to ensure
-/// child [Selectable] is updated properly.
-///
-/// This class optimize the selection update by keeping track of the
-/// [Selectable]s that currently contain the selection edges.
+/// Updates are optimized by tracking which [Selectable]s reside on the edges of
+/// a selection. Subclasses should implement [ensureChildUpdated] to describe
+/// how a [Selectable] should behave when added to a selection.
 abstract class MultiSelectableSelectionContainerDelegate extends SelectionContainerDelegate with ChangeNotifier {
   /// Creates an instance of [MultiSelectableSelectionContainerDelegate].
   MultiSelectableSelectionContainerDelegate() {

@@ -4,7 +4,7 @@
 
 To run the scrolling benchmark on a device:
 
-```
+```sh
 flutter drive --profile test_driver/scroll_perf.dart
 ```
 
@@ -17,7 +17,7 @@ More detailed logs should be in `build/platform_views_scroll_perf_hybrid_composi
 
 To measure startup time on a device:
 
-```
+```sh
 flutter run --profile --trace-startup
 ```
 

@@ -42,6 +42,7 @@ class TabBarTheme with Diagnosticable {
     this.splashFactory,
     this.mouseCursor,
     this.tabAlignment,
+    this.textScaler,
   });
 
   /// Overrides the default value for [TabBar.indicator].
@@ -98,6 +99,9 @@ class TabBarTheme with Diagnosticable {
   /// Overrides the default value for [TabBar.tabAlignment].
   final TabAlignment? tabAlignment;
 
+  /// Overrides the default value for [TabBar.textScaler].
+  final TextScaler? textScaler;
+
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   TabBarTheme copyWith({
@@ -115,6 +119,7 @@ class TabBarTheme with Diagnosticable {
     InteractiveInkFeatureFactory? splashFactory,
     MaterialStateProperty<MouseCursor?>? mouseCursor,
     TabAlignment? tabAlignment,
+    TextScaler? textScaler,
   }) {
     return TabBarTheme(
       indicator: indicator ?? this.indicator,
@@ -131,6 +136,7 @@ class TabBarTheme with Diagnosticable {
       splashFactory: splashFactory ?? this.splashFactory,
       mouseCursor: mouseCursor ?? this.mouseCursor,
       tabAlignment: tabAlignment ?? this.tabAlignment,
+      textScaler: textScaler ?? this.textScaler,
     );
   }
 
@@ -161,6 +167,7 @@ class TabBarTheme with Diagnosticable {
       splashFactory: t < 0.5 ? a.splashFactory : b.splashFactory,
       mouseCursor: t < 0.5 ? a.mouseCursor : b.mouseCursor,
       tabAlignment: t < 0.5 ? a.tabAlignment : b.tabAlignment,
+      textScaler: t < 0.5 ? a.textScaler : b.textScaler,
     );
   }
 
@@ -180,6 +187,7 @@ class TabBarTheme with Diagnosticable {
     splashFactory,
     mouseCursor,
     tabAlignment,
+    textScaler,
   );
 
   @override
@@ -204,6 +212,7 @@ class TabBarTheme with Diagnosticable {
         && other.overlayColor == overlayColor
         && other.splashFactory == splashFactory
         && other.mouseCursor == mouseCursor
-        && other.tabAlignment == tabAlignment;
+        && other.tabAlignment == tabAlignment
+        && other.textScaler == textScaler;
   }
 }

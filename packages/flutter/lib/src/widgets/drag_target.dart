@@ -370,14 +370,11 @@ class Draggable<T extends Object> extends StatefulWidget {
   /// recognizing a drag.
   @protected
   MultiDragGestureRecognizer createRecognizer(GestureMultiDragStartCallback onStart) {
-    switch (affinity) {
-      case Axis.horizontal:
-        return HorizontalMultiDragGestureRecognizer(allowedButtonsFilter: allowedButtonsFilter)..onStart = onStart;
-      case Axis.vertical:
-        return VerticalMultiDragGestureRecognizer(allowedButtonsFilter: allowedButtonsFilter)..onStart = onStart;
-      case null:
-        return ImmediateMultiDragGestureRecognizer(allowedButtonsFilter: allowedButtonsFilter)..onStart = onStart;
-    }
+    return switch (affinity) {
+      Axis.horizontal => HorizontalMultiDragGestureRecognizer(allowedButtonsFilter: allowedButtonsFilter),
+      Axis.vertical   => VerticalMultiDragGestureRecognizer(allowedButtonsFilter: allowedButtonsFilter),
+      null            => ImmediateMultiDragGestureRecognizer(allowedButtonsFilter: allowedButtonsFilter),
+    }..onStart = onStart;
   }
 
   @override
@@ -968,12 +965,10 @@ class _DragAvatar<T extends Object> extends Drag {
   }
 
   Offset _restrictAxis(Offset offset) {
-    if (axis == null) {
-      return offset;
-    }
-    if (axis == Axis.horizontal) {
-      return Offset(offset.dx, 0.0);
-    }
-    return Offset(0.0, offset.dy);
+    return switch (axis) {
+      Axis.horizontal => Offset(offset.dx, 0.0),
+      Axis.vertical   => Offset(0.0, offset.dy),
+      null => offset,
+    };
   }
 }

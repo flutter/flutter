@@ -38,6 +38,7 @@ sealed class WebCompilerConfig {
 
   Map<String, dynamic> get _buildKeyMap => <String, dynamic>{
     'optimizationLevel': optimizationLevel,
+    'webRenderer': renderer.name,
   };
 }
 

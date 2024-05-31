@@ -571,6 +571,10 @@ void main() {
         case SemanticsAction.showOnScreen:
         case SemanticsAction.tap:
           semanticsOwner.performAction(expectedId, action);
+        // TODO(yjbanov): temporary adding default case until https://github.com/flutter/engine/pull/53094 rolls in (see https://github.com/flutter/flutter/issues/83809)
+        // ignore: no_default_cases
+        default:
+          throw UnimplementedError();
       }
       expect(performedActions.length, expectedLength);
       expect(performedActions.last, action);
@@ -578,7 +582,7 @@ void main() {
     }
 
     semantics.dispose();
-  });
+  }, skip: true); // TODO(yjbanov): temporary skip until https://github.com/flutter/engine/pull/53094 rolls in (see https://github.com/flutter/flutter/issues/83809)
 
   testWidgets('Semantics widget supports all flags', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -713,11 +717,9 @@ void main() {
   testWidgets('Actions can be replaced without triggering semantics update', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     int semanticsUpdateCount = 0;
-    final SemanticsHandle handle = tester.binding.pipelineOwner.ensureSemantics(
-      listener: () {
-        semanticsUpdateCount += 1;
-      },
-    );
+    tester.binding.pipelineOwner.semanticsOwner!.addListener(() {
+      semanticsUpdateCount += 1;
+    });
 
     final List<String> performedActions = <String>[];
 
@@ -803,7 +805,6 @@ void main() {
     expect(semantics, hasSemantics(expectedSemantics));
     expect(semanticsUpdateCount, 1);
 
-    handle.dispose();
     semantics.dispose();
   });
 
@@ -887,11 +888,9 @@ void main() {
   testWidgets('Semantics widgets built in a widget tree are sorted properly', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     int semanticsUpdateCount = 0;
-    final SemanticsHandle handle = tester.binding.pipelineOwner.ensureSemantics(
-      listener: () {
-        semanticsUpdateCount += 1;
-      },
-    );
+    tester.binding.pipelineOwner.semanticsOwner!.addListener(() {
+      semanticsUpdateCount += 1;
+    });
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -963,18 +962,15 @@ void main() {
       ignoreRect: true,
     ));
 
-    handle.dispose();
     semantics.dispose();
   });
 
   testWidgets('Semantics widgets built with explicit sort orders are sorted properly', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     int semanticsUpdateCount = 0;
-    final SemanticsHandle handle = tester.binding.pipelineOwner.ensureSemantics(
-      listener: () {
-        semanticsUpdateCount += 1;
-      },
-    );
+    tester.binding.pipelineOwner.semanticsOwner!.addListener(() {
+      semanticsUpdateCount += 1;
+    });
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -1021,18 +1017,15 @@ void main() {
       ignoreRect: true,
     ));
 
-    handle.dispose();
     semantics.dispose();
   });
 
   testWidgets('Semantics widgets without sort orders are sorted properly', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     int semanticsUpdateCount = 0;
-    final SemanticsHandle handle = tester.binding.pipelineOwner.ensureSemantics(
-      listener: () {
-        semanticsUpdateCount += 1;
-      },
-    );
+    tester.binding.pipelineOwner.semanticsOwner!.addListener(() {
+      semanticsUpdateCount += 1;
+    });
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -1082,18 +1075,15 @@ void main() {
       ignoreId: true,
     ));
 
-    handle.dispose();
     semantics.dispose();
   });
 
   testWidgets('Semantics widgets that are transformed are sorted properly', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     int semanticsUpdateCount = 0;
-    final SemanticsHandle handle = tester.binding.pipelineOwner.ensureSemantics(
-      listener: () {
-        semanticsUpdateCount += 1;
-      },
-    );
+    tester.binding.pipelineOwner.semanticsOwner!.addListener(() {
+      semanticsUpdateCount += 1;
+    });
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -1146,14 +1136,13 @@ void main() {
       ignoreId: true,
     ));
 
-    handle.dispose();
     semantics.dispose();
   });
 
   testWidgets('Semantics widgets without sort orders are sorted properly when no Directionality is present', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     int semanticsUpdateCount = 0;
-    final SemanticsHandle handle = tester.binding.pipelineOwner.ensureSemantics(listener: () {
+    tester.binding.pipelineOwner.semanticsOwner!.addListener(() {
       semanticsUpdateCount += 1;
     });
     await tester.pumpWidget(
@@ -1247,7 +1236,6 @@ void main() {
       ),
     );
 
-    handle.dispose();
     semantics.dispose();
   });
 
