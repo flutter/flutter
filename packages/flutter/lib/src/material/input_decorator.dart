@@ -1754,10 +1754,8 @@ class InputDecorator extends StatefulWidget {
   /// The style on which to base the label, hint, counter, and error styles
   /// if the [decoration] does not provide explicit styles.
   ///
-  /// If null, [TextTheme.bodyLarge] will be used.
-  ///
-  /// If null and [ThemeData.useMaterial3] is false, [TextTheme.titleMedium] will
-  /// be used.
+  /// If null, [baseStyle] defaults to the `titleMedium` style from the
+  /// current [Theme], see [ThemeData.textTheme].
   ///
   /// The [TextStyle.textBaseline] of the [baseStyle] is used to determine
   /// the baseline used for text alignment.
@@ -2064,7 +2062,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     final TextStyle? style = MaterialStateProperty.resolveAs(decoration.hintStyle, materialState)
       ?? MaterialStateProperty.resolveAs(themeData.inputDecorationTheme.hintStyle, materialState);
 
-    return (themeData.useMaterial3 ? themeData.textTheme.bodyLarge! : themeData.textTheme.titleMedium!)
+    return themeData.textTheme.titleMedium!
       .merge(widget.baseStyle)
       .merge(defaultStyle)
       .merge(style);
@@ -4674,9 +4672,9 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
   @override
   TextStyle? get hintStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
     if (states.contains(MaterialState.disabled)) {
-      return TextStyle(color: _colors.onSurface.withOpacity(0.38));
+      return TextStyle(color: Theme.of(context).disabledColor);
     }
-    return TextStyle(color: _colors.onSurfaceVariant);
+    return TextStyle(color: Theme.of(context).hintColor);
   });
 
   @override
