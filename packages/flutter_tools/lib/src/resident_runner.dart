@@ -118,7 +118,7 @@ class FlutterDevice {
     // used to file a bug, but the compiler will still start up correctly.
     if (targetPlatform == TargetPlatform.web_javascript) {
       // TODO(zanderso): consistently provide these flags across platforms.
-      final List<String> extraFrontEndOptions = <String>[...buildInfo.extraFrontEndOptions, '--sound-null-safety'];
+      final List<String> extraFrontEndOptions = List<String>.of(buildInfo.extraFrontEndOptions);
 
       final String platformDillPath = globals.fs.path.join(
         globals.artifacts!.getHostArtifact(HostArtifact.webPlatformKernelFolder).path,

@@ -1193,8 +1193,6 @@ abstract class FlutterCommand extends Command<void> {
       }
     }
 
-    extraFrontEndOptions.add('--sound-null-safety');
-
     String? codeSizeDirectory;
     if (argParser.options.containsKey(FlutterOptions.kAnalyzeSize) && boolArg(FlutterOptions.kAnalyzeSize)) {
       Directory directory = globals.fsUtils.getUniqueDirectory(

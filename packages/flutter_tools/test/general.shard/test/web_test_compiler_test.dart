@@ -65,7 +65,6 @@ void main() {
         '--platform',
         'file:///HostArtifact.webPlatformKernelFolder/ddc_outline_sound.dill',
         '--verbosity=error',
-        '--sound-null-safety'
       ], stdout: 'result abc\nline0\nline1\nabc\nabc build/out 0')
     ]);
     final WebTestCompiler compiler = WebTestCompiler(
