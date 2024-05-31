@@ -51,17 +51,11 @@ void main() {
 
     for (final HostArtifact artifact in <HostArtifact>[
       HostArtifact.webPrecompiledAmdCanvaskitAndHtmlSoundSdk,
-      HostArtifact.webPrecompiledAmdCanvaskitAndHtmlSdk,
       HostArtifact.webPrecompiledAmdCanvaskitSoundSdk,
-      HostArtifact.webPrecompiledAmdCanvaskitSdk,
       HostArtifact.webPrecompiledAmdSoundSdk,
-      HostArtifact.webPrecompiledAmdSdk,
       HostArtifact.webPrecompiledDdcCanvaskitAndHtmlSoundSdk,
-      HostArtifact.webPrecompiledDdcCanvaskitAndHtmlSdk,
       HostArtifact.webPrecompiledDdcCanvaskitSoundSdk,
-      HostArtifact.webPrecompiledDdcCanvaskitSdk,
       HostArtifact.webPrecompiledDdcSoundSdk,
-      HostArtifact.webPrecompiledDdcSdk,
     ]) {
       final File artifactFile = artifacts.getHostArtifact(artifact) as File;
       artifactFile.createSync();

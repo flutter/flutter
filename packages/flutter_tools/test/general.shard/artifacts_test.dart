@@ -218,22 +218,6 @@ void main() {
 
     testWithoutContext('Precompiled web AMD module system artifact paths are correct', () {
       expect(
-        artifacts.getHostArtifact(HostArtifact.webPrecompiledAmdSdk).path,
-        'root/bin/cache/flutter_web_sdk/kernel/amd/dart_sdk.js',
-      );
-      expect(
-        artifacts.getHostArtifact(HostArtifact.webPrecompiledAmdSdkSourcemaps).path,
-        'root/bin/cache/flutter_web_sdk/kernel/amd/dart_sdk.js.map',
-      );
-      expect(
-        artifacts.getHostArtifact(HostArtifact.webPrecompiledAmdCanvaskitSdk).path,
-        'root/bin/cache/flutter_web_sdk/kernel/amd-canvaskit/dart_sdk.js',
-      );
-      expect(
-        artifacts.getHostArtifact(HostArtifact.webPrecompiledAmdCanvaskitSdkSourcemaps).path,
-        'root/bin/cache/flutter_web_sdk/kernel/amd-canvaskit/dart_sdk.js.map',
-      );
-      expect(
         artifacts.getHostArtifact(HostArtifact.webPrecompiledAmdSoundSdk).path,
         'root/bin/cache/flutter_web_sdk/kernel/amd-sound/dart_sdk.js',
       );
@@ -252,22 +236,6 @@ void main() {
     });
 
      testWithoutContext('Precompiled web DDC module system artifact paths are correct', () {
-      expect(
-        artifacts.getHostArtifact(HostArtifact.webPrecompiledDdcSdk).path,
-        'root/bin/cache/flutter_web_sdk/kernel/ddc/dart_sdk.js',
-      );
-      expect(
-        artifacts.getHostArtifact(HostArtifact.webPrecompiledDdcSdkSourcemaps).path,
-        'root/bin/cache/flutter_web_sdk/kernel/ddc/dart_sdk.js.map',
-      );
-      expect(
-        artifacts.getHostArtifact(HostArtifact.webPrecompiledDdcCanvaskitSdk).path,
-        'root/bin/cache/flutter_web_sdk/kernel/ddc-canvaskit/dart_sdk.js',
-      );
-      expect(
-        artifacts.getHostArtifact(HostArtifact.webPrecompiledDdcCanvaskitSdkSourcemaps).path,
-        'root/bin/cache/flutter_web_sdk/kernel/ddc-canvaskit/dart_sdk.js.map',
-      );
       expect(
         artifacts.getHostArtifact(HostArtifact.webPrecompiledDdcSoundSdk).path,
         'root/bin/cache/flutter_web_sdk/kernel/ddc-sound/dart_sdk.js',
