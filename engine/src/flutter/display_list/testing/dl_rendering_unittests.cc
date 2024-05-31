@@ -2650,7 +2650,7 @@ class CanvasCompareTester {
   static void compareToReference(const RenderResult* test_result,
                                  const RenderResult* ref_result,
                                  const std::string& info,
-                                 SkRect* bounds,
+                                 const SkRect* bounds,
                                  const BoundsTolerance* tolerance,
                                  const DlColor bg,
                                  bool fuzzyCompares = false,
@@ -3960,15 +3960,24 @@ TEST_F(DisplayListRendering, SaveLayerConsolidation) {
         // when we claim that they are compatible and they aren't.
         const bool always = false;
 
+        // In some circumstances, Skia can combine image filter evaluations
+        // and elide a renderpass. In this case rounding and precision of inputs
+        // to color filters may cause the output to differ by 1.
         if (always || same) {
-          CanvasCompareTester::quickCompareToReference(
-              nested_results.get(), combined_results.get(), same,
-              "nested " + desc1 + " then " + desc2);
+          CanvasCompareTester::compareToReference(
+              nested_results.get(), combined_results.get(),
+              "nested " + desc1 + " then " + desc2, /*bounds=*/nullptr,
+              /*tolerance=*/nullptr, DlColor::kTransparent(),
+              /*fuzzyCompares=*/true, combined_results->width(),
+              combined_results->height(), /*printMismatches=*/true);
         }
         if (always || rev_same) {
-          CanvasCompareTester::quickCompareToReference(
-              reverse_results.get(), combined_results.get(), rev_same,
-              "nested " + desc2 + " then " + desc1);
+          CanvasCompareTester::compareToReference(
+              reverse_results.get(), combined_results.get(),
+              "nested " + desc2 + " then " + desc1, /*bounds=*/nullptr,
+              /*tolerance=*/nullptr, DlColor::kTransparent(),
+              /*fuzzyCompares=*/true, combined_results->width(),
+              combined_results->height(), /*printMismatches=*/true);
         }
       };
 
