@@ -677,7 +677,7 @@ void main() {
     await tester.tap(find.text('Go'));
     await tester.pump();
 
-    expect(findScrollableActionsSectionRenderBox(tester).size.height, moreOrLessEquals(84.0));
+    expect(findScrollableActionsSectionRenderBox(tester).size.height, moreOrLessEquals(112.3));
   });
 
   testWidgets('3 action buttons with cancel button', (WidgetTester tester) async {
@@ -711,7 +711,7 @@ void main() {
     await tester.tap(find.text('Go'));
     await tester.pump();
 
-    expect(findScrollableActionsSectionRenderBox(tester).size.height, moreOrLessEquals(84.0));
+    expect(findScrollableActionsSectionRenderBox(tester).size.height, moreOrLessEquals(168.6));
   });
 
   testWidgets('4+ action buttons with cancel button', (WidgetTester tester) async {
@@ -797,7 +797,7 @@ void main() {
     await tester.tap(find.text('Go'));
     await tester.pump();
 
-    expect(findScrollableActionsSectionRenderBox(tester).size.height, moreOrLessEquals(84.0));
+    expect(findScrollableActionsSectionRenderBox(tester).size.height, moreOrLessEquals(112.3));
   });
 
   testWidgets('Action sheet with just cancel button is correct', (WidgetTester tester) async {

@@ -982,16 +982,25 @@ class _ActionSheetMainSheetState extends State<_ActionSheetMainSheet> {
 
   bool _hasActions() => (widget.actions?.length ?? 0) != 0;
 
-  Widget _buildContent({required bool hasActions, required double maxHeight}) {
-    if (!hasActions) {
-      return Flexible(
+  // If `aggressivelyLayout` is true, then the content section takes as much
+  // space as needed up to `maxHeight`.
+  //
+  // If `aggressivelyLayout` is false, then the content section takes whatever
+  // space is left by the other sections.
+  Widget _buildContent({
+    required bool hasActions,
+    required bool aggressivelyLayout,
+    required double maxHeight,
+  }) {
+    if (hasActions && aggressivelyLayout) {
+      return ConstrainedBox(
+        constraints: BoxConstraints(
+          maxHeight: maxHeight,
+        ),
         child: widget.contentSection,
       );
     }
-    return ConstrainedBox(
-      constraints: BoxConstraints(
-        maxHeight: maxHeight,
-      ),
+    return Flexible(
       child: widget.contentSection,
     );
   }
@@ -1012,9 +1021,13 @@ class _ActionSheetMainSheetState extends State<_ActionSheetMainSheet> {
 
   @override
   Widget build(BuildContext context) {
-    // If both the content section and the actions section overflow, the content
-    // section takes priority but must leave at least `actionsMinHeight` for the
-    // actions section.
+    // The layout rule:
+    //
+    // 1. If there are <= 3 buttons, then the buttons should never scroll.
+    // 2. If there are >3 buttons, then the content section takes priority to
+    //    take over spaces but must leave at least `actionsMinHeight` for the
+    //    actions section.
+    final bool actionsMightScroll = (widget.actions?.length ?? 0) > 3;
     final Color backgroundColor = CupertinoDynamicColor.resolve(_kActionSheetBackgroundColor, context);
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
@@ -1023,6 +1036,7 @@ class _ActionSheetMainSheetState extends State<_ActionSheetMainSheet> {
           children: <Widget>[
             _buildContent(
               hasActions: _hasActions(),
+              aggressivelyLayout: actionsMightScroll,
               maxHeight: constraints.maxHeight - _kActionSheetActionsSectionMinHeight - _kDividerThickness,
             ),
             if (widget.hasContent && _hasActions())
@@ -1031,6 +1045,7 @@ class _ActionSheetMainSheetState extends State<_ActionSheetMainSheet> {
                 hidden: false,
               ),
             Flexible(
+              flex: actionsMightScroll ? 1 : 0,
               child: Stack(
                 children: <Widget>[
                   Positioned.fill(
