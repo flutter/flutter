@@ -116,7 +116,7 @@ class WebTestCompiler {
     required WebRendererMode webRenderer,
   }) async {
     final LanguageVersion languageVersion = currentLanguageVersion(_fileSystem, Cache.flutterRoot!);
-    final List<String> extraFrontEndOptions = List<String>.of(buildInfo.extraFrontEndOptions);
+    final List<String> extraFrontEndOptions = <String>[...buildInfo.extraFrontEndOptions, '--sound-null-safety'];
 
     final String platformDillPath = _fileSystem.path.join(
       _artifacts.getHostArtifact(HostArtifact.webPlatformKernelFolder).path,
