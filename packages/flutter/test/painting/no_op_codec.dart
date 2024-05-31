@@ -4,7 +4,20 @@
 
 import 'dart:ui';
 
-class NoopCodec implements Codec {
+/// Returns a [Codec] that throws on all member invocations.
+Codec createNoOpCodec() => _NoOpCodec();
+
+/// Function matching [DecoderBufferCallback] which returns a [Codec]
+/// that throws on all member invocations.
+Future<Codec> noOpDecoderBufferCallback(
+  ImmutableBuffer buffer, {
+  int? cacheWidth,
+  int? cacheHeight,
+  bool? allowUpscaling,
+}) async =>
+    _NoOpCodec();
+
+class _NoOpCodec implements Codec {
   @override
   void dispose() {}
 
@@ -17,11 +30,3 @@ class NoopCodec implements Codec {
   @override
   int get repetitionCount => throw UnimplementedError();
 }
-
-Future<Codec> noopCodec(
-  ImmutableBuffer buffer, {
-  int? cacheWidth,
-  int? cacheHeight,
-  bool? allowUpscaling,
-}) async =>
-    NoopCodec();
