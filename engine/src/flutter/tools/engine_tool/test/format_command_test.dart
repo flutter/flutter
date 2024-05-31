@@ -159,7 +159,7 @@ void main() {
     final FakeProcessManager manager = _formatProcessManager(
       expectedFlags: <String>['--fix'],
       stdout: <String>[
-        'To fix, run `et format` or:',
+        'To fix, run `et format --all` or:',
         'many',
         'lines',
         'of',
@@ -185,7 +185,7 @@ void main() {
     final FakeProcessManager manager = _formatProcessManager(
       expectedFlags: <String>[],
       stdout: <String>[
-        'To fix, run `et format` or:',
+        'To fix, run `et format --all` or:',
         'many',
         'lines',
         'of',
@@ -206,7 +206,7 @@ void main() {
     expect(
         stringsFromLogs(testLogs),
         equals(<String>[
-          'To fix, run `et format` or:\n',
+          'To fix, run `et format --all` or:\n',
           'many\n',
           'lines\n',
           'of\n',

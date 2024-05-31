@@ -124,7 +124,7 @@ class _FormatStreamer {
       return;
     }
     final String l = line.trim();
-    if (l == 'To fix, run `et format` or:') {
+    if (l == 'To fix, run `et format --all` or:') {
       inADiff = true;
     }
     if (l.isNotEmpty && (!inADiff || dryRun)) {
