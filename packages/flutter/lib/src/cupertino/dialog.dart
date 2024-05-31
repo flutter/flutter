@@ -631,6 +631,7 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
             child: _ActionSheetMainSheet(
               scrollController: _effectiveActionScrollController,
               hasContent: hasContent,
+              hasCancelButton: widget.cancelButton != null,
               contentSection: Builder(builder: _buildContent),
               actions: widget.actions,
               dividerColor: _kActionSheetButtonDividerColor,
@@ -930,6 +931,7 @@ class _ActionSheetMainSheet extends StatefulWidget {
     required this.scrollController,
     required this.actions,
     required this.hasContent,
+    required this.hasCancelButton,
     required this.contentSection,
     required this.dividerColor,
   });
@@ -937,6 +939,7 @@ class _ActionSheetMainSheet extends StatefulWidget {
   final ScrollController? scrollController;
   final List<Widget>? actions;
   final bool hasContent;
+  final bool hasCancelButton;
   final Widget contentSection;
   final Color dividerColor;
 
@@ -1023,11 +1026,14 @@ class _ActionSheetMainSheetState extends State<_ActionSheetMainSheet> {
   Widget build(BuildContext context) {
     // The layout rule:
     //
-    // 1. If there are <= 3 buttons, then the buttons should never scroll.
-    // 2. If there are >3 buttons, then the content section takes priority to
-    //    take over spaces but must leave at least `actionsMinHeight` for the
-    //    actions section.
-    final bool actionsMightScroll = (widget.actions?.length ?? 0) > 3;
+    // 1. If there are <= 3 buttons and a cancel button, or 1 button without a
+    //    cancel button, then the actions section should never scroll.
+    // 2. Otherwise, then the content section takes priority to take over spaces
+    //    but must leave at least `actionsMinHeight` for the actions section.
+    final int numActions = widget.actions?.length ?? 0;
+    final bool actionsMightScroll =
+        (numActions > 3 && widget.hasCancelButton) ||
+        (numActions > 1 && !widget.hasCancelButton) ;
     final Color backgroundColor = CupertinoDynamicColor.resolve(_kActionSheetBackgroundColor, context);
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
