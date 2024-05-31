@@ -287,7 +287,6 @@ void ContextVK::Setup(Settings settings) {
     return;
   }
   if (!transfer_queue.has_value()) {
-    FML_LOG(INFO) << "Dedicated transfer queue not avialable.";
     transfer_queue = graphics_queue.value();
   }
   if (!compute_queue.has_value()) {
