@@ -6,6 +6,7 @@ import 'dart:math' as math;
 import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -146,6 +147,14 @@ const Color _kActionSheetButtonDividerColor = _kActionSheetContentTextColor;
 // The following constant represents a division in text scale factor beyond which
 // we want to change how the dialog is laid out.
 const double _kMaxRegularTextScaleFactor = 1.4;
+
+// Returns the first element of the given list, or null if the list is empty.
+T? _maybeFirst<T>(List<T> l) {
+  if (l.isEmpty) {
+    return null;
+  }
+  return l.first;
+}
 
 // Accessibility mode on iOS is determined by the text scale factor that the
 // user has selected.
@@ -445,6 +454,246 @@ class CupertinoPopupSurface extends StatelessWidget {
   }
 }
 
+typedef _HitTester = HitTestResult Function(Offset location);
+
+// Recognizes taps with possible sliding during the tap.
+//
+// This recognizer only recognizes a single primary pointer. The first pointer
+// added to the recognizer becomes the primary pointer. All other pointers added
+// to the recognizer while the primary pointer is still in effect are considered
+// part of this gesture with events ignored. After the current primary pointer
+// ends, the next pointer added to the recognizer becomes the new primary
+// pointer (which starts a new gesture sequence).
+//
+// This recognizer only allows [kPrimaryMouseButton].
+class _SlidingTapGestureRecognizer extends PanGestureRecognizer {
+  _SlidingTapGestureRecognizer({
+    super.debugOwner,
+  }) : super(dragStartBehavior: DragStartBehavior.down);
+
+  int? _primaryPointer;
+
+  @override
+  void addAllowedPointer(PointerDownEvent event) {
+    _primaryPointer ??= event.pointer;
+    super.addAllowedPointer(event);
+  }
+
+  @override
+  void rejectGesture(int pointer) {
+    if (pointer == _primaryPointer) {
+      _primaryPointer = null;
+    }
+    super.rejectGesture(pointer);
+  }
+
+  @override
+  void handleEvent(PointerEvent event) {
+    if (event.pointer == _primaryPointer) {
+      // If this gesture has a competing gesture (such as scrolling), and the
+      // pointer has not moved far enough to get this panning accepted, a
+      // pointer up event should still be considered as an accepted tap up.
+      // Resolving as accepted will trigger onDragEnd.
+      if (event is PointerUpEvent) {
+        resolve(GestureDisposition.accepted);
+        stopTrackingPointer(_primaryPointer!);
+      } else {
+        super.handleEvent(event);
+      }
+      if (event is PointerUpEvent || event is PointerCancelEvent) {
+        _primaryPointer = null;
+      }
+    }
+  }
+
+  @override
+  String get debugDescription => 'tap slide';
+}
+
+class _AvatarSelectionGestureRecognizer extends GestureRecognizer {
+  _AvatarSelectionGestureRecognizer({super.debugOwner, required this.hitTest})
+    : _slidingTap = _SlidingTapGestureRecognizer() {
+    _slidingTap
+      ..onDown = _onDown
+      ..onUpdate = _onUpdate
+      ..onEnd = _onEnd
+      ..onCancel = _onCancel;
+  }
+
+  final _HitTester hitTest;
+
+  final List<_ActionSheetDragAvatar> _currentAvatars = <_ActionSheetDragAvatar>[];
+  final _SlidingTapGestureRecognizer _slidingTap;
+
+  @override
+  void acceptGesture(int pointer) {
+    _slidingTap.acceptGesture(pointer);
+  }
+
+  @override
+  void rejectGesture(int pointer) {
+    _slidingTap.rejectGesture(pointer);
+  }
+
+  @override
+  void addPointer(PointerDownEvent event) {
+    _slidingTap.addPointer(event);
+  }
+
+  @override
+  void addPointerPanZoom(PointerPanZoomStartEvent event) {
+    _slidingTap.addPointerPanZoom(event);
+  }
+
+  @override
+  void dispose() {
+    _slidingTap.dispose();
+    super.dispose();
+  }
+
+  // Collect the `_ActionSheetDragAvatar`s that are currently hit by the
+  // pointer, check whether the current avatars have changed, and invoke their
+  // methods if necessary.
+  void _updateDrag(Offset pointerPosition) {
+    final HitTestResult result = hitTest(pointerPosition);
+
+    final List<_ActionSheetDragAvatar> foundAvatars = <_ActionSheetDragAvatar>[];
+    for (final HitTestEntry entry in result.path) {
+      if (entry.target case final RenderMetaData target) {
+        if (target.metaData is _ActionSheetDragAvatar) {
+          foundAvatars.add(target.metaData as _ActionSheetDragAvatar);
+        }
+      }
+    }
+
+    // Compare whether the active avatar has changed by simply comparing
+    // the first (inner-most) avatar of the nest.
+    if (_maybeFirst(_currentAvatars) != _maybeFirst(foundAvatars)) {
+      for (final _ActionSheetDragAvatar avatar in _currentAvatars) {
+        avatar.didLeave();
+      }
+      _currentAvatars
+        ..clear()
+        ..addAll(foundAvatars);
+      for (final _ActionSheetDragAvatar avatar in _currentAvatars) {
+        avatar.didEnter();
+      }
+    }
+  }
+
+  void _onDown(DragDownDetails details) {
+    _updateDrag(details.globalPosition);
+  }
+
+  void _onUpdate(DragUpdateDetails details) {
+    _updateDrag(details.globalPosition);
+  }
+
+  void _onEnd(DragEndDetails details) {
+    _updateDrag(details.globalPosition);
+    for (final _ActionSheetDragAvatar avatar in _currentAvatars) {
+      avatar.didConfirm();
+    }
+    _currentAvatars.clear();
+  }
+
+  void _onCancel() {
+    for (final _ActionSheetDragAvatar avatar in _currentAvatars) {
+      avatar.didLeave();
+    }
+    _currentAvatars.clear();
+  }
+
+  @override
+  String get debugDescription => 'button dragging';
+}
+
+// The gesture detector used by action sheets.
+//
+// This gesture detector only responds to the first added pointer (called the
+// primary pointer). All later pointers are kept and ignored. If the primary
+// pointer ends, the next added pointer is considered the new primary pointer.
+//
+// This gesture detector only recognizes one gesture,
+// `_AvatarSelectionGestureRecognizer`.
+class _ActionSheetGestureDetector extends StatelessWidget {
+  const _ActionSheetGestureDetector({
+    this.child,
+  });
+
+  final Widget? child;
+
+  HitTestResult _hitTest(BuildContext context, Offset globalPosition) {
+    final int viewId = View.of(context).viewId;
+    final HitTestResult result = HitTestResult();
+    WidgetsBinding.instance.hitTestInView(result, globalPosition, viewId);
+    return result;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final Map<Type, GestureRecognizerFactory> gestures = <Type, GestureRecognizerFactory>{};
+    gestures[_AvatarSelectionGestureRecognizer] = GestureRecognizerFactoryWithHandlers<_AvatarSelectionGestureRecognizer>(
+      () => _AvatarSelectionGestureRecognizer(
+        debugOwner: this,
+        hitTest: (Offset globalPosition) => _hitTest(context, globalPosition),
+      ),
+      (_AvatarSelectionGestureRecognizer instance) {}
+    );
+
+    return RawGestureDetector(
+      excludeFromSemantics: true,
+      gestures: gestures,
+      child: child,
+    );
+  }
+}
+
+// A region that responds to the "button dragging" gesture.
+//
+// While a button is usually triggered with a tap, several widgets, such as
+// Cupertino action sheets or dialogs, allow the user to "reselect buttons",
+// i.e. drag the pointer around after pressing, and select the button in which
+// the drag ends.
+//
+// This class must be provided to a `MetaData` widget as data, and is typically
+// implemented by a widget state class. When an eligible dragging gesture
+// enters, leaves, or ends in the region marked by the `MetaData` widget,
+// corresponding methods will be called.
+//
+// Multiple `_ActionSheetDragAvatar`s might be nested, which will be treated as
+// the same region, and any eligible method will apply to all avatars in the
+// nest. Since the differentiating algorithm simply checks whether inner-most
+// avatar has changed, all nested avatars must mark the exact same region. (This
+// simple rule is used because it's suffcient for our use cases for now.)
+abstract class _ActionSheetDragAvatar {
+  // A pointer has entered this region.
+  //
+  // This includes:
+  //
+  //  * The pointer has moved into this region from outside.
+  //  * The point has contacted the screen in this region. In this case, this
+  //    method is called as soon as the pointer down event occurs regardless of
+  //    whether the gesture wins the arena immediately.
+  void didEnter();
+
+  // A pointer has exited this region.
+  //
+  // This includes:
+  //  * The pointer has moved out of this region.
+  //  * The pointer is no longer in contact with the screen.
+  //  * The pointer is canceled.
+  //  * The gesture loses the arena.
+  //  * The gesture is completed. In this case, this method is called immediately
+  //    before [didConfirm].
+  void didLeave();
+
+  // The drag gesture is completed in this region.
+  //
+  // This method is called immediately after a [didLeave].
+  void didConfirm();
+}
+
 /// An iOS-style action sheet.
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=U-ao8p4A82k}
@@ -518,7 +767,7 @@ class CupertinoActionSheet extends StatefulWidget {
 
   /// The set of actions that are displayed for the user to select.
   ///
-  /// Typically this is a list of [CupertinoActionSheetAction] widgets.
+  /// This must be a list of [CupertinoActionSheetAction] widgets.
   final List<Widget>? actions;
 
   /// A scroll controller that can be used to control the scrolling of the
@@ -537,7 +786,7 @@ class CupertinoActionSheet extends StatefulWidget {
   /// The optional cancel button that is grouped separately from the other
   /// actions.
   ///
-  /// Typically this is an [CupertinoActionSheetAction] widget.
+  /// This must be a [CupertinoActionSheetAction] widget.
   final Widget? cancelButton;
 
   @override
@@ -664,10 +913,16 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
               ),
               child: SizedBox(
                 width: actionSheetWidth - _kActionSheetEdgeHorizontalPadding * 2,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: children,
+                child: _ActionSheetGestureDetector(
+                  child: Semantics(
+                    explicitChildNodes: true,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: children,
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -687,7 +942,7 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
 ///
 ///  * [CupertinoActionSheet], an alert that presents the user with a set of two or
 ///    more choices related to the current context.
-class CupertinoActionSheetAction extends StatelessWidget {
+class CupertinoActionSheetAction extends StatefulWidget {
   /// Creates an action for an iOS-style action sheet.
   const CupertinoActionSheetAction({
     super.key,
@@ -697,7 +952,10 @@ class CupertinoActionSheetAction extends StatelessWidget {
     required this.child,
   });
 
-  /// The callback that is called when the button is tapped.
+  /// The callback that is called when the button is triggered.
+  ///
+  /// While triggering a button usually means tapping on it, the user can also
+  /// drag on the action sheet, and wherever the drag ends is triggered.
   final VoidCallback onPressed;
 
   /// Whether this action is the default choice in the action sheet.
@@ -716,21 +974,41 @@ class CupertinoActionSheetAction extends StatelessWidget {
   final Widget child;
 
   @override
+  State<CupertinoActionSheetAction> createState() => _CupertinoActionSheetActionState();
+}
+
+class _CupertinoActionSheetActionState extends State<CupertinoActionSheetAction>
+    implements _ActionSheetDragAvatar {
+  // |_ActionSheetDragAvatar|
+  @override
+  void didEnter() {}
+
+  // |_ActionSheetDragAvatar|
+  @override
+  void didLeave() {}
+
+  // |_ActionSheetDragAvatar|
+  @override
+  void didConfirm() {
+    widget.onPressed();
+  }
+
+  @override
   Widget build(BuildContext context) {
     TextStyle style = _kActionSheetActionStyle.copyWith(
-      color: isDestructiveAction
+      color: widget.isDestructiveAction
           ? CupertinoDynamicColor.resolve(CupertinoColors.systemRed, context)
           : CupertinoTheme.of(context).primaryColor,
     );
 
-    if (isDefaultAction) {
+    if (widget.isDefaultAction) {
       style = style.copyWith(fontWeight: FontWeight.w600);
     }
 
     return MouseRegion(
       cursor: kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
-      child: GestureDetector(
-        onTap: onPressed,
+      child: MetaData(
+        metaData: this,
         behavior: HitTestBehavior.opaque,
         child: ConstrainedBox(
           constraints: const BoxConstraints(
@@ -738,6 +1016,7 @@ class CupertinoActionSheetAction extends StatelessWidget {
           ),
           child: Semantics(
             button: true,
+            onTap: widget.onPressed,
             child: Padding(
               padding: const EdgeInsets.symmetric(
                 vertical: 16.0,
@@ -746,7 +1025,7 @@ class CupertinoActionSheetAction extends StatelessWidget {
               child: DefaultTextStyle(
                 style: style,
                 textAlign: TextAlign.center,
-                child: Center(child: child),
+                child: Center(child: widget.child),
               ),
             ),
           ),
@@ -772,29 +1051,32 @@ class _ActionSheetButtonBackground extends StatefulWidget {
   /// The boolean value is true if the user is tapping down on the button.
   final ValueSetter<bool>? onPressStateChange;
 
-  /// The widget below this widget in the tree.
-  ///
-  /// Typically a [Text] widget.
   final Widget child;
 
   @override
   _ActionSheetButtonBackgroundState createState() => _ActionSheetButtonBackgroundState();
 }
 
-class _ActionSheetButtonBackgroundState extends State<_ActionSheetButtonBackground> {
+class _ActionSheetButtonBackgroundState extends State<_ActionSheetButtonBackground> implements _ActionSheetDragAvatar {
   bool isBeingPressed = false;
 
-  void _onTapDown(TapDownDetails event) {
+  // |_ActionSheetDragAvatar|
+  @override
+  void didEnter() {
     setState(() { isBeingPressed = true; });
     widget.onPressStateChange?.call(true);
   }
 
-  void _onTapUp(TapUpDetails event) {
+  // |_ActionSheetDragAvatar|
+  @override
+  void didLeave() {
     setState(() { isBeingPressed = false; });
     widget.onPressStateChange?.call(false);
   }
 
-  void _onTapCancel() {
+  // |_ActionSheetDragAvatar|
+  @override
+  void didConfirm() {
     setState(() { isBeingPressed = false; });
     widget.onPressStateChange?.call(false);
   }
@@ -813,11 +1095,8 @@ class _ActionSheetButtonBackgroundState extends State<_ActionSheetButtonBackgrou
         : CupertinoColors.secondarySystemGroupedBackground;
       borderRadius = const BorderRadius.all(Radius.circular(_kCornerRadius));
     }
-    return GestureDetector(
-      excludeFromSemantics: true,
-      onTapDown: _onTapDown,
-      onTapUp: _onTapUp,
-      onTapCancel: _onTapCancel,
+    return MetaData(
+      metaData: this,
       child: Container(
         decoration: BoxDecoration(
           color: backgroundColor,
