@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
-
 import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/process.dart';
@@ -414,8 +413,9 @@ final GradleHandledError lockFileDepMissingHandler = GradleHandledError(
     final File gradleFile = project.directory
         .childDirectory('android')
         .childFile('build.gradle');
+    final String generateCommand = globals.platform.isWindows ? r'.\gradlew.bat' : './gradlew';
     final String textInBold = globals.logger.terminal.bolden(
-      'To regenerate the lockfiles run: `./gradlew :generateLockfiles` in ${gradleFile.path}\n'
+      'To regenerate the lockfiles run: $generateCommand :generateLockfiles` in ${gradleFile.path}\n'
       'To remove dependency locking, remove the `dependencyLocking` from ${gradleFile.path}'
     );
     globals.printBox(
