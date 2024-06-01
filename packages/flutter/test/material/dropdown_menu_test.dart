@@ -1150,7 +1150,7 @@ void main() {
       ),
     ));
 
-    // Open the menu
+    // Open the menu.
     await tester.tap(find.byType(DropdownMenu<TestMenu>));
     await tester.pump();
 
@@ -1170,6 +1170,28 @@ void main() {
     expect(find.widgetWithText(MenuItemButton, 'Item 3').hitTestable(), findsOneWidget);
     expect(find.widgetWithText(MenuItemButton, 'Item 4').hitTestable(), findsOneWidget);
     expect(find.widgetWithText(MenuItemButton, 'Item 5').hitTestable(), findsOneWidget);
+  });
+
+  testWidgets('Throw assertion error when enable filtering with custom filter callback and enableFilter set on False', (WidgetTester tester) async {
+    final ThemeData themeData = ThemeData();
+    final TextEditingController controller = TextEditingController();
+    addTearDown(controller.dispose);
+
+    expect((){
+      MaterialApp(
+        theme: themeData,
+        home: Scaffold(
+          body: DropdownMenu<TestMenu>(
+            requestFocusOnTap: true,
+            filterCallback: (List<DropdownMenuEntry<TestMenu>> entries, String filter) {
+              return entries.where((DropdownMenuEntry<TestMenu> element) => element.label.contains(filter)).toList();
+            },
+            dropdownMenuEntries: menuChildren,
+            controller: controller,
+          ),
+        ),
+      );
+    }, throwsAssertionError);
   });
 
   testWidgets('The controller can access the value in the input field', (WidgetTester tester) async {

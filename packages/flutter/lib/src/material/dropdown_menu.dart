@@ -173,8 +173,7 @@ class DropdownMenu<T> extends StatefulWidget {
     this.searchCallback,
     required this.dropdownMenuEntries,
     this.inputFormatters,
-  }) :
-        assert(filterCallback == null || enableFilter);
+  }) : assert(filterCallback == null || enableFilter);
 
   /// Determine if the [DropdownMenu] is enabled.
   ///
