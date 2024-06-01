@@ -2,10 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Examples can assume:
-// bool _giveVerse = false;
-
-import 'dart:ui' show lerpDouble;
+import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -15,9 +12,9 @@ import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
 import 'theme.dart';
-import 'thumb_painter.dart';
 
 // Examples can assume:
+// bool _giveVerse = false;
 // bool _lights = false;
 // void setState(VoidCallback fn) { }
 
@@ -62,7 +59,17 @@ import 'thumb_painter.dart';
 ///  * [Switch], the Material Design equivalent.
 ///  * <https://developer.apple.com/design/human-interface-guidelines/toggles/>
 class CupertinoSwitch extends StatefulWidget {
-  /// Creates an iOS-style switch.
+  /// Creates a iOS-style switch.
+  ///
+  /// The switch itself does not maintain any state. Instead, when the state of
+  /// the switch changes, the widget calls the [onChanged] callback. Most widgets
+  /// that use a switch will listen for the [onChanged] callback and rebuild the
+  /// switch with a new [value] to update the visual appearance of the switch.
+  ///
+  /// The following arguments are required:
+  ///
+  /// * [value] determines whether this switch is on or off.
+  /// * [onChanged] is called when the user toggles the switch on or off.
   ///
   /// The [dragStartBehavior] parameter defaults to [DragStartBehavior.start].
   const CupertinoSwitch({
@@ -72,28 +79,38 @@ class CupertinoSwitch extends StatefulWidget {
     this.activeColor,
     this.trackColor,
     this.thumbColor,
+    this.inactiveThumbColor,
     this.applyTheme,
     this.focusColor,
     this.onLabelColor,
     this.offLabelColor,
+    this.activeThumbImage,
+    this.onActiveThumbImageError,
+    this.inactiveThumbImage,
+    this.onInactiveThumbImageError,
+    this.trackOutlineColor,
+    this.trackOutlineWidth,
+    this.thumbIcon,
+    this.mouseCursor,
     this.focusNode,
     this.onFocusChange,
     this.autofocus = false,
     this.dragStartBehavior = DragStartBehavior.start,
-  });
+  })  : assert(activeThumbImage != null || onActiveThumbImageError == null),
+        assert(inactiveThumbImage != null || onInactiveThumbImageError == null);
 
   /// Whether this switch is on or off.
   final bool value;
 
-  /// Called when the user toggles with switch on or off.
+  /// Called when the user toggles the switch on or off.
   ///
   /// The switch passes the new value to the callback but does not actually
   /// change state until the parent widget rebuilds the switch with the new
   /// value.
   ///
-  /// If null, the switch will be displayed as disabled, which has a reduced opacity.
+  /// If null, the switch will be displayed as disabled.
   ///
-  /// The callback provided to onChanged should update the state of the parent
+  /// The callback provided to [onChanged] should update the state of the parent
   /// [StatefulWidget] using the [State.setState] method, so that the parent
   /// gets rebuilt; for example:
   ///
@@ -116,16 +133,21 @@ class CupertinoSwitch extends StatefulWidget {
   /// [CupertinoThemeData.primaryColor].
   final Color? activeColor;
 
-
   /// The color to use for the track when the switch is off.
   ///
   /// Defaults to [CupertinoColors.secondarySystemFill] when null.
   final Color? trackColor;
 
-  /// The color to use for the thumb of the switch.
+  /// The color to use for the thumb when the switch is on.
   ///
   /// Defaults to [CupertinoColors.white] when null.
   final Color? thumbColor;
+
+  /// The color to use on the thumb when the switch is off.
+  ///
+  /// If null, defaults to [thumbColor]. If that is also null, then
+  /// [CupertinoColors.white] is used.
+  final Color? inactiveThumbColor;
 
   /// The color to use for the focus highlight for keyboard interactions.
   ///
@@ -142,6 +164,133 @@ class CupertinoSwitch extends StatefulWidget {
   /// Defaults to [Color.fromARGB(255, 179, 179, 179)]
   /// (or [Color.fromARGB(255, 255, 255, 255)] in high contrast) when null.
   final Color? offLabelColor;
+
+  /// {@macro flutter.material.switch.activeThumbImage}
+  final ImageProvider? activeThumbImage;
+
+  /// {@macro flutter.material.switch.onActiveThumbImageError}
+  final ImageErrorListener? onActiveThumbImageError;
+
+  /// {@macro flutter.material.switch.inactiveThumbImage}
+  final ImageProvider? inactiveThumbImage;
+
+  /// {@macro flutter.material.switch.onInactiveThumbImageError}
+  final ImageErrorListener? onInactiveThumbImageError;
+
+  /// The outline color of this [CupertinoSwitch]'s track.
+  ///
+  /// Resolved in the following states:
+  ///  * [WidgetState.selected].
+  ///  * [WidgetState.hovered].
+  ///  * [WidgetState.focused].
+  ///  * [WidgetState.disabled].
+  ///
+  /// {@tool snippet}
+  /// This example resolves the [trackOutlineColor] based on the current
+  /// [WidgetState] of the [Switch], providing a different [Color] when it is
+  /// [WidgetState.disabled].
+  ///
+  /// ```dart
+  /// CupertinoSwitch(
+  ///   value: true,
+  ///   onChanged: (bool value) { },
+  ///   trackOutlineColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+  ///     if (states.contains(WidgetState.disabled)) {
+  ///       return CupertinoColors.activeOrange.withOpacity(.48);
+  ///     }
+  ///     return null; // Use the default color.
+  ///   }),
+  /// )
+  /// ```
+  /// {@end-tool}
+  ///
+  /// The [CupertinoSwitch] track has no outline by default.
+  final WidgetStateProperty<Color?>? trackOutlineColor;
+
+  /// The outline width of this [CupertinoSwitch]'s track.
+  ///
+  /// Resolved in the following states:
+  ///  * [WidgetState.selected].
+  ///  * [WidgetState.hovered].
+  ///  * [WidgetState.focused].
+  ///  * [WidgetState.disabled].
+  ///
+  /// {@tool snippet}
+  /// This example resolves the [trackOutlineWidth] based on the current
+  /// [WidgetState] of the [CupertinoSwitch], providing a different outline width when it is
+  /// [WidgetState.disabled].
+  ///
+  /// ```dart
+  /// CupertinoSwitch(
+  ///   value: true,
+  ///   onChanged: (bool value) { },
+  ///   trackOutlineWidth: WidgetStateProperty.resolveWith<double?>((Set<WidgetState> states) {
+  ///     if (states.contains(WidgetState.disabled)) {
+  ///       return 5.0;
+  ///     }
+  ///     return null; // Use the default width.
+  ///   }),
+  /// )
+  /// ```
+  /// {@end-tool}
+  ///
+  /// Since a [CupertinoSwitch] has no track outline by default, this parameter
+  /// is set only if [trackOutlineColor] is provided.
+  ///
+  /// Defaults to 2.0.
+  final WidgetStateProperty<double?>? trackOutlineWidth;
+
+  /// The icon to use on the thumb of this switch.
+  ///
+  /// Resolved in the following states:
+  ///  * [WidgetState.selected].
+  ///  * [WidgetState.hovered].
+  ///  * [WidgetState.focused].
+  ///  * [WidgetState.disabled].
+  ///
+  /// {@tool snippet}
+  /// This example resolves the [thumbIcon] based on the current
+  /// [WidgetState] of the [CupertinoSwitch], providing a different [Icon] when it is
+  /// [WidgetState.disabled].
+  ///
+  /// ```dart
+  /// CupertinoSwitch(
+  ///   value: true,
+  ///   onChanged: (bool value) { },
+  ///   thumbIcon: WidgetStateProperty.resolveWith<Icon?>((Set<WidgetState> states) {
+  ///     if (states.contains(WidgetState.disabled)) {
+  ///       return const Icon(Icons.close);
+  ///     }
+  ///     return null; // All other states will use the default thumbIcon.
+  ///   }),
+  /// )
+  /// ```
+  /// {@end-tool}
+  ///
+  /// If null, then the [CupertinoSwitch] does not have any icons on the thumb.
+  final WidgetStateProperty<Icon?>? thumbIcon;
+
+  /// The cursor for a mouse pointer when it enters or is hovering over the
+  /// widget.
+  ///
+  /// If [mouseCursor] is a [WidgetStateProperty<MouseCursor>],
+  /// [WidgetStateProperty.resolve] is used for the following [WidgetState]s:
+  ///
+  ///  * [WidgetState.selected].
+  ///  * [WidgetState.hovered].
+  ///  * [WidgetState.focused].
+  ///  * [WidgetState.disabled].
+  ///
+  /// If null, then [MouseCursor.defer] is used when the switch is disabled.
+  /// When the switch is enabled,[SystemMouseCursors.click] is used on Web, and
+  /// [MouseCursor.defer] is used on other platforms.
+  ///
+  /// See also:
+  ///
+  ///  * [WidgetStateMouseCursor], a [MouseCursor] that implements
+  ///    `WidgetStateProperty` which is used in APIs that need to accept
+  ///    either a [MouseCursor] or a [WidgetStateProperty<MouseCursor>].
+  final MouseCursor? mouseCursor;
 
   /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode? focusNode;
@@ -185,7 +334,7 @@ class CupertinoSwitch extends StatefulWidget {
   final DragStartBehavior dragStartBehavior;
 
   @override
-  State<CupertinoSwitch> createState() => _CupertinoSwitchState();
+  State<StatefulWidget> createState() => _CupertinoSwitchState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -195,123 +344,65 @@ class CupertinoSwitch extends StatefulWidget {
   }
 }
 
-class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderStateMixin {
-  late TapGestureRecognizer _tap;
-  late HorizontalDragGestureRecognizer _drag;
-
-  late AnimationController _positionController;
-  late final CurvedAnimation position;
-
-  late AnimationController _reactionController;
-  late CurvedAnimation _reaction;
-
-  late bool isFocused;
-
-  bool get isInteractive => widget.onChanged != null;
-
-  late final Map<Type, Action<Intent>> _actionMap = <Type, Action<Intent>>{
-    ActivateIntent: CallbackAction<ActivateIntent>(onInvoke: _handleTap),
-  };
-
-  // A non-null boolean value that changes to true at the end of a drag if the
-  // switch must be animated to the position indicated by the widget's value.
-  bool needsPositionAnimation = false;
-
-  @override
-  void initState() {
-    super.initState();
-
-    isFocused = false;
-
-    _tap = TapGestureRecognizer()
-      ..onTapDown = _handleTapDown
-      ..onTapUp = _handleTapUp
-      ..onTap = _handleTap
-      ..onTapCancel = _handleTapCancel;
-    _drag = HorizontalDragGestureRecognizer()
-      ..onStart = _handleDragStart
-      ..onUpdate = _handleDragUpdate
-      ..onEnd = _handleDragEnd
-      ..dragStartBehavior = widget.dragStartBehavior;
-
-    _positionController = AnimationController(
-      duration: _kToggleDuration,
-      value: widget.value ? 1.0 : 0.0,
-      vsync: this,
-    );
-    position = CurvedAnimation(
-      parent: _positionController,
-      curve: Curves.linear,
-    );
-    _reactionController = AnimationController(
-      duration: _kReactionDuration,
-      vsync: this,
-    );
-    _reaction = CurvedAnimation(
-      parent: _reactionController,
-      curve: Curves.ease,
-    );
-  }
+class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderStateMixin, ToggleableStateMixin {
+  final _SwitchPainter _painter = _SwitchPainter();
 
   @override
   void didUpdateWidget(CupertinoSwitch oldWidget) {
     super.didUpdateWidget(oldWidget);
-    _drag.dragStartBehavior = widget.dragStartBehavior;
-
-    if (needsPositionAnimation || oldWidget.value != widget.value) {
-      _resumePositionAnimation(isLinear: needsPositionAnimation);
+    if (oldWidget.value != widget.value) {
+      position
+        ..curve = Curves.ease
+        ..reverseCurve = Curves.ease.flipped;
+      animateToValue();
     }
   }
 
-  // `isLinear` must be true if the position animation is trying to move the
-  // thumb to the closest end after the most recent drag animation, so the curve
-  // does not change when the controller's value is not 0 or 1.
-  //
-  // It can be set to false when it's an implicit animation triggered by
-  // widget.value changes.
-  void _resumePositionAnimation({ bool isLinear = true }) {
-    needsPositionAnimation = false;
-    position
-      ..curve = isLinear ? Curves.linear : Curves.ease
-      ..reverseCurve = isLinear ? Curves.linear : Curves.ease.flipped;
-    if (widget.value) {
-      _positionController.forward();
-    } else {
-      _positionController.reverse();
-    }
+  @override
+  void dispose() {
+    _painter.dispose();
+    super.dispose();
   }
 
-  void _handleTapDown(TapDownDetails details) {
-    if (isInteractive) {
-      needsPositionAnimation = false;
-    }
-      _reactionController.forward();
+  @override
+  ValueChanged<bool?>? get onChanged => widget.onChanged != null ? _handleChanged : null;
+
+  @override
+  bool get tristate => false;
+
+  @override
+  bool? get value => widget.value;
+
+  WidgetStateProperty<Color?> get _widgetThumbColor {
+    return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.selected)) {
+        return widget.thumbColor;
+      }
+      return widget.inactiveThumbColor;
+    });
   }
 
-  void _handleTap([Intent? _]) {
-    if (isInteractive) {
-      widget.onChanged!(!widget.value);
-      _emitVibration();
-    }
+  WidgetStateProperty<Color?> get _widgetTrackColor {
+    return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.selected)) {
+        return widget.activeColor;
+      }
+      return widget.trackColor;
+    });
   }
 
-  void _handleTapUp(TapUpDetails details) {
-    if (isInteractive) {
-      needsPositionAnimation = false;
-      _reactionController.reverse();
-    }
-  }
-
-  void _handleTapCancel() {
-    if (isInteractive) {
-      _reactionController.reverse();
-    }
+  double get _trackInnerLength {
+    const double trackHeight = 31.0;
+    const double trackWidth = 51.0;
+    const double trackInnerStart = trackHeight / 2.0;
+    const double trackInnerEnd = trackWidth - trackInnerStart;
+    const double trackInnerLength = trackInnerEnd - trackInnerStart;
+    return trackInnerLength;
   }
 
   void _handleDragStart(DragStartDetails details) {
     if (isInteractive) {
-      needsPositionAnimation = false;
-      _reactionController.forward();
+      reactionController.forward();
       _emitVibration();
     }
   }
@@ -320,23 +411,36 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
     if (isInteractive) {
       position
         ..curve = Curves.linear
-        ..reverseCurve = Curves.linear;
-      final double delta = details.primaryDelta! / _kTrackInnerLength;
-      _positionController.value += switch (Directionality.of(context)) {
+        ..reverseCurve = null;
+      final double delta = details.primaryDelta! / _trackInnerLength;
+      positionController.value += switch (Directionality.of(context)) {
         TextDirection.rtl => -delta,
         TextDirection.ltr =>  delta,
       };
     }
   }
 
+  bool _needsPositionAnimation = false;
+
   void _handleDragEnd(DragEndDetails details) {
-    // Deferring the animation to the next build phase.
-    setState(() { needsPositionAnimation = true; });
-    // Call onChanged when the user's intent to change value is clear.
     if (position.value >= 0.5 != widget.value) {
-      widget.onChanged!(!widget.value);
+      widget.onChanged?.call(!widget.value);
+      // Wait with finishing the animation until widget.value has changed to
+      // !widget.value as part of the widget.onChanged call above.
+      setState(() {
+        _needsPositionAnimation = true;
+      });
+    } else {
+      animateToValue();
     }
-    _reactionController.reverse();
+    reactionController.reverse();
+  }
+
+  void _handleChanged(bool? value) {
+    assert(value != null);
+    assert(widget.onChanged != null);
+    widget.onChanged?.call(value!);
+    _emitVibration();
   }
 
   void _emitVibration() {
@@ -352,283 +456,550 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
     }
   }
 
-  void _onShowFocusHighlight(bool showHighlight) {
-    setState(() { isFocused = showHighlight; });
+  WidgetStateProperty<Color> get iconColor {
+    return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
+        return CupertinoColors.black;
+      }
+      return CupertinoColors.black;
+    });
   }
+
+  List<BoxShadow>? get thumbShadow => const <BoxShadow> [
+    BoxShadow(
+      color: Color(0x26000000),
+      offset: Offset(0, 3),
+      blurRadius: 8.0,
+    ),
+    BoxShadow(
+      color: Color(0x0F000000),
+      offset: Offset(0, 3),
+      blurRadius: 1.0,
+    ),
+  ];
 
   @override
   Widget build(BuildContext context) {
+    if (_needsPositionAnimation) {
+      _needsPositionAnimation = false;
+      animateToValue();
+    }
+
     final CupertinoThemeData theme = CupertinoTheme.of(context);
+
     final Color activeColor = CupertinoDynamicColor.resolve(
       widget.activeColor
       ?? ((widget.applyTheme ?? theme.applyThemeToAll) ? theme.primaryColor : null)
       ?? CupertinoColors.systemGreen,
       context,
     );
+
+    final bool applyTheme = widget.applyTheme
+      ?? false;
+
+    // Hand coded defaults based on the animation specs.
+    const double? thumbOffset = null;
+    const Size transitionalThumbSize = Size(28.0, 28.0);  // The thumb size at the middle of the track.
+    positionController.duration = const Duration(milliseconds: 200);
+    reactionController.duration = const Duration(milliseconds: 300);
+
+    // Hand coded defaults eyeballed from iOS simulator on Mac.
+    const double disabledOpacity = 0.5;
+    const double activeThumbRadius = 14.0;
+    const double inactiveThumbRadius = 14.0;
+    const double pressedThumbRadius = 14.0;
+    const double thumbRadiusWithIcon = 14.0;
+    const double trackHeight = 31.0;
+    const double trackWidth = 51.0;
+    const Size switchSize = Size(59.0, 39.0);
+    const CupertinoDynamicColor kOffLabelColor = CupertinoDynamicColor.withBrightnessAndContrast(
+      debugLabel: 'offSwitchLabel',
+      // Source: https://github.com/flutter/flutter/pull/39993#discussion_r321946033
+      color: Color.fromARGB(255, 179, 179, 179),
+      // Source: https://github.com/flutter/flutter/pull/39993#issuecomment-535196665
+      darkColor: Color.fromARGB(255, 179, 179, 179),
+      // Source: https://github.com/flutter/flutter/pull/127776#discussion_r1244208264
+      highContrastColor: Color.fromARGB(255, 255, 255, 255),
+      darkHighContrastColor: Color.fromARGB(255, 255, 255, 255),
+    );
+
     final (Color onLabelColor, Color offLabelColor)? onOffLabelColors =
-        MediaQuery.onOffSwitchLabelsOf(context)
-            ? (
-                CupertinoDynamicColor.resolve(
-                  widget.onLabelColor ?? CupertinoColors.white,
-                  context,
-                ),
-                CupertinoDynamicColor.resolve(
-                  widget.offLabelColor ?? _kOffLabelColor,
-                  context,
-                ),
-              )
-            : null;
-    if (needsPositionAnimation) {
-      _resumePositionAnimation();
+      MediaQuery.onOffSwitchLabelsOf(context)
+          ? (
+              CupertinoDynamicColor.resolve(
+                widget.onLabelColor ?? CupertinoColors.white,
+                context,
+              ),
+              CupertinoDynamicColor.resolve(
+                widget.offLabelColor ?? kOffLabelColor,
+                context,
+              ),
+            )
+          : null;
+
+    final WidgetStateProperty<MouseCursor> mouseCursor =
+      WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+        if (states.contains(WidgetState.disabled)) {
+          return MouseCursor.defer;
+        }
+        return kIsWeb ? SystemMouseCursors.click : MouseCursor.defer;
+      });
+
+    Color? resolveTrackColor (Color? trackColor, Set<WidgetState> states){
+      if (trackColor is WidgetStateColor){
+        return WidgetStateProperty.resolveAs<Color?>(trackColor, states);
+      }
+      return trackColor;
     }
-    return MouseRegion(
-      cursor: isInteractive && kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
-      child: Opacity(
-        opacity: widget.onChanged == null ? _kCupertinoSwitchDisabledOpacity : 1.0,
-        child: FocusableActionDetector(
-          onShowFocusHighlight: _onShowFocusHighlight,
-          actions: _actionMap,
-          enabled: isInteractive,
-          focusNode: widget.focusNode,
-          onFocusChange: widget.onFocusChange,
-          autofocus: widget.autofocus,
-          child: _CupertinoSwitchRenderObjectWidget(
-            value: widget.value,
-            activeColor: activeColor,
-            trackColor: CupertinoDynamicColor.resolve(widget.trackColor ?? CupertinoColors.secondarySystemFill, context),
-            thumbColor: CupertinoDynamicColor.resolve(widget.thumbColor ?? CupertinoColors.white, context),
-            // Opacity, lightness, and saturation values were approximated with
-            // color pickers on the switches in the macOS settings.
-            focusColor: CupertinoDynamicColor.resolve(
-              widget.focusColor ??
-              HSLColor
-                    .fromColor(activeColor.withOpacity(0.80))
-                    .withLightness(0.69).withSaturation(0.835)
-                    .toColor(),
-              context),
-            onChanged: widget.onChanged,
-            textDirection: Directionality.of(context),
-            isFocused: isFocused,
-            state: this,
-            onOffLabelColors: onOffLabelColors,
+
+    Color? resolveThumbColor (Color? thumbColor, Set<WidgetState> states){
+      if (thumbColor is WidgetStateColor){
+        return WidgetStateProperty.resolveAs<Color?>(thumbColor, states);
+      }
+      return thumbColor;
+    }
+
+    // Colors need to be resolved in selected and non selected states separately
+    // so that they can be lerped between.
+    final Set<WidgetState> activeStates = states..add(WidgetState.selected);
+    final Set<WidgetState> inactiveStates = states..remove(WidgetState.selected);
+
+    final Color effectiveActiveThumbColor = resolveThumbColor(widget.thumbColor, activeStates)
+      ?? _widgetThumbColor.resolve(activeStates)
+      ?? CupertinoColors.white;
+
+    final Color effectiveInactiveThumbColor = resolveThumbColor(widget.inactiveThumbColor, inactiveStates)
+      ?? _widgetThumbColor.resolve(inactiveStates)
+      ?? effectiveActiveThumbColor;
+
+    final Color effectiveActiveTrackColor = _widgetTrackColor.resolve(activeStates)
+      ?? (applyTheme ? theme.primaryColor : null)
+      ?? CupertinoDynamicColor.resolve(CupertinoColors.systemGreen, context);
+
+    final Color? effectiveActiveTrackOutlineColor = widget.trackOutlineColor?.resolve(activeStates);
+    final double? effectiveActiveTrackOutlineWidth = widget.trackOutlineWidth?.resolve(activeStates);
+
+    final Color effectiveInactiveTrackColor = resolveTrackColor(widget.trackColor, inactiveStates)
+      ?? CupertinoDynamicColor.resolve(CupertinoColors.secondarySystemFill, context);
+
+    final Color? effectiveInactiveTrackOutlineColor = widget.trackOutlineColor?.resolve(inactiveStates);
+
+    final double? effectiveInactiveTrackOutlineWidth = widget.trackOutlineWidth?.resolve(inactiveStates);
+
+    final Icon? effectiveActiveIcon = widget.thumbIcon?.resolve(activeStates);
+
+    final Icon? effectiveInactiveIcon = widget.thumbIcon?.resolve(inactiveStates);
+
+    final Color effectiveActiveIconColor = effectiveActiveIcon?.color ?? iconColor.resolve(activeStates);
+    final Color effectiveInactiveIconColor = effectiveInactiveIcon?.color ?? iconColor.resolve(inactiveStates);
+
+    final Set<WidgetState> activePressedStates = activeStates..add(WidgetState.pressed);
+    final Color effectiveActivePressedThumbColor = resolveThumbColor(widget.thumbColor, activePressedStates)
+      ?? _widgetThumbColor.resolve(activePressedStates)
+      ?? CupertinoColors.white;
+
+    final Set<WidgetState> inactivePressedStates = inactiveStates..add(WidgetState.pressed);
+    final Color effectiveInactivePressedThumbColor = resolveThumbColor(widget.thumbColor, inactivePressedStates)
+      ?? _widgetThumbColor.resolve(inactivePressedStates)
+      ?? CupertinoColors.white;
+
+    final WidgetStateProperty<MouseCursor> effectiveMouseCursor = WidgetStateProperty.resolveWith<MouseCursor>((Set<WidgetState> states) {
+      return WidgetStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states)
+        ?? mouseCursor.resolve(states);
+    });
+
+    final double effectiveActiveThumbRadius = effectiveActiveIcon == null ? activeThumbRadius : thumbRadiusWithIcon;
+    final double effectiveInactiveThumbRadius = effectiveInactiveIcon == null && widget.inactiveThumbImage == null
+      ? inactiveThumbRadius : thumbRadiusWithIcon;
+
+    return Semantics(
+      toggled: widget.value,
+      child: GestureDetector(
+        excludeFromSemantics: true,
+        onHorizontalDragStart: _handleDragStart,
+        onHorizontalDragUpdate: _handleDragUpdate,
+        onHorizontalDragEnd: _handleDragEnd,
+        dragStartBehavior: widget.dragStartBehavior,
+        child: Opacity(
+          opacity: onChanged == null ? disabledOpacity : 1,
+          child: buildToggleable(
+            mouseCursor: effectiveMouseCursor,
+            focusNode: widget.focusNode,
+            onFocusChange: widget.onFocusChange,
+            autofocus: widget.autofocus,
+            size: switchSize,
+            painter: _painter
+              ..position = position
+              ..reaction = reaction
+              ..reactionFocusFade = reactionFocusFade
+              ..reactionHoverFade = reactionHoverFade
+              ..focusColor = CupertinoDynamicColor.resolve(
+                  widget.focusColor ??
+                  HSLColor
+                        .fromColor(activeColor.withOpacity(0.80))
+                        .withLightness(0.69).withSaturation(0.835)
+                        .toColor(),
+                  context)
+              ..downPosition = downPosition
+              ..isFocused = states.contains(WidgetState.focused)
+              ..isHovered = states.contains(WidgetState.hovered)
+              ..activeColor = effectiveActiveThumbColor
+              ..inactiveColor = effectiveInactiveThumbColor
+              ..activePressedColor = effectiveActivePressedThumbColor
+              ..onOffLabelColors = onOffLabelColors
+              ..inactivePressedColor = effectiveInactivePressedThumbColor
+              ..activeThumbImage = widget.activeThumbImage
+              ..onActiveThumbImageError = widget.onActiveThumbImageError
+              ..inactiveThumbImage = widget.inactiveThumbImage
+              ..onInactiveThumbImageError = widget.onInactiveThumbImageError
+              ..activeTrackColor = effectiveActiveTrackColor
+              ..activeTrackOutlineColor = effectiveActiveTrackOutlineColor
+              ..activeTrackOutlineWidth = effectiveActiveTrackOutlineWidth
+              ..inactiveTrackColor = effectiveInactiveTrackColor
+              ..inactiveTrackOutlineColor = effectiveInactiveTrackOutlineColor
+              ..inactiveTrackOutlineWidth = effectiveInactiveTrackOutlineWidth
+              ..configuration = createLocalImageConfiguration(context)
+              ..isInteractive = isInteractive
+              ..trackInnerLength = _trackInnerLength
+              ..textDirection = Directionality.of(context)
+              ..inactiveThumbRadius = effectiveInactiveThumbRadius
+              ..activeThumbRadius = effectiveActiveThumbRadius
+              ..pressedThumbRadius = pressedThumbRadius
+              ..thumbOffset = thumbOffset
+              ..trackHeight = trackHeight
+              ..trackWidth = trackWidth
+              ..activeIconColor = effectiveActiveIconColor
+              ..inactiveIconColor = effectiveInactiveIconColor
+              ..activeIcon = effectiveActiveIcon
+              ..inactiveIcon = effectiveInactiveIcon
+              ..iconTheme = IconTheme.of(context)
+              ..thumbShadow = thumbShadow
+              ..surfaceColor = theme.scaffoldBackgroundColor
+              ..transitionalThumbSize = transitionalThumbSize
+              ..positionController = positionController
           ),
         ),
       ),
     );
   }
-
-  @override
-  void dispose() {
-    _tap.dispose();
-    _drag.dispose();
-
-    _positionController.dispose();
-    _reactionController.dispose();
-    position.dispose();
-    _reaction.dispose();
-    super.dispose();
-  }
 }
 
-class _CupertinoSwitchRenderObjectWidget extends LeafRenderObjectWidget {
-  const _CupertinoSwitchRenderObjectWidget({
-    required this.value,
-    required this.activeColor,
-    required this.trackColor,
-    required this.thumbColor,
-    required this.focusColor,
-    required this.onChanged,
-    required this.textDirection,
-    required this.isFocused,
-    required this.state,
-    required this.onOffLabelColors,
-  });
-
-  final bool value;
-  final Color activeColor;
-  final Color trackColor;
-  final Color thumbColor;
-  final Color focusColor;
-  final ValueChanged<bool>? onChanged;
-  final _CupertinoSwitchState state;
-  final TextDirection textDirection;
-  final bool isFocused;
-  final (Color onLabelColor, Color offLabelColor)? onOffLabelColors;
-
-  @override
-  _RenderCupertinoSwitch createRenderObject(BuildContext context) {
-    return _RenderCupertinoSwitch(
-      value: value,
-      activeColor: activeColor,
-      trackColor: trackColor,
-      thumbColor: thumbColor,
-      focusColor: focusColor,
-      onChanged: onChanged,
-      textDirection: textDirection,
-      isFocused: isFocused,
-      state: state,
-      onOffLabelColors: onOffLabelColors,
-    );
-  }
-
-  @override
-  void updateRenderObject(BuildContext context, _RenderCupertinoSwitch renderObject) {
-    assert(renderObject._state == state);
-    renderObject
-      ..value = value
-      ..activeColor = activeColor
-      ..trackColor = trackColor
-      ..thumbColor = thumbColor
-      ..focusColor = focusColor
-      ..onChanged = onChanged
-      ..textDirection = textDirection
-      ..isFocused = isFocused;
-  }
-}
-
-const double _kTrackWidth = 51.0;
-const double _kTrackHeight = 31.0;
-const double _kTrackRadius = _kTrackHeight / 2.0;
-const double _kTrackInnerStart = _kTrackHeight / 2.0;
-const double _kTrackInnerEnd = _kTrackWidth - _kTrackInnerStart;
-const double _kTrackInnerLength = _kTrackInnerEnd - _kTrackInnerStart;
-const double _kSwitchWidth = 59.0;
-const double _kSwitchHeight = 39.0;
-// Label sizes and padding taken from xcode inspector.
-// See https://github.com/flutter/flutter/issues/4830#issuecomment-528495360
-const double _kOnLabelWidth = 1.0;
-const double _kOnLabelHeight = 10.0;
-const double _kOnLabelPaddingHorizontal = 11.0;
-const double _kOffLabelWidth = 1.0;
-const double _kOffLabelPaddingHorizontal = 12.0;
-const double _kOffLabelRadius = 5.0;
-const CupertinoDynamicColor _kOffLabelColor = CupertinoDynamicColor.withBrightnessAndContrast(
-  debugLabel: 'offSwitchLabel',
-  // Source: https://github.com/flutter/flutter/pull/39993#discussion_r321946033
-  color: Color.fromARGB(255, 179, 179, 179),
-  // Source: https://github.com/flutter/flutter/pull/39993#issuecomment-535196665
-  darkColor: Color.fromARGB(255, 179, 179, 179),
-  // Source: https://github.com/flutter/flutter/pull/127776#discussion_r1244208264
-  highContrastColor: Color.fromARGB(255, 255, 255, 255),
-  darkHighContrastColor: Color.fromARGB(255, 255, 255, 255),
-);
-// Opacity of a disabled switch, as eye-balled from iOS Simulator on Mac.
-const double _kCupertinoSwitchDisabledOpacity = 0.5;
-
-const Duration _kReactionDuration = Duration(milliseconds: 300);
-const Duration _kToggleDuration = Duration(milliseconds: 200);
-
-class _RenderCupertinoSwitch extends RenderConstrainedBox {
-  _RenderCupertinoSwitch({
-    required bool value,
-    required Color activeColor,
-    required Color trackColor,
-    required Color thumbColor,
-    required Color focusColor,
-    ValueChanged<bool>? onChanged,
-    required TextDirection textDirection,
-    required bool isFocused,
-    required _CupertinoSwitchState state,
-    required (Color onLabelColor, Color offLabelColor)? onOffLabelColors,
-  }) : _value = value,
-       _activeColor = activeColor,
-       _trackColor = trackColor,
-       _focusColor = focusColor,
-       _thumbPainter = CupertinoThumbPainter.switchThumb(color: thumbColor),
-       _onChanged = onChanged,
-       _textDirection = textDirection,
-       _isFocused = isFocused,
-       _state = state,
-       _onOffLabelColors = onOffLabelColors,
-       super(additionalConstraints: const BoxConstraints.tightFor(width: _kSwitchWidth, height: _kSwitchHeight)) {
-         state.position.addListener(markNeedsPaint);
-         state._reaction.addListener(markNeedsPaint);
-  }
-
-  final _CupertinoSwitchState _state;
-
-  bool get value => _value;
-  bool _value;
-  set value(bool value) {
-    if (value == _value) {
+class _SwitchPainter extends ToggleablePainter {
+  AnimationController get positionController => _positionController!;
+  AnimationController? _positionController;
+  set positionController(AnimationController? value) {
+    assert(value != null);
+    if (value == _positionController) {
       return;
     }
-    _value = value;
-    markNeedsSemanticsUpdate();
+    _positionController = value;
+    _colorAnimation?.dispose();
+    _colorAnimation = CurvedAnimation(parent: positionController, curve: Curves.easeOut, reverseCurve: Curves.easeIn);
+    notifyListeners();
   }
 
-  Color get activeColor => _activeColor;
-  Color _activeColor;
-  set activeColor(Color value) {
-    if (value == _activeColor) {
+  CurvedAnimation? _colorAnimation;
+
+  Icon? get activeIcon => _activeIcon;
+  Icon? _activeIcon;
+  set activeIcon(Icon? value) {
+    if (value == _activeIcon) {
       return;
     }
-    _activeColor = value;
-    markNeedsPaint();
+    _activeIcon = value;
+    notifyListeners();
   }
 
-  Color get trackColor => _trackColor;
-  Color _trackColor;
-  set trackColor(Color value) {
-    if (value == _trackColor) {
+  Icon? get inactiveIcon => _inactiveIcon;
+  Icon? _inactiveIcon;
+  set inactiveIcon(Icon? value) {
+    if (value == _inactiveIcon) {
       return;
     }
-    _trackColor = value;
-    markNeedsPaint();
+    _inactiveIcon = value;
+    notifyListeners();
   }
 
-  Color get thumbColor => _thumbPainter.color;
-  CupertinoThumbPainter _thumbPainter;
-  set thumbColor(Color value) {
-    if (value == thumbColor) {
+  IconThemeData? get iconTheme => _iconTheme;
+  IconThemeData? _iconTheme;
+  set iconTheme(IconThemeData? value) {
+    if (value == _iconTheme) {
       return;
     }
-    _thumbPainter = CupertinoThumbPainter.switchThumb(color: value);
-    markNeedsPaint();
+    _iconTheme = value;
+    notifyListeners();
   }
 
-  Color get focusColor => _focusColor;
-  Color _focusColor;
-  set focusColor(Color value) {
-    if (value == _focusColor) {
+  Color get activeIconColor => _activeIconColor!;
+  Color? _activeIconColor;
+  set activeIconColor(Color value) {
+    if (value == _activeIconColor) {
       return;
     }
-    _focusColor = value;
-    markNeedsPaint();
+    _activeIconColor = value;
+    notifyListeners();
   }
 
-  ValueChanged<bool>? get onChanged => _onChanged;
-  ValueChanged<bool>? _onChanged;
-  set onChanged(ValueChanged<bool>? value) {
-    if (value == _onChanged) {
+  Color get inactiveIconColor => _inactiveIconColor!;
+  Color? _inactiveIconColor;
+  set inactiveIconColor(Color value) {
+    if (value == _inactiveIconColor) {
       return;
     }
-    final bool wasInteractive = isInteractive;
-    _onChanged = value;
-    if (wasInteractive != isInteractive) {
-      markNeedsPaint();
-      markNeedsSemanticsUpdate();
-    }
+    _inactiveIconColor = value;
+    notifyListeners();
   }
 
-  TextDirection get textDirection => _textDirection;
-  TextDirection _textDirection;
+  Color get activePressedColor => _activePressedColor!;
+  Color? _activePressedColor;
+  set activePressedColor(Color? value) {
+    assert(value != null);
+    if (value == _activePressedColor) {
+      return;
+    }
+    _activePressedColor = value;
+    notifyListeners();
+  }
+
+  Color get inactivePressedColor => _inactivePressedColor!;
+  Color? _inactivePressedColor;
+  set inactivePressedColor(Color? value) {
+    assert(value != null);
+    if (value == _inactivePressedColor) {
+      return;
+    }
+    _inactivePressedColor = value;
+    notifyListeners();
+  }
+
+  double get activeThumbRadius => _activeThumbRadius!;
+  double? _activeThumbRadius;
+  set activeThumbRadius(double value) {
+    if (value == _activeThumbRadius) {
+      return;
+    }
+    _activeThumbRadius = value;
+    notifyListeners();
+  }
+
+  double get inactiveThumbRadius => _inactiveThumbRadius!;
+  double? _inactiveThumbRadius;
+  set inactiveThumbRadius(double value) {
+    if (value == _inactiveThumbRadius) {
+      return;
+    }
+    _inactiveThumbRadius = value;
+    notifyListeners();
+  }
+
+  double get pressedThumbRadius => _pressedThumbRadius!;
+  double? _pressedThumbRadius;
+  set pressedThumbRadius(double value) {
+    if (value == _pressedThumbRadius) {
+      return;
+    }
+    _pressedThumbRadius = value;
+    notifyListeners();
+  }
+
+  double? get thumbOffset => _thumbOffset;
+  double? _thumbOffset;
+  set thumbOffset(double? value) {
+    if (value == _thumbOffset) {
+      return;
+    }
+    _thumbOffset = value;
+    notifyListeners();
+  }
+
+  Size get transitionalThumbSize => _transitionalThumbSize!;
+  Size? _transitionalThumbSize;
+  set transitionalThumbSize(Size value) {
+    if (value == _transitionalThumbSize) {
+      return;
+    }
+    _transitionalThumbSize = value;
+    notifyListeners();
+  }
+
+  double get trackHeight => _trackHeight!;
+  double? _trackHeight;
+  set trackHeight(double value) {
+    if (value == _trackHeight) {
+      return;
+    }
+    _trackHeight = value;
+    notifyListeners();
+  }
+
+  double get trackWidth => _trackWidth!;
+  double? _trackWidth;
+  set trackWidth(double value) {
+    if (value == _trackWidth) {
+      return;
+    }
+    _trackWidth = value;
+    notifyListeners();
+  }
+
+  ImageProvider? get activeThumbImage => _activeThumbImage;
+  ImageProvider? _activeThumbImage;
+  set activeThumbImage(ImageProvider? value) {
+    if (value == _activeThumbImage) {
+      return;
+    }
+    _activeThumbImage = value;
+    notifyListeners();
+  }
+
+  ImageErrorListener? get onActiveThumbImageError => _onActiveThumbImageError;
+  ImageErrorListener? _onActiveThumbImageError;
+  set onActiveThumbImageError(ImageErrorListener? value) {
+    if (value == _onActiveThumbImageError) {
+      return;
+    }
+    _onActiveThumbImageError = value;
+    notifyListeners();
+  }
+
+  ImageProvider? get inactiveThumbImage => _inactiveThumbImage;
+  ImageProvider? _inactiveThumbImage;
+  set inactiveThumbImage(ImageProvider? value) {
+    if (value == _inactiveThumbImage) {
+      return;
+    }
+    _inactiveThumbImage = value;
+    notifyListeners();
+  }
+
+  ImageErrorListener? get onInactiveThumbImageError => _onInactiveThumbImageError;
+  ImageErrorListener? _onInactiveThumbImageError;
+  set onInactiveThumbImageError(ImageErrorListener? value) {
+    if (value == _onInactiveThumbImageError) {
+      return;
+    }
+    _onInactiveThumbImageError = value;
+    notifyListeners();
+  }
+
+  Color get activeTrackColor => _activeTrackColor!;
+  Color? _activeTrackColor;
+  set activeTrackColor(Color value) {
+    if (value == _activeTrackColor) {
+      return;
+    }
+    _activeTrackColor = value;
+    notifyListeners();
+  }
+
+  Color? get activeTrackOutlineColor => _activeTrackOutlineColor;
+  Color? _activeTrackOutlineColor;
+  set activeTrackOutlineColor(Color? value) {
+    if (value == _activeTrackOutlineColor) {
+      return;
+    }
+    _activeTrackOutlineColor = value;
+    notifyListeners();
+  }
+
+  Color? get inactiveTrackOutlineColor => _inactiveTrackOutlineColor;
+  Color? _inactiveTrackOutlineColor;
+  set inactiveTrackOutlineColor(Color? value) {
+    if (value == _inactiveTrackOutlineColor) {
+      return;
+    }
+    _inactiveTrackOutlineColor = value;
+    notifyListeners();
+  }
+
+  double? get activeTrackOutlineWidth => _activeTrackOutlineWidth;
+  double? _activeTrackOutlineWidth;
+  set activeTrackOutlineWidth(double? value) {
+    if (value == _activeTrackOutlineWidth) {
+      return;
+    }
+    _activeTrackOutlineWidth = value;
+    notifyListeners();
+  }
+
+  double? get inactiveTrackOutlineWidth => _inactiveTrackOutlineWidth;
+  double? _inactiveTrackOutlineWidth;
+  set inactiveTrackOutlineWidth(double? value) {
+    if (value == _inactiveTrackOutlineWidth) {
+      return;
+    }
+    _inactiveTrackOutlineWidth = value;
+    notifyListeners();
+  }
+
+  Color get inactiveTrackColor => _inactiveTrackColor!;
+  Color? _inactiveTrackColor;
+  set inactiveTrackColor(Color value) {
+    if (value == _inactiveTrackColor) {
+      return;
+    }
+    _inactiveTrackColor = value;
+    notifyListeners();
+  }
+
+  ImageConfiguration get configuration => _configuration!;
+  ImageConfiguration? _configuration;
+  set configuration(ImageConfiguration value) {
+    if (value == _configuration) {
+      return;
+    }
+    _configuration = value;
+    notifyListeners();
+  }
+
+  TextDirection get textDirection => _textDirection!;
+  TextDirection? _textDirection;
   set textDirection(TextDirection value) {
     if (_textDirection == value) {
       return;
     }
     _textDirection = value;
-    markNeedsPaint();
+    notifyListeners();
   }
 
-  bool get isFocused => _isFocused;
-  bool _isFocused;
-  set isFocused(bool value) {
-    if (value == _isFocused) {
+  Color get surfaceColor => _surfaceColor!;
+  Color? _surfaceColor;
+  set surfaceColor(Color value) {
+    if (value == _surfaceColor) {
       return;
     }
-    _isFocused = value;
-    markNeedsPaint();
+    _surfaceColor = value;
+    notifyListeners();
+  }
+
+  bool get isInteractive => _isInteractive!;
+  bool? _isInteractive;
+  set isInteractive(bool value) {
+    if (value == _isInteractive) {
+      return;
+    }
+    _isInteractive = value;
+    notifyListeners();
+  }
+
+  double get trackInnerLength => _trackInnerLength!;
+  double? _trackInnerLength;
+  set trackInnerLength(double value) {
+    if (value == _trackInnerLength) {
+      return;
+    }
+    _trackInnerLength = value;
+    notifyListeners();
+  }
+
+  List<BoxShadow>? get thumbShadow => _thumbShadow;
+  List<BoxShadow>? _thumbShadow;
+  set thumbShadow(List<BoxShadow>? value) {
+    if (value == _thumbShadow) {
+      return;
+    }
+    _thumbShadow = value;
+    notifyListeners();
   }
 
   (Color onLabelColor, Color offLabelColor)? get onOffLabelColors => _onOffLabelColors;
@@ -638,71 +1009,133 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
       return;
     }
     _onOffLabelColors = value;
-    markNeedsPaint();
+    notifyListeners();
   }
 
-  bool get isInteractive => onChanged != null;
+  final TextPainter _textPainter = TextPainter();
+  Color? _cachedThumbColor;
+  ImageProvider? _cachedThumbImage;
+  ImageErrorListener? _cachedThumbErrorListener;
+  BoxPainter? _cachedThumbPainter;
 
-  @override
-  bool hitTestSelf(Offset position) => true;
+  ShapeDecoration _createDefaultThumbDecoration(Color color, ImageProvider? image, ImageErrorListener? errorListener) {
+    return ShapeDecoration(
+      color: color,
+      image: image == null ? null : DecorationImage(image: image, onError: errorListener),
+      shape: const StadiumBorder(),
+    );
+  }
 
-  @override
-  void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
-    assert(debugHandleEvent(event, entry));
-    if (event is PointerDownEvent && isInteractive) {
-      _state._drag.addPointer(event);
-      _state._tap.addPointer(event);
+  bool _isPainting = false;
+
+  void _handleDecorationChanged() {
+    // If the image decoration is available synchronously, we'll get called here
+    // during paint. There's no reason to mark ourselves as needing paint if we
+    // are already in the middle of painting. (In fact, doing so would trigger
+    // an assert).
+    if (!_isPainting) {
+      notifyListeners();
     }
   }
 
-  @override
-  void describeSemanticsConfiguration(SemanticsConfiguration config) {
-    super.describeSemanticsConfiguration(config);
-
-    if (isInteractive) {
-      config.onTap = _state._handleTap;
-    }
-
-    config.isEnabled = isInteractive;
-    config.isToggled = _value;
-  }
+  bool _stopPressAnimation = false;
+  double? _pressedInactiveThumbRadius;
+  double? _pressedActiveThumbRadius;
+  late double? _pressedThumbExtension;
 
   @override
-  void paint(PaintingContext context, Offset offset) {
-    final Canvas canvas = context.canvas;
-
-    final double currentValue = _state.position.value;
-    final double currentReactionValue = _state._reaction.value;
+  void paint(Canvas canvas, Size size) {
+    final double currentValue = position.value;
 
     final double visualPosition = switch (textDirection) {
       TextDirection.rtl => 1.0 - currentValue,
       TextDirection.ltr => currentValue,
     };
-
-    final Paint paint = Paint()
-      ..color = Color.lerp(trackColor, activeColor, currentValue)!;
-
-    final Rect trackRect = Rect.fromLTWH(
-        offset.dx + (size.width - _kTrackWidth) / 2.0,
-        offset.dy + (size.height - _kTrackHeight) / 2.0,
-        _kTrackWidth,
-        _kTrackHeight,
-    );
-    final RRect trackRRect = RRect.fromRectAndRadius(trackRect, const Radius.circular(_kTrackRadius));
-    canvas.drawRRect(trackRRect, paint);
-
-    if (_isFocused) {
-      // Paints a border around the switch in the focus color.
-      final RRect borderTrackRRect = trackRRect.inflate(1.75);
-
-      final Paint borderPaint = Paint()
-        ..color = focusColor
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 3.5;
-
-      canvas.drawRRect(borderTrackRRect, borderPaint);
+    if (reaction.status == AnimationStatus.reverse && !_stopPressAnimation) {
+      _stopPressAnimation = true;
+    } else {
+      _stopPressAnimation = false;
     }
 
+    // To get the thumb radius when the press ends, the value can be any number
+    // between activeThumbRadius/inactiveThumbRadius and pressedThumbRadius.
+    if (!_stopPressAnimation) {
+      _pressedThumbExtension = reaction.value * 7;
+      if (reaction.isCompleted) {
+        // This happens when the thumb is dragged instead of being tapped.
+        _pressedInactiveThumbRadius = lerpDouble(inactiveThumbRadius, pressedThumbRadius, reaction.value);
+        _pressedActiveThumbRadius = lerpDouble(activeThumbRadius, pressedThumbRadius, reaction.value);
+      }
+      if (currentValue == 0) {
+        _pressedInactiveThumbRadius = lerpDouble(inactiveThumbRadius, pressedThumbRadius, reaction.value);
+        _pressedActiveThumbRadius = activeThumbRadius;
+      }
+      if (currentValue == 1) {
+        _pressedActiveThumbRadius = lerpDouble(activeThumbRadius, pressedThumbRadius, reaction.value);
+        _pressedInactiveThumbRadius = inactiveThumbRadius;
+      }
+    }
+    final Size inactiveThumbSize = Size(_pressedInactiveThumbRadius! * 2 + _pressedThumbExtension!, _pressedInactiveThumbRadius! * 2);
+    final Size activeThumbSize = Size(_pressedActiveThumbRadius! * 2 + _pressedThumbExtension!, _pressedActiveThumbRadius! * 2);
+
+    Size? thumbSize;
+
+    if (reaction.isCompleted) {
+      thumbSize = Size(_pressedInactiveThumbRadius! * 2 + _pressedThumbExtension!, _pressedInactiveThumbRadius! * 2);
+    } else {
+      if (position.isDismissed || position.status == AnimationStatus.forward) {
+        thumbSize = Size.lerp(inactiveThumbSize, activeThumbSize, position.value);
+      } else {
+        thumbSize = Size.lerp(inactiveThumbSize, activeThumbSize, position.value);
+      }
+    }
+
+    // The thumb contracts slightly during the animation.
+    final double inset = thumbOffset == null ? 0 : 1.0 - (currentValue - thumbOffset!).abs() * 2.0;
+    thumbSize = Size(thumbSize!.width - inset, thumbSize.height - inset);
+
+    final double colorValue = _colorAnimation!.value;
+    final Color trackColor = Color.lerp(inactiveTrackColor, activeTrackColor, position.value)!;
+    final Color? trackOutlineColor = inactiveTrackOutlineColor == null || activeTrackOutlineColor == null ? null
+        : Color.lerp(inactiveTrackOutlineColor, activeTrackOutlineColor, colorValue);
+    final double? trackOutlineWidth = lerpDouble(inactiveTrackOutlineWidth, activeTrackOutlineWidth, colorValue);
+    Color lerpedThumbColor;
+    if (!reaction.isDismissed) {
+      lerpedThumbColor = Color.lerp(inactivePressedColor, activePressedColor, colorValue)!;
+    } else if (positionController.status == AnimationStatus.forward) {
+      lerpedThumbColor = Color.lerp(inactivePressedColor, activeColor, colorValue)!;
+    } else if (positionController.status == AnimationStatus.reverse) {
+      lerpedThumbColor = Color.lerp(inactiveColor, activePressedColor, colorValue)!;
+    } else {
+      lerpedThumbColor = Color.lerp(inactiveColor, activeColor, colorValue)!;
+    }
+
+    // Blend the thumb color against a `surfaceColor` background in case the
+    // thumbColor is not opaque. This way we do not see through the thumb to the
+    // track underneath.
+    final Color thumbColor = Color.alphaBlend(lerpedThumbColor, surfaceColor);
+
+    final Icon? thumbIcon = currentValue < 0.5 ? inactiveIcon : activeIcon;
+
+    final ImageProvider? thumbImage = currentValue < 0.5 ? inactiveThumbImage : activeThumbImage;
+
+    final ImageErrorListener? thumbErrorListener = currentValue < 0.5 ? onInactiveThumbImageError : onActiveThumbImageError;
+
+    final Paint paint = Paint()
+      ..color = trackColor;
+
+    final Offset trackPaintOffset = _computeTrackPaintOffset(size, trackWidth, trackHeight);
+    final Offset thumbPaintOffset = _computeThumbPaintOffset(trackPaintOffset, thumbSize, visualPosition);
+
+    final Rect trackRect = Rect.fromLTWH(
+      trackPaintOffset.dx,
+      trackPaintOffset.dy,
+      trackWidth,
+      trackHeight,
+    );
+
+    final double currentReactionValue = reaction.value;
+    _paintTrackWith(canvas, paint, trackPaintOffset, trackOutlineColor, trackOutlineWidth, trackRect);
     if (_onOffLabelColors != null) {
       final (Color onLabelColor, Color offLabelColor) = onOffLabelColors!;
 
@@ -714,23 +1147,32 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
         TextDirection.rtl => (rightLabelOpacity, leftLabelOpacity),
       };
 
+      // Label sizes and padding taken from xcode inspector.
+      // See https://github.com/flutter/flutter/issues/4830#issuecomment-528495360.
+      const double kOnLabelWidth = 1.0;
+      const double kOnLabelHeight = 10.0;
+      const double kOnLabelPaddingHorizontal = 11.0;
+      const double kOffLabelWidth = 1.0;
+      const double kOffLabelPaddingHorizontal = 12.0;
+      const double kOffLabelRadius = 5.0;
+
       final (Offset onLabelOffset, Offset offLabelOffset) =
           switch (textDirection) {
         TextDirection.ltr => (
-            trackRect.centerLeft.translate(_kOnLabelPaddingHorizontal, 0),
-            trackRect.centerRight.translate(-_kOffLabelPaddingHorizontal, 0),
+            trackRect.centerLeft.translate(kOnLabelPaddingHorizontal, 0),
+            trackRect.centerRight.translate(-kOffLabelPaddingHorizontal, 0),
           ),
         TextDirection.rtl => (
-            trackRect.centerRight.translate(-_kOnLabelPaddingHorizontal, 0),
-            trackRect.centerLeft.translate(_kOffLabelPaddingHorizontal, 0),
+            trackRect.centerRight.translate(-kOnLabelPaddingHorizontal, 0),
+            trackRect.centerLeft.translate(kOffLabelPaddingHorizontal, 0),
           ),
       };
 
       // Draws '|' label
       final Rect onLabelRect = Rect.fromCenter(
         center: onLabelOffset,
-        width: _kOnLabelWidth,
-        height: _kOnLabelHeight,
+        width: kOnLabelWidth,
+        height: kOnLabelHeight,
       );
       final Paint onLabelPaint = Paint()
         ..color = onLabelColor.withOpacity(onLabelOpacity)
@@ -741,50 +1183,189 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
       final Paint offLabelPaint = Paint()
         ..color = offLabelColor.withOpacity(offLabelOpacity)
         ..style = PaintingStyle.stroke
-        ..strokeWidth = _kOffLabelWidth;
+        ..strokeWidth = kOffLabelWidth;
       canvas.drawCircle(
         offLabelOffset,
-        _kOffLabelRadius,
+        kOffLabelRadius,
         offLabelPaint,
       );
     }
-
-    final double currentThumbExtension = CupertinoThumbPainter.extension * currentReactionValue;
-    final double thumbLeft = lerpDouble(
-      trackRect.left + _kTrackInnerStart - CupertinoThumbPainter.radius,
-      trackRect.left + _kTrackInnerEnd - CupertinoThumbPainter.radius - currentThumbExtension,
-      visualPosition,
-    )!;
-    final double thumbRight = lerpDouble(
-      trackRect.left + _kTrackInnerStart + CupertinoThumbPainter.radius + currentThumbExtension,
-      trackRect.left + _kTrackInnerEnd + CupertinoThumbPainter.radius,
-      visualPosition,
-    )!;
-    final double thumbCenterY = offset.dy + size.height / 2.0;
-    final Rect thumbBounds = Rect.fromLTRB(
-      thumbLeft,
-      thumbCenterY - CupertinoThumbPainter.radius,
-      thumbRight,
-      thumbCenterY + CupertinoThumbPainter.radius,
+    _paintThumbWith(
+      thumbPaintOffset,
+      canvas,
+      colorValue,
+      thumbColor,
+      thumbImage,
+      thumbErrorListener,
+      thumbIcon,
+      thumbSize,
+      inset,
     );
-
-    _clipRRectLayer.layer = context.pushClipRRect(needsCompositing, Offset.zero, thumbBounds, trackRRect, (PaintingContext innerContext, Offset offset) {
-      _thumbPainter.paint(innerContext.canvas, thumbBounds);
-    }, oldLayer: _clipRRectLayer.layer);
   }
 
-  final LayerHandle<ClipRRectLayer> _clipRRectLayer = LayerHandle<ClipRRectLayer>();
+  /// Computes canvas offset for track's upper left corner.
+  Offset _computeTrackPaintOffset(Size canvasSize, double trackWidth, double trackHeight) {
+    final double horizontalOffset = (canvasSize.width - trackWidth) / 2.0;
+    final double verticalOffset = (canvasSize.height - trackHeight) / 2.0;
+
+    return Offset(horizontalOffset, verticalOffset);
+  }
+
+  /// Computes canvas offset for thumb's upper left corner as if it were a
+  /// square.
+  Offset _computeThumbPaintOffset(Offset trackPaintOffset, Size thumbSize, double visualPosition) {
+    // How much thumb radius extends beyond the track
+    final double trackRadius = trackHeight / 2;
+    final double additionalThumbRadius = thumbSize.height / 2 - trackRadius;
+
+    final double horizontalProgress = visualPosition * (trackInnerLength - _pressedThumbExtension!);
+    final double thumbHorizontalOffset = trackPaintOffset.dx + trackRadius + (_pressedThumbExtension! / 2) - thumbSize.width / 2 + horizontalProgress;
+    final double thumbVerticalOffset = trackPaintOffset.dy - additionalThumbRadius;
+    return Offset(thumbHorizontalOffset, thumbVerticalOffset);
+  }
+
+  void _paintTrackWith(Canvas canvas, Paint paint, Offset trackPaintOffset, Color? trackOutlineColor, double? trackOutlineWidth, Rect trackRect) {
+    final double trackRadius = trackHeight / 2;
+    final RRect trackRRect = RRect.fromRectAndRadius(
+      trackRect,
+      Radius.circular(trackRadius),
+    );
+
+    canvas.drawRRect(trackRRect, paint);
+
+    // paint track outline
+    if (trackOutlineColor != null) {
+      final Rect outlineTrackRect = Rect.fromLTWH(
+        trackPaintOffset.dx + 1,
+        trackPaintOffset.dy + 1,
+        trackWidth - 2,
+        trackHeight - 2,
+      );
+      final RRect outlineTrackRRect = RRect.fromRectAndRadius(
+        outlineTrackRect,
+        Radius.circular(trackRadius),
+      );
+
+      final Paint outlinePaint = Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = trackOutlineWidth ?? 2.0
+        ..color = trackOutlineColor;
+
+      canvas.drawRRect(outlineTrackRRect, outlinePaint);
+    }
+
+    if (isFocused) {
+      final RRect focusedOutline = trackRRect.inflate(1.75);
+      final Paint focusedPaint = Paint()
+        ..style = PaintingStyle.stroke
+        ..color = focusColor
+        ..strokeWidth = 3.5;
+      canvas.drawRRect(focusedOutline, focusedPaint);
+    }
+    canvas.clipRRect(trackRRect);
+  }
+
+  void _paintThumbWith(
+    Offset thumbPaintOffset,
+    Canvas canvas,
+    double currentValue,
+    Color thumbColor,
+    ImageProvider? thumbImage,
+    ImageErrorListener? thumbErrorListener,
+    Icon? thumbIcon,
+    Size thumbSize,
+    double inset,
+    ) {
+    try {
+      _isPainting = true;
+      if (_cachedThumbPainter == null || thumbColor != _cachedThumbColor || thumbImage != _cachedThumbImage || thumbErrorListener != _cachedThumbErrorListener) {
+        _cachedThumbColor = thumbColor;
+        _cachedThumbImage = thumbImage;
+        _cachedThumbErrorListener = thumbErrorListener;
+        _cachedThumbPainter?.dispose();
+        _cachedThumbPainter = _createDefaultThumbDecoration(thumbColor, thumbImage, thumbErrorListener).createBoxPainter(_handleDecorationChanged);
+      }
+      final BoxPainter thumbPainter = _cachedThumbPainter!;
+
+      _paintCupertinoThumbShadowAndBorder(canvas, thumbPaintOffset, thumbSize);
+
+      thumbPainter.paint(
+        canvas,
+        thumbPaintOffset,
+        configuration.copyWith(size: thumbSize),
+      );
+
+      if (thumbIcon != null && thumbIcon.icon != null) {
+        final Color iconColor = Color.lerp(inactiveIconColor, activeIconColor, currentValue)!;
+        final double iconSize = thumbIcon.size ?? 16.0;
+        final IconData iconData = thumbIcon.icon!;
+        final double? iconWeight = thumbIcon.weight ?? iconTheme?.weight;
+        final double? iconFill = thumbIcon.fill ?? iconTheme?.fill;
+        final double? iconGrade = thumbIcon.grade ?? iconTheme?.grade;
+        final double? iconOpticalSize = thumbIcon.opticalSize ?? iconTheme?.opticalSize;
+        final List<Shadow>? iconShadows = thumbIcon.shadows ?? iconTheme?.shadows;
+
+        final TextSpan textSpan = TextSpan(
+          text: String.fromCharCode(iconData.codePoint),
+          style: TextStyle(
+            fontVariations: <FontVariation>[
+              if (iconFill != null) FontVariation('FILL', iconFill),
+              if (iconWeight != null) FontVariation('wght', iconWeight),
+              if (iconGrade != null) FontVariation('GRAD', iconGrade),
+              if (iconOpticalSize != null) FontVariation('opsz', iconOpticalSize),
+            ],
+            color: iconColor,
+            fontSize: iconSize,
+            inherit: false,
+            fontFamily: iconData.fontFamily,
+            package: iconData.fontPackage,
+            shadows: iconShadows,
+          ),
+        );
+        _textPainter
+          ..textDirection = textDirection
+          ..text = textSpan;
+        _textPainter.layout();
+        final double additionalHorizontalOffset = (thumbSize.width - iconSize) / 2;
+        final double additionalVerticalOffset = (thumbSize.height - iconSize) / 2;
+        final Offset offset = thumbPaintOffset + Offset(additionalHorizontalOffset, additionalVerticalOffset);
+
+        _textPainter.paint(canvas, offset);
+      }
+    } finally {
+      _isPainting = false;
+    }
+  }
+
+  void _paintCupertinoThumbShadowAndBorder(Canvas canvas, Offset thumbPaintOffset, Size thumbSize) {
+    final RRect thumbBounds = RRect.fromLTRBR(
+      thumbPaintOffset.dx,
+      thumbPaintOffset.dy,
+      thumbPaintOffset.dx + thumbSize.width,
+      thumbPaintOffset.dy + thumbSize.height,
+      Radius.circular(thumbSize.height / 2.0),
+    );
+    if (thumbShadow != null) {
+      for (final BoxShadow shadow in thumbShadow!) {
+        canvas.drawRRect(thumbBounds.shift(shadow.offset), shadow.toPaint());
+      }
+    }
+
+    canvas.drawRRect(
+      thumbBounds.inflate(0.5),
+      Paint()..color = const Color(0x0A000000),
+    );
+  }
 
   @override
   void dispose() {
-    _clipRRectLayer.layer = null;
+    _textPainter.dispose();
+    _cachedThumbPainter?.dispose();
+    _cachedThumbPainter = null;
+    _cachedThumbColor = null;
+    _cachedThumbImage = null;
+    _cachedThumbErrorListener = null;
+    _colorAnimation?.dispose();
     super.dispose();
-  }
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(FlagProperty('value', value: value, ifTrue: 'checked', ifFalse: 'unchecked', showName: true));
-    description.add(FlagProperty('isInteractive', value: isInteractive, ifTrue: 'enabled', ifFalse: 'disabled', showName: true, defaultValue: true));
   }
 }
