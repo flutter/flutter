@@ -103,25 +103,17 @@ const Color _kDialogColor = CupertinoDynamicColor.withBrightness(
 // Translucent light gray that is painted on top of the blurred backdrop as the
 // background color of a pressed button.
 // Eyeballed from iOS 13 beta simulator.
-const Color _kPressedColor = CupertinoDynamicColor.withBrightness(
-  color: Color(0xFFE1E1E1),
-  darkColor: Color(0xFF2E2E2E),
-);
+const Color _kPressedColor = Color(0xCAE0E0E0);
 
-const Color _kActionSheetCancelPressedColor = CupertinoDynamicColor.withBrightness(
-  color: Color(0xFFECECEC),
-  darkColor: Color(0xFF49494B),
-);
+const Color _kActionSheetCancelColor = Color(0xFFFFFFFF);
+const Color _kActionSheetCancelPressedColor = Color(0xFFECECEC);
 
 // Translucent, very light gray that is painted on top of the blurred backdrop
 // as the action sheet's background color.
 // TODO(LongCatIsLooong): https://github.com/flutter/flutter/issues/39272. Use
 // System Materials once we have them.
 // Extracted from https://developer.apple.com/design/resources/.
-const Color _kActionSheetBackgroundColor = CupertinoDynamicColor.withBrightness(
-  color: Color(0xC7F9F9F9),
-  darkColor: Color(0xC7252525),
-);
+const Color _kActionSheetBackgroundColor = Color(0xC9F9F9F9);
 
 // The gray color used for text that appears in the title area.
 // Extracted from https://developer.apple.com/design/resources/.
@@ -131,7 +123,7 @@ const Color _kActionSheetContentTextColor = Color(0xFF8F8F8F);
 // areas between the content section and actions section, as well as between
 // buttons.
 // Eye-balled from iOS 13 beta simulator.
-const Color _kActionSheetButtonDividerColor = _kActionSheetContentTextColor;
+const Color _kActionSheetButtonDividerColor = Color(0xD3CDCDCD);
 
 // The alert dialog layout policy changes depending on whether the user is using
 // a "regular" font size vs a "large" font size. This is a spectrum. There are
@@ -805,11 +797,11 @@ class _ActionSheetButtonBackgroundState extends State<_ActionSheetButtonBackgrou
     if (!widget.isCancel) {
       backgroundColor = isBeingPressed
         ? _kPressedColor
-        : CupertinoDynamicColor.resolve(_kActionSheetBackgroundColor, context);
+        : _kActionSheetBackgroundColor;
     } else {
       backgroundColor = isBeingPressed
-          ? _kActionSheetCancelPressedColor
-        : CupertinoColors.secondarySystemGroupedBackground;
+        ? _kActionSheetCancelPressedColor
+        : _kActionSheetCancelColor;
       borderRadius = const BorderRadius.all(Radius.circular(_kCornerRadius));
     }
     return GestureDetector(
@@ -819,7 +811,7 @@ class _ActionSheetButtonBackgroundState extends State<_ActionSheetButtonBackgrou
       onTapCancel: _onTapCancel,
       child: Container(
         decoration: BoxDecoration(
-          color: backgroundColor,
+          color: CupertinoDynamicColor.resolve(backgroundColor, context),
           borderRadius: borderRadius,
         ),
         child: widget.child,
