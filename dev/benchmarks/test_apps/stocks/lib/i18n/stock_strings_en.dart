@@ -7,6 +7,8 @@
 
 import 'stock_strings.dart';
 
+// ignore_for_file: type=lint
+
 /// The translations for English (`en`).
 class StockStringsEn extends StockStrings {
   StockStringsEn([String locale = 'en']) : super(locale);
