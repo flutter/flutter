@@ -493,7 +493,7 @@ class _SlidingTapGestureRecognizer extends PanGestureRecognizer {
       // If this gesture has a competing gesture (such as scrolling), and the
       // pointer has not moved far enough to get this panning accepted, a
       // pointer up event should still be considered as an accepted tap up.
-      // Resolving as accepted will trigger onDragEnd.
+      // Manually accept this gesture here, which triggers onDragEnd.
       if (event is PointerUpEvent) {
         resolve(GestureDisposition.accepted);
         stopTrackingPointer(_primaryPointer!);
@@ -510,9 +510,11 @@ class _SlidingTapGestureRecognizer extends PanGestureRecognizer {
   String get debugDescription => 'tap slide';
 }
 
+// Recognizes sliding taps and thereupon interacts with
+// `_ActionSheetDragAvatar`.
 class _AvatarSelectionGestureRecognizer extends GestureRecognizer {
   _AvatarSelectionGestureRecognizer({super.debugOwner, required this.hitTest})
-    : _slidingTap = _SlidingTapGestureRecognizer() {
+    : _slidingTap = _SlidingTapGestureRecognizer(debugOwner: debugOwner) {
     _slidingTap
       ..onDown = _onDown
       ..onUpdate = _onUpdate
@@ -605,7 +607,7 @@ class _AvatarSelectionGestureRecognizer extends GestureRecognizer {
   }
 
   @override
-  String get debugDescription => 'button dragging';
+  String get debugDescription => 'avatar selection';
 }
 
 // The gesture detector used by action sheets.
@@ -649,23 +651,22 @@ class _ActionSheetGestureDetector extends StatelessWidget {
   }
 }
 
-// A region that responds to the "button dragging" gesture.
+// A region that responds to the "sliding tap" gesture.
 //
-// While a button is usually triggered with a tap, several widgets, such as
-// Cupertino action sheets or dialogs, allow the user to "reselect buttons",
-// i.e. drag the pointer around after pressing, and select the button in which
-// the drag ends.
+// Some Cupertino widgets, such as action sheets or dialogs, allow the user to
+// select buttons using "sliding taps", where the user can drag around after
+// pressing on the screen, and whichever button the drag ends in is selected.
 //
-// This class must be provided to a `MetaData` widget as data, and is typically
+// This class is used to define the regions that sliding taps recognize. This
+// class must be provided to a `MetaData` widget as `data`, and is typically
 // implemented by a widget state class. When an eligible dragging gesture
-// enters, leaves, or ends in the region marked by the `MetaData` widget,
-// corresponding methods will be called.
+// enters, leaves, or ends this `MetaData` widget, corresponding methods of this
+// class will be called.
 //
-// Multiple `_ActionSheetDragAvatar`s might be nested, which will be treated as
-// the same region, and any eligible method will apply to all avatars in the
-// nest. Since the differentiating algorithm simply checks whether inner-most
-// avatar has changed, all nested avatars must mark the exact same region. (This
-// simple rule is used because it's suffcient for our use cases for now.)
+// Multiple `_ActionSheetDragAvatar`s might be nested. All outer avatars will
+// be treated as identical to the inner-most one, i.e. when the pointer enters
+// or leaves an avatar, the corresponding method will be called on all avatars
+// that nest it. (This simple algorithm suffices the use cases here.)
 abstract class _ActionSheetDragAvatar {
   // A pointer has entered this region.
   //
@@ -952,10 +953,10 @@ class CupertinoActionSheetAction extends StatefulWidget {
     required this.child,
   });
 
-  /// The callback that is called when the button is triggered.
+  /// The callback that is called when the button is selected.
   ///
-  /// While triggering a button usually means tapping on it, the user can also
-  /// drag on the action sheet, and wherever the drag ends is triggered.
+  /// The button can be selected by either by tapping on this button or by
+  /// pressing elsewhere and sliding onto this button before releasing.
   final VoidCallback onPressed;
 
   /// Whether this action is the default choice in the action sheet.
@@ -1051,6 +1052,9 @@ class _ActionSheetButtonBackground extends StatefulWidget {
   /// The boolean value is true if the user is tapping down on the button.
   final ValueSetter<bool>? onPressStateChange;
 
+  /// The widget below this widget in the tree.
+  ///
+  /// Typically a [Text] widget.
   final Widget child;
 
   @override
