@@ -10,7 +10,6 @@
 #include "flutter/fml/trace_event.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
 #include "impeller/renderer/backend/vulkan/shader_function_vk.h"
-#include "impeller/shader_archive/multi_arch_shader_archive.h"
 #include "impeller/shader_archive/shader_archive.h"
 
 namespace impeller {
@@ -68,13 +67,12 @@ ShaderLibraryVK::ShaderLibraryVK(
     return true;
   };
   for (const auto& library_data : shader_libraries_data) {
-    auto vulkan_library = MultiArchShaderArchive::CreateArchiveFromMapping(
-        library_data, ArchiveRenderingBackend::kVulkan);
-    if (!vulkan_library || !vulkan_library->IsValid()) {
-      VALIDATION_LOG << "Could not construct Vulkan shader library archive.";
+    auto blob_library = ShaderArchive{library_data};
+    if (!blob_library.IsValid()) {
+      VALIDATION_LOG << "Could not construct shader blob library.";
       return;
     }
-    vulkan_library->IterateAllShaders(iterator);
+    blob_library.IterateAllShaders(iterator);
   }
 
   if (!success) {

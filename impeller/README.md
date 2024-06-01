@@ -175,9 +175,6 @@ flowchart TD
 
     spirv -- Reflector --> cxx_sources[C++ Sources]
     cxx_sources -- Ninja Build --> cxx_library[C++ Library]
-
-    vulkan_shader_archive -- Multi Arch Archiver --> multi_arch_archive[Multi Architecture Archive]
-    gles_shader_archive -- Multi Arch Archiver --> multi_arch_archive
 ```
 
 ## Try Impeller in Flutter
