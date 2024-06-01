@@ -1134,8 +1134,9 @@ class _SwitchPainter extends ToggleablePainter {
       trackHeight,
     );
 
-    final double currentReactionValue = reaction.value;
     _paintTrackWith(canvas, paint, trackPaintOffset, trackOutlineColor, trackOutlineWidth, trackRect);
+
+    final double currentReactionValue = reaction.value;
     if (_onOffLabelColors != null) {
       final (Color onLabelColor, Color offLabelColor) = onOffLabelColors!;
 
