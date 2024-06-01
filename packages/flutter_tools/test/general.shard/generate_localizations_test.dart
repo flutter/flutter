@@ -796,7 +796,7 @@ import 'bar.dart';
 
 /// The translations for English (`en`).
 class FooEn extends Foo {
-  FooEn([super.locale = 'en']);
+  FooEn([String locale = 'en']) : super(locale);
 
   @override
   String get title => 'Title';
@@ -896,7 +896,7 @@ import 'app_localizations.dart';
 
 /// The translations for English (`en`).
 class AppLocalizationsEn extends AppLocalizations {
-  AppLocalizationsEn([super.locale = 'en']);
+  AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
   String get title => 'Title';
@@ -927,7 +927,7 @@ import 'app_localizations.dart';
 
 /// The translations for English (`en`).
 class AppLocalizationsEn extends AppLocalizations {
-  AppLocalizationsEn([super.locale = 'en']);
+  AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
   String get title => 'Title';

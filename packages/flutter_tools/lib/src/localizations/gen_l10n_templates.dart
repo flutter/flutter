@@ -70,7 +70,7 @@ import 'package:intl/intl.dart' as intl;
 /// be consistent with the languages listed in the @(class).supportedLocales
 /// property.
 abstract class @(class) {
-  @(class)(String locale) : localeName = intl.Intl.canonicalizedLocale(locale);
+  @(class)(String locale) : localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
   final String localeName;
 
@@ -173,7 +173,7 @@ const String classFileTemplate = '''
 
 /// The translations for @(language) (`@(localeName)`).
 class @(class) extends @(baseClass) {
-  @(class)([super.locale = '@(localeName)']);
+  @(class)([String locale = '@(localeName)']) : super(locale);
 
 @(methods)
 }
