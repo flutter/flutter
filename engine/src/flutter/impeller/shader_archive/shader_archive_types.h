@@ -13,12 +13,6 @@ enum class ArchiveShaderType {
   kCompute,
 };
 
-enum class ArchiveRenderingBackend {
-  kMetal,
-  kVulkan,
-  kOpenGLES,
-};
-
 }  // namespace impeller
 
 #endif  // FLUTTER_IMPELLER_SHADER_ARCHIVE_SHADER_ARCHIVE_TYPES_H_
