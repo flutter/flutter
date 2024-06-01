@@ -458,12 +458,11 @@ typedef _HitTester = HitTestResult Function(Offset location);
 
 // Recognizes taps with possible sliding during the tap.
 //
-// This recognizer only recognizes a single primary pointer. The first pointer
-// added to the recognizer becomes the primary pointer. All other pointers added
-// to the recognizer while the primary pointer is still in effect are considered
-// part of this gesture with events ignored. After the current primary pointer
-// ends, the next pointer added to the recognizer becomes the new primary
-// pointer (which starts a new gesture sequence).
+// This recognizer only tracks one pointer at a time (called the primary
+// pointer), and other pointers added while the primary pointer is alive are
+// ignored and can not be used by other gestures either. After the primary
+// pointer ends, the pointer added next becomes the new primary pointer (which
+// starts a new gesture sequence).
 //
 // This recognizer only allows [kPrimaryMouseButton].
 class _SlidingTapGestureRecognizer extends PanGestureRecognizer {
@@ -611,10 +610,6 @@ class _AvatarSelectionGestureRecognizer extends GestureRecognizer {
 }
 
 // The gesture detector used by action sheets.
-//
-// This gesture detector only responds to the first added pointer (called the
-// primary pointer). All later pointers are kept and ignored. If the primary
-// pointer ends, the next added pointer is considered the new primary pointer.
 //
 // This gesture detector only recognizes one gesture,
 // `_AvatarSelectionGestureRecognizer`.
