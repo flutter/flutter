@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_api_samples/material/menu_anchor/menu_anchor.3.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
