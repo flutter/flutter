@@ -374,6 +374,25 @@ targets:
       subshard: "1_3"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+    # Excludes the following from build tests
+    # /docs, AUTHORS, CODE_OF_CONDUCT.md, CODEOWNERS, CONTRIBUTING.md, README.md, TESTOWNERS
+    runIf:
+      - .github/**
+      - .idea/**
+      - .vscode/**
+      - bin/**
+      - dev/**
+      - examples/**
+      - packages/**
+      - .ci.yaml
+      - .gitattributes
+      - .gitignore
+      - analysis_options.yaml
+      - dartdoc_options.yaml
+      - flutter_console.bat
+      - LICENSE
+      - PATENT_GRANT
+      - version
 
   - name: Linux build_tests_2_3
     recipe: flutter/flutter_drone
@@ -393,6 +412,25 @@ targets:
       subshard: "2_3"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+    # Excludes the following from build tests
+    # /docs, AUTHORS, CODE_OF_CONDUCT.md, CODEOWNERS, CONTRIBUTING.md, README.md, TESTOWNERS
+    runIf:
+      - .github/**
+      - .idea/**
+      - .vscode/**
+      - bin/**
+      - dev/**
+      - examples/**
+      - packages/**
+      - .ci.yaml
+      - .gitattributes
+      - .gitignore
+      - analysis_options.yaml
+      - dartdoc_options.yaml
+      - flutter_console.bat
+      - LICENSE
+      - PATENT_GRANT
+      - version
 
   - name: Linux build_tests_3_3
     recipe: flutter/flutter_drone
@@ -412,6 +450,25 @@ targets:
       subshard: "3_3"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+    # Excludes the following from build tests
+    # /docs, AUTHORS, CODE_OF_CONDUCT.md, CODEOWNERS, CONTRIBUTING.md, README.md, TESTOWNERS
+    runIf:
+      - .github/**
+      - .idea/**
+      - .vscode/**
+      - bin/**
+      - dev/**
+      - examples/**
+      - packages/**
+      - .ci.yaml
+      - .gitattributes
+      - .gitignore
+      - analysis_options.yaml
+      - dartdoc_options.yaml
+      - flutter_console.bat
+      - LICENSE
+      - PATENT_GRANT
+      - version
 
   - name: Linux ci_yaml flutter roller
     recipe: infra/ci_yaml
@@ -435,6 +492,25 @@ targets:
       shard: customer_testing
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+    # Excludes the following from customer tests
+    # /docs, AUTHORS, CODE_OF_CONDUCT.md, CODEOWNERS, CONTRIBUTING.md, README.md, TESTOWNERS
+    runIf:
+      - .github/**
+      - .idea/**
+      - .vscode/**
+      - bin/**
+      - dev/**
+      - examples/**
+      - packages/**
+      - .ci.yaml
+      - .gitattributes
+      - .gitignore
+      - analysis_options.yaml
+      - dartdoc_options.yaml
+      - flutter_console.bat
+      - LICENSE
+      - PATENT_GRANT
+      - version
 
   - name: Linux docs_publish
     recipe: flutter/docs
@@ -3405,6 +3481,25 @@ targets:
       subshard: "1_4"
       tags: >
         ["framework", "hostonly", "shard", "mac"]
+    # Excludes the following from build tests
+    # /docs, AUTHORS, CODE_OF_CONDUCT.md, CODEOWNERS, CONTRIBUTING.md, README.md, TESTOWNERS
+    runIf:
+      - .github/**
+      - .idea/**
+      - .vscode/**
+      - bin/**
+      - dev/**
+      - examples/**
+      - packages/**
+      - .ci.yaml
+      - .gitattributes
+      - .gitignore
+      - analysis_options.yaml
+      - dartdoc_options.yaml
+      - flutter_console.bat
+      - LICENSE
+      - PATENT_GRANT
+      - version
 
   - name: Mac_x64 build_tests_2_4
     recipe: flutter/flutter_drone
@@ -3424,6 +3519,25 @@ targets:
       subshard: "2_4"
       tags: >
         ["framework", "hostonly", "shard", "mac"]
+    # Excludes the following from build tests
+    # /docs, AUTHORS, CODE_OF_CONDUCT.md, CODEOWNERS, CONTRIBUTING.md, README.md, TESTOWNERS
+    runIf:
+      - .github/**
+      - .idea/**
+      - .vscode/**
+      - bin/**
+      - dev/**
+      - examples/**
+      - packages/**
+      - .ci.yaml
+      - .gitattributes
+      - .gitignore
+      - analysis_options.yaml
+      - dartdoc_options.yaml
+      - flutter_console.bat
+      - LICENSE
+      - PATENT_GRANT
+      - version
 
   - name: Mac_x64 build_tests_3_4
     recipe: flutter/flutter_drone
@@ -3443,6 +3557,25 @@ targets:
       subshard: "3_4"
       tags: >
         ["framework", "hostonly", "shard", "mac"]
+    # Excludes the following from build tests
+    # /docs, AUTHORS, CODE_OF_CONDUCT.md, CODEOWNERS, CONTRIBUTING.md, README.md, TESTOWNERS
+    runIf:
+      - .github/**
+      - .idea/**
+      - .vscode/**
+      - bin/**
+      - dev/**
+      - examples/**
+      - packages/**
+      - .ci.yaml
+      - .gitattributes
+      - .gitignore
+      - analysis_options.yaml
+      - dartdoc_options.yaml
+      - flutter_console.bat
+      - LICENSE
+      - PATENT_GRANT
+      - version
 
   - name: Mac_x64 build_tests_4_4
     recipe: flutter/flutter_drone
@@ -3462,6 +3595,25 @@ targets:
       subshard: "4_4"
       tags: >
         ["framework", "hostonly", "shard", "mac"]
+    # Excludes the following from build tests
+    # /docs, AUTHORS, CODE_OF_CONDUCT.md, CODEOWNERS, CONTRIBUTING.md, README.md, TESTOWNERS
+    runIf:
+      - .github/**
+      - .idea/**
+      - .vscode/**
+      - bin/**
+      - dev/**
+      - examples/**
+      - packages/**
+      - .ci.yaml
+      - .gitattributes
+      - .gitignore
+      - analysis_options.yaml
+      - dartdoc_options.yaml
+      - flutter_console.bat
+      - LICENSE
+      - PATENT_GRANT
+      - version
 
   - name: Mac_arm64 build_tests_1_4
     recipe: flutter/flutter_drone
@@ -3480,6 +3632,25 @@ targets:
       subshard: "1_4"
       tags: >
         ["framework", "hostonly", "shard", "mac"]
+    # Excludes the following from build tests
+    # /docs, AUTHORS, CODE_OF_CONDUCT.md, CODEOWNERS, CONTRIBUTING.md, README.md, TESTOWNERS
+    runIf:
+      - .github/**
+      - .idea/**
+      - .vscode/**
+      - bin/**
+      - dev/**
+      - examples/**
+      - packages/**
+      - .ci.yaml
+      - .gitattributes
+      - .gitignore
+      - analysis_options.yaml
+      - dartdoc_options.yaml
+      - flutter_console.bat
+      - LICENSE
+      - PATENT_GRANT
+      - version
 
   - name: Mac_arm64 build_tests_2_4
     recipe: flutter/flutter_drone
@@ -3498,6 +3669,25 @@ targets:
       subshard: "2_4"
       tags: >
         ["framework", "hostonly", "shard", "mac"]
+    # Excludes the following from build tests
+    # /docs, AUTHORS, CODE_OF_CONDUCT.md, CODEOWNERS, CONTRIBUTING.md, README.md, TESTOWNERS
+    runIf:
+      - .github/**
+      - .idea/**
+      - .vscode/**
+      - bin/**
+      - dev/**
+      - examples/**
+      - packages/**
+      - .ci.yaml
+      - .gitattributes
+      - .gitignore
+      - analysis_options.yaml
+      - dartdoc_options.yaml
+      - flutter_console.bat
+      - LICENSE
+      - PATENT_GRANT
+      - version
 
   - name: Mac_arm64 build_tests_3_4
     recipe: flutter/flutter_drone
@@ -3516,6 +3706,25 @@ targets:
       subshard: "3_4"
       tags: >
         ["framework", "hostonly", "shard", "mac"]
+    # Excludes the following from build tests
+    # /docs, AUTHORS, CODE_OF_CONDUCT.md, CODEOWNERS, CONTRIBUTING.md, README.md, TESTOWNERS
+    runIf:
+      - .github/**
+      - .idea/**
+      - .vscode/**
+      - bin/**
+      - dev/**
+      - examples/**
+      - packages/**
+      - .ci.yaml
+      - .gitattributes
+      - .gitignore
+      - analysis_options.yaml
+      - dartdoc_options.yaml
+      - flutter_console.bat
+      - LICENSE
+      - PATENT_GRANT
+      - version
 
   - name: Mac_arm64 build_tests_4_4
     recipe: flutter/flutter_drone
@@ -3534,6 +3743,25 @@ targets:
       subshard: "4_4"
       tags: >
         ["framework", "hostonly", "shard", "mac"]
+    # Excludes the following from build tests
+    # /docs, AUTHORS, CODE_OF_CONDUCT.md, CODEOWNERS, CONTRIBUTING.md, README.md, TESTOWNERS
+    runIf:
+      - .github/**
+      - .idea/**
+      - .vscode/**
+      - bin/**
+      - dev/**
+      - examples/**
+      - packages/**
+      - .ci.yaml
+      - .gitattributes
+      - .gitignore
+      - analysis_options.yaml
+      - dartdoc_options.yaml
+      - flutter_console.bat
+      - LICENSE
+      - PATENT_GRANT
+      - version
 
   - name: Mac_benchmark complex_layout_macos__start_up
     presubmit: false
@@ -3566,6 +3794,25 @@ targets:
       shard: customer_testing
       tags: >
         ["framework", "hostonly", "shard", "mac"]
+    # Excludes the following from customer tests
+    # /docs, AUTHORS, CODE_OF_CONDUCT.md, CODEOWNERS, CONTRIBUTING.md, README.md, TESTOWNERS
+    runIf:
+      - .github/**
+      - .idea/**
+      - .vscode/**
+      - bin/**
+      - dev/**
+      - examples/**
+      - packages/**
+      - .ci.yaml
+      - .gitattributes
+      - .gitignore
+      - analysis_options.yaml
+      - dartdoc_options.yaml
+      - flutter_console.bat
+      - LICENSE
+      - PATENT_GRANT
+      - version
 
   - name: Mac dart_plugin_registry_test
     recipe: devicelab/devicelab_drone
@@ -4156,6 +4403,11 @@ targets:
       subshard: commands
       tags: >
         ["framework", "hostonly", "shard", "mac"]
+    runIf:
+    - dev/**
+    - packages/flutter_tools/**
+    - bin/**
+    - .ci.yaml
 
   - name: Mac_arm64 tool_tests_commands
     recipe: flutter/flutter_drone
@@ -4171,6 +4423,11 @@ targets:
       subshard: commands
       tags: >
         ["framework", "hostonly", "shard", "mac"]
+    runIf:
+    - dev/**
+    - packages/flutter_tools/**
+    - bin/**
+    - .ci.yaml
 
   - name: Mac tool_tests_general
     recipe: flutter/flutter_drone
@@ -5067,6 +5324,25 @@ targets:
       subshard: "1_7"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
+    # Excludes the following from build tests
+    # /docs, AUTHORS, CODE_OF_CONDUCT.md, CODEOWNERS, CONTRIBUTING.md, README.md, TESTOWNERS
+    runIf:
+      - .github/**
+      - .idea/**
+      - .vscode/**
+      - bin/**
+      - dev/**
+      - examples/**
+      - packages/**
+      - .ci.yaml
+      - .gitattributes
+      - .gitignore
+      - analysis_options.yaml
+      - dartdoc_options.yaml
+      - flutter_console.bat
+      - LICENSE
+      - PATENT_GRANT
+      - version
 
   - name: Windows build_tests_2_7
     recipe: flutter/flutter_drone
@@ -5085,6 +5361,25 @@ targets:
       subshard: "2_7"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
+    # Excludes the following from build tests
+    # /docs, AUTHORS, CODE_OF_CONDUCT.md, CODEOWNERS, CONTRIBUTING.md, README.md, TESTOWNERS
+    runIf:
+      - .github/**
+      - .idea/**
+      - .vscode/**
+      - bin/**
+      - dev/**
+      - examples/**
+      - packages/**
+      - .ci.yaml
+      - .gitattributes
+      - .gitignore
+      - analysis_options.yaml
+      - dartdoc_options.yaml
+      - flutter_console.bat
+      - LICENSE
+      - PATENT_GRANT
+      - version
 
   - name: Windows build_tests_3_7
     recipe: flutter/flutter_drone
@@ -5103,6 +5398,25 @@ targets:
       subshard: "3_7"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
+    # Excludes the following from build tests
+    # /docs, AUTHORS, CODE_OF_CONDUCT.md, CODEOWNERS, CONTRIBUTING.md, README.md, TESTOWNERS
+    runIf:
+      - .github/**
+      - .idea/**
+      - .vscode/**
+      - bin/**
+      - dev/**
+      - examples/**
+      - packages/**
+      - .ci.yaml
+      - .gitattributes
+      - .gitignore
+      - analysis_options.yaml
+      - dartdoc_options.yaml
+      - flutter_console.bat
+      - LICENSE
+      - PATENT_GRANT
+      - version
 
   - name: Windows build_tests_4_7
     recipe: flutter/flutter_drone
@@ -5121,6 +5435,25 @@ targets:
       subshard: "4_7"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
+    # Excludes the following from build tests
+    # /docs, AUTHORS, CODE_OF_CONDUCT.md, CODEOWNERS, CONTRIBUTING.md, README.md, TESTOWNERS
+    runIf:
+      - .github/**
+      - .idea/**
+      - .vscode/**
+      - bin/**
+      - dev/**
+      - examples/**
+      - packages/**
+      - .ci.yaml
+      - .gitattributes
+      - .gitignore
+      - analysis_options.yaml
+      - dartdoc_options.yaml
+      - flutter_console.bat
+      - LICENSE
+      - PATENT_GRANT
+      - version
 
   - name: Windows build_tests_5_7
     recipe: flutter/flutter_drone
@@ -5139,6 +5472,25 @@ targets:
       subshard: "5_7"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
+    # Excludes the following from build tests
+    # /docs, AUTHORS, CODE_OF_CONDUCT.md, CODEOWNERS, CONTRIBUTING.md, README.md, TESTOWNERS
+    runIf:
+      - .github/**
+      - .idea/**
+      - .vscode/**
+      - bin/**
+      - dev/**
+      - examples/**
+      - packages/**
+      - .ci.yaml
+      - .gitattributes
+      - .gitignore
+      - analysis_options.yaml
+      - dartdoc_options.yaml
+      - flutter_console.bat
+      - LICENSE
+      - PATENT_GRANT
+      - version
 
   - name: Windows build_tests_6_7
     recipe: flutter/flutter_drone
@@ -5157,6 +5509,25 @@ targets:
       subshard: "6_7"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
+    # Excludes the following from build tests
+    # /docs, AUTHORS, CODE_OF_CONDUCT.md, CODEOWNERS, CONTRIBUTING.md, README.md, TESTOWNERS
+    runIf:
+      - .github/**
+      - .idea/**
+      - .vscode/**
+      - bin/**
+      - dev/**
+      - examples/**
+      - packages/**
+      - .ci.yaml
+      - .gitattributes
+      - .gitignore
+      - analysis_options.yaml
+      - dartdoc_options.yaml
+      - flutter_console.bat
+      - LICENSE
+      - PATENT_GRANT
+      - version
 
   - name: Windows build_tests_7_7
     recipe: flutter/flutter_drone
@@ -5175,6 +5546,25 @@ targets:
       subshard: "7_7"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
+    # Excludes the following from build tests
+    # /docs, AUTHORS, CODE_OF_CONDUCT.md, CODEOWNERS, CONTRIBUTING.md, README.md, TESTOWNERS
+    runIf:
+      - .github/**
+      - .idea/**
+      - .vscode/**
+      - bin/**
+      - dev/**
+      - examples/**
+      - packages/**
+      - .ci.yaml
+      - .gitattributes
+      - .gitignore
+      - analysis_options.yaml
+      - dartdoc_options.yaml
+      - flutter_console.bat
+      - LICENSE
+      - PATENT_GRANT
+      - version
 
   - name: Windows customer_testing
     enabled_branches:
@@ -5185,6 +5575,25 @@ targets:
       shard: customer_testing
       tags: >
         ["framework", "hostonly", "shard", "windows"]
+    # Excludes the following from customer tests
+    # /docs, AUTHORS, CODE_OF_CONDUCT.md, CODEOWNERS, CONTRIBUTING.md, README.md, TESTOWNERS
+    runIf:
+      - .github/**
+      - .idea/**
+      - .vscode/**
+      - bin/**
+      - dev/**
+      - examples/**
+      - packages/**
+      - .ci.yaml
+      - .gitattributes
+      - .gitignore
+      - analysis_options.yaml
+      - dartdoc_options.yaml
+      - flutter_console.bat
+      - LICENSE
+      - PATENT_GRANT
+      - version
 
   - name: Windows framework_tests_libraries
     recipe: flutter/flutter_drone
