@@ -9,4 +9,4 @@
 // Check out https://flutter.googlesource.com/+/master/file1
 // Check out https://source.chromium.org/+/master/file1
 // Check out https://github.com/flutter/flutter/tree/master/file1
-// Check out https://raw.githubusercontent.com/flutter/flutter/blob/master/file1
+// Check out https://raw.githubusercontent.com/flutter/flutter/blob/main/file1
