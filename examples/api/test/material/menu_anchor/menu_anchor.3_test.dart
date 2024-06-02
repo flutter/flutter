@@ -31,7 +31,7 @@ void main() {
  });
 
  testWidgets('Does not show debug banner', (WidgetTester tester) async {
-   await tester.pumpWidget(const SimpleCascadingMenuApp());
+   await tester.pumpWidget(const example.SimpleCascadingMenuApp());
    expect(find.byType(CheckedModeBanner), findsNothing);
  });
 }
