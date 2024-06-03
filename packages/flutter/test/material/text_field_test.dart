@@ -5549,7 +5549,6 @@ void main() {
           value: 'some text',
           actions: <SemanticsAction>[
             SemanticsAction.tap,
-            SemanticsAction.focus,
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
@@ -8384,7 +8383,6 @@ void main() {
           textDirection: TextDirection.ltr,
           actions: <SemanticsAction>[
             SemanticsAction.tap,
-            SemanticsAction.focus,
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
@@ -8406,7 +8404,6 @@ void main() {
           value: 'Guten Tag',
           actions: <SemanticsAction>[
             SemanticsAction.tap,
-            SemanticsAction.focus,
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
@@ -8519,7 +8516,7 @@ void main() {
     expect(
         semantics,
         includesNodeWith(
-          actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+          actions: <SemanticsAction>[SemanticsAction.tap],
           textDirection: TextDirection.ltr,
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
@@ -8536,7 +8533,7 @@ void main() {
     expect(
       semantics,
       includesNodeWith(
-        actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+        actions: <SemanticsAction>[SemanticsAction.tap],
         textDirection: TextDirection.ltr,
         flags: <SemanticsFlag>[
           SemanticsFlag.isTextField,
@@ -8553,7 +8550,7 @@ void main() {
     expect(
         semantics,
         includesNodeWith(
-          actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+          actions: <SemanticsAction>[SemanticsAction.tap],
           textDirection: TextDirection.ltr,
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
@@ -8635,7 +8632,6 @@ void main() {
           textDirection: TextDirection.ltr,
           actions: <SemanticsAction>[
             SemanticsAction.tap,
-            SemanticsAction.focus,
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
@@ -8839,7 +8835,7 @@ void main() {
           TestSemantics(
             id: inputFieldId,
             flags: <SemanticsFlag>[SemanticsFlag.isTextField, SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled],
-            actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+            actions: <SemanticsAction>[SemanticsAction.tap],
             value: textInTextField,
             textDirection: TextDirection.ltr,
           ),
@@ -8914,7 +8910,7 @@ void main() {
           TestSemantics(
             id: inputFieldId,
             flags: <SemanticsFlag>[SemanticsFlag.isTextField, SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled],
-            actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+            actions: <SemanticsAction>[SemanticsAction.tap],
             value: textInTextField,
             textDirection: TextDirection.ltr,
           ),
@@ -9112,7 +9108,6 @@ void main() {
           textDirection: TextDirection.ltr,
           actions: <SemanticsAction>[
             SemanticsAction.tap,
-            SemanticsAction.focus,
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
@@ -9209,7 +9204,6 @@ void main() {
           textDirection: TextDirection.ltr,
           actions: <SemanticsAction>[
             SemanticsAction.tap,
-            SemanticsAction.focus,
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
@@ -9259,7 +9253,6 @@ void main() {
           textDirection: TextDirection.ltr,
           actions: <SemanticsAction>[
             SemanticsAction.tap,
-            SemanticsAction.focus,
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,

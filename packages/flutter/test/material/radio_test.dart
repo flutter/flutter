@@ -313,6 +313,7 @@ void main() {
             SemanticsFlag.isInMutuallyExclusiveGroup,
             SemanticsFlag.isFocusable,  // This flag is delayed by 1 frame.
           ],
+          actions: <SemanticsAction>[SemanticsAction.focus],
         ),
       ],
     ), ignoreRect: true, ignoreTransform: true));

@@ -1983,6 +1983,7 @@ testWidgets('InkResponse radius can be updated', (WidgetTester tester) async {
       label: 'Foo',
       hasLongPressAction: true,
       isFocusable: true,
+      hasFocusAction: true,
       textDirection: TextDirection.ltr,
     ));
 
@@ -2003,6 +2004,7 @@ testWidgets('InkResponse radius can be updated', (WidgetTester tester) async {
     expect(tester.getSemantics(find.bySemanticsLabel('Foo')), matchesSemantics(
       label: 'Foo',
       hasTapAction: true,
+      hasFocusAction: true,
       hasLongPressAction: true,
       isFocusable: true,
       textDirection: TextDirection.ltr,
