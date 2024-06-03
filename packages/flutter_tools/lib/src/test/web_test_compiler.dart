@@ -222,7 +222,6 @@ class WebTestCompiler {
       languageVersion: currentLanguageVersion(_fileSystem, Cache.flutterRoot!),
     );
 
-    final String dartSdkPath = _artifacts.getArtifactPath(Artifact.engineDartSdkPath, platform: TargetPlatform.web_javascript);
     final String platformBinariesPath = _artifacts.getHostArtifact(HostArtifact.webPlatformKernelFolder).path;
     final String platformFilePath = _fileSystem.path.join(platformBinariesPath, 'dart2wasm_platform.dill');
     final List<String> dartDefines = webRenderer.updateDartDefines(buildInfo.dartDefines);
@@ -233,7 +232,6 @@ class WebTestCompiler {
       'compile',
       'wasm',
       '--packages=.dart_tool/package_config.json',
-      '--extra-compiler-option=--dart-sdk=$dartSdkPath',
       '--extra-compiler-option=--platform=$platformFilePath',
       '--extra-compiler-option=--multi-root-scheme=org-dartlang-app',
       '--extra-compiler-option=--multi-root=${projectDirectory.childDirectory('test').path}',

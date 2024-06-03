@@ -3,13 +3,15 @@
 // found in the LICENSE file.
 
 import 'dart:async' show FutureOr;
-import 'dart:io' as io show OSError, SocketException;
+import 'dart:ffi' show Abi;
+import 'dart:io' as io show HttpClient, OSError, SocketException;
 
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:platform/platform.dart';
+import 'package:process/process.dart';
 
 import 'skia_client.dart';
 export 'skia_client.dart';
@@ -56,6 +58,8 @@ Future<void> testExecutable(FutureOr<void> Function() testMain, {String? namePre
   );
   const Platform platform = LocalPlatform();
   const FileSystem fs = LocalFileSystem();
+  const ProcessManager process = LocalProcessManager();
+  final io.HttpClient httpClient = io.HttpClient();
   if (FlutterPostSubmitFileComparator.isForEnvironment(platform)) {
     goldenFileComparator = await FlutterPostSubmitFileComparator.fromLocalFileComparator(
       localFileComparator: goldenFileComparator as LocalFileComparator,
@@ -63,6 +67,9 @@ Future<void> testExecutable(FutureOr<void> Function() testMain, {String? namePre
       namePrefix: namePrefix,
       log: print,
       fs: fs,
+      process: process,
+      httpClient: httpClient,
+      abi: Abi.current(),
     );
   } else if (FlutterPreSubmitFileComparator.isForEnvironment(platform)) {
     goldenFileComparator = await FlutterPreSubmitFileComparator.fromLocalFileComparator(
@@ -71,6 +78,9 @@ Future<void> testExecutable(FutureOr<void> Function() testMain, {String? namePre
       namePrefix: namePrefix,
       log: print,
       fs: fs,
+      process: process,
+      httpClient: httpClient,
+      abi: Abi.current(),
     );
   } else if (FlutterSkippingFileComparator.isForEnvironment(platform)) {
     goldenFileComparator = FlutterSkippingFileComparator.fromLocalFileComparator(
@@ -82,6 +92,9 @@ Future<void> testExecutable(FutureOr<void> Function() testMain, {String? namePre
       namePrefix: namePrefix,
       log: print,
       fs: fs,
+      process: process,
+      httpClient: httpClient,
+      abi: Abi.current(),
     );
   } else {
     goldenFileComparator = await FlutterLocalFileComparator.fromLocalFileComparator(
@@ -89,6 +102,9 @@ Future<void> testExecutable(FutureOr<void> Function() testMain, {String? namePre
       platform: platform,
       log: print,
       fs: fs,
+      process: process,
+      httpClient: httpClient,
+      abi: Abi.current(),
     );
   }
   await testMain();
@@ -280,6 +296,9 @@ class FlutterPostSubmitFileComparator extends FlutterGoldenFileComparator {
     String? namePrefix,
     required LogCallback log,
     required FileSystem fs,
+    required ProcessManager process,
+    required io.HttpClient httpClient,
+    required Abi abi,
   }) async {
     final Directory baseDirectory = FlutterGoldenFileComparator.getBaseDirectory(
       localFileComparator,
@@ -293,6 +312,10 @@ class FlutterPostSubmitFileComparator extends FlutterGoldenFileComparator {
       baseDirectory,
       log: log,
       platform: platform,
+      fs: fs,
+      process: process,
+      httpClient: httpClient,
+      abi: abi,
     );
     await goldens.auth();
     return FlutterPostSubmitFileComparator(
@@ -368,6 +391,9 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
     String? namePrefix,
     required LogCallback log,
     required FileSystem fs,
+    required ProcessManager process,
+    required io.HttpClient httpClient,
+    required Abi abi,
   }) async {
     final Directory baseDirectory = testBasedir ?? FlutterGoldenFileComparator.getBaseDirectory(
       localFileComparator,
@@ -384,6 +410,10 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
       baseDirectory,
       platform: platform,
       log: log,
+      fs: fs,
+      process: process,
+      httpClient: httpClient,
+      abi: abi,
     );
 
     await goldens.auth();
@@ -464,12 +494,19 @@ class FlutterSkippingFileComparator extends FlutterGoldenFileComparator {
     required Platform platform,
     required LogCallback log,
     required FileSystem fs,
+    required ProcessManager process,
+    required io.HttpClient httpClient,
+    required Abi abi,
   }) {
     final Uri basedir = localFileComparator.basedir;
     final SkiaGoldClient skiaClient = SkiaGoldClient(
       fs.directory(basedir),
       platform: platform,
       log: log,
+      fs: fs,
+      process: process,
+      httpClient: httpClient,
+      abi: abi,
     );
     return FlutterSkippingFileComparator(
       basedir,
@@ -556,6 +593,9 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
     Directory? baseDirectory,
     required LogCallback log,
     required FileSystem fs,
+    required ProcessManager process,
+    required io.HttpClient httpClient,
+    required Abi abi,
   }) async {
     baseDirectory ??= FlutterGoldenFileComparator.getBaseDirectory(
       localFileComparator,
@@ -571,6 +611,10 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
       baseDirectory,
       platform: platform,
       log: log,
+      fs: fs,
+      process: process,
+      httpClient: httpClient,
+      abi: abi,
     );
     try {
       // Check if we can reach Gold.
