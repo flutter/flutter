@@ -20,7 +20,8 @@ import 'system_channels.dart';
 /// Pencil.
 ///
 /// [EditableText] uses this class via [ScribeClient] to automatically support
-/// handwriting input when [EditableText.scribbleEnabled] is set to true.
+/// handwriting input when [EditableText.stylusHandwritingEnabled] is set to
+/// true.
 ///
 /// See also:
 ///
