@@ -5443,9 +5443,7 @@ void main() {
           );
 
           final ThemeData theme = Theme.of(tester.element(findPrefixIcon()));
-          // TODO(bleroux): based on M3 spec, it should be theme.colorScheme.onSurface.withOpacity(0.38).
-          // See https://github.com/flutter/flutter/issues/149411.
-          final Color expectedColor = theme.colorScheme.onSurfaceVariant;
+          final Color expectedColor = theme.colorScheme.onSurface.withOpacity(0.38);
           expect(getPrefixIconStyle(tester).color, expectedColor);
         });
 
@@ -5921,9 +5919,7 @@ void main() {
           );
 
           final ThemeData theme = Theme.of(tester.element(findPrefixIcon()));
-          // TODO(bleroux): based on M3 spec, it should be theme.colorScheme.onSurface.withOpacity(0.38).
-          // See https://github.com/flutter/flutter/issues/149411.
-          final Color expectedColor = theme.colorScheme.onSurfaceVariant;
+          final Color expectedColor = theme.colorScheme.onSurface.withOpacity(0.38);
           expect(getPrefixIconStyle(tester).color, expectedColor);
         });
 
