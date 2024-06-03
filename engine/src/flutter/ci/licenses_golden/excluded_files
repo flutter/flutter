@@ -3446,6 +3446,7 @@
 ../../../fuchsia/sdk/linux/packages/cmd-buf-benchmark-test/meta.json
 ../../../fuchsia/sdk/linux/packages/heapdump-collector/meta.json
 ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/meta.json
+../../../fuchsia/sdk/linux/packages/realm_builder_server/meta.json
 ../../../fuchsia/sdk/linux/packages/vkcopy-test/meta.json
 ../../../fuchsia/sdk/linux/packages/vkext-test/meta.json
 ../../../fuchsia/sdk/linux/packages/vkloop-test/meta.json
