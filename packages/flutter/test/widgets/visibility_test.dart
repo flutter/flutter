@@ -52,7 +52,7 @@ void main() {
           TestSemantics.rootChild(
             label: 'a true',
             textDirection: TextDirection.rtl,
-            actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+            actions: <SemanticsAction>[SemanticsAction.tap],
           ),
         ],
       ),

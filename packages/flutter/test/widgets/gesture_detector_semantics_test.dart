@@ -202,7 +202,7 @@ void main() {
       );
 
       expect(semantics, includesNodeWith(
-        actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+        actions: <SemanticsAction>[SemanticsAction.tap],
       ));
 
       semantics.dispose();
@@ -224,7 +224,7 @@ void main() {
       );
 
       expect(semantics, includesNodeWith(
-        actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+        actions: <SemanticsAction>[SemanticsAction.tap],
       ));
 
       await tester.pumpWidget(
@@ -259,7 +259,7 @@ void main() {
       );
 
       expect(semantics, includesNodeWith(
-        actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+        actions: <SemanticsAction>[SemanticsAction.tap],
       ));
 
       await tester.pumpWidget(
@@ -354,7 +354,7 @@ void main() {
         );
 
         expect(semantics, includesNodeWith(
-          actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+          actions: <SemanticsAction>[SemanticsAction.tap],
         ));
 
         semantics.dispose();
@@ -691,7 +691,7 @@ void main() {
       );
 
       expect(semantics, includesNodeWith(
-        actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+        actions: <SemanticsAction>[SemanticsAction.tap],
       ));
 
       semantics.dispose();

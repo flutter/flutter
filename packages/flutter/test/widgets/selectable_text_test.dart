@@ -1647,7 +1647,7 @@ void main() {
                 TestSemantics(
                   id: 4,
                   flags: <SemanticsFlag>[SemanticsFlag.isLink],
-                  actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+                  actions: <SemanticsAction>[SemanticsAction.tap],
                   label: 'link',
                   textDirection: TextDirection.ltr,
                 ),
@@ -2558,7 +2558,7 @@ void main() {
                                     SemanticsFlag.isHidden,
                                     SemanticsFlag.isLink,
                                   ],
-                                  actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+                                  actions: <SemanticsAction>[SemanticsAction.tap],
                                   label: 'off screen',
                                   textDirection: TextDirection.ltr,
                                 ),
