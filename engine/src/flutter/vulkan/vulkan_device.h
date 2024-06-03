@@ -55,9 +55,6 @@ class VulkanDevice {
   [[nodiscard]] bool GetPhysicalDeviceFeatures(
       VkPhysicalDeviceFeatures* features) const;
 
-  [[nodiscard]] bool GetPhysicalDeviceFeaturesSkia(
-      uint32_t* /* mask of GrVkFeatureFlags */ features) const;
-
   [[nodiscard]] int ChooseSurfaceFormat(
       const VulkanSurface& surface,
       const std::vector<VkFormat>& desired_formats,

@@ -20,6 +20,7 @@
 #include "third_party/skia/include/gpu/GrDirectContext.h"
 #include "third_party/skia/include/gpu/ganesh/SkSurfaceGanesh.h"
 #include "third_party/skia/include/gpu/ganesh/vk/GrVkBackendSurface.h"
+#include "third_party/skia/include/gpu/vk/VulkanTypes.h"
 #include "vulkan/vulkan_core.h"
 #include "vulkan/vulkan_fuchsia.h"
 
@@ -394,7 +395,7 @@ bool VulkanSurface::SetupSkiaSurface(sk_sp<GrDirectContext> context,
                                      const VkMemoryRequirements& memory_reqs) {
   FML_CHECK(context != nullptr);
 
-  GrVkAlloc alloc;
+  skgpu::VulkanAlloc alloc;
   alloc.fMemory = vk_memory_;
   alloc.fOffset = 0;
   alloc.fSize = memory_reqs.size;

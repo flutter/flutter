@@ -18,8 +18,6 @@ class VulkanNativeSurface {
 
   virtual const char* GetExtensionName() const = 0;
 
-  virtual uint32_t GetSkiaExtensionName() const = 0;
-
   virtual VkSurfaceKHR CreateSurfaceHandle(
       VulkanProcTable& vk,
       const VulkanHandle<VkInstance>& instance) const = 0;

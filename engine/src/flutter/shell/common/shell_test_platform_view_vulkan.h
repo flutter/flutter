@@ -60,7 +60,8 @@ class ShellTestPlatformViewVulkan : public ShellTestPlatformView {
     sk_sp<GrDirectContext> context_;
 
     bool CreateSkiaGrContext();
-    bool CreateSkiaBackendContext(GrVkBackendContext* context);
+    bool CreateSkiaBackendContext(GrVkBackendContext*,
+                                  VkPhysicalDeviceFeatures*);
 
     FML_DISALLOW_COPY_AND_ASSIGN(OffScreenSurface);
   };

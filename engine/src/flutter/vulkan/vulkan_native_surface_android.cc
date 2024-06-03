@@ -27,11 +27,8 @@ VulkanNativeSurfaceAndroid::~VulkanNativeSurfaceAndroid() {
 }
 
 const char* VulkanNativeSurfaceAndroid::GetExtensionName() const {
+  // https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VK_KHR_android_surface.html
   return VK_KHR_ANDROID_SURFACE_EXTENSION_NAME;
-}
-
-uint32_t VulkanNativeSurfaceAndroid::GetSkiaExtensionName() const {
-  return kKHR_android_surface_GrVkExtensionFlag;
 }
 
 VkSurfaceKHR VulkanNativeSurfaceAndroid::CreateSurfaceHandle(

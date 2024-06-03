@@ -23,8 +23,6 @@ class VulkanNativeSurfaceAndroid : public VulkanNativeSurface {
 
   const char* GetExtensionName() const override;
 
-  uint32_t GetSkiaExtensionName() const override;
-
   VkSurfaceKHR CreateSurfaceHandle(
       VulkanProcTable& vk,
       const VulkanHandle<VkInstance>& instance) const override;
