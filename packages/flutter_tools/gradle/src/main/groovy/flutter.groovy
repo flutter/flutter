@@ -347,10 +347,12 @@ class FlutterPlugin implements Plugin<Project> {
                 if (outer != null) {
                     Exception inner = outer.getCause()
                     if (inner != null) {
-                        String innerMessage = inner.getMessage()
-                        if (innerMessage != null &&
-                                innerMessage.contains("android-skip-build-dependency-validation")) {
-                            throw e
+                        Exception unwrapped = inner.getCause()
+                        if (unwrapped != null) {
+                            String dependencyCheckerErrorName = "Dependency_version_checker_gradle.DependencyValidationException"
+                            if (dependencyCheckerErrorName.equals(unwrapped.getClass().getCanonicalName())) {
+                                throw e
+                            }
                         }
                     }
                 }
