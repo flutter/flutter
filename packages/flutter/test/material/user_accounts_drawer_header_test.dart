@@ -531,6 +531,7 @@ void main() {
                           flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
                           label: 'Signed in\nname\nemail',
                           textDirection: TextDirection.ltr,
+                          actions: <SemanticsAction>[SemanticsAction.focus],
                           children: <TestSemantics>[
                             TestSemantics(
                               label: r'B',
@@ -546,7 +547,7 @@ void main() {
                             ),
                             TestSemantics(
                               flags: <SemanticsFlag>[SemanticsFlag.isButton],
-                              actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+                              actions: <SemanticsAction>[SemanticsAction.tap],
                               label: r'Show accounts',
                               textDirection: TextDirection.ltr,
                             ),

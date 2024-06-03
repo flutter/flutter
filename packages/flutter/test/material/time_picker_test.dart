@@ -1342,7 +1342,7 @@ void main() {
           includesNodeWith(
             label: 'Hour',
             value: '07',
-            actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+            actions: <SemanticsAction>[SemanticsAction.tap],
             flags: <SemanticsFlag>[
               SemanticsFlag.isTextField,
               SemanticsFlag.hasEnabledState,
@@ -1356,7 +1356,7 @@ void main() {
           includesNodeWith(
             label: 'Minute',
             value: '00',
-            actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+            actions: <SemanticsAction>[SemanticsAction.tap],
             flags: <SemanticsFlag>[
               SemanticsFlag.isTextField,
               SemanticsFlag.hasEnabledState,

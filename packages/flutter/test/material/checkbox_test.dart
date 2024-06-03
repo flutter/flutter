@@ -78,6 +78,7 @@ void main() {
       hasEnabledState: true,
       isEnabled: true,
       hasTapAction: true,
+      hasFocusAction: true,
       isFocusable: true,
     ));
 
@@ -97,6 +98,7 @@ void main() {
       isChecked: true,
       isEnabled: true,
       hasTapAction: true,
+      hasFocusAction: true,
       isFocusable: true,
     ));
 
@@ -115,6 +117,7 @@ void main() {
       hasEnabledState: true,
       // isFocusable is delayed by 1 frame.
       isFocusable: true,
+      hasFocusAction: true,
     ));
 
     await tester.pump();
@@ -213,6 +216,7 @@ void main() {
       isChecked: true,
       isEnabled: true,
       hasTapAction: true,
+      hasFocusAction: true,
       isFocusable: true,
     ));
     handle.dispose();
@@ -242,6 +246,7 @@ void main() {
       hasEnabledState: true,
       isEnabled: true,
       hasTapAction: true,
+      hasFocusAction: true,
       isFocusable: true,
     ));
     handle.dispose();
