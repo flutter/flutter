@@ -365,6 +365,7 @@ const List<String> fallbackFonts = <String>[
   'Noto Sans Egyptian Hieroglyphs',
   'Noto Sans Elbasan',
   'Noto Sans Elymaic',
+  'Noto Sans Ethiopic',
   'Noto Sans Georgian',
   'Noto Sans Glagolitic',
   'Noto Sans Gothic',
