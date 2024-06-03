@@ -777,7 +777,7 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
           final Widget transform = Transform(
             alignment: alignment,
             transform: Matrix4.diagonal3Values(x, y, 1.0),
-            filterQuality: stretch == 0 ? null : FilterQuality.low,
+            filterQuality: stretch == 0 ? null : FilterQuality.medium,
             child: widget.child,
           );
 
