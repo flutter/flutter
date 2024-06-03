@@ -283,6 +283,63 @@ dev_dependencies:
     });
   });
 
+  group('--reporter/-r', () {
+    String? passedReporter(List<String> args) {
+      final int i = args.indexOf('-r');
+      if (i < 0) {
+        expect(args, isNot(contains('--reporter')));
+        expect(args, isNot(contains(matches(RegExp(r'^(-r|--reporter=)')))));
+        return null;
+      } else {
+        return args[i+1];
+      }
+    }
+
+    Future<void> expectPassesReporter(String value) async {
+      final FakePackageTest fakePackageTest = FakePackageTest();
+      final TestCommand testCommand = TestCommand(testWrapper: fakePackageTest);
+      final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+      await commandRunner.run(<String>['test', '--no-pub', '-r', value]);
+      expect(passedReporter(fakePackageTest.lastArgs!), equals(value));
+
+      await commandRunner.run(<String>['test', '--no-pub', '-r$value']);
+      expect(passedReporter(fakePackageTest.lastArgs!), equals(value));
+
+      await commandRunner.run(<String>['test', '--no-pub', '--reporter', value]);
+      expect(passedReporter(fakePackageTest.lastArgs!), equals(value));
+
+      await commandRunner.run(<String>['test', '--no-pub', '--reporter=$value']);
+      expect(passedReporter(fakePackageTest.lastArgs!), equals(value));
+    }
+
+    testUsingContext('accepts valid values and passes them through', () async {
+      await expectPassesReporter('compact');
+      await expectPassesReporter('expanded');
+      await expectPassesReporter('failures-only');
+      await expectPassesReporter('github');
+      await expectPassesReporter('json');
+      await expectPassesReporter('silent');
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
+      Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+    });
+
+    testUsingContext('by default, passes no reporter', () async {
+      final FakePackageTest fakePackageTest = FakePackageTest();
+      final TestCommand testCommand = TestCommand(testWrapper: fakePackageTest);
+      final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+      await commandRunner.run(<String>['test', '--no-pub']);
+      expect(passedReporter(fakePackageTest.lastArgs!), isNull);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
+      Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+    });
+  });
+
   testUsingContext('Supports coverage and machine', () async {
     final FakePackageTest fakePackageTest = FakePackageTest();
 
