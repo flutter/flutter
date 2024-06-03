@@ -13,7 +13,6 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/src/physics/utils.dart' show nearEqual;
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../widgets/semantics_tester.dart';
 
@@ -171,10 +170,7 @@ void main() {
     expect(log[0], const Offset(212.0, 300.0));
   });
 
-  testWidgets(
-    // TODO(polina-c): remove when fixed https://github.com/flutter/flutter/issues/145600 [leak-tracking-opt-in]
-    experimentalLeakTesting: LeakTesting.settings.withTracked(classes: <String>['CurvedAnimation']),
-    'Slider can move when tapped (LTR)', (WidgetTester tester) async {
+  testWidgets('Slider can move when tapped (LTR)', (WidgetTester tester) async {
     final Key sliderKey = UniqueKey();
     double value = 0.0;
     double? startValue;
@@ -4387,5 +4383,48 @@ void main() {
     await gesture.moveBy(const Offset(1.0, 0.0));
     await gesture.moveBy(const Offset(1.0, 0.0));
     expect(onChangeCallbackCount, 1);
+  });
+
+  testWidgets('Skip drawing ValueIndicator shape when label painter text is null', (WidgetTester tester) async {
+    double sliderValue = 10;
+
+    await tester.pumpWidget(
+        MaterialApp(
+          home: StatefulBuilder(
+            builder: (BuildContext context, void Function(void Function()) setState) {
+              return Material(
+                child: Slider(
+                  value: sliderValue,
+                  max: 100,
+                  label: sliderValue > 50 ? null : sliderValue.toString(),
+                  divisions: 10,
+                  onChanged: (double value) {
+                    setState(() {
+                      sliderValue = value;
+                    });
+                  },
+                ),
+              );
+            },
+          ),
+        ),
+      );
+
+      final RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
+
+      // Calculate a specific position on the Slider.
+      final Rect sliderRect = tester.getRect(find.byType(Slider));
+      final Offset tapPositionLeft = Offset(sliderRect.left + sliderRect.width * 0.25, sliderRect.center.dy);
+      final Offset tapPositionRight = Offset(sliderRect.left + sliderRect.width * 0.75, sliderRect.center.dy);
+
+      // Tap on the 25% position of the Slider.
+      await tester.tapAt(tapPositionLeft);
+      await tester.pumpAndSettle();
+      expect(valueIndicatorBox, paintsExactlyCountTimes(#drawPath, 2));
+
+      // Tap on the 75% position of the Slider.
+      await tester.tapAt(tapPositionRight);
+      await tester.pumpAndSettle();
+      expect(valueIndicatorBox, paintsExactlyCountTimes(#drawPath, 1));
   });
 }
