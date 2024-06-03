@@ -1354,6 +1354,7 @@ void main() {
               label: 'HELLO',
               actions: <SemanticsAction>[
                 SemanticsAction.tap,
+                SemanticsAction.focus,
               ],
               flags: <SemanticsFlag>[
                 SemanticsFlag.isLink,
@@ -1402,6 +1403,7 @@ void main() {
                   label: 'HELLO',
                   actions: <SemanticsAction>[
                     SemanticsAction.tap,
+                    SemanticsAction.focus,
                   ],
                   flags: <SemanticsFlag>[
                     SemanticsFlag.isLink,
@@ -1469,6 +1471,7 @@ void main() {
                   label: 'HELLO',
                   actions: <SemanticsAction>[
                     SemanticsAction.tap,
+                    SemanticsAction.focus,
                   ],
                   flags: <SemanticsFlag>[
                     SemanticsFlag.isLink,

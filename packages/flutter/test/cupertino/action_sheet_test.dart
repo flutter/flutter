@@ -1138,6 +1138,7 @@ void main() {
                               ],
                               actions: <SemanticsAction>[
                                 SemanticsAction.tap,
+                                SemanticsAction.focus,
                               ],
                               label: 'One',
                             ),
@@ -1147,6 +1148,7 @@ void main() {
                               ],
                               actions: <SemanticsAction>[
                                 SemanticsAction.tap,
+                                SemanticsAction.focus,
                               ],
                               label: 'Two',
                             ),
@@ -1158,6 +1160,7 @@ void main() {
                           ],
                           actions: <SemanticsAction>[
                             SemanticsAction.tap,
+                            SemanticsAction.focus,
                           ],
                           label: 'Cancel',
                         ),

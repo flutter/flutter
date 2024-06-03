@@ -672,11 +672,11 @@ class _FocusState extends State<Focus> {
     if (widget.includeSemantics) {
       child = Semantics(
         // Automatically request the focus for a focusable widget when it
-        // receives accessibility focus. Nothing is needed for losing the
-        // accessibility focus because if focus is lost, that means another node
-        // will gain focus and take focus from this widget.
+        // receives an input focus action from the semantics. Nothing is needed
+        // for losing the focus because if focus is lost, that means another
+        // node will gain focus and take focus from this widget.
         onFocus:
-          !focusNode.hasFocus && focusNode.canRequestFocus
+          _couldRequestFocus
           ? focusNode.requestFocus
           : null,
         focusable: _couldRequestFocus,

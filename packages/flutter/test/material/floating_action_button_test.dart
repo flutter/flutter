@@ -631,6 +631,7 @@ void main() {
           ],
           actions: <SemanticsAction>[
             SemanticsAction.tap,
+            SemanticsAction.focus,
           ],
         ),
       ],
@@ -699,6 +700,7 @@ void main() {
                       tooltip: 'Add Photo',
                       actions: <SemanticsAction>[
                         SemanticsAction.tap,
+                        SemanticsAction.focus,
                       ],
                       flags: <SemanticsFlag>[
                         SemanticsFlag.hasEnabledState,

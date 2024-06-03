@@ -147,6 +147,7 @@ void main() {
         ],
         actions: <SemanticsAction>[
           SemanticsAction.tap,
+          SemanticsAction.focus,
         ],
       ),
     );

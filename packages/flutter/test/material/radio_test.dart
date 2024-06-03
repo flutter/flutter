@@ -221,6 +221,7 @@ void main() {
         ],
         actions: <SemanticsAction>[
           SemanticsAction.tap,
+          SemanticsAction.focus,
         ],
       ),
     );
@@ -254,6 +255,7 @@ void main() {
           ],
           actions: <SemanticsAction>[
             SemanticsAction.tap,
+            SemanticsAction.focus,
           ],
         ),
       ],
@@ -284,6 +286,7 @@ void main() {
           ],
           actions: <SemanticsAction>[
             SemanticsAction.tap,
+            SemanticsAction.focus,
           ],
         ),
       ],
