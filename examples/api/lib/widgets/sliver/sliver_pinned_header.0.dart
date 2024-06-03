@@ -4,31 +4,31 @@
 
 import 'package:flutter/material.dart';
 
-/// Flutter code sample for [SliverPinnedHeader].
+/// Flutter code sample for [PinnedHeaderSliver].
 
 void main() {
-  runApp(const SliverPinnedHeaderApp());
+  runApp(const PinnedHeaderSliverApp());
 }
 
-class SliverPinnedHeaderApp extends StatelessWidget {
-  const SliverPinnedHeaderApp({ super.key });
+class PinnedHeaderSliverApp extends StatelessWidget {
+  const PinnedHeaderSliverApp({ super.key });
 
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      home: SliverPinnedHeaderExample(),
+      home: PinnedHeaderSliverExample(),
     );
   }
 }
 
-class SliverPinnedHeaderExample extends StatefulWidget {
-  const SliverPinnedHeaderExample({ super.key });
+class PinnedHeaderSliverExample extends StatefulWidget {
+  const PinnedHeaderSliverExample({ super.key });
 
   @override
-  State<SliverPinnedHeaderExample> createState() => _SliverPinnedHeaderExampleState();
+  State<PinnedHeaderSliverExample> createState() => _PinnedHeaderSliverExampleState();
 }
 
-class _SliverPinnedHeaderExampleState extends State<SliverPinnedHeaderExample> {
+class _PinnedHeaderSliverExampleState extends State<PinnedHeaderSliverExample> {
   int count = 0;
   late final ScrollController scrollController;
 
@@ -65,7 +65,7 @@ class _SliverPinnedHeaderExampleState extends State<SliverPinnedHeaderExample> {
           alignment: Alignment.center,
           padding: const EdgeInsets.symmetric(vertical: 48),
           child: Text(
-            count.isOdd ? 'Alternative Title\nWith Two Lines' : 'SliverPinnedHeader',
+            count.isOdd ? 'Alternative Title\nWith Two Lines' : 'PinnedHeaderSliver',
             style: theme.textTheme.headlineMedium!.copyWith(
               color: colorScheme.onPrimaryContainer,
             ),
@@ -83,7 +83,7 @@ class _SliverPinnedHeaderExampleState extends State<SliverPinnedHeaderExample> {
             child: CustomScrollView(
               controller: scrollController,
               slivers: <Widget>[
-                SliverPinnedHeader(child: header),
+                PinnedHeaderSliver(child: header),
                 const ItemList(),
               ],
             ),

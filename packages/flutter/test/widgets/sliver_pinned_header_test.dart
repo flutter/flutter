@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('SliverPinnedHeader basics', (WidgetTester tester) async {
+  testWidgets('PinnedHeaderSliver basics', (WidgetTester tester) async {
     Widget buildFrame({ required Axis axis, required bool reverse }) {
       return MaterialApp(
         home: Scaffold(
@@ -14,8 +14,8 @@ void main() {
             scrollDirection: axis,
             reverse: reverse,
             slivers: <Widget>[
-              const SliverPinnedHeader(
-                child: Text('SliverPinnedHeader'),
+              const PinnedHeaderSliver(
+                child: Text('PinnedHeaderSliver'),
               ),
               SliverList(
                 delegate: SliverChildBuilderDelegate(
@@ -29,7 +29,7 @@ void main() {
       );
     }
 
-    Rect getHeaderRect() => tester.getRect(find.text('SliverPinnedHeader'));
+    Rect getHeaderRect() => tester.getRect(find.text('PinnedHeaderSliver'));
     Rect getItemRect(int index) => tester.getRect(find.text('Item $index'));
 
     // axis: Axis.vertical, reverse: false
@@ -42,7 +42,7 @@ void main() {
       // The header's child is at the top of the scroll view and all items are the same height.
       expect(getHeaderRect().topLeft, Offset.zero);
       expect(getHeaderRect().width, 800);
-      expect(getHeaderRect().height, tester.getSize(find.text('SliverPinnedHeader')).height);
+      expect(getHeaderRect().height, tester.getSize(find.text('PinnedHeaderSliver')).height);
 
       // First and last visible items
       final double itemHeight = getItemRect(0).height;
@@ -68,7 +68,7 @@ void main() {
 
       expect(getHeaderRect().topLeft, Offset.zero);
       expect(getHeaderRect().height, 600);
-      expect(getHeaderRect().width, tester.getSize(find.text('SliverPinnedHeader')).width);
+      expect(getHeaderRect().width, tester.getSize(find.text('PinnedHeaderSliver')).width);
 
       // First and last visible items (assuming < 10 items visible)
       final double itemWidth = getItemRect(0).width;
@@ -94,7 +94,7 @@ void main() {
 
       expect(getHeaderRect().bottomLeft, const Offset(0, 600));
       expect(getHeaderRect().width, 800);
-      expect(getHeaderRect().height, tester.getSize(find.text('SliverPinnedHeader')).height);
+      expect(getHeaderRect().height, tester.getSize(find.text('PinnedHeaderSliver')).height);
 
       // First and last visible items
       final double itemHeight = getItemRect(0).height;
@@ -120,7 +120,7 @@ void main() {
 
       expect(getHeaderRect().topRight, const Offset(800, 0));
       expect(getHeaderRect().height, 600);
-      expect(getHeaderRect().width, tester.getSize(find.text('SliverPinnedHeader')).width);
+      expect(getHeaderRect().width, tester.getSize(find.text('PinnedHeaderSliver')).width);
 
       // First and last visible items (assuming < 10 items visible)
       final double itemWidth = getItemRect(0).width;
@@ -139,20 +139,20 @@ void main() {
     }
   });
 
-  testWidgets('SliverPinnedHeader: multiple headers layout one after the other', (WidgetTester tester) async {
+  testWidgets('PinnedHeaderSliver: multiple headers layout one after the other', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: CustomScrollView(
             slivers: <Widget>[
-              const SliverPinnedHeader(
-                child: Text('SliverPinnedHeader 0'),
+              const PinnedHeaderSliver(
+                child: Text('PinnedHeaderSliver 0'),
               ),
-              const SliverPinnedHeader(
-                child: Text('SliverPinnedHeader 1'),
+              const PinnedHeaderSliver(
+                child: Text('PinnedHeaderSliver 1'),
               ),
-              const SliverPinnedHeader(
-                child: Text('SliverPinnedHeader 2'),
+              const PinnedHeaderSliver(
+                child: Text('PinnedHeaderSliver 2'),
               ),
               SliverList(
                 delegate: SliverChildBuilderDelegate(
@@ -166,20 +166,20 @@ void main() {
       ),
     );
 
-    final Rect rect0 = tester.getRect(find.text('SliverPinnedHeader 0'));
+    final Rect rect0 = tester.getRect(find.text('PinnedHeaderSliver 0'));
     expect(rect0.top, 0);
     expect(rect0.width, 800);
 
-    final Rect rect1 = tester.getRect(find.text('SliverPinnedHeader 1'));
+    final Rect rect1 = tester.getRect(find.text('PinnedHeaderSliver 1'));
     expect(rect1.top, rect0.bottom);
     expect(rect1.width, 800);
 
-    final Rect rect2 = tester.getRect(find.text('SliverPinnedHeader 2'));
+    final Rect rect2 = tester.getRect(find.text('PinnedHeaderSliver 2'));
     expect(rect2.top, rect1.bottom);
     expect(rect2.width, 800);
   });
 
-  testWidgets('SliverPinnedHeader: headers that do not start at the top', (WidgetTester tester) async {
+  testWidgets('PinnedHeaderSliver: headers that do not start at the top', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -191,8 +191,8 @@ void main() {
                   childCount: 2,
                 ),
               ),
-              const SliverPinnedHeader(
-                child: Text('SliverPinnedHeader 0'),
+              const PinnedHeaderSliver(
+                child: Text('PinnedHeaderSliver 0'),
               ),
               SliverList(
                 delegate: SliverChildBuilderDelegate(
@@ -200,8 +200,8 @@ void main() {
                   childCount: 2,
                 ),
               ),
-              const SliverPinnedHeader(
-                child: Text('SliverPinnedHeader 1'),
+              const PinnedHeaderSliver(
+                child: Text('PinnedHeaderSliver 1'),
               ),
               SliverList(
                 delegate: SliverChildBuilderDelegate(
@@ -209,8 +209,8 @@ void main() {
                   childCount: 2,
                 ),
               ),
-              const SliverPinnedHeader(
-                child: Text('SliverPinnedHeader 2'),
+              const PinnedHeaderSliver(
+                child: Text('PinnedHeaderSliver 2'),
               ),
               SliverList(
                 delegate: SliverChildBuilderDelegate(
@@ -231,26 +231,26 @@ void main() {
     position.moveTo(itemHeight * 2);
     await tester.pumpAndSettle();
 
-    // That leaves 'SliverPinnedHeader 0' at the top
-    final Rect rect0 = tester.getRect(find.text('SliverPinnedHeader 0'));
+    // That leaves 'PinnedHeaderSliver 0' at the top
+    final Rect rect0 = tester.getRect(find.text('PinnedHeaderSliver 0'));
     expect(rect0.top, 0);
     expect(rect0.width, 800);
 
-    // Scroll 'Item 1.0' and 'Item 1.1' behind 'SliverPinnedHeader 0'
+    // Scroll 'Item 1.0' and 'Item 1.1' behind 'PinnedHeaderSliver 0'
     position.moveTo(itemHeight * 4);
     await tester.pumpAndSettle();
 
-    // That leaves 'SliverPinnedHeader 1' below 'SliverPinnedHeader 0'
-    final Rect rect1 = tester.getRect(find.text('SliverPinnedHeader 1'));
+    // That leaves 'PinnedHeaderSliver 1' below 'PinnedHeaderSliver 0'
+    final Rect rect1 = tester.getRect(find.text('PinnedHeaderSliver 1'));
     expect(rect1.top, rect0.bottom);
     expect(rect1.width, 800);
 
-    // Scroll 'Item 2.0' and 'Item 2.1' behind 'SliverPinnedHeader 1'
+    // Scroll 'Item 2.0' and 'Item 2.1' behind 'PinnedHeaderSliver 1'
     position.moveTo(itemHeight * 6);
     await tester.pumpAndSettle();
 
-    // That leaves 'SliverPinnedHeader 2' below 'SliverPinnedHeader 1'
-    final Rect rect2 = tester.getRect(find.text('SliverPinnedHeader 2'));
+    // That leaves 'PinnedHeaderSliver 2' below 'PinnedHeaderSliver 1'
+    final Rect rect2 = tester.getRect(find.text('PinnedHeaderSliver 2'));
     expect(rect2.top, rect1.bottom);
     expect(rect2.width, 800);
 
@@ -258,8 +258,8 @@ void main() {
     // can go - they will not have moved.
     position.moveTo(itemHeight * 10);
     await tester.pumpAndSettle();
-    expect(tester.getRect(find.text('SliverPinnedHeader 0')), rect0);
-    expect(tester.getRect(find.text('SliverPinnedHeader 1')), rect1);
-    expect(tester.getRect(find.text('SliverPinnedHeader 2')), rect2);
+    expect(tester.getRect(find.text('PinnedHeaderSliver 0')), rect0);
+    expect(tester.getRect(find.text('PinnedHeaderSliver 1')), rect1);
+    expect(tester.getRect(find.text('PinnedHeaderSliver 2')), rect2);
   });
 }
