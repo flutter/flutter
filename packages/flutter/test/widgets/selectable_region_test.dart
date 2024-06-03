@@ -3594,6 +3594,21 @@ void main() {
     skip: kIsWeb, // [intended] Web uses its native context menu.
   );
 
+
+  testWidgets('Ensure consistent layout of SelectionArea children between platforms', (WidgetTester tester) async {
+    await tester.pumpWidget(
+        const MaterialApp(
+          home: SelectionArea(
+            child: Text('Row 1'),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final RenderMouseRegion mouseRegion = tester.renderObjectList<RenderMouseRegion>(find.byType(MouseRegion)).last;
+      expect(mouseRegion.size, const Size(800.0, 600.0));
+    }, 
+  );
+  
   testWidgets('the selection behavior when clicking `Copy` item in mobile platforms', (WidgetTester tester) async {
     List<ContextMenuButtonItem> buttonItems = <ContextMenuButtonItem>[];
     final FocusNode focusNode = FocusNode();
