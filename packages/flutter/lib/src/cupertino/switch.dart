@@ -599,7 +599,7 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
     });
 
     final double effectiveActiveThumbRadius = effectiveActiveIcon == null ? activeThumbRadius : thumbRadiusWithIcon;
-    
+
     final double effectiveInactiveThumbRadius = effectiveInactiveIcon == null && widget.inactiveThumbImage == null
       ? inactiveThumbRadius : thumbRadiusWithIcon;
 
