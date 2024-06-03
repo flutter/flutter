@@ -340,10 +340,26 @@ class FlutterPlugin implements Plugin<Project> {
                         "packages", "flutter_tools", "gradle", "src", "main", "kotlin",
                         "dependency_version_checker.gradle.kts")
                 project.apply from: dependencyCheckerPluginPath
-            } catch (Exception ignored) {
+            } catch (Exception e) {
+                // If the exception was thrown by us in the dependency version checker plugin then
+                // re-throw it.
+                Exception outer = e.getCause()
+                if (outer != null) {
+                    Exception inner = outer.getCause()
+                    if (inner != null) {
+                        String innerMessage = inner.getMessage()
+                        if (innerMessage != null &&
+                                innerMessage.contains("android-skip-build-dependency-validation")) {
+                            throw e
+                        }
+                    }
+                }
+
+                // Otherwise, dependency version checking has failed. Log and continue
+                // the build.
                 project.logger.error("Warning: Flutter was unable to detect project Gradle, Java, " +
                         "AGP, and KGP versions. Skipping dependency version checking. Error was: "
-                        + ignored)
+                        + e)
             }
         }
 
