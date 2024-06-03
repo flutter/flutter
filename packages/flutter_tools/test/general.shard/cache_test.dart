@@ -393,6 +393,35 @@ void main() {
     expect(operatingSystemUtils.chmods, <List<String>>[<String>['/.tmp_rand0/flutter_cache_test_artifact.rand0/bin_dir', 'a+r,a+x']]);
   });
 
+  testWithoutContext('EngineCachedArtifact makes cached package dirs readable and executable by all', () async {
+    final FakeOperatingSystemUtils operatingSystemUtils = FakeOperatingSystemUtils();
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final Directory artifactDir = fileSystem.systemTempDirectory.createTempSync('flutter_cache_test_artifact.');
+    final Directory downloadDir = fileSystem.systemTempDirectory.createTempSync('flutter_cache_test_download.');
+    final FakeSecondaryCache cache = FakeSecondaryCache()
+      ..artifactDirectory = artifactDir
+      ..downloadDir = downloadDir;
+    artifactDir.childDirectory('package_dir').createSync();
+
+    final FakeCachedArtifact artifact = FakeCachedArtifact(
+      cache: cache,
+      binaryDirs: <List<String>>[],
+      packageDirs: <String>[
+        'package_dir',
+      ],
+      requiredArtifacts: DevelopmentArtifact.universal,
+    );
+    await artifact.updateInner(FakeArtifactUpdater(), fileSystem, operatingSystemUtils);
+    final Directory dir = fileSystem.systemTempDirectory
+        .listSync(recursive: true)
+        .whereType<Directory>()
+        .singleWhereOrNull((Directory directory) => directory.basename == 'package_dir')!;
+
+    expect(dir, isNotNull);
+    expect(dir.path, artifactDir.childDirectory('package_dir').path);
+    expect(operatingSystemUtils.chmods, <List<String>>[<String>['/.tmp_rand0/flutter_cache_test_artifact.rand0/package_dir', 'a+r,a+x']]);
+  });
+
   testWithoutContext('Try to remove without a parent', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final Directory parent = fileSystem.directory('dir');
