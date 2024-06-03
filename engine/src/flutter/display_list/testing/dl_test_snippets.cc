@@ -980,5 +980,12 @@ sk_sp<SkTextBlob> GetTestTextBlob(int index) {
   return blob;
 }
 
+sk_sp<SkTextBlob> CreateTextBlob(std::string& message) {
+  sk_sp<SkTextBlob> blob =
+      SkTextBlob::MakeFromText(message.c_str(), message.size(),
+                               CreateTestFontOfSize(20), SkTextEncoding::kUTF8);
+  return blob;
+}
+
 }  // namespace testing
 }  // namespace flutter
