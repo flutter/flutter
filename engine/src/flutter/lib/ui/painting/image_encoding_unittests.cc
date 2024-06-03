@@ -465,8 +465,8 @@ TEST(ImageEncodingImpellerTest, PngEncoding10XR) {
 
   sk_sp<SkImage> image = surface->makeImageSnapshot();
 
-  sk_sp<SkData> png = EncodeImage(image, ImageByteFormat::kPNG);
-  EXPECT_TRUE(png);
+  fml::StatusOr<sk_sp<SkData>> png = EncodeImage(image, ImageByteFormat::kPNG);
+  EXPECT_TRUE(png.ok());
 }
 
 #endif  // IMPELLER_SUPPORTS_RENDERING
