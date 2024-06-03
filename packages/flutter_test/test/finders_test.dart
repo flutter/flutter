@@ -7,7 +7,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:path/path.dart';
 
 const List<Widget> fooBarTexts = <Text>[
   Text('foo', textDirection: TextDirection.ltr),
@@ -313,7 +312,7 @@ void main() {
       expect(find.byTooltip('Tooltip Message'), findsOneWidget);
     });
 
-    testWidgets('finds widgets with tooltipby RegExp', (WidgetTester tester) async {
+    testWidgets('finds widgets with tooltip by RegExp', (WidgetTester tester) async {
       await tester.pumpWidget(_boilerplate(
         const Tooltip(
           message: 'Tooltip Message',
@@ -322,6 +321,34 @@ void main() {
       ));
       expect(find.byTooltip('Tooltip'), findsNothing);
       expect(find.byTooltip(RegExp(r'^Tooltip')), findsOneWidget);
+    });
+    testWidgets('finds widgets by rich text tooltip', (WidgetTester tester) async {
+      await tester.pumpWidget(_boilerplate(
+        const Tooltip(
+          richMessage: TextSpan(
+            children: <InlineSpan>[
+            TextSpan(text: 'Tooltip '),
+            TextSpan(text: 'Message'),
+          ]),
+          child: Text('+'),
+        ),
+      ));
+      expect(find.byTooltip('Tooltip Message'), findsOneWidget);
+    });
+
+    testWidgets('finds widgets with rich text tooltip by RegExp', (WidgetTester tester) async {
+      await tester.pumpWidget(_boilerplate(
+        const Tooltip(
+          richMessage: TextSpan(
+            children: <InlineSpan>[
+            TextSpan(text: 'Tooltip '),
+            TextSpan(text: 'Message'),
+          ]),
+          child: Text('+'),
+        ),
+      ));
+      expect(find.byTooltip('Tooltip M'), findsNothing);
+      expect(find.byTooltip(RegExp(r'^Tooltip M')), findsOneWidget);
     });
   });
 
@@ -1380,9 +1407,16 @@ void main() {
 Widget _boilerplate(Widget child) {
   return Directionality(
     textDirection: TextDirection.ltr,
-    child: child,
+    child: Navigator(
+      onGenerateRoute: (RouteSettings settings) {
+        return MaterialPageRoute<void>(
+          builder: (BuildContext context) => child,
+        );
+      },
+    ),
   );
 }
+
 
 class SimpleCustomSemanticsWidget extends LeafRenderObjectWidget {
   const SimpleCustomSemanticsWidget(this.label, {super.key});

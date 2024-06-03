@@ -374,8 +374,8 @@ class CommonFinders {
     return byWidgetPredicate(
       (Widget widget) {
         return widget is Tooltip && (message is RegExp
-            ? message.hasMatch(widget.message ?? '')
-            : message == widget.message);
+            ? (message.hasMatch(widget.message ?? '') || message.hasMatch(widget.richMessage?.toPlainText() ?? ''))
+            : (message == widget.message || message == widget.richMessage?.toPlainText()));
       },
       skipOffstage: skipOffstage,
     );
