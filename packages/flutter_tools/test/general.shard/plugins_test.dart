@@ -930,7 +930,7 @@ web_plugin_with_nested:${webPluginWithNestedFile.childDirectory('lib').uri}
           ProcessManager: () => FakeProcessManager.any(),
         });
 
-        testUsingContext('Injects user selected implementation despite inline implementation on web', () async {
+        testUsingContext('user-selected implementation overrides inline implementation on web', () async {
           final List<Directory> directories = createFakePlugins(fs, <String>[
             'user_selected_url_launcher_implementation',
             'url_launcher',
@@ -1130,7 +1130,7 @@ flutter:
         ProcessManager: () => FakeProcessManager.any(),
       });
 
-      testUsingContext('Injects user selected implementation despite inline implementation', () async {
+      testUsingContext('user-selected implementation overrides inline implementation', () async {
         final List<Directory> directories = createFakePlugins(fs, <String>[
           'user_selected_url_launcher_implementation',
           'url_launcher',
@@ -1178,7 +1178,7 @@ dependencies:
         ProcessManager: () => FakeProcessManager.any(),
       });
 
-      testUsingContext('Injects user selected implementation despite default implementation', () async {
+      testUsingContext('user-selected implementation overrides default implementation', () async {
         final List<Directory> directories = createFakePlugins(fs, <String>[
           'user_selected_url_launcher_implementation',
           'url_launcher',

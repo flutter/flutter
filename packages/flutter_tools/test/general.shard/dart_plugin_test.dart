@@ -511,7 +511,7 @@ void main() {
         );
       });
 
-      testWithoutContext('selects user selected implementation despite default implementation', () async {
+      testWithoutContext('user-selected implementation overrides default implementation', () async {
         final Set<String> directDependencies = <String>{
           'user_selected_url_launcher_implementation',
           'url_launcher',
@@ -579,7 +579,7 @@ void main() {
         );
       });
 
-      testWithoutContext('selects user selected implementation despite inline implementation', () async {
+      testWithoutContext('user-selected implementation overrides inline implementation', () async {
         final Set<String> directDependencies = <String>{
           'user_selected_url_launcher_implementation',
           'url_launcher',
