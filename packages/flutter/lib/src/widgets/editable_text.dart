@@ -867,7 +867,12 @@ class EditableText extends StatefulWidget {
     this.clipBehavior = Clip.hardEdge,
     this.restorationId,
     this.scrollBehavior,
+    @Deprecated(
+      'Use `stylusHandwritingEnabled` instead. '
+      'This feature was deprecated after v3.22.0-0.3.pre.',
+    )
     this.scribbleEnabled = true,
+    this.stylusHandwritingEnabled = true,
     this.enableIMEPersonalizedLearning = true,
     this.contentInsertionConfiguration,
     this.contextMenuBuilder,
@@ -1693,9 +1698,6 @@ class EditableText extends StatefulWidget {
   /// [scrollPhysics].
   final ScrollPhysics? scrollPhysics;
 
-  // TODO(justinmc): I don't think we should add a scribeEnabled parameter, so
-  // probably this one needs to handle both. It should probably be named
-  // "stylusHandwritingEnabled". Maybe deprecate this one and add a new one?
   /// {@template flutter.widgets.editableText.scribbleEnabled}
   /// Whether iOS 14 Scribble features are enabled for this widget.
   ///
@@ -1703,7 +1705,22 @@ class EditableText extends StatefulWidget {
   ///
   /// Defaults to true.
   /// {@endtemplate}
+  @Deprecated(
+    'Use `stylusHandwritingEnabled` instead. '
+    'This feature was deprecated after v3.22.0-0.3.pre.',
+  )
   final bool scribbleEnabled;
+
+  /// {@template flutter.widgets.editableText.stylusHandwritingEnabled}
+  /// Whether this input supports stylus handwriting, where the user can write
+  /// directly on top of a field.
+  ///
+  /// Currently only the following devices are supported:
+  ///
+  ///  * iPads running iOS 14 and above using an Apple Pencil.
+  ///  * Android devices running API 34 and above and using an active stylus.
+  /// {@endtemplate}
+  final bool stylusHandwritingEnabled;
 
   /// {@template flutter.widgets.editableText.selectionEnabled}
   /// Same as [enableInteractiveSelection].
@@ -2210,6 +2227,7 @@ class EditableText extends StatefulWidget {
     properties.add(DiagnosticsProperty<Iterable<String>>('autofillHints', autofillHints, defaultValue: null));
     properties.add(DiagnosticsProperty<TextHeightBehavior>('textHeightBehavior', textHeightBehavior, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('scribbleEnabled', scribbleEnabled, defaultValue: true));
+    properties.add(DiagnosticsProperty<bool>('stylusHandwritingEnabled', stylusHandwritingEnabled, defaultValue: false));
     properties.add(DiagnosticsProperty<bool>('enableIMEPersonalizedLearning', enableIMEPersonalizedLearning, defaultValue: true));
     properties.add(DiagnosticsProperty<bool>('enableInteractiveSelection', enableInteractiveSelection, defaultValue: true));
     properties.add(DiagnosticsProperty<UndoHistoryController>('undoController', undoController, defaultValue: null));
@@ -2330,6 +2348,15 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   AnimationController? _floatingCursorResetController;
 
   Orientation? _lastOrientation;
+
+  bool get _stylusHandwritingEnabled {
+    // During the deprecation period, respect scribbleEnabled being explicitly
+    // set.
+    if (!widget.scribbleEnabled) {
+      return widget.scribbleEnabled;
+    }
+    return widget.stylusHandwritingEnabled;
+  }
 
   @override
   bool get wantKeepAlive => widget.focusNode.hasFocus;
@@ -4426,7 +4453,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   _ScribbleCacheKey? _scribbleCacheKey;
 
   void _updateSelectionRects({bool force = false}) {
-    if (!widget.scribbleEnabled || defaultTargetPlatform != TargetPlatform.iOS) {
+    if (!_stylusHandwritingEnabled || defaultTargetPlatform != TargetPlatform.iOS) {
       return;
     }
 
@@ -4717,7 +4744,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @override
   void insertTextPlaceholder(Size size) {
-    if (!widget.scribbleEnabled) {
+    if (!_stylusHandwritingEnabled) {
       return;
     }
 
@@ -4732,7 +4759,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @override
   void removeTextPlaceholder() {
-    if (!widget.scribbleEnabled || _placeholderLocation == -1) {
+    if (!_stylusHandwritingEnabled || _placeholderLocation == -1) {
       return;
     }
 
@@ -5265,61 +5292,57 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                           onCopy: _semanticsOnCopy(controls),
                           onCut: _semanticsOnCut(controls),
                           onPaste: _semanticsOnPaste(controls),
-                          child: _ScribbleFocusable(
-                            focusNode: widget.focusNode,
+                          child: _StylusHandwriting(
                             editableKey: _editableKey,
-                            enabled: widget.scribbleEnabled,
+                            enabled: _stylusHandwritingEnabled,
+                            focusNode: widget.focusNode,
                             updateSelectionRects: () {
                               _openInputConnection();
                               _updateSelectionRects(force: true);
                             },
-                            child: _Scribe(
-                              focusNode: widget.focusNode,
-                              editableKey: _editableKey,
-                              child: SizeChangedLayoutNotifier(
-                                child: _Editable(
-                                  key: _editableKey,
-                                  startHandleLayerLink: _startHandleLayerLink,
-                                  endHandleLayerLink: _endHandleLayerLink,
-                                  inlineSpan: buildTextSpan(),
-                                  value: _value,
-                                  cursorColor: _cursorColor,
-                                  backgroundCursorColor: widget.backgroundCursorColor,
-                                  showCursor: _cursorVisibilityNotifier,
-                                  forceLine: widget.forceLine,
-                                  readOnly: widget.readOnly,
-                                  hasFocus: _hasFocus,
-                                  maxLines: widget.maxLines,
-                                  minLines: widget.minLines,
-                                  expands: widget.expands,
-                                  strutStyle: widget.strutStyle,
-                                  selectionColor: _selectionOverlay?.spellCheckToolbarIsVisible ?? false
-                                      ? _spellCheckConfiguration.misspelledSelectionColor ?? widget.selectionColor
-                                      : widget.selectionColor,
-                                  textScaler: effectiveTextScaler,
-                                  textAlign: widget.textAlign,
-                                  textDirection: _textDirection,
-                                  locale: widget.locale,
-                                  textHeightBehavior: widget.textHeightBehavior ?? DefaultTextHeightBehavior.maybeOf(context),
-                                  textWidthBasis: widget.textWidthBasis,
-                                  obscuringCharacter: widget.obscuringCharacter,
-                                  obscureText: widget.obscureText,
-                                  offset: offset,
-                                  rendererIgnoresPointer: widget.rendererIgnoresPointer,
-                                  cursorWidth: widget.cursorWidth,
-                                  cursorHeight: widget.cursorHeight,
-                                  cursorRadius: widget.cursorRadius,
-                                  cursorOffset: widget.cursorOffset ?? Offset.zero,
-                                  selectionHeightStyle: widget.selectionHeightStyle,
-                                  selectionWidthStyle: widget.selectionWidthStyle,
-                                  paintCursorAboveText: widget.paintCursorAboveText,
-                                  enableInteractiveSelection: widget._userSelectionEnabled,
-                                  textSelectionDelegate: this,
-                                  devicePixelRatio: _devicePixelRatio,
-                                  promptRectRange: _currentPromptRectRange,
-                                  promptRectColor: widget.autocorrectionTextRectColor,
-                                  clipBehavior: widget.clipBehavior,
-                                ),
+                            child: SizeChangedLayoutNotifier(
+                              child: _Editable(
+                                key: _editableKey,
+                                startHandleLayerLink: _startHandleLayerLink,
+                                endHandleLayerLink: _endHandleLayerLink,
+                                inlineSpan: buildTextSpan(),
+                                value: _value,
+                                cursorColor: _cursorColor,
+                                backgroundCursorColor: widget.backgroundCursorColor,
+                                showCursor: _cursorVisibilityNotifier,
+                                forceLine: widget.forceLine,
+                                readOnly: widget.readOnly,
+                                hasFocus: _hasFocus,
+                                maxLines: widget.maxLines,
+                                minLines: widget.minLines,
+                                expands: widget.expands,
+                                strutStyle: widget.strutStyle,
+                                selectionColor: _selectionOverlay?.spellCheckToolbarIsVisible ?? false
+                                    ? _spellCheckConfiguration.misspelledSelectionColor ?? widget.selectionColor
+                                    : widget.selectionColor,
+                                textScaler: effectiveTextScaler,
+                                textAlign: widget.textAlign,
+                                textDirection: _textDirection,
+                                locale: widget.locale,
+                                textHeightBehavior: widget.textHeightBehavior ?? DefaultTextHeightBehavior.maybeOf(context),
+                                textWidthBasis: widget.textWidthBasis,
+                                obscuringCharacter: widget.obscuringCharacter,
+                                obscureText: widget.obscureText,
+                                offset: offset,
+                                rendererIgnoresPointer: widget.rendererIgnoresPointer,
+                                cursorWidth: widget.cursorWidth,
+                                cursorHeight: widget.cursorHeight,
+                                cursorRadius: widget.cursorRadius,
+                                cursorOffset: widget.cursorOffset ?? Offset.zero,
+                                selectionHeightStyle: widget.selectionHeightStyle,
+                                selectionWidthStyle: widget.selectionWidthStyle,
+                                paintCursorAboveText: widget.paintCursorAboveText,
+                                enableInteractiveSelection: widget._userSelectionEnabled,
+                                textSelectionDelegate: this,
+                                devicePixelRatio: _devicePixelRatio,
+                                promptRectRange: _currentPromptRectRange,
+                                promptRectColor: widget.autocorrectionTextRectColor,
+                                clipBehavior: widget.clipBehavior,
                               ),
                             ),
                           ),
@@ -5715,13 +5738,13 @@ class _ScribbleFocusableState extends State<_ScribbleFocusable> implements Scrib
 class _Scribe extends StatefulWidget {
   const _Scribe({
     required this.child,
-    required this.focusNode,
     required this.editableKey,
+    required this.focusNode,
   });
 
   final Widget child;
-  final FocusNode focusNode;
   final GlobalKey editableKey;
+  final FocusNode focusNode;
 
   @override
   State<_Scribe> createState() => _ScribeState();
@@ -5786,6 +5809,41 @@ class _ScribeState extends State<_Scribe> implements ScribeClient {
     return Listener(
       onPointerDown: _handlePointerDown,
       child: widget.child,
+    );
+  }
+}
+
+class _StylusHandwriting extends StatelessWidget {
+  const _StylusHandwriting({
+    required this.child,
+    required this.editableKey,
+    required this.enabled,
+    required this.focusNode,
+    required this.updateSelectionRects,
+  });
+
+  final Widget child;
+  final GlobalKey editableKey;
+  final bool enabled;
+  final FocusNode focusNode;
+  final VoidCallback updateSelectionRects;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!enabled) {
+      return child;
+    }
+
+    return _ScribbleFocusable(
+      focusNode: focusNode,
+      editableKey: editableKey,
+      enabled: enabled,
+      updateSelectionRects: updateSelectionRects,
+      child: _Scribe(
+        focusNode: focusNode,
+        editableKey: editableKey,
+        child: child,
+      ),
     );
   }
 }
