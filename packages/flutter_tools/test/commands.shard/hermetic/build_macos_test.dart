@@ -791,7 +791,9 @@ STDERR STUFF
     );
     createMinimalMockProjectFiles();
 
-    final File entitlementFile = fileSystem.file(fileSystem.path.join('macos', 'Runner', 'Release.entitlements'));
+    final File entitlementFile = fileSystem.file(
+      fileSystem.path.join('macos', 'Runner', 'Release.entitlements'),
+    );
     entitlementFile.createSync(recursive: true);
     entitlementFile.writeAsStringSync('''
 <?xml version="1.0" encoding="UTF-8"?>
@@ -809,7 +811,9 @@ STDERR STUFF
       const <String>['build', 'macos', '--release', '--no-pub']
     );
 
-    final File tempEntitlementFile = fileSystem.systemTempDirectory.childFile('flutter_disable_sandbox_entitlement.rand0/ReleaseWithDisabledSandboxing.entitlements');
+    final File tempEntitlementFile = fileSystem.systemTempDirectory.childFile(
+      'flutter_disable_sandbox_entitlement.rand0/ReleaseWithDisabledSandboxing.entitlements',
+    );
     expect(tempEntitlementFile, exists);
     expect(tempEntitlementFile.readAsStringSync(), '''
 <?xml version="1.0" encoding="UTF-8"?>

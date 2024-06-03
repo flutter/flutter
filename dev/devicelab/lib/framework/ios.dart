@@ -193,7 +193,10 @@ Future<bool> runXcodeTests({
   }
   File? disabledSandboxEntitlementFile;
   if (skipCodesign && platformDirectory.endsWith('macos')) {
-    disabledSandboxEntitlementFile = _createDisabledSandboxEntitlementFile(platformDirectory, configuration);
+    disabledSandboxEntitlementFile = _createDisabledSandboxEntitlementFile(
+      platformDirectory,
+      configuration,
+    );
   }
   final String resultBundleTemp = Directory.systemTemp.createTempSync('flutter_xcresult.').path;
   final String resultBundlePath = path.join(resultBundleTemp, 'result');
@@ -261,7 +264,10 @@ Future<bool> runXcodeTests({
 /// access to the app. To workaround this in CI, we create and use a entitlements
 /// file with sandboxing disabled. See
 /// https://developer.apple.com/documentation/security/app_sandbox/accessing_files_from_the_macos_app_sandbox.
-File? _createDisabledSandboxEntitlementFile(String platformDirectory, String configuration) {
+File? _createDisabledSandboxEntitlementFile(
+  String platformDirectory,
+  String configuration,
+) {
   String entitlementDefaultFileName;
   if (configuration == 'Release') {
     entitlementDefaultFileName = 'Release';
@@ -269,7 +275,11 @@ File? _createDisabledSandboxEntitlementFile(String platformDirectory, String con
     entitlementDefaultFileName = 'DebugProfile';
   }
 
-  final String entitlementFilePath = path.join(platformDirectory, 'Runner', '$entitlementDefaultFileName.entitlements');
+  final String entitlementFilePath = path.join(
+    platformDirectory,
+    'Runner',
+    '$entitlementDefaultFileName.entitlements',
+  );
   final File entitlementFile = File(entitlementFilePath);
 
   if (!entitlementFile.existsSync()) {
@@ -277,20 +287,24 @@ File? _createDisabledSandboxEntitlementFile(String platformDirectory, String con
     return null;
   }
 
-  final String originalEntitlementFileContents = entitlementFile.readAsStringSync();
-  final String tempEntitlementPath = Directory.systemTemp.createTempSync('flutter_disable_sandbox_entitlement.').path;
-  final File disabledSandboxEntitlementFile = File(path.join(tempEntitlementPath, '${entitlementDefaultFileName}WithDisabledSandboxing.entitlements'));
+  final String originalEntitlementFileContents =
+      entitlementFile.readAsStringSync();
+  final String tempEntitlementPath = Directory.systemTemp
+      .createTempSync('flutter_disable_sandbox_entitlement.')
+      .path;
+  final File disabledSandboxEntitlementFile = File(path.join(
+    tempEntitlementPath,
+    '${entitlementDefaultFileName}WithDisabledSandboxing.entitlements',
+  ));
   disabledSandboxEntitlementFile.createSync(recursive: true);
   disabledSandboxEntitlementFile.writeAsStringSync(
     originalEntitlementFileContents.replaceAll(
-      RegExp(
-          r'<key>com\.apple\.security\.app-sandbox<\/key>[\S\s]*?<true\/>'),
+      RegExp(r'<key>com\.apple\.security\.app-sandbox<\/key>[\S\s]*?<true\/>'),
       '''
 <key>com.apple.security.app-sandbox</key>
 	<false/>''',
     ),
   );
-
 
   return disabledSandboxEntitlementFile;
 }

@@ -161,7 +161,6 @@ abstract class DesktopDevice extends Device {
       logger: _logger,
     );
     try {
-
       Timer? timer;
       if (this is MacOSDevice) {
         final bool usingCI = globals.platform.environment['LUCI_CI'] == 'True';
@@ -173,7 +172,10 @@ abstract class DesktopDevice extends Device {
             // cause tests in CI to hang. In CI, we workaround this by setting
             // the CODE_SIGN_ENTITLEMENTS build setting to a version with
             // sandboxing disabled.
-            _logger.printError('The Dart VM Service was not discovered after $defaultTimeout minutes. Ensure sandboxing is disabled by checking the set CODE_SIGN_ENTITLEMENTS.');
+            _logger.printError(
+                'The Dart VM Service was not discovered after $defaultTimeout '
+                'minutes. Ensure sandboxing is disabled by checking the set '
+                'CODE_SIGN_ENTITLEMENTS.');
           });
         }
       }

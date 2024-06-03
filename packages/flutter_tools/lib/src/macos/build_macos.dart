@@ -291,7 +291,10 @@ Future<void> _writeCodeSizeAnalysis(BuildInfo buildInfo, SizeAnalyzer? sizeAnaly
 /// access to the app. To workaround this in CI, we create and use a entitlements
 /// file with sandboxing disabled. See
 /// https://developer.apple.com/documentation/security/app_sandbox/accessing_files_from_the_macos_app_sandbox.
-File? _createDisabledSandboxEntitlementFile(MacOSProject macos, String configuration) {
+File? _createDisabledSandboxEntitlementFile(
+  MacOSProject macos,
+  String configuration,
+) {
   String entitlementDefaultFileName;
   if (configuration == 'Release') {
     entitlementDefaultFileName = 'Release';
@@ -307,20 +310,21 @@ File? _createDisabledSandboxEntitlementFile(MacOSProject macos, String configura
       .childFile('$entitlementDefaultFileName.entitlements');
 
   if (!entitlementFile.existsSync()) {
-    globals.logger.printTrace('Unable to find entitlements file at ${entitlementFile.path}');
+    globals.logger.printTrace(
+        'Unable to find entitlements file at ${entitlementFile.path}');
     return null;
   }
 
-  final String originalEntitlementFileContents = entitlementFile.readAsStringSync();
-  final File disabledSandboxEntitlementFile =
-      globals.fs.systemTempDirectory.createTempSync('flutter_disable_sandbox_entitlement.').childFile(
-            '${entitlementDefaultFileName}WithDisabledSandboxing.entitlements',
-          );
+  final String entitlementFileContents = entitlementFile.readAsStringSync();
+  final File disabledSandboxEntitlementFile = globals.fs.systemTempDirectory
+      .createTempSync('flutter_disable_sandbox_entitlement.')
+      .childFile(
+        '${entitlementDefaultFileName}WithDisabledSandboxing.entitlements',
+      );
   disabledSandboxEntitlementFile.createSync(recursive: true);
   disabledSandboxEntitlementFile.writeAsStringSync(
-    originalEntitlementFileContents.replaceAll(
-      RegExp(
-          r'<key>com\.apple\.security\.app-sandbox<\/key>[\S\s]*?<true\/>'),
+    entitlementFileContents.replaceAll(
+      RegExp(r'<key>com\.apple\.security\.app-sandbox<\/key>[\S\s]*?<true\/>'),
       '''
 <key>com.apple.security.app-sandbox</key>
 	<false/>''',
