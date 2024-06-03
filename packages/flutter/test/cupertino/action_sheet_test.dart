@@ -489,6 +489,48 @@ void main() {
     await gesture.up();
   });
 
+  testWidgets('Actions section correctly renders overscrolls with very far scrolls', (WidgetTester tester) async {
+    // When the scroll is really far, the overscroll might be longer than the
+    // actions section, causing overflow if not controlled.
+    final ScrollController actionScrollController = ScrollController();
+    addTearDown(actionScrollController.dispose);
+    await tester.pumpWidget(
+      createAppWithButtonThatLaunchesActionSheet(
+        Builder(builder: (BuildContext context) {
+          return CupertinoActionSheet(
+            message: Text('message' * 300),
+            actions: List<Widget>.generate(4, (int i) =>
+              CupertinoActionSheetAction(
+                onPressed: () {},
+                child: Text('Button $i'),
+              ),
+            ),
+          );
+        }),
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+    await tester.pumpAndSettle();
+
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('Button 0')));
+    await tester.pumpAndSettle();
+    await gesture.moveBy(const Offset(0, 40)); // A short drag to start the gesture.
+    await tester.pumpAndSettle();
+    // The drag is far enough to make the overscroll longer than the section.
+    await gesture.moveBy(const Offset(0, 1000));
+    await tester.pump();
+    // The buttons should be out of the screen
+    expect(
+      tester.getTopLeft(find.text('Button 0')).dy,
+      greaterThan(tester.getBottomLeft(find.byType(CupertinoActionSheet)).dy)
+    );
+    await expectLater(
+      find.byType(CupertinoActionSheet),
+      matchesGoldenFile('cupertinoActionSheet.long-overscroll.0.png'),
+    );
+  });
+
   testWidgets('Tap on button calls onPressed', (WidgetTester tester) async {
     bool wasPressed = false;
     await tester.pumpWidget(
