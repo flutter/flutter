@@ -509,6 +509,53 @@ class _SlidingTapGestureRecognizer extends PanGestureRecognizer {
   String get debugDescription => 'tap slide';
 }
 
+// A region (typically a button) that can receive entering, exiting, and
+// updating events of a "sliding tap" gesture.
+//
+// Some Cupertino widgets, such as action sheets or dialogs, allow the user to
+// select buttons using "sliding taps", where the user can drag around after
+// pressing on the screen, and whichever button the drag ends in is selected.
+//
+// This class is used to define the regions that sliding taps recognize. This
+// class must be provided to a `MetaData` widget as `data`, and is typically
+// implemented by a widget state class. When an eligible dragging gesture
+// enters, leaves, or ends this `MetaData` widget, corresponding methods of this
+// class will be called.
+//
+// Multiple `_ActionSheetDragAvatar`s might be nested.
+// `_AvatarSelectionGestureRecognizer` uses a simple algorithm that only
+// compares if the inner-most avatar has changed (which suffices our use case).
+// Semantically, this means that all outer avatars will be treated as identical
+// to the inner-most one, i.e. when the pointer enters or leaves an avatar, the
+// corresponding method will be called on all avatars that nest it.
+abstract class _ActionSheetDragAvatar {
+  // A pointer has entered this region.
+  //
+  // This includes:
+  //
+  //  * The pointer has moved into this region from outside.
+  //  * The point has contacted the screen in this region. In this case, this
+  //    method is called as soon as the pointer down event occurs regardless of
+  //    whether the gesture wins the arena immediately.
+  void didEnter();
+
+  // A pointer has exited this region.
+  //
+  // This includes:
+  //  * The pointer has moved out of this region.
+  //  * The pointer is no longer in contact with the screen.
+  //  * The pointer is canceled.
+  //  * The gesture loses the arena.
+  //  * The gesture is completed. In this case, this method is called immediately
+  //    before [didConfirm].
+  void didLeave();
+
+  // The drag gesture is completed in this region.
+  //
+  // This method is called immediately after a [didLeave].
+  void didConfirm();
+}
+
 // Recognizes sliding taps and thereupon interacts with
 // `_ActionSheetDragAvatar`.
 class _AvatarSelectionGestureRecognizer extends GestureRecognizer {
@@ -644,50 +691,6 @@ class _ActionSheetGestureDetector extends StatelessWidget {
       child: child,
     );
   }
-}
-
-// A region that responds to the "sliding tap" gesture.
-//
-// Some Cupertino widgets, such as action sheets or dialogs, allow the user to
-// select buttons using "sliding taps", where the user can drag around after
-// pressing on the screen, and whichever button the drag ends in is selected.
-//
-// This class is used to define the regions that sliding taps recognize. This
-// class must be provided to a `MetaData` widget as `data`, and is typically
-// implemented by a widget state class. When an eligible dragging gesture
-// enters, leaves, or ends this `MetaData` widget, corresponding methods of this
-// class will be called.
-//
-// Multiple `_ActionSheetDragAvatar`s might be nested. All outer avatars will
-// be treated as identical to the inner-most one, i.e. when the pointer enters
-// or leaves an avatar, the corresponding method will be called on all avatars
-// that nest it. (This simple algorithm suffices the use cases here.)
-abstract class _ActionSheetDragAvatar {
-  // A pointer has entered this region.
-  //
-  // This includes:
-  //
-  //  * The pointer has moved into this region from outside.
-  //  * The point has contacted the screen in this region. In this case, this
-  //    method is called as soon as the pointer down event occurs regardless of
-  //    whether the gesture wins the arena immediately.
-  void didEnter();
-
-  // A pointer has exited this region.
-  //
-  // This includes:
-  //  * The pointer has moved out of this region.
-  //  * The pointer is no longer in contact with the screen.
-  //  * The pointer is canceled.
-  //  * The gesture loses the arena.
-  //  * The gesture is completed. In this case, this method is called immediately
-  //    before [didConfirm].
-  void didLeave();
-
-  // The drag gesture is completed in this region.
-  //
-  // This method is called immediately after a [didLeave].
-  void didConfirm();
 }
 
 /// An iOS-style action sheet.
