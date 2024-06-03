@@ -172,6 +172,7 @@ void main() {
       hasEnabledState: true,
       isEnabled: true,
       hasTapAction: true,
+      hasFocusAction: true,
       isFocusable: true,
       isInMutuallyExclusiveGroup: true,
     ));
@@ -191,6 +192,7 @@ void main() {
       hasEnabledState: true,
       isEnabled: true,
       hasTapAction: true,
+      hasFocusAction: true,
       isFocusable: true,
       isInMutuallyExclusiveGroup: true,
       isChecked: true,
@@ -211,6 +213,7 @@ void main() {
       hasEnabledState: true,
       isFocusable: true,
       isInMutuallyExclusiveGroup: true,
+      hasFocusAction: true,
     ));
 
     await tester.pump();

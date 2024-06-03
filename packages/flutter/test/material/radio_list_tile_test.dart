@@ -483,6 +483,7 @@ void main() {
                 SemanticsFlag.isInMutuallyExclusiveGroup,
                 SemanticsFlag.isFocusable,
               ],
+              actions: <SemanticsAction>[SemanticsAction.focus],
               label: 'Title',
               textDirection: TextDirection.ltr,
             ),

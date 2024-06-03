@@ -5652,7 +5652,7 @@ void main() {
               flags: <SemanticsFlag>[SemanticsFlag.isFocusable, SemanticsFlag.isSelected],
               id: 2,
               rect: TestSemantics.fullScreen,
-              actions: 1,
+              actions: 1 | SemanticsAction.focus.index,
             ),
             TestSemantics(
               label: 'TAB2\nTab 2 of 2',

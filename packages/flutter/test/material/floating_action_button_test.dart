@@ -924,6 +924,7 @@ void main() {
       tester.getSemantics(find.byType(FloatingActionButton)),
       matchesSemantics(
         hasTapAction: true,
+        hasFocusAction: true,
         hasEnabledState: true,
         isButton: true,
         isEnabled: true,

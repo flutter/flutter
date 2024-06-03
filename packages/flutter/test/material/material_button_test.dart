@@ -662,6 +662,7 @@ void main() {
               SemanticsFlag.isButton,
               SemanticsFlag.isFocusable,
             ],
+            actions: <SemanticsAction>[SemanticsAction.focus],
           ),
         ],
       ),

@@ -2111,6 +2111,7 @@ void main() {
         isFocusable: true,
         isSelected: true,
         hasTapAction: true,
+        hasFocusAction: true,
       ),
     );
     expect(
@@ -2120,6 +2121,7 @@ void main() {
         textDirection: TextDirection.ltr,
         isFocusable: true,
         hasTapAction: true,
+        hasFocusAction: true,
       ),
     );
     expect(
@@ -2129,6 +2131,7 @@ void main() {
         textDirection: TextDirection.ltr,
         isFocusable: true,
         hasTapAction: true,
+        hasFocusAction: true,
       ),
     );
   });
@@ -2165,6 +2168,7 @@ void main() {
         isFocusable: true,
         isSelected: true,
         hasTapAction: true,
+        hasFocusAction: true,
       ),
     );
     expect(
@@ -2174,6 +2178,7 @@ void main() {
         textDirection: TextDirection.ltr,
         isFocusable: true,
         hasTapAction: true,
+        hasFocusAction: true,
       ),
     );
     expect(
@@ -2183,6 +2188,7 @@ void main() {
         textDirection: TextDirection.ltr,
         isFocusable: true,
         hasTapAction: true,
+        hasFocusAction: true,
       ),
     );
   });
@@ -2515,6 +2521,7 @@ void main() {
         isFocusable: true,
         isSelected: true,
         hasTapAction: true,
+        hasFocusAction: true,
       ),
     );
     expect(
@@ -2524,6 +2531,7 @@ void main() {
         textDirection: TextDirection.ltr,
         isFocusable: true,
         hasTapAction: true,
+        hasFocusAction: true,
       ),
     );
   });
@@ -2558,6 +2566,7 @@ void main() {
         isFocusable: true,
         isSelected: true,
         hasTapAction: true,
+        hasFocusAction: true,
       ),
     );
     expect(
@@ -2567,6 +2576,7 @@ void main() {
         textDirection: TextDirection.ltr,
         isFocusable: true,
         hasTapAction: true,
+        hasFocusAction: true,
       ),
     );
   });
