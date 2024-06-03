@@ -254,6 +254,13 @@ void testMain() {
       ]);
     });
 
+    // https://github.com/flutter/flutter/issues/149616
+    test('can find Ethiopic script glyphs ()', () async {
+      await checkDownloadedFamiliesForString('ኢትዮጵያ', <String>[
+        'Noto Sans Ethiopic',
+      ]);
+    });
+
     test('findMinimumFontsForCodePoints for all supported code points',
         () async {
       // Collect all supported code points from all fallback fonts in the Noto
@@ -317,6 +324,7 @@ void testMain() {
             'Noto Sans Egyptian Hieroglyphs',
             'Noto Sans Elbasan',
             'Noto Sans Elymaic',
+            'Noto Sans Ethiopic',
             'Noto Sans Georgian',
             'Noto Sans Glagolitic',
             'Noto Sans Gothic',
