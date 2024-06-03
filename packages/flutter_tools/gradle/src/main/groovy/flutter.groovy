@@ -98,7 +98,6 @@ class FlutterExtension {
 
         return flutterVersionName
     }
-
 }
 
 // This buildscript block supplies dependencies for this file's own import
@@ -349,8 +348,7 @@ class FlutterPlugin implements Plugin<Project> {
                     if (inner != null) {
                         Exception unwrapped = inner.getCause()
                         if (unwrapped != null) {
-                            String dependencyCheckerErrorName = "Dependency_version_checker_gradle.DependencyValidationException"
-                            if (dependencyCheckerErrorName.equals(unwrapped.getClass().getCanonicalName())) {
+                            if (unwrapped instanceof DependencyValidationException) {
                                 throw e
                             }
                         }
@@ -1831,4 +1829,16 @@ class FlutterTask extends BaseFlutterTask {
         buildBundle()
     }
 
+}
+
+// Custom error for when the dependency_version_checker.kts script finds a dependency out of
+// the defined support range.
+class DependencyValidationException extends Exception {
+    public DependencyValidationException(String errorMessage) {
+        super(errorMessage);
+    }
+
+    public DependencyValidationException(String errorMessage, Throwable cause) {
+        super(errorMessage, cause);
+    }
 }

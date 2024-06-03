@@ -359,7 +359,3 @@ class Version(val major: Int, val minor: Int, val patch: Int) : Comparable<Versi
         return major.toString() + "." + minor.toString() + "." + patch.toString()
     }
 }
-
-class DependencyValidationException(message: String? = null, cause: Throwable? = null) : Exception(message, cause) {
-    constructor(cause: Throwable) : this(null, cause)
-}
