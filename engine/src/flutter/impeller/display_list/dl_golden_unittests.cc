@@ -14,6 +14,7 @@ namespace testing {
 using impeller::PlaygroundBackend;
 using impeller::PlaygroundTest;
 using impeller::Point;
+using impeller::Scalar;
 
 INSTANTIATE_PLAYGROUND_SUITE(DlGoldenTest);
 
@@ -55,7 +56,7 @@ TEST_P(DlGoldenTest, Bug147807) {
   Point content_scale = GetContentScale();
   auto draw = [content_scale](DlCanvas* canvas,
                               const std::vector<sk_sp<DlImage>>& images) {
-    canvas->Transform2DAffine(content_scale.x, 0, 0, 0, content_scale.y, 0);
+    canvas->Scale(content_scale.x, content_scale.y);
     DlPaint paint;
     paint.setColor(DlColor(0xfffef7ff));
     canvas->DrawRect(SkRect::MakeLTRB(0, 0, 375, 667), paint);
@@ -91,6 +92,85 @@ TEST_P(DlGoldenTest, Bug147807) {
       canvas->Restore();
     }
     canvas->Restore();
+  };
+
+  DisplayListBuilder builder;
+  std::vector<sk_sp<DlImage>> images;
+  draw(&builder, images);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+namespace {
+void DrawBlurGrid(DlCanvas* canvas) {
+  DlPaint paint;
+  paint.setColor(DlColor(0xfffef7ff));
+  Scalar width = 150;
+  Scalar height = 150;
+  Scalar gap = 80;
+  std::vector<Scalar> blur_radii = {10, 30, 50};
+  for (size_t i = 0; i < blur_radii.size(); ++i) {
+    Scalar blur_radius = blur_radii[i];
+    auto blur_filter = std::make_shared<flutter::DlBlurMaskFilter>(
+        flutter::DlBlurStyle::kNormal, blur_radius);
+    paint.setMaskFilter(blur_filter);
+    SkRRect rrect;
+    Scalar yval = gap + i * (gap + height);
+    rrect.setNinePatch(SkRect::MakeXYWH(gap, yval, width, height), 10, 10, 10,
+                       10);
+    canvas->DrawRRect(rrect, paint);
+    rrect.setNinePatch(SkRect::MakeXYWH(2.0 * gap + width, yval, width, height),
+                       9, 10, 10, 10);
+    canvas->DrawRRect(rrect, paint);
+  }
+}
+}  // namespace
+
+TEST_P(DlGoldenTest, GaussianVsRRectBlur) {
+  Point content_scale = GetContentScale();
+  auto draw = [content_scale](DlCanvas* canvas,
+                              const std::vector<sk_sp<DlImage>>& images) {
+    canvas->Scale(content_scale.x, content_scale.y);
+    canvas->DrawPaint(DlPaint().setColor(DlColor(0xff112233)));
+    DrawBlurGrid(canvas);
+  };
+
+  DisplayListBuilder builder;
+  std::vector<sk_sp<DlImage>> images;
+  draw(&builder, images);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(DlGoldenTest, GaussianVsRRectBlurScaled) {
+  Point content_scale = GetContentScale();
+  auto draw = [content_scale](DlCanvas* canvas,
+                              const std::vector<sk_sp<DlImage>>& images) {
+    canvas->Scale(content_scale.x, content_scale.y);
+    canvas->DrawPaint(DlPaint().setColor(DlColor(0xff112233)));
+    canvas->Scale(0.33, 0.33);
+    DrawBlurGrid(canvas);
+  };
+
+  DisplayListBuilder builder;
+  std::vector<sk_sp<DlImage>> images;
+  draw(&builder, images);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(DlGoldenTest, GaussianVsRRectBlurScaledRotated) {
+  Point content_scale = GetContentScale();
+  auto draw = [content_scale](DlCanvas* canvas,
+                              const std::vector<sk_sp<DlImage>>& images) {
+    canvas->Scale(content_scale.x, content_scale.y);
+    canvas->Translate(200, 200);
+    canvas->DrawPaint(DlPaint().setColor(DlColor(0xff112233)));
+    canvas->Scale(0.33, 0.33);
+    canvas->Translate(300, 300);
+    canvas->Rotate(45);
+    canvas->Translate(-300, -300);
+    DrawBlurGrid(canvas);
   };
 
   DisplayListBuilder builder;

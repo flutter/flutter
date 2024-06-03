@@ -24,7 +24,8 @@ const int32_t GaussianBlurFilterContents::kBlurFilterRequiredMipCount = 4;
 namespace {
 
 // 48 comes from gaussian.frag.
-const int32_t kMaxKernelSize = 48;
+const int32_t kMaxKernelSize = 50;
+constexpr Scalar kMaxSigma = 500.0f;
 
 SamplerDescriptor MakeSamplerDescriptor(MinMagFilter filter,
                                         SamplerAddressMode address_mode) {
@@ -363,9 +364,14 @@ std::optional<Rect> GaussianBlurFilterContents::GetFilterCoverage(
     return {};
   }
 
-  Vector2 scaled_sigma = (effect_transform.Basis() *
+  Vector2 entity_scale_x = entity.GetTransform().Basis() * Vector2(1.0, 0.0);
+  Vector2 entity_scale_y = entity.GetTransform().Basis() * Vector2(0.0, 1.0);
+  Vector2 scaled_sigma = (Matrix::MakeScale({entity_scale_x.GetLength(),
+                                             entity_scale_y.GetLength(), 1.0}) *
                           Vector2(ScaleSigma(sigma_x_), ScaleSigma(sigma_y_)))
                              .Abs();
+  scaled_sigma.x = std::min(scaled_sigma.x, kMaxSigma);
+  scaled_sigma.y = std::min(scaled_sigma.y, kMaxSigma);
   Vector2 blur_radius = Vector2(CalculateBlurRadius(scaled_sigma.x),
                                 CalculateBlurRadius(scaled_sigma.y));
   Vector2 padding(ceil(blur_radius.x), ceil(blur_radius.y));
@@ -384,9 +390,15 @@ std::optional<Entity> GaussianBlurFilterContents::RenderFilter(
     return std::nullopt;
   }
 
+  Vector2 entity_scale_x = entity.GetTransform().Basis() * Vector2(1.0, 0.0);
+  Vector2 entity_scale_y = entity.GetTransform().Basis() * Vector2(0.0, 1.0);
   Vector2 scaled_sigma = (effect_transform.Basis() *
+                          Matrix::MakeScale({entity_scale_x.GetLength(),
+                                             entity_scale_y.GetLength(), 1.0}) *
                           Vector2(ScaleSigma(sigma_x_), ScaleSigma(sigma_y_)))
                              .Abs();
+  scaled_sigma.x = std::min(scaled_sigma.x, kMaxSigma);
+  scaled_sigma.y = std::min(scaled_sigma.y, kMaxSigma);
   Vector2 blur_radius = Vector2(CalculateBlurRadius(scaled_sigma.x),
                                 CalculateBlurRadius(scaled_sigma.y));
   Vector2 padding(ceil(blur_radius.x), ceil(blur_radius.y));
@@ -582,7 +594,7 @@ Quad GaussianBlurFilterContents::CalculateUVs(
 // that puts the minima there and a f(0)=1.
 Scalar GaussianBlurFilterContents::ScaleSigma(Scalar sigma) {
   // Limit the kernel size to 1000x1000 pixels, like Skia does.
-  Scalar clamped = std::min(sigma, 500.0f);
+  Scalar clamped = std::min(sigma, kMaxSigma);
   constexpr Scalar a = 3.4e-06;
   constexpr Scalar b = -3.4e-3;
   constexpr Scalar c = 1.f;
