@@ -1112,16 +1112,29 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
           outerDelta = math.max(outerDelta, overscroll);
           overscrolls.add(overscroll);
         }
+
+        double outerOverscroll = 0.0;
         if (outerDelta != 0.0) {
-          outerDelta -= _outerPosition!.applyClampedDragUpdate(outerDelta);
+          outerOverscroll = _outerPosition!.applyClampedDragUpdate(outerDelta);
+          outerDelta -= outerOverscroll;
         }
 
         // Now deal with any overscroll
+        double outerRemainingDelta = outerDelta;
         for (int i = 0; i < innerPositions.length; ++i) {
           final double remainingDelta = overscrolls[i] - outerDelta;
           if (remainingDelta > 0.0) {
-            innerPositions[i].applyFullDragUpdate(remainingDelta);
+            final double applyDelta = innerPositions[i].applyFullDragUpdate(remainingDelta);
+            outerRemainingDelta = math.max(applyDelta.abs(), outerRemainingDelta);
           }
+        }
+        // `outerOverscroll` The remaining scroll amount in the outer layer.
+        // `outerRemainingDelta` The amount of scroll that can still be applied
+        // to the outer layer after applying the inner layer.
+        // Only when both values are not 0.0, we need to apply the remaining
+        // scroll amount to the outer layer.
+        if (outerRemainingDelta != 0.0 && outerOverscroll != 0.0) {
+          _outerPosition!.applyFullDragUpdate(delta);
         }
       }
     }
