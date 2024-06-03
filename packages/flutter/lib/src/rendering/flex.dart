@@ -308,6 +308,8 @@ enum CrossAxisAlignment {
   /// See also:
   ///
   ///  * [RenderBox.getDistanceToBaseline], which defines the baseline of a box.
+  ///  * [IgnoreBaseline], which can be used to ignore a child for the purpose of
+  ///    baseline alignment.
   baseline;
 
   double _getChildCrossAxisOffset(double freeSpace, bool flipped) {
@@ -821,13 +823,17 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
         final double freeSpace = math.max(0.0, sizes.mainAxisFreeSpace);
         final bool flipMainAxis = _flipMainAxis;
         final (double leadingSpaceY, double spaceBetween) = mainAxisAlignment._distributeSpace(freeSpace, childCount, flipMainAxis);
-        double y = leadingSpaceY;
-        final (_NextChild nextChild, RenderBox? topLeftChild) = flipMainAxis ? (childBefore, lastChild) : (childAfter, firstChild);
-        for (RenderBox? child = topLeftChild; child != null; child = nextChild(child)) {
+        double y = flipMainAxis
+          ? leadingSpaceY + (childCount - 1) * spaceBetween + (sizes.axisSize.mainAxisExtent - sizes.mainAxisFreeSpace)
+          : leadingSpaceY;
+        final double directionUnit = flipMainAxis ? -1.0 : 1.0;
+        for (RenderBox? child = firstChild; baselineOffset == BaselineOffset.noBaseline && child != null; child = childAfter(child)) {
           final BoxConstraints childConstraints = constraintsForChild(child);
           final Size childSize = child.getDryLayout(childConstraints);
-          baselineOffset = baselineOffset.minOf(BaselineOffset(child.getDryBaseline(childConstraints, baseline)) + y);
-          y += spaceBetween + childSize.height;
+          final double? childBaselineOffset = child.getDryBaseline(childConstraints, baseline);
+          final double additionalY = flipMainAxis ? - childSize.height : 0.0;
+          baselineOffset = BaselineOffset(childBaselineOffset) + y + additionalY;
+          y += directionUnit * (spaceBetween + childSize.height);
         }
       case Axis.horizontal:
         final bool flipCrossAxis = _flipCrossAxis;
