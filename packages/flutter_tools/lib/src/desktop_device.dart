@@ -169,9 +169,10 @@ abstract class DesktopDevice extends Device {
           const int defaultTimeout = 5;
           timer = Timer(const Duration(minutes: defaultTimeout), () {
             // As of macOS 14, if sandboxing is enabled and the app is not codesigned,
-            // a dialog will prompt the user to allow the app to run. In CI, we
-            // disable this by setting the CODE_SIGN_ENTITLEMENTS build setting
-            // to a version with sandboxing disabled.
+            // a dialog will prompt the user to allow the app to run. This will
+            // cause tests in CI to hang. In CI, we workaround this by setting
+            // the CODE_SIGN_ENTITLEMENTS build setting to a version with
+            // sandboxing disabled.
             _logger.printError('The Dart VM Service was not discovered after $defaultTimeout minutes. Ensure sandboxing is disabled by checking the set CODE_SIGN_ENTITLEMENTS.');
           });
         }

@@ -254,7 +254,13 @@ Future<bool> runXcodeTests({
   return true;
 }
 
-/// Find the Entitlement file and create a copy. In the copy, disable sandboxing.
+/// Finds and copies macOS entitlements file. In the copy, disables sandboxing.
+/// If entitlements file is not found, returns null.
+///
+/// As of macOS 14, testing a macOS sandbox app may prompt the user to grant
+/// access to the app. To workaround this in CI, we create and use a entitlements
+/// file with sandboxing disabled. See
+/// https://developer.apple.com/documentation/security/app_sandbox/accessing_files_from_the_macos_app_sandbox.
 File? _createDisabledSandboxEntitlementFile(String platformDirectory, String configuration) {
   String entitlementDefaultFileName;
   if (configuration == 'Release') {
