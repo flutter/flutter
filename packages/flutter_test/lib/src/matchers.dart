@@ -674,6 +674,7 @@ Matcher matchesSemantics({
   bool isExpanded = false,
   // Actions //
   bool hasTapAction = false,
+  bool hasFocusAction = false,
   bool hasLongPressAction = false,
   bool hasScrollLeftAction = false,
   bool hasScrollRightAction = false,
@@ -694,7 +695,6 @@ Matcher matchesSemantics({
   bool hasDidGainAccessibilityFocusAction = false,
   bool hasDidLoseAccessibilityFocusAction = false,
   bool hasDismissAction = false,
-  bool hasFocusAction = false,
   // Custom actions and overrides
   String? onTapHint,
   String? onLongPressHint,
@@ -754,6 +754,7 @@ Matcher matchesSemantics({
     isExpanded: isExpanded,
     // Actions
     hasTapAction: hasTapAction,
+    hasFocusAction: hasFocusAction,
     hasLongPressAction: hasLongPressAction,
     hasScrollLeftAction: hasScrollLeftAction,
     hasScrollRightAction: hasScrollRightAction,
@@ -774,7 +775,6 @@ Matcher matchesSemantics({
     hasDidGainAccessibilityFocusAction: hasDidGainAccessibilityFocusAction,
     hasDidLoseAccessibilityFocusAction: hasDidLoseAccessibilityFocusAction,
     hasDismissAction: hasDismissAction,
-    hasFocusAction: hasFocusAction,
     // Custom actions and overrides
     children: children,
     onLongPressHint: onLongPressHint,
@@ -862,6 +862,7 @@ Matcher containsSemantics({
   bool? isExpanded,
   // Actions
   bool? hasTapAction,
+  bool? hasFocusAction,
   bool? hasLongPressAction,
   bool? hasScrollLeftAction,
   bool? hasScrollRightAction,
@@ -882,7 +883,6 @@ Matcher containsSemantics({
   bool? hasDidGainAccessibilityFocusAction,
   bool? hasDidLoseAccessibilityFocusAction,
   bool? hasDismissAction,
-  bool? hasFocusAction,
   // Custom actions and overrides
   String? onTapHint,
   String? onLongPressHint,
@@ -942,6 +942,7 @@ Matcher containsSemantics({
     isExpanded: isExpanded,
     // Actions
     hasTapAction: hasTapAction,
+    hasFocusAction: hasFocusAction,
     hasLongPressAction: hasLongPressAction,
     hasScrollLeftAction: hasScrollLeftAction,
     hasScrollRightAction: hasScrollRightAction,
@@ -962,7 +963,6 @@ Matcher containsSemantics({
     hasDidGainAccessibilityFocusAction: hasDidGainAccessibilityFocusAction,
     hasDidLoseAccessibilityFocusAction: hasDidLoseAccessibilityFocusAction,
     hasDismissAction: hasDismissAction,
-    hasFocusAction: hasFocusAction,
     // Custom actions and overrides
     children: children,
     onLongPressHint: onLongPressHint,
@@ -2263,6 +2263,7 @@ class _MatchesSemanticsData extends Matcher {
     required bool? isExpanded,
     // Actions
     required bool? hasTapAction,
+    required bool? hasFocusAction,
     required bool? hasLongPressAction,
     required bool? hasScrollLeftAction,
     required bool? hasScrollRightAction,
@@ -2283,7 +2284,6 @@ class _MatchesSemanticsData extends Matcher {
     required bool? hasDidGainAccessibilityFocusAction,
     required bool? hasDidLoseAccessibilityFocusAction,
     required bool? hasDismissAction,
-    required bool? hasFocusAction,
     // Custom actions and overrides
     required String? onTapHint,
     required String? onLongPressHint,
@@ -2322,6 +2322,7 @@ class _MatchesSemanticsData extends Matcher {
         },
         actions = <SemanticsAction, bool>{
           if (hasTapAction != null) SemanticsAction.tap: hasTapAction,
+          if (hasFocusAction != null) SemanticsAction.focus: hasFocusAction,
           if (hasLongPressAction != null) SemanticsAction.longPress: hasLongPressAction,
           if (hasScrollLeftAction != null) SemanticsAction.scrollLeft: hasScrollLeftAction,
           if (hasScrollRightAction != null) SemanticsAction.scrollRight: hasScrollRightAction,
@@ -2340,7 +2341,6 @@ class _MatchesSemanticsData extends Matcher {
           if (hasDidLoseAccessibilityFocusAction != null) SemanticsAction.didLoseAccessibilityFocus: hasDidLoseAccessibilityFocusAction,
           if (customActions != null) SemanticsAction.customAction: customActions.isNotEmpty,
           if (hasDismissAction != null) SemanticsAction.dismiss: hasDismissAction,
-          if (hasFocusAction != null) SemanticsAction.focus: hasFocusAction,
           if (hasMoveCursorForwardByWordAction != null) SemanticsAction.moveCursorForwardByWord: hasMoveCursorForwardByWordAction,
           if (hasMoveCursorBackwardByWordAction != null) SemanticsAction.moveCursorBackwardByWord: hasMoveCursorBackwardByWordAction,
           if (hasSetTextAction != null) SemanticsAction.setText: hasSetTextAction,
@@ -2385,8 +2385,8 @@ class _MatchesSemanticsData extends Matcher {
   final Map<SemanticsFlag, bool> flags;
 
   @override
-  Description describe(Description description) {
-    description.add('has semantics');
+  Description describe(Description description, [String? index]) {
+    description.add('${index == null ? '' : 'Child $index '}has semantics');
     if (label != null) {
       description.add(' with label: $label');
     }
@@ -2485,9 +2485,15 @@ class _MatchesSemanticsData extends Matcher {
       description.add(' with custom hints: $hintOverrides');
     }
     if (children != null) {
-      description.add(' with children:\n');
-      for (final _MatchesSemanticsData child in children!.cast<_MatchesSemanticsData>()) {
-        child.describe(description);
+      description.add(' with children:\n  ');
+      final List<_MatchesSemanticsData> childMatches = children!.cast<_MatchesSemanticsData>();
+      int childIndex = 1;
+      for (final _MatchesSemanticsData child in childMatches) {
+        child.describe(description, index != null ? '$index:$childIndex': '$childIndex');
+        if (child != childMatches.last) {
+          description.add('\n  ');
+        }
+        childIndex += 1;
       }
     }
     return description;
