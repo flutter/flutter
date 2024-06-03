@@ -10,10 +10,13 @@ struct _FlRendererGdk {
   // Window being rendered on.
   GdkWindow* window;
 
-  // Main OpenGL rendering context.
+  // OpenGL rendering context used by GDK.
+  GdkGLContext* gdk_context;
+
+  // Main OpenGL rendering context used by Flutter.
   GdkGLContext* main_context;
 
-  // Secondary OpenGL rendering context.
+  // Secondary OpenGL rendering context used by Flutter.
   GdkGLContext* resource_context;
 };
 
@@ -56,6 +59,7 @@ static gdouble fl_renderer_gdk_get_refresh_rate(FlRenderer* renderer) {
 static void fl_renderer_gdk_dispose(GObject* object) {
   FlRendererGdk* self = FL_RENDERER_GDK(object);
 
+  g_clear_object(&self->gdk_context);
   g_clear_object(&self->main_context);
   g_clear_object(&self->resource_context);
 
@@ -82,6 +86,14 @@ FlRendererGdk* fl_renderer_gdk_new(GdkWindow* window) {
 }
 
 gboolean fl_renderer_gdk_create_contexts(FlRendererGdk* self, GError** error) {
+  self->gdk_context = gdk_window_create_gl_context(self->window, error);
+  if (self->gdk_context == nullptr) {
+    return FALSE;
+  }
+  if (!gdk_gl_context_realize(self->gdk_context, error)) {
+    return FALSE;
+  }
+
   self->main_context = gdk_window_create_gl_context(self->window, error);
   if (self->main_context == nullptr) {
     return FALSE;
@@ -103,5 +115,5 @@ gboolean fl_renderer_gdk_create_contexts(FlRendererGdk* self, GError** error) {
 
 GdkGLContext* fl_renderer_gdk_get_context(FlRendererGdk* self) {
   g_return_val_if_fail(FL_IS_RENDERER_GDK(self), nullptr);
-  return self->main_context;
+  return self->gdk_context;
 }
