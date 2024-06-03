@@ -68,7 +68,9 @@ class VulkanWindow {
 
   bool CreateSkiaGrContext();
 
-  bool CreateSkiaBackendContext(GrVkBackendContext* context);
+  bool CreateSkiaBackendContext(GrVkBackendContext*,
+                                VkPhysicalDeviceFeatures*,
+                                skgpu::VulkanExtensions*);
 
   [[nodiscard]] bool RecreateSwapchain();
 

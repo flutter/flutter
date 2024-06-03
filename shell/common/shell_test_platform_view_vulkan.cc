@@ -15,6 +15,7 @@
 #include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/gpu/ganesh/SkSurfaceGanesh.h"
 #include "third_party/skia/include/gpu/ganesh/vk/GrVkDirectContext.h"
+#include "third_party/skia/include/gpu/vk/VulkanExtensions.h"
 
 #if OS_FUCHSIA
 #define VULKAN_SO_PATH "libvulkan.so"
@@ -128,8 +129,15 @@ ShellTestPlatformViewVulkan::OffScreenSurface::OffScreenSurface(
 
 bool ShellTestPlatformViewVulkan::OffScreenSurface::CreateSkiaGrContext() {
   GrVkBackendContext backend_context;
+  skgpu::VulkanExtensions no_extensions;
+  // For now, Skia crashes if fDeviceFeatures is set but fVkExtensions is not.
+  backend_context.fVkExtensions = &no_extensions;
+  VkPhysicalDeviceFeatures features;
+  // It may be tempting to put features into backend_context here
+  // and pass just backend_context into the below function, however the pointers
+  // for features are const, so we won't be able to update them.
 
-  if (!CreateSkiaBackendContext(&backend_context)) {
+  if (!this->CreateSkiaBackendContext(&backend_context, &features)) {
     FML_DLOG(ERROR) << "Could not create Skia backend context.";
     return false;
   }
@@ -153,7 +161,10 @@ bool ShellTestPlatformViewVulkan::OffScreenSurface::CreateSkiaGrContext() {
 }
 
 bool ShellTestPlatformViewVulkan::OffScreenSurface::CreateSkiaBackendContext(
-    GrVkBackendContext* context) {
+    GrVkBackendContext* context,
+    VkPhysicalDeviceFeatures* features) {
+  FML_CHECK(context);
+  FML_CHECK(features);
   auto getProc = CreateSkiaGetProc(vk_);
 
   if (getProc == nullptr) {
@@ -161,8 +172,7 @@ bool ShellTestPlatformViewVulkan::OffScreenSurface::CreateSkiaBackendContext(
     return false;
   }
 
-  uint32_t skia_features = 0;
-  if (!logical_device_->GetPhysicalDeviceFeaturesSkia(&skia_features)) {
+  if (!logical_device_->GetPhysicalDeviceFeatures(features)) {
     FML_DLOG(ERROR) << "Failed to get Physical Device features";
     return false;
   }
@@ -172,11 +182,9 @@ bool ShellTestPlatformViewVulkan::OffScreenSurface::CreateSkiaBackendContext(
   context->fDevice = logical_device_->GetHandle();
   context->fQueue = logical_device_->GetQueueHandle();
   context->fGraphicsQueueIndex = logical_device_->GetGraphicsQueueIndex();
-  context->fMinAPIVersion = application_->GetAPIVersion();
   context->fMaxAPIVersion = application_->GetAPIVersion();
-  context->fFeatures = skia_features;
+  context->fDeviceFeatures = features;
   context->fGetProc = std::move(getProc);
-  context->fOwnsInstanceAndDevice = false;
   context->fMemoryAllocator = memory_allocator_;
 
   return true;
