@@ -16,6 +16,8 @@ import 'convert.dart';
 import 'devfs.dart';
 import 'device.dart';
 import 'device_port_forwarder.dart';
+import 'globals.dart' as globals;
+import 'macos/macos_device.dart';
 import 'protocol_discovery.dart';
 
 /// A partial implementation of Device for desktop-class devices to inherit
@@ -159,8 +161,25 @@ abstract class DesktopDevice extends Device {
       logger: _logger,
     );
     try {
+
+      Timer? timer;
+      if (this is MacOSDevice) {
+        final bool usingCI = globals.platform.environment['LUCI_CI'] == 'True';
+        if (usingCI) {
+          const int defaultTimeout = 5;
+          timer = Timer(const Duration(minutes: defaultTimeout), () {
+            // As of macOS 14, if sandboxing is enabled and the app is not codesigned,
+            // a dialog will prompt the user to allow the app to run. In CI, we
+            // disable this by setting the CODE_SIGN_ENTITLEMENTS build setting
+            // to a version with sandboxing disabled.
+            _logger.printError('The Dart VM Service was not discovered after $defaultTimeout minutes. Ensure sandboxing is disabled by checking the set CODE_SIGN_ENTITLEMENTS.');
+          });
+        }
+      }
+
       final Uri? vmServiceUri = await vmServiceDiscovery.uri;
       if (vmServiceUri != null) {
+        timer?.cancel();
         onAttached(package, buildInfo, process);
         return LaunchResult.succeeded(vmServiceUri: vmServiceUri);
       }

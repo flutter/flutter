@@ -191,6 +191,10 @@ Future<bool> runXcodeTests({
     codeSignStyle = environment['FLUTTER_XCODE_CODE_SIGN_STYLE'];
     provisioningProfile = environment['FLUTTER_XCODE_PROVISIONING_PROFILE_SPECIFIER'];
   }
+  File? disabledSandboxEntitlementFile;
+  if (skipCodesign && platformDirectory.endsWith('macos')) {
+    disabledSandboxEntitlementFile = _createDisabledSandboxEntitlementFile(platformDirectory, configuration);
+  }
   final String resultBundleTemp = Directory.systemTemp.createTempSync('flutter_xcresult.').path;
   final String resultBundlePath = path.join(resultBundleTemp, 'result');
   final int testResultExit = await exec(
@@ -214,6 +218,8 @@ Future<bool> runXcodeTests({
         'CODE_SIGN_STYLE=$codeSignStyle',
       if (provisioningProfile != null)
         'PROVISIONING_PROFILE_SPECIFIER=$provisioningProfile',
+      if (disabledSandboxEntitlementFile != null)
+        'CODE_SIGN_ENTITLEMENTS=${disabledSandboxEntitlementFile.path}',
     ],
     workingDirectory: platformDirectory,
     canFail: true,
@@ -246,4 +252,39 @@ Future<bool> runXcodeTests({
     return false;
   }
   return true;
+}
+
+/// Find the Entitlement file and create a copy. In the copy, disable sandboxing.
+File? _createDisabledSandboxEntitlementFile(String platformDirectory, String configuration) {
+  String entitlementDefaultFileName;
+  if (configuration == 'Release') {
+    entitlementDefaultFileName = 'Release';
+  } else {
+    entitlementDefaultFileName = 'DebugProfile';
+  }
+
+  final String entitlementFilePath = path.join(platformDirectory, 'Runner', '$entitlementDefaultFileName.entitlements');
+  final File entitlementFile = File(entitlementFilePath);
+
+  if (!entitlementFile.existsSync()) {
+    print('Unable to find entitlements file at ${entitlementFile.path}');
+    return null;
+  }
+
+  final String originalEntitlementFileContents = entitlementFile.readAsStringSync();
+  final String tempEntitlementPath = Directory.systemTemp.createTempSync('flutter_disable_sandbox_entitlement.').path;
+  final File disabledSandboxEntitlementFile = File(path.join(tempEntitlementPath, '${entitlementDefaultFileName}WithDisabledSandboxing.entitlements'));
+  disabledSandboxEntitlementFile.createSync(recursive: true);
+  disabledSandboxEntitlementFile.writeAsStringSync(
+    originalEntitlementFileContents.replaceAll(
+      RegExp(
+          r'<key>com\.apple\.security\.app-sandbox<\/key>[\S\s]*?<true\/>'),
+      '''
+<key>com.apple.security.app-sandbox</key>
+	<false/>''',
+    ),
+  );
+
+
+  return disabledSandboxEntitlementFile;
 }
