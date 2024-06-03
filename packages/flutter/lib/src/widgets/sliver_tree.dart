@@ -74,9 +74,9 @@ class TreeSliverNode<T> {
 ///
 /// Used by [TreeSliver.treeNodeBuilder] to build rows on demand for the
 /// tree.
-typedef TreeSliverNodeBuilder = Widget Function(
+typedef TreeSliverNodeBuilder<T> = Widget Function(
   BuildContext context,
-  TreeSliverNode<Object?> node,
+  TreeSliverNode<T> node,
   AnimationStyle animationStyle,
 );
 
@@ -91,8 +91,8 @@ typedef TreeSliverNodeBuilder = Widget Function(
 ///
 ///   * [SliverVariedExtentList], which uses a similar item extent builder for
 ///     dynamic child sizing in the list.
-typedef TreeSliverRowExtentBuilder = double Function(
-  TreeSliverNode<Object?> node,
+typedef TreeSliverRowExtentBuilder<T> = double Function(
+  TreeSliverNode<T> node,
   SliverLayoutDimensions dimensions,
 );
 
@@ -103,7 +103,7 @@ typedef TreeSliverRowExtentBuilder = double Function(
 ///
 ///   * [TreeSliver.onNodeToggle], for controlling node expansion
 ///     programmatically.
-typedef TreeSliverNodeCallback = void Function(TreeSliverNode<Object?> node);
+typedef TreeSliverNodeCallback<T> = void Function(TreeSliverNode<T> node);
 
 /// A mixin for classes implementing a tree structure as expected by a
 /// [TreeSliverController].
@@ -429,7 +429,7 @@ class TreeSliver<T> extends StatefulWidget {
   ///
   /// By default, if this is unset, the [TreeSliver.defaultTreeNodeBuilder]
   /// is used.
-  final TreeSliverNodeBuilder treeNodeBuilder;
+  final TreeSliverNodeBuilder<T> treeNodeBuilder;
 
   /// Called to calculate the extent of the widget built for the given
   /// [TreeSliverNode].
@@ -441,7 +441,7 @@ class TreeSliver<T> extends StatefulWidget {
   ///
   ///   * [SliverVariedExtentList.itemExtentBuilder], a very similar method that
   ///     allows users to dynamically compute extents on demand.
-  final TreeSliverRowExtentBuilder treeRowExtentBuilder;
+  final TreeSliverRowExtentBuilder<T> treeRowExtentBuilder;
 
   /// If provided, the controller can be used to expand and collapse
   /// [TreeSliverNode]s, or lookup information about the current state of the
@@ -451,7 +451,7 @@ class TreeSliver<T> extends StatefulWidget {
   /// Called when a [TreeSliverNode] expands or collapses.
   ///
   /// This will not be called if a [TreeSliverNode] does not have any children.
-  final TreeSliverNodeCallback? onNodeToggle;
+  final TreeSliverNodeCallback<T>? onNodeToggle;
 
   /// The default [AnimationStyle] for expanding and collapsing nodes in the
   /// [TreeSliver].

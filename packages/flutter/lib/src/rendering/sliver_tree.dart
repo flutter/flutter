@@ -16,7 +16,7 @@ import 'sliver_multi_box_adaptor.dart';
 /// Represents the animation of the children of a parent [TreeSliverNode] that
 /// are animating into or out of view.
 ///
-/// The `fromIndex` and `toIndex` are identify the animating children following
+/// The `fromIndex` and `toIndex` identify the animating children following
 /// the parent, with the `value` representing the status of the current
 /// animation. The value of `toIndex` is inclusive, meaning the child at that
 /// index is included in the animating segment.
@@ -45,7 +45,7 @@ class TreeSliverNodeParentData extends SliverMultiBoxAdaptorParentData {
 /// are offset by the indentation specified by
 /// [TreeSliverIndentationType.value] in the cross axis of the viewport. This
 /// means the space allotted to the indentation will not be part of the space
-/// made available to the Widget returned by [TreeSliver.treeNodeBuilder].
+/// made available to the widget returned by [TreeSliver.treeNodeBuilder].
 ///
 /// Alternatively, the indentation can be implemented in
 /// [TreeSliver.treeNodeBuilder], with the depth of the given tree row
@@ -99,7 +99,7 @@ class TreeSliverIndentationType {
 typedef _PaintSegment = ({int leadingIndex, int trailingIndex});
 
 /// A sliver that places multiple [TreeSliverNode]s in a linear array along the
-/// main access, while staggering nodes that are animating into and out of view.
+/// main axis, while staggering nodes that are animating into and out of view.
 ///
 /// The extent of each child node is determined by the [itemExtentBuilder].
 ///
