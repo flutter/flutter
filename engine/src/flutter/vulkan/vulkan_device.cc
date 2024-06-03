@@ -258,33 +258,6 @@ bool VulkanDevice::GetPhysicalDeviceFeatures(
   return true;
 }
 
-bool VulkanDevice::GetPhysicalDeviceFeaturesSkia(uint32_t* sk_features) const {
-  if (sk_features == nullptr) {
-    return false;
-  }
-
-  VkPhysicalDeviceFeatures features;
-
-  if (!GetPhysicalDeviceFeatures(&features)) {
-    return false;
-  }
-
-  uint32_t flags = 0;
-
-  if (features.geometryShader) {
-    flags |= kGeometryShader_GrVkFeatureFlag;
-  }
-  if (features.dualSrcBlend) {
-    flags |= kDualSrcBlend_GrVkFeatureFlag;
-  }
-  if (features.sampleRateShading) {
-    flags |= kSampleRateShading_GrVkFeatureFlag;
-  }
-
-  *sk_features = flags;
-  return true;
-}
-
 std::vector<VkQueueFamilyProperties> VulkanDevice::GetQueueFamilyProperties()
     const {
   uint32_t count = 0;

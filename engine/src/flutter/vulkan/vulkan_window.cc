@@ -21,6 +21,7 @@
 #include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/gpu/GrDirectContext.h"
 #include "third_party/skia/include/gpu/ganesh/vk/GrVkDirectContext.h"
+#include "third_party/skia/include/gpu/vk/VulkanExtensions.h"
 
 namespace vulkan {
 
@@ -120,10 +121,13 @@ GrDirectContext* VulkanWindow::GetSkiaGrContext() {
 }
 
 bool VulkanWindow::CreateSkiaGrContext() {
-#ifdef SK_VUKLAN
+#ifdef SK_VULKAN
   GrVkBackendContext backend_context;
+  VkPhysicalDeviceFeatures features;
+  skgpu::VulkanExtensions extensions;
 
-  if (!CreateSkiaBackendContext(&backend_context)) {
+  if (!this->CreateSkiaBackendContext(&backend_context, &features,
+                                      &extensions)) {
     return false;
   }
 
@@ -146,15 +150,21 @@ bool VulkanWindow::CreateSkiaGrContext() {
 #endif  // SK_VULKAN
 }
 
-bool VulkanWindow::CreateSkiaBackendContext(GrVkBackendContext* context) {
+bool VulkanWindow::CreateSkiaBackendContext(
+    GrVkBackendContext* context,
+    VkPhysicalDeviceFeatures* features,
+    skgpu::VulkanExtensions* extensions) {
+#ifdef SK_VULKAN
+  FML_CHECK(context);
+  FML_CHECK(features);
+  FML_CHECK(extensions);
   auto getProc = CreateSkiaGetProc(vk_);
 
   if (getProc == nullptr) {
     return false;
   }
 
-  uint32_t skia_features = 0;
-  if (!logical_device_->GetPhysicalDeviceFeaturesSkia(&skia_features)) {
+  if (!logical_device_->GetPhysicalDeviceFeatures(features)) {
     return false;
   }
 
@@ -163,15 +173,31 @@ bool VulkanWindow::CreateSkiaBackendContext(GrVkBackendContext* context) {
   context->fDevice = logical_device_->GetHandle();
   context->fQueue = logical_device_->GetQueueHandle();
   context->fGraphicsQueueIndex = logical_device_->GetGraphicsQueueIndex();
-  context->fMinAPIVersion = application_->GetAPIVersion();
-  context->fExtensions = kKHR_surface_GrVkExtensionFlag |
-                         kKHR_swapchain_GrVkExtensionFlag |
-                         surface_->GetNativeSurface().GetSkiaExtensionName();
-  context->fFeatures = skia_features;
+  context->fMaxAPIVersion = application_->GetAPIVersion();
+  context->fDeviceFeatures = features;
   context->fGetProc = std::move(getProc);
-  context->fOwnsInstanceAndDevice = false;
   context->fMemoryAllocator = memory_allocator_;
+
+  constexpr uint32_t instance_extension_count = 2;
+  const char* instance_extensions[instance_extension_count] = {
+      // https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VK_KHR_surface.html
+      VK_KHR_SURFACE_EXTENSION_NAME,
+      surface_->GetNativeSurface().GetExtensionName(),
+  };
+  constexpr uint32_t device_extension_count = 1;
+  const char* device_extensions[device_extension_count] = {
+      // https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VK_KHR_swapchain.html
+      VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+  };
+  extensions->init(context->fGetProc, context->fInstance,
+                   context->fPhysicalDevice, instance_extension_count,
+                   instance_extensions, device_extension_count,
+                   device_extensions);
+  context->fVkExtensions = extensions;
   return true;
+#else
+  return false;
+#endif
 }
 
 sk_sp<SkSurface> VulkanWindow::AcquireSurface() {

@@ -18,7 +18,7 @@
 #include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/gpu/GrDirectContext.h"
 #include "third_party/skia/include/gpu/ganesh/vk/GrVkDirectContext.h"
-#include "third_party/skia/include/gpu/vk/GrVkExtensions.h"
+#include "third_party/skia/include/gpu/vk/VulkanExtensions.h"
 #include "vulkan/vulkan_core.h"
 
 namespace flutter {
@@ -70,8 +70,8 @@ TestVulkanContext::TestVulkanContext() {
   // For creating SkSurfaces from VkImages and snapshotting them, etc.
   // ---------------------------------------------------------------------------
 
-  uint32_t skia_features = 0;
-  if (!device_->GetPhysicalDeviceFeaturesSkia(&skia_features)) {
+  VkPhysicalDeviceFeatures features;
+  if (!device_->GetPhysicalDeviceFeatures(&features)) {
     FML_LOG(ERROR) << "Failed to get physical device features.";
 
     return;
@@ -88,7 +88,7 @@ TestVulkanContext::TestVulkanContext() {
           VK_MAKE_VERSION(1, 0, 0), application_->GetInstance(),
           device_->GetPhysicalDeviceHandle(), device_->GetHandle(), vk_, true);
 
-  GrVkExtensions extensions;
+  skgpu::VulkanExtensions extensions;
 
   GrVkBackendContext backend_context = {};
   backend_context.fInstance = application_->GetInstance();
@@ -96,12 +96,10 @@ TestVulkanContext::TestVulkanContext() {
   backend_context.fDevice = device_->GetHandle();
   backend_context.fQueue = device_->GetQueueHandle();
   backend_context.fGraphicsQueueIndex = device_->GetGraphicsQueueIndex();
-  backend_context.fMinAPIVersion = VK_MAKE_VERSION(1, 0, 0);
   backend_context.fMaxAPIVersion = VK_MAKE_VERSION(1, 0, 0);
-  backend_context.fFeatures = skia_features;
+  backend_context.fDeviceFeatures = &features;
   backend_context.fVkExtensions = &extensions;
   backend_context.fGetProc = get_proc;
-  backend_context.fOwnsInstanceAndDevice = false;
   backend_context.fMemoryAllocator = allocator;
 
   GrContextOptions options =
