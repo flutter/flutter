@@ -321,8 +321,11 @@ class _MenuAnchorState extends State<MenuAnchor> {
     assert(_debugMenuInfo('Disposing of $this'));
     if (_isOpen) {
       _close(inDispose: true);
-      _parent?._removeChild(this);
     }
+
+    // Fix for https://github.com/flutter/flutter/issues/149584
+    _parent?._removeChild(this);
+    _parent = null;
     _anchorChildren.clear();
     _menuController._detach(this);
     _internalMenuController = null;
