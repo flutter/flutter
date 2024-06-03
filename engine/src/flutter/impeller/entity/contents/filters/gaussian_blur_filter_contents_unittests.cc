@@ -400,7 +400,7 @@ TEST_P(GaussianBlurFilterContentsTest,
     if (result_coverage.has_value() && contents_coverage.has_value()) {
       EXPECT_TRUE(RectNear(result_coverage.value(), contents_coverage.value()));
       EXPECT_TRUE(RectNear(contents_coverage.value(),
-                           Rect::MakeLTRB(98.f, 78.f, 302.f, 282.f)));
+                           Rect::MakeXYWH(94.f, 74.f, 212.f, 212.f)));
     }
   }
 }
