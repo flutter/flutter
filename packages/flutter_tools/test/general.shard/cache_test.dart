@@ -427,7 +427,6 @@ void main() {
         .listSync(recursive: true)
         .whereType<Directory>()
         .singleWhereOrNull((Directory directory) => directory.basename == 'pkg')!;
-    expect(dir, isNotNull);
     expect(dir.path, artifactDir.childDirectory('pkg').path);
     expect(dir.childDirectory('package_dir').existsSync(), isTrue);
   });
