@@ -1089,7 +1089,7 @@ void main() {
     );
   });
 
-  testWidgets('Hovering over Cupertino switch updates cursor to clickable on Web', (WidgetTester tester) async {
+  testWidgets('Hovering over switch updates cursor to clickable on Web', (WidgetTester tester) async {
     const bool value = false;
     // Disabled CupertinoSwitch does not update cursor on Web.
     await tester.pumpWidget(
@@ -1288,7 +1288,7 @@ void main() {
     expect(focusNode.hasFocus, isFalse);
   });
 
-  testWidgets('Cupertino switch has semantic events', (WidgetTester tester) async {
+  testWidgets('Switch has semantic events', (WidgetTester tester) async {
     dynamic semanticEvent;
     bool value = false;
     tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, (dynamic message) async {
@@ -1332,7 +1332,7 @@ void main() {
     tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, null);
   });
 
-  testWidgets('Cupertino switch sends semantic events from parent if fully merged', (WidgetTester tester) async {
+  testWidgets('Switch sends semantic events from parent if fully merged', (WidgetTester tester) async {
     dynamic semanticEvent;
     bool value = false;
     tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, (dynamic message) async {
@@ -1789,7 +1789,7 @@ void main() {
       expect(imageCache.liveImageCount, 2);
     });
 
-    testWidgets('Does not crash when imageProvider completes after Switch is disposed', (WidgetTester tester) async {
+    testWidgets('Does not crash when imageProvider completes after switch is disposed', (WidgetTester tester) async {
       final DelayedImageProvider imageProvider = DelayedImageProvider(image);
 
       await tester.pumpWidget(
@@ -1816,7 +1816,7 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('Does not crash when previous imageProvider completes after Switch is disposed', (WidgetTester tester) async {
+    testWidgets('Does not crash when previous imageProvider completes after switch is disposed', (WidgetTester tester) async {
       final DelayedImageProvider imageProvider1 = DelayedImageProvider(image);
       final DelayedImageProvider imageProvider2 = DelayedImageProvider(image);
 

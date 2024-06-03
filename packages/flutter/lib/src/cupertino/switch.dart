@@ -334,7 +334,7 @@ class CupertinoSwitch extends StatefulWidget {
   final DragStartBehavior dragStartBehavior;
 
   @override
-  State<StatefulWidget> createState() => _CupertinoSwitchState();
+  State<CupertinoSwitch> createState() => _CupertinoSwitchState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -411,7 +411,7 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
     if (isInteractive) {
       position
         ..curve = Curves.linear
-        ..reverseCurve = null;
+        ..reverseCurve = Curves.linear;
       final double delta = details.primaryDelta! / _trackInnerLength;
       positionController.value += switch (Directionality.of(context)) {
         TextDirection.rtl => -delta,
@@ -456,15 +456,6 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
     }
   }
 
-  WidgetStateProperty<Color> get iconColor {
-    return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
-      if (states.contains(WidgetState.disabled)) {
-        return CupertinoColors.black;
-      }
-      return CupertinoColors.black;
-    });
-  }
-
   List<BoxShadow>? get thumbShadow => const <BoxShadow> [
     BoxShadow(
       color: Color(0x26000000),
@@ -493,9 +484,6 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
       ?? CupertinoColors.systemGreen,
       context,
     );
-
-    final bool applyTheme = widget.applyTheme
-      ?? false;
 
     // Hand coded defaults based on the animation specs.
     const double? thumbOffset = null;
@@ -573,10 +561,11 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
       ?? effectiveActiveThumbColor;
 
     final Color effectiveActiveTrackColor = _widgetTrackColor.resolve(activeStates)
-      ?? (applyTheme ? theme.primaryColor : null)
+      ?? (widget.applyTheme ?? false ? theme.primaryColor : null)
       ?? CupertinoDynamicColor.resolve(CupertinoColors.systemGreen, context);
 
     final Color? effectiveActiveTrackOutlineColor = widget.trackOutlineColor?.resolve(activeStates);
+
     final double? effectiveActiveTrackOutlineWidth = widget.trackOutlineWidth?.resolve(activeStates);
 
     final Color effectiveInactiveTrackColor = resolveTrackColor(widget.trackColor, inactiveStates)
@@ -590,8 +579,9 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
 
     final Icon? effectiveInactiveIcon = widget.thumbIcon?.resolve(inactiveStates);
 
-    final Color effectiveActiveIconColor = effectiveActiveIcon?.color ?? iconColor.resolve(activeStates);
-    final Color effectiveInactiveIconColor = effectiveInactiveIcon?.color ?? iconColor.resolve(inactiveStates);
+    final Color effectiveActiveIconColor = effectiveActiveIcon?.color ?? CupertinoColors.black;
+
+    final Color effectiveInactiveIconColor = effectiveInactiveIcon?.color ?? CupertinoColors.black;
 
     final Set<WidgetState> activePressedStates = activeStates..add(WidgetState.pressed);
     final Color effectiveActivePressedThumbColor = resolveThumbColor(widget.thumbColor, activePressedStates)
@@ -609,6 +599,7 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
     });
 
     final double effectiveActiveThumbRadius = effectiveActiveIcon == null ? activeThumbRadius : thumbRadiusWithIcon;
+    
     final double effectiveInactiveThumbRadius = effectiveInactiveIcon == null && widget.inactiveThumbImage == null
       ? inactiveThumbRadius : thumbRadiusWithIcon;
 
