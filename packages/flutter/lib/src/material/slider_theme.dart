@@ -1715,28 +1715,34 @@ class RoundedRectSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
     final Radius trackRadius = Radius.circular(trackRect.height / 2);
     final Radius activeTrackRadius = Radius.circular((trackRect.height + additionalActiveTrackHeight) / 2);
 
-    context.canvas.drawRRect(
-      RRect.fromLTRBAndCorners(
-        trackRect.left,
-        (textDirection == TextDirection.ltr) ? trackRect.top - (additionalActiveTrackHeight / 2): trackRect.top,
-        thumbCenter.dx,
-        (textDirection == TextDirection.ltr) ? trackRect.bottom + (additionalActiveTrackHeight / 2) : trackRect.bottom,
-        topLeft: (textDirection == TextDirection.ltr) ? activeTrackRadius : trackRadius,
-        bottomLeft: (textDirection == TextDirection.ltr) ? activeTrackRadius: trackRadius,
-      ),
-      leftTrackPaint,
-    );
-    context.canvas.drawRRect(
-      RRect.fromLTRBAndCorners(
-        thumbCenter.dx,
-        (textDirection == TextDirection.rtl) ? trackRect.top - (additionalActiveTrackHeight / 2) : trackRect.top,
-        trackRect.right,
-        (textDirection == TextDirection.rtl) ? trackRect.bottom + (additionalActiveTrackHeight / 2) : trackRect.bottom,
-        topRight: (textDirection == TextDirection.rtl) ? activeTrackRadius : trackRadius,
-        bottomRight: (textDirection == TextDirection.rtl) ? activeTrackRadius : trackRadius,
-      ),
-      rightTrackPaint,
-    );
+    final bool drawInactiveTrack = thumbCenter.dx < (trackRect.right - (sliderTheme.trackHeight! / 2));
+    if (drawInactiveTrack) {
+      // Draw the inactive track segment.
+      context.canvas.drawRRect(
+        RRect.fromLTRBR(
+          thumbCenter.dx - (sliderTheme.trackHeight! / 2),
+          (textDirection == TextDirection.rtl) ? trackRect.top - (additionalActiveTrackHeight / 2) : trackRect.top,
+          trackRect.right,
+          (textDirection == TextDirection.rtl) ? trackRect.bottom + (additionalActiveTrackHeight / 2) : trackRect.bottom,
+          (textDirection == TextDirection.ltr) ? trackRadius : activeTrackRadius,
+        ),
+        rightTrackPaint,
+      );
+    }
+    final bool drawActiveTrack = thumbCenter.dx > (trackRect.left + (sliderTheme.trackHeight! / 2));
+    if (drawActiveTrack) {
+      // Draw the active track segment.
+      context.canvas.drawRRect(
+        RRect.fromLTRBR(
+          trackRect.left,
+          (textDirection == TextDirection.ltr) ? trackRect.top - (additionalActiveTrackHeight / 2): trackRect.top,
+          thumbCenter.dx + (sliderTheme.trackHeight! / 2),
+          (textDirection == TextDirection.ltr) ? trackRect.bottom + (additionalActiveTrackHeight / 2) : trackRect.bottom,
+          (textDirection == TextDirection.ltr) ? activeTrackRadius : trackRadius,
+        ),
+        leftTrackPaint,
+      );
+    }
 
     final bool showSecondaryTrack = (secondaryOffset != null) &&
         ((textDirection == TextDirection.ltr)
