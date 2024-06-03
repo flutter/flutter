@@ -192,7 +192,7 @@ Future<bool> runXcodeTests({
     provisioningProfile = environment['FLUTTER_XCODE_PROVISIONING_PROFILE_SPECIFIER'];
   }
   File? disabledSandboxEntitlementFile;
-  if (skipCodesign && platformDirectory.endsWith('macos')) {
+  if (platformDirectory.endsWith('macos')) {
     disabledSandboxEntitlementFile = _createDisabledSandboxEntitlementFile(
       platformDirectory,
       configuration,
