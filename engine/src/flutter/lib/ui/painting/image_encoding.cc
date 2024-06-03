@@ -14,6 +14,7 @@
 #include "flutter/fml/status_or.h"
 #include "flutter/fml/trace_event.h"
 #include "flutter/lib/ui/painting/image.h"
+#include "fml/status.h"
 #if IMPELLER_SUPPORTS_RENDERING
 #include "flutter/lib/ui/painting/image_encoding_impeller.h"
 #endif  // IMPELLER_SUPPORTS_RENDERING
@@ -64,16 +65,17 @@ void InvokeDataCallback(std::unique_ptr<DartPersistentValue> callback,
   DartInvoke(callback->value(), {dart_data, Dart_Null()});
 }
 
-sk_sp<SkData> CopyImageByteData(const sk_sp<SkImage>& raster_image,
-                                SkColorType color_type,
-                                SkAlphaType alpha_type) {
+fml::StatusOr<sk_sp<SkData>> CopyImageByteData(
+    const sk_sp<SkImage>& raster_image,
+    SkColorType color_type,
+    SkAlphaType alpha_type) {
   FML_DCHECK(raster_image);
 
   SkPixmap pixmap;
 
   if (!raster_image->peekPixels(&pixmap)) {
-    FML_LOG(ERROR) << "Could not copy pixels from the raster image.";
-    return nullptr;
+    return fml::Status(fml::StatusCode::kInternal,
+                       "Could not copy pixels from the raster image.");
   }
 
   // The color types already match. No need to swizzle. Return early.
@@ -87,15 +89,15 @@ sk_sp<SkData> CopyImageByteData(const sk_sp<SkImage>& raster_image,
                         color_type, alpha_type, nullptr));
 
   if (!surface) {
-    FML_LOG(ERROR) << "Could not set up the surface for swizzle.";
-    return nullptr;
+    fml::Status(fml::StatusCode::kInternal,
+                "Could not set up the surface for swizzle.");
   }
 
   surface->writePixels(pixmap, 0, 0);
 
   if (!surface->peekPixels(&pixmap)) {
-    FML_LOG(ERROR) << "Pixel address is not available.";
-    return nullptr;
+    return fml::Status(fml::StatusCode::kInternal,
+                       "Pixel address is not available.");
   }
 
   return SkData::MakeWithCopy(pixmap.addr(), pixmap.computeByteSize());
@@ -125,7 +127,8 @@ void EncodeImageAndInvokeDataCallback(
       [callback_task = std::move(callback_task), format,
        ui_task_runner](const fml::StatusOr<sk_sp<SkImage>>& raster_image) {
         if (raster_image.ok()) {
-          sk_sp<SkData> encoded = EncodeImage(raster_image.value(), format);
+          fml::StatusOr<sk_sp<SkData>> encoded =
+              EncodeImage(raster_image.value(), format);
           ui_task_runner->PostTask([callback_task = callback_task,
                                     encoded = std::move(encoded)]() mutable {
             callback_task(std::move(encoded));
@@ -199,12 +202,12 @@ Dart_Handle EncodeImage(CanvasImage* canvas_image,
   return Dart_Null();
 }
 
-sk_sp<SkData> EncodeImage(const sk_sp<SkImage>& raster_image,
-                          ImageByteFormat format) {
+fml::StatusOr<sk_sp<SkData>> EncodeImage(const sk_sp<SkImage>& raster_image,
+                                         ImageByteFormat format) {
   TRACE_EVENT0("flutter", __FUNCTION__);
 
   if (!raster_image) {
-    return nullptr;
+    return fml::Status(fml::StatusCode::kInternal, "Missing raster image.");
   }
 
   switch (format) {
@@ -212,8 +215,8 @@ sk_sp<SkData> EncodeImage(const sk_sp<SkImage>& raster_image,
       auto png_image = SkPngEncoder::Encode(nullptr, raster_image.get(), {});
 
       if (png_image == nullptr) {
-        FML_LOG(ERROR) << "Could not convert raster image to PNG.";
-        return nullptr;
+        return fml::Status(fml::StatusCode::kInternal,
+                           "Could not convert raster image to PNG.");
       };
       return png_image;
     }
@@ -233,8 +236,8 @@ sk_sp<SkData> EncodeImage(const sk_sp<SkImage>& raster_image,
                                kUnpremul_SkAlphaType);
   }
 
-  FML_LOG(ERROR) << "Unknown error encoding image.";
-  return nullptr;
+  return fml::Status(fml::StatusCode::kInternal,
+                     "Unknown error encoding image.");
 }
 
 }  // namespace flutter
