@@ -103,8 +103,15 @@ const Color _kDialogColor = CupertinoDynamicColor.withBrightness(
 // Translucent light gray that is painted on top of the blurred backdrop as the
 // background color of a pressed button.
 // Eyeballed from iOS 13 beta simulator.
-const Color _kPressedColor = Color(0xCAE0E0E0);
+const Color _kDialogPressedColor = CupertinoDynamicColor.withBrightness(
+  color: Color(0xFFE1E1E1),
+  darkColor: Color(0xFF2E2E2E),
+);
 
+// Translucent light gray that is painted on top of the blurred backdrop as the
+// background color of a pressed button.
+// Eyeballed from iOS 13 beta simulator.
+const Color _kActionSheetPressedColor = Color(0xCAE0E0E0);
 const Color _kActionSheetCancelColor = Color(0xFFFFFFFF);
 const Color _kActionSheetCancelPressedColor = Color(0xFFECECEC);
 
@@ -796,7 +803,7 @@ class _ActionSheetButtonBackgroundState extends State<_ActionSheetButtonBackgrou
     BorderRadius? borderRadius;
     if (!widget.isCancel) {
       backgroundColor = isBeingPressed
-        ? _kPressedColor
+        ? _kActionSheetPressedColor
         : _kActionSheetBackgroundColor;
     } else {
       backgroundColor = isBeingPressed
@@ -1945,7 +1952,7 @@ class _CupertinoDialogActionsRenderWidget extends MultiChildRenderObjectWidget {
               : _kCupertinoDialogWidth,
       dividerThickness: _dividerThickness,
       dialogColor: CupertinoDynamicColor.resolve(_kDialogColor, context),
-      dialogPressedColor: CupertinoDynamicColor.resolve(_kPressedColor, context),
+      dialogPressedColor: CupertinoDynamicColor.resolve(_kDialogPressedColor, context),
       dividerColor: CupertinoDynamicColor.resolve(CupertinoColors.separator, context),
       hasCancelButton: _hasCancelButton,
     );
@@ -1959,7 +1966,7 @@ class _CupertinoDialogActionsRenderWidget extends MultiChildRenderObjectWidget {
             : _kCupertinoDialogWidth
       ..dividerThickness = _dividerThickness
       ..dialogColor = CupertinoDynamicColor.resolve(_kDialogColor, context)
-      ..dialogPressedColor = CupertinoDynamicColor.resolve(_kPressedColor, context)
+      ..dialogPressedColor = CupertinoDynamicColor.resolve(_kDialogPressedColor, context)
       ..dividerColor = CupertinoDynamicColor.resolve(CupertinoColors.separator, context)
       ..hasCancelButton = _hasCancelButton;
   }
