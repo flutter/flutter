@@ -1000,7 +1000,7 @@ class _ActionSheetMainSheetState extends State<_ActionSheetMainSheet> {
   @override
   Widget build(BuildContext context) {
     // The content section takes priority for vertical space but must leave at
-    // least `actionsMinHeight` for the actions section.
+    // least `_kActionSheetActionsSectionMinHeight` for the actions section.
     final Color backgroundColor = CupertinoDynamicColor.resolve(_kActionSheetBackgroundColor, context);
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
