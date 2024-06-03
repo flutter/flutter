@@ -4736,6 +4736,9 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
 
   @override
   Color? get prefixIconColor => MaterialStateColor.resolveWith((Set<MaterialState> states) {
+    if (states.contains(MaterialState.disabled)) {
+      return _colors.onSurface.withOpacity(0.38);
+    }
     return _colors.onSurfaceVariant;
   });
 

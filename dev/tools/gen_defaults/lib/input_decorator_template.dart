@@ -97,10 +97,10 @@ class _${blockName}DefaultsM3 extends InputDecorationTheme {
   Color? get iconColor => ${componentColor("md.comp.filled-text-field.leading-icon")};
 
   @override
-  Color? get prefixIconColor => MaterialStateColor.resolveWith((Set<MaterialState> states) {${componentColor('md.comp.filled-text-field.error.leading-icon') == componentColor('md.comp.filled-text-field.leading-icon') ? '' : '''
+  Color? get prefixIconColor => MaterialStateColor.resolveWith((Set<MaterialState> states) {
     if (states.contains(MaterialState.disabled)) {
       return ${componentColor('md.comp.filled-text-field.disabled.leading-icon')};
-    }
+    }${componentColor('md.comp.filled-text-field.error.leading-icon') == componentColor('md.comp.filled-text-field.leading-icon') ? '' : '''
     if (states.contains(MaterialState.error)) {
       if (states.contains(MaterialState.hovered)) {
         return ${componentColor('md.comp.filled-text-field.error.hover.leading-icon')};
