@@ -489,7 +489,7 @@ void main() {
     await gesture.up();
   });
 
-  testWidgets('Tap on button calls onPressed', (WidgetTester tester) async {
+  testWidgets('Taps on button calls onPressed', (WidgetTester tester) async {
     bool wasPressed = false;
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
@@ -568,7 +568,7 @@ void main() {
     expect(wasPressed, 19);
   });
 
-  testWidgets('Tap at the padding of buttons calls onPressed', (WidgetTester tester) async {
+  testWidgets('Taps at the padding of buttons calls onPressed', (WidgetTester tester) async {
     // Ensures that the entire button responds to hit tests, not just the text
     // part.
     bool wasPressed = false;
@@ -610,7 +610,7 @@ void main() {
     expect(find.text('One'), findsNothing);
   });
 
-  testWidgets('Tap on a button can be dragged to other buttons', (WidgetTester tester) async {
+  testWidgets('Taps on a button can be slided to other buttons', (WidgetTester tester) async {
     int? pressed;
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
@@ -659,7 +659,7 @@ void main() {
     expect(find.text('One'), findsNothing);
   });
 
-  testWidgets('Tap on the content can be dragged to other buttons', (WidgetTester tester) async {
+  testWidgets('Taps on the content can be slided to other buttons', (WidgetTester tester) async {
     bool wasPressed = false;
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
@@ -699,6 +699,42 @@ void main() {
     expect(wasPressed, true);
     await tester.pumpAndSettle();
     expect(find.text('One'), findsNothing);
+  });
+
+  testWidgets('Taps on the barrier can not be slided to buttons', (WidgetTester tester) async {
+    bool wasPressed = false;
+    await tester.pumpWidget(
+      createAppWithButtonThatLaunchesActionSheet(
+        Builder(builder: (BuildContext context) {
+          return CupertinoActionSheet(
+            title: const Text('The title'),
+            cancelButton: CupertinoActionSheetAction(
+              child: const Text('Cancel'),
+              onPressed: () {
+                expect(wasPressed, false);
+                wasPressed = true;
+                Navigator.pop(context);
+              },
+            ),
+          );
+        }),
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+    await tester.pumpAndSettle();
+    expect(wasPressed, false);
+
+    // Press on the barrier.
+    final TestGesture gesture = await tester.startGesture(const Offset(100, 100));
+    await tester.pumpAndSettle();
+
+    await gesture.moveTo(tester.getCenter(find.text('Cancel')));
+    await tester.pumpAndSettle();
+    await gesture.up();
+    expect(wasPressed, false);
+    await tester.pumpAndSettle();
+    expect(find.text('Cancel'), findsOne);
   });
 
   testWidgets('Action sheet width is correct when given infinite horizontal space', (WidgetTester tester) async {
