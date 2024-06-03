@@ -1698,7 +1698,11 @@ void DisplayListBuilder::drawTextFrame(
     // they will protect overlapping glyphs from the effects of overdraw
     // so we must make the conservative assessment that this DL layer is
     // not compatible with group opacity inheritance.
-    UpdateLayerOpacityCompatibility(false);
+    // A single glyph can still have the opacity peephole applied (this is
+    // likely a glyph used as an Icon)
+    const bool is_single_glyph = text_frame->GetRunCount() == 1u &&
+                                 text_frame->GetRuns()[0].GetGlyphCount() == 1u;
+    UpdateLayerOpacityCompatibility(is_single_glyph);
     UpdateLayerResult(result);
   }
 }
