@@ -465,10 +465,12 @@ typedef _HitTester = HitTestResult Function(Offset location);
 // starts a new gesture sequence).
 //
 // This recognizer only allows [kPrimaryMouseButton].
-class _SlidingTapGestureRecognizer extends PanGestureRecognizer {
+class _SlidingTapGestureRecognizer extends VerticalDragGestureRecognizer {
   _SlidingTapGestureRecognizer({
     super.debugOwner,
-  }) : super(dragStartBehavior: DragStartBehavior.down);
+  }) {
+    dragStartBehavior = DragStartBehavior.down;
+  }
 
   int? _primaryPointer;
 
@@ -660,6 +662,10 @@ class _AvatarSelectionGestureRecognizer extends GestureRecognizer {
 //
 // This gesture detector only recognizes one gesture,
 // `_AvatarSelectionGestureRecognizer`.
+//
+// This widget's child might contain another VerticalDragGestureRecognizer if
+// the actions section or the content section scrolls. Conveniently, Flutter's
+// gesture algorithm makes the inner gesture take priority.
 class _ActionSheetGestureDetector extends StatelessWidget {
   const _ActionSheetGestureDetector({
     this.child,

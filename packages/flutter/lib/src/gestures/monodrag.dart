@@ -984,7 +984,6 @@ class PanGestureRecognizer extends DragGestureRecognizer {
   PanGestureRecognizer({
     super.debugOwner,
     super.supportedDevices,
-    super.dragStartBehavior,
     super.allowedButtonsFilter,
   });
 

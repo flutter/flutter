@@ -779,6 +779,49 @@ void main() {
     expect(find.text('Cancel'), findsOne);
   });
 
+  testWidgets('Sliding taps can still yield to scrolling after horizontal movement', (WidgetTester tester) async {
+    int? pressed;
+    await tester.pumpWidget(
+      createAppWithButtonThatLaunchesActionSheet(
+        Builder(builder: (BuildContext context) {
+          return CupertinoActionSheet(
+            message: Text('Long message' * 200),
+            actions: List<Widget>.generate(10, (int i) =>
+              CupertinoActionSheetAction(
+                onPressed: () {
+                  expect(pressed, null);
+                  pressed = i;
+                },
+                child: Text('Button $i'),
+              ),
+            ),
+          );
+        }),
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+    await tester.pumpAndSettle();
+
+    // Starts on a button.
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('Button 0')));
+    await tester.pumpAndSettle();
+    // Move horizontally.
+    await gesture.moveBy(const Offset(-10, 2));
+    await gesture.moveBy(const Offset(-100, 2));
+    await tester.pumpAndSettle();
+    // Scroll up.
+    await gesture.moveBy(const Offset(0, -40));
+    await gesture.moveBy(const Offset(0, -1000));
+    await tester.pumpAndSettle();
+    // Stop scrolling.
+    await gesture.up();
+    await tester.pumpAndSettle();
+    // The actions section should have been scrolled up and Button 9 is visible.
+    await tester.tap(find.text('Button 9'));
+    expect(pressed, 9);
+  });
+
   testWidgets('Action sheet width is correct when given infinite horizontal space', (WidgetTester tester) async {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
