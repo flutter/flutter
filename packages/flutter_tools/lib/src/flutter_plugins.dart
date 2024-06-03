@@ -1210,7 +1210,7 @@ Map<String, List<Plugin>> _resolvePluginImplementations(
   return pluginsByPlatform;
 }
 
-/// Resolves the plugins for the given [platformKey] (dart-only or native
+/// Resolves the plugins for the given [platformKey] (Dart-only or native
 /// implementations).
 (List<Plugin> pluginImplementations, bool hasPluginPubspecError, bool hasResolutionError) _resolvePluginImplementationsByPlatform(
   Iterable<Plugin> plugins,
