@@ -273,13 +273,31 @@ class CupertinoSwitch extends StatefulWidget {
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// widget.
   ///
-  /// If [mouseCursor] is a [WidgetStateProperty<MouseCursor>],
-  /// [WidgetStateProperty.resolve] is used for the following [WidgetState]s:
-  ///
+  /// Resolved in the following states:
   ///  * [WidgetState.selected].
   ///  * [WidgetState.hovered].
   ///  * [WidgetState.focused].
   ///  * [WidgetState.disabled].
+  ///
+  ///
+  /// {@tool snippet}
+  /// This example resolves the [mouseCursor] based on the current
+  /// [WidgetState] of the [CupertinoSwitch], providing a different [mouseCursor] when it is
+  /// [WidgetState.disabled].
+  ///
+  /// ```dart
+  /// CupertinoSwitch(
+  ///   value: true,
+  ///   onChanged: (bool value) { },
+  ///   mouseCursor: WidgetStateProperty.resolveWith<MouseCursor>((Set<WidgetState> states) {
+  ///     if (states.contains(WidgetState.disabled)) {
+  ///       return SystemMouseCursors.click;
+  ///     }
+  ///     return SystemMouseCursors.basic; // All other states will use the default mouseCursor.
+  ///   }),
+  /// )
+  /// ```
+  /// {@end-tool}
   ///
   /// If null, then [MouseCursor.defer] is used when the switch is disabled.
   /// When the switch is enabled,[SystemMouseCursors.click] is used on Web, and
@@ -290,7 +308,7 @@ class CupertinoSwitch extends StatefulWidget {
   ///  * [WidgetStateMouseCursor], a [MouseCursor] that implements
   ///    `WidgetStateProperty` which is used in APIs that need to accept
   ///    either a [MouseCursor] or a [WidgetStateProperty<MouseCursor>].
-  final MouseCursor? mouseCursor;
+  final WidgetStateProperty<MouseCursor>? mouseCursor;
 
   /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode? focusNode;
@@ -525,7 +543,7 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
             )
           : null;
 
-    final WidgetStateProperty<MouseCursor> mouseCursor =
+    final WidgetStateProperty<MouseCursor> defaultMouseCursor =
       WidgetStateProperty.resolveWith((Set<WidgetState> states) {
         if (states.contains(WidgetState.disabled)) {
           return MouseCursor.defer;
@@ -561,8 +579,7 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
       ?? effectiveActiveThumbColor;
 
     final Color effectiveActiveTrackColor = _widgetTrackColor.resolve(activeStates)
-      ?? (widget.applyTheme ?? false ? theme.primaryColor : null)
-      ?? CupertinoDynamicColor.resolve(CupertinoColors.systemGreen, context);
+      ?? activeColor;
 
     final Color? effectiveActiveTrackOutlineColor = widget.trackOutlineColor?.resolve(activeStates);
 
@@ -593,10 +610,7 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
       ?? _widgetThumbColor.resolve(inactivePressedStates)
       ?? CupertinoColors.white;
 
-    final WidgetStateProperty<MouseCursor> effectiveMouseCursor = WidgetStateProperty.resolveWith<MouseCursor>((Set<WidgetState> states) {
-      return WidgetStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states)
-        ?? mouseCursor.resolve(states);
-    });
+    final WidgetStateProperty<MouseCursor> effectiveMouseCursor = widget.mouseCursor ?? defaultMouseCursor;
 
     final double effectiveActiveThumbRadius = effectiveActiveIcon == null ? activeThumbRadius : thumbRadiusWithIcon;
 
@@ -1246,7 +1260,7 @@ class _SwitchPainter extends ToggleablePainter {
       canvas.drawRRect(outlineTrackRRect, outlinePaint);
     }
 
-    if (isFocused) {
+    if (isFocused && defaultTargetPlatform == TargetPlatform.macOS) {
       final RRect focusedOutline = trackRRect.inflate(1.75);
       final Paint focusedPaint = Paint()
         ..style = PaintingStyle.stroke
