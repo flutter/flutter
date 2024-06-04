@@ -13,6 +13,7 @@ export 'src/gestures/constants.dart';
 export 'src/gestures/converter.dart';
 export 'src/gestures/debug.dart';
 export 'src/gestures/drag.dart';
+export 'src/gestures/drag_boundary.dart';
 export 'src/gestures/drag_details.dart';
 export 'src/gestures/eager.dart';
 export 'src/gestures/events.dart';
