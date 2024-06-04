@@ -50,6 +50,28 @@ void AccumulationRect::accumulate(SkRect r) {
   }
 }
 
+void AccumulationRect::accumulate(AccumulationRect& ar) {
+  if (ar.is_empty()) {
+    return;
+  }
+  if (ar.min_x_ < max_x_ && ar.max_x_ > min_x_ &&  //
+      ar.min_y_ < max_y_ && ar.max_y_ > min_y_) {
+    record_overlapping_bounds();
+  }
+  if (min_x_ > ar.min_x_) {
+    min_x_ = ar.min_x_;
+  }
+  if (min_y_ > ar.min_y_) {
+    min_y_ = ar.min_y_;
+  }
+  if (max_x_ < ar.max_x_) {
+    max_x_ = ar.max_x_;
+  }
+  if (max_y_ < ar.max_y_) {
+    max_y_ = ar.max_y_;
+  }
+}
+
 SkRect AccumulationRect::bounds() const {
   return (max_x_ >= min_x_ && max_y_ >= min_y_)
              ? SkRect::MakeLTRB(min_x_, min_y_, max_x_, max_y_)
