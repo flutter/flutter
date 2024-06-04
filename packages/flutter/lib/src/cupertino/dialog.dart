@@ -631,7 +631,6 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
             child: _ActionSheetMainSheet(
               scrollController: _effectiveActionScrollController,
               hasContent: hasContent,
-              hasCancelButton: widget.cancelButton != null,
               contentSection: Builder(builder: _buildContent),
               actions: widget.actions,
               dividerColor: _kActionSheetButtonDividerColor,
@@ -918,7 +917,6 @@ class _ActionSheetMainSheet extends StatefulWidget {
     required this.scrollController,
     required this.actions,
     required this.hasContent,
-    required this.hasCancelButton,
     required this.contentSection,
     required this.dividerColor,
   });
@@ -926,7 +924,6 @@ class _ActionSheetMainSheet extends StatefulWidget {
   final ScrollController? scrollController;
   final List<Widget>? actions;
   final bool hasContent;
-  final bool hasCancelButton;
   final Widget contentSection;
   final Color dividerColor;
 
@@ -980,25 +977,16 @@ class _ActionSheetMainSheetState extends State<_ActionSheetMainSheet> {
 
   bool _hasActions() => (widget.actions?.length ?? 0) != 0;
 
-  // If `aggressivelyLayout` is true, then the content section takes as much
-  // space as needed up to `maxHeight`.
-  //
-  // If `aggressivelyLayout` is false, then the content section takes whatever
-  // space is left by the other sections.
-  Widget _buildContent({
-    required bool hasActions,
-    required bool aggressivelyLayout,
-    required double maxHeight,
-  }) {
-    if (hasActions && aggressivelyLayout) {
-      return ConstrainedBox(
-        constraints: BoxConstraints(
-          maxHeight: maxHeight,
-        ),
+  Widget _buildContent({required bool hasActions, required double maxHeight}) {
+    if (!hasActions) {
+      return Flexible(
         child: widget.contentSection,
       );
     }
-    return Flexible(
+    return ConstrainedBox(
+      constraints: BoxConstraints(
+        maxHeight: maxHeight,
+      ),
       child: widget.contentSection,
     );
   }
@@ -1019,16 +1007,8 @@ class _ActionSheetMainSheetState extends State<_ActionSheetMainSheet> {
 
   @override
   Widget build(BuildContext context) {
-    // The layout rule:
-    //
-    // 1. If there are <= 3 buttons and a cancel button, or 1 button without a
-    //    cancel button, then the actions section should never scroll.
-    // 2. Otherwise, then the content section takes priority to take over spaces
-    //    but must leave at least `actionsMinHeight` for the actions section.
-    final int numActions = widget.actions?.length ?? 0;
-    final bool actionsMightScroll =
-        (numActions > 3 && widget.hasCancelButton) ||
-        (numActions > 1 && !widget.hasCancelButton) ;
+    // The content section takes priority for vertical space but must leave at
+    // least `_kActionSheetActionsSectionMinHeight` for the actions section.
     final Color backgroundColor = CupertinoDynamicColor.resolve(_kActionSheetBackgroundColor, context);
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
@@ -1037,7 +1017,6 @@ class _ActionSheetMainSheetState extends State<_ActionSheetMainSheet> {
           children: <Widget>[
             _buildContent(
               hasActions: _hasActions(),
-              aggressivelyLayout: actionsMightScroll,
               maxHeight: constraints.maxHeight - _kActionSheetActionsSectionMinHeight - _kDividerThickness,
             ),
             if (widget.hasContent && _hasActions())
@@ -1046,7 +1025,6 @@ class _ActionSheetMainSheetState extends State<_ActionSheetMainSheet> {
                 hidden: false,
               ),
             Flexible(
-              flex: actionsMightScroll ? 1 : 0,
               child: Stack(
                 children: <Widget>[
                   Positioned.fill(
