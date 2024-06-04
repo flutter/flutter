@@ -17,7 +17,7 @@ const String _firefoxExecutableVar = 'FIREFOX_EXECUTABLE';
 ///
 /// If [requestedVersion] is null, uses the version specified on the
 /// command-line. If not specified on the command-line, uses the version
-/// specified in the "browser_lock.yaml" file.
+/// specified in the "package_lock.yaml" file.
 ///
 /// If [requestedVersion] is not null, installs that version. The value
 /// may be "latest" (the latest stable Firefox version), "system"
