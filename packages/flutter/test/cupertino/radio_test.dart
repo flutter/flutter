@@ -4,6 +4,7 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -427,5 +428,46 @@ void main() {
     expect(find.byKey(key), findsNothing);
     // Release pointer after widget disappeared.
     await gesture.up();
+  });
+
+  testWidgets('Radio configures mouse cursor', (WidgetTester tester) async {
+    await tester.pumpWidget(CupertinoApp(
+      home: Center(
+        child: CupertinoRadio<int>(
+          value: 1,
+          groupValue: 1,
+          onChanged: (int? i) { },
+          mouseCursor: SystemMouseCursors.forbidden,
+        ),
+      ),
+    ));
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+      pointer: 1
+    );
+    await gesture.addPointer(location: tester.getCenter(find.byType(CupertinoRadio<int>)));
+    await tester.pump();
+    await gesture.moveTo(tester.getCenter(find.byType(CupertinoRadio<int>)));
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.forbidden);
+  });
+
+  testWidgets('Radio default mouse cursor', (WidgetTester tester) async {
+    await tester.pumpWidget(CupertinoApp(
+      home: Center(
+        child: CupertinoRadio<int>(
+          value: 1,
+          groupValue: 1,
+          onChanged: (int? i) { },
+        ),
+      ),
+    ));
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: tester.getCenter(find.byType(CupertinoRadio<int>)));
+    addTearDown(gesture.removePointer);
+    await tester.pump();
+    await gesture.moveTo(tester.getCenter(find.byType(CupertinoRadio<int>)));
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+        kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic);
   });
 }
