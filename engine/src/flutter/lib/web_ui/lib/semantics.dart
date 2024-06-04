@@ -286,6 +286,7 @@ class SemanticsUpdateBuilder {
     required Int32List childrenInTraversalOrder,
     required Int32List childrenInHitTestOrder,
     required Int32List additionalActions,
+    int headingLevel = 0,
   }) {
     if (transform.length != 16) {
       throw ArgumentError('transform argument must have 16 entries.');
@@ -324,6 +325,7 @@ class SemanticsUpdateBuilder {
       childrenInHitTestOrder: childrenInHitTestOrder,
       additionalActions: additionalActions,
       platformViewId: platformViewId,
+      headingLevel: headingLevel,
     ));
   }
 
