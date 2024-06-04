@@ -163,8 +163,7 @@ abstract class DesktopDevice extends Device {
     try {
       Timer? timer;
       if (this is MacOSDevice) {
-        final bool usingCI = globals.platform.environment['LUCI_CI'] == 'True';
-        if (usingCI) {
+        if (await globals.isRunningOnBot) {
           const int defaultTimeout = 5;
           timer = Timer(const Duration(minutes: defaultTimeout), () {
             // As of macOS 14, if sandboxing is enabled and the app is not codesigned,
@@ -172,10 +171,16 @@ abstract class DesktopDevice extends Device {
             // cause tests in CI to hang. In CI, we workaround this by setting
             // the CODE_SIGN_ENTITLEMENTS build setting to a version with
             // sandboxing disabled.
+            final String sandboxingMessage = globals.platform.environment['LUCI_CI'] == 'True' ?
+                'Ensure sandboxing is disabled by checking the set CODE_SIGN_ENTITLEMENTS.' :
+                'Consider codesigning your app or disabling sandboxing.' ;
             _logger.printError(
                 'The Dart VM Service was not discovered after $defaultTimeout '
-                'minutes. Ensure sandboxing is disabled by checking the set '
-                'CODE_SIGN_ENTITLEMENTS.');
+                'minutes. If the app has sandboxing enabled and is not '
+                'codesigned or codesigning changed, this may be caused by a '
+                'system prompt asking for access. $sandboxingMessage\n'
+                'See https://developer.apple.com/documentation/security/app_sandbox/accessing_files_from_the_macos_app_sandbox '
+                'for more information.');
           });
         }
       }

@@ -390,7 +390,7 @@ void main() {
         ),
       );
       fakeAsync.flushTimers();
-      expect(logger.errorText, contains('Ensure sandboxing is disabled by checking the set'));
+      expect(logger.errorText, contains('Ensure sandboxing is disabled by checking the set CODE_SIGN_ENTITLEMENTS'));
     });
 
 
