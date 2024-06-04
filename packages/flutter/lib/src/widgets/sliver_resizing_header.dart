@@ -130,10 +130,7 @@ class _RenderSliverResizingHeader extends RenderSliver with SlottedContainerRend
     ];
   }
 
-  double boxExtent(RenderBox? box) {
-    if (box == null) {
-      return 0.0;
-    }
+  double boxExtent(RenderBox box) {
     assert(box.hasSize);
     return switch (constraints.axis) {
       Axis.vertical => box.size.height,
@@ -141,7 +138,7 @@ class _RenderSliverResizingHeader extends RenderSliver with SlottedContainerRend
     };
   }
 
-  double get childExtent => boxExtent(child);
+  double get childExtent => child == null ? 0 : boxExtent(child!);
 
   @override
   void setupParentData(RenderObject child) {
@@ -173,13 +170,13 @@ class _RenderSliverResizingHeader extends RenderSliver with SlottedContainerRend
     double minExtent = 0;
     if (minExtentPrototype != null) {
       minExtentPrototype!.layout(prototypeBoxConstraints, parentUsesSize: true);
-      minExtent = boxExtent(minExtentPrototype);
+      minExtent = boxExtent(minExtentPrototype!);
     }
 
     double maxExtent = double.infinity;
     if (maxExtentPrototype != null) {
       maxExtentPrototype!.layout(prototypeBoxConstraints, parentUsesSize: true);
-      maxExtent = boxExtent(maxExtentPrototype);
+      maxExtent = boxExtent(maxExtentPrototype!);
     } else {
       final Size childSize = child!.getDryLayout(prototypeBoxConstraints);
       maxExtent = switch (constraints.axis) {
