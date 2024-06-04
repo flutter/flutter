@@ -8,39 +8,160 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('SliverResizingHeader basics', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      MaterialApp(
+    Widget buildFrame({ required Axis axis, required bool reverse }) {
+      final (Widget minPrototype, Widget maxPrototype) = switch(axis) {
+        Axis.vertical => (const SizedBox(height: 100), const SizedBox(height: 300)),
+        Axis.horizontal => (const SizedBox(width: 100), const SizedBox(width: 300)),
+      };
+      return MaterialApp(
         home: Scaffold(
           body: CustomScrollView(
+            scrollDirection: axis,
+            reverse: reverse,
             slivers: <Widget>[
-              const SliverResizingHeader(
-                minExtentPrototype: SizedBox(height: 100),
-                maxExtentPrototype: SizedBox(height: 300),
-                child: SizedBox(height: 300, child: Text('header')),
+              SliverResizingHeader(
+                minExtentPrototype: minPrototype,
+                maxExtentPrototype: maxPrototype,
+                child:  SizedBox.expand(child: Text('header')),
               ),
               SliverList(
                 delegate: SliverChildBuilderDelegate(
-                  (BuildContext context, int index) => SizedBox(height: 50, child: Text('$index')),
+                  (BuildContext context, int index) => Text('item $index'),
                   childCount: 100,
                 ),
               ),
             ],
           ),
         ),
-      ),
-    );
+      );
+    }
 
-    double getHeaderHeight() => tester.getSize(find.text('header')).height;
+    Rect getHeaderRect() => tester.getRect(find.text('header'));
+    Rect getItemRect(int index) => tester.getRect(find.text('item $index'));
 
-    expect(getHeaderHeight(), 300);
+    // axis: Axis.vertical, reverse: false
+    {
+      await tester.pumpWidget(buildFrame(axis: Axis.vertical, reverse: false));
+      await tester.pumpAndSettle();
+      final ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
 
-    await tester.drag(find.byType(CustomScrollView), const Offset(0, -200));
-    await tester.pumpAndSettle();
-    expect(getHeaderHeight(), 100);
+      // The test viewport is width=800 x height=600
+      // The height=300 header is at the top of the scroll view and all items are the same height.
+      expect(getHeaderRect().topLeft, Offset.zero);
+      expect(getHeaderRect().width, 800);
+      expect(getHeaderRect().height, 300);
 
-    await tester.drag(find.byType(CustomScrollView), const Offset(0, 200));
-    await tester.pumpAndSettle();
-    expect(getHeaderHeight(), 300);
+      // First and last visible items
+      final double itemHeight = getItemRect(0).height;
+      final int visibleItemCount =  300 ~/ itemHeight; // 300 = viewport height - header height
+      expect(find.text('item 0'), findsOneWidget);
+      expect(find.text('item ${visibleItemCount - 1}'), findsOneWidget);
+
+      // Scrolling up and down leaves the header at the top but changes its height
+      // between the heights of the min and max extent prototypes.
+      position.moveTo(200);
+      await tester.pumpAndSettle();
+      expect(getHeaderRect().topLeft, Offset.zero);
+      expect(getHeaderRect().width, 800);
+      expect(getHeaderRect().height, 100);
+      position.moveTo(0);
+      await tester.pumpAndSettle();
+      expect(getHeaderRect().topLeft, Offset.zero);
+      expect(getHeaderRect().width, 800);
+      expect(getHeaderRect().height, 300);
+    }
+
+    // axis: Axis.horizontal, reverse: false
+    {
+      await tester.pumpWidget(buildFrame(axis: Axis.horizontal, reverse: false));
+      await tester.pumpAndSettle();
+      final ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
+
+      // The width=300 header is at the left of the scroll view and all items are the same width.
+      expect(getHeaderRect().topLeft, Offset.zero);
+      expect(getHeaderRect().width, 300);
+      expect(getHeaderRect().height, 600);
+
+      // First and last visible items (assuming < 10 items visible)
+      final double itemWidth = getItemRect(0).width;
+      final int visibleItemCount =  500 ~/ itemWidth; // 500 = viewport width - header width
+      expect(find.text('item 0'), findsOneWidget);
+      expect(find.text('item ${visibleItemCount - 1}'), findsOneWidget);
+
+      // Scrolling up and down leaves the header on the left but changes its width
+      // between the heights of the min and max extent prototypes.
+      position.moveTo(200);
+      await tester.pumpAndSettle();
+      expect(getHeaderRect().topLeft, Offset.zero);
+      expect(getHeaderRect().height, 600);
+      expect(getHeaderRect().width, 100);
+      position.moveTo(0);
+      await tester.pumpAndSettle();
+      expect(getHeaderRect().topLeft, Offset.zero);
+      expect(getHeaderRect().height, 600);
+      expect(getHeaderRect().width, 300);
+    }
+
+    // axis: Axis.vertical, reverse: true
+    {
+      await tester.pumpWidget(buildFrame(axis: Axis.vertical, reverse: true));
+      await tester.pumpAndSettle();
+      final ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
+
+      // The height=300 header is at the bottom of the scroll view and all items are the same height.
+      expect(getHeaderRect().bottomLeft, const Offset(0, 600));
+      expect(getHeaderRect().width, 800);
+      expect(getHeaderRect().height, 300);
+
+      // First and last visible items (assuming < 10 items visible)
+      final double itemHeight = getItemRect(0).height;
+      final int visibleItemCount =  300 ~/ itemHeight; // 300 = viewport height - header height
+      expect(find.text('item 0'), findsOneWidget);
+      expect(find.text('item ${visibleItemCount - 1}'), findsOneWidget);
+
+      // Scrolling up and down leaves the header at the bottom but changes its height
+      // between the heights of the min and max extent prototypes.
+      position.moveTo(200);
+      await tester.pumpAndSettle();
+      expect(getHeaderRect().bottomLeft, const Offset(0, 600));
+      expect(getHeaderRect().width, 800);
+      expect(getHeaderRect().height, 100);
+      position.moveTo(0);
+      await tester.pumpAndSettle();
+      expect(getHeaderRect().bottomLeft, const Offset(0, 600));
+      expect(getHeaderRect().width, 800);
+      expect(getHeaderRect().height, 300);
+    }
+
+    // axis: Axis.horizontal, reverse: true
+    {
+      await tester.pumpWidget(buildFrame(axis: Axis.horizontal, reverse: true));
+      await tester.pumpAndSettle();
+      final ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
+
+      // The width=300 header is on the right of the scroll view and all items are the same width.
+      expect(getHeaderRect().topRight, const Offset(800, 0));
+      expect(getHeaderRect().width, 300);
+      expect(getHeaderRect().height, 600);
+
+      final double itemWidth = getItemRect(0).width;
+      final int visibleItemCount =  500 ~/ itemWidth; // 500 = viewport width - header width
+      expect(find.text('item 0'), findsOneWidget);
+      expect(find.text('item ${visibleItemCount - 1}'), findsOneWidget);
+
+      // Scrolling up and down leaves the header on the left but changes its width
+      // between the heights of the min and max extent prototypes.
+      position.moveTo(200);
+      await tester.pumpAndSettle();
+      expect(getHeaderRect().topRight, const Offset(800, 0));
+      expect(getHeaderRect().height, 600);
+      expect(getHeaderRect().width, 100);
+      position.moveTo(0);
+      await tester.pumpAndSettle();
+      expect(getHeaderRect().topRight, const Offset(800, 0));
+      expect(getHeaderRect().height, 600);
+      expect(getHeaderRect().width, 300);
+    }
   });
 
   testWidgets('SliverResizingHeader overrides initial out of bounds child size', (WidgetTester tester) async {
