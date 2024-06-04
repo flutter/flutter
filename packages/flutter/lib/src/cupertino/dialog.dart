@@ -654,12 +654,10 @@ class _AvatarSelectionGestureRecognizer extends GestureRecognizer {
   }
 
   void _onDown(DragDownDetails details) {
-    print('down ${details.globalPosition}');
     _updateDrag(details.globalPosition);
   }
 
   void _onUpdate(Offset globalPosition) {
-    print('update $globalPosition');
     _updateDrag(globalPosition);
   }
 
