@@ -14,8 +14,10 @@ import 'package:intl/intl.dart' as intl;
 import 'stock_strings_en.dart';
 import 'stock_strings_es.dart';
 
-/// Callers can lookup localized strings with an instance of StockStrings returned
-/// by `StockStrings.of(context)`.
+// ignore_for_file: type=lint
+
+/// Callers can lookup localized strings with an instance of StockStrings
+/// returned by `StockStrings.of(context)`.
 ///
 /// Applications need to include `StockStrings.delegate()` in their app's
 /// `localizationDelegates` list, and the locales they support in the app's
