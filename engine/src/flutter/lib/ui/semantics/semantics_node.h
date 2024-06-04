@@ -143,6 +143,7 @@ struct SemanticsNode {
   std::vector<int32_t> childrenInTraversalOrder;
   std::vector<int32_t> childrenInHitTestOrder;
   std::vector<int32_t> customAccessibilityActions;
+  int32_t headingLevel = 0;
 };
 
 // Contains semantic nodes that need to be updated.
