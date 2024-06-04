@@ -370,12 +370,14 @@ class CommonFinders {
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
-  Finder byTooltip(Pattern message, { bool skipOffstage = true }) {
+  Finder byTooltip(Pattern message, {bool skipOffstage = true}) {
     return byWidgetPredicate(
       (Widget widget) {
-        return widget is Tooltip && (message is RegExp
-            ? (message.hasMatch(widget.message ?? '') || message.hasMatch(widget.richMessage?.toPlainText() ?? ''))
-            : (message == widget.message || message == widget.richMessage?.toPlainText()));
+        return widget is Tooltip &&
+            (message is RegExp
+                ? ((widget.message != null && message.hasMatch(widget.message!)) ||
+                    (widget.richMessage != null && message.hasMatch(widget.richMessage!.toPlainText())))
+                : ((widget.message ?? widget.richMessage?.toPlainText()) == message));
       },
       skipOffstage: skipOffstage,
     );

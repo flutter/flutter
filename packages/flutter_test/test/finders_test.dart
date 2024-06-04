@@ -322,6 +322,7 @@ void main() {
       expect(find.byTooltip('Tooltip'), findsNothing);
       expect(find.byTooltip(RegExp(r'^Tooltip')), findsOneWidget);
     });
+
     testWidgets('finds widgets by rich text tooltip', (WidgetTester tester) async {
       await tester.pumpWidget(_boilerplate(
         const Tooltip(
@@ -349,6 +350,46 @@ void main() {
       ));
       expect(find.byTooltip('Tooltip M'), findsNothing);
       expect(find.byTooltip(RegExp(r'^Tooltip M')), findsOneWidget);
+    });
+
+    testWidgets('finds empty string with tooltip', (WidgetTester tester) async {
+      await tester.pumpWidget(_boilerplate(
+        const Tooltip(
+          message: '',
+          child: Text('+'),
+        ),
+      ));
+      expect(find.byTooltip(''), findsOneWidget);
+
+      await tester.pumpWidget(_boilerplate(
+        const Tooltip(
+          richMessage: TextSpan(
+            children: <InlineSpan>[
+            TextSpan(text: ''),
+          ]),
+          child: Text('+'),
+        ),
+      ));
+      expect(find.byTooltip(''), findsOneWidget);
+
+      await tester.pumpWidget(_boilerplate(
+        const Tooltip(
+          message: '',
+          child: Text('+'),
+        ),
+      ));
+      expect(find.byTooltip(RegExp(r'^$')), findsOneWidget);
+
+      await tester.pumpWidget(_boilerplate(
+        const Tooltip(
+          richMessage: TextSpan(
+            children: <InlineSpan>[
+            TextSpan(text: ''),
+          ]),
+          child: Text('+'),
+        ),
+      ));
+      expect(find.byTooltip(RegExp(r'^$')), findsOneWidget);
     });
   });
 
