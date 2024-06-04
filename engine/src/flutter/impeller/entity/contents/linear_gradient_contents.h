@@ -53,6 +53,10 @@ class LinearGradientContents final : public ColorSourceContents {
                   const Entity& entity,
                   RenderPass& pass) const;
 
+  bool FastLinearGradient(const ContentContext& renderer,
+                          const Entity& entity,
+                          RenderPass& pass) const;
+
   Point start_point_;
   Point end_point_;
   std::vector<Color> colors_;

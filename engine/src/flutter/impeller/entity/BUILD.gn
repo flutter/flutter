@@ -48,6 +48,8 @@ impeller_shaders("entity_shaders") {
     "shaders/filters/linear_to_srgb_filter.frag",
     "shaders/filters/morphology_filter.frag",
     "shaders/blending/vertices_uber.frag",
+    "shaders/gradients/fast_gradient.vert",
+    "shaders/gradients/fast_gradient.frag",
   ]
 }
 

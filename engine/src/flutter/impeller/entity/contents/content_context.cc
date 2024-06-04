@@ -293,6 +293,7 @@ ContentContext::ContentContext(
   {
     solid_fill_pipelines_.CreateDefault(*context_, options);
     texture_pipelines_.CreateDefault(*context_, options);
+    fast_gradient_pipelines_.CreateDefault(*context_, options);
 
     if (context_->GetCapabilities()->SupportsSSBO()) {
       linear_gradient_ssbo_fill_pipelines_.CreateDefault(*context_, options);

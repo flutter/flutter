@@ -734,5 +734,89 @@ TEST_P(AiksTest, GradientStrokesRenderCorrectly) {
   ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
 
+// Draws two gradients that should look identical (except that one is an RRECT).
+TEST_P(AiksTest, FastGradientTestHorizontal) {
+  Canvas canvas;
+  Paint paint;
+  canvas.Translate({100.0f, 0, 0});
+
+  std::vector<Color> colors = {Color::Red(), Color::Blue(), Color::Green()};
+  std::vector<Scalar> stops = {0.0, 0.1, 1.0};
+
+  paint.color_source = ColorSource::MakeLinearGradient(
+      {0, 0}, {300, 0}, std::move(colors), std::move(stops),
+      Entity::TileMode::kClamp, {});
+
+  paint.color = Color(1.0, 1.0, 1.0, 1.0);
+  canvas.DrawRect(Rect::MakeXYWH(0, 0, 300, 300), paint);
+  canvas.Translate({400, 0, 0});
+  canvas.DrawRRect(Rect::MakeXYWH(0, 0, 300, 300), Size(4, 4), paint);
+
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
+// Draws two gradients that should look identical (except that one is an RRECT).
+TEST_P(AiksTest, FastGradientTestVertical) {
+  Canvas canvas;
+  Paint paint;
+  canvas.Translate({100.0f, 0, 0});
+
+  std::vector<Color> colors = {Color::Red(), Color::Blue(), Color::Green()};
+  std::vector<Scalar> stops = {0.0, 0.1, 1.0};
+
+  paint.color_source = ColorSource::MakeLinearGradient(
+      {0, 0}, {0, 300}, std::move(colors), std::move(stops),
+      Entity::TileMode::kClamp, {});
+
+  paint.color = Color(1.0, 1.0, 1.0, 1.0);
+  canvas.DrawRect(Rect::MakeXYWH(0, 0, 300, 300), paint);
+  canvas.Translate({400, 0, 0});
+  canvas.DrawRRect(Rect::MakeXYWH(0, 0, 300, 300), Size(4, 4), paint);
+
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
+// Draws two gradients that should look identical (except that one is an RRECT).
+TEST_P(AiksTest, FastGradientTestHorizontalReversed) {
+  Canvas canvas;
+  Paint paint;
+  canvas.Translate({100.0f, 0, 0});
+
+  std::vector<Color> colors = {Color::Red(), Color::Blue(), Color::Green()};
+  std::vector<Scalar> stops = {0.0, 0.1, 1.0};
+
+  paint.color_source = ColorSource::MakeLinearGradient(
+      {300, 0}, {0, 0}, std::move(colors), std::move(stops),
+      Entity::TileMode::kClamp, {});
+
+  paint.color = Color(1.0, 1.0, 1.0, 1.0);
+  canvas.DrawRect(Rect::MakeXYWH(0, 0, 300, 300), paint);
+  canvas.Translate({400, 0, 0});
+  canvas.DrawRRect(Rect::MakeXYWH(0, 0, 300, 300), Size(4, 4), paint);
+
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
+// Draws two gradients that should look identical (except that one is an RRECT).
+TEST_P(AiksTest, FastGradientTestVerticalReversed) {
+  Canvas canvas;
+  Paint paint;
+  canvas.Translate({100.0f, 0, 0});
+
+  std::vector<Color> colors = {Color::Red(), Color::Blue(), Color::Green()};
+  std::vector<Scalar> stops = {0.0, 0.1, 1.0};
+
+  paint.color_source = ColorSource::MakeLinearGradient(
+      {0, 300}, {0, 0}, std::move(colors), std::move(stops),
+      Entity::TileMode::kClamp, {});
+
+  paint.color = Color(1.0, 1.0, 1.0, 1.0);
+  canvas.DrawRect(Rect::MakeXYWH(0, 0, 300, 300), paint);
+  canvas.Translate({400, 0, 0});
+  canvas.DrawRRect(Rect::MakeXYWH(0, 0, 300, 300), Size(4, 4), paint);
+
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
 }  // namespace testing
 }  // namespace impeller
