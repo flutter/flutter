@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This file is run as part of a reduced test set in CI on Mac and Windows
+// machines.
+@Tags(<String>['reduced-test-set'])
+library;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -266,7 +271,7 @@ void main() {
 
     final Finder finder = find.byElementPredicate(
       (Element element) {
-        return element.widget.runtimeType.toString() == '_CupertinoAlertActionSection';
+        return element.widget.runtimeType.toString() == '_ActionSheetActionSection';
       },
     );
 
@@ -428,6 +433,104 @@ void main() {
     expect(scrollbars[0].controller != scrollbars[1].controller, isTrue);
   });
 
+  testWidgets('Actions section correctly renders overscrolls', (WidgetTester tester) async {
+    // Verifies that when the actions section overscrolls, the overscroll part
+    // is correctly covered with background.
+    final ScrollController actionScrollController = ScrollController();
+    addTearDown(actionScrollController.dispose);
+    await tester.pumpWidget(
+      createAppWithButtonThatLaunchesActionSheet(
+        Builder(builder: (BuildContext context) {
+          return CupertinoActionSheet(
+            actions: List<Widget>.generate(12, (int i) =>
+              CupertinoActionSheetAction(
+                onPressed: () {},
+                child: Text('Button ${'*' * i}'),
+              ),
+            ),
+          );
+        }),
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+    await tester.pumpAndSettle();
+
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('Button *')));
+    await tester.pumpAndSettle();
+    // The button should be pressed now, since the scrolling gesture has not
+    // taken over.
+    await expectLater(
+      find.byType(CupertinoActionSheet),
+      matchesGoldenFile('cupertinoActionSheet.overscroll.0.png'),
+    );
+    // The dragging gesture must be dispatched in at least two segments.
+    // After the first movement, the gesture is started, but the delta is still
+    // zero. The second movement gives the delta.
+    await gesture.moveBy(const Offset(0, 40));
+    await tester.pumpAndSettle();
+    await gesture.moveBy(const Offset(0, 100));
+    // Test the top overscroll. Use `pump` not `pumpAndSettle` to verify the
+    // rendering result of the immediate next frame.
+    await tester.pump();
+    await expectLater(
+      find.byType(CupertinoActionSheet),
+      matchesGoldenFile('cupertinoActionSheet.overscroll.1.png'),
+    );
+
+    await gesture.moveBy(const Offset(0, -300));
+    // Test the bottom overscroll. Use `pump` not `pumpAndSettle` to verify the
+    // rendering result of the immediate next frame.
+    await tester.pump();
+    await expectLater(
+      find.byType(CupertinoActionSheet),
+      matchesGoldenFile('cupertinoActionSheet.overscroll.2.png'),
+    );
+    await gesture.up();
+  });
+
+  testWidgets('Actions section correctly renders overscrolls with very far scrolls', (WidgetTester tester) async {
+    // When the scroll is really far, the overscroll might be longer than the
+    // actions section, causing overflow if not controlled.
+    final ScrollController actionScrollController = ScrollController();
+    addTearDown(actionScrollController.dispose);
+    await tester.pumpWidget(
+      createAppWithButtonThatLaunchesActionSheet(
+        Builder(builder: (BuildContext context) {
+          return CupertinoActionSheet(
+            message: Text('message' * 300),
+            actions: List<Widget>.generate(4, (int i) =>
+              CupertinoActionSheetAction(
+                onPressed: () {},
+                child: Text('Button $i'),
+              ),
+            ),
+          );
+        }),
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+    await tester.pumpAndSettle();
+
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('Button 0')));
+    await tester.pumpAndSettle();
+    await gesture.moveBy(const Offset(0, 40)); // A short drag to start the gesture.
+    await tester.pumpAndSettle();
+    // The drag is far enough to make the overscroll longer than the section.
+    await gesture.moveBy(const Offset(0, 1000));
+    await tester.pump();
+    // The buttons should be out of the screen
+    expect(
+      tester.getTopLeft(find.text('Button 0')).dy,
+      greaterThan(tester.getBottomLeft(find.byType(CupertinoActionSheet)).dy)
+    );
+    await expectLater(
+      find.byType(CupertinoActionSheet),
+      matchesGoldenFile('cupertinoActionSheet.long-overscroll.0.png'),
+    );
+  });
+
   testWidgets('Tap on button calls onPressed', (WidgetTester tester) async {
     bool wasPressed = false;
     await tester.pumpWidget(
@@ -456,6 +559,47 @@ void main() {
     expect(wasPressed, isFalse);
 
     await tester.tap(find.text('One'));
+
+    expect(wasPressed, isTrue);
+
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(find.text('One'), findsNothing);
+  });
+
+  testWidgets('Tap at the padding of buttons calls onPressed', (WidgetTester tester) async {
+    // Ensures that the entire button responds to hit tests, not just the text
+    // part.
+    bool wasPressed = false;
+    await tester.pumpWidget(
+      createAppWithButtonThatLaunchesActionSheet(
+        Builder(builder: (BuildContext context) {
+          return CupertinoActionSheet(
+            actions: <Widget>[
+              CupertinoActionSheetAction(
+                child: const Text('One'),
+                onPressed: () {
+                  wasPressed = true;
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          );
+        }),
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(wasPressed, isFalse);
+
+    await tester.tapAt(
+      tester.getTopLeft(find.text('One')) - const Offset(20, 0),
+    );
 
     expect(wasPressed, isTrue);
 
@@ -575,7 +719,7 @@ void main() {
     await tester.tap(find.text('Go'));
     await tester.pump();
 
-    expect(findScrollableActionsSectionRenderBox(tester).size.height, moreOrLessEquals(112.3));
+    expect(findScrollableActionsSectionRenderBox(tester).size.height, moreOrLessEquals(84.3));
   });
 
   testWidgets('3 action buttons with cancel button', (WidgetTester tester) async {
@@ -609,7 +753,7 @@ void main() {
     await tester.tap(find.text('Go'));
     await tester.pump();
 
-    expect(findScrollableActionsSectionRenderBox(tester).size.height, moreOrLessEquals(168.6));
+    expect(findScrollableActionsSectionRenderBox(tester).size.height, moreOrLessEquals(84.3));
   });
 
   testWidgets('4+ action buttons with cancel button', (WidgetTester tester) async {
@@ -1112,7 +1256,7 @@ void main() {
 RenderBox findScrollableActionsSectionRenderBox(WidgetTester tester) {
   final RenderObject actionsSection = tester.renderObject(
     find.byElementPredicate((Element element) {
-      return element.widget.runtimeType.toString() == '_CupertinoAlertActionSection';
+      return element.widget.runtimeType.toString() == '_ActionSheetActionSection';
     }),
   );
   assert(actionsSection is RenderBox);
