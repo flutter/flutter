@@ -20,16 +20,31 @@ using DlScalar = impeller::Scalar;
 using DlDegrees = impeller::Degrees;
 using DlRadians = impeller::Radians;
 
-using DlISize = impeller::ISize32;
+using DlPoint = impeller::Point;
+using DlIPoint = impeller::IPoint32;
 using DlSize = impeller::Size;
+using DlISize = impeller::ISize32;
 using DlRect = impeller::Rect;
 using DlIRect = impeller::IRect32;
 using DlMatrix = impeller::Matrix;
 
+static_assert(sizeof(SkPoint) == sizeof(DlPoint));
+static_assert(sizeof(SkIPoint) == sizeof(DlIPoint));
+static_assert(sizeof(SkSize) == sizeof(DlSize));
+static_assert(sizeof(SkISize) == sizeof(DlISize));
 static_assert(sizeof(SkRect) == sizeof(DlRect));
+static_assert(sizeof(SkIRect) == sizeof(DlIRect));
+
+inline const DlPoint& ToDlPoint(const SkPoint& point) {
+  return *reinterpret_cast<const DlPoint*>(&point);
+}
 
 inline const DlRect& ToDlRect(const SkRect& rect) {
   return *reinterpret_cast<const DlRect*>(&rect);
+}
+
+inline const DlISize& ToDlISize(const SkISize& size) {
+  return *reinterpret_cast<const DlISize*>(&size);
 }
 
 inline constexpr DlMatrix ToDlMatrix(const SkMatrix& matrix) {
@@ -47,6 +62,10 @@ inline constexpr DlMatrix ToDlMatrix(const SkM44& matrix) {
   DlMatrix dl_matrix;
   matrix.getColMajor(dl_matrix.m);
   return dl_matrix;
+}
+
+inline const SkPoint& ToSkPoint(const DlPoint& point) {
+  return *reinterpret_cast<const SkPoint*>(&point);
 }
 
 inline const SkRect& ToSkRect(const DlRect& rect) {

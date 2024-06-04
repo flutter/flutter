@@ -9,10 +9,6 @@
 namespace flutter {
 namespace testing {
 
-using DlRect = impeller::Rect;
-using DlMatrix = impeller::Matrix;
-using Degrees = impeller::Degrees;
-
 TEST(DisplayListMatrixClipTracker, Constructor) {
   const SkRect cull_rect = SkRect::MakeLTRB(20, 40, 60, 80);
   const DlRect dl_cull_rect = DlRect::MakeLTRB(20, 40, 60, 80);
@@ -602,7 +598,7 @@ TEST(DisplayListMatrixClipTracker, Rotate) {
       SkMatrix::Concat(matrix, SkMatrix::RotateDeg(90));
   const SkM44 rotated_m44 = SkM44(rotated_matrix);
   const DlMatrix rotated_dl_matrix =
-      dl_matrix * DlMatrix::MakeRotationZ(Degrees(90));
+      dl_matrix * DlMatrix::MakeRotationZ(DlDegrees(90));
   const SkRect local_cull_rect = SkRect::MakeLTRB(10, -15, 20, -5);
 
   DisplayListMatrixClipTracker tracker1(cull_rect, matrix);
@@ -644,7 +640,7 @@ TEST(DisplayListMatrixClipState, Rotate) {
       SkMatrix::Concat(matrix, SkMatrix::RotateDeg(90));
   const SkM44 rotated_m44 = SkM44(rotated_matrix);
   const DlMatrix rotated_dl_matrix =
-      dl_matrix * DlMatrix::MakeRotationZ(Degrees(90));
+      dl_matrix * DlMatrix::MakeRotationZ(DlDegrees(90));
   const SkRect local_cull_rect = SkRect::MakeLTRB(10, -15, 20, -5);
 
   DisplayListMatrixClipState state1(cull_rect, matrix);
