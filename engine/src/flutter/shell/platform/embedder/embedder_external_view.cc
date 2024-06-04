@@ -117,7 +117,8 @@ bool EmbedderExternalView::Render(const EmbedderRenderTarget& render_target,
 
     impeller::ExperimentalDlDispatcher impeller_dispatcher(
         aiks_context->GetContentContext(), *impeller_target,
-        /*supports_readback=*/false, cull_rect);
+        display_list->root_has_backdrop_filter(),
+        display_list->max_root_blend_mode(), cull_rect);
     display_list->Dispatch(impeller_dispatcher, sk_cull_rect);
     impeller_dispatcher.FinishRecording();
     aiks_context->GetContentContext().GetTransientsBuffer().Reset();
