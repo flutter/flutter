@@ -18,7 +18,11 @@ class TestImageProvider extends ImageProvider<TestImageProvider> {
 
   final Future<void> future;
 
-  static late ui.Image image;
+  static ui.Image? _image;
+
+  static Future<void> prepareImage() async {
+    _image = await decodeImageFromList(Uint8List.fromList(kTransparentImage));
+  }
 
   @override
   Future<TestImageProvider> obtainKey(ImageConfiguration configuration) {
@@ -28,14 +32,18 @@ class TestImageProvider extends ImageProvider<TestImageProvider> {
   @override
   ImageStreamCompleter loadImage(TestImageProvider key, ImageDecoderCallback decode) {
     return OneFrameImageStreamCompleter(
-      future.then<ImageInfo>((void value) => ImageInfo(image: image)),
+      future.then<ImageInfo>((void value) {
+        final result = ImageInfo(image: _image!);
+        //_image = null;
+        return result;
+      }),
     );
   }
 }
 
 Future<void> main() async {
   AutomatedTestWidgetsFlutterBinding();
-  TestImageProvider.image = await decodeImageFromList(Uint8List.fromList(kTransparentImage));
+  await TestImageProvider.prepareImage();
 
   testWidgets('DecoratedBox handles loading images',
   // TODO(polina-c): dispose ImageStreamCompleterHandle, https://github.com/flutter/flutter/issues/145599 [leaks-to-clean]
