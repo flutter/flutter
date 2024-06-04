@@ -472,6 +472,24 @@ class _SlidingTapGestureRecognizer extends VerticalDragGestureRecognizer {
     dragStartBehavior = DragStartBehavior.down;
   }
 
+  /// Called whenever the primary pointer moves regardless of whether drag has
+  /// started.
+  ///
+  /// The parameter is the global position of the primary pointer.
+  ///
+  /// This allows the caller to track the primary pointer's location before
+  /// the drag starts, which is useful to enhance responsiveness.
+  ValueSetter<Offset>? onResponsiveUpdate;
+
+  /// Called whenever the primary pointer is lifted regardless of whether drag
+  /// has started.
+  ///
+  /// The parameter is the global position of the primary pointer.
+  ///
+  /// This allows the caller to track the primary pointer's location before
+  /// the drag starts, which is useful to enhance responsiveness.
+  ValueSetter<Offset>? onResponsiveEnd;
+
   int? _primaryPointer;
 
   @override
@@ -491,6 +509,9 @@ class _SlidingTapGestureRecognizer extends VerticalDragGestureRecognizer {
   @override
   void handleEvent(PointerEvent event) {
     if (event.pointer == _primaryPointer) {
+      if (event is PointerMoveEvent) {
+        onResponsiveUpdate?.call(event.position);
+      }
       // If this gesture has a competing gesture (such as scrolling), and the
       // pointer has not moved far enough to get this panning accepted, a
       // pointer up event should still be considered as an accepted tap up.
@@ -498,6 +519,7 @@ class _SlidingTapGestureRecognizer extends VerticalDragGestureRecognizer {
       if (event is PointerUpEvent) {
         resolve(GestureDisposition.accepted);
         stopTrackingPointer(_primaryPointer!);
+        onResponsiveEnd?.call(event.position);
       } else {
         super.handleEvent(event);
       }
@@ -565,8 +587,8 @@ class _AvatarSelectionGestureRecognizer extends GestureRecognizer {
     : _slidingTap = _SlidingTapGestureRecognizer(debugOwner: debugOwner) {
     _slidingTap
       ..onDown = _onDown
-      ..onUpdate = _onUpdate
-      ..onEnd = _onEnd
+      ..onResponsiveUpdate = _onUpdate
+      ..onResponsiveEnd = _onEnd
       ..onCancel = _onCancel;
   }
 
@@ -632,15 +654,17 @@ class _AvatarSelectionGestureRecognizer extends GestureRecognizer {
   }
 
   void _onDown(DragDownDetails details) {
+    print('down ${details.globalPosition}');
     _updateDrag(details.globalPosition);
   }
 
-  void _onUpdate(DragUpdateDetails details) {
-    _updateDrag(details.globalPosition);
+  void _onUpdate(Offset globalPosition) {
+    print('update $globalPosition');
+    _updateDrag(globalPosition);
   }
 
-  void _onEnd(DragEndDetails details) {
-    _updateDrag(details.globalPosition);
+  void _onEnd(Offset globalPosition) {
+    _updateDrag(globalPosition);
     for (final _ActionSheetDragAvatar avatar in _currentAvatars) {
       avatar.didConfirm();
     }

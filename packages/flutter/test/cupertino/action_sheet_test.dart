@@ -822,6 +822,48 @@ void main() {
     expect(pressed, 9);
   });
 
+  testWidgets('Sliding taps is responsive even before the drag starts', (WidgetTester tester) async {
+    int? pressed;
+    await tester.pumpWidget(
+      createAppWithButtonThatLaunchesActionSheet(
+        Builder(builder: (BuildContext context) {
+          return CupertinoActionSheet(
+            message: Text('Long message' * 200),
+            actions: List<Widget>.generate(10, (int i) =>
+              CupertinoActionSheetAction(
+                onPressed: () {
+                  expect(pressed, null);
+                  pressed = i;
+                },
+                child: Text('Button $i'),
+              ),
+            ),
+          );
+        }),
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+    await tester.pumpAndSettle();
+
+    // Find the location right within the upper edge of button 1.
+    final Offset start = tester.getTopLeft(find.text('Button 1')) + const Offset(30, -15);
+    // Verify that the start location is within button 1.
+    await tester.tapAt(start);
+    expect(pressed, 1);
+    pressed = null;
+
+    final TestGesture gesture = await tester.startGesture(start);
+    await tester.pumpAndSettle();
+    // Move slightly upwards without starting the drag
+    await gesture.moveBy(const Offset(0, -10));
+    await tester.pumpAndSettle();
+    // Stop scrolling.
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(pressed, 0);
+  });
+
   testWidgets('Action sheet width is correct when given infinite horizontal space', (WidgetTester tester) async {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
