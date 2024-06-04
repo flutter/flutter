@@ -29,6 +29,10 @@ Team members are not expected to participate in multiple Flutter rotations. For 
 
 Before heading out on holiday, or if you get to your shift and find you can't do it, check the upcoming rotations and find a volunteer to swap shifts with while you're out. During some holiday periods when many team members are out and activity is particularly low on the tree, it may not be essential to have a dedicated gardener.
 
+### Journal
+
+Please briefly describe any issues you encountered during your week of gardening in the [packages gardening journal], along with any solutions you think may be useful for other gardeners in the future!
+
 ## Periodic scan
 
 Below are the tasks that should be done routinely while gardening.
@@ -134,5 +138,6 @@ If you see a test failure that appears to be a flake:
 [filing an infra ticket]: /docs/infra/Flutter-Framework-Gardener-Rotation.md#filing-an-infra-ticket
 [flutter-to-packages roller]: https://autoroll.skia.org/r/flutter-packages
 [packages-to-flutter roller]: https://autoroll.skia.org/r/flutter-packages-flutter-autoroll
+[packages gardening journal]: https://goto.google.com/flutter-packages-gardener-journal
 [flutter-stable-to-packages roller]: https://autoroll.skia.org/r/flutter-stable-packages
 [On-call scheduling for Flutter]: https://docs.google.com/document/d/1i-11by4J3zvxWG3qLMm4MKfJ8DrjIJna6DPA9tBmJWc/edit#heading=h.w8bl5vic6x95
