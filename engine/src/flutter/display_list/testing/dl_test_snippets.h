@@ -227,8 +227,6 @@ SkFont CreateTestFontOfSize(SkScalar scalar);
 
 sk_sp<SkTextBlob> GetTestTextBlob(int index);
 
-sk_sp<SkTextBlob> CreateTextBlob(std::string& message);
-
 struct DisplayListInvocation {
   // ----------------------------------
   // Required fields for initialization

@@ -131,7 +131,6 @@ if (enable_unittests) {
       ":display_list",
       ":display_list_fixtures",
       "//flutter/display_list/testing:display_list_testing",
-      "//flutter/impeller/typographer/backends/skia:typographer_skia_backend",
       "//flutter/testing",
       "//flutter/testing:skia",
     ]
