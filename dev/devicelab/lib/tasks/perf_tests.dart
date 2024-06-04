@@ -673,7 +673,7 @@ TaskFunction createRRectBlurPerfTest({
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test_driver/run_app.dart',
-    'rrect_blur_test',
+    'rrect_blur_perf',
     enableImpeller: enableImpeller,
     forceOpenGLES: forceOpenGLES,
     testDriver: 'test_driver/rrect_blur_perf_test.dart',
