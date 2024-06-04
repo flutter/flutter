@@ -131,7 +131,9 @@ class _SliverCoordinatorState extends State<SliverCoordinator> {
     // The callback runs after the descendant CustomScrollView's viewport
     // has been laid out and the _SliverLayoutInfo object has been updated.
     SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
-      widget.callback(notification, data);
+      if (context.mounted) {
+        widget.callback(notification, data);
+      }
     });
     return true;
   }
