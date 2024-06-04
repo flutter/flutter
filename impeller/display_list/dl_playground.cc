@@ -55,7 +55,9 @@ bool DlPlayground::OpenPlaygroundHere(DisplayListPlaygroundCallback callback) {
         list->Dispatch(collector);
 
         ExperimentalDlDispatcher impeller_dispatcher(
-            context.GetContentContext(), render_target, IRect::MakeMaximum());
+            context.GetContentContext(), render_target,
+            display_list->root_has_backdrop_filter(),
+            display_list->max_root_blend_mode(), IRect::MakeMaximum());
         list->Dispatch(impeller_dispatcher);
         impeller_dispatcher.FinishRecording();
         context.GetContentContext().GetTransientsBuffer().Reset();
