@@ -110,7 +110,7 @@ TEST(FlutterView, CursorUpdateDoesHitTest) {
 
   EXPECT_TRUE(hitTestCalled);
   // The hit test coordinate should be in the window coordinate system.
-  EXPECT_TRUE(CGPointEqualToPoint(hitTestCoordinate, CGPointMake(100, 500)));
+  EXPECT_TRUE(CGPointEqualToPoint(hitTestCoordinate, CGPointMake(100, 100)));
   EXPECT_TRUE(cursor.setCalled);
 }
 
@@ -155,6 +155,6 @@ TEST(FlutterView, CursorUpdateDoesNotOverridePlatformView) {
 
   EXPECT_TRUE(hitTestCalled);
   // The hit test coordinate should be in the window coordinate system.
-  EXPECT_TRUE(CGPointEqualToPoint(hitTestCoordinate, CGPointMake(100, 500)));
+  EXPECT_TRUE(CGPointEqualToPoint(hitTestCoordinate, CGPointMake(100, 100)));
   EXPECT_FALSE(cursor.setCalled);
 }
