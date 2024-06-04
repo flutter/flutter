@@ -8,6 +8,7 @@
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/contents/gradient_generator.h"
 #include "impeller/entity/entity.h"
+#include "impeller/geometry/scalar.h"
 #include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/vertex_buffer_builder.h"
 
@@ -52,6 +53,46 @@ bool LinearGradientContents::IsOpaque() const {
     }
   }
   return true;
+}
+
+bool LinearGradientContents::CanApplyFastGradient() const {
+  if (!GetGeometry()->IsAxisAlignedRect() ||
+      !GetInverseEffectTransform().IsIdentity()) {
+    return false;
+  }
+  std::optional<Rect> maybe_rect = GetGeometry()->GetCoverage(Matrix());
+  if (!maybe_rect.has_value()) {
+    return false;
+  }
+  Rect rect = maybe_rect.value();
+
+  if (ScalarNearlyEqual(start_point_.x, end_point_.x)) {
+    // Sort start and end to make on-rect comparisons easier.
+    Point start = (start_point_.y < end_point_.y) ? start_point_ : end_point_;
+    Point end = (start_point_.y < end_point_.y) ? end_point_ : start_point_;
+    // The exact x positon doesn't matter for a vertical gradient, but the y
+    // position must be nearly on the rectangle.
+    if (ScalarNearlyEqual(start.y, rect.GetTop()) &&
+        ScalarNearlyEqual(end.y, rect.GetBottom())) {
+      return true;
+    }
+    return false;
+  }
+
+  if (ScalarNearlyEqual(start_point_.y, end_point_.y)) {
+    // Sort start and end to make on-rect comparisons easier.
+    Point start = (start_point_.x < end_point_.x) ? start_point_ : end_point_;
+    Point end = (start_point_.x < end_point_.x) ? end_point_ : start_point_;
+    // The exact y positon doesn't matter for a horizontal gradient, but the x
+    // position must be nearly on the rectangle.
+    if (ScalarNearlyEqual(start.x, rect.GetLeft()) &&
+        ScalarNearlyEqual(end.x, rect.GetRight())) {
+      return true;
+    }
+    return false;
+  }
+
+  return false;
 }
 
 // A much faster (in terms of ALU) linear gradient that uses vertex
@@ -137,9 +178,7 @@ bool LinearGradientContents::Render(const ContentContext& renderer,
   // TODO(148651): The fast path is overly restrictive, following the design in
   // https://github.com/flutter/flutter/issues/148651 support for more cases can
   // be gradually added.
-  if (GetGeometry()->IsAxisAlignedRect() &&
-      (start_point_.x == end_point_.x || start_point_.y == end_point_.y) &&
-      GetInverseEffectTransform().IsIdentity()) {
+  if (CanApplyFastGradient()) {
     return FastLinearGradient(renderer, entity, pass);
   }
   if (renderer.GetDeviceCapabilities().SupportsSSBO()) {
