@@ -2,6 +2,9 @@
 
 ## Rendering Backend Selection
 
+> [!IMPORTANT]
+> During the preview period, while the team focuses on production readiness, Flutter will fallback to the Skia OpenGL ES backend instead of Impellers OpenGL backend.
+
 Impeller supports both Vulkan and Open GL ES rendering on Android. Impeller will prefer rendering with Vulkan and fallback to OpenGL ES 2.0 for compatibility. With both the Vulkan and OpenGL ES, Impeller supports rendering on [all existing Android versions supported by Flutter](https://docs.flutter.dev/reference/supported-platforms).
 
 The rough logic for backend selection on Android is depicted below.
@@ -48,12 +51,12 @@ Besides older devices still in use, devices you can buy new that don't support V
 
 ### Android Version
 
-For Vulkan support, Impeller needs at least Android 10, API level 29 (Q, Quince Tart). Cumulative usage of Android 10 as of August 21, 2023 is 78.5% per [apilevels.com](https://apilevels.com/).
+For Vulkan support, Impeller needs at least Android 10, API level 29 (Q, Quince Tart). Cumulative usage of Android 10 as of June 04, 2024 is 84.5% per [apilevels.com](https://apilevels.com/).
 
 ```mermaid
 pie title Vulkan version
-	"Android 10 or higher" : 78.5
-	"Android 9 and lower" : 21.5
+	"Android 10 or higher" : 84.5
+	"Android 9 and lower" : 15.5
 ```
 
 Android 9 and older will unconditionally use OpenGL.
