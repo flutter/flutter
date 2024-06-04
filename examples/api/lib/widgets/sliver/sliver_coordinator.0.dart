@@ -26,8 +26,8 @@ class SliverCoordinatorExample extends StatefulWidget {
 }
 
 class _SliverCoordinatorExampleState extends State<SliverCoordinatorExample> {
+  static const String alignedItemId = 'alignedItem';
   late final ScrollController scrollController;
-  late CoordinatedSliver alignedItem;
 
   @override
   void initState() {
@@ -53,8 +53,8 @@ class _SliverCoordinatorExampleState extends State<SliverCoordinatorExample> {
   // either end of the CustomScrollView's viewport we'll auto-scroll
   // so that it's aligned with the top or bottom.
   void maybeAutoScrollAlignedItem(SliverCoordinatorData data) {
-    final SliverConstraints constraints = alignedItem.getSliverConstraints(data);
-    final SliverGeometry geometry = alignedItem.getSliverGeometry(data);
+    final SliverConstraints constraints = data.getSliverConstraints(alignedItemId);
+    final SliverGeometry geometry = data.getSliverGeometry(alignedItemId);
     final double scrollOffset = constraints.scrollOffset;
     final double overflow = geometry.maxPaintExtent - geometry.paintExtent;
     if (overflow > 0 && overflow < geometry.scrollExtent) { // indicates partial visibility
@@ -77,25 +77,26 @@ class _SliverCoordinatorExampleState extends State<SliverCoordinatorExample> {
           padding: const EdgeInsets.symmetric(horizontal: 4),
           child: SliverCoordinator(
             callback: (ScrollNotification notification, SliverCoordinatorData data) {
-              if (notification is ScrollEndNotification && alignedItem.hasLayoutInfo(data)) {
+              if (notification is ScrollEndNotification && data.hasLayoutInfo(alignedItemId)) {
                 maybeAutoScrollAlignedItem(data);
               }
             },
             child: CustomScrollView(
               controller: scrollController,
-              slivers: <Widget>[
-                const SliverPadding(
+              slivers: const <Widget>[
+                SliverPadding(
                   padding: horizontalPadding,
                   sliver: ItemList(itemCount: 15),
                 ),
                 SliverPadding(
                   padding: horizontalPadding,
                   // Each time we scroll the SliverCoordinator's callback will run.
-                  sliver: alignedItem = const CoordinatedSliver(
+                  sliver: CoordinatedSliver(
+                    id: alignedItemId,
                     sliver: BigOrangeSliver(),
                   ),
                 ),
-                const SliverPadding(
+                SliverPadding(
                   padding: horizontalPadding,
                   sliver: ItemList(itemCount: 25),
                 ),

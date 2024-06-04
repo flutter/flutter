@@ -30,8 +30,9 @@ class _SliverLayoutInfo {
 /// Encapsulates a table of layout information for [CoordinatedSliver]s.
 ///
 /// An instance of this class is passed to the [SliverCoordinator.callback].
-/// To retreive data from this table use [CoordinatedSliver.hasLayoutInfo]
-/// [CoordinatedSliver.getSliverConstraints], and [CoordinatedSliver.getSliverGeometry].
+/// To retreive data from this table apply [hasLayoutInfo]
+/// [getSliverConstraints], and [getSliverGeometry] to a valid
+/// [CoordinatedSliver.id].
 class SliverCoordinatorData {
   final Map<Object, _SliverLayoutInfo> _idToInfo = <Object, _SliverLayoutInfo>{};
 
@@ -53,6 +54,30 @@ class SliverCoordinatorData {
   // Clear the contents of the layout information table.
   @protected
   void _clear() => _idToInfo.clear();
+
+
+  /// True if [getSliverConstraints] and [getSliverGeometry] are safe to call
+  /// from  [SliverCoordinator.callback].
+  ///
+  /// False if this sliver wasn't laid out in the most recent [CustomScrollView]
+  /// layout.
+  bool hasLayoutInfo(Object id) {
+    return _get<_SliverLayoutInfo>(id) != null;
+  }
+
+  /// The [SliverConstraints] computed for this sliver in the most recent
+  /// [CustomScrollView] layout.
+  SliverConstraints getSliverConstraints(Object id) {
+    assert(hasLayoutInfo(id));
+    return _get<_SliverLayoutInfo>(id)!.constraints;
+  }
+
+  /// The [SliverGeometry] computed for this sliver in the most recent
+  /// [CustomScrollView] layout.
+  SliverGeometry getSliverGeometry(Object id) {
+    assert(hasLayoutInfo(id));
+    return _get<_SliverLayoutInfo>(id)!.geometry;
+  }
 }
 
 class _SliverCoordinatorScope extends InheritedWidget {
@@ -177,49 +202,31 @@ class CoordinatedSliver extends SingleChildRenderObjectWidget {
   /// has completed layout.
   const CoordinatedSliver({
     super.key,
+    required this.id,
     Widget? sliver,
   }) : super(child: sliver);
+
+  /// A value that uniquely identifies this CoordinatedSliver relative to others
+  /// in the same [CustomScrollView].
+  final Object id;
 
   @override
   RenderObject createRenderObject(BuildContext context) {
     return RenderCoordinatedSliver(
-      id: this,
+      id: id,
       data: SliverCoordinator._of(context),
     );
   }
 
   @override
   void updateRenderObject(BuildContext context, RenderCoordinatedSliver renderObject) {
-    renderObject.id = this;
+    renderObject.id = id;
     renderObject.data = SliverCoordinator._of(context);
   }
 
   @override
   void didUnmountRenderObject(RenderCoordinatedSliver renderObject) {
     renderObject.data._remove<_SliverLayoutInfo>(this);
-  }
-
-  /// True if [getSliverConstraints] and [getSliverGeometry] are safe to call
-  /// from  [SliverCoordinator.callback].
-  ///
-  /// False if this sliver wasn't laid out in the most recent [CustomScrollView]
-  /// layout.
-  bool hasLayoutInfo(SliverCoordinatorData data) {
-    return data._get<_SliverLayoutInfo>(this) != null;
-  }
-
-  /// The [SliverConstraints] computed for this sliver in the most recent
-  /// [CustomScrollView] layout.
-  SliverConstraints getSliverConstraints(SliverCoordinatorData data) {
-    assert(hasLayoutInfo(data));
-    return data._get<_SliverLayoutInfo>(this)!.constraints;
-  }
-
-  /// The [SliverGeometry] computed for this sliver in the most recent
-  /// [CustomScrollView] layout.
-  SliverGeometry getSliverGeometry(SliverCoordinatorData data) {
-    assert(hasLayoutInfo(data));
-    return data._get<_SliverLayoutInfo>(this)!.geometry;
   }
 }
 
