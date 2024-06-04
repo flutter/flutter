@@ -960,8 +960,16 @@ class _ActionSheetMainSheetState extends State<_ActionSheetMainSheet> {
   bool _onScrollUpdate(ScrollUpdateNotification notification) {
     final ScrollMetrics metrics = notification.metrics;
     setState(() {
-      _topOverscroll = math.max(metrics.minScrollExtent - metrics.pixels, 0);
-      _bottomOverscroll = math.max(metrics.pixels - metrics.maxScrollExtent, 0);
+      // The sizes of the overscroll should not be longer than the height of the
+      // actions section.
+      _topOverscroll = math.min(
+        math.max(metrics.minScrollExtent - metrics.pixels, 0),
+        metrics.viewportDimension,
+      );
+      _bottomOverscroll = math.min(
+        math.max(metrics.pixels - metrics.maxScrollExtent, 0),
+        metrics.viewportDimension,
+      );
     });
     return false;
   }
@@ -999,7 +1007,7 @@ class _ActionSheetMainSheetState extends State<_ActionSheetMainSheet> {
   @override
   Widget build(BuildContext context) {
     // The content section takes priority for vertical space but must leave at
-    // least `actionsMinHeight` for the actions section.
+    // least `_kActionSheetActionsSectionMinHeight` for the actions section.
     final Color backgroundColor = CupertinoDynamicColor.resolve(_kActionSheetBackgroundColor, context);
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {

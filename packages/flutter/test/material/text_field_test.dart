@@ -1875,6 +1875,48 @@ void main() {
     expect(find.text('Paste'), findsOneWidget);
   }, skip: isContextMenuProvidedByPlatform); // [intended] only applies to platforms where we supply the context menu.
 
+  testWidgets('infinite multi-line text hint text is not ellipsized by default', (WidgetTester tester) async {
+    const String kLongString =
+      'Enter your email Enter your email Enter your '
+      'email Enter your email Enter your email Enter '
+      'your email Enter your email';
+    const double defaultLineHeight = 24;
+    await tester.pumpWidget(overlay(
+      child: const TextField(
+        maxLines: null,
+        decoration: InputDecoration(
+          labelText: 'Email',
+          hintText: kLongString,
+        ),
+      ),
+    ));
+    final Text hintText = tester.widget<Text>(find.text(kLongString));
+    expect(hintText.overflow, isNull);
+    final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.text(kLongString));
+    expect(paragraph.size.height > defaultLineHeight * 2, isTrue);
+  });
+
+  testWidgets('non-infinite multi-line hint text is  ellipsized by default', (WidgetTester tester) async {
+    const String kLongString =
+        'Enter your email Enter your email Enter your '
+        'email Enter your email Enter your email Enter '
+        'your email Enter your email';
+    const double defaultLineHeight = 24;
+    await tester.pumpWidget(overlay(
+      child: const TextField(
+        maxLines: 2,
+        decoration: InputDecoration(
+          labelText: 'Email',
+          hintText: kLongString,
+        ),
+      ),
+    ));
+    final Text hintText = tester.widget<Text>(find.text(kLongString));
+    expect(hintText.overflow, TextOverflow.ellipsis);
+    final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.text(kLongString));
+    expect(paragraph.size.height < defaultLineHeight * 2 + precisionErrorTolerance, isTrue);
+  });
+
   testWidgets('Entering text hides selection handle caret', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController();
 
@@ -5413,34 +5455,7 @@ void main() {
       color: Colors.pink[500],
       fontSize: 10.0,
     );
-    final ThemeData themeData = ThemeData();
-
-    await tester.pumpWidget(
-      overlay(
-        child: Theme(
-          data: themeData,
-          child: TextField(
-            decoration: const InputDecoration(
-              hintText: 'Placeholder',
-            ),
-            style: style,
-          ),
-        ),
-      ),
-    );
-
-    final Text hintText = tester.widget(find.text('Placeholder'));
-    expect(hintText.style!.color, themeData.colorScheme.onSurfaceVariant);
-    expect(hintText.style!.fontSize, style.fontSize);
-  });
-
-  testWidgets('Material2 - TextField with default hintStyle', (WidgetTester tester) async {
-    final TextStyle style = TextStyle(
-      color: Colors.pink[500],
-      fontSize: 10.0,
-    );
     final ThemeData themeData = ThemeData(
-      useMaterial3: false,
       hintColor: Colors.blue[500],
     );
 

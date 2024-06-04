@@ -2835,8 +2835,10 @@ void main() {
           expect(getHintOpacity(tester), 1.0);
 
           final ThemeData theme = Theme.of(tester.element(findDecorator()));
-          final Color expectedColor = theme.colorScheme.onSurfaceVariant;
-          final TextStyle expectedStyle = theme.textTheme.bodyLarge!.copyWith(color: expectedColor);
+          // TODO(bleroux): from M3 specification, it should be theme.colorScheme.onSurface.
+          final Color expectedColor = theme.hintColor;
+          // TODO(bleroux): from M3 specification, it should be textTheme.bodyLarge.
+          final TextStyle expectedStyle = theme.textTheme.titleMedium!.copyWith(color: expectedColor);
           expect(getHintStyle(tester), expectedStyle);
         });
       });
@@ -2899,8 +2901,10 @@ void main() {
           expect(getHintOpacity(tester), 1.0);
 
           final ThemeData theme = Theme.of(tester.element(findDecorator()));
-          final Color expectedColor = theme.colorScheme.onSurface.withOpacity(0.38);
-          final TextStyle expectedStyle = theme.textTheme.bodyLarge!.copyWith(color: expectedColor);
+          // TODO(bleroux): from M3 specification, it should be theme.colorScheme.onSurface.withOpacity(0.38).
+          final Color expectedColor = theme.disabledColor;
+          // TODO(bleroux): from M3 specification, it should be textTheme.bodyLarge.
+          final TextStyle expectedStyle = theme.textTheme.titleMedium!.copyWith(color: expectedColor);
           expect(getHintStyle(tester), expectedStyle);
         });
       });
@@ -2963,8 +2967,10 @@ void main() {
           expect(getHintOpacity(tester), 1.0);
 
           final ThemeData theme = Theme.of(tester.element(findDecorator()));
-          final Color expectedColor = theme.colorScheme.onSurfaceVariant;
-          final TextStyle expectedStyle = theme.textTheme.bodyLarge!.copyWith(color: expectedColor);
+          // TODO(bleroux): from M3 specification, it should be theme.colorScheme.onSurface.
+          final Color expectedColor = theme.hintColor;
+          // TODO(bleroux): from M3 specification, it should be textTheme.bodyLarge.
+          final TextStyle expectedStyle = theme.textTheme.titleMedium!.copyWith(color: expectedColor);
           expect(getHintStyle(tester), expectedStyle);
         });
       });
@@ -3027,8 +3033,10 @@ void main() {
           expect(getHintOpacity(tester), 1.0);
 
           final ThemeData theme = Theme.of(tester.element(findDecorator()));
-          final Color expectedColor = theme.colorScheme.onSurfaceVariant;
-          final TextStyle expectedStyle = theme.textTheme.bodyLarge!.copyWith(color: expectedColor);
+          // TODO(bleroux): from M3 specification, it should be theme.colorScheme.onSurface.
+          final Color expectedColor = theme.hintColor;
+          // TODO(bleroux): from M3 specification, it should be textTheme.bodyLarge.
+          final TextStyle expectedStyle = theme.textTheme.titleMedium!.copyWith(color: expectedColor);
           expect(getHintStyle(tester), expectedStyle);
         });
       });
@@ -3091,8 +3099,10 @@ void main() {
           expect(getHintOpacity(tester), 1.0);
 
           final ThemeData theme = Theme.of(tester.element(findDecorator()));
-          final Color expectedColor = theme.colorScheme.onSurfaceVariant;
-          final TextStyle expectedStyle = theme.textTheme.bodyLarge!.copyWith(color: expectedColor);
+          // TODO(bleroux): from M3 specification, it should be theme.colorScheme.onSurface.
+          final Color expectedColor = theme.hintColor;
+          // TODO(bleroux): from M3 specification, it should be textTheme.bodyLarge.
+          final TextStyle expectedStyle = theme.textTheme.titleMedium!.copyWith(color: expectedColor);
           expect(getHintStyle(tester), expectedStyle);
         });
       });
@@ -3299,8 +3309,10 @@ void main() {
           expect(getHintOpacity(tester), 1.0);
 
           final ThemeData theme = Theme.of(tester.element(findDecorator()));
-          final Color expectedColor = theme.colorScheme.onSurfaceVariant;
-          final TextStyle expectedStyle = theme.textTheme.bodyLarge!.copyWith(color: expectedColor);
+          // TODO(bleroux): from M3 specification, it should be theme.colorScheme.onSurface.
+          final Color expectedColor = theme.hintColor;
+          // TODO(bleroux): from M3 specification, it should be textTheme.bodyLarge.
+          final TextStyle expectedStyle = theme.textTheme.titleMedium!.copyWith(color: expectedColor);
           expect(getHintStyle(tester), expectedStyle);
         });
       });
@@ -3411,8 +3423,10 @@ void main() {
           expect(getHintOpacity(tester), 1.0);
 
           final ThemeData theme = Theme.of(tester.element(findDecorator()));
-          final Color expectedColor = theme.colorScheme.onSurfaceVariant;
-          final TextStyle expectedStyle = theme.textTheme.bodyLarge!.copyWith(color: expectedColor);
+          // TODO(bleroux): from M3 specification, it should be theme.colorScheme.onSurface.
+          final Color expectedColor = theme.hintColor;
+          // TODO(bleroux): from M3 specification, it should be textTheme.bodyLarge.
+          final TextStyle expectedStyle = theme.textTheme.titleMedium!.copyWith(color: expectedColor);
           expect(getHintStyle(tester), expectedStyle);
         });
       });
@@ -3475,8 +3489,10 @@ void main() {
           expect(getHintOpacity(tester), 1.0);
 
           final ThemeData theme = Theme.of(tester.element(findDecorator()));
-          final Color expectedColor = theme.colorScheme.onSurface.withOpacity(0.38);
-          final TextStyle expectedStyle = theme.textTheme.bodyLarge!.copyWith(color: expectedColor);
+          // TODO(bleroux): from M3 specification, it should be theme.colorScheme.onSurface.withOpacity(0.38).
+          final Color expectedColor = theme.disabledColor;
+          // TODO(bleroux): from M3 specification, it should be textTheme.bodyLarge.
+          final TextStyle expectedStyle = theme.textTheme.titleMedium!.copyWith(color: expectedColor);
           expect(getHintStyle(tester), expectedStyle);
         });
       });
@@ -3539,8 +3555,10 @@ void main() {
           expect(getHintOpacity(tester), 1.0);
 
           final ThemeData theme = Theme.of(tester.element(findDecorator()));
-          final Color expectedColor = theme.colorScheme.onSurfaceVariant;
-          final TextStyle expectedStyle = theme.textTheme.bodyLarge!.copyWith(color: expectedColor);
+          // TODO(bleroux): from M3 specification, it should be theme.colorScheme.onSurface.
+          final Color expectedColor = theme.hintColor;
+          // TODO(bleroux): from M3 specification, it should be textTheme.bodyLarge.
+          final TextStyle expectedStyle = theme.textTheme.titleMedium!.copyWith(color: expectedColor);
           expect(getHintStyle(tester), expectedStyle);
         });
       });
@@ -3603,8 +3621,10 @@ void main() {
           expect(getHintOpacity(tester), 1.0);
 
           final ThemeData theme = Theme.of(tester.element(findDecorator()));
-          final Color expectedColor = theme.colorScheme.onSurfaceVariant;
-          final TextStyle expectedStyle = theme.textTheme.bodyLarge!.copyWith(color: expectedColor);
+          // TODO(bleroux): from M3 specification, it should be theme.colorScheme.onSurface.
+          final Color expectedColor = theme.hintColor;
+          // TODO(bleroux): from M3 specification, it should be textTheme.bodyLarge.
+          final TextStyle expectedStyle = theme.textTheme.titleMedium!.copyWith(color: expectedColor);
           expect(getHintStyle(tester), expectedStyle);
         });
       });
@@ -3667,8 +3687,10 @@ void main() {
           expect(getHintOpacity(tester), 1.0);
 
           final ThemeData theme = Theme.of(tester.element(findDecorator()));
-          final Color expectedColor = theme.colorScheme.onSurfaceVariant;
-          final TextStyle expectedStyle = theme.textTheme.bodyLarge!.copyWith(color: expectedColor);
+          // TODO(bleroux): from M3 specification, it should be theme.colorScheme.onSurface.
+          final Color expectedColor = theme.hintColor;
+          // TODO(bleroux): from M3 specification, it should be textTheme.bodyLarge.
+          final TextStyle expectedStyle = theme.textTheme.titleMedium!.copyWith(color: expectedColor);
           expect(getHintStyle(tester), expectedStyle);
         });
       });
@@ -3873,8 +3895,10 @@ void main() {
           expect(getHintOpacity(tester), 1.0);
 
           final ThemeData theme = Theme.of(tester.element(findDecorator()));
-          final Color expectedColor = theme.colorScheme.onSurfaceVariant;
-          final TextStyle expectedStyle = theme.textTheme.bodyLarge!.copyWith(color: expectedColor);
+          // TODO(bleroux): from M3 specification, it should be theme.colorScheme.onSurface.
+          final Color expectedColor = theme.hintColor;
+          // TODO(bleroux): from M3 specification, it should be textTheme.bodyLarge.
+          final TextStyle expectedStyle = theme.textTheme.titleMedium!.copyWith(color: expectedColor);
           expect(getHintStyle(tester), expectedStyle);
         });
       });
@@ -5258,132 +5282,1145 @@ void main() {
     });
   });
 
-  // This is a regression test for https://github.com/flutter/flutter/issues/139916.
-  testWidgets('Prefix ignores pointer when hidden', (WidgetTester tester) async {
-    bool tapped = false;
+  group('Material3 - InputDecoration prefix/suffix', () {
+    const IconData prefixIcon = Icons.search;
+    const IconData suffixIcon = Icons.cancel_outlined;
 
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
-              return TextField(
-                decoration: InputDecoration(
-                  labelText: 'label',
-                  prefix: GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        tapped = true;
-                      });
-                    },
-                    child: const Icon(Icons.search),
-                  ),
-                ),
-              );
-            }
+    Finder findPrefixIcon() {
+      return find.byIcon(prefixIcon);
+    }
+
+    Rect getPrefixIconRect(WidgetTester tester) {
+      return tester.getRect(findPrefixIcon());
+    }
+
+    Finder findPrefixIconInnerRichText() {
+      return find.descendant(of: findPrefixIcon(), matching: find.byType(RichText));
+    }
+
+    TextStyle getPrefixIconStyle(WidgetTester tester) {
+      return tester.widget<RichText>(findPrefixIconInnerRichText()).text.style!;
+    }
+
+    Finder findSuffixIcon() {
+      return find.byIcon(suffixIcon);
+    }
+
+    Rect getSuffixIconRect(WidgetTester tester) {
+      return tester.getRect(findSuffixIcon());
+    }
+
+    Finder findSuffixIconInnerRichText() {
+      return find.descendant(of: findSuffixIcon(), matching: find.byType(RichText));
+    }
+
+    TextStyle getSuffixIconStyle(WidgetTester tester) {
+      return tester.widget<RichText>(findSuffixIconInnerRichText()).text.style!;
+    }
+
+    group('for filled text field', () {
+      group('when field is enabled', () {
+        testWidgets('prefixIcon is correctly positioned', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+                prefixIcon: Icon(prefixIcon),
+              ),
+            ),
+          );
+
+          // By default, the prefix icon is rendered inside a 48x48 constrained box.
+          expect(getPrefixIconRect(tester).size, const Size(48.0, 48.0));
+          // The icon size is 24 per Material 3 spec.
+          expect(getPrefixIconStyle(tester).fontSize, 24.0);
+          // Prefix icon is vertically centered inside the container.
+          expect(getPrefixIconRect(tester).center.dy, getContainerRect(tester).center.dy);
+          // Left padding is 12 per Material 3 spec.
+          expect(tester.getRect(findPrefixIconInnerRichText()).left, 12.0);
+          // Check the padding between the prefix icon and the input.
+          // TODO(bleroux): the gap between the icon and the input should be 16 based on M3 specification.
+          // See https://github.com/flutter/flutter/issues/149408.
+          expect(getInputRect(tester).left - tester.getRect(findPrefixIconInnerRichText()).right, 12.0);
+        });
+
+        testWidgets('prefixIcon has correct color', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+                prefixIcon: Icon(prefixIcon),
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findPrefixIcon()));
+          final Color expectedColor = theme.colorScheme.onSurfaceVariant;
+          expect(getPrefixIconStyle(tester).color, expectedColor);
+        });
+
+        testWidgets('suffixIcon is correctly positioned', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+                suffixIcon: Icon(suffixIcon),
+              ),
+            ),
+          );
+
+          // By default, the suffix icon is rendered inside a 48x48 constrained box.
+          expect(getSuffixIconRect(tester).size, const Size(48.0, 48.0));
+          // The icon size is 24 per Material 3 spec.
+          expect(getSuffixIconStyle(tester).fontSize, 24.0);
+          // Suffix icon is vertically centered inside the container.
+          expect(getSuffixIconRect(tester).center.dy, getContainerRect(tester).center.dy);
+          // Right padding is 12 per Material 3 spec.
+          expect(getDecoratorRect(tester).right - tester.getRect(findSuffixIconInnerRichText()).right, 12.0);
+          // Check the padding between the suffix icon and the input.
+          // TODO(bleroux): the gap between the icon and the input should be 16 based on M3 specification.
+          // See https://github.com/flutter/flutter/issues/149409.
+          expect(tester.getRect(findSuffixIconInnerRichText()).left - getInputRect(tester).right, 12.0);
+        });
+
+        testWidgets('suffixIcon has correct color', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+                suffixIcon: Icon(suffixIcon),
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findSuffixIcon()));
+          final Color expectedColor = theme.colorScheme.onSurfaceVariant;
+          expect(getSuffixIconStyle(tester).color, expectedColor);
+        });
+      });
+
+      group('when field is disabled', () {
+        testWidgets('prefixIcon is correctly positioned', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              decoration: const InputDecoration(
+                filled: true,
+                enabled: false,
+                prefixIcon: Icon(prefixIcon),
+                labelText: labelText,
+              ),
+            ),
+          );
+
+          // By default, the prefix icon is rendered inside a 48x48 constrained box.
+          expect(getPrefixIconRect(tester).size, const Size(48.0, 48.0));
+          // The icon size is 24 per Material 3 spec.
+          expect(getPrefixIconStyle(tester).fontSize, 24.0);
+          // Prefix icon is vertically centered inside the container.
+          expect(getPrefixIconRect(tester).center.dy, getContainerRect(tester).center.dy);
+          // Left padding is 12 per Material 3 spec.
+          expect(tester.getRect(findPrefixIconInnerRichText()).left, 12.0);
+          // Check the padding between the prefix icon and the input.
+          // TODO(bleroux): the gap between the icon and the input should be 16 based on M3 specification.
+          // See https://github.com/flutter/flutter/issues/149408.
+          expect(getInputRect(tester).left - tester.getRect(findPrefixIconInnerRichText()).right, 12.0);
+        });
+
+        testWidgets('prefixIcon has correct color', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              decoration: const InputDecoration(
+                filled: true,
+                enabled: false,
+                labelText: labelText,
+                prefixIcon: Icon(prefixIcon),
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findPrefixIcon()));
+          final Color expectedColor = theme.colorScheme.onSurface.withOpacity(0.38);
+          expect(getPrefixIconStyle(tester).color, expectedColor);
+        });
+
+        testWidgets('suffixIcon is correctly positioned', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              decoration: const InputDecoration(
+                filled: true,
+                enabled: false,
+                labelText: labelText,
+                suffixIcon: Icon(suffixIcon),
+              ),
+            ),
+          );
+
+          // By default, the suffix icon is rendered inside a 48x48 constrained box.
+          expect(getSuffixIconRect(tester).size, const Size(48.0, 48.0));
+          // The icon size is 24 per Material 3 spec.
+          expect(getSuffixIconStyle(tester).fontSize, 24.0);
+          // Suffix icon is vertically centered inside the container.
+          expect(getSuffixIconRect(tester).center.dy, getContainerRect(tester).center.dy);
+          // Right padding is 12 per Material 3 spec.
+          expect(getDecoratorRect(tester).right - tester.getRect(findSuffixIconInnerRichText()).right, 12.0);
+          // Check the padding between the suffix icon and the input.
+          // TODO(bleroux): the gap between the icon and the input should be 16 based on M3 specification.
+          // See https://github.com/flutter/flutter/issues/149409.
+          expect(tester.getRect(findSuffixIconInnerRichText()).left - getInputRect(tester).right, 12.0);
+        });
+
+        testWidgets('suffixIcon has correct color', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              decoration: const InputDecoration(
+                filled: true,
+                enabled: false,
+                labelText: labelText,
+                suffixIcon: Icon(suffixIcon),
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findSuffixIcon()));
+          final Color expectedColor = theme.colorScheme.onSurface.withOpacity(0.38);
+          expect(getSuffixIconStyle(tester).color, expectedColor);
+        });
+      });
+
+      group('when field is hovered', () {
+        testWidgets('prefixIcon is correctly positioned', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isHovering: true,
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+                prefixIcon: Icon(prefixIcon),
+              ),
+            ),
+          );
+
+          // By default, the prefix icon is rendered inside a 48x48 constrained box.
+          expect(getPrefixIconRect(tester).size, const Size(48.0, 48.0));
+          // The icon size is 24 per Material 3 spec.
+          expect(getPrefixIconStyle(tester).fontSize, 24.0);
+          // Prefix icon is vertically centered inside the container.
+          expect(getPrefixIconRect(tester).center.dy, getContainerRect(tester).center.dy);
+          // Left padding is 12 per Material 3 spec.
+          expect(tester.getRect(findPrefixIconInnerRichText()).left, 12.0);
+          // Check the padding between the prefix icon and the input.
+          // TODO(bleroux): the gap between the icon and the input should be 16 based on M3 specification.
+          // See https://github.com/flutter/flutter/issues/149408.
+          expect(getInputRect(tester).left - tester.getRect(findPrefixIconInnerRichText()).right, 12.0);
+        });
+
+        testWidgets('prefixIcon has correct color', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isHovering: true,
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+                prefixIcon: Icon(prefixIcon),
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findPrefixIcon()));
+          final Color expectedColor = theme.colorScheme.onSurfaceVariant;
+          expect(getPrefixIconStyle(tester).color, expectedColor);
+        });
+
+        testWidgets('suffixIcon is correctly positioned', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isHovering: true,
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+                suffixIcon: Icon(suffixIcon),
+              ),
+            ),
+          );
+
+          // By default, the suffix icon is rendered inside a 48x48 constrained box.
+          expect(getSuffixIconRect(tester).size, const Size(48.0, 48.0));
+          // The icon size is 24 per Material 3 spec.
+          expect(getSuffixIconStyle(tester).fontSize, 24.0);
+          // Suffix icon is vertically centered inside the container.
+          expect(getSuffixIconRect(tester).center.dy, getContainerRect(tester).center.dy);
+          // Right padding is 12 per Material 3 spec.
+          expect(getDecoratorRect(tester).right - tester.getRect(findSuffixIconInnerRichText()).right, 12.0);
+          // Check the padding between the suffix icon and the input.
+          // TODO(bleroux): the gap between the icon and the input should be 16 based on M3 specification.
+          // See https://github.com/flutter/flutter/issues/149409.
+          expect(tester.getRect(findSuffixIconInnerRichText()).left - getInputRect(tester).right, 12.0);
+        });
+
+        testWidgets('suffixIcon has correct color', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isHovering: true,
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+                suffixIcon: Icon(suffixIcon),
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findSuffixIcon()));
+          final Color expectedColor = theme.colorScheme.onSurfaceVariant;
+          expect(getSuffixIconStyle(tester).color, expectedColor);
+        });
+      });
+
+      group('when field is focused', () {
+        testWidgets('prefixIcon is correctly positioned', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isFocused: true,
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+                prefixIcon: Icon(prefixIcon),
+              ),
+            ),
+          );
+
+          // By default, the prefix icon is rendered inside a 48x48 constrained box.
+          expect(getPrefixIconRect(tester).size, const Size(48.0, 48.0));
+          // The icon size is 24 per Material 3 spec.
+          expect(getPrefixIconStyle(tester).fontSize, 24.0);
+          // Prefix icon is vertically centered inside the container.
+          expect(getPrefixIconRect(tester).center.dy, getContainerRect(tester).center.dy);
+          // Left padding is 12 per Material 3 spec.
+          expect(tester.getRect(findPrefixIconInnerRichText()).left, 12.0);
+          // Check the padding between the prefix icon and the input.
+          // TODO(bleroux): the gap between the icon and the input should be 16 based on M3 specification.
+          // See https://github.com/flutter/flutter/issues/149408.
+          expect(getInputRect(tester).left - tester.getRect(findPrefixIconInnerRichText()).right, 12.0);
+        });
+
+        testWidgets('prefixIcon has correct color', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isFocused: true,
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+                prefixIcon: Icon(prefixIcon),
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findPrefixIcon()));
+          final Color expectedColor = theme.colorScheme.onSurfaceVariant;
+          expect(getPrefixIconStyle(tester).color, expectedColor);
+        });
+
+        testWidgets('suffixIcon is correctly positioned', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isFocused: true,
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+                suffixIcon: Icon(suffixIcon),
+              ),
+            ),
+          );
+
+          // By default, the suffix icon is rendered inside a 48x48 constrained box.
+          expect(getSuffixIconRect(tester).size, const Size(48.0, 48.0));
+          // The icon size is 24 per Material 3 spec.
+          expect(getSuffixIconStyle(tester).fontSize, 24.0);
+          // Suffix icon is vertically centered inside the container.
+          expect(getSuffixIconRect(tester).center.dy, getContainerRect(tester).center.dy);
+          // Right padding is 12 per Material 3 spec.
+          expect(getDecoratorRect(tester).right - tester.getRect(findSuffixIconInnerRichText()).right, 12.0);
+          // Check the padding between the suffix icon and the input.
+          // TODO(bleroux): the gap between the icon and the input should be 16 based on M3 specification.
+          // See https://github.com/flutter/flutter/issues/149409.
+          expect(tester.getRect(findSuffixIconInnerRichText()).left - getInputRect(tester).right, 12.0);
+        });
+
+        testWidgets('suffixIcon has correct color', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isFocused: true,
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+                suffixIcon: Icon(suffixIcon),
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findSuffixIcon()));
+          final Color expectedColor = theme.colorScheme.onSurfaceVariant;
+          expect(getSuffixIconStyle(tester).color, expectedColor);
+        });
+      });
+
+      group('when field is in error', () {
+        testWidgets('prefixIcon is correctly positioned', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+                errorText: errorText,
+                prefixIcon: Icon(prefixIcon),
+              ),
+            ),
+          );
+
+          // By default, the prefix icon is rendered inside a 48x48 constrained box.
+          expect(getPrefixIconRect(tester).size, const Size(48.0, 48.0));
+          // The icon size is 24 per Material 3 spec.
+          expect(getPrefixIconStyle(tester).fontSize, 24.0);
+          // Suffix icon is vertically centered inside the container.
+          expect(getPrefixIconRect(tester).center.dy, getContainerRect(tester).center.dy);
+          // Left padding is 12 per Material 3 spec.
+          expect(tester.getRect(findPrefixIconInnerRichText()).left, 12.0);
+          // Check the padding between the prefix icon and the input.
+          // TODO(bleroux): the gap between the icon and the input should be 16 based on M3 specification.
+          // See https://github.com/flutter/flutter/issues/149408.
+          expect(getInputRect(tester).left - tester.getRect(findPrefixIconInnerRichText()).right, 12.0);
+        });
+
+        testWidgets('prefixIcon has correct color', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+                errorText: errorText,
+                prefixIcon: Icon(prefixIcon),
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findPrefixIcon()));
+          final Color expectedColor = theme.colorScheme.onSurfaceVariant;
+          expect(getPrefixIconStyle(tester).color, expectedColor);
+        });
+
+        testWidgets('prefixIcon has correct color when hovered', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isHovering: true,
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+                errorText: errorText,
+                prefixIcon: Icon(prefixIcon),
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findPrefixIcon()));
+          final Color expectedColor = theme.colorScheme.onSurfaceVariant;
+          expect(getPrefixIconStyle(tester).color, expectedColor);
+        });
+
+        testWidgets('suffixIcon is correctly positioned', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+                errorText: errorText,
+                suffixIcon: Icon(suffixIcon),
+              ),
+            ),
+          );
+
+          // By default, the suffix icon is rendered inside a 48x48 constrained box.
+          expect(getSuffixIconRect(tester).size, const Size(48.0, 48.0));
+          // The icon size is 24 per Material 3 spec.
+          expect(getSuffixIconStyle(tester).fontSize, 24.0);
+          // Suffix icon is vertically centered inside the container.
+          expect(getSuffixIconRect(tester).center.dy, getContainerRect(tester).center.dy);
+          // Right padding is 12 per Material 3 spec.
+          expect(getDecoratorRect(tester).right - tester.getRect(findSuffixIconInnerRichText()).right, 12.0);
+          // Check the padding between the suffix icon and the input.
+          // TODO(bleroux): the gap between the icon and the input should be 16 based on M3 specification.
+          // See https://github.com/flutter/flutter/issues/149409.
+          expect(tester.getRect(findSuffixIconInnerRichText()).left - getInputRect(tester).right, 12.0);
+        });
+
+        testWidgets('suffixIcon has correct color', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+                errorText: errorText,
+                suffixIcon: Icon(suffixIcon),
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findSuffixIcon()));
+          final Color expectedColor = theme.colorScheme.error;
+          expect(getSuffixIconStyle(tester).color, expectedColor);
+        });
+
+        testWidgets('suffixIcon has correct color when hovered', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isHovering: true,
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+                errorText: errorText,
+                suffixIcon: Icon(suffixIcon),
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findSuffixIcon()));
+          // TODO(bleroux): based on M3 spec, it should be theme.colorScheme.onErrorContainer.
+          // See https://github.com/flutter/flutter/issues/149410.
+          final Color expectedColor = theme.colorScheme.error;
+          expect(getSuffixIconStyle(tester).color, expectedColor);
+        });
+      });
+    });
+
+    group('for outlined text field', () {
+      group('when field is enabled', () {
+        testWidgets('prefixIcon is correctly positioned', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: labelText,
+                prefixIcon: Icon(prefixIcon),
+              ),
+            ),
+          );
+
+          // By default, the prefix icon is rendered inside a 48x48 constrained box.
+          expect(getPrefixIconRect(tester).size, const Size(48.0, 48.0));
+          // The icon size is 24 per Material 3 spec.
+          expect(getPrefixIconStyle(tester).fontSize, 24.0);
+          // Prefix icon is vertically centered inside the container.
+          expect(getPrefixIconRect(tester).center.dy, getContainerRect(tester).center.dy);
+          // Left padding is 12 per Material 3 spec.
+          expect(tester.getRect(findPrefixIconInnerRichText()).left, 12.0);
+          // Check the padding between the prefix icon and the input.
+          // TODO(bleroux): the gap between the icon and the input should be 16 based on M3 specification.
+          // See https://github.com/flutter/flutter/issues/149408.
+          expect(getInputRect(tester).left - tester.getRect(findPrefixIconInnerRichText()).right, 12.0);
+        });
+
+        testWidgets('prefixIcon has correct color', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: labelText,
+                prefixIcon: Icon(prefixIcon),
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findPrefixIcon()));
+          final Color expectedColor = theme.colorScheme.onSurfaceVariant;
+          expect(getPrefixIconStyle(tester).color, expectedColor);
+        });
+
+        testWidgets('suffixIcon is correctly positioned', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: labelText,
+                suffixIcon: Icon(suffixIcon),
+              ),
+            ),
+          );
+
+          // By default, the suffix icon is rendered inside a 48x48 constrained box.
+          expect(getSuffixIconRect(tester).size, const Size(48.0, 48.0));
+          // The icon size is 24 per Material 3 spec.
+          expect(getSuffixIconStyle(tester).fontSize, 24.0);
+          // Suffix icon is vertically centered inside the container.
+          expect(getSuffixIconRect(tester).center.dy, getContainerRect(tester).center.dy);
+          // Right padding is 12 per Material 3 spec.
+          expect(getDecoratorRect(tester).right - tester.getRect(findSuffixIconInnerRichText()).right, 12.0);
+          // Check the padding between the suffix icon and the input.
+          // TODO(bleroux): the gap between the icon and the input should be 16 based on M3 specification.
+          // See https://github.com/flutter/flutter/issues/149409.
+          expect(tester.getRect(findSuffixIconInnerRichText()).left - getInputRect(tester).right, 12.0);
+        });
+
+        testWidgets('suffixIcon has correct color', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: labelText,
+                suffixIcon: Icon(suffixIcon),
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findSuffixIcon()));
+          final Color expectedColor = theme.colorScheme.onSurfaceVariant;
+          expect(getSuffixIconStyle(tester).color, expectedColor);
+        });
+      });
+
+      group('when field is disabled', () {
+        testWidgets('prefixIcon is correctly positioned', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                enabled: false,
+                prefixIcon: Icon(prefixIcon),
+                labelText: labelText,
+              ),
+            ),
+          );
+
+          // By default, the prefix icon is rendered inside a 48x48 constrained box.
+          expect(getPrefixIconRect(tester).size, const Size(48.0, 48.0));
+          // The icon size is 24 per Material 3 spec.
+          expect(getPrefixIconStyle(tester).fontSize, 24.0);
+          // Prefix icon is vertically centered inside the container.
+          expect(getPrefixIconRect(tester).center.dy, getContainerRect(tester).center.dy);
+          // Left padding is 12 per Material 3 spec.
+          expect(tester.getRect(findPrefixIconInnerRichText()).left, 12.0);
+          // Check the padding between the prefix icon and the input.
+          // TODO(bleroux): the gap between the icon and the input should be 16 based on M3 specification.
+          // See https://github.com/flutter/flutter/issues/149408.
+          expect(getInputRect(tester).left - tester.getRect(findPrefixIconInnerRichText()).right, 12.0);
+        });
+
+        testWidgets('prefixIcon has correct color', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                enabled: false,
+                labelText: labelText,
+                prefixIcon: Icon(prefixIcon),
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findPrefixIcon()));
+          final Color expectedColor = theme.colorScheme.onSurface.withOpacity(0.38);
+          expect(getPrefixIconStyle(tester).color, expectedColor);
+        });
+
+        testWidgets('suffixIcon is correctly positioned', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                enabled: false,
+                labelText: labelText,
+                suffixIcon: Icon(suffixIcon),
+              ),
+            ),
+          );
+
+          // By default, the suffix icon is rendered inside a 48x48 constrained box.
+          expect(getSuffixIconRect(tester).size, const Size(48.0, 48.0));
+          // The icon size is 24 per Material 3 spec.
+          expect(getSuffixIconStyle(tester).fontSize, 24.0);
+          // Suffix icon is vertically centered inside the container.
+          expect(getSuffixIconRect(tester).center.dy, getContainerRect(tester).center.dy);
+          // Right padding is 12 per Material 3 spec.
+          expect(getDecoratorRect(tester).right - tester.getRect(findSuffixIconInnerRichText()).right, 12.0);
+          // Check the padding between the suffix icon and the input.
+          // TODO(bleroux): the gap between the icon and the input should be 16 based on M3 specification.
+          // See https://github.com/flutter/flutter/issues/149409.
+          expect(tester.getRect(findSuffixIconInnerRichText()).left - getInputRect(tester).right, 12.0);
+        });
+
+        testWidgets('suffixIcon has correct color', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                enabled: false,
+                labelText: labelText,
+                suffixIcon: Icon(suffixIcon),
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findSuffixIcon()));
+          final Color expectedColor = theme.colorScheme.onSurface.withOpacity(0.38);
+          expect(getSuffixIconStyle(tester).color, expectedColor);
+        });
+      });
+
+      group('when field is hovered', () {
+        testWidgets('prefixIcon is correctly positioned', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isHovering: true,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: labelText,
+                prefixIcon: Icon(prefixIcon),
+              ),
+            ),
+          );
+
+          // By default, the prefix icon is rendered inside a 48x48 constrained box.
+          expect(getPrefixIconRect(tester).size, const Size(48.0, 48.0));
+          // The icon size is 24 per Material 3 spec.
+          expect(getPrefixIconStyle(tester).fontSize, 24.0);
+          // Prefix icon is vertically centered inside the container.
+          expect(getPrefixIconRect(tester).center.dy, getContainerRect(tester).center.dy);
+          // Left padding is 12 per Material 3 spec.
+          expect(tester.getRect(findPrefixIconInnerRichText()).left, 12.0);
+          // Check the padding between the prefix icon and the input.
+          // TODO(bleroux): the gap between the icon and the input should be 16 based on M3 specification.
+          // See https://github.com/flutter/flutter/issues/149408.
+          expect(getInputRect(tester).left - tester.getRect(findPrefixIconInnerRichText()).right, 12.0);
+        });
+
+        testWidgets('prefixIcon has correct color', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isHovering: true,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: labelText,
+                prefixIcon: Icon(prefixIcon),
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findPrefixIcon()));
+          final Color expectedColor = theme.colorScheme.onSurfaceVariant;
+          expect(getPrefixIconStyle(tester).color, expectedColor);
+        });
+
+        testWidgets('suffixIcon is correctly positioned', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isHovering: true,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: labelText,
+                suffixIcon: Icon(suffixIcon),
+              ),
+            ),
+          );
+
+          // By default, the suffix icon is rendered inside a 48x48 constrained box.
+          expect(getSuffixIconRect(tester).size, const Size(48.0, 48.0));
+          // The icon size is 24 per Material 3 spec.
+          expect(getSuffixIconStyle(tester).fontSize, 24.0);
+          // Suffix icon is vertically centered inside the container.
+          expect(getSuffixIconRect(tester).center.dy, getContainerRect(tester).center.dy);
+          // Right padding is 12 per Material 3 spec.
+          expect(getDecoratorRect(tester).right - tester.getRect(findSuffixIconInnerRichText()).right, 12.0);
+          // Check the padding between the suffix icon and the input.
+          // TODO(bleroux): the gap between the icon and the input should be 16 based on M3 specification.
+          // See https://github.com/flutter/flutter/issues/149409.
+          expect(tester.getRect(findSuffixIconInnerRichText()).left - getInputRect(tester).right, 12.0);
+        });
+
+        testWidgets('suffixIcon has correct color', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isHovering: true,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: labelText,
+                suffixIcon: Icon(suffixIcon),
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findSuffixIcon()));
+          final Color expectedColor = theme.colorScheme.onSurfaceVariant;
+          expect(getSuffixIconStyle(tester).color, expectedColor);
+        });
+      });
+
+      group('when field is focused', () {
+        testWidgets('prefixIcon is correctly positioned', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isFocused: true,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: labelText,
+                prefixIcon: Icon(prefixIcon),
+              ),
+            ),
+          );
+
+          // By default, the prefix icon is rendered inside a 48x48 constrained box.
+          expect(getPrefixIconRect(tester).size, const Size(48.0, 48.0));
+          // The icon size is 24 per Material 3 spec.
+          expect(getPrefixIconStyle(tester).fontSize, 24.0);
+          // Prefix icon is vertically centered inside the container.
+          expect(getPrefixIconRect(tester).center.dy, getContainerRect(tester).center.dy);
+          // Left padding is 12 per Material 3 spec.
+          expect(tester.getRect(findPrefixIconInnerRichText()).left, 12.0);
+          // Check the padding between the prefix icon and the input.
+          // TODO(bleroux): the gap between the icon and the input should be 16 based on M3 specification.
+          // See https://github.com/flutter/flutter/issues/149408.
+          expect(getInputRect(tester).left - tester.getRect(findPrefixIconInnerRichText()).right, 12.0);
+        });
+
+        testWidgets('prefixIcon has correct color', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isFocused: true,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: labelText,
+                prefixIcon: Icon(prefixIcon),
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findPrefixIcon()));
+          final Color expectedColor = theme.colorScheme.onSurfaceVariant;
+          expect(getPrefixIconStyle(tester).color, expectedColor);
+        });
+
+        testWidgets('suffixIcon is correctly positioned', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isFocused: true,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: labelText,
+                suffixIcon: Icon(suffixIcon),
+              ),
+            ),
+          );
+
+          // By default, the suffix icon is rendered inside a 48x48 constrained box.
+          expect(getSuffixIconRect(tester).size, const Size(48.0, 48.0));
+          // The icon size is 24 per Material 3 spec.
+          expect(getSuffixIconStyle(tester).fontSize, 24.0);
+          // Suffix icon is vertically centered inside the container.
+          expect(getSuffixIconRect(tester).center.dy, getContainerRect(tester).center.dy);
+          // Right padding is 12 per Material 3 spec.
+          expect(getDecoratorRect(tester).right - tester.getRect(findSuffixIconInnerRichText()).right, 12.0);
+          // Check the padding between the suffix icon and the input.
+          // TODO(bleroux): the gap between the icon and the input should be 16 based on M3 specification.
+          // See https://github.com/flutter/flutter/issues/149409.
+          expect(tester.getRect(findSuffixIconInnerRichText()).left - getInputRect(tester).right, 12.0);
+        });
+
+        testWidgets('suffixIcon has correct color', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isFocused: true,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: labelText,
+                suffixIcon: Icon(suffixIcon),
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findSuffixIcon()));
+          final Color expectedColor = theme.colorScheme.onSurfaceVariant;
+          expect(getSuffixIconStyle(tester).color, expectedColor);
+        });
+      });
+
+      group('when field is in error', () {
+        testWidgets('prefixIcon is correctly positioned', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: labelText,
+                errorText: errorText,
+                prefixIcon: Icon(prefixIcon),
+              ),
+            ),
+          );
+
+          // By default, the prefix icon is rendered inside a 48x48 constrained box.
+          expect(getPrefixIconRect(tester).size, const Size(48.0, 48.0));
+          // The icon size is 24 per Material 3 spec.
+          expect(getPrefixIconStyle(tester).fontSize, 24.0);
+          // Suffix icon is vertically centered inside the container.
+          expect(getPrefixIconRect(tester).center.dy, getContainerRect(tester).center.dy);
+          // Left padding is 12 per Material 3 spec.
+          expect(tester.getRect(findPrefixIconInnerRichText()).left, 12.0);
+          // Check the padding between the prefix icon and the input.
+          // TODO(bleroux): the gap between the icon and the input should be 16 based on M3 specification.
+          // See https://github.com/flutter/flutter/issues/149408.
+          expect(getInputRect(tester).left - tester.getRect(findPrefixIconInnerRichText()).right, 12.0);
+        });
+
+        testWidgets('prefixIcon has correct color', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: labelText,
+                errorText: errorText,
+                prefixIcon: Icon(prefixIcon),
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findPrefixIcon()));
+          final Color expectedColor = theme.colorScheme.onSurfaceVariant;
+          expect(getPrefixIconStyle(tester).color, expectedColor);
+        });
+
+        testWidgets('prefixIcon has correct color when hovered', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isHovering: true,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: labelText,
+                errorText: errorText,
+                prefixIcon: Icon(prefixIcon),
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findPrefixIcon()));
+          final Color expectedColor = theme.colorScheme.onSurfaceVariant;
+          expect(getPrefixIconStyle(tester).color, expectedColor);
+        });
+
+        testWidgets('suffixIcon is correctly positioned', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: labelText,
+                errorText: errorText,
+                suffixIcon: Icon(suffixIcon),
+              ),
+            ),
+          );
+
+          // By default, the suffix icon is rendered inside a 48x48 constrained box.
+          expect(getSuffixIconRect(tester).size, const Size(48.0, 48.0));
+          // The icon size is 24 per Material 3 spec.
+          expect(getSuffixIconStyle(tester).fontSize, 24.0);
+          // Suffix icon is vertically centered inside the container.
+          expect(getSuffixIconRect(tester).center.dy, getContainerRect(tester).center.dy);
+          // Right padding is 12 per Material 3 spec.
+          expect(getDecoratorRect(tester).right - tester.getRect(findSuffixIconInnerRichText()).right, 12.0);
+          // Check the padding between the suffix icon and the input.
+          // TODO(bleroux): the gap between the icon and the input should be 16 based on M3 specification.
+          // See https://github.com/flutter/flutter/issues/149409.
+          expect(tester.getRect(findSuffixIconInnerRichText()).left - getInputRect(tester).right, 12.0);
+        });
+
+        testWidgets('suffixIcon has correct color', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: labelText,
+                errorText: errorText,
+                suffixIcon: Icon(suffixIcon),
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findSuffixIcon()));
+          final Color expectedColor = theme.colorScheme.error;
+          expect(getSuffixIconStyle(tester).color, expectedColor);
+        });
+
+        testWidgets('suffixIcon has correct color when hovered', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isHovering: true,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: labelText,
+                errorText: errorText,
+                suffixIcon: Icon(suffixIcon),
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findSuffixIcon()));
+          // TODO(bleroux): based on M3 spec, it should be theme.colorScheme.onErrorContainer.
+          // See https://github.com/flutter/flutter/issues/149410.
+          final Color expectedColor = theme.colorScheme.error;
+          expect(getSuffixIconStyle(tester).color, expectedColor);
+        });
+      });
+    });
+
+    testWidgets('InputDecorator iconColor/prefixIconColor/suffixIconColor', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Material(
+            child: TextField(
+              decoration: InputDecoration(
+                icon: Icon(Icons.cabin),
+                prefixIcon: Icon(Icons.sailing),
+                suffixIcon: Icon(Icons.close),
+                iconColor: Colors.amber,
+                prefixIconColor: Colors.green,
+                suffixIconColor: Colors.red,
+                filled: true,
+              ),
+            ),
           ),
         ),
-      ),
-    );
+      );
 
-    expect(tapped, isFalse);
+      expect(tester.widget<IconTheme>(find.widgetWithIcon(IconTheme,Icons.cabin).first).data.color, Colors.amber);
+      expect(tester.widget<IconTheme>(find.widgetWithIcon(IconTheme,Icons.sailing).first).data.color, Colors.green);
+      expect(tester.widget<IconTheme>(find.widgetWithIcon(IconTheme,Icons.close).first).data.color, Colors.red);
+    });
 
-    double prefixOpacity = tester.widget<AnimatedOpacity>(find.ancestor(
-      of: find.byType(Icon),
-      matching: find.byType(AnimatedOpacity),
-    )).opacity;
+    // This is a regression test for https://github.com/flutter/flutter/issues/139916.
+    testWidgets('Prefix ignores pointer when hidden', (WidgetTester tester) async {
+      bool tapped = false;
 
-    // Initially the prefix icon should be hidden.
-    expect(prefixOpacity, 0.0);
-
-    await tester.tap(find.byType(Icon), warnIfMissed: false); // Not expected to find the target.
-    await tester.pump();
-
-    // The suffix icon should ignore pointer events when hidden.
-    expect(tapped, isFalse);
-
-    // Tap the text field to show the prefix icon.
-    await tester.tap(find.byType(TextField));
-    await tester.pump();
-
-    prefixOpacity = tester.widget<AnimatedOpacity>(find.ancestor(
-      of: find.byType(Icon),
-      matching: find.byType(AnimatedOpacity),
-    )).opacity;
-
-    // The prefix icon should be visible.
-    expect(prefixOpacity, 1.0);
-
-    // Tap the prefix icon.
-    await tester.tap(find.byType(Icon));
-    await tester.pump();
-
-    // The prefix icon should be tapped.
-    expect(tapped, isTrue);
-  });
-
-  // This is a regression test for https://github.com/flutter/flutter/issues/139916.
-  testWidgets('Suffix ignores pointer when hidden', (WidgetTester tester) async {
-    bool tapped = false;
-
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
-              return TextField(
-                decoration: InputDecoration(
-                  labelText: 'label',
-                  suffix: GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        tapped = true;
-                      });
-                    },
-                    child: const Icon(Icons.search),
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return TextField(
+                  decoration: InputDecoration(
+                    labelText: 'label',
+                    prefix: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          tapped = true;
+                        });
+                      },
+                      child: const Icon(Icons.search),
+                    ),
                   ),
-                ),
-              );
-            }
+                );
+              }
+            ),
           ),
         ),
-      ),
-    );
+      );
 
-    expect(tapped, isFalse);
+      expect(tapped, isFalse);
 
-    double suffixOpacity = tester.widget<AnimatedOpacity>(find.ancestor(
-      of: find.byType(Icon),
-      matching: find.byType(AnimatedOpacity),
-    )).opacity;
+      double prefixOpacity = tester.widget<AnimatedOpacity>(find.ancestor(
+        of: find.byType(Icon),
+        matching: find.byType(AnimatedOpacity),
+      )).opacity;
 
-    // Initially the suffix icon should be hidden.
-    expect(suffixOpacity, 0.0);
+      // Initially the prefix icon should be hidden.
+      expect(prefixOpacity, 0.0);
 
-    await tester.tap(find.byType(Icon), warnIfMissed: false); // Not expected to find the target.
-    await tester.pump();
+      await tester.tap(find.byType(Icon), warnIfMissed: false); // Not expected to find the target.
+      await tester.pump();
 
-    // The suffix icon should ignore pointer events when hidden.
-    expect(tapped, isFalse);
+      // The suffix icon should ignore pointer events when hidden.
+      expect(tapped, isFalse);
 
-    // Tap the text field to show the suffix icon.
-    await tester.tap(find.byType(TextField));
-    await tester.pump();
+      // Tap the text field to show the prefix icon.
+      await tester.tap(find.byType(TextField));
+      await tester.pump();
 
-    suffixOpacity = tester.widget<AnimatedOpacity>(find.ancestor(
-      of: find.byType(Icon),
-      matching: find.byType(AnimatedOpacity),
-    )).opacity;
+      prefixOpacity = tester.widget<AnimatedOpacity>(find.ancestor(
+        of: find.byType(Icon),
+        matching: find.byType(AnimatedOpacity),
+      )).opacity;
 
-    // The suffix icon should be visible.
-    expect(suffixOpacity, 1.0);
+      // The prefix icon should be visible.
+      expect(prefixOpacity, 1.0);
 
-    // Tap the suffix icon.
-    await tester.tap(find.byType(Icon));
-    await tester.pump();
+      // Tap the prefix icon.
+      await tester.tap(find.byType(Icon));
+      await tester.pump();
 
-    // The suffix icon should be tapped.
-    expect(tapped, isTrue);
+      // The prefix icon should be tapped.
+      expect(tapped, isTrue);
+    });
+
+    // This is a regression test for https://github.com/flutter/flutter/issues/139916.
+    testWidgets('Suffix ignores pointer when hidden', (WidgetTester tester) async {
+      bool tapped = false;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return TextField(
+                  decoration: InputDecoration(
+                    labelText: 'label',
+                    suffix: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          tapped = true;
+                        });
+                      },
+                      child: const Icon(Icons.search),
+                    ),
+                  ),
+                );
+              }
+            ),
+          ),
+        ),
+      );
+
+      expect(tapped, isFalse);
+
+      double suffixOpacity = tester.widget<AnimatedOpacity>(find.ancestor(
+        of: find.byType(Icon),
+        matching: find.byType(AnimatedOpacity),
+      )).opacity;
+
+      // Initially the suffix icon should be hidden.
+      expect(suffixOpacity, 0.0);
+
+      await tester.tap(find.byType(Icon), warnIfMissed: false); // Not expected to find the target.
+      await tester.pump();
+
+      // The suffix icon should ignore pointer events when hidden.
+      expect(tapped, isFalse);
+
+      // Tap the text field to show the suffix icon.
+      await tester.tap(find.byType(TextField));
+      await tester.pump();
+
+      suffixOpacity = tester.widget<AnimatedOpacity>(find.ancestor(
+        of: find.byType(Icon),
+        matching: find.byType(AnimatedOpacity),
+      )).opacity;
+
+      // The suffix icon should be visible.
+      expect(suffixOpacity, 1.0);
+
+      // Tap the suffix icon.
+      await tester.tap(find.byType(Icon));
+      await tester.pump();
+
+      // The suffix icon should be tapped.
+      expect(tapped, isTrue);
+    });
   });
 
   testWidgets('InputDecorator counter text, widget, and null', (WidgetTester tester) async {
@@ -5486,49 +6523,6 @@ void main() {
       maxLength: maxLength,
     ));
     expect(find.byKey(buildCounterKey), findsOneWidget);
-  });
-
-  testWidgets('InputDecorator iconColor/prefixIconColor/suffixIconColor', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const MaterialApp(
-        home: Material(
-          child: TextField(
-            decoration: InputDecoration(
-              icon: Icon(Icons.cabin),
-              prefixIcon: Icon(Icons.sailing),
-              suffixIcon: Icon(Icons.close),
-              iconColor: Colors.amber,
-              prefixIconColor: Colors.green,
-              suffixIconColor: Colors.red,
-              filled: true,
-            ),
-          ),
-        ),
-      ),
-    );
-
-    expect(tester.widget<IconTheme>(find.widgetWithIcon(IconTheme,Icons.cabin).first).data.color, Colors.amber);
-    expect(tester.widget<IconTheme>(find.widgetWithIcon(IconTheme,Icons.sailing).first).data.color, Colors.green);
-    expect(tester.widget<IconTheme>(find.widgetWithIcon(IconTheme,Icons.close).first).data.color, Colors.red);
-  });
-
-  testWidgets('InputDecorator suffixIconColor in error state', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: TextField(
-            decoration: InputDecoration(
-              suffixIcon: IconButton(icon: const Icon(Icons.close), onPressed: () {}),
-              errorText: 'error state',
-              filled: true,
-            ),
-          ),
-        ),
-      ),
-    );
-
-    final ThemeData theme = Theme.of(tester.element(find.byType(TextField)));
-    expect(getIconStyle(tester, Icons.close)?.color, theme.colorScheme.error);
   });
 
   testWidgets('FloatingLabelAlignment.toString()', (WidgetTester tester) async {
