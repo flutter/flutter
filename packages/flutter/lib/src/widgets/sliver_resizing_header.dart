@@ -34,7 +34,7 @@ import 'slotted_render_object_widget.dart';
 /// create a resizing header whose minimum and maximum sizes match small and large
 /// configurations of the same header widget.
 ///
-/// ** See code in examples/api/lib/widgets/sliver/resizing_header_sliver.0.dart **
+/// ** See code in examples/api/lib/widgets/sliver/sliver_resizing_header.0.dart **
 /// {@end-tool}
 // TODO(hansmuller): add See also links to PersistentHeaderSliver, SliverFloatingHeader, etc
 class SliverResizingHeader extends StatelessWidget {
