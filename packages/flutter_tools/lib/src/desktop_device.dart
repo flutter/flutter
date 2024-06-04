@@ -121,6 +121,7 @@ abstract class DesktopDevice extends Device {
       await buildForDevice(
         buildInfo: debuggingOptions.buildInfo,
         mainPath: mainPath,
+        usingCISystem: debuggingOptions.usingCISystem,
       );
     }
 
@@ -171,9 +172,15 @@ abstract class DesktopDevice extends Device {
             // cause tests in CI to hang. In CI, we workaround this by setting
             // the CODE_SIGN_ENTITLEMENTS build setting to a version with
             // sandboxing disabled.
-            final String sandboxingMessage = globals.platform.environment['LUCI_CI'] == 'True' ?
-                'Ensure sandboxing is disabled by checking the set CODE_SIGN_ENTITLEMENTS.' :
-                'Consider codesigning your app or disabling sandboxing.' ;
+            final String sandboxingMessage;
+            if (debuggingOptions.usingCISystem) {
+              sandboxingMessage = 'Ensure sandboxing is disabled by checking '
+                  'the set CODE_SIGN_ENTITLEMENTS.';
+            } else {
+              sandboxingMessage = 'Consider codesigning your app or disabling '
+                  'sandboxing. Flutter will attempt to disable sandboxing if '
+                  'the `--ci` flag is provided.';
+            }
             _logger.printError(
                 'The Dart VM Service was not discovered after $defaultTimeout '
                 'minutes. If the app has sandboxing enabled and is not '
@@ -226,6 +233,7 @@ abstract class DesktopDevice extends Device {
   Future<void> buildForDevice({
     required BuildInfo buildInfo,
     String? mainPath,
+    bool usingCISystem = false,
   });
 
   /// Returns the path to the executable to run for [package] on this device for

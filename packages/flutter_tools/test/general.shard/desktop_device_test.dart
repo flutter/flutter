@@ -10,7 +10,6 @@ import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/desktop_device.dart';
 import 'package:flutter_tools/src/devfs.dart';
@@ -387,22 +386,12 @@ void main() {
           BuildInfo.debug,
           enableImpeller: ImpellerStatus.disabled,
           dartEntrypointArgs: <String>[],
+          usingCISystem: true,
         ),
       );
       fakeAsync.flushTimers();
       expect(logger.errorText, contains('Ensure sandboxing is disabled by checking the set CODE_SIGN_ENTITLEMENTS'));
     });
-
-
-  }, overrides: <Type, Generator>{
-    Platform: () => FakePlatform(
-      operatingSystem: 'macos',
-      environment: <String, String>{
-        'FLUTTER_ROOT': '/',
-        'HOME': '/',
-        'LUCI_CI': 'True'
-      }
-    ),
   });
 }
 
@@ -464,6 +453,7 @@ class FakeDesktopDevice extends DesktopDevice {
   Future<void> buildForDevice({
     String? mainPath,
     BuildInfo? buildInfo,
+    bool usingCISystem = false,
   }) async {
     lastBuiltMainPath = mainPath;
     lastBuildInfo = buildInfo;
@@ -509,6 +499,7 @@ class FakeMacOSDevice extends MacOSDevice {
   Future<void> buildForDevice({
     String? mainPath,
     BuildInfo? buildInfo,
+    bool usingCISystem = false,
   }) async {
   }
 

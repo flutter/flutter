@@ -65,6 +65,7 @@ Future<void> buildMacOS({
   required bool verboseLogging,
   bool configOnly = false,
   SizeAnalyzer? sizeAnalyzer,
+  bool usingCISystem = false,
 }) async {
   final Directory? xcodeWorkspace = flutterProject.macos.xcodeWorkspace;
   if (xcodeWorkspace == null) {
@@ -154,13 +155,16 @@ Future<void> buildMacOS({
   );
   int result;
 
-  final bool usingCI = globals.platform.environment['LUCI_CI'] == 'True';
   File? disabledSandboxEntitlementFile;
-  if (usingCI) {
+  if (usingCISystem) {
     disabledSandboxEntitlementFile = _createDisabledSandboxEntitlementFile(
       flutterProject.macos,
       configuration,
     );
+    if (disabledSandboxEntitlementFile != null) {
+      globals.logger.printStatus(
+        'Detected macOS app running in CI, turning off sandboxing.');
+    }
   }
 
   try {
@@ -180,7 +184,7 @@ Future<void> buildMacOS({
       else
         '-quiet',
       'COMPILER_INDEX_STORE_ENABLE=NO',
-      if (usingCI && disabledSandboxEntitlementFile != null)
+      if (disabledSandboxEntitlementFile != null)
         'CODE_SIGN_ENTITLEMENTS=${disabledSandboxEntitlementFile.path}',
       ...environmentVariablesAsXcodeBuildSettings(globals.platform),
     ],
