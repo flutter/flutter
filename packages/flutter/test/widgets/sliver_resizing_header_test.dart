@@ -22,7 +22,7 @@ void main() {
               SliverResizingHeader(
                 minExtentPrototype: minPrototype,
                 maxExtentPrototype: maxPrototype,
-                child:  SizedBox.expand(child: Text('header')),
+                child:  const SizedBox.expand(child: Text('header')),
               ),
               SliverList(
                 delegate: SliverChildBuilderDelegate(
@@ -162,6 +162,115 @@ void main() {
       expect(getHeaderRect().height, 600);
       expect(getHeaderRect().width, 300);
     }
+  });
+
+  testWidgets('SliverResizingHeader default minExtent is 0', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: CustomScrollView(
+            slivers: <Widget>[
+              const SliverResizingHeader(
+                maxExtentPrototype: SizedBox(height: 300),
+                child: SizedBox.expand(child: Text('header')),
+              ),
+              SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (BuildContext context, int index) => Text('item $index'),
+                  childCount: 100,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.text('header')).height, 300);
+
+    final ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
+
+    position.moveTo(299);
+    await tester.pumpAndSettle();
+    expect(tester.getSize(find.text('header')).height, 1);
+
+    position.moveTo(300);
+    await tester.pumpAndSettle();
+    expect(find.text('header'), findsNothing);
+  });
+
+  testWidgets('SliverResizingHeader with identcial min/max prototypes is effectively a pinned header', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: CustomScrollView(
+            slivers: <Widget>[
+              const SliverResizingHeader(
+                minExtentPrototype: SizedBox(height: 100),
+                maxExtentPrototype: SizedBox(height: 100),
+                child: SizedBox.expand(child: Text('header')),
+              ),
+              SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (BuildContext context, int index) => Text('item $index'),
+                  childCount: 100,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getTopLeft(find.text('header')), Offset.zero);
+    expect(tester.getSize(find.text('header')), const Size(800, 100));
+
+    final ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
+
+    position.moveTo(100);
+    await tester.pumpAndSettle();
+    expect(tester.getTopLeft(find.text('header')), Offset.zero);
+    expect(tester.getSize(find.text('header')), const Size(800, 100));
+
+    position.moveTo(0);
+    await tester.pumpAndSettle();
+    expect(tester.getTopLeft(find.text('header')), Offset.zero);
+    expect(tester.getSize(find.text('header')), const Size(800, 100));
+  });
+
+  testWidgets('SliverResizingHeader default maxExtent matches the child', (WidgetTester tester) async {
+    final Key headerKey = UniqueKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: CustomScrollView(
+            slivers: <Widget>[
+              SliverResizingHeader(
+                child: SizedBox(key: headerKey, height: 300),
+              ),
+              SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (BuildContext context, int index) => Text('item $index'),
+                  childCount: 100,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byKey(headerKey)).height, 300);
+
+    final ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
+
+    position.moveTo(299);
+    await tester.pumpAndSettle();
+    expect(tester.getSize(find.byKey(headerKey)).height, 1);
+
+    position.moveTo(300);
+    await tester.pumpAndSettle();
+    expect(find.byKey(headerKey), findsNothing);
   });
 
   testWidgets('SliverResizingHeader overrides initial out of bounds child size', (WidgetTester tester) async {

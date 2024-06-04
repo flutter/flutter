@@ -7,6 +7,8 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
+import 'basic.dart';
+import 'focus_scope.dart';
 import 'framework.dart';
 import 'slotted_render_object_widget.dart';
 
@@ -17,6 +19,10 @@ import 'slotted_render_object_widget.dart';
 /// The minimum and maximum sizes of this sliver are defined by [minExtentPrototype]
 /// and [maxExtentPrototype], a pair of widgets that are laid out once. You can
 /// use [SizedBox] widgets to define the size limits.
+///
+/// If the [minExtentPrototype] is null, then the default minimum extent is 0. If
+/// [maxExtentPrototype] is null then the default maximum extent is based on the child's
+/// intrisic size.
 ///
 /// This sliver is preferable to the general purpose [SliverPersistentHeader]
 /// for its relatively narrow use case because there's no need to create a
@@ -30,6 +36,7 @@ import 'slotted_render_object_widget.dart';
 ///
 /// ** See code in examples/api/lib/widgets/sliver/resizing_header_sliver.0.dart **
 /// {@end-tool}
+// TODO(hansmuller): add See also links to PersistentHeaderSliver, SliverFloatingHeader, etc
 class SliverResizingHeader extends StatelessWidget {
   /// Create a pinned header sliver that reacts to scrolling by resizing between
   /// the intrinsic sizes of the min and max extent prototypes.
@@ -44,23 +51,32 @@ class SliverResizingHeader extends StatelessWidget {
   /// [CustomScrollView.scrollDirection] axis.
   ///
   /// If null, the minimum size of the sliver is 0.
+  ///
+  /// This widget is never made visible.
   final Widget? minExtentPrototype;
 
   /// Laid out once to define the maximum size of this sliver along the
   /// [CustomScrollView.scrollDirection] axis.
   ///
-  /// If null, the maximum size of the sliver is 0.
+  /// If null, the maximum extent of the sliver is based on the child's
+  /// intrinsic size.
+  ///
+  /// This widget is never made visible.
   final Widget? maxExtentPrototype;
 
   /// The widget contained by this sliver.
   final Widget? child;
 
+  Widget? _excludeFocus(Widget? extentPrototype) {
+    return extentPrototype != null ? ExcludeFocus(child: extentPrototype) : null;
+  }
+
   @override
   Widget build(BuildContext context) {
     return _SliverResizingHeader(
-      minExtentPrototype: minExtentPrototype,
-      maxExtentPrototype: maxExtentPrototype,
-      child: child,
+      minExtentPrototype: _excludeFocus(minExtentPrototype),
+      maxExtentPrototype: _excludeFocus(maxExtentPrototype),
+      child: child ?? const SizedBox.shrink(),
     );
   }
 }
@@ -75,12 +91,12 @@ class _SliverResizingHeader extends SlottedMultiChildRenderObjectWidget<_Slot, R
   const _SliverResizingHeader({
     this.minExtentPrototype,
     this.maxExtentPrototype,
-    this.child,
+    required this.child,
   });
 
   final Widget? minExtentPrototype;
   final Widget? maxExtentPrototype;
-  final Widget? child;
+  final Widget child;
 
   @override
   Iterable<_Slot> get slots => _Slot.values;
@@ -164,6 +180,12 @@ class _RenderSliverResizingHeader extends RenderSliver with SlottedContainerRend
     if (maxExtentPrototype != null) {
       maxExtentPrototype!.layout(prototypeBoxConstraints, parentUsesSize: true);
       maxExtent = boxExtent(maxExtentPrototype);
+    } else {
+      final Size childSize = child!.getDryLayout(prototypeBoxConstraints);
+      maxExtent = switch (constraints.axis) {
+        Axis.vertical => childSize.height,
+        Axis.horizontal => childSize.width,
+      };
     }
 
     final double scrollOffset = constraints.scrollOffset;
