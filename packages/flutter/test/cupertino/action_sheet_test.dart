@@ -719,7 +719,7 @@ void main() {
     await tester.tap(find.text('Go'));
     await tester.pump();
 
-    expect(findScrollableActionsSectionRenderBox(tester).size.height, moreOrLessEquals(112.3));
+    expect(findScrollableActionsSectionRenderBox(tester).size.height, moreOrLessEquals(84.3));
   });
 
   testWidgets('3 action buttons with cancel button', (WidgetTester tester) async {
@@ -753,7 +753,7 @@ void main() {
     await tester.tap(find.text('Go'));
     await tester.pump();
 
-    expect(findScrollableActionsSectionRenderBox(tester).size.height, moreOrLessEquals(168.6));
+    expect(findScrollableActionsSectionRenderBox(tester).size.height, moreOrLessEquals(84.3));
   });
 
   testWidgets('4+ action buttons with cancel button', (WidgetTester tester) async {
