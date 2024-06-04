@@ -516,6 +516,7 @@ void main() {
         onSetText: (String _) => performedActions.add(SemanticsAction.setText),
         onDidGainAccessibilityFocus: () => performedActions.add(SemanticsAction.didGainAccessibilityFocus),
         onDidLoseAccessibilityFocus: () => performedActions.add(SemanticsAction.didLoseAccessibilityFocus),
+        onFocus: () => performedActions.add(SemanticsAction.focus),
       ),
     );
 
@@ -570,6 +571,7 @@ void main() {
         case SemanticsAction.scrollUp:
         case SemanticsAction.showOnScreen:
         case SemanticsAction.tap:
+        case SemanticsAction.focus:
           semanticsOwner.performAction(expectedId, action);
       }
       expect(performedActions.length, expectedLength);
@@ -578,7 +580,7 @@ void main() {
     }
 
     semantics.dispose();
-  }, skip: true); // TODO(yjbanov): temporary skip until https://github.com/flutter/engine/pull/53094 rolls in (see https://github.com/flutter/flutter/issues/83809)
+  });
 
   testWidgets('Semantics widget supports all flags', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
