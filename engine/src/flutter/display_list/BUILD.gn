@@ -120,10 +120,12 @@ if (enable_unittests) {
       "effects/dl_image_filter_unittests.cc",
       "effects/dl_mask_filter_unittests.cc",
       "effects/dl_path_effect_unittests.cc",
+      "geometry/dl_geometry_types_unittests.cc",
       "geometry/dl_region_unittests.cc",
       "geometry/dl_rtree_unittests.cc",
       "skia/dl_sk_conversions_unittests.cc",
       "skia/dl_sk_paint_dispatcher_unittests.cc",
+      "utils/dl_accumulation_rect_unittests.cc",
       "utils/dl_matrix_clip_tracker_unittests.cc",
     ]
 
