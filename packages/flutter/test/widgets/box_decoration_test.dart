@@ -18,10 +18,11 @@ class TestImageProvider extends ImageProvider<TestImageProvider> {
 
   final Future<void> future;
 
-  static ui.Image? _image;
+  static late List<ui.Image> _images;
 
   static Future<void> prepareImage() async {
-    _image = await decodeImageFromList(Uint8List.fromList(kTransparentImage));
+    _images = [await decodeImageFromList(Uint8List.fromList(kTransparentImage)),
+              await decodeImageFromList(Uint8List.fromList(kTransparentImage))];
   }
 
   @override
@@ -31,10 +32,12 @@ class TestImageProvider extends ImageProvider<TestImageProvider> {
 
   @override
   ImageStreamCompleter loadImage(TestImageProvider key, ImageDecoderCallback decode) {
+    final image = _images.last;
+    _images.removeLast();
+
     return OneFrameImageStreamCompleter(
       future.then<ImageInfo>((void value) {
-        final result = ImageInfo(image: _image!);
-        //_image = null;
+        final result = ImageInfo(image: image);
         return result;
       }),
     );
