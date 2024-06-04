@@ -1281,7 +1281,7 @@ class FlutterPlugin implements Plugin<Project> {
                 trackWidgetCreation(trackWidgetCreationValue)
                 targetPlatformValues = targetPlatforms
                 sourceDir(getFlutterSourceDirectory())
-                intermediateDir(project.file("${project.buildDir}/$INTERMEDIATES_DIR/flutter/${variant.name}/"))
+                intermediateDir(project.file("${project.layout.buildDirectory.get().asFile}/$INTERMEDIATES_DIR/flutter/${variant.name}/"))
                 frontendServerStarterPath(frontendServerStarterPathValue)
                 extraFrontEndOptions(extraFrontEndOptionsValue)
                 extraGenSnapshotOptions(extraGenSnapshotOptionsValue)
@@ -1296,7 +1296,7 @@ class FlutterPlugin implements Plugin<Project> {
                 validateDeferredComponents(validateDeferredComponentsValue)
                 flavor(flavorValue)
             }
-            File libJar = project.file("${project.buildDir}/$INTERMEDIATES_DIR/flutter/${variant.name}/libs.jar")
+            File libJar = project.file("${project.layout.buildDirectory.get().asFile}/$INTERMEDIATES_DIR/flutter/${variant.name}/libs.jar")
             Task packJniLibsTask = project.tasks.create(name: "packJniLibs${FLUTTER_BUILD_PREFIX}${variant.name.capitalize()}", type: Jar) {
                 destinationDirectory = libJar.parentFile
                 archiveFileName = libJar.name
@@ -1424,7 +1424,7 @@ class FlutterPlugin implements Plugin<Project> {
                         filename += "-${buildModeFor(variant.buildType)}"
                         project.copy {
                             from new File("$outputDirectoryStr/${output.outputFileName}")
-                            into new File("${project.buildDir}/outputs/flutter-apk")
+                            into new File("${project.layout.buildDirectory.get().asFile}/outputs/flutter-apk")
                             rename {
                                 return "${filename}.apk"
                             }
