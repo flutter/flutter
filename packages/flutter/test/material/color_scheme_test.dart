@@ -2,10 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_color_utilities/material_color_utilities.dart';
+import 'package:material_color_utilities/scheme/scheme_fruit_salad.dart';
+import 'package:material_color_utilities/scheme/scheme_rainbow.dart';
 
 import '../image_data.dart';
 
@@ -684,4 +687,143 @@ void main() {
   },
     skip: isBrowser, // https://github.com/flutter/flutter/issues/44115
   );
+
+  testWidgets('Color values in ColorScheme.fromSeed with different variants matches values in DynamicScheme', (WidgetTester tester) async {
+    const Color seedColor = Colors.orange;
+    final Hct sourceColor =  Hct.fromInt(seedColor.value);
+    for (final DynamicSchemeVariant schemeVariant in DynamicSchemeVariant.values) {
+      final DynamicScheme dynamicScheme = switch (schemeVariant) {
+        DynamicSchemeVariant.tonalSpot => SchemeTonalSpot(sourceColorHct: sourceColor, isDark: false, contrastLevel: 0.0),
+        DynamicSchemeVariant.fidelity => SchemeFidelity(sourceColorHct: sourceColor, isDark: false, contrastLevel: 0.0),
+        DynamicSchemeVariant.content => SchemeContent(sourceColorHct: sourceColor, isDark: false, contrastLevel: 0.0),
+        DynamicSchemeVariant.monochrome => SchemeMonochrome(sourceColorHct: sourceColor, isDark: false, contrastLevel: 0.0),
+        DynamicSchemeVariant.neutral => SchemeNeutral(sourceColorHct: sourceColor, isDark: false, contrastLevel: 0.0),
+        DynamicSchemeVariant.vibrant => SchemeVibrant(sourceColorHct: sourceColor, isDark: false, contrastLevel: 0.0),
+        DynamicSchemeVariant.expressive => SchemeExpressive(sourceColorHct: sourceColor, isDark: false, contrastLevel: 0.0),
+        DynamicSchemeVariant.rainbow => SchemeRainbow(sourceColorHct: sourceColor, isDark: false, contrastLevel: 0.0),
+        DynamicSchemeVariant.fruitSalad => SchemeFruitSalad(sourceColorHct: sourceColor, isDark: false, contrastLevel: 0.0),
+      };
+      final ColorScheme colorScheme = ColorScheme.fromSeed(
+        seedColor: seedColor,
+        dynamicSchemeVariant: schemeVariant,
+      );
+
+      expect(colorScheme.primary.value, MaterialDynamicColors.primary.getArgb(dynamicScheme));
+      expect(colorScheme.onPrimary.value, MaterialDynamicColors.onPrimary.getArgb(dynamicScheme));
+      expect(colorScheme.primaryContainer.value, MaterialDynamicColors.primaryContainer.getArgb(dynamicScheme));
+      expect(colorScheme.onPrimaryContainer.value, MaterialDynamicColors.onPrimaryContainer.getArgb(dynamicScheme));
+      expect(colorScheme.primaryFixed.value, MaterialDynamicColors.primaryFixed.getArgb(dynamicScheme));
+      expect(colorScheme.primaryFixedDim.value, MaterialDynamicColors.primaryFixedDim.getArgb(dynamicScheme));
+      expect(colorScheme.onPrimaryFixed.value, MaterialDynamicColors.onPrimaryFixed.getArgb(dynamicScheme));
+      expect(colorScheme.onPrimaryFixedVariant.value, MaterialDynamicColors.onPrimaryFixedVariant.getArgb(dynamicScheme));
+      expect(colorScheme.secondary.value, MaterialDynamicColors.secondary.getArgb(dynamicScheme));
+      expect(colorScheme.onSecondary.value, MaterialDynamicColors.onSecondary.getArgb(dynamicScheme));
+      expect(colorScheme.secondaryContainer.value, MaterialDynamicColors.secondaryContainer.getArgb(dynamicScheme));
+      expect(colorScheme.onSecondaryContainer.value, MaterialDynamicColors.onSecondaryContainer.getArgb(dynamicScheme));
+      expect(colorScheme.secondaryFixed.value, MaterialDynamicColors.secondaryFixed.getArgb(dynamicScheme));
+      expect(colorScheme.secondaryFixedDim.value, MaterialDynamicColors.secondaryFixedDim.getArgb(dynamicScheme));
+      expect(colorScheme.onSecondaryFixed.value, MaterialDynamicColors.onSecondaryFixed.getArgb(dynamicScheme));
+      expect(colorScheme.onSecondaryFixedVariant.value, MaterialDynamicColors.onSecondaryFixedVariant.getArgb(dynamicScheme));
+      expect(colorScheme.tertiary.value, MaterialDynamicColors.tertiary.getArgb(dynamicScheme));
+      expect(colorScheme.onTertiary.value, MaterialDynamicColors.onTertiary.getArgb(dynamicScheme));
+      expect(colorScheme.tertiaryContainer.value, MaterialDynamicColors.tertiaryContainer.getArgb(dynamicScheme));
+      expect(colorScheme.onTertiaryContainer.value, MaterialDynamicColors.onTertiaryContainer.getArgb(dynamicScheme));
+      expect(colorScheme.tertiaryFixed.value, MaterialDynamicColors.tertiaryFixed.getArgb(dynamicScheme));
+      expect(colorScheme.tertiaryFixedDim.value, MaterialDynamicColors.tertiaryFixedDim.getArgb(dynamicScheme));
+      expect(colorScheme.onTertiaryFixed.value, MaterialDynamicColors.onTertiaryFixed.getArgb(dynamicScheme));
+      expect(colorScheme.onTertiaryFixedVariant.value, MaterialDynamicColors.onTertiaryFixedVariant.getArgb(dynamicScheme));
+      expect(colorScheme.error.value, MaterialDynamicColors.error.getArgb(dynamicScheme));
+      expect(colorScheme.onError.value, MaterialDynamicColors.onError.getArgb(dynamicScheme));
+      expect(colorScheme.errorContainer.value, MaterialDynamicColors.errorContainer.getArgb(dynamicScheme));
+      expect(colorScheme.onErrorContainer.value, MaterialDynamicColors.onErrorContainer.getArgb(dynamicScheme));
+      expect(colorScheme.background.value, MaterialDynamicColors.background.getArgb(dynamicScheme));
+      expect(colorScheme.onBackground.value, MaterialDynamicColors.onBackground.getArgb(dynamicScheme));
+      expect(colorScheme.surface.value, MaterialDynamicColors.surface.getArgb(dynamicScheme));
+      expect(colorScheme.surfaceDim.value, MaterialDynamicColors.surfaceDim.getArgb(dynamicScheme));
+      expect(colorScheme.surfaceBright.value, MaterialDynamicColors.surfaceBright.getArgb(dynamicScheme));
+      expect(colorScheme.surfaceContainerLowest.value, MaterialDynamicColors.surfaceContainerLowest.getArgb(dynamicScheme));
+      expect(colorScheme.surfaceContainerLow.value, MaterialDynamicColors.surfaceContainerLow.getArgb(dynamicScheme));
+      expect(colorScheme.surfaceContainer.value, MaterialDynamicColors.surfaceContainer.getArgb(dynamicScheme));
+      expect(colorScheme.surfaceContainerHigh.value, MaterialDynamicColors.surfaceContainerHigh.getArgb(dynamicScheme));
+      expect(colorScheme.surfaceContainerHighest.value, MaterialDynamicColors.surfaceContainerHighest.getArgb(dynamicScheme));
+      expect(colorScheme.onSurface.value, MaterialDynamicColors.onSurface.getArgb(dynamicScheme));
+      expect(colorScheme.surfaceVariant.value, MaterialDynamicColors.surfaceVariant.getArgb(dynamicScheme));
+      expect(colorScheme.onSurfaceVariant.value, MaterialDynamicColors.onSurfaceVariant.getArgb(dynamicScheme));
+      expect(colorScheme.outline.value, MaterialDynamicColors.outline.getArgb(dynamicScheme));
+      expect(colorScheme.outlineVariant.value, MaterialDynamicColors.outlineVariant.getArgb(dynamicScheme));
+      expect(colorScheme.shadow.value, MaterialDynamicColors.shadow.getArgb(dynamicScheme));
+      expect(colorScheme.scrim.value, MaterialDynamicColors.scrim.getArgb(dynamicScheme));
+      expect(colorScheme.inverseSurface.value, MaterialDynamicColors.inverseSurface.getArgb(dynamicScheme));
+      expect(colorScheme.onInverseSurface.value, MaterialDynamicColors.inverseOnSurface.getArgb(dynamicScheme));
+      expect(colorScheme.inversePrimary.value, MaterialDynamicColors.inversePrimary.getArgb(dynamicScheme));
+    }
+  });
+
+  testWidgets('ColorScheme.fromSeed with different variants spot checks', (WidgetTester tester) async {
+    // Default (Variant.tonalSpot).
+    await _testFilledButtonColor(tester, ColorScheme.fromSeed(seedColor: const Color(0xFF000000)), const Color(0xFF8C4A60));
+    await _testFilledButtonColor(tester, ColorScheme.fromSeed(seedColor: const Color(0xFF00FF00)), const Color(0xFF406836));
+    await _testFilledButtonColor(tester, ColorScheme.fromSeed(seedColor: const Color(0xFF6559F5)), const Color(0xFF5B5891));
+    await _testFilledButtonColor(tester, ColorScheme.fromSeed(seedColor: const Color(0xFFFFFFFF)), const Color(0xFF006874));
+
+    // Variant.fidelity.
+    await _testFilledButtonColor(
+      tester,
+      ColorScheme.fromSeed(
+        seedColor: const Color(0xFF000000),
+        dynamicSchemeVariant: DynamicSchemeVariant.fidelity
+      ),
+      const Color(0xFF000000)
+    );
+    await _testFilledButtonColor(
+      tester,
+      ColorScheme.fromSeed(
+        seedColor: const Color(0xFF00FF00),
+        dynamicSchemeVariant: DynamicSchemeVariant.fidelity
+      ),
+      const Color(0xFF026E00)
+    );
+    await _testFilledButtonColor(
+      tester,
+      ColorScheme.fromSeed(
+        seedColor: const Color(0xFF6559F5),
+        dynamicSchemeVariant: DynamicSchemeVariant.fidelity
+      ),
+      const Color(0xFF3F2CD0)
+    );
+    await _testFilledButtonColor(
+      tester,
+      ColorScheme.fromSeed(
+        seedColor: const Color(0xFFFFFFFF),
+        dynamicSchemeVariant: DynamicSchemeVariant.fidelity
+      ),
+      const Color(0xFF5D5F5F)
+    );
+  });
+}
+
+Future<void> _testFilledButtonColor(WidgetTester tester, ColorScheme scheme, Color expectation) async {
+  final GlobalKey key = GlobalKey();
+  await tester.pumpWidget(Container()); // reset
+  await tester.pumpWidget(
+    MaterialApp(
+      theme: ThemeData(
+        colorScheme: scheme,
+      ),
+      home: FilledButton(
+        key: key,
+        onPressed: () {},
+        child: const SizedBox.square(dimension: 200),
+      ),
+    ),
+  );
+
+
+  final Finder buttonMaterial = find.descendant(
+    of: find.byType(FilledButton),
+    matching: find.byType(Material),
+  );
+  final Material material = tester.widget<Material>(buttonMaterial);
+
+  expect(material.color, expectation);
 }
