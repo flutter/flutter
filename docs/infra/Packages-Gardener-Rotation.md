@@ -1,4 +1,4 @@
-The framework gardener role currently makes use of several tools and communication channels only available to Google employees. See [On-call scheduling for Flutter] for an overview of work required to make this process more open.
+The packages gardener role currently makes use of several tools and communication channels only available to Google employees. See [On-call scheduling for Flutter] for an overview of work required to make this process more open.
 
 ## Objective
 
