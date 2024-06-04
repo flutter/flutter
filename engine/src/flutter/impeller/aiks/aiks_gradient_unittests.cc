@@ -818,5 +818,27 @@ TEST_P(AiksTest, FastGradientTestVerticalReversed) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
+TEST_P(AiksTest, VerifyNonOptimizedGradient) {
+  Canvas canvas;
+  Paint paint;
+  canvas.Translate({100.0f, 0, 0});
+
+  std::vector<Color> colors = {Color::Red(), Color::Blue(), Color::Green()};
+  std::vector<Scalar> stops = {0.0, 0.1, 1.0};
+
+  // Inset the start and end point to verify that we do not apply
+  // the fast gradient condition.
+  paint.color_source = ColorSource::MakeLinearGradient(
+      {0, 150}, {0, 100}, std::move(colors), std::move(stops),
+      Entity::TileMode::kRepeat, {});
+
+  paint.color = Color(1.0, 1.0, 1.0, 1.0);
+  canvas.DrawRect(Rect::MakeXYWH(0, 0, 300, 300), paint);
+  canvas.Translate({400, 0, 0});
+  canvas.DrawRRect(Rect::MakeXYWH(0, 0, 300, 300), Size(4, 4), paint);
+
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
 }  // namespace testing
 }  // namespace impeller

@@ -57,6 +57,8 @@ class LinearGradientContents final : public ColorSourceContents {
                           const Entity& entity,
                           RenderPass& pass) const;
 
+  bool CanApplyFastGradient() const;
+
   Point start_point_;
   Point end_point_;
   std::vector<Color> colors_;
