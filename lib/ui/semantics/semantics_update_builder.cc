@@ -66,7 +66,8 @@ void SemanticsUpdateBuilder::updateNode(
     const tonic::Float64List& transform,
     const tonic::Int32List& childrenInTraversalOrder,
     const tonic::Int32List& childrenInHitTestOrder,
-    const tonic::Int32List& localContextActions) {
+    const tonic::Int32List& localContextActions,
+    int headingLevel) {
   FML_CHECK(scrollChildren == 0 ||
             (scrollChildren > 0 && childrenInHitTestOrder.data()))
       << "Semantics update contained scrollChildren but did not have "
@@ -118,6 +119,8 @@ void SemanticsUpdateBuilder::updateNode(
       localContextActions.data(),
       localContextActions.data() + localContextActions.num_elements());
   nodes_[id] = node;
+
+  node.headingLevel = headingLevel;
 }
 
 void SemanticsUpdateBuilder::updateCustomAction(int id,

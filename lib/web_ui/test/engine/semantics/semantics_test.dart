@@ -725,6 +725,27 @@ void _testHeader() {
 
     semantics().semanticsEnabled = false;
   });
+
+  test('renders aria-level tag for headings with heading level', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
+    updateNode(
+      builder,
+      headingLevel: 2,
+      transform: Matrix4.identity().toFloat64(),
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+    );
+
+    owner().updateSemantics(builder.build());
+    expectSemanticsTree(owner(), '''
+<sem aria-level="2" role="heading" style="filter: opacity(0%); color: rgba(0, 0, 0, 0)"></sem>
+''');
+
+    semantics().semanticsEnabled = false;
+  });
 }
 
 void _testLongestIncreasingSubsequence() {
@@ -3557,6 +3578,7 @@ void updateNode(
   Int32List? childrenInTraversalOrder,
   Int32List? childrenInHitTestOrder,
   Int32List? additionalActions,
+  int headingLevel = 0,
 }) {
   transform ??= Float64List.fromList(Matrix4.identity().storage);
   childrenInTraversalOrder ??= Int32List(0);
@@ -3596,6 +3618,7 @@ void updateNode(
     childrenInTraversalOrder: childrenInTraversalOrder,
     childrenInHitTestOrder: childrenInHitTestOrder,
     additionalActions: additionalActions,
+    headingLevel: headingLevel,
   );
 }
 
