@@ -18,11 +18,12 @@ class TestImageProvider extends ImageProvider<TestImageProvider> {
 
   final Future<void> future;
 
-  static late List<ui.Image> _images;
+  static final List<ui.Image> _images = <ui.Image>[];
 
-  static Future<void> prepareImage() async {
-    _images = [await decodeImageFromList(Uint8List.fromList(kTransparentImage)),
-              await decodeImageFromList(Uint8List.fromList(kTransparentImage))];
+  static Future<void> prepareImages(int count) async {
+    for (int i = 0; i < count; i++) {
+      _images.add(await decodeImageFromList(Uint8List.fromList(kTransparentImage)));
+    }
   }
 
   @override
@@ -46,7 +47,7 @@ class TestImageProvider extends ImageProvider<TestImageProvider> {
 
 Future<void> main() async {
   AutomatedTestWidgetsFlutterBinding();
-  await TestImageProvider.prepareImage();
+  await TestImageProvider.prepareImages(2);
 
   testWidgets('DecoratedBox handles loading images',
   // TODO(polina-c): dispose ImageStreamCompleterHandle, https://github.com/flutter/flutter/issues/145599 [leaks-to-clean]
