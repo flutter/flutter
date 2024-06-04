@@ -164,8 +164,6 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrameFromCAMetalLa
 
         impeller::IRect cull_rect = surface->coverage();
         SkIRect sk_cull_rect = SkIRect::MakeWH(cull_rect.GetWidth(), cull_rect.GetHeight());
-        [[maybe_unused]] auto supports_readback =
-            surface_frame.framebuffer_info().supports_readback;
 
 #if ENABLE_EXPERIMENTAL_CANVAS
         impeller::TextFrameDispatcher collector(aiks_context->GetContentContext(),
@@ -176,7 +174,9 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrameFromCAMetalLa
             fml::MakeCopyable([aiks_context, &display_list, &cull_rect,
                                &sk_cull_rect](impeller::RenderTarget& render_target) -> bool {
               impeller::ExperimentalDlDispatcher impeller_dispatcher(
-                  aiks_context->GetContentContext(), render_target, supports_readback, cull_rect);
+                  aiks_context->GetContentContext(), render_target,
+                  display_list->root_has_backdrop_filter(), display_list->max_root_blend_mode(),
+                  cull_rect);
               display_list->Dispatch(impeller_dispatcher, sk_cull_rect);
               impeller_dispatcher.FinishRecording();
               aiks_context->GetContentContext().GetTransientsBuffer().Reset();

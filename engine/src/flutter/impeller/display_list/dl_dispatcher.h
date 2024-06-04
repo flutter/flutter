@@ -12,6 +12,7 @@
 #include "impeller/aiks/experimental_canvas.h"
 #include "impeller/aiks/paint.h"
 #include "impeller/entity/contents/content_context.h"
+#include "impeller/geometry/color.h"
 
 namespace impeller {
 
@@ -291,7 +292,8 @@ class ExperimentalDlDispatcher : public DlDispatcherBase {
  public:
   ExperimentalDlDispatcher(ContentContext& renderer,
                            RenderTarget& render_target,
-                           bool requires_readback,
+                           bool has_root_backdrop_filter,
+                           flutter::DlBlendMode max_root_blend_mode,
                            IRect cull_rect);
 
   ~ExperimentalDlDispatcher() = default;
