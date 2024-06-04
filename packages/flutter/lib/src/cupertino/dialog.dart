@@ -581,7 +581,7 @@ abstract class _ActionSheetDragAvatar {
 }
 
 // Recognizes sliding taps and thereupon interacts with
-// `_ActionSheetDragAvatar`.
+// `_ActionSheetDragAvatar`s.
 class _AvatarSelectionGestureRecognizer extends GestureRecognizer {
   _AvatarSelectionGestureRecognizer({super.debugOwner, required this.hitTest})
     : _slidingTap = _SlidingTapGestureRecognizer(debugOwner: debugOwner) {

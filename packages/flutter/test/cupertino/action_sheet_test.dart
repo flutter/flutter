@@ -864,6 +864,109 @@ void main() {
     expect(pressed, 0);
   });
 
+  testWidgets('Sliding taps only recognizes the primary pointer', (WidgetTester tester) async {
+    int? pressed;
+    await tester.pumpWidget(
+      createAppWithButtonThatLaunchesActionSheet(
+        Builder(builder: (BuildContext context) {
+          return CupertinoActionSheet(
+            title: const Text('The title'),
+            actions: List<Widget>.generate(8, (int i) =>
+              CupertinoActionSheetAction(
+                onPressed: () {
+                  expect(pressed, null);
+                  pressed = i;
+                },
+                child: Text('Button $i'),
+              ),
+            ),
+          );
+        }),
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+    await tester.pumpAndSettle();
+
+    // Start gesture 1 at button 0
+    final TestGesture gesture1 = await tester.startGesture(tester.getCenter(find.text('Button 0')));
+    await gesture1.moveBy(const Offset(0, 20)); // Starts the gesture
+    await tester.pumpAndSettle();
+
+    // Start gesture 2 at button 1.
+    final TestGesture gesture2 = await tester.startGesture(tester.getCenter(find.text('Button 1')));
+    await gesture2.moveBy(const Offset(0, 20)); // Starts the gesture
+    await tester.pumpAndSettle();
+
+    // Move gesture 1 to button 2 and release.
+    await gesture1.moveTo(tester.getCenter(find.text('Button 2')));
+    await tester.pumpAndSettle();
+    await gesture1.up();
+    await tester.pumpAndSettle();
+
+    expect(pressed, 2);
+    pressed = null;
+
+    // Tap at button 3, which becomes the new primary pointer and is recognized.
+    await tester.tap(find.text('Button 3'));
+    await tester.pumpAndSettle();
+    expect(pressed, 3);
+    pressed = null;
+
+    // Move gesture 2 to button 4 and release.
+    await gesture2.moveTo(tester.getCenter(find.text('Button 4')));
+    await tester.pumpAndSettle();
+    await gesture2.up();
+    await tester.pumpAndSettle();
+
+    // Non-primary pointers should not be recognized.
+    expect(pressed, null);
+  });
+
+  testWidgets('Non-primary pointers can trigger scroll', (WidgetTester tester) async {
+    int? pressed;
+    await tester.pumpWidget(
+      createAppWithButtonThatLaunchesActionSheet(
+        Builder(builder: (BuildContext context) {
+          return CupertinoActionSheet(
+            actions: List<Widget>.generate(12, (int i) =>
+              CupertinoActionSheetAction(
+                onPressed: () {
+                  expect(pressed, null);
+                  pressed = i;
+                },
+                child: Text('Button $i'),
+              ),
+            ),
+          );
+        }),
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+    await tester.pumpAndSettle();
+
+    // Start gesture 1 at button 0
+    final TestGesture gesture1 = await tester.startGesture(tester.getCenter(find.text('Button 0')));
+    await tester.pumpAndSettle();
+
+    expect(tester.getTopLeft(find.text('Button 11')).dy, greaterThan(400));
+
+    // Start gesture 2 at button 1 and scrolls.
+    final TestGesture gesture2 = await tester.startGesture(tester.getCenter(find.text('Button 1')));
+    await gesture2.moveBy(const Offset(0, -20));
+    await gesture2.moveBy(const Offset(0, -500));
+    await tester.pumpAndSettle();
+
+    expect(tester.getTopLeft(find.text('Button 11')).dy, lessThan(400));
+
+    // Release gesture 1, which should not trigger any buttons.
+    await gesture1.up();
+    await tester.pumpAndSettle();
+
+    expect(pressed, null);
+  });
+
   testWidgets('Action sheet width is correct when given infinite horizontal space', (WidgetTester tester) async {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
