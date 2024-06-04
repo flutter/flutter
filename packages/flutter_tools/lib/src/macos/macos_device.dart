@@ -70,12 +70,14 @@ class MacOSDevice extends DesktopDevice {
   Future<void> buildForDevice({
     required BuildInfo buildInfo,
     String? mainPath,
+    bool usingCISystem = false,
   }) async {
     await buildMacOS(
       flutterProject: FlutterProject.current(),
       buildInfo: buildInfo,
       targetOverride: mainPath,
       verboseLogging: _logger.isVerbose,
+      usingCISystem: usingCISystem,
     );
   }
 
