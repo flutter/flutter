@@ -173,7 +173,7 @@ class _RenderSliverResizingHeader extends RenderSliver with SlottedContainerRend
       minExtent = boxExtent(minExtentPrototype!);
     }
 
-    double maxExtent = double.infinity;
+    late final double maxExtent;
     if (maxExtentPrototype != null) {
       maxExtentPrototype!.layout(prototypeBoxConstraints, parentUsesSize: true);
       maxExtent = boxExtent(maxExtentPrototype!);

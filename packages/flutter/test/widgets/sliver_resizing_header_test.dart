@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('SliverResizingHeader basics', (WidgetTester tester) async {
     Widget buildFrame({ required Axis axis, required bool reverse }) {
-      final (Widget minPrototype, Widget maxPrototype) = switch(axis) {
+      final (Widget minPrototype, Widget maxPrototype) = switch (axis) {
         Axis.vertical => (const SizedBox(height: 100), const SizedBox(height: 300)),
         Axis.horizontal => (const SizedBox(width: 100), const SizedBox(width: 300)),
       };
