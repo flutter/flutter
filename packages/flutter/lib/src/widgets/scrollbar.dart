@@ -1323,7 +1323,10 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   late CurvedAnimation _fadeoutOpacityAnimation;
   final GlobalKey  _scrollbarPainterKey = GlobalKey();
   bool _hoverIsActive = false;
-  bool _thumbDragging = false;
+  Drag? _thumbDrag;
+  ScrollHoldController? _thumbHold;
+  Axis? _axis;
+  final GlobalKey<RawGestureDetectorState> _gestureDetectorKey = GlobalKey<RawGestureDetectorState>();
 
   ScrollController? get _effectiveScrollController => widget.controller ?? PrimaryScrollController.maybeOf(context);
 
@@ -1561,7 +1564,34 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     }
   }
 
-  void _updateScrollPosition(Offset updatedOffset) {
+  void _maybeStartFadeoutTimer() {
+    if (!showScrollbar) {
+      _fadeoutTimer?.cancel();
+      _fadeoutTimer = Timer(widget.timeToFade, () {
+        _fadeoutAnimationController.reverse();
+        _fadeoutTimer = null;
+      });
+    }
+  }
+
+  /// Returns the [Axis] of the child scroll view, or null if the
+  /// we haven't seen a ScrollMetrics notification yet.
+  @protected
+  Axis? getScrollbarDirection() => _axis;
+
+  void _disposeThumbDrag() {
+    _thumbDrag = null;
+  }
+
+  void _disposeThumbHold() {
+    _thumbHold = null;
+  }
+
+  // Given the drag's localPosition (see handleThumbPressUpdate) compute the
+  // scroll position delta in the scroll axis direction. Deal with the complications
+  // arising from scroll metrics changes that have occurred since the last
+  // drag update and the need to prevent overscrolling on some platforms.
+  double? _getPrimaryDelta(Offset localPosition) {
     assert(_cachedController != null);
     assert(_startDragScrollbarAxisOffset != null);
     assert(_lastDragUpdateOffset != null);
@@ -1572,22 +1602,22 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     late double primaryDeltaFromLastDragUpdate;
     switch (position.axisDirection) {
       case AxisDirection.up:
-        primaryDeltaFromDragStart = _startDragScrollbarAxisOffset!.dy - updatedOffset.dy;
-        primaryDeltaFromLastDragUpdate = _lastDragUpdateOffset!.dy - updatedOffset.dy;
+        primaryDeltaFromDragStart = _startDragScrollbarAxisOffset!.dy - localPosition.dy;
+        primaryDeltaFromLastDragUpdate = _lastDragUpdateOffset!.dy - localPosition.dy;
       case AxisDirection.right:
-        primaryDeltaFromDragStart = updatedOffset.dx -_startDragScrollbarAxisOffset!.dx;
-        primaryDeltaFromLastDragUpdate = updatedOffset.dx -_lastDragUpdateOffset!.dx;
+        primaryDeltaFromDragStart = localPosition.dx -_startDragScrollbarAxisOffset!.dx;
+        primaryDeltaFromLastDragUpdate = localPosition.dx -_lastDragUpdateOffset!.dx;
       case AxisDirection.down:
-        primaryDeltaFromDragStart = updatedOffset.dy -_startDragScrollbarAxisOffset!.dy;
-        primaryDeltaFromLastDragUpdate = updatedOffset.dy -_lastDragUpdateOffset!.dy;
+        primaryDeltaFromDragStart = localPosition.dy -_startDragScrollbarAxisOffset!.dy;
+        primaryDeltaFromLastDragUpdate = localPosition.dy -_lastDragUpdateOffset!.dy;
       case AxisDirection.left:
-        primaryDeltaFromDragStart = _startDragScrollbarAxisOffset!.dx - updatedOffset.dx;
-        primaryDeltaFromLastDragUpdate = _lastDragUpdateOffset!.dx - updatedOffset.dx;
+        primaryDeltaFromDragStart = _startDragScrollbarAxisOffset!.dx - localPosition.dx;
+        primaryDeltaFromLastDragUpdate = _lastDragUpdateOffset!.dx - localPosition.dx;
     }
 
     // Convert primaryDelta, the amount that the scrollbar moved since the last
     // time when drag started or last updated, into the coordinate space of the scroll
-    // position, and jump to that position.
+    // position.
     double scrollOffsetGlobal = scrollbarPainter.getTrackToScroll(primaryDeltaFromDragStart + _startDragThumbOffset!);
     if (primaryDeltaFromDragStart > 0 && scrollOffsetGlobal < position.pixels
         || primaryDeltaFromDragStart < 0 && scrollOffsetGlobal > position.pixels) {
@@ -1614,27 +1644,8 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
           // platforms, and only then if the physics allow it.
           break;
       }
-      position.jumpTo(newPosition);
-    }
-  }
-
-  void _maybeStartFadeoutTimer() {
-    if (!showScrollbar) {
-      _fadeoutTimer?.cancel();
-      _fadeoutTimer = Timer(widget.timeToFade, () {
-        _fadeoutAnimationController.reverse();
-        _fadeoutTimer = null;
-      });
-    }
-  }
-
-  /// Returns the [Axis] of the child scroll view, or null if the
-  /// current scroll controller does not have any attached positions.
-  @protected
-  Axis? getScrollbarDirection() {
-    assert(_cachedController != null);
-    if (_cachedController!.hasClients) {
-      return _cachedController!.position.axis;
+      final bool isReversed = axisDirectionIsReversed(position.axisDirection);
+      return isReversed ? newPosition - position.pixels : position.pixels - newPosition;
     }
     return null;
   }
@@ -1646,35 +1657,47 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   @mustCallSuper
   void handleThumbPress() {
     assert(_debugCheckHasValidScrollPosition());
+    _cachedController = _effectiveScrollController;
     if (getScrollbarDirection() == null) {
       return;
     }
     _fadeoutTimer?.cancel();
+    _thumbHold = _cachedController!.position.hold(_disposeThumbHold);
   }
 
   /// Handler called when a long press gesture has started.
   ///
-  /// Begins the fade out animation and initializes dragging the scrollbar thumb.
+  /// Begins the fade out animation and creates the thumb's DragScrollController.
   @protected
   @mustCallSuper
   void handleThumbPressStart(Offset localPosition) {
     assert(_debugCheckHasValidScrollPosition());
-    _cachedController = _effectiveScrollController;
     final Axis? direction = getScrollbarDirection();
     if (direction == null) {
       return;
     }
     _fadeoutTimer?.cancel();
     _fadeoutAnimationController.forward();
+
+    assert(_thumbDrag == null);
+    final ScrollPosition position = _cachedController!.position;
+    final RenderBox renderBox = _scrollbarPainterKey.currentContext!.findRenderObject()! as RenderBox;
+    final DragStartDetails details = DragStartDetails(
+      localPosition: localPosition,
+      globalPosition: renderBox.localToGlobal(localPosition),
+    );
+    _thumbDrag = position.drag(details, _disposeThumbDrag);
+    assert(_thumbDrag != null);
+    assert(_thumbHold == null);
+
     _startDragScrollbarAxisOffset = localPosition;
     _lastDragUpdateOffset = localPosition;
     _startDragThumbOffset = scrollbarPainter.getThumbScrollOffset();
-    _thumbDragging = true;
   }
 
   /// Handler called when a currently active long press gesture moves.
   ///
-  /// Updates the position of the child scrollable.
+  /// Updates the position of the child scrollable via the _drag ScrollDragController.
   @protected
   @mustCallSuper
   void handleThumbPressUpdate(Offset localPosition) {
@@ -1690,7 +1713,30 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     if (direction == null) {
       return;
     }
-    _updateScrollPosition(localPosition);
+    // _thumbDrag might be null if the drag activity ended and called _disposeThumbDrag.
+    assert(_thumbHold == null || _thumbDrag == null);
+    if (_thumbDrag == null) {
+      return;
+    }
+
+    final double? primaryDelta = _getPrimaryDelta(localPosition);
+    if (primaryDelta == null) {
+      return;
+    }
+
+    final Offset delta = switch (direction) {
+      Axis.horizontal => Offset(primaryDelta, 0),
+      Axis.vertical => Offset(0, primaryDelta),
+    };
+    final RenderBox renderBox = _scrollbarPainterKey.currentContext!.findRenderObject()! as RenderBox;
+    final DragUpdateDetails scrollDetails = DragUpdateDetails(
+      delta: delta,
+      primaryDelta: primaryDelta,
+      globalPosition: renderBox.localToGlobal(localPosition),
+      localPosition: localPosition,
+    );
+    _thumbDrag!.update(scrollDetails); // Triggers updates to the ScrollPosition and ScrollbarPainter
+
     _lastDragUpdateOffset = localPosition;
   }
 
@@ -1699,12 +1745,45 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   @mustCallSuper
   void handleThumbPressEnd(Offset localPosition, Velocity velocity) {
     assert(_debugCheckHasValidScrollPosition());
-    _thumbDragging = false;
     final Axis? direction = getScrollbarDirection();
     if (direction == null) {
       return;
     }
     _maybeStartFadeoutTimer();
+    _cachedController = null;
+    _lastDragUpdateOffset = null;
+
+    // _thumbDrag might be null if the drag activity ended and called _disposeThumbDrag.
+    assert(_thumbHold == null || _thumbDrag == null);
+    if (_thumbDrag == null) {
+      return;
+    }
+
+    // On mobile platforms flinging the scrollbar thumb causes a ballistic
+    // scroll, just like it via a touch drag.
+    final TargetPlatform platform = ScrollConfiguration.of(context).getPlatform(context);
+    final (Velocity adjustedVelocity, double primaryVelocity) = switch (platform) {
+      TargetPlatform.iOS || TargetPlatform.android => (
+        -velocity,
+        switch (direction) {
+          Axis.horizontal => -velocity.pixelsPerSecond.dx,
+          Axis.vertical => -velocity.pixelsPerSecond.dy,
+        },
+      ),
+      _ => (Velocity.zero, 0),
+    };
+
+    final RenderBox renderBox = _scrollbarPainterKey.currentContext!.findRenderObject()! as RenderBox;
+    final DragEndDetails details = DragEndDetails(
+      localPosition: localPosition,
+      globalPosition: renderBox.localToGlobal(localPosition),
+      velocity: adjustedVelocity,
+      primaryVelocity: primaryVelocity,
+    );
+
+    _thumbDrag?.end(details);
+    assert(_thumbDrag == null);
+
     _startDragScrollbarAxisOffset = null;
     _lastDragUpdateOffset = null;
     _startDragThumbOffset = null;
@@ -1787,6 +1866,10 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     if (_shouldUpdatePainter(metrics.axis)) {
       scrollbarPainter.update(metrics, metrics.axisDirection);
     }
+    if (metrics.axis != _axis) {
+      setState(() { _axis = metrics.axis; });
+    }
+
     return false;
   }
 
@@ -1821,11 +1904,53 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
         scrollbarPainter.update(metrics, metrics.axisDirection);
       }
     } else if (notification is ScrollEndNotification) {
-      if (_startDragScrollbarAxisOffset == null) {
+      if (_thumbDrag == null) {
         _maybeStartFadeoutTimer();
       }
     }
     return false;
+  }
+
+  void _handleThumbDragDown(DragDownDetails details) {
+    handleThumbPress();
+  }
+
+  void _handleThumbDragStart(DragStartDetails details) {
+    handleThumbPressStart(details.localPosition);
+  }
+
+  void _handleThumbDragUpdate(DragUpdateDetails details) {
+    handleThumbPressUpdate(details.localPosition);
+  }
+
+  void _handleThumbDragEnd(DragEndDetails details) {
+    handleThumbPressEnd(details.localPosition, details.velocity);
+  }
+
+  void _handleThumbDragCancel() {
+    if (_gestureDetectorKey.currentContext == null) {
+      // The cancel was caused by the GestureDetector getting disposed, which
+      // means we will get disposed momentarily as well and shouldn't do
+      // any work.
+      return;
+    }
+    // _thumbHold might be null if the drag started.
+    // _thumbDrag might be null if the drag activity ended and called _disposeThumbDrag.
+    assert(_thumbHold == null || _thumbDrag == null);
+    _thumbHold?.cancel();
+    _thumbDrag?.cancel();
+    assert(_thumbHold == null);
+    assert(_thumbDrag == null);
+  }
+
+  void _initThumbDragGestureRecognizer(DragGestureRecognizer instance) {
+    instance.onDown = _handleThumbDragDown;
+    instance.onStart = _handleThumbDragStart;
+    instance.onUpdate = _handleThumbDragUpdate;
+    instance.onEnd = _handleThumbDragEnd;
+    instance.onCancel = _handleThumbDragCancel;
+    instance.gestureSettings = const DeviceGestureSettings(touchSlop: 0);
+    instance.dragStartBehavior = DragStartBehavior.down;
   }
 
   Map<Type, GestureRecognizerFactory> get _gestures {
@@ -1834,20 +1959,28 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       return gestures;
     }
 
-    gestures[_ThumbPressGestureRecognizer] =
-      GestureRecognizerFactoryWithHandlers<_ThumbPressGestureRecognizer>(
-        () => _ThumbPressGestureRecognizer(
-          debugOwner: this,
-          customPaintKey: _scrollbarPainterKey,
-          duration: widget.pressDuration,
-        ),
-        (_ThumbPressGestureRecognizer instance) {
-          instance.onLongPress = handleThumbPress;
-          instance.onLongPressStart = (LongPressStartDetails details) => handleThumbPressStart(details.localPosition);
-          instance.onLongPressMoveUpdate = (LongPressMoveUpdateDetails details) => handleThumbPressUpdate(details.localPosition);
-          instance.onLongPressEnd = (LongPressEndDetails details) => handleThumbPressEnd(details.localPosition, details.velocity);
-        },
-      );
+    switch (_axis) {
+      case Axis.horizontal:
+        gestures[_HorizontalThumbDragGestureRecognizer] =
+          GestureRecognizerFactoryWithHandlers<_HorizontalThumbDragGestureRecognizer>(
+            () => _HorizontalThumbDragGestureRecognizer(
+              debugOwner: this,
+              customPaintKey: _scrollbarPainterKey,
+            ),
+            _initThumbDragGestureRecognizer,
+          );
+      case Axis.vertical:
+        gestures[_VerticalThumbDragGestureRecognizer] =
+          GestureRecognizerFactoryWithHandlers<_VerticalThumbDragGestureRecognizer>(
+            () => _VerticalThumbDragGestureRecognizer(
+              debugOwner: this,
+              customPaintKey: _scrollbarPainterKey,
+            ),
+            _initThumbDragGestureRecognizer,
+          );
+      case null:
+        return gestures;
+    }
 
     gestures[_TrackTapGestureRecognizer] =
       GestureRecognizerFactoryWithHandlers<_TrackTapGestureRecognizer>(
@@ -1862,6 +1995,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
 
     return gestures;
   }
+
   /// Returns true if the provided [Offset] is located over the track of the
   /// [RawScrollbar].
   ///
@@ -1976,7 +2110,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     if ((scrollbarPainter.hitTest(event.localPosition) ?? false) &&
         _cachedController != null &&
         _cachedController!.hasClients &&
-        (!_thumbDragging || kIsWeb)) {
+        (_thumbDrag == null || kIsWeb)) {
       final ScrollPosition position = _cachedController!.position;
       if (event is PointerScrollEvent) {
         if (!position.physics.shouldAcceptUserOffset(position)) {
@@ -2015,6 +2149,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
           child: Listener(
             onPointerSignal: _receivedPointerSignal,
             child: RawGestureDetector(
+              key: _gestureDetectorKey,
               gestures: _gestures,
               child: MouseRegion(
                 onExit: (PointerExitEvent event) {
@@ -2059,38 +2194,33 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   }
 }
 
-// A long press gesture detector that only responds to events on the scrollbar's
-// thumb and ignores everything else.
-class _ThumbPressGestureRecognizer extends LongPressGestureRecognizer {
-  _ThumbPressGestureRecognizer({
-    required Object super.debugOwner,
-    required GlobalKey customPaintKey,
-    required super.duration,
-  }) : _customPaintKey = customPaintKey;
-
-  final GlobalKey _customPaintKey;
-
-  @override
-  bool isPointerAllowed(PointerDownEvent event) {
-    if (!_hitTestInteractive(_customPaintKey, event.position, event.kind)) {
-      return false;
-    }
-    return super.isPointerAllowed(event);
-  }
-
-  bool _hitTestInteractive(GlobalKey customPaintKey, Offset offset, PointerDeviceKind kind) {
-    if (customPaintKey.currentContext == null) {
-      return false;
-    }
-    final CustomPaint customPaint = customPaintKey.currentContext!.widget as CustomPaint;
-    final ScrollbarPainter painter = customPaint.foregroundPainter! as ScrollbarPainter;
-    final Offset localOffset = _getLocalOffset(customPaintKey, offset);
-    return painter.hitTestOnlyThumbInteractive(localOffset, kind);
-  }
+Offset _getLocalOffset(GlobalKey scrollbarPainterKey, Offset position) {
+  final RenderBox renderBox = scrollbarPainterKey.currentContext!.findRenderObject()! as RenderBox;
+  return renderBox.globalToLocal(position);
 }
 
-// A tap gesture detector that only responds to events on the scrollbar's
-// track and ignores everything else, including the thumb.
+bool _isThumbEvent(GlobalKey customPaintKey, PointerEvent event) {
+  if (customPaintKey.currentContext == null) {
+    return false;
+  }
+
+  final CustomPaint customPaint = customPaintKey.currentContext!.widget as CustomPaint;
+  final ScrollbarPainter painter = customPaint.foregroundPainter! as ScrollbarPainter;
+  final Offset localOffset = _getLocalOffset(customPaintKey, event.position);
+  return painter.hitTestOnlyThumbInteractive(localOffset, event.kind);
+}
+
+bool _isTrackEvent(GlobalKey customPaintKey, PointerEvent event) {
+  if (customPaintKey.currentContext == null) {
+    return false;
+  }
+  final CustomPaint customPaint = customPaintKey.currentContext!.widget as CustomPaint;
+  final ScrollbarPainter painter = customPaint.foregroundPainter! as ScrollbarPainter;
+  final Offset localOffset = _getLocalOffset(customPaintKey, event.position);
+  final PointerDeviceKind kind = event.kind;
+  return painter.hitTestInteractive(localOffset, kind) && !painter.hitTestOnlyThumbInteractive(localOffset, kind);
+}
+
 class _TrackTapGestureRecognizer extends TapGestureRecognizer {
   _TrackTapGestureRecognizer({
     required super.debugOwner,
@@ -2101,25 +2231,34 @@ class _TrackTapGestureRecognizer extends TapGestureRecognizer {
 
   @override
   bool isPointerAllowed(PointerDownEvent event) {
-    if (!_hitTestInteractive(_customPaintKey, event.position, event.kind)) {
-      return false;
-    }
-    return super.isPointerAllowed(event);
-  }
-
-  bool _hitTestInteractive(GlobalKey customPaintKey, Offset offset, PointerDeviceKind kind) {
-    if (customPaintKey.currentContext == null) {
-      return false;
-    }
-    final CustomPaint customPaint = customPaintKey.currentContext!.widget as CustomPaint;
-    final ScrollbarPainter painter = customPaint.foregroundPainter! as ScrollbarPainter;
-    final Offset localOffset = _getLocalOffset(customPaintKey, offset);
-    // We only receive track taps that are not on the thumb.
-    return painter.hitTestInteractive(localOffset, kind) && !painter.hitTestOnlyThumbInteractive(localOffset, kind);
+    return _isTrackEvent(_customPaintKey, event) && super.isPointerAllowed(event);
   }
 }
 
-Offset _getLocalOffset(GlobalKey scrollbarPainterKey, Offset position) {
-  final RenderBox renderBox = scrollbarPainterKey.currentContext!.findRenderObject()! as RenderBox;
-  return renderBox.globalToLocal(position);
+class _VerticalThumbDragGestureRecognizer extends VerticalDragGestureRecognizer {
+  _VerticalThumbDragGestureRecognizer({
+    required Object super.debugOwner,
+    required GlobalKey customPaintKey,
+  }) : _customPaintKey = customPaintKey;
+
+  final GlobalKey _customPaintKey;
+
+  @override
+  bool isPointerAllowed(PointerEvent event) {
+    return _isThumbEvent(_customPaintKey, event) && super.isPointerAllowed(event);
+  }
+}
+
+class _HorizontalThumbDragGestureRecognizer extends HorizontalDragGestureRecognizer {
+  _HorizontalThumbDragGestureRecognizer({
+    required Object super.debugOwner,
+    required GlobalKey customPaintKey,
+  }) : _customPaintKey = customPaintKey;
+
+  final GlobalKey _customPaintKey;
+
+  @override
+  bool isPointerAllowed(PointerEvent event) {
+    return _isThumbEvent(_customPaintKey, event) && super.isPointerAllowed(event);
+  }
 }
