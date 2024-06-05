@@ -28,6 +28,7 @@ import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'focus_traversal.dart';
 import 'framework.dart';
+import 'gesture_detector.dart';
 import 'localizations.dart';
 import 'magnifier.dart';
 import 'media_query.dart';
@@ -5735,6 +5736,8 @@ class _ScribbleFocusableState extends State<_ScribbleFocusable> implements Scrib
   }
 }
 
+// TODO(justinmc): Some vertical handwriting seems to want to change the
+// selection instead of writing...
 class _Scribe extends StatefulWidget {
   const _Scribe({
     required this.child,
@@ -5751,6 +5754,12 @@ class _Scribe extends StatefulWidget {
 }
 
 class _ScribeState extends State<_Scribe> implements ScribeClient {
+  // The handwriting bounds padding of EditText in Android API 34.
+  static const EdgeInsets _handwritingPadding = EdgeInsets.symmetric(
+    horizontal: 10.0,
+    vertical: 40.0,
+  );
+
   RenderEditable get _renderEditable => widget.editableKey.currentContext!.findRenderObject()! as RenderEditable;
 
   @override
@@ -5791,7 +5800,11 @@ class _ScribeState extends State<_Scribe> implements ScribeClient {
 
   // End ScribeClient.
 
+  void _handlePanDown(DragDownDetails details) {
+  }
+
   void _handlePointerDown(PointerDownEvent event) {
+    print('justin _handlePointerDown.');
     if (event.kind != ui.PointerDeviceKind.stylus) {
       return;
     }
@@ -5805,7 +5818,83 @@ class _ScribeState extends State<_Scribe> implements ScribeClient {
 
   @override
   Widget build(BuildContext context) {
-    // TODO(justinmc): This should be bigger than the EditableText! Probably need to move it in the widget tree too? It should add 40dp of vertical padding and 10dp of horizontal padding.
+    /*
+    return GestureDetector(
+      onPanDown: _handlePanDown,
+      child: widget.child,
+    );
+    */
+    return Embiggener(
+      margin: _handwritingPadding,
+      child: Listener(
+        onPointerDown: _handlePointerDown,
+        child: Container(
+          alignment: Alignment.center,
+          color: const Color(0x99ff0000),
+          child: Padding(
+            padding: _handwritingPadding,
+            child: widget.child,
+          ),
+        ),
+      ),
+    );
+    /*
+    return OverflowBox(
+      fit: OverflowBoxFit.deferToChild,
+      child: Listener(
+        onPointerDown: _handlePointerDown,
+        child: Container(
+          alignment: Alignment.center,
+          color: const Color(0x99ff0000),
+          child: Padding(
+            padding: _handwritingPadding,
+            child: widget.child,
+          ),
+        ),
+      ),
+    );
+    */
+    /*
+    return Stack(
+      children: <Widget>[
+        Positioned(
+          /*
+          top: -_handwritingPadding.top,
+          left: -_handwritingPadding.left,
+          */
+          top: 20.0,
+          child: Listener(
+            onPointerDown: _handlePointerDown,
+            child: Container(
+              color: const Color(0x99ff0000),
+              child: Padding(
+                padding: _handwritingPadding,
+                child: widget.child,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+      */
+    /*
+    return CustomSingleChildLayout(
+      delegate: EmbiggeningLayoutDelegate(
+        margin: const EdgeInsets.all(32.0),
+      ),
+      child: const Text('i can haz size.'),
+      /*
+      child: Container(
+        color: Color(0x99ff0000),
+        child: widget.child,
+      ),
+      */
+    );
+    */
+    return Container(
+      color: Color(0x99ff0000),
+      child: widget.child,
+    );
     return Listener(
       onPointerDown: _handlePointerDown,
       child: widget.child,
@@ -6197,5 +6286,141 @@ class _WebClipboardStatusNotifier extends ClipboardStatusNotifier {
   @override
   Future<void> update() {
     return Future<void>.value();
+  }
+}
+
+class EmbiggeningLayoutDelegate extends SingleChildLayoutDelegate {
+  EmbiggeningLayoutDelegate({
+    required this.margin,
+  });
+
+  final EdgeInsets margin;
+
+  @override
+  Size getSize(BoxConstraints constraints) {
+    print('justin getSize for constraints $constraints.');
+    return constraints.smallest;
+  }
+
+  @override
+  BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
+    print('justin getConstraints. $constraints');
+    return constraints;
+  }
+
+  @override
+  Offset getPositionForChild(Size size, Size childSize) {
+    return Offset.zero;
+    return Offset(
+      -margin.left,
+      -margin.top,
+    );
+  }
+
+  @override
+  bool shouldRelayout(EmbiggeningLayoutDelegate oldDelegate) {
+    return margin != oldDelegate.margin;
+  }
+}
+
+class Embiggener extends SingleChildRenderObjectWidget {
+  /// Creates a widget that lets its child overflow itself.
+  const Embiggener({
+    super.key,
+    required this.margin,
+    required Widget child,
+  }) : super(
+    child: child,
+  );
+
+  final EdgeInsets margin;
+
+  @override
+  RenderEmbiggener createRenderObject(BuildContext context) {
+    return RenderEmbiggener(
+      margin: margin,
+    );
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, RenderEmbiggener renderObject) {
+    renderObject
+      ..margin = margin;
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<EdgeInsets>('margin', margin));
+  }
+}
+
+class RenderEmbiggener extends RenderAligningShiftedBox {
+  /// Creates a render object that lets its child overflow itself.
+  RenderEmbiggener({
+    super.child,
+    // TODO(justinmc): Do it.
+    super.textDirection = TextDirection.ltr,
+    required EdgeInsets margin,
+  }) : _margin = margin;
+
+  EdgeInsets get margin => _margin;
+  EdgeInsets _margin;
+  set margin(EdgeInsets value) {
+    if (_margin == value) {
+      return;
+    }
+    _margin = value;
+    markNeedsLayout();
+  }
+
+  static BoxConstraints _getChildConstraints(BoxConstraints constraints, EdgeInsets margin) {
+    return BoxConstraints(
+      minWidth: constraints.minWidth,
+      maxWidth: math.max(constraints.minWidth, constraints.maxWidth - margin.horizontal),
+      minHeight: constraints.minHeight,
+      maxHeight: math.max(constraints.minHeight, constraints.maxHeight - margin.vertical),
+    );
+  }
+
+  @override
+  @protected
+  Size computeDryLayout(covariant BoxConstraints constraints) {
+    return child?.getDryLayout(constraints) ?? constraints.smallest;
+  }
+
+  @override
+  double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
+    final RenderBox? child = this.child;
+    if (child == null) {
+      return null;
+    }
+    final BoxConstraints childConstraints = _getChildConstraints(constraints, margin);
+    final double? result = child.getDryBaseline(childConstraints, baseline);
+    if (result == null) {
+      return null;
+    }
+    final Size childSize = child.getDryLayout(childConstraints);
+    final Size size = getDryLayout(constraints);
+    return result + resolvedAlignment.alongOffset(size - childSize as Offset).dy;
+  }
+
+  @override
+  void performLayout() {
+    if (child != null) {
+      final BoxConstraints childConstraints = _getChildConstraints(constraints, margin);
+      print('justin childConstraints are $childConstraints given $constraints and $margin.');
+      child!.layout(childConstraints, parentUsesSize: true);
+      size = constraints.constrain(child!.size);
+      alignChild();
+    } else {
+      size = constraints.smallest;
+    }
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<EdgeInsets>('margin', margin));
   }
 }
