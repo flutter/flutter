@@ -232,7 +232,7 @@ class DependencyVersionChecker {
                         errorGradleVersion.toString(),
                         getPotentialGradleFix(project.getRootDir().getPath())
                     )
-                throw GradleException(errorMessage)
+                throw DependencyValidationException(errorMessage)
             } else if (version < warnGradleVersion) {
                 val warnMessage: String =
                     getWarnMessage(
@@ -257,7 +257,7 @@ class DependencyVersionChecker {
                         errorJavaVersion.toString(),
                         POTENTIAL_JAVA_FIX
                     )
-                throw GradleException(errorMessage)
+                throw DependencyValidationException(errorMessage)
             } else if (version < warnJavaVersion) {
                 val warnMessage: String =
                     getWarnMessage(
@@ -282,7 +282,7 @@ class DependencyVersionChecker {
                         errorAGPVersion.toString(),
                         getPotentialAGPFix(project.getRootDir().getPath())
                     )
-                throw GradleException(errorMessage)
+                throw DependencyValidationException(errorMessage)
             } else if (version < warnAGPVersion) {
                 val warnMessage: String =
                     getWarnMessage(
@@ -307,7 +307,7 @@ class DependencyVersionChecker {
                         errorKGPVersion.toString(),
                         getPotentialKGPFix(project.getRootDir().getPath())
                     )
-                throw GradleException(errorMessage)
+                throw DependencyValidationException(errorMessage)
             } else if (version < warnKGPVersion) {
                 val warnMessage: String =
                     getWarnMessage(
