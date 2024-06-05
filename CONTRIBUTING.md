@@ -14,29 +14,182 @@ contributing guide.
 
 ## Style
 
-The Flutter engine follows Google style for the languages it uses:
+The Flutter engine _generally_ follows Google style for the languages it uses,
+with some exceptions.
 
-- [C++](https://google.github.io/styleguide/cppguide.html)
-  - **Note**: The Linux embedding generally follows idiomatic GObject-based C
-    style. Use of C++ is discouraged in that embedding to avoid creating hybrid
-    code that feels unfamiliar to either developers used to working with
-    `GObject` or C++ developers. For example, do not use STL collections or
-    `std::string`. Exceptions:
-    - C-style casts are forbidden; use C++ casts.
-    - Use `nullptr` rather than `NULL`.
-    - Avoid `#define`; for internal constants use `static constexpr` instead.
-- [Objective-C][objc_style] (including [Objective-C++][objcc_style])
-- [Java][java_style]
+### C/C++
 
-C/C++ and Objective-C/C++ files are formatted with `clang-format`, and GN files
-with `gn format`.
+Follows the [Google C++ Style Guide][google_cpp_style] and is automatically
+formatted with `clang-format`.
 
+Some additional considerations that are in compliance with the style guide, but
+are worth noting:
+
+#### Judiciously use shared_ptr
+
+The engine currently (as of 2024-05-15) uses `shared_ptr` liberally, which can
+be expensive to copy, and is not always necessary.
+
+The C++ style guide has a
+[section on ownership and smart pointers][cpp_ownership] worth reading:
+
+> Do not design your code to use shared ownership without a very good reason.
+> One such reason is to avoid expensive copy operations, but you should only do
+> this if the performance benefits are significant, and the underlying object is
+> immutable.
+
+Prefer using `std::unique_ptr` when possible.
+
+#### Judiciously use `auto`
+
+The C++ style guide has a [section on type deduction][cpp_auto] that is worth
+reading:
+
+> The fundamental rule is: use type deduction only to make the code clearer or
+> safer, and do not use it merely to avoid the inconvenience of writing an
+> explicit type. When judging whether the code is clearer, keep in mind that
+> your readers are not necessarily on your team, or familiar with your project,
+> so types that you and your reviewer experience as unnecessary clutter will
+> very often provide useful information to others. For example, you can assume
+> that the return type of `make_unique<Foo>()` is obvious, but the return type
+> of `MyWidgetFactory()` probably isn't.
+
+Due to our codebase's extensive use of `shared_ptr`, `auto` can have surprising
+performance implications. See [#49801][pr_49801] for an example.
+
+#### Linux Embedding
+
+> [!NOTE]  
+> The Linux embedding instead follows idiomatic GObject-based C style.
+
+Use of C++ in the [Linux embedding][] is discouraged in that embedding to avoid
+creating hybrid code that feels unfamiliar to either developers used to working
+with `GObject` or C++ developers.
+
+For example, _do not_ use STL collections or `std::string`, but _do_:
+
+- Use C++ casts (C-style casts are forbidden).
+- Use `nullptr` rather than `NULL`.
+- Avoid `#define`; for internal constants use `static constexpr` instead.
+
+### Dart
+
+The Flutter engine _intends_ to follow the [Dart style guide][dart_style] but
+currently follows the [Flutter style guide][flutter_style], with the following
+exceptions:
+
+#### Use of type inference is allowed
+
+The [Dart style guide][dart_inference] only requires explicit types when type
+inference is not possible, but the Flutter style guide always requires explicit
+types. The engine is moving towards the Dart style guide, but this is a gradual
+process. In the meantime, follow these guidelines:
+
+- **Always** annotate when inference is not possible.
+- **Prefer** annotating when inference is possible but the type is not
+  obvious.
+
+Some cases when using `var`/`final`/`const` is appropriate:
+
+- When the type is obvious from the right-hand side of the assignment:
+
+  ```dart
+  // Capitalized constructor name always returns a Foo.
+  var foo = Foo();
+
+  // Similar with factory constructors.
+  var bar = Bar.create();
+
+  // Literals (strings, numbers, lists, maps, etc) always return the same type.
+  var name = 'John Doe';
+  var flag = true;
+  var numbers = [1, 2, 3];
+  var map = {'one': 1, 'two': 2, 'three': 3};
+  ```
+
+- When the type is obvious from the method name:
+
+  ```dart
+  // toString() always returns a String.
+  var string = foo().toString();
+
+  // It's reasonable to assume that length returns an int.
+  var length = string.length;
+  ```
+
+- When the type is obvious from the context:
+
+  ```dart
+  // When variables are in the same scope, reduce() clearly returns an int.
+  var list = [1, 2, 3];
+  var sum = list.reduce((a, b) => a + b);
+  ```
+
+Some cases where an explicit type should be considered:
+
+- When the type is not obvious from the right-hand side of the assignment:
+
+  ```dart
+  // What does 'fetchLatest()' return?
+  ImageBuffer buffer = fetchLatest();
+
+  // What does this large chain of method calls return?
+  Iterable<int> numbers = foo().bar().map((b) => b.baz());
+  ```
+
+- When there are semantic implications to the type:
+
+  ```dart
+  // Without 'num', the map would be inferred as 'Map<String, int>'.
+  const map = <String, num>{'one': 1, 'two': 2, 'three': 3};
+  ```
+
+- Or, **when a reviewer requests it**!
+
+  Remember that the goal is to make the code more readable and maintainable, and
+  explicit types _can_ help with that. Code can be changed, so it's always
+  possible to add or remove type annotations later as the code evolves, so avoid
+  bikeshedding over this.
+
+### Java
+
+Follows the [Google Java Style Guide][java_style] and is automatically formatted
+with `google-java-format`.
+
+### Objective-C
+
+Follows the [Google Objective-C Style Guide][objc_style], including for
+Objective-C++ and is automatically formatted with `clang-format`.
+
+### Python
+
+Follows the [Google Python Style Guide][google_python_style] and is
+automatically formatted with `yapf`.
+
+> [!WARNING]
+> Historically, the engine grew a number of one-off Python scripts, often as
+> part of the testing or build infrastructure (i.e. command-line tools). We are
+> instead moving towards using Dart for these tasks, so new Python scripts
+> should be avoided whenever possible.
+
+### GN
+
+Automatically formatted with `gn format`.
+
+[cpp_auto]: https://google.github.io/styleguide/cppguide.html#Type_deduction
+[cpp_ownership]: https://google.github.io/styleguide/cppguide.html#Ownership_and_Smart_Pointers
+[dart_inference]: https://dart.dev/effective-dart/design#types
+[dart_style]: https://dart.dev/effective-dart/style
+[linux embedding]: shell/platform/linux
+[google_cpp_style]: https://google.github.io/styleguide/cppguide.html
+[pr_49801]: https://github.com/flutter/engine/pull/49801
 [code_of_conduct]: https://github.com/flutter/flutter/blob/master/CODE_OF_CONDUCT.md
 [contrib_guide]: https://github.com/flutter/flutter/blob/master/CONTRIBUTING.md
 [engine_dev_setup]: https://github.com/flutter/flutter/blob/master/docs/engine/contributing/Setting-up-the-Engine-development-environment.md
+[flutter_style]: https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo
 [objc_style]: https://google.github.io/styleguide/objcguide.html
-[objcc_style]: https://google.github.io/styleguide/objcguide.html#objective-c
 [java_style]: https://google.github.io/styleguide/javaguide.html
+[google_python_style]: https://google.github.io/styleguide/pyguide.html
 
 ## Testing
 
