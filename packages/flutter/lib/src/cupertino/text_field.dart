@@ -95,6 +95,8 @@ enum OverlayVisibilityMode {
   always,
 }
 
+enum _TextFieldType { bordered, borderless}
+
 class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDetectorBuilder {
   _CupertinoTextFieldSelectionGestureDetectorBuilder({
     required _CupertinoTextFieldState state,
@@ -318,7 +320,8 @@ class CupertinoTextField extends StatefulWidget {
          'Use keyboardType TextInputType.multiline when using TextInputAction.newline on a multiline TextField.',
        ),
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
-       enableInteractiveSelection = enableInteractiveSelection ?? (!readOnly || !obscureText);
+       enableInteractiveSelection = enableInteractiveSelection ?? (!readOnly || !obscureText),
+       _textFieldType = _TextFieldType.bordered;
 
   /// Creates a borderless iOS-style text field.
   ///
@@ -446,7 +449,8 @@ class CupertinoTextField extends StatefulWidget {
          'Use keyboardType TextInputType.multiline when using TextInputAction.newline on a multiline TextField.',
        ),
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
-       enableInteractiveSelection = enableInteractiveSelection ?? (!readOnly || !obscureText);
+       enableInteractiveSelection = enableInteractiveSelection ?? (!readOnly || !obscureText),
+       _textFieldType = _TextFieldType.borderless;
 
   /// {@macro flutter.widgets.editableText.groupId}
   final Object groupId;
@@ -761,6 +765,8 @@ class CupertinoTextField extends StatefulWidget {
   ///
   ///  * [CupertinoAdaptiveTextSelectionToolbar], which is built by default.
   final EditableTextContextMenuBuilder? contextMenuBuilder;
+
+  final _TextFieldType _textFieldType;
 
   static Widget _defaultContextMenuBuilder(BuildContext context, EditableTextState editableTextState) {
     return CupertinoAdaptiveTextSelectionToolbar.editableText(
@@ -1338,9 +1344,21 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
         );
     }
 
-    final BoxDecoration? effectiveDecoration = widget.decoration?.copyWith(
-      border: resolvedBorder,
-      color: enabled ? decorationColor : disabledColor,
+    // If the text field should have a border, set the background color to the
+    // disabled color only if a color for the box decoration was not set.
+    final BoxDecoration? effectiveDecoration = (widget._textFieldType == _TextFieldType.bordered
+      ? widget.decoration?.copyWith(
+          border: resolvedBorder,
+          color: enabled ? decorationColor
+            : (widget.decoration == _kDefaultRoundedBorderDecoration
+                ? disabledColor
+                : widget.decoration?.color
+              ),
+      )
+      : widget.decoration?.copyWith(
+          border: resolvedBorder,
+          color: enabled ? decorationColor : disabledColor,
+      )
     );
 
     final Color selectionColor = CupertinoDynamicColor.maybeResolve(
