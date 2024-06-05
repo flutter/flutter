@@ -772,6 +772,86 @@ void main() {
             '\n\n');
       });
 
+      testUsingContext('provides warning when a plugin references a default plugin without implementation', () async {
+        final Set<String> directDependencies = <String>{'url_launcher'};
+        final List<PluginInterfaceResolution> resolutions =
+            resolvePlatformImplementation(
+          <Plugin>[
+            Plugin.fromYaml(
+              'url_launcher',
+              '',
+              YamlMap.wrap(<String, dynamic>{
+                'platforms': <String, dynamic>{
+                  'linux': <String, dynamic>{
+                    'default_package': 'url_launcher_linux',
+                  },
+                },
+              }),
+              null,
+              <String>[],
+              fileSystem: fs,
+              appDependencies: directDependencies,
+            ),
+            Plugin.fromYaml(
+              'url_launcher_linux',
+              '',
+              YamlMap.wrap(<String, dynamic>{
+                'implements': 'url_launcher',
+                'platforms': <String, dynamic>{},
+              }),
+              null,
+              <String>[],
+              fileSystem: fs,
+              appDependencies: directDependencies,
+            ),
+          ],
+          selectDartPlugins: true,
+        );
+
+        expect(resolutions.length, equals(0));
+        expect(
+            testLogger.warningText,
+            'Package url_launcher:linux references url_launcher_linux:linux as the default plugin, '
+            'but it does not provide an inline implementation.\n'
+            'Ask the maintainers of url_launcher to either avoid referencing a default implementation via `platforms: linux: default_package: url_launcher_linux` '
+            'or add an inline implementation to url_launcher_linux via `platforms: linux: dartPluginClass`.\n'
+            '\n');
+      });
+
+      testUsingContext('provides warning when a plugin references a default plugin which does not exist', () async {
+        final Set<String> directDependencies = <String>{'url_launcher'};
+        final List<PluginInterfaceResolution> resolutions =
+            resolvePlatformImplementation(
+          <Plugin>[
+            Plugin.fromYaml(
+              'url_launcher',
+              '',
+              YamlMap.wrap(<String, dynamic>{
+                'platforms': <String, dynamic>{
+                  'linux': <String, dynamic>{
+                    'default_package': 'url_launcher_linux',
+                  },
+                },
+              }),
+              null,
+              <String>[],
+              fileSystem: fs,
+              appDependencies: directDependencies,
+            ),
+          ],
+          selectDartPlugins: true,
+        );
+
+        expect(resolutions.length, equals(0));
+        expect(
+            testLogger.warningText,
+            'Package url_launcher:linux references url_launcher_linux:linux as the default plugin, '
+            'but the package does not exist.\n'
+            'Ask the maintainers of url_launcher to either avoid referencing a default implementation via `platforms: linux: default_package: url_launcher_linux` '
+            'or create a plugin named url_launcher_linux.\n'
+            '\n');
+      });
+
       testUsingContext('provides error when user selected multiple implementations', () async {
         final Set<String> directDependencies = <String>{
           'url_launcher_linux_1',

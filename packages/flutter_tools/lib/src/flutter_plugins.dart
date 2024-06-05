@@ -1223,8 +1223,8 @@ Map<String, List<Plugin>> _resolvePluginImplementations(
   // Key: the plugin name, value: the list of plugin candidates for the implementation of [platformKey].
   final Map<String, List<Plugin>> pluginImplCandidates = <String, List<Plugin>>{};
 
-  // Key: the plugin name, value: the plugin name of the default implementation of [platformKey].
-  final Map<String, String> defaultImplementations = <String, String>{};
+  // Key: the plugin name, value: the plugin of the default implementation of [platformKey].
+  final Map<String, Plugin> defaultImplementations = <String, Plugin>{};
 
   for (final Plugin plugin in plugins) {
     final String? error = _validatePlugin(plugin, platformKey, pluginType: pluginType);
@@ -1237,8 +1237,28 @@ Map<String, List<Plugin>> _resolvePluginImplementations(
     final String? defaultImplPluginName = _getDefaultImplPlugin(plugin, platformKey, pluginType: pluginType);
 
     if (defaultImplPluginName != null) {
-      // Each plugin can only have one default implementation for this [platformKey].
-      defaultImplementations[plugin.name] = defaultImplPluginName;
+      final Plugin? defaultPackage = plugins.where((Plugin plugin) => plugin.name == defaultImplPluginName).firstOrNull;
+      if (defaultPackage != null) {
+        if (_hasPluginInlineImpl(defaultPackage, platformKey, pluginType: pluginType)) {
+          // Each plugin can only have one default implementation for this [platformKey].
+          defaultImplementations[plugin.name] = defaultPackage;
+          // No need to add the default plugin to `pluginImplCandidates`,
+          // as if the plugin is present and provides an implementation
+          // it is added via `_getImplementedPlugin`.
+        } else {
+          globals.printWarning(
+            'Package ${plugin.name}:$platformKey references $defaultImplPluginName:$platformKey as the default plugin, but it does not provide an inline implementation.\n'
+            'Ask the maintainers of ${plugin.name} to either avoid referencing a default implementation via `platforms: $platformKey: default_package: $defaultImplPluginName` '
+            'or add an inline implementation to $defaultImplPluginName via `platforms: $platformKey: ${pluginType == _PluginType.dart ? 'dartPluginClass' : 'pluginClass'}`.\n',
+          );
+        }
+      } else {
+        globals.printWarning(
+          'Package ${plugin.name}:$platformKey references $defaultImplPluginName:$platformKey as the default plugin, but the package does not exist.\n'
+          'Ask the maintainers of ${plugin.name} to either avoid referencing a default implementation via `platforms: $platformKey: default_package: $defaultImplPluginName` '
+          'or create a plugin named $defaultImplPluginName.\n',
+        );
+      }
     }
     if (implementsPluginName != null) {
       pluginImplCandidates.putIfAbsent(implementsPluginName, () => <Plugin>[]);
@@ -1253,9 +1273,10 @@ Map<String, List<Plugin>> _resolvePluginImplementations(
   for (final MapEntry<String, List<Plugin>> implCandidatesEntry in pluginImplCandidates.entries) {
     final (Plugin? resolution, String? error) = _resolveImplementationOfPlugin(
       platformKey: platformKey,
+      pluginType: pluginType,
       pluginName: implCandidatesEntry.key,
       candidates: implCandidatesEntry.value,
-      defaultPackageName: defaultImplementations[implCandidatesEntry.key],
+      defaultPackage: defaultImplementations[implCandidatesEntry.key],
     );
     if (error != null) {
       globals.printError(error);
@@ -1322,10 +1343,11 @@ String? _getImplementedPlugin(
   _PluginType pluginType = _PluginType.native,
 }) {
   if (_hasPluginInlineImpl(plugin, platformKey, pluginType: pluginType)) {
-    final String? implementsPackage = plugin.implementsPackage;
-
     // Only can serve, if the plugin has an inline implementation.
+
+    final String? implementsPackage = plugin.implementsPackage;
     if (implementsPackage != null && implementsPackage.isNotEmpty) {
+      // The inline plugin implements another package.
       return implementsPackage;
     }
 
@@ -1413,9 +1435,10 @@ bool _hasPluginInlineDartImpl(Plugin plugin, String platformKey) {
 /// Returns an [error] string, if failing.
 (Plugin? resolution, String? error) _resolveImplementationOfPlugin({
   required String platformKey,
+  required _PluginType pluginType,
   required String pluginName,
   required List<Plugin> candidates,
-  String? defaultPackageName,
+  Plugin? defaultPackage,
 }) {
   // If there's only one candidate, use it.
   if (candidates.length == 1) {
@@ -1447,12 +1470,10 @@ bool _hasPluginInlineDartImpl(Plugin plugin, String platformKey) {
     }
   }
   // Next, defer to the default implementation if there is one.
-  if (defaultPackageName != null) {
-    final int defaultIndex = candidates
-        .indexWhere((Plugin plugin) => plugin.name == defaultPackageName);
-    if (defaultIndex != -1) {
-      return (candidates[defaultIndex], null);
-    }
+  if (defaultPackage != null && candidates.contains(defaultPackage)) {
+    // By definition every candidate has an inline implementation
+    assert(_hasPluginInlineImpl(defaultPackage, platformKey, pluginType: pluginType));
+    return (defaultPackage, null);
   }
   // Otherwise, require an explicit choice.
   if (candidates.length > 1) {
