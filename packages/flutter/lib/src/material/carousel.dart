@@ -51,7 +51,7 @@ class CarouselView extends StatefulWidget {
     this.shape,
     this.overlayColor,
     this.itemSnapping = false,
-    this.shrinkExtent,
+    this.shrinkExtent = 0.0,
     this.controller,
     this.scrollDirection = Axis.horizontal,
     this.reverse = false,
@@ -104,12 +104,12 @@ class CarouselView extends StatefulWidget {
   /// larger than the defined [shrinkExtent], the [shrinkExtent] is dynamically
   /// adjusted to match this remaining space, ensuring a smooth size transition.
   ///
-  /// Defaults to null. If this is null, it is set to 0.0 which allows items to
-  /// shrink/expand completely, transitioning between 0.0 and the full [itemExtent].
-  /// In cases where the remaining viewport space for the last visible item is
-  /// larger than the defined [shrinkExtent], the [shrinkExtent] is dynamically
-  /// adjusted to match this remaining space, ensuring a smooth size transition.
-  final double? shrinkExtent;
+  /// Defaults to 0.0. Setting to 0.0 allows items to shrink/expand completely,
+  /// transitioning between 0.0 and the full [itemExtent]. In cases where the
+  /// remaining viewport space for the last visible item is larger than the
+  /// defined [shrinkExtent], the [shrinkExtent] is dynamically adjusted to match
+  /// this remaining space, ensuring a smooth size transition.
+  final double shrinkExtent;
 
   /// Whether the carousel should keep scrolling to the next/previous items to
   /// maintain the original layout.
@@ -188,6 +188,7 @@ class _CarouselViewState extends State<CarouselView> {
         _internalController = null;
         widget.controller?._attach(this);
       } else { // widget.controller == null && oldWidget.controller != null
+        assert(_internalController == null);
         _internalController = CarouselController();
         _controller._attach(this);
       }
@@ -200,9 +201,7 @@ class _CarouselViewState extends State<CarouselView> {
   @override
   void dispose() {
     _controller._detach(this);
-    if (widget.controller == null) {
-      _controller.dispose();
-    }
+    _internalController?.dispose();
     super.dispose();
   }
 
@@ -255,7 +254,7 @@ class _CarouselViewState extends State<CarouselView> {
               slivers: <Widget>[
                 _SliverFixedExtentCarousel(
                   itemExtent: _itemExtent,
-                  minExtent: widget.shrinkExtent ?? 0.0,
+                  minExtent: widget.shrinkExtent,
                   delegate: SliverChildBuilderDelegate(
                     (BuildContext context, int index) {
                       return Padding(
