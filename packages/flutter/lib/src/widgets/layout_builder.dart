@@ -4,6 +4,7 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 
 import 'debug.dart';
 import 'framework.dart';
@@ -81,9 +82,40 @@ class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderOb
   Element? _child;
 
   @override
-  BuildScope get buildScope => LayoutBuilder.applyDoubleRebuildFix ? _buildScope : super.buildScope;
+  BuildScope get buildScope => _buildScope;
 
-  late final BuildScope _buildScope = BuildScope(scheduleRebuild: renderObject.markNeedsLayout);
+  late final BuildScope _buildScope = BuildScope(scheduleRebuild: _scheduleRebuild);
+
+  // To schedule a rebuild, markNeedsLayout needs to be called on this Element's
+  // render object (as the rebuilding is done in its performLayout call). However,
+  // the render tree should typically be kept clean during the postFrameCallbacks
+  // and the idle phase, so the layout data can be safely read.
+  bool _deferredCallbackScheduled = false;
+  void _scheduleRebuild() {
+    if (_deferredCallbackScheduled) {
+      return;
+    }
+
+    final bool deferMarkNeedsLayout = switch (SchedulerBinding.instance.schedulerPhase) {
+      SchedulerPhase.idle || SchedulerPhase.postFrameCallbacks => true,
+      SchedulerPhase.transientCallbacks || SchedulerPhase.midFrameMicrotasks || SchedulerPhase.persistentCallbacks => false,
+    };
+    if (!deferMarkNeedsLayout) {
+      renderObject.markNeedsLayout();
+      return;
+    }
+    _deferredCallbackScheduled = true;
+    SchedulerBinding.instance.scheduleFrameCallback(_frameCallback);
+  }
+
+  void _frameCallback(Duration timestamp) {
+    _deferredCallbackScheduled = false;
+    // This method is only called when the render tree is stable, if the Element
+    // is deactivated it will never be reincorporated back to the tree.
+    if (mounted) {
+      renderObject.markNeedsLayout();
+    }
+  }
 
   @override
   void visitChildren(ElementVisitor visitor) {
@@ -283,12 +315,6 @@ class LayoutBuilder extends ConstrainedLayoutBuilder<BoxConstraints> {
     super.key,
     required super.builder,
   });
-
-  /// Temporary flag that controls whether [LayoutBuilder]s and
-  /// [SliverLayoutBuilder]s should apply the double rebuild fix. This flag is
-  /// for migration only and **SHOULD NOT BE USED**.
-  @Deprecated('This is a temporary migration flag. DO NOT USE THIS.') // flutter_ignore: deprecation_syntax (see analyze.dart)
-  static bool applyDoubleRebuildFix = false;
 
   @override
   RenderObject createRenderObject(BuildContext context) => _RenderLayoutBuilder();

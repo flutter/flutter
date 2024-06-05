@@ -23,9 +23,6 @@ class _MyGlobalObjectKey<T extends State<StatefulWidget>> extends GlobalObjectKe
 }
 
 void main() {
-  setUp(() { LayoutBuilder.applyDoubleRebuildFix = true; });
-  tearDown(() { LayoutBuilder.applyDoubleRebuildFix = false; });
-
   testWidgets('UniqueKey control test', (WidgetTester tester) async {
     final Key key = UniqueKey();
     expect(key, hasOneLineDescription);
