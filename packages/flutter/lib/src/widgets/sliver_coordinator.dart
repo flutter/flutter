@@ -13,7 +13,7 @@ import 'scroll_notification.dart';
 /// its [CustomScrollView] has been laid out.
 ///
 /// The second parameter can be used to retrieve layout information
-/// when [CoordinatedSliver.hasLayoutInfo] is true. See
+/// when [SliverCoordinatorData.hasLayoutInfo] is true. See
 /// [SliverCoordinatorData.getSliverConstraints] and
 /// [SliverCoordinatorData.getSliverGeometry].
 typedef SliverCoordinatorCallback = void Function(ScrollNotification notification, SliverCoordinatorData data);
@@ -181,18 +181,23 @@ class _SliverCoordinatorState extends State<SliverCoordinator> {
 ///
 /// Each coordinated sliver must be assigned a unique [id].
 /// Coordinated slivers store their [SliverConstraints] and
-/// [SliverGeometry] values after they've been laid out in a
-/// [SliverCoordinatorObject]. These values
+/// [SliverGeometry] values after they've been laid out by their
+/// [CustomScrollView]. These values
 /// can be retrieved - after the entire [CustomScrollView] has been
 /// laid out - in a [SliverCoordinator.callback] by applying
 /// [SliverCoordinatorData.getSliverConstraints] and
 /// [SliverCoordinatorData.getSliverGeometry] to [id].
+/// The [SliverCoordinatorData] is cleared as soon as its
+/// [CustomScrollView] ancestor is updated however the latest values
+/// can always be retrieved in the [SliverCoordinator.callback]
+/// which runs after layout has been completed but before any
+/// subsequent [CustomScrollView] updates.
 ///
 /// {@tool dartpad}
 /// This example contains one [CoordinatedSliver] which is
-/// auto-scrolled so that it's aligned with the top of the viewport
-/// whenever a scroll-end gesture leaves it partially visible. The
-/// auto-scroll is triggered by the [SliverCoordinator]'s
+/// auto-scrolled so that it's aligned with the top or bottom of the
+/// viewport whenever a scroll-end gesture leaves it partially
+/// visible. The auto-scroll is triggered by the [SliverCoordinator]'s
 /// callback. The callback has access to the current scroll offset and
 /// the current extent (height) of the [CoordinatedSliver].
 ///
@@ -205,7 +210,7 @@ class CoordinatedSliver extends SingleChildRenderObjectWidget {
   const CoordinatedSliver({
     super.key,
     required this.id,
-    Widget? sliver,
+    required Widget sliver,
   }) : super(child: sliver);
 
   /// A value that uniquely identifies this CoordinatedSliver relative to others
