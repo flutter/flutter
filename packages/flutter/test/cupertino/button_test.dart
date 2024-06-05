@@ -608,6 +608,35 @@ void main() {
     expect(focused, isFalse);
     expect(focusNode.hasFocus, isFalse);
   });
+
+
+  testWidgets('IconThemeData is not replaced by CupertinoButton', (WidgetTester tester) async {
+    const IconThemeData givenIconTheme = IconThemeData(size: 12.0);
+
+    IconThemeData? actualIconTheme;
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: IconTheme(
+            data: givenIconTheme,
+            child: CupertinoButton(
+              onPressed: () {},
+              child: Builder(
+                  builder: (BuildContext context) {
+                    actualIconTheme = IconTheme.of(context);
+
+                    return const Placeholder();
+                  }
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(actualIconTheme?.size, givenIconTheme.size);
+  });
 }
 
 Widget boilerplate({ required Widget child }) {
