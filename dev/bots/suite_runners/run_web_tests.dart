@@ -521,6 +521,7 @@ class WebTestsSuite {
       flutter,
       <String>[
         'run',
+        '--verbose',
         '--debug',
         '-d',
         'chrome',
