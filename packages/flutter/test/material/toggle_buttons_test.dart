@@ -2117,7 +2117,6 @@ void main() {
               ],
               actions: <SemanticsAction>[
                 SemanticsAction.tap,
-                SemanticsAction.focus,
               ],
               rect: const Rect.fromLTRB(0.0, 0.0, 87.0, 48.0),
             ),
@@ -2131,7 +2130,6 @@ void main() {
               ],
               actions: <SemanticsAction>[
                 SemanticsAction.tap,
-                SemanticsAction.focus,
               ],
               rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0)
             ),
@@ -2145,7 +2143,6 @@ void main() {
               ],
               actions: <SemanticsAction>[
                 SemanticsAction.tap,
-                SemanticsAction.focus,
               ],
               rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
             ),
@@ -2191,7 +2188,6 @@ void main() {
               ],
               actions: <SemanticsAction>[
                 SemanticsAction.tap,
-                SemanticsAction.focus,
               ],
             ),
             TestSemantics(
@@ -2205,7 +2201,6 @@ void main() {
               ],
               actions: <SemanticsAction>[
                 SemanticsAction.tap,
-                SemanticsAction.focus,
               ],
             ),
           ],
