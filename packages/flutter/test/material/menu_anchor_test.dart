@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -3274,6 +3275,40 @@ void main() {
   }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/145527
 
   group('CheckboxMenuButton', () {
+    testWidgets('CheckboxMenuButton.adaptive shows the correct CheckboxMenuButton platform widget', (WidgetTester tester) async {
+      Widget buildApp(TargetPlatform platform) {
+        return MaterialApp(
+          theme: ThemeData(platform: platform),
+          home: Material(
+            child: Center(
+              child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+                return CheckboxMenuButton.adaptive(
+                  value: false,
+                  onChanged: (bool? newValue) {},
+                  child: const Text('adaptive checkbox'),
+                );
+              }),
+            ),
+          ),
+        );
+      }
+
+      for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.iOS, TargetPlatform.macOS ]) {
+        await tester.pumpWidget(buildApp(platform));
+        await tester.pumpAndSettle();
+
+        expect(find.byType(CupertinoCheckbox), findsOneWidget);
+      }
+
+      for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows ]) {
+        await tester.pumpWidget(buildApp(platform));
+        await tester.pumpAndSettle();
+
+        expect(find.byType(CupertinoCheckbox), findsNothing);
+      }
+
+    });
+
     testWidgets('tapping toggles checkbox', (WidgetTester tester) async {
       bool? checkBoxValue;
       await tester.pumpWidget(
@@ -3328,6 +3363,41 @@ void main() {
   });
 
   group('RadioMenuButton', () {
+    testWidgets('RadioMenuButton.adaptive shows the correct RadioMenuButton platform widget', (WidgetTester tester) async {
+      Widget buildApp(TargetPlatform platform) {
+        return MaterialApp(
+          theme: ThemeData(platform: platform),
+          home: Material(
+            child: Center(
+              child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+                return RadioMenuButton<int>.adaptive(
+                  value: 0,
+                  groupValue: null,
+                  onChanged: (int? newValue) {},
+                  child: const Text('adaptive radio'),
+                );
+              }),
+            ),
+          ),
+        );
+      }
+
+      for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.iOS, TargetPlatform.macOS ]) {
+        await tester.pumpWidget(buildApp(platform));
+        await tester.pumpAndSettle();
+
+        expect(find.byType(CupertinoRadio<int>), findsOneWidget);
+      }
+
+      for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows ]) {
+        await tester.pumpWidget(buildApp(platform));
+        await tester.pumpAndSettle();
+
+        expect(find.byType(CupertinoRadio<int>), findsNothing);
+      }
+
+    });
+
     testWidgets('tapping toggles radio button', (WidgetTester tester) async {
       int? radioValue;
       await tester.pumpWidget(
