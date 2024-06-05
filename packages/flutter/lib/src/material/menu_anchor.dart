@@ -1245,12 +1245,12 @@ class CheckboxMenuButton extends StatelessWidget {
     required this.child,
   }) : _checkboxType = _CheckboxType.material;
 
-
-  /// Creates an adaptive [CheckboxMenuButton] based on whether the target platform is iOS
-  /// or macOS, following Material design's
-  /// [Cross-platform guidelines](https://material.io/design/platform-guidance/cross-platform-adaptation.html).
+  /// Creates an adaptive [CheckboxMenuButton].
   ///
-  /// The target platform is based on the current [Theme]: [ThemeData.platform].
+  /// The checkbox uses [Checkbox.adaptive] to show a [CupertinoCheckbox] for
+  /// iOS platforms, or [Checkbox] for all others.
+  ///
+  /// All other properties are the same as [CheckboxMenuButton].
   const CheckboxMenuButton.adaptive({
     super.key,
     required this.value,
@@ -1483,11 +1483,12 @@ class RadioMenuButton<T> extends StatelessWidget {
     required this.child,
   }) : _radioType = _RadioType.material;
 
-  /// Creates an adaptive [RadioMenuButton] based on whether the target platform is iOS
-  /// or macOS, following Material design's
-  /// [Cross-platform guidelines](https://material.io/design/platform-guidance/cross-platform-adaptation.html).
+  /// Creates an adaptive [RadioMenuButton].
   ///
-  /// The target platform is based on the current [Theme]: [ThemeData.platform].
+  /// The radio uses [Radio.adaptive] to show a [CupertinoRadio] on iOS
+  /// and a [Radio] on other platforms.
+  ///
+  /// All other properties are the same as [RadioMenuButton].
   const RadioMenuButton.adaptive({
     super.key,
     required this.value,
