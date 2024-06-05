@@ -13,10 +13,10 @@ class MouseRegionApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('MouseRegion.onExit Sample')),
-        body: const Center(
+        appBar: AppBar(title: Text('MouseRegion.onExit Sample')),
+        body: Center(
           child: MouseRegionExample(),
         ),
       ),

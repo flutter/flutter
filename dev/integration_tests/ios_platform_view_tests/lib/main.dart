@@ -104,8 +104,8 @@ class MergeThreadTestPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Platform View Thread Merge Tests'),
+      appBar: const AppBar(
+        title: Text('Platform View Thread Merge Tests'),
       ),
       body: Column(
         children: <Widget>[
@@ -148,8 +148,8 @@ class _FocusTestPageState extends State<FocusTestPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Platform View Focus Tests'),
+      appBar: const AppBar(
+        title: Text('Platform View Focus Tests'),
       ),
       body: Column(
         children: <Widget>[
@@ -182,8 +182,8 @@ class _ZOrderTestPageState extends State<ZOrderTestPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Platform view z order test'),
+      appBar: const AppBar(
+        title: Text('Platform view z order test'),
       ),
       body: Center(
         child: Column(

@@ -84,7 +84,7 @@ void main() {
           padding: EdgeInsets.fromLTRB(0, 20, 0, 34),
         ),
         child: Scaffold(
-          appBar: AppBar(title: const Text('Title')),
+          appBar: const AppBar(title: Text('Title')),
           body: Scrollbar(
             child: ListView(
               children: const <Widget>[SizedBox(width: 4000, height: 4000)],
@@ -128,7 +128,7 @@ void main() {
           padding: EdgeInsets.fromLTRB(0, 20, 0, 34),
         ),
         child: Scaffold(
-          appBar: AppBar(title: const Text('Title')),
+          appBar: const AppBar(title: Text('Title')),
           body: Scrollbar(
             child: ListView(
               children: const <Widget>[SizedBox(width: 40, height: 40)],

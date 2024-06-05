@@ -44,8 +44,8 @@ class AboutListTileExample extends StatelessWidget {
     ];
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Show About Example'),
+      appBar: const AppBar(
+        title: Text('Show About Example'),
       ),
       drawer: Drawer(
         child: SingleChildScrollView(

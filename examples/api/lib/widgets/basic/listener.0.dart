@@ -13,10 +13,10 @@ class ListenerApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('Listener Sample')),
-        body: const Center(
+        appBar: AppBar(title: Text('Listener Sample')),
+        body: Center(
           child: ListenerExample(),
         ),
       ),

@@ -7,10 +7,10 @@ import 'package:flutter/material.dart';
 /// Flutter code sample for [Image.frameBuilder].
 
 void main() {
-  runApp(MaterialApp(
+  runApp(const MaterialApp(
     home: Scaffold(
-      appBar: AppBar(title: const Text('Image.frameBuilder Sample')),
-      body: const Center(
+      appBar: AppBar(title: Text('Image.frameBuilder Sample')),
+      body: Center(
         child: ImageClipExample(
           image: NetworkImage('https://flutter.github.io/assets-for-api-docs/assets/widgets/puffin.jpg'),
         ),

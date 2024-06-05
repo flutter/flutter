@@ -121,7 +121,7 @@ class ListenableBuilderExample extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('ListenableBuilder Example')),
+        appBar: const AppBar(title: Text('ListenableBuilder Example')),
         body: Center(
           child: SizedBox(
             width: 300,

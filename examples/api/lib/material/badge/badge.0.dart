@@ -13,10 +13,10 @@ class BadgeExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('Badge Sample')),
-        body: const BadgeExample(),
+        appBar: AppBar(title: Text('Badge Sample')),
+        body: BadgeExample(),
       ),
     );
   }

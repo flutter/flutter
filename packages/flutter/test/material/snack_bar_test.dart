@@ -2698,7 +2698,7 @@ void main() {
         routes: <String, WidgetBuilder> {
           '/': (BuildContext context) {
             return Scaffold(
-              appBar: AppBar(title: const Text(firstHeader)),
+              appBar: const AppBar(title: Text(firstHeader)),
               body: Center(
                 child: ElevatedButton(
                   key: transitionTarget,
@@ -2721,7 +2721,7 @@ void main() {
               ),
             );
           },
-          '/second': (BuildContext context) => Scaffold(appBar: AppBar(title: const Text(secondHeader))),
+          '/second': (BuildContext context) => const Scaffold(appBar: AppBar(title: Text(secondHeader))),
         },
       );
     }

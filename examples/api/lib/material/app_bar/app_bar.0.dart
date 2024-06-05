@@ -41,11 +41,11 @@ class AppBarExample extends StatelessWidget {
             onPressed: () {
               Navigator.push(context, MaterialPageRoute<void>(
                 builder: (BuildContext context) {
-                  return Scaffold(
+                  return const Scaffold(
                     appBar: AppBar(
-                      title: const Text('Next page'),
+                      title: Text('Next page'),
                     ),
-                    body: const Center(
+                    body: Center(
                       child: Text(
                         'This is the next page',
                         style: TextStyle(fontSize: 24),

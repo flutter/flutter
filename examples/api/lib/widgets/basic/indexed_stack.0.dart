@@ -13,10 +13,10 @@ class IndexedStackApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('IndexedStack Sample')),
-        body: const IndexedStackExample(),
+        appBar: AppBar(title: Text('IndexedStack Sample')),
+        body: IndexedStackExample(),
       ),
     );
   }

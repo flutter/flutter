@@ -26,7 +26,7 @@ class DialogExample extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('AlertDialog Sample')),
+      appBar: const AppBar(title: Text('AlertDialog Sample')),
       body: Center(
         child: OutlinedButton(
           onPressed: () {

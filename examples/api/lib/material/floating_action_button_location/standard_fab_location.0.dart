@@ -33,8 +33,8 @@ class StandardFabLocationExample extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Home page'),
+      appBar: const AppBar(
+        title: Text('Home page'),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {

@@ -12,8 +12,8 @@ class AnimatedImagePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Animated Image'),
+      appBar: const AppBar(
+        title: Text('Animated Image'),
       ),
       body: Image.asset(
         'animated_images/animated_flutter_lgtm.gif',

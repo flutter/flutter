@@ -72,7 +72,7 @@ class _ListTileExampleState extends State<ListTileExample> with TickerProviderSt
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('ListTile Samples')),
+      appBar: const AppBar(title: Text('ListTile Samples')),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: <Widget>[
@@ -90,7 +90,7 @@ class _ListTileExampleState extends State<ListTileExample> with TickerProviderSt
                     context,
                     MaterialPageRoute<Widget>(builder: (BuildContext context) {
                       return Scaffold(
-                        appBar: AppBar(title: const Text('ListTile Hero')),
+                        appBar: const AppBar(title: Text('ListTile Hero')),
                         body: Center(
                           child: Hero(
                             tag: 'ListTile-Hero',

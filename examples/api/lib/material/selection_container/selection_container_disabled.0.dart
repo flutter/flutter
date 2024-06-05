@@ -13,10 +13,10 @@ class SelectionContainerDisabledExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('SelectionContainer.disabled Sample')),
-        body: const Center(
+        appBar: AppBar(title: Text('SelectionContainer.disabled Sample')),
+        body: Center(
           child: SelectionArea(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,

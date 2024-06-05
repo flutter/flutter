@@ -55,7 +55,7 @@ class _SelectionControlsPageState extends State<SelectionControlsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(leading: const BackButton(key: ValueKey<String>('back'))),
+      appBar: const AppBar(leading: BackButton(key: ValueKey<String>('back'))),
       body: Material(
         child: Column(children: <Widget>[
           Row(

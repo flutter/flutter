@@ -17,11 +17,11 @@ class ChipApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData(useMaterial3: true),
-      home: Scaffold(
+      home: const Scaffold(
         appBar: AppBar(
-          title: const Text('FilterChip Sample'),
+          title: Text('FilterChip Sample'),
         ),
-        body: const FilterChipExample(),
+        body: FilterChipExample(),
       ),
     );
   }

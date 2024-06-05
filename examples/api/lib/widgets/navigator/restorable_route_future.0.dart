@@ -13,11 +13,11 @@ class RestorableRouteFutureExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       restorationScopeId: 'app',
       home: Scaffold(
-        appBar: AppBar(title: const Text('RestorableRouteFuture Example')),
-        body: const MyHome(),
+        appBar: AppBar(title: Text('RestorableRouteFuture Example')),
+        body: MyHome(),
       ),
     );
   }

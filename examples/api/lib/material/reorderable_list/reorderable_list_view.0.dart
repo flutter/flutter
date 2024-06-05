@@ -13,10 +13,10 @@ class ReorderableApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('ReorderableListView Sample')),
-        body: const ReorderableExample(),
+        appBar: AppBar(title: Text('ReorderableListView Sample')),
+        body: ReorderableExample(),
       ),
     );
   }

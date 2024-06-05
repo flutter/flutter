@@ -37,7 +37,7 @@ class _MainWidgetState extends State<_MainWidget> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Radio button')),
+      appBar: const AppBar(title: Text('Radio button')),
       body: ListView(
         children: <Widget>[
           RadioListTile<SingingCharacter>(

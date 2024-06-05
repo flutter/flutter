@@ -19,10 +19,10 @@ class NestedGestureDetectorsApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('Nested GestureDetectors')),
-        body: const NestedGestureDetectorsExample(),
+        appBar: AppBar(title: Text('Nested GestureDetectors')),
+        body: NestedGestureDetectorsExample(),
       ),
     );
   }

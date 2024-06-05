@@ -13,10 +13,10 @@ class IconButtonExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('IconButton Sample')),
-        body: const IconButtonExample(),
+        appBar: AppBar(title: Text('IconButton Sample')),
+        body: IconButtonExample(),
       ),
     );
   }

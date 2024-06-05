@@ -13,10 +13,10 @@ class DismissibleExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('Dismissible Sample')),
-        body: const DismissibleExample(),
+        appBar: AppBar(title: Text('Dismissible Sample')),
+        body: DismissibleExample(),
       ),
     );
   }

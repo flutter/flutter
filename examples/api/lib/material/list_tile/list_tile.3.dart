@@ -34,7 +34,7 @@ class _ListTileExampleState extends State<ListTileExample> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('ListTile Sample')),
+      appBar: const AppBar(title: Text('ListTile Sample')),
       body: Center(
         child: ListTile(
           enabled: _enabled,

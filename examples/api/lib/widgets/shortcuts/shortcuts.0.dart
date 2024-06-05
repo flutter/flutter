@@ -14,10 +14,10 @@ class ShortcutsExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('Shortcuts Sample')),
-        body: const Center(
+        appBar: AppBar(title: Text('Shortcuts Sample')),
+        body: Center(
           child: ShortcutsExample(),
         ),
       ),

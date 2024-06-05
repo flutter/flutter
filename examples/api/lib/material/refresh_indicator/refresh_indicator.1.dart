@@ -27,8 +27,8 @@ class RefreshIndicatorExample extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('RefreshIndicator Sample'),
+      appBar: const AppBar(
+        title: Text('RefreshIndicator Sample'),
       ),
       body: RefreshIndicator(
         color: Colors.white,

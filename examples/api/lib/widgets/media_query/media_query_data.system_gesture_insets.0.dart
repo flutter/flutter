@@ -33,7 +33,7 @@ class _SystemGestureInsetsExampleState extends State<SystemGestureInsetsExample>
   Widget build(BuildContext context) {
     final EdgeInsets systemGestureInsets = MediaQuery.of(context).systemGestureInsets;
     return Scaffold(
-      appBar: AppBar(title: const Text('Pad Slider to avoid systemGestureInsets')),
+      appBar: const AppBar(title: Text('Pad Slider to avoid systemGestureInsets')),
       body: Padding(
         padding: EdgeInsets.only(
           // only left and right padding are needed here

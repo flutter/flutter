@@ -74,7 +74,7 @@ class _SearchBarAppState extends State<SearchBarApp> {
     return MaterialApp(
       theme: themeData,
       home: Scaffold(
-        appBar: AppBar(title: const Text('Search Bar Sample')),
+        appBar: const AppBar(title: Text('Search Bar Sample')),
         body: Align(
           alignment: Alignment.topCenter,
           child: Column(

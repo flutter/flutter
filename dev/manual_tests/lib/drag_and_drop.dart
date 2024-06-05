@@ -243,8 +243,8 @@ class DragAndDropAppState extends State<DragAndDropApp> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Drag and Drop Flutter Demo'),
+      appBar: const AppBar(
+        title: Text('Drag and Drop Flutter Demo'),
       ),
       body: Column(
         children: <Widget>[

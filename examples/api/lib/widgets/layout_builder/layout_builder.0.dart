@@ -25,7 +25,7 @@ class LayoutBuilderExample extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('LayoutBuilder Example')),
+      appBar: const AppBar(title: Text('LayoutBuilder Example')),
       body: LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
           if (constraints.maxWidth > 600) {

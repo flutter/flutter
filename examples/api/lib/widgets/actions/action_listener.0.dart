@@ -13,10 +13,10 @@ class ActionListenerExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('ActionListener Sample')),
-        body: const Center(
+        appBar: AppBar(title: Text('ActionListener Sample')),
+        body: Center(
           child: ActionListenerExample(),
         ),
       ),

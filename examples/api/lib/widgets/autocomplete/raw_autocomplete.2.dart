@@ -13,12 +13,12 @@ class AutocompleteExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('RawAutocomplete Form'),
+          title: Text('RawAutocomplete Form'),
         ),
-        body: const Center(
+        body: Center(
           child: AutocompleteFormExample(),
         ),
       ),

@@ -37,8 +37,8 @@ class _SliverOpacityExampleState extends State<SliverOpacityExample> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('SliverOpacity demo'),
+      appBar: const AppBar(
+        title: Text('SliverOpacity demo'),
       ),
       body: CustomScrollView(
         slivers: <Widget>[

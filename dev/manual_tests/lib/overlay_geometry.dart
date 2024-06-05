@@ -185,7 +185,7 @@ class OverlayGeometryAppState extends State<OverlayGeometryApp> {
     return Stack(
       children: <Widget>[
         Scaffold(
-          appBar: AppBar(title: const Text('Tap a Card')),
+          appBar: const AppBar(title: Text('Tap a Card')),
           body: Container(
             padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
             child: NotificationListener<ScrollNotification>(

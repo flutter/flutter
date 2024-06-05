@@ -13,10 +13,10 @@ class AnimatedContainerExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('AnimatedContainer Sample')),
-        body: const AnimatedContainerExample(),
+        appBar: AppBar(title: Text('AnimatedContainer Sample')),
+        body: AnimatedContainerExample(),
       ),
     );
   }

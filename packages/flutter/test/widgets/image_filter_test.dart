@@ -98,8 +98,8 @@ void main() {
             theme: ThemeData(useMaterial3: false, primarySwatch: Colors.blue),
             debugShowCheckedModeBanner: false, // https://github.com/flutter/flutter/issues/143616
             home: Scaffold(
-              appBar: AppBar(
-                title: const Text('Matrix ImageFilter Test'),
+              appBar: const AppBar(
+                title: Text('Matrix ImageFilter Test'),
               ),
               body: const Center(
                 child:Text('Hooray!'),
@@ -136,8 +136,8 @@ void main() {
               theme: ThemeData(useMaterial3: false, primarySwatch: Colors.blue),
               debugShowCheckedModeBanner: false, // https://github.com/flutter/flutter/issues/143616
               home: Scaffold(
-                appBar: AppBar(
-                  title: const Text('Matrix ImageFilter Test'),
+                appBar: const AppBar(
+                  title: Text('Matrix ImageFilter Test'),
                 ),
                 body: const Center(
                   child:Text('Hooray!'),

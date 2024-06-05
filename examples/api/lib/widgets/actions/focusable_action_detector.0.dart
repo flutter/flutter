@@ -122,8 +122,8 @@ class _FocusableActionDetectorExampleState extends State<FocusableActionDetector
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('FocusableActionDetector Example'),
+      appBar: const AppBar(
+        title: Text('FocusableActionDetector Example'),
       ),
       body: Center(
         child: Row(

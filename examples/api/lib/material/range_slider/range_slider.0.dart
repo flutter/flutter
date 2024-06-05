@@ -13,10 +13,10 @@ class RangeSliderExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('RangeSlider Sample')),
-        body: const RangeSliderExample(),
+        appBar: AppBar(title: Text('RangeSlider Sample')),
+        body: RangeSliderExample(),
       ),
     );
   }

@@ -32,8 +32,8 @@ class _ValueListenableBuilderExampleState extends State<ValueListenableBuilderEx
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('ValueListenableBuilder Sample'),
+      appBar: const AppBar(
+        title: Text('ValueListenableBuilder Sample'),
       ),
       body: Center(
         child: Column(

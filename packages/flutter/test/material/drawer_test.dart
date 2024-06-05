@@ -487,7 +487,7 @@ void main() {
                 );
               case Orientation.landscape:
                 return Scaffold(
-                  appBar: AppBar(),
+                  appBar: const AppBar(),
                   body: Container(),
                 );
             }
@@ -528,7 +528,7 @@ void main() {
                 );
               case Orientation.landscape:
                 return Scaffold(
-                  appBar: AppBar(),
+                  appBar: const AppBar(),
                   body: Container(),
                 );
             }

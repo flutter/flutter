@@ -74,8 +74,8 @@ class _HomeState extends State<Home> {
     final double pointCount = 8 + (buttonPressCount % 6);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Press the + Button'),
+      appBar: const AppBar(
+        title: Text('Press the + Button'),
       ),
       // An AnimatedContainer makes the decoration changes entertaining.
       body: AnimatedContainer(

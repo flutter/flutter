@@ -16,10 +16,10 @@ class AnimatedPositionedExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('AnimatedPositioned Sample')),
-        body: const Center(
+        appBar: AppBar(title: Text('AnimatedPositioned Sample')),
+        body: Center(
           child: AnimatedPositionedExample(
             duration: duration,
             curve: curve,

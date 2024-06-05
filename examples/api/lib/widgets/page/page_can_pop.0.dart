@@ -122,7 +122,7 @@ class _HomePageState extends State<_HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Home')),
+      appBar: const AppBar(title: Text('Home')),
       body: Center(
         child: TextButton(
           onPressed: () {
@@ -146,7 +146,7 @@ class _DetailsPageState extends State<_DetailsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Details')),
+      appBar: const AppBar(title: Text('Details')),
       body: Center(
         child: TextButton(
           onPressed: () {

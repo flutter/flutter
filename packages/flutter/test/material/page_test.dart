@@ -929,7 +929,7 @@ void main() {
       builder: (BuildContext context) {
         return Scaffold(
           key: pageScaffoldKey,
-          appBar: AppBar(title: const Text('Page')),
+          appBar: const AppBar(title: Text('Page')),
           body: Padding(
             padding: const EdgeInsets.all(16),
             child: GestureDetector(
@@ -1002,7 +1002,7 @@ void main() {
       builder: (BuildContext context) {
         return Scaffold(
           key: pageScaffoldKey,
-          appBar: AppBar(title: const Text('Page')),
+          appBar: const AppBar(title: Text('Page')),
           body: Padding(
             padding: const EdgeInsets.all(16),
             child: GestureDetector(
@@ -1047,8 +1047,8 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(platform: TargetPlatform.iOS),
-        home: Scaffold(
-          appBar: AppBar(title: const Text('Title')),
+        home: const Scaffold(
+          appBar: AppBar(title: Text('Title')),
         ),
       ),
     );

@@ -14,10 +14,10 @@ class FocusNodeExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('FocusNode Sample')),
-        body: const FocusNodeExample(),
+        appBar: AppBar(title: Text('FocusNode Sample')),
+        body: FocusNodeExample(),
       ),
     );
   }

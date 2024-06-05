@@ -16,9 +16,9 @@ class CheckboxExampleApp extends StatelessWidget {
     return MaterialApp(
       theme: ThemeData(useMaterial3: true, colorSchemeSeed: const Color(0xff6750a4)),
       title: 'Checkbox Sample',
-      home: Scaffold(
-        appBar: AppBar(title: const Text('Checkbox Sample')),
-        body: const Center(
+      home: const Scaffold(
+        appBar: AppBar(title: Text('Checkbox Sample')),
+        body: Center(
           child: CheckboxExample(),
         ),
       ),

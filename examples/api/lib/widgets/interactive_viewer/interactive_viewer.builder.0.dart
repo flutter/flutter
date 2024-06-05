@@ -14,12 +14,12 @@ class IVBuilderExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('IV Builder Example'),
+          title: Text('IV Builder Example'),
         ),
-        body: const _IVBuilderExample(),
+        body: _IVBuilderExample(),
       ),
     );
   }

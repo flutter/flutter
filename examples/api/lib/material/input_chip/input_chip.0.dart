@@ -34,8 +34,8 @@ class _InputChipExampleState extends State<InputChipExample> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('InputChip Sample'),
+      appBar: const AppBar(
+        title: Text('InputChip Sample'),
       ),
       body: Center(
         child: Column(

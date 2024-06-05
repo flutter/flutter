@@ -27,7 +27,7 @@ void main() {
     Widget buildFrame(Widget? bottomSheet) {
       return MaterialApp(
         home: Scaffold(
-          appBar: AppBar(),
+          appBar: const AppBar(),
           body: const Center(child: Text('body')),
           bottomSheet: bottomSheet,
           floatingActionButton: const FloatingActionButton(
@@ -301,7 +301,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          appBar: AppBar(),
+          appBar: const AppBar(),
           body: const Center(child: Text('body')),
           bottomSheet: DraggableScrollableSheet(
             expand: false,
@@ -351,7 +351,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          appBar: AppBar(),
+          appBar: const AppBar(),
           body: const Center(child: Text('body')),
           bottomSheet: DraggableScrollableSheet(
             expand: false,

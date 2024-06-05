@@ -13,10 +13,10 @@ class ConstrainedExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('Constrained Sample')),
-        body: const ConstrainedExample(),
+        appBar: AppBar(title: Text('Constrained Sample')),
+        body: ConstrainedExample(),
       ),
     );
   }

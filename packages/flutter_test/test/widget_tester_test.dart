@@ -161,9 +161,9 @@ void main() {
                   onPressed: () {
                     Navigator.push<void>(context, MaterialPageRoute<void>(
                       builder: (BuildContext context) {
-                        return Scaffold(
+                        return const Scaffold(
                           appBar: AppBar(
-                            title: const Text('Page 2'),
+                            title: Text('Page 2'),
                           ),
                         );
                       },

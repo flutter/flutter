@@ -15,9 +15,9 @@ class HelperExampleApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData(useMaterial3: true),
-      home: Scaffold(
-        appBar: AppBar(title: const Text('InputDecoration.helper Sample')),
-        body: const HelperExample(),
+      home: const Scaffold(
+        appBar: AppBar(title: Text('InputDecoration.helper Sample')),
+        body: HelperExample(),
       ),
     );
   }

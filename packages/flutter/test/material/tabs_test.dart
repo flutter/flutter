@@ -2051,15 +2051,15 @@ void main() {
           animationDuration: const Duration(seconds: 1),
           length: 3,
           child: Scaffold(
-            appBar: AppBar(
-              bottom: const TabBar(
+            appBar: const AppBar(
+              bottom: TabBar(
                 tabs: <Widget>[
                   Tab(text: 'A'),
                   Tab(text: 'B'),
                   Tab(text: 'C'),
                 ],
               ),
-              title: const Text('Tabs Test'),
+              title: Text('Tabs Test'),
             ),
             body: TabBarView(
               children: <Widget>[
@@ -5210,21 +5210,21 @@ void main() {
 
   testWidgets('No crash on dispose', (WidgetTester tester) async {
     await tester.pumpWidget(
-       MaterialApp(
+       const MaterialApp(
          home: DefaultTabController(
            length: 3,
            child: Scaffold(
              appBar: AppBar(
-               bottom: const TabBar(
+               bottom: TabBar(
                  tabs: <Widget>[
                    Tab(icon: Icon(Icons.directions_car)),
                    Tab(icon: Icon(Icons.directions_transit)),
                    Tab(icon: Icon(Icons.directions_bike)),
                  ],
                ),
-               title: const Text('Tabs Demo'),
+               title: Text('Tabs Demo'),
              ),
-             body: const TabBarView(
+             body: TabBarView(
                children: <Widget>[
                  Icon(Icons.directions_car),
                  Icon(Icons.directions_transit),
@@ -5295,8 +5295,8 @@ void main() {
       home: DefaultTabController(
         length: 5,
         child: Scaffold(
-          appBar: AppBar(
-            bottom: const TabBar(
+          appBar: const AppBar(
+            bottom: TabBar(
               tabs: <Widget>[
                 Tab(text: 'car'),
                 Tab(text: 'transit'),
@@ -5305,7 +5305,7 @@ void main() {
                 Tab(text: 'bus'),
               ],
             ),
-            title: const Text('Tabs Test'),
+            title: Text('Tabs Test'),
           ),
           body: TabBarView(
             children: <Widget>[
@@ -5415,12 +5415,12 @@ void main() {
   });
 
   testWidgets('TabBar preferredSize gives correct value when there are both icon and text in tabs', (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(
+    await tester.pumpWidget(const MaterialApp(
       home: DefaultTabController(
         length: 5,
         child: Scaffold(
           appBar: AppBar(
-            bottom: const TabBar(
+            bottom: TabBar(
               tabs: <Widget>[
                 Tab(text: 'car'),
                 Tab(text: 'transit'),
@@ -5429,7 +5429,7 @@ void main() {
                 Tab(text: 'bus'),
               ],
             ),
-            title: const Text('Tabs Test'),
+            title: Text('Tabs Test'),
           ),
         ),
       ),
@@ -5441,12 +5441,12 @@ void main() {
   });
 
   testWidgets('TabBar preferredSize gives correct value when there is only icon or text in tabs', (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(
+    await tester.pumpWidget(const MaterialApp(
       home: DefaultTabController(
         length: 5,
         child: Scaffold(
           appBar: AppBar(
-            bottom: const TabBar(
+            bottom: TabBar(
               tabs: <Widget>[
                 Tab(text: 'car'),
                 Tab(icon: Icon(Icons.message)),
@@ -5455,7 +5455,7 @@ void main() {
                 Tab(text: 'bus'),
               ],
             ),
-            title: const Text('Tabs Test'),
+            title: Text('Tabs Test'),
           ),
         ),
       ),
@@ -5565,11 +5565,11 @@ void main() {
   testWidgets('Change tab bar height', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(useMaterial3: false),
-      home: DefaultTabController(
+      home: const DefaultTabController(
         length: 4,
         child: Scaffold(
           appBar: AppBar(
-            bottom: const TabBar(
+            bottom: TabBar(
               tabs: <Widget>[
                 Tab(
                   icon: Icon(Icons.check,size: 40),
@@ -5606,12 +5606,12 @@ void main() {
   });
 
   testWidgets('Change tab bar height 2', (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(
+    await tester.pumpWidget(const MaterialApp(
       home: DefaultTabController(
         length: 1,
         child: Scaffold(
           appBar: AppBar(
-            bottom: const TabBar(
+            bottom: TabBar(
               tabs: <Widget>[
                 Tab(
                   icon: Icon(Icons.check,size: 40),

@@ -49,8 +49,8 @@ class EditableChipFieldExampleState extends State<EditableChipFieldExample> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Editable Chip Field Sample'),
+      appBar: const AppBar(
+        title: Text('Editable Chip Field Sample'),
       ),
       body: Column(
         children: <Widget>[

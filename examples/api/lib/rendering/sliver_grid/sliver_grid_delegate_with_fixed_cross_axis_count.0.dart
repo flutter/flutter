@@ -13,10 +13,10 @@ class SliverGridDelegateWithFixedCrossAxisCountExampleApp extends StatelessWidge
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('SliverGridDelegateWithFixedCrossAxisCount Sample')),
-        body: const SliverGridDelegateWithFixedCrossAxisCountExample(),
+        appBar: AppBar(title: Text('SliverGridDelegateWithFixedCrossAxisCount Sample')),
+        body: SliverGridDelegateWithFixedCrossAxisCountExample(),
       ),
     );
   }

@@ -27,11 +27,11 @@ class SharedAppDataExample extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return const Scaffold(
       appBar: AppBar(
-        title: const Text('SharedAppData Sample'),
+        title: Text('SharedAppData Sample'),
       ),
-      body: const Center(
+      body: Center(
         child: CustomWidget(),
       ),
     );

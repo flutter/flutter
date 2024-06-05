@@ -53,8 +53,8 @@ class _ContextMenuControllerExampleAppState extends State<ContextMenuControllerE
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Context menu outside of text'),
+        appBar: const AppBar(
+          title: Text('Context menu outside of text'),
         ),
         body: _ContextMenuRegion(
           contextMenuBuilder: (BuildContext context, Offset offset) {

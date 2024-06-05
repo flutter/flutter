@@ -33,7 +33,7 @@ class _ListTileExampleState extends State<ListTileExample> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('ListTile.titleAlignment Sample')),
+      appBar: const AppBar(title: Text('ListTile.titleAlignment Sample')),
       body: Column(
         children: <Widget>[
           const Divider(),

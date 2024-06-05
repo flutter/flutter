@@ -16,12 +16,12 @@ class AnimatedFractionallySizedBoxExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('AnimatedFractionallySizedBox Sample'),
+          title: Text('AnimatedFractionallySizedBox Sample'),
         ),
-        body: const AnimatedFractionallySizedBoxExample(
+        body: AnimatedFractionallySizedBoxExample(
           duration: duration,
           curve: curve,
         ),

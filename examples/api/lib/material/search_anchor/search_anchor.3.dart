@@ -15,12 +15,12 @@ class SearchAnchorAsyncExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('SearchAnchor - async'),
+          title: Text('SearchAnchor - async'),
         ),
-        body: const Center(
+        body: Center(
           child: _AsyncSearchAnchor(),
         ),
       ),

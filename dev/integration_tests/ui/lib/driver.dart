@@ -27,8 +27,8 @@ class DriverTestAppState extends State<DriverTestApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(
-          title: const Text('FlutterDriver test'),
+        appBar: const AppBar(
+          title: Text('FlutterDriver test'),
         ),
         body: ListView(
           padding: const EdgeInsets.all(5.0),

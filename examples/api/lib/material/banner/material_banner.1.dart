@@ -25,8 +25,8 @@ class MaterialBannerExample extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('The MaterialBanner is below'),
+      appBar: const AppBar(
+        title: Text('The MaterialBanner is below'),
       ),
       body: Center(
         child: ElevatedButton(

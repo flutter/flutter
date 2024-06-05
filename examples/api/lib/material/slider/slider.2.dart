@@ -33,7 +33,7 @@ class _SliderExampleState extends State<SliderExample> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Slider')),
+      appBar: const AppBar(title: Text('Slider')),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[

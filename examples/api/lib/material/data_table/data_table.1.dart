@@ -13,10 +13,10 @@ class DataTableExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('DataTable Sample')),
-        body: const DataTableExample(),
+        appBar: AppBar(title: Text('DataTable Sample')),
+        body: DataTableExample(),
       ),
     );
   }

@@ -15,10 +15,10 @@ class CardExamplesApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('Card Examples')),
-        body: const Center(
+        appBar: AppBar(title: Text('Card Examples')),
+        body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[

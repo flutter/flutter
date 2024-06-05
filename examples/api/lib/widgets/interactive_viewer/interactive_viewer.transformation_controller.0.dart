@@ -88,9 +88,9 @@ class _TransformationControllerExampleState extends State<TransformationControll
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.primary,
-      appBar: AppBar(
+      appBar: const AppBar(
         automaticallyImplyLeading: false,
-        title: const Text('Controller demo'),
+        title: Text('Controller demo'),
       ),
       body: Center(
         child: InteractiveViewer(

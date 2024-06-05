@@ -13,10 +13,10 @@ class FormExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('Form Sample')),
-        body: const FormExample(),
+        appBar: AppBar(title: Text('Form Sample')),
+        body: FormExample(),
       ),
     );
   }

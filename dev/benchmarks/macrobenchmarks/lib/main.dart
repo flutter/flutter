@@ -114,7 +114,7 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text(kMacrobenchmarks)),
+      appBar: const AppBar(title: Text(kMacrobenchmarks)),
       body: ListView(
         key: const Key(kScrollableName),
         children: <Widget>[

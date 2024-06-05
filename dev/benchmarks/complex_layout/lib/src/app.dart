@@ -56,7 +56,7 @@ class TileScrollLayout extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Tile Scrolling Layout')),
+      appBar: const AppBar(title: Text('Tile Scrolling Layout')),
       body: ListView.builder(
         key: const Key('tiles-scroll'),
         itemCount: 200,

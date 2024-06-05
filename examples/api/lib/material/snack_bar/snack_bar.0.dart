@@ -13,10 +13,10 @@ class SnackBarExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('SnackBar Sample')),
-        body: const Center(
+        appBar: AppBar(title: Text('SnackBar Sample')),
+        body: Center(
           child: SnackBarExample(),
         ),
       ),

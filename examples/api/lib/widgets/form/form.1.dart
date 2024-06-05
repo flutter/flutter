@@ -19,8 +19,8 @@ class FormApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Confirmation Dialog Example'),
+        appBar: const AppBar(
+          title: Text('Confirmation Dialog Example'),
         ),
         body: Center(
           child: _SaveableForm(),

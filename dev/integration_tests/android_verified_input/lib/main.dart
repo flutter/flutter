@@ -51,8 +51,8 @@ class _Home extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Verified Input Integration Test'),
+      appBar: const AppBar(
+        title: Text('Verified Input Integration Test'),
         centerTitle: true,
         backgroundColor: Colors.black45,
       ),

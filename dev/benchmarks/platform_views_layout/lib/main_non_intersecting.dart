@@ -38,7 +38,7 @@ class PlatformViewLayout extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Platform View Scrolling Layout')),
+      appBar: const AppBar(title: Text('Platform View Scrolling Layout')),
       body: ListView.builder(
         key: const Key('platform-views-scroll'), // This key is used by the driver test.
         itemCount: 200,

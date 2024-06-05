@@ -13,10 +13,10 @@ class AnimatedPaddingExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('AnimatedPadding Sample')),
-        body: const AnimatedPaddingExample(),
+        appBar: AppBar(title: Text('AnimatedPadding Sample')),
+        body: AnimatedPaddingExample(),
       ),
     );
   }

@@ -394,8 +394,8 @@ class _FocusDemoState extends State<FocusDemo> {
             child: DefaultTextStyle(
               style: textTheme.headlineMedium!,
               child: Scaffold(
-                appBar: AppBar(
-                  title: const Text('Actions Demo'),
+                appBar: const AppBar(
+                  title: Text('Actions Demo'),
                 ),
                 body: Center(
                   child: Builder(builder: (BuildContext context) {

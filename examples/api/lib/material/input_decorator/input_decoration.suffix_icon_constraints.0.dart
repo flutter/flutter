@@ -15,9 +15,9 @@ class SuffixIconConstraintsExampleApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData(useMaterial3: true),
-      home: Scaffold(
-        appBar: AppBar(title: const Text('InputDecoration Sample')),
-        body: const SuffixIconConstraintsExample(),
+      home: const Scaffold(
+        appBar: AppBar(title: Text('InputDecoration Sample')),
+        body: SuffixIconConstraintsExample(),
       ),
     );
   }

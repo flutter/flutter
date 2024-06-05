@@ -47,8 +47,8 @@ void main() {
             title: 'Flutter Demo',
             theme: ThemeData(primarySwatch: Colors.blue, useMaterial3: false),
             home: Scaffold(
-              appBar: AppBar(
-                title: const Text('Sepia ColorFilter Test'),
+              appBar: const AppBar(
+                title: Text('Sepia ColorFilter Test'),
               ),
               body: const Center(
                 child:Text('Hooray!'),

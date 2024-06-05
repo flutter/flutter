@@ -71,7 +71,7 @@ class _InheritedModelExampleState extends State<InheritedModelExample> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('InheritedModel Sample')),
+      appBar: const AppBar(title: Text('InheritedModel Sample')),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: <Widget>[

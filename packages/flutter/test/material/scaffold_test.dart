@@ -144,7 +144,7 @@ void main() {
 
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('Title')),
+        appBar: const AppBar(title: Text('Title')),
         body: Container(key: bodyKey),
       ),
     ));
@@ -154,7 +154,7 @@ void main() {
     await tester.pumpWidget(boilerplate(MediaQuery(
         data: const MediaQueryData(viewInsets: EdgeInsets.only(bottom: 100.0)),
         child: Scaffold(
-          appBar: AppBar(title: const Text('Title')),
+          appBar: const AppBar(title: Text('Title')),
           body: Container(key: bodyKey),
         ),
       ),
@@ -166,7 +166,7 @@ void main() {
     await tester.pumpWidget(boilerplate(MediaQuery(
       data: const MediaQueryData(viewInsets: EdgeInsets.only(bottom: 100.0)),
       child: Scaffold(
-        appBar: AppBar(title: const Text('Title')),
+        appBar: const AppBar(title: Text('Title')),
         body: Container(key: bodyKey),
         resizeToAvoidBottomInset: false,
       ),
@@ -222,8 +222,8 @@ void main() {
           viewInsets: EdgeInsets.only(bottom: 580.0),
         ),
         child: Scaffold(
-          appBar: AppBar(
-            title: const Text('Title'),
+          appBar: const AppBar(
+            title: Text('Title'),
           ),
           body: Container(key: bodyKey),
         ),
@@ -588,8 +588,8 @@ void main() {
       MaterialApp(
         theme: ThemeData(platform: TargetPlatform.android, useMaterial3: false),
         home: Scaffold(
-          appBar: AppBar(
-            title: const Text('Title'),
+          appBar: const AppBar(
+            title: Text('Title'),
           ),
           body: Builder(
             builder: (BuildContext context) {
@@ -835,9 +835,9 @@ void main() {
       final GlobalKey rootKey = GlobalKey();
       final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
         '/': (_) => Container(key: rootKey, child: const Text('Home')),
-        '/scaffold': (_) => Scaffold(
+        '/scaffold': (_) => const Scaffold(
             appBar: AppBar(),
-            body: const Text('Scaffold'),
+            body: Text('Scaffold'),
         ),
       };
       await tester.pumpWidget(MaterialApp(routes: routes));
@@ -863,8 +863,8 @@ void main() {
     Future<void> expectCloseIcon(WidgetTester tester, PageRoute<void> Function() routeBuilder, String type) async {
       const IconData expectedIcon = Icons.close;
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(appBar: AppBar(), body: const Text('Page 1')),
+        const MaterialApp(
+          home: Scaffold(appBar: AppBar(), body: Text('Page 1')),
         ),
       );
 
@@ -881,7 +881,7 @@ void main() {
     PageRoute<void> materialRouteBuilder() {
       return MaterialPageRoute<void>(
         builder: (BuildContext context) {
-          return Scaffold(appBar: AppBar(), body: const Text('Page 2'));
+          return const Scaffold(appBar: AppBar(), body: Text('Page 2'));
         },
         fullscreenDialog: true,
       );
@@ -890,7 +890,7 @@ void main() {
     PageRoute<void> pageRouteBuilder() {
       return PageRouteBuilder<void>(
         pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-          return Scaffold(appBar: AppBar(), body: const Text('Page 2'));
+          return const Scaffold(appBar: AppBar(), body: Text('Page 2'));
         },
         fullscreenDialog: true,
       );
@@ -899,7 +899,7 @@ void main() {
     PageRoute<void> customPageRouteBuilder() {
       return _CustomPageRoute<void>(
         builder: (BuildContext context) {
-          return Scaffold(appBar: AppBar(), body: const Text('Page 2'));
+          return const Scaffold(appBar: AppBar(), body: Text('Page 2'));
         },
         fullscreenDialog: true,
       );
@@ -1660,22 +1660,22 @@ void main() {
 
     testWidgets('Drawer state query correctly', (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: SafeArea(
             left: false,
             right: false,
             bottom: false,
             child: Scaffold(
-              endDrawer: const Drawer(
+              endDrawer: Drawer(
                 child: Text('endDrawer'),
               ),
-              drawer: const Drawer(
+              drawer: Drawer(
                 child: Text('drawer'),
               ),
-              body: const Text('scaffold body'),
+              body: Text('scaffold body'),
               appBar: AppBar(
                 centerTitle: true,
-                title: const Text('Title'),
+                title: Text('Title'),
               ),
             ),
           ),
@@ -1716,22 +1716,22 @@ void main() {
 
     testWidgets('Dual Drawer Opening', (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: SafeArea(
             left: false,
             right: false,
             bottom: false,
             child: Scaffold(
-              endDrawer: const Drawer(
+              endDrawer: Drawer(
                 child: Text('endDrawer'),
               ),
-              drawer: const Drawer(
+              drawer: Drawer(
                 child: Text('drawer'),
               ),
-              body: const Text('scaffold body'),
+              body: Text('scaffold body'),
               appBar: AppBar(
                 centerTitle: true,
-                title: const Text('Title'),
+                title: Text('Title'),
               ),
             ),
           ),
@@ -1769,15 +1769,15 @@ void main() {
     testWidgets('Drawer opens correctly with padding from MediaQuery (LTR)', (WidgetTester tester) async {
       const double simulatedNotchSize = 40.0;
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: Scaffold(
-            drawer: const Drawer(
+            drawer: Drawer(
               child: Text('Drawer'),
             ),
-            body: const Text('Scaffold Body'),
+            body: Text('Scaffold Body'),
             appBar: AppBar(
               centerTitle: true,
-              title: const Text('Title'),
+              title: Text('Title'),
             ),
           ),
         ),
@@ -1791,19 +1791,19 @@ void main() {
       expect(scaffoldState.isDrawerOpen, false);
 
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: MediaQuery(
-            data: const MediaQueryData(
+            data: MediaQueryData(
               padding: EdgeInsets.fromLTRB(simulatedNotchSize, 0, 0, 0),
             ),
             child: Scaffold(
-              drawer: const Drawer(
+              drawer: Drawer(
                 child: Text('Drawer'),
               ),
-              body: const Text('Scaffold Body'),
+              body: Text('Scaffold Body'),
               appBar: AppBar(
                 centerTitle: true,
-                title: const Text('Title'),
+                title: Text('Title'),
               ),
             ),
           ),
@@ -1823,15 +1823,15 @@ void main() {
     testWidgets('Drawer opens correctly with padding from MediaQuery (RTL)', (WidgetTester tester) async {
       const double simulatedNotchSize = 40.0;
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: Scaffold(
-            drawer: const Drawer(
+            drawer: Drawer(
               child: Text('Drawer'),
             ),
-            body: const Text('Scaffold Body'),
+            body: Text('Scaffold Body'),
             appBar: AppBar(
               centerTitle: true,
-              title: const Text('Title'),
+              title: Text('Title'),
             ),
           ),
         ),
@@ -1851,21 +1851,21 @@ void main() {
       expect(scaffoldState.isDrawerOpen, false);
 
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: MediaQuery(
-            data: const MediaQueryData(
+            data: MediaQueryData(
               padding: EdgeInsets.fromLTRB(0, 0, simulatedNotchSize, 0),
             ),
             child: Directionality(
               textDirection: TextDirection.rtl,
               child: Scaffold(
-                drawer: const Drawer(
+                drawer: Drawer(
                   child: Text('Drawer'),
                 ),
-                body: const Text('Scaffold body'),
+                body: Text('Scaffold body'),
                 appBar: AppBar(
                   centerTitle: true,
-                  title: const Text('Title'),
+                  title: Text('Title'),
                 ),
               ),
             ),
@@ -1887,15 +1887,15 @@ void main() {
   testWidgets('Drawer opens correctly with custom edgeDragWidth', (WidgetTester tester) async {
     // The default edge drag width is 20.0.
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: Scaffold(
-          drawer: const Drawer(
+          drawer: Drawer(
             child: Text('Drawer'),
           ),
-          body: const Text('Scaffold body'),
+          body: Text('Scaffold body'),
           appBar: AppBar(
             centerTitle: true,
-            title: const Text('Title'),
+            title: Text('Title'),
           ),
         ),
       ),
@@ -1908,16 +1908,16 @@ void main() {
     expect(scaffoldState.isDrawerOpen, false);
 
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: Scaffold(
-          drawer: const Drawer(
+          drawer: Drawer(
             child: Text('Drawer'),
           ),
           drawerEdgeDragWidth: 40.0,
-          body: const Text('Scaffold Body'),
+          body: Text('Scaffold Body'),
           appBar: AppBar(
             centerTitle: true,
-            title: const Text('Title'),
+            title: Text('Title'),
           ),
         ),
       ),
@@ -1932,15 +1932,15 @@ void main() {
 
   testWidgets('Drawer does not open with a drag gesture when it is disabled on mobile', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: Scaffold(
-          drawer: const Drawer(
+          drawer: Drawer(
             child: Text('Drawer'),
           ),
-          body: const Text('Scaffold Body'),
+          body: Text('Scaffold Body'),
           appBar: AppBar(
             centerTitle: true,
-            title: const Text('Title'),
+            title: Text('Title'),
           ),
         ),
       ),
@@ -1959,16 +1959,16 @@ void main() {
     expect(scaffoldState.isDrawerOpen, false);
 
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: Scaffold(
-          drawer: const Drawer(
+          drawer: Drawer(
             child: Text('Drawer'),
           ),
           drawerEnableOpenDragGesture: false,
-          body: const Text('Scaffold body'),
+          body: Text('Scaffold body'),
           appBar: AppBar(
             centerTitle: true,
-            title: const Text('Title'),
+            title: Text('Title'),
           ),
         ),
       ),
@@ -1996,15 +1996,15 @@ void main() {
 
   testWidgets('Drawer does not open with a drag gesture on desktop', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: Scaffold(
-          drawer: const Drawer(
+          drawer: Drawer(
             child: Text('Drawer'),
           ),
-          body: const Text('Scaffold Body'),
+          body: Text('Scaffold Body'),
           appBar: AppBar(
             centerTitle: true,
-            title: const Text('Title'),
+            title: Text('Title'),
           ),
         ),
       ),
@@ -2041,14 +2041,14 @@ void main() {
         home: Builder(
           builder: (BuildContext context) {
             screenWidth = MediaQuery.sizeOf(context).width;
-            return Scaffold(
-              endDrawer: const Drawer(
+            return const Scaffold(
+              endDrawer: Drawer(
                 child: Text('Drawer'),
               ),
-              body: const Text('Scaffold Body'),
+              body: Text('Scaffold Body'),
               appBar: AppBar(
                 centerTitle: true,
-                title: const Text('Title'),
+                title: Text('Title'),
               ),
             );
           },
@@ -2069,16 +2069,16 @@ void main() {
     expect(scaffoldState.isEndDrawerOpen, false);
 
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: Scaffold(
-          endDrawer: const Drawer(
+          endDrawer: Drawer(
             child: Text('Drawer'),
           ),
           endDrawerEnableOpenDragGesture: false,
-          body: const Text('Scaffold body'),
+          body: Text('Scaffold body'),
           appBar: AppBar(
             centerTitle: true,
-            title: const Text('Title'),
+            title: Text('Title'),
           ),
         ),
       ),
@@ -2403,7 +2403,7 @@ void main() {
     testWidgets('FloatingActionButton always keeps the same position regardless of extendBodyBehindAppBar', (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(
         home: Scaffold(
-          appBar: AppBar(),
+          appBar: const AppBar(),
           floatingActionButton: FloatingActionButton(
             onPressed: () {},
             child: const Icon(Icons.add),
@@ -2415,7 +2415,7 @@ void main() {
 
       await tester.pumpWidget(MaterialApp(
         home: Scaffold(
-          appBar: AppBar(),
+          appBar: const AppBar(),
           floatingActionButton: FloatingActionButton(
             onPressed: () {},
             child: const Icon(Icons.add),

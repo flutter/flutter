@@ -15,9 +15,9 @@ class SwitchApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData(useMaterial3: true),
-      home: Scaffold(
-        appBar: AppBar(title: const Text('Switch Sample')),
-        body: const Center(
+      home: const Scaffold(
+        appBar: AppBar(title: Text('Switch Sample')),
+        body: Center(
           child: SwitchExample(),
         ),
       ),

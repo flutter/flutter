@@ -199,8 +199,8 @@ class _TestAppState extends State<TestApp> {
     return MaterialApp(
       title: 'Channels Test',
       home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Channels Test'),
+        appBar: const AppBar(
+          title: Text('Channels Test'),
         ),
         body: Padding(
           padding: const EdgeInsets.all(20.0),

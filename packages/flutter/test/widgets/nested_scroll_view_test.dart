@@ -3669,8 +3669,8 @@ class _TestLayoutExtentIsNegative extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Test'),
+        appBar: const AppBar(
+          title: Text('Test'),
         ),
         body: NestedScrollView(
           headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {

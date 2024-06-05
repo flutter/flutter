@@ -32,7 +32,7 @@ class _CheckboxListTileExampleState extends State<CheckboxListTileExample> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('CheckboxListTile Sample')),
+      appBar: const AppBar(title: Text('CheckboxListTile Sample')),
       body: Center(
         child: CheckboxListTile(
           title: const Text('Animate Slowly'),

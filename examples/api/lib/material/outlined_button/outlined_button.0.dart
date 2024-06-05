@@ -13,10 +13,10 @@ class OutlinedButtonExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('OutlinedButton Sample')),
-        body: const Center(
+        appBar: AppBar(title: Text('OutlinedButton Sample')),
+        body: Center(
           child: OutlinedButtonExample(),
         ),
       ),

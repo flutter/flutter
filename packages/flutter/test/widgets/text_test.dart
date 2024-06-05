@@ -213,7 +213,7 @@ void main() {
       MaterialApp(
         theme: ThemeData(useMaterial3: false),
         home: Scaffold(
-          appBar: AppBar(title: const Text('title')),
+          appBar: const AppBar(title: Text('title')),
           body: Center(
             child: Text.rich(
               TextSpan(
@@ -242,7 +242,7 @@ void main() {
       MaterialApp(
         theme: ThemeData(useMaterial3: false),
         home: Scaffold(
-          appBar: AppBar(title: const Text('title')),
+          appBar: const AppBar(title: Text('title')),
           body: Center(
             child: Text.rich(
               TextSpan(

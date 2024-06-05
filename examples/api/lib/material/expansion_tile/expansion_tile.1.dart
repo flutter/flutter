@@ -25,7 +25,7 @@ class _ExpansionTileControllerAppState extends State<ExpansionTileControllerApp>
     return MaterialApp(
       theme: ThemeData(useMaterial3: true),
       home: Scaffold(
-        appBar: AppBar(title: const Text('ExpansionTileController Sample')),
+        appBar: const AppBar(title: Text('ExpansionTileController Sample')),
         body: Column(
           children: <Widget>[
             // A controller has been provided to the ExpansionTile because it's

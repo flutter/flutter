@@ -13,10 +13,10 @@ class ScrollbarExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('Scrollbar Sample')),
-        body: const ScrollbarExample(),
+        appBar: AppBar(title: Text('Scrollbar Sample')),
+        body: ScrollbarExample(),
       ),
     );
   }

@@ -13,10 +13,10 @@ class SliverFadeTransitionExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('SliverFadeTransition Sample')),
-        body: const Center(
+        appBar: AppBar(title: Text('SliverFadeTransition Sample')),
+        body: Center(
           child: SliverFadeTransitionExample(),
         ),
       ),

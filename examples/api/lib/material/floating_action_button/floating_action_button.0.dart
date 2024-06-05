@@ -42,8 +42,8 @@ class _FloatingActionButtonExampleState extends State<FloatingActionButtonExampl
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('FloatingActionButton Sample'),
+      appBar: const AppBar(
+        title: Text('FloatingActionButton Sample'),
       ),
       body: const Center(child: Text('Press the button below!')),
       floatingActionButton: FloatingActionButton(

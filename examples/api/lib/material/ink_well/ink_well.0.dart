@@ -13,10 +13,10 @@ class InkWellExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('InkWell Sample')),
-        body: const Center(
+        appBar: AppBar(title: Text('InkWell Sample')),
+        body: Center(
           child: InkWellExample(),
         ),
       ),

@@ -13,10 +13,10 @@ class AlertDialogExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('AlertDialog Sample')),
-        body: const Center(
+        appBar: AppBar(title: Text('AlertDialog Sample')),
+        body: Center(
           child: DialogExample(),
         ),
       ),

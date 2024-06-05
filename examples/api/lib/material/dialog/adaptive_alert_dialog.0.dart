@@ -17,9 +17,9 @@ class AdaptiveAlertDialogApp extends StatelessWidget {
     return MaterialApp(
       // Try this: set the platform to TargetPlatform.android and see the difference
       theme: ThemeData(platform: TargetPlatform.iOS, useMaterial3: true),
-      home: Scaffold(
-        appBar: AppBar(title: const Text('AlertDialog Sample')),
-        body: const Center(
+      home: const Scaffold(
+        appBar: AppBar(title: Text('AlertDialog Sample')),
+        body: Center(
           child: AdaptiveDialogExample(),
         ),
       ),

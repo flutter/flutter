@@ -35,7 +35,7 @@ class _AnimatedSlideExampleState extends State<AnimatedSlideExample> {
     final TextTheme textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('AnimatedSlide Sample')),
+      appBar: const AppBar(title: Text('AnimatedSlide Sample')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(

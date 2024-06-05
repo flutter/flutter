@@ -13,10 +13,10 @@ class CharacterActivatorExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('CharacterActivator Sample')),
-        body: const Center(
+        appBar: AppBar(title: Text('CharacterActivator Sample')),
+        body: Center(
           child: CharacterActivatorExample(),
         ),
       ),

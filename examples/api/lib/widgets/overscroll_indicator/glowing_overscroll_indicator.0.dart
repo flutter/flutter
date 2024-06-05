@@ -13,10 +13,10 @@ class GlowingOverscrollIndicatorExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('GlowingOverscrollIndicator Sample')),
-        body: const GlowingOverscrollIndicatorExample(),
+        appBar: AppBar(title: Text('GlowingOverscrollIndicator Sample')),
+        body: GlowingOverscrollIndicatorExample(),
       ),
     );
   }
@@ -27,7 +27,7 @@ class GlowingOverscrollIndicatorExample extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double leadingPaintOffset = MediaQuery.of(context).padding.top + AppBar().preferredSize.height;
+    final double leadingPaintOffset = MediaQuery.of(context).padding.top + const AppBar().preferredSize.height;
     return NotificationListener<OverscrollIndicatorNotification>(
       onNotification: (OverscrollIndicatorNotification notification) {
         if (notification.leading) {

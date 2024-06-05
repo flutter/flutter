@@ -528,7 +528,7 @@ void main() {
           );
         },
         home: Scaffold(
-          appBar: AppBar(title: const Text('Nested Lists')),
+          appBar: const AppBar(title: Text('Nested Lists')),
           body: ReorderableList(
             itemCount: 10,
             itemBuilder: (BuildContext context, int index) {
@@ -583,7 +583,7 @@ void main() {
           );
         },
         home: Scaffold(
-          appBar: AppBar(title: const Text('Nested Lists')),
+          appBar: const AppBar(title: Text('Nested Lists')),
           body: ReorderableList(
             itemCount: 10,
             itemBuilder: (BuildContext context, int index) {
@@ -1167,7 +1167,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          appBar: AppBar(),
+          appBar: const AppBar(),
           drawer: Drawer(
             child: Builder(
               builder: (BuildContext context) {

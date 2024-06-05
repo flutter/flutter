@@ -33,8 +33,8 @@ class _DrawerExampleState extends State<DrawerExample> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Drawer Example'),
+      appBar: const AppBar(
+        title: Text('Drawer Example'),
       ),
       drawer: Drawer(
         child: ListView(

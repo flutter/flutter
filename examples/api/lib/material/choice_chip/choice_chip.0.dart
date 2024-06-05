@@ -35,8 +35,8 @@ class _ActionChoiceExampleState extends State<ActionChoiceExample> {
     final TextTheme textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('ActionChoice Sample'),
+      appBar: const AppBar(
+        title: Text('ActionChoice Sample'),
       ),
       body: Center(
         child: Column(

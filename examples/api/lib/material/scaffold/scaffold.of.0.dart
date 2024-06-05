@@ -18,9 +18,9 @@ class OfExampleApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: Scaffold(
-        body: const MyScaffoldBody(),
-        appBar: AppBar(title: const Text('Scaffold.of Example')),
+      home: const Scaffold(
+        body: MyScaffoldBody(),
+        appBar: AppBar(title: Text('Scaffold.of Example')),
       ),
       color: Colors.white,
     );

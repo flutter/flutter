@@ -53,8 +53,8 @@ class _SelectableRegionToolbarBuilderExampleAppState extends State<SelectableReg
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Context menu anywhere'),
+        appBar: const AppBar(
+          title: Text('Context menu anywhere'),
         ),
         body: Center(
           child: SizedBox(

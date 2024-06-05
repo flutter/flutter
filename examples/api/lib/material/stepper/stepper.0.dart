@@ -13,10 +13,10 @@ class StepperExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('Stepper Sample')),
-        body: const Center(
+        appBar: AppBar(title: Text('Stepper Sample')),
+        body: Center(
           child: StepperExample(),
         ),
       ),

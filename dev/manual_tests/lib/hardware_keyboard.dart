@@ -6,13 +6,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 void main() {
-  runApp(MaterialApp(
+  runApp(const MaterialApp(
     title: 'Hardware Key Demo',
     home: Scaffold(
       appBar: AppBar(
-        title: const Text('Hardware Key Demo'),
+        title: Text('Hardware Key Demo'),
       ),
-      body: const Center(
+      body: Center(
         child: HardwareKeyboardDemo(),
       ),
     ),

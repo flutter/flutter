@@ -640,7 +640,7 @@ void main() {
       MaterialApp(
         theme: ThemeData(useMaterial3: false),
         home: Scaffold(
-          appBar: AppBar(),
+          appBar: const AppBar(),
           body: Column(
             children: <Widget>[
               ConstrainedBox(

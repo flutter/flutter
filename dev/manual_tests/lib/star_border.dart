@@ -60,9 +60,9 @@ class _MyHomePageState extends State<MyHomePage> {
     return SafeArea(
       child: Scaffold(
         key: scaffoldKey,
-        appBar: AppBar(
-          title: const Text('Star Border'),
-          backgroundColor: const Color(0xff323232),
+        appBar: const AppBar(
+          title: Text('Star Border'),
+          backgroundColor: Color(0xff323232),
         ),
         body: Column(
           children: <Widget>[

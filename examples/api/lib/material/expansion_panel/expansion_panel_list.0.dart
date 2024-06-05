@@ -13,10 +13,10 @@ class ExpansionPanelListExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('ExpansionPanelList Sample')),
-        body: const ExpansionPanelListExample(),
+        appBar: AppBar(title: Text('ExpansionPanelList Sample')),
+        body: ExpansionPanelListExample(),
       ),
     );
   }

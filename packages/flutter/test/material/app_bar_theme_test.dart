@@ -455,8 +455,8 @@ void main() {
   testWidgets('AppBar uses AppBarTheme.centerTitle when centerTitle is null', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(appBarTheme: const AppBarTheme(centerTitle: true)),
-      home: Scaffold(appBar: AppBar(
-        title: const Text('Title'),
+      home: const Scaffold(appBar: AppBar(
+        title: Text('Title'),
       )),
     ));
 
@@ -467,9 +467,9 @@ void main() {
   testWidgets('AppBar.centerTitle takes priority over AppBarTheme.centerTitle', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(appBarTheme: const AppBarTheme(centerTitle: true)),
-      home: Scaffold(
+      home: const Scaffold(
         appBar: AppBar(
-          title: const Text('Title'),
+          title: Text('Title'),
           centerTitle: false,
         ),
       ),
@@ -483,8 +483,8 @@ void main() {
   testWidgets('AppBar.centerTitle adapts to TargetPlatform when AppBarTheme.centerTitle is null', (WidgetTester tester) async{
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(platform: TargetPlatform.iOS),
-      home: Scaffold(appBar: AppBar(
-        title: const Text('Title'),
+      home: const Scaffold(appBar: AppBar(
+        title: Text('Title'),
       )),
     ));
 
@@ -497,9 +497,9 @@ void main() {
   testWidgets('AppBar.shadowColor takes priority over AppBarTheme.shadowColor', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(appBarTheme: const AppBarTheme(shadowColor: Colors.red)),
-      home: Scaffold(
+      home: const Scaffold(
         appBar: AppBar(
-          title: const Text('Title'),
+          title: Text('Title'),
           shadowColor: Colors.yellow,
         ),
       ),
@@ -513,9 +513,9 @@ void main() {
   testWidgets('AppBar.surfaceTintColor takes priority over AppBarTheme.surfaceTintColor', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(appBarTheme: const AppBarTheme(surfaceTintColor: Colors.red)),
-      home: Scaffold(
+      home: const Scaffold(
         appBar: AppBar(
-          title: const Text('Title'),
+          title: Text('Title'),
           surfaceTintColor: Colors.yellow,
         ),
       ),
@@ -673,9 +673,9 @@ void main() {
     const double kTitleSpacing = 10;
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(appBarTheme: const AppBarTheme(titleSpacing: kTitleSpacing)),
-      home: Scaffold(
+      home: const Scaffold(
         appBar: AppBar(
-          title: const Text('Title'),
+          title: Text('Title'),
         ),
       ),
     ));
@@ -688,9 +688,9 @@ void main() {
     const double kTitleSpacing = 10;
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(appBarTheme: const AppBarTheme(titleSpacing: kTitleSpacing)),
-      home: Scaffold(
+      home: const Scaffold(
         appBar: AppBar(
-          title: const Text('Title'),
+          title: Text('Title'),
           titleSpacing: 40,
         ),
       ),

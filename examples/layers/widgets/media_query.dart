@@ -93,8 +93,8 @@ void main() {
   runApp(MaterialApp(
     title: 'Media Query Example',
     home: Scaffold(
-      appBar: AppBar(
-        title: const Text('Media Query Example'),
+      appBar: const AppBar(
+        title: Text('Media Query Example'),
       ),
       body: Material(child: AdaptiveContainer(names: _kNames)),
     ),

@@ -5187,11 +5187,11 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           theme: ThemeData(
             primarySwatch: Colors.blue,
           ),
-          home: Scaffold(
+          home: const Scaffold(
             appBar: AppBar(
-              title: const Text('Hello, World'),
+              title: Text('Hello, World'),
             ),
-            body: const Center(
+            body: Center(
               child: Text('Hello, World!'),
             ),
           ),
@@ -5242,13 +5242,13 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
     testWidgets('InspectorSerializationDelegate addAdditionalPropertiesCallback', (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           title: 'Hello World!',
           home: Scaffold(
             appBar: AppBar(
-              title: const Text('Hello World!'),
+              title: Text('Hello World!'),
             ),
-            body: const Center(
+            body: Center(
               child: Column(
                 children: <Widget>[
                   Text('Hello World!'),

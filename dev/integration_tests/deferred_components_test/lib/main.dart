@@ -86,8 +86,8 @@ class MyHomePageState extends State<MyHomePage> {
         },
       );
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Deferred components test'),
+      appBar: const AppBar(
+        title: Text('Deferred components test'),
       ),
       body: Center(
         child: testWidget,

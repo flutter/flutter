@@ -33,7 +33,7 @@ class _ListTileExampleState extends State<ListTileExample> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Custom List Item Sample')),
+      appBar: const AppBar(title: Text('Custom List Item Sample')),
       body: ListView.builder(
         itemCount: 10,
         itemBuilder: (BuildContext context, int index) {

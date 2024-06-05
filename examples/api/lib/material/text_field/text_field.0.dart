@@ -28,10 +28,10 @@ class TextFieldExampleApp extends StatelessWidget {
   const TextFieldExampleApp({super.key});
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('Obscured Textfield')),
-        body: const Center(
+        appBar: AppBar(title: Text('Obscured Textfield')),
+        body: Center(
           child: ObscuredTextFieldSample(),
         ),
       ),

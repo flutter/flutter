@@ -25,13 +25,13 @@ class TabBarExample extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
+    return const DefaultTabController(
       initialIndex: 1,
       length: 3,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('TabBar Sample'),
-          bottom: const TabBar(
+          title: Text('TabBar Sample'),
+          bottom: TabBar(
             tabs: <Widget>[
               Tab(
                 icon: Icon(Icons.cloud_outlined),
@@ -45,7 +45,7 @@ class TabBarExample extends StatelessWidget {
             ],
           ),
         ),
-        body: const TabBarView(
+        body: TabBarView(
           children: <Widget>[
             Center(
               child: Text("It's cloudy here"),

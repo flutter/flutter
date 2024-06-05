@@ -103,8 +103,8 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
     return MaterialApp(
       theme: ThemeData(useMaterial3: true),
       home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Bottom App Bar Demo'),
+        appBar: const AppBar(
+          title: Text('Bottom App Bar Demo'),
         ),
         body: Column(
           children: <Widget>[

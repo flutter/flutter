@@ -13,10 +13,10 @@ class ModalBottomSheetApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('Modal Bottom Sheet Sample')),
-        body: const ModalBottomSheetExample(),
+        appBar: AppBar(title: Text('Modal Bottom Sheet Sample')),
+        body: ModalBottomSheetExample(),
       ),
     );
   }

@@ -66,12 +66,12 @@ class SimpleCascadingMenuApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('MenuAnchor Simple Example'),
-          actions: const <Widget>[
+          title: Text('MenuAnchor Simple Example'),
+          actions: <Widget>[
             MyCascadingMenu(),
           ],
         ),

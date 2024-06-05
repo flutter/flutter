@@ -347,21 +347,21 @@ class TabBarDemo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: DefaultTabController(
         length: 3,
         child: Scaffold(
           appBar: AppBar(
-            bottom: const TabBar(
+            bottom: TabBar(
               tabs: <Widget>[
                 Tab(text: 'car'),
                 Tab(text: 'transit'),
                 Tab(text: 'bike'),
               ],
             ),
-            title: const Text('Tabs Demo'),
+            title: Text('Tabs Demo'),
           ),
-          body: const TabBarView(
+          body: TabBarView(
             children: <Widget>[
               Icon(Icons.directions_car),
               Icon(Icons.directions_transit),

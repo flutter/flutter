@@ -46,8 +46,8 @@ class _EditableTextToolbarBuilderExampleAppState extends State<EditableTextToolb
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Custom button appearance'),
+        appBar: const AppBar(
+          title: Text('Custom button appearance'),
         ),
         body: Center(
           child: Column(

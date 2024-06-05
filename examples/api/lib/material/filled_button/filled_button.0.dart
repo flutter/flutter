@@ -18,7 +18,7 @@ class FilledButtonApp extends StatelessWidget {
     return MaterialApp(
       theme: ThemeData(colorSchemeSeed: const Color(0xff6750a4), useMaterial3: true),
       home: Scaffold(
-        appBar: AppBar(title: const Text('FilledButton Sample')),
+        appBar: const AppBar(title: Text('FilledButton Sample')),
         body: Center(
           child: Row(
             mainAxisSize: MainAxisSize.min,

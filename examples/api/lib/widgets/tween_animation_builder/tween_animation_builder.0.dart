@@ -13,12 +13,12 @@ class TweenAnimationBuilderExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('TweenAnimationBuilder Sample'),
+          title: Text('TweenAnimationBuilder Sample'),
         ),
-        body: const Center(
+        body: Center(
           child: TweenAnimationBuilderExample(),
         ),
       ),

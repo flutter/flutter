@@ -13,12 +13,12 @@ class RestorableValueExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('RestorableValue Sample'),
+          title: Text('RestorableValue Sample'),
         ),
-        body: const RestorableValueExample(restorationId: 'main'),
+        body: RestorableValueExample(restorationId: 'main'),
       ),
     );
   }

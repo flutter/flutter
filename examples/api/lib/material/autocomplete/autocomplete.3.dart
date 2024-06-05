@@ -21,8 +21,8 @@ class AutocompleteExampleApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Autocomplete - async and debouncing'),
+        appBar: const AppBar(
+          title: Text('Autocomplete - async and debouncing'),
         ),
         body: Center(
           child: Column(

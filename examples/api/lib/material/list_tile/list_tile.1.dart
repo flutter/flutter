@@ -26,7 +26,7 @@ class ListTileExample extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('ListTile Sample')),
+      appBar: const AppBar(title: Text('ListTile Sample')),
       body: ListView(
         children: const <Widget>[
           Card(child: ListTile(title: Text('One-line ListTile'))),

@@ -31,7 +31,7 @@ class HeroExample extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Hero Sample')),
+      appBar: const AppBar(title: Text('Hero Sample')),
       body: Column(
         children: <Widget>[
           ListTile(
@@ -75,8 +75,8 @@ class HeroExample extends StatelessWidget {
   void _gotoDetailsPage(BuildContext context) {
     Navigator.of(context).push(MaterialPageRoute<void>(
       builder: (BuildContext context) => Scaffold(
-        appBar: AppBar(
-          title: const Text('Second Page'),
+        appBar: const AppBar(
+          title: Text('Second Page'),
         ),
         body: Align(
           alignment: Alignment.bottomRight,

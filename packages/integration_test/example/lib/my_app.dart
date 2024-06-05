@@ -21,8 +21,8 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Plugin example app'),
+        appBar: const AppBar(
+          title: Text('Plugin example app'),
         ),
         body: Center(
           child: Text('Platform: ${Platform.operatingSystem}\n'),

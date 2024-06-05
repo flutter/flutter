@@ -71,7 +71,7 @@ class _LabeledCheckboxExampleState extends State<LabeledCheckboxExample> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Custom Labeled Checkbox Sample')),
+      appBar: const AppBar(title: Text('Custom Labeled Checkbox Sample')),
       body: Center(
         child: LabeledCheckbox(
           label: 'This is the label text',

@@ -13,10 +13,10 @@ class ScaffoldMessengerExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('ScaffoldMessenger Sample')),
-        body: const Center(
+        appBar: AppBar(title: Text('ScaffoldMessenger Sample')),
+        body: Center(
           child: ScaffoldMessengerExample(),
         ),
       ),

@@ -13,10 +13,10 @@ class ShowBottomSheetExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('ScaffoldState BottomSheet Sample')),
-        body: const ShowBottomSheetExample(),
+        appBar: AppBar(title: Text('ScaffoldState BottomSheet Sample')),
+        body: ShowBottomSheetExample(),
       ),
     );
   }

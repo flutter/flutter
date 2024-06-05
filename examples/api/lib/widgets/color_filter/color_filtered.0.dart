@@ -13,10 +13,10 @@ class ColorFilteredExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('ColorFiltered Sample')),
-        body: const ColorFilteredExample(),
+        appBar: AppBar(title: Text('ColorFiltered Sample')),
+        body: ColorFilteredExample(),
       ),
     );
   }

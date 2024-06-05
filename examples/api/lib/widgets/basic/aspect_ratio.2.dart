@@ -13,10 +13,10 @@ class AspectRatioApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('AspectRatio Sample')),
-        body: const AspectRatioExample(),
+        appBar: AppBar(title: Text('AspectRatio Sample')),
+        body: AspectRatioExample(),
       ),
     );
   }

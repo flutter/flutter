@@ -13,10 +13,10 @@ class VerticalDividerExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('VerticalDivider Sample')),
-        body: const DividerExample(),
+        appBar: AppBar(title: Text('VerticalDivider Sample')),
+        body: DividerExample(),
       ),
     );
   }

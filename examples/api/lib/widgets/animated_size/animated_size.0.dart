@@ -16,10 +16,10 @@ class AnimatedSizeExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('AnimatedSize Sample')),
-        body: const Center(
+        appBar: AppBar(title: Text('AnimatedSize Sample')),
+        body: Center(
           child: AnimatedSizeExample(
             duration: duration,
             curve: curve,

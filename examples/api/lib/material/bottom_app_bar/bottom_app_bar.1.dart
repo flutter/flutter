@@ -44,9 +44,9 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(
+        appBar: const AppBar(
           automaticallyImplyLeading: false,
-          title: const Text('Bottom App Bar Demo'),
+          title: Text('Bottom App Bar Demo'),
         ),
         body: ListView(
           padding: const EdgeInsets.only(bottom: 88),

@@ -187,7 +187,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// If [elevation] is specified, it must be non-negative.
   ///
   /// Typically used in the [Scaffold.appBar] property.
-  AppBar({
+  const AppBar({
     super.key,
     this.leading,
     this.automaticallyImplyLeading = true,
@@ -218,8 +218,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
     this.systemOverlayStyle,
     this.forceMaterialTransparency = false,
     this.clipBehavior,
-  }) : assert(elevation == null || elevation >= 0.0),
-       preferredSize = _PreferredAppBarSize(toolbarHeight, bottom?.preferredSize.height);
+  }) : assert(elevation == null || elevation >= 0.0);
 
   /// Used by [Scaffold] to compute its [AppBar]'s overall height. The returned value is
   /// the same `preferredSize.height` unless [AppBar.toolbarHeight] was null and
@@ -653,7 +652,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// [Scaffold] uses this size to set its app bar's height.
   /// {@endtemplate}
   @override
-  final Size preferredSize;
+  Size get preferredSize => _PreferredAppBarSize(toolbarHeight, bottom?.preferredSize.height);
 
   /// {@template flutter.material.appbar.toolbarHeight}
   /// Defines the height of the toolbar component of an [AppBar].

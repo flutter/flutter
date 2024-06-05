@@ -35,7 +35,7 @@ class _OfExampleAppState extends State<OfExampleApp> {
     return MaterialApp(
       scaffoldMessengerKey: _scaffoldMessengerKey,
       home: Scaffold(
-        appBar: AppBar(title: const Text('ScaffoldMessenger Demo')),
+        appBar: const AppBar(title: Text('ScaffoldMessenger Demo')),
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,

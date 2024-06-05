@@ -225,9 +225,9 @@ class GestureDemoState extends State<GestureDemo> {
 void main() {
   runApp(MaterialApp(
     theme: ThemeData.dark(),
-    home: Scaffold(
-      appBar: AppBar(title: const Text('Gestures Demo')),
-      body: const GestureDemo(),
+    home: const Scaffold(
+      appBar: AppBar(title: Text('Gestures Demo')),
+      body: GestureDemo(),
     ),
   ));
 }

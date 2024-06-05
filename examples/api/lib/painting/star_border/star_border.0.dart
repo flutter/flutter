@@ -15,13 +15,13 @@ class StarBorderApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('StarBorder Example'),
-          backgroundColor: const Color(0xff323232),
+          title: Text('StarBorder Example'),
+          backgroundColor: Color(0xff323232),
         ),
-        body: const StarBorderExample(),
+        body: StarBorderExample(),
       ),
     );
   }

@@ -16,12 +16,12 @@ class HeadingsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return const Scaffold(
       appBar: AppBar(
-        leading: const BackButton(key: ValueKey<String>('back')),
-        title: const Text('Heading', key: _appBarTitleKey),
+        leading: BackButton(key: ValueKey<String>('back')),
+        title: Text('Heading', key: _appBarTitleKey),
       ),
-      body: const Center(
+      body: Center(
         child: Text('Body text', key: _bodyTextKey),
       ),
     );

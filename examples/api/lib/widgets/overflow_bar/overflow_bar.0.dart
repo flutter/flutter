@@ -13,10 +13,10 @@ class OverflowBarExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('OverflowBar Sample')),
-        body: const Center(
+        appBar: AppBar(title: Text('OverflowBar Sample')),
+        body: Center(
           child: OverflowBarExample(),
         ),
       ),

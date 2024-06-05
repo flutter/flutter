@@ -13,10 +13,10 @@ class ElevatedButtonExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('ElevatedButton Sample')),
-        body: const ElevatedButtonExample(),
+        appBar: AppBar(title: Text('ElevatedButton Sample')),
+        body: ElevatedButtonExample(),
       ),
     );
   }

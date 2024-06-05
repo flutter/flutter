@@ -1773,7 +1773,7 @@ class _SemanticsTestWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Semantics Test')),
+      appBar: const AppBar(title: Text('Semantics Test')),
       body: SingleChildScrollView(
         child: Column(
           children: <Widget>[

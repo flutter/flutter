@@ -13,10 +13,10 @@ class SliverFillRemainingExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('SliverFillRemaining Sample')),
-        body: const SliverFillRemainingExample(),
+        appBar: AppBar(title: Text('SliverFillRemaining Sample')),
+        body: SliverFillRemainingExample(),
       ),
     );
   }

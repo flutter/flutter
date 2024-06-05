@@ -17,9 +17,9 @@ class DropdownMenuApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData(useMaterial3:true),
-      home: Scaffold(
-        appBar: AppBar(title: const Text('DropdownMenu Sample')),
-        body: const Center(
+      home: const Scaffold(
+        appBar: AppBar(title: Text('DropdownMenu Sample')),
+        body: Center(
           child: DropdownMenuExample(),
         ),
       ),

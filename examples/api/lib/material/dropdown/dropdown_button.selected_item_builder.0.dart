@@ -21,10 +21,10 @@ class DropdownButtonApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('DropdownButton Sample')),
-        body: const Center(child: DropdownButtonExample()),
+        appBar: AppBar(title: Text('DropdownButton Sample')),
+        body: Center(child: DropdownButtonExample()),
       ),
     );
   }

@@ -116,8 +116,8 @@ void main() {
   runApp(MaterialApp(
     theme: ThemeData.light(),
     home: Scaffold(
-      appBar: AppBar(
-        title: const Text('Hal and Dave'),
+      appBar: const AppBar(
+        title: Text('Hal and Dave'),
       ),
       body: Material(
         color: Colors.grey.shade50,

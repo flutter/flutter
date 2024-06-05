@@ -36,7 +36,7 @@ class _ListenableBuilderExampleState extends State<ListenableBuilderExample> {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('ListenableBuilder Example')),
+        appBar: const AppBar(title: Text('ListenableBuilder Example')),
         body: ListBody(listNotifier: _listNotifier),
         floatingActionButton: FloatingActionButton(
           onPressed: () => _listNotifier.add(_random.nextInt(1 << 31)), // 1 << 31 is the maximum supported value

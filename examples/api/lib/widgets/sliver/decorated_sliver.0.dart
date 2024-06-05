@@ -20,9 +20,9 @@ class SliverDecorationExampleApp extends StatelessWidget {
           ),
         ),
       ),
-      home: Scaffold(
-        appBar: AppBar(title: const Text('SliverDecoration Sample')),
-        body: const SliverDecorationExample(),
+      home: const Scaffold(
+        appBar: AppBar(title: Text('SliverDecoration Sample')),
+        body: SliverDecorationExample(),
       ),
     );
   }

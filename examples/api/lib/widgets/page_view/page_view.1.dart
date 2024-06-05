@@ -35,7 +35,7 @@ class _PageViewExampleState extends State<PageViewExample> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('PageView Sample')),
+      appBar: const AppBar(title: Text('PageView Sample')),
       body: SafeArea(
         child: PageView.custom(
           childrenDelegate: SliverChildBuilderDelegate(

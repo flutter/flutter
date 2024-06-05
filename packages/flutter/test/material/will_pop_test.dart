@@ -34,8 +34,8 @@ class SamplePageState extends State<SamplePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Sample Page')),
+    return const Scaffold(
+      appBar: AppBar(title: Text('Sample Page')),
     );
   }
 }
@@ -50,7 +50,7 @@ class SampleForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Sample Form')),
+      appBar: const AppBar(title: Text('Sample Form')),
       body: SizedBox.expand(
         child: Form(
           onWillPop: () {
@@ -100,7 +100,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          appBar: AppBar(title: const Text('Home')),
+          appBar: const AppBar(title: Text('Home')),
           body: Builder(
             builder: (BuildContext context) {
               return Center(
@@ -155,7 +155,7 @@ void main() {
     Widget buildFrame() {
       return MaterialApp(
         home: Scaffold(
-          appBar: AppBar(title: const Text('Home')),
+          appBar: const AppBar(title: Text('Home')),
           body: Builder(
             builder: (BuildContext context) {
               return Center(
@@ -194,7 +194,7 @@ void main() {
     Widget buildFrame() {
       return MaterialApp(
         home: Scaffold(
-          appBar: AppBar(title: const Text('Home')),
+          appBar: const AppBar(title: Text('Home')),
           body: Builder(
             builder: (BuildContext context) {
               return Center(
@@ -268,7 +268,7 @@ void main() {
     Widget buildFrame() {
       return MaterialApp(
         home: Scaffold(
-          appBar: AppBar(title: const Text('Home')),
+          appBar: const AppBar(title: Text('Home')),
           body: Builder(
             builder: (BuildContext context) {
               return Center(
@@ -354,7 +354,7 @@ void main() {
     Widget buildFrame() {
       return MaterialApp(
         home: Scaffold(
-          appBar: AppBar(title: const Text('Home')),
+          appBar: const AppBar(title: Text('Home')),
           body: Builder(
             builder: (BuildContext context) {
               return Center(

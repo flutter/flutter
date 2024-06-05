@@ -13,12 +13,12 @@ class PhysicalShapeApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('PhysicalShape Sample'),
+          title: Text('PhysicalShape Sample'),
         ),
-        body: const Center(child: PhysicalShapeExample()),
+        body: Center(child: PhysicalShapeExample()),
       ),
     );
   }

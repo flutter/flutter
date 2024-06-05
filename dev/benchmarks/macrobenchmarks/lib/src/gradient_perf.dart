@@ -23,7 +23,7 @@ class GradientPerfHomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Gradient Perf')),
+      appBar: const AppBar(title: Text('Gradient Perf')),
       body: ListView(
         key: const Key(kGradientPerfScrollableName),
         children: <Widget>[

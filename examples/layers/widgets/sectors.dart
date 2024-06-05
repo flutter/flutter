@@ -177,8 +177,8 @@ class SectorAppState extends State<SectorApp> {
       theme: ThemeData.light(),
       title: 'Sector Layout',
       home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Sector Layout in a Widget Tree'),
+        appBar: const AppBar(
+          title: Text('Sector Layout in a Widget Tree'),
         ),
         body: buildBody(),
       ),

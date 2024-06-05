@@ -18,9 +18,9 @@ class BottomSheetApp extends StatelessWidget {
         colorSchemeSeed: const Color(0xff6750a4),
         useMaterial3: true,
       ),
-      home: Scaffold(
-        appBar: AppBar(title: const Text('Bottom Sheet Sample')),
-        body: const BottomSheetExample(),
+      home: const Scaffold(
+        appBar: AppBar(title: Text('Bottom Sheet Sample')),
+        body: BottomSheetExample(),
       ),
     );
   }

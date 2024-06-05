@@ -111,11 +111,11 @@ class MySecondPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return const Scaffold(
       appBar: AppBar(
-        title: const Text('Second page'),
+        title: Text('Second page'),
       ),
-      endDrawer: const Drawer(),
+      endDrawer: Drawer(),
     );
   }
 }

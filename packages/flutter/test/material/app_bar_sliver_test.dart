@@ -1726,17 +1726,17 @@ void main() {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: Center(
           child: AppBar(
-            leading: const Text('Leading'),
-            title: const Text('Title'),
-            actions: const <Widget>[
+            leading: Text('Leading'),
+            title: Text('Title'),
+            actions: <Widget>[
               Text('Action 1'),
               Text('Action 2'),
               Text('Action 3'),
             ],
-            bottom: const PreferredSize(
+            bottom: PreferredSize(
               preferredSize: Size(0.0, kToolbarHeight),
               child: Text('Bottom'),
             ),
@@ -1810,18 +1810,18 @@ void main() {
       MaterialApp(
         home: Semantics(
           textDirection: TextDirection.rtl,
-          child: Directionality(
+          child: const Directionality(
             textDirection: TextDirection.rtl,
             child: Center(
               child: AppBar(
-                leading: const Text('Leading'),
-                title: const Text('Title'),
-                actions: const <Widget>[
+                leading: Text('Leading'),
+                title: Text('Title'),
+                actions: <Widget>[
                   Text('Action 1'),
                   Text('Action 2'),
                   Text('Action 3'),
                 ],
-                bottom: const PreferredSize(
+                bottom: PreferredSize(
                   preferredSize: Size(0.0, kToolbarHeight),
                   child: Text('Bottom'),
                 ),

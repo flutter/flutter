@@ -27,7 +27,7 @@ class _PopupControlsPageState extends State<PopupControlsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(leading: const BackButton(key: ValueKey<String>('back'))),
+      appBar: const AppBar(leading: BackButton(key: ValueKey<String>('back'))),
       body: SafeArea(
         child: Center(
           child: Row(

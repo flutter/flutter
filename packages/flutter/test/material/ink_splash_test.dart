@@ -44,7 +44,7 @@ void main() {
   testWidgets('InkSplash receives textDirection', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('Button Border Test')),
+        appBar: const AppBar(title: Text('Button Border Test')),
         body: Center(
           child: ElevatedButton(
             child: const Text('Test'),

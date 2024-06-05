@@ -10,7 +10,7 @@ class ColorDemoHome extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Color Demo')),
+      appBar: const AppBar(title: Text('Color Demo')),
       body: ListView(
         padding: const EdgeInsets.all(5.0),
         children: <Widget>[

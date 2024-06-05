@@ -95,8 +95,8 @@ class StockSettingsState extends State<StockSettings> {
   }
 
   AppBar buildAppBar(BuildContext context) {
-    return AppBar(
-      title: const Text('Settings'),
+    return const AppBar(
+      title: Text('Settings'),
     );
   }
 

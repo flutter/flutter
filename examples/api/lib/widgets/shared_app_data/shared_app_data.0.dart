@@ -38,8 +38,8 @@ class _SharedAppDataExampleState extends State<SharedAppDataExample> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('SharedAppData Sample'),
+      appBar: const AppBar(
+        title: Text('SharedAppData Sample'),
       ),
       body: Center(
         child: Column(

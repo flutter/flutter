@@ -17,7 +17,7 @@ class OpacityPeepholePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Opacity Peephole tests')),
+      appBar: const AppBar(title: Text('Opacity Peephole tests')),
       body: ListView(
         key: const Key(kOpacityScrollableName),
         children: <Widget>[

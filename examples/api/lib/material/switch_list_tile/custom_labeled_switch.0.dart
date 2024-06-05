@@ -17,9 +17,9 @@ class LabeledSwitchApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData(useMaterial3: true),
-      home: Scaffold(
-        appBar: AppBar(title: const Text('Custom Labeled Switch Sample')),
-        body: const Center(
+      home: const Scaffold(
+        appBar: AppBar(title: Text('Custom Labeled Switch Sample')),
+        body: Center(
           child: LabeledSwitchExample(),
         ),
       ),

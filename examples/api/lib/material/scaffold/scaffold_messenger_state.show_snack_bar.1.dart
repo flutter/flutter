@@ -32,7 +32,7 @@ class _SnackBarExampleState extends State<SnackBarExample> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('SnackBar Sample')),
+      appBar: const AppBar(title: Text('SnackBar Sample')),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Column(

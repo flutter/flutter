@@ -13,13 +13,13 @@ class IgnorePointerApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: Scaffold(
         appBar: AppBar(
           centerTitle: true,
-          title: const Text('IgnorePointer Sample'),
+          title: Text('IgnorePointer Sample'),
         ),
-        body: const Center(child: IgnorePointerExample()),
+        body: Center(child: IgnorePointerExample()),
       ),
     );
   }

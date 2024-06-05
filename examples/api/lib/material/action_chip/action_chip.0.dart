@@ -33,8 +33,8 @@ class _ActionChipExampleState extends State<ActionChipExample> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('ActionChip Sample'),
+      appBar: const AppBar(
+        title: Text('ActionChip Sample'),
       ),
       body: Center(
         child: ActionChip(

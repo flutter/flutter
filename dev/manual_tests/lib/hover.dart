@@ -31,8 +31,8 @@ class _HoverDemoState extends State<HoverDemo> {
     return DefaultTextStyle(
       style: textTheme.headlineMedium!,
       child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Hover Demo'),
+        appBar: const AppBar(
+          title: Text('Hover Demo'),
         ),
         floatingActionButton: FloatingActionButton(
           child: const Text('+'),

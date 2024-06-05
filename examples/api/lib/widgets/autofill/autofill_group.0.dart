@@ -13,10 +13,10 @@ class AutofillGroupExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('AutofillGroup Sample')),
-        body: const AutofillGroupExample(),
+        appBar: AppBar(title: Text('AutofillGroup Sample')),
+        body: AutofillGroupExample(),
       ),
     );
   }

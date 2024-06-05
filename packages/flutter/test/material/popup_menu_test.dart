@@ -849,7 +849,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          appBar: AppBar(title: const Text('Example')),
+          appBar: const AppBar(title: Text('Example')),
           body: Padding(
             padding: const EdgeInsets.all(8.0),
             child: Overlay(
@@ -888,7 +888,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          appBar: AppBar(title: const Text('Example')),
+          appBar: const AppBar(title: Text('Example')),
           body: Padding(
             padding: const EdgeInsets.all(8.0),
             child: Navigator(
@@ -932,7 +932,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          appBar: AppBar(title: const Text('Example')),
+          appBar: const AppBar(title: Text('Example')),
           body: Padding(
             padding: const EdgeInsets.all(8.0),
             child: Navigator(
@@ -2566,8 +2566,8 @@ void main() {
           );
         },
         home: Scaffold(
-          appBar: AppBar(
-            title: const Text('PopupMenu Test'),
+          appBar: const AppBar(
+            title: Text('PopupMenu Test'),
           ),
           body: PopupMenuButton<int>(
             child: const Text('Show Menu'),

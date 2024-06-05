@@ -16,10 +16,10 @@ class AnimatedAlignExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('AnimatedAlign Sample')),
-        body: const AnimatedAlignExample(
+        appBar: AppBar(title: Text('AnimatedAlign Sample')),
+        body: AnimatedAlignExample(
           duration: duration,
           curve: curve,
         ),

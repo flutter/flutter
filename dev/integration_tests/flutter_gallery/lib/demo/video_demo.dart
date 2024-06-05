@@ -321,8 +321,8 @@ class _VideoDemoState extends State<VideoDemo> with SingleTickerProviderStateMix
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Videos'),
+      appBar: const AppBar(
+        title: Text('Videos'),
       ),
       body: isSupported
           ? Scrollbar(

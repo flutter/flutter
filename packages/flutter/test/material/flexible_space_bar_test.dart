@@ -17,9 +17,9 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(platform: TargetPlatform.android),
-        home: Scaffold(
+        home: const Scaffold(
           appBar: AppBar(
-            flexibleSpace: const FlexibleSpaceBar(
+            flexibleSpace: FlexibleSpaceBar(
               title: Text('X'),
             ),
           ),
@@ -39,9 +39,9 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(platform: platform),
-          home: Scaffold(
+          home: const Scaffold(
             appBar: AppBar(
-              flexibleSpace: const FlexibleSpaceBar(
+              flexibleSpace: FlexibleSpaceBar(
                 title: Text('X'),
               ),
             ),
@@ -67,8 +67,8 @@ void main() {
       minExtent: minExtent,
       maxExtent: maxExtent,
       toolbarOpacity: alpha,
-      child: AppBar(
-        flexibleSpace: const FlexibleSpaceBar(
+      child: const AppBar(
+        flexibleSpace: FlexibleSpaceBar(
           title: Text('title'),
           background:  Text('X2'),
           collapseMode: CollapseMode.pin,
@@ -137,9 +137,9 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          appBar: AppBar(
+          appBar: const AppBar(
             toolbarHeight: 300,
-            flexibleSpace: const FlexibleSpaceBar(
+            flexibleSpace: FlexibleSpaceBar(
               title: Text('Title'),
               background:  Text('Background'),
               collapseMode: CollapseMode.pin,
@@ -1010,9 +1010,9 @@ class _SubCategoryScreenViewState extends State<SubCategoryScreenView>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
+      appBar: const AppBar(
         centerTitle: true,
-        title: const Text('Test'),
+        title: Text('Test'),
       ),
       body: CustomScrollView(
         key: SubCategoryScreenView.scrollKey,

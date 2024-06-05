@@ -22,8 +22,8 @@ class _MyWebAppState extends State<MyWebApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Plugin example app'),
+        appBar: const AppBar(
+          title: Text('Plugin example app'),
         ),
         body: Center(
           key: const Key('mainapp'),

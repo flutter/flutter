@@ -37,8 +37,8 @@ class _RestorablePushExampleState extends State<RestorablePushExample> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Sample Code'),
+      appBar: const AppBar(
+        title: Text('Sample Code'),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => Navigator.restorablePush(context, _myRouteBuilder),

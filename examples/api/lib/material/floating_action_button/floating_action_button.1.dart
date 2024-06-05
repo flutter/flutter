@@ -26,8 +26,8 @@ class FloatingActionButtonExample extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('FloatingActionButton Sample'),
+      appBar: const AppBar(
+        title: Text('FloatingActionButton Sample'),
       ),
       body: Center(
         child: Column(

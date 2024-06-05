@@ -34,7 +34,7 @@ class _ListenableBuilderExampleState extends State<ListenableBuilderExample> {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('ListenableBuilder Example')),
+        appBar: const AppBar(title: Text('ListenableBuilder Example')),
         body: CounterBody(counterNotifier: _counter),
         floatingActionButton: FloatingActionButton(
           onPressed: _counter.increment,

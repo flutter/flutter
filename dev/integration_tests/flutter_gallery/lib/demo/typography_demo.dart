@@ -65,7 +65,7 @@ class TypographyDemo extends StatelessWidget {
     ];
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Typography')),
+      appBar: const AppBar(title: Text('Typography')),
       body: SafeArea(
         top: false,
         bottom: false,

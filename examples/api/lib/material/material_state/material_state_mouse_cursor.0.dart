@@ -13,10 +13,10 @@ class MaterialStateMouseCursorExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('MaterialStateMouseCursor Sample')),
-        body: const Center(
+        appBar: AppBar(title: Text('MaterialStateMouseCursor Sample')),
+        body: Center(
           child: MaterialStateMouseCursorExample(
             // TRY THIS: Switch to get a different mouse cursor while hovering ListTile.
             enabled: false,

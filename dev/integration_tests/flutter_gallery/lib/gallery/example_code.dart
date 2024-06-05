@@ -131,11 +131,11 @@ IconButton(
 
 // START buttons_action
 // Floating action button in Scaffold.
-Scaffold(
+const Scaffold(
   appBar: AppBar(
-    title: const Text('Demo'),
+    title: Text('Demo'),
   ),
-  floatingActionButton: const FloatingActionButton(
+  floatingActionButton: FloatingActionButton(
     onPressed: null,
     child: Icon(Icons.add),
   ),

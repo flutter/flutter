@@ -34,7 +34,7 @@ class _SwitchAppState extends State<SwitchApp> {
     return MaterialApp(
       theme: theme,
       home: Scaffold(
-        appBar: AppBar(title: const Text('Adaptive Switches')),
+        appBar: const AppBar(title: Text('Adaptive Switches')),
         body: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[

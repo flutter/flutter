@@ -13,10 +13,10 @@ class ControlsBuilderExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('Stepper Sample')),
-        body: const ControlsBuilderExample(),
+        appBar: AppBar(title: Text('Stepper Sample')),
+        body: ControlsBuilderExample(),
       ),
     );
   }

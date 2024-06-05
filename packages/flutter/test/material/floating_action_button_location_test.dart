@@ -314,7 +314,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          appBar: AppBar(),
+          appBar: const AppBar(),
           floatingActionButton: FloatingActionButton(onPressed: () { }, mini: true),
           floatingActionButtonLocation: FloatingActionButtonLocation.miniStartTop,
           body: const Column(
@@ -333,10 +333,10 @@ void main() {
 
   testWidgets('Start-top floating action button location LTR', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: Scaffold(
           appBar: AppBar(),
-          floatingActionButton: const FloatingActionButton(onPressed: null),
+          floatingActionButton: FloatingActionButton(onPressed: null),
           floatingActionButtonLocation: FloatingActionButtonLocation.startTop,
         ),
       ),
@@ -346,12 +346,12 @@ void main() {
 
   testWidgets('End-top floating action button location RTL', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: Directionality(
           textDirection: TextDirection.rtl,
           child: Scaffold(
             appBar: AppBar(),
-            floatingActionButton: const FloatingActionButton(onPressed: null),
+            floatingActionButton: FloatingActionButton(onPressed: null),
             floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
           ),
         ),
@@ -362,12 +362,12 @@ void main() {
 
   testWidgets('Start-top floating action button location RTL', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: Directionality(
           textDirection: TextDirection.rtl,
           child: Scaffold(
             appBar: AppBar(),
-            floatingActionButton: const FloatingActionButton(onPressed: null),
+            floatingActionButton: FloatingActionButton(onPressed: null),
             floatingActionButtonLocation: FloatingActionButtonLocation.startTop,
           ),
         ),
@@ -378,10 +378,10 @@ void main() {
 
   testWidgets('End-top floating action button location LTR', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: Scaffold(
           appBar: AppBar(),
-          floatingActionButton: const FloatingActionButton(onPressed: null),
+          floatingActionButton: FloatingActionButton(onPressed: null),
           floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
         ),
       ),
@@ -702,7 +702,7 @@ void main() {
               height: 100,
               child: Center(child: Text('BottomSheet')),
             ) : null,
-            appBar: appBar ? AppBar(title: const Text('Demo')) : null,
+            appBar: appBar ? const AppBar(title: Text('Demo')) : null,
             bottomNavigationBar: bottomNavigationBar ? BottomNavigationBar(
               items: const <BottomNavigationBarItem>[
                 BottomNavigationBarItem(
@@ -1648,8 +1648,8 @@ Widget _singleFabScaffold(FloatingActionButtonLocation location, {
     home: Directionality(
       textDirection: textDirection,
       child: Scaffold(
-        appBar: AppBar(
-          title: const Text('FloatingActionButtonLocation Test.'),
+        appBar: const AppBar(
+          title: Text('FloatingActionButtonLocation Test.'),
         ),
         bottomNavigationBar: BottomNavigationBar(
           items: const <BottomNavigationBarItem>[
@@ -1717,7 +1717,7 @@ Widget _buildFrame({
       child: MediaQuery(
         data: MediaQueryData(viewInsets: viewInsets),
         child: Scaffold(
-          appBar: AppBar(title: const Text('FabLocation Test')),
+          appBar: const AppBar(title: Text('FabLocation Test')),
           floatingActionButtonLocation: location,
           floatingActionButton: fab,
           bottomNavigationBar: bab,

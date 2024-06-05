@@ -14,11 +14,11 @@ class SelectionContainerExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: SelectionArea(
         child: Scaffold(
-          appBar: AppBar(title: const Text('SelectionContainer Sample')),
-          body: const Center(
+          appBar: AppBar(title: Text('SelectionContainer Sample')),
+          body: Center(
             child: SelectionAllOrNoneContainer(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,

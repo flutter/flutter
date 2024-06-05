@@ -25,9 +25,9 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(platform: TargetPlatform.android),
-        home: Scaffold(
+        home: const Scaffold(
           appBar: AppBar(
-            title: const Text('X'),
+            title: Text('X'),
           ),
         ),
       ),
@@ -45,9 +45,9 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(platform: platform),
-          home: Scaffold(
+          home: const Scaffold(
             appBar: AppBar(
-              title: const Text('X'),
+              title: Text('X'),
             ),
           ),
         ),
@@ -63,10 +63,10 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(platform: platform),
-          home: Scaffold(
+          home: const Scaffold(
             appBar: AppBar(
-              title: const Text('X'),
-              actions: const <Widget>[
+              title: Text('X'),
+              actions: <Widget>[
                 Icon(Icons.thumb_up),
               ],
             ),
@@ -84,10 +84,10 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(platform: platform),
-          home: Scaffold(
+          home: const Scaffold(
             appBar: AppBar(
-              title: const Text('X'),
-              actions: const <Widget>[
+              title: Text('X'),
+              actions: <Widget>[
                 Icon(Icons.thumb_up),
                 Icon(Icons.thumb_up),
               ],
@@ -106,10 +106,10 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(platform: TargetPlatform.android),
-        home: Scaffold(
+        home: const Scaffold(
           appBar: AppBar(
             centerTitle: true,
-            title: const Text('X'),
+            title: Text('X'),
           ),
         ),
       ),
@@ -124,11 +124,11 @@ void main() {
 
   testWidgets('AppBar centerTitle:false title start edge is 16.0 (LTR)', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: Scaffold(
           appBar: AppBar(
             centerTitle: false,
-            title: const Placeholder(key: Key('X')),
+            title: Placeholder(key: Key('X')),
           ),
         ),
       ),
@@ -141,13 +141,13 @@ void main() {
 
   testWidgets('AppBar centerTitle:false title start edge is 16.0 (RTL)', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: Directionality(
           textDirection: TextDirection.rtl,
           child: Scaffold(
             appBar: AppBar(
               centerTitle: false,
-              title: const Placeholder(key: Key('X')),
+              title: Placeholder(key: Key('X')),
             ),
           ),
         ),
@@ -161,12 +161,12 @@ void main() {
 
   testWidgets('AppBar titleSpacing:32 title start edge is 32.0 (LTR)', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: Scaffold(
           appBar: AppBar(
             centerTitle: false,
             titleSpacing: 32.0,
-            title: const Placeholder(key: Key('X')),
+            title: Placeholder(key: Key('X')),
           ),
         ),
       ),
@@ -179,14 +179,14 @@ void main() {
 
   testWidgets('AppBar titleSpacing:32 title start edge is 32.0 (RTL)', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: Directionality(
           textDirection: TextDirection.rtl,
           child: Scaffold(
             appBar: AppBar(
               centerTitle: false,
               titleSpacing: 32.0,
-              title: const Placeholder(key: Key('X')),
+              title: Placeholder(key: Key('X')),
             ),
           ),
         ),
@@ -202,14 +202,14 @@ void main() {
     'AppBar centerTitle:false leading button title left edge is 72.0 (LTR)',
     (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: Scaffold(
             appBar: AppBar(
               centerTitle: false,
-              title: const Text('X'),
+              title: Text('X'),
             ),
             // A drawer causes a leading hamburger.
-            drawer: const Drawer(),
+            drawer: Drawer(),
           ),
         ),
       );
@@ -222,16 +222,16 @@ void main() {
     'AppBar centerTitle:false leading button title left edge is 72.0 (RTL)',
     (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: Directionality(
             textDirection: TextDirection.rtl,
             child: Scaffold(
               appBar: AppBar(
                 centerTitle: false,
-                title: const Text('X'),
+                title: Text('X'),
               ),
               // A drawer causes a leading hamburger.
-              drawer: const Drawer(),
+              drawer: Drawer(),
             ),
           ),
         ),
@@ -411,13 +411,13 @@ void main() {
 
   testWidgets('AppBar with no Scaffold', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: SizedBox(
           height: kToolbarHeight,
           child: AppBar(
-            leading: const Text('L'),
-            title: const Text('No Scaffold'),
-            actions: const <Widget>[Text('A1'), Text('A2')],
+            leading: Text('L'),
+            title: Text('No Scaffold'),
+            actions: <Widget>[Text('A1'), Text('A2')],
           ),
         ),
       ),
@@ -431,12 +431,12 @@ void main() {
 
   testWidgets('AppBar render at zero size', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: Center(
           child: SizedBox.shrink(
             child: Scaffold(
               appBar: AppBar(
-                title: const Text('X'),
+                title: Text('X'),
               ),
             ),
           ),
@@ -482,12 +482,12 @@ void main() {
 
   testWidgets('AppBar drawer icon has default size', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: Scaffold(
           appBar: AppBar(
-            title: const Text('Howdy!'),
+            title: Text('Howdy!'),
           ),
-          drawer: const Drawer(),
+          drawer: Drawer(),
         ),
       ),
     );
@@ -506,11 +506,11 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: themeData,
-        home: Scaffold(
+        home: const Scaffold(
           appBar: AppBar(
-            title: const Text('Howdy!'),
+            title: Text('Howdy!'),
           ),
-          drawer: const Drawer(),
+          drawer: Drawer(),
         ),
       ),
     );
@@ -520,13 +520,13 @@ void main() {
 
   testWidgets('AppBar drawer icon is sized by iconTheme', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: Scaffold(
           appBar: AppBar(
-            title: const Text('Howdy!'),
-            iconTheme: const IconThemeData(size: 30),
+            title: Text('Howdy!'),
+            iconTheme: IconThemeData(size: 30),
           ),
-          drawer: const Drawer(),
+          drawer: Drawer(),
         ),
       ),
     );
@@ -543,12 +543,12 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: themeData,
-        home: Scaffold(
+        home: const Scaffold(
           appBar: AppBar(
-            title: const Text('Howdy!'),
-            iconTheme: const IconThemeData(color: color),
+            title: Text('Howdy!'),
+            iconTheme: IconThemeData(color: color),
           ),
-          drawer: const Drawer(),
+          drawer: Drawer(),
         ),
       ),
     );
@@ -558,12 +558,12 @@ void main() {
 
   testWidgets('AppBar endDrawer icon has default size', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: Scaffold(
           appBar: AppBar(
-            title: const Text('Howdy!'),
+            title: Text('Howdy!'),
           ),
-          endDrawer: const Drawer(),
+          endDrawer: Drawer(),
         ),
       ),
     );
@@ -583,11 +583,11 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: themeData,
-        home: Scaffold(
+        home: const Scaffold(
           appBar: AppBar(
-            title: const Text('Howdy!'),
+            title: Text('Howdy!'),
           ),
-          endDrawer: const Drawer(),
+          endDrawer: Drawer(),
         ),
       ),
     );
@@ -597,13 +597,13 @@ void main() {
 
   testWidgets('AppBar endDrawer icon is sized by iconTheme', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: Scaffold(
           appBar: AppBar(
-            title: const Text('Howdy!'),
-            iconTheme: const IconThemeData(size: 30),
+            title: Text('Howdy!'),
+            iconTheme: IconThemeData(size: 30),
           ),
-          endDrawer: const Drawer(),
+          endDrawer: Drawer(),
         ),
       ),
     );
@@ -620,12 +620,12 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: themeData,
-        home: Scaffold(
+        home: const Scaffold(
           appBar: AppBar(
-            title: const Text('Howdy!'),
-            iconTheme: const IconThemeData(color: color),
+            title: Text('Howdy!'),
+            iconTheme: IconThemeData(color: color),
           ),
-          endDrawer: const Drawer(),
+          endDrawer: Drawer(),
         ),
       ),
     );
@@ -677,10 +677,10 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: themeData,
-        home: Scaffold(
+        home: const Scaffold(
           appBar: AppBar(
-            leading: const SizedBox(height: 36, width: 36,),
-            title: const Text('X'),
+            leading: SizedBox(height: 36, width: 36,),
+            title: Text('X'),
           ), // Doesn't really matter. Triggers a hamburger regardless.
         ),
       ),
@@ -699,10 +699,10 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
-        home: Scaffold(
+        home: const Scaffold(
           appBar: AppBar(
-            title: const Text('X'),
-            actions: const <Widget> [
+            title: Text('X'),
+            actions: <Widget> [
               IconButton(
                 icon: Icon(Icons.share),
                 onPressed: null,
@@ -845,7 +845,7 @@ void main() {
           DefaultMaterialLocalizations.delegate,
           DefaultWidgetsLocalizations.delegate,
         ],
-        child: Directionality(
+        child: const Directionality(
           textDirection: TextDirection.ltr,
           child: MediaQuery(
             data: topPadding100,
@@ -867,13 +867,13 @@ void main() {
           DefaultMaterialLocalizations.delegate,
           DefaultWidgetsLocalizations.delegate,
         ],
-        child: Directionality(
+        child: const Directionality(
           textDirection: TextDirection.ltr,
           child: MediaQuery(
             data: topPadding100,
             child: Scaffold(
               appBar: AppBar(
-                title: const Text('title'),
+                title: Text('title'),
               ),
             ),
           ),
@@ -944,13 +944,13 @@ void main() {
           DefaultMaterialLocalizations.delegate,
           DefaultWidgetsLocalizations.delegate,
         ],
-        child: Directionality(
+        child: const Directionality(
           textDirection: TextDirection.ltr,
           child: MediaQuery(
             data: topPadding100,
             child: AppBar(
               primary: false,
-              title: const Text('title'),
+              title: Text('title'),
             ),
           ),
         ),
@@ -969,15 +969,15 @@ void main() {
           DefaultMaterialLocalizations.delegate,
           DefaultWidgetsLocalizations.delegate,
         ],
-        child: Directionality(
+        child: const Directionality(
           textDirection: TextDirection.ltr,
           child: MediaQuery(
-            data: const MediaQueryData(padding: EdgeInsets.symmetric(vertical: 100.0)),
+            data: MediaQueryData(padding: EdgeInsets.symmetric(vertical: 100.0)),
             child: Scaffold(
               body: Column(
                 children: <Widget>[
                   AppBar(
-                    title: const Text('title'),
+                    title: Text('title'),
                   ),
                 ],
               ),
@@ -1022,7 +1022,7 @@ void main() {
 
   testWidgets('AppBar updates when you add a drawer', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: Scaffold(
           appBar: AppBar(),
         ),
@@ -1030,9 +1030,9 @@ void main() {
     );
     expect(find.byIcon(Icons.menu), findsNothing);
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: Scaffold(
-          drawer: const Drawer(),
+          drawer: Drawer(),
           appBar: AppBar(),
         ),
       ),
@@ -1042,9 +1042,9 @@ void main() {
 
   testWidgets('AppBar does not draw menu for drawer if automaticallyImplyLeading is false', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: Scaffold(
-          drawer: const Drawer(),
+          drawer: Drawer(),
           appBar: AppBar(
             automaticallyImplyLeading: false,
           ),
@@ -1055,17 +1055,17 @@ void main() {
   });
 
   testWidgets('AppBar does not update the leading if a route is popped case 1', (WidgetTester tester) async {
-    final Page<void> page1 = MaterialPage<void>(
-      key: const ValueKey<String>('1'),
+    const Page<void> page1 = MaterialPage<void>(
+      key: ValueKey<String>('1'),
       child: Scaffold(
-        key: const ValueKey<String>('1'),
+        key: ValueKey<String>('1'),
         appBar: AppBar(),
       ),
     );
-    final Page<void> page2 = MaterialPage<void>(
-        key: const ValueKey<String>('2'),
+    const Page<void> page2 = MaterialPage<void>(
+        key: ValueKey<String>('2'),
         child: Scaffold(
-          key: const ValueKey<String>('2'),
+          key: ValueKey<String>('2'),
           appBar: AppBar(),
         ),
     );
@@ -1093,17 +1093,17 @@ void main() {
   });
 
   testWidgets('AppBar does not update the leading if a route is popped case 2', (WidgetTester tester) async {
-    final Page<void> page1 = MaterialPage<void>(
-      key: const ValueKey<String>('1'),
+    const Page<void> page1 = MaterialPage<void>(
+      key: ValueKey<String>('1'),
       child: Scaffold(
-        key: const ValueKey<String>('1'),
+        key: ValueKey<String>('1'),
         appBar: AppBar(),
       ),
     );
-    final Page<void> page2 = MaterialPage<void>(
-      key: const ValueKey<String>('2'),
+    const Page<void> page2 = MaterialPage<void>(
+      key: ValueKey<String>('2'),
       child: Scaffold(
-        key: const ValueKey<String>('2'),
+        key: ValueKey<String>('2'),
         appBar: AppBar(),
       ),
     );
@@ -1361,13 +1361,13 @@ void main() {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: Center(
           child: AppBar(
-            leading: const Text('Leading'),
-            title: const ExcludeSemantics(child: Text('Title')),
+            leading: Text('Leading'),
+            title: ExcludeSemantics(child: Text('Title')),
             excludeHeaderSemantics: true,
-            actions: const <Widget>[
+            actions: <Widget>[
               Text('Action 1'),
             ],
           ),
@@ -1417,9 +1417,9 @@ void main() {
     final ThemeData darkTheme = ThemeData.dark(useMaterial3: true);
     await tester.pumpWidget(MaterialApp(
       theme: darkTheme,
-      home: Scaffold(
+      home: const Scaffold(
         appBar: AppBar(
-          title: const Text('test'),
+          title: Text('test'),
         ),
       ),
     ));
@@ -1437,9 +1437,9 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: lightTheme,
-        home: Scaffold(
+        home: const Scaffold(
           appBar: AppBar(
-            title: const Text('test'),
+            title: Text('test'),
           ),
         ),
       ),
@@ -1457,8 +1457,8 @@ void main() {
     Widget buildAppBar(ThemeData theme) {
       return MaterialApp(
         theme: theme,
-        home: Scaffold(
-          appBar: AppBar(title: const Text('Title')),
+        home: const Scaffold(
+          appBar: AppBar(title: Text('Title')),
         ),
       );
     }
@@ -1514,9 +1514,9 @@ void main() {
           useMaterial3: true,
           appBarTheme: const AppBarTheme(),
         ),
-        home: Scaffold(
+        home: const Scaffold(
           appBar: AppBar(
-            title: const Text('title'),
+            title: Text('title'),
           ),
         ),
       ),
@@ -1547,11 +1547,11 @@ void main() {
 
   testWidgets('AppBar shape default', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: AppBar(
-          leading: const Text('L'),
-          title: const Text('No Scaffold'),
-          actions: const <Widget>[Text('A1'), Text('A2')],
+          leading: Text('L'),
+          title: Text('No Scaffold'),
+          actions: <Widget>[Text('A1'), Text('A2')],
         ),
       ),
     );
@@ -1570,11 +1570,11 @@ void main() {
       borderRadius: BorderRadius.all(Radius.circular(15.0)),
     );
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: AppBar(
-          leading: const Text('L'),
-          title: const Text('No Scaffold'),
-          actions: const <Widget>[Text('A1'), Text('A2')],
+          leading: Text('L'),
+          title: Text('No Scaffold'),
+          actions: <Widget>[Text('A1'), Text('A2')],
           shape: roundedRectangleBorder,
         ),
       ),
@@ -1601,10 +1601,10 @@ void main() {
             return MediaQuery.withClampedTextScaling(
               minScaleFactor: textScaleFactor,
               maxScaleFactor: textScaleFactor,
-              child: Scaffold(
+              child: const Scaffold(
                 appBar: AppBar(
                   centerTitle: false,
-                  title: const Text('Jumbo', style: TextStyle(fontSize: 18)),
+                  title: Text('Jumbo', style: TextStyle(fontSize: 18)),
                 ),
               ),
             );
@@ -1703,8 +1703,8 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          appBar: AppBar(
-            title: const Text('Title'),
+          appBar: const AppBar(
+            title: Text('Title'),
             toolbarHeight: 48,
           ),
           body: Container(),
@@ -1717,12 +1717,12 @@ void main() {
 
   testWidgets('AppBar respects leadingWidth', (WidgetTester tester) async {
     const Key key = Key('leading');
-    await tester.pumpWidget(MaterialApp(
+    await tester.pumpWidget(const MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          leading: const Placeholder(key: key),
+          leading: Placeholder(key: key),
           leadingWidth: 100,
-          title: const Text('Title'),
+          title: Text('Title'),
         ),
       ),
     ));
@@ -1732,10 +1732,10 @@ void main() {
   });
 
   testWidgets("AppBar with EndDrawer doesn't have leading", (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(
+    await tester.pumpWidget(const MaterialApp(
       home: Scaffold(
         appBar: AppBar(),
-        endDrawer: const Drawer(),
+        endDrawer: Drawer(),
       ),
     ));
 
@@ -1749,10 +1749,10 @@ void main() {
   });
 
   testWidgets('AppBar.titleSpacing defaults to NavigationToolbar.kMiddleSpacing', (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(
+    await tester.pumpWidget(const MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('Title'),
+          title: Text('Title'),
         ),
       ),
     ));
@@ -1823,11 +1823,11 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: themeData,
-        home: Scaffold(
+        home: const Scaffold(
           appBar: AppBar(
-            leading: const Icon(Icons.add_circle),
-            title: const Text('title'),
-            actions: const <Widget>[
+            leading: Icon(Icons.add_circle),
+            title: Text('title'),
+            actions: <Widget>[
               Icon(Icons.ac_unit)
             ],
           ),
@@ -2455,8 +2455,8 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            appBar: AppBar(
-              title: const Text('AppBar'),
+            appBar: const AppBar(
+              title: Text('AppBar'),
             ),
             body: Scrollbar(
               thumbVisibility: true,
@@ -2567,20 +2567,20 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/80256
   testWidgets('The second page should have a back button even it has a end drawer', (WidgetTester tester) async {
-    final Page<void> page1 = MaterialPage<void>(
-        key: const ValueKey<String>('1'),
+    const Page<void> page1 = MaterialPage<void>(
+        key: ValueKey<String>('1'),
         child: Scaffold(
-          key: const ValueKey<String>('1'),
+          key: ValueKey<String>('1'),
           appBar: AppBar(),
-          endDrawer: const Drawer(),
+          endDrawer: Drawer(),
         )
     );
-    final Page<void> page2 = MaterialPage<void>(
-        key: const ValueKey<String>('2'),
+    const Page<void> page2 = MaterialPage<void>(
+        key: ValueKey<String>('2'),
         child: Scaffold(
-          key: const ValueKey<String>('2'),
+          key: ValueKey<String>('2'),
           appBar: AppBar(),
-          endDrawer: const Drawer(),
+          endDrawer: Drawer(),
         )
     );
     final List<Page<void>> pages = <Page<void>>[ page1, page2 ];
@@ -2609,7 +2609,7 @@ void main() {
       MaterialApp(
         home: Scaffold(
           key: key,
-          appBar: AppBar(),
+          appBar: const AppBar(),
         ),
       ),
     );
@@ -2823,9 +2823,9 @@ void main() {
       final ThemeData darkTheme = ThemeData.dark(useMaterial3: false);
       await tester.pumpWidget(MaterialApp(
         theme: darkTheme,
-        home: Scaffold(
+        home: const Scaffold(
           appBar: AppBar(
-            title: const Text('test'),
+            title: Text('test'),
           ),
         ),
       ));
@@ -2845,11 +2845,11 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: themeData,
-          home: Scaffold(
+          home: const Scaffold(
             appBar: AppBar(
-              title: const Text('Howdy!'),
+              title: Text('Howdy!'),
             ),
-            drawer: const Drawer(),
+            drawer: Drawer(),
           ),
         ),
       );
@@ -2865,11 +2865,11 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: themeData,
-          home: Scaffold(
+          home: const Scaffold(
             appBar: AppBar(
-              title: const Text('Howdy!'),
+              title: Text('Howdy!'),
             ),
-            endDrawer: const Drawer(),
+            endDrawer: Drawer(),
           ),
         ),
       );
@@ -2921,10 +2921,10 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: themeData,
-          home: Scaffold(
+          home: const Scaffold(
             appBar: AppBar(
-              leading: const SizedBox(height: 36, width: 36,),
-              title: const Text('X'),
+              leading: SizedBox(height: 36, width: 36,),
+              title: Text('X'),
             ), // Doesn't really matter. Triggers a hamburger regardless.
           ),
         ),
@@ -2943,10 +2943,10 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: theme,
-          home: Scaffold(
+          home: const Scaffold(
             appBar: AppBar(
-              title: const Text('X'),
-              actions: const <Widget> [
+              title: Text('X'),
+              actions: <Widget> [
                 IconButton(
                   icon: Icon(Icons.share),
                   onPressed: null,
@@ -3054,9 +3054,9 @@ void main() {
             useMaterial3: false,
             appBarTheme: const AppBarTheme(),
           ),
-          home: Scaffold(
+          home: const Scaffold(
             appBar: AppBar(
-              title: const Text('title'),
+              title: Text('title'),
             ),
           ),
         ),
@@ -3070,9 +3070,9 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: lightTheme,
-          home: Scaffold(
+          home: const Scaffold(
             appBar: AppBar(
-              title: const Text('test'),
+              title: Text('test'),
             ),
           ),
         ),
@@ -3089,8 +3089,8 @@ void main() {
       Widget buildAppBar(ThemeData theme) {
         return MaterialApp(
           theme: theme,
-          home: Scaffold(
-            appBar: AppBar(title: const Text('Title')),
+          home: const Scaffold(
+            appBar: AppBar(title: Text('Title')),
           ),
         );
       }

@@ -35,7 +35,7 @@ class _RadioListTileExampleState extends State<RadioListTileExample> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('RadioListTile Sample')),
+      appBar: const AppBar(title: Text('RadioListTile Sample')),
       body: Column(
         children: <Widget>[
           RadioListTile<Groceries>(

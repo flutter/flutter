@@ -13,12 +13,12 @@ class FlowApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('Flow Example'),
+          title: Text('Flow Example'),
         ),
-        body: const FlowMenu(),
+        body: FlowMenu(),
       ),
     );
   }

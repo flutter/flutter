@@ -11,11 +11,11 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(useMaterial3: false),
-        home: Scaffold(
+        home: const Scaffold(
           appBar: AppBar(
-            title: const Text('RenderFlex OverFlow'),
+            title: Text('RenderFlex OverFlow'),
           ),
-          body: const SizedBox(
+          body: SizedBox(
             width: 400.0,
             child: Row(
               children: <Widget>[

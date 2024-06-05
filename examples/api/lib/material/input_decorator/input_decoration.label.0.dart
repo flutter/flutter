@@ -15,9 +15,9 @@ class LabelExampleApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData(useMaterial3: true),
-      home: Scaffold(
-        appBar: AppBar(title: const Text('InputDecoration.label Sample')),
-        body: const LabelExample(),
+      home: const Scaffold(
+        appBar: AppBar(title: Text('InputDecoration.label Sample')),
+        body: LabelExample(),
       ),
     );
   }

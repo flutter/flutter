@@ -258,7 +258,7 @@ class ExampleWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('Slotted RenderObject Example')),
+        appBar: const AppBar(title: Text('Slotted RenderObject Example')),
         body: Center(
           child: Diagonal(
             topLeft: Container(

@@ -51,7 +51,7 @@ class _ScaffoldFloatingActionButtonAnimatorExampleState extends State<ScaffoldFl
     return Scaffold(
       floatingActionButtonLocation: _floatingActionButtonLocation,
       floatingActionButtonAnimator: _floatingActionButtonAnimator,
-      appBar: AppBar(title: const Text('FloatingActionButtonAnimator Sample')),
+      appBar: const AppBar(title: Text('FloatingActionButtonAnimator Sample')),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

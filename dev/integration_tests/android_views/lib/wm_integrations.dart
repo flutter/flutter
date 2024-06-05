@@ -41,8 +41,8 @@ class WindowManagerBodyState extends State<WindowManagerBody> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Window Manager Integrations'),
+      appBar: const AppBar(
+        title: Text('Window Manager Integrations'),
       ),
       body: Column(
         children: <Widget>[

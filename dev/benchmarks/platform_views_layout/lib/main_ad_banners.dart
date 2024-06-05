@@ -47,7 +47,7 @@ class PlatformViewAppState extends State<PlatformViewApp> {
       theme: ThemeData.light(),
       title: 'Advanced Layout',
       home: Scaffold(
-        appBar: AppBar(title: const Text('Platform View Ad Banners')),
+        appBar: const AppBar(title: Text('Platform View Ad Banners')),
         body: ListView.builder(
           key: const Key('platform-views-scroll'), // This key is used by the driver test.
           itemCount: 250,

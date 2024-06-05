@@ -13,10 +13,10 @@ class InteractiveViewerExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('InteractiveViewer Sample')),
-        body: const InteractiveViewerExample(),
+        appBar: AppBar(title: Text('InteractiveViewer Sample')),
+        body: InteractiveViewerExample(),
       ),
     );
   }

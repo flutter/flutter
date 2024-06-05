@@ -41,7 +41,7 @@ class _DrawerExampleState extends State<DrawerExample> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
-      appBar: AppBar(title: const Text('Drawer Demo')),
+      appBar: const AppBar(title: Text('Drawer Demo')),
       body: Center(
         child: ElevatedButton(
           onPressed: _openDrawer,

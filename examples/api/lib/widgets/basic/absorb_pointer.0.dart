@@ -13,10 +13,10 @@ class AbsorbPointerApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('AbsorbPointer Sample')),
-        body: const Center(
+        appBar: AppBar(title: Text('AbsorbPointer Sample')),
+        body: Center(
           child: AbsorbPointerExample(),
         ),
       ),

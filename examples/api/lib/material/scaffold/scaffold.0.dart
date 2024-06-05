@@ -32,8 +32,8 @@ class _ScaffoldExampleState extends State<ScaffoldExample> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Sample Code'),
+      appBar: const AppBar(
+        title: Text('Sample Code'),
       ),
       body: Center(child: Text('You have pressed the button $_count times.')),
       floatingActionButton: FloatingActionButton(

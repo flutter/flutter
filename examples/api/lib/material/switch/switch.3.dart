@@ -20,9 +20,9 @@ class SwitchApp extends StatelessWidget {
         // otherwise use iOS defaults.
         cupertinoOverrideTheme: const CupertinoThemeData(applyThemeToAll: true),
       ),
-      home: Scaffold(
-        appBar: AppBar(title: const Text('Switch Sample')),
-        body: const Center(
+      home: const Scaffold(
+        appBar: AppBar(title: Text('Switch Sample')),
+        body: Center(
           child: SwitchExample(),
         ),
       ),

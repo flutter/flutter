@@ -54,7 +54,7 @@ class _ErrorWidgetExampleAppState extends State<ErrorWidgetExampleApp> {
     } else {
       return MaterialApp(
         home: Scaffold(
-          appBar: AppBar(title: const Text('ErrorWidget Sample')),
+          appBar: const AppBar(title: Text('ErrorWidget Sample')),
           body: Center(
             child: TextButton(
                 onPressed: () {

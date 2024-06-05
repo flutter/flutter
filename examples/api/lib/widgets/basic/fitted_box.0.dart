@@ -13,10 +13,10 @@ class FittedBoxApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('FittedBox Sample')),
-        body: const Center(
+        appBar: AppBar(title: Text('FittedBox Sample')),
+        body: Center(
           child: FittedBoxExample(),
         ),
       ),

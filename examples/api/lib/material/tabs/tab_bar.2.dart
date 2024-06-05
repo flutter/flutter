@@ -25,13 +25,13 @@ class TabBarExample extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
+    return const DefaultTabController(
       initialIndex: 1,
       length: 3,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Primary and secondary TabBar'),
-          bottom: const TabBar(
+          title: Text('Primary and secondary TabBar'),
+          bottom: TabBar(
             dividerColor: Colors.transparent,
             tabs: <Widget>[
               Tab(
@@ -49,7 +49,7 @@ class TabBarExample extends StatelessWidget {
             ],
           ),
         ),
-        body: const TabBarView(
+        body: TabBarView(
           children: <Widget>[
             NestedTabBar('Flights'),
             NestedTabBar('Trips'),

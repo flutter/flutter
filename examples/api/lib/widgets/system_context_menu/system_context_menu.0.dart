@@ -15,8 +15,8 @@ class SystemContextMenuExampleApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(
-          title: const Text('SystemContextMenu Basic Example'),
+        appBar: const AppBar(
+          title: Text('SystemContextMenu Basic Example'),
         ),
         body: Center(
           child: TextField(

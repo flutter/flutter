@@ -22,8 +22,8 @@ class ScrollMetricsDemoState extends State<ScrollMetricsDemo> {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(
-          title: const Text('ScrollMetrics Demo'),
+        appBar: const AppBar(
+          title: Text('ScrollMetrics Demo'),
         ),
         floatingActionButton: FloatingActionButton(
           child: const Icon(Icons.add),

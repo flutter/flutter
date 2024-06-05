@@ -41,7 +41,7 @@ class _KeyboardInsertedContentDemoState extends State<KeyboardInsertedContentDem
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Keyboard Inserted Content Sample')),
+      appBar: const AppBar(title: Text('Keyboard Inserted Content Sample')),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[

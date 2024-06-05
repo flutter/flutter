@@ -13,10 +13,10 @@ class MouseCursorExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('MouseCursor Code Sample')),
-        body: const MouseCursorExample(),
+        appBar: AppBar(title: Text('MouseCursor Code Sample')),
+        body: MouseCursorExample(),
       ),
     );
   }

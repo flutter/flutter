@@ -13,10 +13,10 @@ class ClipRRectApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('ClipRRect Sample')),
-        body: const ClipRRectExample(),
+        appBar: AppBar(title: Text('ClipRRect Sample')),
+        body: ClipRRectExample(),
       ),
     );
   }

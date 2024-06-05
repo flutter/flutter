@@ -25,7 +25,7 @@ class _SearchBarAppState extends State<SearchBarApp> {
     return MaterialApp(
       theme: themeData,
       home: Scaffold(
-        appBar: AppBar(title: const Text('Search Anchor Sample')),
+        appBar: const AppBar(title: Text('Search Anchor Sample')),
         body: Column(
           children: <Widget>[
             SearchAnchor(

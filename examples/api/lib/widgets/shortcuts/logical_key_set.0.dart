@@ -14,10 +14,10 @@ class LogicalKeySetExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('LogicalKeySet Sample')),
-        body: const Center(
+        appBar: AppBar(title: Text('LogicalKeySet Sample')),
+        body: Center(
           child: LogicalKeySetExample(),
         ),
       ),

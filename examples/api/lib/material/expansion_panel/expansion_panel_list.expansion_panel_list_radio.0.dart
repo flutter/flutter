@@ -13,10 +13,10 @@ class ExpansionPanelListRadioExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('ExpansionPanelList.radio Sample')),
-        body: const ExpansionPanelListRadioExample(),
+        appBar: AppBar(title: Text('ExpansionPanelList.radio Sample')),
+        body: ExpansionPanelListRadioExample(),
       ),
     );
   }

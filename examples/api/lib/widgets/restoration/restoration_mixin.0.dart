@@ -69,8 +69,8 @@ class _RestorableCounterState extends State<RestorableCounter> with RestorationM
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Restorable Counter'),
+      appBar: const AppBar(
+        title: Text('Restorable Counter'),
       ),
       body: Center(
         child: Column(

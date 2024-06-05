@@ -64,8 +64,8 @@ void main() {
         theme: ThemeData(useMaterial3: false),
         title: 'Pirate app',
         home: Scaffold(
-          appBar: AppBar(
-            title: const Text('Home'),
+          appBar: const AppBar(
+            title: Text('Home'),
           ),
           drawer: Drawer(
             child: ListView(
@@ -147,8 +147,8 @@ void main() {
         theme: ThemeData(useMaterial3: true),
         title: 'Pirate app',
         home: Scaffold(
-          appBar: AppBar(
-            title: const Text('Home'),
+          appBar: const AppBar(
+            title: Text('Home'),
           ),
           drawer: Drawer(
             child: ListView(

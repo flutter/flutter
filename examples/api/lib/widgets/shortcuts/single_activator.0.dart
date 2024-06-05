@@ -14,10 +14,10 @@ class SingleActivatorExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('SingleActivator Sample')),
-        body: const Center(
+        appBar: AppBar(title: Text('SingleActivator Sample')),
+        body: Center(
           child: SingleActivatorExample(),
         ),
       ),

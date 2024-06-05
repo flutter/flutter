@@ -51,8 +51,8 @@ class _TestAppState extends State<TestApp> {
     return MaterialApp(
       title: 'Platform Interaction Test',
       home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Platform Interaction Test'),
+        appBar: const AppBar(
+          title: Text('Platform Interaction Test'),
         ),
         body: Padding(
           padding: const EdgeInsets.all(20.0),

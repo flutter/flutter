@@ -13,10 +13,10 @@ class TableExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('Table Sample')),
-        body: const TableExample(),
+        appBar: AppBar(title: Text('Table Sample')),
+        body: TableExample(),
       ),
     );
   }

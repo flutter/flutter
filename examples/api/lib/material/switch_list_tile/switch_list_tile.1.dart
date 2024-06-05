@@ -15,7 +15,7 @@ class SwitchListTileApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData(useMaterial3: true),
-      home: Scaffold(appBar: AppBar(title: const Text('SwitchListTile Sample')), body: const SwitchListTileExample()),
+      home: const Scaffold(appBar: AppBar(title: Text('SwitchListTile Sample')), body: SwitchListTileExample()),
     );
   }
 }

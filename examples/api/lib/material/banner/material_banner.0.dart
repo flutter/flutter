@@ -24,11 +24,11 @@ class MaterialBannerExample extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return const Scaffold(
       appBar: AppBar(
-        title: const Text('The MaterialBanner is below'),
+        title: Text('The MaterialBanner is below'),
       ),
-      body: const MaterialBanner(
+      body: MaterialBanner(
         padding: EdgeInsets.all(20),
         content: Text('Hello, I am a Material Banner'),
         leading: Icon(Icons.agriculture_outlined),

@@ -13,10 +13,10 @@ class RawScrollbarExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('RawScrollbar Sample')),
-        body: const RawScrollbarExample(),
+        appBar: AppBar(title: Text('RawScrollbar Sample')),
+        body: RawScrollbarExample(),
       ),
     );
   }

@@ -14,10 +14,10 @@ class TapRegionApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('TextFieldTapRegion Example')),
-        body: const TextFieldTapRegionExample(),
+        appBar: AppBar(title: Text('TextFieldTapRegion Example')),
+        body: TextFieldTapRegionExample(),
       ),
     );
   }

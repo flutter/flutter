@@ -13,10 +13,10 @@ class MaterialStatePropertyExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('MaterialStateProperty Sample')),
-        body: const Center(
+        appBar: AppBar(title: Text('MaterialStateProperty Sample')),
+        body: Center(
           child: MaterialStatePropertyExample(),
         ),
       ),

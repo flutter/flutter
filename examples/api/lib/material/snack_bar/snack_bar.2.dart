@@ -40,7 +40,7 @@ class _SnackBarExampleState extends State<SnackBarExample> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('SnackBar Sample')),
+      appBar: const AppBar(title: Text('SnackBar Sample')),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
           ScaffoldMessenger.of(context).showSnackBar(_snackBar());

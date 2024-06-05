@@ -11,10 +11,10 @@ class SliverConstrainedCrossAxisExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('SliverConstrainedCrossAxis Sample')),
-        body: const SliverConstrainedCrossAxisExample(),
+        appBar: AppBar(title: Text('SliverConstrainedCrossAxis Sample')),
+        body: SliverConstrainedCrossAxisExample(),
       ),
     );
   }

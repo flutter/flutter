@@ -141,8 +141,8 @@ class _FocusDemoState extends State<FocusDemo> {
         child: DefaultTextStyle(
           style: textTheme.headlineMedium!,
           child: Scaffold(
-            appBar: AppBar(
-              title: const Text('Focus Demo'),
+            appBar: const AppBar(
+              title: Text('Focus Demo'),
             ),
             floatingActionButton: FloatingActionButton(
               child: const Text('+'),

@@ -44,8 +44,8 @@ class NestedViewEventBodyState extends State<NestedViewEventBody> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Nested view event'),
+      appBar: const AppBar(
+        title: Text('Nested view event'),
       ),
       body: Column(
         children: <Widget>[
