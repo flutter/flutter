@@ -149,7 +149,7 @@ class AnimatedList extends _AnimatedScrollView {
     super.key,
     required AnimatedItemBuilder itemBuilder,
     required AnimatedItemBuilder separatorBuilder,
-    required super.removedSeparatorBuilder,
+    required AnimatedItemBuilder super.removedSeparatorBuilder,
     int initialItemCount = 0,
     super.scrollDirection = Axis.vertical,
     super.reverse = false,
