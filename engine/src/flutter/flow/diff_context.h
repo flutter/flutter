@@ -223,8 +223,8 @@ class DiffContext {
     // when starting subtree to paint layer children).
     bool integral_transform = false;
 
-    // Used to restoring clip tracker when popping state.
-    int clip_tracker_save_count = 0;
+    // Current transform and clip for the layer
+    DisplayListMatrixClipState matrix_clip;
 
     // Whether this subtree has filter bounds adjustment function. If so,
     // it will need to be removed from stack when subtree is closed.
@@ -234,9 +234,8 @@ class DiffContext {
     bool has_texture = false;
   };
 
-  void MakeCurrentTransformIntegral();
+  void MakeTransformIntegral(DisplayListMatrixClipState& matrix_clip);
 
-  DisplayListMatrixClipTracker clip_tracker_;
   std::shared_ptr<std::vector<SkRect>> rects_;
   State state_;
   SkISize frame_size_;

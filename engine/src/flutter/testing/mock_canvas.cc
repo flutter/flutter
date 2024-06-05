@@ -16,19 +16,19 @@ namespace testing {
 
 constexpr SkISize kSize = SkISize::Make(64, 64);
 
-MockCanvas::MockCanvas()
-    : tracker_(SkRect::Make(kSize), SkMatrix::I()), current_layer_(0) {}
+MockCanvas::MockCanvas() : MockCanvas(kSize.fWidth, kSize.fHeight) {}
 
 MockCanvas::MockCanvas(int width, int height)
-    : tracker_(SkRect::MakeIWH(width, height), SkMatrix::I()),
-      current_layer_(0) {}
+    : base_layer_size_({width, height}), current_layer_(0) {
+  state_stack_.emplace_back(DlRect::MakeXYWH(0, 0, width, height), DlMatrix());
+}
 
 MockCanvas::~MockCanvas() {
   EXPECT_EQ(current_layer_, 0);
 }
 
 SkISize MockCanvas::GetBaseLayerSize() const {
-  return tracker_.base_device_cull_rect().roundOut().size();
+  return base_layer_size_;
 }
 
 SkImageInfo MockCanvas::GetImageInfo() const {
@@ -39,7 +39,7 @@ SkImageInfo MockCanvas::GetImageInfo() const {
 void MockCanvas::Save() {
   draw_calls_.emplace_back(
       DrawCall{current_layer_, SaveData{current_layer_ + 1}});
-  tracker_.save();
+  state_stack_.emplace_back(state_stack_.back());
   current_layer_++;  // Must go here; func params order of eval is undefined
 }
 
@@ -53,7 +53,7 @@ void MockCanvas::SaveLayer(const SkRect* bounds,
       SaveLayerData{bounds ? *bounds : SkRect(), paint ? *paint : DlPaint(),
                     backdrop ? backdrop->shared() : nullptr,
                     current_layer_ + 1}});
-  tracker_.save();
+  state_stack_.emplace_back(state_stack_.back());
   current_layer_++;  // Must go here; func params order of eval is undefined
 }
 
@@ -62,7 +62,7 @@ void MockCanvas::Restore() {
 
   draw_calls_.emplace_back(
       DrawCall{current_layer_, RestoreData{current_layer_ - 1}});
-  tracker_.restore();
+  state_stack_.pop_back();
   current_layer_--;  // Must go here; func params order of eval is undefined
 }
 
@@ -91,28 +91,28 @@ void MockCanvas::TransformFullPerspective(
 void MockCanvas::Transform(const SkMatrix* matrix) {
   draw_calls_.emplace_back(
       DrawCall{current_layer_, ConcatMatrixData{SkM44(*matrix)}});
-  tracker_.transform(*matrix);
+  state_stack_.back().transform(*matrix);
 }
 
 void MockCanvas::Transform(const SkM44* matrix) {
   draw_calls_.emplace_back(DrawCall{current_layer_, ConcatMatrixData{*matrix}});
-  tracker_.transform(*matrix);
+  state_stack_.back().transform(*matrix);
 }
 
 void MockCanvas::SetTransform(const SkMatrix* matrix) {
   draw_calls_.emplace_back(
       DrawCall{current_layer_, SetMatrixData{SkM44(*matrix)}});
-  tracker_.setTransform(*matrix);
+  state_stack_.back().setTransform(*matrix);
 }
 
 void MockCanvas::SetTransform(const SkM44* matrix) {
   draw_calls_.emplace_back(DrawCall{current_layer_, SetMatrixData{*matrix}});
-  tracker_.setTransform(*matrix);
+  state_stack_.back().setTransform(*matrix);
 }
 
 void MockCanvas::TransformReset() {
   draw_calls_.emplace_back(DrawCall{current_layer_, SetMatrixData{SkM44()}});
-  tracker_.setIdentity();
+  state_stack_.back().setIdentity();
 }
 
 void MockCanvas::Translate(SkScalar x, SkScalar y) {
@@ -132,11 +132,11 @@ void MockCanvas::Skew(SkScalar sx, SkScalar sy) {
 }
 
 SkM44 MockCanvas::GetTransformFullPerspective() const {
-  return tracker_.matrix_4x4();
+  return state_stack_.back().matrix_4x4();
 }
 
 SkMatrix MockCanvas::GetTransform() const {
-  return tracker_.matrix_3x3();
+  return state_stack_.back().matrix_3x3();
 }
 
 void MockCanvas::DrawTextBlob(const sk_sp<SkTextBlob>& text,
@@ -211,33 +211,33 @@ void MockCanvas::ClipRect(const SkRect& rect, ClipOp op, bool is_aa) {
   ClipEdgeStyle style = is_aa ? kSoftClipEdgeStyle : kHardClipEdgeStyle;
   draw_calls_.emplace_back(
       DrawCall{current_layer_, ClipRectData{rect, op, style}});
-  tracker_.clipRect(rect, op, is_aa);
+  state_stack_.back().clipRect(rect, op, is_aa);
 }
 
 void MockCanvas::ClipRRect(const SkRRect& rrect, ClipOp op, bool is_aa) {
   ClipEdgeStyle style = is_aa ? kSoftClipEdgeStyle : kHardClipEdgeStyle;
   draw_calls_.emplace_back(
       DrawCall{current_layer_, ClipRRectData{rrect, op, style}});
-  tracker_.clipRRect(rrect, op, is_aa);
+  state_stack_.back().clipRRect(rrect, op, is_aa);
 }
 
 void MockCanvas::ClipPath(const SkPath& path, ClipOp op, bool is_aa) {
   ClipEdgeStyle style = is_aa ? kSoftClipEdgeStyle : kHardClipEdgeStyle;
   draw_calls_.emplace_back(
       DrawCall{current_layer_, ClipPathData{path, op, style}});
-  tracker_.clipPath(path, op, is_aa);
+  state_stack_.back().clipPath(path, op, is_aa);
 }
 
 SkRect MockCanvas::GetDestinationClipBounds() const {
-  return tracker_.device_cull_rect();
+  return state_stack_.back().device_cull_rect();
 }
 
 SkRect MockCanvas::GetLocalClipBounds() const {
-  return tracker_.local_cull_rect();
+  return state_stack_.back().local_cull_rect();
 }
 
 bool MockCanvas::QuickReject(const SkRect& bounds) const {
-  return tracker_.content_culled(bounds);
+  return state_stack_.back().content_culled(bounds);
 }
 
 void MockCanvas::DrawDRRect(const SkRRect&, const SkRRect&, const DlPaint&) {

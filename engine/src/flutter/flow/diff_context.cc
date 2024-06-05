@@ -14,8 +14,7 @@ DiffContext::DiffContext(SkISize frame_size,
                          const PaintRegionMap& last_frame_paint_region_map,
                          bool has_raster_cache,
                          bool impeller_enabled)
-    : clip_tracker_(DisplayListMatrixClipTracker(kGiantRect, SkMatrix::I())),
-      rects_(std::make_shared<std::vector<SkRect>>()),
+    : rects_(std::make_shared<std::vector<SkRect>>()),
       frame_size_(frame_size),
       this_frame_paint_region_map_(this_frame_paint_region_map),
       last_frame_paint_region_map_(last_frame_paint_region_map),
@@ -31,11 +30,8 @@ void DiffContext::BeginSubtree() {
   state_.has_texture = false;
   state_.integral_transform = false;
 
-  state_.clip_tracker_save_count = clip_tracker_.getSaveCount();
-  clip_tracker_.save();
-
   if (had_integral_transform) {
-    MakeCurrentTransformIntegral();
+    MakeTransformIntegral(state_.matrix_clip);
   }
 }
 
@@ -44,35 +40,35 @@ void DiffContext::EndSubtree() {
   if (state_.has_filter_bounds_adjustment) {
     filter_bounds_adjustment_stack_.pop_back();
   }
-  clip_tracker_.restoreToCount(state_.clip_tracker_save_count);
   state_ = state_stack_.back();
   state_stack_.pop_back();
 }
 
-DiffContext::State::State() {}
+DiffContext::State::State() : matrix_clip(kGiantRect, SkMatrix::I()) {}
 
 void DiffContext::PushTransform(const SkMatrix& transform) {
-  clip_tracker_.transform(transform);
+  state_.matrix_clip.transform(transform);
 }
 
 void DiffContext::PushTransform(const SkM44& transform) {
-  clip_tracker_.transform(transform);
+  state_.matrix_clip.transform(transform);
 }
 
-void DiffContext::MakeCurrentTransformIntegral() {
+void DiffContext::MakeTransformIntegral(
+    DisplayListMatrixClipState& matrix_clip) {
   // TODO(knopp): This is duplicated from LayerStack. Maybe should be part of
   // clip tracker?
-  if (clip_tracker_.using_4x4_matrix()) {
+  if (matrix_clip.using_4x4_matrix()) {
     SkM44 integral;
-    if (RasterCacheUtil::ComputeIntegralTransCTM(clip_tracker_.matrix_4x4(),
+    if (RasterCacheUtil::ComputeIntegralTransCTM(matrix_clip.matrix_4x4(),
                                                  &integral)) {
-      clip_tracker_.setTransform(integral);
+      matrix_clip.setTransform(integral);
     }
   } else {
     SkMatrix integral;
-    if (RasterCacheUtil::ComputeIntegralTransCTM(clip_tracker_.matrix_3x3(),
+    if (RasterCacheUtil::ComputeIntegralTransCTM(matrix_clip.matrix_3x3(),
                                                  &integral)) {
-      clip_tracker_.setTransform(integral);
+      matrix_clip.setTransform(integral);
     }
   }
 }
@@ -157,21 +153,21 @@ Damage DiffContext::ComputeDamage(const SkIRect& accumulated_buffer_damage,
 
 SkRect DiffContext::MapRect(const SkRect& rect) {
   SkRect mapped_rect(rect);
-  clip_tracker_.mapRect(&mapped_rect);
+  state_.matrix_clip.mapRect(&mapped_rect);
   return mapped_rect;
 }
 
 bool DiffContext::PushCullRect(const SkRect& clip) {
-  clip_tracker_.clipRect(clip, DlCanvas::ClipOp::kIntersect, false);
-  return !clip_tracker_.device_cull_rect().isEmpty();
+  state_.matrix_clip.clipRect(clip, DlCanvas::ClipOp::kIntersect, false);
+  return !state_.matrix_clip.device_cull_rect().isEmpty();
 }
 
 SkMatrix DiffContext::GetTransform3x3() const {
-  return clip_tracker_.matrix_3x3();
+  return state_.matrix_clip.matrix_3x3();
 }
 
 SkRect DiffContext::GetCullRect() const {
-  return clip_tracker_.local_cull_rect();
+  return state_.matrix_clip.local_cull_rect();
 }
 
 void DiffContext::MarkSubtreeDirty(const PaintRegion& previous_paint_region) {
@@ -193,12 +189,12 @@ void DiffContext::AddLayerBounds(const SkRect& rect) {
   // override the transform right before paint. Do the same thing here to get
   // identical paint rect.
   auto transformed_rect = ApplyFilterBoundsAdjustment(MapRect(rect));
-  if (transformed_rect.intersects(clip_tracker_.device_cull_rect())) {
+  if (transformed_rect.intersects(state_.matrix_clip.device_cull_rect())) {
     if (state_.integral_transform) {
-      clip_tracker_.save();
-      MakeCurrentTransformIntegral();
-      transformed_rect = ApplyFilterBoundsAdjustment(MapRect(rect));
-      clip_tracker_.restore();
+      DisplayListMatrixClipState temp_state = state_.matrix_clip;
+      MakeTransformIntegral(temp_state);
+      temp_state.mapRect(rect, &transformed_rect);
+      transformed_rect = ApplyFilterBoundsAdjustment(transformed_rect);
     }
     rects_->push_back(transformed_rect);
     if (IsSubtreeDirty()) {
