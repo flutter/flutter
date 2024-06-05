@@ -137,6 +137,9 @@ enum PointerSignalKind {
   unknown
 }
 
+/// A function that implements the [PointerData.respond] method.
+typedef PointerDataRespondCallback = void Function({bool allowPlatformDefault});
+
 /// Information about the state of a pointer.
 class PointerData {
   /// Creates an object that represents the state of a pointer.
@@ -177,7 +180,8 @@ class PointerData {
     this.panDeltaY = 0.0,
     this.scale = 0.0,
     this.rotation = 0.0,
-  });
+    PointerDataRespondCallback? onRespond,
+  }) : _onRespond = onRespond;
 
   /// The ID of the [FlutterView] this [PointerEvent] originated from.
   final int viewId;
@@ -379,6 +383,36 @@ class PointerData {
   ///
   /// The current angle of the pan/zoom in radians, with 0.0 as the initial angle.
   final double rotation;
+
+  // An optional function that allows the framework to respond to the event
+  // that triggered this PointerData instance.
+  final PointerDataRespondCallback? _onRespond;
+
+  /// Method that the framework/app can call to respond to the native event
+  /// that triggered this [PointerData].
+  ///
+  /// The parameter [allowPlatformDefault] allows the platform to perform the
+  /// default action associated with the native event when it's set to `true`.
+  ///
+  /// This method can be called any number of times, but once `allowPlatformDefault`
+  /// is set to `true`, it can't be set to `false` again.
+  ///
+  /// If `allowPlatformDefault` is never set to `true`, the Flutter engine will
+  /// consume the event, so it won't be seen by the platform. In the web, this
+  /// means that `preventDefault` will be called in the DOM event that triggered
+  /// the `PointerData`. See [Event: preventDefault() method in MDN][EpDmiMDN].
+  ///
+  /// The implementation of this method is configured through the `onRespond`
+  /// parameter of the [PointerData] constructor.
+  ///
+  /// See also [PointerDataRespondCallback].
+  ///
+  /// [EpDmiMDN]: https://developer.mozilla.org/en-US/docs/Web/API/Event/preventDefault
+  void respond({required bool allowPlatformDefault}) {
+    if (_onRespond != null) {
+      _onRespond(allowPlatformDefault: allowPlatformDefault);
+    }
+  }
 
   @override
   String toString() => 'PointerData(viewId: $viewId, x: $physicalX, y: $physicalY)';

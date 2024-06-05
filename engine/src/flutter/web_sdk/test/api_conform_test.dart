@@ -241,12 +241,22 @@ void main() {
         i < uiTypeDef.functionType!.parameters.parameters.length &&
             i < webTypeDef.functionType!.parameters.parameters.length;
         i++) {
-      final SimpleFormalParameter uiParam =
-          (uiTypeDef.type as GenericFunctionType).parameters.parameters[i]
-              as SimpleFormalParameter;
-      final SimpleFormalParameter webParam =
-          (webTypeDef.type as GenericFunctionType).parameters.parameters[i]
-              as SimpleFormalParameter;
+      final FormalParameter uiFormalParam =
+          (uiTypeDef.type as GenericFunctionType).parameters.parameters[i];
+      final FormalParameter webFormalParam =
+          (webTypeDef.type as GenericFunctionType).parameters.parameters[i];
+
+      if (uiFormalParam.runtimeType != webFormalParam.runtimeType) {
+        failed = true;
+        print('Warning: lib/ui/ui.dart $typeDefName parameter $i '
+            '${uiFormalParam.name!.lexeme}} is of type ${uiFormalParam.runtimeType}, but of ${webFormalParam.runtimeType} in lib/web_ui/ui.dart.');
+      }
+
+      // This is not entirely true and can break, but this way we can support both positional and named params
+      // (The assumption that the parameter of a DefaultFormalParameter is a SimpleFormalParameter is a stretch)
+      final SimpleFormalParameter uiParam = ((uiFormalParam is DefaultFormalParameter) ? uiFormalParam.parameter : uiFormalParam) as SimpleFormalParameter;
+      final SimpleFormalParameter webParam = ((webFormalParam is DefaultFormalParameter) ? webFormalParam.parameter : uiFormalParam) as SimpleFormalParameter;
+
       if (webParam.name == null) {
         failed = true;
         print('Warning: lib/web_ui/ui.dart $typeDefName parameter $i should have name.');
