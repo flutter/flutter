@@ -499,6 +499,7 @@ abstract class _BaseAdapter {
   final List<_Listener> _listeners = <_Listener>[];
   DomWheelEvent? _lastWheelEvent;
   bool _lastWheelEventWasTrackpad = false;
+  bool _lastWheelEventAllowedDefault = false;
 
   DomEventTarget get _viewTarget => _view.dom.rootElement;
   DomEventTarget get _globalTarget => _view.embeddingStrategy.globalEventTarget;
@@ -706,6 +707,10 @@ mixin _WheelEventListenerMixin on _BaseAdapter {
         pressureMax: 1.0,
         scrollDeltaX: deltaX,
         scrollDeltaY: deltaY,
+        onRespond: ({bool allowPlatformDefault = false}) {
+          // Once `allowPlatformDefault` is `true`, never go back to `false`!
+          _lastWheelEventAllowedDefault |= allowPlatformDefault;
+        },
       );
     }
     _lastWheelEvent = event;
@@ -722,17 +727,21 @@ mixin _WheelEventListenerMixin on _BaseAdapter {
     ));
   }
 
-  void _handleWheelEvent(DomEvent e) {
-    assert(domInstanceOfString(e, 'WheelEvent'));
-    final DomWheelEvent event = e as DomWheelEvent;
+  void _handleWheelEvent(DomEvent event) {
+    assert(domInstanceOfString(event, 'WheelEvent'));
     if (_debugLogPointerEvents) {
       print(event.type);
     }
-    _callback(e, _convertWheelEventToPointerData(event));
-    // Prevent default so mouse wheel event doesn't get converted to
-    // a scroll event that semantic nodes would process.
-    //
-    event.preventDefault();
+    _lastWheelEventAllowedDefault = false;
+    // [ui.PointerData] can set the `_lastWheelEventAllowedDefault` variable
+    // to true, when the framework says so. See the implementation of `respond`
+    // when creating the PointerData object above.
+    _callback(event, _convertWheelEventToPointerData(event as DomWheelEvent));
+    // This works because the `_callback` is handled synchronously in the
+    // framework, so it's able to modify `_lastWheelEventAllowedDefault`.
+    if (!_lastWheelEventAllowedDefault) {
+      event.preventDefault();
+    }
   }
 
   /// For browsers that report delta line instead of pixels such as FireFox
