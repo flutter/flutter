@@ -987,10 +987,11 @@ class TextStyle with Diagnosticable {
     List<FontVariation>? fontVariations,
     String? package,
     TextOverflow? overflow,
+    double? letterSpacing,
   }) {
     assert(fontSize != null || (fontSizeFactor == 1.0 && fontSizeDelta == 0.0));
     assert(fontWeight != null || fontWeightDelta == 0.0);
-    assert(letterSpacing != null || (letterSpacingFactor == 1.0 && letterSpacingDelta == 0.0));
+    assert((letterSpacing != null|| this.letterSpacing != null) || (letterSpacingFactor == 1.0 && letterSpacingDelta == 0.0));
     assert(wordSpacing != null || (wordSpacingFactor == 1.0 && wordSpacingDelta == 0.0));
     assert(decorationThickness != null || (decorationThicknessFactor == 1.0 && decorationThicknessDelta == 0.0));
 
@@ -1011,7 +1012,7 @@ class TextStyle with Diagnosticable {
       fontSize: fontSize == null ? null : fontSize! * fontSizeFactor + fontSizeDelta,
       fontWeight: fontWeight == null ? null : FontWeight.values[(fontWeight!.index + fontWeightDelta).clamp(0, FontWeight.values.length - 1)],
       fontStyle: fontStyle ?? this.fontStyle,
-      letterSpacing: letterSpacing == null ? null : letterSpacing! * letterSpacingFactor + letterSpacingDelta,
+      letterSpacing: this.letterSpacing == null && letterSpacing == null ? null : (letterSpacing ?? this.letterSpacing)! * letterSpacingFactor + letterSpacingDelta,
       wordSpacing: wordSpacing == null ? null : wordSpacing! * wordSpacingFactor + wordSpacingDelta,
       textBaseline: textBaseline ?? this.textBaseline,
       height: height == null ? null : height! * heightFactor + heightDelta,

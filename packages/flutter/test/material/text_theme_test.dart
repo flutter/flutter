@@ -246,4 +246,28 @@ void main() {
     expect(fullLerp.horizontal, 2.0);
     expect(fullLerp.vertical, 1.0);
   });
+
+  test('TextTheme apply letterSpacing', () {
+    final Typography typography = Typography.material2018();
+    final TextTheme baseTheme = Typography.englishLike2018.merge(typography.black);
+    final TextTheme letterSpacingTheme = baseTheme.apply(
+      letterSpacing: 2.0,
+    );
+
+    expect(letterSpacingTheme.displayLarge!.letterSpacing, 2.0);
+    expect(letterSpacingTheme.displayMedium!.letterSpacing, 2.0);
+    expect(letterSpacingTheme.displaySmall!.letterSpacing, 2.0);
+    expect(letterSpacingTheme.headlineLarge!.letterSpacing, 2.0);
+    expect(letterSpacingTheme.headlineMedium!.letterSpacing, 2.0);
+    expect(letterSpacingTheme.headlineSmall!.letterSpacing, 2.0);
+    expect(letterSpacingTheme.titleLarge!.letterSpacing, 2.0);
+    expect(letterSpacingTheme.titleMedium!.letterSpacing, 2.0);
+    expect(letterSpacingTheme.titleSmall!.letterSpacing, 2.0);
+    expect(letterSpacingTheme.bodyLarge!.letterSpacing, 2.0);
+    expect(letterSpacingTheme.bodyMedium!.letterSpacing, 2.0);
+    expect(letterSpacingTheme.bodySmall!.letterSpacing, 2.0);
+    expect(letterSpacingTheme.labelLarge!.letterSpacing, 2.0);
+    expect(letterSpacingTheme.labelMedium!.letterSpacing, 2.0);
+    expect(letterSpacingTheme.labelSmall!.letterSpacing, 2.0);
+  });
 }

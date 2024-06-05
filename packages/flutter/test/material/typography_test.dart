@@ -410,4 +410,40 @@ void main() {
     expect(textTheme.labelMedium!.color, light);
     expect(textTheme.labelSmall!.color, light);
   });
+
+  test('Typography.applyWith applies letterSpacing correctly', () {
+    final Typography typography = Typography.material2018();
+
+    const double blackLetterSpacing = 1.1;
+    const double whiteLetterSpacing = 1.2;
+    const double englishLikeLetterSpacing = 1.3;
+    const double denseLetterSpacing = 1.4;
+    const double tallLetterSpacing = 1.5;
+    const double defaultLetterSpacing = 1.0;
+
+    final Typography appliedTypography = typography.applyWith(
+      blackLetterSpacing: blackLetterSpacing,
+      whiteLetterSpacing: whiteLetterSpacing,
+      englishLikeLetterSpacing: englishLikeLetterSpacing,
+      denseLetterSpacing: denseLetterSpacing,
+      tallLetterSpacing: tallLetterSpacing,
+      letterSpacing: defaultLetterSpacing,
+    );
+
+    expect(appliedTypography.black.bodyLarge?.letterSpacing, blackLetterSpacing);
+    expect(appliedTypography.white.bodyLarge?.letterSpacing, whiteLetterSpacing);
+    expect(appliedTypography.englishLike.bodyLarge?.letterSpacing, englishLikeLetterSpacing);
+    expect(appliedTypography.dense.bodyLarge?.letterSpacing, denseLetterSpacing);
+    expect(appliedTypography.tall.bodyLarge?.letterSpacing, tallLetterSpacing);
+
+    final Typography defaultAppliedTypography = typography.applyWith(
+      letterSpacing: defaultLetterSpacing,
+    );
+
+    expect(defaultAppliedTypography.black.bodyLarge?.letterSpacing, defaultLetterSpacing);
+    expect(defaultAppliedTypography.white.bodyLarge?.letterSpacing, defaultLetterSpacing);
+    expect(defaultAppliedTypography.englishLike.bodyLarge?.letterSpacing, defaultLetterSpacing);
+    expect(defaultAppliedTypography.dense.bodyLarge?.letterSpacing, defaultLetterSpacing);
+    expect(defaultAppliedTypography.tall.bodyLarge?.letterSpacing, defaultLetterSpacing);
+  });
 }

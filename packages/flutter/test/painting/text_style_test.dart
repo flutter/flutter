@@ -676,4 +676,10 @@ void main() {
     expect(lerpFontVariations(const <FontVariation>[sn80], const <FontVariation>[w300], 1.0), const <FontVariation>[w300]);
     expect(lerpFontVariations(const <FontVariation>[sn40, s0, w100], const <FontVariation>[sp40, w300, sp80], 0.5), anyOf(equals(const <FontVariation>[s0, w200, sp40]), equals(const <FontVariation>[s0, sp40, w200])));
   });
+
+  test('TextStyle apply letterSpacing', () {
+    const TextStyle style = TextStyle(letterSpacing: 1);
+    expect(style.apply().letterSpacing, 1);
+    expect(style.apply(letterSpacing: 2).letterSpacing, 2);
+  });
 }

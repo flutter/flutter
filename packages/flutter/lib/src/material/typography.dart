@@ -333,6 +333,32 @@ class Typography with Diagnosticable {
     );
   }
 
+  /// Apply a letter spacing to specific [TextTheme]s in this [Typography].
+  /// If [letterSpacing] is specified and any of the other letter spacing
+  /// parameters are also specified, the specific parameters will be used.
+  Typography applyWith({
+    double? blackLetterSpacing,
+    double? whiteLetterSpacing,
+    double? englishLikeLetterSpacing,
+    double? denseLetterSpacing,
+    double? tallLetterSpacing,
+    double? letterSpacing,
+  }) {
+    blackLetterSpacing ??= letterSpacing;
+    whiteLetterSpacing ??= letterSpacing;
+    englishLikeLetterSpacing ??= letterSpacing;
+    denseLetterSpacing ??= letterSpacing;
+    tallLetterSpacing ??= letterSpacing;
+
+    return Typography(
+      black: black.apply(letterSpacing: blackLetterSpacing),
+      white: white.apply(letterSpacing: whiteLetterSpacing),
+      englishLike: englishLike.apply(letterSpacing: englishLikeLetterSpacing),
+      dense: dense.apply(letterSpacing: denseLetterSpacing),
+      tall: tall.apply(letterSpacing: tallLetterSpacing),
+    );
+  }
+
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) {

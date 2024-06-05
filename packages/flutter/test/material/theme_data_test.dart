@@ -1469,6 +1469,214 @@ void main() {
       ));
     }
   });
+
+   test('Theme data control test', () {
+    final ThemeData dark = ThemeData.dark();
+
+    expect(dark, hasOneLineDescription);
+    expect(dark, equals(dark.copyWith()));
+    expect(dark.hashCode, equals(dark.copyWith().hashCode));
+
+    final ThemeData light = ThemeData.light();
+    final ThemeData dawn = ThemeData.lerp(dark, light, 0.25);
+
+    expect(dawn.brightness, Brightness.dark);
+    expect(dawn.primaryColor, Color.lerp(dark.primaryColor, light.primaryColor, 0.25));
+  });
+
+  testWidgets('ThemeData.apply applies letterSpacing to all TextStyles in Typografies englishLike and tall', (WidgetTester tester) async {
+    final Typography typography = Typography.material2018();
+
+    final ThemeData theme = ThemeData(
+      textTheme: typography.englishLike.apply(
+        letterSpacing: 1.5,
+      ),
+      primaryTextTheme: typography.tall.apply(
+        letterSpacing: 1.2,
+      ),
+    );
+
+    final TextTheme textTheme = theme.textTheme;
+    final TextTheme primaryTextTheme = theme.primaryTextTheme;
+
+    expect(textTheme.displayLarge!.letterSpacing, 1.5);
+    expect(textTheme.displayMedium!.letterSpacing, 1.5);
+    expect(textTheme.displaySmall!.letterSpacing, 1.5);
+    expect(textTheme.headlineLarge!.letterSpacing, 1.5);
+    expect(textTheme.headlineMedium!.letterSpacing, 1.5);
+    expect(textTheme.headlineSmall!.letterSpacing, 1.5);
+    expect(textTheme.titleLarge!.letterSpacing, 1.5);
+    expect(textTheme.titleMedium!.letterSpacing, 1.5);
+    expect(textTheme.titleSmall!.letterSpacing, 1.5);
+    expect(textTheme.bodyLarge!.letterSpacing, 1.5);
+    expect(textTheme.bodyMedium!.letterSpacing, 1.5);
+    expect(textTheme.bodySmall!.letterSpacing, 1.5);
+    expect(textTheme.labelLarge!.letterSpacing, 1.5);
+    expect(textTheme.labelMedium!.letterSpacing, 1.5);
+    expect(textTheme.labelSmall!.letterSpacing, 1.5);
+
+    expect(primaryTextTheme.displayLarge!.letterSpacing, 1.2);
+    expect(primaryTextTheme.displayMedium!.letterSpacing, 1.2);
+    expect(primaryTextTheme.displaySmall!.letterSpacing, 1.2);
+    expect(primaryTextTheme.headlineLarge!.letterSpacing, 1.2);
+    expect(primaryTextTheme.headlineMedium!.letterSpacing, 1.2);
+    expect(primaryTextTheme.headlineSmall!.letterSpacing, 1.2);
+    expect(primaryTextTheme.titleLarge!.letterSpacing, 1.2);
+    expect(primaryTextTheme.titleMedium!.letterSpacing, 1.2);
+    expect(primaryTextTheme.titleSmall!.letterSpacing, 1.2);
+    expect(primaryTextTheme.bodyLarge!.letterSpacing, 1.2);
+    expect(primaryTextTheme.bodyMedium!.letterSpacing, 1.2);
+    expect(primaryTextTheme.bodySmall!.letterSpacing, 1.2);
+    expect(primaryTextTheme.labelLarge!.letterSpacing, 1.2);
+    expect(primaryTextTheme.labelMedium!.letterSpacing, 1.2);
+    expect(primaryTextTheme.labelSmall!.letterSpacing, 1.2);
+  });
+
+  testWidgets('ThemeData.apply applies letterSpacing to specific TextStyle in Typografies englishLike and tall', (WidgetTester tester) async {
+    final Typography typography = Typography.material2018();
+    final ThemeData theme = ThemeData(
+      textTheme: typography.englishLike.copyWith(
+        bodyLarge: typography.englishLike.bodyLarge!.copyWith(
+          letterSpacing: 1.5,
+        ),
+      ),
+      primaryTextTheme: typography.tall.copyWith(
+        bodyLarge: typography.tall.bodyLarge!.copyWith(
+          letterSpacing: 1.2,
+        ),
+      ),
+    );
+
+    final TextTheme textTheme = theme.textTheme;
+    final TextTheme primaryTextTheme = theme.primaryTextTheme;
+
+    expect(textTheme.bodyLarge!.letterSpacing, 1.5);
+    expect(textTheme.bodyMedium!.letterSpacing, isNot(1.5));
+    expect(textTheme.bodySmall!.letterSpacing, isNot(1.5));
+
+    expect(primaryTextTheme.bodyLarge!.letterSpacing, 1.2);
+    expect(primaryTextTheme.bodyMedium!.letterSpacing, isNot(1.5));
+    expect(primaryTextTheme.bodySmall!.letterSpacing, isNot(1.5));
+  });
+
+  testWidgets('ThemeData.apply applies letterSpacing directly into Typography', (WidgetTester tester) async {
+    final Typography typography = Typography.material2018();
+    final List<TextTheme> styleNames = <TextTheme>[
+      typography.englishLike,
+      typography.dense,
+      typography.tall,
+      typography.black,
+      typography.white,
+    ];
+    final ThemeData theme = ThemeData(
+      typography: typography.applyWith(letterSpacing: 1.5),
+    );
+
+    final TextTheme textTheme = theme.textTheme;
+    final TextTheme primaryTextTheme = theme.primaryTextTheme;
+
+    for (int i = 0; i < styleNames.length; i++) {
+      expect(textTheme.displayLarge!.letterSpacing, 1.5);
+      expect(textTheme.displayMedium!.letterSpacing, 1.5);
+      expect(textTheme.displaySmall!.letterSpacing, 1.5);
+      expect(textTheme.headlineLarge!.letterSpacing, 1.5);
+      expect(textTheme.headlineMedium!.letterSpacing, 1.5);
+      expect(textTheme.headlineSmall!.letterSpacing, 1.5);
+      expect(textTheme.titleLarge!.letterSpacing, 1.5);
+      expect(textTheme.titleMedium!.letterSpacing, 1.5);
+      expect(textTheme.titleSmall!.letterSpacing, 1.5);
+      expect(textTheme.bodyLarge!.letterSpacing, 1.5);
+      expect(textTheme.bodyMedium!.letterSpacing, 1.5);
+      expect(textTheme.bodySmall!.letterSpacing, 1.5);
+      expect(textTheme.labelLarge!.letterSpacing, 1.5);
+      expect(textTheme.labelMedium!.letterSpacing, 1.5);
+      expect(textTheme.labelSmall!.letterSpacing, 1.5);
+
+      expect(primaryTextTheme.displayLarge!.letterSpacing, 1.5);
+      expect(primaryTextTheme.displayMedium!.letterSpacing, 1.5);
+      expect(primaryTextTheme.displaySmall!.letterSpacing, 1.5);
+      expect(primaryTextTheme.headlineLarge!.letterSpacing, 1.5);
+      expect(primaryTextTheme.headlineMedium!.letterSpacing, 1.5);
+      expect(primaryTextTheme.headlineSmall!.letterSpacing, 1.5);
+      expect(primaryTextTheme.titleLarge!.letterSpacing, 1.5);
+      expect(primaryTextTheme.titleMedium!.letterSpacing, 1.5);
+      expect(primaryTextTheme.titleSmall!.letterSpacing, 1.5);
+      expect(primaryTextTheme.bodyLarge!.letterSpacing, 1.5);
+      expect(primaryTextTheme.bodyMedium!.letterSpacing, 1.5);
+      expect(primaryTextTheme.bodySmall!.letterSpacing, 1.5);
+      expect(primaryTextTheme.labelLarge!.letterSpacing, 1.5);
+      expect(primaryTextTheme.labelMedium!.letterSpacing, 1.5);
+      expect(primaryTextTheme.labelSmall!.letterSpacing, 1.5);
+    }
+  });
+
+  testWidgets('ThemeData.apply applies letterSpacing directly into Typography', (WidgetTester tester) async {
+    final Typography typography = Typography.material2018();
+    final List<TextTheme> styleNames = <TextTheme>[
+      typography.englishLike,
+      typography.dense,
+      typography.tall,
+      typography.black,
+      typography.white,
+    ];
+
+    final List<double> letterSpacings = <double>[1.1, 1.2, 1.3, 1.4, 1.5];
+    final ThemeData theme = ThemeData(
+      typography: typography.applyWith(
+        letterSpacing: 1.0,
+        blackLetterSpacing: letterSpacings[0],
+        denseLetterSpacing: letterSpacings[1],
+        englishLikeLetterSpacing: letterSpacings[2],
+        tallLetterSpacing: letterSpacings[3],
+        whiteLetterSpacing: letterSpacings[4],
+      ),
+    );
+
+    final List<TextTheme> themes = <TextTheme>[
+      theme.typography.black,
+      theme.typography.dense,
+      theme.typography.englishLike,
+      theme.typography.tall,
+      theme.typography.white,
+    ];
+
+    for (int i = 0; i < styleNames.length; i++) {
+      final TextTheme textTheme = themes[i];
+      final TextTheme primaryTextTheme = themes[i];
+
+      expect(textTheme.displayLarge!.letterSpacing, letterSpacings[i]);
+      expect(textTheme.displayMedium!.letterSpacing, letterSpacings[i]);
+      expect(textTheme.displaySmall!.letterSpacing, letterSpacings[i]);
+      expect(textTheme.headlineLarge!.letterSpacing, letterSpacings[i]);
+      expect(textTheme.headlineMedium!.letterSpacing, letterSpacings[i]);
+      expect(textTheme.headlineSmall!.letterSpacing, letterSpacings[i]);
+      expect(textTheme.titleLarge!.letterSpacing, letterSpacings[i]);
+      expect(textTheme.titleMedium!.letterSpacing, letterSpacings[i]);
+      expect(textTheme.titleSmall!.letterSpacing, letterSpacings[i]);
+      expect(textTheme.bodyLarge!.letterSpacing, letterSpacings[i]);
+      expect(textTheme.bodyMedium!.letterSpacing, letterSpacings[i]);
+      expect(textTheme.bodySmall!.letterSpacing, letterSpacings[i]);
+      expect(textTheme.labelLarge!.letterSpacing, letterSpacings[i]);
+      expect(textTheme.labelMedium!.letterSpacing, letterSpacings[i]);
+      expect(textTheme.labelSmall!.letterSpacing, letterSpacings[i]);
+
+      expect(primaryTextTheme.displayLarge!.letterSpacing, letterSpacings[i]);
+      expect(primaryTextTheme.displayMedium!.letterSpacing, letterSpacings[i]);
+      expect(primaryTextTheme.displaySmall!.letterSpacing, letterSpacings[i]);
+      expect(primaryTextTheme.headlineLarge!.letterSpacing, letterSpacings[i]);
+      expect(primaryTextTheme.headlineMedium!.letterSpacing, letterSpacings[i]);
+      expect(primaryTextTheme.headlineSmall!.letterSpacing, letterSpacings[i]);
+      expect(primaryTextTheme.titleLarge!.letterSpacing, letterSpacings[i]);
+      expect(primaryTextTheme.titleMedium!.letterSpacing, letterSpacings[i]);
+      expect(primaryTextTheme.titleSmall!.letterSpacing, letterSpacings[i]);
+      expect(primaryTextTheme.bodyLarge!.letterSpacing, letterSpacings[i]);
+      expect(primaryTextTheme.bodyMedium!.letterSpacing, letterSpacings[i]);
+      expect(primaryTextTheme.bodySmall!.letterSpacing, letterSpacings[i]);
+      expect(primaryTextTheme.labelLarge!.letterSpacing, letterSpacings[i]);
+      expect(primaryTextTheme.labelMedium!.letterSpacing, letterSpacings[i]);
+      expect(primaryTextTheme.labelSmall!.letterSpacing, letterSpacings[i]);
+    }
+  });
 }
 
 @immutable

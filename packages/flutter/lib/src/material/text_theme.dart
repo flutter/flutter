@@ -369,6 +369,7 @@ class TextTheme with Diagnosticable {
     TextDecoration? decoration,
     Color? decorationColor,
     TextDecorationStyle? decorationStyle,
+    double? letterSpacing,
   }) {
     return TextTheme(
       displayLarge: displayLarge?.apply(
@@ -381,6 +382,7 @@ class TextTheme with Diagnosticable {
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
         package: package,
+        letterSpacing: letterSpacing,
       ),
       displayMedium: displayMedium?.apply(
         color: displayColor,
@@ -392,6 +394,7 @@ class TextTheme with Diagnosticable {
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
         package: package,
+        letterSpacing: letterSpacing,
       ),
       displaySmall: displaySmall?.apply(
         color: displayColor,
@@ -403,6 +406,7 @@ class TextTheme with Diagnosticable {
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
         package: package,
+        letterSpacing: letterSpacing,
       ),
       headlineLarge: headlineLarge?.apply(
         color: displayColor,
@@ -414,6 +418,7 @@ class TextTheme with Diagnosticable {
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
         package: package,
+        letterSpacing: letterSpacing,
       ),
       headlineMedium: headlineMedium?.apply(
         color: displayColor,
@@ -425,6 +430,7 @@ class TextTheme with Diagnosticable {
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
         package: package,
+        letterSpacing: letterSpacing,
       ),
       headlineSmall: headlineSmall?.apply(
         color: bodyColor,
@@ -436,6 +442,7 @@ class TextTheme with Diagnosticable {
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
         package: package,
+        letterSpacing: letterSpacing,
       ),
       titleLarge: titleLarge?.apply(
         color: bodyColor,
@@ -447,6 +454,7 @@ class TextTheme with Diagnosticable {
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
         package: package,
+        letterSpacing: letterSpacing,
       ),
       titleMedium: titleMedium?.apply(
         color: bodyColor,
@@ -458,6 +466,7 @@ class TextTheme with Diagnosticable {
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
         package: package,
+        letterSpacing: letterSpacing,
       ),
       titleSmall: titleSmall?.apply(
         color: bodyColor,
@@ -469,6 +478,7 @@ class TextTheme with Diagnosticable {
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
         package: package,
+        letterSpacing: letterSpacing,
       ),
       bodyLarge: bodyLarge?.apply(
         color: bodyColor,
@@ -480,6 +490,7 @@ class TextTheme with Diagnosticable {
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
         package: package,
+        letterSpacing: letterSpacing,
       ),
       bodyMedium: bodyMedium?.apply(
         color: bodyColor,
@@ -491,6 +502,7 @@ class TextTheme with Diagnosticable {
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
         package: package,
+        letterSpacing: letterSpacing,
       ),
       bodySmall: bodySmall?.apply(
         color: displayColor,
@@ -502,6 +514,7 @@ class TextTheme with Diagnosticable {
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
         package: package,
+        letterSpacing: letterSpacing,
       ),
       labelLarge: labelLarge?.apply(
         color: bodyColor,
@@ -513,6 +526,7 @@ class TextTheme with Diagnosticable {
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
         package: package,
+        letterSpacing: letterSpacing,
       ),
       labelMedium: labelMedium?.apply(
         color: bodyColor,
@@ -524,6 +538,7 @@ class TextTheme with Diagnosticable {
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
         package: package,
+        letterSpacing: letterSpacing,
       ),
       labelSmall: labelSmall?.apply(
         color: bodyColor,
@@ -535,6 +550,7 @@ class TextTheme with Diagnosticable {
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
         package: package,
+        letterSpacing: letterSpacing,
       ),
     );
   }
