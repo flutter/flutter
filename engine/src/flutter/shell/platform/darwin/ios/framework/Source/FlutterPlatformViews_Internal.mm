@@ -236,12 +236,12 @@ static BOOL _preparedOnce = NO;
 // information about screen scale.
 @property(nonatomic) CATransform3D reverseScreenScale;
 
-- (void)addTransformedPath:(CGPathRef)path matrix:(CATransform3D)matrix;
+- (fml::CFRef<CGPathRef>)getTransformedPath:(CGPathRef)path matrix:(CATransform3D)matrix;
 
 @end
 
 @implementation FlutterClippingMaskView {
-  CGMutablePathRef pathSoFar_;
+  std::vector<fml::CFRef<CGPathRef>> paths_;
 }
 
 - (instancetype)initWithFrame:(CGRect)frame {
@@ -252,29 +252,13 @@ static BOOL _preparedOnce = NO;
   if (self = [super initWithFrame:frame]) {
     self.backgroundColor = UIColor.clearColor;
     _reverseScreenScale = CATransform3DMakeScale(1 / screenScale, 1 / screenScale, 1);
-    pathSoFar_ = CGPathCreateMutable();
   }
   return self;
 }
 
-+ (Class)layerClass {
-  return [CAShapeLayer class];
-}
-
-- (CAShapeLayer*)shapeLayer {
-  return (CAShapeLayer*)self.layer;
-}
-
 - (void)reset {
-  CGPathRelease(pathSoFar_);
-  pathSoFar_ = CGPathCreateMutable();
-  [self shapeLayer].path = nil;
+  paths_.clear();
   [self setNeedsDisplay];
-}
-
-- (void)dealloc {
-  CGPathRelease(pathSoFar_);
-  [super dealloc];
 }
 
 // In some scenarios, when we add this view as a maskView of the ChildClippingView, iOS added
@@ -286,13 +270,28 @@ static BOOL _preparedOnce = NO;
   return NO;
 }
 
+- (void)drawRect:(CGRect)rect {
+  CGContextRef context = UIGraphicsGetCurrentContext();
+  CGContextSaveGState(context);
+
+  // For mask view, only the alpha channel is used.
+  CGContextSetAlpha(context, 1);
+
+  for (size_t i = 0; i < paths_.size(); i++) {
+    CGContextAddPath(context, paths_.at(i));
+    CGContextClip(context);
+  }
+  CGContextFillRect(context, rect);
+  CGContextRestoreGState(context);
+}
+
 - (void)clipRect:(const SkRect&)clipSkRect matrix:(const SkMatrix&)matrix {
   CGRect clipRect = flutter::GetCGRectFromSkRect(clipSkRect);
   CGPathRef path = CGPathCreateWithRect(clipRect, nil);
   // The `matrix` is based on the physical pixels, convert it to UIKit points.
   CATransform3D matrixInPoints =
       CATransform3DConcat(flutter::GetCATransform3DFromSkMatrix(matrix), _reverseScreenScale);
-  [self addTransformedPath:path matrix:matrixInPoints];
+  paths_.push_back([self getTransformedPath:path matrix:matrixInPoints]);
 }
 
 - (void)clipRRect:(const SkRRect&)clipSkRRect matrix:(const SkMatrix&)matrix {
@@ -361,7 +360,7 @@ static BOOL _preparedOnce = NO;
   // TODO(cyanglaz): iOS does not seem to support hard edge on CAShapeLayer. It clearly stated that
   // the CAShaperLayer will be drawn antialiased. Need to figure out a way to do the hard edge
   // clipping on iOS.
-  [self addTransformedPath:pathRef matrix:matrixInPoints];
+  paths_.push_back([self getTransformedPath:pathRef matrix:matrixInPoints]);
 }
 
 - (void)clipPath:(const SkPath&)path matrix:(const SkMatrix&)matrix {
@@ -426,15 +425,15 @@ static BOOL _preparedOnce = NO;
   // The `matrix` is based on the physical pixels, convert it to UIKit points.
   CATransform3D matrixInPoints =
       CATransform3DConcat(flutter::GetCATransform3DFromSkMatrix(matrix), _reverseScreenScale);
-  [self addTransformedPath:pathRef matrix:matrixInPoints];
+  paths_.push_back([self getTransformedPath:pathRef matrix:matrixInPoints]);
 }
 
-- (void)addTransformedPath:(CGPathRef)path matrix:(CATransform3D)matrix {
+- (fml::CFRef<CGPathRef>)getTransformedPath:(CGPathRef)path matrix:(CATransform3D)matrix {
   CGAffineTransform affine =
       CGAffineTransformMake(matrix.m11, matrix.m12, matrix.m21, matrix.m22, matrix.m41, matrix.m42);
-  CGPathAddPath(pathSoFar_, &affine, path);
-  [self shapeLayer].path = pathSoFar_;
+  CGPathRef transformedPath = CGPathCreateCopyByTransformingPath(path, &affine);
   CGPathRelease(path);
+  return fml::CFRef<CGPathRef>(transformedPath);
 }
 
 @end
