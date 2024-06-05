@@ -671,6 +671,14 @@ class _FocusState extends State<Focus> {
     Widget child = widget.child;
     if (widget.includeSemantics) {
       child = Semantics(
+        // Automatically request the focus for a focusable widget when it
+        // receives an input focus action from the semantics. Nothing is needed
+        // for losing the focus because if focus is lost, that means another
+        // node will gain focus and take focus from this widget.
+        onFocus:
+          _couldRequestFocus
+          ? focusNode.requestFocus
+          : null,
         focusable: _couldRequestFocus,
         focused: _hadPrimaryFocus,
         child: widget.child,
@@ -757,6 +765,9 @@ class FocusScope extends Focus {
     super.onKeyEvent,
     super.onKey,
     super.debugLabel,
+    super.includeSemantics,
+    super.descendantsAreFocusable,
+    super.descendantsAreTraversable,
   })  : super(
           focusNode: node,
         );
@@ -770,6 +781,7 @@ class FocusScope extends Focus {
     required FocusScopeNode focusScopeNode,
     FocusNode? parentNode,
     bool autofocus,
+    bool includeSemantics,
     ValueChanged<bool>? onFocusChange,
   })  = _FocusScopeWithExternalFocusNode;
 
@@ -798,6 +810,7 @@ class _FocusScopeWithExternalFocusNode extends FocusScope {
     required FocusScopeNode focusScopeNode,
     super.parentNode,
     super.autofocus,
+    super.includeSemantics,
     super.onFocusChange,
   }) : super(
     node: focusScopeNode,
@@ -834,13 +847,17 @@ class _FocusScopeState extends _FocusState {
   @override
   Widget build(BuildContext context) {
     _focusAttachment!.reparent(parent: widget.parentNode);
-    return Semantics(
-      explicitChildNodes: true,
-      child: _FocusInheritedScope(
-        node: focusNode,
-        child: widget.child,
-      ),
+    Widget result = _FocusInheritedScope(
+      node: focusNode,
+      child: widget.child,
     );
+    if (widget.includeSemantics) {
+      result = Semantics(
+        explicitChildNodes: true,
+        child: result,
+      );
+    }
+    return result;
   }
 }
 

@@ -14,11 +14,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import 'package:vector_math/vector_math_64.dart' show Vector3;
 
+import '../widgets/feedback_tester.dart';
 import '../widgets/semantics_tester.dart';
-import 'feedback_tester.dart';
 
 void main() {
   testWidgets('BottomNavigationBar callback test', (WidgetTester tester) async {
@@ -2112,6 +2111,7 @@ void main() {
         isFocusable: true,
         isSelected: true,
         hasTapAction: true,
+        hasFocusAction: true,
       ),
     );
     expect(
@@ -2121,6 +2121,7 @@ void main() {
         textDirection: TextDirection.ltr,
         isFocusable: true,
         hasTapAction: true,
+        hasFocusAction: true,
       ),
     );
     expect(
@@ -2130,6 +2131,7 @@ void main() {
         textDirection: TextDirection.ltr,
         isFocusable: true,
         hasTapAction: true,
+        hasFocusAction: true,
       ),
     );
   });
@@ -2166,6 +2168,7 @@ void main() {
         isFocusable: true,
         isSelected: true,
         hasTapAction: true,
+        hasFocusAction: true,
       ),
     );
     expect(
@@ -2175,6 +2178,7 @@ void main() {
         textDirection: TextDirection.ltr,
         isFocusable: true,
         hasTapAction: true,
+        hasFocusAction: true,
       ),
     );
     expect(
@@ -2184,14 +2188,12 @@ void main() {
         textDirection: TextDirection.ltr,
         isFocusable: true,
         hasTapAction: true,
+        hasFocusAction: true,
       ),
     );
   });
 
-  testWidgets('BottomNavigationBar handles items.length changes',
-    // TODO(polina-c): remove when fixed https://github.com/flutter/flutter/issues/145600 [leak-tracking-opt-in]
-    experimentalLeakTesting: LeakTesting.settings.withTracked(classes: const <String>['CurvedAnimation']),
-    (WidgetTester tester) async {
+  testWidgets('BottomNavigationBar handles items.length changes', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/10322
 
     Widget buildFrame(int itemCount) {
@@ -2326,10 +2328,7 @@ void main() {
       );
     }
     for (int pump = 1; pump < 9; pump++) {
-      testWidgets('pump $pump',
-        // TODO(polina-c): remove when fixed https://github.com/flutter/flutter/issues/145600 [leak-tracking-opt-in]
-        experimentalLeakTesting: LeakTesting.settings.withTracked(classes: const <String>['CurvedAnimation']).withCreationStackTrace(),
-        (WidgetTester tester) async {
+      testWidgets('pump $pump', (WidgetTester tester) async {
         await tester.pumpWidget(runTest());
         await tester.tap(find.text('Green'));
 
@@ -2522,6 +2521,7 @@ void main() {
         isFocusable: true,
         isSelected: true,
         hasTapAction: true,
+        hasFocusAction: true,
       ),
     );
     expect(
@@ -2531,6 +2531,7 @@ void main() {
         textDirection: TextDirection.ltr,
         isFocusable: true,
         hasTapAction: true,
+        hasFocusAction: true,
       ),
     );
   });
@@ -2565,6 +2566,7 @@ void main() {
         isFocusable: true,
         isSelected: true,
         hasTapAction: true,
+        hasFocusAction: true,
       ),
     );
     expect(
@@ -2574,6 +2576,7 @@ void main() {
         textDirection: TextDirection.ltr,
         isFocusable: true,
         hasTapAction: true,
+        hasFocusAction: true,
       ),
     );
   });
@@ -2754,13 +2757,13 @@ void main() {
                                 SemanticsFlag.isSelected,
                                 SemanticsFlag.isFocusable,
                               ],
-                              actions: <SemanticsAction>[SemanticsAction.tap],
+                              actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                               label: 'A\nTab 1 of 2',
                               textDirection: TextDirection.ltr,
                             ),
                             TestSemantics(
                               flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
-                              actions: <SemanticsAction>[SemanticsAction.tap],
+                              actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                               label: 'B\nTab 2 of 2',
                               textDirection: TextDirection.ltr,
                             ),

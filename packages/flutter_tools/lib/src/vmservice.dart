@@ -574,10 +574,30 @@ class FlutterVmService {
     _logger.printTrace('Running $main in view $viewId...');
     try {
       await service.streamListen(vm_service.EventStreams.kIsolate);
-    } on vm_service.RPCError {
+    } on vm_service.RPCError catch (e) {
+      _logger.printTrace(
+        'Unable to listen to VM service stream "${vm_service.EventStreams.kIsolate}".\n'
+        'Error: $e',
+      );
       // Do nothing, since the tool is already subscribed.
     }
+
+    // TODO(andrewkolos): this is to assist in troubleshooting https://github.com/flutter/flutter/issues/146879
+    // and should be reverted once this issue is resolved.
+    unawaited(service.onReceive.firstWhere((String message) {
+      _logger.printTrace('runInView VM service onReceive listener received "$message"');
+      final dynamic messageAsJson = jsonDecode(message);
+      // ignore: avoid_dynamic_calls -- Temporary code.
+      final dynamic messageKind = messageAsJson['params']?['event']?['kind'];
+      if (messageKind == 'IsolateRunnable') {
+        _logger.printTrace('Received IsolateRunnable event from onReceive.');
+        return true;
+      }
+      return false;
+    }));
+
     final Future<void> onRunnable = service.onIsolateEvent.firstWhere((vm_service.Event event) {
+      _logger.printTrace('runInView VM service onIsolateEvent listener received $event');
       return event.kind == vm_service.EventKind.kIsolateRunnable;
     });
     _logger.printTrace('Calling $kRunInViewMethod...');
@@ -911,11 +931,9 @@ class FlutterVmService {
     Duration delay = const Duration(milliseconds: 50),
   }) async {
     while (true) {
-      _logger.printTrace('Calling _flutter.listViews...');
       final vm_service.Response? response = await callMethodWrapper(
         kListViewsMethod,
       );
-      _logger.printTrace('Response from _flutter.listViews: ${json.encode(response?.json)}');
       if (response == null) {
         // The service may have disappeared mid-request.
         // Return an empty list now, and let the shutdown logic elsewhere deal
