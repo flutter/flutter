@@ -492,7 +492,7 @@ void main() {
     );
   });
 
-    testWidgets('Radio can set inactive/active/fill colors', (WidgetTester tester) async {
+  testWidgets('Radio can set inactive/active/fill colors', (WidgetTester tester) async {
     const Color inactiveBorderColor = Color(0xff999999);
     const Color activeColor = Color(0x0000000A);
     const Color fillColor = Color(0x0000000B);
