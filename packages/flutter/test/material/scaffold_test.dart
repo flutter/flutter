@@ -3396,7 +3396,7 @@ void main() {
     expect(find.byType(FloatingActionButton), findsNothing);
   });
 
-  testWidgets('Scaffold background color desults to ColorScheme.surface', (WidgetTester tester) async {
+  testWidgets('scaffoldBackgroundColor defaults to ColorScheme.surface', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
