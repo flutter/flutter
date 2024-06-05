@@ -631,7 +631,6 @@ void main() {
           ],
           actions: <SemanticsAction>[
             SemanticsAction.tap,
-            SemanticsAction.focus,
           ],
         ),
       ],
@@ -700,7 +699,6 @@ void main() {
                       tooltip: 'Add Photo',
                       actions: <SemanticsAction>[
                         SemanticsAction.tap,
-                        SemanticsAction.focus,
                       ],
                       flags: <SemanticsFlag>[
                         SemanticsFlag.hasEnabledState,
@@ -924,7 +922,6 @@ void main() {
       tester.getSemantics(find.byType(FloatingActionButton)),
       matchesSemantics(
         hasTapAction: true,
-        hasFocusAction: true,
         hasEnabledState: true,
         isButton: true,
         isEnabled: true,

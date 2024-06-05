@@ -160,7 +160,6 @@ void main() {
             ],
             actions: <SemanticsAction>[
               SemanticsAction.tap,
-              SemanticsAction.focus,
             ],
             label: '+',
             textDirection: TextDirection.ltr,
