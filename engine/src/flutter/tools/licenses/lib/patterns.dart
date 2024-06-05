@@ -61,6 +61,11 @@ final RegExp copyrightMentionOkPattern = RegExp(
      r'|const char inflate_copyright\[\] =\n *" inflate 1\.2\.11 Copyright 1995-2017 Mark Adler ";' // found in some freetype files
      r'|" Copyright \(C\) 2016 and later: Unicode, Inc\. and others\. License & terms of use: http://www\.unicode\.org/copyright\.html "'
      r'|"\* / \\\\& ⁊ # % † ‡ ‧ ° © ® ™]"'
+     // It is very likely for copyright-like chars to appear in Unicode
+     // data files in contexts unrelated to copyright.
+     // Imagine that, who would have thought!
+     //                      v--- this one.
+     r'|"\\\\& ⁊ # % † ‡ ‧ ° © ® ™]"'
      r'|" \*   Copyright \(C\) International Business Machines\n"'
      r'|fprintf\(out, "// Copyright \(C\) 2016 and later: Unicode, Inc\. and others\.\\n"\);'
      r'|fprintf\(out, "// License & terms of use: http://www\.unicode\.org/copyright\.html\\n\\n"\);'
