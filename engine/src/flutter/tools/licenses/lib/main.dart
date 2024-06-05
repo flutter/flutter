@@ -461,14 +461,14 @@ class _RepositoryIcuLicenseFile extends _RepositorySingleLicenseFile {
   _RepositoryIcuLicenseFile._(_RepositoryDirectory parent, fs.TextFile io, this.template, License license)
     : super(parent, io, license);
 
+  // Every paragraph of the license is mentioned. All newlines are disregarded [\n+].
   static final RegExp _pattern = RegExp(
-    r'^(UNICODE, INC\. LICENSE AGREEMENT - DATA FILES AND SOFTWARE\n+' // group
-    r'See Terms of Use (?:.|\n)+?'
-    r'COPYRIGHT AND PERMISSION NOTICE\n+'
-    r'Copyright.+\n'
-    r'Distributed under the Terms of Use in .+\n+'
+    // Starting from ICU 74.1 this has been changed to Unicode License V3.
+    r'^(UNICODE LICENSE V3\n+' // group
+    r'COPYRIGHT AND PERMISSION NOTICE(?:.|\n)+?'
     r')(Permission is hereby granted(?:.|\n)+?)' // template group
     r'\n+-+\n+'
+    // From here onwards should be the same as before 74.1
     r'(Third-Party Software Licenses\n+' // group
     r'This section contains third-party software notices and/or additional\n'
     r'terms for licensed third-party software components included within ICU\n'
