@@ -100,7 +100,8 @@ Fortunately this process is easy and mostly automated. Here's how it works:
 1. Edit [`.engine-release.verison`](../../.engine-release.version) to the new
    release version (e.g. `3.21`).
 1. Run all the tests, generating new golden files.
-1. Bulk triage all of the images as positive using the web UI.
+1. Bulk triage all of the images as positive using the web UI (ensure you are
+   logged in, or triaging will fail silently).
 
    ![Screenshot](https://github.com/flutter/flutter/assets/168174/a327ffc0-95b3-4d3a-9d36-052e0607a1e5)
 
