@@ -5,7 +5,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   test('copyWith, ==, hashCode basics', () {
@@ -146,10 +145,7 @@ void main() {
     expect(_indicatorDecoration(tester)?.shape, indicatorShape);
   });
 
-  testWidgets('NavigationRail values take priority over NavigationRailThemeData values when both properties are specified',
-   // TODO(polina-c): remove when fixed https://github.com/flutter/flutter/issues/145600 [leak-tracking-opt-in]
-    experimentalLeakTesting: LeakTesting.settings.withTracked(classes: const <String>['CurvedAnimation']),
-   (WidgetTester tester) async {
+  testWidgets('NavigationRail values take priority over NavigationRailThemeData values when both properties are specified', (WidgetTester tester) async {
     const Color backgroundColor = Color(0x00000001);
     const double elevation = 7.0;
     const double selectedIconSize = 25.0;

@@ -4470,6 +4470,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     if (_properties.onDidLoseAccessibilityFocus != null) {
       config.onDidLoseAccessibilityFocus = _performDidLoseAccessibilityFocus;
     }
+    if (_properties.onFocus != null) {
+      config.onFocus = _performFocus;
+    }
     if (_properties.customSemanticsActions != null) {
       config.customSemanticsActions = _properties.customSemanticsActions!;
     }
@@ -4553,6 +4556,10 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
 
   void _performDidLoseAccessibilityFocus() {
     _properties.onDidLoseAccessibilityFocus?.call();
+  }
+
+  void _performFocus() {
+    _properties.onFocus?.call();
   }
 }
 
