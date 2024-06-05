@@ -98,7 +98,6 @@ class FlutterExtension {
 
         return flutterVersionName
     }
-
 }
 
 // This buildscript block supplies dependencies for this file's own import
@@ -340,10 +339,27 @@ class FlutterPlugin implements Plugin<Project> {
                         "packages", "flutter_tools", "gradle", "src", "main", "kotlin",
                         "dependency_version_checker.gradle.kts")
                 project.apply from: dependencyCheckerPluginPath
-            } catch (Exception ignored) {
+            } catch (Exception e) {
+                // If the exception was thrown by us in the dependency version checker plugin then
+                // re-throw it.
+                Exception outer = e.getCause()
+                if (outer != null) {
+                    Exception inner = outer.getCause()
+                    if (inner != null) {
+                        Exception unwrapped = inner.getCause()
+                        if (unwrapped != null) {
+                            if (unwrapped instanceof DependencyValidationException) {
+                                throw e
+                            }
+                        }
+                    }
+                }
+
+                // Otherwise, dependency version checking has failed. Log and continue
+                // the build.
                 project.logger.error("Warning: Flutter was unable to detect project Gradle, Java, " +
                         "AGP, and KGP versions. Skipping dependency version checking. Error was: "
-                        + ignored)
+                        + e)
             }
         }
 
@@ -1813,4 +1829,16 @@ class FlutterTask extends BaseFlutterTask {
         buildBundle()
     }
 
+}
+
+// Custom error for when the dependency_version_checker.kts script finds a dependency out of
+// the defined support range.
+class DependencyValidationException extends Exception {
+    public DependencyValidationException(String errorMessage) {
+        super(errorMessage);
+    }
+
+    public DependencyValidationException(String errorMessage, Throwable cause) {
+        super(errorMessage, cause);
+    }
 }
