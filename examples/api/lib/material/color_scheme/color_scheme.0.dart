@@ -10,7 +10,6 @@ const Widget divider = SizedBox(height: 10);
 
 void main() => runApp(const ColorSchemeExample());
 
-
 class ColorSchemeExample extends StatefulWidget {
   const ColorSchemeExample({super.key});
 
