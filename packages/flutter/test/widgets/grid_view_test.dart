@@ -898,4 +898,51 @@ void main() {
     expect(controller.position.maxScrollExtent, 472.0);
     expect(controller.position.pixels, 472.0);
   });
+  
+  testWidgets('SliverGridDelegate mainAxisExtent add assert', (WidgetTester tester) async {
+    Widget buildGridView(SliverGridDelegate delegate) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: GridView.builder(
+          gridDelegate: delegate,
+          itemBuilder: (BuildContext context, int index) {
+            return Container(
+              height: 50,
+              alignment: Alignment.center,
+              child: Text('$index'),
+            );
+          },
+          itemCount: 50,
+        ),
+      );
+    }
+
+    expect(
+      () => tester.pumpWidget(buildGridView(SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 3,
+        mainAxisSpacing: 8,
+        crossAxisSpacing: 8,
+        mainAxisExtent: -100,
+      ))),
+      throwsA(isAssertionError.having(
+        (AssertionError e) => e.toString(),
+        '.toString()',
+        contains("'mainAxisExtent == null || mainAxisExtent >= 0': is not true."),
+      )),
+    );
+
+    expect(
+      () => tester.pumpWidget(buildGridView(SliverGridDelegateWithMaxCrossAxisExtent(
+        maxCrossAxisExtent: 100,
+        mainAxisSpacing: 8,
+        crossAxisSpacing: 8,
+        mainAxisExtent: -100,
+      ))),
+      throwsA(isAssertionError.having(
+        (AssertionError e) => e.toString(),
+        '.toString()',
+        contains("'mainAxisExtent == null || mainAxisExtent >= 0': is not true."),
+      )),
+    );
+  });
 }
