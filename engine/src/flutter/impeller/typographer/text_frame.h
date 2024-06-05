@@ -20,16 +20,14 @@ class TextFrame {
  public:
   TextFrame();
 
-  TextFrame(std::vector<TextRun>& runs,
-            Rect bounds,
-            bool has_color,
-            Color color);
+  TextFrame(std::vector<TextRun>& runs, Rect bounds, bool has_color);
 
   ~TextFrame();
 
   void CollectUniqueFontGlyphPairs(FontGlyphMap& glyph_map,
                                    Scalar scale,
-                                   Point offset) const;
+                                   Point offset,
+                                   const GlyphProperties& properties) const;
 
   static Point ComputeSubpixelPosition(
       const TextRun::GlyphPosition& glyph_position,
@@ -68,7 +66,7 @@ class TextFrame {
   ///             COLR fonts can potentially use the paint color in the glyph
   ///             atlas, so this color must be considered as part of the cache
   ///             key.
-  Color GetColor() const;
+  bool HasColor() const;
 
   //----------------------------------------------------------------------------
   /// @brief      The type of atlas this run should be emplaced in.
@@ -82,7 +80,6 @@ class TextFrame {
   std::vector<TextRun> runs_;
   Rect bounds_;
   bool has_color_;
-  Color color_;
 };
 
 }  // namespace impeller

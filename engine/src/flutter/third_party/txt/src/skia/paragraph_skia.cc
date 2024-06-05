@@ -102,9 +102,8 @@ class DisplayListParagraphPainter : public skt::ParagraphPainter {
         builder_->DrawPath(transformed, dl_paints_[paint_id]);
         return;
       }
-      builder_->DrawTextFrame(impeller::MakeTextFrameFromTextBlobSkia(
-                                  blob, dl_paints_[paint_id].getColor()),
-                              x, y, dl_paints_[paint_id]);
+      builder_->DrawTextFrame(impeller::MakeTextFrameFromTextBlobSkia(blob), x,
+                              y, dl_paints_[paint_id]);
       return;
     }
 #endif  // IMPELLER_SUPPORTS_RENDERING
@@ -126,9 +125,8 @@ class DisplayListParagraphPainter : public skt::ParagraphPainter {
       paint.setMaskFilter(&filter);
     }
     if (impeller_enabled_) {
-      builder_->DrawTextFrame(
-          impeller::MakeTextFrameFromTextBlobSkia(blob, paint.getColor()), x, y,
-          paint);
+      builder_->DrawTextFrame(impeller::MakeTextFrameFromTextBlobSkia(blob), x,
+                              y, paint);
       return;
     }
     builder_->DrawTextBlob(blob, x, y, paint);
@@ -219,12 +217,11 @@ class DisplayListParagraphPainter : public skt::ParagraphPainter {
 
   bool ShouldRenderAsPath(const DlPaint& paint) const {
     FML_DCHECK(impeller_enabled_);
-    // Text with non-trivial color sources or stroke paint mode should be
-    // rendered as a path when running on Impeller for correctness. These
-    // filters rely on having the glyph coverage, whereas regular text is
-    // drawn as rectangular texture samples.
-    return ((paint.getColorSource() && !paint.getColorSource()->asColor()) ||
-            paint.getDrawStyle() != DlDrawStyle::kFill);
+    // Text with non-trivial color sources should be rendered as a path when
+    // running on Impeller for correctness. These filters rely on having the
+    // glyph coverage, whereas regular text is drawn as rectangular texture
+    // samples.
+    return (paint.getColorSource() && !paint.getColorSource()->asColor());
   }
 
   DlPaint toDlPaint(const DecorationStyle& decor_style,
