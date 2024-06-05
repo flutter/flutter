@@ -12,9 +12,10 @@ import 'scroll_notification.dart';
 /// Function signature for the [SliverCoordinator.callback], which is called each time
 /// its [CustomScrollView] has been laid out.
 ///
-/// The second parameter can be used to retrieve layout information when
-/// [CoordinatedSliver.hasLayoutInfo] is true. See [CoordinatedSliver.getSliverConstraints]
-/// and [CoordinatedSliver.getSliverGeometry].
+/// The second parameter can be used to retrieve layout information
+/// when [CoordinatedSliver.hasLayoutInfo] is true. See
+/// [SliverCoordinatorData.getSliverConstraints] and
+/// [SliverCoordinatorData.getSliverGeometry].
 typedef SliverCoordinatorCallback = void Function(ScrollNotification notification, SliverCoordinatorData data);
 
 class _SliverLayoutInfo {
@@ -178,13 +179,14 @@ class _SliverCoordinatorState extends State<SliverCoordinator> {
 /// Enables [SliverCoordinator.callback] methods to use sliver layout
 /// information to trigger animations or auto-scrolling.
 ///
+/// Each coordinated sliver must be assigned a unique [id].
 /// Coordinated slivers store their [SliverConstraints] and
-/// [SliverGeometry] values after they've been laid out. These values
+/// [SliverGeometry] values after they've been laid out in a
+/// [SliverCoordinatorObject]. These values
 /// can be retrieved - after the entire [CustomScrollView] has been
-/// laid out - in a [SliverCoordinator.callback] using [getSliverConstraints]
-/// and [getSliverGeometry]. To do so, you must save a reference to the
-/// sliver coordinator widget itself in an enclosing [StatefulWidget].
-/// You can see as much in the example below.
+/// laid out - in a [SliverCoordinator.callback] by applying
+/// [SliverCoordinatorData.getSliverConstraints] and
+/// [SliverCoordinatorData.getSliverGeometry] to [id].
 ///
 /// {@tool dartpad}
 /// This example contains one [CoordinatedSliver] which is
