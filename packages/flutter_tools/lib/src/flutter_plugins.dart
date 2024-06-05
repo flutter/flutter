@@ -1250,11 +1250,16 @@ Map<String, List<Plugin>> _resolvePluginImplementations(
           // No need to add the default plugin to `pluginImplCandidates`,
           // as if the plugin is present and provides an implementation
           // it is added via `_getImplementedPlugin`.
-        } else {
+        } else if (!_hasPluginInlineImpl(
+          defaultPackage,
+          platformKey,
+          pluginType: pluginType != _PluginType.native ? _PluginType.native : _PluginType.dart,
+        )) {
+          // Only warn, if neither an implementation for native nor for Dart is given.
           globals.printWarning(
             'Package ${plugin.name}:$platformKey references $defaultImplPluginName:$platformKey as the default plugin, but it does not provide an inline implementation.\n'
             'Ask the maintainers of ${plugin.name} to either avoid referencing a default implementation via `platforms: $platformKey: default_package: $defaultImplPluginName` '
-            'or add an inline implementation to $defaultImplPluginName via `platforms: $platformKey: ${pluginType == _PluginType.dart ? 'dartPluginClass' : 'pluginClass'}`.\n',
+            'or add an inline implementation to $defaultImplPluginName via `platforms: $platformKey: [dart]PluginClass`.\n',
           );
         }
       } else {
