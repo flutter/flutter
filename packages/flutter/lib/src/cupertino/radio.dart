@@ -16,6 +16,7 @@ import 'colors.dart';
 const Size _size = Size(18.0, 18.0);
 const double _kOuterRadius = 7.0;
 const double _kInnerRadius = 2.975;
+const Color _kTransparentColor = Color(0x00000000);
 
 // The relative values needed to transform a color to its equivalent focus
 // outline color.
@@ -263,6 +264,8 @@ class _CupertinoRadioState<T> extends State<CupertinoRadio<T>> with TickerProvid
         onFocusChange: onFocusChange,
         size: _size,
         painter: _painter
+          ..position = position
+          ..reaction = reaction
           ..focusColor = effectiveFocusOverlayColor
           ..downPosition = downPosition
           ..isFocused = focused
@@ -309,13 +312,7 @@ class _RadioPainter extends ToggleablePainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-
     final Offset center = (Offset.zero & size).center;
-
-    final Paint paint = Paint()
-        ..color = inactiveColor
-        ..style = PaintingStyle.fill
-        ..strokeWidth = 0.1;
 
     if (checkmarkStyle) {
       if (value ?? false) {
@@ -338,27 +335,40 @@ class _RadioPainter extends ToggleablePainter {
         canvas.drawPath(path, checkPaint);
       }
     } else {
-      // Outer border
-      canvas.drawCircle(center, _kOuterRadius, paint);
-
-      paint.style = PaintingStyle.stroke;
-      paint.color = CupertinoColors.inactiveGray;
-      canvas.drawCircle(center, _kOuterRadius, paint);
-
       if (value ?? false) {
-        paint.style = PaintingStyle.fill;
-        paint.color = activeColor;
+        final Paint outerPaint = Paint()
+          ..color = activeColor;
+        canvas.drawCircle(center, _kOuterRadius, outerPaint);
+
+        final Paint innerPaint = Paint()
+          ..color = fillColor;
+        canvas.drawCircle(center, _kInnerRadius, innerPaint);
+      }
+      else {
+        final Paint paint = Paint();
+        paint.color = inactiveColor;
         canvas.drawCircle(center, _kOuterRadius, paint);
-        paint.color = fillColor;
-        canvas.drawCircle(center, _kInnerRadius, paint);
+        
+        final Paint borderPaint = Paint()
+          ..style = PaintingStyle.stroke
+          ..color = CupertinoColors.inactiveGray
+          ..strokeWidth = 0.3;
+        canvas.drawCircle(center, _kOuterRadius, borderPaint);
+
+        // Apply effect to darken radio button when pressed on macOS.
+        if (!reaction.isDismissed && defaultTargetPlatform == TargetPlatform.macOS) {
+          final Paint innerReactionPaint = Paint()
+            ..color = _kTransparentColor.withOpacity(0.05);
+          canvas.drawCircle(center, _kOuterRadius, innerReactionPaint);
+        }
       }
     }
-
     if (isFocused) {
-      paint.style = PaintingStyle.stroke;
-      paint.color = focusColor;
-      paint.strokeWidth = 3.0;
-      canvas.drawCircle(center, _kOuterRadius + 1.5, paint);
+      final Paint focusPaint = Paint()
+        ..style = PaintingStyle.stroke
+        ..color = focusColor
+        ..strokeWidth = 3.0;
+      canvas.drawCircle(center, _kOuterRadius + 1.5, focusPaint);
     }
   }
 }
