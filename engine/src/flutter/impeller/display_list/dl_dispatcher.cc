@@ -125,12 +125,11 @@ static impeller::SamplerDescriptor ToSamplerDescriptor(
       desc.label = "Nearest Sampler";
       break;
     case flutter::DlImageSampling::kLinear:
-    // Impeller doesn't support cubic sampling, but linear is closer to correct
-    // than nearest for this case.
-    case flutter::DlImageSampling::kCubic:
       desc.min_filter = desc.mag_filter = impeller::MinMagFilter::kLinear;
+      desc.mip_filter = impeller::MipFilter::kBase;
       desc.label = "Linear Sampler";
       break;
+    case flutter::DlImageSampling::kCubic:
     case flutter::DlImageSampling::kMipmapLinear:
       desc.min_filter = desc.mag_filter = impeller::MinMagFilter::kLinear;
       desc.mip_filter = impeller::MipFilter::kLinear;

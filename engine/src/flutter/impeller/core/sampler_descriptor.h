@@ -15,11 +15,6 @@ class Context;
 struct SamplerDescriptor final : public Comparable<SamplerDescriptor> {
   MinMagFilter min_filter = MinMagFilter::kNearest;
   MinMagFilter mag_filter = MinMagFilter::kNearest;
-
-  // TODO(https://github.com/flutter/flutter/issues/148253):
-  // `MipFilter::kNearest` is the default value for mip filters, as it
-  // cooresponds with the framework's `FilterQuality.low`. If we ever change the
-  // default filter quality, we should update this function to match.
   MipFilter mip_filter = MipFilter::kNearest;
 
   SamplerAddressMode width_address_mode = SamplerAddressMode::kClampToEdge;
