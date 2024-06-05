@@ -728,6 +728,7 @@ void main() {
       tester.getSemantics(find.byType(ListTile).first),
       matchesSemantics(
         hasTapAction: true,
+        hasFocusAction: true,
         hasEnabledState: true,
         isEnabled: true,
         isFocused: true,
@@ -742,6 +743,7 @@ void main() {
       tester.getSemantics(find.byType(ListTile).last),
       matchesSemantics(
         hasTapAction: true,
+        hasFocusAction: true,
         hasEnabledState: true,
         isEnabled: true,
         isFocusable: true,

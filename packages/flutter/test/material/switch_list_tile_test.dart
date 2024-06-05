@@ -78,7 +78,7 @@ void main() {
             SemanticsFlag.isFocusable,
             SemanticsFlag.isToggled,
           ],
-          actions: SemanticsAction.tap.index,
+          actions: SemanticsAction.tap.index | SemanticsAction.focus.index,
           label: 'aaa\nAAA',
         ),
         TestSemantics.rootChild(
@@ -92,7 +92,7 @@ void main() {
             SemanticsFlag.isEnabled,
             SemanticsFlag.isFocusable,
           ],
-          actions: SemanticsAction.tap.index,
+          actions: SemanticsAction.tap.index | SemanticsAction.focus.index,
           label: 'bbb\nBBB',
         ),
         TestSemantics.rootChild(
@@ -106,7 +106,7 @@ void main() {
             SemanticsFlag.isFocusable,
             SemanticsFlag.isInMutuallyExclusiveGroup,
           ],
-          actions: SemanticsAction.tap.index,
+          actions: SemanticsAction.tap.index | SemanticsAction.focus.index,
           label: 'CCC\nccc',
         ),
       ],

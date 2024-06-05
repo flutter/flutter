@@ -308,7 +308,7 @@ void main() {
                 SemanticsFlag.isEnabled,
                 SemanticsFlag.isFocusable,
               ],
-              actions: <SemanticsAction>[SemanticsAction.tap],
+              actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
               label: 'two',
             ),
             TestSemantics.rootChild(

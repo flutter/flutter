@@ -1999,6 +1999,47 @@ void main() {
         ),
       );
     });
+
+    testWidgets('Focus widget gains input focus when it gains accessibility focus', (WidgetTester tester) async {
+      final SemanticsTester semantics = SemanticsTester(tester);
+      final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
+      final FocusNode focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.rtl,
+          child: Focus(
+            focusNode: focusNode,
+            child: const Text('Test'),
+          ),
+        ),
+      );
+
+      expect(
+        semantics,
+        hasSemantics(
+          TestSemantics.root(
+            children: <TestSemantics>[
+              TestSemantics(
+                id: 1,
+                flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
+                actions: <SemanticsAction>[SemanticsAction.focus],
+                label: 'Test',
+                textDirection: TextDirection.rtl,
+              ),
+            ],
+          ),
+          ignoreRect: true,
+          ignoreTransform: true,
+        ),
+      );
+
+      expect(focusNode.hasFocus, isFalse);
+      semanticsOwner.performAction(1, SemanticsAction.focus);
+      await tester.pumpAndSettle();
+      expect(focusNode.hasFocus, isTrue);
+      semantics.dispose();
+    });
   });
 
   group('ExcludeFocus', () {
