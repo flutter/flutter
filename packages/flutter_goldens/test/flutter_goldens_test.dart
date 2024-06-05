@@ -514,7 +514,7 @@ void main() {
 
        expect(
          skiaClient.getTraceID('flutter.golden.1'),
-         equals('d8867d66b8f0be8d0c31598d8370f5dd'),
+         equals('ae18c7a6aa48e0685525dfe8fdf79003'),
        );
      });
 
@@ -548,7 +548,7 @@ void main() {
 
        expect(
          skiaClient.getTraceID('flutter.golden.1'),
-         equals('febd0e8ef6512c2a82c964b2a9e60012'),
+         equals('e9d5c296c48e7126808520e9cc191243'),
        );
      });
 
@@ -576,7 +576,7 @@ void main() {
       );
       expect(
         skiaClient.getTraceID('flutter.golden.1'),
-        equals('2e3d3f41cb4470748fa1c941f7762823'),
+        equals('9968695b9ae78cdb77cbb2be621ca2d6'),
       );
     });
 
