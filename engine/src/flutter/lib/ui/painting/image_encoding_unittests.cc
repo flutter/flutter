@@ -469,6 +469,28 @@ TEST(ImageEncodingImpellerTest, PngEncoding10XR) {
   EXPECT_TRUE(png.ok());
 }
 
+TEST(ImageEncodingImpellerTest, PngEncodingBGRA10XR) {
+  int width = 100;
+  int height = 100;
+  SkImageInfo info = SkImageInfo::Make(
+      width, height, kBGRA_10101010_XR_SkColorType, kUnpremul_SkAlphaType);
+
+  auto surface = SkSurfaces::Raster(info);
+  SkCanvas* canvas = surface->getCanvas();
+
+  SkPaint paint;
+  paint.setColor(SK_ColorBLUE);
+  paint.setAntiAlias(true);
+
+  canvas->clear(SK_ColorWHITE);
+  canvas->drawCircle(width / 2, height / 2, 100, paint);
+
+  sk_sp<SkImage> image = surface->makeImageSnapshot();
+
+  fml::StatusOr<sk_sp<SkData>> png = EncodeImage(image, ImageByteFormat::kPNG);
+  EXPECT_TRUE(png.ok());
+}
+
 #endif  // IMPELLER_SUPPORTS_RENDERING
 
 }  // namespace testing
