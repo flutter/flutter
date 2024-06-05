@@ -3395,6 +3395,27 @@ void main() {
     // FAB is not visible.
     expect(find.byType(FloatingActionButton), findsNothing);
   });
+
+  testWidgets('Scaffold background color desults to ColorScheme.surface', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          colorScheme: ThemeData().colorScheme.copyWith(
+            surface: Colors.orange,
+            background: Colors.green,
+          )),
+        home: const Scaffold(
+          body: SizedBox.expand(),
+        ),
+      ),
+    );
+
+    final Material scaffoldMaterial = tester.widget<Material>(find.descendant(
+      of: find.byType(Scaffold),
+      matching: find.byType(Material).first,
+    ));
+    expect(scaffoldMaterial.color, Colors.orange);
+  });
 }
 
 class _GeometryListener extends StatefulWidget {
