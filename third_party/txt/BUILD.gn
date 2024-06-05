@@ -122,7 +122,14 @@ source_set("txt") {
 
 if (enable_unittests) {
   test_fixtures("txt_fixtures") {
-    fixtures = [ "third_party/fonts/Roboto-Regular.ttf" ]
+    fixtures = [
+      "third_party/fonts/Roboto-Regular.ttf",
+      "third_party/fonts/NotoColorEmoji.ttf",
+    ]
+
+    if (host_os == "mac") {
+      fixtures += [ "/System/Library/Fonts/Apple Color Emoji.ttc" ]
+    }
   }
 
   executable("txt_benchmarks") {
@@ -176,8 +183,7 @@ if (enable_unittests) {
     # This is needed for //flutter/third_party/googletest for linking zircon
     # symbols.
     if (is_fuchsia) {
-      libs =
-          [ "${fuchsia_arch_root}/sysroot/lib/libzircon.so" ]
+      libs = [ "${fuchsia_arch_root}/sysroot/lib/libzircon.so" ]
     }
   }
 }
