@@ -13,33 +13,41 @@ void main() {
     ScrollNotification? callbackNotification;
     SliverCoordinatorData? callbackData;
 
-    void sliverCoordinatorCallback(ScrollNotification notification, SliverCoordinatorData data) {
-      callbackNotification = notification;
-      callbackData = data;
-    }
-
-    await tester.pumpWidget(
-      MaterialApp(
+    Widget buildFrame({ required Axis axis, required bool reverse }) {
+      callbackNotification = null;
+      callbackData = null;
+      Widget buildItem(double extent, Widget child) {
+        return switch (axis) {
+          Axis.vertical => SizedBox(height: extent, child: child),
+          Axis.horizontal => SizedBox(width: extent, child: child),
+        };
+      }
+      return MaterialApp(
         home: Scaffold(
           body: SliverCoordinator(
-            callback: sliverCoordinatorCallback,
+            callback: (ScrollNotification notification, SliverCoordinatorData data) {
+              callbackNotification = notification;
+              callbackData = data;
+            },
             child: CustomScrollView(
+              scrollDirection: axis,
+              reverse: reverse,
               slivers: <Widget>[
                 SliverList(
                   delegate: SliverChildBuilderDelegate(
-                    (BuildContext context, int index) => SizedBox(height: 100, child: Text('0.$index')),
+                    (BuildContext context, int index) => buildItem(100, Text('0.$index')),
                     childCount: 8,
                   ),
                 ),
-                const CoordinatedSliver(
+                CoordinatedSliver(
                   id: sliverId,
                   sliver: SliverToBoxAdapter(
-                    child: SizedBox(height: 300, child: Text('CoordinatedSliver')),
+                    child: buildItem(300, const Text('CoordinatedSliver')),
                   ),
                 ),
                 SliverList(
                   delegate: SliverChildBuilderDelegate(
-                    (BuildContext context, int index) => SizedBox(height: 100, child: Text('1.$index')),
+                    (BuildContext context, int index) => buildItem(100, Text('1.$index')),
                     childCount: 8,
                   ),
                 ),
@@ -47,24 +55,22 @@ void main() {
             ),
           ),
         ),
-      ),
-    );
-
-    Future<void> scrollVertical(double dy) {
-      callbackNotification = null;
-      callbackData = null;
-      return tester.drag(find.byType(CustomScrollView), Offset(0, dy));
+      );
     }
 
     Finder findSizedBox(String text) => find.widgetWithText(SizedBox, text);
+
+    Future<void> scroll(Offset offset) {
+      callbackNotification = null;
+      callbackData = null;
+      return tester.drag(find.byType(CustomScrollView), offset);
+    }
 
     void testSliverConstraints(double scrollOffset, double precedingScrollExtent, double remainingPaintExtent) {
       final SliverConstraints value = callbackData!.getSliverConstraints(sliverId);
       expect(value.scrollOffset, scrollOffset);
       expect(value.precedingScrollExtent, precedingScrollExtent);
       expect(value.remainingPaintExtent, remainingPaintExtent);
-      expect(value.crossAxisExtent, 800);
-      expect(value.viewportMainAxisExtent, 600);
     }
 
     void testSliverGeometry(double scrollExtent, double paintExtent, double maxPaintExtent) {
@@ -74,64 +80,261 @@ void main() {
       expect(value.maxPaintExtent, maxPaintExtent);
     }
 
-    expect(findSizedBox('0.0'), findsOneWidget);
-    expect(findSizedBox('0.5'), findsOneWidget);
-    expect(findSizedBox('CoordinatedSliver'), findsNothing);
+    // axis: Axis.vertical, reverse: false
+    {
+      await tester.pumpWidget(buildFrame(axis: Axis.vertical, reverse: false));
 
-    // No scroll yet, so no callback data or notification.
-    expect(callbackData, isNull);
-    expect(callbackNotification, isNull);
+      expect(findSizedBox('0.0'), findsOneWidget);
+      expect(findSizedBox('0.5'), findsOneWidget);
+      expect(findSizedBox('CoordinatedSliver'), findsNothing);
 
-    // Scroll the coordinated sliver to the top of the viewport
-    await scrollVertical(-800);
-    await tester.pumpAndSettle();
+      // No scroll yet, so no callback data or notification.
+      expect(callbackData, isNull);
+      expect(callbackNotification, isNull);
 
-    expect(tester.getRect(findSizedBox('CoordinatedSliver')), const Rect.fromLTRB(0.0, 0.0, 800.0, 300.0));
-    expect(callbackData, isNotNull);
-    expect(callbackNotification, isNotNull);
-    expect(callbackData!.hasLayoutInfo(sliverId), isTrue);
+      // Scroll the coordinated sliver to the top of the viewport
+      await scroll(const Offset(0, -800));
+      await tester.pumpAndSettle();
 
-    testSliverConstraints(0, 800, 600);
-    testSliverGeometry(300, 300, 300); // paintExtent = 300
+      expect(tester.getRect(findSizedBox('CoordinatedSliver')), const Rect.fromLTRB(0, 0, 800, 300));
+      expect(callbackData, isNotNull);
+      expect(callbackNotification, isNotNull);
+      expect(callbackData!.hasLayoutInfo(sliverId), isTrue);
 
-    // Scroll the coordinated sliver 50% of the top of the viewport.
-    await scrollVertical(-150);
-    await tester.pumpAndSettle();
+      testSliverConstraints(0, 800, 600);
+      testSliverGeometry(300, 300, 300); // paintExtent = 300
 
-    expect(tester.getRect(findSizedBox('CoordinatedSliver')), const Rect.fromLTRB(0.0, -150.0, 800.0, 150.0));
-    expect(callbackData, isNotNull);
-    expect(callbackNotification, isNotNull);
-    expect(callbackData!.hasLayoutInfo(sliverId), isTrue);
+      // Scroll the coordinated sliver 50% above top of the viewport.
+      await scroll(const Offset(0, -150));
+      await tester.pumpAndSettle();
 
-    testSliverConstraints(150, 800, 600);
-    testSliverGeometry(300, 150, 300); // paintExtent = 150
+      expect(tester.getRect(findSizedBox('CoordinatedSliver')), const Rect.fromLTRB(0.0, -150, 800, 150));
+      expect(callbackData, isNotNull);
+      expect(callbackNotification, isNotNull);
+      expect(callbackData!.hasLayoutInfo(sliverId), isTrue);
 
-    // Scroll the remainder of the coordinated sliver off the top of the viewport.
-    await scrollVertical(-150);
-    await tester.pumpAndSettle();
+      testSliverConstraints(150, 800, 600);
+      testSliverGeometry(300, 150, 300); // paintExtent = 150
 
-    expect(findSizedBox('CoordinatedSliver'), findsNothing);
+      // Scroll the remainder of the coordinated sliver off the top of the viewport.
+      await scroll(const Offset(0, -150));
+      await tester.pumpAndSettle();
 
-    // Even though the coordinated sliver is no longer visible, it was
-    // laid out when the scroll view was scrolled.
-    expect(callbackData, isNotNull);
-    expect(callbackNotification, isNotNull);
-    expect(callbackData!.hasLayoutInfo(sliverId), isTrue);
+      expect(findSizedBox('CoordinatedSliver'), findsNothing);
 
-    testSliverConstraints(300, 800, 600);
-    testSliverGeometry(300, 0, 300); // paintExent = 0
+      // Even though the coordinated sliver is no longer visible, it was
+      // laid out when the scroll view was scrolled.
+      expect(callbackData, isNotNull);
+      expect(callbackNotification, isNotNull);
+      expect(callbackData!.hasLayoutInfo(sliverId), isTrue);
 
-    // Scroll the coordinated sliver down to the top of the viewport again
-    await scrollVertical(300);
-    await tester.pumpAndSettle();
+      testSliverConstraints(300, 800, 600);
+      testSliverGeometry(300, 0, 300); // paintExent = 0
 
-    expect(tester.getRect(findSizedBox('CoordinatedSliver')), const Rect.fromLTRB(0.0, 0.0, 800.0, 300.0));
-    expect(callbackData, isNotNull);
-    expect(callbackNotification, isNotNull);
-    expect(callbackData!.hasLayoutInfo(sliverId), isTrue);
+      // Scroll the coordinated sliver down to the top of the viewport again
+      await scroll(const Offset(0, 300));
+      await tester.pumpAndSettle();
 
-    testSliverConstraints(0, 800, 600);
-    testSliverGeometry(300, 300, 300); // paintExtent = 300
+      expect(tester.getRect(findSizedBox('CoordinatedSliver')), const Rect.fromLTRB(0, 0, 800, 300));
+      expect(callbackData, isNotNull);
+      expect(callbackNotification, isNotNull);
+      expect(callbackData!.hasLayoutInfo(sliverId), isTrue);
+
+      testSliverConstraints(0, 800, 600);
+      testSliverGeometry(300, 300, 300); // paintExtent = 300
+    }
+
+    // axis: Axis.horizontal, reverse: false
+    {
+      await tester.pumpWidget(buildFrame(axis: Axis.horizontal, reverse: false));
+
+      expect(findSizedBox('0.0'), findsOneWidget);
+      expect(findSizedBox('0.5'), findsOneWidget);
+      expect(findSizedBox('CoordinatedSliver'), findsNothing);
+
+      // No scroll yet, so no callback data or notification.
+      expect(callbackData, isNull);
+      expect(callbackNotification, isNull);
+
+      // Scroll the coordinated sliver to the left edge of the viewport
+      await scroll(const Offset(-800, 0));
+      await tester.pumpAndSettle();
+
+      expect(tester.getRect(findSizedBox('CoordinatedSliver')), const Rect.fromLTRB(0, 0, 300, 600));
+      expect(callbackData, isNotNull);
+      expect(callbackNotification, isNotNull);
+      expect(callbackData!.hasLayoutInfo(sliverId), isTrue);
+
+      testSliverConstraints(0, 800, 800);
+      testSliverGeometry(300, 300, 300); // paintExtent = 300
+
+      // Scroll the coordinated sliver 50% off of the left edge of the viewport.
+      await scroll(const Offset(-150, 0));
+      await tester.pumpAndSettle();
+
+      expect(tester.getRect(findSizedBox('CoordinatedSliver')), const Rect.fromLTRB(-150, 0, 150, 600));
+      expect(callbackData, isNotNull);
+      expect(callbackNotification, isNotNull);
+      expect(callbackData!.hasLayoutInfo(sliverId), isTrue);
+
+      testSliverConstraints(150, 800, 800);
+      testSliverGeometry(300, 150, 300); // paintExtent = 150
+
+      // Scroll the remainder of the coordinated sliver off the left edge of the viewport.
+      await scroll(const Offset(-150, 0));
+      await tester.pumpAndSettle();
+
+      expect(findSizedBox('CoordinatedSliver'), findsNothing);
+
+      // Even though the coordinated sliver is no longer visible, it was
+      // laid out when the scroll view was scrolled.
+      expect(callbackData, isNotNull);
+      expect(callbackNotification, isNotNull);
+      expect(callbackData!.hasLayoutInfo(sliverId), isTrue);
+
+      testSliverConstraints(300, 800, 800);
+      testSliverGeometry(300, 0, 300); // paintExent = 0
+
+      // Scroll the coordinated sliver back to the left edge of the viewport again
+      await scroll(const Offset(300, 0));
+      await tester.pumpAndSettle();
+
+      expect(tester.getRect(findSizedBox('CoordinatedSliver')), const Rect.fromLTRB(0, 0, 300, 600));
+      expect(callbackData, isNotNull);
+      expect(callbackNotification, isNotNull);
+      expect(callbackData!.hasLayoutInfo(sliverId), isTrue);
+
+      testSliverConstraints(0, 800, 800);
+      testSliverGeometry(300, 300, 300); // paintExtent = 300
+    }
+
+    // axis: Axis.vertical, reverse: true
+    {
+      await tester.pumpWidget(buildFrame(axis: Axis.vertical, reverse: true));
+
+      expect(findSizedBox('0.0'), findsOneWidget);
+      expect(findSizedBox('0.5'), findsOneWidget);
+      expect(findSizedBox('CoordinatedSliver'), findsNothing);
+
+      // No scroll yet, so no callback data or notification.
+      expect(callbackData, isNull);
+      expect(callbackNotification, isNull);
+
+      // Scroll the coordinated sliver to the bottom of the viewport
+      await scroll(const Offset(0, 800));
+      await tester.pumpAndSettle();
+
+      expect(tester.getRect(findSizedBox('CoordinatedSliver')), const Rect.fromLTRB(0, 300, 800, 600));
+      expect(callbackData, isNotNull);
+      expect(callbackNotification, isNotNull);
+      expect(callbackData!.hasLayoutInfo(sliverId), isTrue);
+
+      testSliverConstraints(0, 800, 600);
+      testSliverGeometry(300, 300, 300); // paintExtent = 300
+
+      // Scroll the coordinated sliver 50% below the bottom of the viewport.
+      await scroll(const Offset(0, 150));
+      await tester.pumpAndSettle();
+
+      expect(tester.getRect(findSizedBox('CoordinatedSliver')), const Rect.fromLTRB(0.0, 450, 800, 750));
+      expect(callbackData, isNotNull);
+      expect(callbackNotification, isNotNull);
+      expect(callbackData!.hasLayoutInfo(sliverId), isTrue);
+
+      testSliverConstraints(150, 800, 600);
+      testSliverGeometry(300, 150, 300); // paintExtent = 150
+
+      // Scroll the remainder of the coordinated sliver below bottom of the viewport.
+      await scroll(const Offset(0, 150));
+      await tester.pumpAndSettle();
+
+      expect(findSizedBox('CoordinatedSliver'), findsNothing);
+
+      // Even though the coordinated sliver is no longer visible, it was
+      // laid out when the scroll view was scrolled.
+      expect(callbackData, isNotNull);
+      expect(callbackNotification, isNotNull);
+      expect(callbackData!.hasLayoutInfo(sliverId), isTrue);
+
+      testSliverConstraints(300, 800, 600);
+      testSliverGeometry(300, 0, 300); // paintExent = 0
+
+      // Scroll the coordinated sliver up to the bottom of the viewport again
+      await scroll(const Offset(0, -300));
+      await tester.pumpAndSettle();
+
+      expect(tester.getRect(findSizedBox('CoordinatedSliver')), const Rect.fromLTRB(0, 300, 800, 600));
+      expect(callbackData, isNotNull);
+      expect(callbackNotification, isNotNull);
+      expect(callbackData!.hasLayoutInfo(sliverId), isTrue);
+
+      testSliverConstraints(0, 800, 600);
+      testSliverGeometry(300, 300, 300); // paintExtent = 300
+    }
+
+    // axis: Axis.horizontal, reverse: true
+    {
+      await tester.pumpWidget(buildFrame(axis: Axis.horizontal, reverse: true));
+
+      expect(findSizedBox('0.0'), findsOneWidget);
+      expect(findSizedBox('0.5'), findsOneWidget);
+      expect(findSizedBox('CoordinatedSliver'), findsNothing);
+
+      // No scroll yet, so no callback data or notification.
+      expect(callbackData, isNull);
+      expect(callbackNotification, isNull);
+
+      // Scroll the coordinated sliver to the right edge of the viewport
+      await scroll(const Offset(800, 0));
+      await tester.pumpAndSettle();
+
+      expect(tester.getRect(findSizedBox('CoordinatedSliver')), const Rect.fromLTRB(500, 0, 800, 600));
+      expect(callbackData, isNotNull);
+      expect(callbackNotification, isNotNull);
+      expect(callbackData!.hasLayoutInfo(sliverId), isTrue);
+
+      testSliverConstraints(0, 800, 800);
+      testSliverGeometry(300, 300, 300); // paintExtent = 300
+
+      // Scroll the coordinated sliver 50% off of the right edge of the viewport.
+      await scroll(const Offset(150, 0));
+      await tester.pumpAndSettle();
+
+      expect(tester.getRect(findSizedBox('CoordinatedSliver')), const Rect.fromLTRB(650, 0, 950, 600));
+      expect(callbackData, isNotNull);
+      expect(callbackNotification, isNotNull);
+      expect(callbackData!.hasLayoutInfo(sliverId), isTrue);
+
+      testSliverConstraints(150, 800, 800);
+      testSliverGeometry(300, 150, 300); // paintExtent = 150
+
+      // Scroll the remainder of the coordinated sliver off the right edge of the viewport.
+      await scroll(const Offset(150, 0));
+      await tester.pumpAndSettle();
+
+      expect(findSizedBox('CoordinatedSliver'), findsNothing);
+
+      // Even though the coordinated sliver is no longer visible, it was
+      // laid out when the scroll view was scrolled.
+      expect(callbackData, isNotNull);
+      expect(callbackNotification, isNotNull);
+      expect(callbackData!.hasLayoutInfo(sliverId), isTrue);
+
+      testSliverConstraints(300, 800, 800);
+      testSliverGeometry(300, 0, 300); // paintExent = 0
+
+      // Scroll the coordinated sliver back to the right edge the viewport again
+      await scroll(const Offset(-300, 0));
+      await tester.pumpAndSettle();
+
+      expect(tester.getRect(findSizedBox('CoordinatedSliver')), const Rect.fromLTRB(500, 0, 800, 600));
+      expect(callbackData, isNotNull);
+      expect(callbackNotification, isNotNull);
+      expect(callbackData!.hasLayoutInfo(sliverId), isTrue);
+
+      testSliverConstraints(0, 800, 800);
+      testSliverGeometry(300, 300, 300); // paintExtent = 300
+    }
   });
 
   testWidgets('CoordinatedSliver removed from SliverCoordinatorData', (WidgetTester tester) async {
