@@ -581,8 +581,8 @@ class SkiaGoldClient {
         'Browser' : _browserKey,
       // This method is only used in local testing to look up the given image.
       // CI is not comprehensive in possible abi keys, so false negatives can
-      // be produced if we include it in local testing, for example CI uses
-      // macos_x64 but a contributor could have macos_arm64
+      // be produced if we include it in local testing. For example CI uses
+      // macos_x64 but a contributor could have macos_arm64.
       // 'Abi': '$abi',
       'CI' : 'luci',
       'Platform' : platform.operatingSystem,
