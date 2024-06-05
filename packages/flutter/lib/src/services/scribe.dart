@@ -83,6 +83,8 @@ class Scribe {
 
   static void registerScribeClient(ScribeClient scribeClient) {
     _instance._scribeClients.add(scribeClient);
+    // TODO(justinmc): Idea for cursor: One frame after this happens, make a
+    // call that sends a Rect for each ScribeClient on screen to the engine.
   }
 
   static void unregisterScribeClient(ScribeClient scribeClient) {
