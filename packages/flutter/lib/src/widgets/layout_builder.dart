@@ -111,7 +111,7 @@ class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderOb
   void _frameCallback(Duration timestamp) {
     _deferredCallbackScheduled = false;
     // This method is only called when the render tree is stable, if the Element
-    // is deactivated it will never be reincorporated back to the true.
+    // is deactivated it will never be reincorporated back to the tree.
     if (mounted) {
       renderObject.markNeedsLayout();
     }
