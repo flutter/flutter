@@ -223,6 +223,7 @@ bool _writeFlutterPluginsList(
 }
 
 /// Creates a map representation of the [plugins] for those supported by [platformKey].
+/// All given [plugins] must provide an implementation for the [platformKey].
 List<Map<String, Object>> _createPluginMapOfPlatform(
   List<Plugin> plugins,
   String platformKey,
@@ -230,7 +231,7 @@ List<Map<String, Object>> _createPluginMapOfPlatform(
   final Set<String> pluginNames = plugins.map((Plugin plugin) => plugin.name).toSet();
   final List<Map<String, Object>> pluginInfo = <Map<String, Object>>[];
   for (final Plugin plugin in plugins) {
-    // This is guaranteed to be non-null due to the `where` filter above.
+    assert(plugin.platforms[platformKey] != null, 'Plugin ${plugin.name} does not provide an implementation for $platformKey.');
     final PluginPlatform platformPlugin = plugin.platforms[platformKey]!;
     pluginInfo.add(<String, Object>{
       _kFlutterPluginsNameKey: plugin.name,
@@ -1166,6 +1167,10 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
   }).toList();
 }
 
+/// Resolves the plugin implementations for all platforms,
+/// see [resolvePlatformImplementation].
+///
+/// Only plugins which provide the according platform implementation are returned.
 Map<String, List<Plugin>> _resolvePluginImplementations(
   List<Plugin> plugins, {
   required _PluginType pluginType,
@@ -1266,6 +1271,7 @@ Map<String, List<Plugin>> _resolvePluginImplementations(
     }
   }
 
+  // Key: the plugin name, value: the plugin which provides an implementation for [platformKey].
   final Map<String, Plugin> pluginResolution = <String, Plugin>{};
 
   // Now resolve all the possible resolutions to a single option for each
