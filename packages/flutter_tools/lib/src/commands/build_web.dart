@@ -142,9 +142,14 @@ class BuildWebCommand extends BuildSubCommand {
         ? int.parse(dart2jsOptimizationLevelValue.substring(1))
         : optimizationLevel;
 
+    final String? webRendererString = stringArg(FlutterOptions.kWebRendererFlag);
+    final WebRendererMode? webRenderer = webRendererString == null
+        ? null
+        : WebRendererMode.values.byName(webRendererString);
+
     final List<WebCompilerConfig> compilerConfigs;
-    if (boolArg('wasm')) {
-      if (stringArg(FlutterOptions.kWebRendererFlag) != argParser.defaultFor(FlutterOptions.kWebRendererFlag)) {
+    if (boolArg(FlutterOptions.kWebWasmFlag)) {
+      if (webRenderer != null) {
         throwToolExit('"--${FlutterOptions.kWebRendererFlag}" cannot be combined with "--${FlutterOptions.kWebWasmFlag}"');
       }
       globals.logger.printBox(
@@ -158,7 +163,6 @@ class BuildWebCommand extends BuildSubCommand {
         WasmCompilerConfig(
           optimizationLevel: optimizationLevel,
           stripWasm: boolArg('strip-wasm'),
-          renderer: WebRendererMode.skwasm,
         ),
         JsCompilerConfig(
           csp: boolArg('csp'),
@@ -167,13 +171,8 @@ class BuildWebCommand extends BuildSubCommand {
           nativeNullAssertions: boolArg('native-null-assertions'),
           noFrequencyBasedMinification: boolArg('no-frequency-based-minification'),
           sourceMaps: boolArg('source-maps'),
-          renderer: WebRendererMode.canvaskit,
         )];
     } else {
-      WebRendererMode webRenderer = WebRendererMode.auto;
-      if (argParser.options.containsKey(FlutterOptions.kWebRendererFlag)) {
-        webRenderer = WebRendererMode.values.byName(stringArg(FlutterOptions.kWebRendererFlag)!);
-      }
       compilerConfigs = <WebCompilerConfig>[JsCompilerConfig(
         csp: boolArg('csp'),
         optimizationLevel: jsOptimizationLevel,
@@ -181,7 +180,7 @@ class BuildWebCommand extends BuildSubCommand {
         nativeNullAssertions: boolArg('native-null-assertions'),
         noFrequencyBasedMinification: boolArg('no-frequency-based-minification'),
         sourceMaps: boolArg('source-maps'),
-        renderer: webRenderer,
+        renderer: webRenderer ?? WebRendererMode.defaultForJs,
       )];
     }
 
