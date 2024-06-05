@@ -746,6 +746,7 @@ void main() {
          hasDidGainAccessibilityFocusAction: true,
          hasDidLoseAccessibilityFocusAction: true,
          hasDismissAction: true,
+         hasFocusAction: true,
          customActions: <CustomSemanticsAction>[action],
       ));
     });
@@ -1033,6 +1034,7 @@ void main() {
           hasDidGainAccessibilityFocusAction: true,
           hasDidLoseAccessibilityFocusAction: true,
           hasDismissAction: true,
+          hasFocusAction: true,
           customActions: <CustomSemanticsAction>[action],
         ),
       );
@@ -1125,6 +1127,7 @@ void main() {
           hasDidGainAccessibilityFocusAction: false,
           hasDidLoseAccessibilityFocusAction: false,
           hasDismissAction: false,
+          hasFocusAction: false,
         ),
       );
     });
