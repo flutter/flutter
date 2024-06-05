@@ -29,7 +29,7 @@ linter:
     - always_declare_return_types
     - always_put_control_body_on_new_line
     # - always_put_required_named_parameters_first # we prefer having parameters in the same order as fields https://github.com/flutter/flutter/issues/10219
-    - always_specify_types
+    # - always_specify_types # DIFFERENT FROM FLUTTER/FLUTTER; see https://github.com/flutter/engine/blob/main/CONTRIBUTING.md#dart
     # - always_use_package_imports # we do this commonly
     - annotate_overrides
     # - avoid_annotating_with_dynamic # conflicts with always_specify_types
@@ -191,7 +191,7 @@ linter:
     - test_types_in_equals
     - throw_in_finally
     - tighten_type_of_initializing_formals
-    # - type_annotate_public_apis # subset of always_specify_types
+    - type_annotate_public_apis # DIFFERENT FROM FLUTTER/FLUTTER; this repo disable always_specify_types (https://github.com/flutter/engine/blob/main/CONTRIBUTING.md#dart)
     - type_init_formals
     - type_literal_in_constant_pattern
     # - unawaited_futures # too many false positives, especially with the way AnimationController works
