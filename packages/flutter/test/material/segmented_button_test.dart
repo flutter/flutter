@@ -1045,6 +1045,43 @@ void main() {
     await tester.pumpAndSettle();
     expect(getOverlayColor(tester), paints..rect(color: overlayColor));
   });
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/144990.
+  testWidgets('SegmentedButton clips border path when drawing segments', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: SegmentedButton<int>(
+              segments: const <ButtonSegment<int>>[
+                ButtonSegment<int>(
+                  value: 0,
+                  label: Text('Option 1'),
+                ),
+                ButtonSegment<int>(
+                  value: 1,
+                  label: Text('Option 2'),
+                ),
+              ],
+              onSelectionChanged: (Set<int> selected) {},
+              selected: const <int>{0},
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      find.byType(SegmentedButton<int>),
+      paints
+        ..save()
+        ..clipPath() // Clip the border.
+        ..path(color: const Color(0xffe8def8)) // Draw segment 0.
+        ..save()
+        ..clipPath() // Clip the border.
+        ..path(color: const Color(0x00000000)), // Draw segment 1.
+    );
+  });
 }
 
 Set<MaterialState> enabled = const <MaterialState>{};

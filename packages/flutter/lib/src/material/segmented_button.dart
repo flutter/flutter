@@ -895,12 +895,11 @@ class _RenderSegmentedButton<T> extends RenderBox with
     Path? enabledClipPath;
     Path? disabledClipPath;
 
-    context.canvas..save()..clipPath(borderClipPath);
     while (child != null) {
       final _SegmentedButtonContainerBoxParentData childParentData = child.parentData! as _SegmentedButtonContainerBoxParentData;
       final Rect childRect = childParentData.surroundingRect!.outerRect.shift(offset);
 
-      context.canvas..save()..clipRect(childRect);
+      context.canvas..save()..clipPath(borderClipPath);
       context.paintChild(child, childParentData.offset + offset);
       context.canvas.restore();
 
@@ -944,7 +943,6 @@ class _RenderSegmentedButton<T> extends RenderBox with
       child = childAfter(child);
       index += 1;
     }
-    context.canvas.restore();
 
     // Paint the outer border for both disabled and enabled clip rect if needed.
     if (disabledClipPath == null) {
