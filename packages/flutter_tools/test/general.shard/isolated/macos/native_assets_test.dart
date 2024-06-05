@@ -177,9 +177,21 @@ void main() {
       nativeAssetsYaml,
       projectUri.resolve('build/native_assets/macos/native_assets.yaml'),
     );
+    final String nativeAssetsYamlContents =
+        await fileSystem.file(nativeAssetsYaml).readAsString();
     expect(
-      await fileSystem.file(nativeAssetsYaml).readAsString(),
+      nativeAssetsYamlContents,
       contains('package:bar/bar.dart'),
+    );
+    // Check that the framework uri is identical for both archs.
+    expect(
+      nativeAssetsYamlContents,
+      stringContainsInOrder(
+        <String>[
+          'bar.framework/bar',
+          'bar.framework/bar',
+        ],
+      ),
     );
     expect(buildRunner.buildDryRunInvocations, 1);
     expect(buildRunner.linkDryRunInvocations, 1);
