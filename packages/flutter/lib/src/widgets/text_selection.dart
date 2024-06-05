@@ -483,8 +483,6 @@ class TextSelectionOverlay {
 
   /// {@macro flutter.widgets.SelectionOverlay.showMagnifier}
   void showMagnifier(Offset positionToShow) {
-    print('justin showmag.');
-    print(StackTrace.current);
     final TextPosition position = renderObject.getPositionForPoint(positionToShow);
     _updateSelectionOverlay();
     _selectionOverlay.showMagnifier(

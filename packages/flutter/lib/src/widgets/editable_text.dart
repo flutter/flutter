@@ -43,6 +43,7 @@ import 'scrollable.dart';
 import 'scrollable_helpers.dart';
 import 'shortcuts.dart';
 import 'size_changed_layout_notifier.dart';
+import 'slotted_render_object_widget.dart';
 import 'spell_check.dart';
 import 'tap_region.dart';
 import 'text.dart';
@@ -5818,26 +5819,22 @@ class _ScribeState extends State<_Scribe> implements ScribeClient {
 
   @override
   Widget build(BuildContext context) {
+    return Listener(
+      onPointerDown: _handlePointerDown,
+      child: widget.child,
+    );
     /*
-    return GestureDetector(
-      onPanDown: _handlePanDown,
+    return _EmbiggenerMultiChildRenderObjectWidget(
+      margin: _handwritingPadding,
+      overflow: Listener(
+        onPointerDown: _handlePointerDown,
+        child: Container(
+          color: const Color(0x99ff0000),
+        ),
+      ),
       child: widget.child,
     );
     */
-    return Embiggener(
-      margin: _handwritingPadding,
-      child: Listener(
-        onPointerDown: _handlePointerDown,
-        child: Container(
-          alignment: Alignment.center,
-          color: const Color(0x99ff0000),
-          child: Padding(
-            padding: _handwritingPadding,
-            child: widget.child,
-          ),
-        ),
-      ),
-    );
     /*
     return OverflowBox(
       fit: OverflowBoxFit.deferToChild,
@@ -5854,51 +5851,6 @@ class _ScribeState extends State<_Scribe> implements ScribeClient {
       ),
     );
     */
-    /*
-    return Stack(
-      children: <Widget>[
-        Positioned(
-          /*
-          top: -_handwritingPadding.top,
-          left: -_handwritingPadding.left,
-          */
-          top: 20.0,
-          child: Listener(
-            onPointerDown: _handlePointerDown,
-            child: Container(
-              color: const Color(0x99ff0000),
-              child: Padding(
-                padding: _handwritingPadding,
-                child: widget.child,
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-      */
-    /*
-    return CustomSingleChildLayout(
-      delegate: EmbiggeningLayoutDelegate(
-        margin: const EdgeInsets.all(32.0),
-      ),
-      child: const Text('i can haz size.'),
-      /*
-      child: Container(
-        color: Color(0x99ff0000),
-        child: widget.child,
-      ),
-      */
-    );
-    */
-    return Container(
-      color: Color(0x99ff0000),
-      child: widget.child,
-    );
-    return Listener(
-      onPointerDown: _handlePointerDown,
-      child: widget.child,
-    );
   }
 }
 
@@ -6323,9 +6275,29 @@ class EmbiggeningLayoutDelegate extends SingleChildLayoutDelegate {
   }
 }
 
-class Embiggener extends SingleChildRenderObjectWidget {
-  /// Creates a widget that lets its child overflow itself.
+class Embiggener extends StatelessWidget {
   const Embiggener({
+    required this.margin,
+    required this.child,
+  });
+
+  final EdgeInsets margin;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: margin,
+      child: EmbiggenerRenderObjectWidget(
+        margin: margin,
+        child: child,
+      ),
+    );
+  }
+}
+
+class EmbiggenerRenderObjectWidget extends SingleChildRenderObjectWidget {
+  const EmbiggenerRenderObjectWidget({
     super.key,
     required this.margin,
     required Widget child,
@@ -6359,7 +6331,6 @@ class RenderEmbiggener extends RenderAligningShiftedBox {
   /// Creates a render object that lets its child overflow itself.
   RenderEmbiggener({
     super.child,
-    // TODO(justinmc): Do it.
     super.textDirection = TextDirection.ltr,
     required EdgeInsets margin,
   }) : _margin = margin;
@@ -6409,7 +6380,6 @@ class RenderEmbiggener extends RenderAligningShiftedBox {
   void performLayout() {
     if (child != null) {
       final BoxConstraints childConstraints = _getChildConstraints(constraints, margin);
-      print('justin childConstraints are $childConstraints given $constraints and $margin.');
       child!.layout(childConstraints, parentUsesSize: true);
       size = constraints.constrain(child!.size);
       alignChild();
@@ -6423,4 +6393,227 @@ class RenderEmbiggener extends RenderAligningShiftedBox {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<EdgeInsets>('margin', margin));
   }
+}
+
+enum _EmbiggenerSlot {
+  child,
+  overflow,
+}
+
+class _EmbiggenerMultiChildRenderObjectWidget extends SlottedMultiChildRenderObjectWidget<_EmbiggenerSlot, RenderBox> {
+  const _EmbiggenerMultiChildRenderObjectWidget({
+    required this.child,
+    required this.margin,
+    required this.overflow,
+  });
+
+  final Widget child;
+  final EdgeInsets margin;
+  final Widget overflow;
+
+  @override
+  Iterable<_EmbiggenerSlot> get slots => _EmbiggenerSlot.values;
+
+  @override
+  Widget childForSlot(_EmbiggenerSlot slot) {
+    return switch (slot) {
+      _EmbiggenerSlot.child    => child,
+      _EmbiggenerSlot.overflow => overflow,
+    };
+  }
+
+  @override
+  _RenderEmbiggener createRenderObject(BuildContext context) {
+    return _RenderEmbiggener(
+      margin: margin,
+    );
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderEmbiggener renderObject) {
+    renderObject.margin = margin;
+  }
+}
+
+class _RenderEmbiggener extends RenderBox with SlottedContainerRenderObjectMixin<_EmbiggenerSlot, RenderBox> {
+  _RenderEmbiggener({
+    required EdgeInsets margin,
+  }) : _margin = margin;
+
+  RenderBox? get child => childForSlot(_EmbiggenerSlot.child);
+  RenderBox? get overflow => childForSlot(_EmbiggenerSlot.overflow);
+
+  // The returned list is ordered for hit testing.
+  @override
+  Iterable<RenderBox> get children {
+    return <RenderBox>[
+      if (child != null)
+        child!,
+      if (overflow != null)
+        overflow!,
+    ];
+  }
+
+  EdgeInsets get margin => _margin;
+  EdgeInsets _margin;
+  set margin(EdgeInsets value) {
+    if (_margin == value) {
+      return;
+    }
+    _margin = value;
+    markNeedsLayout();
+  }
+
+  @override
+  void visitChildrenForSemantics(RenderObjectVisitor visitor) {
+    if (child != null) {
+      visitor(child!);
+    }
+    if (overflow != null) {
+      visitor(overflow!);
+    }
+  }
+
+  @override
+  double computeMinIntrinsicWidth(double height) {
+    if (child == null) {
+      return margin.horizontal;
+    }
+    return child!.getMinIntrinsicWidth(height) + margin.horizontal;
+  }
+
+  @override
+  double computeMaxIntrinsicWidth(double height) {
+    if (child == null) {
+      return margin.horizontal;
+    }
+    return child!.getMaxIntrinsicWidth(height) + margin.horizontal;
+  }
+
+  @override
+  double computeMinIntrinsicHeight(double width) {
+    if (child == null) {
+      return margin.vertical;
+    }
+    return child!.getMinIntrinsicHeight(width) + margin.vertical;
+  }
+
+  @override
+  double computeMaxIntrinsicHeight(double width) {
+    if (child == null) {
+      return margin.vertical;
+    }
+    return child!.getMaxIntrinsicHeight(width) + margin.vertical;
+  }
+
+  @override
+  double computeDistanceToActualBaseline(TextBaseline baseline) {
+    return child?.getDistanceToActualBaseline(baseline) ?? 0.0;
+  }
+
+  @override
+  double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
+    if (child == null) {
+      return 0.0;
+    }
+    return ChildLayoutHelper.getDryBaseline(child!, constraints, baseline);
+  }
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    if (child != null) {
+      final Size childSize = ChildLayoutHelper.dryLayoutChild(child!, constraints);
+      return constraints.constrain(childSize);
+    }
+    return constraints.smallest;
+  }
+
+  @override
+  void performLayout() {
+    if (child != null) {
+      child!.layout(constraints, parentUsesSize: true);
+      size = constraints.constrain(child!.size);
+    } else {
+      size = constraints.smallest;
+    }
+    if (overflow != null) {
+      final BoxConstraints overflowConstraints = BoxConstraints.tight(Size(
+        size.width + margin.horizontal,
+        size.height + margin.vertical,
+      ));
+      overflow!.layout(overflowConstraints);
+    }
+
+
+
+
+    /*
+    // TODO(justinmc): If you make the size accurate, so that it includes both
+    // child and overflow, then everything else will treat this widget as if it
+    // has its real size, but I want everything to think it's just childSize.
+    late final Size childSize;
+    if (child != null) {
+      child!.layout(constraints, parentUsesSize: true);
+      childSize = constraints.constrain(child!.size);
+    } else {
+      childSize = Size.zero;
+    }
+    final Size nextSize;
+    if (overflow != null) {
+      size = Size(
+        childSize.width + margin.horizontal,
+        childSize.height + margin.vertical,
+      );
+      final BoxConstraints overflowConstraints = BoxConstraints.tight(size);
+      overflow!.layout(overflowConstraints);
+    } else {
+      size = childSize;
+    }
+    */
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (overflow != null) {
+      context.paintChild(overflow!, Offset(-margin.left, -margin.top));
+    }
+    if (child != null) {
+      context.paintChild(child!, Offset.zero);
+    }
+  }
+
+  @override
+  bool hitTest(BoxHitTestResult result, { required Offset position }) {
+    print('justin hitTest.');
+    return super.hitTest(result, position: position);
+  }
+
+  /*
+  @override
+  bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
+    if (child != null) {
+      final bool isHit = position.dx <= child!.size.width
+          && position.dy <= child!.size.height;
+      print('justin hitTestChildren:child. Hit? $isHit');
+      if (isHit) {
+        return true;
+      }
+    }
+    if (overflow != null) {
+      final bool isHit = result.addWithPaintOffset(
+        offset: -margin.topLeft,
+        position: position,
+        hitTest: (BoxHitTestResult result, Offset transformed) {
+          assert(transformed == position - margin.topLeft);
+          return child!.hitTest(result, position: transformed);
+        },
+      );
+      print('justin hitTestChildren:overflow. Hit? $isHit');
+      if (isHit) {
+        return true;
+      }
+    }
+    return false;
+  }
+  */
 }
