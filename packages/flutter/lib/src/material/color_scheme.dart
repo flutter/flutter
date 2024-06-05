@@ -285,7 +285,8 @@ class ColorScheme with Diagnosticable {
   ///
   /// The `contrastLevel` parameter indicates the contrast level between color
   /// pairs, such as [primary] and [onPrimary]. 0.0 is the default (normal);
-  /// -1.0 is the lowest; 1.0 is the highest.
+  /// -1.0 is the lowest; 1.0 is the highest. From Material Design guideline, the
+  /// medium and high contrast correspond to 0.5 and 1.0 respectively.
   ///
   /// {@tool dartpad}
   /// This sample shows how to use [ColorScheme.fromSeed] to create dynamic
