@@ -142,6 +142,7 @@ if [ ! -f "$ENGINE_STAMP" ] || [ "$ENGINE_VERSION" != `cat "$ENGINE_STAMP"` ]; t
     verbose_curl="--verbose"
   fi
 
+  echo Downloading dart SDK at $DART_SDK_URL
   curl ${verbose_curl} --retry 3 --continue-at - --location --output "$DART_SDK_ZIP" "$DART_SDK_URL" 2>&1 || {
     curlExitCode=$?
     # Handle range errors specially: retry again with disabled ranges (`--continue-at -` argument)
