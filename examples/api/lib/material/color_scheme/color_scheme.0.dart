@@ -8,10 +8,7 @@ import 'package:flutter/material.dart';
 
 const Widget divider = SizedBox(height: 10);
 
-void main() => runApp(const MaterialApp(
-  debugShowCheckedModeBanner: false,
-  home: ColorSchemeExample()
-));
+void main() => runApp(const ColorSchemeExample());
 
 
 class ColorSchemeExample extends StatefulWidget {
