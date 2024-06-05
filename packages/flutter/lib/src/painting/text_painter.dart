@@ -356,6 +356,7 @@ class _TextLayout {
     // last logical trailing space.
     final bool hasTrailingSpaces = switch (rawString.codeUnitAt(rawString.length - 1)) {
       0x9 ||        // horizontal tab
+      0x3000 ||
       0x20 => true, // space
       _ => false,
     };
