@@ -9,7 +9,7 @@
 
 namespace flutter {
 
-bool DisplayListMatrixClipTracker::is_3x3(const SkM44& m) {
+bool DisplayListMatrixClipState::is_3x3(const SkM44& m) {
   // clang-format off
   return (                                      m.rc(0, 2) == 0 &&
                                                 m.rc(1, 2) == 0 &&
@@ -44,60 +44,6 @@ DisplayListMatrixClipState::DisplayListMatrixClipState(const SkRect& cull_rect,
 DisplayListMatrixClipState::DisplayListMatrixClipState(const SkRect& cull_rect,
                                                        const SkM44& matrix)
     : cull_rect_(ProtectEmpty(cull_rect)), matrix_(ToDlMatrix(matrix)) {}
-
-DisplayListMatrixClipTracker::DisplayListMatrixClipTracker(
-    const DlRect& cull_rect,
-    const DlMatrix& matrix) {
-  saved_.emplace_back(cull_rect, matrix);
-  current_ = &saved_.back();
-  save();  // saved_[0] will always be the initial settings
-}
-
-DisplayListMatrixClipTracker::DisplayListMatrixClipTracker(
-    const SkRect& cull_rect,
-    const SkMatrix& matrix) {
-  saved_.emplace_back(cull_rect, matrix);
-  current_ = &saved_.back();
-  save();  // saved_[0] will always be the initial settings
-}
-
-DisplayListMatrixClipTracker::DisplayListMatrixClipTracker(
-    const SkRect& cull_rect,
-    const SkM44& m44) {
-  saved_.emplace_back(cull_rect, m44);
-  current_ = &saved_.back();
-  save();  // saved_[0] will always be the initial settings
-}
-
-void DisplayListMatrixClipTracker::save() {
-  saved_.emplace_back(*current_);
-  current_ = &saved_.back();
-}
-
-void DisplayListMatrixClipTracker::restore() {
-  if (saved_.size() > 2) {
-    saved_.pop_back();
-    current_ = &saved_.back();
-  }
-}
-
-void DisplayListMatrixClipTracker::reset() {
-  while (saved_.size() > 1) {
-    saved_.pop_back();
-    current_ = &saved_.back();
-  }
-  save();  // saved_[0] will always be the initial settings
-}
-
-void DisplayListMatrixClipTracker::restoreToCount(int restore_count) {
-  FML_DCHECK(restore_count <= getSaveCount());
-  if (restore_count < 1) {
-    restore_count = 1;
-  }
-  while (restore_count < getSaveCount()) {
-    restore();
-  }
-}
 
 bool DisplayListMatrixClipState::inverseTransform(
     const DisplayListMatrixClipState& tracker) {

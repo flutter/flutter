@@ -286,7 +286,8 @@ class MockCanvas final : public DlCanvas {
   void Flush() override;
 
  private:
-  DisplayListMatrixClipTracker tracker_;
+  SkISize base_layer_size_;
+  std::vector<DisplayListMatrixClipState> state_stack_;
   std::vector<DrawCall> draw_calls_;
   int current_layer_;
 };
