@@ -10,14 +10,8 @@ namespace impeller {
 
 TextFrame::TextFrame() = default;
 
-TextFrame::TextFrame(std::vector<TextRun>& runs,
-                     Rect bounds,
-                     bool has_color,
-                     Color color)
-    : runs_(std::move(runs)),
-      bounds_(bounds),
-      has_color_(has_color),
-      color_(color) {}
+TextFrame::TextFrame(std::vector<TextRun>& runs, Rect bounds, bool has_color)
+    : runs_(std::move(runs)), bounds_(bounds), has_color_(has_color) {}
 
 TextFrame::~TextFrame() = default;
 
@@ -38,8 +32,8 @@ GlyphAtlas::Type TextFrame::GetAtlasType() const {
                     : GlyphAtlas::Type::kAlphaBitmap;
 }
 
-Color TextFrame::GetColor() const {
-  return color_;
+bool TextFrame::HasColor() const {
+  return has_color_;
 }
 
 // static
@@ -90,19 +84,21 @@ Point TextFrame::ComputeSubpixelPosition(
   }
 }
 
-void TextFrame::CollectUniqueFontGlyphPairs(FontGlyphMap& glyph_map,
-                                            Scalar scale,
-                                            Point offset) const {
+void TextFrame::CollectUniqueFontGlyphPairs(
+    FontGlyphMap& glyph_map,
+    Scalar scale,
+    Point offset,
+    const GlyphProperties& properties) const {
   for (const TextRun& run : GetRuns()) {
     const Font& font = run.GetFont();
     auto rounded_scale =
         RoundScaledFontSize(scale, font.GetMetrics().point_size);
-    auto& set = glyph_map[ScaledFont{font, rounded_scale, color_}];
+    auto& set = glyph_map[ScaledFont{font, rounded_scale}];
     for (const TextRun::GlyphPosition& glyph_position :
          run.GetGlyphPositions()) {
       Point subpixel = ComputeSubpixelPosition(
           glyph_position, font.GetAxisAlignment(), offset, scale);
-      set.emplace(glyph_position.glyph, subpixel);
+      set.emplace(glyph_position.glyph, subpixel, properties);
     }
   }
 }
