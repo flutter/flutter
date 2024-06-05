@@ -9,11 +9,21 @@
 #include <unordered_set>
 
 #include "impeller/geometry/color.h"
+#include "impeller/geometry/path.h"
 #include "impeller/geometry/point.h"
 #include "impeller/typographer/font.h"
 #include "impeller/typographer/glyph.h"
 
 namespace impeller {
+
+struct GlyphProperties {
+  Color color = Color::Black();
+  Scalar stroke_width = 0.0;
+  Cap stroke_cap = Cap::kButt;
+  Join stroke_join = Join::kMiter;
+  Scalar stroke_miter = 4.0;
+  bool stroke = false;
+};
 
 //------------------------------------------------------------------------------
 /// @brief      A font and a scale.  Used as a key that represents a typeface
@@ -22,7 +32,6 @@ namespace impeller {
 struct ScaledFont {
   Font font;
   Scalar scale;
-  Color color;
 };
 
 //------------------------------------------------------------------------------
@@ -31,9 +40,14 @@ struct ScaledFont {
 struct SubpixelGlyph {
   Glyph glyph;
   Point subpixel_offset;
+  GlyphProperties properties;
 
-  SubpixelGlyph(Glyph p_glyph, Point p_subpixel_offset)
-      : glyph(p_glyph), subpixel_offset(p_subpixel_offset) {}
+  SubpixelGlyph(Glyph p_glyph,
+                Point p_subpixel_offset,
+                GlyphProperties p_properties)
+      : glyph(p_glyph),
+        subpixel_offset(p_subpixel_offset),
+        properties(p_properties) {}
 };
 
 using FontGlyphMap =
@@ -55,7 +69,7 @@ struct FontGlyphPair {
 template <>
 struct std::hash<impeller::ScaledFont> {
   constexpr std::size_t operator()(const impeller::ScaledFont& sf) const {
-    return fml::HashCombine(sf.font.GetHash(), sf.scale, sf.color.ToARGB());
+    return fml::HashCombine(sf.font.GetHash(), sf.scale);
   }
 };
 
@@ -63,16 +77,18 @@ template <>
 struct std::equal_to<impeller::ScaledFont> {
   constexpr bool operator()(const impeller::ScaledFont& lhs,
                             const impeller::ScaledFont& rhs) const {
-    return lhs.font.IsEqual(rhs.font) && lhs.scale == rhs.scale &&
-           lhs.color == rhs.color;
+    return lhs.font.IsEqual(rhs.font) && lhs.scale == rhs.scale;
   }
 };
 
 template <>
 struct std::hash<impeller::SubpixelGlyph> {
   constexpr std::size_t operator()(const impeller::SubpixelGlyph& sg) const {
-    return fml::HashCombine(sg.glyph.index, sg.subpixel_offset.x,
-                            sg.subpixel_offset.y);
+    return fml::HashCombine(
+        sg.glyph.index, sg.subpixel_offset.x, sg.subpixel_offset.y,
+        sg.properties.color.ToARGB(), sg.properties.stroke,
+        sg.properties.stroke_cap, sg.properties.stroke_join,
+        sg.properties.stroke_miter, sg.properties.stroke_width);
   }
 };
 
@@ -82,7 +98,13 @@ struct std::equal_to<impeller::SubpixelGlyph> {
                             const impeller::SubpixelGlyph& rhs) const {
     return lhs.glyph.index == rhs.glyph.index &&
            lhs.glyph.type == rhs.glyph.type &&
-           lhs.subpixel_offset == rhs.subpixel_offset;
+           lhs.subpixel_offset == rhs.subpixel_offset &&
+           lhs.properties.color.ToARGB() == rhs.properties.color.ToARGB() &&
+           lhs.properties.stroke == rhs.properties.stroke &&
+           lhs.properties.stroke_cap == rhs.properties.stroke_cap &&
+           lhs.properties.stroke_join == rhs.properties.stroke_join &&
+           lhs.properties.stroke_miter == rhs.properties.stroke_miter &&
+           lhs.properties.stroke_width == rhs.properties.stroke_width;
   }
 };
 

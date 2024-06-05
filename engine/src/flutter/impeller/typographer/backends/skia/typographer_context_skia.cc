@@ -33,6 +33,7 @@
 #include "impeller/typographer/typographer_context.h"
 #include "include/core/SkColor.h"
 #include "include/core/SkImageInfo.h"
+#include "include/core/SkPaint.h"
 #include "include/core/SkSize.h"
 
 #include "third_party/skia/include/core/SkBitmap.h"
@@ -47,6 +48,32 @@ namespace impeller {
 //              the underlying causes of the overlap.
 //              https://github.com/flutter/flutter/issues/114563
 constexpr auto kPadding = 2;
+
+namespace {
+SkPaint::Cap ToSkiaCap(Cap cap) {
+  switch (cap) {
+    case Cap::kButt:
+      return SkPaint::Cap::kButt_Cap;
+    case Cap::kRound:
+      return SkPaint::Cap::kRound_Cap;
+    case Cap::kSquare:
+      return SkPaint::Cap::kSquare_Cap;
+  }
+  FML_UNREACHABLE();
+}
+
+SkPaint::Join ToSkiaJoin(Join join) {
+  switch (join) {
+    case Join::kMiter:
+      return SkPaint::Join::kMiter_Join;
+    case Join::kRound:
+      return SkPaint::Join::kRound_Join;
+    case Join::kBevel:
+      return SkPaint::Join::kBevel_Join;
+  }
+  FML_UNREACHABLE();
+}
+}  // namespace
 
 std::shared_ptr<TypographerContext> TypographerContextSkia::Make() {
   return std::make_shared<TypographerContextSkia>();
@@ -183,6 +210,7 @@ static void DrawGlyph(SkCanvas* canvas,
                       const ScaledFont& scaled_font,
                       const SubpixelGlyph& glyph,
                       const Rect& scaled_bounds,
+                      const GlyphProperties& prop,
                       bool has_color) {
   const auto& metrics = scaled_font.font.GetMetrics();
   SkPoint position = SkPoint::Make(1, 1);
@@ -197,11 +225,19 @@ static void DrawGlyph(SkCanvas* canvas,
   sk_font.setSubpixel(true);
   sk_font.setSize(sk_font.getSize() * scaled_font.scale);
 
-  auto glyph_color = has_color ? scaled_font.color.ToARGB() : SK_ColorBLACK;
+  auto glyph_color =
+      has_color ? glyph.properties.color.ToARGB() : SK_ColorBLACK;
 
   SkPaint glyph_paint;
   glyph_paint.setColor(glyph_color);
   glyph_paint.setBlendMode(SkBlendMode::kSrc);
+  if (prop.stroke) {
+    glyph_paint.setStroke(true);
+    glyph_paint.setStrokeWidth(prop.stroke_width * scaled_font.scale);
+    glyph_paint.setStrokeCap(ToSkiaCap(glyph.properties.stroke_cap));
+    glyph_paint.setStrokeJoin(ToSkiaJoin(glyph.properties.stroke_join));
+    glyph_paint.setStrokeMiter(prop.stroke_miter * scaled_font.scale);
+  }
   canvas->translate(glyph.subpixel_offset.x, glyph.subpixel_offset.y);
   canvas->drawGlyphs(1u,         // count
                      &glyph_id,  // glyphs
@@ -255,7 +291,8 @@ static bool UpdateAtlasBitmap(const GlyphAtlas& atlas,
       return false;
     }
 
-    DrawGlyph(canvas, pair.scaled_font, pair.glyph, bounds, has_color);
+    DrawGlyph(canvas, pair.scaled_font, pair.glyph, bounds,
+              pair.glyph.properties, has_color);
 
     // Writing to a malloc'd buffer and then copying to the staging buffers
     // benchmarks as substantially faster on a number of Android devices.
@@ -282,9 +319,19 @@ static bool UpdateAtlasBitmap(const GlyphAtlas& atlas,
   return blit_pass->ConvertTextureToShaderRead(texture);
 }
 
-static Rect ComputeGlyphSize(const SkFont& font, const SubpixelGlyph& glyph) {
+static Rect ComputeGlyphSize(const SkFont& font,
+                             const SubpixelGlyph& glyph,
+                             Scalar scale) {
   SkRect scaled_bounds;
-  font.getBounds(&glyph.glyph.index, 1, &scaled_bounds, nullptr);
+  SkPaint glyph_paint;
+  if (glyph.properties.stroke) {
+    glyph_paint.setStroke(true);
+    glyph_paint.setStrokeWidth(glyph.properties.stroke_width * scale);
+    glyph_paint.setStrokeCap(ToSkiaCap(glyph.properties.stroke_cap));
+    glyph_paint.setStrokeJoin(ToSkiaJoin(glyph.properties.stroke_join));
+    glyph_paint.setStrokeMiter(glyph.properties.stroke_miter * scale);
+  }
+  font.getBounds(&glyph.glyph.index, 1, &scaled_bounds, &glyph_paint);
 
   // Expand the bounds of glyphs at subpixel offsets by 2 in the x direction.
   Scalar adjustment = 0.0;
@@ -322,8 +369,8 @@ std::shared_ptr<GlyphAtlas> TypographerContextSkia::CreateGlyphAtlas(
   std::vector<FontGlyphPair> new_glyphs;
   for (const auto& font_value : font_glyph_map) {
     const ScaledFont& scaled_font = font_value.first;
-    const FontGlyphAtlas* font_glyph_atlas = last_atlas->GetFontGlyphAtlas(
-        scaled_font.font, scaled_font.scale, scaled_font.color);
+    const FontGlyphAtlas* font_glyph_atlas =
+        last_atlas->GetFontGlyphAtlas(scaled_font.font, scaled_font.scale);
 
     auto metrics = scaled_font.font.GetMetrics();
 
@@ -343,13 +390,15 @@ std::shared_ptr<GlyphAtlas> TypographerContextSkia::CreateGlyphAtlas(
       for (const SubpixelGlyph& glyph : font_value.second) {
         if (!font_glyph_atlas->FindGlyphBounds(glyph)) {
           new_glyphs.emplace_back(scaled_font, glyph);
-          glyph_sizes.push_back(ComputeGlyphSize(sk_font, glyph));
+          glyph_sizes.push_back(
+              ComputeGlyphSize(sk_font, glyph, scaled_font.scale));
         }
       }
     } else {
       for (const SubpixelGlyph& glyph : font_value.second) {
         new_glyphs.emplace_back(scaled_font, glyph);
-        glyph_sizes.push_back(ComputeGlyphSize(sk_font, glyph));
+        glyph_sizes.push_back(
+            ComputeGlyphSize(sk_font, glyph, scaled_font.scale));
       }
     }
   }
