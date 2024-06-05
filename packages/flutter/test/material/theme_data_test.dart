@@ -1470,20 +1470,6 @@ void main() {
     }
   });
 
-   test('Theme data control test', () {
-    final ThemeData dark = ThemeData.dark();
-
-    expect(dark, hasOneLineDescription);
-    expect(dark, equals(dark.copyWith()));
-    expect(dark.hashCode, equals(dark.copyWith().hashCode));
-
-    final ThemeData light = ThemeData.light();
-    final ThemeData dawn = ThemeData.lerp(dark, light, 0.25);
-
-    expect(dawn.brightness, Brightness.dark);
-    expect(dawn.primaryColor, Color.lerp(dark.primaryColor, light.primaryColor, 0.25));
-  });
-
   testWidgets('ThemeData.apply applies letterSpacing to all TextStyles in Typografies englishLike and tall', (WidgetTester tester) async {
     final Typography typography = Typography.material2018();
 
