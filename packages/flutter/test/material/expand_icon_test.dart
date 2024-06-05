@@ -217,7 +217,6 @@ void main() {
 
     expect(tester.getSemantics(find.byType(ExpandIcon)), matchesSemantics(
       hasTapAction: true,
-      hasFocusAction: true,
       hasEnabledState: true,
       isEnabled: true,
       isFocusable: true,
@@ -234,7 +233,6 @@ void main() {
 
     expect(tester.getSemantics(find.byType(ExpandIcon)), matchesSemantics(
       hasTapAction: true,
-      hasFocusAction: true,
       hasEnabledState: true,
       isEnabled: true,
       isFocusable: true,
@@ -260,7 +258,6 @@ void main() {
       children: <Matcher>[
         matchesSemantics(
           hasTapAction: true,
-          hasFocusAction: true,
           hasEnabledState: true,
           isEnabled: true,
           isFocusable: true,
@@ -280,7 +277,6 @@ void main() {
       children: <Matcher>[
         matchesSemantics(
           hasTapAction: true,
-          hasFocusAction: true,
           hasEnabledState: true,
           isEnabled: true,
           isFocusable: true,

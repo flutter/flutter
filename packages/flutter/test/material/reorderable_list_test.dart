@@ -751,7 +751,6 @@ void main() {
             hasEnabledState: true,
             label: 'Switch tile',
             hasTapAction: true,
-            hasFocusAction: true,
           ));
           handle.dispose();
         });

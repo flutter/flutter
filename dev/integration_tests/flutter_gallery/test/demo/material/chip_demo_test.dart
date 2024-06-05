@@ -20,7 +20,6 @@ void main() {
       isEnabled: true,
       isFocusable: true,
       hasTapAction: true,
-      hasFocusAction: true,
       label: 'Update border shape',
     ));
 
@@ -30,7 +29,6 @@ void main() {
       isEnabled: true,
       isFocusable: true,
       hasTapAction: true,
-      hasFocusAction: true,
       label: 'Reset chips',
     ));
 

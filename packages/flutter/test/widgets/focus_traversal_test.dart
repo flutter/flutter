@@ -3182,9 +3182,6 @@ void main() {
             flags: <SemanticsFlag>[
               SemanticsFlag.isFocusable,
             ],
-            actions: <SemanticsAction>[
-              SemanticsAction.focus,
-            ],
           ),
         ],
       );

@@ -2111,7 +2111,6 @@ void main() {
         isFocusable: true,
         isSelected: true,
         hasTapAction: true,
-        hasFocusAction: true,
       ),
     );
     expect(
@@ -2121,7 +2120,6 @@ void main() {
         textDirection: TextDirection.ltr,
         isFocusable: true,
         hasTapAction: true,
-        hasFocusAction: true,
       ),
     );
     expect(
@@ -2131,7 +2129,6 @@ void main() {
         textDirection: TextDirection.ltr,
         isFocusable: true,
         hasTapAction: true,
-        hasFocusAction: true,
       ),
     );
   });
@@ -2168,7 +2165,6 @@ void main() {
         isFocusable: true,
         isSelected: true,
         hasTapAction: true,
-        hasFocusAction: true,
       ),
     );
     expect(
@@ -2178,7 +2174,6 @@ void main() {
         textDirection: TextDirection.ltr,
         isFocusable: true,
         hasTapAction: true,
-        hasFocusAction: true,
       ),
     );
     expect(
@@ -2188,7 +2183,6 @@ void main() {
         textDirection: TextDirection.ltr,
         isFocusable: true,
         hasTapAction: true,
-        hasFocusAction: true,
       ),
     );
   });
@@ -2521,7 +2515,6 @@ void main() {
         isFocusable: true,
         isSelected: true,
         hasTapAction: true,
-        hasFocusAction: true,
       ),
     );
     expect(
@@ -2531,7 +2524,6 @@ void main() {
         textDirection: TextDirection.ltr,
         isFocusable: true,
         hasTapAction: true,
-        hasFocusAction: true,
       ),
     );
   });
@@ -2566,7 +2558,6 @@ void main() {
         isFocusable: true,
         isSelected: true,
         hasTapAction: true,
-        hasFocusAction: true,
       ),
     );
     expect(
@@ -2576,7 +2567,6 @@ void main() {
         textDirection: TextDirection.ltr,
         isFocusable: true,
         hasTapAction: true,
-        hasFocusAction: true,
       ),
     );
   });
@@ -2757,13 +2747,13 @@ void main() {
                                 SemanticsFlag.isSelected,
                                 SemanticsFlag.isFocusable,
                               ],
-                              actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+                              actions: <SemanticsAction>[SemanticsAction.tap],
                               label: 'A\nTab 1 of 2',
                               textDirection: TextDirection.ltr,
                             ),
                             TestSemantics(
                               flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
-                              actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+                              actions: <SemanticsAction>[SemanticsAction.tap],
                               label: 'B\nTab 2 of 2',
                               textDirection: TextDirection.ltr,
                             ),

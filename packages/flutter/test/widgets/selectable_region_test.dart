@@ -260,7 +260,7 @@ void main() {
                               SemanticsFlag.isEnabled,
                               SemanticsFlag.isFocusable
                             ],
-                            actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+                            actions: <SemanticsAction>[SemanticsAction.tap],
                             label: 'Button',
                             textDirection: TextDirection.ltr,
                           ),

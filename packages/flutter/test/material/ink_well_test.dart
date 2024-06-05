@@ -1178,7 +1178,7 @@ testWidgets('InkResponse radius can be updated', (WidgetTester tester) async {
         ),
       ),
     ));
-    expect(semantics, includesNodeWith(label: 'Button', actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus]));
+    expect(semantics, includesNodeWith(label: 'Button', actions: <SemanticsAction>[SemanticsAction.tap]));
 
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
@@ -1190,7 +1190,7 @@ testWidgets('InkResponse radius can be updated', (WidgetTester tester) async {
         ),
       ),
     ));
-    expect(semantics, isNot(includesNodeWith(label: 'Button', actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus])));
+    expect(semantics, isNot(includesNodeWith(label: 'Button', actions: <SemanticsAction>[SemanticsAction.tap])));
 
     semantics.dispose();
   });
@@ -1983,7 +1983,6 @@ testWidgets('InkResponse radius can be updated', (WidgetTester tester) async {
       label: 'Foo',
       hasLongPressAction: true,
       isFocusable: true,
-      hasFocusAction: true,
       textDirection: TextDirection.ltr,
     ));
 
@@ -2004,7 +2003,6 @@ testWidgets('InkResponse radius can be updated', (WidgetTester tester) async {
     expect(tester.getSemantics(find.bySemanticsLabel('Foo')), matchesSemantics(
       label: 'Foo',
       hasTapAction: true,
-      hasFocusAction: true,
       hasLongPressAction: true,
       isFocusable: true,
       textDirection: TextDirection.ltr,

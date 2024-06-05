@@ -130,7 +130,6 @@ void main() {
                 textDirection: TextDirection.ltr,
                 actions: <SemanticsAction>[
                   SemanticsAction.tap,
-                  SemanticsAction.focus,
                 ],
                 flags: <SemanticsFlag>[
                   SemanticsFlag.hasEnabledState,

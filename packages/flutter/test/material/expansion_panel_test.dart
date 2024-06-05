@@ -211,7 +211,6 @@ void main() {
       isEnabled: true,
       isFocusable: true,
       hasTapAction: true,
-      hasFocusAction: true,
     ));
 
     // Check custom header widget semantics is preserved.
@@ -262,7 +261,6 @@ void main() {
           isEnabled: true,
           isFocusable: true,
           hasTapAction: true,
-          hasFocusAction: true,
         ),
       ],
     ));
@@ -1101,7 +1099,6 @@ void main() {
       isEnabled: true,
       isFocusable: true,
       hasTapAction: true,
-      hasFocusAction: true,
       onTapHint: localizations.expandedIconTapHint,
     ));
 
@@ -1126,7 +1123,6 @@ void main() {
       isEnabled: true,
       isFocusable: true,
       hasTapAction: true,
-      hasFocusAction: true,
       onTapHint: localizations.collapsedIconTapHint,
     ));
 
@@ -1191,7 +1187,6 @@ void main() {
           isEnabled: true,
           isFocusable: true,
           hasTapAction: true,
-          hasFocusAction: true,
         ),
       ],
     ));
@@ -1220,7 +1215,6 @@ void main() {
           isEnabled: true,
           isFocusable: true,
           hasTapAction: true,
-          hasFocusAction: true,
         ),
       ],
     ));
@@ -1274,7 +1268,6 @@ void main() {
       isFocusable: true,
       hasEnabledState: true,
       hasTapAction: true,
-      hasFocusAction: true,
     ));
 
     expect(tester.getSemantics(find.byKey(collapsedKey)), matchesSemantics(
@@ -1283,7 +1276,6 @@ void main() {
       isFocusable: true,
       hasEnabledState: true,
       hasTapAction: true,
-      hasFocusAction: true,
     ));
 
     handle.dispose();

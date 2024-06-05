@@ -1945,7 +1945,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(semantics, isNot(includesNodeWith(
-      actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+      actions: <SemanticsAction>[SemanticsAction.tap],
       label: 'Dismiss',
     )));
     debugDefaultTargetPlatformOverride = null;
