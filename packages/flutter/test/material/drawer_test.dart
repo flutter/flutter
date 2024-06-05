@@ -147,7 +147,7 @@ void main() {
 
     expect(semantics, isNot(includesNodeWith(
       label: const DefaultMaterialLocalizations().modalBarrierDismissLabel,
-      actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+      actions: <SemanticsAction>[SemanticsAction.tap],
     )));
 
     semantics.dispose();

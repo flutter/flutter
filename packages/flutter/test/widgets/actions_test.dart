@@ -1013,11 +1013,9 @@ void main() {
             // This semantic is from `Focus` widget under `FocusableActionDetector`.
             matchesSemantics(
               isFocusable: true,
-              hasFocusAction: true,
               children: <Matcher>[
                 matchesSemantics(
                   hasTapAction: true,
-                  hasFocusAction: true,
                   isButton: true,
                   hasEnabledState: true,
                   isEnabled: true,
@@ -1027,7 +1025,6 @@ void main() {
                 ),
                 matchesSemantics(
                   hasTapAction: true,
-                  hasFocusAction: true,
                   isButton: true,
                   hasEnabledState: true,
                   isEnabled: true,
@@ -1071,7 +1068,6 @@ void main() {
           children: <Matcher>[
             matchesSemantics(
               hasTapAction: true,
-              hasFocusAction: true,
               isButton: true,
               hasEnabledState: true,
               isEnabled: true,
@@ -1081,7 +1077,6 @@ void main() {
             ),
             matchesSemantics(
               hasTapAction: true,
-              hasFocusAction: true,
               isButton: true,
               hasEnabledState: true,
               isEnabled: true,

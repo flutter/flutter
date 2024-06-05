@@ -674,7 +674,6 @@ Matcher matchesSemantics({
   bool isExpanded = false,
   // Actions //
   bool hasTapAction = false,
-  bool hasFocusAction = false,
   bool hasLongPressAction = false,
   bool hasScrollLeftAction = false,
   bool hasScrollRightAction = false,
@@ -754,7 +753,6 @@ Matcher matchesSemantics({
     isExpanded: isExpanded,
     // Actions
     hasTapAction: hasTapAction,
-    hasFocusAction: hasFocusAction,
     hasLongPressAction: hasLongPressAction,
     hasScrollLeftAction: hasScrollLeftAction,
     hasScrollRightAction: hasScrollRightAction,
@@ -862,7 +860,6 @@ Matcher containsSemantics({
   bool? isExpanded,
   // Actions
   bool? hasTapAction,
-  bool? hasFocusAction,
   bool? hasLongPressAction,
   bool? hasScrollLeftAction,
   bool? hasScrollRightAction,
@@ -942,7 +939,6 @@ Matcher containsSemantics({
     isExpanded: isExpanded,
     // Actions
     hasTapAction: hasTapAction,
-    hasFocusAction: hasFocusAction,
     hasLongPressAction: hasLongPressAction,
     hasScrollLeftAction: hasScrollLeftAction,
     hasScrollRightAction: hasScrollRightAction,
@@ -2263,7 +2259,6 @@ class _MatchesSemanticsData extends Matcher {
     required bool? isExpanded,
     // Actions
     required bool? hasTapAction,
-    required bool? hasFocusAction,
     required bool? hasLongPressAction,
     required bool? hasScrollLeftAction,
     required bool? hasScrollRightAction,
@@ -2322,7 +2317,6 @@ class _MatchesSemanticsData extends Matcher {
         },
         actions = <SemanticsAction, bool>{
           if (hasTapAction != null) SemanticsAction.tap: hasTapAction,
-          if (hasFocusAction != null) SemanticsAction.focus: hasFocusAction,
           if (hasLongPressAction != null) SemanticsAction.longPress: hasLongPressAction,
           if (hasScrollLeftAction != null) SemanticsAction.scrollLeft: hasScrollLeftAction,
           if (hasScrollRightAction != null) SemanticsAction.scrollRight: hasScrollRightAction,
@@ -2385,8 +2379,8 @@ class _MatchesSemanticsData extends Matcher {
   final Map<SemanticsFlag, bool> flags;
 
   @override
-  Description describe(Description description, [String? index]) {
-    description.add('${index == null ? '' : 'Child $index '}has semantics');
+  Description describe(Description description) {
+    description.add('has semantics');
     if (label != null) {
       description.add(' with label: $label');
     }
@@ -2485,15 +2479,9 @@ class _MatchesSemanticsData extends Matcher {
       description.add(' with custom hints: $hintOverrides');
     }
     if (children != null) {
-      description.add(' with children:\n  ');
-      final List<_MatchesSemanticsData> childMatches = children!.cast<_MatchesSemanticsData>();
-      int childIndex = 1;
-      for (final _MatchesSemanticsData child in childMatches) {
-        child.describe(description, index != null ? '$index:$childIndex': '$childIndex');
-        if (child != childMatches.last) {
-          description.add('\n  ');
-        }
-        childIndex += 1;
+      description.add(' with children:\n');
+      for (final _MatchesSemanticsData child in children!.cast<_MatchesSemanticsData>()) {
+        child.describe(description);
       }
     }
     return description;
