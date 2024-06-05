@@ -609,7 +609,6 @@ void main() {
     expect(focusNode.hasFocus, isFalse);
   });
 
-
   testWidgets('IconThemeData is not replaced by CupertinoButton', (WidgetTester tester) async {
     const IconThemeData givenIconTheme = IconThemeData(size: 12.0);
 

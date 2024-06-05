@@ -32,6 +32,10 @@ const double _kCupertinoFocusColorSaturation = 0.835;
 /// [EdgeInsets.zero], should be used to prevent clipping larger [child]
 /// widgets.
 ///
+/// Preserves any parent [IconThemeData] but overwrites its [IconThemeData.color]
+/// with the [CupertinoThemeData.primaryColor] (or
+/// [CupertinoThemeData.primaryContrastingColor] if the button is disabled).
+///
 /// {@tool dartpad}
 /// This sample shows produces an enabled and disabled [CupertinoButton] and
 /// [CupertinoButton.filled].
