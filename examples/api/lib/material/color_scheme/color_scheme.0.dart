@@ -173,6 +173,7 @@ class _SettingsState extends State<Settings> {
                   const Text('Contrast level: '),
                   Expanded(
                     child: Slider(
+                      divisions: 4,
                       label: selectedContrast.toString(),
                       min: -1,
                       value: selectedContrast,
