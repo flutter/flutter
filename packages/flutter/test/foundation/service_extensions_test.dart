@@ -170,7 +170,7 @@ void main() {
     if (WidgetInspectorService.instance.isWidgetCreationTracked()) {
       // Some inspector extensions are only exposed if widget creation locations
       // are tracked.
-      widgetInspectorExtensionCount += 2;
+      widgetInspectorExtensionCount += 3;
     }
     expect(binding.extensions.keys.where((String name) => name.startsWith('inspector.')), hasLength(widgetInspectorExtensionCount));
 
