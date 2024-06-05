@@ -87,6 +87,16 @@ class DisplayListParagraphPainter : public skt::ParagraphPainter {
     if (impeller_enabled_) {
       if (ShouldRenderAsPath(dl_paints_[paint_id])) {
         auto path = skia::textlayout::Paragraph::GetPath(blob.get());
+        // If there is no path, this is an emoji and should be drawn as is,
+        // ignoring the color source.
+        if (path.isEmpty()) {
+          builder_->DrawTextFrame(impeller::MakeTextFrameFromTextBlobSkia(
+                                      blob, dl_paints_[paint_id].getColor()),
+                                  x, y, dl_paints_[paint_id]);
+
+          return;
+        }
+
         auto transformed = path.makeTransform(SkMatrix::Translate(
             x + blob->bounds().left(), y + blob->bounds().top()));
         builder_->DrawPath(transformed, dl_paints_[paint_id]);
