@@ -23,7 +23,7 @@ class ClipboardMessageHandler {
     const MethodCodec codec = JSONMethodCodec();
     bool errorEnvelopeEncoded = false;
     _copyToClipboardStrategy
-        .setData(methodCall.arguments['text'] as String?)
+        .setData((methodCall.arguments as Map<String, Object?>)['text'] as String?)
         .then((bool success) {
       if (success) {
         callback!(codec.encodeSuccessEnvelope(true));

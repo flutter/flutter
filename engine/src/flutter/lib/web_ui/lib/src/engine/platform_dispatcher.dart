@@ -535,7 +535,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
             if (renderer is CanvasKitRenderer) {
               assert(
                 decoded.arguments is int,
-                'Argument to Skia.setResourceCacheMaxBytes must be an int, but was ${decoded.arguments.runtimeType}',
+                'Argument to Skia.setResourceCacheMaxBytes must be an int, but was ${(decoded.arguments as Object?).runtimeType}',
               );
               final int cacheSizeInBytes = decoded.arguments as int;
               CanvasKitRenderer.instance.resourceCacheMaxBytes =

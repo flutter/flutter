@@ -412,16 +412,18 @@ class StandardMessageCodec implements MessageCodec<dynamic> {
         result = buffer.getFloat64List(length);
       case _valueList:
         final int length = readSize(buffer);
-        result = <dynamic>[];
+        final theResult = <Object?>[];
         for (int i = 0; i < length; i++) {
-          result.add(readValue(buffer));
+          theResult.add(readValue(buffer));
         }
+        result = theResult;
       case _valueMap:
         final int length = readSize(buffer);
-        result = <dynamic, dynamic>{};
+        final theResult = <Object?, Object?>{};
         for (int i = 0; i < length; i++) {
-          result[readValue(buffer)] = readValue(buffer);
+          theResult[readValue(buffer)] = readValue(buffer);
         }
+        result = theResult;
       default:
         throw const FormatException('Message corrupted');
     }

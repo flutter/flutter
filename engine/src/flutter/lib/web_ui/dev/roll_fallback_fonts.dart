@@ -73,11 +73,12 @@ class RollFallbackFontsCommand extends Command<bool>
         (googleFontsResult['items'] as List<dynamic>)
             .cast<Map<String, dynamic>>();
     final Map<String, Uri> urlForFamily = <String, Uri>{};
-    for (final Map<String, dynamic> fontData in fontDatas) {
+    for (final Map<String, Object?> fontData in fontDatas) {
       if (fallbackFonts.contains(fontData['family'])) {
-        final Uri uri = Uri.parse(fontData['files']['regular'] as String)
+        final files = fontData['files']! as Map<String, Object?>;
+        final Uri uri = Uri.parse(files['regular']! as String)
             .replace(scheme: 'https');
-        urlForFamily[fontData['family'] as String] = uri;
+        urlForFamily[fontData['family']! as String] = uri;
       }
     }
     final Map<String, String> charsetForFamily = <String, String>{};

@@ -34,7 +34,7 @@ void testMain() {
     await Future<void>.delayed(const Duration(milliseconds: 1));
   }
 
-  void mockRunApp () {
+  Future<void> mockRunApp () async {
     runCalled = callOrder++;
   }
 

@@ -156,12 +156,12 @@ class RunSuiteStep implements PipelineStep {
       throw ToolExit('Could not find built bundle ${suite.testBundle.name.ansiMagenta} for suite ${suite.name.ansiCyan}.');
     }
     final String jsonString = resultsJsonFile.readAsStringSync();
-    final dynamic jsonContents = const JsonDecoder().convert(jsonString);
-    final dynamic results = jsonContents['results'];
+    final jsonContents = const JsonDecoder().convert(jsonString) as Map<String, Object?>;
+    final results = jsonContents['results']! as Map<String, Object?>;
     final List<String> testPaths = <String>[];
-    results.forEach((dynamic k, dynamic v) {
-      final String result = v as String;
-      final String testPath = k as String;
+    results.forEach((Object? k, Object? v) {
+      final String result = v! as String;
+      final String testPath = k! as String;
       if (testFiles != null) {
         if (!testFiles!.contains(FilePath.fromTestSet(suite.testBundle.testSet, testPath))) {
           return;
