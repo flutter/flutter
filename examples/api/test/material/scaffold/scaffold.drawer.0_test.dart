@@ -14,7 +14,7 @@ void main() {
 
     expect(find.byType(Drawer), findsNothing);
 
-    // Opens the drawer by tapping the button at the center of the screen.
+    // Open the drawer by tapping the button at the center of the screen.
     await tester.tap(find.widgetWithText(ElevatedButton, 'Open Drawer'));
     await tester.pumpAndSettle();
 
@@ -26,13 +26,13 @@ void main() {
     );
     expect(find.text('This is the Drawer'), findsOne);
 
-    // Closes the drawer by tapping the button inside the drawer.
+    // Close the drawer by tapping the button inside the drawer.
     await tester.tap(find.widgetWithText(ElevatedButton, 'Close Drawer'));
     await tester.pumpAndSettle();
 
     expect(find.byType(Drawer), findsNothing);
 
-    // Opens the drawer by tapping the drawer button in the app bar.
+    // Open the drawer by tapping the drawer button in the app bar.
     expect(tester.getCenter(
       find.byType(DrawerButton)).dx,
       lessThan(400),
@@ -44,7 +44,7 @@ void main() {
     expect(find.byType(Drawer), findsOne);
     expect(find.text('This is the Drawer'), findsOne);
 
-    // Closes the drawer by tapping outside the drawer.
+    // Close the drawer by tapping outside the drawer.
     final Rect drawerRect = tester.getRect(find.byType(Drawer));
     final Offset outsideDrawer = drawerRect.centerRight + const Offset(50, 0);
     await tester.tapAt(outsideDrawer);
