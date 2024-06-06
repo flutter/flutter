@@ -78,15 +78,12 @@ class _PinnedHeaderSliverExampleState extends State<PinnedHeaderSliverExample> {
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 4),
-          child: Scrollbar(
+          child: CustomScrollView(
             controller: scrollController,
-            child: CustomScrollView(
-              controller: scrollController,
-              slivers: <Widget>[
-                PinnedHeaderSliver(child: header),
-                const ItemList(),
-              ],
-            ),
+            slivers: <Widget>[
+              PinnedHeaderSliver(child: header),
+              const ItemList(),
+            ],
           ),
         ),
       ),
