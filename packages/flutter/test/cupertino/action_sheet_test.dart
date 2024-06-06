@@ -18,6 +18,67 @@ import 'package:flutter_test/flutter_test.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
+  testWidgets('Looks correctly under light theme', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      createAppWithButtonThatLaunchesActionSheet(
+        CupertinoActionSheet(
+          message: const Text('The title'),
+          actions: <Widget>[
+            CupertinoActionSheetAction(child: const Text('One'), onPressed: () {}),
+            CupertinoActionSheetAction(child: const Text('Two'), onPressed: () {}),
+          ],
+          cancelButton: CupertinoActionSheetAction(child: const Text('Cancel'), onPressed: () {}),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+    await tester.pumpAndSettle();
+
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('One')));
+    // This golden file also verifies the structure of an action sheet that
+    // has a message, no title, and no overscroll for any sections (in contrast
+    // to cupertinoActionSheet.dark-theme.png).
+    await expectLater(
+      find.byType(CupertinoActionSheet),
+      matchesGoldenFile('cupertinoActionSheet.light-theme.png'),
+    );
+
+    await gesture.up();
+  });
+
+  testWidgets('Looks correctly under dark theme', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      createAppWithButtonThatLaunchesActionSheet(
+        CupertinoActionSheet(
+          title: const Text('The title'),
+          message: const Text('The message'),
+          actions: List<Widget>.generate(20, (int i) =>
+            CupertinoActionSheetAction(
+              onPressed: () {},
+              child: Text('Button $i'),
+            ),
+          ),
+          cancelButton: CupertinoActionSheetAction(child: const Text('Cancel'), onPressed: () {}),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+    await tester.pumpAndSettle();
+
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('Button 0')));
+    // This golden file also verifies the structure of an action sheet that
+    // has both a message and a title, and an overscrolled action section (in
+    // contrast to cupertinoActionSheet.light-theme.png).
+    await expectLater(
+      find.byType(CupertinoActionSheet),
+      matchesGoldenFile('cupertinoActionSheet.dark-theme.png'),
+    );
+
+    await gesture.up();
+  });
+
   testWidgets('Verify that a tap on modal barrier dismisses an action sheet', (WidgetTester tester) async {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
