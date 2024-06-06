@@ -39,7 +39,7 @@ import 'slotted_render_object_widget.dart';
 ///
 /// See also:
 ///
-///  * [SliverPinnedHeader] - which just pins the header at the top
+///  * [PinnedHeaderSliver] - which just pins the header at the top
 ///    of the [CustomScrollView].
 ///  * [SliverPersistentHeader] - a general purpose header that can be
 ///    configured as a pinned, resizing, or floating header.
