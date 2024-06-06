@@ -131,7 +131,7 @@ const Color _kActionSheetContentTextColor = Color(0x851D1D1D);
 // areas between the content section and actions section, as well as between
 // buttons.
 // Eyeballed from iOS 17 simulator.
-const Color _kActionSheetButtonDividerColor = Color(0xD3CDCDCD);
+const Color _kActionSheetButtonDividerColor = Color(0xD4C9C9C9);
 
 // The alert dialog layout policy changes depending on whether the user is using
 // a "regular" font size vs a "large" font size. This is a spectrum. There are
