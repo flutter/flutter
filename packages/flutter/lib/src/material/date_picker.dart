@@ -52,7 +52,8 @@ const Size _inputRangeLandscapeDialogSize = Size(496, 164.0);
 const Duration _dialogSizeAnimationDuration = Duration(milliseconds: 200);
 const double _inputFormPortraitHeight = 98.0;
 const double _inputFormLandscapeHeight = 108.0;
-const double _kMaxTextScaleFactor = 1.3;
+const double _kMaxTextScaleFactor = 3.0;
+const double _kMaxHeaderTextScaleFactor = 2.0;
 
 /// Shows a dialog containing a Material Design date picker.
 ///
@@ -863,27 +864,36 @@ class _DatePickerHeader extends StatelessWidget {
     final TextStyle? helpStyle = (datePickerTheme.headerHelpStyle ?? defaults.headerHelpStyle)?.copyWith(
       color: foregroundColor,
     );
+    const double fontSizeToScale = 14.0;
+    final double textScaleFactor = MediaQuery.textScalerOf(context).clamp(maxScaleFactor: _kMaxHeaderTextScaleFactor).scale(fontSizeToScale) / fontSizeToScale;
+    final double scaledFontSize = MediaQuery.of(context).textScaler.scale(titleStyle?.fontSize ?? 32);
+    final double headerScaleFactor = textScaleFactor > 1 ? textScaleFactor  : 1.0;
 
     final Text help = Text(
       helpText,
       style: helpStyle,
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
+      textScaler: MediaQuery.textScalerOf(context).clamp(maxScaleFactor: 1.6),
     );
     final Text title = Text(
       titleText,
       semanticsLabel: titleSemanticsLabel ?? titleText,
       style: titleStyle,
-      maxLines: orientation == Orientation.portrait ? 1 : 2,
+      maxLines: orientation == Orientation.portrait ? scaledFontSize > 70 ? 2 : 1 : scaledFontSize > 40 ? 3 : 2,
       overflow: TextOverflow.ellipsis,
+      textScaler: MediaQuery.textScalerOf(context).clamp(maxScaleFactor: _kMaxHeaderTextScaleFactor),
     );
+
+    final double fontScaleAdjustedHeaderHeight =
+      orientation == Orientation.portrait ? headerScaleFactor > 1.5 ? headerScaleFactor - 0.1 : headerScaleFactor : headerScaleFactor;
 
     switch (orientation) {
       case Orientation.portrait:
         return Semantics(
           container: true,
           child: SizedBox(
-            height: _datePickerHeaderPortraitHeight,
+            height: _datePickerHeaderPortraitHeight * fontScaleAdjustedHeaderHeight,
             child: Material(
               color: backgroundColor,
               child: Padding(

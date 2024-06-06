@@ -319,10 +319,14 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
     assert(debugCheckHasMaterial(context));
     assert(debugCheckHasMaterialLocalizations(context));
     assert(debugCheckHasDirectionality(context));
+    const double fontSizeToScale = 14.0;
+    final double textScaleFactor = MediaQuery.textScalerOf(context).clamp(maxScaleFactor: 3.0).scale(fontSizeToScale) / fontSizeToScale;
+    final double scaledMaxDayPickerHeight =
+      textScaleFactor > 1.3 ? _maxDayPickerHeight + ((_maxDayPickerRowCount + 1) * ((textScaleFactor - 1) * 8)) : _maxDayPickerHeight;
     return Stack(
       children: <Widget>[
         SizedBox(
-          height: _subHeaderHeight + _maxDayPickerHeight,
+          height: _subHeaderHeight + scaledMaxDayPickerHeight,
           child: _buildPicker(),
         ),
         // Put the mode toggle button on top so that it won't be covered up by the _MonthPicker
@@ -990,12 +994,15 @@ class _DayPickerState extends State<_DayPicker> {
       padding: const EdgeInsets.symmetric(
         horizontal: _monthPickerHorizontalPadding,
       ),
-      child: GridView.custom(
+      child: MediaQuery.withClampedTextScaling(
+        maxScaleFactor: 2.0,
+        child: GridView.custom(
         physics: const ClampingScrollPhysics(),
-        gridDelegate: _dayPickerGridDelegate,
+        gridDelegate: _DayPickerGridDelegate(context),
         childrenDelegate: SliverChildListDelegate(
           dayItems,
           addRepaintBoundaries: false,
+          ),
         ),
       ),
     );
@@ -1120,14 +1127,20 @@ class _DayState extends State<_Day> {
 }
 
 class _DayPickerGridDelegate extends SliverGridDelegate {
-  const _DayPickerGridDelegate();
+  const _DayPickerGridDelegate(this.context);
+
+  final BuildContext context;
 
   @override
   SliverGridLayout getLayout(SliverConstraints constraints) {
+    const double fontSizeToScale = 14.0;
+    final double textScaleFactor = MediaQuery.textScalerOf(context).clamp(maxScaleFactor: 3.0).scale(fontSizeToScale) / fontSizeToScale;
+    final double scaledRowHeight =
+      textScaleFactor > 1.3 ? ((textScaleFactor - 1) * 30) + _dayPickerRowHeight : _dayPickerRowHeight;
     const int columnCount = DateTime.daysPerWeek;
     final double tileWidth = constraints.crossAxisExtent / columnCount;
     final double tileHeight = math.min(
-      _dayPickerRowHeight,
+      scaledRowHeight,
       constraints.viewportMainAxisExtent / (_maxDayPickerRowCount + 1),
     );
     return SliverGridRegularTileLayout(
@@ -1143,8 +1156,6 @@ class _DayPickerGridDelegate extends SliverGridDelegate {
   @override
   bool shouldRelayout(_DayPickerGridDelegate oldDelegate) => false;
 }
-
-const _DayPickerGridDelegate _dayPickerGridDelegate = _DayPickerGridDelegate();
 
 /// A scrollable grid of years to allow picking a year.
 ///
@@ -1259,14 +1270,17 @@ class _YearPickerState extends State<YearPicker> {
       );
     }
 
+    const double fontSizeToScale = 14.0;
+    final double textScaleFactor = MediaQuery.textScalerOf(context).clamp(maxScaleFactor: 3.0).scale(fontSizeToScale) / fontSizeToScale;
+
     // Backfill the _YearPicker with disabled years if necessary.
     final int offset = _itemCount < minYears ? (minYears - _itemCount) ~/ 2 : 0;
     final int year = widget.firstDate.year + index - offset;
     final bool isSelected = year == widget.selectedDate?.year;
     final bool isCurrentYear = year == widget.currentDate.year;
     final bool isDisabled = year < widget.firstDate.year || year > widget.lastDate.year;
-    const double decorationHeight = 36.0;
-    const double decorationWidth = 72.0;
+    final double decorationHeight = 36.0 * textScaleFactor;
+    final double decorationWidth = 72.0 * textScaleFactor;
 
     final Set<MaterialState> states = <MaterialState>{
       if (isDisabled) MaterialState.disabled,
@@ -1350,7 +1364,7 @@ class _YearPickerState extends State<YearPicker> {
           child: GridView.builder(
             controller: _scrollController,
             dragStartBehavior: widget.dragStartBehavior,
-            gridDelegate: _yearPickerGridDelegate,
+            gridDelegate: _YearPickerGridDelegate(context),
             itemBuilder: _buildYearItem,
             itemCount: math.max(_itemCount, minYears),
             padding: const EdgeInsets.symmetric(horizontal: _yearPickerPadding),
@@ -1363,18 +1377,24 @@ class _YearPickerState extends State<YearPicker> {
 }
 
 class _YearPickerGridDelegate extends SliverGridDelegate {
-  const _YearPickerGridDelegate();
+  const _YearPickerGridDelegate(this.context);
+
+  final BuildContext context;
 
   @override
   SliverGridLayout getLayout(SliverConstraints constraints) {
+    const double fontSizeToScale = 14.0;
+    final double textScaleFactor = MediaQuery.textScalerOf(context).clamp(maxScaleFactor: 3.0).scale(fontSizeToScale) / fontSizeToScale;
+    final int scaledYearPickerColumnCount = textScaleFactor > 1.65 ? _yearPickerColumnCount - 1 : _yearPickerColumnCount;
     final double tileWidth =
-      (constraints.crossAxisExtent - (_yearPickerColumnCount - 1) * _yearPickerRowSpacing) / _yearPickerColumnCount;
+      (constraints.crossAxisExtent - (scaledYearPickerColumnCount - 1) * _yearPickerRowSpacing) / scaledYearPickerColumnCount;
+    final double scaledYearPickerRowHeight = textScaleFactor > 1 ? _yearPickerRowHeight + (( textScaleFactor - 1 ) * 9) : _yearPickerRowHeight;
     return SliverGridRegularTileLayout(
       childCrossAxisExtent: tileWidth,
-      childMainAxisExtent: _yearPickerRowHeight,
-      crossAxisCount: _yearPickerColumnCount,
+      childMainAxisExtent: scaledYearPickerRowHeight,
+      crossAxisCount: scaledYearPickerColumnCount,
       crossAxisStride: tileWidth + _yearPickerRowSpacing,
-      mainAxisStride: _yearPickerRowHeight,
+      mainAxisStride: scaledYearPickerRowHeight,
       reverseCrossAxis: axisDirectionIsReversed(constraints.crossAxisDirection),
     );
   }
@@ -1383,4 +1403,4 @@ class _YearPickerGridDelegate extends SliverGridDelegate {
   bool shouldRelayout(_YearPickerGridDelegate oldDelegate) => false;
 }
 
-const _YearPickerGridDelegate _yearPickerGridDelegate = _YearPickerGridDelegate();
+// const _YearPickerGridDelegate _yearPickerGridDelegate = _YearPickerGridDelegate();
