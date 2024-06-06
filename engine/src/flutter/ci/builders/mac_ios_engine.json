@@ -3,7 +3,7 @@
         {
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac-13",
+                "os=Mac-13|Mac-14",
                 "cpu=x86"
             ],
             "gclient_variables": {
@@ -49,7 +49,7 @@
         {
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac-13"
+                "os=Mac-13|Mac-14"
             ],
             "gclient_variables": {
                 "download_android_deps": false,
@@ -96,7 +96,7 @@
         {
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac-13"
+                "os=Mac-13|Mac-14"
             ],
             "gclient_variables": {
                 "download_android_deps": false,
@@ -140,7 +140,7 @@
         {
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac-13"
+                "os=Mac-13|Mac-14"
             ],
             "gclient_variables": {
                 "download_android_deps": false,
@@ -185,7 +185,7 @@
         {
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac-13"
+                "os=Mac-13|Mac-14"
             ],
             "gclient_variables": {
                 "download_android_deps": false,
@@ -230,7 +230,7 @@
         {
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac-13",
+                "os=Mac-13|Mac-14",
                 "cpu=x86"
             ],
             "gclient_variables": {
@@ -278,7 +278,7 @@
         {
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac-13"
+                "os=Mac-13|Mac-14"
             ],
             "gclient_variables": {
                 "download_android_deps": false,
@@ -327,7 +327,7 @@
         {
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac-13"
+                "os=Mac-13|Mac-14"
             ],
             "gclient_variables": {
                 "download_android_deps": false,
@@ -373,7 +373,7 @@
         {
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac-13"
+                "os=Mac-13|Mac-14"
             ],
             "gclient_variables": {
                 "download_android_deps": false,
@@ -420,7 +420,7 @@
         {
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac-13"
+                "os=Mac-13|Mac-14"
             ],
             "gclient_variables": {
                 "download_android_deps": false,

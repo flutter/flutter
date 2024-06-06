@@ -3,7 +3,7 @@
     {
       "cas_archive": false,
       "drone_dimensions": [
-        "os=Mac-13",
+        "os=Mac-13|Mac-14",
         "device_type=none"
       ],
       "gclient_variables": {
@@ -35,7 +35,7 @@
     {
       "cas_archive": false,
       "drone_dimensions": [
-        "os=Mac-13",
+        "os=Mac-13|Mac-14",
         "device_type=none"
       ],
       "gclient_variables": {
@@ -68,7 +68,7 @@
     {
       "cas_archive": false,
       "drone_dimensions": [
-        "os=Mac-13",
+        "os=Mac-13|Mac-14",
         "device_type=none"
       ],
       "gclient_variables": {
@@ -100,7 +100,7 @@
     {
       "cas_archive": false,
       "drone_dimensions": [
-        "os=Mac-13",
+        "os=Mac-13|Mac-14",
         "device_type=none"
       ],
       "gclient_variables": {
@@ -132,7 +132,7 @@
     {
       "cas_archive": false,
       "drone_dimensions": [
-        "os=Mac-13",
+        "os=Mac-13|Mac-14",
         "device_type=none"
       ],
       "gclient_variables": {
@@ -165,7 +165,7 @@
     {
       "cas_archive": false,
       "drone_dimensions": [
-        "os=Mac-13",
+        "os=Mac-13|Mac-14",
         "device_type=none"
       ],
       "gclient_variables": {
@@ -199,7 +199,7 @@
     {
       "cas_archive": false,
       "drone_dimensions": [
-        "os=Mac-13",
+        "os=Mac-13|Mac-14",
         "device_type=none"
       ],
       "gclient_variables": {
@@ -310,7 +310,7 @@
     {
       "cas_archive": false,
       "drone_dimensions": [
-        "os=Mac-13",
+        "os=Mac-13|Mac-14",
         "device_type=none"
       ],
       "gclient_variables": {
@@ -343,7 +343,7 @@
     {
       "cas_archive": false,
       "drone_dimensions": [
-        "os=Mac-13",
+        "os=Mac-13|Mac-14",
         "device_type=none"
       ],
       "gclient_variables": {
@@ -427,7 +427,7 @@
     {
       "cas_archive": false,
       "drone_dimensions": [
-        "os=Mac-13",
+        "os=Mac-13|Mac-14",
         "device_type=none"
       ],
       "gclient_variables": {
@@ -511,7 +511,7 @@
     {
       "cas_archive": false,
       "drone_dimensions": [
-        "os=Mac-13",
+        "os=Mac-13|Mac-14",
         "device_type=none"
       ],
       "gclient_variables": {
@@ -542,7 +542,7 @@
     {
       "cas_archive": false,
       "drone_dimensions": [
-        "os=Mac-13",
+        "os=Mac-13|Mac-14",
         "device_type=none"
       ],
       "gclient_variables": {
@@ -574,7 +574,7 @@
     {
       "cas_archive": false,
       "drone_dimensions": [
-        "os=Mac-13",
+        "os=Mac-13|Mac-14",
         "device_type=none"
       ],
       "gclient_variables": {
@@ -606,7 +606,7 @@
     {
       "cas_archive": false,
       "drone_dimensions": [
-        "os=Mac-13",
+        "os=Mac-13|Mac-14",
         "device_type=none"
       ],
       "gclient_variables": {
@@ -714,7 +714,7 @@
     {
       "cas_archive": false,
       "drone_dimensions": [
-        "os=Mac-13",
+        "os=Mac-13|Mac-14",
         "device_type=none"
       ],
       "gclient_variables": {
@@ -795,7 +795,7 @@
     {
       "cas_archive": false,
       "drone_dimensions": [
-        "os=Mac-13",
+        "os=Mac-13|Mac-14",
         "device_type=none"
       ],
       "gclient_variables": {
