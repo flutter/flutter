@@ -110,8 +110,9 @@ const Color _kDialogPressedColor = CupertinoDynamicColor.withBrightness(
 
 // Translucent light gray that is painted on top of the blurred backdrop as the
 // background color of a pressed button.
-// Eyeballed from iOS 13 beta simulator.
+// Eyeballed from iOS 17 simulator.
 const Color _kActionSheetPressedColor = Color(0xCAE0E0E0);
+
 const Color _kActionSheetCancelColor = Color(0xFFFFFFFF);
 const Color _kActionSheetCancelPressedColor = Color(0xFFECECEC);
 
@@ -119,17 +120,17 @@ const Color _kActionSheetCancelPressedColor = Color(0xFFECECEC);
 // as the action sheet's background color.
 // TODO(LongCatIsLooong): https://github.com/flutter/flutter/issues/39272. Use
 // System Materials once we have them.
-// Extracted from https://developer.apple.com/design/resources/.
-const Color _kActionSheetBackgroundColor = Color(0xC9F9F9F9);
+// Eyeballed from iOS 17 simulator.
+const Color _kActionSheetBackgroundColor = Color(0xC8FCFCFC);
 
 // The gray color used for text that appears in the title area.
-// Extracted from https://developer.apple.com/design/resources/.
-const Color _kActionSheetContentTextColor = Color(0xFF8F8F8F);
+// Eyeballed from iOS 17 simulator.
+const Color _kActionSheetContentTextColor = Color(0x851D1D1D);
 
 // Translucent gray that is painted on top of the blurred backdrop in the gap
 // areas between the content section and actions section, as well as between
 // buttons.
-// Eye-balled from iOS 13 beta simulator.
+// Eyeballed from iOS 17 simulator.
 const Color _kActionSheetButtonDividerColor = Color(0xD3CDCDCD);
 
 // The alert dialog layout policy changes depending on whether the user is using
