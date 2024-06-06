@@ -253,9 +253,9 @@ TEST_F(PainterTest, DrawStrokedTextImpeller) {
   auto recorder = DlOpRecorder();
   draw(style)->Dispatch(recorder);
 
-  EXPECT_EQ(recorder.textFrameCount(), 1);
+  EXPECT_EQ(recorder.textFrameCount(), 0);
   EXPECT_EQ(recorder.blobCount(), 0);
-  EXPECT_EQ(recorder.pathCount(), 0);
+  EXPECT_EQ(recorder.pathCount(), 1);
 }
 
 TEST_F(PainterTest, DrawTextWithGradientImpeller) {
