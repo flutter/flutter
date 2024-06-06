@@ -58,48 +58,6 @@ void main() {
     expect(tester.getCenter(find.text('Page 2')).dx, 400.0);
   });
 
-  testWidgets('Opaque background does not add blur effects, non-opaque background adds blur effects', (WidgetTester tester) async {
-    const CupertinoDynamicColor background = CupertinoDynamicColor.withBrightness(
-      color: Color(0xFFE5E5E5),
-      darkColor: Color(0xF3E5E5E5),
-    );
-
-    await tester.pumpWidget(
-      const CupertinoApp(
-        theme: CupertinoThemeData(brightness: Brightness.light),
-        home: CupertinoNavigationBar(
-          middle: Text('Title'),
-          backgroundColor: background,
-        ),
-      ),
-    );
-    expect(find.byType(BackdropFilter), findsNothing);
-    expect(find.byType(CupertinoNavigationBar), paints..rect(color: background.color));
-
-    await tester.pumpWidget(
-      const CupertinoApp(
-        theme: CupertinoThemeData(brightness: Brightness.dark),
-        home: CupertinoNavigationBar(
-          middle: Text('Title'),
-          backgroundColor: background,
-        ),
-      ),
-    );
-    expect(find.byType(BackdropFilter), findsOneWidget);
-    expect(find.byType(CupertinoNavigationBar), paints..rect(color: background.darkColor));
-  });
-
-  testWidgets('Non-opaque background adds blur effects', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const CupertinoApp(
-        home: CupertinoNavigationBar(
-          middle: Text('Title'),
-        ),
-      ),
-    );
-    expect(find.byType(BackdropFilter), findsOneWidget);
-  });
-
   testWidgets('Nav bar displays correctly', (WidgetTester tester) async {
     final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
     await tester.pumpWidget(
@@ -781,6 +739,7 @@ void main() {
     await tester.pumpWidget(
       const CupertinoApp(
         home: CupertinoNavigationBar(
+          automaticBackgroundVisibility: false,
           middle: Text('Title'),
           border: Border(
             bottom: BorderSide(
@@ -933,6 +892,7 @@ void main() {
           child: CustomScrollView(
             slivers: <Widget>[
               CupertinoSliverNavigationBar(
+                automaticBackgroundVisibility: false,
                 largeTitle: Text('Large Title'),
                 border: Border(
                   bottom: BorderSide(
@@ -940,7 +900,6 @@ void main() {
                     width: 0.0,
                   ),
                 ),
-                initiallyTransparent: false,
               ),
             ],
           ),
@@ -1020,7 +979,7 @@ void main() {
   );
 
   testWidgets(
-    'NavBar is initially transparent and appears when content is scrolled under',
+    'Nav bar background is transparent if `automaticBackgroundVisibility` is true and has no content scrolled under it',
     (WidgetTester tester) async {
       final ScrollController scrollController = ScrollController();
       addTearDown(scrollController.dispose);
@@ -1061,7 +1020,7 @@ void main() {
       final BorderSide side = decoration.border!.bottom;
       expect(side.color.opacity, 0.0);
 
-      // appears transparent since it has the same background color as the scaffold.
+      // appears transparent since the background color is the same as the scaffold.
       expect(find.byType(CupertinoNavigationBar), paints..rect(color: const Color(0xFFFFFFFF)));
 
       scrollController.jumpTo(100.0);
@@ -1082,7 +1041,7 @@ void main() {
   );
 
   testWidgets(
-    'Nav bar is not initially transparent if not a child of CupertinoPageScaffold',
+    'automaticBackgroundVisibility parameter has no effect if nav bar is not a child of CupertinoPageScaffold',
     (WidgetTester tester) async {
       await tester.pumpWidget(
         const CupertinoApp(
@@ -1114,12 +1073,13 @@ void main() {
   );
 
   testWidgets(
-    'Nav bar is not initially transparent if initiallyTransparent parameter is false',
+    'Nav bar background is always visible if `automaticBackgroundVisibility` is false',
     (WidgetTester tester) async {
       await tester.pumpWidget(
         const CupertinoApp(
           home: CupertinoPageScaffold(
             navigationBar: CupertinoNavigationBar(
+              automaticBackgroundVisibility: false,
               backgroundColor: Color(0xFFE5E5E5),
               border: Border(
                 bottom: BorderSide(
@@ -1128,7 +1088,6 @@ void main() {
                 ),
               ),
               middle: Text('Title'),
-              initiallyTransparent: false,
             ),
             child: Placeholder(),
           ),
@@ -1153,6 +1112,7 @@ void main() {
             child: CustomScrollView(
               slivers: <Widget>[
                 const CupertinoSliverNavigationBar(
+                  automaticBackgroundVisibility: false,
                   backgroundColor: Color(0xFFE5E5E5),
                   border: Border(
                     bottom: BorderSide(
@@ -1161,7 +1121,6 @@ void main() {
                     ),
                   ),
                   largeTitle: Text('Title'),
-                  initiallyTransparent: false,
                 ),
                 SliverToBoxAdapter(
                   child: Container(
@@ -1189,7 +1148,7 @@ void main() {
   );
 
   testWidgets(
-    'CupertinoSliverNavigationBar is initially transparent and appears when content is scrolled under',
+    'CupertinoSliverNavigationBar background is transparent if `automaticBackgroundVisibility` is true and has no content scrolled under it',
     (WidgetTester tester) async {
       final ScrollController scrollController = ScrollController();
       addTearDown(scrollController.dispose);
@@ -1234,7 +1193,7 @@ void main() {
       final BorderSide side = decoration.border!.bottom;
       expect(side.color.opacity, 0.0);
 
-      // appears transparent since it has the same background color as the scaffold.
+      // appears transparent since the background color is the same as the scaffold.
       expect(find.byType(CupertinoSliverNavigationBar), paints..rect(color: const Color(0xFFFFFFFF)));
 
       scrollController.jumpTo(400.0);

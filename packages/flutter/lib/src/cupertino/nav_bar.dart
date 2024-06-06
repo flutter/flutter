@@ -132,16 +132,21 @@ class _FixedSizeSlidingTransition extends AnimatedWidget {
 }
 
 /// Returns `child` wrapped with background and a bottom border if background color
-/// is opaque. Otherwise, also blur with [BackdropFilter].
+/// is opaque. Otherwise, also blur with [BackdropFilter] if content scrolls under
+/// the nav bar.
 ///
 /// When `updateSystemUiOverlay` is true, the nav bar will update the OS
 /// status bar's color theme based on the background color of the nav bar.
+///
+/// When `isContentScrolledUnder` is true, the nav bar will render a blurred
+/// background when the content scrolls under the nav bar.
 Widget _wrapWithBackground({
   Border? border,
   required Color backgroundColor,
   Brightness? brightness,
   required Widget child,
   bool updateSystemUiOverlay = true,
+  bool isContentScrolledUnder = false,
 }) {
   Widget result = child;
   if (updateSystemUiOverlay) {
@@ -176,13 +181,11 @@ Widget _wrapWithBackground({
     child: result,
   );
 
-  if (backgroundColor.alpha == 0xFF) {
-    return childWithBackground;
-  }
-
   return ClipRect(
     child: BackdropFilter(
-      filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+      filter: backgroundColor.alpha == 0xFF || !isContentScrolledUnder
+        ? ImageFilter.blur()
+        : ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
       child: childWithBackground,
     ),
   );
@@ -264,7 +267,7 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
     this.trailing,
     this.border = _kDefaultNavBarBorder,
     this.backgroundColor,
-    this.initiallyTransparent = true,
+    this.automaticBackgroundVisibility = true,
     this.brightness,
     this.padding,
     this.transitionBetweenRoutes = true,
@@ -347,17 +350,18 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
   /// {@endtemplate}
   final Color? backgroundColor;
 
-  /// {@template flutter.cupertino.CupertinoNavigationBar.initiallyTransparent}
+  /// {@template flutter.cupertino.CupertinoNavigationBar.automaticBackgroundVisibility}
   /// Whether the navigation bar appears transparent when no content is scrolled under.
   ///
-  /// If this is true, the navigation bar's background color will be the same as the
-  /// parent [CupertinoPageScaffold]'s background color.
+  /// If this is true, the navigation bar's background color will be transparent
+  /// until the content scrolls under it. If false, the navigation bar will always
+  /// use [backgroundColor] as its background color.
   ///
   /// If the navigation bar is not a child of a [CupertinoPageScaffold], this has no effect.
   ///
   /// This value defaults to true.
   /// {@endtemplate}
-  final bool initiallyTransparent;
+  final bool automaticBackgroundVisibility;
 
   /// {@template flutter.cupertino.CupertinoNavigationBar.brightness}
   /// The brightness of the specified [backgroundColor].
@@ -520,13 +524,13 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
 
     final Color? parentPageScaffoldBackgroundColor = CupertinoPageScaffoldBackgroundColor.maybeOf(context);
 
-    final Border? initialBorder = widget.initiallyTransparent && parentPageScaffoldBackgroundColor != null
+    final Border? initialBorder = widget.automaticBackgroundVisibility && parentPageScaffoldBackgroundColor != null
       ? const Border(bottom: BorderSide(width: 0.0, color: Color(0x00000000)))
       : widget.border;
     final Border? effectiveBorder = widget.border == null ? null : Border.lerp(initialBorder, widget.border, _scrollAnimationValue,);
 
-    final Color effectiveBackgroundColor = widget.initiallyTransparent
-      ? Color.lerp(parentPageScaffoldBackgroundColor ?? backgroundColor, backgroundColor, _scrollAnimationValue) ?? backgroundColor
+    final Color effectiveBackgroundColor = widget.automaticBackgroundVisibility && parentPageScaffoldBackgroundColor != null
+      ? Color.lerp(parentPageScaffoldBackgroundColor, backgroundColor, _scrollAnimationValue) ?? backgroundColor
       : backgroundColor;
 
     final _NavigationBarStaticComponents components = _NavigationBarStaticComponents(
@@ -544,6 +548,7 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
     );
 
     final Widget navBar = _wrapWithBackground(
+      isContentScrolledUnder: _scrollAnimationValue > 0.0,
       border: effectiveBorder,
       backgroundColor: effectiveBackgroundColor,
       brightness: widget.brightness,
@@ -670,7 +675,7 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
     this.trailing,
     this.border = _kDefaultNavBarBorder,
     this.backgroundColor,
-    this.initiallyTransparent = true,
+    this.automaticBackgroundVisibility = true,
     this.brightness,
     this.padding,
     this.transitionBetweenRoutes = true,
@@ -752,8 +757,8 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
   /// {@macro flutter.cupertino.CupertinoNavigationBar.backgroundColor}
   final Color? backgroundColor;
 
-  /// {@macro flutter.cupertino.CupertinoNavigationBar.initiallyTransparent}
-  final bool initiallyTransparent;
+  /// {@macro flutter.cupertino.CupertinoNavigationBar.automaticBackgroundVisibility}
+  final bool automaticBackgroundVisibility;
 
   /// {@macro flutter.cupertino.CupertinoNavigationBar.brightness}
   final Brightness? brightness;
@@ -825,7 +830,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
           components: components,
           userMiddle: widget.middle,
           backgroundColor: CupertinoDynamicColor.maybeResolve(widget.backgroundColor, context) ?? CupertinoTheme.of(context).barBackgroundColor,
-          initiallyTransparent: widget.initiallyTransparent,
+          automaticBackgroundVisibility: widget.automaticBackgroundVisibility,
           brightness: widget.brightness,
           border: widget.border,
           padding: widget.padding,
@@ -848,7 +853,7 @@ class _LargeTitleNavigationBarSliverDelegate
     required this.components,
     required this.userMiddle,
     required this.backgroundColor,
-    required this.initiallyTransparent,
+    required this.automaticBackgroundVisibility,
     required this.brightness,
     required this.border,
     required this.padding,
@@ -864,7 +869,7 @@ class _LargeTitleNavigationBarSliverDelegate
   final _NavigationBarStaticComponents components;
   final Widget? userMiddle;
   final Color backgroundColor;
-  final bool initiallyTransparent;
+  final bool automaticBackgroundVisibility;
   final Brightness? brightness;
   final Border? border;
   final EdgeInsetsDirectional? padding;
@@ -904,16 +909,17 @@ class _LargeTitleNavigationBarSliverDelegate
 
     final Color? parentPageScaffoldBackgroundColor = CupertinoPageScaffoldBackgroundColor.maybeOf(context);
 
-    final Border? initialBorder = initiallyTransparent && parentPageScaffoldBackgroundColor != null
+    final Border? initialBorder = automaticBackgroundVisibility && parentPageScaffoldBackgroundColor != null
         ? const Border(bottom: BorderSide(width: 0.0, color: Color(0x00000000)))
         : border;
     final Border? effectiveBorder = border == null ? null : Border.lerp(initialBorder, border, shrinkAnimationValue);
 
-    final Color effectiveBackgroundColor = initiallyTransparent
-        ? Color.lerp(parentPageScaffoldBackgroundColor ?? backgroundColor, backgroundColor, shrinkAnimationValue) ?? backgroundColor
+    final Color effectiveBackgroundColor = automaticBackgroundVisibility && parentPageScaffoldBackgroundColor != null
+        ? Color.lerp(parentPageScaffoldBackgroundColor, backgroundColor, shrinkAnimationValue) ?? backgroundColor
         : backgroundColor;
 
     final Widget navBar = _wrapWithBackground(
+      isContentScrolledUnder: shrinkAnimationValue > 0.0,
       border: effectiveBorder,
       backgroundColor: effectiveBackgroundColor,
       brightness: brightness,
@@ -1002,7 +1008,7 @@ class _LargeTitleNavigationBarSliverDelegate
     return components != oldDelegate.components
         || userMiddle != oldDelegate.userMiddle
         || backgroundColor != oldDelegate.backgroundColor
-        || initiallyTransparent != oldDelegate.initiallyTransparent
+        || automaticBackgroundVisibility != oldDelegate.automaticBackgroundVisibility
         || border != oldDelegate.border
         || padding != oldDelegate.padding
         || actionsForegroundColor != oldDelegate.actionsForegroundColor
