@@ -477,8 +477,9 @@ class _SlidingTapGestureRecognizer extends VerticalDragGestureRecognizer {
   ///
   /// The parameter is the global position of the primary pointer.
   ///
-  /// This allows the caller to track the primary pointer's location before
-  /// the drag starts, which is useful to enhance responsiveness.
+  /// This is similar to `onUpdate`, but allows the caller to track the primary
+  /// pointer's location before the drag starts, which is useful to enhance
+  /// responsiveness.
   ValueSetter<Offset>? onResponsiveUpdate;
 
   /// Called whenever the primary pointer is lifted regardless of whether drag
@@ -486,8 +487,9 @@ class _SlidingTapGestureRecognizer extends VerticalDragGestureRecognizer {
   ///
   /// The parameter is the global position of the primary pointer.
   ///
-  /// This allows the caller to track the primary pointer's location before
-  /// the drag starts, which is useful to enhance responsiveness.
+  /// This is similar to `onEnd`, but allows know the primary pointer's final
+  /// location even if the drag never started, which is useful to enhance
+  /// responsiveness.
   ValueSetter<Offset>? onResponsiveEnd;
 
   int? _primaryPointer;
@@ -546,13 +548,14 @@ class _SlidingTapGestureRecognizer extends VerticalDragGestureRecognizer {
 // enters, leaves, or ends this `MetaData` widget, corresponding methods of this
 // class will be called.
 //
-// Multiple `_ActionSheetDragAvatar`s might be nested.
-// `_AvatarSelectionGestureRecognizer` uses a simple algorithm that only
-// compares if the inner-most avatar has changed (which suffices our use case).
-// Semantically, this means that all outer avatars will be treated as identical
-// to the inner-most one, i.e. when the pointer enters or leaves an avatar, the
-// corresponding method will be called on all avatars that nest it.
-abstract class _ActionSheetDragAvatar {
+// Multiple `_ActionSheetSlideTarget`s might be nested.
+// `_TargetSelectionGestureRecognizer` uses a simple algorithm that only
+// compares if the inner-most slide target has changed (which suffices our use
+// case).  Semantically, this means that all outer targets will be treated as
+// identical to the inner-most one, i.e. when the pointer enters or leaves a
+// slide target, the corresponding method will be called on all targets that
+// nest it.
+abstract class _ActionSheetSlideTarget {
   // A pointer has entered this region.
   //
   // This includes:
@@ -570,7 +573,7 @@ abstract class _ActionSheetDragAvatar {
   //  * The pointer is no longer in contact with the screen.
   //  * The pointer is canceled.
   //  * The gesture loses the arena.
-  //  * The gesture is completed. In this case, this method is called immediately
+  //  * The gesture ends. In this case, this method is called immediately
   //    before [didConfirm].
   void didLeave();
 
@@ -581,9 +584,9 @@ abstract class _ActionSheetDragAvatar {
 }
 
 // Recognizes sliding taps and thereupon interacts with
-// `_ActionSheetDragAvatar`s.
-class _AvatarSelectionGestureRecognizer extends GestureRecognizer {
-  _AvatarSelectionGestureRecognizer({super.debugOwner, required this.hitTest})
+// `_ActionSheetSlideTarget`s.
+class _TargetSelectionGestureRecognizer extends GestureRecognizer {
+  _TargetSelectionGestureRecognizer({super.debugOwner, required this.hitTest})
     : _slidingTap = _SlidingTapGestureRecognizer(debugOwner: debugOwner) {
     _slidingTap
       ..onDown = _onDown
@@ -594,7 +597,7 @@ class _AvatarSelectionGestureRecognizer extends GestureRecognizer {
 
   final _HitTester hitTest;
 
-  final List<_ActionSheetDragAvatar> _currentAvatars = <_ActionSheetDragAvatar>[];
+  final List<_ActionSheetSlideTarget> _currentTargets = <_ActionSheetSlideTarget>[];
   final _SlidingTapGestureRecognizer _slidingTap;
 
   @override
@@ -623,32 +626,36 @@ class _AvatarSelectionGestureRecognizer extends GestureRecognizer {
     super.dispose();
   }
 
-  // Collect the `_ActionSheetDragAvatar`s that are currently hit by the
-  // pointer, check whether the current avatars have changed, and invoke their
+  // Collect the `_ActionSheetSlideTarget`s that are currently hit by the
+  // pointer, check whether the current target have changed, and invoke their
   // methods if necessary.
   void _updateDrag(Offset pointerPosition) {
     final HitTestResult result = hitTest(pointerPosition);
 
-    final List<_ActionSheetDragAvatar> foundAvatars = <_ActionSheetDragAvatar>[];
+    // A slide target might nest other targets, therefore multiple targets might
+    // be found.
+    final List<_ActionSheetSlideTarget> foundTargets = <_ActionSheetSlideTarget>[];
     for (final HitTestEntry entry in result.path) {
       if (entry.target case final RenderMetaData target) {
-        if (target.metaData is _ActionSheetDragAvatar) {
-          foundAvatars.add(target.metaData as _ActionSheetDragAvatar);
+        if (target.metaData is _ActionSheetSlideTarget) {
+          foundTargets.add(target.metaData as _ActionSheetSlideTarget);
         }
       }
     }
 
-    // Compare whether the active avatar has changed by simply comparing
-    // the first (inner-most) avatar of the nest.
-    if (_maybeFirst(_currentAvatars) != _maybeFirst(foundAvatars)) {
-      for (final _ActionSheetDragAvatar avatar in _currentAvatars) {
-        avatar.didLeave();
+    // Compare whether the active target has changed by simply comparing the
+    // first (inner-most) avatar of the nest, ignoring the cases where
+    // _currentTargets intersect with foundTargets (see _ActionSheetSlideTarget's
+    // document for more explanation).
+    if (_currentTargets.firstOrNull != foundTargets.firstOrNull) {
+      for (final _ActionSheetSlideTarget target in _currentTargets) {
+        target.didLeave();
       }
-      _currentAvatars
+      _currentTargets
         ..clear()
-        ..addAll(foundAvatars);
-      for (final _ActionSheetDragAvatar avatar in _currentAvatars) {
-        avatar.didEnter();
+        ..addAll(foundTargets);
+      for (final _ActionSheetSlideTarget target in _currentTargets) {
+        target.didEnter();
       }
     }
   }
@@ -663,27 +670,27 @@ class _AvatarSelectionGestureRecognizer extends GestureRecognizer {
 
   void _onEnd(Offset globalPosition) {
     _updateDrag(globalPosition);
-    for (final _ActionSheetDragAvatar avatar in _currentAvatars) {
-      avatar.didConfirm();
+    for (final _ActionSheetSlideTarget target in _currentTargets) {
+      target.didConfirm();
     }
-    _currentAvatars.clear();
+    _currentTargets.clear();
   }
 
   void _onCancel() {
-    for (final _ActionSheetDragAvatar avatar in _currentAvatars) {
-      avatar.didLeave();
+    for (final _ActionSheetSlideTarget target in _currentTargets) {
+      target.didLeave();
     }
-    _currentAvatars.clear();
+    _currentTargets.clear();
   }
 
   @override
-  String get debugDescription => 'avatar selection';
+  String get debugDescription => 'target selection';
 }
 
 // The gesture detector used by action sheets.
 //
 // This gesture detector only recognizes one gesture,
-// `_AvatarSelectionGestureRecognizer`.
+// `_TargetSelectionGestureRecognizer`.
 //
 // This widget's child might contain another VerticalDragGestureRecognizer if
 // the actions section or the content section scrolls. Conveniently, Flutter's
@@ -705,12 +712,12 @@ class _ActionSheetGestureDetector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Map<Type, GestureRecognizerFactory> gestures = <Type, GestureRecognizerFactory>{};
-    gestures[_AvatarSelectionGestureRecognizer] = GestureRecognizerFactoryWithHandlers<_AvatarSelectionGestureRecognizer>(
-      () => _AvatarSelectionGestureRecognizer(
+    gestures[_TargetSelectionGestureRecognizer] = GestureRecognizerFactoryWithHandlers<_TargetSelectionGestureRecognizer>(
+      () => _TargetSelectionGestureRecognizer(
         debugOwner: this,
         hitTest: (Offset globalPosition) => _hitTest(context, globalPosition),
       ),
-      (_AvatarSelectionGestureRecognizer instance) {}
+      (_TargetSelectionGestureRecognizer instance) {}
     );
 
     return RawGestureDetector(
@@ -1004,16 +1011,16 @@ class CupertinoActionSheetAction extends StatefulWidget {
 }
 
 class _CupertinoActionSheetActionState extends State<CupertinoActionSheetAction>
-    implements _ActionSheetDragAvatar {
-  // |_ActionSheetDragAvatar|
+    implements _ActionSheetSlideTarget {
+  // |_ActionSheetSlideTarget|
   @override
   void didEnter() {}
 
-  // |_ActionSheetDragAvatar|
+  // |_ActionSheetSlideTarget|
   @override
   void didLeave() {}
 
-  // |_ActionSheetDragAvatar|
+  // |_ActionSheetSlideTarget|
   @override
   void didConfirm() {
     widget.onPressed();
@@ -1086,24 +1093,24 @@ class _ActionSheetButtonBackground extends StatefulWidget {
   _ActionSheetButtonBackgroundState createState() => _ActionSheetButtonBackgroundState();
 }
 
-class _ActionSheetButtonBackgroundState extends State<_ActionSheetButtonBackground> implements _ActionSheetDragAvatar {
+class _ActionSheetButtonBackgroundState extends State<_ActionSheetButtonBackground> implements _ActionSheetSlideTarget {
   bool isBeingPressed = false;
 
-  // |_ActionSheetDragAvatar|
+  // |_ActionSheetSlideTarget|
   @override
   void didEnter() {
     setState(() { isBeingPressed = true; });
     widget.onPressStateChange?.call(true);
   }
 
-  // |_ActionSheetDragAvatar|
+  // |_ActionSheetSlideTarget|
   @override
   void didLeave() {
     setState(() { isBeingPressed = false; });
     widget.onPressStateChange?.call(false);
   }
 
-  // |_ActionSheetDragAvatar|
+  // |_ActionSheetSlideTarget|
   @override
   void didConfirm() {
     setState(() { isBeingPressed = false; });
