@@ -41,7 +41,9 @@ void main() {
     expect(find.text('update'), findsOneWidget);
   });
 
-  testWidgets('Router respects update order', (WidgetTester tester) async {
+  testWidgets('Router respects update order',
+  experimentalLeakTesting: LeakTesting.settings.withCreationStackTrace(),
+  (WidgetTester tester) async {
     final SimpleRouteInformationProvider provider = SimpleRouteInformationProvider();
     addTearDown(provider.dispose);
     provider.value = RouteInformation(
@@ -52,6 +54,7 @@ void main() {
     addTearDown(delegate.dispose);
 
     final ValueNotifier<int> notifier = ValueNotifier<int>(0);
+    addTearDown(notifier.dispose);
     await tester.pumpWidget(buildBoilerPlate(
         IntInheritedNotifier(
           notifier: notifier,
