@@ -694,8 +694,9 @@ class _RouterState<T> extends State<Router<T>> with RestorationMixin {
     // The super.didChangeDependencies may have parsed the route information.
     // This can happen if the didChangeDependencies is triggered by state
     // restoration or first build.
-    if (widget.routeInformationProvider != null && _routeParsePending) {
-      _processRouteInformation(widget.routeInformationProvider!.value, () => widget.routerDelegate.setNewRoutePath);
+    final RouteInformation? currentRouteInformation = _routeInformation.value ?? widget.routeInformationProvider?.value;
+    if (currentRouteInformation != null && _routeParsePending) {
+      _processRouteInformation(currentRouteInformation, () => widget.routerDelegate.setNewRoutePath);
     }
     _routeParsePending = false;
     _maybeNeedToReportRouteInformation();
