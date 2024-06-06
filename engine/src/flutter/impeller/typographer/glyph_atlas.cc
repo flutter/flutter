@@ -80,8 +80,9 @@ std::optional<std::pair<Rect, Rect>> GlyphAtlas::FindFontGlyphBounds(
 }
 
 const FontGlyphAtlas* GlyphAtlas::GetFontGlyphAtlas(const Font& font,
-                                                    Scalar scale) const {
-  const auto& found = font_atlas_map_.find(ScaledFont{font, scale});
+                                                    Scalar scale,
+                                                    Color color) const {
+  const auto& found = font_atlas_map_.find({font, scale, color});
   if (found == font_atlas_map_.end()) {
     return nullptr;
   }

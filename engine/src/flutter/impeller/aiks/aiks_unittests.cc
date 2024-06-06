@@ -18,6 +18,7 @@
 #include "impeller/aiks/color_filter.h"
 #include "impeller/aiks/image.h"
 #include "impeller/aiks/image_filter.h"
+#include "impeller/aiks/paint_pass_delegate.h"
 #include "impeller/aiks/testing/context_spy.h"
 #include "impeller/core/device_buffer.h"
 #include "impeller/entity/contents/solid_color_contents.h"
@@ -631,7 +632,6 @@ TEST_P(AiksTest, CanRenderRoundedRectWithNonUniformRadii) {
 }
 
 struct TextRenderOptions {
-  bool stroke = false;
   Scalar font_size = 50;
   Color color = Color::Yellow();
   Point position = Vector2(100, 200);
@@ -671,9 +671,6 @@ bool RenderTextInCanvasSkia(const std::shared_ptr<Context>& context,
   Paint text_paint;
   text_paint.color = options.color;
   text_paint.mask_blur_descriptor = options.mask_blur_descriptor;
-  text_paint.stroke_width = 1;
-  text_paint.style =
-      options.stroke ? Paint::Style::kStroke : Paint::Style::kFill;
   canvas.DrawTextFrame(frame, options.position, text_paint);
   return true;
 }
@@ -714,18 +711,6 @@ TEST_P(AiksTest, CanRenderTextFrame) {
   ASSERT_TRUE(RenderTextInCanvasSkia(
       GetContext(), canvas, "the quick brown fox jumped over the lazy dog!.?",
       "Roboto-Regular.ttf"));
-  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
-}
-
-TEST_P(AiksTest, CanRenderStrokedTextFrame) {
-  Canvas canvas;
-  canvas.DrawPaint({.color = Color(0.1, 0.1, 0.1, 1.0)});
-  ASSERT_TRUE(RenderTextInCanvasSkia(
-      GetContext(), canvas, "the quick brown fox jumped over the lazy dog!.?",
-      "Roboto-Regular.ttf",
-      {
-          .stroke = true,
-      }));
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 

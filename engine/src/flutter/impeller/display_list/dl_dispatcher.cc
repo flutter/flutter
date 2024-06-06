@@ -28,7 +28,6 @@
 #include "impeller/geometry/path_builder.h"
 #include "impeller/geometry/scalar.h"
 #include "impeller/geometry/sigma.h"
-#include "impeller/typographer/font_glyph_pair.h"
 
 #if IMPELLER_ENABLE_3D
 #include "impeller/entity/contents/scene_contents.h"
@@ -1267,22 +1266,8 @@ void TextFrameDispatcher::drawTextFrame(
     const std::shared_ptr<impeller::TextFrame>& text_frame,
     SkScalar x,
     SkScalar y) {
-  GlyphProperties properties;
-  if (paint_.style == Paint::Style::kStroke) {
-    properties.stroke = true;
-    properties.stroke_cap = paint_.stroke_cap;
-    properties.stroke_join = paint_.stroke_join;
-    properties.stroke_miter = paint_.stroke_miter;
-    properties.stroke_width = paint_.stroke_width;
-  }
-  if (text_frame->HasColor()) {
-    properties.color = paint_.color;
-  }
-  renderer_.GetLazyGlyphAtlas()->AddTextFrame(*text_frame,                    //
-                                              matrix_.GetMaxBasisLengthXY(),  //
-                                              Point(x, y),                    //
-                                              properties                      //
-  );
+  renderer_.GetLazyGlyphAtlas()->AddTextFrame(
+      *text_frame, matrix_.GetMaxBasisLengthXY(), Point(x, y));
 }
 
 void TextFrameDispatcher::drawDisplayList(
@@ -1293,61 +1278,6 @@ void TextFrameDispatcher::drawDisplayList(
   display_list->Dispatch(*this);
   restore();
   FML_DCHECK(stack_depth == stack_.size());
-}
-
-// |flutter::DlOpReceiver|
-void TextFrameDispatcher::setDrawStyle(flutter::DlDrawStyle style) {
-  paint_.style = ToStyle(style);
-}
-
-// |flutter::DlOpReceiver|
-void TextFrameDispatcher::setColor(flutter::DlColor color) {
-  paint_.color = {
-      color.getRedF(),
-      color.getGreenF(),
-      color.getBlueF(),
-      color.getAlphaF(),
-  };
-}
-
-// |flutter::DlOpReceiver|
-void TextFrameDispatcher::setStrokeWidth(SkScalar width) {
-  paint_.stroke_width = width;
-}
-
-// |flutter::DlOpReceiver|
-void TextFrameDispatcher::setStrokeMiter(SkScalar limit) {
-  paint_.stroke_miter = limit;
-}
-
-// |flutter::DlOpReceiver|
-void TextFrameDispatcher::setStrokeCap(flutter::DlStrokeCap cap) {
-  switch (cap) {
-    case flutter::DlStrokeCap::kButt:
-      paint_.stroke_cap = Cap::kButt;
-      break;
-    case flutter::DlStrokeCap::kRound:
-      paint_.stroke_cap = Cap::kRound;
-      break;
-    case flutter::DlStrokeCap::kSquare:
-      paint_.stroke_cap = Cap::kSquare;
-      break;
-  }
-}
-
-// |flutter::DlOpReceiver|
-void TextFrameDispatcher::setStrokeJoin(flutter::DlStrokeJoin join) {
-  switch (join) {
-    case flutter::DlStrokeJoin::kMiter:
-      paint_.stroke_join = Join::kMiter;
-      break;
-    case flutter::DlStrokeJoin::kRound:
-      paint_.stroke_join = Join::kRound;
-      break;
-    case flutter::DlStrokeJoin::kBevel:
-      paint_.stroke_join = Join::kBevel;
-      break;
-  }
 }
 
 }  // namespace impeller

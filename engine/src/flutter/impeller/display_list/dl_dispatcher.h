@@ -368,29 +368,10 @@ class TextFrameDispatcher : public flutter::IgnoreAttributeDispatchHelper,
   void drawDisplayList(const sk_sp<flutter::DisplayList> display_list,
                        SkScalar opacity) override;
 
-  // |flutter::DlOpReceiver|
-  void setDrawStyle(flutter::DlDrawStyle style) override;
-
-  // |flutter::DlOpReceiver|
-  void setColor(flutter::DlColor color) override;
-
-  // |flutter::DlOpReceiver|
-  void setStrokeWidth(SkScalar width) override;
-
-  // |flutter::DlOpReceiver|
-  void setStrokeMiter(SkScalar limit) override;
-
-  // |flutter::DlOpReceiver|
-  void setStrokeCap(flutter::DlStrokeCap cap) override;
-
-  // |flutter::DlOpReceiver|
-  void setStrokeJoin(flutter::DlStrokeJoin join) override;
-
  private:
   const ContentContext& renderer_;
   Matrix matrix_;
   std::vector<Matrix> stack_;
-  Paint paint_;
 };
 
 }  // namespace impeller

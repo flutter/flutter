@@ -6,6 +6,7 @@
 
 #include <vector>
 
+#include "display_list/dl_color.h"
 #include "flutter/fml/logging.h"
 #include "impeller/typographer/backends/skia/typeface_skia.h"
 #include "impeller/typographer/font.h"
@@ -38,6 +39,15 @@ static AxisAlignment ToAxisAligment(SkAxisAlignment aligment) {
   FML_UNREACHABLE();
 }
 
+static Color ToColor(const flutter::DlColor& color) {
+  return {
+      static_cast<Scalar>(color.getRedF()),    //
+      static_cast<Scalar>(color.getGreenF()),  //
+      static_cast<Scalar>(color.getBlueF()),   //
+      static_cast<Scalar>(color.getAlphaF())   //
+  };
+}
+
 static Font ToFont(const SkTextBlobRunIterator& run, AxisAlignment alignment) {
   auto& font = run.font();
   auto typeface = std::make_shared<TypefaceSkia>(font.refTypeface());
@@ -59,8 +69,10 @@ static Rect ToRect(const SkRect& rect) {
 }
 
 std::shared_ptr<TextFrame> MakeTextFrameFromTextBlobSkia(
-    const sk_sp<SkTextBlob>& blob) {
+    const sk_sp<SkTextBlob>& blob,
+    flutter::DlColor dl_color) {
   bool has_color = false;
+  Color color = ToColor(dl_color);
   std::vector<TextRun> runs;
   for (SkTextBlobRunIterator run(blob.get()); !run.done(); run.next()) {
     // TODO(jonahwilliams): ask Skia for a public API to look this up.
@@ -102,7 +114,8 @@ std::shared_ptr<TextFrame> MakeTextFrameFromTextBlobSkia(
         continue;
     }
   }
-  return std::make_shared<TextFrame>(runs, ToRect(blob->bounds()), has_color);
+  return std::make_shared<TextFrame>(runs, ToRect(blob->bounds()), has_color,
+                                     has_color ? color : Color::Black());
 }
 
 }  // namespace impeller

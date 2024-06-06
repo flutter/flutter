@@ -32,15 +32,12 @@ LazyGlyphAtlas::~LazyGlyphAtlas() = default;
 
 void LazyGlyphAtlas::AddTextFrame(const TextFrame& frame,
                                   Scalar scale,
-                                  Point offset,
-                                  const GlyphProperties& properties) {
+                                  Point offset) {
   FML_DCHECK(alpha_atlas_ == nullptr && color_atlas_ == nullptr);
   if (frame.GetAtlasType() == GlyphAtlas::Type::kAlphaBitmap) {
-    frame.CollectUniqueFontGlyphPairs(alpha_glyph_map_, scale, offset,
-                                      properties);
+    frame.CollectUniqueFontGlyphPairs(alpha_glyph_map_, scale, offset);
   } else {
-    frame.CollectUniqueFontGlyphPairs(color_glyph_map_, scale, offset,
-                                      properties);
+    frame.CollectUniqueFontGlyphPairs(color_glyph_map_, scale, offset);
   }
 }
 
