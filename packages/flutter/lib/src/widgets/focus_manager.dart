@@ -901,6 +901,11 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
       // is not yet in the tree, neither of which do anything when unfocused.
       return;
     }
+    if (nearestScope == this) {
+      // If this is a scope, then we need to clear the focused children of the
+      // scope, since we are unfocusing the scope itself.
+      nearestScope?._focusedChildren.clear();
+    }
     switch (disposition) {
       case UnfocusDisposition.scope:
         // If it can't request focus, then don't modify its focused children.
