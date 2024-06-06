@@ -342,7 +342,7 @@ class SkiaGoldClient {
 
     final io.ProcessResult result = await process.run(imgtestCommand);
 
-    final String/*!*/ resultStdout = result.stdout.toString();
+    final String resultStdout = result.stdout.toString();
     if (result.exitCode != 0 &&
       !(resultStdout.contains('Untriaged') || resultStdout.contains('negative image'))) {
       String? resultContents;
@@ -477,7 +477,7 @@ class SkiaGoldClient {
       if (revParse.exitCode != 0) {
         throw const SkiaException('Current commit of Flutter can not be found.');
       }
-      return (revParse.stdout as String/*!*/).trim();
+      return (revParse.stdout as String).trim();
     }
   }
 
@@ -517,12 +517,12 @@ class SkiaGoldClient {
     final File authFile = workDirectory.childFile(fs.path.join(
       'temp',
       'auth_opt.json',
-    ))/*!*/;
+    ));
 
     if (await authFile.exists()) {
       final String contents = await authFile.readAsString();
       final Map<String, dynamic> decoded = json.decode(contents) as Map<String, dynamic>;
-      return !(decoded['GSUtil'] as bool/*!*/);
+      return !(decoded['GSUtil'] as bool);
     }
     return false;
   }
