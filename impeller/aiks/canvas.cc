@@ -889,16 +889,9 @@ void Canvas::DrawTextFrame(const std::shared_ptr<TextFrame>& text_frame,
 
   auto text_contents = std::make_shared<TextContents>();
   text_contents->SetTextFrame(text_frame);
+  text_contents->SetColor(paint.color);
   text_contents->SetForceTextColor(paint.mask_blur_descriptor.has_value());
   text_contents->SetOffset(position);
-  text_contents->SetColor(paint.color);
-  text_contents->SetTextProperties(paint.color,                           //
-                                   paint.style == Paint::Style::kStroke,  //
-                                   paint.stroke_width,                    //
-                                   paint.stroke_cap,                      //
-                                   paint.stroke_join,                     //
-                                   paint.stroke_miter                     //
-  );
 
   entity.SetTransform(GetCurrentTransform() *
                       Matrix::MakeTranslation(position));

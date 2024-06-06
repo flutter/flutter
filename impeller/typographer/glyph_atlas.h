@@ -130,7 +130,9 @@ class GlyphAtlas {
   ///             scale are not available in the atlas.  The pointer is only
   ///             valid for the lifetime of the GlyphAtlas.
   ///
-  const FontGlyphAtlas* GetFontGlyphAtlas(const Font& font, Scalar scale) const;
+  const FontGlyphAtlas* GetFontGlyphAtlas(const Font& font,
+                                          Scalar scale,
+                                          Color color) const;
 
  private:
   const Type type_;
