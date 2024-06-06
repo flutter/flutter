@@ -8,7 +8,7 @@ import 'package:flutter_api_samples/material/floating_action_button_location/sta
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('FloatingActionButton', (WidgetTester tester) async {
+  testWidgets('The FloatingActionButton should have a right padding', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.StandardFabLocationExampleApp(),
     );
