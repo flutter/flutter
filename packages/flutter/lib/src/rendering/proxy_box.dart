@@ -4329,6 +4329,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     if (_properties.header != null) {
       config.isHeader = _properties.header!;
     }
+    if (_properties.headingLevel != null) {
+      config.headingLevel = _properties.headingLevel!;
+    }
     if (_properties.textField != null) {
       config.isTextField = _properties.textField!;
     }

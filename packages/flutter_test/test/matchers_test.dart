@@ -684,6 +684,7 @@ void main() {
         customSemanticsActionIds: <int>[CustomSemanticsAction.getIdentifier(action)],
         currentValueLength: 10,
         maxValueLength: 15,
+        headingLevel: 0,
       );
       final _FakeSemanticsNode node = _FakeSemanticsNode(data);
 
@@ -970,6 +971,7 @@ void main() {
         customSemanticsActionIds: <int>[CustomSemanticsAction.getIdentifier(action)],
         currentValueLength: 10,
         maxValueLength: 15,
+        headingLevel: 0,
       );
       final _FakeSemanticsNode node = _FakeSemanticsNode(data);
 
@@ -1062,6 +1064,7 @@ void main() {
         platformViewId: 105,
         currentValueLength: 10,
         maxValueLength: 15,
+        headingLevel: 0,
       );
       final _FakeSemanticsNode node = _FakeSemanticsNode(data);
 
@@ -1161,6 +1164,7 @@ void main() {
         platformViewId: 105,
         currentValueLength: 10,
         maxValueLength: 15,
+        headingLevel: 0,
       );
       final _FakeSemanticsNode emptyNode = _FakeSemanticsNode(emptyData);
 
@@ -1189,6 +1193,7 @@ void main() {
         currentValueLength: 10,
         maxValueLength: 15,
         customSemanticsActionIds: <int>[CustomSemanticsAction.getIdentifier(action)],
+        headingLevel: 0,
       );
       final _FakeSemanticsNode fullNode = _FakeSemanticsNode(fullData);
 
@@ -1279,6 +1284,7 @@ void main() {
         currentValueLength: 10,
         maxValueLength: 15,
         customSemanticsActionIds: <int>[CustomSemanticsAction.getIdentifier(action)],
+        headingLevel: 0,
       );
       final _FakeSemanticsNode node = _FakeSemanticsNode(data);
 
