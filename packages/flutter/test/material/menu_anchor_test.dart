@@ -3298,6 +3298,7 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.byType(CupertinoCheckbox), findsOneWidget);
+        expect(find.byType(Checkbox), findsOneWidget);
       }
 
       for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows ]) {
@@ -3387,6 +3388,7 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.byType(CupertinoRadio<int>), findsOneWidget);
+        expect(find.byType(Radio<int>), findsOneWidget);
       }
 
       for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows ]) {
