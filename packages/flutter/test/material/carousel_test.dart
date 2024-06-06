@@ -195,11 +195,14 @@ void main() {
   });
 
   testWidgets('CarouselController initialItem', (WidgetTester tester) async {
+    final CarouselController controller = CarouselController(initialItem: 5);
+    addTearDown(controller.dispose);
+
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: CarouselView(
-            controller: CarouselController(initialItem: 5),
+            controller: controller,
             itemExtent: 400,
             children: List<Widget>.generate(10, (int index) {
               return Center(
