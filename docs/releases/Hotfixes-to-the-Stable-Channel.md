@@ -27,6 +27,11 @@ INTERNAL NOTE
 ## Flutter 3.22 Changes
 
 ### [3.22.2](https://github.com/flutter/flutter/releases/tag/3.22.2) (June 06, 2024)
+* [dart/55818](https://github.com/dart-lang/sdk/issues/55818) - Fixes an issue where `DART_VM_OPTIONS` were not correctly parsed for standalone Dart executables created with `dart compile exe`.
+* [dart/55873](https://github.com/dart-lang/sdk/issues/55873) - Fixes a bug in dart2wasm that can result in a runtime error that says `array.new_fixed()` has a constant larger than 10000.
+* [dart/55894](https://github.com/dart-lang/sdk/issues/55894) - Adds support for `--enable-experiment` flag to `dart compile` wasm.
+* [dart/55895](https://github.com/dart-lang/sdk/issues/55895) - Fixes an issue in dart2wasm compiler that can result in incorrect nullability of type parameter.
+* [dart/55890](https://github.com/dart-lang/sdk/issues/55890) - Disallows `dart:ffi` imports in user code in dart2wasm as dart2wasm's currently only supports a small subset of `dart:ffi`.
 * [flutter/148885](https://github.com/flutter/flutter/issues/148885) - Fixes a platform view issue on android 14 when multiple activities are used and `onMemoryTrim` is called.
 * [flutter/149178](https://github.com/flutter/flutter/issues/149178) - Fixes an issue on iOS where users are unable to focus on a `TextField` or open the keyboard again after side pop from another screen.
 * [flutter/149210](https://github.com/flutter/flutter/issues/149210) - Fixes an `EditableText` crash that occurs when a custom `TextEditingController` only implements the `TextEditingController` interface.
