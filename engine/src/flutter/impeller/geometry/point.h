@@ -223,6 +223,12 @@ struct TPoint {
     return *this - axis * this->Dot(axis) * 2;
   }
 
+  constexpr TPoint Rotate(const Radians& angle) const {
+    const auto cos_a = std::cosf(angle.radians);
+    const auto sin_a = std::sinf(angle.radians);
+    return {x * cos_a - y * sin_a, x * sin_a + y * cos_a};
+  }
+
   constexpr Radians AngleTo(const TPoint& p) const {
     return Radians{std::atan2(this->Cross(p), this->Dot(p))};
   }

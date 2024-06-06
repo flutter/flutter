@@ -956,6 +956,36 @@ TEST(GeometryTest, PointAbs) {
   ASSERT_POINT_NEAR(a_abs, expected);
 }
 
+TEST(GeometryTest, PointRotate) {
+  {
+    Point a(1, 0);
+    auto rotated = a.Rotate(Radians{kPiOver2});
+    auto expected = Point(0, 1);
+    ASSERT_POINT_NEAR(rotated, expected);
+  }
+
+  {
+    Point a(1, 0);
+    auto rotated = a.Rotate(Radians{-kPiOver2});
+    auto expected = Point(0, -1);
+    ASSERT_POINT_NEAR(rotated, expected);
+  }
+
+  {
+    Point a(1, 0);
+    auto rotated = a.Rotate(Radians{kPi});
+    auto expected = Point(-1, 0);
+    ASSERT_POINT_NEAR(rotated, expected);
+  }
+
+  {
+    Point a(1, 0);
+    auto rotated = a.Rotate(Radians{kPi * 1.5});
+    auto expected = Point(0, -1);
+    ASSERT_POINT_NEAR(rotated, expected);
+  }
+}
+
 TEST(GeometryTest, PointAngleTo) {
   // Negative result in the CCW (with up = -Y) direction.
   {
