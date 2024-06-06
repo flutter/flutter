@@ -5786,9 +5786,7 @@ void main() {
           );
 
           final ThemeData theme = Theme.of(tester.element(findSuffixIcon()));
-          // TODO(bleroux): based on M3 spec, it should be theme.colorScheme.onErrorContainer.
-          // See https://github.com/flutter/flutter/issues/149410.
-          final Color expectedColor = theme.colorScheme.error;
+          final Color expectedColor = theme.colorScheme.onErrorContainer;
           expect(getSuffixIconStyle(tester).color, expectedColor);
         });
       });
@@ -6262,9 +6260,7 @@ void main() {
           );
 
           final ThemeData theme = Theme.of(tester.element(findSuffixIcon()));
-          // TODO(bleroux): based on M3 spec, it should be theme.colorScheme.onErrorContainer.
-          // See https://github.com/flutter/flutter/issues/149410.
-          final Color expectedColor = theme.colorScheme.error;
+          final Color expectedColor = theme.colorScheme.onErrorContainer;
           expect(getSuffixIconStyle(tester).color, expectedColor);
         });
       });
