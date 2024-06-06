@@ -237,11 +237,12 @@ See: https://github.com/flutter/flutter/issues/81867
   <summary>Converting an existing Objective-C Flutter plugin to a Swift package</summary>
 
 ### Converting an existing Objective-C Flutter Plugin to a Swift Package
-Enable the Swift Package Manager feature.
 
 Replace `plugin_name` throughout this guide with the name of your plugin.
 
-1. Start by creating a directory under the `ios`, `macos`, and/or `darwin` directories.
+1. Enable the Swift Package Manager feature.
+
+2. Start by creating a directory under the `ios`, `macos`, and/or `darwin` directories.
 Name this new directory the name of the platform package.
 The below example uses `ios`, replace `ios` with `macos`/`darwin` as applicable.
 
@@ -249,7 +250,7 @@ The below example uses `ios`, replace `ios` with `macos`/`darwin` as applicable.
 /plugin_name/plugin_name_ios/ios/<b>plugin_name_ios</b>
 </pre>
 
-2. Within this new directory, create the following files/directories:
+3. Within this new directory, create the following files/directories:
     - Package.swift (file)
     - Sources (directory)
     - Sources/plugin_name_ios (directory)
@@ -267,7 +268,7 @@ The below example uses `ios`, replace `ios` with `macos`/`darwin` as applicable.
 /plugin_name/plugin_name_ios/ios/plugin_name_ios/<b>Sources/plugin_name_ios/include/plugin_name_ios/.gitkeep</b>
 </pre>
 
-3. Use the following template in the `Package.swift`
+4. Use the following template in the `Package.swift`
 
 ```swift
 // swift-tools-version: 5.9
@@ -310,7 +311,7 @@ let package = Package(
 ```
 
 * **If the plugin name contains `_`, the library name must be a `-` separated version of the plugin name.**
-4. If your plugin has a `PrivacyInfo.xcprivacy`, move it to `Sources/plugin_name_ios/PrivacyInfo.xcprivacy` and uncomment the resource in the Package.swift.
+5. If your plugin has a `PrivacyInfo.xcprivacy`, move it to `Sources/plugin_name_ios/PrivacyInfo.xcprivacy` and uncomment the resource in the Package.swift.
 ```diff
             resources: [
                 // If your plugin requires a privacy manifest, for example if it uses any required
@@ -325,11 +326,11 @@ let package = Package(
                 // https://developer.apple.com/documentation/xcode/bundling-resources-with-a-swift-package
             ],
 ```
-5. Move any resource files from `ios/Assets` to `Sources/plugin_name_ios` (or a subdirectory). Then add them to your Package.swift if applicable. See https://developer.apple.com/documentation/xcode/bundling-resources-with-a-swift-package for more instructions.
-6. Move any public headers from `ios/Classes` to `Sources/plugin_name_ios/include/plugin_name_ios`
+6. Move any resource files from `ios/Assets` to `Sources/plugin_name_ios` (or a subdirectory). Then add them to your Package.swift if applicable. See https://developer.apple.com/documentation/xcode/bundling-resources-with-a-swift-package for more instructions.
+7. Move any public headers from `ios/Classes` to `Sources/plugin_name_ios/include/plugin_name_ios`
     * If you're unsure what headers are public, check your `podspec` for `public_header_files`. If not found, that means all of your headers were public. You should consider whether or not you want all of your headers to be public.
     * The `pluginClass` defined in your pubspec.yaml must be public and within this directory.
-7. Handling modulemap (skip this step if not using a custom modulemap)
+8. Handling modulemap (skip this step if not using a custom modulemap)
 
     If you're using a modulemap for CocoaPods to create a Test submodule, consider removing it for Swift Package Manager. Note that this will make all public headers available via the module.
 
@@ -353,9 +354,9 @@ let package = Package(
 
     If you would like to continue using a custom modulemap, please refer to [Swift Package Manager's documentation](https://github.com/apple/swift-package-manager/blob/main/Documentation/Usage.md#creating-c-language-targets).
 
-8. Move all remaining files from `ios/Classes` to `Sources/plugin_name_ios`
-9. `ios/Assets`, `ios/Resources`, `ios/Classes` should now be empty and can be deleted
-10. If your header files were previously within the same directory as your implementation files, you may need to change your import statements.
+9. Move all remaining files from `ios/Classes` to `Sources/plugin_name_ios`
+10. `ios/Assets`, `ios/Resources`, `ios/Classes` should now be empty and can be deleted
+11. If your header files were previously within the same directory as your implementation files, you may need to change your import statements.
 
    For example, if the following changes were made:
      * `ios/Classes/PublicHeaderFile.h` --> `Sources/plugin_name_ios/include/plugin_name_ios/PublicHeaderFile.h`
@@ -367,7 +368,7 @@ let package = Package(
    + #import "./include/plugin_name_ios/PublicHeaderFile.h"
    ```
 
-11. If using pigeon, you'll want to update your pigeon input file
+12. If using pigeon, you'll want to update your pigeon input file
 ```diff
 - objcHeaderOut: 'ios/Classes/messages.g.h',
 + objcHeaderOut: 'ios/plugin_name_ios/Sources/plugin_name_ios/messages.g.h',
@@ -384,7 +385,7 @@ objcSourceOut: 'ios/plugin_name_ios/Sources/plugin_name_ios/messages.g.m',
 + ),
 ```
 
-12. Update your Package.swift with any customizations you may need
+13. Update your Package.swift with any customizations you may need
     1. Open `/plugin_name/plugin_name_ios/ios/plugin_name_ios/` in Xcode
         * If package does not show any files in Xcode, quit Xcode (Xcode > Quit Xcode) and reopen
         * You don't need to edit your Package.swift through Xcode, but Xcode will provide helpful feedback
@@ -399,7 +400,7 @@ objcSourceOut: 'ios/plugin_name_ios/Sources/plugin_name_ios/messages.g.m',
     4. Make any other customizations - see https://developer.apple.com/documentation/packagedescription for more info on how to write a Package.swift.
     5. If you add additional targets to your Package.swift, try to name them uniquely. If your target name conflicts with another target from another package, this can cause issues that may require manual intervention to be able to use your plugin.
 
-13. Update your `plugin_name_ios.podspec` to point to new paths.
+14. Update your `plugin_name_ios.podspec` to point to new paths.
 ```diff
 - s.source_files = 'Classes/**/*.{h,m}'
 + s.source_files = 'plugin_name_ios/Sources/plugin_name_ios/**/*.{h,m}'
@@ -414,7 +415,7 @@ objcSourceOut: 'ios/plugin_name_ios/Sources/plugin_name_ios/messages.g.m',
 + s.resource_bundles = {'plugin_name_ios_privacy' => ['plugin_name_ios/Sources/plugin_name_ios/PrivacyInfo.xcprivacy']}
 ```
 
-14. Update getting of resources from bundle to use `SWIFTPM_MODULE_BUNDLE`
+15. Update getting of resources from bundle to use `SWIFTPM_MODULE_BUNDLE`
 ```objc
 #if SWIFT_PACKAGE
    NSBundle *bundle = SWIFTPM_MODULE_BUNDLE;
@@ -425,20 +426,20 @@ objcSourceOut: 'ios/plugin_name_ios/Sources/plugin_name_ios/messages.g.m',
 ```
   * Note: `SWIFTPM_MODULE_BUNDLE` will only work if there are actual resources (either [defined in the Package.swift](https://developer.apple.com/documentation/xcode/bundling-resources-with-a-swift-package#Explicitly-declare-or-exclude-resources) or [automatically included by Xcode](https://developer.apple.com/documentation/xcode/bundling-resources-with-a-swift-package#:~:text=Xcode%20detects%20common%20resource%20types%20for%20Apple%20platforms%20and%20treats%20them%20as%20a%20resource%20automatically)). Otherwise, it will fail.
 
-15. If your `plugin_name_ios/Sources/plugin_name_ios/include` directory only contains a `.gitkeep`, you'll want update your `.gitignore` to include the following:
+16. If your `plugin_name_ios/Sources/plugin_name_ios/include` directory only contains a `.gitkeep`, you'll want update your `.gitignore` to include the following:
 ```gitignore
 !.gitkeep
 ```
 
 Then run `flutter pub publish --dry-run` to ensure the `include` directory will be published.
 
-16. Verify plugin still works with CocoaPods
+17. Verify plugin still works with CocoaPods
     1. Disable Swift Package Manager
       ```
       flutter config --no-enable-swift-package-manager
       ```
     2. Run `flutter run` with the example app and ensure it builds and runs
-17. Verify plugin works with Swift Package Manager
+18. Verify plugin works with Swift Package Manager
     1. Enable Swift Package Manager
       ```
       flutter config --enable-swift-package-manager
@@ -446,7 +447,7 @@ Then run `flutter pub publish --dry-run` to ensure the `include` directory will 
     2. Run `flutter run` with the example app and ensure it builds and runs
     3. Open the example app in Xcode and ensure Package Dependencies show in the left Project Navigator
 
-18. Verify tests pass
+19. Verify tests pass
   * **If your plugin has Native unit tests (XCTest), make sure you also complete "Updating unit tests in plugin example app" below.**
   * [Follow instructions for testing plugins](https://docs.flutter.dev/testing/testing-plugins)
 </details>
@@ -455,15 +456,18 @@ Then run `flutter pub publish --dry-run` to ensure the `include` directory will 
   <summary>Converting an existing Swift Flutter plugin to a Swift package</summary>
 
 ### Converting an existing Swift Flutter Plugin to a Swift Package
+
 Replace `plugin_name` throughout this guide with the name of your plugin.
 
-1. Start by creating a directory under the `ios`, `macos`, and/or `darwin` directories. Name this new directory the name of the platform package. The below example uses `ios`, replace `ios` with `macos`/`darwin` if applicable.
+1. Enable the Swift Package Manager feature.
+
+2. Start by creating a directory under the `ios`, `macos`, and/or `darwin` directories. Name this new directory the name of the platform package. The below example uses `ios`, replace `ios` with `macos`/`darwin` if applicable.
 
 <pre>
 /plugin_name/plugin_name_ios/ios/<b>plugin_name_ios</b>
 </pre>
 
-2. Within this new directory, create the following files/directories:
+3. Within this new directory, create the following files/directories:
     - Package.swift (file)
     - Sources (directory)
     - Sources/plugin_name_ios (directory)
@@ -474,7 +478,7 @@ Replace `plugin_name` throughout this guide with the name of your plugin.
 /plugin_name/plugin_name_ios/ios/plugin_name_ios/<b>Sources/plugin_name_ios</b>
 </pre>
 
-3. Use the following template in the `Package.swift`
+4. Use the following template in the `Package.swift`
 ```swift
 // swift-tools-version: 5.9
 // The swift-tools-version declares the minimum version of Swift required to build this package.
@@ -514,7 +518,7 @@ let package = Package(
 
 * **If the plugin name contains `_`, the library name must be a `-` separated version of the plugin name.**
 
-4. If your plugin has a `PrivacyInfo.xcprivacy`, move it to `Sources/plugin_name_ios/PrivacyInfo.xcprivacy` and uncomment the resource in the Package.swift.
+5. If your plugin has a `PrivacyInfo.xcprivacy`, move it to `Sources/plugin_name_ios/PrivacyInfo.xcprivacy` and uncomment the resource in the Package.swift.
 ```diff
             resources: [
                 // If your plugin requires a privacy manifest, for example if it uses any required
@@ -529,16 +533,16 @@ let package = Package(
                 // https://developer.apple.com/documentation/xcode/bundling-resources-with-a-swift-package
             ],
 ```
-5. Move any resource files from `ios/Assets` to `Sources/plugin_name_ios` (or a subdirectory). Then add them to your Package.swift if applicable. See https://developer.apple.com/documentation/xcode/bundling-resources-with-a-swift-package for more instructions.
-6. Move all files from `ios/Classes` to `Sources/plugin_name_ios`
-7. `ios/Assets`, `ios/Resources`, `ios/Classes` should now be empty and can be deleted
-8. If using pigeon, you'll want to update your pigeon input file
+6. Move any resource files from `ios/Assets` to `Sources/plugin_name_ios` (or a subdirectory). Then add them to your Package.swift if applicable. See https://developer.apple.com/documentation/xcode/bundling-resources-with-a-swift-package for more instructions.
+7. Move all files from `ios/Classes` to `Sources/plugin_name_ios`
+8. `ios/Assets`, `ios/Resources`, `ios/Classes` should now be empty and can be deleted
+9. If using pigeon, you'll want to update your pigeon input file
 ```diff
 - swiftOut: 'ios/Classes/messages.g.swift',
 + swiftOut: 'ios/plugin_name_ios/Sources/plugin_name_ios/messages.g.swift',
 ```
 
-9. Update your Package.swift with any customizations you may need
+10. Update your Package.swift with any customizations you may need
     1. Open `/plugin_name/plugin_name_ios/ios/plugin_name_ios/` in Xcode
         * If package does not show any files in Xcode, quit Xcode (Xcode > Quit Xcode) and reopen
         * You don't need to edit your Package.swift through Xcode, but Xcode will provide helpful feedback
@@ -552,7 +556,7 @@ let package = Package(
     ```
     4. Make any other customizations - see https://developer.apple.com/documentation/packagedescription for more info on how to write a Package.swift.
     5. If you add additional targets to your Package.swift, try to name them uniquely. If your target name conflicts with another target from another package, this can cause issues that may require manual intervention to be able to use your plugin.
-10. Update your `plugin_name_ios.podspec` to point to new paths.
+11. Update your `plugin_name_ios.podspec` to point to new paths.
 ```diff
 - s.source_files = 'Classes/**/*.swift'
 + s.source_files = 'plugin_name_ios/Sources/plugin_name_ios/**/*.swift'
@@ -561,7 +565,7 @@ let package = Package(
 + s.resource_bundles = {'plugin_name_ios_privacy' => ['plugin_name_ios/Sources/plugin_name_ios/PrivacyInfo.xcprivacy']}
 ```
 
-11. Update getting of resources from bundle to use `Bundle.module`
+12. Update getting of resources from bundle to use `Bundle.module`
 ```swift
 #if SWIFT_PACKAGE
      let settingsURL = Bundle.module.url(forResource: "image", withExtension: "jpg")
@@ -570,20 +574,20 @@ let package = Package(
 #endif
 ```
   * Note: `Bundle.module` will only work if there are actual resources (either [defined in the Package.swift](https://developer.apple.com/documentation/xcode/bundling-resources-with-a-swift-package#Explicitly-declare-or-exclude-resources) or [automatically included by Xcode](https://developer.apple.com/documentation/xcode/bundling-resources-with-a-swift-package#:~:text=Xcode%20detects%20common%20resource%20types%20for%20Apple%20platforms%20and%20treats%20them%20as%20a%20resource%20automatically)). Otherwise, it will fail.
-12. Verify plugin still works with CocoaPods
+13. Verify plugin still works with CocoaPods
     1. Disable Swift Package Manager
     ```
     flutter config --no-enable-swift-package-manager
     ```
     2. Run `flutter run` with the example app and ensure it builds and runs
-13. Verify plugin works with Swift Package Manager
+14. Verify plugin works with Swift Package Manager
     1. Enable Swift Package Manager
     ```
     flutter config --enable-swift-package-manager
     ```
     2. Run `flutter run` with the example app and ensure it builds and runs
     3. Open the example app in Xcode and ensure Package Dependencies show in the left Project Navigator
-14. Verify tests pass
+15. Verify tests pass
   * **If your plugin has Native unit tests (XCTest), make sure you also complete "Updating unit tests in plugin example app" below.**
   * [Follow instructions for testing plugins](https://docs.flutter.dev/testing/testing-plugins)
 </details>
