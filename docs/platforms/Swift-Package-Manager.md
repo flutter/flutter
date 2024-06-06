@@ -3,11 +3,10 @@
 ## Background
 
 Flutter is migrating to use Swift Package Manager for iOS and macOS native dependencies.
-See: https://github.com/flutter/flutter/issues/126005.
+This is an experimental feature this isn't ready yet for app developers.
+However, plugin authors should add Swift Package Manager support to their packages.
 
-> [!WARNING]
-> Flutter's Swift Package Manager support is experimental.
-> Please [file issues](https://github.com/flutter/flutter/issues/new/choose) if you find bugs.
+Tracking issue: https://github.com/flutter/flutter/issues/126005.
 
 ## For app developers
 
