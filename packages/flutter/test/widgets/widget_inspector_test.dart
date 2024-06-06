@@ -745,440 +745,6 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       );
     });
 
-    test('WidgetInspectorService null id', () {
-      service.disposeAllGroups();
-      expect(service.toObject(null), isNull);
-      expect(service.toId(null, 'test-group'), isNull);
-    });
-
-    test('WidgetInspectorService dispose group', () {
-      service.disposeAllGroups();
-      final Object a = Object();
-      const String group1 = 'group-1';
-      const String group2 = 'group-2';
-      const String group3 = 'group-3';
-      final String? aId = service.toId(a, group1);
-      expect(service.toId(a, group2), equals(aId));
-      expect(service.toId(a, group3), equals(aId));
-      service.disposeGroup(group1);
-      service.disposeGroup(group2);
-      expect(service.toObject(aId), equals(a));
-      service.disposeGroup(group3);
-      expect(() => service.toObject(aId), throwsFlutterError);
-    });
-
-    test('WidgetInspectorService dispose id', () {
-      service.disposeAllGroups();
-      final Object a = Object();
-      final Object b = Object();
-      const String group1 = 'group-1';
-      const String group2 = 'group-2';
-      final String? aId = service.toId(a, group1);
-      final String? bId = service.toId(b, group1);
-      expect(service.toId(a, group2), equals(aId));
-      service.disposeId(bId, group1);
-      expect(() => service.toObject(bId), throwsFlutterError);
-      service.disposeId(aId, group1);
-      expect(service.toObject(aId), equals(a));
-      service.disposeId(aId, group2);
-      expect(() => service.toObject(aId), throwsFlutterError);
-    });
-
-    test('WidgetInspectorService toObjectForSourceLocation', () {
-      const String group = 'test-group';
-      const Text widget = Text('a', textDirection: TextDirection.ltr);
-      service.disposeAllGroups();
-      final String id = service.toId(widget, group)!;
-      expect(service.toObjectForSourceLocation(id), equals(widget));
-      final Element element = widget.createElement();
-      final String elementId = service.toId(element, group)!;
-      expect(service.toObjectForSourceLocation(elementId), equals(widget));
-      expect(element, isNot(equals(widget)));
-      service.disposeGroup(group);
-      expect(() => service.toObjectForSourceLocation(elementId), throwsFlutterError);
-    });
-
-    test('WidgetInspectorService object id test', () {
-      const Text a = Text('a', textDirection: TextDirection.ltr);
-      const Text b = Text('b', textDirection: TextDirection.ltr);
-      const Text c = Text('c', textDirection: TextDirection.ltr);
-      const Text d = Text('d', textDirection: TextDirection.ltr);
-
-      const String group1 = 'group-1';
-      const String group2 = 'group-2';
-      const String group3 = 'group-3';
-      service.disposeAllGroups();
-
-      final String? aId = service.toId(a, group1);
-      final String? bId = service.toId(b, group2);
-      final String? cId = service.toId(c, group3);
-      final String? dId = service.toId(d, group1);
-      // Make sure we get a consistent id if we add the object to a group multiple
-      // times.
-      expect(aId, equals(service.toId(a, group1)));
-      expect(service.toObject(aId), equals(a));
-      expect(service.toObject(aId), isNot(equals(b)));
-      expect(service.toObject(bId), equals(b));
-      expect(service.toObject(cId), equals(c));
-      expect(service.toObject(dId), equals(d));
-      // Make sure we get a consistent id even if we add the object to a different
-      // group.
-      expect(aId, equals(service.toId(a, group3)));
-      expect(aId, isNot(equals(bId)));
-      expect(aId, isNot(equals(cId)));
-
-      service.disposeGroup(group3);
-    });
-
-    testWidgets('WidgetInspectorService maybeSetSelection', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        const Directionality(
-          textDirection: TextDirection.ltr,
-          child: Stack(
-            children: <Widget>[
-              Text('a', textDirection: TextDirection.ltr),
-              Text('b', textDirection: TextDirection.ltr),
-              Text('c', textDirection: TextDirection.ltr),
-            ],
-          ),
-        ),
-      );
-      final Element elementA = find.text('a').evaluate().first;
-      final Element elementB = find.text('b').evaluate().first;
-
-      service.disposeAllGroups();
-      service.selection.clear();
-      int selectionChangedCount = 0;
-      service.selectionChangedCallback = () => selectionChangedCount++;
-      service.setSelection('invalid selection');
-      expect(selectionChangedCount, equals(0));
-      expect(service.selection.currentElement, isNull);
-      service.setSelection(elementA);
-      expect(selectionChangedCount, equals(1));
-      expect(service.selection.currentElement, equals(elementA));
-      expect(service.selection.current, equals(elementA.renderObject));
-
-      service.setSelection(elementB.renderObject);
-      expect(selectionChangedCount, equals(2));
-      expect(service.selection.current, equals(elementB.renderObject));
-      expect(service.selection.currentElement, equals((elementB.renderObject!.debugCreator! as DebugCreator).element));
-
-      service.setSelection('invalid selection');
-      expect(selectionChangedCount, equals(2));
-      expect(service.selection.current, equals(elementB.renderObject));
-
-      service.setSelectionById(service.toId(elementA, 'my-group'));
-      expect(selectionChangedCount, equals(3));
-      expect(service.selection.currentElement, equals(elementA));
-      expect(service.selection.current, equals(elementA.renderObject));
-
-      service.setSelectionById(service.toId(elementA, 'my-group'));
-      expect(selectionChangedCount, equals(3));
-      expect(service.selection.currentElement, equals(elementA));
-    });
-
-    testWidgets('WidgetInspectorService defunct selection regression test', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        const Directionality(
-          textDirection: TextDirection.ltr,
-          child: Stack(
-            children: <Widget>[
-              Text('a', textDirection: TextDirection.ltr),
-            ],
-          ),
-        ),
-      );
-      final Element elementA = find.text('a').evaluate().first;
-
-      service.setSelection(elementA);
-      expect(service.selection.currentElement, equals(elementA));
-      expect(service.selection.current, equals(elementA.renderObject));
-
-      await tester.pumpWidget(
-        const SizedBox(
-          child: Text('b', textDirection: TextDirection.ltr),
-        ),
-      );
-      // Selection is now empty as the element is defunct.
-      expect(service.selection.currentElement, equals(null));
-      expect(service.selection.current, equals(null));
-
-      // Verify that getting the debug creation location of the defunct element
-      // does not crash.
-      expect(debugIsLocalCreationLocation(elementA), isFalse);
-
-      // Verify that generating json for a defunct element does not crash.
-      expect(
-        elementA.toDiagnosticsNode().toJsonMap(
-          InspectorSerializationDelegate(
-            service: service,
-            includeProperties: true,
-          ),
-        ),
-        isNotNull,
-      );
-
-      final Element elementB = find.text('b').evaluate().first;
-      service.setSelection(elementB);
-      expect(service.selection.currentElement, equals(elementB));
-      expect(service.selection.current, equals(elementB.renderObject));
-
-      // Set selection back to a defunct element.
-      service.setSelection(elementA);
-
-      expect(service.selection.currentElement, equals(null));
-      expect(service.selection.current, equals(null));
-    });
-
-    testWidgets('WidgetInspectorService getParentChain', (WidgetTester tester) async {
-      const String group = 'test-group';
-
-      await tester.pumpWidget(
-        const Directionality(
-          textDirection: TextDirection.ltr,
-          child: Stack(
-            children: <Widget>[
-              Text('a', textDirection: TextDirection.ltr),
-              Text('b', textDirection: TextDirection.ltr),
-              Text('c', textDirection: TextDirection.ltr),
-            ],
-          ),
-        ),
-      );
-
-      service.disposeAllGroups();
-      final Element elementB = find.text('b').evaluate().first;
-      final String bId = service.toId(elementB, group)!;
-      final Object? jsonList = json.decode(service.getParentChain(bId, group));
-      expect(jsonList, isList);
-      final List<Object?> chainElements = jsonList! as List<Object?>;
-      final List<Element> expectedChain = elementB.debugGetDiagnosticChain().reversed.toList();
-      // Sanity check that the chain goes back to the root.
-      expect(expectedChain.first, tester.binding.rootElement);
-
-      expect(chainElements.length, equals(expectedChain.length));
-      for (int i = 0; i < expectedChain.length; i += 1) {
-        expect(chainElements[i], isMap);
-        final Map<String, Object?> chainNode = chainElements[i]! as Map<String, Object?>;
-        final Element element = expectedChain[i];
-        expect(chainNode['node'], isMap);
-        final Map<String, Object?> jsonNode = chainNode['node']! as Map<String, Object?>;
-        expect(service.toObject(jsonNode['valueId']! as String), equals(element));
-
-        expect(chainNode['children'], isList);
-        final List<Object?> jsonChildren = chainNode['children']! as List<Object?>;
-        final List<Element> childrenElements = <Element>[];
-        element.visitChildren(childrenElements.add);
-        expect(jsonChildren.length, equals(childrenElements.length));
-        if (i + 1 == expectedChain.length) {
-          expect(chainNode['childIndex'], isNull);
-        } else {
-          expect(chainNode['childIndex'], equals(childrenElements.indexOf(expectedChain[i+1])));
-        }
-        for (int j = 0; j < childrenElements.length; j += 1) {
-          expect(jsonChildren[j], isMap);
-          final Map<String, Object?> childJson = jsonChildren[j]! as Map<String, Object?>;
-          expect(service.toObject(childJson['valueId']! as String), equals(childrenElements[j]));
-        }
-      }
-    });
-
-    test('WidgetInspectorService getProperties', () {
-      const Diagnosticable diagnosticable = Text('a', textDirection: TextDirection.ltr);
-      const String group = 'group';
-      service.disposeAllGroups();
-      final String id = service.toId(diagnosticable, group)!;
-      final List<Object?> propertiesJson = json.decode(service.getProperties(id, group)) as List<Object?>;
-      final List<DiagnosticsNode> properties = diagnosticable.toDiagnosticsNode().getProperties();
-      expect(properties, isNotEmpty);
-      expect(propertiesJson.length, equals(properties.length));
-      for (int i = 0; i < propertiesJson.length; ++i) {
-        final Map<String, Object?> propertyJson = propertiesJson[i]! as Map<String, Object?>;
-        expect(service.toObject(propertyJson['valueId'] as String?), equals(properties[i].value));
-      }
-    });
-
-    testWidgets('WidgetInspectorService getChildren', (WidgetTester tester) async {
-      const String group = 'test-group';
-
-      await tester.pumpWidget(
-        const Directionality(
-          textDirection: TextDirection.ltr,
-          child: Stack(
-            children: <Widget>[
-              Text('a', textDirection: TextDirection.ltr),
-              Text('b', textDirection: TextDirection.ltr),
-              Text('c', textDirection: TextDirection.ltr),
-            ],
-          ),
-        ),
-      );
-      final DiagnosticsNode diagnostic = find.byType(Stack).evaluate().first.toDiagnosticsNode();
-      service.disposeAllGroups();
-      final String id = service.toId(diagnostic, group)!;
-      final List<Object?> propertiesJson = json.decode(service.getChildren(id, group)) as List<Object?>;
-      final List<DiagnosticsNode> children = diagnostic.getChildren();
-      expect(children.length, equals(3));
-      expect(propertiesJson.length, equals(children.length));
-      for (int i = 0; i < propertiesJson.length; ++i) {
-        final Map<String, Object?> propertyJson = propertiesJson[i]! as Map<String, Object?>;
-        expect(service.toObject(propertyJson['valueId']! as String), equals(children[i].value));
-      }
-    });
-
-    testWidgets('WidgetInspectorService creationLocation', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: Stack(
-            children: <Widget>[
-              const Text('a'),
-              const Text('b', textDirection: TextDirection.ltr),
-              'c'.text(),
-            ],
-          ),
-        ),
-      );
-      final Element elementA = find.text('a').evaluate().first;
-      final Element elementB = find.text('b').evaluate().first;
-      final Element elementC = find.text('c').evaluate().first;
-
-      service.disposeAllGroups();
-      service.resetPubRootDirectories();
-      service.setSelection(elementA, 'my-group');
-      final Map<String, Object?> jsonA = json.decode(service.getSelectedWidget(null, 'my-group')) as Map<String, Object?>;
-      final Map<String, Object?> creationLocationA = jsonA['creationLocation']! as Map<String, Object?>;
-      expect(creationLocationA, isNotNull);
-      final String fileA = creationLocationA['file']! as String;
-      final int lineA = creationLocationA['line']! as int;
-      final int columnA = creationLocationA['column']! as int;
-      final String nameA = creationLocationA['name']! as String;
-      expect(nameA, equals('Text'));
-
-      service.setSelection(elementB, 'my-group');
-      final Map<String, Object?> jsonB = json.decode(service.getSelectedWidget(null, 'my-group')) as Map<String, Object?>;
-      final Map<String, Object?> creationLocationB = jsonB['creationLocation']! as Map<String, Object?>;
-      expect(creationLocationB, isNotNull);
-      final String fileB = creationLocationB['file']! as String;
-      final int lineB = creationLocationB['line']! as int;
-      final int columnB = creationLocationB['column']! as int;
-      final String? nameB = creationLocationB['name'] as String?;
-      expect(nameB, equals('Text'));
-
-      service.setSelection(elementC, 'my-group');
-      final Map<String, Object?> jsonC = json.decode(service.getSelectedWidget(null, 'my-group')) as Map<String, Object?>;
-      final Map<String, Object?> creationLocationC = jsonC['creationLocation']! as Map<String, Object?>;
-      expect(creationLocationC, isNotNull);
-      final String fileC = creationLocationC['file']! as String;
-      final int lineC = creationLocationC['line']! as int;
-      final int columnC = creationLocationC['column']! as int;
-      final String? nameC = creationLocationC['name'] as String?;
-      expect(nameC, equals('TextFromString|text'));
-
-      expect(fileA, endsWith('widget_inspector_test.dart'));
-      expect(fileA, equals(fileB));
-      expect(fileA, equals(fileC));
-      // We don't hardcode the actual lines the widgets are created on as that
-      // would make this test fragile.
-      expect(lineA + 1, equals(lineB));
-      expect(lineB + 1, equals(lineC));
-      // Column numbers are more stable than line numbers.
-      expect(columnA, equals(21));
-      expect(columnA, equals(columnB));
-      expect(columnC, equals(19));
-    }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // [intended] Test requires --track-widget-creation flag.
-
-  testWidgets('WidgetInspectorService setSelection notifiers for an Element',
-    (WidgetTester tester) async {
-      await tester.pumpWidget(
-        const Directionality(
-          textDirection: TextDirection.ltr,
-          child: Stack(
-            children: <Widget>[
-              Text('a'),
-              Text('b', textDirection: TextDirection.ltr),
-              Text('c', textDirection: TextDirection.ltr),
-            ],
-          ),
-        ),
-      );
-      final Element elementA = find.text('a').evaluate().first;
-
-      service.disposeAllGroups();
-
-      setupDefaultPubRootDirectory(service);
-
-      // Select the widget
-      service.setSelection(elementA, 'my-group');
-
-      // ensure that developer.inspect was called on the widget
-      final List<Object?> objectsInspected = service.inspectedObjects();
-      expect(objectsInspected, equals(<Element>[elementA]));
-
-      // ensure that a navigate event was sent for the element
-      final List<Map<Object, Object?>> navigateEventsPosted
-        = service.dispatchedEvents('navigate', stream: 'ToolEvent',);
-      expect(navigateEventsPosted.length, equals(1));
-      final Map<Object,Object?> event = navigateEventsPosted[0];
-      final String file = event['fileUri']! as String;
-      final int line = event['line']! as int;
-      final int column = event['column']! as int;
-      expect(file, endsWith('widget_inspector_test.dart'));
-      // We don't hardcode the actual lines the widgets are created on as that
-      // would make this test fragile.
-      expect(line, isNotNull);
-      // Column numbers are more stable than line numbers.
-      expect(column, equals(15));
-    },
-      skip: !WidgetInspectorService.instance.isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
-    );
-
-    testWidgets(
-      'WidgetInspectorService setSelection notifiers for a RenderObject',
-      (WidgetTester tester) async {
-        await tester.pumpWidget(
-          const Directionality(
-            textDirection: TextDirection.ltr,
-            child: Stack(
-              children: <Widget>[
-                Text('a'),
-                Text('b', textDirection: TextDirection.ltr),
-                Text('c', textDirection: TextDirection.ltr),
-              ],
-            ),
-          ),
-        );
-        final Element elementA = find.text('a').evaluate().first;
-
-        service.disposeAllGroups();
-
-        setupDefaultPubRootDirectory(service);
-
-        // Select the render object for the widget.
-        service.setSelection(elementA.renderObject, 'my-group');
-
-        // ensure that developer.inspect was called on the widget
-        final List<Object?> objectsInspected = service.inspectedObjects();
-        expect(objectsInspected, equals(<RenderObject?>[elementA.renderObject]));
-
-        // ensure that a navigate event was sent for the renderObject
-        final List<Map<Object, Object?>> navigateEventsPosted
-          = service.dispatchedEvents('navigate', stream: 'ToolEvent',);
-        expect(navigateEventsPosted.length, equals(1));
-        final Map<Object,Object?> event = navigateEventsPosted[0];
-        final String file = event['fileUri']! as String;
-        final int line = event['line']! as int;
-        final int column = event['column']! as int;
-        expect(file, endsWith('widget_inspector_test.dart'));
-        // We don't hardcode the actual lines the widgets are created on as that
-        // would make this test fragile.
-        expect(line, isNotNull);
-        // Column numbers are more stable than line numbers.
-        expect(column, equals(17));
-      },
-      skip: !WidgetInspectorService.instance.isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
-    );
-
     testWidgets(
       'WidgetInspector selectButton inspection for tap',
       (WidgetTester tester) async {
@@ -1563,6 +1129,312 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         service.disposeAllGroups();
         service.resetPubRootDirectories();
       });
+
+      test('null id', () {
+        service.disposeAllGroups();
+        expect(service.toObject(null), isNull);
+        expect(service.toId(null, 'test-group'), isNull);
+      });
+
+      test('dispose group', () {
+        service.disposeAllGroups();
+        final Object a = Object();
+        const String group1 = 'group-1';
+        const String group2 = 'group-2';
+        const String group3 = 'group-3';
+        final String? aId = service.toId(a, group1);
+        expect(service.toId(a, group2), equals(aId));
+        expect(service.toId(a, group3), equals(aId));
+        service.disposeGroup(group1);
+        service.disposeGroup(group2);
+        expect(service.toObject(aId), equals(a));
+        service.disposeGroup(group3);
+        expect(() => service.toObject(aId), throwsFlutterError);
+      });
+
+      test('dispose id', () {
+        service.disposeAllGroups();
+        final Object a = Object();
+        final Object b = Object();
+        const String group1 = 'group-1';
+        const String group2 = 'group-2';
+        final String? aId = service.toId(a, group1);
+        final String? bId = service.toId(b, group1);
+        expect(service.toId(a, group2), equals(aId));
+        service.disposeId(bId, group1);
+        expect(() => service.toObject(bId), throwsFlutterError);
+        service.disposeId(aId, group1);
+        expect(service.toObject(aId), equals(a));
+        service.disposeId(aId, group2);
+        expect(() => service.toObject(aId), throwsFlutterError);
+      });
+
+      test('toObjectForSourceLocation', () {
+        const String group = 'test-group';
+        const Text widget = Text('a', textDirection: TextDirection.ltr);
+        service.disposeAllGroups();
+        final String id = service.toId(widget, group)!;
+        expect(service.toObjectForSourceLocation(id), equals(widget));
+        final Element element = widget.createElement();
+        final String elementId = service.toId(element, group)!;
+        expect(service.toObjectForSourceLocation(elementId), equals(widget));
+        expect(element, isNot(equals(widget)));
+        service.disposeGroup(group);
+        expect(() => service.toObjectForSourceLocation(elementId),
+            throwsFlutterError);
+      });
+
+      test('object id test', () {
+        const Text a = Text('a', textDirection: TextDirection.ltr);
+        const Text b = Text('b', textDirection: TextDirection.ltr);
+        const Text c = Text('c', textDirection: TextDirection.ltr);
+        const Text d = Text('d', textDirection: TextDirection.ltr);
+
+        const String group1 = 'group-1';
+        const String group2 = 'group-2';
+        const String group3 = 'group-3';
+        service.disposeAllGroups();
+
+        final String? aId = service.toId(a, group1);
+        final String? bId = service.toId(b, group2);
+        final String? cId = service.toId(c, group3);
+        final String? dId = service.toId(d, group1);
+        // Make sure we get a consistent id if we add the object to a group multiple
+        // times.
+        expect(aId, equals(service.toId(a, group1)));
+        expect(service.toObject(aId), equals(a));
+        expect(service.toObject(aId), isNot(equals(b)));
+        expect(service.toObject(bId), equals(b));
+        expect(service.toObject(cId), equals(c));
+        expect(service.toObject(dId), equals(d));
+        // Make sure we get a consistent id even if we add the object to a different
+        // group.
+        expect(aId, equals(service.toId(a, group3)));
+        expect(aId, isNot(equals(bId)));
+        expect(aId, isNot(equals(cId)));
+
+        service.disposeGroup(group3);
+      });
+
+      testWidgets('maybeSetSelection', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          const Directionality(
+            textDirection: TextDirection.ltr,
+            child: Stack(
+              children: <Widget>[
+                Text('a', textDirection: TextDirection.ltr),
+                Text('b', textDirection: TextDirection.ltr),
+                Text('c', textDirection: TextDirection.ltr),
+              ],
+            ),
+          ),
+        );
+        final Element elementA = find.text('a').evaluate().first;
+        final Element elementB = find.text('b').evaluate().first;
+
+        service.disposeAllGroups();
+        service.selection.clear();
+        int selectionChangedCount = 0;
+        service.selectionChangedCallback = () => selectionChangedCount++;
+        service.setSelection('invalid selection');
+        expect(selectionChangedCount, equals(0));
+        expect(service.selection.currentElement, isNull);
+        service.setSelection(elementA);
+        expect(selectionChangedCount, equals(1));
+        expect(service.selection.currentElement, equals(elementA));
+        expect(service.selection.current, equals(elementA.renderObject));
+
+        service.setSelection(elementB.renderObject);
+        expect(selectionChangedCount, equals(2));
+        expect(service.selection.current, equals(elementB.renderObject));
+        expect(
+            service.selection.currentElement,
+            equals((elementB.renderObject!.debugCreator! as DebugCreator)
+                .element));
+
+        service.setSelection('invalid selection');
+        expect(selectionChangedCount, equals(2));
+        expect(service.selection.current, equals(elementB.renderObject));
+
+        service.setSelectionById(service.toId(elementA, 'my-group'));
+        expect(selectionChangedCount, equals(3));
+        expect(service.selection.currentElement, equals(elementA));
+        expect(service.selection.current, equals(elementA.renderObject));
+
+        service.setSelectionById(service.toId(elementA, 'my-group'));
+        expect(selectionChangedCount, equals(3));
+        expect(service.selection.currentElement, equals(elementA));
+      });
+
+      testWidgets('defunct selection regression test',
+          (WidgetTester tester) async {
+        await tester.pumpWidget(
+          const Directionality(
+            textDirection: TextDirection.ltr,
+            child: Stack(
+              children: <Widget>[
+                Text('a', textDirection: TextDirection.ltr),
+              ],
+            ),
+          ),
+        );
+        final Element elementA = find.text('a').evaluate().first;
+
+        service.setSelection(elementA);
+        expect(service.selection.currentElement, equals(elementA));
+        expect(service.selection.current, equals(elementA.renderObject));
+
+        await tester.pumpWidget(
+          const SizedBox(
+            child: Text('b', textDirection: TextDirection.ltr),
+          ),
+        );
+        // Selection is now empty as the element is defunct.
+        expect(service.selection.currentElement, equals(null));
+        expect(service.selection.current, equals(null));
+
+        // Verify that getting the debug creation location of the defunct element
+        // does not crash.
+        expect(debugIsLocalCreationLocation(elementA), isFalse);
+
+        // Verify that generating json for a defunct element does not crash.
+        expect(
+          elementA.toDiagnosticsNode().toJsonMap(
+                InspectorSerializationDelegate(
+                  service: service,
+                  includeProperties: true,
+                ),
+              ),
+          isNotNull,
+        );
+
+        final Element elementB = find.text('b').evaluate().first;
+        service.setSelection(elementB);
+        expect(service.selection.currentElement, equals(elementB));
+        expect(service.selection.current, equals(elementB.renderObject));
+
+        // Set selection back to a defunct element.
+        service.setSelection(elementA);
+
+        expect(service.selection.currentElement, equals(null));
+        expect(service.selection.current, equals(null));
+      });
+
+      testWidgets('getParentChain', (WidgetTester tester) async {
+        const String group = 'test-group';
+
+        await tester.pumpWidget(
+          const Directionality(
+            textDirection: TextDirection.ltr,
+            child: Stack(
+              children: <Widget>[
+                Text('a', textDirection: TextDirection.ltr),
+                Text('b', textDirection: TextDirection.ltr),
+                Text('c', textDirection: TextDirection.ltr),
+              ],
+            ),
+          ),
+        );
+
+        service.disposeAllGroups();
+        final Element elementB = find.text('b').evaluate().first;
+        final String bId = service.toId(elementB, group)!;
+        final Object? jsonList =
+            json.decode(service.getParentChain(bId, group));
+        expect(jsonList, isList);
+        final List<Object?> chainElements = jsonList! as List<Object?>;
+        final List<Element> expectedChain =
+            elementB.debugGetDiagnosticChain().reversed.toList();
+        // Sanity check that the chain goes back to the root.
+        expect(expectedChain.first, tester.binding.rootElement);
+
+        expect(chainElements.length, equals(expectedChain.length));
+        for (int i = 0; i < expectedChain.length; i += 1) {
+          expect(chainElements[i], isMap);
+          final Map<String, Object?> chainNode =
+              chainElements[i]! as Map<String, Object?>;
+          final Element element = expectedChain[i];
+          expect(chainNode['node'], isMap);
+          final Map<String, Object?> jsonNode =
+              chainNode['node']! as Map<String, Object?>;
+          expect(service.toObject(jsonNode['valueId']! as String),
+              equals(element));
+
+          expect(chainNode['children'], isList);
+          final List<Object?> jsonChildren =
+              chainNode['children']! as List<Object?>;
+          final List<Element> childrenElements = <Element>[];
+          element.visitChildren(childrenElements.add);
+          expect(jsonChildren.length, equals(childrenElements.length));
+          if (i + 1 == expectedChain.length) {
+            expect(chainNode['childIndex'], isNull);
+          } else {
+            expect(chainNode['childIndex'],
+                equals(childrenElements.indexOf(expectedChain[i + 1])));
+          }
+          for (int j = 0; j < childrenElements.length; j += 1) {
+            expect(jsonChildren[j], isMap);
+            final Map<String, Object?> childJson =
+                jsonChildren[j]! as Map<String, Object?>;
+            expect(service.toObject(childJson['valueId']! as String),
+                equals(childrenElements[j]));
+          }
+        }
+      });
+
+      test('getProperties', () {
+        const Diagnosticable diagnosticable =
+            Text('a', textDirection: TextDirection.ltr);
+        const String group = 'group';
+        service.disposeAllGroups();
+        final String id = service.toId(diagnosticable, group)!;
+        final List<Object?> propertiesJson =
+            json.decode(service.getProperties(id, group)) as List<Object?>;
+        final List<DiagnosticsNode> properties =
+            diagnosticable.toDiagnosticsNode().getProperties();
+        expect(properties, isNotEmpty);
+        expect(propertiesJson.length, equals(properties.length));
+        for (int i = 0; i < propertiesJson.length; ++i) {
+          final Map<String, Object?> propertyJson =
+              propertiesJson[i]! as Map<String, Object?>;
+          expect(service.toObject(propertyJson['valueId'] as String?),
+              equals(properties[i].value));
+        }
+      });
+
+      testWidgets('getChildren', (WidgetTester tester) async {
+        const String group = 'test-group';
+
+        await tester.pumpWidget(
+          const Directionality(
+            textDirection: TextDirection.ltr,
+            child: Stack(
+              children: <Widget>[
+                Text('a', textDirection: TextDirection.ltr),
+                Text('b', textDirection: TextDirection.ltr),
+                Text('c', textDirection: TextDirection.ltr),
+              ],
+            ),
+          ),
+        );
+        final DiagnosticsNode diagnostic =
+            find.byType(Stack).evaluate().first.toDiagnosticsNode();
+        service.disposeAllGroups();
+        final String id = service.toId(diagnostic, group)!;
+        final List<Object?> propertiesJson =
+            json.decode(service.getChildren(id, group)) as List<Object?>;
+        final List<DiagnosticsNode> children = diagnostic.getChildren();
+        expect(children.length, equals(3));
+        expect(propertiesJson.length, equals(children.length));
+        for (int i = 0; i < propertiesJson.length; ++i) {
+          final Map<String, Object?> propertyJson =
+              propertiesJson[i]! as Map<String, Object?>;
+          expect(service.toObject(propertyJson['valueId']! as String),
+              equals(children[i].value));
+        }
+      });
+
+      group('Requires --track-widget-creation', () {
 
         group('addPubRootDirectories', () {
           testWidgets(
@@ -2029,9 +1901,172 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           },
         );
       });
-    },
-    skip: !WidgetInspectorService.instance.isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
-  );
+
+        testWidgets('creationLocation', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            Directionality(
+              textDirection: TextDirection.ltr,
+              child: Stack(
+                children: <Widget>[
+                  const Text('a'),
+                  const Text('b', textDirection: TextDirection.ltr),
+                  'c'.text(),
+                ],
+              ),
+            ),
+          );
+          final Element elementA = find.text('a').evaluate().first;
+          final Element elementB = find.text('b').evaluate().first;
+          final Element elementC = find.text('c').evaluate().first;
+
+          service.disposeAllGroups();
+          service.resetPubRootDirectories();
+          service.setSelection(elementA, 'my-group');
+          final Map<String, Object?> jsonA =
+              json.decode(service.getSelectedWidget(null, 'my-group'))
+                  as Map<String, Object?>;
+          final Map<String, Object?> creationLocationA =
+              jsonA['creationLocation']! as Map<String, Object?>;
+          expect(creationLocationA, isNotNull);
+          final String fileA = creationLocationA['file']! as String;
+          final int lineA = creationLocationA['line']! as int;
+          final int columnA = creationLocationA['column']! as int;
+          final String nameA = creationLocationA['name']! as String;
+          expect(nameA, equals('Text'));
+
+          service.setSelection(elementB, 'my-group');
+          final Map<String, Object?> jsonB =
+              json.decode(service.getSelectedWidget(null, 'my-group'))
+                  as Map<String, Object?>;
+          final Map<String, Object?> creationLocationB =
+              jsonB['creationLocation']! as Map<String, Object?>;
+          expect(creationLocationB, isNotNull);
+          final String fileB = creationLocationB['file']! as String;
+          final int lineB = creationLocationB['line']! as int;
+          final int columnB = creationLocationB['column']! as int;
+          final String? nameB = creationLocationB['name'] as String?;
+          expect(nameB, equals('Text'));
+
+          service.setSelection(elementC, 'my-group');
+          final Map<String, Object?> jsonC =
+              json.decode(service.getSelectedWidget(null, 'my-group'))
+                  as Map<String, Object?>;
+          final Map<String, Object?> creationLocationC =
+              jsonC['creationLocation']! as Map<String, Object?>;
+          expect(creationLocationC, isNotNull);
+          final String fileC = creationLocationC['file']! as String;
+          final int lineC = creationLocationC['line']! as int;
+          final int columnC = creationLocationC['column']! as int;
+          final String? nameC = creationLocationC['name'] as String?;
+          expect(nameC, equals('TextFromString|text'));
+
+          expect(fileA, endsWith('widget_inspector_test.dart'));
+          expect(fileA, equals(fileB));
+          expect(fileA, equals(fileC));
+          // We don't hardcode the actual lines the widgets are created on as that
+          // would make this test fragile.
+          expect(lineA + 1, equals(lineB));
+          expect(lineB + 1, equals(lineC));
+          // Column numbers are more stable than line numbers.
+          expect(columnA, equals(25));
+          expect(columnA, equals(columnB));
+          expect(columnC, equals(23));
+        });
+
+        testWidgets('setSelection notifiers for an Element',
+            (WidgetTester tester) async {
+          await tester.pumpWidget(
+            const Directionality(
+              textDirection: TextDirection.ltr,
+              child: Stack(
+                children: <Widget>[
+                  Text('a'),
+                  Text('b', textDirection: TextDirection.ltr),
+                  Text('c', textDirection: TextDirection.ltr),
+                ],
+              ),
+            ),
+          );
+          final Element elementA = find.text('a').evaluate().first;
+
+          service.disposeAllGroups();
+
+          setupDefaultPubRootDirectory(service);
+
+          // Select the widget
+          service.setSelection(elementA, 'my-group');
+
+          // ensure that developer.inspect was called on the widget
+          final List<Object?> objectsInspected = service.inspectedObjects();
+          expect(objectsInspected, equals(<Element>[elementA]));
+
+          // ensure that a navigate event was sent for the element
+          final List<Map<Object, Object?>> navigateEventsPosted =
+              service.dispatchedEvents(
+            'navigate',
+            stream: 'ToolEvent',
+          );
+          expect(navigateEventsPosted.length, equals(1));
+          final Map<Object, Object?> event = navigateEventsPosted[0];
+          final String file = event['fileUri']! as String;
+          final int line = event['line']! as int;
+          final int column = event['column']! as int;
+          expect(file, endsWith('widget_inspector_test.dart'));
+          // We don't hardcode the actual lines the widgets are created on as that
+          // would make this test fragile.
+          expect(line, isNotNull);
+          // Column numbers are more stable than line numbers.
+          expect(column, equals(19));
+        });
+
+        testWidgets('setSelection notifiers for a RenderObject',
+            (WidgetTester tester) async {
+          await tester.pumpWidget(
+            const Directionality(
+              textDirection: TextDirection.ltr,
+              child: Stack(
+                children: <Widget>[
+                  Text('a'),
+                  Text('b', textDirection: TextDirection.ltr),
+                  Text('c', textDirection: TextDirection.ltr),
+                ],
+              ),
+            ),
+          );
+          final Element elementA = find.text('a').evaluate().first;
+
+          service.disposeAllGroups();
+
+          setupDefaultPubRootDirectory(service);
+
+          // Select the render object for the widget.
+          service.setSelection(elementA.renderObject, 'my-group');
+
+          // ensure that developer.inspect was called on the widget
+          final List<Object?> objectsInspected = service.inspectedObjects();
+          expect(
+              objectsInspected, equals(<RenderObject?>[elementA.renderObject]));
+
+          // ensure that a navigate event was sent for the renderObject
+          final List<Map<Object, Object?>> navigateEventsPosted =
+              service.dispatchedEvents(
+            'navigate',
+            stream: 'ToolEvent',
+          );
+          expect(navigateEventsPosted.length, equals(1));
+          final Map<Object, Object?> event = navigateEventsPosted[0];
+          final String file = event['fileUri']! as String;
+          final int line = event['line']! as int;
+          final int column = event['column']! as int;
+          expect(file, endsWith('widget_inspector_test.dart'));
+          // We don't hardcode the actual lines the widgets are created on as that
+          // would make this test fragile.
+          expect(line, isNotNull);
+          // Column numbers are more stable than line numbers.
+          expect(column, equals(19));
+        });
+      });
+    });
 
     group('InspectorSelection', () {
       testWidgets('receives notifications when selection changes',
