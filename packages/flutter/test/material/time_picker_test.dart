@@ -1250,7 +1250,7 @@ void main() {
           semantics,
           includesNodeWith(
             label: amString,
-            actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+            actions: <SemanticsAction>[SemanticsAction.tap],
             flags: <SemanticsFlag>[
               SemanticsFlag.isButton,
               SemanticsFlag.isChecked,
@@ -1264,7 +1264,7 @@ void main() {
           semantics,
           includesNodeWith(
             label: pmString,
-            actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+            actions: <SemanticsAction>[SemanticsAction.tap],
             flags: <SemanticsFlag>[
               SemanticsFlag.isButton,
               SemanticsFlag.isInMutuallyExclusiveGroup,
