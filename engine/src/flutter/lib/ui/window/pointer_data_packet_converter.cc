@@ -11,7 +11,8 @@
 
 namespace flutter {
 
-PointerDataPacketConverter::PointerDataPacketConverter() {}
+PointerDataPacketConverter::PointerDataPacketConverter(const Delegate& delegate)
+    : delegate_(delegate) {}
 
 PointerDataPacketConverter::~PointerDataPacketConverter() = default;
 
@@ -39,6 +40,10 @@ std::unique_ptr<PointerDataPacket> PointerDataPacketConverter::Convert(
 void PointerDataPacketConverter::ConvertPointerData(
     PointerData pointer_data,
     std::vector<PointerData>& converted_pointers) {
+  // Ignores pointer events with an invalid view ID.
+  if (!delegate_.ViewExists(pointer_data.view_id)) {
+    return;
+  }
   if (pointer_data.signal_kind == PointerData::SignalKind::kNone) {
     switch (pointer_data.change) {
       case PointerData::Change::kCancel: {

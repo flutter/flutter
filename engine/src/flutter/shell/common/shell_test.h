@@ -110,7 +110,9 @@ class ShellTest : public FixtureTest {
 
   static void PumpOneFrame(Shell* shell);
   static void PumpOneFrame(Shell* shell, FrameContent frame_content);
-  static void DispatchFakePointerData(Shell* shell);
+  // Dispatch a PointerHoverEvent with the specified `x` as the pointer
+  // position.
+  static void DispatchFakePointerData(Shell* shell, double x);
   static void DispatchPointerData(Shell* shell,
                                   std::unique_ptr<PointerDataPacket> packet);
   // Declare |UnreportedTimingsCount|, |GetNeedsReportTimings| and

@@ -5,11 +5,33 @@
 #include "flutter/lib/ui/window/pointer_data_packet_converter.h"
 
 #include <cstring>
+#include <unordered_set>
 
 #include "gtest/gtest.h"
 
 namespace flutter {
 namespace testing {
+
+namespace {
+
+constexpr int64_t kImplicitViewId = 0;
+
+}
+
+class TestDelegate : public PointerDataPacketConverter::Delegate {
+ public:
+  // |PointerDataPacketConverter::Delegate|
+  bool ViewExists(int64_t view_id) const override {
+    return views_.count(view_id) != 0;
+  }
+
+  void AddView(int64_t view_id) { views_.insert(view_id); }
+
+  void RemoveView(int64_t view_id) { views_.erase(view_id); }
+
+ private:
+  std::unordered_set<int64_t> views_;
+};
 
 void CreateSimulatedPointerData(PointerData& data,  // NOLINT
                                 PointerData::Change change,
@@ -45,7 +67,7 @@ void CreateSimulatedPointerData(PointerData& data,  // NOLINT
   data.platformData = 0;
   data.scroll_delta_x = 0.0;
   data.scroll_delta_y = 0.0;
-  data.view_id = 0;
+  data.view_id = kImplicitViewId;
 }
 
 void CreateSimulatedMousePointerData(PointerData& data,  // NOLINT
@@ -85,7 +107,7 @@ void CreateSimulatedMousePointerData(PointerData& data,  // NOLINT
   data.platformData = 0;
   data.scroll_delta_x = scroll_delta_x;
   data.scroll_delta_y = scroll_delta_y;
-  data.view_id = 0;
+  data.view_id = kImplicitViewId;
 }
 
 void CreateSimulatedTrackpadGestureData(PointerData& data,  // NOLINT
@@ -144,7 +166,9 @@ void UnpackPointerPacket(std::vector<PointerData>& output,  // NOLINT
 }
 
 TEST(PointerDataPacketConverterTest, CanConvertPointerDataPacket) {
-  PointerDataPacketConverter converter;
+  TestDelegate delegate;
+  delegate.AddView(kImplicitViewId);
+  PointerDataPacketConverter converter(delegate);
   auto packet = std::make_unique<PointerDataPacket>(6);
   PointerData data;
   CreateSimulatedPointerData(data, PointerData::Change::kAdd, 0, 0.0, 0.0, 0);
@@ -193,7 +217,9 @@ TEST(PointerDataPacketConverterTest, CanConvertPointerDataPacket) {
 }
 
 TEST(PointerDataPacketConverterTest, CanSynthesizeDownAndUp) {
-  PointerDataPacketConverter converter;
+  TestDelegate delegate;
+  delegate.AddView(kImplicitViewId);
+  PointerDataPacketConverter converter(delegate);
   auto packet = std::make_unique<PointerDataPacket>(4);
   PointerData data;
   CreateSimulatedPointerData(data, PointerData::Change::kAdd, 0, 0.0, 0.0, 0);
@@ -244,7 +270,9 @@ TEST(PointerDataPacketConverterTest, CanSynthesizeDownAndUp) {
 }
 
 TEST(PointerDataPacketConverterTest, CanUpdatePointerIdentifier) {
-  PointerDataPacketConverter converter;
+  TestDelegate delegate;
+  delegate.AddView(kImplicitViewId);
+  PointerDataPacketConverter converter(delegate);
   auto packet = std::make_unique<PointerDataPacket>(7);
   PointerData data;
   CreateSimulatedPointerData(data, PointerData::Change::kAdd, 0, 0.0, 0.0, 0);
@@ -299,7 +327,9 @@ TEST(PointerDataPacketConverterTest, CanUpdatePointerIdentifier) {
 }
 
 TEST(PointerDataPacketConverterTest, AlwaysForwardMoveEvent) {
-  PointerDataPacketConverter converter;
+  TestDelegate delegate;
+  delegate.AddView(kImplicitViewId);
+  PointerDataPacketConverter converter(delegate);
   auto packet = std::make_unique<PointerDataPacket>(4);
   PointerData data;
   CreateSimulatedPointerData(data, PointerData::Change::kAdd, 0, 0.0, 0.0, 0);
@@ -336,7 +366,9 @@ TEST(PointerDataPacketConverterTest, AlwaysForwardMoveEvent) {
 }
 
 TEST(PointerDataPacketConverterTest, CanWorkWithDifferentDevices) {
-  PointerDataPacketConverter converter;
+  TestDelegate delegate;
+  delegate.AddView(kImplicitViewId);
+  PointerDataPacketConverter converter(delegate);
   auto packet = std::make_unique<PointerDataPacket>(12);
   PointerData data;
   CreateSimulatedPointerData(data, PointerData::Change::kAdd, 0, 0.0, 0.0, 0);
@@ -433,7 +465,9 @@ TEST(PointerDataPacketConverterTest, CanWorkWithDifferentDevices) {
 }
 
 TEST(PointerDataPacketConverterTest, CanSynthesizeAdd) {
-  PointerDataPacketConverter converter;
+  TestDelegate delegate;
+  delegate.AddView(kImplicitViewId);
+  PointerDataPacketConverter converter(delegate);
   auto packet = std::make_unique<PointerDataPacket>(2);
   PointerData data;
   CreateSimulatedPointerData(data, PointerData::Change::kDown, 0, 330.0, 450.0,
@@ -478,7 +512,9 @@ TEST(PointerDataPacketConverterTest, CanSynthesizeAdd) {
 
 TEST(PointerDataPacketConverterTest, CanHandleThreeFingerGesture) {
   // Regression test https://github.com/flutter/flutter/issues/20517.
-  PointerDataPacketConverter converter;
+  TestDelegate delegate;
+  delegate.AddView(kImplicitViewId);
+  PointerDataPacketConverter converter(delegate);
   PointerData data;
   std::vector<PointerData> result;
   // First finger down.
@@ -558,7 +594,9 @@ TEST(PointerDataPacketConverterTest, CanConvertPointerSignals) {
       PointerData::SignalKind::kScale,
   };
   for (const PointerData::SignalKind& kind : signal_kinds) {
-    PointerDataPacketConverter converter;
+    TestDelegate delegate;
+    delegate.AddView(kImplicitViewId);
+    PointerDataPacketConverter converter(delegate);
     auto packet = std::make_unique<PointerDataPacket>(6);
     PointerData data;
     CreateSimulatedMousePointerData(data, PointerData::Change::kAdd,
@@ -666,7 +704,9 @@ TEST(PointerDataPacketConverterTest, CanConvertPointerSignals) {
 }
 
 TEST(PointerDataPacketConverterTest, CanConvertTrackpadGesture) {
-  PointerDataPacketConverter converter;
+  TestDelegate delegate;
+  delegate.AddView(kImplicitViewId);
+  PointerDataPacketConverter converter(delegate);
   auto packet = std::make_unique<PointerDataPacket>(3);
   PointerData data;
   CreateSimulatedTrackpadGestureData(data, PointerData::Change::kPanZoomStart,
@@ -717,7 +757,10 @@ TEST(PointerDataPacketConverterTest, CanConvertTrackpadGesture) {
 }
 
 TEST(PointerDataPacketConverterTest, CanConvertViewId) {
-  PointerDataPacketConverter converter;
+  TestDelegate delegate;
+  delegate.AddView(100);
+  delegate.AddView(200);
+  PointerDataPacketConverter converter(delegate);
   auto packet = std::make_unique<PointerDataPacket>(2);
   PointerData data;
   CreateSimulatedPointerData(data, PointerData::Change::kAdd, 0, 0.0, 0.0, 0);

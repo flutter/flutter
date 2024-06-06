@@ -3534,7 +3534,7 @@ TEST_F(EmbedderTest, CanSendPointerEventWithViewId) {
   builder.SetSoftwareRendererConfig();
   builder.SetDartEntrypoint("pointer_data_packet_view_id");
 
-  fml::AutoResetWaitableEvent ready_latch, count_latch, message_latch;
+  fml::AutoResetWaitableEvent ready_latch, add_view_latch, message_latch;
   context.AddNativeCallback(
       "SignalNativeTest",
       CREATE_NATIVE_ENTRY(
@@ -3550,9 +3550,31 @@ TEST_F(EmbedderTest, CanSendPointerEventWithViewId) {
 
   auto engine = builder.LaunchEngine();
   ASSERT_TRUE(engine.is_valid());
-
   ready_latch.Wait();
 
+  // Add view 2
+  FlutterWindowMetricsEvent metrics = {};
+  metrics.struct_size = sizeof(FlutterWindowMetricsEvent);
+  metrics.width = 800;
+  metrics.height = 600;
+  metrics.pixel_ratio = 1.0;
+  metrics.view_id = 2;
+
+  FlutterAddViewInfo info = {};
+  info.struct_size = sizeof(FlutterAddViewInfo);
+  info.view_id = 2;
+  info.view_metrics = &metrics;
+  info.add_view_callback = [](const FlutterAddViewResult* result) {
+    EXPECT_TRUE(result->added);
+    fml::AutoResetWaitableEvent* add_view_latch =
+        reinterpret_cast<fml::AutoResetWaitableEvent*>(result->user_data);
+    add_view_latch->Signal();
+  };
+  info.user_data = &add_view_latch;
+  ASSERT_EQ(FlutterEngineAddView(engine.get(), &info), kSuccess);
+  add_view_latch.Wait();
+
+  // Send a pointer event for view 2
   FlutterPointerEvent pointer_event = {};
   pointer_event.struct_size = sizeof(FlutterPointerEvent);
   pointer_event.phase = FlutterPointerPhase::kAdd;

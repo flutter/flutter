@@ -49,7 +49,8 @@ class Window;
 /// `RuntimeController` and flushed to the Dart VM when the isolate becomes
 /// ready before the entrypoint function. See `PlatformData`.
 ///
-class RuntimeController : public PlatformConfigurationClient {
+class RuntimeController : public PlatformConfigurationClient,
+                          PointerDataPacketConverter::Delegate {
  public:
   /// A callback that's invoked after this `RuntimeController` attempts to
   /// add a view to the Dart isolate.
@@ -722,6 +723,9 @@ class RuntimeController : public PlatformConfigurationClient {
   PlatformConfiguration* GetPlatformConfigurationIfAvailable();
 
   bool FlushRuntimeStateToIsolate();
+
+  // |PointerDataPacketConverter::Delegate|
+  bool ViewExists(int64_t view_id) const override;
 
   // |PlatformConfigurationClient|
   std::string DefaultRouteName() override;
