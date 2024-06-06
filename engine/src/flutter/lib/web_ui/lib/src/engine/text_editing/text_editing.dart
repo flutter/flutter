@@ -2184,9 +2184,10 @@ class TextEditingChannel {
     final TextInputCommand command;
     switch (call.method) {
       case 'TextInput.setClient':
+        final args = call.arguments! as List<Object?>;
         command = TextInputSetClient(
-          clientId: call.arguments[0] as int,
-          configuration: InputConfiguration.fromFrameworkMessage(call.arguments[1] as Map<String, dynamic>),
+          clientId: args[0]! as int,
+          configuration: InputConfiguration.fromFrameworkMessage(args[1]! as Map<String, Object?>),
         );
 
       case 'TextInput.updateConfig':

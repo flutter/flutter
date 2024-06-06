@@ -279,13 +279,15 @@ void testMain() {
     await callback.future;
     expect(myWindow.browserHistory, isA<MultiEntriesBrowserHistory>());
     expect(myWindow.browserHistory.urlStrategy!.getPath(), '/baz');
-    final dynamic wrappedState = myWindow.browserHistory.urlStrategy!.getState();
-    final dynamic actualState = wrappedState['state'];
+    final wrappedState = myWindow.browserHistory.urlStrategy!.getState()! as Map<Object?, Object?>;
+    final actualState = wrappedState['state']! as Map<Object?, Object?>;
     expect(actualState['state1'], true);
     expect(actualState['state2'], 1);
     expect(actualState['state3'], 'string');
-    expect(actualState['state4']['substate1'], 1.0);
-    expect(actualState['state4']['substate2'], 'string2');
+
+    final state4 = actualState['state4']! as Map<Object?, Object?>;
+    expect(state4['substate1'], 1.0);
+    expect(state4['substate2'], 'string2');
   });
 
   test('routeInformationUpdated can handle uri',
