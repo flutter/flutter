@@ -22,6 +22,15 @@ import 'framework.dart';
 ///
 /// ** See code in examples/api/lib/widgets/sliver/pinned_header_sliver.0.dart **
 /// {@end-tool}
+///
+///
+/// See also:
+///
+///  * [SliverResizingHeader] - which similarly pins the header at the top
+///    of the [CustomScrollView] but reacts to scrolling by resizing the header
+///    between its minimum and maximum extent limits.
+///  * [SliverPersistentHeader] - a general purpose header that can be
+///    configured as a pinned, resizing, or floating header.
 class PinnedHeaderSliver extends SingleChildRenderObjectWidget {
   /// Creates a sliver whose [Widget] child appears at the top of a
   /// [CustomScrollView].
