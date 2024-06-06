@@ -21,7 +21,8 @@ void main() {
     expect(find.byType(Drawer), findsOne);
     expect(tester.getCenter(
       find.byType(Drawer)).dx,
-      greaterThan(400), reason: 'The drawer should be on the right side of the screen',
+      greaterThan(400),
+      reason: 'The drawer should be on the right side of the screen',
     );
     expect(find.text('This is the Drawer'), findsOne);
 
@@ -34,7 +35,8 @@ void main() {
     // Opens the drawer by tapping the drawer button in the app bar.
     expect(tester.getCenter(
       find.byType(EndDrawerButton)).dx,
-      greaterThan(400), reason: 'The drawer button should be on the right side of the app bar',
+      greaterThan(400),
+      reason: 'The drawer button should be on the right side of the app bar',
     );
     await tester.tap(find.byType(EndDrawerButton));
     await tester.pumpAndSettle();
@@ -42,7 +44,7 @@ void main() {
     expect(find.byType(Drawer), findsOne);
     expect(find.text('This is the Drawer'), findsOne);
 
-    // Closes the drawer by tapping outside the drawer
+    // Closes the drawer by tapping outside the drawer.
     final Rect drawerRect = tester.getRect(find.byType(Drawer));
     final Offset outsideDrawer = drawerRect.centerLeft - const Offset(50, 0);
     await tester.tapAt(outsideDrawer);
