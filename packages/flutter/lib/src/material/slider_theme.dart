@@ -1117,6 +1117,9 @@ abstract class SliderTrackShape {
     bool isDiscrete,
     required TextDirection textDirection,
   });
+
+  /// Whether the track shape is rounded.
+  bool get isRounded;
 }
 
 /// Base class for [RangeSlider] thumb shapes.
@@ -1636,6 +1639,9 @@ class RectangularSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
       }
     }
   }
+
+  @override
+  bool get isRounded => false;
 }
 
 /// The default shape of a [Slider]'s track.
@@ -1714,6 +1720,8 @@ class RoundedRectSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
     );
     final Radius trackRadius = Radius.circular(trackRect.height / 2);
     final Radius activeTrackRadius = Radius.circular((trackRect.height + additionalActiveTrackHeight) / 2);
+    final bool isLTR = textDirection == TextDirection.ltr;
+    final bool isRTL = textDirection == TextDirection.rtl;
 
     final bool drawInactiveTrack = thumbCenter.dx < (trackRect.right - (sliderTheme.trackHeight! / 2));
     if (drawInactiveTrack) {
@@ -1721,10 +1729,10 @@ class RoundedRectSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
       context.canvas.drawRRect(
         RRect.fromLTRBR(
           thumbCenter.dx - (sliderTheme.trackHeight! / 2),
-          (textDirection == TextDirection.rtl) ? trackRect.top - (additionalActiveTrackHeight / 2) : trackRect.top,
+          isRTL ? trackRect.top - (additionalActiveTrackHeight / 2) : trackRect.top,
           trackRect.right,
-          (textDirection == TextDirection.rtl) ? trackRect.bottom + (additionalActiveTrackHeight / 2) : trackRect.bottom,
-          (textDirection == TextDirection.ltr) ? trackRadius : activeTrackRadius,
+          isRTL ? trackRect.bottom + (additionalActiveTrackHeight / 2) : trackRect.bottom,
+          isLTR ? trackRadius : activeTrackRadius,
         ),
         rightTrackPaint,
       );
@@ -1735,24 +1743,22 @@ class RoundedRectSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
       context.canvas.drawRRect(
         RRect.fromLTRBR(
           trackRect.left,
-          (textDirection == TextDirection.ltr) ? trackRect.top - (additionalActiveTrackHeight / 2): trackRect.top,
+          isLTR ? trackRect.top - (additionalActiveTrackHeight / 2): trackRect.top,
           thumbCenter.dx + (sliderTheme.trackHeight! / 2),
-          (textDirection == TextDirection.ltr) ? trackRect.bottom + (additionalActiveTrackHeight / 2) : trackRect.bottom,
-          (textDirection == TextDirection.ltr) ? activeTrackRadius : trackRadius,
+          isLTR ? trackRect.bottom + (additionalActiveTrackHeight / 2) : trackRect.bottom,
+          isLTR ? activeTrackRadius : trackRadius,
         ),
         leftTrackPaint,
       );
     }
 
     final bool showSecondaryTrack = (secondaryOffset != null) &&
-        ((textDirection == TextDirection.ltr)
-            ? (secondaryOffset.dx > thumbCenter.dx)
-            : (secondaryOffset.dx < thumbCenter.dx));
+        (isLTR ? (secondaryOffset.dx > thumbCenter.dx) : (secondaryOffset.dx < thumbCenter.dx));
 
     if (showSecondaryTrack) {
       final ColorTween secondaryTrackColorTween = ColorTween(begin: sliderTheme.disabledSecondaryActiveTrackColor, end: sliderTheme.secondaryActiveTrackColor);
       final Paint secondaryTrackPaint = Paint()..color = secondaryTrackColorTween.evaluate(enableAnimation)!;
-      if (textDirection == TextDirection.ltr) {
+      if (isLTR) {
         context.canvas.drawRRect(
           RRect.fromLTRBAndCorners(
             thumbCenter.dx,
@@ -1779,6 +1785,9 @@ class RoundedRectSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
       }
     }
   }
+
+  @override
+  bool get isRounded => true;
 }
 
 
