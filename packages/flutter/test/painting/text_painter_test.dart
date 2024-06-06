@@ -147,6 +147,32 @@ void main() {
       painter.dispose();
     });
 
+    test('TextPainter caret test with trailing full-width space', () {
+      final TextPainter painter = TextPainter()
+        ..textDirection = TextDirection.ltr;
+
+      const String text = 'A　';
+      checkCaretOffsetsLtr(text);
+
+      painter.text = const TextSpan(text: text);
+      painter.layout();
+
+      Offset caretOffset = painter.getOffsetForCaret(
+        const ui.TextPosition(offset: 0),
+        ui.Rect.zero,
+      );
+      expect(caretOffset.dx, 0);
+
+      caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 1), ui.Rect.zero);
+      expect(caretOffset.dx, painter.width / 2);
+
+      caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: text.length), ui.Rect.zero);
+      expect(caretOffset.dx, painter.width);
+
+      painter.dispose();
+    });
+
+
     test('TextPainter caret test with WidgetSpan', () {
       // Regression test for https://github.com/flutter/flutter/issues/98458.
       final TextPainter painter = TextPainter()
