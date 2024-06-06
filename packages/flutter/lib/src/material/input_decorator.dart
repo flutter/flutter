@@ -4748,6 +4748,9 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
       return _colors.onSurface.withOpacity(0.38);
     }
     if (states.contains(MaterialState.error)) {
+      if (states.contains(MaterialState.hovered)) {
+        return _colors.onErrorContainer;
+      }
       return _colors.error;
     }
     return _colors.onSurfaceVariant;
