@@ -181,7 +181,7 @@ abstract class RenderSliverEdgeInsetsPadding extends RenderSliver with RenderObj
   bool hitTestChildren(SliverHitTestResult result, { required double mainAxisPosition, required double crossAxisPosition }) {
     if (child != null && child!.geometry!.hitTestExtent > 0.0) {
       final SliverPhysicalParentData childParentData = child!.parentData! as SliverPhysicalParentData;
-      result.addWithAxisOffset(
+      return result.addWithAxisOffset(
         mainAxisPosition: mainAxisPosition,
         crossAxisPosition: crossAxisPosition,
         mainAxisOffset: childMainAxisPosition(child!),
