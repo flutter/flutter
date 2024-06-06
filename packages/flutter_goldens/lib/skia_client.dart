@@ -52,10 +52,10 @@ class SkiaGoldClient {
     required this.fs,
     required this.process,
     required this.platform,
-    Abi? abi,
+    required this.abi,
     required this.httpClient,
     required this.log,
-  }) : abi = abi ?? Abi.current();
+  });
 
   /// The file system to use for storing the local clone of the repository.
   ///
@@ -78,8 +78,6 @@ class SkiaGoldClient {
   final io.HttpClient httpClient;
 
   /// The ABI of the current host platform.
-  ///
-  /// If not overridden for testing, defaults to [Abi.current];
   final Abi abi;
 
   /// The local [Directory] within the [comparisonRoot] for the current test
@@ -498,7 +496,7 @@ class SkiaGoldClient {
     final String? webRenderer = _webRendererValue;
     final Map<String, dynamic> keys = <String, dynamic>{
       'Platform' : platform.operatingSystem,
-      'Abi': abi.toString(),
+      'Abi': '$abi',
       'CI' : 'luci',
       if (_isImpeller)
         'impeller': 'swiftshader',
@@ -581,7 +579,11 @@ class SkiaGoldClient {
     final Map<String, Object?> parameters = <String, Object?>{
       if (_isBrowserTest)
         'Browser' : _browserKey,
-      'Abi': abi.toString(),
+      // This method is only used in local testing to look up the given image.
+      // CI is not comprehensive in possible abi keys, so false negatives can
+      // be produced if we include it in local testing. For example CI uses
+      // macos_x64 but a contributor could have macos_arm64.
+      // 'Abi': '$abi',
       'CI' : 'luci',
       'Platform' : platform.operatingSystem,
       if (webRenderer != null)

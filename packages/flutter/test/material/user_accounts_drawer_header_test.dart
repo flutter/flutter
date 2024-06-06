@@ -5,7 +5,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import '../widgets/semantics_tester.dart';
 
 const Key avatarA = Key('A');
@@ -262,10 +261,7 @@ void main() {
     expect(transformWidget.transform.getRotation()[4], 1.0);
   });
 
-  testWidgets('UserAccountsDrawerHeader icon color changes',
-  // TODO(polina-c): remove when fixed https://github.com/flutter/flutter/issues/145600 [leak-tracking-opt-in]
-  experimentalLeakTesting: LeakTesting.settings.withTracked(classes: const <String>['CurvedAnimation']),
-  (WidgetTester tester) async {
+  testWidgets('UserAccountsDrawerHeader icon color changes', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Material(
         child: UserAccountsDrawerHeader(

@@ -4,7 +4,7 @@ See also [Crashes](Crashes.md) for advice on handling engine crashes (specifical
 
 ## Running a Flutter app with a local engine
 
-First, make sure the appropriate version of the engine is built (see [Compiling the engine](./dev/Compiling-the-engine.md)).
+First, make sure the appropriate version of the engine is built (see [Compiling the engine](./contributing/Compiling-the-engine.md)).
 
 ### Using the Flutter tool
 
@@ -19,7 +19,7 @@ to run an app with the local engine where `XXXX` should be replaced with the ver
 > 💡 **TIP**: When developing on a Mac with ARM (M CPU), use `--local-engine-host=host_debug_unopt_arm64`.
 >
 > You can continue to use `host_debug_unopt` (required for Intel Macs), but the engine will be run under Rosetta
-> which may be slower. See [Developing with Flutter on Apple Silicon](https://github.com/flutter/flutter/wiki/Developing-with-Flutter-on-Apple-Silicon)
+> which may be slower. See [Developing with Flutter on Apple Silicon](../platforms/desktop/macos/Developing-with-Flutter-on-Apple-Silicon.md)
 > for more information.
 
 
@@ -47,7 +47,7 @@ You will need to add a new [launch configuration](https://code.visualstudio.com/
 
 ## Bisecting a roll failure
 
-If the engine roll is failing (see [Autorollers](https://github.com/flutter/flutter/wiki/Autorollers)), you can use `git bisect` on the engine repo to track down the offending commit, using the `--local-engine` and `--local-engine-host` arguments as described above to run the failing framework test with each version of the engine.
+If the engine roll is failing (see [Autorollers](../infra/Autorollers.md)), you can use `git bisect` on the engine repo to track down the offending commit, using the `--local-engine` and `--local-engine-host` arguments as described above to run the failing framework test with each version of the engine.
 
 ## Tracing OpenGL calls in Skia
 
