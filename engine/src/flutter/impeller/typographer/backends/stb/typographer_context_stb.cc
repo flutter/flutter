@@ -428,8 +428,8 @@ std::shared_ptr<GlyphAtlas> TypographerContextSTB::CreateGlyphAtlas(
   std::vector<Rect> new_sizes;
   for (const auto& font_value : font_glyph_map) {
     const ScaledFont& scaled_font = font_value.first;
-    const FontGlyphAtlas* font_glyph_atlas = last_atlas->GetFontGlyphAtlas(
-        scaled_font.font, scaled_font.scale, scaled_font.color);
+    const FontGlyphAtlas* font_glyph_atlas =
+        last_atlas->GetFontGlyphAtlas(scaled_font.font, scaled_font.scale);
     if (font_glyph_atlas) {
       for (const SubpixelGlyph& glyph : font_value.second) {
         if (!font_glyph_atlas->FindGlyphBounds(glyph)) {
