@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/material/dropdown_menu/dropdown_menu.1.dart'
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('DropdownMenu', (WidgetTester tester) async {
+  testWidgets('The DropdownMenu should display a menu with the list of entries the user can select', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.DropdownMenuApp(),
     );
