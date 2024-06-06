@@ -3305,8 +3305,8 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.byType(CupertinoCheckbox), findsNothing);
+        expect(find.byType(Checkbox), findsOneWidget);
       }
-
     });
 
     testWidgets('tapping toggles checkbox', (WidgetTester tester) async {
@@ -3394,8 +3394,8 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.byType(CupertinoRadio<int>), findsNothing);
+        expect(find.byType(Radio<int>), findsOneWidget);
       }
-
     });
 
     testWidgets('tapping toggles radio button', (WidgetTester tester) async {

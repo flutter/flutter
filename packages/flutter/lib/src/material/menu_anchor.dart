@@ -1245,12 +1245,10 @@ class CheckboxMenuButton extends StatelessWidget {
     required this.child,
   }) : _checkboxType = _CheckboxType.material;
 
-  /// Creates an adaptive [CheckboxMenuButton].
-  ///
-  /// The checkbox uses [Checkbox.adaptive] to show a [CupertinoCheckbox] for
-  /// iOS platforms, or [Checkbox] for all others.
-  ///
-  /// All other properties are the same as [CheckboxMenuButton].
+  /// On iOS and macOS, this constructor uses a [CupertinoCheckbox], which has
+  /// matching functionality and presentation as Material checkboxes, and are the
+  /// graphics expected on iOS. On other platforms, this uses a Material
+  /// design [Checkbox].
   const CheckboxMenuButton.adaptive({
     super.key,
     required this.value,
@@ -1268,7 +1266,6 @@ class CheckboxMenuButton extends StatelessWidget {
     this.closeOnActivate = true,
     required this.child,
   }) : _checkboxType = _CheckboxType.adaptive;
-
 
   /// Whether this checkbox is checked.
   ///
@@ -1483,12 +1480,10 @@ class RadioMenuButton<T> extends StatelessWidget {
     required this.child,
   }) : _radioType = _RadioType.material;
 
-  /// Creates an adaptive [RadioMenuButton].
-  ///
-  /// The radio uses [Radio.adaptive] to show a [CupertinoRadio] on iOS
-  /// and a [Radio] on other platforms.
-  ///
-  /// All other properties are the same as [RadioMenuButton].
+  /// On iOS and macOS, this constructor uses a [CupertinoRadio], which has
+  /// matching functionality and presentation as Material radios, and are the
+  /// graphics expected on iOS. On other platforms, this uses a Material
+  /// design [Radio].
   const RadioMenuButton.adaptive({
     super.key,
     required this.value,
