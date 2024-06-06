@@ -91,6 +91,25 @@ TEST_P(AiksTest, CanRenderStrokePathWithCubicLine) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
+TEST_P(AiksTest, CanRenderQuadraticStrokeWithInstantTurn) {
+  Canvas canvas;
+
+  Paint paint;
+  paint.color = Color::Red();
+  paint.style = Paint::Style::kStroke;
+  paint.stroke_cap = Cap::kRound;
+  paint.stroke_width = 50;
+
+  // Should draw a diagonal pill shape. If flat on either end, the stroke is
+  // rendering wrong.
+  PathBuilder builder;
+  builder.MoveTo({250, 250});
+  builder.QuadraticCurveTo({100, 100}, {250, 250});
+
+  canvas.DrawPath(builder.TakePath(), paint);
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
 TEST_P(AiksTest, CanRenderDifferencePaths) {
   Canvas canvas;
 
