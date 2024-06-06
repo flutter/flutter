@@ -299,6 +299,26 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       }
     });
 
+    Future<void> pumpWidgetTreeWithABC(WidgetTester tester) async {
+      await tester.pumpWidget(
+        const Directionality(
+          textDirection: TextDirection.ltr,
+          child: Stack(
+            children: <Widget>[
+              Text('a', textDirection: TextDirection.ltr),
+              Text('b', textDirection: TextDirection.ltr),
+              Text('c', textDirection: TextDirection.ltr),
+            ],
+          ),
+        ),
+      );
+    }
+
+    Element findElementABC(String letter) {
+      assert(<String>['a', 'b', 'c'].contains(letter));
+      return find.text(letter).evaluate().first;
+    }
+
     test ('objectToDiagnosticsNode returns null for non-diagnosticable', () {
       expect(WidgetInspectorService.objectToDiagnosticsNode(Alignment.bottomCenter), isNull);
     });
@@ -1117,7 +1137,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
     });
 
     group(
-    'WidgetInspectorService',
+    'WidgetInspectorService API',
     () {
       late final String pubRootTest;
 
@@ -1217,20 +1237,9 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       });
 
       testWidgets('maybeSetSelection', (WidgetTester tester) async {
-        await tester.pumpWidget(
-          const Directionality(
-            textDirection: TextDirection.ltr,
-            child: Stack(
-              children: <Widget>[
-                Text('a', textDirection: TextDirection.ltr),
-                Text('b', textDirection: TextDirection.ltr),
-                Text('c', textDirection: TextDirection.ltr),
-              ],
-            ),
-          ),
-        );
-        final Element elementA = find.text('a').evaluate().first;
-        final Element elementB = find.text('b').evaluate().first;
+        await pumpWidgetTreeWithABC(tester);
+        final Element elementA = findElementABC('a');
+        final Element elementB = findElementABC('b');
 
         service.disposeAllGroups();
         service.selection.clear();
@@ -1323,21 +1332,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       testWidgets('getParentChain', (WidgetTester tester) async {
         const String group = 'test-group';
 
-        await tester.pumpWidget(
-          const Directionality(
-            textDirection: TextDirection.ltr,
-            child: Stack(
-              children: <Widget>[
-                Text('a', textDirection: TextDirection.ltr),
-                Text('b', textDirection: TextDirection.ltr),
-                Text('c', textDirection: TextDirection.ltr),
-              ],
-            ),
-          ),
-        );
+        await pumpWidgetTreeWithABC(tester);
 
         service.disposeAllGroups();
-        final Element elementB = find.text('b').evaluate().first;
+        final Element elementB = findElementABC('b');
         final String bId = service.toId(elementB, group)!;
         final Object? jsonList =
             json.decode(service.getParentChain(bId, group));
@@ -1405,18 +1403,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       testWidgets('getChildren', (WidgetTester tester) async {
         const String group = 'test-group';
 
-        await tester.pumpWidget(
-          const Directionality(
-            textDirection: TextDirection.ltr,
-            child: Stack(
-              children: <Widget>[
-                Text('a', textDirection: TextDirection.ltr),
-                Text('b', textDirection: TextDirection.ltr),
-                Text('c', textDirection: TextDirection.ltr),
-              ],
-            ),
-          ),
-        );
+        await pumpWidgetTreeWithABC(tester);
+
         final DiagnosticsNode diagnostic =
             find.byType(Stack).evaluate().first.toDiagnosticsNode();
         service.disposeAllGroups();
@@ -1440,18 +1428,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           testWidgets(
             'does not have createdByLocalProject when there are no pubRootDirectories',
             (WidgetTester tester) async {
-              const Widget widget = Directionality(
-                textDirection: TextDirection.ltr,
-                child: Stack(
-                  children: <Widget>[
-                    Text('a'),
-                    Text('b', textDirection: TextDirection.ltr),
-                    Text('c', textDirection: TextDirection.ltr),
-                  ],
-                ),
-              );
-              await tester.pumpWidget(widget);
-              final Element elementA = find.text('a').evaluate().first;
+              await pumpWidgetTreeWithABC(tester);
+              final Element elementA = findElementABC('a');
               service.setSelection(elementA, 'my-group');
 
               final Map<String, Object?> jsonObject =
@@ -1470,18 +1448,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           testWidgets(
             'has createdByLocalProject when the element is part of the pubRootDirectory',
             (WidgetTester tester) async {
-              const Widget widget = Directionality(
-                textDirection: TextDirection.ltr,
-                child: Stack(
-                  children: <Widget>[
-                    Text('a'),
-                    Text('b', textDirection: TextDirection.ltr),
-                    Text('c', textDirection: TextDirection.ltr),
-                  ],
-                ),
-              );
-              await tester.pumpWidget(widget);
-              final Element elementA = find.text('a').evaluate().first;
+              await pumpWidgetTreeWithABC(tester);
+              final Element elementA = findElementABC('a');
 
               service.addPubRootDirectories(<String>[pubRootTest]);
 
@@ -1496,18 +1464,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           testWidgets(
             'does not have createdByLocalProject when widget package directory is a suffix of a pubRootDirectory',
             (WidgetTester tester) async {
-              const Widget widget = Directionality(
-                textDirection: TextDirection.ltr,
-                child: Stack(
-                  children: <Widget>[
-                    Text('a'),
-                    Text('b', textDirection: TextDirection.ltr),
-                    Text('c', textDirection: TextDirection.ltr),
-                  ],
-                ),
-              );
-              await tester.pumpWidget(widget);
-              final Element elementA = find.text('a').evaluate().first;
+              await pumpWidgetTreeWithABC(tester);
+              final Element elementA = findElementABC('a');
               service.setSelection(elementA, 'my-group');
 
               service.addPubRootDirectories(<String>['/invalid/$pubRootTest']);
@@ -1521,18 +1479,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           testWidgets(
             'has createdByLocalProject when the pubRootDirectory is prefixed with file://',
             (WidgetTester tester) async {
-              const Widget widget = Directionality(
-                textDirection: TextDirection.ltr,
-                child: Stack(
-                  children: <Widget>[
-                    Text('a'),
-                    Text('b', textDirection: TextDirection.ltr),
-                    Text('c', textDirection: TextDirection.ltr),
-                  ],
-                ),
-              );
-              await tester.pumpWidget(widget);
-              final Element elementA = find.text('a').evaluate().first;
+              await pumpWidgetTreeWithABC(tester);
+              final Element elementA = findElementABC('a');
               service.setSelection(elementA, 'my-group');
 
               service.addPubRootDirectories(<String>['file://$pubRootTest']);
@@ -1546,18 +1494,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           testWidgets(
             'does not have createdByLocalProject when thePubRootDirectory has a different suffix',
             (WidgetTester tester) async {
-              const Widget widget = Directionality(
-                textDirection: TextDirection.ltr,
-                child: Stack(
-                  children: <Widget>[
-                    Text('a'),
-                    Text('b', textDirection: TextDirection.ltr),
-                    Text('c', textDirection: TextDirection.ltr),
-                  ],
-                ),
-              );
-              await tester.pumpWidget(widget);
-              final Element elementA = find.text('a').evaluate().first;
+              await pumpWidgetTreeWithABC(tester);
+              final Element elementA = findElementABC('a');
               service.setSelection(elementA, 'my-group');
 
               service.addPubRootDirectories(<String>['$pubRootTest/different']);
@@ -1571,18 +1509,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           testWidgets(
             'has createdByLocalProject even if another pubRootDirectory does not match',
             (WidgetTester tester) async {
-              const Widget widget = Directionality(
-                textDirection: TextDirection.ltr,
-                child: Stack(
-                  children: <Widget>[
-                    Text('a'),
-                    Text('b', textDirection: TextDirection.ltr),
-                    Text('c', textDirection: TextDirection.ltr),
-                  ],
-                ),
-              );
-              await tester.pumpWidget(widget);
-              final Element elementA = find.text('a').evaluate().first;
+              await pumpWidgetTreeWithABC(tester);
+              final Element elementA = findElementABC('a');
               service.setSelection(elementA, 'my-group');
 
               service.addPubRootDirectories(<String>[
@@ -1599,18 +1527,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           testWidgets(
             'widget is part of core framework and is the child of a widget in the package pubRootDirectories',
             (WidgetTester tester) async {
-              const Widget widget = Directionality(
-                textDirection: TextDirection.ltr,
-                child: Stack(
-                  children: <Widget>[
-                    Text('a'),
-                    Text('b', textDirection: TextDirection.ltr),
-                    Text('c', textDirection: TextDirection.ltr),
-                  ],
-                ),
-              );
-              await tester.pumpWidget(widget);
-              final Element elementA = find.text('a').evaluate().first;
+              await pumpWidgetTreeWithABC(tester);
+              final Element elementA = findElementABC('a');
               final Element richText = find
                   .descendant(
                     of: find.text('a'),
@@ -1676,18 +1594,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         testWidgets(
           'reacts to add and removing pubRootDirectories',
           (WidgetTester tester) async {
-            const Widget widget = Directionality(
-              textDirection: TextDirection.ltr,
-              child: Stack(
-                children: <Widget>[
-                  Text('a'),
-                  Text('b', textDirection: TextDirection.ltr),
-                  Text('c', textDirection: TextDirection.ltr),
-                ],
-              ),
-            );
-            await tester.pumpWidget(widget);
-            final Element elementA = find.text('a').evaluate().first;
+            await pumpWidgetTreeWithABC(tester);
+            final Element elementA = findElementABC('a');
 
             service.addPubRootDirectories(<String>[
               pubRootTest,
@@ -1714,18 +1622,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         testWidgets(
           'does not match when the package directory does not match',
           (WidgetTester tester) async {
-            const Widget widget = Directionality(
-              textDirection: TextDirection.ltr,
-              child: Stack(
-                children: <Widget>[
-                  Text('a'),
-                  Text('b', textDirection: TextDirection.ltr),
-                  Text('c', textDirection: TextDirection.ltr),
-                ],
-              ),
-            );
-            await tester.pumpWidget(widget);
-            final Element elementA = find.text('a').evaluate().first;
+            await pumpWidgetTreeWithABC(tester);
+            final Element elementA = findElementABC('a');
             service.setSelection(elementA, 'my-group');
 
             service.addPubRootDirectories(<String>[
@@ -1742,18 +1640,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         testWidgets(
           'has createdByLocalProject when the pubRootDirectory is prefixed with file://',
           (WidgetTester tester) async {
-            const Widget widget = Directionality(
-              textDirection: TextDirection.ltr,
-              child: Stack(
-                children: <Widget>[
-                  Text('a'),
-                  Text('b', textDirection: TextDirection.ltr),
-                  Text('c', textDirection: TextDirection.ltr),
-                ],
-              ),
-            );
-            await tester.pumpWidget(widget);
-            final Element elementA = find.text('a').evaluate().first;
+            await pumpWidgetTreeWithABC(tester);
+            final Element elementA = findElementABC('a');
             service.setSelection(elementA, 'my-group');
 
             service.addPubRootDirectories(<String>['file://$pubRootTest']);
@@ -1767,18 +1655,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         testWidgets(
           'can handle consecutive calls to add',
           (WidgetTester tester) async {
-            const Widget widget = Directionality(
-              textDirection: TextDirection.ltr,
-              child: Stack(
-                children: <Widget>[
-                  Text('a'),
-                  Text('b', textDirection: TextDirection.ltr),
-                  Text('c', textDirection: TextDirection.ltr),
-                ],
-              ),
-            );
-            await tester.pumpWidget(widget);
-            final Element elementA = find.text('a').evaluate().first;
+            await pumpWidgetTreeWithABC(tester);
+            final Element elementA = findElementABC('a');
             service.setSelection(elementA, 'my-group');
 
             service.addPubRootDirectories(<String>[
@@ -1796,18 +1674,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         testWidgets(
           'can handle removing an unrelated pubRootDirectory',
           (WidgetTester tester) async {
-            const Widget widget = Directionality(
-              textDirection: TextDirection.ltr,
-              child: Stack(
-                children: <Widget>[
-                  Text('a'),
-                  Text('b', textDirection: TextDirection.ltr),
-                  Text('c', textDirection: TextDirection.ltr),
-                ],
-              ),
-            );
-            await tester.pumpWidget(widget);
-            final Element elementA = find.text('a').evaluate().first;
+            await pumpWidgetTreeWithABC(tester);
+            final Element elementA = findElementABC('a');
             service.setSelection(elementA, 'my-group');
 
             service.addPubRootDirectories(<String>[
@@ -1832,18 +1700,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         testWidgets(
           'can handle parent widget being part of a separate package',
           (WidgetTester tester) async {
-            const Widget widget = Directionality(
-              textDirection: TextDirection.ltr,
-              child: Stack(
-                children: <Widget>[
-                  Text('a'),
-                  Text('b', textDirection: TextDirection.ltr),
-                  Text('c', textDirection: TextDirection.ltr),
-                ],
-              ),
-            );
-            await tester.pumpWidget(widget);
-            final Element elementA = find.text('a').evaluate().first;
+            await pumpWidgetTreeWithABC(tester);
+            final Element elementA = findElementABC('a');
             final Element richText = find
                 .descendant(
                   of: find.text('a'),
@@ -2021,19 +1879,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
         testWidgets('setSelection notifiers for a RenderObject',
             (WidgetTester tester) async {
-          await tester.pumpWidget(
-            const Directionality(
-              textDirection: TextDirection.ltr,
-              child: Stack(
-                children: <Widget>[
-                  Text('a'),
-                  Text('b', textDirection: TextDirection.ltr),
-                  Text('c', textDirection: TextDirection.ltr),
-                ],
-              ),
-            ),
-          );
-          final Element elementA = find.text('a').evaluate().first;
+          await pumpWidgetTreeWithABC(tester);
+          final Element elementA = findElementABC('a');
 
           service.disposeAllGroups();
 
@@ -2063,25 +1910,16 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           // would make this test fragile.
           expect(line, isNotNull);
           // Column numbers are more stable than line numbers.
-          expect(column, equals(19));
+          expect(column, equals(15));
         });
       });
+
     });
 
     group('InspectorSelection', () {
       testWidgets('receives notifications when selection changes',
           (WidgetTester tester) async {
-        await tester.pumpWidget(
-          const Directionality(
-            textDirection: TextDirection.ltr,
-            child: Stack(
-              children: <Widget>[
-                Text('a'),
-                Text('b'),
-              ],
-            ),
-          ),
-        );
+        await pumpWidgetTreeWithABC(tester);
         final InspectorSelection selection = InspectorSelection();
         addTearDown(selection.dispose);
         int count = 0;
@@ -2165,20 +2003,9 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
     });
 
     testWidgets('ext.flutter.inspector.setSelection', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        const Directionality(
-          textDirection: TextDirection.ltr,
-          child: Stack(
-            children: <Widget>[
-              Text('a', textDirection: TextDirection.ltr),
-              Text('b', textDirection: TextDirection.ltr),
-              Text('c', textDirection: TextDirection.ltr),
-            ],
-          ),
-        ),
-      );
-      final Element elementA = find.text('a').evaluate().first;
-      final Element elementB = find.text('b').evaluate().first;
+      await pumpWidgetTreeWithABC(tester);
+      final Element elementA = findElementABC('a');
+      final Element elementB = findElementABC('b');
 
       service.disposeAllGroups();
       service.selection.clear();
@@ -2217,20 +2044,9 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
     testWidgets('ext.flutter.inspector.getParentChain', (WidgetTester tester) async {
       const String group = 'test-group';
 
-      await tester.pumpWidget(
-        const Directionality(
-          textDirection: TextDirection.ltr,
-          child: Stack(
-            children: <Widget>[
-              Text('a', textDirection: TextDirection.ltr),
-              Text('b', textDirection: TextDirection.ltr),
-              Text('c', textDirection: TextDirection.ltr),
-            ],
-          ),
-        ),
-      );
+      await pumpWidgetTreeWithABC(tester);
+      final Element elementB = findElementABC('b');
 
-      final Element elementB = find.text('b').evaluate().first;
       final String bId = service.toId(elementB, group)!;
       final Object? jsonList = await service.testExtension(
         WidgetInspectorServiceExtensions.getParentChain.name,
@@ -2288,19 +2104,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
     testWidgets('ext.flutter.inspector.getChildren', (WidgetTester tester) async {
       const String group = 'test-group';
-
-      await tester.pumpWidget(
-        const Directionality(
-          textDirection: TextDirection.ltr,
-          child: Stack(
-            children: <Widget>[
-              Text('a', textDirection: TextDirection.ltr),
-              Text('b', textDirection: TextDirection.ltr),
-              Text('c', textDirection: TextDirection.ltr),
-            ],
-          ),
-        ),
-      );
+      await pumpWidgetTreeWithABC(tester);
       final DiagnosticsNode diagnostic = find.byType(Stack).evaluate().first.toDiagnosticsNode();
       final String id = service.toId(diagnostic, group)!;
       final List<Object?> propertiesJson = (await service.testExtension(
@@ -2318,19 +2122,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
     testWidgets('ext.flutter.inspector.getChildrenDetailsSubtree', (WidgetTester tester) async {
       const String group = 'test-group';
-
-      await tester.pumpWidget(
-        const Directionality(
-          textDirection: TextDirection.ltr,
-          child: Stack(
-            children: <Widget>[
-              Text('a', textDirection: TextDirection.ltr),
-              Text('b', textDirection: TextDirection.ltr),
-              Text('c', textDirection: TextDirection.ltr),
-            ],
-          ),
-        ),
-      );
+      await pumpWidgetTreeWithABC(tester);
       final Diagnosticable diagnosticable = find.byType(Stack).evaluate().first;
       final String id = service.toId(diagnosticable, group)!;
       final List<Object?> childrenJson = (await service.testExtension(
@@ -2358,18 +2150,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
     testWidgets('WidgetInspectorService getDetailsSubtree', (WidgetTester tester) async {
       const String group = 'test-group';
 
-      await tester.pumpWidget(
-        const Directionality(
-          textDirection: TextDirection.ltr,
-          child: Stack(
-            children: <Widget>[
-              Text('a', textDirection: TextDirection.ltr),
-              Text('b', textDirection: TextDirection.ltr),
-              Text('c', textDirection: TextDirection.ltr),
-            ],
-          ),
-        ),
-      );
+      await pumpWidgetTreeWithABC(tester);
       final Diagnosticable diagnosticable = find.byType(Stack).evaluate().first;
       final String id = service.toId(diagnosticable, group)!;
       final Map<String, Object?> subtreeJson = (await service.testExtension(
@@ -2449,20 +2230,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
     testWidgets('ext.flutter.inspector.getRootWidgetSummaryTree', (WidgetTester tester) async {
       const String group = 'test-group';
-      await tester.pumpWidget(
-        const Directionality(
-          textDirection: TextDirection.ltr,
-          child: Stack(
-            children: <Widget>[
-              Text('a', textDirection: TextDirection.ltr),
-              Text('b', textDirection: TextDirection.ltr),
-              Text('c', textDirection: TextDirection.ltr),
-            ],
-          ),
-        ),
-      );
-
-      final Element elementA = find.text('a').evaluate().first;
+      await pumpWidgetTreeWithABC(tester);
+      final Element elementA = findElementABC('a');
 
       service.disposeAllGroups();
       service.resetPubRootDirectories();
@@ -2560,19 +2329,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
     testWidgets('ext.flutter.inspector.getRootWidgetSummaryTreeWithPreviews', (WidgetTester tester) async {
       const String group = 'test-group';
 
-      await tester.pumpWidget(
-        const Directionality(
-          textDirection: TextDirection.ltr,
-          child: Stack(
-            children: <Widget>[
-              Text('a', textDirection: TextDirection.ltr),
-              Text('b', textDirection: TextDirection.ltr),
-              Text('c', textDirection: TextDirection.ltr),
-            ],
-          ),
-        ),
-      );
-      final Element elementA = find.text('a').evaluate().first;
+      await pumpWidgetTreeWithABC(tester);
+      final Element elementA = findElementABC('a');
 
       service
         ..disposeAllGroups()
@@ -2651,19 +2409,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
     testWidgets('ext.flutter.inspector.getSelectedSummaryWidget', (WidgetTester tester) async {
       const String group = 'test-group';
 
-      await tester.pumpWidget(
-        const Directionality(
-          textDirection: TextDirection.ltr,
-          child: Stack(
-            children: <Widget>[
-              Text('a', textDirection: TextDirection.ltr),
-              Text('b', textDirection: TextDirection.ltr),
-              Text('c', textDirection: TextDirection.ltr),
-            ],
-          ),
-        ),
-      );
-      final Element elementA = find.text('a').evaluate().first;
+      await pumpWidgetTreeWithABC(tester);
+      final Element elementA = findElementABC('a');
 
       final List<DiagnosticsNode> children = elementA.debugDescribeChildren();
       expect(children.length, equals(1));
@@ -2720,20 +2467,9 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
     }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // [intended] Test requires --track-widget-creation flag.
 
     testWidgets('ext.flutter.inspector creationLocation', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        const Directionality(
-          textDirection: TextDirection.ltr,
-          child: Stack(
-            children: <Widget>[
-              Text('a'),
-              Text('b', textDirection: TextDirection.ltr),
-              Text('c', textDirection: TextDirection.ltr),
-            ],
-          ),
-        ),
-      );
-      final Element elementA = find.text('a').evaluate().first;
-      final Element elementB = find.text('b').evaluate().first;
+      await pumpWidgetTreeWithABC(tester);
+      final Element elementA = findElementABC('a');
+      final Element elementB = findElementABC('b');
 
       service.disposeAllGroups();
       service.resetPubRootDirectories();
@@ -2784,20 +2520,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         testWidgets(
           'has createdByLocalProject when the widget is in the pubRootDirectory',
           (WidgetTester tester) async {
-            await tester.pumpWidget(
-              const Directionality(
-                textDirection: TextDirection.ltr,
-                child: Stack(
-                  children: <Widget>[
-                    Text('a'),
-                    Text('b', textDirection: TextDirection.ltr),
-                    Text('c', textDirection: TextDirection.ltr),
-                  ],
-                ),
-              ),
-            );
-
-            final Element elementA = find.text('a').evaluate().first;
+            await pumpWidgetTreeWithABC(tester);
+            final Element elementA = findElementABC('a');
             service.setSelection(elementA, 'my-group');
 
             await service.testExtension(
@@ -2817,20 +2541,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         testWidgets(
           'does not have createdByLocalProject if the prefix of the pubRootDirectory is different',
           (WidgetTester tester) async {
-            await tester.pumpWidget(
-              const Directionality(
-                textDirection: TextDirection.ltr,
-                child: Stack(
-                  children: <Widget>[
-                    Text('a'),
-                    Text('b', textDirection: TextDirection.ltr),
-                    Text('c', textDirection: TextDirection.ltr),
-                  ],
-                ),
-              ),
-            );
-
-            final Element elementA = find.text('a').evaluate().first;
+            await pumpWidgetTreeWithABC(tester);
+            final Element elementA = findElementABC('a');
             service.setSelection(elementA, 'my-group');
 
             await service.testExtension(
@@ -2850,20 +2562,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         testWidgets(
           'has createdByLocalProject if the pubRootDirectory is prefixed with file://',
           (WidgetTester tester) async {
-            await tester.pumpWidget(
-              const Directionality(
-                textDirection: TextDirection.ltr,
-                child: Stack(
-                  children: <Widget>[
-                    Text('a'),
-                    Text('b', textDirection: TextDirection.ltr),
-                    Text('c', textDirection: TextDirection.ltr),
-                  ],
-                ),
-              ),
-            );
-
-            final Element elementA = find.text('a').evaluate().first;
+            await pumpWidgetTreeWithABC(tester);
+            final Element elementA = findElementABC('a');
             service.setSelection(elementA, 'my-group');
 
             await service.testExtension(
@@ -2883,20 +2583,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         testWidgets(
           'does not have createdByLocalProject if the pubRootDirectory has a different suffix',
           (WidgetTester tester) async {
-            await tester.pumpWidget(
-              const Directionality(
-                textDirection: TextDirection.ltr,
-                child: Stack(
-                  children: <Widget>[
-                    Text('a'),
-                    Text('b', textDirection: TextDirection.ltr),
-                    Text('c', textDirection: TextDirection.ltr),
-                  ],
-                ),
-              ),
-            );
-
-            final Element elementA = find.text('a').evaluate().first;
+            await pumpWidgetTreeWithABC(tester);
+            final Element elementA = findElementABC('a');
             service.setSelection(elementA, 'my-group');
 
             await service.testExtension(
@@ -2916,20 +2604,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         testWidgets(
           'has createdByLocalProject if at least one of the pubRootDirectories matches',
           (WidgetTester tester) async {
-            await tester.pumpWidget(
-              const Directionality(
-                textDirection: TextDirection.ltr,
-                child: Stack(
-                  children: <Widget>[
-                    Text('a'),
-                    Text('b', textDirection: TextDirection.ltr),
-                    Text('c', textDirection: TextDirection.ltr),
-                  ],
-                ),
-              ),
-            );
-
-            final Element elementA = find.text('a').evaluate().first;
+            await pumpWidgetTreeWithABC(tester);
+            final Element elementA = findElementABC('a');
             service.setSelection(elementA, 'my-group');
 
             await service.testExtension(
@@ -2953,19 +2629,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         testWidgets(
           'widget is part of core framework and is the child of a widget in the package pubRootDirectories',
           (WidgetTester tester) async {
-            await tester.pumpWidget(
-              const Directionality(
-                textDirection: TextDirection.ltr,
-                child: Stack(
-                  children: <Widget>[
-                    Text('a'),
-                    Text('b', textDirection: TextDirection.ltr),
-                    Text('c', textDirection: TextDirection.ltr),
-                  ],
-                ),
-              ),
-            );
-            final Element elementA = find.text('a').evaluate().first;
+            await pumpWidgetTreeWithABC(tester);
+            final Element elementA = findElementABC('a');
 
             // The RichText child of the Text widget is created by the core framework
             // not the current package.
@@ -3064,19 +2729,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         testWidgets(
           'has createdByLocalProject when the widget is in the pubRootDirectory',
           (WidgetTester tester) async {
-            await tester.pumpWidget(
-              const Directionality(
-                textDirection: TextDirection.ltr,
-                child: Stack(
-                  children: <Widget>[
-                    Text('a'),
-                    Text('b', textDirection: TextDirection.ltr),
-                      Text('c', textDirection: TextDirection.ltr),
-                  ],
-                ),
-              ),
-            );
-            final Element elementA = find.text('a').evaluate().first;
+            await pumpWidgetTreeWithABC(tester);
+            final Element elementA = findElementABC('a');
             service.setSelection(elementA, 'my-group');
 
             await service.testExtension(
@@ -3096,19 +2750,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         testWidgets(
           'does not have createdByLocalProject if the prefix of the pubRootDirectory is different',
           (WidgetTester tester) async {
-            await tester.pumpWidget(
-              const Directionality(
-                textDirection: TextDirection.ltr,
-                child: Stack(
-                  children: <Widget>[
-                    Text('a'),
-                    Text('b', textDirection: TextDirection.ltr),
-                    Text('c', textDirection: TextDirection.ltr),
-                  ],
-                ),
-              ),
-            );
-            final Element elementA = find.text('a').evaluate().first;
+            await pumpWidgetTreeWithABC(tester);
+            final Element elementA = findElementABC('a');
             service.setSelection(elementA, 'my-group');
 
             await service.testExtension(
@@ -3131,19 +2774,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         testWidgets(
           'has createdByLocalProject if the pubRootDirectory is prefixed with file://',
           (WidgetTester tester) async {
-            await tester.pumpWidget(
-              const Directionality(
-                textDirection: TextDirection.ltr,
-                child: Stack(
-                  children: <Widget>[
-                    Text('a'),
-                    Text('b', textDirection: TextDirection.ltr),
-                    Text('c', textDirection: TextDirection.ltr),
-                  ],
-                ),
-              ),
-            );
-            final Element elementA = find.text('a').evaluate().first;
+            await pumpWidgetTreeWithABC(tester);
+            final Element elementA = findElementABC('a');
             service.setSelection(elementA, 'my-group');
 
             await service.testExtension(
@@ -3163,19 +2795,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         testWidgets(
           'does not have createdByLocalProject if the pubRootDirectory has a different suffix',
           (WidgetTester tester) async {
-            await tester.pumpWidget(
-              const Directionality(
-                textDirection: TextDirection.ltr,
-                child: Stack(
-                  children: <Widget>[
-                    Text('a'),
-                    Text('b', textDirection: TextDirection.ltr),
-                    Text('c', textDirection: TextDirection.ltr),
-                  ],
-                ),
-              ),
-            );
-            final Element elementA = find.text('a').evaluate().first;
+            await pumpWidgetTreeWithABC(tester);
+            final Element elementA = findElementABC('a');
             service.setSelection(elementA, 'my-group');
 
             await service.testExtension(
@@ -3198,19 +2819,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         testWidgets(
           'has createdByLocalProject if at least one of the pubRootDirectories matches',
           (WidgetTester tester) async {
-            await tester.pumpWidget(
-              const Directionality(
-                textDirection: TextDirection.ltr,
-                child: Stack(
-                  children: <Widget>[
-                    Text('a'),
-                    Text('b', textDirection: TextDirection.ltr),
-                    Text('c', textDirection: TextDirection.ltr),
-                  ],
-                ),
-              ),
-            );
-            final Element elementA = find.text('a').evaluate().first;
+            await pumpWidgetTreeWithABC(tester);
+            final Element elementA = findElementABC('a');
             service.setSelection(elementA, 'my-group');
 
             await service.testExtension(
@@ -3256,18 +2866,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       testWidgets(
         'reacts to add and removing pubRootDirectories',
         (WidgetTester tester) async {
-          const Widget widget = Directionality(
-            textDirection: TextDirection.ltr,
-            child: Stack(
-              children: <Widget>[
-                Text('a'),
-                Text('b', textDirection: TextDirection.ltr),
-                Text('c', textDirection: TextDirection.ltr),
-              ],
-            ),
-          );
-          await tester.pumpWidget(widget);
-          final Element elementA = find.text('a').evaluate().first;
+          await pumpWidgetTreeWithABC(tester);
+          final Element elementA = findElementABC('a');
 
           await service.testExtension(
             WidgetInspectorServiceExtensions.addPubRootDirectories.name,
@@ -3306,18 +2906,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       testWidgets(
         'does not match when the package directory does not match',
         (WidgetTester tester) async {
-          const Widget widget = Directionality(
-            textDirection: TextDirection.ltr,
-            child: Stack(
-              children: <Widget>[
-                Text('a'),
-                Text('b', textDirection: TextDirection.ltr),
-                Text('c', textDirection: TextDirection.ltr),
-              ],
-            ),
-          );
-          await tester.pumpWidget(widget);
-          final Element elementA = find.text('a').evaluate().first;
+          await pumpWidgetTreeWithABC(tester);
+          final Element elementA = findElementABC('a');
           service.setSelection(elementA, 'my-group');
 
           service.testExtension(
@@ -3340,18 +2930,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       testWidgets(
         'has createdByLocalProject when the pubRootDirectory is prefixed with file://',
         (WidgetTester tester) async {
-          const Widget widget = Directionality(
-            textDirection: TextDirection.ltr,
-            child: Stack(
-              children: <Widget>[
-                Text('a'),
-                Text('b', textDirection: TextDirection.ltr),
-                Text('c', textDirection: TextDirection.ltr),
-              ],
-            ),
-          );
-          await tester.pumpWidget(widget);
-          final Element elementA = find.text('a').evaluate().first;
+          await pumpWidgetTreeWithABC(tester);
+          final Element elementA = findElementABC('a');
           service.setSelection(elementA, 'my-group');
 
           service.testExtension(
@@ -3371,18 +2951,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       testWidgets(
         'can handle consecutive calls to add',
         (WidgetTester tester) async {
-          const Widget widget = Directionality(
-            textDirection: TextDirection.ltr,
-            child: Stack(
-              children: <Widget>[
-                Text('a'),
-                Text('b', textDirection: TextDirection.ltr),
-                Text('c', textDirection: TextDirection.ltr),
-              ],
-            ),
-          );
-          await tester.pumpWidget(widget);
-          final Element elementA = find.text('a').evaluate().first;
+          await pumpWidgetTreeWithABC(tester);
+          final Element elementA = findElementABC('a');
           service.setSelection(elementA, 'my-group');
 
           service.testExtension(
@@ -3405,18 +2975,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       testWidgets(
         'can handle removing an unrelated pubRootDirectory',
         (WidgetTester tester) async {
-          const Widget widget = Directionality(
-            textDirection: TextDirection.ltr,
-            child: Stack(
-              children: <Widget>[
-                Text('a'),
-                Text('b', textDirection: TextDirection.ltr),
-                Text('c', textDirection: TextDirection.ltr),
-              ],
-            ),
-          );
-          await tester.pumpWidget(widget);
-          final Element elementA = find.text('a').evaluate().first;
+          await pumpWidgetTreeWithABC(tester);
+          final Element elementA = findElementABC('a');
           service.setSelection(elementA, 'my-group');
 
           service.testExtension(
@@ -3451,18 +3011,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       testWidgets(
         'can handle parent widget being part of a separate package',
         (WidgetTester tester) async {
-          const Widget widget = Directionality(
-            textDirection: TextDirection.ltr,
-            child: Stack(
-              children: <Widget>[
-                Text('a'),
-                Text('b', textDirection: TextDirection.ltr),
-                Text('c', textDirection: TextDirection.ltr),
-              ],
-            ),
-          );
-          await tester.pumpWidget(widget);
-          final Element elementA = find.text('a').evaluate().first;
+          await pumpWidgetTreeWithABC(tester);
+          final Element elementA = findElementABC('a');
           final Element richText = find
               .descendant(
                 of: find.text('a'),
@@ -3562,18 +3112,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       testWidgets(
         'reacts to add and removing pubRootDirectories',
         (WidgetTester tester) async {
-          const Widget widget = Directionality(
-            textDirection: TextDirection.ltr,
-            child: Stack(
-              children: <Widget>[
-                Text('a'),
-                Text('b', textDirection: TextDirection.ltr),
-                Text('c', textDirection: TextDirection.ltr),
-              ],
-            ),
-          );
-          await tester.pumpWidget(widget);
-          final Element elementA = find.text('a').evaluate().first;
+          await pumpWidgetTreeWithABC(tester);
+          final Element elementA = findElementABC('a');
 
           await service.testExtension(
             WidgetInspectorServiceExtensions.addPubRootDirectories.name,
@@ -3614,18 +3154,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       testWidgets(
         'does not match when the package directory does not match',
         (WidgetTester tester) async {
-          const Widget widget = Directionality(
-            textDirection: TextDirection.ltr,
-            child: Stack(
-              children: <Widget>[
-                Text('a'),
-                Text('b', textDirection: TextDirection.ltr),
-                Text('c', textDirection: TextDirection.ltr),
-              ],
-            ),
-          );
-          await tester.pumpWidget(widget);
-          final Element elementA = find.text('a').evaluate().first;
+          await pumpWidgetTreeWithABC(tester);
+          final Element elementA = findElementABC('a');
           service.setSelection(elementA, 'my-group');
 
           service.testExtension(
@@ -3648,18 +3178,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       testWidgets(
         'has createdByLocalProject when the pubRootDirectory is prefixed with file://',
         (WidgetTester tester) async {
-          const Widget widget = Directionality(
-            textDirection: TextDirection.ltr,
-            child: Stack(
-              children: <Widget>[
-                Text('a'),
-                Text('b', textDirection: TextDirection.ltr),
-                Text('c', textDirection: TextDirection.ltr),
-              ],
-            ),
-          );
-          await tester.pumpWidget(widget);
-          final Element elementA = find.text('a').evaluate().first;
+          await pumpWidgetTreeWithABC(tester);
+          final Element elementA = findElementABC('a');
           service.setSelection(elementA, 'my-group');
 
           service.testExtension(
@@ -3682,18 +3202,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       testWidgets(
         'can handle consecutive calls to add',
         (WidgetTester tester) async {
-          const Widget widget = Directionality(
-            textDirection: TextDirection.ltr,
-            child: Stack(
-              children: <Widget>[
-                Text('a'),
-                Text('b', textDirection: TextDirection.ltr),
-                Text('c', textDirection: TextDirection.ltr),
-              ],
-            ),
-          );
-          await tester.pumpWidget(widget);
-          final Element elementA = find.text('a').evaluate().first;
+          await pumpWidgetTreeWithABC(tester);
+          final Element elementA = findElementABC('a');
           service.setSelection(elementA, 'my-group');
 
           service.testExtension(
@@ -3722,18 +3232,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       testWidgets(
         'can handle removing an unrelated pubRootDirectory',
         (WidgetTester tester) async {
-          const Widget widget = Directionality(
-            textDirection: TextDirection.ltr,
-            child: Stack(
-              children: <Widget>[
-                Text('a'),
-                Text('b', textDirection: TextDirection.ltr),
-                Text('c', textDirection: TextDirection.ltr),
-              ],
-            ),
-          );
-          await tester.pumpWidget(widget);
-          final Element elementA = find.text('a').evaluate().first;
+          await pumpWidgetTreeWithABC(tester);
+          final Element elementA = findElementABC('a');
           service.setSelection(elementA, 'my-group');
 
           service.testExtension(
