@@ -583,6 +583,7 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
             border: effectiveBorder,
             hasUserMiddle: widget.middle != null,
             largeExpanded: false,
+            isContentScrolledUnder: _scrollAnimationValue > 0.0,
             child: navBar,
           ),
         );
@@ -995,6 +996,7 @@ class _LargeTitleNavigationBarSliverDelegate
         border: effectiveBorder,
         hasUserMiddle: userMiddle != null && (alwaysShowMiddle || !showLargeTitle),
         largeExpanded: showLargeTitle,
+        isContentScrolledUnder: shrinkAnimationValue > 0.0,
         child: navBar,
       ),
     );
@@ -1743,6 +1745,7 @@ class _TransitionableNavigationBar extends StatelessWidget {
     required this.border,
     required this.hasUserMiddle,
     required this.largeExpanded,
+    required this.isContentScrolledUnder,
     required this.child,
   }) : assert(!largeExpanded || largeTitleTextStyle != null),
        super(key: componentsKeys.navBarBoxKey);
@@ -1755,6 +1758,7 @@ class _TransitionableNavigationBar extends StatelessWidget {
   final Border? border;
   final bool hasUserMiddle;
   final bool largeExpanded;
+  final bool isContentScrolledUnder;
   final Widget child;
 
   RenderBox get renderBox {
@@ -1818,6 +1822,7 @@ class _NavigationBarTransition extends StatelessWidget {
     required this.animation,
     required this.topNavBar,
     required this.bottomNavBar,
+    required this.flightDirection,
   }) : heightTween = Tween<double>(
          begin: bottomNavBar.renderBox.size.height,
          end: topNavBar.renderBox.size.height,
@@ -1838,6 +1843,7 @@ class _NavigationBarTransition extends StatelessWidget {
   final Tween<double> heightTween;
   final ColorTween backgroundTween;
   final BorderTween borderTween;
+  final HeroFlightDirection flightDirection;
 
   @override
   Widget build(BuildContext context) {
@@ -1855,6 +1861,9 @@ class _NavigationBarTransition extends StatelessWidget {
         animation: animation,
         builder: (BuildContext context, Widget? child) {
           return _wrapWithBackground(
+            isContentScrolledUnder: flightDirection == HeroFlightDirection.push
+              ? topNavBar.isContentScrolledUnder
+              : bottomNavBar.isContentScrolledUnder,
             // Don't update the system status bar color mid-flight.
             updateSystemUiOverlay: false,
             backgroundColor: backgroundTween.evaluate(animation)!,
@@ -2594,12 +2603,14 @@ Widget _navBarHeroFlightShuttleBuilder(
         animation: animation,
         bottomNavBar: fromNavBar,
         topNavBar: toNavBar,
+        flightDirection: flightDirection,
       );
     case HeroFlightDirection.pop:
       return _NavigationBarTransition(
         animation: animation,
         bottomNavBar: toNavBar,
         topNavBar: fromNavBar,
+        flightDirection: flightDirection,
       );
   }
 }
