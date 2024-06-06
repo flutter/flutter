@@ -148,14 +148,6 @@ const Color _kActionSheetButtonDividerColor = _kActionSheetContentTextColor;
 // we want to change how the dialog is laid out.
 const double _kMaxRegularTextScaleFactor = 1.4;
 
-// Returns the first element of the given list, or null if the list is empty.
-T? _maybeFirst<T>(List<T> l) {
-  if (l.isEmpty) {
-    return null;
-  }
-  return l.first;
-}
-
 // Accessibility mode on iOS is determined by the text scale factor that the
 // user has selected.
 bool _isInAccessibilityMode(BuildContext context) {
