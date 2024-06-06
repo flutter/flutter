@@ -37,7 +37,7 @@ const Color _kTransparentColor = Color(0x00000000);
 /// solution.
 ///
 /// {@tool dartpad}
-/// This example shows how you can override the default theme of
+/// This example shows how you can override the default color palette of
 /// a [CupertinoCheckbox] with a [WidgetStateProperty].
 /// In this example, the checkbox's color will be `CupertinoColors.activeGreen`
 /// when the [CupertinoCheckbox] is being pressed, hovered, or focused.
