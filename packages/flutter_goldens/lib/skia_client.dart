@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
-import 'dart:ffi' show Abi;
 import 'dart:io' as io;
 
 import 'package:crypto/crypto.dart';
@@ -52,7 +51,6 @@ class SkiaGoldClient {
     required this.fs,
     required this.process,
     required this.platform,
-    required this.abi,
     required this.httpClient,
     required this.log,
   });
@@ -76,9 +74,6 @@ class SkiaGoldClient {
 
   /// A client for making Http requests to the Flutter Gold dashboard.
   final io.HttpClient httpClient;
-
-  /// The ABI of the current host platform.
-  final Abi abi;
 
   /// The local [Directory] within the [comparisonRoot] for the current test
   /// context. In this directory, the client will create image and JSON files
@@ -496,7 +491,6 @@ class SkiaGoldClient {
     final String? webRenderer = _webRendererValue;
     final Map<String, dynamic> keys = <String, dynamic>{
       'Platform' : platform.operatingSystem,
-      'Abi': '$abi',
       'CI' : 'luci',
       if (_isImpeller)
         'impeller': 'swiftshader',
@@ -579,11 +573,6 @@ class SkiaGoldClient {
     final Map<String, Object?> parameters = <String, Object?>{
       if (_isBrowserTest)
         'Browser' : _browserKey,
-      // This method is only used in local testing to look up the given image.
-      // CI is not comprehensive in possible abi keys, so false negatives can
-      // be produced if we include it in local testing. For example CI uses
-      // macos_x64 but a contributor could have macos_arm64.
-      // 'Abi': '$abi',
       'CI' : 'luci',
       'Platform' : platform.operatingSystem,
       if (webRenderer != null)
