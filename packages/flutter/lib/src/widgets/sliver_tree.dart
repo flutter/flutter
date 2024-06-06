@@ -864,6 +864,11 @@ class _TreeSliverState<T> extends State<TreeSliver<T>> with TickerProviderStateM
       if (widget.onNodeToggle != null) {
         widget.onNodeToggle!(node);
       }
+      if (_currentAnimationForParent[node] != null) {
+        // Dispose of the old animation if this node was already animating.
+        _currentAnimationForParent[node]!.animation.dispose();
+      }
+
       final AnimationController controller = _currentAnimationForParent[node]?.controller
         ?? AnimationController(
           value: node._expanded ? 0.0 : 1.0,
@@ -874,6 +879,7 @@ class _TreeSliverState<T> extends State<TreeSliver<T>> with TickerProviderStateM
           switch (status) {
             case AnimationStatus.dismissed:
             case AnimationStatus.completed:
+              _currentAnimationForParent[node]!.animation.dispose();
               _currentAnimationForParent[node]!.controller.dispose();
               _currentAnimationForParent.remove(node);
               _updateActiveAnimations();
