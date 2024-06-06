@@ -989,6 +989,9 @@ class FlutterVmService {
         }
       }
       return await extensionAdded.future;
+    } on vm_service.RPCError {
+      // Translate this exception into something the outer layer understands
+      throw VmServiceDisappearedException();
     } finally {
       await isolateEvents.cancel();
       try {
