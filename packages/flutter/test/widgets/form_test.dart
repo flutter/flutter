@@ -1128,7 +1128,6 @@ void main() {
     expect(find.text(errorText), findsOneWidget);
   });
 
-
   testWidgets('Validator will not be called if forceErrorText is provided.', (WidgetTester tester) async {
     final GlobalKey<FormState> formKey = GlobalKey<FormState>();
     const String forceErrorText = 'Forcing error.';
