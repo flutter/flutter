@@ -103,7 +103,6 @@ class FilterChip extends StatelessWidget
     this.avatarBorder = const CircleBorder(),
     this.avatarBoxConstraints,
     this.deleteIconBoxConstraints,
-    this.chipAnimationStyle,
   }) : assert(pressElevation == null || pressElevation >= 0.0),
        assert(elevation == null || elevation >= 0.0),
        _chipVariant = _ChipVariant.flat;
@@ -150,7 +149,6 @@ class FilterChip extends StatelessWidget
     this.avatarBorder = const CircleBorder(),
     this.avatarBoxConstraints,
     this.deleteIconBoxConstraints,
-    this.chipAnimationStyle,
   }) : assert(pressElevation == null || pressElevation >= 0.0),
        assert(elevation == null || elevation >= 0.0),
        _chipVariant = _ChipVariant.elevated;
@@ -223,8 +221,6 @@ class FilterChip extends StatelessWidget
   final BoxConstraints? avatarBoxConstraints;
   @override
   final BoxConstraints? deleteIconBoxConstraints;
-  @override
-  final ChipAnimationStyle? chipAnimationStyle;
 
   @override
   bool get isEnabled => onSelected != null;
@@ -276,7 +272,6 @@ class FilterChip extends StatelessWidget
       iconTheme: iconTheme,
       avatarBoxConstraints: avatarBoxConstraints,
       deleteIconBoxConstraints: deleteIconBoxConstraints,
-      chipAnimationStyle: chipAnimationStyle,
     );
   }
 }

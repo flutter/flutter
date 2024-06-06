@@ -124,7 +124,6 @@ class InputChip extends StatelessWidget
     this.avatarBorder = const CircleBorder(),
     this.avatarBoxConstraints,
     this.deleteIconBoxConstraints,
-    this.chipAnimationStyle,
   }) : assert(pressElevation == null || pressElevation >= 0.0),
        assert(elevation == null || elevation >= 0.0);
 
@@ -200,8 +199,6 @@ class InputChip extends StatelessWidget
   final BoxConstraints? avatarBoxConstraints;
   @override
   final BoxConstraints? deleteIconBoxConstraints;
-  @override
-  final ChipAnimationStyle? chipAnimationStyle;
 
   @override
   Widget build(BuildContext context) {
@@ -249,7 +246,6 @@ class InputChip extends StatelessWidget
       iconTheme: iconTheme,
       avatarBoxConstraints: avatarBoxConstraints,
       deleteIconBoxConstraints: deleteIconBoxConstraints,
-      chipAnimationStyle: chipAnimationStyle,
     );
   }
 }
