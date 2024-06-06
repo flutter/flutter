@@ -793,7 +793,7 @@ void main() {
     testWithoutContext('throws when the service is disposed', () async {
       final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
 
-      fakeVmServiceHost.vmService.dispose();
+      await fakeVmServiceHost.vmService.dispose();
 
       expect(
         () => fakeVmServiceHost.vmService.findExtensionIsolate(kExtensionName),
