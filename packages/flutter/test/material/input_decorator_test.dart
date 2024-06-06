@@ -1697,7 +1697,7 @@ void main() {
                     decoration: InputDecoration(
                       icon: Icon(Icons.insert_link),
                       labelText: 'primaryLink',
-                      hintText: 'Primary link to story',
+                      hintText: 'Primary link to stories',
                       border: OutlineInputBorder(),
                     ),
                   ),
