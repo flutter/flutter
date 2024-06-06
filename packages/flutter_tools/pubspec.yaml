@@ -10,7 +10,7 @@ dependencies:
   #
   # For detailed instructions, refer to:
   # https://github.com/flutter/flutter/wiki/Updating-dependencies-in-Flutter
-  archive: 3.3.2
+  archive: 3.6.1
   args: 2.5.0
   browser_launcher: 1.1.1
   dds: 4.2.3
@@ -120,4 +120,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: 4c0d
+# PUBSPEC CHECKSUM: 8f0f
