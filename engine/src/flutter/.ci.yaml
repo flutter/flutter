@@ -30,7 +30,7 @@ platform_properties:
           {"dependency": "open_jdk", "version": "version:17"}
         ]
       device_type: none
-      os: Mac-13
+      os: Mac-13|Mac-14
       $flutter/osx_sdk : >-
         {
           "sdk_version": "15a240d"
@@ -363,7 +363,7 @@ targets:
           "sdk_version": "15a240d"
         }
     drone_dimensions:
-      - os=Mac-13
+      - os=Mac-13|Mac-14
 
   - name: Linux mac_clangd
     recipe: engine_v2/engine_v2
@@ -392,7 +392,7 @@ targets:
           "sdk_version": "15a240d"
         }
     drone_dimensions:
-      - os=Mac-13
+      - os=Mac-13|Mac-14
       - cpu=x86
 
   - name: Mac impeller-cmake-example
