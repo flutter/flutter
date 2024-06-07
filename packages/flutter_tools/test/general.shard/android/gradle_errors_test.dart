@@ -775,14 +775,13 @@ Execution failed for task ':app:generateDebugFeatureTransitiveDeps'.
 
       expect(
         testLogger.statusText,
-        contains(
-          '\n'
-          '┌─ Flutter Fix ────────────────────────────────────────────────────────────────────────────┐\n'
-          '│ You need to update the lockfile, or disable Gradle dependency locking.                   │\n'
-          '│ To regenerate the lockfiles run: `./gradlew :generateLockfiles` in /android/build.gradle │\n'
-          '│ To remove dependency locking, remove the `dependencyLocking` from /android/build.gradle  │\n'
-          '└──────────────────────────────────────────────────────────────────────────────────────────┘\n'
-        )
+        contains('\n'
+            '┌─ Flutter Fix ────────────────────────────────────────────────────────────────────────────┐\n'
+            '│ You need to update the lockfile, or disable Gradle dependency locking.                   │\n'
+            '│ To regenerate the lockfiles run:  ./gradlew :generateLockfiles` in /android/build.gradle │\n'
+            '│ To remove dependency locking, remove the `dependencyLocking` from /android/build.gradle  │\n'
+            '└──────────────────────────────────────────────────────────────────────────────────────────┘\n'
+            '')
       );
     }, overrides: <Type, Generator>{
       GradleUtils: () => FakeGradleUtils(),
@@ -790,6 +789,57 @@ Execution failed for task ':app:generateDebugFeatureTransitiveDeps'.
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
     });
+  });
+// Test for ISSUE -> : "Most error messages in gradle_errors.dart assume a unix like path separator/environment for windows #136763"
+// It is successfully passing the test for linux enviroment.
+  testUsingContext('generates correct gradle command for Unix-like environment',
+      () async {
+    await lockFileDepMissingHandler.handler(
+      project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+      usesAndroidX: true,
+      line: '',
+    );
+
+    expect(
+        testLogger.statusText,
+        contains('\n'
+            '┌─ Flutter Fix ────────────────────────────────────────────────────────────────────────────┐\n'
+            '│ You need to update the lockfile, or disable Gradle dependency locking.                   │\n'
+            '│ To regenerate the lockfiles run:  ./gradlew :generateLockfiles` in /android/build.gradle │\n'
+            '│ To remove dependency locking, remove the `dependencyLocking` from /android/build.gradle  │\n'
+            '└──────────────────────────────────────────────────────────────────────────────────────────┘\n'
+            ''));
+  }, overrides: <Type, Generator>{
+    GradleUtils: () => FakeGradleUtils(),
+    Platform: () => fakePlatform('linux'),
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+  });
+
+// Test for-> Most error messages in gradle_errors.dart assume a unix like path separator/environment #136763
+// It is successfully passing the test for windows enviroment.
+    testUsingContext('generates correct gradle command for windows environment',
+      () async {
+    await lockFileDepMissingHandler.handler(
+      project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+      usesAndroidX: true,
+      line: '',
+    );
+    expect(
+        testLogger.statusText,
+        contains('\n'
+            '┌─ Flutter Fix ────────────────────────────────────────────────────────────────────────────────┐\n'
+            '│ You need to update the lockfile, or disable Gradle dependency locking.                       │\n'
+            '│ To regenerate the lockfiles run:  .\\gradlew.bat :generateLockfiles` in /android/build.gradle │\n'
+            '│ To remove dependency locking, remove the `dependencyLocking` from /android/build.gradle      │\n'
+            '└──────────────────────────────────────────────────────────────────────────────────────────────┘\n'
+            ''));
+  }, overrides: <Type, Generator>{
+    GradleUtils: () => FakeGradleUtils(),
+    // Platform: () => fakePlatform('android'),
+    Platform: () => fakePlatform('windows'),
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
   });
 
   group('Incompatible Kotlin version', () {
