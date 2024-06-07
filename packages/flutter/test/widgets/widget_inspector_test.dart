@@ -1916,7 +1916,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
         group('Widget Tree APIs', () {
 
-          /// Gets the widget using [WidgetInspectorServiceExtensions.getSelectedWidget] 
+          /// Gets the widget using [WidgetInspectorServiceExtensions.getSelectedWidget]
           /// for the given [element].
           Future<Map<String, dynamic>> selectedWidgetResponseForElement(
               Element element) async {
@@ -1977,7 +1977,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
             ))! as List<Object?>;
           }
 
-          /// Verifies that the children from the JSON response are identical to 
+          /// Verifies that the children from the JSON response are identical to
           /// those from [WidgetInspectorServiceExtensions.getChildrenSummaryTree].
           Future<void> verifyChildrenMatchOtherApi(Map<String, Object?> jsonResponse,
               {required String group, bool checkForPreviews = false}) async {
@@ -2117,8 +2117,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
             ))! as Map<String, Object?>;
 
             await verifyChildrenMatchOtherApi(
-              rootJson, 
-              group: group, 
+              rootJson,
+              group: group,
               checkForPreviews: true,
             );
           });
