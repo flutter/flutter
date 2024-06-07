@@ -2237,9 +2237,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           expect(columnA, equals(15));
           expect(columnA, equals(columnB));
         });
-      },
-          skip: !WidgetInspectorService.instance
-              .isWidgetCreationTracked()); // [intended] Test requires --track-widget-creation flag.
+      }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // [intended] Test requires --track-widget-creation flag.
     });
 
     group('InspectorSelection', () {
