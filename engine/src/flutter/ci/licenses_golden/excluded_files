@@ -2806,7 +2806,6 @@
 ../../../flutter/third_party/skia/modules/svg/utils/BUILD.bazel
 ../../../flutter/third_party/skia/package.json
 ../../../flutter/third_party/skia/platform_tools
-../../../flutter/third_party/skia/public.bzl
 ../../../flutter/third_party/skia/relnotes/README.md
 ../../../flutter/third_party/skia/requirements.txt
 ../../../flutter/third_party/skia/resources
