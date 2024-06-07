@@ -17656,6 +17656,8 @@ void main() {
   });
 
   testWidgets('Can implement TextEditingController', (WidgetTester tester) async {
+    final _TextEditingControllerImpl controller = _TextEditingControllerImpl();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(),
@@ -17664,7 +17666,7 @@ void main() {
           child: EditableText(
             autofocus: true,
             backgroundCursorColor: Colors.grey,
-            controller: _TextEditingControllerImpl(),
+            controller: controller,
             focusNode: focusNode,
             style: textStyle,
             cursorColor: cursorColor,
