@@ -49,14 +49,14 @@ static void AndroidPlatformThreadConfigSetter(
       break;
     }
     case fml::Thread::ThreadPriority::kDisplay: {
-      fml::RequestAffinity(fml::CpuAffinity::kNotEfficiency);
+      fml::RequestAffinity(fml::CpuAffinity::kPerformance);
       if (::setpriority(PRIO_PROCESS, 0, -1) != 0) {
         FML_LOG(ERROR) << "Failed to set UI task runner priority";
       }
       break;
     }
     case fml::Thread::ThreadPriority::kRaster: {
-      fml::RequestAffinity(fml::CpuAffinity::kNotEfficiency);
+      fml::RequestAffinity(fml::CpuAffinity::kPerformance);
       // Android describes -8 as "most important display threads, for
       // compositing the screen and retrieving input events". Conservatively
       // set the raster thread to slightly lower priority than it.
