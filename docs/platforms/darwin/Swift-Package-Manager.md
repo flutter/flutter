@@ -20,6 +20,37 @@ Swift Package Manager adoption will be gradual.
 Flutter recommends that Flutter plugins support _both_ Swift Package Manager
 and CocoaPods until further notice.
 
+<!-- The 'Enable Swift Package Manager' section is copied in the
+For app developers' and 'For plugin authors' sections. Keep these in sync! -->
+<details>
+  <summary>Enable Swift Package Manager</summary>
+
+### Enable Swift Package Manager
+
+Switch to Flutter's `master` channel:
+
+```sh
+flutter channel master
+flutter upgrade
+```
+
+Enable the Swift Package Manager feature:
+
+```sh
+flutter config --enable-swift-package-manager
+```
+
+Running an app using the Flutter CLI will automatically migrate it to support
+Swift Package Manager.
+
+> **Note**:
+> Flutter will fallback to CocoaPods for dependencies that do not support Swift
+> Package Manager yet.
+
+</details>
+<!-- The 'Enable Swift Package Manager' section is copied in the
+For app developers' and 'For plugin authors' sections. Keep these in sync! -->
+
 <details>
   <summary>Adding Swift Package Manager support to an existing Swift Flutter plugin</summary>
 
@@ -438,6 +469,8 @@ Note: OCMock uses unsafe build flags and can only be used if targeted by commit.
 
 ## For app developers
 
+<!-- The 'Enable Swift Package Manager' section is copied in the
+For app developers' and 'For plugin authors' sections. Keep these in sync! -->
 <details>
   <summary>Enable Swift Package Manager</summary>
 
@@ -464,6 +497,8 @@ Swift Package Manager.
 > Package Manager yet.
 
 </details>
+<!-- The 'Enable Swift Package Manager' section is copied in the
+For app developers' and 'For plugin authors' sections. Keep these in sync! -->
 
 <details>
   <summary>How to manually add Swift Package Manager integration to iOS project if Flutter CLI fails to automatically migrate</summary>
