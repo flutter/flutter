@@ -3,8 +3,13 @@
 ## Background
 
 Flutter is migrating to use Swift Package Manager for iOS and macOS native dependencies.
-This is an experimental feature this isn't ready yet for app developers.
-However, plugin authors should add Swift Package Manager support to their packages.
+This is an experimental feature that may change in the future.
+We recommend plugin authors add Swift Package Manager support to their packages.
+Flutter will continue to support CocoaPods until further notice.
+
+> 💡 **Tip**:
+> If you found a bug in Flutter's Swift Package Manager feature,
+> please [open an issue](https://github.com/flutter/flutter/issues/new?template=2_bug.yml).
 
 Tracking issue: https://github.com/flutter/flutter/issues/126005.
 
@@ -55,7 +60,7 @@ Please [file a bug](https://github.com/flutter/flutter/issues/new?template=1_act
 
 3. Click the `+` button
 4. Click the `Add Local...` button on the bottom of the dialog that opens
-5. Navigate to `your_app/ios/Flutter/Packages/FlutterGeneratedPluginSwiftPackage` and click `Add Package` button
+5. Navigate to `your_app/ios/Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage` and click `Add Package` button
 6. Ensure it is added to the Runner Target and click `Add Package` button
 
 ![Screenshot 2024-04-05 at 10 17 21 AM](https://github.com/flutter/flutter/assets/15619084/b5bf410d-c0d4-47b0-b84c-2738002e97d4)
@@ -108,7 +113,7 @@ Please [file a bug](https://github.com/flutter/flutter/issues/new?template=1_act
 
 3. Click the `+` button
 4. Click the `Add Local...` button on the bottom of the dialog that opens
-5. Navigate to `your_app/macos/Flutter/Packages/FlutterGeneratedPluginSwiftPackage` and click `Add Package` button
+5. Navigate to `your_app/macos/Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage` and click `Add Package` button
 6. Ensure it is added to the Runner Target and click `Add Package` button
 
 ![Screenshot 2024-04-05 at 10 17 21 AM](https://github.com/flutter/flutter/assets/15619084/b5bf410d-c0d4-47b0-b84c-2738002e97d4)
@@ -147,6 +152,8 @@ Please [file a bug](https://github.com/flutter/flutter/issues/new?template=1_act
 <details>
   <summary>How to use a Swift Package Flutter plugin that requires a higher OS version</summary>
 
+### How to use a Swift Package Flutter plugin that requires a higher OS version
+
 If a Swift Package Flutter plugin requires a higher OS version than the project, you may get an error like this:
 
 ```
@@ -162,7 +169,7 @@ To still be able to use the plugin, you'll need to increase the Minimum Deployme
 <details>
   <summary>How to add Swift Package Manager integration to a custom target</summary>
 
-## How to add Swift Package Manager integration to a custom target
+### How to add Swift Package Manager integration to a custom target
 Follow the steps in `How to manually add Swift Package Manager integration to iOS/macOS project if Flutter CLI fails to automatically migrate`.
 
 In Part 1, Step 6 use your custom target instead of the Flutter target.
@@ -222,29 +229,33 @@ flutter config --no-enable-swift-package-manager
 </details>
 
 <details>
-  <summary>Add-to-app</summary>
+  <summary>Add-to-app (Add Flutter to an existing app)</summary>
 
-### Add-to-app
+### Add-to-app (Add Flutter to an existing app)<
 
-Flutter's Swift Package Manager feature does not support add-to-app scenarios yet.
-See: https://github.com/flutter/flutter/issues/81867
+Flutter's Swift Package Manager feature does not yet support add-to-app scenarios.
+See: https://github.com/flutter/flutter/issues/146957
 
 </details>
 
 ## For plugin authors
 
-<details>
-  <summary>Converting an existing Objective-C Flutter plugin to a Swift package</summary>
+Swift Package Manager adoption in Flutter applications will take time.
+Flutter recommends that Flutter plugins support _both_ Swift Package Manager
+and CocoaPods until further notice.
 
-### Converting an existing Objective-C Flutter Plugin to a Swift Package
+<details>
+  <summary>Adding Swift Package Manager support to an existing Swift Flutter plugin</summary>
+
+### Adding Swift Package Manager support to an existing Swift Flutter plugin
 
 Replace `plugin_name` throughout this guide with the name of your plugin.
+The below example uses `ios`, replace `ios` with `macos`/`darwin` as applicable.
 
 1. Enable the Swift Package Manager feature.
 
 2. Start by creating a directory under the `ios`, `macos`, and/or `darwin` directories.
 Name this new directory the name of the platform package.
-The below example uses `ios`, replace `ios` with `macos`/`darwin` as applicable.
 
 <pre>
 /plugin_name/plugin_name_ios/ios/<b>plugin_name_ios</b>
@@ -334,13 +345,13 @@ let package = Package(
 
     If you're using a modulemap for CocoaPods to create a Test submodule, consider removing it for Swift Package Manager. Note that this will make all public headers available via the module.
 
-    To remove it for Swift Package Manager but keep it for CocoaPods, exclude the modulemap and umbrella header in the plugin's Package.swift. The example below assumes they are located within the `Sources/plugin_name_ios` directory.
+    To remove it for Swift Package Manager but keep it for CocoaPods, exclude the modulemap and umbrella header in the plugin's Package.swift. The example below assumes they are located within the `Sources/plugin_name_ios/include` directory.
 
     ```diff
             .target(
                 name: "plugin_name_ios",
                 dependencies: [],
-    +           exclude: ["cocoapods_plugin_name_ios.modulemap", "plugin_name_ios-umbrella.h"],
+    +           exclude: ["include/cocoapods_plugin_name_ios.modulemap", "include/plugin_name_ios-umbrella.h"],
     ```
 
     If you want to keep your unit tests compatible with both CocoaPods and Swift Package Manager, you can try the following:
@@ -352,21 +363,22 @@ let package = Package(
     + #endif
     ```
 
-    If you would like to continue using a custom modulemap, please refer to [Swift Package Manager's documentation](https://github.com/apple/swift-package-manager/blob/main/Documentation/Usage.md#creating-c-language-targets).
+    If you would like to use a custom modulemap with your Swift package,
+    please refer to [Swift Package Manager's documentation](https://github.com/apple/swift-package-manager/blob/main/Documentation/Usage.md#creating-c-language-targets).
 
 9. Move all remaining files from `ios/Classes` to `Sources/plugin_name_ios`
 10. `ios/Assets`, `ios/Resources`, `ios/Classes` should now be empty and can be deleted
 11. If your header files were previously within the same directory as your implementation files, you may need to change your import statements.
 
-   For example, if the following changes were made:
-     * `ios/Classes/PublicHeaderFile.h` --> `Sources/plugin_name_ios/include/plugin_name_ios/PublicHeaderFile.h`
-     * `ios/Classes/ImplementationFile.m` --> `Sources/plugin_name_ios/ImplementationFile.m`
+    For example, if the following changes were made:
+    * `ios/Classes/PublicHeaderFile.h` --> `Sources/plugin_name_ios/include/plugin_name_ios/PublicHeaderFile.h`
+    * `ios/Classes/ImplementationFile.m` --> `Sources/plugin_name_ios/ImplementationFile.m`
 
-   Within `ImplementationFile.m`, the import would change:
-   ```diff
-   - #import "PublicHeaderFile.h"
-   + #import "./include/plugin_name_ios/PublicHeaderFile.h"
-   ```
+    Within `ImplementationFile.m`, the import would change:
+    ```diff
+    - #import "PublicHeaderFile.h"
+    + #import "./include/plugin_name_ios/PublicHeaderFile.h"
+    ```
 
 12. If using pigeon, you'll want to update your pigeon input file
 ```diff
@@ -453,15 +465,16 @@ Then run `flutter pub publish --dry-run` to ensure the `include` directory will 
 </details>
 
 <details>
-  <summary>Converting an existing Swift Flutter plugin to a Swift package</summary>
+  <summary>Adding Swift Package Manager support to an existing Swift Flutter plugin</summary>
 
-### Converting an existing Swift Flutter Plugin to a Swift Package
+### Adding Swift Package Manager support to an existing Swift Flutter plugin
 
 Replace `plugin_name` throughout this guide with the name of your plugin.
+The below example uses `ios`, replace `ios` with `macos`/`darwin` as applicable.
 
 1. Enable the Swift Package Manager feature.
 
-2. Start by creating a directory under the `ios`, `macos`, and/or `darwin` directories. Name this new directory the name of the platform package. The below example uses `ios`, replace `ios` with `macos`/`darwin` if applicable.
+2. Start by creating a directory under the `ios`, `macos`, and/or `darwin` directories. Name this new directory the name of the platform package.
 
 <pre>
 /plugin_name/plugin_name_ios/ios/<b>plugin_name_ios</b>
@@ -621,9 +634,9 @@ Then in the terminal, run `pod install` in the `plugin_name_ios/example/ios` dir
 
 ![Screenshot 2024-04-09 at 3 11 21 PM](https://github.com/flutter/flutter/assets/15619084/9e88c220-97d6-48f8-91ce-0b0ce72f50fa)
 
-Note: OCMock uses unsafe build flags and cant only be used if targeted by commit. `fe1661a3efed11831a6452f4b1a0c5e6ddc08c3d` is the commit for the 3.9.3 version.
+Note: OCMock uses unsafe build flags and can only be used if targeted by commit. `fe1661a3efed11831a6452f4b1a0c5e6ddc08c3d` is the commit for the 3.9.3 version.
 
-5. Ensure it is added to the `RunnerTests` Target and click `Add Package` button
+5. Ensure it is added to the `RunnerTests` Target and click the `Add Package` button
 
 ![Screenshot 2024-04-09 at 3 12 12 PM](https://github.com/flutter/flutter/assets/15619084/06424d39-e317-4360-8b99-571fd3f046f2)
 
