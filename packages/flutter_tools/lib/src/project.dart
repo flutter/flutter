@@ -544,7 +544,7 @@ class AndroidProject extends FlutterProjectPlatform {
         // pluginManagement block of the settings.gradle file.
         // See https://docs.gradle.org/current/userguide/composite_builds.html#included_plugin_builds,
         // as well as the settings.gradle and build.gradle templates.
-        final bool declarativeApply = line.contains(RegExp('dev\.flutter\.(?:(?:flutter-gradle-plugin)|(?:`flutter-gradle-plugin`))'));
+        final bool declarativeApply = line.contains(RegExp('dev\\.flutter\\.(?:(?:flutter-gradle-plugin)|(?:`flutter-gradle-plugin`))'));
 
         // This case allows for flutter run/build to work for modules. It does
         // not guarantee the Flutter Gradle Plugin is applied.
