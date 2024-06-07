@@ -4671,9 +4671,9 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
   @override
   TextStyle? get hintStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
     if (states.contains(MaterialState.disabled)) {
-      return TextStyle(color: Theme.of(context).disabledColor);
+      return TextStyle(color: _colors.onSurface.withOpacity(0.38));
     }
-    return TextStyle(color: Theme.of(context).hintColor);
+    return TextStyle(color: _colors.onSurfaceVariant);
   });
 
   @override
