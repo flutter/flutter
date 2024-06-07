@@ -5959,7 +5959,7 @@ class RawImage extends LeafRenderObjectWidget {
     this.centerSlice,
     this.matchTextDirection = false,
     this.invertColors = false,
-    this.filterQuality = FilterQuality.low,
+    this.filterQuality = FilterQuality.medium,
     this.isAntiAlias = false,
   });
 
@@ -6002,8 +6002,7 @@ class RawImage extends LeafRenderObjectWidget {
 
   /// Used to set the filterQuality of the image.
   ///
-  /// Defaults to [FilterQuality.low] to scale the image, which corresponds to
-  /// bilinear interpolation.
+  /// Defaults to [FilterQuality.medium].
   final FilterQuality filterQuality;
 
   /// Used to combine [color] with this image.
@@ -7102,6 +7101,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     bool? keyboardKey,
     bool? link,
     bool? header,
+    int? headingLevel,
     bool? textField,
     bool? readOnly,
     bool? focusable,
@@ -7152,6 +7152,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     SetTextHandler? onSetText,
     VoidCallback? onDidGainAccessibilityFocus,
     VoidCallback? onDidLoseAccessibilityFocus,
+    VoidCallback? onFocus,
     Map<CustomSemanticsAction, VoidCallback>? customSemanticsActions,
   }) : this.fromProperties(
     key: key,
@@ -7172,6 +7173,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       keyboardKey: keyboardKey,
       link: link,
       header: header,
+      headingLevel: headingLevel,
       textField: textField,
       readOnly: readOnly,
       focusable: focusable,
@@ -7216,6 +7218,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       onMoveCursorBackwardByCharacter: onMoveCursorBackwardByCharacter,
       onDidGainAccessibilityFocus: onDidGainAccessibilityFocus,
       onDidLoseAccessibilityFocus: onDidLoseAccessibilityFocus,
+      onFocus: onFocus,
       onDismiss: onDismiss,
       onSetSelection: onSetSelection,
       onSetText: onSetText,

@@ -199,7 +199,7 @@ enum WebRendererMode implements CliEnum {
   static const WebRendererMode defaultForWasm = WebRendererMode.skwasm;
 
   @override
-  String get cliName => snakeCase(name, '-');
+  String get cliName => kebabCase(name);
 
   @override
   String get helpText => switch (this) {

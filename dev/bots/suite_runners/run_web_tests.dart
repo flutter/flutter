@@ -152,10 +152,9 @@ class WebTestsSuite {
 
       // This test doesn't do anything interesting w.r.t. rendering, so we don't run the full build mode x renderer matrix.
       // These tests have been extremely flaky, so we are temporarily disabling them until we figure out how to make them more robust.
-      // See https://github.com/flutter/flutter/issues/143834
-      // () => _runWebE2eTest('text_editing_integration', buildMode: 'debug', renderer: 'canvaskit'),
-      // () => _runWebE2eTest('text_editing_integration', buildMode: 'profile', renderer: 'html'),
-      // () => _runWebE2eTest('text_editing_integration', buildMode: 'release', renderer: 'html'),
+      () => _runWebE2eTest('text_editing_integration', buildMode: 'debug', renderer: 'canvaskit'),
+      () => _runWebE2eTest('text_editing_integration', buildMode: 'profile', renderer: 'html'),
+      () => _runWebE2eTest('text_editing_integration', buildMode: 'release', renderer: 'html'),
 
       // This test doesn't do anything interesting w.r.t. rendering, so we don't run the full build mode x renderer matrix.
       () => _runWebE2eTest('url_strategy_integration', buildMode: 'debug', renderer: 'html'),
@@ -293,6 +292,11 @@ class WebTestsSuite {
     bool expectWriteResponseFile = false,
     String expectResponseFileContent = '',
   }) async {
+    // TODO(yjbanov): this is temporarily disabled due to https://github.com/flutter/flutter/issues/147731
+    if (buildMode == 'debug' && renderer == 'canvaskit') {
+      print('SKIPPED: $target in debug CanvasKit mode due to https://github.com/flutter/flutter/issues/147731');
+      return;
+    }
     printProgress('${green}Running integration tests $target in $buildMode mode.$reset');
     await runCommand(
       flutter,
@@ -421,6 +425,11 @@ class WebTestsSuite {
   /// The test is written using `package:integration_test` (despite the "e2e" in
   /// the name, which is there for historic reasons).
   Future<void> _runGalleryE2eWebTest(String buildMode, { bool canvasKit = false }) async {
+    // TODO(yjbanov): this is temporarily disabled due to https://github.com/flutter/flutter/issues/147731
+    if (buildMode == 'debug' && canvasKit) {
+      print('SKIPPED: Gallery e2e web test in debug CanvasKit mode due to https://github.com/flutter/flutter/issues/147731');
+      return;
+    }
     printProgress('${green}Running flutter_gallery integration test in --$buildMode using ${canvasKit ? 'CanvasKit' : 'HTML'} renderer.$reset');
     final String testAppDirectory = path.join(flutterRoot, 'dev', 'integration_tests', 'flutter_gallery');
     await runCommand(
@@ -512,6 +521,7 @@ class WebTestsSuite {
       flutter,
       <String>[
         'run',
+        '--verbose',
         '--debug',
         '-d',
         'chrome',
@@ -524,10 +534,15 @@ class WebTestsSuite {
       ],
       outputMode: OutputMode.capture,
       outputListener: (String line, Process process) {
+        bool shutdownFlutterTool = false;
         if (line.contains('--- TEST SUCCEEDED ---')) {
           success = true;
+          shutdownFlutterTool = true;
         }
-        if (success || line.contains('--- TEST FAILED ---')) {
+        if (line.contains('--- TEST FAILED ---')) {
+          shutdownFlutterTool = true;
+        }
+        if (shutdownFlutterTool) {
           process.stdin.add('q'.codeUnits);
         }
       },

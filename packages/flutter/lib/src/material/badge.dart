@@ -24,6 +24,13 @@ import 'theme.dart';
 /// or a button's icon, as in [TextButton.icon]. The badge's default
 /// configuration is intended to work well with a default sized (24)
 /// [Icon].
+///
+/// {@tool dartpad}
+/// This example shows how to create a [Badge] with label and count
+/// wrapped on an icon in an [IconButton].
+///
+/// ** See code in examples/api/lib/material/badge/badge.0.dart **
+/// {@end-tool}
 class Badge extends StatelessWidget {
   /// Create a Badge that stacks [label] on top of [child].
   ///

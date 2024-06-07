@@ -146,6 +146,7 @@ Future<void> main(List<String> args) async {
       'customer_testing': customerTestingRunner,
       'analyze': analyzeRunner,
       'fuchsia_precache': fuchsiaPrecacheRunner,
+      'snippets': _runSnippetsTests,
       'docs': docsRunner,
       'verify_binaries_codesigned': verifyCodesignedTestRunner,
       kTestHarnessShardName: testHarnessTestsRunner, // Used for testing this script; also run as part of SHARD=framework_tests, SUBSHARD=misc.
@@ -234,6 +235,21 @@ Future<void> _runToolTests() async {
     'general': _runGeneralToolTests,
     'commands': _runCommandsToolTests,
   });
+}
+
+Future<void> _runSnippetsTests() async {
+  final String snippetsPath = path.join(flutterRoot, 'dev', 'snippets');
+  final List<String> allTests = Directory(path.join(snippetsPath, 'test'))
+      .listSync(recursive: true).whereType<File>()
+      .map<String>((FileSystemEntity entry) => path.relative(entry.path, from: _toolsPath))
+      .where((String testPath) => path.basename(testPath).endsWith('_test.dart')).toList();
+
+  await runDartTest(
+    snippetsPath,
+    forceSingleCore: true,
+    testPaths: selectIndexOfTotalSubshard<String>(allTests),
+    collectMetrics: true,
+  );
 }
 
 Future<void> runForbiddenFromReleaseTests() async {
