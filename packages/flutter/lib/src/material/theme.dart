@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore_for_file: public_member_api_docs
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 
@@ -112,9 +114,22 @@ class Theme extends StatelessWidget {
     return ThemeData.localize(theme, theme.typography.geometryThemeFor(category));
   }
 
-  // The inherited themes in widgets library can not infer their values from
-  // Theme in material library. Wraps the child with these inherited themes to
-  // overrides their values directly.
+  static Widget merge({
+    Key? key,
+    required Object data,
+    required Widget child,
+  }) {
+    return Builder(
+      builder: (BuildContext context) {
+        final ThemeData value = of(context).config.merge(data).applyDefaults();
+        return Theme(key: key, data: value, child: child);
+      },
+    );
+  }
+
+  // The inherited themes in widgets library cannot infer their values from the
+  // Theme in material library. This function wraps the child with the relevant
+  // inherited themes to override their values directly.
   Widget _wrapsWidgetThemes(BuildContext context, Widget child) {
     final DefaultSelectionStyle selectionStyle = DefaultSelectionStyle.of(context);
     return IconTheme(
