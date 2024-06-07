@@ -187,9 +187,6 @@ void main() {
     expect(buildRunner.linkDryRunInvocations, 1);
     // Check that the framework uri is identical for both archs.
     final String pathSeparator = const LocalPlatform().pathSeparator;
-    if (const LocalPlatform().isWindows) {
-      return; // Backslashes in commands, but we will never run these commands on Windows.
-    }
     expect(
       nativeAssetsYamlContents,
       stringContainsInOrder(
