@@ -464,6 +464,32 @@ class AnimationController extends Animation<double>
   AnimationStatus get status => _status;
   late AnimationStatus _status;
 
+  TickerFuture _toggle(String method, bool animateForward, double? from) {
+    assert(() {
+      if (duration == null && (animateForward || reverseDuration == null)) {
+        final (String duration, String durationQuotes) = animateForward
+            ? ('duration', '"duration"')
+            : ('duration or reverseDuration', '"duration" or "reverseDuration"');
+        throw FlutterError(
+          'AnimationController.$method() called with no default $duration.\n'
+          'The $durationQuotes property should be set, either in the constructor or later, before '
+          'calling the $method() function.',
+        );
+      }
+      return true;
+    }());
+    assert(
+      _ticker != null,
+      'AnimationController.$method() called after AnimationController.dispose()\n'
+      'AnimationController methods should not be used after calling dispose.',
+    );
+    _direction = animateForward ? _AnimationDirection.forward : _AnimationDirection.reverse;
+    if (from != null) {
+      value = from;
+    }
+    return _animateToInternal(animateForward ? upperBound : lowerBound);
+  }
+
   /// Starts running this animation forwards (towards the end).
   ///
   /// Returns a [TickerFuture] that completes when the animation is complete.
@@ -471,35 +497,12 @@ class AnimationController extends Animation<double>
   /// If [from] is non-null, it will be set as the current [value] before running
   /// the animation.
   ///
-  /// The most recently returned [TickerFuture], if any, is marked as having been
-  /// canceled, meaning the future never completes and its [TickerFuture.orCancel]
-  /// derivative future completes with a [TickerCanceled] error.
+  /// {@macro flutter.animation.AnimationController.ticker_canceled}
   ///
   /// During the animation, [status] is reported as [AnimationStatus.forward],
   /// which switches to [AnimationStatus.completed] when [upperBound] is
   /// reached at the end of the animation.
-  TickerFuture forward({ double? from }) {
-    assert(() {
-      if (duration == null) {
-        throw FlutterError(
-          'AnimationController.forward() called with no default duration.\n'
-          'The "duration" property should be set, either in the constructor or later, before '
-          'calling the forward() function.',
-        );
-      }
-      return true;
-    }());
-    assert(
-      _ticker != null,
-      'AnimationController.forward() called after AnimationController.dispose()\n'
-      'AnimationController methods should not be used after calling dispose.',
-    );
-    _direction = _AnimationDirection.forward;
-    if (from != null) {
-      value = from;
-    }
-    return _animateToInternal(upperBound);
-  }
+  TickerFuture forward({ double? from }) => _toggle('forward', true, from);
 
   /// Starts running this animation in reverse (towards the beginning).
   ///
@@ -508,85 +511,32 @@ class AnimationController extends Animation<double>
   /// If [from] is non-null, it will be set as the current [value] before running
   /// the animation.
   ///
-  /// The most recently returned [TickerFuture], if any, is marked as having been
-  /// canceled, meaning the future never completes and its [TickerFuture.orCancel]
-  /// derivative future completes with a [TickerCanceled] error.
+  /// {@macro flutter.animation.AnimationController.ticker_canceled}
   ///
   /// During the animation, [status] is reported as [AnimationStatus.reverse],
   /// which switches to [AnimationStatus.dismissed] when [lowerBound] is
   /// reached at the end of the animation.
-  TickerFuture reverse({ double? from }) {
-    assert(() {
-      if (duration == null && reverseDuration == null) {
-        throw FlutterError(
-          'AnimationController.reverse() called with no default duration or reverseDuration.\n'
-          'The "duration" or "reverseDuration" property should be set, either in the constructor or later, before '
-          'calling the reverse() function.',
-        );
-      }
-      return true;
-    }());
-    assert(
-      _ticker != null,
-      'AnimationController.reverse() called after AnimationController.dispose()\n'
-      'AnimationController methods should not be used after calling dispose.',
-    );
-    _direction = _AnimationDirection.reverse;
-    if (from != null) {
-      value = from;
-    }
-    return _animateToInternal(lowerBound);
-  }
+  TickerFuture reverse({ double? from }) => _toggle('reverse', false, from);
 
-  /// Toggles the direction of this animation, based on whether it [isForwardOrCompleted].
+  /// Toggles the direction of this animation.
   ///
-  /// Specifically, this function acts the same way as [reverse] if the [status] is
-  /// either [AnimationStatus.forward] or [AnimationStatus.completed], and acts as
-  /// [forward] for [AnimationStatus.reverse] or [AnimationStatus.dismissed].
+  /// The value of [newDirection] should toggle between `true` and `false`, and
+  /// [toggle] should be called each time it changes. This function acts like [forward]
+  /// when the [newDirection] is `true`, and [reverse] when it's `false`.
   ///
-  /// If [from] is non-null, it will be set as the current [value] before running
-  /// the animation.
+  /// If no [newDirection] is provided, the controller changes direction each time,
+  /// based on the current [status].
   ///
-  /// The most recently returned [TickerFuture], if any, is marked as having been
-  /// canceled, meaning the future never completes and its [TickerFuture.orCancel]
-  /// derivative future completes with a [TickerCanceled] error.
-  TickerFuture toggle({ double? from }) {
-    assert(() {
-      Duration? duration = this.duration;
-      if (isForwardOrCompleted) {
-        duration ??= reverseDuration;
-      }
-      if (duration == null) {
-        throw FlutterError(
-          'AnimationController.toggle() called with no default duration.\n'
-          'The "duration" property should be set, either in the constructor or later, before '
-          'calling the toggle() function.',
-        );
-      }
-      return true;
-    }());
-    assert(
-      _ticker != null,
-      'AnimationController.toggle() called after AnimationController.dispose()\n'
-      'AnimationController methods should not be used after calling dispose.',
-    );
-    _direction = isForwardOrCompleted ? _AnimationDirection.reverse : _AnimationDirection.forward;
-    if (from != null) {
-      value = from;
-    }
-    return _animateToInternal(switch (_direction) {
-      _AnimationDirection.forward => upperBound,
-      _AnimationDirection.reverse => lowerBound,
-    });
+  /// {@macro flutter.animation.AnimationController.ticker_canceled}
+  TickerFuture toggle([ bool? newDirection ]) {
+    return _toggle('toggle', newDirection ?? !isForwardOrCompleted, null);
   }
 
   /// Drives the animation from its current value to target.
   ///
   /// Returns a [TickerFuture] that completes when the animation is complete.
   ///
-  /// The most recently returned [TickerFuture], if any, is marked as having been
-  /// canceled, meaning the future never completes and its [TickerFuture.orCancel]
-  /// derivative future completes with a [TickerCanceled] error.
+  /// {@macro flutter.animation.AnimationController.ticker_canceled}
   ///
   /// During the animation, [status] is reported as [AnimationStatus.forward]
   /// regardless of whether `target` > [value] or not. At the end of the
@@ -621,9 +571,7 @@ class AnimationController extends Animation<double>
   ///
   /// Returns a [TickerFuture] that completes when the animation is complete.
   ///
-  /// The most recently returned [TickerFuture], if any, is marked as having been
-  /// canceled, meaning the future never completes and its [TickerFuture.orCancel]
-  /// derivative future completes with a [TickerCanceled] error.
+  /// {@macro flutter.animation.AnimationController.ticker_canceled}
   ///
   /// During the animation, [status] is reported as [AnimationStatus.reverse]
   /// regardless of whether `target` < [value] or not. At the end of the
@@ -714,9 +662,7 @@ class AnimationController extends Animation<double>
   /// The [TickerFuture.orCancel] future completes with an error when the animation is
   /// stopped (e.g. with [stop]).
   ///
-  /// The most recently returned [TickerFuture], if any, is marked as having been
-  /// canceled, meaning the future never completes and its [TickerFuture.orCancel]
-  /// derivative future completes with a [TickerCanceled] error.
+  /// {@macro flutter.animation.AnimationController.ticker_canceled}
   TickerFuture repeat({
     double? min,
     double? max,
@@ -772,9 +718,7 @@ class AnimationController extends Animation<double>
   ///
   /// Returns a [TickerFuture] that completes when the animation is complete.
   ///
-  /// The most recently returned [TickerFuture], if any, is marked as having been
-  /// canceled, meaning the future never completes and its [TickerFuture.orCancel]
-  /// derivative future completes with a [TickerCanceled] error.
+  /// {@macro flutter.animation.AnimationController.ticker_canceled}
   TickerFuture fling({ double velocity = 1.0, SpringDescription? springDescription, AnimationBehavior? animationBehavior }) {
     springDescription ??= _kFlingSpringDescription;
     _direction = velocity < 0.0 ? _AnimationDirection.reverse : _AnimationDirection.forward;
@@ -807,9 +751,7 @@ class AnimationController extends Animation<double>
   ///
   /// Returns a [TickerFuture] that completes when the animation is complete.
   ///
-  /// The most recently returned [TickerFuture], if any, is marked as having been
-  /// canceled, meaning the future never completes and its [TickerFuture.orCancel]
-  /// derivative future completes with a [TickerCanceled] error.
+  /// {@macro flutter.animation.AnimationController.ticker_canceled}
   ///
   /// The [status] is always [AnimationStatus.forward] for the entire duration
   /// of the simulation.
@@ -868,9 +810,11 @@ class AnimationController extends Animation<double>
   /// Release the resources used by this object. The object is no longer usable
   /// after this method is called.
   ///
+  /// {@template flutter.animation.AnimationController.ticker_canceled}
   /// The most recently returned [TickerFuture], if any, is marked as having been
   /// canceled, meaning the future never completes and its [TickerFuture.orCancel]
   /// derivative future completes with a [TickerCanceled] error.
+  /// {@endtemplate}
   @override
   void dispose() {
     assert(() {
