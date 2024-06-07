@@ -2027,9 +2027,9 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
               'objectGroup': group
             },
           ))! as List<Object?>;
+          childrenJson = childJson['children']! as List<Object?>;
           expect(alternateChildrenJson.length, equals(0));
-          // Tests are failing when this typo is fixed.
-          expect(childJson['chidlren'], isNull);
+          expect(childrenJson.length, equals(0));
         });
 
         testWidgets(
