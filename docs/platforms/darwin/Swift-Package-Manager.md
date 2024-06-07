@@ -7,7 +7,7 @@ This is an experimental feature that may change in the future.
 We recommend plugin authors add Swift Package Manager support to their packages.
 Flutter will continue to support CocoaPods until further notice.
 
-> 💡 **Tip**:
+> [!TIP]
 > If you found a bug in Flutter's Swift Package Manager feature,
 > please [open an issue](https://github.com/flutter/flutter/issues/new?template=2_bug.yml).
 
@@ -36,7 +36,7 @@ flutter config --enable-swift-package-manager
 Running an app using the Flutter CLI will automatically migrate it to support
 Swift Package Manager.
 
-> 💡**Note**:
+> **Note**:
 > Flutter will fallback to CocoaPods for dependencies that do not support Swift
 > Package Manager yet.
 
@@ -60,8 +60,8 @@ Please [file a bug](https://github.com/flutter/flutter/issues/new?template=1_act
 
 3. Click the `+` button
 4. Click the `Add Local...` button on the bottom of the dialog that opens
-5. Navigate to `your_app/ios/Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage` and click `Add Package` button
-6. Ensure it is added to the Runner Target and click `Add Package` button
+5. Navigate to `your_app/ios/Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage` and click the `Add Package` button
+6. Ensure it is added to the `Runner` target and click the `Add Package` button
 
 ![Screenshot 2024-04-05 at 10 17 21 AM](https://github.com/flutter/flutter/assets/15619084/b5bf410d-c0d4-47b0-b84c-2738002e97d4)
 
@@ -113,8 +113,8 @@ Please [file a bug](https://github.com/flutter/flutter/issues/new?template=1_act
 
 3. Click the `+` button
 4. Click the `Add Local...` button on the bottom of the dialog that opens
-5. Navigate to `your_app/macos/Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage` and click `Add Package` button
-6. Ensure it is added to the Runner Target and click `Add Package` button
+5. Navigate to `your_app/macos/Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage` and click the `Add Package` button
+6. Ensure it is added to the Runner Target and click the `Add Package` button
 
 ![Screenshot 2024-04-05 at 10 17 21 AM](https://github.com/flutter/flutter/assets/15619084/b5bf410d-c0d4-47b0-b84c-2738002e97d4)
 
@@ -150,11 +150,11 @@ Please [file a bug](https://github.com/flutter/flutter/issues/new?template=1_act
 </details>
 
 <details>
-  <summary>How to use a Swift Package Flutter plugin that requires a higher OS version</summary>
+  <summary>How to use a Swift Package Manager Flutter plugin that requires a higher OS version</summary>
 
-### How to use a Swift Package Flutter plugin that requires a higher OS version
+### How to use a Swift Package Manager Flutter plugin that requires a higher OS version
 
-If a Swift Package Flutter plugin requires a higher OS version than the project, you may get an error like this:
+If a Swift Package Flutter Manager plugin requires a higher OS version than the project, you may get an error like this:
 
 ```
 Target Integrity (Xcode): The package product 'plugin_name_ios' requires minimum platform version 14.0 for the iOS platform, but this target supports 12.0
@@ -229,9 +229,9 @@ flutter config --no-enable-swift-package-manager
 </details>
 
 <details>
-  <summary>Add-to-app (Add Flutter to an existing app)</summary>
+  <summary>Add Flutter to an existing app (add-to-app)</summary>
 
-### Add-to-app (Add Flutter to an existing app)<
+### Add Flutter to an existing app (add-to-app)
 
 Flutter's Swift Package Manager feature does not yet support add-to-app scenarios.
 See: https://github.com/flutter/flutter/issues/146957
@@ -240,7 +240,8 @@ See: https://github.com/flutter/flutter/issues/146957
 
 ## For plugin authors
 
-Swift Package Manager adoption in Flutter applications will take time.
+Swift Package Manager adoption will be gradual.
+
 Flutter recommends that Flutter plugins support _both_ Swift Package Manager
 and CocoaPods until further notice.
 
@@ -438,12 +439,14 @@ objcSourceOut: 'ios/plugin_name_ios/Sources/plugin_name_ios/messages.g.m',
 ```
   * Note: `SWIFTPM_MODULE_BUNDLE` will only work if there are actual resources (either [defined in the Package.swift](https://developer.apple.com/documentation/xcode/bundling-resources-with-a-swift-package#Explicitly-declare-or-exclude-resources) or [automatically included by Xcode](https://developer.apple.com/documentation/xcode/bundling-resources-with-a-swift-package#:~:text=Xcode%20detects%20common%20resource%20types%20for%20Apple%20platforms%20and%20treats%20them%20as%20a%20resource%20automatically)). Otherwise, it will fail.
 
-16. If your `plugin_name_ios/Sources/plugin_name_ios/include` directory only contains a `.gitkeep`, you'll want update your `.gitignore` to include the following:
-```gitignore
-!.gitkeep
-```
+16. If your `plugin_name_ios/Sources/plugin_name_ios/include` directory only contains a `.gitkeep`,
+    you'll want update your `.gitignore` to include the following:
 
-Then run `flutter pub publish --dry-run` to ensure the `include` directory will be published.
+    ```gitignore
+    !.gitkeep
+    ```
+
+    Then run `flutter pub publish --dry-run` to ensure the `include` directory will be published.
 
 17. Verify plugin still works with CocoaPods
     1. Disable Swift Package Manager
@@ -650,8 +653,8 @@ Note: OCMock uses unsafe build flags and can only be used if targeted by commit.
    3. Navigate to Package Dependencies for the project
    4. Click the `+` button
    5. Click the `Add Local...` button on the bottom of the dialog that opens
-   6. Navigate to `plugin_name/plugin_name_ios/ios/plugin_name_ios` and click `Add Package` button
-   7. Ensure it is added to the `RunnerTests` Target and click `Add Package` button
+   6. Navigate to `plugin_name/plugin_name_ios/ios/plugin_name_ios` and click the `Add Package` button
+   7. Ensure it is added to the `RunnerTests` target and click the `Add Package` button
 
 7. Ensure tests pass Product > Test
 </details>
