@@ -93,6 +93,7 @@ export 'src/widgets/page_storage.dart';
 export 'src/widgets/page_view.dart';
 export 'src/widgets/pages.dart';
 export 'src/widgets/performance_overlay.dart';
+export 'src/widgets/pinned_header_sliver.dart';
 export 'src/widgets/placeholder.dart';
 export 'src/widgets/platform_menu_bar.dart';
 export 'src/widgets/platform_selectable_region_context_menu.dart';
