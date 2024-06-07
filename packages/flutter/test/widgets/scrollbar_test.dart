@@ -86,6 +86,46 @@ void main() {
   );
 
   test(
+    'Scrollbar is not smaller than minLength with large scroll views, '
+    'if minLength is small ',
+    () {
+      const double minLen = 3.5;
+      const Size size = Size(600, 10);
+      final ScrollMetrics metrics = defaultMetrics.copyWith(
+        maxScrollExtent: 100000,
+        viewportDimension: size.height,
+      );
+
+      // When overscroll.
+      painter = _buildPainter(
+        minLength: minLen,
+        minOverscrollLength: minLen,
+        scrollMetrics: metrics,
+      );
+
+      painter.paint(testCanvas, size);
+
+      final Rect rect0 = captureRect();
+      expect(rect0.top, 0);
+      expect(rect0.left, size.width - _kThickness);
+      expect(rect0.width, _kThickness);
+      expect(rect0.height >= minLen, true);
+
+      // When scroll normally.
+      const double newPixels = 1.0;
+
+      painter.update(metrics.copyWith(pixels: newPixels), metrics.axisDirection);
+
+      painter.paint(testCanvas, size);
+
+      final Rect rect1 = captureRect();
+      expect(rect1.left, size.width - _kThickness);
+      expect(rect1.width, _kThickness);
+      expect(rect1.height >= minLen, true);
+    },
+  );
+
+  test(
     'When scrolling normally (no overscrolling), the size of the scrollbar stays the same, '
     'and it scrolls evenly',
     () {
