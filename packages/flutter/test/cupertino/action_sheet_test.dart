@@ -1351,7 +1351,7 @@ Widget createAppWithButtonThatLaunchesActionSheet(Widget actionSheet) {
 //
 // The `theme` will be applied to the app and determines the background.
 class TestScaffoldApp extends StatefulWidget {
-  const TestScaffoldApp({required this.theme, required this.actionSheet});
+  const TestScaffoldApp({super.key, required this.theme, required this.actionSheet});
   final CupertinoThemeData theme;
   final Widget actionSheet;
 
