@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/material/input_decorator/input_decoration.la
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Shows the whole app', (WidgetTester tester) async {
+  testWidgets('Decorates TextField in sample app with label', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.LabelExampleApp(),
     );

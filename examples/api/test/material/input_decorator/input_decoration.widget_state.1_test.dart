@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/material/input_decorator/input_decoration.wi
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Shows all decorations', (WidgetTester tester) async {
+  testWidgets('TextFormField updates decorations depending on state', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.MaterialStateExampleApp(),
     );
@@ -29,7 +29,7 @@ void main() {
     );
   });
 
-  testWidgets('Validates field', (WidgetTester tester) async {
+  testWidgets('Validates field input', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.MaterialStateExampleApp(),
     );

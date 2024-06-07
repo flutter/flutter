@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/material/input_decorator/input_decoration.pr
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Shows all decorations', (WidgetTester tester) async {
+  testWidgets('Shows two TextFields decorated with prefix icon sizes matching their hint text', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.PrefixIconConstraintsExampleApp(),
     );
@@ -37,7 +37,7 @@ void main() {
       greaterThan(tester.getSize(smallerIcon).longestSide));
   });
 
-  testWidgets('Is prefix icon', (WidgetTester tester) async {
+  testWidgets('prefixIcons are placed left of hintText', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.PrefixIconConstraintsExampleApp(),
     );

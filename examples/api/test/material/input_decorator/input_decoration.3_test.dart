@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/material/input_decorator/input_decoration.3.
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Shows all decorations', (WidgetTester tester) async {
+  testWidgets('TextFormField is decorated', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.InputDecorationExampleApp(),
     );
@@ -23,7 +23,7 @@ void main() {
     );
   });
 
-  testWidgets('Correct element ordering', (WidgetTester tester) async {
+  testWidgets('Decorations are correctly ordered', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.InputDecorationExampleApp(),
     );

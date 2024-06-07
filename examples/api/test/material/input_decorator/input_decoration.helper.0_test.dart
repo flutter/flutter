@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/material/input_decorator/input_decoration.he
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('InputDecorator helper', (WidgetTester tester) async {
+  testWidgets('Shows multi element InputDecorator help decoration', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.HelperExampleApp(),
     );

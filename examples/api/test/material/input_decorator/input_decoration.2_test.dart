@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/material/input_decorator/input_decoration.2.
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Shows all decorations', (WidgetTester tester) async {
+  testWidgets('TextField is decorated', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.InputDecorationExampleApp(),
     );
