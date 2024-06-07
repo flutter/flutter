@@ -3,21 +3,21 @@
 // found in the LICENSE file.
 
 import { createWasmInstantiator } from "./instantiate_wasm.js";
+import { joinPathSegments } from "./utils.js";
 
-export const loadSkwasm = (deps, config, browserEnvironment, engineRevision) => {
+export const loadSkwasm = (deps, config, browserEnvironment, baseUrl) => {
   return new Promise((resolve, reject) => {
-    const baseUrl = config.canvasKitBaseUrl ?? `https://www.gstatic.com/flutter-canvaskit/${engineRevision}/`;
-    let skwasmUrl = `${baseUrl}skwasm.js`;
+    let skwasmUrl = joinPathSegments(baseUrl, "skwasm.js");
     if (deps.flutterTT.policy) {
       skwasmUrl = deps.flutterTT.policy.createScriptURL(skwasmUrl);
     }
-    const wasmInstantiator = createWasmInstantiator(`${baseUrl}skwasm.wasm`);
+    const wasmInstantiator = createWasmInstantiator(joinPathSegments(baseUrl, "skwasm.wasm"));
     const script = document.createElement("script");
     script.src = skwasmUrl;
     if (config.nonce) {
       script.nonce = config.nonce;
     }
-    script.addEventListener('load', async () => {
+    script.addEventListener("load", async () => {
       try {
         const skwasmInstance = await skwasm({
           instantiateWasm: wasmInstantiator,
@@ -28,10 +28,10 @@ export const loadSkwasm = (deps, config, browserEnvironment, engineRevision) => 
             // make sure that the worker JS can be loaded regardless of where
             // it is hosted.
             const url = scriptDirectory + fileName;
-            if (url.endsWith('.worker.js')) {
+            if (url.endsWith(".worker.js")) {
               return URL.createObjectURL(new Blob(
-                [`importScripts('${url}');`],
-                { 'type': 'application/javascript' }));
+                [`importScripts("${url}");`],
+                { "type": "application/javascript" }));
             }
             return url;
           }
@@ -41,7 +41,7 @@ export const loadSkwasm = (deps, config, browserEnvironment, engineRevision) => 
         reject(e);
       }
     });
-    script.addEventListener('error', reject);
+    script.addEventListener("error", reject);
     document.head.appendChild(script);
   });
 }

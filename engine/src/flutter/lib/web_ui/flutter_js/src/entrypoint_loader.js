@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import { baseUri } from "./base_uri.js";
+import { baseUri, joinPathSegments } from "./utils.js";
 
 /**
  * Handles injecting the main Flutter web entrypoint (main.dart.js), and notifying
@@ -37,7 +37,7 @@ export class FlutterEntrypointLoader {
    * Returns undefined when an `onEntrypointLoaded` callback is supplied in `options`.
    */
   async loadEntrypoint(options) {
-    const { entrypointUrl = `${baseUri}main.dart.js`, onEntrypointLoaded, nonce } =
+    const { entrypointUrl = joinPathSegments(baseUri, "main.dart.js"), onEntrypointLoaded, nonce } =
       options || {};
     return this._loadJSEntrypoint(entrypointUrl, onEntrypointLoaded, nonce);
   }
@@ -63,11 +63,12 @@ export class FlutterEntrypointLoader {
     onEntrypointLoaded ??= (engineInitializer) => {
       engineInitializer.initializeEngine(config).then((appRunner) => appRunner.runApp())
     };
+    const { entryPointBaseUrl } = config;
     if (build.compileTarget === "dart2wasm") {
-      return this._loadWasmEntrypoint(build, deps, onEntrypointLoaded);
+      return this._loadWasmEntrypoint(build, deps, entryPointBaseUrl, onEntrypointLoaded);
     } else {
       const mainPath = build.mainJsPath ?? "main.dart.js";
-      const entrypointUrl = `${baseUri}${mainPath}`;
+      const entrypointUrl = joinPathSegments(baseUri, entryPointBaseUrl, mainPath);
       return this._loadJSEntrypoint(entrypointUrl, onEntrypointLoaded, nonce);
     }
   }
@@ -138,16 +139,17 @@ export class FlutterEntrypointLoader {
    *
    * @param {import("./types").WasmApplicationBuild} build
    * @param {*} deps
+   * @param {string} entryPointBaseUrl
    * @param {import("./types").OnEntrypointLoadedCallback} onEntrypointLoaded
    */
-  async _loadWasmEntrypoint(build, deps, onEntrypointLoaded) {
+  async _loadWasmEntrypoint(build, deps, entrypointBaseUrl, onEntrypointLoaded) {
     if (!this._scriptLoaded) {
       this._scriptLoaded = true;
 
       this._onEntrypointLoaded = onEntrypointLoaded;
       const { mainWasmPath, jsSupportRuntimePath } = build;
-      const moduleUri = `${baseUri}${mainWasmPath}`;
-      let jsSupportRuntimeUri = `${baseUri}${jsSupportRuntimePath}`;
+      const moduleUri = joinPathSegments(baseUri, entrypointBaseUrl, mainWasmPath);
+      let jsSupportRuntimeUri = joinPathSegments(baseUri, entrypointBaseUrl, jsSupportRuntimePath);
       if (this._ttPolicy != null) {
         jsSupportRuntimeUri = this._ttPolicy.createScriptURL(jsSupportRuntimeUri);
       }  
