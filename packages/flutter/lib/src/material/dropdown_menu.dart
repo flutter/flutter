@@ -25,6 +25,12 @@ import 'theme_data.dart';
 // late BuildContext context;
 // late FocusNode myFocusNode;
 
+/// A callback function that returns the list of the items that matches the
+/// current applied filter.
+///
+/// Used by [DropdownMenu.filterCallback].
+typedef FilterCallback<T> = List<DropdownMenuEntry<T>> Function(List<DropdownMenuEntry<T>> entries, String filter);
+
 /// A callback function that returns the index of the item that matches the
 /// current contents of a text field.
 ///
@@ -154,6 +160,7 @@ class DropdownMenu<T> extends StatefulWidget {
     this.enableFilter = false,
     this.enableSearch = true,
     this.textStyle,
+    this.textAlign = TextAlign.start,
     this.inputDecorationTheme,
     this.menuStyle,
     this.controller,
@@ -162,10 +169,11 @@ class DropdownMenu<T> extends StatefulWidget {
     this.focusNode,
     this.requestFocusOnTap,
     this.expandedInsets,
+    this.filterCallback,
     this.searchCallback,
     required this.dropdownMenuEntries,
     this.inputFormatters,
-  });
+  }) : assert(filterCallback == null || enableFilter);
 
   /// Determine if the [DropdownMenu] is enabled.
   ///
@@ -263,6 +271,11 @@ class DropdownMenu<T> extends StatefulWidget {
   /// Defaults to the overall theme's [TextTheme.bodyLarge]
   /// if the dropdown menu theme's value is null.
   final TextStyle? textStyle;
+
+  /// The text align for the [TextField] of the [DropdownMenu].
+  ///
+  /// Defaults to [TextAlign.start].
+  final TextAlign textAlign;
 
   /// Defines the default appearance of [InputDecoration] to show around the text field.
   ///
@@ -375,6 +388,41 @@ class DropdownMenu<T> extends StatefulWidget {
   ///
   /// Defaults to null.
   final EdgeInsets? expandedInsets;
+
+  /// When [DropdownMenu.enableFilter] is true, this callback is used to
+  /// compute the list of filtered items.
+  ///
+  /// {@tool snippet}
+  ///
+  /// In this example the `filterCallback` returns the items that contains the
+  /// trimmed query.
+  ///
+  /// ```dart
+  /// DropdownMenu<Text>(
+  ///   enableFilter: true,
+  ///   filterCallback: (List<DropdownMenuEntry<Text>> entries, String filter) {
+  ///     final String trimmedFilter = filter.trim().toLowerCase();
+  ///       if (trimmedFilter.isEmpty) {
+  ///         return entries;
+  ///       }
+  ///
+  ///       return entries
+  ///         .where((DropdownMenuEntry<Text> entry) =>
+  ///           entry.label.toLowerCase().contains(trimmedFilter),
+  ///         )
+  ///         .toList();
+  ///   },
+  ///   dropdownMenuEntries: const <DropdownMenuEntry<Text>>[],
+  /// )
+  /// ```
+  /// {@end-tool}
+  ///
+  /// Defaults to null. If this parameter is null and the
+  /// [DropdownMenu.enableFilter] property is set to true, the default behavior
+  /// will return a filtered list. The filtered list will contain items
+  /// that match the text provided by the input field, with a case-insensitive
+  /// comparison. When this is not null, `enableFilter` must be set to true.
+  final FilterCallback<T>? filterCallback;
 
   /// When [DropdownMenu.enableSearch] is true, this callback is used to compute
   /// the index of the search result to be highlighted.
@@ -685,7 +733,8 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
     final DropdownMenuThemeData defaults = _DropdownMenuDefaultsM3(context);
 
     if (_enableFilter) {
-      filteredEntries = filter(widget.dropdownMenuEntries, _localTextEditingController!);
+      filteredEntries = widget.filterCallback?.call(filteredEntries, _localTextEditingController!.text)
+        ?? filter(widget.dropdownMenuEntries, _localTextEditingController!);
     }
 
     if (widget.enableSearch) {
@@ -754,6 +803,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
           focusNode: widget.focusNode,
           canRequestFocus: canRequestFocus(),
           enableInteractiveSelection: canRequestFocus(),
+          textAlign: widget.textAlign,
           textAlignVertical: TextAlignVertical.center,
           style: effectiveTextStyle,
           controller: _localTextEditingController,

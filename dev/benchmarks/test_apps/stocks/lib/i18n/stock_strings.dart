@@ -14,6 +14,8 @@ import 'package:intl/intl.dart' as intl;
 import 'stock_strings_en.dart';
 import 'stock_strings_es.dart';
 
+// ignore_for_file: type=lint
+
 /// Callers can lookup localized strings with an instance of StockStrings
 /// returned by `StockStrings.of(context)`.
 ///
