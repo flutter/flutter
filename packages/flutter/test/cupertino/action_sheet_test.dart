@@ -18,7 +18,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
-  testWidgets('Looks correctly under light theme', (WidgetTester tester) async {
+  testWidgets('Overall looks correctly under light theme', (WidgetTester tester) async {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
         CupertinoActionSheet(
@@ -40,14 +40,14 @@ void main() {
     // has a message, no title, and no overscroll for any sections (in contrast
     // to cupertinoActionSheet.dark-theme.png).
     await expectLater(
-      find.byType(CupertinoActionSheet),
-      matchesGoldenFile('cupertinoActionSheet.light-theme.png'),
+      find.byType(CupertinoApp),
+      matchesGoldenFile('cupertinoActionSheet.overall-light-theme.png'),
     );
 
     await gesture.up();
   });
 
-  testWidgets('Looks correctly under dark theme', (WidgetTester tester) async {
+  testWidgets('Overall looks correctly under dark theme', (WidgetTester tester) async {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
         CupertinoActionSheet(
@@ -72,8 +72,8 @@ void main() {
     // has both a message and a title, and an overscrolled action section (in
     // contrast to cupertinoActionSheet.light-theme.png).
     await expectLater(
-      find.byType(CupertinoActionSheet),
-      matchesGoldenFile('cupertinoActionSheet.dark-theme.png'),
+      find.byType(CupertinoApp),
+      matchesGoldenFile('cupertinoActionSheet.overall-dark-theme.png'),
     );
 
     await gesture.up();
