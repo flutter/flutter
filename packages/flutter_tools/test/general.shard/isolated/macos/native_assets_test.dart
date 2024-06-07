@@ -183,18 +183,22 @@ void main() {
       nativeAssetsYamlContents,
       contains('package:bar/bar.dart'),
     );
+    expect(buildRunner.buildDryRunInvocations, 1);
+    expect(buildRunner.linkDryRunInvocations, 1);
     // Check that the framework uri is identical for both archs.
+    final String pathSeparator = const LocalPlatform().pathSeparator;
+    if (const LocalPlatform().isWindows) {
+      return; // Backslashes in commands, but we will never run these commands on Windows.
+    }
     expect(
       nativeAssetsYamlContents,
       stringContainsInOrder(
         <String>[
-          'bar.framework/bar',
-          'bar.framework/bar',
+          'bar.framework${pathSeparator}bar',
+          'bar.framework${pathSeparator}bar',
         ],
       ),
     );
-    expect(buildRunner.buildDryRunInvocations, 1);
-    expect(buildRunner.linkDryRunInvocations, 1);
   });
 
   testUsingContext('build with assets but not enabled', overrides: <Type, Generator>{
