@@ -1121,6 +1121,78 @@ void testMain() {
       ]);
     });
 
+    test('sinks platform view under the canvas if it does not overlap with the picture',
+        () async {
+      ui_web.platformViewRegistry.registerViewFactory(
+        'test-view',
+        (int viewId) => createDomHTMLDivElement()..className = 'platform-view',
+      );
+
+      CkPicture rectPicture(double l, double t, double w, double h) {
+        final ui.Rect rect = ui.Rect.fromLTWH(l, t, w, h);
+        return paintPicture(rect, (CkCanvas canvas) {
+          canvas.drawRect(
+              rect, CkPaint()..color = const ui.Color.fromARGB(255, 255, 0, 0));
+        });
+      }
+
+      await createPlatformView(0, 'test-view');
+      await createPlatformView(1, 'test-view');
+
+      expect(PlatformViewManager.instance.isVisible(0), isTrue);
+      expect(PlatformViewManager.instance.isVisible(1), isTrue);
+
+      final LayerSceneBuilder sb = LayerSceneBuilder();
+
+      // First picture-view-picture stack.
+      {
+        sb.pushOffset(0, 0);
+        sb.addPicture(
+          ui.Offset.zero,
+          rectPicture(0, 0, 10, 10),
+        );
+        sb.addPlatformView(
+          0,
+          width: 10,
+          height: 10,
+        );
+        sb.addPicture(
+          ui.Offset.zero,
+          rectPicture(2, 2, 5, 5),
+        );
+        sb.pop();
+      }
+
+      // Second picture-view-picture stack that does not overlap with the first one.
+      {
+        sb.pushOffset(20, 0);
+        sb.addPicture(
+          ui.Offset.zero,
+          rectPicture(0, 0, 10, 10),
+        );
+        sb.addPlatformView(
+          1,
+          width: 10,
+          height: 10,
+        );
+        sb.addPicture(
+          ui.Offset.zero,
+          rectPicture(2, 2, 5, 5),
+        );
+        sb.pop();
+      }
+
+      final LayerScene scene1 = sb.build();
+      await renderScene(scene1);
+      _expectSceneMatches(<_EmbeddedViewMarker>[
+        _overlay,
+        _platformView,
+        _overlay,
+        _platformView,
+        _overlay,
+      ]);
+    });
+
     test('optimizes overlays correctly with transforms and clips', () async {
       ui_web.platformViewRegistry.registerViewFactory(
         'test-view',
