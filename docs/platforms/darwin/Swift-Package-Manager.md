@@ -685,6 +685,14 @@ flutter config --no-enable-swift-package-manager
 
 ![Screenshot 2024-04-05 at 2 25 25 PM](https://github.com/flutter/flutter/assets/15619084/caa5194a-80c2-4243-b251-13bd8fd3bfee)
 
+6. Next, select Product > Scheme > Edit Scheme
+7. Click the `>` next to "Build" in the left side bar
+8. Select Pre-actions
+9. Select the `Run Prepare Flutter Framework Script`
+10. Click the 🗑️ button
+
+![Screenshot](https://github.com/flutter/flutter/assets/737941/0f760191-bfb5-400b-a120-7c99f4751b0f)
+
 </details>
 
 <details>
