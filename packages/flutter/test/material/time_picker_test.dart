@@ -27,7 +27,7 @@ void main() {
   testWidgets('Material2 - Dialog size - dial mode', (WidgetTester tester) async {
     addTearDown(tester.view.reset);
 
-    const Size timePickerPortraitSize = Size(310, 468);
+    const Size timePickerPortraitSize =  Size(310, 468);
     const Size timePickerLandscapeSize = Size(524, 342);
     const Size timePickerLandscapeSizeM2 = Size(508, 300);
     const EdgeInsets padding = EdgeInsets.fromLTRB(8, 18, 8, 8);
@@ -58,7 +58,7 @@ void main() {
       materialType: MaterialType.material2,
     );
 
-    width = timePickerLandscapeSize.width + padding.horizontal;
+    width =  timePickerLandscapeSize.width + padding.horizontal;
     height = timePickerLandscapeSizeM2.height + padding.vertical;
     expect(
       tester.getSize(find.byWidget(getMaterialFromDialog(tester))),
@@ -124,7 +124,7 @@ void main() {
   testWidgets('Material3 - Dialog size - dial mode', (WidgetTester tester) async {
     addTearDown(tester.view.reset);
 
-    const Size timePickerPortraitSize = Size(310, 468);
+    const Size timePickerPortraitSize =  Size(310, 468);
     const Size timePickerLandscapeSize = Size(524, 342);
     const EdgeInsets padding = EdgeInsets.all(24.0);
     double width;
@@ -154,7 +154,7 @@ void main() {
       materialType: MaterialType.material3,
     );
 
-    width = timePickerLandscapeSize.width + padding.horizontal;
+    width =  timePickerLandscapeSize.width + padding.horizontal;
     height = timePickerLandscapeSize.height + padding.vertical;
     expect(
       tester.getSize(find.byWidget(getMaterialFromDialog(tester))),
@@ -550,13 +550,17 @@ void main() {
       });
 
       testWidgets('Material2 - Widgets have correct label capitalization in input mode', (WidgetTester tester) async {
-        await startPicker(tester, (TimeOfDay? time) {}, entryMode: TimePickerEntryMode.input, materialType: MaterialType.material2);
+        await startPicker(tester, (TimeOfDay? time) {},
+          entryMode: TimePickerEntryMode.input, materialType: MaterialType.material2
+        );
         expect(find.text('ENTER TIME'), findsOneWidget);
         expect(find.text('CANCEL'), findsOneWidget);
       });
 
       testWidgets('Material3 - Widgets have correct label capitalization in input mode', (WidgetTester tester) async {
-        await startPicker(tester, (TimeOfDay? time) {}, entryMode: TimePickerEntryMode.input, materialType: MaterialType.material3);
+        await startPicker(tester, (TimeOfDay? time) {},
+          entryMode: TimePickerEntryMode.input, materialType: MaterialType.material3
+        );
         expect(find.text('Enter time'), findsOneWidget);
         expect(find.text('Cancel'), findsOneWidget);
       });
@@ -681,10 +685,11 @@ void main() {
                     builder: (BuildContext context) {
                       return ElevatedButton(
                         child: const Text('X'),
-                        onPressed: () => showTimePicker(
-                          context: context,
-                          initialTime: const TimeOfDay(hour: 7, minute: 0),
-                        ),
+                        onPressed: () =>
+                            showTimePicker(
+                              context: context,
+                              initialTime: const TimeOfDay(hour: 7, minute: 0),
+                            ),
                       );
                     },
                   ),
@@ -714,11 +719,12 @@ void main() {
                     builder: (BuildContext context) {
                       return ElevatedButton(
                         child: const Text('X'),
-                        onPressed: () => showTimePicker(
-                          context: context,
-                          barrierDismissible: false,
-                          initialTime: const TimeOfDay(hour: 7, minute: 0),
-                        ),
+                        onPressed: () =>
+                            showTimePicker(
+                              context: context,
+                              barrierDismissible: false,
+                              initialTime: const TimeOfDay(hour: 7, minute: 0),
+                            ),
                       );
                     },
                   ),
@@ -963,11 +969,9 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(tester.getTopLeft(find.text(selectTimeString)), equals(const Offset(154, 155)));
-        expect(
-            tester.getBottomRight(find.text(selectTimeString)),
-            equals(
-              const Offset(280.5, 165),
-            ));
+        expect(tester.getBottomRight(find.text(selectTimeString)), equals(
+          const Offset(280.5, 165),
+        ));
         expect(tester.getBottomRight(find.text(okString)).dx, 644);
         expect(tester.getBottomLeft(find.text(okString)).dx, 616);
         expect(tester.getBottomRight(find.text(cancelString)).dx, 582);
@@ -979,11 +983,9 @@ void main() {
         await tester.tap(find.text('X'));
         await tester.pumpAndSettle();
 
-        expect(
-            tester.getTopLeft(find.text(selectTimeString)),
-            equals(
-              const Offset(519.5, 155),
-            ));
+        expect(tester.getTopLeft(find.text(selectTimeString)), equals(
+          const Offset(519.5, 155),
+        ));
         expect(tester.getBottomRight(find.text(selectTimeString)), equals(const Offset(646, 165)));
         expect(tester.getBottomLeft(find.text(okString)).dx, 156);
         expect(tester.getBottomRight(find.text(okString)).dx, 184);
@@ -1833,16 +1835,21 @@ void main() {
 
       // Fixes regression that was reverted in https://github.com/flutter/flutter/pull/64094#pullrequestreview-469836378.
       testWidgets('Ensure hour/minute fields are top-aligned with the separator', (WidgetTester tester) async {
-        await startPicker(tester, (TimeOfDay? time) {}, entryMode: TimePickerEntryMode.input, materialType: materialType);
-        final double hourFieldTop = tester.getTopLeft(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_HourTextField')).dy;
-        final double minuteFieldTop = tester.getTopLeft(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_MinuteTextField')).dy;
-        final double separatorTop = tester.getTopLeft(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_TimeSelectorSeparator')).dy;
+        await startPicker(tester, (TimeOfDay? time) {},
+            entryMode: TimePickerEntryMode.input, materialType: materialType);
+        final double hourFieldTop =
+            tester.getTopLeft(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_HourTextField')).dy;
+        final double minuteFieldTop =
+            tester.getTopLeft(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_MinuteTextField')).dy;
+        final double separatorTop =
+            tester.getTopLeft(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_TimeSelectorSeparator')).dy;
         expect(hourFieldTop, separatorTop);
         expect(minuteFieldTop, separatorTop);
       });
 
       testWidgets('Can switch between hour/minute fields using keyboard input action', (WidgetTester tester) async {
-        await startPicker(tester, (TimeOfDay? time) {}, entryMode: TimePickerEntryMode.input, materialType: materialType);
+        await startPicker(tester, (TimeOfDay? time) {},
+            entryMode: TimePickerEntryMode.input, materialType: materialType);
 
         final Finder hourFinder = find.byType(TextField).first;
         final TextField hourField = tester.widget(hourFinder);
@@ -1974,7 +1981,7 @@ void main() {
     final ThemeData theme = ThemeData();
     await startPicker(
       tester,
-      (TimeOfDay? value) {},
+      (TimeOfDay? value) { },
       theme: theme,
     );
 
@@ -1987,7 +1994,7 @@ void main() {
     final ThemeData theme = ThemeData(useMaterial3: false);
     await startPicker(
       tester,
-      (TimeOfDay? value) {},
+      (TimeOfDay? value) { },
       theme: theme,
     );
 
@@ -2279,7 +2286,9 @@ Future<Offset?> startPicker(
   ));
   await tester.tap(find.text('X'));
   await tester.pumpAndSettle(const Duration(seconds: 1));
-  return entryMode == TimePickerEntryMode.dial ? tester.getCenter(find.byKey(const ValueKey<String>('time-picker-dial'))) : null;
+  return entryMode == TimePickerEntryMode.dial
+      ? tester.getCenter(find.byKey(const ValueKey<String>('time-picker-dial')))
+      : null;
 }
 
 Future<void> finishPicker(WidgetTester tester) async {
