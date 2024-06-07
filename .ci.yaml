@@ -1972,7 +1972,6 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey android_view_scroll_perf__timeline_summary
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -1983,7 +1982,6 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey animated_image_gc_perf
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -1994,7 +1992,6 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey animated_complex_opacity_perf__e2e_summary
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -2005,7 +2002,6 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey animated_complex_image_filtered_perf__e2e_summary
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -2016,7 +2012,6 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey animated_placeholder_perf__e2e_summary
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -2027,7 +2022,6 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey backdrop_filter_perf__e2e_summary
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -2115,7 +2109,6 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey clipper_cache_perf__e2e_summary
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -2126,7 +2119,6 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey color_filter_and_fade_perf__e2e_summary
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -2137,7 +2129,6 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey color_filter_cache_perf__e2e_summary
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -2148,7 +2139,6 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey color_filter_with_unstable_child_perf__e2e_summary
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -2159,7 +2149,6 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey raster_cache_use_memory_perf__e2e_summary
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -2170,7 +2159,6 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey shader_mask_cache_perf__e2e_summary
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -2181,7 +2169,6 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey complex_layout_android__scroll_smoothness
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -2196,7 +2183,6 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey complex_layout_scroll_perf__devtools_memory
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -2211,7 +2197,6 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey complex_layout_scroll_perf__memory
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -2226,7 +2211,6 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey complex_layout_scroll_perf__timeline_summary
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -2280,7 +2264,6 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey complex_layout_semantics_perf
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -2295,7 +2278,6 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey complex_layout__start_up
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -2310,7 +2292,6 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey cubic_bezier_perf__e2e_summary
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -2330,7 +2311,6 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey cull_opacity_perf__e2e_summary
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -2350,7 +2330,6 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey devtools_profile_start_test
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -2393,7 +2372,6 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey fading_child_animation_perf__timeline_summary
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -2404,7 +2382,6 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey fast_scroll_heavy_gridview__memory
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -2415,7 +2392,6 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey fast_scroll_large_images__memory
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -2435,7 +2411,7 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey flutter_engine_group_performance
     recipe: devicelab/devicelab_drone
-    bringup: true
+    bringup: true # https://github.com/flutter/flutter/issues/149666
     presubmit: false
     timeout: 60
     properties:
@@ -2446,7 +2422,6 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey flutter_gallery__back_button_memory
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -2457,7 +2432,6 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey flutter_gallery__image_cache_memory
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -2468,7 +2442,7 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey flutter_gallery__memory_nav
     recipe: devicelab/devicelab_drone
-    bringup: true
+    bringup: true # https://github.com/flutter/flutter/issues/149901
     presubmit: false
     timeout: 60
     properties:
@@ -2479,7 +2453,6 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey flutter_gallery__start_up
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -2490,7 +2463,6 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey flutter_gallery__start_up_delayed
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -2528,7 +2500,6 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey flutter_test_performance
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -2539,7 +2510,6 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey flutter_view__start_up
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -2559,7 +2529,6 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey fullscreen_textfield_perf
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -2570,7 +2539,6 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey fullscreen_textfield_perf__e2e_summary
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -2581,7 +2549,6 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey very_long_picture_scrolling_perf__e2e_summary
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 120
     properties:
