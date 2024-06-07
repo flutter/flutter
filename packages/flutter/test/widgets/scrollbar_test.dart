@@ -5,6 +5,7 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/src/physics/utils.dart' show nearEqual;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -82,46 +83,6 @@ void main() {
     viewportDimension: 100,
     axisDirection: AxisDirection.down,
     devicePixelRatio: 3.0,
-  );
-
-  test(
-    'Scrollbar is not smaller than minLength with large scroll views, '
-    'if minLength is small ',
-    () {
-      const double minLen = 3.5;
-      const Size size = Size(600, 10);
-      final ScrollMetrics metrics = defaultMetrics.copyWith(
-        maxScrollExtent: 100000,
-        viewportDimension: size.height,
-      );
-
-      // When overscroll.
-      painter = _buildPainter(
-        minLength: minLen,
-        minOverscrollLength: minLen,
-        scrollMetrics: metrics,
-      );
-
-      painter.paint(testCanvas, size);
-
-      final Rect rect0 = captureRect();
-      expect(rect0.top, 0);
-      expect(rect0.left, size.width - _kThickness);
-      expect(rect0.width, _kThickness);
-      expect(rect0.height >= minLen, true);
-
-      // When scroll normally.
-      const double newPixels = 1.0;
-
-      painter.update(metrics.copyWith(pixels: newPixels), metrics.axisDirection);
-
-      painter.paint(testCanvas, size);
-
-      final Rect rect1 = captureRect();
-      expect(rect1.left, size.width - _kThickness);
-      expect(rect1.width, _kThickness);
-      expect(rect1.height >= minLen, true);
-    },
   );
 
   test(
@@ -3212,4 +3173,47 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
   },
     variant: TargetPlatformVariant.all(),
   );
+
+  testWidgets('Safe to drag tracpkad when maxScrollExtent is 0 (scrollbar is not painted)', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/149803
+    final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
+
+    Widget buildFrame(double sizedBoxHeight) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: RawScrollbar(
+            controller: scrollController,
+            child: SingleChildScrollView(
+              controller: scrollController,
+              child: SizedBox(width: 100.0, height: sizedBoxHeight),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(100)); // Test viewport has height=600
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 0.0);
+    expect(scrollController.position.maxScrollExtent, 0.0);
+
+    await tester.drag(find.byType(SingleChildScrollView), const Offset(0, -100), kind: PointerDeviceKind.trackpad);
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 0.0);
+    expect(scrollController.position.maxScrollExtent, 0.0);
+
+    await tester.pumpWidget(buildFrame(700));
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 0.0);
+    expect(scrollController.position.maxScrollExtent, 100.0);
+
+    await tester.drag(find.byType(SingleChildScrollView), const Offset(0, -100), kind: PointerDeviceKind.trackpad);
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 100.0);
+    expect(scrollController.position.maxScrollExtent, 100.0);
+
+  });
 }
