@@ -41,7 +41,7 @@ void main() {
 
     final Directory tempDir = createResolvedTempDirectorySync('macos_content_validation.');
 
-    // Pre-cache iOS engine Flutter.xcframework artifacts.
+    // Pre-cache macOS engine FlutterMacOS.xcframework artifacts.
     final ProcessResult result = processManager.runSync(
       <String>[
         flutterBin,
@@ -54,29 +54,23 @@ void main() {
 
     expect(result, const ProcessResultMatcher());
     expect(xcframeworkArtifact.existsSync(), isTrue);
+
+    final Directory frameworkArtifact = fileSystem.directory(
+      fileSystem.path.joinAll(<String>[
+        xcframeworkArtifact.path,
+        'macos-arm64_x86_64',
+        'FlutterMacOS.framework',
+      ]),
+    );
+    // Check read/write permissions are set correctly in the framework engine artifact.
+    final String artifactStat = frameworkArtifact.statSync().mode.toRadixString(8);
+    expect(artifactStat, '40755');
   });
 
   for (final String buildMode in <String>['Debug', 'Release']) {
     final String buildModeLower = buildMode.toLowerCase();
 
     test('flutter build macos --$buildModeLower builds a valid app', () {
-      final Directory frameworkArtifact = fileSystem.directory(
-        fileSystem.path.joinAll(<String>[
-          getFlutterRoot(),
-          'bin',
-          'cache',
-          'artifacts',
-          'engine',
-          if (buildMode == 'Debug') 'darwin-x64' else 'darwin-x64-release',
-          'FlutterMacOS.xcframework',
-          'macos-arm64_x86_64',
-          'FlutterMacOS.framework',
-        ]),
-      );
-      // Check read/write permissions are set correctly in the framework engine artifact.
-      final String artifactStat = frameworkArtifact.statSync().mode.toRadixString(8);
-      expect(artifactStat, '40755');
-
       final String workingDirectory = fileSystem.path.join(
         getFlutterRoot(),
         'dev',
