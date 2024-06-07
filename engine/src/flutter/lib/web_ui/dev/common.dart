@@ -45,10 +45,10 @@ abstract class PlatformBinding {
   String get chromePlatformString;
 
   String getChromeDownloadUrl(String version) =>
-      'https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing/$version/$chromePlatformString/chrome-$chromePlatformString.zip';
+      'https://storage.googleapis.com/chrome-for-testing-public/$version/$chromePlatformString/chrome-$chromePlatformString.zip';
 
   String getChromeDriverDownloadUrl(String version) =>
-      'https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing/$version/$chromePlatformString/chromedriver-$chromePlatformString.zip';
+      'https://storage.googleapis.com/chrome-for-testing-public/$version/$chromePlatformString/chromedriver-$chromePlatformString.zip';
 
   String getFirefoxDownloadUrl(String version);
   String getFirefoxDownloadFilename(String version);

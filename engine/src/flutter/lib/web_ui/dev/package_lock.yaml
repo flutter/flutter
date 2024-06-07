@@ -1,7 +1,7 @@
 # Please refer to the "Upgrade Browser Version" section in the README.md for
 # more details on how to update browser version numbers.
 chrome:
-  version: '119.0.6045.9'
+  version: '125.0.6422.141'
 
 firefox:
   version: '106.0'
