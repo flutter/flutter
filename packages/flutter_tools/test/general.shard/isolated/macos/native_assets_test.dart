@@ -177,12 +177,25 @@ void main() {
       nativeAssetsYaml,
       projectUri.resolve('build/native_assets/macos/native_assets.yaml'),
     );
+    final String nativeAssetsYamlContents =
+        await fileSystem.file(nativeAssetsYaml).readAsString();
     expect(
-      await fileSystem.file(nativeAssetsYaml).readAsString(),
+      nativeAssetsYamlContents,
       contains('package:bar/bar.dart'),
     );
     expect(buildRunner.buildDryRunInvocations, 1);
     expect(buildRunner.linkDryRunInvocations, 1);
+    // Check that the framework uri is identical for both archs.
+    final String pathSeparator = const LocalPlatform().pathSeparator;
+    expect(
+      nativeAssetsYamlContents,
+      stringContainsInOrder(
+        <String>[
+          'bar.framework${pathSeparator}bar',
+          'bar.framework${pathSeparator}bar',
+        ],
+      ),
+    );
   });
 
   testUsingContext('build with assets but not enabled', overrides: <Type, Generator>{
