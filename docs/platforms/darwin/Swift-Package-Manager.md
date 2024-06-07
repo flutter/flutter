@@ -382,21 +382,23 @@ let package = Package(
     ```
 
 12. If using pigeon, you'll want to update your pigeon input file
-```diff
-- objcHeaderOut: 'ios/Classes/messages.g.h',
-+ objcHeaderOut: 'ios/plugin_name_ios/Sources/plugin_name_ios/messages.g.h',
-- objcSourceOut: 'ios/Classes/messages.g.m',
-+ objcSourceOut: 'ios/plugin_name_ios/Sources/plugin_name_ios/messages.g.m',
-```
 
-If your `objcHeaderOut` file is no longer within the same directory as the `objcSourceOut`, you can change the `#import` using `ObjcOptions.headerIncludePath`:
-```diff
-objcHeaderOut: 'ios/plugin_name_ios/Sources/plugin_name_ios/include/plugin_name_ios/messages.g.h',
-objcSourceOut: 'ios/plugin_name_ios/Sources/plugin_name_ios/messages.g.m',
-+ objcOptions: ObjcOptions(
-+   headerIncludePath: './include/plugin_name_ios/messages.g.h',
-+ ),
-```
+    ```diff
+    - objcHeaderOut: 'ios/Classes/messages.g.h',
+    + objcHeaderOut: 'ios/plugin_name_ios/Sources/plugin_name_ios/messages.g.h',
+    - objcSourceOut: 'ios/Classes/messages.g.m',
+    + objcSourceOut: 'ios/plugin_name_ios/Sources/plugin_name_ios/messages.g.m',
+    ```
+
+    If your `objcHeaderOut` file is no longer within the same directory as the `objcSourceOut`, you can change the `#import` using `ObjcOptions.headerIncludePath`:
+
+    ```diff
+    objcHeaderOut: 'ios/plugin_name_ios/Sources/plugin_name_ios/include/plugin_name_ios/messages.g.h',
+    objcSourceOut: 'ios/plugin_name_ios/Sources/plugin_name_ios/messages.g.m',
+    + objcOptions: ObjcOptions(
+    +   headerIncludePath: './include/plugin_name_ios/messages.g.h',
+    + ),
+    ```
 
 13. Update your Package.swift with any customizations you may need
     1. Open `/plugin_name/plugin_name_ios/ios/plugin_name_ios/` in Xcode
