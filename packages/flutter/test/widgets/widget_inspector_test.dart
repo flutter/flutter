@@ -1913,221 +1913,215 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           expect(column, equals(15));
         });
 
-        testWidgets('ext.flutter.inspector.getRootWidgetSummaryTree',
-            (WidgetTester tester) async {
-          const String group = 'test-group';
-          await pumpWidgetTreeWithABC(tester);
-          final Element elementA = findElementABC('a');
 
-          service.disposeAllGroups();
-          service.resetPubRootDirectories();
-          service.setSelection(elementA, 'my-group');
-          final Map<String, dynamic> jsonA = (await service.testExtension(
-            WidgetInspectorServiceExtensions.getSelectedWidget.name,
-            <String, String>{'objectGroup': 'my-group'},
-          ))! as Map<String, dynamic>;
+        group('Widget Tree APIs', () {
 
-          service.resetPubRootDirectories();
-          Map<String, Object?> rootJson = (await service.testExtension(
-            WidgetInspectorServiceExtensions.getRootWidgetSummaryTree.name,
-            <String, String>{'objectGroup': group},
-          ))! as Map<String, Object?>;
+          /// Gets the widget using [WidgetInspectorServiceExtensions.getSelectedWidget] 
+          /// for the given [element].
+          Future<Map<String, dynamic>> selectedWidgetResponseForElement(
+              Element element) async {
+            service
+              ..disposeAllGroups()
+              ..resetPubRootDirectories()
+              ..setSelection(element, 'my-group');
 
-          // We haven't yet properly specified which directories are summary tree
-          // directories so we get an empty tree other than the root that is always
-          // included.
-          final Object? rootWidget =
-              service.toObject(rootJson['valueId']! as String);
-          expect(rootWidget, equals(WidgetsBinding.instance.rootElement));
-          List<Object?> childrenJson = rootJson['children']! as List<Object?>;
-          // There are no summary tree children.
-          expect(childrenJson.length, equals(0));
+            return (await service.testExtension(
+              WidgetInspectorServiceExtensions.getSelectedWidget.name,
+              <String, String>{'objectGroup': 'my-group'},
+            ))! as Map<String, dynamic>;
+          }
 
-          final Map<String, Object?> creationLocation =
-              jsonA['creationLocation']! as Map<String, Object?>;
-          expect(creationLocation, isNotNull);
-          final String testFile = creationLocation['file']! as String;
-          expect(testFile, endsWith('widget_inspector_test.dart'));
-          final List<String> segments = Uri.parse(testFile).pathSegments;
-          // Strip a couple subdirectories away to generate a plausible pub root
-          // directory.
-          final String pubRootTest =
-              '/${segments.take(segments.length - 2).join('/')}';
-          service.resetPubRootDirectories();
-          await service.testExtension(
-            WidgetInspectorServiceExtensions.addPubRootDirectories.name,
-            <String, String>{'arg0': pubRootTest},
-          );
+          /// Verifies the creation location is expected for the given
+          /// [responseJson].
+          Map<String, Object?> verifyAndReturnCreationLocation(
+              Map<String, dynamic> responseJson) {
+            final Map<String, Object?> creationLocation =
+                responseJson['creationLocation']! as Map<String, Object?>;
+            expect(creationLocation, isNotNull);
+            return creationLocation;
+          }
 
-          rootJson = (await service.testExtension(
-            WidgetInspectorServiceExtensions.getRootWidgetSummaryTree.name,
-            <String, String>{'objectGroup': group},
-          ))! as Map<String, Object?>;
-          childrenJson = rootJson['children']! as List<Object?>;
-          // The tree of nodes returned contains all widgets created directly by the
-          // test.
-          childrenJson = rootJson['children']! as List<Object?>;
-          expect(childrenJson.length, equals(1));
+          /// Verifies the test file is expected for the given
+          /// [creationLocation].
+          String verifyAndReturnTestFile(
+              Map<String, Object?> creationLocation) {
+            final String testFile = creationLocation['file']! as String;
+            expect(testFile, endsWith('widget_inspector_test.dart'));
+            return testFile;
+          }
 
-          List<Object?> alternateChildrenJson = (await service.testExtension(
-            WidgetInspectorServiceExtensions.getChildrenSummaryTree.name,
-            <String, String>{
-              'arg': rootJson['valueId']! as String,
-              'objectGroup': group
-            },
-          ))! as List<Object?>;
-          expect(alternateChildrenJson.length, equals(1));
-          Map<String, Object?> childJson =
-              childrenJson[0]! as Map<String, Object?>;
-          Map<String, Object?> alternateChildJson =
-              alternateChildrenJson[0]! as Map<String, Object?>;
-          expect(childJson['description'], startsWith('Directionality'));
-          expect(
-              alternateChildJson['description'], startsWith('Directionality'));
-          expect(alternateChildJson['valueId'], equals(childJson['valueId']));
+          /// Adds a pub root directory for the given [testFile].
+          void addPubRootDirectoryFor(String testFile) {
+            final List<String> segments = Uri.parse(testFile).pathSegments;
+            // Strip a couple subdirectories away to generate a plausible pub
+            // root directory.
+            final String pubRootTest =
+                '/${segments.take(segments.length - 2).join('/')}';
+            service
+              ..resetPubRootDirectories()
+              ..addPubRootDirectories(<String>[pubRootTest]);
+          }
 
-          childrenJson = childJson['children']! as List<Object?>;
-          alternateChildrenJson = (await service.testExtension(
-            WidgetInspectorServiceExtensions.getChildrenSummaryTree.name,
-            <String, String>{
-              'arg': childJson['valueId']! as String,
-              'objectGroup': group
-            },
-          ))! as List<Object?>;
-          expect(alternateChildrenJson.length, equals(1));
-          expect(childrenJson.length, equals(1));
-          alternateChildJson =
-              alternateChildrenJson[0]! as Map<String, Object?>;
-          childJson = childrenJson[0]! as Map<String, Object?>;
-          expect(childJson['description'], startsWith('Stack'));
-          expect(alternateChildJson['description'], startsWith('Stack'));
-          expect(alternateChildJson['valueId'], equals(childJson['valueId']));
-          childrenJson = childJson['children']! as List<Object?>;
+          /// Gets the children nodes from the JSON response.
+          List<Object?> childrenFromJsonResponse(Map<String, Object?> json) {
+            return json['children']! as List<Object?>;
+          }
 
-          childrenJson = childJson['children']! as List<Object?>;
-          alternateChildrenJson = (await service.testExtension(
-            WidgetInspectorServiceExtensions.getChildrenSummaryTree.name,
-            <String, String>{
-              'arg': childJson['valueId']! as String,
-              'objectGroup': group
-            },
-          ))! as List<Object?>;
-          expect(alternateChildrenJson.length, equals(3));
-          expect(childrenJson.length, equals(3));
-          alternateChildJson =
-              alternateChildrenJson[2]! as Map<String, Object?>;
-          childJson = childrenJson[2]! as Map<String, Object?>;
-          expect(childJson['description'], startsWith('Text'));
-          expect(alternateChildJson['description'], startsWith('Text'));
-          expect(alternateChildJson['valueId'], equals(childJson['valueId']));
-          alternateChildrenJson = (await service.testExtension(
-            WidgetInspectorServiceExtensions.getChildrenSummaryTree.name,
-            <String, String>{
-              'arg': childJson['valueId']! as String,
-              'objectGroup': group
-            },
-          ))! as List<Object?>;
-          expect(alternateChildrenJson.length, equals(0));
-          // Tests are failing when this typo is fixed.
-          expect(childJson['chidlren'], isNull);
-        });
+          /// Gets the children nodes using a call to
+          /// [WidgetInspectorServiceExtensions.getChildrenSummaryTree].
+          Future<List<Object?>> childrenFromGetChildrenSummaryTree(
+              String valueId, String group) async {
+            return (await service.testExtension(
+              WidgetInspectorServiceExtensions.getChildrenSummaryTree.name,
+              <String, String>{'arg': valueId, 'objectGroup': group},
+            ))! as List<Object?>;
+          }
 
-        testWidgets(
-            'ext.flutter.inspector.getRootWidgetSummaryTreeWithPreviews',
-            (WidgetTester tester) async {
-          const String group = 'test-group';
+          /// Verifies that the children from the JSON response are identical to 
+          /// those from [WidgetInspectorServiceExtensions.getChildrenSummaryTree].
+          Future<void> verifyChildrenMatchOtherApi(Map<String, Object?> jsonResponse,
+              {required String group, bool checkForPreviews = false}) async {
+            List<Object?> children = childrenFromJsonResponse(jsonResponse);
+            List<Object?> childrenFromOtherApi =
+                await childrenFromGetChildrenSummaryTree(
+                    jsonResponse['valueId']! as String, group);
 
-          await pumpWidgetTreeWithABC(tester);
-          final Element elementA = findElementABC('a');
+            // Verify that the number of children are the same,
+            expect(children.length, equals(1));
+            expect(children.length, equals(childrenFromOtherApi.length));
 
-          service
-            ..disposeAllGroups()
-            ..resetPubRootDirectories()
-            ..setSelection(elementA, 'my-group');
+            // Get the first child.
+            Map<String, Object?> child =
+                children[0]! as Map<String, Object?>;
+            Map<String, Object?> childFromOtherApi =
+                childrenFromOtherApi[0]! as Map<String, Object?>;
 
-          final Map<String, dynamic> jsonA = (await service.testExtension(
-            WidgetInspectorServiceExtensions.getSelectedWidget.name,
-            <String, String>{'objectGroup': 'my-group'},
-          ))! as Map<String, dynamic>;
+            // Verify the first child is the same.
+            expect(child['description'], startsWith('Directionality'));
+            expect(child['description'], equals(childFromOtherApi['description']));
+            expect(child['valueId'], equals(childFromOtherApi['valueId']));
 
-          final Map<String, Object?> creationLocation =
-              jsonA['creationLocation']! as Map<String, Object?>;
-          expect(creationLocation, isNotNull);
-          final String testFile = creationLocation['file']! as String;
-          expect(testFile, endsWith('widget_inspector_test.dart'));
-          final List<String> segments = Uri.parse(testFile).pathSegments;
-          // Strip a couple subdirectories away to generate a plausible pub root
-          // directory.
-          final String pubRootTest =
-              '/${segments.take(segments.length - 2).join('/')}';
-          service
-            ..resetPubRootDirectories()
-            ..addPubRootDirectories(<String>[pubRootTest]);
+            // Get the first child's children.
+            children = childrenFromJsonResponse(child);
+            childrenFromOtherApi = await childrenFromGetChildrenSummaryTree(
+                childFromOtherApi['valueId']! as String, group);
 
-          final Map<String, Object?> rootJson = (await service.testExtension(
-            WidgetInspectorServiceExtensions
-                .getRootWidgetSummaryTreeWithPreviews.name,
-            <String, String>{'groupName': group},
-          ))! as Map<String, Object?>;
-          List<Object?> childrenJson = rootJson['children']! as List<Object?>;
-          // The tree of nodes returned contains all widgets created directly by the
-          // test.
-          childrenJson = rootJson['children']! as List<Object?>;
-          expect(childrenJson.length, equals(1));
+            // Verify the first child's children are the same length.
+            expect(children.length, equals(1));
+            expect(children.length, equals(childrenFromOtherApi.length));
 
-          List<Object?> alternateChildrenJson = (await service.testExtension(
-            WidgetInspectorServiceExtensions.getChildrenSummaryTree.name,
-            <String, String>{
-              'arg': rootJson['valueId']! as String,
-              'objectGroup': group
-            },
-          ))! as List<Object?>;
-          expect(alternateChildrenJson.length, equals(1));
-          Map<String, Object?> childJson =
-              childrenJson[0]! as Map<String, Object?>;
-          Map<String, Object?> alternateChildJson =
-              alternateChildrenJson[0]! as Map<String, Object?>;
-          expect(childJson['description'], startsWith('Directionality'));
-          expect(
-              alternateChildJson['description'], startsWith('Directionality'));
-          expect(alternateChildJson['valueId'], equals(childJson['valueId']));
+            // Get the first child's first child.
+            child = children[0]! as Map<String, Object?>;
+            childFromOtherApi =
+                childrenFromOtherApi[0]! as Map<String, Object?>;
 
-          childrenJson = childJson['children']! as List<Object?>;
-          alternateChildrenJson = (await service.testExtension(
-            WidgetInspectorServiceExtensions.getChildrenSummaryTree.name,
-            <String, String>{
-              'arg': childJson['valueId']! as String,
-              'objectGroup': group
-            },
-          ))! as List<Object?>;
-          expect(alternateChildrenJson.length, equals(1));
-          expect(childrenJson.length, equals(1));
-          alternateChildJson =
-              alternateChildrenJson[0]! as Map<String, Object?>;
-          childJson = childrenJson[0]! as Map<String, Object?>;
-          expect(childJson['description'], startsWith('Stack'));
-          expect(alternateChildJson['description'], startsWith('Stack'));
-          expect(alternateChildJson['valueId'], equals(childJson['valueId']));
-          childrenJson = childJson['children']! as List<Object?>;
+            // Verify the first child's first child is the same.
+            expect(child['description'], startsWith('Stack'));
+            expect(child['description'],
+            equals(childFromOtherApi['description']));
+            expect(child['valueId'], equals(childFromOtherApi['valueId']));
 
-          childrenJson = childJson['children']! as List<Object?>;
-          alternateChildrenJson = (await service.testExtension(
-            WidgetInspectorServiceExtensions.getChildrenSummaryTree.name,
-            <String, String>{
-              'arg': childJson['valueId']! as String,
-              'objectGroup': group
-            },
-          ))! as List<Object?>;
-          expect(alternateChildrenJson.length, equals(3));
-          expect(childrenJson.length, equals(3));
-          alternateChildJson =
-              alternateChildrenJson[2]! as Map<String, Object?>;
-          childJson = childrenJson[2]! as Map<String, Object?>;
-          expect(childJson['description'], startsWith('Text'));
+            // Get the first child's first child's children.
+            children = childrenFromJsonResponse(child);
+            childrenFromOtherApi = await childrenFromGetChildrenSummaryTree(
+                childFromOtherApi['valueId']! as String, group);
 
-          // [childJson] contains the 'textPreview' key since the tree was requested
-          // with previews [getRootWidgetSummaryTreeWithPreviews].
-          expect(childJson['textPreview'], equals('c'));
+            // Verify the first child's first child's children are the same
+            // length.
+            expect(children.length, equals(3));
+            expect(children.length, equals(childrenFromOtherApi.length));
+
+            // Get the first child's first child's third child.
+            child = children[2]! as Map<String, Object?>;
+            childFromOtherApi =
+                childrenFromOtherApi[2]! as Map<String, Object?>;
+
+            // Verify the first child's first child's third child are the same.
+            expect(child['description'], startsWith('Text'));
+            expect(child['description'], childFromOtherApi['description']);
+            expect(child['valueId'], equals(childFromOtherApi['valueId']));
+
+            // If the tree was requested with previews, then check that the
+            // child has the `textPreview` key:
+            if (checkForPreviews) {
+              expect(child['textPreview'], equals('c'));
+            }
+
+            // Get the first child's first child's third child's children.
+            children = childrenFromJsonResponse(child);
+            childrenFromOtherApi = await childrenFromGetChildrenSummaryTree(
+              childFromOtherApi['valueId']! as String, group);
+
+            // Verify first child's first child's third child's has no children.
+            expect(children.length, equals(0));
+            expect(childrenFromOtherApi.length, equals(children.length));
+          }
+
+          testWidgets('ext.flutter.inspector.getRootWidgetSummaryTree',
+              (WidgetTester tester) async {
+            const String group = 'test-group';
+            await pumpWidgetTreeWithABC(tester);
+            final Element elementA = findElementABC('a');
+            final Map<String, dynamic> jsonA =
+                await selectedWidgetResponseForElement(elementA);
+
+            service.resetPubRootDirectories();
+            Map<String, Object?> rootJson = (await service.testExtension(
+              WidgetInspectorServiceExtensions.getRootWidgetSummaryTree.name,
+              <String, String>{'objectGroup': group},
+            ))! as Map<String, Object?>;
+
+            // We haven't yet properly specified which directories are summary tree
+            // directories so we get an empty tree other than the root that is always
+            // included.
+            final Object? rootWidget =
+                service.toObject(rootJson['valueId']! as String);
+            expect(rootWidget, equals(WidgetsBinding.instance.rootElement));
+            final List<Object?> childrenJson =
+                rootJson['children']! as List<Object?>;
+            // There are no summary tree children.
+            expect(childrenJson.length, equals(0));
+
+            final Map<String, Object?> creationLocation =
+                verifyAndReturnCreationLocation(jsonA);
+            final String testFile = verifyAndReturnTestFile(creationLocation);
+            addPubRootDirectoryFor(testFile);
+
+            rootJson = (await service.testExtension(
+              WidgetInspectorServiceExtensions.getRootWidgetSummaryTree.name,
+              <String, String>{'objectGroup': group},
+            ))! as Map<String, Object?>;
+
+            await verifyChildrenMatchOtherApi(rootJson, group: group);
+          });
+
+          testWidgets(
+              'ext.flutter.inspector.getRootWidgetSummaryTreeWithPreviews',
+              (WidgetTester tester) async {
+            const String group = 'test-group';
+
+            await pumpWidgetTreeWithABC(tester);
+            final Element elementA = findElementABC('a');
+            final Map<String, dynamic> jsonA =
+                await selectedWidgetResponseForElement(elementA);
+
+            final Map<String, Object?> creationLocation =
+                verifyAndReturnCreationLocation(jsonA);
+            final String testFile = verifyAndReturnTestFile(creationLocation);
+            addPubRootDirectoryFor(testFile);
+
+            final Map<String, Object?> rootJson = (await service.testExtension(
+              WidgetInspectorServiceExtensions
+                  .getRootWidgetSummaryTreeWithPreviews.name,
+              <String, String>{'groupName': group},
+            ))! as Map<String, Object?>;
+
+            await verifyChildrenMatchOtherApi(
+              rootJson, 
+              group: group, 
+              checkForPreviews: true,
+            );
+          });
         });
 
         testWidgets('ext.flutter.inspector.getSelectedSummaryWidget',
