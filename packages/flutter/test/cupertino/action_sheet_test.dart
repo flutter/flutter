@@ -20,8 +20,9 @@ import '../widgets/semantics_tester.dart';
 void main() {
   testWidgets('Overall looks correctly under light theme', (WidgetTester tester) async {
     await tester.pumpWidget(
-      createAppWithButtonThatLaunchesActionSheet(
-        CupertinoActionSheet(
+      TestScaffoldApp(
+        theme: const CupertinoThemeData(brightness: Brightness.light),
+        actionSheet: CupertinoActionSheet(
           message: const Text('The title'),
           actions: <Widget>[
             CupertinoActionSheetAction(child: const Text('One'), onPressed: () {}),
@@ -49,8 +50,9 @@ void main() {
 
   testWidgets('Overall looks correctly under dark theme', (WidgetTester tester) async {
     await tester.pumpWidget(
-      createAppWithButtonThatLaunchesActionSheet(
-        CupertinoActionSheet(
+      TestScaffoldApp(
+        theme: const CupertinoThemeData(brightness: Brightness.dark),
+        actionSheet: CupertinoActionSheet(
           title: const Text('The title'),
           message: const Text('The message'),
           actions: List<Widget>.generate(20, (int i) =>
@@ -1342,6 +1344,50 @@ Widget createAppWithButtonThatLaunchesActionSheet(Widget actionSheet) {
       }),
     ),
   );
+}
+
+// Shows an app that has a button with text "Go", and clicking this button
+// displays the `actionSheet` and hides the button.
+//
+// The `theme` will be applied to the app and determines the background.
+class TestScaffoldApp extends StatefulWidget {
+  const TestScaffoldApp({required this.theme, required this.actionSheet});
+  final CupertinoThemeData theme;
+  final Widget actionSheet;
+
+  @override
+  TestScaffoldAppState createState() => TestScaffoldAppState();
+}
+
+class TestScaffoldAppState extends State<TestScaffoldApp> {
+  bool _pressedButton = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return CupertinoApp(
+      theme: widget.theme,
+      home: Builder(builder: (BuildContext context) =>
+        CupertinoPageScaffold(
+          child: Center(
+            child: _pressedButton ? Container() : CupertinoButton(
+              onPressed: () {
+                setState(() {
+                  _pressedButton = true;
+                });
+                showCupertinoModalPopup<void>(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return widget.actionSheet;
+                  },
+                );
+              },
+              child: const Text('Go'),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 Widget boilerplate(Widget child) {
