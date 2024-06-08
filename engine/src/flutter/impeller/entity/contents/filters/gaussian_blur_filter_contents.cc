@@ -263,7 +263,8 @@ Entity ApplyBlurStyle(FilterContents::BlurStyle blur_style,
           Entity::FromSnapshot(input_snapshot, entity.GetBlendMode());
       Entity result;
       Matrix blurred_transform = blur_entity.GetTransform();
-      Matrix snapshot_transform = snapshot_entity.GetTransform();
+      Matrix snapshot_transform =
+          entity.GetTransform() * snapshot_entity.GetTransform();
       result.SetContents(Contents::MakeAnonymous(
           fml::MakeCopyable([blur_entity = blur_entity.Clone(),
                              blurred_transform, snapshot_transform,
@@ -359,15 +360,14 @@ std::optional<Rect> GaussianBlurFilterContents::GetFilterCoverage(
     return {};
   }
 
-  std::optional<Rect> input_coverage = inputs[0]->GetCoverage(entity);
-  if (!input_coverage.has_value()) {
+  Entity snapshot_entity = entity.Clone();
+  snapshot_entity.SetTransform(Matrix());
+  std::optional<Rect> source_coverage = inputs[0]->GetCoverage(snapshot_entity);
+  if (!source_coverage.has_value()) {
     return {};
   }
 
-  Vector2 entity_scale_x = entity.GetTransform().Basis() * Vector2(1.0, 0.0);
-  Vector2 entity_scale_y = entity.GetTransform().Basis() * Vector2(0.0, 1.0);
-  Vector2 scaled_sigma = (Matrix::MakeScale({entity_scale_x.GetLength(),
-                                             entity_scale_y.GetLength(), 1.0}) *
+  Vector2 scaled_sigma = (effect_transform.Basis() *
                           Vector2(ScaleSigma(sigma_x_), ScaleSigma(sigma_y_)))
                              .Abs();
   scaled_sigma.x = std::min(scaled_sigma.x, kMaxSigma);
@@ -375,8 +375,8 @@ std::optional<Rect> GaussianBlurFilterContents::GetFilterCoverage(
   Vector2 blur_radius = Vector2(CalculateBlurRadius(scaled_sigma.x),
                                 CalculateBlurRadius(scaled_sigma.y));
   Vector2 padding(ceil(blur_radius.x), ceil(blur_radius.y));
-  Vector2 local_padding = (entity.GetTransform().Basis() * padding).Abs();
-  return input_coverage.value().Expand(Point(local_padding.x, local_padding.y));
+  Rect expanded_source_coverage = source_coverage->Expand(padding);
+  return expanded_source_coverage.TransformBounds(entity.GetTransform());
 }
 
 std::optional<Entity> GaussianBlurFilterContents::RenderFilter(
@@ -390,11 +390,7 @@ std::optional<Entity> GaussianBlurFilterContents::RenderFilter(
     return std::nullopt;
   }
 
-  Vector2 entity_scale_x = entity.GetTransform().Basis() * Vector2(1.0, 0.0);
-  Vector2 entity_scale_y = entity.GetTransform().Basis() * Vector2(0.0, 1.0);
   Vector2 scaled_sigma = (effect_transform.Basis() *
-                          Matrix::MakeScale({entity_scale_x.GetLength(),
-                                             entity_scale_y.GetLength(), 1.0}) *
                           Vector2(ScaleSigma(sigma_x_), ScaleSigma(sigma_y_)))
                              .Abs();
   scaled_sigma.x = std::min(scaled_sigma.x, kMaxSigma);
@@ -420,17 +416,28 @@ std::optional<Entity> GaussianBlurFilterContents::RenderFilter(
     mip_count = 1;
   }
 
+  Entity snapshot_entity = entity.Clone();
+  snapshot_entity.SetTransform(Matrix());
+  std::optional<Rect> source_expanded_coverage_hint;
+  if (expanded_coverage_hint.has_value()) {
+    source_expanded_coverage_hint =
+        expanded_coverage_hint->TransformBounds(entity.GetTransform().Invert());
+  }
+
   std::optional<Snapshot> input_snapshot =
-      inputs[0]->GetSnapshot("GaussianBlur", renderer, entity,
-                             /*coverage_limit=*/expanded_coverage_hint,
+      inputs[0]->GetSnapshot("GaussianBlur", renderer, snapshot_entity,
+                             /*coverage_limit=*/source_expanded_coverage_hint,
                              /*mip_count=*/mip_count);
   if (!input_snapshot.has_value()) {
     return std::nullopt;
   }
 
   if (scaled_sigma.x < kEhCloseEnough && scaled_sigma.y < kEhCloseEnough) {
-    return Entity::FromSnapshot(input_snapshot.value(),
-                                entity.GetBlendMode());  // No blur to render.
+    Entity result =
+        Entity::FromSnapshot(input_snapshot.value(),
+                             entity.GetBlendMode());  // No blur to render.
+    result.SetTransform(entity.GetTransform() * input_snapshot->transform);
+    return result;
   }
 
   // In order to avoid shimmering in downsampling step, we should have mips.
@@ -462,7 +469,7 @@ std::optional<Entity> GaussianBlurFilterContents::RenderFilter(
   Vector2 effective_scalar =
       Vector2(subpass_size) / source_rect_padded.GetSize();
 
-  Quad uvs = CalculateUVs(inputs[0], entity, source_rect_padded,
+  Quad uvs = CalculateUVs(inputs[0], snapshot_entity, source_rect_padded,
                           input_snapshot->texture->GetSize());
 
   std::shared_ptr<CommandBuffer> command_buffer =
@@ -484,18 +491,14 @@ std::optional<Entity> GaussianBlurFilterContents::RenderFilter(
 
   std::optional<Rect> input_snapshot_coverage = input_snapshot->GetCoverage();
   Quad blur_uvs = {Point(0, 0), Point(1, 0), Point(0, 1), Point(1, 1)};
-  if (expanded_coverage_hint.has_value() &&
-      input_snapshot_coverage.has_value() &&
-      // TODO(https://github.com/flutter/flutter/issues/140890): Remove this
-      //   condition. There is some flaw in coverage stopping us from using this
-      //   today. I attempted to use source coordinates to calculate the uvs,
-      //   but that didn't work either.
-      input_snapshot.has_value() &&
-      input_snapshot.value().transform.IsTranslationScaleOnly()) {
+  FML_DCHECK(input_snapshot.value().transform.IsTranslationScaleOnly());
+  if (source_expanded_coverage_hint.has_value() &&
+      input_snapshot_coverage.has_value()) {
     // Only process the uvs where the blur is happening, not the whole texture.
-    std::optional<Rect> uvs = MakeReferenceUVs(input_snapshot_coverage.value(),
-                                               expanded_coverage_hint.value())
-                                  .Intersection(Rect::MakeSize(Size(1, 1)));
+    std::optional<Rect> uvs =
+        MakeReferenceUVs(input_snapshot_coverage.value(),
+                         source_expanded_coverage_hint.value())
+            .Intersection(Rect::MakeSize(Size(1, 1)));
     FML_DCHECK(uvs.has_value());
     if (uvs.has_value()) {
       blur_uvs[0] = uvs->GetLeftTop();
@@ -560,7 +563,7 @@ std::optional<Entity> GaussianBlurFilterContents::RenderFilter(
 
   Entity blur_output_entity = Entity::FromSnapshot(
       Snapshot{.texture = pass3_out.value().GetRenderTargetTexture(),
-               .transform = input_snapshot->transform *
+               .transform = entity.GetTransform() * input_snapshot->transform *
                             padding_snapshot_adjustment *
                             Matrix::MakeScale(1 / effective_scalar),
                .sampler_descriptor = sampler_desc,

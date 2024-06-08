@@ -665,6 +665,45 @@ TEST_P(AiksTest, GaussianBlurRotatedAndClippedInteractive) {
   ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
 
+TEST_P(AiksTest, GaussianBlurRotatedNonUniform) {
+  auto callback = [&](AiksContext& renderer) -> std::optional<Picture> {
+    const char* tile_mode_names[] = {"Clamp", "Repeat", "Mirror", "Decal"};
+    const Entity::TileMode tile_modes[] = {
+        Entity::TileMode::kClamp, Entity::TileMode::kRepeat,
+        Entity::TileMode::kMirror, Entity::TileMode::kDecal};
+
+    static float rotation = 45;
+    static float scale = 0.6;
+    static int selected_tile_mode = 3;
+
+    if (AiksTest::ImGuiBegin("Controls", nullptr,
+                             ImGuiWindowFlags_AlwaysAutoResize)) {
+      ImGui::SliderFloat("Rotation (degrees)", &rotation, -180, 180);
+      ImGui::SliderFloat("Scale", &scale, 0, 2.0);
+      ImGui::Combo("Tile mode", &selected_tile_mode, tile_mode_names,
+                   sizeof(tile_mode_names) / sizeof(char*));
+      ImGui::End();
+    }
+
+    Canvas canvas;
+    Paint paint = {.color = Color::Green(),
+                   .image_filter =
+                       ImageFilter::MakeBlur(Sigma(50.0), Sigma(0.0),
+                                             FilterContents::BlurStyle::kNormal,
+                                             tile_modes[selected_tile_mode])};
+    Vector2 center = Vector2(1024, 768) / 2;
+    canvas.Scale(GetContentScale());
+    canvas.Translate({center.x, center.y, 0});
+    canvas.Scale({scale, scale, 1});
+    canvas.Rotate(Degrees(rotation));
+
+    canvas.DrawRRect(Rect::MakeXYWH(-100, -100, 200, 200), Size(10, 10), paint);
+    return canvas.EndRecordingAsPicture();
+  };
+
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
+}
+
 // This addresses a bug where tiny blurs could result in mip maps that beyond
 // the limits for the textures used for blurring.
 // See also: b/323402168
