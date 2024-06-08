@@ -362,7 +362,7 @@ void main() {
     expect(find.text('Item 7'), findsNothing);
   });
 
-  testWidgets('Carousel respects itemSnapping', (WidgetTester tester) async {
+  testWidgets('CarouselView respects itemSnapping', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -410,7 +410,7 @@ void main() {
     expect(getItem(3), findsOneWidget);
   });
 
-  testWidgets('Carousel.weighted respects itemSnapping', (WidgetTester tester) async {
+  testWidgets('CarouselView.weighted respects itemSnapping', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -458,7 +458,7 @@ void main() {
     expect(getItem(3), findsNothing);
   });
 
-  testWidgets('Carousel respect itemSnapping when fling', (WidgetTester tester) async {
+  testWidgets('CarouselView respect itemSnapping when fling', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -512,7 +512,7 @@ void main() {
     expect(getItem(4), findsNothing);
   });
 
-  testWidgets('Carousel.weighted respect itemSnapping when fling', (WidgetTester tester) async {
+  testWidgets('CarouselView.weighted respect itemSnapping when fling', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -530,6 +530,15 @@ void main() {
       )
     );
     await tester.pumpAndSettle();
+
+    Finder getItem(int index)
+      => find.descendant(
+        of: find.byType(CarouselView),
+        matching: find.ancestor(
+          of: find.text('$index'),
+          matching: find.byType(Padding)
+        ),
+      );
 
     // Show item 0, 1, and 2.
     expect(getItem(0), findsOneWidget);
@@ -600,7 +609,7 @@ void main() {
     expect(getItem(3), findsOneWidget);
   });
 
-  testWidgets('Carousel respects reverse', (WidgetTester tester) async {
+  testWidgets('CarouselView respects reverse', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -640,7 +649,7 @@ void main() {
     expect(rect3, const Rect.fromLTRB(0.0, 0.0, 200.0, 600.0));
   });
 
-  testWidgets('Carousel respects shrinkExtent', (WidgetTester tester) async {
+  testWidgets('CarouselView respects shrinkExtent', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
