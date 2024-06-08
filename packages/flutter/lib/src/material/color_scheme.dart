@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: public_member_api_docs
-
 import 'dart:async';
 import 'dart:ui' as ui;
 
@@ -12,8 +10,9 @@ import 'package:flutter/widgets.dart';
 import 'package:material_color_utilities/material_color_utilities.dart';
 
 import 'colors.dart';
-import 'theme_data.dart';
+import 'theme.dart';
 
+/// {@template flutter.material.color_scheme.DynamicSchemeVariant}
 /// The algorithm used to construct a [ColorScheme] in [ColorScheme.fromSeed].
 ///
 /// The `tonalSpot` variant builds default Material scheme colors. These colors are
@@ -25,6 +24,7 @@ import 'theme_data.dart';
 /// Color fidelity (`DynamicSchemeVariant.fidelity`) is a feature that adjusts
 /// tones in these cases to produce the intended visual results without harming
 /// visual contrast.
+/// {@endtemplate}
 enum DynamicSchemeVariant {
   /// Default for Material theme colors. Builds pastel palettes with a low chroma.
   tonalSpot,
@@ -60,7 +60,13 @@ enum DynamicSchemeVariant {
   fruitSalad,
 }
 
+/// {@template flutter.material.color_scheme.ColorSchemeConfiguration}
+/// Stores the data passed into the [ColorScheme.fromSeed] constructor.
+///
+/// Used in [Theme.merge].
+/// {@endtemplate}
 class ColorSchemeConfiguration {
+  /// {@macro flutter.material.color_scheme.ColorSchemeConfiguration}
   const ColorSchemeConfiguration({
     this.seedColor,
     this.brightness,
@@ -129,72 +135,180 @@ class ColorSchemeConfiguration {
     this.surfaceVariant,
   });
 
+  /// Used in [ColorScheme.fromSeed] to generate the full color scheme.
+  ///
+  /// {@macro flutter.material.color_scheme.seedColor}
   final Color? seedColor;
+
+  /// The overall brightness of this color scheme.
   final Brightness? brightness;
+
+  /// {@macro flutter.material.color_scheme.DynamicSchemeVariant}
   final DynamicSchemeVariant? dynamicSchemeVariant;
+
+  /// {@macro flutter.material.color_scheme.contrastLevel}
   final double? contrastLevel;
+
+  /// The color displayed most frequently across your app’s screens and components.
   final Color? primary;
+
+  /// {@macro flutter.material.color_scheme.onPrimary}
   final Color? onPrimary;
+
+  /// A color used for elements needing less emphasis than [primary].
   final Color? primaryContainer;
+
+  /// {@macro flutter.material.color_scheme.onPrimaryContainer}
   final Color? onPrimaryContainer;
+
+  /// {@macro flutter.material.color_scheme.primaryFixed}
   final Color? primaryFixed;
+
+  /// A color used for elements needing more emphasis than [primaryFixed].
   final Color? primaryFixedDim;
+
+  /// {@macro flutter.material.color_scheme.onPrimaryFixed}
   final Color? onPrimaryFixed;
+
+  /// {@macro flutter.material.color_scheme.onPrimaryFixedVariant}
   final Color? onPrimaryFixedVariant;
+
+  /// {@macro flutter.material.color_scheme.secondary}
   final Color? secondary;
+  /// {@macro flutter.material.color_scheme.onSecondary}
   final Color? onSecondary;
+
+  /// A color used for elements needing less emphasis than [secondary].
   final Color? secondaryContainer;
+
+  /// {@macro flutter.material.color_scheme.onSecondaryContainer}
   final Color? onSecondaryContainer;
+
+  /// {@macro flutter.material.color_scheme.secondaryFixed}
   final Color? secondaryFixed;
+
+  /// A color used for elements needing more emphasis than [secondaryFixed].
   final Color? secondaryFixedDim;
+
+  /// A color that's clearly legible when drawn on [secondaryFixed].
   final Color? onSecondaryFixed;
+
+  /// {@macro flutter.material.color_scheme.onSecondaryFixedVariant}
   final Color? onSecondaryFixedVariant;
+
+  /// {@macro flutter.material.color_scheme.tertiary}
   final Color? tertiary;
+
+  /// {@macro flutter.material.color_scheme.onTertiary}
   final Color? onTertiary;
+
+  /// A color used for elements needing less emphasis than [tertiary].
   final Color? tertiaryContainer;
+
+  /// {@macro flutter.material.color_scheme.onTertiaryContainer}
   final Color? onTertiaryContainer;
+
+  /// {@macro flutter.material.color_scheme.tertiaryFixed}
   final Color? tertiaryFixed;
+
+  /// A color used for elements needing more emphasis than [tertiaryFixed].
   final Color? tertiaryFixedDim;
+
+  /// A color that's clearly legible when drawn on [tertiaryFixed].
   final Color? onTertiaryFixed;
+
+  /// {@macro flutter.material.color_scheme.onTertiaryFixedVariant}
   final Color? onTertiaryFixedVariant;
+
+  /// {@macro flutter.material.color_scheme.error}
   final Color? error;
+
+  /// {@macro flutter.material.color_scheme.onError}
   final Color? onError;
+
+  /// A color used for error elements needing less emphasis than [error].
   final Color? errorContainer;
+
+  /// {@macro flutter.material.color_scheme.onErrorContainer}
   final Color? onErrorContainer;
+
+  /// A utility color that creates boundaries and emphasis to improve usability.
   final Color? outline;
+
+  /// {@macro flutter.material.color_scheme.outlineVariant}
   final Color? outlineVariant;
+
+  /// The background color for widgets like [Card].
   final Color? surface;
+
+  /// {@macro flutter.material.color_scheme.onSurface}
   final Color? onSurface;
+
+  /// A color that's always darkest in the dark or light theme.
   final Color? surfaceDim;
+
+  /// A color that's always the lightest in the dark or light theme.
   final Color? surfaceBright;
+
+  /// {@macro flutter.material.color_scheme.surfaceContainerLowest}
   final Color? surfaceContainerLowest;
+
+  /// {@macro flutter.material.color_scheme.surfaceContainerLow}
   final Color? surfaceContainerLow;
+
+  /// {@macro flutter.material.color_scheme.surfaceContainer}
   final Color? surfaceContainer;
+
+  /// {@macro flutter.material.color_scheme.surfaceContainerHigh}
   final Color? surfaceContainerHigh;
+
+  /// {@macro flutter.material.color_scheme.surfaceContainerHighest}
   final Color? surfaceContainerHighest;
+
+  /// {@macro flutter.material.color_scheme.onSurfaceVariant}
   final Color? onSurfaceVariant;
+
+  /// {@macro flutter.material.color_scheme.inverseSurface}
   final Color? inverseSurface;
+
+  /// {@macro flutter.material.color_scheme.onInverseSurface}
   final Color? onInverseSurface;
+
+  /// {@macro flutter.material.color_scheme.inversePrimary}
   final Color? inversePrimary;
+
+  /// A color use to paint the drop shadows of elevated components.
   final Color? shadow;
+
+  /// A color use to paint the scrim around of modal components.
   final Color? scrim;
+
+  /// {@macro flutter.material.color_scheme.surfaceTint}
   final Color? surfaceTint;
+
+  /// A color that typically appears behind scrollable content.
   @Deprecated(
     'Use surface instead. '
     'This feature was deprecated after v3.18.0-0.1.pre.'
   )
   final Color? background;
+
+  /// {@macro flutter.material.color_scheme.onBackground}
   @Deprecated(
     'Use onSurface instead. '
     'This feature was deprecated after v3.18.0-0.1.pre.'
   )
   final Color? onBackground;
+
+  /// {@macro flutter.material.color_scheme.surfaceVariant}
   @Deprecated(
     'Use surfaceContainerHighest instead. '
     'This feature was deprecated after v3.18.0-0.1.pre.'
   )
   final Color? surfaceVariant;
 
+  /// Creates a copy of this color scheme configuration with the given fields
+  /// replaced by the non-null parameter values.
   ColorSchemeConfiguration copyWith({
     Color? seedColor,
     Brightness? brightness,
@@ -319,6 +433,16 @@ class ColorSchemeConfiguration {
     );
   }
 
+  /// Creates a new [ColorScheme] configuration based on the current
+  /// configuration and the properties of [other].
+  ///
+  /// If [other] is a [Brightness] or [DynamicSchemeVariant], it will
+  /// be applied to this configuration, and if it's a [Color], it will
+  /// be used as the [seedColor].
+  ///
+  /// If [other] is a [ColorSchemeConfiguration] or a color scheme created
+  /// using the [ColorScheme.fromSeed] constructor, its configuration is
+  /// returned, with the null properties filled in with values from `this`.
   ColorSchemeConfiguration merge(Object other) {
     final ColorSchemeConfiguration? otherConfig = switch (other) {
       final ColorScheme colorScheme => colorScheme.config,
@@ -401,6 +525,8 @@ class ColorSchemeConfiguration {
     };
   }
 
+  /// Turns the configuration into a [ColorScheme], by creating
+  /// a [DynamicScheme] based on the provided [dynamicSchemeVariant].
   ColorScheme applyDefaults() {
     final DynamicScheme scheme = ColorScheme._buildDynamicScheme(
       brightness ?? Brightness.light,
@@ -670,6 +796,7 @@ class ColorScheme with Diagnosticable {
 
   /// Generate a [ColorScheme] derived from the given `seedColor`.
   ///
+  /// {@template flutter.material.color_scheme.seedColor}
   /// Using the `seedColor` as a starting point, a set of tonal palettes are
   /// constructed. By default, the tonal palettes are based on the Material 3
   /// Color system and provide all of the [ColorScheme] colors. These colors are
@@ -683,6 +810,7 @@ class ColorScheme with Diagnosticable {
   ///
   /// Given the nature of the algorithm, the `seedColor` may not wind up as
   /// one of the ColorScheme colors.
+  /// {@endtemplate}
   ///
   /// The `dynamicSchemeVariant` parameter creates different types of
   /// [DynamicScheme]s, which are used to generate different styles of [ColorScheme]s.
@@ -692,10 +820,12 @@ class ColorScheme with Diagnosticable {
   /// If the resulting color scheme is too dark, consider setting `dynamicSchemeVariant`
   /// to [DynamicSchemeVariant.fidelity], whose palettes match the seed color.
   ///
+  /// {@template flutter.material.color_scheme.contrastLevel}
   /// The `contrastLevel` parameter indicates the contrast level between color
   /// pairs, such as [primary] and [onPrimary]. 0.0 is the default (normal);
   /// -1.0 is the lowest; 1.0 is the highest. From Material Design guideline, the
   /// medium and high contrast correspond to 0.5 and 1.0 respectively.
+  /// {@endtemplate}
   ///
   /// {@tool dartpad}
   /// This sample shows how to use [ColorScheme.fromSeed] to create dynamic
@@ -1410,6 +1540,7 @@ class ColorScheme with Diagnosticable {
 
   static Brightness _brightnessFor(Color color) => ThemeData.estimateBrightnessForColor(color);
 
+  /// {@macro flutter.material.color_scheme.ColorSchemeConfiguration}
   final ColorSchemeConfiguration? config;
 
   /// The overall brightness of this color scheme.
@@ -1418,11 +1549,13 @@ class ColorScheme with Diagnosticable {
   /// The color displayed most frequently across your app’s screens and components.
   final Color primary;
 
+  /// {@template flutter.material.color_scheme.onPrimary}
   /// A color that's clearly legible when drawn on [primary].
   ///
   /// To ensure that an app is accessible, a contrast ratio between
   /// [primary] and [onPrimary] of at least 4.5:1 is recommended. See
   /// <https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html>.
+  /// {@endtemplate}
   final Color onPrimary;
 
   final Color? _primaryContainer;
@@ -1430,17 +1563,21 @@ class ColorScheme with Diagnosticable {
   Color get primaryContainer => _primaryContainer ?? primary;
 
   final Color? _onPrimaryContainer;
+  /// {@template flutter.material.color_scheme.onPrimaryContainer}
   /// A color that's clearly legible when drawn on [primaryContainer].
   ///
   /// To ensure that an app is accessible, a contrast ratio between
   /// [primaryContainer] and [onPrimaryContainer] of at least 4.5:1
   /// is recommended. See
   /// <https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html>.
+  /// {@endtemplate}
   Color get onPrimaryContainer => _onPrimaryContainer ?? onPrimary;
 
   final Color? _primaryFixed;
+  /// {@template flutter.material.color_scheme.primaryFixed}
   /// A substitute for [primaryContainer] that's the same color for the dark
   /// and light themes.
+  /// {@endtemplate}
   Color get primaryFixed => _primaryFixed ?? primary;
 
   final Color? _primaryFixedDim;
@@ -1448,24 +1585,32 @@ class ColorScheme with Diagnosticable {
   Color get primaryFixedDim => _primaryFixedDim ?? primary;
 
   final Color? _onPrimaryFixed;
+  /// {@template flutter.material.color_scheme.onPrimaryFixed}
   /// A color that is used for text and icons that exist on top of elements having
   /// [primaryFixed] color.
+  /// {@endtemplate}
   Color get onPrimaryFixed => _onPrimaryFixed ?? onPrimary;
 
   final Color? _onPrimaryFixedVariant;
+  /// {@template flutter.material.color_scheme.onPrimaryFixedVariant}
   /// A color that provides a lower-emphasis option for text and icons than
   /// [onPrimaryFixed].
+  /// {@endtemplate}
   Color get onPrimaryFixedVariant => _onPrimaryFixedVariant ?? onPrimary;
 
+  /// {@template flutter.material.color_scheme.secondary}
   /// An accent color used for less prominent components in the UI, such as
   /// filter chips, while expanding the opportunity for color expression.
+  /// {@endtemplate}
   final Color secondary;
 
+  /// {@template flutter.material.color_scheme.onSecondary}
   /// A color that's clearly legible when drawn on [secondary].
   ///
   /// To ensure that an app is accessible, a contrast ratio between
   /// [secondary] and [onSecondary] of at least 4.5:1 is recommended. See
   /// <https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html>.
+  /// {@endtemplate}
   final Color onSecondary;
 
   final Color? _secondaryContainer;
@@ -1473,17 +1618,21 @@ class ColorScheme with Diagnosticable {
   Color get secondaryContainer => _secondaryContainer ?? secondary;
 
   final Color? _onSecondaryContainer;
+  /// {@template flutter.material.color_scheme.onSecondaryContainer}
   /// A color that's clearly legible when drawn on [secondaryContainer].
   ///
   /// To ensure that an app is accessible, a contrast ratio between
   /// [secondaryContainer] and [onSecondaryContainer] of at least 4.5:1 is
   /// recommended. See
   /// <https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html>.
+  /// {@endtemplate}
   Color get onSecondaryContainer => _onSecondaryContainer ?? onSecondary;
 
   final Color? _secondaryFixed;
+  /// {@template flutter.material.color_scheme.secondaryFixed}
   /// A substitute for [secondaryContainer] that's the same color for the dark
   /// and light themes.
+  /// {@endtemplate}
   Color get secondaryFixed => _secondaryFixed ?? secondary;
 
   final Color? _secondaryFixedDim;
@@ -1491,27 +1640,32 @@ class ColorScheme with Diagnosticable {
   Color get secondaryFixedDim => _secondaryFixedDim ?? secondary;
 
   final Color? _onSecondaryFixed;
-  /// A color that is used for text and icons that exist on top of elements having
-  /// [secondaryFixed] color.
+  /// A color that's clearly legible when drawn on [secondaryFixed].
   Color get onSecondaryFixed => _onSecondaryFixed ?? onSecondary;
 
   final Color? _onSecondaryFixedVariant;
+  /// {@template flutter.material.color_scheme.onSecondaryFixedVariant}
   /// A color that provides a lower-emphasis option for text and icons than
   /// [onSecondaryFixed].
+  /// {@endtemplate}
   Color get onSecondaryFixedVariant => _onSecondaryFixedVariant ?? onSecondary;
 
   final Color? _tertiary;
+  /// {@template flutter.material.color_scheme.tertiary}
   /// A color used as a contrasting accent that can balance [primary]
   /// and [secondary] colors or bring heightened attention to an element,
   /// such as an input field.
+  /// {@endtemplate}
   Color get tertiary => _tertiary ?? secondary;
 
   final Color? _onTertiary;
+  /// {@template flutter.material.color_scheme.onTertiary}
   /// A color that's clearly legible when drawn on [tertiary].
   ///
   /// To ensure that an app is accessible, a contrast ratio between
   /// [tertiary] and [onTertiary] of at least 4.5:1 is recommended. See
   /// <https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html>.
+  /// {@endtemplate}
   Color get onTertiary => _onTertiary ?? onSecondary;
 
   final Color? _tertiaryContainer;
@@ -1519,17 +1673,21 @@ class ColorScheme with Diagnosticable {
   Color get tertiaryContainer => _tertiaryContainer ?? tertiary;
 
   final Color? _onTertiaryContainer;
+  /// {@template flutter.material.color_scheme.onTertiaryContainer}
   /// A color that's clearly legible when drawn on [tertiaryContainer].
   ///
   /// To ensure that an app is accessible, a contrast ratio between
   /// [tertiaryContainer] and [onTertiaryContainer] of at least 4.5:1 is
   /// recommended. See
   /// <https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html>.
+  /// {@endtemplate}
   Color get onTertiaryContainer => _onTertiaryContainer ?? onTertiary;
 
   final Color? _tertiaryFixed;
+  /// {@template flutter.material.color_scheme.tertiaryFixed}
   /// A substitute for [tertiaryContainer] that's the same color for dark
   /// and light themes.
+  /// {@endtemplate}
   Color get tertiaryFixed => _tertiaryFixed ?? tertiary;
 
   final Color? _tertiaryFixedDim;
@@ -1537,24 +1695,29 @@ class ColorScheme with Diagnosticable {
   Color get tertiaryFixedDim => _tertiaryFixedDim ?? tertiary;
 
   final Color? _onTertiaryFixed;
-  /// A color that is used for text and icons that exist on top of elements having
-  /// [tertiaryFixed] color.
+  /// A color that's clearly legible when drawn on [tertiaryFixed].
   Color get onTertiaryFixed => _onTertiaryFixed ?? onTertiary;
 
   final Color? _onTertiaryFixedVariant;
+  /// {@template flutter.material.color_scheme.onTertiaryFixedVariant}
   /// A color that provides a lower-emphasis option for text and icons than
   /// [onTertiaryFixed].
+  /// {@endtemplate}
   Color get onTertiaryFixedVariant => _onTertiaryFixedVariant ?? onTertiary;
 
+  /// {@template flutter.material.color_scheme.error}
   /// The color to use for input validation errors, e.g. for
   /// [InputDecoration.errorText].
+  /// {@endtemplate}
   final Color error;
 
+  /// {@template flutter.material.color_scheme.onError}
   /// A color that's clearly legible when drawn on [error].
   ///
   /// To ensure that an app is accessible, a contrast ratio between
   /// [error] and [onError] of at least 4.5:1 is recommended. See
   /// <https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html>.
+  /// {@endtemplate}
   final Color onError;
 
   final Color? _errorContainer;
@@ -1562,27 +1725,33 @@ class ColorScheme with Diagnosticable {
   Color get errorContainer => _errorContainer ?? error;
 
   final Color? _onErrorContainer;
+  /// {@template flutter.material.color_scheme.onErrorContainer}
   /// A color that's clearly legible when drawn on [errorContainer].
   ///
   /// To ensure that an app is accessible, a contrast ratio between
   /// [errorContainer] and [onErrorContainer] of at least 4.5:1 is
   /// recommended. See
   /// <https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html>.
+  /// {@endtemplate}
   Color get onErrorContainer => _onErrorContainer ?? onError;
 
   /// The background color for widgets like [Card].
   final Color surface;
 
+  /// {@template flutter.material.color_scheme.onSurface}
   /// A color that's clearly legible when drawn on [surface].
   ///
   /// To ensure that an app is accessible, a contrast ratio between
   /// [surface] and [onSurface] of at least 4.5:1 is recommended. See
   /// <https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html>.
+  /// {@endtemplate}
   final Color onSurface;
 
   final Color? _surfaceVariant;
+  /// {@template flutter.material.color_scheme.surfaceVariant}
   /// A color variant of [surface] that can be used for differentiation against
   /// a component using [surface].
+  /// {@endtemplate}
   @Deprecated(
     'Use surfaceContainerHighest instead. '
     'This feature was deprecated after v3.18.0-0.1.pre.'
@@ -1598,16 +1767,21 @@ class ColorScheme with Diagnosticable {
   Color get surfaceBright => _surfaceBright ?? surface;
 
   final Color? _surfaceContainerLowest;
+  /// {@template flutter.material.color_scheme.surfaceContainerLowest}
   /// A surface container color with the lightest tone and the least emphasis
   /// relative to the surface.
+  /// {@endtemplate}
   Color get surfaceContainerLowest => _surfaceContainerLowest ?? surface;
 
   final Color? _surfaceContainerLow;
+  /// {@template flutter.material.color_scheme.surfaceContainerLow}
   /// A surface container color with a lighter tone that creates less emphasis
   /// than [surfaceContainer] but more emphasis than [surfaceContainerLowest].
+  /// {@endtemplate}
   Color get surfaceContainerLow => _surfaceContainerLow ?? surface;
 
   final Color? _surfaceContainer;
+  /// {@template flutter.material.color_scheme.surfaceContainer}
   /// A recommended color role for a distinct area within the surface.
   ///
   /// Surface container color roles are independent of elevation. They replace the old
@@ -1616,25 +1790,32 @@ class ColorScheme with Diagnosticable {
   ///
   /// Surface container colors include [surfaceContainerLowest], [surfaceContainerLow],
   /// [surfaceContainer], [surfaceContainerHigh] and [surfaceContainerHighest].
+  /// {@endtemplate}
   Color get surfaceContainer => _surfaceContainer ?? surface;
 
   final Color? _surfaceContainerHigh;
+  /// {@template flutter.material.color_scheme.surfaceContainerHigh}
   /// A surface container color with a darker tone. It is used to create more
   /// emphasis than [surfaceContainer] but less emphasis than [surfaceContainerHighest].
+  /// {@endtemplate}
   Color get surfaceContainerHigh => _surfaceContainerHigh ?? surface;
 
   final Color? _surfaceContainerHighest;
+  /// {@template flutter.material.color_scheme.surfaceContainerHighest}
   /// A surface container color with the darkest tone. It is used to create the
   /// most emphasis against the surface.
+  /// {@endtemplate}
   Color get surfaceContainerHighest => _surfaceContainerHighest ?? surface;
 
   final Color? _onSurfaceVariant;
+  /// {@template flutter.material.color_scheme.onSurfaceVariant}
   /// A color that's clearly legible when drawn on [surfaceVariant].
   ///
   /// To ensure that an app is accessible, a contrast ratio between
   /// [surfaceVariant] and [onSurfaceVariant] of at least 4.5:1 is
   /// recommended. See
   /// <https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html>.
+  /// {@endtemplate}
   Color get onSurfaceVariant => _onSurfaceVariant ?? onSurface;
 
   final Color? _outline;
@@ -1642,8 +1823,10 @@ class ColorScheme with Diagnosticable {
   Color get outline => _outline ?? onBackground;
 
   final Color? _outlineVariant;
+  /// {@template flutter.material.color_scheme.outlineVariant}
   /// A utility color that creates boundaries for decorative elements when a
   /// 3:1 contrast isn’t required, such as for dividers or decorative elements.
+  /// {@endtemplate}
   Color get outlineVariant => _outlineVariant ?? onBackground;
 
   final Color? _shadow;
@@ -1655,28 +1838,36 @@ class ColorScheme with Diagnosticable {
   Color get scrim => _scrim ?? const Color(0xff000000);
 
   final Color? _inverseSurface;
+  /// {@template flutter.material.color_scheme.inverseSurface}
   /// A surface color used for displaying the reverse of what’s seen in the
   /// surrounding UI, for example in a SnackBar to bring attention to
   /// an alert.
+  /// {@endtemplate}
   Color get inverseSurface => _inverseSurface ?? onSurface;
 
   final Color? _onInverseSurface;
+  /// {@template flutter.material.color_scheme.onInverseSurface}
   /// A color that's clearly legible when drawn on [inverseSurface].
   ///
   /// To ensure that an app is accessible, a contrast ratio between
   /// [inverseSurface] and [onInverseSurface] of at least 4.5:1 is
   /// recommended. See
   /// <https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html>.
+  /// {@endtemplate}
   Color get onInverseSurface => _onInverseSurface ?? surface;
 
   final Color? _inversePrimary;
+  /// {@template flutter.material.color_scheme.inversePrimary}
   /// An accent color used for displaying a highlight color on [inverseSurface]
   /// backgrounds, like button text in a SnackBar.
+  /// {@endtemplate}
   Color get inversePrimary => _inversePrimary ?? onPrimary;
 
   final Color? _surfaceTint;
+  /// {@template flutter.material.color_scheme.surfaceTint}
   /// A color used as an overlay on a surface color to indicate a component's
   /// elevation.
+  /// {@endtemplate}
   Color get surfaceTint => _surfaceTint ?? primary;
 
   final Color? _background;
@@ -1688,11 +1879,13 @@ class ColorScheme with Diagnosticable {
   Color get background => _background ?? surface;
 
   final Color? _onBackground;
+  /// {@template flutter.material.color_scheme.onBackground}
   /// A color that's clearly legible when drawn on [background].
   ///
   /// To ensure that an app is accessible, a contrast ratio between
   /// [background] and [onBackground] of at least 4.5:1 is recommended. See
   /// <https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html>.
+  /// {@endtemplate}
   @Deprecated(
     'Use onSurface instead. '
     'This feature was deprecated after v3.18.0-0.1.pre.'

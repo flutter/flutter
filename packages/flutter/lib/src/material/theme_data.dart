@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: public_member_api_docs
-
 import 'dart:ui' show Color, lerpDouble;
 
 import 'package:flutter/cupertino.dart';
@@ -65,6 +63,7 @@ import 'tab_bar_theme.dart';
 import 'text_button_theme.dart';
 import 'text_selection_theme.dart';
 import 'text_theme.dart';
+import 'theme.dart';
 import 'time_picker_theme.dart';
 import 'toggle_buttons_theme.dart';
 import 'tooltip_theme.dart';
@@ -182,41 +181,13 @@ enum MaterialTapTargetSize {
   }
 }
 
-/// Defines the configuration of the overall visual [Theme] for a [MaterialApp]
-/// or a widget subtree within the app.
+/// {@template flutter.material.theme_data.ThemeConfiguration}
+/// Stores the values passed into the [ThemeData] constructor.
 ///
-/// The [MaterialApp] theme property can be used to configure the appearance
-/// of the entire app. Widget subtrees within an app can override the app's
-/// theme by including a [Theme] widget at the top of the subtree.
-///
-/// Widgets whose appearance should align with the overall theme can obtain the
-/// current theme's configuration with [Theme.of]. Material components typically
-/// depend exclusively on the [colorScheme] and [textTheme]. These properties
-/// are guaranteed to have non-null values.
-///
-/// The static [Theme.of] method finds the [ThemeData] value specified for the
-/// nearest [BuildContext] ancestor. This lookup is inexpensive, essentially
-/// just a single HashMap access. It can sometimes be a little confusing
-/// because [Theme.of] can not see a [Theme] widget that is defined in the
-/// current build method's context. To overcome that, create a new custom widget
-/// for the subtree that appears below the new [Theme], or insert a widget
-/// that creates a new BuildContext, like [Builder].
-///
-/// {@tool dartpad}
-/// This example demonstrates how a typical [MaterialApp] specifies
-/// and uses a custom [Theme]. The theme's [ColorScheme] is based on a
-/// single "seed" color and configures itself to match the platform's
-/// current light or dark color configuration. The theme overrides the
-/// default configuration of [FloatingActionButton] to show how to
-/// customize the appearance a class of components.
-///
-/// ** See code in examples/api/lib/material/theme_data/theme_data.0.dart **
-/// {@end-tool}
-///
-/// See <https://material.io/design/color/> for
-/// more discussion on how to pick the right colors.
-
+/// Used in [Theme.merge].
+/// {@endtemplate}
 class ThemeConfiguration {
+  /// {@macro flutter.material.theme_data.ThemeConfiguration}
   const ThemeConfiguration({
     this.adaptations,
     this.applyElevationOverlayColor,
@@ -318,106 +289,307 @@ class ThemeConfiguration {
   // alphabetical by symbol name.
 
   // GENERAL CONFIGURATION
+  /// An iterable which contains the adaptations for the theme.
+  ///
+  /// To obtain an adaptation, use [ThemeData.getAdaptation].
   final Iterable<Adaptation<Object>>? adaptations;
+
+  /// {@macro flutter.material.theme_data.applyElevationOverlayColor}
   final bool? applyElevationOverlayColor;
+
+  /// {@macro flutter.material.theme_data.cupertinoOverrideTheme}
   final NoDefaultCupertinoThemeData? cupertinoOverrideTheme;
+
+  /// {@macro flutter.material.theme_data.extensions}
   final Iterable<ThemeExtension<dynamic>>? extensions;
+
+  /// {@macro flutter.material.theme_data.inputDecorationTheme}
   final InputDecorationTheme? inputDecorationTheme;
+
+  /// {@macro flutter.material.theme_data.materialTapTargetSize}
   final MaterialTapTargetSize? materialTapTargetSize;
+
+  /// {@macro flutter.material.theme_data.pageTransitionsTheme}
   final PageTransitionsTheme? pageTransitionsTheme;
+
+  /// {@macro flutter.material.theme_data.platform}
   final TargetPlatform? platform;
+
+  /// A theme for customizing the colors, thickness, and shape of [Scrollbar]s.
   final ScrollbarThemeData? scrollbarTheme;
+
+  /// {@macro flutter.material.theme_data.splashFactory}
   final InteractiveInkFeatureFactory? splashFactory;
+
+  /// {@macro flutter.material.theme_data.useMaterial3}
   final bool? useMaterial3;
+
+  /// The density value for specifying the compactness of various UI components.
+  ///
+  /// {@macro flutter.material.themedata.visualDensity}
   final VisualDensity? visualDensity;
+
   // COLOR
+
+  /// {@macro flutter.material.color_scheme.ColorScheme}
+  ///
+  /// This property was added much later than the theme's set of highly specific
+  /// colors, like [cardColor], [canvasColor] etc. New components can be defined
+  /// exclusively in terms of [colorScheme]. Existing components will gradually
+  /// migrate to it, to the extent that is possible without significant
+  /// backwards compatibility breaks.
   final ColorScheme? colorScheme;
+
+  /// {@macro flutter.material.theme_data.brightness}
   final Brightness? brightness;
+
+  /// Used in [ColorScheme.fromSeed] to generate the full color scheme.
+  ///
+  /// {@macro flutter.material.color_scheme.seedColor}
   final Color? colorSchemeSeed;
+
   // [colorScheme] is the preferred way to configure colors. The [Color] properties
   // listed below (as well as primarySwatch) will gradually be phased out, see
   // https://github.com/flutter/flutter/issues/91772.
+
+  /// The default color of [MaterialType.canvas] [Material].
   final Color? canvasColor;
+
+  /// The color of [Material] when it is used as a [Card].
   final Color? cardColor;
+
+  /// The background color of [Dialog] elements.
   final Color? dialogBackgroundColor;
+
+  /// {@macro flutter.material.theme_data.disabledColor}
   final Color? disabledColor;
+
+  /// {@macro flutter.material.theme_data.dividerColor}
   final Color? dividerColor;
+
+  /// The focus color used indicate that a component has the input focus.
   final Color? focusColor;
+
+  /// {@macro flutter.material.theme_data.highlightColor}
   final Color? highlightColor;
+
+  /// {@macro flutter.material.theme_data.hintColor}
   final Color? hintColor;
+
+  /// {@macro flutter.material.theme_data.hoverColor}
   final Color? hoverColor;
+
+  /// The color of the selected tab indicator in a tab bar.
   final Color? indicatorColor;
+
+  /// {@macro flutter.material.theme_data.primaryColor}
   final Color? primaryColor;
+
+  /// A darker version of the [primaryColor].
   final Color? primaryColorDark;
+
+  /// A lighter version of the [primaryColor].
   final Color? primaryColorLight;
+
+  /// A [MaterialColor] used to define the [ColorScheme].
+  ///
+  /// This option will eventually be phased out; consider using
+  /// [colorSchemeSeed] instead.
   final MaterialColor? primarySwatch;
+
+  /// {@macro flutter.material.theme_data.scaffoldBackgroundColor}
   final Color? scaffoldBackgroundColor;
+
+  /// {@macro flutter.material.theme_data.secondaryHeaderColor}
   final Color? secondaryHeaderColor;
+
+  /// {@macro flutter.material.theme_data.shadowColor}
   final Color? shadowColor;
+
+  /// {@macro flutter.material.theme_data.splashColor}
   final Color? splashColor;
+
+  /// {@macro flutter.material.theme_data.unselectedWidgetColor}
   final Color? unselectedWidgetColor;
+
   // TYPOGRAPHY & ICONOGRAPHY
+
+  /// The font family to use when generating the [ThemeData.typography].
   final String? fontFamily;
+
+  /// A list of backup font families to use if the main [fontFamily] is
+  /// unavailable on the current platform.
   final List<String>? fontFamilyFallback;
+
+  /// The package to use when generating the [ThemeData.typography].
   final String? package;
+
+  /// An icon theme that contrasts with the card and canvas colors.
   final IconThemeData? iconTheme;
+
+  /// An icon theme that contrasts with the primary color.
   final IconThemeData? primaryIconTheme;
+
+  /// A text theme that contrasts with the primary color.
   final TextTheme? primaryTextTheme;
+
+  /// Text with a color that contrasts with the card and canvas colors.
   final TextTheme? textTheme;
+
+  /// {@macro flutter.material.theme_data.typography}
   final Typography? typography;
+
   // COMPONENT THEMES
+
+  /// {@macro flutter.material.theme_data.actionIconTheme}
   final ActionIconThemeData? actionIconTheme;
+
+  /// {@macro flutter.material.theme_data.appBarTheme}
   final AppBarTheme? appBarTheme;
+
+  /// A theme for customizing the color of [Badge]s.
   final BadgeThemeData? badgeTheme;
+
+  /// A theme for customizing the color and text style of a [MaterialBanner].
   final MaterialBannerThemeData? bannerTheme;
+
+  /// A theme for customizing the shape, elevation, and color of a [BottomAppBar].
   final BottomAppBarTheme? bottomAppBarTheme;
+
+  /// {@macro flutter.material.theme_data.bottomNavigationBarTheme}
   final BottomNavigationBarThemeData? bottomNavigationBarTheme;
+
+  /// A theme for customizing the color, elevation, and shape of a bottom sheet.
   final BottomSheetThemeData? bottomSheetTheme;
+
+  /// {@macro flutter.material.theme_data.buttonTheme}
   final ButtonThemeData? buttonTheme;
+
+  /// {@macro flutter.material.theme_data.cardTheme}
   final CardTheme? cardTheme;
+
+  /// A theme for customizing the appearance and layout of [Checkbox] widgets.
   final CheckboxThemeData? checkboxTheme;
+
+  /// {@macro flutter.material.theme_data.chipTheme}
   final ChipThemeData? chipTheme;
+
+  /// {@macro flutter.material.theme_data.dataTableTheme}
   final DataTableThemeData? dataTableTheme;
+
+  /// {@macro flutter.material.theme_data.datePickerTheme}
   final DatePickerThemeData? datePickerTheme;
+
+  /// A theme for customizing the shape of a dialog.
   final DialogTheme? dialogTheme;
+
+  /// {@macro flutter.material.theme_data.dividerTheme}
   final DividerThemeData? dividerTheme;
+
+  /// A theme for customizing the appearance and layout of [Drawer] widgets.
   final DrawerThemeData? drawerTheme;
+
+  /// A theme for customizing the appearance and layout of [DropdownMenu] widgets.
   final DropdownMenuThemeData? dropdownMenuTheme;
+
+  /// {@macro flutter.material.theme_data.elevatedButtonTheme}
   final ElevatedButtonThemeData? elevatedButtonTheme;
+
+  /// A theme for customizing the visual properties of [ExpansionTile]s.
   final ExpansionTileThemeData? expansionTileTheme;
+
+  /// {@macro flutter.material.theme_data.filledButtonTheme}
   final FilledButtonThemeData? filledButtonTheme;
+
+  /// {@macro flutter.material.theme_data.floatingActionButtonTheme}
   final FloatingActionButtonThemeData? floatingActionButtonTheme;
+
+  /// {@macro flutter.material.theme_data.iconButtonTheme}
   final IconButtonThemeData? iconButtonTheme;
+
+  /// A theme for customizing the appearance of [ListTile] widgets.
   final ListTileThemeData? listTileTheme;
+
+  /// {@macro flutter.material.theme_data.menuBarTheme}
   final MenuBarThemeData? menuBarTheme;
+
+  /// {@macro flutter.material.theme_data.menuButtonTheme}
   final MenuButtonThemeData? menuButtonTheme;
+
+  /// {@macro flutter.material.theme_data.menuTheme}
   final MenuThemeData? menuTheme;
+
+  /// {@macro flutter.material.theme_data.navigationBarTheme}
   final NavigationBarThemeData? navigationBarTheme;
+
+  /// {@macro flutter.material.theme_data.navigationDrawerTheme}
   final NavigationDrawerThemeData? navigationDrawerTheme;
+
+  /// {@macro flutter.material.theme_data.navigationRailTheme}
   final NavigationRailThemeData? navigationRailTheme;
+
+  /// {@macro flutter.material.theme_data.outlinedButtonTheme}
   final OutlinedButtonThemeData? outlinedButtonTheme;
+
+  /// {@macro flutter.material.theme_data.popupMenuTheme}
   final PopupMenuThemeData? popupMenuTheme;
+
+  /// A theme for customizing the appearance and layout of [ProgressIndicator] widgets.
   final ProgressIndicatorThemeData? progressIndicatorTheme;
+
+  /// A theme for customizing the appearance and layout of [Radio] widgets.
   final RadioThemeData? radioTheme;
+
+  /// A theme for customizing the appearance and layout of [SearchBar] widgets.
   final SearchBarThemeData? searchBarTheme;
+
+  /// A theme for customizing the appearance and layout of search views created by [SearchAnchor] widgets.
   final SearchViewThemeData? searchViewTheme;
+
+  /// A theme for customizing the appearance and layout of [SegmentedButton] widgets.
   final SegmentedButtonThemeData? segmentedButtonTheme;
+
+  /// {@macro flutter.material.theme_data.sliderTheme}
   final SliderThemeData? sliderTheme;
+
+  /// A theme for customizing colors, shape, elevation, and behavior of a [SnackBar].
   final SnackBarThemeData? snackBarTheme;
+
+  /// A theme for customizing the appearance and layout of [Switch] widgets.
   final SwitchThemeData? switchTheme;
+
+  /// A theme for customizing the size, shape, and color of the tab bar indicator.
   final TabBarTheme? tabBarTheme;
+
+  /// {@macro flutter.material.theme_data.textButtonTheme}
   final TextButtonThemeData? textButtonTheme;
+
+  /// A theme for customizing the appearance and layout of [TextField] widgets.
   final TextSelectionThemeData? textSelectionTheme;
+
+  /// A theme for customizing the appearance and layout of time picker widgets.
   final TimePickerThemeData? timePickerTheme;
+
+  /// Defines the default configuration of [ToggleButtons] widgets.
   final ToggleButtonsThemeData? toggleButtonsTheme;
+
+  /// {@macro flutter.material.theme_data.tooltipTheme}
   final TooltipThemeData? tooltipTheme;
+
+
   // DEPRECATED (newest deprecations at the bottom)
+
+  /// A theme for customizing the appearance and layout of [ButtonBar] widgets.
   @Deprecated(
     'Use OverflowBar instead. '
     'This feature was deprecated after v3.21.0-10.0.pre.',
   )
   final ButtonBarThemeData? buttonBarTheme;
 
+  /// Creates a copy of this configuration but with the given fields replaced
+  /// with the new values.
+  ///
+  /// The [brightness] value is applied to the [colorScheme].
   ThemeConfiguration copyWith({
     // For the sanity of the reader, make sure these properties are in the same
     // order in every place that they are separated by section comments (e.g.
@@ -630,6 +802,9 @@ class ThemeConfiguration {
     );
   }
 
+  /// Creates a new configuration based on the properties of the [other] object.
+  ///
+  /// Used in [Theme.merge].
   ThemeConfiguration merge(Object other) {
     final ThemeConfiguration? otherConfig = switch (other) {
       final ThemeData themeData => themeData.config,
@@ -849,6 +1024,10 @@ class ThemeConfiguration {
     };
   }
 
+  /// Turns this configuration into a [ThemeData] object.
+  ///
+  /// Default values are applied to `null` members so they can be passed
+  /// into the [ThemeData.raw] constructor.
   ThemeData applyDefaults() {
     bool? applyElevationOverlayColor = this.applyElevationOverlayColor;
     ColorScheme? colorScheme = this.colorScheme;
@@ -1081,6 +1260,39 @@ class ThemeConfiguration {
   }
 }
 
+/// Defines the configuration of the overall visual [Theme] for a [MaterialApp]
+/// or a widget subtree within the app.
+///
+/// The [MaterialApp] theme property can be used to configure the appearance
+/// of the entire app. Widget subtrees within an app can override the app's
+/// theme by including a [Theme] widget at the top of the subtree.
+///
+/// Widgets whose appearance should align with the overall theme can obtain the
+/// current theme's configuration with [Theme.of]. Material components typically
+/// depend exclusively on the [colorScheme] and [textTheme]. These properties
+/// are guaranteed to have non-null values.
+///
+/// The static [Theme.of] method finds the [ThemeData] value specified for the
+/// nearest [BuildContext] ancestor. This lookup is inexpensive, essentially
+/// just a single HashMap access. It can sometimes be a little confusing
+/// because [Theme.of] can not see a [Theme] widget that is defined in the
+/// current build method's context. To overcome that, create a new custom widget
+/// for the subtree that appears below the new [Theme], or insert a widget
+/// that creates a new BuildContext, like [Builder].
+///
+/// {@tool dartpad}
+/// This example demonstrates how a typical [MaterialApp] specifies
+/// and uses a custom [Theme]. The theme's [ColorScheme] is based on a
+/// single "seed" color and configures itself to match the platform's
+/// current light or dark color configuration. The theme overrides the
+/// default configuration of [FloatingActionButton] to show how to
+/// customize the appearance a class of components.
+///
+/// ** See code in examples/api/lib/material/theme_data/theme_data.0.dart **
+/// {@end-tool}
+///
+/// See <https://material.io/design/color/> for
+/// more discussion on how to pick the right colors.
 @immutable
 class ThemeData with Diagnosticable {
   /// Create a [ThemeData] that's used to configure a [Theme].
@@ -1536,13 +1748,16 @@ class ThemeData with Diagnosticable {
     };
   }
 
+  /// {@macro flutter.material.theme_data.ThemeConfiguration}
   final ThemeConfiguration config;
 
+  /// {@template flutter.material.theme_data.brightness}
   /// The overall theme brightness.
   ///
   /// The default [TextStyle] color for the [textTheme] is black if the
   /// theme is constructed with [Brightness.light] and white if the
   /// theme is constructed with [Brightness.dark].
+  /// {@endtemplate}
   Brightness get brightness => colorScheme.brightness;
 
   // For the sanity of the reader, make sure these properties are in the same
@@ -1552,6 +1767,7 @@ class ThemeData with Diagnosticable {
 
   // GENERAL CONFIGURATION
 
+  /// {@template flutter.material.theme_data.applyElevationOverlayColor}
   /// Apply a semi-transparent overlay color on Material surfaces to indicate
   /// elevation for dark themes.
   ///
@@ -1587,8 +1803,10 @@ class ThemeData with Diagnosticable {
   ///    the overlay color to its surface color.
   ///  * <https://material.io/design/color/dark-theme.html>, which specifies how
   ///    the overlay should be applied.
+  /// {@endtemplate}
   final bool applyElevationOverlayColor;
 
+  /// {@template flutter.material.theme_data.cupertinoOverrideTheme}
   /// Components of the [CupertinoThemeData] to override from the Material
   /// [ThemeData] adaptation.
   ///
@@ -1599,14 +1817,17 @@ class ThemeData with Diagnosticable {
   ///
   /// This cascading effect for individual attributes of the [CupertinoThemeData]
   /// can be overridden using attributes of this [cupertinoOverrideTheme].
+  /// {@endtemplate}
   final NoDefaultCupertinoThemeData? cupertinoOverrideTheme;
 
+  /// {@template flutter.material.theme_data.extensions}
   /// Arbitrary additions to this theme.
   ///
   /// To define extensions, pass an [Iterable] containing one or more [ThemeExtension]
   /// subclasses to [ThemeData.new] or [copyWith].
   ///
   /// To obtain an extension, use [extension].
+  /// {@endtemplate}
   ///
   /// {@tool dartpad}
   /// This sample shows how to create and use a subclass of [ThemeExtension] that
@@ -1633,26 +1854,33 @@ class ThemeData with Diagnosticable {
   /// To obtain an adaptation, use [getAdaptation].
   final Map<Type, Adaptation<Object>> adaptationMap;
 
+  /// {@template flutter.material.theme_data.inputDecorationTheme}
   /// The default [InputDecoration] values for [InputDecorator], [TextField],
   /// and [TextFormField] are based on this theme.
   ///
   /// See [InputDecoration.applyDefaults].
+  /// {@endtemplate}
   final InputDecorationTheme inputDecorationTheme;
 
+  /// {@template flutter.material.theme_data.materialTapTargetSize}
   /// Configures the hit test size of certain Material widgets.
   ///
   /// Defaults to a [platform]-appropriate size: [MaterialTapTargetSize.padded]
   /// on mobile platforms, [MaterialTapTargetSize.shrinkWrap] on desktop
   /// platforms.
+  /// {@endtemplate}
   final MaterialTapTargetSize materialTapTargetSize;
 
+  /// {@template flutter.material.theme_data.pageTransitionsTheme}
   /// Default [MaterialPageRoute] transitions per [TargetPlatform].
   ///
   /// [MaterialPageRoute.buildTransitions] delegates to a [platform] specific
   /// [PageTransitionsBuilder]. If a matching builder is not found, a builder
   /// whose platform is null is used.
+  /// {@endtemplate}
   final PageTransitionsTheme pageTransitionsTheme;
 
+  /// {@template flutter.material.theme_data.platform}
   /// The platform the material widgets should adapt to target.
   ///
   /// Defaults to the current platform, as exposed by [defaultTargetPlatform].
@@ -1678,11 +1906,13 @@ class ThemeData with Diagnosticable {
   /// [debugDefaultTargetPlatformOverride].
   ///
   /// Determines the defaults for [typography] and [materialTapTargetSize].
+  /// {@endtemplate}
   final TargetPlatform platform;
 
   /// A theme for customizing the colors, thickness, and shape of [Scrollbar]s.
   final ScrollbarThemeData scrollbarTheme;
 
+  /// {@template flutter.material.theme_data.splashFactory}
   /// Defines the appearance of ink splashes produces by [InkWell]
   /// and [InkResponse].
   ///
@@ -1693,8 +1923,10 @@ class ThemeData with Diagnosticable {
   ///    more aggressively than the default.
   ///  * [InkSparkle.splashFactory], which defines a more aggressive and organic
   ///    splash with sparkle effects.
+  /// {@endtemplate}
   final InteractiveInkFeatureFactory splashFactory;
 
+  /// {@template flutter.material.theme_data.useMaterial3}
   /// A temporary flag that can be used to opt-out of Material 3 features.
   ///
   /// This flag is _true_ by default. If false, then components will
@@ -1778,6 +2010,7 @@ class ThemeData with Diagnosticable {
   /// See also:
   ///
   ///   * [Material 3 specification](https://m3.material.io/).
+  /// {@endtemplate}
   final bool useMaterial3;
 
   /// The density value for specifying the compactness of various UI components.
@@ -1834,42 +2067,54 @@ class ThemeData with Diagnosticable {
   /// The background color of [Dialog] elements.
   final Color dialogBackgroundColor;
 
+  /// {@template flutter.material.theme_data.disabledColor}
   /// The color used for widgets that are inoperative, regardless of
   /// their state. For example, a disabled checkbox (which may be
   /// checked or unchecked).
+  /// {@endtemplate}
   final Color disabledColor;
 
+  /// {@template flutter.material.theme_data.dividerColor}
   /// The color of [Divider]s and [PopupMenuDivider]s, also used
   /// between [ListTile]s, between rows in [DataTable]s, and so forth.
   ///
   /// To create an appropriate [BorderSide] that uses this color, consider
   /// [Divider.createBorderSide].
+  /// {@endtemplate}
   final Color dividerColor;
 
   /// The focus color used indicate that a component has the input focus.
   final Color focusColor;
 
+  /// {@template flutter.material.theme_data.highlightColor}
   /// The highlight color used during ink splash animations or to
   /// indicate an item in a menu is selected.
+  /// {@endtemplate}
   final Color highlightColor;
 
+  /// {@template flutter.material.theme_data.hintColor}
   /// The color to use for hint text or placeholder text, e.g. in
   /// [TextField] fields.
+  /// {@endtemplate}
   final Color hintColor;
 
+  /// {@template flutter.material.theme_data.hoverColor}
   /// The hover color used to indicate when a pointer is hovering over a
   /// component.
+  /// {@endtemplate}
   final Color hoverColor;
 
   /// The color of the selected tab indicator in a tab bar.
   final Color indicatorColor;
 
+  /// {@template flutter.material.theme_data.primaryColor}
   /// The background color for major parts of the app (toolbars, tab bars, etc)
   ///
   /// The theme's [colorScheme] property contains [ColorScheme.primary], as
   /// well as a color that contrasts well with the primary color called
   /// [ColorScheme.onPrimary]. It might be simpler to just configure an app's
   /// visuals in terms of the theme's [colorScheme].
+  /// {@endtemplate}
   final Color primaryColor;
 
   /// A darker version of the [primaryColor].
@@ -1878,16 +2123,21 @@ class ThemeData with Diagnosticable {
   /// A lighter version of the [primaryColor].
   final Color primaryColorLight;
 
+  /// {@template flutter.material.theme_data.scaffoldBackgroundColor}
   /// The default color of the [Material] that underlies the [Scaffold]. The
   /// background color for a typical material app or a page within the app.
+  /// {@endtemplate}
   final Color scaffoldBackgroundColor;
 
+  /// {@template flutter.material.theme_data.secondaryHeaderColor}
   /// The color of the header of a [PaginatedDataTable] when there are selected rows.
   // According to the spec for data tables:
   // https://material.io/archive/guidelines/components/data-tables.html#data-tables-tables-within-cards
   // ...this should be the "50-value of secondary app color".
+  /// {@endtemplate}
   final Color secondaryHeaderColor;
 
+  /// {@template flutter.material.theme_data.shadowColor}
   /// The color that the [Material] widget uses to draw elevation shadows.
   ///
   /// Defaults to fully opaque black.
@@ -1897,16 +2147,21 @@ class ThemeData with Diagnosticable {
   /// As the elevation of the component increases, the overlay increases in
   /// opacity. The [applyElevationOverlayColor] property turns the elevation
   /// overlay on or off for dark themes.
+  /// {@endtemplate}
   final Color shadowColor;
 
+  /// {@template flutter.material.theme_data.splashColor}
   /// The color of ink splashes.
   ///
   /// See also:
   ///  * [splashFactory], which defines the appearance of the splash.
+  /// {@endtemplate}
   final Color splashColor;
 
+  /// {@template flutter.material.theme_data.unselectedWidgetColor}
   /// The color used for widgets in their inactive (but enabled)
   /// state. For example, an unchecked checkbox. See also [disabledColor].
+  /// {@endtemplate}
   final Color unselectedWidgetColor;
 
   // TYPOGRAPHY & ICONOGRAPHY
@@ -1923,19 +2178,25 @@ class ThemeData with Diagnosticable {
   /// Text with a color that contrasts with the card and canvas colors.
   final TextTheme textTheme;
 
+  /// {@template flutter.material.theme_data.typography}
   /// The color and geometry [TextTheme] values used to configure [textTheme].
   ///
   /// Defaults to a [platform]-appropriate typography.
+  /// {@endtemplate}
   final Typography typography;
 
   // COMPONENT THEMES
 
+  /// {@template flutter.material.theme_data.actionIconTheme}
   /// A theme for customizing icons of [BackButtonIcon], [CloseButtonIcon],
   /// [DrawerButtonIcon], or [EndDrawerButtonIcon].
+  /// {@endtemplate}
   final ActionIconThemeData? actionIconTheme;
 
+  /// {@template flutter.material.theme_data.appBarTheme}
   /// A theme for customizing the color, elevation, brightness, iconTheme and
   /// textTheme of [AppBar]s.
+  /// {@endtemplate}
   final AppBarTheme appBarTheme;
 
   /// A theme for customizing the color of [Badge]s.
@@ -1947,43 +2208,57 @@ class ThemeData with Diagnosticable {
   /// A theme for customizing the shape, elevation, and color of a [BottomAppBar].
   final BottomAppBarTheme bottomAppBarTheme;
 
+  /// {@template flutter.material.theme_data.bottomNavigationBarTheme}
   /// A theme for customizing the appearance and layout of [BottomNavigationBar]
   /// widgets.
+  /// {@endtemplate}
   final BottomNavigationBarThemeData bottomNavigationBarTheme;
 
   /// A theme for customizing the color, elevation, and shape of a bottom sheet.
   final BottomSheetThemeData bottomSheetTheme;
 
+  /// {@template flutter.material.theme_data.buttonTheme}
   /// Defines the default configuration of button widgets, like [DropdownButton]
   /// and [ButtonBar].
+  /// {@endtemplate}
   final ButtonThemeData buttonTheme;
 
+  /// {@template flutter.material.theme_data.cardTheme}
   /// The colors and styles used to render [Card].
   ///
   /// This is the value returned from [CardTheme.of].
+  /// {@endtemplate}
   final CardTheme cardTheme;
 
   /// A theme for customizing the appearance and layout of [Checkbox] widgets.
   final CheckboxThemeData checkboxTheme;
 
+  /// {@template flutter.material.theme_data.chipTheme}
   /// The colors and styles used to render [Chip]s.
   ///
   /// This is the value returned from [ChipTheme.of].
+  /// {@endtemplate}
   final ChipThemeData chipTheme;
 
+  /// {@template flutter.material.theme_data.dataTableTheme}
   /// A theme for customizing the appearance and layout of [DataTable]
   /// widgets.
+  /// {@endtemplate}
   final DataTableThemeData dataTableTheme;
 
+  /// {@template flutter.material.theme_data.datePickerTheme}
   /// A theme for customizing the appearance and layout of [DatePickerDialog]
   /// widgets.
+  /// {@endtemplate}
   final DatePickerThemeData datePickerTheme;
 
   /// A theme for customizing the shape of a dialog.
   final DialogTheme dialogTheme;
 
+  /// {@template flutter.material.theme_data.dividerTheme}
   /// A theme for customizing the color, thickness, and indents of [Divider]s,
   /// [VerticalDivider]s, etc.
+  /// {@endtemplate}
   final DividerThemeData dividerTheme;
 
   /// A theme for customizing the appearance and layout of [Drawer] widgets.
@@ -1992,58 +2267,82 @@ class ThemeData with Diagnosticable {
   /// A theme for customizing the appearance and layout of [DropdownMenu] widgets.
   final DropdownMenuThemeData dropdownMenuTheme;
 
+  /// {@template flutter.material.theme_data.elevatedButtonTheme}
   /// A theme for customizing the appearance and internal layout of
   /// [ElevatedButton]s.
+  /// {@endtemplate}
   final ElevatedButtonThemeData elevatedButtonTheme;
 
   /// A theme for customizing the visual properties of [ExpansionTile]s.
   final ExpansionTileThemeData expansionTileTheme;
 
+  /// {@template flutter.material.theme_data.filledButtonTheme}
   /// A theme for customizing the appearance and internal layout of
   /// [FilledButton]s.
+  /// {@endtemplate}
   final FilledButtonThemeData filledButtonTheme;
 
+  /// {@template flutter.material.theme_data.floatingActionButtonTheme}
   /// A theme for customizing the shape, elevation, and color of a
   /// [FloatingActionButton].
+  /// {@endtemplate}
   final FloatingActionButtonThemeData floatingActionButtonTheme;
 
+  /// {@template flutter.material.theme_data.iconButtonTheme}
   /// A theme for customizing the appearance and internal layout of
   /// [IconButton]s.
+  /// {@endtemplate}
   final IconButtonThemeData iconButtonTheme;
 
   /// A theme for customizing the appearance of [ListTile] widgets.
   final ListTileThemeData listTileTheme;
 
+  /// {@template flutter.material.theme_data.menuBarTheme}
   /// A theme for customizing the color, shape, elevation, and other [MenuStyle]
   /// aspects of the menu bar created by the [MenuBar] widget.
+  /// {@endtemplate}
   final MenuBarThemeData menuBarTheme;
 
+  /// {@template flutter.material.theme_data.menuButtonTheme}
   /// A theme for customizing the color, shape, elevation, and text style of
   /// cascading menu buttons created by [SubmenuButton] or [MenuItemButton].
+  /// {@endtemplate}
   final MenuButtonThemeData menuButtonTheme;
 
+  /// {@template flutter.material.theme_data.menuTheme}
   /// A theme for customizing the color, shape, elevation, and other [MenuStyle]
   /// attributes of menus created by the [SubmenuButton] widget.
+  /// {@endtemplate}
   final MenuThemeData menuTheme;
 
+  /// {@template flutter.material.theme_data.navigationBarTheme}
   /// A theme for customizing the background color, text style, and icon themes
   /// of a [NavigationBar].
+  /// {@endtemplate}
   final NavigationBarThemeData navigationBarTheme;
 
+  /// {@template flutter.material.theme_data.navigationDrawerTheme}
   /// A theme for customizing the background color, text style, and icon themes
   /// of a [NavigationDrawer].
+  /// {@endtemplate}
   final NavigationDrawerThemeData navigationDrawerTheme;
 
+  /// {@template flutter.material.theme_data.navigationRailTheme}
   /// A theme for customizing the background color, elevation, text style, and
   /// icon themes of a [NavigationRail].
+  /// {@endtemplate}
   final NavigationRailThemeData navigationRailTheme;
 
+  /// {@template flutter.material.theme_data.outlinedButtonTheme}
   /// A theme for customizing the appearance and internal layout of
   /// [OutlinedButton]s.
+  /// {@endtemplate}
   final OutlinedButtonThemeData outlinedButtonTheme;
 
+  /// {@template flutter.material.theme_data.popupMenuTheme}
   /// A theme for customizing the color, shape, elevation, and text style of
   /// popup menus.
+  /// {@endtemplate}
   final PopupMenuThemeData popupMenuTheme;
 
   /// A theme for customizing the appearance and layout of [ProgressIndicator] widgets.
@@ -2061,9 +2360,11 @@ class ThemeData with Diagnosticable {
   /// A theme for customizing the appearance and layout of [SegmentedButton] widgets.
   final SegmentedButtonThemeData segmentedButtonTheme;
 
+  /// {@template flutter.material.theme_data.sliderTheme}
   /// The colors and shapes used to render [Slider].
   ///
   /// This is the value returned from [SliderTheme.of].
+  /// {@endtemplate}
   final SliderThemeData sliderTheme;
 
   /// A theme for customizing colors, shape, elevation, and behavior of a [SnackBar].
@@ -2075,8 +2376,10 @@ class ThemeData with Diagnosticable {
   /// A theme for customizing the size, shape, and color of the tab bar indicator.
   final TabBarTheme tabBarTheme;
 
+  /// {@template flutter.material.theme_data.textButtonTheme}
   /// A theme for customizing the appearance and internal layout of
   /// [TextButton]s.
+  /// {@endtemplate}
   final TextButtonThemeData textButtonTheme;
 
   /// A theme for customizing the appearance and layout of [TextField] widgets.
@@ -2088,9 +2391,11 @@ class ThemeData with Diagnosticable {
   /// Defines the default configuration of [ToggleButtons] widgets.
   final ToggleButtonsThemeData toggleButtonsTheme;
 
+  /// {@template flutter.material.theme_data.tooltipTheme}
   /// A theme for customizing the visual properties of [Tooltip]s.
   ///
   /// This is the value returned from [TooltipTheme.of].
+  /// {@endtemplate}
   final TooltipThemeData tooltipTheme;
 
   /// A theme for customizing the appearance and layout of [ButtonBar] widgets.

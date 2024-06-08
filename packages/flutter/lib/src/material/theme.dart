@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: public_member_api_docs
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 
@@ -114,6 +112,13 @@ class Theme extends StatelessWidget {
     return ThemeData.localize(theme, theme.typography.geometryThemeFor(category));
   }
 
+  /// Creates a new [ThemeData] object, visible to child widgets via [Theme.of].
+  ///
+  /// The new theme data is generated using [ThemeConfiguration.merge] and
+  /// [ThemeConfiguration.applyDefaults].
+  ///
+  /// The argument passed [data] can be a number of different types, including
+  /// [ThemeData], [Brightness], [IconTheme], [VisualDensity], and [TargetPlatform].
   static Widget merge({
     Key? key,
     required Object data,

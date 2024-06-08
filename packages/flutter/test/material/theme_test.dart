@@ -554,6 +554,52 @@ void main() {
     expect(theme.textTheme.displayLarge!.debugLabel, '(englishLike displayLarge 2021).merge((blackMountainView displayLarge).apply)');
   });
 
+  group('Theme.merge()', () {
+    final ThemeData theme = ThemeData(
+      colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+    );
+
+    Future<void> createPage(WidgetTester tester, WidgetBuilder builder, {Object? merge}) {
+      Widget home = Scaffold(body: Builder(builder: builder));
+      if (merge != null) {
+        home = Theme.merge(data: merge, child: home);
+      }
+
+      return tester.pumpWidget(
+        MaterialApp(theme: theme, home: home),
+      );
+    }
+
+    testWidgets('Theme.merge() using Brightness', (WidgetTester tester) async {
+      Object? data;
+      Widget getBrightness(BuildContext context) {
+        data = Theme.of(context).brightness;
+        return const SizedBox.shrink();
+      }
+
+      await createPage(tester, getBrightness);
+      expect(data, Brightness.light);
+
+      await createPage(tester, getBrightness, merge: Brightness.dark);
+      expect(data, Brightness.dark);
+    });
+
+    testWidgets('Theme.merge() using InputDecorationTheme', (WidgetTester tester) async {
+      const InputDecorationTheme newDecoration = InputDecorationTheme(fillColor: Colors.cyan);
+      Object? data;
+      Widget getDecoration(BuildContext context) {
+        data = Theme.of(context).inputDecorationTheme.fillColor;
+        return const SizedBox.shrink();
+      }
+
+      await createPage(tester, getDecoration);
+      expect(data, isNull);
+
+      await createPage(tester, getDecoration, merge: newDecoration);
+      expect(data, newDecoration.fillColor);
+    });
+  });
+
   group('Cupertino theme', () {
     late int buildCount;
     CupertinoThemeData? actualTheme;
