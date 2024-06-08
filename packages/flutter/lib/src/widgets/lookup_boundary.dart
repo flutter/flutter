@@ -57,15 +57,15 @@ import 'framework.dart';
 /// [LookupBoundary] because the [RenderObject] produced by that widget subtree
 /// is not attached to the render tree that the [ViewAnchor] itself belongs to.
 ///
-/// As an example, [Material.of] relies on lookup boundaries to hide the
-/// [Material] widget from certain descendant button widget. Buttons reach out
-/// to their [Material] ancestor to draw ink splashes on its associated render
+/// As an example, [Splash.of] relies on lookup boundaries to hide the
+/// [SplashBox] widget from certain descendant button widgets. Buttons reach out
+/// to their [SplashBox] ancestor to draw [Splash]es on its associated render
 /// object. This only produces the desired effect if the button render object
-/// is a descendant of the [Material] render object. If the element tree and
+/// is a descendant of the [SplashController] render object. If the element tree and
 /// the render tree are not in sync due to anomalies described above, this may
-/// not be the case. To avoid incorrect visuals, the [Material] relies on
+/// not be the case. To avoid incorrect visuals, the [SplashBox] relies on
 /// lookup boundaries to hide itself from descendants in subtrees with such
-/// anomalies. Those subtrees are expected to introduce their own [Material]
+/// anomalies. Those subtrees are expected to introduce their own [SplashBox]
 /// widget that buttons there can utilize without crossing a lookup boundary.
 class LookupBoundary extends InheritedWidget {
   /// Creates a [LookupBoundary].

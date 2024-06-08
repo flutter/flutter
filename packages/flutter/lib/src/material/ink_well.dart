@@ -28,136 +28,29 @@ import 'theme.dart';
 // Examples can assume:
 // late BuildContext context;
 
-/// An ink feature that displays a [color] "splash" in response to a user
+/// An ink feature that displays a color [Splash] in response to a user
 /// gesture that can be confirmed or canceled.
 ///
-/// Subclasses call [confirm] when an input gesture is recognized. For
+/// Subclasses call `confirm` when an input gesture is recognized. For
 /// example a press event might trigger an ink feature that's confirmed
 /// when the corresponding up event is seen.
 ///
-/// Subclasses call [cancel] when an input gesture is aborted before it
+/// Subclasses call `cancel` when an input gesture is aborted before it
 /// is recognized. For example a press event might trigger an ink feature
 /// that's canceled when the pointer is dragged out of the reference
 /// box.
 ///
 /// The [InkWell] and [InkResponse] widgets generate instances of this
 /// class.
-abstract class InteractiveInkFeature extends InkFeature {
-  /// Creates an InteractiveInkFeature.
-  InteractiveInkFeature({
-    required super.controller,
-    required super.referenceBox,
-    required Color color,
-    ShapeBorder? customBorder,
-    super.onRemoved,
-  }) : _color = color,
-       _customBorder = customBorder;
+@Deprecated(
+  'Use InteractiveSplash instead. '
+  '"Splash effects" no longer rely on a MaterialInkController. '
+  'This feature was deprecated after v3.24.0-0.2.pre.',
+)
+typedef InteractiveInkFeature = Splash;
 
-  /// Called when the user input that triggered this feature's appearance was confirmed.
-  ///
-  /// Typically causes the ink to propagate faster across the material. By default this
-  /// method does nothing.
-  void confirm() { }
-
-  /// Called when the user input that triggered this feature's appearance was canceled.
-  ///
-  /// Typically causes the ink to gradually disappear. By default this method does
-  /// nothing.
-  void cancel() { }
-
-  /// The ink's color.
-  Color get color => _color;
-  Color _color;
-  set color(Color value) {
-    if (value == _color) {
-      return;
-    }
-    _color = value;
-    controller.markNeedsPaint();
-  }
-
-  /// The ink's optional custom border.
-  ShapeBorder? get customBorder => _customBorder;
-  ShapeBorder? _customBorder;
-  set customBorder(ShapeBorder? value) {
-    if (value == _customBorder) {
-      return;
-    }
-    _customBorder = value;
-    controller.markNeedsPaint();
-  }
-
-  /// Draws an ink splash or ink ripple on the passed in [Canvas].
-  ///
-  /// The [transform] argument is the [Matrix4] transform that typically
-  /// shifts the coordinate space of the canvas to the space in which
-  /// the ink circle is to be painted.
-  ///
-  /// [center] is the [Offset] from origin of the canvas where the center
-  /// of the circle is drawn.
-  ///
-  /// [paint] takes a [Paint] object that describes the styles used to draw the ink circle.
-  /// For example, [paint] can specify properties like color, strokewidth, colorFilter.
-  ///
-  /// [radius] is the radius of ink circle to be drawn on canvas.
-  ///
-  /// [clipCallback] is the callback used to obtain the [Rect] used for clipping the ink effect.
-  /// If [clipCallback] is null, no clipping is performed on the ink circle.
-  ///
-  /// Clipping can happen in 3 different ways:
-  ///  1. If [customBorder] is provided, it is used to determine the path
-  ///     for clipping.
-  ///  2. If [customBorder] is null, and [borderRadius] is provided, the canvas
-  ///     is clipped by an [RRect] created from [clipCallback] and [borderRadius].
-  ///  3. If [borderRadius] is the default [BorderRadius.zero], then the [Rect] provided
-  ///      by [clipCallback] is used for clipping.
-  ///
-  /// [textDirection] is used by [customBorder] if it is non-null. This allows the [customBorder]'s path
-  /// to be properly defined if it was the path was expressed in terms of "start" and "end" instead of
-  /// "left" and "right".
-  ///
-  /// For examples on how the function is used, see [InkSplash] and [InkRipple].
-  @protected
-  void paintInkCircle({
-    required Canvas canvas,
-    required Matrix4 transform,
-    required Paint paint,
-    required Offset center,
-    required double radius,
-    TextDirection? textDirection,
-    ShapeBorder? customBorder,
-    BorderRadius borderRadius = BorderRadius.zero,
-    RectCallback? clipCallback,
-  }) {
-
-    final Offset? originOffset = MatrixUtils.getAsTranslation(transform);
-    canvas.save();
-    if (originOffset == null) {
-      canvas.transform(transform.storage);
-    } else {
-      canvas.translate(originOffset.dx, originOffset.dy);
-    }
-    if (clipCallback != null) {
-      final Rect rect = clipCallback();
-      if (customBorder != null) {
-        canvas.clipPath(customBorder.getOuterPath(rect, textDirection: textDirection));
-      } else if (borderRadius != BorderRadius.zero) {
-        canvas.clipRRect(RRect.fromRectAndCorners(
-          rect,
-          topLeft: borderRadius.topLeft, topRight: borderRadius.topRight,
-          bottomLeft: borderRadius.bottomLeft, bottomRight: borderRadius.bottomRight,
-        ));
-      } else {
-        canvas.clipRect(rect);
-      }
-    }
-    canvas.drawCircle(center, radius, paint);
-    canvas.restore();
-  }
-}
-
-/// An encapsulation of an [InteractiveInkFeature] constructor used by
-/// [InkWell], [InkResponse], and [ThemeData].
+/// An encapsulation of a [Splash] constructor used by [InkWell],
+/// [InkResponse], and [ThemeData].
 ///
 /// Interactive ink feature implementations should provide a static const
 /// `splashFactory` value that's an instance of this class. The `splashFactory`
@@ -167,32 +60,12 @@ abstract class InteractiveInkFeature extends InkFeature {
 ///
 ///  * [InkSplash.splashFactory]
 ///  * [InkRipple.splashFactory]
-abstract class InteractiveInkFeatureFactory {
-  /// Abstract const constructor. This constructor enables subclasses to provide
-  /// const constructors so that they can be used in const expressions.
-  ///
-  /// Subclasses should provide a const constructor.
-  const InteractiveInkFeatureFactory();
-
-  /// The factory method.
-  ///
-  /// Subclasses should override this method to return a new instance of an
-  /// [InteractiveInkFeature].
-  @factory
-  InteractiveInkFeature create({
-    required MaterialInkController controller,
-    required RenderBox referenceBox,
-    required Offset position,
-    required Color color,
-    required TextDirection textDirection,
-    bool containedInkWell = false,
-    RectCallback? rectCallback,
-    BorderRadius? borderRadius,
-    ShapeBorder? customBorder,
-    double? radius,
-    VoidCallback? onRemoved,
-  });
-}
+@Deprecated(
+  'Use SplashFactory instead. '
+  '"Splash effects" no longer rely on a MaterialInkController. '
+  'This feature was deprecated after v3.24.0-0.2.pre.',
+)
+typedef InteractiveInkFeatureFactory = SplashFactory;
 
 abstract class _ParentInkResponseState {
   void markChildInkResponsePressed(_ParentInkResponseState childState, bool value);
@@ -266,11 +139,11 @@ typedef _CheckContext = bool Function(BuildContext context);
 /// matches the Material Design premise wherein the [Material] is what is
 /// actually reacting to touches by spreading ink.
 ///
-/// If a Widget uses this class directly, it should include the following line
-/// at the top of its build function to call [debugCheckHasMaterial]:
+/// If a Widget uses this class directly, it should call [debugCheckSplash]
+/// at the top of its build method:
 ///
 /// ```dart
-/// assert(debugCheckHasMaterial(context));
+/// assert(debugCheckSplash(context));
 /// ```
 ///
 /// ## Troubleshooting
@@ -1369,11 +1242,11 @@ class _InkResponseState extends State<_InkResponseStateWidget>
 /// matches the Material Design premise wherein the [Material] is what is
 /// actually reacting to touches by spreading ink.
 ///
-/// If a Widget uses this class directly, it should include the following line
-/// at the top of its build function to call [debugCheckHasMaterial]:
+/// If a Widget uses this class directly, it should call [debugCheckSplash]
+/// at the top of its build method:
 ///
 /// ```dart
-/// assert(debugCheckHasMaterial(context));
+/// assert(debugCheckSplash(context));
 /// ```
 ///
 /// ## Troubleshooting
@@ -1386,27 +1259,21 @@ class _InkResponseState extends State<_InkResponseStateWidget>
 /// This is because ink splashes draw on the underlying [Material] itself, as
 /// if the ink was spreading inside the material.
 ///
-/// The [Ink] widget can be used as a replacement for [Image], [Container], or
-/// [DecoratedBox] to ensure that the image or decoration also paints in the
-/// [Material] itself, below the ink.
+/// Replacing the opaque widget with a [Material] allows the ink splash to be shown.
 ///
-/// If this is not possible for some reason, e.g. because you are using an
-/// opaque [CustomPaint] widget, alternatively consider using a second
-/// [Material] above the opaque widget but below the [InkWell] (as an
-/// ancestor to the ink well). The [MaterialType.transparency] material
-/// kind can be used for this purpose.
+/// Alternatively, an [SplashBox] can be set as the opaque widget's child, and
+/// [Splash] effects will be visible on top of it.
 ///
 /// ### InkWell isn't clipping properly
 ///
-/// If you want to clip an InkWell or any [Ink] widgets you need to keep in mind
-/// that the [Material] that the Ink will be printed on is responsible for clipping.
-/// This means you can't wrap the [Ink] widget in a clipping widget directly,
-/// since this will leave the [Material] not clipped (and by extension the printed
-/// [Ink] widgets as well).
+/// In order to clip an InkWell (or any other [Splash] widgets), clipping should
+/// be applied to the widget providing the [SplashController], which could be a
+/// [Material] or a [SplashBox].
 ///
-/// An easy solution is to deliberately wrap the [Ink] widgets you want to clip
-/// in a [Material], and wrap that in a clipping widget instead. See [Ink] for
-/// an example.
+/// If, for example, the ancestor [SplashController] is supplied by a [Scaffold],
+/// clipping the ancestor might be undesirable. In this case, the InkWell can
+/// be wrapped in a [SplashBox], so that clipping, resizing, and [Splash] effects
+/// are no longer directly tied to the [Scaffold].
 ///
 /// ### The ink splashes don't track the size of an animated container
 /// If the size of an InkWell's [Material] ancestor changes while the InkWell's

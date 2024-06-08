@@ -11,6 +11,16 @@ void main() {
   RenderObject renderObject;
   Object object;
 
+  // Changes made in https://github.com/flutter/flutter/pull/149963
+  void splashThings(
+    InkFeature feature,
+    InteractiveInkFeature splash,
+    InteractiveInkFeatureFactory splashFactory,
+  ) {
+    debugCheckHasMaterial(context);
+    final MaterialInkController controller = Material.of(context);
+  }
+
   // Changes made in https://github.com/flutter/flutter/pull/26259
   Scaffold scaffold = Scaffold(resizeToAvoidBottomPadding: true);
   scaffold = Scaffold(error: '');
