@@ -629,15 +629,18 @@ abstract class _CachedImageBase {
       FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
     }
 
-    if (SchedulerBinding.instance.f)
-
-    // Give any interested parties a chance to listen to the stream before we
-    // potentially dispose it.
-    SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
-      assert(handle != null);
+    if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.idle) {
       handle?.dispose();
       handle = null;
-    }, debugLabel: 'CachedImage.disposeHandle');
+    } else {
+      // Give any interested parties a chance to listen to the stream before we
+      // potentially dispose it.
+      SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
+        assert(handle != null);
+        handle?.dispose();
+        handle = null;
+      }, debugLabel: 'CachedImage.disposeHandle');
+    }
   }
 }
 
