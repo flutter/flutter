@@ -1853,7 +1853,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     assert(child._parent == this);
     assert(child.attached == attached);
     assert(child.parentData != null);
-    child._cleanRelayoutBoundary();
+    _cleanChildRelayoutBoundary(child);
     child.parentData!.detach();
     child.parentData = null;
     child._parent = null;
@@ -2346,10 +2346,13 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     markParentNeedsLayout();
   }
 
-  void _cleanRelayoutBoundary() {
-    if (_relayoutBoundary != this) {
-      _relayoutBoundary = null;
-      visitChildren(_cleanChildRelayoutBoundary);
+  /// Set [_relayoutBoundary] to null throughout this render object's subtree,
+  /// stopping at relayout boundaries.
+  // This is a static method to reduce closure allocation with visitChildren.
+  static void _cleanChildRelayoutBoundary(RenderObject child) {
+    if (child._relayoutBoundary != child) {
+      child._relayoutBoundary = null;
+      child.visitChildren(_cleanChildRelayoutBoundary);
     }
   }
 
@@ -2363,11 +2366,6 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
       _relayoutBoundary = parentRelayoutBoundary;
       visitChildren(_propagateRelayoutBoundaryToChild);
     }
-  }
-
-  // Reduces closure allocation for visitChildren use cases.
-  static void _cleanChildRelayoutBoundary(RenderObject child) {
-    child._cleanRelayoutBoundary();
   }
 
   static void _propagateRelayoutBoundaryToChild(RenderObject child) {
@@ -2531,6 +2529,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
       return;
     }
     _constraints = constraints;
+
     if (_relayoutBoundary != null && relayoutBoundary != _relayoutBoundary) {
       // The local relayout boundary has changed, must notify children in case
       // they also need updating. Otherwise, they will be confused about what
@@ -2538,6 +2537,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
       visitChildren(_cleanChildRelayoutBoundary);
     }
     _relayoutBoundary = relayoutBoundary;
+
     assert(!_debugMutationsLocked);
     assert(!_doingThisLayoutWithCallback);
     assert(() {
