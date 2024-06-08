@@ -2185,6 +2185,18 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   }
   bool _needsLayout = true;
 
+  /// The nearest relayout boundary enclosing this render object, if known.
+  ///
+  /// When not null, the relayout boundary is either this render object itself
+  /// or one of its ancestors, and all the render objects in the ancestry chain
+  /// up through that ancestor have the same [_relayoutBoundary].
+  /// Equivalently: when not null, the relayout boundary is either this render
+  /// object itself or the same as that of its parent.  (So [_relayoutBoundary]
+  /// is one of `null`, `this`, or `parent!._relayoutBoundary!`.)
+  ///
+  /// This is set in [layout], and consulted by [markNeedsLayout] in deciding
+  /// whether to recursively mark the parent as also needing layout.
+  // TODO(gnprice): Just when is _relayoutBoundary null, and what does that mean?
   RenderObject? _relayoutBoundary;
 
   /// Whether [invokeLayoutCallback] for this render object is currently running.
@@ -2351,6 +2363,8 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   // This is a static method to reduce closure allocation with visitChildren.
   static void _cleanChildRelayoutBoundary(RenderObject child) {
     if (child._relayoutBoundary != child) {
+      // This may temporarily break the _relayoutBoundary invariant at children;
+      // the visitChildren restores the invariant.
       child._relayoutBoundary = null;
       child.visitChildren(_cleanChildRelayoutBoundary);
     }
@@ -2377,6 +2391,8 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   /// thereafter.
   void _setRelayoutBoundary(RenderObject value) {
     assert(value != _relayoutBoundary);
+    // This may temporarily break the _relayoutBoundary invariant at children;
+    // the visitChildren restores the invariant.
     _relayoutBoundary = value;
     visitChildren(_propagateRelayoutBoundaryToChild);
   }
