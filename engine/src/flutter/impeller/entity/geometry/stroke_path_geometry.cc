@@ -10,6 +10,7 @@
 #include "impeller/geometry/constants.h"
 #include "impeller/geometry/path_builder.h"
 #include "impeller/geometry/path_component.h"
+#include "impeller/geometry/separated_vector.h"
 
 namespace impeller {
 using VS = SolidFillVertexShader;
@@ -163,45 +164,13 @@ class StrokeGenerator {
     }
   }
 
-  /// @brief  Represents a ray in 2D space.
-  ///
-  ///         This is a simple convenience struct for handling polyline offset
-  ///         values when generating stroke geometry. For performance reasons,
-  ///         it's sometimes adventageous to track the direction and magnitude
-  ///         for offsets separately.
-  struct Ray {
-    /// The normalized direction of the ray.
-    Vector2 direction;
-
-    /// The magnitude of the ray.
-    Scalar magnitude = 0.0;
-
-    /// Returns the vector representation of the ray.
-    Vector2 GetVector() const { return direction * magnitude; }
-
-    /// Returns the scalar alignment of the two rays.
-    ///
-    /// Domain: [-1, 1]
-    /// A value of 1 indicates the rays are parallel and pointing in the same
-    /// direction. A value of -1 indicates the rays are parallel and pointing in
-    /// opposite directions. A value of 0 indicates the rays are perpendicular.
-    Scalar GetAlignment(const Ray& other) const {
-      return direction.Dot(other.direction);
-    }
-
-    /// Returns the scalar angle between the two rays.
-    Radians AngleTo(const Ray& other) const {
-      return direction.AngleTo(other.direction);
-    }
-  };
-
   /// Computes offset by calculating the direction from point_i - 1 to point_i
   /// if point_i is within `contour_start_point_i` and `contour_end_point_i`;
   /// Otherwise, it uses direction from contour.
-  Ray ComputeOffset(const size_t point_i,
-                    const size_t contour_start_point_i,
-                    const size_t contour_end_point_i,
-                    const Path::PolylineContour& contour) const {
+  SeparatedVector2 ComputeOffset(const size_t point_i,
+                                 const size_t contour_start_point_i,
+                                 const size_t contour_end_point_i,
+                                 const Path::PolylineContour& contour) const {
     Point direction;
     if (point_i >= contour_end_point_i) {
       direction = contour.end_direction;
@@ -211,8 +180,8 @@ class StrokeGenerator {
       direction = (polyline.GetPoint(point_i) - polyline.GetPoint(point_i - 1))
                       .Normalize();
     }
-    return {.direction = Vector2{-direction.y, direction.x},
-            .magnitude = stroke_width * 0.5f};
+    return SeparatedVector2(Vector2{-direction.y, direction.x},
+                            stroke_width * 0.5f);
   }
 
   void AddVerticesForLinearComponent(VertexWriter& vtx_builder,
@@ -338,8 +307,8 @@ class StrokeGenerator {
   const CapProc<VertexWriter>& cap_proc;
   const Scalar scale;
 
-  Ray previous_offset;
-  Ray offset;
+  SeparatedVector2 previous_offset;
+  SeparatedVector2 offset;
   SolidFillVertexShader::PerVertexData vtx;
 };
 
