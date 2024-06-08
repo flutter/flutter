@@ -2265,7 +2265,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
       return true;
     }
     RenderObject node = this;
-    while (node != _relayoutBoundary) {
+    while (node._isRelayoutBoundary != true) {
       assert(node._isRelayoutBoundary == false);
       assert(node.parent != null);
       node = node.parent!;
@@ -3944,7 +3944,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
       if (_isRelayoutBoundary == false) {
         int count = 1;
         RenderObject? target = parent;
-        while (target != null && target != _relayoutBoundary) {
+        while (target != null && target._isRelayoutBoundary == false) {
           target = target.parent;
           count += 1;
         }
