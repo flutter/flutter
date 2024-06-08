@@ -8,7 +8,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('TextFormFieldExample2 Widget Tests', () {
-
     testWidgets('Input validation handles empty, incorrect, and short usernames', (WidgetTester tester) async {
       await tester.pumpWidget(const example.TextFormFieldExampleApp());
       final Finder textFormField = find.byType(TextFormField);
@@ -28,7 +27,12 @@ void main() {
       await tester.enterText(textFormField, 'jo');
       await tester.tap(saveButton);
       await tester.pump();
-      expect(find.text('username should be at least 3 characters long'), findsOneWidget);
+      expect(find.text('Username should be at least 3 characters long'), findsOneWidget);
+
+      await tester.enterText(textFormField, '1jo');
+      await tester.tap(saveButton);
+      await tester.pump();
+      expect(find.text('Username must not start with a number'), findsOneWidget);
     });
 
     testWidgets('Async validation feedback is handled correctly', (WidgetTester tester) async {
@@ -36,25 +40,29 @@ void main() {
       final Finder textFormField = find.byType(TextFormField);
       final Finder saveButton = find.byType(TextButton);
 
-      // Simulate entering a username already taken
+      // Simulate entering a username already taken.
       await tester.enterText(textFormField, 'jack');
       await tester.pump();
       await tester.tap(saveButton);
-      await tester.pumpAndSettle(const Duration(seconds: 3)); // Wait for async call
-
+      await tester.pump();
+      expect(find.text('Username jack is already taken'), findsNothing);
+      await tester.pump(const Duration(seconds: 3)); // Wait for async call.
       expect(find.text('Username jack is already taken'), findsOneWidget);
 
       await tester.enterText(textFormField, 'alex');
       await tester.pump();
       await tester.tap(saveButton);
-      await tester.pumpAndSettle(const Duration(seconds: 3));
+      await tester.pump();
+      expect(find.text('Username alex is already taken'), findsNothing);
+      await tester.pump(const Duration(seconds: 3));
       expect(find.text('Username alex is already taken'), findsOneWidget);
 
       await tester.enterText(textFormField, 'jack');
       await tester.pump();
       await tester.tap(saveButton);
       await tester.pump();
-      // The error should be displayed immediately from cache.
+      expect(find.text('Username jack is already taken'), findsNothing);
+      await tester.pump(const Duration(seconds: 3)); // Wait for async call.
       expect(find.text('Username jack is already taken'), findsOneWidget);
     });
 
@@ -67,7 +75,7 @@ void main() {
       await tester.tap(saveButton);
       await tester.pump();
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
-      await tester.pumpAndSettle(const Duration(seconds: 3));
+      await tester.pump(const Duration(seconds: 3));
       expect(find.byType(CircularProgressIndicator), findsNothing);
     });
   });
