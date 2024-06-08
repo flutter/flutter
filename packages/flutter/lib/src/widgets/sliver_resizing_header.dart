@@ -36,7 +36,13 @@ import 'slotted_render_object_widget.dart';
 ///
 /// ** See code in examples/api/lib/widgets/sliver/sliver_resizing_header.0.dart **
 /// {@end-tool}
-// TODO(hansmuller): add See also links to PersistentHeaderSliver, SliverFloatingHeader, etc
+///
+/// See also:
+///
+///  * [PinnedHeaderSliver] - which just pins the header at the top
+///    of the [CustomScrollView].
+///  * [SliverPersistentHeader] - a general purpose header that can be
+///    configured as a pinned, resizing, or floating header.
 class SliverResizingHeader extends StatelessWidget {
   /// Create a pinned header sliver that reacts to scrolling by resizing between
   /// the intrinsic sizes of the min and max extent prototypes.
