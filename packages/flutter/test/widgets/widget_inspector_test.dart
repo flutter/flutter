@@ -319,6 +319,26 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       return find.text(letter).evaluate().first;
     }
 
+    Future<void> pumpWidgetTreeWithABC(WidgetTester tester) async {
+      await tester.pumpWidget(
+        const Directionality(
+          textDirection: TextDirection.ltr,
+          child: Stack(
+            children: <Widget>[
+              Text('a', textDirection: TextDirection.ltr),
+              Text('b', textDirection: TextDirection.ltr),
+              Text('c', textDirection: TextDirection.ltr),
+            ],
+          ),
+        ),
+      );
+    }
+
+    Element findElementABC(String letter) {
+      assert(<String>['a', 'b', 'c'].contains(letter));
+      return find.text(letter).evaluate().first;
+    }
+
     test ('objectToDiagnosticsNode returns null for non-diagnosticable', () {
       expect(WidgetInspectorService.objectToDiagnosticsNode(Alignment.bottomCenter), isNull);
     });
