@@ -598,6 +598,11 @@ class ImageCacheStatus {
   String toString() => '${objectRuntimeType(this, 'ImageCacheStatus')}(pending: $pending, live: $live, keepAlive: $keepAlive)';
 }
 
+
+bool testStarted = false;
+bool testEnded = false;
+List<int> createdHandles = [];
+
 /// Base class for [_CachedImage] and [_LiveImage].
 ///
 /// Exists primarily so that a [_LiveImage] cannot be added to the
@@ -607,6 +612,11 @@ abstract class _CachedImageBase {
     this.completer, {
     this.sizeBytes,
   }) : handle = completer.keepAlive() {
+    if (testStarted && !testEnded) {
+      createdHandles.add(identityHashCode(handle));
+      print('!!! created handle: ${createdHandles.last}');
+    }
+
     // TODO(polina-c): stop duplicating code across disposables
     // https://github.com/flutter/flutter/issues/137435
     if (kFlutterMemoryAllocationsEnabled) {
@@ -628,11 +638,21 @@ abstract class _CachedImageBase {
     if (kFlutterMemoryAllocationsEnabled) {
       FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
     }
+
+    final code1 = identityHashCode(handle);
+    if (createdHandles.contains(code1)) {
+      print('!!! scheduled for dispose: $code1, ${SchedulerBinding.instance.schedulerPhase}');
+    }
+
     // Give any interested parties a chance to listen to the stream before we
     // potentially dispose it.
     SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
       assert(handle != null);
+      final code2 = identityHashCode(handle);
       handle?.dispose();
+      if (createdHandles.contains(code2)) {
+        print('!!! disposed: $code2');
+      }
       handle = null;
     }, debugLabel: 'CachedImage.disposeHandle');
   }
