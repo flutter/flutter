@@ -2128,7 +2128,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     _owner = owner;
     // If the node was dirtied in some way while unattached, make sure to add
     // it to the appropriate dirty list now that an owner is available
-    if (_needsLayout && _relayoutBoundary != null) {
+    if (_needsLayout && _isRelayoutBoundary != null) {
       // Don't enter this block if we've never laid out at all;
       // scheduleInitialLayout() will handle it
       _needsLayout = false;
@@ -2260,20 +2260,20 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   static bool debugCheckingIntrinsics = false;
 
   bool _debugRelayoutBoundaryAlreadyMarkedNeedsLayout() {
-    if (_relayoutBoundary == null) {
+    if (_isRelayoutBoundary == null) {
       // We don't know where our relayout boundary is yet.
       return true;
     }
     RenderObject node = this;
     while (node != _relayoutBoundary) {
-      assert(node._relayoutBoundary == _relayoutBoundary);
+      assert(node._isRelayoutBoundary == false);
       assert(node.parent != null);
       node = node.parent!;
       if ((!node._needsLayout) && (!node._debugDoingThisLayout)) {
         return false;
       }
     }
-    assert(node._relayoutBoundary == node);
+    assert(node._isRelayoutBoundary ?? false);
     return true;
   }
 
@@ -2321,7 +2321,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
       assert(_debugRelayoutBoundaryAlreadyMarkedNeedsLayout());
       return;
     }
-    if (_relayoutBoundary == null) {
+    if (_isRelayoutBoundary == null) {
       _needsLayout = true;
       if (parent != null) {
         // _relayoutBoundary is cleaned by an ancestor in RenderObject.layout.
@@ -2331,7 +2331,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
       }
       return;
     }
-    if (_relayoutBoundary != this) {
+    if (_isRelayoutBoundary == false) {
       markParentNeedsLayout();
     } else {
       _needsLayout = true;
@@ -2387,7 +2387,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   /// stopping at relayout boundaries.
   // This is a static method to reduce closure allocation with visitChildren.
   static void _cleanChildRelayoutBoundary(RenderObject child) {
-    if (child._relayoutBoundary != child) {
+    if (child._isRelayoutBoundary != true) {
       child.visitChildren(_cleanChildRelayoutBoundary);
       child._relayoutBoundary = null;
     }
@@ -2395,7 +2395,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
 
   // This is a static method to reduce closure allocation with visitChildren.
   static void _propagateRelayoutBoundaryToChild(RenderObject child) {
-    if (child._relayoutBoundary == child) {
+    if (child._isRelayoutBoundary ?? false) {
       return;
     }
     final RenderObject? parentRelayoutBoundary = child.parent?._relayoutBoundary;
@@ -2426,7 +2426,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     assert(attached);
     assert(parent is! RenderObject);
     assert(!owner!._debugDoingLayout);
-    assert(_relayoutBoundary == null);
+    assert(_isRelayoutBoundary == null);
     _relayoutBoundary = this;
     assert(() {
       _debugCanParentUseSize = false;
@@ -2438,7 +2438,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   @pragma('vm:notify-debugger-on-exception')
   void _layoutWithoutResize() {
     assert(_needsLayout);
-    assert(_relayoutBoundary == this);
+    assert(_isRelayoutBoundary ?? false);
     RenderObject? debugPreviousActiveLayout;
     assert(!_debugMutationsLocked);
     assert(!_doingThisLayoutWithCallback);
@@ -3948,7 +3948,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
         header += ' DISPOSED';
         return header;
       }
-      if (_relayoutBoundary != null && _relayoutBoundary != this) {
+      if (_isRelayoutBoundary == false) {
         int count = 1;
         RenderObject? target = parent;
         while (target != null && target != _relayoutBoundary) {
