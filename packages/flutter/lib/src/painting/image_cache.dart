@@ -628,6 +628,9 @@ abstract class _CachedImageBase {
     if (kFlutterMemoryAllocationsEnabled) {
       FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
     }
+
+    if (SchedulerBinding.instance.f)
+
     // Give any interested parties a chance to listen to the stream before we
     // potentially dispose it.
     SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
