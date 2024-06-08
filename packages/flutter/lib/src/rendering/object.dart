@@ -2187,6 +2187,18 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
 
   /// The nearest relayout boundary enclosing this render object, if known.
   ///
+  /// For discussion, see [_isRelayoutBoundary].
+  ///
+  /// When not null, the relayout boundary is either this render object itself
+  /// or one of its ancestors, and all the render objects in the ancestry chain
+  /// up through that ancestor have the same [_relayoutBoundary].
+  /// Equivalently: when not null, the relayout boundary is either this render
+  /// object itself or the same as that of its parent.  (So [_relayoutBoundary]
+  /// is one of `null`, `this`, or `parent!._relayoutBoundary!`.)
+  RenderObject? _relayoutBoundary;
+
+  /// Whether this render object is a relayout boundary, if known.
+  ///
   /// When a render object is marked as needing layout, its parent may
   /// as a result also need to be marked as needing layout.
   /// For details, see [markNeedsLayout].
@@ -2205,13 +2217,12 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   /// This property can also be null while an ancestor in the tree is
   /// currently doing layout, until this render object itself does layout.
   ///
-  /// When not null, the relayout boundary is either this render object itself
-  /// or one of its ancestors, and all the render objects in the ancestry chain
-  /// up through that ancestor have the same [_relayoutBoundary].
-  /// Equivalently: when not null, the relayout boundary is either this render
-  /// object itself or the same as that of its parent.  (So [_relayoutBoundary]
-  /// is one of `null`, `this`, or `parent!._relayoutBoundary!`.)
-  RenderObject? _relayoutBoundary;
+  /// When [_isRelayoutBoundary] is false, then `parent?._isRelayoutBoundary`
+  /// may be true or false but not null.  As a result, when it's known that
+  /// this render object is not a relayout boundary, that always comes with
+  /// knowledge of some specific ancestor which is the nearest enclosing
+  /// relayout boundary.
+  bool? get _isRelayoutBoundary => _relayoutBoundary == null ? null : _relayoutBoundary == this;
 
   /// Whether [invokeLayoutCallback] for this render object is currently running.
   bool get debugDoingThisLayoutWithCallback => _doingThisLayoutWithCallback;
