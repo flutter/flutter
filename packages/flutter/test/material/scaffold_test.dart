@@ -3396,14 +3396,16 @@ void main() {
     expect(find.byType(FloatingActionButton), findsNothing);
   });
 
-  testWidgets('scaffoldBackgroundColor defaults to ColorScheme.surface', (WidgetTester tester) async {
+  testWidgets('Scaffold background color defaults to ColorScheme.surface', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(
+      colorScheme: ThemeData().colorScheme.copyWith(
+        surface: Colors.orange,
+        background: Colors.green,
+      )
+    );
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(
-          colorScheme: ThemeData().colorScheme.copyWith(
-            surface: Colors.orange,
-            background: Colors.green,
-          )),
+        theme: theme,
         home: const Scaffold(
           body: SizedBox.expand(),
         ),
@@ -3414,7 +3416,7 @@ void main() {
       of: find.byType(Scaffold),
       matching: find.byType(Material).first,
     ));
-    expect(scaffoldMaterial.color, Colors.orange);
+    expect(scaffoldMaterial.color, theme.colorScheme.surface);
   });
 }
 
