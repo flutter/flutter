@@ -1384,7 +1384,7 @@ void main() {
       expect(find.text('Page 2 of tab 2'), findsNothing);
       expect(lastFrameworkHandlesBack, isFalse);
       testEnded = true;
-      print('!!! test testEnded');
+      print('!!! test ended');
     },
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
       skip: kIsWeb, // [intended] frameworkHandlesBack not used on web.
