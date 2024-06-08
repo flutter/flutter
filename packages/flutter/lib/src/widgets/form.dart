@@ -470,12 +470,16 @@ class FormField<T> extends StatefulWidget {
   ///
   /// When the [forceErrorText] property is provided, the [FormFieldState.errorText]
   /// will be set to the provided value, causing the form field to be considered
-  /// invalid and display the error message specified.
+  /// invalid and to display the error message specified.
+  ///
+  /// When [validator] is provided, [forceErrorText] will override any error that it
+  /// returns. [validator] will not be called unless [forceErrorText] is null.
   ///
   /// See also:
   ///
   /// * [InputDecoration.errorText], which is used to display error messages in the text
-  /// field's decoration.
+  /// field's decoration without effecting the field's state. When [forceErrorText] is
+  /// not null, it will override [InputDecoration.errorText] value.
   final String? forceErrorText;
 
   /// An optional method that validates an input. Returns an error string to
@@ -546,7 +550,7 @@ class FormField<T> extends StatefulWidget {
 /// for use in constructing the form field's widget.
 class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
   late T? _value = widget.initialValue;
-  // Marking it as late, so we can get to register it
+  // Marking it as late, so it can be registered
   // with the value provided by [forceErrorText].
   late final RestorableStringN _errorText;
   final RestorableBool _hasInteractedByUser = RestorableBool(false);
@@ -601,8 +605,9 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
   }
 
   /// Calls [FormField.validator] to set the [errorText] only if [FormField.forceErrorText] is null.
-  /// Returns true if there were no errors.
+  /// When [FormField.forceErrorText] is not null, [FormField.validator] will not be called.
   ///
+  /// Returns true if there were no errors.
   /// See also:
   ///
   ///  * [isValid], which passively gets the validity without setting
