@@ -348,7 +348,7 @@ class _TextLayout {
     final int lastLineIndex = _paragraph.numberOfLines - 1;
     assert(lastLineIndex >= 0);
     final ui.LineMetrics lineMetrics = _paragraph.getLineMetricsAt(lastLineIndex)!;
-    // SkParagraph currently treats " " and "\t" as white spaces. Trailing white
+    // SkParagraph currently treats " ", "\t", and "\u{3000}" as white spaces. Trailing white
     // spaces don't contribute to the line width and thus require special handling
     // when they're present.
     // Luckily they have the same bidi embedding level as the paragraph as per
