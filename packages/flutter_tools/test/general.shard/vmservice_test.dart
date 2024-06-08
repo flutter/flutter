@@ -789,6 +789,17 @@ void main() {
         throwsA(isA<VmServiceDisappearedException>()),
       );
     });
+
+    testWithoutContext('throws when the service is disposed', () async {
+      final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
+
+      await fakeVmServiceHost.vmService.dispose();
+
+      expect(
+        () => fakeVmServiceHost.vmService.findExtensionIsolate(kExtensionName),
+        throwsA(isA<VmServiceDisappearedException>()),
+      );
+    });
   });
 
   testWithoutContext('Can process log events from the vm service', () {
