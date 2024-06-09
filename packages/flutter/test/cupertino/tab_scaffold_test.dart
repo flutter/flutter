@@ -4,6 +4,7 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
@@ -1286,6 +1287,13 @@ void main() {
     testWidgets('System back navigation inside of tabs',
     // experimentalLeakTesting: LeakTesting.settings.withCreationStackTrace(),
     (WidgetTester tester) async {
+      addTearDown((){
+        print('!!! looping handleEventLoopCallback');
+        while(SchedulerBinding.instance.handleEventLoopCallback()){
+          print('!!! handleEventLoopCallback returned true');
+        }
+        print('!!! loop handleEventLoopCallback completed');
+      });
       testStarted = true;
       print('!!! test started');
       await tester.pumpWidget(
