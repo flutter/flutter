@@ -20,9 +20,6 @@ import 'gesture_detector.dart';
 /// [wrapForTap] or [wrapForLongPress] to achieve the same (see example code
 /// below).
 ///
-/// Calling any of these methods is a no-op on iOS as actions on that platform
-/// typically don't provide haptic or acoustic feedback.
-///
 /// All methods in this class are usually called from within a
 /// [StatelessWidget.build] method or from a [State]'s methods as you have to
 /// provide a [BuildContext].
@@ -127,8 +124,10 @@ abstract final class Feedback {
 
   /// Provides platform-specific feedback for a long press.
   ///
-  /// On Android the platform-typical vibration is triggered. On iOS this is a
-  /// no-op as that platform usually doesn't provide feedback for long presses.
+  /// On Android the platform-typical vibration is triggered. On iOS a
+  /// heavy-impact haptic feedback is triggered alongside the click system
+  /// sound, which was observed to be the default behavior on a physical iPhone
+  /// 15 Pro running iOS version 17.5.
   ///
   /// See also:
   ///
@@ -141,6 +140,10 @@ abstract final class Feedback {
       case TargetPlatform.fuchsia:
         return HapticFeedback.vibrate();
       case TargetPlatform.iOS:
+        return Future.wait(<Future<void>>[
+          SystemSound.play(SystemSoundType.click),
+          HapticFeedback.heavyImpact()
+        ]);
       case TargetPlatform.linux:
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
@@ -151,9 +154,10 @@ abstract final class Feedback {
   /// Wraps a [GestureLongPressCallback] to provide platform specific feedback
   /// for a long press before the provided callback is executed.
   ///
-  /// On Android the platform-typical vibration is triggered. On iOS this
-  /// is a no-op as that platform usually doesn't provide feedback for a long
-  /// press.
+  /// On Android the platform-typical vibration is triggered. On iOS a
+  /// heavy-impact haptic feedback is triggered alongside the click system
+  /// sound, which was observed to be the default behavior on a physical iPhone
+  /// 15 Pro running iOS version 17.5.
   ///
   /// See also:
   ///
