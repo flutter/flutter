@@ -2374,9 +2374,8 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     }
     final RenderObject? parentRelayoutBoundary = parent?._relayoutBoundary;
     assert(parentRelayoutBoundary != null);
-    if (parentRelayoutBoundary != _relayoutBoundary) {
-      _setRelayoutBoundary(parentRelayoutBoundary!);
-    }
+    assert(parentRelayoutBoundary != _relayoutBoundary);
+    _setRelayoutBoundary(parentRelayoutBoundary!);
   }
 
   // This is a static method to reduce closure allocation with visitChildren.
