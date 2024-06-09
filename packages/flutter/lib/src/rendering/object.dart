@@ -2554,7 +2554,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
         return true;
       }());
 
-      if (relayoutBoundary != _relayoutBoundary) {
+      if (isRelayoutBoundary != _isRelayoutBoundary) {
         _setRelayoutBoundary(relayoutBoundary);
       }
 
@@ -2565,7 +2565,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     }
     _constraints = constraints;
 
-    if (_relayoutBoundary != null && relayoutBoundary != _relayoutBoundary) {
+    if (_isRelayoutBoundary != null && isRelayoutBoundary != _isRelayoutBoundary) {
       // The local relayout boundary has changed, must notify children in case
       // they also need updating. Otherwise, they will be confused about what
       // their actual relayout boundary is later.
