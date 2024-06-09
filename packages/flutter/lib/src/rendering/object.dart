@@ -2321,20 +2321,13 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
       assert(_debugRelayoutBoundaryAlreadyMarkedNeedsLayout());
       return;
     }
-    if (_isRelayoutBoundary == null) {
-      _needsLayout = true;
+    _needsLayout = true;
+    if (_isRelayoutBoundary != true) {
+      assert(parent != null || _isRelayoutBoundary == null);
       if (parent != null) {
-        // _relayoutBoundary is cleaned by an ancestor in RenderObject.layout.
-        // Conservatively mark everything dirty until it reaches the closest
-        // known relayout boundary.
         markParentNeedsLayout();
       }
-      return;
-    }
-    if (_isRelayoutBoundary == false) {
-      markParentNeedsLayout();
     } else {
-      _needsLayout = true;
       if (owner != null) {
         assert(() {
           if (debugPrintMarkNeedsLayoutStacks) {
