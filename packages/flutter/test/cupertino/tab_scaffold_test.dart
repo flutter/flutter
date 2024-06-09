@@ -1284,16 +1284,21 @@ void main() {
           .setMockMethodCallHandler(SystemChannels.platform, null);
     });
 
+    void _completeCallbacks(){
+      print('!!! looping handleEventLoopCallback');
+      while(SchedulerBinding.instance.handleEventLoopCallback()){
+        print('!!! handleEventLoopCallback returned true');
+      }
+      print('!!! loop handleEventLoopCallback completed');
+    }
+
+    tearDownAll(() {
+      _completeCallbacks();
+    });
+
     testWidgets('System back navigation inside of tabs',
     // experimentalLeakTesting: LeakTesting.settings.withCreationStackTrace(),
     (WidgetTester tester) async {
-      addTearDown((){
-        print('!!! looping handleEventLoopCallback');
-        while(SchedulerBinding.instance.handleEventLoopCallback()){
-          print('!!! handleEventLoopCallback returned true');
-        }
-        print('!!! loop handleEventLoopCallback completed');
-      });
       testStarted = true;
       print('!!! test started');
       await tester.pumpWidget(
