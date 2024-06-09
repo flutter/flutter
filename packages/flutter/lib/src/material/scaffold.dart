@@ -1391,9 +1391,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
         // the previous controller and run an exit animation for the previous
         // widget before running the entrance animation for the new child.
         _previousChild = oldWidget.child;
-        _previousController
-          ..value = currentValue
-          ..reverse();
+        _previousController.reverse(from: currentValue);
         widget.currentController.value = 0.0;
       }
     }

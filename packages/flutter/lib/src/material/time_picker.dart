@@ -1133,9 +1133,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
       tween
         ..begin = beginValue
         ..end = target;
-      controller
-        ..value = 0
-        ..forward();
+      controller.forward(from: 0);
     }
 
     animateToValue(

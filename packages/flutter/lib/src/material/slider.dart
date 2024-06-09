@@ -1296,11 +1296,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     final bool wasInteractive = isInteractive;
     _onChanged = value;
     if (wasInteractive != isInteractive) {
-      if (isInteractive) {
-        _state.enableController.forward();
-      } else {
-        _state.enableController.reverse();
-      }
+      _state.enableController.toggle(isInteractive);
       markNeedsPaint();
       markNeedsSemanticsUpdate();
     }
@@ -1382,11 +1378,9 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     // Only show overlay when pointer is hovering the thumb.
     if (hovered && hoveringThumb) {
       _state.overlayController.forward();
-    } else {
+    } else if (!_active && !hasFocus) {
       // Only remove overlay when Slider is inactive and unfocused.
-      if (!_active && !hasFocus) {
-        _state.overlayController.reverse();
-      }
+      _state.overlayController.reverse();
     }
   }
 

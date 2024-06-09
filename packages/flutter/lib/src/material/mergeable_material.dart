@@ -411,9 +411,7 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
                 final MergeableMaterialItem newChild = newChildren[k];
                 if (newChild is MaterialGap) {
                   _animationTuples[newChild.key]!.gapStart = gapSize * newChild.size / gapSizeSum;
-                  _animationTuples[newChild.key]!.controller
-                    ..value = 0.0
-                    ..forward();
+                  _animationTuples[newChild.key]!.controller.forward(from: 0.0);
                 }
               }
             }
@@ -453,18 +451,18 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
                 size: gapSizeSum,
               );
               _insertChild(startOld, gap);
-              _animationTuples[gap.key]!.gapStart = 0.0;
-              _animationTuples[gap.key]!.controller
-                ..value = 1.0
-                ..reverse();
+              _animationTuples[gap.key]!
+                ..gapStart = 0.0
+                ..controller.reverse(from: 1.0);
 
               j += 1;
             }
           } else if (oldLength == 1) {
             // Shrink gap.
             final MaterialGap gap = _children[startOld] as MaterialGap;
-            _animationTuples[gap.key]!.gapStart = 0.0;
-            _animationTuples[gap.key]!.controller.reverse();
+            _animationTuples[gap.key]!
+              ..gapStart = 0.0
+              ..controller.reverse();
           }
         }
       } else {

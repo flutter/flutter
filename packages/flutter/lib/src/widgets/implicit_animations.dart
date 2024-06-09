@@ -394,9 +394,7 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
         _updateTween(tween, targetValue);
         return tween;
       });
-      _controller
-        ..value = 0.0
-        ..forward();
+      _controller.forward(from: 0.0);
       didUpdateTweens();
     }
   }

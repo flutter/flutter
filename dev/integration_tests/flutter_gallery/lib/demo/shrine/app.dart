@@ -46,7 +46,7 @@ class _ShrineAppState extends State<ShrineApp> with SingleTickerProviderStateMix
       home: HomePage(
         backdrop: Backdrop(
           frontLayer: const ProductPage(),
-          backLayer: CategoryMenuPage(onCategoryTap: () => _controller.forward()),
+          backLayer: CategoryMenuPage(onCategoryTap: _controller.forward),
           frontTitle: const Text('SHRINE'),
           backTitle: const Text('MENU'),
           controller: _controller,

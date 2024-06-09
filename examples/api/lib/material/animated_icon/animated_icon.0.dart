@@ -44,9 +44,7 @@ class _AnimatedIconExampleState extends State<AnimatedIconExample> with SingleTi
     controller = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 2),
-    )
-      ..forward()
-      ..repeat(reverse: true);
+    )..repeat(reverse: true);
     animation = Tween<double>(begin: 0.0, end: 1.0).animate(controller);
   }
 

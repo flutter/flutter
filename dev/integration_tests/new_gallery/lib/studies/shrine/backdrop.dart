@@ -209,16 +209,12 @@ class _BackdropState extends State<Backdrop>
     _controller = widget.controller;
   }
 
-  bool get _frontLayerVisible {
-    final AnimationStatus status = _controller.status;
-    return status == AnimationStatus.completed ||
-        status == AnimationStatus.forward;
-  }
+  bool get _frontLayerVisible => _controller.isForwardOrCompleted;
 
   void _toggleBackdropLayerVisibility() {
     // Call setState here to update layerAnimation if that's necessary
     setState(() {
-      _frontLayerVisible ? _controller.reverse() : _controller.forward();
+      _controller.toggle();
     });
   }
 

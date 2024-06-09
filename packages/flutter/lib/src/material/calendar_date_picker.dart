@@ -409,14 +409,8 @@ class _DatePickerModeToggleButtonState extends State<_DatePickerModeToggleButton
   @override
   void didUpdateWidget(_DatePickerModeToggleButton oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.mode == widget.mode) {
-      return;
-    }
-
-    if (widget.mode == DatePickerMode.year) {
-      _controller.forward();
-    } else {
-      _controller.reverse();
+    if (oldWidget.mode != widget.mode) {
+      _controller.toggle(widget.mode == DatePickerMode.year);
     }
   }
 

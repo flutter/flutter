@@ -261,8 +261,7 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSegmentedC
     }
 
     if (oldWidget.groupValue != widget.groupValue) {
-      int index = 0;
-      for (final T key in widget.children.keys) {
+      for (final (int index, T key) in widget.children.keys.indexed) {
         if (widget.groupValue == key) {
           _childTweens[index] = _forwardBackgroundColorTween;
           _selectionControllers[index].forward();
@@ -270,7 +269,6 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSegmentedC
           _childTweens[index] = _reverseBackgroundColorTween;
           _selectionControllers[index].reverse();
         }
-        index += 1;
       }
     }
   }

@@ -92,17 +92,9 @@ class _CategoryListItemState extends State<CategoryListItem>
   }
 
   void _handleTap() {
-    if (_controller.isDismissed) {
-      _controller.forward();
-      if (widget.onTap != null) {
-        widget.onTap!(true);
-      }
-    } else {
-      _controller.reverse();
-      if (widget.onTap != null) {
-        widget.onTap!(false);
-      }
-    }
+    final bool shouldOpenList = _controller.isDismissed;
+    _controller.toggle(shouldOpenList);
+    widget.onTap?.call(shouldOpenList);
   }
 
   Widget _buildHeaderWithChildren(BuildContext context, Widget? child) {

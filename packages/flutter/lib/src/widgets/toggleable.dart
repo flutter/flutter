@@ -193,22 +193,10 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
   /// This method must be called whenever [value] changes to ensure that the
   /// visual representation of the Toggleable matches the current [value].
   void animateToValue() {
-    if (tristate) {
-      if (value == null) {
-        _positionController.value = 0.0;
-      }
-      if (value ?? true) {
-        _positionController.forward();
-      } else {
-        _positionController.reverse();
-      }
-    } else {
-      if (value ?? false) {
-        _positionController.forward();
-      } else {
-        _positionController.reverse();
-      }
+    if (tristate && value == null) {
+      _positionController.value = 0.0;
     }
+    _positionController.toggle(value ?? tristate);
   }
 
   @override
@@ -266,11 +254,7 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
   void _handleFocusHighlightChanged(bool focused) {
     if (focused != _focused) {
       setState(() { _focused = focused; });
-      if (focused) {
-        _reactionFocusFadeController.forward();
-      } else {
-        _reactionFocusFadeController.reverse();
-      }
+      _reactionFocusFadeController.toggle(focused);
     }
   }
 
@@ -278,11 +262,7 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
   void _handleHoverChanged(bool hovering) {
     if (hovering != _hovering) {
       setState(() { _hovering = hovering; });
-      if (hovering) {
-        _reactionHoverFadeController.forward();
-      } else {
-        _reactionHoverFadeController.reverse();
-      }
+      _reactionHoverFadeController.toggle(hovering);
     }
   }
 

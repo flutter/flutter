@@ -230,15 +230,10 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
     super.dispose();
   }
 
-  bool get _frontLayerVisible {
-    final AnimationStatus status = _controller!.status;
-    return status == AnimationStatus.completed || status == AnimationStatus.forward;
-  }
-
   void _toggleBackdropLayerVisibility() {
     // Call setState here to update layerAnimation if that's necessary
     setState(() {
-      _frontLayerVisible ? _controller!.reverse() : _controller!.forward();
+      _controller!.toggle();
     });
   }
 
@@ -252,7 +247,7 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
     double secondWeight; // Weight of second TweenSequenceItem
     Animation<double> animation; // Animation on which TweenSequence runs
 
-    if (_frontLayerVisible) {
+    if (_controller!.isForwardOrCompleted) {
       firstCurve = _kAccelerateCurve;
       secondCurve = _kDecelerateCurve;
       firstWeight = _kPeakVelocityTime;

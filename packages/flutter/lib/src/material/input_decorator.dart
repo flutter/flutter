@@ -242,19 +242,13 @@ class _BorderContainerState extends State<_BorderContainer> with TickerProviderS
         begin: oldWidget.border,
         end: widget.border,
       );
-      _controller
-        ..value = 0.0
-        ..forward();
+      _controller.forward(from: 0.0);
     }
     if (widget.hoverColor != oldWidget.hoverColor) {
       _hoverColorTween = ColorTween(begin: Colors.transparent, end: widget.hoverColor);
     }
     if (widget.isHovering != oldWidget.isHovering) {
-      if (widget.isHovering) {
-        _hoverColorController.forward();
-      } else {
-        _hoverColorController.reverse();
-      }
+      _hoverColorController.toggle(widget.isHovering);
     }
   }
 
@@ -400,15 +394,13 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
     final bool helperTextStateChanged = newErrorText == null && (newHelperText != null) != (oldHelperText != null);
 
     if (errorStateChanged || errorTextStateChanged || helperStateChanged || helperTextStateChanged) {
-      if (newError != null || newErrorText != null) {
+      final bool hasError = newError != null || newErrorText != null;
+      if (hasError) {
         _error = _buildError();
-        _controller.forward();
       } else if (newHelper != null || newHelperText != null) {
         _helper = _buildHelper();
-        _controller.reverse();
-      } else {
-        _controller.reverse();
       }
+      _controller.toggle(hasError);
     }
   }
 
@@ -1950,20 +1942,16 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     final bool floatBehaviorChanged = widget.decoration.floatingLabelBehavior != old.decoration.floatingLabelBehavior;
 
     if (widget._labelShouldWithdraw != old._labelShouldWithdraw || floatBehaviorChanged) {
-      if (_floatingLabelEnabled && widget._labelShouldWithdraw) {
-        _floatingLabelController.forward();
-      } else {
-        _floatingLabelController.reverse();
-      }
+      _floatingLabelController.toggle(
+        _floatingLabelEnabled && widget._labelShouldWithdraw,
+      );
     }
 
     final String? errorText = decoration.errorText;
     final String? oldErrorText = old.decoration.errorText;
 
     if (_floatingLabelController.isCompleted && errorText != null && errorText != oldErrorText) {
-      _shakingLabelController
-        ..value = 0.0
-        ..forward();
+      _shakingLabelController.forward(from: 0.0);
     }
   }
 

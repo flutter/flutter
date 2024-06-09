@@ -100,7 +100,7 @@ class _ShrineAppState extends State<ShrineApp>
   Widget mobileBackdrop() {
     return Backdrop(
       frontLayer: const ProductPage(),
-      backLayer: CategoryMenuPage(onCategoryTap: () => _controller.forward()),
+      backLayer: CategoryMenuPage(onCategoryTap: _controller.forward),
       frontTitle: const Text('SHRINE'),
       backTitle: Text(GalleryLocalizations.of(context)!.shrineMenuCaption),
       controller: _controller,

@@ -43,17 +43,6 @@ class _FadeScaleTransitionDemoState extends State<FadeScaleTransitionDemo>
     super.dispose();
   }
 
-  bool get _isAnimationRunningForwardsOrComplete {
-    switch (_controller.status) {
-      case AnimationStatus.forward:
-      case AnimationStatus.completed:
-        return true;
-      case AnimationStatus.reverse:
-      case AnimationStatus.dismissed:
-        return false;
-    }
-  }
-
   Widget _showExampleAlertDialog() {
     return Theme(
       data: Theme.of(context),
@@ -116,15 +105,9 @@ class _FadeScaleTransitionDemoState extends State<FadeScaleTransitionDemo>
                 ),
                 const SizedBox(width: 10),
                 ElevatedButton(
-                  onPressed: () {
-                    if (_isAnimationRunningForwardsOrComplete) {
-                      _controller.reverse();
-                    } else {
-                      _controller.forward();
-                    }
-                  },
+                  onPressed: _controller.toggle,
                   child: Text(
-                    _isAnimationRunningForwardsOrComplete
+                    _controller.isForwardOrCompleted
                         ? localizations.demoFadeScaleHideFabButton
                         : localizations.demoFadeScaleShowFabButton,
                   ),

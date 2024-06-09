@@ -430,8 +430,7 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
         });
       }
       resolvedBackgroundColor = backgroundColor; // Defer changing the background color.
-      controller!.value = 0;
-      controller!.forward();
+      controller!.forward(from: 0);
     }
     elevation = resolvedElevation;
     backgroundColor = resolvedBackgroundColor;

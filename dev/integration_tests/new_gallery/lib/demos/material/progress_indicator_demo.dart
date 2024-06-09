@@ -36,10 +36,8 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo>
       curve: const Interval(0.0, 0.9, curve: Curves.fastOutSlowIn),
       reverseCurve: Curves.fastOutSlowIn,
     )..addStatusListener((AnimationStatus status) {
-        if (status == AnimationStatus.dismissed) {
-          _controller.forward();
-        } else if (status == AnimationStatus.completed) {
-          _controller.reverse();
+        if (!status.isAnimating) {
+          _controller.toggle();
         }
       });
   }

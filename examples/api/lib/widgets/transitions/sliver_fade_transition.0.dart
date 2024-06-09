@@ -45,10 +45,8 @@ class _SliverFadeTransitionExampleState extends State<SliverFadeTransitionExampl
   void initState() {
     super.initState();
     animation.addStatusListener((AnimationStatus status) {
-      if (status == AnimationStatus.completed) {
-        controller.reverse();
-      } else if (status == AnimationStatus.dismissed) {
-        controller.forward();
+      if (!status.isAnimating) {
+        controller.toggle();
       }
     });
     controller.forward();

@@ -371,11 +371,7 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
     super.didUpdateWidget(oldWidget);
 
     if (widget.extended != oldWidget.extended) {
-      if (widget.extended) {
-        _extendedController.forward();
-      } else {
-        _extendedController.reverse();
-      }
+      _extendedController.toggle(widget.extended);
     }
 
     // No animated segue if the length of the items list changes.

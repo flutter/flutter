@@ -360,9 +360,7 @@ class _AnimatedHomePageState extends State<_AnimatedHomePage>
       // Start our animation halfway through the splash page animation.
       _launchTimer = Timer(
         halfSplashPageAnimationDuration,
-        () {
-          _animationController.forward();
-        },
+        _animationController.forward,
       );
     }
   }

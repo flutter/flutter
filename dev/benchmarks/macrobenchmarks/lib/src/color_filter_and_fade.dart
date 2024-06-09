@@ -96,10 +96,8 @@ class _ColorFilterAndFadePageState extends State<ColorFilterAndFadePage> with Ti
     _controller = AnimationController(duration: const Duration(seconds: 3), vsync: this);
     _opacityAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(_controller);
     _opacityAnimation.addStatusListener((AnimationStatus status) {
-      if (status == AnimationStatus.completed) {
-        _controller.reverse();
-      } else if (status == AnimationStatus.dismissed) {
-        _controller.forward();
+      if (!status.isAnimating) {
+        _controller.toggle();
       }
     });
     _controller.forward();

@@ -65,11 +65,6 @@ class _SplashPageState extends State<SplashPage>
     10: 6,
   };
 
-  bool get _isSplashVisible {
-    return _controller.status == AnimationStatus.completed ||
-        _controller.status == AnimationStatus.forward;
-  }
-
   @override
   void initState() {
     super.initState();
@@ -77,11 +72,10 @@ class _SplashPageState extends State<SplashPage>
     // If the number of included effects changes, this number should be changed.
     _effect = _random.nextInt(_effectDurations.length) + 1;
 
-    _controller =
-        AnimationController(duration: splashPageAnimationDuration, vsync: this)
-          ..addListener(() {
-            setState(() {});
-          });
+    _controller = AnimationController(
+      duration: splashPageAnimationDuration,
+      vsync: this,
+    )..addListener(() => setState(() {}));
   }
 
   @override
@@ -104,6 +98,8 @@ class _SplashPageState extends State<SplashPage>
 
   @override
   Widget build(BuildContext context) {
+    final bool isSplashVisible = _controller.isForwardOrCompleted;
+
     return NotificationListener<ToggleSplashNotification>(
       onNotification: (_) {
         _controller.forward();
@@ -115,7 +111,7 @@ class _SplashPageState extends State<SplashPage>
           builder: (BuildContext context, BoxConstraints constraints) {
             final Animation<RelativeRect> animation = _getPanelAnimation(context, constraints);
             Widget frontLayer = widget.child;
-            if (_isSplashVisible) {
+            if (isSplashVisible) {
               frontLayer = MouseRegion(
                 cursor: SystemMouseCursors.click,
                 child: GestureDetector(
@@ -146,7 +142,7 @@ class _SplashPageState extends State<SplashPage>
             return Stack(
               children: <Widget>[
                 _SplashBackLayer(
-                  isSplashCollapsed: !_isSplashVisible,
+                  isSplashCollapsed: !isSplashVisible,
                   effect: _effect,
                   onTap: _controller.forward,
                 ),

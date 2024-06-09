@@ -85,9 +85,7 @@ class _ProgressIndicatorExampleState extends State<ProgressIndicatorExample> wit
                       if (determinate) {
                         controller.stop();
                       } else {
-                        controller
-                          ..forward(from: controller.value)
-                          ..repeat();
+                        controller.repeat();
                       }
                     });
                   },

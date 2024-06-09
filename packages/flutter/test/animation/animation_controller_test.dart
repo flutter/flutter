@@ -42,14 +42,12 @@ void main() {
     bool didComplete = false;
     bool didDismiss = false;
     controller.addStatusListener((AnimationStatus status) {
-      if (status == AnimationStatus.completed) {
+      if (status.isCompleted) {
         didComplete = true;
-        controller.value = 0.0;
-        controller.forward();
-      } else if (status == AnimationStatus.dismissed) {
+        controller.forward(from: 0.0);
+      } else if (status.isDismissed) {
         didDismiss = true;
-        controller.value = 0.0;
-        controller.forward();
+        controller.forward(from: 0.0);
       }
     });
 
@@ -262,17 +260,19 @@ void main() {
       vsync: const TestVSync(),
     );
 
-    controller.toggle();
+    controller.toggle(true);
     tick(const Duration(milliseconds: 10));
     tick(const Duration(milliseconds: 30));
     expect(controller.value, moreOrLessEquals(0.4));
+    controller.toggle(true);
+    tick(const Duration(milliseconds: 10));
     tick(const Duration(milliseconds: 60));
     expect(controller.value, moreOrLessEquals(1.0));
     tick(const Duration(milliseconds: 90));
     expect(controller.value, moreOrLessEquals(1.0));
     controller.stop();
 
-    controller.toggle();
+    controller.toggle(false);
     tick(const Duration(milliseconds: 210));
     tick(const Duration(milliseconds: 220));
     expect(controller.value, moreOrLessEquals(0.9));
