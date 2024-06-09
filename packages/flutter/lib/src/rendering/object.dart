@@ -2222,7 +2222,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   /// (where it will always be false).
   static bool debugCheckingIntrinsics = false;
 
-  bool _debugSubtreeRelayoutRootAlreadyMarkedNeedsLayout() {
+  bool _debugRelayoutBoundaryAlreadyMarkedNeedsLayout() {
     if (_relayoutBoundary == null) {
       // We don't know where our relayout boundary is yet.
       return true;
@@ -2281,7 +2281,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   void markNeedsLayout() {
     assert(_debugCanPerformMutations);
     if (_needsLayout) {
-      assert(_debugSubtreeRelayoutRootAlreadyMarkedNeedsLayout());
+      assert(_debugRelayoutBoundaryAlreadyMarkedNeedsLayout());
       return;
     }
     if (_relayoutBoundary == null) {
