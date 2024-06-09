@@ -1746,4 +1746,49 @@ void main() {
       areCreateAndDispose,
     );
   });
+
+  testWidgets('Fix `setState() or markNeedsBuild()` error when draggable_scrollable_sheet is scrolling',
+      (WidgetTester tester) async {
+    final DraggableScrollableController controller = DraggableScrollableController();
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, void Function(void Function()) setState) {
+            return Scaffold(
+              body: AnimatedBuilder(
+                animation: controller,
+                builder: (BuildContext context, _) => const SizedBox(),
+              ),
+              bottomSheet: DraggableScrollableSheet(
+                controller: controller,
+                builder: (BuildContext context, ScrollController innerScrollController) => ColoredBox(
+                  color: Colors.black,
+                  child: ListView.builder(
+                    controller: innerScrollController,
+                    itemBuilder: (BuildContext context, int index) => Text(
+                      'draggable_item $index',
+                      style: const TextStyle(
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    final double controllerValue = controller.size;
+    expect(controllerValue, 0.5);
+
+    await tester.drag(find.text('draggable_item 1'), const Offset(0, -200));
+    await tester.pumpAndSettle();
+
+    await tester.drag(find.text('draggable_item 1'), const Offset(0, 400));
+    await tester.pumpAndSettle();
+    expect(controllerValue, 0.5);
+  });
 }

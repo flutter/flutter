@@ -835,7 +835,17 @@ class _DraggableScrollableSheetScrollController extends ScrollController {
         curve: Curves.linear,
       );
     }
-    extent.updateSize(extent.initialSize, position.context.notificationContext!);
+    // When resetting, the element may have been marked dirty,
+    // and call updateSize will immediately show FlutterError (setState() or markNeedsBuild() called during build
+    // executing updateSize on the next frame can avoid the error
+    final StatefulElement element = position.context.notificationContext! as StatefulElement;
+    if (element.dirty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        extent.updateSize(extent.initialSize, element);
+      });
+    } else {
+      extent.updateSize(extent.initialSize, element);
+    }
   }
 
   @override

@@ -3396,19 +3396,16 @@ void main() {
     expect(find.byType(FloatingActionButton), findsNothing);
   });
 
-  testWidgets('fix _floatingActionButtonVisibility update',
-      (WidgetTester tester) async {
+  testWidgets('fix _floatingActionButtonVisibility update', (WidgetTester tester) async {
     final List<String> log = <String>[];
 
     bool expanded = true;
-    final DraggableScrollableController controller =
-        DraggableScrollableController();
+    final DraggableScrollableController controller = DraggableScrollableController();
     addTearDown(controller.dispose);
     await tester.pumpWidget(
       MaterialApp(
         home: StatefulBuilder(
-          builder:
-              (BuildContext context, void Function(void Function()) setState) {
+          builder: (BuildContext context, void Function(void Function()) setState) {
             return Scaffold(
               bottomSheet: expanded
                   ? DraggableScrollableSheet(
@@ -3418,8 +3415,7 @@ void main() {
                       maxChildSize: 0.5,
                       snapSizes: const <double>[0.5],
                       controller: controller,
-                      builder: (BuildContext context,
-                          ScrollController scrollController) {
+                      builder: (BuildContext context, ScrollController scrollController) {
                         return SingleChildScrollView(
                           controller: scrollController,
                           child: Column(
@@ -3472,6 +3468,7 @@ void main() {
     FlutterError.onError = handler;
     expect(log.length, 0);
   });
+
 }
 
 class _GeometryListener extends StatefulWidget {
