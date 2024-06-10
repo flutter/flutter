@@ -416,7 +416,7 @@ final GradleHandledError lockFileDepMissingHandler = GradleHandledError(
         .childFile('build.gradle');
         final String generatedGradleCommand = globals.platform.isWindows ? r'.\gradlew.bat' : './gradlew';
     final String textInBold = globals.logger.terminal.bolden(
-      'To regenerate the lockfiles run:  $generatedGradleCommand :generateLockfiles` in ${gradleFile.path}\n'
+      'To regenerate the lockfiles run: `$generatedGradleCommand :generateLockfiles` in ${gradleFile.path}\n'
       'To remove dependency locking, remove the `dependencyLocking` from ${gradleFile.path}'
     );
     globals.printBox(
