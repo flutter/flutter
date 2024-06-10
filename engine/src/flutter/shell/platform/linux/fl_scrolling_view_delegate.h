@@ -38,6 +38,7 @@ struct _FlScrollingViewDelegateInterface {
                                    size_t timestamp,
                                    double x,
                                    double y,
+                                   FlutterPointerDeviceKind device_kind,
                                    double scroll_delta_x,
                                    double scroll_delta_y,
                                    int64_t buttons);
@@ -59,6 +60,7 @@ void fl_scrolling_view_delegate_send_mouse_pointer_event(
     size_t timestamp,
     double x,
     double y,
+    FlutterPointerDeviceKind device_kind,
     double scroll_delta_x,
     double scroll_delta_y,
     int64_t buttons);
