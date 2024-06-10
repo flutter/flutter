@@ -131,7 +131,7 @@ class _SettingsState extends State<Settings> {
                       setState(() {
                         selectedBrightness = value ? Brightness.light : Brightness.dark;
                       });
-                      widget.updateTheme.call(selectedBrightness, selectedColor, selectedContrast);
+                      widget.updateTheme(selectedBrightness, selectedColor, selectedContrast);
                     },
                   )
                 ],
@@ -150,7 +150,7 @@ class _SettingsState extends State<Settings> {
                         setState(() {
                           selectedColor = itemColor;
                         });
-                        widget.updateTheme.call(selectedBrightness, selectedColor, selectedContrast);
+                        widget.updateTheme(selectedBrightness, selectedColor, selectedContrast);
                       },
                     );
                   },
@@ -169,7 +169,7 @@ class _SettingsState extends State<Settings> {
                         setState(() {
                           selectedContrast = value;
                         });
-                        widget.updateTheme.call(selectedBrightness, selectedColor, selectedContrast);
+                        widget.updateTheme(selectedBrightness, selectedColor, selectedContrast);
                       },
                     ),
                   ),
