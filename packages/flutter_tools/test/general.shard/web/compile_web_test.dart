@@ -76,7 +76,6 @@ void main() {
         const WasmCompilerConfig(
           optimizationLevel: 0,
           stripWasm: false,
-          renderer: WebRendererMode.skwasm,
         ),
         const JsCompilerConfig.run(
           nativeNullAssertions: true,
@@ -165,7 +164,7 @@ void main() {
               BuildInfo.debug,
               ServiceWorkerStrategy.offlineFirst,
               compilerConfigs: <WebCompilerConfig>[
-                const JsCompilerConfig.run(nativeNullAssertions: true, renderer: WebRendererMode.auto),
+                const JsCompilerConfig.run(nativeNullAssertions: true, renderer: WebRendererMode.canvaskit),
               ]
             ),
         throwsToolExit(message: 'Failed to compile application for the Web.'));
