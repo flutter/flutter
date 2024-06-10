@@ -195,10 +195,7 @@ class BrowserDetection {
   bool get isEdge => userAgent.contains('Edg/');
 
   /// Whether we are running from a wasm module compiled with dart2wasm.
-  ///
-  /// Note: Currently the ffi library is available from dart2wasm but not dart2js
-  /// or dartdevc.
-  bool get isWasm => const bool.fromEnvironment('dart.library.ffi');
+  bool get isWasm => !const bool.fromEnvironment('dart.library.html');
 }
 
 /// A short-hand accessor to the [BrowserDetection.instance] singleton.

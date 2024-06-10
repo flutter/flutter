@@ -165,7 +165,7 @@ void printSomething() {
   test('gets correct extra imports', () {
     // Root libraries.
     expect(getExtraImportsForLibrary('engine'), <String>[
-      "import 'dart:_skwasm_stub' if (dart.library.ffi) 'dart:_skwasm_impl';",
+      "import 'dart:_skwasm_impl' if (dart.library.html) 'dart:_skwasm_stub';",
       "import 'dart:ui_web' as ui_web;",
       "import 'dart:_web_unicode';",
       "import 'dart:_web_test_fonts';",
