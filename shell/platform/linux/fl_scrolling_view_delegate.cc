@@ -17,13 +17,15 @@ void fl_scrolling_view_delegate_send_mouse_pointer_event(
     size_t timestamp,
     double x,
     double y,
+    FlutterPointerDeviceKind device_kind,
     double scroll_delta_x,
     double scroll_delta_y,
     int64_t buttons) {
   g_return_if_fail(FL_IS_SCROLLING_VIEW_DELEGATE(self));
 
   FL_SCROLLING_VIEW_DELEGATE_GET_IFACE(self)->send_mouse_pointer_event(
-      self, phase, timestamp, x, y, scroll_delta_x, scroll_delta_y, buttons);
+      self, phase, timestamp, x, y, device_kind, scroll_delta_x, scroll_delta_y,
+      buttons);
 }
 void fl_scrolling_view_delegate_send_pointer_pan_zoom_event(
     FlScrollingViewDelegate* self,
