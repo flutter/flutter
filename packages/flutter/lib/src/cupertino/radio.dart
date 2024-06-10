@@ -125,8 +125,8 @@ class CupertinoRadio<T> extends StatefulWidget {
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// widget.
   ///
-  /// If [mouseCursor] is a [WidgetStateProperty<MouseCursor>],
-  /// [WidgetStateProperty.resolve] is used for the following [WidgetState]s:
+  /// If [mouseCursor] is a [WidgetStateMouseCursor],
+  /// [WidgetStateMouseCursor.resolve] is used for the following [WidgetState]s:
   ///
   ///  * [WidgetState.selected].
   ///  * [WidgetState.hovered].
@@ -265,7 +265,7 @@ class _CupertinoRadioState<T> extends State<CupertinoRadio<T>> with TickerProvid
     final WidgetStateProperty<MouseCursor> effectiveMouseCursor =
       WidgetStateProperty.resolveWith<MouseCursor>((Set<WidgetState> states) {
         return WidgetStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states)
-        ?? (states.contains(WidgetState.disabled)
+          ?? (states.contains(WidgetState.disabled)
               ? SystemMouseCursors.basic
               : kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic
             );
@@ -342,7 +342,6 @@ class _RadioPainter extends ToggleablePainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-
     final Offset center = (Offset.zero & size).center;
 
     final Paint paint = Paint()

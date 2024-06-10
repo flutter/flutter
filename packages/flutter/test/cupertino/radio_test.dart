@@ -445,11 +445,72 @@ void main() {
       kind: PointerDeviceKind.mouse,
       pointer: 1
     );
+    addTearDown(gesture.removePointer);
     await gesture.addPointer(location: tester.getCenter(find.byType(CupertinoRadio<int>)));
     await tester.pump();
     await gesture.moveTo(tester.getCenter(find.byType(CupertinoRadio<int>)));
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.forbidden);
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.forbidden
+    );
+  });
+
+  testWidgets('Mouse cursor resolves in disabled/hovered/focused states', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode(debugLabel: 'Radio');
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+
+    await tester.pumpWidget(CupertinoApp(
+      home: Center(
+        child: CupertinoRadio<int>(
+          value: 1,
+          groupValue: 1,
+          onChanged: (int? i) { },
+          mouseCursor: const RadioMouseCursor(),
+          focusNode: focusNode
+        ),
+      ),
+    ));
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+      pointer: 1
+    );
+    addTearDown(gesture.removePointer);
+    await gesture.addPointer(location: tester.getCenter(find.byType(CupertinoRadio<int>)));
+    await tester.pump();
+
+    // Test hovered case.
+    await gesture.moveTo(tester.getCenter(find.byType(CupertinoRadio<int>)));
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.click
+    );
+
+    // Test focused case.
+    focusNode.requestFocus();
+    await tester.pump();
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.grab
+    );
+
+    // Test disabled case.
+    await tester.pumpWidget(const CupertinoApp(
+      home: Center(
+        child: CupertinoRadio<int>(
+          value: 1,
+          groupValue: 1,
+          onChanged: null,
+          mouseCursor: RadioMouseCursor(),
+        ),
+      ),
+    ));
+
+    await tester.pump();
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.forbidden
+    );
+    focusNode.dispose();
   });
 
   testWidgets('Radio default mouse cursor', (WidgetTester tester) async {
@@ -462,12 +523,36 @@ void main() {
         ),
       ),
     ));
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+      pointer: 1
+    );
+    addTearDown(gesture.removePointer);
     await gesture.addPointer(location: tester.getCenter(find.byType(CupertinoRadio<int>)));
     addTearDown(gesture.removePointer);
     await tester.pump();
     await gesture.moveTo(tester.getCenter(find.byType(CupertinoRadio<int>)));
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-        kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic);
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic
+    );
   });
+}
+
+class RadioMouseCursor extends WidgetStateMouseCursor {
+  const RadioMouseCursor();
+
+  @override
+  MouseCursor resolve(Set<WidgetState> states) {
+    if (states.contains(WidgetState.disabled)) {
+      return SystemMouseCursors.forbidden;
+    }
+    if (states.contains(WidgetState.focused)){
+      return SystemMouseCursors.grab;
+    }
+    return SystemMouseCursors.click;
+  }
+
+  @override
+  String get debugDescription => 'RadioMouseCursor()';
 }
