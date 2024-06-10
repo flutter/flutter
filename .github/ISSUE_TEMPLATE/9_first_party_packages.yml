@@ -56,7 +56,6 @@ body:
         - palette_generator
         - path_provider
         - pigeon
-        - platform
         - plugin_platform_interface
         - pointer_interceptor
         - process
