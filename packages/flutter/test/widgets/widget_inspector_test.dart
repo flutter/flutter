@@ -1979,20 +1979,23 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
           /// Returns whether the child was created by the local project.
           bool wasCreatedByLocalProject(Map<String, Object?> childJson) {
-            return childJson['createdByLocalProject'] != null &&
-                childJson['createdByLocalProject'] == true;
+            return childJson['createdByLocalProject'] == true;
           }
 
           /// Returns whether the child has a description matching [description].
-          bool hasDescription(Map<String, Object?> childJson, {required String description}) {
-            return childJson['description'] != null &&
-                childJson['description'] == description;
+          bool hasDescription(
+            Map<String, Object?> childJson, {
+            required String description,
+          }) {
+            return childJson['description'] == description;
           }
 
           /// Returns whether the child has a text preview matching [preview].
-          bool hasTextPreview(Map<String, Object?> childJson, {required String preview}) {
-            return childJson['textPreview'] != null &&
-                childJson['textPreview'] == preview;
+          bool hasTextPreview(
+            Map<String, Object?> childJson, {
+            required String preview,
+          }) {
+            return childJson['textPreview'] == preview;
           }
 
           /// Verifies that the children from the JSON response are identical to
@@ -2076,12 +2079,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           }
 
           bool allChildrenSatisfyCondition(Map<String, Object?> treeRoot,
-              {required bool Function(Map<String, Object?> child) condition}) {
+              {
+            required bool Function(Map<String, Object?> child) condition,
+          }) {
             final List<Object?> children = childrenFromJsonResponse(treeRoot);
-            if (children.isEmpty) {
-              return true;
-            }
-
             for (int childIdx = 0; childIdx < children.length; childIdx++) {
               final Map<String, Object?> child =
                   children[childIdx]! as Map<String, Object?>;
@@ -2097,12 +2098,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           }
 
           bool oneChildSatisfiesCondition(Map<String, Object?> treeRoot,
-              {required bool Function(Map<String, Object?> child) condition}) {
+              {
+            required bool Function(Map<String, Object?> child) condition,
+          }) {
             final List<Object?> children = childrenFromJsonResponse(treeRoot);
-            if (children.isEmpty) {
-              return false;
-            }
-
             for (int childIdx = 0; childIdx < children.length; childIdx++) {
               final Map<String, Object?> child =
                   children[childIdx]! as Map<String, Object?>;
@@ -2209,8 +2208,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
               expect(
                   allChildrenSatisfyCondition(rootJson,
-                      condition: wasCreatedByLocalProject),
-                  isTrue);
+                  condition: wasCreatedByLocalProject,
+                ),
+                isTrue,
+              );
               await verifyChildrenMatchOtherApi(rootJson, group: group);
             });
 
@@ -2241,8 +2242,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
               expect(
                   allChildrenSatisfyCondition(rootJson,
-                      condition: wasCreatedByLocalProject),
-                  isTrue);
+                  condition: wasCreatedByLocalProject,
+                ),
+                isTrue,
+              );
               await verifyChildrenMatchOtherApi(
                 rootJson,
                 group: group,
@@ -2285,7 +2288,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
                 return hasDescription(child, description: 'Text') &&
                     wasCreatedByLocalProject(child) &&
                     !hasTextPreview(child, preview: 'a');
-              }),
+                },
+              ),
               isTrue,
             );
             expect(
@@ -2293,7 +2297,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
                 return hasDescription(child, description: 'Text') &&
                     wasCreatedByLocalProject(child) &&
                     !hasTextPreview(child, preview: 'b');
-              }),
+                },
+              ),
               isTrue,
             );
             expect(
@@ -2301,7 +2306,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
                 return hasDescription(child, description: 'Text') &&
                     wasCreatedByLocalProject(child) &&
                     !hasTextPreview(child, preview: 'c');
-              }),
+                },
+              ),
               isTrue,
             );
           });
@@ -2332,7 +2338,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
             expect(
               allChildrenSatisfyCondition(rootJson,
-                  condition: wasCreatedByLocalProject),
+                condition: wasCreatedByLocalProject,
+              ),
               isFalse,
             );
             expect(
@@ -2340,7 +2347,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
                 return hasDescription(child, description: 'Text') &&
                     wasCreatedByLocalProject(child) &&
                     hasTextPreview(child, preview: 'a');
-              }),
+                },
+              ),
               isTrue,
             );
             expect(
@@ -2348,7 +2356,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
                 return hasDescription(child, description: 'Text') &&
                     wasCreatedByLocalProject(child) &&
                     hasTextPreview(child, preview: 'b');
-              }),
+                },
+              ),
               isTrue,
             );
             expect(
@@ -2356,7 +2365,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
                 return hasDescription(child, description: 'Text') &&
                     wasCreatedByLocalProject(child) &&
                     hasTextPreview(child, preview: 'c');
-              }),
+                },
+              ),
               isTrue,
             );
           });

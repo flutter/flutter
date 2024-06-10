@@ -1969,7 +1969,10 @@ mixin WidgetInspectorService {
   ) {
     final String groupName = parameters['groupName']!;
     final Map<String, Object?>? result = _getRootWidgetTreeImpl(
-        groupName: groupName, isSummaryTree: true, withPreviews: true);
+      groupName: groupName,
+      isSummaryTree: true,
+      withPreviews: true,
+    );
     return Future<Map<String, dynamic>>.value(<String, dynamic>{
       'result': result,
     });
@@ -2007,15 +2010,12 @@ mixin WidgetInspectorService {
     // Combine the given addAdditionalPropertiesCallback with logic to add text
     // previews as well (if withPreviews is true):
     Map<String, Object>? combinedAddAdditionalPropertiesCallback(
-        DiagnosticsNode node, InspectorSerializationDelegate delegate) {
-      Map<String, Object> additionalPropertiesJson = <String, Object>{};
-      if (addAdditionalPropertiesCallback != null) {
-        final Map<String, Object>? json =
-            addAdditionalPropertiesCallback(node, delegate);
-        if (json != null) {
-          additionalPropertiesJson = json;
-        }
-      }
+      DiagnosticsNode node,
+      InspectorSerializationDelegate delegate,
+    ) {
+      final Map<String, Object> additionalPropertiesJson =
+          addAdditionalPropertiesCallback?.call(node, delegate) ??
+              <String, Object>{};
       if (!withPreviews) {
         return additionalPropertiesJson;
       }
