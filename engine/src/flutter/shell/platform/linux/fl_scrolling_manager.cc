@@ -143,7 +143,8 @@ void fl_scrolling_manager_handle_scroll_event(FlScrollingManager* self,
                                       this is a discrete scroll event */
         ,
         event_time * kMicrosecondsPerMillisecond, event_x * scale_factor,
-        event_y * scale_factor, scroll_delta_x, scroll_delta_y, 0);
+        event_y * scale_factor, kFlutterPointerDeviceKindMouse, scroll_delta_x,
+        scroll_delta_y, 0);
   }
 }
 

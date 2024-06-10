@@ -792,6 +792,7 @@ void fl_engine_send_mouse_pointer_event(FlEngine* self,
                                         size_t timestamp,
                                         double x,
                                         double y,
+                                        FlutterPointerDeviceKind device_kind,
                                         double scroll_delta_x,
                                         double scroll_delta_y,
                                         int64_t buttons) {
@@ -812,7 +813,7 @@ void fl_engine_send_mouse_pointer_event(FlEngine* self,
   }
   fl_event.scroll_delta_x = scroll_delta_x;
   fl_event.scroll_delta_y = scroll_delta_y;
-  fl_event.device_kind = kFlutterPointerDeviceKindMouse;
+  fl_event.device_kind = device_kind;
   fl_event.buttons = buttons;
   fl_event.device = kMousePointerDeviceId;
   // TODO(dkwingsmt): Assign the correct view ID once the Linux embedder

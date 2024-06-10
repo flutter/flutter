@@ -13,6 +13,7 @@ typedef std::function<void(FlutterPointerPhase phase,
                            size_t timestamp,
                            double x,
                            double y,
+                           FlutterPointerDeviceKind device_kind,
                            double scroll_delta_x,
                            double scroll_delta_y,
                            int64_t buttons)>
@@ -32,6 +33,7 @@ typedef struct {
   size_t timestamp;
   double x;
   double y;
+  FlutterPointerDeviceKind device_kind;
   double scroll_delta_x;
   double scroll_delta_y;
   int64_t buttons;
@@ -114,13 +116,14 @@ static void fl_mock_view_send_mouse_pointer_event(
     size_t timestamp,
     double x,
     double y,
+    FlutterPointerDeviceKind device_kind,
     double scroll_delta_x,
     double scroll_delta_y,
     int64_t buttons) {
   FlMockScrollingViewDelegatePrivate* priv =
       FL_MOCK_SCROLLING_VIEW_DELEGATE_GET_PRIVATE(delegate);
-  priv->mouse_handler(phase, timestamp, x, y, scroll_delta_x, scroll_delta_y,
-                      buttons);
+  priv->mouse_handler(phase, timestamp, x, y, device_kind, scroll_delta_x,
+                      scroll_delta_y, buttons);
 }
 
 static void fl_mock_view_send_pointer_pan_zoom_event(
@@ -182,7 +185,8 @@ class ScrollingTester {
     fl_mock_scrolling_view_set_mouse_handler(
         view_,
         [](FlutterPointerPhase phase, size_t timestamp, double x, double y,
-           double scroll_delta_x, double scroll_delta_y, int64_t buttons) {
+           FlutterPointerDeviceKind device_kind, double scroll_delta_x,
+           double scroll_delta_y, int64_t buttons) {
           // do nothing
         });
     fl_mock_scrolling_view_set_pan_zoom_handler(
@@ -204,13 +208,15 @@ class ScrollingTester {
       std::vector<MousePointerEventRecord>& storage) {
     fl_mock_scrolling_view_set_mouse_handler(
         view_, [&storage](FlutterPointerPhase phase, size_t timestamp, double x,
-                          double y, double scroll_delta_x,
-                          double scroll_delta_y, int64_t buttons) {
+                          double y, FlutterPointerDeviceKind device_kind,
+                          double scroll_delta_x, double scroll_delta_y,
+                          int64_t buttons) {
           storage.push_back(MousePointerEventRecord{
               .phase = phase,
               .timestamp = timestamp,
               .x = x,
               .y = y,
+              .device_kind = device_kind,
               .scroll_delta_x = scroll_delta_x,
               .scroll_delta_y = scroll_delta_y,
               .buttons = buttons,
@@ -278,6 +284,7 @@ TEST(FlScrollingManagerTest, DiscreteDirectionional) {
   EXPECT_EQ(mouse_records.size(), 1u);
   EXPECT_EQ(mouse_records[0].x, 4.0);
   EXPECT_EQ(mouse_records[0].y, 8.0);
+  EXPECT_EQ(mouse_records[0].device_kind, kFlutterPointerDeviceKindMouse);
   EXPECT_EQ(mouse_records[0].timestamp,
             1000lu);  // Milliseconds -> Microseconds
   EXPECT_EQ(mouse_records[0].scroll_delta_x, 0);
@@ -288,6 +295,7 @@ TEST(FlScrollingManagerTest, DiscreteDirectionional) {
   EXPECT_EQ(mouse_records.size(), 2u);
   EXPECT_EQ(mouse_records[1].x, 4.0);
   EXPECT_EQ(mouse_records[1].y, 8.0);
+  EXPECT_EQ(mouse_records[1].device_kind, kFlutterPointerDeviceKindMouse);
   EXPECT_EQ(mouse_records[1].timestamp,
             1000lu);  // Milliseconds -> Microseconds
   EXPECT_EQ(mouse_records[1].scroll_delta_x, 0);
@@ -298,6 +306,7 @@ TEST(FlScrollingManagerTest, DiscreteDirectionional) {
   EXPECT_EQ(mouse_records.size(), 3u);
   EXPECT_EQ(mouse_records[2].x, 4.0);
   EXPECT_EQ(mouse_records[2].y, 8.0);
+  EXPECT_EQ(mouse_records[2].device_kind, kFlutterPointerDeviceKindMouse);
   EXPECT_EQ(mouse_records[2].timestamp,
             1000lu);  // Milliseconds -> Microseconds
   EXPECT_EQ(mouse_records[2].scroll_delta_x, 53 * -1.0);
@@ -308,6 +317,7 @@ TEST(FlScrollingManagerTest, DiscreteDirectionional) {
   EXPECT_EQ(mouse_records.size(), 4u);
   EXPECT_EQ(mouse_records[3].x, 4.0);
   EXPECT_EQ(mouse_records[3].y, 8.0);
+  EXPECT_EQ(mouse_records[3].device_kind, kFlutterPointerDeviceKindMouse);
   EXPECT_EQ(mouse_records[3].timestamp,
             1000lu);  // Milliseconds -> Microseconds
   EXPECT_EQ(mouse_records[3].scroll_delta_x, 53 * 1.0);
@@ -335,6 +345,7 @@ TEST(FlScrollingManagerTest, DiscreteScrolling) {
   EXPECT_EQ(mouse_records.size(), 1u);
   EXPECT_EQ(mouse_records[0].x, 4.0);
   EXPECT_EQ(mouse_records[0].y, 8.0);
+  EXPECT_EQ(mouse_records[0].device_kind, kFlutterPointerDeviceKindMouse);
   EXPECT_EQ(mouse_records[0].timestamp,
             1000lu);  // Milliseconds -> Microseconds
   EXPECT_EQ(mouse_records[0].scroll_delta_x, 53 * 1.0);
