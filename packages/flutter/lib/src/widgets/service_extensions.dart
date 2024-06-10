@@ -392,8 +392,6 @@ enum WidgetInspectorServiceExtensions {
   ///   encoded String representation of this data.
   /// * [WidgetInspectorService.initServiceExtensions], where the service
   ///   extension is registered.
-  ///
-  @Deprecated('Use getRootWidgetTree instead.')
   getRootWidgetSummaryTree,
 
   /// Name of service extension that, when called, will return the
@@ -408,8 +406,6 @@ enum WidgetInspectorServiceExtensions {
   ///
   /// * [WidgetInspectorService.initServiceExtensions], where the service
   ///   extension is registered.
-  ///
-  @Deprecated('Use getRootWidgetTree instead.')
   getRootWidgetSummaryTreeWithPreviews,
 
   /// Name of service extension that, when called, will return the details
