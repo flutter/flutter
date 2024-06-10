@@ -36,7 +36,7 @@ Future<DartDevelopmentServiceInstance> defaultStartDartDevelopmentService(
   String? google3WorkspaceRoot,
   Uri? devToolsServerAddress,
 }) async {
-  final String exe = const p.LocalPlatform().resolvedExecutable;
+  final String exe = const p.LocalPlatform().executable;
   final io.Process process = await io.Process.start(
     exe,
     <String>[
