@@ -39,6 +39,17 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   final ContextMenuController _menuController = ContextMenuController();
   final SelectionController _selectionController = SelectionController();
+  final int _text1Id = SelectableRegionState.nextSelectableId;
+  final int _text2Id = SelectableRegionState.nextSelectableId;
+  final int _text3Id = SelectableRegionState.nextSelectableId;
+
+  Map<int, TextSpan> dataSourceMap = <int, TextSpan>{};
+
+  @override
+  void initState() {
+    super.initState();
+    _initData();
+  }
 
   @override
   void dispose() {
@@ -46,8 +57,28 @@ class _MyHomePageState extends State<MyHomePage> {
     super.dispose();
   }
 
-  String _trimPlaceholders(String text) {
-    return text.replaceAll(String.fromCharCode(PlaceholderSpan.placeholderCodeUnit), '');
+  void _initData() {
+    dataSourceMap[_text1Id] = TextSpan(
+      text: 'This is some bulleted list:\n',
+      children: <InlineSpan>[
+        WidgetSpan(
+          child: Column(
+            children: <Widget>[
+              for (int i = 1; i <= 7; i += 1)
+                Padding(
+                  padding: const EdgeInsets.only(left: 20.0),
+                  child: Text('• Bullet $i'),
+                )
+            ],
+          ),
+        ),
+      ],
+    );
+    dataSourceMap[_text2Id] = const TextSpan(
+      text: 'This is some text in a text widget.',
+      children: <InlineSpan>[TextSpan(text: 'more text')],
+    );
+    dataSourceMap[_text3Id] = const TextSpan(text: 'This is some text in another text widget.');
   }
 
   void _emphasizeText(List<SelectedContentController<Object>>? controllers) {
@@ -56,73 +87,91 @@ class _MyHomePageState extends State<MyHomePage> {
     }
     for (int index = 0; index < controllers.length; index += 1) {
       final SelectedContentController<Object> contentController = controllers[index];
-      if (contentController.value is! TextSpan) {
-        // Do not edit the controller if it is not text.
+      if (contentController.content is! TextSpan || contentController.selectableId == null) {
+        // Do not edit the controller if it is not text or if a selectable id has not been provided.
         return;
       }
-      final String plainText = (contentController.value as TextSpan).toPlainText(includeSemanticsLabels: false);
-      String collectedSelection = '';
-      String beforeSelection = '';
-      String afterSelection = '';
+      final TextSpan rawSpan = contentController.content as TextSpan;
       final int startOffset = min(contentController.startOffset, contentController.endOffset);
       final int endOffset = max(contentController.startOffset, contentController.endOffset);
-      // Collect text before selection.
-      for (int j = 0; j < startOffset; j += 1) {
-        beforeSelection += String.fromCharCode(plainText.codeUnitAt(j));
-      }
-      beforeSelection = _trimPlaceholders(beforeSelection);
-      // Collect text inside selection.
-      for (int j = startOffset; j < endOffset; j += 1) {
-        final String currentChar = String.fromCharCode(plainText.codeUnitAt(j));
-        if (currentChar == String.fromCharCode(PlaceholderSpan.placeholderCodeUnit)) {
-          // There is a placeholder within the selection, we should consider checking
-          // the children controllers if we would like to edit it more granularly.
-          _emphasizeText(contentController.children);
-          continue;
-        }
-        collectedSelection += currentChar;
-      }
-      collectedSelection = _trimPlaceholders(collectedSelection);
-      // Collect text after selection.
-      for (int j = endOffset; j < plainText.length; j += 1) {
-        afterSelection += String.fromCharCode(plainText.codeUnitAt(j));
-      }
-      afterSelection = _trimPlaceholders(afterSelection);
-      final List<InlineSpan> concreteSpans = <InlineSpan>[];
-      final TextSpan beforeSpan = TextSpan(text: beforeSelection);
-      final TextSpan selectionSpan = TextSpan(text: collectedSelection, style: const TextStyle(color: Colors.red));
-      final TextSpan afterSpan = TextSpan(text: afterSelection);
-      // Check if any span is empty, if a span is empty do not include it in the
-      // new span tree. Move any retained bullet children to the very last span.
-      if (beforeSelection.isNotEmpty) {
-        concreteSpans.add(beforeSpan);
-      }
-      if (collectedSelection.isNotEmpty) {
-        concreteSpans.add(selectionSpan);
-      }
-      if (collectedSelection.isNotEmpty) {
-        concreteSpans.add(afterSpan);
-      }
-      TextSpan lastSpan = concreteSpans.last as TextSpan;
-      final List<InlineSpan> collectedChildren = <InlineSpan>[];
-      if ((contentController.value as TextSpan).children != null) {
-        for (int i = 0; i < (contentController.value as TextSpan).children!.length; i += 1) {
-          if (((contentController.value as TextSpan).children![i] as TextSpan).children != null) {
-            collectedChildren.addAll(((contentController.value as TextSpan).children![i] as TextSpan).children!);
+      final List<InlineSpan> beforeSelection = <InlineSpan>[];
+      final List<InlineSpan> insideSelection = <InlineSpan>[];
+      final List<InlineSpan> afterSelection = <InlineSpan>[];
+      int count = 0;
+      rawSpan.visitChildren((InlineSpan child) {
+        if (child is TextSpan) {
+          final String? rawText = child.text;
+          if (rawText != null) {
+            if (count < startOffset) {
+              final int newStart = min(startOffset - count, rawText.length);
+              final int globalNewStart = count + newStart;
+              // Collect spans before selection.
+              beforeSelection.add(
+                TextSpan(
+                  style: child.style,
+                  text: rawText.substring(0, newStart),
+                ),
+              );
+              // Check if this span also contains the selection.
+              if (globalNewStart == startOffset && newStart < rawText.length) {
+                final int newStartAfterSelection = min(newStart + (endOffset - startOffset), rawText.length);
+                final int globalNewStartAfterSelection = count + newStartAfterSelection;
+                insideSelection.add(
+                  TextSpan(
+                    style: const TextStyle(color: Colors.red),
+                    text: rawText.substring(newStart, newStartAfterSelection),
+                  ),
+                );
+                // Check if this span contains content after the selection.
+                if (globalNewStartAfterSelection == endOffset && newStartAfterSelection < rawText.length) {
+                  afterSelection.add(
+                    TextSpan(
+                      style: child.style,
+                      text: rawText.substring(newStartAfterSelection),
+                    ),
+                  );
+                }
+              }
+            } else if (count >= endOffset) {
+              // Collect spans after selection.
+              afterSelection.add(TextSpan(style: child.style, text: rawText));
+            } else {
+              // Collect spans inside selection.
+              final int newStart = min(endOffset - startOffset, rawText.length); 
+              final int globalNewStart = count + newStart;
+              insideSelection.add(TextSpan(style: const TextStyle(color: Colors.red), text: rawText.substring(0, newStart)));
+              // Check if this span contains content after the selection.
+              if (globalNewStart == endOffset && newStart < rawText.length) {
+                afterSelection.add(TextSpan(style: child.style, text: rawText.substring(newStart)));
+              }
+            }
+            count += rawText.length;
+          }
+        } else if (child is WidgetSpan) {
+          count += 1;
+          if (count < startOffset) {
+            beforeSelection.add(child);
+          } else if (count >= endOffset) {
+            afterSelection.add(child);
+          } else {
+            insideSelection.add(child);
           }
         }
-      }
-      if (collectedChildren.isNotEmpty) {
-        // Retain any children and place them in the last span.
-        lastSpan = TextSpan(text: _trimPlaceholders(lastSpan.toPlainText(includeSemanticsLabels: false)), children: collectedChildren);
-      }
-      concreteSpans[concreteSpans.length - 1] = lastSpan;
-      final TextSpan newSpan = TextSpan(
-        style: (contentController.value as TextSpan).style,
-        children: concreteSpans,
+        return true;
+      });
+      dataSourceMap[contentController.selectableId!] = TextSpan(
+        style: (contentController.content as TextSpan).style,
+        children: <InlineSpan>[
+          ...beforeSelection,
+          ...insideSelection,
+          ...afterSelection,
+        ],
       );
-      contentController.value = newSpan;
     }
+    _selectionController.clear();
+    setState(() {
+      
+    });
   }
 
   @override
@@ -135,10 +184,10 @@ class _MyHomePageState extends State<MyHomePage> {
       body: SelectionArea(
         controller: _selectionController,
         onSelectionChanged: (SelectedContent? selectedContent) {
-            if (selectedContent == null
-                || selectedContent.plainText.isEmpty
-                || (selectedContent.geometry.startSelectionPoint == null
-                || selectedContent.geometry.endSelectionPoint == null)) {
+          if (selectedContent == null
+              || selectedContent.plainText.isEmpty
+              || (selectedContent.geometry.startSelectionPoint == null
+              || selectedContent.geometry.endSelectionPoint == null)) {
             return;
           }
           _menuController.show(
@@ -171,28 +220,21 @@ class _MyHomePageState extends State<MyHomePage> {
         },
         child: Center(
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               Text.rich(
-                TextSpan(
-                  text: 'This is some bulleted list:\n',
-                  children: <InlineSpan>[
-                    WidgetSpan(
-                      child: Column(
-                        children: <Widget>[
-                          for (int i = 1; i <= 7; i += 1)
-                            Padding(
-                              padding: const EdgeInsets.only(left: 20.0),
-                              child: Text('• Bullet $i'),
-                            )
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
+                selectableId: _text1Id,
+                dataSourceMap[_text1Id]!,
               ),
-              const Text('This is some text in a text widget.'),
-              const Text('Some more text in a different text widget.'),
+              Text.rich(
+                selectableId: _text2Id,
+                dataSourceMap[_text2Id]!,
+              ),
+              Text.rich(
+                selectableId: _text3Id,
+                dataSourceMap[_text3Id]!,
+              ),
             ],
           ),
         ),
