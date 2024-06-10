@@ -9,7 +9,6 @@ import 'dart:typed_data';
 
 import 'package:js/js_util.dart' as js_util;
 import 'package:meta/meta.dart';
-import 'package:ui/src/engine/skwasm/skwasm_stub.dart' if (dart.library.ffi) 'package:ui/src/engine/skwasm/skwasm_impl.dart';
 
 import 'browser_detection.dart';
 
@@ -38,13 +37,6 @@ import 'browser_detection.dart';
 /// used carefully and only on types that are known to not contains `JSNull` and
 /// `JSUndefined`.
 extension ObjectToJSAnyExtension on Object {
-  // Once `Object.toJSBox` is faster (see
-  // https://github.com/dart-lang/sdk/issues/55183) we can remove this
-  // backend-specific workaround.
-  @pragma('wasm:prefer-inline')
-  @pragma('dart2js:tryInline')
-  JSAny get toJSWrapper => dartToJsWrapper(this);
-
   @pragma('wasm:prefer-inline')
   @pragma('dart2js:tryInline')
   JSAny get toJSAnyShallow {
@@ -61,10 +53,6 @@ extension ObjectToJSAnyExtension on Object {
 }
 
 extension JSAnyToObjectExtension on JSAny {
-  @pragma('wasm:prefer-inline')
-  @pragma('dart2js:tryInline')
-  Object get fromJSWrapper => jsWrapperToDart(this);
-
   @pragma('wasm:prefer-inline')
   @pragma('dart2js:tryInline')
   Object get toObjectShallow {
@@ -3682,13 +3670,14 @@ class DomFinalizationRegistry {
 
 extension DomFinalizationRegistryExtension on DomFinalizationRegistry {
   @JS('register')
-  external JSVoid register(JSAny target, JSAny value);
+  external JSVoid register(
+      ExternalDartReference target, ExternalDartReference value);
 
   @JS('register')
-  external JSVoid registerWithToken(JSAny target, JSAny value, JSAny token);
+  external JSVoid registerWithToken(ExternalDartReference target, ExternalDartReference value, ExternalDartReference token);
 
   @JS('unregister')
-  external JSVoid unregister(JSAny token);
+  external JSVoid unregister(ExternalDartReference token);
 }
 
 @JS('window.FinalizationRegistry')
