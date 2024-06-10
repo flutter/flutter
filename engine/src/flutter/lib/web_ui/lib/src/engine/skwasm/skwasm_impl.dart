@@ -11,7 +11,6 @@ import 'dart:ffi';
 
 export 'skwasm_impl/canvas.dart';
 export 'skwasm_impl/codecs.dart';
-export 'skwasm_impl/dart_js_conversion.dart';
 export 'skwasm_impl/filters.dart';
 export 'skwasm_impl/font_collection.dart';
 export 'skwasm_impl/image.dart';

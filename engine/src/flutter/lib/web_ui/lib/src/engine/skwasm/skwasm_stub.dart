@@ -6,5 +6,4 @@
 // ignore: unnecessary_library_directive
 library skwasm_stub;
 
-export 'skwasm_stub/dart_js_conversion.dart';
 export 'skwasm_stub/renderer.dart';
