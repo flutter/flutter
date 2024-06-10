@@ -2347,7 +2347,7 @@ Future<void> main() async {
     expect(tester.getSize(find.byKey(smallContainer)), const Size(100,100));
   });
 
-  testWidgets('Can add two page with pages with heroes simultaneously.', (WidgetTester tester) async {
+  testWidgets('Can add two page with heroes simultaneously using page API.', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/115358.
 
     const String heroTag = 'foo';

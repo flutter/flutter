@@ -834,14 +834,14 @@ class HeroController extends NavigatorObserver {
   final Map<Object, _HeroFlight> _flights = <Object, _HeroFlight>{};
 
   @override
-  void didChangeTop(Route<dynamic> newRoute, Route<dynamic>? oldRoute) {
-    assert(newRoute.isCurrent);
+  void didChangeTop(Route<dynamic> topRoute, Route<dynamic>? previousTopRoute) {
+    assert(topRoute.isCurrent);
     assert(navigator != null);
-    if (oldRoute == null) {
+    if (previousTopRoute == null) {
       return;
     }
     if (!navigator!.userGestureInProgress) {
-      _maybeStartHeroTransition(oldRoute, newRoute, false);
+      _maybeStartHeroTransition(previousTopRoute, topRoute, false);
     }
   }
 
@@ -894,12 +894,14 @@ class HeroController extends NavigatorObserver {
     final Animation<double> newRouteAnimation = toRoute.animation!;
     final Animation<double> oldRouteAnimation = fromRoute.animation!;
     final HeroFlightDirection flightType;
-    if (isUserGestureTransition || oldRouteAnimation.status == AnimationStatus.reverse) {
-      flightType = HeroFlightDirection.pop;
-    } else if (newRouteAnimation.status == AnimationStatus.forward) {
-      flightType = HeroFlightDirection.push;
-    } else {
-      return;
+    switch ((isUserGestureTransition, oldRouteAnimation.status, newRouteAnimation.status)) {
+      case (true, _, _):
+      case (_, AnimationStatus.reverse, _):
+        flightType = HeroFlightDirection.pop;
+      case (_, _, AnimationStatus.forward):
+        flightType = HeroFlightDirection.push;
+      default:
+        return;
     }
 
     // A user gesture may have already completed the pop, or we might be the initial route
