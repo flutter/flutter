@@ -31,8 +31,9 @@ void main() {
       );
     }
     expect(coloredBox().color, const Color(0xff65558f));
-    await tester.tap(find.byIcon(Icons.settings));
+    await tester.tap(find.byType(example.SettingsButton));
     await tester.pumpAndSettle();
+    expect(find.text('Settings'), findsOneWidget);
     await tester.tap(find.byType(IconButton).at(6));
     await tester.pumpAndSettle();
 
