@@ -189,7 +189,7 @@ class _MyHomePageState extends State<MyHomePage> {
               afterSelection.add(TextSpan(style: child.style, text: rawText));
             } else {
               // Collect spans inside selection.
-              final int newStart = min(endOffset - startOffset, rawText.length); 
+              final int newStart = min(endOffset - startOffset, rawText.length);
               final int globalNewStart = count + newStart;
               if (controllerIndex == 0) {
                 insideSelection.add(const TextSpan(text: '\n'));
@@ -243,9 +243,7 @@ class _MyHomePageState extends State<MyHomePage> {
     }
     _textWidgets.clear();
     _textWidgets.addAll(newText);
-    setState(() {
-      
-    });
+    setState(() {});
   }
 
   @override
