@@ -32,6 +32,7 @@ class _MainWidget extends StatelessWidget {
         children: <Widget>[
           const TextField(
             key: Key('enabled text field'),
+            maxLines: null,
             decoration: InputDecoration(
               labelText: 'Email',
               suffixText: '@gmail.com',
@@ -40,6 +41,7 @@ class _MainWidget extends StatelessWidget {
           ),
           TextField(
             key: const Key('disabled text field'),
+            maxLines: null,
             decoration: const InputDecoration(
               labelText: 'Email',
               suffixText: '@gmail.com',
