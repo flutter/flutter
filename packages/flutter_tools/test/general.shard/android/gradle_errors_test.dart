@@ -816,8 +816,7 @@ Execution failed for task ':app:generateDebugFeatureTransitiveDeps'.
     ProcessManager: () => processManager,
   });
 
-// Test for-> Most error messages in gradle_errors.dart assume a unix like path separator/environment #136763
-// It is successfully passing the test for windows enviroment.
+
     testUsingContext('generates correct gradle command for windows environment',
       () async {
     await lockFileDepMissingHandler.handler(
