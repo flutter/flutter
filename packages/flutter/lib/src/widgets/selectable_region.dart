@@ -371,6 +371,11 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   /// The list of native text processing actions provided by the engine.
   final List<ProcessTextAction> _processTextActions = <ProcessTextAction>[];
 
+  // Ids.
+  static int _currentSelectableId = 0;
+  /// Returns a universally unique id for a [Selectable].
+  static int get nextSelectableId => _currentSelectableId++;
+
   @override
   void initState() {
     super.initState();

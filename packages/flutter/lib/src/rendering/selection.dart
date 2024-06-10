@@ -104,9 +104,18 @@ abstract class SelectionHandler implements ValueListenable<SelectionGeometry> {
 ///
 /// A user can set the value on this controller to modify the content under
 /// a selection created by [SelectionArea] or [SelectableRegion].
-abstract class SelectedContentController<T extends Object> extends ValueNotifier<T> {
+abstract class SelectedContentController<T extends Object> {
   /// Creates a controller for the content of a [Selectable] or [SelectionHandler].
-  SelectedContentController(super.value);
+  SelectedContentController({
+    this.selectableId,
+    required this.content,
+  });
+
+  /// The unique id for the [Selectable] that created the controller.
+  final int? selectableId;
+
+  /// The content that contains the selection.
+  final T content;
 
   /// Additional controllers to include as children.
   ///
@@ -114,14 +123,11 @@ abstract class SelectedContentController<T extends Object> extends ValueNotifier
   /// selection.
   List<SelectedContentController<Object>> children = <SelectedContentController<Object>>[];
 
-  /// The start of the selection relative to the type of content in [value].
+  /// The start of the selection relative to the type of content in [content].
   int get startOffset;
 
-  /// The end of the selection relative to the type of content in [value].
+  /// The end of the selection relative to the type of content in [content].
   int get endOffset;
-
-  /// Builds the content from current [value].
-  T buildContents();
 
   /// Adds a child controller to the list of [children].
   void addChild(SelectedContentController<Object> childController) {
@@ -131,7 +137,8 @@ abstract class SelectedContentController<T extends Object> extends ValueNotifier
   @override
   String toString() {
     return 'SelectedContentController(\n'
-           '  value: $value,\n'
+           '  selectableId: $selectableId,\n'
+           '  content: $content,\n'
            '  startOffset: $startOffset,\n'
            '  endOffset: $endOffset,\n'
            '  children: $children,\n'
