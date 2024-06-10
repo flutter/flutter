@@ -490,7 +490,7 @@ void main() {
     await tester.pump();
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.grab
+      SystemMouseCursors.basic
     );
 
     // Test disabled case.
@@ -548,7 +548,7 @@ class RadioMouseCursor extends WidgetStateMouseCursor {
       return SystemMouseCursors.forbidden;
     }
     if (states.contains(WidgetState.focused)){
-      return SystemMouseCursors.grab;
+      return SystemMouseCursors.basic;
     }
     return SystemMouseCursors.click;
   }
