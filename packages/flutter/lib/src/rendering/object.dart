@@ -2396,6 +2396,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
 
   @pragma('vm:notify-debugger-on-exception')
   void _layoutWithoutResize() {
+    assert(_needsLayout);
     assert(_relayoutBoundary == this);
     RenderObject? debugPreviousActiveLayout;
     assert(!_debugMutationsLocked);
