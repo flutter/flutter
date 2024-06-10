@@ -19,7 +19,7 @@ import 'theme.dart';
 /// The [CarouselView] presents a scrollable list of items, each of which can dynamically
 /// change size based on the chosen layout.
 ///
-/// Material Design 3 introduces 4 [Carousel] layouts:
+/// Material Design 3 introduces 4 carousel layouts:
 ///  * Multi-browse: This layout shows at least one large, medium, and small
 /// carousel item at a time.
 ///  * Uncontained (default): This layout show items that scroll to the edge of
@@ -47,10 +47,12 @@ import 'theme.dart';
 ///
 /// The [CarouselController] is used to control the
 /// [CarouselController.initialItem], which determines the first fully expanded
-/// item when the [Carousel] is initially displayed. For example, if the layout
-/// weights is [1, 2, 3, 2, 1] and the initial item is 4 (the fourth item), the
-/// list will display items 2, 3, 4, 5, and 6 in the view with weights 1, 2, 3,
-/// 2 and 1 respectively.
+/// item when the [CarouselView] or [CarouselView.weighted] is initially displayed.
+/// This is straightforward for [CarouselView] because each item in the view
+/// has fixed size. In [CarouselView.weighted], for instance, if the layout
+/// weights are [1, 2, 3, 2, 1] and the initial item is 4 (the fourth item), the
+/// view will display items 2, 3, 4, 5, and 6 with weights 1, 2, 3, 2 and 1
+/// respectively.
 ///
 /// The [CarouselView.itemExtent] property must be non-null and defines the base
 /// size of items. While items typically maintain this size, the first and last
@@ -203,7 +205,7 @@ class CarouselView extends StatefulWidget {
   /// Whether the "squished" item is allowed to expand to the max size.
   ///
   /// If this is false, the layout of the carousel doesn't change. This is especially
-  /// useful when a weight list in [Carousel.weighted] has a max item in the
+  /// useful when a weight list in [CarouselView.weighted] has a max item in the
   /// middle and at least one small item on either side, such as [1, 7, 1],
   /// the first or the last item cannot expand to the max size. If this is true,
   /// there will be some space before the first item or after the last item
