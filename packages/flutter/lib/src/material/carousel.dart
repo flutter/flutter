@@ -36,7 +36,7 @@ import 'theme.dart';
 /// multi-browse, hero, and full-screen.
 ///
 /// In [CarouselView.weighted], weights are relative proportions. For example,
-/// if the layout weights is [3,2,1], it means the first visible item occupies
+/// if the layout weights is `[3, 2, 1]`, it means the first visible item occupies
 /// 3/6 of the viewport; the second visible item occupies 2/6 of the viewport;
 /// the last visible item occupies 1/6 of the viewport. As the carousel scrolls,
 /// the size of the latter one gradually changes to the size of the former one.
@@ -50,7 +50,7 @@ import 'theme.dart';
 /// item when the [CarouselView] or [CarouselView.weighted] is initially displayed.
 /// This is straightforward for [CarouselView] because each item in the view
 /// has fixed size. In [CarouselView.weighted], for instance, if the layout
-/// weights are [1, 2, 3, 2, 1] and the initial item is 4 (the fourth item), the
+/// weights are `[1, 2, 3, 2, 1]` and the initial item is 4 (the fourth item), the
 /// view will display items 2, 3, 4, 5, and 6 with weights 1, 2, 3, 2 and 1
 /// respectively.
 ///
@@ -92,15 +92,15 @@ class CarouselView extends StatefulWidget {
        layoutWeights = null;
 
 /// Creates a scrollable list where the size of each child widget is dynamically
-/// determined by the provided `layoutWeights`.
+/// determined by the provided [layoutWeights].
 ///
 /// The `layoutWeights` parameter is required and defines the relative size
 /// proportions of each child widget.
 ///
-/// When `allowFullyExpand` is set to `true`, each child can be expanded to its
-/// maximum size while scrolling. For example, with `layoutWeights` of `[1, 7, 1]`,
+/// When [allowFullyExpand] is set to `true`, each child can be expanded to its
+/// maximum size while scrolling. For example, with [layoutWeights] of `[1, 7, 1]`,
 /// the initial weight of the first item is 1. However, by enabling
-/// `allowFullyExpand` and scrolling forward, the first item can expand to occupy
+/// [allowFullyExpand] and scrolling forward, the first item can expand to occupy
 /// a weight of 7, leaving a weight of 1 as white space before it. This feature
 /// is particularly useful for achieving "hero" and "center-aligned hero" layouts.
   const CarouselView.weighted({
