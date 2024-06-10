@@ -72,7 +72,6 @@ const TextStyle _kActionSheetContentStyle = TextStyle(
 // Generic constants shared between Dialog and ActionSheet.
 const double _kBlurAmount = 20.0;
 const double _kCornerRadius = 14.0;
-const double _kDividerThickness = 0.3;
 
 // Dialog specific constants.
 // iOS dialogs have a normal display width and another display width that is
@@ -83,6 +82,7 @@ const double _kAccessibilityCupertinoDialogWidth = 310.0;
 const double _kDialogEdgePadding = 20.0;
 const double _kDialogMinButtonHeight = 45.0;
 const double _kDialogMinButtonFontSize = 10.0;
+const double _kDialogDividerThickness = 0.3;
 
 // ActionSheet specific constants.
 const double _kActionSheetEdgeHorizontalPadding = 8.0;
@@ -92,6 +92,7 @@ const double _kActionSheetContentHorizontalPadding = 16.0;
 const double _kActionSheetContentVerticalPadding = 12.0;
 const double _kActionSheetButtonHeight = 56.0;
 const double _kActionSheetActionsSectionMinHeight = 84.3;
+const double _kActionSheetDividerThickness = 1.0;
 
 // A translucent color that is painted on top of the blurred backdrop as the
 // dialog's background color
@@ -1154,11 +1155,15 @@ class _ActionSheetDivider extends StatelessWidget {
   Widget build(BuildContext context) {
     final Color backgroundColor = CupertinoDynamicColor.resolve(_kActionSheetBackgroundColor, context);
     return Container(
-      height: _kDividerThickness,
+      height: logicalThickness(context),
       decoration: BoxDecoration(
         color: hidden ? backgroundColor : dividerColor,
       ),
     );
+  }
+
+  static double logicalThickness(BuildContext context) {
+    return _kActionSheetDividerThickness / View.of(context).devicePixelRatio;
   }
 }
 
@@ -1325,7 +1330,9 @@ class _ActionSheetMainSheetState extends State<_ActionSheetMainSheet> {
           children: <Widget>[
             _buildContent(
               hasActions: _hasActions(),
-              maxHeight: constraints.maxHeight - _kActionSheetActionsSectionMinHeight - _kDividerThickness,
+              maxHeight: constraints.maxHeight
+                  - _kActionSheetActionsSectionMinHeight
+                  - _ActionSheetDivider.logicalThickness(context),
             ),
             if (widget.hasContent && _hasActions())
               _ActionSheetDivider(
@@ -1377,7 +1384,7 @@ class _CupertinoDialogRenderWidget extends RenderObjectWidget {
   @override
   RenderObject createRenderObject(BuildContext context) {
     return _RenderCupertinoDialog(
-      dividerThickness: _kDividerThickness,
+      dividerThickness: _kDialogDividerThickness,
       isInAccessibilityMode: _isInAccessibilityMode(context),
       dividerColor: CupertinoDynamicColor.resolve(dividerColor, context),
     );
@@ -1972,7 +1979,7 @@ class _CupertinoAlertActionSection extends StatelessWidget {
             for (final Widget child in children)
               _PressableActionButton(child: child),
           ],
-          dividerThickness: _kDividerThickness,
+          dividerThickness: _kDialogDividerThickness,
         ),
       ),
     );

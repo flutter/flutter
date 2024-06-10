@@ -1020,7 +1020,7 @@ void main() {
     await tester.tap(find.text('Go'));
     await tester.pump();
 
-    expect(tester.getSize(find.byType(CupertinoActionSheet)).height, moreOrLessEquals(132.3));
+    expect(tester.getSize(find.byType(CupertinoActionSheet)).height, moreOrLessEquals(132.33333333333334));
   });
 
   testWidgets('1 action button with cancel button', (WidgetTester tester) async {
@@ -1288,7 +1288,7 @@ void main() {
     expect(tester.getBottomLeft(find.widgetWithText(CupertinoActionSheetAction, 'Cancel')).dy, 590.0);
     expect(
       tester.getBottomLeft(find.widgetWithText(CupertinoActionSheetAction, 'One')).dy,
-      moreOrLessEquals(469.7),
+      moreOrLessEquals(469.66666666666663),
     );
     expect(tester.getBottomLeft(find.widgetWithText(CupertinoActionSheetAction, 'Two')).dy, 526.0);
   });
