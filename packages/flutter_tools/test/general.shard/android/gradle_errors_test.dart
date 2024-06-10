@@ -790,7 +790,7 @@ Execution failed for task ':app:generateDebugFeatureTransitiveDeps'.
       ProcessManager: () => processManager,
     });
   });
-// Test for ISSUE -> : "Most error messages in gradle_errors.dart assume a unix like path separator/environment for windows #136763"
+
 // It is successfully passing the test for linux enviroment.
   testUsingContext('generates correct gradle command for Unix-like environment',
       () async {
