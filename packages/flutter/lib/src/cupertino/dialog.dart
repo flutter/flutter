@@ -104,35 +104,35 @@ const Color _kDialogColor = CupertinoDynamicColor.withBrightness(
 // Translucent light gray that is painted on top of the blurred backdrop as the
 // background color of a pressed button.
 // Eyeballed from iOS 13 beta simulator.
-const Color _kPressedColor = CupertinoDynamicColor.withBrightness(
+const Color _kDialogPressedColor = CupertinoDynamicColor.withBrightness(
   color: Color(0xFFE1E1E1),
   darkColor: Color(0xFF2E2E2E),
 );
 
-const Color _kActionSheetCancelPressedColor = CupertinoDynamicColor.withBrightness(
-  color: Color(0xFFECECEC),
-  darkColor: Color(0xFF49494B),
-);
+// Translucent light gray that is painted on top of the blurred backdrop as the
+// background color of a pressed button.
+// Eyeballed from iOS 17 simulator.
+const Color _kActionSheetPressedColor = Color(0xCAE0E0E0);
+
+const Color _kActionSheetCancelColor = Color(0xFFFFFFFF);
+const Color _kActionSheetCancelPressedColor = Color(0xFFECECEC);
 
 // Translucent, very light gray that is painted on top of the blurred backdrop
 // as the action sheet's background color.
 // TODO(LongCatIsLooong): https://github.com/flutter/flutter/issues/39272. Use
 // System Materials once we have them.
-// Extracted from https://developer.apple.com/design/resources/.
-const Color _kActionSheetBackgroundColor = CupertinoDynamicColor.withBrightness(
-  color: Color(0xC7F9F9F9),
-  darkColor: Color(0xC7252525),
-);
+// Eyeballed from iOS 17 simulator.
+const Color _kActionSheetBackgroundColor = Color(0xC8FCFCFC);
 
 // The gray color used for text that appears in the title area.
-// Extracted from https://developer.apple.com/design/resources/.
-const Color _kActionSheetContentTextColor = Color(0xFF8F8F8F);
+// Eyeballed from iOS 17 simulator.
+const Color _kActionSheetContentTextColor = Color(0x851D1D1D);
 
 // Translucent gray that is painted on top of the blurred backdrop in the gap
 // areas between the content section and actions section, as well as between
 // buttons.
-// Eye-balled from iOS 13 beta simulator.
-const Color _kActionSheetButtonDividerColor = _kActionSheetContentTextColor;
+// Eyeballed from iOS 17 simulator.
+const Color _kActionSheetButtonDividerColor = Color(0xD4C9C9C9);
 
 // The alert dialog layout policy changes depending on whether the user is using
 // a "regular" font size vs a "large" font size. This is a spectrum. There are
@@ -1115,19 +1115,19 @@ class _ActionSheetButtonBackgroundState extends State<_ActionSheetButtonBackgrou
     BorderRadius? borderRadius;
     if (!widget.isCancel) {
       backgroundColor = isBeingPressed
-        ? _kPressedColor
-        : CupertinoDynamicColor.resolve(_kActionSheetBackgroundColor, context);
+        ? _kActionSheetPressedColor
+        : _kActionSheetBackgroundColor;
     } else {
       backgroundColor = isBeingPressed
-          ? _kActionSheetCancelPressedColor
-        : CupertinoColors.secondarySystemGroupedBackground;
+        ? _kActionSheetCancelPressedColor
+        : _kActionSheetCancelColor;
       borderRadius = const BorderRadius.all(Radius.circular(_kCornerRadius));
     }
     return MetaData(
       metaData: this,
       child: Container(
         decoration: BoxDecoration(
-          color: backgroundColor,
+          color: CupertinoDynamicColor.resolve(backgroundColor, context),
           borderRadius: borderRadius,
         ),
         child: widget.child,
@@ -2269,7 +2269,7 @@ class _CupertinoDialogActionsRenderWidget extends MultiChildRenderObjectWidget {
               : _kCupertinoDialogWidth,
       dividerThickness: _dividerThickness,
       dialogColor: CupertinoDynamicColor.resolve(_kDialogColor, context),
-      dialogPressedColor: CupertinoDynamicColor.resolve(_kPressedColor, context),
+      dialogPressedColor: CupertinoDynamicColor.resolve(_kDialogPressedColor, context),
       dividerColor: CupertinoDynamicColor.resolve(CupertinoColors.separator, context),
       hasCancelButton: _hasCancelButton,
     );
@@ -2283,7 +2283,7 @@ class _CupertinoDialogActionsRenderWidget extends MultiChildRenderObjectWidget {
             : _kCupertinoDialogWidth
       ..dividerThickness = _dividerThickness
       ..dialogColor = CupertinoDynamicColor.resolve(_kDialogColor, context)
-      ..dialogPressedColor = CupertinoDynamicColor.resolve(_kPressedColor, context)
+      ..dialogPressedColor = CupertinoDynamicColor.resolve(_kDialogPressedColor, context)
       ..dividerColor = CupertinoDynamicColor.resolve(CupertinoColors.separator, context)
       ..hasCancelButton = _hasCancelButton;
   }
