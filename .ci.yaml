@@ -363,7 +363,7 @@ targets:
           "sdk_version": "15a240d"
         }
     drone_dimensions:
-      - os=Mac-13|Mac-14
+      - os=Mac-13
 
   - name: Linux mac_clangd
     recipe: engine_v2/engine_v2
