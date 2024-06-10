@@ -3721,6 +3721,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      os: Mac-13
       dependencies: >-
         [
           {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"},
