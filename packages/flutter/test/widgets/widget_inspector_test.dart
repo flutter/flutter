@@ -2280,7 +2280,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
             expect(
               allChildrenSatisfyCondition(rootJson,
-                  condition: wasCreatedByLocalProject),
+                condition: wasCreatedByLocalProject,
+              ),
               isFalse,
             );
             expect(
