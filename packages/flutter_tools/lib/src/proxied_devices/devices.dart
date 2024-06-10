@@ -856,7 +856,7 @@ class ProxiedDartDevelopmentService with DartDevelopmentServiceLocalOperationsMi
           // if (devToolsServerAddress != null) 'devToolsServerAddress': devToolsServerAddress.toString(),
         }
       ));
-      
+
       remoteUriStr = response['ddsUri'] as String?;
       // TODO(bkonyi): uncomment when ready to serve DevTools from DDS.
       /*
