@@ -279,6 +279,67 @@ void main() {
     expect(observations[0].previous, 'Page 1');
   });
 
+  testWidgets('Can push, pop, and replace in sequence', (WidgetTester tester) async {
+    const MaterialPage<void> initial = MaterialPage<void>(key: ValueKey<String>('initial'), child: Text('initial'));
+    const MaterialPage<void> push = MaterialPage<void>(key: ValueKey<String>('push'), child: Text('push'));
+    const MaterialPage<void> replace = MaterialPage<void>(key: ValueKey<String>('replace'), child: Text('replace'));
+    List<Page<void>> pages = <Page<void>>[
+      initial
+    ];
+    bool popPageCallback(Route<dynamic> route, dynamic result) {
+      pages.removeLast();
+      return route.didPop(result);
+    }
+    final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(
+      TestDependencies(
+        child: Navigator(
+          key: navigator,
+          pages: pages,
+          onPopPage: popPageCallback,
+        ),
+      ),
+    );
+    expect(find.text('initial'), findsOneWidget);
+
+    // Push a new page
+    pages = <Page<void>>[
+      initial,
+      push
+    ];
+    await tester.pumpWidget(
+      TestDependencies(
+        child: Navigator(
+          key: navigator,
+          pages: pages,
+          onPopPage:popPageCallback,
+        ),
+      ),
+    );
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.text('push'), findsOneWidget);
+
+    // Pop before push finishes.
+    navigator.currentState!.pop();
+
+    // Replace the entire pages
+    // Push a new page
+    pages = <Page<void>>[
+      replace
+    ];
+    await tester.pumpWidget(
+      TestDependencies(
+        child: Navigator(
+          key: navigator,
+          pages: pages,
+          onPopPage:popPageCallback,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('replace'), findsOneWidget);
+  });
+
   testWidgets('Navigator.of rootNavigator finds root Navigator', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Material(
