@@ -206,7 +206,7 @@ class CarouselView extends StatefulWidget {
   ///
   /// If this is false, the layout of the carousel doesn't change. This is especially
   /// useful when a weight list in [CarouselView.weighted] has a max item in the
-  /// middle and at least one small item on either side, such as [1, 7, 1],
+  /// middle and at least one small item on either side, such as `[1, 7, 1]`,
   /// the first or the last item cannot expand to the max size. If this is true,
   /// there will be some space before the first item or after the last item
   /// coming so every items have a chance to be fully expanded.
