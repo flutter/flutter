@@ -2001,19 +2001,34 @@ mixin WidgetInspectorService {
             DiagnosticsNode, InspectorSerializationDelegate)?
         addAdditionalPropertiesCallback,
   }) {
-    Map<String, Object>? addPreviewsCallback(
-        DiagnosticsNode node, InspectorSerializationDelegate? delegate) {
-      final Map<String, Object> additionalJson = <String, Object>{};
+    final bool shouldAddAdditionalProperties =
+        addAdditionalPropertiesCallback != null || withPreviews;
+
+    // Combine the given addAdditionalPropertiesCallback with logic to add text
+    // previews as well (if withPreviews is true):
+    Map<String, Object>? combinedAddAdditionalPropertiesCallback(
+        DiagnosticsNode node, InspectorSerializationDelegate delegate) {
+      Map<String, Object> additionalPropertiesJson = <String, Object>{};
+      if (addAdditionalPropertiesCallback != null) {
+        final Map<String, Object>? json =
+            addAdditionalPropertiesCallback(node, delegate);
+        if (json != null) {
+          additionalPropertiesJson = json;
+        }
+      }
+      if (!withPreviews) {
+        return additionalPropertiesJson;
+      }
       final Object? value = node.value;
       if (value is Element) {
         final RenderObject? renderObject = value.renderObject;
         if (renderObject is RenderParagraph) {
-          additionalJson['textPreview'] = renderObject.text.toPlainText();
+          additionalPropertiesJson['textPreview'] =
+              renderObject.text.toPlainText();
         }
       }
-      return additionalJson;
+      return additionalPropertiesJson;
     }
-
     return _nodeToJson(
       WidgetsBinding.instance.rootElement?.toDiagnosticsNode(),
       InspectorSerializationDelegate(
@@ -2021,8 +2036,9 @@ mixin WidgetInspectorService {
         subtreeDepth: 1000000,
         summaryTree: isSummaryTree,
         service: this,
-        addAdditionalPropertiesCallback: addAdditionalPropertiesCallback ??
-            (withPreviews ? addPreviewsCallback : null),
+        addAdditionalPropertiesCallback: shouldAddAdditionalProperties
+            ? combinedAddAdditionalPropertiesCallback
+            : null,
       ),
     );
   }
