@@ -89,4 +89,4 @@ const bool kIsWeb = bool.fromEnvironment('dart.library.js_util');
 ///   in tests with [debugDefaultTargetPlatformOverride].
 /// * [dart:io.Platform], a way to find out the browser's platform that is not
 ///   overridable in tests.
-const bool kIsWasm = kIsWeb && bool.fromEnvironment('dart.library.ffi');
+const bool kIsWasm = bool.fromEnvironment('dart.tool.dart2wasm');
