@@ -3969,7 +3969,6 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     for (final NavigatorObserver observer in _effectiveObservers) {
       NavigatorObserver._navigators[observer] = null;
     }
-    _effectiveObservers = const <NavigatorObserver>[];
     super.deactivate();
   }
 

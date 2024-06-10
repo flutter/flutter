@@ -4352,9 +4352,9 @@ void main() {
     await tester.pumpWidget(build());
     observer._checkInvocations(<Symbol>[#navigator, #didPush, #didChangeTop]);
     await tester.pumpWidget(Container(child: build()));
-    observer._checkInvocations(<Symbol>[#navigator, #didPush, #didChangeTop]);
+    observer._checkInvocations(<Symbol>[#navigator, #didPush, #didChangeTop, #navigator]);
     await tester.pumpWidget(Container());
-    observer._checkInvocations(<Symbol>[]);
+    observer._checkInvocations(<Symbol>[#navigator]);
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(build(key));
     observer._checkInvocations(<Symbol>[#navigator, #didPush, #didChangeTop]);
