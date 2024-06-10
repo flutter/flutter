@@ -289,14 +289,14 @@ void main() {
     bool popPageCallback(Route<dynamic> route, dynamic result) {
       pages.removeLast();
       return route.didPop(result);
-    };
+    }
     final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
     await tester.pumpWidget(
       TestDependencies(
         child: Navigator(
           key: navigator,
           pages: pages,
-          onPopPage:popPageCallback,
+          onPopPage: popPageCallback,
         ),
       ),
     );
