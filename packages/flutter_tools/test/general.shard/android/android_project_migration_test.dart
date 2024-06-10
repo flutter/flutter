@@ -8,6 +8,7 @@ import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart';
 import 'package:flutter_tools/src/android/migrations/android_studio_java_gradle_conflict_migration.dart';
 import 'package:flutter_tools/src/android/migrations/min_sdk_version_migration.dart';
+import 'package:flutter_tools/src/android/migrations/multidex_removal_migration.dart';
 import 'package:flutter_tools/src/android/migrations/top_level_gradle_build_file_migration.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/version.dart';
@@ -424,6 +425,51 @@ tasks.register("clean", Delete) {
         project.appGradleFile.writeAsStringSync(sampleModuleGradleBuildFile(equalsSyntaxMinSdkVersion19));
         await migration.migrate();
         expect(project.appGradleFile.readAsStringSync(), sampleModuleGradleBuildFile(equalsSyntaxMinSdkVersion19));
+      });
+    });
+
+    group('delete FlutterMultiDexApplication.java, if it exists', ()
+    {
+      late MemoryFileSystem memoryFileSystem;
+      late BufferLogger bufferLogger;
+      late FakeAndroidProject project;
+      late MultidexRemovalMigration migration;
+
+      setUp(() {
+        memoryFileSystem = MemoryFileSystem.test();
+        memoryFileSystem.currentDirectory.childDirectory('android').createSync();
+        bufferLogger = BufferLogger.test();
+        project = FakeAndroidProject(
+          root: memoryFileSystem.currentDirectory.childDirectory('android'),
+        );
+        project.appGradleFile.parent.createSync(recursive: true);
+        migration = MultidexRemovalMigration(
+            project,
+            bufferLogger
+        );
+      });
+
+      testWithoutContext('do nothing when FlutterMultiDexApplication.java is not present', () async {
+        await migration.migrate();
+        expect(bufferLogger.traceText, isEmpty);
+      });
+
+      testWithoutContext('delete and note when FlutterMultiDexApplication.java is present', () async {
+        // Write a blank string to the FlutterMultiDexApplication.java file.
+        final File flutterMultiDexApplication =  project.hostAppGradleRoot
+            .childDirectory('src')
+            .childDirectory('main')
+            .childDirectory('java')
+            .childDirectory('io')
+            .childDirectory('flutter')
+            .childDirectory('app')
+            .childFile('FlutterMultiDexApplication.java')
+          ..createSync(recursive: true);
+        flutterMultiDexApplication.writeAsStringSync('');
+
+        await migration.migrate();
+        expect(bufferLogger.traceText, contains(MultidexRemovalMigration.deletionMessage));
+        expect(flutterMultiDexApplication.existsSync(), false);
       });
     });
   });

@@ -1271,11 +1271,11 @@ class _SortArrow extends StatefulWidget {
 }
 
 class _SortArrowState extends State<_SortArrow> with TickerProviderStateMixin {
-  late AnimationController _opacityController;
-  late Animation<double> _opacityAnimation;
+  late final AnimationController _opacityController;
+  late final CurvedAnimation _opacityAnimation;
 
-  late AnimationController _orientationController;
-  late Animation<double> _orientationAnimation;
+  late final AnimationController _orientationController;
+  late final Animation<double> _orientationAnimation;
   double _orientationOffset = 0.0;
 
   bool? _up;
@@ -1315,7 +1315,7 @@ class _SortArrowState extends State<_SortArrow> with TickerProviderStateMixin {
   }
 
   void _resetOrientationAnimation(AnimationStatus status) {
-    if (status == AnimationStatus.completed) {
+    if (status.isCompleted) {
       assert(_orientationAnimation.value == math.pi);
       _orientationOffset += math.pi;
       _orientationController.value = 0.0; // TODO(ianh): This triggers a pointless rebuild.
@@ -1328,7 +1328,7 @@ class _SortArrowState extends State<_SortArrow> with TickerProviderStateMixin {
     bool skipArrow = false;
     final bool? newUp = widget.up ?? _up;
     if (oldWidget.visible != widget.visible) {
-      if (widget.visible && (_opacityController.status == AnimationStatus.dismissed)) {
+      if (widget.visible && _opacityController.isDismissed) {
         _orientationController.stop();
         _orientationController.value = 0.0;
         _orientationOffset = newUp! ? 0.0 : math.pi;
@@ -1341,7 +1341,7 @@ class _SortArrowState extends State<_SortArrow> with TickerProviderStateMixin {
       }
     }
     if ((_up != newUp) && !skipArrow) {
-      if (_orientationController.status == AnimationStatus.dismissed) {
+      if (_orientationController.isDismissed) {
         _orientationController.forward();
       } else {
         _orientationController.reverse();
@@ -1354,6 +1354,7 @@ class _SortArrowState extends State<_SortArrow> with TickerProviderStateMixin {
   void dispose() {
     _opacityController.dispose();
     _orientationController.dispose();
+    _opacityAnimation.dispose();
     super.dispose();
   }
 

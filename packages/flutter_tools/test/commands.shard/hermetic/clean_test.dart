@@ -66,9 +66,11 @@ void main() {
         expect(projectUnderTest.ios.deprecatedCompiledDartFramework, isNot(exists));
         expect(projectUnderTest.ios.deprecatedProjectFlutterFramework, isNot(exists));
         expect(projectUnderTest.ios.flutterPodspec, isNot(exists));
+        expect(projectUnderTest.ios.flutterPluginSwiftPackageDirectory, isNot(exists));
 
         expect(projectUnderTest.linux.ephemeralDirectory, isNot(exists));
         expect(projectUnderTest.macos.ephemeralDirectory, isNot(exists));
+        expect(projectUnderTest.macos.flutterPluginSwiftPackageDirectory, isNot(exists));
         expect(projectUnderTest.windows.ephemeralDirectory, isNot(exists));
 
         expect(projectUnderTest.flutterPluginsFile, isNot(exists));
@@ -239,9 +241,11 @@ FlutterProject setupProjectUnderTest(Directory currentDirectory, bool setupXcode
   projectUnderTest.ios.deprecatedCompiledDartFramework.createSync(recursive: true);
   projectUnderTest.ios.deprecatedProjectFlutterFramework.createSync(recursive: true);
   projectUnderTest.ios.flutterPodspec.createSync(recursive: true);
+  projectUnderTest.ios.flutterPluginSwiftPackageDirectory.createSync(recursive: true);
 
   projectUnderTest.linux.ephemeralDirectory.createSync(recursive: true);
   projectUnderTest.macos.ephemeralDirectory.createSync(recursive: true);
+  projectUnderTest.macos.flutterPluginSwiftPackageDirectory.createSync(recursive: true);
   projectUnderTest.windows.ephemeralDirectory.createSync(recursive: true);
   projectUnderTest.flutterPluginsFile.createSync(recursive: true);
   projectUnderTest.flutterPluginsDependenciesFile.createSync(recursive: true);

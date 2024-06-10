@@ -1470,13 +1470,13 @@ class TextPainter {
       .getBoxesForRange(graphemeRange.start, graphemeRange.end, boxHeightStyle: ui.BoxHeightStyle.strut);
 
     if (boxes.isNotEmpty) {
-      final bool ahchorToLeft = switch (glyphInfo.writingDirection) {
+      final bool anchorToLeft = switch (glyphInfo.writingDirection) {
         TextDirection.ltr => anchorToLeadingEdge,
         TextDirection.rtl => !anchorToLeadingEdge,
       };
-      final TextBox box = ahchorToLeft ? boxes.first : boxes.last;
+      final TextBox box = anchorToLeft ? boxes.first : boxes.last;
       metrics = _LineCaretMetrics(
-        offset: Offset(ahchorToLeft ? box.left : box.right, box.top),
+        offset: Offset(anchorToLeft ? box.left : box.right, box.top),
         writingDirection: box.direction,
       );
     } else {

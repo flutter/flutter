@@ -45,7 +45,7 @@ final Platform notWindowsPlatform = FakePlatform(
 );
 
 void main() {
-  late FileSystem fileSystem;
+  late MemoryFileSystem fileSystem;
   late ProcessManager processManager;
   late TestUsage usage;
   late FakeAnalytics fakeAnalytics;

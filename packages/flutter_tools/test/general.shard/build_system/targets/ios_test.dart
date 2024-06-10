@@ -42,7 +42,7 @@ const List<String> _kSharedConfig = <String>[
 
 void main() {
   late Environment environment;
-  late FileSystem fileSystem;
+  late MemoryFileSystem fileSystem;
   late FakeProcessManager processManager;
   late Artifacts artifacts;
   late BufferLogger logger;
@@ -541,6 +541,7 @@ void main() {
         '--delete',
         '--filter',
         '- .DS_Store/',
+        '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
         'Artifact.flutterFramework.TargetPlatform.ios.debug.EnvironmentType.physical',
         outputDir.path,
       ]);
@@ -597,6 +598,7 @@ void main() {
           '--delete',
           '--filter',
           '- .DS_Store/',
+          '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
           'Artifact.flutterFramework.TargetPlatform.ios.debug.EnvironmentType.simulator',
           outputDir.path,
           ],

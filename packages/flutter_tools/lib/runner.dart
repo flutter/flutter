@@ -92,7 +92,7 @@ Future<int> run(
 
           // TODO(eliasyishak): Set the telemetry for the unified_analytics
           //  package as well, the above will be removed once we have
-          //  fully transitioned to using the new package
+          //  fully transitioned to using the new package, https://github.com/flutter/flutter/issues/128251
           await globals.analytics.setTelemetry(false);
         }
 
@@ -111,10 +111,21 @@ Future<int> run(
 
           // TODO(eliasyishak): Set the telemetry for the unified_analytics
           //  package as well, the above will be removed once we have
-          //  fully transitioned to using the new package
+          //  fully transitioned to using the new package, https://github.com/flutter/flutter/issues/128251
           await globals.analytics.setTelemetry(true);
         }
 
+        // Send an event to GA3 for any users that are opted into GA3
+        // analytics but have opted out of GA4 (package:unified_analytics)
+        // TODO(eliasyishak): remove once GA3 sunset, https://github.com/flutter/flutter/issues/128251
+        if (!globals.analytics.telemetryEnabled &&
+            globals.flutterUsage.enabled) {
+          UsageEvent(
+            'ga4_and_ga3_status_mismatch',
+            'opted_out_of_ga4',
+            flutterUsage: globals.flutterUsage,
+          ).send();
+        }
 
         await runner.run(args);
 
@@ -190,10 +201,10 @@ Future<int> _handleToolError(
     globals.analytics.send(Event.exception(exception: error.runtimeType.toString()));
     await asyncGuard(() async {
       final CrashReportSender crashReportSender = CrashReportSender(
-        usage: globals.flutterUsage,
         platform: globals.platform,
         logger: globals.logger,
         operatingSystemUtils: globals.os,
+        analytics: globals.analytics,
       );
       await crashReportSender.sendReport(
         error: error,

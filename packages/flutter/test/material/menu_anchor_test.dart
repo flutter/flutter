@@ -166,6 +166,10 @@ void main() {
     );
   }
 
+  RenderObject getOverlayColor(WidgetTester tester) {
+    return tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+  }
+
   testWidgets('Menu responds to density changes', (WidgetTester tester) async {
     Widget buildMenu({VisualDensity? visualDensity = VisualDensity.standard}) {
       return MaterialApp(
@@ -2494,6 +2498,56 @@ void main() {
       final AssertionError exception = tester.takeException() as AssertionError;
       expect(exception, isAssertionError);
     }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
+
+    testWidgets('MenuItemButton.styleFrom overlayColor overrides default overlay color', (WidgetTester tester) async {
+      const Color overlayColor = Color(0xffff0000);
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          body: MenuItemButton(
+            style: MenuItemButton.styleFrom(overlayColor: overlayColor),
+            onPressed: () {},
+            child: const Text('MenuItem'),
+          ),
+        ),
+      ));
+
+      // Hovered.
+      final Offset center = tester.getCenter(find.byType(MenuItemButton));
+      final TestGesture gesture = await tester.createGesture(
+        kind: PointerDeviceKind.mouse,
+      );
+      await gesture.addPointer();
+      await gesture.moveTo(center);
+      await tester.pumpAndSettle();
+      expect(getOverlayColor(tester), paints..rect(color: overlayColor.withOpacity(0.08)));
+
+      // Highlighted (pressed).
+      await gesture.down(center);
+      await tester.pumpAndSettle();
+      expect(
+        getOverlayColor(tester),
+        paints
+          ..rect(color: overlayColor.withOpacity(0.08))
+          ..rect(color: overlayColor.withOpacity(0.08))
+          ..rect(color: overlayColor.withOpacity(0.1)),
+      );
+    });
+
+    testWidgets('MenuItemButton can build when its child is null', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: SizedBox(
+              width: 200,
+              child: MenuItemButton(),
+            ),
+          ),
+        ),
+      );
+
+      // exception `Null check operator used on a null value` would be thrown.
+      expect(tester.takeException(), isNull);
+    });
   });
 
   group('Layout', () {
@@ -3708,6 +3762,45 @@ void main() {
       matching: find.byType(IntrinsicWidth),
     );
     expect(intrinsicWidthFinder, findsOneWidget);
+  });
+
+  testWidgets('SubmenuButton.styleFrom overlayColor overrides default overlay color', (WidgetTester tester) async {
+    const Color overlayColor = Color(0xffff00ff);
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: SubmenuButton(
+          style: SubmenuButton.styleFrom(overlayColor: overlayColor),
+          menuChildren: <Widget>[
+            MenuItemButton(
+              onPressed: () {},
+              child: const Text('MenuItemButton'),
+            ),
+          ],
+          child: const Text('Submenu'),
+        ),
+      ),
+    ));
+
+    // Hovered.
+    final Offset center = tester.getCenter(find.byType(SubmenuButton));
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
+    await gesture.addPointer();
+    await gesture.moveTo(center);
+    await tester.pumpAndSettle();
+    expect(getOverlayColor(tester), paints..rect(color: overlayColor.withOpacity(0.08)));
+
+    // Highlighted (pressed).
+    await gesture.down(center);
+    await tester.pumpAndSettle();
+    expect(
+      getOverlayColor(tester),
+      paints
+        ..rect(color: overlayColor.withOpacity(0.08))
+        ..rect(color: overlayColor.withOpacity(0.08))
+        ..rect(color: overlayColor.withOpacity(0.1)),
+    );
   });
 }
 
