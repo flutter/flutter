@@ -110,6 +110,9 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
   /// {@endtemplate}
   String? get title;
 
+  /// The delegated transition received from an incoming route.
+  DelegatedTransitionBuilder? receivedTransition;
+
   ValueNotifier<String?>? _previousTitle;
 
   /// The title string of the previous [CupertinoPageRoute].
@@ -165,9 +168,6 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
 
   @override
   bool canTransitionTo(TransitionRoute<dynamic> nextRoute) {
-    if (controller != null && controller!.isAnimating) {
-      return false;
-    }
     // Don't perform outgoing animation if the next route is a fullscreen dialog.
     return nextRoute is FlexibleTransitionRouteMixin<T> || nextRoute is CupertinoRouteTransitionMixin && !nextRoute.fullscreenDialog;
   }
@@ -232,6 +232,7 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
     BuildContext context,
     Animation<double> animation,
     Animation<double> secondaryAnimation,
+    DelegatedTransitionBuilder? receivedTransition,
     Widget child,
   ) {
     // Check if the route has an animation that's currently participating
@@ -252,6 +253,7 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
         primaryRouteAnimation: animation,
         secondaryRouteAnimation: secondaryAnimation,
         linearTransition: linearTransition,
+        delegateTransitionBuilder: receivedTransition,
         child: _CupertinoBackGestureDetector<T>(
           enabledCallback: () => route.popGestureEnabled,
           onStartPopGesture: () => _startPopGesture<T>(route),
@@ -263,7 +265,7 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
 
   @override
   Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
-    return buildPageTransitions<T>(this, context, animation, secondaryAnimation, child);
+    return buildPageTransitions<T>(this, context, animation, secondaryAnimation, receivedTransition, child);
   }
 }
 
@@ -428,6 +430,7 @@ class CupertinoPageTransition extends StatefulWidget {
     required this.secondaryRouteAnimation,
     required this.child,
     required this.linearTransition,
+    this.delegateTransitionBuilder,
   });
 
   /// The widget below this widget in the tree.
@@ -445,6 +448,8 @@ class CupertinoPageTransition extends StatefulWidget {
   ///    Used to precisely track back gesture drags.
   final bool linearTransition;
 
+  /// Delegated transition builder
+  final DelegatedTransitionBuilder? delegateTransitionBuilder;
 
   /// The delegated transition.
   static Widget delegateTransition(BuildContext context, Widget? child, Animation<double> secondaryAnimation) {
@@ -546,7 +551,6 @@ class _CupertinoPageTransitionState extends State<CupertinoPageTransition> {
     assert(debugCheckHasDirectionality(context));
     final TextDirection textDirection = Directionality.of(context);
     return DelegatedTransition(
-      context: context,
       animation: widget.secondaryRouteAnimation,
       builder: (BuildContext context, Widget? child) {
         return SlideTransition(
@@ -556,6 +560,7 @@ class _CupertinoPageTransitionState extends State<CupertinoPageTransition> {
           child: child,
         );
       },
+      delegateTransitionBuilder: widget.delegateTransitionBuilder,
       child: SlideTransition(
         position: _primaryPositionAnimation,
         textDirection: textDirection,

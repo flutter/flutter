@@ -105,9 +105,6 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> implements FlexibleTransit
 
   @override
   bool canTransitionTo(TransitionRoute<dynamic> nextRoute) {
-    if (controller != null && controller!.isAnimating) {
-      return false;
-    }
     return (nextRoute is MaterialRouteTransitionMixin && !nextRoute.fullscreenDialog)
       || (nextRoute is CupertinoRouteTransitionMixin && !nextRoute.fullscreenDialog)
       || (nextRoute is FlexibleTransitionRouteMixin<T>);
@@ -136,7 +133,7 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> implements FlexibleTransit
   Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
     final PageTransitionsTheme theme = Theme.of(context).pageTransitionsTheme;
     delegatedTransition = theme.delegatedTransition(context);
-    return theme.buildTransitions<T>(this, context, animation, secondaryAnimation, child);
+    return theme.buildTransitions<T>(this, context, animation, secondaryAnimation, receivedTransition, child);
   }
 }
 
@@ -197,7 +194,7 @@ class MaterialPage<T> extends Page<T> {
 //
 // This route uses the builder from the page to build its content. This ensures
 // the content is up to date after page updates.
-class _PageBasedMaterialPageRoute<T> extends PageRoute<T> with MaterialRouteTransitionMixin<T> {
+class _PageBasedMaterialPageRoute<T> extends PageRoute<T> with MaterialRouteTransitionMixin<T>, FlexibleTransitionRouteMixin<T> {
   _PageBasedMaterialPageRoute({
     required MaterialPage<T> page,
     super.allowSnapshotting,
