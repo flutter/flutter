@@ -189,7 +189,7 @@ class _MyHomePageState extends State<MyHomePage> {
               afterSelection.add(TextSpan(style: child.style, text: rawText));
             } else {
               // Collect spans inside selection.
-              final int newStart = min(endOffset - startOffset, rawText.length);
+              final int newStart = min(endOffset - count, rawText.length);
               final int globalNewStart = count + newStart;
               if (controllerIndex == 0) {
                 insideSelection.add(const TextSpan(text: '\n'));
@@ -211,7 +211,6 @@ class _MyHomePageState extends State<MyHomePage> {
             count += rawText.length;
           }
         } else if (child is WidgetSpan) {
-          count += 1;
           if (count < startOffset) {
             beforeSelection.add(child);
           } else if (count >= endOffset) {
@@ -219,6 +218,7 @@ class _MyHomePageState extends State<MyHomePage> {
           } else {
             insideSelection.add(child);
           }
+          count += 1;
         }
         return true;
       });
