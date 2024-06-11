@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 
 /// Flutter code sample for [TextFormField].
 
+const Duration kFakeHttpRequestDuration = Duration(seconds: 3);
+
 void main() => runApp(const TextFormFieldExampleApp());
 
 class TextFormFieldExampleApp extends StatelessWidget {
@@ -43,7 +45,7 @@ class _TextFormFieldExampleState extends State<TextFormFieldExample> {
       return 'This field is required';
     }
     if (value.length != value.replaceAll(' ', '').length) {
-      return 'Username must not contains any spaces';
+      return 'Username must not contain any spaces';
     }
     if (int.tryParse(value[0]) != null) {
       return 'Username must not start with a number';
@@ -64,9 +66,9 @@ class _TextFormFieldExampleState extends State<TextFormFieldExample> {
   }
 
   Future<void> onSave() async {
-    // Providing a default value in case if this was called on the
+    // Providing a default value in case this was called on the
     // first frame, the [fromKey.currentState] will be null.
-    final bool isValid = formKey.currentState?.validate() ?? true;
+    final bool isValid = formKey.currentState?.validate() ?? false;
     if (!isValid) {
       return;
     }
@@ -125,8 +127,7 @@ class _TextFormFieldExampleState extends State<TextFormFieldExample> {
 Future<String?> validateUsernameFromServer(String username) async {
   final Set<String> takenUsernames = <String>{'jack', 'alex'};
 
-  // Simulate an http request.
-  await Future<void>.delayed(const Duration(seconds: 3));
+  await Future<void>.delayed(kFakeHttpRequestDuration);
 
   final bool isValid = !takenUsernames.contains(username);
   if (isValid) {

@@ -46,7 +46,7 @@ void main() {
       await tester.tap(saveButton);
       await tester.pump();
       expect(find.text('Username jack is already taken'), findsNothing);
-      await tester.pump(const Duration(seconds: 3)); // Wait for async call.
+      await tester.pump(example.kFakeHttpRequestDuration);
       expect(find.text('Username jack is already taken'), findsOneWidget);
 
       await tester.enterText(textFormField, 'alex');
@@ -54,7 +54,7 @@ void main() {
       await tester.tap(saveButton);
       await tester.pump();
       expect(find.text('Username alex is already taken'), findsNothing);
-      await tester.pump(const Duration(seconds: 3));
+      await tester.pump(example.kFakeHttpRequestDuration);
       expect(find.text('Username alex is already taken'), findsOneWidget);
 
       await tester.enterText(textFormField, 'jack');
@@ -62,7 +62,7 @@ void main() {
       await tester.tap(saveButton);
       await tester.pump();
       expect(find.text('Username jack is already taken'), findsNothing);
-      await tester.pump(const Duration(seconds: 3)); // Wait for async call.
+      await tester.pump(example.kFakeHttpRequestDuration);
       expect(find.text('Username jack is already taken'), findsOneWidget);
     });
 
@@ -75,7 +75,7 @@ void main() {
       await tester.tap(saveButton);
       await tester.pump();
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
-      await tester.pump(const Duration(seconds: 3));
+      await tester.pump(example.kFakeHttpRequestDuration);
       expect(find.byType(CircularProgressIndicator), findsNothing);
     });
   });
