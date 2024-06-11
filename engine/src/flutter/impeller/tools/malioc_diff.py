@@ -246,20 +246,21 @@ def compare_performance(variant, before, after):
 def compare_variants(befores, afters):
   differences = []
   for variant_name, before_variant in befores.items():
-    after_variant = afters[variant_name]
-    for variant_key, before_variant_val in before_variant.items():
-      after_variant_val = after_variant[variant_key]
-      if variant_key == 'performance':
-        differences += compare_performance(variant_name, before_variant_val, after_variant_val)
-      elif before_variant_val != after_variant_val:
-        differences += [
-            'In variant {}:\n  {vkey}: {} <- before\n  {vkey}: {} <- after'.format(
-                variant_name,
-                before_variant_val,
-                after_variant_val,
-                vkey=variant_key,
-            )
-        ]
+    if variant_name in afters:
+      after_variant = afters[variant_name]
+      for variant_key, before_variant_val in before_variant.items():
+        after_variant_val = after_variant[variant_key]
+        if variant_key == 'performance':
+          differences += compare_performance(variant_name, before_variant_val, after_variant_val)
+        elif before_variant_val != after_variant_val:
+          differences += [
+              'In variant {}:\n  {vkey}: {} <- before\n  {vkey}: {} <- after'.format(
+                  variant_name,
+                  before_variant_val,
+                  after_variant_val,
+                  vkey=variant_key,
+              )
+          ]
   return differences
 
 
