@@ -2515,10 +2515,13 @@ mixin FlexibleTransitionRouteMixin<T> on TransitionRoute<T> {
   /// The delegated transition provided to the previous route.
   DelegatedTransitionBuilder? get delegatedTransition;
 
+  /// The delegated transition received from an incoming route.
+  DelegatedTransitionBuilder? receivedTransition;
+
   @override
   void didChangeNext(Route<dynamic>? nextRoute) {
     if (nextRoute is FlexibleTransitionRouteMixin<T> && canTransitionTo(nextRoute) && navigator != null) {
-      navigator!.delegateTransitionBuilder = nextRoute.delegatedTransition;
+      receivedTransition = nextRoute.delegatedTransition;
     }
     super.didChangeNext(nextRoute);
   }
@@ -2526,7 +2529,7 @@ mixin FlexibleTransitionRouteMixin<T> on TransitionRoute<T> {
   @override
   void didPopNext(Route<dynamic> nextRoute) {
     if (nextRoute is FlexibleTransitionRouteMixin<T> && canTransitionTo(nextRoute) && navigator != null) {
-      navigator!.delegateTransitionBuilder = nextRoute.delegatedTransition;
+      receivedTransition = nextRoute.delegatedTransition;
     }
     super.didPopNext(nextRoute);
   }

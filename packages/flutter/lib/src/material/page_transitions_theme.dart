@@ -82,6 +82,38 @@ class _OpenUpwardsPageTransition extends StatefulWidget {
   // Used by all of the transition animations.
   static const Curve _transitionCurve = Cubic(0.20, 0.00, 0.00, 1.00);
 
+  static Widget delegateTransition(BuildContext context, Widget? child, Animation<double> secondaryAnimation) {
+    final Animation<Offset> secondaryTranslationAnimation = _secondaryTranslationTween.animate(
+      CurvedAnimation(
+        parent: secondaryAnimation,
+        curve: _transitionCurve,
+        reverseCurve: _transitionCurve.flipped,
+      ),
+    );
+
+    final CurvedAnimation primaryAnimation = CurvedAnimation(
+      parent: ReverseAnimation(secondaryAnimation),
+      curve: _transitionCurve,
+      reverseCurve: _transitionCurve.flipped,
+    );
+
+    final Animation<Offset> primaryTranslationAnimation = _primaryTranslationTween.animate(primaryAnimation);
+
+    return AnimatedBuilder(
+      animation: secondaryAnimation,
+      child: FractionalTranslation(
+        translation: secondaryTranslationAnimation.value,
+        child: child,
+      ),
+      builder: (BuildContext context, Widget? child) {
+        return FractionalTranslation(
+          translation: secondaryTranslationAnimation.value,
+          child: child,
+        );
+      },
+    );
+  }
+
   final Animation<double> animation;
   final Animation<double> secondaryAnimation;
   final Widget child;
@@ -644,6 +676,11 @@ class OpenUpwardsPageTransitionsBuilder extends PageTransitionsBuilder {
   /// Android P.
   const OpenUpwardsPageTransitionsBuilder();
 
+  /// Delegate animation
+  static Widget delegateTransition(BuildContext context, Widget? child, Animation<double> secondaryAnimation) {
+    return _OpenUpwardsPageTransition.delegateTransition(context, child, secondaryAnimation);
+  }
+
   @override
   Widget buildTransitions<T>(
     PageRoute<T>? route,
@@ -882,19 +919,6 @@ class PageTransitionsTheme with Diagnosticable {
       secondaryAnimation: secondaryAnimation,
       child: child,
     );
-  }
-
-  /// Provide delegate transition for platform.
-  DelegatedTransitionBuilder? delegatedTransition(BuildContext context) {
-    final TargetPlatform platform = Theme.of(context).platform;
-
-    final PageTransitionsBuilder matchingBuilder =
-      builders[platform] ?? const ZoomPageTransitionsBuilder();
-
-    if (matchingBuilder == const ZoomPageTransitionsBuilder()) {
-      return ZoomPageTransitionsBuilder.delegateTransition;
-    }
-    return null;
   }
 
   // Map the builders to a list with one PageTransitionsBuilder per platform for

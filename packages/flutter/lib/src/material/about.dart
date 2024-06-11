@@ -1407,6 +1407,7 @@ class _MasterDetailScaffoldState extends State<_MasterDetailScaffold>
                       null,
                       animation,
                       null,
+                      null,
                       child,
                     ),
                   duration: const Duration(milliseconds: 500),
