@@ -3214,7 +3214,7 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
     variant: TargetPlatformVariant.all(),
   );
 
-  testWidgets('Safe to drag tracpkad when maxScrollExtent is 0 (scrollbar is not painted)', (WidgetTester tester) async {
+  testWidgets('Safe to drag trackpad when maxScrollExtent is 0 (scrollbar is not painted)', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/149803
     final ScrollController scrollController = ScrollController();
     addTearDown(scrollController.dispose);

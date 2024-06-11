@@ -1958,7 +1958,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       && _effectiveScrollController != null
       && _effectiveScrollController!.positions.length == 1
       && _effectiveScrollController!.position.hasContentDimensions
-      && _effectiveScrollController!.position.maxScrollExtent > 0;
+      && _effectiveScrollController!.position.maxScrollExtent > 0.0;
   }
 
   Map<Type, GestureRecognizerFactory> get _gestures {
