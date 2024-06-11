@@ -21,7 +21,14 @@ RenderPipeline::RenderPipeline(
 void RenderPipeline::BindToPipelineDescriptor(
     impeller::ShaderLibrary& library,
     impeller::PipelineDescriptor& desc) {
-  desc.SetVertexDescriptor(vertex_shader_->GetVertexDescriptor());
+  auto vertex_descriptor = vertex_shader_->CreateVertexDescriptor();
+  vertex_descriptor->RegisterDescriptorSetLayouts(
+      vertex_shader_->GetDescriptorSetLayouts().data(),
+      vertex_shader_->GetDescriptorSetLayouts().size());
+  vertex_descriptor->RegisterDescriptorSetLayouts(
+      fragment_shader_->GetDescriptorSetLayouts().data(),
+      fragment_shader_->GetDescriptorSetLayouts().size());
+  desc.SetVertexDescriptor(vertex_descriptor);
 
   desc.AddStageEntrypoint(vertex_shader_->GetFunctionFromLibrary(library));
   desc.AddStageEntrypoint(fragment_shader_->GetFunctionFromLibrary(library));
