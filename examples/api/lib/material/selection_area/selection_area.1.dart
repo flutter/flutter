@@ -44,6 +44,7 @@ class _MyHomePageState extends State<MyHomePage> {
   final int _text3Id = SelectableRegionState.nextSelectableId;
 
   Map<int, TextSpan> dataSourceMap = <int, TextSpan>{};
+  Map<int, TextSpan> bulletSourceMap = <int, TextSpan>{};
 
   @override
   void initState() {
@@ -58,16 +59,23 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _initData() {
+    for (int i = 1; i <= 7; i += 1) {
+      final int currentSelectableId = SelectableRegionState.nextSelectableId;
+      bulletSourceMap[currentSelectableId] = TextSpan(text: '• Bullet $i');
+    }
     dataSourceMap[_text1Id] = TextSpan(
       text: 'This is some bulleted list:\n',
       children: <InlineSpan>[
         WidgetSpan(
           child: Column(
             children: <Widget>[
-              for (int i = 1; i <= 7; i += 1)
+              for (final MapEntry<int, TextSpan> entry in bulletSourceMap.entries)
                 Padding(
                   padding: const EdgeInsets.only(left: 20.0),
-                  child: Text('• Bullet $i'),
+                  child: Text.rich(
+                    bulletSourceMap[entry.key]!,
+                    selectableId: entry.key,
+                  ),
                 )
             ],
           ),
@@ -81,7 +89,7 @@ class _MyHomePageState extends State<MyHomePage> {
     dataSourceMap[_text3Id] = const TextSpan(text: 'This is some text in another text widget.');
   }
 
-  void _emphasizeText(List<SelectedContentController<Object>>? controllers) {
+  void _emphasizeText(List<SelectedContentController<Object>>? controllers, { Map<int, TextSpan>? dataMap }) {
     if (controllers == null || controllers.isEmpty) {
       return;
     }
@@ -148,25 +156,59 @@ class _MyHomePageState extends State<MyHomePage> {
             count += rawText.length;
           }
         } else if (child is WidgetSpan) {
-          count += 1;
           if (count < startOffset) {
             beforeSelection.add(child);
           } else if (count >= endOffset) {
             afterSelection.add(child);
           } else {
-            insideSelection.add(child);
+            // Update bulleted list data.
+            for (final SelectedContentController<Object> controller in contentController.children) {
+              _emphasizeText(
+                <SelectedContentController<Object>>[controller],
+                dataMap: bulletSourceMap,
+              );
+            }
+            // Re-create bulleted list.
+            insideSelection.add(
+              WidgetSpan(
+                child: Column(
+                  children: <Widget>[
+                    for (final MapEntry<int, TextSpan> entry in bulletSourceMap.entries)
+                      Padding(
+                        padding: const EdgeInsets.only(left: 20.0),
+                        child: Text.rich(
+                          bulletSourceMap[entry.key]!,
+                          selectableId: entry.key,
+                        ),
+                      )
+                  ],
+                ),
+              ),
+            );
           }
+          count += 1;
         }
         return true;
       });
-      dataSourceMap[contentController.selectableId!] = TextSpan(
-        style: (contentController.content as TextSpan).style,
-        children: <InlineSpan>[
-          ...beforeSelection,
-          ...insideSelection,
-          ...afterSelection,
-        ],
-      );
+      if (dataMap != null) {
+        dataMap[contentController.selectableId!] = TextSpan(
+          style: (contentController.content as TextSpan).style,
+          children: <InlineSpan>[
+            ...beforeSelection,
+            ...insideSelection,
+            ...afterSelection,
+          ],
+        );
+      } else {
+        dataSourceMap[contentController.selectableId!] = TextSpan(
+          style: (contentController.content as TextSpan).style,
+          children: <InlineSpan>[
+            ...beforeSelection,
+            ...insideSelection,
+            ...afterSelection,
+          ],
+        );
+      }
     }
     _selectionController.clear();
     setState(() {});
