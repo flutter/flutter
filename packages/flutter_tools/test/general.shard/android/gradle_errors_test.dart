@@ -791,7 +791,6 @@ Execution failed for task ':app:generateDebugFeatureTransitiveDeps'.
     });
   });
 
-// It is successfully passing the test for linux enviroment.
   testUsingContext('generates correct gradle command for Unix-like environment',
       () async {
     await lockFileDepMissingHandler.handler(
@@ -835,7 +834,6 @@ Execution failed for task ':app:generateDebugFeatureTransitiveDeps'.
             ''));
   }, overrides: <Type, Generator>{
     GradleUtils: () => FakeGradleUtils(),
-    // Platform: () => fakePlatform('android'),
     Platform: () => fakePlatform('windows'),
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
