@@ -1186,6 +1186,9 @@ void Shell::OnPlatformViewMarkTextureFrameAvailable(int64_t texture_id) {
   // Tell the rasterizer that one of its textures has a new frame available.
   task_runners_.GetRasterTaskRunner()->PostTask(
       [rasterizer = rasterizer_->GetWeakPtr(), texture_id]() {
+        if (!rasterizer) {
+          return;
+        }
         auto registry = rasterizer->GetTextureRegistry();
 
         if (!registry) {
