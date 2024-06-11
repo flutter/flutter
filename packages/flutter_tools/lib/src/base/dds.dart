@@ -42,9 +42,12 @@ class DartDevelopmentService {
     bool? disableServiceAuthCodes,
     bool cacheStartupProfile = false,
   }) async {
-    final Uri ddsUri = Uri(
+    final ddsUri = Uri( // should fail analysis
       scheme: 'http',
-      host: ((ipv6 ?? false) ? io.InternetAddress.loopbackIPv6 : io.InternetAddress.loopbackIPv4).host,
+      host: switch (ipv6) {
+        true => io.InternetAddress.loopbackIPv6.host,
+        null || false => io.InternetAddress.loopbackIPv4.host,
+      },
       port: hostPort ?? 0,
     );
     logger.printTrace(
