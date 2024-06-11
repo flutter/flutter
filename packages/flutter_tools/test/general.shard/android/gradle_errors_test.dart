@@ -775,14 +775,14 @@ Execution failed for task ':app:generateDebugFeatureTransitiveDeps'.
 
       expect(
         testLogger.statusText,
-        contains('\n'
-            '┌─ Flutter Fix ────────────────────────────────────────────────────────────────────────────┐\n'
-            '│ You need to update the lockfile, or disable Gradle dependency locking.                   │\n'
-            '│ To regenerate the lockfiles run: `./gradlew :generateLockfiles` in /android/build.gradle │\n'
-            '│ To remove dependency locking, remove the `dependencyLocking` from /android/build.gradle  │\n'
-            '└──────────────────────────────────────────────────────────────────────────────────────────┘\n'
-            '')
-      );
+        contains(
+          '\n'
+          '┌─ Flutter Fix ────────────────────────────────────────────────────────────────────────────┐\n'
+          '│ You need to update the lockfile, or disable Gradle dependency locking.                   │\n'
+          '│ To regenerate the lockfiles run: `./gradlew :generateLockfiles` in /android/build.gradle │\n'
+          '│ To remove dependency locking, remove the `dependencyLocking` from /android/build.gradle  │\n'
+          '└──────────────────────────────────────────────────────────────────────────────────────────┘\n'
+        )
     }, overrides: <Type, Generator>{
       GradleUtils: () => FakeGradleUtils(),
       Platform: () => fakePlatform('android'),
