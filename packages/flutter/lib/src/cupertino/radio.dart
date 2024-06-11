@@ -348,7 +348,7 @@ class _RadioPainter extends ToggleablePainter {
         final Paint paint = Paint();
         paint.color = inactiveColor;
         canvas.drawCircle(center, _kOuterRadius, paint);
-        
+
         final Paint borderPaint = Paint()
           ..style = PaintingStyle.stroke
           ..color = CupertinoColors.inactiveGray
