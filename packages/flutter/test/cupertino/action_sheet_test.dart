@@ -17,18 +17,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/semantics_tester.dart';
 
-final Finder mainSheet = find.byElementPredicate(
-  (Element element) {
-    return element.widget.runtimeType.toString() == '_ActionSheetMainSheet';
-  },
-);
-
-final Finder contentSection = find.byElementPredicate(
-  (Element element) {
-    return element.widget.runtimeType.toString() == '_CupertinoAlertContentSection';
-  },
-);
-
 final Finder actionsSection = find.byElementPredicate(
   (Element element) {
     return element.widget.runtimeType.toString() == '_ActionSheetActionSection';
@@ -241,16 +229,23 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
 
-    // Content section should be at the bottom left of action sheet.
+    // Content section should be at the bottom left of action sheet
+    // (minus padding).
     expect(
-      tester.getBottomLeft(contentSection),
-      tester.getBottomLeft(mainSheet),
+      tester.getBottomLeft(find.byType(ClipRRect)),
+      tester.getBottomLeft(find.byType(CupertinoActionSheet)) - const Offset(-8.0, 8.0),
     );
 
-    // Check that the dialog size is the same as the content section size.
+    // Check that the dialog size is the same as the content section size
+    // (minus padding).
     expect(
-      tester.getSize(contentSection),
-      tester.getSize(mainSheet),
+      tester.getSize(find.byType(ClipRRect)).height,
+      tester.getSize(find.byType(CupertinoActionSheet)).height  - 16.0,
+    );
+
+    expect(
+      tester.getSize(find.byType(ClipRRect)).width,
+      tester.getSize(find.byType(CupertinoActionSheet)).width - 16.0,
     );
   });
 
@@ -280,19 +275,25 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
 
+    final Finder finder = find.byElementPredicate(
+      (Element element) {
+        return element.widget.runtimeType.toString() == '_ActionSheetActionSection';
+      },
+    );
+
     // Check that the title/message section is not displayed (action section is
     // at the top of the action sheet + padding).
     expect(
-      tester.getTopLeft(actionsSection),
-      tester.getTopLeft(mainSheet),
+      tester.getTopLeft(finder),
+      tester.getTopLeft(find.byType(CupertinoActionSheet)) + const Offset(8.0, 8.0),
     );
 
     expect(
-      tester.getTopLeft(mainSheet),
+      tester.getTopLeft(find.byType(CupertinoActionSheet)) + const Offset(8.0, 8.0),
       tester.getTopLeft(find.widgetWithText(CupertinoActionSheetAction, 'One')),
     );
     expect(
-      tester.getBottomLeft(mainSheet),
+      tester.getBottomLeft(find.byType(CupertinoActionSheet)) + const Offset(8.0, -8.0),
       tester.getBottomLeft(find.widgetWithText(CupertinoActionSheetAction, 'Two')),
     );
   });
@@ -1025,7 +1026,7 @@ void main() {
     await tester.tap(find.text('Go'));
     await tester.pump();
 
-    expect(tester.getSize(mainSheet).height, moreOrLessEquals(114.3));
+    expect(tester.getSize(find.byType(CupertinoActionSheet)).height, moreOrLessEquals(130.3));
   });
 
   testWidgets('1 action button with cancel button', (WidgetTester tester) async {
@@ -1299,7 +1300,7 @@ void main() {
       tester.getBottomLeft(find.widgetWithText(CupertinoActionSheetAction, 'One')).dy,
       moreOrLessEquals(469.7),
     );
-    expect(tester.getBottomLeft(find.widgetWithText(CupertinoActionSheetAction, 'Two')).dy, 535.0);
+    expect(tester.getBottomLeft(find.widgetWithText(CupertinoActionSheetAction, 'Two')).dy, 527.0);
   });
 
   // Verify that on a phone with the given `viewSize` and `viewPadding`, the the
@@ -1343,6 +1344,12 @@ void main() {
 
     await tester.tap(find.text('Go'));
     await tester.pumpAndSettle();
+
+    final Finder mainSheet = find.byElementPredicate(
+      (Element element) {
+        return element.widget.runtimeType.toString() == '_ActionSheetMainSheet';
+      },
+    );
     expect(tester.getSize(mainSheet), expectedSize);
   }
 
@@ -1719,9 +1726,13 @@ void main() {
 }
 
 RenderBox findScrollableActionsSectionRenderBox(WidgetTester tester) {
-  final RenderObject actionsSectionObject = tester.renderObject(actionsSection);
-  assert(actionsSectionObject is RenderBox);
-  return actionsSectionObject as RenderBox;
+  final RenderObject actionsSection = tester.renderObject(
+    find.byElementPredicate((Element element) {
+      return element.widget.runtimeType.toString() == '_ActionSheetActionSection';
+    }),
+  );
+  assert(actionsSection is RenderBox);
+  return actionsSection as RenderBox;
 }
 
 Widget createAppWithButtonThatLaunchesActionSheet(Widget actionSheet) {
