@@ -3969,6 +3969,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     for (final NavigatorObserver observer in _effectiveObservers) {
       NavigatorObserver._navigators[observer] = null;
     }
+    _effectiveObservers = <NavigatorObserver>[];
     super.deactivate();
   }
 
@@ -3989,12 +3990,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       _debugLocked = true;
       return true;
     }());
-    assert(() {
-      for (final NavigatorObserver observer in _effectiveObservers) {
-        assert(observer.navigator != this);
-      }
-      return true;
-    }());
+    assert(_effectiveObservers.isEmpty);
     _updateHeroController(null);
     focusNode.dispose();
     _forcedDisposeAllRouteEntries();
