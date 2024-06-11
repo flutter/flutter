@@ -150,7 +150,7 @@ class _MyHomePageState extends State<MyHomePage> {
               afterSelection.add(TextSpan(style: child.style, text: rawText));
             } else {
               // Collect spans inside selection.
-              final int newStart = min(endOffset - startOffset, rawText.length);
+              final int newStart = min(endOffset - count, rawText.length);
               final int globalNewStart = count + newStart;
               insideSelection.add(TextSpan(style: const TextStyle(color: Colors.red), text: rawText.substring(0, newStart)));
               // Check if this span contains content after the selection.
