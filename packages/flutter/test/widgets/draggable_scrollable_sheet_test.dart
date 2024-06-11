@@ -1747,6 +1747,7 @@ void main() {
     );
   });
 
+  // This is a regression test for https://github.com/flutter/flutter/issues/146736
   testWidgets('Fix `setState() or markNeedsBuild()` error when draggable_scrollable_sheet is scrolling',
       (WidgetTester tester) async {
     final DraggableScrollableController controller = DraggableScrollableController();

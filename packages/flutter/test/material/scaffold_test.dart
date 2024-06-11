@@ -3396,7 +3396,8 @@ void main() {
     expect(find.byType(FloatingActionButton), findsNothing);
   });
 
-  testWidgets('fix _floatingActionButtonVisibility update', (WidgetTester tester) async {
+  // This is a regression test for https://github.com/flutter/flutter/issues/146736
+  testWidgets("Removing FAB and removing DraggableScrollableSheet at the same time doesn't throw assertion", (WidgetTester tester) async {
     final List<String> log = <String>[];
 
     bool expanded = true;
