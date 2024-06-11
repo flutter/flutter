@@ -57,7 +57,6 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
         _dartExecutable,
         'devtools',
         '--no-launch-browser',
-        // TODO(bkonyi): does this need to be behind the flag?
         if (printDtdUri) '--print-dtd',
         if (vmServiceUri != null) '--vm-uri=$vmServiceUri',
         ...?additionalArguments,
