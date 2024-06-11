@@ -511,7 +511,7 @@ class MethodChannel {
   ///
   /// Dart generics are reified, meaning that an untyped `List<dynamic>` cannot
   /// masquerade as a `List<T>`. Since [invokeMethod] can only return dynamic
-  /// maps, we instead create a new typed list using [List.cast].
+  /// lists, we instead create a new typed list using [List.cast].
   ///
   /// See also:
   ///
