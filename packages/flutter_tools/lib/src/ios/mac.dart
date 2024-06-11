@@ -568,10 +568,18 @@ void updateShorebirdYaml(BuildInfo buildInfo, BuildableIOSApp app) {
       i++;
     }
 
+    String parentChildren = '';
+    if (parent.existsSync()) {
+      parentChildren = parent.listSync().map((FileSystemEntity entity) => entity.basename).join(', ');
+    }
+
     throw Exception('''
 Cannot find shorebird.yaml in ${shorebirdYaml.absolute.path}.
 Resolved app name: $resolvedAppName
-Closest existing parent: ${parent.absolute.path}
+
+Closest existing parent:
+  PATH: ${parent.absolute.path}
+  CHILDREN: $parentChildren
 
 Please file an issue at: https://github.com/shorebirdtech/shorebird/issues/new
 ''');
