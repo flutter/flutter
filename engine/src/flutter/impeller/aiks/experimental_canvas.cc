@@ -391,6 +391,7 @@ void ExperimentalCanvas::DrawTextFrame(
   text_contents->SetForceTextColor(paint.mask_blur_descriptor.has_value());
   text_contents->SetScale(GetCurrentTransform().GetMaxBasisLengthXY());
   text_contents->SetColor(paint.color);
+  text_contents->SetOffset(position);
   text_contents->SetTextProperties(paint.color,                           //
                                    paint.style == Paint::Style::kStroke,  //
                                    paint.stroke_width,                    //
