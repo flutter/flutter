@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 // TODO(bkonyi): remove this file when ready to serve DevTools from DDS.
+//
+// See https://github.com/flutter/flutter/issues/150044
 
 import 'dart:async';
 
@@ -302,10 +304,10 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
 
   @override
   Future<void> shutdown() async {
-    if (_devToolsLauncher == null || _shutdown || !_served) {
+    _shutdown = true;
+    if (_devToolsLauncher == null || !_served) {
       return;
     }
-    _shutdown = true;
     _readyToAnnounce = false;
     await _devToolsLauncher.close();
   }

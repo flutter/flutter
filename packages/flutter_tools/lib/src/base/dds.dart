@@ -51,7 +51,6 @@ Future<DartDevelopmentServiceInstance> defaultStartDartDevelopmentService(
       ],
       if (!enableAuthCodes) '--disable-service-auth-codes',
       // TODO(bkonyi): uncomment when ready to serve DevTools from DDS.
-      // See https://github.com/flutter/flutter/issues/150044
       // if (enableDevTools) '--serve-devtools',
       if (google3WorkspaceRoot != null)
         '--google3-workspace-root=$google3WorkspaceRoot',
