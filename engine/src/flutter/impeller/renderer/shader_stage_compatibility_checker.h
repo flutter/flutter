@@ -5,6 +5,10 @@
 #ifndef FLUTTER_IMPELLER_RENDERER_SHADER_STAGE_COMPATIBILITY_CHECKER_H_
 #define FLUTTER_IMPELLER_RENDERER_SHADER_STAGE_COMPATIBILITY_CHECKER_H_
 
+#include <cstddef>
+
+#include "impeller/core/shader_types.h"
+
 namespace impeller {
 /// This is a classed use to check that the input slots of fragment shaders
 /// match the output slots of the vertex shaders.
@@ -58,9 +62,15 @@ class ShaderStageCompatibilityChecker {
 // TODO(https://github.com/flutter/flutter/issues/146852): Make impellerc emit
 // an empty array for output slots.
 struct ClipVertexShader;
+struct SolidFillVertexShader;
 
 template <typename FragmentShaderT>
 class ShaderStageCompatibilityChecker<ClipVertexShader, FragmentShaderT> {
+ public:
+  static constexpr bool Check() { return true; }
+};
+template <typename FragmentShaderT>
+class ShaderStageCompatibilityChecker<SolidFillVertexShader, FragmentShaderT> {
  public:
   static constexpr bool Check() { return true; }
 };
