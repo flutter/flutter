@@ -541,12 +541,13 @@ Future<XcodeBuildResult> buildXcodeProject({
 }
 
 void updateShorebirdYaml(BuildInfo buildInfo, BuildableIOSApp app) {
+  final String resolvedAppName = app.name ?? 'Runner.app';
   final File shorebirdYaml = globals.fs.file(
     globals.fs.path.join(
       app.archiveBundleOutputPath,
       'Products',
       'Applications',
-      app.name ?? 'Runner.app',
+      resolvedAppName,
       'Frameworks',
       'App.framework',
       'flutter_assets',
@@ -554,8 +555,21 @@ void updateShorebirdYaml(BuildInfo buildInfo, BuildableIOSApp app) {
     ),
   );
   if (!shorebirdYaml.existsSync()) {
+    // Find the closest existing parent of the file.
+    Directory parent = shorebirdYaml.parent;
+
+    int i = 0;
+    const int maxDepth = 6;
+    while (!parent.existsSync() && i < maxDepth) {
+      parent = parent.parent;
+      i++;
+    }
+
     throw Exception('''
 Cannot find shorebird.yaml in ${shorebirdYaml.absolute.path}.
+Resolved app name: $resolvedAppName
+Closest existing parent: ${parent.absolute.path}
+
 Please file an issue at: https://github.com/shorebirdtech/shorebird/issues/new
 ''');
   }
