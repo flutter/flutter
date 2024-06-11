@@ -779,8 +779,8 @@ class _SelectableTextContainer extends StatefulWidget {
 }
 
 class _SelectableTextContainerState extends State<_SelectableTextContainer> {
-  late final _SelectableTextContainerDelegate _selectionDelegate;
-  late final _TextSpanContentController _textContentController;
+  late _SelectableTextContainerDelegate _selectionDelegate;
+  late _TextSpanContentController _textContentController;
   final GlobalKey _textKey = GlobalKey();
 
   @override
@@ -788,6 +788,15 @@ class _SelectableTextContainerState extends State<_SelectableTextContainer> {
     super.initState();
     _textContentController = _TextSpanContentController(selectableId: widget.selectableId, content: widget.text);
     _selectionDelegate = _SelectableTextContainerDelegate(_textKey, _textContentController);
+  }
+
+  @override
+  void didUpdateWidget(covariant _SelectableTextContainer oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.text != oldWidget.text || widget.selectableId != oldWidget.selectableId) {
+      _textContentController = _TextSpanContentController(selectableId: widget.selectableId, content: widget.text);
+      _selectionDelegate = _SelectableTextContainerDelegate(_textKey, _textContentController);
+    }
   }
 
   @override
@@ -1294,10 +1303,10 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
       textContentController.endOffset = selections.last.endOffset;
     } else {
       // TODO(Renzo-Olivares): Determine inverted selection?
-      // final TextPosition positionAfterEnd = paragraph.getPositionForOffset(selectables[currentSelectionEndIndex].boundingBoxes.last.bottomRight);
-      // textContentController.endOffset = positionAfterEnd.offset;
-      final TextPosition positionAfterEnd = paragraph.getPositionForOffset(selectables[currentSelectionEndIndex].value.endSelectionPoint!.localPosition);
+      final TextPosition positionAfterEnd = paragraph.getPositionForOffset(selectables[currentSelectionEndIndex].boundingBoxes.last.bottomRight);
       textContentController.endOffset = positionAfterEnd.offset;
+      // final TextPosition positionAfterEnd = paragraph.getPositionForOffset(selectables[currentSelectionEndIndex].value.endSelectionPoint!.localPosition);
+      // textContentController.endOffset = positionAfterEnd.offset;
     }
     final StringBuffer buffer = StringBuffer();
     for (final SelectedContent selection in selections) {
