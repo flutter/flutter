@@ -782,7 +782,7 @@ Execution failed for task ':app:generateDebugFeatureTransitiveDeps'.
           '│ To regenerate the lockfiles run: `./gradlew :generateLockfiles` in /android/build.gradle │\n'
           '│ To remove dependency locking, remove the `dependencyLocking` from /android/build.gradle  │\n'
           '└──────────────────────────────────────────────────────────────────────────────────────────┘\n'
-        )
+        ));
     }, overrides: <Type, Generator>{
       GradleUtils: () => FakeGradleUtils(),
       Platform: () => fakePlatform('android'),
