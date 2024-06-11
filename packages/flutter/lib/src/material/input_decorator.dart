@@ -2164,7 +2164,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         hintText,
         style: hintStyle,
         textDirection: decoration.hintTextDirection,
-        overflow: hintStyle.overflow ?? TextOverflow.ellipsis,
+        overflow: hintStyle.overflow ?? (decoration.hintMaxLines == null ? null : TextOverflow.ellipsis),
         textAlign: textAlign,
         maxLines: decoration.hintMaxLines,
       ),
@@ -4570,7 +4570,7 @@ class _InputDecoratorDefaultsM2 extends InputDecorationTheme {
 
   @override
   TextStyle? get helperStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
-    final ThemeData themeData= Theme.of(context);
+    final ThemeData themeData = Theme.of(context);
     if (states.contains(MaterialState.disabled)) {
       return themeData.textTheme.bodySmall!.copyWith(color: Colors.transparent);
     }
@@ -4580,7 +4580,7 @@ class _InputDecoratorDefaultsM2 extends InputDecorationTheme {
 
   @override
   TextStyle? get errorStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
-    final ThemeData themeData= Theme.of(context);
+    final ThemeData themeData = Theme.of(context);
     if (states.contains(MaterialState.disabled)) {
       return themeData.textTheme.bodySmall!.copyWith(color: Colors.transparent);
     }
@@ -4629,6 +4629,9 @@ class _InputDecoratorDefaultsM2 extends InputDecorationTheme {
   Color? get suffixIconColor => MaterialStateColor.resolveWith((Set<MaterialState> states) {
     if (states.contains(MaterialState.disabled) && !states.contains(MaterialState.focused)) {
       return Theme.of(context).disabledColor;
+    }
+    if (states.contains(MaterialState.error)) {
+      return Theme.of(context).colorScheme.error;
     }
     if (states.contains(MaterialState.focused)) {
       return Theme.of(context).colorScheme.primary;
@@ -4733,6 +4736,9 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
 
   @override
   Color? get prefixIconColor => MaterialStateColor.resolveWith((Set<MaterialState> states) {
+    if (states.contains(MaterialState.disabled)) {
+      return _colors.onSurface.withOpacity(0.38);
+    }
     return _colors.onSurfaceVariant;
   });
 
@@ -4742,6 +4748,9 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
       return _colors.onSurface.withOpacity(0.38);
     }
     if (states.contains(MaterialState.error)) {
+      if (states.contains(MaterialState.hovered)) {
+        return _colors.onErrorContainer;
+      }
       return _colors.error;
     }
     return _colors.onSurfaceVariant;
