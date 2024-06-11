@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
@@ -588,8 +589,8 @@ class _CheckboxPainter extends ToggleablePainter {
         _drawBox(canvas, outer, paint, side);
         _drawDash(canvas, origin, strokePaint);
     }
-    // Apply effect to darken checkbox when pressed.
-    if (!reaction.isDismissed) {
+    // Apply effect to darken checkbox when pressed on macOS.
+    if (!reaction.isDismissed && defaultTargetPlatform == TargetPlatform.macOS) {
       final Paint paint = Paint()
         ..color = _kTransparentColor.withOpacity(0.05);
       final Rect outer = _outerRectAt(origin);
