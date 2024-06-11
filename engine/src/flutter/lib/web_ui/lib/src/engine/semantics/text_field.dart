@@ -257,7 +257,6 @@ class TextField extends PrimaryRoleManager {
     editableElement = semanticsObject.hasFlag(ui.SemanticsFlag.isMultiline)
         ? createDomHTMLTextAreaElement()
         : createDomHTMLInputElement();
-    _updateEnabledState();
 
     // On iOS, even though the semantic text field is transparent, the cursor
     // and text highlighting are still visible. The cursor and text selection
@@ -311,7 +310,16 @@ class TextField extends PrimaryRoleManager {
           }
 
           EnginePlatformDispatcher.instance.invokeOnSemanticsAction(
-              semanticsObject.id, ui.SemanticsAction.focus, null);
+              semanticsObject.id, ui.SemanticsAction.didGainAccessibilityFocus, null);
+        }));
+    activeEditableElement.addEventListener('blur',
+        createDomEventListener((DomEvent event) {
+          if (EngineSemantics.instance.gestureMode != GestureMode.browserGestures) {
+            return;
+          }
+
+          EnginePlatformDispatcher.instance.invokeOnSemanticsAction(
+              semanticsObject.id, ui.SemanticsAction.didLoseAccessibilityFocus, null);
         }));
   }
 
@@ -425,19 +433,20 @@ class TextField extends PrimaryRoleManager {
     // and wait for a tap event before invoking the iOS workaround and creating
     // the editable element.
     if (editableElement != null) {
-      _updateEnabledState();
       activeEditableElement.style
         ..width = '${semanticsObject.rect!.width}px'
         ..height = '${semanticsObject.rect!.height}px';
 
       if (semanticsObject.hasFocus) {
-        if (domDocument.activeElement != activeEditableElement && semanticsObject.isEnabled) {
+        if (domDocument.activeElement !=
+            activeEditableElement) {
           semanticsObject.owner.addOneTimePostUpdateCallback(() {
             activeEditableElement.focus();
           });
         }
         SemanticsTextEditingStrategy._instance?.activate(this);
-      } else if (domDocument.activeElement == activeEditableElement) {
+      } else if (domDocument.activeElement ==
+          activeEditableElement) {
         if (!isIosSafari) {
           SemanticsTextEditingStrategy._instance?.deactivate(this);
           // Only apply text, because this node is not focused.
@@ -455,16 +464,6 @@ class TextField extends PrimaryRoleManager {
     } else {
       element.removeAttribute('aria-label');
     }
-  }
-
-  void _updateEnabledState() {
-    final DomElement? element = editableElement;
-
-    if (element == null) {
-      return;
-    }
-
-    (element as DomElementWithDisabledProperty).disabled = !semanticsObject.isEnabled;
   }
 
   @override
