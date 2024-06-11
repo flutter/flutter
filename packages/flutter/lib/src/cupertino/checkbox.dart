@@ -127,8 +127,8 @@ class CupertinoCheckbox extends StatefulWidget {
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// widget.
   ///
-  /// If [mouseCursor] is a [WidgetStateProperty<MouseCursor>],
-  /// [WidgetStateProperty.resolve] is used for the following [WidgetState]s:
+  /// If [mouseCursor] is a [WidgetStateMouseCursor],
+  /// [WidgetStateMouseCursor.resolve] is used for the following [WidgetState]s:
   ///
   ///  * [WidgetState.selected].
   ///  * [WidgetState.hovered].
