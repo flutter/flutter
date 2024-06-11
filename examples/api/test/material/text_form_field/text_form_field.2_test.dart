@@ -22,7 +22,7 @@ void main() {
       await tester.enterText(textFormField, 'jo hn');
       await tester.tap(saveButton);
       await tester.pump();
-      expect(find.text('Username must not contains any spaces'), findsOneWidget);
+      expect(find.text('Username must not contain any spaces'), findsOneWidget);
 
       await tester.enterText(textFormField, 'jo');
       await tester.tap(saveButton);
