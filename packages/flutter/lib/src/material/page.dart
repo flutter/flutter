@@ -197,7 +197,7 @@ class MaterialPage<T> extends Page<T> {
 //
 // This route uses the builder from the page to build its content. This ensures
 // the content is up to date after page updates.
-class _PageBasedMaterialPageRoute<T> extends PageRoute<T> with MaterialRouteTransitionMixin<T> {
+class _PageBasedMaterialPageRoute<T> extends PageRoute<T> with MaterialRouteTransitionMixin<T>, FlexibleTransitionRouteMixin<T> {
   _PageBasedMaterialPageRoute({
     required MaterialPage<T> page,
     super.allowSnapshotting,
