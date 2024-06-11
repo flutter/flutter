@@ -6,11 +6,12 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 
+import '../artifacts.dart';
 import '../convert.dart';
 import '../device.dart';
+import '../globals.dart' as globals;
 import 'io.dart' as io;
 import 'logger.dart';
-import 'platform.dart' as p;
 
 /// A representation of the current DDS state including:
 ///
@@ -36,7 +37,9 @@ Future<DartDevelopmentServiceInstance> defaultStartDartDevelopmentService(
   String? google3WorkspaceRoot,
   Uri? devToolsServerAddress,
 }) async {
-  final String exe = const p.LocalPlatform().executable;
+  final String exe = globals.artifacts!.getArtifactPath(
+    Artifact.engineDartBinary,
+  );
   final io.Process process = await io.Process.start(
     exe,
     <String>[
@@ -48,6 +51,7 @@ Future<DartDevelopmentServiceInstance> defaultStartDartDevelopmentService(
       ],
       if (!enableAuthCodes) '--disable-service-auth-codes',
       // TODO(bkonyi): uncomment when ready to serve DevTools from DDS.
+      // See https://github.com/flutter/flutter/issues/150044
       // if (enableDevTools) '--serve-devtools',
       if (google3WorkspaceRoot != null)
         '--google3-workspace-root=$google3WorkspaceRoot',
@@ -59,10 +63,11 @@ Future<DartDevelopmentServiceInstance> defaultStartDartDevelopmentService(
   );
   final Completer<DartDevelopmentServiceInstance> completer =
       Completer<DartDevelopmentServiceInstance>();
-  late StreamSubscription<String> stderrSub;
-  stderrSub = process.stderr.transform(utf8.decoder).listen((String event) {
-    final Map<String, dynamic> result =
-        json.decode(event) as Map<String, dynamic>;
+  late StreamSubscription<Object?> stderrSub;
+  stderrSub = process.stderr
+      .transform(utf8.decoder)
+      .transform(json.decoder)
+      .listen((Object? result) {
     if (result
         case {
           'state': 'started',
