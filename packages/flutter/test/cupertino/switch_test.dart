@@ -627,6 +627,9 @@ void main() {
 
   testWidgets('Switch can set active/inactive thumb colors', (WidgetTester tester) async {
     bool value = false;
+    const Color activeThumbColor = Color(0xff00000A);
+    const Color inactiveThumbColor = Color(0xff00000B);
+
     await tester.pumpWidget(
       CupertinoApp(
         home: Directionality(
@@ -643,8 +646,8 @@ void main() {
                         value = newValue;
                       });
                     },
-                    thumbColor: Colors.red[500],
-                    inactiveThumbColor: Colors.yellow[500],
+                    thumbColor: activeThumbColor,
+                    inactiveThumbColor: inactiveThumbColor,
                   ),
                 ),
               );
@@ -657,7 +660,7 @@ void main() {
       find.byType(CupertinoSwitch),
       paints
         ..rrect()..rrect()..rrect()..rrect()
-        ..rrect(color: Colors.yellow[500]),
+        ..rrect(color: inactiveThumbColor),
     );
     await tester.drag(find.byType(CupertinoSwitch), const Offset(-30.0, 0.0));
     await tester.pump();
@@ -665,7 +668,7 @@ void main() {
       find.byType(CupertinoSwitch),
       paints
         ..rrect()..rrect()..rrect()..rrect()
-        ..rrect(color: Colors.red[500]),
+        ..rrect(color: activeThumbColor),
     );
   });
 
@@ -1109,7 +1112,10 @@ void main() {
     final Offset cupertinoSwitch = tester.getCenter(find.byType(CupertinoSwitch));
     await gesture.addPointer(location: cupertinoSwitch);
     await tester.pumpAndSettle();
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.basic
+    );
 
     // Enabled CupertinoSwitch updates cursor when hovering on Web.
     await tester.pumpWidget(
@@ -1131,7 +1137,10 @@ void main() {
 
     await gesture.moveTo(const Offset(10, 10));
     await tester.pumpAndSettle();
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.basic
+    );
 
     await gesture.moveTo(cupertinoSwitch);
     await tester.pumpAndSettle();
@@ -1143,6 +1152,7 @@ void main() {
 
   testWidgets('Switch configures mouse cursor', (WidgetTester tester) async {
     const bool value = false;
+    const Offset switchSize = Offset(51.0, 31.0);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -1164,11 +1174,20 @@ void main() {
       kind: PointerDeviceKind.mouse,
       pointer: 1
     );
-    await gesture.addPointer(location: tester.getCenter(find.byType(CupertinoSwitch)));
+    // The pointer is not pointing at the switch.
+    await gesture.addPointer(location: tester.getCenter(find.byType(CupertinoSwitch)) + switchSize);
     await tester.pump();
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.basic
+    );
+    // The pointer now points at the switch.
     await gesture.moveTo(tester.getCenter(find.byType(CupertinoSwitch)));
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.forbidden);
+    await tester.pump();
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.forbidden
+    );
   });
 
   testWidgets('CupertinoSwitch is focusable and has correct focus color', (WidgetTester tester) async {
