@@ -779,7 +779,7 @@ class _SelectableTextContainer extends StatefulWidget {
 }
 
 class _SelectableTextContainerState extends State<_SelectableTextContainer> {
-  late _SelectableTextContainerDelegate _selectionDelegate;
+  late final _SelectableTextContainerDelegate _selectionDelegate;
   late _TextSpanContentController _textContentController;
   final GlobalKey _textKey = GlobalKey();
 
@@ -795,7 +795,7 @@ class _SelectableTextContainerState extends State<_SelectableTextContainer> {
     super.didUpdateWidget(oldWidget);
     if (widget.text != oldWidget.text || widget.selectableId != oldWidget.selectableId) {
       _textContentController = _TextSpanContentController(selectableId: widget.selectableId, content: widget.text);
-      _selectionDelegate = _SelectableTextContainerDelegate(_textKey, _textContentController);
+      _selectionDelegate._attachController(_textContentController);
     }
   }
 
@@ -894,9 +894,13 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
     this.textContentController,
   ) : _textKey = textKey;
 
-  final _TextSpanContentController textContentController;
+  _TextSpanContentController textContentController;
   final GlobalKey _textKey;
   RenderParagraph get paragraph => _textKey.currentContext!.findRenderObject()! as RenderParagraph;
+
+  void _attachController(_TextSpanContentController newController) {
+    textContentController = newController;
+  }
 
   @override
   SelectionResult handleSelectParagraph(SelectParagraphSelectionEvent event) {
@@ -1270,20 +1274,16 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
     if (paragraph.selectableBelongsToParagraph(selectables[currentSelectionStartIndex])) {
       textContentController.startOffset = selections.first.startOffset;
     } else {
-      // TODO(Renzo-Olivares): Determine inverted selection
-      // final TextPosition positionBeforeStart = paragraph.getPositionForOffset(selectables[currentSelectionStartIndex].boundingBoxes.first.bottomLeft);
-      // textContentController.startOffset = positionBeforeStart.offset;
-      final TextPosition positionBeforeStart = paragraph.getPositionForOffset(selectables[currentSelectionStartIndex].value.startSelectionPoint!.localPosition);
+      // TODO(Renzo-Olivares): Determine inverted selection.
+      final TextPosition positionBeforeStart = paragraph.getPositionForOffset(selectables[currentSelectionStartIndex].boundingBoxes.first.bottomLeft);
       textContentController.startOffset = positionBeforeStart.offset;
     }
     if (paragraph.selectableBelongsToParagraph(selectables[currentSelectionEndIndex])) {
       textContentController.endOffset = selections.last.endOffset;
     } else {
-      // TODO(Renzo-Olivares): Determine inverted selection?
+      // TODO(Renzo-Olivares): Determine inverted selection.
       final TextPosition positionAfterEnd = paragraph.getPositionForOffset(selectables[currentSelectionEndIndex].boundingBoxes.last.bottomRight);
       textContentController.endOffset = positionAfterEnd.offset;
-      // final TextPosition positionAfterEnd = paragraph.getPositionForOffset(selectables[currentSelectionEndIndex].value.endSelectionPoint!.localPosition);
-      // textContentController.endOffset = positionAfterEnd.offset;
     }
     final StringBuffer buffer = StringBuffer();
     for (final SelectedContent selection in selections) {
