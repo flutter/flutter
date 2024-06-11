@@ -140,8 +140,8 @@ Localhost is redirected to the proxy.
 
 - https://github.com/flutter/flutter/issues/24854
 - https://github.com/flutter/flutter/issues/16875#issuecomment-384758566
-- https://stackoverflow.com/questions/9546324/adding-directory-to-path-environment-variable-in-windows[Adding directory to PATH Environment Variable in Windows]
-- https://stackoverflow.com/questions/19287379/how-do-i-add-to-the-windows-path-variable-using-setx-having-weird-problems[How do I add to the Windows PATH variable using setx? Having weird problems]
+- [Adding directory to PATH Environment Variable in Windows](https://stackoverflow.com/questions/9546324)
+- [How do I add to the Windows PATH variable using setx? Having weird problems](https://stackoverflow.com/questions/19287379)
 
 
 = Empty Template for new recipes
