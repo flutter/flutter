@@ -795,7 +795,7 @@ class _SelectableTextContainerState extends State<_SelectableTextContainer> {
     super.didUpdateWidget(oldWidget);
     if (widget.text != oldWidget.text || widget.selectableId != oldWidget.selectableId) {
       _textContentController = _TextSpanContentController(selectableId: widget.selectableId, content: widget.text);
-      _selectionDelegate._attachController(_textContentController);
+      _selectionDelegate._attachController = _textContentController;
     }
   }
 
@@ -898,7 +898,7 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
   final GlobalKey _textKey;
   RenderParagraph get paragraph => _textKey.currentContext!.findRenderObject()! as RenderParagraph;
 
-  void _attachController(_TextSpanContentController newController) {
+  set _attachController(_TextSpanContentController newController) {
     textContentController = newController;
   }
 

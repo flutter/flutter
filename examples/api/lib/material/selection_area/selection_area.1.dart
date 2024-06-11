@@ -292,9 +292,7 @@ class _MyHomePageState extends State<MyHomePage> {
           for (final MapEntry<int, TextSpan> entry in originBulletSourceData.entries) {
             bulletSourceMap[entry.key] = entry.value;
           }
-          setState(() {
-            
-          });
+          setState(() {});
         },
         child: const Icon(Icons.undo),
       ),
