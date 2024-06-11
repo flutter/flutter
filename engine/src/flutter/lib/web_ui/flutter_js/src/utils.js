@@ -22,7 +22,7 @@ export function joinPathSegments(...segments) {
 function stripLeftSlashes(s) {
   let i = 0;
   while (i < s.length) {
-    if (s.charCodeAt(i) !== "/") {
+    if (s.charAt(i) !== "/") {
       break;
     }
     i++;
@@ -33,7 +33,7 @@ function stripLeftSlashes(s) {
 function stripRightSlashes(s) {
   let i = s.length;
   while (i > 0) {
-    if (s.charCodeAt(i - 1) !== "/") {
+    if (s.charAt(i - 1) !== "/") {
       break;
     }
     i--;
