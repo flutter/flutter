@@ -1060,7 +1060,6 @@ void main() {
     expect(fieldKey.currentState!.hasInteractedByUser, isFalse);
   });
 
-
   testWidgets('forceErrorText forces an error state when first init.', (WidgetTester tester) async {
     const String forceErrorText = 'Forcing error.';
 
@@ -1087,6 +1086,42 @@ void main() {
 
     await tester.pumpWidget(builder(AutovalidateMode.disabled));
     expect(find.text(forceErrorText), findsOne);
+  });
+
+  testWidgets(
+    'Validate returns false when forceErrorText is non-null even when Validator returns a null value',
+    (WidgetTester tester) async {
+      final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+      const String forceErrorText = 'Forcing error';
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: MediaQuery(
+            data: const MediaQueryData(),
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: Center(
+                child: Material(
+                  child: Form(
+                    key: formKey,
+                    child: TextFormField(
+                      forceErrorText: forceErrorText,
+                      validator: (String? value) => null,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text(forceErrorText), findsOne);
+      final bool isValid = formKey.currentState!.validate();
+      await tester.pump();
+
+      expect(find.text(forceErrorText), findsOne);
+      expect(isValid, isFalse);
   });
 
   testWidgets('forceErrorText forces an error state only after setting it to a non-null value.', (WidgetTester tester) async {
