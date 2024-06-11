@@ -529,7 +529,6 @@ void main() {
     );
     addTearDown(gesture.removePointer);
     await gesture.addPointer(location: tester.getCenter(find.byType(CupertinoRadio<int>)));
-    addTearDown(gesture.removePointer);
     await tester.pump();
     await gesture.moveTo(tester.getCenter(find.byType(CupertinoRadio<int>)));
     expect(
