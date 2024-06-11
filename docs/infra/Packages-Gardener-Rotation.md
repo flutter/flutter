@@ -55,7 +55,7 @@ Unmute the [hackers-ecosystem channel] and [hackers-infra channel] on [Discord].
 Check that all of the auto-rollers are running:
 * [flutter/flutter → flutter/packages][flutter-to-packages roller]
 * [flutter/packages → flutter/flutter][packages-to-flutter roller]
-    * This roller only rolls once per day, on weekdays, in order to avoid roller loops with the flutter/flutter → flutter/plugin roller.
+    * This roller only rolls once per day, on weekdays, in order to avoid roller loops with the flutter/flutter → flutter/packages roller.
 * [Flutter `stable` → flutter/packages][flutter-stable-to-packages roller]
     * This should only do something when there is a Flutter stable channel update, so will often be idle.
 
