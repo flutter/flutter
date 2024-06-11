@@ -135,6 +135,9 @@ class PlatformSelectableRegionContextMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Stack(
+      // Setting fit to StackFit.passthrough will prevent the child from
+      // misaligning on web and be consistent with other platforms.
+      fit: StackFit.passthrough,
       alignment: Alignment.center,
       children: <Widget>[
         const Positioned.fill(
