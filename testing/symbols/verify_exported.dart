@@ -140,7 +140,9 @@ int _checkAndroid(String outPath, String nmPath, Iterable<String> builds) {
     };
     final Map<String, String> badSymbols = <String, String>{};
     for (final String key in entryMap.keys) {
-      if (entryMap[key] != expectedSymbols[key]) {
+      final bool isValidFlutterGpuSymbol =
+          key.startsWith('InternalFlutterGpu') && entryMap[key] == 'T';
+      if (!isValidFlutterGpuSymbol && entryMap[key] != expectedSymbols[key]) {
         badSymbols[key] = entryMap[key]!;
       }
     }

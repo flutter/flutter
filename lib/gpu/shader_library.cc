@@ -208,6 +208,8 @@ fml::RefPtr<ShaderLibrary> ShaderLibrary::MakeFromFlatbuffer(
         [payload = payload](auto, auto) {}  //
     );
 
+    std::vector<impeller::DescriptorSetLayout> descriptor_set_layouts;
+
     std::unordered_map<std::string, Shader::UniformBinding> uniform_structs;
     if (backend_shader->uniform_structs() != nullptr) {
       for (const auto& uniform : *backend_shader->uniform_structs()) {
@@ -245,6 +247,12 @@ fml::RefPtr<ShaderLibrary> ShaderLibrary::MakeFromFlatbuffer(
                 },
             .size_in_bytes = static_cast<size_t>(uniform->size_in_bytes()),
         };
+
+        descriptor_set_layouts.push_back(impeller::DescriptorSetLayout{
+            static_cast<uint32_t>(uniform->binding()),
+            impeller::DescriptorType::kUniformBuffer,
+            ToShaderStage(backend_shader->stage()),
+        });
       }
     }
 
@@ -258,16 +266,21 @@ fml::RefPtr<ShaderLibrary> ShaderLibrary::MakeFromFlatbuffer(
             .set = static_cast<size_t>(uniform->set()),
             .binding = static_cast<size_t>(uniform->binding()),
         };
+
+        descriptor_set_layouts.push_back(impeller::DescriptorSetLayout{
+            static_cast<uint32_t>(uniform->binding()),
+            impeller::DescriptorType::kSampledImage,
+            ToShaderStage(backend_shader->stage()),
+        });
       }
     }
 
-    std::shared_ptr<impeller::VertexDescriptor> vertex_descriptor = nullptr;
+    std::vector<impeller::ShaderStageIOSlot> inputs;
+    std::vector<impeller::ShaderStageBufferLayout> layouts;
     if (backend_shader->stage() ==
         impeller::fb::shaderbundle::ShaderStage::kVertex) {
-      vertex_descriptor = std::make_shared<impeller::VertexDescriptor>();
       auto inputs_fb = backend_shader->inputs();
 
-      std::vector<impeller::ShaderStageIOSlot> inputs;
       inputs.reserve(inputs_fb->size());
       size_t default_stride = 0;
       for (const auto& input : *inputs_fb) {
@@ -286,20 +299,17 @@ fml::RefPtr<ShaderLibrary> ShaderLibrary::MakeFromFlatbuffer(
         default_stride +=
             SizeOfInputType(input->type()) * slot.vec_size * slot.columns;
       }
-      std::vector<impeller::ShaderStageBufferLayout> layouts = {
-          impeller::ShaderStageBufferLayout{
-              .stride = default_stride,
-              .binding = 0u,
-          }};
-
-      vertex_descriptor->SetStageInputs(inputs, layouts);
+      layouts = {impeller::ShaderStageBufferLayout{
+          .stride = default_stride,
+          .binding = 0u,
+      }};
     }
 
     auto shader = flutter::gpu::Shader::Make(
         backend_shader->entrypoint()->str(),
         ToShaderStage(backend_shader->stage()), std::move(code_mapping),
-        std::move(vertex_descriptor), std::move(uniform_structs),
-        std::move(uniform_textures));
+        std::move(inputs), std::move(layouts), std::move(uniform_structs),
+        std::move(uniform_textures), std::move(descriptor_set_layouts));
     shader_map[bundled_shader->name()->str()] = std::move(shader);
   }
 
