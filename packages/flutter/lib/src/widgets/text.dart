@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:collection' show LinkedHashMap;
 import 'dart:math';
 import 'dart:ui' as ui show TextHeightBehavior;
 
@@ -1245,17 +1246,22 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
     if (currentSelectionStartIndex == -1 || currentSelectionEndIndex == -1) {
       return null;
     }
-    final List<SelectedContent> selections = <SelectedContent>[
-      for (final Selectable selectable in selectables)
-        if (selectable.getSelectedContent() case final SelectedContent data) data,
-    ];
+    final int selectionStart = min(currentSelectionStartIndex, currentSelectionEndIndex);
+    final int selectionEnd = max(currentSelectionStartIndex, currentSelectionEndIndex);
+    final LinkedHashMap<int, SelectedContent> selections = LinkedHashMap<int, SelectedContent>();
+    for (int index = selectionStart; index <= selectionEnd; index += 1) {
+      final SelectedContent? selectedContent = selectables[index].getSelectedContent();
+      if (selectedContent != null) {
+        selections[index] = selectedContent;
+      }
+    }
     if (selections.isEmpty) {
       return null;
     }
     // A [_SelectableFragment] does not typically provide a [SelectedContentController],
     // so this pass should collect all [PlaceholderSpan] child controllers.
     final List<SelectedContentController<Object>> childControllers = <SelectedContentController<Object>>[
-      for (final SelectedContent selectedContent in selections)
+      for (final SelectedContent selectedContent in selections.values)
         if (selectedContent.controllers case final List<SelectedContentController<Object>> data) ...data,
     ];
     // To prevent from adding duplicate controllers to children list.
@@ -1272,21 +1278,25 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
     // begins or ends on a placeholder, we should consider its position relative
     // to the root text.
     if (paragraph.selectableBelongsToParagraph(selectables[currentSelectionStartIndex])) {
-      textContentController.startOffset = selections.first.startOffset;
+      textContentController.startOffset = selections[currentSelectionStartIndex]!.startOffset;
     } else {
-      // TODO(Renzo-Olivares): Determine inverted selection.
-      final TextPosition positionBeforeStart = paragraph.getPositionForOffset(selectables[currentSelectionStartIndex].boundingBoxes.first.bottomLeft);
+      final bool localSelectionForward = selections[currentSelectionStartIndex]!.endOffset >= selections[currentSelectionStartIndex]!.startOffset;
+      final TextPosition positionBeforeStart = localSelectionForward 
+                                             ? paragraph.getPositionForOffset(selectables[currentSelectionStartIndex].boundingBoxes.first.bottomLeft)
+                                             : paragraph.getPositionForOffset(selectables[currentSelectionStartIndex].boundingBoxes.last.bottomRight);
       textContentController.startOffset = positionBeforeStart.offset;
     }
     if (paragraph.selectableBelongsToParagraph(selectables[currentSelectionEndIndex])) {
-      textContentController.endOffset = selections.last.endOffset;
+      textContentController.endOffset = selections[currentSelectionEndIndex]!.endOffset;
     } else {
-      // TODO(Renzo-Olivares): Determine inverted selection.
-      final TextPosition positionAfterEnd = paragraph.getPositionForOffset(selectables[currentSelectionEndIndex].boundingBoxes.last.bottomRight);
+      final bool localSelectionForward = selections[currentSelectionEndIndex]!.endOffset >= selections[currentSelectionEndIndex]!.startOffset;
+      final TextPosition positionAfterEnd = localSelectionForward
+                                          ? paragraph.getPositionForOffset(selectables[currentSelectionEndIndex].boundingBoxes.last.bottomRight)
+                                          : paragraph.getPositionForOffset(selectables[currentSelectionEndIndex].boundingBoxes.first.bottomLeft);
       textContentController.endOffset = positionAfterEnd.offset;
     }
     final StringBuffer buffer = StringBuffer();
-    for (final SelectedContent selection in selections) {
+    for (final SelectedContent selection in selections.values) {
       buffer.write(selection.plainText);
     }
     return SelectedContent(
