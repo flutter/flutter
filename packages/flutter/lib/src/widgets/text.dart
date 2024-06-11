@@ -519,7 +519,7 @@ class Text extends StatelessWidget {
 
   /// A unique id used to identify this [Selectable] widget.
   ///
-  /// When this widget is created you can request a unique id
+  /// When creating this widget you can request a unique id
   /// through [SelectableRegionState.nextSelectableId].
   final int? selectableId;
 
