@@ -45,6 +45,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Map<int, TextSpan> dataSourceMap = <int, TextSpan>{};
   Map<int, TextSpan> bulletSourceMap = <int, TextSpan>{};
+  late final Map<int, TextSpan> originSourceData;
+  late final Map<int, TextSpan> originBulletSourceData;
 
   @override
   void initState() {
@@ -84,9 +86,12 @@ class _MyHomePageState extends State<MyHomePage> {
     );
     dataSourceMap[_text2Id] = const TextSpan(
       text: 'This is some text in a text widget.',
-      children: <InlineSpan>[TextSpan(text: 'more text')],
+      children: <InlineSpan>[TextSpan(text: ' This is some more text in the same text widget.')],
     );
     dataSourceMap[_text3Id] = const TextSpan(text: 'This is some text in another text widget.');
+    // Save the origin data so we can revert our changes.
+    originSourceData = <int, TextSpan>{ ...dataSourceMap };
+    originBulletSourceData = <int, TextSpan>{ ...bulletSourceMap };
   }
 
   void _emphasizeText(List<SelectedContentController<Object>>? controllers, { Map<int, TextSpan>? dataMap }) {
@@ -260,7 +265,6 @@ class _MyHomePageState extends State<MyHomePage> {
         },
         child: Center(
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               Text.rich(
@@ -278,6 +282,21 @@ class _MyHomePageState extends State<MyHomePage> {
             ],
           ),
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          // Resets the state to the origin data.
+          for (final MapEntry<int, TextSpan> entry in originSourceData.entries) {
+            dataSourceMap[entry.key] = entry.value;
+          }
+          for (final MapEntry<int, TextSpan> entry in originBulletSourceData.entries) {
+            bulletSourceMap[entry.key] = entry.value;
+          }
+          setState(() {
+            
+          });
+        },
+        child: const Icon(Icons.undo),
       ),
     );
   }
