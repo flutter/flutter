@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui';
 
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button_style.dart';
@@ -976,54 +977,60 @@ class _ViewContentState extends State<_ViewContent> {
             color: effectiveBackgroundColor,
             surfaceTintColor: effectiveSurfaceTint,
             elevation: effectiveElevation,
-            child: FadeTransition(
-              opacity: viewIconsFadeCurve,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: <Widget>[
-                  Padding(
-                    padding: EdgeInsets.only(top: widget.topPadding),
-                    child: SafeArea(
-                      top: false,
-                      bottom: false,
-                      child: SearchBar(
-                        autoFocus: true,
-                        constraints: headerConstraints ?? (widget.showFullScreenView ? BoxConstraints(minHeight: _SearchViewDefaultsM3.fullScreenBarHeight) : null),
-                        leading: widget.viewLeading ?? defaultLeading,
-                        trailing: widget.viewTrailing ?? defaultTrailing,
-                        hintText: widget.viewHintText,
-                        backgroundColor: const MaterialStatePropertyAll<Color>(Colors.transparent),
-                        overlayColor: const MaterialStatePropertyAll<Color>(Colors.transparent),
-                        elevation: const MaterialStatePropertyAll<double>(0.0),
-                        textStyle: MaterialStatePropertyAll<TextStyle?>(effectiveTextStyle),
-                        hintStyle: MaterialStatePropertyAll<TextStyle?>(effectiveHintStyle),
-                        controller: _controller,
-                        onChanged: (String value) {
-                          widget.viewOnChanged?.call(value);
-                          updateSuggestions();
-                        },
-                        onSubmitted: widget.viewOnSubmitted,
-                        textCapitalization: widget.textCapitalization,
-                        textInputAction: widget.textInputAction,
-                        keyboardType: widget.keyboardType,
+            child: OverflowBox(
+              alignment: Alignment.topLeft,
+              maxWidth: math.min(widget.viewMaxWidth, _screenSize!.width),
+              minWidth: 0,
+              fit: OverflowBoxFit.deferToChild,
+              child: FadeTransition(
+                opacity: viewIconsFadeCurve,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    Padding(
+                      padding: EdgeInsets.only(top: widget.topPadding),
+                      child: SafeArea(
+                        top: false,
+                        bottom: false,
+                        child: SearchBar(
+                          autoFocus: true,
+                          constraints: headerConstraints ?? (widget.showFullScreenView ? BoxConstraints(minHeight: _SearchViewDefaultsM3.fullScreenBarHeight) : null),
+                          leading: widget.viewLeading ?? defaultLeading,
+                          trailing: widget.viewTrailing ?? defaultTrailing,
+                          hintText: widget.viewHintText,
+                          backgroundColor: const MaterialStatePropertyAll<Color>(Colors.transparent),
+                          overlayColor: const MaterialStatePropertyAll<Color>(Colors.transparent),
+                          elevation: const MaterialStatePropertyAll<double>(0.0),
+                          textStyle: MaterialStatePropertyAll<TextStyle?>(effectiveTextStyle),
+                          hintStyle: MaterialStatePropertyAll<TextStyle?>(effectiveHintStyle),
+                          controller: _controller,
+                          onChanged: (String value) {
+                            widget.viewOnChanged?.call(value);
+                            updateSuggestions();
+                          },
+                          onSubmitted: widget.viewOnSubmitted,
+                          textCapitalization: widget.textCapitalization,
+                          textInputAction: widget.textInputAction,
+                          keyboardType: widget.keyboardType,
+                        ),
                       ),
                     ),
-                  ),
-                  if (_controller.isOpen && (widget.showFullScreenView || result.isNotEmpty)) ...<Widget>[
-                    FadeTransition(
-                      opacity: viewDividerFadeCurve,
-                      child: viewDivider,
-                    ),
-                    Flexible(
-                      fit: (effectiveShrinkWrap && !widget.showFullScreenView) ? FlexFit.loose : FlexFit.tight,
-                      child: FadeTransition(
-                        opacity: viewListFadeOnIntervalCurve,
-                        child: viewBuilder(result),
+                    if (widget.showFullScreenView || result.isNotEmpty) ...<Widget>[
+                      FadeTransition(
+                        opacity: viewDividerFadeCurve,
+                        child: viewDivider,
                       ),
-                    ),
+                      Flexible(
+                        fit: (effectiveShrinkWrap && !widget.showFullScreenView) ? FlexFit.loose : FlexFit.tight,
+                        child: FadeTransition(
+                          opacity: viewListFadeOnIntervalCurve,
+                          child: viewBuilder(result),
+                        ),
+                      ),
+                    ],
                   ],
-                ],
+                ),
               ),
             ),
           ),
