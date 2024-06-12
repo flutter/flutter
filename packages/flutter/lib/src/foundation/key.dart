@@ -21,6 +21,7 @@ import 'diagnostics.dart';
 ///
 ///  * [Widget.key], which discusses how widgets use keys.
 @immutable
+@pragma('flutter:keep-to-string-in-subtypes')
 abstract class Key {
   /// Construct a [ValueKey<String>] with the given [String].
   ///

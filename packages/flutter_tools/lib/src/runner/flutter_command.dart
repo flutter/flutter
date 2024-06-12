@@ -376,7 +376,16 @@ abstract class FlutterCommand extends Command<void> {
   String? get packagesPath => stringArg(FlutterGlobalOptions.kPackagesOption, global: true);
 
   /// Whether flutter is being run from our CI.
-  bool get usingCISystem => boolArg(FlutterGlobalOptions.kContinuousIntegrationFlag, global: true);
+  ///
+  /// This is true if `--ci` is passed to the command or if environment
+  /// variable `LUCI_CI` is `True`.
+  bool get usingCISystem {
+    return boolArg(
+          FlutterGlobalOptions.kContinuousIntegrationFlag,
+          global: true,
+        ) ||
+        globals.platform.environment['LUCI_CI'] == 'True';
+  }
 
   String? get debugLogsDirectoryPath => stringArg(FlutterGlobalOptions.kDebugLogsDirectoryFlag, global: true);
 
@@ -702,7 +711,6 @@ abstract class FlutterCommand extends Command<void> {
   void usesWebRendererOption() {
     argParser.addOption(
       FlutterOptions.kWebRendererFlag,
-      defaultsTo: WebRendererMode.auto.name,
       allowed: WebRendererMode.values.map((WebRendererMode e) => e.name),
       help: 'The renderer implementation to use when building for the web.',
       allowedHelp: CliEnum.allowedHelp(WebRendererMode.values)
