@@ -38,7 +38,7 @@ class DependencyVersionChecker {
         private const val GRADLE_NAME: String = "Gradle"
         private const val JAVA_NAME: String = "Java"
         private const val AGP_NAME: String = "Android Gradle Plugin"
-        public const val KGP_NAME: String = "Kotlin"
+        private const val KGP_NAME: String = "Kotlin"
 
         // The following messages represent best effort guesses at where a Flutter developer should
         // look to upgrade a dependency that is below the corresponding threshold. Developers can
