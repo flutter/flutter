@@ -165,12 +165,8 @@ class WebDriverService extends DriverService {
         headless,
         webBrowserFlags: webBrowserFlags,
         chromeBinary: chromeBinary,
+        allAdditionalCapabilities: allBrowsersDesiredCapabilities,
       );
-      if (allBrowsersDesiredCapabilities != null) {
-        (allBrowsersDesiredCapabilities[browser.name]! as Map<String, Object?>).forEach((String key, Object? value) {
-          desiredCapabilities![key] = value;
-        });
-      }
       webDriver = await async_io.createDriver(
         uri: Uri.parse('http://localhost:$driverPort/'),
         desired: desiredCapabilities,
@@ -294,8 +290,9 @@ Map<String, dynamic> getDesiredCapabilities(
   bool? headless, {
   List<String> webBrowserFlags = const <String>[],
   String? chromeBinary,
-}) =>
-    switch (browser) {
+  Map<String, Object?>? allAdditionalCapabilities,
+}) {
+    Map<String, dynamic> capabilities = switch (browser) {
       Browser.chrome => <String, dynamic>{
           'acceptInsecureCerts': true,
           'browserName': 'chrome',
@@ -371,3 +368,26 @@ Map<String, dynamic> getDesiredCapabilities(
           },
         },
     };
+
+    if (allAdditionalCapabilities != null && allAdditionalCapabilities.containsKey(browser.name)) {
+      final Map<String, Object?> browserAdditionalCapabilities = allAdditionalCapabilities[browser.name]! as Map<String, Object?>;
+      capabilities = _mergeMaps(capabilities, browserAdditionalCapabilities);
+    }
+
+    return capabilities;
+}
+
+/// Merges two maps recursively.
+Map<String, Object?> _mergeMaps(Map<String, Object?> left, Map<String, Object?> right) {
+  final Map<String, Object?> mergedMap = Map<String, Object?>.from(left);
+
+  right.forEach((String key, Object? value) {
+    if (value is Map && left[key] is Map) {
+      mergedMap[key] = _mergeMaps(left[key]! as Map<String, Object?>, value as Map<String, Object?>);
+    } else {
+      mergedMap[key] = value;
+    }
+  });
+
+  return mergedMap;
+}
