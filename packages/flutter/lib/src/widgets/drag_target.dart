@@ -856,11 +856,14 @@ class _DragAvatar<T extends Object> extends Drag {
 
   void updateDrag(Offset globalPosition) {
     _lastOffset = globalPosition - dragStartPoint;
-    final RenderBox box = overlayState.context.findRenderObject()! as RenderBox;
-    final Offset overlaySpaceOffset = box.globalToLocal(globalPosition);
-    _overlayOffset = overlaySpaceOffset - dragStartPoint;
+    if (overlayState.mounted) {
+      final RenderBox box = overlayState.context.findRenderObject()! as RenderBox;
+      final Offset overlaySpaceOffset = box.globalToLocal(globalPosition);
+      _overlayOffset = overlaySpaceOffset - dragStartPoint;
 
-    _entry!.markNeedsBuild();
+      _entry!.markNeedsBuild();
+    }
+
     final HitTestResult result = HitTestResult();
     WidgetsBinding.instance.hitTestInView(result, globalPosition + feedbackOffset, viewId);
 
