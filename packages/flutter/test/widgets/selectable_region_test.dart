@@ -4440,6 +4440,319 @@ void main() {
     skip: kIsWeb, // [intended] Web uses its native context menu.
   );
 
+  testWidgets('onSelectionChanged SelectionContentController is accurate with WidgetSpans', (WidgetTester tester) async {
+    SelectedContent? content;
+    final FocusNode focusNode = FocusNode();
+    final int textId1 = SelectableRegionState.nextSelectableId;
+    final int textId2 = SelectableRegionState.nextSelectableId;
+    addTearDown(focusNode.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SelectableRegion(
+          onSelectionChanged: (SelectedContent? selectedContent) => content = selectedContent,
+          focusNode: focusNode,
+          selectionControls: materialTextSelectionControls,
+          child: Column(
+            children: <Widget>[
+              Text.rich(
+                TextSpan(
+                  text: 'Hello world, ',
+                  children: <InlineSpan>[
+                    WidgetSpan(
+                      child: Text(
+                        'how are you today.',
+                        selectableId: textId2,
+                      ),
+                    ),
+                  ],
+                ),
+                selectableId: textId1,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(find.descendant(of: find.textContaining('Hello world'), matching: find.byType(RichText).first));
+    final RenderParagraph paragraph2 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('how are you today.'), matching: find.byType(RichText)));
+    final TestGesture mouseGesture = await tester.startGesture(textOffsetToPosition(paragraph1, 0), kind: PointerDeviceKind.mouse);
+
+    expect(content, isNull);
+    addTearDown(mouseGesture.removePointer);
+    await tester.pump();
+
+    // Selection on paragraph1.
+    await mouseGesture.moveTo(textOffsetToPosition(paragraph1, 1));
+    await tester.pumpAndSettle();
+    expect(content, isNotNull);
+    expect(content!.plainText, 'H');
+    expect(content!.controllers, isNotNull);
+    expect(content!.controllers!.length, 1);
+    expect(content!.controllers![0].startOffset, 0);
+    expect(content!.controllers![0].endOffset, 1);
+    expect((content!.controllers![0].content as TextSpan).children, isNotNull);
+    expect(((content!.controllers![0].content as TextSpan).children!.first as TextSpan).text, isNotNull);
+    expect(((content!.controllers![0].content as TextSpan).children!.first as TextSpan).text, 'Hello world, ');
+
+    // Selection on paragraph1.
+    await mouseGesture.moveTo(textOffsetToPosition(paragraph1, 10));
+    await tester.pumpAndSettle();
+    expect(content, isNotNull);
+    expect(content!.plainText, 'Hello worl');
+    expect(content!.controllers, isNotNull);
+    expect(content!.controllers!.length, 1);
+    expect(content!.controllers![0].startOffset, 0);
+    expect(content!.controllers![0].endOffset, 10);
+    expect((content!.controllers![0].content as TextSpan).children, isNotNull);
+    expect(((content!.controllers![0].content as TextSpan).children!.first as TextSpan).text, isNotNull);
+    expect(((content!.controllers![0].content as TextSpan).children!.first as TextSpan).text, 'Hello world, ');
+
+    // Selection on paragraph1 and paragraph2.
+    await mouseGesture.moveTo(textOffsetToPosition(paragraph2, 10));
+    await tester.pumpAndSettle();
+    expect(content, isNotNull);
+    expect(content!.plainText, 'Hello world, how are yo');
+    expect(content!.controllers, isNotNull);
+    expect(content!.controllers!.length, 1);
+    expect(content!.controllers![0].startOffset, 0);
+    expect(content!.controllers![0].endOffset, 14);
+    expect((content!.controllers![0].content as TextSpan).children, isNotNull);
+    expect(((content!.controllers![0].content as TextSpan).children!.first as TextSpan).text, isNotNull);
+    expect(((content!.controllers![0].content as TextSpan).children!.first as TextSpan).text, 'Hello world, ');
+    expect(content!.controllers![0].children.length, 1);
+    expect(content!.controllers![0].children[0].startOffset, 0);
+    expect(content!.controllers![0].children[0].endOffset, 10);
+    expect((content!.controllers![0].children[0].content as TextSpan).text, isNotNull);
+    expect((content!.controllers![0].children[0].content as TextSpan).text, 'how are you today.');
+    await mouseGesture.up();
+    await tester.pump();
+    expect(content, isNotNull);
+    expect(content!.plainText, 'Hello world, how are yo');
+
+    // Collapsed selection.
+    await mouseGesture.down(textOffsetToPosition(paragraph2, 3));
+    await tester.pump();
+    await mouseGesture.up();
+    await tester.pumpAndSettle(kDoubleTapTimeout);
+    expect(content, isNotNull);
+    expect(content!.plainText, '');
+    expect(content!.controllers, isNotNull);
+    expect(content!.controllers!.length, 1);
+    expect(content!.controllers![0].startOffset, 13);
+    expect(content!.controllers![0].endOffset, 14);
+    expect((content!.controllers![0].content as TextSpan).children, isNotNull);
+    expect(((content!.controllers![0].content as TextSpan).children!.first as TextSpan).text, isNotNull);
+    expect(((content!.controllers![0].content as TextSpan).children!.first as TextSpan).text, 'Hello world, ');
+    expect(content!.controllers![0].children.length, 1);
+    expect(content!.controllers![0].children[0].startOffset, 3);
+    expect(content!.controllers![0].children[0].endOffset, 3);
+    expect((content!.controllers![0].children[0].content as TextSpan).text, isNotNull);
+    expect((content!.controllers![0].children[0].content as TextSpan).text, 'how are you today.');
+    
+    // Backwards selection.
+    await mouseGesture.down(textOffsetToPosition(paragraph2, 4));
+    await tester.pump();
+    await mouseGesture.moveTo(textOffsetToPosition(paragraph1, 0));
+    await tester.pumpAndSettle();
+    expect(content, isNotNull);
+    expect(content!.plainText, 'Hello world, how ');
+    expect(content!.controllers, isNotNull);
+    expect(content!.controllers!.length, 1);
+    expect(content!.controllers![0].startOffset, 14);
+    expect(content!.controllers![0].endOffset, 0);
+    expect((content!.controllers![0].content as TextSpan).children, isNotNull);
+    expect(((content!.controllers![0].content as TextSpan).children!.first as TextSpan).text, isNotNull);
+    expect(((content!.controllers![0].content as TextSpan).children!.first as TextSpan).text, 'Hello world, ');
+    expect(content!.controllers![0].children.length, 1);
+    expect(content!.controllers![0].children[0].startOffset, 4);
+    expect(content!.controllers![0].children[0].endOffset, 0);
+    expect((content!.controllers![0].children[0].content as TextSpan).text, isNotNull);
+    expect((content!.controllers![0].children[0].content as TextSpan).text, 'how are you today.');
+    await mouseGesture.up();
+    await tester.pump();
+    expect(content, isNotNull);
+    expect(content!.plainText, 'Hello world, how ');
+
+    // Collapsed selection.
+    await mouseGesture.down(textOffsetToPosition(paragraph1, 0));
+    await tester.pumpAndSettle();
+    await mouseGesture.up();
+    await tester.pumpAndSettle(kDoubleTapTimeout);
+    expect(content, isNotNull);
+    expect(content!.plainText, '');
+    expect(content!.controllers, isNotNull);
+    expect(content!.controllers!.length, 1);
+    expect(content!.controllers![0].startOffset, 0);
+    expect(content!.controllers![0].endOffset, 0);
+    expect((content!.controllers![0].content as TextSpan).children, isNotNull);
+    expect(((content!.controllers![0].content as TextSpan).children!.first as TextSpan).text, isNotNull);
+    expect(((content!.controllers![0].content as TextSpan).children!.first as TextSpan).text, 'Hello world, ');
+  });
+
+  testWidgets('onSelectionChanged SelectionContentController is accurate', (WidgetTester tester) async {
+    SelectedContent? content;
+    final FocusNode focusNode = FocusNode();
+    final int textKey1 = SelectableRegionState.nextSelectableId;
+    final int textKey2 = SelectableRegionState.nextSelectableId;
+    final int textKey3 = SelectableRegionState.nextSelectableId;
+    addTearDown(focusNode.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SelectableRegion(
+          onSelectionChanged: (SelectedContent? selectedContent) => content = selectedContent,
+          focusNode: focusNode,
+          selectionControls: materialTextSelectionControls,
+          child: Column(
+            children: <Widget>[
+              Text(
+                'How are you?',
+                selectableId: textKey1,
+              ),
+              Text(
+                'Good, and you?',
+                selectableId: textKey2,
+              ),
+              Text(
+                'Fine, thank you.',
+                selectableId: textKey3,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you?'), matching: find.byType(RichText)));
+    final RenderParagraph paragraph2 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Good, and you?'), matching: find.byType(RichText)));
+    final RenderParagraph paragraph3 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Fine, thank you.'), matching: find.byType(RichText)));
+    final TestGesture mouseGesture = await tester.startGesture(textOffsetToPosition(paragraph1, 4), kind: PointerDeviceKind.mouse);
+
+    expect(content, isNull);
+    addTearDown(mouseGesture.removePointer);
+    await tester.pump();
+
+    // Selection on paragraph1.
+    await mouseGesture.moveTo(textOffsetToPosition(paragraph1, 7));
+    await tester.pumpAndSettle();
+    expect(content, isNotNull);
+    expect(content!.plainText, 'are');
+    expect(content!.controllers, isNotNull);
+    expect(content!.controllers!.length, 1);
+    expect(content!.controllers![0].startOffset, 4);
+    expect(content!.controllers![0].endOffset, 7);
+    expect((content!.controllers![0].content as TextSpan).text, isNotNull);
+    expect((content!.controllers![0].content as TextSpan).text, 'How are you?');
+
+    // Selection on paragraph1.
+    await mouseGesture.moveTo(textOffsetToPosition(paragraph1, 10));
+    await tester.pumpAndSettle();
+    expect(content, isNotNull);
+    expect(content!.plainText, 'are yo');
+    expect(content!.controllers, isNotNull);
+    expect(content!.controllers!.length, 1);
+    expect(content!.controllers![0].startOffset, 4);
+    expect(content!.controllers![0].endOffset, 10);
+    expect((content!.controllers![0].content as TextSpan).text, isNotNull);
+    expect((content!.controllers![0].content as TextSpan).text, 'How are you?');
+
+    // Selection on paragraph1 and paragraph2.
+    await mouseGesture.moveTo(textOffsetToPosition(paragraph2, 10));
+    await tester.pumpAndSettle();
+    expect(content, isNotNull);
+    expect(content!.plainText, 'are you?Good, and ');
+    expect(content!.controllers, isNotNull);
+    expect(content!.controllers!.length, 2);
+    expect(content!.controllers![0].startOffset, 4);
+    expect(content!.controllers![0].endOffset, 12);
+    expect((content!.controllers![0].content as TextSpan).text, isNotNull);
+    expect((content!.controllers![0].content as TextSpan).text, 'How are you?');
+    expect(content!.controllers![1].startOffset, 0);
+    expect(content!.controllers![1].endOffset, 10);
+    expect((content!.controllers![1].content as TextSpan).text, isNotNull);
+    expect((content!.controllers![1].content as TextSpan).text, 'Good, and you?');
+
+    // Selection on paragraph1, paragraph2, and paragraph3.
+    await mouseGesture.moveTo(textOffsetToPosition(paragraph3, 10));
+    await tester.pumpAndSettle();
+    expect(content, isNotNull);
+    expect(content!.plainText, 'are you?Good, and you?Fine, than');
+    expect(content!.controllers, isNotNull);
+    expect(content!.controllers!.length, 3);
+    expect(content!.controllers![0].startOffset, 4);
+    expect(content!.controllers![0].endOffset, 12);
+    expect((content!.controllers![0].content as TextSpan).text, isNotNull);
+    expect((content!.controllers![0].content as TextSpan).text, 'How are you?');
+    expect(content!.controllers![1].startOffset, 0);
+    expect(content!.controllers![1].endOffset, 14);
+    expect((content!.controllers![1].content as TextSpan).text, isNotNull);
+    expect((content!.controllers![1].content as TextSpan).text, 'Good, and you?');
+    expect(content!.controllers![2].startOffset, 0);
+    expect(content!.controllers![2].endOffset, 10);
+    expect((content!.controllers![2].content as TextSpan).text, isNotNull);
+    expect((content!.controllers![2].content as TextSpan).text, 'Fine, thank you.');
+    await mouseGesture.up();
+    await tester.pump();
+    expect(content, isNotNull);
+    expect(content!.plainText, 'are you?Good, and you?Fine, than');
+
+    // Collapsed selection.
+    await mouseGesture.down(textOffsetToPosition(paragraph1, 3));
+    await tester.pump();
+    await mouseGesture.up();
+    await tester.pumpAndSettle(kDoubleTapTimeout);
+    expect(content, isNotNull);
+    expect(content!.plainText, '');
+    expect(content!.controllers, isNotNull);
+    expect(content!.controllers!.length, 1);
+    expect(content!.controllers![0].startOffset, 3);
+    expect(content!.controllers![0].endOffset, 3);
+    expect((content!.controllers![0].content as TextSpan).text, isNotNull);
+    expect((content!.controllers![0].content as TextSpan).text, 'How are you?');
+    
+    // Backwards selection.
+    await mouseGesture.down(textOffsetToPosition(paragraph3, 4));
+    await tester.pump();
+    await mouseGesture.moveTo(textOffsetToPosition(paragraph1, 0));
+    await tester.pumpAndSettle();
+    expect(content, isNotNull);
+    expect(content!.plainText, 'How are you?Good, and you?Fine');
+    expect(content!.controllers, isNotNull);
+    expect(content!.controllers!.length, 3);
+    expect(content!.controllers![0].startOffset, 12);
+    expect(content!.controllers![0].endOffset, 0);
+    expect((content!.controllers![0].content as TextSpan).text, isNotNull);
+    expect((content!.controllers![0].content as TextSpan).text, 'How are you?');
+    expect(content!.controllers![1].startOffset, 14);
+    expect(content!.controllers![1].endOffset, 0);
+    expect((content!.controllers![1].content as TextSpan).text, isNotNull);
+    expect((content!.controllers![1].content as TextSpan).text, 'Good, and you?');
+    expect(content!.controllers![2].startOffset, 4);
+    expect(content!.controllers![2].endOffset, 0);
+    expect((content!.controllers![2].content as TextSpan).text, isNotNull);
+    expect((content!.controllers![2].content as TextSpan).text, 'Fine, thank you.');
+    await mouseGesture.up();
+    await tester.pump();
+    expect(content, isNotNull);
+    expect(content!.plainText, 'How are you?Good, and you?Fine');
+
+    // Collapsed selection.
+    await mouseGesture.down(textOffsetToPosition(paragraph1, 0));
+    await tester.pumpAndSettle();
+    await mouseGesture.up();
+    await tester.pumpAndSettle(kDoubleTapTimeout);
+    expect(content, isNotNull);
+    expect(content!.plainText, '');
+    expect(content!.controllers, isNotNull);
+    expect(content!.controllers!.length, 1);
+    expect(content!.controllers![0].startOffset, 0);
+    expect(content!.controllers![0].endOffset, 0);
+    expect((content!.controllers![0].content as TextSpan).text, isNotNull);
+    expect((content!.controllers![0].content as TextSpan).text, 'How are you?');
+  });
+
   testWidgets('onSelectionChange is called when the selection changes through gestures', (WidgetTester tester) async {
     SelectedContent? content;
     final FocusNode focusNode = FocusNode();
