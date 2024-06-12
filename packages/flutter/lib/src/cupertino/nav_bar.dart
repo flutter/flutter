@@ -346,6 +346,9 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
   /// tab bar will automatically produce a blurring effect to the content
   /// behind it.
   ///
+  /// By default, the navigation bar's background is visible only when scrolled under.
+  /// This behavior can be controlled with [automaticBackgroundVisibility].
+  ///
   /// Defaults to [CupertinoTheme]'s `barBackgroundColor` if null.
   /// {@endtemplate}
   final Color? backgroundColor;
