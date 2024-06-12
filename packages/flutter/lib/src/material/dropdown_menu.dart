@@ -655,7 +655,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
         style: effectiveStyle,
         leadingIcon: entry.leadingIcon,
         trailingIcon: entry.trailingIcon,
-        onPressed: entry.enabled
+        onPressed: entry.enabled && widget.enabled
           ? () {
               _localTextEditingController?.value = TextEditingValue(
                 text: entry.label,
@@ -676,7 +676,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
 
   void handleUpKeyInvoke(_) {
     setState(() {
-      if (!_menuHasEnabledItem || !_controller.isOpen) {
+      if (!widget.enabled || !_menuHasEnabledItem || !_controller.isOpen) {
         return;
       }
       _enableFilter = false;
@@ -695,7 +695,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
 
   void handleDownKeyInvoke(_) {
     setState(() {
-      if (!_menuHasEnabledItem || !_controller.isOpen) {
+      if (!widget.enabled || !_menuHasEnabledItem || !_controller.isOpen) {
         return;
       }
       _enableFilter = false;
@@ -786,7 +786,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
             isSelected: controller.isOpen,
             icon: widget.trailingIcon ?? const Icon(Icons.arrow_drop_down),
             selectedIcon: widget.selectedTrailingIcon ?? const Icon(Icons.arrow_drop_up),
-            onPressed: () {
+            onPressed: !widget.enabled ? null : () {
               handlePressed(controller);
             },
           ),
@@ -799,6 +799,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
 
         final Widget textField = TextField(
           key: _anchorKey,
+          enabled: widget.enabled,
           mouseCursor: effectiveMouseCursor,
           focusNode: widget.focusNode,
           canRequestFocus: canRequestFocus(),
@@ -825,7 +826,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
             }
             controller.close();
           },
-          onTap: () {
+          onTap: !widget.enabled ? null : () {
             handlePressed(controller);
           },
           onChanged: (String text) {
@@ -837,7 +838,6 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
           },
           inputFormatters: widget.inputFormatters,
           decoration: InputDecoration(
-            enabled: widget.enabled,
             label: widget.label,
             hintText: widget.hintText,
             helperText: widget.helperText,
