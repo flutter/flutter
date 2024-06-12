@@ -9,6 +9,8 @@
 @Tags(<String>['no-shuffle'])
 library;
 
+import 'dart:async';
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -3610,6 +3612,45 @@ void main() {
     // Different rotations can incur rounding errors, this makes it more robust
     expect(feedbackTopLeft.dx, moreOrLessEquals(secondLocation.dx));
     expect(feedbackTopLeft.dy, moreOrLessEquals(secondLocation.dy));
+
+    // Finish gesture to release resources.
+    await gesture.up();
+    await tester.pump();
+  });
+
+  testWidgets('Drag and drop - unmounting overlay ends drag gracefully', (WidgetTester tester) async {
+    final ValueNotifier<bool> mountedNotifier = ValueNotifier<bool>(true);
+
+    await tester.pumpWidget(ValueListenableBuilder<bool>(
+      valueListenable: mountedNotifier,
+      builder: (_, bool value, __) => value
+          ? const MaterialApp(
+              home: Scaffold(
+                body: Draggable<int>(
+                  data: 42,
+                  feedback: Text('Feedback'),
+                  child: Text('Source'),
+                ),
+              ),
+            )
+          : Container(),
+    ));
+
+    final Offset location = tester.getCenter(find.text('Source'));
+    final TestGesture gesture = await tester.startGesture(location);
+    final Offset secondLocation = location + const Offset(100, 100);
+    await gesture.moveTo(secondLocation);
+    await tester.pump();
+    expect(find.text('Feedback'), findsOneWidget);
+
+    // Unmount overlay
+    mountedNotifier.value = false;
+    await tester.pump();
+
+    await gesture.moveTo(location);
+
+    expect(find.byType(Container), findsOneWidget);
+    expect(find.text('Feedback'), findsNothing);
 
     // Finish gesture to release resources.
     await gesture.up();
