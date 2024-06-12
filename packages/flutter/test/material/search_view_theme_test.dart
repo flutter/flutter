@@ -71,7 +71,7 @@ void main() {
       headerTextStyle: TextStyle(fontSize: 24.0),
       headerHintStyle: TextStyle(fontSize: 16.0),
       constraints: BoxConstraints(minWidth: 350, minHeight: 240),
-      bottomPadding: 32.0,
+      padding: EdgeInsets.only(bottom: 32.0),
       shrinkWrap: true,
     ).debugFillProperties(builder);
 
@@ -89,7 +89,7 @@ void main() {
     expect(description[6], 'headerTextStyle: TextStyle(inherit: true, size: 24.0)');
     expect(description[7], 'headerHintStyle: TextStyle(inherit: true, size: 16.0)');
     expect(description[8], 'constraints: BoxConstraints(350.0<=w<=Infinity, 240.0<=h<=Infinity)');
-    expect(description[9], 'bottomPadding: 32.0');
+    expect(description[9], 'padding: EdgeInsets(0.0, 0.0, 0.0, 32.0)');
     expect(description[10], 'shrinkWrap: true');
   });
 
