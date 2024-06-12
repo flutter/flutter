@@ -16,6 +16,7 @@ import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/utils.dart';
+import '../build_info.dart';
 import '../cache.dart';
 import '../convert.dart';
 import '../reporting/reporting.dart';
@@ -735,6 +736,13 @@ class FlutterBuildSystem extends BuildSystem {
     FileSystem fileSystem,
     Map<String, File> currentOutputs,
   ) {
+    if (environment.defines[kXcodePreAction] == 'PrepareFramework') {
+      // If the current build is the PrepareFramework Xcode pre-action, skip
+      // updating the last build identifier and cleaning up the previous build
+      // since this build is not a complete build.
+      return;
+    }
+
     final String currentBuildId = fileSystem.path.basename(environment.buildDir.path);
     final File lastBuildIdFile = environment.outputDir.childFile('.last_build_id');
     if (!lastBuildIdFile.existsSync()) {
