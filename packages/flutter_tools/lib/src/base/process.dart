@@ -271,6 +271,35 @@ abstract class ProcessUtils {
     );
     return completer.future;
   }
+
+  /// See [writelnToStdinGuarded]. This calls `stdin.write` instead of `stdin.writeln`.
+  static Future<void> writeToStdinGuarded({
+    required IOSink stdin,
+    required String line,
+    required void Function(Object, StackTrace) onError,
+  }) async {
+    final Completer<void> completer = Completer<void>();
+
+    void writeFlushAndComplete() {
+      stdin.write(line);
+      stdin.flush().whenComplete(() {
+        if (!completer.isCompleted) {
+          completer.complete();
+        }
+      });
+    }
+
+    runZonedGuarded(
+      writeFlushAndComplete,
+      (Object error, StackTrace stackTrace) {
+        onError(error, stackTrace);
+        if (!completer.isCompleted) {
+          completer.complete();
+        }
+      },
+    );
+    return completer.future;
+  }
 }
 
 class _DefaultProcessUtils implements ProcessUtils {
