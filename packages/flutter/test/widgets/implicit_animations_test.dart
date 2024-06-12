@@ -599,6 +599,7 @@ void main() {
     final GlobalKey<ImplicitlyAnimatedWidgetState<AnimatedOpacity>> key =
         GlobalKey<ImplicitlyAnimatedWidgetState<AnimatedOpacity>>();
     final ValueNotifier<Curve> curve = ValueNotifier<Curve>(const Interval(0.0, 0.5));
+    addTearDown(curve.dispose);
     await tester.pumpWidget(wrap(
       child: ValueListenableBuilder<Curve>(
         valueListenable: curve,
@@ -647,6 +648,29 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(secondCurvedAnimation.isDisposed, isTrue);
+  });
+
+  group('Verify that default args match non-animated variants', () {
+    const Widget child = SizedBox.shrink();
+    const Color color = Color(0x00000000);
+
+    testWidgets('PhysicalModel default args', (WidgetTester tester) async {
+      const AnimatedPhysicalModel animatedPhysicalModel = AnimatedPhysicalModel(
+        duration: Duration.zero,
+        color: color,
+        shadowColor: color,
+        child: child,
+      );
+      const PhysicalModel physicalModel = PhysicalModel(
+        color: color,
+        shadowColor: color,
+        child: child,
+      );
+      expect(identical(animatedPhysicalModel.shape, physicalModel.shape), isTrue);
+      expect(identical(animatedPhysicalModel.clipBehavior, physicalModel.clipBehavior), isTrue);
+      expect(identical(animatedPhysicalModel.borderRadius, physicalModel.borderRadius), isTrue);
+    });
+    // TODO(nate-thegrate): add every class!
   });
 }
 
@@ -903,9 +927,7 @@ class _TestAnimatedPhysicalModelWidgetState extends _TestAnimatedWidgetState {
       duration: duration,
       onEnd: widget.callback,
       color: toggle ? Colors.red : Colors.green,
-      elevation: 0,
       shadowColor: Colors.blue,
-      shape: BoxShape.rectangle,
       child: child,
     );
   }

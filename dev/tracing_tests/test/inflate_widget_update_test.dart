@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'common.dart';
 
 void main() {
-  WidgetsFlutterBinding.ensureInitialized();
+  ZoneIgnoringTestBinding.ensureInitialized();
   initTimelineTests();
   test('Widgets with updated keys produce well formed timelines', () async {
     await runFrame(() { runApp(const TestRoot()); });

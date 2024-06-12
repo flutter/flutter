@@ -8,28 +8,58 @@ import 'package:flutter/foundation.dart';
 /// The direction of a scroll, relative to the positive scroll offset axis given
 /// by an [AxisDirection] and a [GrowthDirection].
 ///
-/// This contrasts to [GrowthDirection] in that it has a third value, [idle],
-/// for the case where no scroll is occurring.
+/// This is similar to [GrowthDirection], but contrasts in that it has a third
+/// value, [idle], for the case where no scroll is occurring.
 ///
 /// This is used by [RenderSliverFloatingPersistentHeader] to only expand when
 /// the user is scrolling in the same direction as the detected scroll offset
 /// change.
+///
+/// {@template flutter.rendering.ScrollDirection.sample}
+/// {@tool dartpad}
+/// This sample shows a [CustomScrollView], with [Radio] buttons in the
+/// [AppBar.bottom] that change the [AxisDirection] to illustrate different
+/// configurations. With a [NotificationListener] to listen to
+/// [UserScrollNotification]s, which occur when the [ScrollDirection] changes
+/// or stops.
+///
+/// ** See code in examples/api/lib/rendering/scroll_direction/scroll_direction.0.dart **
+/// {@end-tool}
+/// {@endtemplate}
+///
+/// See also:
+///
+///  * [AxisDirection], which is a directional version of this enum (with values
+///    like left and right, rather than just horizontal).
+///  * [GrowthDirection], the direction in which slivers and their content are
+///    ordered, relative to the scroll offset axis as specified by
+///    [AxisDirection].
+///  * [UserScrollNotification], which will notify listeners when the
+///    [ScrollDirection] changes.
 enum ScrollDirection {
   /// No scrolling is underway.
   idle,
 
-  /// Scrolling is happening in the positive scroll offset direction.
-  ///
-  /// For example, for the [GrowthDirection.forward] part of a vertical
-  /// [AxisDirection.down] list, this means the content is moving up, exposing
-  /// lower content.
-  forward,
-
   /// Scrolling is happening in the negative scroll offset direction.
   ///
   /// For example, for the [GrowthDirection.forward] part of a vertical
-  /// [AxisDirection.down] list, this means the content is moving down, exposing
-  /// earlier content.
+  /// [AxisDirection.down] list, which is the default directional configuration
+  /// of all scroll views, this means the content is going down, exposing
+  /// earlier content as it approaches the zero position.
+  ///
+  /// An anecdote for this most common case is 'forward is toward' the zero
+  /// position.
+  forward,
+
+  /// Scrolling is happening in the positive scroll offset direction.
+  ///
+  /// For example, for the [GrowthDirection.forward] part of a vertical
+  /// [AxisDirection.down] list, which is the default directional configuration
+  /// of all scroll views, this means the content is moving up, exposing
+  /// lower content.
+  ///
+  /// An anecdote for this most common case is reversing, or backing away, from
+  /// the zero position.
   reverse,
 }
 
@@ -39,14 +69,11 @@ enum ScrollDirection {
 /// (and vice versa) and returns [ScrollDirection.idle] for
 /// [ScrollDirection.idle].
 ScrollDirection flipScrollDirection(ScrollDirection direction) {
-  switch (direction) {
-    case ScrollDirection.idle:
-      return ScrollDirection.idle;
-    case ScrollDirection.forward:
-      return ScrollDirection.reverse;
-    case ScrollDirection.reverse:
-      return ScrollDirection.forward;
-  }
+  return switch (direction) {
+    ScrollDirection.idle    => ScrollDirection.idle,
+    ScrollDirection.forward => ScrollDirection.reverse,
+    ScrollDirection.reverse => ScrollDirection.forward,
+  };
 }
 
 /// Which part of the content inside the viewport should be visible.
@@ -67,7 +94,11 @@ abstract class ViewportOffset extends ChangeNotifier {
   /// Default constructor.
   ///
   /// Allows subclasses to construct this object directly.
-  ViewportOffset();
+  ViewportOffset() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      ChangeNotifier.maybeDispatchObjectCreation(this);
+    }
+  }
 
   /// Creates a viewport offset with the given [pixels] value.
   ///
@@ -196,7 +227,6 @@ abstract class ViewportOffset extends ChangeNotifier {
     Curve? curve,
     bool? clamp,
   }) {
-    assert(to != null);
     if (duration == null || duration == Duration.zero) {
       jumpTo(to);
       return Future<void>.value();
@@ -217,12 +247,14 @@ abstract class ViewportOffset extends ChangeNotifier {
   /// For example, [RenderSliverFloatingPersistentHeader] will only expand a
   /// floating app bar when the [userScrollDirection] is in the positive scroll
   /// offset direction.
+  ///
+  /// {@macro flutter.rendering.ScrollDirection.sample}
   ScrollDirection get userScrollDirection;
 
   /// Whether a viewport is allowed to change [pixels] implicitly to respond to
   /// a call to [RenderObject.showOnScreen].
   ///
-  /// [RenderObject.showOnScreen] is for example used to bring a text field
+  /// [RenderObject.showOnScreen] is, for example, used to bring a text field
   /// fully on screen after it has received focus. This property controls
   /// whether the viewport associated with this offset is allowed to change the
   /// offset's [pixels] value to fulfill such a request.

@@ -48,15 +48,17 @@ class MacOSDevice extends DesktopDevice {
   String get name => 'macOS';
 
   @override
+  bool get supportsFlavors => true;
+
+  @override
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.darwin;
 
   @override
   Future<String> get targetPlatformDisplayName async {
     if (_operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm64) {
       return 'darwin-arm64';
-    } else {
-      return 'darwin-x64';
     }
+    return 'darwin-x64';
   }
 
   @override
@@ -65,31 +67,32 @@ class MacOSDevice extends DesktopDevice {
   }
 
   @override
-  Future<void> buildForDevice(
-    covariant MacOSApp package, {
+  Future<void> buildForDevice({
     required BuildInfo buildInfo,
     String? mainPath,
+    bool usingCISystem = false,
   }) async {
     await buildMacOS(
       flutterProject: FlutterProject.current(),
       buildInfo: buildInfo,
       targetOverride: mainPath,
       verboseLogging: _logger.isVerbose,
+      usingCISystem: usingCISystem,
     );
   }
 
   @override
-  String? executablePathForDevice(covariant MacOSApp package, BuildMode buildMode) {
-    return package.executable(buildMode);
+  String? executablePathForDevice(covariant MacOSApp package, BuildInfo buildInfo) {
+    return package.executable(buildInfo);
   }
 
   @override
-  void onAttached(covariant MacOSApp package, BuildMode buildMode, Process process) {
+  void onAttached(covariant MacOSApp package, BuildInfo buildInfo, Process process) {
     // Bring app to foreground. Ideally this would be done post-launch rather
     // than post-attach, since this won't run for release builds, but there's
     // no general-purpose way of knowing when a process is far enough along in
     // the launch process for 'open' to foreground it.
-    final String? applicationBundle = package.applicationBundle(buildMode);
+    final String? applicationBundle = package.applicationBundle(buildInfo);
     if (applicationBundle == null) {
       _logger.printError('Failed to foreground app; application bundle not found');
       return;

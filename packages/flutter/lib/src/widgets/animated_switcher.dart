@@ -19,15 +19,13 @@ class _ChildEntry {
     required this.animation,
     required this.transition,
     required this.widgetChild,
-  }) : assert(animation != null),
-       assert(transition != null),
-       assert(controller != null);
+  });
 
   // The animation controller for the child's transition.
   final AnimationController controller;
 
   // The (curved) animation being used to drive the transition.
-  final Animation<double> animation;
+  final CurvedAnimation animation;
 
   // The currently built transition for this child.
   Widget transition;
@@ -105,9 +103,6 @@ typedef AnimatedSwitcherLayoutBuilder = Widget Function(Widget? currentChild, Li
 ///  * [FadeTransition], which [AnimatedSwitcher] uses to perform the transition.
 class AnimatedSwitcher extends StatefulWidget {
   /// Creates an [AnimatedSwitcher].
-  ///
-  /// The [duration], [transitionBuilder], [layoutBuilder], [switchInCurve], and
-  /// [switchOutCurve] parameters must not be null.
   const AnimatedSwitcher({
     super.key,
     this.child,
@@ -117,11 +112,7 @@ class AnimatedSwitcher extends StatefulWidget {
     this.switchOutCurve = Curves.linear,
     this.transitionBuilder = AnimatedSwitcher.defaultTransitionBuilder,
     this.layoutBuilder = AnimatedSwitcher.defaultLayoutBuilder,
-  }) : assert(duration != null),
-       assert(switchInCurve != null),
-       assert(switchOutCurve != null),
-       assert(transitionBuilder != null),
-       assert(layoutBuilder != null);
+  });
 
   /// The current child widget to display. If there was a previous child, then
   /// that child will be faded out using the [switchOutCurve], while the new
@@ -317,7 +308,7 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProvider
       reverseDuration: widget.reverseDuration,
       vsync: this,
     );
-    final Animation<double> animation = CurvedAnimation(
+    final CurvedAnimation animation = CurvedAnimation(
       parent: controller,
       curve: widget.switchInCurve,
       reverseCurve: widget.switchOutCurve,
@@ -340,7 +331,7 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProvider
     required Widget child,
     required AnimatedSwitcherTransitionBuilder builder,
     required AnimationController controller,
-    required Animation<double> animation,
+    required CurvedAnimation animation,
   }) {
     final _ChildEntry entry = _ChildEntry(
       widgetChild: child,
@@ -349,7 +340,7 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProvider
       controller: controller,
     );
     animation.addStatusListener((AnimationStatus status) {
-      if (status == AnimationStatus.dismissed) {
+      if (status.isDismissed) {
         setState(() {
           assert(mounted);
           assert(_outgoingEntries.contains(entry));
@@ -357,6 +348,7 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProvider
           _markChildWidgetCacheAsDirty();
         });
         controller.dispose();
+        animation.dispose();
       }
     });
     return entry;
@@ -385,9 +377,11 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProvider
   void dispose() {
     if (_currentEntry != null) {
       _currentEntry!.controller.dispose();
+      _currentEntry!.animation.dispose();
     }
     for (final _ChildEntry entry in _outgoingEntries) {
       entry.controller.dispose();
+      entry.animation.dispose();
     }
     super.dispose();
   }

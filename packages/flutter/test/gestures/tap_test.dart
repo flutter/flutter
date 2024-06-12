@@ -99,6 +99,7 @@ void main() {
 
   testGesture('Should recognize tap', (GestureTester tester) {
     final TapGestureRecognizer tap = TapGestureRecognizer();
+    addTearDown(tap.dispose);
 
     bool tapRecognized = false;
     tap.onTap = () {
@@ -312,7 +313,6 @@ void main() {
     expect(tapsRecognized, 0);
     tester.route(down1);
     expect(tapsRecognized, 0);
-
 
     tester.route(up2);
     expect(tapsRecognized, 0);
@@ -643,6 +643,7 @@ void main() {
     final TapGestureRecognizer tap = TapGestureRecognizer();
     final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer()
       ..onStart = (_) {}; // Need a callback to compete
+    addTearDown(drag.dispose);
 
     final List<String> recognized = <String>[];
     tap.onTapDown = (_) {
@@ -674,7 +675,9 @@ void main() {
 
   testGesture('losing tap gesture recognizer does not send onTapCancel', (GestureTester tester) {
     final TapGestureRecognizer tap = TapGestureRecognizer();
+    addTearDown(tap.dispose);
     final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer();
+    addTearDown(drag.dispose);
 
     final List<String> recognized = <String>[];
     tap.onTapDown = (_) {
@@ -707,6 +710,7 @@ void main() {
     // In this way, `BaseTapGestureRecognizer.didExceedDeadline` can be triggered
     // after its `_reset`.
     final TapGestureRecognizer tap = TapGestureRecognizer();
+    addTearDown(tap.dispose);
 
     final List<String> recognized = <String>[];
     tap.onTapDown = (_) {
@@ -772,6 +776,7 @@ void main() {
         ..onTapCancel = () {
           recognized.add('cancel');
         };
+      addTearDown(tap.dispose);
     });
 
     tearDown(() {
@@ -877,6 +882,7 @@ void main() {
         ..onTapCancel = () {
           recognized.add('primaryCancel');
         };
+      addTearDown(primary.dispose);
       primary2 = TapGestureRecognizer()
         ..onTapDown = (TapDownDetails details) {
           recognized.add('primary2Down');
@@ -887,6 +893,7 @@ void main() {
         ..onTapCancel = () {
           recognized.add('primary2Cancel');
         };
+      addTearDown(primary2.dispose);
       secondary = TapGestureRecognizer()
         ..onSecondaryTapDown = (TapDownDetails details) {
           recognized.add('secondaryDown');
@@ -897,6 +904,7 @@ void main() {
         ..onSecondaryTapCancel = () {
           recognized.add('secondaryCancel');
         };
+      addTearDown(secondary.dispose);
       tertiary = TapGestureRecognizer()
         ..onTertiaryTapDown = (TapDownDetails details) {
           recognized.add('tertiaryDown');
@@ -907,6 +915,7 @@ void main() {
         ..onTertiaryTapCancel = () {
           recognized.add('tertiaryCancel');
         };
+      addTearDown(tertiary.dispose);
     });
 
     tearDown(() {
@@ -1094,9 +1103,12 @@ void main() {
       ..onTap = () {
         didTap = true;
       };
+    addTearDown(tap.dispose);
+
     // Add drag recognizer for competition
     final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer()
       ..onStart = (_) {};
+    addTearDown(drag.dispose);
 
     final TestPointer pointer1 = TestPointer();
 

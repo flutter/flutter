@@ -41,19 +41,16 @@ class TableBorder {
 
   /// Creates a border for a table where all the interior sides use the same
   /// styling and all the exterior sides use the same styling.
-  factory TableBorder.symmetric({
+  const TableBorder.symmetric({
     BorderSide inside = BorderSide.none,
     BorderSide outside = BorderSide.none,
-  }) {
-    return TableBorder(
-      top: outside,
-      right: outside,
-      bottom: outside,
-      left: outside,
-      horizontalInside: inside,
-      verticalInside: inside,
-    );
-  }
+    this.borderRadius = BorderRadius.zero,
+  }) : top = outside,
+       right = outside,
+       bottom = outside,
+       left = outside,
+       horizontalInside = inside,
+       verticalInside = inside;
 
   /// The top side of this border.
   final BorderSide top;
@@ -74,6 +71,8 @@ class TableBorder {
   final BorderSide verticalInside;
 
   /// The [BorderRadius] to use when painting the corners of this border.
+  ///
+  /// It is also applied to [DataTable]'s [Material].
   final BorderRadius borderRadius;
 
   /// The widths of the sides of this border represented as an [EdgeInsets].
@@ -87,12 +86,6 @@ class TableBorder {
   /// Whether all the sides of the border (outside and inside) are identical.
   /// Uniform borders are typically more efficient to paint.
   bool get isUniform {
-    assert(top != null);
-    assert(right != null);
-    assert(bottom != null);
-    assert(left != null);
-    assert(horizontalInside != null);
-    assert(verticalInside != null);
 
     final Color topColor = top.color;
     if (right.color != topColor ||
@@ -157,9 +150,8 @@ class TableBorder {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static TableBorder? lerp(TableBorder? a, TableBorder? b, double t) {
-    assert(t != null);
-    if (a == null && b == null) {
-      return null;
+    if (identical(a, b)) {
+      return a;
     }
     if (a == null) {
       return b!.scale(t);
@@ -210,19 +202,9 @@ class TableBorder {
     required Iterable<double> columns,
   }) {
     // properties can't be null
-    assert(top != null);
-    assert(right != null);
-    assert(bottom != null);
-    assert(left != null);
-    assert(horizontalInside != null);
-    assert(verticalInside != null);
 
     // arguments can't be null
-    assert(canvas != null);
-    assert(rect != null);
-    assert(rows != null);
     assert(rows.isEmpty || (rows.first >= 0.0 && rows.last <= rect.height));
-    assert(columns != null);
     assert(columns.isEmpty || (columns.first >= 0.0 && columns.last <= rect.width));
 
     if (columns.isNotEmpty || rows.isNotEmpty) {
@@ -242,7 +224,6 @@ class TableBorder {
               path.lineTo(rect.left + x, rect.bottom);
             }
             canvas.drawPath(path, paint);
-            break;
           case BorderStyle.none:
             break;
         }
@@ -261,13 +242,12 @@ class TableBorder {
               path.lineTo(rect.right, rect.top + y);
             }
             canvas.drawPath(path, paint);
-            break;
           case BorderStyle.none:
             break;
         }
       }
     }
-    if(!isUniform || borderRadius == BorderRadius.zero) {
+    if (!isUniform || borderRadius == BorderRadius.zero) {
       paintBorder(canvas, rect, top: top, right: right, bottom: bottom, left: left);
     } else {
       final RRect outer = borderRadius.toRRect(rect);

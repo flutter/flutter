@@ -60,12 +60,12 @@ class _FilteredChildAnimationPageState extends State<FilteredChildAnimationPage>
   }
 
   String get _title {
-    switch (_filterType) {
-      case FilterType.opacity: return 'Fading Child Animation';
-      case FilterType.rotateTransform: return 'Transformed Child Animation';
-      case FilterType.rotateFilter: return 'Matrix Filtered Child Animation';
-      case null: return 'Static Child';
-    }
+    return switch (_filterType) {
+      FilterType.opacity => 'Fading Child Animation',
+      FilterType.rotateTransform => 'Transformed Child Animation',
+      FilterType.rotateFilter => 'Matrix Filtered Child Animation',
+      null => 'Static Child',
+    };
   }
 
   static Widget _makeChild(int rows, int cols, double fontSize, bool complex) {
@@ -115,7 +115,6 @@ class _FilteredChildAnimationPageState extends State<FilteredChildAnimationPage>
           opacity: (_controller.value * 2.0 - 1.0).abs(),
           child: child,
         );
-        break;
       case FilterType.rotateTransform:
         builder = (BuildContext context, Widget? child) => Transform(
           transform: Matrix4.rotationZ(_controller.value * 2.0 * pi),
@@ -123,7 +122,6 @@ class _FilteredChildAnimationPageState extends State<FilteredChildAnimationPage>
           filterQuality: FilterQuality.low,
           child: child,
         );
-        break;
       case FilterType.rotateFilter:
         builder = (BuildContext context, Widget? child) => ImageFiltered(
           imageFilter: ImageFilter.matrix((
@@ -134,7 +132,6 @@ class _FilteredChildAnimationPageState extends State<FilteredChildAnimationPage>
           ).storage),
           child: child,
         );
-        break;
     }
     return RepaintBoundary(
       child: AnimatedBuilder(

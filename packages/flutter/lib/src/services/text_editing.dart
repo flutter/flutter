@@ -12,8 +12,6 @@ export 'dart:ui' show TextAffinity, TextPosition;
 @immutable
 class TextSelection extends TextRange {
   /// Creates a text selection.
-  ///
-  /// The [baseOffset] and [extentOffset] arguments must not be null.
   const TextSelection({
     required this.baseOffset,
     required this.extentOffset,
@@ -29,8 +27,6 @@ class TextSelection extends TextRange {
   /// A collapsed selection starts and ends at the same offset, which means it
   /// contains zero characters but instead serves as an insertion point in the
   /// text.
-  ///
-  /// The [offset] argument must not be null.
   const TextSelection.collapsed({
     required int offset,
     this.affinity = TextAffinity.downstream,
@@ -199,7 +195,7 @@ class TextSelection extends TextRange {
   /// ## Difference with [extendTo]
   /// In contrast with this method, [extendTo] is a pivot; it holds
   /// [TextSelection.baseOffset] fixed while moving [TextSelection.extentOffset]
-  /// to the given [TextPosition].  It doesn't strictly grow the selection and
+  /// to the given [TextPosition]. It doesn't strictly grow the selection and
   /// may collapse it or flip its order.
   TextSelection expandTo(TextPosition position, [bool extentAtIndex = false]) {
     // If position is already within in the selection, there's nothing to do.

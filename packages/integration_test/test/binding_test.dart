@@ -39,6 +39,7 @@ Future<void> main() async {
       ));
       expect(tester.binding, binding);
       binding.reportData = <String, dynamic>{'answer': 42};
+      await tester.pump();
     });
 
     testWidgets('hitTesting works when using setSurfaceSize', (WidgetTester tester) async {
@@ -76,15 +77,15 @@ Future<void> main() async {
     testWidgets('setSurfaceSize works', (WidgetTester tester) async {
       await tester.pumpWidget(const MaterialApp(home: Center(child: Text('Test'))));
 
-      final Size windowCenter = tester.binding.window.physicalSize /
-          tester.binding.window.devicePixelRatio /
+      final Size viewCenter = tester.view.physicalSize /
+          tester.view.devicePixelRatio /
           2;
-      final double windowCenterX = windowCenter.width;
-      final double windowCenterY = windowCenter.height;
+      final double viewCenterX = viewCenter.width;
+      final double viewCenterY = viewCenter.height;
 
       Offset widgetCenter = tester.getRect(find.byType(Text)).center;
-      expect(widgetCenter.dx, windowCenterX);
-      expect(widgetCenter.dy, windowCenterY);
+      expect(widgetCenter.dx, viewCenterX);
+      expect(widgetCenter.dy, viewCenterY);
 
       await tester.binding.setSurfaceSize(const Size(200, 300));
       await tester.pump();
@@ -95,8 +96,8 @@ Future<void> main() async {
       await tester.binding.setSurfaceSize(null);
       await tester.pump();
       widgetCenter = tester.getRect(find.byType(Text)).center;
-      expect(widgetCenter.dx, windowCenterX);
-      expect(widgetCenter.dy, windowCenterY);
+      expect(widgetCenter.dx, viewCenterX);
+      expect(widgetCenter.dy, viewCenterY);
     });
 
     testWidgets('Test traceAction', (WidgetTester tester) async {
@@ -160,10 +161,8 @@ class FakeVM extends Fake implements vm.VmService {
     return vm.Timestamp(timestamp: lastTimeStamp);
   }
 
-  List<String> recordedStreams = <String>[];
   @override
   Future<vm.Success> setVMTimelineFlags(List<String> recordedStreams) async {
-    recordedStreams = recordedStreams;
     return vm.Success();
   }
 

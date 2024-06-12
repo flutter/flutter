@@ -4,12 +4,20 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   test('MaterialStatesController constructor', () {
     expect(MaterialStatesController().value, <MaterialState>{});
     expect(MaterialStatesController(<MaterialState>{}).value, <MaterialState>{});
     expect(MaterialStatesController(<MaterialState>{MaterialState.selected}).value, <MaterialState>{MaterialState.selected});
+  });
+
+  test('MaterialStatesController dispatches memory events', () async {
+    await expectLater(
+      await memoryEvents(() => MaterialStatesController().dispose(), MaterialStatesController),
+      areCreateAndDispose,
+    );
   });
 
   test('MaterialStatesController update, listener', () {

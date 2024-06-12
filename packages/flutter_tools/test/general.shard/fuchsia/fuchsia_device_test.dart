@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:file/memory.dart';
@@ -19,6 +17,7 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/device_port_forwarder.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/fuchsia/fuchsia_device.dart';
 import 'package:flutter_tools/src/fuchsia/fuchsia_ffx.dart';
 import 'package:flutter_tools/src/fuchsia/fuchsia_kernel_compiler.dart';
@@ -28,13 +27,13 @@ import 'package:flutter_tools/src/fuchsia/fuchsia_workflow.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/vmservice.dart';
-import 'package:meta/meta.dart';
 import 'package:test/fake.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_vm_services.dart';
+import '../../src/fakes.dart';
 
 final vm_service.Isolate fakeIsolate = vm_service.Isolate(
   id: '1',
@@ -56,9 +55,9 @@ final vm_service.Isolate fakeIsolate = vm_service.Isolate(
 
 void main() {
   group('fuchsia device', () {
-    MemoryFileSystem memoryFileSystem;
-    File sshConfig;
-    FakeProcessManager processManager;
+    late MemoryFileSystem memoryFileSystem;
+    late File sshConfig;
+    late FakeProcessManager processManager;
 
     setUp(() {
       memoryFileSystem = MemoryFileSystem.test();
@@ -306,8 +305,8 @@ void main() {
   });
 
   group('displays friendly error when', () {
-    File artifactFile;
-    FakeProcessManager processManager;
+    late File artifactFile;
+    late FakeProcessManager processManager;
 
     setUp(() {
       processManager = FakeProcessManager.empty();
@@ -350,9 +349,9 @@ void main() {
 [2018-11-09 01:30:12][52580][52983][log] INFO: example_app.cm(flutter): Did thing this time
 
   ''';
-      FakeProcessManager processManager;
-      File ffx;
-      File sshConfig;
+      late FakeProcessManager processManager;
+      late File ffx;
+      late File sshConfig;
 
       setUp(() {
         processManager = FakeProcessManager.empty();
@@ -475,7 +474,7 @@ void main() {
   });
 
   group('screenshot', () {
-    FakeProcessManager processManager;
+    late FakeProcessManager processManager;
 
     setUp(() {
       processManager = FakeProcessManager.empty();
@@ -486,6 +485,7 @@ void main() {
       expect(device.supportsScreenshot, true);
     }, overrides: <Type, Generator>{
       Platform: () => FakePlatform(),
+      FeatureFlags: () => TestFeatureFlags(isFuchsiaEnabled: true),
     });
 
     testUsingContext('is not supported on Windows', () {
@@ -496,6 +496,7 @@ void main() {
       Platform: () => FakePlatform(
             operatingSystem: 'windows',
           ),
+      FeatureFlags: () => TestFeatureFlags(isFuchsiaEnabled: true),
     });
 
     test("takeScreenshot throws if file isn't .ppm", () async {
@@ -535,6 +536,7 @@ void main() {
               'FUCHSIA_SSH_CONFIG': '/fuchsia/out/default/.ssh',
             },
           ),
+      FeatureFlags: () => TestFeatureFlags(isFuchsiaEnabled: true),
     });
 
     testUsingContext('takeScreenshot throws if scp failed', () async {
@@ -585,6 +587,7 @@ void main() {
               'FUCHSIA_SSH_CONFIG': '/fuchsia/out/default/.ssh',
             },
           ),
+      FeatureFlags: () => TestFeatureFlags(isFuchsiaEnabled: true),
     });
 
     testUsingContext(
@@ -635,6 +638,7 @@ void main() {
               'FUCHSIA_SSH_CONFIG': '/fuchsia/out/default/.ssh',
             },
           ),
+      FeatureFlags: () => TestFeatureFlags(isFuchsiaEnabled: true),
     }, testOn: 'posix');
 
     testUsingContext('takeScreenshot returns', () async {
@@ -677,12 +681,13 @@ void main() {
               'FUCHSIA_SSH_CONFIG': '/fuchsia/out/default/.ssh',
             },
           ),
+      FeatureFlags: () => TestFeatureFlags(isFuchsiaEnabled: true),
     });
   });
 
   group('portForwarder', () {
-    FakeProcessManager processManager;
-    File sshConfig;
+    late FakeProcessManager processManager;
+    late File sshConfig;
 
     setUp(() {
       processManager = FakeProcessManager.empty();
@@ -732,7 +737,7 @@ void main() {
             method: kListViewsMethod,
             jsonResponse: <String, Object>{
               'views': <Object>[
-                for (FlutterView view in views) view.toJson(),
+                for (final FlutterView view in views) view.toJson(),
               ],
             },
           ),
@@ -746,7 +751,7 @@ void main() {
         fuchsiaDevice,
         expectedIsolateName,
         (Uri uri) async => fakeVmServiceHost.vmService,
-        (Device device, Uri uri, bool enableServiceAuthCodes) => null,
+        (Device device, Uri uri, bool enableServiceAuthCodes) async {},
         true, // only poll once.
       );
       return discoveryProtocol.uri;
@@ -789,7 +794,7 @@ void main() {
         // wrong name.
         FlutterView(
             id: '2',
-            uiIsolate: vm_service.Isolate.parse(<String, Object>{
+            uiIsolate: vm_service.Isolate.parse(<String, Object?>{
               ...fakeIsolate.toJson(),
               'name': 'wrong name',
             })),
@@ -854,8 +859,8 @@ void main() {
   });
 
   group('sdkNameAndVersion: ', () {
-    File sshConfig;
-    FakeProcessManager processManager;
+    late File sshConfig;
+    late FakeProcessManager processManager;
 
     setUp(() {
       sshConfig = MemoryFileSystem.test().file('ssh_config')
@@ -934,15 +939,12 @@ void main() {
 }
 
 class FuchsiaModulePackage extends ApplicationPackage {
-  FuchsiaModulePackage({@required this.name}) : super(id: name);
+  FuchsiaModulePackage({required this.name}) : super(id: name);
 
   @override
   final String name;
 }
 
-// Unfortunately Device, despite not being immutable, has an `operator ==`.
-// Until we fix that, we have to also ignore related lints here.
-// ignore: avoid_implementing_value_types
 class MockFuchsiaDevice extends Fake implements FuchsiaDevice {
   MockFuchsiaDevice(this.id, this.portForwarder, this._ipv6);
 
@@ -982,7 +984,7 @@ class FakePortForwarder extends Fake implements DevicePortForwarder {
 
 class FakeFuchsiaFfx implements FuchsiaFfx {
   @override
-  Future<List<String>> list({Duration timeout}) async {
+  Future<List<String>> list({Duration? timeout}) async {
     return <String>['192.168.42.172 scare-cable-skip-ffx'];
   }
 
@@ -992,7 +994,7 @@ class FakeFuchsiaFfx implements FuchsiaFfx {
   }
 
   @override
-  Future<String> sessionShow() async {
+  Future<String?> sessionShow() async {
     return null;
   }
 
@@ -1002,14 +1004,18 @@ class FakeFuchsiaFfx implements FuchsiaFfx {
   }
 }
 
+class FakeFuchsiaPM extends Fake implements FuchsiaPM {}
+
+class FakeFuchsiaKernelCompiler extends Fake implements FuchsiaKernelCompiler {}
+
 class FakeFuchsiaSdk extends Fake implements FuchsiaSdk {
   FakeFuchsiaSdk({
-    FuchsiaPM pm,
-    FuchsiaKernelCompiler compiler,
-    FuchsiaFfx ffx,
-    String devices,
-  })  : fuchsiaPM = pm,
-        fuchsiaKernelCompiler = compiler,
+    FuchsiaPM? pm,
+    FuchsiaKernelCompiler? compiler,
+    FuchsiaFfx? ffx,
+    String? devices,
+  })  : fuchsiaPM = pm ?? FakeFuchsiaPM(),
+        fuchsiaKernelCompiler = compiler ?? FakeFuchsiaKernelCompiler(),
         fuchsiaFfx = ffx ?? FakeFuchsiaFfx(),
         _devices = devices;
 
@@ -1022,10 +1028,10 @@ class FakeFuchsiaSdk extends Fake implements FuchsiaSdk {
   @override
   final FuchsiaFfx fuchsiaFfx;
 
-  final String _devices;
+  final String? _devices;
 
   @override
-  Future<String> listDevices({Duration timeout}) async {
+  Future<String?> listDevices({Duration? timeout}) async {
     return _devices;
   }
 }
@@ -1034,11 +1040,11 @@ class FakeDartDevelopmentService extends Fake
     implements DartDevelopmentService {
   @override
   Future<void> startDartDevelopmentService(
-    Uri observatoryUri, {
-    @required Logger logger,
-    int hostPort,
-    bool ipv6,
-    bool disableServiceAuthCodes,
+    Uri vmServiceUri, {
+    required Logger logger,
+    int? hostPort,
+    bool? ipv6,
+    bool? disableServiceAuthCodes,
     bool cacheStartupProfile = false,
   }) async {}
 

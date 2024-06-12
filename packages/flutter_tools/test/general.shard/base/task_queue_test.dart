@@ -54,8 +54,8 @@ void main() {
       final Set<int> completed = <int>{};
       final TaskQueue<void> tracker = TaskQueue<void>(maxJobs: 1);
       await tracker.add(() async => completed.add(0));
-      await tracker.add(() async => throw TestException()).catchError((Object _) {});
-      await tracker.add(() async => throw TestException()).catchError((Object _) {});
+      await tracker.add(() async => throw TestException()).then((_) {}, onError: (Object _) {});
+      await tracker.add(() async => throw TestException()).then((_) {}, onError: (Object _) {});
       await tracker.add(() async => completed.add(3));
       await tracker.tasksComplete;
       expect(completed.length, equals(2));

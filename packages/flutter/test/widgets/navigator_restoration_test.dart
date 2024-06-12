@@ -5,6 +5,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   testWidgets('Restoration Smoke Test', (WidgetTester tester) async {
@@ -976,7 +977,9 @@ void main() {
     expect(findRoute('p1', count: 0), findsOneWidget);
   });
 
-  testWidgets('Helpful assert thrown all routes in onGenerateInitialRoutes are not restorable', (WidgetTester tester) async {
+  testWidgets('Helpful assert thrown all routes in onGenerateInitialRoutes are not restorable',
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
+  (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         restorationScopeId: 'material_app',
@@ -1015,6 +1018,7 @@ void main() {
   });
 }
 
+@pragma('vm:entry-point')
 Route<void> _routeBuilder(BuildContext context, Object? arguments) {
   return MaterialPageRoute<void>(
     builder: (BuildContext context) {
@@ -1025,6 +1029,7 @@ Route<void> _routeBuilder(BuildContext context, Object? arguments) {
   );
 }
 
+@pragma('vm:entry-point')
 Route<void> _routeFutureBuilder(BuildContext context, Object? arguments) {
   return MaterialPageRoute<void>(
     builder: (BuildContext context) {
@@ -1045,7 +1050,7 @@ class PagedTestWidget extends StatelessWidget {
       child: Directionality(
         textDirection: TextDirection.ltr,
         child: MediaQuery(
-          data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
+          data: MediaQueryData.fromView(View.of(context)),
           child: const PagedTestNavigator(),
         ),
       ),
@@ -1171,7 +1176,7 @@ class TestWidget extends StatelessWidget {
       child: Directionality(
         textDirection: TextDirection.ltr,
         child: MediaQuery(
-          data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
+          data: MediaQueryData.fromView(View.of(context)),
           child: Navigator(
             initialRoute: 'home',
             restorationScopeId: 'app',

@@ -12,9 +12,10 @@ const int _kNumWarmUp = 100;
 class Data {
   Data(this.value);
 
-  Map<String, dynamic> toJson() => <String, dynamic>{ 'value': value };
-
   final int value;
+
+  @override
+  String toString() => 'Data($value)';
 }
 
 List<Data> test(int length) {

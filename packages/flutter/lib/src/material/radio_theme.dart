@@ -55,18 +55,12 @@ class RadioThemeData with Diagnosticable {
 
   /// {@macro flutter.material.radio.fillColor}
   ///
-  /// If specified, overrides the default value of [Radio.fillColor]. The
-  /// default value is the value of [ThemeData.disabledColor] in the disabled
-  /// state, [ThemeData.toggleableActiveColor] in the selected state, and
-  /// [ThemeData.unselectedWidgetColor] in the default state.
+  /// If specified, overrides the default value of [Radio.fillColor].
   final MaterialStateProperty<Color?>? fillColor;
 
   /// {@macro flutter.material.radio.overlayColor}
   ///
-  /// If specified, overrides the default value of [Radio.overlayColor]. The
-  /// default value is [ThemeData.toggleableActiveColor] with alpha
-  /// [kRadialReactionAlpha], [ThemeData.focusColor] and [ThemeData.hoverColor]
-  /// in the pressed, focused, and hovered state.
+  /// If specified, overrides the default value of [Radio.overlayColor].
   final MaterialStateProperty<Color?>? overlayColor;
 
   /// {@macro flutter.material.radio.splashRadius}
@@ -112,6 +106,9 @@ class RadioThemeData with Diagnosticable {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static RadioThemeData lerp(RadioThemeData? a, RadioThemeData? b, double t) {
+    if (identical(a, b) && a != null) {
+      return a;
+    }
     return RadioThemeData(
       mouseCursor: t < 0.5 ? a?.mouseCursor : b?.mouseCursor,
       fillColor: MaterialStateProperty.lerp<Color?>(a?.fillColor, b?.fillColor, t, Color.lerp),

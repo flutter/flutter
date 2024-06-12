@@ -18,8 +18,14 @@
   "cutButtonLabel": "切り取り",
   "copyButtonLabel": "コピー",
   "pasteButtonLabel": "貼り付け",
-  "selectAllButtonLabel": "すべて選択",
+  "selectAllButtonLabel": "すべてを選択",
   "tabSemanticsLabel": "タブ: $tabIndex/$tabCount",
   "modalBarrierDismissLabel": "閉じる",
-  "searchTextFieldPlaceholderLabel": "検索"
+  "searchTextFieldPlaceholderLabel": "検索",
+  "noSpellCheckReplacementsLabel": "置き換えるものがありません",
+  "menuDismissLabel": "メニューを閉じる",
+  "lookUpButtonLabel": "調べる",
+  "searchWebButtonLabel": "ウェブを検索",
+  "shareButtonLabel": "共有...",
+  "clearButtonLabel": "Clear"
 }

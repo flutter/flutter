@@ -15,6 +15,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../image_data.dart';
 import '../rendering/rendering_tester.dart';
 import 'mocks_for_image_cache.dart';
+import 'no_op_codec.dart';
 
 void main() {
   TestRenderingFlutterBinding.ensureInitialized();
@@ -88,22 +89,18 @@ void main() {
     final FileImage provider = FileImage(file);
 
     expect(provider.loadBuffer(provider, (ImmutableBuffer buffer, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) async {
-      return Future<Codec>.value(FakeCodec());
+      return Future<Codec>.value(createNoOpCodec());
     }), isA<MultiFrameImageStreamCompleter>());
 
     expect(await error.future, isStateError);
   });
-
-  Future<Codec> decoder(ImmutableBuffer buffer, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) async {
-    return FakeCodec();
-  }
 
   test('File image sets tag', () async {
     final MemoryFileSystem fs = MemoryFileSystem();
     final File file = fs.file('/blue.png')..createSync(recursive: true)..writeAsBytesSync(kBlueSquarePng);
     final FileImage provider = FileImage(file);
 
-    final MultiFrameImageStreamCompleter completer = provider.loadBuffer(provider, decoder) as MultiFrameImageStreamCompleter;
+    final MultiFrameImageStreamCompleter completer = provider.loadBuffer(provider, noOpDecoderBufferCallback) as MultiFrameImageStreamCompleter;
 
     expect(completer.debugLabel, file.path);
   });
@@ -112,7 +109,7 @@ void main() {
     final Uint8List bytes = Uint8List.fromList(kBlueSquarePng);
     final MemoryImage provider = MemoryImage(bytes);
 
-    final MultiFrameImageStreamCompleter completer = provider.loadBuffer(provider, decoder) as MultiFrameImageStreamCompleter;
+    final MultiFrameImageStreamCompleter completer = provider.loadBuffer(provider, noOpDecoderBufferCallback) as MultiFrameImageStreamCompleter;
 
     expect(completer.debugLabel, 'MemoryImage(${describeIdentity(bytes)})');
   });
@@ -121,7 +118,7 @@ void main() {
     const String asset = 'images/blue.png';
     final ExactAssetImage provider = ExactAssetImage(asset, bundle: _TestAssetBundle());
     final AssetBundleImageKey key = await provider.obtainKey(ImageConfiguration.empty);
-    final MultiFrameImageStreamCompleter completer = provider.loadBuffer(key, decoder) as MultiFrameImageStreamCompleter;
+    final MultiFrameImageStreamCompleter completer = provider.loadBuffer(key, noOpDecoderBufferCallback) as MultiFrameImageStreamCompleter;
 
     expect(completer.debugLabel, asset);
   });
@@ -131,27 +128,40 @@ void main() {
     final ResizeImage provider = ResizeImage(MemoryImage(bytes), width: 40, height: 40);
     final MultiFrameImageStreamCompleter completer = provider.loadBuffer(
       await provider.obtainKey(ImageConfiguration.empty),
-      decoder,
+      noOpDecoderBufferCallback,
     ) as MultiFrameImageStreamCompleter;
 
     expect(completer.debugLabel, 'MemoryImage(${describeIdentity(bytes)}) - Resized(40×40)');
   });
-}
 
-class FakeCodec implements Codec {
-  @override
-  void dispose() {}
+  test('File image throws error when given a real but non-image file', () async {
+    final Completer<Exception> error = Completer<Exception>();
+    FlutterError.onError = (FlutterErrorDetails details) {
+      error.complete(details.exception as Exception);
+    };
+    final FileImage provider = FileImage(File('pubspec.yaml'));
 
-  @override
-  int get frameCount => throw UnimplementedError();
+    expect(imageCache.statusForKey(provider).untracked, true);
+    expect(imageCache.pendingImageCount, 0);
 
-  @override
-  Future<FrameInfo> getNextFrame() {
-    throw UnimplementedError();
-  }
+    provider.resolve(ImageConfiguration.empty);
 
-  @override
-  int get repetitionCount => throw UnimplementedError();
+    expect(imageCache.statusForKey(provider).pending, true);
+    expect(imageCache.pendingImageCount, 1);
+
+    expect(await error.future, isException
+      .having((Exception exception) => exception.toString(), 'toString', contains('Invalid image data')));
+
+    // Invalid images are marked as pending so that we do not attempt to reload them.
+    expect(imageCache.statusForKey(provider).untracked, false);
+    expect(imageCache.pendingImageCount, 1);
+  }, skip: kIsWeb); // [intended] The web cannot load files.
+
+  test('ImageProvider toStrings', () async {
+    expect(const NetworkImage('test', scale: 1.21).toString(), 'NetworkImage("test", scale: 1.2)');
+    expect(const ExactAssetImage('test', scale: 1.21).toString(), 'ExactAssetImage(name: "test", scale: 1.2, bundle: null)');
+    expect(MemoryImage(Uint8List(0), scale: 1.21).toString(), equalsIgnoringHashCodes('MemoryImage(Uint8List#00000, scale: 1.2)'));
+  });
 }
 
 class _TestAssetBundle extends CachingAssetBundle {

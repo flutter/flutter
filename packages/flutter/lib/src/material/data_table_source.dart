@@ -18,21 +18,32 @@ import 'data_table.dart';
 ///
 /// DataTableSource objects are expected to be long-lived, not recreated with
 /// each build.
+///
+/// If a [DataTableSource] is used with a [PaginatedDataTable] that supports
+/// sortable columns (see [DataColumn.onSort] and
+/// [PaginatedDataTable.sortColumnIndex]), the rows reported by the data source
+/// must be reported in the sorted order.
 abstract class DataTableSource extends ChangeNotifier {
   /// Called to obtain the data about a particular row.
   ///
+  /// Rows should be keyed so that state can be maintained when the data source
+  /// is sorted (e.g. in response to [DataColumn.onSort]). Keys should be
+  /// consistent for a given [DataRow] regardless of the sort order (i.e. the
+  /// key represents the data's identity, not the row position).
+  ///
   /// The [DataRow.byIndex] constructor provides a convenient way to construct
-  /// [DataRow] objects for this callback's purposes without having to worry about
-  /// independently keying each row.
+  /// [DataRow] objects for this method's purposes without having to worry about
+  /// independently keying each row. The index passed to that constructor is the
+  /// index of the underlying data, which is different than the `index`
+  /// parameter for [getRow], which represents the _sorted_ position.
   ///
   /// If the given index does not correspond to a row, or if no data is yet
   /// available for a row, then return null. The row will be left blank and a
   /// loading indicator will be displayed over the table. Once data is available
   /// or once it is firmly established that the row index in question is beyond
-  /// the end of the table, call [notifyListeners].
+  /// the end of the table, call [notifyListeners]. (See [rowCount].)
   ///
-  /// Data returned from this method must be consistent for the lifetime of the
-  /// object. If the row count changes, then a new delegate must be provided.
+  /// If the underlying data changes, call [notifyListeners].
   DataRow? getRow(int index);
 
   /// Called to obtain the number of rows to tell the user are available.
@@ -58,5 +69,7 @@ abstract class DataTableSource extends ChangeNotifier {
   /// Called to obtain the number of rows that are currently selected.
   ///
   /// If the selected row count changes, call [notifyListeners].
+  ///
+  /// Selected rows are those whose [DataRow.selected] property is set to true.
   int get selectedRowCount;
 }

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ffi' show Abi;
 import 'dart:io' as io;
 
 import 'package:file/file.dart';
@@ -26,23 +27,33 @@ void main() {
         'bin',
         'flutter',
       );
-      processManager.runSync(<String>[flutterBin, 'config',
+      ProcessResult result = processManager.runSync(<String>[flutterBin, 'config',
         '--enable-windows-desktop',
       ]);
+      expect(result, const ProcessResultMatcher());
 
-      processManager.runSync(<String>[
+      result = processManager.runSync(<String>[
         flutterBin,
         ...getLocalEngineArguments(),
         'create',
         'hello',
       ], workingDirectory: tempDir.path);
+      expect(result, const ProcessResultMatcher());
 
       projectRoot = tempDir.childDirectory('hello');
+
+      final String arch;
+      if (Abi.current() == Abi.windowsArm64) {
+        arch = 'arm64';
+      } else {
+        arch = 'x64';
+      }
 
       releaseDir = fileSystem.directory(fileSystem.path.join(
         projectRoot.path,
         'build',
         'windows',
+        arch,
         'runner',
         'Release',
       ));
@@ -65,8 +76,8 @@ void main() {
         'windows',
         '--no-pub',
       ], workingDirectory: projectRoot.path);
+      expect(result, const ProcessResultMatcher());
 
-      expect(result.exitCode, 0);
       expect(releaseDir, exists);
       expect(exeFile, exists);
 
@@ -79,7 +90,7 @@ void main() {
     });
 
     testWithoutContext('flutter build windows sets build name', () {
-      processManager.runSync(<String>[
+      final ProcessResult result = processManager.runSync(<String>[
         flutterBin,
         ...getLocalEngineArguments(),
         'build',
@@ -88,6 +99,7 @@ void main() {
         '--build-name',
         '1.2.3',
       ], workingDirectory: projectRoot.path);
+      expect(result, const ProcessResultMatcher());
 
       final String fileVersion = _getFileVersion(exeFile);
       final String productVersion = _getProductVersion(exeFile);
@@ -97,7 +109,7 @@ void main() {
     });
 
     testWithoutContext('flutter build windows sets build name and build number', () {
-      processManager.runSync(<String>[
+      final ProcessResult result = processManager.runSync(<String>[
         flutterBin,
         ...getLocalEngineArguments(),
         'build',
@@ -108,6 +120,7 @@ void main() {
         '--build-number',
         '4',
       ], workingDirectory: projectRoot.path);
+      expect(result, const ProcessResultMatcher());
 
       final String fileVersion = _getFileVersion(exeFile);
       final String productVersion = _getProductVersion(exeFile);
@@ -129,9 +142,7 @@ String _getFileVersion(File file) {
     <String>[]
   );
 
-  if (result.exitCode != 0) {
-    throw Exception('GetVersionInfo failed.');
-  }
+  expect(result, const ProcessResultMatcher());
 
   // Trim trailing new line.
   final String output = result.stdout as String;
@@ -144,9 +155,7 @@ String _getProductVersion(File file) {
     <String>[]
   );
 
-  if (result.exitCode != 0) {
-    throw Exception('GetVersionInfo failed.');
-  }
+  expect(result, const ProcessResultMatcher());
 
   // Trim trailing new line.
   final String output = result.stdout as String;

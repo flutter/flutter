@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-String? unused;
+String? unused; // ignore: unreachable_from_main
 
 void main() {
   runApp(const MyApp());

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import '../base/error_handling_io.dart';
 import '../base/fingerprint.dart';
 import '../build_info.dart';
 import '../cache.dart';
@@ -14,20 +15,57 @@ import '../project.dart';
 Future<void> processPodsIfNeeded(
   XcodeBasedProject xcodeProject,
   String buildDirectory,
-  BuildMode buildMode) async {
+  BuildMode buildMode, {
+  bool forceCocoaPodsOnly = false,
+}) async {
   final FlutterProject project = xcodeProject.parent;
-  // Ensure that the plugin list is up to date, since hasPlugins relies on it.
-  await refreshPluginsList(project, macOSPlatform: project.macos.existsSync());
-  if (!(hasPlugins(project) || (project.isModule && xcodeProject.podfile.existsSync()))) {
+
+  // When using Swift Package Manager, the Podfile may not exist so if there
+  // isn't a Podfile, skip processing pods.
+  if (project.usesSwiftPackageManager && !xcodeProject.podfile.existsSync() && !forceCocoaPodsOnly) {
     return;
   }
-  // If the Xcode project, Podfile, or generated xcconfig have changed since
-  // last run, pods should be updated.
+  // Ensure that the plugin list is up to date, since hasPlugins relies on it.
+  await refreshPluginsList(
+    project,
+    iosPlatform: project.ios.existsSync(),
+    macOSPlatform: project.macos.existsSync(),
+    forceCocoaPodsOnly: forceCocoaPodsOnly,
+  );
+
+  // If there are no plugins and if the project is a not module with an existing
+  // podfile, skip processing pods
+  if (!hasPlugins(project) && !(project.isModule && xcodeProject.podfile.existsSync())) {
+    return;
+  }
+
+  // If forcing the use of only CocoaPods, but the project is using Swift
+  // Package Manager, print a warning that CocoaPods will be used.
+  if (forceCocoaPodsOnly && project.usesSwiftPackageManager) {
+    globals.logger.printWarning(
+        'Swift Package Manager does not yet support this command. '
+        'CocoaPods will be used instead.');
+
+    // If CocoaPods has been deintegrated, add it back.
+    if (!xcodeProject.podfile.existsSync()) {
+      await globals.cocoaPods?.setupPodfile(xcodeProject);
+    }
+
+    // Delete Swift Package Manager manifest to invalidate fingerprinter
+    ErrorHandlingFileSystem.deleteIfExists(
+      xcodeProject.flutterPluginSwiftPackageManifest,
+    );
+  }
+
+  // If the Xcode project, Podfile, generated plugin Swift Package, or podhelper
+  // have changed since last run, pods should be updated.
   final Fingerprinter fingerprinter = Fingerprinter(
     fingerprintPath: globals.fs.path.join(buildDirectory, 'pod_inputs.fingerprint'),
     paths: <String>[
       xcodeProject.xcodeProjectInfoFile.path,
       xcodeProject.podfile.path,
+      if (xcodeProject.flutterPluginSwiftPackageManifest.existsSync())
+        xcodeProject.flutterPluginSwiftPackageManifest.path,
       globals.fs.path.join(
         Cache.flutterRoot!,
         'packages',

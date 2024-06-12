@@ -36,6 +36,7 @@ class _MyScrollContainerState extends State<_MyScrollContainer> {
   static const Duration stepDuration = Duration(milliseconds: 500);
 
   late PageController pageController;
+  final _CustomPainter _painter =  _CustomPainter('aa');
   int pageNumber = 0;
 
   @override
@@ -57,6 +58,7 @@ class _MyScrollContainerState extends State<_MyScrollContainer> {
   @override
   void dispose() {
     pageController.dispose();
+    _painter._textPainter.dispose();
     super.dispose();
   }
 
@@ -66,7 +68,7 @@ class _MyScrollContainerState extends State<_MyScrollContainer> {
         controller: pageController,
         itemBuilder: (BuildContext context, int position) {
           return CustomPaint(
-            painter: _CustomPainter('aa'),
+            painter: _painter,
             size: const Size(300, 500),
           );
         });
@@ -93,7 +95,7 @@ class _CustomPainter extends CustomPainter {
     yPosition = viewPadding;
     _textPainter.textDirection = TextDirection.ltr;
     _textPainter.textWidthBasis = TextWidthBasis.longestLine;
-    _textPainter.textScaleFactor = 1;
+    _textPainter.textScaler = TextScaler.noScaling;
     const TextStyle textStyle =
         TextStyle(color: Colors.black87, fontSize: 13, fontFamily: 'Roboto');
 

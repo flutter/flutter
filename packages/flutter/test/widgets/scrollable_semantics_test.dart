@@ -57,6 +57,7 @@ void main() {
     final ScrollController scrollController = ScrollController(
       initialScrollOffset: kItemHeight / 2,
     );
+    addTearDown(scrollController.dispose);
 
     await tester.pumpWidget(
       Directionality(
@@ -96,6 +97,7 @@ void main() {
     final ScrollController scrollController = ScrollController(
       initialScrollOffset: kItemHeight / 2,
     );
+    addTearDown(scrollController.dispose);
 
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
@@ -166,6 +168,7 @@ void main() {
     final ScrollController scrollController = ScrollController(
       initialScrollOffset: 2.5 * kItemHeight,
     );
+    addTearDown(scrollController.dispose);
 
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
@@ -536,7 +539,10 @@ void main() {
           ),
         ),
       );
+    });
 
+    tearDown(() {
+      scrollController.dispose();
     });
 
     testWidgets('brings item above leading edge to leading edge', (WidgetTester tester) async {

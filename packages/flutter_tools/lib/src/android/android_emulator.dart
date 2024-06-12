@@ -62,9 +62,7 @@ class AndroidEmulators extends EmulatorDiscovery {
       <String>[emulatorPath, '-list-avds'])).stdout.trim();
 
     final List<AndroidEmulator> emulators = <AndroidEmulator>[];
-    if (listAvdsOutput != null) {
-      _extractEmulatorAvdInfo(listAvdsOutput, emulators);
-    }
+    _extractEmulatorAvdInfo(listAvdsOutput, emulators);
     return emulators;
   }
 
@@ -143,7 +141,7 @@ class AndroidEmulator extends Emulator {
   @override
   PlatformType get platformType => PlatformType.android;
 
-  String? _prop(String name) => _properties != null ? _properties![name] : null;
+  String? _prop(String name) => _properties != null ? _properties[name] : null;
 
   @override
   Future<void> launch({@visibleForTesting Duration? startupDuration, bool coldBoot = false}) async {

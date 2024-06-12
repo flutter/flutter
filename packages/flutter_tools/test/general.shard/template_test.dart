@@ -9,8 +9,11 @@ import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/template.dart';
+import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/template.dart';
 import '../src/common.dart';
+import '../src/context.dart';
 
 void main() {
   testWithoutContext('Template constructor throws ToolExit when source directory is missing', () {
@@ -41,6 +44,80 @@ void main() {
 
     expect(() => template.render(directory, <String, Object>{}),
       throwsToolExit());
+  });
+
+  group('template image directory', () {
+    final Map<Type, Generator> overrides = <Type, Generator>{
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.any(),
+    };
+    const TemplatePathProvider templatePathProvider = TemplatePathProvider();
+
+    testUsingContext('templatePathProvider.imageDirectory returns parent template directory if passed null name', () async {
+      final String packageConfigPath = globals.fs.path.join(
+        Cache.flutterRoot!,
+        'packages',
+        'flutter_tools',
+        '.dart_tool',
+        'package_config.json',
+      );
+
+      globals.fs.file(packageConfigPath)
+        ..createSync(recursive: true)
+        ..writeAsStringSync('''
+{
+  "configVersion": 2,
+  "packages": [
+    {
+      "name": "flutter_template_images",
+      "rootUri": "/flutter_template_images",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    }
+  ]
+}
+''');
+      expect(
+          (await templatePathProvider.imageDirectory(null, globals.fs, globals.logger)).path,
+          globals.fs.path.absolute(
+            'flutter_template_images',
+            'templates',
+          ),
+      );
+    }, overrides: overrides);
+
+    testUsingContext('templatePathProvider.imageDirectory returns the directory containing the `name` template directory', () async {
+      final String packageConfigPath = globals.fs.path.join(
+        Cache.flutterRoot!,
+        'packages',
+        'flutter_tools',
+        '.dart_tool',
+        'package_config.json',
+      );
+      globals.fs.file(packageConfigPath)
+        ..createSync(recursive: true)
+        ..writeAsStringSync('''
+{
+  "configVersion": 2,
+  "packages": [
+    {
+      "name": "flutter_template_images",
+      "rootUri": "/flutter_template_images",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    }
+  ]
+}
+''');
+      expect(
+        (await templatePathProvider.imageDirectory('app_shared', globals.fs, globals.logger)).path,
+        globals.fs.path.absolute(
+          'flutter_template_images',
+          'templates',
+          'app_shared',
+        ),
+      );
+    }, overrides: overrides);
   });
 
   group('renders template', () {
@@ -117,6 +194,23 @@ void main() {
       expect(logger.errorText, isEmpty);
       expect(logger.statusText, isEmpty);
     });
+  });
+
+  testWithoutContext('escapeYamlString', () {
+    expect(escapeYamlString(''), r'""');
+    expect(escapeYamlString('\x00\n\r\t\b'), r'"\0\n\r\t\x08"');
+    expect(escapeYamlString('test'), r'"test"');
+    expect(escapeYamlString('test\n test'), r'"test\n test"');
+    expect(escapeYamlString('\x00\x01\x02\x0c\x19\xab'), r'"\0\x01\x02\x0c\x19«"');
+    expect(escapeYamlString('"'), r'"\""');
+    expect(escapeYamlString(r'\'), r'"\\"');
+    expect(escapeYamlString('[user branch]'), r'"[user branch]"');
+    expect(escapeYamlString('main'), r'"main"');
+    expect(escapeYamlString('TEST_BRANCH'), r'"TEST_BRANCH"');
+    expect(escapeYamlString(' '), r'" "');
+    expect(escapeYamlString(' \n '), r'" \n "');
+    expect(escapeYamlString('""'), r'"\"\""');
+    expect(escapeYamlString('"\x01\u{0263A}\u{1F642}'), r'"\"\x01☺🙂"');
   });
 }
 

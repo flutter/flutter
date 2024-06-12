@@ -16,7 +16,7 @@ void main() {
 
     painter.text = const TextSpan(
       text: 'ABC DEF\nGHI',
-      style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
+      style: TextStyle(fontSize: 10.0),
     );
     painter.layout();
 
@@ -32,6 +32,7 @@ void main() {
       painter.getWordBoundary(const TextPosition(offset: 9)),
       const TextRange(start: 8, end: 11),
     );
+    painter.dispose();
   });
 
   test('TextPainter - bidi overrides in LTR', () {
@@ -41,7 +42,7 @@ void main() {
     painter.text = const TextSpan(
       text: '${Unicode.RLO}HEBREW1 ${Unicode.LRO}english2${Unicode.PDF} HEBREW3${Unicode.PDF}',
            //      0       12345678      9      101234567       18     90123456       27
-      style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
+      style: TextStyle(fontSize: 10.0),
     );
     TextSpan textSpan = painter.text! as TextSpan;
     expect(textSpan.text!.length, 28);
@@ -164,6 +165,7 @@ void main() {
       // The list currently has one extra bogus entry (the last entry, for the
       // trailing U+202C PDF, should be empty but is one-pixel-wide instead).
     ], skip: skipExpectsWithKnownBugs); // https://github.com/flutter/flutter/issues/87536
+    painter.dispose();
   }, skip: skipTestsWithKnownBugs); // https://github.com/flutter/flutter/issues/87536
 
   test('TextPainter - bidi overrides in RTL', () {
@@ -173,7 +175,7 @@ void main() {
     painter.text = const TextSpan(
       text: '${Unicode.RLO}HEBREW1 ${Unicode.LRO}english2${Unicode.PDF} HEBREW3${Unicode.PDF}',
            //      0       12345678      9      101234567       18     90123456       27
-      style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
+      style: TextStyle(fontSize: 10.0),
     );
     final TextSpan textSpan = painter.text! as TextSpan;
     expect(textSpan.text!.length, 28);
@@ -255,6 +257,7 @@ void main() {
       // The list is currently in the wrong order (so selection boxes will paint in the wrong order).
       skip: skipExpectsWithKnownBugs, // https://github.com/flutter/flutter/issues/87536
     );
+    painter.dispose();
   }, skip: skipTestsWithKnownBugs); // https://github.com/flutter/flutter/issues/87536
 
   test('TextPainter - forced line-wrapping with bidi', () {
@@ -263,7 +266,7 @@ void main() {
 
     painter.text = const TextSpan(
       text: 'A\u05D0', // A, Alef
-      style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
+      style: TextStyle(fontSize: 10.0),
     );
     final TextSpan textSpan = painter.text! as TextSpan;
     expect(textSpan.text!.length, 2);
@@ -298,9 +301,9 @@ void main() {
       painter.getOffsetForCaret(const TextPosition(offset: 2, affinity: TextAffinity.upstream), Rect.zero),
       const Offset(0.0, 10.0),
     );
-    expect( // after the Alef
+    expect( // To the right of the Alef
       painter.getOffsetForCaret(const TextPosition(offset: 2), Rect.zero),
-      const Offset(0.0, 10.0),
+      const Offset(10.0, 10.0),
     );
 
     expect(
@@ -322,6 +325,7 @@ void main() {
         TextBox.fromLTRBD(0.0, 10.0, 10.0, 20.0, TextDirection.rtl), // Alef
       ],
     );
+    painter.dispose();
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/32238
 
   test('TextPainter - line wrap mid-word', () {
@@ -329,14 +333,14 @@ void main() {
       ..textDirection = TextDirection.ltr;
 
     painter.text = const TextSpan(
-      style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
+      style: TextStyle(fontSize: 10.0),
       children: <TextSpan>[
         TextSpan(
           text: 'hello', // width 50
         ),
         TextSpan(
           text: 'lovely', // width 120
-          style: TextStyle(fontFamily: 'Ahem', fontSize: 20.0),
+          style: TextStyle(fontSize: 20.0),
         ),
         TextSpan(
           text: 'world', // width 50
@@ -356,6 +360,7 @@ void main() {
       // horizontal offsets are one pixel off in places; vertical offsets are good
       skip: skipExpectsWithKnownBugs, // https://github.com/flutter/flutter/issues/87536
     );
+    painter.dispose();
   }, skip: skipTestsWithKnownBugs); // https://github.com/flutter/flutter/issues/87536
 
   test('TextPainter - line wrap mid-word, bidi - LTR base', () {
@@ -363,14 +368,14 @@ void main() {
       ..textDirection = TextDirection.ltr;
 
     painter.text = const TextSpan(
-      style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
+      style: TextStyle(fontSize: 10.0),
       children: <TextSpan>[
         TextSpan(
           text: 'hello', // width 50
         ),
         TextSpan(
           text: '\u062C\u0645\u064A\u0644', // width 80
-          style: TextStyle(fontFamily: 'Ahem', fontSize: 20.0),
+          style: TextStyle(fontSize: 20.0),
         ),
         TextSpan(
           text: 'world', // width 50
@@ -412,6 +417,7 @@ void main() {
       <TextBox>[TextBox.fromLTRBD(70.0, 28.0, 80.0, 38.0, TextDirection.ltr)],
       <TextBox>[TextBox.fromLTRBD(80.0, 28.0, 90.0, 38.0, TextDirection.ltr)],
     ]);
+    painter.dispose();
   }, skip: skipTestsWithKnownBugs); // https://github.com/flutter/flutter/issues/87536
 
   test('TextPainter - line wrap mid-word, bidi - RTL base', () {
@@ -419,14 +425,14 @@ void main() {
       ..textDirection = TextDirection.rtl;
 
     painter.text = const TextSpan(
-      style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
+      style: TextStyle(fontSize: 10.0),
       children: <TextSpan>[
         TextSpan(
           text: 'hello', // width 50
         ),
         TextSpan(
           text: '\u062C\u0645\u064A\u0644', // width 80
-          style: TextStyle(fontFamily: 'Ahem', fontSize: 20.0),
+          style: TextStyle(fontSize: 20.0),
         ),
         TextSpan(
           text: 'world', // width 50
@@ -447,6 +453,7 @@ void main() {
       // The list is currently in the wrong order (so selection boxes will paint in the wrong order).
       skip: skipExpectsWithKnownBugs, // https://github.com/flutter/flutter/issues/87536
     );
+    painter.dispose();
   }, skip: skipTestsWithKnownBugs); // https://github.com/flutter/flutter/issues/87536
 
   test('TextPainter - multiple levels', () {
@@ -456,7 +463,7 @@ void main() {
     final String pyramid = rlo(lro(rlo(lro(rlo('')))));
     painter.text = TextSpan(
       text: pyramid,
-      style: const TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
+      style: const TextStyle(fontSize: 10.0),
     );
     painter.layout();
 
@@ -478,6 +485,7 @@ void main() {
       // Also currently there's an extraneous box at the start of the list.
       skip: skipExpectsWithKnownBugs, // https://github.com/flutter/flutter/issues/87536
     );
+    painter.dispose();
   }, skip: skipTestsWithKnownBugs); // https://github.com/flutter/flutter/issues/87536
 
   test('TextPainter - getPositionForOffset - RTL in LTR', () {
@@ -486,7 +494,7 @@ void main() {
 
     painter.text = const TextSpan(
       text: 'ABC\u05D0\u05D1\u05D2DEF', // A B C Alef Bet Gimel D E F -- but the Hebrew letters are RTL
-      style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
+      style: TextStyle(fontSize: 10.0),
     );
     painter.layout();
 
@@ -561,6 +569,7 @@ void main() {
       painter.getPositionForOffset(const Offset(100.0, 5.0)).toString(),
       const TextPosition(offset: 9, affinity: TextAffinity.upstream).toString(),
     );
+    painter.dispose();
   }, skip: skipTestsWithKnownBugs); // https://github.com/flutter/flutter/issues/87536
 
   test('TextPainter - getPositionForOffset - LTR in RTL', () {
@@ -569,7 +578,7 @@ void main() {
 
     painter.text = const TextSpan(
       text: '\u05D0\u05D1\u05D2ABC\u05D3\u05D4\u05D5',
-      style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
+      style: TextStyle(fontSize: 10.0),
     );
     painter.layout();
 
@@ -606,6 +615,7 @@ void main() {
       painter.getPositionForOffset(const Offset(62.0, 5.0)).toString(),
       const TextPosition(offset: 3, affinity: TextAffinity.upstream).toString(),
     );
+    painter.dispose();
   }, skip: skipTestsWithKnownBugs); // https://github.com/flutter/flutter/issues/87536
 
   test('TextPainter - Spaces', () {
@@ -614,7 +624,7 @@ void main() {
 
     painter.text = const TextSpan(
       text: ' ',
-      style: TextStyle(fontFamily: 'Ahem', fontSize: 100.0),
+      style: TextStyle(fontSize: 100.0),
       children: <TextSpan>[
         TextSpan(
           text: ' ',
@@ -667,6 +677,7 @@ void main() {
       // Horizontal offsets are currently one pixel off in places; vertical offsets are good.
       skip: skipExpectsWithKnownBugs, // https://github.com/flutter/flutter/issues/87536
     );
+    painter.dispose();
   }, skip: skipTestsWithKnownBugs); // https://github.com/flutter/flutter/issues/87536
 
   test('TextPainter - empty text baseline', () {
@@ -674,10 +685,11 @@ void main() {
       ..textDirection = TextDirection.ltr;
     painter.text = const TextSpan(
       text: '',
-      style: TextStyle(fontFamily: 'Ahem', fontSize: 100.0, height: 1.0),
+      style: TextStyle(fontFamily: 'FlutterTest', fontSize: 100.0, height: 1.0),
     );
     painter.layout();
-    expect(painter.computeDistanceToActualBaseline(TextBaseline.alphabetic), moreOrLessEquals(80.0, epsilon: 0.001));
+    expect(painter.computeDistanceToActualBaseline(TextBaseline.alphabetic), 75.0);
+    painter.dispose();
   });
 }
 

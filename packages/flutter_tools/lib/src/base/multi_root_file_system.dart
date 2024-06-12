@@ -44,8 +44,7 @@ class MultiRootFileSystem extends ForwardingFileSystem {
     required FileSystem delegate,
     required String scheme,
     required List<String> roots,
-  })   : assert(delegate != null),
-        assert(roots.isNotEmpty),
+  })   : assert(roots.isNotEmpty),
         _scheme = scheme,
         _roots = roots.map((String root) => delegate.path.normalize(root)).toList(),
         super(delegate);
@@ -116,18 +115,15 @@ class MultiRootFileSystem extends ForwardingFileSystem {
   /// If the path is a multiroot uri, resolve to the actual path of the
   /// underlying file system. Otherwise, return as is.
   dynamic _resolve(dynamic path) {
-    Uri uri;
     if (path == null) {
       return null;
-    } else if (path is String) {
-      uri = Uri.parse(path);
-    } else if (path is Uri) {
-      uri = path;
-    } else if (path is FileSystemEntity) {
-      uri = path.uri;
-    } else {
-      throw ArgumentError('Invalid type for "path": ${(path as Object?)?.runtimeType}');
     }
+    final Uri uri = switch (path) {
+      String() => Uri.parse(path),
+      Uri() => path,
+      FileSystemEntity() => path.uri,
+      _ => throw ArgumentError('Invalid type for "path": ${(path as Object?)?.runtimeType}'),
+    };
 
     if (!uri.hasScheme || uri.scheme != _scheme) {
       return path;
@@ -249,7 +245,8 @@ class MultiRootDirectory
     'MultiRootDirectory(fileSystem = $fileSystem, delegate = $delegate)';
 }
 
-class MultiRootLink extends MultiRootFileSystemEntity<Link, io.Link>
+class MultiRootLink
+    extends MultiRootFileSystemEntity<Link, io.Link>
     with ForwardingLink {
   MultiRootLink({
     required super.fileSystem,

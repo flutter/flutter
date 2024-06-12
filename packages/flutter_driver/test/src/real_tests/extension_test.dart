@@ -7,15 +7,16 @@
 // https://github.com/flutter/flutter/issues/85160
 // Fails with "flutter test --test-randomize-ordering-seed=20210721"
 @Tags(<String>['no-shuffle'])
+library;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide TextInputAction;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter/services.dart' hide TextInputAction;
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:flutter_driver/src/extension/extension.dart';
-import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_test/flutter_test.dart' hide TextInputAction;
 
 import 'stubs/stub_command.dart';
 import 'stubs/stub_command_extension.dart';
@@ -472,7 +473,7 @@ void main() {
     });
 
     testWidgets('works when semantics are enabled', (WidgetTester tester) async {
-      final SemanticsHandle semantics = RendererBinding.instance.pipelineOwner.ensureSemantics();
+      final SemanticsHandle semantics = tester.ensureSemantics();
       await tester.pumpWidget(
         const Text('hello', textDirection: TextDirection.ltr));
 
@@ -496,7 +497,7 @@ void main() {
     }, semanticsEnabled: false);
 
     testWidgets('throws state error multiple matches are found', (WidgetTester tester) async {
-      final SemanticsHandle semantics = RendererBinding.instance.pipelineOwner.ensureSemantics();
+      final SemanticsHandle semantics = tester.ensureSemantics();
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
@@ -648,10 +649,10 @@ void main() {
       }
 
       await tester.pumpWidget(
-          MaterialApp(
+          const MaterialApp(
               home: Column(
-                key: const ValueKey<String>('column'),
-                children: const <Widget>[
+                key: ValueKey<String>('column'),
+                children: <Widget>[
                   Text('Hello1', key: ValueKey<String>('text1')),
                   Text('Hello2', key: ValueKey<String>('text2')),
                   Text('Hello3', key: ValueKey<String>('text3')),
@@ -693,10 +694,10 @@ void main() {
       }
 
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: Column(
-            key: const ValueKey<String>('column'),
-            children: const <Widget>[
+            key: ValueKey<String>('column'),
+            children: <Widget>[
               Text('Hello1', key: ValueKey<String>('text1')),
               Text('Hello2', key: ValueKey<String>('text2')),
               Text('Hello3', key: ValueKey<String>('text3')),
@@ -728,22 +729,22 @@ void main() {
       }
 
       await tester.pumpWidget(
-          MaterialApp(
+          const MaterialApp(
             home: Center(
                 child: SizedBox(
-                  key: const ValueKey<String>('parent'),
+                  key: ValueKey<String>('parent'),
                   height: 100,
                   width: 100,
                   child: Center(
                     child: Row(
-                      children: const <Widget>[
+                      children: <Widget>[
                         SizedBox(
                           key: ValueKey<String>('leftchild'),
                           width: 25,
                           height: 25,
                         ),
                         SizedBox(
-                          key: ValueKey<String>('righttchild'),
+                          key: ValueKey<String>('rightchild'),
                           width: 25,
                           height: 25,
                         ),
@@ -773,7 +774,7 @@ void main() {
       await tester.pump(const Duration(seconds: 2));
       expect(await result, null);
 
-      result = getAncestorTopLeft(of: 'leftchild', matching: 'righttchild');
+      result = getAncestorTopLeft(of: 'leftchild', matching: 'rightchild');
       await tester.pump(const Duration(seconds: 2));
       expect(await result, null);
     });
@@ -1146,13 +1147,11 @@ void main() {
       return result;
     }
 
-    final Widget testWidget = MaterialApp(
+    const Widget testWidget = MaterialApp(
       home: Material(
-        child: Column(children: const<Widget> [
+        child: Column(children: <Widget> [
           Text('Hello ', key: Key('widgetOne')),
-          SizedBox(
-            height: 0,
-            width: 0,
+          SizedBox.shrink(
             child: Text('World!', key: Key('widgetTwo')),
           ),
         ]),
@@ -1244,6 +1243,43 @@ void main() {
           'response': <String, dynamic>{},
         },
       );
+    });
+  });
+
+  group('sendTextInputAction', () {
+    late FlutterDriverExtension driverExtension;
+
+    Future<void> sendAction(TextInputAction action) async {
+      final Map<String, String> arguments = SendTextInputAction(action).serialize();
+      await driverExtension.call(arguments);
+    }
+
+    MaterialApp testWidget(TextEditingController controller) => MaterialApp(
+      home: Material(
+        child: Center(
+          child: TextField(
+            key: const ValueKey<String>('foo'),
+            autofocus: true,
+            controller: controller,
+            onSubmitted: (_) {
+              controller.value = const TextEditingValue(text: 'bar');
+            },
+          ),
+        ),
+      ),
+    );
+
+    testWidgets('press done trigger onSubmitted and change value', (WidgetTester tester) async {
+      driverExtension = FlutterDriverExtension((String? arg) async => '', true, true);
+
+      final TextEditingController controller = TextEditingController(
+        text: 'foo',
+      );
+      await tester.pumpWidget(testWidget(controller));
+
+      expect(controller.value.text, 'foo');
+      await sendAction(TextInputAction.done);
+      expectSync(controller.value.text, 'bar');
     });
   });
 }

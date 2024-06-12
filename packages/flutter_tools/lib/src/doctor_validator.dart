@@ -36,7 +36,7 @@ enum ValidationType {
   missing,
   partial,
   notAvailable,
-  installed,
+  success,
 }
 
 enum ValidationMessageType {
@@ -116,21 +116,18 @@ class GroupedValidator extends DoctorValidator {
     for (final ValidationResult result in results) {
       statusInfo ??= result.statusInfo;
       switch (result.type) {
-        case ValidationType.installed:
+        case ValidationType.success:
           if (mergedType == ValidationType.missing) {
             mergedType = ValidationType.partial;
           }
-          break;
         case ValidationType.notAvailable:
         case ValidationType.partial:
           mergedType = ValidationType.partial;
-          break;
         case ValidationType.crash:
         case ValidationType.missing:
-          if (mergedType == ValidationType.installed) {
+          if (mergedType == ValidationType.success) {
             mergedType = ValidationType.partial;
           }
-          break;
       }
       mergedMessages.addAll(result.messages);
     }
@@ -142,7 +139,7 @@ class GroupedValidator extends DoctorValidator {
 
 @immutable
 class ValidationResult {
-  /// [ValidationResult.type] should only equal [ValidationResult.installed]
+  /// [ValidationResult.type] should only equal [ValidationResult.success]
   /// if no [messages] are hints or errors.
   const ValidationResult(this.type, this.messages, { this.statusInfo });
 
@@ -165,50 +162,36 @@ class ValidationResult {
   final List<ValidationMessage> messages;
 
   String get leadingBox {
-    assert(type != null);
-    switch (type) {
-      case ValidationType.crash:
-        return '[☠]';
-      case ValidationType.missing:
-        return '[✗]';
-      case ValidationType.installed:
-        return '[✓]';
-      case ValidationType.notAvailable:
-      case ValidationType.partial:
-        return '[!]';
-    }
+    return switch (type) {
+      ValidationType.crash   => '[☠]',
+      ValidationType.missing => '[✗]',
+      ValidationType.success => '[✓]',
+      ValidationType.notAvailable || ValidationType.partial => '[!]',
+    };
   }
 
   String get coloredLeadingBox {
-    assert(type != null);
-    switch (type) {
-      case ValidationType.crash:
-        return globals.terminal.color(leadingBox, TerminalColor.red);
-      case ValidationType.missing:
-        return globals.terminal.color(leadingBox, TerminalColor.red);
-      case ValidationType.installed:
-        return globals.terminal.color(leadingBox, TerminalColor.green);
-      case ValidationType.notAvailable:
-      case ValidationType.partial:
-        return globals.terminal.color(leadingBox, TerminalColor.yellow);
-    }
+    return globals.terminal.color(leadingBox, switch (type) {
+      ValidationType.success => TerminalColor.green,
+      ValidationType.crash || ValidationType.missing => TerminalColor.red,
+      ValidationType.notAvailable || ValidationType.partial => TerminalColor.yellow,
+    });
   }
 
   /// The string representation of the type.
   String get typeStr {
-    assert(type != null);
-    switch (type) {
-      case ValidationType.crash:
-        return 'crash';
-      case ValidationType.missing:
-        return 'missing';
-      case ValidationType.installed:
-        return 'installed';
-      case ValidationType.notAvailable:
-        return 'notAvailable';
-      case ValidationType.partial:
-        return 'partial';
-    }
+    return switch (type) {
+      ValidationType.crash        => 'crash',
+      ValidationType.missing      => 'missing',
+      ValidationType.success      => 'installed',
+      ValidationType.notAvailable => 'notAvailable',
+      ValidationType.partial      => 'partial',
+    };
+  }
+
+  @override
+  String toString() {
+    return '$runtimeType($type, $messages, $statusInfo)';
   }
 }
 
@@ -255,25 +238,19 @@ class ValidationMessage {
   bool get isInformation => type == ValidationMessageType.information;
 
   String get indicator {
-    switch (type) {
-      case ValidationMessageType.error:
-        return '✗';
-      case ValidationMessageType.hint:
-        return '!';
-      case ValidationMessageType.information:
-        return '•';
-    }
+    return switch (type) {
+      ValidationMessageType.error => '✗',
+      ValidationMessageType.hint => '!',
+      ValidationMessageType.information => '•',
+    };
   }
 
   String get coloredIndicator {
-    switch (type) {
-      case ValidationMessageType.error:
-        return globals.terminal.color(indicator, TerminalColor.red);
-      case ValidationMessageType.hint:
-        return globals.terminal.color(indicator, TerminalColor.yellow);
-      case ValidationMessageType.information:
-        return globals.terminal.color(indicator, TerminalColor.green);
-    }
+    return globals.terminal.color(indicator, switch (type) {
+      ValidationMessageType.error       => TerminalColor.red,
+      ValidationMessageType.hint        => TerminalColor.yellow,
+      ValidationMessageType.information => TerminalColor.green,
+    });
   }
 
   @override

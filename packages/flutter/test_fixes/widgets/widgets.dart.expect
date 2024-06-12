@@ -1,0 +1,180 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import 'package:flutter/widgets.dart';
+
+void main() {
+  // Generic reference variables.
+  BuildContext context;
+  RenderObjectWidget renderObjectWidget;
+  RenderObject renderObject;
+  Object object;
+  TickerProvider vsync;
+
+  // Changes made in https://github.com/flutter/flutter/pull/123352
+  WidgetsBinding.instance.rootElement;
+
+  // Changes made in https://github.com/flutter/flutter/pull/119647
+  MediaQueryData.fromView(View.of(context));
+
+  // Changes made in https://github.com/flutter/flutter/pull/119186 and https://github.com/flutter/flutter/pull/81067
+  AnimatedSize(duration: Duration.zero);
+
+  // Changes made in https://github.com/flutter/flutter/pull/45941 and https://github.com/flutter/flutter/pull/83843
+  final WidgetsBinding binding = WidgetsBinding.instance;
+  binding.deferFirstFrame();
+  binding.allowFirstFrame();
+
+  // Changes made in https://github.com/flutter/flutter/pull/44189
+  const StatefulElement statefulElement = StatefulElement(myWidget);
+  statefulElement.dependOnInheritedElement(ancestor);
+
+  // Changes made in https://github.com/flutter/flutter/pull/61648
+  const Form form = Form(autovalidateMode: AutovalidateMode.always);
+  const Form form = Form(autovalidateMode: AutovalidateMode.disabled);
+  const Form form = Form(error: '');
+  final autoMode = form.autovalidateMode;
+
+  // Changes made in https://github.com/flutter/flutter/pull/61648
+  const FormField formField = FormField(autovalidateMode: AutovalidateMode.always);
+  const FormField formField = FormField(autovalidateMode: AutovalidateMode.disabled);
+  const FormField formField = FormField(error: '');
+  final autoMode = formField.autovalidateMode;
+
+  // Changes made in https://github.com/flutter/flutter/pull/66305
+  const Stack stack = Stack(clipBehavior: Clip.none);
+  const Stack stack = Stack(clipBehavior: Clip.hardEdge);
+  const Stack stack = Stack(error: '');
+  final behavior = stack.clipBehavior;
+
+  // Changes made in https://github.com/flutter/flutter/pull/68736
+  MediaQuery.maybeOf(context);
+  MediaQuery.of(context);
+  MediaQuery.of(error: '');
+
+  // Changes made in https://github.com/flutter/flutter/pull/70726
+  Navigator.maybeOf(context);
+  Navigator.of(context);
+  Navigator.of(error: '');
+
+  // Changes made in https://github.com/flutter/flutter/pull/68910
+  Router.maybeOf(context);
+  Router.of(context);
+  Router.of(error: '');
+
+  // Changes made in https://github.com/flutter/flutter/pull/68911
+  Localizations.maybeLocaleOf(context);
+  Localizations.localeOf(context);
+  Localizations.localeOf(error: '');
+
+  // Changes made in https://github.com/flutter/flutter/pull/68917
+  FocusTraversalOrder.maybeOf(context);
+  FocusTraversalOrder.of(context);
+  FocusTraversalOrder.of(error: '');
+  FocusTraversalGroup.of(error: '');
+  FocusTraversalGroup.maybeOf(context);
+  FocusTraversalGroup.of(context);
+  Focus.maybeOf(context);
+  Focus.of(context);
+  Focus.of(error: '');
+
+  // Changes made in https://github.com/flutter/flutter/pull/68921
+  Shortcuts.maybeOf(context);
+  Shortcuts.of(context);
+  Shortcuts.of(error: '');
+
+  // Changes made in https://github.com/flutter/flutter/pull/68925
+  AnimatedList.maybeOf(context);
+  AnimatedList.of(context);
+  AnimatedList.of(error: '');
+  SliverAnimatedList.of(error: '');
+  SliverAnimatedList.maybeOf(context);
+  SliverAnimatedList.of(context);
+
+  // Changes made in https://github.com/flutter/flutter/pull/59127
+  const BottomNavigationBarItem bottomNavigationBarItem = BottomNavigationBarItem(label: myTitle);
+  const BottomNavigationBarItem bottomNavigationBarItem = BottomNavigationBarItem();
+  const BottomNavigationBarItem bottomNavigationBarItem = BottomNavigationBarItem(error: '');
+  bottomNavigationBarItem.label;
+
+  // Changes made in https://github.com/flutter/flutter/pull/79160
+  Draggable draggable = Draggable();
+  draggable = Draggable(dragAnchorStrategy: childDragAnchorStrategy);
+  draggable = Draggable(dragAnchorStrategy: pointerDragAnchorStrategy);
+  draggable = Draggable(error: '');
+  draggable.dragAnchorStrategy;
+
+  // Changes made in https://github.com/flutter/flutter/pull/79160
+  LongPressDraggable longPressDraggable = LongPressDraggable();
+  longPressDraggable = LongPressDraggable(dragAnchorStrategy: childDragAnchorStrategy);
+  longPressDraggable = LongPressDraggable(dragAnchorStrategy: pointerDragAnchorStrategy);
+  longPressDraggable = LongPressDraggable(error: '');
+  longPressDraggable.dragAnchorStrategy;
+
+  // Changes made in https://github.com/flutter/flutter/pull/64254
+  final LeafRenderObjectElement leafElement = LeafRenderObjectElement();
+  leafElement.insertRenderObjectChild(renderObject, object);
+  leafElement.moveRenderObjectChild(renderObject, object);
+  leafElement.removeRenderObjectChild(renderObject);
+  final ListWheelElement listWheelElement = ListWheelElement();
+  listWheelElement.insertRenderObjectChild(renderObject, object);
+  listWheelElement.moveRenderObjectChild(renderObject, object);
+  listWheelElement.removeRenderObjectChild(renderObject);
+  final MultiChildRenderObjectElement multiChildRenderObjectElement = MultiChildRenderObjectElement();
+  multiChildRenderObjectElement.insertRenderObjectChild(renderObject, object);
+  multiChildRenderObjectElement.moveRenderObjectChild(renderObject, object);
+  multiChildRenderObjectElement.removeRenderObjectChild(renderObject);
+  final SingleChildRenderObjectElement singleChildRenderObjectElement = SingleChildRenderObjectElement();
+  singleChildRenderObjectElement.insertRenderObjectChild(renderObject, object);
+  singleChildRenderObjectElement.moveRenderObjectChild(renderObject, object);
+  singleChildRenderObjectElement.removeRenderObjectChild(renderObject);
+  final SliverMultiBoxAdaptorElement sliverMultiBoxAdaptorElement = SliverMultiBoxAdaptorElement();
+  sliverMultiBoxAdaptorElement.insertRenderObjectChild(renderObject, object);
+  sliverMultiBoxAdaptorElement.moveRenderObjectChild(renderObject, object);
+  sliverMultiBoxAdaptorElement.removeRenderObjectChild(renderObject);
+  final RenderObjectToWidgetElement renderObjectToWidgetElement = RenderObjectToWidgetElement(widget);
+  renderObjectToWidgetElement.insertRenderObjectChild(renderObject, object);
+  renderObjectToWidgetElement.moveRenderObjectChild(renderObject, object);
+  renderObjectToWidgetElement.removeRenderObjectChild(renderObject);
+
+  // Changes made in https://flutter.dev/docs/release/breaking-changes/clip-behavior
+  ListWheelViewport listWheelViewport = ListWheelViewport();
+  listWheelViewport = ListWheelViewport(clipBehavior: Clip.hardEdge);
+  listWheelViewport = ListWheelViewport(clipBehavior: Clip.none);
+  listWheelViewport = ListWheelViewport(error: '');
+  listWheelViewport.clipBehavior;
+
+  // Changes made in https://github.com/flutter/flutter/pull/87839
+  final OverscrollIndicatorNotification notification = OverscrollIndicatorNotification(leading: true);
+  final OverscrollIndicatorNotification notification = OverscrollIndicatorNotification(error: '');
+  notification.disallowIndicator();
+
+  // Changes made in https://github.com/flutter/flutter/pull/96957
+  RawScrollbar rawScrollbar = RawScrollbar(thumbVisibility: true);
+  nowShowing = rawScrollbar.thumbVisibility;
+
+  // Change made in https://github.com/flutter/flutter/pull/100381
+  SelectionOverlay.fadeDuration;
+
+  // Changes made in https://github.com/flutter/flutter/pull/78588
+  final ScrollBehavior scrollBehavior = ScrollBehavior();
+  scrollBehavior.buildOverscrollIndicator(context, child, axisDirection);
+
+  // Changes made in https://github.com/flutter/flutter/pull/114459
+  MediaQuery.boldTextOf(context);
+
+  // Changes made in https://github.com/flutter/flutter/pull/122555
+  final ScrollableDetails details = ScrollableDetails(
+    direction: AxisDirection.down,
+    decorationClipBehavior: Clip.none,
+  );
+  final Clip clip = details.decorationClipBehavior;
+
+  final PlatformMenuBar platformMenuBar = PlatformMenuBar(menus: <PlatformMenuItem>[], child: const SizedBox());
+  final Widget bodyValue = platformMenuBar.child;
+
+  // Changes made in TBD
+  final NavigatorState state = Navigator.of(context);
+  state.focusNode.enclosingScope!;
+}

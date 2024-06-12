@@ -17,13 +17,11 @@
 /// unless the additions are cleared as described above.
 const Set<String> kCorePackageAllowList = <String>{
   // Please keep this list in alphabetical order.
-  'archive',
   'async',
   'boolean_selector',
   'characters',
   'clock',
   'collection',
-  'crypto',
   'fake_async',
   'file',
   'flutter',
@@ -33,6 +31,9 @@ const Set<String> kCorePackageAllowList = <String>{
   'fuchsia_remote_debug_protocol',
   'integration_test',
   'intl',
+  'leak_tracker',
+  'leak_tracker_flutter_testing',
+  'leak_tracker_testing',
   'matcher',
   'material_color_utilities',
   'meta',
@@ -47,7 +48,6 @@ const Set<String> kCorePackageAllowList = <String>{
   'sync_http',
   'term_glyph',
   'test_api',
-  'typed_data',
   'vector_math',
   'vm_service',
   'webdriver',

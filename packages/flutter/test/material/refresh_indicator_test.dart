@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -250,12 +252,82 @@ void main() {
       ),
     );
 
-    await tester.fling(find.text('X'), const Offset(0.0, 100.0), 1000.0);
+    await tester.fling(find.text('X'), const Offset(0.0, 200.0), 1000.0);
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
     await tester.pump(const Duration(seconds: 1));
     await tester.pump(const Duration(seconds: 1));
     expect(refreshCalled, true);
+  });
+
+  testWidgets('RefreshIndicator - drag back not far enough to cancel', (WidgetTester tester) async {
+    refreshCalled = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: RefreshIndicator(
+          onRefresh: refresh,
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            children: const <Widget>[
+              SizedBox(
+                height: 200.0,
+                child: Text('X'),
+              ),
+              SizedBox(height: 1000),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final Offset startLocation = tester.getCenter(find.text('X'), warnIfMissed: true, callee: 'drag');
+    final TestPointer testPointer = TestPointer();
+    await tester.sendEventToBinding(testPointer.down(startLocation));
+    await tester.sendEventToBinding(testPointer.move(startLocation + const Offset(0.0, 175)));
+    await tester.pump();
+    await tester.sendEventToBinding(testPointer.move(startLocation + const Offset(0.0, 150)));
+    await tester.pump();
+    await tester.sendEventToBinding(testPointer.up());
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
+    expect(refreshCalled, true);
+  });
+
+  testWidgets('RefreshIndicator - drag back far enough to cancel', (WidgetTester tester) async {
+    refreshCalled = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: RefreshIndicator(
+          onRefresh: refresh,
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            children: const <Widget>[
+              SizedBox(
+                height: 200.0,
+                child: Text('X'),
+              ),
+              SizedBox(height: 1000),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final Offset startLocation = tester.getCenter(find.text('X'), warnIfMissed: true, callee: 'drag');
+    final TestPointer testPointer = TestPointer();
+    await tester.sendEventToBinding(testPointer.down(startLocation));
+    await tester.sendEventToBinding(testPointer.move(startLocation + const Offset(0.0, 175)));
+    await tester.pump();
+    await tester.sendEventToBinding(testPointer.move(startLocation + const Offset(0.0, 149)));
+    await tester.pump();
+    await tester.sendEventToBinding(testPointer.up());
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
+    expect(refreshCalled, false);
   });
 
   testWidgets('RefreshIndicator - show - slow', (WidgetTester tester) async {
@@ -406,15 +478,22 @@ void main() {
       ),
     );
 
-    await tester.fling(find.text('A'), const Offset(0.0, 300.0), 1000.0);
+    if (debugDefaultTargetPlatformOverride == TargetPlatform.macOS) {
+      await tester.fling(find.text('A'), const Offset(0.0, 1500.0), 10000.0);
+    }
+    else {
+      await tester.fling(find.text('A'), const Offset(0.0, 300.0), 1000.0);
+    }
     await tester.pump(const Duration(milliseconds: 100));
     expect(lastScrollOffset = controller.offset, lessThan(0.0));
     expect(refreshCalled, isFalse);
 
-    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 400));
     expect(controller.offset, greaterThan(lastScrollOffset));
     expect(controller.offset, lessThan(0.0));
     expect(refreshCalled, isTrue);
+
+    controller.dispose();
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets('RefreshIndicator does not force child to relayout', (WidgetTester tester) async {
@@ -610,6 +689,8 @@ void main() {
     await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
     await tester.pump(const Duration(seconds: 1)); // finish the indicator settle animation
     expect(tester.getCenter(find.byType(RefreshProgressIndicator)).dy, lessThan(300.0));
+
+    scrollController.dispose();
   });
 
   testWidgets('Reverse RefreshIndicator(anywhere mode) should be shown when dragging from non-zero scroll position', (WidgetTester tester) async {
@@ -646,6 +727,8 @@ void main() {
     await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
     await tester.pump(const Duration(seconds: 1)); // finish the indicator settle animation
     expect(tester.getCenter(find.byType(RefreshProgressIndicator)).dy, lessThan(300.0));
+
+    scrollController.dispose();
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/71936
@@ -683,6 +766,8 @@ void main() {
     await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
     await tester.pump(const Duration(seconds: 1)); // finish the indicator settle animation
     expect(find.byType(RefreshProgressIndicator), findsNothing);
+
+    scrollController.dispose();
   });
 
   testWidgets('Top RefreshIndicator(onEdge mode) should not be shown when dragging from non-zero scroll position', (WidgetTester tester) async {
@@ -717,6 +802,8 @@ void main() {
     await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
     await tester.pump(const Duration(seconds: 1)); // finish the indicator settle animation
     expect(find.byType(RefreshProgressIndicator), findsNothing);
+
+    scrollController.dispose();
   });
 
   testWidgets('Reverse RefreshIndicator(onEdge mode) should be shown when dragging from non-zero scroll position', (WidgetTester tester) async {
@@ -752,6 +839,8 @@ void main() {
     await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
     await tester.pump(const Duration(seconds: 1)); // finish the indicator settle animation
     expect(find.byType(RefreshProgressIndicator), findsNothing);
+
+    scrollController.dispose();
   });
 
   testWidgets('ScrollController.jumpTo should not trigger the refresh indicator', (WidgetTester tester) async {
@@ -784,6 +873,50 @@ void main() {
     await tester.pump(const Duration(seconds: 1)); // finish the indicator hide animation
 
     expect(refreshCalled, false);
+
+    scrollController.dispose();
+  });
+
+  testWidgets('RefreshIndicator.adaptive', (WidgetTester tester) async {
+    Widget buildFrame(TargetPlatform platform) {
+      return MaterialApp(
+        theme: ThemeData(platform: platform),
+        home: RefreshIndicator.adaptive(
+          onRefresh: refresh,
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
+              return SizedBox(
+                height: 200.0,
+                child: Text(item),
+              );
+            }).toList(),
+          ),
+        ),
+      );
+    }
+
+    for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.iOS, TargetPlatform.macOS ]) {
+      await tester.pumpWidget(buildFrame(platform));
+      await tester.pumpAndSettle(); // Finish the theme change animation.
+      await tester.fling(find.text('A'), const Offset(0.0, 300.0), 1000.0);
+      await tester.pump();
+
+      expect(find.byType(CupertinoActivityIndicator), findsOneWidget);
+      expect(find.byType(RefreshProgressIndicator), findsNothing);
+    }
+
+    for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows ]) {
+      await tester.pumpWidget(buildFrame(platform));
+      await tester.pumpAndSettle(); // Finish the theme change animation.
+      await tester.fling(find.text('A'), const Offset(0.0, 300.0), 1000.0);
+      await tester.pump();
+
+      expect(tester.getSemantics(find.byType(RefreshProgressIndicator)), matchesSemantics(
+        label: 'Refresh',
+      ));
+      expect(find.byType(CupertinoActivityIndicator), findsNothing);
+    }
   });
 
   testWidgets('RefreshIndicator color defaults to ColorScheme.primary', (WidgetTester tester) async {
@@ -910,6 +1043,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: RefreshIndicator(
           onRefresh: refresh,
           child: Builder(
@@ -1004,5 +1138,69 @@ void main() {
     await tester.pump(const Duration(seconds: 1)); // finish the indicator hide animation
     expect(refreshCalled, true);
     expect(stretchAccepted, false);
+  });
+
+  testWidgets('RefreshIndicator manipulates value color opacity correctly', (WidgetTester tester) async {
+    final List<Color> colors = <Color>[
+      Colors.black,
+      Colors.black54,
+      Colors.white,
+      Colors.white54,
+      Colors.transparent,
+    ];
+    const List<double> positions = <double>[50.0, 100.0, 150.0];
+
+    Future<void> testColor(Color color) async {
+      final AnimationController positionController = AnimationController(vsync: const TestVSync());
+      addTearDown(positionController.dispose);
+      // Correspond to [_setupColorTween].
+      final Animation<Color?> valueColorAnimation = positionController.drive(
+        ColorTween(
+          begin: color.withAlpha(0),
+          end: color.withAlpha(color.alpha),
+        ).chain(
+          CurveTween(
+            // Correspond to [_kDragSizeFactorLimit].
+            curve: const Interval(0.0, 1.0 / 1.5),
+          ),
+        ),
+      );
+      await tester.pumpWidget(
+        MaterialApp(
+          home: RefreshIndicator(
+            onRefresh: refresh,
+            color: color,
+            child: ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              children: const <Widget>[Text('X')],
+            ),
+          ),
+        ),
+      );
+
+      RefreshProgressIndicator getIndicator() {
+        return tester.widget<RefreshProgressIndicator>(
+          find.byType(RefreshProgressIndicator),
+        );
+      }
+
+      // Correspond to [_kDragContainerExtentPercentage].
+      final double maxPosition = tester.view.physicalSize.height / tester.view.devicePixelRatio * 0.25;
+      for (final double position in positions) {
+        await tester.fling(find.text('X'), Offset(0.0, position), 1.0);
+        await tester.pump();
+        positionController.value = position / maxPosition;
+        expect(
+          getIndicator().valueColor!.value!.alpha,
+          valueColorAnimation.value!.alpha,
+        );
+        // Wait until the fling finishes before starting the next fling.
+        await tester.pumpAndSettle();
+      }
+    }
+
+    for (final Color color in colors) {
+      await testColor(color);
+    }
   });
 }

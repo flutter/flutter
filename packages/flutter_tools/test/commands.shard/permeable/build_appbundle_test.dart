@@ -2,34 +2,41 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:args/command_runner.dart';
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_builder.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_appbundle.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/android_common.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fakes.dart' show FakeFlutterVersion;
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
   Cache.disableLocking();
 
   group('Usage', () {
-    Directory tempDir;
-    TestUsage testUsage;
+    late Directory tempDir;
+    late TestUsage testUsage;
+    late FakeAnalytics fakeAnalytics;
 
     setUp(() {
       tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
       testUsage = TestUsage();
+      fakeAnalytics = getInitializedFakeAnalyticsInstance(
+        fs: MemoryFileSystem.test(),
+        fakeFlutterVersion: FakeFlutterVersion(),
+      );
     });
 
     tearDown(() {
@@ -43,8 +50,24 @@ void main() {
 
       expect((await command.usageValues).commandBuildAppBundleTargetPlatform, 'android-arm,android-arm64,android-x64');
 
+      expect(
+        fakeAnalytics.sentEvents,
+        contains(Event.commandUsageValues(
+          workflow: 'appbundle',
+          commandHasTerminal: false,
+          buildAppBundleTargetPlatform: 'android-arm,android-arm64,android-x64',
+          buildAppBundleBuildMode: 'release',
+        )),
+      );
     }, overrides: <Type, Generator>{
       AndroidBuilder: () => FakeAndroidBuilder(),
+      Analytics: () => fakeAnalytics,
+    });
+
+    testUsingContext('alias aab', () async {
+      final BuildAppBundleCommand command =
+          BuildAppBundleCommand(logger: BufferLogger.test());
+      expect(command.aliases, contains('aab'));
     });
 
     testUsingContext('build type', () async {
@@ -87,10 +110,10 @@ void main() {
   });
 
   group('Gradle', () {
-    Directory tempDir;
-    FakeProcessManager processManager;
-    FakeAndroidSdk fakeAndroidSdk;
-    TestUsage testUsage;
+    late Directory tempDir;
+    late FakeProcessManager processManager;
+    late FakeAndroidSdk fakeAndroidSdk;
+    late TestUsage testUsage;
 
     setUp(() {
       testUsage = TestUsage();
@@ -114,7 +137,7 @@ void main() {
             arguments: <String>['--no-pub'],
           );
         }, throwsToolExit(
-          message: 'No Android SDK found. Try setting the ANDROID_SDK_ROOT environment variable',
+          message: 'No Android SDK found. Try setting the ANDROID_HOME environment variable',
         ));
       },
       overrides: <Type, Generator>{
@@ -213,9 +236,9 @@ void main() {
 
 Future<BuildAppBundleCommand> runBuildAppBundleCommand(
   String target, {
-  List<String> arguments,
+  List<String>? arguments,
 }) async {
-  final BuildAppBundleCommand command = BuildAppBundleCommand();
+  final BuildAppBundleCommand command = BuildAppBundleCommand(logger: BufferLogger.test());
   final CommandRunner<void> runner = createTestCommandRunner(command);
   await runner.run(<String>[
     'appbundle',

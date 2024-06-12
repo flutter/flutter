@@ -27,12 +27,20 @@ import 'theme.dart';
 ///    its subtree.
 ///  * [ButtonBar], which uses this to configure itself and its children
 ///    button widgets.
+@Deprecated(
+  'Use OverflowBar instead. '
+  'This feature was deprecated after v3.21.0-10.0.pre.',
+)
 @immutable
 class ButtonBarThemeData with Diagnosticable {
   /// Constructs the set of properties used to configure [ButtonBar] widgets.
   ///
   /// Both [buttonMinWidth] and [buttonHeight] must be non-negative if they
   /// are not null.
+  @Deprecated(
+    'Use OverflowBar instead. '
+    'This feature was deprecated after v3.21.0-10.0.pre.',
+  )
   const ButtonBarThemeData({
     this.alignment,
     this.mainAxisSize,
@@ -146,9 +154,8 @@ class ButtonBarThemeData with Diagnosticable {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static ButtonBarThemeData? lerp(ButtonBarThemeData? a, ButtonBarThemeData? b, double t) {
-    assert(t != null);
-    if (a == null && b == null) {
-      return null;
+    if (identical(a, b)) {
+      return a;
     }
     return ButtonBarThemeData(
       alignment: t < 0.5 ? a?.alignment : b?.alignment,
@@ -232,15 +239,13 @@ class ButtonBarThemeData with Diagnosticable {
 ///  * [ButtonBarThemeData], which describes the actual configuration of a button
 ///    bar theme.
 class ButtonBarTheme extends InheritedWidget {
-  /// Constructs a button bar theme that configures all descendent [ButtonBar]
+  /// Constructs a button bar theme that configures all descendant [ButtonBar]
   /// widgets.
-  ///
-  /// The [data] must not be null.
   const ButtonBarTheme({
     super.key,
     required this.data,
     required super.child,
-  }) : assert(data != null);
+  });
 
   /// The properties used for all descendant [ButtonBar] widgets.
   final ButtonBarThemeData data;

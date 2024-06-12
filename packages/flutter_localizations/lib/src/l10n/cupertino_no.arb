@@ -21,5 +21,11 @@
   "pasteButtonLabel": "Lim inn",
   "selectAllButtonLabel": "Velg alle",
   "modalBarrierDismissLabel": "Avvis",
-  "searchTextFieldPlaceholderLabel": "Søk"
+  "searchTextFieldPlaceholderLabel": "Søk",
+  "noSpellCheckReplacementsLabel": "Fant ingen erstatninger",
+  "menuDismissLabel": "Lukk menyen",
+  "lookUpButtonLabel": "Slå opp",
+  "searchWebButtonLabel": "Søk på nettet",
+  "shareButtonLabel": "Del…",
+  "clearButtonLabel": "Clear"
 }

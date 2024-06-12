@@ -11,13 +11,16 @@ import 'semantics_tester.dart';
 void main() {
   testWidgets('Semantics tester visits last child', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
-    const TextStyle textStyle = TextStyle(fontFamily: 'Ahem');
+    const TextStyle textStyle = TextStyle();
+    final TapGestureRecognizer recognizer = TapGestureRecognizer();
+    addTearDown(recognizer.dispose);
+
     await tester.pumpWidget(
       Text.rich(
         TextSpan(
           children: <TextSpan>[
             const TextSpan(text: 'hello'),
-            TextSpan(text: 'world', recognizer: TapGestureRecognizer()..onTap = () { }),
+            TextSpan(text: 'world', recognizer: recognizer..onTap = () { }),
           ],
           style: textStyle,
         ),

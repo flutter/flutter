@@ -14,6 +14,21 @@ import 'scheduler_tester.dart';
 class TestSchedulerBinding extends BindingBase with SchedulerBinding, ServicesBinding {
   final Map<String, List<Map<String, dynamic>>> eventsDispatched = <String, List<Map<String, dynamic>>>{};
 
+  VoidCallback? additionalHandleBeginFrame;
+  VoidCallback? additionalHandleDrawFrame;
+
+  @override
+  void handleBeginFrame(Duration? rawTimeStamp) {
+    additionalHandleBeginFrame?.call();
+    super.handleBeginFrame(rawTimeStamp);
+  }
+
+  @override
+  void handleDrawFrame() {
+    additionalHandleDrawFrame?.call();
+    super.handleDrawFrame();
+  }
+
   @override
   void postEvent(String eventKind, Map<String, dynamic> eventData) {
     getEventsDispatched(eventKind).add(eventData);
@@ -37,6 +52,11 @@ void main() {
 
   setUpAll(() {
     scheduler = TestSchedulerBinding();
+  });
+
+  tearDown(() {
+    scheduler.additionalHandleBeginFrame = null;
+    scheduler.additionalHandleDrawFrame = null;
   });
 
   test('Tasks are executed in the right order', () {
@@ -109,6 +129,25 @@ void main() {
     expect(scheduler.handleEventLoopCallback(), isFalse);
     expect(executedTasks, hasLength(1));
     expect(executedTasks[0], equals(0));
+  });
+
+  test('scheduleWarmUpFrame should flush microtasks between callbacks', () async {
+    addTearDown(() => scheduler.handleEventLoopCallback());
+
+    bool microtaskDone = false;
+    final Completer<void> drawFrameDone = Completer<void>();
+    scheduler.additionalHandleBeginFrame = () {
+      expect(microtaskDone, false);
+      scheduleMicrotask(() {
+        microtaskDone = true;
+      });
+    };
+    scheduler.additionalHandleDrawFrame = () {
+      expect(microtaskDone, true);
+      drawFrameDone.complete();
+    };
+    scheduler.scheduleWarmUpFrame();
+    await drawFrameDone.future;
   });
 
   test('2 calls to scheduleWarmUpFrame just schedules it once', () {
@@ -215,6 +254,8 @@ void main() {
     tick(const Duration(seconds: 8));
     expect(lastTimeStamp, const Duration(seconds: 3)); // 2s + (8 - 6)s / 2
     expect(lastSystemTimeStamp, const Duration(seconds: 8));
+
+    timeDilation = 1.0; // restore time dilation, or it will affect other tests
   });
 
   test('Animation frame scheduled in the middle of the warm-up frame', () {
@@ -249,6 +290,31 @@ void main() {
     // callback that reschedules the engine frame.
     warmUpDrawFrame();
     expect(scheduler.hasScheduledFrame, isTrue);
+  });
+
+  test('Can schedule futures to completion', () async {
+    bool isCompleted = false;
+
+    // `Future` is disallowed in this file due to the import of
+    // scheduler_tester.dart so annotations cannot be specified.
+    // ignore: always_specify_types
+    final result = scheduler.scheduleTask(
+      () async {
+        // Yield, so if awaiting `result` did not wait for completion of this
+        // task, the assertion on `isCompleted` will fail.
+        await null;
+        await null;
+
+        isCompleted = true;
+        return 1;
+      },
+      Priority.idle,
+    );
+
+    scheduler.handleEventLoopCallback();
+    await result;
+
+    expect(isCompleted, true);
   });
 }
 

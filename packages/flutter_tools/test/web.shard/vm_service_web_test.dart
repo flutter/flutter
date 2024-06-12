@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/vmservice.dart';
 import 'package:vm_service/vm_service.dart';
 import 'package:vm_service/vm_service_io.dart';
 
@@ -96,7 +97,7 @@ Future<void> validateFlutterVersion(VmService client) async {
     client.onEvent('Service'),
       emitsThrough(predicate((Event e) {
         if (e.kind == EventKind.kServiceRegistered &&
-            e.service == 'flutterVersion') {
+            e.service == kFlutterVersionServiceName) {
           method = e.method;
           return true;
         }

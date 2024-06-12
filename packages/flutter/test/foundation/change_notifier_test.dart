@@ -26,6 +26,12 @@ class A {
 }
 
 class B extends A with ChangeNotifier {
+  B() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      ChangeNotifier.maybeDispatchObjectCreation(this);
+    }
+  }
+
   @override
   void test() {
     notifyListeners();
@@ -34,6 +40,12 @@ class B extends A with ChangeNotifier {
 }
 
 class Counter with ChangeNotifier {
+  Counter() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      ChangeNotifier.maybeDispatchObjectCreation(this);
+    }
+  }
+
   int get value => _value;
   int _value = 0;
   set value(int value) {
@@ -49,6 +61,24 @@ class Counter with ChangeNotifier {
 }
 
 void main() {
+  testWidgets('ChangeNotifier can not dispose in callback', (WidgetTester tester) async {
+    final TestNotifier test = TestNotifier();
+    bool callbackDidFinish = false;
+    void foo() {
+      test.dispose();
+      callbackDidFinish = true;
+    }
+    test.addListener(foo);
+
+    test.notify();
+
+    final AssertionError error = tester.takeException() as AssertionError;
+    expect(error.toString().contains('dispose()'), isTrue);
+    // Make sure it crashes during dispose call.
+    expect(callbackDidFinish, isFalse);
+    test.dispose();
+  });
+
   testWidgets('ChangeNotifier', (WidgetTester tester) async {
     final List<String> log = <String>[];
     void listener() {
@@ -131,6 +161,7 @@ void main() {
     expect(log, <String>['badListener', 'listener1', 'listener2']);
     expect(tester.takeException(), isArgumentError);
     log.clear();
+    test.dispose();
   });
 
   test('ChangeNotifier with mutating listener', () {
@@ -280,6 +311,21 @@ void main() {
     source2.notify();
     source3.notify();
     expect(log, <String>['listener1', 'listener2', 'listener1', 'listener2']);
+    log.clear();
+  });
+
+  test('Merging change notifiers supports any iterable', () {
+    final TestNotifier source1 = TestNotifier();
+    final TestNotifier source2 = TestNotifier();
+    final List<String> log = <String>[];
+
+    final Listenable merged = Listenable.merge(<Listenable?>{source1, source2});
+    void listener() => log.add('listener');
+
+    merged.addListener(listener);
+    source1.notify();
+    source2.notify();
+    expect(log, <String>['listener', 'listener']);
     log.clear();
   });
 

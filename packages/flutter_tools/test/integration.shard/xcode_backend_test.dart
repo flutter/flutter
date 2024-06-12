@@ -9,6 +9,7 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../src/common.dart';
+import 'test_utils.dart';
 
 const String xcodeBackendPath = 'bin/xcode_backend.sh';
 const String xcodeBackendErrorHeader = '========================================================================';
@@ -66,7 +67,7 @@ void main() {
     expect(result.exitCode, isNot(0));
   }, skip: !io.Platform.isMacOS); // [intended] requires macos toolchain.
 
-  group('observatory Bonjour service keys', () {
+  group('vmService Bonjour service keys', () {
     late Directory buildDirectory;
     late File infoPlist;
 
@@ -78,15 +79,14 @@ void main() {
     test('handles when the Info.plist is missing', () async {
       final ProcessResult result = await Process.run(
         xcodeBackendPath,
-        <String>['test_observatory_bonjour_service'],
+        <String>['test_vm_service_bonjour_service'],
         environment: <String, String>{
           'CONFIGURATION': 'Debug',
           'BUILT_PRODUCTS_DIR': buildDirectory.path,
           'INFOPLIST_PATH': 'Info.plist',
         },
       );
-      expect(result.stdout, contains('Info.plist does not exist.'));
-      expect(result.exitCode, 0);
+      expect(result, const ProcessResultMatcher(stdoutPattern: 'Info.plist does not exist.'));
     });
 
     const String emptyPlist = '''
@@ -102,7 +102,7 @@ void main() {
 
       final ProcessResult result = await Process.run(
         xcodeBackendPath,
-        <String>['test_observatory_bonjour_service'],
+        <String>['test_vm_service_bonjour_service'],
         environment: <String, String>{
           'CONFIGURATION': 'Release',
           'BUILT_PRODUCTS_DIR': buildDirectory.path,
@@ -112,10 +112,10 @@ void main() {
 
       final String actualInfoPlist = infoPlist.readAsStringSync();
       expect(actualInfoPlist, isNot(contains('NSBonjourServices')));
-      expect(actualInfoPlist, isNot(contains('dartobservatory')));
+      expect(actualInfoPlist, isNot(contains('dartVmService')));
       expect(actualInfoPlist, isNot(contains('NSLocalNetworkUsageDescription')));
 
-      expect(result.exitCode, 0);
+      expect(result, const ProcessResultMatcher());
     });
 
     for (final String buildConfiguration in <String>['Debug', 'Profile']) {
@@ -124,7 +124,7 @@ void main() {
 
         final ProcessResult result = await Process.run(
           xcodeBackendPath,
-          <String>['test_observatory_bonjour_service'],
+          <String>['test_vm_service_bonjour_service'],
           environment: <String, String>{
             'CONFIGURATION': buildConfiguration,
             'BUILT_PRODUCTS_DIR': buildDirectory.path,
@@ -134,10 +134,10 @@ void main() {
 
         final String actualInfoPlist = infoPlist.readAsStringSync();
         expect(actualInfoPlist, contains('NSBonjourServices'));
-        expect(actualInfoPlist, contains('dartobservatory'));
+        expect(actualInfoPlist, contains('dartVmService'));
         expect(actualInfoPlist, contains('NSLocalNetworkUsageDescription'));
 
-        expect(result.exitCode, 0);
+        expect(result, const ProcessResultMatcher());
       });
     }
 
@@ -158,7 +158,7 @@ void main() {
 
       final ProcessResult result = await Process.run(
         xcodeBackendPath,
-        <String>['test_observatory_bonjour_service'],
+        <String>['test_vm_service_bonjour_service'],
         environment: <String, String>{
           'CONFIGURATION': 'Debug',
           'BUILT_PRODUCTS_DIR': buildDirectory.path,
@@ -173,7 +173,7 @@ void main() {
 <dict>
 	<key>NSBonjourServices</key>
 	<array>
-		<string>_dartobservatory._tcp</string>
+		<string>_dartVmService._tcp</string>
 		<string>_bogus._tcp</string>
 	</array>
 	<key>NSLocalNetworkUsageDescription</key>
@@ -181,7 +181,32 @@ void main() {
 </dict>
 </plist>
 ''');
-      expect(result.exitCode, 0);
+      expect(result, const ProcessResultMatcher());
+    });
+
+    test('does not add bonjour settings when port publication is disabled', () async {
+      infoPlist.writeAsStringSync('''
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+</dict>
+</plist>''');
+
+      final ProcessResult result = await Process.run(
+        xcodeBackendPath,
+        <String>['test_vm_service_bonjour_service'],
+        environment: <String, String>{
+          'CONFIGURATION': 'Debug',
+          'BUILT_PRODUCTS_DIR': buildDirectory.path,
+          'INFOPLIST_PATH': 'Info.plist',
+          'DISABLE_PORT_PUBLICATION': 'YES',
+        },
+      );
+
+      expect(infoPlist.readAsStringSync().contains('NSBonjourServices'), isFalse);
+      expect(infoPlist.readAsStringSync().contains('NSLocalNetworkUsageDescription'), isFalse);
+      expect(result, const ProcessResultMatcher());
     });
   }, skip: !io.Platform.isMacOS); // [intended] requires macos toolchain.
 }

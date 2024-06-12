@@ -127,9 +127,11 @@ abstract class MultiChildLayoutDelegate {
 
   /// True if a non-null LayoutChild was provided for the specified id.
   ///
-  /// Call this from the [performLayout] or [getSize] methods to
-  /// determine which children are available, if the child list might
-  /// vary.
+  /// Call this from the [performLayout] method to determine which children
+  /// are available, if the child list might vary.
+  ///
+  /// This method cannot be called from [getSize] as the size is not allowed
+  /// to depend on the children.
   bool hasChild(Object childId) => _idToChild![childId] != null;
 
   /// Ask the child to update its layout within the limits specified by
@@ -185,11 +187,6 @@ abstract class MultiChildLayoutDelegate {
         throw FlutterError(
           'The $this custom multichild layout delegate tried to position out a non-existent child:\n'
           'There is no child with the id "$childId".',
-        );
-      }
-      if (offset == null) {
-        throw FlutterError(
-          'The $this custom multichild layout delegate provided a null position for the child with id "$childId".',
         );
       }
       return true;
@@ -306,13 +303,10 @@ class RenderCustomMultiChildLayoutBox extends RenderBox
   with ContainerRenderObjectMixin<RenderBox, MultiChildLayoutParentData>,
        RenderBoxContainerDefaultsMixin<RenderBox, MultiChildLayoutParentData> {
   /// Creates a render object that customizes the layout of multiple children.
-  ///
-  /// The [delegate] argument must not be null.
   RenderCustomMultiChildLayoutBox({
     List<RenderBox>? children,
     required MultiChildLayoutDelegate delegate,
-  }) : assert(delegate != null),
-       _delegate = delegate {
+  }) : _delegate = delegate {
     addAll(children);
   }
 
@@ -327,7 +321,6 @@ class RenderCustomMultiChildLayoutBox extends RenderBox
   MultiChildLayoutDelegate get delegate => _delegate;
   MultiChildLayoutDelegate _delegate;
   set delegate(MultiChildLayoutDelegate newDelegate) {
-    assert(newDelegate != null);
     if (_delegate == newDelegate) {
       return;
     }
@@ -400,7 +393,8 @@ class RenderCustomMultiChildLayoutBox extends RenderBox
   }
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  @protected
+  Size computeDryLayout(covariant BoxConstraints constraints) {
     return _getSize(constraints);
   }
 

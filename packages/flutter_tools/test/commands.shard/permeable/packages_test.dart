@@ -2,13 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 // TODO(gspencergoog): Remove this tag once this test's state leaks/test
 // dependencies have been fixed.
 // https://github.com/flutter/flutter/issues/85160
 // Fails with "flutter test --test-randomize-ordering-seed=1000"
 @Tags(<String>['no-shuffle'])
+library;
 
 import 'dart:async';
 import 'dart:convert';
@@ -24,6 +23,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/packages.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -32,19 +32,30 @@ import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
+  late FakeStdio mockStdio;
+
+  setUp(() {
+    mockStdio = FakeStdio()..stdout.terminalColumns = 80;
+  });
+
   Cache.disableLocking();
   group('packages get/upgrade', () {
-    Directory tempDir;
+    late Directory tempDir;
+    late FakeAnalytics fakeAnalytics;
 
     setUp(() {
       tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
+      fakeAnalytics = getInitializedFakeAnalyticsInstance(
+        fs: MemoryFileSystem.test(),
+        fakeFlutterVersion: FakeFlutterVersion(),
+      );
     });
 
     tearDown(() {
       tryToDelete(tempDir);
     });
 
-    Future<String> createProjectWithPlugin(String plugin, { List<String> arguments }) async {
+    Future<String> createProjectWithPlugin(String plugin, { List<String>? arguments }) async {
       final String projectPath = await createProject(tempDir, arguments: arguments);
       final File pubspec = globals.fs.file(globals.fs.path.join(projectPath, 'pubspec.yaml'));
       String content = await pubspec.readAsString();
@@ -60,13 +71,14 @@ void main() {
       return projectPath;
     }
 
-    Future<PackagesCommand> runCommandIn(String projectPath, String verb, { List<String> args }) async {
+    Future<PackagesCommand> runCommandIn(String projectPath, String verb, { List<String>? args }) async {
       final PackagesCommand command = PackagesCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>[
         'packages',
         verb,
         ...?args,
+        '--directory',
         projectPath,
       ]);
       return command;
@@ -197,24 +209,46 @@ void main() {
       }
     }
 
-    testUsingContext('get fetches packages', () async {
+    testUsingContext('get fetches packages and has output from pub', () async {
       final String projectPath = await createProject(tempDir,
         arguments: <String>['--no-pub', '--template=module']);
       removeGeneratedFiles(projectPath);
 
       await runCommandIn(projectPath, 'get');
 
+      expect(mockStdio.stdout.writes.map(utf8.decode),
+        allOf(
+          // The output of pub changed, adding backticks around the directory name.
+          // These regexes are tolerant of the backticks being present or absent.
+          contains(matches(RegExp(r'Resolving dependencies in .+flutter_project`?\.\.\.'))),
+          contains(matches(RegExp(r'\+ flutter 0\.0\.0 from sdk flutter'))),
+          contains(matches(RegExp(r'Changed \d+ dependencies in .+flutter_project`?!'))),
+        ),
+      );
+
       expectDependenciesResolved(projectPath);
       expectZeroPluginsInjected(projectPath);
+      expect(
+        analyticsTimingEventExists(
+          sentEvents: fakeAnalytics.sentEvents,
+          workflow: 'pub',
+          variableName: 'get',
+          label: 'success',
+        ),
+        true,
+      );
     }, overrides: <Type, Generator>{
-      Pub: () => Pub(
+      Stdio: () => mockStdio,
+      Pub: () => Pub.test(
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
         usage: globals.flutterUsage,
         botDetector: globals.botDetector,
         platform: globals.platform,
+        stdio: mockStdio,
       ),
+      Analytics: () => fakeAnalytics,
     });
 
     testUsingContext('get --offline fetches packages', () async {
@@ -226,6 +260,83 @@ void main() {
 
       expectDependenciesResolved(projectPath);
       expectZeroPluginsInjected(projectPath);
+    }, overrides: <Type, Generator>{
+      Stdio: () => mockStdio,
+      Pub: () => Pub.test(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        processManager: globals.processManager,
+        usage: globals.flutterUsage,
+        botDetector: globals.botDetector,
+        platform: globals.platform,
+        stdio: mockStdio,
+      ),
+    });
+
+    testUsingContext('get generates synthetic package when l10n.yaml has synthetic-package: true', () async {
+      final String projectPath = await createProject(tempDir,
+        arguments: <String>['--no-pub', '--template=module']);
+      final Directory projectDir = globals.fs.directory(projectPath);
+      projectDir
+        .childDirectory('lib')
+        .childDirectory('l10n')
+        .childFile('app_en.arb')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('{ "hello": "Hello world!" }');
+      String pubspecFileContent = projectDir.childFile('pubspec.yaml').readAsStringSync();
+      pubspecFileContent = pubspecFileContent.replaceFirst(RegExp(r'\nflutter\:'), '''
+flutter:
+  generate: true
+''');
+      projectDir
+        .childFile('pubspec.yaml')
+        .writeAsStringSync(pubspecFileContent);
+      projectDir
+        .childFile('l10n.yaml')
+        .writeAsStringSync('synthetic-package: true');
+      await runCommandIn(projectPath, 'get');
+      expect(
+        projectDir
+          .childDirectory('.dart_tool')
+          .childDirectory('flutter_gen')
+          .childDirectory('gen_l10n')
+          .childFile('app_localizations.dart')
+          .existsSync(),
+        true
+      );
+    }, overrides: <Type, Generator>{
+      Pub: () => Pub(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        processManager: globals.processManager,
+        usage: globals.flutterUsage,
+        botDetector: globals.botDetector,
+        platform: globals.platform,
+      ),
+    });
+
+    testUsingContext('get generates normal files when l10n.yaml has synthetic-package: false', () async {
+      final String projectPath = await createProject(tempDir,
+        arguments: <String>['--no-pub', '--template=module']);
+      final Directory projectDir = globals.fs.directory(projectPath);
+      projectDir
+        .childDirectory('lib')
+        .childDirectory('l10n')
+        .childFile('app_en.arb')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('{ "hello": "Hello world!" }');
+      projectDir
+        .childFile('l10n.yaml')
+        .writeAsStringSync('synthetic-package: false');
+      await runCommandIn(projectPath, 'get');
+      expect(
+        projectDir
+          .childDirectory('lib')
+          .childDirectory('l10n')
+          .childFile('app_localizations.dart')
+          .existsSync(),
+        true
+      );
     }, overrides: <Type, Generator>{
       Pub: () => Pub(
         fileSystem: globals.fs,
@@ -243,17 +354,24 @@ void main() {
       removeGeneratedFiles(projectPath);
 
       final PackagesCommand command = await runCommandIn(projectPath, 'get');
-      final PackagesGetCommand getCommand = command.subcommands['get'] as PackagesGetCommand;
+      final PackagesGetCommand getCommand = command.subcommands['get']! as PackagesGetCommand;
 
       expect((await getCommand.usageValues).commandPackagesNumberPlugins, 0);
+      expect(
+        (await getCommand.unifiedAnalyticsUsageValues('pub/get'))
+            .eventData['packagesNumberPlugins'],
+        0,
+      );
     }, overrides: <Type, Generator>{
-      Pub: () => Pub(
+      Stdio: () => mockStdio,
+      Pub: () => Pub.test(
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
         usage: globals.flutterUsage,
         botDetector: globals.botDetector,
         platform: globals.platform,
+        stdio: mockStdio,
       ),
     });
 
@@ -265,17 +383,25 @@ void main() {
       final String exampleProjectPath = globals.fs.path.join(projectPath, 'example');
 
       final PackagesCommand command = await runCommandIn(exampleProjectPath, 'get');
-      final PackagesGetCommand getCommand = command.subcommands['get'] as PackagesGetCommand;
+      final PackagesGetCommand getCommand = command.subcommands['get']! as PackagesGetCommand;
 
-      expect((await getCommand.usageValues).commandPackagesNumberPlugins, 1);
+      // A plugin example depends on the plugin itself, and integration_test.
+      expect((await getCommand.usageValues).commandPackagesNumberPlugins, 2);
+      expect(
+        (await getCommand.unifiedAnalyticsUsageValues('pub/get'))
+            .eventData['packagesNumberPlugins'],
+        2,
+      );
     }, overrides: <Type, Generator>{
-      Pub: () => Pub(
+      Stdio: () => mockStdio,
+      Pub: () => Pub.test(
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
         usage: globals.flutterUsage,
         botDetector: globals.botDetector,
         platform: globals.platform,
+        stdio: mockStdio,
       ),
     });
 
@@ -285,17 +411,24 @@ void main() {
       removeGeneratedFiles(projectPath);
 
       final PackagesCommand command = await runCommandIn(projectPath, 'get');
-      final PackagesGetCommand getCommand = command.subcommands['get'] as PackagesGetCommand;
+      final PackagesGetCommand getCommand = command.subcommands['get']! as PackagesGetCommand;
 
       expect((await getCommand.usageValues).commandPackagesProjectModule, false);
+      expect(
+        (await getCommand.unifiedAnalyticsUsageValues('pub/get'))
+            .eventData['packagesProjectModule'],
+        false,
+      );
     }, overrides: <Type, Generator>{
-      Pub: () => Pub(
+      Stdio: () => mockStdio,
+      Pub: () => Pub.test(
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
         usage: globals.flutterUsage,
         botDetector: globals.botDetector,
         platform: globals.platform,
+        stdio: mockStdio,
       ),
     });
 
@@ -305,46 +438,24 @@ void main() {
       removeGeneratedFiles(projectPath);
 
       final PackagesCommand command = await runCommandIn(projectPath, 'get');
-      final PackagesGetCommand getCommand = command.subcommands['get'] as PackagesGetCommand;
+      final PackagesGetCommand getCommand = command.subcommands['get']! as PackagesGetCommand;
 
       expect((await getCommand.usageValues).commandPackagesProjectModule, true);
+      expect(
+        (await getCommand.unifiedAnalyticsUsageValues('pub/get'))
+            .eventData['packagesProjectModule'],
+        true,
+      );
     }, overrides: <Type, Generator>{
-      Pub: () => Pub(
+      Stdio: () => mockStdio,
+      Pub: () => Pub.test(
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
         usage: globals.flutterUsage,
         botDetector: globals.botDetector,
         platform: globals.platform,
-      ),
-    });
-
-    testUsingContext('indicate that Android project reports v1 in usage value', () async {
-      final String projectPath = await createProject(tempDir,
-        arguments: <String>['--no-pub']);
-      removeGeneratedFiles(projectPath);
-
-      final File androidManifest = globals.fs.file(globals.fs.path.join(
-        projectPath,
-        'android/app/src/main/AndroidManifest.xml',
-      ));
-      final String updatedAndroidManifestString =
-          androidManifest.readAsStringSync().replaceAll('android:value="2"', 'android:value="1"');
-
-      androidManifest.writeAsStringSync(updatedAndroidManifestString);
-
-      final PackagesCommand command = await runCommandIn(projectPath, 'get');
-      final PackagesGetCommand getCommand = command.subcommands['get'] as PackagesGetCommand;
-
-      expect((await getCommand.usageValues).commandPackagesAndroidEmbeddingVersion, 'v1');
-    }, overrides: <Type, Generator>{
-      Pub: () => Pub(
-        fileSystem: globals.fs,
-        logger: globals.logger,
-        processManager: globals.processManager,
-        usage: globals.flutterUsage,
-        botDetector: globals.botDetector,
-        platform: globals.platform,
+        stdio: mockStdio,
       ),
     });
 
@@ -354,17 +465,24 @@ void main() {
       removeGeneratedFiles(projectPath);
 
       final PackagesCommand command = await runCommandIn(projectPath, 'get');
-      final PackagesGetCommand getCommand = command.subcommands['get'] as PackagesGetCommand;
+      final PackagesGetCommand getCommand = command.subcommands['get']! as PackagesGetCommand;
 
       expect((await getCommand.usageValues).commandPackagesAndroidEmbeddingVersion, 'v2');
+      expect(
+        (await getCommand.unifiedAnalyticsUsageValues('pub/get'))
+            .eventData['packagesAndroidEmbeddingVersion'],
+        'v2',
+      );
     }, overrides: <Type, Generator>{
-      Pub: () => Pub(
+      Stdio: () => mockStdio,
+      Pub: () => Pub.test(
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
         usage: globals.flutterUsage,
         botDetector: globals.botDetector,
         platform: globals.platform,
+        stdio: mockStdio,
       ),
     });
 
@@ -378,14 +496,15 @@ void main() {
       expectDependenciesResolved(projectPath);
       expectZeroPluginsInjected(projectPath);
     }, overrides: <Type, Generator>{
-      Stdio: () => FakeStdio()..stdout.terminalColumns = 80,
-      Pub: () => Pub(
+      Stdio: () => mockStdio,
+      Pub: () => Pub.test(
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
         usage: globals.flutterUsage,
         botDetector: globals.botDetector,
         platform: globals.platform,
+        stdio: mockStdio,
       ),
     });
 
@@ -399,13 +518,15 @@ void main() {
       expectDependenciesResolved(projectPath);
       expectModulePluginInjected(projectPath);
     }, overrides: <Type, Generator>{
-      Pub: () => Pub(
+      Stdio: () => mockStdio,
+      Pub: () => Pub.test(
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
         usage: globals.flutterUsage,
         botDetector: globals.botDetector,
         platform: globals.platform,
+        stdio: mockStdio,
       ),
     });
 
@@ -427,20 +548,22 @@ void main() {
       expectDependenciesResolved(exampleProjectPath);
       expectPluginInjected(exampleProjectPath);
     }, overrides: <Type, Generator>{
-      Pub: () => Pub(
+      Stdio: () => mockStdio,
+      Pub: () => Pub.test(
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
         usage: globals.flutterUsage,
         botDetector: globals.botDetector,
         platform: globals.platform,
+        stdio: mockStdio,
       ),
     });
   });
 
   group('packages test/pub', () {
-    FakeProcessManager processManager;
-    FakeStdio mockStdio;
+    late FakeProcessManager processManager;
+    late FakeStdio mockStdio;
 
     setUp(() {
       processManager = FakeProcessManager.empty();
@@ -452,7 +575,7 @@ void main() {
       globals.fs.directory('/packages/flutter_tools').createSync(recursive: true);
       globals.fs.file('pubspec.yaml').createSync();
       processManager.addCommand(
-        const FakeCommand(command: <String>['/bin/cache/dart-sdk/bin/dart', '__deprecated_pub', 'run', 'test']),
+        const FakeCommand(command: <String>['/bin/cache/dart-sdk/bin/dart', 'pub', '--suppress-analytics', 'run', 'test']),
       );
       await createTestCommandRunner(PackagesCommand()).run(<String>['packages', 'test']);
 
@@ -463,13 +586,14 @@ void main() {
       ProcessManager: () => processManager,
       Stdio: () => mockStdio,
       BotDetector: () => const FakeBotDetector(false),
-      Pub: () => Pub(
+      Pub: () => Pub.test(
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
         usage: globals.flutterUsage,
         botDetector: globals.botDetector,
         platform: globals.platform,
+        stdio: mockStdio,
       ),
     });
 
@@ -477,7 +601,7 @@ void main() {
       Cache.flutterRoot = '';
       globals.fs.file('pubspec.yaml').createSync();
       processManager.addCommand(
-        const FakeCommand(command: <String>['/bin/cache/dart-sdk/bin/dart', '__deprecated_pub', '--trace', 'run', 'test']),
+        const FakeCommand(command: <String>['/bin/cache/dart-sdk/bin/dart', 'pub', '--suppress-analytics', '--trace', 'run', 'test']),
       );
       await createTestCommandRunner(PackagesCommand()).run(<String>['packages', 'test']);
 
@@ -488,13 +612,14 @@ void main() {
       ProcessManager: () => processManager,
       Stdio: () => mockStdio,
       BotDetector: () => const FakeBotDetector(true),
-      Pub: () => Pub(
+      Pub: () => Pub.test(
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
         usage: globals.flutterUsage,
         botDetector: globals.botDetector,
         platform: globals.platform,
+        stdio: mockStdio,
       ),
     });
 
@@ -505,7 +630,7 @@ void main() {
       processManager.addCommand(
         FakeCommand(
           command: const <String>[
-            '/bin/cache/dart-sdk/bin/dart', '__deprecated_pub', 'run', '--foo', 'bar',
+            '/bin/cache/dart-sdk/bin/dart', 'pub', '--suppress-analytics', 'run', '--foo', 'bar',
           ],
           stdin: stdin,
         ),
@@ -518,13 +643,14 @@ void main() {
       Platform: () => FakePlatform(environment: <String, String>{}),
       ProcessManager: () => processManager,
       Stdio: () => mockStdio,
-      Pub: () => Pub(
+      Pub: () => Pub.test(
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
         usage: globals.flutterUsage,
         botDetector: globals.botDetector,
         platform: globals.platform,
+        stdio: mockStdio,
       ),
     });
 
@@ -535,7 +661,7 @@ void main() {
       processManager.addCommand(
         FakeCommand(
           command: const <String>[
-            '/bin/cache/dart-sdk/bin/dart', '__deprecated_pub', 'token', 'list',
+            '/bin/cache/dart-sdk/bin/dart', 'pub', '--suppress-analytics', 'token', 'list',
           ],
           stdin: stdin,
         ),
@@ -548,13 +674,14 @@ void main() {
       Platform: () => FakePlatform(environment: <String, String>{}),
       ProcessManager: () => processManager,
       Stdio: () => mockStdio,
-      Pub: () => Pub(
+      Pub: () => Pub.test(
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
         usage: globals.flutterUsage,
         botDetector: globals.botDetector,
         platform: globals.platform,
+        stdio: mockStdio,
       ),
     });
 
@@ -563,7 +690,7 @@ void main() {
       processManager.addCommand(
         FakeCommand(
           command: const <String>[
-            '/bin/cache/dart-sdk/bin/dart', '__deprecated_pub', 'upgrade', '-h',
+            '/bin/cache/dart-sdk/bin/dart', 'pub', '--suppress-analytics', 'upgrade', '-h',
           ],
           stdin:  IOSink(StreamController<List<int>>().sink),
         ),
@@ -576,13 +703,14 @@ void main() {
       Platform: () => FakePlatform(environment: <String, String>{}),
       ProcessManager: () => processManager,
       Stdio: () => mockStdio,
-      Pub: () => Pub(
+      Pub: () => Pub.test(
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
         usage: globals.flutterUsage,
         botDetector: globals.botDetector,
         platform: globals.platform,
+        stdio: mockStdio,
       ),
     });
   });

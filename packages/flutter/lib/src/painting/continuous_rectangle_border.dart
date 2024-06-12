@@ -33,12 +33,11 @@ import 'edge_insets.dart';
 ///    radius in a step function instead of gradually like the
 ///    [ContinuousRectangleBorder].
 class ContinuousRectangleBorder extends OutlinedBorder {
-  /// The arguments must not be null.
+  /// Creates a [ContinuousRectangleBorder].
   const ContinuousRectangleBorder({
     super.side,
     this.borderRadius = BorderRadius.zero,
-  }) : assert(side != null),
-       assert(borderRadius != null);
+  });
 
   /// The radius for each corner.
   ///
@@ -59,7 +58,6 @@ class ContinuousRectangleBorder extends OutlinedBorder {
 
   @override
   ShapeBorder? lerpFrom(ShapeBorder? a, double t) {
-    assert(t != null);
     if (a is ContinuousRectangleBorder) {
       return ContinuousRectangleBorder(
         side: BorderSide.lerp(a.side, side, t),
@@ -71,7 +69,6 @@ class ContinuousRectangleBorder extends OutlinedBorder {
 
   @override
   ShapeBorder? lerpTo(ShapeBorder? b, double t) {
-    assert(t != null);
     if (b is ContinuousRectangleBorder) {
       return ContinuousRectangleBorder(
         side: BorderSide.lerp(side, b.side, t),
@@ -152,7 +149,6 @@ class ContinuousRectangleBorder extends OutlinedBorder {
           getOuterPath(rect, textDirection: textDirection),
           side.toPaint(),
         );
-        break;
     }
   }
 

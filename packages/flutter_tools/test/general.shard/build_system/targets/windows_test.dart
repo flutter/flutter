@@ -9,7 +9,6 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
-import 'package:flutter_tools/src/build_system/depfile.dart';
 import 'package:flutter_tools/src/build_system/targets/common.dart';
 import 'package:flutter_tools/src/build_system/targets/windows.dart';
 import 'package:flutter_tools/src/convert.dart';
@@ -30,10 +29,6 @@ void main() {
       defines: <String, String>{
         kBuildMode: 'debug',
       },
-    );
-    final DepfileService depfileService = DepfileService(
-      logger: BufferLogger.test(),
-      fileSystem: fileSystem,
     );
     environment.buildDir.createSync(recursive: true);
 
@@ -60,7 +55,7 @@ void main() {
     }
     fileSystem.directory('windows').createSync();
 
-    await const UnpackWindows().build(environment);
+    await const UnpackWindows(TargetPlatform.windows_x64).build(environment);
 
     // Output files are copied correctly.
     expect(fileSystem.file(r'C:\windows\flutter\ephemeral\flutter_export.h'), exists);
@@ -83,9 +78,9 @@ void main() {
     // Depfile is created correctly.
     expect(outputDepfile, exists);
 
-    final List<String> inputPaths = depfileService.parse(outputDepfile)
+    final List<String> inputPaths = environment.depFileService.parse(outputDepfile)
       .inputs.map((File file) => file.path).toList();
-    final List<String> outputPaths = depfileService.parse(outputDepfile)
+    final List<String> outputPaths = environment.depFileService.parse(outputDepfile)
       .outputs.map((File file) => file.path).toList();
 
     // Depfile has expected sources.
@@ -152,7 +147,7 @@ void main() {
       },
     ));
 
-    await const DebugBundleWindowsAssets().build(environment);
+    await const DebugBundleWindowsAssets(TargetPlatform.windows_x64).build(environment);
 
     // Depfile is created and dill is copied.
     expect(environment.buildDir.childFile('flutter_assets.d'), exists);
@@ -180,7 +175,7 @@ void main() {
     environment.buildDir.childFile('app.so').createSync(recursive: true);
 
     await const WindowsAotBundle(AotElfProfile(TargetPlatform.windows_x64)).build(environment);
-    await const ProfileBundleWindowsAssets().build(environment);
+    await const ProfileBundleWindowsAssets(TargetPlatform.windows_x64).build(environment);
 
     // Depfile is created and so is copied.
     expect(environment.buildDir.childFile('flutter_assets.d'), exists);
@@ -207,7 +202,7 @@ void main() {
     environment.buildDir.childFile('app.so').createSync(recursive: true);
 
     await const WindowsAotBundle(AotElfRelease(TargetPlatform.windows_x64)).build(environment);
-    await const ReleaseBundleWindowsAssets().build(environment);
+    await const ReleaseBundleWindowsAssets(TargetPlatform.windows_x64).build(environment);
 
     // Depfile is created and so is copied.
     expect(environment.buildDir.childFile('flutter_assets.d'), exists);

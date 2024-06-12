@@ -89,6 +89,9 @@ class TestRoute extends Route<String?> with LocalHistoryRoute<String?> {
   @override
   void dispose() {
     log('dispose');
+    for (final OverlayEntry e in _entries) {
+      e.dispose();
+    }
     _entries.clear();
     routes.remove(this);
     super.dispose();
@@ -116,8 +119,6 @@ void main() {
   testWidgets('Route settings', (WidgetTester tester) async {
     const RouteSettings settings = RouteSettings(name: 'A');
     expect(settings, hasOneLineDescription);
-    final RouteSettings settings2 = settings.copyWith(name: 'B');
-    expect(settings2.name, 'B');
   });
 
   testWidgets('Route settings arguments', (WidgetTester tester) async {
@@ -127,14 +128,6 @@ void main() {
     final Object arguments = Object();
     final RouteSettings settings2 = RouteSettings(name: 'A', arguments: arguments);
     expect(settings2.arguments, same(arguments));
-
-    final RouteSettings settings3 = settings2.copyWith();
-    expect(settings3.arguments, equals(arguments));
-
-    final Object arguments2 = Object();
-    final RouteSettings settings4 = settings2.copyWith(arguments: arguments2);
-    expect(settings4.arguments, same(arguments2));
-    expect(settings4.arguments, isNot(same(arguments)));
   });
 
   testWidgets('Route management - push, replace, pop sequence', (WidgetTester tester) async {
@@ -411,7 +404,7 @@ void main() {
       ],
     );
     await tester.pumpWidget(Container());
-    expect(results, equals(<String>['A: dispose', 'b: dispose']));
+    expect(results, equals(<String>['b: dispose', 'A: dispose']));
     expect(routes.isEmpty, isTrue);
     results.clear();
   });
@@ -555,8 +548,11 @@ void main() {
 
   testWidgets('Can autofocus a TextField nested in a Focus in a route.', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController();
+    addTearDown(controller.dispose);
 
     final FocusNode focusNode = FocusNode(debugLabel: 'Test Node');
+    addTearDown(focusNode.dispose);
+
     await tester.pumpWidget(
       Material(
         child: MaterialApp(
@@ -1740,7 +1736,7 @@ void main() {
       semantics.dispose();
     }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}));
 
-    testWidgets('focus traverse correct when pop multiple page simultaneously', (WidgetTester tester) async {
+    testWidgets('focus traversal is correct when popping multiple pages simultaneously', (WidgetTester tester) async {
       // Regression test: https://github.com/flutter/flutter/issues/48903
       final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
       await tester.pumpWidget(MaterialApp(
@@ -2084,12 +2080,8 @@ class _TestDialogRouteWithCustomBarrierCurve<T> extends PopupRoute<T> {
   final Color? barrierColor;
 
   @override
-  Curve get barrierCurve {
-    if (_barrierCurve == null) {
-      return super.barrierCurve;
-    }
-    return _barrierCurve!;
-  }
+  Curve get barrierCurve => _barrierCurve ?? super.barrierCurve;
+
   final Curve? _barrierCurve;
 
   @override
@@ -2163,6 +2155,7 @@ class WidgetWithNoLocalHistoryState extends State<WidgetWithNoLocalHistory> {
 class _RestorableDialogTestWidget extends StatelessWidget {
   const _RestorableDialogTestWidget();
 
+  @pragma('vm:entry-point')
   static Route<Object?> _dialogBuilder(BuildContext context, Object? arguments) {
     return RawDialogRoute<void>(
       pageBuilder: (

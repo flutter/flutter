@@ -18,6 +18,7 @@ void main() {
     final AnnotatedRegionLayer<int> layer = layers.whereType<AnnotatedRegionLayer<int>>().first;
     expect(layer.value, 1);
   });
+
   testWidgets('provides a value to the layer tree in a particular region', (WidgetTester tester) async {
     await tester.pumpWidget(
       Transform.translate(
@@ -29,13 +30,13 @@ void main() {
       ),
     );
     int? result = RendererBinding.instance.renderView.debugLayer!.find<int>(Offset(
-      10.0 * RendererBinding.instance.window.devicePixelRatio,
-      10.0 * RendererBinding.instance.window.devicePixelRatio,
+      10.0 * tester.view.devicePixelRatio,
+      10.0 * tester.view.devicePixelRatio,
     ));
     expect(result, null);
     result = RendererBinding.instance.renderView.debugLayer!.find<int>(Offset(
-      50.0 * RendererBinding.instance.window.devicePixelRatio,
-      50.0 * RendererBinding.instance.window.devicePixelRatio,
+      50.0 * tester.view.devicePixelRatio,
+      50.0 * tester.view.devicePixelRatio,
     ));
     expect(result, 1);
   });

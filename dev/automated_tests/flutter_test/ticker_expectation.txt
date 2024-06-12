@@ -12,6 +12,6 @@ There was one transient callback left. The stack trace for when it was registere
 .*..:.. \+0 -1: Does flutter_test catch leaking tickers\? \[E\]
   Test failed\. See exception logs above\.
   The test description was: Does flutter_test catch leaking tickers\?
- *
-To run this test again: .*ticker_test\.dart -p vm --plain-name 'Does flutter_test catch leaking tickers\?'
+[ \n]*
+To run this test again: .*ticker_test\.dart -p vm --plain-name ['"]Does flutter_test catch leaking tickers\?['"]
 .*..:.. \+0 -1: Some tests failed\. *

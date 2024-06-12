@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import '../base/context.dart';
-import '../base/user_messages.dart' hide userMessages;
+import '../base/user_messages.dart';
 import '../doctor_validator.dart';
 import 'visual_studio.dart';
 
@@ -15,7 +15,7 @@ class VisualStudioValidator extends DoctorValidator {
     required UserMessages userMessages,
   }) : _visualStudio = visualStudio,
        _userMessages = userMessages,
-       super('Visual Studio - develop for Windows');
+       super('Visual Studio - develop Windows apps');
 
   final VisualStudio _visualStudio;
   final UserMessages _userMessages;
@@ -27,7 +27,7 @@ class VisualStudioValidator extends DoctorValidator {
     String? versionInfo;
 
     if (_visualStudio.isInstalled) {
-      status = ValidationType.installed;
+      status = ValidationType.success;
 
       messages.add(ValidationMessage(
           _userMessages.visualStudioLocation(_visualStudio.installLocation ?? 'unknown')

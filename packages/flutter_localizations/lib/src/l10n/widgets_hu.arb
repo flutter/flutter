@@ -1,0 +1,8 @@
+{
+  "reorderItemToStart": "Áthelyezés az elejére",
+  "reorderItemToEnd": "Áthelyezés a végére",
+  "reorderItemUp": "Áthelyezés felfelé",
+  "reorderItemDown": "Áthelyezés lefelé",
+  "reorderItemLeft": "Áthelyezés balra",
+  "reorderItemRight": "Áthelyezés jobbra"
+}

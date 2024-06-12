@@ -18,23 +18,9 @@ void log(String message) {
   }
 }
 
-class Commit {
-  Commit(this.hash, this.timestamp);
-
-  final String hash;
-  final DateTime timestamp;
-
-  static String formatArgument = '--format=%H %cI';
-
-  static Commit parse(String line) {
-    final int space = line.indexOf(' ');
-    return Commit(line.substring(0, space), DateTime.parse(line.substring(space+1, line.length).trimRight()));
-  }
-
-  static List<Commit> parseList(String lines) {
-    return lines.split('\n').where((String line) => line.isNotEmpty).map(parse).toList().reversed.toList();
-  }
-}
+const String _commitTimestampFormat = '--format=%cI';
+DateTime _parseTimestamp(String line) => DateTime.parse(line.trim());
+int _countLines(String output) => output.trim().split('/n').where((String line) => line.isNotEmpty).length;
 
 String findCommit({
   required String primaryRepoDirectory,
@@ -43,65 +29,63 @@ String findCommit({
   required String secondaryRepoDirectory,
   required String secondaryBranch,
 }) {
-  final Commit anchor;
+  final DateTime anchor;
   if (primaryBranch == primaryTrunk) {
-    log('on $primaryTrunk, using last commit as anchor');
-    anchor = Commit.parse(git(primaryRepoDirectory, <String>['log', Commit.formatArgument, '--max-count=1', primaryBranch, '--']));
+    log('on $primaryTrunk, using last commit time');
+    anchor = _parseTimestamp(git(primaryRepoDirectory, <String>['log', _commitTimestampFormat, '--max-count=1', primaryBranch, '--']));
   } else {
-    final List<Commit> branchCommits = Commit.parseList(git(primaryRepoDirectory, <String>['log', Commit.formatArgument, primaryBranch, '--']));
-    final List<Commit> trunkCommits = Commit.parseList(git(primaryRepoDirectory, <String>['log', Commit.formatArgument, primaryTrunk, '--']));
-    if (branchCommits.isEmpty || trunkCommits.isEmpty || branchCommits.first.hash != trunkCommits.first.hash) {
+    final String mergeBase = git(primaryRepoDirectory, <String>['merge-base', primaryBranch, primaryTrunk], allowFailure: true).trim();
+    if (mergeBase.isEmpty) {
       throw StateError('Branch $primaryBranch does not seem to have a common history with trunk $primaryTrunk.');
     }
-    if (branchCommits.last.hash == trunkCommits.last.hash) {
-      log('$primaryBranch is even with $primaryTrunk, using last commit as anchor');
-      anchor = trunkCommits.last;
-    } else {
-      int index = 0;
-      while (branchCommits.length > index && trunkCommits.length > index && branchCommits[index].hash == trunkCommits[index].hash) {
-        index += 1;
+    anchor = _parseTimestamp(git(primaryRepoDirectory, <String>['log', _commitTimestampFormat, '--max-count=1', mergeBase, '--']));
+    if (debugLogging) {
+      final int missingTrunkCommits = _countLines(git(primaryRepoDirectory, <String>['rev-list', primaryTrunk, '^$primaryBranch', '--']));
+      final int extraCommits = _countLines(git(primaryRepoDirectory, <String>['rev-list', primaryBranch, '^$primaryTrunk', '--']));
+      if (missingTrunkCommits == 0 && extraCommits == 0) {
+        log('$primaryBranch is even with $primaryTrunk at $mergeBase');
+      } else {
+        log('$primaryBranch branched from $primaryTrunk $missingTrunkCommits commits ago, trunk has advanced by $extraCommits commits since then.');
       }
-      log('$primaryBranch branched from $primaryTrunk ${branchCommits.length - index} commits ago, trunk has advanced by ${trunkCommits.length - index} commits since then.');
-      anchor = trunkCommits[index - 1];
     }
   }
   return git(secondaryRepoDirectory, <String>[
     'log',
     '--format=%H',
-    '--until=${anchor.timestamp.toIso8601String()}',
+    '--until=${anchor.toIso8601String()}',
     '--max-count=1',
     secondaryBranch,
     '--',
   ]);
 }
 
-String git(String workingDirectory, List<String> arguments) {
+String git(String workingDirectory, List<String> arguments, {bool allowFailure = false}) {
   final ProcessResult result = Process.runSync('git', arguments, workingDirectory: workingDirectory);
-  if (result.exitCode != 0 || '${result.stderr}'.isNotEmpty) {
+  if (!allowFailure && result.exitCode != 0 || '${result.stderr}'.isNotEmpty) {
     throw ProcessException('git', arguments, '${result.stdout}${result.stderr}', result.exitCode);
   }
   return '${result.stdout}';
 }
 
 void main(List<String> arguments) {
-  if (arguments.isEmpty || arguments.length > 2 || arguments.contains('--help') || arguments.contains('-h')) {
+  if (arguments.isEmpty || arguments.length != 4 || arguments.contains('--help') || arguments.contains('-h')) {
     print(
-      'Usage: dart find_commit.dart [<path-to-primary-repo>] <path-to-secondary-repo>\n'
+      'Usage: dart find_commit.dart <path-to-primary-repo> <primary-trunk> <path-to-secondary-repo> <secondary-branch>\n'
       'This script will find the commit in the secondary repo that was contemporary\n'
       'when the commit in the primary repo was created. If that commit is on a\n'
-      "branch, then the date of the branch's creation is used instead.\n"
-      'If <path-to-primary-repo> is omitted, the current directory is used for the\n'
-      'primary repo.'
+      "branch, then the date of the branch's last merge is used instead."
     );
   } else {
-    final String primaryRepo = arguments.length == 1 ? '.' : arguments.first;
-    final String secondaryRepo = arguments.last;
+    final String primaryRepo = arguments.first;
+    final String primaryTrunk = arguments[1];
+    final String secondaryRepo = arguments[2];
+    final String secondaryBranch = arguments.last;
     print(findCommit(
       primaryRepoDirectory: primaryRepo,
       primaryBranch: git(primaryRepo, <String>['rev-parse', '--abbrev-ref', 'HEAD']).trim(),
-      primaryTrunk: 'master',
+      primaryTrunk: primaryTrunk,
       secondaryRepoDirectory: secondaryRepo,
-      secondaryBranch: 'master',
+      secondaryBranch: secondaryBranch,
     ).trim());
   }
 }

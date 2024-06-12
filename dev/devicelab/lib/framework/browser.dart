@@ -25,6 +25,7 @@ class ChromeOptions {
     this.windowHeight = 1024,
     this.headless,
     this.debugPort,
+    this.enableWasmGC = false,
   });
 
   /// If not null passed as `--user-data-dir`.
@@ -53,6 +54,9 @@ class ChromeOptions {
   /// mode without a debug port, Chrome quits immediately. For most tests it is
   /// typical to set [headless] to true and set a non-null debug port.
   final int? debugPort;
+
+  /// Whether to enable experimental WasmGC flags
+  final bool enableWasmGC;
 }
 
 /// A function called when the Chrome process encounters an error.
@@ -83,6 +87,10 @@ class Chrome {
       print('Launching Chrome...');
     }
 
+    final String jsFlags = options.enableWasmGC ? <String>[
+      '--experimental-wasm-gc',
+      '--experimental-wasm-type-reflection',
+    ].join(' ') : '';
     final bool withDebugging = options.debugPort != null;
     final List<String> args = <String>[
       if (options.userDataDirectory != null)
@@ -104,6 +112,7 @@ class Chrome {
       '--no-default-browser-check',
       '--disable-default-apps',
       '--disable-translate',
+      if (jsFlags.isNotEmpty) '--js-flags=$jsFlags',
     ];
 
     final io.Process chromeProcess = await _spawnChromiumProcess(
@@ -304,12 +313,6 @@ class BlinkTraceSummary {
         orElse: () => throw noMeasuredFramesFound(),
       );
 
-      if (firstMeasuredFrameEvent == null) {
-        // This happens in benchmarks that do not measure frames, such as some
-        // of the text layout benchmarks.
-        return null;
-      }
-
       final int tabPid = firstMeasuredFrameEvent.pid!;
 
       // Filter out data from unrelated processes
@@ -419,23 +422,11 @@ Duration _computeAverageDuration(List<BlinkTraceEvent> events) {
 /// See also:
 ///  * https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview
 class BlinkTraceEvent {
-  BlinkTraceEvent._({
-    required this.args,
-    required this.cat,
-    required this.name,
-    required this.ph,
-    this.pid,
-    this.tid,
-    this.ts,
-    this.tts,
-    this.tdur,
-  });
-
   /// Parses an event from its JSON representation.
   ///
   /// Sample event encoded as JSON (the data is bogus, this just shows the format):
   ///
-  /// ```
+  /// ```json
   /// {
   ///   "name": "myName",
   ///   "cat": "category,list",
@@ -455,19 +446,16 @@ class BlinkTraceEvent {
   /// For detailed documentation of the format see:
   ///
   /// https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview
-  static BlinkTraceEvent fromJson(Map<String, dynamic> json) {
-    return BlinkTraceEvent._(
-      args: json['args'] as Map<String, dynamic>,
-      cat: json['cat'] as String,
-      name: json['name'] as String,
-      ph: json['ph'] as String,
-      pid: _readInt(json, 'pid'),
-      tid: _readInt(json, 'tid'),
-      ts: _readInt(json, 'ts'),
-      tts: _readInt(json, 'tts'),
-      tdur: _readInt(json, 'tdur'),
-    );
-  }
+  BlinkTraceEvent.fromJson(Map<String, dynamic> json)
+      : args = json['args'] as Map<String, dynamic>,
+        cat = json['cat'] as String,
+        name = json['name'] as String,
+        ph = json['ph'] as String,
+        pid = _readInt(json, 'pid'),
+        tid = _readInt(json, 'tid'),
+        ts = _readInt(json, 'ts'),
+        tts = _readInt(json, 'tts'),
+        tdur = _readInt(json, 'tdur');
 
   /// Event-specific data.
   final Map<String, dynamic> args;
@@ -569,12 +557,7 @@ class BlinkTraceEvent {
 /// Returns null if the value is null.
 int? _readInt(Map<String, dynamic> json, String key) {
   final num? jsonValue = json[key] as num?;
-
-  if (jsonValue == null) {
-    return null;
-  }
-
-  return jsonValue.toInt();
+  return jsonValue?.toInt();
 }
 
 /// Used by [Chrome.launch] to detect a glibc bug and retry launching the

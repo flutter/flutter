@@ -6,6 +6,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 List<Widget> children(int n) {
   return List<Widget>.generate(n, (int i) {
@@ -16,6 +17,7 @@ List<Widget> children(int n) {
 void main() {
   testWidgets('Scrolling with list view changes, leaving the overscroll', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(MaterialApp(home: ListView(controller: controller, children: children(30))));
     final double thirty = controller.position.maxScrollExtent;
     controller.jumpTo(thirty);
@@ -30,6 +32,7 @@ void main() {
 
   testWidgets('Scrolling with list view changes, remaining overscrolled', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(MaterialApp(home: ListView(controller: controller, children: children(30))));
     final double thirty = controller.position.maxScrollExtent;
     controller.jumpTo(thirty);
@@ -129,66 +132,9 @@ void main() {
     expect(find.text('Page 9'), findsOneWidget);
   });
 
-  List<Widget> childrenSizeIncrease(int n) {
-    return List<Widget>.generate(n, (int i) {
-      return SizedBox(height: 40.0 + i * 3, child: Text('$i'));
-    });
-  }
-
-  testWidgets('Check for duplicate pixels with ClampingScrollPhysics', (WidgetTester tester) async {
-    final List<double> scrollSimulationXList = <double>[];
-    final TestScrollPhysics testScrollPhysics = TestScrollPhysics(
-      scrollSimulationXList,
-      parent: const ClampingScrollPhysics(),
-    );
-    await tester.pumpWidget(
-      MaterialApp(
-        home: ListView(
-          physics: testScrollPhysics,
-          children: childrenSizeIncrease(100),
-        ),
-      ),
-    );
-    await tester.fling(find.byType(ListView), const Offset(0.0, -4000.0), 4000.0);
-    await tester.pumpAndSettle();
-    final Set<double> checkSet = <double>{};
-    checkSet.addAll(scrollSimulationXList);
-    /// checkSet.length + 1 is because:
-    /// simulation.x(0.0) will be called in _startSimulation.
-    /// The first frame of the animation will also call simulation.x(0.0).
-    /// It can be tolerated that it has at most one duplicate value.
-    final bool hasOnlyOneDuplicate = scrollSimulationXList.length == checkSet.length + 1;
-    expect(true, hasOnlyOneDuplicate); // and ends up at the end
-  });
-
-  testWidgets('Check for duplicate pixels with BouncingScrollPhysics', (WidgetTester tester) async {
-    final List<double> scrollSimulationXList = <double>[];
-    final TestScrollPhysics testScrollPhysics = TestScrollPhysics(
-      scrollSimulationXList,
-      parent: const BouncingScrollPhysics(),
-    );
-    await tester.pumpWidget(
-      MaterialApp(
-        home: ListView(
-          physics: testScrollPhysics,
-          children: childrenSizeIncrease(100),
-        ),
-      ),
-    );
-    await tester.fling(find.byType(ListView), const Offset(0.0, -4000.0), 4000.0);
-    await tester.pumpAndSettle();
-    final Set<double> checkSet = <double>{};
-    checkSet.addAll(scrollSimulationXList);
-    /// checkSet.length + 1 is because:
-    /// simulation.x(0.0) will be call in _startSimulation.
-    /// The first frame of the animation will also call simulation.x(0.0).
-    /// It can be tolerated that it has at most one duplicate value.
-    final bool noDuplicate = scrollSimulationXList.length == checkSet.length + 1;
-    expect(true, noDuplicate); // and ends up at the end
-  });
-
   testWidgets('Pointer is not ignored during trackpad scrolling.', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     int? lastTapped;
     int? lastHovered;
     await tester.pumpWidget(MaterialApp(
@@ -266,62 +212,29 @@ void main() {
     expect(lastTapped, equals(3));
     await tester.pumpAndSettle();
   });
-}
 
-class TestScrollPhysics extends ScrollPhysics {
-  const TestScrollPhysics(this.scrollSimulationXList, { super.parent });
-
-  final List<double> scrollSimulationXList;
-
-  @override
-  Simulation? createBallisticSimulation(
-    ScrollMetrics position,
-    double velocity,
-  ) {
-    final Simulation? scrollSimulation = super.createBallisticSimulation(
-      position,
-      velocity,
+  test('$ScrollActivity dispatches memory events', () async {
+    await expectLater(
+      await memoryEvents(
+        () => _ScrollActivity(_ScrollActivityDelegate()).dispose(),
+        _ScrollActivity,
+      ),
+      areCreateAndDispose,
     );
-    if (scrollSimulation != null && scrollSimulationXList != null) {
-      return TestScrollScrollSimulation(
-        scrollSimulation,
-        scrollSimulationXList,
-      );
-    }
-    return scrollSimulation;
-  }
+  });
 
-  @override
-  TestScrollPhysics applyTo(ScrollPhysics? ancestor) {
-    return TestScrollPhysics(
-      scrollSimulationXList,
-      parent: buildParent(ancestor),
+  test('$ScrollDragController dispatches memory events', () async {
+    await expectLater(
+      await memoryEvents(
+        () => ScrollDragController(
+          delegate: _ScrollActivityDelegate(),
+          details: DragStartDetails(),
+        ).dispose(),
+        ScrollDragController,
+      ),
+      areCreateAndDispose,
     );
-  }
-}
-
-class TestScrollScrollSimulation extends Simulation {
-  TestScrollScrollSimulation(this.innerScrollSimulation,
-      this.scrollSimulationXList,);
-
-  final Simulation innerScrollSimulation;
-
-  final List<double> scrollSimulationXList;
-
-  @override
-  double dx(double time) => innerScrollSimulation.dx(time);
-
-  @override
-  bool isDone(double time) => innerScrollSimulation.isDone(time);
-
-  @override
-  double x(double time) {
-    final double simulationX = innerScrollSimulation.x(time);
-    if (scrollSimulationXList != null) {
-      scrollSimulationXList.add(simulationX);
-    }
-    return simulationX;
-  }
+  });
 }
 
 class PageView62209 extends StatefulWidget {
@@ -468,4 +381,34 @@ class _Carousel62209State extends State<Carousel62209> {
       ),
     );
   }
+}
+
+class _ScrollActivity extends ScrollActivity {
+  _ScrollActivity(super.delegate);
+
+  @override
+  bool get isScrolling => false;
+
+  @override
+  bool get shouldIgnorePointer => true;
+
+  @override
+  double get velocity => 0.0;
+}
+
+class _ScrollActivityDelegate extends ScrollActivityDelegate {
+  @override
+  void applyUserOffset(double delta) {}
+
+  @override
+  AxisDirection get axisDirection => AxisDirection.down;
+
+  @override
+  void goBallistic(double velocity) {}
+
+  @override
+  void goIdle() {}
+
+  @override
+  double setPixels(double pixels) => 0.0;
 }

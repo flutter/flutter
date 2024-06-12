@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:isolate';
 
 import 'package:flutter/services.dart';
 
@@ -31,13 +32,11 @@ class ExtendedStandardMessageCodec extends StandardMessageCodec {
 
   @override
   dynamic readValueOfType(int type, ReadBuffer buffer) {
-    switch (type) {
-    case _dateTime:
-      return DateTime.fromMillisecondsSinceEpoch(buffer.getInt64());
-    case _pair:
-      return Pair(readValue(buffer), readValue(buffer));
-    default: return super.readValueOfType(type, buffer);
-    }
+    return switch (type) {
+      _dateTime => DateTime.fromMillisecondsSinceEpoch(buffer.getInt64()),
+      _pair => Pair(readValue(buffer), readValue(buffer)),
+      _ => super.readValueOfType(type, buffer),
+    };
   }
 }
 
@@ -76,6 +75,41 @@ Future<TestStepResult> basicStandardHandshake(dynamic message) async {
   );
   return _basicMessageHandshake<dynamic>(
       'Standard >${toString(message)}<', channel, message);
+}
+
+Future<void> _basicBackgroundStandardEchoMain(List<Object> args) async {
+  final SendPort sendPort = args[2] as SendPort;
+  final Object message = args[1];
+  final String name = 'Background Echo >${toString(message)}<';
+  const String description =
+      'Uses a platform channel from a background isolate.';
+  try {
+    BackgroundIsolateBinaryMessenger.ensureInitialized(
+        args[0] as RootIsolateToken);
+    const BasicMessageChannel<dynamic> channel = BasicMessageChannel<dynamic>(
+      'std-echo',
+      ExtendedStandardMessageCodec(),
+    );
+    final Object response = await channel.send(message) as Object;
+
+    final TestStatus testStatus = TestStepResult.deepEquals(message, response)
+        ? TestStatus.ok
+        : TestStatus.failed;
+    sendPort.send(TestStepResult(name, description, testStatus));
+  } catch (ex) {
+    sendPort.send(TestStepResult(name, description, TestStatus.failed,
+        error: ex.toString()));
+  }
+}
+
+Future<TestStepResult> basicBackgroundStandardEcho(Object message) async {
+  final ReceivePort receivePort = ReceivePort();
+  Isolate.spawn(_basicBackgroundStandardEchoMain, <Object>[
+    ServicesBinding.rootIsolateToken!,
+    message,
+    receivePort.sendPort,
+  ]);
+  return await receivePort.first as TestStepResult;
 }
 
 Future<TestStepResult> basicBinaryMessageToUnknownChannel() async {

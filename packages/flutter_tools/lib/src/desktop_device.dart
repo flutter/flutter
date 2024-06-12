@@ -16,12 +16,14 @@ import 'convert.dart';
 import 'devfs.dart';
 import 'device.dart';
 import 'device_port_forwarder.dart';
+import 'globals.dart' as globals;
+import 'macos/macos_device.dart';
 import 'protocol_discovery.dart';
 
 /// A partial implementation of Device for desktop-class devices to inherit
 /// from, containing implementations that are common to all desktop devices.
 abstract class DesktopDevice extends Device {
-  DesktopDevice(super.identifier, {
+  DesktopDevice(super.id, {
       required PlatformType super.platformType,
       required super.ephemeral,
       required Logger logger,
@@ -44,7 +46,7 @@ abstract class DesktopDevice extends Device {
   final DesktopLogReader _deviceLogReader = DesktopLogReader();
 
   @override
-  DevFSWriter createDevFSWriter(covariant ApplicationPackage? app, String? userIdentifier) {
+  DevFSWriter createDevFSWriter(ApplicationPackage? app, String? userIdentifier) {
     return LocalDevFSWriter(fileSystem: _fileSystem);
   }
 
@@ -117,16 +119,16 @@ abstract class DesktopDevice extends Device {
   }) async {
     if (!prebuiltApplication) {
       await buildForDevice(
-        package,
         buildInfo: debuggingOptions.buildInfo,
         mainPath: mainPath,
+        usingCISystem: debuggingOptions.usingCISystem,
       );
     }
 
     // Ensure that the executable is locatable.
-    final BuildMode buildMode = debuggingOptions.buildInfo.mode;
+    final BuildInfo buildInfo = debuggingOptions.buildInfo;
     final bool traceStartup = platformArgs['trace-startup'] as bool? ?? false;
-    final String? executable = executablePathForDevice(package, buildMode);
+    final String? executable = executablePathForDevice(package, buildInfo);
     if (executable == null) {
       _logger.printError('Unable to find executable to run');
       return LaunchResult.failed();
@@ -150,20 +152,51 @@ abstract class DesktopDevice extends Device {
     unawaited(process.exitCode.then((_) => _runningProcesses.remove(process)));
 
     _deviceLogReader.initializeProcess(process);
-    if (debuggingOptions.buildInfo.isRelease == true) {
+    if (debuggingOptions.buildInfo.isRelease) {
       return LaunchResult.succeeded();
     }
-    final ProtocolDiscovery observatoryDiscovery = ProtocolDiscovery.observatory(_deviceLogReader,
+    final ProtocolDiscovery vmServiceDiscovery = ProtocolDiscovery.vmService(_deviceLogReader,
       devicePort: debuggingOptions.deviceVmServicePort,
       hostPort: debuggingOptions.hostVmServicePort,
       ipv6: ipv6,
       logger: _logger,
     );
     try {
-      final Uri? observatoryUri = await observatoryDiscovery.uri;
-      if (observatoryUri != null) {
-        onAttached(package, buildMode, process);
-        return LaunchResult.succeeded(observatoryUri: observatoryUri);
+      Timer? timer;
+      if (this is MacOSDevice) {
+        if (await globals.isRunningOnBot) {
+          const int defaultTimeout = 5;
+          timer = Timer(const Duration(minutes: defaultTimeout), () {
+            // As of macOS 14, if sandboxing is enabled and the app is not codesigned,
+            // a dialog will prompt the user to allow the app to run. This will
+            // cause tests in CI to hang. In CI, we workaround this by setting
+            // the CODE_SIGN_ENTITLEMENTS build setting to a version with
+            // sandboxing disabled.
+            final String sandboxingMessage;
+            if (debuggingOptions.usingCISystem) {
+              sandboxingMessage = 'Ensure sandboxing is disabled by checking '
+                  'the set CODE_SIGN_ENTITLEMENTS.';
+            } else {
+              sandboxingMessage = 'Consider codesigning your app or disabling '
+                  'sandboxing. Flutter will attempt to disable sandboxing if '
+                  'the `--ci` flag is provided.';
+            }
+            _logger.printError(
+                'The Dart VM Service was not discovered after $defaultTimeout '
+                'minutes. If the app has sandboxing enabled and is not '
+                'codesigned or codesigning changed, this may be caused by a '
+                'system prompt asking for access. $sandboxingMessage\n'
+                'See https://developer.apple.com/documentation/security/app_sandbox/accessing_files_from_the_macos_app_sandbox '
+                'for more information.');
+          });
+        }
+      }
+
+      final Uri? vmServiceUri = await vmServiceDiscovery.uri;
+      if (vmServiceUri != null) {
+        timer?.cancel();
+        onAttached(package, buildInfo, process);
+        return LaunchResult.succeeded(vmServiceUri: vmServiceUri);
       }
       _logger.printError(
         'Error waiting for a debug connection: '
@@ -172,14 +205,14 @@ abstract class DesktopDevice extends Device {
     } on Exception catch (error) {
       _logger.printError('Error waiting for a debug connection: $error');
     } finally {
-      await observatoryDiscovery.cancel();
+      await vmServiceDiscovery.cancel();
     }
     return LaunchResult.failed();
   }
 
   @override
   Future<bool> stopApp(
-    ApplicationPackage app, {
+    ApplicationPackage? app, {
     String? userIdentifier,
   }) async {
     bool succeeded = true;
@@ -197,19 +230,19 @@ abstract class DesktopDevice extends Device {
   }
 
   /// Builds the current project for this device, with the given options.
-  Future<void> buildForDevice(
-    ApplicationPackage package, {
+  Future<void> buildForDevice({
     required BuildInfo buildInfo,
     String? mainPath,
+    bool usingCISystem = false,
   });
 
   /// Returns the path to the executable to run for [package] on this device for
   /// the given [buildMode].
-  String? executablePathForDevice(ApplicationPackage package, BuildMode buildMode);
+  String? executablePathForDevice(ApplicationPackage package, BuildInfo buildInfo);
 
   /// Called after a process is attached, allowing any device-specific extra
   /// steps to be run.
-  void onAttached(ApplicationPackage package, BuildMode buildMode, Process process) {}
+  void onAttached(ApplicationPackage package, BuildInfo buildInfo, Process process) {}
 
   /// Computes a set of environment variables used to pass debugging information
   /// to the engine without interfering with application level command line
@@ -256,6 +289,9 @@ abstract class DesktopDevice extends Device {
     if (debuggingOptions.traceSystrace) {
       addFlag('trace-systrace=true');
     }
+    if (debuggingOptions.traceToFile != null) {
+      addFlag('trace-to-file=${debuggingOptions.traceToFile}');
+    }
     if (debuggingOptions.endlessTraceBuffer) {
       addFlag('endless-trace-buffer=true');
     }
@@ -268,11 +304,18 @@ abstract class DesktopDevice extends Device {
     if (debuggingOptions.purgePersistentCache) {
       addFlag('purge-persistent-cache=true');
     }
+    switch (debuggingOptions.enableImpeller) {
+      case ImpellerStatus.enabled:
+        addFlag('enable-impeller=true');
+      case ImpellerStatus.disabled:
+      case ImpellerStatus.platformDefault:
+        addFlag('enable-impeller=false');
+    }
     // Options only supported when there is a VM Service connection between the
     // tool and the device, usually in debug or profile mode.
     if (debuggingOptions.debuggingEnabled) {
       if (debuggingOptions.deviceVmServicePort != null) {
-        addFlag('observatory-port=${debuggingOptions.deviceVmServicePort}');
+        addFlag('vm-service-port=${debuggingOptions.deviceVmServicePort}');
       }
       if (debuggingOptions.buildInfo.isDebug) {
         addFlag('enable-checked-mode=true');

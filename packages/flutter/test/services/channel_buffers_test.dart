@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
@@ -14,15 +13,11 @@ class TestChannelBuffersFlutterBinding extends BindingBase with SchedulerBinding
 
 void main() {
   ByteData makeByteData(String str) {
-    final List<int> list = utf8.encode(str);
-    final ByteBuffer buffer = list is Uint8List ? list.buffer : Uint8List.fromList(list).buffer;
-    return ByteData.view(buffer);
+    return ByteData.sublistView(utf8.encode(str));
   }
 
   String getString(ByteData data) {
-    final ByteBuffer buffer = data.buffer;
-    final List<int> list = buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
-    return utf8.decode(list);
+    return utf8.decode(Uint8List.sublistView(data));
   }
 
   test('does drain channel buffers', () async {

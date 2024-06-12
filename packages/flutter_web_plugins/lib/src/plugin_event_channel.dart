@@ -15,10 +15,9 @@ import 'plugin_registry.dart';
 /// channel sends a stream of events to the handler listening on the
 /// framework-side.
 ///
-/// The channel [name] must not be null. If no [codec] is provided, then
-/// [StandardMethodCodec] is used. If no [binaryMessenger] is provided, then
-/// [pluginBinaryMessenger], which sends messages to the framework-side,
-/// is used.
+/// If no [codec] is provided, then [StandardMethodCodec] is used. If no
+/// [binaryMessenger] is provided, then [pluginBinaryMessenger], which sends
+/// messages to the framework-side, is used.
 ///
 /// Channels created using this class implement two methods for
 /// subscribing to the event stream. The methods use the encoding of
@@ -37,23 +36,18 @@ import 'plugin_registry.dart';
 /// subscribed are silently discarded.
 class PluginEventChannel<T> {
   /// Creates a new plugin event channel.
-  ///
-  /// The [name] and [codec] arguments must not be null.
   const PluginEventChannel(
     this.name, [
     this.codec = const StandardMethodCodec(),
     this.binaryMessenger,
-  ]) : assert(name != null),
-       assert(codec != null);
+  ]);
 
   /// The logical channel on which communication happens.
-  ///
-  /// This must not be null.
   final String name;
 
   /// The message codec used by this channel.
   ///
-  /// This must not be null. This defaults to [StandardMethodCodec].
+  /// Defaults to [StandardMethodCodec].
   final MethodCodec codec;
 
   /// The messenger used by this channel to send platform messages.
@@ -108,7 +102,7 @@ class _EventChannelHandler<T> {
     this.codec,
     this.controller,
     this.messenger,
-  ) : assert(messenger != null);
+  );
 
   final String name;
   final MethodCodec codec;

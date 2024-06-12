@@ -2,59 +2,71 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for AnimatedSize
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [AnimatedSize].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const AnimatedSizeExampleApp());
 
-  static const String _title = 'Flutter Code Sample';
+class AnimatedSizeExampleApp extends StatelessWidget {
+  const AnimatedSizeExampleApp({super.key});
+
+  static const Duration duration = Duration(seconds: 1);
+  static const Curve curve = Curves.easeIn;
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
+        appBar: AppBar(title: const Text('AnimatedSize Sample')),
         body: const Center(
-          child: MyStatefulWidget(),
+          child: AnimatedSizeExample(
+            duration: duration,
+            curve: curve,
+          ),
         ),
       ),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class AnimatedSizeExample extends StatefulWidget {
+  const AnimatedSizeExample({
+    required this.duration,
+    required this.curve,
+    super.key,
+  });
+
+  final Duration duration;
+
+  final Curve curve;
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<AnimatedSizeExample> createState() => _AnimatedSizeExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
-  double _size = 50.0;
-  bool _large = false;
-
-  void _updateSize() {
-    setState(() {
-      _size = _large ? 250.0 : 100.0;
-      _large = !_large;
-    });
-  }
+class _AnimatedSizeExampleState extends State<AnimatedSizeExample> {
+  bool _isSelected = false;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => _updateSize(),
-      child: Container(
+      onTap: () {
+        setState(() {
+          _isSelected = !_isSelected;
+        });
+      },
+      child: ColoredBox(
         color: Colors.amberAccent,
         child: AnimatedSize(
-          curve: Curves.easeIn,
-          duration: const Duration(seconds: 1),
-          child: FlutterLogo(size: _size),
+          duration: widget.duration,
+          curve: widget.curve,
+          child: SizedBox.square(
+            dimension: _isSelected ? 250.0 : 100.0,
+            child: const Center(
+              child: FlutterLogo(size: 75.0),
+            ),
+          ),
         ),
       ),
     );

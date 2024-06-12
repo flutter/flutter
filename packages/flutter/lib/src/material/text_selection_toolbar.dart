@@ -4,20 +4,20 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 
+import 'color_scheme.dart';
 import 'debug.dart';
 import 'icon_button.dart';
 import 'icons.dart';
 import 'material.dart';
 import 'material_localizations.dart';
+import 'theme.dart';
 
-// Minimal padding from all edges of the selection toolbar to all edges of the
-// viewport.
-const double _kToolbarScreenPadding = 8.0;
 const double _kToolbarHeight = 44.0;
+const double _kToolbarContentDistance = 8.0;
 
 /// A fully-functional Material-style text selection toolbar.
 ///
@@ -29,8 +29,8 @@ const double _kToolbarHeight = 44.0;
 ///
 /// See also:
 ///
-///  * [TextSelectionControls.buildToolbar], where this is used by default to
-///    build an Android-style toolbar.
+///  * [AdaptiveTextSelectionToolbar], which builds the toolbar for the current
+///    platform.
 ///  * [CupertinoTextSelectionToolbar], which is similar, but builds an iOS-
 ///    style toolbar.
 class TextSelectionToolbar extends StatelessWidget {
@@ -78,6 +78,17 @@ class TextSelectionToolbar extends StatelessWidget {
   /// {@endtemplate}
   final ToolbarBuilder toolbarBuilder;
 
+  /// The size of the text selection handles.
+  ///
+  /// See also:
+  ///
+  ///  * [SpellCheckSuggestionsToolbar], which references this value to calculate
+  ///    the padding between the toolbar and anchor.
+  static const double kHandleSize = 22.0;
+
+  /// Padding between the toolbar and the anchor.
+  static const double kToolbarContentDistanceBelow = kHandleSize - 2.0;
+
   // Build the default Android Material text selection menu toolbar.
   static Widget _defaultToolbarBuilder(BuildContext context, Widget child) {
     return _TextSelectionToolbarContainer(
@@ -87,34 +98,38 @@ class TextSelectionToolbar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double paddingAbove = MediaQuery.of(context).padding.top
-        + _kToolbarScreenPadding;
-    final double availableHeight = anchorAbove.dy - paddingAbove;
+    // Incorporate the padding distance between the content and toolbar.
+    final Offset anchorAbovePadded =
+        anchorAbove - const Offset(0.0, _kToolbarContentDistance);
+    final Offset anchorBelowPadded =
+        anchorBelow + const Offset(0.0, kToolbarContentDistanceBelow);
+
+    const double screenPadding = CupertinoTextSelectionToolbar.kToolbarScreenPadding;
+    final double paddingAbove = MediaQuery.paddingOf(context).top
+        + screenPadding;
+    final double availableHeight = anchorAbovePadded.dy - _kToolbarContentDistance - paddingAbove;
     final bool fitsAbove = _kToolbarHeight <= availableHeight;
-    final Offset localAdjustment = Offset(_kToolbarScreenPadding, paddingAbove);
+    // Makes up for the Padding above the Stack.
+    final Offset localAdjustment = Offset(screenPadding, paddingAbove);
 
     return Padding(
       padding: EdgeInsets.fromLTRB(
-        _kToolbarScreenPadding,
+        screenPadding,
         paddingAbove,
-        _kToolbarScreenPadding,
-        _kToolbarScreenPadding,
+        screenPadding,
+        screenPadding,
       ),
-      child: Stack(
-        children: <Widget>[
-          CustomSingleChildLayout(
-            delegate: TextSelectionToolbarLayoutDelegate(
-              anchorAbove: anchorAbove - localAdjustment,
-              anchorBelow: anchorBelow - localAdjustment,
-              fitsAbove: fitsAbove,
-            ),
-            child: _TextSelectionToolbarOverflowable(
-              isAbove: fitsAbove,
-              toolbarBuilder: toolbarBuilder,
-              children: children,
-            ),
-          ),
-        ],
+      child: CustomSingleChildLayout(
+        delegate: TextSelectionToolbarLayoutDelegate(
+          anchorAbove: anchorAbovePadded - localAdjustment,
+          anchorBelow: anchorBelowPadded - localAdjustment,
+          fitsAbove: fitsAbove,
+        ),
+        child: _TextSelectionToolbarOverflowable(
+          isAbove: fitsAbove,
+          toolbarBuilder: toolbarBuilder,
+          children: children,
+        ),
       ),
     );
   }
@@ -156,8 +171,8 @@ class _TextSelectionToolbarOverflowableState extends State<_TextSelectionToolbar
   // changed and saved values are no longer relevant. This should be called in
   // setState or another context where a rebuild is happening.
   void _reset() {
-    // Change _TextSelectionToolbarTrailingEdgeAlign's key when the menu changes in
-    // order to cause it to rebuild. This lets it recalculate its
+    // Change _TextSelectionToolbarTrailingEdgeAlign's key when the menu changes
+    // in order to cause it to rebuild. This lets it recalculate its
     // saved width for the new set of children, and it prevents AnimatedSize
     // from animating the size change.
     _containerKey = UniqueKey();
@@ -228,8 +243,7 @@ class _TextSelectionToolbarTrailingEdgeAlign extends SingleChildRenderObjectWidg
     required Widget super.child,
     required this.overflowOpen,
     required this.textDirection,
-  }) : assert(child != null),
-       assert(overflowOpen != null);
+  });
 
   final bool overflowOpen;
   final TextDirection textDirection;
@@ -353,13 +367,11 @@ class _TextSelectionToolbarTrailingEdgeAlignRenderBox extends RenderProxyBox {
 // Renders the menu items in the correct positions in the menu and its overflow
 // submenu based on calculating which item would first overflow.
 class _TextSelectionToolbarItemsLayout extends MultiChildRenderObjectWidget {
-  _TextSelectionToolbarItemsLayout({
+  const _TextSelectionToolbarItemsLayout({
     required this.isAbove,
     required this.overflowOpen,
     required super.children,
-  }) : assert(children != null),
-       assert(isAbove != null),
-       assert(overflowOpen != null);
+  });
 
   final bool isAbove;
   final bool overflowOpen;
@@ -402,9 +414,7 @@ class _RenderTextSelectionToolbarItemsLayout extends RenderBox with ContainerRen
   _RenderTextSelectionToolbarItemsLayout({
     required bool isAbove,
     required bool overflowOpen,
-  }) : assert(overflowOpen != null),
-       assert(isAbove != null),
-       _isAbove = isAbove,
+  }) : _isAbove = isAbove,
        _overflowOpen = overflowOpen,
        super();
 
@@ -559,6 +569,40 @@ class _RenderTextSelectionToolbarItemsLayout extends RenderBox with ContainerRen
     size = nextSize;
   }
 
+  // Horizontally expand the children when the menu overflows so they can react to
+  // pointer events into their whole area.
+  void _resizeChildrenWhenOverflow() {
+    if (!overflowOpen) {
+      return;
+    }
+
+    final RenderBox navButton = firstChild!;
+    int i = -1;
+
+    visitChildren((RenderObject renderObjectChild) {
+      final RenderBox child = renderObjectChild as RenderBox;
+      final ToolbarItemsParentData childParentData = child.parentData! as ToolbarItemsParentData;
+
+      i++;
+
+      // Ignore the navigation button.
+      if (renderObjectChild == navButton) {
+        return;
+      }
+
+      // There is no need to update children that won't be painted.
+      if (!_shouldPaintChild(renderObjectChild, i)) {
+        childParentData.shouldPaint = false;
+        return;
+      }
+
+      child.layout(
+        BoxConstraints.tightFor(width: size.width),
+        parentUsesSize: true,
+      );
+    });
+  }
+
   @override
   void performLayout() {
     _lastIndexThatFits = -1;
@@ -569,6 +613,7 @@ class _RenderTextSelectionToolbarItemsLayout extends RenderBox with ContainerRen
 
     _layoutChildren();
     _placeChildren();
+    _resizeChildrenWhenOverflow();
   }
 
   @override
@@ -642,13 +687,34 @@ class _TextSelectionToolbarContainer extends StatelessWidget {
 
   final Widget child;
 
+  // These colors were taken from a screenshot of a Pixel 6 emulator running
+  // Android API level 34.
+  static const Color _defaultColorLight = Color(0xffffffff);
+  static const Color _defaultColorDark = Color(0xff424242);
+
+  static Color _getColor(ColorScheme colorScheme) {
+    final bool isDefaultSurface = switch (colorScheme.brightness) {
+      Brightness.light => identical(ThemeData().colorScheme.surface, colorScheme.surface),
+      Brightness.dark => identical(ThemeData.dark().colorScheme.surface, colorScheme.surface),
+    };
+    if (!isDefaultSurface) {
+      return colorScheme.surface;
+    }
+    return switch (colorScheme.brightness) {
+      Brightness.light => _defaultColorLight,
+      Brightness.dark => _defaultColorDark,
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
     return Material(
       // This value was eyeballed to match the native text selection menu on
-      // a Pixel 2 running Android 10.
-      borderRadius: const BorderRadius.all(Radius.circular(7.0)),
+      // a Pixel 6 emulator running Android API level 34.
+      borderRadius: const BorderRadius.all(Radius.circular(_kToolbarHeight / 2)),
       clipBehavior: Clip.antiAlias,
+      color: _getColor(theme.colorScheme),
       elevation: 1.0,
       type: MaterialType.card,
       child: child,

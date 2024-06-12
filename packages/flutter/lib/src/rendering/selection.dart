@@ -58,7 +58,7 @@ enum SelectionResult {
 /// The abstract interface to handle [SelectionEvent]s.
 ///
 /// This interface is extended by [Selectable] and [SelectionContainerDelegate]
-/// and is typically not use directly.
+/// and is typically not used directly.
 ///
 /// {@template flutter.rendering.SelectionHandler}
 /// This class returns a [SelectionGeometry] as its [value], and is responsible
@@ -142,6 +142,10 @@ mixin Selectable implements SelectionHandler {
   /// The size of this [Selectable].
   Size get size;
 
+  /// A list of [Rect]s that represent the bounding box of this [Selectable]
+  /// in local coordinates.
+  List<Rect> get boundingBoxes;
+
   /// Disposes resources held by the mixer.
   void dispose();
 }
@@ -206,9 +210,7 @@ mixin SelectionRegistrant on Selectable {
 }
 
 /// A utility class that provides useful methods for handling selection events.
-class SelectionUtils {
-  SelectionUtils._();
-
+abstract final class SelectionUtils {
   /// Determines [SelectionResult] purely based on the target rectangle.
   ///
   /// This method returns [SelectionResult.end] if the `point` is inside the
@@ -296,6 +298,39 @@ enum SelectionEventType {
   ///
   /// Used by [SelectWordSelectionEvent].
   selectWord,
+
+  /// An event to select a paragraph at the location
+  /// [SelectParagraphSelectionEvent.globalPosition].
+  ///
+  /// Used by [SelectParagraphSelectionEvent].
+  selectParagraph,
+
+  /// An event that extends the selection by a specific [TextGranularity].
+  granularlyExtendSelection,
+
+  /// An event that extends the selection in a specific direction.
+  directionallyExtendSelection,
+}
+
+/// The unit of how selection handles move in text.
+///
+/// The [GranularlyExtendSelectionEvent] uses this enum to describe how
+/// [Selectable] should extend its selection.
+enum TextGranularity {
+  /// Treats each character as an atomic unit when moving the selection handles.
+  character,
+
+  /// Treats word as an atomic unit when moving the selection handles.
+  word,
+
+  /// Treats a paragraph as an atomic unit when moving the selection handles.
+  paragraph,
+
+  /// Treats each line break as an atomic unit when moving the selection handles.
+  line,
+
+  /// Treats the entire document as an atomic unit when moving the selection handles.
+  document,
 }
 
 /// An abstract base class for selection events.
@@ -344,6 +379,21 @@ class SelectWordSelectionEvent extends SelectionEvent {
   final Offset globalPosition;
 }
 
+/// Selects the entire paragraph at the location.
+///
+/// This event can be sent as the result of a triple click to select.
+class SelectParagraphSelectionEvent extends SelectionEvent {
+  /// Creates a select paragraph event at the [globalPosition].
+  const SelectParagraphSelectionEvent({required this.globalPosition, this.absorb = false}): super._(SelectionEventType.selectParagraph);
+
+  /// The position in global coordinates to select paragraph at.
+  final Offset globalPosition;
+
+  /// Whether the selectable receiving the event should be absorbed into
+  /// an encompassing paragraph.
+  final bool absorb;
+}
+
 /// Updates a selection edge.
 ///
 /// An active selection contains two edges, start and end. Use the [type] to
@@ -353,26 +403,161 @@ class SelectWordSelectionEvent extends SelectionEvent {
 ///
 /// The [globalPosition] contains the new offset of the edge.
 ///
-/// This event is dispatched when the framework detects [DragStartDetails] in
+/// The [granularity] contains the granularity that the selection edge should move by.
+/// Only [TextGranularity.character] and [TextGranularity.word] are currently supported.
+///
+/// This event is dispatched when the framework detects [TapDragStartDetails] in
 /// [SelectionArea]'s gesture recognizers for mouse devices, or the selection
 /// handles have been dragged to new locations.
 class SelectionEdgeUpdateEvent extends SelectionEvent {
   /// Creates a selection start edge update event.
   ///
   /// The [globalPosition] contains the location of the selection start edge.
+  ///
+  /// The [granularity] contains the granularity which the selection edge should move by.
+  /// This value defaults to [TextGranularity.character].
   const SelectionEdgeUpdateEvent.forStart({
-    required this.globalPosition
-  }) : super._(SelectionEventType.startEdgeUpdate);
+    required this.globalPosition,
+    TextGranularity? granularity
+  }) : granularity = granularity ?? TextGranularity.character, super._(SelectionEventType.startEdgeUpdate);
 
   /// Creates a selection end edge update event.
   ///
   /// The [globalPosition] contains the new location of the selection end edge.
+  ///
+  /// The [granularity] contains the granularity which the selection edge should move by.
+  /// This value defaults to [TextGranularity.character].
   const SelectionEdgeUpdateEvent.forEnd({
-    required this.globalPosition
-  }) : super._(SelectionEventType.endEdgeUpdate);
+    required this.globalPosition,
+    TextGranularity? granularity
+  }) : granularity = granularity ?? TextGranularity.character, super._(SelectionEventType.endEdgeUpdate);
 
   /// The new location of the selection edge.
   final Offset globalPosition;
+
+  /// The granularity for which the selection moves.
+  ///
+  /// Only [TextGranularity.character] and [TextGranularity.word] are currently supported.
+  ///
+  /// Defaults to [TextGranularity.character].
+  final TextGranularity granularity;
+}
+
+/// Extends the start or end of the selection by a given [TextGranularity].
+///
+/// To handle this event, move the associated selection edge, as dictated by
+/// [isEnd], according to the [granularity].
+class GranularlyExtendSelectionEvent extends SelectionEvent {
+  /// Creates a [GranularlyExtendSelectionEvent].
+  const GranularlyExtendSelectionEvent({
+    required this.forward,
+    required this.isEnd,
+    required this.granularity,
+  }) : super._(SelectionEventType.granularlyExtendSelection);
+
+  /// Whether to extend the selection forward.
+  final bool forward;
+
+  /// Whether this event is updating the end selection edge.
+  final bool isEnd;
+
+  /// The granularity for which the selection extend.
+  final TextGranularity granularity;
+}
+
+/// The direction to extend a selection.
+///
+/// The [DirectionallyExtendSelectionEvent] uses this enum to describe how
+/// [Selectable] should extend their selection.
+enum SelectionExtendDirection {
+  /// Move one edge of the selection vertically to the previous adjacent line.
+  ///
+  /// For text selection, it should consider both soft and hard linebreak.
+  ///
+  /// See [DirectionallyExtendSelectionEvent.dx] on how to
+  /// calculate the horizontal offset.
+  previousLine,
+
+  /// Move one edge of the selection vertically to the next adjacent line.
+  ///
+  /// For text selection, it should consider both soft and hard linebreak.
+  ///
+  /// See [DirectionallyExtendSelectionEvent.dx] on how to
+  /// calculate the horizontal offset.
+  nextLine,
+
+  /// Move the selection edges forward to a certain horizontal offset in the
+  /// same line.
+  ///
+  /// If there is no on-going selection, the selection must start with the first
+  /// line (or equivalence of first line in a non-text selectable) and select
+  /// toward the horizontal offset in the same line.
+  ///
+  /// The selectable that receives [DirectionallyExtendSelectionEvent] with this
+  /// enum must return [SelectionResult.end].
+  ///
+  /// See [DirectionallyExtendSelectionEvent.dx] on how to
+  /// calculate the horizontal offset.
+  forward,
+
+  /// Move the selection edges backward to a certain horizontal offset in the
+  /// same line.
+  ///
+  /// If there is no on-going selection, the selection must start with the last
+  /// line (or equivalence of last line in a non-text selectable) and select
+  /// backward the horizontal offset in the same line.
+  ///
+  /// The selectable that receives [DirectionallyExtendSelectionEvent] with this
+  /// enum must return [SelectionResult.end].
+  ///
+  /// See [DirectionallyExtendSelectionEvent.dx] on how to
+  /// calculate the horizontal offset.
+  backward,
+}
+
+/// Extends the current selection with respect to a [direction].
+///
+/// To handle this event, move the associated selection edge, as dictated by
+/// [isEnd], according to the [direction].
+///
+/// The movements are always based on [dx]. The value is in
+/// global coordinates and is the horizontal offset the selection edge should
+/// move to when moving to across lines.
+class DirectionallyExtendSelectionEvent extends SelectionEvent {
+  /// Creates a [DirectionallyExtendSelectionEvent].
+  const DirectionallyExtendSelectionEvent({
+    required this.dx,
+    required this.isEnd,
+    required this.direction,
+  }) : super._(SelectionEventType.directionallyExtendSelection);
+
+  /// The horizontal offset the selection should move to.
+  ///
+  /// The offset is in global coordinates.
+  final double dx;
+
+  /// Whether this event is updating the end selection edge.
+  final bool isEnd;
+
+  /// The directional movement of this event.
+  ///
+  /// See also:
+  ///  * [SelectionExtendDirection], which explains how to handle each enum.
+  final SelectionExtendDirection direction;
+
+  /// Makes a copy of this object with its property replaced with the new
+  /// values.
+  DirectionallyExtendSelectionEvent copyWith({
+    double? dx,
+    bool? isEnd,
+    SelectionExtendDirection? direction,
+  }) {
+    return DirectionallyExtendSelectionEvent(
+      dx: dx ?? this.dx,
+      isEnd: isEnd ?? this.isEnd,
+      direction: direction ?? this.direction,
+    );
+  }
 }
 
 /// A registrar that keeps track of [Selectable]s in the subtree.
@@ -433,8 +618,8 @@ enum SelectionStatus {
 /// The geometry of the current selection.
 ///
 /// This includes details such as the locations of the selection start and end,
-/// line height, etc. This information is used for drawing selection controls
-/// for mobile platforms.
+/// line height, the rects that encompass the selection, etc. This information
+/// is used for drawing selection controls for mobile platforms.
 ///
 /// The positions in geometry are in local coordinates of the [SelectionHandler]
 /// or [Selectable].
@@ -447,6 +632,7 @@ class SelectionGeometry {
   const SelectionGeometry({
     this.startSelectionPoint,
     this.endSelectionPoint,
+    this.selectionRects = const <Rect>[],
     required this.status,
     required this.hasContent,
   }) : assert((startSelectionPoint == null && endSelectionPoint == null) || status != SelectionStatus.none);
@@ -484,6 +670,10 @@ class SelectionGeometry {
   /// The status of ongoing selection in the [Selectable] or [SelectionHandler].
   final SelectionStatus status;
 
+  /// The rects in the local coordinates of the containing [Selectable] that
+  /// represent the selection if there is any.
+  final List<Rect> selectionRects;
+
   /// Whether there is any selectable content in the [Selectable] or
   /// [SelectionHandler].
   final bool hasContent;
@@ -495,12 +685,14 @@ class SelectionGeometry {
   SelectionGeometry copyWith({
     SelectionPoint? startSelectionPoint,
     SelectionPoint? endSelectionPoint,
+    List<Rect>? selectionRects,
     SelectionStatus? status,
     bool? hasContent,
   }) {
     return SelectionGeometry(
       startSelectionPoint: startSelectionPoint ?? this.startSelectionPoint,
       endSelectionPoint: endSelectionPoint ?? this.endSelectionPoint,
+      selectionRects: selectionRects ?? this.selectionRects,
       status: status ?? this.status,
       hasContent: hasContent ?? this.hasContent,
     );
@@ -517,6 +709,7 @@ class SelectionGeometry {
     return other is SelectionGeometry
         && other.startSelectionPoint == startSelectionPoint
         && other.endSelectionPoint == endSelectionPoint
+        && other.selectionRects == selectionRects
         && other.status == status
         && other.hasContent == hasContent;
   }
@@ -526,6 +719,7 @@ class SelectionGeometry {
     return Object.hash(
       startSelectionPoint,
       endSelectionPoint,
+      selectionRects,
       status,
       hasContent,
     );
@@ -534,17 +728,13 @@ class SelectionGeometry {
 
 /// The geometry information of a selection point.
 @immutable
-class SelectionPoint {
+class SelectionPoint with Diagnosticable {
   /// Creates a selection point object.
-  ///
-  /// All properties must not be null.
   const SelectionPoint({
     required this.localPosition,
     required this.lineHeight,
     required this.handleType,
-  }) : assert(localPosition != null),
-       assert(lineHeight != null),
-       assert(handleType != null);
+  });
 
   /// The position of the selection point in the local coordinates of the
   /// containing [Selectable].
@@ -579,6 +769,14 @@ class SelectionPoint {
       lineHeight,
       handleType,
     );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Offset>('localPosition', localPosition));
+    properties.add(DoubleProperty('lineHeight', lineHeight));
+    properties.add(EnumProperty<TextSelectionHandleType>('handleType', handleType));
   }
 }
 

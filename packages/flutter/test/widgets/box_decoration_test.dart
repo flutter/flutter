@@ -11,14 +11,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../image_data.dart';
-import '../rendering/mock_canvas.dart';
 
 class TestImageProvider extends ImageProvider<TestImageProvider> {
   TestImageProvider(this.future);
 
   final Future<void> future;
 
-  static late ui.Image image;
+  static final List<ui.Image> _images = <ui.Image>[];
+
+  static Future<void> prepareImages(int count) async {
+    for (int i = 0; i < count; i++) {
+      _images.add(await decodeImageFromList(Uint8List.fromList(kTransparentImage)));
+    }
+  }
 
   @override
   Future<TestImageProvider> obtainKey(ImageConfiguration configuration) {
@@ -26,18 +31,26 @@ class TestImageProvider extends ImageProvider<TestImageProvider> {
   }
 
   @override
-  ImageStreamCompleter load(TestImageProvider key, DecoderCallback decode) {
+  ImageStreamCompleter loadImage(TestImageProvider key, ImageDecoderCallback decode) {
+    assert(_images.isNotEmpty, 'ask for more images in `prepareImages`');
+    final ui.Image image = _images.last;
+    _images.removeLast();
+
     return OneFrameImageStreamCompleter(
-      future.then<ImageInfo>((void value) => ImageInfo(image: image)),
+      future.then<ImageInfo>((void value) {
+        final ImageInfo result = ImageInfo(image: image);
+        return result;
+      }),
     );
   }
 }
 
 Future<void> main() async {
   AutomatedTestWidgetsFlutterBinding();
-  TestImageProvider.image = await decodeImageFromList(Uint8List.fromList(kTransparentImage));
+  await TestImageProvider.prepareImages(2);
 
   testWidgets('DecoratedBox handles loading images', (WidgetTester tester) async {
+    addTearDown(imageCache.clear);
     final GlobalKey key = GlobalKey();
     final Completer<void> completer = Completer<void>();
     await tester.pumpWidget(
@@ -61,6 +74,7 @@ Future<void> main() async {
   });
 
   testWidgets('Moving a DecoratedBox', (WidgetTester tester) async {
+    addTearDown(imageCache.clear);
     final Completer<void> completer = Completer<void>();
     final Widget subtree = KeyedSubtree(
       key: GlobalKey(),
@@ -249,12 +263,7 @@ Future<void> main() async {
           350.0, 200.0, 450.0, 300.0,
           topRight: const Radius.circular(10.0),
         ),
-        inner: RRect.fromLTRBAndCorners(
-          360.0, 210.0, 440.0, 290.0,
-          topLeft: const Radius.circular(-10.0),
-          bottomRight: const Radius.circular(-10.0),
-          bottomLeft: const Radius.circular(-10.0),
-        ),
+        inner: RRect.fromLTRBAndCorners(360.0, 210.0, 440.0, 290.0),
       )
       ..circle(x: 400.0, y: 350.0, radius: 45.0),
     );

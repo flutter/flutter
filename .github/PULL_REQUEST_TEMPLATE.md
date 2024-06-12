@@ -1,6 +1,6 @@
 *Replace this paragraph with a description of what this PR is changing or adding, and why. Consider including before/after screenshots.*
 
-*List which issues are fixed by this PR. You must list at least one issue.*
+*List which issues are fixed by this PR. You must list at least one issue. An issue is not required if the PR fixes something trivial like a typo.*
 
 *If you had to change anything in the [flutter/tests] repo, include a link to the migration guide as per the [breaking change policy].*
 
@@ -13,6 +13,7 @@
 - [ ] I listed at least one issue that this PR fixes in the description above.
 - [ ] I updated/added relevant documentation (doc comments with `///`).
 - [ ] I added new tests to check the change I am making, or this PR is [test-exempt].
+- [ ] I followed the [breaking change policy] and added [Data Driven Fixes] where supported.
 - [ ] All existing and new tests are passing.
 
 If you need help, consider asking for advice on the #hackers-new channel on [Discord].
@@ -27,3 +28,4 @@ If you need help, consider asking for advice on the #hackers-new channel on [Dis
 [flutter/tests]: https://github.com/flutter/tests
 [breaking change policy]: https://github.com/flutter/flutter/wiki/Tree-hygiene#handling-breaking-changes
 [Discord]: https://github.com/flutter/flutter/wiki/Chat
+[Data Driven Fixes]: https://github.com/flutter/flutter/wiki/Data-driven-Fixes

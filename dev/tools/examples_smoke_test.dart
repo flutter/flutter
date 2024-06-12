@@ -17,21 +17,21 @@ import 'package:path/path.dart' as path;
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
-FileSystem filesystem = const LocalFileSystem();
-ProcessManager processManager = const LocalProcessManager();
-Platform platform = const LocalPlatform();
+const FileSystem _kFilesystem = LocalFileSystem();
+const ProcessManager _kProcessManager = LocalProcessManager();
+const Platform _kPlatform = LocalPlatform();
 
 FutureOr<dynamic> main() async {
-  if (!platform.isLinux && !platform.isWindows && !platform.isMacOS) {
+  if (!_kPlatform.isLinux && !_kPlatform.isWindows && !_kPlatform.isMacOS) {
     stderr.writeln('Example smoke tests are only designed to run on desktop platforms');
     exitCode = 4;
     return;
   }
-  final Directory flutterDir = filesystem.directory(
+  final Directory flutterDir = _kFilesystem.directory(
     path.absolute(
       path.dirname(
         path.dirname(
-          path.dirname(platform.script.toFilePath()),
+          path.dirname(_kPlatform.script.toFilePath()),
         ),
       ),
     ),
@@ -63,16 +63,16 @@ Future<void> runSmokeTests({
   required Directory apiDir,
 }) async {
   final File flutterExe =
-      flutterDir.childDirectory('bin').childFile(platform.isWindows ? 'flutter.bat' : 'flutter');
+      flutterDir.childDirectory('bin').childFile(_kPlatform.isWindows ? 'flutter.bat' : 'flutter');
   final List<String> cmd = <String>[
     // If we're in a container with no X display, then use the virtual framebuffer.
-    if (platform.isLinux &&
-        (platform.environment['DISPLAY'] == null ||
-         platform.environment['DISPLAY']!.isEmpty)) '/usr/bin/xvfb-run',
+    if (_kPlatform.isLinux &&
+        (_kPlatform.environment['DISPLAY'] == null ||
+         _kPlatform.environment['DISPLAY']!.isEmpty)) '/usr/bin/xvfb-run',
     flutterExe.absolute.path,
     'test',
     '--reporter=expanded',
-    '--device-id=${platform.operatingSystem}',
+    '--device-id=${_kPlatform.operatingSystem}',
     integrationTest.absolute.path,
   ];
   await runCommand(cmd, workingDirectory: apiDir);
@@ -81,13 +81,12 @@ Future<void> runSmokeTests({
 // A class to hold information related to an example, used to generate names
 // from for the tests.
 class ExampleInfo {
-  ExampleInfo(this.file, Directory examplesLibDir)
+  ExampleInfo(File file, Directory examplesLibDir)
       : importPath = _getImportPath(file, examplesLibDir),
         importName = '' {
     importName = importPath.replaceAll(RegExp(r'\.dart$'), '').replaceAll(RegExp(r'\W'), '_');
   }
 
-  final File file;
   final String importPath;
   String importName;
 
@@ -113,22 +112,22 @@ Future<File> generateTest(Directory apiDir) async {
     .trim()
     .split('\n');
   final Iterable<File> examples = gitFiles.map<File>((String examplePath) {
-    return filesystem.file(path.join(examplesLibDir.absolute.path, examplePath));
+    return _kFilesystem.file(path.join(examplesLibDir.absolute.path, examplePath));
   });
 
   // Collect the examples, and import them all as separate symbols.
-  final List<String> imports = <String>[];
-  imports.add('''import 'package:flutter/widgets.dart';''');
-  imports.add('''import 'package:flutter_test/flutter_test.dart';''');
-  imports.add('''import 'package:integration_test/integration_test.dart';''');
-  final List<ExampleInfo> infoList = <ExampleInfo>[];
-  for (final File example in examples) {
-    final ExampleInfo info = ExampleInfo(example, examplesLibDir);
-    infoList.add(info);
-    imports.add('''import 'package:flutter_api_samples/${info.importPath}' as ${info.importName};''');
-  }
-  imports.sort();
+  final List<ExampleInfo> infoList = <ExampleInfo>[
+    for (final File example in examples) ExampleInfo(example, examplesLibDir),
+  ];
   infoList.sort((ExampleInfo a, ExampleInfo b) => a.importPath.compareTo(b.importPath));
+  final List<String> imports = <String>[
+    "import 'package:flutter/widgets.dart';",
+    "import 'package:flutter/scheduler.dart';",
+    "import 'package:flutter_test/flutter_test.dart';",
+    "import 'package:integration_test/integration_test.dart';",
+    for (final ExampleInfo info in infoList)
+      "import 'package:flutter_api_samples/${info.importPath}' as ${info.importName};"
+  ]..sort();
 
   final StringBuffer buffer = StringBuffer();
   buffer.writeln('// Temporary generated file. Do not commit.');
@@ -165,6 +164,7 @@ void main() {
         expect(find.byType(WidgetsApp), findsOneWidget);
       } finally {
         ErrorWidget.builder = originalBuilder;
+        timeDilation = 1.0;
       }
     },
   );
@@ -201,7 +201,7 @@ Future<String> runCommand(
   }
 
   try {
-    process = await processManager.start(
+    process = await _kProcessManager.start(
       cmd,
       workingDirectory: workingDirectory.absolute.path,
       environment: environment,

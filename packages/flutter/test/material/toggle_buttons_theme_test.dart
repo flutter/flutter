@@ -7,8 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
-
 Widget boilerplate({required Widget child}) {
   return Directionality(
     textDirection: TextDirection.ltr,
@@ -20,6 +18,12 @@ void main() {
   test('ToggleButtonsThemeData copyWith, ==, hashCode basics', () {
     expect(const ToggleButtonsThemeData(), const ToggleButtonsThemeData().copyWith());
     expect(const ToggleButtonsThemeData().hashCode, const ToggleButtonsThemeData().copyWith().hashCode);
+  });
+
+  test('ToggleButtonsThemeData lerp special cases', () {
+    expect(ToggleButtonsThemeData.lerp(null, null, 0), null);
+    const ToggleButtonsThemeData data = ToggleButtonsThemeData();
+    expect(identical(ToggleButtonsThemeData.lerp(data, data, 0.5), data), true);
   });
 
   test('ToggleButtonsThemeData defaults', () {
@@ -261,10 +265,10 @@ void main() {
                 color: enabledColor,
                 isSelected: const <bool>[false],
                 onPressed: (int index) {},
-                children: <Widget>[
+                children: const <Widget>[
                   // This Row is used like this to test for both TextStyle
                   // and IconTheme for Text and Icon widgets respectively.
-                  Row(children: const <Widget>[
+                  Row(children: <Widget>[
                     Text('First child'),
                     Icon(Icons.check),
                   ]),
@@ -290,8 +294,8 @@ void main() {
                 color: enabledColor,
                 isSelected: const <bool>[true],
                 onPressed: (int index) {},
-                children: <Widget>[
-                  Row(children: const <Widget>[
+                children: const <Widget>[
+                  Row(children: <Widget>[
                     Text('First child'),
                     Icon(Icons.check),
                   ]),
@@ -317,8 +321,8 @@ void main() {
               child: ToggleButtons(
                 color: enabledColor,
                 isSelected: const <bool>[false],
-                children: <Widget>[
-                  Row(children: const <Widget>[
+                children: const <Widget>[
+                  Row(children: <Widget>[
                     Text('First child'),
                     Icon(Icons.check),
                   ]),
@@ -346,8 +350,8 @@ void main() {
             child: ToggleButtons(
               isSelected: const <bool>[true],
               onPressed: (int index) {},
-              children: <Widget>[
-                Row(children: const <Widget>[
+              children: const <Widget>[
+                Row(children: <Widget>[
                   Text('First child'),
                 ]),
               ],
@@ -506,6 +510,8 @@ void main() {
     expect(inkFeatures, paints..rect(color: focusColor));
 
     await hoverGesture.removePointer();
+
+    focusNode.dispose();
   });
 
   testWidgets(

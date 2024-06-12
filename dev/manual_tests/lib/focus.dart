@@ -91,13 +91,14 @@ class _FocusDemoState extends State<FocusDemo> {
     super.dispose();
   }
 
-  KeyEventResult _handleKeyPress(FocusNode node, RawKeyEvent event) {
-    if (event is RawKeyDownEvent) {
+  KeyEventResult _handleKeyPress(FocusNode node, KeyEvent event) {
+    if (event is KeyDownEvent) {
       print('Scope got key event: ${event.logicalKey}, $node');
-      print('Keys down: ${RawKeyboard.instance.keysPressed}');
+      print('Keys down: ${HardwareKeyboard.instance.logicalKeysPressed}');
       if (event.logicalKey == LogicalKeyboardKey.tab) {
         debugDumpFocusTree();
-        if (event.isShiftPressed) {
+        if (HardwareKeyboard.instance.logicalKeysPressed.contains(LogicalKeyboardKey.shiftLeft)
+            || HardwareKeyboard.instance.logicalKeysPressed.contains(LogicalKeyboardKey.shiftRight)) {
           print('Moving to previous.');
           node.previousFocus();
           return KeyEventResult.handled;
@@ -135,7 +136,7 @@ class _FocusDemoState extends State<FocusDemo> {
       policy: ReadingOrderTraversalPolicy(),
       child: FocusScope(
         debugLabel: 'Scope',
-        onKey: _handleKeyPress,
+        onKeyEvent: _handleKeyPress,
         autofocus: true,
         child: DefaultTextStyle(
           style: textTheme.headlineMedium!,
@@ -152,18 +153,18 @@ class _FocusDemoState extends State<FocusDemo> {
                 return Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
-                    Row(
+                    const Row(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      children: const <Widget>[
+                      children: <Widget>[
                         DemoButton(
                           name: 'One',
                           autofocus: true,
                         ),
                       ],
                     ),
-                    Row(
+                    const Row(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      children: const <Widget>[
+                      children: <Widget>[
                         DemoButton(name: 'Two'),
                         DemoButton(
                           name: 'Three',
@@ -171,9 +172,9 @@ class _FocusDemoState extends State<FocusDemo> {
                         ),
                       ],
                     ),
-                    Row(
+                    const Row(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      children: const <Widget>[
+                      children: <Widget>[
                         DemoButton(name: 'Four'),
                         DemoButton(name: 'Five'),
                         DemoButton(name: 'Six'),

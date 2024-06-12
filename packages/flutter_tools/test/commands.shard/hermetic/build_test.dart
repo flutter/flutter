@@ -2,17 +2,21 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/process.dart';
+import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
-import 'package:meta/meta.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fakes.dart';
+import '../../src/test_build_system.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
@@ -26,19 +30,39 @@ void main() {
     ]), throwsToolExit(message: '"--${FlutterOptions.kDartObfuscationOption}" can only be used in '
         'combination with "--${FlutterOptions.kSplitDebugInfoOption}"'));
   });
+
   group('Fatal Logs', () {
-    FakeBuildCommand command;
-    MemoryFileSystem fs;
+    late FakeBuildCommand command;
+    late MemoryFileSystem fs;
+    late BufferLogger logger;
+    late ProcessManager processManager;
+    late ProcessUtils processUtils;
+    late Artifacts artifacts;
 
     setUp(() {
       fs = MemoryFileSystem.test();
+      artifacts = Artifacts.test(fileSystem: fs);
       fs.file('/package/pubspec.yaml').createSync(recursive: true);
       fs.currentDirectory = '/package';
       Cache.disableLocking();
+      logger = BufferLogger.test();
+      processManager = FakeProcessManager.empty();
+      processUtils = ProcessUtils(
+        logger: logger,
+        processManager: processManager,
+      );
     });
 
     testUsingContext("doesn't fail if --fatal-warnings specified and no warnings occur", () async {
-      command = FakeBuildCommand();
+      command = FakeBuildCommand(
+        artifacts: artifacts,
+        androidSdk: FakeAndroidSdk(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        fileSystem: fs,
+        logger: logger,
+        processUtils: processUtils,
+        osUtils: FakeOperatingSystemUtils(),
+      );
       try {
         await createTestCommandRunner(command).run(<String>[
           'build',
@@ -50,11 +74,19 @@ void main() {
       }
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
+      ProcessManager: () => processManager,
     });
 
     testUsingContext("doesn't fail if --fatal-warnings not specified", () async {
-      command = FakeBuildCommand();
+      command = FakeBuildCommand(
+        artifacts: artifacts,
+        androidSdk: FakeAndroidSdk(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        fileSystem: fs,
+        logger: logger,
+        processUtils: processUtils,
+        osUtils: FakeOperatingSystemUtils(),
+      );
       testLogger.printWarning('Warning: Mild annoyance Will Robinson!');
       try {
         await createTestCommandRunner(command).run(<String>[
@@ -66,11 +98,19 @@ void main() {
       }
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
+      ProcessManager: () => processManager,
     });
 
     testUsingContext('fails if --fatal-warnings specified and warnings emitted', () async {
-      command = FakeBuildCommand();
+      command = FakeBuildCommand(
+        artifacts: artifacts,
+        androidSdk: FakeAndroidSdk(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        fileSystem: fs,
+        logger: logger,
+        processUtils: processUtils,
+        osUtils: FakeOperatingSystemUtils(),
+      );
       testLogger.printWarning('Warning: Mild annoyance Will Robinson!');
       await expectLater(createTestCommandRunner(command).run(<String>[
         'build',
@@ -79,11 +119,19 @@ void main() {
       ]), throwsToolExit(message: 'Logger received warning output during the run, and "--${FlutterOptions.kFatalWarnings}" is enabled.'));
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
+      ProcessManager: () => processManager,
     });
 
     testUsingContext('fails if --fatal-warnings specified and errors emitted', () async {
-      command = FakeBuildCommand();
+      command = FakeBuildCommand(
+        artifacts: artifacts,
+        androidSdk: FakeAndroidSdk(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        fileSystem: fs,
+        logger: logger,
+        processUtils: processUtils,
+        osUtils: FakeOperatingSystemUtils(),
+      );
       testLogger.printError('Error: Danger Will Robinson!');
       await expectLater(createTestCommandRunner(command).run(<String>[
         'build',
@@ -92,7 +140,7 @@ void main() {
       ]), throwsToolExit(message: 'Logger received error output during the run, and "--${FlutterOptions.kFatalWarnings}" is enabled.'));
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
+      ProcessManager: () => processManager,
     });
   });
 }
@@ -117,8 +165,17 @@ class FakeBuildInfoCommand extends FlutterCommand {
 }
 
 class FakeBuildCommand extends BuildCommand {
-  FakeBuildCommand({bool verboseHelp = false}) : super(verboseHelp: verboseHelp) {
-    addSubcommand(FakeBuildSubcommand(verboseHelp: verboseHelp));
+  FakeBuildCommand({
+    required super.fileSystem,
+    required super.buildSystem,
+    required super.osUtils,
+    required Logger logger,
+    required super.androidSdk,
+    required super.processUtils,
+    required super.artifacts,
+    bool verboseHelp = false,
+  }) : super(logger: logger) {
+    addSubcommand(FakeBuildSubcommand(logger: logger, verboseHelp: verboseHelp));
   }
 
   @override
@@ -134,7 +191,7 @@ class FakeBuildCommand extends BuildCommand {
 }
 
 class FakeBuildSubcommand extends BuildSubCommand {
-  FakeBuildSubcommand({@required bool verboseHelp}) : super(verboseHelp: verboseHelp);
+  FakeBuildSubcommand({required super.logger, required super.verboseHelp});
 
   @override
   String get description => '';

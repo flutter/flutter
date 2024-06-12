@@ -5,16 +5,17 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   testWidgets('Render and element tree stay in sync when keyed children move around', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/48855.
 
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
         child: Column(
-          children: const <Widget>[
+          children: <Widget>[
             Text('0', key: ValueKey<int>(0)),
             Text('1', key: ValueKey<int>(1)),
             Text('2', key: ValueKey<int>(2)),
@@ -35,10 +36,10 @@ void main() {
     );
 
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
         child: Column(
-          children: const <Widget>[
+          children: <Widget>[
             Text('0', key: ValueKey<int>(0)),
             Text('6', key: ValueKey<int>(6)),
             Text('7', key: ValueKey<int>(7)),
@@ -62,8 +63,8 @@ void main() {
   testWidgets('Building a new MultiChildRenderObjectElement with children having duplicated keys throws', (WidgetTester tester) async {
     const ValueKey<int> duplicatedKey = ValueKey<int>(1);
 
-    await tester.pumpWidget(Column(
-      children: const <Widget>[
+    await tester.pumpWidget(const Column(
+      children: <Widget>[
         Text('Text 1', textDirection: TextDirection.ltr, key: duplicatedKey),
         Text('Text 2', textDirection: TextDirection.ltr, key: duplicatedKey),
       ],
@@ -79,7 +80,9 @@ void main() {
     );
   });
 
-  testWidgets('Updating a MultiChildRenderObjectElement to have children with duplicated keys throws', (WidgetTester tester) async {
+  testWidgets('Updating a MultiChildRenderObjectElement to have children with duplicated keys throws',
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
+  (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/81541
 
     const ValueKey<int> key1 = ValueKey<int>(1);

@@ -25,7 +25,7 @@ void main() {
       await project.setUpIn(tempDir);
 
       flutter = FlutterRunTestDriver(tempDir);
-      await flutter.run(withDebugger: true);
+      await flutter.run(withDebugger: true, verbose: true);
       final int? port = flutter.vmServicePort;
       expect(port != null, true);
       vmService = await vmServiceConnectUri('ws://localhost:$port/ws');
@@ -55,7 +55,7 @@ void main() {
 
     testWithoutContext('flutterMemoryInfo can be called', () async {
       final Response response =
-          await vmService.callServiceExtension('s0.flutterMemoryInfo');
+      await vmService.callServiceExtension('s0.flutterMemoryInfo');
       expect(response.type, 'Success');
     });
 

@@ -1,0 +1,298 @@
+# Copyright 2014 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# For details regarding the *Flutter Fix* feature, see
+# https://flutter.dev/docs/development/tools/flutter-fix
+
+# Please add new fixes to the top of the file, separated by one blank line
+# from other fixes. In a comment, include a link to the PR where the change
+# requiring the fix was made.
+
+# Every fix must be tested. See the flutter/packages/flutter/test_fixes/README.md
+# file for instructions on testing these data driven fixes.
+
+# For documentation about this file format, see
+# https://dart.dev/go/data-driven-fixes.
+
+# * Fixes in this file are from the Cupertino library. *
+version: 1
+transforms:
+  # Change made in https://github.com/flutter/flutter/pull/20649
+  # TODO(Piinks): Add tests when `bulkApply:false` testing is supported, https://github.com/dart-lang/sdk/issues/44639
+  - title: "Replace with 'CupertinoPopupSurface'"
+    date: 2021-01-07
+    bulkApply: false
+    element:
+      uris: [ 'cupertino.dart' ]
+      class: 'CupertinoDialog'
+    changes:
+      - kind: 'rename'
+        newName: 'CupertinoPopupSurface'
+
+  # Change made in https://github.com/flutter/flutter/pull/20649
+  # TODO(Piinks): Add tests when `bulkApply:false` testing is supported, https://github.com/dart-lang/sdk/issues/44639
+  - title: "Replace with 'CupertinoAlertDialog'"
+    date: 2021-01-07
+    bulkApply: false
+    element:
+      uris: [ 'cupertino.dart' ]
+      class: 'CupertinoDialog'
+    changes:
+      - kind: 'rename'
+        newName: 'CupertinoAlertDialog'
+      - kind: 'renameParameter'
+        oldName: 'child'
+        newName: 'content'
+
+  # Changes made in https://github.com/flutter/flutter/pull/68905.
+  - title: "Migrate from 'nullOk'"
+    date: 2021-01-27
+    element:
+      uris: [ 'cupertino.dart' ]
+      method: 'resolveFrom'
+      inClass: 'CupertinoTextThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'nullOk'
+
+  # Changes made in https://github.com/flutter/flutter/pull/68905.
+  - title: "Migrate from 'nullOk'"
+    date: 2021-01-27
+    element:
+      uris: [ 'cupertino.dart' ]
+      method: 'resolveFrom'
+      inClass: 'NoDefaultCupertinoThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'nullOk'
+
+  # Changes made in https://github.com/flutter/flutter/pull/68905.
+  - title: "Migrate from 'nullOk'"
+    date: 2021-01-27
+    element:
+      uris: [ 'cupertino.dart' ]
+      method: 'resolveFrom'
+      inClass: 'CupertinoThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'nullOk'
+
+  # Changes made in https://github.com/flutter/flutter/pull/68736.
+  - title: "Migrate from 'nullOk'"
+    date: 2021-01-27
+    element:
+      uris: [ 'cupertino.dart' ]
+      method: 'brightnessOf'
+      inClass: 'CupertinoTheme'
+    oneOf:
+      - if: "nullOk == 'true'"
+        changes:
+          - kind: 'rename'
+            newName: 'maybeBrightnessOf'
+          - kind: 'removeParameter'
+            name: 'nullOk'
+      - if: "nullOk == 'false'"
+        changes:
+          - kind: 'removeParameter'
+            name: 'nullOk'
+    variables:
+      nullOk:
+        kind: 'fragment'
+        value: 'arguments[nullOk]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/68905.
+  - title: "Migrate from 'nullOk'"
+    date: 2021-01-27
+    element:
+      uris: [ 'cupertino.dart' ]
+      method: 'of'
+      inClass: 'CupertinoUserInterfaceLevel'
+    oneOf:
+      - if: "nullOk == 'true'"
+        changes:
+          - kind: 'rename'
+            newName: 'maybeOf'
+          - kind: 'removeParameter'
+            name: 'nullOk'
+      - if: "nullOk == 'false'"
+        changes:
+          - kind: 'removeParameter'
+            name: 'nullOk'
+    variables:
+      nullOk:
+        kind: 'fragment'
+        value: 'arguments[nullOk]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/68905.
+  - title: "Migrate from 'nullOk'"
+    date: 2021-01-27
+    element:
+      uris: [ 'cupertino.dart' ]
+      method: 'resolveFrom'
+      inClass: 'CupertinoDynamicColor'
+    changes:
+      - kind: 'removeParameter'
+        name: 'nullOk'
+
+  # Changes made in https://github.com/flutter/flutter/pull/68905.
+  - title: "Migrate from 'nullOk'"
+    date: 2021-01-27
+    element:
+      uris: [ 'cupertino.dart' ]
+      method: 'resolve'
+      inClass: 'CupertinoDynamicColor'
+    oneOf:
+      - if: "nullOk == 'true'"
+        changes:
+          - kind: 'rename'
+            newName: 'maybeResolve'
+          - kind: 'removeParameter'
+            name: 'nullOk'
+      - if: "nullOk == 'false'"
+        changes:
+          - kind: 'removeParameter'
+            name: 'nullOk'
+    variables:
+      nullOk:
+        kind: 'fragment'
+        value: 'arguments[nullOk]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/72043
+  - title: "Migrate to 'maxLengthEnforcement'"
+    date: 2020-12-13
+    element:
+      uris: [ 'cupertino.dart' ]
+      field: 'maxLengthEnforced'
+      inClass: 'CupertinoTextField'
+    changes:
+      - kind: 'rename'
+        newName: 'maxLengthEnforcement'
+
+  # Changes made in https://github.com/flutter/flutter/pull/72043
+  - title: "Migrate to 'maxLengthEnforcement'"
+    date: 2020-12-13
+    element:
+      uris: [ 'cupertino.dart' ]
+      constructor: 'borderless'
+      inClass: 'CupertinoTextField'
+    oneOf:
+      - if: "maxLengthEnforced == 'true'"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'maxLengthEnforcement'
+            style: optional_named
+            argumentValue:
+              expression: 'MaxLengthEnforcement.enforce'
+              requiredIf: "maxLengthEnforced == 'true'"
+          - kind: 'removeParameter'
+            name: 'maxLengthEnforced'
+      - if: "maxLengthEnforced == 'false'"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'maxLengthEnforcement'
+            style: optional_named
+            argumentValue:
+              expression: 'MaxLengthEnforcement.none'
+              requiredIf: "maxLengthEnforced == 'false'"
+          - kind: 'removeParameter'
+            name: 'maxLengthEnforced'
+    variables:
+      maxLengthEnforced:
+        kind: 'fragment'
+        value: 'arguments[maxLengthEnforced]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/72043
+  - title: "Migrate to 'maxLengthEnforcement'"
+    date: 2020-12-13
+    element:
+      uris: [ 'cupertino.dart' ]
+      constructor: ''
+      inClass: 'CupertinoTextField'
+    oneOf:
+      - if: "maxLengthEnforced == 'true'"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'maxLengthEnforcement'
+            style: optional_named
+            argumentValue:
+              expression: 'MaxLengthEnforcement.enforce'
+              requiredIf: "maxLengthEnforced == 'true'"
+          - kind: 'removeParameter'
+            name: 'maxLengthEnforced'
+      - if: "maxLengthEnforced == 'false'"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'maxLengthEnforcement'
+            style: optional_named
+            argumentValue:
+              expression: 'MaxLengthEnforcement.none'
+              requiredIf: "maxLengthEnforced == 'false'"
+          - kind: 'removeParameter'
+            name: 'maxLengthEnforced'
+    variables:
+      maxLengthEnforced:
+        kind: 'fragment'
+        value: 'arguments[maxLengthEnforced]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/96957
+  - title: "Migrate to 'thumbVisibility'"
+    date: 2022-01-20
+    element:
+      uris: [ 'cupertino.dart' ]
+      field: 'isAlwaysShown'
+      inClass: 'CupertinoScrollbar'
+    changes:
+      - kind: 'rename'
+        newName: 'thumbVisibility'
+
+  # Changes made in https://github.com/flutter/flutter/pull/96957
+  - title: "Migrate to 'thumbVisibility'"
+    date: 2022-01-20
+    element:
+      uris: [ 'cupertino.dart' ]
+      constructor: ''
+      inClass: 'CupertinoScrollbar'
+    changes:
+      - kind: 'renameParameter'
+        oldName: 'isAlwaysShown'
+        newName: 'thumbVisibility'
+
+  # Changes made in https://github.com/flutter/flutter/pull/41859
+  - title: "Remove 'brightness'"
+    date: 2020-12-10
+    element:
+      uris: [ 'cupertino.dart' ]
+      constructor: ''
+      inClass: 'CupertinoTextThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'brightness'
+
+  # Changes made in https://github.com/flutter/flutter/pull/41859
+  - title: "Remove 'brightness'"
+    date: 2020-12-10
+    element:
+      uris: [ 'cupertino.dart' ]
+      method: 'copyWith'
+      inClass: 'CupertinoTextThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'brightness'
+
+  # Changes made in https://github.com/flutter/flutter/pull/78588
+  - title: "Migrate to 'buildOverscrollIndicator'"
+    date: 2021-03-18
+    element:
+      uris: [ 'cupertino.dart' ]
+      method: 'buildViewportChrome'
+      inClass: 'CupertinoScrollBehavior'
+    changes:
+    - kind: 'rename'
+      newName: 'buildOverscrollIndicator'
+
+# Before adding a new fix: read instructions at the top of this file.

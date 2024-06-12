@@ -143,9 +143,9 @@ class ApluginPlatformInterfaceMacOS {
 
       late Process run;
       await inDirectory(path.join(tempDir.path, 'app'), () async {
-        run = await startProcess(
-          path.join(flutterDirectory.path, 'bin', 'flutter'),
-          flutterCommandArgs('run', <String>['-d', 'macos', '-v']),
+        run = await startFlutter(
+          'run',
+          options: <String>['-d', 'macos', '-v'],
         );
       });
 

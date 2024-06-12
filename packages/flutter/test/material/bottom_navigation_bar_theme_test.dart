@@ -15,6 +15,11 @@ void main() {
     expect(const BottomNavigationBarThemeData().hashCode, const BottomNavigationBarThemeData().copyWith().hashCode);
   });
 
+  test('BottomNavigationBarThemeData lerp special cases', () {
+    const BottomNavigationBarThemeData data = BottomNavigationBarThemeData();
+    expect(identical(BottomNavigationBarThemeData.lerp(data, data, 0.5), data), true);
+  });
+
   test('BottomNavigationBarThemeData defaults', () {
     const BottomNavigationBarThemeData themeData = BottomNavigationBarThemeData();
     expect(themeData.backgroundColor, null);
@@ -97,7 +102,7 @@ void main() {
     expect(description[8], 'showSelectedLabels: true');
     expect(description[9], 'showUnselectedLabels: true');
     expect(description[10], 'type: BottomNavigationBarType.fixed');
-    expect(description[11], 'mouseCursor: MaterialStateMouseCursor(clickable)');
+    expect(description[11], 'mouseCursor: WidgetStateMouseCursor(clickable)');
   });
 
   testWidgets('BottomNavigationBar is themeable', (WidgetTester tester) async {
@@ -359,14 +364,14 @@ void main() {
     );
 
 
-    final Finder findOpacity = find.descendant(
+    final Finder findVisibility = find.descendant(
       of: find.byType(BottomNavigationBar),
-      matching: find.byType(Opacity),
+      matching: find.byType(Visibility),
     );
 
-    expect(findOpacity, findsNWidgets(2));
-    expect(tester.widget<Opacity>(findOpacity.at(0)).opacity, 0.0);
-    expect(tester.widget<Opacity>(findOpacity.at(1)).opacity, 0.0);
+    expect(findVisibility, findsNWidgets(2));
+    expect(tester.widget<Visibility>(findVisibility.at(0)).visible, false);
+    expect(tester.widget<Visibility>(findVisibility.at(1)).visible, false);
   });
 
   testWidgets('BottomNavigationBarTheme can be used to hide selected labels', (WidgetTester tester) async {

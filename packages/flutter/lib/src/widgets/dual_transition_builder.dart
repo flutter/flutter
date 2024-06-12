@@ -32,18 +32,13 @@ typedef AnimatedTransitionBuilder = Widget Function(
 /// any descendant widget is lost when the transition starts or completes.
 class DualTransitionBuilder extends StatefulWidget {
   /// Creates a [DualTransitionBuilder].
-  ///
-  /// The [animation], [forwardBuilder], and [reverseBuilder] arguments are
-  /// required and must not be null.
   const DualTransitionBuilder({
     super.key,
     required this.animation,
     required this.forwardBuilder,
     required this.reverseBuilder,
     this.child,
-  }) : assert(animation != null),
-       assert(forwardBuilder != null),
-       assert(reverseBuilder != null);
+  });
 
   /// The animation that drives the [child]'s transition.
   ///
@@ -134,8 +129,6 @@ class _DualTransitionBuilderState extends State<DualTransitionBuilder> {
     required AnimationStatus lastEffective,
     required AnimationStatus current,
   }) {
-    assert(current != null);
-    assert(lastEffective != null);
     switch (current) {
       case AnimationStatus.dismissed:
       case AnimationStatus.completed:
@@ -167,12 +160,10 @@ class _DualTransitionBuilderState extends State<DualTransitionBuilder> {
       case AnimationStatus.forward:
         _forwardAnimation.parent = widget.animation;
         _reverseAnimation.parent = kAlwaysDismissedAnimation;
-        break;
       case AnimationStatus.reverse:
       case AnimationStatus.completed:
         _forwardAnimation.parent = kAlwaysCompleteAnimation;
         _reverseAnimation.parent = ReverseAnimation(widget.animation);
-        break;
     }
   }
 

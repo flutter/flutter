@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -293,26 +294,28 @@ void main() {
     double value = 0.75;
 
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: SemanticsDebugger(
-          child: Directionality(
-            textDirection: TextDirection.ltr,
-            child: MediaQuery(
-              data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
-              child: Material(
-                child: Center(
-                  child: Slider(
-                    value: value,
-                    onChanged: (double newValue) {
-                      value = newValue;
-                    },
+      MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: SemanticsDebugger(
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: MediaQuery(
+                data: MediaQueryData.fromView(tester.view),
+                child: Material(
+                  child: Center(
+                    child: Slider(
+                      value: value,
+                      onChanged: (double newValue) {
+                        value = newValue;
+                      },
+                    ),
                   ),
                 ),
               ),
             ),
           ),
-        ),
+        )
       ),
     );
 
@@ -322,8 +325,17 @@ void main() {
     // interpreted as a gesture by the semantics debugger and sent to the widget
     // as a semantic action that always moves by 10% of the complete track.
     await tester.fling(find.byType(Slider), const Offset(-100.0, 0.0), 2000.0, warnIfMissed: false); // hitting the debugger
-    expect(value, equals(0.70));
-  });
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        expect(value, equals(0.65));
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+        expect(value, equals(0.70));
+    }
+  }, variant: TargetPlatformVariant.all());
 
   testWidgets('SemanticsDebugger checkbox', (WidgetTester tester) async {
     final Key keyTop = UniqueKey();
@@ -438,6 +450,33 @@ void main() {
     );
   });
 
+  testWidgets('SemanticsDebugger ignores duplicated label and tooltip for Android', (WidgetTester tester) async {
+    final Key child = UniqueKey();
+    final Key debugger = UniqueKey();
+    final bool isPlatformAndroid = defaultTargetPlatform == TargetPlatform.android;
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: SemanticsDebugger(
+          key: debugger,
+          child: Material(
+            child: Semantics(
+              container: true,
+              key: child,
+              label: 'text',
+              tooltip: 'text',
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      _getMessageShownInSemanticsDebugger(widgetKey: child, debuggerKey: debugger, tester: tester),
+      isPlatformAndroid ? 'text' : 'text\ntext',
+    );
+  }, variant: TargetPlatformVariant.all());
+
   testWidgets('SemanticsDebugger textfield', (WidgetTester tester) async {
     final UniqueKey textField = UniqueKey();
     final UniqueKey debugger = UniqueKey();
@@ -485,6 +524,43 @@ void main() {
     // ignore: avoid_dynamic_calls
     expect(_getSemanticsDebuggerPainter(debuggerKey: debugger, tester: tester).labelStyle, labelStyle);
   });
+
+  testWidgets('SemanticsDebugger label for rtl.', (WidgetTester tester) async {
+    final UniqueKey debugger = UniqueKey();
+    final Key label = UniqueKey();
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.rtl,
+        child: SemanticsDebugger(
+          key: debugger,
+          child: Semantics(
+            label: 'ملصق',
+            textDirection: TextDirection.rtl,
+            key: label,
+          ),
+        ),
+      ),
+    );
+
+    expect(_getMessageShownInSemanticsDebugger(widgetKey: label, debuggerKey: debugger, tester: tester), '\u2067ملصق\u2069');
+  });
+
+  testWidgets('SemanticsDebugger turns on semantics.', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/147665.
+    expect(tester.binding.semanticsEnabled, isFalse);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.rtl,
+        child: SemanticsDebugger(
+          child: Semantics(
+            label: 'Hello World',
+          ),
+        ),
+      ),
+    );
+    expect(tester.binding.semanticsEnabled, isTrue);
+  }, semanticsEnabled: false);
 }
 
 String _getMessageShownInSemanticsDebugger({

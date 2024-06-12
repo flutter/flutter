@@ -2,37 +2,48 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for AnimatedAlign
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [AnimatedAlign].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const AnimatedAlignExampleApp());
 
-  static const String _title = 'Flutter Code Sample';
+class AnimatedAlignExampleApp extends StatelessWidget {
+  const AnimatedAlignExampleApp({super.key});
+
+  static const Duration duration = Duration(seconds: 1);
+  static const Curve curve = Curves.fastOutSlowIn;
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
-        body: const MyStatefulWidget(),
+        appBar: AppBar(title: const Text('AnimatedAlign Sample')),
+        body: const AnimatedAlignExample(
+          duration: duration,
+          curve: curve,
+        ),
       ),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class AnimatedAlignExample extends StatefulWidget {
+  const AnimatedAlignExample({
+    required this.duration,
+    required this.curve,
+    super.key,
+  });
+
+  final Duration duration;
+
+  final Curve curve;
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<AnimatedAlignExample> createState() => _AnimatedAlignExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _AnimatedAlignExampleState extends State<AnimatedAlignExample> {
   bool selected = false;
 
   @override
@@ -50,8 +61,8 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
           color: Colors.red,
           child: AnimatedAlign(
             alignment: selected ? Alignment.topRight : Alignment.bottomLeft,
-            duration: const Duration(seconds: 1),
-            curve: Curves.fastOutSlowIn,
+            duration: widget.duration,
+            curve: widget.curve,
             child: const FlutterLogo(size: 50.0),
           ),
         ),

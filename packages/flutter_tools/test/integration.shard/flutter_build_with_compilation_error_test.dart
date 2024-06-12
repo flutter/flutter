@@ -64,11 +64,13 @@ int x = 'String';
       ], workingDirectory: projectRoot.path);
 
       expect(
-        // iOS shows this as stdout.
-        targetPlatform == 'ios' ? result.stdout : result.stderr,
-        contains("A value of type 'String' can't be assigned to a variable of type 'int'."),
+        result,
+        const ProcessResultMatcher(
+          exitCode: 1,
+          stderrPattern: "A value of type 'String' can't be assigned to a variable of type 'int'.",
+        ),
       );
-      expect(result.exitCode, 1);
+      expect(result.stderr, isNot(contains("Warning: The 'dart2js' entrypoint script is deprecated")));
     });
   }
 }

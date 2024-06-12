@@ -25,6 +25,7 @@ void _tests() {
     const double appBarExpandedHeight = 200.0;
 
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     final List<Widget> listChildren = List<Widget>.generate(30, (int i) {
       return SizedBox(
         height: appBarExpandedHeight,
@@ -289,6 +290,7 @@ void _tests() {
     final ScrollController scrollController = ScrollController(
       initialScrollOffset: containerHeight * 1.5,
     );
+    addTearDown(scrollController.dispose);
     final List<Widget> slivers = List<Widget>.generate(30, (int i) {
       return SliverToBoxAdapter(
         child: SizedBox(
@@ -463,6 +465,7 @@ void _tests() {
       );
     });
     final ScrollController controller = ScrollController(initialScrollOffset: 280.0);
+    addTearDown(controller.dispose);
     await tester.pumpWidget(Semantics(
       textDirection: TextDirection.ltr,
       child: Localizations(
@@ -568,6 +571,7 @@ void _tests() {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     final ScrollController controller = ScrollController(initialScrollOffset: 280.0);
+    addTearDown(controller.dispose);
     final List<Widget> slivers = List<Widget>.generate(10, (int i) {
       return SliverToBoxAdapter(
         child: SizedBox(
@@ -685,6 +689,7 @@ void _tests() {
       );
     });
     final ScrollController controller = ScrollController(initialScrollOffset: 280.0);
+    addTearDown(controller.dispose);
     await tester.pumpWidget(Semantics(
       textDirection: TextDirection.ltr,
       child: Localizations(
@@ -793,6 +798,7 @@ void _tests() {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     final ScrollController controller = ScrollController(initialScrollOffset: 280.0);
+    addTearDown(controller.dispose);
     final List<Widget> slivers = List<Widget>.generate(10, (int i) {
       return SliverToBoxAdapter(
         child: SizedBox(
@@ -907,6 +913,7 @@ void _tests() {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     final ScrollController controller = ScrollController(initialScrollOffset: 280.0);
+    addTearDown(controller.dispose);
     final GlobalKey forwardAppBarKey = GlobalKey(debugLabel: 'forward app bar');
     final List<Widget> forwardChildren = List<Widget>.generate(10, (int i) {
       return SizedBox(

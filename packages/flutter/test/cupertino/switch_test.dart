@@ -5,6 +5,7 @@
 // This file is run as part of a reduced test set in CI on Mac and Windows
 // machines.
 @Tags(<String>['reduced-test-set'])
+library;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -13,8 +14,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../rendering/mock_canvas.dart';
 
 void main() {
   testWidgets('Switch can toggle on tap', (WidgetTester tester) async {
@@ -44,6 +43,39 @@ void main() {
 
     expect(value, isFalse);
     await tester.tap(find.byKey(switchKey));
+    expect(value, isTrue);
+  });
+
+  testWidgets('CupertinoSwitch can be toggled by keyboard shortcuts', (WidgetTester tester) async {
+    bool value = true;
+    Widget buildApp({bool enabled = true}) {
+      return CupertinoApp(
+        home: CupertinoPageScaffold(
+          child: Center(
+            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+              return CupertinoSwitch(
+                value: value,
+                onChanged: enabled ? (bool newValue) {
+                  setState(() {
+                    value = newValue;
+                  });
+                } : null,
+              );
+            }),
+          ),
+        ),
+      );
+    }
+    await tester.pumpWidget(buildApp());
+    await tester.pumpAndSettle();
+    expect(value, isTrue);
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pumpAndSettle();
+    await tester.sendKeyEvent(LogicalKeyboardKey.space);
+    await tester.pumpAndSettle();
+    expect(value, isFalse);
+    await tester.sendKeyEvent(LogicalKeyboardKey.space);
+    await tester.pumpAndSettle();
     expect(value, isTrue);
   });
 
@@ -458,7 +490,6 @@ void main() {
     await gesture.up();
     await tester.pump();
     expect(value, isFalse);
-    // ignore: avoid_dynamic_calls
     final CurvedAnimation position = (tester.state(find.byType(CupertinoSwitch)) as dynamic).position as CurvedAnimation;
     expect(position.value, lessThan(0.5));
     await tester.pump();
@@ -719,6 +750,187 @@ void main() {
     );
   });
 
+  PaintPattern onLabelPaintPattern({
+    required int alpha,
+    bool isRtl = false,
+  }) =>
+      paints
+        ..rect(
+          rect: Rect.fromLTWH(isRtl ? 43.5 : 14.5, 14.5, 1.0, 10.0),
+          color: const Color(0xffffffff).withAlpha(alpha),
+          style: PaintingStyle.fill,
+        );
+
+  PaintPattern offLabelPaintPattern({
+    required int alpha,
+    bool highContrast = false,
+    bool isRtl = false,
+  }) =>
+      paints
+        ..circle(
+          x: isRtl ? 16.0 : 43.0,
+          y: 19.5,
+          radius: 5.0,
+          color:
+              (highContrast ? const Color(0xffffffff) : const Color(0xffb3b3b3))
+                  .withAlpha(alpha),
+          strokeWidth: 1.0,
+          style: PaintingStyle.stroke,
+        );
+
+  testWidgets('Switch renders switch labels correctly before, during, and after being tapped', (WidgetTester tester) async {
+    final Key switchKey = UniqueKey();
+    bool value = false;
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(onOffSwitchLabels: true),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Center(
+                child: RepaintBoundary(
+                  child: CupertinoSwitch(
+                    key: switchKey,
+                    value: value,
+                    dragStartBehavior: DragStartBehavior.down,
+                    onChanged: (bool newValue) {
+                      setState(() {
+                        value = newValue;
+                      });
+                    },
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    final RenderObject switchRenderObject =
+        tester.element(find.byType(CupertinoSwitch)).renderObject!;
+
+    expect(switchRenderObject, offLabelPaintPattern(alpha: 255));
+    expect(switchRenderObject, onLabelPaintPattern(alpha: 0));
+
+    await tester.tap(find.byKey(switchKey));
+    expect(value, isTrue);
+
+    // Kick off animation, then advance to intermediate frame.
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 60));
+    expect(switchRenderObject, onLabelPaintPattern(alpha: 131));
+    expect(switchRenderObject, offLabelPaintPattern(alpha: 124));
+
+    await tester.pumpAndSettle();
+    expect(switchRenderObject, onLabelPaintPattern(alpha: 255));
+    expect(switchRenderObject, offLabelPaintPattern(alpha: 0));
+  });
+
+  testWidgets('Switch renders switch labels correctly before, during, and after being tapped in high contrast', (WidgetTester tester) async {
+    final Key switchKey = UniqueKey();
+    bool value = false;
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(
+          onOffSwitchLabels: true,
+          highContrast: true,
+        ),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Center(
+                child: RepaintBoundary(
+                  child: CupertinoSwitch(
+                    key: switchKey,
+                    value: value,
+                    dragStartBehavior: DragStartBehavior.down,
+                    onChanged: (bool newValue) {
+                      setState(() {
+                        value = newValue;
+                      });
+                    },
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    final RenderObject switchRenderObject =
+        tester.element(find.byType(CupertinoSwitch)).renderObject!;
+
+    expect(switchRenderObject, offLabelPaintPattern(highContrast: true, alpha: 255));
+    expect(switchRenderObject, onLabelPaintPattern(alpha: 0));
+
+    await tester.tap(find.byKey(switchKey));
+    expect(value, isTrue);
+
+    // Kick off animation, then advance to intermediate frame.
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 60));
+    expect(switchRenderObject, onLabelPaintPattern(alpha: 131));
+    expect(switchRenderObject, offLabelPaintPattern(highContrast: true, alpha: 124));
+
+    await tester.pumpAndSettle();
+    expect(switchRenderObject, onLabelPaintPattern(alpha: 255));
+    expect(switchRenderObject, offLabelPaintPattern(highContrast: true, alpha: 0));
+  });
+
+  testWidgets('Switch renders switch labels correctly before, during, and after being tapped with direction rtl', (WidgetTester tester) async {
+    final Key switchKey = UniqueKey();
+    bool value = false;
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(onOffSwitchLabels: true),
+        child: Directionality(
+          textDirection: TextDirection.rtl,
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Center(
+                child: RepaintBoundary(
+                  child: CupertinoSwitch(
+                    key: switchKey,
+                    value: value,
+                    dragStartBehavior: DragStartBehavior.down,
+                    onChanged: (bool newValue) {
+                      setState(() {
+                        value = newValue;
+                      });
+                    },
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    final RenderObject switchRenderObject =
+        tester.element(find.byType(CupertinoSwitch)).renderObject!;
+
+    expect(switchRenderObject, offLabelPaintPattern(isRtl: true, alpha: 255));
+    expect(switchRenderObject, onLabelPaintPattern(isRtl: true, alpha: 0));
+
+    await tester.tap(find.byKey(switchKey));
+    expect(value, isTrue);
+
+    // Kick off animation, then advance to intermediate frame.
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 60));
+    expect(switchRenderObject, onLabelPaintPattern(isRtl: true, alpha: 131));
+    expect(switchRenderObject, offLabelPaintPattern(isRtl: true, alpha: 124));
+
+    await tester.pumpAndSettle();
+    expect(switchRenderObject, onLabelPaintPattern(isRtl: true, alpha: 255));
+    expect(switchRenderObject, offLabelPaintPattern(isRtl: true, alpha: 0));
+  });
+
   testWidgets('Switch renders correctly in dark mode', (WidgetTester tester) async {
     final Key switchKey = UniqueKey();
     bool value = false;
@@ -761,6 +973,66 @@ void main() {
     await expectLater(
       find.byKey(switchKey),
       matchesGoldenFile('switch.tap.on.dark.png'),
+    );
+  });
+
+  testWidgets('Switch can apply the ambient theme and be opted out', (WidgetTester tester) async {
+    final Key switchKey = UniqueKey();
+    bool value = false;
+    await tester.pumpWidget(
+      CupertinoTheme(
+        data: const CupertinoThemeData(primaryColor: Colors.amber, applyThemeToAll: true),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Center(
+                child: RepaintBoundary(
+                  child: Column(
+                    children: <Widget>[
+                      CupertinoSwitch(
+                        key: switchKey,
+                        value: value,
+                        dragStartBehavior: DragStartBehavior.down,
+                        applyTheme: true,
+                        onChanged: (bool newValue) {
+                          setState(() {
+                            value = newValue;
+                          });
+                        },
+                      ),
+                      CupertinoSwitch(
+                        value: value,
+                        dragStartBehavior: DragStartBehavior.down,
+                        applyTheme: false,
+                        onChanged: (bool newValue) {
+                          setState(() {
+                            value = newValue;
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    await expectLater(
+      find.byType(Column),
+      matchesGoldenFile('switch.tap.off.themed.png'),
+    );
+
+    await tester.tap(find.byKey(switchKey));
+    expect(value, isTrue);
+
+    await tester.pumpAndSettle();
+    await expectLater(
+      find.byType(Column),
+      matchesGoldenFile('switch.tap.on.themed.png'),
     );
   });
 
@@ -818,5 +1090,118 @@ void main() {
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
       kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
     );
+  });
+
+  testWidgets('CupertinoSwitch is focusable and has correct focus color', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode(debugLabel: 'CupertinoSwitch');
+    addTearDown(focusNode.dispose);
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    bool value = true;
+    const Color focusColor = Color(0xffff0000);
+
+    Widget buildApp({bool enabled = true}) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Center(
+              child: CupertinoSwitch(
+                value: value,
+                onChanged: enabled ? (bool newValue) {
+                  setState(() {
+                    value = newValue;
+                  });
+                } : null,
+                focusColor: focusColor,
+                focusNode: focusNode,
+                autofocus: true,
+              ),
+            );
+          },
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildApp());
+    await tester.pumpAndSettle();
+
+    expect(focusNode.hasPrimaryFocus, isTrue);
+    expect(
+      find.byType(CupertinoSwitch),
+      paints
+        ..rrect(color: const Color(0xff34c759))
+        ..rrect(color: focusColor)
+        ..clipRRect()
+        ..rrect(color: const Color(0x26000000))
+        ..rrect(color: const Color(0x0f000000))
+        ..rrect(color: const Color(0x0a000000))
+        ..rrect(color: const Color(0xffffffff)),
+    );
+
+    // Check the false value.
+    value = false;
+    await tester.pumpWidget(buildApp());
+    await tester.pumpAndSettle();
+
+    expect(focusNode.hasPrimaryFocus, isTrue);
+    expect(
+      find.byType(CupertinoSwitch),
+      paints
+        ..rrect(color: const Color(0x28787880))
+        ..rrect(color: focusColor)
+        ..clipRRect()
+        ..rrect(color: const Color(0x26000000))
+        ..rrect(color: const Color(0x0f000000))
+        ..rrect(color: const Color(0x0a000000))
+        ..rrect(color: const Color(0xffffffff)),
+    );
+
+    // Check what happens when disabled.
+    value = false;
+    await tester.pumpWidget(buildApp(enabled: false));
+    await tester.pumpAndSettle();
+
+    expect(focusNode.hasPrimaryFocus, isFalse);
+    expect(
+      find.byType(CupertinoSwitch),
+      paints
+        ..rrect(color: const Color(0x28787880))
+        ..clipRRect()
+        ..rrect(color: const Color(0x26000000))
+        ..rrect(color: const Color(0x0f000000))
+        ..rrect(color: const Color(0x0a000000))
+        ..rrect(color: const Color(0xffffffff)),
+    );
+  });
+
+  testWidgets('CupertinoSwitch.onFocusChange callback', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode(debugLabel: 'CupertinoSwitch');
+    addTearDown(focusNode.dispose);
+    bool focused = false;
+    await tester.pumpWidget(
+      Directionality(
+      textDirection: TextDirection.ltr,
+      child: Center(
+        child: CupertinoSwitch(
+            value: true,
+            focusNode: focusNode,
+            onFocusChange: (bool value) {
+              focused = value;
+            },
+            onChanged:(bool newValue) {},
+          ),
+        ),
+      ),
+    );
+
+    focusNode.requestFocus();
+    await tester.pump();
+    expect(focused, isTrue);
+    expect(focusNode.hasFocus, isTrue);
+
+    focusNode.unfocus();
+    await tester.pump();
+    expect(focused, isFalse);
+    expect(focusNode.hasFocus, isFalse);
   });
 }

@@ -44,13 +44,15 @@ class NavigationBarThemeData with Diagnosticable {
   const NavigationBarThemeData({
     this.height,
     this.backgroundColor,
-    this.surfaceTintColor,
     this.elevation,
+    this.shadowColor,
+    this.surfaceTintColor,
     this.indicatorColor,
     this.indicatorShape,
     this.labelTextStyle,
     this.iconTheme,
     this.labelBehavior,
+    this.overlayColor,
   });
 
   /// Overrides the default value of [NavigationBar.height].
@@ -59,11 +61,14 @@ class NavigationBarThemeData with Diagnosticable {
   /// Overrides the default value of [NavigationBar.backgroundColor].
   final Color? backgroundColor;
 
-  /// Overrides the default value of [NavigationBar.surfaceTintColor].
-  final Color? surfaceTintColor;
-
   /// Overrides the default value of [NavigationBar.elevation].
   final double? elevation;
+
+  /// Overrides the default value of [NavigationBar.shadowColor].
+  final Color? shadowColor;
+
+  /// Overrides the default value of [NavigationBar.surfaceTintColor].
+  final Color? surfaceTintColor;
 
   /// Overrides the default value of [NavigationBar]'s selection indicator.
   final Color? indicatorColor;
@@ -87,29 +92,36 @@ class NavigationBarThemeData with Diagnosticable {
   /// Overrides the default value of [NavigationBar.labelBehavior].
   final NavigationDestinationLabelBehavior? labelBehavior;
 
+  /// Overrides the default value of [NavigationBar.overlayColor].
+  final MaterialStateProperty<Color?>? overlayColor;
+
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   NavigationBarThemeData copyWith({
     double? height,
     Color? backgroundColor,
-    Color? surfaceTintColor,
     double? elevation,
+    Color? shadowColor,
+    Color? surfaceTintColor,
     Color? indicatorColor,
     ShapeBorder? indicatorShape,
     MaterialStateProperty<TextStyle?>? labelTextStyle,
     MaterialStateProperty<IconThemeData?>? iconTheme,
     NavigationDestinationLabelBehavior? labelBehavior,
+    MaterialStateProperty<Color?>? overlayColor,
   }) {
     return NavigationBarThemeData(
       height: height ?? this.height,
       backgroundColor: backgroundColor ?? this.backgroundColor,
-      surfaceTintColor: surfaceTintColor ?? this.surfaceTintColor,
       elevation: elevation ?? this.elevation,
+      shadowColor: shadowColor ?? this.shadowColor,
+      surfaceTintColor: surfaceTintColor ?? this.surfaceTintColor,
       indicatorColor: indicatorColor ?? this.indicatorColor,
       indicatorShape: indicatorShape ?? this.indicatorShape,
       labelTextStyle: labelTextStyle ?? this.labelTextStyle,
       iconTheme: iconTheme ?? this.iconTheme,
       labelBehavior: labelBehavior ?? this.labelBehavior,
+      overlayColor: overlayColor ?? this.overlayColor,
     );
   }
 
@@ -119,20 +131,21 @@ class NavigationBarThemeData with Diagnosticable {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static NavigationBarThemeData? lerp(NavigationBarThemeData? a, NavigationBarThemeData? b, double t) {
-    assert(t != null);
-    if (a == null && b == null) {
-      return null;
+    if (identical(a, b)) {
+      return a;
     }
     return NavigationBarThemeData(
       height: lerpDouble(a?.height, b?.height, t),
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
-      surfaceTintColor: Color.lerp(a?.surfaceTintColor, b?.surfaceTintColor, t),
       elevation: lerpDouble(a?.elevation, b?.elevation, t),
+      shadowColor: Color.lerp(a?.shadowColor, b?.shadowColor, t),
+      surfaceTintColor: Color.lerp(a?.surfaceTintColor, b?.surfaceTintColor, t),
       indicatorColor: Color.lerp(a?.indicatorColor, b?.indicatorColor, t),
       indicatorShape: ShapeBorder.lerp(a?.indicatorShape, b?.indicatorShape, t),
       labelTextStyle: MaterialStateProperty.lerp<TextStyle?>(a?.labelTextStyle, b?.labelTextStyle, t, TextStyle.lerp),
       iconTheme: MaterialStateProperty.lerp<IconThemeData?>(a?.iconTheme, b?.iconTheme, t, IconThemeData.lerp),
       labelBehavior: t < 0.5 ? a?.labelBehavior : b?.labelBehavior,
+      overlayColor: MaterialStateProperty.lerp<Color?>(a?.overlayColor, b?.overlayColor, t, Color.lerp),
     );
   }
 
@@ -140,13 +153,15 @@ class NavigationBarThemeData with Diagnosticable {
   int get hashCode => Object.hash(
     height,
     backgroundColor,
-    surfaceTintColor,
     elevation,
+    shadowColor,
+    surfaceTintColor,
     indicatorColor,
     indicatorShape,
     labelTextStyle,
     iconTheme,
     labelBehavior,
+    overlayColor,
   );
 
   @override
@@ -158,15 +173,17 @@ class NavigationBarThemeData with Diagnosticable {
       return false;
     }
     return other is NavigationBarThemeData
-        && other.height == height
-        && other.backgroundColor == backgroundColor
-        && other.surfaceTintColor == surfaceTintColor
-        && other.elevation == elevation
-        && other.indicatorColor == indicatorColor
-        && other.indicatorShape == indicatorShape
-        && other.labelTextStyle == labelTextStyle
-        && other.iconTheme == iconTheme
-        && other.labelBehavior == labelBehavior;
+      && other.height == height
+      && other.backgroundColor == backgroundColor
+      && other.elevation == elevation
+      && other.shadowColor == shadowColor
+      && other.surfaceTintColor == surfaceTintColor
+      && other.indicatorColor == indicatorColor
+      && other.indicatorShape == indicatorShape
+      && other.labelTextStyle == labelTextStyle
+      && other.iconTheme == iconTheme
+      && other.labelBehavior == labelBehavior
+      && other.overlayColor == overlayColor;
   }
 
   @override
@@ -174,13 +191,15 @@ class NavigationBarThemeData with Diagnosticable {
     super.debugFillProperties(properties);
     properties.add(DoubleProperty('height', height, defaultValue: null));
     properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: null));
-    properties.add(ColorProperty('surfaceTintColor', surfaceTintColor, defaultValue: null));
     properties.add(DoubleProperty('elevation', elevation, defaultValue: null));
+    properties.add(ColorProperty('shadowColor', shadowColor, defaultValue: null));
+    properties.add(ColorProperty('surfaceTintColor', surfaceTintColor, defaultValue: null));
     properties.add(ColorProperty('indicatorColor', indicatorColor, defaultValue: null));
     properties.add(DiagnosticsProperty<ShapeBorder>('indicatorShape', indicatorShape, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<TextStyle?>>('labelTextStyle', labelTextStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<IconThemeData?>>('iconTheme', iconTheme, defaultValue: null));
     properties.add(DiagnosticsProperty<NavigationDestinationLabelBehavior>('labelBehavior', labelBehavior, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('overlayColor', overlayColor, defaultValue: null));
   }
 }
 
@@ -197,13 +216,11 @@ class NavigationBarThemeData with Diagnosticable {
 class NavigationBarTheme extends InheritedTheme {
   /// Creates a navigation rail theme that controls the
   /// [NavigationBarThemeData] properties for a [NavigationBar].
-  ///
-  /// The data argument must not be null.
   const NavigationBarTheme({
     super.key,
     required this.data,
     required super.child,
-  }) : assert(data != null);
+  });
 
   /// Specifies the background color, label text style, icon theme, and label
   /// type values for descendant [NavigationBar] widgets.

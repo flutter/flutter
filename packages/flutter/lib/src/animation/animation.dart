@@ -27,7 +27,31 @@ enum AnimationStatus {
   reverse,
 
   /// The animation is stopped at the end.
-  completed,
+  completed;
+
+  /// Whether the animation is stopped at the beginning.
+  bool get isDismissed => this == dismissed;
+
+  /// Whether the animation is stopped at the end.
+  bool get isCompleted => this == completed;
+
+  /// Whether the animation is running in either direction.
+  bool get isAnimating => switch (this) {
+    forward   || reverse   => true,
+    completed || dismissed => false,
+  };
+
+  /// {@template flutter.animation.AnimationStatus.isForwardOrCompleted}
+  /// Whether the current aim of the animation is toward completion.
+  ///
+  /// Specifically, returns `true` for [AnimationStatus.forward] or
+  /// [AnimationStatus.completed], and `false` for
+  /// [AnimationStatus.reverse] or [AnimationStatus.dismissed].
+  /// {@endtemplate}
+  bool get isForwardOrCompleted => switch (this) {
+    forward || completed => true,
+    reverse || dismissed => false,
+  };
 }
 
 /// Signature for listeners attached using [Animation.addStatusListener].
@@ -54,7 +78,7 @@ typedef ValueListenableTransformer<T> = T Function(T);
 /// See also:
 ///
 ///  * [Tween], which can be used to create [Animation] subclasses that
-///    convert `Animation<double>`s into other kinds of `Animation`s.
+///    convert `Animation<double>`s into other kinds of [Animation]s.
 abstract class Animation<T> extends Listenable implements ValueListenable<T> {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -81,9 +105,9 @@ abstract class Animation<T> extends Listenable implements ValueListenable<T> {
   ///       final double opacity = (value / 1000).clamp(0, 1);
   ///       return Opacity(opacity: opacity, child: child);
   ///     },
-  ///     child: Container(
+  ///     child: const ColoredBox(
   ///       color: Colors.red,
-  ///       child: const Text('Hello, Animation'),
+  ///       child: Text('Hello, Animation'),
   ///     ),
   ///   );
   /// }
@@ -100,9 +124,9 @@ abstract class Animation<T> extends Listenable implements ValueListenable<T> {
   ///     opacity: Animation<double>.fromValueListenable(_scrollPosition, transformer: (double value) {
   ///       return (value / 1000).clamp(0, 1);
   ///     }),
-  ///     child: Container(
+  ///     child: const ColoredBox(
   ///       color: Colors.red,
-  ///       child: const Text('Hello, Animation'),
+  ///       child: Text('Hello, Animation'),
   ///     ),
   ///   );
   /// }
@@ -150,10 +174,16 @@ abstract class Animation<T> extends Listenable implements ValueListenable<T> {
   T get value;
 
   /// Whether this animation is stopped at the beginning.
-  bool get isDismissed => status == AnimationStatus.dismissed;
+  bool get isDismissed => status.isDismissed;
 
   /// Whether this animation is stopped at the end.
-  bool get isCompleted => status == AnimationStatus.completed;
+  bool get isCompleted => status.isCompleted;
+
+  /// Whether this animation is running in either direction.
+  bool get isAnimating => status.isAnimating;
+
+  /// {@macro flutter.animation.AnimationStatus.isForwardOrCompleted}
+  bool get isForwardOrCompleted => status.isForwardOrCompleted;
 
   /// Chains a [Tween] (or [CurveTween]) to this [Animation].
   ///
@@ -269,17 +299,12 @@ abstract class Animation<T> extends Listenable implements ValueListenable<T> {
   /// * "&#x23ED;": [AnimationStatus.completed] ([value] == 1.0)
   /// * "&#x23EE;": [AnimationStatus.dismissed] ([value] == 0.0)
   String toStringDetails() {
-    assert(status != null);
-    switch (status) {
-      case AnimationStatus.forward:
-        return '\u25B6'; // >
-      case AnimationStatus.reverse:
-        return '\u25C0'; // <
-      case AnimationStatus.completed:
-        return '\u23ED'; // >>|
-      case AnimationStatus.dismissed:
-        return '\u23EE'; // |<<
-    }
+    return switch (status) {
+      AnimationStatus.forward   => '\u25B6', // >
+      AnimationStatus.reverse   => '\u25C0', // <
+      AnimationStatus.completed => '\u23ED', // >>|
+      AnimationStatus.dismissed => '\u23EE', // |<<
+    };
   }
 }
 

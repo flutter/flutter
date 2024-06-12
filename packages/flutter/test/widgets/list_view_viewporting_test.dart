@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
 import 'test_widgets.dart';
 
 void main() {
@@ -78,11 +77,14 @@ void main() {
     }
 
     Widget builder() {
+      final ScrollController controller = ScrollController(initialScrollOffset: 300.0);
+      addTearDown(controller.dispose);
+
       return Directionality(
         textDirection: TextDirection.ltr,
         child: FlipWidget(
           left: ListView.builder(
-            controller: ScrollController(initialScrollOffset: 300.0),
+            controller: controller,
             itemBuilder: itemBuilder,
           ),
           right: const Text('Not Today'),
@@ -141,12 +143,15 @@ void main() {
     }
 
     Widget builder() {
+      final ScrollController controller = ScrollController(initialScrollOffset: 500.0);
+      addTearDown(controller.dispose);
+
       return Directionality(
         textDirection: TextDirection.ltr,
         child: FlipWidget(
           left: ListView.builder(
             scrollDirection: Axis.horizontal,
-            controller: ScrollController(initialScrollOffset: 500.0),
+            controller: controller,
             itemBuilder: itemBuilder,
           ),
           right: const Text('Not Today'),
@@ -231,7 +236,7 @@ void main() {
 
   testWidgets('ListView reinvoke builders', (WidgetTester tester) async {
     late StateSetter setState;
-    ThemeData themeData = ThemeData.light();
+    ThemeData themeData = ThemeData.light(useMaterial3: false);
 
     Widget itemBuilder(BuildContext context, int index) {
       return Container(
@@ -263,7 +268,7 @@ void main() {
     expect(widget.color, equals(Colors.blue));
 
     setState(() {
-      themeData = ThemeData(primarySwatch: Colors.green);
+      themeData = ThemeData(primarySwatch: Colors.green, useMaterial3: false);
     });
 
     await tester.pump();
@@ -326,20 +331,20 @@ void main() {
     expect(
       list.toStringDeep(minLevel: DiagnosticLevel.info),
       equalsIgnoringHashCodes(
-        'RenderSliverList#00000 relayoutBoundary=up1\n'
+        'RenderSliverList#00000 relayoutBoundary=up2\n'
         ' │ needs compositing\n'
         ' │ parentData: paintOffset=Offset(0.0, 0.0) (can use size)\n'
         ' │ constraints: SliverConstraints(AxisDirection.down,\n'
         ' │   GrowthDirection.forward, ScrollDirection.idle, scrollOffset:\n'
-        ' │   0.0, remainingPaintExtent: 600.0, crossAxisExtent: 800.0,\n'
-        ' │   crossAxisDirection: AxisDirection.right,\n'
-        ' │   viewportMainAxisExtent: 600.0, remainingCacheExtent: 850.0,\n'
-        ' │   cacheOrigin: 0.0)\n'
+        ' │   0.0, precedingScrollExtent: 0.0, remainingPaintExtent: 600.0,\n'
+        ' │   crossAxisExtent: 800.0, crossAxisDirection:\n'
+        ' │   AxisDirection.right, viewportMainAxisExtent: 600.0,\n'
+        ' │   remainingCacheExtent: 850.0, cacheOrigin: 0.0)\n'
         ' │ geometry: SliverGeometry(scrollExtent: 300.0, paintExtent: 300.0,\n'
         ' │   maxPaintExtent: 300.0, cacheExtent: 300.0)\n'
         ' │ currently live children: 0 to 2\n'
         ' │\n'
-        ' ├─child with index 0: RenderRepaintBoundary#00000 relayoutBoundary=up2\n'
+        ' ├─child with index 0: RenderRepaintBoundary#00000 relayoutBoundary=up3\n'
         ' │ │ needs compositing\n'
         ' │ │ parentData: index=0; layoutOffset=0.0 (can use size)\n'
         ' │ │ constraints: BoxConstraints(w=800.0, 0.0<=h<=Infinity)\n'
@@ -349,7 +354,7 @@ void main() {
         ' │ │ diagnosis: insufficient data to draw conclusion (less than five\n'
         ' │ │   repaints)\n'
         ' │ │\n'
-        ' │ └─child: RenderConstrainedBox#00000 relayoutBoundary=up3\n'
+        ' │ └─child: RenderConstrainedBox#00000 relayoutBoundary=up4\n'
         ' │   │ parentData: <none> (can use size)\n'
         ' │   │ constraints: BoxConstraints(w=800.0, 0.0<=h<=Infinity)\n'
         ' │   │ size: Size(800.0, 100.0)\n'
@@ -368,7 +373,7 @@ void main() {
         ' │         size: Size(800.0, 100.0)\n'
         ' │         additionalConstraints: BoxConstraints(biggest)\n'
         ' │\n'
-        ' ├─child with index 1: RenderRepaintBoundary#00000 relayoutBoundary=up2\n'
+        ' ├─child with index 1: RenderRepaintBoundary#00000 relayoutBoundary=up3\n'
         ' │ │ needs compositing\n'
         ' │ │ parentData: index=1; layoutOffset=100.0 (can use size)\n'
         ' │ │ constraints: BoxConstraints(w=800.0, 0.0<=h<=Infinity)\n'
@@ -378,7 +383,7 @@ void main() {
         ' │ │ diagnosis: insufficient data to draw conclusion (less than five\n'
         ' │ │   repaints)\n'
         ' │ │\n'
-        ' │ └─child: RenderConstrainedBox#00000 relayoutBoundary=up3\n'
+        ' │ └─child: RenderConstrainedBox#00000 relayoutBoundary=up4\n'
         ' │   │ parentData: <none> (can use size)\n'
         ' │   │ constraints: BoxConstraints(w=800.0, 0.0<=h<=Infinity)\n'
         ' │   │ size: Size(800.0, 100.0)\n'
@@ -397,7 +402,7 @@ void main() {
         ' │         size: Size(800.0, 100.0)\n'
         ' │         additionalConstraints: BoxConstraints(biggest)\n'
         ' │\n'
-        ' └─child with index 2: RenderRepaintBoundary#00000 relayoutBoundary=up2\n'
+        ' └─child with index 2: RenderRepaintBoundary#00000 relayoutBoundary=up3\n'
         '   │ needs compositing\n'
         '   │ parentData: index=2; layoutOffset=200.0 (can use size)\n'
         '   │ constraints: BoxConstraints(w=800.0, 0.0<=h<=Infinity)\n'
@@ -407,7 +412,7 @@ void main() {
         '   │ diagnosis: insufficient data to draw conclusion (less than five\n'
         '   │   repaints)\n'
         '   │\n'
-        '   └─child: RenderConstrainedBox#00000 relayoutBoundary=up3\n'
+        '   └─child: RenderConstrainedBox#00000 relayoutBoundary=up4\n'
         '     │ parentData: <none> (can use size)\n'
         '     │ constraints: BoxConstraints(w=800.0, 0.0<=h<=Infinity)\n'
         '     │ size: Size(800.0, 100.0)\n'
@@ -436,6 +441,9 @@ void main() {
 
   testWidgets('ListView should not paint hidden children', (WidgetTester tester) async {
     const Text text = Text('test');
+    final ScrollController controller = ScrollController(initialScrollOffset: 300.0);
+    addTearDown(controller.dispose);
+
     await tester.pumpWidget(
         Directionality(
             textDirection: TextDirection.ltr,
@@ -444,7 +452,7 @@ void main() {
                   height: 200.0,
                   child: ListView(
                     cacheExtent: 500.0,
-                    controller: ScrollController(initialScrollOffset: 300.0),
+                    controller: controller,
                     children: const <Widget>[
                       SizedBox(height: 140.0, child: text),
                       SizedBox(height: 160.0, child: text),
@@ -464,13 +472,16 @@ void main() {
   });
 
   testWidgets('ListView should paint with offset', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController(initialScrollOffset: 120.0);
+    addTearDown(controller.dispose);
+
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: SizedBox(
             height: 500.0,
             child: CustomScrollView(
-              controller: ScrollController(initialScrollOffset: 120.0),
+              controller: controller,
               slivers: <Widget>[
                 const SliverAppBar(
                   expandedHeight: 250.0,

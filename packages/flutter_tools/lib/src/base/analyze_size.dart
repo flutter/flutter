@@ -5,6 +5,7 @@
 import 'package:archive/archive.dart';
 import 'package:archive/archive_io.dart';
 import 'package:meta/meta.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 import 'package:vm_snapshot_analysis/treemap.dart';
 
 import '../convert.dart';
@@ -20,8 +21,10 @@ class SizeAnalyzer {
     required FileSystem fileSystem,
     required Logger logger,
     required Usage flutterUsage,
+    required Analytics analytics,
     Pattern appFilenamePattern = 'libapp.so',
   }) : _flutterUsage = flutterUsage,
+       _analytics = analytics,
        _fileSystem = fileSystem,
        _logger = logger,
        _appFilenamePattern = appFilenamePattern;
@@ -30,6 +33,7 @@ class SizeAnalyzer {
   final Logger _logger;
   final Pattern _appFilenamePattern;
   final Usage _flutterUsage;
+  final Analytics _analytics;
   String? _appFilename;
 
   static const String aotSnapshotFileName = 'aot-snapshot.json';
@@ -88,6 +92,7 @@ class SizeAnalyzer {
 
     assert(_appFilename != null);
     CodeSizeEvent(type, flutterUsage: _flutterUsage).send();
+    _analytics.send(Event.codeSizeAnalysis(platform: type));
     return apkAnalysisJson;
   }
 
@@ -141,6 +146,7 @@ class SizeAnalyzer {
       precompilerTrace: json.decode(precompilerTrace.readAsStringSync()) as Map<String, Object?>? ?? <String, Object?>{},
     );
     CodeSizeEvent(kind, flutterUsage: _flutterUsage).send();
+    _analytics.send(Event.codeSizeAnalysis(platform: kind));
     return apkAnalysisJson;
   }
 
@@ -430,9 +436,7 @@ class _SymbolNode {
   _SymbolNode(
     this.name, {
     this.byteSize = 0,
-  })  : assert(name != null),
-        assert(byteSize != null),
-        _children = <String, _SymbolNode>{};
+  })  : _children = <String, _SymbolNode>{};
 
   /// The human friendly identifier for this node.
   String name;
@@ -465,18 +469,15 @@ class _SymbolNode {
   }
 
   Map<String, Object?> toJson() {
-    final Map<String, Object?> json = <String, Object?>{
+    final List<Map<String, Object?>> childrenAsJson = <Map<String, Object?>>[
+      for (final _SymbolNode child in children) child.toJson(),
+    ];
+
+    return <String, Object?>{
       'n': name,
       'value': byteSize,
+      if (childrenAsJson.isNotEmpty) 'children': childrenAsJson,
     };
-    final List<Map<String, Object?>> childrenAsJson = <Map<String, Object?>>[];
-    for (final _SymbolNode child in children) {
-      childrenAsJson.add(child.toJson());
-    }
-    if (childrenAsJson.isNotEmpty) {
-      json['children'] = childrenAsJson;
-    }
-    return json;
   }
 }
 

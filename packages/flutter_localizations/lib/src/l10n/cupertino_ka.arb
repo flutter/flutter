@@ -21,5 +21,11 @@
   "selectAllButtonLabel": "ყველას არჩევა",
   "tabSemanticsLabel": "ჩანართი $tabIndex / $tabCount-დან",
   "modalBarrierDismissLabel": "დახურვა",
-  "searchTextFieldPlaceholderLabel": "ძიება"
+  "searchTextFieldPlaceholderLabel": "ძიება",
+  "noSpellCheckReplacementsLabel": "ჩანაცვლება არ მოიძებნა",
+  "menuDismissLabel": "მენიუს უარყოფა",
+  "lookUpButtonLabel": "აიხედეთ ზემოთ",
+  "searchWebButtonLabel": "ვებში ძიება",
+  "shareButtonLabel": "გაზიარება...",
+  "clearButtonLabel": "Clear"
 }

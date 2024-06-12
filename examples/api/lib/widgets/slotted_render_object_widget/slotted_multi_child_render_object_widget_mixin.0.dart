@@ -5,15 +5,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
+/// Flutter code sample for [SlottedMultiChildRenderObjectWidget].
+
 /// Slots used for the children of [Diagonal] and [RenderDiagonal].
 enum DiagonalSlot {
   topLeft,
   bottomRight,
 }
 
-/// A widget that demonstrates the usage of [SlottedMultiChildRenderObjectWidgetMixin]
-/// by providing slots for two children that will be arranged diagonally.
-class Diagonal extends RenderObjectWidget with SlottedMultiChildRenderObjectWidgetMixin<DiagonalSlot> {
+/// A widget that demonstrates the usage of
+/// [SlottedMultiChildRenderObjectWidget] by providing slots for two
+/// children that will be arranged diagonally.
+class Diagonal extends SlottedMultiChildRenderObjectWidget<DiagonalSlot, RenderBox> {
   const Diagonal({
     super.key,
     this.topLeft,
@@ -30,12 +33,10 @@ class Diagonal extends RenderObjectWidget with SlottedMultiChildRenderObjectWidg
 
   @override
   Widget? childForSlot(DiagonalSlot slot) {
-    switch (slot) {
-      case DiagonalSlot.topLeft:
-        return topLeft;
-      case DiagonalSlot.bottomRight:
-        return bottomRight;
-    }
+    return switch (slot) {
+      DiagonalSlot.topLeft     => topLeft,
+      DiagonalSlot.bottomRight => bottomRight,
+    };
   }
 
   // The [createRenderObject] and [updateRenderObject] methods configure the
@@ -46,7 +47,7 @@ class Diagonal extends RenderObjectWidget with SlottedMultiChildRenderObjectWidg
   // [SlottedRenderObjectElement.update].
 
   @override
-  SlottedContainerRenderObjectMixin<DiagonalSlot> createRenderObject(
+  SlottedContainerRenderObjectMixin<DiagonalSlot, RenderBox> createRenderObject(
     BuildContext context,
   ) {
     return RenderDiagonal(
@@ -57,15 +58,17 @@ class Diagonal extends RenderObjectWidget with SlottedMultiChildRenderObjectWidg
   @override
   void updateRenderObject(
     BuildContext context,
-    SlottedContainerRenderObjectMixin<DiagonalSlot> renderObject,
+    SlottedContainerRenderObjectMixin<DiagonalSlot, RenderBox> renderObject,
   ) {
     (renderObject as RenderDiagonal).backgroundColor = backgroundColor;
   }
 }
 
-/// A render object that demonstrates the usage of [SlottedContainerRenderObjectMixin]
-/// by providing slots for two children that will be arranged diagonally.
-class RenderDiagonal extends RenderBox with SlottedContainerRenderObjectMixin<DiagonalSlot>, DebugOverflowIndicatorMixin {
+/// A render object that demonstrates the usage of
+/// [SlottedContainerRenderObjectMixin] by providing slots for two children that
+/// will be arranged diagonally.
+class RenderDiagonal extends RenderBox
+    with SlottedContainerRenderObjectMixin<DiagonalSlot, RenderBox>, DebugOverflowIndicatorMixin {
   RenderDiagonal({Color? backgroundColor}) : _backgroundColor = backgroundColor;
 
   // Getters and setters to configure the [RenderObject] with the configuration
@@ -96,10 +99,8 @@ class RenderDiagonal extends RenderBox with SlottedContainerRenderObjectMixin<Di
   @override
   Iterable<RenderBox> get children {
     return <RenderBox>[
-      if (_topLeft != null)
-        _topLeft!,
-      if (_bottomRight != null)
-        _bottomRight!,
+      if (_topLeft != null) _topLeft!,
+      if (_bottomRight != null) _bottomRight!,
     ];
   }
 
@@ -153,8 +154,7 @@ class RenderDiagonal extends RenderBox with SlottedContainerRenderObjectMixin<Di
     if (backgroundColor != null) {
       context.canvas.drawRect(
         offset & size,
-        Paint()
-          ..color = backgroundColor!,
+        Paint()..color = backgroundColor!,
       );
     }
 
@@ -189,7 +189,7 @@ class RenderDiagonal extends RenderBox with SlottedContainerRenderObjectMixin<Di
   // HIT TEST
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
+  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
     for (final RenderBox child in children) {
       final BoxParentData parentData = child.parentData! as BoxParentData;
       final bool isHit = result.addWithPaintOffset(
@@ -222,7 +222,8 @@ class RenderDiagonal extends RenderBox with SlottedContainerRenderObjectMixin<Di
   double computeMaxIntrinsicWidth(double height) {
     final double topLeftWidth = _topLeft?.getMaxIntrinsicWidth(double.infinity) ?? 0;
     final double bottomRightWith = _bottomRight?.getMaxIntrinsicWidth(double.infinity) ?? 0;
-    return topLeftWidth + bottomRightWith;  }
+    return topLeftWidth + bottomRightWith;
+  }
 
   @override
   double computeMinIntrinsicHeight(double width) {
@@ -241,8 +242,8 @@ class RenderDiagonal extends RenderBox with SlottedContainerRenderObjectMixin<Di
   @override
   Size computeDryLayout(BoxConstraints constraints) {
     const BoxConstraints childConstraints = BoxConstraints();
-    final Size topLeftSize = _topLeft?.computeDryLayout(childConstraints) ?? Size.zero;
-    final Size bottomRightSize = _bottomRight?.computeDryLayout(childConstraints) ?? Size.zero;
+    final Size topLeftSize = _topLeft?.getDryLayout(childConstraints) ?? Size.zero;
+    final Size bottomRightSize = _bottomRight?.getDryLayout(childConstraints) ?? Size.zero;
     return constraints.constrain(Size(
       topLeftSize.width + bottomRightSize.width,
       topLeftSize.height + bottomRightSize.height,

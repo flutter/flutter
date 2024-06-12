@@ -91,7 +91,9 @@ for how to set up your development environment, or ask in #hackers-test on Disco
 Developing for Flutter
 ----------------------
 
-If you would prefer to write code, you may wish to start with our list of [good first contributions](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+contribution%22).
+If you would prefer to write code, you may wish to start with our list of good first issues for [Flutter](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22) or for [Flutter DevTools](https://github.com/flutter/devtools/labels/good%20first%20issue). See the respective sections below for further instructions.
+
+### Framework and Engine
 
 To develop for Flutter, you will eventually need to become familiar
 with our processes and conventions. This section lists the documents
@@ -121,6 +123,7 @@ presented.
 5. [Flutter design doc template](https://flutter.dev/go/template),
    which should be used when proposing a new technical design.  This is a good
    practice to do before coding more intricate changes.
+   See also our [guidance for writing design docs](https://github.com/flutter/flutter/wiki/Design-Documents).
 
 [![How to contribute to Flutter](https://img.youtube.com/vi/4yBgOBAOx_A/0.jpg)](https://www.youtube.com/watch?v=4yBgOBAOx_A)
 
@@ -131,6 +134,14 @@ and an article [Contributing to Flutter: Getting Started](https://medium.com/@ay
 on Medium that may be of interest. For a curated list of pages see the sidebar
 on the wiki's home page. They are more or less listed in order of importance.
 
+### DevTools
+
+Contributing code to Dart & Flutter DevTools may be a good place to start if you are
+looking to dip your toes into contributing with a relatively low-cost setup or if you
+are generally excited about improving the Dart & Flutter developer experience.
+
+Please see the DevTools [CONTRIBUTING.md](https://github.com/flutter/devtools/blob/master/CONTRIBUTING.md)
+guide to get started.
 
 Outreach
 --------
@@ -159,7 +170,7 @@ To contribute API documentation, an excellent command of the English language is
 We have a [whole section in our style guide](https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#documentation-dartdocs-javadocs-etc)
 that you should read before you write API documentation. It includes notes on the "Flutter Voice", such as our word and grammar conventions.
 
-In general, a really productive way to improve documentation is to use Flutter and stop any time your have a question: find the answer, then
+In general, a really productive way to improve documentation is to use Flutter and stop any time you have a question: find the answer, then
 document the answer where you first looked for it.
 
 We also keep [a list of areas that need better API documentation](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3A%22d%3A+api+docs%22+sort%3Areactions-%2B1-desc).

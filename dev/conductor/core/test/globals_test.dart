@@ -31,25 +31,27 @@ void main() {
     late pb.ConductorState state;
 
     setUp(() {
-      state = pb.ConductorState(
-        engine: pb.Repository(
-          candidateBranch: candidateBranch,
-          cherrypicks: <pb.Cherrypick>[
-            pb.Cherrypick(trunkRevision: engineCherrypick1),
-            pb.Cherrypick(trunkRevision: engineCherrypick2),
-          ],
-          dartRevision: dartRevision,
-          workingBranch: workingBranch,
-        ),
-        framework: pb.Repository(
-          candidateBranch: candidateBranch,
-          cherrypicks: <pb.Cherrypick>[
-            pb.Cherrypick(trunkRevision: frameworkCherrypick),
-          ],
-          workingBranch: workingBranch,
-        ),
-        releaseChannel: releaseChannel,
-        releaseVersion: releaseVersion,
+      state = (pb.ConductorState.create()
+        ..engine = (pb.Repository.create()
+          ..candidateBranch = candidateBranch
+          ..cherrypicks.addAll(<pb.Cherrypick>[
+            pb.Cherrypick.create()
+              ..trunkRevision = engineCherrypick1,
+            pb.Cherrypick.create()
+              ..trunkRevision = engineCherrypick2,
+          ])
+          ..dartRevision = dartRevision
+          ..workingBranch = workingBranch
+        )
+        ..framework = (pb.Repository.create()
+          ..candidateBranch = candidateBranch
+          ..cherrypicks.add(pb.Cherrypick.create()
+              ..trunkRevision = frameworkCherrypick
+          )
+          ..workingBranch = workingBranch
+        )
+        ..releaseChannel = releaseChannel
+        ..releaseVersion = releaseVersion
       );
     });
 
@@ -162,7 +164,7 @@ void main() {
   });
 }
 
-class FakeArgs implements ArgResults {
+class FakeArgs extends Fake implements ArgResults {
   FakeArgs({
     this.arguments = const <String>[],
     this.name = 'fake-command',
@@ -176,15 +178,6 @@ class FakeArgs implements ArgResults {
 
   @override
   final String name;
-
-  @override
-  ArgResults? get command => throw Exception('Unimplemented');
-
-  @override
-  List<String> get rest => throw Exception('Unimplemented');
-
-  @override
-  Iterable<String> get options => throw Exception('Unimplemented');
 
   @override
   bool wasParsed(String name) {

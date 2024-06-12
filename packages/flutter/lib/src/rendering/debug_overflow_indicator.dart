@@ -109,10 +109,19 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
     );
   static final Paint _labelBackgroundPaint = Paint()..color = const Color(0xFFFFFFFF);
 
-  final List<TextPainter> _indicatorLabel = List<TextPainter>.filled(
+  final List<TextPainter> _indicatorLabel = List<TextPainter>.generate(
     _OverflowSide.values.length,
-    TextPainter(textDirection: TextDirection.ltr), // This label is in English.
+    (int i) => TextPainter(textDirection: TextDirection.ltr), // This label is in English.
+    growable: false,
   );
+
+  @override
+  void dispose() {
+    for (final TextPainter painter in _indicatorLabel) {
+      painter.dispose();
+    }
+    super.dispose();
+  }
 
   // Set to true to trigger a debug message in the console upon
   // the next paint call. Will be reset after each paint.
@@ -120,15 +129,11 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
 
   String _formatPixels(double value) {
     assert(value > 0.0);
-    final String pixels;
-    if (value > 10.0) {
-      pixels = value.toStringAsFixed(0);
-    } else if (value > 1.0) {
-      pixels = value.toStringAsFixed(1);
-    } else {
-      pixels = value.toStringAsPrecision(3);
-    }
-    return pixels;
+    return switch (value) {
+      > 10.0 => value.toStringAsFixed(0),
+      >  1.0 => value.toStringAsFixed(1),
+      _      => value.toStringAsPrecision(3),
+    };
   }
 
   List<_OverflowRegionData> _calculateOverflowRegions(RelativeRect overflow, Rect containerRect) {
@@ -226,10 +231,8 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
     switch (overflows.length) {
       case 1:
         overflowText = overflows.first;
-        break;
       case 2:
         overflowText = '${overflows.first} and ${overflows.last}';
-        break;
       default:
         overflows[overflows.length - 1] = 'and ${overflows[overflows.length - 1]}';
         overflowText = overflows.join(', ');

@@ -15,7 +15,6 @@ import 'assets.dart';
 import 'common.dart';
 import 'desktop.dart';
 import 'icon_tree_shaker.dart';
-import 'shader_compiler.dart';
 
 /// The only files/subdirectories we care out.
 const List<String> _kLinuxArtifacts = <String>[
@@ -53,7 +52,7 @@ class UnpackLinux extends Target {
     if (buildModeEnvironment == null) {
       throw MissingDefineException(kBuildMode, name);
     }
-    final BuildMode buildMode = getBuildModeForName(buildModeEnvironment);
+    final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
     final String engineSourcePath = environment.artifacts
       .getArtifactPath(
         Artifact.linuxDesktopPath,
@@ -84,11 +83,7 @@ class UnpackLinux extends Target {
         platform: targetPlatform,
       )
     );
-    final DepfileService depfileService = DepfileService(
-      fileSystem: environment.fileSystem,
-      logger: environment.logger,
-    );
-    depfileService.writeToFile(
+    environment.depFileService.writeToFile(
       depfile,
       environment.buildDir.childFile(_kLinuxDepfile),
     );
@@ -125,7 +120,7 @@ abstract class BundleLinuxAssets extends Target {
     if (buildModeEnvironment == null) {
       throw MissingDefineException(kBuildMode, 'bundle_linux_assets');
     }
-    final BuildMode buildMode = getBuildModeForName(buildModeEnvironment);
+    final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
     final Directory outputDirectory = environment.outputDir
       .childDirectory('flutter_assets');
     if (!outputDirectory.existsSync()) {
@@ -142,16 +137,12 @@ abstract class BundleLinuxAssets extends Target {
       environment,
       outputDirectory,
       targetPlatform: targetPlatform,
+      buildMode: buildMode,
       additionalContent: <String, DevFSContent>{
         'version.json': DevFSStringContent(versionInfo),
       },
-      shaderTarget: ShaderTarget.sksl,
     );
-    final DepfileService depfileService = DepfileService(
-      fileSystem: environment.fileSystem,
-      logger: environment.logger,
-    );
-    depfileService.writeToFile(
+    environment.depFileService.writeToFile(
       depfile,
       environment.buildDir.childFile('flutter_assets.d'),
     );

@@ -58,7 +58,7 @@ class DelayedBase64Image extends ImageProvider<int> {
   }
 
   @override
-  ImageStreamCompleter loadBuffer(int key, DecoderBufferCallback decode) {
+  ImageStreamCompleter loadImage(int key, ImageDecoderCallback decode) {
     return MultiFrameImageStreamCompleter(
       codec: Future<ui.Codec>.delayed(
         delay,

@@ -8,8 +8,7 @@
 // (or vice versa).
 
 @Tags(<String>['reduced-test-set'])
-
-import 'dart:ui' as ui;
+library;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -49,6 +48,7 @@ class _TestSliverPersistentHeaderDelegate extends SliverPersistentHeaderDelegate
 void main() {
   testWidgets('Scrollable widget scrollDirection update test', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     Widget buildFrame(Axis axis) {
       return Directionality(
         textDirection: TextDirection.ltr,
@@ -92,6 +92,8 @@ void main() {
   });
 
   testWidgets('Viewport getOffsetToReveal - down', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController(initialScrollOffset: 300.0);
+    addTearDown(controller.dispose);
     List<Widget> children;
     await tester.pumpWidget(
       Directionality(
@@ -101,7 +103,7 @@ void main() {
             height: 200.0,
             width: 300.0,
             child: ListView(
-              controller: ScrollController(initialScrollOffset: 300.0),
+              controller: controller,
               children: children = List<Widget>.generate(20, (int i) {
                 return SizedBox(
                   height: 100.0,
@@ -136,6 +138,8 @@ void main() {
   });
 
   testWidgets('Viewport getOffsetToReveal - right', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController(initialScrollOffset: 300.0);
+    addTearDown(controller.dispose);
     List<Widget> children;
 
     await tester.pumpWidget(
@@ -147,7 +151,7 @@ void main() {
             width: 200.0,
             child: ListView(
               scrollDirection: Axis.horizontal,
-              controller: ScrollController(initialScrollOffset: 300.0),
+              controller: controller,
               children: children = List<Widget>.generate(20, (int i) {
                 return SizedBox(
                   height: 300.0,
@@ -182,6 +186,8 @@ void main() {
   });
 
   testWidgets('Viewport getOffsetToReveal - up', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController(initialScrollOffset: 300.0);
+    addTearDown(controller.dispose);
     List<Widget> children;
 
     await tester.pumpWidget(
@@ -192,7 +198,7 @@ void main() {
             height: 200.0,
             width: 300.0,
             child: ListView(
-              controller: ScrollController(initialScrollOffset: 300.0),
+              controller: controller,
               reverse: true,
               children: children = List<Widget>.generate(20, (int i) {
                 return SizedBox(
@@ -228,6 +234,8 @@ void main() {
   });
 
   testWidgets('Viewport getOffsetToReveal - left', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController(initialScrollOffset: 300.0);
+    addTearDown(controller.dispose);
     List<Widget> children;
 
     await tester.pumpWidget(
@@ -240,7 +248,7 @@ void main() {
             child: ListView(
               scrollDirection: Axis.horizontal,
               reverse: true,
-              controller: ScrollController(initialScrollOffset: 300.0),
+              controller: controller,
               children: children = List<Widget>.generate(20, (int i) {
                 return SizedBox(
                   height: 300.0,
@@ -275,6 +283,8 @@ void main() {
   });
 
   testWidgets('Viewport getOffsetToReveal Sliver - down', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController(initialScrollOffset: 300.0);
+    addTearDown(controller.dispose);
     final List<Widget> children = <Widget>[];
     await tester.pumpWidget(
       Directionality(
@@ -284,7 +294,7 @@ void main() {
             height: 200.0,
             width: 300.0,
             child: CustomScrollView(
-              controller: ScrollController(initialScrollOffset: 300.0),
+              controller: controller,
               slivers: List<Widget>.generate(20, (int i) {
                 final Widget sliver = SliverToBoxAdapter(
                   child: SizedBox(
@@ -321,6 +331,8 @@ void main() {
   });
 
   testWidgets('Viewport getOffsetToReveal Sliver - right', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController(initialScrollOffset: 300.0);
+    addTearDown(controller.dispose);
     final List<Widget> children = <Widget>[];
     await tester.pumpWidget(
       Directionality(
@@ -331,7 +343,7 @@ void main() {
             width: 200.0,
             child: CustomScrollView(
               scrollDirection: Axis.horizontal,
-              controller: ScrollController(initialScrollOffset: 300.0),
+              controller: controller,
               slivers: List<Widget>.generate(20, (int i) {
                 final Widget sliver = SliverToBoxAdapter(
                     child: SizedBox(
@@ -368,6 +380,8 @@ void main() {
   });
 
   testWidgets('Viewport getOffsetToReveal Sliver - up', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController(initialScrollOffset: 300.0);
+    addTearDown(controller.dispose);
     final List<Widget> children = <Widget>[];
     await tester.pumpWidget(
       Directionality(
@@ -377,7 +391,7 @@ void main() {
             height: 200.0,
             width: 300.0,
             child: CustomScrollView(
-              controller: ScrollController(initialScrollOffset: 300.0),
+              controller: controller,
               reverse: true,
               slivers: List<Widget>.generate(20, (int i) {
                 final Widget sliver = SliverToBoxAdapter(
@@ -531,6 +545,8 @@ void main() {
   });
 
   testWidgets('Viewport getOffsetToReveal Sliver - left', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController(initialScrollOffset: 300.0);
+    addTearDown(controller.dispose);
     final List<Widget> children = <Widget>[];
     await tester.pumpWidget(
       Directionality(
@@ -542,7 +558,7 @@ void main() {
             child: CustomScrollView(
               scrollDirection: Axis.horizontal,
               reverse: true,
-              controller: ScrollController(initialScrollOffset: 300.0),
+              controller: controller,
               slivers: List<Widget>.generate(20, (int i) {
                 final Widget sliver = SliverToBoxAdapter(
                     child: SizedBox(
@@ -581,6 +597,15 @@ void main() {
   testWidgets('Nested Viewports showOnScreen', (WidgetTester tester) async {
     final List<ScrollController> controllersX = List<ScrollController>.generate(10, (int i) => ScrollController(initialScrollOffset: 400.0));
     final ScrollController controllerY = ScrollController(initialScrollOffset: 400.0);
+
+    addTearDown((){
+      controllerY.dispose();
+      for (final ScrollController controller in controllersX) {
+        controller.dispose();
+      }
+    });
+
+
     final List<List<Widget>> children = List<List<Widget>>.generate(10, (int y) {
       return List<Widget>.generate(10, (int x) {
         return SizedBox(
@@ -781,19 +806,14 @@ void main() {
     }
 
     testWidgets('Reverse List showOnScreen', (WidgetTester tester) async {
-      final ui.Size originalScreenSize = tester.binding.window.physicalSize;
-      final double originalDevicePixelRatio = tester.binding.window.devicePixelRatio;
-      addTearDown(() {
-        tester.binding.window.devicePixelRatioTestValue = originalDevicePixelRatio;
-        tester.binding.window.physicalSizeTestValue = originalScreenSize;
-      });
+      addTearDown(tester.view.reset);
       const double screenHeight = 400.0;
       const double screenWidth = 400.0;
       const double itemHeight = screenHeight / 10.0;
       const ValueKey<String> centerKey = ValueKey<String>('center');
 
-      tester.binding.window.devicePixelRatioTestValue = 1.0;
-      tester.binding.window.physicalSizeTestValue = const Size(screenWidth, screenHeight);
+      tester.view.devicePixelRatio = 1.0;
+      tester.view.physicalSize = const Size(screenWidth, screenHeight);
 
       await tester.pumpWidget(Directionality(
         textDirection: TextDirection.ltr,
@@ -854,6 +874,9 @@ void main() {
     testWidgets('in view in inner, but not in outer', (WidgetTester tester) async {
       final ScrollController inner = ScrollController();
       final ScrollController outer = ScrollController();
+      addTearDown(inner.dispose);
+      addTearDown(outer.dispose);
+
       await buildNestedScroller(
         tester: tester,
         inner: inner,
@@ -871,6 +894,9 @@ void main() {
     testWidgets('not in view of neither inner nor outer', (WidgetTester tester) async {
       final ScrollController inner = ScrollController();
       final ScrollController outer = ScrollController();
+      addTearDown(inner.dispose);
+      addTearDown(outer.dispose);
+
       await buildNestedScroller(
         tester: tester,
         inner: inner,
@@ -888,6 +914,9 @@ void main() {
     testWidgets('in view in inner and outer', (WidgetTester tester) async {
       final ScrollController inner = ScrollController(initialScrollOffset: 200.0);
       final ScrollController outer = ScrollController(initialScrollOffset: 200.0);
+      addTearDown(inner.dispose);
+      addTearDown(outer.dispose);
+
       await buildNestedScroller(
         tester: tester,
         inner: inner,
@@ -905,6 +934,9 @@ void main() {
     testWidgets('inner shown in outer, but item not visible', (WidgetTester tester) async {
       final ScrollController inner = ScrollController(initialScrollOffset: 200.0);
       final ScrollController outer = ScrollController(initialScrollOffset: 200.0);
+      addTearDown(inner.dispose);
+      addTearDown(outer.dispose);
+
       await buildNestedScroller(
         tester: tester,
         inner: inner,
@@ -922,6 +954,9 @@ void main() {
     testWidgets('inner half shown in outer, item only visible in inner', (WidgetTester tester) async {
       final ScrollController inner = ScrollController();
       final ScrollController outer = ScrollController(initialScrollOffset: 100.0);
+      addTearDown(inner.dispose);
+      addTearDown(outer.dispose);
+
       await buildNestedScroller(
         tester: tester,
         inner: inner,
@@ -943,6 +978,8 @@ void main() {
     List<Widget> slivers;
     final ScrollController controllerX = ScrollController();
     final ScrollController controllerY = ScrollController();
+    addTearDown(controllerX.dispose);
+    addTearDown(controllerY.dispose);
 
     await tester.pumpWidget(
       Directionality(
@@ -993,6 +1030,8 @@ void main() {
     Widget sliver;
     final ScrollController controllerX = ScrollController();
     final ScrollController controllerY = ScrollController();
+    addTearDown(controllerX.dispose);
+    addTearDown(controllerY.dispose);
 
     await tester.pumpWidget(
       Directionality(
@@ -1051,7 +1090,8 @@ void main() {
 
   testWidgets('Viewport showOnScreen with objects larger than viewport', (WidgetTester tester) async {
     List<Widget> children;
-    ScrollController controller;
+    final ScrollController controller = ScrollController(initialScrollOffset: 300.0);
+    addTearDown(controller.dispose);
 
     await tester.pumpWidget(
       Directionality(
@@ -1060,7 +1100,7 @@ void main() {
           child: SizedBox(
             height: 200.0,
             child: ListView(
-              controller: controller = ScrollController(initialScrollOffset: 300.0),
+              controller: controller,
               children: children = List<Widget>.generate(20, (int i) {
                 return SizedBox(
                   height: 300.0,
@@ -1113,7 +1153,8 @@ void main() {
     'Viewport showOnScreen should not scroll if the rect is already visible, even if it does not scroll linearly',
     (WidgetTester tester) async {
       List<Widget> children;
-      ScrollController controller;
+      final ScrollController controller = ScrollController(initialScrollOffset: 300.0);
+      addTearDown(controller.dispose);
 
       const Key headerKey = Key('header');
       await tester.pumpWidget(
@@ -1123,7 +1164,7 @@ void main() {
             child: SizedBox(
               height: 600.0,
               child: CustomScrollView(
-                controller: controller = ScrollController(initialScrollOffset: 300.0),
+                controller: controller,
                 slivers: children = List<Widget>.generate(20, (int i) {
                   return i == 10
                   ? SliverPersistentHeader(
@@ -1218,12 +1259,10 @@ void main() {
       }
 
       final RenderBox renderBox = renderObject as RenderBox;
-      switch (axis) {
-        case Axis.horizontal:
-          return renderBox.size.width;
-        case Axis.vertical:
-          return renderBox.size.height;
-      }
+      return switch (axis) {
+        Axis.horizontal => renderBox.size.width,
+        Axis.vertical   => renderBox.size.height,
+      };
     }
 
     group('animated: $animated, scrollDirection: $axis', () {
@@ -1271,6 +1310,46 @@ void main() {
           expect(mainAxisExtent(tester, pinnedHeaderContent), 300);
         },
       );
+
+      testWidgets('RenderViewportBase.showOnScreen twice almost instantly', (WidgetTester tester) async{
+        // Regression test for https://github.com/flutter/flutter/issues/137901
+        await tester.pumpWidget(
+          buildList(
+            floatingHeader: SliverPersistentHeader(
+              pinned: true,
+              floating: true,
+              delegate: _TestSliverPersistentHeaderDelegate(minExtent: 100, maxExtent: 300, key: headerKey, vsync: vsync),
+            ),
+          ),
+        );
+
+        final Finder pinnedHeaderContent = find.byKey(headerKey, skipOffstage: false);
+
+        controller.jumpTo(300.0 * 15);
+        await tester.pumpAndSettle();
+        expect(mainAxisExtent(tester, pinnedHeaderContent), lessThan(300));
+
+
+        tester.renderObject(pinnedHeaderContent).showOnScreen(
+          descendant: tester.renderObject(pinnedHeaderContent),
+          // Adding different rect to check if the second showOnScreen call
+          // leads to a different result.
+          // When the animation has forward status and the second showOnScreen
+          // is called, the new animation won't start.
+          rect: Offset.zero & const Size(150, 150),
+          duration: const Duration(seconds: 3),
+        );
+        await tester.pump(const Duration(seconds: 1));
+
+        tester.renderObject(pinnedHeaderContent).showOnScreen(
+          descendant: tester.renderObject(pinnedHeaderContent),
+          rect: Offset.zero & const Size(300, 300),
+        );
+
+        await tester.pumpAndSettle();
+        expect(controller.offset, 300.0 * 15);
+        expect(mainAxisExtent(tester, pinnedHeaderContent), 150);
+      });
 
       testWidgets(
         'RenderViewportBase.showOnScreen but no child',
@@ -1592,11 +1671,21 @@ void main() {
       final double revealOffset = viewport.getOffsetToReveal(target, 0.0).offset;
       expect(revealOffset, -(300.0 + padding.horizontal)  * 5 + 34.0 * 2);
     });
+
+    testWidgets('will not assert on mismatched axis', (WidgetTester tester) async {
+      await tester.pumpWidget(buildList(axis: Axis.vertical, reverse: true, reverseGrowth: true));
+      final RenderAbstractViewport viewport = tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
+
+      final RenderObject target = tester.renderObject(find.text('Tile 0', skipOffstage: false));
+      viewport.getOffsetToReveal(target, 0.0, axis: Axis.horizontal);
+    });
   });
 
   testWidgets('RenderViewportBase.showOnScreen reports the correct targetRect', (WidgetTester tester) async {
     final ScrollController innerController = ScrollController();
     final ScrollController outerController = ScrollController();
+    addTearDown(innerController.dispose);
+    addTearDown(outerController.dispose);
 
     await tester.pumpWidget(
       Directionality(
@@ -1874,7 +1963,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: MediaQuery(
           data: const MediaQueryData(),
-          child: Container(
+          child: ColoredBox(
             color: const Color(0xFF000000),
             child: Column(
               children: <Widget>[
@@ -1910,6 +1999,8 @@ void main() {
     testWidgets('constrained viewport correctly clips overflow', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/89717
       final  ScrollController controller = ScrollController();
+      addTearDown(controller.dispose);
+
       await tester.pumpWidget(
         buildClippingShrinkWrap(controller, constrain: true)
       );
@@ -1937,6 +2028,8 @@ void main() {
     testWidgets('correctly clips overflow without constraints', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/89717
       final  ScrollController controller = ScrollController();
+      addTearDown(controller.dispose);
+
       await tester.pumpWidget(
         buildClippingShrinkWrap(controller)
       );
@@ -1965,6 +2058,8 @@ void main() {
       // Regression test for https://github.com/flutter/flutter/issues/10949
       // Scrollables should overscroll by default on iOS and macOS
       final  ScrollController controller = ScrollController();
+      addTearDown(controller.dispose);
+
       await tester.pumpWidget(
         buildSimpleShrinkWrap(controller: controller),
       );
@@ -2004,6 +2099,8 @@ void main() {
       // Regression test for https://github.com/flutter/flutter/issues/10949
       // Scrollables should overscroll by default on iOS and macOS
       final  ScrollController controller = ScrollController();
+      addTearDown(controller.dispose);
+
       await tester.pumpWidget(
         buildSimpleShrinkWrap(controller: controller, scrollDirection: Axis.horizontal),
       );
@@ -2043,6 +2140,8 @@ void main() {
       // Regression test for https://github.com/flutter/flutter/issues/10949
       // Scrollables should overscroll when the scroll physics allow
       final  ScrollController controller = ScrollController();
+      addTearDown(controller.dispose);
+
       await tester.pumpWidget(
         buildSimpleShrinkWrap(controller: controller, physics: const BouncingScrollPhysics()),
       );
@@ -2082,6 +2181,8 @@ void main() {
       // Regression test for https://github.com/flutter/flutter/issues/10949
       // Scrollables should overscroll when the scroll physics allow
       final  ScrollController controller = ScrollController();
+      addTearDown(controller.dispose);
+
       await tester.pumpWidget(
         buildSimpleShrinkWrap(
           controller: controller,
@@ -2194,4 +2295,158 @@ void main() {
     });
     expect(visited, true);
   });
+
+  testWidgets(
+      'Shrinkwrapping viewport asserts bounded cross axis', (WidgetTester tester) async {
+    final List<FlutterErrorDetails> errors = <FlutterErrorDetails>[];
+    FlutterError.onError = (FlutterErrorDetails error) => errors.add(error);
+    // Vertical
+    await tester.pumpWidget(Directionality(
+        textDirection: TextDirection.ltr,
+        child: ListView(
+          scrollDirection: Axis.horizontal,
+          children: <Widget>[
+            ListView(
+              shrinkWrap: true,
+              children: const <Widget>[ SizedBox.square(dimension: 500) ],
+            ),
+          ],
+        ),
+      ));
+
+    expect(errors, isNotEmpty);
+    expect(errors.first.exception, isFlutterError);
+    FlutterError error = errors.first.exception as FlutterError;
+    expect(
+      error.toString(),
+      contains('Viewports expand in the cross axis to fill their container'),
+    );
+    errors.clear();
+
+    // Horizontal
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: ListView(
+        children: <Widget>[
+          ListView(
+            scrollDirection: Axis.horizontal,
+            shrinkWrap: true,
+            children: const <Widget>[ SizedBox.square(dimension: 500) ],
+          ),
+        ],
+      ),
+    ));
+
+    expect(errors, isNotEmpty);
+    expect(errors.first.exception, isFlutterError);
+    error = errors.first.exception as FlutterError;
+    expect(
+      error.toString(),
+      contains('Viewports expand in the cross axis to fill their container'),
+    );
+    errors.clear();
+
+    // No children
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        children: <Widget>[
+          ListView(
+            shrinkWrap: true,
+          ),
+        ],
+      ),
+    ));
+
+    expect(errors, isNotEmpty);
+    expect(errors.first.exception, isFlutterError);
+    error = errors.first.exception as FlutterError;
+    expect(
+      error.toString(),
+      contains('Viewports expand in the cross axis to fill their container'),
+    );
+    errors.clear();
+  });
+
+  testWidgets('RenderViewport maxLayoutCycles depends on the number of children',
+      (WidgetTester tester) async {
+    Future<void> expectFlutterError({
+      required Widget widget,
+      required WidgetTester tester,
+    }) async {
+      final List<FlutterErrorDetails> errors = <FlutterErrorDetails>[];
+      final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+      FlutterError.onError = (FlutterErrorDetails error) => errors.add(error);
+      try {
+        await tester.pumpWidget(widget);
+      } finally {
+        FlutterError.onError = oldHandler;
+      }
+      expect(errors, isNotEmpty);
+      expect(errors.first.exception, isFlutterError);
+    }
+
+    Widget buildWidget({required int sliverCount, required int correctionsCount}) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: CustomScrollView(
+          slivers: List<Widget>.generate(
+              sliverCount,
+              (_) => _ScrollOffsetCorrectionSliver(correctionsCount: correctionsCount)),
+        ),
+      );
+    }
+
+    // 5 correction per child will pass.
+    await tester.pumpWidget(buildWidget(sliverCount: 30, correctionsCount: 5));
+
+    // 15 correction per child will throw exception.
+    await expectFlutterError(
+      widget: buildWidget(sliverCount: 1, correctionsCount: 15),
+      tester: tester,
+    );
+  });
+}
+
+// Simple sliver that applies N scroll offset corrections.
+class _RenderScrollOffsetCorrectionSliver extends RenderSliver {
+  int _correctionCount = 0;
+  @override
+  void performLayout() {
+    if (_correctionCount > 0) {
+      --_correctionCount;
+      geometry = const SliverGeometry(scrollOffsetCorrection: 1.0);
+      return;
+    }
+    const double extent = 5;
+    final double paintedChildSize = calculatePaintOffset(constraints, from: 0.0, to: extent);
+    final double cacheExtent = calculateCacheOffset(constraints, from: 0.0, to: extent);
+
+    geometry = SliverGeometry(
+      scrollExtent: extent,
+      paintExtent: paintedChildSize,
+      maxPaintExtent: extent,
+      cacheExtent: cacheExtent
+    );
+  }
+}
+
+class _ScrollOffsetCorrectionSliver extends SingleChildRenderObjectWidget {
+  const _ScrollOffsetCorrectionSliver({required this.correctionsCount});
+  final int correctionsCount;
+
+  @override
+  _RenderScrollOffsetCorrectionSliver createRenderObject(BuildContext context) {
+    final _RenderScrollOffsetCorrectionSliver sliver = _RenderScrollOffsetCorrectionSliver();
+    sliver._correctionCount = correctionsCount;
+    return sliver;
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, covariant _RenderScrollOffsetCorrectionSliver renderObject) {
+    super.updateRenderObject(context, renderObject);
+    renderObject.markNeedsLayout();
+    renderObject._correctionCount = correctionsCount;
+  }
 }

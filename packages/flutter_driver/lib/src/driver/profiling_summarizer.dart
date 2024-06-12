@@ -16,7 +16,7 @@ const Set<String> kProfilingEvents = <String>{
 };
 
 // These field names need to be in-sync with:
-// https://github.com/flutter/engine/blob/master/shell/profiling/sampling_profiler.cc
+// https://github.com/flutter/engine/blob/main/shell/profiling/sampling_profiler.cc
 const String _kCpuProfile = 'CpuUsage';
 const String _kGpuProfile = 'GpuUsage';
 const String _kMemoryProfile = 'MemoryUsage';
@@ -36,7 +36,7 @@ enum ProfileType {
 /// Summarizes [TimelineEvents]s corresponding to [kProfilingEvents] category.
 ///
 /// A sample event (some fields have been omitted for brevity):
-/// ```
+/// ```json
 ///     {
 ///      "category": "embedder",
 ///      "name": "CpuUsage",
@@ -70,7 +70,7 @@ class ProfilingSummarizer {
   final Map<ProfileType, List<TimelineEvent>> eventByType;
 
   /// Returns the average, 90th and 99th percentile summary of CPU, GPU and Memory
-  /// usage from the recorded events. Note: If a given profile type isn't available
+  /// usage from the recorded events. If a given profile type isn't available
   /// for any reason, the map will not contain the said profile type.
   Map<String, dynamic> summarize() {
     final Map<String, dynamic> summary = <String, dynamic>{};
@@ -121,16 +121,12 @@ class ProfilingSummarizer {
   }
 
   static ProfileType _getProfileType(String? eventName) {
-    switch (eventName) {
-      case _kCpuProfile:
-        return ProfileType.CPU;
-      case _kGpuProfile:
-        return ProfileType.GPU;
-      case _kMemoryProfile:
-        return ProfileType.Memory;
-      default:
-        throw Exception('Invalid profiling event: $eventName.');
-    }
+    return switch (eventName) {
+      _kCpuProfile    => ProfileType.CPU,
+      _kGpuProfile    => ProfileType.GPU,
+      _kMemoryProfile => ProfileType.Memory,
+      _ => throw Exception('Invalid profiling event: $eventName.'),
+    };
   }
 
   double _getProfileValue(ProfileType profileType, TimelineEvent e) {

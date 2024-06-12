@@ -23,7 +23,6 @@ void main() {
     androidWorkflow = AndroidWorkflow(
       androidSdk: FakeAndroidSdk(),
       featureFlags: TestFeatureFlags(),
-      operatingSystemUtils: FakeOperatingSystemUtils(),
     );
   });
 
@@ -34,7 +33,6 @@ void main() {
       androidWorkflow: AndroidWorkflow(
         androidSdk: FakeAndroidSdk(null),
         featureFlags: TestFeatureFlags(),
-        operatingSystemUtils: FakeOperatingSystemUtils(),
       ),
       processManager: FakeProcessManager.empty(),
       fileSystem: MemoryFileSystem.test(),
@@ -55,7 +53,6 @@ void main() {
       androidWorkflow: AndroidWorkflow(
         androidSdk: FakeAndroidSdk(),
         featureFlags: TestFeatureFlags(),
-        operatingSystemUtils: FakeOperatingSystemUtils(),
       ),
       processManager: fakeProcessManager,
       fileSystem: MemoryFileSystem.test(),
@@ -74,7 +71,6 @@ void main() {
       androidWorkflow: AndroidWorkflow(
         androidSdk: FakeAndroidSdk(null),
         featureFlags: TestFeatureFlags(),
-        operatingSystemUtils: FakeOperatingSystemUtils(),
       ),
       processManager: FakeProcessManager.empty(),
       fileSystem: MemoryFileSystem.test(),
@@ -91,6 +87,7 @@ void main() {
       const FakeCommand(
         command: <String>['adb', 'devices', '-l'],
         exitCode: 1,
+        stderr: '<stderr from adb>'
       ),
     ]);
     final AndroidDevices androidDevices = AndroidDevices(
@@ -103,8 +100,15 @@ void main() {
       userMessages: UserMessages(),
     );
 
-    expect(androidDevices.pollingGetDevices(),
-      throwsToolExit(message: RegExp('Unable to run "adb"')));
+    expect(
+      androidDevices.pollingGetDevices(),
+      throwsToolExit(
+        message:
+          'Unable to run "adb", check your Android SDK installation and ANDROID_HOME environment variable: adb\n'
+          'Error details: Process exited abnormally with exit code 1:\n'
+          '<stderr from adb>',
+      ),
+    );
   });
 
   testWithoutContext('AndroidDevices is disabled if feature is disabled', () {
@@ -116,7 +120,6 @@ void main() {
         featureFlags: TestFeatureFlags(
           isAndroidEnabled: false,
         ),
-        operatingSystemUtils: FakeOperatingSystemUtils(),
       ),
       processManager: FakeProcessManager.any(),
       fileSystem: MemoryFileSystem.test(),
@@ -127,7 +130,7 @@ void main() {
     expect(androidDevices.supportsPlatform, false);
   });
 
-  testWithoutContext('AndroidDevices can parse output for physical devices', () async {
+  testWithoutContext('AndroidDevices can parse output for physical attached devices', () async {
     final AndroidDevices androidDevices = AndroidDevices(
       userMessages: UserMessages(),
       androidWorkflow: androidWorkflow,
@@ -152,6 +155,35 @@ List of devices attached
     expect(devices, hasLength(1));
     expect(devices.first.name, 'Nexus 7');
     expect(devices.first.category, Category.mobile);
+    expect(devices.first.connectionInterface, DeviceConnectionInterface.attached);
+  });
+
+  testWithoutContext('AndroidDevices can parse output for physical wireless devices', () async {
+    final AndroidDevices androidDevices = AndroidDevices(
+      userMessages: UserMessages(),
+      androidWorkflow: androidWorkflow,
+      androidSdk: FakeAndroidSdk(),
+      logger: BufferLogger.test(),
+      processManager: FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(
+          command: <String>['adb', 'devices', '-l'],
+          stdout: '''
+List of devices attached
+05a02bac._adb-tls-connect._tcp.               device product:razor model:Nexus_7 device:flo
+
+  ''',
+        ),
+      ]),
+      platform: FakePlatform(),
+      fileSystem: MemoryFileSystem.test(),
+    );
+
+    final List<Device> devices = await androidDevices.pollingGetDevices();
+
+    expect(devices, hasLength(1));
+    expect(devices.first.name, 'Nexus 7');
+    expect(devices.first.category, Category.mobile);
+    expect(devices.first.connectionInterface, DeviceConnectionInterface.wireless);
   });
 
   testWithoutContext('AndroidDevices can parse output for emulators and short listings', () async {

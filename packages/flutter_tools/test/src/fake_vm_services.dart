@@ -4,12 +4,13 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/vmservice.dart';
-import 'package:test_api/test_api.dart' hide test; // ignore: deprecated_member_use
+import 'package:test/test.dart' hide test;
 import 'package:vm_service/vm_service.dart' as vm_service;
 
-export 'package:test_api/test_api.dart' hide isInstanceOf, test; // ignore: deprecated_member_use
+export 'package:test/test.dart' hide isInstanceOf, test;
 
 /// A fake implementation of a vm_service that mocks the JSON-RPC request
 /// and response structure.
@@ -22,7 +23,7 @@ class FakeVmServiceHost {
     _vmService = FlutterVmService(vm_service.VmService(
       _input.stream,
       _output.add,
-    ), httpAddress: httpAddress, wsAddress: wsAddress);
+    ), httpAddress: httpAddress, wsAddress: wsAddress, logger: BufferLogger.test());
     _applyStreamListen();
     _output.stream.listen((String data) {
       final Map<String, Object?> request = json.decode(data) as Map<String, Object?>;
@@ -39,7 +40,7 @@ class FakeVmServiceHost {
         expect(_requests, isEmpty);
         return;
       }
-      if (fakeRequest.errorCode == null) {
+      if (fakeRequest.error == null) {
         _input.add(json.encode(<String, Object?>{
           'jsonrpc': '2.0',
           'id': request['id'],
@@ -50,8 +51,8 @@ class FakeVmServiceHost {
           'jsonrpc': '2.0',
           'id': request['id'],
           'error': <String, Object?>{
-            'code': fakeRequest.errorCode,
-            'message': 'error',
+            'code': fakeRequest.error!.code,
+            'message': fakeRequest.error!.error,
           },
         }));
       }
@@ -90,12 +91,22 @@ abstract class VmServiceExpectation {
   bool get isRequest;
 }
 
+class FakeRPCError {
+  const FakeRPCError({
+    required this.code,
+    this.error = 'error',
+  });
+
+  final int code;
+  final String error;
+}
+
 class FakeVmServiceRequest implements VmServiceExpectation {
   const FakeVmServiceRequest({
     required this.method,
     this.args = const <String, Object?>{},
     this.jsonResponse,
-    this.errorCode,
+    this.error,
     this.close = false,
   });
 
@@ -106,7 +117,7 @@ class FakeVmServiceRequest implements VmServiceExpectation {
 
   /// If non-null, the error code for a [vm_service.RPCError] in place of a
   /// standard response.
-  final int? errorCode;
+  final FakeRPCError? error;
   final Map<String, Object?>? args;
   final Map<String, Object?>? jsonResponse;
 

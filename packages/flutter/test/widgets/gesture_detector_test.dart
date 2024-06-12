@@ -125,6 +125,40 @@ void main() {
     expect(didEndPan, isTrue);
   });
 
+  testWidgets('DragEndDetails returns the last known position', (WidgetTester tester) async {
+    Offset updateOffset = const Offset(10.0, 10.0);
+    const EdgeInsets paddingOffset = EdgeInsets.all(10.0);
+    Offset? endOffset;
+    Offset? globalEndOffset;
+
+    await tester.pumpWidget(
+      Padding(
+        padding: paddingOffset,
+        child: GestureDetector(
+          onPanStart: (DragStartDetails details) {
+          },
+          onPanUpdate: (DragUpdateDetails details) {
+            updateOffset += details.delta;
+          },
+          onPanEnd: (DragEndDetails details) {
+            endOffset = details.localPosition;
+            globalEndOffset = details.globalPosition;
+          },
+          child: Container(
+            color: const Color(0xFF00FF00),
+          ),
+        ),
+      ),
+    );
+
+    await tester.dragFrom(const Offset(20.0, 20.0), const Offset(30.0, 40.0));
+
+    expect(endOffset, isNotNull);
+    expect(updateOffset, endOffset);
+    // Make sure details.globalPosition works correctly.
+    expect(Offset(endOffset!.dx + paddingOffset.left, endOffset!.dy + paddingOffset.top), globalEndOffset);
+  });
+
   group('Tap', () {
     final ButtonVariant buttonVariant = ButtonVariant(
       values: <int>[kPrimaryButton, kSecondaryButton, kTertiaryButton],
@@ -363,7 +397,7 @@ void main() {
       // to a point (400,300) below it. This should never call onTap.
       Future<void> dragOut(Duration timeout) async {
         final TestGesture gesture =
-        await tester.startGesture(const Offset(400.0, 50.0), buttons: ButtonVariant.button);
+            await tester.startGesture(const Offset(400.0, 50.0), buttons: ButtonVariant.button);
         // If the timeout is less than kPressTimeout the recognizer will not
         // trigger any callbacks. If the timeout is greater than kLongPressTimeout
         // then onTapDown, onLongPress, and onCancel will be called.
@@ -874,6 +908,76 @@ void main() {
         }
       });
     });
+  });
+
+  testWidgets('supportedDevices update test', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/111716
+    bool didStartPan = false;
+    Offset? panDelta;
+    bool didEndPan = false;
+    Widget buildFrame(Set<PointerDeviceKind>? supportedDevices) {
+      return GestureDetector(
+        onPanStart: (DragStartDetails details) {
+          didStartPan = true;
+        },
+        onPanUpdate: (DragUpdateDetails details) {
+          panDelta = (panDelta ?? Offset.zero) + details.delta;
+        },
+        onPanEnd: (DragEndDetails details) {
+          didEndPan = true;
+        },
+        supportedDevices: supportedDevices,
+        child: Container(
+          color: const Color(0xFF00FF00),
+        )
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(<PointerDeviceKind>{PointerDeviceKind.mouse}));
+
+    expect(didStartPan, isFalse);
+    expect(panDelta, isNull);
+    expect(didEndPan, isFalse);
+
+    await tester.dragFrom(const Offset(10.0, 10.0), const Offset(20.0, 30.0), kind: PointerDeviceKind.mouse);
+
+    // Matching device should allow gesture.
+    expect(didStartPan, isTrue);
+    expect(panDelta!.dx, 20.0);
+    expect(panDelta!.dy, 30.0);
+    expect(didEndPan, isTrue);
+
+    didStartPan = false;
+    panDelta = null;
+    didEndPan = false;
+
+    await tester.pumpWidget(buildFrame(<PointerDeviceKind>{PointerDeviceKind.stylus}));
+
+    await tester.dragFrom(const Offset(10.0, 10.0), const Offset(20.0, 30.0), kind: PointerDeviceKind.mouse);
+    // Non-matching device should not lead to any callbacks.
+    expect(didStartPan, isFalse);
+    expect(panDelta, isNull);
+    expect(didEndPan, isFalse);
+
+    await tester.dragFrom(const Offset(10.0, 10.0), const Offset(20.0, 30.0), kind: PointerDeviceKind.stylus);
+    // Matching device should allow gesture.
+    expect(didStartPan, isTrue);
+    expect(panDelta!.dx, 20.0);
+    expect(panDelta!.dy, 30.0);
+    expect(didEndPan, isTrue);
+
+    didStartPan = false;
+    panDelta = null;
+    didEndPan = false;
+
+    // If set to null, events from all device types will be recognized
+    await tester.pumpWidget(buildFrame(null));
+
+    await tester.dragFrom(const Offset(10.0, 10.0), const Offset(20.0, 30.0), kind: PointerDeviceKind.unknown);
+    expect(didStartPan, isTrue);
+    expect(panDelta!.dx, 20.0);
+    expect(panDelta!.dy, 30.0);
+    expect(didEndPan, isTrue);
   });
 
   testWidgets('supportedDevices is respected', (WidgetTester tester) async {

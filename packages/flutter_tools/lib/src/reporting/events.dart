@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of reporting;
+part of 'reporting.dart';
 
 /// A generic usage even that does not involve custom dimensions.
 ///
@@ -39,7 +39,6 @@ class HotEvent extends UsageEvent {
     required this.sdkName,
     required this.emulator,
     required this.fullRestart,
-    required this.fastReassemble,
     this.reason,
     this.finalLibraryCount,
     this.syncedLibraryCount,
@@ -54,14 +53,15 @@ class HotEvent extends UsageEvent {
     this.scannedSourcesCount,
     this.reassembleTimeInMs,
     this.reloadVMTimeInMs,
-  }) : super('hot', parameter, flutterUsage: globals.flutterUsage);
+    // TODO(fujino): make this required
+    Usage? usage,
+  }) : super('hot', parameter, flutterUsage: usage ?? globals.flutterUsage);
 
   final String? reason;
   final String targetPlatform;
   final String sdkName;
   final bool emulator;
   final bool fullRestart;
-  final bool fastReassemble;
   final int? finalLibraryCount;
   final int? syncedLibraryCount;
   final int? syncedClassesCount;
@@ -92,7 +92,6 @@ class HotEvent extends UsageEvent {
       hotEventInvalidatedSourcesCount: invalidatedSourcesCount,
       hotEventTransferTimeInMs: transferTimeInMs,
       hotEventOverallTimeInMs: overallTimeInMs,
-      fastReassemble: fastReassemble,
       hotEventCompileTimeInMs: compileTimeInMs,
       hotEventFindInvalidatedTimeInMs: findInvalidatedTimeInMs,
       hotEventScannedSourcesCount: scannedSourcesCount,
@@ -190,10 +189,14 @@ class BuildEvent extends UsageEvent {
 
 /// An event that reports the result of a top-level command.
 class CommandResultEvent extends UsageEvent {
-  CommandResultEvent(super.commandPath, super.result)
-      : assert(commandPath != null),
-        assert(result != null),
+  CommandResultEvent(
+    super.commandPath,
+    super.result,
+    int? maxRss,
+  )   : _maxRss = maxRss,
         super(flutterUsage: globals.flutterUsage);
+
+  final int? _maxRss;
 
   @override
   void send() {
@@ -207,17 +210,13 @@ class CommandResultEvent extends UsageEvent {
     // A separate event for the memory highwater mark. This is a separate event
     // so that we can get the command result even if trying to grab maxRss
     // throws an exception.
-    try {
-      final int maxRss = globals.processInfo.maxRss;
+    if (_maxRss != null) {
       flutterUsage.sendEvent(
         'tool-command-max-rss',
         category,
         label: parameter,
-        value: maxRss,
+        value: _maxRss,
       );
-    } on Exception catch (error) {
-      // If grabbing the maxRss fails for some reason, just don't send an event.
-      globals.printTrace('Querying maxRss failed with error: $error');
     }
   }
 }

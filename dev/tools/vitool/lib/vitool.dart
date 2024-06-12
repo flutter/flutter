@@ -152,23 +152,13 @@ class PathCommandAnimation {
   }
 
   String toDart() {
-    String dartCommandClass;
-    switch (type) {
-      case 'M':
-        dartCommandClass = '_PathMoveTo';
-        break;
-      case 'C':
-        dartCommandClass = '_PathCubicTo';
-        break;
-      case 'L':
-        dartCommandClass = '_PathLineTo';
-        break;
-      case 'Z':
-        dartCommandClass = '_PathClose';
-        break;
-      default:
-        throw Exception('unsupported path command: $type');
-    }
+    final String dartCommandClass = switch (type) {
+      'M' => '_PathMoveTo',
+      'C' => '_PathCubicTo',
+      'L' => '_PathLineTo',
+      'Z' => '_PathClose',
+      _ => throw Exception('unsupported path command: $type'),
+    };
     final StringBuffer sb = StringBuffer();
     sb.write('${kIndent * 4}const $dartCommandClass(\n');
     for (final List<Point<double>> pointFrames in points) {

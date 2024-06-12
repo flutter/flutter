@@ -178,7 +178,9 @@ class _DemoItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final bool isDark = theme.brightness == Brightness.dark;
-    final double textScaleFactor = MediaQuery.textScaleFactorOf(context);
+    // The fontSize to use for computing the heuristic UI scaling factor.
+    const double defaultFontSize = 14.0;
+    final double containerScalingFactor = MediaQuery.textScalerOf(context).scale(defaultFontSize) / defaultFontSize;
     return RawMaterialButton(
       splashColor: theme.primaryColor.withOpacity(0.12),
       highlightColor: Colors.transparent,
@@ -186,7 +188,7 @@ class _DemoItem extends StatelessWidget {
         _launchDemo(context);
       },
       child: Container(
-        constraints: BoxConstraints(minHeight: _kDemoItemHeight * textScaleFactor),
+        constraints: BoxConstraints(minHeight: _kDemoItemHeight * containerScalingFactor),
         child: Row(
           children: <Widget>[
             Container(
@@ -324,14 +326,14 @@ class _GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStat
       backgroundColor: isDark ? _kFlutterBlue : theme.primaryColor,
       body: SafeArea(
         bottom: false,
-        child: WillPopScope(
-          onWillPop: () {
-            // Pop the category page if Android back button is pressed.
-            if (_category != null) {
-              setState(() => _category = null);
-              return Future<bool>.value(false);
+        child: PopScope<Object?>(
+          canPop: _category == null,
+          onPopInvokedWithResult: (bool didPop, Object? result) {
+            if (didPop) {
+              return;
             }
-            return Future<bool>.value(true);
+            // Pop the category page if Android back button is pressed.
+            setState(() => _category = null);
           },
           child: Backdrop(
             backTitle: const Text('Options'),

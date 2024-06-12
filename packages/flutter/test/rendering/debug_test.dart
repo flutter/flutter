@@ -7,7 +7,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vector_math/vector_math_64.dart';
 
-import 'mock_canvas.dart';
 import 'rendering_tester.dart';
 
 void main() {
@@ -260,5 +259,16 @@ void main() {
     debugDisableOpacityLayers = true;
     expect(() => debugAssertAllRenderVarsUnset('ERROR'), throwsFlutterError);
     debugDisableOpacityLayers = false;
+  });
+
+  test('debugCheckHasBoundedAxis warns for vertical and horizontal axis', () {
+    expect(
+      () => debugCheckHasBoundedAxis(Axis.vertical, const BoxConstraints()),
+      throwsFlutterError,
+    );
+    expect(
+      () => debugCheckHasBoundedAxis(Axis.horizontal, const BoxConstraints()),
+      throwsFlutterError,
+    );
   });
 }

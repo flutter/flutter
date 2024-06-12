@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-// Various tests to verify that Aniamted opacity layers (i.e. FadeTransition) do not
+// Various tests to verify that animated opacity layers (i.e. FadeTransition) do not
 // dirty children even without explicit repaint boundaries. These intentionally use
 // text to ensure we don't measure the opacity peephole case.
 class AnimatedComplexOpacity extends StatefulWidget {
@@ -21,7 +21,13 @@ class _AnimatedComplexOpacityState extends State<AnimatedComplexOpacity> with Si
   @override
   void initState() {
     super.initState();
-    controller.forward(from: 0.0);
+    controller.repeat();
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
   }
 
   @override

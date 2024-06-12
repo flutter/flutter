@@ -119,13 +119,29 @@ void main() {
     renderObject.paint(context, Offset.zero); // ignore: avoid_dynamic_calls
     expect(context.clipBehavior, equals(Clip.hardEdge));
 
-    // 3rd, pump a new widget to check that the render object can update its clip behavior.
+    // 3rd, check that the underlying Scrollable has the same clipBehavior
+    // Regression test for https://github.com/flutter/flutter/issues/133330
+    Finder scrollable = find.byWidgetPredicate((Widget widget) => widget is Scrollable);
+    expect(
+      (tester.widget(scrollable) as Scrollable).clipBehavior,
+      Clip.hardEdge,
+    );
+
+    // 4th, pump a new widget to check that the render object can update its clip behavior.
     await tester.pumpWidget(SingleChildScrollView(clipBehavior: Clip.antiAlias, child: Container(height: 2000.0)));
     expect(renderObject.clipBehavior, equals(Clip.antiAlias)); // ignore: avoid_dynamic_calls
 
-    // 4th, check that a non-default clip behavior can be sent to the painting context.
+    // 5th, check that a non-default clip behavior can be sent to the painting context.
     renderObject.paint(context, Offset.zero); // ignore: avoid_dynamic_calls
     expect(context.clipBehavior, equals(Clip.antiAlias));
+
+    // 6th, check that the underlying Scrollable has the same clipBehavior
+    // Regression test for https://github.com/flutter/flutter/issues/133330
+    scrollable = find.byWidgetPredicate((Widget widget) => widget is Scrollable);
+    expect(
+      (tester.widget(scrollable) as Scrollable).clipBehavior,
+      Clip.antiAlias,
+    );
   });
 
   testWidgets('SingleChildScrollView control test', (WidgetTester tester) async {
@@ -146,6 +162,7 @@ void main() {
 
   testWidgets('Changing controllers changes scroll position', (WidgetTester tester) async {
     final TestScrollController controller = TestScrollController();
+    addTearDown(controller.dispose);
 
     await tester.pumpWidget(SingleChildScrollView(
       child: Container(
@@ -168,6 +185,7 @@ void main() {
 
   testWidgets('Sets PrimaryScrollController when primary', (WidgetTester tester) async {
     final ScrollController primaryScrollController = ScrollController();
+    addTearDown(primaryScrollController.dispose);
     await tester.pumpWidget(PrimaryScrollController(
       controller: primaryScrollController,
       child: SingleChildScrollView(
@@ -186,6 +204,7 @@ void main() {
 
   testWidgets('Changing scroll controller inside dirty layout builder does not assert', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
 
     await tester.pumpWidget(Center(
       child: SizedBox(
@@ -232,14 +251,17 @@ void main() {
   });
 
   testWidgets('SingleChildScrollViews with controllers are not primary by default', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     final SingleChildScrollView view = SingleChildScrollView(
-      controller: ScrollController(),
+      controller: controller,
     );
     expect(view.primary, isNull);
   });
 
   testWidgets('Vertical SingleChildScrollViews use PrimaryScrollController by default on mobile', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(primaryScrollControllerBoilerplate(
       child: const SingleChildScrollView(),
       controller: controller,
@@ -249,6 +271,7 @@ void main() {
 
   testWidgets("Vertical SingleChildScrollViews don't use PrimaryScrollController by default on desktop", (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(primaryScrollControllerBoilerplate(
       child: const SingleChildScrollView(),
       controller: controller,
@@ -259,6 +282,7 @@ void main() {
   testWidgets('Nested scrollables have a null PrimaryScrollController', (WidgetTester tester) async {
     const Key innerKey = Key('inner');
     final ScrollController primaryScrollController = ScrollController();
+    addTearDown(primaryScrollController.dispose);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -287,6 +311,7 @@ void main() {
   testWidgets('SingleChildScrollView semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
 
     await tester.pumpWidget(
       Directionality(
@@ -305,6 +330,19 @@ void main() {
       ),
     );
 
+    List<TestSemantics> generateSemanticsChildren({int startHidden = -1, int endHidden = 30}) {
+      final List<TestSemantics> children = <TestSemantics>[];
+      for (int index = 0; index < 30; index += 1) {
+        final bool isHidden = index <= startHidden || index >= endHidden;
+        children.add(TestSemantics(
+          label: 'Tile $index',
+          textDirection: TextDirection.ltr,
+          flags: isHidden ? const <SemanticsFlag>[SemanticsFlag.isHidden] : 0,
+        ));
+      }
+      return children;
+    }
+
     expect(semantics, hasSemantics(
       TestSemantics(
         children: <TestSemantics>[
@@ -315,33 +353,7 @@ void main() {
             actions: <SemanticsAction>[
               SemanticsAction.scrollUp,
             ],
-            children: <TestSemantics>[
-              TestSemantics(
-                label: r'Tile 0',
-                textDirection: TextDirection.ltr,
-              ),
-              TestSemantics(
-                label: r'Tile 1',
-                textDirection: TextDirection.ltr,
-              ),
-              TestSemantics(
-                label: r'Tile 2',
-                textDirection: TextDirection.ltr,
-              ),
-              TestSemantics(
-                flags: <SemanticsFlag>[
-                  SemanticsFlag.isHidden,
-                ],
-                label: r'Tile 3',
-                textDirection: TextDirection.ltr,
-              ),
-              TestSemantics(
-                flags: <SemanticsFlag>[
-                  SemanticsFlag.isHidden,],
-                label: r'Tile 4',
-                textDirection: TextDirection.ltr,
-              ),
-            ],
+            children: generateSemanticsChildren(endHidden: 3),
           ),
         ],
       ),
@@ -362,48 +374,7 @@ void main() {
               SemanticsAction.scrollUp,
               SemanticsAction.scrollDown,
             ],
-            children: <TestSemantics>[
-              TestSemantics(
-                flags: <SemanticsFlag>[
-                  SemanticsFlag.isHidden,
-                ],
-                label: r'Tile 13',
-                textDirection: TextDirection.ltr,
-              ),
-              TestSemantics(
-                flags: <SemanticsFlag>[
-                  SemanticsFlag.isHidden,
-                ],
-                label: r'Tile 14',
-                textDirection: TextDirection.ltr,
-              ),
-              TestSemantics(
-                label: r'Tile 15',
-                textDirection: TextDirection.ltr,
-              ),
-              TestSemantics(
-                label: r'Tile 16',
-                textDirection: TextDirection.ltr,
-              ),
-              TestSemantics(
-                label: r'Tile 17',
-                textDirection: TextDirection.ltr,
-              ),
-              TestSemantics(
-                flags: <SemanticsFlag>[
-                  SemanticsFlag.isHidden,
-                ],
-                label: r'Tile 18',
-                textDirection: TextDirection.ltr,
-              ),
-              TestSemantics(
-                flags: <SemanticsFlag>[
-                  SemanticsFlag.isHidden,
-                ],
-                label: r'Tile 19',
-                textDirection: TextDirection.ltr,
-              ),
-            ],
+            children: generateSemanticsChildren(startHidden: 14, endHidden: 18),
           ),
         ],
       ),
@@ -423,34 +394,7 @@ void main() {
             actions: <SemanticsAction>[
               SemanticsAction.scrollDown,
             ],
-            children: <TestSemantics>[
-              TestSemantics(
-                flags: <SemanticsFlag>[
-                  SemanticsFlag.isHidden,
-                ],
-                label: r'Tile 25',
-                textDirection: TextDirection.ltr,
-              ),
-              TestSemantics(
-                flags: <SemanticsFlag>[
-                  SemanticsFlag.isHidden,
-                ],
-                label: r'Tile 26',
-                textDirection: TextDirection.ltr,
-              ),
-              TestSemantics(
-                label: r'Tile 27',
-                textDirection: TextDirection.ltr,
-              ),
-              TestSemantics(
-                label: r'Tile 28',
-                textDirection: TextDirection.ltr,
-              ),
-              TestSemantics(
-                label: r'Tile 29',
-                textDirection: TextDirection.ltr,
-              ),
-            ],
+            children: generateSemanticsChildren(startHidden: 26),
           ),
         ],
       ),
@@ -460,7 +404,90 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('SingleChildScrollView getOffsetToReveal - down', (WidgetTester tester) async {
+  testWidgets('SingleChildScrollView semantics clips cover entire child vertical', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
+    final UniqueKey scrollView = UniqueKey();
+    final UniqueKey childBox = UniqueKey();
+    const double length = 10000;
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: SingleChildScrollView(
+          key: scrollView,
+          controller: controller,
+          child: SizedBox(key: childBox, height: length),
+        ),
+      ),
+    );
+    final RenderObject scrollRenderObject = tester.renderObject(find.byKey(scrollView));
+    RenderAbstractViewport? viewport;
+    void findsRenderViewPort(RenderObject child) {
+      if (viewport != null) {
+        return;
+      }
+      if (child is RenderAbstractViewport) {
+        viewport = child;
+        return;
+      }
+      child.visitChildren(findsRenderViewPort);
+    }
+    scrollRenderObject.visitChildren(findsRenderViewPort);
+    expect(viewport, isNotNull);
+    final RenderObject childRenderObject = tester.renderObject(find.byKey(childBox));
+    Rect semanticsClip = viewport!.describeSemanticsClip(childRenderObject)!;
+    expect(semanticsClip.size.height, length);
+
+    controller.jumpTo(2000);
+    await tester.pump();
+    semanticsClip = viewport!.describeSemanticsClip(childRenderObject)!;
+    expect(semanticsClip.size.height, length);
+  });
+
+  testWidgets('SingleChildScrollView semantics clips cover entire child', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
+    final UniqueKey scrollView = UniqueKey();
+    final UniqueKey childBox = UniqueKey();
+    const double length = 10000;
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: SingleChildScrollView(
+          key: scrollView,
+          scrollDirection: Axis.horizontal,
+          controller: controller,
+          child: SizedBox(key: childBox, width: length),
+        ),
+      ),
+    );
+    final RenderObject scrollRenderObject = tester.renderObject(find.byKey(scrollView));
+    RenderAbstractViewport? viewport;
+    void findsRenderViewPort(RenderObject child) {
+      if (viewport != null) {
+        return;
+      }
+      if (child is RenderAbstractViewport) {
+        viewport = child;
+        return;
+      }
+      child.visitChildren(findsRenderViewPort);
+    }
+    scrollRenderObject.visitChildren(findsRenderViewPort);
+    expect(viewport, isNotNull);
+    final RenderObject childRenderObject = tester.renderObject(find.byKey(childBox));
+    Rect semanticsClip = viewport!.describeSemanticsClip(childRenderObject)!;
+    expect(semanticsClip.size.width, length);
+
+    controller.jumpTo(2000);
+    await tester.pump();
+    semanticsClip = viewport!.describeSemanticsClip(childRenderObject)!;
+    expect(semanticsClip.size.width, length);
+  });
+
+  testWidgets('SingleChildScrollView getOffsetToReveal - will not assert on axis mismatch', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController(initialScrollOffset: 300.0);
+    addTearDown(controller.dispose);
     List<Widget> children;
     await tester.pumpWidget(
       Directionality(
@@ -470,7 +497,41 @@ void main() {
             height: 200.0,
             width: 300.0,
             child: SingleChildScrollView(
-              controller: ScrollController(initialScrollOffset: 300.0),
+              controller: controller,
+              child: Column(
+                children: children = List<Widget>.generate(20, (int i) {
+                  return SizedBox(
+                    height: 100.0,
+                    width: 300.0,
+                    child: Text('Tile $i'),
+                  );
+                }),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RenderAbstractViewport viewport = tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
+
+    final RenderObject target = tester.renderObject(find.byWidget(children[5]));
+    viewport.getOffsetToReveal(target, 0.0, axis: Axis.horizontal);
+  });
+
+  testWidgets('SingleChildScrollView getOffsetToReveal - down', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController(initialScrollOffset: 300.0);
+    addTearDown(controller.dispose);
+    List<Widget> children;
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox(
+            height: 200.0,
+            width: 300.0,
+            child: SingleChildScrollView(
+              controller: controller,
               child: Column(
                 children: children = List<Widget>.generate(20, (int i) {
                   return SizedBox(
@@ -507,6 +568,8 @@ void main() {
   });
 
   testWidgets('SingleChildScrollView getOffsetToReveal - up', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController(initialScrollOffset: 300.0);
+    addTearDown(controller.dispose);
     final List<Widget> children = List<Widget>.generate(20, (int i) {
       return SizedBox(
         height: 100.0,
@@ -522,7 +585,7 @@ void main() {
             height: 200.0,
             width: 300.0,
             child: SingleChildScrollView(
-              controller: ScrollController(initialScrollOffset: 300.0),
+              controller: controller,
               reverse: true,
               child: Column(
                 children: children.reversed.toList(),
@@ -554,6 +617,8 @@ void main() {
   });
 
   testWidgets('SingleChildScrollView getOffsetToReveal - right', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController(initialScrollOffset: 300.0);
+    addTearDown(controller.dispose);
     List<Widget> children;
 
     await tester.pumpWidget(
@@ -565,7 +630,7 @@ void main() {
             width: 200.0,
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
-              controller: ScrollController(initialScrollOffset: 300.0),
+              controller: controller,
               child: Row(
                 children: children = List<Widget>.generate(20, (int i) {
                   return SizedBox(
@@ -602,6 +667,8 @@ void main() {
   });
 
   testWidgets('SingleChildScrollView getOffsetToReveal - left', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController(initialScrollOffset: 300.0);
+    addTearDown(controller.dispose);
     final List<Widget> children = List<Widget>.generate(20, (int i) {
       return SizedBox(
         height: 300.0,
@@ -620,7 +687,7 @@ void main() {
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               reverse: true,
-              controller: ScrollController(initialScrollOffset: 300.0),
+              controller: controller,
               child: Row(
                 children: children.reversed.toList(),
               ),
@@ -660,8 +727,10 @@ void main() {
         );
       });
     });
-    ScrollController controllerX;
-    ScrollController controllerY;
+    late ScrollController controllerX;
+    addTearDown(() => controllerX.dispose());
+    late ScrollController controllerY;
+    addTearDown(() => controllerY.dispose());
 
     /// Builds a gird:
     ///
@@ -862,7 +931,9 @@ void main() {
 
     testWidgets('in view in inner, but not in outer', (WidgetTester tester) async {
       final ScrollController inner = ScrollController();
+      addTearDown(inner.dispose);
       final ScrollController outer = ScrollController();
+      addTearDown(outer.dispose);
       await buildNestedScroller(
         tester: tester,
         inner: inner,
@@ -879,7 +950,9 @@ void main() {
 
     testWidgets('not in view of neither inner nor outer', (WidgetTester tester) async {
       final ScrollController inner = ScrollController();
+      addTearDown(inner.dispose);
       final ScrollController outer = ScrollController();
+      addTearDown(outer.dispose);
       await buildNestedScroller(
         tester: tester,
         inner: inner,
@@ -896,7 +969,9 @@ void main() {
 
     testWidgets('in view in inner and outer', (WidgetTester tester) async {
       final ScrollController inner = ScrollController(initialScrollOffset: 200.0);
+      addTearDown(inner.dispose);
       final ScrollController outer = ScrollController(initialScrollOffset: 200.0);
+      addTearDown(outer.dispose);
       await buildNestedScroller(
         tester: tester,
         inner: inner,
@@ -913,7 +988,9 @@ void main() {
 
     testWidgets('inner shown in outer, but item not visible', (WidgetTester tester) async {
       final ScrollController inner = ScrollController(initialScrollOffset: 200.0);
+      addTearDown(inner.dispose);
       final ScrollController outer = ScrollController(initialScrollOffset: 200.0);
+      addTearDown(outer.dispose);
       await buildNestedScroller(
         tester: tester,
         inner: inner,
@@ -930,7 +1007,9 @@ void main() {
 
     testWidgets('inner half shown in outer, item only visible in inner', (WidgetTester tester) async {
       final ScrollController inner = ScrollController();
+      addTearDown(inner.dispose);
       final ScrollController outer = ScrollController(initialScrollOffset: 100.0);
+      addTearDown(outer.dispose);
       await buildNestedScroller(
         tester: tester,
         inner: inner,
@@ -948,6 +1027,11 @@ void main() {
 
   testWidgets('keyboardDismissBehavior tests', (WidgetTester tester) async {
     final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+    addTearDown(() {
+      for (final FocusNode node in focusNodes) {
+        node.dispose();
+      }
+    });
 
     Future<void> boilerplate(ScrollViewKeyboardDismissBehavior behavior) {
       return tester.pumpWidget(
@@ -993,5 +1077,45 @@ void main() {
     await tester.drag(finder, const Offset(0.0, -40.0));
     await tester.pumpAndSettle();
     expect(textField.focusNode!.hasFocus, isTrue);
+  });
+
+  testWidgets('keyboardDismissBehavior.OnDrag with drawer tests', (WidgetTester tester) async {
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          key: scaffoldKey,
+          drawer: Container(),
+          body: Column(
+            children: <Widget>[
+              const TextField(),
+              Expanded(
+                child: SingleChildScrollView(
+                  keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+                  child: Container(
+                    height: 1000,
+                  )
+                ),
+              ),
+            ]
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.testTextInput.isVisible, isFalse);
+    final Finder finder = find.byType(TextField).first;
+    await tester.tap(finder);
+    expect(tester.testTextInput.isVisible, isTrue);
+
+    await tester.drag(find.byType(SingleChildScrollView).first, const Offset(0.0, -40.0));
+    await tester.pumpAndSettle();
+
+    expect(tester.testTextInput.isVisible, isFalse);
+    scaffoldKey.currentState!.openDrawer();
+    await tester.pumpAndSettle();
+
+    expect(tester.testTextInput.isVisible, isFalse);
   });
 }

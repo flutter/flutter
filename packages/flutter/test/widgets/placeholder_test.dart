@@ -5,19 +5,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
-
 void main() {
   testWidgets('Placeholder', (WidgetTester tester) async {
     await tester.pumpWidget(const Placeholder());
     expect(tester.renderObject<RenderBox>(find.byType(Placeholder)).size, const Size(800.0, 600.0));
     await tester.pumpWidget(const Center(child: Placeholder()));
     expect(tester.renderObject<RenderBox>(find.byType(Placeholder)).size, const Size(800.0, 600.0));
-    await tester.pumpWidget(Stack(textDirection: TextDirection.ltr, children: const <Widget>[Positioned(top: 0.0, bottom: 0.0, child: Placeholder())]));
+    await tester.pumpWidget(const Stack(textDirection: TextDirection.ltr, children: <Widget>[Positioned(top: 0.0, bottom: 0.0, child: Placeholder())]));
     expect(tester.renderObject<RenderBox>(find.byType(Placeholder)).size, const Size(400.0, 600.0));
-    await tester.pumpWidget(Stack(textDirection: TextDirection.ltr, children: const <Widget>[Positioned(left: 0.0, right: 0.0, child: Placeholder())]));
+    await tester.pumpWidget(const Stack(textDirection: TextDirection.ltr, children: <Widget>[Positioned(left: 0.0, right: 0.0, child: Placeholder())]));
     expect(tester.renderObject<RenderBox>(find.byType(Placeholder)).size, const Size(800.0, 400.0));
-    await tester.pumpWidget(Stack(textDirection: TextDirection.ltr, children: const <Widget>[Positioned(top: 0.0, child: Placeholder(fallbackWidth: 200.0, fallbackHeight: 300.0))]));
+    await tester.pumpWidget(const Stack(textDirection: TextDirection.ltr, children: <Widget>[Positioned(top: 0.0, child: Placeholder(fallbackWidth: 200.0, fallbackHeight: 300.0))]));
     expect(tester.renderObject<RenderBox>(find.byType(Placeholder)).size, const Size(200.0, 300.0));
   });
 

@@ -5,8 +5,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
-
 const Color _kAndroidThumbIdleColor = Color(0xffbcbcbc);
 
 Widget _buildSingleChildScrollViewWithScrollbar({

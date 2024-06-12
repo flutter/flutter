@@ -279,11 +279,11 @@ class IconBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 16.0, right: 16.0),
+    return const Padding(
+      padding: EdgeInsets.only(left: 16.0, right: 16.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: const <Widget>[
+        children: <Widget>[
           IconWithText(Icons.thumb_up, 'Like'),
           IconWithText(Icons.comment, 'Comment'),
           IconWithText(Icons.share, 'Share'),
@@ -524,7 +524,7 @@ class ItemGalleryBox extends StatelessWidget {
                         child: Column(
                           children: <Widget>[
                             Expanded(
-                              child: Container(
+                              child: ColoredBox(
                                 color: Theme.of(context).primaryColor,
                                 child: Center(
                                   child: Text(tabName, style: Theme.of(context).textTheme.headlineSmall!.copyWith(color: Colors.white)),
@@ -578,9 +578,9 @@ class BottomBar extends StatelessWidget {
           ),
         ),
       ),
-      child: Row(
+      child: const Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: const <Widget>[
+        children: <Widget>[
           BottomBarButton(Icons.new_releases, 'News'),
           BottomBarButton(Icons.people, 'Requests'),
           BottomBarButton(Icons.chat, 'Messenger'),
@@ -630,7 +630,7 @@ class GalleryDrawer extends StatelessWidget {
   Widget build(BuildContext context) {
     final ScrollMode currentMode = ComplexLayoutApp.of(context)!.scrollMode;
     return Drawer(
-      // Note: for real apps, see the Gallery material Drawer demo. More
+      // For real apps, see the Gallery material Drawer demo. More
       // typically, a drawer would have a fixed header with a scrolling body
       // below it.
       child: ListView(

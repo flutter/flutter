@@ -1,0 +1,13 @@
+# Tests that are excluded from batch Gradle updating and lockfile generation.
+# Each exclusion must have an associated reason. Please avoid adding to this list unless necessary,
+# as each exclusion must be updated by hand.
+
+# flutter_gallery uses discontinued plugins with old AGP versions that block the app itself using
+# a newer AGP version.
+- dev/integration_tests/flutter_gallery/android
+
+# gradle_deprecated_settings intentionally uses a Gradle file structure matching an old output of
+# `flutter create`. It must be updated manually, by changing the desired versions in the Gradle
+# files, and then running `rm buildscript-gradle.lockfile && ./gradlew :generateLockfiles` from
+# its android subdirectory.
+- dev/integration_tests/gradle_deprecated_settings/android

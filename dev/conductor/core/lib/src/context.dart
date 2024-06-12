@@ -26,7 +26,7 @@ abstract class Context {
 
   /// Confirm an action with the user before proceeding.
   ///
-  /// The default implementation reads from STDIN. This can be overriden in UI
+  /// The default implementation reads from STDIN. This can be overridden in UI
   /// implementations that capture user interaction differently.
   Future<bool> prompt(String message) async {
     stdio.write('${message.trim()} (y/n) ');

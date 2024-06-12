@@ -4,6 +4,7 @@
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'gesture_tester.dart';
 
@@ -63,8 +64,9 @@ void main() {
   });
 
   testGesture('MultiDrag: can filter based on device kind', (GestureTester tester) {
-    final DelayedMultiDragGestureRecognizer drag =
-        DelayedMultiDragGestureRecognizer(kind: PointerDeviceKind.touch);
+    final DelayedMultiDragGestureRecognizer drag = DelayedMultiDragGestureRecognizer(
+      supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.touch },
+    );
 
     bool didStartDrag = false;
     drag.onStart = (Offset position) {
@@ -90,60 +92,54 @@ void main() {
     drag.dispose();
   });
 
-  testWidgets('ImmediateMultiGestureRecognizer asserts when kind and supportedDevices are both set', (WidgetTester tester) async {
-    try {
-      ImmediateMultiDragGestureRecognizer(
-        kind: PointerDeviceKind.touch,
-        supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.touch },
-      );
-    } catch(error) {
-      expect(error, isAssertionError);
-      expect(error.toString(), contains('kind == null || supportedDevices == null'));
-    }
+  test('allowedButtonsFilter should work the same when null or not specified', () {
+    // Regression test for https://github.com/flutter/flutter/pull/122227
+
+    final ImmediateMultiDragGestureRecognizer recognizer1 = ImmediateMultiDragGestureRecognizer();
+    // ignore: avoid_redundant_argument_values
+    final ImmediateMultiDragGestureRecognizer recognizer2 = ImmediateMultiDragGestureRecognizer(allowedButtonsFilter: null);
+
+    // We want to test _allowedButtonsFilter, which is called in this method.
+    const PointerDownEvent allowedPointer = PointerDownEvent(timeStamp: Duration(days: 10));
+    // ignore: invalid_use_of_protected_member
+    expect(recognizer1.isPointerAllowed(allowedPointer), true);
+    // ignore: invalid_use_of_protected_member
+    expect(recognizer2.isPointerAllowed(allowedPointer), true);
+
+    const PointerDownEvent rejectedPointer = PointerDownEvent(timeStamp: Duration(days: 10), buttons: kMiddleMouseButton);
+    // ignore: invalid_use_of_protected_member
+    expect(recognizer1.isPointerAllowed(rejectedPointer), false);
+    // ignore: invalid_use_of_protected_member
+    expect(recognizer2.isPointerAllowed(rejectedPointer), false);
   });
 
-  testWidgets('HorizontalMultiDragGestureRecognizer asserts when kind and supportedDevices are both set', (WidgetTester tester) async {
-    expect(
-      () {
-        HorizontalMultiDragGestureRecognizer(
-            kind: PointerDeviceKind.touch,
-            supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.touch },
-        );
-      },
-      throwsA(
-        isA<AssertionError>().having((AssertionError error) => error.toString(),
-        'description', contains('kind == null || supportedDevices == null')),
+  test('$MultiDragPointerState dispatches memory events', () async {
+    await expectLater(
+      await memoryEvents(
+        () => _MultiDragPointerState(
+          Offset.zero,
+          PointerDeviceKind.touch,
+          null,
+        ).dispose(),
+        _MultiDragPointerState,
       ),
+      areCreateAndDispose,
     );
   });
+}
 
-  testWidgets('VerticalMultiDragGestureRecognizer asserts when kind and supportedDevices are both set', (WidgetTester tester) async {
-    expect(
-      () {
-        VerticalMultiDragGestureRecognizer(
-            kind: PointerDeviceKind.touch,
-            supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.touch },
-        );
-      },
-      throwsA(
-        isA<AssertionError>().having((AssertionError error) => error.toString(),
-        'description', contains('kind == null || supportedDevices == null')),
-      ),
-    );
-  });
+class _MultiDragPointerState extends MultiDragPointerState {
+  _MultiDragPointerState(
+    super.initialPosition,
+    super.kind,
+    super.gestureSettings,
+  );
 
-  testWidgets('DelayedMultiDragGestureRecognizer asserts when kind and supportedDevices are both set', (WidgetTester tester) async {
-    expect(
-      () {
-        DelayedMultiDragGestureRecognizer(
-            kind: PointerDeviceKind.touch,
-            supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.touch },
-        );
-      },
-      throwsA(
-        isA<AssertionError>().having((AssertionError error) => error.toString(),
-        'description', contains('kind == null || supportedDevices == null')),
-      ),
-    );
-  });
+  @override
+  void accepted(GestureMultiDragStartCallback starter) {}
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
 }

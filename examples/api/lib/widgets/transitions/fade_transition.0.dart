@@ -2,58 +2,89 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for FadeTransition
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [FadeTransition].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const FadeTransitionExampleApp());
 
-  static const String _title = 'Flutter Code Sample';
+class FadeTransitionExampleApp extends StatelessWidget {
+  const FadeTransitionExampleApp({super.key});
+
+  static const Duration duration = Duration(seconds: 2);
+  static const Curve curve = Curves.easeIn;
 
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: _title,
-      home: MyStatefulWidget(),
+      home: FadeTransitionExample(
+        duration: duration,
+        curve: curve,
+      ),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class FadeTransitionExample extends StatefulWidget {
+  const FadeTransitionExample({
+    required this.duration,
+    required this.curve,
+    super.key,
+  });
+
+  final Duration duration;
+
+  final Curve curve;
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<FadeTransitionExample> createState() => _FadeTransitionExampleState();
 }
 
-/// AnimationControllers can be created with `vsync: this` because of TickerProviderStateMixin.
-class _MyStatefulWidgetState extends State<MyStatefulWidget>
+/// [AnimationController]s can be created with `vsync: this` because of
+/// [TickerProviderStateMixin].
+class _FadeTransitionExampleState extends State<FadeTransitionExample>
     with TickerProviderStateMixin {
   late final AnimationController _controller = AnimationController(
-    duration: const Duration(seconds: 2),
+    duration: widget.duration,
     vsync: this,
   )..repeat(reverse: true);
-  late final Animation<double> _animation = CurvedAnimation(
+  late final CurvedAnimation _animation = CurvedAnimation(
     parent: _controller,
-    curve: Curves.easeIn,
+    curve: widget.curve,
   );
 
   @override
+  void didUpdateWidget(FadeTransitionExample oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (oldWidget.duration != widget.duration) {
+      _controller
+        ..duration = widget.duration
+        ..repeat(reverse: true);
+    }
+
+    if (oldWidget.curve != widget.curve) {
+      _animation.curve = widget.curve;
+    }
+  }
+
+  @override
   void dispose() {
+    _animation.dispose();
     _controller.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return ColoredBox(
       color: Colors.white,
       child: FadeTransition(
         opacity: _animation,
-        child: const Padding(padding: EdgeInsets.all(8), child: FlutterLogo()),
+        child: const Padding(
+          padding: EdgeInsets.all(8),
+          child: FlutterLogo(),
+        ),
       ),
     );
   }

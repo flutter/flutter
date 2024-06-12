@@ -6,7 +6,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:dds/src/dap/logging.dart';
+import 'package:dds/dap.dart' show Logger;
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/debug_adapters/server.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
@@ -19,7 +19,7 @@ abstract class DapTestServer {
   Future<void> stop();
   StreamSink<List<int>> get sink;
   Stream<List<int>> get stream;
-  Function(String message)? onStderrOutput;
+  void Function(String message)? onStderrOutput;
 }
 
 /// An instance of a DAP server running in-process (to aid debugging).
@@ -83,7 +83,7 @@ class OutOfProcessDapTestServer extends DapTestServer {
         .listen((String error) {
       logger?.call(error);
       if (!_isShuttingDown) {
-        final Function(String message)? stderrHandler = onStderrOutput;
+        final void Function(String message)? stderrHandler = onStderrOutput;
         if (stderrHandler != null) {
           stderrHandler(error);
         } else {

@@ -25,6 +25,7 @@ class AnalysisServer {
     required Logger logger,
     required Platform platform,
     required Terminal terminal,
+    required this.suppressAnalytics,
     String? protocolTrafficLog,
   }) : _fileSystem = fileSystem,
        _processManager = processManager,
@@ -41,6 +42,7 @@ class AnalysisServer {
   final Platform _platform;
   final Terminal _terminal;
   final String? _protocolTrafficLog;
+  final bool suppressAnalytics;
 
   Process? _process;
   final StreamController<bool> _analyzingController =
@@ -66,6 +68,7 @@ class AnalysisServer {
       '--disable-server-feature-search',
       '--sdk',
       sdkPath,
+      if (suppressAnalytics) '--suppress-analytics',
       if (_protocolTrafficLog != null)
         '--protocol-traffic-log=$_protocolTrafficLog',
     ];
@@ -149,12 +152,13 @@ class AnalysisServer {
         }
 
         if (paramsMap != null) {
-          if (event == 'server.status') {
-            _handleStatus(paramsMap);
-          } else if (event == 'analysis.errors') {
-            _handleAnalysisIssues(paramsMap);
-          } else if (event == 'server.error') {
-            _handleServerError(paramsMap);
+          switch (event) {
+            case 'server.status':
+              _handleStatus(paramsMap);
+            case 'analysis.errors':
+              _handleAnalysisIssues(paramsMap);
+            case 'server.error':
+              _handleServerError(paramsMap);
           }
         }
       } else if (response['error'] != null) {
@@ -238,15 +242,11 @@ class AnalysisError implements Comparable<AnalysisError> {
   String get _separator => _platform.isWindows ? '-' : '•';
 
   String get colorSeverity {
-    switch (writtenError.severityLevel) {
-      case AnalysisSeverity.error:
-        return _terminal.color(writtenError.severity, TerminalColor.red);
-      case AnalysisSeverity.warning:
-        return _terminal.color(writtenError.severity, TerminalColor.yellow);
-      case AnalysisSeverity.info:
-      case AnalysisSeverity.none:
-        return writtenError.severity;
-    }
+    return switch (writtenError.severityLevel) {
+      AnalysisSeverity.error   => _terminal.color(writtenError.severity, TerminalColor.red),
+      AnalysisSeverity.warning => _terminal.color(writtenError.severity, TerminalColor.yellow),
+      AnalysisSeverity.info || AnalysisSeverity.none => writtenError.severity,
+    };
   }
 
   String get type => writtenError.type;

@@ -13,12 +13,12 @@ void main() {
     Future<void> setAppLifeCycleState(AppLifecycleState state) async {
       final ByteData? message =
           const StringCodec().encodeMessage(state.toString());
-      await ServicesBinding.instance.defaultBinaryMessenger
-          .handlePlatformMessage('flutter/lifecycle', message, (_) {});
+      await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
+          'flutter/lifecycle', message, (_) {});
     }
 
     await tester.pumpWidget(
-     const example.MyApp(),
+     const example.WidgetBindingObserverExampleApp(),
     );
 
     expect(find.text('There are no AppLifecycleStates to show.'), findsOneWidget);
@@ -33,14 +33,14 @@ void main() {
 
     await setAppLifeCycleState(AppLifecycleState.paused);
     await tester.pumpAndSettle();
-    await setAppLifeCycleState(AppLifecycleState.resumed);
-    await tester.pumpAndSettle();
-    expect(find.text('state is: AppLifecycleState.paused'), findsOneWidget);
+    // Can't look for paused text here because rendering is paused.
 
-    await setAppLifeCycleState(AppLifecycleState.detached);
+    await setAppLifeCycleState(AppLifecycleState.inactive);
     await tester.pumpAndSettle();
+    expect(find.text('state is: AppLifecycleState.inactive'), findsNWidgets(2));
+
     await setAppLifeCycleState(AppLifecycleState.resumed);
     await tester.pumpAndSettle();
-    expect(find.text('state is: AppLifecycleState.detached'), findsOneWidget);
+    expect(find.text('state is: AppLifecycleState.resumed'), findsNWidgets(2));
   });
 }

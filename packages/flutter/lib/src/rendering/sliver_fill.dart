@@ -27,13 +27,10 @@ import 'sliver_fixed_extent_list.dart';
 class RenderSliverFillViewport extends RenderSliverFixedExtentBoxAdaptor {
   /// Creates a sliver that contains multiple box children that each fill the
   /// viewport.
-  ///
-  /// The [childManager] argument must not be null.
   RenderSliverFillViewport({
     required super.childManager,
     double viewportFraction = 1.0,
-  }) : assert(viewportFraction != null),
-       assert(viewportFraction > 0.0),
+  }) : assert(viewportFraction > 0.0),
        _viewportFraction = viewportFraction;
 
   @override
@@ -47,7 +44,6 @@ class RenderSliverFillViewport extends RenderSliverFixedExtentBoxAdaptor {
   double get viewportFraction => _viewportFraction;
   double _viewportFraction;
   set viewportFraction(double value) {
-    assert(value != null);
     if (_viewportFraction == value) {
       return;
     }
@@ -87,21 +83,36 @@ class RenderSliverFillRemainingWithScrollable extends RenderSliverSingleBoxAdapt
     final SliverConstraints constraints = this.constraints;
     final double extent = constraints.remainingPaintExtent - math.min(constraints.overlap, 0.0);
 
+    final double cacheExtent = calculateCacheOffset(
+      constraints,
+      from: 0.0,
+      to: constraints.viewportMainAxisExtent,
+    );
     if (child != null) {
+      double maxExtent = extent;
+
+      // If sliver has no extent, but is within viewport's cacheExtent, use the
+      // sliver's cacheExtent as the maxExtent so that it does not get dropped
+      // from the semantic tree.
+      if (extent == 0 && cacheExtent > 0) {
+        maxExtent = cacheExtent;
+      }
       child!.layout(constraints.asBoxConstraints(
         minExtent: extent,
-        maxExtent: extent,
+        maxExtent: maxExtent,
       ));
     }
 
     final double paintedChildSize = calculatePaintOffset(constraints, from: 0.0, to: extent);
     assert(paintedChildSize.isFinite);
     assert(paintedChildSize >= 0.0);
+
     geometry = SliverGeometry(
       scrollExtent: constraints.viewportMainAxisExtent,
       paintExtent: paintedChildSize,
       maxPaintExtent: paintedChildSize,
       hasVisualOverflow: extent > constraints.remainingPaintExtent || constraints.scrollOffset > 0.0,
+      cacheExtent: cacheExtent,
     );
     if (child != null) {
       setChildParentData(child!, constraints, geometry!);
@@ -142,15 +153,10 @@ class RenderSliverFillRemaining extends RenderSliverSingleBoxAdapter {
     double extent = constraints.viewportMainAxisExtent - constraints.precedingScrollExtent;
 
     if (child != null) {
-      final double childExtent;
-      switch (constraints.axis) {
-        case Axis.horizontal:
-          childExtent = child!.getMaxIntrinsicWidth(constraints.crossAxisExtent);
-          break;
-        case Axis.vertical:
-          childExtent = child!.getMaxIntrinsicHeight(constraints.crossAxisExtent);
-          break;
-      }
+      final double childExtent = switch (constraints.axis) {
+        Axis.horizontal => child!.getMaxIntrinsicWidth(constraints.crossAxisExtent),
+        Axis.vertical  => child!.getMaxIntrinsicHeight(constraints.crossAxisExtent),
+      };
 
       // If the childExtent is greater than the computed extent, we want to use
       // that instead of potentially cutting off the child. This allows us to
@@ -171,11 +177,14 @@ class RenderSliverFillRemaining extends RenderSliverSingleBoxAdapter {
     final double paintedChildSize = calculatePaintOffset(constraints, from: 0.0, to: extent);
     assert(paintedChildSize.isFinite);
     assert(paintedChildSize >= 0.0);
+
+    final double cacheExtent = calculateCacheOffset(constraints, from: 0.0, to: extent);
     geometry = SliverGeometry(
       scrollExtent: extent,
       paintExtent: paintedChildSize,
       maxPaintExtent: paintedChildSize,
       hasVisualOverflow: extent > constraints.remainingPaintExtent || constraints.scrollOffset > 0.0,
+      cacheExtent: cacheExtent,
     );
     if (child != null) {
       setChildParentData(child!, constraints, geometry!);
@@ -219,15 +228,10 @@ class RenderSliverFillRemainingAndOverscroll extends RenderSliverSingleBoxAdapte
     double maxExtent = constraints.remainingPaintExtent - math.min(constraints.overlap, 0.0);
 
     if (child != null) {
-      final double childExtent;
-      switch (constraints.axis) {
-        case Axis.horizontal:
-          childExtent = child!.getMaxIntrinsicWidth(constraints.crossAxisExtent);
-          break;
-        case Axis.vertical:
-          childExtent = child!.getMaxIntrinsicHeight(constraints.crossAxisExtent);
-          break;
-      }
+      final double childExtent = switch (constraints.axis) {
+        Axis.horizontal => child!.getMaxIntrinsicWidth(constraints.crossAxisExtent),
+        Axis.vertical  => child!.getMaxIntrinsicHeight(constraints.crossAxisExtent),
+      };
 
       // If the childExtent is greater than the computed extent, we want to use
       // that instead of potentially cutting off the child. This allows us to
@@ -249,11 +253,14 @@ class RenderSliverFillRemainingAndOverscroll extends RenderSliverSingleBoxAdapte
     final double paintedChildSize = calculatePaintOffset(constraints, from: 0.0, to: extent);
     assert(paintedChildSize.isFinite);
     assert(paintedChildSize >= 0.0);
+
+    final double cacheExtent = calculateCacheOffset(constraints, from: 0.0, to: extent);
     geometry = SliverGeometry(
       scrollExtent: extent,
       paintExtent: math.min(maxExtent, constraints.remainingPaintExtent),
       maxPaintExtent: maxExtent,
       hasVisualOverflow: extent > constraints.remainingPaintExtent || constraints.scrollOffset > 0.0,
+      cacheExtent: cacheExtent,
     );
     if (child != null) {
       setChildParentData(child!, constraints, geometry!);

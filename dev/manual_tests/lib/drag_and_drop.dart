@@ -16,16 +16,16 @@ class ExampleDragTarget extends StatefulWidget {
 class ExampleDragTargetState extends State<ExampleDragTarget> {
   Color _color = Colors.grey;
 
-  void _handleAccept(Color data) {
+  void _handleAccept(DragTargetDetails<Color> details) {
     setState(() {
-      _color = data;
+      _color = details.data;
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return DragTarget<Color>(
-      onAccept: _handleAccept,
+      onAcceptWithDetails: _handleAccept,
       builder: (BuildContext context, List<Color?> data, List<dynamic> rejectedData) {
         return Container(
           height: 100.0,
@@ -217,7 +217,7 @@ class MovableBall extends StatelessWidget {
       );
     } else {
       return DragTarget<bool>(
-        onAccept: (bool data) { callback(position); },
+        onAcceptWithDetails: (DragTargetDetails<bool> data) { callback(position); },
         builder: (BuildContext context, List<bool?> accepted, List<dynamic> rejected) {
           return dashedBall;
         },
@@ -270,9 +270,9 @@ class DragAndDropAppState extends State<DragAndDropApp> {
               ],
             ),
           ),
-          Expanded(
+          const Expanded(
             child: Row(
-              children: const <Widget>[
+              children: <Widget>[
                 Expanded(child: ExampleDragTarget()),
                 Expanded(child: ExampleDragTarget()),
                 Expanded(child: ExampleDragTarget()),

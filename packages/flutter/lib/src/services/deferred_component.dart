@@ -24,11 +24,7 @@ import 'system_channels.dart';
 /// Deferred components are currently an Android-only feature. The methods in
 /// this class are a no-op and all assets and dart code are already available
 /// without installation if called on other platforms.
-class DeferredComponent {
-  // This class is not meant to be instantiated or extended; this constructor
-  // prevents instantiation and extension.
-  DeferredComponent._();
-
+abstract final class DeferredComponent {
   // TODO(garyq): We should eventually expand this to install components by loadingUnitId
   // as well as componentName, but currently, loadingUnitId is opaque to the dart code
   // so this is not possible. The API has been left flexible to allow adding

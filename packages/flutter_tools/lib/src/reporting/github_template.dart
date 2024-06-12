@@ -85,7 +85,7 @@ class GitHubTemplateCreator {
     final String title = '[tool_crash] $errorString';
     final String body = '''
 ## Command
-```
+```sh
 $command
 ```
 
@@ -96,10 +96,10 @@ $command
 
 ## Logs
 $errorString
-```
+```console
 ${LineSplitter.split(stackTrace.toString()).take(25).join('\n')}
 ```
-```
+```console
 $doctorText
 ```
 
@@ -125,13 +125,13 @@ ${_projectMetadataInformation()}
     }
     try {
       final FlutterManifest manifest = project.manifest;
-      if (project == null || manifest == null || manifest.isEmpty) {
+      if (manifest.isEmpty) {
         return 'No pubspec in working directory.';
       }
       final FlutterProjectMetadata metadata = FlutterProjectMetadata(project.metadataFile, _logger);
       final FlutterProjectType? projectType = metadata.projectType;
       final StringBuffer description = StringBuffer()
-        ..writeln('**Type**: ${projectType == null ? 'malformed' : flutterProjectTypeToString(projectType)}')
+        ..writeln('**Type**: ${projectType == null ? 'malformed' : projectType.cliName}')
         ..writeln('**Version**: ${manifest.appVersion}')
         ..writeln('**Material**: ${manifest.usesMaterialDesign}')
         ..writeln('**Android X**: ${manifest.usesAndroidX}')

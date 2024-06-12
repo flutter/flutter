@@ -39,9 +39,9 @@ class ExpandIcon extends StatefulWidget {
     this.color,
     this.disabledColor,
     this.expandedColor,
-  }) : assert(isExpanded != null),
-       assert(size != null),
-       assert(padding != null);
+    this.splashColor,
+    this.highlightColor,
+  });
 
   /// Whether the icon is in an expanded state.
   ///
@@ -51,7 +51,7 @@ class ExpandIcon extends StatefulWidget {
 
   /// The size of the icon.
   ///
-  /// This property must not be null. It defaults to 24.0.
+  /// Defaults to 24.
   final double size;
 
   /// The callback triggered when the icon is pressed and the state changes
@@ -63,10 +63,10 @@ class ExpandIcon extends StatefulWidget {
   /// The padding around the icon. The entire padded icon will react to input
   /// gestures.
   ///
-  /// This property must not be null. It defaults to 8.0 padding on all sides.
+  /// Defaults to a padding of 8 on all sides.
   final EdgeInsetsGeometry padding;
 
-
+  /// {@template flutter.material.ExpandIcon.color}
   /// The color of the icon.
   ///
   /// Defaults to [Colors.black54] when the theme's
@@ -74,6 +74,7 @@ class ExpandIcon extends StatefulWidget {
   /// [Colors.white60] when it is [Brightness.dark]. This adheres to the
   /// Material Design specifications for [icons](https://material.io/design/iconography/system-icons.html#color)
   /// and for [dark theme](https://material.io/design/color/dark-theme.html#ui-application)
+  /// {@endtemplate}
   final Color? color;
 
   /// The color of the icon when it is disabled,
@@ -94,6 +95,20 @@ class ExpandIcon extends StatefulWidget {
   /// Material Design specifications for [icons](https://material.io/design/iconography/system-icons.html#color)
   /// and for [dark theme](https://material.io/design/color/dark-theme.html#ui-application)
   final Color? expandedColor;
+
+  /// Defines the splash color of the IconButton.
+  ///
+  /// If [ThemeData.useMaterial3] is true, this field will be ignored,
+  /// as [IconButton.splashColor] will be ignored, and you should use
+  /// [highlightColor] instead.
+  ///
+  /// Defaults to [ThemeData.splashColor].
+  final Color? splashColor;
+
+  /// Defines the highlight color of the IconButton.
+  ///
+  /// Defaults to [ThemeData.highlightColor].
+  final Color? highlightColor;
 
   @override
   State<ExpandIcon> createState() => _ExpandIconState();
@@ -153,12 +168,10 @@ class _ExpandIconState extends State<ExpandIcon> with SingleTickerProviderStateM
       return widget.color!;
     }
 
-    switch(Theme.of(context).brightness) {
-      case Brightness.light:
-        return Colors.black54;
-      case Brightness.dark:
-        return Colors.white60;
-    }
+    return switch (Theme.of(context).brightness) {
+      Brightness.light => Colors.black54,
+      Brightness.dark  => Colors.white60,
+    };
   }
 
   @override
@@ -173,6 +186,8 @@ class _ExpandIconState extends State<ExpandIcon> with SingleTickerProviderStateM
       child: IconButton(
         padding: widget.padding,
         iconSize: widget.size,
+        highlightColor: widget.highlightColor,
+        splashColor: widget.splashColor,
         color: _iconColor,
         disabledColor: widget.disabledColor,
         onPressed: widget.onPressed == null ? null : _handlePressed,

@@ -57,6 +57,12 @@ void main() {
       expect(lerped.shadows, const <Shadow>[Shadow(color: Color(0xFFFFFFFF), blurRadius: 0.25, offset: Offset(0.25, 0.25))]);
     });
 
+    test('IconThemeData lerp special cases', () {
+      expect(IconThemeData.lerp(null, null, 0), const IconThemeData());
+      const IconThemeData data = IconThemeData();
+      expect(identical(IconThemeData.lerp(data, data, 0.5), data), true);
+    });
+
     test('with second null', () {
       final IconThemeData lerped = IconThemeData.lerp(data, null, 0.25);
 

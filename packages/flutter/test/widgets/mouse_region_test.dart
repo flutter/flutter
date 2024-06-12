@@ -1088,7 +1088,7 @@ void main() {
     expect(paintCount, 1);
   });
 
-  testWidgets('A MouseRegion mounted under the pointer should should take effect in the next postframe', (WidgetTester tester) async {
+  testWidgets('A MouseRegion mounted under the pointer should take effect in the next postframe', (WidgetTester tester) async {
     bool hovered = false;
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
@@ -1768,7 +1768,11 @@ void main() {
 
   testWidgets("RenderMouseRegion's debugFillProperties when default", (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
-    RenderMouseRegion().debugFillProperties(builder);
+
+    final RenderMouseRegion renderMouseRegion = RenderMouseRegion();
+    addTearDown(renderMouseRegion.dispose);
+
+    renderMouseRegion.debugFillProperties(builder);
 
     final List<String> description = builder.properties.where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info)).map((DiagnosticsNode node) => node.toString()).toList();
 
@@ -1783,14 +1787,21 @@ void main() {
 
   testWidgets("RenderMouseRegion's debugFillProperties when full", (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
-    RenderMouseRegion(
+
+    final RenderErrorBox renderErrorBox = RenderErrorBox();
+    addTearDown(renderErrorBox.dispose);
+
+    final RenderMouseRegion renderMouseRegion = RenderMouseRegion(
       onEnter: (PointerEnterEvent event) {},
       onExit: (PointerExitEvent event) {},
       onHover: (PointerHoverEvent event) {},
       cursor: SystemMouseCursors.click,
       validForMouseTracker: false,
-      child: RenderErrorBox(),
-    ).debugFillProperties(builder);
+      child: renderErrorBox,
+    );
+    addTearDown(renderMouseRegion.dispose);
+
+    renderMouseRegion.debugFillProperties(builder);
 
     final List<String> description = builder.properties.where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info)).map((DiagnosticsNode node) => node.toString()).toList();
 
@@ -1825,7 +1836,8 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/67044
-  testWidgets('Handle mouse events should ignore the detached MouseTrackerAnnotation', (WidgetTester tester) async {
+  testWidgets('Handle mouse events should ignore the detached MouseTrackerAnnotation',
+  (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Center(
         child: Draggable<int>(
@@ -1851,7 +1863,51 @@ void main() {
 
     // Continue drag mouse should not trigger any assert.
     await gesture.moveBy(const Offset(10.0, 10.0));
+
+     // Dispose gesture
+    await gesture.cancel();
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('stylus input works', (WidgetTester tester) async {
+    bool onEnter = false;
+    bool onExit = false;
+    bool onHover = false;
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: MouseRegion(
+          onEnter: (_) => onEnter = true,
+          onExit: (_) => onExit = true,
+          onHover: (_) => onHover = true,
+          child: const SizedBox(
+            width: 10.0,
+            height: 10.0,
+          ),
+        ),
+      ),
+    ));
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.stylus);
+    await gesture.addPointer(location: const Offset(20.0, 20.0));
+    await tester.pump();
+
+    expect(onEnter, false);
+    expect(onHover, false);
+    expect(onExit, false);
+
+    await gesture.moveTo(const Offset(5.0, 5.0));
+    await tester.pump();
+
+    expect(onEnter, true);
+    expect(onHover, true);
+    expect(onExit, false);
+
+    await gesture.moveTo(const Offset(20.0, 20.0));
+    await tester.pump();
+
+    expect(onEnter, true);
+    expect(onHover, true);
+    expect(onExit, true);
   });
 }
 
@@ -1930,7 +1986,7 @@ class _HoverClientWithClosuresState extends State<_HoverClientWithClosures> {
 class _ColumnContainer extends StatelessWidget {
   const _ColumnContainer({
     required this.children,
-  }) : assert(children != null);
+  });
 
   final List<Widget> children;
 

@@ -33,6 +33,10 @@ class ProductCard extends StatelessWidget {
       fit: BoxFit.cover,
     );
 
+    // The fontSize to use for computing the heuristic UI scaling factor.
+    const double defaultFontSize = 14.0;
+    final double containerScalingFactor = MediaQuery.textScalerOf(context).scale(defaultFontSize) / defaultFontSize;
+
     return ScopedModelDescendant<AppStateModel>(
       builder: (BuildContext context, Widget? child, AppStateModel model) {
         return GestureDetector(
@@ -52,7 +56,7 @@ class ProductCard extends StatelessWidget {
                 child: imageWidget,
               ),
               SizedBox(
-                height: kTextBoxHeight * MediaQuery.of(context).textScaleFactor,
+                height: kTextBoxHeight * containerScalingFactor,
                 width: 121.0,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.end,

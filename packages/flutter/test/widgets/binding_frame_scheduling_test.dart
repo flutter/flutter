@@ -18,14 +18,15 @@ void main() {
     expect(PlatformDispatcher.instance.onDrawFrame, isNull);
 
     // Instantiation does nothing with regards to frame scheduling.
-    expect(WidgetsFlutterBinding.ensureInitialized(), isA<WidgetsFlutterBinding>());
+    final WidgetsFlutterBindingWithTestBinaryMessenger binding = WidgetsFlutterBindingWithTestBinaryMessenger();
+    expect(binding, isA<WidgetsFlutterBinding>());
     expect(SchedulerBinding.instance.hasScheduledFrame, isFalse);
     expect(PlatformDispatcher.instance.onBeginFrame, isNull);
     expect(PlatformDispatcher.instance.onDrawFrame, isNull);
 
     // Framework starts with detached statue. Sends resumed signal to enable frame.
     final ByteData message = const StringCodec().encodeMessage('AppLifecycleState.resumed')!;
-    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
+    await binding.defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
     expect(PlatformDispatcher.instance.onBeginFrame, isNull);
     expect(PlatformDispatcher.instance.onDrawFrame, isNull);
     expect(SchedulerBinding.instance.hasScheduledFrame, isFalse);
@@ -37,3 +38,5 @@ void main() {
     expect(SchedulerBinding.instance.hasScheduledFrame, isTrue);
   });
 }
+
+class WidgetsFlutterBindingWithTestBinaryMessenger extends WidgetsFlutterBinding with TestDefaultBinaryMessengerBinding { }

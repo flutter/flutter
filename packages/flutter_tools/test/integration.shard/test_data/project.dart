@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:file/file.dart';
-import 'package:flutter_tools/src/web/file_generators/flutter_js.dart';
 
 import '../test_utils.dart';
 import 'deferred_components_config.dart';
@@ -61,7 +60,7 @@ abstract class Project {
 
     // Setup for different flutter web initializations
     writeFile(fileSystem.path.join(dir.path, 'web', 'index.html'), indexHtml);
-    writeFile(fileSystem.path.join(dir.path, 'web', 'flutter.js'), generateFlutterJsFile());
+    writeFile(fileSystem.path.join(dir.path, 'web', 'flutter.js'), '');
     writeFile(fileSystem.path.join(dir.path, 'web', 'flutter_service_worker.js'), '');
     writePackages(dir.path);
     await getPackages(dir.path);

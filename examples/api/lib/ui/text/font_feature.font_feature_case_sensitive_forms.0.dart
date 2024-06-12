@@ -2,10 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for FontFeature.FontFeature.caseSensitiveForms
-import 'dart:ui';
-
 import 'package:flutter/widgets.dart';
+
+/// Flutter code sample for [FontFeature.FontFeature.caseSensitiveForms].
 
 void main() => runApp(const ExampleApp());
 
@@ -26,7 +25,8 @@ class ExampleWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // The Piazzolla font can be downloaded from Google Fonts (https://www.google.com/fonts).
+    // The Piazzolla font can be downloaded from Google Fonts
+    // (https://www.google.com/fonts).
     return const Text(
       '(A) [A] {A} «A» A/B A•B',
       style: TextStyle(

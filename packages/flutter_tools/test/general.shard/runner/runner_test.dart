@@ -2,39 +2,45 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/runner.dart' as runner;
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/bot_detector.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart' as io;
 import 'package:flutter_tools/src/base/net.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/reporting/crash_reporting.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_http_client.dart';
+import '../../src/fakes.dart';
 
 const String kCustomBugInstructions = 'These are instructions to report with a custom bug tracker.';
 
 void main() {
-  int firstExitCode;
+  int? firstExitCode;
+  late MemoryFileSystem fileSystem;
 
   group('runner', () {
+    late FakeAnalytics fakeAnalytics;
+    late TestUsage testUsage;
+
     setUp(() {
       // Instead of exiting with dart:io exit(), this causes an exception to
       // be thrown, which we catch with the onError callback in the zone below.
       //
-      // Tests might trigger exit() multiple times.  In real life, exit() would
+      // Tests might trigger exit() multiple times. In real life, exit() would
       // cause the VM to terminate immediately, so only the first one matters.
       firstExitCode = null;
       io.setExitFunctionForTests((int exitCode) {
@@ -47,6 +53,14 @@ void main() {
       });
 
       Cache.disableLocking();
+      fileSystem = MemoryFileSystem.test();
+
+      fakeAnalytics = getInitializedFakeAnalyticsInstance(
+        fs: fileSystem,
+        fakeFlutterVersion: FakeFlutterVersion(),
+      );
+
+      testUsage = TestUsage();
     });
 
     tearDown(() {
@@ -58,7 +72,7 @@ void main() {
       final Completer<void> completer = Completer<void>();
       // runner.run() asynchronously calls the exit function set above, so we
       // catch it in a zone.
-      unawaited(runZoned<Future<void>>(
+      unawaited(runZoned<Future<void>?>(
         () {
           unawaited(runner.run(
             <String>['crash'],
@@ -68,10 +82,11 @@ void main() {
             // This flutterVersion disables crash reporting.
             flutterVersion: '[user-branch]/',
             reportCrashes: true,
+            shutdownHooks: ShutdownHooks(),
           ));
           return null;
         },
-        onError: (Object error, StackTrace stack) { // ignore: deprecated_member_use
+        onError: (Object error, StackTrace stack) {
           expect(firstExitCode, isNotNull);
           expect(firstExitCode, isNot(0));
           expect(error.toString(), 'Exception: test exit');
@@ -88,21 +103,23 @@ void main() {
       // attempt.
       final CrashingUsage crashingUsage = globals.flutterUsage as CrashingUsage;
       expect(crashingUsage.sentException.toString(), 'Exception: an exception % --');
+      expect(fakeAnalytics.sentEvents, contains(Event.exception(exception: '_Exception')));
     }, overrides: <Type, Generator>{
       Platform: () => FakePlatform(environment: <String, String>{
         'FLUTTER_ANALYTICS_LOG_FILE': 'test',
         'FLUTTER_ROOT': '/',
       }),
-      FileSystem: () => MemoryFileSystem.test(),
+      FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
       Usage: () => CrashingUsage(),
       Artifacts: () => Artifacts.test(),
       HttpClientFactory: () => () => FakeHttpClient.any(),
+      Analytics: () => fakeAnalytics,
     });
 
     // This Completer completes when CrashingFlutterCommand.runCommand
     // completes, but ideally we'd want it to complete when execution resumes
-    // runner.run.  Currently the distinction does not matter, but if it ever
+    // runner.run. Currently the distinction does not matter, but if it ever
     // does, this test might fail to catch a regression of
     // https://github.com/flutter/flutter/issues/56406.
     final Completer<void> commandCompleter = Completer<void>();
@@ -110,7 +127,7 @@ void main() {
       final Completer<void> completer = Completer<void>();
       // runner.run() asynchronously calls the exit function set above, so we
       // catch it in a zone.
-      unawaited(runZoned<Future<void>>(
+      unawaited(runZoned<Future<void>?>(
         () {
           unawaited(runner.run(
             <String>['crash'],
@@ -120,10 +137,11 @@ void main() {
             // This flutterVersion disables crash reporting.
             flutterVersion: '[user-branch]/',
             reportCrashes: true,
+            shutdownHooks: ShutdownHooks(),
           ));
           return null;
         },
-        onError: (Object error, StackTrace stack) { // ignore: deprecated_member_use
+        onError: (Object error, StackTrace stack) {
           expect(firstExitCode, isNotNull);
           expect(firstExitCode, isNot(0));
           expect(error.toString(), 'Exception: test exit');
@@ -136,7 +154,7 @@ void main() {
         'FLUTTER_ANALYTICS_LOG_FILE': 'test',
         'FLUTTER_ROOT': '/',
       }),
-      FileSystem: () => MemoryFileSystem.test(),
+      FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
       CrashReporter: () => WaitingCrashReporter(commandCompleter.future),
       Artifacts: () => Artifacts.test(),
@@ -157,20 +175,21 @@ void main() {
       final Completer<void> completer = Completer<void>();
       // runner.run() asynchronously calls the exit function set above, so we
       // catch it in a zone.
-      unawaited(runZoned<Future<void>>(
+      unawaited(runZoned<Future<void>?>(
         () {
-        unawaited(runner.run(
-          <String>['crash'],
-          () => <FlutterCommand>[
-            CrashingFlutterCommand(),
-          ],
-          // This flutterVersion disables crash reporting.
-          flutterVersion: '[user-branch]/',
-          reportCrashes: true,
-        ));
-        return null;
+          unawaited(runner.run(
+            <String>['crash'],
+            () => <FlutterCommand>[
+              CrashingFlutterCommand(),
+            ],
+            // This flutterVersion disables crash reporting.
+            flutterVersion: '[user-branch]/',
+            reportCrashes: true,
+            shutdownHooks: ShutdownHooks(),
+          ));
+          return null;
         },
-        onError: (Object error, StackTrace stack) { // ignore: deprecated_member_use
+        onError: (Object error, StackTrace stack) {
           expect(firstExitCode, isNotNull);
           expect(firstExitCode, isNot(0));
           expect(error.toString(), 'Exception: test exit');
@@ -193,7 +212,7 @@ void main() {
       expect(logContents, contains('CrashingFlutterCommand.runCommand'));
       expect(logContents, contains('[!] Flutter'));
 
-      final CrashDetails sentDetails = (globals.crashReporter as WaitingCrashReporter)._details;
+      final CrashDetails sentDetails = (globals.crashReporter! as WaitingCrashReporter)._details;
       expect(sentDetails.command, 'flutter crash');
       expect(sentDetails.error.toString(), 'Exception: an exception % --');
       expect(sentDetails.stackTrace.toString(), contains('CrashingFlutterCommand.runCommand'));
@@ -205,28 +224,328 @@ void main() {
           'FLUTTER_ROOT': '/',
         }
       ),
-      FileSystem: () => MemoryFileSystem.test(),
+      FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
       UserMessages: () => CustomBugInstructions(),
       Artifacts: () => Artifacts.test(),
       CrashReporter: () => WaitingCrashReporter(Future<void>.value()),
       HttpClientFactory: () => () => FakeHttpClient.any(),
     });
+
+    group('in directory without permission', () {
+      setUp(() {
+        bool inTestSetup = true;
+        fileSystem = MemoryFileSystem(opHandle: (String context, FileSystemOp operation) {
+          if (inTestSetup) {
+            // Allow all operations during test setup.
+            return;
+          }
+          const Set<FileSystemOp> disallowedOperations = <FileSystemOp>{
+            FileSystemOp.create,
+            FileSystemOp.delete,
+            FileSystemOp.copy,
+            FileSystemOp.write,
+          };
+          // Make current_directory not writable.
+          if (context.startsWith('/current_directory') && disallowedOperations.contains(operation)) {
+            throw FileSystemException('No permission, context = $context, operation = $operation');
+          }
+        });
+        final Directory currentDirectory = fileSystem.directory('/current_directory');
+        currentDirectory.createSync();
+        fileSystem.currentDirectory = currentDirectory;
+        inTestSetup = false;
+      });
+      testUsingContext('create local report in temporary directory', () async {
+        // Since crash reporting calls the doctor, which checks for the devtools
+        // version file in the cache, write a version file to the memory fs.
+        Cache.flutterRoot = '/path/to/flutter';
+        final Directory devtoolsDir = globals.fs.directory(
+          '${Cache.flutterRoot}/bin/cache/dart-sdk/bin/resources/devtools',
+        )..createSync(recursive: true);
+        devtoolsDir.childFile('version.json').writeAsStringSync(
+          '{"version": "1.2.3"}',
+        );
+
+        final Completer<void> completer = Completer<void>();
+        // runner.run() asynchronously calls the exit function set above, so we
+        // catch it in a zone.
+        unawaited(runZoned<Future<void>?>(
+          () {
+            unawaited(runner.run(
+              <String>['crash'],
+              () => <FlutterCommand>[
+                CrashingFlutterCommand(),
+              ],
+              // This flutterVersion disables crash reporting.
+              flutterVersion: '[user-branch]/',
+              reportCrashes: true,
+              shutdownHooks: ShutdownHooks(),
+            ));
+            return null;
+          },
+          onError: (Object error, StackTrace stack) {
+            expect(firstExitCode, isNotNull);
+            expect(firstExitCode, isNot(0));
+            expect(error.toString(), 'Exception: test exit');
+            completer.complete();
+          },
+        ));
+        await completer.future;
+
+        final String errorText = testLogger.errorText;
+        expect(
+          errorText,
+          containsIgnoringWhitespace('Oops; flutter has exited unexpectedly: "Exception: an exception % --".\n'),
+        );
+
+        final File log = globals.fs.systemTempDirectory.childFile('flutter_01.log');
+        final String logContents = log.readAsStringSync();
+        expect(logContents, contains(kCustomBugInstructions));
+        expect(logContents, contains('flutter crash'));
+        expect(logContents, contains('Exception: an exception % --'));
+        expect(logContents, contains('CrashingFlutterCommand.runCommand'));
+        expect(logContents, contains('[!] Flutter'));
+
+        final CrashDetails sentDetails = (globals.crashReporter! as WaitingCrashReporter)._details;
+        expect(sentDetails.command, 'flutter crash');
+        expect(sentDetails.error.toString(), 'Exception: an exception % --');
+        expect(sentDetails.stackTrace.toString(), contains('CrashingFlutterCommand.runCommand'));
+        expect(await sentDetails.doctorText.text, contains('[!] Flutter'));
+      }, overrides: <Type, Generator>{
+        Platform: () => FakePlatform(
+          environment: <String, String>{
+            'FLUTTER_ANALYTICS_LOG_FILE': 'test',
+            'FLUTTER_ROOT': '/',
+          }
+        ),
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        UserMessages: () => CustomBugInstructions(),
+        Artifacts: () => Artifacts.test(),
+        CrashReporter: () => WaitingCrashReporter(Future<void>.value()),
+        HttpClientFactory: () => () => FakeHttpClient.any(),
+      });
+    });
+
+    testUsingContext('do not print welcome on bots', () async {
+        io.setExitFunctionForTests((int exitCode) {});
+
+        await runner.run(
+          <String>['--version', '--machine'],
+          () => <FlutterCommand>[],
+          // This flutterVersion disables crash reporting.
+          flutterVersion: '[user-branch]/',
+          shutdownHooks: ShutdownHooks(),
+        );
+
+        expect(testUsage.printedWelcome, false);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => MemoryFileSystem.test(),
+        ProcessManager: () => FakeProcessManager.any(),
+        BotDetector: () => const FakeBotDetector(true),
+        Usage: () => testUsage,
+      },
+    );
+  });
+
+  group('unified_analytics', () {
+    late FakeAnalytics fakeAnalytics;
+    late MemoryFileSystem fs;
+    late TestUsage testUsage;
+
+    setUp(() {
+      fs = MemoryFileSystem.test();
+
+      fakeAnalytics = getInitializedFakeAnalyticsInstance(
+        fs: fs,
+        fakeFlutterVersion: FakeFlutterVersion(),
+      );
+      testUsage = TestUsage();
+    });
+
+    testUsingContext(
+      'runner disable telemetry with flag',
+      () async {
+        io.setExitFunctionForTests((int exitCode) {});
+
+        expect(globals.analytics.telemetryEnabled, true);
+
+        await runner.run(
+          <String>['--disable-analytics'],
+          () => <FlutterCommand>[],
+          // This flutterVersion disables crash reporting.
+          flutterVersion: '[user-branch]/',
+          shutdownHooks: ShutdownHooks(),
+        );
+
+        expect(globals.analytics.telemetryEnabled, false);
+      },
+      overrides: <Type, Generator>{
+        Analytics: () => fakeAnalytics,
+        FileSystem: () => MemoryFileSystem.test(),
+        ProcessManager: () => FakeProcessManager.any(),
+      },
+    );
+
+    testUsingContext(
+      'runner sends mismatch event to ga3 if user opted in to ga3 but out of ga4 analytics',
+      () async {
+        io.setExitFunctionForTests((int exitCode) {});
+
+        // Begin by opting out of telemetry for package:unified_analytics
+        // and leaving legacy analytics opted in
+        await fakeAnalytics.setTelemetry(false);
+        expect(fakeAnalytics.telemetryEnabled, false);
+        expect(testUsage.enabled, true);
+
+        await runner.run(
+          <String>[],
+          () => <FlutterCommand>[],
+          // This flutterVersion disables crash reporting.
+          flutterVersion: '[user-branch]/',
+          shutdownHooks: ShutdownHooks(),
+        );
+
+        expect(
+          testUsage.events,
+          contains(const TestUsageEvent(
+            'ga4_and_ga3_status_mismatch',
+            'opted_out_of_ga4',
+          )),
+        );
+        expect(fakeAnalytics.telemetryEnabled, false);
+        expect(testUsage.enabled, true);
+        expect(fakeAnalytics.sentEvents, isEmpty);
+
+      },
+      overrides: <Type, Generator>{
+        Analytics: () => fakeAnalytics,
+        FileSystem: () => MemoryFileSystem.test(),
+        ProcessManager: () => FakeProcessManager.any(),
+        Usage: () => testUsage,
+      },
+    );
+
+    testUsingContext(
+      'runner does not send mismatch event to ga3 if user opted out of ga3 & ga4 analytics',
+      () async {
+        io.setExitFunctionForTests((int exitCode) {});
+
+        // Begin by opting out of telemetry for package:unified_analytics
+        // and legacy analytics
+        await fakeAnalytics.setTelemetry(false);
+        testUsage.enabled = false;
+        expect(fakeAnalytics.telemetryEnabled, false);
+        expect(testUsage.enabled, false);
+
+        await runner.run(
+          <String>[],
+          () => <FlutterCommand>[],
+          // This flutterVersion disables crash reporting.
+          flutterVersion: '[user-branch]/',
+          shutdownHooks: ShutdownHooks(),
+        );
+
+        expect(
+          testUsage.events,
+          isNot(contains(const TestUsageEvent(
+            'ga4_and_ga3_status_mismatch',
+            'opted_out_of_ga4',
+          ))),
+        );
+        expect(fakeAnalytics.telemetryEnabled, false);
+        expect(testUsage.enabled, false);
+        expect(fakeAnalytics.sentEvents, isEmpty);
+
+      },
+      overrides: <Type, Generator>{
+        Analytics: () => fakeAnalytics,
+        FileSystem: () => MemoryFileSystem.test(),
+        ProcessManager: () => FakeProcessManager.any(),
+        Usage: () => testUsage,
+      },
+    );
+
+    testUsingContext(
+      'runner enabling analytics with flag',
+      () async {
+        io.setExitFunctionForTests((int exitCode) {});
+
+        expect(globals.analytics.telemetryEnabled, true);
+
+        await runner.run(
+          <String>['--disable-analytics'],
+          () => <FlutterCommand>[],
+          // This flutterVersion disables crash reporting.
+          flutterVersion: '[user-branch]/',
+          shutdownHooks: ShutdownHooks(),
+        );
+
+        expect(globals.analytics.telemetryEnabled, false);
+
+        await runner.run(
+          <String>['--enable-analytics'],
+          () => <FlutterCommand>[],
+          // This flutterVersion disables crash reporting.
+          flutterVersion: '[user-branch]/',
+          shutdownHooks: ShutdownHooks(),
+        );
+
+        expect(globals.analytics.telemetryEnabled, true);
+      },
+      overrides: <Type, Generator>{
+        Analytics: () => fakeAnalytics,
+        FileSystem: () => MemoryFileSystem.test(),
+        ProcessManager: () => FakeProcessManager.any(),
+      },
+    );
+
+    testUsingContext(
+      'throw error when both flags passed',
+      () async {
+        io.setExitFunctionForTests((int exitCode) {});
+
+        expect(globals.analytics.telemetryEnabled, true);
+
+        final int exitCode = await runner.run(
+          <String>[
+            '--disable-analytics',
+            '--enable-analytics',
+          ],
+          () => <FlutterCommand>[],
+          // This flutterVersion disables crash reporting.
+          flutterVersion: '[user-branch]/',
+          shutdownHooks: ShutdownHooks(),
+        );
+
+        expect(exitCode, 1,
+            reason: 'Should return 1 due to conflicting options for telemetry');
+        expect(globals.analytics.telemetryEnabled, true,
+            reason: 'Should not have changed from initialization');
+      },
+      overrides: <Type, Generator>{
+        Analytics: () => fakeAnalytics,
+        FileSystem: () => MemoryFileSystem.test(),
+        ProcessManager: () => FakeProcessManager.any(),
+      },
+    );
   });
 }
 
 class CrashingFlutterCommand extends FlutterCommand {
   CrashingFlutterCommand({
     bool asyncCrash = false,
-    Completer<void> completer,
+    Completer<void>? completer,
   }) :  _asyncCrash = asyncCrash,
         _completer = completer;
 
   final bool _asyncCrash;
-  final Completer<void> _completer;
+  final Completer<void>? _completer;
 
   @override
-  String get description => null;
+  String get description => '';
 
   @override
   String get name => 'crash';
@@ -245,7 +564,7 @@ class CrashingFlutterCommand extends FlutterCommand {
     });
 
     await completer.future;
-    _completer.complete();
+    _completer!.complete();
 
     return FlutterCommandResult.success();
   }
@@ -294,16 +613,16 @@ class CrashingUsage implements Usage {
   String get clientId => _impl.clientId;
 
   @override
-  void sendCommand(String command, {CustomDimensions parameters}) =>
+  void sendCommand(String command, {CustomDimensions? parameters}) =>
       _impl.sendCommand(command, parameters: parameters);
 
   @override
   void sendEvent(
     String category,
     String parameter, {
-    String label,
-    int value,
-    CustomDimensions parameters,
+    String? label,
+    int? value,
+    CustomDimensions? parameters,
   }) => _impl.sendEvent(
     category,
     parameter,
@@ -317,7 +636,7 @@ class CrashingUsage implements Usage {
     String category,
     String variableName,
     Duration duration, {
-    String label,
+    String? label,
   }) => _impl.sendTiming(category, variableName, duration, label: label);
 
   @override
@@ -338,12 +657,12 @@ class CustomBugInstructions extends UserMessages {
 /// A fake [CrashReporter] that waits for a [Future] to complete.
 ///
 /// Used to exacerbate a race between the success and failure paths of
-/// [runner.run].  See https://github.com/flutter/flutter/issues/56406.
+/// [runner.run]. See https://github.com/flutter/flutter/issues/56406.
 class WaitingCrashReporter implements CrashReporter {
   WaitingCrashReporter(Future<void> future) : _future = future;
 
   final Future<void> _future;
-  CrashDetails _details;
+  late CrashDetails _details;
 
   @override
   Future<void> informUser(CrashDetails details, File crashFile) {

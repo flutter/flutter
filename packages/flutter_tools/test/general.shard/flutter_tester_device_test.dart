@@ -14,12 +14,13 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/test/flutter_tester_device.dart';
 import 'package:flutter_tools/src/test/font_config_manager.dart';
+import 'package:flutter_tools/src/vmservice.dart';
 import 'package:stream_channel/stream_channel.dart';
 import 'package:test/fake.dart';
 
-import '../src/common.dart';
 import '../src/context.dart';
 import '../src/fake_process_manager.dart';
+import '../src/fake_vm_services.dart';
 
 void main() {
   late FakePlatform platform;
@@ -38,16 +39,62 @@ void main() {
 
   FlutterTesterTestDevice createDevice({
     List<String> dartEntrypointArgs = const <String>[],
-    bool enableObservatory = false,
+    bool enableVmService = false,
+    bool enableImpeller = false,
   }) =>
     TestFlutterTesterDevice(
       platform: platform,
       fileSystem: fileSystem,
       processManager: processManager,
-      enableObservatory: enableObservatory,
+      enableVmService: enableVmService,
       dartEntrypointArgs: dartEntrypointArgs,
       uriConverter: (String input) => '$input/converted',
+      enableImpeller: enableImpeller,
     );
+
+  testUsingContext('Missing dir error caught for FontConfigManger.dispose', () async {
+    final FontConfigManager fontConfigManager = FontConfigManager();
+
+    final Directory fontsDirectory = fileSystem.file(fontConfigManager.fontConfigFile).parent;
+    fontsDirectory.deleteSync(recursive: true);
+
+    await fontConfigManager.dispose();
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+  });
+
+  testUsingContext('Flutter tester passes through impeller config and environment variables.', () async {
+    processManager = FakeProcessManager.list(<FakeCommand>[]);
+    device = createDevice(enableImpeller: true);
+    processManager.addCommand(FakeCommand(command: const <String>[
+        '/',
+        '--disable-vm-service',
+        '--ipv6',
+        '--enable-checked-mode',
+        '--verify-entry-points',
+        '--enable-impeller',
+        '--enable-dart-profiling',
+        '--non-interactive',
+        '--use-test-fonts',
+        '--disable-asset-fonts',
+        '--packages=.dart_tool/package_config.json',
+        'example.dill',
+      ], environment: <String, String>{
+        'FLUTTER_TEST': 'true',
+        'FONTCONFIG_FILE': device.fontConfigManager.fontConfigFile.path,
+        'SERVER_PORT': '0',
+        'APP_NAME': '',
+        'FLUTTER_TEST_IMPELLER': 'true',
+      }));
+
+    await device.start('example.dill');
+
+    expect(processManager, hasNoRemainingExpectations);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+  });
 
   group('The FLUTTER_TEST environment variable is passed to the test process', () {
     setUp(() {
@@ -63,7 +110,7 @@ void main() {
     FakeCommand flutterTestCommand(String expectedFlutterTestValue) {
       return FakeCommand(command: const <String>[
         '/',
-        '--disable-observatory',
+        '--disable-vm-service',
         '--ipv6',
         '--enable-checked-mode',
         '--verify-entry-points',
@@ -121,7 +168,7 @@ void main() {
         const FakeCommand(
           command: <String>[
             '/',
-            '--disable-observatory',
+            '--disable-vm-service',
             '--ipv6',
             '--enable-checked-mode',
             '--verify-entry-points',
@@ -156,7 +203,7 @@ void main() {
         const FakeCommand(
           command: <String>[
             '/',
-            '--observatory-port=0',
+            '--vm-service-port=0',
             '--ipv6',
             '--enable-checked-mode',
             '--verify-entry-points',
@@ -173,12 +220,12 @@ void main() {
           stderr: 'failure',
         ),
       ]);
-      device = createDevice(enableObservatory: true);
+      device = createDevice(enableVmService: true);
     });
 
-    testUsingContext('skips setting observatory port and uses the input port for DDS instead', () async {
+    testUsingContext('skips setting VM Service port and uses the input port for DDS instead', () async {
       await device.start('example.dill');
-      await device.observatoryUri;
+      await device.vmServiceUri;
 
       final Uri uri = await (device as TestFlutterTesterDevice).ddsServiceUriFuture();
       expect(uri.port, 1234);
@@ -186,7 +233,7 @@ void main() {
 
     testUsingContext('sets up UriConverter from context', () async {
       await device.start('example.dill');
-      await device.observatoryUri;
+      await device.vmServiceUri;
 
       final FakeDartDevelopmentService dds = (device as TestFlutterTesterDevice).dds
       as FakeDartDevelopmentService;
@@ -206,9 +253,10 @@ class TestFlutterTesterDevice extends FlutterTesterTestDevice {
     required super.platform,
     required super.fileSystem,
     required super.processManager,
-    required super.enableObservatory,
+    required super.enableVmService,
     required List<String> dartEntrypointArgs,
     required UriConverter uriConverter,
+    required bool enableImpeller,
   }) : super(
     id: 999,
     shellPath: '/',
@@ -221,6 +269,7 @@ class TestFlutterTesterDevice extends FlutterTesterTestDevice {
       ),
       hostVmServicePort: 1234,
       dartEntrypointArgs: dartEntrypointArgs,
+      enableImpeller: enableImpeller ? ImpellerStatus.enabled : ImpellerStatus.platformDefault,
     ),
     machine: false,
     host: InternetAddress.loopbackIPv6,
@@ -249,6 +298,17 @@ class TestFlutterTesterDevice extends FlutterTesterTestDevice {
       uriConverter: uriConverter,
     );
     return dds;
+  }
+
+  @override
+  Future<FlutterVmService> connectToVmServiceImpl(
+    Uri httpUri, {
+    CompileExpression? compileExpression,
+    required Logger logger,
+  }) async {
+    return FakeVmServiceHost(requests: <VmServiceExpectation>[
+      const FakeVmServiceRequest(method: '_serveObservatory'),
+    ]).vmService;
   }
 
   @override

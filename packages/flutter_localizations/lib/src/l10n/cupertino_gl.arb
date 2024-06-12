@@ -21,5 +21,11 @@
   "selectAllButtonLabel": "Seleccionar todo",
   "tabSemanticsLabel": "Pestana $tabIndex de $tabCount",
   "modalBarrierDismissLabel": "Ignorar",
-  "searchTextFieldPlaceholderLabel": "Fai unha busca"
+  "searchTextFieldPlaceholderLabel": "Fai unha busca",
+  "noSpellCheckReplacementsLabel": "Non se encontrou ningunha substitución",
+  "menuDismissLabel": "Pechar menú",
+  "lookUpButtonLabel": "Mirar cara arriba",
+  "searchWebButtonLabel": "Buscar na Web",
+  "shareButtonLabel": "Compartir…",
+  "clearButtonLabel": "Clear"
 }

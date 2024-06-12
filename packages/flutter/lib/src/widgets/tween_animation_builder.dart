@@ -90,11 +90,13 @@ import 'value_listenable_builder.dart';
 /// [AnimatedBuilder], which can be used similarly to this
 /// [TweenAnimationBuilder], but unlike the latter it is powered by a
 /// developer-managed [AnimationController].
+///
+/// See also:
+///
+/// * [ValueListenableBuilder], a widget whose content stays synced with a
+///   [ValueListenable] instead of a [Tween].
 class TweenAnimationBuilder<T extends Object?> extends ImplicitlyAnimatedWidget {
   /// Creates a [TweenAnimationBuilder].
-  ///
-  /// The properties [tween], [duration], and [builder] are required. The values
-  /// for [tween], [curve], and [builder] must not be null.
   ///
   /// The [TweenAnimationBuilder] takes full ownership of the provided [tween]
   /// instance and mutates it. Once a [Tween] has been passed to a
@@ -108,9 +110,7 @@ class TweenAnimationBuilder<T extends Object?> extends ImplicitlyAnimatedWidget 
     required this.builder,
     super.onEnd,
     this.child,
-  }) : assert(tween != null),
-       assert(curve != null),
-       assert(builder != null);
+  });
 
   /// Defines the target value for the animation.
   ///

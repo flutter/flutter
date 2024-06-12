@@ -7,9 +7,11 @@ import 'dart:math' as math;
 
 import 'package:file/file.dart';
 import 'package:intl/intl.dart';
+import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path; // flutter_ignore: package_path_import
 
 import '../convert.dart';
+import 'platform.dart';
 
 /// A path jointer for URL paths.
 final path.Context urlContext = path.url;
@@ -26,12 +28,34 @@ String camelCase(String str) {
   return str;
 }
 
+/// Convert `fooBar` to `foo-bar`.
+String kebabCase(String str) {
+  return _reCase(str, '-');
+}
+
 final RegExp _upperRegex = RegExp(r'[A-Z]');
 
 /// Convert `fooBar` to `foo_bar`.
-String snakeCase(String str, [ String sep = '_' ]) {
+String snakeCase(String str) {
+  return _reCase(str, '_');
+}
+
+/// Convert `fooBar` to `foo[sep]bar`.
+String _reCase(String str, String sep) {
   return str.replaceAllMapped(_upperRegex,
       (Match m) => '${m.start == 0 ? '' : sep}${m[0]!.toLowerCase()}');
+}
+
+abstract interface class CliEnum implements Enum {
+  String get cliName;
+  String get helpText;
+
+  static Map<String, String> allowedHelp<T extends CliEnum>(List<T> values) =>
+      Map<String, String>.fromEntries(
+        values.map(
+          (T e) => MapEntry<String, String>(e.cliName, e.helpText),
+        ),
+      );
 }
 
 /// Converts `fooBar` to `FooBar`.
@@ -42,7 +66,8 @@ String sentenceCase(String str, [String? locale]) {
   if (str.isEmpty) {
     return str;
   }
-  return toBeginningOfSentenceCase(str, locale)!;
+  // TODO(christopherfujino): Remove this check after the next release of intl
+  return ArgumentError.checkNotNull(toBeginningOfSentenceCase(str, locale));
 }
 
 /// Converts `foo_bar` to `Foo Bar`.
@@ -52,13 +77,6 @@ String snakeCaseToTitleCase(String snakeCaseString) {
 
 /// Return the plural of the given word (`cat(s)`).
 String pluralize(String word, int count) => count == 1 ? word : '${word}s';
-
-/// Return the name of an enum item.
-String getEnumName(dynamic enumItem) {
-  final String name = '$enumItem';
-  final int index = name.indexOf('.');
-  return index == -1 ? name : name.substring(index + 1);
-}
 
 String toPrettyJson(Object jsonable) {
   final String value = const JsonEncoder.withIndent('  ').convert(jsonable);
@@ -77,18 +95,23 @@ String getElapsedAsMilliseconds(Duration duration) {
   return '${kMillisecondsFormat.format(duration.inMilliseconds)}ms';
 }
 
-/// Return a String - with units - for the size in MB of the given number of bytes.
-String getSizeAsMB(int bytesLength) {
-  return '${(bytesLength / (1024 * 1024)).toStringAsFixed(1)}MB';
+/// Return a platform-appropriate [String] representing the size of the given number of bytes.
+String getSizeAsPlatformMB(int bytesLength, {
+    @visibleForTesting Platform platform = const LocalPlatform()
+  }) {
+  // Because Windows displays 'MB' but actually reports MiB, we calculate MiB
+  // accordingly on Windows.
+  final int bytesInPlatformMB = platform.isWindows ? 1024 * 1024 : 1000 * 1000;
+  return '${(bytesLength / bytesInPlatformMB).toStringAsFixed(1)}MB';
 }
 
 /// A class to maintain a list of items, fire events when items are added or
 /// removed, and calculate a diff of changes when a new list of items is
 /// available.
 class ItemListNotifier<T> {
-  ItemListNotifier(): _items = <T>{};
+  ItemListNotifier(): _items = <T>{}, _isPopulated = false;
 
-  ItemListNotifier.from(List<T> items) : _items = Set<T>.of(items);
+  ItemListNotifier.from(List<T> items) : _items = Set<T>.of(items), _isPopulated = true;
 
   Set<T> _items;
 
@@ -100,6 +123,11 @@ class ItemListNotifier<T> {
 
   List<T> get items => _items.toList();
 
+  bool _isPopulated;
+
+  /// Returns whether the list has been populated.
+  bool get isPopulated => _isPopulated;
+
   void updateWithNewList(List<T> updatedList) {
     final Set<T> updatedSet = Set<T>.of(updatedList);
 
@@ -107,9 +135,10 @@ class ItemListNotifier<T> {
     final Set<T> removedItems = _items.difference(updatedSet);
 
     _items = updatedSet;
+    _isPopulated = true;
 
-    addedItems.forEach(_addedController.add);
     removedItems.forEach(_removedController.add);
+    addedItems.forEach(_addedController.add);
   }
 
   void removeItem(T item) {
@@ -141,9 +170,7 @@ class SettingsFile {
     }
   }
 
-  factory SettingsFile.parseFromFile(File file) {
-    return SettingsFile.parse(file.readAsStringSync());
-  }
+  SettingsFile.parseFromFile(File file) : this.parse(file.readAsStringSync());
 
   final Map<String, String> values = <String, String>{};
 
@@ -188,7 +215,7 @@ const int kMinColumnWidth = 10;
 /// ```
 ///
 /// yields:
-/// ```
+/// ```none
 ///   Usage: app main_command <subcommand>
 ///          [arguments]
 /// ```
@@ -207,7 +234,7 @@ String wrapText(String text, {
   int? indent,
 }) {
   assert(columnWidth >= 0);
-  if (text == null || text.isEmpty) {
+  if (text.isEmpty) {
     return '';
   }
   indent ??= 0;
@@ -288,14 +315,14 @@ class _AnsiRun {
 /// widths is fine, for instance).
 ///
 /// If [outputPreferences.wrapText] is false, then the text will be returned
-/// simply split at the newlines, but not wrapped. If [shouldWrap] is specified,
+/// split at the newlines, but not wrapped. If [shouldWrap] is specified,
 /// then it overrides the [outputPreferences.wrapText] setting.
 List<String> _wrapTextAsLines(String text, {
   int start = 0,
   required int columnWidth,
   required bool shouldWrap,
 }) {
-  if (text == null || text.isEmpty) {
+  if (text.isEmpty) {
     return <String>[''];
   }
   assert(start >= 0);
@@ -339,7 +366,7 @@ List<String> _wrapTextAsLines(String text, {
   final int effectiveLength = math.max(columnWidth - start, kMinColumnWidth);
   for (final String line in text.split('\n')) {
     // If the line is short enough, even with ANSI codes, then we can just add
-    // add it and move on.
+    // it and move on.
     if (line.length <= effectiveLength || !shouldWrap) {
       result.add(line);
       continue;
@@ -467,4 +494,39 @@ Match? firstMatchInFile(File file, RegExp regExp) {
     }
   }
   return null;
+}
+
+/// Tests for shallow equality on two sets.
+bool setEquals<T>(Set<T>? a, Set<T>? b) {
+  if (a == null) {
+    return b == null;
+  }
+  if (b == null || a.length != b.length) {
+    return false;
+  }
+  if (identical(a, b)) {
+    return true;
+  }
+  for (final T value in a) {
+    if (!b.contains(value)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+/// Tests for shallow equality on two lists.
+bool listEquals<T>(List<T> a, List<T> b) {
+  if (identical(a, b)) {
+    return true;
+  }
+  if (a.length != b.length) {
+    return false;
+  }
+  for (int index = 0; index < a.length; index++) {
+    if (a[index] != b[index]) {
+      return false;
+    }
+  }
+  return true;
 }

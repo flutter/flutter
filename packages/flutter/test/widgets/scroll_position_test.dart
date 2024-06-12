@@ -34,7 +34,7 @@ Future<void> performTest(WidgetTester tester, bool maintainState) async {
     Directionality(
       textDirection: TextDirection.ltr,
       child: MediaQuery(
-        data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
+        data: MediaQueryData.fromView(tester.view),
         child: Navigator(
           key: navigatorKey,
           onGenerateRoute: (RouteSettings settings) {
@@ -167,7 +167,14 @@ void main() {
   testWidgets('scroll alignment is honored by ensureVisible', (WidgetTester tester) async {
     final List<int> items = List<int>.generate(11, (int index) => index).toList();
     final List<FocusNode> nodes = List<FocusNode>.generate(11, (int index) => FocusNode(debugLabel: 'Item ${index + 1}')).toList();
+    addTearDown(() {
+      for (final FocusNode node in nodes) {
+        node.dispose();
+      }
+    });
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
+
     await tester.pumpWidget(
       MaterialApp(
         home: ListView(

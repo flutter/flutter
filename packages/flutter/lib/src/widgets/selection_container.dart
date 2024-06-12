@@ -29,7 +29,7 @@ import 'framework.dart';
 /// This sample demonstrates how to create a [SelectionContainer] that only
 /// allows selecting everything or nothing with no partial selection.
 ///
-/// ** See code in examples/api/lib/material/selection_area/custom_container.dart **
+/// ** See code in examples/api/lib/material/selection_container/selection_container.0.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -41,20 +41,22 @@ class SelectionContainer extends StatefulWidget {
   ///
   /// If [registrar] is not provided, this selection container gets the
   /// [SelectionRegistrar] from the context instead.
-  ///
-  /// The [delegate] and [child] must not be null.
   const SelectionContainer({
     super.key,
     this.registrar,
     required SelectionContainerDelegate this.delegate,
     required this.child,
-  }) : assert(delegate != null),
-       assert(child != null);
+  });
 
   /// Creates a selection container that disables selection for the
   /// subtree.
   ///
-  /// The [child] must not be null.
+  /// {@tool dartpad}
+  /// This sample demonstrates how to disable selection for a Text under a
+  /// SelectionArea.
+  ///
+  /// ** See code in examples/api/lib/material/selection_container/selection_container_disabled.0.dart **
+  /// {@end-tool}
   const SelectionContainer.disabled({
     super.key,
     required this.child,
@@ -127,7 +129,8 @@ class _SelectionContainerState extends State<SelectionContainer> with Selectable
         _listeners.forEach(widget.delegate!.addListener);
       }
       if (oldWidget.delegate?.value != widget.delegate?.value) {
-        for (final VoidCallback listener in _listeners) {
+        // Avoid concurrent modification.
+        for (final VoidCallback listener in _listeners.toList(growable: false)) {
           listener();
         }
       }
@@ -198,6 +201,9 @@ class _SelectionContainerState extends State<SelectionContainer> with Selectable
   Size get size => (context.findRenderObject()! as RenderBox).size;
 
   @override
+  List<Rect> get boundingBoxes => <Rect>[(context.findRenderObject()! as RenderBox).paintBounds];
+
+  @override
   void dispose() {
     if (!widget._disabled) {
       widget.delegate!._selectionContainerContext = null;
@@ -233,7 +239,7 @@ class SelectionRegistrarScope extends InheritedWidget {
     super.key,
     required SelectionRegistrar this.registrar,
     required super.child,
-  }) : assert(registrar != null);
+  });
 
   /// Creates a selection registrar scope that disables selection for the
   /// subtree.
@@ -292,12 +298,26 @@ abstract class SelectionContainerDelegate implements SelectionHandler, Selection
     return box.getTransformTo(ancestor);
   }
 
+  /// Whether the [SelectionContainer] has undergone layout and has a size.
+  ///
+  /// See also:
+  ///
+  ///  * [RenderBox.hasSize], which is used internally by this method.
+  bool get hasSize {
+    assert(
+    _selectionContainerContext?.findRenderObject() != null,
+    'The _selectionContainerContext must have a renderObject, such as after the first build has completed.',
+    );
+    final RenderBox box = _selectionContainerContext!.findRenderObject()! as RenderBox;
+    return box.hasSize;
+  }
+
   /// Gets the size of the [SelectionContainer] of this delegate.
   ///
   /// Can only be called after [SelectionContainer] is laid out.
   Size get containerSize {
     assert(
-      _selectionContainerContext?.findRenderObject() != null,
+      hasSize,
       'containerSize cannot be called before SelectionContainer is laid out.',
     );
     final RenderBox box = _selectionContainerContext!.findRenderObject()! as RenderBox;

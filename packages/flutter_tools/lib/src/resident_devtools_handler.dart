@@ -24,6 +24,19 @@ abstract class ResidentDevtoolsHandler {
   /// The current devtools server, or null if one is not running.
   DevToolsServerAddress? get activeDevToolsServer;
 
+  /// The Dart Tooling Daemon (DTD) URI for the DTD instance being hosted by
+  /// DevTools server.
+  ///
+  /// This will be null if the DevTools server is not served through Flutter
+  /// tools (e.g. if it is served from an IDE).
+  Uri? get dtdUri;
+
+  /// Whether to print the Dart Tooling Daemon URI.
+  ///
+  /// This will always return false when there is not a DTD instance being
+  /// served from the DevTools server.
+  bool get printDtdUri;
+
   /// Whether it's ok to announce the [activeDevToolsServer].
   ///
   /// This should only return true once all the devices have been notified
@@ -35,6 +48,7 @@ abstract class ResidentDevtoolsHandler {
   Future<void> serveAndAnnounceDevTools({
     Uri? devToolsServerAddress,
     required List<FlutterDevice?> flutterDevices,
+    bool isStartPaused = false,
   });
 
   bool launchDevToolsInBrowser({required List<FlutterDevice?> flutterDevices});
@@ -63,6 +77,12 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
   }
 
   @override
+  Uri? get dtdUri => _devToolsLauncher?.dtdUri;
+
+  @override
+  bool get printDtdUri => _devToolsLauncher?.printDtdUri ?? false;
+
+  @override
   bool get readyToAnnounce => _readyToAnnounce;
   bool _readyToAnnounce = false;
 
@@ -71,36 +91,73 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
   Future<void> serveAndAnnounceDevTools({
     Uri? devToolsServerAddress,
     required List<FlutterDevice?> flutterDevices,
+    bool isStartPaused = false,
   }) async {
     assert(!_readyToAnnounce);
     if (!_residentRunner.supportsServiceProtocol || _devToolsLauncher == null) {
       return;
     }
     if (devToolsServerAddress != null) {
-      _devToolsLauncher!.devToolsUrl = devToolsServerAddress;
+      _devToolsLauncher.devToolsUrl = devToolsServerAddress;
     } else {
-      await _devToolsLauncher!.serve();
+      await _devToolsLauncher.serve();
       _served = true;
     }
-    await _devToolsLauncher!.ready;
+    await _devToolsLauncher.ready;
     // Do not attempt to print debugger list if the connection has failed or if we're shutting down.
-    if (_devToolsLauncher!.activeDevToolsServer == null || _shutdown) {
+    if (_devToolsLauncher.activeDevToolsServer == null || _shutdown) {
       assert(!_readyToAnnounce);
       return;
     }
-    final List<FlutterDevice?> devicesWithExtension = await _devicesWithExtensions(flutterDevices);
-    await _maybeCallDevToolsUriServiceExtension(devicesWithExtension);
-    await _callConnectedVmServiceUriExtension(devicesWithExtension);
+
+    final Uri? devToolsUrl = _devToolsLauncher.devToolsUrl;
+    if (devToolsUrl != null) {
+      for (final FlutterDevice? device in flutterDevices) {
+        if (device == null) {
+          continue;
+        }
+        // Notify the DDS instances that there's a DevTools instance available so they can correctly
+        // redirect DevTools related requests.
+        device.device?.dds.setExternalDevToolsUri(devToolsUrl);
+      }
+    }
+
+    Future<void> callServiceExtensions() async {
+      final List<FlutterDevice?> devicesWithExtension = await _devicesWithExtensions(flutterDevices);
+      await Future.wait(
+        <Future<void>>[
+          _maybeCallDevToolsUriServiceExtension(devicesWithExtension),
+          _callConnectedVmServiceUriExtension(devicesWithExtension)
+        ]
+      );
+    }
+
+    // If the application is starting paused, we can't invoke service extensions
+    // as they're handled on the target app's paused isolate. Since invoking
+    // service extensions will block in this situation, we should wait to invoke
+    // them until after we've output the DevTools connection details.
+    if (!isStartPaused) {
+      await callServiceExtensions();
+    }
+
+    // This check needs to happen after the possible asynchronous call above,
+    // otherwise a shutdown event might be missed and the DevTools launcher may
+    // no longer be initialized.
     if (_shutdown) {
       // If we're shutting down, no point reporting the debugger list.
       return;
     }
+
     _readyToAnnounce = true;
-    assert(_devToolsLauncher!.activeDevToolsServer != null);
+    assert(_devToolsLauncher.activeDevToolsServer != null);
     if (_residentRunner.reportedDebuggers) {
       // Since the DevTools only just became available, we haven't had a chance to
       // report their URLs yet. Do so now.
-      _residentRunner.printDebuggerList(includeObservatory: false);
+      _residentRunner.printDebuggerList(includeVmService: false);
+    }
+
+    if (isStartPaused) {
+      await callServiceExtensions();
     }
   }
 
@@ -110,9 +167,9 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
     if (!_residentRunner.supportsServiceProtocol || _devToolsLauncher == null) {
       return false;
     }
-    if (_devToolsLauncher!.devToolsUrl == null) {
+    if (_devToolsLauncher.devToolsUrl == null) {
       _logger.startProgress('Waiting for Flutter DevTools to be served...');
-      unawaited(_devToolsLauncher!.ready.then((_) {
+      unawaited(_devToolsLauncher.ready.then((_) {
         _launchDevToolsForDevices(flutterDevices);
       }));
     } else {
@@ -256,7 +313,7 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
     }
     _shutdown = true;
     _readyToAnnounce = false;
-    await _devToolsLauncher!.close();
+    await _devToolsLauncher.close();
   }
 }
 
@@ -281,7 +338,11 @@ class NoOpDevtoolsHandler implements ResidentDevtoolsHandler {
   }
 
   @override
-  Future<void> serveAndAnnounceDevTools({Uri? devToolsServerAddress, List<FlutterDevice?>? flutterDevices}) async {
+  Future<void> serveAndAnnounceDevTools({
+    Uri? devToolsServerAddress,
+    List<FlutterDevice?>? flutterDevices,
+    bool isStartPaused = false,
+  }) async {
     return;
   }
 
@@ -295,6 +356,12 @@ class NoOpDevtoolsHandler implements ResidentDevtoolsHandler {
     wasShutdown = true;
     return;
   }
+
+  @override
+  Uri? get dtdUri => null;
+
+  @override
+  bool get printDtdUri => false;
 }
 
 /// Convert a [URI] with query parameters into a display format instead

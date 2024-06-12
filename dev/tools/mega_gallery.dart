@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Make `n` copies of flutter_gallery.
-
 import 'dart:io';
 
 import 'package:args/args.dart';
@@ -12,6 +10,7 @@ import 'package:path/path.dart' as path;
 /// If no `copies` param is passed in, we scale the generated app up to 60k lines.
 const int kTargetLineCount = 60 * 1024;
 
+/// Make `n` copies of flutter_gallery.
 void main(List<String> args) {
   // If we're run from the `tools` dir, set the cwd to the repo root.
   if (path.basename(Directory.current.path) == 'tools') {
@@ -86,8 +85,16 @@ void main(List<String> args) {
   pubspec = pubspec.replaceAll('../../packages/flutter', '../../../packages/flutter');
   _file(out, 'pubspec.yaml').writeAsStringSync(pubspec);
 
-  // Remove the (flutter_gallery specific) analysis_options.yaml file.
-  _file(out, 'analysis_options.yaml').deleteSync();
+  // Replace the (flutter_gallery specific) analysis_options.yaml file with a default one.
+  _file(out, 'analysis_options.yaml').writeAsStringSync(
+    '''
+analyzer:
+  errors:
+    # See analysis_options.yaml in the flutter root for context.
+    deprecated_member_use: ignore
+    deprecated_member_use_from_same_package: ignore
+'''
+  );
 
   _file(out, '.dartignore').writeAsStringSync('');
 

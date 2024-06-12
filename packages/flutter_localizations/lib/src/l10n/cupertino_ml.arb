@@ -21,5 +21,11 @@
   "selectAllButtonLabel": "എല്ലാം തിരഞ്ഞെടുക്കുക",
   "tabSemanticsLabel": "$tabCount ടാബിൽ $tabIndex-ാമത്തേത്",
   "modalBarrierDismissLabel": "നിരസിക്കുക",
-  "searchTextFieldPlaceholderLabel": "തിരയുക"
+  "searchTextFieldPlaceholderLabel": "തിരയുക",
+  "noSpellCheckReplacementsLabel": "റീപ്ലേസ്‌മെന്റുകളൊന്നും കണ്ടെത്തിയില്ല",
+  "menuDismissLabel": "മെനു ഡിസ്മിസ് ചെയ്യുക",
+  "lookUpButtonLabel": "മുകളിലേക്ക് നോക്കുക",
+  "searchWebButtonLabel": "വെബിൽ തിരയുക",
+  "shareButtonLabel": "പങ്കിടുക...",
+  "clearButtonLabel": "Clear"
 }

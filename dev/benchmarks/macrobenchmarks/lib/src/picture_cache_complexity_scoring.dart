@@ -34,7 +34,7 @@ class PictureCacheComplexityScoringPage extends StatelessWidget {
   }
 
   // For now we just test a single case where the widget being cached is actually
-  // relatively cheap to rasterise, and so should not be in the cache.
+  // relatively cheap to rasterize, and so should not be in the cache.
   //
   // Eventually we can extend this to add new test cases based on the tab name.
   Widget _buildComplexityScoringWidgets(String name) {
