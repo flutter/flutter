@@ -466,7 +466,7 @@ class Context {
       // The "prepare" command runs in a pre-action script, which doesn't always
       // filter the "ARCHS" build setting to only the active arch. To workaround,
       // if "ONLY_ACTIVE_ARCH" is true and the "NATIVE_ARCH" is arm, assume the
-      // active  arch is also arm to improve caching. If this assumption is
+      // active arch is also arm to improve caching. If this assumption is
       // incorrect, it will later be corrected by the "build" command.
       if (environment['ONLY_ACTIVE_ARCH'] == 'YES' && environment['NATIVE_ARCH'] != null) {
         if (environment['NATIVE_ARCH']!.contains('arm')) {
