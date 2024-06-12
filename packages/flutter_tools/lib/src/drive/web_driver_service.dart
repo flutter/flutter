@@ -160,15 +160,16 @@ class WebDriverService extends DriverService {
     late async_io.WebDriver webDriver;
     final Browser browser = Browser.fromCliName(browserName);
     try {
+      desiredCapabilities = getDesiredCapabilities(
+        browser,
+        headless,
+        webBrowserFlags: webBrowserFlags,
+        chromeBinary: chromeBinary,
+      );
       if (allBrowsersDesiredCapabilities != null) {
-        desiredCapabilities = allBrowsersDesiredCapabilities[browser.name]! as Map<String, Object?>;
-      } else {
-        desiredCapabilities = getDesiredCapabilities(
-          browser,
-          headless,
-          webBrowserFlags: webBrowserFlags,
-          chromeBinary: chromeBinary,
-        );
+        (allBrowsersDesiredCapabilities[browser.name]! as Map<String, Object?>).forEach((String key, Object? value) {
+          desiredCapabilities![key] = value;
+        });
       }
       webDriver = await async_io.createDriver(
         uri: Uri.parse('http://localhost:$driverPort/'),
