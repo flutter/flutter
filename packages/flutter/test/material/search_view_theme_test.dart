@@ -194,7 +194,7 @@ void main() {
 
       final ConstrainedBox constrainedBox = tester.widget<ConstrainedBox>(find.descendant(of: findViewContent(), matching: find.byType(ConstrainedBox)).first);
       expect(constrainedBox.constraints.maxWidth, 250.0);
-      expect(constrainedBox.constraints.maxHeight, 434.0);
+      expect(constrainedBox.constraints.maxHeight, 450.0);
 
       final Text hintText = tester.widget(find.text('hint text'));
       expect(hintText.style?.color, headerHintStyle.color);
