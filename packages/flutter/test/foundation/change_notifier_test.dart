@@ -774,5 +774,31 @@ void main() {
       );
       expect(computedNotifier.value, null);
     });
+
+    test(
+      'when dispose some listenable and change another should emit normally',
+      () {
+        final ValueNotifier<int> notifier1 = ValueNotifier<int>(5);
+        final ValueNotifier<int> notifier2 = ValueNotifier<int>(10);
+
+        final ComputedNotifier<int> computedNotifier = ComputedNotifier<int>(
+            <ValueNotifier<int>>[notifier1, notifier2], () {
+          return notifier1.value + notifier2.value;
+        });
+
+        int listenerValue = computedNotifier.value;
+        computedNotifier.addListener(
+          () => listenerValue = computedNotifier.value,
+        );
+        expect(listenerValue, 15);
+
+        notifier1.value = 10;
+        expect(listenerValue, 20);
+
+        notifier1.dispose();
+        notifier2.value = 20;
+        expect(listenerValue, 30);
+      },
+    );
   });
 }
