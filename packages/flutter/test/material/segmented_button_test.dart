@@ -1117,7 +1117,7 @@ void main() {
           p2: const Offset(166.8000030517578, tapTargetSize - 4.0),
         ),
     );
-  });
+  }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
 }
 
 Set<MaterialState> enabled = const <MaterialState>{};
