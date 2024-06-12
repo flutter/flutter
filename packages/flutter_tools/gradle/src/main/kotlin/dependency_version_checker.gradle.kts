@@ -104,6 +104,7 @@ class DependencyVersionChecker {
          * we treat it as within the range for the purpose of this check.
          */
         fun checkDependencyVersions(project: Project) {
+            project.extra.set("failedDependencyChecks", false)
             var agpVersion: Version?
             var kgpVersion: Version?
 

@@ -340,17 +340,19 @@ class FlutterPlugin implements Plugin<Project> {
                         "dependency_version_checker.gradle.kts")
                 project.apply from: dependencyCheckerPluginPath
             } catch (Exception e) {
-                // If the exception was thrown by us in the dependency version checker plugin then
-                // re-throw it.
-                if (project.hasProperty("failedDependencyChecks")) {
+
+                if (!project.failedDependencyChecks) {
+                    // Dependency version checking has failed. Log and continue
+                    // the build.
+                    project.logger.error("Warning: Flutter was unable to detect project Gradle, Java, " +
+                            "AGP, and KGP versions. Skipping dependency version checking. Error was: "
+                            + e)
+                }
+                else {
+                    // If the exception was thrown by us in the dependency version checker plugin then
+                    // re-throw it.
                     throw e
                 }
-
-                // Otherwise, dependency version checking has failed. Log and continue
-                // the build.
-                project.logger.error("Warning: Flutter was unable to detect project Gradle, Java, " +
-                        "AGP, and KGP versions. Skipping dependency version checking. Error was: "
-                        + e)
             }
         }
 
