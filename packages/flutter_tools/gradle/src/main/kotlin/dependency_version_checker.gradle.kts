@@ -235,6 +235,7 @@ class DependencyVersionChecker {
                         errorGradleVersion.toString(),
                         getPotentialGradleFix(project.getRootDir().getPath())
                     )
+                project.extra.set("failedDependencyChecks", true)
                 throw DependencyValidationException(errorMessage)
             } else if (version < warnGradleVersion) {
                 val warnMessage: String =
@@ -260,6 +261,7 @@ class DependencyVersionChecker {
                         errorJavaVersion.toString(),
                         POTENTIAL_JAVA_FIX
                     )
+                project.extra.set("failedDependencyChecks", true)
                 throw DependencyValidationException(errorMessage)
             } else if (version < warnJavaVersion) {
                 val warnMessage: String =
@@ -285,6 +287,7 @@ class DependencyVersionChecker {
                         errorAGPVersion.toString(),
                         getPotentialAGPFix(project.getRootDir().getPath())
                     )
+                project.extra.set("failedDependencyChecks", true)
                 throw DependencyValidationException(errorMessage)
             } else if (version < warnAGPVersion) {
                 val warnMessage: String =
@@ -310,6 +313,7 @@ class DependencyVersionChecker {
                         errorKGPVersion.toString(),
                         getPotentialKGPFix(project.getRootDir().getPath())
                     )
+                project.extra.set("failedDependencyChecks", true)
                 throw DependencyValidationException(errorMessage)
             } else if (version < warnKGPVersion) {
                 val warnMessage: String =
@@ -358,4 +362,10 @@ class Version(val major: Int, val minor: Int, val patch: Int) : Comparable<Versi
     override fun toString(): String {
         return major.toString() + "." + minor.toString() + "." + patch.toString()
     }
+}
+
+// Custom error for when the dependency_version_checker.kts script finds a dependency out of
+// the defined support range.
+class DependencyValidationException(message: String? = null, cause: Throwable? = null) : Exception(message, cause) {
+    constructor(cause: Throwable) : this(null, cause)
 }
