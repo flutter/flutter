@@ -303,14 +303,10 @@ class DriveCommand extends RunCommandBase {
         );
       }
 
-      // Extract desiredCapabilities from file if specifying --web-desired-capablities-from-file
       final String? desiredCapabilitiesJsonFilePath =
           stringArg('web-desired-capabilities-from-file');
-      Map<String, Object?>? desiredCapabilitiesJsonMap;
-      if (desiredCapabilitiesJsonFilePath!=null && _fileSystem.isFileSync(desiredCapabilitiesJsonFilePath)) {
-        final String desiredCapabilitiesJsonRaw = _fileSystem.file(desiredCapabilitiesJsonFilePath).readAsStringSync();
-        desiredCapabilitiesJsonMap = json.decode(desiredCapabilitiesJsonRaw) as Map<String, Object?>;
-      }
+      final Map<String, Object?>? desiredCapabilities = _extractDesiredCapabilities(desiredCapabilitiesJsonFilePath);
+
       final Future<int> testResultFuture = driverService.startTest(
         testFile,
         stringsArg('test-arguments'),
@@ -326,7 +322,7 @@ class DriveCommand extends RunCommandBase {
           : null,
         androidEmulator: boolArg('android-emulator'),
         profileMemory: stringArg('profile-memory'),
-        allBrowsersDesiredCapabilities: desiredCapabilitiesJsonMap,
+        allBrowsersDesiredCapabilities: desiredCapabilities,
       );
 
       if (screenshot != null) {
@@ -483,4 +479,15 @@ class DriveCommand extends RunCommandBase {
       _logger.printError('Error taking screenshot: $error');
     }
   }
+
+  /// Extract desiredCapabilities from file if specifying --web-desired-capabilities-from-file.
+  Map<String, Object?>? _extractDesiredCapabilities(String? filepath) {
+    Map<String, Object?>? desiredCapabilitiesJsonMap;
+    if (filepath != null && _fileSystem.isFileSync(filepath)) {
+      final String desiredCapabilitiesJsonRaw = _fileSystem.file(filepath).readAsStringSync();
+      desiredCapabilitiesJsonMap = json.decode(desiredCapabilitiesJsonRaw) as Map<String, Object?>;
+    }
+    return desiredCapabilitiesJsonMap;
+  }
+
 }
