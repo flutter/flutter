@@ -958,6 +958,12 @@ const String kBuildNumber = 'BuildNumber';
 /// Will be "build" when building and "install" when archiving.
 const String kXcodeAction = 'Action';
 
+/// The define of the Xcode build Pre-action.
+///
+/// Will be "PrepareFramework" when copying the Flutter/FlutterMacOS framework
+/// to the BUILT_PRODUCTS_DIR prior to the build.
+const String kXcodePreAction = 'PreBuildAction';
+
 final Converter<String, String> _defineEncoder = utf8.encoder.fuse(base64.encoder);
 final Converter<String, String> _defineDecoder = base64.decoder.fuse(utf8.decoder);
 
