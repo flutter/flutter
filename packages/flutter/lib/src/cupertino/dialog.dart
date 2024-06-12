@@ -65,8 +65,9 @@ const TextStyle _kActionSheetContentStyle = TextStyle(
   inherit: false,
   fontSize: 13.0,
   fontWeight: FontWeight.w400,
-  color: _kActionSheetContentTextColor,
   textBaseline: TextBaseline.alphabetic,
+  // The `color` is configured by _kActionSheetContentTextColor to be dynamic on
+  // context.
 );
 
 // Generic constants shared between Dialog and ActionSheet.
@@ -112,27 +113,45 @@ const Color _kDialogPressedColor = CupertinoDynamicColor.withBrightness(
 // Translucent light gray that is painted on top of the blurred backdrop as the
 // background color of a pressed button.
 // Eyeballed from iOS 17 simulator.
-const Color _kActionSheetPressedColor = Color(0xCAE0E0E0);
+const Color _kActionSheetPressedColor = CupertinoDynamicColor.withBrightness(
+  color: Color(0xCAE0E0E0),
+  darkColor: Color(0xC1515151),
+);
 
-const Color _kActionSheetCancelColor = Color(0xFFFFFFFF);
-const Color _kActionSheetCancelPressedColor = Color(0xFFECECEC);
+const Color _kActionSheetCancelColor = CupertinoDynamicColor.withBrightness(
+  color: Color(0xFFFFFFFF),
+  darkColor: Color(0xFF2C2C2C),
+);
+const Color _kActionSheetCancelPressedColor = CupertinoDynamicColor.withBrightness(
+  color: Color(0xFFECECEC),
+  darkColor: Color(0xFF494949),
+);
 
 // Translucent, very light gray that is painted on top of the blurred backdrop
 // as the action sheet's background color.
 // TODO(LongCatIsLooong): https://github.com/flutter/flutter/issues/39272. Use
 // System Materials once we have them.
 // Eyeballed from iOS 17 simulator.
-const Color _kActionSheetBackgroundColor = Color(0xC8FCFCFC);
+const Color _kActionSheetBackgroundColor = CupertinoDynamicColor.withBrightness(
+  color: Color(0xC8FCFCFC),
+  darkColor: Color(0xBE292929),
+);
 
 // The gray color used for text that appears in the title area.
 // Eyeballed from iOS 17 simulator.
-const Color _kActionSheetContentTextColor = Color(0x851D1D1D);
+const Color _kActionSheetContentTextColor = CupertinoDynamicColor.withBrightness(
+  color: Color(0x851D1D1D),
+  darkColor: Color(0x96F1F1F1),
+);
 
 // Translucent gray that is painted on top of the blurred backdrop in the gap
 // areas between the content section and actions section, as well as between
 // buttons.
 // Eyeballed from iOS 17 simulator.
-const Color _kActionSheetButtonDividerColor = Color(0xD4C9C9C9);
+const Color _kActionSheetButtonDividerColor = CupertinoDynamicColor.withBrightness(
+  color: Color(0xD4C9C9C9),
+  darkColor: Color(0xD57D7D7D),
+);
 
 // The alert dialog layout policy changes depending on whether the user is using
 // a "regular" font size vs a "large" font size. This is a spectrum. There are
@@ -841,6 +860,9 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
 
   Widget _buildContent(BuildContext context) {
     final List<Widget> content = <Widget>[];
+    final TextStyle textStyle = _kActionSheetContentStyle.copyWith(
+      color: CupertinoDynamicColor.resolve(_kActionSheetContentTextColor, context),
+    );
     if (hasContent) {
       final Widget titleSection = _CupertinoAlertContentSection(
         title: widget.title,
@@ -859,11 +881,11 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
           top: widget.title == null ? _kActionSheetContentVerticalPadding : 0.0,
         ),
         titleTextStyle: widget.message == null
-            ? _kActionSheetContentStyle
-            : _kActionSheetContentStyle.copyWith(fontWeight: FontWeight.w600),
+            ? textStyle
+            : textStyle.copyWith(fontWeight: FontWeight.w600),
         messageTextStyle: widget.title == null
-            ? _kActionSheetContentStyle.copyWith(fontWeight: FontWeight.w600)
-            : _kActionSheetContentStyle,
+            ? textStyle.copyWith(fontWeight: FontWeight.w600)
+            : textStyle,
         additionalPaddingBetweenTitleAndMessage: const EdgeInsets.only(top: 4.0),
       );
       content.add(Flexible(child: titleSection));
@@ -908,7 +930,7 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
               hasContent: hasContent,
               contentSection: Builder(builder: _buildContent),
               actions: widget.actions,
-              dividerColor: _kActionSheetButtonDividerColor,
+              dividerColor: CupertinoDynamicColor.resolve(_kActionSheetButtonDividerColor, context),
             ),
           ),
         ),
