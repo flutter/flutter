@@ -890,87 +890,109 @@ class IOSDevice extends Device {
 
       return launchSuccess;
     } else {
-      _logger.printStatus(
-        'You may be prompted to give access to control Xcode. Flutter uses Xcode '
-        'to run your app. If access is not allowed, you can change this through '
-        'your Settings > Privacy & Security > Automation.',
-      );
-      final int launchTimeout = isWirelesslyConnected ? 45 : 30;
-      final Timer timer = Timer(discoveryTimeout ?? Duration(seconds: launchTimeout), () {
-        _logger.printError(
-          'Xcode is taking longer than expected to start debugging the app. '
-          'Ensure the project is opened in Xcode.',
+      final Version? xcodeVersion = globals.xcode?.currentVersion;
+      if (xcodeVersion != null && xcodeVersion.major >= 16) {
+        // Install app to device
+        final bool installSuccess = await _coreDeviceControl.installApp(
+          deviceId: id,
+          bundlePath: package.deviceBundlePath,
         );
-      });
-
-      XcodeDebugProject debugProject;
-      final FlutterProject flutterProject = FlutterProject.current();
-
-      if (package is PrebuiltIOSApp) {
-        debugProject = await _xcodeDebug.createXcodeProjectWithCustomBundle(
-          package.deviceBundlePath,
-          templateRenderer: globals.templateRenderer,
-          verboseLogging: _logger.isVerbose,
-        );
-      } else if (package is BuildableIOSApp) {
-        // Before installing/launching/debugging with Xcode, update the build
-        // settings to use a custom configuration build directory so Xcode
-        // knows where to find the app bundle to launch.
-        final Directory bundle = _fileSystem.directory(
-          package.deviceBundlePath,
-        );
-        await updateGeneratedXcodeProperties(
-          project: flutterProject,
-          buildInfo: debuggingOptions.buildInfo,
-          targetOverride: mainPath,
-          configurationBuildDir: bundle.parent.absolute.path,
-        );
-
-        final IosProject project = package.project;
-        final XcodeProjectInfo? projectInfo = await project.projectInfo();
-        if (projectInfo == null) {
-          globals.printError('Xcode project not found.');
-          return false;
-        }
-        if (project.xcodeWorkspace == null) {
-          globals.printError('Unable to get Xcode workspace.');
-          return false;
-        }
-        final String? scheme = projectInfo.schemeFor(debuggingOptions.buildInfo);
-        if (scheme == null) {
-          projectInfo.reportFlavorNotFoundAndExit();
+        if (!installSuccess) {
+          return installSuccess;
         }
 
-        _xcodeDebug.ensureXcodeDebuggerLaunchAction(project.xcodeProjectSchemeFile(scheme: scheme));
-
-        debugProject = XcodeDebugProject(
-          scheme: scheme,
-          xcodeProject: project.xcodeProject,
-          xcodeWorkspace: project.xcodeWorkspace!,
-          hostAppProjectName: project.hostAppProjectName,
-          expectedConfigurationBuildDir: bundle.parent.absolute.path,
-          verboseLogging: _logger.isVerbose,
+        // Launch app on device and attach with lldb
+        final bool launchSuccess = await _coreDeviceControl.launchAndAttach(
+          deviceId: id,
+          bundleId: package.id,
+          launchArguments: launchArguments,
+          startStopped: true,
         );
+
+        return launchSuccess;
       } else {
-        // This should not happen. Currently, only PrebuiltIOSApp and
-        // BuildableIOSApp extend from IOSApp.
-        _logger.printError('IOSApp type ${package.runtimeType} is not recognized.');
-        return false;
+        _logger.printStatus(
+          'You may be prompted to give access to control Xcode. Flutter uses Xcode '
+          'to run your app. If access is not allowed, you can change this through '
+          'your Settings > Privacy & Security > Automation.',
+        );
+        final int launchTimeout = isWirelesslyConnected ? 45 : 30;
+        final Timer timer = Timer(discoveryTimeout ?? Duration(seconds: launchTimeout), () {
+          _logger.printError(
+            'Xcode is taking longer than expected to start debugging the app. '
+            'Ensure the project is opened in Xcode.',
+          );
+        });
+
+        XcodeDebugProject debugProject;
+        final FlutterProject flutterProject = FlutterProject.current();
+
+        if (package is PrebuiltIOSApp) {
+          debugProject = await _xcodeDebug.createXcodeProjectWithCustomBundle(
+            package.deviceBundlePath,
+            templateRenderer: globals.templateRenderer,
+            verboseLogging: _logger.isVerbose,
+          );
+        } else if (package is BuildableIOSApp) {
+          // Before installing/launching/debugging with Xcode, update the build
+          // settings to use a custom configuration build directory so Xcode
+          // knows where to find the app bundle to launch.
+          final Directory bundle = _fileSystem.directory(
+            package.deviceBundlePath,
+          );
+          await updateGeneratedXcodeProperties(
+            project: flutterProject,
+            buildInfo: debuggingOptions.buildInfo,
+            targetOverride: mainPath,
+            configurationBuildDir: bundle.parent.absolute.path,
+          );
+
+          final IosProject project = package.project;
+          final XcodeProjectInfo? projectInfo = await project.projectInfo();
+          if (projectInfo == null) {
+            globals.printError('Xcode project not found.');
+            return false;
+          }
+          if (project.xcodeWorkspace == null) {
+            globals.printError('Unable to get Xcode workspace.');
+            return false;
+          }
+          final String? scheme = projectInfo.schemeFor(debuggingOptions.buildInfo);
+          if (scheme == null) {
+            projectInfo.reportFlavorNotFoundAndExit();
+          }
+
+          _xcodeDebug.ensureXcodeDebuggerLaunchAction(project.xcodeProjectSchemeFile(scheme: scheme));
+
+          debugProject = XcodeDebugProject(
+            scheme: scheme,
+            xcodeProject: project.xcodeProject,
+            xcodeWorkspace: project.xcodeWorkspace!,
+            hostAppProjectName: project.hostAppProjectName,
+            expectedConfigurationBuildDir: bundle.parent.absolute.path,
+            verboseLogging: _logger.isVerbose,
+          );
+        } else {
+          // This should not happen. Currently, only PrebuiltIOSApp and
+          // BuildableIOSApp extend from IOSApp.
+          _logger.printError('IOSApp type ${package.runtimeType} is not recognized.');
+          return false;
+        }
+
+        final bool debugSuccess = await _xcodeDebug.debugApp(
+          project: debugProject,
+          deviceId: id,
+          launchArguments:launchArguments,
+        );
+        timer.cancel();
+
+        // Kill Xcode on shutdown when running from CI
+        if (debuggingOptions.usingCISystem) {
+          shutdownHooks.addShutdownHook(() => _xcodeDebug.exit(force: true));
+        }
+
+        return debugSuccess;
       }
-
-      final bool debugSuccess = await _xcodeDebug.debugApp(
-        project: debugProject,
-        deviceId: id,
-        launchArguments:launchArguments,
-      );
-      timer.cancel();
-
-      // Kill Xcode on shutdown when running from CI
-      if (debuggingOptions.usingCISystem) {
-        shutdownHooks.addShutdownHook(() => _xcodeDebug.exit(force: true));
-      }
-
-      return debugSuccess;
     }
   }
 
@@ -987,6 +1009,7 @@ class IOSDevice extends Device {
     if (_xcodeDebug.debugStarted) {
       return _xcodeDebug.exit();
     }
+    await _coreDeviceControl.stopApp(deviceId: id);
     return false;
   }
 

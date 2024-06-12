@@ -10,9 +10,11 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
+import '../base/version.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../macos/xcode.dart';
+import 'lldb.dart';
 
 /// A wrapper around the `devicectl` command line tool.
 ///
@@ -36,6 +38,11 @@ class IOSCoreDeviceControl {
   final ProcessUtils _processUtils;
   final Xcode _xcode;
   final FileSystem _fileSystem;
+
+  late final LLDB _lldb = LLDB(
+    logger: _logger,
+    processUtils: _processUtils,
+  );
 
   /// When the `--timeout` flag is used with `devicectl`, it must be at
   /// least 5 seconds. If lower than 5 seconds, `devicectl` will error and not
@@ -313,14 +320,15 @@ class IOSCoreDeviceControl {
     }
   }
 
-  Future<bool> launchApp({
+  Future<IOSCoreDeviceLaunchResult?> _launchApp({
     required String deviceId,
     required String bundleId,
     List<String> launchArguments = const <String>[],
+    bool startStopped = false,
   }) async {
     if (!_xcode.isDevicectlInstalled) {
       _logger.printError('devicectl is not installed.');
-      return false;
+      return null;
     }
 
     final Directory tempDirectory = _fileSystem.systemTempDirectory.createTempSync('core_devices.');
@@ -335,8 +343,125 @@ class IOSCoreDeviceControl {
       'launch',
       '--device',
       deviceId,
+      if (startStopped) '--start-stopped',
       bundleId,
       if (launchArguments.isNotEmpty) ...launchArguments,
+      '--json-output',
+      output.path,
+    ];
+
+    try {
+      await _processUtils.run(command, throwOnError: true);
+      final String stringOutput = output.readAsStringSync();
+
+      try {
+        return IOSCoreDeviceLaunchResult.fromJson(json.decode(stringOutput) as Map<String, Object?>);
+      } on FormatException {
+        // We failed to parse the devicectl output, or it returned junk.
+        _logger.printError('devicectl returned non-JSON response: $stringOutput');
+        return null;
+      }
+    } on ProcessException catch (err) {
+      _logger.printError('Error executing devicectl: $err');
+      return null;
+    } finally {
+      tempDirectory.deleteSync(recursive: true);
+    }
+  }
+
+  Future<bool> launchApp({
+    required String deviceId,
+    required String bundleId,
+    List<String> launchArguments = const <String>[],
+    bool startStopped = false,
+  }) async {
+    final IOSCoreDeviceLaunchResult? launchResult = await _launchApp(
+      bundleId: bundleId,
+      deviceId: deviceId,
+      launchArguments: launchArguments,
+      startStopped: startStopped,
+    );
+
+    if (launchResult == null || launchResult.outcome != 'success') {
+      return false;
+    }
+    return true;
+  }
+
+  Future<bool> launchAndAttach({
+    required String deviceId,
+    required String bundleId,
+    List<String> launchArguments = const <String>[],
+    bool startStopped = false,
+  }) async {
+    final Version? xcodeVersion = _xcode.currentVersion;
+    if (xcodeVersion == null || xcodeVersion.major < 16) {
+      _logger.printTrace('Launching and attaching using devicectl is only compatible with Xcode 16 and greater.');
+      return false;
+    }
+
+    final IOSCoreDeviceLaunchResult? launchResult = await _launchApp(
+      bundleId: bundleId,
+      deviceId: deviceId,
+      launchArguments: launchArguments,
+      startStopped: startStopped,
+    );
+
+    if (launchResult == null || launchResult.outcome != 'success') {
+      return false;
+    }
+
+    final IOSCoreDeviceRunningProcess? launchedProcess = launchResult.process;
+    final int? processId = launchedProcess?.processIdentifier;
+    if (launchedProcess == null || processId == null) {
+      return false;
+    }
+
+    final bool attachStatus = await _lldb.launchAndAttach(deviceId, processId);
+
+    // If it fails to attach with lldb, kill the launched process so it doesn't stay hanging.
+    if (!attachStatus) {
+      await stopApp(deviceId: deviceId, processId: processId);
+      return false;
+    }
+    return attachStatus;
+  }
+
+  Future<bool> stopApp({
+    required String deviceId,
+    int? processId,
+  }) async {
+    int? processToStop;
+    if (_lldb.isRunning) {
+      processToStop = _lldb.processId;
+      // Exit the lldb process so it doesn't process any kill signals.
+      _lldb.exit();
+    } else {
+      processToStop = processId;
+    }
+
+    // There is no process to stop, so return true.
+    if (processToStop == null) {
+      return true;
+    }
+
+    // Killing the lldb process may not kill the app process. Kill it with
+    // devicectl to ensure it stops.
+    final Directory tempDirectory = _fileSystem.systemTempDirectory.createTempSync('core_devices.');
+    final File output = tempDirectory.childFile('launch_results.json');
+    output.createSync();
+
+    final List<String> command = <String>[
+      ..._xcode.xcrunCommand(),
+      'devicectl',
+      'device',
+      'process',
+      'terminate',
+      '--device',
+      deviceId,
+      '--pid',
+      processToStop.toString(),
+      '--kill',
       '--json-output',
       output.path,
     ];
@@ -844,4 +969,78 @@ class IOSCoreDeviceInstalledApp {
   final bool? removable;
   final String? url;
   final String? version;
+}
+
+class IOSCoreDeviceLaunchResult {
+  IOSCoreDeviceLaunchResult._({
+    required this.outcome,
+    required this.process,
+  });
+
+  /// Parse JSON from `devicectl device process launch --device <uuid|ecid|udid|name> <bundle-identifier-or-path> --json-output`.
+  ///
+  /// Example:
+  /// {
+  ///   "info" : {
+  ///     ...
+  ///     "outcome" : "success",
+  ///   },
+  ///   "result" : {
+  ///     ...
+  ///     "process" : {
+  ///       ...
+  ///       "executable" : "file:////private/var/containers/Bundle/Application/D12EFD3B-4567-890E-B1F2-23456DAA789A/Runner.app/Runner",
+  ///       "processIdentifier" : 14306
+  ///     }
+  ///   }
+  /// }
+  factory IOSCoreDeviceLaunchResult.fromJson(Map<String, Object?> data) {
+    String? outcome;
+    IOSCoreDeviceRunningProcess? process;
+    final Object? info = data['info'];
+    if (info is Map<String, Object?>) {
+      outcome = info['outcome'] as String?;
+    }
+
+    final Object? result = data['result'];
+    if (result is Map<String, Object?>) {
+      final Object? processObject = result['process'];
+      if (processObject is Map<String, Object?>) {
+        process = IOSCoreDeviceRunningProcess.fromJson(processObject);
+      }
+    }
+
+    return IOSCoreDeviceLaunchResult._(
+      outcome: outcome,
+      process: process,
+    );
+  }
+
+  final String? outcome;
+  final IOSCoreDeviceRunningProcess? process;
+}
+
+class IOSCoreDeviceRunningProcess {
+  IOSCoreDeviceRunningProcess._({
+    required this.executable,
+    required this.processIdentifier,
+  });
+
+  //// Parse `process` section of JSON from `devicectl device process launch --device <uuid|ecid|udid|name> <bundle-identifier-or-path> --json-output`.
+  ///
+  /// Example:
+  ///     "process" : {
+  ///       ...
+  ///       "executable" : "file:////private/var/containers/Bundle/Application/D12EFD3B-4567-890E-B1F2-23456DAA789A/Runner.app/Runner",
+  ///       "processIdentifier" : 14306
+  ///     }
+  factory IOSCoreDeviceRunningProcess.fromJson(Map<String, Object?> data) {
+    return IOSCoreDeviceRunningProcess._(
+      executable: data['executable']?.toString(),
+      processIdentifier: data['processIdentifier'] is int? ? data['processIdentifier'] as int? : null,
+    );
+  }
+
+  final String? executable;
+  final int? processIdentifier;
 }
