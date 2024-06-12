@@ -17,12 +17,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/semantics_tester.dart';
 
-final Finder actionsSection = find.byElementPredicate(
-  (Element element) {
-    return element.widget.runtimeType.toString() == '_ActionSheetActionSection';
-  },
-);
-
 void main() {
   testWidgets('Verify that a tap on modal barrier dismisses an action sheet', (WidgetTester tester) async {
     await tester.pumpWidget(
