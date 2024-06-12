@@ -275,7 +275,7 @@ void main() {
 
     final Map<String, Object?> allAdditionalCapabilities = <String, Object?>{
       Browser.chrome.name: <String, Map<String, Map<String, int>>>{
-        'goog:chromeOptions': {
+        'goog:chromeOptions': <String, Map<String, int>>{
           'prefs': <String, int>{
             'profile.default_content_setting_values.media_stream_mic': 1,
             'profile.default_content_setting_values.media_stream_camera': 1,
