@@ -559,9 +559,13 @@ void updateShorebirdYaml(BuildInfo buildInfo, BuildableIOSApp app) {
     Directory parent = shorebirdYaml.parent;
 
     int i = 0;
-    // The max depth is just a hard limit to prevent the cli from going to far behind.
+    // The max depth is just a hard limit to prevent the cli from going too far back in the
+    // folder tree and unintentionally "invading" a user folder that isn't the project. 
+    //
     // This limit should never be reached though, since at least the `Applications` or
     // `Products` folder should exist, no matter what changed in the app.
+    // This is really just an overcautious from our side to make sure we never
+    // access files that we don't need.
     const int maxDepth = 7;
     while (!parent.existsSync() && i < maxDepth) {
       parent = parent.parent;
