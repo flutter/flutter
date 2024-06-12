@@ -7,6 +7,8 @@
 @Tags(<String>['reduced-test-set'])
 library;
 
+import 'dart:ui' show ImageFilter;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -56,6 +58,105 @@ void main() {
 
     // Expect the middle of the title to be exactly in the middle of the screen.
     expect(tester.getCenter(find.text('Page 2')).dx, 400.0);
+  });
+
+  testWidgets('Opaque background does not add blur effects, non-opaque background adds blur effects', (WidgetTester tester) async {
+    const CupertinoDynamicColor background = CupertinoDynamicColor.withBrightness(
+      color: Color(0xFFE5E5E5),
+      darkColor: Color(0xF3E5E5E5),
+    );
+
+    final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        theme: const CupertinoThemeData(brightness: Brightness.light),
+        home: CupertinoPageScaffold(
+          navigationBar: const CupertinoNavigationBar(
+            middle: Text('Title'),
+            backgroundColor: background,
+          ),
+          child: ListView(
+            controller: scrollController,
+            children: const <Widget>[
+              Placeholder(),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    scrollController.jumpTo(100.0);
+    await tester.pump();
+
+    expect(
+      tester.widget(find.byType(BackdropFilter)),
+      isA<BackdropFilter>().having((BackdropFilter filter) => filter.filter, 'filter', ImageFilter.blur()),
+    );
+    expect(find.byType(CupertinoNavigationBar), paints..rect(color: background.color));
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        theme: const CupertinoThemeData(brightness: Brightness.dark),
+        home: CupertinoPageScaffold(
+          navigationBar: const CupertinoNavigationBar(
+            middle: Text('Title'),
+            backgroundColor: background,
+          ),
+          child: ListView(
+            controller: scrollController,
+            children: const <Widget>[
+              Placeholder(),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    scrollController.jumpTo(100.0);
+    await tester.pump();
+
+    expect(
+      tester.widget(find.byType(BackdropFilter)),
+      isA<BackdropFilter>().having((BackdropFilter f) => f.filter, 'filter', ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0)),
+    );
+    expect(find.byType(CupertinoNavigationBar), paints..rect(color: background.darkColor));
+  });
+
+  testWidgets("Background doesn't add blur effect when no content is scrolled under", (WidgetTester test) async {
+    final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
+
+    await test.pumpWidget(
+      CupertinoApp(
+        theme: const CupertinoThemeData(brightness: Brightness.light),
+        home: CupertinoPageScaffold(
+          navigationBar: const CupertinoNavigationBar(
+            middle: Text('Title'),
+          ),
+          child: ListView(
+            controller: scrollController,
+            children: const <Widget>[
+              Placeholder(),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      test.widget(find.byType(BackdropFilter)),
+      isA<BackdropFilter>().having((BackdropFilter filter) => filter.filter, 'filter', ImageFilter.blur()),
+    );
+
+    scrollController.jumpTo(100.0);
+    await test.pump();
+
+    expect(
+      test.widget(find.byType(BackdropFilter)),
+      isA<BackdropFilter>().having((BackdropFilter filter) => filter.filter, 'filter', ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0)),
+    );
   });
 
   testWidgets('Nav bar displays correctly', (WidgetTester tester) async {
