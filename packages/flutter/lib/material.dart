@@ -46,6 +46,7 @@ export 'src/material/button_theme.dart';
 export 'src/material/calendar_date_picker.dart';
 export 'src/material/card.dart';
 export 'src/material/card_theme.dart';
+export 'src/material/carousel.dart';
 export 'src/material/checkbox.dart';
 export 'src/material/checkbox_list_tile.dart';
 export 'src/material/checkbox_theme.dart';
