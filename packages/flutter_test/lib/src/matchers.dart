@@ -2264,7 +2264,7 @@ class _MatchesSemanticsData extends Matcher {
     // Actions
     required bool? hasTapAction,
     // TODO(gspencergoog): Once this has landed, and customer tests have been
-    // updated, remove the ignore below. hasFocusAction.
+    // updated, remove the ignore below.
     // https://github.com/flutter/flutter/issues/149842
     // ignore: avoid_unused_constructor_parameters
     required bool? hasFocusAction,
@@ -2327,7 +2327,7 @@ class _MatchesSemanticsData extends Matcher {
         actions = <SemanticsAction, bool>{
           if (hasTapAction != null) SemanticsAction.tap: hasTapAction,
           // TODO(gspencergoog): Once this has landed, and customer tests have
-          // been updated, add A line here that adds handling for
+          // been updated, add a line here that adds handling for
           // hasFocusAction. https://github.com/flutter/flutter/issues/149842
           if (hasLongPressAction != null) SemanticsAction.longPress: hasLongPressAction,
           if (hasScrollLeftAction != null) SemanticsAction.scrollLeft: hasScrollLeftAction,
