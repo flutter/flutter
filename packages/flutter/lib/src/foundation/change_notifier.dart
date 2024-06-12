@@ -558,3 +558,71 @@ class ValueNotifier<T> extends ChangeNotifier implements ValueListenable<T> {
   @override
   String toString() => '${describeIdentity(this)}($value)';
 }
+
+/// A [ValueListenable] that computes its value from other listeners.
+///
+/// This notifier listens to a list of other listeners and calls a compute function
+/// whenever any of them change to determine its own value.
+///
+/// The listeners are merged into a single listenable using [Listenable.merge].
+///
+/// ## Example
+///
+/// ```dart
+/// final ValueNotifier<int> a = ValueNotifier<int>(1);
+/// final ValueNotifier<int> b = ValueNotifier<int>(2);
+///
+/// final ComputedNotifier<int> sum = ComputedNotifier<int>(
+///   [a, b, c, d],
+///   () => a.value + b.value,
+/// );
+///
+/// print(sum.value); // 3
+///
+/// a.value = 2;
+/// print(sum.value); // 4
+///
+/// b.value = 3;
+/// print(sum.value); // 5
+///
+/// sum.dispose();
+/// ```
+/// ## Caveats
+///
+/// Because this class only notifies listeners when the computed value changes,
+/// it may emit the same value multiple times if the compute function returns
+/// the same value for different inputs.
+///
+/// Additionally, it is important to dispose of the listeners that are passed
+/// to the constructor when they are no longer needed.
+///
+class ComputedNotifier<T> extends ChangeNotifier implements ValueListenable<T> {
+  /// Creates a [ComputedNotifier] that computes its value from the given listeners.
+  ComputedNotifier(this._listenableList, this._compute) {
+    _listenable.addListener(notifyListeners);
+    if (kFlutterMemoryAllocationsEnabled) {
+      ChangeNotifier.maybeDispatchObjectCreation(this);
+    }
+  }
+
+  /// The function that computes the value of this notifier.
+  final T Function() _compute;
+
+  /// The list of listeners that this notifier depends on.
+  final List<ValueListenable<dynamic>> _listenableList;
+
+  /// The listenable that this notifier depends on.
+  Listenable get _listenable => Listenable.merge(_listenableList);
+
+  @override
+  void dispose() {
+    _listenable.removeListener(notifyListeners);
+    super.dispose();
+  }
+
+  @override
+  T get value => _compute();
+
+  @override
+  String toString() => '${describeIdentity(this)}($value)';
+}
