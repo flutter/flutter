@@ -759,8 +759,9 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
       }
     }
 
-    if (innerPosition == null) {
-      // It's either just us or a velocity=0 situation.
+    if (innerPosition == null || _outerPosition!.pixels < _outerPosition!.minScrollExtent) {
+      // It's either just us or a velocity=0 situation or outer pixels exceeds
+      // the minScrollExtent.
       return _outerPosition!.createBallisticScrollActivity(
         _outerPosition!.physics.createBallisticSimulation(
           _outerPosition!,
@@ -1125,7 +1126,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
           final double remainingDelta = overscrolls[i] - outerDelta;
           if (remainingDelta > 0.0) {
             final double applyDelta = innerPositions[i].applyFullDragUpdate(remainingDelta);
-            outerRemainingDelta = math.max(applyDelta.abs(), outerRemainingDelta);
+            outerRemainingDelta = math.min(applyDelta, outerRemainingDelta);
           }
         }
         // `outerOverscroll` The remaining scroll amount in the outer layer.
@@ -1134,7 +1135,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
         // Only when both values are not 0.0, we need to apply the remaining
         // scroll amount to the outer layer.
         if (outerRemainingDelta != 0.0 && outerOverscroll != 0.0) {
-          _outerPosition!.applyFullDragUpdate(delta);
+          _outerPosition!.applyFullDragUpdate(outerRemainingDelta.abs());
         }
       }
     }
