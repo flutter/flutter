@@ -148,7 +148,7 @@ class DriveCommand extends RunCommandBase {
               'before exiting. Defaults to no timeout.',
         valueHelp: '360')
       ..addOption('web-desired-capabilities-from-file',
-        help: 'The path of a json format file which define desired capabilities of browsers used in WebDriver.',
+        help: 'The path of a json format file which define additional desired capabilities of browsers used in WebDriver.',
           valueHelp: 'desired_capabilities.json');
   }
 
@@ -480,7 +480,7 @@ class DriveCommand extends RunCommandBase {
     }
   }
 
-  /// Extract desiredCapabilities from file if specifying --web-desired-capabilities-from-file.
+  /// Extracts desiredCapabilities from file if specifying --web-desired-capabilities-from-file.
   Map<String, Object?>? _extractDesiredCapabilities(String? filepath) {
     Map<String, Object?>? desiredCapabilitiesJsonMap;
     if (filepath != null && _fileSystem.isFileSync(filepath)) {
