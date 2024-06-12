@@ -3594,19 +3594,24 @@ void main() {
     skip: kIsWeb, // [intended] Web uses its native context menu.
   );
 
+  // Regression test for https://github.com/flutter/flutter/issues/148934
   testWidgets('Ensure consistent layout of SelectionArea children between platforms', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
-        home: SelectionArea(
-          child: Text('Row 1'),
+        home: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+              SelectionArea(child: Text('row 1')),
+              Text('row 2'),
+            ],
         ),
       ),
     );
     await tester.pumpAndSettle();
-    final Offset offset = tester.getTopLeft(find.byType(Text));
-    expect(offset, Offset.zero);
-  },
-  );
+    final double xOffset1 = tester.getTopLeft(find.text('row 1')).dx;
+    final double xOffset2 = tester.getTopLeft(find.text('row 2')).dx;
+    expect(xOffset1, xOffset2);
+  });
 
   testWidgets('the selection behavior when clicking `Copy` item in mobile platforms', (WidgetTester tester) async {
     List<ContextMenuButtonItem> buttonItems = <ContextMenuButtonItem>[];
