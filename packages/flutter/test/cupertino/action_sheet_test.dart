@@ -1487,9 +1487,9 @@ void main() {
       exitRecorder.collate(5),
       matchesGoldenFile('cupertinoActionSheet.exit.png'),
     );
-  });
+  }, skip: kIsWeb);
 
-  testWidgets('Modal barrier is pressed during transition', (WidgetTester tester) async {
+  testWidgets('Animation is correct if entering is canceled halfway', (WidgetTester tester) async {
     final AnimationSheetBuilder recorder = AnimationSheetBuilder(
       frameSize: const Size(600, 600)
     );
@@ -1532,8 +1532,7 @@ void main() {
       recorder.collate(5),
       matchesGoldenFile('cupertinoActionSheet.interrupted-enter.png'),
     );
-  });
-
+  }, skip: kIsWeb);
 
   testWidgets('Action sheet semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
