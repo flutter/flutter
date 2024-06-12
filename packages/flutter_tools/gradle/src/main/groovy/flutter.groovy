@@ -339,6 +339,7 @@ class FlutterPlugin implements Plugin<Project> {
                         "packages", "flutter_tools", "gradle", "src", "main", "kotlin",
                         "dependency_version_checker.gradle.kts")
                 project.apply from: dependencyCheckerPluginPath
+                project.logger.error("HI GRAY" + DependencyVersionChecker.KGP_NAME)
             } catch (Exception e) {
                 // If the exception was thrown by us in the dependency version checker plugin then
                 // re-throw it.
