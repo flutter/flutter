@@ -91,7 +91,7 @@ class _TextFormFieldExampleState extends State<TextFormFieldExample> {
   Widget build(BuildContext context) {
     return Material(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24),
+        padding: const EdgeInsets.symmetric(horizontal: 24.0),
         child: Center(
           child: Form(
             key: formKey,
@@ -107,7 +107,7 @@ class _TextFormFieldExampleState extends State<TextFormFieldExample> {
                   validator: validator,
                   onChanged: onChanged,
                 ),
-                const SizedBox(height: 40),
+                const SizedBox(height: 40.0),
                 if (isLoading)
                   const CircularProgressIndicator()
                 else
