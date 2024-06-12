@@ -449,6 +449,7 @@ void main() {
               label: '1',
               actions: <SemanticsAction>[
                 SemanticsAction.tap,
+                SemanticsAction.focus,
               ],
             ),
 
@@ -466,6 +467,7 @@ void main() {
               label: '2',
               actions: <SemanticsAction>[
                 SemanticsAction.tap,
+                SemanticsAction.focus,
               ],
             ),
 
@@ -529,6 +531,7 @@ void main() {
               label: '1',
               actions: <SemanticsAction>[
                 SemanticsAction.tap,
+                SemanticsAction.focus,
               ],
             ),
 
@@ -544,6 +547,7 @@ void main() {
               label: '2',
               actions: <SemanticsAction>[
                 SemanticsAction.tap,
+                SemanticsAction.focus,
               ],
             ),
 

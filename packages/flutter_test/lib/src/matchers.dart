@@ -674,6 +674,7 @@ Matcher matchesSemantics({
   bool isExpanded = false,
   // Actions //
   bool hasTapAction = false,
+  bool hasFocusAction = false,
   bool hasLongPressAction = false,
   bool hasScrollLeftAction = false,
   bool hasScrollRightAction = false,
@@ -753,6 +754,7 @@ Matcher matchesSemantics({
     isExpanded: isExpanded,
     // Actions
     hasTapAction: hasTapAction,
+    hasFocusAction: hasFocusAction,
     hasLongPressAction: hasLongPressAction,
     hasScrollLeftAction: hasScrollLeftAction,
     hasScrollRightAction: hasScrollRightAction,
@@ -860,6 +862,7 @@ Matcher containsSemantics({
   bool? isExpanded,
   // Actions
   bool? hasTapAction,
+  bool? hasFocusAction,
   bool? hasLongPressAction,
   bool? hasScrollLeftAction,
   bool? hasScrollRightAction,
@@ -939,6 +942,7 @@ Matcher containsSemantics({
     isExpanded: isExpanded,
     // Actions
     hasTapAction: hasTapAction,
+    hasFocusAction: hasFocusAction,
     hasLongPressAction: hasLongPressAction,
     hasScrollLeftAction: hasScrollLeftAction,
     hasScrollRightAction: hasScrollRightAction,
@@ -2259,6 +2263,11 @@ class _MatchesSemanticsData extends Matcher {
     required bool? isExpanded,
     // Actions
     required bool? hasTapAction,
+    // TODO(gspencergoog): Once this has landed, and customer tests have been
+    // updated, remove the ignore below.
+    // https://github.com/flutter/flutter/issues/149842
+    // ignore: avoid_unused_constructor_parameters
+    required bool? hasFocusAction,
     required bool? hasLongPressAction,
     required bool? hasScrollLeftAction,
     required bool? hasScrollRightAction,
@@ -2317,6 +2326,9 @@ class _MatchesSemanticsData extends Matcher {
         },
         actions = <SemanticsAction, bool>{
           if (hasTapAction != null) SemanticsAction.tap: hasTapAction,
+          // TODO(gspencergoog): Once this has landed, and customer tests have
+          // been updated, add a line here that adds handling for
+          // hasFocusAction. https://github.com/flutter/flutter/issues/149842
           if (hasLongPressAction != null) SemanticsAction.longPress: hasLongPressAction,
           if (hasScrollLeftAction != null) SemanticsAction.scrollLeft: hasScrollLeftAction,
           if (hasScrollRightAction != null) SemanticsAction.scrollRight: hasScrollRightAction,
@@ -2379,8 +2391,8 @@ class _MatchesSemanticsData extends Matcher {
   final Map<SemanticsFlag, bool> flags;
 
   @override
-  Description describe(Description description) {
-    description.add('has semantics');
+  Description describe(Description description, [String? index]) {
+    description.add('${index == null ? '' : 'Child $index '}has semantics');
     if (label != null) {
       description.add(' with label: $label');
     }
@@ -2414,12 +2426,19 @@ class _MatchesSemanticsData extends Matcher {
     if (tooltip != null) {
       description.add(' with tooltip: $tooltip');
     }
-    if (actions.isNotEmpty) {
-      final List<SemanticsAction> expectedActions = actions.entries
+    // TODO(gspencergoog): Remove filter once customer tests have been updated
+    // with the proper actions information for focus.
+    // https://github.com/flutter/flutter/issues/149842
+    final Map<ui.SemanticsAction, bool> nonFocusActions =
+      Map<ui.SemanticsAction, bool>.fromEntries(actions.entries.where(
+        (MapEntry<ui.SemanticsAction, bool> e) => e.key != SemanticsAction.focus
+      ));
+    if (nonFocusActions.isNotEmpty) {
+      final List<SemanticsAction> expectedActions = nonFocusActions.entries
         .where((MapEntry<ui.SemanticsAction, bool> e) => e.value)
         .map((MapEntry<ui.SemanticsAction, bool> e) => e.key)
         .toList();
-      final List<SemanticsAction> notExpectedActions = actions.entries
+      final List<SemanticsAction> notExpectedActions = nonFocusActions.entries
         .where((MapEntry<ui.SemanticsAction, bool> e) => !e.value)
         .map((MapEntry<ui.SemanticsAction, bool> e) => e.key)
         .toList();
@@ -2479,9 +2498,15 @@ class _MatchesSemanticsData extends Matcher {
       description.add(' with custom hints: $hintOverrides');
     }
     if (children != null) {
-      description.add(' with children:\n');
-      for (final _MatchesSemanticsData child in children!.cast<_MatchesSemanticsData>()) {
-        child.describe(description);
+      description.add(' with children:\n  ');
+      final List<_MatchesSemanticsData> childMatches = children!.cast<_MatchesSemanticsData>();
+      int childIndex = 1;
+      for (final _MatchesSemanticsData child in childMatches) {
+        child.describe(description, index != null ? '$index:$childIndex': '$childIndex');
+        if (child != childMatches.last) {
+          description.add('\n  ');
+        }
+        childIndex += 1;
       }
     }
     return description;
@@ -2592,10 +2617,17 @@ class _MatchesSemanticsData extends Matcher {
     if (maxValueLength != null && maxValueLength != data.maxValueLength) {
       return failWithDescription(matchState, 'maxValueLength was: ${data.maxValueLength}');
     }
-    if (actions.isNotEmpty) {
+    // TODO(gspencergoog): Remove filter once customer tests have been updated
+    // with the proper actions information for focus.
+    // https://github.com/flutter/flutter/issues/149842
+    final Map<ui.SemanticsAction, bool> nonFocusActions =
+      Map<ui.SemanticsAction, bool>.fromEntries(actions.entries.where(
+        (MapEntry<ui.SemanticsAction, bool> e) => e.key != SemanticsAction.focus
+      ));
+    if (nonFocusActions.isNotEmpty) {
       final List<SemanticsAction> unexpectedActions = <SemanticsAction>[];
       final List<SemanticsAction> missingActions = <SemanticsAction>[];
-      for (final MapEntry<ui.SemanticsAction, bool> actionEntry in actions.entries) {
+      for (final MapEntry<ui.SemanticsAction, bool> actionEntry in nonFocusActions.entries) {
         final ui.SemanticsAction action = actionEntry.key;
         final bool actionExpected = actionEntry.value;
         final bool actionPresent = (action.index & data.actions) == action.index;
