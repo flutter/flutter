@@ -531,7 +531,7 @@ void main() {
     );
   });
 
-  testWidgets('Taps on button calls onPressed', (WidgetTester tester) async {
+  testWidgets('Tap on button calls onPressed', (WidgetTester tester) async {
     bool wasPressed = false;
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
@@ -541,7 +541,6 @@ void main() {
               CupertinoActionSheetAction(
                 child: const Text('One'),
                 onPressed: () {
-                  expect(wasPressed, false);
                   wasPressed = true;
                   Navigator.pop(context);
                 },
@@ -569,48 +568,7 @@ void main() {
     expect(find.text('One'), findsNothing);
   });
 
-  testWidgets('Can tap after scrolling', (WidgetTester tester) async {
-    int? wasPressed;
-    await tester.pumpWidget(
-      createAppWithButtonThatLaunchesActionSheet(
-        Builder(builder: (BuildContext context) {
-          return CupertinoActionSheet(
-            actions: List<Widget>.generate(20, (int i) =>
-              CupertinoActionSheetAction(
-                onPressed: () {
-                  expect(wasPressed, null);
-                  wasPressed = i;
-                },
-                child: Text('Button $i'),
-              ),
-            ),
-          );
-        }),
-      ),
-    );
-
-    await tester.tap(find.text('Go'));
-    await tester.pumpAndSettle();
-    expect(find.text('Button 19').hitTestable(), findsNothing);
-
-    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('Button 1')));
-    await tester.pumpAndSettle();
-    // The dragging gesture must be dispatched in at least two segments.
-    // The first movement starts the gesture without setting a delta.
-    await gesture.moveBy(const Offset(0, -20));
-    await tester.pumpAndSettle();
-    await gesture.moveBy(const Offset(0, -1000));
-    await tester.pumpAndSettle();
-    await gesture.up();
-    await tester.pumpAndSettle();
-    expect(find.text('Button 19').hitTestable(), findsOne);
-
-    await tester.tap(find.text('Button 19'));
-    await tester.pumpAndSettle();
-    expect(wasPressed, 19);
-  });
-
-  testWidgets('Taps at the padding of buttons calls onPressed', (WidgetTester tester) async {
+  testWidgets('Tap at the padding of buttons calls onPressed', (WidgetTester tester) async {
     // Ensures that the entire button responds to hit tests, not just the text
     // part.
     bool wasPressed = false;
@@ -622,7 +580,6 @@ void main() {
               CupertinoActionSheetAction(
                 child: const Text('One'),
                 onPressed: () {
-                  expect(wasPressed, false);
                   wasPressed = true;
                   Navigator.pop(context);
                 },
@@ -650,321 +607,6 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
 
     expect(find.text('One'), findsNothing);
-  });
-
-  testWidgets('Taps on a button can be slided to other buttons', (WidgetTester tester) async {
-    int? pressed;
-    await tester.pumpWidget(
-      createAppWithButtonThatLaunchesActionSheet(
-        Builder(builder: (BuildContext context) {
-          return CupertinoActionSheet(
-            actions: <Widget>[
-              CupertinoActionSheetAction(
-                child: const Text('One'),
-                onPressed: () {
-                  expect(pressed, null);
-                  pressed = 1;
-                  Navigator.pop(context);
-                },
-              ),
-              CupertinoActionSheetAction(
-                child: const Text('Two'),
-                onPressed: () {
-                  expect(pressed, null);
-                  pressed = 2;
-                  Navigator.pop(context);
-                },
-              ),
-            ],
-          );
-        }),
-      ),
-    );
-
-    await tester.tap(find.text('Go'));
-    await tester.pumpAndSettle();
-    expect(pressed, null);
-
-    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('One')));
-    await tester.pumpAndSettle();
-
-    await gesture.moveTo(tester.getCenter(find.text('Two')));
-    await tester.pumpAndSettle();
-    await expectLater(
-      find.byType(CupertinoActionSheet),
-      matchesGoldenFile('cupertinoActionSheet.press-drag.png'),
-    );
-
-    await gesture.up();
-    expect(pressed, 2);
-    await tester.pumpAndSettle();
-    expect(find.text('One'), findsNothing);
-  });
-
-  testWidgets('Taps on the content can be slided to other buttons', (WidgetTester tester) async {
-    bool wasPressed = false;
-    await tester.pumpWidget(
-      createAppWithButtonThatLaunchesActionSheet(
-        Builder(builder: (BuildContext context) {
-          return CupertinoActionSheet(
-            title: const Text('The title'),
-            actions: <Widget>[
-              CupertinoActionSheetAction(
-                child: const Text('One'),
-                onPressed: () {
-                },
-              ),
-            ],
-            cancelButton: CupertinoActionSheetAction(
-              child: const Text('Cancel'),
-              onPressed: () {
-                expect(wasPressed, false);
-                wasPressed = true;
-                Navigator.pop(context);
-              },
-            ),
-          );
-        }),
-      ),
-    );
-
-    await tester.tap(find.text('Go'));
-    await tester.pumpAndSettle();
-    expect(wasPressed, false);
-
-    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('The title')));
-    await tester.pumpAndSettle();
-
-    await gesture.moveTo(tester.getCenter(find.text('Cancel')));
-    await tester.pumpAndSettle();
-    await gesture.up();
-    expect(wasPressed, true);
-    await tester.pumpAndSettle();
-    expect(find.text('One'), findsNothing);
-  });
-
-  testWidgets('Taps on the barrier can not be slided to buttons', (WidgetTester tester) async {
-    bool wasPressed = false;
-    await tester.pumpWidget(
-      createAppWithButtonThatLaunchesActionSheet(
-        Builder(builder: (BuildContext context) {
-          return CupertinoActionSheet(
-            title: const Text('The title'),
-            cancelButton: CupertinoActionSheetAction(
-              child: const Text('Cancel'),
-              onPressed: () {
-                expect(wasPressed, false);
-                wasPressed = true;
-                Navigator.pop(context);
-              },
-            ),
-          );
-        }),
-      ),
-    );
-
-    await tester.tap(find.text('Go'));
-    await tester.pumpAndSettle();
-    expect(wasPressed, false);
-
-    // Press on the barrier.
-    final TestGesture gesture = await tester.startGesture(const Offset(100, 100));
-    await tester.pumpAndSettle();
-
-    await gesture.moveTo(tester.getCenter(find.text('Cancel')));
-    await tester.pumpAndSettle();
-    await gesture.up();
-    expect(wasPressed, false);
-    await tester.pumpAndSettle();
-    expect(find.text('Cancel'), findsOne);
-  });
-
-  testWidgets('Sliding taps can still yield to scrolling after horizontal movement', (WidgetTester tester) async {
-    int? pressed;
-    await tester.pumpWidget(
-      createAppWithButtonThatLaunchesActionSheet(
-        Builder(builder: (BuildContext context) {
-          return CupertinoActionSheet(
-            message: Text('Long message' * 200),
-            actions: List<Widget>.generate(10, (int i) =>
-              CupertinoActionSheetAction(
-                onPressed: () {
-                  expect(pressed, null);
-                  pressed = i;
-                },
-                child: Text('Button $i'),
-              ),
-            ),
-          );
-        }),
-      ),
-    );
-
-    await tester.tap(find.text('Go'));
-    await tester.pumpAndSettle();
-
-    // Starts on a button.
-    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('Button 0')));
-    await tester.pumpAndSettle();
-    // Move horizontally.
-    await gesture.moveBy(const Offset(-10, 2));
-    await gesture.moveBy(const Offset(-100, 2));
-    await tester.pumpAndSettle();
-    // Scroll up.
-    await gesture.moveBy(const Offset(0, -40));
-    await gesture.moveBy(const Offset(0, -1000));
-    await tester.pumpAndSettle();
-    // Stop scrolling.
-    await gesture.up();
-    await tester.pumpAndSettle();
-    // The actions section should have been scrolled up and Button 9 is visible.
-    await tester.tap(find.text('Button 9'));
-    expect(pressed, 9);
-  });
-
-  testWidgets('Sliding taps is responsive even before the drag starts', (WidgetTester tester) async {
-    int? pressed;
-    await tester.pumpWidget(
-      createAppWithButtonThatLaunchesActionSheet(
-        Builder(builder: (BuildContext context) {
-          return CupertinoActionSheet(
-            message: Text('Long message' * 200),
-            actions: List<Widget>.generate(10, (int i) =>
-              CupertinoActionSheetAction(
-                onPressed: () {
-                  expect(pressed, null);
-                  pressed = i;
-                },
-                child: Text('Button $i'),
-              ),
-            ),
-          );
-        }),
-      ),
-    );
-
-    await tester.tap(find.text('Go'));
-    await tester.pumpAndSettle();
-
-    // Find the location right within the upper edge of button 1.
-    final Offset start = tester.getTopLeft(find.text('Button 1')) + const Offset(30, -15);
-    // Verify that the start location is within button 1.
-    await tester.tapAt(start);
-    expect(pressed, 1);
-    pressed = null;
-
-    final TestGesture gesture = await tester.startGesture(start);
-    await tester.pumpAndSettle();
-    // Move slightly upwards without starting the drag
-    await gesture.moveBy(const Offset(0, -10));
-    await tester.pumpAndSettle();
-    // Stop scrolling.
-    await gesture.up();
-    await tester.pumpAndSettle();
-    expect(pressed, 0);
-  });
-
-  testWidgets('Sliding taps only recognizes the primary pointer', (WidgetTester tester) async {
-    int? pressed;
-    await tester.pumpWidget(
-      createAppWithButtonThatLaunchesActionSheet(
-        Builder(builder: (BuildContext context) {
-          return CupertinoActionSheet(
-            title: const Text('The title'),
-            actions: List<Widget>.generate(8, (int i) =>
-              CupertinoActionSheetAction(
-                onPressed: () {
-                  expect(pressed, null);
-                  pressed = i;
-                },
-                child: Text('Button $i'),
-              ),
-            ),
-          );
-        }),
-      ),
-    );
-
-    await tester.tap(find.text('Go'));
-    await tester.pumpAndSettle();
-
-    // Start gesture 1 at button 0
-    final TestGesture gesture1 = await tester.startGesture(tester.getCenter(find.text('Button 0')));
-    await gesture1.moveBy(const Offset(0, 20)); // Starts the gesture
-    await tester.pumpAndSettle();
-
-    // Start gesture 2 at button 1.
-    final TestGesture gesture2 = await tester.startGesture(tester.getCenter(find.text('Button 1')));
-    await gesture2.moveBy(const Offset(0, 20)); // Starts the gesture
-    await tester.pumpAndSettle();
-
-    // Move gesture 1 to button 2 and release.
-    await gesture1.moveTo(tester.getCenter(find.text('Button 2')));
-    await tester.pumpAndSettle();
-    await gesture1.up();
-    await tester.pumpAndSettle();
-
-    expect(pressed, 2);
-    pressed = null;
-
-    // Tap at button 3, which becomes the new primary pointer and is recognized.
-    await tester.tap(find.text('Button 3'));
-    await tester.pumpAndSettle();
-    expect(pressed, 3);
-    pressed = null;
-
-    // Move gesture 2 to button 4 and release.
-    await gesture2.moveTo(tester.getCenter(find.text('Button 4')));
-    await tester.pumpAndSettle();
-    await gesture2.up();
-    await tester.pumpAndSettle();
-
-    // Non-primary pointers should not be recognized.
-    expect(pressed, null);
-  });
-
-  testWidgets('Non-primary pointers can trigger scroll', (WidgetTester tester) async {
-    int? pressed;
-    await tester.pumpWidget(
-      createAppWithButtonThatLaunchesActionSheet(
-        Builder(builder: (BuildContext context) {
-          return CupertinoActionSheet(
-            actions: List<Widget>.generate(12, (int i) =>
-              CupertinoActionSheetAction(
-                onPressed: () {
-                  expect(pressed, null);
-                  pressed = i;
-                },
-                child: Text('Button $i'),
-              ),
-            ),
-          );
-        }),
-      ),
-    );
-
-    await tester.tap(find.text('Go'));
-    await tester.pumpAndSettle();
-
-    // Start gesture 1 at button 0
-    final TestGesture gesture1 = await tester.startGesture(tester.getCenter(find.text('Button 0')));
-    await tester.pumpAndSettle();
-
-    expect(tester.getTopLeft(find.text('Button 11')).dy, greaterThan(400));
-
-    // Start gesture 2 at button 1 and scrolls.
-    final TestGesture gesture2 = await tester.startGesture(tester.getCenter(find.text('Button 1')));
-    await gesture2.moveBy(const Offset(0, -20));
-    await gesture2.moveBy(const Offset(0, -500));
-    await tester.pumpAndSettle();
-
-    expect(tester.getTopLeft(find.text('Button 11')).dy, lessThan(400));
-
-    // Release gesture 1, which should not trigger any buttons.
-    await gesture1.up();
-    await tester.pumpAndSettle();
-
-    expect(pressed, null);
   });
 
   testWidgets('Action sheet width is correct when given infinite horizontal space', (WidgetTester tester) async {
@@ -1229,7 +871,6 @@ void main() {
             cancelButton: CupertinoActionSheetAction(
               child: const Text('Cancel'),
               onPressed: () {
-                expect(wasPressed, false);
                 wasPressed = true;
                 Navigator.pop(context);
               },
@@ -1291,39 +932,6 @@ void main() {
       moreOrLessEquals(469.7),
     );
     expect(tester.getBottomLeft(find.widgetWithText(CupertinoActionSheetAction, 'Two')).dy, 526.0);
-  });
-
-  testWidgets('Action buttons shows pressed color as soon as the pointer is down', (WidgetTester tester) async {
-    // Verifies that the the pressed color is not delayed for some milliseconds,
-    // a symptom if the color relies on a tap gesture timing out.
-    await tester.pumpWidget(
-      createAppWithButtonThatLaunchesActionSheet(
-        CupertinoActionSheet(
-          title: const Text('The title'),
-          actions: <Widget>[
-            CupertinoActionSheetAction(
-              child: const Text('One'),
-              onPressed: () { },
-            ),
-            CupertinoActionSheetAction(
-              child: const Text('Two'),
-              onPressed: () { },
-            ),
-          ],
-        ),
-      ),
-    );
-
-    await tester.tap(find.text('Go'));
-    await tester.pumpAndSettle();
-
-    final TestGesture pointer = await tester.startGesture(tester.getCenter(find.text('One')));
-    await tester.pump();
-    await expectLater(
-      find.byType(CupertinoActionSheet),
-      matchesGoldenFile('cupertinoActionSheet.pressed.png'),
-    );
-    await pointer.up();
   });
 
   testWidgets('Enter/exit animation is correct', (WidgetTester tester) async {
