@@ -917,7 +917,7 @@ void main() {
       );
     }
 
-    expect(
+    await expectLater(
       () => tester.pumpWidget(buildGridView(
         SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 3,
@@ -935,7 +935,7 @@ void main() {
       ),
     );
 
-    expect(
+    await expectLater(
       () => tester.pumpWidget(
         buildGridView(
           SliverGridDelegateWithMaxCrossAxisExtent(
