@@ -1292,6 +1292,7 @@ void main() {
                             SemanticsFlag.isSlider,
                           ],
                           actions: <SemanticsAction>[
+                            SemanticsAction.focus,
                             SemanticsAction.increase,
                             SemanticsAction.decrease,
                           ],
@@ -1350,6 +1351,7 @@ void main() {
                             SemanticsFlag.isFocusable,
                             SemanticsFlag.isSlider,
                           ],
+                          actions: <SemanticsAction>[SemanticsAction.focus],
                           value: '50%',
                           increasedValue: '55%',
                           decreasedValue: '45%',
@@ -1452,7 +1454,7 @@ void main() {
                         TestSemantics(
                           id: 4,
                           flags: <SemanticsFlag>[SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled, SemanticsFlag.isFocusable, SemanticsFlag.isSlider],
-                          actions: <SemanticsAction>[SemanticsAction.increase, SemanticsAction.decrease],
+                          actions: <SemanticsAction>[SemanticsAction.focus, SemanticsAction.increase, SemanticsAction.decrease],
                           value: '50%',
                           increasedValue: '60%',
                           decreasedValue: '40%',
@@ -1565,6 +1567,7 @@ void main() {
                             SemanticsFlag.isSlider,
                           ],
                           actions: <SemanticsAction>[
+                            SemanticsAction.focus,
                             SemanticsAction.increase,
                             SemanticsAction.decrease,
                             SemanticsAction.didGainAccessibilityFocus,
@@ -1625,6 +1628,7 @@ void main() {
                             SemanticsFlag.isSlider,
                           ],
                           actions: <SemanticsAction>[
+                            SemanticsAction.focus,
                             SemanticsAction.didGainAccessibilityFocus,
                           ],
                           value: '50%',
@@ -1729,7 +1733,7 @@ void main() {
                         TestSemantics(
                           id: 4,
                           flags: <SemanticsFlag>[SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled, SemanticsFlag.isFocusable, SemanticsFlag.isSlider],
-                          actions: <SemanticsAction>[SemanticsAction.increase, SemanticsAction.decrease],
+                          actions: <SemanticsAction>[SemanticsAction.focus, SemanticsAction.increase, SemanticsAction.decrease],
                           value: '40',
                           increasedValue: '60',
                           decreasedValue: '20',
@@ -1789,7 +1793,7 @@ void main() {
                         TestSemantics(
                           id: 4,
                           flags: <SemanticsFlag>[SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled, SemanticsFlag.isFocusable, SemanticsFlag.isSlider],
-                          actions: <SemanticsAction>[SemanticsAction.increase, SemanticsAction.decrease],
+                          actions: <SemanticsAction>[SemanticsAction.focus, SemanticsAction.increase, SemanticsAction.decrease],
                           value: '40',
                           increasedValue: '60',
                           decreasedValue: '20',
@@ -2633,6 +2637,7 @@ void main() {
                           SemanticsFlag.isSlider,
                         ],
                         actions: <SemanticsAction>[
+                          SemanticsAction.focus,
                           SemanticsAction.increase,
                           SemanticsAction.decrease,
                           SemanticsAction.didGainAccessibilityFocus,
