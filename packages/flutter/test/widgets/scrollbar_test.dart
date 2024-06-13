@@ -2809,7 +2809,7 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
   });
 
   testWidgets('The thumb should follow the pointer when the scroll metrics changed during dragging', (WidgetTester tester) async {
-    // Regressing test for https://github.com/flutter/flutter/issues/112072
+    // Regression test for https://github.com/flutter/flutter/issues/112072
     final ScrollController scrollController = ScrollController();
     addTearDown(scrollController.dispose);
     await tester.pumpWidget(
@@ -2880,7 +2880,7 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
   });
 
   testWidgets('The scrollable should not stutter when the scroll metrics shrink during dragging', (WidgetTester tester) async {
-    // Regressing test for https://github.com/flutter/flutter/issues/121574
+    // Regression test for https://github.com/flutter/flutter/issues/121574
     final ScrollController scrollController = ScrollController();
     addTearDown(scrollController.dispose);
     await tester.pumpWidget(
@@ -2990,4 +2990,226 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
 
     expect(scrollController.offset, 100.0);
   }, variant: TargetPlatformVariant.all());
+
+  testWidgets('Flinging a vertical scrollbar thumb does not cause a ballistic scroll - non-mobile platforms', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
+
+    bool isMobilePlatform() {
+      return const <TargetPlatform>{TargetPlatform.iOS, TargetPlatform.android}
+        .contains(debugDefaultTargetPlatformOverride);
+    }
+
+    Widget buildFrame({ required bool reverse }) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: PrimaryScrollController(
+            controller: scrollController,
+            child: RawScrollbar(
+              thumbVisibility: true,
+              controller: scrollController,
+              child: CustomScrollView(
+                controller: scrollController,
+                reverse: reverse,
+                slivers: <Widget>[
+                  SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (BuildContext context, int index) {
+                        return Container(
+                          height: 100,
+                          alignment: Alignment.center,
+                          child: Text('$index'),
+                        );
+                      },
+                      childCount: 10,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(reverse: false));
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 0.0);
+
+    // Try flinging downward. The flingFrom() method generates 50 moves of about 2
+    // pixels and then a fling with the indicated velocity.
+    await tester.flingFrom(const Offset(797.0, 45.0), const Offset(0, 60.0), 500.0);
+    await tester.pumpAndSettle();
+
+    if (isMobilePlatform()) {
+      expect(scrollController.offset, greaterThan(100.0), reason: 'Ballistic scroll expected on $debugDefaultTargetPlatformOverride');
+    } else {
+      expect(scrollController.offset, 100.0, reason: 'Ballistic scroll not expected on $debugDefaultTargetPlatformOverride');
+    }
+
+    // Tap at the top of the track to scroll back to the origin.
+    await tester.tapAt(const Offset(797.0, 5.0));
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 0.0);
+
+    // Drag the thumb to the bottom.
+    await tester.dragFrom(const Offset(797.0, 45.0), const Offset(0, 1000.0));
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 400.0);
+
+    // Try flinging upward.
+    await tester.flingFrom(const Offset(797.0, 545.0), const Offset(0, -60), 500.0);
+    await tester.pumpAndSettle();
+    if (isMobilePlatform()) {
+      expect(scrollController.offset, lessThan(300.0), reason: 'Ballistic scroll expected on $debugDefaultTargetPlatformOverride');
+    } else {
+      expect(scrollController.offset, 300.0, reason: 'Ballistic scroll not expected on $debugDefaultTargetPlatformOverride');
+    }
+
+    // Tap at the top of the track to scroll back to the origin.
+    await tester.tapAt(const Offset(797.0, 5.0));
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 0.0);
+
+    // Same tests with reverse: true
+
+    await tester.pumpWidget(buildFrame(reverse: true));
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 0.0);
+
+    // Try flinging upward.
+    await tester.flingFrom(const Offset(797.0, 545.0), const Offset(0, -60), 500.0);
+    await tester.pumpAndSettle();
+    if (isMobilePlatform()) {
+      expect(scrollController.offset, greaterThan(100.0), reason: 'Ballistic scroll expected on $debugDefaultTargetPlatformOverride');
+    } else {
+      expect(scrollController.offset, 100.0, reason: 'Ballistic scroll not expected on $debugDefaultTargetPlatformOverride');
+    }
+
+    // Tap at the top of the track to scroll to the limit
+    await tester.tapAt(const Offset(797.0, 5.0));
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 400.0);
+
+    // Try flinging downward.
+    await tester.flingFrom(const Offset(797.0, 45.0), const Offset(0, 60.0), 500.0);
+    await tester.pumpAndSettle();
+    if (isMobilePlatform()) {
+      expect(scrollController.offset, lessThan(300.0), reason: 'Ballistic scroll expected on $debugDefaultTargetPlatformOverride');
+    } else {
+      expect(scrollController.offset, 300.0, reason: 'Ballistic scroll not expected on $debugDefaultTargetPlatformOverride');
+    }
+  }, variant: TargetPlatformVariant.all());
+
+  testWidgets('Flinging a horizontal scrollbar thumb does not cause a ballistic scroll - non-mobile platforms', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
+
+    bool isMobilePlatform() {
+      return const <TargetPlatform>{TargetPlatform.iOS, TargetPlatform.android}
+        .contains(debugDefaultTargetPlatformOverride);
+    }
+
+    Widget buildFrame({ required bool reverse }) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: PrimaryScrollController(
+            controller: scrollController,
+            child: RawScrollbar(
+              thumbVisibility: true,
+              controller: scrollController,
+              child: CustomScrollView(
+                controller: scrollController,
+                reverse: reverse,
+                scrollDirection: Axis.horizontal,
+                slivers: <Widget>[
+                  SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (BuildContext context, int index) {
+                        return Container(
+                          width: 100,
+                          alignment: Alignment.center,
+                          child: Text('$index'),
+                        );
+                      },
+                      childCount: 10,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(reverse: false));
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 0.0);
+
+    // Try flinging to the right.
+    await tester.flingFrom(const Offset(45.0, 597.0), const Offset(80, 0.0), 500.0);
+    await tester.pumpAndSettle();
+    if (isMobilePlatform()) {
+      expect(scrollController.offset, greaterThan(100.0), reason: 'Ballistic scroll expected on $debugDefaultTargetPlatformOverride');
+    } else {
+      expect(scrollController.offset, 100.0, reason: 'Ballistic scroll not expected on $debugDefaultTargetPlatformOverride');
+    }
+
+    // Tap at the end of the track to scroll to the limit.
+    await tester.tapAt(const Offset(794.0, 597.0));
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 200.0);
+
+    // Try flinging to the left.
+    await tester.flingFrom(const Offset(794.0, 597.0), const Offset(-80, 0), 500.0);
+    await tester.pumpAndSettle();
+    if (isMobilePlatform()) {
+      expect(scrollController.offset, lessThan(100.0), reason: 'Ballistic scroll expected on $debugDefaultTargetPlatformOverride');
+    } else {
+      expect(scrollController.offset, 100.0, reason: 'Ballistic scroll not expected on $debugDefaultTargetPlatformOverride');
+    }
+
+    // Tap at the beginning of the track to scroll back to the origin.
+    await tester.tapAt(const Offset(6.0, 597.0));
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 0.0);
+
+    // Same tests with reverse: true
+
+    await tester.pumpWidget(buildFrame(reverse: true));
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 0.0);
+
+    // Try flinging to the left.
+    await tester.flingFrom(const Offset(794.0, 597.0), const Offset(-80, 0), 500.0);
+    await tester.pumpAndSettle();
+    if (isMobilePlatform()) {
+      expect(scrollController.offset, greaterThan(100.0), reason: 'Ballistic scroll expected on $debugDefaultTargetPlatformOverride');
+    } else {
+      expect(scrollController.offset, 100.0, reason: 'Ballistic scroll not expected on $debugDefaultTargetPlatformOverride');
+    }
+
+    // Tap at the beginning of the track to scroll to the limit.
+    await tester.tapAt(const Offset(6.0, 597.0));
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 200.0);
+
+    // Try flinging to the right.
+    await tester.flingFrom(const Offset(6.0, 597.0), const Offset(80, 0), 500.0);
+    await tester.pumpAndSettle();
+
+    if (isMobilePlatform()) {
+      expect(scrollController.offset, lessThan(100.0), reason: 'Ballistic scroll expected on $debugDefaultTargetPlatformOverride');
+    } else {
+      expect(scrollController.offset, 100.0, reason: 'Ballistic scroll not expected on $debugDefaultTargetPlatformOverride');
+    }
+
+  },
+    variant: TargetPlatformVariant.all(),
+  );
 }
