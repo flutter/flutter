@@ -63,6 +63,16 @@ class DisplayListMatrixClipState {
   SkRect local_cull_rect() const;
   SkRect device_cull_rect() const { return ToSkRect(cull_rect_); }
 
+  bool rect_covers_cull(const DlRect& content) const;
+  bool rect_covers_cull(const SkRect& content) const {
+    return rect_covers_cull(ToDlRect(content));
+  }
+  bool oval_covers_cull(const DlRect& content_bounds) const;
+  bool oval_covers_cull(const SkRect& content_bounds) const {
+    return oval_covers_cull(ToDlRect(content_bounds));
+  }
+  bool rrect_covers_cull(const SkRRect& content) const;
+
   bool content_culled(const DlRect& content_bounds) const;
   bool content_culled(const SkRect& content_bounds) const {
     return content_culled(ToDlRect(content_bounds));
@@ -146,6 +156,7 @@ class DisplayListMatrixClipState {
   DlRect cull_rect_;
   DlMatrix matrix_;
 
+  bool getLocalCullCorners(DlPoint corners[4]) const;
   void adjustCullRect(const DlRect& clip, ClipOp op, bool is_aa);
 };
 
