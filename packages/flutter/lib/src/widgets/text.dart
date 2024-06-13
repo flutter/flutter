@@ -1271,11 +1271,9 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
       for (final SelectedContent selectedContent in selections.values)
         if (selectedContent.controllers case final List<SelectedContentController<Object>> data) ...data,
     ];
-    // To prevent from adding duplicate controllers to children list.
-    textContentController.children.clear();
-    for (int index = 0; index < childControllers.length; index += 1) {
-      textContentController.addChild(childControllers[index]);
-    }
+    _attachController = textContentController.copyWith(
+      children: childControllers,
+    );
     // Accurately find the selection endpoints, selections.first.startOffset and
     // selections.last.endOffset are only accurate when the selections.first and
     // selections.last are root selectables with regards to the text. When the
@@ -1509,6 +1507,7 @@ class _TextSpanContentController extends SelectedContentController<TextSpan> {
   _TextSpanContentController({
     super.selectableId,
     required super.content,
+    super.children,
   });
 
   @override
@@ -1529,5 +1528,18 @@ class _TextSpanContentController extends SelectedContentController<TextSpan> {
       return;
     }
     _end = newValue;
+  }
+
+  @override
+  _TextSpanContentController copyWith({
+    int? selectableId,
+    TextSpan? content,
+    List<SelectedContentController<Object>>? children,
+  }) {
+    return _TextSpanContentController(
+      selectableId: selectableId ?? this.selectableId,
+      content: content ?? this.content,
+      children: children ?? this.children,
+    );
   }
 }

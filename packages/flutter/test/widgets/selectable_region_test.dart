@@ -4521,11 +4521,12 @@ void main() {
     expect((content!.controllers![0].content as TextSpan).children, isNotNull);
     expect(((content!.controllers![0].content as TextSpan).children!.first as TextSpan).text, isNotNull);
     expect(((content!.controllers![0].content as TextSpan).children!.first as TextSpan).text, 'Hello world, ');
-    expect(content!.controllers![0].children.length, 1);
-    expect(content!.controllers![0].children[0].startOffset, 0);
-    expect(content!.controllers![0].children[0].endOffset, 10);
-    expect((content!.controllers![0].children[0].content as TextSpan).text, isNotNull);
-    expect((content!.controllers![0].children[0].content as TextSpan).text, 'how are you today.');
+    expect(content!.controllers![0].children, isNotNull);
+    expect(content!.controllers![0].children!.length, 1);
+    expect(content!.controllers![0].children![0].startOffset, 0);
+    expect(content!.controllers![0].children![0].endOffset, 10);
+    expect((content!.controllers![0].children![0].content as TextSpan).text, isNotNull);
+    expect((content!.controllers![0].children![0].content as TextSpan).text, 'how are you today.');
     await mouseGesture.up();
     await tester.pump();
     expect(content, isNotNull);
@@ -4545,11 +4546,12 @@ void main() {
     expect((content!.controllers![0].content as TextSpan).children, isNotNull);
     expect(((content!.controllers![0].content as TextSpan).children!.first as TextSpan).text, isNotNull);
     expect(((content!.controllers![0].content as TextSpan).children!.first as TextSpan).text, 'Hello world, ');
-    expect(content!.controllers![0].children.length, 1);
-    expect(content!.controllers![0].children[0].startOffset, 3);
-    expect(content!.controllers![0].children[0].endOffset, 3);
-    expect((content!.controllers![0].children[0].content as TextSpan).text, isNotNull);
-    expect((content!.controllers![0].children[0].content as TextSpan).text, 'how are you today.');
+    expect(content!.controllers![0].children, isNotNull);
+    expect(content!.controllers![0].children!.length, 1);
+    expect(content!.controllers![0].children![0].startOffset, 3);
+    expect(content!.controllers![0].children![0].endOffset, 3);
+    expect((content!.controllers![0].children![0].content as TextSpan).text, isNotNull);
+    expect((content!.controllers![0].children![0].content as TextSpan).text, 'how are you today.');
     
     // Backwards selection.
     await mouseGesture.down(textOffsetToPosition(paragraph2, 4));
@@ -4565,11 +4567,12 @@ void main() {
     expect((content!.controllers![0].content as TextSpan).children, isNotNull);
     expect(((content!.controllers![0].content as TextSpan).children!.first as TextSpan).text, isNotNull);
     expect(((content!.controllers![0].content as TextSpan).children!.first as TextSpan).text, 'Hello world, ');
-    expect(content!.controllers![0].children.length, 1);
-    expect(content!.controllers![0].children[0].startOffset, 4);
-    expect(content!.controllers![0].children[0].endOffset, 0);
-    expect((content!.controllers![0].children[0].content as TextSpan).text, isNotNull);
-    expect((content!.controllers![0].children[0].content as TextSpan).text, 'how are you today.');
+    expect(content!.controllers![0].children, isNotNull);
+    expect(content!.controllers![0].children!.length, 1);
+    expect(content!.controllers![0].children![0].startOffset, 4);
+    expect(content!.controllers![0].children![0].endOffset, 0);
+    expect((content!.controllers![0].children![0].content as TextSpan).text, isNotNull);
+    expect((content!.controllers![0].children![0].content as TextSpan).text, 'how are you today.');
     await mouseGesture.up();
     await tester.pump();
     expect(content, isNotNull);
