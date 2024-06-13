@@ -257,7 +257,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         );
                         _selectionController.clear();
                       },
-                      label: 'Emphasize Text',
+                      label: 'Color Text Red',
                     ),
                   ],
                   anchors: TextSelectionToolbarAnchors(
