@@ -262,8 +262,21 @@ class FlutterCommandRunner extends CommandRunner<void> {
     ArgResults topLevelResults, {
     required bool topLevelMachineFlag,
   }) async {
+    // Check if the user has explicitly requested a version check.
+    final bool versionCheckFlag = topLevelResults[FlutterGlobalOptions.kVersionCheckFlag] as bool? ?? false;
+    final bool explicitVersionCheckPassed = topLevelResults.wasParsed(FlutterGlobalOptions.kVersionCheckFlag) && versionCheckFlag;
+    if (explicitVersionCheckPassed) {
+      return true;
+    }
+
+
     // If the top level --machine flag is set, we don't want to check for updates.
     if (topLevelMachineFlag) {
+      return false;
+    }
+
+    // Running the "upgrade" command is already checking, don't check twice.
+    if (topLevelResults.command?.name == 'upgrade') {
       return false;
     }
 
@@ -278,24 +291,9 @@ class FlutterCommandRunner extends CommandRunner<void> {
       return false;
     }
 
-    // Running the "upgrade" command is already checking, don't check twice.
-    if (topLevelResults.command?.name == 'upgrade') {
-      return false;
-    }
-
-    // Check if the user has explicitly requested a version check.
-    final bool versionCheckFlag = topLevelResults[FlutterGlobalOptions.kVersionCheckFlag] as bool? ?? false;
-    final bool explicitVersionCheckPassed = topLevelResults.wasParsed(FlutterGlobalOptions.kVersionCheckFlag) && versionCheckFlag;
-    if (explicitVersionCheckPassed) {
-      return true;
-    }
-
-    final bool notAttachedToTerminal = !globals.stdio.hasTerminal;
     // e.g. `flutter bash-completion` or `flutter zsh-completion`
-    final bool isShellCompletionCommand = (topLevelResults.command?.name ?? '').endsWith('-completion');
-    if (notAttachedToTerminal ||
-        isShellCompletionCommand ||
-        await globals.botDetector.isRunningOnBot) {
+    final bool isShellCompletionCommand = !globals.stdio.hasTerminal && (topLevelResults.command?.name ?? '').endsWith('-completion');
+    if (isShellCompletionCommand || await globals.botDetector.isRunningOnBot) {
       return false;
     }
 
