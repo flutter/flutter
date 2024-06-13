@@ -956,13 +956,22 @@ void DisplayListBuilder::ClipRect(const SkRect& rect,
   if (!rect.isFinite()) {
     return;
   }
+  if (current_info().is_nop) {
+    return;
+  }
+  if (current_info().has_valid_clip &&
+      clip_op == DlCanvas::ClipOp::kIntersect &&
+      layer_local_state().rect_covers_cull(rect)) {
+    return;
+  }
   global_state().clipRect(rect, clip_op, is_aa);
-  if (current_info().is_nop ||
-      current_info().global_state.is_cull_rect_empty()) {
+  layer_local_state().clipRect(rect, clip_op, is_aa);
+  if (global_state().is_cull_rect_empty() ||
+      layer_local_state().is_cull_rect_empty()) {
     current_info().is_nop = true;
     return;
   }
-  layer_local_state().clipRect(rect, clip_op, is_aa);
+  current_info().has_valid_clip = true;
   checkForDeferredSave();
   switch (clip_op) {
     case ClipOp::kIntersect:
@@ -978,28 +987,40 @@ void DisplayListBuilder::ClipRRect(const SkRRect& rrect,
                                    bool is_aa) {
   if (rrect.isRect()) {
     clipRect(rrect.rect(), clip_op, is_aa);
-  } else {
-    global_state().clipRRect(rrect, clip_op, is_aa);
-    if (current_info().is_nop ||
-        current_info().global_state.is_cull_rect_empty()) {
-      current_info().is_nop = true;
-      return;
-    }
-    layer_local_state().clipRRect(rrect, clip_op, is_aa);
-    checkForDeferredSave();
-    switch (clip_op) {
-      case ClipOp::kIntersect:
-        Push<ClipIntersectRRectOp>(0, rrect, is_aa);
-        break;
-      case ClipOp::kDifference:
-        Push<ClipDifferenceRRectOp>(0, rrect, is_aa);
-        break;
-    }
+    return;
+  }
+  if (current_info().is_nop) {
+    return;
+  }
+  if (current_info().has_valid_clip &&
+      clip_op == DlCanvas::ClipOp::kIntersect &&
+      layer_local_state().rrect_covers_cull(rrect)) {
+    return;
+  }
+  global_state().clipRRect(rrect, clip_op, is_aa);
+  layer_local_state().clipRRect(rrect, clip_op, is_aa);
+  if (global_state().is_cull_rect_empty() ||
+      layer_local_state().is_cull_rect_empty()) {
+    current_info().is_nop = true;
+    return;
+  }
+  current_info().has_valid_clip = true;
+  checkForDeferredSave();
+  switch (clip_op) {
+    case ClipOp::kIntersect:
+      Push<ClipIntersectRRectOp>(0, rrect, is_aa);
+      break;
+    case ClipOp::kDifference:
+      Push<ClipDifferenceRRectOp>(0, rrect, is_aa);
+      break;
   }
 }
 void DisplayListBuilder::ClipPath(const SkPath& path,
                                   ClipOp clip_op,
                                   bool is_aa) {
+  if (current_info().is_nop) {
+    return;
+  }
   if (!path.isInverseFillType()) {
     SkRect rect;
     if (path.isRect(&rect)) {
@@ -1018,12 +1039,13 @@ void DisplayListBuilder::ClipPath(const SkPath& path,
     }
   }
   global_state().clipPath(path, clip_op, is_aa);
-  if (current_info().is_nop ||
-      current_info().global_state.is_cull_rect_empty()) {
+  layer_local_state().clipPath(path, clip_op, is_aa);
+  if (global_state().is_cull_rect_empty() ||
+      layer_local_state().is_cull_rect_empty()) {
     current_info().is_nop = true;
     return;
   }
-  layer_local_state().clipPath(path, clip_op, is_aa);
+  current_info().has_valid_clip = true;
   checkForDeferredSave();
   switch (clip_op) {
     case ClipOp::kIntersect:

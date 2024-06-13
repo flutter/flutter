@@ -566,6 +566,7 @@ class DisplayListBuilder final : public virtual DlCanvas,
     // For constructor (root layer) initialization
     explicit SaveInfo(const DlRect& cull_rect)
         : is_save_layer(true),
+          has_valid_clip(false),
           global_state(cull_rect),
           layer_state(cull_rect),
           layer_info(new LayerInfo(nullptr, 0u)) {}
@@ -576,6 +577,7 @@ class DisplayListBuilder final : public virtual DlCanvas,
     explicit SaveInfo(const SaveInfo* parent_info)
         : is_save_layer(false),
           has_deferred_save_op(true),
+          has_valid_clip(parent_info->has_valid_clip),
           global_state(parent_info->global_state),
           layer_state(parent_info->layer_state),
           layer_info(parent_info->layer_info) {}
@@ -585,6 +587,7 @@ class DisplayListBuilder final : public virtual DlCanvas,
                       const std::shared_ptr<const DlImageFilter>& filter,
                       int rtree_rect_index)
         : is_save_layer(true),
+          has_valid_clip(false),
           global_state(parent_info->global_state),
           layer_state(kMaxCullRect),
           layer_info(new LayerInfo(filter, rtree_rect_index)) {}
@@ -593,6 +596,7 @@ class DisplayListBuilder final : public virtual DlCanvas,
 
     bool has_deferred_save_op = false;
     bool is_nop = false;
+    bool has_valid_clip;
 
     // The depth when the save call is recorded, used to compute the total
     // depth of its content when the associated restore is called.

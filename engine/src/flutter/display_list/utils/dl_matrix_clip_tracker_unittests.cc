@@ -764,5 +764,179 @@ TEST(DisplayListMatrixClipState, MapAndClipRectScale) {
   }
 }
 
+TEST(DisplayListMatrixClipState, RectCoverage) {
+  DlRect rect = DlRect::MakeLTRB(100.0f, 100.0f, 200.0f, 200.0f);
+  DisplayListMatrixClipState state(rect);
+
+  EXPECT_TRUE(state.rect_covers_cull(rect));
+  EXPECT_TRUE(state.rect_covers_cull(rect.Expand(0.1f, 0.0f, 0.0f, 0.0f)));
+  EXPECT_TRUE(state.rect_covers_cull(rect.Expand(0.0f, 0.1f, 0.0f, 0.0f)));
+  EXPECT_TRUE(state.rect_covers_cull(rect.Expand(0.0f, 0.0f, 0.1f, 0.0f)));
+  EXPECT_TRUE(state.rect_covers_cull(rect.Expand(0.0f, 0.0f, 0.0f, 0.1f)));
+  EXPECT_FALSE(state.rect_covers_cull(rect.Expand(-0.1f, 0.0f, 0.0f, 0.0f)));
+  EXPECT_FALSE(state.rect_covers_cull(rect.Expand(0.0f, -0.1f, 0.0f, 0.0f)));
+  EXPECT_FALSE(state.rect_covers_cull(rect.Expand(0.0f, 0.0f, -0.1f, 0.0f)));
+  EXPECT_FALSE(state.rect_covers_cull(rect.Expand(0.0f, 0.0f, 0.0f, -0.1f)));
+}
+
+TEST(DisplayListMatrixClipState, RectCoverageUnderScale) {
+  DlRect rect = DlRect::MakeLTRB(100.0f, 100.0f, 200.0f, 200.0f);
+  DisplayListMatrixClipState state(rect);
+  state.scale(2.0f, 2.0f);
+
+  EXPECT_FALSE(state.rect_covers_cull(DlRect::MakeLTRB(100, 100, 200, 200)));
+  EXPECT_TRUE(state.rect_covers_cull(DlRect::MakeLTRB(50, 50, 100, 100)));
+  EXPECT_TRUE(state.rect_covers_cull(DlRect::MakeLTRB(49, 50, 100, 100)));
+  EXPECT_TRUE(state.rect_covers_cull(DlRect::MakeLTRB(50, 49, 100, 100)));
+  EXPECT_TRUE(state.rect_covers_cull(DlRect::MakeLTRB(50, 50, 101, 100)));
+  EXPECT_TRUE(state.rect_covers_cull(DlRect::MakeLTRB(50, 50, 100, 101)));
+  EXPECT_FALSE(state.rect_covers_cull(DlRect::MakeLTRB(51, 50, 100, 100)));
+  EXPECT_FALSE(state.rect_covers_cull(DlRect::MakeLTRB(50, 51, 100, 100)));
+  EXPECT_FALSE(state.rect_covers_cull(DlRect::MakeLTRB(50, 50, 99, 100)));
+  EXPECT_FALSE(state.rect_covers_cull(DlRect::MakeLTRB(50, 50, 100, 99)));
+}
+
+TEST(DisplayListMatrixClipState, RectCoverageUnderRotation) {
+  DlRect rect = DlRect::MakeLTRB(-1.0f, -1.0f, 1.0f, 1.0f);
+  DlRect cull = rect.Scale(impeller::kSqrt2 * 25);
+  DlRect test = rect.Scale(50.0f);
+  DlRect test_true = test.Expand(0.002f);
+  DlRect test_false = test.Expand(-0.002f);
+
+  for (int i = 0; i <= 360; i++) {
+    DisplayListMatrixClipState state(cull);
+    state.rotate(i);
+    EXPECT_TRUE(state.rect_covers_cull(test_true))
+        << "  testing " << test_true << std::endl
+        << "    contains " << state.local_cull_rect() << std::endl
+        << "    at " << i << " degrees";
+    if ((i % 90) == 45) {
+      // The cull rect is largest when viewed at multiples of 45
+      // degrees so we will fail to contain it at those angles
+      EXPECT_FALSE(state.rect_covers_cull(test_false))
+          << "  testing " << test_false << std::endl
+          << "    contains " << state.local_cull_rect() << std::endl
+          << "    at " << i << " degrees";
+    } else {
+      // At other angles, the cull rect is not quite so big as to encroach
+      // upon the expanded test rectangle.
+      EXPECT_TRUE(state.rect_covers_cull(test_false))
+          << "  testing " << test_false << std::endl
+          << "    contains " << state.local_cull_rect() << std::endl
+          << "    at " << i << " degrees";
+    }
+  }
+}
+
+TEST(DisplayListMatrixClipState, OvalCoverage) {
+  DlRect cull = DlRect::MakeLTRB(-50.0f, -50.0f, 50.0f, 50.0f);
+  DisplayListMatrixClipState state(cull);
+  // The cull rect corners will be at (50, 50) so the oval needs to have
+  // a radius large enough to cover that - sqrt(2*50*50) == sqrt(2) * 50
+  // We pad by an ever so slight 0.02f to account for round off error and
+  // then use larger expansion/contractions of 0.1f to cover/not-cover it.
+  DlRect test = cull.Scale(impeller::kSqrt2).Expand(0.02f);
+
+  EXPECT_TRUE(state.oval_covers_cull(test));
+  EXPECT_TRUE(state.oval_covers_cull(test.Expand(0.1f, 0.0f, 0.0f, 0.0f)));
+  EXPECT_TRUE(state.oval_covers_cull(test.Expand(0.0f, 0.1f, 0.0f, 0.0f)));
+  EXPECT_TRUE(state.oval_covers_cull(test.Expand(0.0f, 0.0f, 0.1f, 0.0f)));
+  EXPECT_TRUE(state.oval_covers_cull(test.Expand(0.0f, 0.0f, 0.0f, 0.1f)));
+  EXPECT_FALSE(state.oval_covers_cull(test.Expand(-0.1f, 0.0f, 0.0f, 0.0f)));
+  EXPECT_FALSE(state.oval_covers_cull(test.Expand(0.0f, -0.1f, 0.0f, 0.0f)));
+  EXPECT_FALSE(state.oval_covers_cull(test.Expand(0.0f, 0.0f, -0.1f, 0.0f)));
+  EXPECT_FALSE(state.oval_covers_cull(test.Expand(0.0f, 0.0f, 0.0f, -0.1f)));
+}
+
+TEST(DisplayListMatrixClipState, OvalCoverageUnderScale) {
+  DlRect cull = DlRect::MakeLTRB(-50.0f, -50.0f, 50.0f, 50.0f);
+  DisplayListMatrixClipState state(cull);
+  state.scale(2.0f, 2.0f);
+  // The cull rect corners will be at (50, 50) so the oval needs to have
+  // a radius large enough to cover that - sqrt(2*50*50) == sqrt(2) * 50
+  // We pad by an ever so slight 0.02f to account for round off error and
+  // then use larger expansion/contractions of 0.1f to cover/not-cover it.
+  // We combine that with an additional scale 0.5f since we are viewing
+  // the cull rect under a 2.0 scale.
+  DlRect test = cull.Scale(0.5f * impeller::kSqrt2).Expand(0.02f);
+
+  EXPECT_TRUE(state.oval_covers_cull(test));
+  EXPECT_TRUE(state.oval_covers_cull(test.Expand(0.1f, 0.0f, 0.0f, 0.0f)));
+  EXPECT_TRUE(state.oval_covers_cull(test.Expand(0.0f, 0.1f, 0.0f, 0.0f)));
+  EXPECT_TRUE(state.oval_covers_cull(test.Expand(0.0f, 0.0f, 0.1f, 0.0f)));
+  EXPECT_TRUE(state.oval_covers_cull(test.Expand(0.0f, 0.0f, 0.0f, 0.1f)));
+  EXPECT_FALSE(state.oval_covers_cull(test.Expand(-0.1f, 0.0f, 0.0f, 0.0f)));
+  EXPECT_FALSE(state.oval_covers_cull(test.Expand(0.0f, -0.1f, 0.0f, 0.0f)));
+  EXPECT_FALSE(state.oval_covers_cull(test.Expand(0.0f, 0.0f, -0.1f, 0.0f)));
+  EXPECT_FALSE(state.oval_covers_cull(test.Expand(0.0f, 0.0f, 0.0f, -0.1f)));
+}
+
+TEST(DisplayListMatrixClipState, OvalCoverageUnderRotation) {
+  DlRect unit = DlRect::MakeLTRB(-1.0f, -1.0f, 1.0f, 1.0f);
+  DlRect cull = unit.Scale(50.0f);
+  // See above, test bounds need to be sqrt(2) larger for the inscribed
+  // oval to contain the cull rect. These tests are simpler than the scaled
+  // rectangle coverage tests because this expanded test oval will
+  // precisely cover the cull rect at all angles.
+  DlRect test = cull.Scale(impeller::kSqrt2);
+  DlRect test_true = test.Expand(0.002f);
+  DlRect test_false = test.Expand(-0.002f);
+
+  for (int i = 0; i <= 360; i++) {
+    DisplayListMatrixClipState state(cull);
+    state.rotate(i);
+    EXPECT_TRUE(state.oval_covers_cull(test_true))
+        << "  testing " << test_true << std::endl
+        << "    contains " << state.local_cull_rect() << std::endl
+        << "    at " << i << " degrees";
+    EXPECT_FALSE(state.oval_covers_cull(test_false))
+        << "  testing " << test_false << std::endl
+        << "    contains " << state.local_cull_rect() << std::endl
+        << "    at " << i << " degrees";
+  }
+}
+
+TEST(DisplayListMatrixClipState, RRectCoverage) {
+  SkRect cull = SkRect::MakeLTRB(-50.0f, -50.0f, 50.0f, 50.0f);
+  DisplayListMatrixClipState state(cull);
+  // test_bounds need to contain
+  SkRect test = cull.makeOutset(2.0f, 2.0f);
+
+  // RRect of cull with no corners covers
+  EXPECT_TRUE(state.rrect_covers_cull(SkRRect::MakeRectXY(cull, 0.0f, 0.0f)));
+  // RRect of cull with even the tiniest corners does not cover
+  EXPECT_FALSE(
+      state.rrect_covers_cull(SkRRect::MakeRectXY(cull, 0.01f, 0.01f)));
+
+  // Expanded by 2.0 and then with a corner of 2.0 obviously still covers
+  EXPECT_TRUE(state.rrect_covers_cull(SkRRect::MakeRectXY(test, 2.0f, 2.0f)));
+  // The corner point of the cull rect is at (c-2, c-2) relative to the
+  // corner of the rrect bounds so we compute its disance to the center
+  // of the circular part and compare it to the radius of the corner (c)
+  // to find the corner radius where it will start to leave the rounded
+  // rectangle:
+  //
+  //     +-----------      +
+  //     |    __---^^      |
+  //     |  +/-------  +   |
+  //     |  / \        |   c
+  //     | /|   \     c-2  |
+  //     |/ |     \    |   |
+  //     || |       *  +   +
+  //
+  // sqrt(2*(c-2)*(c-2)) > c
+  // 2*(c-2)*(c-2) > c*c
+  // 2*(cc - 4c + 4) > cc
+  // 2cc - 8c + 8 > cc
+  // cc - 8c + 8 > 0
+  // c > 8 +/- sqrt(64 - 32) / 2
+  // c > ~6.828
+  // corners set to 6.82 should still cover the cull rect
+  EXPECT_TRUE(state.rrect_covers_cull(SkRRect::MakeRectXY(test, 6.82f, 6.82f)));
+  // but corners set to 6.83 should not cover the cull rect
+  EXPECT_FALSE(
+      state.rrect_covers_cull(SkRRect::MakeRectXY(test, 6.84f, 6.84f)));
+}
+
 }  // namespace testing
 }  // namespace flutter
