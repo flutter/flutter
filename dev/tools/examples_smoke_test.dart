@@ -74,6 +74,7 @@ Future<void> runSmokeTests({
     '--reporter=expanded',
     '--device-id=${_kPlatform.operatingSystem}',
     integrationTest.absolute.path,
+    '-v'
   ];
   await runCommand(cmd, workingDirectory: apiDir);
 }
