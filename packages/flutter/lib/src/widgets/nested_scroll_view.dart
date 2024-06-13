@@ -633,7 +633,6 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
   late _NestedScrollController _outerController;
   late _NestedScrollController _innerController;
 
-  @override
   bool get outOfRange {
     return (_outerPosition?.outOfRange ?? false) || _innerPositions.any((_NestedScrollPosition position) => position.outOfRange);
   }
