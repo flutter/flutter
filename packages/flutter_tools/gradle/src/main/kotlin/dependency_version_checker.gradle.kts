@@ -84,7 +84,7 @@ class DependencyVersionChecker {
         // "warn" version for a full release to provide advanced warning. See
         // flutter.dev/go/android-dependency-versions for more.
         val warnGradleVersion: Version = Version(7, 1, 0)
-        val errorGradleVersion: Version = Version(7, 0, 1)
+        val errorGradleVersion: Version = Version(7, 0, 2)
 
         val warnJavaVersion: JavaVersion = JavaVersion.VERSION_11
         val errorJavaVersion: JavaVersion = JavaVersion.VERSION_1_1
