@@ -13,11 +13,11 @@ void main() {
     );
     expect(find.widgetWithIcon(IconButton, Icons.settings_outlined), findsExactly(8));
     final Finder unselectedIconButtons = find.widgetWithIcon(IconButton, Icons.settings_outlined);
-    for (int i = 0; i <= 6; i += 2) {
-      expect(tester.widget<IconButton>(unselectedIconButtons.at(i)).onPressed, isA<VoidCallback>());
-      expect(tester.widget<IconButton>(unselectedIconButtons.at(i + 1)).onPressed, isNull);
+    for (int i = 0; i <= 6; i++) {
+      final IconButton button = tester.widget<IconButton>(unselectedIconButtons.at(i));
+      expect(button.onPressed, i.isEven ? isA<VoidCallback>() : isNull);
+      expect(button.isSelected, isFalse);
     }
-    expect(tester.widgetList<IconButton>(unselectedIconButtons).map((IconButton iconButton) => iconButton.isSelected), everyElement(isFalse));
 
     // Select the icons buttons.
     for (int i = 0; i <= 3; i++) {
@@ -46,5 +46,4 @@ void main() {
     }
     expect(tester.widgetList<IconButton>(unselectedIconButtons).map((IconButton iconButton) => iconButton.isSelected), everyElement(isFalse));
   });
-
 }
