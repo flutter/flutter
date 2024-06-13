@@ -444,13 +444,6 @@ abstract class WidgetStateOutlinedBorder extends LinearBorder implements WidgetS
       _WidgetStateOutlinedBorder(callback);
 }
 
-/// A [WidgetStateOutlinedBorder] created from a [WidgetPropertyResolver<OutlinedBorder>]
-/// callback alone.
-///
-/// If used as a regular [OutlinedBorder], the shape resolved in the default state will
-/// be used.
-///
-/// Used by [MaterialStateOutlinedBorder.resolveWith].
 class _WidgetStateOutlinedBorder extends WidgetStateOutlinedBorder {
   const _WidgetStateOutlinedBorder(this._resolve);
 
