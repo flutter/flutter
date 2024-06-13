@@ -39,6 +39,7 @@ class DependencyVersionChecker {
         private const val JAVA_NAME: String = "Java"
         private const val AGP_NAME: String = "Android Gradle Plugin"
         private const val KGP_NAME: String = "Kotlin"
+        private const val OUT_OF_SUPPORT_RANGE_PROPERTY = "usesUnsupportedDependencyVersions"
 
         // The following messages represent best effort guesses at where a Flutter developer should
         // look to upgrade a dependency that is below the corresponding threshold. Developers can
@@ -104,7 +105,7 @@ class DependencyVersionChecker {
          * we treat it as within the range for the purpose of this check.
          */
         fun checkDependencyVersions(project: Project) {
-            project.extra.set("failedDependencyChecks", false)
+            project.extra.set(OUT_OF_SUPPORT_RANGE_PROPERTY, false)
             var agpVersion: Version?
             var kgpVersion: Version?
 
@@ -236,7 +237,7 @@ class DependencyVersionChecker {
                         errorGradleVersion.toString(),
                         getPotentialGradleFix(project.getRootDir().getPath())
                     )
-                project.extra.set("failedDependencyChecks", true)
+                project.extra.set(OUT_OF_SUPPORT_RANGE_PROPERTY, true)
                 throw DependencyValidationException(errorMessage)
             } else if (version < warnGradleVersion) {
                 val warnMessage: String =
@@ -262,7 +263,7 @@ class DependencyVersionChecker {
                         errorJavaVersion.toString(),
                         POTENTIAL_JAVA_FIX
                     )
-                project.extra.set("failedDependencyChecks", true)
+                project.extra.set(OUT_OF_SUPPORT_RANGE_PROPERTY, true)
                 throw DependencyValidationException(errorMessage)
             } else if (version < warnJavaVersion) {
                 val warnMessage: String =
@@ -288,7 +289,7 @@ class DependencyVersionChecker {
                         errorAGPVersion.toString(),
                         getPotentialAGPFix(project.getRootDir().getPath())
                     )
-                project.extra.set("failedDependencyChecks", true)
+                project.extra.set(OUT_OF_SUPPORT_RANGE_PROPERTY, true)
                 throw DependencyValidationException(errorMessage)
             } else if (version < warnAGPVersion) {
                 val warnMessage: String =
@@ -314,7 +315,7 @@ class DependencyVersionChecker {
                         errorKGPVersion.toString(),
                         getPotentialKGPFix(project.getRootDir().getPath())
                     )
-                project.extra.set("failedDependencyChecks", true)
+                project.extra.set(OUT_OF_SUPPORT_RANGE_PROPERTY, true)
                 throw DependencyValidationException(errorMessage)
             } else if (version < warnKGPVersion) {
                 val warnMessage: String =
