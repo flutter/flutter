@@ -32,6 +32,8 @@ impeller_shaders("shader_fixtures") {
     "instanced_draw.vert",
     "mipmaps.frag",
     "mipmaps.vert",
+    "planet.frag",
+    "planet.vert",
     "sample.comp",
     "sepia.frag",
     "sepia.vert",
