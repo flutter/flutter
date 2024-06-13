@@ -287,19 +287,22 @@ std::vector<DisplayListInvocationGroup> CreateAllSaveRestoreOps() {
               r.drawRect({10, 10, 20, 20});
               r.restore();
             }},
+           // For saveLayer calls with bounds, we need at least one unclipped
+           // draw command so that the bounds are not reduced in size to the
+           // clip dimensions on the re-dispatch.
            {5, 120, 3,
             [](DlOpReceiver& r) {
               r.saveLayer(&kTestBounds, SaveLayerOptions::kNoAttributes);
+              r.drawRect(kTestBounds);
               r.clipRect({0, 0, 25, 25}, DlCanvas::ClipOp::kIntersect, true);
-              r.drawRect({5, 5, 15, 15});
               r.drawRect({10, 10, 20, 20});
               r.restore();
             }},
            {5, 120, 3,
             [](DlOpReceiver& r) {
               r.saveLayer(&kTestBounds, SaveLayerOptions::kWithAttributes);
+              r.drawRect(kTestBounds);
               r.clipRect({0, 0, 25, 25}, DlCanvas::ClipOp::kIntersect, true);
-              r.drawRect({5, 5, 15, 15});
               r.drawRect({10, 10, 20, 20});
               r.restore();
             }},
@@ -325,8 +328,8 @@ std::vector<DisplayListInvocationGroup> CreateAllSaveRestoreOps() {
             [](DlOpReceiver& r) {
               r.saveLayer(&kTestBounds, SaveLayerOptions::kNoAttributes,
                           &kTestCFImageFilter1);
+              r.drawRect(kTestBounds);
               r.clipRect({0, 0, 25, 25}, DlCanvas::ClipOp::kIntersect, true);
-              r.drawRect({5, 5, 15, 15});
               r.drawRect({10, 10, 20, 20});
               r.restore();
             }},
@@ -334,8 +337,8 @@ std::vector<DisplayListInvocationGroup> CreateAllSaveRestoreOps() {
             [](DlOpReceiver& r) {
               r.saveLayer(&kTestBounds, SaveLayerOptions::kWithAttributes,
                           &kTestCFImageFilter1);
+              r.drawRect(kTestBounds);
               r.clipRect({0, 0, 25, 25}, DlCanvas::ClipOp::kIntersect, true);
-              r.drawRect({5, 5, 15, 15});
               r.drawRect({10, 10, 20, 20});
               r.restore();
             }},

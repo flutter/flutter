@@ -226,6 +226,25 @@ struct TRect {
            p.y < bottom_;
   }
 
+  /// @brief  Returns true iff the provided point |p| is inside the
+  ///         closed-range interior of this rectangle.
+  ///
+  ///         Unlike the regular |Contains(TPoint)| method, this method
+  ///         considers all points along the boundary of the rectangle
+  ///         to be contained within the rectangle - useful for testing
+  ///         if vertices that define a filled shape would carry the
+  ///         interior of that shape outside the bounds of the rectangle.
+  ///         Since both geometries are defining half-open spaces, their
+  ///         defining geometry needs to consider their boundaries to
+  ///         be equivalent with respect to interior and exterior.
+  [[nodiscard]] constexpr bool ContainsInclusive(const TPoint<Type>& p) const {
+    return !this->IsEmpty() &&  //
+           p.x >= left_ &&      //
+           p.y >= top_ &&       //
+           p.x <= right_ &&     //
+           p.y <= bottom_;
+  }
+
   /// @brief  Returns true iff this rectangle is not empty and it also
   ///         contains every point considered inside the provided
   ///         rectangle |o| (as determined by |Contains(TPoint)|).

@@ -394,7 +394,7 @@ TEST_F(BackdropFilterLayerTest, OpacityInheritance) {
 
   clip->Paint(display_list_paint_context());
 
-  DisplayListBuilder expected_builder(clip_rect);
+  DisplayListBuilder expected_builder;
   /* ClipRectLayer::Paint */ {
     expected_builder.Save();
     {
