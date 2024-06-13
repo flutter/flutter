@@ -123,10 +123,10 @@ abstract class SelectedContentController<T extends Object> {
   /// selection.
   List<SelectedContentController<Object>> children = <SelectedContentController<Object>>[];
 
-  /// The start of the selection relative to the type of content in [content].
+  /// The start of the selection relative to the [content].
   int get startOffset;
 
-  /// The end of the selection relative to the type of content in [content].
+  /// The end of the selection relative to the [content].
   int get endOffset;
 
   /// Adds a child controller to the list of [children].
