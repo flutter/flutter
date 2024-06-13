@@ -14,7 +14,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import static org.robolectric.Shadows.shadowOf;
 
 import android.graphics.Canvas;
@@ -23,12 +22,16 @@ import android.graphics.SurfaceTexture;
 import android.media.Image;
 import android.os.Looper;
 import android.view.Surface;
+import androidx.lifecycle.Lifecycle;
+import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
+import io.flutter.embedding.android.FlutterActivity;
 import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.view.TextureRegistry;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -37,10 +40,14 @@ import org.robolectric.annotation.Config;
 @Config(manifest = Config.NONE)
 @RunWith(AndroidJUnit4.class)
 public class FlutterRendererTest {
+  @Rule(order = 1)
+  public final FlutterEngineRule engineRule = new FlutterEngineRule();
+
+  @Rule(order = 2)
+  public final ActivityScenarioRule<FlutterActivity> scenarioRule =
+      new ActivityScenarioRule<>(engineRule.makeIntent());
 
   private FlutterJNI fakeFlutterJNI;
-  private Surface fakeSurface;
-  private Surface fakeSurface2;
 
   @Before
   public void init() {
@@ -50,16 +57,14 @@ public class FlutterRendererTest {
 
   @Before
   public void setup() {
-    fakeFlutterJNI = mock(FlutterJNI.class);
-    fakeSurface = mock(Surface.class);
-    fakeSurface2 = mock(Surface.class);
+    fakeFlutterJNI = engineRule.getFlutterJNI();
   }
 
   @Test
   public void itForwardsSurfaceCreationNotificationToFlutterJNI() {
     // Setup the test.
     Surface fakeSurface = mock(Surface.class);
-    FlutterRenderer flutterRenderer = new FlutterRenderer(fakeFlutterJNI);
+    FlutterRenderer flutterRenderer = engineRule.getFlutterEngine().getRenderer();
 
     // Execute the behavior under test.
     flutterRenderer.startRenderingToSurface(fakeSurface, false);
@@ -72,7 +77,7 @@ public class FlutterRendererTest {
   public void itForwardsSurfaceChangeNotificationToFlutterJNI() {
     // Setup the test.
     Surface fakeSurface = mock(Surface.class);
-    FlutterRenderer flutterRenderer = new FlutterRenderer(fakeFlutterJNI);
+    FlutterRenderer flutterRenderer = engineRule.getFlutterEngine().getRenderer();
 
     flutterRenderer.startRenderingToSurface(fakeSurface, false);
 
@@ -87,7 +92,7 @@ public class FlutterRendererTest {
   public void itForwardsSurfaceDestructionNotificationToFlutterJNI() {
     // Setup the test.
     Surface fakeSurface = mock(Surface.class);
-    FlutterRenderer flutterRenderer = new FlutterRenderer(fakeFlutterJNI);
+    FlutterRenderer flutterRenderer = engineRule.getFlutterEngine().getRenderer();
 
     flutterRenderer.startRenderingToSurface(fakeSurface, false);
 
@@ -101,8 +106,9 @@ public class FlutterRendererTest {
   @Test
   public void itStopsRenderingToOneSurfaceBeforeRenderingToANewSurface() {
     // Setup the test.
+    Surface fakeSurface = mock(Surface.class);
     Surface fakeSurface2 = mock(Surface.class);
-    FlutterRenderer flutterRenderer = new FlutterRenderer(fakeFlutterJNI);
+    FlutterRenderer flutterRenderer = engineRule.getFlutterEngine().getRenderer();
 
     flutterRenderer.startRenderingToSurface(fakeSurface, false);
 
@@ -116,7 +122,8 @@ public class FlutterRendererTest {
   @Test
   public void itStopsRenderingToSurfaceWhenRequested() {
     // Setup the test.
-    FlutterRenderer flutterRenderer = new FlutterRenderer(fakeFlutterJNI);
+    Surface fakeSurface = mock(Surface.class);
+    FlutterRenderer flutterRenderer = engineRule.getFlutterEngine().getRenderer();
 
     flutterRenderer.startRenderingToSurface(fakeSurface, false);
 
@@ -130,10 +137,10 @@ public class FlutterRendererTest {
   @Test
   public void iStopsRenderingToSurfaceWhenSurfaceAlreadySet() {
     // Setup the test.
-    FlutterRenderer flutterRenderer = new FlutterRenderer(fakeFlutterJNI);
+    Surface fakeSurface = mock(Surface.class);
+    FlutterRenderer flutterRenderer = engineRule.getFlutterEngine().getRenderer();
 
     flutterRenderer.startRenderingToSurface(fakeSurface, false);
-
     flutterRenderer.startRenderingToSurface(fakeSurface, false);
 
     // Verify behavior under test.
@@ -143,10 +150,10 @@ public class FlutterRendererTest {
   @Test
   public void itNeverStopsRenderingToSurfaceWhenRequested() {
     // Setup the test.
-    FlutterRenderer flutterRenderer = new FlutterRenderer(fakeFlutterJNI);
+    Surface fakeSurface = mock(Surface.class);
+    FlutterRenderer flutterRenderer = engineRule.getFlutterEngine().getRenderer();
 
     flutterRenderer.startRenderingToSurface(fakeSurface, false);
-
     flutterRenderer.startRenderingToSurface(fakeSurface, true);
 
     // Verify behavior under test.
@@ -156,13 +163,11 @@ public class FlutterRendererTest {
   @Test
   public void itStopsSurfaceTextureCallbackWhenDetached() {
     // Setup the test.
-    FlutterRenderer flutterRenderer = new FlutterRenderer(fakeFlutterJNI);
-
-    fakeFlutterJNI.detachFromNativeAndReleaseResources();
+    Surface fakeSurface = mock(Surface.class);
+    FlutterRenderer flutterRenderer = engineRule.getFlutterEngine().getRenderer();
 
     FlutterRenderer.SurfaceTextureRegistryEntry entry =
         (FlutterRenderer.SurfaceTextureRegistryEntry) flutterRenderer.createSurfaceTexture();
-
     flutterRenderer.startRenderingToSurface(fakeSurface, false);
 
     // Execute the behavior under test.
@@ -175,9 +180,8 @@ public class FlutterRendererTest {
   @Test
   public void itRegistersExistingSurfaceTexture() {
     // Setup the test.
-    FlutterRenderer flutterRenderer = new FlutterRenderer(fakeFlutterJNI);
-
-    fakeFlutterJNI.detachFromNativeAndReleaseResources();
+    Surface fakeSurface = mock(Surface.class);
+    FlutterRenderer flutterRenderer = engineRule.getFlutterEngine().getRenderer();
 
     SurfaceTexture surfaceTexture = new SurfaceTexture(0);
 
@@ -197,11 +201,8 @@ public class FlutterRendererTest {
   @Test
   public void itUnregistersTextureWhenSurfaceTextureFinalized() {
     // Setup the test.
-    FlutterJNI fakeFlutterJNI = mock(FlutterJNI.class);
-    when(fakeFlutterJNI.isAttached()).thenReturn(true);
-    FlutterRenderer flutterRenderer = new FlutterRenderer(fakeFlutterJNI);
-
-    fakeFlutterJNI.detachFromNativeAndReleaseResources();
+    Surface fakeSurface = mock(Surface.class);
+    FlutterRenderer flutterRenderer = engineRule.getFlutterEngine().getRenderer();
 
     FlutterRenderer.SurfaceTextureRegistryEntry entry =
         (FlutterRenderer.SurfaceTextureRegistryEntry) flutterRenderer.createSurfaceTexture();
@@ -223,18 +224,15 @@ public class FlutterRendererTest {
   @Test
   public void itStopsUnregisteringTextureWhenDetached() {
     // Setup the test.
-    FlutterJNI fakeFlutterJNI = mock(FlutterJNI.class);
-    when(fakeFlutterJNI.isAttached()).thenReturn(false);
-    FlutterRenderer flutterRenderer = new FlutterRenderer(fakeFlutterJNI);
-
-    fakeFlutterJNI.detachFromNativeAndReleaseResources();
+    Surface fakeSurface = mock(Surface.class);
+    engineRule.setJniIsAttached(false);
+    FlutterRenderer flutterRenderer = engineRule.getFlutterEngine().getRenderer();
 
     FlutterRenderer.SurfaceTextureRegistryEntry entry =
         (FlutterRenderer.SurfaceTextureRegistryEntry) flutterRenderer.createSurfaceTexture();
     long id = entry.id();
 
     flutterRenderer.startRenderingToSurface(fakeSurface, false);
-
     flutterRenderer.stopRenderingToSurface();
 
     // Execute the behavior under test.
@@ -246,18 +244,17 @@ public class FlutterRendererTest {
     verify(fakeFlutterJNI, times(0)).unregisterTexture(eq(id));
   }
 
+  /** @noinspection FinalizeCalledExplicitly */
   void runFinalization(FlutterRenderer.SurfaceTextureRegistryEntry entry) {
     CountDownLatch latch = new CountDownLatch(1);
     Thread fakeFinalizer =
         new Thread(
-            new Runnable() {
-              public void run() {
-                try {
-                  entry.finalize();
-                  latch.countDown();
-                } catch (Throwable e) {
-                  // do nothing
-                }
+            () -> {
+              try {
+                entry.finalize();
+                latch.countDown();
+              } catch (Throwable e) {
+                // do nothing
               }
             });
     fakeFinalizer.start();
@@ -270,8 +267,14 @@ public class FlutterRendererTest {
 
   @Test
   public void itConvertsDisplayFeatureArrayToPrimitiveArrays() {
-    // Setup the test.
+    // Intentionally do not use 'engineRule' in this test, because we are testing a very narrow
+    // API (the side-effects of 'setViewportMetrics'). Under normal construction, the engine will
+    // invoke 'setViewportMetrics' a number of times automatically, making testing the side-effects
+    // of the method call more difficult than needed.
+    FlutterJNI fakeFlutterJNI = mock(FlutterJNI.class);
     FlutterRenderer flutterRenderer = new FlutterRenderer(fakeFlutterJNI);
+
+    // Setup the test.
     FlutterRenderer.ViewportMetrics metrics = new FlutterRenderer.ViewportMetrics();
     metrics.width = 1000;
     metrics.height = 1000;
@@ -332,16 +335,10 @@ public class FlutterRendererTest {
   @Test
   public void itNotifyImageFrameListener() {
     // Setup the test.
-    FlutterRenderer flutterRenderer = new FlutterRenderer(fakeFlutterJNI);
+    FlutterRenderer flutterRenderer = engineRule.getFlutterEngine().getRenderer();
 
     AtomicInteger invocationCount = new AtomicInteger(0);
-    final TextureRegistry.OnFrameConsumedListener listener =
-        new TextureRegistry.OnFrameConsumedListener() {
-          @Override
-          public void onFrameConsumed() {
-            invocationCount.incrementAndGet();
-          }
-        };
+    final TextureRegistry.OnFrameConsumedListener listener = invocationCount::incrementAndGet;
 
     FlutterRenderer.SurfaceTextureRegistryEntry entry =
         (FlutterRenderer.SurfaceTextureRegistryEntry) flutterRenderer.createSurfaceTexture();
@@ -357,7 +354,7 @@ public class FlutterRendererTest {
   @Test
   public void itAddsListenerWhenSurfaceTextureEntryCreated() {
     // Setup the test.
-    FlutterRenderer flutterRenderer = spy(new FlutterRenderer(fakeFlutterJNI));
+    FlutterRenderer flutterRenderer = spy(engineRule.getFlutterEngine().getRenderer());
 
     // Execute the behavior under test.
     FlutterRenderer.SurfaceTextureRegistryEntry entry =
@@ -370,7 +367,7 @@ public class FlutterRendererTest {
   @Test
   public void itRemovesListenerWhenSurfaceTextureEntryReleased() {
     // Setup the test.
-    FlutterRenderer flutterRenderer = spy(new FlutterRenderer(fakeFlutterJNI));
+    FlutterRenderer flutterRenderer = spy(engineRule.getFlutterEngine().getRenderer());
     FlutterRenderer.SurfaceTextureRegistryEntry entry =
         (FlutterRenderer.SurfaceTextureRegistryEntry) flutterRenderer.createSurfaceTexture();
 
@@ -384,16 +381,11 @@ public class FlutterRendererTest {
   @Test
   public void itNotifySurfaceTextureEntryWhenMemoryPressureWarning() {
     // Setup the test.
-    FlutterRenderer flutterRenderer = new FlutterRenderer(fakeFlutterJNI);
+    FlutterRenderer flutterRenderer = engineRule.getFlutterEngine().getRenderer();
 
     AtomicInteger invocationCount = new AtomicInteger(0);
     final TextureRegistry.OnTrimMemoryListener listener =
-        new TextureRegistry.OnTrimMemoryListener() {
-          @Override
-          public void onTrimMemory(int level) {
-            invocationCount.incrementAndGet();
-          }
-        };
+        level -> invocationCount.incrementAndGet();
 
     FlutterRenderer.SurfaceTextureRegistryEntry entry =
         (FlutterRenderer.SurfaceTextureRegistryEntry) flutterRenderer.createSurfaceTexture();
@@ -409,7 +401,8 @@ public class FlutterRendererTest {
   @Test
   public void itDoesDispatchSurfaceDestructionNotificationOnlyOnce() {
     // Setup the test.
-    FlutterRenderer flutterRenderer = new FlutterRenderer(fakeFlutterJNI);
+    Surface fakeSurface = mock(Surface.class);
+    FlutterRenderer flutterRenderer = engineRule.getFlutterEngine().getRenderer();
 
     flutterRenderer.startRenderingToSurface(fakeSurface, false);
 
@@ -424,7 +417,8 @@ public class FlutterRendererTest {
 
   @Test
   public void itInvokesCreatesSurfaceWhenStartingRendering() {
-    FlutterRenderer flutterRenderer = new FlutterRenderer(fakeFlutterJNI);
+    Surface fakeSurface = mock(Surface.class);
+    FlutterRenderer flutterRenderer = engineRule.getFlutterEngine().getRenderer();
 
     flutterRenderer.startRenderingToSurface(fakeSurface, false);
     verify(fakeFlutterJNI, times(1)).onSurfaceCreated(eq(fakeSurface));
@@ -432,7 +426,9 @@ public class FlutterRendererTest {
 
   @Test
   public void itDoesNotInvokeCreatesSurfaceWhenResumingRendering() {
-    FlutterRenderer flutterRenderer = new FlutterRenderer(fakeFlutterJNI);
+    Surface fakeSurface = mock(Surface.class);
+    Surface fakeSurface2 = mock(Surface.class);
+    FlutterRenderer flutterRenderer = engineRule.getFlutterEngine().getRenderer();
 
     // The following call sequence mimics the behaviour of FlutterView when it exits from hybrid
     // composition mode.
@@ -458,9 +454,10 @@ public class FlutterRendererTest {
 
   @Test
   public void ImageReaderSurfaceProducerProducesImageOfCorrectSize() {
-    FlutterRenderer flutterRenderer = new FlutterRenderer(fakeFlutterJNI);
+    FlutterRenderer flutterRenderer = engineRule.getFlutterEngine().getRenderer();
+    TextureRegistry.SurfaceProducer producer = flutterRenderer.createSurfaceProducer();
     FlutterRenderer.ImageReaderSurfaceProducer texture =
-        flutterRenderer.new ImageReaderSurfaceProducer(0);
+        (FlutterRenderer.ImageReaderSurfaceProducer) producer;
     texture.disableFenceForTest();
 
     // Returns a null image when one hasn't been produced.
@@ -481,6 +478,7 @@ public class FlutterRendererTest {
 
     // Extract the image and check its size.
     Image image = texture.acquireLatestImage();
+    assert image != null;
     assertEquals(1, image.getWidth());
     assertEquals(1, image.getHeight());
     image.close();
@@ -500,6 +498,7 @@ public class FlutterRendererTest {
 
     // Extract the image and check its size.
     image = texture.acquireLatestImage();
+    assert image != null;
     assertEquals(5, image.getWidth());
     assertEquals(5, image.getHeight());
     image.close();
@@ -510,10 +509,11 @@ public class FlutterRendererTest {
   }
 
   @Test
-  public void ImageReaderSurfaceProducerDoesNotDropFramesWhenResizeInflight() {
-    FlutterRenderer flutterRenderer = new FlutterRenderer(fakeFlutterJNI);
+  public void ImageReaderSurfaceProducerDoesNotDropFramesWhenResizeInFlight() {
+    FlutterRenderer flutterRenderer = engineRule.getFlutterEngine().getRenderer();
+    TextureRegistry.SurfaceProducer producer = flutterRenderer.createSurfaceProducer();
     FlutterRenderer.ImageReaderSurfaceProducer texture =
-        flutterRenderer.new ImageReaderSurfaceProducer(0);
+        (FlutterRenderer.ImageReaderSurfaceProducer) producer;
     texture.disableFenceForTest();
 
     // Returns a null image when one hasn't been produced.
@@ -541,9 +541,10 @@ public class FlutterRendererTest {
 
   @Test
   public void ImageReaderSurfaceProducerImageReadersAndImagesCount() {
-    FlutterRenderer flutterRenderer = new FlutterRenderer(fakeFlutterJNI);
+    FlutterRenderer flutterRenderer = engineRule.getFlutterEngine().getRenderer();
+    TextureRegistry.SurfaceProducer producer = flutterRenderer.createSurfaceProducer();
     FlutterRenderer.ImageReaderSurfaceProducer texture =
-        flutterRenderer.new ImageReaderSurfaceProducer(0);
+        (FlutterRenderer.ImageReaderSurfaceProducer) producer;
     texture.disableFenceForTest();
 
     // Returns a null image when one hasn't been produced.
@@ -623,9 +624,11 @@ public class FlutterRendererTest {
 
   @Test
   public void ImageReaderSurfaceProducerTrimMemoryCallback() {
-    FlutterRenderer flutterRenderer = new FlutterRenderer(fakeFlutterJNI);
+    FlutterRenderer flutterRenderer = engineRule.getFlutterEngine().getRenderer();
+    TextureRegistry.SurfaceProducer producer = flutterRenderer.createSurfaceProducer();
     FlutterRenderer.ImageReaderSurfaceProducer texture =
-        flutterRenderer.new ImageReaderSurfaceProducer(0);
+        (FlutterRenderer.ImageReaderSurfaceProducer) producer;
+
     texture.disableFenceForTest();
 
     // Returns a null image when one hasn't been produced.
@@ -687,37 +690,46 @@ public class FlutterRendererTest {
   // A 0x0 ImageReader is a runtime error.
   @Test
   public void ImageReaderSurfaceProducerClampsWidthAndHeightTo1() {
-    FlutterRenderer flutterRenderer = new FlutterRenderer(fakeFlutterJNI);
-    FlutterRenderer.ImageReaderSurfaceProducer texture =
-        flutterRenderer.new ImageReaderSurfaceProducer(0);
+    FlutterRenderer flutterRenderer = engineRule.getFlutterEngine().getRenderer();
+    TextureRegistry.SurfaceProducer producer = flutterRenderer.createSurfaceProducer();
 
     // Default values.
-    assertEquals(texture.getWidth(), 1);
-    assertEquals(texture.getHeight(), 1);
+    assertEquals(producer.getWidth(), 1);
+    assertEquals(producer.getHeight(), 1);
 
     // Try setting width and height to 0.
-    texture.setSize(0, 0);
+    producer.setSize(0, 0);
 
     // Ensure we can still create/get a surface without an exception being raised.
-    assertNotNull(texture.getSurface());
+    assertNotNull(producer.getSurface());
 
     // Expect clamp to 1.
-    assertEquals(texture.getWidth(), 1);
-    assertEquals(texture.getHeight(), 1);
+    assertEquals(producer.getWidth(), 1);
+    assertEquals(producer.getHeight(), 1);
   }
 
   @Test
   public void SurfaceTextureSurfaceProducerCreatesAConnectedTexture() {
     // Force creating a SurfaceTextureSurfaceProducer regardless of Android API version.
-    FlutterRenderer.debugForceSurfaceProducerGlTextures = true;
+    Surface fakeSurface = mock(Surface.class);
+    try {
+      FlutterRenderer.debugForceSurfaceProducerGlTextures = true;
+      FlutterRenderer flutterRenderer = engineRule.getFlutterEngine().getRenderer();
+      TextureRegistry.SurfaceProducer producer = flutterRenderer.createSurfaceProducer();
 
-    FlutterRenderer flutterRenderer = new FlutterRenderer(fakeFlutterJNI);
-    TextureRegistry.SurfaceProducer producer = flutterRenderer.createSurfaceProducer();
+      flutterRenderer.startRenderingToSurface(fakeSurface, false);
 
-    flutterRenderer.startRenderingToSurface(fakeSurface, false);
+      // Verify behavior under test.
+      assertEquals(producer.id(), 0);
+      verify(fakeFlutterJNI, times(1)).registerTexture(eq(producer.id()), any());
+    } finally {
+      FlutterRenderer.debugForceSurfaceProducerGlTextures = false;
+    }
+  }
 
-    // Verify behavior under test.
-    assertEquals(producer.id(), 0);
-    verify(fakeFlutterJNI, times(1)).registerTexture(eq(producer.id()), any());
+  @Test
+  public void CanLaunchActivityUsingFlutterEngine() {
+    // This is a placeholder test that will be used to test lifecycle events w/ SurfaceProducer.
+    scenarioRule.getScenario().moveToState(Lifecycle.State.RESUMED);
   }
 }
