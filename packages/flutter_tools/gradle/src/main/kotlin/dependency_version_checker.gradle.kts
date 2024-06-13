@@ -39,6 +39,10 @@ class DependencyVersionChecker {
         private const val JAVA_NAME: String = "Java"
         private const val AGP_NAME: String = "Android Gradle Plugin"
         private const val KGP_NAME: String = "Kotlin"
+
+        // String constant that defines the name of the Gradle extra property that we set when
+        // detecting that the project is using versions outside of Flutter's support range.
+        // https://docs.gradle.org/current/kotlin-dsl/gradle/org.gradle.api/-project/index.html#-2107180640%2FProperties%2F-1867656071.
         private const val OUT_OF_SUPPORT_RANGE_PROPERTY = "usesUnsupportedDependencyVersions"
 
         // The following messages represent best effort guesses at where a Flutter developer should
