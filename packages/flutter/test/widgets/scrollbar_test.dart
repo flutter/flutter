@@ -5,6 +5,7 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/src/physics/utils.dart' show nearEqual;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -3212,4 +3213,47 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
   },
     variant: TargetPlatformVariant.all(),
   );
+
+  testWidgets('Safe to drag trackpad when maxScrollExtent is 0 (scrollbar is not painted)', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/149803
+    final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
+
+    Widget buildFrame(double sizedBoxHeight) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: RawScrollbar(
+            controller: scrollController,
+            child: SingleChildScrollView(
+              controller: scrollController,
+              child: SizedBox(width: 100.0, height: sizedBoxHeight),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(100)); // Test viewport has height=600
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 0.0);
+    expect(scrollController.position.maxScrollExtent, 0.0);
+
+    await tester.drag(find.byType(SingleChildScrollView), const Offset(0, -100), kind: PointerDeviceKind.trackpad);
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 0.0);
+    expect(scrollController.position.maxScrollExtent, 0.0);
+
+    await tester.pumpWidget(buildFrame(700));
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 0.0);
+    expect(scrollController.position.maxScrollExtent, 100.0);
+
+    await tester.drag(find.byType(SingleChildScrollView), const Offset(0, -100), kind: PointerDeviceKind.trackpad);
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 100.0);
+    expect(scrollController.position.maxScrollExtent, 100.0);
+
+  });
 }
