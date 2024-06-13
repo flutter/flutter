@@ -1487,7 +1487,7 @@ void main() {
       exitRecorder.collate(5),
       matchesGoldenFile('cupertinoActionSheet.exit.png'),
     );
-  }, skip: kIsWeb);
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
 
   testWidgets('Animation is correct if entering is canceled halfway', (WidgetTester tester) async {
     final AnimationSheetBuilder recorder = AnimationSheetBuilder(
@@ -1532,7 +1532,7 @@ void main() {
       recorder.collate(5),
       matchesGoldenFile('cupertinoActionSheet.interrupted-enter.png'),
     );
-  }, skip: kIsWeb);
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
 
   testWidgets('Action sheet semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
