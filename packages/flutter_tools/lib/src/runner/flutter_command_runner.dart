@@ -250,7 +250,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
   }
 
   /// Whether to perform a flutter version check, which prints a warning if old.
-  /// 
+  ///
   /// This method should be narrowly used in the following manner:
   /// ```dart
   /// final bool topLevelMachineFlag = topLevelResults[FlutterGlobalOptions.kMachineFlag] as bool? ?? false;
