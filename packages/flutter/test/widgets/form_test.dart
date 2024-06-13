@@ -1060,7 +1060,7 @@ void main() {
     expect(fieldKey.currentState!.hasInteractedByUser, isFalse);
   });
 
-  testWidgets('forceErrorText forces an error state when first init.', (WidgetTester tester) async {
+  testWidgets('forceErrorText forces an error state when first init', (WidgetTester tester) async {
     const String forceErrorText = 'Forcing error.';
 
     Widget builder(AutovalidateMode autovalidateMode) {
@@ -1124,7 +1124,7 @@ void main() {
       expect(isValid, isFalse);
   });
 
-  testWidgets('forceErrorText forces an error state only after setting it to a non-null value.', (WidgetTester tester) async {
+  testWidgets('forceErrorText forces an error state only after setting it to a non-null value', (WidgetTester tester) async {
     final GlobalKey<FormState> formKey = GlobalKey<FormState>();
     const String errorText = 'Forcing Error Text';
     Widget builder(AutovalidateMode autovalidateMode, String? forceErrorText) {
@@ -1156,7 +1156,7 @@ void main() {
     expect(find.text(errorText), findsOne);
   });
 
-  testWidgets('Validator will not be called if forceErrorText is provided.', (WidgetTester tester) async {
+  testWidgets('Validator will not be called if forceErrorText is provided', (WidgetTester tester) async {
     final GlobalKey<FormState> formKey = GlobalKey<FormState>();
     const String forceErrorText = 'Forcing error.';
     const String validatorErrorText = 'this error should not appear as we override it with forceErrorText';
