@@ -11,6 +11,7 @@ import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../artifacts.dart';
+import '../base/common.dart';
 import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
@@ -775,7 +776,14 @@ class FlutterBuildSystem extends BuildSystem {
     for (final String lastOutput in lastOutputs) {
       if (!currentOutputs.containsKey(lastOutput)) {
         final File lastOutputFile = fileSystem.file(lastOutput);
-        ErrorHandlingFileSystem.deleteIfExists(lastOutputFile);
+        try {
+          ErrorHandlingFileSystem.deleteIfExists(lastOutputFile);
+        } on FileSystemException catch (e) {
+          throwToolExit(
+            'Unable to delete stale build output file.\n$e\n'
+            "Make sure your user account has permissions to write to your project's build directory.",
+          );
+        }
       }
     }
   }

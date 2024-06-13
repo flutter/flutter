@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io';
 
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
@@ -991,6 +992,53 @@ void main() {
     expect(environment.outputDir.childFile('.last_build_id').readAsStringSync(),
       '6666cd76f96956469e7be39d750cc7d9');
     expect(environment.outputDir.childFile('stale'), isNot(exists));
+  });
+
+  testWithoutContext('trackSharedBuildDirectory catches exceptions from deleting output files and exits the tool', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test(
+      opHandle: (String context, FileSystemOp operation) {
+        if (context.endsWith('stale') && operation == FileSystemOp.delete) {
+          throw PathAccessException(
+            context,
+            const OSError('Access is denied.', 5),
+            'Cannot delete file',
+          );
+        }
+      },
+    );
+    final Environment environment = Environment.test(
+      fileSystem.currentDirectory,
+      artifacts: Artifacts.test(),
+      processManager: FakeProcessManager.empty(),
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+    );
+
+    environment.outputDir
+      .childFile('.last_build_id')
+      .writeAsStringSync('foo');
+    final Directory otherBuildDir = environment.buildDir.parent
+      .childDirectory('foo')
+      ..createSync(recursive: true);
+    final File staleFile = environment.outputDir
+      .childFile('stale')
+      ..createSync();
+    otherBuildDir.childFile('outputs.json')
+      .writeAsStringSync(json.encode(<String>[staleFile.absolute.path]));
+    final FlutterBuildSystem buildSystem = FlutterBuildSystem(
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+      platform: FakePlatform(),
+    );
+
+    expect(
+      () => buildSystem.trackSharedBuildDirectory(environment, fileSystem, <String, File>{}),
+      throwsToolExit(
+        message: 'Unable to delete stale build output file.\n'
+          "PathAccessException: Cannot delete file, path = '/stale' (OS Error: Access is denied., errno = 5)\n"
+          "Make sure your user account has permissions to write to your project's build directory.",
+      ),
+    );
   });
 
   testWithoutContext('multiple builds to the same output directory do no leave stale artifacts', () async {
