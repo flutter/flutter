@@ -111,7 +111,8 @@ void main() {
   }
 
   testUsingContext(
-      'AGP version at low end of supported builds successfully', () async {
+      'AGP version out of "warn" support band but in "error" band builds '
+          'successfully and prints warning', () async {
 
     final ProcessResult result = await buildFlutterApkWithSpecifiedDependencyVersions(
         gradleVersion: '7.5',
@@ -119,6 +120,7 @@ void main() {
         kgpVersion: '1.7.10'
     );
     expect(result, const ProcessResultMatcher());
+    expect(result.stderr, contains('Please upgrade your Android Gradle Plugin version'));
   });
 
   testUsingContext(
@@ -133,7 +135,8 @@ void main() {
   });
 
   testUsingContext(
-      'Kotlin version at low end of supported builds successfully', () async {
+      'Kotlin version out of "warn" support band but in "error" band builds '
+          'successfully and prints warning', () async {
     final ProcessResult result = await buildFlutterApkWithSpecifiedDependencyVersions(
         gradleVersion: '7.5',
         agpVersion: '7.4.0',
@@ -141,5 +144,6 @@ void main() {
     );
 
     expect(result, const ProcessResultMatcher());
+    expect(result.stderr, contains('Please upgrade your Kotlin version'));
   });
 }
