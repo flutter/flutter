@@ -38,6 +38,11 @@ bool GoldenPlaygroundTest::OpenPlaygroundHere(
 }
 
 bool GoldenPlaygroundTest::OpenPlaygroundHere(
+    const AiksDlPlaygroundCallback& callback) {
+  return false;
+}
+
+bool GoldenPlaygroundTest::OpenPlaygroundHere(
     const sk_sp<flutter::DisplayList>& list) {
   return false;
 }
