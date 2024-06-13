@@ -1,4 +1,4 @@
-Signature: 55da20a7433dc7c3f0296c5408992bf9
+Signature: 078b27a5565f5efaa324b482119243f1
 
 ====================================================================================================
 LIBRARY: etc1
@@ -9557,6 +9557,8 @@ ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/geom/AnalyticBlurMask
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/precompile/PaintOption.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/precompile/PaintOption.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/precompile/PaintOptions.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/precompile/PrecompileBaseComplete.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/precompile/PrecompileBlender.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/precompile/PrecompileBlenderPriv.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/render/AnalyticBlurRenderStep.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/render/AnalyticBlurRenderStep.h + ../../../flutter/third_party/skia/LICENSE
@@ -9631,6 +9633,8 @@ FILE: ../../../flutter/third_party/skia/src/gpu/graphite/geom/AnalyticBlurMask.h
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/precompile/PaintOption.cpp
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/precompile/PaintOption.h
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/precompile/PaintOptions.cpp
+FILE: ../../../flutter/third_party/skia/src/gpu/graphite/precompile/PrecompileBaseComplete.h
+FILE: ../../../flutter/third_party/skia/src/gpu/graphite/precompile/PrecompileBlender.cpp
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/precompile/PrecompileBlenderPriv.h
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/render/AnalyticBlurRenderStep.cpp
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/render/AnalyticBlurRenderStep.h
