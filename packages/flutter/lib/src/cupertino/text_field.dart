@@ -1339,7 +1339,6 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
     }
 
     // Use the default disabled color only if the box decoration was not set.
-    // box decoration was not set.
     final BoxDecoration? effectiveDecoration =
       widget.decoration?.copyWith(
         border: resolvedBorder,
