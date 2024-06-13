@@ -1400,6 +1400,7 @@
 ../../../flutter/third_party/dart/runtime/observatory/tests
 ../../../flutter/third_party/dart/runtime/observatory/update_sources.py
 ../../../flutter/third_party/dart/runtime/observatory/web/third_party/README.md
+../../../flutter/third_party/dart/runtime/platform/uri_test.cc
 ../../../flutter/third_party/dart/runtime/tests
 ../../../flutter/third_party/dart/runtime/tools/.gitignore
 ../../../flutter/third_party/dart/runtime/tools/android_finder.py
@@ -1570,7 +1571,6 @@
 ../../../flutter/third_party/dart/runtime/vm/unicode_test.cc
 ../../../flutter/third_party/dart/runtime/vm/unit_test.cc
 ../../../flutter/third_party/dart/runtime/vm/unit_test.h
-../../../flutter/third_party/dart/runtime/vm/uri_test.cc
 ../../../flutter/third_party/dart/runtime/vm/utils_test.cc
 ../../../flutter/third_party/dart/runtime/vm/virtual_memory_test.cc
 ../../../flutter/third_party/dart/runtime/vm/zone_test.cc
