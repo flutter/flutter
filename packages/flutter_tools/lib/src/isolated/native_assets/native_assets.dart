@@ -719,7 +719,7 @@ Future<(Uri? nativeAssetsYaml, List<Uri> dependencies)> buildNativeAssetsSingleA
     buildMode: buildModeCli,
     workingDirectory: projectUri,
     includeParentEnvironment: true,
-    cCompilerConfig: await buildRunner.ndkCCompilerConfigImpl,
+    cCompilerConfig: await buildRunner.cCompilerConfig,
     buildResult: buildResult,
   );
   ensureNativeAssetsLinkSucceed(linkResult);
