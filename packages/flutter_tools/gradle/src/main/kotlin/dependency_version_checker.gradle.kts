@@ -83,7 +83,7 @@ class DependencyVersionChecker {
         // Before updating any "error" version, ensure that you have updated the corresponding
         // "warn" version for a full release to provide advanced warning. See
         // flutter.dev/go/android-dependency-versions for more.
-        val warnGradleVersion: Version = Version(7, 0, 2)
+        val warnGradleVersion: Version = Version(7, 1, 0)
         val errorGradleVersion: Version = Version(7, 0, 1)
 
         val warnJavaVersion: JavaVersion = JavaVersion.VERSION_11

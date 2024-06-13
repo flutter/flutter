@@ -124,7 +124,8 @@ void main() {
   });
 
   testUsingContext(
-      'Gradle version at low end of supported builds successfully', () async {
+      'Gradle version out of "warn" support band but in "error" band builds '
+          'successfully and prints warning', () async {
     // Create a new flutter project.
     final ProcessResult result = await buildFlutterApkWithSpecifiedDependencyVersions(
         gradleVersion: '7.0.2',
@@ -132,6 +133,7 @@ void main() {
         kgpVersion: '1.7.10'
     );
     expect(result, const ProcessResultMatcher());
+    expect(result.stderr, contains('Please upgrade your Gradle version'));
   });
 
   testUsingContext(
