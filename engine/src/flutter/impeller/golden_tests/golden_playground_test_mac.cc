@@ -211,6 +211,25 @@ bool GoldenPlaygroundTest::OpenPlaygroundHere(Picture picture) {
 }
 
 bool GoldenPlaygroundTest::OpenPlaygroundHere(
+    const AiksDlPlaygroundCallback& callback) {
+  AiksContext renderer(GetContext(), typographer_context_);
+
+  std::optional<Picture> picture;
+  std::unique_ptr<testing::Screenshot> screenshot;
+  for (int i = 0; i < 2; ++i) {
+    auto display_list = callback();
+    DlDispatcher dispatcher;
+    display_list->Dispatch(dispatcher);
+    Picture picture = dispatcher.EndRecordingAsPicture();
+
+    screenshot = pimpl_->screenshotter->MakeScreenshot(renderer, picture,
+                                                       pimpl_->window_size);
+  }
+
+  return SaveScreenshot(std::move(screenshot));
+}
+
+bool GoldenPlaygroundTest::OpenPlaygroundHere(
     AiksPlaygroundCallback
         callback) {  // NOLINT(performance-unnecessary-value-param)
   AiksContext renderer(GetContext(), typographer_context_);
