@@ -90,8 +90,14 @@ class _MyHomePageState extends State<MyHomePage> {
     );
     dataSourceMap[_text3Id] = const TextSpan(text: 'This is some text in another text widget.');
     // Save the origin data so we can revert our changes.
-    originSourceData = <int, TextSpan>{ ...dataSourceMap };
-    originBulletSourceData = <int, TextSpan>{ ...bulletSourceMap };
+    originSourceData = <int, TextSpan>{};
+    originBulletSourceData = <int, TextSpan>{};
+    for (final MapEntry<int, TextSpan> entry in dataSourceMap.entries) {
+      originSourceData[entry.key] = entry.value;
+    }
+    for (final MapEntry<int, TextSpan> entry in bulletSourceMap.entries) {
+      originBulletSourceData[entry.key] = entry.value;
+    }
   }
 
   void _emphasizeText(List<SelectedContentController<Object>>? controllers, { Map<int, TextSpan>? dataMap }) {
@@ -230,9 +236,9 @@ class _MyHomePageState extends State<MyHomePage> {
         controller: _selectionController,
         onSelectionChanged: (SelectedContent? selectedContent) {
           if (selectedContent == null
-              || selectedContent.plainText.isEmpty
-              || (selectedContent.geometry.startSelectionPoint == null
-              || selectedContent.geometry.endSelectionPoint == null)) {
+             || selectedContent.plainText.isEmpty
+             || selectedContent.geometry.startSelectionPoint == null
+             || selectedContent.geometry.endSelectionPoint == null) {
             return;
           }
           _menuController.show(
@@ -285,14 +291,15 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // Resets the state to the origin data.
-          for (final MapEntry<int, TextSpan> entry in originSourceData.entries) {
-            dataSourceMap[entry.key] = entry.value;
-          }
-          for (final MapEntry<int, TextSpan> entry in originBulletSourceData.entries) {
-            bulletSourceMap[entry.key] = entry.value;
-          }
-          setState(() {});
+          setState(() {
+            // Resets the state to the origin data.
+            for (final MapEntry<int, TextSpan> entry in originSourceData.entries) {
+              dataSourceMap[entry.key] = entry.value;
+            }
+            for (final MapEntry<int, TextSpan> entry in originBulletSourceData.entries) {
+              bulletSourceMap[entry.key] = entry.value;
+            }
+          });
         },
         child: const Icon(Icons.undo),
       ),

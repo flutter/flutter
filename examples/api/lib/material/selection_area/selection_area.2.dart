@@ -254,9 +254,9 @@ class _MyHomePageState extends State<MyHomePage> {
         controller: _selectionController,
         onSelectionChanged: (SelectedContent? selectedContent) {
             if (selectedContent == null
-                || selectedContent.plainText.isEmpty
-                || (selectedContent.geometry.startSelectionPoint == null
-                || selectedContent.geometry.endSelectionPoint == null)) {
+               || selectedContent.plainText.isEmpty
+               || selectedContent.geometry.startSelectionPoint == null
+               || selectedContent.geometry.endSelectionPoint == null) {
             return;
           }
           _menuController.show(

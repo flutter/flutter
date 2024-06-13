@@ -518,12 +518,6 @@ class Text extends StatelessWidget {
          'textScaleFactor is deprecated and cannot be specified when textScaler is specified.',
        );
 
-  /// A unique id used to identify this [Selectable] widget.
-  ///
-  /// When creating this widget you can request a unique id
-  /// through [SelectableRegionState.nextSelectableId].
-  final int? selectableId;
-
   /// The text to display.
   ///
   /// This will be null if a [textSpan] is provided instead.
@@ -647,6 +641,18 @@ class Text extends StatelessWidget {
   /// that, the selection color defaults to [DefaultSelectionStyle.defaultColor]
   /// (semi-transparent grey).
   final Color? selectionColor;
+
+  /// A unique id used to identify this [Selectable] widget.
+  ///
+  /// This is ignored if [SelectionContainer.maybeOf] returns null
+  /// in the [BuildContext] of the [Text] widget.
+  ///
+  /// When creating this widget you can request a unique id
+  /// through [SelectableRegionState.nextSelectableId].
+  ///
+  /// When this is null, the [SelectedContentController] created
+  /// by this widget will not be identifiable.
+  final int? selectableId;
 
   @override
   Widget build(BuildContext context) {
