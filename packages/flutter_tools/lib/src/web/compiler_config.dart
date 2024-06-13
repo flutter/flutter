@@ -152,7 +152,7 @@ class WasmCompilerConfig extends WebCompilerConfig {
     final bool stripSymbols = buildMode == BuildMode.release && stripWasm;
     return <String>[
       '-O$optimizationLevel',
-      '--${stripSymbols ? 'no-' : ''}name-section',
+      '--${stripSymbols ? '' : 'no-'}strip-wasm',
     ];
   }
 
