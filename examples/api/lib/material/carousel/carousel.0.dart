@@ -40,13 +40,7 @@ class CarouselExample extends StatefulWidget {
 }
 
 class _CarouselExampleState extends State<CarouselExample> {
-  late final CarouselController controller;
-
-  @override
-  void initState() {
-    controller = CarouselController(initialItem: 1);
-    super.initState();
-  }
+  final CarouselController controller = CarouselController(initialItem: 1);
 
   @override
   void dispose() {
@@ -65,7 +59,7 @@ class _CarouselExampleState extends State<CarouselExample> {
           child: CarouselView.weighted(
             controller: controller,
             itemSnapping: true,
-            layoutWeights: const <int>[1,7,1],
+            layoutWeights: const <int>[1, 7, 1],
             children: ImageInfo.values.map((ImageInfo image) {
               return HeroLayoutCard(imageInfo: image);
             }).toList(),
@@ -93,7 +87,7 @@ class _CarouselExampleState extends State<CarouselExample> {
         ConstrainedBox(
           constraints: const BoxConstraints(maxHeight: 200),
           child: CarouselView.weighted(
-            layoutWeights: const <int>[3,3,3,2,1],
+            layoutWeights: const <int>[3, 3, 3, 2, 1],
             allowFullyExpand: false,
             children: CardInfo.values.map((CardInfo info) {
               return ColoredBox(
