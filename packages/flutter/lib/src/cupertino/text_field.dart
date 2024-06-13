@@ -178,7 +178,7 @@ class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGe
 ///    Design UI conventions.
 ///  * [EditableText], which is the raw text editing control at the heart of a
 ///    [TextField].
-///  * Learn how to use a [TextEditingController] in one of our [cookbook recipes](https://flutter.dev/docs/cookbook/forms/text-field-changes#2-use-a-texteditingcontroller).
+///  * Learn how to use a [TextEditingController] in one of our [cookbook recipes](https://docs.flutter.dev/cookbook/forms/text-field-changes#2-use-a-texteditingcontroller).
 ///  * <https://developer.apple.com/design/human-interface-guidelines/ios/controls/text-fields/>
 class CupertinoTextField extends StatefulWidget {
   /// Creates an iOS-style text field.
