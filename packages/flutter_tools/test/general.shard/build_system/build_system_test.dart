@@ -19,24 +19,126 @@ import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
 
 void main() {
-  late FileSystem fileSystem;
-  late Environment environment;
-  late TestTarget fooTarget;
-  late TestTarget barTarget;
-  late TestTarget fizzTarget;
-  late TestTarget sharedTarget;
-  late int fooInvocations;
-  late int barInvocations;
-  late int shared;
+  testWithoutContext('Does not throw exception if asked to build with missing inputs', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final BuildSystem buildSystem = setUpBuildSystem(fileSystem);
 
-  setUp(() {
-    fileSystem = MemoryFileSystem.test();
-    fooInvocations = 0;
-    barInvocations = 0;
-    shared = 0;
+    final TestTarget fooTarget = TestTarget((Environment environment) async {})
+      ..name = 'foo'
+      ..inputs = const <Source>[
+        Source.pattern('{PROJECT_DIR}/foo.dart'),
+      ]
+      ..outputs = const <Source>[
+        Source.pattern('{BUILD_DIR}/out'),
+      ]
+      ..dependencies = <Target>[];
 
-    /// Create various test targets.
-    fooTarget = TestTarget((Environment environment) async {
+    final Environment environment = Environment.test(
+      fileSystem.currentDirectory,
+      artifacts: Artifacts.test(),
+      processManager: FakeProcessManager.empty(),
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+    );
+    fileSystem.file('foo.dart')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('');
+    fileSystem.file('pubspec.yaml').createSync();
+
+    // Delete required input file.
+    fileSystem.file('foo.dart').deleteSync();
+    final BuildResult buildResult = await buildSystem.build(fooTarget, environment);
+
+    expect(buildResult.hasException, false);
+  });
+
+  testWithoutContext('Saves a stamp file with inputs and outputs', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final BuildSystem buildSystem = setUpBuildSystem(fileSystem);
+
+    final TestTarget fooTarget = TestTarget((Environment environment) async {
+      environment
+        .buildDir
+        .childFile('out')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('hey');
+    })
+      ..name = 'foo'
+      ..inputs = const <Source>[
+        Source.pattern('{PROJECT_DIR}/foo.dart'),
+      ]
+      ..outputs = const <Source>[
+        Source.pattern('{BUILD_DIR}/out'),
+      ]
+      ..dependencies = <Target>[];
+
+    final Environment environment = Environment.test(
+      fileSystem.currentDirectory,
+      artifacts: Artifacts.test(),
+      processManager: FakeProcessManager.empty(),
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+    );
+    fileSystem.file('foo.dart')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('');
+    fileSystem.file('pubspec.yaml').createSync();
+
+    await buildSystem.build(fooTarget, environment);
+    final File stampFile = fileSystem.file(
+      '${environment.buildDir.path}/foo.stamp');
+
+    expect(stampFile, exists);
+
+    final Map<String, Object?>? stampContents = castStringKeyedMap(
+      json.decode(stampFile.readAsStringSync()));
+
+    expect(stampContents, containsPair('inputs', <Object>['/foo.dart']));
+    expect(stampContents!.containsKey('buildKey'), false);
+  });
+
+  testWithoutContext('Creates a BuildResult with inputs and outputs', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final BuildSystem buildSystem = setUpBuildSystem(fileSystem);
+
+    final TestTarget fooTarget = TestTarget((Environment environment) async {
+      environment
+        .buildDir
+        .childFile('out')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('hey');
+    })
+      ..name = 'foo'
+      ..inputs = const <Source>[
+        Source.pattern('{PROJECT_DIR}/foo.dart'),
+      ]
+      ..outputs = const <Source>[
+        Source.pattern('{BUILD_DIR}/out'),
+      ]
+      ..dependencies = <Target>[];
+
+    final Environment environment = Environment.test(
+      fileSystem.currentDirectory,
+      artifacts: Artifacts.test(),
+      processManager: FakeProcessManager.empty(),
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+    );
+    fileSystem.file('foo.dart')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('');
+    fileSystem.file('pubspec.yaml').createSync();
+
+    final BuildResult result = await buildSystem.build(fooTarget, environment);
+    expect(result.inputFiles.single.path, '/foo.dart');
+    expect(result.outputFiles.single.path, '${environment.buildDir.path}/out');
+  });
+
+  testWithoutContext('Does not re-invoke build if stamp is valid', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    int fooInvocations = 0;
+
+    final TestTarget fooTarget = TestTarget((Environment environment) async {
       environment
         .buildDir
         .childFile('out')
@@ -52,7 +154,265 @@ void main() {
         Source.pattern('{BUILD_DIR}/out'),
       ]
       ..dependencies = <Target>[];
-    barTarget = TestTarget((Environment environment) async {
+
+    final Environment environment = Environment.test(
+      fileSystem.currentDirectory,
+      artifacts: Artifacts.test(),
+      processManager: FakeProcessManager.empty(),
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+    );
+    fileSystem.file('foo.dart')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('');
+    fileSystem.file('pubspec.yaml').createSync();
+
+    final BuildSystem buildSystem = setUpBuildSystem(fileSystem);
+
+    await buildSystem.build(fooTarget, environment);
+    await buildSystem.build(fooTarget, environment);
+
+    expect(fooInvocations, 1);
+  });
+
+  testWithoutContext('Re-invoke build if input is modified', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    int fooInvocations = 0;
+
+    final TestTarget fooTarget = TestTarget((Environment environment) async {
+      environment
+        .buildDir
+        .childFile('out')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('hey');
+      fooInvocations++;
+    })
+      ..name = 'foo'
+      ..inputs = const <Source>[
+        Source.pattern('{PROJECT_DIR}/foo.dart'),
+      ]
+      ..outputs = const <Source>[
+        Source.pattern('{BUILD_DIR}/out'),
+      ]
+      ..dependencies = <Target>[];
+
+    final Environment environment = Environment.test(
+      fileSystem.currentDirectory,
+      artifacts: Artifacts.test(),
+      processManager: FakeProcessManager.empty(),
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+    );
+    fileSystem.file('foo.dart')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('');
+    fileSystem.file('pubspec.yaml').createSync();
+
+    final BuildSystem buildSystem = setUpBuildSystem(fileSystem);
+    await buildSystem.build(fooTarget, environment);
+
+    fileSystem.file('foo.dart').writeAsStringSync('new contents');
+
+    await buildSystem.build(fooTarget, environment);
+
+    expect(fooInvocations, 2);
+  });
+
+  testWithoutContext('Re-invoke build if build key is modified', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    int fooInvocations = 0;
+
+    final TestTarget fooTarget = TestTarget((Environment environment) async {
+      environment
+        .buildDir
+        .childFile('out')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('hey');
+      fooInvocations++;
+    })
+      ..name = 'foo'
+      ..inputs = const <Source>[
+        Source.pattern('{PROJECT_DIR}/foo.dart'),
+      ]
+      ..outputs = const <Source>[
+        Source.pattern('{BUILD_DIR}/out'),
+      ]
+      ..dependencies = <Target>[];
+
+    final Environment environment = Environment.test(
+      fileSystem.currentDirectory,
+      artifacts: Artifacts.test(),
+      processManager: FakeProcessManager.empty(),
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+    );
+    fileSystem.file('foo.dart')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('');
+    fileSystem.file('pubspec.yaml').createSync();
+
+    final BuildSystem buildSystem = setUpBuildSystem(fileSystem);
+    fooTarget.buildKey = 'old';
+
+    await buildSystem.build(fooTarget, environment);
+
+    fooTarget.buildKey = 'new';
+
+    await buildSystem.build(fooTarget, environment);
+
+    expect(fooInvocations, 2);
+  });
+
+  testWithoutContext('does not re-invoke build if input timestamp changes', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    int fooInvocations = 0;
+
+    final TestTarget fooTarget = TestTarget((Environment environment) async {
+      environment
+        .buildDir
+        .childFile('out')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('hey');
+      fooInvocations++;
+    })
+      ..name = 'foo'
+      ..inputs = const <Source>[
+        Source.pattern('{PROJECT_DIR}/foo.dart'),
+      ]
+      ..outputs = const <Source>[
+        Source.pattern('{BUILD_DIR}/out'),
+      ]
+      ..dependencies = <Target>[];
+
+    final Environment environment = Environment.test(
+      fileSystem.currentDirectory,
+      artifacts: Artifacts.test(),
+      processManager: FakeProcessManager.empty(),
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+    );
+    fileSystem.file('foo.dart')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('');
+    fileSystem.file('pubspec.yaml').createSync();
+
+    final BuildSystem buildSystem = setUpBuildSystem(fileSystem);
+    await buildSystem.build(fooTarget, environment);
+
+    // The file was previously empty so this does not modify it.
+    fileSystem.file('foo.dart').writeAsStringSync('');
+    await buildSystem.build(fooTarget, environment);
+
+    expect(fooInvocations, 1);
+  });
+
+  testWithoutContext('does not re-invoke build if output timestamp changes', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    int fooInvocations = 0;
+
+    final TestTarget fooTarget = TestTarget((Environment environment) async {
+      environment
+        .buildDir
+        .childFile('out')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('hey');
+      fooInvocations++;
+    })
+      ..name = 'foo'
+      ..inputs = const <Source>[
+        Source.pattern('{PROJECT_DIR}/foo.dart'),
+      ]
+      ..outputs = const <Source>[
+        Source.pattern('{BUILD_DIR}/out'),
+      ]
+      ..dependencies = <Target>[];
+
+    final Environment environment = Environment.test(
+      fileSystem.currentDirectory,
+      artifacts: Artifacts.test(),
+      processManager: FakeProcessManager.empty(),
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+    );
+    fileSystem.file('foo.dart')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('');
+    fileSystem.file('pubspec.yaml').createSync();
+    final BuildSystem buildSystem = setUpBuildSystem(fileSystem);
+    await buildSystem.build(fooTarget, environment);
+
+    // This is the same content that the output file previously
+    // contained.
+    environment.buildDir.childFile('out').writeAsStringSync('hey');
+    await buildSystem.build(fooTarget, environment);
+
+    expect(fooInvocations, 1);
+  });
+
+  testWithoutContext('Re-invoke build if output is modified', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    int fooInvocations = 0;
+
+    final TestTarget fooTarget = TestTarget((Environment environment) async {
+      environment
+        .buildDir
+        .childFile('out')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('hey');
+      fooInvocations++;
+    })
+      ..name = 'foo'
+      ..inputs = const <Source>[
+        Source.pattern('{PROJECT_DIR}/foo.dart'),
+      ]
+      ..outputs = const <Source>[
+        Source.pattern('{BUILD_DIR}/out'),
+      ]
+      ..dependencies = <Target>[];
+
+    final Environment environment = Environment.test(
+      fileSystem.currentDirectory,
+      artifacts: Artifacts.test(),
+      processManager: FakeProcessManager.empty(),
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+    );
+    fileSystem.file('foo.dart')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('');
+    fileSystem.file('pubspec.yaml').createSync();
+    final BuildSystem buildSystem = setUpBuildSystem(fileSystem);
+    await buildSystem.build(fooTarget, environment);
+
+    environment.buildDir.childFile('out').writeAsStringSync('Something different');
+
+    await buildSystem.build(fooTarget, environment);
+
+    expect(fooInvocations, 2);
+  });
+
+  testWithoutContext('Runs dependencies of targets', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    int fooInvocations = 0;
+    final TestTarget fooTarget = TestTarget((Environment environment) async {
+      environment
+        .buildDir
+        .childFile('out')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('hey');
+      fooInvocations++;
+    })
+      ..name = 'foo'
+      ..inputs = const <Source>[
+        Source.pattern('{PROJECT_DIR}/foo.dart'),
+      ]
+      ..outputs = const <Source>[
+        Source.pattern('{BUILD_DIR}/out'),
+      ]
+      ..dependencies = <Target>[];
+
+    int barInvocations = 0;
+    final TestTarget barTarget = TestTarget((Environment environment) async {
       environment.buildDir
         .childFile('bar')
         ..createSync(recursive: true)
@@ -67,29 +427,11 @@ void main() {
         Source.pattern('{BUILD_DIR}/bar'),
       ]
       ..dependencies = <Target>[];
-    fizzTarget = TestTarget((Environment environment) async {
-      throw Exception('something bad happens');
-    })
-      ..name = 'fizz'
-      ..inputs = const <Source>[
-        Source.pattern('{BUILD_DIR}/out'),
-      ]
-      ..outputs = const <Source>[
-        Source.pattern('{BUILD_DIR}/fizz'),
-      ]
-      ..dependencies = <Target>[fooTarget];
-    sharedTarget = TestTarget((Environment environment) async {
-      shared += 1;
-    })
-      ..name = 'shared'
-      ..inputs = const <Source>[
-        Source.pattern('{PROJECT_DIR}/foo.dart'),
-      ];
-    final Artifacts artifacts = Artifacts.test();
-    environment = Environment.test(
+
+    final Environment environment = Environment.test(
       fileSystem.currentDirectory,
-      artifacts: artifacts,
-      processManager: FakeProcessManager.any(),
+      artifacts: Artifacts.test(),
+      processManager: FakeProcessManager.empty(),
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
     );
@@ -97,143 +439,6 @@ void main() {
       ..createSync(recursive: true)
       ..writeAsStringSync('');
     fileSystem.file('pubspec.yaml').createSync();
-  });
-
-  testWithoutContext('Does not throw exception if asked to build with missing inputs', () async {
-    final BuildSystem buildSystem = setUpBuildSystem(fileSystem);
-
-    // Delete required input file.
-    fileSystem.file('foo.dart').deleteSync();
-    final BuildResult buildResult = await buildSystem.build(fooTarget, environment);
-
-    expect(buildResult.hasException, false);
-  });
-
-  testWithoutContext('Does not throw exception if it does not produce a specified output', () async {
-    final BuildSystem buildSystem = setUpBuildSystem(fileSystem);
-
-    // This target is document as producing foo.dart but does not actually
-    // output this value.
-    final Target badTarget = TestTarget((Environment environment) async {})
-      ..inputs = const <Source>[
-        Source.pattern('{PROJECT_DIR}/foo.dart'),
-      ]
-      ..outputs = const <Source>[
-        Source.pattern('{BUILD_DIR}/out'),
-      ];
-    final BuildResult result = await buildSystem.build(badTarget, environment);
-
-    expect(result.hasException, false);
-  });
-
-  testWithoutContext('Saves a stamp file with inputs and outputs', () async {
-    final BuildSystem buildSystem = setUpBuildSystem(fileSystem);
-    await buildSystem.build(fooTarget, environment);
-    final File stampFile = fileSystem.file(
-      '${environment.buildDir.path}/foo.stamp');
-
-    expect(stampFile, exists);
-
-    final Map<String, Object?>? stampContents = castStringKeyedMap(
-      json.decode(stampFile.readAsStringSync()));
-
-    expect(stampContents, containsPair('inputs', <Object>['/foo.dart']));
-    expect(stampContents!.containsKey('buildKey'), false);
-  });
-
-  testWithoutContext('Saves a stamp file with inputs, outputs and build key', () async {
-    fooTarget.buildKey = 'fooBuildKey';
-    final BuildSystem buildSystem = setUpBuildSystem(fileSystem);
-    await buildSystem.build(fooTarget, environment);
-    final File stampFile = fileSystem.file(
-      '${environment.buildDir.path}/foo.stamp');
-
-    expect(stampFile, exists);
-
-    final Map<String, Object?>? stampContents = castStringKeyedMap(
-      json.decode(stampFile.readAsStringSync()));
-
-    expect(stampContents, containsPair('inputs', <Object>['/foo.dart']));
-    expect(stampContents, containsPair('buildKey', 'fooBuildKey'));
-  });
-
-  testWithoutContext('Creates a BuildResult with inputs and outputs', () async {
-    final BuildSystem buildSystem = setUpBuildSystem(fileSystem);
-    final BuildResult result = await buildSystem.build(fooTarget, environment);
-
-    expect(result.inputFiles.single.path, '/foo.dart');
-    expect(result.outputFiles.single.path, '${environment.buildDir.path}/out');
-  });
-
-  testWithoutContext('Does not re-invoke build if stamp is valid', () async {
-    final BuildSystem buildSystem = setUpBuildSystem(fileSystem);
-
-    await buildSystem.build(fooTarget, environment);
-    await buildSystem.build(fooTarget, environment);
-
-    expect(fooInvocations, 1);
-  });
-
-  testWithoutContext('Re-invoke build if input is modified', () async {
-    final BuildSystem buildSystem = setUpBuildSystem(fileSystem);
-    await buildSystem.build(fooTarget, environment);
-
-    fileSystem.file('foo.dart').writeAsStringSync('new contents');
-
-    await buildSystem.build(fooTarget, environment);
-
-    expect(fooInvocations, 2);
-  });
-
-  testWithoutContext('Re-invoke build if build key is modified', () async {
-    final BuildSystem buildSystem = setUpBuildSystem(fileSystem);
-    fooTarget.buildKey = 'old';
-
-    await buildSystem.build(fooTarget, environment);
-
-    fooTarget.buildKey = 'new';
-
-    await buildSystem.build(fooTarget, environment);
-
-    expect(fooInvocations, 2);
-  });
-
-  testWithoutContext('does not re-invoke build if input timestamp changes', () async {
-    final BuildSystem buildSystem = setUpBuildSystem(fileSystem);
-    await buildSystem.build(fooTarget, environment);
-
-    // The file was previously empty so this does not modify it.
-    fileSystem.file('foo.dart').writeAsStringSync('');
-    await buildSystem.build(fooTarget, environment);
-
-    expect(fooInvocations, 1);
-  });
-
-  testWithoutContext('does not re-invoke build if output timestamp changes', () async {
-    final BuildSystem buildSystem = setUpBuildSystem(fileSystem);
-    await buildSystem.build(fooTarget, environment);
-
-    // This is the same content that the output file previously
-    // contained.
-    environment.buildDir.childFile('out').writeAsStringSync('hey');
-    await buildSystem.build(fooTarget, environment);
-
-    expect(fooInvocations, 1);
-  });
-
-
-  testWithoutContext('Re-invoke build if output is modified', () async {
-    final BuildSystem buildSystem = setUpBuildSystem(fileSystem);
-    await buildSystem.build(fooTarget, environment);
-
-    environment.buildDir.childFile('out').writeAsStringSync('Something different');
-
-    await buildSystem.build(fooTarget, environment);
-
-    expect(fooInvocations, 2);
-  });
-
-  testWithoutContext('Runs dependencies of targets', () async {
     final BuildSystem buildSystem = setUpBuildSystem(fileSystem);
     barTarget.dependencies.add(fooTarget);
 
@@ -245,6 +450,58 @@ void main() {
   });
 
   testWithoutContext('Only invokes shared dependencies once', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final TestTarget fooTarget = TestTarget((Environment environment) async {
+      environment
+        .buildDir
+        .childFile('out')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('hey');
+    })
+      ..name = 'foo'
+      ..inputs = const <Source>[
+        Source.pattern('{PROJECT_DIR}/foo.dart'),
+      ]
+      ..outputs = const <Source>[
+        Source.pattern('{BUILD_DIR}/out'),
+      ]
+      ..dependencies = <Target>[];
+
+    final TestTarget barTarget = TestTarget((Environment environment) async {
+      environment.buildDir
+        .childFile('bar')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('there');
+    })
+      ..name = 'bar'
+      ..inputs = const <Source>[
+        Source.pattern('{BUILD_DIR}/out'),
+      ]
+      ..outputs = const <Source>[
+        Source.pattern('{BUILD_DIR}/bar'),
+      ]
+      ..dependencies = <Target>[];
+
+    int shared = 0;
+    final TestTarget sharedTarget = TestTarget((Environment environment) async {
+      shared += 1;
+    })
+      ..name = 'shared'
+      ..inputs = const <Source>[
+        Source.pattern('{PROJECT_DIR}/foo.dart'),
+      ];
+
+    final Environment environment = Environment.test(
+      fileSystem.currentDirectory,
+      artifacts: Artifacts.test(),
+      processManager: FakeProcessManager.empty(),
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+    );
+    fileSystem.file('foo.dart')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('');
+    fileSystem.file('pubspec.yaml').createSync();
     final BuildSystem buildSystem = setUpBuildSystem(fileSystem);
     fooTarget.dependencies.add(sharedTarget);
     barTarget.dependencies.add(sharedTarget);
@@ -256,6 +513,15 @@ void main() {
   });
 
   testWithoutContext('Automatically cleans old outputs when build graph changes', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final Environment environment = Environment.test(
+      fileSystem.currentDirectory,
+      artifacts: Artifacts.test(),
+      processManager: FakeProcessManager.empty(),
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+    );
+
     final BuildSystem buildSystem = setUpBuildSystem(fileSystem);
     final TestTarget testTarget = TestTarget((Environment environment) async {
       environment.buildDir.childFile('foo.out').createSync();
@@ -281,6 +547,15 @@ void main() {
   });
 
   testWithoutContext('Does not crash when filesystem and cache are out of sync', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final Environment environment = Environment.test(
+      fileSystem.currentDirectory,
+      artifacts: Artifacts.test(),
+      processManager: FakeProcessManager.empty(),
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+    );
+
     final BuildSystem buildSystem = setUpBuildSystem(fileSystem);
     final TestTarget testWithoutContextTarget = TestTarget((Environment environment) async {
       environment.buildDir.childFile('foo.out').createSync();
@@ -307,6 +582,15 @@ void main() {
   });
 
   testWithoutContext('Reruns build if stamp is corrupted', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final Environment environment = Environment.test(
+      fileSystem.currentDirectory,
+      artifacts: Artifacts.test(),
+      processManager: FakeProcessManager.empty(),
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+    );
+
     final BuildSystem buildSystem = setUpBuildSystem(fileSystem);
     final TestTarget testWithoutContextTarget = TestTarget((Environment environment) async {
       environment.buildDir.childFile('foo.out').createSync();
@@ -329,8 +613,43 @@ void main() {
     await buildSystem.build(testWithoutContextTarget, environment);
   });
 
-
   testWithoutContext('handles a throwing build action without crashing', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final Environment environment = Environment.test(
+      fileSystem.currentDirectory,
+      artifacts: Artifacts.test(),
+      processManager: FakeProcessManager.empty(),
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+    );
+    final TestTarget fooTarget = TestTarget((Environment environment) async {
+      environment
+        .buildDir
+        .childFile('out')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('hey');
+    })
+      ..name = 'foo'
+      ..inputs = const <Source>[
+        Source.pattern('{PROJECT_DIR}/foo.dart'),
+      ]
+      ..outputs = const <Source>[
+        Source.pattern('{BUILD_DIR}/out'),
+      ]
+      ..dependencies = <Target>[];
+
+    final TestTarget fizzTarget = TestTarget((Environment environment) async {
+      throw Exception('something bad happens');
+    })
+      ..name = 'fizz'
+      ..inputs = const <Source>[
+        Source.pattern('{BUILD_DIR}/out'),
+      ]
+      ..outputs = const <Source>[
+        Source.pattern('{BUILD_DIR}/fizz'),
+      ]
+      ..dependencies = <Target>[fooTarget];
+
     final BuildSystem buildSystem = setUpBuildSystem(fileSystem);
     final BuildResult result = await buildSystem.build(fizzTarget, environment);
 
@@ -338,6 +657,30 @@ void main() {
   });
 
   testWithoutContext('Can describe itself with JSON output', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final Environment environment = Environment.test(
+      fileSystem.currentDirectory,
+      artifacts: Artifacts.test(),
+      processManager: FakeProcessManager.empty(),
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+    );
+    final TestTarget fooTarget = TestTarget((Environment environment) async {
+      environment
+        .buildDir
+        .childFile('out')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('hey');
+    })
+      ..name = 'foo'
+      ..inputs = const <Source>[
+        Source.pattern('{PROJECT_DIR}/foo.dart'),
+      ]
+      ..outputs = const <Source>[
+        Source.pattern('{BUILD_DIR}/out'),
+      ]
+      ..dependencies = <Target>[];
+
     environment.buildDir.createSync(recursive: true);
 
     expect(fooTarget.toJson(environment), <String, Object?>{
@@ -363,6 +706,15 @@ void main() {
   });
 
   testWithoutContext('Target with depfile dependency will not run twice without invalidation', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final Environment environment = Environment.test(
+      fileSystem.currentDirectory,
+      artifacts: Artifacts.test(),
+      processManager: FakeProcessManager.empty(),
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+    );
+
     final BuildSystem buildSystem = setUpBuildSystem(fileSystem);
     int called = 0;
     final TestTarget target = TestTarget((Environment environment) async {
@@ -388,6 +740,15 @@ void main() {
 
   testWithoutContext('Target with depfile dependency will not run twice without '
     'invalidation in incremental builds', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final Environment environment = Environment.test(
+      fileSystem.currentDirectory,
+      artifacts: Artifacts.test(),
+      processManager: FakeProcessManager.empty(),
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+    );
+
     final BuildSystem buildSystem = setUpBuildSystem(fileSystem);
     int called = 0;
     final TestTarget target = TestTarget((Environment environment) async {
@@ -413,6 +774,8 @@ void main() {
   });
 
   testWithoutContext('output directory is an input to the build',  () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+
     final Environment environmentA = Environment.test(
       fileSystem.currentDirectory,
       outputDir: fileSystem.directory('a'),
@@ -434,6 +797,8 @@ void main() {
   });
 
   testWithoutContext('Additional inputs do not change the build configuration',  () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+
     final Environment environmentA = Environment.test(
       fileSystem.currentDirectory,
       artifacts: Artifacts.test(),
@@ -458,7 +823,16 @@ void main() {
     expect(environmentA.buildDir.path, equals(environmentB.buildDir.path));
   });
 
-  testWithoutContext('A target with depfile dependencies can delete stale outputs on the first run',  () async {
+  testWithoutContext('A target with depfile dependencies can delete stale outputs on the first run', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final Environment environment = Environment.test(
+      fileSystem.currentDirectory,
+      artifacts: Artifacts.test(),
+      processManager: FakeProcessManager.empty(),
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+    );
+
     final BuildSystem buildSystem = setUpBuildSystem(fileSystem);
     int called = 0;
     final TestTarget target = TestTarget((Environment environment) async {
@@ -494,6 +868,15 @@ void main() {
   });
 
   testWithoutContext('trackSharedBuildDirectory handles a missing .last_build_id', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final Environment environment = Environment.test(
+      fileSystem.currentDirectory,
+      artifacts: Artifacts.test(),
+      processManager: FakeProcessManager.empty(),
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+    );
+
     FlutterBuildSystem(
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
@@ -506,6 +889,7 @@ void main() {
   });
 
   testWithoutContext('trackSharedBuildDirectory handles a missing output dir', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
     final Environment environment = Environment.test(
       fileSystem.currentDirectory,
       outputDir: fileSystem.directory('a/b/c/d'),
@@ -526,6 +910,14 @@ void main() {
   });
 
   testWithoutContext('trackSharedBuildDirectory does not modify .last_build_id when config is identical', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final Environment environment = Environment.test(
+      fileSystem.currentDirectory,
+      artifacts: Artifacts.test(),
+      processManager: FakeProcessManager.any(),
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+    );
     environment.outputDir.childFile('.last_build_id')
       ..writeAsStringSync('6666cd76f96956469e7be39d750cc7d9')
       ..setLastModifiedSync(DateTime(1991, 8, 23));
@@ -540,6 +932,15 @@ void main() {
   });
 
   testWithoutContext('trackSharedBuildDirectory does not delete files when outputs.json is missing', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final Environment environment = Environment.test(
+      fileSystem.currentDirectory,
+      artifacts: Artifacts.test(),
+      processManager: FakeProcessManager.empty(),
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+    );
+
     environment.outputDir
       .childFile('.last_build_id')
       .writeAsStringSync('foo');
@@ -561,6 +962,15 @@ void main() {
   });
 
   testWithoutContext('trackSharedBuildDirectory deletes files in outputs.json but not in current outputs', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final Environment environment = Environment.test(
+      fileSystem.currentDirectory,
+      artifacts: Artifacts.test(),
+      processManager: FakeProcessManager.empty(),
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+    );
+
     environment.outputDir
       .childFile('.last_build_id')
       .writeAsStringSync('foo');
@@ -584,6 +994,8 @@ void main() {
   });
 
   testWithoutContext('multiple builds to the same output directory do no leave stale artifacts', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+
     final BuildSystem buildSystem = setUpBuildSystem(fileSystem);
     final Environment testEnvironmentDebug = Environment.test(
       fileSystem.currentDirectory,
@@ -632,7 +1044,16 @@ void main() {
     expect(fileSystem.file('output/release'), exists);
   });
 
-  testWithoutContext('A target using canSkip can create a conditional output',  () async {
+  testWithoutContext('A target using canSkip can create a conditional output', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final Environment environment = Environment.test(
+      fileSystem.currentDirectory,
+      artifacts: Artifacts.test(),
+      processManager: FakeProcessManager.empty(),
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+    );
+
     final BuildSystem buildSystem = setUpBuildSystem(fileSystem);
     final File bar = environment.buildDir.childFile('bar');
     final File foo = environment.buildDir.childFile('foo');
@@ -676,7 +1097,15 @@ void main() {
   });
 
   testWithoutContext('Build completes all dependencies before failing', () async {
-    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final Environment environment = Environment.test(
+      fileSystem.currentDirectory,
+      artifacts: Artifacts.test(),
+      processManager: FakeProcessManager.empty(),
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+    );
+
     final BuildSystem buildSystem = setUpBuildSystem(fileSystem, FakePlatform(
       numberOfProcessors: 10, // Ensure the tool will process tasks concurrently.
     ));
@@ -709,7 +1138,6 @@ void main() {
     expect(result.success, false);
     expect(result.exceptions.keys, containsAll(<String>['B', 'C']));
   });
-
 }
 
 BuildSystem setUpBuildSystem(FileSystem fileSystem, [FakePlatform? platform]) {
