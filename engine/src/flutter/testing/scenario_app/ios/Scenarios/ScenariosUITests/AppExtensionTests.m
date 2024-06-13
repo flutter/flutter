@@ -33,13 +33,6 @@
   [button tap];
   BOOL launchedExtensionInFlutter = NO;
 
-  // Wait for first cell of share sheet to appear.
-  XCUIElement* firstCell = self.hostApplication.collectionViews.cells.firstMatch;
-  if (![firstCell waitForExistenceWithTimeout:10]) {
-    NSLog(@"%@", self.hostApplication.debugDescription);
-    XCTFail(@"Failed due to not able to find any cells with %@ seconds", @(10));
-  }
-
   // Custom share extension button (like the one in this test) does not have a
   // unique identity on older versions of iOS. They are all identified as
   // `XCElementSnapshotPrivilegedValuePlaceholder`. On iOS 17, they are
@@ -49,6 +42,15 @@
   NSPredicate* cellPredicate = [NSPredicate
       predicateWithFormat:
           @"label == 'XCElementSnapshotPrivilegedValuePlaceholder' OR label = 'Scenarios'"];
+
+  // Wait for the first cell matching the cellPredicate on the share sheet to appear.
+  XCUIElement* firstCell =
+      [self.hostApplication.collectionViews.cells matchingPredicate:cellPredicate].firstMatch;
+  if (![firstCell waitForExistenceWithTimeout:10]) {
+    NSLog(@"%@", self.hostApplication.debugDescription);
+    XCTFail(@"Failed due to not able to find Scenarios cell within %@ seconds", @(10));
+  }
+
   NSArray<XCUIElement*>* shareSheetCells =
       [self.hostApplication.collectionViews.cells matchingPredicate:cellPredicate]
           .allElementsBoundByIndex;
