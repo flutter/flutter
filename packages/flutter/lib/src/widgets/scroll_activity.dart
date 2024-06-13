@@ -47,11 +47,6 @@ abstract class ScrollActivityDelegate {
   /// Terminate the current activity and start a ballistic activity with the
   /// given velocity.
   void goBallistic(double velocity);
-
-  /// Flag to indicate whether the scroll view is over-scrolled. Meaning the
-  /// user has scrolled beyond the extents of the scrollable. This is possible
-  /// e.g. with [BouncingScrollPhysics].
-  bool get outOfRange;
 }
 
 /// Base class for scrolling activities like dragging and flinging.
