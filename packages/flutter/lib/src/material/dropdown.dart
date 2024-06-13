@@ -1601,10 +1601,12 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
         child: widget.padding == null ? result : Padding(padding: widget.padding!, child: result),
       ),
     );
-    if(items.isEmpty) result = Semantics(
-      button: true,
-      child: result,
-    );
+    if(items.isEmpty) {
+        result = Semantics(
+          button: true,
+          child: result,
+      );
+    }
     return result;
   }
 }
