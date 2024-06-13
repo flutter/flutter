@@ -8,10 +8,10 @@ import 'package:flutter/rendering.dart';
 
 /// Flutter code sample for [SelectionArea].
 
-void main() => runApp(const SelectionAreaComplexEmphasizeTextExampleApp());
+void main() => runApp(const SelectionAreaColorTextRedExampleApp());
 
-class SelectionAreaComplexEmphasizeTextExampleApp extends StatelessWidget {
-  const SelectionAreaComplexEmphasizeTextExampleApp({super.key});
+class SelectionAreaColorTextRedExampleApp extends StatelessWidget {
+  const SelectionAreaColorTextRedExampleApp({super.key});
 
   // This widget is the root of your application.
   @override
@@ -100,7 +100,10 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  void _emphasizeText(List<SelectedContentController<Object>>? controllers, { Map<int, TextSpan>? dataMap }) {
+  void _colorSelectionRed(
+    List<SelectedContentController<Object>>? controllers,
+    { required Map<int, TextSpan> dataMap }
+  ) {
     if (controllers == null || controllers.isEmpty) {
       return;
     }
@@ -172,9 +175,13 @@ class _MyHomePageState extends State<MyHomePage> {
           } else if (count >= endOffset) {
             afterSelection.add(child);
           } else {
+            if (contentController.children == null) {
+              count += 1;
+              return true;
+            }
             // Update bulleted list data.
-            for (final SelectedContentController<Object> controller in contentController.children) {
-              _emphasizeText(
+            for (final SelectedContentController<Object> controller in contentController.children!) {
+              _colorSelectionRed(
                 <SelectedContentController<Object>>[controller],
                 dataMap: bulletSourceMap,
               );
@@ -201,25 +208,14 @@ class _MyHomePageState extends State<MyHomePage> {
         }
         return true;
       });
-      if (dataMap != null) {
-        dataMap[contentController.selectableId!] = TextSpan(
-          style: (contentController.content as TextSpan).style,
-          children: <InlineSpan>[
-            ...beforeSelection,
-            ...insideSelection,
-            ...afterSelection,
-          ],
-        );
-      } else {
-        dataSourceMap[contentController.selectableId!] = TextSpan(
-          style: (contentController.content as TextSpan).style,
-          children: <InlineSpan>[
-            ...beforeSelection,
-            ...insideSelection,
-            ...afterSelection,
-          ],
-        );
-      }
+      dataMap[contentController.selectableId!] = TextSpan(
+        style: (contentController.content as TextSpan).style,
+        children: <InlineSpan>[
+          ...beforeSelection,
+          ...insideSelection,
+          ...afterSelection,
+        ],
+      );
     }
     _selectionController.clear();
     setState(() {});
@@ -255,7 +251,10 @@ class _MyHomePageState extends State<MyHomePage> {
                     ContextMenuButtonItem(
                       onPressed: () {
                         ContextMenuController.removeAny();
-                        _emphasizeText(selectedContent.controllers);
+                        _colorSelectionRed(
+                          selectedContent.controllers,
+                          dataMap: dataSourceMap,
+                        );
                         _selectionController.clear();
                       },
                       label: 'Emphasize Text',

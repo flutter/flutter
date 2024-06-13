@@ -109,6 +109,7 @@ abstract class SelectedContentController<T extends Object> {
   SelectedContentController({
     this.selectableId,
     required this.content,
+    this.children,
   });
 
   /// The unique id for the [Selectable] that created the controller.
@@ -117,22 +118,25 @@ abstract class SelectedContentController<T extends Object> {
   /// The content that contains the selection.
   final T content;
 
-  /// Additional controllers to include as children.
-  ///
-  /// Children of a given controller enable more granular modification of the
-  /// selection.
-  List<SelectedContentController<Object>> children = <SelectedContentController<Object>>[];
-
   /// The start of the selection relative to the [content].
   int get startOffset;
 
   /// The end of the selection relative to the [content].
   int get endOffset;
 
-  /// Adds a child controller to the list of [children].
-  void addChild(SelectedContentController<Object> childController) {
-    children.add(childController);
-  }
+  /// Additional controllers to include as children.
+  ///
+  /// Children of a given controller enable more granular modification of the
+  /// selection.
+  final List<SelectedContentController<Object>>? children;
+
+  /// Makes a copy of this object with its property replaced with the new
+  /// values.
+  SelectedContentController<T> copyWith({
+    int? selectableId,
+    T? content,
+    List<SelectedContentController<Object>>? children,
+  });
 
   @override
   String toString() {
