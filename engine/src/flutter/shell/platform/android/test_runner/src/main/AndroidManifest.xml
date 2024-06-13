@@ -2,6 +2,8 @@
 
   <application>
 
+    <activity android:name="io.flutter.embedding.android.FlutterActivity" />
+
     <activity android:name="io.flutter.embedding.android.FlutterFragmentActivity" />
 
     <activity android:name="io.flutter.embedding.android.FlutterFragmentActivityTest$FlutterFragmentActivityWithProvidedEngine" />
