@@ -93,7 +93,7 @@ enum _ScaffoldSlot {
 ///    top of the app using the [ScaffoldMessengerState.showMaterialBanner] method.
 ///  * [debugCheckHasScaffoldMessenger], which asserts that the given context
 ///    has a [ScaffoldMessenger] ancestor.
-///  * Cookbook: [Display a SnackBar](https://flutter.dev/docs/cookbook/design/snackbars)
+///  * Cookbook: [Display a SnackBar](https://docs.flutter.dev/cookbook/design/snackbars)
 class ScaffoldMessenger extends StatefulWidget {
   /// Creates a widget that manages [SnackBar]s for [Scaffold] descendants.
   const ScaffoldMessenger({
@@ -1642,7 +1642,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 ///    [ScaffoldMessengerState.showMaterialBanner] method to show material banners.
 ///  * [ScaffoldState], which is the state associated with this widget.
 ///  * <https://material.io/design/layout/responsive-layout-grid.html>
-///  * Cookbook: [Add a Drawer to a screen](https://flutter.dev/docs/cookbook/design/drawer)
+///  * Cookbook: [Add a Drawer to a screen](https://docs.flutter.dev/cookbook/design/drawer)
 class Scaffold extends StatefulWidget {
   /// Creates a visual scaffold for Material Design widgets.
   const Scaffold({

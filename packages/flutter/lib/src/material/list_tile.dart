@@ -351,8 +351,8 @@ enum ListTileTitleAlignment {
 ///    that combine [ListTile] with other controls.
 ///  * Material 3 [ListTile] specifications are referenced from <https://m3.material.io/components/lists/specs>
 ///    and Material 2 [ListTile] specifications are referenced from <https://material.io/design/components/lists.html>
-///  * Cookbook: [Use lists](https://flutter.dev/docs/cookbook/lists/basic-list)
-///  * Cookbook: [Implement swipe to dismiss](https://flutter.dev/docs/cookbook/gestures/dismissible)
+///  * Cookbook: [Use lists](https://docs.flutter.dev/cookbook/lists/basic-list)
+///  * Cookbook: [Implement swipe to dismiss](https://docs.flutter.dev/cookbook/gestures/dismissible)
 class ListTile extends StatelessWidget {
   /// Creates a list tile.
   ///
