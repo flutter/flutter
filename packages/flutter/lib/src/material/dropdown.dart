@@ -1587,7 +1587,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       );
     }
 
-    return Actions(
+    result = Actions(
       actions: _actionMap,
       child: InkWell(
         mouseCursor: effectiveMouseCursor,
@@ -1601,6 +1601,11 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
         child: widget.padding == null ? result : Padding(padding: widget.padding!, child: result),
       ),
     );
+    if(items.isEmpty) result = Semantics(
+      button: true,
+      child: result,
+    );
+    return result;
   }
 }
 
