@@ -779,7 +779,7 @@ class AndroidDevice extends Device {
   @override
   void clearLogs() {
      final RunResult result = _processUtils.runSync(adbCommandForDevice(<String>['logcat', '-c']));
-     // Do not log to standard error because that causes test to fail. 
+     // Do not log to standard error because that causes test to fail.
      if (result.exitCode != 0) {
       _logger.printTrace('"adb logcat -c" failed: exitCode: ${result.exitCode}'
         ' stdout: ${result.stdout} stderr: ${result.stderr}');
