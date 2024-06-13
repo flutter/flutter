@@ -62,6 +62,7 @@ Future<void> runSmokeTests({
   required File integrationTest,
   required Directory apiDir,
 }) async {
+  final String? flutterLogsDirectory = _kPlatform.environment['LOGS_FILE'];
   final File flutterExe =
       flutterDir.childDirectory('bin').childFile(_kPlatform.isWindows ? 'flutter.bat' : 'flutter');
   final List<String> cmd = <String>[
@@ -71,6 +72,8 @@ Future<void> runSmokeTests({
          _kPlatform.environment['DISPLAY']!.isEmpty)) '/usr/bin/xvfb-run',
     flutterExe.absolute.path,
     'test',
+    '--ci',
+    if (flutterLogsDirectory?.isEmpty ?? false) '--debug-logs-dir=$flutterLogsDirectory',
     '--reporter=expanded',
     '--device-id=${_kPlatform.operatingSystem}',
     integrationTest.absolute.path,
