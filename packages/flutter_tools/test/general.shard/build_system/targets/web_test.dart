@@ -951,7 +951,7 @@ void main() {
                   ],
                   '--extra-compiler-option=--depfile=${depFile.absolute.path}',
                   '-O$level',
-                  if (strip && buildMode == 'release') '--no-name-section' else '--name-section',
+                  if (strip && buildMode == 'release') '--strip-wasm' else '--no-strip-wasm',
                   '-o',
                   environment.buildDir.childFile('main.dart.wasm').absolute.path,
                   environment.buildDir.childFile('main.dart').absolute.path,
