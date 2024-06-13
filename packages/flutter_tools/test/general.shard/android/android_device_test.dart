@@ -340,7 +340,7 @@ flutter:
         ),
       ])
     );
-    device.clearLogs()
+    device.clearLogs();
   });
 
   testWithoutContext('AndroidDevice lastLogcatTimestamp returns null if shell command failed', () async {
