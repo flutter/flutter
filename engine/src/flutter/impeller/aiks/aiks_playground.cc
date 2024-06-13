@@ -81,4 +81,23 @@ bool AiksPlayground::OpenPlaygroundHere(
   return OpenPlaygroundHere(std::move(picture));
 }
 
+bool AiksPlayground::OpenPlaygroundHere(
+    const AiksDlPlaygroundCallback& callback) {
+  AiksContext renderer(GetContext(), typographer_context_);
+
+  if (!renderer.IsValid()) {
+    return false;
+  }
+
+  return Playground::OpenPlaygroundHere(
+      [&renderer, &callback](RenderTarget& render_target) -> bool {
+        auto display_list = callback();
+        DlDispatcher dispatcher;
+        display_list->Dispatch(dispatcher);
+        Picture picture = dispatcher.EndRecordingAsPicture();
+
+        return renderer.Render(picture, render_target, true);
+      });
+}
+
 }  // namespace impeller
