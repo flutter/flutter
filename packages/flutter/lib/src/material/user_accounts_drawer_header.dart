@@ -124,7 +124,7 @@ class _AccountDetailsState extends State<_AccountDetails> with SingleTickerProvi
     super.didUpdateWidget(oldWidget);
     // Triggering the animation is only necessary when the state of the arrow changes.
     if (oldWidget.isOpen != widget.isOpen) {
-      _controller.toggle(widget.isOpen);
+      _controller.toggle(forward: widget.isOpen);
     }
   }
 

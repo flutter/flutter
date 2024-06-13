@@ -68,7 +68,7 @@ class _FlowMenuState extends State<FlowMenu> with SingleTickerProviderStateMixin
         constraints: BoxConstraints.tight(Size(buttonDiameter, buttonDiameter)),
         onPressed: () {
           _updateMenu(icon);
-          menuAnimation.toggle(!menuAnimation.isCompleted);
+          menuAnimation.toggle(forward: !menuAnimation.isCompleted);
         },
         child: Icon(
           icon,

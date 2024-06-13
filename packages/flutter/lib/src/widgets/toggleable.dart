@@ -196,7 +196,7 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
     if (tristate && value == null) {
       _positionController.value = 0.0;
     }
-    _positionController.toggle(value ?? tristate);
+    _positionController.toggle(forward: value ?? tristate);
   }
 
   @override
@@ -254,7 +254,7 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
   void _handleFocusHighlightChanged(bool focused) {
     if (focused != _focused) {
       setState(() { _focused = focused; });
-      _reactionFocusFadeController.toggle(focused);
+      _reactionFocusFadeController.toggle(forward: focused);
     }
   }
 
@@ -262,7 +262,7 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
   void _handleHoverChanged(bool hovering) {
     if (hovering != _hovering) {
       setState(() { _hovering = hovering; });
-      _reactionHoverFadeController.toggle(hovering);
+      _reactionHoverFadeController.toggle(forward: hovering);
     }
   }
 

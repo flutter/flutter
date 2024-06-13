@@ -1777,7 +1777,7 @@ class _SelectionToolbarWrapperState extends State<_SelectionToolbarWrapper> with
     super.dispose();
   }
 
-  void _toolbarVisibilityChanged() => _controller.toggle(widget.visibility?.value ?? true);
+  void _toolbarVisibilityChanged() => _controller.toggle(forward: widget.visibility?.value ?? true);
 
   @override
   Widget build(BuildContext context) {
@@ -1843,7 +1843,7 @@ class _SelectionHandleOverlayState extends State<_SelectionHandleOverlay> with S
     widget.visibility?.addListener(_handleVisibilityChanged);
   }
 
-  void _handleVisibilityChanged() => _controller.toggle(widget.visibility?.value ?? true);
+  void _handleVisibilityChanged() => _controller.toggle(forward: widget.visibility?.value ?? true);
 
   @override
   void didUpdateWidget(_SelectionHandleOverlay oldWidget) {

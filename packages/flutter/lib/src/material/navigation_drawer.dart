@@ -661,7 +661,7 @@ class _SelectableAnimatedBuilderState extends State<_SelectableAnimatedBuilder>
       _controller.duration = widget.duration;
     }
     if (oldWidget.isSelected != widget.isSelected) {
-      _controller.toggle(widget.isSelected);
+      _controller.toggle(forward: widget.isSelected);
     }
   }
 

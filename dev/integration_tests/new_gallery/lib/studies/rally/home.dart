@@ -306,7 +306,7 @@ class _RallyTabState extends State<_RallyTab>
   @override
   void didUpdateWidget(_RallyTab oldWidget) {
     super.didUpdateWidget(oldWidget);
-    _controller.toggle(widget.isExpanded);
+    _controller.toggle(forward: widget.isExpanded);
   }
 
   @override

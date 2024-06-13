@@ -520,16 +520,17 @@ class AnimationController extends Animation<double>
 
   /// Toggles the direction of this animation.
   ///
-  /// The value of [newDirection] should toggle between `true` and `false`, and
-  /// [toggle] should be called each time it changes. This function acts like [forward]
-  /// when the [newDirection] is `true`, and [reverse] when it's `false`.
+  /// The value of `forward` should toggle between `true` and `false`, and
+  /// `toggle()` should be called each time it changes. This function acts
+  /// like `forward()` or `reverse()` based on whether the value passed is
+  /// `true` or `false`, respectively.
   ///
-  /// If no [newDirection] is provided, the controller changes direction each time,
+  /// If no argument is provided, the controller changes direction every time,
   /// based on the current [status].
   ///
   /// {@macro flutter.animation.AnimationController.ticker_canceled}
-  TickerFuture toggle([ bool? newDirection ]) {
-    return _toggle('toggle', newDirection ?? !isForwardOrCompleted, null);
+  TickerFuture toggle({ bool? forward }) {
+    return _toggle('toggle', forward ?? !isForwardOrCompleted, null);
   }
 
   /// Drives the animation from its current value to target.

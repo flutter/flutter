@@ -93,7 +93,7 @@ class _CategoryListItemState extends State<CategoryListItem>
 
   void _handleTap() {
     final bool shouldOpenList = _controller.isDismissed;
-    _controller.toggle(shouldOpenList);
+    _controller.toggle(forward: shouldOpenList);
     widget.onTap?.call(shouldOpenList);
   }
 

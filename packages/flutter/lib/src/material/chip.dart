@@ -1209,23 +1209,23 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
     if (oldWidget.isEnabled != widget.isEnabled) {
       setState(() {
         setMaterialState(MaterialState.disabled, !widget.isEnabled);
-        enableController.toggle(widget.isEnabled);
+        enableController.toggle(forward: widget.isEnabled);
       });
     }
     if (oldWidget.avatar != widget.avatar || oldWidget.selected != widget.selected) {
       setState(() {
-        avatarDrawerController.toggle(hasAvatar || widget.selected);
+        avatarDrawerController.toggle(forward: hasAvatar || widget.selected);
       });
     }
     if (oldWidget.selected != widget.selected) {
       setState(() {
         setMaterialState(MaterialState.selected, widget.selected);
-        selectController.toggle(widget.selected);
+        selectController.toggle(forward: widget.selected);
       });
     }
     if (oldWidget.onDeleted != widget.onDeleted) {
       setState(() {
-        deleteDrawerController.toggle(hasDeleteButton);
+        deleteDrawerController.toggle(forward: hasDeleteButton);
       });
     }
   }
