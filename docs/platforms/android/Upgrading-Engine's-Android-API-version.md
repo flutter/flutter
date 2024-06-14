@@ -22,6 +22,8 @@ It is no longer recommended to upload CIPD android sdk packages manually, but if
 
 Typically, `<your-android-dir>` is in your home directory under `~/Library/Android`. The `<new-version-tag>` is what you will use to specify the new package you uploaded in the Flutter engine DEPS file.
 
+The `flutter-cipd-writers` role is required in order to complete this operation. Googlers can apply for access [here](https://grants.corp.google.com/#/grants?request=8h%2Fflutter-cipd-writers) Once this role is granted, `cipd auth-login` must be run in order for cipd to update the user's available roles.
+
 ## Engine:
 
 * DEPS: Roll buildroot hash
