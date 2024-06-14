@@ -16,7 +16,6 @@ import 'colors.dart';
 const Size _size = Size(18.0, 18.0);
 const double _kOuterRadius = 7.0;
 const double _kInnerRadius = 2.975;
-const Color _kTransparentColor = Color(0x00000000);
 
 // The relative values needed to transform a color to its equivalent focus
 // outline color.
@@ -391,7 +390,7 @@ class _RadioPainter extends ToggleablePainter {
         // Apply effect to darken radio button when pressed on macOS.
         if (!reaction.isDismissed && defaultTargetPlatform == TargetPlatform.macOS) {
           final Paint innerReactionPaint = Paint()
-            ..color = _kTransparentColor.withOpacity(0.05);
+            ..color = CupertinoColors.transparent.withOpacity(0.05);
           canvas.drawCircle(center, _kOuterRadius, innerReactionPaint);
         }
       }
