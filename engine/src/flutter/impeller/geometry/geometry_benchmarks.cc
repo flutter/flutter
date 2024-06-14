@@ -116,31 +116,32 @@ static void BM_Convex(benchmark::State& state, Args&&... args) {
   state.counters["TotalPointCount"] = point_count;
 }
 
-#define MAKE_STROKE_BENCHMARK_CAPTURE(path, cap, join, closed, uvname, uvtype) \
-  BENCHMARK_CAPTURE(BM_StrokePolyline, stroke_##path##_##cap##_##join##uvname, \
+#define MAKE_STROKE_BENCHMARK_CAPTURE(path, cap, join, closed)         \
+  BENCHMARK_CAPTURE(BM_StrokePolyline, stroke_##path##_##cap##_##join, \
                     Create##path(closed), Cap::k##cap, Join::k##join)
 
-#define MAKE_STROKE_BENCHMARK_CAPTURE_CAPS_JOINS(path, uvname, uvtype)       \
-  MAKE_STROKE_BENCHMARK_CAPTURE(path, Butt, Bevel, false, uvname, uvtype);   \
-  MAKE_STROKE_BENCHMARK_CAPTURE(path, Butt, Miter, false, uvname, uvtype);   \
-  MAKE_STROKE_BENCHMARK_CAPTURE(path, Butt, Round, false, uvname, uvtype);   \
-  MAKE_STROKE_BENCHMARK_CAPTURE(path, Square, Bevel, false, uvname, uvtype); \
-  MAKE_STROKE_BENCHMARK_CAPTURE(path, Round, Bevel, false, uvname, uvtype)
+#define MAKE_STROKE_BENCHMARK_CAPTURE_ALL_CAPS_JOINS(path, closed) \
+  MAKE_STROKE_BENCHMARK_CAPTURE(path, Butt, Bevel, closed);        \
+  MAKE_STROKE_BENCHMARK_CAPTURE(path, Butt, Miter, closed);        \
+  MAKE_STROKE_BENCHMARK_CAPTURE(path, Butt, Round, closed);        \
+  MAKE_STROKE_BENCHMARK_CAPTURE(path, Square, Bevel, closed);      \
+  MAKE_STROKE_BENCHMARK_CAPTURE(path, Round, Bevel, closed)
 
-BENCHMARK_CAPTURE(BM_Polyline, cubic_polyline, CreateCubic(true), false);
-BENCHMARK_CAPTURE(BM_Polyline,
-                  unclosed_cubic_polyline,
-                  CreateCubic(false),
-                  false);
+BENCHMARK_CAPTURE(BM_Polyline, cubic_polyline, CreateCubic(true));
+BENCHMARK_CAPTURE(BM_Polyline, unclosed_cubic_polyline, CreateCubic(false));
+MAKE_STROKE_BENCHMARK_CAPTURE_ALL_CAPS_JOINS(Cubic, false);
 
-BENCHMARK_CAPTURE(BM_Polyline, quad_polyline, CreateQuadratic(true), false);
-BENCHMARK_CAPTURE(BM_Polyline,
-                  unclosed_quad_polyline,
-                  CreateQuadratic(false),
-                  false);
+BENCHMARK_CAPTURE(BM_Polyline, quad_polyline, CreateQuadratic(true));
+BENCHMARK_CAPTURE(BM_Polyline, unclosed_quad_polyline, CreateQuadratic(false));
+MAKE_STROKE_BENCHMARK_CAPTURE_ALL_CAPS_JOINS(Quadratic, false);
 
 BENCHMARK_CAPTURE(BM_Convex, rrect_convex, CreateRRect(), true);
-MAKE_STROKE_BENCHMARK_CAPTURE(RRect, Butt, Bevel, , , );
+// A round rect has no ends so we don't need to try it with all cap values
+// but it does have joins and even though they should all be almost
+// colinear, we run the benchmark against all 3 join values.
+MAKE_STROKE_BENCHMARK_CAPTURE(RRect, Butt, Bevel, );
+MAKE_STROKE_BENCHMARK_CAPTURE(RRect, Butt, Miter, );
+MAKE_STROKE_BENCHMARK_CAPTURE(RRect, Butt, Round, );
 
 namespace {
 
