@@ -573,7 +573,7 @@ class ValueNotifier<T> extends ChangeNotifier implements ValueListenable<T> {
 /// final ValueNotifier<int> b = ValueNotifier<int>(2);
 ///
 /// final ComputedNotifier<int> sum = ComputedNotifier<int>(
-///   [a, b, c, d],
+///   [a, b],
 ///   () => a.value + b.value,
 /// );
 ///
@@ -595,7 +595,6 @@ class ValueNotifier<T> extends ChangeNotifier implements ValueListenable<T> {
 ///
 /// Additionally, it is important to dispose of the listeners that are passed
 /// to the constructor when they are no longer needed.
-///
 class ComputedNotifier<T> extends ChangeNotifier implements ValueListenable<T> {
   /// Creates a [ComputedNotifier] that computes its value from the given listeners.
   ComputedNotifier(this._listenableList, this._compute) {
