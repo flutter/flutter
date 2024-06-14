@@ -278,7 +278,7 @@ PRs are reviewed weekly across the framework, packages, and engine repositories:
 - [P0 list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-linux+label%3AP0+sort%3Aupdated-asc)
 - [Linux PRs on the engine](https://github.com/flutter/engine/pulls?q=is%3Aopen+is%3Apr+label%3A%22affects%3A+desktop%22+label%3Aplatform-linux+sort%3Aupdated-asc)
 - [Linux PRs on the framework](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+label%3A%22a%3A+desktop%22+label%3Aplatform-linux+sort%3Aupdated-asc)
-- [Linux PRs on packages](https://github.com/flutter/packages/pulls?q=is%3Aopen+is%3Apr+label%3Atriage-linux%2Ctriage-macos%2Ctriage-windows+sort%3Aupdated-asc)
+- [Linux PRs on packages](https://github.com/flutter/packages/pulls?q=is%3Aopen+is%3Apr+label%3Atriage-linux+sort%3Aupdated-asc)
 
 ### macOS platform team (`team-macos`)
 
@@ -286,7 +286,7 @@ PRs are reviewed weekly across the framework, packages, and engine repositories:
 - [P0 list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-macos+label%3AP0+sort%3Aupdated-asc)
 - [macOS PRs on the engine](https://github.com/flutter/engine/pulls?q=is%3Aopen+is%3Apr+label%3A%22affects%3A+desktop%22+label%3Aplatform-macos+sort%3Aupdated-asc)
 - [macOS PRs on the framework](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+label%3A%22a%3A+desktop%22+platform-macos++sort%3Aupdated-asc)
-- [macOS PRs on packages](https://github.com/flutter/packages/pulls?q=is%3Aopen+is%3Apr+label%3Atriage-linux%2Ctriage-macos%2Ctriage-windows+sort%3Aupdated-asc)
+- [macOS PRs on packages](https://github.com/flutter/packages/pulls?q=is%3Aopen+is%3Apr+label%3Atriage-macos+sort%3Aupdated-asc)
 
 ### News Toolkit team (`team-news`)
 
@@ -320,7 +320,7 @@ PRs are reviewed weekly across the framework, packages, and engine repositories:
 - [P0 list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-windows+label%3AP0+sort%3Aupdated-asc)
 - [Windows PRs on the engine](https://github.com/flutter/engine/pulls?q=is%3Aopen+is%3Apr+label%3A%22affects%3A+desktop%22+label%3Aplatform-windows+sort%3Aupdated-asc)
 - [Windows PRs on the framework](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+label%3A%22a%3A+desktop%22+label%3Aplatform-windows+sort%3Aupdated-asc)
-- [Windows PRs on packages](https://github.com/flutter/packages/pulls?q=is%3Aopen+is%3Apr+label%3Atriage-linux%2Ctriage-macos%2Ctriage-windows+sort%3Aupdated-asc)
+- [Windows PRs on packages](https://github.com/flutter/packages/pulls?q=is%3Aopen+is%3Apr+label%3Atriage-windows+sort%3Aupdated-asc)
 
 ## Adding a new team
 

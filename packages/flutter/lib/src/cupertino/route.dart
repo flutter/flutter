@@ -854,7 +854,7 @@ class _CupertinoEdgeShadowDecoration extends Decoration {
       // Eyeballed gradient used to mimic a drop shadow on the start side only.
       <Color>[
         Color(0x04000000),
-        Color(0x00000000),
+        CupertinoColors.transparent,
       ],
     ),
   );

@@ -643,11 +643,11 @@ class WidgetStatePropertyAll<T> implements WidgetStateProperty<T> {
 /// or loses the focus it will [update] its controller's [value] and
 /// notify listeners of the change.
 ///
-/// When calling `setState` in a [MaterialStatesController] listener, use the
+/// When calling `setState` in a [WidgetStatesController] listener, use the
 /// [SchedulerBinding.addPostFrameCallback] to delay the call to `setState` after
 /// the frame has been rendered. It's generally prudent to use the
 /// [SchedulerBinding.addPostFrameCallback] because some of the widgets that
-/// depend on [MaterialStatesController] may call [update] in their build method.
+/// depend on [WidgetStatesController] may call [update] in their build method.
 /// In such cases, listener's that call `setState` - during the build phase - will cause
 /// an error.
 ///
