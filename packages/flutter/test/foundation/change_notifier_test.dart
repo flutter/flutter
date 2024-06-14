@@ -373,7 +373,7 @@ void main() {
     final TestNotifier source = TestNotifier();
     source.dispose();
     expect(() {
-      source.addListener(() { });
+      source.addListener(() {});
     }, throwsFlutterError);
     expect(() {
       source.dispose();
@@ -397,7 +397,7 @@ void main() {
 
   test('Can check hasListener on a disposed ChangeNotifier', () {
     final HasListenersTester<int> source = HasListenersTester<int>(0);
-    source.addListener(() {});
+    source.addListener(() { });
     expect(source.testHasListeners, isTrue);
     FlutterError? error;
     try {
