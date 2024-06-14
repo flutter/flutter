@@ -17,7 +17,6 @@ import 'constants.dart';
 const double _kCupertinoFocusColorOpacity = 0.80;
 const double _kCupertinoFocusColorBrightness = 0.69;
 const double _kCupertinoFocusColorSaturation = 0.835;
-const Color _kTransparentColor = Color(0x00000000);
 
 /// A macOS style checkbox.
 ///
@@ -348,7 +347,7 @@ class _CupertinoCheckboxState extends State<CupertinoCheckbox> with TickerProvid
         return const BorderSide(color: borderColor);
       }
       if (states.contains(WidgetState.selected) || states.contains(WidgetState.focused)) {
-        return const BorderSide(width: 0.0, color: _kTransparentColor);
+        return const BorderSide(width: 0.0, color: CupertinoColors.transparent);
       }
       return const BorderSide(color: borderColor);
     });
@@ -523,7 +522,7 @@ class _CheckboxPainter extends ToggleablePainter {
     // Since the focus outline is drawn around the outer border,
     // only clip to the outer border when not in focus.
     if (value == false && reaction.isDismissed && !isFocused &&
-      shadowColor != _kTransparentColor) {
+      shadowColor != CupertinoColors.transparent) {
       canvas.clipPath(shape.getOuterPath(outer));
       canvas.drawPath(shape.getOuterPath(outer), paint);
 
@@ -594,7 +593,7 @@ class _CheckboxPainter extends ToggleablePainter {
     // Apply effect to darken checkbox when pressed on macOS.
     if (!reaction.isDismissed && defaultTargetPlatform == TargetPlatform.macOS) {
       final Paint paint = Paint()
-        ..color = _kTransparentColor.withOpacity(0.05);
+        ..color = CupertinoColors.black.withOpacity(0.05);
       final Rect outer = _outerRectAt(origin);
       canvas.drawPath(shape.getOuterPath(outer), paint);
     }
