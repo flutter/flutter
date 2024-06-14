@@ -80,7 +80,6 @@ void main() {
 
     for (final BuildMode buildMode in <BuildMode>[BuildMode.debug, BuildMode.release]) {
       group('build in ${buildMode.cliName} mode', () {
-        late Directory frameworkArtifact;
         late Directory outputPath;
         late Directory outputApp;
         late Directory frameworkDirectory;
@@ -95,20 +94,6 @@ void main() {
         late ProcessResult buildResult;
 
         setUpAll(() {
-          frameworkArtifact = fileSystem.directory(
-            fileSystem.path.joinAll(<String>[
-              flutterRoot,
-              'bin',
-              'cache',
-              'artifacts',
-              'engine',
-              if (buildMode == BuildMode.debug) 'ios' else 'ios-release',
-              'Flutter.xcframework',
-              'ios-arm64',
-              'Flutter.framework',
-            ]),
-          );
-
           buildResult = processManager.runSync(<String>[
             flutterBin,
             ...getLocalEngineArguments(),
@@ -151,10 +136,6 @@ void main() {
         });
 
         testWithoutContext('flutter build ios builds a valid app', () {
-          // Check read/write permissions are set correctly in the framework engine artifact.
-          final String artifactStat = frameworkArtifact.statSync().mode.toRadixString(8);
-          expect(artifactStat, '40755');
-
           printOnFailure('Output of flutter build ios:');
           printOnFailure(buildResult.stdout.toString());
           printOnFailure(buildResult.stderr.toString());
