@@ -3594,7 +3594,7 @@ void main() {
     skip: kIsWeb, // [intended] Web uses its native context menu.
   );
 
-  // Regression test for https://github.com/flutter/flutter/issues/148934
+  // Regression test for https://github.com/flutter/flutter/issues/121053.
   testWidgets('Ensure consistent layout of SelectionArea children between platforms', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
