@@ -26,6 +26,21 @@ INTERNAL NOTE
 -->
 ## Flutter 3.22 Changes
 
+### [3.22.2](https://github.com/flutter/flutter/releases/tag/3.22.2) (June 06, 2024)
+* [dart/55818](https://github.com/dart-lang/sdk/issues/55818) - Fixes an issue where `DART_VM_OPTIONS` were not correctly parsed for standalone Dart executables created with `dart compile exe`.
+* [dart/55873](https://github.com/dart-lang/sdk/issues/55873) - Fixes a bug in dart2wasm that can result in a runtime error that says `array.new_fixed()` has a constant larger than 10000.
+* [dart/55894](https://github.com/dart-lang/sdk/issues/55894) - Adds support for `--enable-experiment` flag to `dart compile` wasm.
+* [dart/55895](https://github.com/dart-lang/sdk/issues/55895) - Fixes an issue in dart2wasm compiler that can result in incorrect nullability of type parameter.
+* [dart/55890](https://github.com/dart-lang/sdk/issues/55890) - Disallows `dart:ffi` imports in user code in dart2wasm as dart2wasm's currently only supports a small subset of `dart:ffi`.
+* [flutter/148885](https://github.com/flutter/flutter/issues/148885) - Fixes a platform view issue on android 14 when multiple activities are used and `onMemoryTrim` is called.
+* [flutter/149178](https://github.com/flutter/flutter/issues/149178) - Fixes an issue on iOS where users are unable to focus on a `TextField` or open the keyboard again after side pop from another screen.
+* [flutter/149210](https://github.com/flutter/flutter/issues/149210) - Fixes an `EditableText` crash that occurs when a custom `TextEditingController` only implements the `TextEditingController` interface.
+* [flutter/149588](https://github.com/flutter/flutter/issues/149588) - Fixes a crash that occurs when rendering children in `TwoDimentionalViewport` using keep alive widgets (e.g InkWell).
+* [flutter/148916](https://github.com/flutter/flutter/pull/148916) - Fixes an issue in the `ColorScheme.fromSeed` method to respect the seed color even if the seed color is very bright.
+* [flutter/149345](https://github.com/flutter/flutter/pull/149345) - Adds a service extension that DevTools uses to support a "Track widget build counts" feature in DevTools 2.36.0.
+* [flutter/149378](https://github.com/flutter/flutter/pull/149378) - Fixes a focus issue on iOS and MacOS that causes `TextFields` to not function after cupertino back swipes.
+* [flutter/52987](https://github.com/flutter/engine/pull/52987) - Fixes an issue on Android where platform view inputs are mapped to the wrong location.
+
 ### [3.22.1](https://github.com/flutter/flutter/releases/tag/3.22.1) (May 22, 2024)
 * [dart/55714](https://github.com/dart-lang/sdk/issues/55714) - Fixes a bug in the CFE which could manifest as compilation errors of Flutter
   web apps when compiled with dart2wasm.

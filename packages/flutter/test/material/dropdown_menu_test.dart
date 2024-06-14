@@ -83,11 +83,9 @@ void main() {
     expect(material.textStyle?.height, 1.43);
   });
 
-  testWidgets('DropdownMenu can be disabled', (WidgetTester tester) async {
-    final ThemeData themeData = ThemeData();
+  testWidgets('Inner TextField is disabled when DropdownMenu is disabled', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
-        theme: themeData,
         home: Scaffold(
           body: SafeArea(
             child: DropdownMenu<TestMenu>(
@@ -100,7 +98,7 @@ void main() {
     );
 
     final TextField textField = tester.widget(find.byType(TextField));
-    expect(textField.decoration?.enabled, false);
+    expect(textField.enabled, false);
     final Finder menuMaterial = find.ancestor(
       of: find.byType(SingleChildScrollView),
       matching: find.byType(Material),
@@ -114,6 +112,25 @@ void main() {
       matching: find.byType(Material),
     );
     expect(updatedMenuMaterial, findsNothing);
+  });
+
+  testWidgets('Inner IconButton is disabled when DropdownMenu is disabled', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/149598.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SafeArea(
+            child: DropdownMenu<TestMenu>(
+              enabled: false,
+              dropdownMenuEntries: menuChildren,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final IconButton trailingButton = tester.widget(find.widgetWithIcon(IconButton, Icons.arrow_drop_down).first);
+    expect(trailingButton.onPressed, null);
   });
 
   testWidgets('Material2 - The width of the text field should always be the same as the menu view',
