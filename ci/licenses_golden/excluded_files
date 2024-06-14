@@ -144,6 +144,7 @@
 ../../../flutter/impeller/display_list/aiks_dl_gradient_unittests.cc
 ../../../flutter/impeller/display_list/aiks_dl_opacity_unittests.cc
 ../../../flutter/impeller/display_list/aiks_dl_path_unittests.cc
+../../../flutter/impeller/display_list/dl_golden_blur_unittests.cc
 ../../../flutter/impeller/display_list/dl_golden_unittests.cc
 ../../../flutter/impeller/display_list/dl_golden_unittests.h
 ../../../flutter/impeller/display_list/dl_unittests.cc
