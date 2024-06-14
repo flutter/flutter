@@ -26,7 +26,7 @@ Future<void> main() async {
   final Completer<void> ready = Completer<void>();
   runApp(GestureDetector(
     onTap: () {
-      debugPrint('Received tap.');
+      debugPrint('==== MEMORY BENCHMARK ==== TAPPED ====');
       ready.complete();
     },
     behavior: HitTestBehavior.opaque,
@@ -35,7 +35,6 @@ Future<void> main() async {
     ),
   ));
   await SchedulerBinding.instance.endOfFrame;
-  await Future<void>.delayed(const Duration(milliseconds: 50));
   debugPrint('==== MEMORY BENCHMARK ==== READY ====');
 
   await ready.future;
