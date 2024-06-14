@@ -400,8 +400,11 @@ TEST_P(GaussianBlurFilterContentsTest,
     EXPECT_TRUE(contents_coverage.has_value());
     if (result_coverage.has_value() && contents_coverage.has_value()) {
       EXPECT_TRUE(RectNear(result_coverage.value(), contents_coverage.value()));
+      // Scaling a blurred entity doesn't seem to scale the blur radius linearly
+      // when comparing results with rrect_blur. That's why this is not
+      // Rect::MakeXYWH(98.f, 78.f, 204.0f, 204.f).
       EXPECT_TRUE(RectNear(contents_coverage.value(),
-                           Rect::MakeXYWH(98.f, 78.f, 204.0f, 204.f)));
+                           Rect::MakeXYWH(94.f, 74.f, 212.0f, 212.f)));
     }
   }
 }
