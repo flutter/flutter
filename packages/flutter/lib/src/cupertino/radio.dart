@@ -390,7 +390,7 @@ class _RadioPainter extends ToggleablePainter {
         // Apply effect to darken radio button when pressed on macOS.
         if (!reaction.isDismissed && defaultTargetPlatform == TargetPlatform.macOS) {
           final Paint innerReactionPaint = Paint()
-            ..color = CupertinoColors.transparent.withOpacity(0.05);
+            ..color = CupertinoColors.black.withOpacity(0.05);
           canvas.drawCircle(center, _kOuterRadius, innerReactionPaint);
         }
       }
