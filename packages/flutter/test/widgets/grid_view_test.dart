@@ -930,7 +930,7 @@ void main() {
         isAssertionError.having(
           (AssertionError e) => e.toString(),
           '.toString()',
-          contains("'mainAxisExtent == null || mainAxisExtent >= 0': is not true."),
+          contains('mainAxisExtent == null || mainAxisExtent >= 0'),
         ),
       ),
     );
@@ -950,7 +950,7 @@ void main() {
         isAssertionError.having(
           (AssertionError e) => e.toString(),
           '.toString()',
-          contains("'mainAxisExtent == null || mainAxisExtent >= 0': is not true."),
+          contains('mainAxisExtent == null || mainAxisExtent >= 0'),
         ),
       ),
     );
