@@ -61,15 +61,13 @@ class Counter with ChangeNotifier {
 }
 
 void main() {
-  testWidgets('ChangeNotifier can not dispose in callback',
-      (WidgetTester tester) async {
+  testWidgets('ChangeNotifier can not dispose in callback', (WidgetTester tester) async {
     final TestNotifier test = TestNotifier();
     bool callbackDidFinish = false;
     void foo() {
       test.dispose();
       callbackDidFinish = true;
     }
-
     test.addListener(foo);
 
     test.notify();
@@ -205,8 +203,7 @@ void main() {
     log.clear();
   });
 
-  test('During notifyListeners, a listener was added and removed immediately',
-      () {
+  test('During notifyListeners, a listener was added and removed immediately', () {
     final TestNotifier source = TestNotifier();
     final List<String> log = <String>[];
 
@@ -258,9 +255,7 @@ void main() {
     },
   );
 
-  test(
-      'If the first listener removes itself, notifyListeners still notify all listeners',
-      () {
+  test('If the first listener removes itself, notifyListeners still notify all listeners', () {
     final TestNotifier source = TestNotifier();
     final List<String> log = <String>[];
 
@@ -378,7 +373,7 @@ void main() {
     final TestNotifier source = TestNotifier();
     source.dispose();
     expect(() {
-      source.addListener(() {});
+      source.addListener(() { });
     }, throwsFlutterError);
     expect(() {
       source.dispose();
