@@ -574,6 +574,72 @@ void main() {
     );
   });
 
+  testWidgets('Radio is slightly darkened when pressed on macOS', (WidgetTester tester) async {
+    const Color activeInnerColor = Color(0xffffffff);
+    const Color activeOuterColor = Color(0xff007aff);
+    const Color inactiveBorderColor = Color(0xff999999);
+    const Color inactiveOuterColor = Color(0xffffffff);
+    const double innerRadius = 2.975;
+    const double outerRadius = 7.0;
+    const Color pressedDarkShadow = Color(0x0d000000);
+
+    await tester.pumpWidget(CupertinoApp(
+        home: Center(
+          child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+            return CupertinoRadio<int>(
+              value: 1,
+              groupValue: 2,
+              onChanged: (int? i) { },
+            );
+          }),
+        ),
+      )
+    );
+
+    final TestGesture gesture1 =
+      await tester.startGesture(tester.getCenter(find.byType(CupertinoRadio<int>)));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byType(CupertinoRadio<int>),
+      paints
+        ..circle(radius: outerRadius, style: PaintingStyle.fill, color: inactiveOuterColor)
+        ..circle(radius: outerRadius, style: PaintingStyle.stroke, color: inactiveBorderColor)
+        ..circle(radius: outerRadius, style: PaintingStyle.fill, color: pressedDarkShadow),
+      reason: 'Unselected pressed radio button is slightly darkened',
+    );
+
+    await tester.pumpWidget(CupertinoApp(
+        home: Center(
+          child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+            return CupertinoRadio<int>(
+              value: 2,
+              groupValue: 2,
+              onChanged: (int? i) { },
+            );
+          }),
+        ),
+      )
+    );
+    final TestGesture gesture2 =
+      await tester.startGesture(tester.getCenter(find.byType(CupertinoRadio<int>)));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byType(CupertinoRadio<int>),
+      paints
+        ..circle(radius: outerRadius, style: PaintingStyle.fill, color: activeOuterColor)
+        ..circle(radius: innerRadius, style: PaintingStyle.fill, color: activeInnerColor)
+        ..circle(radius: outerRadius, style: PaintingStyle.fill, color: pressedDarkShadow),
+      reason: 'Selected pressed radio button is slightly darkened',
+    );
+
+    // Finish gestures to release resources.
+    await gesture1.up();
+    await gesture2.up();
+    await tester.pumpAndSettle();
+  }, variant: TargetPlatformVariant.only(TargetPlatform.macOS));
+
   testWidgets('Radio is focusable and has correct focus colors', (WidgetTester tester) async {
     const Color activeInnerColor = Color(0xffffffff);
     const Color activeOuterColor = Color(0xff007aff);

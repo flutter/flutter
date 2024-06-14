@@ -257,9 +257,6 @@ class _CupertinoRadioState<T> extends State<CupertinoRadio<T>> with TickerProvid
           .withSaturation(_kCupertinoFocusColorSaturation)
           .toColor();
 
-    final Color effectiveActivePressedOverlayColor =
-      HSLColor.fromColor(effectiveActiveColor).withLightness(0.45).toColor();
-
     final Color effectiveFillColor = widget.fillColor ?? CupertinoColors.white;
 
     final WidgetStateProperty<MouseCursor> effectiveMouseCursor =
@@ -301,7 +298,7 @@ class _CupertinoRadioState<T> extends State<CupertinoRadio<T>> with TickerProvid
           ..focusColor = effectiveFocusOverlayColor
           ..downPosition = downPosition
           ..isFocused = focused
-          ..activeColor = downPosition != null ? effectiveActivePressedOverlayColor : effectiveActiveColor
+          ..activeColor = effectiveActiveColor
           ..inactiveColor = effectiveInactiveColor
           ..fillColor = effectiveFillColor
           ..value = value
@@ -386,14 +383,13 @@ class _RadioPainter extends ToggleablePainter {
           ..color = CupertinoColors.inactiveGray
           ..strokeWidth = 0.3;
         canvas.drawCircle(center, _kOuterRadius, borderPaint);
-
-        // Apply effect to darken radio button when pressed on macOS.
-        if (!reaction.isDismissed && defaultTargetPlatform == TargetPlatform.macOS) {
-          final Paint innerReactionPaint = Paint()
-            ..color = CupertinoColors.black.withOpacity(0.05);
-          canvas.drawCircle(center, _kOuterRadius, innerReactionPaint);
-        }
       }
+    }
+    // Apply effect to darken radio button when pressed on macOS.
+    if (downPosition != null && defaultTargetPlatform == TargetPlatform.macOS) {
+      final Paint innerReactionPaint = Paint()
+        ..color = CupertinoColors.black.withOpacity(0.05);
+      canvas.drawCircle(center, _kOuterRadius, innerReactionPaint);
     }
     if (isFocused) {
       final Paint focusPaint = Paint()
