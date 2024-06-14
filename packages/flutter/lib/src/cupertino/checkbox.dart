@@ -521,8 +521,7 @@ class _CheckboxPainter extends ToggleablePainter {
     //
     // Since the focus outline is drawn around the outer border,
     // only clip to the outer border when not in focus.
-    if (value == false && reaction.isDismissed && !isFocused &&
-      shadowColor != CupertinoColors.transparent) {
+    if (value == false && !isFocused && shadowColor != CupertinoColors.transparent) {
       canvas.clipPath(shape.getOuterPath(outer));
       canvas.drawPath(shape.getOuterPath(outer), paint);
 
@@ -591,7 +590,7 @@ class _CheckboxPainter extends ToggleablePainter {
         _drawDash(canvas, origin, strokePaint);
     }
     // Apply effect to darken checkbox when pressed on macOS.
-    if (!reaction.isDismissed && defaultTargetPlatform == TargetPlatform.macOS) {
+    if (downPosition != null && defaultTargetPlatform == TargetPlatform.macOS) {
       final Paint paint = Paint()
         ..color = CupertinoColors.black.withOpacity(0.05);
       final Rect outer = _outerRectAt(origin);
