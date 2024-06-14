@@ -10,11 +10,7 @@ void main() {
   testWidgets('Show Alert dialog', (WidgetTester tester) async {
     const String dialogTitle = 'AlertDialog Title';
     await tester.pumpWidget(
-      const MaterialApp(
-        home: Scaffold(
-          body: example.AlertDialogExampleApp(),
-        ),
-      ),
+      const example.AlertDialogExampleApp(),
     );
 
     expect(find.text(dialogTitle), findsNothing);
