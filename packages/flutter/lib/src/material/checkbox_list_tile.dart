@@ -194,6 +194,7 @@ class CheckboxListTile extends StatelessWidget {
     this.enableFeedback,
     this.checkboxSemanticLabel,
   }) : _checkboxType = _CheckboxType.material,
+       shadowColor = null,
        assert(tristate || value != null),
        assert(!isThreeLine || subtitle != null);
 
@@ -237,6 +238,7 @@ class CheckboxListTile extends StatelessWidget {
     this.onFocusChange,
     this.enableFeedback,
     this.checkboxSemanticLabel,
+    this.shadowColor,
   }) : _checkboxType = _CheckboxType.adaptive,
        assert(tristate || value != null),
        assert(!isThreeLine || subtitle != null);
@@ -358,6 +360,9 @@ class CheckboxListTile extends StatelessWidget {
   /// [ThemeData.checkboxTheme] is used. If that is also null, then the side
   /// will be width 2.
   final BorderSide? side;
+
+  /// {@macro flutter.cupertino.CupertinoCheckbox.shadowColor}
+  final Color? shadowColor;
 
   /// {@macro flutter.material.checkbox.isError}
   ///
@@ -514,6 +519,7 @@ class CheckboxListTile extends StatelessWidget {
             side: side,
             isError: isError,
             semanticLabel: checkboxSemanticLabel,
+            shadowColor: shadowColor,
           ),
         );
     }
