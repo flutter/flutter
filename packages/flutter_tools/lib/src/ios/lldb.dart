@@ -112,16 +112,16 @@ class LLDB {
         await stdoutSubscription.cancel();
         await stderrSubscription.cancel();
       }).whenComplete(() async {
+        _lldbProcess = null;
         if (!attachCompleter.isCompleted) {
           attachCompleter.complete(false);
         }
-        _lldbProcess = null;
       }));
     } on ProcessException catch (exception) {
       _logger.printError('Process exception running lldb:\n$exception');
       return false;
     } on ArgumentError catch (exception) {
-      _logger.printError('Process exception running lldb:\n$exception');
+      _logger.printError('Argument exception running lldb:\n$exception');
       return false;
     }
 

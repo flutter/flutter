@@ -348,6 +348,8 @@ class IOSDevice extends Device {
   @visibleForTesting
   IOSDeployDebugger? iosDeployDebugger;
 
+  IOSCoreDeviceLauncher? _coreDeviceLauncher;
+
   @override
   Future<bool> get isLocalEmulator async => false;
 
@@ -840,6 +842,21 @@ class IOSDevice extends Device {
         deviceLogReader.debuggerStream = iosDeployDebugger;
       }
     }
+
+    // final Version? xcodeVersion = globals.xcode?.currentVersion;
+    // if (isCoreDevice && xcodeVersion != null && xcodeVersion.major >= 16) {
+    //    _coreDeviceLauncher = IOSCoreDeviceLauncher(
+    //     deviceId: id,
+    //     logger: globals.logger,
+    //     processUtils: globals.processUtils,
+    //     xcode: globals.xcode!,
+    //     fileSystem: globals.fs,
+    //     coreDeviceControl: _coreDeviceControl,
+    //   );
+    //   if (deviceLogReader is IOSDeviceLogReader) {
+    //     deviceLogReader.coreDeviceDebugger = _coreDeviceDebugger;
+    //   }
+    // }
     // Don't port forward if debugging with a wireless device.
     return ProtocolDiscovery.vmService(
       deviceLogReader,
@@ -869,7 +886,50 @@ class IOSDevice extends Device {
     required ShutdownHooks shutdownHooks,
     @visibleForTesting Duration? discoveryTimeout,
   }) async {
-    if (!debuggingOptions.debuggingEnabled) {
+    final Version? xcodeVersion = globals.xcode?.currentVersion;
+    if (xcodeVersion != null && xcodeVersion.major >= 16) {
+      // Xcode 16 introduced new features to allow logs to be gathered via
+      // devicectl and a debugserver to be launched via lldb.
+
+      // Install app to device
+      final IOSCoreDeviceInstallResult? installResult = await _coreDeviceControl.installAppWithResults(
+        deviceId: id,
+        bundlePath: package.deviceBundlePath,
+      );
+      if (installResult == null || installResult.outcome != 'success' || installResult.installationURL == null) {
+        return false;
+      }
+
+      _coreDeviceLauncher = IOSCoreDeviceLauncher(
+        deviceId: id,
+        logger: globals.logger,
+        processUtils: globals.processUtils,
+        xcode: globals.xcode!,
+        fileSystem: globals.fs,
+        coreDeviceControl: _coreDeviceControl,
+      );
+      final DeviceLogReader deviceLogReader = getLogReader(
+        app: package,
+        usingCISystem: debuggingOptions.usingCISystem,
+      );
+      if (deviceLogReader is IOSDeviceLogReader) {
+        deviceLogReader.coreDeviceDebugger = _coreDeviceLauncher;
+      }
+
+      if (debuggingOptions.debuggingEnabled) {
+        return _coreDeviceLauncher!.launchAppAndAttachDebugger(
+          bundleId: package.id,
+          installationURL: installResult.installationURL!,
+          launchArguments: launchArguments,
+        );
+      } else {
+        // Release mode
+        return _coreDeviceLauncher!.launchAppWithLogs(
+          bundleId: package.id,
+          launchArguments: launchArguments,
+        );
+      }
+    } else if (!debuggingOptions.debuggingEnabled) {
       // Release mode
 
       // Install app to device
@@ -882,117 +942,102 @@ class IOSDevice extends Device {
       }
 
       // Launch app to device
-      final bool launchSuccess = await _coreDeviceControl.launchApp(
+      _coreDeviceLauncher = IOSCoreDeviceLauncher(
         deviceId: id,
+        logger: globals.logger,
+        processUtils: globals.processUtils,
+        xcode: globals.xcode!,
+        fileSystem: globals.fs,
+        coreDeviceControl: _coreDeviceControl,
+      );
+      final bool launchSuccess = await _coreDeviceLauncher!.launchApp(
         bundleId: package.id,
         launchArguments: launchArguments,
       );
 
       return launchSuccess;
     } else {
-      final Version? xcodeVersion = globals.xcode?.currentVersion;
-      if (xcodeVersion != null && xcodeVersion.major >= 16) {
-        // Install app to device
-        final bool installSuccess = await _coreDeviceControl.installApp(
-          deviceId: id,
-          bundlePath: package.deviceBundlePath,
+      _logger.printStatus(
+        'You may be prompted to give access to control Xcode. Flutter uses Xcode '
+        'to run your app. If access is not allowed, you can change this through '
+        'your Settings > Privacy & Security > Automation.',
+      );
+      final int launchTimeout = isWirelesslyConnected ? 45 : 30;
+      final Timer timer = Timer(discoveryTimeout ?? Duration(seconds: launchTimeout), () {
+        _logger.printError(
+          'Xcode is taking longer than expected to start debugging the app. '
+          'Ensure the project is opened in Xcode.',
         );
-        if (!installSuccess) {
-          return installSuccess;
-        }
+      });
 
-        // Launch app on device and attach with lldb
-        final bool launchSuccess = await _coreDeviceControl.launchAndAttach(
-          deviceId: id,
-          bundleId: package.id,
-          launchArguments: launchArguments,
-          startStopped: true,
+      XcodeDebugProject debugProject;
+      final FlutterProject flutterProject = FlutterProject.current();
+
+      if (package is PrebuiltIOSApp) {
+        debugProject = await _xcodeDebug.createXcodeProjectWithCustomBundle(
+          package.deviceBundlePath,
+          templateRenderer: globals.templateRenderer,
+          verboseLogging: _logger.isVerbose,
+        );
+      } else if (package is BuildableIOSApp) {
+        // Before installing/launching/debugging with Xcode, update the build
+        // settings to use a custom configuration build directory so Xcode
+        // knows where to find the app bundle to launch.
+        final Directory bundle = _fileSystem.directory(
+          package.deviceBundlePath,
+        );
+        await updateGeneratedXcodeProperties(
+          project: flutterProject,
+          buildInfo: debuggingOptions.buildInfo,
+          targetOverride: mainPath,
+          configurationBuildDir: bundle.parent.absolute.path,
         );
 
-        return launchSuccess;
-      } else {
-        _logger.printStatus(
-          'You may be prompted to give access to control Xcode. Flutter uses Xcode '
-          'to run your app. If access is not allowed, you can change this through '
-          'your Settings > Privacy & Security > Automation.',
-        );
-        final int launchTimeout = isWirelesslyConnected ? 45 : 30;
-        final Timer timer = Timer(discoveryTimeout ?? Duration(seconds: launchTimeout), () {
-          _logger.printError(
-            'Xcode is taking longer than expected to start debugging the app. '
-            'Ensure the project is opened in Xcode.',
-          );
-        });
-
-        XcodeDebugProject debugProject;
-        final FlutterProject flutterProject = FlutterProject.current();
-
-        if (package is PrebuiltIOSApp) {
-          debugProject = await _xcodeDebug.createXcodeProjectWithCustomBundle(
-            package.deviceBundlePath,
-            templateRenderer: globals.templateRenderer,
-            verboseLogging: _logger.isVerbose,
-          );
-        } else if (package is BuildableIOSApp) {
-          // Before installing/launching/debugging with Xcode, update the build
-          // settings to use a custom configuration build directory so Xcode
-          // knows where to find the app bundle to launch.
-          final Directory bundle = _fileSystem.directory(
-            package.deviceBundlePath,
-          );
-          await updateGeneratedXcodeProperties(
-            project: flutterProject,
-            buildInfo: debuggingOptions.buildInfo,
-            targetOverride: mainPath,
-            configurationBuildDir: bundle.parent.absolute.path,
-          );
-
-          final IosProject project = package.project;
-          final XcodeProjectInfo? projectInfo = await project.projectInfo();
-          if (projectInfo == null) {
-            globals.printError('Xcode project not found.');
-            return false;
-          }
-          if (project.xcodeWorkspace == null) {
-            globals.printError('Unable to get Xcode workspace.');
-            return false;
-          }
-          final String? scheme = projectInfo.schemeFor(debuggingOptions.buildInfo);
-          if (scheme == null) {
-            projectInfo.reportFlavorNotFoundAndExit();
-          }
-
-          _xcodeDebug.ensureXcodeDebuggerLaunchAction(project.xcodeProjectSchemeFile(scheme: scheme));
-
-          debugProject = XcodeDebugProject(
-            scheme: scheme,
-            xcodeProject: project.xcodeProject,
-            xcodeWorkspace: project.xcodeWorkspace!,
-            hostAppProjectName: project.hostAppProjectName,
-            expectedConfigurationBuildDir: bundle.parent.absolute.path,
-            verboseLogging: _logger.isVerbose,
-          );
-        } else {
-          // This should not happen. Currently, only PrebuiltIOSApp and
-          // BuildableIOSApp extend from IOSApp.
-          _logger.printError('IOSApp type ${package.runtimeType} is not recognized.');
+        final IosProject project = package.project;
+        final XcodeProjectInfo? projectInfo = await project.projectInfo();
+        if (projectInfo == null) {
+          globals.printError('Xcode project not found.');
           return false;
         }
-
-        final bool debugSuccess = await _xcodeDebug.debugApp(
-          project: debugProject,
-          deviceId: id,
-          launchArguments:launchArguments,
-        );
-        timer.cancel();
-
-        // Kill Xcode on shutdown when running from CI
-        if (debuggingOptions.usingCISystem) {
-          shutdownHooks.addShutdownHook(() => _xcodeDebug.exit(force: true));
+        if (project.xcodeWorkspace == null) {
+          globals.printError('Unable to get Xcode workspace.');
+          return false;
+        }
+        final String? scheme = projectInfo.schemeFor(debuggingOptions.buildInfo);
+        if (scheme == null) {
+          projectInfo.reportFlavorNotFoundAndExit();
         }
 
-        return debugSuccess;
+        _xcodeDebug.ensureXcodeDebuggerLaunchAction(project.xcodeProjectSchemeFile(scheme: scheme));
+
+        debugProject = XcodeDebugProject(
+          scheme: scheme,
+          xcodeProject: project.xcodeProject,
+          xcodeWorkspace: project.xcodeWorkspace!,
+          hostAppProjectName: project.hostAppProjectName,
+          expectedConfigurationBuildDir: bundle.parent.absolute.path,
+          verboseLogging: _logger.isVerbose,
+        );
+      } else {
+        // This should not happen. Currently, only PrebuiltIOSApp and
+        // BuildableIOSApp extend from IOSApp.
+        _logger.printError('IOSApp type ${package.runtimeType} is not recognized.');
+        return false;
       }
+
+      final bool debugSuccess = await _xcodeDebug.debugApp(
+        project: debugProject,
+        deviceId: id,
+        launchArguments:launchArguments,
+      );
+      timer.cancel();
+
+      // Kill Xcode on shutdown when running from CI
+      if (debuggingOptions.usingCISystem) {
+        shutdownHooks.addShutdownHook(() => _xcodeDebug.exit(force: true));
+      }
+
+      return debugSuccess;
     }
   }
 
@@ -1009,7 +1054,10 @@ class IOSDevice extends Device {
     if (_xcodeDebug.debugStarted) {
       return _xcodeDebug.exit();
     }
-    await _coreDeviceControl.stopApp(deviceId: id);
+    final IOSCoreDeviceLauncher? coreDeviceLauncher = _coreDeviceLauncher;
+    if (coreDeviceLauncher != null) {
+      return coreDeviceLauncher.exit();
+    }
     return false;
   }
 
@@ -1356,6 +1404,14 @@ class IOSDeviceLogReader extends DeviceLogReader {
     // Also, `idevicesyslog` does not work with iOS 17 wireless devices, so use the
     // Dart VM for wireless devices.
     if (_isCoreDevice) {
+      final Version? xcodeVersion = globals.xcode?.currentVersion;
+      // Starting with Xcode 16, you can stream logs from devicectl for core devices.
+      if (xcodeVersion != null && xcodeVersion.major >= 16) {
+        return _IOSDeviceLogSources(
+          primarySource: IOSDeviceLogSource.devicectlConsole,
+          fallbackSource: IOSDeviceLogSource.unifiedLogging,
+        );
+      }
       if (_isWirelesslyConnected) {
         return _IOSDeviceLogSources(
           primarySource: IOSDeviceLogSource.unifiedLogging,
@@ -1425,6 +1481,40 @@ class IOSDeviceLogReader extends DeviceLogReader {
   bool get useIOSDeployLogging {
     return logSources.primarySource == IOSDeviceLogSource.iosDeploy ||
         logSources.fallbackSource == IOSDeviceLogSource.iosDeploy;
+  }
+
+  /// Whether `devicectl` is used as either the primary or fallback source for device logs.
+  @visibleForTesting
+  bool get useCoreDeviceLogging {
+    return logSources.primarySource == IOSDeviceLogSource.devicectlConsole ||
+        logSources.fallbackSource == IOSDeviceLogSource.devicectlConsole;
+  }
+
+  IOSCoreDeviceLauncher? _coreDeviceDebugger;
+  IOSCoreDeviceLauncher? get coreDeviceDebugger => _coreDeviceDebugger;
+  set coreDeviceDebugger(IOSCoreDeviceLauncher? debugger) {
+    if (debugger != null) {
+      _listenToCoreDevice(debugger);
+    }
+    _coreDeviceDebugger = debugger;
+  }
+
+  /// Listen to devicectl for logs on iOS 17 or greater with Xcode 16 and greater.
+  Future<void> _listenToCoreDevice(IOSCoreDeviceLauncher debugger) async {
+    if (!useCoreDeviceLogging) {
+      return;
+    }
+
+    // Add the debugger logs to the controller created on initialization.
+    _loggingSubscriptions.add(debugger.logLines.listen(
+      (String line) => addToLinesController(
+        _debuggerLineHandler(line),
+        IOSDeviceLogSource.devicectlConsole,
+      ),
+      onError: linesController.addError,
+      onDone: linesController.close,
+      cancelOnError: true,
+    ));
   }
 
   /// Listen to Dart VM for logs on iOS 13 or greater.
@@ -1563,6 +1653,8 @@ enum IOSDeviceLogSource {
   idevicesyslog,
   /// Gets logs from the Dart VM Service.
   unifiedLogging,
+  /// Gets logs from devicectl launch --console
+  devicectlConsole,
 }
 
 class _IOSDeviceLogSources {
