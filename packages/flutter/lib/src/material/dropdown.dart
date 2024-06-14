@@ -1589,7 +1589,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
 
     return Semantics(
       button: items.isEmpty,
-      child:Actions(
+      child: Actions(
         actions: _actionMap,
         child: InkWell(
           mouseCursor: effectiveMouseCursor,
