@@ -6,7 +6,7 @@ environment:
 
 dependencies:
   collection: 1.17.0
-  crypto: 3.0.1
+  crypto: 3.0.3
   image: 3.0.1
   js: 0.6.4
   meta: ^1.7.0
