@@ -1053,7 +1053,7 @@ void main() {
     );
   });
 
-  testWidgets('Scrollbar thumb cannot be dragged into overscroll if the platform does not allow it', (WidgetTester tester) async {
+  testWidgets('Scrollbar thumb cannot be mouse-dragged into overscroll if the platform does not allow it', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     addTearDown(scrollController.dispose);
     await tester.pumpWidget(
@@ -1094,9 +1094,9 @@ void main() {
         ),
     );
 
-    // Try to drag the thumb into overscroll.
+    // Try to drag the thumb into overscroll with the mouse.
     const double scrollAmount = -10.0;
-    final TestGesture dragScrollbarGesture = await tester.startGesture(const Offset(797.0, 45.0));
+    final TestGesture dragScrollbarGesture = await tester.startGesture(const Offset(797.0, 45.0), kind: PointerDeviceKind.mouse);
     await tester.pumpAndSettle();
     await dragScrollbarGesture.moveBy(const Offset(0.0, scrollAmount));
     await tester.pumpAndSettle();
