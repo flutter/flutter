@@ -247,11 +247,13 @@ class CupertinoCheckbox extends StatefulWidget {
   /// [RoundedRectangleBorder] with a circular corner radius of 4.0.
   final OutlinedBorder? shape;
 
+  /// {@template flutter.cupertino.CupertinoCheckbox.shadowColor}
   /// The color of the dropshadow from the top edge of the checkbox.
   ///
   /// From measuring the composition of the dropshadow in HIG checkbox examples,
   /// the checkbox was found to have a slight dropshadow with three layers, each
   /// one pixel long, starting from the top edge.
+  /// {@endtemplate}
   ///
   /// If this property is null, then the dropshadow has color
   /// [CupertinoColors.black]. If no shadow is desired, set this property to the
