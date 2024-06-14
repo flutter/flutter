@@ -909,8 +909,8 @@ void Canvas::DrawTextFrame(const std::shared_ptr<TextFrame>& text_frame,
   //              needs to be reworked in order to interact correctly with
   //              mask filters.
   //              https://github.com/flutter/flutter/issues/133297
-  entity.SetContents(
-      paint.WithFilters(paint.WithMaskBlur(std::move(text_contents), true)));
+  entity.SetContents(paint.WithFilters(paint.WithMaskBlur(
+      std::move(text_contents), true, GetCurrentTransform())));
 
   AddRenderEntityToCurrentPass(std::move(entity));
 }
