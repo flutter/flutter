@@ -354,9 +354,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
 
   DismissDirection get _dismissDirection => _extentToDirection(_dragExtent);
 
-  bool get _isActive {
-    return _dragUnderway || _moveController.isAnimating;
-  }
+  double get _dismissThreshold => widget.dismissThresholds[_dismissDirection] ?? _kDismissThreshold;
 
   double get _overallDragAxisExtent {
     final Size size = context.size!;
@@ -381,7 +379,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
   }
 
   void _handleDragUpdate(DragUpdateDetails details) {
-    if (!_isActive || _moveController.isAnimating) {
+    if (!_dragUnderway || _moveController.isAnimating) {
       return;
     }
 
@@ -442,7 +440,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
   void _handleDismissUpdateValueChanged() {
     if (widget.onUpdate != null) {
       final bool oldDismissThresholdReached = _dismissThresholdReached;
-      _dismissThresholdReached = _moveController.value > (widget.dismissThresholds[_dismissDirection] ?? _kDismissThreshold);
+      _dismissThresholdReached = _moveController.value > _dismissThreshold;
       final DismissUpdateDetails details = DismissUpdateDetails(
           direction: _dismissDirection,
           reached: _dismissThresholdReached,
@@ -498,7 +496,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
   }
 
   void _handleDragEnd(DragEndDetails details) {
-    if (!_isActive || _moveController.isAnimating) {
+    if (!_dragUnderway || _moveController.isAnimating) {
       return;
     }
     _dragUnderway = false;
@@ -511,7 +509,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
       case _FlingGestureKind.forward:
         assert(_dragExtent != 0.0);
         assert(!_moveController.isDismissed);
-        if ((widget.dismissThresholds[_dismissDirection] ?? _kDismissThreshold) >= 1.0) {
+        if (_dismissThreshold >= 1.0) {
           _moveController.reverse();
           break;
         }
@@ -524,7 +522,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
         _moveController.fling(velocity: -flingVelocity.abs() * _kFlingVelocityScale);
       case _FlingGestureKind.none:
         if (!_moveController.isDismissed) { // we already know it's not completed, we check that above
-          if (_moveController.value > (widget.dismissThresholds[_dismissDirection] ?? _kDismissThreshold)) {
+          if (_moveController.value > _dismissThreshold) {
             _moveController.forward();
           } else {
             _moveController.reverse();
@@ -543,7 +541,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
   }
 
   Future<void> _handleMoveCompleted() async {
-    if ((widget.dismissThresholds[_dismissDirection] ?? _kDismissThreshold) >= 1.0) {
+    if (_dismissThreshold >= 1.0) {
       _moveController.reverse();
       return;
     }
