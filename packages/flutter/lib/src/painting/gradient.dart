@@ -507,6 +507,7 @@ class LinearGradient extends Gradient {
       colors: interpolated.colors,
       stops: interpolated.stops,
       tileMode: t < 0.5 ? a.tileMode : b.tileMode, // TODO(ianh): interpolate tile mode
+      transform: t < 0.5 ? a.transform : b.transform,
     );
   }
 
@@ -787,6 +788,7 @@ class RadialGradient extends Gradient {
       tileMode: t < 0.5 ? a.tileMode : b.tileMode, // TODO(ianh): interpolate tile mode
       focal: AlignmentGeometry.lerp(a.focal, b.focal, t),
       focalRadius: math.max(0.0, ui.lerpDouble(a.focalRadius, b.focalRadius, t)!),
+      transform: t < 0.5 ? a.transform : b.transform,
     );
   }
 
@@ -1052,6 +1054,7 @@ class SweepGradient extends Gradient {
       colors: interpolated.colors,
       stops: interpolated.stops,
       tileMode: t < 0.5 ? a.tileMode : b.tileMode, // TODO(ianh): interpolate tile mode
+      transform: t < 0.5 ? a.transform : b.transform,
     );
   }
 
