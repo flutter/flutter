@@ -2075,7 +2075,7 @@ class MemoryTest {
     // or throw an error instead of tying up the infrastructure for 30 minutes.
     prepareForNextMessage('TAPPED');
     bool tapped = false;
-    int i = 0;
+    int tapCount = 0;
     await Future.any(<Future<void>>[
       () async {
         while (true) {
