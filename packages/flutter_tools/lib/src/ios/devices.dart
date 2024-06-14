@@ -348,7 +348,7 @@ class IOSDevice extends Device {
   @visibleForTesting
   IOSDeployDebugger? iosDeployDebugger;
 
-  IOSCoreDeviceLauncher? _coreDeviceLauncher;
+  IOSCoreDeviceLauncher? _coreDeviceLauncherWithLogs;
 
   @override
   Future<bool> get isLocalEmulator async => false;
@@ -618,7 +618,7 @@ class IOSDevice extends Device {
       });
 
       Uri? localUri;
-      if (isCoreDevice) {
+      if (isCoreDevice && _coreDeviceLauncherWithLogs == null) {
         localUri = await _discoverDartVMForCoreDevice(
           debuggingOptions: debuggingOptions,
           packageId: packageId,
@@ -842,21 +842,6 @@ class IOSDevice extends Device {
         deviceLogReader.debuggerStream = iosDeployDebugger;
       }
     }
-
-    // final Version? xcodeVersion = globals.xcode?.currentVersion;
-    // if (isCoreDevice && xcodeVersion != null && xcodeVersion.major >= 16) {
-    //    _coreDeviceLauncher = IOSCoreDeviceLauncher(
-    //     deviceId: id,
-    //     logger: globals.logger,
-    //     processUtils: globals.processUtils,
-    //     xcode: globals.xcode!,
-    //     fileSystem: globals.fs,
-    //     coreDeviceControl: _coreDeviceControl,
-    //   );
-    //   if (deviceLogReader is IOSDeviceLogReader) {
-    //     deviceLogReader.coreDeviceDebugger = _coreDeviceDebugger;
-    //   }
-    // }
     // Don't port forward if debugging with a wireless device.
     return ProtocolDiscovery.vmService(
       deviceLogReader,
@@ -900,7 +885,7 @@ class IOSDevice extends Device {
         return false;
       }
 
-      _coreDeviceLauncher = IOSCoreDeviceLauncher(
+      _coreDeviceLauncherWithLogs = IOSCoreDeviceLauncher(
         deviceId: id,
         logger: globals.logger,
         processUtils: globals.processUtils,
@@ -913,18 +898,18 @@ class IOSDevice extends Device {
         usingCISystem: debuggingOptions.usingCISystem,
       );
       if (deviceLogReader is IOSDeviceLogReader) {
-        deviceLogReader.coreDeviceDebugger = _coreDeviceLauncher;
+        deviceLogReader.coreDeviceDebugger = _coreDeviceLauncherWithLogs;
       }
 
       if (debuggingOptions.debuggingEnabled) {
-        return _coreDeviceLauncher!.launchAppAndAttachDebugger(
+        return _coreDeviceLauncherWithLogs!.launchAppAndAttachDebugger(
           bundleId: package.id,
           installationURL: installResult.installationURL!,
           launchArguments: launchArguments,
         );
       } else {
         // Release mode
-        return _coreDeviceLauncher!.launchAppWithLogs(
+        return _coreDeviceLauncherWithLogs!.launchAppWithLogs(
           bundleId: package.id,
           launchArguments: launchArguments,
         );
@@ -942,7 +927,8 @@ class IOSDevice extends Device {
       }
 
       // Launch app to device
-      _coreDeviceLauncher = IOSCoreDeviceLauncher(
+      // Don't set to _coreDeviceLauncherWithLogs since we're not getting logs.
+      final IOSCoreDeviceLauncher launcher = IOSCoreDeviceLauncher(
         deviceId: id,
         logger: globals.logger,
         processUtils: globals.processUtils,
@@ -950,7 +936,7 @@ class IOSDevice extends Device {
         fileSystem: globals.fs,
         coreDeviceControl: _coreDeviceControl,
       );
-      final bool launchSuccess = await _coreDeviceLauncher!.launchApp(
+      final bool launchSuccess = await launcher.launchApp(
         bundleId: package.id,
         launchArguments: launchArguments,
       );
@@ -1054,7 +1040,7 @@ class IOSDevice extends Device {
     if (_xcodeDebug.debugStarted) {
       return _xcodeDebug.exit();
     }
-    final IOSCoreDeviceLauncher? coreDeviceLauncher = _coreDeviceLauncher;
+    final IOSCoreDeviceLauncher? coreDeviceLauncher = _coreDeviceLauncherWithLogs;
     if (coreDeviceLauncher != null) {
       return coreDeviceLauncher.exit();
     }
