@@ -1764,16 +1764,25 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       return;
     }
 
+    double velocityInScrollbarDirection() {
+      return switch (direction) {
+        Axis.horizontal => -velocity.pixelsPerSecond.dx,
+        Axis.vertical => -velocity.pixelsPerSecond.dy,
+      };
+    }
+
     // On mobile platforms flinging the scrollbar thumb causes a ballistic
-    // scroll, just like it via a touch drag.
+    // scroll, just like it via a touch drag. Likewise for desktops when
+    // dragging on the trackpad or with a stylus.
     final TargetPlatform platform = ScrollConfiguration.of(context).getPlatform(context);
     final (Velocity adjustedVelocity, double primaryVelocity) = switch (platform) {
       TargetPlatform.iOS || TargetPlatform.android => (
         -velocity,
-        switch (direction) {
-          Axis.horizontal => -velocity.pixelsPerSecond.dx,
-          Axis.vertical => -velocity.pixelsPerSecond.dy,
-        },
+        velocityInScrollbarDirection(),
+      ),
+      TargetPlatform.linux || TargetPlatform.macOS || TargetPlatform.windows when _thumbDragCanOverscroll => (
+        -velocity,
+        velocityInScrollbarDirection(),
       ),
       _ => (Velocity.zero, 0),
     };
