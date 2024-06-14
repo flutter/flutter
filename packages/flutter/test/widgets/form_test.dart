@@ -1089,7 +1089,7 @@ void main() {
   });
 
   testWidgets(
-    'Validate returns false when forceErrorText is non-null even when Validator returns a null value',
+    'Validate returns false when forceErrorText is non-null even when validator returns a null value',
     (WidgetTester tester) async {
       final GlobalKey<FormState> formKey = GlobalKey<FormState>();
       const String forceErrorText = 'Forcing error';
@@ -1118,10 +1118,11 @@ void main() {
 
       expect(find.text(forceErrorText), findsOne);
       final bool isValid = formKey.currentState!.validate();
-      await tester.pump();
-
-      expect(find.text(forceErrorText), findsOne);
       expect(isValid, isFalse);
+
+      await tester.pump();
+      expect(find.text(forceErrorText), findsOne);
+
   });
 
   testWidgets('forceErrorText forces an error state only after setting it to a non-null value', (WidgetTester tester) async {
