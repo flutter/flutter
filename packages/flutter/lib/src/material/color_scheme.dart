@@ -1898,6 +1898,10 @@ class ColorScheme with Diagnosticable {
     DynamicSchemeVariant schemeVariant,
     double contrastLevel,
   ) {
+    assert(
+      contrastLevel >= -1.0 && contrastLevel <= 1.0,
+      'contrastLevel must be between -1.0 and 1.0 inclusive.',
+    );
     final bool isDark = brightness == Brightness.dark;
     final Hct sourceColor =  Hct.fromInt(seedColor.value);
     return switch (schemeVariant) {
