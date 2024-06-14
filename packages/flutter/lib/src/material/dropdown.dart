@@ -1587,27 +1587,23 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       );
     }
 
-    result = Actions(
-      actions: _actionMap,
-      child: InkWell(
-        mouseCursor: effectiveMouseCursor,
-        onTap: _enabled ? _handleTap : null,
-        canRequestFocus: _enabled,
-        borderRadius: widget.borderRadius,
-        focusNode: focusNode,
-        autofocus: widget.autofocus,
-        focusColor: widget.focusColor ?? Theme.of(context).focusColor,
-        enableFeedback: false,
-        child: widget.padding == null ? result : Padding(padding: widget.padding!, child: result),
+    return Semantics(
+      button: items.isEmpty,
+      child:Actions(
+        actions: _actionMap,
+        child: InkWell(
+          mouseCursor: effectiveMouseCursor,
+          onTap: _enabled ? _handleTap : null,
+          canRequestFocus: _enabled,
+          borderRadius: widget.borderRadius,
+          focusNode: focusNode,
+          autofocus: widget.autofocus,
+          focusColor: widget.focusColor ?? Theme.of(context).focusColor,
+          enableFeedback: false,
+          child: widget.padding == null ? result : Padding(padding: widget.padding!, child: result),
+        ),
       ),
     );
-    if(items.isEmpty) {
-        result = Semantics(
-          button: true,
-          child: result,
-      );
-    }
-    return result;
   }
 }
 
