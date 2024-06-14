@@ -1,4 +1,4 @@
-Signature: 96343840801f63809f765861fbbf6246
+Signature: 5978aa85f1d580ab032ba7a39ea7222f
 
 ====================================================================================================
 LIBRARY: etc1
@@ -9446,7 +9446,6 @@ ORIGIN: ../../../flutter/third_party/skia/src/codec/SkJpegMetadataDecoderImpl.cp
 ORIGIN: ../../../flutter/third_party/skia/src/codec/SkJpegMetadataDecoderImpl.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkFontScanner.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/ports/SkFontMgr_fontations_empty.cpp + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/ports/SkFontMgr_fontations_empty.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/sfnt/SkOTTable_sbix.h + ../../../flutter/third_party/skia/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../flutter/third_party/skia/include/ports/SkFontMgr_Fontations.h
@@ -9462,7 +9461,6 @@ FILE: ../../../flutter/third_party/skia/src/codec/SkJpegMetadataDecoderImpl.cpp
 FILE: ../../../flutter/third_party/skia/src/codec/SkJpegMetadataDecoderImpl.h
 FILE: ../../../flutter/third_party/skia/src/core/SkFontScanner.h
 FILE: ../../../flutter/third_party/skia/src/ports/SkFontMgr_fontations_empty.cpp
-FILE: ../../../flutter/third_party/skia/src/ports/SkFontMgr_fontations_empty.h
 FILE: ../../../flutter/third_party/skia/src/sfnt/SkOTTable_sbix.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2024 Google Inc.
