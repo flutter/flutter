@@ -1119,6 +1119,8 @@ abstract class SliderTrackShape {
   });
 
   /// Whether the track shape is rounded.
+  ///
+  /// This is used to determine the correct position of the thumb in relation to the track.
   bool get isRounded;
 }
 
