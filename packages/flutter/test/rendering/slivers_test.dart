@@ -1028,7 +1028,15 @@ void main() {
       viewportMainAxisExtent: 3.0,
       crossAxisExtent: 4.0,
     );
-    expect(dimensions.hashCode, Object.hash(1.0, 2.0, 3.0, 4.0));
+    expect(
+      dimensions.hashCode,
+      Object.hash(
+        dimensions.scrollOffset,
+        dimensions.precedingScrollExtent,
+        dimensions.viewportMainAxisExtent,
+        dimensions.crossAxisExtent,
+      ),
+    );
   });
 }
 
