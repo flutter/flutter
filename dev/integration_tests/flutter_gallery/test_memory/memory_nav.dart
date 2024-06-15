@@ -40,6 +40,9 @@ Future<void> main() async {
   await ready.future;
   debugPrint('Continuing...');
 
+  // Wait out any errant taps due to synchronization
+  await Future<void>.delayed(const Duration(milliseconds: 200));
+
   // remove onTap handler, enable pointer events for app
   runApp(GestureDetector(
     child: const IgnorePointer(

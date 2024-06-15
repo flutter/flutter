@@ -2082,10 +2082,10 @@ class MemoryTest {
           if (tapped) {
             break;
           }
-          i += 1;
-          print('tapping device... [$i]');
+          tapCount += 1;
+          print('tapping device... [$tapCount]');
           await device!.tap(100, 100);
-          await Future<void>.delayed(const Duration(milliseconds: 250));
+          await Future<void>.delayed(const Duration(milliseconds: 100));
         }
       }(),
       () async {
