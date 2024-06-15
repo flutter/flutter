@@ -144,6 +144,19 @@ void main() {
       painter.layout();
       caretOffset = painter.getOffsetForCaret(ui.TextPosition(offset: text.length), ui.Rect.zero);
       expect(caretOffset.dx, painter.width);
+
+      // Test with trailing full-width space
+      const String textWithFullWidthSpace = 'A\u{3000}';
+      checkCaretOffsetsLtr(textWithFullWidthSpace);
+      painter.text = const TextSpan(text: textWithFullWidthSpace);
+      painter.layout();
+      caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 0), ui.Rect.zero);
+      expect(caretOffset.dx, 0);
+      caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 1), ui.Rect.zero);
+      expect(caretOffset.dx, painter.width / 2);
+      caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: textWithFullWidthSpace.length), ui.Rect.zero);
+      expect(caretOffset.dx, painter.width);
+
       painter.dispose();
     });
 
@@ -1694,6 +1707,17 @@ void main() {
       () => painter.getOffsetForCaret(const TextPosition(offset: 0), Rect.zero),
       returnsNormally,
     );
+  });
+
+  test('kTextHeightNone unsets the text height multiplier', () {
+    final TextPainter painter = TextPainter(
+      textDirection: TextDirection.ltr,
+      text: const TextSpan(
+        style: TextStyle(fontSize: 10, height: 1000),
+        children: <TextSpan>[TextSpan(text: 'A', style: TextStyle(height: kTextHeightNone))],
+      ),
+    )..layout();
+    expect(painter.height, 10);
   });
 
   test('TextPainter dispatches memory events', () async {

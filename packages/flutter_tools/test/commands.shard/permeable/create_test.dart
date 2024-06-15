@@ -2109,6 +2109,52 @@ void main() {
     ));
   });
 
+  testUsingContext('does not remove an existing test/ directory when recreating an application project with the --empty flag', () async {
+    await _createProject(
+      projectDir,
+      <String>['--no-pub', '--empty'],
+      <String>[],
+    );
+
+    projectDir.childDirectory('test').childFile('example_test.dart').createSync(recursive: true);
+
+    await _createProject(
+      projectDir,
+      <String>['--no-pub', '--empty'],
+      <String>['test/example_test.dart'],
+    );
+
+    expect(projectDir.childDirectory('test').childFile('example_test.dart'), exists);
+  });
+
+  testUsingContext('does not create a test/ directory when creating a new application project with the --empty flag', () async {
+    await _createProject(
+      projectDir,
+      <String>['--no-pub', '--empty'],
+      <String>[],
+      unexpectedPaths: <String>['test'],
+    );
+
+    expect(projectDir.childDirectory('test'), isNot(exists));
+  });
+
+  testUsingContext("does not create a test/ directory, if it doesn't already exist, when recreating an application project with the --empty flag", () async {
+    await _createProject(
+      projectDir,
+      <String>['--no-pub', '--empty'],
+      <String>[],
+    );
+
+    await _createProject(
+      projectDir,
+      <String>['--no-pub', '--empty'],
+      <String>[],
+      unexpectedPaths: <String>['test'],
+    );
+
+    expect(projectDir.childDirectory('test'), isNot(exists));
+  });
+
   testUsingContext('can create a sample-based project', () async {
     await _createAndAnalyzeProject(
       projectDir,
@@ -3770,7 +3816,7 @@ void main() {
         '--no-pub',
         '--template=plugin',
         '--project-name=test',
-        projectDir.path,
+        'dev/test',
       ]),
       throwsToolExit(message: 'Unable to read the template manifest at path'),
     );
@@ -3778,8 +3824,7 @@ void main() {
     FileSystem: () => MemoryFileSystem.test(
       opHandle: (String context, FileSystemOp operation) {
         if (operation == FileSystemOp.read && context.contains('template_manifest.json')) {
-          throw io.PathNotFoundException(
-              context, const OSError(), 'Cannot open file');
+          throw io.PathNotFoundException(context, const OSError(), 'Cannot open file');
         }
       },
     ),

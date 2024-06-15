@@ -298,37 +298,26 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo>
       ),
       child: Builder(
         builder: (BuildContext context) {
+          final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+          final Widget showAlertButton = CupertinoButton.filled(
+            onPressed: () => switch (widget.type) {
+              AlertDemoType.alert            => _alertDialogRoute,
+              AlertDemoType.alertTitle       => _alertWithTitleDialogRoute,
+              AlertDemoType.alertButtons     => _alertWithButtonsDialogRoute,
+              AlertDemoType.alertButtonsOnly => _alertWithButtonsOnlyDialogRoute,
+              AlertDemoType.actionSheet      => _modalPopupRoute,
+            }.present(),
+            child: Text(localizations.cupertinoShowAlert),
+          );
+
           return Column(
             children: <Widget>[
-              Expanded(
-                child: Center(
-                  child: CupertinoButton.filled(
-                    onPressed: () {
-                      switch (widget.type) {
-                        case AlertDemoType.alert:
-                          _alertDialogRoute.present();
-                        case AlertDemoType.alertTitle:
-                          _alertWithTitleDialogRoute.present();
-                        case AlertDemoType.alertButtons:
-                          _alertWithButtonsDialogRoute.present();
-                        case AlertDemoType.alertButtonsOnly:
-                          _alertWithButtonsOnlyDialogRoute.present();
-                        case AlertDemoType.actionSheet:
-                          _modalPopupRoute.present();
-                      }
-                    },
-                    child: Text(
-                      GalleryLocalizations.of(context)!.cupertinoShowAlert,
-                    ),
-                  ),
-                ),
-              ),
+              Expanded(child: Center(child: showAlertButton)),
               if (lastSelectedValue.value != null)
                 Padding(
                   padding: const EdgeInsets.all(16),
                   child: Text(
-                    GalleryLocalizations.of(context)!
-                        .dialogSelectedOption(lastSelectedValue.value!),
+                    localizations.dialogSelectedOption(lastSelectedValue.value!),
                     style: CupertinoTheme.of(context).textTheme.textStyle,
                     textAlign: TextAlign.center,
                   ),

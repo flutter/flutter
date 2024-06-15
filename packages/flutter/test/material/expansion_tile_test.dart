@@ -11,7 +11,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class TestIcon extends StatefulWidget {
   const TestIcon({super.key});
@@ -223,10 +222,7 @@ void main() {
     expect(iconColor(collapsedIconKey), foregroundColor);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgets('ExpansionTile subtitle',
-  // TODO(polina-c): remove when fixed https://github.com/flutter/flutter/issues/145600 [leak-tracking-opt-in]
-  experimentalLeakTesting: LeakTesting.settings.withTracked(classes: const <String>['CurvedAnimation']),
-  (WidgetTester tester) async {
+  testWidgets('ExpansionTile subtitle', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -732,6 +728,7 @@ void main() {
       tester.getSemantics(find.byType(ListTile).first),
       matchesSemantics(
         hasTapAction: true,
+        hasFocusAction: true,
         hasEnabledState: true,
         isEnabled: true,
         isFocused: true,
@@ -746,6 +743,7 @@ void main() {
       tester.getSemantics(find.byType(ListTile).last),
       matchesSemantics(
         hasTapAction: true,
+        hasFocusAction: true,
         hasEnabledState: true,
         isEnabled: true,
         isFocusable: true,

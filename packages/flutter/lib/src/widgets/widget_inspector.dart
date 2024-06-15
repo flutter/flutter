@@ -1114,6 +1114,14 @@ mixin WidgetInspectorService {
         registerExtension: registerExtension,
       );
 
+      _registerSignalServiceExtension(
+        name: WidgetInspectorServiceExtensions.widgetLocationIdMap.name,
+        callback: () {
+          return _locationIdMapToJson();
+        },
+        registerExtension: registerExtension,
+      );
+
       _registerBoolServiceExtension(
         name: WidgetInspectorServiceExtensions.trackRepaintWidgets.name,
         getter: () async => _trackRepaintWidgets,
@@ -1245,6 +1253,11 @@ mixin WidgetInspectorService {
     registerServiceExtension(
       name: WidgetInspectorServiceExtensions.getRootWidgetSummaryTreeWithPreviews.name,
       callback: _getRootWidgetSummaryTreeWithPreviews,
+      registerExtension: registerExtension,
+    );
+    registerServiceExtension(
+      name: WidgetInspectorServiceExtensions.getRootWidgetTree.name,
+      callback: _getRootWidgetTree,
       registerExtension: registerExtension,
     );
     registerServiceExtension(
@@ -1943,40 +1956,91 @@ mixin WidgetInspectorService {
     String groupName, {
     Map<String, Object>? Function(DiagnosticsNode, InspectorSerializationDelegate)? addAdditionalPropertiesCallback,
   }) {
-    return _nodeToJson(
-      WidgetsBinding.instance.rootElement?.toDiagnosticsNode(),
-      InspectorSerializationDelegate(
-        groupName: groupName,
-        subtreeDepth: 1000000,
-        summaryTree: true,
-        service: this,
-        addAdditionalPropertiesCallback: addAdditionalPropertiesCallback,
-      ),
+    return _getRootWidgetTreeImpl(
+      groupName: groupName,
+      isSummaryTree: true,
+      withPreviews: false,
+      addAdditionalPropertiesCallback: addAdditionalPropertiesCallback,
     );
   }
-
 
   Future<Map<String, Object?>> _getRootWidgetSummaryTreeWithPreviews(
     Map<String, String> parameters,
   ) {
     final String groupName = parameters['groupName']!;
-    final Map<String, Object?>? result = _getRootWidgetSummaryTree(
-      groupName,
-      addAdditionalPropertiesCallback: (DiagnosticsNode node, InspectorSerializationDelegate? delegate) {
-        final Map<String, Object> additionalJson = <String, Object>{};
-        final Object? value = node.value;
-        if (value is Element) {
-          final RenderObject? renderObject = value.renderObject;
-          if (renderObject is RenderParagraph) {
-            additionalJson['textPreview'] = renderObject.text.toPlainText();
-          }
-        }
-        return additionalJson;
-      },
+    final Map<String, Object?>? result = _getRootWidgetTreeImpl(
+      groupName: groupName,
+      isSummaryTree: true,
+      withPreviews: true,
     );
     return Future<Map<String, dynamic>>.value(<String, dynamic>{
       'result': result,
     });
+  }
+
+  Future<Map<String, Object?>> _getRootWidgetTree(
+    Map<String, String> parameters,
+  ) {
+    final String groupName = parameters['groupName']!;
+    final bool isSummaryTree = parameters['isSummaryTree'] == 'true';
+    final bool withPreviews = parameters['withPreviews'] == 'true';
+
+    final Map<String, Object?>? result = _getRootWidgetTreeImpl(
+      groupName: groupName,
+      isSummaryTree: isSummaryTree,
+      withPreviews: withPreviews,
+    );
+
+    return Future<Map<String, dynamic>>.value(<String, dynamic>{
+      'result': result,
+    });
+  }
+
+  Map<String, Object?>? _getRootWidgetTreeImpl({
+    required String groupName,
+    required bool isSummaryTree,
+    required bool withPreviews,
+    Map<String, Object>? Function(
+            DiagnosticsNode, InspectorSerializationDelegate)?
+        addAdditionalPropertiesCallback,
+  }) {
+    final bool shouldAddAdditionalProperties =
+        addAdditionalPropertiesCallback != null || withPreviews;
+
+    // Combine the given addAdditionalPropertiesCallback with logic to add text
+    // previews as well (if withPreviews is true):
+    Map<String, Object>? combinedAddAdditionalPropertiesCallback(
+      DiagnosticsNode node,
+      InspectorSerializationDelegate delegate,
+    ) {
+      final Map<String, Object> additionalPropertiesJson =
+          addAdditionalPropertiesCallback?.call(node, delegate) ??
+              <String, Object>{};
+      if (!withPreviews) {
+        return additionalPropertiesJson;
+      }
+      final Object? value = node.value;
+      if (value is Element) {
+        final RenderObject? renderObject = value.renderObject;
+        if (renderObject is RenderParagraph) {
+          additionalPropertiesJson['textPreview'] =
+              renderObject.text.toPlainText();
+        }
+      }
+      return additionalPropertiesJson;
+    }
+    return _nodeToJson(
+      WidgetsBinding.instance.rootElement?.toDiagnosticsNode(),
+      InspectorSerializationDelegate(
+        groupName: groupName,
+        subtreeDepth: 1000000,
+        summaryTree: isSummaryTree,
+        service: this,
+        addAdditionalPropertiesCallback: shouldAddAdditionalProperties
+            ? combinedAddAdditionalPropertiesCallback
+            : null,
+      ),
+    );
   }
 
   /// Returns a JSON representation of the subtree rooted at the
@@ -2365,9 +2429,11 @@ mixin WidgetInspectorService {
   bool? _widgetCreationTracked;
 
   late Duration _frameStart;
+  late int _frameNumber;
 
   void _onFrameStart(Duration timeStamp) {
     _frameStart = timeStamp;
+    _frameNumber = PlatformDispatcher.instance.frameData.frameNumber;
     SchedulerBinding.instance.addPostFrameCallback(_onFrameEnd, debugLabel: 'WidgetInspector.onFrameStart');
   }
 
@@ -2381,7 +2447,13 @@ mixin WidgetInspectorService {
   }
 
   void _postStatsEvent(String eventName, _ElementLocationStatsTracker stats) {
-    postEvent(eventName, stats.exportToJson(_frameStart));
+    postEvent(
+      eventName,
+      stats.exportToJson(
+        _frameStart,
+        frameNumber: _frameNumber,
+      ),
+    );
   }
 
   /// All events dispatched by a [WidgetInspectorService] use this method
@@ -2590,7 +2662,7 @@ class _ElementLocationStatsTracker {
 
   /// Exports the current counts and then resets the stats to prepare to track
   /// the next frame of data.
-  Map<String, dynamic> exportToJson(Duration startTime) {
+  Map<String, dynamic> exportToJson(Duration startTime, {required int frameNumber}) {
     final List<int> events = List<int>.filled(active.length * 2, 0);
     int j = 0;
     for (final _LocationCount stat in active) {
@@ -2600,6 +2672,7 @@ class _ElementLocationStatsTracker {
 
     final Map<String, dynamic> json = <String, dynamic>{
       'startTime': startTime.inMicroseconds,
+      'frameNumber': frameNumber,
       'events': events,
     };
 
@@ -3246,12 +3319,21 @@ class _InspectorOverlayLayer extends Layer {
     final Rect targetRect = MatrixUtils.transformRect(
       state.selected.transform, state.selected.rect,
     );
-    final Offset target = Offset(targetRect.left, targetRect.center.dy);
-    const double offsetFromWidget = 9.0;
-    final double verticalOffset = (targetRect.height) / 2 + offsetFromWidget;
+    if (!targetRect.hasNaN) {
+      final Offset target = Offset(targetRect.left, targetRect.center.dy);
+      const double offsetFromWidget = 9.0;
+      final double verticalOffset = (targetRect.height) / 2 + offsetFromWidget;
 
-    _paintDescription(canvas, state.tooltip, state.textDirection, target, verticalOffset, size, targetRect);
-
+      _paintDescription(
+        canvas,
+        state.tooltip,
+        state.textDirection,
+        target,
+        verticalOffset,
+        size,
+        targetRect,
+      );
+    }
     // TODO(jacobr): provide an option to perform a debug paint of just the
     // selected widget.
     return recorder.endRecording();
@@ -3628,6 +3710,34 @@ int _toLocationId(_Location location) {
   _locations.add(location);
   _locationToId[location] = id;
   return id;
+}
+
+Map<String, dynamic> _locationIdMapToJson() {
+  const String idsKey = 'ids';
+  const String linesKey = 'lines';
+  const String columnsKey = 'columns';
+  const String namesKey = 'names';
+
+  final Map<String, Map<String, List<Object?>>> fileLocationsMap =
+      <String, Map<String, List<Object?>>>{};
+  for (final MapEntry<_Location, int> entry in _locationToId.entries) {
+    final _Location location = entry.key;
+    final Map<String, List<Object?>> locations = fileLocationsMap.putIfAbsent(
+      location.file,
+      () => <String, List<Object?>>{
+        idsKey: <int>[],
+        linesKey: <int>[],
+        columnsKey: <int>[],
+        namesKey: <String?>[],
+      },
+    );
+
+    locations[idsKey]!.add(entry.value);
+    locations[linesKey]!.add(location.line);
+    locations[columnsKey]!.add(location.column);
+    locations[namesKey]!.add(location.name);
+  }
+  return fileLocationsMap;
 }
 
 /// A delegate that configures how a hierarchy of [DiagnosticsNode]s are

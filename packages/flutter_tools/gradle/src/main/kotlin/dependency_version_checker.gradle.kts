@@ -40,6 +40,11 @@ class DependencyVersionChecker {
         private const val AGP_NAME: String = "Android Gradle Plugin"
         private const val KGP_NAME: String = "Kotlin"
 
+        // String constant that defines the name of the Gradle extra property that we set when
+        // detecting that the project is using versions outside of Flutter's support range.
+        // https://docs.gradle.org/current/kotlin-dsl/gradle/org.gradle.api/-project/index.html#-2107180640%2FProperties%2F-1867656071.
+        private const val OUT_OF_SUPPORT_RANGE_PROPERTY = "usesUnsupportedDependencyVersions"
+
         // The following messages represent best effort guesses at where a Flutter developer should
         // look to upgrade a dependency that is below the corresponding threshold. Developers can
         // change some of these locations, so they are not guaranteed to be accurate.
@@ -104,11 +109,12 @@ class DependencyVersionChecker {
          * we treat it as within the range for the purpose of this check.
          */
         fun checkDependencyVersions(project: Project) {
-            var agpVersion: Version? = null
-            var kgpVersion: Version? = null
+            project.extra.set(OUT_OF_SUPPORT_RANGE_PROPERTY, false)
+            var agpVersion: Version?
+            var kgpVersion: Version?
 
             checkGradleVersion(getGradleVersion(project), project)
-            checkJavaVersion(getJavaVersion(project), project)
+            checkJavaVersion(getJavaVersion(), project)
             agpVersion = getAGPVersion(project)
             if (agpVersion != null) {
                 checkAGPVersion(agpVersion, project)
@@ -140,7 +146,7 @@ class DependencyVersionChecker {
         }
 
         // https://docs.gradle.org/current/kotlin-dsl/gradle/org.gradle.api/-java-version/index.html#-1790786897%2FFunctions%2F-1793262594
-        fun getJavaVersion(project: Project): JavaVersion {
+        fun getJavaVersion(): JavaVersion {
             return JavaVersion.current()
         }
 
@@ -149,7 +155,7 @@ class DependencyVersionChecker {
         fun getAGPVersion(project: Project): Version? {
             val agpPluginName: String = "com.android.base"
             val agpVersionFieldName: String = "ANDROID_GRADLE_PLUGIN_VERSION"
-            var agpVersion: Version? = null
+            var agpVersion: Version?
             try {
                 agpVersion =
                     Version.fromString(
@@ -161,6 +167,7 @@ class DependencyVersionChecker {
             } catch (ignored: ClassNotFoundException) {
                 // Use deprecated Version class as it exists in older AGP (com.android.Version) does
                 // not exist in those versions.
+                @Suppress("deprecation")
                 agpVersion =
                     Version.fromString(
                         project.plugins.getPlugin(agpPluginName)::class.java.classLoader.loadClass(
@@ -192,7 +199,7 @@ class DependencyVersionChecker {
             if (versionString == null) {
                 return null
             } else {
-                return Version.fromString(versionString!! as String)
+                return Version.fromString(versionString as String)
             }
         }
 
@@ -234,7 +241,8 @@ class DependencyVersionChecker {
                         errorGradleVersion.toString(),
                         getPotentialGradleFix(project.getRootDir().getPath())
                     )
-                throw GradleException(errorMessage)
+                project.extra.set(OUT_OF_SUPPORT_RANGE_PROPERTY, true)
+                throw DependencyValidationException(errorMessage)
             } else if (version < warnGradleVersion) {
                 val warnMessage: String =
                     getWarnMessage(
@@ -259,7 +267,8 @@ class DependencyVersionChecker {
                         errorJavaVersion.toString(),
                         POTENTIAL_JAVA_FIX
                     )
-                throw GradleException(errorMessage)
+                project.extra.set(OUT_OF_SUPPORT_RANGE_PROPERTY, true)
+                throw DependencyValidationException(errorMessage)
             } else if (version < warnJavaVersion) {
                 val warnMessage: String =
                     getWarnMessage(
@@ -284,7 +293,8 @@ class DependencyVersionChecker {
                         errorAGPVersion.toString(),
                         getPotentialAGPFix(project.getRootDir().getPath())
                     )
-                throw GradleException(errorMessage)
+                project.extra.set(OUT_OF_SUPPORT_RANGE_PROPERTY, true)
+                throw DependencyValidationException(errorMessage)
             } else if (version < warnAGPVersion) {
                 val warnMessage: String =
                     getWarnMessage(
@@ -309,7 +319,8 @@ class DependencyVersionChecker {
                         errorKGPVersion.toString(),
                         getPotentialKGPFix(project.getRootDir().getPath())
                     )
-                throw GradleException(errorMessage)
+                project.extra.set(OUT_OF_SUPPORT_RANGE_PROPERTY, true)
+                throw DependencyValidationException(errorMessage)
             } else if (version < warnKGPVersion) {
                 val warnMessage: String =
                     getWarnMessage(
@@ -341,15 +352,15 @@ class Version(val major: Int, val minor: Int, val patch: Int) : Comparable<Versi
         }
     }
 
-    override fun compareTo(otherVersion: Version): Int {
-        if (major != otherVersion.major) {
-            return major - otherVersion.major
+    override fun compareTo(other: Version): Int {
+        if (major != other.major) {
+            return major - other.major
         }
-        if (minor != otherVersion.minor) {
-            return minor - otherVersion.minor
+        if (minor != other.minor) {
+            return minor - other.minor
         }
-        if (patch != otherVersion.patch) {
-            return patch - otherVersion.patch
+        if (patch != other.patch) {
+            return patch - other.patch
         }
         return 0
     }
@@ -357,4 +368,10 @@ class Version(val major: Int, val minor: Int, val patch: Int) : Comparable<Versi
     override fun toString(): String {
         return major.toString() + "." + minor.toString() + "." + patch.toString()
     }
+}
+
+// Custom error for when the dependency_version_checker.kts script finds a dependency out of
+// the defined support range.
+class DependencyValidationException(message: String? = null, cause: Throwable? = null) : Exception(message, cause) {
+    constructor(cause: Throwable) : this(null, cause)
 }

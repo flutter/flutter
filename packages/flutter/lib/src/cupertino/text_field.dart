@@ -178,7 +178,7 @@ class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGe
 ///    Design UI conventions.
 ///  * [EditableText], which is the raw text editing control at the heart of a
 ///    [TextField].
-///  * Learn how to use a [TextEditingController] in one of our [cookbook recipes](https://flutter.dev/docs/cookbook/forms/text-field-changes#2-use-a-texteditingcontroller).
+///  * Learn how to use a [TextEditingController] in one of our [cookbook recipes](https://docs.flutter.dev/cookbook/forms/text-field-changes#2-use-a-texteditingcontroller).
 ///  * <https://developer.apple.com/design/human-interface-guidelines/ios/controls/text-fields/>
 class CupertinoTextField extends StatefulWidget {
   /// Creates an iOS-style text field.
@@ -221,6 +221,7 @@ class CupertinoTextField extends StatefulWidget {
   ///    characters" and how it may differ from the intuitive meaning.
   const CupertinoTextField({
     super.key,
+    this.groupId = EditableText,
     this.controller,
     this.focusNode,
     this.undoController,
@@ -351,6 +352,7 @@ class CupertinoTextField extends StatefulWidget {
   ///    characters" and how it may differ from the intuitive meaning.
   const CupertinoTextField.borderless({
     super.key,
+    this.groupId = EditableText,
     this.controller,
     this.focusNode,
     this.undoController,
@@ -445,6 +447,9 @@ class CupertinoTextField extends StatefulWidget {
        ),
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
        enableInteractiveSelection = enableInteractiveSelection ?? (!readOnly || !obscureText);
+
+  /// {@macro flutter.widgets.editableText.groupId}
+  final Object groupId;
 
   /// Controls the text being edited.
   ///
@@ -1333,10 +1338,16 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
         );
     }
 
-    final BoxDecoration? effectiveDecoration = widget.decoration?.copyWith(
-      border: resolvedBorder,
-      color: enabled ? decorationColor : disabledColor,
-    );
+    // Use the default disabled color only if the box decoration was not set.
+    final BoxDecoration? effectiveDecoration =
+      widget.decoration?.copyWith(
+        border: resolvedBorder,
+        color: enabled ? decorationColor
+          : (widget.decoration == _kDefaultRoundedBorderDecoration
+              ? disabledColor
+              : widget.decoration?.color
+            ),
+      );
 
     final Color selectionColor = CupertinoDynamicColor.maybeResolve(
       DefaultSelectionStyle.of(context).selectionColor,
@@ -1387,6 +1398,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
             selectionColor: _effectiveFocusNode.hasFocus ? selectionColor : null,
             selectionControls: widget.selectionEnabled
               ? textSelectionControls : null,
+            groupId: widget.groupId,
             onChanged: widget.onChanged,
             onSelectionChanged: _handleSelectionChanged,
             onEditingComplete: widget.onEditingComplete,

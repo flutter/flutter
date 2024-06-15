@@ -36,7 +36,7 @@ enum AnimationStatus {
   bool get isCompleted => this == completed;
 
   /// Whether the animation is running in either direction.
-  bool get isRunning => switch (this) {
+  bool get isAnimating => switch (this) {
     forward   || reverse   => true,
     completed || dismissed => false,
   };
@@ -180,7 +180,7 @@ abstract class Animation<T> extends Listenable implements ValueListenable<T> {
   bool get isCompleted => status.isCompleted;
 
   /// Whether this animation is running in either direction.
-  bool get isRunning => status.isRunning;
+  bool get isAnimating => status.isAnimating;
 
   /// {@macro flutter.animation.AnimationStatus.isForwardOrCompleted}
   bool get isForwardOrCompleted => status.isForwardOrCompleted;
