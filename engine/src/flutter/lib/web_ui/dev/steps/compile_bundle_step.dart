@@ -278,6 +278,7 @@ class Dart2WasmCompiler extends TestCompiler {
 
       '--libraries-spec=${environment.dartSdkDir.path}/lib/libraries.json',
       '--enable-asserts',
+      '--enable-experimental-wasm-interop',
 
       // We do not want to auto-select a renderer in tests. As of today, tests
       // are designed to run in one specific mode. So instead, we specify the
