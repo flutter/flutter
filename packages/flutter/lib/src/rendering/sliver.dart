@@ -34,7 +34,7 @@ class SliverLayoutDimensions {
     required this.scrollOffset,
     required this.precedingScrollExtent,
     required this.viewportMainAxisExtent,
-    required this.crossAxisExtent,
+    required this.crossAxisExtent
   });
 
   /// {@macro flutter.rendering.SliverConstraints.scrollOffset}
@@ -80,7 +80,7 @@ class SliverLayoutDimensions {
     scrollOffset,
     precedingScrollExtent,
     viewportMainAxisExtent,
-    crossAxisExtent
+    crossAxisExtent,
   );
 }
 
