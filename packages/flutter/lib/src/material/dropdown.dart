@@ -1586,7 +1586,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
         child: result,
       );
     }
-    final childHasButtonSemantic = hintIndex!= null || (_selectedIndex != null && widget.selectedItemBuilder == null);
+    final childHasButtonSemantic = hintIndex != null || (_selectedIndex != null && widget.selectedItemBuilder == null);
     return Semantics(
       button: !childHasButtonSemantic,
       child: Actions(
