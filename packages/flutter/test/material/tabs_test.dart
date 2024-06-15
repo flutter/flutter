@@ -3592,7 +3592,7 @@ void main() {
                     children: <TestSemantics>[
                       TestSemantics(
                         id: 4,
-                        actions: <SemanticsAction>[SemanticsAction.tap],
+                        actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                         flags: <SemanticsFlag>[
                           SemanticsFlag.isSelected,
                           SemanticsFlag.isFocusable,
@@ -3604,7 +3604,7 @@ void main() {
                       TestSemantics(
                         id: 5,
                         flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
-                        actions: <SemanticsAction>[SemanticsAction.tap],
+                        actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                         label: 'TAB #1\nTab 2 of 2',
                         rect: const Rect.fromLTRB(0.0, 0.0, 116.0, kTextTabBarHeight),
                         transform: Matrix4.translationValues(116.0, 276.0, 0.0),
@@ -3863,7 +3863,7 @@ void main() {
                           SemanticsFlag.isSelected,
                           SemanticsFlag.isFocusable,
                         ],
-                        actions: <SemanticsAction>[SemanticsAction.tap],
+                        actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                         label: 'Semantics override 0\nTab 1 of 2',
                         rect: const Rect.fromLTRB(0.0, 0.0, 116.0, kTextTabBarHeight),
                         transform: Matrix4.translationValues(0.0, 276.0, 0.0),
@@ -3871,7 +3871,7 @@ void main() {
                       TestSemantics(
                         id: 5,
                         flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
-                        actions: <SemanticsAction>[SemanticsAction.tap],
+                        actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                         label: 'Semantics override 1\nTab 2 of 2',
                         rect: const Rect.fromLTRB(0.0, 0.0, 116.0, kTextTabBarHeight),
                         transform: Matrix4.translationValues(116.0, 276.0, 0.0),
@@ -5652,14 +5652,14 @@ void main() {
               flags: <SemanticsFlag>[SemanticsFlag.isFocusable, SemanticsFlag.isSelected],
               id: 2,
               rect: TestSemantics.fullScreen,
-              actions: 1,
+              actions: 1 | SemanticsAction.focus.index,
             ),
             TestSemantics(
               label: 'TAB2\nTab 2 of 2',
               flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
               id: 3,
               rect: TestSemantics.fullScreen,
-              actions: <SemanticsAction>[SemanticsAction.tap],
+              actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
             ),
             TestSemantics(
               id: 4,
