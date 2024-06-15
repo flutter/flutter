@@ -1031,7 +1031,6 @@ void main() {
     expect(dimensions.hashCode, Object.hash(1.0, 2.0, 3.0, 4.0));
   });
 }
-}
 
 class _DummyHitTestTarget implements HitTestTarget {
   @override
