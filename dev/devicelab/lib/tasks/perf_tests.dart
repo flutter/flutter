@@ -2071,34 +2071,9 @@ class MemoryTest {
     await launchApp();
     await recordStart();
 
-    // Keep "tapping" the device till it responds with the string we expect,
-    // or throw an error instead of tying up the infrastructure for 30 minutes.
-    prepareForNextMessage('TAPPED');
-    bool tapped = false;
-    int tapCount = 0;
-    await Future.any(<Future<void>>[
-      () async {
-        while (true) {
-          if (tapped) {
-            break;
-          }
-          tapCount += 1;
-          print('tapping device... [$tapCount]');
-          await device!.tap(100, 100);
-          await Future<void>.delayed(const Duration(milliseconds: 100));
-        }
-      }(),
-      () async {
-        print('awaiting "tapped" message... (timeout: 10 seconds)');
-        try {
-          await receivedNextMessage?.timeout(const Duration(seconds: 10));
-        } finally {
-          tapped = true;
-        }
-      }(),
-    ]);
-
     prepareForNextMessage('DONE');
+    print('tapping device...');
+    await device!.tap(100, 100);
     print('awaiting "done" message...');
     await receivedNextMessage;
 

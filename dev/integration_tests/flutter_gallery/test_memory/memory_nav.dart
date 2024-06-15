@@ -26,7 +26,7 @@ Future<void> main() async {
   final Completer<void> ready = Completer<void>();
   runApp(GestureDetector(
     onTap: () {
-      debugPrint('==== MEMORY BENCHMARK ==== TAPPED ====');
+      debugPrint('Received tap.');
       ready.complete();
     },
     behavior: HitTestBehavior.opaque,
@@ -35,13 +35,11 @@ Future<void> main() async {
     ),
   ));
   await SchedulerBinding.instance.endOfFrame;
+  await Future<void>.delayed(const Duration(milliseconds: 50));
   debugPrint('==== MEMORY BENCHMARK ==== READY ====');
 
   await ready.future;
   debugPrint('Continuing...');
-
-  // Wait out any errant taps due to synchronization
-  await Future<void>.delayed(const Duration(milliseconds: 200));
 
   // remove onTap handler, enable pointer events for app
   runApp(GestureDetector(
