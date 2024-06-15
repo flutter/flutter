@@ -1,4 +1,4 @@
-Signature: f2d70d88d627f18b45c03f08dd2aaf6a
+Signature: be0775db9b6f2440291926f69dfcc7a1
 
 ====================================================================================================
 LIBRARY: dart
@@ -3035,7 +3035,6 @@ ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/js_runtime/lib/insta
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/js/_js.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/js/_js_client.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/js/_js_server.dart + ../../../flutter/third_party/dart/LICENSE
-ORIGIN: ../../../flutter/third_party/dart/sdk/lib/typed_data/unmodifiable_typed_data.dart + ../../../flutter/third_party/dart/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../flutter/third_party/dart/runtime/bin/crashpad.h
 FILE: ../../../flutter/third_party/dart/runtime/bin/dart_embedder_api_impl.cc
@@ -3083,7 +3082,6 @@ FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/js_runtime/lib/instant
 FILE: ../../../flutter/third_party/dart/sdk/lib/js/_js.dart
 FILE: ../../../flutter/third_party/dart/sdk/lib/js/_js_client.dart
 FILE: ../../../flutter/third_party/dart/sdk/lib/js/_js_server.dart
-FILE: ../../../flutter/third_party/dart/sdk/lib/typed_data/unmodifiable_typed_data.dart
 ----------------------------------------------------------------------------------------------------
 Copyright (c) 2018, the Dart project authors.  Please see the AUTHORS file
 for details. All rights reserved.
@@ -4751,7 +4749,7 @@ Exhibit B - "Incompatible With Secondary Licenses" Notice
   This Source Code Form is "Incompatible With Secondary Licenses", as
   defined by the Mozilla Public License, v. 2.0.
 
-You may obtain a copy of this library's Source Code Form from: https://dart.googlesource.com/sdk/+/e90b0a53e0587720e3135712bd704e031fc9cac8
+You may obtain a copy of this library's Source Code Form from: https://dart.googlesource.com/sdk/+/dca20ab646c5f7d4b299d690756d84af3b582d6d
 /third_party/fallback_root_certificates/
 
 ====================================================================================================
