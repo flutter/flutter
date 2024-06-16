@@ -3806,40 +3806,42 @@ void main() {
 
   // Fixes https://github.com/flutter/flutter/pull/149586
   testWidgets('Garbage collector destroys child _MenuAnchorState after parent is closed', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        home: MenuAnchor(
-          controller: controller,
-          menuChildren: const [
-            SubmenuButton(
-              menuChildren: [],
-              child: Text(''),
-            )
-          ]
+      await tester.pumpWidget(
+        MaterialApp(
+          home: MenuAnchor(
+            controller: controller,
+            menuChildren: const [
+              SubmenuButton(
+                menuChildren: [],
+                child: Text(''),
+              )
+            ]
+          ),
         ),
-      ),
-    );
-
-    controller.open();
-    await tester.pump();
-
-    WeakReference? state = WeakReference(tester.firstState(find.byType(SubmenuButton)));
-    expect(state.target, isNotNull);
-
-    controller.close();
-    await tester.pump();
-
-    controller.open();
-    await tester.pump();
-
-    controller.close();
-    await tester.pump();
-
-    // Garbage collect
-    await tester.runAsync(forceGC);
-
-    expect(state.target, isNull);
-  });
+      );
+  
+      controller.open();
+      await tester.pump();
+  
+      WeakReference? state = WeakReference(tester.firstState(find.byType(SubmenuButton)));
+      expect(state.target, isNotNull);
+  
+      controller.close();
+      await tester.pump();
+  
+      controller.open();
+      await tester.pump();
+  
+      controller.close();
+      await tester.pump();
+  
+      // Garbage collect
+      await tester.runAsync(forceGC);
+  
+      expect(state.target, isNull);
+    }, 
+    skip: kIsWeb  // ForceGC does not work in web and in release mode.
+  );
 }
 
 List<Widget> createTestMenus({
