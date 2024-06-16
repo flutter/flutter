@@ -15,6 +15,7 @@ import '../base/context.dart';
 import '../base/io.dart' as io;
 import '../base/io.dart';
 import '../base/os.dart';
+import '../base/platform.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
@@ -1571,23 +1572,38 @@ abstract class FlutterCommand extends Command<void> {
 
   Map<String, String> extractWebHeaders() {
     final Map<String, String> webHeaders = <String, String>{};
+    final List<String> invalidHeaders = <String>[];
 
+    // Extract web headers from CLI arguments
     if (argParser.options.containsKey('web-header')) {
       final List<String> candidates = stringsArg('web-header');
-      final List<String> invalidHeaders = <String>[];
       for (final String candidate in candidates) {
         final Match? keyValueMatch = _HttpRegex.httpHeader.firstMatch(candidate);
           if (keyValueMatch == null) {
             invalidHeaders.add(candidate);
             continue;
           }
-
           webHeaders[keyValueMatch.group(1)!] = keyValueMatch.group(2)!;
       }
+    }
 
-      if (invalidHeaders.isNotEmpty) {
-        throwToolExit('Invalid web headers: ${invalidHeaders.join(', ')}');
+    // Extract web headers from environment variable
+    final Map<String,String> environment = const LocalPlatform().environment;
+    final String? flutterWebHeadersEnv = environment['FLUTTER_WEB_HEADERS'];
+    if (flutterWebHeadersEnv != null) {
+      final List<String> candidates = flutterWebHeadersEnv.split(',');
+      for (final String candidate in candidates) {
+        final Match? keyValueMatch = _HttpRegex.httpHeader.firstMatch(candidate);
+          if (keyValueMatch == null) {
+            invalidHeaders.add(candidate);
+            continue;
+          }
+          webHeaders[keyValueMatch.group(1)!] = keyValueMatch.group(2)!;
       }
+    }
+
+    if (invalidHeaders.isNotEmpty) {
+      throwToolExit('Invalid web headers: ${invalidHeaders.join(', ')}');
     }
 
     return webHeaders;
