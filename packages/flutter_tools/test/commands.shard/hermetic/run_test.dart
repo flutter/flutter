@@ -1047,10 +1047,7 @@ void main() {
           ]), throwsToolExit());
 
         final DebuggingOptions options = await command.createDebuggingOptions(true);
-        expect(options.webHeaders, <String, String>{
-          'hurray': 'env-var',
-          'yay': 'another-var'
-        });
+        expect(options.webHeaders, <String, String>{'foo': 'bar'});
       }, overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
@@ -1058,7 +1055,7 @@ void main() {
         DeviceManager: () => testDeviceManager,
         Platform: () => FakePlatform(
           environment: <String, String>{
-            'FLUTTER_WEB_HEADERS': 'hurray=env-var,yay=another-var'
+            'FLUTTER_WEB_HEADERS': 'foo = bar'
           }
         ),
       });
