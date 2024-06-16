@@ -3804,7 +3804,7 @@ void main() {
   });
 
   // Fixes https://github.com/flutter/flutter/pull/149586
-  testWidgets('Nested anchor state should dispose after a menu is closed', (WidgetTester tester) async {
+  testWidgets('MenuAnchor is garbage collected when its parent is closed', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: MenuAnchor(
