@@ -2381,7 +2381,7 @@ class CustomMultiChildLayout extends MultiChildRenderObjectWidget {
 ///  * [FittedBox], which sizes and positions its child widget to fit the parent
 ///    according to a given [BoxFit] discipline.
 ///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
-///  * [Understanding constraints](https://flutter.dev/docs/development/ui/layout/constraints),
+///  * [Understanding constraints](https://docs.flutter.dev/ui/layout/constraints),
 ///    an in-depth article about layout in Flutter.
 class SizedBox extends SingleChildRenderObjectWidget {
   /// Creates a fixed size box. The [width] and [height] parameters can be null
@@ -7101,6 +7101,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     bool? keyboardKey,
     bool? link,
     bool? header,
+    int? headingLevel,
     bool? textField,
     bool? readOnly,
     bool? focusable,
@@ -7172,6 +7173,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       keyboardKey: keyboardKey,
       link: link,
       header: header,
+      headingLevel: headingLevel,
       textField: textField,
       readOnly: readOnly,
       focusable: focusable,
