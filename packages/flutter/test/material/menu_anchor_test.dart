@@ -3802,6 +3802,43 @@ void main() {
         ..rect(color: overlayColor.withOpacity(0.1)),
     );
   });
+
+  // Fixes https://github.com/flutter/flutter/pull/149586
+  testWidgets('Nested anchor state should dispose after a menu is closed', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MenuAnchor(
+          controller: controller,
+          menuChildren: const [
+            SubmenuButton(
+              menuChildren: [],
+              child: Text(''),
+            )
+          ]
+        ),
+      ),
+    );
+
+    controller.open();
+    await tester.pump();
+
+    WeakReference? state = WeakReference(tester.firstState(find.byType(SubmenuButton)));
+    expect(state.target, isNotNull);
+
+    controller.close();
+    await tester.pump();
+
+    controller.open();
+    await tester.pump();
+
+    controller.close();
+    await tester.pump();
+
+    // Garbage collect
+    await tester.runAsync(forceGC);
+
+    expect(state.target, isNull);
+  });
 }
 
 List<Widget> createTestMenus({
