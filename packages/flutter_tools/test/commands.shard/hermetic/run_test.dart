@@ -1037,6 +1037,30 @@ void main() {
         Logger: () => logger,
         DeviceManager: () => testDeviceManager,
       });
+
+      testUsingContext('load headers from environment variable', () async {
+        final RunCommand command = RunCommand();
+        await expectLater(
+          () => createTestCommandRunner(command).run(<String>[
+            'run',
+            '--no-pub', '--no-hot',
+          ]), throwsToolExit());
+
+        final DebuggingOptions options = await command.createDebuggingOptions(true);
+        expect(options.webHeaders, <String, String>{
+          'hurray': 'env-var'
+        });
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Logger: () => logger,
+        DeviceManager: () => testDeviceManager,
+        Platform: () => FakePlatform(
+          environment: <String, String>{
+            'FLUTTER_WEB_HEADERS': 'hurray=env-var'
+          }
+        ),
+      });
     });
   });
 
