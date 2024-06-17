@@ -616,6 +616,7 @@ void main() {
           rect: const Rect.fromLTRB(0.0, 0.0, 48.0, 48.0),
           actions: <SemanticsAction>[
             SemanticsAction.tap,
+            SemanticsAction.focus,
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.hasEnabledState,
@@ -690,6 +691,7 @@ void main() {
                         TestSemantics(
                           actions: <SemanticsAction>[
                             SemanticsAction.tap,
+                            SemanticsAction.focus,
                           ],
                           flags: <SemanticsFlag>[
                             SemanticsFlag.hasEnabledState,
@@ -2177,6 +2179,7 @@ void main() {
           TestSemantics.rootChild(
             actions: <SemanticsAction>[
               SemanticsAction.tap,
+              SemanticsAction.focus,
             ],
             rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
             transform: Matrix4.translationValues(356.0, 276.0, 0.0),
