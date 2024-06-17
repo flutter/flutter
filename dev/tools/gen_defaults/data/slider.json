@@ -1,5 +1,5 @@
 {
-  "version": "4_0_0",
+  "version": "v4_1_0",
 
   "md.comp.slider.active.handle.height": 44.0,
   "md.comp.slider.active.handle.leading-space": 6.0,
@@ -23,7 +23,6 @@
   "md.comp.slider.focus.active.track.color": "primary",
   "md.comp.slider.focus.handle.width": 2.0,
   "md.comp.slider.focus.inactive.track.color": "secondaryContainer",
-  "md.comp.slider.focus.stop.color": "primary",
   "md.comp.slider.handle.color": "primary",
   "md.comp.slider.handle.height": 44.0,
   "md.comp.slider.handle.shape": "md.sys.shape.corner.full",
@@ -32,7 +31,6 @@
   "md.comp.slider.inactive.track.color": "secondaryContainer",
   "md.comp.slider.inactive.track.height": 16.0,
   "md.comp.slider.inactive.track.shape": "md.sys.shape.corner.full",
-  "md.comp.slider.label.label-text.color": "onInverseSurface",
   "md.comp.slider.pressed.active.track.color": "primary",
   "md.comp.slider.pressed.handle.color": "primary",
   "md.comp.slider.pressed.handle.width": 2.0,
