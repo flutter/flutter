@@ -41,7 +41,7 @@ void main() {
   });
 
   testWidgets('CarouselView items customization', (WidgetTester tester) async {
-    final GlobalKey key = GlobalKey();
+    final Key key = UniqueKey();
     final ThemeData theme = ThemeData();
 
     await tester.pumpWidget(
@@ -94,7 +94,7 @@ void main() {
     RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
 
     // On hovered.
-    final TestGesture gesture = await _pointGestureToCarouselItem(tester, key);
+    final TestGesture gesture = await hoverPointerOverCarouselItem(tester, key);
     await tester.pumpAndSettle();
     expect(inkFeatures, paints..rect(color: Colors.red.withOpacity(1.0)));
 
@@ -116,12 +116,12 @@ void main() {
 
     const MaterialState state = MaterialState.focused;
 
-    // Check overlay color in focused state
+    // Check overlay color in focused state.
     expect(inkWell.overlayColor?.resolve(<WidgetState>{state}), Colors.purple);
   });
 
-  testWidgets('CarouselView respect onTap', (WidgetTester tester) async {
-    final List<GlobalKey> keys = List<GlobalKey>.generate(10, (_) => GlobalKey());
+  testWidgets('CarouselView respects onTap', (WidgetTester tester) async {
+    final List<Key> keys = List<Key>.generate(10, (_) => UniqueKey());
     final ThemeData theme = ThemeData();
     int tapIndex = 0;
 
@@ -136,7 +136,7 @@ void main() {
             },
             children: List<Widget>.generate(10, (int index) {
               return Center(
-                key: keys.elementAt(index),
+                key: keys[index],
                 child: Text('Item $index'),
               );
             }),
@@ -145,12 +145,12 @@ void main() {
       ),
     );
 
-    final Finder item1 = find.byKey(keys.elementAt(1));
+    final Finder item1 = find.byKey(keys[1]);
     await tester.tap(find.ancestor(of: item1, matching: find.byType(Stack)));
     await tester.pump();
     expect(tapIndex, 1);
 
-    final Finder item2 = find.byKey(keys.elementAt(2));
+    final Finder item2 = find.byKey(keys[2]);
     await tester.tap(find.ancestor(of: item2, matching: find.byType(Stack)));
     await tester.pump();
     expect(tapIndex, 2);
@@ -210,7 +210,7 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(buildCarouselView(weights: <int>[4,3,2,1]));
+    await tester.pumpWidget(buildCarouselView(weights: <int>[4, 3, 2, 1]));
 
     final Size viewportSize = MediaQuery.of(tester.element(find.byType(CarouselView))).size;
     expect(viewportSize, const Size(800, 600));
@@ -238,7 +238,7 @@ void main() {
     expect(find.text('Item 4'), findsNothing);
 
     // Test shorter weight list.
-    await tester.pumpWidget(buildCarouselView(weights: <int>[7,1]));
+    await tester.pumpWidget(buildCarouselView(weights: <int>[7, 1]));
     await tester.pumpAndSettle();
     expect(viewportSize, const Size(800, 600));
 
@@ -295,7 +295,7 @@ void main() {
         home: Scaffold(
           body: CarouselView.weighted(
             controller: CarouselController(initialItem: 5),
-            layoutWeights: const <int>[7,1],
+            layoutWeights: const <int>[7, 1],
             children: List<Widget>.generate(10, (int index) {
               return Center(
                 child: Text('Item $index'),
@@ -329,7 +329,7 @@ void main() {
         home: Scaffold(
           body: CarouselView.weighted(
             controller: CarouselController(initialItem: 5),
-            layoutWeights: const <int>[1,8,1],
+            layoutWeights: const <int>[1, 8, 1],
             children: List<Widget>.generate(10, (int index) {
               return Center(
                 child: Text('Item $index'),
@@ -417,7 +417,7 @@ void main() {
           body: CarouselView.weighted(
             itemSnapping: true,
             allowFullyExpand: false,
-            layoutWeights: const <int>[1,7],
+            layoutWeights: const <int>[1, 7],
             children: List<Widget>.generate(10, (int index) {
               return Center(
                 child: Text('Item $index'),
@@ -519,7 +519,7 @@ void main() {
           body: CarouselView.weighted(
             itemSnapping: true,
             allowFullyExpand: false,
-            layoutWeights: const <int>[1,8,1],
+            layoutWeights: const <int>[1, 8, 1],
             children: List<Widget>.generate(10, (int index) {
               return Center(
                 child: Text('$index'),
@@ -693,7 +693,7 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: CarouselView.weighted(
-            layoutWeights: const <int>[1,2,4,2,1],
+            layoutWeights: const <int>[1, 2, 4, 2, 1],
             itemSnapping: true,
             children: List<Widget>.generate(10, (int index) {
               return Center(
@@ -735,7 +735,7 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: CarouselView.weighted(
-            layoutWeights: const <int>[1,2,4,2,1],
+            layoutWeights: const <int>[1, 2, 4, 2, 1],
             allowFullyExpand: false,
             children: List<Widget>.generate(10, (int index) {
               return Center(
@@ -793,7 +793,7 @@ Finder getItem(int index) {
   return find.descendant(of: find.byType(CarouselView), matching: find.ancestor(of: find.text('Item $index'), matching: find.byType(Padding)));
 }
 
-Future<TestGesture> _pointGestureToCarouselItem(WidgetTester tester, GlobalKey key) async {
+Future<TestGesture> hoverPointerOverCarouselItem(WidgetTester tester, Key key) async {
   final Offset center = tester.getCenter(find.byKey(key));
   final TestGesture gesture = await tester.createGesture(
     kind: PointerDeviceKind.mouse,
