@@ -3607,6 +3607,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   void markNeedsSemanticsUpdate() {
     assert(!_debugDisposed);
     assert(!attached || !owner!._debugDoingSemantics);
+    _cachedSemanticFragment = null;
     if (!attached || owner!._semanticsOwner == null) {
       _cachedSemanticsConfiguration = null;
       return;
@@ -3712,8 +3713,16 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     assert(interestingFragment.config == null && result.any((SemanticsNode node) => node == _semantics));
   }
 
-  /// Returns the semantics that this node would like to add to its parent.
+
+  _SemanticsFragment? _cachedSemanticFragment;
   _SemanticsFragment _getSemanticsForParent({
+    required bool mergeIntoParent,
+    required bool blockUserActions,
+  }) {
+    return _cachedSemanticFragment ??= _computeSemanticsForParent(mergeIntoParent: mergeIntoParent, blockUserActions: blockUserActions);
+  }
+  /// Returns the semantics that this node would like to add to its parent.
+  _SemanticsFragment _computeSemanticsForParent({
     required bool mergeIntoParent,
     required bool blockUserActions,
   }) {
@@ -4853,6 +4862,10 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
   bool _isConfigWritable = false;
   bool _mergesToSibling = false;
 
+  bool _compiled = false;
+  final List<SemanticsNode> _producedNode = <SemanticsNode>[];
+  final List<SemanticsNode> _producedSibling = <SemanticsNode>[];
+
   final List<List<_InterestingSemanticsFragment>> _siblingMergeGroups;
 
   void _mergeSiblingGroup(Rect? parentSemanticsClipRect, Rect? parentPaintClipRect, List<SemanticsNode> result, Set<int> usedSemanticsIds) {
@@ -4928,6 +4941,27 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
     required List<SemanticsNode> result,
     required List<SemanticsNode> siblingNodes,
   }) {
+    if (!_compiled) {
+      _compileChildren(
+        parentSemanticsClipRect: parentSemanticsClipRect,
+        parentPaintClipRect: parentPaintClipRect,
+        elevationAdjustment: elevationAdjustment,
+        siblingNodes: siblingNodes,
+      );
+    }
+    assert(_compiled = true);
+    result.addAll(_producedNode);
+    siblingNodes.addAll(_producedSibling);
+  }
+
+  void _compileChildren({
+    Rect? parentSemanticsClipRect,
+    Rect? parentPaintClipRect,
+    required double elevationAdjustment,
+    required List<SemanticsNode> siblingNodes,
+  }) {
+    assert(!_compiled);
+    _compiled = true;
     final Set<int> usedSemanticsIds = <int>{};
     Iterable<_InterestingSemanticsFragment> compilingFragments = _children;
     for (final List<_InterestingSemanticsFragment> siblingGroup in _siblingMergeGroups) {
@@ -4940,7 +4974,7 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
       _mergeSiblingGroup(
         parentSemanticsClipRect,
         parentPaintClipRect,
-        siblingNodes,
+        _producedSibling,
         usedSemanticsIds,
       );
       for (final _InterestingSemanticsFragment fragment in compilingFragments) {
@@ -4963,10 +4997,11 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
           // the parent config (as thickness). We still need to make sure that
           // its children are placed at the elevation dictated by this config.
           elevationAdjustment: elevationAdjustment + _config.elevation,
-          result: result,
-          siblingNodes: siblingNodes,
+          result: _producedNode,
+          siblingNodes: _producedSibling,
         );
       }
+
       return;
     }
 
@@ -5034,7 +5069,7 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
     } else {
       node.updateWith(config: _config, childrenInInversePaintOrder: children);
     }
-    result.add(node);
+    _producedNode.add(node);
     // Sibling node needs to attach to the parent of an explicit node.
     for (final SemanticsNode siblingNode in siblingNodes) {
       // sibling nodes are in the same coordinate of the immediate explicit node.
@@ -5047,7 +5082,7 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
         siblingNode.tags!.addAll(_tagsForChildren!);
       }
     }
-    result.addAll(siblingNodes);
+    _producedNode.addAll(siblingNodes);
     siblingNodes.clear();
   }
 
