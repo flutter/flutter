@@ -2363,13 +2363,22 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     final RenderObject? parentRelayoutBoundary = parent?._relayoutBoundary;
     assert(parentRelayoutBoundary != null);
     if (parentRelayoutBoundary != _relayoutBoundary) {
-      _relayoutBoundary = parentRelayoutBoundary;
-      visitChildren(_propagateRelayoutBoundaryToChild);
+      _setRelayoutBoundary(parentRelayoutBoundary!);
     }
   }
 
+  // This is a static method to reduce closure allocation with visitChildren.
   static void _propagateRelayoutBoundaryToChild(RenderObject child) {
     child._propagateRelayoutBoundary();
+  }
+
+  /// Set [_relayoutBoundary] to [value] throughout this render object's
+  /// subtree, including this render object but stopping at relayout boundaries
+  /// thereafter.
+  void _setRelayoutBoundary(RenderObject value) {
+    assert(value != _relayoutBoundary);
+    _relayoutBoundary = value;
+    visitChildren(_propagateRelayoutBoundaryToChild);
   }
 
   /// Bootstrap the rendering pipeline by scheduling the very first layout.
@@ -2519,8 +2528,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
       }());
 
       if (relayoutBoundary != _relayoutBoundary) {
-        _relayoutBoundary = relayoutBoundary;
-        visitChildren(_propagateRelayoutBoundaryToChild);
+        _setRelayoutBoundary(relayoutBoundary);
       }
 
       if (!kReleaseMode && debugProfileLayoutsEnabled) {
