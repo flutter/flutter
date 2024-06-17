@@ -21,19 +21,24 @@ import 'theme.dart';
 ///
 /// Material Design 3 introduces 4 carousel layouts:
 ///  * Multi-browse: This layout shows at least one large, medium, and small
-/// carousel item at a time.
-///  * Uncontained (default): This layout show items that scroll to the edge of
-/// the container.
+///    carousel item at a time. This layout is supported by [CarouselView.weighted].
+///  * Uncontained (default): This layout show items that scroll to the edge of the
+///    container. This layout is supported by [CarouselView].
 ///  * Hero: This layout shows at least one large and one small item at a time.
+///    This layout is supported by [CarouselView.weighted].
 ///  * Full-screen: This layout shows one edge-to-edge large item at a time and
-/// scrolls vertically.
+///    scrolls vertically. The full-screen layout can be supported by both
+///    constructors.
 ///
-/// This widget supports uncontained carousel layout. It shows items that scroll
-/// to the edge of the container, behaving similarly to a [ListView] where all
-/// children are a uniform size. [CarouselView.weighted] enables dynamic item
-/// sizing. Each item is assigned a weight that determines the portion of the
-/// viewport it occupies. This allows you to easily create layouts like
-/// multi-browse, hero, and full-screen.
+/// The default constructor implements the uncontained layout model. It shows
+/// items that scroll to the edge of the container, behaving similarly to a
+/// [ListView] where all children are a uniform size. [CarouselView.weighted]
+/// enables dynamic item sizing. Each item is assigned a weight that determines
+/// the portion of the viewport it occupies. This allows you to easily create
+/// layouts like multi-browse, and hero. In order to have a full-screen layout,
+/// if [CarouselView] is used, then set the [itemExtent] to screen size; if
+/// [CarouselView.weighted] is used, then set the [layoutWeights] to only have
+/// one integer in the array.
 ///
 /// In [CarouselView.weighted], weights are relative proportions. For example,
 /// if the layout weights is `[3, 2, 1]`, it means the first visible item occupies
@@ -69,7 +74,7 @@ import 'theme.dart';
 /// See also:
 ///
 ///  * [CarouselController], which controls the first fully visible item in the
-/// view.
+///    view.
 ///  * [PageView], which is a scrollable list that works page by page.
 class CarouselView extends StatefulWidget {
   /// Creates a Material Design carousel.
@@ -86,7 +91,7 @@ class CarouselView extends StatefulWidget {
     this.scrollDirection = Axis.horizontal,
     this.reverse = false,
     this.onTap,
-    required this.itemExtent,
+    required double this.itemExtent,
     required this.children,
   }) : allowFullyExpand = true,
        layoutWeights = null;
@@ -117,7 +122,7 @@ class CarouselView extends StatefulWidget {
     this.reverse = false,
     this.allowFullyExpand = true,
     this.onTap,
-    required this.layoutWeights,
+    required List<int> this.layoutWeights,
     required this.children,
   }) : itemExtent = null;
 
@@ -201,7 +206,6 @@ class CarouselView extends StatefulWidget {
   /// Defaults to false.
   final bool reverse;
 
-
   /// Whether the "squished" item is allowed to expand to the max size.
   ///
   /// If this is false, the layout of the carousel doesn't change. This is especially
@@ -209,7 +213,7 @@ class CarouselView extends StatefulWidget {
   /// middle and at least one small item on either side, such as `[1, 7, 1]`,
   /// the first or the last item cannot expand to the max size. If this is true,
   /// there will be some space before the first item or after the last item
-  /// coming so every items have a chance to be fully expanded.
+  /// coming so every item has a chance to be fully expanded.
   ///
   /// Defaults to true.
   final bool allowFullyExpand;
@@ -248,7 +252,7 @@ class _CarouselViewState extends State<CarouselView> {
   List<int>? _weights;
   CarouselController? _internalController;
   CarouselController get _controller => widget.controller ?? _internalController!;
-  late bool allowFullyExpand;
+  late bool _allowFullyExpand;
 
   @override
   void initState() {
@@ -263,7 +267,7 @@ class _CarouselViewState extends State<CarouselView> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    allowFullyExpand = widget.allowFullyExpand;
+    _allowFullyExpand = widget.allowFullyExpand;
     _itemExtent = widget.itemExtent;
   }
 
@@ -359,7 +363,7 @@ class _CarouselViewState extends State<CarouselView> {
                           child: Stack(
                             fit: StackFit.expand,
                             children: <Widget>[
-                              widget.children.elementAt(index),
+                              widget.children[index],
                               Material(
                                 color: Colors.transparent,
                                 child: InkWell(
@@ -389,7 +393,7 @@ class _CarouselViewState extends State<CarouselView> {
                   ),
                 ),
                 if (_weights != null) _SliverWeightedCarousel(
-                  allowFullyExpand: allowFullyExpand,
+                  allowFullyExpand: _allowFullyExpand,
                   shrinkExtent: widget.shrinkExtent,
                   weights: _weights!,
                   delegate: SliverChildBuilderDelegate(
@@ -705,9 +709,10 @@ class _SliverWeightedCarousel extends SliverMultiBoxAdaptorWidget {
 
   @override
   void updateRenderObject(BuildContext context, _RenderSliverWeightedCarousel renderObject) {
-    renderObject.allowFullyExpand = allowFullyExpand;
-    renderObject.shrinkExtent = shrinkExtent;
-    renderObject.weights = weights;
+    renderObject
+      ..allowFullyExpand = allowFullyExpand
+      ..shrinkExtent = shrinkExtent
+      ..weights = weights;
   }
 }
 
@@ -840,7 +845,6 @@ class _RenderSliverWeightedCarousel extends RenderSliverFixedExtentBoxAdaptor {
     return allowFullyExpand ? index - smallerWeightCount : index;
   }
 
-
   // This value indicates the scrolling progress of items following the first
   // item. It informs them how much the first item has moved off-screen,
   // enabling them to adjust their sizes (grow or shrink) accordingly.
@@ -933,8 +937,7 @@ class _RenderSliverWeightedCarousel extends RenderSliverFixedExtentBoxAdaptor {
   }
 
   BoxConstraints _getChildConstraints(int index) {
-    double extent;
-    extent = itemExtentBuilder!(index, _currentLayoutDimensions)!;
+    final double extent = itemExtentBuilder!(index, _currentLayoutDimensions)!;
     return constraints.asBoxConstraints(
       minExtent: extent,
       maxExtent: extent,
