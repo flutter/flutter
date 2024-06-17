@@ -408,7 +408,7 @@ class _CarouselViewState extends State<CarouselView> {
                           child: Stack(
                             fit: StackFit.expand,
                             children: <Widget>[
-                              widget.children.elementAt(index),
+                              widget.children[index],
                               Material(
                                 color: Colors.transparent,
                                 child: InkWell(
