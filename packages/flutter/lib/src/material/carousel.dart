@@ -1406,7 +1406,7 @@ class CarouselController extends ScrollController {
     final double? itemExtent = _carouselState!._itemExtent;
     int expandedItem = initialItem;
 
-    if (weights != null && !_carouselState!.allowFullyExpand) {
+    if (weights != null && !_carouselState!._allowFullyExpand) {
       int smallerWeights = 0;
       for (final int weight in weights) {
         if (weight == weights.max) {
