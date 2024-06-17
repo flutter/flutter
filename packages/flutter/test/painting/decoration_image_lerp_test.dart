@@ -43,6 +43,8 @@ void main() {
       await _load(red);
     });
 
+    imageCache.clear();
+
     // await tester.pumpWidget(
     //   ColoredBox(
     //     color: Colors.white,
@@ -192,7 +194,6 @@ void main() {
     //     expect(getBlockPixel(index), lime);
     //   }
     // }
-    imageCache.clear();
   }, skip: kIsWeb); // TODO(ianh): https://github.com/flutter/flutter/issues/130612, https://github.com/flutter/flutter/issues/130609
 
   testWidgets('ImageDecoration.lerp',
