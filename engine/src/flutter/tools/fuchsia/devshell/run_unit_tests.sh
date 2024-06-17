@@ -83,7 +83,13 @@ test_names=()
 for test_package in $test_packages
 do
   engine-info "... publishing ${test_package} ..."
-  ${FUCHSIA_DIR}/.jiri_root/bin/ffx repository publish $FUCHSIA_DIR/$(cat $FUCHSIA_DIR/.fx-build-dir)/amber-files --package-archive "${test_package}"
+  (
+    # ffx can not be called outside of FUCHSIA_DIR.
+    cd ${FUCHSIA_DIR}
+    ${FUCHSIA_DIR}/.jiri_root/bin/ffx repository publish \
+        $FUCHSIA_DIR/$(cat $FUCHSIA_DIR/.fx-build-dir)/amber-files \
+        --package-archive "${test_package}"
+  )
   test_names+=("$(basename ${test_package} | sed -e "s/-0.far//")")
 done
 
