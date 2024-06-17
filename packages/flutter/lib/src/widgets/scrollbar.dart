@@ -1622,13 +1622,15 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     // coordinate space of the scroll position.
     double scrollOffsetGlobal = thumbDragStartedOnThumb
       ? scrollbarPainter.getTrackToScroll(primaryDeltaFromDragStart + _startDragThumbOffset!)
-      : primaryDeltaFromDragStart + _startDragThumbOffset!;
+      : _startDragThumbOffset! -primaryDeltaFromDragStart;
 
     if (primaryDeltaFromDragStart > 0 && scrollOffsetGlobal < position.pixels
         || primaryDeltaFromDragStart < 0 && scrollOffsetGlobal > position.pixels) {
       // Adjust the position value if the scrolling direction conflicts with
       // the dragging direction due to scroll metrics shrink.
-      scrollOffsetGlobal = position.pixels + scrollbarPainter.getTrackToScroll(primaryDeltaFromLastDragUpdate);
+      scrollOffsetGlobal = thumbDragStartedOnThumb
+        ? position.pixels + scrollbarPainter.getTrackToScroll(primaryDeltaFromLastDragUpdate)
+        : position.pixels - primaryDeltaFromLastDragUpdate;
     }
     if (scrollOffsetGlobal != position.pixels) {
       // Ensure we don't drag into overscroll if the physics do not allow it.
@@ -1769,35 +1771,28 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       return;
     }
 
-    double velocityInScrollbarDirection() {
-      return switch (direction) {
-        Axis.horizontal => -velocity.pixelsPerSecond.dx,
-        Axis.vertical => -velocity.pixelsPerSecond.dy,
-      };
+    if (thumbDragStartedOnThumb) {
+      velocity = -velocity;
     }
 
     // On mobile platforms flinging the scrollbar thumb causes a ballistic
-    // scroll, just like it via a touch drag. Likewise for desktops when
+    // scroll, just like it does via a touch drag. Likewise for desktops when
     // dragging on the trackpad or with a stylus.
     final TargetPlatform platform = ScrollConfiguration.of(context).getPlatform(context);
-    final (Velocity adjustedVelocity, double primaryVelocity) = switch (platform) {
-      TargetPlatform.iOS || TargetPlatform.android => (
-        -velocity,
-        velocityInScrollbarDirection(),
-      ),
-      TargetPlatform.linux || TargetPlatform.macOS || TargetPlatform.windows when !thumbDragStartedOnThumb => (
-        -velocity,
-        velocityInScrollbarDirection(),
-      ),
-      _ => (Velocity.zero, 0),
+    final Velocity adjustedVelocity = switch (platform) {
+      TargetPlatform.iOS || TargetPlatform.android => velocity,
+      TargetPlatform.fuchsia || TargetPlatform.linux || TargetPlatform.macOS || TargetPlatform.windows when !thumbDragStartedOnThumb => velocity,
+      _ => Velocity.zero,
     };
-
     final RenderBox renderBox = _scrollbarPainterKey.currentContext!.findRenderObject()! as RenderBox;
     final DragEndDetails details = DragEndDetails(
       localPosition: localPosition,
       globalPosition: renderBox.localToGlobal(localPosition),
       velocity: adjustedVelocity,
-      primaryVelocity: primaryVelocity,
+      primaryVelocity: switch (direction) {
+        Axis.horizontal => adjustedVelocity.pixelsPerSecond.dx,
+        Axis.vertical => adjustedVelocity.pixelsPerSecond.dy,
+      },
     );
 
     _thumbDrag?.end(details);
