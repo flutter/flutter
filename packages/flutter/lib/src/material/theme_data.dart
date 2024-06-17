@@ -404,11 +404,11 @@ class ThemeData with Diagnosticable {
 
       // Default some of the color settings to values from the color scheme
       primaryColor ??= primarySurfaceColor;
-      canvasColor ??= colorScheme.background;
-      scaffoldBackgroundColor ??= colorScheme.background;
+      canvasColor ??= colorScheme.surface;
+      scaffoldBackgroundColor ??= colorScheme.surface;
       cardColor ??= colorScheme.surface;
       dividerColor ??= colorScheme.outline;
-      dialogBackgroundColor ??= colorScheme.background;
+      dialogBackgroundColor ??= colorScheme.surface;
       indicatorColor ??= onPrimarySurfaceColor;
       applyElevationOverlayColor ??= brightness == Brightness.dark;
     }
@@ -776,11 +776,11 @@ class ThemeData with Diagnosticable {
       colorScheme: colorScheme,
       brightness: colorScheme.brightness,
       primaryColor: primarySurfaceColor,
-      canvasColor: colorScheme.background,
-      scaffoldBackgroundColor: colorScheme.background,
+      canvasColor: colorScheme.surface,
+      scaffoldBackgroundColor: colorScheme.surface,
       cardColor: colorScheme.surface,
       dividerColor: colorScheme.onSurface.withOpacity(0.12),
-      dialogBackgroundColor: colorScheme.background,
+      dialogBackgroundColor: colorScheme.surface,
       indicatorColor: onPrimarySurfaceColor,
       textTheme: textTheme,
       applyElevationOverlayColor: isDark,
