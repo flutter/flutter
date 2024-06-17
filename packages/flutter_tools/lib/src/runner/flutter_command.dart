@@ -15,7 +15,6 @@ import '../base/context.dart';
 import '../base/io.dart' as io;
 import '../base/io.dart';
 import '../base/os.dart';
-import '../base/platform.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
@@ -1588,7 +1587,7 @@ abstract class FlutterCommand extends Command<void> {
     }
 
     // Extract web headers from environment variable
-    final Map<String,String> environment = const LocalPlatform().environment;
+    final Map<String,String> environment = globals.platform.environment;
     final String? flutterWebHeadersEnv = environment['FLUTTER_WEB_HEADERS'];
     if (flutterWebHeadersEnv != null) {
       final List<String> candidates = flutterWebHeadersEnv.split(',');
