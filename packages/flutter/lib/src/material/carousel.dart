@@ -781,11 +781,11 @@ class _RenderSliverWeightedCarousel extends RenderSliverFixedExtentBoxAdaptor {
     ) {
       assert(index - _firstVisibleItemIndex < weights.length);
       final int currIndexOnWeightList = index - _firstVisibleItemIndex;
-      final int currWeight = weights.elementAt(currIndexOnWeightList);
+      final int currWeight = weights[currIndexOnWeightList];
       extent = extentUnit * currWeight; // initial extent
       final double progress = _firstVisibleItemOffscreenExtent / firstChildExtent;
 
-      final int prevWeight = weights.elementAt(currIndexOnWeightList - 1);
+      final int prevWeight = weights[currIndexOnWeightList - 1];
       final double finalIncrease = (prevWeight - currWeight) / weights.max;
       extent = extent + finalIncrease * progress * maxChildExtent;
     }
@@ -1030,10 +1030,10 @@ class _RenderSliverWeightedCarousel extends RenderSliverFixedExtentBoxAdaptor {
     double extraLayoutOffset = 0;
     if (allowFullyExpand) {
       for (int i = weights.length - 1; i >= 0; i--) {
-        if (weights.elementAt(i) == weights.max) {
+        if (weights[i] == weights.max) {
           break;
         }
-        extraLayoutOffset += weights.elementAt(i) * extentUnit;
+        extraLayoutOffset += weights[i] * extentUnit;
       }
     }
 
