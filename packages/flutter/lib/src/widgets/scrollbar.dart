@@ -1621,8 +1621,8 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     // last time when drag started or last updated, into the
     // coordinate space of the scroll position.
     double scrollOffsetGlobal = thumbDragStartedOnThumb
-      ? scrollbarPainter.getTrackToScroll(primaryDeltaFromDragStart + _startDragThumbOffset!)
-      : _startDragThumbOffset! -primaryDeltaFromDragStart;
+      ? scrollbarPainter.getTrackToScroll(_startDragThumbOffset! + primaryDeltaFromDragStart)
+      : scrollbarPainter.getTrackToScroll(_startDragThumbOffset!) - primaryDeltaFromDragStart;
 
     if (primaryDeltaFromDragStart > 0 && scrollOffsetGlobal < position.pixels
         || primaryDeltaFromDragStart < 0 && scrollOffsetGlobal > position.pixels) {
