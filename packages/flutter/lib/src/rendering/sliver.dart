@@ -80,7 +80,7 @@ class SliverLayoutDimensions {
     scrollOffset,
     precedingScrollExtent,
     viewportMainAxisExtent,
-    viewportMainAxisExtent
+    crossAxisExtent,
   );
 }
 
