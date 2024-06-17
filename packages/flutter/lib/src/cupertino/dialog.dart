@@ -6,6 +6,7 @@ import 'dart:math' as math;
 import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -64,8 +65,9 @@ const TextStyle _kActionSheetContentStyle = TextStyle(
   inherit: false,
   fontSize: 13.0,
   fontWeight: FontWeight.w400,
-  color: _kActionSheetContentTextColor,
   textBaseline: TextBaseline.alphabetic,
+  // The `color` is configured by _kActionSheetContentTextColor to be dynamic on
+  // context.
 );
 
 // Generic constants shared between Dialog and ActionSheet.
@@ -103,35 +105,53 @@ const Color _kDialogColor = CupertinoDynamicColor.withBrightness(
 // Translucent light gray that is painted on top of the blurred backdrop as the
 // background color of a pressed button.
 // Eyeballed from iOS 13 beta simulator.
-const Color _kPressedColor = CupertinoDynamicColor.withBrightness(
+const Color _kDialogPressedColor = CupertinoDynamicColor.withBrightness(
   color: Color(0xFFE1E1E1),
   darkColor: Color(0xFF2E2E2E),
 );
 
+// Translucent light gray that is painted on top of the blurred backdrop as the
+// background color of a pressed button.
+// Eyeballed from iOS 17 simulator.
+const Color _kActionSheetPressedColor = CupertinoDynamicColor.withBrightness(
+  color: Color(0xCAE0E0E0),
+  darkColor: Color(0xC1515151),
+);
+
+const Color _kActionSheetCancelColor = CupertinoDynamicColor.withBrightness(
+  color: Color(0xFFFFFFFF),
+  darkColor: Color(0xFF2C2C2C),
+);
 const Color _kActionSheetCancelPressedColor = CupertinoDynamicColor.withBrightness(
   color: Color(0xFFECECEC),
-  darkColor: Color(0xFF49494B),
+  darkColor: Color(0xFF494949),
 );
 
 // Translucent, very light gray that is painted on top of the blurred backdrop
 // as the action sheet's background color.
 // TODO(LongCatIsLooong): https://github.com/flutter/flutter/issues/39272. Use
 // System Materials once we have them.
-// Extracted from https://developer.apple.com/design/resources/.
+// Eyeballed from iOS 17 simulator.
 const Color _kActionSheetBackgroundColor = CupertinoDynamicColor.withBrightness(
-  color: Color(0xC7F9F9F9),
-  darkColor: Color(0xC7252525),
+  color: Color(0xC8FCFCFC),
+  darkColor: Color(0xBE292929),
 );
 
 // The gray color used for text that appears in the title area.
-// Extracted from https://developer.apple.com/design/resources/.
-const Color _kActionSheetContentTextColor = Color(0xFF8F8F8F);
+// Eyeballed from iOS 17 simulator.
+const Color _kActionSheetContentTextColor = CupertinoDynamicColor.withBrightness(
+  color: Color(0x851D1D1D),
+  darkColor: Color(0x96F1F1F1),
+);
 
 // Translucent gray that is painted on top of the blurred backdrop in the gap
 // areas between the content section and actions section, as well as between
 // buttons.
-// Eye-balled from iOS 13 beta simulator.
-const Color _kActionSheetButtonDividerColor = _kActionSheetContentTextColor;
+// Eyeballed from iOS 17 simulator.
+const Color _kActionSheetButtonDividerColor = CupertinoDynamicColor.withBrightness(
+  color: Color(0xD4C9C9C9),
+  darkColor: Color(0xD57D7D7D),
+);
 
 // The alert dialog layout policy changes depending on whether the user is using
 // a "regular" font size vs a "large" font size. This is a spectrum. There are
@@ -445,6 +465,280 @@ class CupertinoPopupSurface extends StatelessWidget {
   }
 }
 
+typedef _HitTester = HitTestResult Function(Offset location);
+
+// Recognizes taps with possible sliding during the tap.
+//
+// This recognizer only tracks one pointer at a time (called the primary
+// pointer), and other pointers added while the primary pointer is alive are
+// ignored and can not be used by other gestures either. After the primary
+// pointer ends, the pointer added next becomes the new primary pointer (which
+// starts a new gesture sequence).
+//
+// This recognizer only allows [kPrimaryMouseButton].
+class _SlidingTapGestureRecognizer extends VerticalDragGestureRecognizer {
+  _SlidingTapGestureRecognizer({
+    super.debugOwner,
+  }) {
+    dragStartBehavior = DragStartBehavior.down;
+  }
+
+  /// Called whenever the primary pointer moves regardless of whether drag has
+  /// started.
+  ///
+  /// The parameter is the global position of the primary pointer.
+  ///
+  /// This is similar to `onUpdate`, but allows the caller to track the primary
+  /// pointer's location before the drag starts, which is useful to enhance
+  /// responsiveness.
+  ValueSetter<Offset>? onResponsiveUpdate;
+
+  /// Called whenever the primary pointer is lifted regardless of whether drag
+  /// has started.
+  ///
+  /// The parameter is the global position of the primary pointer.
+  ///
+  /// This is similar to `onEnd`, but allows know the primary pointer's final
+  /// location even if the drag never started, which is useful to enhance
+  /// responsiveness.
+  ValueSetter<Offset>? onResponsiveEnd;
+
+  int? _primaryPointer;
+
+  @override
+  void addAllowedPointer(PointerDownEvent event) {
+    _primaryPointer ??= event.pointer;
+    super.addAllowedPointer(event);
+  }
+
+  @override
+  void rejectGesture(int pointer) {
+    if (pointer == _primaryPointer) {
+      _primaryPointer = null;
+    }
+    super.rejectGesture(pointer);
+  }
+
+  @override
+  void handleEvent(PointerEvent event) {
+    if (event.pointer == _primaryPointer) {
+      if (event is PointerMoveEvent) {
+        onResponsiveUpdate?.call(event.position);
+      }
+      // If this gesture has a competing gesture (such as scrolling), and the
+      // pointer has not moved far enough to get this panning accepted, a
+      // pointer up event should still be considered as an accepted tap up.
+      // Manually accept this gesture here, which triggers onDragEnd.
+      if (event is PointerUpEvent) {
+        resolve(GestureDisposition.accepted);
+        stopTrackingPointer(_primaryPointer!);
+        onResponsiveEnd?.call(event.position);
+      } else {
+        super.handleEvent(event);
+      }
+      if (event is PointerUpEvent || event is PointerCancelEvent) {
+        _primaryPointer = null;
+      }
+    }
+  }
+
+  @override
+  String get debugDescription => 'tap slide';
+}
+
+// A region (typically a button) that can receive entering, exiting, and
+// updating events of a "sliding tap" gesture.
+//
+// Some Cupertino widgets, such as action sheets or dialogs, allow the user to
+// select buttons using "sliding taps", where the user can drag around after
+// pressing on the screen, and whichever button the drag ends in is selected.
+//
+// This class is used to define the regions that sliding taps recognize. This
+// class must be provided to a `MetaData` widget as `data`, and is typically
+// implemented by a widget state class. When an eligible dragging gesture
+// enters, leaves, or ends this `MetaData` widget, corresponding methods of this
+// class will be called.
+//
+// Multiple `_ActionSheetSlideTarget`s might be nested.
+// `_TargetSelectionGestureRecognizer` uses a simple algorithm that only
+// compares if the inner-most slide target has changed (which suffices our use
+// case).  Semantically, this means that all outer targets will be treated as
+// identical to the inner-most one, i.e. when the pointer enters or leaves a
+// slide target, the corresponding method will be called on all targets that
+// nest it.
+abstract class _ActionSheetSlideTarget {
+  // A pointer has entered this region.
+  //
+  // This includes:
+  //
+  //  * The pointer has moved into this region from outside.
+  //  * The point has contacted the screen in this region. In this case, this
+  //    method is called as soon as the pointer down event occurs regardless of
+  //    whether the gesture wins the arena immediately.
+  void didEnter();
+
+  // A pointer has exited this region.
+  //
+  // This includes:
+  //  * The pointer has moved out of this region.
+  //  * The pointer is no longer in contact with the screen.
+  //  * The pointer is canceled.
+  //  * The gesture loses the arena.
+  //  * The gesture ends. In this case, this method is called immediately
+  //    before [didConfirm].
+  void didLeave();
+
+  // The drag gesture is completed in this region.
+  //
+  // This method is called immediately after a [didLeave].
+  void didConfirm();
+}
+
+// Recognizes sliding taps and thereupon interacts with
+// `_ActionSheetSlideTarget`s.
+class _TargetSelectionGestureRecognizer extends GestureRecognizer {
+  _TargetSelectionGestureRecognizer({super.debugOwner, required this.hitTest})
+    : _slidingTap = _SlidingTapGestureRecognizer(debugOwner: debugOwner) {
+    _slidingTap
+      ..onDown = _onDown
+      ..onResponsiveUpdate = _onUpdate
+      ..onResponsiveEnd = _onEnd
+      ..onCancel = _onCancel;
+  }
+
+  final _HitTester hitTest;
+
+  final List<_ActionSheetSlideTarget> _currentTargets = <_ActionSheetSlideTarget>[];
+  final _SlidingTapGestureRecognizer _slidingTap;
+
+  @override
+  void acceptGesture(int pointer) {
+    _slidingTap.acceptGesture(pointer);
+  }
+
+  @override
+  void rejectGesture(int pointer) {
+    _slidingTap.rejectGesture(pointer);
+  }
+
+  @override
+  void addPointer(PointerDownEvent event) {
+    _slidingTap.addPointer(event);
+  }
+
+  @override
+  void addPointerPanZoom(PointerPanZoomStartEvent event) {
+    _slidingTap.addPointerPanZoom(event);
+  }
+
+  @override
+  void dispose() {
+    _slidingTap.dispose();
+    super.dispose();
+  }
+
+  // Collect the `_ActionSheetSlideTarget`s that are currently hit by the
+  // pointer, check whether the current target have changed, and invoke their
+  // methods if necessary.
+  void _updateDrag(Offset pointerPosition) {
+    final HitTestResult result = hitTest(pointerPosition);
+
+    // A slide target might nest other targets, therefore multiple targets might
+    // be found.
+    final List<_ActionSheetSlideTarget> foundTargets = <_ActionSheetSlideTarget>[];
+    for (final HitTestEntry entry in result.path) {
+      if (entry.target case final RenderMetaData target) {
+        if (target.metaData is _ActionSheetSlideTarget) {
+          foundTargets.add(target.metaData as _ActionSheetSlideTarget);
+        }
+      }
+    }
+
+    // Compare whether the active target has changed by simply comparing the
+    // first (inner-most) avatar of the nest, ignoring the cases where
+    // _currentTargets intersect with foundTargets (see _ActionSheetSlideTarget's
+    // document for more explanation).
+    if (_currentTargets.firstOrNull != foundTargets.firstOrNull) {
+      for (final _ActionSheetSlideTarget target in _currentTargets) {
+        target.didLeave();
+      }
+      _currentTargets
+        ..clear()
+        ..addAll(foundTargets);
+      for (final _ActionSheetSlideTarget target in _currentTargets) {
+        target.didEnter();
+      }
+    }
+  }
+
+  void _onDown(DragDownDetails details) {
+    _updateDrag(details.globalPosition);
+  }
+
+  void _onUpdate(Offset globalPosition) {
+    _updateDrag(globalPosition);
+  }
+
+  void _onEnd(Offset globalPosition) {
+    _updateDrag(globalPosition);
+    for (final _ActionSheetSlideTarget target in _currentTargets) {
+      target.didConfirm();
+    }
+    _currentTargets.clear();
+  }
+
+  void _onCancel() {
+    for (final _ActionSheetSlideTarget target in _currentTargets) {
+      target.didLeave();
+    }
+    _currentTargets.clear();
+  }
+
+  @override
+  String get debugDescription => 'target selection';
+}
+
+// The gesture detector used by action sheets.
+//
+// This gesture detector only recognizes one gesture,
+// `_TargetSelectionGestureRecognizer`.
+//
+// This widget's child might contain another VerticalDragGestureRecognizer if
+// the actions section or the content section scrolls. Conveniently, Flutter's
+// gesture algorithm makes the inner gesture take priority.
+class _ActionSheetGestureDetector extends StatelessWidget {
+  const _ActionSheetGestureDetector({
+    this.child,
+  });
+
+  final Widget? child;
+
+  HitTestResult _hitTest(BuildContext context, Offset globalPosition) {
+    final int viewId = View.of(context).viewId;
+    final HitTestResult result = HitTestResult();
+    WidgetsBinding.instance.hitTestInView(result, globalPosition, viewId);
+    return result;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final Map<Type, GestureRecognizerFactory> gestures = <Type, GestureRecognizerFactory>{};
+    gestures[_TargetSelectionGestureRecognizer] = GestureRecognizerFactoryWithHandlers<_TargetSelectionGestureRecognizer>(
+      () => _TargetSelectionGestureRecognizer(
+        debugOwner: this,
+        hitTest: (Offset globalPosition) => _hitTest(context, globalPosition),
+      ),
+      (_TargetSelectionGestureRecognizer instance) {}
+    );
+
+    return RawGestureDetector(
+      excludeFromSemantics: true,
+      gestures: gestures,
+      child: child,
+    );
+  }
+}
+
 /// An iOS-style action sheet.
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=U-ao8p4A82k}
@@ -518,7 +812,7 @@ class CupertinoActionSheet extends StatefulWidget {
 
   /// The set of actions that are displayed for the user to select.
   ///
-  /// Typically this is a list of [CupertinoActionSheetAction] widgets.
+  /// This must be a list of [CupertinoActionSheetAction] widgets.
   final List<Widget>? actions;
 
   /// A scroll controller that can be used to control the scrolling of the
@@ -537,7 +831,7 @@ class CupertinoActionSheet extends StatefulWidget {
   /// The optional cancel button that is grouped separately from the other
   /// actions.
   ///
-  /// Typically this is an [CupertinoActionSheetAction] widget.
+  /// This must be a [CupertinoActionSheetAction] widget.
   final Widget? cancelButton;
 
   @override
@@ -566,6 +860,9 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
 
   Widget _buildContent(BuildContext context) {
     final List<Widget> content = <Widget>[];
+    final TextStyle textStyle = _kActionSheetContentStyle.copyWith(
+      color: CupertinoDynamicColor.resolve(_kActionSheetContentTextColor, context),
+    );
     if (hasContent) {
       final Widget titleSection = _CupertinoAlertContentSection(
         title: widget.title,
@@ -584,11 +881,11 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
           top: widget.title == null ? _kActionSheetContentVerticalPadding : 0.0,
         ),
         titleTextStyle: widget.message == null
-            ? _kActionSheetContentStyle
-            : _kActionSheetContentStyle.copyWith(fontWeight: FontWeight.w600),
+            ? textStyle
+            : textStyle.copyWith(fontWeight: FontWeight.w600),
         messageTextStyle: widget.title == null
-            ? _kActionSheetContentStyle.copyWith(fontWeight: FontWeight.w600)
-            : _kActionSheetContentStyle,
+            ? textStyle.copyWith(fontWeight: FontWeight.w600)
+            : textStyle,
         additionalPaddingBetweenTitleAndMessage: const EdgeInsets.only(top: 4.0),
       );
       content.add(Flexible(child: titleSection));
@@ -633,7 +930,7 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
               hasContent: hasContent,
               contentSection: Builder(builder: _buildContent),
               actions: widget.actions,
-              dividerColor: _kActionSheetButtonDividerColor,
+              dividerColor: CupertinoDynamicColor.resolve(_kActionSheetButtonDividerColor, context),
             ),
           ),
         ),
@@ -663,10 +960,16 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
               ),
               child: SizedBox(
                 width: actionSheetWidth - _kActionSheetEdgeHorizontalPadding * 2,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: children,
+                child: _ActionSheetGestureDetector(
+                  child: Semantics(
+                    explicitChildNodes: true,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: children,
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -686,7 +989,7 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
 ///
 ///  * [CupertinoActionSheet], an alert that presents the user with a set of two or
 ///    more choices related to the current context.
-class CupertinoActionSheetAction extends StatelessWidget {
+class CupertinoActionSheetAction extends StatefulWidget {
   /// Creates an action for an iOS-style action sheet.
   const CupertinoActionSheetAction({
     super.key,
@@ -696,7 +999,10 @@ class CupertinoActionSheetAction extends StatelessWidget {
     required this.child,
   });
 
-  /// The callback that is called when the button is tapped.
+  /// The callback that is called when the button is selected.
+  ///
+  /// The button can be selected by either by tapping on this button or by
+  /// pressing elsewhere and sliding onto this button before releasing.
   final VoidCallback onPressed;
 
   /// Whether this action is the default choice in the action sheet.
@@ -715,21 +1021,41 @@ class CupertinoActionSheetAction extends StatelessWidget {
   final Widget child;
 
   @override
+  State<CupertinoActionSheetAction> createState() => _CupertinoActionSheetActionState();
+}
+
+class _CupertinoActionSheetActionState extends State<CupertinoActionSheetAction>
+    implements _ActionSheetSlideTarget {
+  // |_ActionSheetSlideTarget|
+  @override
+  void didEnter() {}
+
+  // |_ActionSheetSlideTarget|
+  @override
+  void didLeave() {}
+
+  // |_ActionSheetSlideTarget|
+  @override
+  void didConfirm() {
+    widget.onPressed();
+  }
+
+  @override
   Widget build(BuildContext context) {
     TextStyle style = _kActionSheetActionStyle.copyWith(
-      color: isDestructiveAction
+      color: widget.isDestructiveAction
           ? CupertinoDynamicColor.resolve(CupertinoColors.systemRed, context)
           : CupertinoTheme.of(context).primaryColor,
     );
 
-    if (isDefaultAction) {
+    if (widget.isDefaultAction) {
       style = style.copyWith(fontWeight: FontWeight.w600);
     }
 
     return MouseRegion(
       cursor: kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
-      child: GestureDetector(
-        onTap: onPressed,
+      child: MetaData(
+        metaData: this,
         behavior: HitTestBehavior.opaque,
         child: ConstrainedBox(
           constraints: const BoxConstraints(
@@ -737,6 +1063,7 @@ class CupertinoActionSheetAction extends StatelessWidget {
           ),
           child: Semantics(
             button: true,
+            onTap: widget.onPressed,
             child: Padding(
               padding: const EdgeInsets.symmetric(
                 vertical: 16.0,
@@ -745,7 +1072,7 @@ class CupertinoActionSheetAction extends StatelessWidget {
               child: DefaultTextStyle(
                 style: style,
                 textAlign: TextAlign.center,
-                child: Center(child: child),
+                child: Center(child: widget.child),
               ),
             ),
           ),
@@ -780,20 +1107,26 @@ class _ActionSheetButtonBackground extends StatefulWidget {
   _ActionSheetButtonBackgroundState createState() => _ActionSheetButtonBackgroundState();
 }
 
-class _ActionSheetButtonBackgroundState extends State<_ActionSheetButtonBackground> {
+class _ActionSheetButtonBackgroundState extends State<_ActionSheetButtonBackground> implements _ActionSheetSlideTarget {
   bool isBeingPressed = false;
 
-  void _onTapDown(TapDownDetails event) {
+  // |_ActionSheetSlideTarget|
+  @override
+  void didEnter() {
     setState(() { isBeingPressed = true; });
     widget.onPressStateChange?.call(true);
   }
 
-  void _onTapUp(TapUpDetails event) {
+  // |_ActionSheetSlideTarget|
+  @override
+  void didLeave() {
     setState(() { isBeingPressed = false; });
     widget.onPressStateChange?.call(false);
   }
 
-  void _onTapCancel() {
+  // |_ActionSheetSlideTarget|
+  @override
+  void didConfirm() {
     setState(() { isBeingPressed = false; });
     widget.onPressStateChange?.call(false);
   }
@@ -804,22 +1137,19 @@ class _ActionSheetButtonBackgroundState extends State<_ActionSheetButtonBackgrou
     BorderRadius? borderRadius;
     if (!widget.isCancel) {
       backgroundColor = isBeingPressed
-        ? _kPressedColor
-        : CupertinoDynamicColor.resolve(_kActionSheetBackgroundColor, context);
+        ? _kActionSheetPressedColor
+        : _kActionSheetBackgroundColor;
     } else {
       backgroundColor = isBeingPressed
-          ? _kActionSheetCancelPressedColor
-        : CupertinoColors.secondarySystemGroupedBackground;
+        ? _kActionSheetCancelPressedColor
+        : _kActionSheetCancelColor;
       borderRadius = const BorderRadius.all(Radius.circular(_kCornerRadius));
     }
-    return GestureDetector(
-      excludeFromSemantics: true,
-      onTapDown: _onTapDown,
-      onTapUp: _onTapUp,
-      onTapCancel: _onTapCancel,
+    return MetaData(
+      metaData: this,
       child: Container(
         decoration: BoxDecoration(
-          color: backgroundColor,
+          color: CupertinoDynamicColor.resolve(backgroundColor, context),
           borderRadius: borderRadius,
         ),
         child: widget.child,
@@ -1961,7 +2291,7 @@ class _CupertinoDialogActionsRenderWidget extends MultiChildRenderObjectWidget {
               : _kCupertinoDialogWidth,
       dividerThickness: _dividerThickness,
       dialogColor: CupertinoDynamicColor.resolve(_kDialogColor, context),
-      dialogPressedColor: CupertinoDynamicColor.resolve(_kPressedColor, context),
+      dialogPressedColor: CupertinoDynamicColor.resolve(_kDialogPressedColor, context),
       dividerColor: CupertinoDynamicColor.resolve(CupertinoColors.separator, context),
       hasCancelButton: _hasCancelButton,
     );
@@ -1975,7 +2305,7 @@ class _CupertinoDialogActionsRenderWidget extends MultiChildRenderObjectWidget {
             : _kCupertinoDialogWidth
       ..dividerThickness = _dividerThickness
       ..dialogColor = CupertinoDynamicColor.resolve(_kDialogColor, context)
-      ..dialogPressedColor = CupertinoDynamicColor.resolve(_kPressedColor, context)
+      ..dialogPressedColor = CupertinoDynamicColor.resolve(_kDialogPressedColor, context)
       ..dividerColor = CupertinoDynamicColor.resolve(CupertinoColors.separator, context)
       ..hasCancelButton = _hasCancelButton;
   }
