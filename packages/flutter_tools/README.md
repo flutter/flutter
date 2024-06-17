@@ -7,7 +7,7 @@ for building Flutter applications.
 
 Be sure to follow the instructions on [CONTRIBUTING.md](../../CONTRIBUTING.md)
 to set up your development environment. Further, familiarize yourself with the
-[style guide](https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo),
+[style guide](../../docs/contributing/Style-guide-for-Flutter-repo.md),
 which we follow.
 
 ### Setting up
@@ -36,8 +36,8 @@ $ flutter analyze
 
 ### Writing tests
 
-As with other parts of the Flutter repository, all changes in behavior [must be
-tested](https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#write-test-find-bug).
+As with other parts of the Flutter repository, all changes in behavior
+[must be tested](../../docs/contributing/Style-guide-for-Flutter-repo.md#write-test-find-bug).
 Tests live under the `test/` subdirectory.
 
 - Hermetic unit tests of tool internals go under `test/general.shard`

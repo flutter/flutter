@@ -41,7 +41,7 @@ If the Flutter build is broken due to a golden file test failure, this typically
   Visit https://flutter-gold.skia.org/ to view and approve
   the image(s), or revert the associated change. For more
   information, visit the wiki:
-  https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package:flutter
+  https://github.com/flutter/flutter/blob/main/docs/contributing/testing/Writing-a-golden-file-test-for-package-flutter.md
 ```
 
 To resolve, visit the [Flutter Gold dashboard](https://flutter-gold.skia.org/) to view the batch of images in question. If they are intended changes, approve them by clicking the checkmark, and re-run the failing test to resolve. If the image changes are not intended, revert the associated change.

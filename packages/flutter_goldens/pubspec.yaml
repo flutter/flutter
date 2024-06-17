@@ -7,7 +7,7 @@ dependencies:
   # To update these, use "flutter update-packages --force-upgrade".
   #
   # For detailed instructions, refer to:
-  # https://github.com/flutter/flutter/wiki/Updating-dependencies-in-Flutter
+  # https://github.com/flutter/flutter/blob/main/docs/infra/Updating-dependencies-in-Flutter.md
   flutter:
     sdk: flutter
   flutter_test:
