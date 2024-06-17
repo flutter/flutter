@@ -111,6 +111,9 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
               'Instructions for connecting with a debugger are printed to the '
               'console once the test has started.',
       )
+      ..addFlag('fail-fast',
+        help: 'Stop running tests after the first failure.',
+      )
       ..addFlag('run-skipped',
         help: 'Run skipped tests instead of skipping them.',
       )
@@ -578,6 +581,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         reporter: stringArg('reporter'),
         fileReporter: stringArg('file-reporter'),
         timeout: stringArg('timeout'),
+        failFast: boolArg('fail-fast'),
         runSkipped: boolArg('run-skipped'),
         shardIndex: shardIndex,
         totalShards: totalShards,
@@ -605,6 +609,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         reporter: stringArg('reporter'),
         fileReporter: stringArg('file-reporter'),
         timeout: stringArg('timeout'),
+        failFast: boolArg('fail-fast'),
         runSkipped: boolArg('run-skipped'),
         shardIndex: shardIndex,
         totalShards: totalShards,
