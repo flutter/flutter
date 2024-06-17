@@ -1094,9 +1094,9 @@ void main() {
         ),
     );
 
-    // Try to drag the thumb into overscroll with the mouse.
+    // Try to drag the thumb into overscroll.
     const double scrollAmount = -10.0;
-    final TestGesture dragScrollbarGesture = await tester.startGesture(const Offset(797.0, 45.0), kind: PointerDeviceKind.mouse);
+    final TestGesture dragScrollbarGesture = await tester.startGesture(const Offset(797.0, 45.0));
     await tester.pumpAndSettle();
     await dragScrollbarGesture.moveBy(const Offset(0.0, scrollAmount));
     await tester.pumpAndSettle();
@@ -3041,7 +3041,7 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
 
     // Try flinging downward. The flingFrom() method generates 50 moves of about 2
     // pixels and then a fling with the indicated velocity.
-    await tester.flingFrom(const Offset(797.0, 45.0), const Offset(0, 60.0), 500.0, deviceKind: PointerDeviceKind.mouse);
+    await tester.flingFrom(const Offset(797.0, 45.0), const Offset(0, 60.0), 500.0);
     await tester.pumpAndSettle();
 
     if (isMobilePlatform()) {
@@ -3061,7 +3061,7 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
     expect(scrollController.offset, 400.0);
 
     // Try flinging upward.
-    await tester.flingFrom(const Offset(797.0, 545.0), const Offset(0, -60), 500.0, deviceKind: PointerDeviceKind.mouse);
+    await tester.flingFrom(const Offset(797.0, 545.0), const Offset(0, -60), 500.0);
     await tester.pumpAndSettle();
     if (isMobilePlatform()) {
       expect(scrollController.offset, lessThan(300.0), reason: 'Ballistic scroll expected on $debugDefaultTargetPlatformOverride');
@@ -3081,7 +3081,7 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
     expect(scrollController.offset, 0.0);
 
     // Try flinging upward.
-    await tester.flingFrom(const Offset(797.0, 545.0), const Offset(0, -60), 500.0, deviceKind: PointerDeviceKind.mouse);
+    await tester.flingFrom(const Offset(797.0, 545.0), const Offset(0, -60), 500.0);
     await tester.pumpAndSettle();
     if (isMobilePlatform()) {
       expect(scrollController.offset, greaterThan(100.0), reason: 'Ballistic scroll expected on $debugDefaultTargetPlatformOverride');
@@ -3095,7 +3095,7 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
     expect(scrollController.offset, 400.0);
 
     // Try flinging downward.
-    await tester.flingFrom(const Offset(797.0, 45.0), const Offset(0, 60.0), 500.0, deviceKind: PointerDeviceKind.mouse);
+    await tester.flingFrom(const Offset(797.0, 45.0), const Offset(0, 60.0), 500.0);
     await tester.pumpAndSettle();
     if (isMobilePlatform()) {
       expect(scrollController.offset, lessThan(300.0), reason: 'Ballistic scroll expected on $debugDefaultTargetPlatformOverride');
@@ -3167,7 +3167,7 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
     expect(scrollController.offset, 200.0);
 
     // Try flinging to the left.
-    await tester.flingFrom(const Offset(794.0, 597.0), const Offset(-80, 0), 500.0, deviceKind: PointerDeviceKind.mouse);
+    await tester.flingFrom(const Offset(794.0, 597.0), const Offset(-80, 0), 500.0);
     await tester.pumpAndSettle();
     if (isMobilePlatform()) {
       expect(scrollController.offset, lessThan(100.0), reason: 'Ballistic scroll expected on $debugDefaultTargetPlatformOverride');
@@ -3187,7 +3187,7 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
     expect(scrollController.offset, 0.0);
 
     // Try flinging to the left.
-    await tester.flingFrom(const Offset(794.0, 597.0), const Offset(-80, 0), 500.0, deviceKind: PointerDeviceKind.mouse);
+    await tester.flingFrom(const Offset(794.0, 597.0), const Offset(-80, 0), 500.0);
     await tester.pumpAndSettle();
     if (isMobilePlatform()) {
       expect(scrollController.offset, greaterThan(100.0), reason: 'Ballistic scroll expected on $debugDefaultTargetPlatformOverride');
@@ -3201,7 +3201,7 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
     expect(scrollController.offset, 200.0);
 
     // Try flinging to the right.
-    await tester.flingFrom(const Offset(6.0, 597.0), const Offset(80, 0), 500.0, deviceKind: PointerDeviceKind.mouse);
+    await tester.flingFrom(const Offset(6.0, 597.0), const Offset(80, 0), 500.0);
     await tester.pumpAndSettle();
 
     if (isMobilePlatform()) {

@@ -1324,7 +1324,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   final GlobalKey  _scrollbarPainterKey = GlobalKey();
   bool _hoverIsActive = false;
   Drag? _thumbDrag;
-  PointerDeviceKind? _thumbDragStartKind;
+  bool _thumbDragStartedOnThumb = false;
   ScrollHoldController? _thumbHold;
   Axis? _axis;
   final GlobalKey<RawGestureDetectorState> _gestureDetectorKey = GlobalKey<RawGestureDetectorState>();
@@ -1616,10 +1616,14 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
         primaryDeltaFromLastDragUpdate = _lastDragUpdateOffset!.dx - localPosition.dx;
     }
 
-    // Convert primaryDelta, the amount that the scrollbar moved since the last
-    // time when drag started or last updated, into the coordinate space of the scroll
-    // position.
-    double scrollOffsetGlobal = scrollbarPainter.getTrackToScroll(primaryDeltaFromDragStart + _startDragThumbOffset!);
+    // If we're actually dragging the scrollbar thumb then Convert
+    // primaryDelta, the amount that the scrollbar moved since the
+    // last time when drag started or last updated, into the
+    // coordinate space of the scroll position.
+    double scrollOffsetGlobal = thumbDragStartedOnThumb
+      ? scrollbarPainter.getTrackToScroll(primaryDeltaFromDragStart + _startDragThumbOffset!)
+      : primaryDeltaFromDragStart + _startDragThumbOffset!;
+
     if (primaryDeltaFromDragStart > 0 && scrollOffsetGlobal < position.pixels
         || primaryDeltaFromDragStart < 0 && scrollOffsetGlobal > position.pixels) {
       // Adjust the position value if the scrolling direction conflicts with
@@ -1636,12 +1640,13 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       final TargetPlatform platform = ScrollConfiguration.of(context).getPlatform(context);
       switch (platform) {
         // Only disallow desktop overscroll if the drag was initiated by the
-        // mouse - presumably by dragging the scrollbar's thumb.
+        // by actually dragging the scrollbar's thumb. If, for example, the drag
+        // was initiated by the trackpad, overscrolling is OK.
         case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
         case TargetPlatform.macOS:
         case TargetPlatform.windows:
-          if (!_thumbDragCanOverscroll) {
+          if (_thumbDragStartedOnThumb) {
             newPosition = clampDouble(newPosition, position.minScrollExtent, position.maxScrollExtent);
           }
         case TargetPlatform.iOS:
@@ -1780,7 +1785,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
         -velocity,
         velocityInScrollbarDirection(),
       ),
-      TargetPlatform.linux || TargetPlatform.macOS || TargetPlatform.windows when _thumbDragCanOverscroll => (
+      TargetPlatform.linux || TargetPlatform.macOS || TargetPlatform.windows when !thumbDragStartedOnThumb => (
         -velocity,
         velocityInScrollbarDirection(),
       ),
@@ -1868,6 +1873,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   }
 
   bool _handleScrollMetricsNotification(ScrollMetricsNotification notification) {
+
     if (!widget.notificationPredicate(notification.asScrollUpdate())) {
       return false;
     }
@@ -1939,25 +1945,27 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     return renderBox.globalToLocal(offset);
   }
 
-  /// The type of pointer that initiated the drag reported by [handleThumbPressStart].
+  /// A "thumb drag" gesture can be started by dragging the thumb directly, or with a
+  /// scroll gesture on the trackpad, or by dragging the scrollable on a touch screen.
   ///
   /// Used by [handleThumbPressUpdate] to decide if overscrolling is acceptable
   /// and by [handleThumbPressEnd] to decide the event's remaining velocity
   /// should be applied to a fling.
   @protected
-  PointerDeviceKind? get thumbDragStartKind => _thumbDragStartKind;
-
-  bool get _thumbDragCanOverscroll {
-    return switch (thumbDragStartKind) {
-      null || PointerDeviceKind.mouse || PointerDeviceKind.unknown => false,
-      _ => true,
-    };
-  }
+  bool get thumbDragStartedOnThumb => _thumbDragStartedOnThumb;
 
 
   void _handleThumbDragStart(DragStartDetails details) {
-    _thumbDragStartKind = details.kind;
-    handleThumbPressStart(_globalToScrollbar(details.globalPosition));
+    final Offset localOffset = _globalToScrollbar(details.globalPosition);
+    _thumbDragStartedOnThumb = false;
+    if (_scrollbarPainterKey.currentContext != null) {
+      final CustomPaint customPaint = _scrollbarPainterKey.currentContext!.widget as CustomPaint;
+      final ScrollbarPainter? painter = customPaint.foregroundPainter as ScrollbarPainter?;
+      if (painter != null && details.kind != null) {
+        _thumbDragStartedOnThumb = painter.hitTestOnlyThumbInteractive(localOffset, details.kind!);
+      }
+    }
+    handleThumbPressStart(localOffset);
   }
 
   void _handleThumbDragUpdate(DragUpdateDetails details) {
@@ -1966,11 +1974,9 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
 
   void _handleThumbDragEnd(DragEndDetails details) {
     handleThumbPressEnd(_globalToScrollbar(details.globalPosition), details.velocity);
-    _thumbDragStartKind = null;
   }
 
   void _handleThumbDragCancel() {
-    _thumbDragStartKind = null;
     if (_gestureDetectorKey.currentContext == null) {
       // The cancel was caused by the GestureDetector getting disposed, which
       // means we will get disposed momentarily as well and shouldn't do
