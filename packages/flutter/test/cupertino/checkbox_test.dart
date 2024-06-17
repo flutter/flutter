@@ -468,10 +468,10 @@ void main() {
 
   testWidgets('Checkbox default shadows, colors, and size', (WidgetTester tester) async {
     const Color enabledCheckColor = Color(0xffffffff);
-    const Color disabledCheckColor = Color(0xff000000);
+    const Color disabledCheckColor = Color(0xffacacac);
     const Color inactiveFillColor = Color(0xffffffff);
     const Color activeFillColor = Color(0xff007aff);
-    const Color disabledFillColor = Color(0xffffffff);
+    const Color disabledFillColor = Color(0x80ffffff);
     const Color activeBorderColor = Color(0x00000000);
     const Color inactiveBorderColor = Color(0xffd1d1d6);
 

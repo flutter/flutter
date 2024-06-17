@@ -18,6 +18,15 @@ const double _kCupertinoFocusColorOpacity = 0.80;
 const double _kCupertinoFocusColorBrightness = 0.69;
 const double _kCupertinoFocusColorSaturation = 0.835;
 
+// Eyeballed from Apple's Design Resources (macOS) template.
+const Color _kDisabledCheckColor =Color.fromARGB(255, 172, 172, 172);
+
+// Eyeballed from a checkbox on a physical Macbook Pro running macOS version 14.5.
+const CupertinoDynamicColor _kDefaultFillColor = CupertinoDynamicColor.withBrightness(
+    color: CupertinoColors.white,
+    darkColor: Color.fromARGB(255, 87, 87, 87),
+  );
+
 /// A macOS style checkbox.
 ///
 /// The checkbox itself does not maintain any state. Instead, when the state of
@@ -151,7 +160,7 @@ class CupertinoCheckbox extends StatefulWidget {
 
   /// The color used if the checkbox is inactive.
   ///
-  /// By default, [CupertinoColors.inactiveGray] is used.
+  /// By default, [CupertinoColors.white] with an opacity of 0.5 is used.
   ///
   /// If [fillColor] returns a non-null color in the [WidgetState.disabled]
   /// state, it will be used instead of this color.
@@ -167,7 +176,7 @@ class CupertinoCheckbox extends StatefulWidget {
   ///
   /// {@tool snippet}
   /// This example resolves the [fillColor] based on the current [WidgetState]
-  /// of the [Checkbox], providing a different [Color] when it is
+  /// of the [CupertinoCheckbox], providing a different [Color] when it is
   /// [WidgetState.disabled].
   ///
   /// ```dart
@@ -190,7 +199,8 @@ class CupertinoCheckbox extends StatefulWidget {
 
   /// The color to use for the check icon when this checkbox is checked.
   ///
-  /// If null, then the value of [CupertinoColors.white] is used.
+  /// If null, then the value of [CupertinoColors.white] is used if the checkbox
+  /// is enabled. If the checkbox is disabled, a grey-black color is used.
   final Color? checkColor;
 
   /// If true, the checkbox's [value] can be true, false, or null.
@@ -250,7 +260,7 @@ class CupertinoCheckbox extends StatefulWidget {
   /// The color of the dropshadow from the top edge of the checkbox.
   ///
   /// From measuring the composition of the dropshadow in HIG checkbox examples,
-  /// the checkbox was found to have a slight dropshadow with three layers, each
+  /// the checkbox was found to have a slight dropshadow with two layers, each
   /// one pixel long, starting from the top edge.
   /// {@endtemplate}
   ///
@@ -319,19 +329,19 @@ class _CupertinoCheckboxState extends State<CupertinoCheckbox> with TickerProvid
   WidgetStateProperty<Color> get _widgetFillColor {
     return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
       if (states.contains(WidgetState.disabled)) {
-        return widget.inactiveColor ?? CupertinoColors.white;
+        return widget.inactiveColor ?? CupertinoColors.white.withOpacity(0.5);
       }
       if (states.contains(WidgetState.selected)) {
         return widget.activeColor ?? CupertinoColors.activeBlue;
       }
-      return CupertinoColors.white;
+      return _kDefaultFillColor;
     });
   }
 
   WidgetStateProperty<Color> get _widgetCheckColor {
     return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
       if (states.contains(WidgetState.disabled) && states.contains(WidgetState.selected)) {
-        return widget.checkColor ?? CupertinoColors.black;
+        return widget.checkColor ?? _kDisabledCheckColor;
      }
       if (states.contains(WidgetState.selected)) {
         return widget.checkColor ?? CupertinoColors.white;
@@ -525,9 +535,9 @@ class _CheckboxPainter extends ToggleablePainter {
       canvas.clipPath(shape.getOuterPath(outer));
       canvas.drawPath(shape.getOuterPath(outer), paint);
 
-      // The drop shadow has three layers.
+      // The drop shadow has two layers.
       final Rect shadowRect = Rect.fromLTRB(
-        outer.left, outer.top, outer.right, outer.top + 3);
+        outer.left, outer.top, outer.right, outer.top + 2);
       final LinearGradient topEdgeGradient = LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
