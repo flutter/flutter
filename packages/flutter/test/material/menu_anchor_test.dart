@@ -3811,37 +3811,41 @@ void main() {
         MaterialApp(
           home: MenuAnchor(
             controller: controller,
-            menuChildren: const [
+            menuChildren: const <Widget>[
               SubmenuButton(
-                menuChildren: [],
+                menuChildren: <Widget>[],
                 child: Text(''),
               )
-            ]
+            ],
           ),
         ),
       );
-  
+
       controller.open();
       await tester.pump();
-  
-      WeakReference? state = WeakReference(tester.firstState(find.byType(SubmenuButton)));
+
+      final WeakReference<State> state =
+        WeakReference<State>(
+          tester.firstState<State<SubmenuButton>>(
+            find.byType(SubmenuButton),
+          ),
+        );
       expect(state.target, isNotNull);
-  
+
       controller.close();
       await tester.pump();
-  
+
       controller.open();
       await tester.pump();
-  
+
       controller.close();
       await tester.pump();
-  
+
       // Garbage collect
       await tester.runAsync(forceGC);
-  
+
       expect(state.target, isNull);
-    }, 
-    skip: kIsWeb  // ForceGC does not work in web and in release mode.
+    }, skip: kIsWeb // [intended] ForceGC does not work in web and in release mode. See https://api.flutter.dev/flutter/package-leak_tracker_leak_tracker/forceGC.html
   );
 }
 
