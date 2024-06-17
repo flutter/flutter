@@ -479,7 +479,7 @@ dev_dependencies:
       expect(fakePackageTest.lastArgs, contains(passValue ?? value));
     }
 
-    testUsingContext('pass values through', () async {
+    testUsingContext('passes various CLI options through to package:test', () async {
       await expectPassesArgument('--start-paused', '--pause-after-load');
       await expectPassesArgument('--fail-fast');
       await expectPassesArgument('--run-skipped');
