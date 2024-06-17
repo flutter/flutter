@@ -43,6 +43,7 @@ class DlOpRecorder final : public virtual DlOpReceiver,
                            private IgnoreTransformDispatchHelper {
  public:
   int lineCount() const { return lines_.size(); }
+  int dashedLineCount() const { return dashed_lines_.size(); }
   int rectCount() const { return rects_.size(); }
   int pathCount() const { return paths_.size(); }
   int textFrameCount() const { return text_frames_.size(); }
@@ -52,6 +53,13 @@ class DlOpRecorder final : public virtual DlOpReceiver,
  private:
   void drawLine(const SkPoint& p0, const SkPoint& p1) override {
     lines_.emplace_back(p0, p1);
+  }
+
+  void drawDashedLine(const DlPoint& p0,
+                      const DlPoint& p1,
+                      DlScalar on_length,
+                      DlScalar off_length) override {
+    dashed_lines_.emplace_back(p0, p1, DlPoint(on_length, off_length));
   }
 
   void drawTextFrame(const std::shared_ptr<impeller::TextFrame>& text_frame,
@@ -77,6 +85,7 @@ class DlOpRecorder final : public virtual DlOpReceiver,
   std::vector<std::shared_ptr<impeller::TextFrame>> text_frames_;
   std::vector<sk_sp<SkTextBlob>> blobs_;
   std::vector<std::pair<SkPoint, SkPoint>> lines_;
+  std::vector<std::tuple<DlPoint, DlPoint, DlPoint>> dashed_lines_;
   std::vector<SkRect> rects_;
   std::vector<SkPath> paths_;
   const DlPathEffect* path_effect_;
@@ -201,8 +210,9 @@ TEST_F(PainterTest, DrawDashedLineSkia) {
       ->Dispatch(recorder);
 
   // Skia draws a dashed underline as a filled rectangle with a path effect.
-  EXPECT_EQ(recorder.lineCount(), 1);
-  EXPECT_TRUE(recorder.hasPathEffect());
+  EXPECT_EQ(recorder.lineCount(), 0);
+  EXPECT_EQ(recorder.dashedLineCount(), 1);
+  EXPECT_FALSE(recorder.hasPathEffect());
 }
 
 #ifdef IMPELLER_SUPPORTS_RENDERING
@@ -227,7 +237,8 @@ TEST_F(PainterTest, DrawDashedLineImpeller) {
       ->Dispatch(recorder);
 
   // Impeller draws a dashed underline as a path.
-  EXPECT_EQ(recorder.pathCount(), 1);
+  EXPECT_EQ(recorder.pathCount(), 0);
+  EXPECT_EQ(recorder.dashedLineCount(), 1);
   EXPECT_FALSE(recorder.hasPathEffect());
 }
 

@@ -152,6 +152,15 @@ void DlSkCanvasDispatcher::drawColor(DlColor color, DlBlendMode mode) {
 void DlSkCanvasDispatcher::drawLine(const SkPoint& p0, const SkPoint& p1) {
   canvas_->drawLine(p0, p1, paint());
 }
+void DlSkCanvasDispatcher::drawDashedLine(const DlPoint& p0,
+                                          const DlPoint& p1,
+                                          DlScalar on_length,
+                                          DlScalar off_length) {
+  SkPaint dash_paint = paint();
+  SkScalar intervals[] = {on_length, off_length};
+  dash_paint.setPathEffect(SkDashPathEffect::Make(intervals, 2, 0.0f));
+  canvas_->drawLine(ToSkPoint(p0), ToSkPoint(p1), dash_paint);
+}
 void DlSkCanvasDispatcher::drawRect(const SkRect& rect) {
   canvas_->drawRect(rect, paint());
 }

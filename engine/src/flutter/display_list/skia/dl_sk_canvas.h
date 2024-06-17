@@ -94,6 +94,11 @@ class DlSkCanvasAdapter final : public virtual DlCanvas {
   void DrawLine(const SkPoint& p0,
                 const SkPoint& p1,
                 const DlPaint& paint) override;
+  void DrawDashedLine(const DlPoint& p0,
+                      const DlPoint& p1,
+                      DlScalar on_length,
+                      DlScalar off_length,
+                      const DlPaint& paint) override;
   void DrawRect(const SkRect& rect, const DlPaint& paint) override;
   void DrawOval(const SkRect& bounds, const DlPaint& paint) override;
   void DrawCircle(const SkPoint& center,

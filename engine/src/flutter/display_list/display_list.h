@@ -111,6 +111,7 @@ namespace flutter {
   V(DrawColor)                      \
                                     \
   V(DrawLine)                       \
+  V(DrawDashedLine)                 \
   V(DrawRect)                       \
   V(DrawOval)                       \
   V(DrawCircle)                     \

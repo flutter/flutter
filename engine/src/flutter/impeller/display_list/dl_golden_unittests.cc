@@ -11,9 +11,11 @@
 namespace flutter {
 namespace testing {
 
+using impeller::Degrees;
 using impeller::PlaygroundBackend;
 using impeller::PlaygroundTest;
 using impeller::Point;
+using impeller::Radians;
 using impeller::Scalar;
 
 INSTANTIATE_PLAYGROUND_SUITE(DlGoldenTest);
@@ -171,6 +173,66 @@ TEST_P(DlGoldenTest, GaussianVsRRectBlurScaledRotated) {
     canvas->Rotate(45);
     canvas->Translate(-300, -300);
     DrawBlurGrid(canvas);
+  };
+
+  DisplayListBuilder builder;
+  std::vector<sk_sp<DlImage>> images;
+  draw(&builder, images);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(DlGoldenTest, DashedLinesTest) {
+  Point content_scale = GetContentScale();
+  auto draw = [content_scale](DlCanvas* canvas,
+                              const std::vector<sk_sp<DlImage>>& images) {
+    canvas->Scale(content_scale.x, content_scale.y);
+    canvas->DrawPaint(DlPaint().setColor(DlColor::kWhite()));
+
+    auto draw_one = [canvas](DlStrokeCap cap, Scalar x, Scalar y,
+                             Scalar dash_on, Scalar dash_off) {
+      Point center = Point(x, y);
+      Scalar inner = 20.0f;
+      Scalar outer = 100.0f;
+      DlPaint thick_paint = DlPaint()
+                                .setColor(DlColor::kBlue())
+                                .setStrokeCap(cap)
+                                .setStrokeWidth(8.0f);
+      DlPaint middle_paint = DlPaint()
+                                 .setColor(DlColor::kGreen())
+                                 .setStrokeCap(cap)
+                                 .setStrokeWidth(5.0f);
+      DlPaint thin_paint = DlPaint()
+                               .setColor(DlColor::kMagenta())
+                               .setStrokeCap(cap)
+                               .setStrokeWidth(2.0f);
+      for (int degrees = 0; degrees < 360; degrees += 30) {
+        Point delta = Point(1.0f, 0.0f).Rotate(Degrees(degrees));
+        canvas->DrawDashedLine(center + inner * delta, center + outer * delta,
+                               dash_on, dash_off, thick_paint);
+        canvas->DrawDashedLine(center + inner * delta, center + outer * delta,
+                               dash_on, dash_off, middle_paint);
+        canvas->DrawDashedLine(center + inner * delta, center + outer * delta,
+                               dash_on, dash_off, thin_paint);
+      }
+    };
+
+    draw_one(DlStrokeCap::kButt, 150.0f, 150.0f, 15.0f, 10.0f);
+    draw_one(DlStrokeCap::kSquare, 400.0f, 150.0f, 15.0f, 10.0f);
+    draw_one(DlStrokeCap::kRound, 150.0f, 400.0f, 15.0f, 10.0f);
+    draw_one(DlStrokeCap::kRound, 400.0f, 400.0f, 0.0f, 11.0f);
+
+    // Make sure the rendering op responds appropriately to clipping
+    canvas->Save();
+    SkPath clip_path = SkPath();
+    clip_path.moveTo(275.0f, 225.0f);
+    clip_path.lineTo(325.0f, 275.0f);
+    clip_path.lineTo(275.0f, 325.0f);
+    clip_path.lineTo(225.0f, 275.0f);
+    canvas->ClipPath(clip_path);
+    canvas->DrawColor(DlColor::kYellow());
+    draw_one(DlStrokeCap::kRound, 275.0f, 275.0f, 15.0f, 10.0f);
+    canvas->Restore();
   };
 
   DisplayListBuilder builder;

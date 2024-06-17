@@ -40,6 +40,10 @@ class DisplayListMetalComplexityCalculator
                    const DlImageFilter* backdrop) override;
 
     void drawLine(const SkPoint& p0, const SkPoint& p1) override;
+    void drawDashedLine(const DlPoint& p0,
+                        const DlPoint& p1,
+                        DlScalar on_length,
+                        DlScalar off_length) override;
     void drawRect(const SkRect& rect) override;
     void drawOval(const SkRect& bounds) override;
     void drawCircle(const SkPoint& center, SkScalar radius) override;

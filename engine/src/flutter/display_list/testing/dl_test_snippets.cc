@@ -526,6 +526,10 @@ std::vector<DisplayListInvocationGroup> CreateAllRenderingOps() {
             }},
            {1, 24, 1,
             [](DlOpReceiver& r) {
+              r.drawLine({1, 0}, {10, 10});
+            }},
+           {1, 24, 1,
+            [](DlOpReceiver& r) {
               r.drawLine({0, 1}, {10, 10});
             }},
            {1, 24, 1,
@@ -535,6 +539,37 @@ std::vector<DisplayListInvocationGroup> CreateAllRenderingOps() {
            {1, 24, 1,
             [](DlOpReceiver& r) {
               r.drawLine({0, 0}, {10, 20});
+            }},
+       }},
+      {"DrawDashedLine",
+       {
+           {1, 32, 1,
+            [](DlOpReceiver& r) {
+              r.drawDashedLine({0, 0}, {10, 10}, 4.0f, 2.0f);
+            }},
+           {1, 32, 1,
+            [](DlOpReceiver& r) {
+              r.drawDashedLine({1, 0}, {10, 10}, 4.0f, 2.0f);
+            }},
+           {1, 32, 1,
+            [](DlOpReceiver& r) {
+              r.drawDashedLine({0, 1}, {10, 10}, 4.0f, 2.0f);
+            }},
+           {1, 32, 1,
+            [](DlOpReceiver& r) {
+              r.drawDashedLine({0, 0}, {20, 10}, 4.0f, 2.0f);
+            }},
+           {1, 32, 1,
+            [](DlOpReceiver& r) {
+              r.drawDashedLine({0, 0}, {10, 20}, 4.0f, 2.0f);
+            }},
+           {1, 32, 1,
+            [](DlOpReceiver& r) {
+              r.drawDashedLine({0, 0}, {10, 10}, 5.0f, 2.0f);
+            }},
+           {1, 32, 1,
+            [](DlOpReceiver& r) {
+              r.drawDashedLine({0, 0}, {10, 10}, 4.0f, 3.0f);
             }},
        }},
       {"DrawRect",

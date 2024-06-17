@@ -5,8 +5,9 @@
 #ifndef FLUTTER_IMPELLER_DISPLAY_LIST_DL_DISPATCHER_H_
 #define FLUTTER_IMPELLER_DISPLAY_LIST_DL_DISPATCHER_H_
 
-#include "display_list/utils/dl_receiver_utils.h"
 #include "flutter/display_list/dl_op_receiver.h"
+#include "flutter/display_list/geometry/dl_geometry_types.h"
+#include "flutter/display_list/utils/dl_receiver_utils.h"
 #include "fml/logging.h"
 #include "impeller/aiks/canvas.h"
 #include "impeller/aiks/experimental_canvas.h"
@@ -15,6 +16,9 @@
 #include "impeller/geometry/color.h"
 
 namespace impeller {
+
+using DlScalar = flutter::DlScalar;
+using DlPoint = flutter::DlPoint;
 
 class DlDispatcherBase : public flutter::DlOpReceiver {
  public:
@@ -141,6 +145,12 @@ class DlDispatcherBase : public flutter::DlOpReceiver {
 
   // |flutter::DlOpReceiver|
   void drawLine(const SkPoint& p0, const SkPoint& p1) override;
+
+  // |flutter::DlOpReceiver|
+  void drawDashedLine(const DlPoint& p0,
+                      const DlPoint& p1,
+                      DlScalar on_length,
+                      DlScalar off_length) override;
 
   // |flutter::DlOpReceiver|
   void drawRect(const SkRect& rect) override;

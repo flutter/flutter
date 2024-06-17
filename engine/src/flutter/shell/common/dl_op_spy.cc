@@ -44,6 +44,12 @@ void DlOpSpy::drawPaint() {
 void DlOpSpy::drawLine(const SkPoint& p0, const SkPoint& p1) {
   did_draw_ |= will_draw_;
 }
+void DlOpSpy::drawDashedLine(const DlPoint& p0,
+                             const DlPoint& p1,
+                             DlScalar on_length,
+                             DlScalar off_length) {
+  did_draw_ |= will_draw_;
+}
 void DlOpSpy::drawRect(const SkRect& rect) {
   did_draw_ |= will_draw_;
 }

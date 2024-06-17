@@ -1977,68 +1977,6 @@ class CanvasCompareTester {
                      ctx.paint.setStrokeMiter(0.0);
                      ctx.paint.setStrokeJoin(DlStrokeJoin::kMiter);
                    }));
-
-    {
-      const SkScalar test_dashes_1[] = {29.0, 2.0};
-      const SkScalar test_dashes_2[] = {17.0, 1.5};
-      auto dl_dash_effect = DlDashPathEffect::Make(test_dashes_1, 2, 0.0f);
-      auto sk_dash_effect = SkDashPathEffect::Make(test_dashes_1, 2, 0.0f);
-      {
-        RenderWith(testP, stroke_base_env, tolerance,
-                   CaseParameters(
-                       "PathEffect without forced stroking == Dash-29-2",
-                       [=](const SkSetupContext& ctx) {
-                         // Provide some non-trivial stroke size to get dashed
-                         ctx.paint.setStrokeWidth(5.0);
-                         ctx.paint.setPathEffect(sk_dash_effect);
-                       },
-                       [=](const DlSetupContext& ctx) {
-                         // Provide some non-trivial stroke size to get dashed
-                         ctx.paint.setStrokeWidth(5.0);
-                         ctx.paint.setPathEffect(dl_dash_effect);
-                       }));
-      }
-      {
-        RenderWith(testP, stroke_base_env, tolerance,
-                   CaseParameters(
-                       "PathEffect == Dash-29-2",
-                       [=](const SkSetupContext& ctx) {
-                         // Need stroke style to see dashing properly
-                         ctx.paint.setStyle(SkPaint::kStroke_Style);
-                         // Provide some non-trivial stroke size to get dashed
-                         ctx.paint.setStrokeWidth(5.0);
-                         ctx.paint.setPathEffect(sk_dash_effect);
-                       },
-                       [=](const DlSetupContext& ctx) {
-                         // Need stroke style to see dashing properly
-                         ctx.paint.setDrawStyle(DlDrawStyle::kStroke);
-                         // Provide some non-trivial stroke size to get dashed
-                         ctx.paint.setStrokeWidth(5.0);
-                         ctx.paint.setPathEffect(dl_dash_effect);
-                       }));
-      }
-      dl_dash_effect = DlDashPathEffect::Make(test_dashes_2, 2, 0.0f);
-      sk_dash_effect = SkDashPathEffect::Make(test_dashes_2, 2, 0.0f);
-      {
-        RenderWith(testP, stroke_base_env, tolerance,
-                   CaseParameters(
-                       "PathEffect == Dash-17-1.5",
-                       [=](const SkSetupContext& ctx) {
-                         // Need stroke style to see dashing properly
-                         ctx.paint.setStyle(SkPaint::kStroke_Style);
-                         // Provide some non-trivial stroke size to get dashed
-                         ctx.paint.setStrokeWidth(5.0);
-                         ctx.paint.setPathEffect(sk_dash_effect);
-                       },
-                       [=](const DlSetupContext& ctx) {
-                         // Need stroke style to see dashing properly
-                         ctx.paint.setDrawStyle(DlDrawStyle::kStroke);
-                         // Provide some non-trivial stroke size to get dashed
-                         ctx.paint.setStrokeWidth(5.0);
-                         ctx.paint.setPathEffect(dl_dash_effect);
-                       }));
-      }
-    }
   }
 
   static void RenderWithTransforms(const TestParameters& testP,
@@ -3001,6 +2939,57 @@ TEST_F(DisplayListRendering, DrawVerticalLine) {
           kDrawHVLineFlags)
           .set_draw_line()
           .set_vertical_line());
+}
+
+TEST_F(DisplayListRendering, DrawDiagonalDashedLines) {
+  SkPoint p1 = SkPoint::Make(kRenderLeft, kRenderTop);
+  SkPoint p2 = SkPoint::Make(kRenderRight, kRenderBottom);
+  SkPoint p3 = SkPoint::Make(kRenderLeft, kRenderBottom);
+  SkPoint p4 = SkPoint::Make(kRenderRight, kRenderTop);
+  // Adding some edge center to edge center diagonals to better fill
+  // out the RRect Clip so bounds checking sees less empty bounds space.
+  SkPoint p5 = SkPoint::Make(kRenderCenterX, kRenderTop);
+  SkPoint p6 = SkPoint::Make(kRenderRight, kRenderCenterY);
+  SkPoint p7 = SkPoint::Make(kRenderLeft, kRenderCenterY);
+  SkPoint p8 = SkPoint::Make(kRenderCenterX, kRenderBottom);
+
+  // Full diagonals are 100x100 which are 140 in length
+  // Dashing them with 25 on, 5 off means that the last
+  // dash goes from 120 to 145 which means both ends of the
+  // diagonals will be in an "on" dash for maximum bounds
+
+  // Edge to edge diagonals are 50x50 which are 70 in length
+  // Dashing them with 25 on, 5 off means that the last
+  // dash goes from 60 to 85 which means both ends of the
+  // edge diagonals will be in a dash segment
+
+  CanvasCompareTester::RenderAll(  //
+      TestParameters(
+          [=](const SkRenderContext& ctx) {  //
+            // Skia requires kStroke style on horizontal and vertical
+            // lines to get the bounds correct.
+            // See https://bugs.chromium.org/p/skia/issues/detail?id=12446
+            SkPaint p = ctx.paint;
+            p.setStyle(SkPaint::kStroke_Style);
+            SkScalar intervals[2] = {25.0f, 5.0f};
+            p.setPathEffect(SkDashPathEffect::Make(intervals, 2.0f, 0.0f));
+            ctx.canvas->drawLine(p1, p2, p);
+            ctx.canvas->drawLine(p3, p4, p);
+            ctx.canvas->drawLine(p5, p6, p);
+            ctx.canvas->drawLine(p7, p8, p);
+          },
+          [=](const DlRenderContext& ctx) {                           //
+            ctx.canvas->DrawDashedLine(ToDlPoint(p1), ToDlPoint(p2),  //
+                                       25.0f, 5.0f, ctx.paint);
+            ctx.canvas->DrawDashedLine(ToDlPoint(p3), ToDlPoint(p4),  //
+                                       25.0f, 5.0f, ctx.paint);
+            ctx.canvas->DrawDashedLine(ToDlPoint(p5), ToDlPoint(p6),  //
+                                       25.0f, 5.0f, ctx.paint);
+            ctx.canvas->DrawDashedLine(ToDlPoint(p7), ToDlPoint(p8),  //
+                                       25.0f, 5.0f, ctx.paint);
+          },
+          kDrawLineFlags)
+          .set_draw_line());
 }
 
 TEST_F(DisplayListRendering, DrawRect) {
