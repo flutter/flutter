@@ -100,6 +100,16 @@ void DisplayListGLComplexityCalculator::GLHelper::drawLine(const SkPoint& p0,
   AccumulateComplexity(complexity);
 }
 
+void DisplayListGLComplexityCalculator::GLHelper::drawDashedLine(
+    const DlPoint& p0,
+    const DlPoint& p1,
+    DlScalar on_length,
+    DlScalar off_length) {
+  // Dashing is slightly more complex than a regular drawLine, but this
+  // op is so rare it is not worth measuring the difference.
+  drawLine(ToSkPoint(p0), ToSkPoint(p1));
+}
+
 void DisplayListGLComplexityCalculator::GLHelper::drawRect(const SkRect& rect) {
   if (IsComplex()) {
     return;

@@ -1099,6 +1099,29 @@ void DisplayListBuilder::DrawLine(const SkPoint& p0,
   SetAttributesFromPaint(paint, DisplayListOpFlags::kDrawLineFlags);
   drawLine(p0, p1);
 }
+void DisplayListBuilder::drawDashedLine(const DlPoint& p0,
+                                        const DlPoint& p1,
+                                        DlScalar on_length,
+                                        DlScalar off_length) {
+  SkRect bounds = SkRect::MakeLTRB(p0.x, p0.y, p1.x, p1.y).makeSorted();
+  DisplayListAttributeFlags flags =
+      (bounds.width() > 0.0f && bounds.height() > 0.0f) ? kDrawLineFlags
+                                                        : kDrawHVLineFlags;
+  OpResult result = PaintResult(current_, flags);
+  if (result != OpResult::kNoEffect && AccumulateOpBounds(bounds, flags)) {
+    Push<DrawDashedLineOp>(0, p0, p1, on_length, off_length);
+    CheckLayerOpacityCompatibility();
+    UpdateLayerResult(result);
+  }
+}
+void DisplayListBuilder::DrawDashedLine(const DlPoint& p0,
+                                        const DlPoint& p1,
+                                        DlScalar on_length,
+                                        DlScalar off_length,
+                                        const DlPaint& paint) {
+  SetAttributesFromPaint(paint, DisplayListOpFlags::kDrawLineFlags);
+  drawDashedLine(p0, p1, on_length, off_length);
+}
 void DisplayListBuilder::drawRect(const SkRect& rect) {
   DisplayListAttributeFlags flags = kDrawRectFlags;
   OpResult result = PaintResult(current_, flags);

@@ -156,6 +156,12 @@ class DisplayListBuilder final : public virtual DlCanvas,
                 const SkPoint& p1,
                 const DlPaint& paint) override;
   // |DlCanvas|
+  void DrawDashedLine(const DlPoint& p0,
+                      const DlPoint& p1,
+                      DlScalar on_length,
+                      DlScalar off_length,
+                      const DlPaint& paint) override;
+  // |DlCanvas|
   void DrawRect(const SkRect& rect, const DlPaint& paint) override;
   // |DlCanvas|
   void DrawOval(const SkRect& bounds, const DlPaint& paint) override;
@@ -418,6 +424,11 @@ class DisplayListBuilder final : public virtual DlCanvas,
   }
   // |DlOpReceiver|
   void drawLine(const SkPoint& p0, const SkPoint& p1) override;
+  // |DlOpReceiver|
+  void drawDashedLine(const DlPoint& p0,
+                      const DlPoint& p1,
+                      DlScalar on_length,
+                      DlScalar off_length) override;
   // |DlOpReceiver|
   void drawRect(const SkRect& rect) override;
   // |DlOpReceiver|

@@ -776,6 +776,17 @@ void DisplayListStreamDispatcher::drawLine(const SkPoint& p0,
                                            const SkPoint& p1) {
   startl() << "drawLine(" << p0 << ", " << p1 << ");" << std::endl;
 }
+void DisplayListStreamDispatcher::drawDashedLine(const DlPoint& p0,
+                                                 const DlPoint& p1,
+                                                 DlScalar on_length,
+                                                 DlScalar off_length) {
+  startl() << "drawDashedLine("
+           << p0 << ", "
+           << p1 << ", "
+           << on_length << ", "
+           << off_length
+           << ");" << std::endl;
+}
 void DisplayListStreamDispatcher::drawRect(const SkRect& rect) {
   startl() << "drawRect(" << rect << ");" << std::endl;
 }

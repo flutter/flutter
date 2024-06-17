@@ -736,6 +736,28 @@ DEFINE_DRAW_2ARG_OP(Circle, SkPoint, center, SkScalar, radius)
 DEFINE_DRAW_2ARG_OP(DRRect, SkRRect, outer, SkRRect, inner)
 #undef DEFINE_DRAW_2ARG_OP
 
+// 4 byte header + 24 byte payload packs into 32 bytes (4 bytes unused)
+struct DrawDashedLineOp final : DrawOpBase {
+  static constexpr auto kType = DisplayListOpType::kDrawDashedLine;
+
+  DrawDashedLineOp(const DlPoint& p0,
+                   const DlPoint& p1,
+                   DlScalar on_length,
+                   DlScalar off_length)
+      : p0(p0), p1(p1), on_length(on_length), off_length(off_length) {}
+
+  const DlPoint p0;
+  const DlPoint p1;
+  const SkScalar on_length;
+  const SkScalar off_length;
+
+  void dispatch(DispatchContext& ctx) const {
+    if (op_needed(ctx)) {
+      ctx.receiver.drawDashedLine(p0, p1, on_length, off_length);
+    }
+  }
+};
+
 // 4 byte header + 28 byte payload packs efficiently into 32 bytes
 struct DrawArcOp final : DrawOpBase {
   static constexpr auto kType = DisplayListOpType::kDrawArc;
