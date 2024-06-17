@@ -6722,30 +6722,6 @@ void main() {
       tabAlignment: TabAlignment.center,
     ));
     expect(tester.getSize(find.byType(TabBar)).width, 307.5);
-
-    // Test default tab bar width when the divider color is set to transparent
-    // and tabAlignment is set to startOffset.
-    await tester.pumpWidget(buildTabBar(
-      dividerColor: Colors.transparent,
-      tabAlignment: TabAlignment.startOffset,
-    ));
-    expect(tester.getSize(find.byType(TabBar)).width, 359.5);
-
-    // Test default tab bar width when the divider color is set to transparent
-    // and tabAlignment is set to start.
-    await tester.pumpWidget(buildTabBar(
-      dividerColor: Colors.transparent,
-      tabAlignment: TabAlignment.start,
-    ));
-    expect(tester.getSize(find.byType(TabBar)).width, 307.5);
-
-    // Test default tab bar width when the divider color is set to transparent
-    // and tabAlignment is set to center.
-    await tester.pumpWidget(buildTabBar(
-      dividerColor: Colors.transparent,
-      tabAlignment: TabAlignment.center,
-    ));
-    expect(tester.getSize(find.byType(TabBar)).width, 307.5);
   });
 
   group('Material 2', () {
@@ -7249,5 +7225,52 @@ void main() {
     expect(find.text('Page 4'), findsNothing);
     expect(find.text('Page 3'), findsOneWidget);
     expect(scrollable.controller!.position.pixels, equals(0.0));
+  });
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/150316.
+  testWidgets('Scrollable TabBar wuth transparent divider expands to full width', (WidgetTester tester) async {
+    Widget buildTabBar({ Color? dividerColor, TabAlignment? tabAlignment }) {
+      return boilerplate(
+        child: Center(
+          child: DefaultTabController(
+            length: 3,
+            child: TabBar(
+              dividerColor: dividerColor,
+              tabAlignment: tabAlignment,
+              isScrollable: true,
+              tabs: const <Widget>[
+                Tab(text: 'Tab 1'),
+                Tab(text: 'Tab 2'),
+                Tab(text: 'Tab 3'),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Test default tab bar width when the divider color is set to transparent
+    // and tabAlignment is set to startOffset.
+    await tester.pumpWidget(buildTabBar(
+      dividerColor: Colors.transparent,
+      tabAlignment: TabAlignment.startOffset,
+    ));
+    expect(tester.getSize(find.byType(TabBar)).width, 800.0);
+
+    // Test default tab bar width when the divider color is set to transparent
+    // and tabAlignment is set to start.
+    await tester.pumpWidget(buildTabBar(
+      dividerColor: Colors.transparent,
+      tabAlignment: TabAlignment.start,
+    ));
+    expect(tester.getSize(find.byType(TabBar)).width, 800.0);
+
+    // Test default tab bar width when the divider color is set to transparent
+    // and tabAlignment is set to center.
+    await tester.pumpWidget(buildTabBar(
+      dividerColor: Colors.transparent,
+      tabAlignment: TabAlignment.center,
+    ));
+    expect(tester.getSize(find.byType(TabBar)).width, 800.0);
   });
 }
