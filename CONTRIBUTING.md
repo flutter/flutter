@@ -18,7 +18,7 @@ We grant commit access (which includes full rights to the issue
 database, such as being able to edit labels) to people who have gained
 our trust and demonstrated a commitment to Flutter. For more details
 see the [Contributor access](./docs/contributing/Contributor-access.md)
-page on our wiki.
+page in our docs.
 
 We communicate primarily over GitHub and [Discord](./docs/contributing/Chat.md).
 
@@ -129,7 +129,7 @@ presented.
 
 In addition to the documents, there is a video linked above on **How to contribute to Flutter**
 from the [Flutter](https://youtube.com/c/flutterdev) YouTube channel,
-there are many pages on [our Wiki](./docs/README.md),
+there are many pages in [our docs](./docs/README.md),
 and an article [Contributing to Flutter: Getting Started](https://medium.com/@ayushbherwani/contributing-to-flutter-getting-started-a0db68cbcd5b)
 on Medium that may be of interest. For a curated list of pages see the sidebar
 on the wiki's home page. They are more or less listed in order of importance.
