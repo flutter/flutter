@@ -258,6 +258,14 @@ void MockCanvas::DrawLine(const SkPoint& p0,
   FML_DCHECK(false);
 }
 
+void MockCanvas::DrawDashedLine(const DlPoint& p0,
+                                const DlPoint& p1,
+                                DlScalar on_length,
+                                DlScalar off_length,
+                                const DlPaint& paint) {
+  FML_DCHECK(false);
+}
+
 void MockCanvas::DrawPoints(PointMode,
                             uint32_t,
                             const SkPoint[],

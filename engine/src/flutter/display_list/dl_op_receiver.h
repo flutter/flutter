@@ -343,6 +343,10 @@ class DlOpReceiver {
   virtual void drawColor(DlColor color, DlBlendMode mode) = 0;
   virtual void drawPaint() = 0;
   virtual void drawLine(const SkPoint& p0, const SkPoint& p1) = 0;
+  virtual void drawDashedLine(const DlPoint& p0,
+                              const DlPoint& p1,
+                              DlScalar on_length,
+                              DlScalar off_length) = 0;
   virtual void drawRect(const SkRect& rect) = 0;
   virtual void drawOval(const SkRect& bounds) = 0;
   virtual void drawCircle(const SkPoint& center, SkScalar radius) = 0;
