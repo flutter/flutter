@@ -4,10 +4,16 @@
 
 #include "flatland_connection.h"
 
+#include <lib/async/cpp/task.h>
+#include <lib/async/default.h>
+
+#include <zircon/rights.h>
 #include <zircon/status.h>
+#include <zircon/types.h>
+
+#include <utility>
 
 #include "flutter/fml/logging.h"
-#include "flutter/fml/trace_event.h"
 
 namespace flutter_runner {
 
@@ -22,12 +28,14 @@ double DeltaFromNowInNanoseconds(const fml::TimePoint& now,
 }  // namespace
 
 FlatlandConnection::FlatlandConnection(
-    std::string debug_label,
+    const std::string& debug_label,
     fuchsia::ui::composition::FlatlandHandle flatland,
     fml::closure error_callback,
-    on_frame_presented_event on_frame_presented_callback)
-    : flatland_(flatland.Bind()),
-      error_callback_(error_callback),
+    on_frame_presented_event on_frame_presented_callback,
+    async_dispatcher_t* dispatcher)
+    : dispatcher_(dispatcher),
+      flatland_(flatland.Bind()),
+      error_callback_(std::move(error_callback)),
       on_frame_presented_callback_(std::move(on_frame_presented_callback)) {
   flatland_.set_error_handler([callback = error_callback_](zx_status_t status) {
     FML_LOG(ERROR) << "Flatland disconnected: " << zx_status_get_string(status);
@@ -71,6 +79,42 @@ void FlatlandConnection::DoPresent() {
   fuchsia::ui::composition::PresentArgs present_args;
   present_args.set_requested_presentation_time(0);
   present_args.set_acquire_fences(std::move(acquire_fences_));
+
+  // Schedule acquire fence overflow signaling if there is one.
+  if (acquire_overflow_ != nullptr) {
+    FML_CHECK(acquire_overflow_->event_.is_valid());
+    async::PostTask(dispatcher_, [dispatcher = dispatcher_,
+                                  overflow = acquire_overflow_]() {
+      const size_t fences_size = overflow->fences_.size();
+      std::shared_ptr<size_t> fences_completed = std::make_shared<size_t>(0);
+      std::shared_ptr<std::vector<async::WaitOnce>> closures;
+
+      for (auto i = 0u; i < fences_size; i++) {
+        auto wait = std::make_unique<async::WaitOnce>(
+            overflow->fences_[i].get(), ZX_EVENT_SIGNALED, 0u);
+        auto wait_ptr = wait.get();
+        wait_ptr->Begin(
+            dispatcher,
+            [wait = std::move(wait), overflow, fences_size, fences_completed,
+             closures](async_dispatcher_t*, async::WaitOnce*,
+                       zx_status_t status, const zx_packet_signal_t*) {
+              (*fences_completed)++;
+              FML_CHECK(status == ZX_OK)
+                  << "status: " << zx_status_get_string(status);
+              if (*fences_completed == fences_size) {
+                // Signal the acquire fence passed on to Flatland.
+                const zx_status_t status =
+                    overflow->event_.signal(0, ZX_EVENT_SIGNALED);
+                FML_CHECK(status == ZX_OK)
+                    << "status: " << zx_status_get_string(status);
+              }
+            });
+      }
+    });
+    acquire_overflow_.reset();
+  }
+  FML_CHECK(acquire_overflow_ == nullptr);
+
   present_args.set_release_fences(std::move(previous_present_release_fences_));
   // Frame rate over latency.
   present_args.set_unsquashable(true);
@@ -81,6 +125,44 @@ void FlatlandConnection::DoPresent() {
   // the correct ones for VulkanSurface's interpretation.
   previous_present_release_fences_.clear();
   previous_present_release_fences_.swap(current_present_release_fences_);
+  previous_release_overflow_ = current_release_overflow_;
+  current_release_overflow_ = nullptr;
+
+  // Similar to the treatment of acquire_fences_overflow_ above. Except in
+  // the other direction.
+  if (previous_release_overflow_ != nullptr) {
+    FML_CHECK(previous_release_overflow_->event_.is_valid());
+
+    std::shared_ptr<Overflow> fences = previous_release_overflow_;
+
+    async::PostTask(dispatcher_, [dispatcher = dispatcher_,
+                                  fences = previous_release_overflow_]() {
+      FML_CHECK(fences != nullptr);
+      FML_CHECK(fences->event_.is_valid());
+
+      auto wait = std::make_unique<async::WaitOnce>(fences->event_.get(),
+                                                    ZX_EVENT_SIGNALED, 0u);
+      auto wait_ptr = wait.get();
+
+      wait_ptr->Begin(
+          dispatcher, [_wait = std::move(wait), fences](
+                          async_dispatcher_t*, async::WaitOnce*,
+                          zx_status_t status, const zx_packet_signal_t*) {
+            FML_CHECK(status == ZX_OK)
+                << "status: " << zx_status_get_string(status);
+
+            // Multiplex signaling all events.
+            for (auto& event : fences->fences_) {
+              const zx_status_t status = event.signal(0, ZX_EVENT_SIGNALED);
+              FML_CHECK(status == ZX_OK)
+                  << "status: " << zx_status_get_string(status);
+            }
+          });
+    });
+    previous_release_overflow_ = nullptr;
+  }
+  FML_CHECK(previous_release_overflow_ == nullptr);  // Moved.
+
   acquire_fences_.clear();
 }
 
@@ -93,12 +175,13 @@ void FlatlandConnection::AwaitVsync(FireCallbackCallback callback) {
   const auto now = fml::TimePoint::Now();
 
   // Initial case.
-  if (MaybeRunInitialVsyncCallback(now, callback))
+  if (MaybeRunInitialVsyncCallback(now, callback)) {
     return;
+  }
 
   // Throttle case.
   if (threadsafe_state_.present_credits_ == 0) {
-    threadsafe_state_.pending_fire_callback_ = callback;
+    threadsafe_state_.pending_fire_callback_ = std::move(callback);
     return;
   }
 
@@ -116,8 +199,9 @@ void FlatlandConnection::AwaitVsyncForSecondaryCallback(
   const auto now = fml::TimePoint::Now();
 
   // Initial case.
-  if (MaybeRunInitialVsyncCallback(now, callback))
+  if (MaybeRunInitialVsyncCallback(now, callback)) {
     return;
+  }
 
   // Regular case.
   RunVsyncCallback(now, callback);
@@ -260,14 +344,75 @@ void FlatlandConnection::RunVsyncCallback(const fml::TimePoint& now,
   callback(frame_start, frame_end);
 }
 
+// Enqueue a single fence into either the "base" vector of fences, or a
+// "special" overflow multiplexer.
+//
+// Args:
+//   - fence: the fence to add
+//   - fences: the "regular" fences vector to add to.
+//   - overflow: the overflow fences vector. Fences added here if there are
+//     more than can fit in `fences`.
+static void Enqueue(zx::event fence,
+                    std::vector<zx::event>* fences,
+                    std::shared_ptr<Overflow>* overflow) {
+  constexpr size_t kMaxFences =
+      fuchsia::ui::composition::MAX_ACQUIRE_RELEASE_FENCE_COUNT;
+
+  // Number of all previously added fences, plus this one.
+  const auto num_all_fences =
+      fences->size() + 1 +
+      ((*overflow == nullptr) ? 0 : (*overflow)->fences_.size());
+
+  // If more than max number of fences come in, schedule any further fences into
+  // an overflow. The overflow fences are scheduled for processing here, but are
+  // processed in DoPresent().
+  if (num_all_fences <= kMaxFences) {
+    fences->push_back(std::move(fence));
+  } else if (num_all_fences == kMaxFences + 1) {
+    // The ownership of the overflow will be handed over to the signaling
+    // closure on DoPresent call. So we always expect that we enter here with
+    // overflow not set.
+    FML_CHECK((*overflow) == nullptr) << "overflow is still active";
+    *overflow = std::make_shared<Overflow>();
+
+    // Set up the overflow fences. Creates an overflow handle, places it
+    // into `fences` instead of the previous fence, and puts the prior fence
+    // and this one into overflow.
+    zx::event overflow_handle = std::move(fences->back());
+    fences->pop_back();
+
+    zx::event overflow_fence;
+    zx_status_t status = zx::event::create(0, &overflow_fence);
+    FML_CHECK(status == ZX_OK) << "status: " << zx_status_get_string(status);
+
+    // Every DoPresent should invalidate this handle.  Holler if not.
+    FML_CHECK(!(*overflow)->event_.is_valid()) << "overflow valid";
+    status =
+        overflow_fence.duplicate(ZX_RIGHT_SAME_RIGHTS, &(*overflow)->event_);
+    FML_CHECK(status == ZX_OK) << "status: " << zx_status_get_string(status);
+    fences->push_back(std::move(overflow_fence));
+
+    // Prepare for wait_many call.
+    (*overflow)->fences_.push_back(std::move(overflow_handle));
+    (*overflow)->fences_.push_back(std::move(fence));
+
+    FML_LOG(INFO) << "Enqueue using fence overflow, expect a performance hit.";
+  } else {
+    FML_CHECK((*overflow) != nullptr);
+    // Just add to the overflow fences.
+    (*overflow)->fences_.push_back(std::move(fence));
+  }
+}
+
 // This method is called from the raster thread.
 void FlatlandConnection::EnqueueAcquireFence(zx::event fence) {
-  acquire_fences_.push_back(std::move(fence));
+  Enqueue(std::move(fence), &acquire_fences_, &acquire_overflow_);
 }
 
 // This method is called from the raster thread.
 void FlatlandConnection::EnqueueReleaseFence(zx::event fence) {
-  current_present_release_fences_.push_back(std::move(fence));
+  Enqueue(std::move(fence), &current_present_release_fences_,
+          &current_release_overflow_);
 }
 
 }  // namespace flutter_runner

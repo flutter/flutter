@@ -2,10 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// Maintains a connection to Fuchsia's Flatland protocol used for rendering
+// 2D graphics scenes.
+
 #ifndef FLUTTER_SHELL_PLATFORM_FUCHSIA_FLUTTER_FLATLAND_CONNECTION_H_
 #define FLUTTER_SHELL_PLATFORM_FUCHSIA_FLUTTER_FLATLAND_CONNECTION_H_
 
 #include <fuchsia/ui/composition/cpp/fidl.h>
+#include <lib/async/default.h>
 
 #include "flutter/fml/closure.h"
 #include "flutter/fml/macros.h"
@@ -21,6 +25,19 @@
 
 namespace flutter_runner {
 
+// The maximum number of fences that can be signaled at a time.
+static constexpr size_t kMaxFences =
+    fuchsia::ui::composition::MAX_ACQUIRE_RELEASE_FENCE_COUNT;
+
+// A helper to ferry around multiplexed events for signaling. Helps move
+// non-copyable events into closures.
+class Overflow {
+ public:
+  std::vector<zx::event> fences_;
+  zx::event event_;
+  Overflow() { fences_.reserve(kMaxFences); };
+};
+
 using on_frame_presented_event =
     std::function<void(fuchsia::scenic::scheduling::FramePresentedInfo)>;
 
@@ -33,10 +50,12 @@ static constexpr fml::TimeDelta kInitialFlatlandVsyncOffset =
 // maintaining the Flatland instance connection and presenting updates.
 class FlatlandConnection final {
  public:
-  FlatlandConnection(std::string debug_label,
-                     fuchsia::ui::composition::FlatlandHandle flatland,
-                     fml::closure error_callback,
-                     on_frame_presented_event on_frame_presented_callback);
+  FlatlandConnection(
+      const std::string& debug_label,
+      fuchsia::ui::composition::FlatlandHandle flatland,
+      fml::closure error_callback,
+      on_frame_presented_event on_frame_presented_callback,
+      async_dispatcher_t* dispatcher = async_get_default_dispatcher());
 
   ~FlatlandConnection();
 
@@ -58,7 +77,24 @@ class FlatlandConnection final {
     return {++next_content_id_};
   }
 
+  // Adds a new acquire fence to be sent out to the next Present() call.
+  //
+  // Acquire fences must all be signaled by the user.
+  //
+  // PERFORMANCE NOTES:
+  //
+  // Enqueuing more than 16 fences per frame incurs a performance penalty, so
+  // use them sparingly.
+  //
+  // Skipped frames may cause the number of fences to increase, leading to
+  // more performance issues. Ideally, the flow of the frames should be smooth.
   void EnqueueAcquireFence(zx::event fence);
+
+  // Adds a new release fence to be sent out to the next Present() call.
+  //
+  // Release fences are all signaled by Scenic (Flatland server).
+  //
+  // See the performance notes on EnqueueAcquireFence for performance details.
   void EnqueueReleaseFence(zx::event fence);
 
  private:
@@ -74,6 +110,8 @@ class FlatlandConnection final {
                                     FireCallbackCallback& callback);
   void RunVsyncCallback(const fml::TimePoint& now,
                         FireCallbackCallback& callback);
+
+  async_dispatcher_t* dispatcher_;
 
   fuchsia::ui::composition::FlatlandPtr flatland_;
 
@@ -102,9 +140,21 @@ class FlatlandConnection final {
     bool first_feedback_received_ = false;
   } threadsafe_state_;
 
+  // Acquire fences sent to Flatland.
   std::vector<zx::event> acquire_fences_;
+
+  // Multiplexed acquire fences over the critical number of ~16.
+  std::shared_ptr<Overflow> acquire_overflow_;
+
+  // Release fences sent to Flatland. Similar to acquire fences above.
   std::vector<zx::event> current_present_release_fences_;
+  std::shared_ptr<Overflow> current_release_overflow_;
+
+  // Release fences from the prior call to DoPresent().
+  // Similar to acquire fences above.
   std::vector<zx::event> previous_present_release_fences_;
+  std::shared_ptr<Overflow> previous_release_overflow_;
+
   std::string debug_label_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(FlatlandConnection);

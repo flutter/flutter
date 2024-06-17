@@ -41,7 +41,7 @@ fuchsia::ui::composition::FlatlandHandle FakeFlatland::ConnectFlatland(
 }
 
 void FakeFlatland::Disconnect(fuchsia::ui::composition::FlatlandError error) {
-  flatland_binding_.events().OnError(std::move(error));
+  flatland_binding_.events().OnError(error);
   flatland_binding_.Unbind();
   allocator_binding_
       .Unbind();  // TODO(fxb/85619): Does the real Scenic unbind this when
