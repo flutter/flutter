@@ -421,7 +421,7 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
   final _SwitchPainter _painter = _SwitchPainter();
 
   @override
-  void initState(){
+  void initState() {
     super.initState();
     positionController.duration = const Duration(milliseconds: 200);
     reactionController.duration = const Duration(milliseconds: 300);
