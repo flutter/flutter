@@ -696,10 +696,8 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       throwToolExit('Error: Failed to build asset bundle');
     }
     if (await _needRebuild(assetBundle.entries, flavor)) {
-      final Directory buildDirectory = globals.fs.directory('build');
-
       await writeBundle(
-        buildDirectory.childDirectory('unit_test_assets'),
+        globals.fs.directory(globals.fs.path.join('build', 'unit_test_assets')),
         assetBundle.entries,
         targetPlatform: TargetPlatform.tester,
         impellerStatus: impellerStatus,
@@ -712,7 +710,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       );
 
       final File cachedFlavorFile = globals.fs.file(
-        globals.fs.path.join(buildDirectory.path, 'test_cache', 'flavor.txt'),
+        globals.fs.path.join('build', 'test_cache', 'flavor.txt'),
       );
       await cachedFlavorFile.create(recursive: true);
       await cachedFlavorFile.writeAsString(flavor ?? '');
