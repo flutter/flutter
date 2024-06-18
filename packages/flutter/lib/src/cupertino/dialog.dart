@@ -354,6 +354,10 @@ class _CupertinoAlertDialogState extends State<CupertinoAlertDialog> {
       actionSection = _AlertDialogActionSection(
         scrollController: _effectiveActionScrollController,
         actions: widget.actions,
+        dialogColor: CupertinoDynamicColor.resolve(_kDialogColor, context),
+        dialogPressedColor: CupertinoDynamicColor.resolve(_kDialogPressedColor, context),
+        dividerColor: CupertinoDynamicColor.resolve(CupertinoColors.separator, context),
+        dividerThickness: _kDividerThickness,
         pressedIndex: _pressedIndex,
         onPressedUpdate: _onPressedUpdate,
       );
@@ -1184,15 +1188,17 @@ class _ActionSheetButtonBackgroundState extends State<_ActionSheetButtonBackgrou
 class _ActionSheetDivider extends StatelessWidget {
   const _ActionSheetDivider({
     required this.dividerColor,
+    required this.hiddenColor,
     required this.hidden,
   });
 
   final Color dividerColor;
+  final Color hiddenColor;
   final bool hidden;
 
   @override
   Widget build(BuildContext context) {
-    final Color backgroundColor = CupertinoDynamicColor.resolve(_kActionSheetBackgroundColor, context);
+    final Color backgroundColor = CupertinoDynamicColor.resolve(hiddenColor, context);
     return LimitedBox(
       maxHeight: _kDividerThickness,
       child: Container(
@@ -1240,6 +1246,7 @@ class _ActionSheetActionSection extends StatelessWidget {
       if (actionIndex != 0) {
         column.add(_ActionSheetDivider(
           dividerColor: dividerColor,
+          hiddenColor: _kActionSheetBackgroundColor,
           hidden: pressedIndex == actionIndex - 1 || pressedIndex == actionIndex,
         ));
       }
@@ -1373,6 +1380,7 @@ class _ActionSheetMainSheetState extends State<_ActionSheetMainSheet> {
             if (widget.hasContent && _hasActions())
               _ActionSheetDivider(
                 dividerColor: widget.dividerColor,
+                hiddenColor: _kActionSheetBackgroundColor,
                 hidden: false,
               ),
             Flexible(
@@ -1992,12 +2000,21 @@ class _CupertinoAlertContentSection extends StatelessWidget {
 class _AlertDialogActionSection extends StatelessWidget {
   const _AlertDialogActionSection({
     required this.actions,
+    required this.dividerThickness,
+    required this.dialogColor,
+    required this.dialogPressedColor,
+    required this.dividerColor,
     required this.onPressedUpdate,
     required this.pressedIndex,
     required this.scrollController,
   });
 
   final List<Widget> actions;
+
+  final double dividerThickness;
+  final Color dialogColor;
+  final Color dialogPressedColor;
+  final Color dividerColor;
 
   final _PressedUpdateHandler onPressedUpdate;
   final int? pressedIndex;
@@ -2021,11 +2038,14 @@ class _AlertDialogActionSection extends StatelessWidget {
     for (int actionIndex = 0; actionIndex < actions.length; actionIndex += 1) {
       if (actionIndex != 0) {
         column.add(_ActionSheetDivider(
-          dividerColor: CupertinoDynamicColor.resolve(CupertinoColors.separator, context),
+          dividerColor: dividerColor,
+          hiddenColor: dialogColor,
           hidden: pressedIndex == actionIndex - 1 || pressedIndex == actionIndex,
         ));
       }
       column.add(_AlertDialogButtonBackground(
+        idleColor: dialogColor,
+        pressedColor: dialogPressedColor,
         onPressStateChange: (bool state) {
           onPressedUpdate(actionIndex, state);
         },
@@ -2049,7 +2069,9 @@ class _AlertDialogActionSection extends StatelessWidget {
 // background) and reports its state to the parent with `onPressStateChange`.
 class _AlertDialogButtonBackground extends StatefulWidget {
   const _AlertDialogButtonBackground({
-    this.onPressStateChange,
+    required this.idleColor,
+    required this.pressedColor,
+    required this.onPressStateChange,
     required this.child,
   });
 
@@ -2057,6 +2079,9 @@ class _AlertDialogButtonBackground extends StatefulWidget {
   ///
   /// The boolean value is true if the user is tapping down on the button.
   final ValueSetter<bool>? onPressStateChange;
+
+  final Color idleColor;
+  final Color pressedColor;
 
   /// The widget below this widget in the tree.
   ///
@@ -2088,8 +2113,8 @@ class _AlertDialogButtonBackgroundState extends State<_AlertDialogButtonBackgrou
   @override
   Widget build(BuildContext context) {
     final Color backgroundColor = _isPressed
-      ? _kActionSheetCancelPressedColor
-      : _kActionSheetCancelColor;
+      ? widget.pressedColor
+      : widget.idleColor;
     return MergeSemantics(
       // TODO(mattcarroll): Button press dynamics need overhaul for iOS:
       // https://github.com/flutter/flutter/issues/19786
