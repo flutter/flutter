@@ -107,6 +107,7 @@ source_set("runtime") {
     ":test_font",
     "$dart_src/runtime:dart_api",
     "$dart_src/runtime/bin:dart_io_api",
+    "$dart_src/runtime/bin:native_assets_api",
     "//flutter/assets",
     "//flutter/common",
     "//flutter/flow",
