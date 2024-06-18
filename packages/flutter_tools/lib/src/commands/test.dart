@@ -7,6 +7,7 @@ import 'package:package_config/package_config_types.dart';
 
 import '../asset.dart';
 import '../base/common.dart';
+import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../build_info.dart';
 import '../bundle_builder.dart';
@@ -712,8 +713,13 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       final File cachedFlavorFile = globals.fs.file(
         globals.fs.path.join('build', 'test_cache', 'flavor.txt'),
       );
-      await cachedFlavorFile.create(recursive: true);
-      await cachedFlavorFile.writeAsString(flavor ?? '');
+      if (cachedFlavorFile.existsSync()) {
+        await cachedFlavorFile.delete();
+      }
+      if (flavor != null) {
+        await cachedFlavorFile.create(recursive: true);
+        await cachedFlavorFile.writeAsString(flavor);
+      }
     }
   }
 
