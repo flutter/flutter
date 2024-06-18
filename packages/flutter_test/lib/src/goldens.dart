@@ -96,7 +96,8 @@ abstract class GoldenFileComparator {
 
   /// Returns a [ComparisonResult] to describe the pixel differential of the
   /// [test] and [master] image bytes provided.
-  static Future<ComparisonResult> compareLists(List<int> test, List<int> master) {
+  static Future<ComparisonResult> compareLists(
+      List<int> test, List<int> master) {
     return goldens.compareLists(test, master);
   }
 }
@@ -120,8 +121,30 @@ abstract class GoldenFileComparator {
 ///
 /// Callers may choose to override the default comparator by setting this to a
 /// custom comparator during test set-up (or using directory-level test
-/// configuration). For example, some projects may wish to install a comparator
-/// with tolerance levels for allowable differences.
+/// configuration).
+///
+/// {@tool snippet}
+/// For example, some projects may wish to install a comparator with tolerance
+/// levels for allowable differences:
+///
+/// ```dart
+/// testWidgets('matches golden file with a 0.01 tolerance', (WidgetTester tester) async {
+///   final previousGoldenFileComparator = goldenFileComparator;
+///   goldenFileComparator = _MyTolerantGoldenFileComparator(
+///     Uri.parse('test/my_widget_test.dart'),
+///     precisionTolerance: 0.01,
+///   );
+///   addTearDown(() => goldenFileComparator = previousGoldenFileComparator);
+///
+///   await tester.pumpWidget(const ColoredBox(color: Color(0xff00ff00)));
+///
+///   await expectLater(
+///     find.byType(ColoredBox),
+///     matchesGoldenFile('my_golden.png'),
+///   );
+/// });
+/// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -257,7 +280,8 @@ abstract class WebGoldenComparator {
 ///  * [goldenFileComparator], the comparator used when tests are not running on
 ///    a web browser.
 WebGoldenComparator get webGoldenComparator => _webGoldenComparator;
-WebGoldenComparator _webGoldenComparator = const _TrivialWebGoldenComparator._();
+WebGoldenComparator _webGoldenComparator =
+    const _TrivialWebGoldenComparator._();
 set webGoldenComparator(WebGoldenComparator value) {
   _webGoldenComparator = value;
 }
