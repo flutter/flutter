@@ -65,7 +65,7 @@ class DependencyVersionChecker {
 
         private fun getPotentialAGPFix(projectDirectory: String): String {
             return "Your project's AGP version is typically " +
-                "defined the plugins block of the `settings.gradle` file " +
+                "defined in the plugins block of the `settings.gradle` file " +
                 "($projectDirectory/settings.gradle), by a plugin with the id of " +
                 "com.android.application. \nIf you don't see a plugins block, your project " +
                 "was likely created with an older template version. In this case it is most " +
@@ -76,7 +76,7 @@ class DependencyVersionChecker {
 
         private fun getPotentialKGPFix(projectDirectory: String): String {
             return "Your project's KGP version is typically " +
-                "defined the plugins block of the `settings.gradle` file " +
+                "defined in the plugins block of the `settings.gradle` file " +
                 "($projectDirectory/settings.gradle), by a plugin with the id of " +
                 "org.jetbrains.kotlin.android. \nIf you don't see a plugins block, your project " +
                 "was likely created with an older template version, in which case it is most " +
