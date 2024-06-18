@@ -605,6 +605,7 @@ class _BottomNavigationTile extends StatelessWidget {
 
     result = Semantics(
       selected: selected,
+      button: true,
       container: true,
       child: Stack(
         children: <Widget>[

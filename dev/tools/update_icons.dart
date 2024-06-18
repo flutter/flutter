@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 // Regenerates a Dart file with a class containing IconData constants.
-// See https://github.com/flutter/flutter/wiki/Updating-Material-Design-Fonts-&-Icons
+// See https://github.com/flutter/flutter/blob/main/docs/libraries/material/Updating-Material-Design-Fonts-%26-Icons.md
 // Should be idempotent with:
 // dart dev/tools/update_icons.dart --new-codepoints bin/cache/artifacts/material_fonts/codepoints
 
