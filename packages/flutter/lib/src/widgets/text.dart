@@ -787,22 +787,26 @@ class _SelectableTextContainer extends StatefulWidget {
 
 class _SelectableTextContainerState extends State<_SelectableTextContainer> {
   late final _SelectableTextContainerDelegate _selectionDelegate;
-  late _TextSpanContentRange _textContentRange;
   final GlobalKey _textKey = GlobalKey();
 
   @override
   void initState() {
     super.initState();
-    _textContentRange = _TextSpanContentRange(selectableId: widget.selectableId, content: widget.text);
-    _selectionDelegate = _SelectableTextContainerDelegate(_textKey, _textContentRange);
+    _selectionDelegate = _SelectableTextContainerDelegate(
+      _textKey,
+      textState: widget.text,
+      selectableId: widget.selectableId,
+    );
   }
 
   @override
   void didUpdateWidget(covariant _SelectableTextContainer oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.text != oldWidget.text || widget.selectableId != oldWidget.selectableId) {
-      _textContentRange = _TextSpanContentRange(selectableId: widget.selectableId, content: widget.text);
-      _selectionDelegate._attachRange = _textContentRange;
+    if (widget.text != oldWidget.text) {
+      _selectionDelegate._attachState = widget.text;
+    }
+    if (widget.selectableId != oldWidget.selectableId) {
+      _selectionDelegate._attachId = widget.selectableId;
     }
   }
 
@@ -898,16 +902,25 @@ const double _kSelectableVerticalComparingThreshold = 3.0;
 class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainerDelegate {
   _SelectableTextContainerDelegate(
     GlobalKey textKey,
-    this.textContentRange,
+    {
+      required this.textState,
+      this.selectableId,
+    }
   ) : _textKey = textKey;
 
-  _TextSpanContentRange textContentRange;
+  TextSpan textState;
+  int? selectableId;
   final GlobalKey _textKey;
   RenderParagraph get paragraph => _textKey.currentContext!.findRenderObject()! as RenderParagraph;
 
   // ignore: avoid_setters_without_getters
-  set _attachRange(_TextSpanContentRange newRange) {
-    textContentRange = newRange;
+  set _attachState(TextSpan newState) {
+    textState = newState;
+  }
+
+  // ignore: avoid_setters_without_getters
+  set _attachId(int? newId) {
+    selectableId = newId;
   }
 
   @override
@@ -1265,15 +1278,6 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
     if (selections.isEmpty) {
       return null;
     }
-    // A [_SelectableFragment] does not typically provide a [SelectedContentRange],
-    // so this pass should collect all [PlaceholderSpan] child ranges.
-    final List<SelectedContentRange<Object>> childRanges = <SelectedContentRange<Object>>[
-      for (final SelectedContent selectedContent in selections.values)
-        if (selectedContent.ranges case final List<SelectedContentRange<Object>> data) ...data,
-    ];
-    _attachRange = textContentRange.copyWith(
-      children: childRanges,
-    );
     // Accurately find the selection endpoints, selections.first.startOffset and
     // selections.last.endOffset are only accurate when the selections.first and
     // selections.last are root selectables with regards to the text. When the
@@ -1282,24 +1286,38 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
     // A placeholder only spans one character unit in the text. So when the selection
     // begins or ends on a placeholder, we should consider its position relative
     // to the root text.
+    late final int startOffset;
+    late final int endOffset;
     if (paragraph.selectableBelongsToParagraph(selectables[currentSelectionStartIndex])) {
-      textContentRange.startOffset = selections[currentSelectionStartIndex]!.startOffset;
+      startOffset = selections[currentSelectionStartIndex]!.startOffset;
     } else {
       final bool localSelectionForward = selections[currentSelectionStartIndex]!.endOffset >= selections[currentSelectionStartIndex]!.startOffset;
       final TextPosition positionBeforeStart = localSelectionForward
                                              ? paragraph.getPositionForOffset(selectables[currentSelectionStartIndex].boundingBoxes.first.bottomLeft)
                                              : paragraph.getPositionForOffset(selectables[currentSelectionStartIndex].boundingBoxes.last.bottomRight);
-      textContentRange.startOffset = positionBeforeStart.offset;
+      startOffset = positionBeforeStart.offset;
     }
     if (paragraph.selectableBelongsToParagraph(selectables[currentSelectionEndIndex])) {
-      textContentRange.endOffset = selections[currentSelectionEndIndex]!.endOffset;
+      endOffset = selections[currentSelectionEndIndex]!.endOffset;
     } else {
       final bool localSelectionForward = selections[currentSelectionEndIndex]!.endOffset >= selections[currentSelectionEndIndex]!.startOffset;
       final TextPosition positionAfterEnd = localSelectionForward
                                           ? paragraph.getPositionForOffset(selectables[currentSelectionEndIndex].boundingBoxes.last.bottomRight)
                                           : paragraph.getPositionForOffset(selectables[currentSelectionEndIndex].boundingBoxes.first.bottomLeft);
-      textContentRange.endOffset = positionAfterEnd.offset;
+      endOffset = positionAfterEnd.offset;
     }
+    // A [_SelectableFragment] does not typically provide a [SelectedContentRange],
+    // so this pass should collect all [PlaceholderSpan] child ranges.
+    final List<SelectedContentRange<Object>> childRanges = <SelectedContentRange<Object>>[
+      for (final SelectedContent selectedContent in selections.values)
+        if (selectedContent.ranges case final List<SelectedContentRange<Object>> data) ...data,
+    ];
+    final _TextSpanContentRange range = _TextSpanContentRange(
+      content: textState,
+      selectableId: selectableId,
+      start: startOffset,
+      end: endOffset,
+    );
     final StringBuffer buffer = StringBuffer();
     for (final SelectedContent selection in selections.values) {
       buffer.write(selection.plainText);
@@ -1307,9 +1325,9 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
     return SelectedContent(
       plainText: buffer.toString(),
       geometry: value,
-      startOffset: textContentRange.startOffset,
-      endOffset: textContentRange.endOffset,
-      ranges: <SelectedContentRange<Object>>[textContentRange],
+      startOffset: range.startOffset,
+      endOffset: range.endOffset,
+      ranges: <SelectedContentRange<Object>>[range],
     );
   }
 
@@ -1508,38 +1526,15 @@ class _TextSpanContentRange extends SelectedContentRange<TextSpan> {
     super.selectableId,
     required super.content,
     super.children,
+    this.start = -1,
+    this.end = -1,
   });
 
   @override
-  int get startOffset => _start;
-  int _start = -1;
-  set startOffset(int newValue) {
-    if (_start== newValue) {
-      return;
-    }
-    _start = newValue;
-  }
+  int get startOffset => start;
+  final int start;
 
   @override
-  int get endOffset => _end;
-  int _end = -1;
-  set endOffset(int newValue) {
-    if (_end == newValue) {
-      return;
-    }
-    _end = newValue;
-  }
-
-  @override
-  _TextSpanContentRange copyWith({
-    int? selectableId,
-    TextSpan? content,
-    List<SelectedContentRange<Object>>? children,
-  }) {
-    return _TextSpanContentRange(
-      selectableId: selectableId ?? this.selectableId,
-      content: content ?? this.content,
-      children: children ?? this.children,
-    );
-  }
+  int get endOffset => end;
+  final int end;
 }
