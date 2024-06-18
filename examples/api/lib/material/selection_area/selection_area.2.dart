@@ -129,17 +129,17 @@ class _MyHomePageState extends State<MyHomePage> {
     return paragraphSpans;
   }
 
-  void _insertContent(List<SelectedContentController<Object>> controllers, String plainText) {
-    int controllerIndex = 0;
+  void _insertContent(List<SelectedContentRange<Object>> ranges, String plainText) {
+    int rangeIndex = 0;
     final List<Widget> newText = <Widget>[];
-    for (final SelectedContentController<Object> contentController in controllers) {
-      if (contentController.content is! TextSpan || contentController.selectableId == null) {
-        // Do not edit the controller if it is not text or if a selectable id has not been provided.
+    for (final SelectedContentRange<Object> contentRange in ranges) {
+      if (contentRange.content is! TextSpan || contentRange.selectableId == null) {
+        // Cannot replace content at range if not text or if a selectable id has not been provided.
         return;
       }
-      final TextSpan rawSpan = contentController.content as TextSpan;
-      final int startOffset = min(contentController.startOffset, contentController.endOffset);
-      final int endOffset = max(contentController.startOffset, contentController.endOffset);
+      final TextSpan rawSpan = contentRange.content as TextSpan;
+      final int startOffset = min(contentRange.startOffset, contentRange.endOffset);
+      final int endOffset = max(contentRange.startOffset, contentRange.endOffset);
       final List<InlineSpan> beforeSelection = <InlineSpan>[];
       final List<InlineSpan> insideSelection = <InlineSpan>[];
       final List<InlineSpan> afterSelection = <InlineSpan>[];
@@ -162,14 +162,14 @@ class _MyHomePageState extends State<MyHomePage> {
               if (globalNewStart == startOffset && newStart < rawText.length) {
                 final int newStartAfterSelection = min(newStart + (endOffset - startOffset), rawText.length);
                 final int globalNewStartAfterSelection = count + newStartAfterSelection;
-                if (controllerIndex == 0) {
+                if (rangeIndex == 0) {
                   insideSelection.add(const TextSpan(text: '\n'));
                   insideSelection.add(const TextSpan(text: '\n'));
                   // Can either wrap with a SelectionArea so the WidgetSpan can have its
                   // own contained selection. Or a SelectionContainer.disabled to completely
                   // disable the selection of the WidgetSpan contents.
                   insideSelection.add(WidgetSpan(child: SelectionArea(child: DetailBox(children: _initSpans(plainText)))));
-                  if (controllers.length == 1) {
+                  if (ranges.length == 1) {
                     insideSelection.add(const TextSpan(text: '\n'));
                     insideSelection.add(const TextSpan(text: '\n'));
                   }
@@ -191,14 +191,14 @@ class _MyHomePageState extends State<MyHomePage> {
               // Collect spans inside selection.
               final int newStart = min(endOffset - count, rawText.length);
               final int globalNewStart = count + newStart;
-              if (controllerIndex == 0) {
+              if (rangeIndex == 0) {
                 insideSelection.add(const TextSpan(text: '\n'));
                 insideSelection.add(const TextSpan(text: '\n'));
                 // Can either wrap with a SelectionArea so the WidgetSpan can have its
                 // own contained selection. Or a SelectionContainer.disabled to completely
                 // disable the selection of the WidgetSpan contents.
                 insideSelection.add(WidgetSpan(child: SelectionArea(child: DetailBox(children: _initSpans(plainText)))));
-                if (controllers.length == 1) {
+                if (ranges.length == 1) {
                   insideSelection.add(const TextSpan(text: '\n'));
                   insideSelection.add(const TextSpan(text: '\n'));
                 }
@@ -222,15 +222,15 @@ class _MyHomePageState extends State<MyHomePage> {
         }
         return true;
       });
-      dataSourceMap[contentController.selectableId!] = TextSpan(
-        style: (contentController.content as TextSpan).style,
+      dataSourceMap[contentRange.selectableId!] = TextSpan(
+        style: (contentRange.content as TextSpan).style,
         children: <InlineSpan>[
           ...beforeSelection,
           ...insideSelection,
           ...afterSelection,
         ],
       );
-      controllerIndex += 1;
+      rangeIndex += 1;
     }
     // Rebuild column contents.
     for (final MapEntry<int, TextSpan> entry in dataSourceMap.entries) {
@@ -273,8 +273,8 @@ class _MyHomePageState extends State<MyHomePage> {
                     ContextMenuButtonItem(
                       onPressed: () {
                         ContextMenuController.removeAny();
-                        if (selectedContent.controllers != null) {
-                          _insertContent(selectedContent.controllers!, selectedContent.plainText);
+                        if (selectedContent.ranges != null) {
+                          _insertContent(selectedContent.ranges!, selectedContent.plainText);
                         }
                         _selectionController.clear();
                       },

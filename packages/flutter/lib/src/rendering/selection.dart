@@ -100,19 +100,39 @@ abstract class SelectionHandler implements ValueListenable<SelectionGeometry> {
   SelectionResult dispatchSelectionEvent(SelectionEvent event);
 }
 
-/// A controller for the content of a [Selectable].
+/// Represents a range of content within a given [SelectedContent].
 ///
-/// A user can set the value on this controller to modify the content under
-/// a selection created by [SelectionArea] or [SelectableRegion].
-abstract class SelectedContentController<T extends Object> {
-  /// Creates a controller for the content of a [Selectable] or [SelectionHandler].
-  SelectedContentController({
+/// This class stores the information of an active selection under
+/// a [Selectable] or [SelectionHandler], including the start and
+/// end positions of a selection relative to the content, as well
+/// as an identifier to identify the owner of the content, any
+/// children selection ranges that may be contained within the active
+/// selection, and the content itself.
+///
+/// [SelectionArea] and [SelectableRegion] provide access to this
+/// information through the [SelectedContent] provided in their
+/// [SelectionArea.onSelectionChanged] and
+/// [SelectableRegion.onSelectionChanged] members.
+///
+/// {@tool dartpad}
+/// This example shows how to color red the active selection
+/// under a [SelectionArea] or [SelectableRegion].
+///
+/// ** See code in examples/api/lib/material/selection_area/selection_area.1.dart **
+/// {@end-tool}
+///
+/// See also:
+/// 
+///   * [SelectedContent], which contains the [SelectedContentRange] for a given [Selectable].
+abstract class SelectedContentRange<T extends Object> {
+  /// Creates a range for the content of a [Selectable] or [SelectionHandler].
+  SelectedContentRange({
     this.selectableId,
     required this.content,
     this.children,
   });
 
-  /// The unique id for the [Selectable] that created the controller.
+  /// The unique id for the [Selectable] that created the range.
   final int? selectableId;
 
   /// The content that contains the selection.
@@ -124,23 +144,23 @@ abstract class SelectedContentController<T extends Object> {
   /// The end of the selection relative to the [content].
   int get endOffset;
 
-  /// Additional controllers to include as children.
+  /// Additional ranges to include as children.
   ///
-  /// Children of a given controller enable more granular modification of the
+  /// Children of a given range enable more granular modification of the
   /// selection.
-  final List<SelectedContentController<Object>>? children;
+  final List<SelectedContentRange<Object>>? children;
 
   /// Makes a copy of this object with its property replaced with the new
   /// values.
-  SelectedContentController<T> copyWith({
+  SelectedContentRange<T> copyWith({
     int? selectableId,
     T? content,
-    List<SelectedContentController<Object>>? children,
+    List<SelectedContentRange<Object>>? children,
   });
 
   @override
   String toString() {
-    return 'SelectedContentController(\n'
+    return 'SelectedContentRange(\n'
            '  selectableId: $selectableId,\n'
            '  content: $content,\n'
            '  startOffset: $startOffset,\n'
@@ -162,7 +182,7 @@ class SelectedContent {
     required this.geometry,
     this.startOffset = -1,
     this.endOffset = -1,
-    this.controllers,
+    this.ranges,
   });
 
   /// The selected content in plain text format.
@@ -174,19 +194,19 @@ class SelectedContent {
 
   /// The value representing the beginning of the selection, defaults to -1.
   ///
-  /// If the [Selectable] contains mutable text, then the offset represents
+  /// If the [Selectable] contains text, then the offset represents
   /// character offsets.
   final int startOffset;
 
   /// The value representing the end of the selection, defaults to -1.
   ///
-  /// If the [Selectable] contains mutable text, then the offset represents
+  /// If the [Selectable] contains text, then the offset represents
   /// character offsets.
   final int endOffset;
 
-  /// A list of [SelectedContentController]s that represent the selection, and
-  /// can be used to modify the contents of the selection.
-  final List<SelectedContentController<Object>>? controllers;
+  /// A list of [SelectedContentRange]s that represent the content under
+  /// the active selection.
+  final List<SelectedContentRange<Object>>? ranges;
 
   @override
   String toString() {
@@ -195,7 +215,7 @@ class SelectedContent {
            '  geometry: $geometry,\n'
            '  startOffset: $startOffset,\n'
            '  endOffset: $endOffset,\n'
-           '  controllers: $controllers,\n'
+           '  ranges: $ranges,\n'
            ')';
   }
 }

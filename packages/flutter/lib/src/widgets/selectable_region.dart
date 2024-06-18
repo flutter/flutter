@@ -2417,9 +2417,9 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     if (selections.isEmpty) {
       return null;
     }
-    final List<SelectedContentController<Object>> childControllers = <SelectedContentController<Object>>[
+    final List<SelectedContentRange<Object>> childRanges = <SelectedContentRange<Object>>[
       for (final SelectedContent selectedContent in selections)
-        if (selectedContent.controllers case final List<SelectedContentController<Object>> data) ...data,
+        if (selectedContent.ranges case final List<SelectedContentRange<Object>> data) ...data,
     ];
     final StringBuffer buffer = StringBuffer();
     for (final SelectedContent selection in selections) {
@@ -2428,7 +2428,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     return SelectedContent(
       plainText: buffer.toString(),
       geometry: value,
-      controllers: childControllers,
+      ranges: childRanges,
     );
   }
 

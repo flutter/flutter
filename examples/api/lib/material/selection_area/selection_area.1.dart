@@ -101,21 +101,21 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _colorSelectionRed(
-    List<SelectedContentController<Object>>? controllers,
+    List<SelectedContentRange<Object>>? ranges,
     { required Map<int, TextSpan> dataMap }
   ) {
-    if (controllers == null || controllers.isEmpty) {
+    if (ranges == null || ranges.isEmpty) {
       return;
     }
-    for (int index = 0; index < controllers.length; index += 1) {
-      final SelectedContentController<Object> contentController = controllers[index];
-      if (contentController.content is! TextSpan || contentController.selectableId == null) {
-        // Do not edit the controller if it is not text or if a selectable id has not been provided.
+    for (int index = 0; index < ranges.length; index += 1) {
+      final SelectedContentRange<Object> contentRange = ranges[index];
+      if (contentRange.content is! TextSpan || contentRange.selectableId == null) {
+        // Cannot color range red if it is not text or if a selectable id has not been provided.
         return;
       }
-      final TextSpan rawSpan = contentController.content as TextSpan;
-      final int startOffset = min(contentController.startOffset, contentController.endOffset);
-      final int endOffset = max(contentController.startOffset, contentController.endOffset);
+      final TextSpan rawSpan = contentRange.content as TextSpan;
+      final int startOffset = min(contentRange.startOffset, contentRange.endOffset);
+      final int endOffset = max(contentRange.startOffset, contentRange.endOffset);
       final List<InlineSpan> beforeSelection = <InlineSpan>[];
       final List<InlineSpan> insideSelection = <InlineSpan>[];
       final List<InlineSpan> afterSelection = <InlineSpan>[];
@@ -175,14 +175,14 @@ class _MyHomePageState extends State<MyHomePage> {
           } else if (count >= endOffset) {
             afterSelection.add(child);
           } else {
-            if (contentController.children == null) {
+            if (contentRange.children == null) {
               count += 1;
               return true;
             }
             // Update bulleted list data.
-            for (final SelectedContentController<Object> controller in contentController.children!) {
+            for (final SelectedContentRange<Object> range in contentRange.children!) {
               _colorSelectionRed(
-                <SelectedContentController<Object>>[controller],
+                <SelectedContentRange<Object>>[range],
                 dataMap: bulletSourceMap,
               );
             }
@@ -208,8 +208,8 @@ class _MyHomePageState extends State<MyHomePage> {
         }
         return true;
       });
-      dataMap[contentController.selectableId!] = TextSpan(
-        style: (contentController.content as TextSpan).style,
+      dataMap[contentRange.selectableId!] = TextSpan(
+        style: (contentRange.content as TextSpan).style,
         children: <InlineSpan>[
           ...beforeSelection,
           ...insideSelection,
@@ -252,7 +252,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       onPressed: () {
                         ContextMenuController.removeAny();
                         _colorSelectionRed(
-                          selectedContent.controllers,
+                          selectedContent.ranges,
                           dataMap: dataSourceMap,
                         );
                         _selectionController.clear();
