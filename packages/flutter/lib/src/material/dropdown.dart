@@ -785,12 +785,9 @@ class _DropdownMenuItemContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Semantics(
-      button: true,
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(minHeight: _kMenuItemHeight),
-        child: Align(alignment: alignment, child: child),
-      ),
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: _kMenuItemHeight),
+      child: Align(alignment: alignment, child: child),
     );
   }
 }
@@ -1586,9 +1583,9 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
         child: result,
       );
     }
-    final bool childHasButtonSemantic = hintIndex != null || (_selectedIndex != null && widget.selectedItemBuilder == null);
+
     return Semantics(
-      button: !childHasButtonSemantic,
+      button: true,
       child: Actions(
         actions: _actionMap,
         child: InkWell(
