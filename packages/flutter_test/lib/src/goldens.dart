@@ -96,8 +96,7 @@ abstract class GoldenFileComparator {
 
   /// Returns a [ComparisonResult] to describe the pixel differential of the
   /// [test] and [master] image bytes provided.
-  static Future<ComparisonResult> compareLists(
-      List<int> test, List<int> master) {
+  static Future<ComparisonResult> compareLists(List<int> test, List<int> master) {
     return goldens.compareLists(test, master);
   }
 }
@@ -280,8 +279,7 @@ abstract class WebGoldenComparator {
 ///  * [goldenFileComparator], the comparator used when tests are not running on
 ///    a web browser.
 WebGoldenComparator get webGoldenComparator => _webGoldenComparator;
-WebGoldenComparator _webGoldenComparator =
-    const _TrivialWebGoldenComparator._();
+WebGoldenComparator _webGoldenComparator = const _TrivialWebGoldenComparator._();
 set webGoldenComparator(WebGoldenComparator value) {
   _webGoldenComparator = value;
 }
