@@ -15,7 +15,6 @@
 #include "flutter/display_list/effects/dl_color_source.h"
 #include "flutter/display_list/effects/dl_image_filter.h"
 #include "flutter/display_list/effects/dl_mask_filter.h"
-#include "flutter/display_list/effects/dl_path_effect.h"
 #include "flutter/display_list/image/dl_image.h"
 
 #include "flutter/impeller/geometry/path.h"
@@ -157,7 +156,6 @@ class DlOpReceiver {
   // filter so that the color inversion happens after the ColorFilter.
   virtual void setInvertColors(bool invert) = 0;
   virtual void setBlendMode(DlBlendMode mode) = 0;
-  virtual void setPathEffect(const DlPathEffect* effect) = 0;
   virtual void setMaskFilter(const DlMaskFilter* filter) = 0;
   virtual void setImageFilter(const DlImageFilter* filter) = 0;
 
