@@ -6,8 +6,8 @@ import 'dart:io' as io;
 import 'dart:typed_data';
 
 import 'package:analyzer/file_system/file_system.dart';
-import 'package:analyzer/src/generated/source.dart';
-import 'package:analyzer/src/source/source_resource.dart';
+import 'package:analyzer/source/file_source.dart';
+import 'package:analyzer/source/source.dart';
 import 'package:file/file.dart' as file;
 import 'package:file/local.dart' as file;
 import 'package:meta/meta.dart';
