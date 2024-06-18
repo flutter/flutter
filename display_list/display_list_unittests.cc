@@ -124,7 +124,6 @@ class DisplayListTestBase : public BaseT {
     EXPECT_EQ(builder_paint.getColorFilter(), defaults.getColorFilter());
     EXPECT_EQ(builder_paint.getImageFilter(), defaults.getImageFilter());
     EXPECT_EQ(builder_paint.getMaskFilter(), defaults.getMaskFilter());
-    EXPECT_EQ(builder_paint.getPathEffect(), defaults.getPathEffect());
     EXPECT_EQ(builder_paint, defaults);
     EXPECT_TRUE(builder_paint.isDefault());
 
@@ -443,10 +442,6 @@ TEST_F(DisplayListTest, BuildRestoresAttributes) {
   check_defaults(builder, cull_rect);
 
   receiver.setMaskFilter(&kTestMaskFilter1);
-  builder.Build();
-  check_defaults(builder, cull_rect);
-
-  receiver.setPathEffect(kTestPathEffect1.get());
   builder.Build();
   check_defaults(builder, cull_rect);
 }

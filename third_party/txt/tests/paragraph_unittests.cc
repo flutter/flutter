@@ -48,7 +48,6 @@ class DlOpRecorder final : public virtual DlOpReceiver,
   int pathCount() const { return paths_.size(); }
   int textFrameCount() const { return text_frames_.size(); }
   int blobCount() const { return blobs_.size(); }
-  bool hasPathEffect() const { return path_effect_ != nullptr; }
 
  private:
   void drawLine(const SkPoint& p0, const SkPoint& p1) override {
@@ -78,17 +77,12 @@ class DlOpRecorder final : public virtual DlOpReceiver,
 
   void drawPath(const SkPath& path) override { paths_.push_back(path); }
 
-  void setPathEffect(const DlPathEffect* effect) override {
-    path_effect_ = effect;
-  }
-
   std::vector<std::shared_ptr<impeller::TextFrame>> text_frames_;
   std::vector<sk_sp<SkTextBlob>> blobs_;
   std::vector<std::pair<SkPoint, SkPoint>> lines_;
   std::vector<std::tuple<DlPoint, DlPoint, DlPoint>> dashed_lines_;
   std::vector<SkRect> rects_;
   std::vector<SkPath> paths_;
-  const DlPathEffect* path_effect_;
 };
 
 template <typename T>
@@ -199,7 +193,6 @@ TEST_F(PainterTest, DrawsSolidLineSkia) {
   // Skia may draw a solid underline as a filled rectangle:
   // https://skia.googlesource.com/skia/+/refs/heads/main/modules/skparagraph/src/Decorations.cpp#91
   EXPECT_EQ(recorder.rectCount(), 1);
-  EXPECT_FALSE(recorder.hasPathEffect());
 }
 
 TEST_F(PainterTest, DrawDashedLineSkia) {
@@ -212,7 +205,6 @@ TEST_F(PainterTest, DrawDashedLineSkia) {
   // Skia draws a dashed underline as a filled rectangle with a path effect.
   EXPECT_EQ(recorder.lineCount(), 0);
   EXPECT_EQ(recorder.dashedLineCount(), 1);
-  EXPECT_FALSE(recorder.hasPathEffect());
 }
 
 #ifdef IMPELLER_SUPPORTS_RENDERING
@@ -226,7 +218,6 @@ TEST_F(PainterTest, DrawsSolidLineImpeller) {
   // Skia may draw a solid underline as a filled rectangle:
   // https://skia.googlesource.com/skia/+/refs/heads/main/modules/skparagraph/src/Decorations.cpp#91
   EXPECT_EQ(recorder.rectCount(), 1);
-  EXPECT_FALSE(recorder.hasPathEffect());
 }
 
 TEST_F(PainterTest, DrawDashedLineImpeller) {
@@ -239,7 +230,6 @@ TEST_F(PainterTest, DrawDashedLineImpeller) {
   // Impeller draws a dashed underline as a path.
   EXPECT_EQ(recorder.pathCount(), 0);
   EXPECT_EQ(recorder.dashedLineCount(), 1);
-  EXPECT_FALSE(recorder.hasPathEffect());
 }
 
 TEST_F(PainterTest, DrawTextFrameImpeller) {
