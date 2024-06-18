@@ -478,12 +478,6 @@ void DlDispatcherBase::setBlendMode(flutter::DlBlendMode dl_mode) {
   paint_.blend_mode = ToBlendMode(dl_mode);
 }
 
-// |flutter::DlOpReceiver|
-void DlDispatcherBase::setPathEffect(const flutter::DlPathEffect* effect) {
-  // Needs https://github.com/flutter/flutter/issues/95434
-  UNIMPLEMENTED;
-}
-
 static FilterContents::BlurStyle ToBlurStyle(flutter::DlBlurStyle blur_style) {
   switch (blur_style) {
     case flutter::DlBlurStyle::kNormal:

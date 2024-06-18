@@ -114,15 +114,6 @@ inline sk_sp<SkMaskFilter> ToSk(const DlMaskFilter& filter) {
   return ToSk(&filter);
 }
 
-extern sk_sp<SkPathEffect> ToSk(const DlPathEffect* effect);
-inline sk_sp<SkPathEffect> ToSk(
-    const std::shared_ptr<const DlPathEffect>& effect) {
-  return ToSk(effect.get());
-}
-inline sk_sp<SkPathEffect> ToSk(const DlPathEffect& effect) {
-  return ToSk(&effect);
-}
-
 extern sk_sp<SkVertices> ToSk(const DlVertices* vertices);
 inline sk_sp<SkVertices> ToSk(
     const std::shared_ptr<const DlVertices>& vertices) {

@@ -30,6 +30,7 @@
 #include "third_party/skia/include/core/SkStream.h"
 #include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/core/SkTypeface.h"
+#include "third_party/skia/include/effects/SkDashPathEffect.h"
 #include "third_party/skia/include/effects/SkGradientShader.h"
 #include "third_party/skia/include/effects/SkImageFilters.h"
 #include "third_party/skia/include/encode/SkPngEncoder.h"
@@ -911,30 +912,14 @@ class TestParameters {
     if (flags_.is_stroked(ref_attr.getDrawStyle()) != is_stroked) {
       return false;
     }
-    DisplayListSpecialGeometryFlags geo_flags =
-        flags_.WithPathEffect(attr.getPathEffect().get(), is_stroked);
-    if (flags_.applies_path_effect() &&  //
-        ref_attr.getPathEffect() != attr.getPathEffect()) {
-      if (renderer.targets_impeller()) {
-        // Impeller ignores DlPathEffect objects:
-        // https://github.com/flutter/flutter/issues/109736
-      } else {
-        switch (attr.getPathEffect()->type()) {
-          case DlPathEffectType::kDash: {
-            if (is_stroked && !ignores_dashes()) {
-              return false;
-            }
-            break;
-          }
-        }
-      }
-    }
     if (!is_stroked) {
       return true;
     }
     if (ref_attr.getStrokeWidth() != attr.getStrokeWidth()) {
       return false;
     }
+    DisplayListSpecialGeometryFlags geo_flags =
+        flags_.GeometryFlags(is_stroked);
     if (geo_flags.may_have_end_caps() &&  //
         getCap(ref_attr, geo_flags) != getCap(attr, geo_flags)) {
       return false;
@@ -1009,10 +994,8 @@ class TestParameters {
       adjust =
           half_width * paint.getStrokeMiter() + tolerance.discrete_offset();
     }
-    auto path_effect = paint.getPathEffect();
 
-    DisplayListSpecialGeometryFlags geo_flags =
-        flags_.WithPathEffect(path_effect.get(), true);
+    DisplayListSpecialGeometryFlags geo_flags = flags_.GeometryFlags(true);
     if (paint.getStrokeCap() == DlStrokeCap::kButt &&
         !geo_flags.butt_cap_becomes_square()) {
       adjust = std::max(adjust, half_width);

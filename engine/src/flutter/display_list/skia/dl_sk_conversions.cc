@@ -49,7 +49,6 @@ SkPaint ToSk(const DlPaint& paint) {
   }
 
   sk_paint.setMaskFilter(ToSk(paint.getMaskFilterPtr()));
-  sk_paint.setPathEffect(ToSk(paint.getPathEffectPtr()));
 
   return sk_paint;
 }
@@ -271,20 +270,6 @@ sk_sp<SkMaskFilter> ToSk(const DlMaskFilter* filter) {
       return SkMaskFilter::MakeBlur(ToSk(blur_filter->style()),
                                     blur_filter->sigma(),
                                     blur_filter->respectCTM());
-    }
-  }
-}
-
-sk_sp<SkPathEffect> ToSk(const DlPathEffect* effect) {
-  if (!effect) {
-    return nullptr;
-  }
-  switch (effect->type()) {
-    case DlPathEffectType::kDash: {
-      const DlDashPathEffect* dash_effect = effect->asDash();
-      FML_DCHECK(dash_effect != nullptr);
-      return SkDashPathEffect::Make(dash_effect->intervals(),
-                                    dash_effect->count(), dash_effect->phase());
     }
   }
 }

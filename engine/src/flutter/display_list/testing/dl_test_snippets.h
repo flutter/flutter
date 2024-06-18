@@ -11,7 +11,6 @@
 
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkSurface.h"
-#include "third_party/skia/include/effects/SkDashPathEffect.h"
 #include "third_party/skia/include/effects/SkGradientShader.h"
 #include "third_party/skia/include/effects/SkImageFilters.h"
 
@@ -53,9 +52,6 @@ constexpr float kInvertColorMatrix[20] = {
      1.0,  1.0,  1.0, 1.0,   0,
 };
 // clang-format on
-
-const SkScalar kTestDashes1[] = {4.0, 2.0};
-const SkScalar kTestDashes2[] = {1.0, 1.5};
 
 constexpr SkPoint kTestPoints[] = {
     {10, 10},
@@ -175,10 +171,6 @@ static const DlColorFilterImageFilter kTestCFImageFilter1(
     kTestBlendColorFilter1);
 static const DlColorFilterImageFilter kTestCFImageFilter2(
     kTestBlendColorFilter2);
-static const std::shared_ptr<DlPathEffect> kTestPathEffect1 =
-    DlDashPathEffect::Make(kTestDashes1, 2, 0.0f);
-static const std::shared_ptr<DlPathEffect> kTestPathEffect2 =
-    DlDashPathEffect::Make(kTestDashes2, 2, 0.0f);
 static const DlBlurMaskFilter kTestMaskFilter1(DlBlurStyle::kNormal, 3.0);
 static const DlBlurMaskFilter kTestMaskFilter2(DlBlurStyle::kNormal, 5.0);
 static const DlBlurMaskFilter kTestMaskFilter3(DlBlurStyle::kSolid, 3.0);

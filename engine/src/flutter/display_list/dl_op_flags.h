@@ -10,7 +10,6 @@
 
 namespace flutter {
 
-class DlPathEffect;
 /// The base class for the classes that maintain a list of
 /// attributes that might be important for a number of operations
 /// including which rendering attributes need to be set before
@@ -86,9 +85,8 @@ class DisplayListFlags {
   static constexpr int kUsesBlend           = 1 << 13;
   static constexpr int kUsesShader          = 1 << 14;
   static constexpr int kUsesColorFilter     = 1 << 15;
-  static constexpr int kUsesPathEffect      = 1 << 16;
-  static constexpr int kUsesMaskFilter      = 1 << 17;
-  static constexpr int kUsesImageFilter     = 1 << 18;
+  static constexpr int kUsesMaskFilter      = 1 << 16;
+  static constexpr int kUsesImageFilter     = 1 << 17;
 
   // Some ops have an optional paint argument. If the version
   // stored in the DisplayList ignores the paint, but there
@@ -102,7 +100,7 @@ class DisplayListFlags {
 
   static constexpr int kAnyAttributeMask =  //
       kUsesAntiAlias | kUsesAlpha | kUsesColor | kUsesBlend | kUsesShader |
-      kUsesColorFilter | kUsesPathEffect | kUsesMaskFilter | kUsesImageFilter;
+      kUsesColorFilter | kUsesMaskFilter | kUsesImageFilter;
 };
 
 class DisplayListFlagsBase : protected DisplayListFlags {
@@ -164,9 +162,9 @@ class DisplayListSpecialGeometryFlags : DisplayListFlagsBase {
 
 class DisplayListAttributeFlags : DisplayListFlagsBase {
  public:
-  const DisplayListSpecialGeometryFlags WithPathEffect(
-      const DlPathEffect* effect,
-      bool is_stroked) const;
+  const DisplayListSpecialGeometryFlags GeometryFlags(bool is_stroked) const {
+    return special_flags_;
+  }
 
   constexpr bool ignores_paint() const { return has_any(kIgnoresPaint); }
 
@@ -198,9 +196,6 @@ class DisplayListAttributeFlags : DisplayListFlagsBase {
   }
   /// The primitive honors the DlBlendMode
   constexpr bool applies_blend() const { return has_any(kUsesBlend); }
-  constexpr bool applies_path_effect() const {
-    return has_any(kUsesPathEffect);
-  }
   /// The primitive honors the DlMaskFilter whether set using the
   /// filter object or using the convenience method |setMaskBlurFilter|
   constexpr bool applies_mask_filter() const {
@@ -264,14 +259,12 @@ class DisplayListOpFlags : DisplayListFlags {
   // Flags common to all primitives that stroke or fill
   static constexpr int kBaseStrokeOrFillFlags = (kIsDrawnGeometry |  //
                                                  kUsesAntiAlias |    //
-                                                 kUsesMaskFilter |   //
-                                                 kUsesPathEffect);
+                                                 kUsesMaskFilter);
 
   // Flags common to primitives that stroke geometry
   static constexpr int kBaseStrokeFlags = (kIsStrokedGeometry |  //
                                            kUsesAntiAlias |      //
-                                           kUsesMaskFilter |     //
-                                           kUsesPathEffect);
+                                           kUsesMaskFilter);
 
   // Flags common to primitives that render an image with paint attributes
   static constexpr int kBaseImageFlags = (kIsNonGeometric |   //

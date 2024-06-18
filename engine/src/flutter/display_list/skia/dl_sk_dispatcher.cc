@@ -9,6 +9,7 @@
 #include "flutter/display_list/skia/dl_sk_types.h"
 #include "flutter/fml/trace_event.h"
 
+#include "third_party/skia/include/effects/SkDashPathEffect.h"
 #include "third_party/skia/include/utils/SkShadowUtils.h"
 
 namespace flutter {

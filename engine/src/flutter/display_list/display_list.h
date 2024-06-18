@@ -69,9 +69,6 @@ namespace flutter {
   V(SetColor)                       \
   V(SetBlendMode)                   \
                                     \
-  V(SetPodPathEffect)               \
-  V(ClearPathEffect)                \
-                                    \
   V(ClearColorFilter)               \
   V(SetPodColorFilter)              \
                                     \

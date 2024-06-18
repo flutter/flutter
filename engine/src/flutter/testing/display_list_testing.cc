@@ -544,9 +544,6 @@ void DisplayListStreamDispatcher::setInvertColors(bool invert) {
 void DisplayListStreamDispatcher::setBlendMode(DlBlendMode mode) {
   startl() << "setBlendMode(" << mode << ");" << std::endl;
 }
-void DisplayListStreamDispatcher::setPathEffect(const DlPathEffect* effect) {
-  startl() << "setPathEffect(" << effect << ");" << std::endl;
-}
 void DisplayListStreamDispatcher::setMaskFilter(const DlMaskFilter* filter) {
   if (filter == nullptr) {
     startl() << "setMaskFilter(no MaskFilter);" << std::endl;

@@ -11,6 +11,7 @@
 #include "flutter/fml/trace_event.h"
 
 #include "third_party/skia/include/core/SkColorFilter.h"
+#include "third_party/skia/include/effects/SkDashPathEffect.h"
 #include "third_party/skia/include/gpu/GrDirectContext.h"
 #include "third_party/skia/include/gpu/GrRecordingContext.h"
 

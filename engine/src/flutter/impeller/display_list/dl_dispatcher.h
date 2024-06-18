@@ -61,9 +61,6 @@ class DlDispatcherBase : public flutter::DlOpReceiver {
   void setBlendMode(flutter::DlBlendMode mode) override;
 
   // |flutter::DlOpReceiver|
-  void setPathEffect(const flutter::DlPathEffect* effect) override;
-
-  // |flutter::DlOpReceiver|
   void setMaskFilter(const flutter::DlMaskFilter* filter) override;
 
   // |flutter::DlOpReceiver|

@@ -88,9 +88,6 @@ void DlSkPaintDispatchHelper::setColorFilter(const DlColorFilter* filter) {
   sk_color_filter_ = ToSk(filter);
   paint_.setColorFilter(makeColorFilter());
 }
-void DlSkPaintDispatchHelper::setPathEffect(const DlPathEffect* effect) {
-  paint_.setPathEffect(ToSk(effect));
-}
 void DlSkPaintDispatchHelper::setMaskFilter(const DlMaskFilter* filter) {
   paint_.setMaskFilter(ToSk(filter));
 }

@@ -231,7 +231,6 @@ DEFINE_SET_CLEAR_DLATTR_OP(ColorFilter, ColorFilter, filter)
 DEFINE_SET_CLEAR_DLATTR_OP(ImageFilter, ImageFilter, filter)
 DEFINE_SET_CLEAR_DLATTR_OP(MaskFilter, MaskFilter, filter)
 DEFINE_SET_CLEAR_DLATTR_OP(ColorSource, Shader, source)
-DEFINE_SET_CLEAR_DLATTR_OP(PathEffect, PathEffect, effect)
 #undef DEFINE_SET_CLEAR_DLATTR_OP
 
 // 4 byte header + 80 bytes for the embedded DlImageColorSource

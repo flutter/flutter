@@ -12,7 +12,6 @@
 #include "flutter/display_list/dl_op_receiver.h"
 #include "flutter/display_list/dl_paint.h"
 #include "flutter/display_list/dl_sampling_options.h"
-#include "flutter/display_list/effects/dl_path_effect.h"
 #include "flutter/display_list/geometry/dl_geometry_types.h"
 #include "flutter/display_list/image/dl_image.h"
 #include "flutter/display_list/utils/dl_accumulation_rect.h"
@@ -343,12 +342,6 @@ class DisplayListBuilder final : public virtual DlCanvas,
   void setColorFilter(const DlColorFilter* filter) override {
     if (NotEquals(current_.getColorFilter(), filter)) {
       onSetColorFilter(filter);
-    }
-  }
-  // |DlOpReceiver|
-  void setPathEffect(const DlPathEffect* effect) override {
-    if (NotEquals(current_.getPathEffect(), effect)) {
-      onSetPathEffect(effect);
     }
   }
   // |DlOpReceiver|
@@ -771,7 +764,6 @@ class DisplayListBuilder final : public virtual DlCanvas,
   void onSetColorSource(const DlColorSource* source);
   void onSetImageFilter(const DlImageFilter* filter);
   void onSetColorFilter(const DlColorFilter* filter);
-  void onSetPathEffect(const DlPathEffect* effect);
   void onSetMaskFilter(const DlMaskFilter* filter);
 
   static DisplayListAttributeFlags FlagsForPointMode(PointMode mode);

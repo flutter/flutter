@@ -338,22 +338,6 @@ void DisplayListBuilder::onSetColorFilter(const DlColorFilter* filter) {
   }
   UpdateCurrentOpacityCompatibility();
 }
-void DisplayListBuilder::onSetPathEffect(const DlPathEffect* effect) {
-  if (effect == nullptr) {
-    current_.setPathEffect(nullptr);
-    Push<ClearPathEffectOp>(0);
-  } else {
-    current_.setPathEffect(effect->shared());
-    switch (effect->type()) {
-      case DlPathEffectType::kDash: {
-        const DlDashPathEffect* dash_effect = effect->asDash();
-        void* pod = Push<SetPodPathEffectOp>(dash_effect->size());
-        new (pod) DlDashPathEffect(dash_effect);
-        break;
-      }
-    }
-  }
-}
 void DisplayListBuilder::onSetMaskFilter(const DlMaskFilter* filter) {
   if (filter == nullptr) {
     current_.setMaskFilter(nullptr);
@@ -404,9 +388,6 @@ void DisplayListBuilder::SetAttributesFromPaint(
   }
   if (flags.applies_image_filter()) {
     setImageFilter(paint.getImageFilter().get());
-  }
-  if (flags.applies_path_effect()) {
-    setPathEffect(paint.getPathEffect().get());
   }
   if (flags.applies_mask_filter()) {
     setMaskFilter(paint.getMaskFilter().get());
@@ -1726,14 +1707,7 @@ bool DisplayListBuilder::AdjustBoundsForPaint(SkRect& bounds,
 
     // Path effect occurs before stroking...
     DisplayListSpecialGeometryFlags special_flags =
-        flags.WithPathEffect(current_.getPathEffectPtr(), is_stroked);
-    if (current_.getPathEffect()) {
-      auto effect_bounds = current_.getPathEffect()->effect_bounds(bounds);
-      if (!effect_bounds.has_value()) {
-        return false;
-      }
-      bounds = effect_bounds.value();
-    }
+        flags.GeometryFlags(is_stroked);
 
     if (is_stroked) {
       // Determine the max multiplier to the stroke width first.
