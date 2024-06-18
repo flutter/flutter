@@ -3261,4 +3261,84 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
     await tester.pumpAndSettle();
     expect(scrollController.offset, 0.0);
   });
+
+  testWidgets('Desktop trackpad drag direction: -X,-Y produces positive scroll offset changes', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
+
+    Widget buildFrame(Axis scrollDirection) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: RawScrollbar(
+            controller: scrollController,
+            child: SingleChildScrollView(
+              scrollDirection: scrollDirection,
+              controller: scrollController,
+              child: const SizedBox(width: 1600, height: 1200),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Vertical scrolling: -Y trackpad motion produces positive scroll offset change
+
+    await tester.pumpWidget(buildFrame(Axis.vertical));
+    expect(scrollController.offset, 0);
+    expect(scrollController.position.maxScrollExtent, 600);
+
+    await tester.trackpadFling(find.byType(SingleChildScrollView), const Offset(0, -600), 500);
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 600);
+
+    await tester.trackpadFling(find.byType(SingleChildScrollView), const Offset(0, 600), 500);
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 0);
+
+    // Overscroll is OK for (vertical) trackpad gestures.
+
+    await tester.trackpadFling(find.byType(SingleChildScrollView), const Offset(0, -100), 500);
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, greaterThan(100));
+    scrollController.jumpTo(600);
+
+    await tester.trackpadFling(find.byType(SingleChildScrollView), const Offset(0, 100), 500);
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, lessThan(500));
+    scrollController.jumpTo(0);
+
+    // Horizontal scrolling: -X trackpad motion produces positive scroll offset change
+
+    await tester.pumpWidget(buildFrame(Axis.horizontal));
+    expect(scrollController.offset, 0);
+    expect(scrollController.position.maxScrollExtent, 800);
+
+    await tester.trackpadFling(find.byType(SingleChildScrollView), const Offset(-800, 0), 500);
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 800);
+
+    await tester.trackpadFling(find.byType(SingleChildScrollView), const Offset(800, 0), 500);
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 0);
+
+    // Overscroll is OK for (horizontal) trackpad gestures.
+
+    await tester.trackpadFling(find.byType(SingleChildScrollView), const Offset(-100, 0), 500);
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, greaterThan(100));
+    scrollController.jumpTo(800);
+
+    await tester.trackpadFling(find.byType(SingleChildScrollView), const Offset(100, 0), 500);
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, lessThan(700));
+    scrollController.jumpTo(0);
+
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{
+    TargetPlatform.macOS,
+    TargetPlatform.linux,
+    TargetPlatform.windows,
+    TargetPlatform.fuchsia,
+  }));
 }
