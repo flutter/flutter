@@ -605,6 +605,37 @@ void main() {
     await tester.tap(find.byType(FittedBox), warnIfMissed: false);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('FittedBox with zero size child does not throw', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Center(
+        child: ConstrainedBox(
+          constraints: BoxConstraints.tight(
+            const Size(200.0, 200.0),
+          ),
+          child: const FittedBox(
+            child: SizedBox.shrink(),
+          ),
+        ),
+      ),
+    );
+    expect(tester.takeException(), isNull);
+
+    await tester.pumpWidget(
+      Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(
+            maxWidth: 200.0,
+            maxHeight: 200.0,
+          ),
+          child: const FittedBox(
+            child: SizedBox.shrink(),
+          ),
+        ),
+      ),
+    );
+    expect(tester.takeException(), isNull);
+  });
 }
 
 List<Type> getLayers() {
