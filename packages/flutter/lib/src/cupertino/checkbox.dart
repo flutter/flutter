@@ -95,7 +95,6 @@ class CupertinoCheckbox extends StatefulWidget {
     this.autofocus = false,
     this.side,
     this.shape,
-    this.shadowColor,
     this.isError = false,
     this.semanticLabel,
   }) : assert(tristate || value != null);
@@ -260,19 +259,6 @@ class CupertinoCheckbox extends StatefulWidget {
   /// If this property is null then the shape defaults to a
   /// [RoundedRectangleBorder] with a circular corner radius of 4.0.
   final OutlinedBorder? shape;
-
-  /// {@template flutter.cupertino.CupertinoCheckbox.shadowColor}
-  /// The color of the dropshadow from the top edge of the checkbox.
-  ///
-  /// From measuring the composition of the dropshadow in HIG checkbox examples,
-  /// the checkbox was found to have a slight dropshadow with two layers, each
-  /// one pixel long, starting from the top edge.
-  /// {@endtemplate}
-  ///
-  /// If this property is null, then the dropshadow has color
-  /// [CupertinoColors.black]. If no shadow is desired, set this property to the
-  /// transparent color ([Color(0x00000000)]).
-  final Color? shadowColor;
 
   /// True if this checkbox wants to show an error state.
   ///
@@ -440,7 +426,6 @@ class _CupertinoCheckboxState extends State<CupertinoCheckbox> with TickerProvid
             borderRadius: BorderRadius.circular(4.0),
           )
           ..side = effectiveBorderSide
-          ..shadowColor = widget.shadowColor ?? CupertinoColors.black,
       ),
     );
   }
@@ -497,16 +482,6 @@ class _CheckboxPainter extends ToggleablePainter {
     notifyListeners();
   }
 
-  Color get shadowColor => _shadowColor!;
-  Color? _shadowColor;
-  set shadowColor(Color? value) {
-    if (_shadowColor == value) {
-      return;
-    }
-    _shadowColor = value;
-    notifyListeners();
-  }
-
   Rect _outerRectAt(Offset origin) {
     const double size = CupertinoCheckbox.width;
     final Rect rect = Rect.fromLTWH(origin.dx, origin.dy, size, size);
@@ -529,35 +504,7 @@ class _CheckboxPainter extends ToggleablePainter {
   }
 
   void _drawBox(Canvas canvas, Rect outer, Paint paint, BorderSide? side) {
-    // Add dropshadow effect when unselected.
-    //
-    // The gradient colors were eyeballed from a checkbox on a physical Macbook
-    // Pro running macOS version 14.5.
-    //
-    // Since the focus outline is drawn around the outer border,
-    // only clip to the outer border when not in focus.
-    if (value == false && !isFocused && shadowColor != CupertinoColors.transparent) {
-      canvas.clipPath(shape.getOuterPath(outer));
-      canvas.drawPath(shape.getOuterPath(outer), paint);
-
-      // The drop shadow has two layers.
-      final Rect shadowRect = Rect.fromLTRB(
-        outer.left, outer.top, outer.right, outer.top + 2);
-      final LinearGradient topEdgeGradient = LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: <Color>[
-          shadowColor.withOpacity(0.1),
-          shadowColor.withOpacity(0.05),
-        ],
-      );
-      final Paint gradientPaint = Paint()
-        ..shader = topEdgeGradient.createShader(shadowRect);
-      canvas.drawPath(shape.getInnerPath(shadowRect), gradientPaint);
-    }
-    else {
-      canvas.drawPath(shape.getOuterPath(outer), paint);
-    }
+    canvas.drawPath(shape.getOuterPath(outer), paint);
     if (side != null) {
       shape.copyWith(side: side).paint(canvas, outer);
     }

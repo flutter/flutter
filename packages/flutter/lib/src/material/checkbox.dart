@@ -95,7 +95,6 @@ class Checkbox extends StatefulWidget {
     this.isError = false,
     this.semanticLabel,
   }) : _checkboxType = _CheckboxType.material,
-       shadowColor = null,
        assert(tristate || value != null);
 
   /// Creates an adaptive [Checkbox] based on whether the target platform is iOS
@@ -134,7 +133,6 @@ class Checkbox extends StatefulWidget {
     this.side,
     this.isError = false,
     this.semanticLabel,
-    this.shadowColor,
   }) : _checkboxType = _CheckboxType.adaptive,
        assert(tristate || value != null);
 
@@ -382,9 +380,6 @@ class Checkbox extends StatefulWidget {
   /// will be width 2.
   final BorderSide? side;
 
-  /// {@macro flutter.cupertino.CupertinoCheckbox.shadowColor}
-  final Color? shadowColor;
-
   /// {@template flutter.material.checkbox.isError}
   /// True if this checkbox wants to show an error state.
   ///
@@ -503,7 +498,6 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
               shape: widget.shape,
               isError: widget.isError,
               semanticLabel: widget.semanticLabel,
-              shadowColor: widget.shadowColor,
             );
         }
     }

@@ -493,9 +493,7 @@ void main() {
     expect(
       find.byType(CupertinoCheckbox),
       paints
-      ..clipPath()  // Clips the dropshadow to fit in the checkbox.
       ..path(color: inactiveFillColor)
-      ..path()  // The dropshadow's path, which is a linear gradient.
       ..drrect(color: inactiveBorderColor),
       reason: 'Inactive enabled checkbox should have default fill color and shadow',
     );
