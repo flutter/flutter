@@ -150,14 +150,6 @@ abstract class SelectedContentRange<T extends Object> {
   /// selection.
   final List<SelectedContentRange<Object>>? children;
 
-  /// Makes a copy of this object with its property replaced with the new
-  /// values.
-  SelectedContentRange<T> copyWith({
-    int? selectableId,
-    T? content,
-    List<SelectedContentRange<Object>>? children,
-  });
-
   @override
   String toString() {
     return 'SelectedContentRange(\n'
