@@ -16,6 +16,7 @@ import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
+import '../base/version.dart';
 import '../build_info.dart';
 import '../convert.dart';
 import '../doctor_validator.dart';
@@ -103,7 +104,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     argParser.addOption(
       'export-method',
       defaultsTo: 'app-store',
-      allowed: <String>['app-store', 'ad-hoc', 'development', 'enterprise'],
+      allowed: <String>['app-store', 'app-store-connect', 'ad-hoc', 'release-testing', 'development', 'debugging', 'enterprise'],
       help: 'Specify how the IPA will be distributed.',
       allowedHelp: <String, String>{
         'app-store': 'Upload to the App Store.',
@@ -467,14 +468,14 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     String? exportOptions = exportOptionsPlist;
     String? exportMethod = exportOptions != null ?
         globals.plistParser.getValueFromFile<String?>(exportOptions, 'method') : null;
-    exportMethod ??= stringArg('export-method')!;
-    final bool isAppStoreUpload = exportMethod == 'app-store';
+    exportMethod ??= _getVersionAppropriateExportMethod(stringArg('export-method')!);
+    final bool isAppStoreUpload = exportMethod == 'app-store' || exportMethod == 'app-store-connect';
     File? generatedExportPlist;
     try {
       final String exportMethodDisplayName = isAppStoreUpload ? 'App Store' : exportMethod;
       status = globals.logger.startProgress('Building $exportMethodDisplayName IPA...');
       if (exportOptions == null) {
-        generatedExportPlist = _createExportPlist();
+        generatedExportPlist = _createExportPlist(exportMethod);
         exportOptions = generatedExportPlist.path;
       }
 
@@ -555,7 +556,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     return FlutterCommandResult.success();
   }
 
-  File _createExportPlist() {
+  File _createExportPlist(String exportMethod) {
     // Create the plist to be passed into xcodebuild -exportOptionsPlist.
     final StringBuffer plistContents = StringBuffer('''
 <?xml version="1.0" encoding="UTF-8"?>
@@ -563,7 +564,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
 <plist version="1.0">
     <dict>
         <key>method</key>
-        <string>${stringArg('export-method')}</string>
+        <string>$exportMethod</string>
         <key>uploadBitcode</key>
         <false/>
     </dict>
@@ -575,6 +576,28 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     tempPlist.writeAsStringSync(plistContents.toString());
 
     return tempPlist;
+  }
+
+  String _getVersionAppropriateExportMethod(String method) {
+    final Version? currVersion = globals.xcode!.currentVersion;
+    if (currVersion != null) {
+      if (currVersion.major >= 15 || (currVersion.major == 14 && currVersion.minor > 3)) {
+        final Map<String, String> exportMethodMap = <String, String>{
+          'app-store': 'app-store-connect',
+          'ad-hoc': 'release-testing',
+          'development': 'debugging',
+        };
+        return exportMethodMap[method] ?? method;
+      } else {
+        final Map<String, String> exportMethodMap = <String, String>{
+          'app-store-connect': 'app-store',
+          'release-testing': 'ad-hoc',
+          'debugging': 'development',
+        };
+        return exportMethodMap[method] ?? method;
+      }
+    }
+    return '';
   }
 }
 

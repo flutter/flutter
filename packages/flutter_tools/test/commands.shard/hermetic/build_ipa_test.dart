@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
+import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
@@ -33,7 +34,6 @@ class FakeXcodeProjectInterpreterWithBuildSettings extends FakeXcodeProjectInter
   FakeXcodeProjectInterpreterWithBuildSettings({ this.overrides = const <String, String>{} });
 
   final Map<String, String> overrides;
-
   @override
   Future<Map<String, String>> getBuildSettings(
     String projectPath, {
@@ -45,6 +45,15 @@ class FakeXcodeProjectInterpreterWithBuildSettings extends FakeXcodeProjectInter
       'PRODUCT_BUNDLE_IDENTIFIER': 'io.flutter.someProject',
       'DEVELOPMENT_TEAM': 'abc',
     };
+  }
+
+  Version _version = Version(14, 0, 0);
+
+  @override
+  Version get version => _version;
+
+  set version(Version newVersion) {
+    _version = newVersion;
   }
 }
 
@@ -411,6 +420,130 @@ void main() {
     ProcessManager: () => fakeProcessManager,
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+  });
+
+  testUsingContext('ipa build uses new instead of legacy export methods when on XCode versions > 14.3', () async {
+    final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      logger: logger,
+      fileSystem: fileSystem,
+      processUtils: processUtils,
+      osUtils: FakeOperatingSystemUtils(),
+    );
+    fakeProcessManager.addCommands(<FakeCommand>[
+      xattrCommand,
+      setUpFakeXcodeBuildHandler(),
+      exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
+    ]);
+    createMinimalMockProjectFiles();
+    await createTestCommandRunner(command).run(
+        const <String>['build', 'ipa','--export-method', 'ad-hoc', '--no-pub']
+    );
+    expect(logger.statusText, contains('Building release-testing IPA'));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    Logger: () => logger,
+    ProcessManager: () => fakeProcessManager,
+    Platform: () => macosPlatform,
+    XcodeProjectInterpreter: () {
+      return FakeXcodeProjectInterpreterWithBuildSettings()
+      ..version = Version(14, 4, null);
+    },
+  });
+
+  testUsingContext('ipa build uses legacy instead of new export methods when on XCode versions <= 14.3', () async {
+    final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      logger: logger,
+      fileSystem: fileSystem,
+      processUtils: processUtils,
+      osUtils: FakeOperatingSystemUtils(),
+    );
+    fakeProcessManager.addCommands(<FakeCommand>[
+      xattrCommand,
+      setUpFakeXcodeBuildHandler(),
+      exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
+    ]);
+    createMinimalMockProjectFiles();
+    await createTestCommandRunner(command).run(
+        const <String>['build', 'ipa','--export-method', 'debugging', '--no-pub']
+    );
+    expect(logger.statusText, contains('Building development IPA'));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    Logger: () => logger,
+    ProcessManager: () => fakeProcessManager,
+    Platform: () => macosPlatform,
+    XcodeProjectInterpreter: () {
+      return FakeXcodeProjectInterpreterWithBuildSettings()
+        ..version = Version(14, 3, null);
+    },
+  });
+
+  testUsingContext('ipa build accepts legacy methods when on XCode versions <= 14.3', () async {
+    final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      logger: logger,
+      fileSystem: fileSystem,
+      processUtils: processUtils,
+      osUtils: FakeOperatingSystemUtils(),
+    );
+    fakeProcessManager.addCommands(<FakeCommand>[
+      xattrCommand,
+      setUpFakeXcodeBuildHandler(),
+      exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
+    ]);
+    createMinimalMockProjectFiles();
+    await createTestCommandRunner(command).run(
+        const <String>['build', 'ipa','--export-method', 'app-store', '--no-pub']
+    );
+    expect(logger.statusText, contains('Building App Store IPA'));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    Logger: () => logger,
+    ProcessManager: () => fakeProcessManager,
+    Platform: () => macosPlatform,
+    XcodeProjectInterpreter: () {
+      return FakeXcodeProjectInterpreterWithBuildSettings()
+        ..version = Version(14, null, null);
+    },
+  });
+
+  testUsingContext('ipa build accepts new export methods when on XCode versions > 14.3', () async {
+    final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      logger: logger,
+      fileSystem: fileSystem,
+      processUtils: processUtils,
+      osUtils: FakeOperatingSystemUtils(),
+    );
+    fakeProcessManager.addCommands(<FakeCommand>[
+      xattrCommand,
+      setUpFakeXcodeBuildHandler(),
+      exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
+    ]);
+    createMinimalMockProjectFiles();
+    await createTestCommandRunner(command).run(
+        const <String>['build', 'ipa','--export-method', 'debugging', '--no-pub']
+    );
+    expect(logger.statusText, contains('Building debugging IPA'));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    Logger: () => logger,
+    ProcessManager: () => fakeProcessManager,
+    Platform: () => macosPlatform,
+    XcodeProjectInterpreter: () {
+      return FakeXcodeProjectInterpreterWithBuildSettings()
+        ..version = Version(16, 0, null);
+    },
   });
 
   testUsingContext('ipa build reports method from --export-options-plist when used', () async {
