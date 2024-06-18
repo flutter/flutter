@@ -84,7 +84,7 @@ const double _kAccessibilityCupertinoDialogWidth = 310.0;
 const double _kDialogEdgePadding = 20.0;
 const double _kDialogMinButtonHeight = 45.0;
 const double _kDialogMinButtonFontSize = 10.0;
-const double _kDialogActionsSectionMinHeight = 68.0;
+const double _kDialogActionsSectionMinHeight = 67.8;
 
 // ActionSheet specific constants.
 const double _kActionSheetEdgeHorizontalPadding = 8.0;
@@ -458,13 +458,14 @@ class _CupertinoAlertDialogState extends State<CupertinoAlertDialog> {
     final bool hasContent = widget.title != null && widget.content != null;
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
-        final double maxHeight = _isInAccessibilityMode(context) ?
+        final double contentMaxHeight = _isInAccessibilityMode(context) ?
           constraints.maxHeight / 2 :
-          constraints.maxHeight - _kDialogActionsSectionMinHeight - _kDividerThickness;
+          math.max(0,
+              constraints.maxHeight - _kDialogActionsSectionMinHeight - _kDividerThickness);
         return Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            _buildContent(context, maxHeight: maxHeight),
+            _buildContent(context, maxHeight: contentMaxHeight),
             if (hasContent && hasActions)
               _ActionSheetDivider(
                 dividerColor: dividerColor,
@@ -1493,12 +1494,14 @@ class _ActionSheetMainSheetState extends State<_ActionSheetMainSheet> {
     final Color backgroundColor = CupertinoDynamicColor.resolve(_kActionSheetBackgroundColor, context);
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
+        final double contentMaxHeight = math.max(0,
+            constraints.maxHeight - _kActionSheetActionsSectionMinHeight - _kDividerThickness);
         return Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             _buildContent(
               hasActions: _hasActions(),
-              maxHeight: constraints.maxHeight - _kActionSheetActionsSectionMinHeight - _kDividerThickness,
+              maxHeight: contentMaxHeight,
             ),
             if (widget.hasContent && _hasActions())
               _ActionSheetDivider(
@@ -1633,9 +1636,6 @@ class _CupertinoAlertContentSection extends StatelessWidget {
 }
 
 // The "actions section" of a [CupertinoAlertDialog].
-//
-// See [_RenderCupertinoDialogActions] for details about action button sizing
-// and layout.
 class _AlertDialogActionSection extends StatelessWidget {
   const _AlertDialogActionSection({
     required this.actions,
