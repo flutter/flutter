@@ -271,7 +271,7 @@ void _printLoudly(String message) {
 
 // THE FOLLOWING CODE IS A VIOLATION OF OUR STYLE GUIDE
 // BECAUSE IT INTRODUCES A VERY FLAKY RACE CONDITION
-// https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#never-check-if-a-port-is-available-before-using-it-never-add-timeouts-and-other-race-conditions
+// https://github.com/flutter/flutter/blob/main/docs/contributing/Style-guide-for-Flutter-repo.md#never-check-if-a-port-is-available-before-using-it-never-add-timeouts-and-other-race-conditions
 // DO NOT USE THE FOLLOWING FUNCTIONS
 // DO NOT WRITE CODE LIKE THE FOLLOWING FUNCTIONS
 // https://github.com/flutter/flutter/issues/109474

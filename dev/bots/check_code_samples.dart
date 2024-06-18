@@ -324,7 +324,6 @@ final Set<String> _knownMissingTests = <String>{
   'examples/api/test/material/stepper/stepper.controls_builder.0_test.dart',
   'examples/api/test/material/flexible_space_bar/flexible_space_bar.0_test.dart',
   'examples/api/test/material/chip/deletable_chip_attributes.on_deleted.0_test.dart',
-  'examples/api/test/material/icon_button/icon_button.3_test.dart',
   'examples/api/test/material/expansion_panel/expansion_panel_list.expansion_panel_list_radio.0_test.dart',
   'examples/api/test/material/input_decorator/input_decoration.1_test.dart',
   'examples/api/test/material/input_decorator/input_decoration.prefix_icon_constraints.0_test.dart',
