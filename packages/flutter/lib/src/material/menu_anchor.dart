@@ -330,7 +330,6 @@ class _MenuAnchorState extends State<MenuAnchor> {
       _close(inDispose: true);
     }
 
-    // Fix for https://github.com/flutter/flutter/issues/149584
     _parent?._removeChild(this);
     _parent = null;
     _anchorChildren.clear();
