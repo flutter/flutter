@@ -24,8 +24,8 @@ open source.
 
 * [Install Flutter](https://flutter.dev/get-started/)
 * [Flutter documentation](https://docs.flutter.dev/)
-* [Development wiki](https://github.com/flutter/flutter/wiki)
-* [Contributing to Flutter](https://github.com/flutter/flutter/blob/master/CONTRIBUTING.md)
+* [Development wiki](./docs/README.md)
+* [Contributing to Flutter](https://github.com/flutter/flutter/blob/main/CONTRIBUTING.md)
 
 For announcements about new releases, follow the
 [flutter-announce@googlegroups.com](https://groups.google.com/forum/#!forum/flutter-announce)
@@ -100,7 +100,7 @@ Information on how to get started can be found in our
 [contributor guide](CONTRIBUTING.md).
 
 [flutter.dev]: https://flutter.dev
-[Discord instructions]: https://github.com/flutter/flutter/wiki/Chat
+[Discord instructions]: ./docs/contributing/Chat.md
 [Discord badge]: https://img.shields.io/discord/608014603317936148?logo=discord
 [Twitter handle]: https://img.shields.io/twitter/follow/flutterdev.svg?style=social&label=Follow
 [Twitter badge]: https://twitter.com/intent/follow?screen_name=flutterdev
@@ -121,5 +121,5 @@ Information on how to get started can be found in our
 [macOS FFI]: https://docs.flutter.dev/development/platform-integration/macos/c-interop
 [Windows FFI]: https://docs.flutter.dev/development/platform-integration/windows/building#integrating-with-windows
 [platform channels]: https://docs.flutter.dev/development/platform-integration/platform-channels
-[interop example]: https://github.com/flutter/flutter/tree/master/examples/platform_channel
+[interop example]: https://github.com/flutter/flutter/tree/main/examples/platform_channel
 [Impeller]: https://docs.flutter.dev/perf/impeller

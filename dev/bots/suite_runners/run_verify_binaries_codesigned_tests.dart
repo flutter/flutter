@@ -12,7 +12,7 @@ import 'package:process/process.dart';
 import '../run_command.dart';
 import '../utils.dart';
 
-Future<void> verifyCodesignedTestRunner(String flutterRoot) async {
+Future<void> verifyCodesignedTestRunner() async {
   printProgress('${green}Running binaries codesign verification$reset');
   await runCommand(
     'flutter',

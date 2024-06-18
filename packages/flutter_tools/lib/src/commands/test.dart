@@ -111,6 +111,9 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
               'Instructions for connecting with a debugger are printed to the '
               'console once the test has started.',
       )
+      ..addFlag('fail-fast',
+        help: 'Stop running tests after the first failure.',
+      )
       ..addFlag('run-skipped',
         help: 'Run skipped tests instead of skipping them.',
       )
@@ -216,12 +219,14 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       ..addOption('reporter',
         abbr: 'r',
         help: 'Set how to print test results. If unset, value will default to either compact or expanded.',
-        allowed: <String>['compact', 'expanded', 'github', 'json'],
+        allowed: <String>['compact', 'expanded', 'failures-only', 'github', 'json', 'silent'],
         allowedHelp: <String, String>{
-          'compact':  'A single line that updates dynamically (The default reporter).',
+          'compact':  'A single line, updated continuously (the default).',
           'expanded': 'A separate line for each update. May be preferred when logging to a file or in continuous integration.',
+          'failures-only': 'A separate line for failing tests, with no output for passing tests.',
           'github':   'A custom reporter for GitHub Actions (the default reporter when running on GitHub Actions).',
           'json':     'A machine-readable format. See: https://dart.dev/go/test-docs/json_reporter.md',
+          'silent':   'A reporter with no output. May be useful when only the exit code is meaningful.'
         },
       )
       ..addOption('file-reporter',
@@ -411,7 +416,11 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
 
     String? testAssetDirectory;
     if (buildTestAssets) {
-      await _buildTestAsset(flavor: buildInfo.flavor, impellerStatus: debuggingOptions.enableImpeller);
+      await _buildTestAsset(
+        flavor: buildInfo.flavor,
+        impellerStatus: debuggingOptions.enableImpeller,
+        buildMode: debuggingOptions.buildInfo.mode,
+      );
       testAssetDirectory = globals.fs.path.
         join(flutterProject.directory.path, 'build', 'unit_test_assets');
     }
@@ -572,6 +581,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         reporter: stringArg('reporter'),
         fileReporter: stringArg('file-reporter'),
         timeout: stringArg('timeout'),
+        failFast: boolArg('fail-fast'),
         runSkipped: boolArg('run-skipped'),
         shardIndex: shardIndex,
         totalShards: totalShards,
@@ -599,6 +609,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         reporter: stringArg('reporter'),
         fileReporter: stringArg('file-reporter'),
         timeout: stringArg('timeout'),
+        failFast: boolArg('fail-fast'),
         runSkipped: boolArg('run-skipped'),
         shardIndex: shardIndex,
         totalShards: totalShards,
@@ -674,6 +685,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
   Future<void> _buildTestAsset({
     required String? flavor,
     required ImpellerStatus impellerStatus,
+    required BuildMode buildMode,
   }) async {
     final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
     final int build = await assetBundle.build(
@@ -694,6 +706,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         artifacts: globals.artifacts!,
         logger: globals.logger,
         projectDir: globals.fs.currentDirectory,
+        buildMode: buildMode,
       );
     }
   }

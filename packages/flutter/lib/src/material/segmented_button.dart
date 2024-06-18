@@ -203,7 +203,12 @@ class SegmentedButton<T> extends StatefulWidget {
   ///
   /// The [foregroundColor], [selectedForegroundColor], and [disabledForegroundColor]
   /// colors are used to create a [MaterialStateProperty] [ButtonStyle.foregroundColor],
-  /// and a derived [ButtonStyle.overlayColor].
+  /// and a derived [ButtonStyle.overlayColor] if [overlayColor] isn't specified.
+  ///
+  /// If [overlayColor] is specified and its value is [Colors.transparent]
+  /// then the pressed/focused/hovered highlights are effectively defeated.
+  /// Otherwise a [MaterialStateProperty] with the same opacities as the
+  /// default is created.
   ///
   /// The [backgroundColor], [selectedBackgroundColor] and [disabledBackgroundColor]
   /// colors are used to create a [MaterialStateProperty] [ButtonStyle.backgroundColor].
@@ -261,6 +266,7 @@ class SegmentedButton<T> extends StatefulWidget {
     Color? disabledBackgroundColor,
     Color? shadowColor,
     Color? surfaceTintColor,
+    Color? overlayColor,
     double? elevation,
     TextStyle? textStyle,
     EdgeInsetsGeometry? padding,
@@ -286,9 +292,13 @@ class SegmentedButton<T> extends StatefulWidget {
       (backgroundColor == null && disabledBackgroundColor == null && selectedBackgroundColor == null)
         ? null
         : _SegmentButtonDefaultColor(backgroundColor, disabledBackgroundColor, selectedBackgroundColor);
-    final MaterialStateProperty<Color?>? overlayColor = (foregroundColor == null && selectedForegroundColor == null)
-      ? null
-      : _SegmentedButtonDefaultsM3.resolveStateColor(foregroundColor, selectedForegroundColor);
+    final MaterialStateProperty<Color?>? overlayColorProp = (foregroundColor == null &&
+      selectedForegroundColor == null && overlayColor == null)
+        ? null
+        : switch (overlayColor) {
+            (final Color overlayColor) when overlayColor.value == 0 => const MaterialStatePropertyAll<Color?>(Colors.transparent),
+            _ => _SegmentedButtonDefaultsM3.resolveStateColor(foregroundColor, selectedForegroundColor, overlayColor),
+          };
     return TextButton.styleFrom(
       textStyle: textStyle,
       shadowColor: shadowColor,
@@ -311,7 +321,7 @@ class SegmentedButton<T> extends StatefulWidget {
     ).copyWith(
       foregroundColor: foregroundColorProp,
       backgroundColor: backgroundColorProp,
-      overlayColor: overlayColor,
+      overlayColor: overlayColorProp,
     );
   }
 
@@ -885,12 +895,11 @@ class _RenderSegmentedButton<T> extends RenderBox with
     Path? enabledClipPath;
     Path? disabledClipPath;
 
-    context.canvas..save()..clipPath(borderClipPath);
     while (child != null) {
       final _SegmentedButtonContainerBoxParentData childParentData = child.parentData! as _SegmentedButtonContainerBoxParentData;
       final Rect childRect = childParentData.surroundingRect!.outerRect.shift(offset);
 
-      context.canvas..save()..clipRect(childRect);
+      context.canvas..save()..clipPath(borderClipPath);
       context.paintChild(child, childParentData.offset + offset);
       context.canvas.restore();
 
@@ -925,8 +934,8 @@ class _RenderSegmentedButton<T> extends RenderBox with
         final BorderSide divider = segments[index - 1].enabled || segments[index].enabled
           ? enabledBorder.side.copyWith(strokeAlign: 0.0)
           : disabledBorder.side.copyWith(strokeAlign: 0.0);
-        final Offset top = Offset(dividerPos, childRect.top);
-        final Offset bottom = Offset(dividerPos, childRect.bottom);
+        final Offset top = Offset(dividerPos, borderRect.top);
+        final Offset bottom = Offset(dividerPos, borderRect.bottom);
         context.canvas.drawLine(top, bottom, divider.toPaint());
       }
 
@@ -934,7 +943,6 @@ class _RenderSegmentedButton<T> extends RenderBox with
       child = childAfter(child);
       index += 1;
     }
-    context.canvas.restore();
 
     // Paint the outer border for both disabled and enabled clip rect if needed.
     if (disabledClipPath == null) {
@@ -1066,27 +1074,27 @@ class _SegmentedButtonDefaultsM3 extends SegmentedButtonThemeData {
   @override
   Widget? get selectedIcon => const Icon(Icons.check);
 
-  static MaterialStateProperty<Color?> resolveStateColor(Color? unselectedColor, Color? selectedColor){
+  static MaterialStateProperty<Color?> resolveStateColor(Color? unselectedColor, Color? selectedColor, Color? overlayColor){
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.selected)) {
         if (states.contains(MaterialState.pressed)) {
-          return selectedColor?.withOpacity(0.1);
+          return (overlayColor ?? selectedColor)?.withOpacity(0.1);
         }
         if (states.contains(MaterialState.hovered)) {
-          return selectedColor?.withOpacity(0.08);
+          return (overlayColor ?? selectedColor)?.withOpacity(0.08);
         }
         if (states.contains(MaterialState.focused)) {
-          return selectedColor?.withOpacity(0.1);
+          return (overlayColor ?? selectedColor)?.withOpacity(0.1);
         }
       } else {
         if (states.contains(MaterialState.pressed)) {
-          return unselectedColor?.withOpacity(0.1);
+          return (overlayColor ?? unselectedColor)?.withOpacity(0.1);
         }
         if (states.contains(MaterialState.hovered)) {
-          return unselectedColor?.withOpacity(0.08);
+          return (overlayColor ?? unselectedColor)?.withOpacity(0.08);
         }
         if (states.contains(MaterialState.focused)) {
-          return unselectedColor?.withOpacity(0.1);
+          return (overlayColor ?? unselectedColor)?.withOpacity(0.1);
         }
       }
       return Colors.transparent;

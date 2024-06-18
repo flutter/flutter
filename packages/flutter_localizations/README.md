@@ -20,7 +20,7 @@ and `WidgetsLocalizations`, with appropriate name substitutions):
    String get showMenuTooltip;
    ```
    to the localizations class `MaterialLocalizations`,
-   in [`packages/flutter/lib/src/material/material_localizations.dart`](https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/material/material_localizations.dart);
+   in [`packages/flutter/lib/src/material/material_localizations.dart`](https://github.com/flutter/flutter/blob/main/packages/flutter/lib/src/material/material_localizations.dart);
 
    ### For messages with parameters, add new function
    ```
@@ -41,7 +41,7 @@ and `WidgetsLocalizations`, with appropriate name substitutions):
    @override
    String aboutListTileTitle(String applicationName) => 'About $applicationName';
    ```
-   For messages with parameters, do also add the function to `GlobalMaterialLocalizations`  in [`packages/flutter_localizations/lib/src/material_localizations.dart`](https://github.com/flutter/flutter/blob/master/packages/flutter_localizations/lib/src/material_localizations.dart), and add a raw getter as demonstrated below:
+   For messages with parameters, do also add the function to `GlobalMaterialLocalizations`  in [`packages/flutter_localizations/lib/src/material_localizations.dart`](https://github.com/flutter/flutter/blob/main/packages/flutter_localizations/lib/src/material_localizations.dart), and add a raw getter as demonstrated below:
 
    ```
    /// The raw version of [aboutListTileTitle], with `$applicationName` verbatim

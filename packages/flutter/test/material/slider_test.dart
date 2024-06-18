@@ -48,6 +48,36 @@ class LoggingThumbShape extends SliderComponentShape {
   }
 }
 
+// A value indicator shape to log labelPainter text.
+class LoggingValueIndicatorShape extends SliderComponentShape {
+  LoggingValueIndicatorShape(this.logLabel);
+
+  final List<InlineSpan> logLabel;
+
+  @override
+  Size getPreferredSize(bool isEnabled, bool isDiscrete) {
+    return const Size(10.0, 10.0);
+  }
+
+  @override
+  void paint(
+    PaintingContext context,
+    Offset offset, {
+    required Animation<double> activationAnimation,
+    required Animation<double> enableAnimation,
+    required bool isDiscrete,
+    required TextPainter labelPainter,
+    required RenderBox parentBox,
+    required SliderThemeData sliderTheme,
+    required TextDirection textDirection,
+    required double value,
+    required double textScaleFactor,
+    required Size sizeWithOverflow,
+  }) {
+    logLabel.add(labelPainter.text!);
+  }
+}
+
 class TallSliderTickMarkShape extends SliderTickMarkShape {
   @override
   Size getPreferredSize({required SliderThemeData sliderTheme, required bool isEnabled}) {
@@ -971,6 +1001,79 @@ void main() {
     }
   });
 
+  testWidgets('Slider value indicator respects bold text', (WidgetTester tester) async {
+      final Key sliderKey = UniqueKey();
+      double value = 0.0;
+      final List<InlineSpan> log = <InlineSpan>[];
+      final LoggingValueIndicatorShape loggingValueIndicatorShape = LoggingValueIndicatorShape(log);
+
+      Widget buildSlider({ bool boldText = false }) {
+        return MaterialApp(
+          home: Directionality(
+            textDirection: TextDirection.ltr,
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return MediaQuery(
+                  data: MediaQueryData(boldText: boldText),
+                  child: Material(
+                    child: Theme(
+                      data: Theme.of(context).copyWith(
+                        sliderTheme: Theme.of(context).sliderTheme.copyWith(
+                          showValueIndicator: ShowValueIndicator.always,
+                          valueIndicatorShape: loggingValueIndicatorShape,
+                        ),
+                      ),
+                      child: Center(
+                        child: OverflowBox(
+                          maxWidth: double.infinity,
+                          maxHeight: double.infinity,
+                          child: Slider(
+                            key: sliderKey,
+                            max: 100.0,
+                            divisions: 4,
+                            label: '${value.round()}',
+                            value: value,
+                            onChanged: (double newValue) {
+                              setState(() {
+                                value = newValue;
+                              });
+                            },
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        );
+      }
+      // Normal text
+      await tester.pumpWidget(buildSlider());
+      Offset center = tester.getCenter(find.byType(Slider));
+      TestGesture gesture = await tester.startGesture(center);
+      await tester.pumpAndSettle();
+
+      expect(log.last.toPlainText(), '50');
+      expect(log.last.style!.fontWeight, FontWeight.w500);
+
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      // Bold text
+      await tester.pumpWidget(buildSlider(boldText: true));
+      center = tester.getCenter(find.byType(Slider));
+      gesture = await tester.startGesture(center);
+      await tester.pumpAndSettle();
+
+      expect(log.last.toPlainText(), '50');
+      expect(log.last.style!.fontWeight, FontWeight.w700);
+
+      await gesture.up();
+      await tester.pumpAndSettle();
+  });
+
   testWidgets('Tick marks are skipped when they are too dense', (WidgetTester tester) async {
     Widget buildSlider({
       required int divisions,
@@ -1189,6 +1292,7 @@ void main() {
                             SemanticsFlag.isSlider,
                           ],
                           actions: <SemanticsAction>[
+                            SemanticsAction.focus,
                             SemanticsAction.increase,
                             SemanticsAction.decrease,
                           ],
@@ -1247,6 +1351,7 @@ void main() {
                             SemanticsFlag.isFocusable,
                             SemanticsFlag.isSlider,
                           ],
+                          actions: <SemanticsAction>[SemanticsAction.focus],
                           value: '50%',
                           increasedValue: '55%',
                           decreasedValue: '45%',
@@ -1349,7 +1454,7 @@ void main() {
                         TestSemantics(
                           id: 4,
                           flags: <SemanticsFlag>[SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled, SemanticsFlag.isFocusable, SemanticsFlag.isSlider],
-                          actions: <SemanticsAction>[SemanticsAction.increase, SemanticsAction.decrease],
+                          actions: <SemanticsAction>[SemanticsAction.focus, SemanticsAction.increase, SemanticsAction.decrease],
                           value: '50%',
                           increasedValue: '60%',
                           decreasedValue: '40%',
@@ -1462,6 +1567,7 @@ void main() {
                             SemanticsFlag.isSlider,
                           ],
                           actions: <SemanticsAction>[
+                            SemanticsAction.focus,
                             SemanticsAction.increase,
                             SemanticsAction.decrease,
                             SemanticsAction.didGainAccessibilityFocus,
@@ -1522,6 +1628,7 @@ void main() {
                             SemanticsFlag.isSlider,
                           ],
                           actions: <SemanticsAction>[
+                            SemanticsAction.focus,
                             SemanticsAction.didGainAccessibilityFocus,
                           ],
                           value: '50%',
@@ -1626,7 +1733,7 @@ void main() {
                         TestSemantics(
                           id: 4,
                           flags: <SemanticsFlag>[SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled, SemanticsFlag.isFocusable, SemanticsFlag.isSlider],
-                          actions: <SemanticsAction>[SemanticsAction.increase, SemanticsAction.decrease],
+                          actions: <SemanticsAction>[SemanticsAction.focus, SemanticsAction.increase, SemanticsAction.decrease],
                           value: '40',
                           increasedValue: '60',
                           decreasedValue: '20',
@@ -1686,7 +1793,7 @@ void main() {
                         TestSemantics(
                           id: 4,
                           flags: <SemanticsFlag>[SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled, SemanticsFlag.isFocusable, SemanticsFlag.isSlider],
-                          actions: <SemanticsAction>[SemanticsAction.increase, SemanticsAction.decrease],
+                          actions: <SemanticsAction>[SemanticsAction.focus, SemanticsAction.increase, SemanticsAction.decrease],
                           value: '40',
                           increasedValue: '60',
                           decreasedValue: '20',
@@ -2530,6 +2637,7 @@ void main() {
                           SemanticsFlag.isSlider,
                         ],
                         actions: <SemanticsAction>[
+                          SemanticsAction.focus,
                           SemanticsAction.increase,
                           SemanticsAction.decrease,
                           SemanticsAction.didGainAccessibilityFocus,
@@ -4280,5 +4388,48 @@ void main() {
     await gesture.moveBy(const Offset(1.0, 0.0));
     await gesture.moveBy(const Offset(1.0, 0.0));
     expect(onChangeCallbackCount, 1);
+  });
+
+  testWidgets('Skip drawing ValueIndicator shape when label painter text is null', (WidgetTester tester) async {
+    double sliderValue = 10;
+
+    await tester.pumpWidget(
+        MaterialApp(
+          home: StatefulBuilder(
+            builder: (BuildContext context, void Function(void Function()) setState) {
+              return Material(
+                child: Slider(
+                  value: sliderValue,
+                  max: 100,
+                  label: sliderValue > 50 ? null : sliderValue.toString(),
+                  divisions: 10,
+                  onChanged: (double value) {
+                    setState(() {
+                      sliderValue = value;
+                    });
+                  },
+                ),
+              );
+            },
+          ),
+        ),
+      );
+
+      final RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
+
+      // Calculate a specific position on the Slider.
+      final Rect sliderRect = tester.getRect(find.byType(Slider));
+      final Offset tapPositionLeft = Offset(sliderRect.left + sliderRect.width * 0.25, sliderRect.center.dy);
+      final Offset tapPositionRight = Offset(sliderRect.left + sliderRect.width * 0.75, sliderRect.center.dy);
+
+      // Tap on the 25% position of the Slider.
+      await tester.tapAt(tapPositionLeft);
+      await tester.pumpAndSettle();
+      expect(valueIndicatorBox, paintsExactlyCountTimes(#drawPath, 2));
+
+      // Tap on the 75% position of the Slider.
+      await tester.tapAt(tapPositionRight);
+      await tester.pumpAndSettle();
+      expect(valueIndicatorBox, paintsExactlyCountTimes(#drawPath, 1));
   });
 }

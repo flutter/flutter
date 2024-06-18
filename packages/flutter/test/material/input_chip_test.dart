@@ -521,7 +521,7 @@ void main() {
     expect(chipTopLeft.dx, avatarCenter.dx - (labelSize.width / 2) - padding - border);
     expect(chipTopLeft.dy, avatarCenter.dy - (labelSize.width / 2) - padding - border);
 
-    // Calculate the distnance between avatar and label.
+    // Calculate the distance between avatar and label.
     Offset labelTopLeft = tester.getTopLeft(find.byType(Container));
     expect(labelTopLeft.dx, avatarCenter.dx + (labelSize.width / 2) + labelPadding);
 
@@ -537,7 +537,7 @@ void main() {
     expect(chipTopLeft.dx, avatarCenter.dx - (iconSize / 2) - padding - border);
     expect(chipTopLeft.dy, avatarCenter.dy - (labelSize.width / 2) - padding - border);
 
-    // Calculate the distnance between avatar and label.
+    // Calculate the distance between avatar and label.
     labelTopLeft = tester.getTopLeft(find.byType(Container));
     expect(labelTopLeft.dx, avatarCenter.dx + (iconSize / 2) + labelPadding);
   });
@@ -598,5 +598,23 @@ void main() {
     // Calculate the distance between delete icon and label.
     labelTopRight = tester.getTopRight(find.byType(Container));
     expect(labelTopRight.dx, deleteIconCenter.dx - (iconSize / 2) - labelPadding);
+  });
+
+  testWidgets('InputChip.chipAnimationStyle is passed to RawChip', (WidgetTester tester) async {
+    final ChipAnimationStyle chipAnimationStyle = ChipAnimationStyle(
+      enableAnimation: AnimationStyle(duration: Durations.short2),
+      selectAnimation: AnimationStyle.noAnimation,
+    );
+
+    await tester.pumpWidget(wrapForChip(
+      child: Center(
+        child: InputChip(
+          chipAnimationStyle: chipAnimationStyle,
+          label: const Text('InputChip'),
+        ),
+      ),
+    ));
+
+    expect(tester.widget<RawChip>(find.byType(RawChip)).chipAnimationStyle, chipAnimationStyle);
   });
 }

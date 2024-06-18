@@ -188,6 +188,7 @@ class NestedScrollView extends StatefulWidget {
     this.dragStartBehavior = DragStartBehavior.start,
     this.floatHeaderSlivers = false,
     this.clipBehavior = Clip.hardEdge,
+    this.hitTestBehavior = HitTestBehavior.opaque,
     this.restorationId,
     this.scrollBehavior,
   });
@@ -296,6 +297,11 @@ class NestedScrollView extends StatefulWidget {
   ///
   /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
+
+  /// {@macro flutter.widgets.scrollable.hitTestBehavior}
+  ///
+  /// Defaults to [HitTestBehavior.opaque].
+  final HitTestBehavior hitTestBehavior;
 
   /// {@macro flutter.widgets.scrollable.restorationId}
   final String? restorationId;
@@ -489,6 +495,7 @@ class NestedScrollViewState extends State<NestedScrollView> {
             handle: _absorberHandle,
             clipBehavior: widget.clipBehavior,
             restorationId: widget.restorationId,
+            hitTestBehavior: widget.hitTestBehavior,
           );
         },
       ),
@@ -506,6 +513,7 @@ class _NestedScrollViewCustomScrollView extends CustomScrollView {
     required super.slivers,
     required this.handle,
     required super.clipBehavior,
+    super.hitTestBehavior,
     super.dragStartBehavior,
     super.restorationId,
   });
@@ -1201,8 +1209,7 @@ class _NestedScrollController extends ScrollController {
   }
 
   Iterable<_NestedScrollPosition> get nestedPositions {
-    // TODO(vegorov): use instance method version of castFrom when it is available.
-    return Iterable.castFrom<ScrollPosition, _NestedScrollPosition>(positions);
+    return positions.cast<_NestedScrollPosition>();
   }
 }
 

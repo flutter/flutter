@@ -84,7 +84,7 @@ abstract class GoldenFileComparator {
   /// historical golden files.
   ///
   /// Version numbers are used in golden file tests for package:flutter. You can
-  /// learn more about these tests [here](https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package:flutter).
+  /// learn more about these tests [here](https://github.com/flutter/flutter/blob/main/docs/contributing/testing/Writing-a-golden-file-test-for-package-flutter.md).
   Uri getTestUri(Uri key, int? version) {
     if (version == null) {
       return key;
@@ -127,11 +127,7 @@ abstract class GoldenFileComparator {
 ///
 ///  * [flutter_test] for more information about how to configure tests at the
 ///    directory-level.
-GoldenFileComparator get goldenFileComparator => _goldenFileComparator;
-GoldenFileComparator _goldenFileComparator = const TrivialComparator._();
-set goldenFileComparator(GoldenFileComparator value) {
-  _goldenFileComparator = value;
-}
+GoldenFileComparator goldenFileComparator = const TrivialComparator._();
 
 /// Compares image pixels against a golden image file.
 ///
@@ -220,7 +216,7 @@ abstract class WebGoldenComparator {
   /// historical golden files.
   ///
   /// Version numbers are used in golden file tests for package:flutter. You can
-  /// learn more about these tests [here](https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package:flutter).
+  /// learn more about these tests [here](https://github.com/flutter/flutter/blob/main/docs/contributing/testing/Writing-a-golden-file-test-for-package-flutter.md).
   Uri getTestUri(Uri key, int? version) {
     if (version == null) {
       return key;

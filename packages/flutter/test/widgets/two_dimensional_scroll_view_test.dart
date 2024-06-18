@@ -353,6 +353,37 @@ void main() {
       expect(scrollable.widget.dragStartBehavior, DragStartBehavior.down);
     }, variant: TargetPlatformVariant.all());
 
+    testWidgets('TwoDimensionalScrollable with hitTestBehavior.translucent lets widgets underneath catch the hit', (WidgetTester tester) async {
+      bool tapped = false;
+      final Key key = UniqueKey();
+      late final TwoDimensionalChildBuilderDelegate delegate;
+      addTearDown(() => delegate.dispose());
+      await tester.pumpWidget(MaterialApp(
+        home: Stack(
+          children: <Widget>[
+            Positioned.fill(
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () => tapped = true,
+                child: SizedBox(key: key, height: 300),
+              ),
+            ),
+            SimpleBuilderTableView(
+              hitTestBehavior: HitTestBehavior.translucent,
+              delegate: delegate = TwoDimensionalChildBuilderDelegate(
+                builder: (BuildContext context, ChildVicinity vicinity) {
+                  return const SizedBox(width: 50, height: 50);
+                },
+              ),
+            ),
+          ],
+        ),
+      ));
+      await tester.pumpAndSettle();
+      await tester.tapAt(tester.getCenter(find.byKey(key)));
+      expect(tapped, isTrue);
+    }, variant: TargetPlatformVariant.all());
+
     testWidgets('Interrupt fling with tap stops scrolling', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/133529
       final List<String> log = <String>[];
@@ -887,6 +918,52 @@ void main() {
         expect(verticalController.position.pixels, greaterThan(840.0));
         expect(horizontalController.position.pixels, 0.0);
       });
+    });
+
+    testWidgets('Dismiss keyboard onDrag and keep dismissed on drawer opened', (WidgetTester tester) async {
+      late final TwoDimensionalChildBuilderDelegate delegate;
+      final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+      addTearDown(() => delegate.dispose());
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            key: scaffoldKey,
+            drawer: Container(),
+            body: Column(
+              children: <Widget>[
+                const TextField(),
+                Expanded(
+                  child: SimpleBuilderTableView(
+                    keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+                    delegate: delegate = TwoDimensionalChildBuilderDelegate(
+                      builder: _testChildBuilder,
+                      maxXIndex: 99,
+                      maxYIndex: 99,
+                    ),
+                  ),
+                ),
+              ]
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      expect(tester.testTextInput.isVisible, isFalse);
+      final Finder finder = find.byType(TextField).first;
+      await tester.tap(finder);
+      expect(tester.testTextInput.isVisible, isTrue);
+
+      await tester.drag(find.byType(SimpleBuilderTableView).first, const Offset(-40.0, -40.0));
+      await tester.pumpAndSettle();
+
+      expect(tester.testTextInput.isVisible, isFalse);
+      scaffoldKey.currentState!.openDrawer();
+      await tester.pumpAndSettle();
+
+      expect(tester.testTextInput.isVisible, isFalse);
     });
   });
 }

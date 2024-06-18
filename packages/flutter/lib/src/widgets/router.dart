@@ -694,8 +694,9 @@ class _RouterState<T> extends State<Router<T>> with RestorationMixin {
     // The super.didChangeDependencies may have parsed the route information.
     // This can happen if the didChangeDependencies is triggered by state
     // restoration or first build.
-    if (widget.routeInformationProvider != null && _routeParsePending) {
-      _processRouteInformation(widget.routeInformationProvider!.value, () => widget.routerDelegate.setNewRoutePath);
+    final RouteInformation? currentRouteInformation = _routeInformation.value ?? widget.routeInformationProvider?.value;
+    if (currentRouteInformation != null && _routeParsePending) {
+      _processRouteInformation(currentRouteInformation, () => widget.routerDelegate.setNewRoutePath);
     }
     _routeParsePending = false;
     _maybeNeedToReportRouteInformation();
@@ -1476,15 +1477,15 @@ class PlatformRouteInformationProvider extends RouteInformationProvider with Wid
 
   @override
   void routerReportsNewRouteInformation(RouteInformation routeInformation, {RouteInformationReportingType type = RouteInformationReportingType.none}) {
-    final bool replace =
-      type == RouteInformationReportingType.neglect ||
-      (type == RouteInformationReportingType.none &&
-      _equals(_valueInEngine.uri, routeInformation.uri));
     SystemNavigator.selectMultiEntryHistory();
     SystemNavigator.routeInformationUpdated(
       uri: routeInformation.uri,
       state: routeInformation.state,
-      replace: replace,
+      replace: switch (type) {
+        RouteInformationReportingType.neglect => true,
+        RouteInformationReportingType.navigate => false,
+        RouteInformationReportingType.none => _equals(_valueInEngine.uri, routeInformation.uri),
+      },
     );
     _value = routeInformation;
     _valueInEngine = routeInformation;

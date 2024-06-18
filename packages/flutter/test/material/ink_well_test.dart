@@ -7,8 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/src/services/keyboard_key.g.dart';
 import 'package:flutter_test/flutter_test.dart';
+import '../widgets/feedback_tester.dart';
 import '../widgets/semantics_tester.dart';
-import 'feedback_tester.dart';
 
 void main() {
   testWidgets('InkWell gestures control test', (WidgetTester tester) async {
@@ -1178,7 +1178,7 @@ testWidgets('InkResponse radius can be updated', (WidgetTester tester) async {
         ),
       ),
     ));
-    expect(semantics, includesNodeWith(label: 'Button', actions: <SemanticsAction>[SemanticsAction.tap]));
+    expect(semantics, includesNodeWith(label: 'Button', actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus]));
 
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
@@ -1190,7 +1190,7 @@ testWidgets('InkResponse radius can be updated', (WidgetTester tester) async {
         ),
       ),
     ));
-    expect(semantics, isNot(includesNodeWith(label: 'Button', actions: <SemanticsAction>[SemanticsAction.tap])));
+    expect(semantics, isNot(includesNodeWith(label: 'Button', actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus])));
 
     semantics.dispose();
   });
@@ -1983,6 +1983,7 @@ testWidgets('InkResponse radius can be updated', (WidgetTester tester) async {
       label: 'Foo',
       hasLongPressAction: true,
       isFocusable: true,
+      hasFocusAction: true,
       textDirection: TextDirection.ltr,
     ));
 
@@ -2003,6 +2004,7 @@ testWidgets('InkResponse radius can be updated', (WidgetTester tester) async {
     expect(tester.getSemantics(find.bySemanticsLabel('Foo')), matchesSemantics(
       label: 'Foo',
       hasTapAction: true,
+      hasFocusAction: true,
       hasLongPressAction: true,
       isFocusable: true,
       textDirection: TextDirection.ltr,

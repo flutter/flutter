@@ -8,7 +8,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'feedback_tester.dart';
+
+import '../widgets/feedback_tester.dart';
 
 void main() {
   late DateTime firstDate;
@@ -265,6 +266,16 @@ void main() {
     await preparePicker(tester, (Future<DateTimeRange?> range) async {
       expect(find.text(helpText!), findsOneWidget);
       expect(find.text(saveText!), findsOneWidget);
+    });
+  });
+
+  testWidgets('Long helpText does not cutoff the save button', (WidgetTester tester) async {
+    helpText = 'long helpText' * 100;
+    saveText = 'make it so';
+    await preparePicker(tester, (Future<DateTimeRange?> range) async {
+      expect(find.text(helpText!), findsOneWidget);
+      expect(find.text(saveText!), findsOneWidget);
+      expect(tester.takeException(), null);
     });
   });
 
@@ -1308,6 +1319,7 @@ void main() {
           matchesSemantics(
             label: '30, Saturday, January 30, 2016, Today',
             hasTapAction: true,
+            hasFocusAction: true,
             isFocusable: true,
           ),
         );
@@ -1576,7 +1588,7 @@ void main() {
         expect(appBar.actionsIconTheme, iconTheme);
         expect(appBar.elevation, null);
         expect(appBar.scrolledUnderElevation, null);
-        expect(appBar.backgroundColor, null);
+        expect(appBar.backgroundColor, theme.colorScheme.primary);
       });
     });
 

@@ -60,6 +60,7 @@ abstract class UnpackMacOS extends Target {
       '--delete',
       '--filter',
       '- .DS_Store/',
+      '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
       basePath,
       environment.outputDir.path,
     ]);
@@ -438,6 +439,7 @@ abstract class MacOSBundleFlutterAssets extends Target {
       environment,
       assetDirectory,
       targetPlatform: TargetPlatform.darwin,
+      buildMode: buildMode,
       flavor: environment.defines[kFlavor],
     );
     environment.depFileService.writeToFile(
