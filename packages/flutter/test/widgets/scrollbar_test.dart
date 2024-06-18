@@ -3240,20 +3240,25 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
     expect(scrollController.offset, 0.0);
     expect(scrollController.position.maxScrollExtent, 0.0);
 
-    await tester.drag(find.byType(SingleChildScrollView), const Offset(0, -100), kind: PointerDeviceKind.trackpad);
+    await tester.trackpadFling(find.byType(SingleChildScrollView), const Offset(0, -100), 500);
     await tester.pumpAndSettle();
     expect(scrollController.offset, 0.0);
-    expect(scrollController.position.maxScrollExtent, 0.0);
+
+    await tester.trackpadFling(find.byType(SingleChildScrollView), const Offset(0, 100), 500);
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 0.0);
 
     await tester.pumpWidget(buildFrame(700));
     await tester.pumpAndSettle();
     expect(scrollController.offset, 0.0);
     expect(scrollController.position.maxScrollExtent, 100.0);
 
-    await tester.drag(find.byType(SingleChildScrollView), const Offset(0, -100), kind: PointerDeviceKind.trackpad);
+    await tester.trackpadFling(find.byType(SingleChildScrollView), const Offset(0, -100), 500);
     await tester.pumpAndSettle();
     expect(scrollController.offset, 100.0);
-    expect(scrollController.position.maxScrollExtent, 100.0);
 
+    await tester.trackpadFling(find.byType(SingleChildScrollView), const Offset(0, 100), 500);
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 0.0);
   });
 }

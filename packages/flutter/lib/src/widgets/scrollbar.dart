@@ -1325,6 +1325,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   bool _hoverIsActive = false;
   Drag? _thumbDrag;
   bool _thumbDragStartedOnThumb = false;
+  bool _isScrollable = false;
   ScrollHoldController? _thumbHold;
   Axis? _axis;
   final GlobalKey<RawGestureDetectorState> _gestureDetectorKey = GlobalKey<RawGestureDetectorState>();
@@ -1868,7 +1869,6 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   }
 
   bool _handleScrollMetricsNotification(ScrollMetricsNotification notification) {
-
     if (!widget.notificationPredicate(notification.asScrollUpdate())) {
       return false;
     }
@@ -1883,6 +1883,9 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     }
     if (metrics.axis != _axis) {
       setState(() { _axis = metrics.axis; });
+    }
+    if (_isScrollable != notification.metrics.maxScrollExtent > 0) {
+      setState(() { _isScrollable = !_isScrollable; });
     }
 
     return false;
@@ -2009,7 +2012,6 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     if (!_canHandleScrollGestures()) {
       return gestures;
     }
-
     switch (_axis) {
       case Axis.horizontal:
         gestures[_HorizontalThumbDragGestureRecognizer] =
