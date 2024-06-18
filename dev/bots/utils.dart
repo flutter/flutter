@@ -179,13 +179,13 @@ Never reportErrorsAndExit(String message) {
   print('${red}For your convenience, the error messages reported above are repeated here:$reset');
   final bool printSeparators = _errorMessages.any((List<String> messages) => messages.length > 1);
   if (printSeparators) {
-    print('  🙙  🙛  ');
+    print('  ⛝  ⛝  ');
   }
   for (int index = 0; index < _errorMessages.length * 2 - 1; index += 1) {
     if (index.isEven) {
       _errorMessages[index ~/ 2].forEach(print);
     } else if (printSeparators) {
-      print('  🙙  🙛  ');
+      print('  ⛝  ⛝  ');
     }
   }
   print(redLine);
