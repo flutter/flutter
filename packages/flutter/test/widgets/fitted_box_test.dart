@@ -606,6 +606,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/135082
   testWidgets('FittedBox with zero size child does not throw', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Center(
