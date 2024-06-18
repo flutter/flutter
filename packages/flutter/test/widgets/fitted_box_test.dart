@@ -608,12 +608,12 @@ void main() {
 
   testWidgets('FittedBox with zero size child does not throw', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Center(
-        child: ConstrainedBox(
-          constraints: BoxConstraints.tight(
-            const Size(200.0, 200.0),
-          ),
-          child: const FittedBox(
+      const Center(
+        child: SizedBox(
+          height: 200.0,
+          width: 200.0,
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
             child: SizedBox.shrink(),
           ),
         ),
