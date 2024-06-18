@@ -83,6 +83,10 @@ class CupertinoCheckbox extends StatefulWidget {
     required this.onChanged,
     this.mouseCursor,
     this.activeColor,
+    @Deprecated(
+      'Use fillColor to resolve this color in different WidgetStates instead. '
+      'This feature was deprecated after v3.23.0-13.0.pre.'
+    )
     this.inactiveColor,
     this.fillColor,
     this.checkColor,
@@ -160,10 +164,11 @@ class CupertinoCheckbox extends StatefulWidget {
 
   /// The color used if the checkbox is inactive.
   ///
-  /// By default, [CupertinoColors.white] with an opacity of 0.5 is used.
-  ///
-  /// If [fillColor] returns a non-null color in the [WidgetState.disabled]
-  /// state, it will be used instead of this color.
+  /// By default, [CupertinoColors.inactiveGray] is used.
+  @Deprecated(
+    'Use fillColor to resolve this color in different WidgetStates instead. '
+    'This feature was deprecated after v3.23.0-13.0.pre.'
+  )
   final Color? inactiveColor;
 
   /// The color that fills the checkbox, in all [WidgetState]s.
@@ -194,7 +199,7 @@ class CupertinoCheckbox extends StatefulWidget {
   /// {@end-tool}
   ///
   /// If null, then the value of [activeColor] is used in the selected
-  /// state, and the value of [inactiveColor] is used in the disabled state.
+  /// state, and [CupertinoColors.white] is used in the unselected state.
   final WidgetStateProperty<Color?>? fillColor;
 
   /// The color to use for the check icon when this checkbox is checked.
@@ -329,7 +334,7 @@ class _CupertinoCheckboxState extends State<CupertinoCheckbox> with TickerProvid
   WidgetStateProperty<Color> get _widgetFillColor {
     return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
       if (states.contains(WidgetState.disabled)) {
-        return widget.inactiveColor ?? CupertinoColors.white.withOpacity(0.5);
+        return CupertinoColors.white.withOpacity(0.5);
       }
       if (states.contains(WidgetState.selected)) {
         return widget.activeColor ?? CupertinoColors.activeBlue;
