@@ -132,6 +132,7 @@ String generateTestBootstrap({
   required Uri testUrl,
   required InternetAddress host,
   File? testConfigFile,
+  Uri? packageConfigUri,
   bool updateGoldens = false,
   String languageVersionHeader = '',
   bool nullSafety = false,
@@ -174,6 +175,9 @@ import '$testUrl' as test;
 import '${Uri.file(testConfigFile.path)}' as test_config;
 ''');
   }
+  buffer.write('''
+const packageConfigLocation = '$packageConfigUri';
+''');
   buffer.write('''
 
 /// Returns a serialized test suite.
@@ -641,6 +645,7 @@ class FlutterPlatform extends PlatformPlugin {
     return generateTestBootstrap(
       testUrl: testUrl,
       testConfigFile: findTestConfigFile(globals.fs.file(testUrl), globals.logger),
+      // packageConfigUri: ??
       host: host!,
       updateGoldens: updateGoldens!,
       flutterTestDep: packageConfig['flutter_test'] != null,
