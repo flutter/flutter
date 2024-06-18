@@ -1617,10 +1617,9 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
         primaryDeltaFromLastDragUpdate = _lastDragUpdateOffset!.dx - localPosition.dx;
     }
 
-    // If we're actually dragging the scrollbar thumb then Convert
-    // primaryDelta, the amount that the scrollbar moved since the
-    // last time when drag started or last updated, into the
-    // coordinate space of the scroll position.
+    // Convert primaryDelta, the amount that the scrollbar moved since the last
+    // time when drag started or last updated, into the coordinate space of the scroll
+    // position.
     double scrollOffsetGlobal = thumbDragStartedOnThumb
       ? scrollbarPainter.getTrackToScroll(_startDragThumbOffset! + primaryDeltaFromDragStart)
       : scrollbarPainter.getTrackToScroll(_startDragThumbOffset!) - primaryDeltaFromDragStart;
@@ -1942,6 +1941,8 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     return renderBox.globalToLocal(offset);
   }
 
+  /// True if the thumb drag gesture started with a press on the scrollbar's thumb.
+  ///
   /// A "thumb drag" gesture can be started by dragging the thumb directly, or with a
   /// scroll gesture on the trackpad, or by dragging the scrollable on a touch screen.
   ///

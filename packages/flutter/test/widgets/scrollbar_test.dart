@@ -1053,7 +1053,7 @@ void main() {
     );
   });
 
-  testWidgets('Scrollbar thumb cannot be mouse-dragged into overscroll if the platform does not allow it', (WidgetTester tester) async {
+  testWidgets('Scrollbar thumb cannot be dragged into overscroll if the platform does not allow it', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     addTearDown(scrollController.dispose);
     await tester.pumpWidget(
@@ -3153,7 +3153,7 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
     expect(scrollController.offset, 0.0);
 
     // Try flinging to the right.
-    await tester.flingFrom(const Offset(45.0, 597.0), const Offset(80, 0.0), 500.0, deviceKind: PointerDeviceKind.mouse);
+    await tester.flingFrom(const Offset(45.0, 597.0), const Offset(80, 0.0), 500.0);
     await tester.pumpAndSettle();
     if (isMobilePlatform()) {
       expect(scrollController.offset, greaterThan(100.0), reason: 'Ballistic scroll expected on $debugDefaultTargetPlatformOverride');
