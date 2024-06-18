@@ -84,6 +84,7 @@ const double _kAccessibilityCupertinoDialogWidth = 310.0;
 const double _kDialogEdgePadding = 20.0;
 const double _kDialogMinButtonHeight = 45.0;
 const double _kDialogMinButtonFontSize = 10.0;
+const double _kDialogActionsSectionMinHeight = 68.0;
 
 // ActionSheet specific constants.
 const double _kActionSheetEdgeHorizontalPadding = 8.0;
@@ -285,7 +286,7 @@ class _CupertinoAlertDialogState extends State<CupertinoAlertDialog> {
   ScrollController get _effectiveActionScrollController =>
     widget.actionScrollController ?? (_backupActionScrollController ??= ScrollController());
 
-  Widget _buildContent(BuildContext context) {
+  Widget _buildContent(BuildContext context, {required double maxHeight}) {
     const double defaultFontSize = 14.0;
     final double effectiveTextScaleFactor = MediaQuery.textScalerOf(context).scale(defaultFontSize) / defaultFontSize;
 
@@ -319,12 +320,30 @@ class _CupertinoAlertDialogState extends State<CupertinoAlertDialog> {
         ),
     ];
 
-    return ColoredBox(
-      color: CupertinoDynamicColor.resolve(_kDialogColor, context),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: children,
+    final Color backgroundColor = CupertinoDynamicColor.resolve(_kDialogColor, context);
+
+    if (widget.actions.isEmpty) {
+      return ColoredBox(
+        color: backgroundColor,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: children,
+        ),
+      );
+    }
+
+    return ConstrainedBox(
+      constraints: BoxConstraints(
+        maxHeight: maxHeight,
+      ),
+      child: ColoredBox(
+        color: backgroundColor,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: children,
+        ),
       ),
     );
   }
@@ -343,6 +362,30 @@ class _CupertinoAlertDialogState extends State<CupertinoAlertDialog> {
         _pressedIndex = actionIndex;
       });
     }
+  }
+
+  double _topOverscroll = 0;
+  double _bottomOverscroll = 0;
+
+  // Fills the overscroll area at the top and bottom of the sheet. This is
+  // necessary because the action section's background is rendered by the
+  // buttons, so that a button's background can be _replaced_ by a different
+  // color when the button is pressed.
+  Widget _buildOverscroll(Color backgroundColor) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: <Widget>[
+        Container(
+          color: backgroundColor,
+          height: _topOverscroll,
+        ),
+        Container(
+          color: backgroundColor,
+          height: _bottomOverscroll,
+        ),
+      ],
+    );
   }
 
   Widget _buildActions() {
@@ -364,6 +407,87 @@ class _CupertinoAlertDialogState extends State<CupertinoAlertDialog> {
     }
 
     return actionSection;
+  }
+
+  bool _onScrollUpdate(ScrollUpdateNotification notification) {
+    final ScrollMetrics metrics = notification.metrics;
+    setState(() {
+      // The sizes of the overscroll should not be longer than the height of the
+      // actions section.
+      _topOverscroll = math.min(
+        math.max(metrics.minScrollExtent - metrics.pixels, 0),
+        metrics.viewportDimension,
+      );
+      _bottomOverscroll = math.min(
+        math.max(metrics.pixels - metrics.maxScrollExtent, 0),
+        metrics.viewportDimension,
+      );
+    });
+    return false;
+  }
+
+  // iOS style layout policy for sizing an alert dialog's content section and action
+  // button section.
+  //
+  // The policy is as follows:
+  //
+  // If all content and buttons fit on screen:
+  // The content section and action button section are sized intrinsically and centered
+  // vertically on screen.
+  //
+  // If all content and buttons do not fit on screen, and iOS is NOT in accessibility mode:
+  // A minimum height for the action button section is calculated. The action
+  // button section will not be rendered shorter than this minimum. See
+  // [_RenderCupertinoDialogActions] for the minimum height calculation.
+  //
+  // With the minimum action button section calculated, the content section can
+  // take up as much space as is available, up to the point that it hits the
+  // minimum button height at the bottom.
+  //
+  // After the content section is laid out, the action button section is allowed
+  // to take up any remaining space that was not consumed by the content section.
+  //
+  // If all content and buttons do not fit on screen, and iOS IS in accessibility mode:
+  // The button section is given up to 50% of the available height. Then the content
+  // section is given whatever height remains.
+  Widget _renderDialogLayout({
+    required Widget actionsSection,
+    required Color dividerColor,
+  }) {
+    final bool hasActions = widget.actions.isNotEmpty;
+    final bool hasContent = widget.title != null && widget.content != null;
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        final double maxHeight = _isInAccessibilityMode(context) ?
+          constraints.maxHeight / 2 :
+          constraints.maxHeight - _kDialogActionsSectionMinHeight - _kDividerThickness;
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            _buildContent(context, maxHeight: maxHeight),
+            if (hasContent && hasActions)
+              _ActionSheetDivider(
+                dividerColor: dividerColor,
+                hiddenColor: _kDialogColor,
+                hidden: false,
+              ),
+            Flexible(
+              child: Stack(
+                children: <Widget>[
+                  Positioned.fill(
+                    child: _buildOverscroll(_kDialogColor),
+                  ),
+                  NotificationListener<ScrollUpdateNotification>(
+                    onNotification: _onScrollUpdate,
+                    child: actionsSection,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -405,8 +529,7 @@ class _CupertinoAlertDialogState extends State<CupertinoAlertDialog> {
                             scopesRoute: true,
                             explicitChildNodes: true,
                             label: localizations.alertDialogLabel,
-                            child: _CupertinoDialogRenderWidget(
-                              contentSection: _buildContent(context),
+                            child: _renderDialogLayout(
                               actionsSection: _buildActions(),
                               dividerColor: CupertinoColors.separator,
                             ),
@@ -1408,490 +1531,6 @@ class _ActionSheetMainSheetState extends State<_ActionSheetMainSheet> {
       },
     );
   }
-}
-
-// iOS style layout policy widget for sizing an alert dialog's content section and
-// action button section.
-//
-// See [_RenderCupertinoDialog] for specific layout policy details.
-class _CupertinoDialogRenderWidget extends RenderObjectWidget {
-  const _CupertinoDialogRenderWidget({
-    required this.contentSection,
-    required this.actionsSection,
-    required this.dividerColor,
-  });
-
-  final Widget contentSection;
-  final Widget actionsSection;
-  final Color dividerColor;
-
-  @override
-  RenderObject createRenderObject(BuildContext context) {
-    return _RenderCupertinoDialog(
-      dividerThickness: _kDividerThickness,
-      isInAccessibilityMode: _isInAccessibilityMode(context),
-      dividerColor: CupertinoDynamicColor.resolve(dividerColor, context),
-    );
-  }
-
-  @override
-  void updateRenderObject(BuildContext context, _RenderCupertinoDialog renderObject) {
-    renderObject
-      ..isInAccessibilityMode = _isInAccessibilityMode(context)
-      ..dividerColor = CupertinoDynamicColor.resolve(dividerColor, context);
-  }
-
-  @override
-  RenderObjectElement createElement() {
-    return _CupertinoDialogRenderElement(this);
-  }
-}
-
-class _CupertinoDialogRenderElement extends RenderObjectElement {
-  _CupertinoDialogRenderElement(_CupertinoDialogRenderWidget super.widget);
-
-  Element? _contentElement;
-  Element? _actionsElement;
-
-  @override
-  _RenderCupertinoDialog get renderObject => super.renderObject as _RenderCupertinoDialog;
-
-  @override
-  void visitChildren(ElementVisitor visitor) {
-    if (_contentElement != null) {
-      visitor(_contentElement!);
-    }
-    if (_actionsElement != null) {
-      visitor(_actionsElement!);
-    }
-  }
-
-  @override
-  void mount(Element? parent, Object? newSlot) {
-    super.mount(parent, newSlot);
-    final _CupertinoDialogRenderWidget dialogRenderWidget = widget as _CupertinoDialogRenderWidget;
-    _contentElement = updateChild(_contentElement, dialogRenderWidget.contentSection, _AlertDialogSections.contentSection);
-    _actionsElement = updateChild(_actionsElement, dialogRenderWidget.actionsSection, _AlertDialogSections.actionsSection);
-  }
-
-  @override
-  void insertRenderObjectChild(RenderObject child, _AlertDialogSections slot) {
-    _placeChildInSlot(child, slot);
-  }
-
-  @override
-  void moveRenderObjectChild(RenderObject child, _AlertDialogSections oldSlot, _AlertDialogSections newSlot) {
-    assert(false);
-    return;
-  }
-
-  @override
-  void update(RenderObjectWidget newWidget) {
-    super.update(newWidget);
-    final _CupertinoDialogRenderWidget dialogRenderWidget = widget as _CupertinoDialogRenderWidget;
-    _contentElement = updateChild(_contentElement, dialogRenderWidget.contentSection, _AlertDialogSections.contentSection);
-    _actionsElement = updateChild(_actionsElement, dialogRenderWidget.actionsSection, _AlertDialogSections.actionsSection);
-  }
-
-  @override
-  void forgetChild(Element child) {
-    assert(child == _contentElement || child == _actionsElement);
-    if (_contentElement == child) {
-      _contentElement = null;
-    } else {
-      assert(_actionsElement == child);
-      _actionsElement = null;
-    }
-    super.forgetChild(child);
-  }
-
-  @override
-  void removeRenderObjectChild(RenderObject child, _AlertDialogSections slot) {
-    assert(child == renderObject.contentSection || child == renderObject.actionsSection);
-    if (renderObject.contentSection == child) {
-      renderObject.contentSection = null;
-    } else {
-      assert(renderObject.actionsSection == child);
-      renderObject.actionsSection = null;
-    }
-  }
-
-  void _placeChildInSlot(RenderObject child, _AlertDialogSections slot) {
-    switch (slot) {
-      case _AlertDialogSections.contentSection:
-        renderObject.contentSection = child as RenderBox;
-      case _AlertDialogSections.actionsSection:
-        renderObject.actionsSection = child as RenderBox;
-    }
-  }
-}
-
-// iOS style layout policy for sizing an alert dialog's content section and action
-// button section.
-//
-// The policy is as follows:
-//
-// If all content and buttons fit on screen:
-// The content section and action button section are sized intrinsically and centered
-// vertically on screen.
-//
-// If all content and buttons do not fit on screen, and iOS is NOT in accessibility mode:
-// A minimum height for the action button section is calculated. The action
-// button section will not be rendered shorter than this minimum. See
-// [_RenderCupertinoDialogActions] for the minimum height calculation.
-//
-// With the minimum action button section calculated, the content section can
-// take up as much space as is available, up to the point that it hits the
-// minimum button height at the bottom.
-//
-// After the content section is laid out, the action button section is allowed
-// to take up any remaining space that was not consumed by the content section.
-//
-// If all content and buttons do not fit on screen, and iOS IS in accessibility mode:
-// The button section is given up to 50% of the available height. Then the content
-// section is given whatever height remains.
-class _RenderCupertinoDialog extends RenderBox {
-  _RenderCupertinoDialog({
-    RenderBox? contentSection,
-    RenderBox? actionsSection,
-    double dividerThickness = 0.0,
-    bool isInAccessibilityMode = false,
-    required Color dividerColor,
-  }) : _contentSection = contentSection,
-       _actionsSection = actionsSection,
-       _dividerThickness = dividerThickness,
-       _isInAccessibilityMode = isInAccessibilityMode,
-       _dividerPaint = Paint()
-         ..color = dividerColor
-         ..style = PaintingStyle.fill;
-
-  RenderBox? get contentSection => _contentSection;
-  RenderBox? _contentSection;
-  set contentSection(RenderBox? newContentSection) {
-    if (newContentSection != _contentSection) {
-      if (_contentSection != null) {
-        dropChild(_contentSection!);
-      }
-      _contentSection = newContentSection;
-      if (_contentSection != null) {
-        adoptChild(_contentSection!);
-      }
-    }
-  }
-
-  RenderBox? get actionsSection => _actionsSection;
-  RenderBox? _actionsSection;
-  set actionsSection(RenderBox? newActionsSection) {
-    if (newActionsSection != _actionsSection) {
-      if (null != _actionsSection) {
-        dropChild(_actionsSection!);
-      }
-      _actionsSection = newActionsSection;
-      if (null != _actionsSection) {
-        adoptChild(_actionsSection!);
-      }
-    }
-  }
-
-  bool get isInAccessibilityMode => _isInAccessibilityMode;
-  bool _isInAccessibilityMode;
-  set isInAccessibilityMode(bool newValue) {
-    if (newValue != _isInAccessibilityMode) {
-      _isInAccessibilityMode = newValue;
-      markNeedsLayout();
-    }
-  }
-
-  double get _dialogWidth => isInAccessibilityMode
-      ? _kAccessibilityCupertinoDialogWidth
-      : _kCupertinoDialogWidth;
-
-  final double _dividerThickness;
-  final Paint _dividerPaint;
-
-  Color get dividerColor => _dividerPaint.color;
-  set dividerColor(Color newValue) {
-    if (dividerColor == newValue) {
-      return;
-    }
-
-    _dividerPaint.color = newValue;
-    markNeedsPaint();
-  }
-
-  @override
-  void attach(PipelineOwner owner) {
-    super.attach(owner);
-    if (null != contentSection) {
-      contentSection!.attach(owner);
-    }
-    if (null != actionsSection) {
-      actionsSection!.attach(owner);
-    }
-  }
-
-  @override
-  void detach() {
-    super.detach();
-    if (null != contentSection) {
-      contentSection!.detach();
-    }
-    if (null != actionsSection) {
-      actionsSection!.detach();
-    }
-  }
-
-  @override
-  void redepthChildren() {
-    if (null != contentSection) {
-      redepthChild(contentSection!);
-    }
-    if (null != actionsSection) {
-      redepthChild(actionsSection!);
-    }
-  }
-
-  @override
-  void setupParentData(RenderBox child) {
-    if (child.parentData is! BoxParentData) {
-      child.parentData = BoxParentData();
-    } else if (child.parentData is! MultiChildLayoutParentData) {
-      child.parentData = MultiChildLayoutParentData();
-    }
-  }
-
-  @override
-  void visitChildren(RenderObjectVisitor visitor) {
-    if (contentSection != null) {
-      visitor(contentSection!);
-    }
-    if (actionsSection != null) {
-      visitor(actionsSection!);
-    }
-  }
-
-  @override
-  List<DiagnosticsNode> debugDescribeChildren() => <DiagnosticsNode>[
-    if (contentSection != null) contentSection!.toDiagnosticsNode(name: 'content'),
-    if (actionsSection != null) actionsSection!.toDiagnosticsNode(name: 'actions'),
-  ];
-
-  @override
-  double computeMinIntrinsicWidth(double height) {
-    return _dialogWidth;
-  }
-
-  @override
-  double computeMaxIntrinsicWidth(double height) {
-    return _dialogWidth;
-  }
-
-  @override
-  double computeMinIntrinsicHeight(double width) {
-    final double contentHeight = contentSection!.getMinIntrinsicHeight(width);
-    final double actionsHeight = actionsSection!.getMinIntrinsicHeight(width);
-    final bool hasDivider = contentHeight > 0.0 && actionsHeight > 0.0;
-    final double height = contentHeight + (hasDivider ? _dividerThickness : 0.0) + actionsHeight;
-
-    if (height.isFinite) {
-      return height;
-    }
-    return 0.0;
-  }
-
-  @override
-  double computeMaxIntrinsicHeight(double width) {
-    final double contentHeight = contentSection!.getMaxIntrinsicHeight(width);
-    final double actionsHeight = actionsSection!.getMaxIntrinsicHeight(width);
-    final bool hasDivider = contentHeight > 0.0 && actionsHeight > 0.0;
-    final double height = contentHeight + (hasDivider ? _dividerThickness : 0.0) + actionsHeight;
-
-    if (height.isFinite) {
-      return height;
-    }
-    return 0.0;
-  }
-
-  @override
-  Size computeDryLayout(BoxConstraints constraints) {
-    return _performLayout(
-      constraints: constraints,
-      layoutChild: ChildLayoutHelper.dryLayoutChild,
-    ).size;
-  }
-
-  @override
-  void performLayout() {
-    final _AlertDialogSizes dialogSizes = _performLayout(
-      constraints: constraints,
-      layoutChild: ChildLayoutHelper.layoutChild,
-    );
-    size = dialogSizes.size;
-
-    // Set the position of the actions box to sit at the bottom of the dialog.
-    // The content box defaults to the top left, which is where we want it.
-    assert(actionsSection!.parentData is BoxParentData);
-    final BoxParentData actionParentData = actionsSection!.parentData! as BoxParentData;
-    actionParentData.offset = Offset(0.0, dialogSizes.contentHeight + dialogSizes.dividerThickness);
-  }
-
-  _AlertDialogSizes _performLayout({required BoxConstraints constraints, required ChildLayouter layoutChild}) {
-    return isInAccessibilityMode
-        ? performAccessibilityLayout(
-            constraints: constraints,
-            layoutChild: layoutChild,
-          ) : performRegularLayout(
-            constraints: constraints,
-            layoutChild: layoutChild,
-          );
-  }
-
-  // When not in accessibility mode, an alert dialog might reduce the space
-  // for buttons to just over 1 button's height to make room for the content
-  // section.
-  _AlertDialogSizes performRegularLayout({required BoxConstraints constraints, required ChildLayouter layoutChild}) {
-    final bool hasDivider = contentSection!.getMaxIntrinsicHeight(getMaxIntrinsicWidth(0)) > 0.0
-        && actionsSection!.getMaxIntrinsicHeight(getMaxIntrinsicWidth(0)) > 0.0;
-    final double dividerThickness = hasDivider ? _dividerThickness : 0.0;
-
-    final double minActionsHeight = actionsSection!.getMinIntrinsicHeight(getMaxIntrinsicWidth(0));
-
-    final Size contentSize = layoutChild(
-      contentSection!,
-      constraints.deflate(EdgeInsets.only(bottom: minActionsHeight + dividerThickness)),
-    );
-
-    final Size actionsSize = layoutChild(
-      actionsSection!,
-      constraints.deflate(EdgeInsets.only(top: contentSize.height + dividerThickness)),
-    );
-
-    final double dialogHeight = contentSize.height + dividerThickness + actionsSize.height;
-
-    return _AlertDialogSizes(
-      size: constraints.constrain(Size(_dialogWidth, dialogHeight)),
-      contentHeight: contentSize.height,
-      dividerThickness: dividerThickness,
-    );
-  }
-
-  // When in accessibility mode, an alert dialog will allow buttons to take
-  // up to 50% of the dialog height, even if the content exceeds available space.
-  _AlertDialogSizes performAccessibilityLayout({required BoxConstraints constraints, required ChildLayouter layoutChild}) {
-    final bool hasDivider = contentSection!.getMaxIntrinsicHeight(_dialogWidth) > 0.0
-        && actionsSection!.getMaxIntrinsicHeight(_dialogWidth) > 0.0;
-    final double dividerThickness = hasDivider ? _dividerThickness : 0.0;
-
-    final double maxContentHeight = contentSection!.getMaxIntrinsicHeight(_dialogWidth);
-    final double maxActionsHeight = actionsSection!.getMaxIntrinsicHeight(_dialogWidth);
-
-    final Size contentSize;
-    final Size actionsSize;
-    if (maxContentHeight + dividerThickness + maxActionsHeight > constraints.maxHeight) {
-      // AlertDialog: There isn't enough room for everything. Following iOS's
-      // accessibility dialog layout policy, first we allow the actions to take
-      // up to 50% of the dialog height. Second we fill the rest of the
-      // available space with the content section.
-
-      actionsSize = layoutChild(
-        actionsSection!,
-        constraints.deflate(EdgeInsets.only(top: constraints.maxHeight / 2.0)),
-      );
-
-      contentSize = layoutChild(
-        contentSection!,
-        constraints.deflate(EdgeInsets.only(bottom: actionsSize.height + dividerThickness)),
-      );
-    } else {
-      // Everything fits. Give content and actions all the space they want.
-
-      contentSize = layoutChild(
-        contentSection!,
-        constraints,
-      );
-
-      actionsSize = layoutChild(
-        actionsSection!,
-        constraints.deflate(EdgeInsets.only(top: contentSize.height)),
-      );
-    }
-
-    // Calculate overall dialog height.
-    final double dialogHeight = contentSize.height + dividerThickness + actionsSize.height;
-
-    return _AlertDialogSizes(
-      size: constraints.constrain(Size(_dialogWidth, dialogHeight)),
-      contentHeight: contentSize.height,
-      dividerThickness: dividerThickness,
-    );
-  }
-
-  @override
-  void paint(PaintingContext context, Offset offset) {
-    final BoxParentData contentParentData = contentSection!.parentData! as BoxParentData;
-    contentSection!.paint(context, offset + contentParentData.offset);
-
-    final bool hasDivider = contentSection!.size.height > 0.0 && actionsSection!.size.height > 0.0;
-    if (hasDivider) {
-      _paintDividerBetweenContentAndActions(context.canvas, offset);
-    }
-
-    final BoxParentData actionsParentData = actionsSection!.parentData! as BoxParentData;
-    actionsSection!.paint(context, offset + actionsParentData.offset);
-  }
-
-  void _paintDividerBetweenContentAndActions(Canvas canvas, Offset offset) {
-    canvas.drawRect(
-      Rect.fromLTWH(
-        offset.dx,
-        offset.dy + contentSection!.size.height,
-        size.width,
-        _dividerThickness,
-      ),
-      _dividerPaint,
-    );
-  }
-
-  @override
-  bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
-    final BoxParentData contentSectionParentData = contentSection!.parentData! as BoxParentData;
-    final BoxParentData actionsSectionParentData = actionsSection!.parentData! as BoxParentData;
-    return result.addWithPaintOffset(
-            offset: contentSectionParentData.offset,
-            position: position,
-            hitTest: (BoxHitTestResult result, Offset transformed) {
-              assert(transformed == position - contentSectionParentData.offset);
-              return contentSection!.hitTest(result, position: transformed);
-            },
-          ) ||
-          result.addWithPaintOffset(
-            offset: actionsSectionParentData.offset,
-            position: position,
-            hitTest: (BoxHitTestResult result, Offset transformed) {
-              assert(transformed == position - actionsSectionParentData.offset);
-              return actionsSection!.hitTest(result, position: transformed);
-            },
-          );
-  }
-}
-
-class _AlertDialogSizes {
-  const _AlertDialogSizes({
-    required this.size,
-    required this.contentHeight,
-    required this.dividerThickness,
-  });
-
-  final Size size;
-  final double contentHeight;
-  final double dividerThickness;
-}
-
-// Visual components of an alert dialog that need to be explicitly sized and
-// laid out at runtime.
-enum _AlertDialogSections {
-  contentSection,
-  actionsSection,
 }
 
 // The "content section" of a CupertinoAlertDialog.
