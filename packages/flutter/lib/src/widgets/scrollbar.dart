@@ -1906,8 +1906,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       return false;
     }
 
-    if (notification is ScrollUpdateNotification ||
-      notification is OverscrollNotification) {
+    if (notification is ScrollUpdateNotification || notification is OverscrollNotification) {
       // Any movements always makes the scrollbar start showing up.
       if (!_fadeoutAnimationController.isForwardOrCompleted) {
         _fadeoutAnimationController.forward();
