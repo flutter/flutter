@@ -1,25 +1,61 @@
 # iOS CPU Profiling
 
-XCode has a number of built in profiling tools that can easily be used with local or prebuilt engines. This document is focused on creating flame graph charts, which is not a part of XCode but provides a useful way to look at aggregate performance. Compared to the Android Studio flame graph this one is a little wonky, but still useful.
+XCode (via Instruments) has a number of built in profiling tools that can easily be used with local or prebuilt engines. This document is focused on creating [Flame Graphs](https://www.brendangregg.com/flamegraphs.html). These are not part of XCode but provide a useful way to look at aggregate performance. The process for generating Flame Graphs for iOS/macOS is a bit janky compared to Android Studio however and external tools are necessary.
 
+## Setup External Tools
 
-1. Clone the "FlameGraph" swift package from `https://github.com/lennet/FlameGraph`
-2. Start a "Time Profiler" based profile session.
+We need to setup the [`FlameGraph` Swift command-line tool](https://github.com/lennet/FlameGraph). You can either [build the tool locally](https://github.com/lennet/FlameGraph?tab=readme-ov-file#swift-package-manager), or use the [Mint Package Manager](https://github.com/yonaskolb/mint) for Swift packages. We'll use Mint in the following example.
 
-![Alt text](assets/ios_profiling/ios_time_profiler_example.png)
+Skip the following steps if you have already performed them.
 
-  Click the red dot to begin and record as much profile data as you want, then press stop to conclude the trace.
+### Install Mint
 
-3. Select the thread to investigate, in this case you want io.flutter.raster. IMPORTANT: also select the trace root.
+Install Mint via Brew.
 
-![Alt text](assets/ios_profiling/ios_profiler_select_thread.png)
+```sh
+brew install mint
+```
 
-4. Copy the trace with the keyboard shortcut (⇧⌘C) or the menu ("Edit" -> "Deep Copy").
+Add the Mint `bin` directory to your path. The following assumes your `.rc` file is `.profile`. Adjust as necessary.
 
-![Alt text](assets/ios_profiling/deep_copy.png)
+```sh
+echo 'export PATH="$PATH:$HOME/.mint/bin"' >> ~/.profile
+source ~/.profile
+```
 
-5. On the command line, run `swift run FlameGraph --html output.html`
+### Install FlameGraph via Mint
 
-A new browser tab will open with the flame graph. It may require some zooming to be useful.
+```sh
+mint install lennet/FlameGraph
+```
 
-![Alt text](assets/ios_profiling/flamegraph.png)
+## Capture Profile using Instruments
+
+Use the Time Profiler Xcode template.
+
+![Time Profiler Template](assets/ios_profiling/ios_time_profiler_example.png)
+
+Click the red dot to begin and record as much profile data as you want. Press stop to conclude the trace.
+
+Select the thread to investigate, in this case you want `io.flutter.raster`.
+
+> [!IMPORTANT]
+> Make sure to select the trace root.
+
+![Select Thread to Investigate](assets/ios_profiling/ios_profiler_select_thread.png)
+
+Copy the trace with the keyboard shortcut (⇧⌘C) or the menu ("Edit" -> "Deep Copy").
+
+![Deep Copy](assets/ios_profiling/deep_copy.png)
+
+## Convert Profile to FlameGraph
+
+On the command line, run `FlameGraph` to convert the contents of the profile in your pasteboard to an HTML format.
+
+```sh
+FlameGraph --html output.html
+```
+
+A new browser tab will open with the Flame Graph. It may require some zooming to be useful.
+
+![Flame Graph](assets/ios_profiling/flamegraph.png)
