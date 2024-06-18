@@ -329,15 +329,33 @@ class _CupertinoAlertDialogState extends State<CupertinoAlertDialog> {
     );
   }
 
+  int? _pressedIndex;
+
+  void _onPressedUpdate(int actionIndex, bool state) {
+    if (!state) {
+      if (_pressedIndex == actionIndex) {
+        setState(() {
+          _pressedIndex = null;
+        });
+      }
+    } else {
+      setState(() {
+        _pressedIndex = actionIndex;
+      });
+    }
+  }
+
   Widget _buildActions() {
     Widget actionSection = const LimitedBox(
       maxWidth: 0,
       child: SizedBox(width: double.infinity, height: 0),
     );
     if (widget.actions.isNotEmpty) {
-      actionSection = _CupertinoAlertActionSection(
+      actionSection = _AlertDialogActionSection(
         scrollController: _effectiveActionScrollController,
         actions: widget.actions,
+        pressedIndex: _pressedIndex,
+        onPressedUpdate: _onPressedUpdate,
       );
     }
 
@@ -1971,13 +1989,18 @@ class _CupertinoAlertContentSection extends StatelessWidget {
 //
 // See [_RenderCupertinoDialogActions] for details about action button sizing
 // and layout.
-class _CupertinoAlertActionSection extends StatelessWidget {
-  const _CupertinoAlertActionSection({
+class _AlertDialogActionSection extends StatelessWidget {
+  const _AlertDialogActionSection({
     required this.actions,
-    this.scrollController,
+    required this.onPressedUpdate,
+    required this.pressedIndex,
+    required this.scrollController,
   });
 
   final List<Widget> actions;
+
+  final _PressedUpdateHandler onPressedUpdate;
+  final int? pressedIndex;
 
   // A scroll controller that can be used to control the scrolling of the
   // actions in the dialog.
@@ -1995,21 +2018,19 @@ class _CupertinoAlertActionSection extends StatelessWidget {
       );
     }
     final List<Widget> column = <Widget>[];
-    for (int actionIndex = 0; actionIndex < actions!.length; actionIndex += 1) {
+    for (int actionIndex = 0; actionIndex < actions.length; actionIndex += 1) {
       if (actionIndex != 0) {
         column.add(_ActionSheetDivider(
           dividerColor: CupertinoDynamicColor.resolve(CupertinoColors.separator, context),
-          // hidden: pressedIndex == actionIndex - 1 || pressedIndex == actionIndex,
-          hidden: false,
+          hidden: pressedIndex == actionIndex - 1 || pressedIndex == actionIndex,
         ));
       }
-      // column.add(_ActionSheetButtonBackground(
-      //   onPressStateChange: (bool state) {
-      //     onPressedUpdate(actionIndex, state);
-      //   },
-      //   child: actions![actionIndex],
-      // ));
-      column.add(_PressableActionButton(child: actions[actionIndex]));
+      column.add(_AlertDialogButtonBackground(
+        onPressStateChange: (bool state) {
+          onPressedUpdate(actionIndex, state);
+        },
+        child: actions[actionIndex],
+      ));
     }
 
     return CupertinoScrollbar(
@@ -2024,52 +2045,71 @@ class _CupertinoAlertActionSection extends StatelessWidget {
   }
 }
 
-// Button that updates its render state when pressed.
-//
-// The pressed state is forwarded to an _ActionButtonParentDataWidget. The
-// corresponding _ActionButtonParentData is then interpreted and rendered
-// appropriately by _RenderCupertinoDialogActions.
-class _PressableActionButton extends StatefulWidget {
-  const _PressableActionButton({
+// Renders the background of a button (both the pressed background and the idle
+// background) and reports its state to the parent with `onPressStateChange`.
+class _AlertDialogButtonBackground extends StatefulWidget {
+  const _AlertDialogButtonBackground({
+    this.onPressStateChange,
     required this.child,
   });
 
+  /// Called when the user taps down or lifts up on the button.
+  ///
+  /// The boolean value is true if the user is tapping down on the button.
+  final ValueSetter<bool>? onPressStateChange;
+
+  /// The widget below this widget in the tree.
+  ///
+  /// Typically a [Text] widget.
   final Widget child;
 
   @override
-  _PressableActionButtonState createState() => _PressableActionButtonState();
+  _AlertDialogButtonBackgroundState createState() => _AlertDialogButtonBackgroundState();
 }
 
-class _PressableActionButtonState extends State<_PressableActionButton> {
+class _AlertDialogButtonBackgroundState extends State<_AlertDialogButtonBackground> {
   bool _isPressed = false;
+
+  void onTapDown(TapDownDetails details) {
+    setState(() { _isPressed = true; });
+    widget.onPressStateChange?.call(true);
+  }
+
+  void onTapUp(TapUpDetails details) {
+    setState(() { _isPressed = false; });
+    widget.onPressStateChange?.call(false);
+  }
+
+  void onTapCancel() {
+    setState(() { _isPressed = false; });
+    widget.onPressStateChange?.call(false);
+  }
 
   @override
   Widget build(BuildContext context) {
+    final Color backgroundColor = _isPressed
+      ? _kActionSheetCancelPressedColor
+      : _kActionSheetCancelColor;
     return MergeSemantics(
       // TODO(mattcarroll): Button press dynamics need overhaul for iOS:
       // https://github.com/flutter/flutter/issues/19786
       child: GestureDetector(
         excludeFromSemantics: true,
         behavior: HitTestBehavior.opaque,
-        onTapDown: (TapDownDetails details) => setState(() {
-          _isPressed = true;
-        }),
-        onTapUp: (TapUpDetails details) => setState(() {
-          _isPressed = false;
-        }),
+        onTapDown: onTapDown,
+        onTapUp: onTapUp,
         // TODO(mattcarroll): Cancel is currently triggered when user moves
         //  past slop instead of off button: https://github.com/flutter/flutter/issues/19783
-        onTapCancel: () => setState(() => _isPressed = false),
-        child: widget.child,
+        onTapCancel: onTapCancel,
+        child: Container(
+          decoration: BoxDecoration(
+            color: CupertinoDynamicColor.resolve(backgroundColor, context),
+          ),
+          child: widget.child,
+        ),
       ),
     );
   }
-}
-
-// ParentData applied to individual action buttons that report whether or not
-// that button is currently pressed by the user.
-class _ActionButtonParentData extends MultiChildLayoutParentData {
-  bool isPressed = false;
 }
 
 /// A button typically used in a [CupertinoAlertDialog].
