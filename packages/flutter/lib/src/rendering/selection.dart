@@ -122,8 +122,8 @@ abstract class SelectionHandler implements ValueListenable<SelectionGeometry> {
 /// {@end-tool}
 ///
 /// See also:
-/// 
-///   * [SelectedContent], which contains the [SelectedContentRange] for a given [Selectable].
+///
+///   * [SelectedContent], which contains the [SelectedContentRange] for a given [Selectable] or [SelectionHandler].
 abstract class SelectedContentRange<T extends Object> {
   /// Creates a range for the content of a [Selectable] or [SelectionHandler].
   SelectedContentRange({
