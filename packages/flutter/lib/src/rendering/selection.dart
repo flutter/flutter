@@ -100,7 +100,7 @@ abstract class SelectionHandler implements ValueListenable<SelectionGeometry> {
   SelectionResult dispatchSelectionEvent(SelectionEvent event);
 }
 
-/// Represents a range of content within a given [SelectedContent].
+/// Represents a range of content for a given [SelectedContent].
 ///
 /// This class stores the information of an active selection under
 /// a [Selectable] or [SelectionHandler], including the start and
