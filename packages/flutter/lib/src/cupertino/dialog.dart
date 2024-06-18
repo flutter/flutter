@@ -2057,7 +2057,8 @@ class _AlertDialogActionSection extends StatelessWidget {
       controller: scrollController,
       child: SingleChildScrollView(
         controller: scrollController,
-        child: _DialogActionsSection(
+        child: _AlertDialogActionsLayout(
+          dividerThickness: dividerThickness,
           children: column,
         ),
       ),
@@ -2313,19 +2314,28 @@ class CupertinoDialogAction extends StatelessWidget {
   }
 }
 
-class _DialogActionsSection extends MultiChildRenderObjectWidget {
-  const _DialogActionsSection({ required super.children });
+class _AlertDialogActionsLayout extends MultiChildRenderObjectWidget {
+  const _AlertDialogActionsLayout({
+    required double dividerThickness,
+    required super.children,
+  }) : _dividerThickness = dividerThickness;
+
+  final double _dividerThickness;
 
   @override
   RenderObject createRenderObject(BuildContext context) {
     assert(children.length.isOdd,
       'The `children` must be a list with an odd number of elements, where '
       'action buttons alternate with dividers');
-    return _RenderDialogActionsSection();
+    return _RenderAlertDialogActionsLayout(
+      dividerThickness: _dividerThickness,
+    );
   }
 
   @override
-  void updateRenderObject(BuildContext context, _RenderDialogActionsSection renderObject) {
+  void updateRenderObject(BuildContext context, _RenderAlertDialogActionsLayout renderObject) {
+    renderObject
+      .dividerThickness = _dividerThickness;
   }
 }
 
@@ -2363,12 +2373,25 @@ class _DialogActionsSection extends MultiChildRenderObjectWidget {
 // they are filled with the standard white dialog background color. The one
 // exception is the very 1st divider which is always rendered. This policy comes
 // from observation of native iOS dialogs.
-class _RenderDialogActionsSection extends RenderFlex {
-  _RenderDialogActionsSection() : super(
-    direction: Axis.vertical,
-    mainAxisSize: MainAxisSize.min,
-    crossAxisAlignment: CrossAxisAlignment.stretch,
-  );
+class _RenderAlertDialogActionsLayout extends RenderFlex {
+  _RenderAlertDialogActionsLayout({
+    required double dividerThickness,
+  }) : _dividerThickness = dividerThickness,
+       super(
+         direction: Axis.vertical,
+         mainAxisSize: MainAxisSize.min,
+         crossAxisAlignment: CrossAxisAlignment.stretch,
+       );
+
+  // The thickness of the divider between buttons.
+  double get dividerThickness => _dividerThickness;
+  double _dividerThickness;
+  set dividerThickness(double newValue) {
+    if (newValue != _dividerThickness) {
+      _dividerThickness = newValue;
+      markNeedsLayout();
+    }
+  }
 
   @override
   @protected
@@ -2387,8 +2410,7 @@ class _RenderDialogActionsSection extends RenderFlex {
     }
 
     final double overallWidth = constraints.maxWidth;
-    const double dividerWidth = _kDividerThickness;
-    final double childWidth = (overallWidth - dividerWidth) / 2;
+    final double childWidth = (overallWidth - dividerThickness) / 2;
     if (!_useHorizontalLayout(childWidth)) {
       return super.computeDryLayout(constraints);
     }
@@ -2416,8 +2438,7 @@ class _RenderDialogActionsSection extends RenderFlex {
     }());
 
     final double overallWidth = constraints.maxWidth;
-    const double dividerWidth = _kDividerThickness;
-    final double childWidth = (overallWidth - dividerWidth) / 2;
+    final double childWidth = (overallWidth - dividerThickness) / 2;
     if (!_useHorizontalLayout(childWidth)) {
       return super.performLayout();
     }
@@ -2436,9 +2457,9 @@ class _RenderDialogActionsSection extends RenderFlex {
       if (divider == null) {
         break;
       }
-      divider.layout(BoxConstraints.tight(Size(dividerWidth, maxChildHeight)));
+      divider.layout(BoxConstraints.tight(Size(dividerThickness, maxChildHeight)));
       (divider.parentData! as FlexParentData).offset = Offset(x, 0);
-      x += dividerWidth;
+      x += dividerThickness;
 
       child = childAfter(divider)!;
     }
@@ -2481,6 +2502,7 @@ class _RenderDialogActionsSection extends RenderFlex {
   // The `childWidth` is the width for each child. If `dry` is true, then a dry
   // layout is performed instead.
   double _layOutChildrenHorizontally({required double childWidth, required bool dry}) {
+    // The childCount should have been verified by `_useHorizontalLayout`.
     assert(childCount == 3);
     RenderBox child = firstChild!;
     final BoxConstraints childConstraints = BoxConstraints(
