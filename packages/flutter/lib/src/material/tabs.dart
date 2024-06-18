@@ -1549,12 +1549,11 @@ class _TabBarState extends State<TabBar> {
     final double index = _controller!.index.toDouble();
     final double value = _controller!.animation!.value;
     final double offset = switch (value - index) {
-      -1.0 || 1.0 => leadingPosition ?? middlePosition,
-      0 => middlePosition,
-      < 0 when leadingPosition == null => middlePosition,
-      > 0 when trailingPosition == null => middlePosition,
-      < 0 => lerpDouble(middlePosition, leadingPosition, index - value)!,
-      _   => lerpDouble(middlePosition, trailingPosition, value - index)!,
+      -1.0 => leadingPosition ?? middlePosition,
+      1.0  => trailingPosition ?? middlePosition,
+      0    => middlePosition,
+      < 0  => leadingPosition == null ? middlePosition : lerpDouble(middlePosition, leadingPosition, index - value)!,
+      _    => trailingPosition == null ? middlePosition : lerpDouble(middlePosition, trailingPosition, value - index)!,
     };
 
     _scrollController!.jumpTo(offset);
