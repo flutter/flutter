@@ -604,7 +604,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
         return exportMethodMap[method] ?? method;
       }
     }
-    throwToolExit('Encountered invalid export-method input. Valid inputs include');
+    throwToolExit('Encountered invalid export-method input.');
   }
 }
 
