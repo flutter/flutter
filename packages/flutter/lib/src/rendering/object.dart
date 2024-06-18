@@ -3726,6 +3726,9 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
         // updated.
         cached.markBlocksUserActions(blockUserActions);
         cached.markMergesToParent(mergeIntoParent);
+        // Restored the explicitness for now since the existing value may
+        // set by the parent.
+        cached.markExplicitness(_semanticsConfiguration.isSemanticBoundary);
       }
       // The _ContainerSemanticsFrag
       return cached;
@@ -3798,9 +3801,10 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     });
 
     assert(childConfigurationsDelegate != null || configToFragment.isEmpty);
-
-    for (final _InterestingSemanticsFragment fragment in mergeUpFragments) {
-      fragment.markExplicitness(explicitChildNode);
+    if (explicitChildNode) {
+      for (final _InterestingSemanticsFragment fragment in mergeUpFragments) {
+        fragment.markExplicitness(true);
+      }
     }
     if (!explicitChildNode && childConfigurationsDelegate != null) {
       final ChildSemanticsConfigurationsResult result = childConfigurationsDelegate(childConfigurations);
