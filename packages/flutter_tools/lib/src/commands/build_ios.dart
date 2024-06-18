@@ -107,10 +107,14 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
       allowed: <String>['app-store', 'app-store-connect', 'ad-hoc', 'release-testing', 'development', 'debugging', 'enterprise'],
       help: 'Specify how the IPA will be distributed.',
       allowedHelp: <String, String>{
-        'app-store': 'Upload to the App Store.',
+        'app-store': 'Upload to the App Store. For XCode <= 15.3.',
+        'app-store-connect': 'Upload to the App Store. For XCode > 15.3',
         'ad-hoc': 'Test on designated devices that do not need to be registered with the Apple developer account. '
-                  'Requires a distribution certificate.',
-        'development': 'Test only on development devices registered with the Apple developer account.',
+                  'Requires a distribution certificate. For XCode <= 15.3.',
+        'release-testing': 'Test on designated devices that do not need to be registered with the Apple developer account. '
+            'Requires a distribution certificate. For XCode > 15.3',
+        'development': 'Test only on development devices registered with the Apple developer account. For XCode <= 15.3.',
+        'debugging': 'Test only on development devices registered with the Apple developer account. For XCode > 15.3.',
         'enterprise': 'Distribute an app registered with the Apple Developer Enterprise Program.',
       },
     );
@@ -600,7 +604,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
         return exportMethodMap[method] ?? method;
       }
     }
-    return '';
+    throwToolExit('Encountered invalid export-method input. Valid inputs include');
   }
 }
 
