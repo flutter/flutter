@@ -3841,8 +3841,10 @@ void main() {
       controller.close();
       await tester.pump();
 
-      // Garbage collect
-      await tester.runAsync(forceGC);
+      // Garbage collect. 1 should be enough, but 3 prevents flaky tests.
+      await tester.runAsync<void>(() async {
+        await forceGC(fullGcCycles: 3);
+      });
 
       expect(state.target, isNull);
     }, skip: kIsWeb // [intended] ForceGC does not work in web and in release mode. See https://api.flutter.dev/flutter/package-leak_tracker_leak_tracker/forceGC.html
