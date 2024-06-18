@@ -9,7 +9,7 @@
 //
 // For documentation on creating sample code, see ../../examples/api/README.md
 // See also our style guide's discussion on documentation and sample code:
-// https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#documentation-dartdocs-javadocs-etc
+// https://github.com/flutter/flutter/blob/main/docs/contributing/Style-guide-for-Flutter-repo.md
 //
 // This tool is used to analyze smaller snippets of code in the API docs.
 // Such snippets are wrapped in ```dart ... ``` blocks, which may themselves

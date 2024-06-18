@@ -1338,10 +1338,16 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
         );
     }
 
-    final BoxDecoration? effectiveDecoration = widget.decoration?.copyWith(
-      border: resolvedBorder,
-      color: enabled ? decorationColor : disabledColor,
-    );
+    // Use the default disabled color only if the box decoration was not set.
+    final BoxDecoration? effectiveDecoration =
+      widget.decoration?.copyWith(
+        border: resolvedBorder,
+        color: enabled ? decorationColor
+          : (widget.decoration == _kDefaultRoundedBorderDecoration
+              ? disabledColor
+              : widget.decoration?.color
+            ),
+      );
 
     final Color selectionColor = CupertinoDynamicColor.maybeResolve(
       DefaultSelectionStyle.of(context).selectionColor,
