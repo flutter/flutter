@@ -449,7 +449,7 @@ void main() {
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () {
       return FakeXcodeProjectInterpreterWithBuildSettings()
-      ..version = Version(14, 4, null);
+      ..version = Version(15, 4, null);
     },
   });
 
@@ -480,7 +480,7 @@ void main() {
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () {
       return FakeXcodeProjectInterpreterWithBuildSettings()
-        ..version = Version(14, 3, null);
+        ..version = Version(15, 3, null);
     },
   });
 

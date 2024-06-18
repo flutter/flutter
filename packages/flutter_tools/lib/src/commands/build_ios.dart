@@ -578,10 +578,13 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     return tempPlist;
   }
 
+  // As of Xcode 15.4, the old export methods 'app-store', 'ad-hoc', and 'development'
+  // are now deprecated. The new equivalents are 'app-store-connect', 'release-testing',
+  // and 'debugging'.
   String _getVersionAppropriateExportMethod(String method) {
     final Version? currVersion = globals.xcode!.currentVersion;
     if (currVersion != null) {
-      if (currVersion.major >= 15 || (currVersion.major == 14 && currVersion.minor > 3)) {
+      if (currVersion.major >= 16 || (currVersion.major == 15 && currVersion.minor > 3)) {
         final Map<String, String> exportMethodMap = <String, String>{
           'app-store': 'app-store-connect',
           'ad-hoc': 'release-testing',
