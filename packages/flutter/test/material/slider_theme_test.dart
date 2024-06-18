@@ -2543,6 +2543,11 @@ void main() {
     });
   });
 
+  testWidgets('SliderTrackShape isRounded defaults', (WidgetTester tester) async {
+    expect(const RectangularSliderTrackShape().isRounded, isFalse);
+    expect(const RoundedRectSliderTrackShape().isRounded, isTrue);
+  });
+
   group('Material 2', () {
     // These tests are only relevant for Material 2. Once Material 2
     // support is deprecated and the APIs are removed, these tests

@@ -1121,7 +1121,7 @@ abstract class SliderTrackShape {
   /// Whether the track shape is rounded.
   ///
   /// This is used to determine the correct position of the thumb in relation to the track.
-  bool get isRounded;
+  bool get isRounded => false;
 }
 
 /// Base class for [RangeSlider] thumb shapes.
@@ -1641,9 +1641,6 @@ class RectangularSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
       }
     }
   }
-
-  @override
-  bool get isRounded => false;
 }
 
 /// The default shape of a [Slider]'s track.
