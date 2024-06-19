@@ -35,13 +35,14 @@ class _NavBarExampleState extends State<NavBarExample> {
         // Try removing opacity to observe the lack of a blur effect and of sliding content.
         backgroundColor: CupertinoColors.systemGrey.withOpacity(0.5),
         middle: const Text('CupertinoNavigationBar Sample'),
+        automaticBackgroundVisibility: false,
       ),
-      child: ListView(
+      child: Column(
         children: <Widget>[
-          Container(height: 200, color: CupertinoColors.systemRed),
-          Container(height: 200, color: CupertinoColors.systemGreen),
-          Container(height: 200, color: CupertinoColors.systemBlue),
-          Container(height: 200, color: CupertinoColors.systemYellow),
+          Container(height: 50, color: CupertinoColors.systemRed),
+          Container(height: 50, color: CupertinoColors.systemGreen),
+          Container(height: 20, color: CupertinoColors.systemBlue),
+          Container(height: 20, color: CupertinoColors.systemYellow),
         ],
       ),
     );
