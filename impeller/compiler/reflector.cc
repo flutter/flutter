@@ -376,6 +376,8 @@ std::shared_ptr<RuntimeStageData::Shader> Reflector::GenerateRuntimeStageData()
 
     const auto& ubo = ubos[0];
 
+    size_t binding =
+        compiler_->get_decoration(ubo.id, spv::Decoration::DecorationBinding);
     auto members = ReadStructMembers(ubo.type_id);
     std::vector<uint8_t> struct_layout;
     size_t float_count = 0;
@@ -410,9 +412,8 @@ std::shared_ptr<RuntimeStageData::Shader> Reflector::GenerateRuntimeStageData()
     }
     data->uniforms.emplace_back(UniformDescription{
         .name = ubo.name,
-        .location = 64,  // Magic constant that must match the descriptor set
-                         // location for fragment programs.
-        .binding = 64,
+        .location = binding,
+        .binding = binding,
         .type = spirv_cross::SPIRType::Struct,
         .struct_layout = std::move(struct_layout),
         .struct_float_count = float_count,
