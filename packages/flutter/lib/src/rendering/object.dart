@@ -2363,10 +2363,8 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   // This is a static method to reduce closure allocation with visitChildren.
   static void _cleanChildRelayoutBoundary(RenderObject child) {
     if (child._relayoutBoundary != child) {
-      // This may temporarily break the _relayoutBoundary invariant at children;
-      // the visitChildren restores the invariant.
-      child._relayoutBoundary = null;
       child.visitChildren(_cleanChildRelayoutBoundary);
+      child._relayoutBoundary = null;
     }
   }
 
