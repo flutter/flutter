@@ -18,9 +18,7 @@ void main() {
     expect(find.byIcon(Icons.web), findsOneWidget);
 
     expect(
-      tester.widget<TextField>(find.byType(TextField))
-        .decoration
-        ?.prefixIconColor,
+      tester.widget<TextField>(find.byType(TextField)).decoration?.prefixIconColor,
       isA<WidgetStateColor>()
         .having((WidgetStateColor color) => color.resolve(<WidgetState>{}), 'default', Colors.grey)
         .having((WidgetStateColor color) => color.resolve(<WidgetState>{WidgetState.focused}), 'focused', Colors.blue)
