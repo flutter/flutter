@@ -69,12 +69,13 @@ TaskFunction createMicrobenchmarkTask({
       ...await runMicrobench('lib/language/compute_bench.dart'),
       ...await runMicrobench('lib/language/sync_star_bench.dart'),
       ...await runMicrobench('lib/language/sync_star_semantics_bench.dart'),
+      ...await runMicrobench('lib/layout/relayout_boundary_bench.dart'),
+      ...await runMicrobench('lib/layout/text_intrinsic_bench.dart'),
       ...await runMicrobench('lib/stocks/animation_bench.dart'),
       ...await runMicrobench('lib/stocks/build_bench_profiled.dart'),
       ...await runMicrobench('lib/stocks/build_bench.dart'),
       ...await runMicrobench('lib/stocks/layout_bench.dart'),
       ...await runMicrobench('lib/ui/image_bench.dart'),
-      ...await runMicrobench('lib/layout/text_intrinsic_bench.dart'),
     };
 
     return TaskResult.success(allResults,
