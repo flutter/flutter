@@ -34,38 +34,35 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  static const String _aboutSteve =
-    'Steve is a dog whose personality is as unique as his name. Not your average canine, '
-    'Steve exudes a sense of adventure and curiosity that sets him apart from his peers. '
-    'Whether it is exploring the depths of the backyard or bravely venturing into unknown '
-    'territories during his walks, Steve approaches life with a wagging tail and an eager heart. '
-    'His keen senses and intuitive nature often lead him to discover things that would otherwise '
-    'go unnoticed, making every day an exciting adventure.\n'
+  static const String _aboutLorem =
+    'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin ac turpis vitae felis varius '
+    'mattis. Nulla facilisi. Pellentesque habitant morbi tristique senectus et netus et malesuada '
+    'fames ac turpis egestas. Aenean sit amet cursus turpis. Suspendisse potenti. Quisque vel '
+    'libero ac ligula cursus tincidunt id vel metus. Vivamus at sapien sit amet quam feugiat '
+    'fermentum sit amet nec velit.\n'
     '\n'
-    'At home, Steve is the epitome of loyalty and companionship. His family knows they can always '
-    'count on him for comfort and joy, especially on the days when they need it the most. With a '
-    'gentle nudge of his nose or a comforting rest of his head on their lap, Steve has a way of '
-    'making problems seem less daunting. His presence in the house is like a beacon of warmth and '
-    'love, illuminating the lives of those around him.\n'
+    'Vestibulum nec dui non odio fermentum consequat non id felis. Integer vel massa ut nunc '
+    'congue cursus. Nunc eu lacus eros. Aliquam erat volutpat. Vivamus posuere libero at ligula '
+    'ultrices, at volutpat risus auctor. Nullam ac mauris quis justo auctor tempor. Nulla quis '
+    'lobortis nisi, ut bibendum felis. Duis ac libero sit amet magna varius sagittis vel in arcu.\n'
     '\n'
-    'Steve’s intelligence is another trait that can not be overlooked. He’s not just skilled at '
-    'learning tricks and following commands; Steve seems to understand the emotions and needs of '
-    'his family, responding in ways that are both helpful and heartwarming. This emotional '
-    'intelligence, combined with his playful antics, makes every interaction with him both '
-    'meaningful and entertaining. Whether it’s playing fetch or simply lying by your side, Steve '
-    'knows how to make the most of every moment.\n'
+    'Etiam varius, eros ac gravida sagittis, mi justo vulputate mauris, non posuere lacus sapien '
+    'quis lectus. Donec non felis et libero malesuada ultricies. Nulla facilisi. Vestibulum sed '
+    'nulla ac libero venenatis ullamcorper. Integer fringilla diam eu eros euismod, a congue purus '
+    'vulputate. Sed at urna in urna faucibus elementum. Curabitur eget orci at lacus efficitur '
+    'dictum. Duis gravida bibendum sapien, sed fermentum libero vestibulum sed.\n'
     '\n'
-    'Socially, Steve is a star. His friendly demeanor and playful spirit make him a favorite among '
-    'both dogs and humans alike. At the park, he is often seen leading the pack, initiating games, '
-    'and making new friends. Steve’s ability to get along with everyone, coupled with his '
-    'infectious energy, often turns a simple outing into an unforgettable experience for everyone '
-    'involved.\n'
+    'Praesent congue ex et magna vehicula, nec fringilla dui sollicitudin. Quisque at erat et mi '
+    'facilisis accumsan id a felis. Cras a interdum lacus, non bibendum libero. Nulla facilisi. '
+    'Donec a dui sapien. Suspendisse potenti. Integer et risus quis arcu facilisis dignissim. '
+    'Suspendisse potenti. Nam ac orci nec arcu malesuada vulputate.\n'
     '\n'
-    'As the seasons change, so do the adventures and stories that come with Steve. From basking in '
-    'the summer sun to leaving paw prints in the winter snow, each season offers new opportunities '
-    'for discovery and fun. Steve embraces these changes with enthusiasm, reminding everyone of '
-    'the joy and wonder that the world has to offer. Through his eyes, life is an endless '
-    'adventure, full of moments to be cherished and explored.';
+    'Sed vestibulum libero sit amet dolor fringilla, at aliquet purus sollicitudin. Donec sed '
+    'nunc venenatis, bibendum libero ut, condimentum libero. Vivamus dictum lectus sit amet purus '
+    'accumsan convallis. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere '
+    'cubilia curae; Mauris volutpat, nisl a scelerisque vestibulum, dui felis varius mauris, et '
+    'eleifend orci justo id lectus. Integer sagittis, lorem nec molestie condimentum, tortor nisl '
+    'aliquam velit, eget efficitur justo mauris a ante.';
 
   final ContextMenuController _menuController = ContextMenuController();
   final SelectionController _selectionController = SelectionController();
@@ -75,7 +72,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    _textWidgets = _initWidgets(_aboutSteve);
+    _textWidgets = _initWidgets(_aboutLorem);
   }
 
   @override
