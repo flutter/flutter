@@ -639,6 +639,25 @@ void main() {
   }, skip: isBrowser, // [intended] uses dart:isolate and io.
   );
 
+  test('fromSeed() asserts on invalid contrast levels', () {
+    expect(() {
+      ColorScheme.fromSeed(seedColor: Colors.blue, contrastLevel: -1.5);
+    }, throwsAssertionError);
+
+    expect(() {
+      ColorScheme.fromSeed(seedColor: Colors.blue, contrastLevel: 1.5);
+    }, throwsAssertionError);
+  });
+
+  test('fromImageProvider() asserts on invalid contrast levels', () async {
+    final Uint8List blueSquareBytes = Uint8List.fromList(kBlueSquarePng);
+    final ImageProvider image = MemoryImage(blueSquareBytes);
+
+    expect(() => ColorScheme.fromImageProvider(provider: image, contrastLevel: -1.5), throwsAssertionError);
+
+    expect(() => ColorScheme.fromImageProvider(provider: image, contrastLevel: 1.5), throwsAssertionError);
+  });
+
   test('fromImageProvider() propagates TimeoutException when image cannot be rendered', () async {
     final Uint8List blueSquareBytes = Uint8List.fromList(kBlueSquarePng);
 
