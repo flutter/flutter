@@ -1813,7 +1813,6 @@ class _NavigationBarTransition extends StatelessWidget {
     required this.animation,
     required this.topNavBar,
     required this.bottomNavBar,
-    required this.flightDirection,
   }) : heightTween = Tween<double>(
          begin: bottomNavBar.renderBox.size.height,
          end: topNavBar.renderBox.size.height,
@@ -1834,7 +1833,6 @@ class _NavigationBarTransition extends StatelessWidget {
   final Tween<double> heightTween;
   final ColorTween backgroundTween;
   final BorderTween borderTween;
-  final HeroFlightDirection flightDirection;
 
   @override
   Widget build(BuildContext context) {
@@ -2591,14 +2589,12 @@ Widget _navBarHeroFlightShuttleBuilder(
         animation: animation,
         bottomNavBar: fromNavBar,
         topNavBar: toNavBar,
-        flightDirection: flightDirection,
       );
     case HeroFlightDirection.pop:
       return _NavigationBarTransition(
         animation: animation,
         bottomNavBar: toNavBar,
         topNavBar: fromNavBar,
-        flightDirection: flightDirection,
       );
   }
 }
