@@ -292,6 +292,9 @@ class _CarouselViewState extends State<CarouselView> {
     if (widget.itemExtent != oldWidget.itemExtent) {
       _itemExtent = widget.itemExtent;
     }
+    if (widget.allowFullyExpand != oldWidget.allowFullyExpand) {
+      _allowFullyExpand = widget.allowFullyExpand;
+    }
   }
 
   @override
@@ -1275,7 +1278,7 @@ class _CarouselPosition extends ScrollPositionWithSingleContext implements _Caro
        || layoutWeights == null && itemExtent != null),
        _itemToShowOnStartup = initialItem.toDouble(),
        super(
-         initialPixels: null
+         initialPixels: null,
        );
 
   final int initialItem;
@@ -1291,6 +1294,7 @@ class _CarouselPosition extends ScrollPositionWithSingleContext implements _Caro
   @override
   List<int>? layoutWeights;
   double getItemFromPixels(double pixels, double viewportDimension) {
+    print(layoutWeights);
     assert(viewportDimension > 0.0);
     double fraction;
     if (itemExtent != null) {
@@ -1316,6 +1320,7 @@ class _CarouselPosition extends ScrollPositionWithSingleContext implements _Caro
       assert(layoutWeights != null);
       fraction = layoutWeights!.first / layoutWeights!.sum;
     }
+    print(layoutWeights);
 
     return item * viewportDimension * fraction;
   }
