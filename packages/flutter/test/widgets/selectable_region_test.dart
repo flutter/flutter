@@ -3595,7 +3595,7 @@ void main() {
   );
 
   // Regression test for https://github.com/flutter/flutter/issues/121053.
-  testWidgets('Ensure consistent layout of SelectionArea children between platforms', (WidgetTester tester) async {
+  testWidgets('Ensure SelectionArea does not affect the layout of its children', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Column(
@@ -3611,7 +3611,9 @@ void main() {
     final double xOffset1 = tester.getTopLeft(find.text('row 1')).dx;
     final double xOffset2 = tester.getTopLeft(find.text('row 2')).dx;
     expect(xOffset1, xOffset2);
-  });
+  },
+    variant: TargetPlatformVariant.all(),
+  );
 
   testWidgets('the selection behavior when clicking `Copy` item in mobile platforms', (WidgetTester tester) async {
     List<ContextMenuButtonItem> buttonItems = <ContextMenuButtonItem>[];
