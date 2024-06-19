@@ -192,7 +192,7 @@ class SwitchListTile extends StatelessWidget {
     this.contentPadding,
     this.secondary,
     this.selected = false,
-    this.controlAffinity = ListTileControlAffinity.platform,
+    this.controlAffinity,
     this.shape,
     this.selectedTileColor,
     this.visualDensity,
@@ -249,7 +249,7 @@ class SwitchListTile extends StatelessWidget {
     this.contentPadding,
     this.secondary,
     this.selected = false,
-    this.controlAffinity = ListTileControlAffinity.platform,
+    this.controlAffinity,
     this.shape,
     this.selectedTileColor,
     this.visualDensity,
@@ -480,7 +480,7 @@ class SwitchListTile extends StatelessWidget {
   /// Defines the position of control and [secondary], relative to text.
   ///
   /// By default, the value of [controlAffinity] is [ListTileControlAffinity.platform].
-  final ListTileControlAffinity controlAffinity;
+  final ListTileControlAffinity? controlAffinity;
 
   /// {@macro flutter.material.ListTile.shape}
   final ShapeBorder? shape;
@@ -565,14 +565,14 @@ class SwitchListTile extends StatelessWidget {
           ),
         );
     }
-
+    final ThemeData theme = Theme.of(context);
+    final ListTileControlAffinity controlAffinity = this.controlAffinity ?? theme.listTileTheme.controlAffinity ?? ListTileControlAffinity.platform;
     Widget? leading, trailing;
     (leading, trailing) = switch (controlAffinity) {
       ListTileControlAffinity.leading => (control, secondary),
       ListTileControlAffinity.trailing || ListTileControlAffinity.platform => (secondary, control),
     };
 
-    final ThemeData theme = Theme.of(context);
     final SwitchThemeData switchTheme = SwitchTheme.of(context);
     final Set<MaterialState> states = <MaterialState>{
       if (selected) MaterialState.selected,
