@@ -2368,19 +2368,15 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     }
   }
 
-  void _propagateRelayoutBoundary() {
-    if (_relayoutBoundary == this) {
-      return;
-    }
-    final RenderObject? parentRelayoutBoundary = parent?._relayoutBoundary;
-    assert(parentRelayoutBoundary != null);
-    assert(parentRelayoutBoundary != _relayoutBoundary);
-    _setRelayoutBoundary(parentRelayoutBoundary!);
-  }
-
   // This is a static method to reduce closure allocation with visitChildren.
   static void _propagateRelayoutBoundaryToChild(RenderObject child) {
-    child._propagateRelayoutBoundary();
+    if (child._relayoutBoundary == child) {
+      return;
+    }
+    final RenderObject? parentRelayoutBoundary = child.parent?._relayoutBoundary;
+    assert(parentRelayoutBoundary != null);
+    assert(parentRelayoutBoundary != child._relayoutBoundary);
+    child._setRelayoutBoundary(parentRelayoutBoundary!);
   }
 
   /// Set [_relayoutBoundary] to [value] throughout this render object's
