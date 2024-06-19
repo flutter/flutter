@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// See: https://github.com/flutter/flutter/wiki/Release-process
+// See: https://github.com/flutter/flutter/blob/main/docs/releases/Release-process.md
 
 import 'dart:io' as io;
 
