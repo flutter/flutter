@@ -3613,6 +3613,7 @@ void main() {
     mountedNotifier.value = false;
     await tester.pump();
 
+    // This should not throw
     await gesture.moveTo(location);
 
     expect(find.byType(Container), findsOneWidget);
