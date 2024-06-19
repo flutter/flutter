@@ -70,6 +70,8 @@ impellerc("runtime_stages") {
     "ink_sparkle.frag",
     "runtime_stage_example.frag",
     "gradient.frag",
+    "uniforms_and_sampler_1.frag",
+    "uniforms_and_sampler_2.frag",
   ]
   sl_file_extension = "iplr"
 
