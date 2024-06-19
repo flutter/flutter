@@ -11,14 +11,14 @@ void main() {
     await tester.pumpWidget(
       const example.SelectionAreaColorTextRedExampleApp(),
     );
-    expect(find.widgetWithIcon(Icon, Icons.undo), findsOneWidget);
-    expect(find.byType(Column), findsOneWidget);
-    expect(find.widgetWithText(Text, 'This is some bulleted list:\n'), findsOneWidget);
+    expect(find.widgetWithIcon(FloatingActionButton, Icons.undo), findsOneWidget);
+    expect(find.byType(Column), findsNWidgets(2));
+    expect(find.textContaining('This is some bulleted list:\n'), findsOneWidget);
     for (int i = 1; i <= 7; i += 1) {
       expect(find.widgetWithText(Text, '• Bullet $i'), findsOneWidget);
     }
-    expect(find.widgetWithText(Text, 'This is some text in a text widget.'), findsOneWidget);
-    expect(find.widgetWithText(Text, ' This is some more text in the same text widget.'), findsOneWidget);
-    expect(find.widgetWithText(Text, 'This is some text in another text widget.'), findsOneWidget);
+    expect(find.textContaining('This is some text in a text widget.'), findsOneWidget);
+    expect(find.textContaining(' This is some more text in the same text widget.'), findsOneWidget);
+    expect(find.textContaining('This is some text in another text widget.'), findsOneWidget);
   });
 }
