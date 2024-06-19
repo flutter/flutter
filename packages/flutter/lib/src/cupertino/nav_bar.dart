@@ -137,16 +137,12 @@ class _FixedSizeSlidingTransition extends AnimatedWidget {
 ///
 /// When `updateSystemUiOverlay` is true, the nav bar will update the OS
 /// status bar's color theme based on the background color of the nav bar.
-///
-/// When `isContentScrolledUnder` is true, the nav bar will render a blurred
-/// background when the content scrolls under the nav bar.
 Widget _wrapWithBackground({
   Border? border,
   required Color backgroundColor,
   Brightness? brightness,
   required Widget child,
   bool updateSystemUiOverlay = true,
-  bool isContentScrolledUnder = false,
 }) {
   Widget result = child;
   if (updateSystemUiOverlay) {
@@ -183,9 +179,8 @@ Widget _wrapWithBackground({
 
   return ClipRect(
     child: BackdropFilter(
-      filter: backgroundColor.alpha == 0xFF || !isContentScrolledUnder
-        ? ImageFilter.blur()
-        : ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+      enabled: backgroundColor.alpha != 0xFF,
+      filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
       child: childWithBackground,
     ),
   );
@@ -551,7 +546,6 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
     );
 
     final Widget navBar = _wrapWithBackground(
-      isContentScrolledUnder: _scrollAnimationValue > 0.0,
       border: effectiveBorder,
       backgroundColor: effectiveBackgroundColor,
       brightness: widget.brightness,
@@ -589,7 +583,6 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
             border: effectiveBorder,
             hasUserMiddle: widget.middle != null,
             largeExpanded: false,
-            isContentScrolledUnder: _scrollAnimationValue > 0.0,
             child: navBar,
           ),
         );
@@ -923,7 +916,6 @@ class _LargeTitleNavigationBarSliverDelegate
         : backgroundColor;
 
     final Widget navBar = _wrapWithBackground(
-      isContentScrolledUnder: shrinkAnimationValue > 0.0,
       border: effectiveBorder,
       backgroundColor: effectiveBackgroundColor,
       brightness: brightness,
@@ -1002,7 +994,6 @@ class _LargeTitleNavigationBarSliverDelegate
         border: effectiveBorder,
         hasUserMiddle: userMiddle != null && (alwaysShowMiddle || !showLargeTitle),
         largeExpanded: showLargeTitle,
-        isContentScrolledUnder: shrinkAnimationValue > 0.0,
         child: navBar,
       ),
     );
@@ -1751,7 +1742,6 @@ class _TransitionableNavigationBar extends StatelessWidget {
     required this.border,
     required this.hasUserMiddle,
     required this.largeExpanded,
-    required this.isContentScrolledUnder,
     required this.child,
   }) : assert(!largeExpanded || largeTitleTextStyle != null),
        super(key: componentsKeys.navBarBoxKey);
@@ -1764,7 +1754,6 @@ class _TransitionableNavigationBar extends StatelessWidget {
   final Border? border;
   final bool hasUserMiddle;
   final bool largeExpanded;
-  final bool isContentScrolledUnder;
   final Widget child;
 
   RenderBox get renderBox {
@@ -1868,9 +1857,6 @@ class _NavigationBarTransition extends StatelessWidget {
         animation: animation,
         builder: (BuildContext context, Widget? child) {
           return _wrapWithBackground(
-            isContentScrolledUnder: flightDirection == HeroFlightDirection.push
-              ? topNavBar.isContentScrolledUnder
-              : bottomNavBar.isContentScrolledUnder,
             // Don't update the system status bar color mid-flight.
             updateSystemUiOverlay: false,
             backgroundColor: backgroundTween.evaluate(animation)!,

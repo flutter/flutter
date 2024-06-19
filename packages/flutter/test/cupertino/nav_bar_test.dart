@@ -92,7 +92,7 @@ void main() {
 
     expect(
       tester.widget(find.byType(BackdropFilter)),
-      isA<BackdropFilter>().having((BackdropFilter filter) => filter.filter, 'filter', ImageFilter.blur()),
+      isA<BackdropFilter>().having((BackdropFilter filter) => filter.enabled, 'filter enabled', false),
     );
     expect(find.byType(CupertinoNavigationBar), paints..rect(color: background.color));
 
@@ -119,7 +119,7 @@ void main() {
 
     expect(
       tester.widget(find.byType(BackdropFilter)),
-      isA<BackdropFilter>().having((BackdropFilter f) => f.filter, 'filter', ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0)),
+      isA<BackdropFilter>().having((BackdropFilter f) => f.enabled, 'filter enabled', true),
     );
     expect(find.byType(CupertinoNavigationBar), paints..rect(color: background.darkColor));
   });
@@ -147,7 +147,7 @@ void main() {
 
     expect(
       test.widget(find.byType(BackdropFilter)),
-      isA<BackdropFilter>().having((BackdropFilter filter) => filter.filter, 'filter', ImageFilter.blur()),
+      isA<BackdropFilter>().having((BackdropFilter filter) => filter.enabled, 'filter enabled', false),
     );
 
     scrollController.jumpTo(100.0);
@@ -155,7 +155,7 @@ void main() {
 
     expect(
       test.widget(find.byType(BackdropFilter)),
-      isA<BackdropFilter>().having((BackdropFilter filter) => filter.filter, 'filter', ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0)),
+      isA<BackdropFilter>().having((BackdropFilter filter) => filter.enabled, 'filter enabled', true),
     );
   });
 
