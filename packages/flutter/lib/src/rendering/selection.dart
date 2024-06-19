@@ -121,6 +121,13 @@ abstract class SelectionHandler implements ValueListenable<SelectionGeometry> {
 /// ** See code in examples/api/lib/material/selection_area/selection_area.1.dart **
 /// {@end-tool}
 ///
+/// {@tool dartpad}
+/// This example shows how to replace the active selection
+/// under a [SelectionArea] or [SelectableRegion] with a widget.
+///
+/// ** See code in examples/api/lib/material/selection_area/selection_area.2.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///   * [SelectedContent], which contains the [SelectedContentRange] for a given [Selectable] or [SelectionHandler].
