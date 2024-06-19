@@ -2,7 +2,6 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 
 android {
-    namespace = "dev.flutter.scenarios"
     lintOptions {
         abortOnError true
         checkAllWarnings true
@@ -17,7 +16,7 @@ android {
         // NewerVersionAvailable and GradleDependency need to be taken care of
         // by a roller rather than as part of CI.
         // The others are irrelevant for a test application.
-        disable 'UnpackedNativeCode','MissingApplicationIcon','GoogleAppIndexingApiWarning','GoogleAppIndexingWarning','GradleDependency','NewerVersionAvailable','Registered', 'ObsoleteLintCustomCheck'
+        disable 'UnpackedNativeCode','MissingApplicationIcon','GoogleAppIndexingApiWarning','GoogleAppIndexingWarning','GradleDependency','NewerVersionAvailable','Registered'
     }
     buildToolsVersion = '34.0.0'
     compileSdkVersion 34

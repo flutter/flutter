@@ -785,7 +785,7 @@ deps = {
      'packages': [
        {
         'package': 'flutter/android/embedding_bundle',
-        'version': 'last_updated:2024-06-18T12:13:41-0700'
+        'version': 'last_updated:2023-08-11T11:35:44-0700'
        }
      ],
      'condition': 'download_android_deps',
