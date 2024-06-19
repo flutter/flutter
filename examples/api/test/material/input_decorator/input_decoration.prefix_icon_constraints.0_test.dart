@@ -21,20 +21,22 @@ void main() {
     final Finder normalIcon = find.descendant(
       of: find.ancestor(
         of: find.text('Normal Icon Constraints'),
-        matching: find.byType(TextField)
+        matching: find.byType(TextField),
       ),
-      matching: find.byIcon(Icons.search)
+      matching: find.byIcon(Icons.search),
     );
     final Finder smallerIcon = find.descendant(
       of: find.ancestor(
         of: find.text('Smaller Icon Constraints'),
-        matching: find.byType(TextField)
+        matching: find.byType(TextField),
       ),
-      matching: find.byIcon(Icons.search)
+      matching: find.byIcon(Icons.search),
     );
 
-    expect(tester.getSize(normalIcon).longestSide,
-      greaterThan(tester.getSize(smallerIcon).longestSide));
+    expect(
+      tester.getSize(normalIcon).longestSide,
+      greaterThan(tester.getSize(smallerIcon).longestSide),
+    );
   });
 
   testWidgets('prefixIcons are placed left of hintText', (WidgetTester tester) async {
@@ -45,21 +47,25 @@ void main() {
     final Finder normalIcon = find.descendant(
       of: find.ancestor(
         of: find.text('Normal Icon Constraints'),
-        matching: find.byType(TextField)
+        matching: find.byType(TextField),
       ),
-      matching: find.byIcon(Icons.search)
+      matching: find.byIcon(Icons.search),
     );
     final Finder smallerIcon = find.descendant(
       of: find.ancestor(
         of: find.text('Smaller Icon Constraints'),
-        matching: find.byType(TextField)
+        matching: find.byType(TextField),
       ),
-      matching: find.byIcon(Icons.search)
+      matching: find.byIcon(Icons.search),
     );
 
-    expect(tester.getCenter(find.text('Normal Icon Constraints')).dx,
-      greaterThan(tester.getCenter(normalIcon).dx));
-    expect(tester.getCenter(find.text('Smaller Icon Constraints')).dx,
-      greaterThan(tester.getCenter(smallerIcon).dx));
+    expect(
+      tester.getCenter(find.text('Normal Icon Constraints')).dx,
+      greaterThan(tester.getCenter(normalIcon).dx),
+    );
+    expect(
+      tester.getCenter(find.text('Smaller Icon Constraints')).dx,
+      greaterThan(tester.getCenter(smallerIcon).dx),
+    );
   });
 }
