@@ -334,7 +334,6 @@ final Set<String> _knownMissingTests = <String>{
   'examples/api/test/material/input_decorator/input_decoration.suffix_icon_constraints.0_test.dart',
   'examples/api/test/material/input_decorator/input_decoration.3_test.dart',
   'examples/api/test/material/input_decorator/input_decoration.material_state.1_test.dart',
-  'examples/api/test/material/text_form_field/text_form_field.1_test.dart',
   'examples/api/test/material/scrollbar/scrollbar.1_test.dart',
   'examples/api/test/material/search_anchor/search_anchor.0_test.dart',
   'examples/api/test/material/search_anchor/search_anchor.1_test.dart',
