@@ -862,6 +862,52 @@ void main() {
         expect(testLogger.warningText, '');
       });
 
+      testUsingContext('avoid warning when a plugin references a default plugin with a Dart implementation only', () async {
+        final Set<String> directDependencies = <String>{'url_launcher'};
+        final List<PluginInterfaceResolution> resolutions =
+        resolvePlatformImplementation(
+          <Plugin>[
+            Plugin.fromYaml(
+              'url_launcher',
+              '',
+              YamlMap.wrap(<String, dynamic>{
+                'platforms': <String, dynamic>{
+                  'linux': <String, dynamic>{
+                    'default_package': 'url_launcher_linux',
+                  },
+                },
+              }),
+              null,
+              <String>[],
+              fileSystem: fs,
+              appDependencies: directDependencies,
+            ),
+            Plugin.fromYaml(
+              'url_launcher_linux',
+              '',
+              YamlMap.wrap(<String, dynamic>{
+                'implements': 'url_launcher',
+                'platforms': <String, dynamic>{
+                  'linux': <String, dynamic>{
+                    'dartPluginClass': 'UrlLauncherLinux',
+                  },
+                },
+              }),
+              null,
+              <String>[],
+              fileSystem: fs,
+              appDependencies: directDependencies,
+            ),
+          ],
+          // Select native plugins, to test avoiding trigger a warning for
+          // default plugins, while no dart plugins are selected.
+          selectDartPlugins: false,
+        );
+
+        expect(resolutions.length, equals(0));
+        expect(testLogger.warningText, '');
+      });
+
       testUsingContext('provides warning when a plugin references a default plugin which does not exist', () async {
         final Set<String> directDependencies = <String>{'url_launcher'};
         final List<PluginInterfaceResolution> resolutions =
