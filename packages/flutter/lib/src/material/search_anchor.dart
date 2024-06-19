@@ -318,7 +318,6 @@ class SearchAnchor extends StatefulWidget {
   /// Has no effect if the search view is full-screen.
   ///
   /// If null, the value of [SearchViewThemeData.padding] will be used.
-  /// If this is also null, then the padding defaults to `EdgeInsets.only(bottom: 16)`.
   final EdgeInsets? viewPadding;
 
   /// Whether the search view should shrink-wrap its contents.
@@ -955,9 +954,9 @@ class _ViewContentState extends State<_ViewContent> {
       ?? widget.viewHeaderTextStyle
       ?? viewTheme.headerTextStyle
       ?? viewDefaults.headerHintStyle;
-    final EdgeInsets effectivePadding = widget.viewPadding
+    final EdgeInsets? effectivePadding = widget.viewPadding
       ?? viewTheme.padding
-      ?? viewDefaults.padding!;
+      ?? viewDefaults.padding;
     final bool effectiveShrinkWrap = widget.viewShrinkWrap
       ?? viewTheme.shrinkWrap
       ?? viewDefaults.shrinkWrap!;
@@ -977,7 +976,7 @@ class _ViewContentState extends State<_ViewContent> {
             maxHeight: _viewRect.height,
           ),
           child: Padding(
-            padding: effectivePadding,
+            padding: effectivePadding ?? EdgeInsets.zero,
             child: Material(
               clipBehavior: Clip.antiAlias,
               shape: effectiveShape,
@@ -1649,9 +1648,6 @@ class _SearchViewDefaultsM3 extends SearchViewThemeData {
 
   @override
   BoxConstraints get constraints => const BoxConstraints(minWidth: 360.0, minHeight: 240.0);
-
-  @override
-  EdgeInsets get padding => const EdgeInsets.only(bottom: 16.0);
 
   @override
   bool get shrinkWrap => false;
