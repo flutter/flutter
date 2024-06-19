@@ -132,8 +132,7 @@ class _FixedSizeSlidingTransition extends AnimatedWidget {
 }
 
 /// Returns `child` wrapped with background and a bottom border if background color
-/// is opaque. Otherwise, also blur with [BackdropFilter] if content scrolls under
-/// the nav bar.
+/// is opaque. Otherwise, also blur with [BackdropFilter].
 ///
 /// When `updateSystemUiOverlay` is true, the nav bar will update the OS
 /// status bar's color theme based on the background color of the nav bar.
