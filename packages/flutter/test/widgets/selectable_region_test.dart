@@ -4529,7 +4529,7 @@ void main() {
     expect(paragraph1.selections[0], const TextSelection(baseOffset: 0, extentOffset: 12));
     expect(paragraph2.selections[0], const TextSelection(baseOffset: 0, extentOffset: 14));
     expect(paragraph3.selections[0], const TextSelection(baseOffset: 0, extentOffset: 16));
-  }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/125582.
+  });
 
   testWidgets('onSelectionChanged SelectedContentRange is accurate with WidgetSpans', (WidgetTester tester) async {
     SelectedContent? content;
