@@ -685,10 +685,10 @@ void main() {
     await tester.pumpAndSettle();
     expect(pressed, null);
 
-    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('One')));
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('Two')));
     await tester.pumpAndSettle();
 
-    await gesture.moveTo(tester.getCenter(find.text('Two')));
+    await gesture.moveTo(tester.getCenter(find.text('One')));
     await tester.pumpAndSettle();
     await expectLater(
       find.byType(CupertinoActionSheet),
@@ -696,7 +696,7 @@ void main() {
     );
 
     await gesture.up();
-    expect(pressed, 2);
+    expect(pressed, 1);
     await tester.pumpAndSettle();
     expect(find.text('One'), findsNothing);
   });
@@ -1317,7 +1317,8 @@ void main() {
     await tester.tap(find.text('Go'));
     await tester.pumpAndSettle();
 
-    final TestGesture pointer = await tester.startGesture(tester.getCenter(find.text('One')));
+    final TestGesture pointer = await tester.startGesture(tester.getCenter(find.text('Two')));
+    // Just `pump`, not `pumpAndSettle`, as we want to verify the very next frame.
     await tester.pump();
     await expectLater(
       find.byType(CupertinoActionSheet),
