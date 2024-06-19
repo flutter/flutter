@@ -41,8 +41,8 @@ class _NavBarExampleState extends State<NavBarExample> {
         children: <Widget>[
           Container(height: 50, color: CupertinoColors.systemRed),
           Container(height: 50, color: CupertinoColors.systemGreen),
-          Container(height: 20, color: CupertinoColors.systemBlue),
-          Container(height: 20, color: CupertinoColors.systemYellow),
+          Container(height: 50, color: CupertinoColors.systemBlue),
+          Container(height: 50, color: CupertinoColors.systemYellow),
         ],
       ),
     );
