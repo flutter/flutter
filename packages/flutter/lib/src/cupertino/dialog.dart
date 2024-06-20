@@ -1402,7 +1402,7 @@ class _ActionSheetMainSheetState extends State<_ActionSheetMainSheet> {
 }
 
 class _CupertinoDialogRenderWidget extends StatefulWidget {
-  _CupertinoDialogRenderWidget({
+  const _CupertinoDialogRenderWidget({
     required this.contentSection,
     required this.actionsSection,
     required this.dividerColor,
@@ -1697,8 +1697,8 @@ class _CupertinoAlertActionSection extends StatelessWidget {
       child: SingleChildScrollView(
         controller: scrollController,
         child: _AlertDialogActionsLayout(
-          children: column,
           dividerThickness: _kDividerThickness,
+          children: column,
         ),
       ),
     );
