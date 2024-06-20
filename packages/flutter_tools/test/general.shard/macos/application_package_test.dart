@@ -161,11 +161,11 @@ group('PrebuiltMacOSApp', () {
       final MacOSProject project = FlutterProject.fromDirectory(globals.fs.currentDirectory).macos;
       final BuildableMacOSApp macosApp = MacOSApp.fromMacOSProject(project) as BuildableMacOSApp;
 
-      const BuildInfo vanillaApp = BuildInfo(BuildMode.debug, null, treeShakeIcons: false);
+      const BuildInfo vanillaApp = BuildInfo(BuildMode.debug, null, treeShakeIcons: false, packageConfigPath: '.dart_tool/package_config.json');
       String? applicationBundle = macosApp.bundleDirectory(vanillaApp);
       expect(applicationBundle, 'Debug');
 
-      const BuildInfo flavoredApp = BuildInfo(BuildMode.release, 'flavor', treeShakeIcons: false);
+      const BuildInfo flavoredApp = BuildInfo(BuildMode.release, 'flavor', treeShakeIcons: false, packageConfigPath: '.dart_tool/package_config.json');
       applicationBundle = macosApp.bundleDirectory(flavoredApp);
       expect(applicationBundle, 'Release-flavor');
 

@@ -518,6 +518,7 @@ void main() {
             buildName: '1.2.3',
             buildNumber: '4',
             treeShakeIcons: false,
+            packageConfigPath: '.dart_tool/package_config.json',
           )),
           platformArgs: <String, Object>{},
         );
@@ -592,6 +593,7 @@ void main() {
               buildName: '1.2.3',
               buildNumber: '4',
               treeShakeIcons: false,
+              packageConfigPath: '.dart_tool/package_config.json',
             )),
             platformArgs: <String, Object>{},
           );
@@ -659,6 +661,7 @@ void main() {
             buildName: '1.2.3',
             buildNumber: '4',
             treeShakeIcons: false,
+            packageConfigPath: '.dart_tool/package_config.json',
           )),
           platformArgs: <String, Object>{},
         );
@@ -710,6 +713,7 @@ void main() {
             buildName: '1.2.3',
             buildNumber: '4',
             treeShakeIcons: false,
+            packageConfigPath: '.dart_tool/package_config.json',
           )),
           platformArgs: <String, Object>{},
         );
@@ -748,6 +752,7 @@ void main() {
             buildName: '1.2.3',
             buildNumber: '4',
             treeShakeIcons: false,
+            packageConfigPath: '.dart_tool/package_config.json',
           )),
           platformArgs: <String, Object>{},
         );
@@ -797,6 +802,7 @@ void main() {
             buildName: '1.2.3',
             buildNumber: '4',
             treeShakeIcons: false,
+            packageConfigPath: '.dart_tool/package_config.json',
           )),
           platformArgs: <String, Object>{},
         ), throwsToolExit());

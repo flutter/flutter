@@ -30,7 +30,13 @@ void main() {
     expect(() => validateBuild(
       const AndroidBuildInfo(
         // Invalid number
-        BuildInfo(BuildMode.debug, '', treeShakeIcons: false, buildNumber: 'a'),
+        BuildInfo(
+          BuildMode.debug,
+          '',
+          treeShakeIcons: false,
+          buildNumber: 'a',
+          packageConfigPath: '.dart_tool/package_config.json',
+        ),
         targetArchs: <AndroidArch>[AndroidArch.x86],
       ),
     ), throwsToolExit(message: 'buildNumber: a was not a valid integer value.'));
@@ -38,7 +44,13 @@ void main() {
     expect(() => validateBuild(
       const AndroidBuildInfo(
         // Negative number
-        BuildInfo(BuildMode.debug, '', treeShakeIcons: false, buildNumber: '-1'),
+        BuildInfo(
+          BuildMode.debug,
+          '',
+          treeShakeIcons: false,
+          buildNumber: '-1',
+          packageConfigPath: '.dart_tool/package_config.json',
+        ),
         targetArchs: <AndroidArch>[AndroidArch.x86],
       ),
     ), throwsToolExit(message: 'buildNumber: -1 must be a positive integer value.'));
@@ -46,7 +58,13 @@ void main() {
     expect(() => validateBuild(
       const AndroidBuildInfo(
         // bigger than maximum supported play store value
-        BuildInfo(BuildMode.debug, '', treeShakeIcons: false, buildNumber: '2100000001'),
+        BuildInfo(
+          BuildMode.debug,
+          '',
+          treeShakeIcons: false,
+          buildNumber: '2100000001',
+          packageConfigPath: '.dart_tool/package_config.json',
+        ),
         targetArchs: <AndroidArch>[AndroidArch.x86],
       ),
     ), throwsToolExit(message: 'buildNumber: 2100000001 is greater than the maximum '
@@ -56,7 +74,13 @@ void main() {
   testWithoutContext('validateBuild does not throw on positive number', () {
     expect(() => validateBuild(
       const AndroidBuildInfo(
-        BuildInfo(BuildMode.debug, '', treeShakeIcons: false, buildNumber: '2'),
+        BuildInfo(
+          BuildMode.debug,
+          '',
+          treeShakeIcons: false,
+          buildNumber: '2',
+          packageConfigPath: '.dart_tool/package_config.json',
+        ),
         targetArchs: <AndroidArch>[AndroidArch.x86],
       ),
     ), returnsNormally);

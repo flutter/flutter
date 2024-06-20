@@ -272,7 +272,7 @@ void main() {
   testUsingContext('WebRunner copies compiled app.dill to cache during startup',
       () async {
     final DebuggingOptions debuggingOptions = DebuggingOptions.enabled(
-      const BuildInfo(BuildMode.debug, null, treeShakeIcons: false),
+      const BuildInfo(BuildMode.debug, null, treeShakeIcons: false, packageConfigPath: '.dart_tool/package_config.json'),
     );
     final ResidentRunner residentWebRunner =
         setUpResidentRunner(flutterDevice, debuggingOptions: debuggingOptions);

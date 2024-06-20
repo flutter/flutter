@@ -70,7 +70,7 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
     final Directory outputDirectory =
         globals.fs.directory(globals.fs.path.absolute(globals.fs.path.normalize(outputArgument)));
 
-    final List<BuildInfo> buildInfos = await getBuildInfos();
+    final List<BuildInfo> buildInfos = await getBuildInfos(project);
     displayNullSafetyMode(buildInfos.first);
 
     for (final BuildInfo buildInfo in buildInfos) {

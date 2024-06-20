@@ -138,7 +138,7 @@ class BuildApkCommand extends BuildSubCommand {
     displayNullSafetyMode(androidBuildInfo.buildInfo);
     globals.terminal.usesTerminalUi = true;
     await androidBuilder?.buildApk(
-      project: FlutterProject.current(),
+      project: project,
       target: targetFile,
       androidBuildInfo: androidBuildInfo,
       configOnly: configOnly,

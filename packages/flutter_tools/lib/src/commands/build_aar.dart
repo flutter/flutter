@@ -77,6 +77,7 @@ class BuildAarCommand extends BuildSubCommand {
     DevelopmentArtifact.androidGenSnapshot,
   };
 
+  @override
   late final FlutterProject project = _getProject();
 
   @override

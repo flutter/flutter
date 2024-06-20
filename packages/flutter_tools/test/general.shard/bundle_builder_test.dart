@@ -175,6 +175,7 @@ void main() {
         fileSystemScheme: 'test7',
         dartDefines: <String>['test8', 'test9'],
         treeShakeIcons: true,
+        packageConfigPath: '.dart_tool/package_config.json',
       ),
       project: project,
       mainPath: mainPath,

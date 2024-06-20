@@ -1164,13 +1164,18 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
+  /// Returns a [FlutterProject] view of the current directory or a ToolExit error,
+  /// if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
+  FlutterProject get project => FlutterProject.current();
+
   /// Compute the [BuildInfo] for the current flutter command.
+  ///
   /// Commands that build multiple build modes can pass in a [forcedBuildMode]
   /// to be used instead of parsing flags.
   ///
   /// Throws a [ToolExit] if the current set of options is not compatible with
   /// each other.
-  Future<BuildInfo> getBuildInfo({ BuildMode? forcedBuildMode, File? forcedTargetFile }) async {
+  Future<BuildInfo> getBuildInfo({BuildMode? forcedBuildMode, File? forcedTargetFile}) async {
     final bool trackWidgetCreation = argParser.options.containsKey('track-widget-creation') &&
       boolArg('track-widget-creation');
 
@@ -1178,8 +1183,7 @@ abstract class FlutterCommand extends Command<void> {
       ? stringArg('build-number')
       : null;
 
-    final File packagesFile = globals.fs.file(
-      packagesPath ?? globals.fs.path.absolute('.dart_tool', 'package_config.json'));
+    final File packagesFile = globals.fs.file(packagesPath ?? project.packageConfigFile);
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
         packagesFile, logger: globals.logger, throwOnError: false);
 
@@ -1292,7 +1296,7 @@ abstract class FlutterCommand extends Command<void> {
       }
     }
 
-    final String? defaultFlavor = FlutterProject.current().manifest.defaultFlavor;
+    final String? defaultFlavor = project.manifest.defaultFlavor;
     final String? cliFlavor = argParser.options.containsKey('flavor') ? stringArg('flavor') : null;
     final String? flavor = cliFlavor ?? defaultFlavor;
     if (flavor != null) {
@@ -1332,7 +1336,7 @@ abstract class FlutterCommand extends Command<void> {
       bundleSkSLPath: bundleSkSLPath,
       dartExperiments: experiments,
       performanceMeasurementFile: performanceMeasurementFile,
-      packagesPath: packagesPath ?? globals.fs.path.absolute('.dart_tool', 'package_config.json'),
+      packageConfigPath: packagesFile.path,
       nullSafetyMode: nullSafetyMode,
       codeSizeDirectory: codeSizeDirectory,
       androidGradleDaemon: androidGradleDaemon,

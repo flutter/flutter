@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
+
 import 'package:package_config/package_config_types.dart';
 
 import 'artifacts.dart';
@@ -37,7 +39,7 @@ class BuildInfo {
     List<String>? dartExperiments,
     required this.treeShakeIcons,
     this.performanceMeasurementFile,
-    this.packagesPath = '.dart_tool/package_config.json', // TODO(zanderso): make this required and remove the default.
+    required this.packageConfigPath,
     this.nullSafetyMode = NullSafetyMode.sound,
     this.codeSizeDirectory,
     this.androidGradleDaemon = true,
@@ -74,7 +76,7 @@ class BuildInfo {
   ///
   /// This is used by package:package_config to locate the actual package_config.json
   /// file. If not provided, defaults to `.dart_tool/package_config.json`.
-  final String packagesPath;
+  final String packageConfigPath;
 
   final List<String> fileSystemRoots;
   final String? fileSystemScheme;
@@ -180,10 +182,47 @@ class BuildInfo {
   /// If set, builds native assets with `build.dart` from all packages.
   final bool buildNativeAssets;
 
-  static const BuildInfo debug = BuildInfo(BuildMode.debug, null, trackWidgetCreation: true, treeShakeIcons: false);
-  static const BuildInfo profile = BuildInfo(BuildMode.profile, null, treeShakeIcons: kIconTreeShakerEnabledDefault);
-  static const BuildInfo jitRelease = BuildInfo(BuildMode.jitRelease, null, treeShakeIcons: kIconTreeShakerEnabledDefault);
-  static const BuildInfo release = BuildInfo(BuildMode.release, null, treeShakeIcons: kIconTreeShakerEnabledDefault);
+  // Can be used when the actual information is not needed.
+  static const BuildInfo dummy = BuildInfo(
+    BuildMode.debug,
+    null,
+    trackWidgetCreation: true,
+    treeShakeIcons: false,
+    packageConfigPath: '.dart_tool/package_config.json',
+  );
+
+  @visibleForTesting
+  static const BuildInfo debug = BuildInfo(
+    BuildMode.debug,
+    null,
+    trackWidgetCreation: true,
+    treeShakeIcons: false,
+    packageConfigPath: '.dart_tool/package_config.json',
+  );
+
+  @visibleForTesting
+  static const BuildInfo profile = BuildInfo(
+    BuildMode.profile,
+    null,
+    treeShakeIcons: kIconTreeShakerEnabledDefault,
+    packageConfigPath: '.dart_tool/package_config.json',
+  );
+
+  @visibleForTesting
+  static const BuildInfo jitRelease = BuildInfo(
+    BuildMode.jitRelease,
+    null,
+    treeShakeIcons: kIconTreeShakerEnabledDefault,
+    packageConfigPath: '.dart_tool/package_config.json',
+  );
+
+  @visibleForTesting
+  static const BuildInfo release = BuildInfo(
+    BuildMode.release,
+    null,
+    treeShakeIcons: kIconTreeShakerEnabledDefault,
+    packageConfigPath: '.dart_tool/package_config.json',
+  );
 
   /// Returns whether a debug build is requested.
   ///
@@ -287,7 +326,7 @@ class BuildInfo {
         'PERFORMANCE_MEASUREMENT_FILE': performanceMeasurementFile!,
       if (bundleSkSLPath != null)
         'BUNDLE_SKSL_PATH': bundleSkSLPath!,
-      'PACKAGE_CONFIG': packagesPath,
+      'PACKAGE_CONFIG': packageConfigPath,
       if (codeSizeDirectory != null)
         'CODE_SIZE_DIRECTORY': codeSizeDirectory!,
       if (flavor != null)
