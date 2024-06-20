@@ -48,6 +48,10 @@ class CupertinoButton extends StatefulWidget {
     this.pressedOpacity = 0.4,
     this.borderRadius = const BorderRadius.all(Radius.circular(8.0)),
     this.alignment = Alignment.center,
+    this.focusColor,
+    this.focusNode,
+    this.onFocusChange,
+    this.autofocus = false,
     required this.onPressed,
   }) : assert(pressedOpacity == null || (pressedOpacity >= 0.0 && pressedOpacity <= 1.0)),
        _filled = false;
@@ -67,6 +71,10 @@ class CupertinoButton extends StatefulWidget {
     this.pressedOpacity = 0.4,
     this.borderRadius = const BorderRadius.all(Radius.circular(8.0)),
     this.alignment = Alignment.center,
+    this.focusColor,
+    this.focusNode,
+    this.onFocusChange,
+    this.autofocus = false,
     required this.onPressed,
   }) : assert(pressedOpacity == null || (pressedOpacity >= 0.0 && pressedOpacity <= 1.0)),
        color = null,
@@ -131,6 +139,21 @@ class CupertinoButton extends StatefulWidget {
   /// Always defaults to [Alignment.center].
   final AlignmentGeometry alignment;
 
+  /// The color to use for the focus highlight for keyboard interactions.
+  ///
+  /// Defaults to a slightly transparent [color]. If [color] is null, defaults
+  /// to a slightly transparent [CupertinoColors.activeBlue].
+  final Color? focusColor;
+
+  /// {@macro flutter.widgets.Focus.focusNode}
+  final FocusNode? focusNode;
+
+  /// {@macro flutter.material.inkwell.onFocusChange}
+  final ValueChanged<bool>? onFocusChange;
+
+  /// {@macro flutter.widgets.Focus.autofocus}
+  final bool autofocus;
+
   final bool _filled;
 
   /// Whether the button is enabled or disabled. Buttons are disabled by default. To
@@ -156,9 +179,12 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
   late AnimationController _animationController;
   late Animation<double> _opacityAnimation;
 
+  late bool isFocused;
+
   @override
   void initState() {
     super.initState();
+    isFocused = false;
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 200),
       value: 0.0,
@@ -224,6 +250,10 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
     });
   }
 
+  void _onShowFocusHighlight(bool showHighlight) {
+    setState(() { isFocused = showHighlight; });
+  }
+
   @override
   Widget build(BuildContext context) {
     final bool enabled = widget.enabled;
@@ -239,47 +269,69 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
         ? primaryColor
         : CupertinoDynamicColor.resolve(CupertinoColors.placeholderText, context);
 
+    final Color effectiveFocusOutlineColor = widget.focusColor ??
+      HSLColor
+        .fromColor((backgroundColor ?? CupertinoColors.activeBlue).withOpacity(0.80))
+        .withLightness(0.69).withSaturation(0.835)
+        .toColor();
+
     final TextStyle textStyle = themeData.textTheme.textStyle.copyWith(color: foregroundColor);
 
     return MouseRegion(
       cursor: enabled && kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTapDown: enabled ? _handleTapDown : null,
-        onTapUp: enabled ? _handleTapUp : null,
-        onTapCancel: enabled ? _handleTapCancel : null,
-        onTap: widget.onPressed,
-        child: Semantics(
-          button: true,
-          child: ConstrainedBox(
-            constraints: widget.minSize == null
-              ? const BoxConstraints()
-              : BoxConstraints(
-                  minWidth: widget.minSize!,
-                  minHeight: widget.minSize!,
-                ),
-            child: FadeTransition(
-              opacity: _opacityAnimation,
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  borderRadius: widget.borderRadius,
-                  color: backgroundColor != null && !enabled
-                    ? CupertinoDynamicColor.resolve(widget.disabledColor, context)
-                    : backgroundColor,
-                ),
-                child: Padding(
-                  padding: widget.padding ?? (backgroundColor != null
-                    ? _kBackgroundButtonPadding
-                    : _kButtonPadding),
-                  child: Align(
-                    alignment: widget.alignment,
-                    widthFactor: 1.0,
-                    heightFactor: 1.0,
-                    child: DefaultTextStyle(
-                      style: textStyle,
-                      child: IconTheme(
-                        data: IconThemeData(color: foregroundColor),
-                        child: widget.child,
+      child: FocusableActionDetector(
+        focusNode: widget.focusNode,
+        autofocus: widget.autofocus,
+        onFocusChange: widget.onFocusChange,
+        onShowFocusHighlight: _onShowFocusHighlight,
+        enabled: enabled,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTapDown: enabled ? _handleTapDown : null,
+          onTapUp: enabled ? _handleTapUp : null,
+          onTapCancel: enabled ? _handleTapCancel : null,
+          onTap: widget.onPressed,
+          child: Semantics(
+            button: true,
+            child: ConstrainedBox(
+              constraints: widget.minSize == null
+                ? const BoxConstraints()
+                : BoxConstraints(
+                    minWidth: widget.minSize!,
+                    minHeight: widget.minSize!,
+                  ),
+              child: FadeTransition(
+                opacity: _opacityAnimation,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    border: enabled && isFocused
+                      ? Border.fromBorderSide(
+                          BorderSide(
+                            color: effectiveFocusOutlineColor,
+                            width: 3.5,
+                            strokeAlign: BorderSide.strokeAlignOutside
+                          )
+                        )
+                      : null,
+                    borderRadius: widget.borderRadius,
+                    color: backgroundColor != null && !enabled
+                      ? CupertinoDynamicColor.resolve(widget.disabledColor, context)
+                      : backgroundColor,
+                  ),
+                  child: Padding(
+                    padding: widget.padding ?? (backgroundColor != null
+                      ? _kBackgroundButtonPadding
+                      : _kButtonPadding),
+                    child: Align(
+                      alignment: widget.alignment,
+                      widthFactor: 1.0,
+                      heightFactor: 1.0,
+                      child: DefaultTextStyle(
+                        style: textStyle,
+                        child: IconTheme(
+                          data: IconThemeData(color: foregroundColor),
+                          child: widget.child,
+                        ),
                       ),
                     ),
                   ),

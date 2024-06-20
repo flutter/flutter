@@ -486,6 +486,39 @@ void main() {
       kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
     );
   });
+
+  testWidgets('Button can be focused and has default colors', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode(debugLabel: 'Button');
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    final Color defaultFocusColor = Color(0xFFFFFFFF);
+    final double defaultFocusWidth = 3.5;
+    
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoButton.filled(
+            onPressed: () { },
+            focusNode: focusNode,
+            autofocus: true,
+            child: const Text('Tap me'),
+          ),
+        ),
+      ),
+    );
+
+    expect(focusNode.hasPrimaryFocus, isTrue);
+    final BoxDecoration decoration = tester.widget<DecoratedBox>(
+      find.descendant(
+        of: find.byType(CupertinoButton),
+        matching: find.byType(DecoratedBox),
+      ),
+    ).decoration as BoxDecoration;
+    await tester.pumpAndSettle();
+    expect(
+      decoration.border,
+      Border.fromBorderSide(BorderSide(color: Color(0xFFFFFFFF), width: 3.5))
+    );
+  });
 }
 
 Widget boilerplate({ required Widget child }) {
