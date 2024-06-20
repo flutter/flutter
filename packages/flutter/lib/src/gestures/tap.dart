@@ -354,7 +354,7 @@ abstract class BaseTapGestureRecognizer extends PrimaryPointerGestureRecognizer 
 /// no-op.
 ///
 /// {@template flutter.gestures.tap.TapGestureRecognizer.allowedButtonsFilter}
-/// The [allowedButtonsFilter] argument only gives this recognizer the
+/// The `allowedButtonsFilter` argument only gives this recognizer the
 /// ability to limit the buttons it accepts. It does not provide the
 /// ability to recognize any buttons beyond the ones it already accepts:
 /// kPrimaryButton, kSecondaryButton or kTertiaryButton. Therefore, a
