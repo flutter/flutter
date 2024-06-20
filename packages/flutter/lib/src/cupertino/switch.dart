@@ -1276,7 +1276,7 @@ class _SwitchPainter extends ToggleablePainter {
       canvas.drawRRect(outlineTrackRRect, outlinePaint);
     }
 
-    if (isFocused && defaultTargetPlatform == TargetPlatform.macOS) {
+    if (isFocused) {
       final RRect focusedOutline = trackRRect.inflate(1.75);
       final Paint focusedPaint = Paint()
         ..style = PaintingStyle.stroke

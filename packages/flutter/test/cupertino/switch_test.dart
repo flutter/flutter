@@ -1270,7 +1270,7 @@ void main() {
         ..rrect(color: const Color(0x0a000000))
         ..rrect(color: const Color(0xffffffff)),
     );
-  }, variant: TargetPlatformVariant.only(TargetPlatform.macOS));
+  });
 
   testWidgets('CupertinoSwitch.onFocusChange callback', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'CupertinoSwitch');
@@ -1684,7 +1684,7 @@ void main() {
     );
 
     focusNode.dispose();
-  }, variant: TargetPlatformVariant.only(TargetPlatform.macOS));
+  });
 
   testWidgets('Switch can set icon', (WidgetTester tester) async {
     WidgetStateProperty<Icon?> thumbIcon(Icon? activeIcon, Icon? inactiveIcon) {
