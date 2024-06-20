@@ -3806,7 +3806,7 @@ void main() {
   });
 
   testWidgets('Garbage collector destroys child _MenuAnchorState after parent is closed', (WidgetTester tester) async {
-      // Regression test for https://github.com/flutter/flutter/pull/149586
+      // Regression test for https://github.com/flutter/flutter/issues/149584
       await tester.pumpWidget(
         MaterialApp(
           home: MenuAnchor(
