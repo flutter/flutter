@@ -1671,6 +1671,44 @@ void main() {
     expect(tester.widget<Container>(find.widgetWithText(Container, 'Item 1')).padding, const EdgeInsets.symmetric(horizontal: 12.0));
   });
 
+  testWidgets('PopupMenu default padding', (WidgetTester tester) async {
+    final Key popupMenuButtonKey = UniqueKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: PopupMenuButton<String>(
+              key: popupMenuButtonKey,
+              child: const Text('button'),
+              onSelected: (String result) { },
+              itemBuilder: (BuildContext context) {
+                return <PopupMenuEntry<String>>[
+                   const PopupMenuItem<String>(
+                    value: '0',
+                    enabled: false,
+                    child: Text('Item 0'),
+                  ),
+                  const PopupMenuItem<String>(
+                    value: '1',
+                    child: Text('Item 1'),
+                  ),
+                ];
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Show the menu.
+    await tester.tap(find.byKey(popupMenuButtonKey));
+    await tester.pump(const Duration(milliseconds: 300));
+
+    // Check popup menu padding.
+    final SingleChildScrollView popupMenu = tester.widget<SingleChildScrollView>(find.byType(SingleChildScrollView));
+    expect(popupMenu.padding, const EdgeInsets.symmetric(vertical: 8.0));
+  });
+
   testWidgets('Material2 - PopupMenuItem default padding', (WidgetTester tester) async {
     final Key popupMenuButtonKey = UniqueKey();
     await tester.pumpWidget(
@@ -1707,6 +1745,45 @@ void main() {
 
     expect(tester.widget<Container>(find.widgetWithText(Container, 'Item 0')).padding, const EdgeInsets.symmetric(horizontal: 16.0));
     expect(tester.widget<Container>(find.widgetWithText(Container, 'Item 1')).padding, const EdgeInsets.symmetric(horizontal: 16.0));
+  });
+
+  testWidgets('Material2 - PopupMenuItem default padding', (WidgetTester tester) async {
+    final Key popupMenuButtonKey = UniqueKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: false),
+        home: Scaffold(
+          body: Center(
+            child: PopupMenuButton<String>(
+              key: popupMenuButtonKey,
+              child: const Text('button'),
+              onSelected: (String result) { },
+              itemBuilder: (BuildContext context) {
+                return <PopupMenuEntry<String>>[
+                   const PopupMenuItem<String>(
+                    value: '0',
+                    enabled: false,
+                    child: Text('Item 0'),
+                  ),
+                  const PopupMenuItem<String>(
+                    value: '1',
+                    child: Text('Item 1'),
+                  ),
+                ];
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Show the menu.
+    await tester.tap(find.byKey(popupMenuButtonKey));
+    await tester.pump(const Duration(milliseconds: 300));
+
+    // Check popup menu padding.
+    final SingleChildScrollView popupMenu = tester.widget<SingleChildScrollView>(find.byType(SingleChildScrollView));
+    expect(popupMenu.padding, const EdgeInsets.symmetric(vertical: 8.0));
   });
 
   testWidgets('PopupMenuItem custom padding', (WidgetTester tester) async {
