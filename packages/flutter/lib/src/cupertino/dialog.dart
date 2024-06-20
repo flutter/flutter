@@ -286,7 +286,7 @@ class _CupertinoAlertDialogState extends State<CupertinoAlertDialog> {
   ScrollController get _effectiveActionScrollController =>
     widget.actionScrollController ?? (_backupActionScrollController ??= ScrollController());
 
-  Widget _buildContent(BuildContext context, {required double maxHeight}) {
+  Widget _buildContent(BuildContext context) {
     const double defaultFontSize = 14.0;
     final double effectiveTextScaleFactor = MediaQuery.textScalerOf(context).scale(defaultFontSize) / defaultFontSize;
 
@@ -320,19 +320,12 @@ class _CupertinoAlertDialogState extends State<CupertinoAlertDialog> {
         ),
     ];
 
-    final Color backgroundColor = CupertinoDynamicColor.resolve(_kDialogColor, context);
-
-    return ConstrainedBox(
-      constraints: BoxConstraints(
-        maxHeight: maxHeight,
-      ),
-      child: ColoredBox(
-        color: backgroundColor,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: children,
-        ),
+    return ColoredBox(
+      color: CupertinoDynamicColor.resolve(_kDialogColor, context),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: children,
       ),
     );
   }
@@ -459,7 +452,10 @@ class _CupertinoAlertDialogState extends State<CupertinoAlertDialog> {
         return Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            _buildContent(context, maxHeight: contentMaxHeight),
+            ConstrainedBox(
+              constraints: BoxConstraints(maxHeight: contentMaxHeight),
+              child: _buildContent(context),
+            ),
             if (hasContent && hasActions)
               _ActionSheetDivider(
                 dividerColor: dividerColor,
