@@ -2517,8 +2517,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 ///
 /// {@tool dartpad}
 /// This sample shows how to style a `TextField` with a prefixIcon that changes color
-/// based on the `MaterialState`. The color defaults to gray, be green while focused
-/// and red if in an error state.
+/// based on the `MaterialState`. The color defaults to gray and is green while focused.
 ///
 /// ** See code in examples/api/lib/material/input_decorator/input_decoration.widget_state.0.dart **
 /// {@end-tool}
