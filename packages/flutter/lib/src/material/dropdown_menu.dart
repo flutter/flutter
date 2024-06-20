@@ -758,6 +758,10 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
     if (widget.width != null) {
       effectiveMenuStyle = effectiveMenuStyle.copyWith(minimumSize: MaterialStatePropertyAll<Size?>(Size(widget.width!, 0.0)));
     } else if (anchorWidth != null){
+      // The width of `_MenuPanel` in `MenuAnchor` will be constrained further
+      // based on visual density, so it might result a menu whose width is
+      // different from the width of the text field. This calcaulation is
+      // reverting the visual density adjustment.
       final VisualDensity visualDensity = effectiveMenuStyle.visualDensity ?? Theme.of(context).visualDensity;
       final double dx = (visualDensity.horizontal) * 4;
       effectiveMenuStyle = effectiveMenuStyle.copyWith(minimumSize: MaterialStatePropertyAll<Size?>(Size(anchorWidth - dx, 0.0)));

@@ -328,10 +328,7 @@ class _MenuAnchorState extends State<MenuAnchor> with TickerProviderStateMixin {
       _internalMenuController = MenuController();
     }
     _menuController._attach(this);
-    _animateController = AnimationController(
-      duration: const Duration(milliseconds: 500),
-      vsync: this,
-    );
+    _animateController = AnimationController(vsync: this);
   }
 
   @override
