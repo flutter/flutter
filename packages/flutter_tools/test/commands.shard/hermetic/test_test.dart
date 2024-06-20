@@ -189,29 +189,6 @@ dev_dependencies:
     ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testUsingContext('Pipes test-randomize-ordering-seed to package:test',
-      () async {
-    final FakePackageTest fakePackageTest = FakePackageTest();
-
-    final TestCommand testCommand = TestCommand(testWrapper: fakePackageTest);
-    final CommandRunner<void> commandRunner =
-        createTestCommandRunner(testCommand);
-
-    await commandRunner.run(const <String>[
-      'test',
-      '--test-randomize-ordering-seed=random',
-      '--no-pub',
-    ]);
-    expect(
-      fakePackageTest.lastArgs,
-      contains('--test-randomize-ordering-seed=random'),
-    );
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fs,
-    ProcessManager: () => FakeProcessManager.any(),
-    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
-  });
-
   testUsingContext(
       'Confirmation that the reporter, timeout, and concurrency args are not set by default',
       () async {
@@ -492,54 +469,26 @@ dev_dependencies:
     ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testUsingContext('Pipes start-paused to package:test',
-      () async {
-    final FakePackageTest fakePackageTest = FakePackageTest();
+  group('Pipes to package:test', () {
+    Future<void> expectPassesArgument(String value, [String? passValue]) async {
+      final FakePackageTest fakePackageTest = FakePackageTest();
+      final TestCommand testCommand = TestCommand(testWrapper: fakePackageTest);
+      final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
 
-    final TestCommand testCommand = TestCommand(testWrapper: fakePackageTest);
-    final CommandRunner<void> commandRunner =
-        createTestCommandRunner(testCommand);
+      await commandRunner.run(<String>['test', '--no-pub', value]);
+      expect(fakePackageTest.lastArgs, contains(passValue ?? value));
+    }
 
-    await commandRunner.run(const <String>[
-      'test',
-      '--no-pub',
-      '--start-paused',
-      '--',
-      'test/fake_test.dart',
-    ]);
-    expect(
-      fakePackageTest.lastArgs,
-      contains('--pause-after-load'),
-    );
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fs,
-    ProcessManager: () => FakeProcessManager.any(),
-    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
-  });
-
-  testUsingContext('Pipes run-skipped to package:test',
-      () async {
-    final FakePackageTest fakePackageTest = FakePackageTest();
-
-    final TestCommand testCommand = TestCommand(testWrapper: fakePackageTest);
-    final CommandRunner<void> commandRunner =
-        createTestCommandRunner(testCommand);
-
-    await commandRunner.run(const <String>[
-      'test',
-      '--no-pub',
-      '--run-skipped',
-      '--',
-      'test/fake_test.dart',
-    ]);
-    expect(
-      fakePackageTest.lastArgs,
-      contains('--run-skipped'),
-    );
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fs,
-    ProcessManager: () => FakeProcessManager.any(),
-    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+    testUsingContext('passes various CLI options through to package:test', () async {
+      await expectPassesArgument('--start-paused', '--pause-after-load');
+      await expectPassesArgument('--fail-fast');
+      await expectPassesArgument('--run-skipped');
+      await expectPassesArgument('--test-randomize-ordering-seed=random');
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
+      Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+    });
   });
 
   testUsingContext('Pipes enable-vmService', () async {
@@ -674,6 +623,7 @@ dev_dependencies:
         '--test-randomize-ordering-seed=random',
         '--tags=tag1',
         '--exclude-tags=tag2',
+        '--fail-fast',
         '--run-skipped',
         '--total-shards=1',
         '--shard-index=1',
@@ -715,6 +665,7 @@ const List<String> packageTestArgs = <String>[
   'tag1',
   '--exclude-tags',
   'tag2',
+  '--fail-fast',
   '--run-skipped',
   '--total-shards=1',
   '--shard-index=1',
@@ -1466,6 +1417,7 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
     String? reporter,
     String? fileReporter,
     String? timeout,
+    bool failFast = false,
     bool runSkipped = false,
     int? shardIndex,
     int? totalShards,
@@ -1513,6 +1465,7 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
     String? reporter,
     String? fileReporter,
     String? timeout,
+    bool failFast = false,
     bool runSkipped = false,
     int? shardIndex,
     int? totalShards,

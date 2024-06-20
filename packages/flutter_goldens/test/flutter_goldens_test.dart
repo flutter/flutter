@@ -5,7 +5,6 @@
 // See also dev/automated_tests/flutter_test/flutter_gold_test.dart
 
 import 'dart:convert';
-import 'dart:ffi' show Abi;
 import 'dart:io' hide Directory;
 
 import 'package:file/file.dart';
@@ -31,11 +30,6 @@ const List<int> _kTestPngBytes = <int>[
   78, 68, 174, 66, 96, 130,
 ];
 
-// We intentionally use an ABI that is unlikely to be the one anyone editing this code
-// would assume, so that if there any any assumptions made about the ABI, they will
-// be more likely to fail the tests.
-const Abi testAbi = Abi.fuchsiaRiscv64;
-
 void main() {
   group('SkiaGoldClient', () {
     test('web HTML test', () async {
@@ -60,7 +54,6 @@ void main() {
         process: process,
         platform: platform,
         httpClient: fakeHttpClient,
-        abi: testAbi,
         log: (String message) => fail('skia gold client printed unexpected output: "$message"'),
       );
 
@@ -111,7 +104,6 @@ void main() {
         process: process,
         platform: platform,
         httpClient: fakeHttpClient,
-        abi: testAbi,
         log: (String message) => fail('skia gold client printed unexpected output: "$message"'),
       );
 
@@ -154,7 +146,6 @@ void main() {
         process: process,
         platform: platform,
         httpClient: fakeHttpClient,
-        abi: testAbi,
         log: (String message) => fail('skia gold client printed unexpected output: "$message"'),
       );
       final File authFile = fs.file('/workDirectory/temp/auth_opt.json')
@@ -183,7 +174,6 @@ void main() {
         process: process,
         platform: platform,
         httpClient: fakeHttpClient,
-        abi: testAbi,
         log: (String message) => fail('skia gold client printed unexpected output: "$message"'),
       );
       final File authFile = fs.file('/workDirectory/temp/auth_opt.json')
@@ -216,7 +206,6 @@ void main() {
         process: process,
         platform: platform,
         httpClient: fakeHttpClient,
-        abi: testAbi,
         log: (String message) => fail('skia gold client printed unexpected output: "$message"'),
       );
 
@@ -248,7 +237,6 @@ void main() {
         process: process,
         platform: platform,
         httpClient: fakeHttpClient,
-        abi: testAbi,
         log: (String message) => fail('skia gold client printed unexpected output: "$message"'),
       );
 
@@ -299,7 +287,6 @@ void main() {
         process: process,
         platform: platform,
         httpClient: fakeHttpClient,
-        abi: testAbi,
         log: (String message) => fail('skia gold client printed unexpected output: "$message"'),
       );
 
@@ -358,7 +345,6 @@ void main() {
         process: process,
         platform: platform,
         httpClient: fakeHttpClient,
-        abi: testAbi,
         log: (String message) => fail('skia gold client printed unexpected output: "$message"'),
       );
 
@@ -421,7 +407,6 @@ void main() {
         process: process,
         platform: platform,
         httpClient: fakeHttpClient,
-        abi: testAbi,
         log: (String message) => fail('skia gold client printed unexpected output: "$message"'),
       );
       const RunInvocation goldctlInvocation = RunInvocation(
@@ -467,7 +452,6 @@ void main() {
         process: process,
         platform: platform,
         httpClient: fakeHttpClient,
-        abi: testAbi,
         log: (String message) => fail('skia gold client printed unexpected output: "$message"'),
       );
 
@@ -508,7 +492,6 @@ void main() {
          process: process,
          platform: platform,
          httpClient: fakeHttpClient,
-         abi: Abi.linuxX64,
          log: (String message) => fail('skia gold client printed unexpected output: "$message"'),
        );
 
@@ -542,7 +525,6 @@ void main() {
          process: process,
          platform: platform,
          httpClient: fakeHttpClient,
-         abi: Abi.linuxX64,
          log: (String message) => fail('skia gold client printed unexpected output: "$message"'),
        );
 
@@ -571,7 +553,6 @@ void main() {
         process: process,
         platform: platform,
         httpClient: fakeHttpClient,
-        abi: Abi.linuxX64,
         log: (String message) => fail('skia gold client printed unexpected output: "$message"'),
       );
       expect(
@@ -602,7 +583,6 @@ void main() {
         process: process,
         platform: platform,
         httpClient: fakeHttpClient,
-        abi: testAbi,
         log: (String message) => fail('skia gold client printed unexpected output: "$message"'),
       );
       const RunInvocation goldctlInvocation = RunInvocation(
@@ -652,7 +632,6 @@ void main() {
         process: process,
         platform: platform,
         httpClient: fakeHttpClient,
-        abi: testAbi,
         log: (String message) => fail('skia gold client printed unexpected output: "$message"'),
       );
       const RunInvocation goldctlInvocation = RunInvocation(
@@ -698,7 +677,6 @@ void main() {
           process: process,
           platform: platform,
           httpClient: fakeHttpClient,
-          abi: testAbi,
           log: (String message) => fail('skia gold client printed unexpected output: "$message"'),
         );
         final Uri imageUrl = Uri.parse(
@@ -878,7 +856,6 @@ void main() {
           fs: fs,
           process: FakeProcessManager(),
           httpClient: FakeHttpClient(),
-          abi: testAbi,
         );
         expect(fakeSkiaClient.initCalls, 0);
       });
@@ -967,7 +944,6 @@ void main() {
           fs: fs,
           process: FakeProcessManager(),
           httpClient: FakeHttpClient(),
-          abi: testAbi,
         );
         expect(fakeSkiaClient.tryInitCalls, 0);
       });
@@ -1073,7 +1049,6 @@ void main() {
           fs: fs,
           process: FakeProcessManager(),
           httpClient: FakeHttpClient(),
-          abi: testAbi,
         );
         expect(comparator1.runtimeType, FlutterSkippingFileComparator);
 
@@ -1087,7 +1062,6 @@ void main() {
           fs: fs,
           process: FakeProcessManager(),
           httpClient: FakeHttpClient(),
-          abi: testAbi,
         );
         expect(comparator2.runtimeType, FlutterSkippingFileComparator);
 
@@ -1101,7 +1075,6 @@ void main() {
           fs: fs,
           process: FakeProcessManager(),
           httpClient: FakeHttpClient(),
-          abi: testAbi,
         );
         expect(comparator3.runtimeType, FlutterSkippingFileComparator);
 

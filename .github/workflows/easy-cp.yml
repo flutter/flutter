@@ -30,7 +30,7 @@ jobs:
         run: |
           echo "COMMIT_SHA=$(echo ${{ github.event.pull_request.merge_commit_sha }})" >> $GITHUB_ENV
       - name: Checkout Flutter Repo
-        uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332
         with:
           repository: flutteractionsbot/flutter
           path: flutter
@@ -81,7 +81,7 @@ jobs:
         if: ${{ failure() && steps.attempt-cp.conclusion == 'failure' }}
         run: |
           FAILURE_MSG="Failed to create CP due to merge conflicts.<br>"
-          FAILURE_MSG+="You will need to create the PR manually. See [the cherrypick wiki](https://github.com/flutter/flutter/wiki/Flutter-Cherrypick-Process) for more info."
+          FAILURE_MSG+="You will need to create the PR manually. See [the cherrypick wiki](https://github.com/flutter/flutter/blob/main/docs/releases/Flutter-Cherrypick-Process.md) for more info."
           gh pr comment ${{ github.event.pull_request.number }} -R flutter/flutter -b "${FAILURE_MSG}"
         env:
           GITHUB_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}

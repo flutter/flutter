@@ -1489,11 +1489,11 @@ void main() {
       final RenderBox box = tester.firstRenderObject<RenderBox>(find.byType(CustomPaint));
 
       // Animation starts with effectively no shadow
-      expect(box, paintsShadowRect(dx: 795, color: const Color(0x00000000)));
-      expect(box, paintsShadowRect(dx: 785, color: const Color(0x00000000)));
-      expect(box, paintsShadowRect(dx: 775, color: const Color(0x00000000)));
-      expect(box, paintsShadowRect(dx: 765, color: const Color(0x00000000)));
-      expect(box, paintsShadowRect(dx: 755, color: const Color(0x00000000)));
+      expect(box, paintsShadowRect(dx: 795, color: CupertinoColors.transparent));
+      expect(box, paintsShadowRect(dx: 785, color: CupertinoColors.transparent));
+      expect(box, paintsShadowRect(dx: 775, color: CupertinoColors.transparent));
+      expect(box, paintsShadowRect(dx: 765, color: CupertinoColors.transparent));
+      expect(box, paintsShadowRect(dx: 755, color: CupertinoColors.transparent));
 
       await tester.pump(const Duration(milliseconds: 100));
 
@@ -1501,8 +1501,8 @@ void main() {
       expect(box, paintsShadowRect(dx: 296, color: const Color(0x03000000)));
       expect(box, paintsShadowRect(dx: 286, color: const Color(0x02000000)));
       expect(box, paintsShadowRect(dx: 276, color: const Color(0x01000000)));
-      expect(box, paintsShadowRect(dx: 266, color: const Color(0x00000000)));
-      expect(box, paintsShadowRect(dx: 266, color: const Color(0x00000000)));
+      expect(box, paintsShadowRect(dx: 266, color: CupertinoColors.transparent));
+      expect(box, paintsShadowRect(dx: 266, color: CupertinoColors.transparent));
 
       await tester.pumpAndSettle();
 
@@ -1512,7 +1512,7 @@ void main() {
       expect(box, paintsShadowRect(dx: -10, color: const Color(0x03000000)));
       expect(box, paintsShadowRect(dx: -20, color: const Color(0x02000000)));
       expect(box, paintsShadowRect(dx: -30, color: const Color(0x01000000)));
-      expect(box, paintsShadowRect(dx: -40, color: const Color(0x00000000)));
+      expect(box, paintsShadowRect(dx: -40, color: CupertinoColors.transparent));
 
       // Start animation in reverse
       tester.state<NavigatorState>(find.byType(Navigator)).pop();
@@ -1523,16 +1523,16 @@ void main() {
       expect(box, paintsShadowRect(dx: 488, color: const Color(0x03000000)));
       expect(box, paintsShadowRect(dx: 478, color: const Color(0x02000000)));
       expect(box, paintsShadowRect(dx: 468, color: const Color(0x01000000)));
-      expect(box, paintsShadowRect(dx: 458, color: const Color(0x00000000)));
+      expect(box, paintsShadowRect(dx: 458, color: CupertinoColors.transparent));
 
       await tester.pump(const Duration(milliseconds: 150));
 
       // At the end of the animation, the shadow approaches full transparency
       expect(box, paintsShadowRect(dx: 794, color: const Color(0x01000000)));
-      expect(box, paintsShadowRect(dx: 784, color: const Color(0x00000000)));
-      expect(box, paintsShadowRect(dx: 774, color: const Color(0x00000000)));
-      expect(box, paintsShadowRect(dx: 764, color: const Color(0x00000000)));
-      expect(box, paintsShadowRect(dx: 754, color: const Color(0x00000000)));
+      expect(box, paintsShadowRect(dx: 784, color: CupertinoColors.transparent));
+      expect(box, paintsShadowRect(dx: 774, color: CupertinoColors.transparent));
+      expect(box, paintsShadowRect(dx: 764, color: CupertinoColors.transparent));
+      expect(box, paintsShadowRect(dx: 754, color: CupertinoColors.transparent));
     });
 
     testWidgets('when route is fullscreenDialog, it has no visible _CupertinoEdgeShadowDecoration', (WidgetTester tester) async {
@@ -1945,7 +1945,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(semantics, isNot(includesNodeWith(
-      actions: <SemanticsAction>[SemanticsAction.tap],
+      actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
       label: 'Dismiss',
     )));
     debugDefaultTargetPlatformOverride = null;
@@ -2020,8 +2020,6 @@ void main() {
   });
 
   testWidgets('showCupertinoModalPopup transparent barrier color is transparent', (WidgetTester tester) async {
-    const Color kTransparentColor = Color(0x00000000);
-
     await tester.pumpWidget(CupertinoApp(
       home: CupertinoPageScaffold(
         child: Builder(builder: (BuildContext context) {
@@ -2030,7 +2028,7 @@ void main() {
               await showCupertinoModalPopup<void>(
                 context: context,
                 builder: (BuildContext context) => const SizedBox(),
-                barrierColor: kTransparentColor,
+                barrierColor: CupertinoColors.transparent,
               );
             },
             child: const Text('tap'),
