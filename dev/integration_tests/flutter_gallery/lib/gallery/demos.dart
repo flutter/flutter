@@ -555,14 +555,6 @@ List<GalleryDemo> _buildGalleryDemos() {
       routeName: ImagesDemo.routeName,
       buildRoute: (BuildContext context) => const ImagesDemo(),
     ),
-    GalleryDemo(
-      title: 'Video',
-      subtitle: 'Video playback',
-      icon: GalleryIcons.drive_video,
-      category: _kMedia,
-      routeName: VideoDemo.routeName,
-      buildRoute: (BuildContext context) => const VideoDemo(),
-    ),
   ];
   return galleryDemos;
 }
