@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
+import 'dart:typed_data';
+
 import 'package:collection/collection.dart' show ListEquality, MapEquality;
 
 import 'package:flutter_devicelab/framework/devices.dart';
@@ -125,6 +130,11 @@ void main() {
           cmd(command: 'input', arguments: <String>['tap', '100', '200']),
         ]);
       });
+
+      test('start/stop LoggingToSink does not crash', () async {
+        unawaited(device.startLoggingToSink(IOSink(_MemoryIOSink())));
+        unawaited(device.stopLoggingToSink());
+      });
     });
   });
 }
@@ -231,4 +241,66 @@ class FakeDevice extends AndroidDevice {
       environment: environment,
     ));
   }
+}
+
+/// An IOSink that collects whatever is written to it.
+/// Inspired by packages/flutter_tools/lib/src/base/net.dart
+class _MemoryIOSink implements IOSink {
+  @override
+  Encoding encoding = utf8;
+
+  final BytesBuilder writes = BytesBuilder(copy: false);
+
+  @override
+  void add(List<int> data) {
+    writes.add(data);
+  }
+
+  @override
+  Future<void> addStream(Stream<List<int>> stream) {
+    final Completer<void> completer = Completer<void>();
+    stream.listen(add).onDone(completer.complete);
+    return completer.future;
+  }
+
+  @override
+  void writeCharCode(int charCode) {
+    add(<int>[charCode]);
+  }
+
+  @override
+  void write(Object? obj) {
+    add(encoding.encode('$obj'));
+  }
+
+  @override
+  void writeln([Object? obj = '']) {
+    add(encoding.encode('$obj\n'));
+  }
+
+  @override
+  void writeAll(Iterable<dynamic> objects, [String separator = '']) {
+    bool addSeparator = false;
+    for (final dynamic object in objects) {
+      if (addSeparator) {
+        write(separator);
+      }
+      write(object);
+      addSeparator = true;
+    }
+  }
+
+  @override
+  void addError(dynamic error, [StackTrace? stackTrace]) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> get done => close();
+
+  @override
+  Future<void> close() async {}
+
+  @override
+  Future<void> flush() async {}
 }
