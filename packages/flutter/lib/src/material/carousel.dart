@@ -1294,7 +1294,6 @@ class _CarouselPosition extends ScrollPositionWithSingleContext implements _Caro
   @override
   List<int>? layoutWeights;
   double getItemFromPixels(double pixels, double viewportDimension) {
-    print(layoutWeights);
     assert(viewportDimension > 0.0);
     double fraction;
     if (itemExtent != null) {
@@ -1320,7 +1319,6 @@ class _CarouselPosition extends ScrollPositionWithSingleContext implements _Caro
       assert(layoutWeights != null);
       fraction = layoutWeights!.first / layoutWeights!.sum;
     }
-    print(layoutWeights);
 
     return item * viewportDimension * fraction;
   }
