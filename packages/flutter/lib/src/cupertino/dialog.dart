@@ -450,12 +450,12 @@ class _CupertinoAlertDialogState extends State<CupertinoAlertDialog> {
   // If all content and buttons do not fit on screen, and iOS IS in accessibility mode:
   // The button section is given up to 50% of the available height. Then the content
   // section is given whatever height remains.
-  Widget _renderDialogLayout({
+  Widget _renderSheet({
     required Widget actionsSection,
     required Color dividerColor,
   }) {
     final bool hasActions = widget.actions.isNotEmpty;
-    final bool hasContent = widget.title != null && widget.content != null;
+    final bool hasContent = widget.title != null || widget.content != null;
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
         final double contentMaxHeight = _isInAccessibilityMode(context) ?
@@ -536,7 +536,7 @@ class _CupertinoAlertDialogState extends State<CupertinoAlertDialog> {
                               removeRight: true,
                               removeBottom: true,
                               context: context,
-                              child: _renderDialogLayout(
+                              child: _renderSheet(
                                 actionsSection: _buildActions(),
                                 dividerColor: CupertinoColors.separator,
                               ),
