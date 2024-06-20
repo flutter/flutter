@@ -53,7 +53,7 @@ Future<void> testExecutable(FutureOr<void> Function() testMain, {String? namePre
     'bootstrap logic sets "goldenFileComparator" to a LocalFileComparator. It '
     'appears in this instance however that the "goldenFileComparator" is a '
     '${goldenFileComparator.runtimeType}.\n'
-    'See also: https://api.flutter.dev/flutter/flutter_test/flutter_test-library.html',
+    'See also: https://flutter.dev/to/flutter-test-docs',
   );
   const Platform platform = LocalPlatform();
   const FileSystem fs = LocalFileSystem();
