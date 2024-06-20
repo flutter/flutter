@@ -331,7 +331,7 @@ public class StandardMessageCodec implements MessageCodec<Object> {
   }
 
   /** Reads a value as written by writeValue. */
-  @NonNull
+  @Nullable
   protected final Object readValue(@NonNull ByteBuffer buffer) {
     if (!buffer.hasRemaining()) {
       throw new IllegalArgumentException("Message corrupted");
