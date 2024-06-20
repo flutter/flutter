@@ -349,10 +349,6 @@ class _CupertinoAlertDialogState extends State<CupertinoAlertDialog> {
       return _CupertinoAlertActionSection(
         scrollController: _effectiveActionScrollController,
         actions: widget.actions,
-        dialogColor: CupertinoDynamicColor.resolve(_kDialogColor, context),
-        dialogPressedColor: CupertinoDynamicColor.resolve(_kDialogPressedColor, context),
-        dividerColor: CupertinoDynamicColor.resolve(CupertinoColors.separator, context),
-        dividerThickness: _kDividerThickness,
         pressedIndex: _pressedIndex,
         onPressedUpdate: _onPressedUpdate,
       );
@@ -1647,21 +1643,12 @@ class _CupertinoAlertContentSection extends StatelessWidget {
 class _CupertinoAlertActionSection extends StatelessWidget {
   const _CupertinoAlertActionSection({
     required this.actions,
-    required this.dividerThickness,
-    required this.dialogColor,
-    required this.dialogPressedColor,
-    required this.dividerColor,
     required this.onPressedUpdate,
     required this.pressedIndex,
     required this.scrollController,
   });
 
   final List<Widget> actions;
-
-  final double dividerThickness;
-  final Color dialogColor;
-  final Color dialogPressedColor;
-  final Color dividerColor;
 
   final _PressedUpdateHandler onPressedUpdate;
   final int? pressedIndex;
@@ -1681,6 +1668,11 @@ class _CupertinoAlertActionSection extends StatelessWidget {
         child: SizedBox(width: double.infinity, height: 0),
       );
     }
+
+    final Color dialogColor = CupertinoDynamicColor.resolve(_kDialogColor, context);
+    final Color dialogPressedColor = CupertinoDynamicColor.resolve(_kDialogPressedColor, context);
+    final Color dividerColor = CupertinoDynamicColor.resolve(CupertinoColors.separator, context);
+
     final List<Widget> column = <Widget>[];
     for (int actionIndex = 0; actionIndex < actions.length; actionIndex += 1) {
       if (actionIndex != 0) {
@@ -1705,8 +1697,8 @@ class _CupertinoAlertActionSection extends StatelessWidget {
       child: SingleChildScrollView(
         controller: scrollController,
         child: _AlertDialogActionsLayout(
-          dividerThickness: dividerThickness,
           children: column,
+          dividerThickness: _kDividerThickness,
         ),
       ),
     );
@@ -1760,9 +1752,7 @@ class _AlertDialogButtonBackgroundState extends State<_AlertDialogButtonBackgrou
 
   @override
   Widget build(BuildContext context) {
-    final Color backgroundColor = _isPressed
-      ? widget.pressedColor
-      : widget.idleColor;
+    final Color backgroundColor = _isPressed ? widget.pressedColor : widget.idleColor;
     return MergeSemantics(
       // TODO(mattcarroll): Button press dynamics need overhaul for iOS:
       // https://github.com/flutter/flutter/issues/19786
