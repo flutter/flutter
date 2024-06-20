@@ -3536,6 +3536,7 @@ void _testLink() {
 
     final SemanticsObject object = pumpSemantics();
     expect(object.element.tagName.toLowerCase(), 'a');
+    expect(object.element.hasAttribute('href'), isFalse);
   });
 }
 
