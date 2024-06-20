@@ -2035,10 +2035,7 @@ class _RenderAlertDialogActionsLayout extends RenderFlex {
   Size computeDryLayout(covariant BoxConstraints constraints) {
     FlutterError? constraintsError;
     assert(() {
-      constraintsError = _debugCheckConstraints(
-        constraints: constraints,
-        reportParentConstraints: false,
-      );
+      constraintsError = _debugCheckConstraints(constraints: constraints);
       return true;
     }());
     if (constraintsError != null) {
@@ -2064,10 +2061,7 @@ class _RenderAlertDialogActionsLayout extends RenderFlex {
     }
 
     assert(() {
-      final FlutterError? constraintsError = _debugCheckConstraints(
-        constraints: constraints,
-        reportParentConstraints: true,
-      );
+      final FlutterError? constraintsError = _debugCheckConstraints(constraints: constraints);
       if (constraintsError != null) {
         throw constraintsError;
       }
@@ -2103,7 +2097,7 @@ class _RenderAlertDialogActionsLayout extends RenderFlex {
     size = constraints.constrain(Size(overallWidth, maxChildHeight));
   }
 
-  FlutterError? _debugCheckConstraints({required BoxConstraints constraints, required bool reportParentConstraints}) {
+  FlutterError? _debugCheckConstraints({required BoxConstraints constraints}) {
     FlutterError? result;
     assert(() {
       if (constraints.maxWidth == double.infinity) {
