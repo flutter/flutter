@@ -9,7 +9,7 @@ import 'package:flutter_api_samples/widgets/inherited_notifier/inherited_notifie
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('It rotate the spinners', (WidgetTester tester) async {
+  testWidgets('It rotates the spinners', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.InheritedNotifierExampleApp(),
     );
