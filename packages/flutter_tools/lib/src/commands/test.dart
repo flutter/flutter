@@ -695,7 +695,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     if (build != 0) {
       throwToolExit('Error: Failed to build asset bundle');
     }
-    if (_needRebuild(assetBundle.entries, flavor)) {
+    if (_needsRebuild(assetBundle.entries, flavor)) {
       await writeBundle(
         globals.fs.directory(globals.fs.path.join('build', 'unit_test_assets')),
         assetBundle.entries,
@@ -722,7 +722,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     }
   }
 
-  bool _needRebuild(Map<String, AssetBundleEntry> entries, String? flavor) {
+  bool _needsRebuild(Map<String, AssetBundleEntry> entries, String? flavor) {
     // TODO(andrewkolos): This logic might fail in the future if we change the
     // schema of the contents of the asset manifest file and the user does not
     // perform a `flutter clean` after upgrading.
