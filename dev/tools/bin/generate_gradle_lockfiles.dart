@@ -90,15 +90,23 @@ void main(List<String> arguments) {
       continue;
     }
 
-    final File rootBuildGradle = androidDirectory.childFile('build.gradle');
-    if (!rootBuildGradle.existsSync()) {
-      print('${rootBuildGradle.path} does not exist - skipping');
+    late File rootBuildGradle;
+    if (androidDirectory.childFile('build.gradle').existsSync()) {
+      rootBuildGradle = androidDirectory.childFile('build.gradle');
+    } else if (androidDirectory.childFile('build.gradle.kts').existsSync()) {
+      rootBuildGradle = androidDirectory.childFile('build.gradle.kts');
+    } else {
+      print('${androidDirectory.childFile('build.gradle').path}(.kts) does not exist - skipping');
       continue;
     }
 
-    final File settingsGradle = androidDirectory.childFile('settings.gradle');
-    if (!settingsGradle.existsSync()) {
-      print('${settingsGradle.path} does not exist - skipping');
+    late File settingsGradle;
+    if (androidDirectory.childFile('settings.gradle').existsSync()) {
+      settingsGradle = androidDirectory.childFile('settings.gradle');
+    } else if (androidDirectory.childFile('settings.gradle.kts').existsSync()) {
+      settingsGradle = androidDirectory.childFile('settings.gradle.kts');
+    } else {
+      print('${androidDirectory.childFile('settings.gradle').path}(.kts) does not exist - skipping');
       continue;
     }
 
