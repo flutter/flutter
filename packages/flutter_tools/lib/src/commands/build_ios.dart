@@ -445,7 +445,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
         );
       }
     }
-    globals.printStatus('\nTo update the settings, please refer to https://docs.flutter.dev/deployment/ios\n');
+    globals.printStatus('\nTo update the settings, please refer to https://flutter.dev/to/ios-deploy\n');
 
     // xcarchive failed or not at expected location.
     if (xcarchiveResult.exitStatus != ExitStatus.success) {
