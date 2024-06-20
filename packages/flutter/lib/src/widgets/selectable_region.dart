@@ -510,7 +510,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
         }
         // From observation, these platforms reset their tap count to 0 when
         // the number of consecutive taps exceeds the max consecutive tap supported.
-        // For example on Debian Linux with GTK, when going past a triple click,
+        // For example on native Android, when going past a triple click,
         // on the fourth click the selection is moved to the precise click
         // position, on the fifth click the word at the position is selected, and
         // on the sixth click the paragraph at the position is selected.
@@ -539,25 +539,11 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.iOS:
-        _gestureRecognizers[TapAndHorizontalDragGestureRecognizer] = GestureRecognizerFactoryWithHandlers<TapAndHorizontalDragGestureRecognizer>(
-              () => TapAndHorizontalDragGestureRecognizer(debugOwner:this),
-              (TapAndHorizontalDragGestureRecognizer instance) {
-            instance
-              ..eagerVictoryOnDrag = defaultTargetPlatform != TargetPlatform.iOS
-              ..onTapDown = _startNewMouseSelectionGesture
-              ..onTapUp = _handleMouseTapUp
-              ..onDragStart = _handleMouseDragStart
-              ..onDragUpdate = _handleMouseDragUpdate
-              ..onDragEnd = _handleMouseDragEnd
-              ..onCancel = _clearSelection
-              ..dragStartBehavior = DragStartBehavior.down;
-          },
-        );
       case TargetPlatform.linux:
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
         _gestureRecognizers[TapAndPanGestureRecognizer] = GestureRecognizerFactoryWithHandlers<TapAndPanGestureRecognizer>(
-              () => TapAndPanGestureRecognizer(debugOwner:this, supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.mouse }),
+              () => TapAndPanGestureRecognizer(debugOwner:this),
               (TapAndPanGestureRecognizer instance) {
             instance
               ..onTapDown = _startNewMouseSelectionGesture
@@ -584,6 +570,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     );
   }
 
+  Offset? _doubleTapOffset;
   void _startNewMouseSelectionGesture(TapDragDownDetails details) {
     _lastPointerDeviceKind = details.kind;
     switch (_getEffectiveConsecutiveTapCount(details.consecutiveTapCount)) {
@@ -606,7 +593,8 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
         switch (defaultTargetPlatform) {
           case TargetPlatform.iOS:
             if (kIsWeb && details.kind != null && !_isPrecisePointerDevice(details.kind!)) {
-              // Double tap on iOS web is only enabled with a precise pointer device.
+              // Double tap on iOS web triggers when a drag begins after the double tap.
+              _doubleTapOffset = details.globalPosition;
               break;
             }
             _selectWordAt(offset: details.globalPosition);
@@ -669,10 +657,11 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
               _selectEndTo(offset: details.globalPosition, continuous: true, textGranularity: TextGranularity.word);
             }
           case TargetPlatform.iOS:
-            if (kIsWeb && details.kind != null && !_isPrecisePointerDevice(details.kind!)) {
-              // Double tap + drag on iOS web is only enabled with a precise
-              // pointer device.
-              break;
+            if (kIsWeb && details.kind != null && !_isPrecisePointerDevice(details.kind!) && _doubleTapOffset != null) {
+              // On iOS web a double tap does not select the word at the position,
+              // until the drag has begun.
+              _selectWordAt(offset: _doubleTapOffset!);
+              _doubleTapOffset = null;
             }
             _selectEndTo(offset: details.globalPosition, continuous: true, textGranularity: TextGranularity.word);
             if (details.kind != null && !_isPrecisePointerDevice(details.kind!)) {

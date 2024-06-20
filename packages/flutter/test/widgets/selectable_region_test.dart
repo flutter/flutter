@@ -60,14 +60,14 @@ void main() {
       await tester.pumpAndSettle();
       renderSelectionSpy.events.clear();
 
-      await gesture.moveTo(const Offset(100.0, 200.0));
+      await gesture.moveTo(const Offset(200.0, 100.0));
       expect(renderSelectionSpy.events.length, 2);
       expect(renderSelectionSpy.events[0].type, SelectionEventType.startEdgeUpdate);
       final SelectionEdgeUpdateEvent startEdge = renderSelectionSpy.events[0] as SelectionEdgeUpdateEvent;
       expect(startEdge.globalPosition, const Offset(200.0, 200.0));
       expect(renderSelectionSpy.events[1].type, SelectionEventType.endEdgeUpdate);
       SelectionEdgeUpdateEvent endEdge = renderSelectionSpy.events[1] as SelectionEdgeUpdateEvent;
-      expect(endEdge.globalPosition, const Offset(100.0, 200.0));
+      expect(endEdge.globalPosition, const Offset(200.0, 100.0));
       renderSelectionSpy.events.clear();
 
       await gesture.moveTo(const Offset(100.0, 100.0));
@@ -700,7 +700,7 @@ void main() {
       await gesture.up();
     },
       variant: TargetPlatformVariant.mobile(),
-      skip: kIsWeb, // [intended] Double tap / double tap + drag gestures are not fully enabled on the web for mobile platforms.
+      skip: kIsWeb, // [intended] Web does not support double tap + drag gestures on all of the tested platforms.
     );
 
     testWidgets('touch can select multiple widgets on double tap drag on mobile platforms', (WidgetTester tester) async {
@@ -752,7 +752,7 @@ void main() {
       await gesture.up();
     },
       variant: TargetPlatformVariant.mobile(),
-      skip: kIsWeb, // [intended] Double tap / double tap + drag gestures are not fully enabled on the web for mobile platforms.
+      skip: kIsWeb, // [intended] Web does not support double tap + drag gestures on all of the tested platforms.
     );
 
     testWidgets('touch can select multiple widgets on double tap drag and return to origin word on mobile platforms', (WidgetTester tester) async {
@@ -816,7 +816,7 @@ void main() {
       await gesture.up();
     },
       variant: TargetPlatformVariant.mobile(),
-      skip: kIsWeb, // [intended] Double tap / double tap + drag gestures are not fully enabled on the web for mobile platforms.
+      skip: kIsWeb, // [intended] Web does not support double tap + drag gestures on all of the tested platforms.
     );
 
     testWidgets('touch can reverse selection across multiple widgets on double tap drag on mobile platforms', (WidgetTester tester) async {
@@ -867,7 +867,7 @@ void main() {
       await gesture.up();
     },
       variant: TargetPlatformVariant.mobile(),
-      skip: kIsWeb, // [intended] Double tap / double tap + drag gestures are not fully enabled on the web for mobile platforms.
+      skip: kIsWeb, // [intended] Web does not support double tap + drag gestures on all of the tested platforms.
     );
 
     testWidgets('touch cannot triple tap or triple tap drag on Android and iOS', (WidgetTester tester) async {
@@ -976,7 +976,7 @@ void main() {
       expect(paragraph.selections[0], defaultTargetPlatform == TargetPlatform.iOS ? const TextSelection(baseOffset: 0, extentOffset: 5) : const TextSelection.collapsed(offset: 2));
     },
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.iOS }),
-      skip: kIsWeb, // [intended] Double tap / double tap + drag gestures are not fully enabled on the web for mobile platforms.
+      skip: kIsWeb, // [intended] Web does not support double tap + drag gestures on all of the tested platforms.
     );
 
     testWidgets('touch cannot select word-by-word on double tap drag when on Android web', (WidgetTester tester) async {
@@ -1032,7 +1032,7 @@ void main() {
       skip: !kIsWeb, // [intended] This test verifies web behavior.
     );
 
-    testWidgets('touch cannot double tap or double tap drag when on iOS web', (WidgetTester tester) async {
+    testWidgets('touch can double tap + drag on iOS web', (WidgetTester tester) async {
       final FocusNode focusNode = FocusNode();
       addTearDown(focusNode.dispose);
 
@@ -1060,27 +1060,62 @@ void main() {
       await tester.pumpAndSettle();
       expect(paragraph.selections[0], const TextSelection.collapsed(offset: 2));
 
-      // Dragging should not change the selection.
+      // Dragging should change the selection.
       await gesture.moveTo(textOffsetToPosition(paragraph, 3));
       await tester.pumpAndSettle();
-      expect(paragraph.selections[0], const TextSelection.collapsed(offset: 2));
+      expect(paragraph.selections[0], const TextSelection(baseOffset: 0, extentOffset: 4));
 
       await gesture.moveTo(textOffsetToPosition(paragraph, 4));
       await tester.pump();
-      expect(paragraph.selections[0], const TextSelection.collapsed(offset: 2));
+      expect(paragraph.selections[0], const TextSelection(baseOffset: 0, extentOffset: 7));
 
       await gesture.moveTo(textOffsetToPosition(paragraph, 7));
       await tester.pump();
-      expect(paragraph.selections[0], const TextSelection.collapsed(offset: 2));
+      expect(paragraph.selections[0], const TextSelection(baseOffset: 0, extentOffset: 8));
 
       await gesture.moveTo(textOffsetToPosition(paragraph, 8));
       await tester.pump();
-      expect(paragraph.selections[0], const TextSelection.collapsed(offset: 2));
+      expect(paragraph.selections[0], const TextSelection(baseOffset: 0, extentOffset: 11));
 
       // Check backward selection.
       await gesture.moveTo(textOffsetToPosition(paragraph, 1));
       await tester.pump();
+      expect(paragraph.selections[0], const TextSelection(baseOffset: 0, extentOffset: 3));
+      await gesture.up();
+      await tester.pumpAndSettle();
+    },
+      variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+      skip: !kIsWeb, // [intended] This test verifies web behavior.
+    );
+
+    testWidgets('touch cannot double tap on iOS web', (WidgetTester tester) async {
+      final FocusNode focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: SelectableRegion(
+            focusNode: focusNode,
+            selectionControls: materialTextSelectionControls,
+            child: const Center(
+              child: Text('How are you'),
+            ),
+          ),
+        ),
+      );
+      final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you'), matching: find.byType(RichText)));
+      final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph, 2));
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
       expect(paragraph.selections[0], const TextSelection.collapsed(offset: 2));
+
+      // A double tap should not change the selection.
+      await gesture.down(textOffsetToPosition(paragraph, 2));
+      await tester.pumpAndSettle();
+      expect(paragraph.selections[0], const TextSelection.collapsed(offset: 2));
+
       await gesture.up();
       await tester.pumpAndSettle();
     },
