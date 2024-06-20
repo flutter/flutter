@@ -322,17 +322,6 @@ class _CupertinoAlertDialogState extends State<CupertinoAlertDialog> {
 
     final Color backgroundColor = CupertinoDynamicColor.resolve(_kDialogColor, context);
 
-    if (widget.actions.isEmpty) {
-      return ColoredBox(
-        color: backgroundColor,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: children,
-        ),
-      );
-    }
-
     return ConstrainedBox(
       constraints: BoxConstraints(
         maxHeight: maxHeight,
@@ -458,10 +447,15 @@ class _CupertinoAlertDialogState extends State<CupertinoAlertDialog> {
     final bool hasContent = widget.title != null || widget.content != null;
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
-        final double contentMaxHeight = _isInAccessibilityMode(context) ?
-          constraints.maxHeight / 2 :
-          math.max(0,
+        final double contentMaxHeight;
+        if (!hasActions) {
+          contentMaxHeight = constraints.maxHeight;
+        } else if (_isInAccessibilityMode(context)) {
+          contentMaxHeight = constraints.maxHeight / 2;
+        } else {
+          contentMaxHeight = math.max(0,
               constraints.maxHeight - _kDialogActionsSectionMinHeight - _kDividerThickness);
+        }
         return Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
