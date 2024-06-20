@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
@@ -19,7 +18,7 @@ const double _kCupertinoFocusColorBrightness = 0.69;
 const double _kCupertinoFocusColorSaturation = 0.835;
 
 // Eyeballed from Apple's Design Resources (macOS) template.
-const Color _kDisabledCheckColor =Color.fromARGB(255, 172, 172, 172);
+const Color _kDisabledCheckColor = Color.fromARGB(255, 172, 172, 172);
 
 // Eyeballed from a checkbox on a physical Macbook Pro running macOS version 14.5.
 const CupertinoDynamicColor _kDefaultFillColor = CupertinoDynamicColor.withBrightness(
@@ -543,8 +542,8 @@ class _CheckboxPainter extends ToggleablePainter {
         _drawBox(canvas, outer, paint, side);
         _drawDash(canvas, origin, strokePaint);
     }
-    // Apply effect to darken checkbox when pressed on macOS.
-    if (downPosition != null && defaultTargetPlatform == TargetPlatform.macOS) {
+    // Apply effect to darken checkbox when pressed.
+    if (downPosition != null) {
       final Paint paint = Paint()
         ..color = CupertinoColors.black.withOpacity(0.05);
       final Rect outer = _outerRectAt(origin);

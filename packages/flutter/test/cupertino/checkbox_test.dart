@@ -788,7 +788,7 @@ void main() {
     );
   });
 
-  testWidgets('Checkbox is slightly darkened when pressed on macOS', (WidgetTester tester) async {
+  testWidgets('Checkbox is slightly darkened when pressed', (WidgetTester tester) async {
     const Color checkColor = Color(0xffffffff);
     const Color defaultActiveFillColor = Color(0xff007aff);
     const Color defaultInactiveFillColor = Color(0xffffffff);
@@ -849,7 +849,7 @@ void main() {
     await gesture1.up();
     await gesture2.up();
     await tester.pumpAndSettle();
-  }, variant: TargetPlatformVariant.only(TargetPlatform.macOS));
+  });
 }
 
 class CheckboxMouseCursor extends WidgetStateMouseCursor {
