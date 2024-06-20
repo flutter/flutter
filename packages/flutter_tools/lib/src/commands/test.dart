@@ -724,9 +724,9 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
 
   bool _needsRebuild(Map<String, AssetBundleEntry> entries, String? flavor) {
     // TODO(andrewkolos): This logic might fail in the future if we change the
-    // schema of the contents of the asset manifest file and the user does not
-    // perform a `flutter clean` after upgrading.
-    // See https://github.com/flutter/flutter/issues/128563.
+    //  schema of the contents of the asset manifest file and the user does not
+    //  perform a `flutter clean` after upgrading.
+    //  See https://github.com/flutter/flutter/issues/128563.
     final File manifest = globals.fs.file(globals.fs.path.join('build', 'unit_test_assets', 'AssetManifest.bin'));
     if (!manifest.existsSync()) {
       return true;
