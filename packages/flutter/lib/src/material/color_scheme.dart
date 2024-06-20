@@ -1836,11 +1836,8 @@ class ColorScheme with Diagnosticable {
     final Completer<ui.Image> imageCompleter = Completer<ui.Image>();
     late ImageStreamListener listener;
     late ui.Image scaledImage;
-    Timer? loadFailureTimeout;
 
     listener = ImageStreamListener((ImageInfo info, bool sync) async {
-      loadFailureTimeout?.cancel();
-      stream.removeListener(listener);
       final ui.Image image = info.image;
       final int width = image.width;
       final int height = image.height;
@@ -1866,19 +1863,25 @@ class ColorScheme with Diagnosticable {
       scaledImage = await picture.toImage(paintWidth.toInt(), paintHeight.toInt());
       imageCompleter.complete(info.image);
     }, onError: (Object exception, StackTrace? stackTrace) {
-      stream.removeListener(listener);
       throw Exception('Failed to render image: $exception');
     });
 
-    loadFailureTimeout = Timer(const Duration(seconds: 5), () {
-      stream.removeListener(listener);
+    final loadFailureTimeout = Timer(const Duration(seconds: 5), () {
       imageCompleter.completeError(
         TimeoutException('Timeout occurred trying to load image'));
     });
 
     stream.addListener(listener);
-    await imageCompleter.future;
-    return scaledImage;
+
+    try {
+      await imageCompleter.future;
+      return scaledImage;
+    } on Exception catch (error, _) {
+      rethrow;
+    } finally {
+      loadFailureTimeout.cancel();
+      stream.removeListener(listener);
+    }
   }
 
   // Converts AABBGGRR color int to AARRGGBB format.
