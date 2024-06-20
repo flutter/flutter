@@ -383,7 +383,7 @@ class _CupertinoAlertDialogState extends State<CupertinoAlertDialog> {
       child: SizedBox(width: double.infinity, height: 0),
     );
     if (widget.actions.isNotEmpty) {
-      actionSection = _AlertDialogActionSection(
+      actionSection = _CupertinoAlertActionSection(
         scrollController: _effectiveActionScrollController,
         actions: widget.actions,
         dialogColor: CupertinoDynamicColor.resolve(_kDialogColor, context),
@@ -1637,8 +1637,8 @@ class _CupertinoAlertContentSection extends StatelessWidget {
 }
 
 // The "actions section" of a [CupertinoAlertDialog].
-class _AlertDialogActionSection extends StatelessWidget {
-  const _AlertDialogActionSection({
+class _CupertinoAlertActionSection extends StatelessWidget {
+  const _CupertinoAlertActionSection({
     required this.actions,
     required this.dividerThickness,
     required this.dialogColor,
