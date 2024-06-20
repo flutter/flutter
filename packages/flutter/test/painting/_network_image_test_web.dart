@@ -95,6 +95,10 @@ void runTests() {
 
   testWidgets('loads an image using withCredentials true',
       (WidgetTester tester) async {
+    if (!isCanvasKit) {
+      // The HTML renderer uses an `<img>` tag, it does not fetch the image via XMLHttpRequest.
+      return;
+    }
     final TestHttpRequest testHttpRequest = TestHttpRequest()
       ..status = 200
       ..mockEvent = MockEvent('load', web.Event('test error'))
