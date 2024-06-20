@@ -83,10 +83,6 @@ class CupertinoCheckbox extends StatefulWidget {
     required this.onChanged,
     this.mouseCursor,
     this.activeColor,
-    @Deprecated(
-      'Use fillColor to resolve this color in different WidgetStates instead. '
-      'This feature was deprecated after v3.23.0-13.0.pre.'
-    )
     this.inactiveColor,
     this.fillColor,
     this.checkColor,
@@ -164,10 +160,6 @@ class CupertinoCheckbox extends StatefulWidget {
   /// The color used if the checkbox is inactive.
   ///
   /// By default, [CupertinoColors.inactiveGray] is used.
-  @Deprecated(
-    'Use fillColor to resolve this color in different WidgetStates instead. '
-    'This feature was deprecated after v3.23.0-13.0.pre.'
-  )
   final Color? inactiveColor;
 
   /// The color that fills the checkbox, in all [WidgetState]s.
