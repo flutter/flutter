@@ -494,7 +494,7 @@ void main() {
     // ensures that an empty content section doesn't accidentally render some
     // empty space in the dialog.
     final Finder contentSectionFinder = find.byElementPredicate((Element element) {
-      return element.widget.runtimeType.toString() == '_AlertDialogActionSection';
+      return element.widget.runtimeType.toString() == '_CupertinoAlertActionSection';
     });
 
     final Finder modalBoundaryFinder = find.byType(ClipRRect);
@@ -1557,7 +1557,7 @@ RenderBox findActionButtonRenderBoxByTitle(WidgetTester tester, String title) {
 
 RenderBox findScrollableActionsSectionRenderBox(WidgetTester tester) {
   final RenderObject actionsSection = tester.renderObject(find.byElementPredicate((Element element) {
-    return element.widget.runtimeType.toString() == '_AlertDialogActionSection';
+    return element.widget.runtimeType.toString() == '_CupertinoAlertActionSection';
   }));
   assert(actionsSection is RenderBox);
   return actionsSection as RenderBox;
