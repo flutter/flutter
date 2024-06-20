@@ -14,40 +14,47 @@ void main() {
       const example.InheritedNotifierExampleApp(),
     );
 
-    final Iterable<Transform> widgets = tester.widgetList<Transform>(find.ancestor(of: find.text('Whee!'), matching: find.byType(Transform)));
-    expect(widgets, everyElement(isA<Transform>().having((Transform widget) => widget.transform, 'transform', Matrix4.identity())));
-
-    await tester.pump(const Duration(seconds: 1));
-    expect(widgets, everyElement(isA<Transform>().having((Transform widget) => widget.transform, 'transform', Matrix4.rotationZ(0.2 * math.pi))));
-
-    await tester.pump(const Duration(seconds: 1));
-    expect(widgets, everyElement(isA<Transform>().having((Transform widget) => widget.transform, 'transform', Matrix4.rotationZ(0.4 * math.pi))));
-
-    await tester.pump(const Duration(seconds: 1));
-    expect(widgets, everyElement(isA<Transform>().having((Transform widget) => widget.transform, 'transform', Matrix4.rotationZ(0.6 * math.pi))));
-
-    await tester.pump(const Duration(seconds: 1));
-    expect(widgets, everyElement(isA<Transform>().having((Transform widget) => widget.transform, 'transform', Matrix4.rotationZ(0.8 * math.pi))));
-
-    await tester.pump(const Duration(seconds: 1));
-    expect(
-      widgets,
-      everyElement(isA<Transform>().having((Transform widget) => widget.transform, 'transform', Matrix4.identity()..storage[0] = -1..storage[5] = -1)),
+    final Iterable<Transform> widgets = tester.widgetList<Transform>(
+      find.ancestor(
+        of: find.text('Whee!'),
+        matching: find.byType(Transform),
+      ),
     );
 
-    await tester.pump(const Duration(seconds: 1));
-    expect(widgets, everyElement(isA<Transform>().having((Transform widget) => widget.transform, 'transform', Matrix4.rotationZ(1.2 * math.pi))));
+    Matcher transformMatcher(Matrix4 matrix) {
+      return everyElement(isA<Transform>().having((Transform widget) => widget.transform, 'transform', matrix));
+    }
+
+    expect(widgets, transformMatcher(Matrix4.identity()));
 
     await tester.pump(const Duration(seconds: 1));
-    expect(widgets, everyElement(isA<Transform>().having((Transform widget) => widget.transform, 'transform', Matrix4.rotationZ(1.4 * math.pi))));
+    expect(widgets, transformMatcher(Matrix4.rotationZ(0.2 * math.pi)));
 
     await tester.pump(const Duration(seconds: 1));
-    expect(widgets, everyElement(isA<Transform>().having((Transform widget) => widget.transform, 'transform', Matrix4.rotationZ(1.6 * math.pi))));
+    expect(widgets, transformMatcher(Matrix4.rotationZ(0.4 * math.pi)));
 
     await tester.pump(const Duration(seconds: 1));
-    expect(widgets, everyElement(isA<Transform>().having((Transform widget) => widget.transform, 'transform', Matrix4.rotationZ(1.8 * math.pi))));
+    expect(widgets, transformMatcher(Matrix4.rotationZ(0.6 * math.pi)));
 
     await tester.pump(const Duration(seconds: 1));
-    expect(widgets, everyElement(isA<Transform>().having((Transform widget) => widget.transform, 'transform', Matrix4.identity())));
+    expect(widgets, transformMatcher(Matrix4.rotationZ(0.8 * math.pi)));
+
+    await tester.pump(const Duration(seconds: 1));
+    expect(widgets, transformMatcher(Matrix4.identity()..storage[0] = -1..storage[5] = -1));
+
+    await tester.pump(const Duration(seconds: 1));
+    expect(widgets, transformMatcher(Matrix4.rotationZ(1.2 * math.pi)));
+
+    await tester.pump(const Duration(seconds: 1));
+    expect(widgets, transformMatcher(Matrix4.rotationZ(1.4 * math.pi)));
+
+    await tester.pump(const Duration(seconds: 1));
+    expect(widgets, transformMatcher(Matrix4.rotationZ(1.6 * math.pi)));
+
+    await tester.pump(const Duration(seconds: 1));
+    expect(widgets, transformMatcher(Matrix4.rotationZ(1.8 * math.pi)));
+
+    await tester.pump(const Duration(seconds: 1));
+    expect(widgets, transformMatcher(Matrix4.identity()));
   });
 }
