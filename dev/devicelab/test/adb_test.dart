@@ -23,8 +23,7 @@ void main() {
       device = FakeDevice(deviceId: 'fakeDeviceId');
     });
 
-    tearDown(() {
-    });
+    tearDown(() {});
 
     group('cpu check', () {
       test('arm64', () async {
@@ -124,16 +123,79 @@ void main() {
 
     group('adb', () {
       test('tap', () async {
+        FakeDevice.resetLog();
         await device.tap(100, 200);
         expectLog(<CommandArgs>[
-          cmd(command: 'getprop', arguments: <String>['ro.bootimage.build.fingerprint', ';', 'getprop', 'ro.build.version.release', ';', 'getprop', 'ro.build.version.sdk']),
           cmd(command: 'input', arguments: <String>['tap', '100', '200']),
         ]);
       });
 
-      test('start/stop LoggingToSink does not crash', () async {
-        unawaited(device.startLoggingToSink(IOSink(_MemoryIOSink())));
-        unawaited(device.stopLoggingToSink());
+      test('awaitDevice', () async {
+        FakeDevice.resetLog();
+        // The expected value from `adb shell getprop sys.boot_completed`
+        FakeDevice.output = '1';
+        await device.awaitDevice();
+        expectLog(<CommandArgs>[
+          cmd(command: 'adb', environment: <String, String>{
+            FakeDevice.canFailKey: 'false'
+          }, arguments: <String>[
+            '-s',
+            device.deviceId,
+            'wait-for-device',
+          ]),
+          cmd(command: 'adb', environment: <String, String>{
+            FakeDevice.canFailKey: 'false',
+          }, arguments: <String>[
+            '-s',
+            device.deviceId,
+            'shell',
+            'getprop sys.boot_completed',
+          ])
+        ]);
+      });
+
+      test('reboot', () async {
+        FakeDevice.resetLog();
+        await device.reboot();
+        expectLog(<CommandArgs>[
+          cmd(command: 'adb', environment: <String, String>{
+            FakeDevice.canFailKey: 'false'
+          }, arguments: <String>[
+            '-s',
+            device.deviceId,
+            'reboot',
+          ]),
+        ]);
+      });
+
+      test('clearLog', () async {
+        FakeDevice.resetLog();
+        await device.clearLogs();
+        expectLog(<CommandArgs>[
+          cmd(command: 'adb', environment: <String, String>{
+            FakeDevice.canFailKey: 'true'
+          }, arguments: <String>[
+            '-s',
+            device.deviceId,
+            'logcat',
+            '-c',
+          ]),
+        ]);
+      });
+
+      test('startLoggingToSink calls adb', () async {
+        FakeDevice.resetLog();
+        await device.startLoggingToSink(IOSink(_MemoryIOSink()));
+        expectLog(<CommandArgs>[
+          cmd(command: 'adb', environment: <String, String>{
+            FakeDevice.canFailKey: 'true'
+          }, arguments: <String>[
+            '-s',
+            device.deviceId,
+            'logcat',
+            '--clear',
+          ]),
+        ]);
       });
     });
   });
@@ -191,6 +253,8 @@ class CommandArgs {
 class FakeDevice extends AndroidDevice {
   FakeDevice({required super.deviceId});
 
+  static const String canFailKey = 'canFail';
+
   static String output = '';
 
   static List<CommandArgs> commandLog = <CommandArgs>[];
@@ -221,6 +285,20 @@ class FakeDevice extends AndroidDevice {
     output = '''
       arm64
     ''';
+  }
+
+  @override
+  Future<String> adb(List<String> arguments,
+      {Map<String, String>? environment,
+      bool silent = false,
+      bool canFail = false}) async {
+      environment ??= <String, String>{};
+    commandLog.add(CommandArgs(
+      command: 'adb',
+      arguments: arguments,
+      environment: environment..putIfAbsent('canFail', () => '$canFail'),
+    ));
+    return output;
   }
 
   @override

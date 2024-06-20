@@ -772,7 +772,7 @@ class AndroidDevice extends Device {
 
   @override
   Future<void> clearLogs() {
-    return adb(<String>['logcat', '-c']);
+    return adb(<String>['logcat', '-c'], canFail: true);
   }
 
   @override
