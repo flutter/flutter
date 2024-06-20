@@ -530,9 +530,16 @@ class _CupertinoAlertDialogState extends State<CupertinoAlertDialog> {
                             scopesRoute: true,
                             explicitChildNodes: true,
                             label: localizations.alertDialogLabel,
-                            child: _renderDialogLayout(
-                              actionsSection: _buildActions(),
-                              dividerColor: CupertinoColors.separator,
+                            child: MediaQuery.removePadding(
+                              removeLeft: true,
+                              removeTop: true,
+                              removeRight: true,
+                              removeBottom: true,
+                              context: context,
+                              child: _renderDialogLayout(
+                                actionsSection: _buildActions(),
+                                dividerColor: CupertinoColors.separator,
+                              ),
                             ),
                           ),
                         ),
