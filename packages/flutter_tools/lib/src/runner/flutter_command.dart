@@ -508,7 +508,6 @@ abstract class FlutterCommand extends Command<void> {
     );
     argParser.addFlag(
       'dds',
-      hide: !verboseHelp,
       defaultsTo: true,
       help: 'Enable the Dart Developer Service (DDS).\n'
             'It may be necessary to disable this when attaching to an application with '
