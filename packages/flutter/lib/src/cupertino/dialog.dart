@@ -286,47 +286,43 @@ class _CupertinoAlertDialogState extends State<CupertinoAlertDialog> {
   ScrollController get _effectiveActionScrollController =>
     widget.actionScrollController ?? (_backupActionScrollController ??= ScrollController());
 
-  Widget _buildContent(BuildContext context) {
+  bool get hasContent => widget.title != null || widget.content != null;
+
+  Widget? _buildContent(BuildContext context) {
+    if (!hasContent) {
+      return null;
+    }
+
     const double defaultFontSize = 14.0;
     final double effectiveTextScaleFactor = MediaQuery.textScalerOf(context).scale(defaultFontSize) / defaultFontSize;
 
-    final List<Widget> children = <Widget>[
-      if (widget.title != null || widget.content != null)
-        Flexible(
-          flex: 3,
-          child: _CupertinoAlertContentSection(
-            title: widget.title,
-            message: widget.content,
-            scrollController: _effectiveScrollController,
-            titlePadding: EdgeInsets.only(
-              left: _kDialogEdgePadding,
-              right: _kDialogEdgePadding,
-              bottom: widget.content == null ? _kDialogEdgePadding : 1.0,
-              top: _kDialogEdgePadding * effectiveTextScaleFactor,
-            ),
-            messagePadding: EdgeInsets.only(
-              left: _kDialogEdgePadding,
-              right: _kDialogEdgePadding,
-              bottom: _kDialogEdgePadding * effectiveTextScaleFactor,
-              top: widget.title == null ? _kDialogEdgePadding : 1.0,
-            ),
-            titleTextStyle: _kCupertinoDialogTitleStyle.copyWith(
-              color: CupertinoDynamicColor.resolve(CupertinoColors.label, context),
-            ),
-            messageTextStyle: _kCupertinoDialogContentStyle.copyWith(
-              color: CupertinoDynamicColor.resolve(CupertinoColors.label, context),
-            ),
-          ),
-        ),
-    ];
+    final Widget child = _CupertinoAlertContentSection(
+      title: widget.title,
+      message: widget.content,
+      scrollController: _effectiveScrollController,
+      titlePadding: EdgeInsets.only(
+        left: _kDialogEdgePadding,
+        right: _kDialogEdgePadding,
+        bottom: widget.content == null ? _kDialogEdgePadding : 1.0,
+        top: _kDialogEdgePadding * effectiveTextScaleFactor,
+      ),
+      messagePadding: EdgeInsets.only(
+        left: _kDialogEdgePadding,
+        right: _kDialogEdgePadding,
+        bottom: _kDialogEdgePadding * effectiveTextScaleFactor,
+        top: widget.title == null ? _kDialogEdgePadding : 1.0,
+      ),
+      titleTextStyle: _kCupertinoDialogTitleStyle.copyWith(
+        color: CupertinoDynamicColor.resolve(CupertinoColors.label, context),
+      ),
+      messageTextStyle: _kCupertinoDialogContentStyle.copyWith(
+        color: CupertinoDynamicColor.resolve(CupertinoColors.label, context),
+      ),
+    );
 
     return ColoredBox(
       color: CupertinoDynamicColor.resolve(_kDialogColor, context),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: children,
-      ),
+      child: child,
     );
   }
 
@@ -346,37 +342,11 @@ class _CupertinoAlertDialogState extends State<CupertinoAlertDialog> {
     }
   }
 
-  double _topOverscroll = 0;
-  double _bottomOverscroll = 0;
-
-  // Fills the overscroll area at the top and bottom of the sheet. This is
-  // necessary because the action section's background is rendered by the
-  // buttons, so that a button's background can be _replaced_ by a different
-  // color when the button is pressed.
-  Widget _buildOverscroll(Color backgroundColor) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: <Widget>[
-        Container(
-          color: backgroundColor,
-          height: _topOverscroll,
-        ),
-        Container(
-          color: backgroundColor,
-          height: _bottomOverscroll,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildActions() {
-    Widget actionSection = const LimitedBox(
-      maxWidth: 0,
-      child: SizedBox(width: double.infinity, height: 0),
-    );
-    if (widget.actions.isNotEmpty) {
-      actionSection = _CupertinoAlertActionSection(
+  Widget? _buildActions() {
+    if (widget.actions.isEmpty) {
+      return null;
+    } else {
+      return _CupertinoAlertActionSection(
         scrollController: _effectiveActionScrollController,
         actions: widget.actions,
         dialogColor: CupertinoDynamicColor.resolve(_kDialogColor, context),
@@ -387,98 +357,6 @@ class _CupertinoAlertDialogState extends State<CupertinoAlertDialog> {
         onPressedUpdate: _onPressedUpdate,
       );
     }
-
-    return actionSection;
-  }
-
-  bool _onScrollUpdate(ScrollUpdateNotification notification) {
-    final ScrollMetrics metrics = notification.metrics;
-    setState(() {
-      // The sizes of the overscroll should not be longer than the height of the
-      // actions section.
-      _topOverscroll = math.min(
-        math.max(metrics.minScrollExtent - metrics.pixels, 0),
-        metrics.viewportDimension,
-      );
-      _bottomOverscroll = math.min(
-        math.max(metrics.pixels - metrics.maxScrollExtent, 0),
-        metrics.viewportDimension,
-      );
-    });
-    return false;
-  }
-
-  // iOS style layout policy for sizing an alert dialog's content section and action
-  // button section.
-  //
-  // The policy is as follows:
-  //
-  // If all content and buttons fit on screen:
-  // The content section and action button section are sized intrinsically and centered
-  // vertically on screen.
-  //
-  // If all content and buttons do not fit on screen, and iOS is NOT in accessibility mode:
-  // A minimum height for the action button section is calculated. The action
-  // button section will not be rendered shorter than this minimum. See
-  // [_RenderCupertinoDialogActions] for the minimum height calculation.
-  //
-  // With the minimum action button section calculated, the content section can
-  // take up as much space as is available, up to the point that it hits the
-  // minimum button height at the bottom.
-  //
-  // After the content section is laid out, the action button section is allowed
-  // to take up any remaining space that was not consumed by the content section.
-  //
-  // If all content and buttons do not fit on screen, and iOS IS in accessibility mode:
-  // The button section is given up to 50% of the available height. Then the content
-  // section is given whatever height remains.
-  Widget _renderSheet({
-    required Widget actionsSection,
-    required Color dividerColor,
-  }) {
-    final bool hasActions = widget.actions.isNotEmpty;
-    final bool hasContent = widget.title != null || widget.content != null;
-    return LayoutBuilder(
-      builder: (BuildContext context, BoxConstraints constraints) {
-        final double contentMaxHeight;
-        if (!hasActions) {
-          contentMaxHeight = constraints.maxHeight;
-        } else if (_isInAccessibilityMode(context)) {
-          contentMaxHeight = constraints.maxHeight / 2;
-        } else {
-          contentMaxHeight = math.max(0,
-              constraints.maxHeight - _kDialogActionsSectionMinHeight - _kDividerThickness);
-        }
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            ConstrainedBox(
-              constraints: BoxConstraints(maxHeight: contentMaxHeight),
-              child: _buildContent(context),
-            ),
-            if (hasContent && hasActions)
-              _ActionSheetDivider(
-                dividerColor: dividerColor,
-                hiddenColor: _kDialogColor,
-                hidden: false,
-              ),
-            Flexible(
-              child: Stack(
-                children: <Widget>[
-                  Positioned.fill(
-                    child: _buildOverscroll(_kDialogColor),
-                  ),
-                  NotificationListener<ScrollUpdateNotification>(
-                    onNotification: _onScrollUpdate,
-                    child: actionsSection,
-                  ),
-                ],
-              ),
-            ),
-          ],
-        );
-      },
-    );
   }
 
   @override
@@ -520,16 +398,10 @@ class _CupertinoAlertDialogState extends State<CupertinoAlertDialog> {
                             scopesRoute: true,
                             explicitChildNodes: true,
                             label: localizations.alertDialogLabel,
-                            child: MediaQuery.removePadding(
-                              removeLeft: true,
-                              removeTop: true,
-                              removeRight: true,
-                              removeBottom: true,
-                              context: context,
-                              child: _renderSheet(
-                                actionsSection: _buildActions(),
-                                dividerColor: CupertinoColors.separator,
-                              ),
+                            child: _CupertinoDialogRenderWidget(
+                              contentSection: _buildContent(context),
+                              actionsSection: _buildActions(),
+                              dividerColor: CupertinoColors.separator,
                             ),
                           ),
                         ),
@@ -1529,6 +1401,145 @@ class _ActionSheetMainSheetState extends State<_ActionSheetMainSheet> {
           ],
         );
       },
+    );
+  }
+}
+
+class _CupertinoDialogRenderWidget extends StatefulWidget {
+  _CupertinoDialogRenderWidget({
+    required this.contentSection,
+    required this.actionsSection,
+    required this.dividerColor,
+  });
+
+  final Widget? contentSection;
+  final Widget? actionsSection;
+  final Color dividerColor;
+
+  @override
+  _CupertinoDialogRenderWidgetState createState() => _CupertinoDialogRenderWidgetState();
+}
+
+class _CupertinoDialogRenderWidgetState extends State<_CupertinoDialogRenderWidget> {
+
+  double _topOverscroll = 0;
+  double _bottomOverscroll = 0;
+
+  // Fills the overscroll area at the top and bottom of the sheet. This is
+  // necessary because the action section's background is rendered by the
+  // buttons, so that a button's background can be _replaced_ by a different
+  // color when the button is pressed.
+  Widget _buildOverscroll(Color backgroundColor) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: <Widget>[
+        Container(
+          color: backgroundColor,
+          height: _topOverscroll,
+        ),
+        Container(
+          color: backgroundColor,
+          height: _bottomOverscroll,
+        ),
+      ],
+    );
+  }
+
+  bool _onScrollUpdate(ScrollUpdateNotification notification) {
+    final ScrollMetrics metrics = notification.metrics;
+    setState(() {
+      // The sizes of the overscroll should not be longer than the height of the
+      // actions section.
+      _topOverscroll = math.min(
+        math.max(metrics.minScrollExtent - metrics.pixels, 0),
+        metrics.viewportDimension,
+      );
+      _bottomOverscroll = math.min(
+        math.max(metrics.pixels - metrics.maxScrollExtent, 0),
+        metrics.viewportDimension,
+      );
+    });
+    return false;
+  }
+
+  // iOS style layout policy for sizing an alert dialog's content section and action
+  // button section.
+  //
+  // The policy is as follows:
+  //
+  // If all content and buttons fit on screen:
+  // The content section and action button section are sized intrinsically and centered
+  // vertically on screen.
+  //
+  // If all content and buttons do not fit on screen, and iOS is NOT in accessibility mode:
+  // A minimum height for the action button section is calculated. The action
+  // button section will not be rendered shorter than this minimum. See
+  // [_RenderCupertinoDialogActions] for the minimum height calculation.
+  //
+  // With the minimum action button section calculated, the content section can
+  // take up as much space as is available, up to the point that it hits the
+  // minimum button height at the bottom.
+  //
+  // After the content section is laid out, the action button section is allowed
+  // to take up any remaining space that was not consumed by the content section.
+  //
+  // If all content and buttons do not fit on screen, and iOS IS in accessibility mode:
+  // The button section is given up to 50% of the available height. Then the content
+  // section is given whatever height remains.
+  @override
+  Widget build(BuildContext context) {
+    final bool hasActions = widget.actionsSection != null;
+    final bool hasContent = widget.contentSection != null;
+    return MediaQuery.removePadding(
+      removeLeft: true,
+      removeTop: true,
+      removeRight: true,
+      removeBottom: true,
+      context: context,
+      child: LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
+          final double contentMaxHeight;
+          if (!hasActions) {
+            contentMaxHeight = constraints.maxHeight;
+          } else if (_isInAccessibilityMode(context)) {
+            contentMaxHeight = constraints.maxHeight / 2;
+          } else {
+            contentMaxHeight = math.max(0,
+                constraints.maxHeight - _kDialogActionsSectionMinHeight - _kDividerThickness);
+          }
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              if (hasContent)
+                ConstrainedBox(
+                  constraints: BoxConstraints(maxHeight: contentMaxHeight),
+                  child: widget.contentSection,
+                ),
+              if (hasContent && hasActions)
+                _ActionSheetDivider(
+                  dividerColor: widget.dividerColor,
+                  hiddenColor: _kDialogColor,
+                  hidden: false,
+                ),
+              if (hasActions)
+                Flexible(
+                  child: Stack(
+                    children: <Widget>[
+                      Positioned.fill(
+                        child: _buildOverscroll(_kDialogColor),
+                      ),
+                      NotificationListener<ScrollUpdateNotification>(
+                        onNotification: _onScrollUpdate,
+                        child: widget.actionsSection!,
+                      ),
+                    ],
+                  ),
+                ),
+            ],
+          );
+        },
+      ),
     );
   }
 }
