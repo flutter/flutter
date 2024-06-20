@@ -31,7 +31,7 @@ understanding with new team members.
 The primary goal of these style guidelines is to improve code readability so
 that everyone, whether reading the code for the first time or
 maintaining it for years, can quickly determine what the code does.
-Secondary goals are to design systems that are simple and bug-free, 
+Secondary goals are to design systems that are simple and bug-free,
 and to avoid arguments over subjective matters.
 
 For anything not covered by this document, check the
