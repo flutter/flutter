@@ -1324,7 +1324,6 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   final GlobalKey  _scrollbarPainterKey = GlobalKey();
   bool _hoverIsActive = false;
   Drag? _thumbDrag;
-  bool _thumbDragStartedOnThumb = false;
   bool _isScrollable = false;
   ScrollHoldController? _thumbHold;
   Axis? _axis;
@@ -1620,17 +1619,13 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     // Convert primaryDelta, the amount that the scrollbar moved since the last
     // time when drag started or last updated, into the coordinate space of the scroll
     // position.
-    double scrollOffsetGlobal = thumbDragStartedOnThumb
-      ? scrollbarPainter.getTrackToScroll(_startDragThumbOffset! + primaryDeltaFromDragStart)
-      : scrollbarPainter.getTrackToScroll(_startDragThumbOffset!) - primaryDeltaFromDragStart;
+    double scrollOffsetGlobal = scrollbarPainter.getTrackToScroll(_startDragThumbOffset! + primaryDeltaFromDragStart);
 
     if (primaryDeltaFromDragStart > 0 && scrollOffsetGlobal < position.pixels
         || primaryDeltaFromDragStart < 0 && scrollOffsetGlobal > position.pixels) {
       // Adjust the position value if the scrolling direction conflicts with
       // the dragging direction due to scroll metrics shrink.
-      scrollOffsetGlobal = thumbDragStartedOnThumb
-        ? position.pixels + scrollbarPainter.getTrackToScroll(primaryDeltaFromLastDragUpdate)
-        : position.pixels - primaryDeltaFromLastDragUpdate;
+      scrollOffsetGlobal = position.pixels + scrollbarPainter.getTrackToScroll(primaryDeltaFromLastDragUpdate);
     }
     if (scrollOffsetGlobal != position.pixels) {
       // Ensure we don't drag into overscroll if the physics do not allow it.
@@ -1648,9 +1643,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
         case TargetPlatform.linux:
         case TargetPlatform.macOS:
         case TargetPlatform.windows:
-          if (_thumbDragStartedOnThumb) {
-            newPosition = clampDouble(newPosition, position.minScrollExtent, position.maxScrollExtent);
-          }
+          newPosition = clampDouble(newPosition, position.minScrollExtent, position.maxScrollExtent);
         case TargetPlatform.iOS:
         case TargetPlatform.android:
           // We can only drag the scrollbar into overscroll on mobile
@@ -1771,17 +1764,12 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       return;
     }
 
-    if (thumbDragStartedOnThumb) {
-      velocity = -velocity;
-    }
-
     // On mobile platforms flinging the scrollbar thumb causes a ballistic
     // scroll, just like it does via a touch drag. Likewise for desktops when
     // dragging on the trackpad or with a stylus.
     final TargetPlatform platform = ScrollConfiguration.of(context).getPlatform(context);
     final Velocity adjustedVelocity = switch (platform) {
-      TargetPlatform.iOS || TargetPlatform.android => velocity,
-      TargetPlatform.fuchsia || TargetPlatform.linux || TargetPlatform.macOS || TargetPlatform.windows when !thumbDragStartedOnThumb => velocity,
+      TargetPlatform.iOS || TargetPlatform.android => -velocity,
       _ => Velocity.zero,
     };
     final RenderBox renderBox = _scrollbarPainterKey.currentContext!.findRenderObject()! as RenderBox;
@@ -1941,29 +1929,8 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     return renderBox.globalToLocal(offset);
   }
 
-  /// True if the thumb drag gesture started with a press on the scrollbar's thumb.
-  ///
-  /// A "thumb drag" gesture can be started by dragging the thumb directly, or with a
-  /// scroll gesture on the trackpad, or by dragging the scrollable on a touch screen.
-  ///
-  /// Used by [handleThumbPressUpdate] to decide if overscrolling is acceptable
-  /// and by [handleThumbPressEnd] to decide the event's remaining velocity
-  /// should be applied to a fling.
-  @protected
-  bool get thumbDragStartedOnThumb => _thumbDragStartedOnThumb;
-
-
   void _handleThumbDragStart(DragStartDetails details) {
-    final Offset localOffset = _globalToScrollbar(details.globalPosition);
-    _thumbDragStartedOnThumb = false;
-    if (_scrollbarPainterKey.currentContext != null) {
-      final CustomPaint customPaint = _scrollbarPainterKey.currentContext!.widget as CustomPaint;
-      final ScrollbarPainter? painter = customPaint.foregroundPainter as ScrollbarPainter?;
-      if (painter != null && details.kind != null) {
-        _thumbDragStartedOnThumb = painter.hitTestOnlyThumbInteractive(localOffset, details.kind!);
-      }
-    }
-    handleThumbPressStart(localOffset);
+    handleThumbPressStart(_globalToScrollbar(details.globalPosition));
   }
 
   void _handleThumbDragUpdate(DragUpdateDetails details) {
@@ -2298,6 +2265,11 @@ class _VerticalThumbDragGestureRecognizer extends VerticalDragGestureRecognizer 
   final GlobalKey _customPaintKey;
 
   @override
+  bool isPointerPanZoomAllowed(PointerPanZoomStartEvent event) {
+    return false;
+  }
+
+  @override
   bool isPointerAllowed(PointerEvent event) {
     return _isThumbEvent(_customPaintKey, event) && super.isPointerAllowed(event);
   }
@@ -2310,6 +2282,11 @@ class _HorizontalThumbDragGestureRecognizer extends HorizontalDragGestureRecogni
   }) : _customPaintKey = customPaintKey;
 
   final GlobalKey _customPaintKey;
+
+  @override
+  bool isPointerPanZoomAllowed(PointerPanZoomStartEvent event) {
+    return false;
+  }
 
   @override
   bool isPointerAllowed(PointerEvent event) {
