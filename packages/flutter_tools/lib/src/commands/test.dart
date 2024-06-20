@@ -695,7 +695,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     if (build != 0) {
       throwToolExit('Error: Failed to build asset bundle');
     }
-    if (await _needRebuild(assetBundle.entries, flavor)) {
+    if (_needRebuild(assetBundle.entries, flavor)) {
       await writeBundle(
         globals.fs.directory(globals.fs.path.join('build', 'unit_test_assets')),
         assetBundle.entries,
@@ -716,13 +716,13 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         await cachedFlavorFile.delete();
       }
       if (flavor != null) {
-        await cachedFlavorFile.create(recursive: true);
-        await cachedFlavorFile.writeAsString(flavor);
+        cachedFlavorFile.createSync(recursive: true);
+        cachedFlavorFile.writeAsStringSync(flavor);
       }
     }
   }
 
-  Future<bool> _needRebuild(Map<String, AssetBundleEntry> entries, String? flavor) async {
+  bool _needRebuild(Map<String, AssetBundleEntry> entries, String? flavor) {
     // TODO(andrewkolos): This logic might fail in the future if we change the
     // schema of the contents of the asset manifest file and the user does not
     // perform a `flutter clean` after upgrading.
@@ -752,7 +752,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       globals.fs.path.join('build', 'test_cache', 'flavor.txt'),
     );
     final String? cachedFlavor = cachedFlavorFile.existsSync()
-        ? await cachedFlavorFile.readAsString()
+        ? cachedFlavorFile.readAsStringSync()
         : null;
     if (cachedFlavor != flavor) {
       return true;
