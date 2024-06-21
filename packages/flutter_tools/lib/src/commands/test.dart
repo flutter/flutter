@@ -111,6 +111,9 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
               'Instructions for connecting with a debugger are printed to the '
               'console once the test has started.',
       )
+      ..addFlag('fail-fast',
+        help: 'Stop running tests after the first failure.',
+      )
       ..addFlag('run-skipped',
         help: 'Run skipped tests instead of skipping them.',
       )
@@ -578,6 +581,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         reporter: stringArg('reporter'),
         fileReporter: stringArg('file-reporter'),
         timeout: stringArg('timeout'),
+        failFast: boolArg('fail-fast'),
         runSkipped: boolArg('run-skipped'),
         shardIndex: shardIndex,
         totalShards: totalShards,
@@ -605,6 +609,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         reporter: stringArg('reporter'),
         fileReporter: stringArg('file-reporter'),
         timeout: stringArg('timeout'),
+        failFast: boolArg('fail-fast'),
         runSkipped: boolArg('run-skipped'),
         shardIndex: shardIndex,
         totalShards: totalShards,
@@ -690,7 +695,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     if (build != 0) {
       throwToolExit('Error: Failed to build asset bundle');
     }
-    if (_needRebuild(assetBundle.entries)) {
+    if (_needsRebuild(assetBundle.entries, flavor)) {
       await writeBundle(
         globals.fs.directory(globals.fs.path.join('build', 'unit_test_assets')),
         assetBundle.entries,
@@ -703,14 +708,25 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         projectDir: globals.fs.currentDirectory,
         buildMode: buildMode,
       );
+
+      final File cachedFlavorFile = globals.fs.file(
+        globals.fs.path.join('build', 'test_cache', 'flavor.txt'),
+      );
+      if (cachedFlavorFile.existsSync()) {
+        await cachedFlavorFile.delete();
+      }
+      if (flavor != null) {
+        cachedFlavorFile.createSync(recursive: true);
+        cachedFlavorFile.writeAsStringSync(flavor);
+      }
     }
   }
 
-  bool _needRebuild(Map<String, AssetBundleEntry> entries) {
+  bool _needsRebuild(Map<String, AssetBundleEntry> entries, String? flavor) {
     // TODO(andrewkolos): This logic might fail in the future if we change the
-    // schema of the contents of the asset manifest file and the user does not
-    // perform a `flutter clean` after upgrading.
-    // See https://github.com/flutter/flutter/issues/128563.
+    //  schema of the contents of the asset manifest file and the user does not
+    //  perform a `flutter clean` after upgrading.
+    //  See https://github.com/flutter/flutter/issues/128563.
     final File manifest = globals.fs.file(globals.fs.path.join('build', 'unit_test_assets', 'AssetManifest.bin'));
     if (!manifest.existsSync()) {
       return true;
@@ -731,6 +747,17 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         return true;
       }
     }
+
+    final File cachedFlavorFile = globals.fs.file(
+      globals.fs.path.join('build', 'test_cache', 'flavor.txt'),
+    );
+    final String? cachedFlavor = cachedFlavorFile.existsSync()
+        ? cachedFlavorFile.readAsStringSync()
+        : null;
+    if (cachedFlavor != flavor) {
+      return true;
+    }
+
     return false;
   }
 }

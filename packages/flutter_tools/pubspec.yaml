@@ -9,7 +9,7 @@ dependencies:
   # To update these, use "flutter update-packages --force-upgrade".
   #
   # For detailed instructions, refer to:
-  # https://github.com/flutter/flutter/wiki/Updating-dependencies-in-Flutter
+  # https://github.com/flutter/flutter/blob/main/docs/infra/Updating-dependencies-in-Flutter.md
   archive: 3.6.1
   args: 2.5.0
   browser_launcher: 1.1.1
@@ -65,7 +65,7 @@ dependencies:
   test_api: 0.7.2
   test_core: 0.6.4
 
-  vm_service: 14.2.3
+  vm_service: 14.2.4
 
   standard_message_codec: 0.0.1+4
 
@@ -120,4 +120,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: e746
+# PUBSPEC CHECKSUM: 6447

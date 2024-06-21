@@ -66,14 +66,14 @@ void main() {
       .map((String line) {
         return line
           .replaceAll('/', Platform.isWindows ? r'\' : '/')
-          .replaceAll('STYLE_GUIDE_URL', 'https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo')
+          .replaceAll('STYLE_GUIDE_URL', 'https://github.com/flutter/flutter/blob/main/docs/contributing/Style-guide-for-Flutter-repo.md')
           .replaceAll('RELEASES_URL', 'https://flutter.dev/docs/development/tools/sdk/releases');
       })
       .join('\n');
     expect(result,
       '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════\n'
       '$lines\n'
-      '║ See: https://github.com/flutter/flutter/wiki/Tree-hygiene#handling-breaking-changes\n'
+      '║ See: https://github.com/flutter/flutter/blob/main/docs/contributing/Tree-hygiene.md#handling-breaking-changes\n'
       '╚═══════════════════════════════════════════════════════════════════════════════\n'
     );
   });
@@ -92,7 +92,7 @@ void main() {
     expect(result.length, 4 + lines.length, reason: 'output had unexpected number of lines:\n${result.join('\n')}');
     expect(result[0], '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════');
     expect(result.getRange(1, result.length - 3).toSet(), lines.toSet());
-    expect(result[result.length - 3], '║ See: https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package:flutter');
+    expect(result[result.length - 3], '║ See: https://github.com/flutter/flutter/blob/main/docs/contributing/testing/Writing-a-golden-file-test-for-package-flutter.md');
     expect(result[result.length - 2], '╚═══════════════════════════════════════════════════════════════════════════════');
     expect(result[result.length - 1], ''); // trailing newline
   });
@@ -187,7 +187,7 @@ void main() {
         '║ to which you need access, you should consider how to fetch it from another repository;\n'
         '║ for example, the "assets-for-api-docs" repository is used for images in API docs.\n'
         '║ To add assets to flutter_tools templates, see the instructions in the wiki:\n'
-        '║ https://github.com/flutter/flutter/wiki/Managing-template-image-assets\n'
+        '║ https://github.com/flutter/flutter/blob/main/docs/tool/Managing-template-image-assets.md\n'
         '╚═══════════════════════════════════════════════════════════════════════════════\n'
       );
     }

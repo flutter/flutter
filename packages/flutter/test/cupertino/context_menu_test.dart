@@ -283,7 +283,7 @@ void main() {
       final BoxDecoration? boxDecoration = (tester.firstWidget(decoyChildDescendant) as Container).decoration as BoxDecoration?;
       const List<Color?> expectedColors = <Color?>[null, Color(0x00000000)];
 
-      // `Color(0x00000000)` -> Is `Colors.transparent`.
+      // `Color(0x00000000)` -> Is `CupertinoColors.transparent`.
       // `null`              -> Default when no color argument is given in `BoxDecoration`.
       // Any other color won't preserve the child's property.
       expect(expectedColors, contains(boxDecoration?.color));

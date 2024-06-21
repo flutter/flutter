@@ -8397,6 +8397,34 @@ void main() {
     );
   });
 
+  testWidgets('Disabled widget does not override background color', (WidgetTester tester) async {
+    const Color backgroundColor = Color(0x0000000A);
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(
+          child: CupertinoTextField(
+            enabled: false,
+            decoration: BoxDecoration(color: backgroundColor),
+          ),
+        ),
+      ),
+    );
+
+    final BoxDecoration decoration = tester
+        .widget<DecoratedBox>(
+          find.descendant(
+            of: find.byType(CupertinoTextField),
+            matching: find.byType(DecoratedBox),
+          ),
+        )
+        .decoration as BoxDecoration;
+
+    expect(
+      decoration.color!.value,
+      backgroundColor.value,
+    );
+  });
+
   // Regression test for https://github.com/flutter/flutter/issues/78097.
   testWidgets(
     'still gets disabled background color when decoration is null',
