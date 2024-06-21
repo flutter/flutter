@@ -613,7 +613,7 @@ void main() {
         ),
       ]);
 
-      final Future<Map<String, String>?> signingConfigsFuture = getCodeSigningIdentityDevelopmentTeamBuildSetting(
+      Future<Map<String, String>?> getCodeSigningIdentities() => getCodeSigningIdentityDevelopmentTeamBuildSetting(
         buildSettings: <String, String>{
           'bogus': 'bogus',
         },
@@ -624,9 +624,16 @@ void main() {
         terminal: testTerminal,
       );
 
-      expect(signingConfigsFuture, throwsToolExit(
-        // TODO match on message.
-      ));
+      await expectLater(
+        () => getCodeSigningIdentities(),
+        throwsA(
+          const TypeMatcher<Exception>().having(
+            (Exception e) => e.toString(),
+            'message',
+            equals('Exception: Unexpected error when writing to openssl: SocketException: Bad pipe'),
+          ),
+        ),
+      );
     });
   });
 }

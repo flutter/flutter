@@ -234,9 +234,9 @@ Future<String?> _getCodeSigningIdentityDevelopmentTeam({
 
   await ProcessUtils.writeToStdinGuarded(
     stdin: opensslProcess.stdin,
-    line: signingCertificateStdout,
+    content: signingCertificateStdout,
     onError: (Object? error, _) {
-      throwToolExit('Failed to write to openssl process. Error: $error');
+      throw Exception('Unexpected error when writing to openssl: $error');
     },
   );
   await opensslProcess.stdin.close();

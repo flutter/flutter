@@ -285,17 +285,22 @@ abstract class ProcessUtils {
       } else {
         stdin.write(content);
       }
-      stdin.flush().whenComplete(() {
-        if (!completer.isCompleted) {
-          completer.complete();
-        }
+      stdin.flush().then((_) {
+        completer.complete();
       });
     }
 
     runZonedGuarded(
       writeFlushAndComplete,
       (Object error, StackTrace stackTrace) {
-        onError(error, stackTrace);
+        try {
+          onError(error, stackTrace);
+        }
+        on Exception catch (e) {
+          completer.completeError(e);
+        }
+
+        // We may have already completed with an error in the above catch block.
         if (!completer.isCompleted) {
           completer.complete();
         }
