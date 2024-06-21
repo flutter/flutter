@@ -304,7 +304,7 @@ void main() {
       expect(artifact2.didUpdate, false);
       expect(
         logger.errorText,
-        contains('https://flutter.dev/to/use-mirror-site'),
+        contains('https://flutter.dev/to/china-setup'),
       );
     });
 
