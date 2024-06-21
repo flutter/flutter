@@ -948,16 +948,13 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
 
     final double x = MediaQuery.viewPaddingOf(context).top;
 
-    late final double y;
-    if (x <= x1) {
-      y = y1;
-    } else if (x >= x2) {
-      y = y2;
-    } else {
-      y = Tween<double>(begin: y1, end: y2).transform(
+    final double y = switch (x) {
+      <= x1 => y1,
+      >= x2 => y2,
+      _ => Tween<double>(begin: y1, end: y2).transform(
         (x - x1) / (x2 - x1)
-      );
-    }
+      ),
+    };
     final double padding = (y * x).roundToDouble();
     // In case there is no view padding, there should still be some space
     // between the action sheet and the edge.
