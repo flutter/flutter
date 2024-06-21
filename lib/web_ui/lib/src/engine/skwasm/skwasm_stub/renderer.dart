@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:js_interop';
 import 'dart:math' as math;
 import 'dart:typed_data';
 
@@ -188,5 +189,10 @@ class SkwasmRenderer implements Renderer {
   @override
   ui.Image createImageFromImageBitmap(DomImageBitmap imageSource) {
     throw UnimplementedError('Skwasm not implemented on this platform.');
+  }
+
+  @override
+  ui.Image createImageFromTextureSource(JSAny object,  { required int width, required int height, required bool transferOwnership }) {
+    throw Exception('Skwasm not implemented on this platform.');
   }
 }
