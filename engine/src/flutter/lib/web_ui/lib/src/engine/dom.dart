@@ -658,16 +658,7 @@ extension DomElementExtension on DomElement {
   external JSNumber? get _tabIndex;
   double? get tabIndex => _tabIndex?.toDartDouble;
 
-  @JS('focus')
-  external JSVoid _focus(JSAny options);
-
-  void focus({bool? preventScroll, bool? focusVisible}) {
-    final Map<String, bool> options = <String, bool>{
-      if (preventScroll != null) 'preventScroll': preventScroll,
-      if (focusVisible != null) 'focusVisible': focusVisible,
-    };
-    _focus(options.toJSAnyDeep);
-  }
+  external JSVoid focus();
 
   @JS('scrollTop')
   external JSNumber get _scrollTop;
@@ -2258,11 +2249,9 @@ extension DomKeyboardEventExtension on DomKeyboardEvent {
   external JSBoolean? get _repeat;
   bool? get repeat => _repeat?.toDart;
 
-  // Safari injects synthetic keyboard events after auto-complete that don't
-  // have a `shiftKey` attribute, so this property must be nullable.
   @JS('shiftKey')
-  external JSBoolean? get _shiftKey;
-  bool? get shiftKey => _shiftKey?.toDart;
+  external JSBoolean get _shiftKey;
+  bool get shiftKey => _shiftKey.toDart;
 
   @JS('isComposing')
   external JSBoolean get _isComposing;
