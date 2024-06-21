@@ -249,39 +249,42 @@ abstract class ProcessUtils {
     required String line,
     required void Function(Object, StackTrace) onError,
   }) async {
-    final Completer<void> completer = Completer<void>();
-
-    void writeFlushAndComplete() {
-      stdin.writeln(line);
-      stdin.flush().whenComplete(() {
-        if (!completer.isCompleted) {
-          completer.complete();
-        }
-      });
-    }
-
-    runZonedGuarded(
-      writeFlushAndComplete,
-      (Object error, StackTrace stackTrace) {
-        onError(error, stackTrace);
-        if (!completer.isCompleted) {
-          completer.complete();
-        }
-      },
+    await _writeToStdinGuarded(
+      stdin: stdin,
+      content: line,
+      onError: onError,
+      isLine: true,
     );
-    return completer.future;
   }
 
   /// See [writelnToStdinGuarded]. This calls `stdin.write` instead of `stdin.writeln`.
   static Future<void> writeToStdinGuarded({
     required IOSink stdin,
-    required String line,
+    required String content,
     required void Function(Object, StackTrace) onError,
+  }) async {
+    await _writeToStdinGuarded(
+      stdin: stdin,
+      content: content,
+      onError: onError,
+      isLine: false,
+    );
+  }
+
+  static Future<void> _writeToStdinGuarded({
+    required IOSink stdin,
+    required String content,
+    required void Function(Object, StackTrace) onError,
+    required bool isLine
   }) async {
     final Completer<void> completer = Completer<void>();
 
     void writeFlushAndComplete() {
-      stdin.write(line);
+      if (isLine) {
+        stdin.writeln(content);
+      } else {
+        stdin.write(content);
+      }
       stdin.flush().whenComplete(() {
         if (!completer.isCompleted) {
           completer.complete();
