@@ -4420,7 +4420,9 @@ class ClipExpector : public virtual DlOpReceiver,
 
   template <typename T>
   void check(T shape, ClipOp clip_op, bool is_aa) {
-    ASSERT_LT(index_, clip_expectations_.size()) << label();
+    ASSERT_LT(index_, clip_expectations_.size())
+        << label() << std::endl
+        << "extra clip shape = " << shape;
     auto expected = clip_expectations_[index_];
     EXPECT_EQ(expected.clip_op, clip_op) << label();
     EXPECT_EQ(expected.is_aa, is_aa) << label();
@@ -4442,6 +4444,30 @@ class ClipExpector : public virtual DlOpReceiver,
            ":" + std::to_string(line_);
   }
 };
+
+TEST_F(DisplayListTest, ClipRectCullingPixel6a) {
+  // These particular values create bit errors if we use the path that
+  // tests for inclusion in local space, but work OK if we use a forward
+  // path that tests for inclusion in device space, due to the fact that
+  // the extra matrix inversion is just enough math to cause the transform
+  // to place the local space cull corners just outside the original rect.
+  // The test in device space only works under a simple scale, such as we
+  // use for DPR adjustments (and which are not always inversion friendly).
+
+  auto frame = SkRect::MakeLTRB(0.0f, 0.0f, 1080.0f, 2400.0f);
+  DlScalar DPR = 2.625f;
+  auto clip = SkRect::MakeLTRB(0.0f, 0.0f, 1080.0f / DPR, 2400.0f / DPR);
+
+  DisplayListBuilder cull_builder;
+  cull_builder.ClipRect(frame, ClipOp::kIntersect, false);
+  cull_builder.Scale(DPR, DPR);
+  cull_builder.ClipRect(clip, ClipOp::kIntersect, false);
+  auto cull_dl = cull_builder.Build();
+
+  CLIP_EXPECTOR(expector);
+  expector.addExpectation(frame, ClipOp::kIntersect, false);
+  cull_dl->Dispatch(expector);
+}
 
 TEST_F(DisplayListTest, ClipRectCulling) {
   auto clip = SkRect::MakeLTRB(10.0f, 10.0f, 20.0f, 20.0f);
