@@ -1025,12 +1025,16 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
 
   /// The color of the divider.
   ///
+  /// If the [dividerColor] is [Colors.transparent], then the divider will not be drawn.
+  ///
   /// If null and [ThemeData.useMaterial3] is false, [TabBarTheme.dividerColor]
   /// color is used. If that is null and [ThemeData.useMaterial3] is true,
   /// [ColorScheme.outlineVariant] will be used, otherwise divider will not be drawn.
   final Color? dividerColor;
 
   /// The height of the divider.
+  ///
+  /// If the [dividerHeight] is zero or negative, then the divider will not be drawn.
   ///
   /// If null and [ThemeData.useMaterial3] is true, [TabBarTheme.dividerHeight] is used.
   /// If that is also null and [ThemeData.useMaterial3] is true, 1.0 will be used.
@@ -1549,12 +1553,11 @@ class _TabBarState extends State<TabBar> {
     final double index = _controller!.index.toDouble();
     final double value = _controller!.animation!.value;
     final double offset = switch (value - index) {
-      -1.0 || 1.0 => leadingPosition ?? middlePosition,
-      0 => middlePosition,
-      < 0 when leadingPosition == null => middlePosition,
-      > 0 when trailingPosition == null => middlePosition,
-      < 0 => lerpDouble(middlePosition, leadingPosition, index - value)!,
-      _   => lerpDouble(middlePosition, trailingPosition, value - index)!,
+      -1.0 => leadingPosition ?? middlePosition,
+      1.0  => trailingPosition ?? middlePosition,
+      0    => middlePosition,
+      < 0  => leadingPosition == null ? middlePosition : lerpDouble(middlePosition, leadingPosition, index - value)!,
+      _    => trailingPosition == null ? middlePosition : lerpDouble(middlePosition, trailingPosition, value - index)!,
     };
 
     _scrollController!.jumpTo(offset);
@@ -1814,19 +1817,18 @@ class _TabBarState extends State<TabBar> {
 
         final Color dividerColor = widget.dividerColor ?? tabBarTheme.dividerColor ?? _defaults.dividerColor!;
         final double dividerHeight = widget.dividerHeight ?? tabBarTheme.dividerHeight ?? _defaults.dividerHeight!;
-        final bool showDivider = dividerColor != Colors.transparent && dividerHeight > 0;
 
         tabBar = Align(
           heightFactor: 1.0,
-          widthFactor: showDivider ? null : 1.0,
+          widthFactor: dividerHeight > 0 ? null : 1.0,
           alignment: effectiveAlignment,
           child: tabBar,
         );
 
-        if (showDivider) {
+        if (dividerColor != Colors.transparent && dividerHeight > 0) {
           tabBar = CustomPaint(
             painter: _DividerPainter(
-              dividerColor: widget.dividerColor ?? tabBarTheme.dividerColor ?? _defaults.dividerColor!,
+              dividerColor: dividerColor,
               dividerHeight: widget.dividerHeight ?? tabBarTheme.dividerHeight ?? _defaults.dividerHeight!,
             ),
             child: tabBar,

@@ -3325,8 +3325,8 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   /// tree as this [RenderObject], as the behavior is undefined.
   ///
   /// This method ignores [RenderObject.paintsChild]. This means it will still
-  /// try to compute the paint transform even if [this] or `target` is currently
-  /// not visible.
+  /// try to compute the paint transform even if this [RenderObject] or
+  /// `target` is currently not visible.
   ///
   /// If `target` is null, this method returns a matrix that maps from the
   /// local paint coordinate system to the coordinate system of the
