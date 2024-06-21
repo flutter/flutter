@@ -422,38 +422,7 @@ void main() {
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
-  testUsingContext('ipa build uses new instead of legacy export methods when on XCode versions > 15.3', () async {
-    final BuildCommand command = BuildCommand(
-      artifacts: artifacts,
-      androidSdk: FakeAndroidSdk(),
-      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      logger: logger,
-      fileSystem: fileSystem,
-      processUtils: processUtils,
-      osUtils: FakeOperatingSystemUtils(),
-    );
-    fakeProcessManager.addCommands(<FakeCommand>[
-      xattrCommand,
-      setUpFakeXcodeBuildHandler(),
-      exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
-    ]);
-    createMinimalMockProjectFiles();
-    await createTestCommandRunner(command).run(
-        const <String>['build', 'ipa','--export-method', 'ad-hoc', '--no-pub']
-    );
-    expect(logger.statusText, contains('Building release-testing IPA'));
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    Logger: () => logger,
-    ProcessManager: () => fakeProcessManager,
-    Platform: () => macosPlatform,
-    XcodeProjectInterpreter: () {
-      return FakeXcodeProjectInterpreterWithBuildSettings()
-      ..version = Version(15, 4, null);
-    },
-  });
-
-  testUsingContext('ipa build uses new instead of legacy export methods when on XCode versions > 15.3', () async {
+  testUsingContext('ipa build uses new "debugging" export method when on XCode versions > 15.3', () async {
     final BuildCommand command = BuildCommand(
       artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
@@ -473,6 +442,37 @@ void main() {
         const <String>['build', 'ipa','--export-method', 'development', '--no-pub']
     );
     expect(logger.statusText, contains('Building debugging IPA'));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    Logger: () => logger,
+    ProcessManager: () => fakeProcessManager,
+    Platform: () => macosPlatform,
+    XcodeProjectInterpreter: () {
+      return FakeXcodeProjectInterpreterWithBuildSettings()
+      ..version = Version(15, 4, null);
+    },
+  });
+
+  testUsingContext('ipa build uses new "release-testing" export method when on XCode versions > 15.3', () async {
+    final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      logger: logger,
+      fileSystem: fileSystem,
+      processUtils: processUtils,
+      osUtils: FakeOperatingSystemUtils(),
+    );
+    fakeProcessManager.addCommands(<FakeCommand>[
+      xattrCommand,
+      setUpFakeXcodeBuildHandler(),
+      exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
+    ]);
+    createMinimalMockProjectFiles();
+    await createTestCommandRunner(command).run(
+        const <String>['build', 'ipa','--export-method', 'ad-hoc', '--no-pub']
+    );
+    expect(logger.statusText, contains('Building release-testing IPA'));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     Logger: () => logger,

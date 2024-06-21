@@ -107,10 +107,10 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
       allowed: <String>['app-store', 'ad-hoc', 'development', 'enterprise'],
       help: 'Specify how the IPA will be distributed.',
       allowedHelp: <String, String>{
-        'app-store': 'Upload to the App Store. For XCode <= 15.3.',
+        'app-store': 'Upload to the App Store.',
         'ad-hoc': 'Test on designated devices that do not need to be registered with the Apple developer account. '
-                  'Requires a distribution certificate. For XCode <= 15.3.',
-        'development': 'Test only on development devices registered with the Apple developer account. For XCode <= 15.3.',
+                  'Requires a distribution certificate.',
+        'development': 'Test only on development devices registered with the Apple developer account.',
         'enterprise': 'Distribute an app registered with the Apple Developer Enterprise Program.',
       },
     );
