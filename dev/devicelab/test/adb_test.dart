@@ -295,6 +295,7 @@ class FakeDevice extends AndroidDevice {
       environment ??= <String, String>{};
     commandLog.add(CommandArgs(
       command: 'adb',
+      // ignore: prefer_spread_collections
       arguments: <String>['-s', deviceId]..addAll(arguments),
       environment: environment..putIfAbsent('canFail', () => '$canFail'),
     ));
