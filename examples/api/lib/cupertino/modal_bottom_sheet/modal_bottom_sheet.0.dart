@@ -194,7 +194,6 @@ class MBSTransition extends StatelessWidget {
     final TextDirection textDirection = Directionality.of(context);
     final bool topLevelMBS = Navigator.of(context).widget is! MBSNavigator;
     return DelegatedTransition(
-      context: context,
       animation: secondaryRouteAnimation,
       builder: (BuildContext context, Widget? child) {
         return SlideTransition(

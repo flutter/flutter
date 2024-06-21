@@ -177,18 +177,6 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
     return previousRoute is FlexibleTransitionRouteMixin<T> || previousRoute is CupertinoRouteTransitionMixin && !previousRoute.fullscreenDialog;
   }
 
-  /// True if an iOS-style back swipe pop gesture is currently underway for [route].
-  ///
-  /// This just checks the route's [NavigatorState.userGestureInProgress].
-  ///
-  /// See also:
-  ///
-  ///  * [popGestureEnabled], which returns true if a user-triggered pop gesture
-  ///    would be allowed.
-  static bool isPopGestureInProgress(PageRoute<dynamic> route) {
-    return route.navigator!.userGestureInProgress;
-  }
-
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
     final Widget child = buildContent(context);
@@ -253,7 +241,7 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
         primaryRouteAnimation: animation,
         secondaryRouteAnimation: secondaryAnimation,
         linearTransition: linearTransition,
-        delegateTransitionBuilder: receivedTransition,
+        receivedTransitionBuilder: receivedTransition,
         child: _CupertinoBackGestureDetector<T>(
           enabledCallback: () => route.popGestureEnabled,
           onStartPopGesture: () => _startPopGesture<T>(route),
@@ -430,7 +418,7 @@ class CupertinoPageTransition extends StatefulWidget {
     required this.secondaryRouteAnimation,
     required this.child,
     required this.linearTransition,
-    this.delegateTransitionBuilder,
+    this.receivedTransitionBuilder,
   });
 
   /// The widget below this widget in the tree.
@@ -449,7 +437,7 @@ class CupertinoPageTransition extends StatefulWidget {
   final bool linearTransition;
 
   /// Delegated transition builder
-  final DelegatedTransitionBuilder? delegateTransitionBuilder;
+  final DelegatedTransitionBuilder? receivedTransitionBuilder;
 
   /// The delegated transition.
   static Widget delegateTransition(BuildContext context, Widget? child, Animation<double> secondaryAnimation) {
@@ -560,7 +548,7 @@ class _CupertinoPageTransitionState extends State<CupertinoPageTransition> {
           child: child,
         );
       },
-      delegateTransitionBuilder: widget.delegateTransitionBuilder,
+      receivedTransitionBuilder: widget.receivedTransitionBuilder,
       child: SlideTransition(
         position: _primaryPositionAnimation,
         textDirection: textDirection,
