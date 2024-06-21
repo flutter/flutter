@@ -18448,6 +18448,60 @@ void main() {
     expect(focusNode.hasFocus, isFalse);
     semantics.dispose();
   }, variant: TargetPlatformVariant.all());
+
+  testWidgets('when receives SemanticsAction.focus while already focused, shows keyboard', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
+    final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextField(focusNode: focusNode),
+          ),
+        ),
+      ),
+    );
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+
+    tester.testTextInput.log.clear();
+    expect(focusNode.hasFocus, isTrue);
+    semanticsOwner.performAction(4, SemanticsAction.focus);
+    await tester.pumpAndSettle();
+    expect(focusNode.hasFocus, isTrue);
+    expect(tester.testTextInput.log.single.method, 'TextInput.show');
+
+    semantics.dispose();
+  }, variant: TargetPlatformVariant.all());
+
+  testWidgets('when receives SemanticsAction.focus while focused but read-only, does not show keyboard', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
+    final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextField(focusNode: focusNode, readOnly: true),
+          ),
+        ),
+      ),
+    );
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+
+    tester.testTextInput.log.clear();
+    expect(focusNode.hasFocus, isTrue);
+    semanticsOwner.performAction(4, SemanticsAction.focus);
+    await tester.pumpAndSettle();
+    expect(focusNode.hasFocus, isTrue);
+    expect(tester.testTextInput.log, isEmpty);
+
+    semantics.dispose();
+  }, variant: TargetPlatformVariant.all());
 }
 
 /// A Simple widget for testing the obscure text.

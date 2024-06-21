@@ -1607,6 +1607,19 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
 
                       if (_effectiveFocusNode.canRequestFocus && !_effectiveFocusNode.hasFocus) {
                         _effectiveFocusNode.requestFocus();
+                      } else if (!widget.readOnly) {
+                        // If the platform requested focus, that means that previously the
+                        // platform believed that the text field did not have focus (even
+                        // though Flutter's widget system believed otherwise). This likely
+                        // means that the on-screen keyboard is hidden, or more generally,
+                        // there is no current editing session in this field. To correct
+                        // that, keyboard must be requested.
+                        //
+                        // A concrete scenario where this can happen is when the user
+                        // dismisses the keyboard on the web. The editing session is
+                        // closed by the engine, but the text field widget stays focused
+                        // in the framework.
+                        _requestKeyboard();
                       }
                     }
                   : null,
