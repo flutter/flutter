@@ -18,6 +18,71 @@ import 'package:flutter_test/flutter_test.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
+  testWidgets('Overall looks correctly under light theme', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      TestScaffoldApp(
+        theme: const CupertinoThemeData(brightness: Brightness.light),
+        actionSheet: CupertinoActionSheet(
+          message: const Text('The title'),
+          actions: <Widget>[
+            CupertinoActionSheetAction(child: const Text('One'), onPressed: () {}),
+            CupertinoActionSheetAction(child: const Text('Two'), onPressed: () {}),
+          ],
+          cancelButton: CupertinoActionSheetAction(child: const Text('Cancel'), onPressed: () {}),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+    await tester.pumpAndSettle();
+
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('One')));
+    await tester.pumpAndSettle();
+    // This golden file also verifies the structure of an action sheet that
+    // has a message, no title, and no overscroll for any sections (in contrast
+    // to cupertinoActionSheet.dark-theme.png).
+    await expectLater(
+      find.byType(CupertinoApp),
+      matchesGoldenFile('cupertinoActionSheet.overall-light-theme.png'),
+    );
+
+    await gesture.up();
+  });
+
+  testWidgets('Overall looks correctly under dark theme', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      TestScaffoldApp(
+        theme: const CupertinoThemeData(brightness: Brightness.dark),
+        actionSheet: CupertinoActionSheet(
+          title: const Text('The title'),
+          message: const Text('The message'),
+          actions: List<Widget>.generate(20, (int i) =>
+            CupertinoActionSheetAction(
+              onPressed: () {},
+              child: Text('Button $i'),
+            ),
+          ),
+          cancelButton: CupertinoActionSheetAction(child: const Text('Cancel'), onPressed: () {}),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+    await tester.pumpAndSettle();
+
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('Button 0')));
+    await tester.pumpAndSettle();
+    // This golden file also verifies the structure of an action sheet that
+    // has both a message and a title, and an overscrolled action section (in
+    // contrast to cupertinoActionSheet.light-theme.png).
+    await expectLater(
+      find.byType(CupertinoApp),
+      matchesGoldenFile('cupertinoActionSheet.overall-dark-theme.png'),
+    );
+
+    await gesture.up();
+  });
+
   testWidgets('Verify that a tap on modal barrier dismisses an action sheet', (WidgetTester tester) async {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
@@ -1674,6 +1739,54 @@ Widget createAppWithButtonThatLaunchesActionSheet(Widget actionSheet) {
       }),
     ),
   );
+}
+
+// Shows an app that has a button with text "Go", and clicking this button
+// displays the `actionSheet` and hides the button.
+//
+// The `theme` will be applied to the app and determines the background.
+class TestScaffoldApp extends StatefulWidget {
+  const TestScaffoldApp({super.key, required this.theme, required this.actionSheet});
+  final CupertinoThemeData theme;
+  final Widget actionSheet;
+
+  @override
+  TestScaffoldAppState createState() => TestScaffoldAppState();
+}
+
+class TestScaffoldAppState extends State<TestScaffoldApp> {
+  bool _pressedButton = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return CupertinoApp(
+      // This CupertinoApp is captured in golden test as a whole. The debug
+      // banner contains tilted text, whose anti-alias might cause false
+      // negative result. https://github.com/flutter/flutter/pull/150442
+      debugShowCheckedModeBanner: false,
+      theme: widget.theme,
+      home: Builder(builder: (BuildContext context) =>
+        CupertinoPageScaffold(
+          child: Center(
+            child: _pressedButton ? Container() : CupertinoButton(
+              onPressed: () {
+                setState(() {
+                  _pressedButton = true;
+                });
+                showCupertinoModalPopup<void>(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return widget.actionSheet;
+                  },
+                );
+              },
+              child: const Text('Go'),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 Widget boilerplate(Widget child) {
