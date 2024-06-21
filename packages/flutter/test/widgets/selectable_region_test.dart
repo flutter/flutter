@@ -1085,7 +1085,7 @@ void main() {
       await tester.pumpAndSettle();
     },
       variant: TargetPlatformVariant.only(TargetPlatform.iOS),
-      skip: !kIsWeb, // [intended] This test verifies web behavior.
+      skip: true, // https://github.com/flutter/flutter/issues/125582.
     );
 
     testWidgets('touch cannot double tap on iOS web', (WidgetTester tester) async {
