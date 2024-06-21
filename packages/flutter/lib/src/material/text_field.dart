@@ -1594,6 +1594,22 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
                 },
                 onDidGainAccessibilityFocus: handleDidGainAccessibilityFocus,
                 onDidLoseAccessibilityFocus: handleDidLoseAccessibilityFocus,
+                onFocus: _isEnabled
+                  ? () {
+                      assert(
+                        _effectiveFocusNode.canRequestFocus,
+                        'Received SemanticsAction.focus from the engine. However, the FocusNode '
+                        'of this text field cannot gain focus. This likely indicates a bug. '
+                        'If this text field cannot be focused (e.g. because it is not '
+                        'enabled), then its corresponding semantics node must be configured '
+                        'such that the assistive technology cannot request focus on it.'
+                      );
+
+                      if (_effectiveFocusNode.canRequestFocus && !_effectiveFocusNode.hasFocus) {
+                        _effectiveFocusNode.requestFocus();
+                      }
+                    }
+                  : null,
                 child: child,
               );
             },
