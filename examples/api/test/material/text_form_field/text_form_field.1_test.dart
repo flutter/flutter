@@ -55,5 +55,4 @@ void main() {
 
     expect(getFocuses(), const <bool>[true, false, false, false, false]);
   });
-
 }
