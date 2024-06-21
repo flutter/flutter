@@ -1833,6 +1833,10 @@ class TestScaffoldAppState extends State<TestScaffoldApp> {
   @override
   Widget build(BuildContext context) {
     return CupertinoApp(
+      // This CupertinoApp is captured in golden test as a whole. The debug
+      // banner contains tilted text, whose anti-alias might cause false
+      // negative result. https://github.com/flutter/flutter/pull/150442
+      debugShowCheckedModeBanner: false,
       theme: widget.theme,
       home: Builder(builder: (BuildContext context) =>
         CupertinoPageScaffold(
