@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:js_interop';
 import 'dart:math' as math;
 import 'dart:typed_data';
 
@@ -128,6 +129,9 @@ abstract class Renderer {
   });
 
   FutureOr<ui.Image> createImageFromImageBitmap(DomImageBitmap imageSource);
+
+  FutureOr<ui.Image> createImageFromTextureSource(JSAny object,
+      {required int width, required int height, required bool transferOwnership});
 
   void decodeImageFromPixels(
     Uint8List pixels,
