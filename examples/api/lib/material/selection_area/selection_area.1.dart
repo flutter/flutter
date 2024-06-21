@@ -13,7 +13,6 @@ void main() => runApp(const SelectionAreaColorTextRedExampleApp());
 class SelectionAreaColorTextRedExampleApp extends StatelessWidget {
   const SelectionAreaColorTextRedExampleApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(

@@ -110,7 +110,7 @@ abstract class SelectionHandler implements ValueListenable<SelectionGeometry> {
 /// selection, and the content itself.
 ///
 /// [SelectionArea] and [SelectableRegion] provide access to this
-/// information through the [SelectedContent] provided in their
+/// information through the [SelectedContent] passed to their
 /// [SelectionArea.onSelectionChanged] and
 /// [SelectableRegion.onSelectionChanged] members.
 ///
