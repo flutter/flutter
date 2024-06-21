@@ -3352,7 +3352,7 @@ void main() {
               ];
             },
             body: ListView.builder(
-              padding: const EdgeInsets.all(8),
+              physics: const ClampingScrollPhysics(),
               itemCount: 30,
               itemBuilder: (BuildContext context, int index) {
                 return SizedBox(
@@ -3385,7 +3385,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(appBarHeight(tester), expandedAppBarHeight);
       expect(nestedScrollView.currentState?.outerController.offset, 0);
-    });
+    }, variant: TargetPlatformVariant.all());
   });
 }
 
