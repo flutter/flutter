@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:js_interop';
 import 'dart:math' as math;
 import 'dart:typed_data';
 
@@ -232,6 +233,29 @@ class CanvasKitRenderer implements Renderer {
   ui.Image createImageFromImageBitmap(DomImageBitmap imageBitmap) {
     final SkImage? skImage =
         canvasKit.MakeLazyImageFromImageBitmap(imageBitmap, true);
+    if (skImage == null) {
+      throw Exception('Failed to convert image bitmap to an SkImage.');
+    }
+    return CkImage(skImage);
+  }
+
+  @override
+  FutureOr<ui.Image> createImageFromTextureSource(JSAny object,
+      {required int width, required int height, required bool transferOwnership}) async {
+        if (!transferOwnership) {
+          final DomImageBitmap bitmap = await createImageBitmap(object, (x:0, y: 0, width: width, height: height));
+          return createImageFromImageBitmap(bitmap);
+        }
+    final SkImage? skImage = canvasKit.MakeLazyImageFromTextureSourceWithInfo(
+        object,
+        SkPartialImageInfo(
+          width: width.toDouble(),
+          height: height.toDouble(),
+          alphaType: canvasKit.AlphaType.Premul,
+          colorType: canvasKit.ColorType.RGBA_8888,
+          colorSpace: SkColorSpaceSRGB,
+        ));
+
     if (skImage == null) {
       throw Exception('Failed to convert image bitmap to an SkImage.');
     }
