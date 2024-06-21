@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
@@ -285,9 +286,15 @@ class _VideoDemoState extends State<VideoDemo> with SingleTickerProviderStateMix
 
   bool isDisposed = false;
 
+  // Only non-test mobile environments are supported for this demo.
+  bool isSupported = Platform.isAndroid || Platform.isIOS;
+
   @override
   void initState() {
     super.initState();
+    if (!isSupported) {
+      return;
+    }
 
     Future<void> initController(VideoPlayerController controller, String name) async {
       controller.setLooping(true);
@@ -317,8 +324,8 @@ class _VideoDemoState extends State<VideoDemo> with SingleTickerProviderStateMix
       appBar: AppBar(
         title: const Text('Videos'),
       ),
-        body:
-        Scrollbar(
+      body: isSupported
+          ? Scrollbar(
               child: ListView(
                 primary: true,
                 children: <Widget>[
@@ -334,7 +341,8 @@ class _VideoDemoState extends State<VideoDemo> with SingleTickerProviderStateMix
                   ),
                 ],
               ),
-            ),
+            )
+          : const Placeholder(),
     );
   }
 }
