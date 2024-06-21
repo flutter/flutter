@@ -779,6 +779,33 @@ TEST(DisplayListMatrixClipState, RectCoverage) {
   EXPECT_FALSE(state.rect_covers_cull(rect.Expand(0.0f, 0.0f, 0.0f, -0.1f)));
 }
 
+TEST(DisplayListMatrixClipState, RectCoverageAccuracy) {
+  // These particular values create bit errors if we use the path that
+  // tests for inclusion in local space, but work OK if we use a forward
+  // path that tests for inclusion in device space, due to the fact that
+  // the extra matrix inversion is just enough math to cause the transform
+  // to place the local space cull corners just outside the original rect.
+  // The test in device space only works under a simple scale, such as we
+  // use for DPR adjustments (and which are not always inversion friendly).
+
+  DlRect cull = DlRect::MakeLTRB(0.0f, 0.0f, 1080.0f, 2400.0f);
+  DlScalar DPR = 2.625;
+  DlRect rect = DlRect::MakeLTRB(0.0f, 0.0f, 1080.0f / DPR, 2400.0f / DPR);
+
+  DisplayListMatrixClipState state(cull);
+  state.scale(DPR, DPR);
+
+  EXPECT_TRUE(state.rect_covers_cull(rect));
+  EXPECT_TRUE(state.rect_covers_cull(rect.Expand(0.1f, 0.0f, 0.0f, 0.0f)));
+  EXPECT_TRUE(state.rect_covers_cull(rect.Expand(0.0f, 0.1f, 0.0f, 0.0f)));
+  EXPECT_TRUE(state.rect_covers_cull(rect.Expand(0.0f, 0.0f, 0.1f, 0.0f)));
+  EXPECT_TRUE(state.rect_covers_cull(rect.Expand(0.0f, 0.0f, 0.0f, 0.1f)));
+  EXPECT_FALSE(state.rect_covers_cull(rect.Expand(-0.1f, 0.0f, 0.0f, 0.0f)));
+  EXPECT_FALSE(state.rect_covers_cull(rect.Expand(0.0f, -0.1f, 0.0f, 0.0f)));
+  EXPECT_FALSE(state.rect_covers_cull(rect.Expand(0.0f, 0.0f, -0.1f, 0.0f)));
+  EXPECT_FALSE(state.rect_covers_cull(rect.Expand(0.0f, 0.0f, 0.0f, -0.1f)));
+}
+
 TEST(DisplayListMatrixClipState, RectCoverageUnderScale) {
   DlRect rect = DlRect::MakeLTRB(100.0f, 100.0f, 200.0f, 200.0f);
   DisplayListMatrixClipState state(rect);
