@@ -135,7 +135,6 @@ class PlatformSelectableRegionContextMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Stack(
-      alignment: Alignment.center,
       children: <Widget>[
         const Positioned.fill(
           child: HtmlElementView(
