@@ -239,6 +239,12 @@ bool DisplayListMatrixClipState::rect_covers_cull(const DlRect& content) const {
   if (cull_rect_.IsEmpty()) {
     return true;
   }
+  if (matrix_.IsAligned2D()) {
+    // This transform-to-device calculation is faster and more accurate
+    // for rect-to-rect aligned transformations, but not accurate under
+    // (non-quadrant) rotations and skews.
+    return content.TransformAndClipBounds(matrix_).Contains(cull_rect_);
+  }
   DlPoint corners[4];
   if (!getLocalCullCorners(corners)) {
     return false;
