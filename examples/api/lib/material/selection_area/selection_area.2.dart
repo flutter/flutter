@@ -12,7 +12,6 @@ void main() => runApp(const SelectionAreaInsertContentExampleApp());
 class SelectionAreaInsertContentExampleApp extends StatelessWidget {
   const SelectionAreaInsertContentExampleApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(

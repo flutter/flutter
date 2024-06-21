@@ -1524,18 +1524,19 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
 
 class _TextSpanContentRange extends SelectedContentRange<TextSpan> {
   _TextSpanContentRange({
-    this.start = -1,
-    this.end = -1,
+    int start = -1,
+    int end = -1,
     super.selectableId,
     required super.content,
     super.children,
-  });
+  }) : _start = start,
+       _end = end;
 
   @override
-  int get startOffset => start;
-  final int start;
+  int get startOffset => _start;
+  final int _start;
 
   @override
-  int get endOffset => end;
-  final int end;
+  int get endOffset => _end;
+  final int _end;
 }
