@@ -1634,11 +1634,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
 
       // The physics may allow overscroll when actually *scrolling*, but
       // dragging on the scrollbar does not always allow us to enter overscroll.
-      final TargetPlatform platform = ScrollConfiguration.of(context).getPlatform(context);
-      switch (platform) {
-        // Only disallow desktop overscroll if the drag was initiated by the
-        // by actually dragging the scrollbar's thumb. If, for example, the drag
-        // was initiated by the trackpad, overscrolling is OK.
+      switch (ScrollConfiguration.of(context).getPlatform(context)) {
         case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
         case TargetPlatform.macOS:

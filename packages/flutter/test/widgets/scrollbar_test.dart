@@ -3263,6 +3263,16 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
   });
 
   testWidgets('Desktop trackpad drag direction: -X,-Y produces positive scroll offset changes', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/149999.
+    // This test doesn't strictly test the scrollbar: trackpad flings
+    // that begin in the center of the scrollable are handled by the
+    // scrollable, not the scrollbar. However: the scrollbar widget does
+    // contain the scrollable and this test verifies that it doesn't
+    // inadvertantly handle thumb down/start/update/end gestures due
+    // to trackpad pan/zoom events. Those callbacks are prevented by
+    // the overrides of isPointerPanZoomAllowed in the scrollbar
+    // gesture recognizers.
+
     final ScrollController scrollController = ScrollController();
     addTearDown(scrollController.dispose);
 
@@ -3334,6 +3344,82 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
     await tester.pumpAndSettle();
     expect(scrollController.offset, lessThan(700));
     scrollController.jumpTo(0);
+
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{
+    TargetPlatform.macOS,
+    TargetPlatform.linux,
+    TargetPlatform.windows,
+    TargetPlatform.fuchsia,
+  }));
+
+  testWidgets('Desktop trackpad, nested ListViews, no explicit scrollbars, horizontal drag succeeds', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/150236.
+    // This test is similar to "Desktop trackpad drag direction: -X,-Y...".
+    // It's really only verifying that trackpad gestures are being handled
+    // by the scrollable, not the scrollbar.
+
+    final Key outerListViewKey = UniqueKey();
+    final ScrollController scrollControllerY = ScrollController();
+    final ScrollController scrollControllerX = ScrollController();
+    addTearDown(scrollControllerY.dispose);
+    addTearDown(scrollControllerX.dispose);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: ListView(
+            key: outerListViewKey,
+            controller: scrollControllerY,
+            children: <Widget>[
+              const SizedBox(width: 200, height: 200),
+              SizedBox(
+                height: 200,
+                child: ListView( // vertically centered within the 600 high viewport
+                  scrollDirection: Axis.horizontal,
+                  controller: scrollControllerX,
+                  children: List<Widget>.generate(5, (int index) {
+                    return SizedBox(
+                      width: 200,
+                      child: Center(child: Text('item $index')),
+                    );
+                  }),
+                ),
+              ),
+              const SizedBox(width: 200, height: 200),
+              const SizedBox(width: 200, height: 200),
+              const SizedBox(width: 200, height: 200),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    Finder outerListView() => find.byKey(outerListViewKey);
+
+    // 800x600 viewport content is 1000x1000
+    expect(tester.getSize(outerListView()), const Size(800, 600));
+    expect(scrollControllerY.offset, 0);
+    expect(scrollControllerY.position.maxScrollExtent, 400);
+    expect(scrollControllerX.offset, 0);
+    expect(scrollControllerX.position.maxScrollExtent, 200);
+
+    // Vertical scrolling: -Y trackpad motion produces positive scroll offset change
+    await tester.trackpadFling(outerListView(), const Offset(0, -600), 500);
+    await tester.pumpAndSettle();
+    expect(scrollControllerY.offset, 400);
+    await tester.trackpadFling(outerListView(), const Offset(0, 600), 500);
+    await tester.pumpAndSettle();
+    expect(scrollControllerY.offset, 0);
+
+    // Horizontal scrolling: -X trackpad motion produces positive scroll offset change
+    await tester.trackpadFling(outerListView(), const Offset(-800, 0), 500);
+    await tester.pumpAndSettle();
+    expect(scrollControllerX.offset, 200);
+    await tester.trackpadFling(outerListView(), const Offset(800, 0), 500);
+    await tester.pumpAndSettle();
+    expect(scrollControllerX.offset, 0);
 
   }, variant: const TargetPlatformVariant(<TargetPlatform>{
     TargetPlatform.macOS,
