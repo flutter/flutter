@@ -2108,7 +2108,6 @@ void main() {
       matchesSemantics(
         label: 'AC\nTab 1 of 3',
         textDirection: TextDirection.ltr,
-        isButton: true,
         isFocusable: true,
         isSelected: true,
         hasTapAction: true,
@@ -2120,7 +2119,6 @@ void main() {
       matchesSemantics(
         label: 'Alarm\nTab 2 of 3',
         textDirection: TextDirection.ltr,
-        isButton: true,
         isFocusable: true,
         hasTapAction: true,
         hasFocusAction: true,
@@ -2131,7 +2129,6 @@ void main() {
       matchesSemantics(
         label: 'Hot Tub\nTab 3 of 3',
         textDirection: TextDirection.ltr,
-        isButton: true,
         isFocusable: true,
         hasTapAction: true,
         hasFocusAction: true,
@@ -2168,7 +2165,6 @@ void main() {
       matchesSemantics(
         label: 'AC\nTab 1 of 3',
         textDirection: TextDirection.ltr,
-        isButton: true,
         isFocusable: true,
         isSelected: true,
         hasTapAction: true,
@@ -2180,7 +2176,6 @@ void main() {
       matchesSemantics(
         label: 'Alarm\nTab 2 of 3',
         textDirection: TextDirection.ltr,
-        isButton: true,
         isFocusable: true,
         hasTapAction: true,
         hasFocusAction: true,
@@ -2191,7 +2186,6 @@ void main() {
       matchesSemantics(
         label: 'Hot Tub\nTab 3 of 3',
         textDirection: TextDirection.ltr,
-        isButton: true,
         isFocusable: true,
         hasTapAction: true,
         hasFocusAction: true,
@@ -2524,7 +2518,6 @@ void main() {
       matchesSemantics(
         label: 'Red\nTab 1 of 2',
         textDirection: TextDirection.ltr,
-        isButton: true,
         isFocusable: true,
         isSelected: true,
         hasTapAction: true,
@@ -2536,7 +2529,6 @@ void main() {
       matchesSemantics(
         label: 'Green\nTab 2 of 2',
         textDirection: TextDirection.ltr,
-        isButton: true,
         isFocusable: true,
         hasTapAction: true,
         hasFocusAction: true,
@@ -2571,7 +2563,6 @@ void main() {
       matchesSemantics(
         label: 'Red\nTab 1 of 2',
         textDirection: TextDirection.ltr,
-        isButton: true,
         isFocusable: true,
         isSelected: true,
         hasTapAction: true,
@@ -2583,7 +2574,6 @@ void main() {
       matchesSemantics(
         label: 'Green\nTab 2 of 2',
         textDirection: TextDirection.ltr,
-        isButton: true,
         isFocusable: true,
         hasTapAction: true,
         hasFocusAction: true,
@@ -2764,7 +2754,6 @@ void main() {
                           children: <TestSemantics>[
                             TestSemantics(
                               flags: <SemanticsFlag>[
-                                SemanticsFlag.isButton,
                                 SemanticsFlag.isSelected,
                                 SemanticsFlag.isFocusable,
                               ],
@@ -2773,10 +2762,7 @@ void main() {
                               textDirection: TextDirection.ltr,
                             ),
                             TestSemantics(
-                              flags: <SemanticsFlag>[
-                                SemanticsFlag.isButton,
-                                SemanticsFlag.isFocusable,
-                              ],
+                              flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
                               actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                               label: 'B\nTab 2 of 2',
                               textDirection: TextDirection.ltr,
