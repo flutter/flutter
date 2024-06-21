@@ -104,17 +104,13 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     argParser.addOption(
       'export-method',
       defaultsTo: 'app-store',
-      allowed: <String>['app-store', 'app-store-connect', 'ad-hoc', 'release-testing', 'development', 'debugging', 'enterprise'],
+      allowed: <String>['app-store', 'ad-hoc', 'development', 'enterprise'],
       help: 'Specify how the IPA will be distributed.',
       allowedHelp: <String, String>{
         'app-store': 'Upload to the App Store. For XCode <= 15.3.',
-        'app-store-connect': 'Upload to the App Store. For XCode > 15.3',
         'ad-hoc': 'Test on designated devices that do not need to be registered with the Apple developer account. '
                   'Requires a distribution certificate. For XCode <= 15.3.',
-        'release-testing': 'Test on designated devices that do not need to be registered with the Apple developer account. '
-            'Requires a distribution certificate. For XCode > 15.3',
         'development': 'Test only on development devices registered with the Apple developer account. For XCode <= 15.3.',
-        'debugging': 'Test only on development devices registered with the Apple developer account. For XCode > 15.3.',
         'enterprise': 'Distribute an app registered with the Apple Developer Enterprise Program.',
       },
     );
@@ -589,22 +585,20 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     final Version? currVersion = globals.xcode!.currentVersion;
     if (currVersion != null) {
       if (currVersion.major >= 16 || (currVersion.major == 15 && currVersion.minor > 3)) {
-        final Map<String, String> exportMethodMap = <String, String>{
-          'app-store': 'app-store-connect',
-          'ad-hoc': 'release-testing',
-          'development': 'debugging',
-        };
-        return exportMethodMap[method] ?? method;
-      } else {
-        final Map<String, String> exportMethodMap = <String, String>{
-          'app-store-connect': 'app-store',
-          'release-testing': 'ad-hoc',
-          'debugging': 'development',
-        };
-        return exportMethodMap[method] ?? method;
+        switch (method) {
+          case 'app-store':
+            return 'app-store-connect';
+          case 'ad-hoc':
+            return 'release-testing';
+          case 'development':
+            return 'debugging';
+          default:
+            throwToolExit('Encountered invalid export-method input.');
+        }
       }
+      return method;
     }
-    throwToolExit('Encountered invalid export-method input.');
+    throwToolExit('Xcode version could not be found.');
   }
 }
 
