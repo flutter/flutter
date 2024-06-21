@@ -1,4 +1,4 @@
-Signature: f8da4823d0a13ef014212d4e6eb898a8
+Signature: 1c8fe66c1c8049bf75a6c9bc71fd0074
 
 ====================================================================================================
 LIBRARY: fuchsia_sdk
@@ -6780,6 +6780,7 @@ ORIGIN: ../../../fuchsia/sdk/linux/pkg/inspect/vmo/state.cc + ../../../fuchsia/s
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/inspect/vmo/types.cc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/media_cpp/include/lib/media/cpp/type_converters.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/media_cpp/type_converters.cc + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/memory_barriers/include/src/lib/memory_barriers/memory_barriers.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/mmio/include/lib/mmio/mmio.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/mmio/mmio-buffer.cc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/view_token_pair.cc + ../../../fuchsia/sdk/linux/LICENSE
@@ -7149,6 +7150,7 @@ FILE: ../../../fuchsia/sdk/linux/pkg/inspect/vmo/state.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/inspect/vmo/types.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/media_cpp/include/lib/media/cpp/type_converters.h
 FILE: ../../../fuchsia/sdk/linux/pkg/media_cpp/type_converters.cc
+FILE: ../../../fuchsia/sdk/linux/pkg/memory_barriers/include/src/lib/memory_barriers/memory_barriers.h
 FILE: ../../../fuchsia/sdk/linux/pkg/mmio/include/lib/mmio/mmio.h
 FILE: ../../../fuchsia/sdk/linux/pkg/mmio/mmio-buffer.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/view_token_pair.cc
