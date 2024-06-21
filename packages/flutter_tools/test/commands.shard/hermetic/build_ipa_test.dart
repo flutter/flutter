@@ -422,7 +422,7 @@ void main() {
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
-  testUsingContext('ipa build uses new "debugging" export method when on XCode versions > 15.3', () async {
+  testUsingContext('ipa build uses new "debugging" export method when on Xcode versions > 15.3', () async {
     final BuildCommand command = BuildCommand(
       artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
@@ -453,7 +453,7 @@ void main() {
     },
   });
 
-  testUsingContext('ipa build uses new "release-testing" export method when on XCode versions > 15.3', () async {
+  testUsingContext('ipa build uses new "release-testing" export method when on Xcode versions > 15.3', () async {
     final BuildCommand command = BuildCommand(
       artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
@@ -484,7 +484,7 @@ void main() {
     },
   });
 
-  testUsingContext('ipa build accepts legacy methods when on XCode versions <= 14.3', () async {
+  testUsingContext('ipa build accepts legacy methods when on Xcode versions <= 15.3', () async {
     final BuildCommand command = BuildCommand(
       artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
