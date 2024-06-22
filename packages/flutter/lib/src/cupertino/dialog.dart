@@ -2112,27 +2112,59 @@ class _RenderAlertDialogActionsLayout extends RenderFlex {
     }
   }
 
+  double horizontalSlotWidthFor({required double overallWidth}) =>
+    (overallWidth - dividerThickness) / 2;
+
+  @override
+  double computeMinIntrinsicHeight(double width) {
+    if (!_debugHasValidConstraints(constraints)) {
+      return 0;
+    }
+
+    if (!_useHorizontalLayout(width)) {
+      return super.computeMinIntrinsicHeight(width);
+    }
+
+    final double slotWidth = horizontalSlotWidthFor(overallWidth: width);
+    double height = 0;
+    _forEachSlot((RenderBox slot) {
+      height = math.max(height, slot.getMinIntrinsicHeight(slotWidth));
+    });
+    return constraints.constrainHeight(height);
+  }
+
+  @override
+  double computeMaxIntrinsicHeight(double width) {
+    if (!_debugHasValidConstraints(constraints)) {
+      return 0;
+    }
+
+    if (!_useHorizontalLayout(width)) {
+      return super.computeMinIntrinsicHeight(width);
+    }
+
+    final double slotWidth = horizontalSlotWidthFor(overallWidth: width);
+    double height = 0;
+    _forEachSlot((RenderBox slot) {
+      height = math.max(height, slot.getMaxIntrinsicHeight(slotWidth));
+    });
+    return constraints.constrainHeight(height);
+  }
+
   @override
   @protected
   Size computeDryLayout(covariant BoxConstraints constraints) {
-    FlutterError? constraintsError;
-    assert(() {
-      constraintsError = _debugCheckConstraints(constraints: constraints);
-      return true;
-    }());
-    if (constraintsError != null) {
-      assert(debugCannotComputeDryLayout(error: constraintsError));
+    if (!_debugHasValidConstraints(constraints)) {
       return Size.zero;
     }
 
     final double overallWidth = constraints.maxWidth;
-    final double childWidth = (overallWidth - dividerThickness) / 2;
-    if (!_useHorizontalLayout(childWidth)) {
+    if (!_useHorizontalLayout(overallWidth)) {
       return super.computeDryLayout(constraints);
     }
 
-    final double maxChildHeight = _layOutChildrenHorizontally(childWidth: childWidth, dry: true);
-    return constraints.constrain(Size(overallWidth, maxChildHeight));
+    final double height = getMinIntrinsicHeight(overallWidth);
+    return Size(overallWidth, height);
   }
 
   @override
@@ -2142,63 +2174,70 @@ class _RenderAlertDialogActionsLayout extends RenderFlex {
       return;
     }
 
-    assert(() {
-      final FlutterError? constraintsError = _debugCheckConstraints(constraints: constraints);
-      if (constraintsError != null) {
-        throw constraintsError;
-      }
-      return true;
-    }());
+    if (!_debugHasValidConstraints(constraints)) {
+      size = constraints.smallest;
+      return;
+    }
 
     final double overallWidth = constraints.maxWidth;
-    final double childWidth = (overallWidth - dividerThickness) / 2;
-    if (!_useHorizontalLayout(childWidth)) {
+    if (!_useHorizontalLayout(overallWidth)) {
       return super.performLayout();
     }
 
-    final double maxChildHeight = _layOutChildrenHorizontally(childWidth: childWidth, dry: false);
+    final double slotWidth = horizontalSlotWidthFor(overallWidth: overallWidth);
+    final double height = getMinIntrinsicHeight(overallWidth);
+    size = Size(overallWidth, height);
 
-    RenderBox child = firstChild!;
+    RenderBox slot = firstChild!;
     double x = 0;
     while (true) {
-      // Children are placed vertically center.
-      final double childYOffset = (maxChildHeight - child.size.height) / 2;
-      (child.parentData! as FlexParentData).offset = Offset(x, childYOffset);
-      x += child.size.width;
+      slot.layout(BoxConstraints.tight(Size(slotWidth, height)), parentUsesSize: true);
+      (slot.parentData! as FlexParentData).offset = Offset(x, 0);
+      x += slot.size.width;
 
-      final RenderBox? divider = childAfter(child);
+      final RenderBox? divider = childAfter(slot);
       if (divider == null) {
         break;
       }
-      divider.layout(BoxConstraints.tight(Size(dividerThickness, maxChildHeight)));
+      divider.layout(BoxConstraints.tight(Size(dividerThickness, height)));
       (divider.parentData! as FlexParentData).offset = Offset(x, 0);
       x += dividerThickness;
 
-      child = childAfter(divider)!;
+      slot = childAfter(divider)!;
     }
-    size = constraints.constrain(Size(overallWidth, maxChildHeight));
   }
 
-  FlutterError? _debugCheckConstraints({required BoxConstraints constraints}) {
-    FlutterError? result;
+  bool _debugHasValidConstraints(BoxConstraints constraints) {
+    FlutterError? constraintsError;
+    ErrorSummary? errorSummary;
     assert(() {
       if (constraints.maxWidth == double.infinity) {
-        result = FlutterError('The incoming width constraints are unbounded.');
+        errorSummary = ErrorSummary('The incoming width constraints are unbounded.');
+      }
+      if (errorSummary != null) {
+        constraintsError = FlutterError.fromParts(<DiagnosticsNode>[
+          errorSummary!,
+          ErrorDescription('The incoming constraints are: $constraints'),
+        ]);
       }
       return true;
     }());
-    return result;
+    if (constraintsError != null) {
+      throw constraintsError!;
+    }
+    return true;
   }
 
-  bool _useHorizontalLayout(double childWidth) {
+  bool _useHorizontalLayout(double overallWidth) {
     // Horizontal layout only applies to cases of 3 children: 2 action buttons
     // and 1 divider.
     if (childCount != 3) {
       return false;
     }
+    final double slotWidth = horizontalSlotWidthFor(overallWidth: overallWidth);
     RenderBox child = firstChild!;
     while (true) {
-      if (child.getMinIntrinsicWidth(double.infinity) > childWidth) {
+      if (child.getMinIntrinsicWidth(double.infinity) > slotWidth) {
         return false;
       }
       final RenderBox? divider = childAfter(child);
@@ -2210,35 +2249,16 @@ class _RenderAlertDialogActionsLayout extends RenderFlex {
     return true;
   }
 
-  // Lay out children in horizontal mode, and return the max children height.
-  //
-  // The `childWidth` is the width for each child. If `dry` is true, then a dry
-  // layout is performed instead.
-  double _layOutChildrenHorizontally({required double childWidth, required bool dry}) {
-    // The childCount should have been verified by `_useHorizontalLayout`.
-    assert(childCount == 3);
-    RenderBox child = firstChild!;
-    final BoxConstraints childConstraints = BoxConstraints(
-      maxHeight: constraints.maxHeight,
-      maxWidth: childWidth,
-      minWidth: childWidth,
-    );
-    double maxChildHeight = 0.0;
+  void _forEachSlot(ValueSetter<RenderBox> action) {
+    assert(childCount.isOdd);
+    RenderBox slot = firstChild!;
     while (true) {
-      final double childHeight;
-      if (dry) {
-        childHeight = child.getDryLayout(childConstraints).height;
-      } else {
-        child.layout(childConstraints, parentUsesSize: true);
-        childHeight = child.size.height;
-      }
-      maxChildHeight = math.max(maxChildHeight, childHeight);
-      final RenderBox? divider = childAfter(child);
+      action(slot);
+      final RenderBox? divider = childAfter(slot);
       if (divider == null) {
         break;
       }
-      child = childAfter(divider)!;
+      slot = childAfter(divider)!;
     }
-    return maxChildHeight;
   }
 }
