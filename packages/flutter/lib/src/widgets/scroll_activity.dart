@@ -613,7 +613,7 @@ class BallisticScrollActivity extends ScrollActivity {
   }
 
   @override
-  bool shouldIgnorePointer;
+  final bool shouldIgnorePointer;
 
   @override
   bool get isScrolling => true;
