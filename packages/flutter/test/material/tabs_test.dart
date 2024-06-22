@@ -6722,30 +6722,6 @@ void main() {
       tabAlignment: TabAlignment.center,
     ));
     expect(tester.getSize(find.byType(TabBar)).width, 307.5);
-
-    // Test default tab bar width when the divider color is set to transparent
-    // and tabAlignment is set to startOffset.
-    await tester.pumpWidget(buildTabBar(
-      dividerColor: Colors.transparent,
-      tabAlignment: TabAlignment.startOffset,
-    ));
-    expect(tester.getSize(find.byType(TabBar)).width, 359.5);
-
-    // Test default tab bar width when the divider color is set to transparent
-    // and tabAlignment is set to start.
-    await tester.pumpWidget(buildTabBar(
-      dividerColor: Colors.transparent,
-      tabAlignment: TabAlignment.start,
-    ));
-    expect(tester.getSize(find.byType(TabBar)).width, 307.5);
-
-    // Test default tab bar width when the divider color is set to transparent
-    // and tabAlignment is set to center.
-    await tester.pumpWidget(buildTabBar(
-      dividerColor: Colors.transparent,
-      tabAlignment: TabAlignment.center,
-    ));
-    expect(tester.getSize(find.byType(TabBar)).width, 307.5);
   });
 
   group('Material 2', () {
@@ -7158,4 +7134,143 @@ void main() {
     labelSize = tester.getSize(find.text('Tab 1'));
     expect(labelSize, equals(const Size(140.5, 40.0)));
   }, skip: isBrowser && !isSkiaWeb); // https://github.com/flutter/flutter/issues/87543
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/150000.
+  testWidgets('Scrollable TabBar does not jitter in the middle position', (WidgetTester tester) async {
+    final List<String> tabs = List<String>.generate(20, (int index) => 'Tab $index');
+
+    await tester.pumpWidget(MaterialApp(
+      home: DefaultTabController(
+        length: tabs.length,
+        initialIndex: 10,
+        child: Scaffold(
+          appBar: AppBar(
+            bottom: TabBar(
+              isScrollable: true,
+              tabs: tabs.map((String tab) => Tab(text: tab)).toList(),
+            ),
+          ),
+          body: TabBarView(
+            children: <Widget>[
+              for (int i = 0; i < tabs.length; i++)
+                Center(
+                  child: Text('Page $i'),
+                ),
+            ],
+          ),
+        ),
+      ),
+    ));
+
+    final SingleChildScrollView scrollable = tester.widget(find.byType(SingleChildScrollView));
+    expect(find.text('Page 10'), findsOneWidget);
+    expect(find.text('Page 11'), findsNothing);
+    expect(scrollable.controller!.position.pixels, closeTo(683.2, 0.1));
+
+    // Drag the TabBarView to the left.
+    await tester.drag(find.byType(TabBarView), const Offset(-800, 0));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
+
+    expect(find.text('Page 10'), findsNothing);
+    expect(find.text('Page 11'), findsOneWidget);
+    expect(scrollable.controller!.position.pixels, closeTo(799.8, 0.1));
+  });
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/150000.
+  testWidgets('Scrollable TabBar does not jitter when the tab bar reaches the start', (WidgetTester tester) async {
+    final List<String> tabs = List<String>.generate(20, (int index) => 'Tab $index');
+
+    await tester.pumpWidget(MaterialApp(
+      home: DefaultTabController(
+        length: tabs.length,
+        initialIndex: 4,
+        child: Scaffold(
+          appBar: AppBar(
+            bottom: TabBar(
+              isScrollable: true,
+              tabs: tabs.map((String tab) => Tab(text: tab)).toList(),
+            ),
+          ),
+          body: TabBarView(
+            children: <Widget>[
+              for (int i = 0; i < tabs.length; i++)
+                Center(
+                  child: Text('Page $i'),
+                ),
+            ],
+          ),
+        ),
+      ),
+    ));
+
+    final SingleChildScrollView scrollable = tester.widget(find.byType(SingleChildScrollView));
+
+    expect(find.text('Page 4'), findsOneWidget);
+    expect(find.text('Page 3'), findsNothing);
+    expect(scrollable.controller!.position.pixels, closeTo(61.25, 0.1));
+
+    // Drag the TabBarView to the right.
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('Page 4')));
+    await gesture.moveBy(const Offset(600.0, 0.0));
+    await gesture.up();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(find.text('Page 4'), findsOneWidget);
+    expect(find.text('Page 3'), findsOneWidget);
+    expect(scrollable.controller!.position.pixels, closeTo(0.2, 0.1));
+
+    await tester.pumpAndSettle();
+    expect(find.text('Page 4'), findsNothing);
+    expect(find.text('Page 3'), findsOneWidget);
+    expect(scrollable.controller!.position.pixels, equals(0.0));
+  });
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/150316.
+  testWidgets('Scrollable TabBar wuth transparent divider expands to full width', (WidgetTester tester) async {
+    Widget buildTabBar({ Color? dividerColor, TabAlignment? tabAlignment }) {
+      return boilerplate(
+        child: Center(
+          child: DefaultTabController(
+            length: 3,
+            child: TabBar(
+              dividerColor: dividerColor,
+              tabAlignment: tabAlignment,
+              isScrollable: true,
+              tabs: const <Widget>[
+                Tab(text: 'Tab 1'),
+                Tab(text: 'Tab 2'),
+                Tab(text: 'Tab 3'),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Test default tab bar width when the divider color is set to transparent
+    // and tabAlignment is set to startOffset.
+    await tester.pumpWidget(buildTabBar(
+      dividerColor: Colors.transparent,
+      tabAlignment: TabAlignment.startOffset,
+    ));
+    expect(tester.getSize(find.byType(TabBar)).width, 800.0);
+
+    // Test default tab bar width when the divider color is set to transparent
+    // and tabAlignment is set to start.
+    await tester.pumpWidget(buildTabBar(
+      dividerColor: Colors.transparent,
+      tabAlignment: TabAlignment.start,
+    ));
+    expect(tester.getSize(find.byType(TabBar)).width, 800.0);
+
+    // Test default tab bar width when the divider color is set to transparent
+    // and tabAlignment is set to center.
+    await tester.pumpWidget(buildTabBar(
+      dividerColor: Colors.transparent,
+      tabAlignment: TabAlignment.center,
+    ));
+    expect(tester.getSize(find.byType(TabBar)).width, 800.0);
+  });
 }

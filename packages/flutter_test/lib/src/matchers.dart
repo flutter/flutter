@@ -538,7 +538,7 @@ Matcher coversSameAreaAs(Path expectedPath, { required Rect areaToCompare, int s
 ///
 /// See also:
 ///
-///  * [GoldenFileComparator], which acts as the backend for this matcher.
+///  * [goldenFileComparator], which acts as the backend for this matcher.
 ///  * [LocalFileComparator], which is the default [GoldenFileComparator]
 ///    implementation for `flutter test`.
 ///  * [matchesReferenceImage], which should be used instead if you want to
