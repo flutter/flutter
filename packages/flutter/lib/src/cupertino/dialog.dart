@@ -86,13 +86,12 @@ const double _kDialogMinButtonHeight = 45.0;
 const double _kDialogMinButtonFontSize = 10.0;
 
 // ActionSheet specific constants.
-const double _kActionSheetEdgeHorizontalPadding = 8.0;
+const double _kActionSheetEdgePadding = 8.0;
 const double _kActionSheetCancelButtonPadding = 8.0;
-const double _kActionSheetEdgeVerticalPadding = 10.0;
 const double _kActionSheetContentHorizontalPadding = 16.0;
-const double _kActionSheetContentVerticalPadding = 12.0;
-const double _kActionSheetButtonHeight = 56.0;
-const double _kActionSheetActionsSectionMinHeight = 84.3;
+const double _kActionSheetContentVerticalPadding = 13.5;
+const double _kActionSheetButtonHeight = 57.0;
+const double _kActionSheetActionsSectionMinHeight = 84.0;
 
 // A translucent color that is painted on top of the blurred backdrop as the
 // dialog's background color
@@ -915,9 +914,88 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
     );
   }
 
+  // Given data point (x1, y1) and (x2, y2), derive the y corresponding to x
+  // using linear interpolation between the two data points, and extrapolates
+  // flatly beyond these points.
+  //
+  //              (x2, y2)
+  //                _____________
+  //               /
+  //              /
+  //    _________/
+  //           (x1, y1)
+  static double _lerp(double x, double x1, double y1, double x2, double y2) {
+    if (x <= x1) {
+      return y1;
+    } else if (x >= x2) {
+      return y2;
+    } else {
+      return Tween<double>(begin: y1, end: y2).transform(
+        (x - x1) / (x2 - x1)
+      );
+    }
+  }
+
+  // Derive the top padding, which is the distance between the top of a
+  // full-height action sheet and the top of the safe area.
+  //
+  // The algorithm and its values are derived from measuring on the simulator.
+  double _topPadding(BuildContext context) {
+    if (MediaQuery.orientationOf(context) == Orientation.landscape) {
+      return _kActionSheetEdgePadding;
+    }
+
+    // The top padding in portrait mode is in general close to the top view
+    // padding, but not always equal:
+    //
+    //                            | view padding | action sheet padding | ratio
+    //   No notch (eg. iPhone SE) |     20.0     |        20.0          | 1.0
+    //   Notch (eg. iPhone 13)    |     47.0     |        47.0          | 1.0
+    //   Capsule (eg. iPhone 15)  |     59.0     |        54.0          | 0.915
+    //
+    // Currently, we cannot determine why the result changes on "capsules."
+    // Therefore, we'll hard code this rule, given the limited types of actual
+    // devices. To provide an algorithm that accepts arbitrary view padding, this
+    // function calculates the ratio as a continuous curve with linear
+    // interpolation.
+
+    // The x for lerp is the top view padding, while the y is ratio of
+    // action sheet padding versus top view padding.
+    const double viewPaddingData1 = 47.0;
+    const double paddingRatioData1 = 1.0;
+    const double viewPaddingData2 = 59.0;
+    const double paddingRatioData2 = 54.0 / 59.0;
+
+    final double currentViewPadding = MediaQuery.viewPaddingOf(context).top;
+
+    final double currentPaddingRatio = _lerp(
+      /* x= */currentViewPadding,
+      /* x1, y1= */viewPaddingData1, paddingRatioData1,
+      /* x2, y2= */viewPaddingData2, paddingRatioData2,
+    );
+    final double padding = (currentPaddingRatio * currentViewPadding).roundToDouble();
+    // In case there is no view padding, there should still be some space
+    // between the action sheet and the edge.
+    return math.max(padding, _kDialogEdgePadding);
+  }
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
+
+    /*
+     *  ╭─────────────────╮  ↑                ↑
+     *  │    The title    │ Content section   |
+     *  │   The message   │  ↓                |
+     *  ├─────────────────┤  ↑             Main sheet
+     *  │    Action 1     │  |                |
+     *  ├─────────────────┤ Actions section   |
+     *  │    Action 2     │  |                |
+     *  ╰─────────────────╯  ↓                ↓
+     *  ╭─────────────────╮
+     *  │     Cancel      │
+     *  ╰─────────────────╯
+     */
 
     final List<Widget> children = <Widget>[
       Flexible(
@@ -943,6 +1021,7 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
     };
 
     return SafeArea(
+      minimum: const EdgeInsets.only(bottom: _kActionSheetEdgePadding),
       child: ScrollConfiguration(
         // A CupertinoScrollbar is built-in below
         behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
@@ -954,12 +1033,15 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
           child: CupertinoUserInterfaceLevel(
             data: CupertinoUserInterfaceLevelData.elevated,
             child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: _kActionSheetEdgeHorizontalPadding,
-                vertical: _kActionSheetEdgeVerticalPadding,
+              padding: EdgeInsets.only(
+                left: _kActionSheetEdgePadding,
+                right: _kActionSheetEdgePadding,
+                top: _topPadding(context),
+                // The bottom padding is set on SafeArea.minimum, allowing it to
+                // be consumed by bottom view padding.
               ),
               child: SizedBox(
-                width: actionSheetWidth - _kActionSheetEdgeHorizontalPadding * 2,
+                width: actionSheetWidth - _kActionSheetEdgePadding * 2,
                 child: _ActionSheetGestureDetector(
                   child: Semantics(
                     explicitChildNodes: true,
