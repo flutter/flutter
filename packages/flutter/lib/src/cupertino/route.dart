@@ -347,6 +347,8 @@ class CupertinoPage<T> extends Page<T> {
     this.title,
     this.fullscreenDialog = false,
     this.allowSnapshotting = true,
+    super.canPop,
+    super.onPopInvoked,
     super.key,
     super.name,
     super.arguments,
@@ -435,7 +437,7 @@ class _CupertinoPageTransitionState extends State<CupertinoPageTransition> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.primaryRouteAnimation != widget.primaryRouteAnimation
     || oldWidget.secondaryRouteAnimation != widget.secondaryRouteAnimation
-    || oldWidget.child != widget.child || oldWidget.linearTransition != widget.linearTransition) {
+    || oldWidget.linearTransition != widget.linearTransition) {
     _disposeCurve();
     _setupAnimation();
     }
@@ -443,43 +445,42 @@ class _CupertinoPageTransitionState extends State<CupertinoPageTransition> {
 
   @override
   void dispose() {
-    super.dispose();
     _disposeCurve();
+    super.dispose();
   }
 
   void _disposeCurve() {
     _primaryPositionCurve?.dispose();
     _secondaryPositionCurve?.dispose();
     _primaryShadowCurve?.dispose();
+    _primaryPositionCurve = null;
+    _secondaryPositionCurve = null;
+    _primaryShadowCurve = null;
   }
 
   void _setupAnimation() {
-    _primaryPositionAnimation =
-           (widget.linearTransition
-             ? widget.primaryRouteAnimation
-             : _primaryPositionCurve = CurvedAnimation(
-                 parent: widget.primaryRouteAnimation,
-                 curve: Curves.fastEaseInToSlowEaseOut,
-                 reverseCurve: Curves.fastEaseInToSlowEaseOut.flipped,
-               )
-           ).drive(_kRightMiddleTween);
-       _secondaryPositionAnimation =
-           (widget.linearTransition
-             ? widget.secondaryRouteAnimation
-             : _secondaryPositionCurve = CurvedAnimation(
-                 parent: widget.secondaryRouteAnimation,
-                 curve: Curves.linearToEaseOut,
-                 reverseCurve: Curves.easeInToLinear,
-               )
-           ).drive(_kMiddleLeftTween);
-       _primaryShadowAnimation =
-           (widget.linearTransition
-             ? widget.primaryRouteAnimation
-             : _secondaryPositionCurve = CurvedAnimation(
-                 parent: widget.primaryRouteAnimation,
-                 curve: Curves.linearToEaseOut,
-               )
-           ).drive(_CupertinoEdgeShadowDecoration.kTween);
+    if (!widget.linearTransition) {
+      _primaryPositionCurve = CurvedAnimation(
+        parent: widget.primaryRouteAnimation,
+        curve: Curves.fastEaseInToSlowEaseOut,
+        reverseCurve: Curves.fastEaseInToSlowEaseOut.flipped,
+      );
+      _secondaryPositionCurve = CurvedAnimation(
+        parent: widget.secondaryRouteAnimation,
+        curve: Curves.linearToEaseOut,
+        reverseCurve: Curves.easeInToLinear,
+      );
+      _primaryShadowCurve = CurvedAnimation(
+        parent: widget.primaryRouteAnimation,
+        curve: Curves.linearToEaseOut,
+      );
+    }
+    _primaryPositionAnimation = (_primaryPositionCurve ?? widget.primaryRouteAnimation)
+      .drive(_kRightMiddleTween);
+    _secondaryPositionAnimation = (_secondaryPositionCurve ?? widget.secondaryRouteAnimation)
+      .drive(_kMiddleLeftTween);
+    _primaryShadowAnimation = (_primaryShadowCurve ?? widget.primaryRouteAnimation)
+      .drive(_CupertinoEdgeShadowDecoration.kTween);
   }
 
   @override
@@ -557,7 +558,6 @@ class _CupertinoFullscreenDialogTransitionState extends State<CupertinoFullscree
     super.didUpdateWidget(oldWidget);
     if (oldWidget.primaryRouteAnimation != widget.primaryRouteAnimation ||
         oldWidget.secondaryRouteAnimation != widget.secondaryRouteAnimation ||
-        oldWidget.child != widget.child ||
         oldWidget.linearTransition != widget.linearTransition) {
         _disposeCurve();
         _setupAnimation();
@@ -854,7 +854,7 @@ class _CupertinoEdgeShadowDecoration extends Decoration {
       // Eyeballed gradient used to mimic a drop shadow on the start side only.
       <Color>[
         Color(0x04000000),
-        Color(0x00000000),
+        CupertinoColors.transparent,
       ],
     ),
   );
@@ -1096,7 +1096,7 @@ class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
   @override
   Duration get transitionDuration => _kModalPopupTransitionDuration;
 
-  Animation<double>? _animation;
+  CurvedAnimation? _animation;
 
   late Tween<Offset> _offsetTween;
 
@@ -1141,6 +1141,12 @@ class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
         child: child,
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _animation?.dispose();
+    super.dispose();
   }
 }
 
@@ -1239,23 +1245,7 @@ final Animatable<double> _dialogScaleTween = Tween<double>(begin: 1.3, end: 1.0)
   .chain(CurveTween(curve: Curves.linearToEaseOut));
 
 Widget _buildCupertinoDialogTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
-  final CurvedAnimation fadeAnimation = CurvedAnimation(
-    parent: animation,
-    curve: Curves.easeInOut,
-  );
-  if (animation.status == AnimationStatus.reverse) {
-    return FadeTransition(
-      opacity: fadeAnimation,
-      child: child,
-    );
-  }
-  return FadeTransition(
-    opacity: fadeAnimation,
-    child: ScaleTransition(
-      scale: animation.drive(_dialogScaleTween),
-      child: child,
-    ),
-  );
+  return child;
 }
 
 /// Displays an iOS-style dialog above the current contents of the app, with
@@ -1382,14 +1372,58 @@ class CupertinoDialogRoute<T> extends RawDialogRoute<T> {
     String? barrierLabel,
     // This transition duration was eyeballed comparing with iOS
     super.transitionDuration = const Duration(milliseconds: 250),
-    super.transitionBuilder = _buildCupertinoDialogTransitions,
+    this.transitionBuilder,
     super.settings,
     super.anchorPoint,
   }) : super(
         pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
           return builder(context);
         },
+        transitionBuilder: transitionBuilder ?? _buildCupertinoDialogTransitions,
         barrierLabel: barrierLabel ?? CupertinoLocalizations.of(context).modalBarrierDismissLabel,
         barrierColor: barrierColor ?? CupertinoDynamicColor.resolve(kCupertinoModalBarrierColor, context),
       );
+
+  /// Custom transition builder
+  RouteTransitionsBuilder? transitionBuilder;
+
+  CurvedAnimation? _fadeAnimation;
+
+  @override
+  Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+
+    if (transitionBuilder != null) {
+      return super.buildTransitions(context, animation, secondaryAnimation, child);
+    }
+
+    if (_fadeAnimation?.parent != animation) {
+      _fadeAnimation?.dispose();
+      _fadeAnimation = CurvedAnimation(
+        parent: animation,
+        curve: Curves.easeInOut,
+      );
+    }
+
+    final CurvedAnimation fadeAnimation = _fadeAnimation!;
+
+    if (animation.status == AnimationStatus.reverse) {
+      return FadeTransition(
+        opacity: fadeAnimation,
+        child: super.buildTransitions(context, animation, secondaryAnimation, child),
+      );
+    }
+    return FadeTransition(
+      opacity: fadeAnimation,
+      child: ScaleTransition(
+        scale: animation.drive(_dialogScaleTween),
+        child: super.buildTransitions(context, animation, secondaryAnimation, child),
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _fadeAnimation?.dispose();
+    super.dispose();
+  }
 }

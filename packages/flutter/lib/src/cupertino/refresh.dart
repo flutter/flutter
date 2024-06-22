@@ -558,7 +558,7 @@ class _CupertinoSliverRefreshControlState extends State<CupertinoSliverRefreshCo
               widget.refreshIndicatorExtent,
             );
           }
-          return Container();
+          return const LimitedBox(maxWidth: 0.0, maxHeight: 0.0, child: SizedBox.expand());
         },
       ),
     );

@@ -7,6 +7,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+
 import '../widgets/semantics_tester.dart';
 
 void main() {
@@ -3631,6 +3632,55 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('NavigationRail labels shall not overflow if longer texts provided - extended', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/110901.
+    // The navigation rail has a narrow width constraint. The text should wrap.
+    const String normalLabel = 'Abc';
+    const String longLabel = 'Very long bookmark text for navigation destination';
+    await tester.pumpWidget(MaterialApp(
+      home: Builder(
+        builder: (BuildContext context) {
+          return Scaffold(
+            body: Row(
+              children: <Widget>[
+                SizedBox(
+                  width: 140.0,
+                  child: NavigationRail(
+                    selectedIndex: 1,
+                    extended: true,
+                    destinations: const <NavigationRailDestination>[
+                      NavigationRailDestination(
+                        icon: Icon(Icons.favorite_border),
+                        selectedIcon: Icon(Icons.favorite),
+                        label: Text(normalLabel),
+                      ),
+                      NavigationRailDestination(
+                        icon: Icon(Icons.bookmark_border),
+                        selectedIcon: Icon(Icons.bookmark),
+                        label: Text(longLabel),
+                      ),
+                    ],
+                  ),
+                ),
+                const Expanded(
+                  child: Text('body'),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    ));
+
+    expect(find.byType(NavigationRail), findsOneWidget);
+    expect(find.text(normalLabel), findsOneWidget);
+    expect(find.text(longLabel), findsOneWidget);
+
+    // If the widget manages to layout without throwing an overflow exception,
+    // the test passes.
+    expect(tester.takeException(), isNull);
+  });
+
   group('Material 2', () {
     // These tests are only relevant for Material 2. Once Material 2
     // support is deprecated and the APIs are removed, these tests
@@ -5463,25 +5513,25 @@ TestSemantics _expectedSemantics() {
                       SemanticsFlag.isSelected,
                       SemanticsFlag.isFocusable,
                     ],
-                    actions: <SemanticsAction>[SemanticsAction.tap],
+                    actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                     label: 'Abc\nTab 1 of 4',
                     textDirection: TextDirection.ltr,
                   ),
                   TestSemantics(
                     flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
-                    actions: <SemanticsAction>[SemanticsAction.tap],
+                    actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                     label: 'Def\nTab 2 of 4',
                     textDirection: TextDirection.ltr,
                   ),
                   TestSemantics(
                     flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
-                    actions: <SemanticsAction>[SemanticsAction.tap],
+                    actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                     label: 'Ghi\nTab 3 of 4',
                     textDirection: TextDirection.ltr,
                   ),
                   TestSemantics(
                     flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
-                    actions: <SemanticsAction>[SemanticsAction.tap],
+                    actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                     label: 'Jkl\nTab 4 of 4',
                     textDirection: TextDirection.ltr,
                   ),

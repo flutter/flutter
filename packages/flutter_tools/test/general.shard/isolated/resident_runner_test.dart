@@ -81,7 +81,9 @@ void main() {
         expect(result, 0);
 
         expect(buildRunner.buildInvocations, 0);
-        expect(buildRunner.dryRunInvocations, 0);
+        expect(buildRunner.buildDryRunInvocations, 0);
+        expect(buildRunner.linkInvocations, 0);
+        expect(buildRunner.linkDryRunInvocations, 0);
         expect(buildRunner.hasPackageConfigInvocations, 0);
         expect(buildRunner.packagesWithNativeAssetsInvocations, 0);
 

@@ -140,6 +140,7 @@ void main() {
     final DefaultTextStyle widget = tester.widget(find.byType(DefaultTextStyle));
 
     expect(widget.style.color!.withAlpha(255), CupertinoColors.systemGreen.color);
+    expect(widget.style.fontFamily, 'CupertinoSystemText');
   });
 
   testWidgets('Dialog dark theme', (WidgetTester tester) async {

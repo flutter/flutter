@@ -58,8 +58,8 @@ class SourceLine {
 
 /// A class containing the name and contents associated with a code block inside of a
 /// code sample, for named injection into a template.
-class TemplateInjection {
-  TemplateInjection(this.name, this.contents, {this.language = ''});
+class SkeletonInjection {
+  SkeletonInjection(this.name, this.contents, {this.language = ''});
   final String name;
   final List<SourceLine> contents;
   final String language;
@@ -137,7 +137,7 @@ abstract class CodeSample {
   String get element => start.element ?? '';
   String output = '';
   Map<String, Object?> metadata = <String, Object?>{};
-  List<TemplateInjection> parts = <TemplateInjection>[];
+  List<SkeletonInjection> parts = <SkeletonInjection>[];
   SourceLine get start => input.isEmpty ? _lineProto : input.first;
 
   String get template {
@@ -325,26 +325,18 @@ enum SourceElementType {
   unknownType,
 }
 
-/// Converts the enun type [SourceElementType] to a human readable string.
+/// Converts the enum type [SourceElementType] to a human readable string.
 String sourceElementTypeAsString(SourceElementType type) {
-  switch (type) {
-    case SourceElementType.classType:
-      return 'class';
-    case SourceElementType.fieldType:
-      return 'field';
-    case SourceElementType.methodType:
-      return 'method';
-    case SourceElementType.constructorType:
-      return 'constructor';
-    case SourceElementType.typedefType:
-      return 'typedef';
-    case SourceElementType.topLevelVariableType:
-      return 'variable';
-    case SourceElementType.functionType:
-      return 'function';
-    case SourceElementType.unknownType:
-      return 'unknown';
-  }
+  return switch (type) {
+    SourceElementType.classType            => 'class',
+    SourceElementType.fieldType            => 'field',
+    SourceElementType.methodType           => 'method',
+    SourceElementType.constructorType      => 'constructor',
+    SourceElementType.typedefType          => 'typedef',
+    SourceElementType.topLevelVariableType => 'variable',
+    SourceElementType.functionType         => 'function',
+    SourceElementType.unknownType          => 'unknown',
+  };
 }
 
 /// A class that represents a Dart element in a source file.

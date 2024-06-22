@@ -212,7 +212,7 @@ class InkSparkle extends InteractiveInkFeature {
   }
 
   void _handleStatusChanged(AnimationStatus status) {
-    if (status == AnimationStatus.completed) {
+    if (status.isCompleted) {
       dispose();
     }
   }

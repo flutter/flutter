@@ -1219,30 +1219,29 @@ class PipelineOwner with DiagnosticableTreeMixin {
   SemanticsOwner? get semanticsOwner => _semanticsOwner;
   SemanticsOwner? _semanticsOwner;
 
-  /// The number of clients registered to listen for semantics.
+  /// Deprecated.
   ///
-  /// The number is increased whenever [ensureSemantics] is called and decreased
-  /// when [SemanticsHandle.dispose] is called.
+  /// Use [SemanticsBinding.debugOutstandingSemanticsHandles] instead. This
+  /// API is broken because an outstanding semantics handle on a given pipeline
+  /// owner doesn't mean that semantics are actually produced.
+  @Deprecated(
+    'Use SemanticsBinding.debugOutstandingSemanticsHandles instead. '
+    'This API is broken (see ensureSemantics). '
+    'This feature was deprecated after v3.22.0-23.0.pre.'
+  )
   int get debugOutstandingSemanticsHandles => _outstandingSemanticsHandles;
   int _outstandingSemanticsHandles = 0;
 
-  /// Opens a [SemanticsHandle] and calls [listener] whenever the semantics tree
-  /// generated from the render tree owned by this [PipelineOwner] updates.
+  /// Deprecated.
   ///
-  /// Calling this method only ensures that this particular [PipelineOwner] will
-  /// generate a semantics tree. Consider calling
-  /// [SemanticsBinding.ensureSemantics] instead to turn on semantics globally
-  /// for the entire app.
-  ///
-  /// The [PipelineOwner] updates the semantics tree only when there are clients
-  /// that wish to use the semantics tree. These clients express their interest
-  /// by holding [SemanticsHandle] objects that notify them whenever the
-  /// semantics tree updates.
-  ///
-  /// Clients can close their [SemanticsHandle] by calling
-  /// [SemanticsHandle.dispose]. Once all the outstanding [SemanticsHandle]
-  /// objects for a given [PipelineOwner] are closed, the [PipelineOwner] stops
-  /// maintaining the semantics tree.
+  /// Call [SemanticsBinding.ensureSemantics] instead and optionally add a
+  /// listener to [PipelineOwner.semanticsOwner]. This API is broken as calling
+  /// it does not guarantee that semantics are produced.
+  @Deprecated(
+    'Call SemanticsBinding.ensureSemantics instead and optionally add a listener to PipelineOwner.semanticsOwner. '
+    'This API is broken; it does not guarantee that semantics are actually produced. '
+    'This feature was deprecated after v3.22.0-23.0.pre.'
+  )
   SemanticsHandle ensureSemantics({ VoidCallback? listener }) {
     _outstandingSemanticsHandles += 1;
     _updateSemanticsOwner();
@@ -2000,8 +1999,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
         }
 
         if (!activeLayoutRoot._debugMutationsLocked) {
-          final RenderObject? p = activeLayoutRoot.debugLayoutParent;
-          activeLayoutRoot = p is RenderObject ? p : null;
+          activeLayoutRoot = activeLayoutRoot.debugLayoutParent;
         } else {
           // activeLayoutRoot found.
           break;
@@ -3005,7 +3003,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
         owner!._nodesNeedingPaint.add(this);
         owner!.requestVisualUpdate();
       }
-    } else if (parent is RenderObject) {
+    } else if (parent != null) {
       parent!.markNeedsPaint();
     } else {
       assert(() {
@@ -3021,9 +3019,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
       //
       // Trees rooted at a RenderView do not go through this
       // code path because RenderViews are repaint boundaries.
-      if (owner != null) {
-        owner!.requestVisualUpdate();
-      }
+      owner?.requestVisualUpdate();
     }
   }
 
@@ -3318,12 +3314,21 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   }
 
   /// {@template flutter.rendering.RenderObject.getTransformTo}
-  /// Applies the paint transform up the tree to `ancestor`.
+  /// Applies the paint transform from this [RenderObject] to the `target`
+  /// [RenderObject].
   ///
   /// Returns a matrix that maps the local paint coordinate system to the
-  /// coordinate system of `ancestor`.
+  /// coordinate system of `target`, or a [Matrix4.zero] if the paint transform
+  /// can not be computed.
   ///
-  /// If `ancestor` is null, this method returns a matrix that maps from the
+  /// This method throws an exception when the `target` is not in the same render
+  /// tree as this [RenderObject], as the behavior is undefined.
+  ///
+  /// This method ignores [RenderObject.paintsChild]. This means it will still
+  /// try to compute the paint transform even if this [RenderObject] or
+  /// `target` is currently not visible.
+  ///
+  /// If `target` is null, this method returns a matrix that maps from the
   /// local paint coordinate system to the coordinate system of the
   /// [PipelineOwner.rootNode].
   /// {@endtemplate}
@@ -3333,30 +3338,61 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   /// the global coordinate system in logical pixels. To get physical pixels,
   /// use [applyPaintTransform] from the [RenderView] to further transform the
   /// coordinate.
-  Matrix4 getTransformTo(RenderObject? ancestor) {
-    final bool ancestorSpecified = ancestor != null;
+  Matrix4 getTransformTo(RenderObject? target) {
     assert(attached);
-    if (ancestor == null) {
-      final RenderObject? rootNode = owner!.rootNode;
-      if (rootNode is RenderObject) {
-        ancestor = rootNode;
+    // The paths from to fromRenderObject and toRenderObject's common ancestor.
+    // Each list's length is greater than 1 if not null.
+    //
+    // [this, ...., commonAncestorRenderObject], or null if `this` is the common
+    // ancestor.
+    List<RenderObject>? fromPath;
+    // [target, ...., commonAncestorRenderObject], or null if `target` is the
+    // common ancestor.
+    List<RenderObject>? toPath;
+
+    RenderObject from = this;
+    RenderObject to = target ?? owner!.rootNode!;
+
+    while (!identical(from, to)) {
+      final int fromDepth = from.depth;
+      final int toDepth = to.depth;
+
+      if (fromDepth >= toDepth) {
+        final RenderObject fromParent = from.parent ?? (throw FlutterError('$target and $this are not in the same render tree.'));
+        (fromPath ??= <RenderObject>[this]).add(fromParent);
+        from = fromParent;
+      }
+      if (fromDepth <= toDepth) {
+        final RenderObject toParent = to.parent ?? (throw FlutterError('$target and $this are not in the same render tree.'));
+        assert(target != null, '$this has a depth that is less than or equal to ${owner?.rootNode}');
+        (toPath ??= <RenderObject>[target!]).add(toParent);
+        to = toParent;
       }
     }
-    final List<RenderObject> renderers = <RenderObject>[];
-    for (RenderObject renderer = this; renderer != ancestor; renderer = renderer.parent!) {
-      renderers.add(renderer);
-      assert(renderer.parent != null); // Failed to find ancestor in parent chain.
-    }
-    if (ancestorSpecified) {
-      renderers.add(ancestor!);
-    }
-    final Matrix4 transform = Matrix4.identity();
-    for (int index = renderers.length - 1; index > 0; index -= 1) {
-      renderers[index].applyPaintTransform(renderers[index - 1], transform);
-    }
-    return transform;
-  }
 
+    Matrix4? fromTransform;
+    if (fromPath != null) {
+      assert(fromPath.length > 1);
+      fromTransform = Matrix4.identity();
+      final int lastIndex = target == null ? fromPath.length - 2 : fromPath.length - 1;
+      for (int index = lastIndex; index > 0; index -= 1) {
+        fromPath[index].applyPaintTransform(fromPath[index - 1], fromTransform);
+      }
+    }
+    if (toPath == null) {
+      return fromTransform ?? Matrix4.identity();
+    }
+
+    assert(toPath.length > 1);
+    final Matrix4 toTransform = Matrix4.identity();
+    for (int index = toPath.length - 1; index > 0; index -= 1) {
+      toPath[index].applyPaintTransform(toPath[index - 1], toTransform);
+    }
+    if (toTransform.invert() == 0) {      // If the matrix is singular then `invert()` doesn't do anything.
+      return Matrix4.zero();
+    }
+    return (fromTransform?..multiply(toTransform)) ?? toTransform;
+  }
 
   /// Returns a rect in this object's coordinate system that describes
   /// the approximate bounding box of the clip rect that would be

@@ -11,7 +11,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
-import 'feedback.dart';
 import 'text_theme.dart';
 import 'theme.dart';
 import 'tooltip_theme.dart';
@@ -473,21 +472,14 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   // a PointerDown event interacts with some other UI component.
   final Set<int> _activeHoveringPointerDevices = <int>{};
 
-  static bool _isTooltipVisible(AnimationStatus status) {
-    return switch (status) {
-      AnimationStatus.completed || AnimationStatus.forward || AnimationStatus.reverse => true,
-      AnimationStatus.dismissed                                                       => false,
-    };
-  }
-
   AnimationStatus _animationStatus = AnimationStatus.dismissed;
   void _handleStatusChanged(AnimationStatus status) {
     assert(mounted);
-    switch ((_isTooltipVisible(_animationStatus), _isTooltipVisible(status))) {
-      case (true, false):
+    switch ((_animationStatus.isDismissed, status.isDismissed)) {
+      case (false, true):
         Tooltip._openedTooltips.remove(this);
         _overlayController.hide();
-      case (false, true):
+      case (true, false):
         _overlayController.show();
         Tooltip._openedTooltips.add(this);
         SemanticsService.tooltip(_tooltipMessage);
@@ -513,17 +505,12 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       !(_timer?.isActive ?? false) || _controller.status != AnimationStatus.reverse,
       'timer must not be active when the tooltip is fading out',
     );
-    switch (_controller.status) {
-      case AnimationStatus.dismissed when withDelay.inMicroseconds > 0:
-        _timer?.cancel();
-        _timer = Timer(withDelay, show);
-      // If the tooltip is already fading in or fully visible, skip the
-      // animation and show the tooltip immediately.
-      case AnimationStatus.dismissed:
-      case AnimationStatus.forward:
-      case AnimationStatus.reverse:
-      case AnimationStatus.completed:
-        show();
+    if (_controller.isDismissed && withDelay.inMicroseconds > 0) {
+      _timer?.cancel();
+      _timer = Timer(withDelay, show);
+    } else {
+      show(); // If the tooltip is already fading in or fully visible, skip the
+              // animation and show the tooltip immediately.
     }
   }
 
@@ -538,20 +525,14 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     _timer = null;
     // Use _backingController instead of _controller to prevent the lazy getter
     // from instantiating an AnimationController unnecessarily.
-    switch (_backingController?.status) {
-      case null:
-      case AnimationStatus.reverse:
-      case AnimationStatus.dismissed:
-        break;
+    if (_backingController?.isForwardOrCompleted ?? false) {
       // Dismiss when the tooltip is fading in: if there's a dismiss delay we'll
       // allow the fade in animation to continue until the delay timer fires.
-      case AnimationStatus.forward:
-      case AnimationStatus.completed:
-        if (withDelay.inMicroseconds > 0) {
-          _timer = Timer(withDelay, _controller.reverse);
-        } else {
-          _controller.reverse();
-        }
+      if (withDelay.inMicroseconds > 0) {
+        _timer = Timer(withDelay, _controller.reverse);
+      } else {
+        _controller.reverse();
+      }
     }
   }
 
@@ -603,7 +584,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       // callback (_handleTapToDismiss) will not be called.
       return;
     }
-    if ((_timer == null && _controller.status == AnimationStatus.dismissed) || event is! PointerDownEvent) {
+    if ((_timer == null && _controller.isDismissed) || event is! PointerDownEvent) {
       return;
     }
     _handleTapToDismiss();
@@ -623,7 +604,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     if (!_visible) {
       return;
     }
-    final bool tooltipCreated = _controller.status == AnimationStatus.dismissed;
+    final bool tooltipCreated = _controller.isDismissed;
     if (tooltipCreated && _enableFeedback) {
       assert(_triggerMode == TooltipTriggerMode.tap);
       Feedback.forTap(context);
@@ -642,7 +623,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     if (!_visible) {
       return;
     }
-    final bool tooltipCreated = _visible && _controller.status == AnimationStatus.dismissed;
+    final bool tooltipCreated = _visible && _controller.isDismissed;
     if (tooltipCreated && _enableFeedback) {
       assert(_triggerMode == TooltipTriggerMode.longPress);
       Feedback.forLongPress(context);
@@ -712,15 +693,11 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
 
     _timer?.cancel();
     _timer = null;
-    switch (_controller.status) {
-      case AnimationStatus.dismissed:
-      case AnimationStatus.reverse:
-        _scheduleShowTooltip(withDelay: Duration.zero);
-        return true;
-      case AnimationStatus.forward:
-      case AnimationStatus.completed:
-        return false;
+    if (_controller.isForwardOrCompleted) {
+      return false;
     }
+    _scheduleShowTooltip(withDelay: Duration.zero);
+    return true;
   }
 
   @override

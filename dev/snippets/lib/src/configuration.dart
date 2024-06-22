@@ -11,7 +11,6 @@ class SnippetConfiguration {
   const SnippetConfiguration({
     required this.configDirectory,
     required this.skeletonsDirectory,
-    required this.templatesDirectory,
     this.filesystem = const LocalFileSystem(),
   });
 
@@ -24,10 +23,6 @@ class SnippetConfiguration {
   /// The directory containing the HTML skeletons to be filled out with metadata
   /// and returned to dartdoc for insertion in the output.
   final Directory skeletonsDirectory;
-
-  /// The directory containing the code templates that can be referenced by the
-  /// dartdoc.
-  final Directory templatesDirectory;
 
   /// Gets the skeleton file to use for the given [SampleType] and DartPad
   /// preference.
@@ -47,11 +42,6 @@ class FlutterRepoSnippetConfiguration extends SnippetConfiguration {
               const <String>['dev', 'snippets', 'config']),
           skeletonsDirectory: _underRoot(filesystem, flutterRoot,
               const <String>['dev', 'snippets', 'config', 'skeletons']),
-          templatesDirectory: _underRoot(
-            filesystem,
-            flutterRoot,
-            const <String>['dev', 'snippets', 'config', 'templates'],
-          ),
         );
 
   final Directory flutterRoot;

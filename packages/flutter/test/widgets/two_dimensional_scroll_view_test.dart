@@ -919,5 +919,51 @@ void main() {
         expect(horizontalController.position.pixels, 0.0);
       });
     });
+
+    testWidgets('Dismiss keyboard onDrag and keep dismissed on drawer opened', (WidgetTester tester) async {
+      late final TwoDimensionalChildBuilderDelegate delegate;
+      final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+      addTearDown(() => delegate.dispose());
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            key: scaffoldKey,
+            drawer: Container(),
+            body: Column(
+              children: <Widget>[
+                const TextField(),
+                Expanded(
+                  child: SimpleBuilderTableView(
+                    keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+                    delegate: delegate = TwoDimensionalChildBuilderDelegate(
+                      builder: _testChildBuilder,
+                      maxXIndex: 99,
+                      maxYIndex: 99,
+                    ),
+                  ),
+                ),
+              ]
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      expect(tester.testTextInput.isVisible, isFalse);
+      final Finder finder = find.byType(TextField).first;
+      await tester.tap(finder);
+      expect(tester.testTextInput.isVisible, isTrue);
+
+      await tester.drag(find.byType(SimpleBuilderTableView).first, const Offset(-40.0, -40.0));
+      await tester.pumpAndSettle();
+
+      expect(tester.testTextInput.isVisible, isFalse);
+      scaffoldKey.currentState!.openDrawer();
+      await tester.pumpAndSettle();
+
+      expect(tester.testTextInput.isVisible, isFalse);
+    });
   });
 }

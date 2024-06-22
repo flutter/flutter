@@ -252,14 +252,11 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
   }
 
   Future<bool> _matchesCPURequirement(AndroidDevice device) async {
-    switch (cpu) {
-      case null:
-        return true;
-      case AndroidCPU.arm64:
-        return device.isArm64();
-      case AndroidCPU.arm:
-        return device.isArm();
-    }
+    return switch (cpu) {
+      null => Future<bool>.value(true),
+      AndroidCPU.arm64 => device.isArm64(),
+      AndroidCPU.arm   => device.isArm(),
+    };
   }
 
   /// Picks a random Android device out of connected devices and sets it as

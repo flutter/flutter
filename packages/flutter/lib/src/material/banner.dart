@@ -312,17 +312,12 @@ class _MaterialBannerState extends State<MaterialBanner> {
     super.dispose();
   }
 
-  void _onAnimationStatusChanged(AnimationStatus animationStatus) {
-    switch (animationStatus) {
-      case AnimationStatus.dismissed:
-      case AnimationStatus.forward:
-      case AnimationStatus.reverse:
-        break;
-      case AnimationStatus.completed:
-        if (widget.onVisible != null && !_wasVisible) {
-          widget.onVisible!();
-        }
-        _wasVisible = true;
+  void _onAnimationStatusChanged(AnimationStatus status) {
+    if (status.isCompleted) {
+      if (widget.onVisible != null && !_wasVisible) {
+        widget.onVisible!();
+      }
+      _wasVisible = true;
     }
   }
 
@@ -345,14 +340,18 @@ class _MaterialBannerState extends State<MaterialBanner> {
         ?? bannerTheme.leadingPadding
         ?? const EdgeInsetsDirectional.only(end: 16.0);
 
-    final Widget actionsBar = Container(
-      alignment: AlignmentDirectional.centerEnd,
+    final Widget actionsBar = ConstrainedBox(
       constraints: const BoxConstraints(minHeight: 52.0),
-      padding: const EdgeInsets.symmetric(horizontal: 8),
-      child: OverflowBar(
-        overflowAlignment: widget.overflowAlignment,
-        spacing: 8,
-        children: widget.actions,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        child: Align(
+          alignment: AlignmentDirectional.centerEnd,
+          child: OverflowBar(
+            overflowAlignment: widget.overflowAlignment,
+            spacing: 8,
+            children: widget.actions,
+          ),
+        ),
       ),
     );
 
@@ -373,8 +372,8 @@ class _MaterialBannerState extends State<MaterialBanner> {
         ?? bannerTheme.contentTextStyle
         ?? defaults.contentTextStyle;
 
-    Widget materialBanner = Container(
-      margin: margin,
+    Widget materialBanner = Padding(
+      padding: margin,
       child: Material(
         elevation: elevation,
         color: backgroundColor,

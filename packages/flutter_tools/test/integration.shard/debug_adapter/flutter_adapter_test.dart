@@ -464,8 +464,11 @@ The relevant error-causing widget was:
       // Launch the app and wait for it to stop at an exception.
       late int originalThreadId, newThreadId;
       await Future.wait(<Future<void>>[
-        // Capture the thread ID of the stopped thread.
-        dap.client.stoppedEvents.first.then((StoppedEventBody event) => originalThreadId = event.threadId!),
+        // Capture the thread ID of thread when it stops on the exception
+        // (ignoring the stop on entry that occurs during thread start).
+        dap.client.stoppedEvents
+          .where((StoppedEventBody event) => event.reason == 'exception').first
+          .then((StoppedEventBody event) => originalThreadId = event.threadId!),
         dap.client.start(
           exceptionPauseMode: 'All', // Ensure we stop on all exceptions
           launch: () => dap.client.launch(
@@ -478,8 +481,11 @@ The relevant error-causing widget was:
       // Hot restart, ensuring it completes and capturing the ID of the new thread
       // to pause.
       await Future.wait(<Future<void>>[
-        // Capture the thread ID of the newly stopped thread.
-        dap.client.stoppedEvents.first.then((StoppedEventBody event) => newThreadId = event.threadId!),
+        // Capture the thread ID of the next stop on exception (ignoring any
+        // stop on exit/entry that occurs during thread start/exit).
+        dap.client.stoppedEvents
+            .where((StoppedEventBody event) => event.reason == 'exception').first
+            .then((StoppedEventBody event) => newThreadId = event.threadId!),
         dap.client.hotRestart(),
       ], eagerError: true);
 

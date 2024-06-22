@@ -1209,8 +1209,7 @@ class _NestedScrollController extends ScrollController {
   }
 
   Iterable<_NestedScrollPosition> get nestedPositions {
-    // TODO(vegorov): use instance method version of castFrom when it is available.
-    return Iterable.castFrom<ScrollPosition, _NestedScrollPosition>(positions);
+    return positions.cast<_NestedScrollPosition>();
   }
 }
 

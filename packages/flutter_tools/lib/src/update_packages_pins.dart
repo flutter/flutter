@@ -23,18 +23,18 @@ const Map<String, String> kManuallyPinnedDependencies = <String, String>{
   'flutter_gallery_assets': '1.0.2', // Tests depend on the exact version.
   'flutter_template_images': '4.2.0', // Must always exactly match flutter_tools template.
   'material_color_utilities': '0.11.1', // Keep pinned to latest until 1.0.0.
-  'archive': '3.3.2', // https://github.com/flutter/flutter/issues/115660
   'leak_tracker': '10.0.5', // https://github.com/flutter/devtools/issues/3951
   'leak_tracker_testing': '3.0.1', // https://github.com/flutter/devtools/issues/3951
   'leak_tracker_flutter_testing': '3.0.5', // https://github.com/flutter/devtools/issues/3951
   'path_provider_android':
       '2.2.1', // https://github.com/flutter/flutter/issues/140796
-  'camera_android': '0.10.8+17', // https://github.com/flutter/flutter/issues/146004
-  'dds': '4.1.0', // https://github.com/dart-lang/sdk/issues/55559
 };
 
 /// These are packages that are explicitly excluded from appearing in the list
 /// of pinned packages added to each pubspec.yaml.
 const List<String> kExplicitlyExcludedPackages = <String>[
   '_macros', // Synthetic dependency for macros package, which isn't published.
+  // This is effectively pinned via the Dart SDK pin, see
+  // https://github.com/flutter/flutter/issues/148004 for more context.
+  'macros',
 ];

@@ -521,6 +521,7 @@ class WebTestsSuite {
       flutter,
       <String>[
         'run',
+        '--verbose',
         '--debug',
         '-d',
         'chrome',
@@ -533,10 +534,15 @@ class WebTestsSuite {
       ],
       outputMode: OutputMode.capture,
       outputListener: (String line, Process process) {
+        bool shutdownFlutterTool = false;
         if (line.contains('--- TEST SUCCEEDED ---')) {
           success = true;
+          shutdownFlutterTool = true;
         }
-        if (success || line.contains('--- TEST FAILED ---')) {
+        if (line.contains('--- TEST FAILED ---')) {
+          shutdownFlutterTool = true;
+        }
+        if (shutdownFlutterTool) {
           process.stdin.add('q'.codeUnits);
         }
       },

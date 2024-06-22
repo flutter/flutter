@@ -705,6 +705,7 @@ void main() {
         'example/ios/Runner/Runner-Bridging-Header.h',
         'example/lib/main.dart',
         'ios/Classes/FlutterProjectPlugin.swift',
+        'ios/Resources/PrivacyInfo.xcprivacy',
         'lib/flutter_project.dart',
       ],
       unexpectedPaths: <String>[
@@ -726,7 +727,7 @@ void main() {
       <String>[
         'ios/flutter_project/Package.swift',
         'ios/flutter_project/Sources/flutter_project/FlutterProjectPlugin.swift',
-        'ios/flutter_project/Sources/flutter_project/Resources/.gitkeep',
+        'ios/flutter_project/Sources/flutter_project/PrivacyInfo.xcprivacy',
         'macos/flutter_project/Package.swift',
         'macos/flutter_project/Sources/flutter_project/FlutterProjectPlugin.swift',
         'macos/flutter_project/Sources/flutter_project/Resources/.gitkeep',
@@ -755,7 +756,7 @@ void main() {
         'ios/flutter_project/Package.swift',
         'ios/flutter_project/Sources/flutter_project/include/flutter_project/FlutterProjectPlugin.h',
         'ios/flutter_project/Sources/flutter_project/FlutterProjectPlugin.m',
-        'ios/flutter_project/Sources/flutter_project/Resources/.gitkeep',
+        'ios/flutter_project/Sources/flutter_project/PrivacyInfo.xcprivacy',
       ],
       unexpectedPaths: <String>[
         'ios/Classes/FlutterProjectPlugin.swift',
@@ -922,7 +923,7 @@ void main() {
     // Import for the new embedding class.
     expect(mainActivity.contains('import io.flutter.embedding.android.FlutterActivity'), true);
 
-    expect(logger.statusText, isNot(contains('https://github.com/flutter/flutter/wiki/Upgrading-pre-1.12-Android-projects')));
+    expect(logger.statusText, isNot(contains('https://github.com/flutter/flutter/blob/main/docs/platforms/android/Upgrading-pre-1.12-Android-projects.md')));
   }, overrides: <Type, Generator>{
     Logger: () => logger,
   });
@@ -2106,6 +2107,52 @@ void main() {
       throwsToolExit(
         message: 'The --empty flag is only supported for the app template.',
     ));
+  });
+
+  testUsingContext('does not remove an existing test/ directory when recreating an application project with the --empty flag', () async {
+    await _createProject(
+      projectDir,
+      <String>['--no-pub', '--empty'],
+      <String>[],
+    );
+
+    projectDir.childDirectory('test').childFile('example_test.dart').createSync(recursive: true);
+
+    await _createProject(
+      projectDir,
+      <String>['--no-pub', '--empty'],
+      <String>['test/example_test.dart'],
+    );
+
+    expect(projectDir.childDirectory('test').childFile('example_test.dart'), exists);
+  });
+
+  testUsingContext('does not create a test/ directory when creating a new application project with the --empty flag', () async {
+    await _createProject(
+      projectDir,
+      <String>['--no-pub', '--empty'],
+      <String>[],
+      unexpectedPaths: <String>['test'],
+    );
+
+    expect(projectDir.childDirectory('test'), isNot(exists));
+  });
+
+  testUsingContext("does not create a test/ directory, if it doesn't already exist, when recreating an application project with the --empty flag", () async {
+    await _createProject(
+      projectDir,
+      <String>['--no-pub', '--empty'],
+      <String>[],
+    );
+
+    await _createProject(
+      projectDir,
+      <String>['--no-pub', '--empty'],
+      <String>[],
+      unexpectedPaths: <String>['test'],
+    );
+
+    expect(projectDir.childDirectory('test'), isNot(exists));
   });
 
   testUsingContext('can create a sample-based project', () async {
@@ -3769,7 +3816,7 @@ void main() {
         '--no-pub',
         '--template=plugin',
         '--project-name=test',
-        projectDir.path,
+        'dev/test',
       ]),
       throwsToolExit(message: 'Unable to read the template manifest at path'),
     );
@@ -3777,8 +3824,7 @@ void main() {
     FileSystem: () => MemoryFileSystem.test(
       opHandle: (String context, FileSystemOp operation) {
         if (operation == FileSystemOp.read && context.contains('template_manifest.json')) {
-          throw io.PathNotFoundException(
-              context, const OSError(), 'Cannot open file');
+          throw io.PathNotFoundException(context, const OSError(), 'Cannot open file');
         }
       },
     ),

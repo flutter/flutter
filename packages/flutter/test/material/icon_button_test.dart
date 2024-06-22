@@ -9,8 +9,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import '../widgets/feedback_tester.dart';
 import '../widgets/semantics_tester.dart';
-import 'feedback_tester.dart';
 
 class MockOnPressedFunction {
   int called = 0;
@@ -616,6 +616,7 @@ void main() {
           rect: const Rect.fromLTRB(0.0, 0.0, 48.0, 48.0),
           actions: <SemanticsAction>[
             SemanticsAction.tap,
+            SemanticsAction.focus,
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.hasEnabledState,
@@ -690,6 +691,7 @@ void main() {
                         TestSemantics(
                           actions: <SemanticsAction>[
                             SemanticsAction.tap,
+                            SemanticsAction.focus,
                           ],
                           flags: <SemanticsFlag>[
                             SemanticsFlag.hasEnabledState,
@@ -2177,6 +2179,7 @@ void main() {
           TestSemantics.rootChild(
             actions: <SemanticsAction>[
               SemanticsAction.tap,
+              SemanticsAction.focus,
             ],
             rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
             transform: Matrix4.translationValues(356.0, 276.0, 0.0),

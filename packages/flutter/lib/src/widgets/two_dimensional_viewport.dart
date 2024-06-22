@@ -1318,7 +1318,9 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
         }
     }
     _lastChild = previousChild;
-    parentDataOf(_lastChild!)._nextSibling = null;
+    if (_lastChild != null) {
+      parentDataOf(_lastChild!)._nextSibling = null;
+    }
     // Reset for next layout pass.
     _leadingXIndex = null;
     _trailingXIndex = null;
@@ -1647,6 +1649,10 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
         _children.remove(slot);
       }
       assert(_debugTrackOrphans(noLongerOrphan: child));
+      if (_keepAliveBucket[childParentData.vicinity] == child) {
+        _keepAliveBucket.remove(childParentData.vicinity);
+      }
+      assert(_keepAliveBucket[childParentData.vicinity] != child);
       dropChild(child);
       return;
     }

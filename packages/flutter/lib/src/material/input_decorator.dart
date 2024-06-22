@@ -729,7 +729,9 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
        _expands = expands,
        _material3 = material3;
 
-  static const double subtextGap = 8.0;
+  // TODO(bleroux): consider defining this value as a Material token and making it
+  // configurable by InputDecorationTheme.
+  double get subtextGap => material3 ? 4.0 : 8.0;
 
   RenderBox? get icon => childForSlot(_DecorationSlot.icon);
   RenderBox? get input => childForSlot(_DecorationSlot.input);
@@ -1865,9 +1867,11 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   late final CurvedAnimation _floatingLabelAnimation;
   late final AnimationController _shakingLabelController;
   final _InputBorderGap _borderGap = _InputBorderGap();
-  static const OrdinalSortKey _kPrefixSemanticsSortOrder = OrdinalSortKey(0);
-  static const OrdinalSortKey _kInputSemanticsSortOrder = OrdinalSortKey(1);
-  static const OrdinalSortKey _kSuffixSemanticsSortOrder = OrdinalSortKey(2);
+  // Provide a unique name to avoid mixing up sort order with sibling input
+  // decorators.
+  late final OrdinalSortKey _prefixSemanticsSortOrder = OrdinalSortKey(0, name: hashCode.toString());
+  late final OrdinalSortKey _inputSemanticsSortOrder = OrdinalSortKey(1, name: hashCode.toString());
+  late final OrdinalSortKey _suffixSemanticsSortOrder = OrdinalSortKey(2, name: hashCode.toString());
   static const SemanticsTag _kPrefixSemanticsTag = SemanticsTag('_InputDecoratorState.prefix');
   static const SemanticsTag _kSuffixSemanticsTag = SemanticsTag('_InputDecoratorState.suffix');
 
@@ -2160,7 +2164,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         hintText,
         style: hintStyle,
         textDirection: decoration.hintTextDirection,
-        overflow: hintStyle.overflow ?? TextOverflow.ellipsis,
+        overflow: hintStyle.overflow ?? (decoration.hintMaxLines == null ? null : TextOverflow.ellipsis),
         textAlign: textAlign,
         maxLines: decoration.hintMaxLines,
       ),
@@ -2219,7 +2223,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
           labelIsFloating: widget._labelShouldWithdraw,
           text: decoration.prefixText,
           style: MaterialStateProperty.resolveAs(decoration.prefixStyle, materialState) ?? hintStyle,
-          semanticsSortKey: needsSemanticsSortOrder ? _kPrefixSemanticsSortOrder : null,
+          semanticsSortKey: needsSemanticsSortOrder ? _prefixSemanticsSortOrder : null,
           semanticsTag: _kPrefixSemanticsTag,
           child: decoration.prefix,
         )
@@ -2230,7 +2234,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
           labelIsFloating: widget._labelShouldWithdraw,
           text: decoration.suffixText,
           style: MaterialStateProperty.resolveAs(decoration.suffixStyle, materialState) ?? hintStyle,
-          semanticsSortKey: needsSemanticsSortOrder ? _kSuffixSemanticsSortOrder : null,
+          semanticsSortKey: needsSemanticsSortOrder ? _suffixSemanticsSortOrder : null,
           semanticsTag: _kSuffixSemanticsTag,
           child: decoration.suffix,
         )
@@ -2238,7 +2242,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 
     if (input != null && needsSemanticsSortOrder) {
       input = Semantics(
-        sortKey: _kInputSemanticsSortOrder,
+        sortKey: _inputSemanticsSortOrder,
         child: input,
       );
     }
@@ -2513,10 +2517,9 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 ///
 /// {@tool dartpad}
 /// This sample shows how to style a `TextField` with a prefixIcon that changes color
-/// based on the `MaterialState`. The color defaults to gray, be blue while focused
-/// and red if in an error state.
+/// based on the `MaterialState`. The color defaults to gray and is green while focused.
 ///
-/// ** See code in examples/api/lib/material/input_decorator/input_decoration.material_state.0.dart **
+/// ** See code in examples/api/lib/material/input_decorator/input_decoration.widget_state.0.dart **
 /// {@end-tool}
 ///
 /// {@tool dartpad}
@@ -2524,7 +2527,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 /// based on the `MaterialState` through the use of `ThemeData`. The color defaults
 /// to gray, be blue while focused and red if in an error state.
 ///
-/// ** See code in examples/api/lib/material/input_decorator/input_decoration.material_state.1.dart **
+/// ** See code in examples/api/lib/material/input_decorator/input_decoration.widget_state.1.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -4566,7 +4569,7 @@ class _InputDecoratorDefaultsM2 extends InputDecorationTheme {
 
   @override
   TextStyle? get helperStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
-    final ThemeData themeData= Theme.of(context);
+    final ThemeData themeData = Theme.of(context);
     if (states.contains(MaterialState.disabled)) {
       return themeData.textTheme.bodySmall!.copyWith(color: Colors.transparent);
     }
@@ -4576,7 +4579,7 @@ class _InputDecoratorDefaultsM2 extends InputDecorationTheme {
 
   @override
   TextStyle? get errorStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
-    final ThemeData themeData= Theme.of(context);
+    final ThemeData themeData = Theme.of(context);
     if (states.contains(MaterialState.disabled)) {
       return themeData.textTheme.bodySmall!.copyWith(color: Colors.transparent);
     }
@@ -4625,6 +4628,9 @@ class _InputDecoratorDefaultsM2 extends InputDecorationTheme {
   Color? get suffixIconColor => MaterialStateColor.resolveWith((Set<MaterialState> states) {
     if (states.contains(MaterialState.disabled) && !states.contains(MaterialState.focused)) {
       return Theme.of(context).disabledColor;
+    }
+    if (states.contains(MaterialState.error)) {
+      return Theme.of(context).colorScheme.error;
     }
     if (states.contains(MaterialState.focused)) {
       return Theme.of(context).colorScheme.primary;
@@ -4729,6 +4735,9 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
 
   @override
   Color? get prefixIconColor => MaterialStateColor.resolveWith((Set<MaterialState> states) {
+    if (states.contains(MaterialState.disabled)) {
+      return _colors.onSurface.withOpacity(0.38);
+    }
     return _colors.onSurfaceVariant;
   });
 
@@ -4738,6 +4747,9 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
       return _colors.onSurface.withOpacity(0.38);
     }
     if (states.contains(MaterialState.error)) {
+      if (states.contains(MaterialState.hovered)) {
+        return _colors.onErrorContainer;
+      }
       return _colors.error;
     }
     return _colors.onSurfaceVariant;
