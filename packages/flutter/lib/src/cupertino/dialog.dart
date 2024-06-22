@@ -914,6 +914,28 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
     );
   }
 
+  // Given data point (x1, y1) and (x2, y2), derive the y corresponding to x
+  // using linear interpolation between the two data points, and extrapolates
+  // flatly beyond these points.
+  //
+  //              (x2, y2)
+  //                _____________
+  //               /
+  //              /
+  //    _________/
+  //           (x1, y1)
+  static double _lerp(double x, double x1, double y1, double x2, double y2) {
+    if (x <= x1) {
+      return y1;
+    } else if (x >= x2) {
+      return y2;
+    } else {
+      return Tween<double>(begin: y1, end: y2).transform(
+        (x - x1) / (x2 - x1)
+      );
+    }
+  }
+
   // Derive the top padding, which is the distance between the top of a
   // full-height action sheet and the top of the safe area.
   //
@@ -934,28 +956,24 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
     // Currently, we cannot determine why the result changes on "capsules."
     // Therefore, we'll hard code this rule, given the limited types of actual
     // devices. To provide an algorithm that accepts arbitrary view padding, this
-    // function calculates the ratio as a continuous curve. It performs linear
-    // interpolation between (47.0, 1.0) and (59.0, 0.915) and extrapolates flatly
-    // beyond these points.
+    // function calculates the ratio as a continuous curve with linear
+    // interpolation.
 
-    // x stands for top view padding.
-    const double x1 = 47.0;
-    const double x2 = 59.0;
+    // The x for lerp is the top view padding, while the y is ratio of
+    // action sheet padding versus top view padding.
+    const double viewPaddingData1 = 47.0;
+    const double paddingRatioData1 = 1.0;
+    const double viewPaddingData2 = 59.0;
+    const double paddingRatioData2 = 54.0 / 59.0;
 
-    // y is the ratio of action_sheet_padding / view_padding.
-    const double y1 = 1.0;
-    const double y2 = 54.0 / 59.0;
+    final double currentViewPadding = MediaQuery.viewPaddingOf(context).top;
 
-    final double x = MediaQuery.viewPaddingOf(context).top;
-
-    final double y = switch (x) {
-      <= x1 => y1,
-      >= x2 => y2,
-      _ => Tween<double>(begin: y1, end: y2).transform(
-        (x - x1) / (x2 - x1)
-      ),
-    };
-    final double padding = (y * x).roundToDouble();
+    final double currentPaddingRatio = _lerp(
+      /* x= */currentViewPadding,
+      /* x1, y1= */viewPaddingData1, paddingRatioData1,
+      /* x2, y2= */viewPaddingData2, paddingRatioData2,
+    );
+    final double padding = (currentPaddingRatio * currentViewPadding).roundToDouble();
     // In case there is no view padding, there should still be some space
     // between the action sheet and the edge.
     return math.max(padding, _kDialogEdgePadding);
