@@ -235,6 +235,12 @@ abstract class Gradient {
   /// Typically this is the same as interpolating from null (with [lerp]).
   Gradient scale(double factor);
 
+  /// Returns a new gradient that matches this gradient with the given opacity
+  ///
+  /// A factor of 0.0 (or less) should result in a variant of the gradient that
+  /// is fully transparent
+  Gradient withOpacity(double opacity);
+
   /// Linearly interpolates from another [Gradient] to `this`.
   ///
   /// When implementing this method in subclasses, return null if this class
@@ -551,6 +557,18 @@ class LinearGradient extends Gradient {
 
     return '${objectRuntimeType(this, 'LinearGradient')}(${description.join(', ')})';
   }
+
+  /// Returns a new [LinearGradient] with its colors opacity changed to the given opacity.
+  @override
+  LinearGradient withOpacity(double opacity) {
+    return LinearGradient(
+      begin: begin,
+      end: end,
+      colors: colors.map<Color>((Color color) => color.withOpacity(opacity)).toList(),
+      stops: stops,
+      tileMode: tileMode,
+    );
+  }
 }
 
 /// A 2D radial gradient.
@@ -838,6 +856,20 @@ class RadialGradient extends Gradient {
 
     return '${objectRuntimeType(this, 'RadialGradient')}(${description.join(', ')})';
   }
+
+  /// Returns a new [LinearGradient] with its colors opacity changed to the given opacity.
+  @override
+  RadialGradient withOpacity(double opacity) {
+    return RadialGradient(
+      center: center,
+      radius: radius,
+      colors: colors.map<Color>((Color color) => color.withOpacity(opacity)).toList(),
+      stops: stops,
+      tileMode: tileMode,
+      focal: focal,
+      focalRadius: focalRadius,
+    );
+  }
 }
 
 /// A 2D sweep gradient.
@@ -1100,5 +1132,18 @@ class SweepGradient extends Gradient {
     ];
 
     return '${objectRuntimeType(this, 'SweepGradient')}(${description.join(', ')})';
+  }
+
+  /// Returns a new [LinearGradient] with its colors opacity changed to the given opacity.
+  @override
+  SweepGradient withOpacity(double opacity) {
+    return SweepGradient(
+      center: center,
+      startAngle: startAngle,
+      endAngle: endAngle,
+      colors: colors.map<Color>((Color color) => color.withOpacity(opacity)).toList(),
+      stops: stops,
+      tileMode: tileMode,
+    );
   }
 }
