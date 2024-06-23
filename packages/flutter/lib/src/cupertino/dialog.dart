@@ -1935,26 +1935,21 @@ class CupertinoDialogAction extends StatelessWidget {
     // button text to fit the available space.
     final double fontSizeRatio = MediaQuery.textScalerOf(context).scale(textStyle.fontSize!) / _kDialogMinButtonFontSize;
 
-    return IntrinsicHeight(
-      child: SizedBox(
-        width: double.infinity,
-        child: FittedBox(
-          fit: BoxFit.scaleDown,
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              maxWidth: fontSizeRatio * (dialogWidth - (2 * padding)),
-            ),
-            child: Semantics(
-              button: true,
-              onTap: onPressed,
-              child: DefaultTextStyle(
-                style: textStyle,
-                textAlign: TextAlign.center,
-                overflow: TextOverflow.ellipsis,
-                maxLines: 1,
-                child: content,
-              ),
-            ),
+    return FittedBox(
+      fit: BoxFit.scaleDown,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxWidth: fontSizeRatio * (dialogWidth - (2 * padding)),
+        ),
+        child: Semantics(
+          button: true,
+          onTap: onPressed,
+          child: DefaultTextStyle(
+            style: textStyle,
+            textAlign: TextAlign.center,
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1,
+            child: content,
           ),
         ),
       ),
@@ -2094,13 +2089,16 @@ class _AlertDialogActionsLayout extends MultiChildRenderObjectWidget {
 // from observation of native iOS dialogs.
 class _RenderAlertDialogActionsLayout extends RenderFlex {
   _RenderAlertDialogActionsLayout({
+    List<RenderBox>? children,
     required double dividerThickness,
   }) : _dividerThickness = dividerThickness,
        super(
          direction: Axis.vertical,
          mainAxisSize: MainAxisSize.min,
          crossAxisAlignment: CrossAxisAlignment.stretch,
-       );
+       ) {
+    addAll(children);
+  }
 
   // The thickness of the divider between buttons.
   double get dividerThickness => _dividerThickness;
