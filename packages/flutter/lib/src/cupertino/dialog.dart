@@ -1541,6 +1541,22 @@ class _CupertinoDialogRenderWidgetState extends State<_CupertinoDialogRenderWidg
     return false;
   }
 
+  Widget _buildActionsSection() {
+    return Flexible(
+      child: Stack(
+        children: <Widget>[
+          Positioned.fill(
+            child: _buildOverscroll(_kDialogColor),
+          ),
+          NotificationListener<ScrollUpdateNotification>(
+            onNotification: _onScrollUpdate,
+            child: widget.actionsSection!,
+          ),
+        ],
+      ),
+    );
+  }
+
   // iOS style layout policy for sizing an alert dialog's content section and action
   // button section.
   //
@@ -1577,44 +1593,28 @@ class _CupertinoDialogRenderWidgetState extends State<_CupertinoDialogRenderWidg
       context: context,
       child: LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
-          final double contentMaxHeight;
           if (!hasActions) {
-            contentMaxHeight = constraints.maxHeight;
-          } else if (_isInAccessibilityMode(context)) {
-            contentMaxHeight = constraints.maxHeight / 2;
-          } else {
-            contentMaxHeight = math.max(0,
-                constraints.maxHeight - _kDialogActionsSectionMinHeight - _kDividerThickness);
+            return widget.contentSection ?? Container();
           }
-          return Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              if (hasContent)
-                ConstrainedBox(
-                  constraints: BoxConstraints(maxHeight: contentMaxHeight),
-                  child: widget.contentSection,
-                ),
-              if (hasContent && hasActions)
+          if (!hasContent) {
+            return _buildActionsSection();
+          }
+          final double actionsMaxHeight = _isInAccessibilityMode(context)
+              ? constraints.maxHeight / 2 + _kDividerThickness
+              : _kDialogActionsSectionMinHeight + _kDividerThickness;
+          return _PriorityColumn(
+            top: widget.contentSection!,
+            bottom: Column(
+              children: <Widget>[
                 _ActionSheetDivider(
                   dividerColor: widget.dividerColor,
                   hiddenColor: _kDialogColor,
                   hidden: false,
                 ),
-              if (hasActions)
-                Flexible(
-                  child: Stack(
-                    children: <Widget>[
-                      Positioned.fill(
-                        child: _buildOverscroll(_kDialogColor),
-                      ),
-                      NotificationListener<ScrollUpdateNotification>(
-                        onNotification: _onScrollUpdate,
-                        child: widget.actionsSection!,
-                      ),
-                    ],
-                  ),
-                ),
-            ],
+                _buildActionsSection(),
+              ],
+            ),
+            bottomMinHeight: actionsMaxHeight,
           );
         },
       ),
@@ -2028,6 +2028,110 @@ class CupertinoDialogAction extends StatelessWidget {
   }
 }
 
+class _PriorityColumn extends MultiChildRenderObjectWidget {
+  _PriorityColumn({
+    required Widget top,
+    required Widget bottom,
+    required this.bottomMinHeight,
+  }) : super(children: <Widget>[top, bottom]);
+
+  final double bottomMinHeight;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return _RenderPriorityColumn(
+      bottomMinHeight: bottomMinHeight,
+    );
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderPriorityColumn renderObject) {
+    renderObject
+      .bottomMinHeight = bottomMinHeight;
+  }
+}
+
+class _RenderPriorityColumn extends RenderFlex {
+  _RenderPriorityColumn({
+    List<RenderBox>? children,
+    required double bottomMinHeight,
+  }) : _bottomMinHeight = bottomMinHeight,
+       super(
+         direction: Axis.vertical,
+         mainAxisSize: MainAxisSize.min,
+         crossAxisAlignment: CrossAxisAlignment.stretch,
+       ) {
+    addAll(children);
+  }
+
+  double get bottomMinHeight => _bottomMinHeight;
+  double _bottomMinHeight;
+  set bottomMinHeight(double newValue) {
+    if (newValue != _bottomMinHeight) {
+      _bottomMinHeight = newValue;
+      markNeedsLayout();
+    }
+  }
+
+  @override
+  double computeMinIntrinsicHeight(double width) {
+    assert(childCount == 2);
+    return firstChild!.getMinIntrinsicHeight(width) + lastChild!.getMinIntrinsicHeight(width);
+  }
+
+  @override
+  double computeMaxIntrinsicHeight(double width) {
+    assert(childCount == 2);
+    return firstChild!.getMaxIntrinsicHeight(width) + lastChild!.getMaxIntrinsicHeight(width);
+  }
+
+  @override
+  @protected
+  Size computeDryLayout(covariant BoxConstraints constraints) {
+    final double width = constraints.maxWidth;
+    final double maxHeight = constraints.maxHeight;
+    final (double topHeight, double bottomHeight) = _childrenHeights(width, maxHeight);
+    return Size(width, topHeight + bottomHeight);
+  }
+
+  @override
+  void performLayout() {
+    final double width = constraints.maxWidth;
+    final double maxHeight = constraints.maxHeight;
+    final (double topHeight, double bottomHeight) = _childrenHeights(width, maxHeight);
+    size = Size(width, topHeight + bottomHeight);
+
+    firstChild!.layout(BoxConstraints.tight(Size(width, topHeight)), parentUsesSize: true);
+    (firstChild!.parentData! as FlexParentData).offset = Offset.zero;
+
+    lastChild!.layout(BoxConstraints.tight(Size(width, bottomHeight)), parentUsesSize: true);
+    (lastChild!.parentData! as FlexParentData).offset = Offset(0, topHeight);
+  }
+
+  (double, double) _childrenHeights(double width, double maxHeight) {
+    assert(childCount == 2);
+    final double topIntrinsic = firstChild!.getMinIntrinsicHeight(width);
+    final double bottomIntrinsic = lastChild!.getMinIntrinsicHeight(width);
+    // Try to layout both children as their intrinsic height.
+    if (topIntrinsic + bottomIntrinsic <= maxHeight) {
+      return (topIntrinsic, bottomIntrinsic);
+    }
+    // _bottomMinHeight is only effective when bottom actually needs that much.
+    final double effectiveBottomMinHeight = math.min(_bottomMinHeight, bottomIntrinsic) ;
+    // Try to layout top as intrinsics, as long as the bottom has at least
+    // effectiveBottomMinHeight.
+    if (maxHeight - topIntrinsic >= effectiveBottomMinHeight) {
+      return (topIntrinsic, maxHeight - topIntrinsic);
+    }
+    // Try to layout bottom as effectiveBottomMinHeight, as long as top has at
+    // least 0.
+    if (maxHeight >= effectiveBottomMinHeight) {
+      return (maxHeight - effectiveBottomMinHeight, effectiveBottomMinHeight);
+    }
+    return (0, maxHeight);
+  }
+}
+
 class _AlertDialogActionsLayout extends MultiChildRenderObjectWidget {
   const _AlertDialogActionsLayout({
     required double dividerThickness,
@@ -2115,10 +2219,6 @@ class _RenderAlertDialogActionsLayout extends RenderFlex {
 
   @override
   double computeMinIntrinsicHeight(double width) {
-    if (!_debugHasValidConstraints(constraints)) {
-      return 0;
-    }
-
     if (!_useHorizontalLayout(width)) {
       return super.computeMinIntrinsicHeight(width);
     }
@@ -2128,15 +2228,11 @@ class _RenderAlertDialogActionsLayout extends RenderFlex {
     _forEachSlot((RenderBox slot) {
       height = math.max(height, slot.getMinIntrinsicHeight(slotWidth));
     });
-    return constraints.constrainHeight(height);
+    return height;
   }
 
   @override
   double computeMaxIntrinsicHeight(double width) {
-    if (!_debugHasValidConstraints(constraints)) {
-      return 0;
-    }
-
     if (!_useHorizontalLayout(width)) {
       return super.computeMinIntrinsicHeight(width);
     }
@@ -2146,7 +2242,7 @@ class _RenderAlertDialogActionsLayout extends RenderFlex {
     _forEachSlot((RenderBox slot) {
       height = math.max(height, slot.getMaxIntrinsicHeight(slotWidth));
     });
-    return constraints.constrainHeight(height);
+    return height;
   }
 
   @override
