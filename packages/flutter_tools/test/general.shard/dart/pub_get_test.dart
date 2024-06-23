@@ -37,7 +37,6 @@ void main() {
       fileSystem: fileSystem,
       logger: logger,
       processManager: processManager,
-      usage: TestUsage(),
       platform: FakePlatform(),
       botDetector: const BotDetectorAlwaysNo(),
       stdio: FakeStdio(),
@@ -92,7 +91,6 @@ void main() {
         fileSystem: fileSystem,
         logger: logger,
         processManager: processManager,
-        usage: TestUsage(),
         platform: FakePlatform(),
         botDetector: const BotDetectorAlwaysNo(),
         stdio: FakeStdio(),
@@ -147,7 +145,6 @@ void main() {
         fileSystem: fileSystem,
         logger: logger,
         processManager: processManager,
-        usage: TestUsage(),
         platform: FakePlatform(),
         botDetector: const BotDetectorAlwaysNo(),
         stdio: FakeStdio(),
@@ -201,7 +198,6 @@ void main() {
         fileSystem: fileSystem,
         logger: logger,
         processManager: processManager,
-        usage: TestUsage(),
         platform: FakePlatform(),
         botDetector: const BotDetectorAlwaysNo(),
         stdio: FakeStdio(),
@@ -234,7 +230,6 @@ void main() {
         fileSystem: fileSystem,
         logger: logger,
         processManager: processManager,
-        usage: TestUsage(),
         platform: FakePlatform(),
         botDetector: const BotDetectorAlwaysNo(),
         stdio: FakeStdio(),
@@ -273,7 +268,6 @@ void main() {
       fileSystem: fileSystem,
       logger: logger,
       processManager: processManager,
-      usage: TestUsage(),
       platform: FakePlatform(),
       botDetector: const BotDetectorAlwaysNo(),
       stdio: FakeStdio(),
@@ -319,7 +313,6 @@ void main() {
       fileSystem: fileSystem,
       logger: logger,
       processManager: processManager,
-      usage: TestUsage(),
       platform: FakePlatform(),
       botDetector: const BotDetectorAlwaysNo(),
       stdio: FakeStdio(),
@@ -364,7 +357,6 @@ void main() {
       fileSystem: fileSystem,
       logger: logger,
       processManager: processManager,
-      usage: TestUsage(),
       platform: FakePlatform(),
       botDetector: const BotDetectorAlwaysNo(),
       stdio: FakeStdio(),
@@ -412,7 +404,6 @@ void main() {
       fileSystem: fileSystem,
       logger: logger,
       processManager: processManager,
-      usage: TestUsage(),
       platform: FakePlatform(),
       botDetector: const BotDetectorAlwaysNo(),
       stdio: FakeStdio(),
@@ -457,7 +448,6 @@ void main() {
       fileSystem: fileSystem,
       logger: logger,
       processManager: processManager,
-      usage: TestUsage(),
       platform: FakePlatform(),
       botDetector: const BotDetectorAlwaysNo(),
       stdio: FakeStdio(),
@@ -502,7 +492,6 @@ void main() {
       fileSystem: fileSystem,
       logger: logger,
       processManager: processManager,
-      usage: TestUsage(),
       platform: FakePlatform(),
       botDetector: const BotDetectorAlwaysNo(),
       stdio: FakeStdio(),
@@ -550,7 +539,6 @@ void main() {
       fileSystem: fileSystem,
       logger: logger,
       processManager: processManager,
-      usage: TestUsage(),
       platform: FakePlatform(),
       botDetector: const BotDetectorAlwaysNo(),
       stdio: FakeStdio(),
@@ -596,7 +584,6 @@ void main() {
       platform: FakePlatform(),
       fileSystem: fileSystem,
       logger: logger,
-      usage: TestUsage(),
       botDetector: const BotDetectorAlwaysNo(),
       stdio: mockStdio,
       processManager: processManager,
@@ -675,7 +662,6 @@ exit code: 66
       platform: FakePlatform(),
       fileSystem: fileSystem,
       logger: logger,
-      usage: TestUsage(),
       botDetector: const BotDetectorAlwaysNo(),
       stdio: FakeStdio(),
       processManager: processManager,
@@ -733,7 +719,6 @@ exit code: 66
     final FakeStdio mockStdio = FakeStdio();
     final Pub pub = Pub.test(
       platform: FakePlatform(),
-      usage: TestUsage(),
       fileSystem: fileSystem,
       logger: logger,
       processManager: processManager,
@@ -784,7 +769,6 @@ exit code: 66
     final FakeStdio mockStdio = FakeStdio();
     final Pub pub = Pub.test(
       platform: FakePlatform(),
-      usage: TestUsage(),
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       processManager: processManager,
@@ -855,7 +839,6 @@ exit code: 66
     final BufferLogger logger = BufferLogger.test();
     final Pub pub = Pub.test(
       platform: platform,
-      usage: TestUsage(),
       fileSystem: fileSystem,
       logger: logger,
       processManager: processManager,
@@ -900,7 +883,6 @@ exit code: 66
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       processManager: processManager,
-      usage: TestUsage(),
       botDetector: const BotDetectorAlwaysNo(),
       stdio: mockStdio,
       platform: FakePlatform(
@@ -925,49 +907,16 @@ exit code: 66
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testWithoutContext('analytics sent on success', () async {
-    final FileSystem fileSystem = MemoryFileSystem.test();
-    final TestUsage usage = TestUsage();
-    final Pub pub = Pub.test(
-      fileSystem: fileSystem,
-      logger: BufferLogger.test(),
-      processManager: FakeProcessManager.any(),
-      botDetector: const BotDetectorAlwaysNo(),
-      stdio: FakeStdio(),
-      usage: usage,
-      platform: FakePlatform(environment: const <String, String>{
-        'PUB_CACHE': 'custom/pub-cache/path',
-      }),
-    );
-    fileSystem.file('version').createSync();
-    fileSystem.file('pubspec.yaml').createSync();
-    fileSystem.file('.dart_tool/package_config.json')
-      ..createSync(recursive: true)
-      ..writeAsStringSync('{"configVersion": 2,"packages": []}');
-
-    await pub.get(
-      project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
-      context: PubContext.flutterTests,
-    );
-    expect(
-        usage.events,
-        contains(
-          const TestUsageEvent('pub-result', 'flutter-tests', label: 'success'),
-        ));
-  });
-
   testWithoutContext(
       'package_config_subset file is generated from packages and not timestamp',
       () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final TestUsage usage = TestUsage();
     final Pub pub = Pub.test(
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.any(),
       botDetector: const BotDetectorAlwaysNo(),
       stdio: FakeStdio(),
-      usage: usage,
       platform: FakePlatform(environment: const <String, String>{
         'PUB_CACHE': 'custom/pub-cache/path',
       }),
@@ -1000,57 +949,6 @@ exit code: 66
       'file:///lib/\n'
       '2\n',
     );
-  });
-
-  testWithoutContext('analytics sent on failure', () async {
-    final FileSystem fileSystem = MemoryFileSystem.test();
-    fileSystem.directory('custom/pub-cache/path').createSync(recursive: true);
-    final TestUsage usage = TestUsage();
-
-    final FakeProcessManager processManager =
-        FakeProcessManager.list(<FakeCommand>[
-      const FakeCommand(
-        command: <String>[
-          'bin/cache/dart-sdk/bin/dart',
-          'pub',
-          '--suppress-analytics',
-          '--directory',
-          '.',
-          'get',
-          '--example',
-        ],
-        exitCode: 1,
-      ),
-    ]);
-
-    final Pub pub = Pub.test(
-      usage: usage,
-      fileSystem: fileSystem,
-      logger: BufferLogger.test(),
-      processManager: processManager,
-      botDetector: const BotDetectorAlwaysNo(),
-      stdio: FakeStdio(),
-      platform: FakePlatform(
-        environment: const <String, String>{
-          'PUB_CACHE': 'custom/pub-cache/path',
-        },
-      ),
-    );
-    try {
-      await pub.get(
-        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
-        context: PubContext.flutterTests,
-      );
-    } on ToolExit {
-      // Ignore.
-    }
-
-    expect(
-        usage.events,
-        contains(
-          const TestUsageEvent('pub-result', 'flutter-tests', label: 'failure'),
-        ));
-    expect(processManager, hasNoRemainingExpectations);
   });
 
   testWithoutContext('Pub error handling', () async {
@@ -1110,7 +1008,6 @@ exit code: 66
       ),
     ]);
     final Pub pub = Pub.test(
-        usage: TestUsage(),
         fileSystem: fileSystem,
         logger: logger,
         processManager: processManager,

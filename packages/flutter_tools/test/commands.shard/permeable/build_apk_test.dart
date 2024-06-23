@@ -17,6 +17,7 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/testing.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/android_common.dart';
@@ -31,11 +32,9 @@ void main() {
 
   group('Usage', () {
     late Directory tempDir;
-    late TestUsage testUsage;
     late FakeAnalytics fakeAnalytics;
 
     setUp(() {
-      testUsage = TestUsage();
       tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
       fakeAnalytics = getInitializedFakeAnalyticsInstance(
         fs: MemoryFileSystem.test(),
@@ -115,17 +114,17 @@ void main() {
 
       await runBuildApkCommand(projectPath);
 
-      expect(testUsage.events, contains(
-        const TestUsageEvent(
-          'tool-command-result',
-          'apk',
-          label: 'success',
-        ),
-      ));
+      final Iterable<Event> successEvent = fakeAnalytics.sentEvents.where(
+        (Event e) =>
+            e.eventName == DashEvent.flutterCommandResult &&
+            e.eventData['commandPath'] == 'create' &&
+            e.eventData['result'] == 'success',
+      );
+      expect(successEvent, isNotEmpty, reason: 'Tool should send create success event');
     },
     overrides: <Type, Generator>{
       AndroidBuilder: () => FakeAndroidBuilder(),
-      Usage: () => testUsage,
+      Analytics: () => fakeAnalytics,
     });
   });
 
@@ -134,15 +133,18 @@ void main() {
     late FakeProcessManager processManager;
     late String gradlew;
     late AndroidSdk mockAndroidSdk;
-    late TestUsage testUsage;
+    late FakeAnalytics analytics;
 
     setUp(() {
-      testUsage = TestUsage();
       tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
       gradlew = globals.fs.path.join(tempDir.path, 'flutter_project', 'android',
           globals.platform.isWindows ? 'gradlew.bat' : 'gradlew');
       processManager = FakeProcessManager.empty();
       mockAndroidSdk = FakeAndroidSdk(globals.fs.directory('irrelevant'));
+      analytics = getInitializedFakeAnalyticsInstance(
+        fs: MemoryFileSystem.test(),
+        fakeFlutterVersion: FakeFlutterVersion(),
+      );
     });
 
     tearDown(() {
@@ -335,14 +337,16 @@ void main() {
           containsIgnoringWhitespace('To learn more, see: https://developer.android.com/studio/build/shrink-code'),
         )
       );
-      expect(testUsage.events, contains(
-        const TestUsageEvent(
-          'build',
-          'gradle',
-          label: 'gradle-r8-failure',
-          parameters: CustomDimensions(),
+
+      expect(
+        analytics.sentEvents,
+        contains(
+          Event.flutterBuildInfo(
+            label: 'gradle-r8-failure',
+            buildType: 'gradle',
+          ),
         ),
-      ));
+      );
       expect(processManager, hasNoRemainingExpectations);
     },
     overrides: <Type, Generator>{
@@ -350,7 +354,7 @@ void main() {
       Java: () => null,
       FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
       ProcessManager: () => processManager,
-      Usage: () => testUsage,
+      Analytics: () => analytics,
       AndroidStudio: () => FakeAndroidStudio(),
     });
 
@@ -389,14 +393,14 @@ void main() {
           ),
         ),
       );
-      expect(testUsage.events, contains(
-        const TestUsageEvent(
-          'build',
-          'gradle',
-          label: 'app-not-using-android-x',
-          parameters: CustomDimensions(),
+
+      expect(
+        analytics.sentEvents,
+        contains(
+          Event.flutterBuildInfo(
+              label: 'gradle-random-event-label-success', buildType: 'gradle'),
         ),
-      ));
+      );
       expect(processManager, hasNoRemainingExpectations);
     },
     overrides: <Type, Generator>{
@@ -404,7 +408,7 @@ void main() {
       FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
       Java: () => null,
       ProcessManager: () => processManager,
-      Usage: () => testUsage,
+      Analytics: () => analytics,
       AndroidStudio: () => FakeAndroidStudio(),
     });
 
@@ -436,14 +440,14 @@ void main() {
           ))
         ),
       );
-      expect(testUsage.events, contains(
-        const TestUsageEvent(
-          'build',
-          'gradle',
+
+      expect(
+        analytics.sentEvents,
+        contains(Event.flutterBuildInfo(
           label: 'app-using-android-x',
-          parameters: CustomDimensions(),
-        ),
-      ));
+          buildType: 'gradle',
+        )),
+      );
       expect(processManager, hasNoRemainingExpectations);
     },
     overrides: <Type, Generator>{
@@ -451,7 +455,7 @@ void main() {
       FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
       Java: () => null,
       ProcessManager: () => processManager,
-      Usage: () => testUsage,
+      Analytics: () => analytics,
       AndroidStudio: () => FakeAndroidStudio(),
     });
   });

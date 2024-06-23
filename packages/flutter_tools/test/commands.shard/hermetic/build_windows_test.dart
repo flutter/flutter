@@ -47,7 +47,6 @@ final Platform notWindowsPlatform = FakePlatform(
 void main() {
   late MemoryFileSystem fileSystem;
   late ProcessManager processManager;
-  late TestUsage usage;
   late FakeAnalytics fakeAnalytics;
 
   setUpAll(() {
@@ -58,7 +57,6 @@ void main() {
   setUp(() {
     fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
     Cache.flutterRoot = flutterRoot;
-    usage = TestUsage();
     fakeAnalytics = getInitializedFakeAnalyticsInstance(
       fs: fileSystem,
       fakeFlutterVersion: FakeFlutterVersion(),
@@ -997,9 +995,6 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
 
     expect(testLogger.statusText, contains('A summary of your Windows bundle analysis can be found at'));
     expect(testLogger.statusText, contains('dart devtools --appSizeBase='));
-    expect(usage.events, contains(
-        const TestUsageEvent('code-size-analysis', 'windows'),
-    ));
     expect(fakeAnalytics.sentEvents, contains(
       Event.codeSizeAnalysis(platform: 'windows')
     ));
@@ -1009,7 +1004,6 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     ProcessManager: () => processManager,
     Platform: () => windowsPlatform,
     FileSystemUtils: () => FileSystemUtils(fileSystem: fileSystem, platform: windowsPlatform),
-    Usage: () => usage,
     Analytics: () => fakeAnalytics,
   });
 

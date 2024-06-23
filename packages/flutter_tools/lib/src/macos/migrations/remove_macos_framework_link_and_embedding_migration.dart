@@ -15,14 +15,11 @@ class RemoveMacOSFrameworkLinkAndEmbeddingMigration extends ProjectMigrator {
   RemoveMacOSFrameworkLinkAndEmbeddingMigration(
     MacOSProject project,
     super.logger,
-    Usage usage,
     Analytics analytics,
   )   : _xcodeProjectInfoFile = project.xcodeProjectInfoFile,
-        _usage = usage,
         _analytics = analytics;
 
   final File _xcodeProjectInfoFile;
-  final Usage _usage;
   final Analytics _analytics;
 
   @override
@@ -91,9 +88,6 @@ class RemoveMacOSFrameworkLinkAndEmbeddingMigration extends ProjectMigrator {
 
     if (line.contains('/* App.framework ') ||
         line.contains('/* FlutterMacOS.framework ')) {
-      UsageEvent('macos-migration', 'remove-frameworks',
-              label: 'failure', flutterUsage: _usage)
-          .send();
       _analytics.send(Event.appleUsageEvent(
         workflow: 'macos-migration',
         parameter: 'remove-frameworks',

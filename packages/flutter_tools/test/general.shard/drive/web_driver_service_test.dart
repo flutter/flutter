@@ -315,7 +315,6 @@ class FakeWebRunnerFactory implements WebRunnerFactory {
     Logger? logger,
     FileSystem? fileSystem,
     SystemClock? systemClock,
-    Usage? usage,
     Analytics? analytics,
     bool machine = false,
   }) {

@@ -66,7 +66,6 @@ final Platform notMacosPlatform = FakePlatform(
 
 void main() {
   late MemoryFileSystem fileSystem;
-  late TestUsage usage;
   late FakeProcessManager fakeProcessManager;
   late ProcessUtils processUtils;
   late BufferLogger logger;
@@ -82,7 +81,6 @@ void main() {
     fileSystem = MemoryFileSystem.test();
     artifacts = Artifacts.test(fileSystem: fileSystem);
     logger = BufferLogger.test();
-    usage = TestUsage();
     fakeProcessManager = FakeProcessManager.empty();
     processUtils = ProcessUtils(
       logger: logger,
@@ -657,7 +655,6 @@ STDERR STUFF
     Platform: () => macosPlatform,
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
     FileSystemUtils: () => FileSystemUtils(fileSystem: fileSystem, platform: macosPlatform),
-    Usage: () => usage,
     Analytics: () => fakeAnalytics,
   });
   testUsingContext('Performs code size analysis and sends analytics from arm64 host', () async {
@@ -682,9 +679,6 @@ STDERR STUFF
 
     expect(testLogger.statusText, contains('A summary of your macOS bundle analysis can be found at'));
     expect(testLogger.statusText, contains('dart devtools --appSizeBase='));
-    expect(usage.events, contains(
-      const TestUsageEvent('code-size-analysis', 'macos'),
-    ));
     expect(fakeAnalytics.sentEvents, contains(Event.codeSizeAnalysis(platform: 'macos')));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -711,7 +705,6 @@ STDERR STUFF
     Platform: () => macosPlatform,
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
     FileSystemUtils: () => FileSystemUtils(fileSystem: fileSystem, platform: macosPlatform),
-    Usage: () => usage,
     Analytics: () => fakeAnalytics,
   });
 

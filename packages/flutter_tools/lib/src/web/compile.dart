@@ -42,14 +42,12 @@ class WebBuilder {
     required Logger logger,
     required ProcessManager processManager,
     required BuildSystem buildSystem,
-    required Usage usage,
     required Analytics analytics,
     required FlutterVersion flutterVersion,
     required FileSystem fileSystem,
   })  : _logger = logger,
         _processManager = processManager,
         _buildSystem = buildSystem,
-        _flutterUsage = usage,
         _analytics = analytics,
         _flutterVersion = flutterVersion,
         _fileSystem = fileSystem;
@@ -57,7 +55,6 @@ class WebBuilder {
   final Logger _logger;
   final ProcessManager _processManager;
   final BuildSystem _buildSystem;
-  final Usage _flutterUsage;
   final Analytics _analytics;
   final FlutterVersion _flutterVersion;
   final FileSystem _fileSystem;
@@ -107,7 +104,6 @@ class WebBuilder {
             logger: _logger,
             processManager: _processManager,
             platform: globals.platform,
-            usage: _flutterUsage,
             analytics: _analytics,
             cacheDir: globals.cache.getRoot(),
             engineVersion: globals.artifacts!.isLocalEngine ? null : _flutterVersion.engineRevision,
@@ -143,12 +139,6 @@ class WebBuilder {
       configs: compilerConfigs,
     );
 
-    BuildEvent(
-      'web-compile',
-      type: 'web',
-      settings: buildSettingsString,
-      flutterUsage: _flutterUsage,
-    ).send();
     _analytics.send(Event.flutterBuildInfo(
       label: 'web-compile',
       buildType: 'web',
@@ -157,11 +147,6 @@ class WebBuilder {
 
     final Duration elapsedDuration = sw.elapsed;
     final String variableName = compilerConfigs.length > 1 ? 'dual-compile' : 'dart2js';
-    _flutterUsage.sendTiming(
-      'build',
-      variableName,
-      elapsedDuration,
-    );
     _analytics.send(Event.timing(
       workflow: 'build',
       variableName: variableName,

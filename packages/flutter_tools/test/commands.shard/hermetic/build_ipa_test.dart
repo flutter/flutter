@@ -73,7 +73,6 @@ class FakePlistUtils extends Fake implements PlistParser {
 
 void main() {
   late MemoryFileSystem fileSystem;
-  late TestUsage usage;
   late FakeProcessManager fakeProcessManager;
   late ProcessUtils processUtils;
   late FakePlistUtils plistUtils;
@@ -88,7 +87,6 @@ void main() {
   setUp(() {
     fileSystem = MemoryFileSystem.test();
     artifacts = Artifacts.test(fileSystem: fileSystem);
-    usage = TestUsage();
     fakeProcessManager = FakeProcessManager.empty();
     logger = BufferLogger.test();
     processUtils = ProcessUtils(
@@ -869,9 +867,6 @@ void main() {
 
     expect(logger.statusText, contains('A summary of your iOS bundle analysis can be found at'));
     expect(logger.statusText, contains('dart devtools --appSizeBase='));
-    expect(usage.events, contains(
-      const TestUsageEvent('code-size-analysis', 'ios'),
-    ));
     expect(fakeProcessManager, hasNoRemainingExpectations);
     expect(fakeAnalytics.sentEvents, contains(
       Event.codeSizeAnalysis(platform: 'ios')
@@ -882,7 +877,6 @@ void main() {
     ProcessManager: () => fakeProcessManager,
     Platform: () => macosPlatform,
     FileSystemUtils: () => FileSystemUtils(fileSystem: fileSystem, platform: macosPlatform),
-    Usage: () => usage,
     Analytics: () => fakeAnalytics,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });

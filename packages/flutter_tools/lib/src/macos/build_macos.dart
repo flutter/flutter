@@ -78,7 +78,6 @@ Future<void> buildMacOS({
     RemoveMacOSFrameworkLinkAndEmbeddingMigration(
       flutterProject.macos,
       globals.logger,
-      globals.flutterUsage,
       globals.analytics,
     ),
     MacOSDeploymentTargetMigration(flutterProject.macos, globals.logger),
@@ -215,7 +214,6 @@ Future<void> buildMacOS({
   }
   await _writeCodeSizeAnalysis(buildInfo, sizeAnalyzer);
   final Duration elapsedDuration = sw.elapsed;
-  globals.flutterUsage.sendTiming('build', 'xcode-macos', elapsedDuration);
   globals.analytics.send(Event.timing(
     workflow: 'build',
     variableName: 'xcode-macos',

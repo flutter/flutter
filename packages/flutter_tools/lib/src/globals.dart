@@ -72,7 +72,6 @@ AndroidSdk? get androidSdk => context.get<AndroidSdk>();
 FlutterVersion get flutterVersion => context.get<FlutterVersion>()!;
 FuchsiaArtifacts? get fuchsiaArtifacts => context.get<FuchsiaArtifacts>();
 FuchsiaSdk? get fuchsiaSdk => context.get<FuchsiaSdk>();
-Usage get flutterUsage => context.get<Usage>()!;
 XcodeProjectInterpreter? get xcodeProjectInterpreter => context.get<XcodeProjectInterpreter>();
 XCDevice? get xcdevice => context.get<XCDevice>();
 Xcode? get xcode => context.get<Xcode>();

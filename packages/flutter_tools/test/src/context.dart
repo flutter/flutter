@@ -116,7 +116,6 @@ void testUsingContext(
           Logger: () => BufferLogger.test(),
           OperatingSystemUtils: () => FakeOperatingSystemUtils(),
           PersistentToolState: () => buildPersistentToolState(globals.fs),
-          Usage: () => TestUsage(),
           XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(),
           FileSystem: () => LocalFileSystemBlockingSetCurrentDirectory(),
           PlistParser: () => FakePlistParser(),

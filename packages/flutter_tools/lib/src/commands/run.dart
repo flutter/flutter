@@ -701,7 +701,6 @@ class RunCommand extends RunCommandBase {
         debuggingOptions: await createDebuggingOptions(webMode),
         stayResident: stayResident,
         fileSystem: globals.fs,
-        usage: globals.flutterUsage,
         analytics: globals.analytics,
         logger: globals.logger,
         systemClock: globals.systemClock,

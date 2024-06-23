@@ -57,8 +57,6 @@ import 'macos/xcode.dart';
 import 'mdns_discovery.dart';
 import 'persistent_tool_state.dart';
 import 'reporting/crash_reporting.dart';
-import 'reporting/first_run.dart';
-import 'reporting/reporting.dart';
 import 'reporting/unified_analytics.dart';
 import 'resident_runner.dart';
 import 'run_hot.dart';
@@ -102,7 +100,6 @@ Future<T> runInContext<T>(
         processManager: globals.processManager,
         fileSystem: globals.fs,
         artifacts: globals.artifacts!,
-        usage: globals.flutterUsage,
         analytics: globals.analytics,
         gradleUtils: globals.gradleUtils!,
         platform: globals.platform,
@@ -168,7 +165,6 @@ Future<T> runInContext<T>(
         logger: globals.logger,
         platform: globals.platform,
         xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
-        usage: globals.flutterUsage,
         analytics: globals.analytics,
       ),
       CocoaPodsValidator: () => CocoaPodsValidator(
@@ -301,7 +297,6 @@ Future<T> runInContext<T>(
       ),
       MDnsVmServiceDiscovery: () => MDnsVmServiceDiscovery(
         logger: globals.logger,
-        flutterUsage: globals.flutterUsage,
         analytics: globals.analytics,
       ),
       OperatingSystemUtils: () => OperatingSystemUtils(
@@ -335,14 +330,9 @@ Future<T> runInContext<T>(
         processManager: globals.processManager,
         botDetector: globals.botDetector,
         platform: globals.platform,
-        usage: globals.flutterUsage,
       ),
       Stdio: () => Stdio(),
       SystemClock: () => const SystemClock(),
-      Usage: () => Usage(
-        runningOnBot: runningOnBot,
-        firstRunMessenger: FirstRunMessenger(persistentToolState: globals.persistentToolState!),
-      ),
       UserMessages: () => UserMessages(),
       VisualStudioValidator: () => VisualStudioValidator(
         userMessages: globals.userMessages,
@@ -393,7 +383,6 @@ Future<T> runInContext<T>(
         processManager: globals.processManager,
         platform: globals.platform,
         fileSystem: globals.fs,
-        usage: globals.flutterUsage,
         analytics: globals.analytics,
       ),
     },

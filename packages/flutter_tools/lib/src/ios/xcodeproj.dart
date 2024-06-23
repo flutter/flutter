@@ -30,7 +30,6 @@ class XcodeProjectInterpreter {
     required ProcessManager processManager,
     required Logger logger,
     required FileSystem fileSystem,
-    required Usage usage,
     required Analytics analytics,
   }) {
     return XcodeProjectInterpreter._(
@@ -38,7 +37,6 @@ class XcodeProjectInterpreter {
       processManager: processManager,
       logger: logger,
       fileSystem: fileSystem,
-      usage: usage,
       analytics: analytics,
     );
   }
@@ -48,7 +46,6 @@ class XcodeProjectInterpreter {
     required ProcessManager processManager,
     required Logger logger,
     required FileSystem fileSystem,
-    required Usage usage,
     required Analytics analytics,
     Version? version,
     String? build,
@@ -65,7 +62,6 @@ class XcodeProjectInterpreter {
         _version = version,
         _build = build,
         _versionText = version?.toString(),
-        _usage = usage,
         _analytics = analytics;
 
   /// Create an [XcodeProjectInterpreter] for testing.
@@ -88,7 +84,6 @@ class XcodeProjectInterpreter {
       fileSystem: MemoryFileSystem.test(),
       platform: platform,
       processManager: processManager,
-      usage: TestUsage(),
       logger: BufferLogger.test(),
       version: version,
       build: build,
@@ -101,7 +96,6 @@ class XcodeProjectInterpreter {
   final ProcessUtils _processUtils;
   final OperatingSystemUtils _operatingSystemUtils;
   final Logger _logger;
-  final Usage _usage;
   final Analytics _analytics;
   static final RegExp _versionRegex = RegExp(r'Xcode ([0-9.]+).*Build version (\w+)');
 
@@ -238,11 +232,6 @@ class XcodeProjectInterpreter {
       return parseXcodeBuildSettings(out);
     } on Exception catch (error) {
       if (error is ProcessException && error.toString().contains('timed out')) {
-        BuildEvent('xcode-show-build-settings-timeout',
-          type: 'ios',
-          command: showBuildSettingsCommand.join(' '),
-          flutterUsage: _usage,
-        ).send();
         _analytics.send(Event.flutterBuildInfo(
           label: 'xcode-show-build-settings-timeout',
           buildType: 'ios',
@@ -298,11 +287,6 @@ class XcodeProjectInterpreter {
       return result.stdout.trim();
     } on Exception catch (error) {
       if (error is ProcessException && error.toString().contains('timed out')) {
-        BuildEvent('xcode-show-build-settings-timeout',
-          type: 'ios',
-          command: showBuildSettingsCommand.join(' '),
-          flutterUsage: _usage,
-        ).send();
         _analytics.send(Event.flutterBuildInfo(
           label: 'xcode-show-build-settings-timeout',
           buildType: 'ios',

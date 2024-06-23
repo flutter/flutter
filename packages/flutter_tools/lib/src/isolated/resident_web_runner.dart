@@ -56,7 +56,6 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
     required Logger logger,
     required FileSystem fileSystem,
     required SystemClock systemClock,
-    required Usage usage,
     required Analytics analytics,
     bool machine = false,
   }) {
@@ -69,7 +68,6 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
       stayResident: stayResident,
       urlTunneller: urlTunneller,
       machine: machine,
-      usage: usage,
       analytics: analytics,
       systemClock: systemClock,
       fileSystem: fileSystem,
@@ -94,14 +92,12 @@ class ResidentWebRunner extends ResidentRunner {
     required FileSystem fileSystem,
     required Logger logger,
     required SystemClock systemClock,
-    required Usage usage,
     required Analytics analytics,
     UrlTunneller? urlTunneller,
     ResidentDevtoolsHandlerFactory devtoolsHandler = createDefaultHandler,
   }) : _fileSystem = fileSystem,
        _logger = logger,
        _systemClock = systemClock,
-       _usage = usage,
        _analytics = analytics,
        _urlTunneller = urlTunneller,
        super(
@@ -117,7 +113,6 @@ class ResidentWebRunner extends ResidentRunner {
   final FileSystem _fileSystem;
   final Logger _logger;
   final SystemClock _systemClock;
-  final Usage _usage;
   final Analytics _analytics;
   final UrlTunneller? _urlTunneller;
 
@@ -341,7 +336,6 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
             buildSystem: globals.buildSystem,
             fileSystem: _fileSystem,
             flutterVersion: globals.flutterVersion,
-            usage: globals.flutterUsage,
             analytics: globals.analytics,
           );
           await webBuilder.buildWeb(
@@ -431,7 +425,6 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
           buildSystem: globals.buildSystem,
           fileSystem: _fileSystem,
           flutterVersion: globals.flutterVersion,
-          usage: globals.flutterUsage,
           analytics: globals.analytics,
         );
         await webBuilder.buildWeb(
@@ -475,22 +468,12 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
 
     // Don't track restart times for dart2js builds or web-server devices.
     if (debuggingOptions.buildInfo.isDebug && deviceIsDebuggable) {
-      _usage.sendTiming('hot', 'web-incremental-restart', elapsed);
       _analytics.send(Event.timing(
         workflow: 'hot',
         variableName: 'web-incremental-restart',
         elapsedMilliseconds: elapsed.inMilliseconds,
       ));
       final String sdkName = await device!.device!.sdkNameAndVersion;
-      HotEvent(
-        'restart',
-        targetPlatform: getNameForTargetPlatform(TargetPlatform.web_javascript),
-        sdkName: sdkName,
-        emulator: false,
-        fullRestart: true,
-        reason: reason,
-        overallTimeInMs: elapsed.inMilliseconds,
-      ).send();
       _analytics.send(Event.hotRunnerInfo(
         label: 'restart',
         targetPlatform: getNameForTargetPlatform(TargetPlatform.web_javascript),

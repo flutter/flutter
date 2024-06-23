@@ -21,12 +21,12 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/doctor_validator.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
-import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/vscode/vscode.dart';
 import 'package:flutter_tools/src/vscode/vscode_validator.dart';
 import 'package:flutter_tools/src/web/workflow.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/testing.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
@@ -181,131 +181,6 @@ void main() {
     }, overrides: <Type, Generator>{
       AnsiTerminal: () => FakeTerminal(),
       DoctorValidatorsProvider: () => FakeDoctorValidatorsProvider(),
-    });
-  });
-
-  group('doctor usage params', () {
-    late TestUsage testUsage;
-
-    setUp(() {
-      testUsage = TestUsage();
-    });
-
-    testUsingContext('contains installed', () async {
-      final Doctor doctor = Doctor(logger: logger, clock: const SystemClock());
-      await doctor.diagnose(verbose: false);
-
-      expect(testUsage.events.length, 3);
-      expect(testUsage.events, contains(
-        const TestUsageEvent(
-          'doctor-result',
-          'PassingValidator',
-          label: 'installed',
-        ),
-      ));
-    }, overrides: <Type, Generator>{
-      DoctorValidatorsProvider: () => FakeDoctorValidatorsProvider(),
-      Usage: () => testUsage,
-    });
-
-    testUsingContext('contains installed and partial', () async {
-      await FakePassingDoctor(logger).diagnose(verbose: false);
-
-      expect(testUsage.events, unorderedEquals(<TestUsageEvent>[
-        const TestUsageEvent(
-          'doctor-result',
-          'PassingValidator',
-          label: 'installed',
-        ),
-        const TestUsageEvent(
-          'doctor-result',
-          'PassingValidator',
-          label: 'installed',
-        ),
-        const TestUsageEvent(
-          'doctor-result',
-          'PartialValidatorWithHintsOnly',
-          label: 'partial',
-        ),
-        const TestUsageEvent(
-          'doctor-result',
-          'PartialValidatorWithErrors',
-          label: 'partial',
-        ),
-      ]));
-    }, overrides: <Type, Generator>{
-      Usage: () => testUsage,
-    });
-
-    testUsingContext('contains installed, missing and partial', () async {
-      await FakeDoctor(logger).diagnose(verbose: false);
-
-      expect(testUsage.events, unorderedEquals(<TestUsageEvent>[
-        const TestUsageEvent(
-          'doctor-result',
-          'PassingValidator',
-          label: 'installed',
-        ),
-        const TestUsageEvent(
-          'doctor-result',
-          'MissingValidator',
-          label: 'missing',
-        ),
-        const TestUsageEvent(
-          'doctor-result',
-          'NotAvailableValidator',
-          label: 'notAvailable',
-        ),
-        const TestUsageEvent(
-          'doctor-result',
-          'PartialValidatorWithHintsOnly',
-          label: 'partial',
-        ),
-        const TestUsageEvent(
-          'doctor-result',
-          'PartialValidatorWithErrors',
-          label: 'partial',
-        ),
-      ]));
-    }, overrides: <Type, Generator>{
-      Usage: () => testUsage,
-    });
-
-    testUsingContext('events for grouped validators are properly decomposed', () async {
-      await FakeGroupedDoctor(logger).diagnose(verbose: false);
-
-      expect(testUsage.events, unorderedEquals(<TestUsageEvent>[
-        const TestUsageEvent(
-          'doctor-result',
-          'PassingGroupedValidator',
-          label: 'installed',
-        ),
-        const TestUsageEvent(
-          'doctor-result',
-          'PassingGroupedValidator',
-          label: 'installed',
-        ),
-        const TestUsageEvent(
-          'doctor-result',
-          'PassingGroupedValidator',
-          label: 'installed',
-        ),
-        const TestUsageEvent(
-          'doctor-result',
-          'MissingGroupedValidator',
-          label: 'missing',
-        ),
-      ]));
-    }, overrides: <Type, Generator>{
-      Usage: () => testUsage,
-    });
-
-    testUsingContext('sending events can be skipped', () async {
-      await FakePassingDoctor(logger).diagnose(verbose: false, sendEvent: false);
-
-      expect(testUsage.events, isEmpty);
-    }, overrides: <Type, Generator>{
-      Usage: () => testUsage,
     });
   });
 
@@ -500,11 +375,14 @@ void main() {
   });
 
   group('doctor diagnosis wrapper', () {
-    late TestUsage testUsage;
+    late FakeAnalytics analytics;
     late BufferLogger logger;
 
     setUp(() {
-      testUsage = TestUsage();
+      analytics = getInitializedFakeAnalyticsInstance(
+        fs: fs,
+        fakeFlutterVersion: FakeFlutterVersion(),
+      );
       logger = BufferLogger.test();
     });
 
@@ -529,17 +407,17 @@ void main() {
       expect(await doctorText.piiStrippedText, expectedPiiStrippedText);
       expect(await doctorText.piiStrippedText, expectedPiiStrippedText);
 
-      // Only one event sent.
-      expect(testUsage.events, <TestUsageEvent>[
-        const TestUsageEvent(
-          'doctor-result',
-          'PiiValidator',
-          label: 'installed',
+      expect(analytics.sentEvents, hasLength(1));
+      expect(
+        analytics.sentEvents[0].eventData,
+        allOf(
+          containsPair('validatorName', 'PII Validator'),
+          containsPair('result', 'installed'),
         ),
-      ]);
+      );
     }, overrides: <Type, Generator>{
       AnsiTerminal: () => FakeTerminal(),
-      Usage: () => testUsage,
+      Analytics: () => analytics,
     });
 
     testUsingContext('without PII has same text and PII-stripped text', () async {
@@ -549,7 +427,7 @@ void main() {
       expect(piiText, isNotEmpty);
       expect(piiText, await doctorText.piiStrippedText);
     }, overrides: <Type, Generator>{
-      Usage: () => testUsage,
+      Analytics: () => analytics,
     });
   });
 

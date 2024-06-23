@@ -110,12 +110,10 @@ void main() {
   group('hotRestart', () {
     final FakeResidentCompiler residentCompiler = FakeResidentCompiler();
     late MemoryFileSystem fileSystem;
-    late TestUsage testUsage;
     late FakeAnalytics fakeAnalytics;
 
     setUp(() {
       fileSystem = MemoryFileSystem.test();
-      testUsage = TestUsage();
       fakeAnalytics = getInitializedFakeAnalyticsInstance(
         fs: fileSystem,
         fakeFlutterVersion: FakeFlutterVersion(),
@@ -293,21 +291,6 @@ void main() {
         ).restart(fullRestart: true);
 
         expect(result.isOk, true);
-        expect(testUsage.events, <TestUsageEvent>[
-          const TestUsageEvent('hot', 'restart', parameters: CustomDimensions(
-            hotEventTargetPlatform: 'flutter-tester',
-            hotEventSdkName: 'Tester',
-            hotEventEmulator: false,
-            hotEventFullRestart: true,
-            hotEventOverallTimeInMs: 64000,
-            hotEventSyncedBytes: 4,
-            hotEventInvalidatedSourcesCount: 2,
-            hotEventTransferTimeInMs: 32000,
-            hotEventCompileTimeInMs: 16000,
-            hotEventFindInvalidatedTimeInMs: 128000,
-            hotEventScannedSourcesCount: 8,
-          )),
-        ]);
 
         expect(fakeAnalytics.sentEvents, contains(
           Event.hotRunnerInfo(
@@ -332,7 +315,6 @@ void main() {
         FileSystem: () => fileSystem,
         Platform: () => FakePlatform(),
         ProcessManager: () => FakeProcessManager.any(),
-        Usage: () => testUsage,
       });
     });
 
@@ -386,7 +368,6 @@ void main() {
             String? sdkName,
             bool? emulator,
             String? reason,
-            Usage usage,
             Analytics? analytics,
           ) async {
             firstReloadDetails['finalLibraryCount'] = 2;
@@ -408,27 +389,6 @@ void main() {
         ).restart();
 
         expect(result.isOk, true);
-        expect(testUsage.events, <TestUsageEvent>[
-          const TestUsageEvent('hot', 'reload', parameters: CustomDimensions(
-            hotEventFinalLibraryCount: 2,
-            hotEventSyncedLibraryCount: 3,
-            hotEventSyncedClassesCount: 4,
-            hotEventSyncedProceduresCount: 5,
-            hotEventSyncedBytes: 8,
-            hotEventInvalidatedSourcesCount: 6,
-            hotEventTransferTimeInMs: 32000,
-            hotEventOverallTimeInMs: 128000,
-            hotEventTargetPlatform: 'flutter-tester',
-            hotEventSdkName: 'Tester',
-            hotEventEmulator: false,
-            hotEventFullRestart: false,
-            hotEventCompileTimeInMs: 16000,
-            hotEventFindInvalidatedTimeInMs: 64000,
-            hotEventScannedSourcesCount: 16,
-            hotEventReassembleTimeInMs: 256000,
-            hotEventReloadVMTimeInMs: 512000,
-          )),
-        ]);
         expect(fakeAnalytics.sentEvents, contains(
           Event.hotRunnerInfo(
             label: 'reload',
@@ -458,7 +418,6 @@ void main() {
         FileSystem: () => fileSystem,
         Platform: () => FakePlatform(),
         ProcessManager: () => FakeProcessManager.any(),
-        Usage: () => testUsage,
       });
     });
 
@@ -493,7 +452,6 @@ void main() {
         FileSystem: () => fileSystem,
         Platform: () => FakePlatform(),
         ProcessManager: () => FakeProcessManager.any(),
-        Usage: () => testUsage,
       });
     });
 
@@ -528,7 +486,6 @@ void main() {
         FileSystem: () => fileSystem,
         Platform: () => FakePlatform(),
         ProcessManager: () => FakeProcessManager.any(),
-        Usage: () => testUsage,
       });
     });
   });

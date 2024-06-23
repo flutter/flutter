@@ -298,7 +298,6 @@ class PackagesGetCommand extends FlutterCommand {
           outputDir: globals.fs.directory(getBuildDirectory()),
           processManager: globals.processManager,
           platform: globals.platform,
-          usage: globals.flutterUsage,
           analytics: analytics,
           projectDir: rootProject.directory,
           generateDartPluginRegistry: true,
@@ -320,7 +319,6 @@ class PackagesGetCommand extends FlutterCommand {
           outputDir: globals.fs.directory(getBuildDirectory()),
           processManager: globals.processManager,
           platform: globals.platform,
-          usage: globals.flutterUsage,
           analytics: analytics,
           projectDir: rootProject.directory,
           generateDartPluginRegistry: true,
@@ -357,7 +355,6 @@ class PackagesGetCommand extends FlutterCommand {
         touchesPackageConfig: !(isHelp || dryRun),
       );
       final Duration elapsedDuration = timer.elapsed;
-      globals.flutterUsage.sendTiming('pub', 'get', elapsedDuration, label: 'success');
       analytics.send(Event.timing(
         workflow: 'pub',
         variableName: 'get',
@@ -367,7 +364,6 @@ class PackagesGetCommand extends FlutterCommand {
     // Not limiting to catching Exception because the exception is rethrown.
     } catch (_) { // ignore: avoid_catches_without_on_clauses
       final Duration elapsedDuration = timer.elapsed;
-      globals.flutterUsage.sendTiming('pub', 'get', elapsedDuration, label: 'failure');
       analytics.send(Event.timing(
         workflow: 'pub',
         variableName: 'get',

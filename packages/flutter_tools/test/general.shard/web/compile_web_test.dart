@@ -20,7 +20,6 @@ import '../../src/test_build_system.dart';
 
 void main() {
   late MemoryFileSystem fileSystem;
-  late TestUsage testUsage;
   late FakeAnalytics fakeAnalytics;
   late BufferLogger logger;
   late FakeFlutterVersion flutterVersion;
@@ -28,7 +27,6 @@ void main() {
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
-    testUsage = TestUsage();
     logger = BufferLogger.test();
     flutterVersion = FakeFlutterVersion(frameworkVersion: '1.0.0', engineRevision: '9.8.7');
     fakeAnalytics = getInitializedFakeAnalyticsInstance(
@@ -62,7 +60,6 @@ void main() {
       logger: logger,
       processManager: FakeProcessManager.any(),
       buildSystem: buildSystem,
-      usage: testUsage,
       flutterVersion: flutterVersion,
       fileSystem: fileSystem,
       analytics: fakeAnalytics,
@@ -92,25 +89,6 @@ void main() {
       contains('generated_plugin_registrant.dart not found. Skipping.'),
     );
 
-    // Sends build config event
-    expect(
-      testUsage.events,
-      unorderedEquals(
-        <TestUsageEvent>[
-      const TestUsageEvent(
-        'build',
-        'web',
-        label: 'web-compile',
-            parameters: CustomDimensions(
-              buildEventSettings:
-                  'optimizationLevel: 4; web-renderer: skwasm,canvaskit; web-target: wasm,js;',
-
-      ),
-          ),
-        ],
-      ),
-    );
-
     expect(
       fakeAnalytics.sentEvents,
       containsAll(<Event>[
@@ -122,10 +100,6 @@ void main() {
       ]),
     );
 
-    // Sends timing event.
-    final TestTimingEvent timingEvent = testUsage.timings.single;
-    expect(timingEvent.category, 'build');
-    expect(timingEvent.variableName, 'dual-compile');
     expect(
       analyticsTimingEventExists(
         sentEvents: fakeAnalytics.sentEvents,
@@ -152,7 +126,6 @@ void main() {
       logger: logger,
       processManager: FakeProcessManager.any(),
       buildSystem: buildSystem,
-      usage: testUsage,
       flutterVersion: flutterVersion,
       fileSystem: fileSystem,
       analytics: fakeAnalytics,
@@ -170,7 +143,6 @@ void main() {
         throwsToolExit(message: 'Failed to compile application for the Web.'));
 
     expect(logger.errorText, contains('Target hello failed: FormatException: illegal character in input string'));
-    expect(testUsage.timings, isEmpty);
     expect(fakeAnalytics.sentEvents, isEmpty);
   });
 }

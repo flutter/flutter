@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/bot_detector.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart' as io;
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/net.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
@@ -34,7 +35,6 @@ void main() {
 
   group('runner', () {
     late FakeAnalytics fakeAnalytics;
-    late TestUsage testUsage;
 
     setUp(() {
       // Instead of exiting with dart:io exit(), this causes an exception to
@@ -59,8 +59,6 @@ void main() {
         fs: fileSystem,
         fakeFlutterVersion: FakeFlutterVersion(),
       );
-
-      testUsage = TestUsage();
     });
 
     tearDown(() {
@@ -101,8 +99,6 @@ void main() {
       // exception on the first attempt, the second attempt tries to report the
       // *original* crash, and not the crash from the first crash report
       // attempt.
-      final CrashingUsage crashingUsage = globals.flutterUsage as CrashingUsage;
-      expect(crashingUsage.sentException.toString(), 'Exception: an exception % --');
       expect(fakeAnalytics.sentEvents, contains(Event.exception(exception: '_Exception')));
     }, overrides: <Type, Generator>{
       Platform: () => FakePlatform(environment: <String, String>{
@@ -111,7 +107,6 @@ void main() {
       }),
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
-      Usage: () => CrashingUsage(),
       Artifacts: () => Artifacts.test(),
       HttpClientFactory: () => () => FakeHttpClient.any(),
       Analytics: () => fakeAnalytics,
@@ -327,33 +322,11 @@ void main() {
         HttpClientFactory: () => () => FakeHttpClient.any(),
       });
     });
-
-    testUsingContext('do not print welcome on bots', () async {
-        io.setExitFunctionForTests((int exitCode) {});
-
-        await runner.run(
-          <String>['--version', '--machine'],
-          () => <FlutterCommand>[],
-          // This flutterVersion disables crash reporting.
-          flutterVersion: '[user-branch]/',
-          shutdownHooks: ShutdownHooks(),
-        );
-
-        expect(testUsage.printedWelcome, false);
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => MemoryFileSystem.test(),
-        ProcessManager: () => FakeProcessManager.any(),
-        BotDetector: () => const FakeBotDetector(true),
-        Usage: () => testUsage,
-      },
-    );
   });
 
   group('unified_analytics', () {
     late FakeAnalytics fakeAnalytics;
     late MemoryFileSystem fs;
-    late TestUsage testUsage;
 
     setUp(() {
       fs = MemoryFileSystem.test();
@@ -362,7 +335,6 @@ void main() {
         fs: fs,
         fakeFlutterVersion: FakeFlutterVersion(),
       );
-      testUsage = TestUsage();
     });
 
     testUsingContext(
@@ -386,85 +358,6 @@ void main() {
         Analytics: () => fakeAnalytics,
         FileSystem: () => MemoryFileSystem.test(),
         ProcessManager: () => FakeProcessManager.any(),
-      },
-    );
-
-    testUsingContext(
-      'runner sends mismatch event to ga3 if user opted in to ga3 but out of ga4 analytics',
-      () async {
-        io.setExitFunctionForTests((int exitCode) {});
-
-        // Begin by opting out of telemetry for package:unified_analytics
-        // and leaving legacy analytics opted in
-        await fakeAnalytics.setTelemetry(false);
-        expect(fakeAnalytics.telemetryEnabled, false);
-        expect(testUsage.enabled, true);
-
-        await runner.run(
-          <String>[],
-          () => <FlutterCommand>[],
-          // This flutterVersion disables crash reporting.
-          flutterVersion: '[user-branch]/',
-          shutdownHooks: ShutdownHooks(),
-        );
-
-        expect(
-          testUsage.events,
-          contains(const TestUsageEvent(
-            'ga4_and_ga3_status_mismatch',
-            'opted_out_of_ga4',
-          )),
-        );
-        expect(fakeAnalytics.telemetryEnabled, false);
-        expect(testUsage.enabled, true);
-        expect(fakeAnalytics.sentEvents, isEmpty);
-
-      },
-      overrides: <Type, Generator>{
-        Analytics: () => fakeAnalytics,
-        FileSystem: () => MemoryFileSystem.test(),
-        ProcessManager: () => FakeProcessManager.any(),
-        Usage: () => testUsage,
-      },
-    );
-
-    testUsingContext(
-      'runner does not send mismatch event to ga3 if user opted out of ga3 & ga4 analytics',
-      () async {
-        io.setExitFunctionForTests((int exitCode) {});
-
-        // Begin by opting out of telemetry for package:unified_analytics
-        // and legacy analytics
-        await fakeAnalytics.setTelemetry(false);
-        testUsage.enabled = false;
-        expect(fakeAnalytics.telemetryEnabled, false);
-        expect(testUsage.enabled, false);
-
-        await runner.run(
-          <String>[],
-          () => <FlutterCommand>[],
-          // This flutterVersion disables crash reporting.
-          flutterVersion: '[user-branch]/',
-          shutdownHooks: ShutdownHooks(),
-        );
-
-        expect(
-          testUsage.events,
-          isNot(contains(const TestUsageEvent(
-            'ga4_and_ga3_status_mismatch',
-            'opted_out_of_ga4',
-          ))),
-        );
-        expect(fakeAnalytics.telemetryEnabled, false);
-        expect(testUsage.enabled, false);
-        expect(fakeAnalytics.sentEvents, isEmpty);
-
-      },
-      overrides: <Type, Generator>{
-        Analytics: () => fakeAnalytics,
-        FileSystem: () => MemoryFileSystem.test(),
-        ProcessManager: () => FakeProcessManager.any(),
-        Usage: () => testUsage,
       },
     );
 
@@ -568,85 +461,6 @@ class CrashingFlutterCommand extends FlutterCommand {
 
     return FlutterCommandResult.success();
   }
-}
-
-class CrashingUsage implements Usage {
-  CrashingUsage() : _impl = Usage(
-    versionOverride: '[user-branch]',
-    runningOnBot: true,
-  );
-
-  final Usage _impl;
-
-  dynamic get sentException => _sentException;
-  dynamic _sentException;
-
-  bool _firstAttempt = true;
-
-  // Crash while crashing.
-  @override
-  void sendException(dynamic exception) {
-    if (_firstAttempt) {
-      _firstAttempt = false;
-      throw Exception('CrashingUsage.sendException');
-    }
-    _sentException = exception;
-  }
-
-  @override
-  bool get suppressAnalytics => _impl.suppressAnalytics;
-
-  @override
-  set suppressAnalytics(bool value) {
-    _impl.suppressAnalytics = value;
-  }
-
-  @override
-  bool get enabled => _impl.enabled;
-
-  @override
-  set enabled(bool value) {
-    _impl.enabled = value;
-  }
-
-  @override
-  String get clientId => _impl.clientId;
-
-  @override
-  void sendCommand(String command, {CustomDimensions? parameters}) =>
-      _impl.sendCommand(command, parameters: parameters);
-
-  @override
-  void sendEvent(
-    String category,
-    String parameter, {
-    String? label,
-    int? value,
-    CustomDimensions? parameters,
-  }) => _impl.sendEvent(
-    category,
-    parameter,
-    label: label,
-    value: value,
-    parameters: parameters,
-  );
-
-  @override
-  void sendTiming(
-    String category,
-    String variableName,
-    Duration duration, {
-    String? label,
-  }) => _impl.sendTiming(category, variableName, duration, label: label);
-
-  @override
-  Stream<Map<String, dynamic>> get onSend => _impl.onSend;
-
-  @override
-  Future<void> ensureAnalyticsSent() => _impl.ensureAnalyticsSent();
-
-  @override
-  void printWelcome() => _impl.printWelcome();
 }
 
 class CustomBugInstructions extends UserMessages {

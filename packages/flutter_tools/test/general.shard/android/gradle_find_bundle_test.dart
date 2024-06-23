@@ -32,7 +32,6 @@ void main() {
       project,
       const BuildInfo(BuildMode.release, 'fooBar', treeShakeIcons: false),
       BufferLogger.test(),
-      TestUsage(),
       fakeAnalytics,
     );
 
@@ -46,7 +45,6 @@ void main() {
       project,
       const BuildInfo(BuildMode.release, 'foo_bar', treeShakeIcons: false),
       BufferLogger.test(),
-      TestUsage(),
       fakeAnalytics,
     );
 
@@ -60,7 +58,6 @@ void main() {
       project,
       const BuildInfo(BuildMode.release, 'foo_Bar', treeShakeIcons: false),
       BufferLogger.test(),
-      TestUsage(),
       fakeAnalytics,
     );
 
@@ -74,7 +71,6 @@ void main() {
       project,
       const BuildInfo(BuildMode.release, 'foo', treeShakeIcons: false),
       BufferLogger.test(),
-      TestUsage(),
       fakeAnalytics,
     );
 
@@ -88,7 +84,6 @@ void main() {
       project,
       const BuildInfo(BuildMode.release, 'fooA', treeShakeIcons: false),
       BufferLogger.test(),
-      TestUsage(),
       fakeAnalytics,
     );
 
@@ -102,7 +97,6 @@ void main() {
       project,
       const BuildInfo(BuildMode.release, null, treeShakeIcons: false),
       BufferLogger.test(),
-      TestUsage(),
       fakeAnalytics,
     );
 
@@ -116,7 +110,6 @@ void main() {
       project,
       const BuildInfo(BuildMode.debug, 'fooBar', treeShakeIcons: false),
       BufferLogger.test(),
-      TestUsage(),
       fakeAnalytics,
     );
 
@@ -130,7 +123,6 @@ void main() {
       project,
       const BuildInfo(BuildMode.debug, 'foo_bar', treeShakeIcons: false),
       BufferLogger.test(),
-      TestUsage(),
       fakeAnalytics,
     );
 
@@ -144,7 +136,6 @@ void main() {
       project,
       const BuildInfo(BuildMode.debug, 'foo_Bar', treeShakeIcons: false),
       BufferLogger.test(),
-      TestUsage(),
       fakeAnalytics,
     );
 
@@ -158,7 +149,6 @@ void main() {
       project,
       const BuildInfo(BuildMode.debug, 'foo', treeShakeIcons: false),
       BufferLogger.test(),
-      TestUsage(),
       fakeAnalytics,
     );
 
@@ -172,7 +162,6 @@ void main() {
       project,
       const BuildInfo(BuildMode.debug, 'fooA', treeShakeIcons: false),
       BufferLogger.test(),
-      TestUsage(),
       fakeAnalytics,
     );
 
@@ -186,7 +175,6 @@ void main() {
       project,
       BuildInfo.debug,
       BufferLogger.test(),
-      TestUsage(),
       fakeAnalytics,
     );
 
@@ -200,7 +188,6 @@ void main() {
       project,
       const BuildInfo(BuildMode.profile, 'fooBar', treeShakeIcons: false),
       BufferLogger.test(),
-      TestUsage(),
       fakeAnalytics,
     );
 
@@ -214,7 +201,6 @@ void main() {
       project,
       const BuildInfo(BuildMode.profile, 'foo_bar', treeShakeIcons: false),
       BufferLogger.test(),
-      TestUsage(),
       fakeAnalytics,
     );
 
@@ -228,7 +214,6 @@ void main() {
       project,
       const BuildInfo(BuildMode.profile, 'foo_Bar', treeShakeIcons: false),
       BufferLogger.test(),
-      TestUsage(),
       fakeAnalytics,
     );
 
@@ -242,7 +227,6 @@ void main() {
       project,
       const BuildInfo(BuildMode.profile, 'foo', treeShakeIcons: false),
       BufferLogger.test(),
-      TestUsage(),
       fakeAnalytics,
     );
 
@@ -256,7 +240,6 @@ void main() {
       project,
       const BuildInfo(BuildMode.profile, 'fooA', treeShakeIcons: false),
       BufferLogger.test(),
-      TestUsage(),
       fakeAnalytics,
     );
 
@@ -270,7 +253,6 @@ void main() {
       project,
       const BuildInfo(BuildMode.profile, null, treeShakeIcons: false),
       BufferLogger.test(),
-      TestUsage(),
       fakeAnalytics,
     );
 
@@ -284,7 +266,6 @@ void main() {
       project,
       const BuildInfo(BuildMode.release, null, treeShakeIcons: false),
       BufferLogger.test(),
-      TestUsage(),
       fakeAnalytics,
     );
 
@@ -298,7 +279,6 @@ void main() {
       project,
       const BuildInfo(BuildMode.profile, null, treeShakeIcons: false),
       BufferLogger.test(),
-      TestUsage(),
       fakeAnalytics,
     );
 
@@ -312,7 +292,6 @@ void main() {
       project,
       BuildInfo.debug,
       BufferLogger.test(),
-      TestUsage(),
       fakeAnalytics,
     );
 
@@ -326,7 +305,6 @@ void main() {
       project,
       const BuildInfo(BuildMode.release, 'foo_bar', treeShakeIcons: false),
       BufferLogger.test(),
-      TestUsage(),
       fakeAnalytics,
     );
 
@@ -340,7 +318,6 @@ void main() {
       project,
       const BuildInfo(BuildMode.release, 'foo_Bar', treeShakeIcons: false),
       BufferLogger.test(),
-      TestUsage(),
       fakeAnalytics,
     );
 
@@ -354,8 +331,7 @@ void main() {
       project,
       const BuildInfo(BuildMode.profile, 'foo_bar', treeShakeIcons: false),
       BufferLogger.test(),
-    TestUsage(),
-    fakeAnalytics,
+      fakeAnalytics,
     );
 
     expect(bundle, isNotNull);
@@ -368,7 +344,6 @@ void main() {
       project,
       const BuildInfo(BuildMode.debug, 'foo_Bar', treeShakeIcons: false),
       BufferLogger.test(),
-      TestUsage(),
       fakeAnalytics,
     );
 
@@ -383,7 +358,6 @@ void main() {
       project,
       const BuildInfo(BuildMode.release, 'Foo_Bar', treeShakeIcons: false),
       BufferLogger.test(),
-      TestUsage(),
       fakeAnalytics,
     );
 
@@ -398,7 +372,6 @@ void main() {
       project,
       const BuildInfo(BuildMode.debug, 'Foo_Bar', treeShakeIcons: false),
       BufferLogger.test(),
-      TestUsage(),
       fakeAnalytics,
     );
 
@@ -408,14 +381,12 @@ void main() {
 
   testWithoutContext('AAB not found', () {
     final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
-    final TestUsage testUsage = TestUsage();
     expect(
       () {
         findBundleFile(
           project,
           const BuildInfo(BuildMode.debug, 'foo_bar', treeShakeIcons: false),
           BufferLogger.test(),
-          testUsage,
           fakeAnalytics,
         );
       },
@@ -425,16 +396,6 @@ void main() {
           "was generated under ${project.android.buildDirectory.path}, but the tool couldn't find it."
       )
     );
-    expect(testUsage.events, contains(
-      TestUsageEvent(
-        'build',
-        'gradle',
-        label: 'gradle-expected-file-not-found',
-        parameters: CustomDimensions.fromMap(<String, String> {
-          'cd37': 'androidGradlePluginVersion: 7.6.3, fileExtension: .aab',
-        }),
-      ),
-    ));
     expect(fakeAnalytics.sentEvents, hasLength(1));
     expect(
       fakeAnalytics.sentEvents,

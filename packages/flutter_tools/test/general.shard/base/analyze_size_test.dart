@@ -66,7 +66,6 @@ void main() {
       fileSystem: fileSystem,
       logger: logger,
       appFilenamePattern: RegExp(r'lib.*app\.so'),
-      flutterUsage: TestUsage(),
       analytics: const NoOpAnalytics(),
     );
 
@@ -151,7 +150,6 @@ void main() {
       fileSystem: fileSystem,
       logger: logger,
       appFilenamePattern: RegExp(r'lib.*app\.so'),
-      flutterUsage: TestUsage(),
       analytics: const NoOpAnalytics(),
     );
 
@@ -194,7 +192,6 @@ void main() {
       fileSystem: fileSystem,
       logger: logger,
       appFilenamePattern: RegExp(r'lib.*app\.so'),
-      flutterUsage: TestUsage(),
       analytics: const NoOpAnalytics(),
     );
 
@@ -238,7 +235,6 @@ void main() {
       fileSystem: fileSystem,
       logger: logger,
       appFilenamePattern: RegExp(r'lib.*app\.so'),
-      flutterUsage: TestUsage(),
       analytics: const NoOpAnalytics(),
     );
 

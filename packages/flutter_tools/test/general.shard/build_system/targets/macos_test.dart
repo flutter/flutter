@@ -30,7 +30,6 @@ void main() {
   late FakeCommand lipoInfoNonFatCommand;
   late FakeCommand lipoInfoFatCommand;
   late FakeCommand lipoVerifyX86_64Command;
-  late TestUsage usage;
   late FakeAnalytics fakeAnalytics;
 
   setUp(() {
@@ -38,7 +37,6 @@ void main() {
     artifacts = Artifacts.test();
     fileSystem = MemoryFileSystem.test();
     logger = BufferLogger.test();
-    usage = TestUsage();
     fakeAnalytics = getInitializedFakeAnalyticsInstance(
       fs: fileSystem,
       fakeFlutterVersion: FakeFlutterVersion(),
@@ -56,7 +54,6 @@ void main() {
       logger: logger,
       fileSystem: fileSystem,
       engineVersion: '2',
-      usage: usage,
       analytics: fakeAnalytics,
     );
 
@@ -407,7 +404,6 @@ void main() {
         .createSync(recursive: true);
 
     await const ReleaseMacOSBundleFlutterAssets().build(environment);
-    expect(usage.events, contains(const TestUsageEvent('assemble', 'macos-archive', label: 'success')));
     expect(fakeAnalytics.sentEvents, contains(
       Event.appleUsageEvent(
         workflow: 'assemble',
@@ -427,7 +423,6 @@ void main() {
     // Throws because the project files are not set up.
     await expectLater(() => const ReleaseMacOSBundleFlutterAssets().build(environment),
         throwsA(const TypeMatcher<FileSystemException>()));
-    expect(usage.events, contains(const TestUsageEvent('assemble', 'macos-archive', label: 'fail')));
     expect(fakeAnalytics.sentEvents, contains(
       Event.appleUsageEvent(
         workflow: 'assemble',

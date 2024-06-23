@@ -72,7 +72,6 @@ void main() {
       fileSystem: fileSystem,
       platform: platform,
       processManager: fakeProcessManager,
-      usage: TestUsage(),
       analytics: const NoOpAnalytics(),
     );
   });
@@ -185,7 +184,6 @@ void main() {
       fileSystem: fileSystem,
       platform: platform,
       processManager: fakeProcessManager,
-      usage: TestUsage(),
       analytics: const NoOpAnalytics(),
     );
     fileSystem.file(xcodebuild).deleteSync();
@@ -512,7 +510,6 @@ void main() {
       fileSystem: fileSystem,
       platform: platform,
       processManager: fakeProcessManager,
-      usage: TestUsage(),
       analytics: const NoOpAnalytics(),
     );
 
@@ -539,7 +536,6 @@ void main() {
       fileSystem: fileSystem,
       platform: platform,
       processManager: fakeProcessManager,
-      usage: TestUsage(),
       analytics: const NoOpAnalytics(),
     );
 
@@ -566,7 +562,6 @@ void main() {
       fileSystem: fileSystem,
       platform: platform,
       processManager: fakeProcessManager,
-      usage: TestUsage(),
       analytics: const NoOpAnalytics(),
     );
 

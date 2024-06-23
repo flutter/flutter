@@ -787,11 +787,6 @@ void writeLocalProperties(File properties) {
 }
 
 void exitWithNoSdkMessage() {
-  BuildEvent('unsupported-project',
-          type: 'gradle',
-          eventError: 'android-sdk-not-found',
-          flutterUsage: globals.flutterUsage)
-      .send();
   globals.analytics.send(Event.flutterBuildInfo(
     label: 'unsupported-project',
     buildType: 'gradle',

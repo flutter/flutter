@@ -192,7 +192,6 @@ void main() {
     group('run app', () {
       late MemoryFileSystem fs;
       late Artifacts artifacts;
-      late TestUsage usage;
       late FakeAnsiTerminal fakeTerminal;
       late analytics.FakeAnalytics fakeAnalytics;
 
@@ -203,7 +202,6 @@ void main() {
       setUp(() {
         fakeTerminal = FakeAnsiTerminal();
         artifacts = Artifacts.test();
-        usage = TestUsage();
         fs = MemoryFileSystem.test();
 
         fs.currentDirectory.childFile('pubspec.yaml')
@@ -466,7 +464,6 @@ void main() {
         DeviceManager: () => testDeviceManager,
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
-        Usage: () => usage,
       });
 
       testUsingContext('passes device target platform to usage', () async {
@@ -485,14 +482,6 @@ void main() {
           '--no-hot',
         ]), isNull);
 
-        expect(usage.commands, contains(
-          TestUsageCommand('run', parameters: CustomDimensions.fromMap(<String, String>{
-            'cd3': 'false', 'cd4': 'ios', 'cd22': 'iOS 13',
-            'cd23': 'debug', 'cd18': 'false', 'cd15': 'swift', 'cd31': 'true',
-            'cd57': 'usb',
-            'cd58': 'false',
-          })
-        )));
         expect(
           fakeAnalytics.sentEvents,
           contains(
@@ -518,7 +507,6 @@ void main() {
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
         Stdio: () => FakeStdio(),
-        Usage: () => usage,
         analytics.Analytics: () => fakeAnalytics,
       });
 
@@ -538,14 +526,6 @@ void main() {
           'test/widget_test.dart',
         ]), isNull);
 
-        expect(usage.commands, contains(
-          TestUsageCommand('run', parameters: CustomDimensions.fromMap(<String, String>{
-            'cd3': 'false', 'cd4': 'ios', 'cd22': 'iOS 13',
-            'cd23': 'debug', 'cd18': 'false', 'cd15': 'swift', 'cd31': 'true',
-            'cd57': 'usb',
-            'cd58': 'true',
-          })),
-        ));
         expect(
           fakeAnalytics.sentEvents,
           contains(
@@ -571,7 +551,6 @@ void main() {
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
         Stdio: () => FakeStdio(),
-        Usage: () => usage,
         analytics.Analytics: () => fakeAnalytics,
       });
 
@@ -600,7 +579,6 @@ void main() {
           DeviceManager: () => testDeviceManager,
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
-          Usage: () => usage,
           Stdio: () => FakeStdio(),
           Logger: () => AppRunLogger(parent: logger),
         });
@@ -628,7 +606,6 @@ void main() {
           DeviceManager: () => testDeviceManager,
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
-          Usage: () => usage,
           Stdio: () => FakeStdio(),
           Logger: () => AppRunLogger(parent: logger),
         });

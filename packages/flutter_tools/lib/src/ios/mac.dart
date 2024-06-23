@@ -155,7 +155,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   final FlutterProject project = FlutterProject.current();
 
   final List<ProjectMigrator> migrators = <ProjectMigrator>[
-    RemoveFrameworkLinkAndEmbeddingMigration(app.project, globals.logger, globals.flutterUsage, globals.analytics),
+    RemoveFrameworkLinkAndEmbeddingMigration(app.project, globals.logger, globals.analytics),
     XcodeBuildSystemMigration(app.project, globals.logger),
     ProjectBaseConfigurationMigration(app.project, globals.logger),
     ProjectBuildLocationMigration(app.project, globals.logger),
@@ -452,7 +452,6 @@ Future<XcodeBuildResult> buildXcodeProject({
           + getElapsedAsSeconds(sw.elapsed).padLeft(5),
     );
     final Duration elapsedDuration = sw.elapsed;
-    globals.flutterUsage.sendTiming(xcodeBuildActionToString(buildAction), 'xcode-ios', elapsedDuration);
     globals.analytics.send(Event.timing(
       workflow: xcodeBuildActionToString(buildAction),
       variableName: 'xcode-ios',
@@ -625,7 +624,6 @@ Future<void> diagnoseXcodeBuildFailure(
   required Analytics analytics,
   required Logger logger,
   required FileSystem fileSystem,
-  required Usage flutterUsage,
   required SupportedPlatform platform,
   required FlutterProject project,
 }) async {
@@ -639,13 +637,6 @@ Future<void> diagnoseXcodeBuildFailure(
     final String command = xcodeBuildExecution.buildCommands.toString();
     final String settings = xcodeBuildExecution.buildSettings.toString();
 
-    BuildEvent(
-      label,
-      type: buildType,
-      command: command,
-      settings: settings,
-      flutterUsage: flutterUsage,
-    ).send();
     analytics.send(Event.flutterBuildInfo(
       label: label,
       buildType: buildType,
