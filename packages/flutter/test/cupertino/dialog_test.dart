@@ -702,10 +702,7 @@ void main() {
 
     final RenderBox actionsSectionBox = findScrollableActionsSectionRenderBox(tester);
 
-    expect(
-      actionsSectionBox.size.height,
-      67.80000000000001,
-    );
+    expect(actionsSectionBox.size.height, 67.8);
   });
 
   testWidgets('Actions section height for 2 stacked buttons without enough room and large accessibility font is 50% of dialog height.', (WidgetTester tester) async {

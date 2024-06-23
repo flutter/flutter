@@ -1542,18 +1542,16 @@ class _CupertinoDialogRenderWidgetState extends State<_CupertinoDialogRenderWidg
   }
 
   Widget _buildActionsSection() {
-    return Flexible(
-      child: Stack(
-        children: <Widget>[
-          Positioned.fill(
-            child: _buildOverscroll(_kDialogColor),
-          ),
-          NotificationListener<ScrollUpdateNotification>(
-            onNotification: _onScrollUpdate,
-            child: widget.actionsSection!,
-          ),
-        ],
-      ),
+    return Stack(
+      children: <Widget>[
+        Positioned.fill(
+          child: _buildOverscroll(_kDialogColor),
+        ),
+        NotificationListener<ScrollUpdateNotification>(
+          onNotification: _onScrollUpdate,
+          child: widget.actionsSection!,
+        ),
+      ],
     );
   }
 
@@ -1611,7 +1609,9 @@ class _CupertinoDialogRenderWidgetState extends State<_CupertinoDialogRenderWidg
                   hiddenColor: _kDialogColor,
                   hidden: false,
                 ),
-                _buildActionsSection(),
+                Flexible(
+                  child: _buildActionsSection(),
+                ),
               ],
             ),
             bottomMinHeight: actionsMaxHeight,
