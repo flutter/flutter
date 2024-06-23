@@ -22,7 +22,6 @@ import 'src/doctor.dart';
 import 'src/features.dart';
 import 'src/globals.dart' as globals;
 import 'src/reporting/crash_reporting.dart';
-import 'src/reporting/reporting.dart';
 import 'src/runner/flutter_command.dart';
 import 'src/runner/flutter_command_runner.dart';
 
@@ -78,22 +77,8 @@ Future<int> run(
         // Same functionality as "flutter config --no-analytics" for disabling
         // except with the `value` hard coded as false
         if (args.contains('--disable-analytics')) {
-          // The tool sends the analytics event *before* toggling the flag
-          // intentionally to be sure that opt-out events are sent correctly.
-          AnalyticsConfigEvent(enabled: false).send();
-
-          // Normally, the tool waits for the analytics to all send before the
-          // tool exits, but only when analytics are enabled. When reporting that
-          // analytics have been disable, the wait must be done here instead.
-          await globals.flutterUsage.ensureAnalyticsSent();
-
-          globals.flutterUsage.enabled = false;
-          globals.printStatus('Analytics reporting disabled.');
-
-          // TODO(eliasyishak): Set the telemetry for the unified_analytics
-          //  package as well, the above will be removed once we have
-          //  fully transitioned to using the new package, https://github.com/flutter/flutter/issues/128251
           await globals.analytics.setTelemetry(false);
+          globals.printStatus('Analytics reporting disabled.');
         }
 
         // Enable analytics if user passes in the `--enable-analytics` option
@@ -102,29 +87,8 @@ Future<int> run(
         // Same functionality as `flutter config --analytics` for enabling
         // except with the `value` hard coded as true
         if (args.contains('--enable-analytics')) {
-          // The tool sends the analytics event *before* toggling the flag
-          // intentionally to be sure that opt-out events are sent correctly.
-          AnalyticsConfigEvent(enabled: true).send();
-
-          globals.flutterUsage.enabled = true;
-          globals.printStatus('Analytics reporting enabled.');
-
-          // TODO(eliasyishak): Set the telemetry for the unified_analytics
-          //  package as well, the above will be removed once we have
-          //  fully transitioned to using the new package, https://github.com/flutter/flutter/issues/128251
           await globals.analytics.setTelemetry(true);
-        }
-
-        // Send an event to GA3 for any users that are opted into GA3
-        // analytics but have opted out of GA4 (package:unified_analytics)
-        // TODO(eliasyishak): remove once GA3 sunset, https://github.com/flutter/flutter/issues/128251
-        if (!globals.analytics.telemetryEnabled &&
-            globals.flutterUsage.enabled) {
-          UsageEvent(
-            'ga4_and_ga3_status_mismatch',
-            'opted_out_of_ga4',
-            flutterUsage: globals.flutterUsage,
-          ).send();
+          globals.printStatus('Analytics reporting enabled.');
         }
 
         await runner.run(args);
@@ -196,8 +160,6 @@ Future<int> _handleToolError(
       return exitWithHooks(1, shutdownHooks: shutdownHooks);
     }
 
-    // Report to both [Usage] and [CrashReportSender].
-    globals.flutterUsage.sendException(error);
     globals.analytics.send(Event.exception(exception: error.runtimeType.toString()));
     await asyncGuard(() async {
       final CrashReportSender crashReportSender = CrashReportSender(

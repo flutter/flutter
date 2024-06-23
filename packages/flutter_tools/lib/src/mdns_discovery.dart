@@ -15,7 +15,6 @@ import 'base/logger.dart';
 import 'build_info.dart';
 import 'convert.dart';
 import 'device.dart';
-import 'reporting/reporting.dart';
 
 /// A wrapper around [MDnsClient] to find a Dart VM Service instance.
 class MDnsVmServiceDiscovery {
@@ -26,12 +25,10 @@ class MDnsVmServiceDiscovery {
     MDnsClient? mdnsClient,
     MDnsClient? preliminaryMDnsClient,
     required Logger logger,
-    required Usage flutterUsage,
     required Analytics analytics,
   })  : _client = mdnsClient ?? MDnsClient(),
         _preliminaryClient = preliminaryMDnsClient,
         _logger = logger,
-        _flutterUsage = flutterUsage,
         _analytics = analytics;
 
   final MDnsClient _client;
@@ -41,7 +38,6 @@ class MDnsVmServiceDiscovery {
   final MDnsClient? _preliminaryClient;
 
   final Logger _logger;
-  final Usage _flutterUsage;
   final Analytics _analytics;
 
   @visibleForTesting
@@ -507,7 +503,6 @@ class MDnsVmServiceDiscovery {
     final TargetPlatform targetPlatform = await device.targetPlatform;
     switch (targetPlatform) {
       case TargetPlatform.ios:
-        UsageEvent('ios-mdns', 'no-ipv4-link-local', flutterUsage: _flutterUsage).send();
         _analytics.send(Event.appleUsageEvent(workflow: 'ios-mdns', parameter: 'no-ipv4-link-local'));
         _logger.printError(
           'The mDNS query for an attached iOS device failed. It may '

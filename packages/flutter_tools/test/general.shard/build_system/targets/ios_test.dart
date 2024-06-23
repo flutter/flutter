@@ -12,7 +12,6 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/ios.dart';
 import 'package:flutter_tools/src/convert.dart';
-import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../../src/common.dart';
@@ -46,7 +45,6 @@ void main() {
   late FakeProcessManager processManager;
   late Artifacts artifacts;
   late BufferLogger logger;
-  late TestUsage usage;
   late FakeAnalytics fakeAnalytics;
 
   setUp(() {
@@ -54,7 +52,6 @@ void main() {
     processManager = FakeProcessManager.empty();
     logger = BufferLogger.test();
     artifacts = Artifacts.test();
-    usage = TestUsage();
     fakeAnalytics = getInitializedFakeAnalyticsInstance(
       fs: fileSystem,
       fakeFlutterVersion: FakeFlutterVersion(),
@@ -70,7 +67,6 @@ void main() {
       logger: logger,
       fileSystem: fileSystem,
       engineVersion: '2',
-      usage: usage,
       analytics: fakeAnalytics,
     );
   });
@@ -394,7 +390,6 @@ void main() {
     expect(assetDirectory.childFile('AssetManifest.json'), exists);
     expect(assetDirectory.childFile('vm_snapshot_data'), isNot(exists));
     expect(assetDirectory.childFile('isolate_snapshot_data'), isNot(exists));
-    expect(usage.events, isEmpty);
     expect(fakeAnalytics.sentEvents, isEmpty);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -434,7 +429,6 @@ void main() {
     ]);
 
     await const ReleaseIosApplicationBundle().build(environment);
-    expect(usage.events, contains(const TestUsageEvent('assemble', 'ios-archive', label: 'success')));
     expect(fakeAnalytics.sentEvents, contains(Event.appleUsageEvent(
       workflow: 'assemble',
       parameter: 'ios-archive',
@@ -453,7 +447,6 @@ void main() {
     // Throws because the project files are not set up.
     await expectLater(() => const ReleaseIosApplicationBundle().build(environment),
         throwsA(const TypeMatcher<FileSystemException>()));
-    expect(usage.events, contains(const TestUsageEvent('assemble', 'ios-archive', label: 'fail')));
     expect(fakeAnalytics.sentEvents, contains(Event.appleUsageEvent(
       workflow: 'assemble',
       parameter: 'ios-archive',

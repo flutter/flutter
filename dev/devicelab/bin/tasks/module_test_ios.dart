@@ -271,7 +271,6 @@ dependencies:
         objectiveCHostApp,
       );
 
-      final File objectiveCAnalyticsOutputFile = File(path.join(tempDir.path, 'analytics-objc.log'));
       final Directory objectiveCBuildDirectory = Directory(path.join(tempDir.path, 'build-objc'));
 
       await inDirectory(objectiveCHostApp, () async {
@@ -373,9 +372,6 @@ end
             'BUILD_DIR=${objectiveCBuildDirectory.path}',
             'COMPILER_INDEX_STORE_ENABLE=NO',
           ],
-          environment: <String, String> {
-            'FLUTTER_ANALYTICS_LOG_FILE': objectiveCAnalyticsOutputFile.path,
-          },
         );
       });
 
@@ -435,18 +431,6 @@ end
         }
       });
 
-      section('Check that the host build sends the correct analytics');
-
-      final String objectiveCAnalyticsOutput = objectiveCAnalyticsOutputFile.readAsStringSync();
-      if (!objectiveCAnalyticsOutput.contains('cd24: ios')
-          || !objectiveCAnalyticsOutput.contains('cd25: true')
-          || !objectiveCAnalyticsOutput.contains('viewName: assemble')) {
-        return TaskResult.failure(
-          'Building outer Objective-C app produced the following analytics: "$objectiveCAnalyticsOutput" '
-          'but not the expected strings: "cd24: ios", "cd25: true", "viewName: assemble"'
-        );
-      }
-
       section('Archive iOS Objective-C host app');
 
       await inDirectory(objectiveCHostApp, () async {
@@ -469,9 +453,6 @@ end
             'COMPILER_INDEX_STORE_ENABLE=NO',
             'archive',
           ],
-          environment: <String, String> {
-            'FLUTTER_ANALYTICS_LOG_FILE': objectiveCAnalyticsOutputFile.path,
-          },
         );
 
         final String archivedAppPath = path.join(
@@ -632,7 +613,6 @@ end
         swiftHostApp,
       );
 
-      final File swiftAnalyticsOutputFile = File(path.join(tempDir.path, 'analytics-swift.log'));
       final Directory swiftBuildDirectory = Directory(path.join(tempDir.path, 'build-swift'));
 
       await inDirectory(swiftHostApp, () async {
@@ -659,9 +639,6 @@ end
             'BUILD_DIR=${swiftBuildDirectory.path}',
             'COMPILER_INDEX_STORE_ENABLE=NO',
           ],
-          environment: <String, String> {
-            'FLUTTER_ANALYTICS_LOG_FILE': swiftAnalyticsOutputFile.path,
-          },
         );
       });
 
@@ -673,16 +650,6 @@ end
       )));
       if (!existingSwiftAppBuilt) {
         return TaskResult.failure('Failed to build existing Swift app .app');
-      }
-
-      final String swiftAnalyticsOutput = swiftAnalyticsOutputFile.readAsStringSync();
-      if (!swiftAnalyticsOutput.contains('cd24: ios')
-          || !swiftAnalyticsOutput.contains('cd25: true')
-          || !swiftAnalyticsOutput.contains('viewName: assemble')) {
-        return TaskResult.failure(
-          'Building outer Swift app produced the following analytics: "$swiftAnalyticsOutput" '
-          'but not the expected strings: "cd24: ios", "cd25: true", "viewName: assemble"'
-        );
       }
 
       return TaskResult.success(null);

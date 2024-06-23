@@ -13,7 +13,6 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/drive/web_driver_service.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/web/web_runner.dart';
 import 'package:test/fake.dart';
@@ -315,7 +314,6 @@ class FakeWebRunnerFactory implements WebRunnerFactory {
     Logger? logger,
     FileSystem? fileSystem,
     SystemClock? systemClock,
-    Usage? usage,
     Analytics? analytics,
     bool machine = false,
   }) {

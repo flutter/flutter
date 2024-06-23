@@ -407,3 +407,27 @@ enum CustomDimensionsEnum {
 
   String get cdKey => 'cd${index + 1}';
 }
+
+bool _mapsEqual(Map<dynamic, dynamic>? a, Map<dynamic, dynamic>? b) {
+  if (a == b) {
+    return true;
+  }
+  if (a == null || b == null) {
+    return false;
+  }
+  if (a.length != b.length) {
+    return false;
+  }
+
+  for (final dynamic k in a.keys) {
+    final dynamic bValue = b[k];
+    if (bValue == null && !b.containsKey(k)) {
+      return false;
+    }
+    if (bValue != a[k]) {
+      return false;
+    }
+  }
+
+  return true;
+}

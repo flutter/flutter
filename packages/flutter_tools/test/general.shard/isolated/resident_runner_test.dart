@@ -74,7 +74,7 @@ void main() {
           target: 'main.dart',
           devtoolsHandler: createNoOpHandler,
           nativeAssetsBuilder: FakeHotRunnerNativeAssetsBuilder(buildRunner),
-          analytics: FakeAnalytics(),
+          analytics: _FakeAnalytics(),
           nativeAssetsYamlFile: 'foo.yaml',
         );
 
@@ -97,7 +97,7 @@ void main() {
       });
 }
 
-class FakeAnalytics extends Fake implements Analytics {
+class _FakeAnalytics extends Fake implements Analytics {
   @override
   void send(Event event) => sentEvents.add(event);
 

@@ -31,7 +31,6 @@ dependencies:
   process: 5.0.2
   fake_async: 1.3.1
   stack_trace: 1.11.1
-  usage: 4.1.1
   webdriver: 3.0.3
   webkit_inspection_protocol: 1.2.1
   xml: 6.5.0

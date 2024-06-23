@@ -19,7 +19,6 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../convert.dart';
-import '../reporting/reporting.dart';
 import 'depfile.dart';
 import 'exceptions.dart';
 import 'file_store.dart';
@@ -343,7 +342,6 @@ class Environment {
     required Artifacts artifacts,
     required ProcessManager processManager,
     required Platform platform,
-    required Usage usage,
     required Analytics analytics,
     String? engineVersion,
     required bool generateDartPluginRegistry,
@@ -386,7 +384,6 @@ class Environment {
       artifacts: artifacts,
       processManager: processManager,
       platform: platform,
-      usage: usage,
       analytics: analytics,
       engineVersion: engineVersion,
       inputs: inputs,
@@ -409,7 +406,6 @@ class Environment {
     Map<String, String> inputs = const <String, String>{},
     String? engineVersion,
     Platform? platform,
-    Usage? usage,
     Analytics? analytics,
     bool generateDartPluginRegistry = false,
     required FileSystem fileSystem,
@@ -431,7 +427,6 @@ class Environment {
       artifacts: artifacts,
       processManager: processManager,
       platform: platform ?? FakePlatform(),
-      usage: usage ?? TestUsage(),
       analytics: analytics ?? const NoOpAnalytics(),
       engineVersion: engineVersion,
       generateDartPluginRegistry: generateDartPluginRegistry,
@@ -452,7 +447,6 @@ class Environment {
     required this.logger,
     required this.fileSystem,
     required this.artifacts,
-    required this.usage,
     required this.analytics,
     this.engineVersion,
     required this.inputs,
@@ -544,8 +538,6 @@ class Environment {
   final Artifacts artifacts;
 
   final FileSystem fileSystem;
-
-  final Usage usage;
 
   final Analytics analytics;
 

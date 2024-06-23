@@ -27,7 +27,6 @@ import 'package:flutter_tools/src/ios/application_package.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/mdns_discovery.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_hot.dart';
 import 'package:flutter_tools/src/vmservice.dart';
@@ -157,7 +156,6 @@ void main() {
           mdnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
           preliminaryMDnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
           logger: logger,
-          flutterUsage: TestUsage(),
           analytics: const NoOpAnalytics(),
         ),
       });
@@ -221,7 +219,6 @@ void main() {
           mdnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
           preliminaryMDnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
           logger: logger,
-          flutterUsage: TestUsage(),
           analytics: const NoOpAnalytics(),
         ),
         Signals: () => FakeSignals(),
@@ -291,7 +288,6 @@ void main() {
           mdnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
           preliminaryMDnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
           logger: logger,
-          flutterUsage: TestUsage(),
           analytics: const NoOpAnalytics(),
         ),
         ProcessManager: () => FakeProcessManager.empty(),
@@ -364,7 +360,6 @@ void main() {
             },
           ),
           logger: logger,
-          flutterUsage: TestUsage(),
           analytics: const NoOpAnalytics(),
         ),
       });
@@ -437,7 +432,6 @@ void main() {
             },
           ),
           logger: logger,
-          flutterUsage: TestUsage(),
           analytics: const NoOpAnalytics(),
         ),
       });
@@ -514,7 +508,6 @@ void main() {
             },
           ),
           logger: logger,
-          flutterUsage: TestUsage(),
           analytics: const NoOpAnalytics(),
         ),
       });
@@ -591,7 +584,6 @@ void main() {
             },
           ),
           logger: logger,
-          flutterUsage: TestUsage(),
           analytics: const NoOpAnalytics(),
         ),
       });
