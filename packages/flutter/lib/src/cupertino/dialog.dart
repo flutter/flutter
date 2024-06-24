@@ -857,13 +857,17 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
 
   bool get hasContent => widget.title != null || widget.message != null;
 
-  Widget _buildContent(BuildContext context) {
-    final List<Widget> content = <Widget>[];
+  Widget? _buildContent(BuildContext context) {
+    if (!hasContent) {
+      return null;
+    }
     final TextStyle textStyle = _kActionSheetContentStyle.copyWith(
       color: CupertinoDynamicColor.resolve(_kActionSheetContentTextColor, context),
     );
-    if (hasContent) {
-      final Widget titleSection = _CupertinoAlertContentSection(
+    return ColoredBox(
+      color: CupertinoDynamicColor.resolve(_kActionSheetBackgroundColor, context),
+      child:
+        _CupertinoAlertContentSection(
         title: widget.title,
         message: widget.message,
         scrollController: _effectiveMessageScrollController,
@@ -886,16 +890,6 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
             ? textStyle.copyWith(fontWeight: FontWeight.w600)
             : textStyle,
         additionalPaddingBetweenTitleAndMessage: const EdgeInsets.only(top: 4.0),
-      );
-      content.add(Flexible(child: titleSection));
-    }
-
-    return ColoredBox(
-      color: CupertinoDynamicColor.resolve(_kActionSheetBackgroundColor, context),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: content,
       ),
     );
   }
@@ -1005,9 +999,8 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
             filter: ImageFilter.blur(sigmaX: _kBlurAmount, sigmaY: _kBlurAmount),
             child: _ActionSheetMainSheet(
               scrollController: _effectiveActionScrollController,
-              hasContent: hasContent,
-              contentSection: Builder(builder: _buildContent),
-              actions: widget.actions,
+              contentSection: _buildContent(context),
+              actions: widget.actions ?? List<Widget>.empty(),
               dividerColor: CupertinoDynamicColor.resolve(_kActionSheetButtonDividerColor, context),
             ),
           ),
@@ -1328,15 +1321,13 @@ class _ActionSheetMainSheet extends StatefulWidget {
   const _ActionSheetMainSheet({
     required this.scrollController,
     required this.actions,
-    required this.hasContent,
     required this.contentSection,
     required this.dividerColor,
   });
 
   final ScrollController? scrollController;
-  final List<Widget>? actions;
-  final bool hasContent;
-  final Widget contentSection;
+  final List<Widget> actions;
+  final Widget? contentSection;
   final Color dividerColor;
 
   @override
@@ -1387,21 +1378,8 @@ class _ActionSheetMainSheetState extends State<_ActionSheetMainSheet> {
     return false;
   }
 
-  bool _hasActions() => (widget.actions?.length ?? 0) != 0;
-
-  Widget _buildContent({required bool hasActions, required double maxHeight}) {
-    if (!hasActions) {
-      return Flexible(
-        child: widget.contentSection,
-      );
-    }
-    return ConstrainedBox(
-      constraints: BoxConstraints(
-        maxHeight: maxHeight,
-      ),
-      child: widget.contentSection,
-    );
-  }
+  bool get _hasContent => widget.contentSection != null;
+  bool get _hasActions => widget.actions.isNotEmpty;
 
   void _onPressedUpdate(int actionIndex, bool state) {
     if (!state) {
@@ -1417,50 +1395,59 @@ class _ActionSheetMainSheetState extends State<_ActionSheetMainSheet> {
     }
   }
 
+  Widget _dividerAndActionsSection(BuildContext context) {
+    if (!_hasActions) {
+      return _empty;
+    }
+    final Color backgroundColor = CupertinoDynamicColor.resolve(_kActionSheetBackgroundColor, context);
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        if (_hasContent)
+          _ActionSheetDivider(
+            dividerColor: widget.dividerColor,
+            hidden: false,
+          ),
+        Stack(
+          children: <Widget>[
+            Positioned.fill(
+              child: _buildOverscroll(),
+            ),
+            NotificationListener<ScrollUpdateNotification>(
+              onNotification: _onScrollUpdate,
+              child: _ActionSheetActionSection(
+                actions: widget.actions,
+                scrollController: widget.scrollController,
+                pressedIndex: _pressedIndex,
+                dividerColor: widget.dividerColor,
+                backgroundColor: backgroundColor,
+                onPressedUpdate: _onPressedUpdate,
+              ),
+            )
+          ],
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    // The content section takes priority for vertical space but must leave at
-    // least `_kActionSheetActionsSectionMinHeight` for the actions section.
-    final Color backgroundColor = CupertinoDynamicColor.resolve(_kActionSheetBackgroundColor, context);
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            _buildContent(
-              hasActions: _hasActions(),
-              maxHeight: constraints.maxHeight - _kActionSheetActionsSectionMinHeight - _kDividerThickness,
-            ),
-            if (widget.hasContent && _hasActions())
-              _ActionSheetDivider(
-                dividerColor: widget.dividerColor,
-                hidden: false,
-              ),
-            Flexible(
-              child: Stack(
-                children: <Widget>[
-                  Positioned.fill(
-                    child: _buildOverscroll(),
-                  ),
-                  NotificationListener<ScrollUpdateNotification>(
-                    onNotification: _onScrollUpdate,
-                    child: _ActionSheetActionSection(
-                      actions: widget.actions,
-                      scrollController: widget.scrollController,
-                      pressedIndex: _pressedIndex,
-                      dividerColor: widget.dividerColor,
-                      backgroundColor: backgroundColor,
-                      onPressedUpdate: _onPressedUpdate,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
+        return _PriorityColumn(
+          top: widget.contentSection ?? _empty,
+          bottom: _dividerAndActionsSection(context),
+          bottomMinHeight: _kActionSheetActionsSectionMinHeight + _kDividerThickness,
         );
       },
     );
   }
+
+  static const Widget _empty = LimitedBox(
+    maxWidth: 0,
+    child: SizedBox(width: double.infinity, height: 0),
+  );
 }
 
 // iOS style layout policy widget for sizing an alert dialog's content section and
@@ -2928,5 +2915,126 @@ class _RenderCupertinoDialogActions extends RenderBox
   @override
   bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
     return defaultHitTestChildren(result, position: position);
+  }
+}
+
+// A column of two widgets that allows the top widget to take as much vertical
+// space as needed as long as the bottom is ensured the give minimal height.
+//
+// The `_PriorityColumn` stretches both widgets horizontally to its maximal
+// width constraint, and allocates vertical space in the following priority:
+//
+//  1. The `bottom` widget, as much as it requests, up to `bottomMinHeight`.
+//  2. The `top` widget, as much as it requests.
+//  3. The `bottom` widget, as much as it requests.
+//
+// This algorithm is observed on several iOS widgets, such as the action sheet
+// and the alert dialog.
+//
+// This algorithm is probably impossible to implement via compositing simple
+// layout widgets because the bottom widget might take up more than
+// `bottomMinHeight` if the top widget is short enough, or it might take up less
+// than `bottomMinHeight` if itself is shorter.
+class _PriorityColumn extends MultiChildRenderObjectWidget {
+  _PriorityColumn({
+    required Widget top,
+    required Widget bottom,
+    required this.bottomMinHeight,
+  }) : super(children: <Widget>[top, bottom]);
+
+  final double bottomMinHeight;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return _RenderPriorityColumn(
+      bottomMinHeight: bottomMinHeight,
+    );
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderPriorityColumn renderObject) {
+    renderObject
+      .bottomMinHeight = bottomMinHeight;
+  }
+}
+
+class _RenderPriorityColumn extends RenderFlex {
+  _RenderPriorityColumn({
+    List<RenderBox>? children,
+    required double bottomMinHeight,
+  }) : _bottomMinHeight = bottomMinHeight,
+       super(
+         direction: Axis.vertical,
+         mainAxisSize: MainAxisSize.min,
+         crossAxisAlignment: CrossAxisAlignment.stretch,
+       ) {
+    addAll(children);
+  }
+
+  double get bottomMinHeight => _bottomMinHeight;
+  double _bottomMinHeight;
+  set bottomMinHeight(double newValue) {
+    if (newValue != _bottomMinHeight) {
+      _bottomMinHeight = newValue;
+      markNeedsLayout();
+    }
+  }
+
+  @override
+  double computeMinIntrinsicHeight(double width) {
+    assert(childCount == 2);
+    return firstChild!.getMinIntrinsicHeight(width) + lastChild!.getMinIntrinsicHeight(width);
+  }
+
+  @override
+  double computeMaxIntrinsicHeight(double width) {
+    assert(childCount == 2);
+    return firstChild!.getMaxIntrinsicHeight(width) + lastChild!.getMaxIntrinsicHeight(width);
+  }
+
+  @override
+  @protected
+  Size computeDryLayout(covariant BoxConstraints constraints) {
+    final double width = constraints.maxWidth;
+    final double maxHeight = constraints.maxHeight;
+    final (double topHeight, double bottomHeight) = _childrenHeights(width, maxHeight);
+    return Size(width, topHeight + bottomHeight);
+  }
+
+  @override
+  void performLayout() {
+    final double width = constraints.maxWidth;
+    final double maxHeight = constraints.maxHeight;
+    final (double topHeight, double bottomHeight) = _childrenHeights(width, maxHeight);
+    size = Size(width, topHeight + bottomHeight);
+
+    firstChild!.layout(BoxConstraints.tight(Size(width, topHeight)), parentUsesSize: true);
+    (firstChild!.parentData! as FlexParentData).offset = Offset.zero;
+
+    lastChild!.layout(BoxConstraints.tight(Size(width, bottomHeight)), parentUsesSize: true);
+    (lastChild!.parentData! as FlexParentData).offset = Offset(0, topHeight);
+  }
+
+  (double, double) _childrenHeights(double width, double maxHeight) {
+    assert(childCount == 2);
+    final double topIntrinsic = firstChild!.getMinIntrinsicHeight(width);
+    final double bottomIntrinsic = lastChild!.getMinIntrinsicHeight(width);
+    // Try to layout both children as their intrinsic height.
+    if (topIntrinsic + bottomIntrinsic <= maxHeight) {
+      return (topIntrinsic, bottomIntrinsic);
+    }
+    // _bottomMinHeight is only effective when bottom actually needs that much.
+    final double effectiveBottomMinHeight = math.min(_bottomMinHeight, bottomIntrinsic) ;
+    // Try to layout top as intrinsics, as long as the bottom has at least
+    // effectiveBottomMinHeight.
+    if (maxHeight - topIntrinsic >= effectiveBottomMinHeight) {
+      return (topIntrinsic, maxHeight - topIntrinsic);
+    }
+    // Try to layout bottom as effectiveBottomMinHeight, as long as top has at
+    // least 0.
+    if (maxHeight >= effectiveBottomMinHeight) {
+      return (maxHeight - effectiveBottomMinHeight, effectiveBottomMinHeight);
+    }
+    return (0, maxHeight);
   }
 }

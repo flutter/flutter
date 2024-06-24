@@ -598,8 +598,8 @@ void main() {
 
   testWidgets('Takes maximum vertical space with one action and long content', (WidgetTester tester) async {
     // Ensure that if the actions section is shorter than
-    // _kActionSheetActionsSectionMinHeight, the content section can take up
-    // more vertical space to fill up to the maximum vertical height.
+    // _kActionSheetActionsSectionMinHeight, the content section can be assigned
+    // with the remaining vertical space to fill up the maximal height.
 
     late double screenHeight;
     await tester.pumpWidget(
@@ -611,7 +611,7 @@ void main() {
             actions: <Widget>[
               CupertinoActionSheetAction(
                 onPressed: () {},
-                child: const Text('Button 0i'),
+                child: const Text('Button 0'),
               ),
             ],
           );
