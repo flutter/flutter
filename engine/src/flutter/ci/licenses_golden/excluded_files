@@ -424,6 +424,7 @@
 ../../../flutter/sky/tools/create_embedder_framework.py
 ../../../flutter/sky/tools/create_full_ios_framework.py
 ../../../flutter/sky/tools/create_ios_framework.py
+../../../flutter/sky/tools/create_macos_binary.py
 ../../../flutter/sky/tools/create_macos_framework.py
 ../../../flutter/sky/tools/create_macos_gen_snapshots.py
 ../../../flutter/sky/tools/create_xcframework.py
