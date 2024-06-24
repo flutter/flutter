@@ -207,7 +207,7 @@ class FlutterHtmlKeyboardEvent {
   num? get timeStamp => _event.timeStamp;
   bool get altKey => _event.altKey;
   bool get ctrlKey => _event.ctrlKey;
-  bool get shiftKey => _event.shiftKey;
+  bool get shiftKey => _event.shiftKey ?? false;
   bool get metaKey => _event.metaKey;
   bool get isComposing => _event.isComposing;
 

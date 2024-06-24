@@ -51,7 +51,7 @@ final class ViewFocusBinding {
     if (state == ui.ViewFocusState.focused) {
       // Only move the focus to the flutter view if nothing inside it is focused already.
       if (viewId != _viewId(domDocument.activeElement)) {
-        viewElement?.focus();
+        viewElement?.focus(preventScroll: true);
       }
     } else {
       viewElement?.blur();
@@ -70,7 +70,7 @@ final class ViewFocusBinding {
 
   late final DomEventListener _handleKeyDown = createDomEventListener((DomEvent event) {
     event as DomKeyboardEvent;
-    if (event.shiftKey) {
+    if (event.shiftKey ?? false) {
       _viewFocusDirection = ui.ViewFocusDirection.backward;
     }
   });
