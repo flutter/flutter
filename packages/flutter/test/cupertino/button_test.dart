@@ -300,7 +300,7 @@ void main() {
             label: 'ABC',
             flags: <SemanticsFlag>[
               SemanticsFlag.isButton,
-              SemanticsFlag.isFocusable
+              SemanticsFlag.isFocusable,
             ]
           ),
         ],
@@ -497,7 +497,7 @@ void main() {
       BorderSide(
         color: Color(0xcc6eadf2),
         width: 3.5,
-        strokeAlign: BorderSide.strokeAlignOutside
+        strokeAlign: BorderSide.strokeAlignOutside,
       )
     );
 
@@ -517,17 +517,14 @@ void main() {
     expect(focusNode.hasPrimaryFocus, isTrue);
 
     // The button has no border.
-    final BoxDecoration preFocusDecoration = tester.widget<DecoratedBox>(
+    final BoxDecoration unfocusedDecoration = tester.widget<DecoratedBox>(
       find.descendant(
         of: find.byType(CupertinoButton),
         matching: find.byType(DecoratedBox),
       ),
     ).decoration as BoxDecoration;
     await tester.pump();
-    expect(
-      preFocusDecoration.border,
-      null
-    );
+    expect(unfocusedDecoration.border, null);
 
     // When focused, the button has a light blue border outline by default.
     focusNode.requestFocus();
@@ -538,10 +535,7 @@ void main() {
         matching: find.byType(DecoratedBox),
       ),
     ).decoration as BoxDecoration;
-    expect(
-      decoration.border,
-      defaultFocusBorder
-    );
+    expect(decoration.border, defaultFocusBorder);
   });
 
   testWidgets('Button configures focus color', (WidgetTester tester) async {
@@ -574,22 +568,10 @@ void main() {
     ).decoration as BoxDecoration;
     final Border border = decoration.border! as Border;
     await tester.pumpAndSettle();
-    expect(
-      border.bottom.color,
-      focusColor
-    );
-    expect(
-      border.top.color,
-      focusColor
-    );
-    expect(
-      border.left.color,
-      focusColor
-    );
-    expect(
-      border.right.color,
-      focusColor
-    );
+    expect(border.top.color, focusColor);
+    expect(border.left.color, focusColor);
+    expect(border.right.color, focusColor);
+    expect(border.bottom.color, focusColor);
   });
 
   testWidgets('CupertinoButton.onFocusChange callback', (WidgetTester tester) async {

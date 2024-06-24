@@ -309,7 +309,7 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
                           BorderSide(
                             color: effectiveFocusOutlineColor,
                             width: 3.5,
-                            strokeAlign: BorderSide.strokeAlignOutside
+                            strokeAlign: BorderSide.strokeAlignOutside,
                           )
                         )
                       : null,
