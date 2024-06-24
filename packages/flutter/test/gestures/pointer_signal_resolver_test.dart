@@ -42,6 +42,19 @@ void main() {
     tester.resolver.resolve(tester.event);
   });
 
+  test('Resolving with no entries should notify engine of no-op', () {
+    bool allowedPlatformDefault = false;
+    final PointerSignalTester tester = PointerSignalTester();
+    tester.event = PointerScrollEvent(
+      onRespond: ({required bool allowPlatformDefault}) {
+        allowedPlatformDefault = allowPlatformDefault;
+      },
+    );
+    tester.resolver.resolve(tester.event);
+    expect(allowedPlatformDefault, isTrue,
+      reason: 'Should have called respond with allowPlatformDefault: true');
+  });
+
   test('First entry should always win', () {
     final PointerSignalTester tester = PointerSignalTester();
     final TestPointerSignalListener first = tester.addListener();

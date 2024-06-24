@@ -508,7 +508,6 @@ abstract class FlutterCommand extends Command<void> {
     );
     argParser.addFlag(
       'dds',
-      hide: !verboseHelp,
       defaultsTo: true,
       help: 'Enable the Dart Developer Service (DDS).\n'
             'It may be necessary to disable this when attaching to an application with '
@@ -711,7 +710,6 @@ abstract class FlutterCommand extends Command<void> {
   void usesWebRendererOption() {
     argParser.addOption(
       FlutterOptions.kWebRendererFlag,
-      defaultsTo: WebRendererMode.auto.name,
       allowed: WebRendererMode.values.map((WebRendererMode e) => e.name),
       help: 'The renderer implementation to use when building for the web.',
       allowedHelp: CliEnum.allowedHelp(WebRendererMode.values)

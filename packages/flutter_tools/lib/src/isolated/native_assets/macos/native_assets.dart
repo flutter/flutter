@@ -214,10 +214,19 @@ Map<AssetImpl, KernelAsset> _assetTargetLocations(
   Uri? absolutePath,
 ) {
   final Set<String> alreadyTakenNames = <String>{};
-  return <AssetImpl, KernelAsset>{
-    for (final AssetImpl asset in nativeAssets)
-      asset: _targetLocationMacOS(asset, absolutePath, alreadyTakenNames),
-  };
+  final Map<String, KernelAssetPath> idToPath = <String, KernelAssetPath>{};
+  final Map<AssetImpl, KernelAsset> result = <AssetImpl, KernelAsset>{};
+  for (final AssetImpl asset in nativeAssets) {
+    final KernelAssetPath path = idToPath[asset.id] ??
+        _targetLocationMacOS(asset, absolutePath, alreadyTakenNames).path;
+    idToPath[asset.id] = path;
+    result[asset] = KernelAsset(
+      id: (asset as NativeCodeAssetImpl).id,
+      target: Target.fromArchitectureAndOS(asset.architecture!, asset.os),
+      path: path,
+    );
+  }
+  return result;
 }
 
 KernelAsset _targetLocationMacOS(

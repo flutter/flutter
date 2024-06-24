@@ -208,10 +208,10 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
 ///    you are implementing an entirely different design language, such as
 ///    Cupertino.
 ///  * <https://material.io/design/components/text-fields.html>
-///  * Cookbook: [Create and style a text field](https://flutter.dev/docs/cookbook/forms/text-input)
-///  * Cookbook: [Handle changes to a text field](https://flutter.dev/docs/cookbook/forms/text-field-changes)
-///  * Cookbook: [Retrieve the value of a text field](https://flutter.dev/docs/cookbook/forms/retrieve-input)
-///  * Cookbook: [Focus and text fields](https://flutter.dev/docs/cookbook/forms/focus)
+///  * Cookbook: [Create and style a text field](https://docs.flutter.dev/cookbook/forms/text-input)
+///  * Cookbook: [Handle changes to a text field](https://docs.flutter.dev/cookbook/forms/text-field-changes)
+///  * Cookbook: [Retrieve the value of a text field](https://docs.flutter.dev/cookbook/forms/retrieve-input)
+///  * Cookbook: [Focus and text fields](https://docs.flutter.dev/cookbook/forms/focus)
 class TextField extends StatefulWidget {
   /// Creates a Material Design text field.
   ///

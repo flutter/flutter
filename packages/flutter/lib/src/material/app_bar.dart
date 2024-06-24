@@ -172,7 +172,7 @@ class _PreferredAppBarSize extends Size {
 ///    can expand and collapse.
 ///  * <https://material.io/design/components/app-bars-top.html>
 ///  * <https://m3.material.io/components/top-app-bar>
-///  * Cookbook: [Place a floating app bar above a list](https://flutter.dev/docs/cookbook/lists/floating-app-bar)
+///  * Cookbook: [Place a floating app bar above a list](https://docs.flutter.dev/cookbook/lists/floating-app-bar)
 class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// Creates a Material Design app bar.
   ///

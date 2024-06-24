@@ -407,7 +407,7 @@ Stage your change and the documentation for your change. Typically this will be 
 
 If possible, include flutter fixes to aid users in migration. Whether or not the change is supported by flutter fix should be included in the migration guide. To learn about authoring fixes, see [Data driven Fixes](Data-driven-Fixes.md).
 
-**Use our [breaking change migration guide template](https://github.com/flutter/website/blob/main/src/release/breaking-changes/template.md)** (follow all the instructions in the comments) to create the migration guide that describes the change. Do not land the migration guide at this time. You will need to update it before you land it in the last step.
+**Use our [breaking change migration guide template](https://github.com/flutter/website/blob/main/src/content/release/breaking-changes/template.md)** (follow all the instructions in the comments) to create the migration guide that describes the change. Do not land the migration guide at this time. You will need to update it before you land it in the last step.
 
 ### 4. Land your change.
 
@@ -421,7 +421,7 @@ During this process, each individual PR does not break any tests, so it should n
 Once everything has landed:
 
 * update your migration guide based on your experience migrating everyone,
-* update the timeline on the guide, and push it to [the flutter.dev Web site](https://flutter.dev/docs/release/breaking-changes) (don't forget to update the [index](https://github.com/flutter/website/blob/main/src/release/breaking-changes/index.md) of that directory as well),
+* update the timeline on the guide, and push it to [the flutter.dev Web site](https://flutter.dev/docs/release/breaking-changes) (don't forget to update the [index](https://github.com/flutter/website/blob/main/src/content/release/breaking-changes/index.md) of that directory as well),
 * e-mail a copy to [flutter-announce@](https://groups.google.com/g/flutter-announce),
 * notify the `#announcements` channel on our [Chat](Chat.md), and
 * add the [**c: API break** label](https://github.com/flutter/flutter/labels/c%3A%20API%20break) to the relevant issues, so they get listed in the upcoming Release notes.
