@@ -1636,8 +1636,8 @@ void main() {
       );
     });
 
-    testWidgets('InputDecorator OutlineBorder focused label with icon', (WidgetTester tester) async {
-      // This is a regression test for https://github.com/flutter/flutter/issues/82321
+    testWidgets('OutlineBorder starts at the right position when border radius is taller than horizontal content padding', (WidgetTester tester) async {
+      // This is a regression test for https://github.com/flutter/flutter/issues/82321.
       Widget buildFrame(TextDirection textDirection) {
         return MaterialApp(
           home: Scaffold(
@@ -1651,9 +1651,7 @@ void main() {
                     isFocused: true,
                     isEmpty: true,
                     decoration: InputDecoration(
-                      filled: true,
-                      fillColor: const Color(0xFF00FF00),
-                      labelText: 'label text',
+                      labelText: labelText,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(30.0),
                         gapPadding: 0.0,
@@ -1668,20 +1666,53 @@ void main() {
       }
 
       await tester.pumpWidget(buildFrame(TextDirection.ltr));
-      await expectLater(
-        find.byType(InputDecorator),
-        matchesGoldenFile('m3_input_decorator.outline_label.ltr.png'),
+      RenderBox borderBox = InputDecorator.containerOf(tester.element(findBorderPainter()))!;
+      // Convert label bottom left offset to border path coordinate system.
+      final Offset labelBottomLeftLocalToBorder = borderBox.globalToLocal(getLabelRect(tester).bottomLeft);
+
+      expect(findBorderPainter(), paints
+        ..save()
+        ..path(
+          // The label bottom left corner should not be part of the border.
+          excludes: <Offset>[
+            labelBottomLeftLocalToBorder,
+          ],
+          // The points just before the label bottom left corner should be part of the border.
+          includes: <Offset>[
+            labelBottomLeftLocalToBorder - const Offset(1, 0),
+            labelBottomLeftLocalToBorder - const Offset(1, 1),
+          ],
+        )
+        ..restore(),
       );
 
       await tester.pumpWidget(buildFrame(TextDirection.rtl));
-      await expectLater(
-        find.byType(InputDecorator),
-        matchesGoldenFile('m3_input_decorator.outline_label.rtl.png'),
+      borderBox = InputDecorator.containerOf(tester.element(findBorderPainter()))!;
+      // Convert label bottom right offset to border path coordinate system.
+      Offset labelBottomRightLocalToBorder = borderBox.globalToLocal(getLabelRect(tester).bottomRight);
+      // TODO(bleroux): determine why the position has to be moved by 2 pixels to the right.
+      // See https://github.com/flutter/flutter/issues/150109.
+      labelBottomRightLocalToBorder += const Offset(2, 0);
+
+      expect(findBorderPainter(), paints
+        ..save()
+        ..path(
+          // The label bottom right corner should not be part of the border.
+          excludes: <Offset>[
+            labelBottomRightLocalToBorder,
+          ],
+          // The points just after the label bottom right corner should be part of the border.
+          includes: <Offset>[
+            labelBottomRightLocalToBorder + const Offset(1, 0),
+            labelBottomRightLocalToBorder + const Offset(1, 1),
+          ],
+        )
+        ..restore(),
       );
     });
 
-    testWidgets('InputDecorator OutlineBorder focused label with icon', (WidgetTester tester) async {
-      // Regression test for https://github.com/flutter/flutter/issues/18111
+    testWidgets('OutlineBorder does not draw over label when input decorator is focused and has an icon', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/18111.
       Widget buildFrame(TextDirection textDirection) {
         return MaterialApp(
           home: Scaffold(
@@ -1696,8 +1727,7 @@ void main() {
                     isEmpty: true,
                     decoration: InputDecoration(
                       icon: Icon(Icons.insert_link),
-                      labelText: 'primaryLink',
-                      hintText: 'Primary link to story',
+                      labelText: labelText,
                       border: OutlineInputBorder(),
                     ),
                   ),
@@ -1709,15 +1739,29 @@ void main() {
       }
 
       await tester.pumpWidget(buildFrame(TextDirection.ltr));
-      await expectLater(
-        find.byType(InputDecorator),
-        matchesGoldenFile('m3_input_decorator.outline_icon_label.ltr.png'),
+      RenderBox borderBox = InputDecorator.containerOf(tester.element(findBorderPainter()))!;
+      expect(findBorderPainter(), paints
+        ..save()
+        ..path(
+          excludes: <Offset>[
+            borderBox.globalToLocal(getLabelRect(tester).centerLeft),
+            borderBox.globalToLocal(getLabelRect(tester).centerRight),
+          ],
+        )
+        ..restore(),
       );
 
       await tester.pumpWidget(buildFrame(TextDirection.rtl));
-      await expectLater(
-        find.byType(InputDecorator),
-        matchesGoldenFile('m3_input_decorator.outline_icon_label.rtl.png'),
+      borderBox = InputDecorator.containerOf(tester.element(findBorderPainter()))!;
+      expect(findBorderPainter(), paints
+        ..save()
+        ..path(
+          excludes: <Offset>[
+            borderBox.globalToLocal(getLabelRect(tester).centerLeft),
+            borderBox.globalToLocal(getLabelRect(tester).centerRight),
+          ],
+        )
+        ..restore(),
       );
     });
   });
