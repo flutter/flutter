@@ -49,13 +49,14 @@ use of the time between when the widget tree is first configured and when
 the engine requests an update, the framework schedules a _warm-up frame_
 using [PlatformDispatcher.scheduleWarmUpFrame][scheduleWarmUpFrame].
 
-A warm-up frame may never actually render (as the engine did not request
-it and therefore does not have a valid context in which to paint), but it
-will cause the framework to go through the steps of building, laying out,
-and painting, which can together take several milliseconds. Thus, when the
-engine requests a real frame, much of the work will already have been
-completed, and the framework can generate the frame with minimal
-additional effort.
+A warm-up frame may never actually render (as it invokes
+[FlutterView.render][flutterViewRender] outside of the scope of
+[PlatformDispatcher.onBeginFrame][onBeginFrame] or
+[PlatformDispatcher.onDrawFrame][onDrawFrame]), but it will cause the framework
+to go through the steps of building, laying out, and painting, which can
+together take several milliseconds. Thus, when the engine requests a real frame,
+much of the work will already have been completed, and the framework can
+generate the frame with minimal additional effort.
 
 At startup, a warm-up frame can be produced before the Flutter engine has reported the
 initial view metrics using [PlatformDispatcher.onMetricsChanged][onMetricsChanged].
@@ -73,6 +74,7 @@ TODO(cbracken): write this up using [this patch](https://github.com/flutter/engi
 [handleBeginFrame]: https://api.flutter.dev/flutter/scheduler/SchedulerBinding/handleBeginFrame.html
 [layerTree]: https://github.com/flutter/engine/blob/main/flow/layers/layer_tree.h
 [onBeginFrame]: https://api.flutter.dev/flutter/dart-ui/PlatformDispatcher/onBeginFrame.html
+[onDrawFrame]: https://api.flutter.dev/flutter/dart-ui/PlatformDispatcher/onDrawFrame.html
 [onMetricsChanged]: https://api.flutter.dev/flutter/dart-ui/PlatformDispatcher/onMetricsChanged.html
 [pipeline]: https://github.com/flutter/engine/blob/main/shell/common/pipeline.h
 [rasterizer]: https://github.com/flutter/engine/blob/main/shell/common/rasterizer.h
