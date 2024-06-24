@@ -2,6 +2,7 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 
 android {
+    namespace = "dev.flutter.scenarios"
     lintOptions {
         abortOnError true
         checkAllWarnings true
