@@ -1183,9 +1183,12 @@ abstract class FlutterCommand extends Command<void> {
       ? stringArg('build-number')
       : null;
 
-    final File packagesFile = globals.fs.file(packagesPath ?? project.packageConfigFile);
+    final File packageConfigFile = globals.fs.file(packagesPath ?? project.packageConfigFile);
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-        packagesFile, logger: globals.logger, throwOnError: false);
+      packageConfigFile,
+      logger: globals.logger,
+      throwOnError: false,
+    );
 
     final List<String> experiments =
       argParser.options.containsKey(FlutterOptions.kEnableExperiment)
@@ -1336,7 +1339,7 @@ abstract class FlutterCommand extends Command<void> {
       bundleSkSLPath: bundleSkSLPath,
       dartExperiments: experiments,
       performanceMeasurementFile: performanceMeasurementFile,
-      packageConfigPath: packagesFile.path,
+      packageConfigPath: packageConfigFile.path,
       nullSafetyMode: nullSafetyMode,
       codeSizeDirectory: codeSizeDirectory,
       androidGradleDaemon: androidGradleDaemon,

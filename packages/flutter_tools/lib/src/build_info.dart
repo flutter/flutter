@@ -182,7 +182,7 @@ class BuildInfo {
   /// If set, builds native assets with `build.dart` from all packages.
   final bool buildNativeAssets;
 
-  // Can be used when the actual information is not needed.
+  /// Can be used when the actual information is not needed.
   static const BuildInfo dummy = BuildInfo(
     BuildMode.debug,
     null,

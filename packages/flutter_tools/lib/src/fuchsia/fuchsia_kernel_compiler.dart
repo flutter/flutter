@@ -28,7 +28,10 @@ class FuchsiaKernelCompiler {
     final String outDir = getFuchsiaBuildDirectory();
     final String appName = fuchsiaProject.project.manifest.appName;
     final String fsRoot = fuchsiaProject.project.directory.path;
-    final String relativePackageConfigPath = globals.fs.path.relative(buildInfo.packageConfigPath, from: fsRoot);
+    final String relativePackageConfigPath = globals.fs.path.relative(
+      buildInfo.packageConfigPath,
+      from: fsRoot,
+    );
     final String manifestPath = globals.fs.path.join(outDir, '$appName.dilpmanifest');
     final String? kernelCompiler = globals.artifacts?.getArtifactPath(
       Artifact.fuchsiaKernelCompiler,

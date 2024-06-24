@@ -108,7 +108,7 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
   @override
   bool get reportNullSafety => false;
 
-  Future<List<BuildInfo>> getBuildInfos(FlutterProject project) async {
+  Future<List<BuildInfo>> getBuildInfos() async {
     return <BuildInfo>[
       if (boolArg('debug'))   await getBuildInfo(forcedBuildMode: BuildMode.debug),
       if (boolArg('profile')) await getBuildInfo(forcedBuildMode: BuildMode.profile),
@@ -126,7 +126,7 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
       throwToolExit('Building frameworks for iOS is only supported on the Mac.');
     }
 
-    if ((await getBuildInfos(project)).isEmpty) {
+    if ((await getBuildInfos()).isEmpty) {
       throwToolExit('At least one of "--debug" or "--profile", or "--release" is required.');
     }
 
@@ -233,7 +233,7 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
     }
 
     final Directory outputDirectory = globals.fs.directory(globals.fs.path.absolute(globals.fs.path.normalize(outputArgument)));
-    final List<BuildInfo> buildInfos = await getBuildInfos(project);
+    final List<BuildInfo> buildInfos = await getBuildInfos();
     displayNullSafetyMode(buildInfos.first);
     for (final BuildInfo buildInfo in buildInfos) {
       final String? productBundleIdentifier = await project.ios.productBundleIdentifier(buildInfo);
