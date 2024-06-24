@@ -81,6 +81,13 @@ export 'package:flutter/services.dart' show SmartDashesType, SmartQuotesType;
 /// ** See code in examples/api/lib/material/text_form_field/text_form_field.1.dart **
 /// {@end-tool}
 ///
+/// {@tool dartpad}
+/// This example shows how to force an error text to the field after making
+/// an asynchronous call.
+///
+/// ** See code in examples/api/lib/material/text_form_field/text_form_field.2.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * <https://material.io/design/components/text-fields.html>
@@ -105,6 +112,7 @@ class TextFormField extends FormField<String> {
     this.controller,
     String? initialValue,
     FocusNode? focusNode,
+    super.forceErrorText,
     InputDecoration? decoration = const InputDecoration(),
     TextInputType? keyboardType,
     TextCapitalization textCapitalization = TextCapitalization.none,
