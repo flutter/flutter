@@ -129,7 +129,7 @@ abstract class GoldenFileComparator {
 /// ```dart
 /// testWidgets('matches golden file with a 0.01 tolerance', (WidgetTester tester) async {
 ///   final previousGoldenFileComparator = goldenFileComparator;
-///   goldenFileComparator = _MyTolerantGoldenFileComparator(
+///   goldenFileComparator = _TolerantGoldenFileComparator(
 ///     Uri.parse('test/my_widget_test.dart'),
 ///     precisionTolerance: 0.01,
 ///   );
@@ -142,6 +142,37 @@ abstract class GoldenFileComparator {
 ///     matchesGoldenFile('my_golden.png'),
 ///   );
 /// });
+/// 
+/// class _TolerantGoldenFileComparator extends LocalFileComparator {
+///   _TolerantGoldenFileComparator(
+///     super.testFile, {
+///     required double precisionTolerance,
+///   }) : _precisionTolerance = precisionTolerance;
+///
+///   /// How much the golden image can differ from the test image.
+///   ///
+///   /// It is expected to be between 0 and 1. Where 0 is no difference (the same image)
+///   /// and 1 is the maximum difference (completely different images).
+///   final double _precisionTolerance;
+/// 
+///   @override
+///   Future<bool> compare(Uint8List imageBytes, Uri golden) async {
+///     final result = await GoldenFileComparator.compareLists(
+///       imageBytes,
+///       await getGoldenBytes(golden),
+///     );
+///
+///     final passed = result.passed || result.diffPercent <= _precisionTolerance;
+///     if (passed) {
+///       result.dispose();
+///       return true;
+///     }
+///
+///     final error = await generateFailureOutput(result, golden, basedir);
+///     result.dispose();
+///     throw FlutterError(error);
+///   }
+/// }
 /// ```
 /// {@end-tool}
 ///
