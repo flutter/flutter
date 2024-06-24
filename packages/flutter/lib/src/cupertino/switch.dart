@@ -665,9 +665,9 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
               ..focusColor = CupertinoDynamicColor.resolve(
                   widget.focusColor ??
                   HSLColor
-                        .fromColor(activeColor.withOpacity(0.80))
-                        .withLightness(0.69).withSaturation(0.835)
-                        .toColor(),
+                    .fromColor(activeColor.withOpacity(0.80))
+                    .withLightness(0.69).withSaturation(0.835)
+                    .toColor(),
                   context)
               ..downPosition = downPosition
               ..isFocused = states.contains(WidgetState.focused)
