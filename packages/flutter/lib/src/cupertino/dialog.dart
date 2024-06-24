@@ -2918,23 +2918,27 @@ class _RenderCupertinoDialogActions extends RenderBox
   }
 }
 
-// A column of two widgets that allows the top widget to take as much vertical
-// space as needed as long as the bottom is ensured the give minimal height.
+// A column layout with two widgets, where the top widget expands vertically as
+// needed, and the bottom widget has a minimum height.
 //
-// The `_PriorityColumn` stretches both widgets horizontally to its maximal
-// width constraint, and allocates vertical space in the following priority:
+// Both child widgets stretch horizontally to the parent's maximum width
+// constraint, with vertical space allocated in this priority:
 //
-//  1. The `bottom` widget, as much as it requests, up to `bottomMinHeight`.
-//  2. The `top` widget, as much as it requests.
-//  3. The `bottom` widget, as much as it requests.
+//  1. The `bottom` widget receives its requested height, up to a
+//     `bottomMinHeight` limit.
+//  2. The `top` widget receives its requested height.
+//  3. The `bottom` widget receives additional height as needed.
 //
-// This algorithm is observed on several iOS widgets, such as the action sheet
-// and the alert dialog.
+// This mirrors the behavior seen in iOS components like action sheets and
+// alerts.
 //
-// This algorithm is probably impossible to implement via compositing simple
-// layout widgets because the bottom widget might take up more than
-// `bottomMinHeight` if the top widget is short enough, or it might take up less
-// than `bottomMinHeight` if itself is shorter.
+// Implementing this layout with simple compositing widgets is challenging
+// because:
+//
+//  * The bottom widget should take more than `bottomMinHeight` if the top
+//    widget is short.
+//  * The bottom widget should take less than `bottomMinHeight` if it is
+//    naturally shorter.
 class _PriorityColumn extends MultiChildRenderObjectWidget {
   _PriorityColumn({
     required Widget top,
