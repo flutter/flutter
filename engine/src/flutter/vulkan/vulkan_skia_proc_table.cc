@@ -6,7 +6,8 @@
 
 namespace vulkan {
 
-GrVkGetProc CreateSkiaGetProc(const fml::RefPtr<vulkan::VulkanProcTable>& vk) {
+skgpu::VulkanGetProc CreateSkiaGetProc(
+    const fml::RefPtr<vulkan::VulkanProcTable>& vk) {
   if (!vk || !vk->IsValid()) {
     return nullptr;
   }

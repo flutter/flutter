@@ -17,7 +17,7 @@
 #include "third_party/skia/include/core/SkSize.h"
 #include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/gpu/GrDirectContext.h"
-#include "third_party/skia/include/gpu/vk/GrVkBackendContext.h"
+#include "third_party/skia/include/gpu/vk/VulkanBackendContext.h"
 
 namespace vulkan {
 
@@ -68,7 +68,7 @@ class VulkanWindow {
 
   bool CreateSkiaGrContext();
 
-  bool CreateSkiaBackendContext(GrVkBackendContext*,
+  bool CreateSkiaBackendContext(skgpu::VulkanBackendContext*,
                                 VkPhysicalDeviceFeatures*,
                                 skgpu::VulkanExtensions*);
 

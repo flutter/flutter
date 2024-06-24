@@ -7,11 +7,12 @@
 
 #include "flutter/vulkan/procs/vulkan_proc_table.h"
 
-#include "third_party/skia/include/gpu/vk/GrVkBackendContext.h"
+#include "third_party/skia/include/gpu/vk/VulkanTypes.h"
 
 namespace vulkan {
 
-GrVkGetProc CreateSkiaGetProc(const fml::RefPtr<vulkan::VulkanProcTable>& vk);
+skgpu::VulkanGetProc CreateSkiaGetProc(
+    const fml::RefPtr<vulkan::VulkanProcTable>& vk);
 
 }  // namespace vulkan
 

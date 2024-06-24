@@ -128,7 +128,7 @@ ShellTestPlatformViewVulkan::OffScreenSurface::OffScreenSurface(
 }
 
 bool ShellTestPlatformViewVulkan::OffScreenSurface::CreateSkiaGrContext() {
-  GrVkBackendContext backend_context;
+  skgpu::VulkanBackendContext backend_context;
   skgpu::VulkanExtensions no_extensions;
   // For now, Skia crashes if fDeviceFeatures is set but fVkExtensions is not.
   backend_context.fVkExtensions = &no_extensions;
@@ -161,7 +161,7 @@ bool ShellTestPlatformViewVulkan::OffScreenSurface::CreateSkiaGrContext() {
 }
 
 bool ShellTestPlatformViewVulkan::OffScreenSurface::CreateSkiaBackendContext(
-    GrVkBackendContext* context,
+    skgpu::VulkanBackendContext* context,
     VkPhysicalDeviceFeatures* features) {
   FML_CHECK(context);
   FML_CHECK(features);
