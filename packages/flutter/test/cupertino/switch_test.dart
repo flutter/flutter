@@ -1641,7 +1641,6 @@ void main() {
 
     Widget buildSwitch() {
       return MaterialApp(
-        theme: ThemeData(useMaterial3: true),
         home: Material(
           child: Center(
             child: CupertinoSwitch(
