@@ -596,6 +596,36 @@ void main() {
     );
   });
 
+  testWidgets('Takes maximum vertical space with one action and long content', (WidgetTester tester) async {
+    // Ensure that if the actions section is shorter than
+    // _kActionSheetActionsSectionMinHeight, the content section can take up
+    // more vertical space to fill up to the maximum vertical height.
+
+    late double screenHeight;
+    await tester.pumpWidget(
+      createAppWithButtonThatLaunchesActionSheet(
+        Builder(builder: (BuildContext context) {
+          screenHeight = MediaQuery.sizeOf(context).height;
+          return CupertinoActionSheet(
+            message: Text('content ' * 1000),
+            actions: <Widget>[
+              CupertinoActionSheetAction(
+                onPressed: () {},
+                child: const Text('Button 0i'),
+              ),
+            ],
+          );
+        }),
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+    await tester.pump();
+
+    // Expect the action sheet to take all available height.
+    expect(tester.getSize(find.byType(CupertinoActionSheet)).height, screenHeight);
+  });
+
   testWidgets('Taps on button calls onPressed', (WidgetTester tester) async {
     bool wasPressed = false;
     await tester.pumpWidget(
