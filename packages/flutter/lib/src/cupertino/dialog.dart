@@ -1409,23 +1409,25 @@ class _ActionSheetMainSheetState extends State<_ActionSheetMainSheet> {
             dividerColor: widget.dividerColor,
             hidden: false,
           ),
-        Stack(
-          children: <Widget>[
-            Positioned.fill(
-              child: _buildOverscroll(),
-            ),
-            NotificationListener<ScrollUpdateNotification>(
-              onNotification: _onScrollUpdate,
-              child: _ActionSheetActionSection(
-                actions: widget.actions,
-                scrollController: widget.scrollController,
-                pressedIndex: _pressedIndex,
-                dividerColor: widget.dividerColor,
-                backgroundColor: backgroundColor,
-                onPressedUpdate: _onPressedUpdate,
+        Flexible(
+          child: Stack(
+            children: <Widget>[
+              Positioned.fill(
+                child: _buildOverscroll(),
               ),
-            )
-          ],
+              NotificationListener<ScrollUpdateNotification>(
+                onNotification: _onScrollUpdate,
+                child: _ActionSheetActionSection(
+                  actions: widget.actions,
+                  scrollController: widget.scrollController,
+                  pressedIndex: _pressedIndex,
+                  dividerColor: widget.dividerColor,
+                  backgroundColor: backgroundColor,
+                  onPressedUpdate: _onPressedUpdate,
+                ),
+              )
+            ],
+          ),
         ),
       ],
     );
