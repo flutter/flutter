@@ -43,9 +43,8 @@ void main() {
     testUsingContext('indicate the default target platforms', () async {
       final String projectPath = await createProject(tempDir,
           arguments: <String>['--no-pub', '--template=app']);
-      final BuildAppBundleCommand command = await runBuildAppBundleCommand(projectPath);
 
-      expect((await command.usageValues).commandBuildAppBundleTargetPlatform, 'android-arm,android-arm64,android-x64');
+      await runBuildAppBundleCommand(projectPath);
 
       expect(
         fakeAnalytics.sentEvents,
@@ -71,23 +70,57 @@ void main() {
       final String projectPath = await createProject(tempDir,
           arguments: <String>['--no-pub', '--template=app']);
 
-      final BuildAppBundleCommand commandDefault = await runBuildAppBundleCommand(projectPath);
-      expect((await commandDefault.usageValues).commandBuildAppBundleBuildMode, 'release');
+     await runBuildAppBundleCommand(projectPath);
+      expect(
+        fakeAnalytics.sentEvents,
+        contains(Event.commandUsageValues(
+          workflow: 'appbundle',
+          commandHasTerminal: false,
+          buildAppBundleTargetPlatform: 'android-arm,android-arm64,android-x64',
+          buildAppBundleBuildMode: 'release',
+        )),
+      );
 
-      final BuildAppBundleCommand commandInRelease = await runBuildAppBundleCommand(projectPath,
-          arguments: <String>['--release']);
-      expect((await commandInRelease.usageValues).commandBuildAppBundleBuildMode, 'release');
+      fakeAnalytics.sentEvents.clear();
+      await runBuildAppBundleCommand(projectPath, arguments: <String>['--release']);
+      expect(
+        fakeAnalytics.sentEvents,
+        contains(Event.commandUsageValues(
+          workflow: 'appbundle',
+          commandHasTerminal: false,
+          buildAppBundleTargetPlatform: 'android-arm,android-arm64,android-x64',
+          buildAppBundleBuildMode: 'release',
+        )),
+      );
 
-      final BuildAppBundleCommand commandInDebug = await runBuildAppBundleCommand(projectPath,
-          arguments: <String>['--debug']);
-      expect((await commandInDebug.usageValues).commandBuildAppBundleBuildMode, 'debug');
+      fakeAnalytics.sentEvents.clear();
+      await runBuildAppBundleCommand(projectPath, arguments: <String>['--debug']);
+      expect(
+        fakeAnalytics.sentEvents,
+        contains(Event.commandUsageValues(
+          workflow: 'appbundle',
+          commandHasTerminal: false,
+          buildAppBundleTargetPlatform: 'android-arm,android-arm64,android-x64',
+          buildAppBundleBuildMode: 'debug',
+        )),
+      );
 
-      final BuildAppBundleCommand commandInProfile = await runBuildAppBundleCommand(projectPath,
-          arguments: <String>['--profile']);
-      expect((await commandInProfile.usageValues).commandBuildAppBundleBuildMode, 'profile');
+      fakeAnalytics.sentEvents.clear();
+      await runBuildAppBundleCommand(projectPath, arguments: <String>['--profile']);
 
+      expect(
+        fakeAnalytics.sentEvents,
+        contains(Event.commandUsageValues(
+          workflow: 'appbundle',
+          commandHasTerminal: false,
+          buildAppBundleTargetPlatform: 'android-arm,android-arm64,android-x64',
+          buildAppBundleBuildMode: 'profile',
+        )),
+      );
+      fakeAnalytics.sentEvents.clear();
     }, overrides: <Type, Generator>{
       AndroidBuilder: () => FakeAndroidBuilder(),
+      Analytics: () => fakeAnalytics,
     });
 
     testUsingContext('logs success', () async {
@@ -183,16 +216,12 @@ void main() {
         ),
       );
 
-      analytics.sentEvents;
-      print('todo');
-      // expect(analytics.sentEvents, contains(
-      //   const TestUsageEvent(
-      //     'build',
-      //     'gradle',
-      //     label: 'app-not-using-android-x',
-      //     parameters: CustomDimensions(),
-      //   ),
-      // ));
+      expect(analytics.sentEvents, contains(
+        Event.flutterBuildInfo(
+          label: 'app-not-using-android-x',
+          buildType: 'gradle',
+        ),
+      ));
     },
     overrides: <Type, Generator>{
       AndroidSdk: () => androidSdk,
