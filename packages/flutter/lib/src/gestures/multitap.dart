@@ -119,8 +119,8 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
   DoubleTapGestureRecognizer({
     super.debugOwner,
     super.supportedDevices,
-    AllowedButtonsFilter? allowedButtonsFilter,
-  }) : super(allowedButtonsFilter: allowedButtonsFilter ?? _defaultButtonAcceptBehavior);
+    super.allowedButtonsFilter = _defaultButtonAcceptBehavior,
+  });
 
   // The default value for [allowedButtonsFilter].
   // Accept the input if, and only if, [kPrimaryButton] is pressed.
@@ -161,7 +161,7 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
   ///
   /// See also:
   ///
-  ///  * `allowedButtonsFilter`, which decides which button will be allowed.
+  ///  * [allowedButtonsFilter], which decides which button will be allowed.
   ///  * [TapDownDetails], which is passed as an argument to this callback.
   ///  * [GestureDetector.onDoubleTapDown], which exposes this callback.
   GestureTapDownCallback? onDoubleTapDown;
@@ -174,7 +174,7 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
   ///
   /// See also:
   ///
-  ///  * `allowedButtonsFilter`, which decides which button will be allowed.
+  ///  * [allowedButtonsFilter], which decides which button will be allowed.
   ///  * [GestureDetector.onDoubleTap], which exposes this callback.
   GestureDoubleTapCallback? onDoubleTap;
 
@@ -188,7 +188,7 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
   ///
   /// See also:
   ///
-  ///  * `allowedButtonsFilter`, which decides which button will be allowed.
+  ///  * [allowedButtonsFilter], which decides which button will be allowed.
   ///  * [GestureDetector.onDoubleTapCancel], which exposes this callback.
   GestureTapCancelCallback? onDoubleTapCancel;
 
