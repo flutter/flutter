@@ -100,19 +100,10 @@ enum AnimationBehavior {
 /// The constructor uses the [TickerProvider] to create a [Ticker], which
 /// the [AnimationController] uses to step through the animation it controls.
 ///
-/// If an [AnimationController] is being created from a [State],
-/// then the State can implement [TickerProvider] by mixing in
-/// either [TickerProviderStateMixin] or [SingleTickerProviderStateMixin].
-/// The [TickerProviderStateMixin] class always works for this purpose; the
-/// [SingleTickerProviderStateMixin] is slightly more efficient in the case of
-/// the class only ever needing one [Ticker] (e.g. if the class creates only a
-/// single [AnimationController] during its entire lifetime).
-///
-/// In widget tests, the [WidgetTester] object can be used as a ticker provider.
-/// In other contexts, you will have to either
-/// pass a [TickerProvider] from a higher level (e.g. indirectly from a [State]
-/// that mixes in [TickerProviderStateMixin]), or create a custom
-/// [TickerProvider] subclass.
+/// For advice on obtaining a ticker provider, see [TickerProvider].
+/// Typically the relevant [State] serves as the ticker provider,
+/// after applying a suitable mixin to cause the [State] subclass to
+/// implement [TickerProvider].
 ///
 /// ## Life cycle
 ///

@@ -22,7 +22,8 @@ typedef TickerCallback = void Function(Duration elapsed);
 /// An interface implemented by classes that can vend [Ticker] objects.
 ///
 /// To obtain a [TickerProvider], consider mixing in either
-/// [TickerProviderStateMixin] or [SingleTickerProviderStateMixin]
+/// [TickerProviderStateMixin] (which always works)
+/// or [SingleTickerProviderStateMixin] (which is more efficient when it works)
 /// to make a [State] subclass implement [TickerProvider].
 /// You might then pass that [State] to lower-level widgets
 /// or other related objects.
