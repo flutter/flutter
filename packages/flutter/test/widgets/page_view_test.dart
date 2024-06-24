@@ -1377,6 +1377,7 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/146986
     final PageController controller = PageController();
     addTearDown(controller.dispose);
+    double? currentPage;
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: PageView(
@@ -1384,7 +1385,7 @@ void main() {
           children: <Widget>[
             Builder(
               builder: (BuildContext context) {
-                final double currentPage = controller.hasClients ? controller.page ?? -1.0 : -2.0;
+                currentPage = controller.hasClients ? controller.page ?? -1.0 : -2.0;
                 return Center(child: Text(currentPage.toString()));
               },
             ),
@@ -1392,7 +1393,6 @@ void main() {
         ),
       ),
     ));
-
-    expect(find.text('-1.0'), findsOneWidget);
+    expect(currentPage, -1.0);
   });
 }
