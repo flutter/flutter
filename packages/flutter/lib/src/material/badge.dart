@@ -74,7 +74,7 @@ class Badge extends StatelessWidget {
   /// The badge's fill color.
   ///
   /// Defaults to the [BadgeTheme]'s background color, or
-  /// [ColorScheme.errorColor] if the theme value is null.
+  /// [ColorScheme.error] if the theme value is null.
   final Color? backgroundColor;
 
   /// The color of the badge's [label] text.
