@@ -331,6 +331,18 @@ flutter:
     expect(await device.emulatorId, isNull);
   });
 
+  testWithoutContext('AndroidDevice clearLogs does not crash', () async {
+    final AndroidDevice device = setUpAndroidDevice(
+      processManager: FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(
+          command: <String>['adb', '-s', '1234', 'logcat', '-c'],
+          exitCode: 1,
+        ),
+      ])
+    );
+    device.clearLogs();
+  });
+
   testWithoutContext('AndroidDevice lastLogcatTimestamp returns null if shell command failed', () async {
     final AndroidDevice device = setUpAndroidDevice(
       processManager: FakeProcessManager.list(<FakeCommand>[
