@@ -283,8 +283,8 @@ if (is_mac) {
     output = "$full_platform_name$suffix/gen_snapshot.zip"
     files = [
       {
-        source = "$root_out_dir/gen_snapshot_$target_cpu"
-        destination = "gen_snapshot_$target_cpu"
+        source = "${root_out_dir}/gen_snapshot_${target_cpu}"
+        destination = "gen_snapshot_${target_cpu}"
       },
     ]
   }
