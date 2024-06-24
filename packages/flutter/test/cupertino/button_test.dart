@@ -298,7 +298,10 @@ void main() {
           TestSemantics.rootChild(
             actions: SemanticsAction.tap.index,
             label: 'ABC',
-            flags: SemanticsFlag.isButton.index,
+            flags: <SemanticsFlag>[
+              SemanticsFlag.isButton,
+              SemanticsFlag.isFocusable
+            ]
           ),
         ],
       ),
@@ -490,13 +493,18 @@ void main() {
   testWidgets('Button can be focused and has default colors', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'Button');
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
-    final Color defaultFocusColor = Color(0xFFFFFFFF);
-    final double defaultFocusWidth = 3.5;
-    
+    const Border defaultFocusBorder = Border.fromBorderSide(
+      BorderSide(
+        color: Color(0xcc6eadf2),
+        width: 3.5,
+        strokeAlign: BorderSide.strokeAlignOutside
+      )
+    );
+
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
-          child: CupertinoButton.filled(
+          child: CupertinoButton(
             onPressed: () { },
             focusNode: focusNode,
             autofocus: true,
@@ -507,16 +515,80 @@ void main() {
     );
 
     expect(focusNode.hasPrimaryFocus, isTrue);
+
+    // The button has no border.
+    final BoxDecoration preFocusDecoration = tester.widget<DecoratedBox>(
+      find.descendant(
+        of: find.byType(CupertinoButton),
+        matching: find.byType(DecoratedBox),
+      ),
+    ).decoration as BoxDecoration;
+    await tester.pump();
+    expect(
+      preFocusDecoration.border,
+      null
+    );
+
+    // When focused, the button has a light blue border outline by default.
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
     final BoxDecoration decoration = tester.widget<DecoratedBox>(
       find.descendant(
         of: find.byType(CupertinoButton),
         matching: find.byType(DecoratedBox),
       ),
     ).decoration as BoxDecoration;
-    await tester.pumpAndSettle();
     expect(
       decoration.border,
-      Border.fromBorderSide(BorderSide(color: Color(0xFFFFFFFF), width: 3.5))
+      defaultFocusBorder
+    );
+  });
+
+  testWidgets('Button configures focus color', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode(debugLabel: 'Button');
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    const Color focusColor = CupertinoColors.systemGreen;
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoButton(
+            onPressed: () { },
+            focusNode: focusNode,
+            autofocus: true,
+            focusColor: focusColor,
+            child: const Text('Tap me'),
+          ),
+        ),
+      ),
+    );
+
+    expect(focusNode.hasPrimaryFocus, isTrue);
+    focusNode.requestFocus();
+    await tester.pump();
+    final BoxDecoration decoration = tester.widget<DecoratedBox>(
+      find.descendant(
+        of: find.byType(CupertinoButton),
+        matching: find.byType(DecoratedBox),
+      ),
+    ).decoration as BoxDecoration;
+    final Border border = decoration.border! as Border;
+    await tester.pumpAndSettle();
+    expect(
+      border.bottom.color,
+      focusColor
+    );
+    expect(
+      border.top.color,
+      focusColor
+    );
+    expect(
+      border.left.color,
+      focusColor
+    );
+    expect(
+      border.right.color,
+      focusColor
     );
   });
 }
