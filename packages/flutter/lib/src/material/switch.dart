@@ -138,9 +138,9 @@ class Switch extends StatelessWidget {
   ///
   /// To provide a custom switch theme that's only used by this factory
   /// constructor, pass a custom `Adaptation<SwitchThemeData>` class to the
-  /// `adaptations` of [ThemeData]. This can be useful in situations where you
-  /// don't want the overall [ThemeData.switchTheme] to apply when this adaptive
-  /// constructor is used.
+  /// `adaptations` parameter of [ThemeData]. This can be useful in situations
+  /// where you don't want the overall [ThemeData.switchTheme] to apply when
+  /// this adaptive constructor is used.
   ///
   /// {@tool dartpad}
   /// This sample shows how to create and use subclasses of [Adaptation] that
