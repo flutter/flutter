@@ -2728,8 +2728,8 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
     expect(
       find.byType(RawScrollbar),
       paints
-        ..rect(rect: const Rect.fromLTRB(744.0, 50.0, 750.0, 550.0)) // track
-        ..rect(rect: const Rect.fromLTRB(744.0, 50.0, 750.0, 71.0)) // thumb
+        ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0)) // track
+        ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 21.0)) // thumb
     ); // thumb
   });
 
@@ -3489,5 +3489,36 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
     await tester.pumpAndSettle();
     // Scrolling is now possible, so there are scrollbar (thumb and track) gesture recognizers.
     expect(getScrollbarGestureDetector().gestures.length, greaterThan(1));
+  });
+
+  testWidgets('RawScrollbar without padding', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
+    await tester.pumpWidget(
+        Directionality(
+            textDirection: TextDirection.ltr,
+            child: MediaQuery(
+              data: const MediaQueryData(
+              ),
+              child: RawScrollbar(
+                controller: scrollController,
+                minThumbLength: 21,
+                minOverscrollLength: 8,
+                thumbVisibility: true,
+                child: SingleChildScrollView(
+                  controller: scrollController,
+                  child: const SizedBox(width: 1000.0, height: 50000.0),
+                ),
+              ),
+            )
+        )
+    );
+    await tester.pumpAndSettle();
+    expect(
+        find.byType(RawScrollbar),
+        paints
+          ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0)) // track
+          ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 21.0)) // thumb
+    ); // thumb
   });
 }
