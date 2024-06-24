@@ -244,6 +244,11 @@ abstract class ProcessUtils {
   /// ```
   ///
   /// However it did not catch a [SocketException] on Linux.
+  ///
+  /// As part of making sure errors are caught, this function will call [flush]
+  /// on [stdin] to ensure that [line] is written to the pipe before this
+  /// function returns. This means completion will be blocked if the kernel
+  /// buffer of the pipe is full.
   static Future<void> writelnToStdinGuarded({
     required IOSink stdin,
     required String line,
@@ -257,7 +262,9 @@ abstract class ProcessUtils {
     );
   }
 
-  /// See [writelnToStdinGuarded]. This calls `stdin.write` instead of `stdin.writeln`.
+  /// Please see [writelnToStdinGuarded].
+  ///
+  /// This calls `stdin.write` instead of `stdin.writeln`.
   static Future<void> writeToStdinGuarded({
     required IOSink stdin,
     required String content,
