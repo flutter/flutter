@@ -578,17 +578,16 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
 
     final (Color onLabelColor, Color offLabelColor)? onOffLabelColors =
       MediaQuery.onOffSwitchLabelsOf(context)
-          ? (
-              CupertinoDynamicColor.resolve(
-                widget.onLabelColor ?? CupertinoColors.white,
-                context,
-              ),
-              CupertinoDynamicColor.resolve(
-                widget.offLabelColor ?? _kOffLabelColor,
-                context,
-              ),
-            )
-          : null;
+        ? (CupertinoDynamicColor.resolve(
+            widget.onLabelColor ?? CupertinoColors.white,
+            context,
+          ),
+          CupertinoDynamicColor.resolve(
+            widget.offLabelColor ?? _kOffLabelColor,
+            context,
+          ),
+        )
+        : null;
 
     // Colors need to be resolved in selected and non selected states separately
     // so that they can be lerped between.
