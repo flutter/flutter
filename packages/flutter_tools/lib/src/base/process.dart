@@ -275,7 +275,7 @@ abstract class ProcessUtils {
     required IOSink stdin,
     required String content,
     required void Function(Object, StackTrace) onError,
-    required bool isLine
+    required bool isLine,
   }) async {
     final Completer<void> completer = Completer<void>();
 
@@ -295,8 +295,7 @@ abstract class ProcessUtils {
       (Object error, StackTrace stackTrace) {
         try {
           onError(error, stackTrace);
-        }
-        on Exception catch (e) {
+        } on Exception catch (e) {
           completer.completeError(e);
         }
 
