@@ -81,8 +81,8 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     this.velocityTrackerBuilder = _defaultBuilder,
     this.onlyAcceptDragOnThreshold = false,
     super.supportedDevices,
-    AllowedButtonsFilter? allowedButtonsFilter,
-  }) : super(allowedButtonsFilter: allowedButtonsFilter ?? _defaultButtonAcceptBehavior);
+    super.allowedButtonsFilter = _defaultButtonAcceptBehavior,
+  });
 
   static VelocityTracker _defaultBuilder(PointerEvent event) => VelocityTracker.withKind(event.kind);
 
@@ -146,7 +146,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   ///
   /// See also:
   ///
-  ///  * `allowedButtonsFilter`, which decides which button will be allowed.
+  ///  * [allowedButtonsFilter], which decides which button will be allowed.
   ///  * [DragDownDetails], which is passed as an argument to this callback.
   GestureDragDownCallback? onDown;
 
@@ -161,7 +161,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   ///
   /// See also:
   ///
-  ///  * `allowedButtonsFilter`, which decides which button will be allowed.
+  ///  * [allowedButtonsFilter], which decides which button will be allowed.
   ///  * [DragStartDetails], which is passed as an argument to this callback.
   GestureDragStartCallback? onStart;
 
@@ -183,7 +183,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   ///
   /// See also:
   ///
-  ///  * `allowedButtonsFilter`, which decides which button will be allowed.
+  ///  * [allowedButtonsFilter], which decides which button will be allowed.
   ///  * [DragUpdateDetails], which is passed as an argument to this callback.
   GestureDragUpdateCallback? onUpdate;
 
@@ -206,7 +206,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   ///
   /// See also:
   ///
-  ///  * `allowedButtonsFilter`, which decides which button will be allowed.
+  ///  * [allowedButtonsFilter], which decides which button will be allowed.
   ///  * [DragEndDetails], which is passed as an argument to this callback.
   GestureDragEndCallback? onEnd;
 
@@ -214,7 +214,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   ///
   /// See also:
   ///
-  ///  * `allowedButtonsFilter`, which decides which button will be allowed.
+  ///  * [allowedButtonsFilter], which decides which button will be allowed.
   GestureDragCancelCallback? onCancel;
 
   /// The minimum distance an input pointer drag must have moved

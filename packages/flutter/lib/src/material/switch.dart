@@ -137,9 +137,9 @@ class Switch extends StatelessWidget {
   /// is iOS or macOS, otherwise a Material Design switch is created.
   ///
   /// To provide a custom switch theme that's only used by this factory
-  /// constructor, add a custom `Adaptation<SwitchThemeData>` class to
-  /// `ThemeData.adaptations`. This can be useful in situations where you don't
-  /// want the overall [ThemeData.switchTheme] to apply when this adaptive
+  /// constructor, pass a custom `Adaptation<SwitchThemeData>` class to the
+  /// `adaptations` of [ThemeData]. This can be useful in situations where you
+  /// don't want the overall [ThemeData.switchTheme] to apply when this adaptive
   /// constructor is used.
   ///
   /// {@tool dartpad}
