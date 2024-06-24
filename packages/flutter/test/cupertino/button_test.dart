@@ -591,6 +591,35 @@ void main() {
       focusColor
     );
   });
+
+  testWidgets('CupertinoButton.onFocusChange callback', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode(debugLabel: 'CupertinoButton');
+    bool focused = false;
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoButton(
+            onPressed: () { },
+            focusNode: focusNode,
+            onFocusChange: (bool value) {
+              focused = value;
+            },
+            child: const Text('Tap me'),
+          ),
+        ),
+      ),
+    );
+
+    focusNode.requestFocus();
+    await tester.pump();
+    expect(focused, isTrue);
+    expect(focusNode.hasFocus, isTrue);
+
+    focusNode.unfocus();
+    await tester.pump();
+    expect(focused, isFalse);
+    expect(focusNode.hasFocus, isFalse);
+  });
 }
 
 Widget boilerplate({ required Widget child }) {
