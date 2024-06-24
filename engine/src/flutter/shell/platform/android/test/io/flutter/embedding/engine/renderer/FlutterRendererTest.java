@@ -23,6 +23,8 @@ import android.media.Image;
 import android.os.Looper;
 import android.view.Surface;
 import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleRegistry;
+import androidx.lifecycle.ProcessLifecycleOwner;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import io.flutter.embedding.android.FlutterActivity;
@@ -728,8 +730,46 @@ public class FlutterRendererTest {
   }
 
   @Test
-  public void CanLaunchActivityUsingFlutterEngine() {
-    // This is a placeholder test that will be used to test lifecycle events w/ SurfaceProducer.
-    scenarioRule.getScenario().moveToState(Lifecycle.State.RESUMED);
+  public void ImageReaderSurfaceProducerIsDestroyedOnTrimMemory() {
+    FlutterRenderer flutterRenderer = engineRule.getFlutterEngine().getRenderer();
+    TextureRegistry.SurfaceProducer producer = flutterRenderer.createSurfaceProducer();
+
+    // Create and set a mock callback.
+    TextureRegistry.SurfaceProducer.Callback callback =
+        mock(TextureRegistry.SurfaceProducer.Callback.class);
+    producer.setCallback(callback);
+
+    // Trim memory.
+    ((FlutterRenderer.ImageReaderSurfaceProducer) producer).onTrimMemory(40);
+
+    // Verify.
+    verify(callback).onSurfaceDestroyed();
+  }
+
+  @Test
+  public void ImageReaderSurfaceProducerIsCreatedOnLifecycleResume() throws Exception {
+    FlutterRenderer flutterRenderer = engineRule.getFlutterEngine().getRenderer();
+    TextureRegistry.SurfaceProducer producer = flutterRenderer.createSurfaceProducer();
+
+    // Create a callback.
+    CountDownLatch latch = new CountDownLatch(1);
+    TextureRegistry.SurfaceProducer.Callback callback =
+        new TextureRegistry.SurfaceProducer.Callback() {
+          @Override
+          public void onSurfaceCreated() {
+            latch.countDown();
+          }
+
+          @Override
+          public void onSurfaceDestroyed() {}
+        };
+    producer.setCallback(callback);
+
+    // Trigger a resume.
+    ((LifecycleRegistry) ProcessLifecycleOwner.get().getLifecycle())
+        .setCurrentState(Lifecycle.State.RESUMED);
+
+    // Verify.
+    latch.await();
   }
 }

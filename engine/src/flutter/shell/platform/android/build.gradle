@@ -62,4 +62,3 @@ android {
         implementation "org.mockito:mockito-android:$mockitoVersion"
     }
 }
-

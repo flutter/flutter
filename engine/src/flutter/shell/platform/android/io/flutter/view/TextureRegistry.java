@@ -62,7 +62,7 @@ public interface TextureRegistry {
     /** @return The identity of this texture. */
     long id();
 
-    /** Deregisters and releases all resources . */
+    /** De-registers and releases all resources . */
     void release();
   }
 
@@ -79,18 +79,52 @@ public interface TextureRegistry {
     int getHeight();
 
     /**
-     * Get a Surface that can be used to update the texture contents.
+     * Direct access to the surface object.
      *
-     * <p>NOTE: You should not cache the returned surface but instead invoke getSurface each time
-     * you need to draw. The surface may change when the texture is resized or has its format
+     * <p>When using this API, you will usually need to implement {@link SurfaceProducer.Callback}
+     * and provide it to {@link #setCallback(Callback)} in order to be notified when an existing
+     * surface has been destroyed (such as when the application goes to the background) or a new
+     * surface has been created (such as when the application is resumed back to the foreground).
+     *
+     * <p>NOTE: You should not cache the returned surface but instead invoke {@code getSurface} each
+     * time you need to draw. The surface may change when the texture is resized or has its format
      * changed.
      *
      * @return a Surface to use for a drawing target for various APIs.
      */
     Surface getSurface();
 
+    /**
+     * Sets a callback that is notified when a previously created {@link Surface} returned by {@link
+     * SurfaceProducer#getSurface()} is no longer valid, either due to being destroyed or being
+     * changed.
+     *
+     * @param callback The callback to notify, or null to remove the callback.
+     */
+    void setCallback(Callback callback);
+
+    /** Callback invoked by {@link #setCallback(Callback)}. */
+    interface Callback {
+      /**
+       * Invoked when a previous surface is now invalid and a new surface is now available.
+       *
+       * <p>Typically plugins will use this callback as a signal to redraw, such as due to the
+       * texture being resized, the format being changed, or the application being resumed after
+       * being suspended in the background.
+       */
+      void onSurfaceCreated();
+
+      /**
+       * Invoked when a previous surface is now invalid.
+       *
+       * <p>Typically plugins will use this callback as a signal to release resources.
+       */
+      void onSurfaceDestroyed();
+    }
+
+    /** This method is not officially part of the public API surface and will be deprecated. */
     void scheduleFrame();
-  };
+  }
 
   /** A registry entry for a managed SurfaceTexture. */
   @Keep
@@ -144,7 +178,7 @@ public interface TextureRegistry {
      * @return Image or null.
      */
     @Nullable
-    public Image acquireLatestImage();
+    Image acquireLatestImage();
   }
 
   @Keep
@@ -155,6 +189,6 @@ public interface TextureRegistry {
      * @return SurfaceTexture.
      */
     @NonNull
-    public SurfaceTexture getSurfaceTexture();
+    SurfaceTexture getSurfaceTexture();
   }
 }

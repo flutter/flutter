@@ -902,6 +902,7 @@ public class FlutterView extends SurfaceView
     throw new UnsupportedOperationException("Image textures are not supported in this mode.");
   }
 
+  @NonNull
   @Override
   public SurfaceProducer createSurfaceProducer() {
     throw new UnsupportedOperationException(

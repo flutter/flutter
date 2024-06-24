@@ -13,17 +13,19 @@
     "url": "https://maven.google.com/androidx/lifecycle/lifecycle-common-java8/2.2.0/lifecycle-common-java8-2.2.0.jar",
     "out_file_name": "androidx_lifecycle_common_java8.jar",
     "maven_dependency": "androidx.lifecycle:lifecycle-common-java8:2.2.0",
-    "provides": [
-      "androidx.lifecycle.DefaultLifecycleObserver"
-    ]
+    "provides": ["androidx.lifecycle.DefaultLifecycleObserver"]
+  },
+  {
+    "url": "https://maven.google.com/androidx/lifecycle/lifecycle-process/2.2.0/lifecycle-process-2.2.0.aar",
+    "out_file_name": "androidx_lifecycle_process.aar",
+    "maven_dependency": "androidx.lifecycle:lifecycle-process:2.2.0",
+    "provides": ["androidx.lifecycle.ProcessLifecycleOwner"]
   },
   {
     "url": "https://maven.google.com/androidx/lifecycle/lifecycle-runtime/2.2.0/lifecycle-runtime-2.2.0.aar",
     "out_file_name": "androidx_lifecycle_runtime.aar",
     "maven_dependency": "androidx.lifecycle:lifecycle-runtime:2.2.0",
-    "provides": [
-      "androidx.lifecycle.LifecycleRegistry"
-    ]
+    "provides": ["androidx.lifecycle.LifecycleRegistry"]
   },
   {
     "url": "https://maven.google.com/androidx/fragment/fragment/1.1.0/fragment-1.1.0.aar",
@@ -54,17 +56,13 @@
     "url": "https://maven.google.com/androidx/tracing/tracing/1.0.0/tracing-1.0.0.aar",
     "out_file_name": "androidx_tracing.aar",
     "maven_dependency": "androidx.tracing:tracing:1.0.0",
-    "provides": [
-      "androidx.tracing.Trace"
-    ]
+    "provides": ["androidx.tracing.Trace"]
   },
   {
     "url": "https://dl.google.com/android/maven2/androidx/core/core/1.6.0/core-1.6.0.aar",
     "out_file_name": "androidx_core.aar",
     "maven_dependency": "androidx.core:core:1.6.0",
-    "provides": [
-      "androidx.core.view.WindowInsetsControllerCompat"
-    ]
+    "provides": ["androidx.core.view.WindowInsetsControllerCompat"]
   },
   {
     "url": "https://maven.google.com/androidx/window/window-java/1.0.0-beta04/window-java-1.0.0-beta04.aar",

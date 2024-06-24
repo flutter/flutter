@@ -374,6 +374,7 @@ embedding_dependencies_jars = [
   "//third_party/android_embedding_dependencies/lib/lifecycle-common-java8-2.2.0.jar",
   "//third_party/android_embedding_dependencies/lib/lifecycle-livedata-2.0.0.jar",
   "//third_party/android_embedding_dependencies/lib/lifecycle-livedata-core-2.0.0.jar",
+  "//third_party/android_embedding_dependencies/lib/lifecycle-process-2.2.0.jar",
   "//third_party/android_embedding_dependencies/lib/lifecycle-runtime-2.2.0.jar",
   "//third_party/android_embedding_dependencies/lib/lifecycle-viewmodel-2.1.0.jar",
   "//third_party/android_embedding_dependencies/lib/loader-1.0.0.jar",

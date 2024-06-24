@@ -1582,13 +1582,16 @@ public class PlatformViewsControllerTest {
         new TextureRegistry() {
           public void TextureRegistry() {}
 
+          @NonNull
           @Override
           public SurfaceTextureEntry createSurfaceTexture() {
             return registerSurfaceTexture(mock(SurfaceTexture.class));
           }
 
+          @NonNull
           @Override
-          public SurfaceTextureEntry registerSurfaceTexture(SurfaceTexture surfaceTexture) {
+          public SurfaceTextureEntry registerSurfaceTexture(
+              @NonNull SurfaceTexture surfaceTexture) {
             return new SurfaceTextureEntry() {
               @NonNull
               @Override
@@ -1606,6 +1609,7 @@ public class PlatformViewsControllerTest {
             };
           }
 
+          @NonNull
           @Override
           public ImageTextureEntry createImageTexture() {
             return new ImageTextureEntry() {
@@ -1622,9 +1626,13 @@ public class PlatformViewsControllerTest {
             };
           }
 
+          @NonNull
           @Override
           public SurfaceProducer createSurfaceProducer() {
             return new SurfaceProducer() {
+              @Override
+              public void setCallback(SurfaceProducer.Callback cb) {}
+
               @Override
               public long id() {
                 return 0;
