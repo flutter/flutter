@@ -24,7 +24,6 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/pre_run_validator.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/testing.dart';
@@ -1159,32 +1158,6 @@ class FakeTargetCommand extends FlutterCommand {
 
   @override
   String get name => 'test';
-}
-
-class FakeReportingNullSafetyCommand extends FlutterCommand {
-  FakeReportingNullSafetyCommand() {
-    argParser.addFlag('debug');
-    argParser.addFlag('release');
-    argParser.addFlag('jit-release');
-    argParser.addFlag('profile');
-  }
-
-  @override
-  String get description => 'test';
-
-  @override
-  String get name => 'test';
-
-  @override
-  bool get shouldRunPub => true;
-
-  @override
-  bool get reportNullSafety => true;
-
-  @override
-  Future<FlutterCommandResult> runCommand() async {
-    return FlutterCommandResult.success();
-  }
 }
 
 class FakeDdsCommand extends FlutterCommand {

@@ -13,7 +13,6 @@ import '../base/os.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../project.dart';
-import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart' show FlutterCommandResult;
 import 'build.dart';
 
@@ -68,9 +67,6 @@ class BuildAarCommand extends BuildSubCommand {
 
   @override
   final String name = 'aar';
-
-  @override
-  bool get reportNullSafety => false;
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{

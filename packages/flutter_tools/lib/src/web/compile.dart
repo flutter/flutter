@@ -20,7 +20,6 @@ import '../globals.dart' as globals;
 import '../platform_plugins.dart';
 import '../plugins.dart';
 import '../project.dart';
-import '../reporting/reporting.dart';
 import '../version.dart';
 import 'compiler_config.dart';
 import 'file_generators/flutter_service_worker_js.dart';

@@ -9,7 +9,6 @@ import 'package:process/process.dart';
 
 import '../convert.dart';
 import '../globals.dart' as globals;
-import '../reporting/first_run.dart';
 import 'io.dart';
 import 'logger.dart';
 

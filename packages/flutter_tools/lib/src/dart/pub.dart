@@ -7,7 +7,6 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:process/process.dart';
-import 'package:unified_analytics/unified_analytics.dart';
 
 import '../base/bot_detector.dart';
 import '../base/common.dart';
@@ -424,8 +423,6 @@ class _DefaultPub implements Pub {
     }
 
     final int code = exitCode;
-    final String result = code == 0 ? 'success' : 'failure';
-
     if (code != 0) {
       final StringBuffer buffer = StringBuffer('$failureMessage\n');
       buffer.writeln('command: "${pubCommand.join(' ')}"');

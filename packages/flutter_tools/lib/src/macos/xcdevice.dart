@@ -26,7 +26,6 @@ import '../ios/ios_deploy.dart';
 import '../ios/iproxy.dart';
 import '../ios/mac.dart';
 import '../ios/xcode_debug.dart';
-import '../reporting/reporting.dart';
 import 'xcode.dart';
 
 class XCDeviceEventNotification {

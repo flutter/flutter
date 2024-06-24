@@ -19,7 +19,6 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../convert.dart';
-import '../reporting/reporting.dart';
 import 'depfile.dart';
 import 'exceptions.dart';
 import 'file_store.dart';

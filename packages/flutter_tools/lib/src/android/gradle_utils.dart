@@ -18,7 +18,6 @@ import '../build_info.dart';
 import '../cache.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
-import '../reporting/reporting.dart';
 import 'android_sdk.dart';
 
 // These are the versions used in the project templates.

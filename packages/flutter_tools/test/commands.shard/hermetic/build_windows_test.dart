@@ -11,7 +11,6 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_windows.dart';
 import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/windows/build_windows.dart';
 import 'package:flutter_tools/src/windows/visual_studio.dart';
 import 'package:test/fake.dart';

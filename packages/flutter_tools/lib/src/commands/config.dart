@@ -9,7 +9,6 @@ import '../base/common.dart';
 import '../convert.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
-import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
 import '../runner/flutter_command_runner.dart';
 

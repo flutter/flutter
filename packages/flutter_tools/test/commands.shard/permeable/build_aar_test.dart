@@ -20,7 +20,6 @@ import 'package:test/fake.dart';
 import 'package:unified_analytics/testing.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
-import '../../general.shard/isolated/resident_runner_test.dart';
 import '../../src/android_common.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';

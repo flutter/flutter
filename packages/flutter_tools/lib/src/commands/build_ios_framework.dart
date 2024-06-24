@@ -105,9 +105,6 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
   FlutterVersion get flutterVersion => _injectedFlutterVersion ?? globals.flutterVersion;
   final FlutterVersion? _injectedFlutterVersion;
 
-  @override
-  bool get reportNullSafety => false;
-
   @protected
   late final FlutterProject project = FlutterProject.current();
 

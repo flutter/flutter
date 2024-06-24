@@ -23,7 +23,6 @@ import 'devfs.dart';
 import 'device.dart';
 import 'globals.dart' as globals;
 import 'project.dart';
-import 'reporting/reporting.dart';
 import 'resident_runner.dart';
 import 'vmservice.dart';
 

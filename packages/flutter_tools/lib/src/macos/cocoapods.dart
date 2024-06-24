@@ -22,7 +22,6 @@ import '../ios/xcodeproj.dart';
 import '../migrations/cocoapods_script_symlink.dart';
 import '../migrations/cocoapods_toolchain_directory_migration.dart';
 import '../project.dart';
-import '../reporting/reporting.dart';
 
 const String noCocoaPodsConsequence = '''
   CocoaPods is a package manager for iOS or macOS platform code.

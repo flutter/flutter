@@ -10,7 +10,6 @@ import '../base/process.dart';
 import '../base/terminal.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
-import '../reporting/reporting.dart';
 import 'gradle_utils.dart';
 
 typedef GradleErrorTest = bool Function(String);

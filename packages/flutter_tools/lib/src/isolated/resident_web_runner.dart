@@ -29,7 +29,6 @@ import '../device.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
-import '../reporting/reporting.dart';
 import '../resident_devtools_handler.dart';
 import '../resident_runner.dart';
 import '../run_hot.dart';
