@@ -905,9 +905,8 @@ Future<void> verifyNoTestImports(String workingDirectory) async {
   }
   // Fail if any errors
   if (errors.isNotEmpty) {
-    final String s = errors.length == 1 ? '' : 's';
     foundError(<String>[
-      '${bold}The following file$s import a test directly. Test utilities should be in their own file.$reset',
+      '${bold}The following file(s) import a test directly. Test utilities should be in their own file.$reset',
       ...errors,
     ]);
   }
