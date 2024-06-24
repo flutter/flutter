@@ -866,8 +866,7 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
     );
     return ColoredBox(
       color: CupertinoDynamicColor.resolve(_kActionSheetBackgroundColor, context),
-      child:
-        _CupertinoAlertContentSection(
+      child: _CupertinoAlertContentSection(
         title: widget.title,
         message: widget.message,
         scrollController: _effectiveMessageScrollController,
@@ -3030,7 +3029,7 @@ class _RenderPriorityColumn extends RenderFlex {
       return (topIntrinsic, bottomIntrinsic);
     }
     // _bottomMinHeight is only effective when bottom actually needs that much.
-    final double effectiveBottomMinHeight = math.min(_bottomMinHeight, bottomIntrinsic) ;
+    final double effectiveBottomMinHeight = math.min(_bottomMinHeight, bottomIntrinsic);
     // Try to layout top as intrinsics, as long as the bottom has at least
     // effectiveBottomMinHeight.
     if (maxHeight - topIntrinsic >= effectiveBottomMinHeight) {
