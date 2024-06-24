@@ -23,8 +23,6 @@ const int32_t GaussianBlurFilterContents::kBlurFilterRequiredMipCount = 4;
 
 namespace {
 
-// 48 comes from gaussian.frag.
-const int32_t kMaxKernelSize = 50;
 constexpr Scalar kMaxSigma = 500.0f;
 
 SamplerDescriptor MakeSamplerDescriptor(MinMagFilter filter,
@@ -174,7 +172,7 @@ fml::StatusOr<RenderTarget> MakeBlurSubpass(
             pass, host_buffer.EmplaceUniform(frame_info));
         GaussianBlurPipeline::FragmentShader::KernelSamples kernel_samples =
             LerpHackKernelSamples(GenerateBlurInfo(blur_info));
-        FML_CHECK(kernel_samples.sample_count < kMaxKernelSize);
+        FML_CHECK(kernel_samples.sample_count <= kGaussianBlurMaxKernelSize);
         GaussianBlurFragmentShader::BindKernelSamples(
             pass, host_buffer.EmplaceUniform(kernel_samples));
         return pass.Draw().ok();
@@ -639,9 +637,8 @@ Scalar GaussianBlurFilterContents::ScaleSigma(Scalar sigma) {
   return clamped * scalar;
 }
 
-GaussianBlurPipeline::FragmentShader::KernelSamples GenerateBlurInfo(
-    BlurParameters parameters) {
-  GaussianBlurPipeline::FragmentShader::KernelSamples result;
+KernelSamples GenerateBlurInfo(BlurParameters parameters) {
+  KernelSamples result;
   result.sample_count =
       ((2 * parameters.blur_radius) / parameters.step_size) + 1;
 
@@ -651,6 +648,18 @@ GaussianBlurPipeline::FragmentShader::KernelSamples GenerateBlurInfo(
   if (parameters.blur_radius >= 3) {
     result.sample_count -= 2;
     x_offset = 1;
+  }
+
+  // This is a safe-guard to make sure we don't overflow the fragment shader.
+  // The kernel size is multiplied by 2 since we'll use the lerp hack on the
+  // result. In practice this isn't throwing away much data since the blur radii
+  // are around 53 before the down-sampling and max sigma of 500 kick in.
+  //
+  // TODO(https://github.com/flutter/flutter/issues/150462): Come up with a more
+  // wholistic remedy for this.  A proper downsample size should not make this
+  // required. Or we can increase the kernel size.
+  if (result.sample_count > KernelSamples::kMaxKernelSize) {
+    result.sample_count = KernelSamples::kMaxKernelSize;
   }
 
   Scalar tally = 0.0f;
@@ -676,11 +685,12 @@ GaussianBlurPipeline::FragmentShader::KernelSamples GenerateBlurInfo(
 // This works by shrinking the kernel size by 2 and relying on lerp to read
 // between the samples.
 GaussianBlurPipeline::FragmentShader::KernelSamples LerpHackKernelSamples(
-    GaussianBlurPipeline::FragmentShader::KernelSamples parameters) {
+    KernelSamples parameters) {
   GaussianBlurPipeline::FragmentShader::KernelSamples result;
   result.sample_count = ((parameters.sample_count - 1) / 2) + 1;
   int32_t middle = result.sample_count / 2;
   int32_t j = 0;
+  FML_DCHECK(result.sample_count <= kGaussianBlurMaxKernelSize);
   for (int i = 0; i < result.sample_count; i++) {
     if (i == middle) {
       result.samples[i] = parameters.samples[j++];
