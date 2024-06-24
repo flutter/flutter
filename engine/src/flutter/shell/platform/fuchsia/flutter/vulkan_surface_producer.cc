@@ -21,8 +21,8 @@
 #include "third_party/skia/include/gpu/ganesh/SkSurfaceGanesh.h"
 #include "third_party/skia/include/gpu/ganesh/vk/GrVkBackendSurface.h"
 #include "third_party/skia/include/gpu/ganesh/vk/GrVkDirectContext.h"
-#include "third_party/skia/include/gpu/vk/GrVkBackendContext.h"
 #include "third_party/skia/include/gpu/vk/GrVkTypes.h"
+#include "third_party/skia/include/gpu/vk/VulkanBackendContext.h"
 #include "third_party/skia/include/gpu/vk/VulkanExtensions.h"
 
 namespace flutter_runner {
@@ -125,7 +125,7 @@ bool VulkanSurfaceProducer::Initialize() {
       logical_device_->GetPhysicalDeviceHandle(), logical_device_->GetHandle(),
       vk_, true);
 
-  GrVkBackendContext backend_context;
+  skgpu::VulkanBackendContext backend_context;
   backend_context.fInstance = application_->GetInstance();
   backend_context.fPhysicalDevice = logical_device_->GetPhysicalDeviceHandle();
   backend_context.fDevice = logical_device_->GetHandle();

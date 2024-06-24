@@ -12,7 +12,7 @@
 #include "flutter/shell/gpu/gpu_surface_vulkan_delegate.h"
 #include "flutter/vulkan/vulkan_skia_proc_table.h"
 #include "include/gpu/GrDirectContext.h"
-#include "include/gpu/vk/GrVkBackendContext.h"
+#include "include/gpu/vk/VulkanBackendContext.h"
 #include "include/gpu/vk/VulkanExtensions.h"
 #include "third_party/skia/include/gpu/ganesh/vk/GrVkDirectContext.h"
 
@@ -143,7 +143,7 @@ sk_sp<GrDirectContext> EmbedderSurfaceVulkan::CreateGrContext(
 
   skgpu::VulkanExtensions extensions;
 
-  GrVkBackendContext backend_context = {};
+  skgpu::VulkanBackendContext backend_context = {};
   backend_context.fInstance = instance;
   backend_context.fPhysicalDevice = device_.GetPhysicalDeviceHandle();
   backend_context.fDevice = device_.GetHandle();

@@ -9,7 +9,6 @@
 #include <vector>
 
 #include "flutter/vulkan/procs/vulkan_proc_table.h"
-#include "third_party/skia/include/gpu/vk/GrVkBackendContext.h"
 #include "vulkan_surface.h"
 #include "vulkan_utilities.h"
 

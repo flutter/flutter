@@ -122,7 +122,7 @@ GrDirectContext* VulkanWindow::GetSkiaGrContext() {
 
 bool VulkanWindow::CreateSkiaGrContext() {
 #ifdef SK_VULKAN
-  GrVkBackendContext backend_context;
+  skgpu::VulkanBackendContext backend_context;
   VkPhysicalDeviceFeatures features;
   skgpu::VulkanExtensions extensions;
 
@@ -151,7 +151,7 @@ bool VulkanWindow::CreateSkiaGrContext() {
 }
 
 bool VulkanWindow::CreateSkiaBackendContext(
-    GrVkBackendContext* context,
+    skgpu::VulkanBackendContext* context,
     VkPhysicalDeviceFeatures* features,
     skgpu::VulkanExtensions* extensions) {
 #ifdef SK_VULKAN
