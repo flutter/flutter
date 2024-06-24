@@ -142,7 +142,7 @@ abstract class GoldenFileComparator {
 ///     matchesGoldenFile('my_golden.png'),
 ///   );
 /// });
-/// 
+///
 /// class _TolerantGoldenFileComparator extends LocalFileComparator {
 ///   _TolerantGoldenFileComparator(
 ///     super.testFile, {
@@ -154,7 +154,7 @@ abstract class GoldenFileComparator {
 ///   /// It is expected to be between 0 and 1. Where 0 is no difference (the same image)
 ///   /// and 1 is the maximum difference (completely different images).
 ///   final double _precisionTolerance;
-/// 
+///
 ///   @override
 ///   Future<bool> compare(Uint8List imageBytes, Uri golden) async {
 ///     final result = await GoldenFileComparator.compareLists(
