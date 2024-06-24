@@ -14,23 +14,27 @@ export 'package:flutter/foundation.dart' show DiagnosticsNode;
 
 /// Signature for the callback passed to the [Ticker] class's constructor.
 ///
-/// The argument is the time that the object had spent enabled so far
-/// at the time of the callback being called.
+/// The argument is the time elapsed from
+/// the frame timestamp when the ticker was last started
+/// to the current frame timestamp.
 typedef TickerCallback = void Function(Duration elapsed);
 
 /// An interface implemented by classes that can vend [Ticker] objects.
 ///
+/// To obtain a [TickerProvider], consider mixing in either
+/// [TickerProviderStateMixin] or [SingleTickerProviderStateMixin]
+/// to make a [State] subclass implement [TickerProvider].
+/// You might then pass that [State] to lower-level widgets
+/// or other related objects.
+/// This ensures the resulting [Ticker]s will only tick when that [State]'s
+/// subtree is enabled, as defined by [TickerMode].
+///
+/// In widget tests, the [WidgetTester] object is also a [TickerProvider].
+///
 /// Tickers can be used by any object that wants to be notified whenever a frame
 /// triggers, but are most commonly used indirectly via an
 /// [AnimationController]. [AnimationController]s need a [TickerProvider] to
-/// obtain their [Ticker]. If you are creating an [AnimationController] from a
-/// [State], then you can use the [TickerProviderStateMixin] and
-/// [SingleTickerProviderStateMixin] classes to obtain a suitable
-/// [TickerProvider]. The widget test framework [WidgetTester] object can be
-/// used as a ticker provider in the context of tests. In other contexts, you
-/// will have to either pass a [TickerProvider] from a higher level (e.g.
-/// indirectly from a [State] that mixes in [TickerProviderStateMixin]), or
-/// create a custom [TickerProvider] subclass.
+/// obtain their [Ticker].
 abstract class TickerProvider {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -43,9 +47,9 @@ abstract class TickerProvider {
   Ticker createTicker(TickerCallback onTick);
 }
 
-// TODO(jacobr): make Ticker use Diagnosticable to simplify reporting errors
-// related to a ticker.
-/// Calls its callback once per animation frame.
+/// Calls its callback once per animation frame, when enabled.
+///
+/// To obtain a ticker, consider [TickerProvider].
 ///
 /// When created, a ticker is initially disabled. Call [start] to
 /// enable the ticker.
@@ -55,11 +59,15 @@ abstract class TickerProvider {
 /// are called.
 ///
 /// By convention, the [start] and [stop] methods are used by the ticker's
-/// consumer, and the [muted] property is controlled by the [TickerProvider]
-/// that created the ticker.
+/// consumer (for example, an [AnimationController]), and the [muted] property
+/// is controlled by the [TickerProvider] that created the ticker (for example,
+/// a [State] that uses [TickerProviderStateMixin] to silence the ticker when
+/// the state's subtree is disabled as defined by [TickerMode]).
 ///
 /// Tickers are driven by the [SchedulerBinding]. See
 /// [SchedulerBinding.scheduleFrameCallback].
+// TODO(jacobr): make Ticker use Diagnosticable to simplify reporting errors
+// related to a ticker.
 class Ticker {
   /// Creates a ticker that will call the provided callback once per frame while
   /// running.
@@ -146,6 +154,8 @@ class Ticker {
   /// [isTicking].
   bool get isActive => _future != null;
 
+  /// The frame timestamp when the ticker was last started,
+  /// as reported by [SchedulerBinding.currentFrameTimestamp].
   Duration? _startTime;
 
   /// Starts the clock for this [Ticker]. If the ticker is not [muted], then this
