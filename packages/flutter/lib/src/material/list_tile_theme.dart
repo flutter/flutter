@@ -268,7 +268,7 @@ class ListTileThemeData with Diagnosticable {
       && other.enableFeedback == enableFeedback
       && other.mouseCursor == mouseCursor
       && other.visualDensity == visualDensity
-      && other.titleAlignment == titleAlignment 
+      && other.titleAlignment == titleAlignment
       && other.controlAffinity == controlAffinity;
   }
 
