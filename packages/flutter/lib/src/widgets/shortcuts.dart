@@ -940,8 +940,8 @@ class ShortcutManager with Diagnosticable, ChangeNotifier {
 /// deletion intent may be to delete a character in a text input, or to delete
 /// a file in a file menu.
 ///
-/// See the article on [Using Actions and
-/// Shortcuts](https://docs.flutter.dev/development/ui/advanced/actions_and_shortcuts)
+/// See the article on
+/// [Using Actions and Shortcuts](https://flutter.dev/to/actions-shortcuts)
 /// for a detailed explanation.
 ///
 /// {@tool dartpad}
@@ -1138,8 +1138,8 @@ class _ShortcutsState extends State<Shortcuts> {
 /// a descendant of this widget handles the key, then the key event will not
 /// reach this widget for handling.
 ///
-/// See the article on [Using Actions and
-/// Shortcuts](https://docs.flutter.dev/development/ui/advanced/actions_and_shortcuts)
+/// See the article on
+/// [Using Actions and Shortcuts](https://flutter.dev/to/actions-shortcuts)
 /// for a detailed explanation.
 ///
 /// See also:
