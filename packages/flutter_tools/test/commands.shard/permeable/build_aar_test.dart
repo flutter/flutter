@@ -67,23 +67,42 @@ void main() {
       final String projectPath = await createProject(tempDir,
           arguments: <String>['--no-pub', '--template=module']);
 
-      final BuildAarCommand command = await runCommandIn(projectPath);
-      expect((await command.usageValues).commandBuildAarProjectType, 'module');
-
+      await runCommandIn(projectPath);
+      expect(
+        analytics.sentEvents,
+        contains(
+          Event.commandUsageValues(
+            workflow: 'aar',
+            buildAarProjectType: 'module',
+            buildAarTargetPlatform: 'android-arm,android-arm64,android-x64',
+            commandHasTerminal: false,
+          ),
+        ),
+      );
     }, overrides: <Type, Generator>{
       AndroidBuilder: () => FakeAndroidBuilder(),
+      Analytics: () => analytics,
     });
 
     testUsingContext('indicate the target platform', () async {
       final String projectPath = await createProject(tempDir,
           arguments: <String>['--no-pub', '--template=module']);
 
-      final BuildAarCommand command = await runCommandIn(projectPath,
-          arguments: <String>['--target-platform=android-arm']);
-      expect((await command.usageValues).commandBuildAarTargetPlatform, 'android-arm');
-
+      await runCommandIn(projectPath, arguments: <String>['--target-platform=android-arm']);
+      expect(
+        analytics.sentEvents,
+        contains(
+          Event.commandUsageValues(
+            workflow: 'aar',
+            buildAarProjectType: 'module',
+            buildAarTargetPlatform: 'android-arm',
+            commandHasTerminal: false,
+          ),
+        ),
+      );
     }, overrides: <Type, Generator>{
       AndroidBuilder: () => FakeAndroidBuilder(),
+      Analytics: () => analytics,
     });
 
     testUsingContext('logs success', () async {

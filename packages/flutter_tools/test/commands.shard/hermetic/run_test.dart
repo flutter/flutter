@@ -25,7 +25,6 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/macos/macos_ipad_device.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_hot.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
@@ -49,7 +48,7 @@ void main() {
   group('run', () {
     late BufferLogger logger;
     late TestDeviceManager testDeviceManager;
-    late FileSystem fileSystem;
+    late MemoryFileSystem fileSystem;
 
     setUp(() {
       logger = BufferLogger.test();
@@ -745,17 +744,22 @@ void main() {
           );
         }
 
-        final CustomDimensions dimensions = await command.usageValues;
+        final analytics.Event usageValues = await command.unifiedAnalyticsUsageValues('run');
 
-        expect(dimensions, const CustomDimensions(
-          commandRunIsEmulator: false,
-          commandRunTargetName: 'android-arm',
-          commandRunTargetOsVersion: '',
-          commandRunModeName: 'debug',
-          commandRunProjectModule: false,
-          commandRunProjectHostLanguage: '',
-          commandRunIsTest: false,
-        ));
+        expect(
+          usageValues,
+          equals(analytics.Event.commandUsageValues(
+            workflow: 'run',
+            commandHasTerminal: false,
+            runIsEmulator: false,
+            runTargetName: 'android-arm',
+            runTargetOsVersion: '',
+            runModeName: 'debug',
+            runProjectModule: false,
+            runProjectHostLanguage: '',
+            runIsTest: false,
+          )),
+        );
       }, overrides: <Type, Generator>{
         DeviceManager: () => testDeviceManager,
         Cache: () => Cache.test(processManager: FakeProcessManager.any()),
@@ -785,18 +789,23 @@ void main() {
           );
         }
 
-        final CustomDimensions dimensions = await command.usageValues;
+        final analytics.Event usageValues = await command.unifiedAnalyticsUsageValues('run');
 
-        expect(dimensions, const CustomDimensions(
-          commandRunIsEmulator: false,
-          commandRunTargetName: 'ios',
-          commandRunTargetOsVersion: 'iOS 16.2',
-          commandRunModeName: 'debug',
-          commandRunProjectModule: false,
-          commandRunProjectHostLanguage: '',
-          commandRunIOSInterfaceType: 'usb',
-          commandRunIsTest: false,
-        ));
+        expect(
+          usageValues,
+          equals(analytics.Event.commandUsageValues(
+            workflow: 'run',
+            commandHasTerminal: false,
+            runIsEmulator: false,
+            runTargetName: 'ios',
+            runTargetOsVersion: 'iOS 16.2',
+            runModeName: 'debug',
+            runProjectModule: false,
+            runProjectHostLanguage: '',
+            runIOSInterfaceType: 'usb',
+            runIsTest: false,
+          )),
+        );
       }, overrides: <Type, Generator>{
         DeviceManager: () => testDeviceManager,
         Cache: () => Cache.test(processManager: FakeProcessManager.any()),
@@ -829,18 +838,23 @@ void main() {
           );
         }
 
-        final CustomDimensions dimensions = await command.usageValues;
+        final analytics.Event usageValues = await command.unifiedAnalyticsUsageValues('run');
 
-        expect(dimensions, const CustomDimensions(
-          commandRunIsEmulator: false,
-          commandRunTargetName: 'ios',
-          commandRunTargetOsVersion: 'iOS 16.2',
-          commandRunModeName: 'debug',
-          commandRunProjectModule: false,
-          commandRunProjectHostLanguage: '',
-          commandRunIOSInterfaceType: 'wireless',
-          commandRunIsTest: false,
-        ));
+        expect(
+          usageValues,
+          equals(analytics.Event.commandUsageValues(
+            workflow: 'run',
+            commandHasTerminal: false,
+            runIsEmulator: false,
+            runTargetName: 'ios',
+            runTargetOsVersion: 'iOS 16.2',
+            runModeName: 'debug',
+            runProjectModule: false,
+            runProjectHostLanguage: '',
+            runIOSInterfaceType: 'wireless',
+            runIsTest: false,
+          )),
+        );
       }, overrides: <Type, Generator>{
         DeviceManager: () => testDeviceManager,
         Cache: () => Cache.test(processManager: FakeProcessManager.any()),
@@ -873,18 +887,24 @@ void main() {
             ),
           );
         }
-        final CustomDimensions dimensions = await command.usageValues;
 
-        expect(dimensions, const CustomDimensions(
-          commandRunIsEmulator: false,
-          commandRunTargetName: 'multiple',
-          commandRunTargetOsVersion: 'multiple',
-          commandRunModeName: 'debug',
-          commandRunProjectModule: false,
-          commandRunProjectHostLanguage: '',
-          commandRunIOSInterfaceType: 'wireless',
-          commandRunIsTest: false,
-        ));
+        final analytics.Event usageValues = await command.unifiedAnalyticsUsageValues('run');
+
+        expect(
+          usageValues,
+          equals(analytics.Event.commandUsageValues(
+            workflow: 'run',
+            commandHasTerminal: false,
+            runIsEmulator: false,
+            runTargetName: 'multiple',
+            runTargetOsVersion: 'multiple',
+            runModeName: 'debug',
+            runProjectModule: false,
+            runProjectHostLanguage: '',
+            runIOSInterfaceType: 'wireless',
+            runIsTest: false,
+          )),
+        );
       }, overrides: <Type, Generator>{
         DeviceManager: () => testDeviceManager,
         Cache: () => Cache.test(processManager: FakeProcessManager.any()),

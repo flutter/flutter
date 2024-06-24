@@ -9,9 +9,9 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/packages.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart' as analytics;
 
 import '../../src/context.dart';
 import '../../src/test_flutter_command_runner.dart';
@@ -55,30 +55,6 @@ void main() {
     ));
   });
 
-  testUsingContext('pub get usage values are resilient to missing package config files before running "pub get"', () async {
-    fileSystem.currentDirectory.childFile('pubspec.yaml').createSync();
-    fileSystem.currentDirectory.childFile('.flutter-plugins').createSync();
-    fileSystem.currentDirectory.childFile('.flutter-plugins-dependencies').createSync();
-    fileSystem.currentDirectory.childDirectory('android').childFile('AndroidManifest.xml')
-      ..createSync(recursive: true)
-      ..writeAsStringSync(minimalV2EmbeddingManifest);
-
-    final PackagesGetCommand command = PackagesGetCommand('get', '', PubContext.pubGet);
-    final CommandRunner<void> commandRunner = createTestCommandRunner(command);
-
-    await commandRunner.run(<String>['get']);
-
-    expect(await command.usageValues, const CustomDimensions(
-      commandPackagesNumberPlugins: 0,
-      commandPackagesProjectModule: false,
-      commandPackagesAndroidEmbeddingVersion: 'v2',
-    ));
-  }, overrides: <Type, Generator>{
-    Pub: () => pub,
-    ProcessManager: () => FakeProcessManager.any(),
-    FileSystem: () => fileSystem,
-  });
-
   testUsingContext('pub get usage values are resilient to poorly formatted package config before "pub get"', () async {
     fileSystem.currentDirectory.childFile('pubspec.yaml').createSync();
     fileSystem.currentDirectory.childFile('.flutter-plugins').createSync();
@@ -95,12 +71,16 @@ void main() {
     final CommandRunner<void> commandRunner = createTestCommandRunner(command);
 
     await commandRunner.run(<String>['get']);
-
-    expect(await command.usageValues, const CustomDimensions(
-      commandPackagesNumberPlugins: 0,
-      commandPackagesProjectModule: false,
-      commandPackagesAndroidEmbeddingVersion: 'v2',
-    ));
+    expect(
+      await command.unifiedAnalyticsUsageValues('pub'),
+      analytics.Event.commandUsageValues(
+        workflow: 'pub',
+        commandHasTerminal: false,
+        packagesNumberPlugins: 0,
+        packagesProjectModule: false,
+        packagesAndroidEmbeddingVersion: 'v2',
+      ),
+    );
   }, overrides: <Type, Generator>{
     Pub: () => pub,
     ProcessManager: () => FakeProcessManager.any(),
@@ -163,11 +143,16 @@ void main() {
 
     await commandRunner.run(<String>['get']);
 
-    expect(await command.usageValues, const CustomDimensions(
-      commandPackagesNumberPlugins: 0,
-      commandPackagesProjectModule: false,
-      commandPackagesAndroidEmbeddingVersion: 'v2',
-    ));
+    expect(
+      await command.unifiedAnalyticsUsageValues('pub'),
+      analytics.Event.commandUsageValues(
+        workflow: 'pub',
+        commandHasTerminal: false,
+        packagesNumberPlugins: 0,
+        packagesProjectModule: false,
+        packagesAndroidEmbeddingVersion: 'v2',
+      ),
+    );
   }, overrides: <Type, Generator>{
     Pub: () => pub,
     ProcessManager: () => FakeProcessManager.any(),

@@ -70,9 +70,8 @@ void main() {
     final String projectPath = await createProject(tempDir,
         arguments: <String>['--no-pub', '--template=module']);
 
-    final BuildBundleCommand command = await runCommandIn(projectPath);
+    await runCommandIn(projectPath);
 
-    expect((await command.usageValues).commandBuildBundleIsModule, true);
     expect(
       fakeAnalytics.sentEvents,
       contains(
@@ -91,10 +90,8 @@ void main() {
   testUsingContext('bundle getUsage indicate that project is not a module', () async {
     final String projectPath = await createProject(tempDir,
         arguments: <String>['--no-pub', '--template=app']);
+    await runCommandIn(projectPath);
 
-    final BuildBundleCommand command = await runCommandIn(projectPath);
-
-    expect((await command.usageValues).commandBuildBundleIsModule, false);
     expect(
       fakeAnalytics.sentEvents,
       contains(
@@ -116,7 +113,11 @@ void main() {
 
     final BuildBundleCommand command = await runCommandIn(projectPath);
 
-    expect((await command.usageValues).commandBuildBundleTargetPlatform, 'android-arm');
+    expect(
+      (await command.unifiedAnalyticsUsageValues('bundle'))
+          .eventData['buildBundleTargetPlatform'],
+      'android-arm',
+    );
   });
 
   testUsingContext('bundle fails to build for Windows if feature is disabled', () async {

@@ -70,7 +70,7 @@ void main() {
       final String projectPath = await createProject(tempDir,
           arguments: <String>['--no-pub', '--template=app']);
 
-     await runBuildAppBundleCommand(projectPath);
+      await runBuildAppBundleCommand(projectPath);
       expect(
         fakeAnalytics.sentEvents,
         contains(Event.commandUsageValues(
@@ -117,7 +117,6 @@ void main() {
           buildAppBundleBuildMode: 'profile',
         )),
       );
-      fakeAnalytics.sentEvents.clear();
     }, overrides: <Type, Generator>{
       AndroidBuilder: () => FakeAndroidBuilder(),
       Analytics: () => fakeAnalytics,
@@ -254,16 +253,12 @@ void main() {
         )
       );
 
-      analytics.sentEvents;
-      print('todo');
-      // expect(testUsage.events, contains(
-      //   const TestUsageEvent(
-      //     'build',
-      //     'gradle',
-      //     label: 'app-using-android-x',
-      //     parameters: CustomDimensions(),
-      //   ),
-      // ));
+      expect(analytics.sentEvents, contains(
+        Event.flutterBuildInfo(
+          label: 'app-using-android-x',
+          buildType: 'gradle',
+        ),
+      ));
     },
     overrides: <Type, Generator>{
       AndroidSdk: () => androidSdk,

@@ -48,9 +48,7 @@ void main() {
     testUsingContext('indicate the default target platforms', () async {
       final String projectPath = await createProject(tempDir,
           arguments: <String>['--no-pub', '--template=app']);
-      final BuildApkCommand command = await runBuildApkCommand(projectPath);
-
-      expect((await command.usageValues).commandBuildApkTargetPlatform, 'android-arm,android-arm64,android-x64');
+      await runBuildApkCommand(projectPath);
 
       expect(
         fakeAnalytics.sentEvents,
@@ -75,11 +73,19 @@ void main() {
 
       final BuildApkCommand commandWithFlag = await runBuildApkCommand(projectPath,
           arguments: <String>['--split-per-abi']);
-      expect((await commandWithFlag.usageValues).commandBuildApkSplitPerAbi, true);
+
+      expect(
+        (await commandWithFlag.unifiedAnalyticsUsageValues('run'))
+            .eventData['buildApkSplitPerApi'],
+        isTrue,
+      );
 
       final BuildApkCommand commandWithoutFlag = await runBuildApkCommand(projectPath);
-      expect((await commandWithoutFlag.usageValues).commandBuildApkSplitPerAbi, false);
-
+      expect(
+        (await commandWithoutFlag.unifiedAnalyticsUsageValues('run'))
+            .eventData['buildApkSplitPerApi'],
+        isFalse
+      );
     }, overrides: <Type, Generator>{
       AndroidBuilder: () => FakeAndroidBuilder(),
     });
@@ -88,23 +94,56 @@ void main() {
       final String projectPath = await createProject(tempDir,
           arguments: <String>['--no-pub', '--template=app']);
 
-      final BuildApkCommand commandDefault = await runBuildApkCommand(projectPath);
-      expect((await commandDefault.usageValues).commandBuildApkBuildMode, 'release');
+      await runBuildApkCommand(projectPath);
+      expect(
+        fakeAnalytics.sentEvents,
+        contains(Event.commandUsageValues(
+          workflow: 'appbundle',
+          commandHasTerminal: false,
+          buildAppBundleTargetPlatform: 'android-arm,android-arm64,android-x64',
+          buildAppBundleBuildMode: 'release',
+        )),
+      );
 
-      final BuildApkCommand commandInRelease = await runBuildApkCommand(projectPath,
-          arguments: <String>['--release']);
-      expect((await commandInRelease.usageValues).commandBuildApkBuildMode, 'release');
+      fakeAnalytics.sentEvents.clear();
+      await runBuildApkCommand(projectPath, arguments: <String>['--release']);
+      expect(
+        fakeAnalytics.sentEvents,
+        contains(Event.commandUsageValues(
+          workflow: 'appbundle',
+          commandHasTerminal: false,
+          buildAppBundleTargetPlatform: 'android-arm,android-arm64,android-x64',
+          buildAppBundleBuildMode: 'release',
+        )),
+      );
 
-      final BuildApkCommand commandInDebug = await runBuildApkCommand(projectPath,
-          arguments: <String>['--debug']);
-      expect((await commandInDebug.usageValues).commandBuildApkBuildMode, 'debug');
+      fakeAnalytics.sentEvents.clear();
+      await runBuildApkCommand(projectPath, arguments: <String>['--debug']);
+      expect(
+        fakeAnalytics.sentEvents,
+        contains(Event.commandUsageValues(
+          workflow: 'appbundle',
+          commandHasTerminal: false,
+          buildAppBundleTargetPlatform: 'android-arm,android-arm64,android-x64',
+          buildAppBundleBuildMode: 'debug',
+        )),
+      );
 
-      final BuildApkCommand commandInProfile = await runBuildApkCommand(projectPath,
-          arguments: <String>['--profile']);
-      expect((await commandInProfile.usageValues).commandBuildApkBuildMode, 'profile');
+      fakeAnalytics.sentEvents.clear();
+      await runBuildApkCommand(projectPath, arguments: <String>['--profile']);
 
+      expect(
+        fakeAnalytics.sentEvents,
+        contains(Event.commandUsageValues(
+          workflow: 'appbundle',
+          commandHasTerminal: false,
+          buildAppBundleTargetPlatform: 'android-arm,android-arm64,android-x64',
+          buildAppBundleBuildMode: 'profile',
+        )),
+      );
     }, overrides: <Type, Generator>{
       AndroidBuilder: () => FakeAndroidBuilder(),
+      Analytics: () => fakeAnalytics,
     });
 
     testUsingContext('logs success', () async {
