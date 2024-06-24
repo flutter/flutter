@@ -1,3 +1,5 @@
+# Writing a golden file test for package:flutter
+
 _(This page is referenced by comments in the Flutter codebase.)_
 
 **If you want to learn how to write a golden test for your package, see [the `matchesGoldenFile` API docs](https://api.flutter.dev/flutter/flutter_test/matchesGoldenFile.html).** This wiki page describes the special process specifically for the Flutter team itself.
@@ -8,6 +10,7 @@ Golden file tests for `package:flutter` use [Flutter Gold](https://flutter-gold.
 - [Known Issues](#known-issues)
 - [Build Breakage](#build-breakage)
 - [Creating a New Golden File Test](#creating-a-new-golden-file-test)
+- [Adding a new key in the Skia Client](#Adding-a-new-key-in-the-Skia-Client)
 - [Updating a Golden File Test](#updating-a-golden-file-test)
 - [Flutter Gold Login](#flutter-gold-login)
 - [`flutter-gold` Check](#flutter-gold-check)
@@ -38,7 +41,7 @@ If the Flutter build is broken due to a golden file test failure, this typically
   Visit https://flutter-gold.skia.org/ to view and approve
   the image(s), or revert the associated change. For more
   information, visit the wiki:
-  https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package:flutter
+  https://github.com/flutter/flutter/blob/main/docs/contributing/testing/Writing-a-golden-file-test-for-package-flutter.md
 ```
 
 To resolve, visit the [Flutter Gold dashboard](https://flutter-gold.skia.org/) to view the batch of images in question. If they are intended changes, approve them by clicking the checkmark, and re-run the failing test to resolve. If the image changes are not intended, revert the associated change.
@@ -75,6 +78,23 @@ New test results will be compiled into a tryjob on the Flutter Gold dashboard, u
 New tests can be triaged from these tryjobs, which will cause the pending `flutter-gold` check to pass. Review the tryjob and the images that were generated, making sure they look as expected. Currently, we generate images for Linux, Mac, Windows, and Web platforms. It is common for there to be slight differences between them. Click the checkmark to approve the change, completing triage.
 
 And that’s it! Your new golden file(s) will be checked in as the baseline(s) for your new test(s), and your PR will be ready to merge. :tada:
+
+## Adding a new key in the Skia Client
+
+Approved golden file images on the [Flutter Gold Dashboard] [Flutter Gold](https://flutter-gold.skia.org/?query=source_type%3Dflutter)
+are keyed with parameters like platform, CI environment, test name, browser, and image extension.
+
+When adding new keys, consider all possible values, and whether or not they are covered by the CI environments that are used
+to test changes in presubmit and postsubmit testing. If not all possible values are accounted for, false negatives can occur
+in local testing.
+
+For example, we once included an abi key, which in our CI environments at the time could be linux_x64, windows_x64, or mac_x64.
+These keys are used to look up approved images for local testing, so when a mac_arm64 machine would run local tests,
+no image could be found and the tests would fail.
+Omitting the key in the lookup did most often find the right image, but it was not consistently reliable, so we removed it.
+
+If the CI environments available for testing changes do not cover all value of a particular key, it is not a good key to
+include as part of testing.
 
 ## Updating a Golden File Test
 

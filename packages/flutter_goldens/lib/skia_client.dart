@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
-import 'dart:ffi' show Abi;
 import 'dart:io' as io;
 
 import 'package:crypto/crypto.dart';
@@ -14,7 +13,7 @@ import 'package:process/process.dart';
 
 // If you are here trying to figure out how to use golden files in the Flutter
 // repo itself, consider reading this wiki page:
-// https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package%3Aflutter
+// https://github.com/flutter/flutter/blob/main/docs/contributing/testing/Writing-a-golden-file-test-for-package-flutter.md
 
 const String _kFlutterRootKey = 'FLUTTER_ROOT';
 const String _kGoldctlKey = 'GOLDCTL';
@@ -52,7 +51,6 @@ class SkiaGoldClient {
     required this.fs,
     required this.process,
     required this.platform,
-    required this.abi,
     required this.httpClient,
     required this.log,
   });
@@ -76,9 +74,6 @@ class SkiaGoldClient {
 
   /// A client for making Http requests to the Flutter Gold dashboard.
   final io.HttpClient httpClient;
-
-  /// The ABI of the current host platform.
-  final Abi abi;
 
   /// The local [Directory] within the [comparisonRoot] for the current test
   /// context. In this directory, the client will create image and JSON files
@@ -243,7 +238,7 @@ class SkiaGoldClient {
         ..writeln('Visit https://flutter-gold.skia.org/ to view and approve ')
         ..writeln('the image(s), or revert the associated change. For more ')
         ..writeln('information, visit the wiki: ')
-        ..writeln('https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package:flutter')
+        ..writeln('https://github.com/flutter/flutter/blob/main/docs/contributing/testing/Writing-a-golden-file-test-for-package-flutter.md')
         ..writeln()
         ..writeln('Debug information for Gold --------------------------------')
         ..writeln('stdout: ${result.stdout}')
@@ -347,7 +342,7 @@ class SkiaGoldClient {
 
     final io.ProcessResult result = await process.run(imgtestCommand);
 
-    final String/*!*/ resultStdout = result.stdout.toString();
+    final String resultStdout = result.stdout.toString();
     if (result.exitCode != 0 &&
       !(resultStdout.contains('Untriaged') || resultStdout.contains('negative image'))) {
       String? resultContents;
@@ -482,7 +477,7 @@ class SkiaGoldClient {
       if (revParse.exitCode != 0) {
         throw const SkiaException('Current commit of Flutter can not be found.');
       }
-      return (revParse.stdout as String/*!*/).trim();
+      return (revParse.stdout as String).trim();
     }
   }
 
@@ -496,7 +491,6 @@ class SkiaGoldClient {
     final String? webRenderer = _webRendererValue;
     final Map<String, dynamic> keys = <String, dynamic>{
       'Platform' : platform.operatingSystem,
-      'Abi': '$abi',
       'CI' : 'luci',
       if (_isImpeller)
         'impeller': 'swiftshader',
@@ -523,12 +517,12 @@ class SkiaGoldClient {
     final File authFile = workDirectory.childFile(fs.path.join(
       'temp',
       'auth_opt.json',
-    ))/*!*/;
+    ));
 
     if (await authFile.exists()) {
       final String contents = await authFile.readAsString();
       final Map<String, dynamic> decoded = json.decode(contents) as Map<String, dynamic>;
-      return !(decoded['GSUtil'] as bool/*!*/);
+      return !(decoded['GSUtil'] as bool);
     }
     return false;
   }
@@ -579,7 +573,6 @@ class SkiaGoldClient {
     final Map<String, Object?> parameters = <String, Object?>{
       if (_isBrowserTest)
         'Browser' : _browserKey,
-      'Abi': '$abi',
       'CI' : 'luci',
       'Platform' : platform.operatingSystem,
       if (webRenderer != null)

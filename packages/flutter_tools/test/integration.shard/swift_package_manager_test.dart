@@ -302,6 +302,75 @@ void main() {
         );
       }
     }, skip: !platform.isMacOS); // [intended] Swift Package Manager only works on macos.
+
+    test('Caches build targets between builds with Swift Package Manager on $platformName', () async {
+      final Directory workingDirectory = fileSystem.systemTempDirectory
+            .createTempSync('swift_package_manager_caching.');
+        final String workingDirectoryPath = workingDirectory.path;
+        try {
+          // Create and build an app using the Swift Package Manager version of
+          // integration_test.
+          await SwiftPackageManagerUtils.enableSwiftPackageManager(flutterBin, workingDirectoryPath);
+
+          final String appDirectoryPath = await SwiftPackageManagerUtils.createApp(
+            flutterBin,
+            workingDirectoryPath,
+            iosLanguage: 'swift',
+            platform: platformName,
+            usesSwiftPackageManager: true,
+            options: <String>['--platforms=$platformName'],
+          );
+          SwiftPackageManagerUtils.addDependency(appDirectoryPath: appDirectoryPath, plugin: integrationTestPlugin);
+
+          final String unpackTarget = 'debug_unpack_$platformName';
+          final String bundleFlutterAssetsTarget = 'debug_${platformName}_bundle_flutter_assets';
+          final bool noCodesign = platformName == 'ios';
+          await SwiftPackageManagerUtils.buildApp(
+            flutterBin,
+            appDirectoryPath,
+            options: <String>[
+              platformName,
+              '--debug',
+              '-v',
+              if (noCodesign)
+                '--no-codesign',
+            ],
+            expectedLines: <Pattern>[
+              r'SchemeAction Run\ Prepare\ Flutter\ Framework\ Script',
+              '$unpackTarget: Starting due to',
+              '-dPreBuildAction=PrepareFramework $unpackTarget',
+            ],
+            unexpectedLines: <String>[],
+          );
+
+          await SwiftPackageManagerUtils.buildApp(
+            flutterBin,
+            appDirectoryPath,
+            options: <String>[
+              platformName,
+              '--debug',
+              '-v',
+              if (noCodesign)
+                '--no-codesign',
+            ],
+            expectedLines: <Pattern>[
+              r'SchemeAction Run\ Prepare\ Flutter\ Framework\ Script',
+              'Skipping target: $unpackTarget',
+              'Skipping target: $bundleFlutterAssetsTarget',
+            ],
+            unexpectedLines: <String>[
+              'Starting due to',
+            ],
+          );
+
+        } finally {
+          await SwiftPackageManagerUtils.disableSwiftPackageManager(flutterBin, workingDirectoryPath);
+          ErrorHandlingFileSystem.deleteIfExists(
+            workingDirectory,
+            recursive: true,
+          );
+        }
+    }, skip: !platform.isMacOS); // [intended] Swift Package Manager only works on macos.
   }
 
   test('Build ios-framework with module app uses CocoaPods', () async {

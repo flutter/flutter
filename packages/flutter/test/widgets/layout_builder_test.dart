@@ -7,9 +7,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  setUp(() { LayoutBuilder.applyDoubleRebuildFix = true; });
-  tearDown(() { LayoutBuilder.applyDoubleRebuildFix = false; });
-
   testWidgets('LayoutBuilder parent size', (WidgetTester tester) async {
     late Size layoutBuilderSize;
     final Key childKey = UniqueKey();
@@ -332,6 +329,30 @@ void main() {
       ),
     ));
     expect(built, 2);
+  });
+
+  testWidgets('LayoutBuilder does not dirty the render tree during the idle phase', (WidgetTester tester) async {
+    RenderObject? dirtyRenderObject;
+    void visitSubtree(RenderObject node) {
+      assert(dirtyRenderObject == null);
+      if (node.debugNeedsLayout) {
+        dirtyRenderObject = node;
+        return;
+      }
+      node.visitChildren(visitSubtree);
+    }
+
+    final Widget target = LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) => const Placeholder(),
+    );
+    await tester.pumpWidget(target);
+    final RenderObject renderObject = tester.renderObject(find.byWidget(target));
+    visitSubtree(renderObject);
+    expect(dirtyRenderObject, isNull);
+
+    tester.element(find.byType(Placeholder)).markNeedsBuild();
+    visitSubtree(renderObject);
+    expect(dirtyRenderObject, isNull);
   });
 
   testWidgets('LayoutBuilder can change size without rebuild', (WidgetTester tester) async {

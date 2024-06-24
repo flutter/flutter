@@ -1,4 +1,4 @@
-Versions used, 4_0_0
+Versions used, v4_1_0
 md.comp.assist-chip.container.shape,
 md.comp.assist-chip.disabled.label-text.color,
 md.comp.assist-chip.elevated.container.color,
@@ -252,6 +252,7 @@ md.comp.filled-text-field.error.focus.trailing-icon.color,
 md.comp.filled-text-field.error.hover.active-indicator.color,
 md.comp.filled-text-field.error.hover.label-text.color,
 md.comp.filled-text-field.error.hover.supporting-text.color,
+md.comp.filled-text-field.error.hover.trailing-icon.color,
 md.comp.filled-text-field.error.label-text.color,
 md.comp.filled-text-field.error.leading-icon.color,
 md.comp.filled-text-field.error.supporting-text.color,

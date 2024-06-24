@@ -41,9 +41,6 @@ class StatefulWrapperState extends State<StatefulWrapper> {
 }
 
 void main() {
-  setUp(() { LayoutBuilder.applyDoubleRebuildFix = true; });
-  tearDown(() { LayoutBuilder.applyDoubleRebuildFix = false; });
-
   testWidgets('Moving global key inside a LayoutBuilder', (WidgetTester tester) async {
     final GlobalKey<StatefulWrapperState> key = GlobalKey<StatefulWrapperState>();
     await tester.pumpWidget(

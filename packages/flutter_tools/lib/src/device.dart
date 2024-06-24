@@ -992,7 +992,7 @@ class DebuggingOptions {
     this.webEnableExpressionEvaluation = false,
     this.webHeaders = const <String, String>{},
     this.webLaunchUrl,
-    this.webRenderer = WebRendererMode.auto,
+    WebRendererMode? webRenderer,
     this.webUseWasm = false,
     this.vmserviceOutFile,
     this.fastStart = false,
@@ -1006,7 +1006,8 @@ class DebuggingOptions {
     this.enableEmbedderApi = false,
     this.usingCISystem = false,
     this.debugLogsDirectoryPath,
-   }) : debuggingEnabled = true;
+   })  : debuggingEnabled = true,
+        webRenderer = webRenderer ?? WebRendererMode.getDefault(useWasm: webUseWasm);
 
   DebuggingOptions.disabled(this.buildInfo, {
       this.dartEntrypointArgs = const <String>[],
@@ -1023,7 +1024,7 @@ class DebuggingOptions {
       this.webBrowserFlags = const <String>[],
       this.webLaunchUrl,
       this.webHeaders = const <String, String>{},
-      this.webRenderer = WebRendererMode.auto,
+      WebRendererMode? webRenderer,
       this.webUseWasm = false,
       this.cacheSkSL = false,
       this.traceAllowlist,
@@ -1061,7 +1062,8 @@ class DebuggingOptions {
       webEnableExpressionEvaluation = false,
       nullAssertions = false,
       nativeNullAssertions = false,
-      serveObservatory = false;
+      serveObservatory = false,
+      webRenderer = webRenderer ?? WebRendererMode.getDefault(useWasm: webUseWasm);
 
   DebuggingOptions._({
     required this.buildInfo,

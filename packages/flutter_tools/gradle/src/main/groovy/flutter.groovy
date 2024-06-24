@@ -98,7 +98,6 @@ class FlutterExtension {
 
         return flutterVersionName
     }
-
 }
 
 // This buildscript block supplies dependencies for this file's own import
@@ -340,10 +339,18 @@ class FlutterPlugin implements Plugin<Project> {
                         "packages", "flutter_tools", "gradle", "src", "main", "kotlin",
                         "dependency_version_checker.gradle.kts")
                 project.apply from: dependencyCheckerPluginPath
-            } catch (Exception ignored) {
-                project.logger.error("Warning: Flutter was unable to detect project Gradle, Java, " +
-                        "AGP, and KGP versions. Skipping dependency version checking. Error was: "
-                        + ignored)
+            } catch (Exception e) {
+                if (!project.usesUnsupportedDependencyVersions) {
+                    // Possible bug in dependency checking code - warn and do not block build.
+                    project.logger.error("Warning: Flutter was unable to detect project Gradle, Java, " +
+                            "AGP, and KGP versions. Skipping dependency version checking. Error was: "
+                            + e)
+                }
+                else {
+                    // If usesUnsupportedDependencyVersions is set, the exception was thrown by us
+                    // in the dependency version checker plugin so re-throw it here.
+                    throw e
+                }
             }
         }
 

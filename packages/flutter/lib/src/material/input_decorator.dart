@@ -2517,10 +2517,9 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 ///
 /// {@tool dartpad}
 /// This sample shows how to style a `TextField` with a prefixIcon that changes color
-/// based on the `MaterialState`. The color defaults to gray, be blue while focused
-/// and red if in an error state.
+/// based on the `MaterialState`. The color defaults to gray and is green while focused.
 ///
-/// ** See code in examples/api/lib/material/input_decorator/input_decoration.material_state.0.dart **
+/// ** See code in examples/api/lib/material/input_decorator/input_decoration.widget_state.0.dart **
 /// {@end-tool}
 ///
 /// {@tool dartpad}
@@ -2528,7 +2527,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 /// based on the `MaterialState` through the use of `ThemeData`. The color defaults
 /// to gray, be blue while focused and red if in an error state.
 ///
-/// ** See code in examples/api/lib/material/input_decorator/input_decoration.material_state.1.dart **
+/// ** See code in examples/api/lib/material/input_decorator/input_decoration.widget_state.1.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -4748,6 +4747,9 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
       return _colors.onSurface.withOpacity(0.38);
     }
     if (states.contains(MaterialState.error)) {
+      if (states.contains(MaterialState.hovered)) {
+        return _colors.onErrorContainer;
+      }
       return _colors.error;
     }
     return _colors.onSurfaceVariant;
