@@ -28,6 +28,29 @@ List<TreeSliverNode<String>> simpleNodeSet = <TreeSliverNode<String>>[
 
 void main() {
   group('TreeSliverNode', () {
+    setUp(() {
+      // Reset node conditions for each test.
+      simpleNodeSet = <TreeSliverNode<String>>[
+        TreeSliverNode<String>('Root 0'),
+        TreeSliverNode<String>(
+          'Root 1',
+          expanded: true,
+          children: <TreeSliverNode<String>>[
+            TreeSliverNode<String>('Child 1:0'),
+            TreeSliverNode<String>('Child 1:1'),
+          ],
+        ),
+        TreeSliverNode<String>(
+          'Root 2',
+          children: <TreeSliverNode<String>>[
+            TreeSliverNode<String>('Child 2:0'),
+            TreeSliverNode<String>('Child 2:1'),
+          ],
+        ),
+        TreeSliverNode<String>('Root 3'),
+      ];
+    });
+
     test('getters, toString', () {
       final List<TreeSliverNode<String>> children = <TreeSliverNode<String>>[
         TreeSliverNode<String>('child'),
@@ -123,6 +146,7 @@ void main() {
         TreeSliverNode<String>('Root 3'),
       ];
     });
+
     testWidgets('Can set controller on TreeSliver', (WidgetTester tester) async {
       final TreeSliverController controller = TreeSliverController();
       TreeSliverController? returnedController;
@@ -427,6 +451,26 @@ void main() {
   });
 
   testWidgets('.toggleNodeWith, onNodeToggle', (WidgetTester tester) async {
+    simpleNodeSet = <TreeSliverNode<String>>[
+      TreeSliverNode<String>('Root 0'),
+      TreeSliverNode<String>(
+        'Root 1',
+        expanded: true,
+        children: <TreeSliverNode<String>>[
+          TreeSliverNode<String>('Child 1:0'),
+          TreeSliverNode<String>('Child 1:1'),
+        ],
+      ),
+      TreeSliverNode<String>(
+        'Root 2',
+        children: <TreeSliverNode<String>>[
+          TreeSliverNode<String>('Child 2:0'),
+          TreeSliverNode<String>('Child 2:1'),
+        ],
+      ),
+      TreeSliverNode<String>('Root 3'),
+    ];
+
     final TreeSliverController controller = TreeSliverController();
     // The default node builder wraps the leading icon with toggleNodeWith.
     bool toggled = false;
@@ -516,6 +560,26 @@ void main() {
   });
 
   testWidgets('AnimationStyle is piped through to node builder', (WidgetTester tester) async {
+    simpleNodeSet = <TreeSliverNode<String>>[
+      TreeSliverNode<String>('Root 0'),
+      TreeSliverNode<String>(
+        'Root 1',
+        expanded: true,
+        children: <TreeSliverNode<String>>[
+          TreeSliverNode<String>('Child 1:0'),
+          TreeSliverNode<String>('Child 1:1'),
+        ],
+      ),
+      TreeSliverNode<String>(
+        'Root 2',
+        children: <TreeSliverNode<String>>[
+          TreeSliverNode<String>('Child 2:0'),
+          TreeSliverNode<String>('Child 2:1'),
+        ],
+      ),
+      TreeSliverNode<String>('Root 3'),
+    ];
+
     AnimationStyle? style;
     await tester.pumpWidget(MaterialApp(
       home: CustomScrollView(
