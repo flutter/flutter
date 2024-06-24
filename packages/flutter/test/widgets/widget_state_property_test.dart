@@ -22,7 +22,7 @@ void main() {
 
   test('WidgetStateProperty.map()', () {
     final WidgetStateMapKey active = WidgetState.hovered | WidgetState.focused | WidgetState.pressed;
-    final WidgetStateProperty<String?> value = WidgetStateProperty.map<String?>(
+    final WidgetStateProperty<String?> value = WidgetStateProperty<String?>.map(
       <WidgetStateMapKey, String?>{
         active & WidgetState.error: 'active error',
         WidgetState.disabled | WidgetState.error: 'kinda sus',

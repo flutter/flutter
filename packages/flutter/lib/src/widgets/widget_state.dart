@@ -665,12 +665,18 @@ class _WidgetTextStyleMapper extends WidgetStateTextStyle {
 ///    `WidgetStateProperty`.
 /// {@macro flutter.widgets.WidgetStateProperty.implementations}
 abstract class WidgetStateProperty<T> {
-  /// Returns a value of type `T` that depends on [states].
+  /// This abstract constructor enables the class to be extended.
   ///
-  /// Widgets like [TextButton] and [ElevatedButton] apply this method to their
-  /// current [WidgetState]s to compute colors and other visual parameters
-  /// at build time.
-  T resolve(Set<WidgetState> states);
+  /// [WidgetStateProperty] is designed as an interface, so this
+  /// constructor is only needed for backward compatibility.
+  WidgetStateProperty();
+
+  /// Convenience method for creating a [WidgetStateProperty] from a [WidgetStateMap].
+  const factory WidgetStateProperty.map(WidgetStateMap<T> map) = _WidgetStateMapper<T>;
+
+  /// Convenience method for creating a [WidgetStateProperty] from a
+  /// [WidgetPropertyResolver] function alone.
+  static WidgetStateProperty<T> resolveWith<T>(WidgetPropertyResolver<T> callback) => _WidgetStatePropertyWith<T>(callback);
 
   /// Resolves the value for the given set of states if `value` is a
   /// [WidgetStateProperty], otherwise returns the value itself.
@@ -685,13 +691,6 @@ abstract class WidgetStateProperty<T> {
     }
     return value;
   }
-
-  /// Convenience method for creating a [WidgetStateProperty] from a
-  /// [WidgetPropertyResolver] function alone.
-  static WidgetStateProperty<T> resolveWith<T>(WidgetPropertyResolver<T> callback) => _WidgetStatePropertyWith<T>(callback);
-
-  /// Convenience method for creating a [WidgetStateProperty] from a [WidgetStateMap].
-  static WidgetStateProperty<T> map<T>(WidgetStateMap<T> map) => _WidgetStateMapper<T>(map);
 
   /// Convenience method for creating a [WidgetStateProperty] that resolves
   /// to a single value for all states.
@@ -716,6 +715,13 @@ abstract class WidgetStateProperty<T> {
     }
     return _LerpProperties<T>(a, b, t, lerpFunction);
   }
+
+  /// Returns a value of type `T` that depends on [states].
+  ///
+  /// Widgets like [TextButton] and [ElevatedButton] apply this method to their
+  /// current [WidgetState]s to compute colors and other visual parameters
+  /// at build time.
+  T resolve(Set<WidgetState> states);
 }
 
 class _LerpProperties<T> implements WidgetStateProperty<T?> {
@@ -750,7 +756,7 @@ class _WidgetStatePropertyWith<T> implements WidgetStateProperty<T> {
 /// Example:
 ///
 /// ```dart
-/// WidgetStateProperty.map<Color?>(<WidgetStateMapKey, Color?>{
+/// WidgetStateProperty<Color?>.map(<WidgetStateMapKey, Color?>{
 ///   WidgetState.error & WidgetState.selected: Colors.red,
 ///   WidgetState.selected & ~WidgetState.focused: Colors.blueAccent,
 ///   WidgetState.hovered | WidgetState.focused: Colors.blue,
@@ -778,7 +784,7 @@ class _WidgetStatePropertyWith<T> implements WidgetStateProperty<T> {
 /// ```dart
 /// final WidgetStateMapKey selectedError = WidgetState.selected & WidgetState.error;
 ///
-/// final WidgetStateProperty<Color> color = WidgetStateProperty.map<Color>(<WidgetStateMapKey, Color>{
+/// final WidgetStateProperty<Color> color = WidgetStateProperty<Color>.map(<WidgetStateMapKey, Color>{
 ///   selectedError & WidgetState.hovered: Colors.redAccent,
 ///   selectedError: Colors.red,
 ///   WidgetState.disabled: Colors.grey,
@@ -824,7 +830,7 @@ class _WidgetStateMapper<T> implements WidgetStateProperty<T> {
     assert(
       null is T,
       '$errorMessage\n'
-      'Consider using "WidgetStateProperty.map<$T?>()", '
+      'Consider using "WidgetStateProperty<$T?>.map()", '
       'or adding the "WidgetState.any" key to this map.',
     );
 
