@@ -1373,18 +1373,19 @@ void main() {
     });
   });
 
-  testWidgets('Get the page value before the content dimension is determined,do not throw an assertion and return null', (WidgetTester tester) async {
+  testWidgets('Get the page value before the content dimension is determined,do not throw an assertion and return null',
+      (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/146986.
     final PageController controller = PageController();
     addTearDown(controller.dispose);
-    double? currentPage;
     await tester.pumpWidget(MaterialApp(
-      home: Scaffold(
-        body: PageView(
+      home: Material(
+        child: PageView(
           controller: controller,
           children: <Widget>[
             Builder(
               builder: (BuildContext context) {
-                currentPage = controller.hasClients ? controller.page ?? -1.0 : -2.0;
+                final double currentPage = controller.hasClients ? controller.page ?? -1.0 : -2.0;
                 return Center(child: Text(currentPage.toString()));
               },
             ),
@@ -1392,6 +1393,6 @@ void main() {
         ),
       ),
     ));
-    expect(currentPage, -1.0);
+    expect(find.text('-1.0'), findsOneWidget);
   });
 }
