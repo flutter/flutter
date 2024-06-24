@@ -293,7 +293,7 @@ class CupertinoSwitch extends StatefulWidget {
   /// Since a [CupertinoSwitch] has no track outline by default, this parameter
   /// is set only if [trackOutlineColor] is provided.
   ///
-  /// Defaults to 2.0.
+  /// Defaults to 2.0 if a [trackOutlineColor] is provided.
   final WidgetStateProperty<double?>? trackOutlineWidth;
 
   /// The icon to use on the thumb of this switch.
@@ -1120,8 +1120,7 @@ class _SwitchPainter extends ToggleablePainter {
     }
 
     // The thumb contracts slightly during the animation.
-    final double inset = thumbOffset == null ? 0 : 1.0 - (currentValue - thumbOffset!).abs() * 2.0;
-    final Size thumbSize = Size(uncontractedThumbSize!.width - inset, uncontractedThumbSize.height - inset);
+    final Size thumbSize = Size(uncontractedThumbSize!.width, uncontractedThumbSize.height);
 
     final double colorValue = _colorAnimation!.value;
     final Color trackColor = Color.lerp(inactiveTrackColor, activeTrackColor, position.value)!;
@@ -1220,7 +1219,6 @@ class _SwitchPainter extends ToggleablePainter {
       thumbErrorListener,
       thumbIcon,
       thumbSize,
-      inset,
     );
   }
 
@@ -1287,15 +1285,14 @@ class _SwitchPainter extends ToggleablePainter {
   }
 
   void _paintThumbWith(
-    Offset thumbPaintOffset,
-    Canvas canvas,
-    double currentValue,
-    Color thumbColor,
-    ImageProvider? thumbImage,
-    ImageErrorListener? thumbErrorListener,
-    Icon? thumbIcon,
-    Size thumbSize,
-    double inset,
+      Offset thumbPaintOffset,
+      Canvas canvas,
+      double currentValue,
+      Color thumbColor,
+      ImageProvider? thumbImage,
+      ImageErrorListener? thumbErrorListener,
+      Icon? thumbIcon,
+      Size thumbSize,
     ) {
     try {
       _isPainting = true;
