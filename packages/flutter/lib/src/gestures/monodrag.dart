@@ -99,7 +99,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   /// no difference in behavior between the two settings.
   ///
   /// For more information about the gesture arena:
-  /// https://flutter.dev/docs/development/ui/advanced/gestures#gesture-disambiguation
+  /// https://docs.flutter.dev/ui/interactivity/gestures#gesture-disambiguation
   ///
   /// By default, the drag start behavior is [DragStartBehavior.start].
   ///
@@ -146,7 +146,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   ///
   /// See also:
   ///
-  ///  * [allowedButtonsFilter], which decides which button will be allowed.
+  ///  * `allowedButtonsFilter`, which decides which button will be allowed.
   ///  * [DragDownDetails], which is passed as an argument to this callback.
   GestureDragDownCallback? onDown;
 
@@ -161,7 +161,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   ///
   /// See also:
   ///
-  ///  * [allowedButtonsFilter], which decides which button will be allowed.
+  ///  * `allowedButtonsFilter`, which decides which button will be allowed.
   ///  * [DragStartDetails], which is passed as an argument to this callback.
   GestureDragStartCallback? onStart;
 
@@ -183,7 +183,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   ///
   /// See also:
   ///
-  ///  * [allowedButtonsFilter], which decides which button will be allowed.
+  ///  * `allowedButtonsFilter`, which decides which button will be allowed.
   ///  * [DragUpdateDetails], which is passed as an argument to this callback.
   GestureDragUpdateCallback? onUpdate;
 
@@ -206,7 +206,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   ///
   /// See also:
   ///
-  ///  * [allowedButtonsFilter], which decides which button will be allowed.
+  ///  * `allowedButtonsFilter`, which decides which button will be allowed.
   ///  * [DragEndDetails], which is passed as an argument to this callback.
   GestureDragEndCallback? onEnd;
 
@@ -214,7 +214,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   ///
   /// See also:
   ///
-  ///  * [allowedButtonsFilter], which decides which button will be allowed.
+  ///  * `allowedButtonsFilter`, which decides which button will be allowed.
   GestureDragCancelCallback? onCancel;
 
   /// The minimum distance an input pointer drag must have moved

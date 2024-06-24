@@ -765,7 +765,7 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
   /// no difference in behavior between the two settings.
   ///
   /// For more information about the gesture arena:
-  /// https://flutter.dev/docs/development/ui/advanced/gestures#gesture-disambiguation
+  /// https://docs.flutter.dev/ui/interactivity/gestures#gesture-disambiguation
   ///
   /// By default, the drag start behavior is [DragStartBehavior.start].
   ///

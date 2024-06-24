@@ -26,8 +26,7 @@ dart fix --compare-to-golden
 For more documentation about Data Driven Fixes, see
 https://dart.dev/go/data-driven-fixes#test-folder.
 
-To learn more about how fixes are authored in package:flutter, see
-https://github.com/flutter/flutter/wiki/Data-driven-Fixes
+To learn more about how fixes are authored in package:flutter, see [Data driven Fixes](../../../../docs/contributing/Data-driven-Fixes.md).
 
 ## When making structural changes to this directory
 
