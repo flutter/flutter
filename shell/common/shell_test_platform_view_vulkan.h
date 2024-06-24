@@ -11,6 +11,9 @@
 #include "flutter/vulkan/vulkan_application.h"
 #include "flutter/vulkan/vulkan_device.h"
 #include "flutter/vulkan/vulkan_skia_proc_table.h"
+#include "third_party/skia/include/gpu/vk/VulkanBackendContext.h"
+#include "third_party/skia/include/gpu/vk/VulkanMemoryAllocator.h"
+#include "third_party/skia/include/gpu/vk/VulkanTypes.h"
 
 namespace flutter {
 namespace testing {
@@ -60,7 +63,7 @@ class ShellTestPlatformViewVulkan : public ShellTestPlatformView {
     sk_sp<GrDirectContext> context_;
 
     bool CreateSkiaGrContext();
-    bool CreateSkiaBackendContext(GrVkBackendContext*,
+    bool CreateSkiaBackendContext(skgpu::VulkanBackendContext*,
                                   VkPhysicalDeviceFeatures*);
 
     FML_DISALLOW_COPY_AND_ASSIGN(OffScreenSurface);

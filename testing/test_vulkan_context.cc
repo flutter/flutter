@@ -18,6 +18,7 @@
 #include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/gpu/GrDirectContext.h"
 #include "third_party/skia/include/gpu/ganesh/vk/GrVkDirectContext.h"
+#include "third_party/skia/include/gpu/vk/VulkanBackendContext.h"
 #include "third_party/skia/include/gpu/vk/VulkanExtensions.h"
 #include "vulkan/vulkan_core.h"
 
@@ -90,7 +91,7 @@ TestVulkanContext::TestVulkanContext() {
 
   skgpu::VulkanExtensions extensions;
 
-  GrVkBackendContext backend_context = {};
+  skgpu::VulkanBackendContext backend_context = {};
   backend_context.fInstance = application_->GetInstance();
   backend_context.fPhysicalDevice = device_->GetPhysicalDeviceHandle();
   backend_context.fDevice = device_->GetHandle();
