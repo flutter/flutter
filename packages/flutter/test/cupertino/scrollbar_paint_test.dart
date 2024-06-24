@@ -82,20 +82,19 @@ void main() {
 
     expect(find.byType(CupertinoScrollbar), paints..rrect(
       color: _kScrollbarColor,
-      rrect: RRect.fromRectAndRadius(
+      rrect:  RRect.fromRectAndRadius(
         const Rect.fromLTWH(
           800.0 - 3 - 3, // Screen width - margin - thickness.
-          44 + 20 + 3.0, // nav bar height + top margin
+          3.0, //top margin
           3, // Thickness.
           // Fraction visible * (viewport size - padding - margin)
           // where Fraction visible = (viewport size - padding) / content size
-          (600.0 - 34 - 44 - 20) / 4000.0 * (600.0 - 2 * 3 - 34 - 44 - 20),
+          (600.0 - 2*3 - 4) / 4000.0 * (600.0 - 2 * 3 - 4),
         ),
         _kScrollbarRadius,
       ),
     ));
   });
-
   testWidgets("should not paint when there isn't enough space", (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
