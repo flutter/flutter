@@ -4329,6 +4329,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     if (_properties.header != null) {
       config.isHeader = _properties.header!;
     }
+    if (_properties.headingLevel != null) {
+      config.headingLevel = _properties.headingLevel!;
+    }
     if (_properties.textField != null) {
       config.isTextField = _properties.textField!;
     }
@@ -4467,6 +4470,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     if (_properties.onDidLoseAccessibilityFocus != null) {
       config.onDidLoseAccessibilityFocus = _performDidLoseAccessibilityFocus;
     }
+    if (_properties.onFocus != null) {
+      config.onFocus = _performFocus;
+    }
     if (_properties.customSemanticsActions != null) {
       config.customSemanticsActions = _properties.customSemanticsActions!;
     }
@@ -4550,6 +4556,10 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
 
   void _performDidLoseAccessibilityFocus() {
     _properties.onDidLoseAccessibilityFocus?.call();
+  }
+
+  void _performFocus() {
+    _properties.onFocus?.call();
   }
 }
 

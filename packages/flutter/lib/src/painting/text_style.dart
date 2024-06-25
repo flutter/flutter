@@ -8,6 +8,7 @@ import 'dart:ui' as ui show
   Shadow,
   StrutStyle,
   TextStyle,
+  kTextHeightNone,
   lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -458,8 +459,8 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 ///  * [TextSpan], the class that wraps a [TextStyle] for the purposes of
 ///    passing it to a [RichText].
 ///  * [TextStyle](https://api.flutter.dev/flutter/dart-ui/TextStyle-class.html), the class in the [dart:ui] library.
-///  * Cookbook: [Use a custom font](https://flutter.dev/docs/cookbook/design/fonts)
-///  * Cookbook: [Use themes to share colors and font styles](https://flutter.dev/docs/cookbook/design/themes)
+///  * Cookbook: [Use a custom font](https://docs.flutter.dev/cookbook/design/fonts)
+///  * Cookbook: [Use themes to share colors and font styles](https://docs.flutter.dev/cookbook/design/themes)
 @immutable
 class TextStyle with Diagnosticable {
   /// Creates a text style.
@@ -640,14 +641,13 @@ class TextStyle with Diagnosticable {
 
   /// The height of this text span, as a multiple of the font size.
   ///
-  /// When [height] is null or omitted, the line height will be determined
-  /// by the font's metrics directly, which may differ from the fontSize.
-  /// When [height] is non-null, the line height of the span of text will be a
-  /// multiple of [fontSize] and be exactly `fontSize * height` logical pixels
-  /// tall.
+  /// When [height] is [kTextHeightNone], the line height will be determined by
+  /// the font's metrics directly, which may differ from the fontSize. Otherwise
+  /// the line height of the span of text will be a multiple of [fontSize],
+  /// and be exactly `fontSize * height` logical pixels tall.
   ///
-  /// For most fonts, setting [height] to 1.0 is not the same as omitting or
-  /// setting height to null because the [fontSize] sets the height of the EM-square,
+  /// For most fonts, setting [height] to 1.0 is not the same as setting height
+  /// to [kTextHeightNone] because the [fontSize] sets the height of the EM-square,
   /// which is different than the font provided metrics for line height. The
   /// following diagram illustrates the difference between the font-metrics
   /// defined line height and the line height produced with `height: 1.0`
@@ -954,7 +954,8 @@ class TextStyle with Diagnosticable {
   /// [TextStyle] with a [FontWeight.w300].
   ///
   /// If the underlying values are null, then the corresponding factors and/or
-  /// deltas must not be specified.
+  /// deltas must not be specified. Additionally, if [height] is [kTextHeightNone]
+  /// it will not be modified by this method.
   ///
   /// If [foreground] is specified on this object, then applying [color] here
   /// will have no effect and if [background] is specified on this object, then
@@ -1014,7 +1015,7 @@ class TextStyle with Diagnosticable {
       letterSpacing: letterSpacing == null ? null : letterSpacing! * letterSpacingFactor + letterSpacingDelta,
       wordSpacing: wordSpacing == null ? null : wordSpacing! * wordSpacingFactor + wordSpacingDelta,
       textBaseline: textBaseline ?? this.textBaseline,
-      height: height == null ? null : height! * heightFactor + heightDelta,
+      height: (height == null || height == ui.kTextHeightNone) ? height : height! * heightFactor + heightDelta,
       leadingDistribution: leadingDistribution ?? this.leadingDistribution,
       locale: locale ?? this.locale,
       foreground: foreground,

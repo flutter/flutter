@@ -5,7 +5,6 @@
 // See also dev/automated_tests/flutter_test/flutter_gold_test.dart
 
 import 'dart:convert';
-import 'dart:ffi' show Abi;
 import 'dart:io' hide Directory;
 
 import 'package:file/file.dart';
@@ -493,13 +492,12 @@ void main() {
          process: process,
          platform: platform,
          httpClient: fakeHttpClient,
-         abi: Abi.linuxX64,
          log: (String message) => fail('skia gold client printed unexpected output: "$message"'),
        );
 
        expect(
          skiaClient.getTraceID('flutter.golden.1'),
-         equals('d8867d66b8f0be8d0c31598d8370f5dd'),
+         equals('ae18c7a6aa48e0685525dfe8fdf79003'),
        );
      });
 
@@ -527,13 +525,12 @@ void main() {
          process: process,
          platform: platform,
          httpClient: fakeHttpClient,
-         abi: Abi.linuxX64,
          log: (String message) => fail('skia gold client printed unexpected output: "$message"'),
        );
 
        expect(
          skiaClient.getTraceID('flutter.golden.1'),
-         equals('febd0e8ef6512c2a82c964b2a9e60012'),
+         equals('e9d5c296c48e7126808520e9cc191243'),
        );
      });
 
@@ -556,12 +553,11 @@ void main() {
         process: process,
         platform: platform,
         httpClient: fakeHttpClient,
-        abi: Abi.linuxX64,
         log: (String message) => fail('skia gold client printed unexpected output: "$message"'),
       );
       expect(
         skiaClient.getTraceID('flutter.golden.1'),
-        equals('2e3d3f41cb4470748fa1c941f7762823'),
+        equals('9968695b9ae78cdb77cbb2be621ca2d6'),
       );
     });
 
@@ -858,6 +854,8 @@ void main() {
           goldens: fakeSkiaClient,
           log: (String message) => fail('skia gold client printed unexpected output: "$message"'),
           fs: fs,
+          process: FakeProcessManager(),
+          httpClient: FakeHttpClient(),
         );
         expect(fakeSkiaClient.initCalls, 0);
       });
@@ -944,6 +942,8 @@ void main() {
           goldens: fakeSkiaClient,
           log: (String message) => fail('skia gold client printed unexpected output: "$message"'),
           fs: fs,
+          process: FakeProcessManager(),
+          httpClient: FakeHttpClient(),
         );
         expect(fakeSkiaClient.tryInitCalls, 0);
       });
@@ -1047,6 +1047,8 @@ void main() {
           baseDirectory: fakeDirectory,
           log: (String message) => fail('skia gold client printed unexpected output: "$message"'),
           fs: fs,
+          process: FakeProcessManager(),
+          httpClient: FakeHttpClient(),
         );
         expect(comparator1.runtimeType, FlutterSkippingFileComparator);
 
@@ -1058,6 +1060,8 @@ void main() {
           baseDirectory: fakeDirectory,
           log: (String message) => fail('skia gold client printed unexpected output: "$message"'),
           fs: fs,
+          process: FakeProcessManager(),
+          httpClient: FakeHttpClient(),
         );
         expect(comparator2.runtimeType, FlutterSkippingFileComparator);
 
@@ -1069,6 +1073,8 @@ void main() {
           baseDirectory: fakeDirectory,
           log: (String message) => fail('skia gold client printed unexpected output: "$message"'),
           fs: fs,
+          process: FakeProcessManager(),
+          httpClient: FakeHttpClient(),
         );
         expect(comparator3.runtimeType, FlutterSkippingFileComparator);
 

@@ -241,7 +241,7 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
   }
 
   void _handleDragEnd(DragEndDetails details) {
-    if (_controller!.isAnimating || _controller!.status == AnimationStatus.completed) {
+    if (!_controller!.isDismissed) {
       return;
     }
 
@@ -254,9 +254,7 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
   }
 
   void _toggleFrontLayer() {
-    final AnimationStatus status = _controller!.status;
-    final bool isOpen = status == AnimationStatus.completed || status == AnimationStatus.forward;
-    _controller!.fling(velocity: isOpen ? -2.0 : 2.0);
+    _controller!.fling(velocity: _controller!.isForwardOrCompleted ? -2.0 : 2.0);
   }
 
   Widget _buildStack(BuildContext context, BoxConstraints constraints) {
@@ -293,7 +291,7 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
                 AnimationStatus.dismissed,
                 controller: _controller,
                 child: Visibility(
-                  visible: _controller!.status != AnimationStatus.completed,
+                  visible: !_controller!.isCompleted,
                   maintainState: true,
                   child: widget.backLayer!,
                 ),

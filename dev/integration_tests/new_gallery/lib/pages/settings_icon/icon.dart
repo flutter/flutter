@@ -34,12 +34,12 @@ class _SettingsIconPainter extends CustomPainter {
   ///
   /// The icon is aligned to the bottom-start corner.
   void _computeCenterAndScaling(Size size) {
+    _scaling = min(size.width / unitWidth, size.height / unitHeight);
     final double dx = switch (Directionality.of(context)) {
       TextDirection.rtl => size.width - unitWidth * _scaling / 2,
       TextDirection.ltr => unitWidth * _scaling / 2,
     };
     _center = Offset(dx, size.height - unitHeight * _scaling / 2);
-    _scaling = min(size.width / unitWidth, size.height / unitHeight);
   }
 
   /// Transforms an offset in relative units into an offset in logical pixels.

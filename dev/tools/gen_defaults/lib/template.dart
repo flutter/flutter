@@ -69,7 +69,7 @@ abstract class TokenTemplate {
   /// If the file already contains a generated text block matching the
   /// [blockName], it will be replaced by the [generate] output. Otherwise
   /// the content will just be appended to the end of the file.
-  Future<void> updateFile() async {
+  void updateFile() {
     final String contents = File(fileName).readAsStringSync();
     final String beginComment = '$beginGeneratedComment - $blockName\n';
     final String endComment = '$endGeneratedComment - $blockName\n';

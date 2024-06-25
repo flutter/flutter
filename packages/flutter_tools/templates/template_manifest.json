@@ -337,6 +337,7 @@
         "templates/plugin_cocoapods/ios-objc.tmpl/Classes/pluginClass.m.tmpl",
         "templates/plugin_cocoapods/ios-swift.tmpl/Classes/pluginClass.swift.tmpl",
         "templates/plugin_cocoapods/ios.tmpl/Assets/.gitkeep",
+        "templates/plugin_cocoapods/ios.tmpl/Resources/PrivacyInfo.xcprivacy",
         "templates/plugin_cocoapods/macos.tmpl/Classes/pluginClass.swift.tmpl",
 
         "templates/plugin_swift_package_manager/ios-objc.tmpl/projectName.tmpl/Sources/projectName.tmpl/include/projectName.tmpl/pluginClass.h.tmpl",
@@ -344,7 +345,7 @@
         "templates/plugin_swift_package_manager/ios-objc.tmpl/projectName.tmpl/Package.swift.tmpl",
         "templates/plugin_swift_package_manager/ios-swift.tmpl/projectName.tmpl/Sources/projectName.tmpl/pluginClass.swift.tmpl",
         "templates/plugin_swift_package_manager/ios-swift.tmpl/projectName.tmpl/Package.swift.tmpl",
-        "templates/plugin_swift_package_manager/ios.tmpl/projectName.tmpl/Sources/projectName.tmpl/Resources/.gitkeep",
+        "templates/plugin_swift_package_manager/ios.tmpl/projectName.tmpl/Sources/projectName.tmpl/PrivacyInfo.xcprivacy",
         "templates/plugin_swift_package_manager/macos.tmpl/projectName.tmpl/Sources/projectName.tmpl/Resources/.gitkeep",
         "templates/plugin_swift_package_manager/macos.tmpl/projectName.tmpl/Sources/projectName.tmpl/pluginClass.swift.tmpl",
         "templates/plugin_swift_package_manager/macos.tmpl/projectName.tmpl/Package.swift.tmpl",

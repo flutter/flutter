@@ -729,7 +729,9 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
        _expands = expands,
        _material3 = material3;
 
-  static const double subtextGap = 8.0;
+  // TODO(bleroux): consider defining this value as a Material token and making it
+  // configurable by InputDecorationTheme.
+  double get subtextGap => material3 ? 4.0 : 8.0;
 
   RenderBox? get icon => childForSlot(_DecorationSlot.icon);
   RenderBox? get input => childForSlot(_DecorationSlot.input);
@@ -2162,7 +2164,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         hintText,
         style: hintStyle,
         textDirection: decoration.hintTextDirection,
-        overflow: hintStyle.overflow ?? TextOverflow.ellipsis,
+        overflow: hintStyle.overflow ?? (decoration.hintMaxLines == null ? null : TextOverflow.ellipsis),
         textAlign: textAlign,
         maxLines: decoration.hintMaxLines,
       ),
@@ -2515,10 +2517,9 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 ///
 /// {@tool dartpad}
 /// This sample shows how to style a `TextField` with a prefixIcon that changes color
-/// based on the `MaterialState`. The color defaults to gray, be blue while focused
-/// and red if in an error state.
+/// based on the `MaterialState`. The color defaults to gray and is green while focused.
 ///
-/// ** See code in examples/api/lib/material/input_decorator/input_decoration.material_state.0.dart **
+/// ** See code in examples/api/lib/material/input_decorator/input_decoration.widget_state.0.dart **
 /// {@end-tool}
 ///
 /// {@tool dartpad}
@@ -2526,7 +2527,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 /// based on the `MaterialState` through the use of `ThemeData`. The color defaults
 /// to gray, be blue while focused and red if in an error state.
 ///
-/// ** See code in examples/api/lib/material/input_decorator/input_decoration.material_state.1.dart **
+/// ** See code in examples/api/lib/material/input_decorator/input_decoration.widget_state.1.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -4568,7 +4569,7 @@ class _InputDecoratorDefaultsM2 extends InputDecorationTheme {
 
   @override
   TextStyle? get helperStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
-    final ThemeData themeData= Theme.of(context);
+    final ThemeData themeData = Theme.of(context);
     if (states.contains(MaterialState.disabled)) {
       return themeData.textTheme.bodySmall!.copyWith(color: Colors.transparent);
     }
@@ -4578,7 +4579,7 @@ class _InputDecoratorDefaultsM2 extends InputDecorationTheme {
 
   @override
   TextStyle? get errorStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
-    final ThemeData themeData= Theme.of(context);
+    final ThemeData themeData = Theme.of(context);
     if (states.contains(MaterialState.disabled)) {
       return themeData.textTheme.bodySmall!.copyWith(color: Colors.transparent);
     }
@@ -4627,6 +4628,9 @@ class _InputDecoratorDefaultsM2 extends InputDecorationTheme {
   Color? get suffixIconColor => MaterialStateColor.resolveWith((Set<MaterialState> states) {
     if (states.contains(MaterialState.disabled) && !states.contains(MaterialState.focused)) {
       return Theme.of(context).disabledColor;
+    }
+    if (states.contains(MaterialState.error)) {
+      return Theme.of(context).colorScheme.error;
     }
     if (states.contains(MaterialState.focused)) {
       return Theme.of(context).colorScheme.primary;
@@ -4731,6 +4735,9 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
 
   @override
   Color? get prefixIconColor => MaterialStateColor.resolveWith((Set<MaterialState> states) {
+    if (states.contains(MaterialState.disabled)) {
+      return _colors.onSurface.withOpacity(0.38);
+    }
     return _colors.onSurfaceVariant;
   });
 
@@ -4740,6 +4747,9 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
       return _colors.onSurface.withOpacity(0.38);
     }
     if (states.contains(MaterialState.error)) {
+      if (states.contains(MaterialState.hovered)) {
+        return _colors.onErrorContainer;
+      }
       return _colors.error;
     }
     return _colors.onSurfaceVariant;

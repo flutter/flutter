@@ -15,7 +15,6 @@ import 'color_scheme.dart';
 import 'colors.dart';
 import 'debug.dart';
 import 'desktop_text_selection.dart';
-import 'feedback.dart';
 import 'input_decorator.dart';
 import 'magnifier.dart';
 import 'material_localizations.dart';
@@ -209,10 +208,10 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
 ///    you are implementing an entirely different design language, such as
 ///    Cupertino.
 ///  * <https://material.io/design/components/text-fields.html>
-///  * Cookbook: [Create and style a text field](https://flutter.dev/docs/cookbook/forms/text-input)
-///  * Cookbook: [Handle changes to a text field](https://flutter.dev/docs/cookbook/forms/text-field-changes)
-///  * Cookbook: [Retrieve the value of a text field](https://flutter.dev/docs/cookbook/forms/retrieve-input)
-///  * Cookbook: [Focus and text fields](https://flutter.dev/docs/cookbook/forms/focus)
+///  * Cookbook: [Create and style a text field](https://docs.flutter.dev/cookbook/forms/text-input)
+///  * Cookbook: [Handle changes to a text field](https://docs.flutter.dev/cookbook/forms/text-field-changes)
+///  * Cookbook: [Retrieve the value of a text field](https://docs.flutter.dev/cookbook/forms/retrieve-input)
+///  * Cookbook: [Focus and text fields](https://docs.flutter.dev/cookbook/forms/focus)
 class TextField extends StatefulWidget {
   /// Creates a Material Design text field.
   ///
@@ -260,6 +259,7 @@ class TextField extends StatefulWidget {
   ///    characters" and how it may differ from the intuitive meaning.
   const TextField({
     super.key,
+    this.groupId = EditableText,
     this.controller,
     this.focusNode,
     this.undoController,
@@ -368,6 +368,9 @@ class TextField extends StatefulWidget {
   /// ** See code in examples/api/lib/widgets/text_magnifier/text_magnifier.0.dart **
   /// {@end-tool}
   final TextMagnifierConfiguration? magnifierConfiguration;
+
+  /// {@macro flutter.widgets.editableText.groupId}
+  final Object groupId;
 
   /// Controls the text being edited.
   ///
@@ -1500,6 +1503,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
           onEditingComplete: widget.onEditingComplete,
           onSubmitted: widget.onSubmitted,
           onAppPrivateCommand: widget.onAppPrivateCommand,
+          groupId: widget.groupId,
           onSelectionHandleTapped: _handleSelectionHandleTapped,
           onTapOutside: widget.onTapOutside,
           inputFormatters: formatters,

@@ -581,7 +581,9 @@ class FlutterVmService {
       );
       // Do nothing, since the tool is already subscribed.
     }
+
     final Future<void> onRunnable = service.onIsolateEvent.firstWhere((vm_service.Event event) {
+      _logger.printTrace('runInView VM service onIsolateEvent listener received $event');
       return event.kind == vm_service.EventKind.kIsolateRunnable;
     });
     _logger.printTrace('Calling $kRunInViewMethod...');
@@ -987,6 +989,9 @@ class FlutterVmService {
         }
       }
       return await extensionAdded.future;
+    } on vm_service.RPCError {
+      // Translate this exception into something the outer layer understands
+      throw VmServiceDisappearedException();
     } finally {
       await isolateEvents.cancel();
       try {

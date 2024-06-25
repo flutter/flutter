@@ -154,6 +154,7 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   }) : _platformDispatcher = platformDispatcher {
     _updateViewsAndDisplays();
     _platformDispatcher.onMetricsChanged = _handleMetricsChanged;
+    _platformDispatcher.onViewFocusChange = _handleViewFocusChanged;
   }
 
   /// The [PlatformDispatcher] that is wrapped by this [TestPlatformDispatcher].
@@ -176,10 +177,21 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   set onMetricsChanged(VoidCallback? callback) {
     _onMetricsChanged = callback;
   }
-
   void _handleMetricsChanged() {
     _updateViewsAndDisplays();
     _onMetricsChanged?.call();
+  }
+
+  @override
+  ViewFocusChangeCallback? get onViewFocusChange => _platformDispatcher.onViewFocusChange;
+  ViewFocusChangeCallback? _onViewFocusChange;
+  @override
+  set onViewFocusChange(ViewFocusChangeCallback? callback) {
+    _onViewFocusChange = callback;
+  }
+  void _handleViewFocusChanged(ViewFocusEvent event) {
+    _updateViewsAndDisplays();
+    _onViewFocusChange?.call(event);
   }
 
   @override

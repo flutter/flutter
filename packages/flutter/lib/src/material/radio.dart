@@ -447,6 +447,7 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin, Togg
               value: widget.value,
               groupValue: widget.groupValue,
               onChanged: widget.onChanged,
+              mouseCursor: widget.mouseCursor,
               toggleable: widget.toggleable,
               activeColor: widget.activeColor,
               focusColor: widget.focusColor,

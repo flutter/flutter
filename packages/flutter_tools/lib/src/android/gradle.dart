@@ -37,6 +37,7 @@ import 'gradle_utils.dart';
 import 'java.dart';
 import 'migrations/android_studio_java_gradle_conflict_migration.dart';
 import 'migrations/min_sdk_version_migration.dart';
+import 'migrations/multidex_removal_migration.dart';
 import 'migrations/top_level_gradle_build_file_migration.dart';
 
 /// The regex to grab variant names from printBuildVariants gradle task
@@ -313,6 +314,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
           androidStudio: _androidStudio,
           java: globals.java),
       MinSdkVersionMigration(project.android, _logger),
+      MultidexRemovalMigration(project.android, _logger),
     ];
 
     final ProjectMigration migration = ProjectMigration(migrators);

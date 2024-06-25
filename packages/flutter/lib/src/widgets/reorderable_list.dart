@@ -1162,7 +1162,7 @@ class _ReorderableItemState extends State<_ReorderableItem> {
           )
             ..addListener(rebuild)
             ..addStatusListener((AnimationStatus status) {
-              if (status == AnimationStatus.completed) {
+              if (status.isCompleted) {
                 _startOffset = _targetOffset;
                 _offsetAnimation!.dispose();
                 _offsetAnimation = null;
@@ -1380,7 +1380,7 @@ class _DragInfo extends Drag {
       duration: const Duration(milliseconds: 250),
     )
     ..addStatusListener((AnimationStatus status) {
-      if (status == AnimationStatus.dismissed) {
+      if (status.isDismissed) {
         _dropCompleted();
       }
     })

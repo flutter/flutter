@@ -111,6 +111,9 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
               'Instructions for connecting with a debugger are printed to the '
               'console once the test has started.',
       )
+      ..addFlag('fail-fast',
+        help: 'Stop running tests after the first failure.',
+      )
       ..addFlag('run-skipped',
         help: 'Run skipped tests instead of skipping them.',
       )
@@ -216,12 +219,14 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       ..addOption('reporter',
         abbr: 'r',
         help: 'Set how to print test results. If unset, value will default to either compact or expanded.',
-        allowed: <String>['compact', 'expanded', 'github', 'json'],
+        allowed: <String>['compact', 'expanded', 'failures-only', 'github', 'json', 'silent'],
         allowedHelp: <String, String>{
-          'compact':  'A single line that updates dynamically (The default reporter).',
+          'compact':  'A single line, updated continuously (the default).',
           'expanded': 'A separate line for each update. May be preferred when logging to a file or in continuous integration.',
+          'failures-only': 'A separate line for failing tests, with no output for passing tests.',
           'github':   'A custom reporter for GitHub Actions (the default reporter when running on GitHub Actions).',
           'json':     'A machine-readable format. See: https://dart.dev/go/test-docs/json_reporter.md',
+          'silent':   'A reporter with no output. May be useful when only the exit code is meaningful.'
         },
       )
       ..addOption('file-reporter',
@@ -576,6 +581,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         reporter: stringArg('reporter'),
         fileReporter: stringArg('file-reporter'),
         timeout: stringArg('timeout'),
+        failFast: boolArg('fail-fast'),
         runSkipped: boolArg('run-skipped'),
         shardIndex: shardIndex,
         totalShards: totalShards,
@@ -603,6 +609,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         reporter: stringArg('reporter'),
         fileReporter: stringArg('file-reporter'),
         timeout: stringArg('timeout'),
+        failFast: boolArg('fail-fast'),
         runSkipped: boolArg('run-skipped'),
         shardIndex: shardIndex,
         totalShards: totalShards,
@@ -688,7 +695,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     if (build != 0) {
       throwToolExit('Error: Failed to build asset bundle');
     }
-    if (_needRebuild(assetBundle.entries)) {
+    if (_needsRebuild(assetBundle.entries, flavor)) {
       await writeBundle(
         globals.fs.directory(globals.fs.path.join('build', 'unit_test_assets')),
         assetBundle.entries,
@@ -701,14 +708,25 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         projectDir: globals.fs.currentDirectory,
         buildMode: buildMode,
       );
+
+      final File cachedFlavorFile = globals.fs.file(
+        globals.fs.path.join('build', 'test_cache', 'flavor.txt'),
+      );
+      if (cachedFlavorFile.existsSync()) {
+        await cachedFlavorFile.delete();
+      }
+      if (flavor != null) {
+        cachedFlavorFile.createSync(recursive: true);
+        cachedFlavorFile.writeAsStringSync(flavor);
+      }
     }
   }
 
-  bool _needRebuild(Map<String, AssetBundleEntry> entries) {
+  bool _needsRebuild(Map<String, AssetBundleEntry> entries, String? flavor) {
     // TODO(andrewkolos): This logic might fail in the future if we change the
-    // schema of the contents of the asset manifest file and the user does not
-    // perform a `flutter clean` after upgrading.
-    // See https://github.com/flutter/flutter/issues/128563.
+    //  schema of the contents of the asset manifest file and the user does not
+    //  perform a `flutter clean` after upgrading.
+    //  See https://github.com/flutter/flutter/issues/128563.
     final File manifest = globals.fs.file(globals.fs.path.join('build', 'unit_test_assets', 'AssetManifest.bin'));
     if (!manifest.existsSync()) {
       return true;
@@ -729,6 +747,17 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         return true;
       }
     }
+
+    final File cachedFlavorFile = globals.fs.file(
+      globals.fs.path.join('build', 'test_cache', 'flavor.txt'),
+    );
+    final String? cachedFlavor = cachedFlavorFile.existsSync()
+        ? cachedFlavorFile.readAsStringSync()
+        : null;
+    if (cachedFlavor != flavor) {
+      return true;
+    }
+
     return false;
   }
 }

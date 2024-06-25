@@ -119,6 +119,13 @@ typedef MenuAnchorChildBuilder = Widget Function(
 ///
 /// ** See code in examples/api/lib/material/menu_anchor/menu_anchor.1.dart **
 /// {@end-tool}
+///
+/// {@tool dartpad}
+/// This example demonstrates a simplified cascading menu using the [MenuAnchor]
+/// widget.
+///
+/// ** See code in examples/api/lib/material/menu_anchor/menu_anchor.3.dart **
+/// {@end-tool}
 class MenuAnchor extends StatefulWidget {
   /// Creates a const [MenuAnchor].
   ///
@@ -321,8 +328,10 @@ class _MenuAnchorState extends State<MenuAnchor> {
     assert(_debugMenuInfo('Disposing of $this'));
     if (_isOpen) {
       _close(inDispose: true);
-      _parent?._removeChild(this);
     }
+
+    _parent?._removeChild(this);
+    _parent = null;
     _anchorChildren.clear();
     _menuController._detach(this);
     _internalMenuController = null;
@@ -3629,7 +3638,7 @@ bool _debugMenuInfo(String message, [Iterable<String>? details]) {
 }
 
 /// Whether [defaultTargetPlatform] is an Apple platform (Mac or iOS).
-bool get _isApple {
+bool get _isCupertino {
   switch (defaultTargetPlatform) {
     case TargetPlatform.iOS:
     case TargetPlatform.macOS:
@@ -3648,7 +3657,7 @@ bool get _isApple {
 /// render them in a particular order defined by Apple's human interface
 /// guidelines, and format them so that the modifier keys always align.
 bool get _usesSymbolicModifiers {
-  return _isApple;
+  return _isCupertino;
 }
 
 
@@ -3657,7 +3666,7 @@ bool get _platformSupportsAccelerators {
   // different set of characters to be generated, and the native menus don't
   // support accelerators anyhow, so we just disable accelerators on these
   // platforms.
-  return !_isApple;
+  return !_isCupertino;
 }
 
 // BEGIN GENERATED TOKEN PROPERTIES - Menu

@@ -731,6 +731,66 @@ void main() {
       );
     });
 
+    testWidgets('Ensure KeepAlive widget is not held onto when it no longer should be kept alive offscreen', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/138977
+      final UniqueKey checkBoxKey = UniqueKey();
+      final Widget originCell = KeepAliveOnlyWhenHovered(
+        key: checkBoxKey,
+        child: const SizedBox.square(dimension: 200),
+      );
+      const Widget otherCell = SizedBox.square(dimension: 200, child: Placeholder());
+      final ScrollController verticalController = ScrollController();
+      addTearDown(verticalController.dispose);
+      final TwoDimensionalChildListDelegate listDelegate = TwoDimensionalChildListDelegate(
+        children: <List<Widget>>[
+          <Widget>[originCell, otherCell, otherCell, otherCell, otherCell],
+          <Widget>[otherCell, otherCell, otherCell, otherCell, otherCell],
+          <Widget>[otherCell, otherCell, otherCell, otherCell, otherCell],
+          <Widget>[otherCell, otherCell, otherCell, otherCell, otherCell],
+          <Widget>[otherCell, otherCell, otherCell, otherCell, otherCell],
+        ],
+      );
+      addTearDown(listDelegate.dispose);
+
+      await tester.pumpWidget(simpleListTest(
+        delegate: listDelegate,
+        verticalDetails: ScrollableDetails.vertical(controller: verticalController),
+      ));
+      await tester.pumpAndSettle();
+      expect(find.byKey(checkBoxKey), findsOneWidget);
+
+      // Scroll away, should not be kept alive (disposed).
+      verticalController.jumpTo(verticalController.position.maxScrollExtent);
+      await tester.pump();
+      expect(find.byKey(checkBoxKey), findsNothing);
+
+      // Bring back into view
+      verticalController.jumpTo(0.0);
+      await tester.pump();
+      expect(find.byKey(checkBoxKey), findsOneWidget);
+
+      // Hover over widget to make it keep alive.
+      final TestGesture gesture = await tester.createGesture(
+        kind: PointerDeviceKind.mouse,
+      );
+      await gesture.addPointer(location: Offset.zero);
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+      await gesture.moveTo(tester.getCenter(find.byKey(checkBoxKey)));
+      await tester.pump();
+
+      // Scroll away, should be kept alive still.
+      verticalController.jumpTo(verticalController.position.maxScrollExtent);
+      await tester.pump();
+      expect(find.byKey(checkBoxKey), findsOneWidget);
+
+      // Move the pointer outside the widget bounds to trigger exit event
+      // and remove it from keep alive bucket.
+      await gesture.moveTo(const Offset(300, 300));
+      await tester.pump();
+      expect(find.byKey(checkBoxKey), findsNothing);
+    });
+
     testWidgets('list delegate will not add automatic keep alives', (WidgetTester tester) async {
       final UniqueKey checkBoxKey = UniqueKey();
       final Widget originCell = SizedBox.square(
@@ -2711,6 +2771,27 @@ void main() {
           const Rect.fromLTRB(0.0, 200.0, 200.0, 400.0),
         );
       });
+    });
+
+    testWidgets('Does not throw when no child is laid out',
+        (WidgetTester tester) async {
+      final TwoDimensionalChildBuilderDelegate delegate =
+          TwoDimensionalChildBuilderDelegate(
+        maxXIndex: 50,
+        maxYIndex: 50,
+        addAutomaticKeepAlives: false,
+        addRepaintBoundaries: false,
+        builder: (BuildContext context, ChildVicinity vicinity) {
+          if (vicinity.xIndex > 10) {
+            return const SizedBox.square(dimension: 200);
+          }
+          return null;
+        },
+      );
+      addTearDown(delegate.dispose);
+
+      await tester.pumpWidget(simpleBuilderTest(delegate: delegate));
+      expect(tester.takeException(), isNull);
     });
 
     testWidgets('correctly reorders children and wont throw assertion failure',

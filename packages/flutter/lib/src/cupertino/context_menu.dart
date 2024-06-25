@@ -502,7 +502,7 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
   // Watch for when _ContextMenuRoute is closed and return to the state where
   // the CupertinoContextMenu just behaves as a Container.
   void _routeAnimationStatusListener(AnimationStatus status) {
-    if (status != AnimationStatus.dismissed) {
+    if (!status.isDismissed) {
       return;
     }
     if (mounted) {
@@ -1125,14 +1125,14 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
     // When the scale passes the threshold, animate the sheet back in.
     if (_lastScale > _kSheetScaleThreshold) {
       _moveController.removeListener(_moveListener);
-      if (_sheetController.status != AnimationStatus.dismissed) {
+      if (!_sheetController.isDismissed) {
         _sheetController.reverse();
       }
     }
   }
 
   void _flingStatusListener(AnimationStatus status) {
-    if (status != AnimationStatus.completed) {
+    if (!status.isCompleted) {
       return;
     }
 

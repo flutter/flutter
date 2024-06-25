@@ -557,7 +557,7 @@ Future<void> verifyNoSyncAsyncStar(String workingDirectory, {int minimumMatches 
   }
   if (errors.isNotEmpty) {
     foundError(<String>[
-      '${bold}Do not use sync*/async* methods. See https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#avoid-syncasync for details.$reset',
+      '${bold}Do not use sync*/async* methods. See https://github.com/flutter/flutter/blob/main/docs/contributing/Style-guide-for-Flutter-repo.md#avoid-syncasync for details.$reset',
       ...errors,
     ]);
   }
@@ -624,7 +624,7 @@ Future<void> verifyGoldenTags(String workingDirectory, { int minimumMatches = 20
   if (errors.isNotEmpty) {
     foundError(<String>[
       ...errors,
-      '${bold}See: https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package:flutter$reset',
+      '${bold}See: https://github.com/flutter/flutter/blob/main/docs/contributing/testing/Writing-a-golden-file-test-for-package-flutter.md$reset',
     ]);
   }
 }
@@ -696,7 +696,7 @@ Future<void> verifyDeprecations(String workingDirectory, { int minimumMatches = 
             message = messageMatch.namedGroup('message');
             final String firstChar = String.fromCharCode(message!.runes.first);
             if (firstChar.toUpperCase() != firstChar) {
-              throw 'Deprecation notice should be a grammatically correct sentence and start with a capital letter; see style guide: https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo';
+              throw 'Deprecation notice should be a grammatically correct sentence and start with a capital letter; see style guide: https://github.com/flutter/flutter/blob/main/docs/contributing/Style-guide-for-Flutter-repo.md';
             }
           } else {
             message += messageMatch.namedGroup('message')!;
@@ -743,7 +743,7 @@ Future<void> verifyDeprecations(String workingDirectory, { int minimumMatches = 
   if (errors.isNotEmpty) {
     foundError(<String>[
       ...errors,
-      '${bold}See: https://github.com/flutter/flutter/wiki/Tree-hygiene#handling-breaking-changes$reset',
+      '${bold}See: https://github.com/flutter/flutter/blob/main/docs/contributing/Tree-hygiene.md#handling-breaking-changes$reset',
     ]);
   }
 }
@@ -878,7 +878,7 @@ Future<void> verifySkipTestComments(String workingDirectory) async {
   if (errors.isNotEmpty) {
     foundError(<String>[
       ...errors,
-      '\n${bold}See: https://github.com/flutter/flutter/wiki/Tree-hygiene#skipped-tests$reset',
+      '\n${bold}See: https://github.com/flutter/flutter/blob/main/docs/contributing/Tree-hygiene.md#skipped-tests$reset',
     ]);
   }
 }
@@ -1301,14 +1301,19 @@ Future<void> verifyRepositoryLinks(String workingDirectory) async {
 
   // Repos whose default branch is still 'master'
   const Set<String> repoExceptions = <String>{
+    'bdero/flutter-gpu-examples',
+    'chromium/chromium',
     'clojure/clojure',
     'dart-lang/test', // TODO(guidezpl): remove when https://github.com/dart-lang/test/issues/2209 is closed
+    'dart-lang/webdev',
     'eseidelGoogle/bezier_perf',
     'flutter/devtools', // TODO(guidezpl): remove when https://github.com/flutter/devtools/issues/7551 is closed
     'flutter/flutter_gallery_assets', // TODO(guidezpl): remove when subtask in https://github.com/flutter/flutter/issues/121564 is complete
     'flutter/flutter-intellij', // TODO(guidezpl): remove when https://github.com/flutter/flutter-intellij/issues/7342 is closed
     'flutter/platform_tests', // TODO(guidezpl): remove when subtask in https://github.com/flutter/flutter/issues/121564 is complete
+    'flutter/web_installers',
     'glfw/glfw',
+    'GoogleCloudPlatform/artifact-registry-maven-tools',
     'material-components/material-components-android', // TODO(guidezpl): remove when https://github.com/material-components/material-components-android/issues/4144 is closed
     'torvalds/linux',
     'tpn/winsdk-10',
@@ -1813,7 +1818,7 @@ Future<void> verifyNoBinaries(String workingDirectory, { Set<Hash256>? legacyBin
         'to which you need access, you should consider how to fetch it from another repository;',
         'for example, the "assets-for-api-docs" repository is used for images in API docs.',
         'To add assets to flutter_tools templates, see the instructions in the wiki:',
-        'https://github.com/flutter/flutter/wiki/Managing-template-image-assets',
+        'https://github.com/flutter/flutter/blob/main/docs/tool/Managing-template-image-assets.md',
       ]);
     }
   }
@@ -2109,9 +2114,9 @@ Future<void> verifyTabooDocumentation(String workingDirectory, { int minimumMatc
   }
   if (errors.isNotEmpty) {
     foundError(<String>[
-      '${bold}Avoid the word "simply" in documentation. See https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#use-the-passive-voice-recommend-do-not-require-never-say-things-are-simple for details.$reset',
+      '${bold}Avoid the word "simply" in documentation. See https://github.com/flutter/flutter/blob/main/docs/contributing/Style-guide-for-Flutter-repo.md#use-the-passive-voice-recommend-do-not-require-never-say-things-are-simple for details.$reset',
       '${bold}In many cases these words can be omitted without loss of generality; in other cases it may require a bit of rewording to avoid implying that the task is simple.$reset',
-      '${bold}Similarly, avoid using "note:" or the phrase "note that". See https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#avoid-empty-prose for details.$reset',
+      '${bold}Similarly, avoid using "note:" or the phrase "note that". See https://github.com/flutter/flutter/blob/main/docs/contributing/Style-guide-for-Flutter-repo.md#avoid-empty-prose for details.$reset',
       ...errors,
     ]);
   }

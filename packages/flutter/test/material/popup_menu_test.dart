@@ -9,10 +9,9 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
+import '../widgets/feedback_tester.dart';
 import '../widgets/semantics_tester.dart';
-import 'feedback_tester.dart';
 
 void main() {
   testWidgets('Navigator.push works within a PopupMenuButton', (WidgetTester tester) async {
@@ -927,6 +926,51 @@ void main() {
     expect(tester.getTopLeft(popupFinder), buttonTopLeft);
   });
 
+  testWidgets('PopupMenu positioning inside nested Navigator when useRootNavigator',
+    (WidgetTester tester) async {
+    final Key buttonKey = UniqueKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(title: const Text('Example')),
+          body: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Navigator(
+              onGenerateRoute: (RouteSettings settings) {
+                return MaterialPageRoute<dynamic>(
+                  builder: (BuildContext context) {
+                    return Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Center(
+                        child: PopupMenuButton<int>(
+                          key: buttonKey,
+                          useRootNavigator: true,
+                          itemBuilder: (_) => <PopupMenuItem<int>>[
+                            const PopupMenuItem<int>(value: 1, child: Text('Item 1')),
+                            const PopupMenuItem<int>(value: 2, child: Text('Item 2')),
+                          ],
+                          child: const Text('Show Menu'),
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Finder buttonFinder = find.byKey(buttonKey);
+    final Finder popupFinder = find.bySemanticsLabel('Popup menu');
+    await tester.tap(buttonFinder);
+    await tester.pumpAndSettle();
+
+    final Offset buttonTopLeft = tester.getTopLeft(buttonFinder);
+    expect(tester.getTopLeft(popupFinder), buttonTopLeft);
+  });
+
   testWidgets('Popup menu with RouteSettings', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
     const RouteSettings popupRoute = RouteSettings(name: '/popup');
@@ -1175,7 +1219,7 @@ void main() {
                               SemanticsFlag.isEnabled,
                               SemanticsFlag.isFocusable,
                             ],
-                            actions: <SemanticsAction>[SemanticsAction.tap],
+                            actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                             label: '1',
                             textDirection: TextDirection.ltr,
                           ),
@@ -1186,7 +1230,7 @@ void main() {
                               SemanticsFlag.isEnabled,
                               SemanticsFlag.isFocusable,
                             ],
-                            actions: <SemanticsAction>[SemanticsAction.tap],
+                            actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                             label: '2',
                             textDirection: TextDirection.ltr,
                           ),
@@ -1197,7 +1241,7 @@ void main() {
                               SemanticsFlag.isEnabled,
                               SemanticsFlag.isFocusable,
                             ],
-                            actions: <SemanticsAction>[SemanticsAction.tap],
+                            actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                             label: '3',
                             textDirection: TextDirection.ltr,
                           ),
@@ -1208,7 +1252,7 @@ void main() {
                               SemanticsFlag.isEnabled,
                               SemanticsFlag.isFocusable,
                             ],
-                            actions: <SemanticsAction>[SemanticsAction.tap],
+                            actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                             label: '4',
                             textDirection: TextDirection.ltr,
                           ),
@@ -1219,7 +1263,7 @@ void main() {
                               SemanticsFlag.isEnabled,
                               SemanticsFlag.isFocusable,
                             ],
-                            actions: <SemanticsAction>[SemanticsAction.tap],
+                            actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                             label: '5',
                             textDirection: TextDirection.ltr,
                           ),
@@ -1307,7 +1351,7 @@ void main() {
                               SemanticsFlag.isEnabled,
                               SemanticsFlag.isFocusable,
                             ],
-                            actions: <SemanticsAction>[SemanticsAction.tap],
+                            actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                             label: 'test1\ntest2',
                             textDirection: TextDirection.ltr,
                           ),
@@ -1388,7 +1432,7 @@ void main() {
                               SemanticsFlag.isEnabled,
                               SemanticsFlag.isFocusable,
                             ],
-                            actions: <SemanticsAction>[SemanticsAction.tap],
+                            actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                             label: '1',
                             textDirection: TextDirection.ltr,
                           ),
@@ -1408,7 +1452,7 @@ void main() {
                               SemanticsFlag.isEnabled,
                               SemanticsFlag.isFocusable,
                             ],
-                            actions: <SemanticsAction>[SemanticsAction.tap],
+                            actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                             label: '3',
                             textDirection: TextDirection.ltr,
                           ),
@@ -1419,7 +1463,7 @@ void main() {
                               SemanticsFlag.isEnabled,
                               SemanticsFlag.isFocusable,
                             ],
-                            actions: <SemanticsAction>[SemanticsAction.tap],
+                            actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                             label: '4',
                             textDirection: TextDirection.ltr,
                           ),
@@ -1430,7 +1474,7 @@ void main() {
                               SemanticsFlag.isEnabled,
                               SemanticsFlag.isFocusable,
                             ],
-                            actions: <SemanticsAction>[SemanticsAction.tap],
+                            actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                             label: '5',
                             textDirection: TextDirection.ltr,
                           ),
@@ -1627,6 +1671,44 @@ void main() {
     expect(tester.widget<Container>(find.widgetWithText(Container, 'Item 1')).padding, const EdgeInsets.symmetric(horizontal: 12.0));
   });
 
+  testWidgets('PopupMenu default padding', (WidgetTester tester) async {
+    final Key popupMenuButtonKey = UniqueKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: PopupMenuButton<String>(
+              key: popupMenuButtonKey,
+              child: const Text('button'),
+              onSelected: (String result) { },
+              itemBuilder: (BuildContext context) {
+                return <PopupMenuEntry<String>>[
+                   const PopupMenuItem<String>(
+                    value: '0',
+                    enabled: false,
+                    child: Text('Item 0'),
+                  ),
+                  const PopupMenuItem<String>(
+                    value: '1',
+                    child: Text('Item 1'),
+                  ),
+                ];
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Show the menu.
+    await tester.tap(find.byKey(popupMenuButtonKey));
+    await tester.pump(const Duration(milliseconds: 300));
+
+    // Check popup menu padding.
+    final SingleChildScrollView popupMenu = tester.widget<SingleChildScrollView>(find.byType(SingleChildScrollView));
+    expect(popupMenu.padding, const EdgeInsets.symmetric(vertical: 8.0));
+  });
+
   testWidgets('Material2 - PopupMenuItem default padding', (WidgetTester tester) async {
     final Key popupMenuButtonKey = UniqueKey();
     await tester.pumpWidget(
@@ -1663,6 +1745,45 @@ void main() {
 
     expect(tester.widget<Container>(find.widgetWithText(Container, 'Item 0')).padding, const EdgeInsets.symmetric(horizontal: 16.0));
     expect(tester.widget<Container>(find.widgetWithText(Container, 'Item 1')).padding, const EdgeInsets.symmetric(horizontal: 16.0));
+  });
+
+  testWidgets('Material2 - PopupMenuItem default padding', (WidgetTester tester) async {
+    final Key popupMenuButtonKey = UniqueKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: false),
+        home: Scaffold(
+          body: Center(
+            child: PopupMenuButton<String>(
+              key: popupMenuButtonKey,
+              child: const Text('button'),
+              onSelected: (String result) { },
+              itemBuilder: (BuildContext context) {
+                return <PopupMenuEntry<String>>[
+                   const PopupMenuItem<String>(
+                    value: '0',
+                    enabled: false,
+                    child: Text('Item 0'),
+                  ),
+                  const PopupMenuItem<String>(
+                    value: '1',
+                    child: Text('Item 1'),
+                  ),
+                ];
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Show the menu.
+    await tester.tap(find.byKey(popupMenuButtonKey));
+    await tester.pump(const Duration(milliseconds: 300));
+
+    // Check popup menu padding.
+    final SingleChildScrollView popupMenu = tester.widget<SingleChildScrollView>(find.byType(SingleChildScrollView));
+    expect(popupMenu.padding, const EdgeInsets.symmetric(vertical: 8.0));
   });
 
   testWidgets('PopupMenuItem custom padding', (WidgetTester tester) async {
@@ -2097,10 +2218,7 @@ void main() {
     expect(find.text('PopupMenuButton icon'), findsOneWidget);
   });
 
-  testWidgets('showMenu uses nested navigator by default',
-    // TODO(polina-c): remove when fixed https://github.com/flutter/flutter/issues/145600 [leak-tracking-opt-in]
-    experimentalLeakTesting: LeakTesting.settings.withTracked(classes: const <String>['CurvedAnimation']),
-    (WidgetTester tester) async {
+  testWidgets('showMenu uses nested navigator by default', (WidgetTester tester) async {
     final MenuObserver rootObserver = MenuObserver();
     final MenuObserver nestedObserver = MenuObserver();
 
