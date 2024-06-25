@@ -378,8 +378,7 @@ class _RadioPainter extends ToggleablePainter {
         final Paint innerPaint = Paint()
           ..color = isActive ? fillColor : _kDisabledInnerColor;
         canvas.drawCircle(center, _kInnerRadius, innerPaint);
-      }
-      else {
+      } else {
         final Paint paint = Paint();
         paint.color = isActive ? inactiveColor : _kDisabledOuterColor;
         canvas.drawCircle(center, _kOuterRadius, paint);
