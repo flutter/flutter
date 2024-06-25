@@ -2,11 +2,7 @@
 
 ## Summary
 
-- Optimize for readability.
-- Write detailed documentation.
-- Make error messages useful.
-- Never use timeouts or timers.
-- Avoid `is`, `print`, `part of`, `extension` and `_`.
+Optimize for readability. Write detailed documentation. Make error messages useful. Never use timeouts or timers. Avoid `is`, `print`, `part of`, `extension` and `_`.
 
 ## Introduction
 
@@ -31,8 +27,8 @@ understanding with new team members.
 The primary goal of these style guidelines is to improve code readability so
 that everyone, whether reading the code for the first time or
 maintaining it for years, can quickly determine what the code does.
-Secondary goals are to design systems that are simple and bug-free,
-and to avoid arguments over subjective matters.
+Secondary goals are to design systems that are simple, to increase the
+likelihood of catching bugs quickly, and to avoid arguments over subjective matters.
 
 For anything not covered by this document, check the
 [Dart style guide](https://www.dartlang.org/guides/language/effective-dart/)
@@ -52,7 +48,7 @@ interactions with the code, and that the reader is more experienced with Dart.
 flutter/flutter and flutter/engine repositories. However, we do recommend its
 use in general.)
 
-### A word on API design
+### A word on designing APIs
 
 API design is an art. Like all forms of art, one learns by practicing. The best way to get good at designing APIs is to spend a decade or more designing them, while working closely with people who are using your APIs. Ideally, one would first do this in very controlled situations, with small numbers of developers using one's APIs, before graduating to writing APIs that will be used by hundreds of thousands or even millions of developers.
 
@@ -537,7 +533,7 @@ Example:
 abstract class Picture ...
 ```
 
-You can also use "See also" links:
+You can also use "See also" links, as in:
 
 ```dart
 /// See also:
