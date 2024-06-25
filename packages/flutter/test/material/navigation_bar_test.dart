@@ -1180,6 +1180,102 @@ void main() {
     );
   });
 
+  testWidgets('safeAreaVerticalOffset changes the height of the safe area', (WidgetTester tester) async {
+    Widget buildNavigationBar({double? safeAreaVerticalOffset, double? height}) {
+      return MaterialApp(
+        home: Scaffold(
+          bottomNavigationBar: NavigationBar(
+          height: height,
+          safeAreaVerticalOffset: safeAreaVerticalOffset,
+          destinations: const <Widget>[
+            NavigationDestination(
+              icon: IconWithRandomColor(icon: Icons.ac_unit),
+              label: 'AC',
+            ),
+            NavigationDestination(
+              icon: IconWithRandomColor(icon: Icons.access_alarm),
+              label: 'Alarm',
+            ),
+          ])
+        ),
+      );
+    }
+
+    // Default height of the nav bar should be the safe area height(34.0) + the default bar height(80.0)
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(
+          padding: EdgeInsets.only(bottom: 34.0),
+        ),
+        child: buildNavigationBar(),
+      )
+    );
+
+    expect(tester.getSize(find.byType(NavigationBar)).height, 80.0 + 34.0);
+
+    // With safeAreaVerticalOffset setting to -12, the bar itset has height of 80.0,
+    // and the overall bar height is 80.0 + 34.0 - 12.0.
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(
+          padding: EdgeInsets.only(bottom: 34.0),
+        ),
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return buildNavigationBar(safeAreaVerticalOffset: -12.0);
+          }
+        ),
+      )
+    );
+
+
+    expect(tester.getSize(find.byType(NavigationBar)).height, 80.0 + 34.0 - 12.0);
+    expect(
+      tester.getSize(find.descendant(
+        of: find.byType(NavigationBar),
+        matching: find.descendant(of: find.byType(SafeArea), matching: find.byType(SizedBox).first),
+      )).height,
+      80.0,
+    );
+
+    Finder findSafeArea = find.byType(SafeArea);
+    SafeArea safeArea = tester.widget<SafeArea>(findSafeArea);
+    expect(safeArea.minimum.bottom, 34.0 - 12.0);
+
+    // With safeAreaVerticalOffset setting to -12 and the bar itset setting to 56.0,
+    // and the overall bar height is 56.0 + 34.0 - 12.0.
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(
+          padding: EdgeInsets.only(bottom: 34.0),
+        ),
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return buildNavigationBar(
+              height: 56.0,
+              safeAreaVerticalOffset: -12.0
+            );
+          }
+        ),
+      )
+    );
+
+
+    expect(tester.getSize(find.byType(NavigationBar)).height, 56.0 + 34.0 - 12.0);
+    expect(
+      tester.getSize(find.descendant(
+        of: find.byType(NavigationBar),
+        matching: find.descendant(of: find.byType(SafeArea), matching: find.byType(SizedBox).first),
+      )).height,
+      56.0,
+    );
+
+    findSafeArea = find.byType(SafeArea);
+    safeArea = tester.widget<SafeArea>(findSafeArea);
+    expect(safeArea.minimum.bottom, 34.0 - 12.0);
+  });
+
+
   group('Material 2', () {
     // These tests are only relevant for Material 2. Once Material 2
     // support is deprecated and the APIs are removed, these tests
