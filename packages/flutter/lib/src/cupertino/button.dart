@@ -16,6 +16,12 @@ const EdgeInsets _kBackgroundButtonPadding = EdgeInsets.symmetric(
   horizontal: 64.0,
 );
 
+// The relative values needed to transform a color to it's equivalent focus
+// outline color.
+const double _kCupertinoFocusColorOpacity = 0.80;
+const double _kCupertinoFocusColorBrightness = 0.69;
+const double _kCupertinoFocusColorSaturation = 0.835;
+
 /// An iOS-style button.
 ///
 /// Takes in a text or an icon that fades out and in on touch. May optionally have a
@@ -142,7 +148,9 @@ class CupertinoButton extends StatefulWidget {
   /// The color to use for the focus highlight for keyboard interactions.
   ///
   /// Defaults to a slightly transparent [color]. If [color] is null, defaults
-  /// to [CupertinoColors.activeBlue] with an opacity 0.80.
+  /// to a slightly transparent [CupertinoColors.activeBlue]. Slightly
+  /// transparent in this context means the color is used with an opacity of
+  /// 0.80, a brightness of 0.69 and a saturation of 0.835.
   final Color? focusColor;
 
   /// {@macro flutter.widgets.Focus.focusNode}
@@ -251,7 +259,7 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
   }
 
   void _onShowFocusHighlight(bool showHighlight) {
-    setState(() { 
+    setState(() {
       isFocused = showHighlight;
     });
   }
@@ -273,8 +281,10 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
 
     final Color effectiveFocusOutlineColor = widget.focusColor ??
       HSLColor
-        .fromColor((backgroundColor ?? CupertinoColors.activeBlue).withOpacity(0.80))
-        .withLightness(0.69).withSaturation(0.835)
+        .fromColor((backgroundColor ?? CupertinoColors.activeBlue)
+        .withOpacity(_kCupertinoFocusColorOpacity))
+        .withLightness(_kCupertinoFocusColorBrightness)
+        .withSaturation(_kCupertinoFocusColorSaturation)
         .toColor();
 
     final TextStyle textStyle = themeData.textTheme.textStyle.copyWith(color: foregroundColor);
