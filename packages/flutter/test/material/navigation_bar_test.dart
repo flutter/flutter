@@ -1228,7 +1228,6 @@ void main() {
       )
     );
 
-
     expect(tester.getSize(find.byType(NavigationBar)).height, 80.0 + 34.0 - 12.0);
     expect(
       tester.getSize(find.descendant(
@@ -1260,7 +1259,6 @@ void main() {
       )
     );
 
-
     expect(tester.getSize(find.byType(NavigationBar)).height, 56.0 + 34.0 - 12.0);
     expect(
       tester.getSize(find.descendant(
@@ -1274,7 +1272,6 @@ void main() {
     safeArea = tester.widget<SafeArea>(findSafeArea);
     expect(safeArea.minimum.bottom, 34.0 - 12.0);
   });
-
 
   group('Material 2', () {
     // These tests are only relevant for Material 2. Once Material 2
