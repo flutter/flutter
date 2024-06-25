@@ -90,7 +90,7 @@ class ErrorHandlingFileSystem extends ForwardingFileSystem {
       // but this should be fine since this code should never come up here.
       final bool codeCorrespondsToPathOrFileNotFound = err.osError?.errorCode == kSystemCodeCannotFindFile ||
           err.osError?.errorCode == kSystemCodePathNotFound;
-      if (!codeCorrespondsToPathOrFileNotFound|| _noExitOnFailure) {
+      if (!codeCorrespondsToPathOrFileNotFound || _noExitOnFailure) {
         rethrow;
       }
       if (file.existsSync()) {
