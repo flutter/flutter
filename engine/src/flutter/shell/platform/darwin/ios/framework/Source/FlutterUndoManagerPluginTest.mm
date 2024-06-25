@@ -27,6 +27,7 @@ FLUTTER_ASSERT_ARC
 
 @property(readonly) NSUInteger undoCount;
 @property(readonly) NSUInteger redoCount;
+@property(nonatomic, nullable) NSUndoManager* undoManager;
 
 - (instancetype)initWithUndoManager:(NSUndoManager*)undoManager
                 activeTextInputView:(TextInputViewTest*)activeTextInputView;
@@ -162,6 +163,40 @@ FLUTTER_ASSERT_ARC
                                     }];
 
   OCMVerify(never(), [self.activeTextInputView inputDelegate]);
+}
+
+- (void)testDeallocRemovesAllUndoManagerActions {
+  __weak FlutterUndoManagerPlugin* weakUndoManagerPlugin;
+  // Use a real undo manager.
+  NSUndoManager* undoManager = [[NSUndoManager alloc] init];
+  @autoreleasepool {
+    id activeTextInputView = OCMClassMock([TextInputViewTest class]);
+
+    FakeFlutterUndoManagerDelegate* undoManagerDelegate =
+        [[FakeFlutterUndoManagerDelegate alloc] initWithUndoManager:undoManager
+                                                activeTextInputView:activeTextInputView];
+
+    FlutterUndoManagerPlugin* undoManagerPlugin =
+        [[FlutterUndoManagerPlugin alloc] initWithDelegate:undoManagerDelegate];
+    weakUndoManagerPlugin = undoManagerPlugin;
+
+    FlutterMethodCall* setUndoStateCall =
+        [FlutterMethodCall methodCallWithMethodName:@"UndoManager.setUndoState"
+                                          arguments:@{@"canUndo" : @YES, @"canRedo" : @YES}];
+    [undoManagerPlugin handleMethodCall:setUndoStateCall
+                                 result:^(id _Nullable result){
+                                 }];
+    XCTAssertTrue(undoManager.canUndo);
+    XCTAssertTrue(undoManager.canRedo);
+    // Fake out the undoManager being nil, which happens when the FlutterViewController deallocs and
+    // the undo manager can't be fetched from the FlutterEngine delegate.
+    undoManagerDelegate.undoManager = nil;
+  }
+  XCTAssertNil(weakUndoManagerPlugin);
+  // Regression test for https://github.com/flutter/flutter/issues/150408.
+  // Undo manager undo and redo stack should be empty after the plugin deallocs.
+  XCTAssertFalse(undoManager.canUndo);
+  XCTAssertFalse(undoManager.canRedo);
 }
 
 @end
