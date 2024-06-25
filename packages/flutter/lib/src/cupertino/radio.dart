@@ -23,6 +23,10 @@ const double _kCupertinoFocusColorOpacity = 0.80;
 const double _kCupertinoFocusColorBrightness = 0.69;
 const double _kCupertinoFocusColorSaturation = 0.835;
 
+// Eyeballed from Apple Design Resources figma files for macOS Sonoma.
+final Color _kDisabledOuterColor = CupertinoColors.white.withOpacity(0.58);
+final Color _kDisabledInnerColor = CupertinoColors.black.withOpacity(0.25);
+
 /// A macOS-style radio button.
 ///
 /// Used to select between a number of mutually exclusive values. When one radio
@@ -302,7 +306,8 @@ class _CupertinoRadioState<T> extends State<CupertinoRadio<T>> with TickerProvid
           ..inactiveColor = effectiveInactiveColor
           ..fillColor = effectiveFillColor
           ..value = value
-          ..checkmarkStyle = widget.useCheckmarkStyle,
+          ..checkmarkStyle = widget.useCheckmarkStyle
+          ..isActive = widget.onChanged != null,
       ),
     );
   }
@@ -366,16 +371,16 @@ class _RadioPainter extends ToggleablePainter {
     } else {
       if (value ?? false) {
         final Paint outerPaint = Paint()
-          ..color = activeColor;
+          ..color = isActive ? activeColor : _kDisabledOuterColor;
         canvas.drawCircle(center, _kOuterRadius, outerPaint);
 
         final Paint innerPaint = Paint()
-          ..color = fillColor;
+          ..color = isActive ? fillColor : _kDisabledInnerColor;
         canvas.drawCircle(center, _kInnerRadius, innerPaint);
       }
       else {
         final Paint paint = Paint();
-        paint.color = inactiveColor;
+        paint.color = isActive ? inactiveColor : _kDisabledOuterColor;
         canvas.drawCircle(center, _kOuterRadius, paint);
 
         final Paint borderPaint = Paint()
@@ -385,8 +390,8 @@ class _RadioPainter extends ToggleablePainter {
         canvas.drawCircle(center, _kOuterRadius, borderPaint);
       }
     }
-    // Apply effect to darken radio button when pressed on macOS.
-    if (downPosition != null && defaultTargetPlatform == TargetPlatform.macOS) {
+    // Apply effect to darken radio button when pressed.
+    if (downPosition != null) {
       final Paint innerReactionPaint = Paint()
         ..color = CupertinoColors.black.withOpacity(0.05);
       canvas.drawCircle(center, _kOuterRadius, innerReactionPaint);
