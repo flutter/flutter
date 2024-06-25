@@ -1282,7 +1282,7 @@ abstract class FlutterCommand extends Command<void> {
     final Map<String, Object?> defineConfigJsonMap = extractDartDefineConfigJsonMap();
     final List<String> dartDefines = extractDartDefines(defineConfigJsonMap: defineConfigJsonMap);
 
-    final bool useLocalCanvasKit = !boolArg(FlutterOptions.kWebResourcesCdnFlag) || stringArg(FlutterGlobalOptions.kLocalWebSDKOption) != null;
+    final bool useLocalCanvasKit = !boolArg(FlutterOptions.kWebResourcesCdnFlag) || stringArg(FlutterGlobalOptions.kLocalWebSDKOption, global: true) != null;
 
     final String? defaultFlavor = FlutterProject.current().manifest.defaultFlavor;
     final String? cliFlavor = argParser.options.containsKey('flavor') ? stringArg('flavor') : null;

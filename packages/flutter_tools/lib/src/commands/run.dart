@@ -242,7 +242,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     }
 
     // If we are using a locally built web sdk, we should use local CanvasKit
-    if (stringArg(FlutterGlobalOptions.kLocalWebSDKOption) != null) {
+    if (stringArg(FlutterGlobalOptions.kLocalWebSDKOption, global: true) != null) {
       return true;
     }
     return false;
