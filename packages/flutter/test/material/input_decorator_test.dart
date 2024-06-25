@@ -6482,7 +6482,7 @@ void main() {
       expect(getInputRect(tester).top, 0.0);
       expect(getHintOpacity(tester), 0.0);
 
-      // The hint should appear
+      // The hint should appear.
       await tester.pumpWidget(
         buildInputDecorator(
           isEmpty: true,
@@ -6517,7 +6517,7 @@ void main() {
       expect(getInputRect(tester).top, 0.0);
       expect(getHintOpacity(tester), 0.0);
 
-      // The hint should appear
+      // The hint should appear.
       await tester.pumpWidget(
         buildInputDecorator(
           isEmpty: true,
