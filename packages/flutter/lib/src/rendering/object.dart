@@ -2187,15 +2187,16 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
 
   /// The nearest relayout boundary enclosing this render object, if known.
   ///
-  /// When not null, the relayout boundary is either this render object itself
-  /// or one of its ancestors, and all the render objects in the ancestry chain
-  /// up through that ancestor have the same [_relayoutBoundary].
-  /// Equivalently: when not null, the relayout boundary is either this render
-  /// object itself or the same as that of its parent.  (So [_relayoutBoundary]
-  /// is one of `null`, `this`, or `parent!._relayoutBoundary!`.)
+  /// When a render object is marked as needing layout, its parent may
+  /// as a result also need to be marked as needing layout.
+  /// For details, see [markNeedsLayout].
+  /// A render object where relayout does not require relayout of the parent
+  /// (because its size cannot change on relayout, or because
+  /// its parent does not use the child's size for its own layout)
+  /// is a "relayout boundary".
   ///
-  /// This is set in [layout], and consulted by [markNeedsLayout] in deciding
-  /// whether to recursively mark the parent as also needing layout.
+  /// This property is set in [layout], and consulted by [markNeedsLayout] in
+  /// deciding whether to recursively mark the parent as also needing layout.
   ///
   /// This property is initially null, and becomes null again if this
   /// render object is removed from the tree (with [dropChild]);
@@ -2203,6 +2204,13 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   /// after it was most recently added to the tree.
   /// This property can also be null while an ancestor in the tree is
   /// currently doing layout, until this render object itself does layout.
+  ///
+  /// When not null, the relayout boundary is either this render object itself
+  /// or one of its ancestors, and all the render objects in the ancestry chain
+  /// up through that ancestor have the same [_relayoutBoundary].
+  /// Equivalently: when not null, the relayout boundary is either this render
+  /// object itself or the same as that of its parent.  (So [_relayoutBoundary]
+  /// is one of `null`, `this`, or `parent!._relayoutBoundary!`.)
   RenderObject? _relayoutBoundary;
 
   /// Whether [invokeLayoutCallback] for this render object is currently running.
