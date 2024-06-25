@@ -3617,13 +3617,13 @@ SkRuntimeEffect? MakeRuntimeEffect(String program) =>
 extension SkSkRuntimeEffectExtension on SkRuntimeEffect {
   @JS('makeShader')
   external SkShader? _makeShader(JSAny uniforms);
-  SkShader? makeShader(List<Object> uniforms) =>
+  SkShader? makeShader(SkFloat32List uniforms) =>
       _makeShader(uniforms.toJSAnyShallow);
 
   @JS('makeShaderWithChildren')
   external SkShader? _makeShaderWithChildren(JSAny uniforms, JSAny children);
   SkShader? makeShaderWithChildren(
-      List<Object> uniforms, List<Object?> children) =>
+          SkFloat32List uniforms, List<Object?> children) =>
           _makeShaderWithChildren(uniforms.toJSAnyShallow,
               children.toJSAnyShallow);
 }
