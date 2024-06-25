@@ -23,7 +23,6 @@ class AlertDialogApp extends StatelessWidget {
 class AlertDialogExample extends StatelessWidget {
   const AlertDialogExample({super.key});
 
-  // This shows a CupertinoAlertDialog.
   void _showAlertDialog(BuildContext context) {
     showCupertinoDialog<void>(
       context: context,

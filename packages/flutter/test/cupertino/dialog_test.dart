@@ -19,7 +19,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
-  testWidgets('Overall looks correctly under light theme', (WidgetTester tester) async {
+  testWidgets('Overall appearance is correct for the light theme', (WidgetTester tester) async {
     await tester.pumpWidget(
       TestScaffoldApp(
         theme: const CupertinoThemeData(brightness: Brightness.light),
@@ -49,7 +49,7 @@ void main() {
     await gesture.up();
   });
 
-  testWidgets('Overall looks correctly under dark theme', (WidgetTester tester) async {
+  testWidgets('Overall appearance is correct for the dark theme', (WidgetTester tester) async {
     await tester.pumpWidget(
       TestScaffoldApp(
         theme: const CupertinoThemeData(brightness: Brightness.dark),
