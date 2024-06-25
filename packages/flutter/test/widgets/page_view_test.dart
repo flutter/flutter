@@ -1385,14 +1385,14 @@ void main() {
           children: <Widget>[
             Builder(
               builder: (BuildContext context) {
-                final double currentPage = controller.hasClients ? controller.page ?? -1.0 : -2.0;
-                return Center(child: Text(currentPage.toString()));
+                final String currentPage = controller.hasClients ? '${controller.page}' : 'not empty';
+                return Center(child: Text(currentPage));
               },
             ),
           ],
         ),
       ),
     ));
-    expect(find.text('-1.0'), findsOneWidget);
+    expect(find.text('null'), findsOneWidget);
   });
 }
