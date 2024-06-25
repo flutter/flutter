@@ -280,6 +280,9 @@ Future<void> testMain() async {
         final ByteData? rgbaData = await image.toByteData();
         expect(rgbaData, isNotNull);
         expect(rgbaData!.lengthInBytes, isNonZero);
+
+        // Make sure it isn't all zeros.
+        expect(rgbaData.buffer.asUint8List().any((int byte) => byte != 0), true);
       });
 
       test('toByteData_png', () async {

@@ -72,6 +72,24 @@ mergeInto(LibraryManager.library, {
             }
             associatedObjectsMap.delete(pointer);
             return;
+          case 'disposeSurface':
+            _surface_dispose(data.surface);
+            return;
+          case 'rasterizeImage':
+            _surface_rasterizeImageOnWorker(
+              data.surface,
+              data.image,
+              data.format,
+              data.callbackId,
+            );
+            return;
+          case 'onRasterizeComplete':
+            _surface_onRasterizeComplete(
+              data.surface,
+              data.data,
+              data.callbackId,
+            );
+            return;
           default:
             console.warn(`unrecognized skwasm message: ${skwasmMessage}`);
         }
@@ -153,6 +171,29 @@ mergeInto(LibraryManager.library, {
         pointer,
       });
     };
+    _skwasm_dispatchDisposeSurface = function(threadId, surface) {
+      PThread.pthreads[threadId].postMessage({
+        skwasmMessage: 'disposeSurface',
+        surface,
+      });
+    }
+    _skwasm_dispatchRasterizeImage = function(threadId, surface, image, format, callbackId) {
+      PThread.pthreads[threadId].postMessage({
+        skwasmMessage: 'rasterizeImage',
+        surface,
+        image,
+        format,
+        callbackId,
+      });
+    }
+    _skwasm_postRasterizeResult = function(surface, data, callbackId) {
+      postMessage({
+        skwasmMessage: 'onRasterizeComplete',
+        surface,
+        data,
+        callbackId,
+      });
+    }
   },
   skwasm_setAssociatedObjectOnThread: function () {},
   skwasm_setAssociatedObjectOnThread__deps: ['$skwasm_support_setup'],
@@ -176,5 +217,11 @@ mergeInto(LibraryManager.library, {
   skwasm_resolveAndPostImages__deps: ['$skwasm_support_setup'],
   skwasm_createGlTextureFromTextureSource: function () {},
   skwasm_createGlTextureFromTextureSource__deps: ['$skwasm_support_setup'],
+  skwasm_dispatchDisposeSurface: function() {},
+  skwasm_dispatchDisposeSurface__deps: ['$skwasm_support_setup'],
+  skwasm_dispatchRasterizeImage: function() {},
+  skwasm_dispatchRasterizeImage__deps: ['$skwasm_support_setup'],
+  skwasm_postRasterizeResult: function() {},
+  skwasm_postRasterizeResult__deps: ['$skwasm_support_setup'],
 });
   
