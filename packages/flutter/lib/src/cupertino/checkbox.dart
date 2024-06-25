@@ -17,7 +17,8 @@ const double _kCupertinoFocusColorOpacity = 0.80;
 const double _kCupertinoFocusColorBrightness = 0.69;
 const double _kCupertinoFocusColorSaturation = 0.835;
 
-// Eyeballed from Apple's Design Resources (macOS) template.
+// Eyeballed from Apple's Design Resources (macOS Sonoma) figma template:
+// https://www.figma.com/design/vmIRIt4jgAmSFvXO0SAxU2/Apple-Design-Resources---macOS-(Community)
 const Color _kDisabledCheckColor = Color.fromARGB(255, 172, 172, 172);
 
 // Eyeballed from a checkbox on a physical Macbook Pro running macOS version 14.5.
