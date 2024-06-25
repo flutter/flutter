@@ -122,7 +122,7 @@ FlutterPlatform installHook({
 /// If [testConfigFile] is specified, it must follow the conventions of test
 /// configuration files as outlined in the [flutter_test] library. By default,
 /// the test file will be launched directly.
-/// 
+///
 /// The [packageConfigUri] argument specifies the package config location for
 /// the test file being launched. This is expected to be a file URI.
 ///
