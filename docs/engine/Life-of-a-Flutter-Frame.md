@@ -18,7 +18,6 @@ Flutter does some minimal housekeeping when a frame is requested, primarily to i
 
 Once a frame is scheduled, Flutter [waits for a vsync][vsyncWaiter] from the operating system to proceed.
 
-
 ## Building the frame
 
 At the heart of Flutter's graphics workflow is the frame [pipeline][pipeline]. The pipeline is responsible for coordinating work between the UI thread, where the application code runs, and the Raster thread, where rasterization and compositing is performed. See the [threading section][engineArchThreading] of the Engine Architecture wiki for more details on threading in the engine.
@@ -41,6 +40,28 @@ Once a surface is acquired, the [LayerTree][layerTree] is rasterized to the surf
 
 The above process is repeated until the pipeline is empty.
 
+## Warm-up frame
+
+Normally, the Flutter framework begins producing a frame when it receives
+a vsync event from the operating system. However, this may not happen for
+several milliseconds after the app starts (or after a hot reload). To make
+use of the time between when the widget tree is first configured and when
+the engine requests an update, the framework schedules a _warm-up frame_
+using [PlatformDispatcher.scheduleWarmUpFrame][scheduleWarmUpFrame].
+
+A warm-up frame may never actually render (as it invokes
+[FlutterView.render][flutterViewRender] outside of the scope of
+[PlatformDispatcher.onBeginFrame][onBeginFrame] or
+[PlatformDispatcher.onDrawFrame][onDrawFrame]), but it will cause the framework
+to go through the steps of building, laying out, and painting, which can
+together take several milliseconds. Thus, when the engine requests a real frame,
+much of the work will already have been completed, and the framework can
+generate the frame with minimal additional effort.
+
+At startup, a warm-up frame can be produced before the Flutter engine has reported the
+initial view metrics using [PlatformDispatcher.onMetricsChanged][onMetricsChanged].
+As a result, the first frame can be produced with a size of zero.
+
 ## Cleaning up frame resources
 
 TODO(cbracken): write this up using [this patch](https://github.com/flutter/engine/pull/38038) as a reminder.
@@ -53,10 +74,13 @@ TODO(cbracken): write this up using [this patch](https://github.com/flutter/engi
 [handleBeginFrame]: https://api.flutter.dev/flutter/scheduler/SchedulerBinding/handleBeginFrame.html
 [layerTree]: https://github.com/flutter/engine/blob/main/flow/layers/layer_tree.h
 [onBeginFrame]: https://api.flutter.dev/flutter/dart-ui/PlatformDispatcher/onBeginFrame.html
+[onDrawFrame]: https://api.flutter.dev/flutter/dart-ui/PlatformDispatcher/onDrawFrame.html
+[onMetricsChanged]: https://api.flutter.dev/flutter/dart-ui/PlatformDispatcher/onMetricsChanged.html
 [pipeline]: https://github.com/flutter/engine/blob/main/shell/common/pipeline.h
 [rasterizer]: https://github.com/flutter/engine/blob/main/shell/common/rasterizer.h
 [renderingPipelineTalk]: https://www.youtube.com/watch?v=UUfXWzp0-DU
 [scene]: https://api.flutter.dev/flutter/dart-ui/Scene-class.html
+[scheduleWarmUpFrame]: https://api.flutter.dev/flutter/dart-ui/PlatformDispatcher/scheduleWarmUpFrame.html
 [surface]: https://github.com/flutter/engine/blob/main/flow/surface.h
 [scheduleFrame]: https://api.flutter.dev/flutter/dart-ui/PlatformDispatcher/scheduleFrame.html
 [vsyncWaiter]: https://github.com/flutter/engine/blob/main/shell/common/vsync_waiter.h
