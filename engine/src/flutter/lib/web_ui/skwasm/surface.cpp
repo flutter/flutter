@@ -5,6 +5,7 @@
 #include "surface.h"
 #include <algorithm>
 
+#include "skwasm_support.h"
 #include "third_party/skia/include/gpu/GrBackendSurface.h"
 #include "third_party/skia/include/gpu/GrDirectContext.h"
 #include "third_party/skia/include/gpu/ganesh/gl/GrGLBackendSurface.h"
@@ -34,12 +35,9 @@ Surface::Surface() {
   skwasm_syncTimeOriginForThread(_thread);
 }
 
-// Main thread only
+// Worker thread only
 void Surface::dispose() {
-  assert(emscripten_is_main_browser_thread());
-  emscripten_dispatch_to_thread(_thread, EM_FUNC_SIG_VI,
-                                reinterpret_cast<void*>(fDispose), nullptr,
-                                this);
+  delete this;
 }
 
 // Main thread only
@@ -65,9 +63,7 @@ uint32_t Surface::rasterizeImage(SkImage* image, ImageByteFormat format) {
   uint32_t callbackId = ++_currentCallbackId;
   image->ref();
 
-  emscripten_dispatch_to_thread(_thread, EM_FUNC_SIG_VIIII,
-                                reinterpret_cast<void*>(fRasterizeImage),
-                                nullptr, this, image, format, callbackId);
+  skwasm_dispatchRasterizeImage(_thread, this, image, format, callbackId);
   return callbackId;
 }
 
@@ -123,11 +119,6 @@ void Surface::_init() {
 }
 
 // Worker thread only
-void Surface::_dispose() {
-  delete this;
-}
-
-// Worker thread only
 void Surface::_resizeCanvasToFit(int width, int height) {
   if (!_surface || width > _canvasWidth || height > _canvasHeight) {
     _canvasWidth = std::max(width, _canvasWidth);
@@ -175,9 +166,10 @@ void Surface::renderPicturesOnWorker(sk_sp<SkPicture>* pictures,
   skwasm_resolveAndPostImages(this, imagePromiseArray, rasterStart, callbackId);
 }
 
-void Surface::_rasterizeImage(SkImage* image,
-                              ImageByteFormat format,
-                              uint32_t callbackId) {
+// Worker thread only
+void Surface::rasterizeImageOnWorker(SkImage* image,
+                                     ImageByteFormat format,
+                                     uint32_t callbackId) {
   // We handle PNG encoding with browser APIs so that we can omit libpng from
   // skia to save binary size.
   assert(format != ImageByteFormat::png);
@@ -192,17 +184,35 @@ void Surface::_rasterizeImage(SkImage* image,
   size_t byteSize = info.computeByteSize(bytesPerRow);
   data = SkData::MakeUninitialized(byteSize);
   uint8_t* pixels = reinterpret_cast<uint8_t*>(data->writable_data());
-  bool success = image->readPixels(_grContext.get(), image->imageInfo(), pixels,
-                                   bytesPerRow, 0, 0);
-  if (!success) {
-    printf("Failed to read pixels from image!\n");
-    data = nullptr;
-  }
-  emscripten_async_run_in_main_runtime_thread(
-      EM_FUNC_SIG_VIII, fOnRasterizeComplete, this, data.release(), callbackId);
+
+  // TODO(jacksongardner):
+  // Normally we'd just call `readPixels` on the image. However, this doesn't
+  // actually work in some cases due to a skia bug. Instead, we just draw the
+  // image to our scratch canvas and grab the pixels out directly with
+  // `glReadPixels`. Once the skia bug is fixed, we should switch back to using
+  // `SkImage::readPixels` instead.
+  // See https://g-issues.skia.org/issues/349201915
+  _resizeCanvasToFit(image->width(), image->height());
+  auto canvas = _surface->getCanvas();
+  canvas->drawColor(SK_ColorTRANSPARENT, SkBlendMode::kSrc);
+
+  // We want the pixels from the upper left corner, but glReadPixels gives us
+  // the pixels from the lower left corner. So we have to flip the image when we
+  // are drawing it to get the pixels in the desired order.
+  canvas->save();
+  canvas->scale(1, -1);
+  canvas->drawImage(image, 0, -_canvasHeight);
+  canvas->restore();
+  _grContext->flush(_surface.get());
+
+  emscripten_glReadPixels(0, 0, image->width(), image->height(), GL_RGBA,
+                          GL_UNSIGNED_BYTE, reinterpret_cast<void*>(pixels));
+
+  image->unref();
+  skwasm_postRasterizeResult(this, data.release(), callbackId);
 }
 
-void Surface::_onRasterizeComplete(SkData* data, uint32_t callbackId) {
+void Surface::onRasterizeComplete(uint32_t callbackId, SkData* data) {
   _callbackHandler(callbackId, data, __builtin_wasm_ref_null_extern());
 }
 
@@ -212,22 +222,18 @@ void Surface::onRenderComplete(uint32_t callbackId, SkwasmObject imageBitmap) {
   _callbackHandler(callbackId, nullptr, imageBitmap);
 }
 
-void Surface::fDispose(Surface* surface) {
-  surface->_dispose();
+TextureSourceWrapper::TextureSourceWrapper(unsigned long threadId,
+                                           SkwasmObject textureSource)
+    : _rasterThreadId(threadId) {
+  skwasm_setAssociatedObjectOnThread(_rasterThreadId, this, textureSource);
 }
 
-void Surface::fOnRasterizeComplete(Surface* surface,
-                                   SkData* imageData,
-                                   uint32_t callbackId) {
-  surface->_onRasterizeComplete(imageData, callbackId);
+TextureSourceWrapper::~TextureSourceWrapper() {
+  skwasm_disposeAssociatedObjectOnThread(_rasterThreadId, this);
 }
 
-void Surface::fRasterizeImage(Surface* surface,
-                              SkImage* image,
-                              ImageByteFormat format,
-                              uint32_t callbackId) {
-  surface->_rasterizeImage(image, format, callbackId);
-  image->unref();
+SkwasmObject TextureSourceWrapper::getTextureSource() {
+  return skwasm_getAssociatedObject(this);
 }
 
 SKWASM_EXPORT Surface* surface_create() {
@@ -245,6 +251,12 @@ SKWASM_EXPORT void surface_setCallbackHandler(
 }
 
 SKWASM_EXPORT void surface_destroy(Surface* surface) {
+  // Dispatch to the worker
+  skwasm_dispatchDisposeSurface(surface->getThreadId(), surface);
+}
+
+SKWASM_EXPORT void surface_dispose(Surface* surface) {
+  // This should be called directly only on the worker
   surface->dispose();
 }
 
@@ -272,10 +284,23 @@ SKWASM_EXPORT uint32_t surface_rasterizeImage(Surface* surface,
   return surface->rasterizeImage(image, format);
 }
 
+SKWASM_EXPORT void surface_rasterizeImageOnWorker(Surface* surface,
+                                                  SkImage* image,
+                                                  ImageByteFormat format,
+                                                  uint32_t callbackId) {
+  surface->rasterizeImageOnWorker(image, format, callbackId);
+}
+
 // This is used by the skwasm JS support code to call back into C++ when the
 // we finish creating the image bitmap, which is an asynchronous operation.
 SKWASM_EXPORT void surface_onRenderComplete(Surface* surface,
                                             uint32_t callbackId,
                                             SkwasmObject imageBitmap) {
-  return surface->onRenderComplete(callbackId, imageBitmap);
+  surface->onRenderComplete(callbackId, imageBitmap);
+}
+
+SKWASM_EXPORT void surface_onRasterizeComplete(Surface* surface,
+                                               SkData* data,
+                                               uint32_t callbackId) {
+  surface->onRasterizeComplete(callbackId, data);
 }
