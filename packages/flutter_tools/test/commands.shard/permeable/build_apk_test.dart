@@ -160,7 +160,7 @@ void main() {
         globals.fs.file(manifestPath).writeAsStringSync(newManifest);
       }
 
-      testUsingContext('a default build does not report an Impeller manifest setting', () async {
+      testUsingContext('a default APK build reports Impeller as disabled', () async {
         final String projectPath = await createProject(
           tempDir,
           arguments: <String>['--no-pub', '--template=app', '--platform=android']
@@ -168,27 +168,19 @@ void main() {
 
         await runBuildApkCommand(projectPath);
 
-        expect(testUsage.events, isNot(contains(
-          const TestUsageEvent(
-            'build',
-            'gradle',
-            label: 'manifest-impeller-enabled',
-            parameters: CustomDimensions(),
+        expect(
+          fakeAnalytics.sentEvents,
+          contains(
+            Event.flutterBuildInfo(
+              label: 'manifest-impeller-disabled',
+              buildType: 'android',
+            ),
           ),
-        )));
-
-        expect(testUsage.events, isNot(contains(
-          const TestUsageEvent(
-            'build',
-            'gradle',
-            label: 'manifest-impeller-disabled',
-            parameters: CustomDimensions(),
-          ),
-        )));
+        );
       }, overrides: <Type, Generator>{
+        Analytics: () => fakeAnalytics,
         AndroidBuilder: () => FakeAndroidBuilder(),
         FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
-        Usage: () => testUsage,
       });
 
       testUsingContext('EnableImpeller="true" reports an enabled event', () async {
@@ -205,27 +197,19 @@ void main() {
 
         await runBuildApkCommand(projectPath);
 
-        expect(testUsage.events, contains(
-          const TestUsageEvent(
-            'build',
-            'android',
-            label: 'manifest-impeller-enabled',
-            parameters: CustomDimensions(),
+        expect(
+          fakeAnalytics.sentEvents,
+          contains(
+            Event.flutterBuildInfo(
+              label: 'manifest-impeller-enabled',
+              buildType: 'android',
+            ),
           ),
-        ));
-
-        expect(testUsage.events, isNot(contains(
-          const TestUsageEvent(
-            'build',
-            'android',
-            label: 'manifest-impeller-disabled',
-            parameters: CustomDimensions(),
-          ),
-        )));
+        );
       }, overrides: <Type, Generator>{
+        Analytics: () => fakeAnalytics,
         AndroidBuilder: () => FakeAndroidBuilder(),
         FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
-        Usage: () => testUsage,
       });
 
       testUsingContext('EnableImpeller="false" reports an disabled event', () async {
@@ -242,27 +226,19 @@ void main() {
 
         await runBuildApkCommand(projectPath);
 
-        expect(testUsage.events, isNot(contains(
-          const TestUsageEvent(
-            'build',
-            'android',
-            label: 'manifest-impeller-enabled',
-            parameters: CustomDimensions(),
+        expect(
+          fakeAnalytics.sentEvents,
+          contains(
+            Event.flutterBuildInfo(
+              label: 'manifest-impeller-disabled',
+              buildType: 'android',
+            ),
           ),
-        )));
-
-        expect(testUsage.events, contains(
-          const TestUsageEvent(
-            'build',
-            'android',
-            label: 'manifest-impeller-disabled',
-            parameters: CustomDimensions(),
-          ),
-        ));
+        );
       }, overrides: <Type, Generator>{
+        Analytics: () => fakeAnalytics,
         AndroidBuilder: () => FakeAndroidBuilder(),
         FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
-        Usage: () => testUsage,
       });
     });
   });

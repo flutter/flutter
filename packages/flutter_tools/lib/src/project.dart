@@ -882,12 +882,14 @@ $javaGradleCompatUrl
     return AndroidEmbeddingVersionResult(AndroidEmbeddingVersion.v1, 'No `<meta-data android:name="flutterEmbedding" android:value="2"/>` in ${appManifestFile.absolute.path}');
   }
 
+  static const bool _impellerEnabledByDefault = false;
+
   /// Returns the `io.flutter.embedding.android.EnableImpeller` manifest value.
   /// 
-  /// If there is no manifest file, or the key is not present, returns `null`.
-  bool? computeImpellerEnabled() {
+  /// If there is no manifest file, or the key is not present, returns `false`.
+  bool computeImpellerEnabled() {
     if (!appManifestFile.existsSync()) {
-      return null;
+      return _impellerEnabledByDefault;
     }
     final XmlDocument document;
     try {
@@ -911,7 +913,7 @@ $javaGradleCompatUrl
         }
       }
     }
-    return null;
+    return _impellerEnabledByDefault;
   }
 }
 
