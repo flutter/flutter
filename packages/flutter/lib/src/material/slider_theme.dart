@@ -1539,6 +1539,10 @@ mixin BaseSliderTrackShape {
     // If the parentBox's size less than slider's size the trackRight will be less than trackLeft, so switch them.
     return Rect.fromLTRB(math.min(trackLeft, trackRight), trackTop, math.max(trackLeft, trackRight), trackBottom);
   }
+
+  /// Whether the track shape is rounded. This is used to determine the correct
+  /// position of the thumb in relation to the track. Defaults to false.
+  bool get isRounded => false;
 }
 
 /// A [Slider] track that's a simple rectangle.
