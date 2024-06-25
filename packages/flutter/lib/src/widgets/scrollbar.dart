@@ -1324,7 +1324,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   final GlobalKey  _scrollbarPainterKey = GlobalKey();
   bool _hoverIsActive = false;
   Drag? _thumbDrag;
-  bool _isScrollable = false;
+  bool _maxScrollExtentPermitsScrolling = false;
   ScrollHoldController? _thumbHold;
   Axis? _axis;
   final GlobalKey<RawGestureDetectorState> _gestureDetectorKey = GlobalKey<RawGestureDetectorState>();
@@ -1867,8 +1867,8 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     if (metrics.axis != _axis) {
       setState(() { _axis = metrics.axis; });
     }
-    if (_isScrollable != notification.metrics.maxScrollExtent > 0) {
-      setState(() { _isScrollable = !_isScrollable; });
+    if (_maxScrollExtentPermitsScrolling != notification.metrics.maxScrollExtent > 0.0) {
+      setState(() { _maxScrollExtentPermitsScrolling = !_maxScrollExtentPermitsScrolling; });
     }
 
     return false;
@@ -1918,7 +1918,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   // The protected RawScrollbar API methods - handleThumbPressStart,
   // handleThumbPressUpdate, handleThumbPressEnd - all depend on a
   // localPosition parameter that defines the event's location relative
-  // to the scrollbar.  Ensure that the localPosition is reported consistently,
+  // to the scrollbar. Ensure that the localPosition is reported consistently,
   // even if the source of the event is a trackpad or a stylus.
   Offset _globalToScrollbar(Offset offset) {
     final RenderBox renderBox = _scrollbarPainterKey.currentContext!.findRenderObject()! as RenderBox;

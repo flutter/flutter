@@ -3427,4 +3427,67 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
     TargetPlatform.windows,
     TargetPlatform.fuchsia,
   }));
+
+  testWidgets('Desktop trackpad, nested ListViews, no explicit scrollbars, horizontal drag succeeds', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/150342
+
+    final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
+
+    late Size childSize;
+    late StateSetter rebuildScrollViewChild;
+
+    Widget buildFrame(Axis scrollDirection) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: RawScrollbar(
+            controller: scrollController,
+            child: SingleChildScrollView(
+              controller: scrollController,
+              scrollDirection: scrollDirection,
+              child: StatefulBuilder(
+                builder: (BuildContext context, StateSetter setState) {
+                  rebuildScrollViewChild = setState;
+                  return SizedBox(width: childSize.width, height: childSize.height);
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    RawGestureDetector getScrollbarGestureDetector() {
+      return tester.widget<RawGestureDetector>(
+        find.descendant(of: find.byType(RawScrollbar), matching: find.byType(RawGestureDetector)).first
+      );
+    }
+
+    // Vertical scrollDirection
+
+    childSize = const Size(800, 600);
+    await tester.pumpWidget(buildFrame(Axis.vertical));
+    // Scrolling isn't possible, so there are no scrollbar gesture recognizers.
+    expect(getScrollbarGestureDetector().gestures.length, 0);
+
+    rebuildScrollViewChild(() { childSize = const Size(800, 800); });
+    await tester.pumpAndSettle();
+    // Scrolling is now possible, so there are scrollbar (thumb and track) gesture recognizers.
+    expect(getScrollbarGestureDetector().gestures.length, greaterThan(1));
+
+    // Horizontal scrollDirection
+
+    childSize = const Size(800, 600);
+    await tester.pumpWidget(buildFrame(Axis.horizontal));
+    await tester.pumpAndSettle();
+    // Scrolling isn't possible, so there are no scrollbar gesture recognizers.
+    expect(getScrollbarGestureDetector().gestures.length, 0);
+
+    rebuildScrollViewChild(() { childSize = const Size(1000, 600); });
+    await tester.pumpAndSettle();
+    // Scrolling is now possible, so there are scrollbar (thumb and track) gesture recognizers.
+    expect(getScrollbarGestureDetector().gestures.length, greaterThan(1));
+  });
 }
