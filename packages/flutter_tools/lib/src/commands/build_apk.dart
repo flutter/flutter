@@ -137,12 +137,28 @@ class BuildApkCommand extends BuildSubCommand {
     validateBuild(androidBuildInfo);
     displayNullSafetyMode(androidBuildInfo.buildInfo);
     globals.terminal.usesTerminalUi = true;
+    final FlutterProject project = FlutterProject.current();
     await androidBuilder?.buildApk(
-      project: FlutterProject.current(),
+      project: project,
       target: targetFile,
       androidBuildInfo: androidBuildInfo,
       configOnly: configOnly,
     );
+    final bool? impellerEnabled = project.android.computeImpellerEnabled();
+    if (impellerEnabled != null) {
+      final String buildLabel = impellerEnabled
+            ? 'manifest-impeller-enabled'
+            : 'manifest-impeller-disabled';
+      BuildEvent(
+        buildLabel,
+        type: 'android',
+        flutterUsage: globals.flutterUsage
+      ).send();
+      globals.analytics.send(Event.flutterBuildInfo(
+        label: buildLabel,
+        buildType: 'android',
+      ));
+    }
     return FlutterCommandResult.success();
   }
 }

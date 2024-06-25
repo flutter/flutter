@@ -127,6 +127,144 @@ void main() {
       AndroidBuilder: () => FakeAndroidBuilder(),
       Usage: () => testUsage,
     });
+
+    group('Impeller AndroidManifest.xml setting', () {
+      // Adds a key-value `<meta-data>` pair to the `<application>` tag in the
+      // cooresponding `AndroidManifest.xml` file, right before the closing
+      // `</application>` tag.
+      void writeManifestMetadata({
+        required String projectPath,
+        required String name,
+        required String value,
+      }) {
+        final String manifestPath = globals.fs.path.join(
+          projectPath,
+          'android',
+          'app',
+          'src',
+          'main',
+          'AndroidManifest.xml',
+        );
+
+        // It would be unnecessarily complicated to parse this XML file and
+        // insert the key-value pair, so we just insert it right before the
+        // closing </application> tag.
+        final String oldManifest = globals.fs.file(manifestPath).readAsStringSync();
+        final String newManifest = oldManifest.replaceFirst(
+          '</application>',
+          '    <meta-data\n'
+          '        android:name="$name"\n'
+          '        android:value="$value" />\n'
+          '    </application>',
+        );
+        globals.fs.file(manifestPath).writeAsStringSync(newManifest);
+      }
+
+      testUsingContext('a default build does not report an Impeller manifest setting', () async {
+        final String projectPath = await createProject(
+          tempDir,
+          arguments: <String>['--no-pub', '--template=app', '--platform=android']
+        );
+
+        await runBuildApkCommand(projectPath);
+
+        expect(testUsage.events, isNot(contains(
+          const TestUsageEvent(
+            'build',
+            'gradle',
+            label: 'manifest-impeller-enabled',
+            parameters: CustomDimensions(),
+          ),
+        )));
+
+        expect(testUsage.events, isNot(contains(
+          const TestUsageEvent(
+            'build',
+            'gradle',
+            label: 'manifest-impeller-disabled',
+            parameters: CustomDimensions(),
+          ),
+        )));
+      }, overrides: <Type, Generator>{
+        AndroidBuilder: () => FakeAndroidBuilder(),
+        FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
+        Usage: () => testUsage,
+      });
+
+      testUsingContext('EnableImpeller="true" reports an enabled event', () async {
+        final String projectPath = await createProject(
+          tempDir,
+          arguments: <String>['--no-pub', '--template=app', '--platform=android']
+        );
+
+        writeManifestMetadata(
+          projectPath: projectPath,
+          name: 'io.flutter.embedding.android.EnableImpeller',
+          value: 'true',
+        );
+
+        await runBuildApkCommand(projectPath);
+
+        expect(testUsage.events, contains(
+          const TestUsageEvent(
+            'build',
+            'android',
+            label: 'manifest-impeller-enabled',
+            parameters: CustomDimensions(),
+          ),
+        ));
+
+        expect(testUsage.events, isNot(contains(
+          const TestUsageEvent(
+            'build',
+            'android',
+            label: 'manifest-impeller-disabled',
+            parameters: CustomDimensions(),
+          ),
+        )));
+      }, overrides: <Type, Generator>{
+        AndroidBuilder: () => FakeAndroidBuilder(),
+        FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
+        Usage: () => testUsage,
+      });
+
+      testUsingContext('EnableImpeller="false" reports an disabled event', () async {
+        final String projectPath = await createProject(
+          tempDir,
+          arguments: <String>['--no-pub', '--template=app', '--platform=android']
+        );
+
+        writeManifestMetadata(
+          projectPath: projectPath,
+          name: 'io.flutter.embedding.android.EnableImpeller',
+          value: 'false',
+        );
+
+        await runBuildApkCommand(projectPath);
+
+        expect(testUsage.events, isNot(contains(
+          const TestUsageEvent(
+            'build',
+            'android',
+            label: 'manifest-impeller-enabled',
+            parameters: CustomDimensions(),
+          ),
+        )));
+
+        expect(testUsage.events, contains(
+          const TestUsageEvent(
+            'build',
+            'android',
+            label: 'manifest-impeller-disabled',
+            parameters: CustomDimensions(),
+          ),
+        ));
+      }, overrides: <Type, Generator>{
+        AndroidBuilder: () => FakeAndroidBuilder(),
+        FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
+        Usage: () => testUsage,
+      });
+    });
   });
 
   group('Gradle', () {
