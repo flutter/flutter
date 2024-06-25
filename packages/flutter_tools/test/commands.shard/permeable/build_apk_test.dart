@@ -76,14 +76,14 @@ void main() {
 
       expect(
         (await commandWithFlag.unifiedAnalyticsUsageValues('run'))
-            .eventData['buildApkSplitPerApi'],
+            .eventData['buildApkSplitPerAbi'],
         isTrue,
       );
 
       final BuildApkCommand commandWithoutFlag = await runBuildApkCommand(projectPath);
       expect(
         (await commandWithoutFlag.unifiedAnalyticsUsageValues('run'))
-            .eventData['buildApkSplitPerApi'],
+            .eventData['buildApkSplitPerAbi'],
         isFalse
       );
     }, overrides: <Type, Generator>{
@@ -98,10 +98,11 @@ void main() {
       expect(
         fakeAnalytics.sentEvents,
         contains(Event.commandUsageValues(
-          workflow: 'appbundle',
+          workflow: 'apk',
           commandHasTerminal: false,
-          buildAppBundleTargetPlatform: 'android-arm,android-arm64,android-x64',
-          buildAppBundleBuildMode: 'release',
+          buildApkTargetPlatform: 'android-arm,android-arm64,android-x64',
+          buildApkBuildMode: 'release',
+          buildApkSplitPerAbi: false,
         )),
       );
 
@@ -110,10 +111,11 @@ void main() {
       expect(
         fakeAnalytics.sentEvents,
         contains(Event.commandUsageValues(
-          workflow: 'appbundle',
+          workflow: 'apk',
           commandHasTerminal: false,
-          buildAppBundleTargetPlatform: 'android-arm,android-arm64,android-x64',
-          buildAppBundleBuildMode: 'release',
+          buildApkTargetPlatform: 'android-arm,android-arm64,android-x64',
+          buildApkBuildMode: 'release',
+          buildApkSplitPerAbi: false,
         )),
       );
 
@@ -122,10 +124,11 @@ void main() {
       expect(
         fakeAnalytics.sentEvents,
         contains(Event.commandUsageValues(
-          workflow: 'appbundle',
+          workflow: 'apk',
           commandHasTerminal: false,
-          buildAppBundleTargetPlatform: 'android-arm,android-arm64,android-x64',
-          buildAppBundleBuildMode: 'debug',
+          buildApkTargetPlatform: 'android-arm,android-arm64,android-x64',
+          buildApkBuildMode: 'debug',
+          buildApkSplitPerAbi: false,
         )),
       );
 
@@ -135,10 +138,11 @@ void main() {
       expect(
         fakeAnalytics.sentEvents,
         contains(Event.commandUsageValues(
-          workflow: 'appbundle',
+          workflow: 'apk',
           commandHasTerminal: false,
-          buildAppBundleTargetPlatform: 'android-arm,android-arm64,android-x64',
-          buildAppBundleBuildMode: 'profile',
+          buildApkTargetPlatform: 'android-arm,android-arm64,android-x64',
+          buildApkBuildMode: 'profile',
+          buildApkSplitPerAbi: false,
         )),
       );
     }, overrides: <Type, Generator>{

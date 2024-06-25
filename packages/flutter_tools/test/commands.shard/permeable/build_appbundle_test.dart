@@ -24,7 +24,7 @@ import '../../src/test_flutter_command_runner.dart';
 void main() {
   Cache.disableLocking();
 
-  group('Usage', () {
+  group('analytics', () {
     late Directory tempDir;
     late FakeAnalytics fakeAnalytics;
 
@@ -132,9 +132,10 @@ void main() {
         fakeAnalytics.sentEvents,
         contains(
           Event.flutterCommandResult(
-            commandPath: 'appbundle',
+            commandPath: 'create',
             result: 'success',
-            commandHasTerminal: true,
+            commandHasTerminal: false,
+            maxRss: globals.processInfo.maxRss,
           ),
         ),
       );
