@@ -886,7 +886,7 @@ $javaGradleCompatUrl
   static const bool _impellerEnabledByDefault = false;
 
   /// Returns the `io.flutter.embedding.android.EnableImpeller` manifest value.
-  /// 
+  ///
   /// If there is no manifest file, or the key is not present, returns `false`.
   bool computeImpellerEnabled() {
     if (!appManifestFile.existsSync()) {
