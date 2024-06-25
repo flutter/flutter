@@ -78,7 +78,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     _addFontSizeObserver();
     _addLocaleChangedListener();
     registerHotRestartListener(dispose);
-    AppLifecycleState.instance.addListener(_setAppLifecycleState);
+    _appLifecycleState.addListener(_setAppLifecycleState);
     _viewFocusBinding.init();
     domDocument.body?.prepend(accessibilityPlaceholder);
     _onViewDisposedListener = viewManager.onViewDisposed.listen((_) {
@@ -122,7 +122,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     _disconnectFontSizeObserver();
     _removeLocaleChangedListener();
     HighContrastSupport.instance.removeListener(_updateHighContrast);
-    AppLifecycleState.instance.removeListener(_setAppLifecycleState);
+    _appLifecycleState.removeListener(_setAppLifecycleState);
     _viewFocusBinding.dispose();
     accessibilityPlaceholder.remove();
     _onViewDisposedListener.cancel();
@@ -154,6 +154,9 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   ];
 
   late final FlutterViewManager viewManager = FlutterViewManager(this);
+
+  late final AppLifecycleState _appLifecycleState =
+      AppLifecycleState.create(viewManager);
 
   /// The current list of windows.
   @override
