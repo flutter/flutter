@@ -181,6 +181,11 @@ import '$testUrl' as test;
 import '${Uri.file(testConfigFile.path)}' as test_config;
 ''');
   }
+
+  // IMPORTANT: DO NOT RENAME, REMOVE, OR MODIFY THE 'packageConfigLocation'
+  // VARAIBLE.
+  // Dash tooling like Dart DevTools performs an evaluation on this variable at
+  // runtime to get the package config location for Flutter test targets.
   buffer.write('''
 
 const packageConfigLocation = '$packageConfigUri';
