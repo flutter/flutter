@@ -1,4 +1,4 @@
-Signature: 0e4af40f333ea146834d901da41a1124
+Signature: 5f25db7a3b96987251f429d03beef50e
 
 ====================================================================================================
 LIBRARY: dart
@@ -3914,7 +3914,6 @@ ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm_js_compatibilit
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm_js_compatibility/lib/int_patch.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm_js_compatibility/lib/string_buffer_patch.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm_js_compatibility/lib/string_patch.dart + ../../../flutter/third_party/dart/LICENSE
-ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm_js_compatibility/lib/typed_data.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm_js_compatibility/lib/typed_data_patch.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/async/future_extensions.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/js_interop/js_interop.dart + ../../../flutter/third_party/dart/LICENSE
@@ -3978,7 +3977,6 @@ FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm_js_compatibility/
 FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm_js_compatibility/lib/int_patch.dart
 FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm_js_compatibility/lib/string_buffer_patch.dart
 FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm_js_compatibility/lib/string_patch.dart
-FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm_js_compatibility/lib/typed_data.dart
 FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm_js_compatibility/lib/typed_data_patch.dart
 FILE: ../../../flutter/third_party/dart/sdk/lib/async/future_extensions.dart
 FILE: ../../../flutter/third_party/dart/sdk/lib/js_interop/js_interop.dart
@@ -4753,7 +4751,7 @@ Exhibit B - "Incompatible With Secondary Licenses" Notice
   This Source Code Form is "Incompatible With Secondary Licenses", as
   defined by the Mozilla Public License, v. 2.0.
 
-You may obtain a copy of this library's Source Code Form from: https://dart.googlesource.com/sdk/+/bb18127b2a8e1a1afd882efcc38271212b238ff3
+You may obtain a copy of this library's Source Code Form from: https://dart.googlesource.com/sdk/+/38bb74f63829eb08a2bd191226c40064aa457ee0
 /third_party/fallback_root_certificates/
 
 ====================================================================================================
