@@ -614,7 +614,7 @@ void main() {
       ]);
 
       Future<Map<String, String>?> getCodeSigningIdentities() => getCodeSigningIdentityDevelopmentTeamBuildSetting(
-        buildSettings: <String, String>{
+        buildSettings: const <String, String>{
           'bogus': 'bogus',
         },
         platform: macosPlatform,
