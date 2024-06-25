@@ -412,6 +412,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       debugLogsDirectoryPath: debugLogsDirectoryPath,
       webRenderer: webRenderer,
       webUseWasm: useWasm,
+      webUseLocalCanvaskit: true,
     );
 
     String? testAssetDirectory;
