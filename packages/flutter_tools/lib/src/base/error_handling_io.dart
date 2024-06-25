@@ -76,12 +76,12 @@ class ErrorHandlingFileSystem extends ForwardingFileSystem {
   /// This method should be preferred to checking if it exists and
   /// then deleting, because it handles the edge case where the file or directory
   /// is deleted by a different program between the two calls.
-  static bool deleteIfExists(FileSystemEntity file, {bool recursive = false}) {
-    if (!file.existsSync()) {
+  static bool deleteIfExists(FileSystemEntity entity, {bool recursive = false}) {
+    if (!entity.existsSync()) {
       return false;
     }
     try {
-      file.deleteSync(recursive: recursive);
+      entity.deleteSync(recursive: recursive);
     } on FileSystemException catch (err) {
       // Certain error codes indicate the file could not be found. It could have
       // been deleted by a different program while the tool was running.
@@ -93,9 +93,9 @@ class ErrorHandlingFileSystem extends ForwardingFileSystem {
       if (!codeCorrespondsToPathOrFileNotFound || _noExitOnFailure) {
         rethrow;
       }
-      if (file.existsSync()) {
+      if (entity.existsSync()) {
         throwToolExit(
-          'The Flutter tool tried to delete the file or directory ${file.path} but was '
+          'The Flutter tool tried to delete the file or directory ${entity.path} but was '
           "unable to. This may be due to the file and/or project's location on a read-only "
           'volume. Consider relocating the project and trying again',
         );
