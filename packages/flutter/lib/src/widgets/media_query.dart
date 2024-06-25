@@ -289,7 +289,7 @@ class MediaQueryData {
   /// are automatically rebuilt.
   ///
   /// See the article on [Creating responsive and adaptive
-  /// apps](https://docs.flutter.dev/development/ui/layout/adaptive-responsive)
+  /// apps](https://docs.flutter.dev/ui/adaptive-responsive)
   /// for an introduction.
   ///
   /// See also:

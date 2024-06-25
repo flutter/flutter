@@ -1004,7 +1004,7 @@ class WidgetsApp extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  * <https://flutter.dev/debugging/#performance-overlay>
+  ///  * <https://flutter.dev/to/performance-overlay>
   final bool showPerformanceOverlay;
 
   /// Turns on an overlay that shows the accessibility information
@@ -1656,7 +1656,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
           ),
           ErrorSpacer(),
           ErrorDescription(
-            'See https://flutter.dev/tutorials/internationalization/ for more '
+            'See https://flutter.dev/to/internationalization/ for more '
             "information about configuring an app's locale, supportedLocales, "
             'and localizationsDelegates parameters.',
           ),

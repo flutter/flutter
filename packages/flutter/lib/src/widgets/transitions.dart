@@ -621,7 +621,7 @@ class FadeTransition extends SingleChildRenderObjectWidget {
 /// To avoid such problems, it is generally a good idea to combine this widget
 /// with a [SliverIgnorePointer] that one enables when the [opacity] animation
 /// reaches zero. This prevents interactions with any children in the subtree
-/// when the [sliver] is not visible. For performance reasons, when implementing
+/// when the sliver is not visible. For performance reasons, when implementing
 /// this, care should be taken not to rebuild the relevant widget (e.g. by
 /// calling [State.setState]) except at the transition point.
 ///
