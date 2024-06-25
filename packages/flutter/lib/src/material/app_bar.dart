@@ -760,12 +760,18 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
 }
 
 class _AppBarState extends State<AppBar> {
+  final Map<RawGestureDetector?, double> _notificationListenerStates = <RawGestureDetector?, double>{};
   ScrollNotificationObserverState? _scrollNotificationObserver;
   bool _scrolledUnder = false;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    if(Scaffold.maybeOf(context)?.isDrawerOpen ?? false) {
+      _scrollNotificationObserver?.removeListener(_handleScrollNotification);
+      _scrollNotificationObserver = null;
+      return;
+    }
     _scrollNotificationObserver?.removeListener(_handleScrollNotification);
     _scrollNotificationObserver = ScrollNotificationObserver.maybeOf(context);
     _scrollNotificationObserver?.addListener(_handleScrollNotification);
@@ -777,11 +783,25 @@ class _AppBarState extends State<AppBar> {
       _scrollNotificationObserver!.removeListener(_handleScrollNotification);
       _scrollNotificationObserver = null;
     }
+    _notificationListenerStates.clear();
     super.dispose();
   }
 
   void _handleScrollNotification(ScrollNotification notification) {
     if (notification is ScrollUpdateNotification && widget.notificationPredicate(notification)) {
+      final RawGestureDetector? rawGestureDetector = notification.context?.widget as RawGestureDetector?;
+
+      if (rawGestureDetector != null) {
+        _notificationListenerStates[rawGestureDetector] = notification.metrics.axisDirection == AxisDirection.down
+        ? notification.metrics.extentBefore
+        : notification.metrics.extentAfter;
+
+        // If any of the scroll offsets are greater than 0, then the MaterialState.scrolledUnder
+        if (_notificationListenerStates.values.toList().any((double element) => element > 0) && _scrolledUnder) {
+          return;
+        }
+      }
+
       final bool oldScrolledUnder = _scrolledUnder;
       final ScrollMetrics metrics = notification.metrics;
       switch (metrics.axisDirection) {

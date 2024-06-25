@@ -2563,6 +2563,217 @@ void main() {
       expect(getAppBarBackgroundColor(tester), defaultColor);
       expect(tester.getSize(findAppBarMaterial()).height, kToolbarHeight);
     });
+
+    testWidgets('Material3 - scrolledUnderElevation should be maintained when drawer is opened', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            appBar: AppBar(
+              elevation: 0,
+              backgroundColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
+                return states.contains(MaterialState.scrolledUnder)
+                  ? scrolledColor
+                  : defaultColor;
+              }),
+              title: const Text('AppBar'),
+              notificationPredicate: (ScrollNotification notification) {
+                // Represents both scroll views below being treated as a
+                // single viewport.
+                return notification.depth <= 1;
+              },
+            ),
+            drawer: const Drawer(),
+            body: SingleChildScrollView(
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Container(
+                  height: 1200,
+                  width: 1200,
+                  color: Colors.teal,
+                ),
+              ),
+            ),
+          ),
+        )
+      );
+
+      expect(getAppBarBackgroundColor(tester), defaultColor);
+      expect(tester.getSize(findAppBarMaterial()).height, kToolbarHeight);
+
+      final TestGesture gesture = await tester.startGesture(const Offset(50.0, 400.0));
+      await gesture.moveBy(const Offset(0.0, -kToolbarHeight));
+      await tester.pump();
+      await gesture.moveBy(const Offset(0.0, -kToolbarHeight));
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      expect(getAppBarBackgroundColor(tester), scrolledColor);
+      expect(tester.getSize(findAppBarMaterial()).height, kToolbarHeight);
+
+      await tester.tap(find.byIcon(Icons.menu));
+      await tester.pumpAndSettle();
+
+      expect(getAppBarBackgroundColor(tester), scrolledColor);
+      expect(tester.getSize(findAppBarMaterial()).height, kToolbarHeight);
+
+      await tester.tap(find.byType(Scaffold));
+      await tester.pumpAndSettle();
+
+      expect(getAppBarBackgroundColor(tester), scrolledColor);
+      expect(tester.getSize(findAppBarMaterial()).height, kToolbarHeight);
+    });
+
+    testWidgets('Material3 - scrolledUnderElevation should be applied when scrolled under with multiple list views', (WidgetTester tester) async {
+      final GlobalKey list1Key = GlobalKey();
+      final GlobalKey list2Key = GlobalKey();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            appBar: AppBar(
+              elevation: 0,
+              backgroundColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
+                return states.contains(MaterialState.scrolledUnder)
+                  ? scrolledColor
+                  : defaultColor;
+              }),
+              title: const Text('AppBar'),
+              notificationPredicate: (ScrollNotification notification) {
+                // Represents both scroll views below being treated as a
+                // single viewport.
+                return notification.depth <= 1;
+              },
+            ),
+            body: Row(
+              children: <Widget>[
+                Expanded(
+                  child: ListView(
+                    key: list1Key,
+                    children: <Widget>[
+                      Container(height: 1200, color: Colors.teal),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: ListView(
+                    key: list2Key,
+                    children: <Widget>[
+                      Container(height: 1200, color: Colors.teal),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+        )
+      ));
+
+      // Initial state: AppBar should have the default color.
+      expect(getAppBarBackgroundColor(tester), defaultColor);
+
+      // Scroll the first list view.
+      await tester.drag(find.byKey(list1Key), const Offset(0, -300));
+      await tester.pumpAndSettle();
+
+      // The AppBar should now have the scrolled color.
+      expect(getAppBarBackgroundColor(tester), scrolledColor);
+
+      // Scroll back to the top.
+      await tester.drag(find.byKey(list1Key), const Offset(0, 300));
+      await tester.pumpAndSettle();
+
+      // The AppBar should be back to the default color.
+      expect(getAppBarBackgroundColor(tester), defaultColor);
+
+      // Scroll the second list view.
+      await tester.drag(find.byKey(list2Key), const Offset(0, -300));
+      await tester.pumpAndSettle();
+
+      // The AppBar should again have the scrolled color.
+      expect(getAppBarBackgroundColor(tester), scrolledColor);
+
+      // Scroll back to the top.
+      await tester.drag(find.byKey(list2Key), const Offset(0, 300));
+      await tester.pumpAndSettle();
+
+      // The AppBar should be back to the default color.
+      expect(getAppBarBackgroundColor(tester), defaultColor);
+    });
+
+    testWidgets('Material3 - scrolledUnderElevation should be applied when scrolled under with multiple list views with list scrolled', (WidgetTester tester) async {
+      final GlobalKey list1Key = GlobalKey();
+      final GlobalKey list2Key = GlobalKey();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            appBar: AppBar(
+              elevation: 0,
+              backgroundColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
+                return states.contains(MaterialState.scrolledUnder)
+                  ? scrolledColor
+                  : defaultColor;
+              }),
+              title: const Text('AppBar'),
+              notificationPredicate: (ScrollNotification notification) {
+                // Represents both scroll views below being treated as a
+                // single viewport.
+                return notification.depth <= 1;
+              },
+            ),
+            body: Row(
+              children: <Widget>[
+                Expanded(
+                  child: ListView(
+                    key: list1Key,
+                    children: <Widget>[
+                      Container(height: 1200, color: Colors.teal),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: ListView(
+                    key: list2Key,
+                    children: <Widget>[
+                      Container(height: 1200, color: Colors.teal),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+        )
+      ));
+
+      // Initial state: AppBar should have the default color.
+      expect(getAppBarBackgroundColor(tester), defaultColor);
+
+      // Scroll the first list view.
+      await tester.drag(find.byKey(list1Key), const Offset(0, -300));
+      await tester.pumpAndSettle();
+
+      // The AppBar should now have the scrolled color.
+      expect(getAppBarBackgroundColor(tester), scrolledColor);
+
+      // Scroll the second list view.
+      await tester.drag(find.byKey(list2Key), const Offset(0, -300));
+      await tester.pumpAndSettle();
+
+      // The AppBar should again have the scrolled color.
+      expect(getAppBarBackgroundColor(tester), scrolledColor);
+
+      // Scroll list 1 back to the top.
+      await tester.drag(find.byKey(list1Key), const Offset(0, 300));
+      await tester.pumpAndSettle();
+
+      // The AppBar should still have the scrolled color.
+      expect(getAppBarBackgroundColor(tester), scrolledColor);
+
+      // Scroll list 2 back to the top.
+      await tester.drag(find.byKey(list2Key), const Offset(0, 300));
+      await tester.pumpAndSettle();
+
+      // The AppBar should be back to the default color.
+      expect(getAppBarBackgroundColor(tester), defaultColor);
+    });
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/80256
