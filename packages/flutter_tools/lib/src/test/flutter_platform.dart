@@ -15,6 +15,7 @@ import 'package:test_core/src/platform.dart'; // ignore: implementation_imports
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
+import '../build_info.dart';
 import '../cache.dart';
 import '../compile.dart';
 import '../convert.dart';
@@ -71,6 +72,7 @@ FlutterPlatform installHook({
   TestTimeRecorder? testTimeRecorder,
   UriConverter? uriConverter,
   TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
+  BuildInfo? buildInfo,
 }) {
   assert(enableVmService || enableObservatory || (!debuggingOptions.startPaused && debuggingOptions.hostVmServicePort == null));
 
@@ -102,6 +104,7 @@ FlutterPlatform installHook({
     testTimeRecorder: testTimeRecorder,
     uriConverter: uriConverter,
     nativeAssetsBuilder: nativeAssetsBuilder,
+    buildInfo: buildInfo,
   );
   platformPluginRegistration(platform);
   return platform;
@@ -119,6 +122,9 @@ FlutterPlatform installHook({
 /// If [testConfigFile] is specified, it must follow the conventions of test
 /// configuration files as outlined in the [flutter_test] library. By default,
 /// the test file will be launched directly.
+/// 
+/// The [packageConfigUri] argument specifies the package config location for
+/// the test file being launched. This is expected to be a file URI.
 ///
 /// The [updateGoldens] argument will set the [autoUpdateGoldens] global
 /// variable in the [flutter_test] package before invoking the test.
@@ -176,6 +182,7 @@ import '${Uri.file(testConfigFile.path)}' as test_config;
 ''');
   }
   buffer.write('''
+
 const packageConfigLocation = '$packageConfigUri';
 ''');
   buffer.write('''
@@ -299,6 +306,7 @@ class FlutterPlatform extends PlatformPlugin {
     this.testTimeRecorder,
     this.uriConverter,
     this.nativeAssetsBuilder,
+    this.buildInfo,
   });
 
   final String shellPath;
@@ -316,6 +324,7 @@ class FlutterPlatform extends PlatformPlugin {
   final String? icudtlPath;
   final TestTimeRecorder? testTimeRecorder;
   final TestCompilerNativeAssetsBuilder? nativeAssetsBuilder;
+  final BuildInfo? buildInfo;
 
   // This can be used by internal projects that require custom logic for converting package: URIs to local paths.
   final UriConverter? uriConverter;
@@ -645,7 +654,7 @@ class FlutterPlatform extends PlatformPlugin {
     return generateTestBootstrap(
       testUrl: testUrl,
       testConfigFile: findTestConfigFile(globals.fs.file(testUrl), globals.logger),
-      // packageConfigUri: ??
+      packageConfigUri: buildInfo != null ? globals.fs.path.toUri(buildInfo!.packagesPath) : null,
       host: host!,
       updateGoldens: updateGoldens!,
       flutterTestDep: packageConfig['flutter_test'] != null,
