@@ -498,7 +498,7 @@ void main() {
         color: Color(0xcc6eadf2),
         width: 3.5,
         strokeAlign: BorderSide.strokeAlignOutside,
-      )
+      ),
     );
 
     await tester.pumpWidget(
