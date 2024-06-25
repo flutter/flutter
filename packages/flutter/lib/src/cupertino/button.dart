@@ -142,7 +142,7 @@ class CupertinoButton extends StatefulWidget {
   /// The color to use for the focus highlight for keyboard interactions.
   ///
   /// Defaults to a slightly transparent [color]. If [color] is null, defaults
-  /// to a slightly transparent [CupertinoColors.activeBlue].
+  /// to [CupertinoColors.activeBlue] with an opacity 0.80.
   final Color? focusColor;
 
   /// {@macro flutter.widgets.Focus.focusNode}
@@ -251,7 +251,9 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
   }
 
   void _onShowFocusHighlight(bool showHighlight) {
-    setState(() { isFocused = showHighlight; });
+    setState(() { 
+      isFocused = showHighlight;
+    });
   }
 
   @override
@@ -310,7 +312,7 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
                             color: effectiveFocusOutlineColor,
                             width: 3.5,
                             strokeAlign: BorderSide.strokeAlignOutside,
-                          )
+                          ),
                         )
                       : null,
                     borderRadius: widget.borderRadius,
