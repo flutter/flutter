@@ -56,6 +56,12 @@ const CupertinoDynamicColor _kOffLabelColor = CupertinoDynamicColor.withBrightne
   darkHighContrastColor: Color.fromARGB(255, 255, 255, 255),
 );
 
+// The relative values needed to transform a color to it's equivalent focus
+// outline color.
+const double _kCupertinoFocusColorOpacity = 0.80;
+const double _kCupertinoFocusColorBrightness = 0.69;
+const double _kCupertinoFocusColorSaturation = 0.835;
+
 // Examples can assume:
 // bool _giveVerse = false;
 // bool _lights = false;
@@ -207,7 +213,8 @@ class CupertinoSwitch extends StatefulWidget {
 
   /// The color to use for the focus highlight for keyboard interactions.
   ///
-  /// Defaults to a slightly transparent [activeColor].
+  /// Defaults to [activeColor] with an opacity of 0.80, a brightness of 0.69
+  /// and a saturation of 0.835.
   final Color? focusColor;
 
   /// The color to use for the accessibility label when the switch is on.
@@ -368,7 +375,10 @@ class CupertinoSwitch extends StatefulWidget {
   /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode? focusNode;
 
-  /// {@macro flutter.material.inkwell.onFocusChange}
+   /// Handler called when the focus changes.
+   ///
+   /// Called with true if this widget's node gains focus, and false if it loses
+   /// focus.
   final ValueChanged<bool>? onFocusChange;
 
   /// {@macro flutter.widgets.Focus.autofocus}
@@ -665,8 +675,10 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
               ..focusColor = CupertinoDynamicColor.resolve(
                   widget.focusColor ??
                   HSLColor
-                    .fromColor(activeColor.withOpacity(0.80))
-                    .withLightness(0.69).withSaturation(0.835)
+                    .fromColor(activeColor
+                    .withOpacity(_kCupertinoFocusColorOpacity))
+                    .withLightness(_kCupertinoFocusColorBrightness)
+                    .withSaturation(_kCupertinoFocusColorSaturation)
                     .toColor(),
                   context)
               ..downPosition = downPosition
