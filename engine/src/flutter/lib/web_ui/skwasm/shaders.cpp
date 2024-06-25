@@ -130,9 +130,10 @@ SKWASM_EXPORT SkShader* shader_createRuntimeEffectShader(
   for (size_t i = 0; i < childCount; i++) {
     childPointers.emplace_back(sk_ref_sp<SkShader>(children[i]));
   }
+
   return runtimeEffect
-      ->makeShader(SkData::MakeWithCopy(uniforms->data(), uniforms->size()),
-                   childPointers.data(), childCount, nullptr)
+      ->makeShader(sk_ref_sp<SkData>(uniforms), childPointers.data(),
+                   childCount, nullptr)
       .release();
 }
 

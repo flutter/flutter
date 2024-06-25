@@ -366,11 +366,13 @@ half4 main(vec2 fragCoord) {
     final SkRuntimeEffect? invalidEffect = MakeRuntimeEffect(kInvalidSkSlProgram);
     expect(invalidEffect, isNull);
 
-    final SkShader? shader = effect!.makeShader(<double>[]);
+    final SkFloat32List emptyUniforms = mallocFloat32List(0);
+    final SkShader? shader = effect!.makeShader(emptyUniforms);
     expect(shader, isNotNull);
 
     // mismatched uniforms returns null.
-    final SkShader? invalidShader = effect.makeShader(<double>[1]);
+    final SkFloat32List mismatchedUniforms = mallocFloat32List(1);
+    final SkShader? invalidShader = effect.makeShader(mismatchedUniforms);
 
     expect(invalidShader, isNull);
 
@@ -382,8 +384,16 @@ return u_color;
 }
 ''';
 
+    final SkFloat32List uniforms = mallocFloat32List(4);
+    final uniformData = uniforms.toTypedArray();
+
+    uniformData[0] = 1.0;
+    uniformData[1] = 0.0;
+    uniformData[2] = 0.0;
+    uniformData[3] = 1.0;
+
     final SkShader? shaderWithUniform = MakeRuntimeEffect(kSkSlProgramWithUniforms)
-      !.makeShader(<double>[1.0, 0.0, 0.0, 1.0]);
+      !.makeShader(uniforms);
 
     expect(shaderWithUniform, isNotNull);
   });

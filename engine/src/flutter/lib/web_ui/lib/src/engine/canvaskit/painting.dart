@@ -420,14 +420,14 @@ class CkFragmentProgram implements ui.FragmentProgram {
 
 class CkFragmentShader implements ui.FragmentShader, CkShader {
   CkFragmentShader(this.name, this.effect, int floatCount, int textureCount)
-      : floats = List<double>.filled(floatCount + textureCount * 2, 0),
+      : floats = mallocFloat32List(floatCount + textureCount * 2),
         samplers = List<SkShader?>.filled(textureCount, null),
         lastFloatIndex = floatCount;
 
   final String name;
   final SkRuntimeEffect effect;
   final int lastFloatIndex;
-  final List<double> floats;
+  final SkFloat32List floats;
   final List<SkShader?> samplers;
 
   @visibleForTesting
@@ -454,7 +454,7 @@ class CkFragmentShader implements ui.FragmentShader, CkShader {
   @override
   void setFloat(int index, double value) {
     assert(!_debugDisposed, 'FragmentShader has been disposed of.');
-    floats[index] = value;
+    floats.toTypedArray()[index] = value;
   }
 
   @override
@@ -476,6 +476,7 @@ class CkFragmentShader implements ui.FragmentShader, CkShader {
     }());
     ref?.dispose();
     ref = null;
+    free(floats);
   }
 
   bool _debugDisposed = false;
