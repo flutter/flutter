@@ -445,6 +445,22 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFile
     );
   }
 
+  /// Handles the app.stop event from Flutter.
+  Future<void> _handleAppStop(Map<String, Object?> params) async {
+    // It's possible to get an app.stop without ever having an app.start in the
+    // case of an error, so we may need to clean up the launch progress.
+    // https://github.com/Dart-Code/Dart-Code/issues/5124
+    // https://github.com/flutter/flutter/issues/149258
+    launchProgress?.end();
+    launchProgress = null;
+
+    // If the stop had an error attached, be sure to pass it to the client.
+    final Object? error = params['error'];
+    if (error is String) {
+      sendConsoleOutput(error);
+    }
+  }
+
   /// Handles the daemon.connected event, recording the pid of the flutter_tools process.
   void _handleDaemonConnected(Map<String, Object?> params) {
     // On Windows, the pid from the process we spawn is the shell running
@@ -491,6 +507,8 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFile
         _handleAppProgress(params);
       case 'app.started':
         _handleAppStarted();
+      case 'app.stop':
+        _handleAppStop(params);
     }
 
     if (_eventsToForwardToClient.contains(event)) {

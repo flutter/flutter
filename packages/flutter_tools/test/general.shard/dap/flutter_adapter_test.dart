@@ -289,6 +289,63 @@ void main() {
           // progressEnd isn't included because we used takeWhile to stop when it arrived above.
         ]));
       });
+
+      test('handles app.stop errors during launch', () async {
+        final MockFlutterDebugAdapter adapter = MockFlutterDebugAdapter(
+          fileSystem: MemoryFileSystem.test(style: fsStyle),
+          platform: platform,
+          simulateAppStarted: false,
+          simulateAppStopError: true,
+
+        );
+        final Completer<void> responseCompleter = Completer<void>();
+
+        final FlutterLaunchRequestArguments args = FlutterLaunchRequestArguments(
+          cwd: '.',
+          program: 'foo.dart',
+        );
+
+        // Capture any progress events.
+        final List<List<Object?>> progressEvents = <List<Object?>>[];
+        final StreamSubscription<Map<String, Object?>> progressEventsSubscription =
+            adapter.dapToClientProgressEvents
+                .listen((Map<String, Object?> message) {
+                    progressEvents.add(<Object?>[message['event'], (message['body']! as Map<String, Object?>)['message']]);
+                });
+
+        // Capture any console output messages.
+        final List<String> consoleOutputMessages = <String>[];
+        final StreamSubscription<String> consoleOutputMessagesSubscription =
+            adapter.dapToClientMessages
+                .where((Map<String, Object?> message) => message['event'] == 'output')
+                .map((Map<String, Object?> message) => message['body']! as Map<String, Object?>)
+                .where((Map<String, Object?> body) => body['category'] == 'console' || body['category'] == null)
+                .map((Map<String, Object?> body) => body['output']! as String)
+                .listen(consoleOutputMessages.add);
+
+        // Initialize with progress support.
+        await adapter.initializeRequest(
+          MockRequest(),
+          DartInitializeRequestArguments(adapterID: 'test', supportsProgressReporting: true, ),
+          (_) {},
+        );
+        await adapter.configurationDoneRequest(MockRequest(), null, () {});
+        await adapter.launchRequest(MockRequest(), args, responseCompleter.complete);
+        await responseCompleter.future;
+        await pumpEventQueue(); // Allow async events to be processed.
+        await progressEventsSubscription.cancel();
+        await consoleOutputMessagesSubscription.cancel();
+
+        // Ensure we got both the start and end progress events.
+        expect(progressEvents, containsAllInOrder(<List<Object?>>[
+          <Object?>['progressStart', 'Launching…'],
+          <Object?>['progressEnd', null],
+          // progressEnd isn't included because we used takeWhile to stop when it arrived above.
+        ]));
+
+        // Also ensure we got console output with the error.
+        expect(consoleOutputMessages, contains('App stopped due to an error\n'));
+      });
     });
 
     group('attachRequest', () {
