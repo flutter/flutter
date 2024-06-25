@@ -188,10 +188,9 @@ class DisplayListBuilder final : public virtual DlCanvas,
                   const SkPoint pts[],
                   const DlPaint& paint) override;
   // |DlCanvas|
-  void DrawVertices(const DlVertices* vertices,
+  void DrawVertices(const std::shared_ptr<DlVertices>& vertices,
                     DlBlendMode mode,
                     const DlPaint& paint) override;
-  using DlCanvas::DrawVertices;
   // |DlCanvas|
   void DrawImage(const sk_sp<DlImage>& image,
                  const SkPoint point,
@@ -442,7 +441,8 @@ class DisplayListBuilder final : public virtual DlCanvas,
   // |DlOpReceiver|
   void drawPoints(PointMode mode, uint32_t count, const SkPoint pts[]) override;
   // |DlOpReceiver|
-  void drawVertices(const DlVertices* vertices, DlBlendMode mode) override;
+  void drawVertices(const std::shared_ptr<DlVertices>& vertices,
+                    DlBlendMode mode) override;
 
   // |DlOpReceiver|
   void drawImage(const sk_sp<DlImage> image,

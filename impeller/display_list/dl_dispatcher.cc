@@ -957,8 +957,9 @@ void DlDispatcherBase::drawPoints(PointMode mode,
 }
 
 // |flutter::DlOpReceiver|
-void DlDispatcherBase::drawVertices(const flutter::DlVertices* vertices,
-                                    flutter::DlBlendMode dl_mode) {
+void DlDispatcherBase::drawVertices(
+    const std::shared_ptr<flutter::DlVertices>& vertices,
+    flutter::DlBlendMode dl_mode) {
   GetCanvas().DrawVertices(MakeVertices(vertices), ToBlendMode(dl_mode),
                            paint_);
 }

@@ -242,7 +242,7 @@ class MockCanvas final : public DlCanvas {
                   uint32_t count,
                   const SkPoint pts[],
                   const DlPaint& paint) override;
-  void DrawVertices(const DlVertices* vertices,
+  void DrawVertices(const std::shared_ptr<DlVertices>& vertices,
                     DlBlendMode mode,
                     const DlPaint& paint) override;
 

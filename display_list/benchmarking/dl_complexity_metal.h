@@ -57,7 +57,8 @@ class DisplayListMetalComplexityCalculator
     void drawPoints(DlCanvas::PointMode mode,
                     uint32_t count,
                     const SkPoint points[]) override;
-    void drawVertices(const DlVertices* vertices, DlBlendMode mode) override;
+    void drawVertices(const std::shared_ptr<DlVertices>& vertices,
+                      DlBlendMode mode) override;
     void drawImage(const sk_sp<DlImage> image,
                    const SkPoint point,
                    DlImageSampling sampling,

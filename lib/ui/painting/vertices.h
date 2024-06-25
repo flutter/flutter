@@ -26,7 +26,7 @@ class Vertices : public RefCountedDartWrappable<Vertices> {
                    Dart_Handle colors_handle,
                    Dart_Handle indices_handle);
 
-  const DlVertices* vertices() const { return vertices_.get(); }
+  const std::shared_ptr<DlVertices>& vertices() const { return vertices_; }
 
   void dispose();
 
