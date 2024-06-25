@@ -402,7 +402,7 @@ class _CupertinoAlertDialogState extends State<CupertinoAlertDialog> {
 ///
 /// {@tool dartpad}
 /// This sample shows how to use a [CupertinoPopupSurface].
-///	The [CupertinoPopupSurface] shows a model popup from the bottom of the screen.
+/// The [CupertinoPopupSurface] shows a model popup from the bottom of the screen.
 /// Toggling the switch to configure its surface color.
 ///
 /// ** See code in examples/api/lib/cupertino/dialog/cupertino_popup_surface.0.dart **
