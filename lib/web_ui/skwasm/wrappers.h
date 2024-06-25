@@ -13,6 +13,8 @@
 
 namespace Skwasm {
 
+using SkwasmObject = __externref_t;
+
 struct SurfaceWrapper {
   EMSCRIPTEN_WEBGL_CONTEXT_HANDLE context;
   sk_sp<GrDirectContext> grContext;
