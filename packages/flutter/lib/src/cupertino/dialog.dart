@@ -2113,7 +2113,9 @@ class _PressableActionButtonState extends State<_PressableActionButton> {
   @override
   Widget build(BuildContext context) {
     return _ActionButtonParentDataWidget(
-      isPressed: _isPressed,
+      isPressed: widget.child is CupertinoDialogAction
+        ? (widget.child as CupertinoDialogAction).enabled && _isPressed
+        : _isPressed,
       child: MergeSemantics(
         // TODO(mattcarroll): Button press dynamics need overhaul for iOS:
         // https://github.com/flutter/flutter/issues/19786
