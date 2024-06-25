@@ -42,16 +42,17 @@ class _SliverCoordinatorExampleState extends State<SliverCoordinatorExample> {
   }
 
   void autoScrollTo(double offset) {
-    scrollController.position.animateTo(
+    scrollController.animateTo(
       offset,
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeInOut,
     );
   }
 
-  // Called each time a scroll gesture ends. If the alignedItem overlaps
-  // either end of the CustomScrollView's viewport we'll auto-scroll
-  // so that it's aligned with the top or bottom.
+  // Called each time a scroll gesture ends. If the alignedItem is
+  // only partially visible because it extends beyond either end of
+  // the CustomScrollView's viewport we'll auto-scroll so that it's
+  // fully visible and aligned with the top or bottom.
   void maybeAutoScrollAlignedItem(SliverCoordinatorData data) {
     final SliverConstraints constraints = data.getSliverConstraints(alignedItemId);
     final SliverGeometry geometry = data.getSliverGeometry(alignedItemId);
