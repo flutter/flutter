@@ -178,7 +178,7 @@ class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGe
 ///    Design UI conventions.
 ///  * [EditableText], which is the raw text editing control at the heart of a
 ///    [TextField].
-///  * Learn how to use a [TextEditingController] in one of our [cookbook recipes](https://flutter.dev/docs/cookbook/forms/text-field-changes#2-use-a-texteditingcontroller).
+///  * Learn how to use a [TextEditingController] in one of our [cookbook recipes](https://docs.flutter.dev/cookbook/forms/text-field-changes#2-use-a-texteditingcontroller).
 ///  * <https://developer.apple.com/design/human-interface-guidelines/ios/controls/text-fields/>
 class CupertinoTextField extends StatefulWidget {
   /// Creates an iOS-style text field.
@@ -1338,10 +1338,16 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
         );
     }
 
-    final BoxDecoration? effectiveDecoration = widget.decoration?.copyWith(
-      border: resolvedBorder,
-      color: enabled ? decorationColor : disabledColor,
-    );
+    // Use the default disabled color only if the box decoration was not set.
+    final BoxDecoration? effectiveDecoration =
+      widget.decoration?.copyWith(
+        border: resolvedBorder,
+        color: enabled ? decorationColor
+          : (widget.decoration == _kDefaultRoundedBorderDecoration
+              ? disabledColor
+              : widget.decoration?.color
+            ),
+      );
 
     final Color selectionColor = CupertinoDynamicColor.maybeResolve(
       DefaultSelectionStyle.of(context).selectionColor,

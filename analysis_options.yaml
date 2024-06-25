@@ -44,7 +44,7 @@ linter:
     # - avoid_annotating_with_dynamic # conflicts with always_specify_types
     - avoid_bool_literals_in_conditional_expressions
     # - avoid_catches_without_on_clauses # blocked on https://github.com/dart-lang/linter/issues/3023
-    # - avoid_catching_errors # blocked on https://github.com/dart-lang/linter/issues/3023
+    # - avoid_catching_errors # blocked on https://github.com/dart-lang/linter/issues/4998
     # - avoid_classes_with_only_static_members # we do this commonly for `abstract final class`es
     - avoid_double_and_int_checks
     - avoid_dynamic_calls
@@ -158,7 +158,7 @@ linter:
     # - prefer_constructors_over_static_methods # far too many false positives
     - prefer_contains
     # - prefer_double_quotes # opposite of prefer_single_quotes
-    # - prefer_expression_function_bodies # conflicts with https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#consider-using--for-short-functions-and-methods
+    # - prefer_expression_function_bodies # conflicts with ./docs/contributing/Style-guide-for-Flutter-repo.md#consider-using--for-short-functions-and-methods
     - prefer_final_fields
     - prefer_final_in_for_each
     - prefer_final_locals
@@ -171,7 +171,7 @@ linter:
     - prefer_if_null_operators
     - prefer_initializing_formals
     - prefer_inlined_adds
-    # - prefer_int_literals # conflicts with https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#use-double-literals-for-double-constants
+    # - prefer_int_literals # conflicts with ./docs/contributing/Style-guide-for-Flutter-repo.md#use-double-literals-for-double-constants
     - prefer_interpolation_to_compose_strings
     - prefer_is_empty
     - prefer_is_not_empty

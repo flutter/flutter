@@ -269,7 +269,10 @@ class TestSemantics {
     final int actionsBitmask = actions is int
         ? actions as int
         : (actions as List<SemanticsAction>).fold<int>(0, (int bitmask, SemanticsAction action) => bitmask | action.index);
-    if (actionsBitmask != nodeData.actions) {
+    // TODO(gspencergoog): Remove focus filter once customer tests have been
+    // updated with the proper actions information for focus.
+    // https://github.com/flutter/flutter/issues/149842
+    if ((actionsBitmask & ~SemanticsAction.focus.index) != (nodeData.actions & ~SemanticsAction.focus.index)) {
       return fail('expected node id $id to have actions $actions but found actions ${nodeData.actions}.');
     }
 
@@ -523,9 +526,16 @@ class SemanticsTester {
       if (textDirection != null && node.textDirection != textDirection) {
         return false;
       }
+
       if (actions != null) {
-        final int expectedActions = actions.fold<int>(0, (int value, SemanticsAction action) => value | action.index);
-        final int actualActions = node.getSemanticsData().actions;
+        // TODO(gspencergoog): Remove focus filter once customer tests have been
+        // updated with the proper actions information for focus.
+        // https://github.com/flutter/flutter/issues/149842
+        final List<SemanticsAction> nonFocusActions = actions.where(
+          (SemanticsAction action) => action != SemanticsAction.focus
+        ).toList();
+        final int expectedActions = nonFocusActions.fold<int>(0, (int value, SemanticsAction action) => value | action.index);
+        final int actualActions = node.getSemanticsData().actions & ~SemanticsAction.focus.index;
         if (expectedActions != actualActions) {
           return false;
         }
@@ -647,11 +657,14 @@ class SemanticsTester {
 
   static String _actionsToSemanticsActionExpression(dynamic actions) {
     Iterable<SemanticsAction> list;
+    // TODO(gspencergoog): Remove focus filter once customer tests have been
+    // updated with the proper actions information for focus.
+    // https://github.com/flutter/flutter/issues/149842
     if (actions is int) {
       list = SemanticsAction.values
-          .where((SemanticsAction action) => (action.index & actions) != 0);
+          .where((SemanticsAction action) => action != SemanticsAction.focus && (action.index & actions) != 0);
     } else {
-      list = actions as List<SemanticsAction>;
+      list = (actions as List<SemanticsAction>).where((SemanticsAction action) => action != SemanticsAction.focus);
     }
     return '<SemanticsAction>[${list.join(', ')}]';
   }
@@ -874,7 +887,10 @@ class _IncludesNodeWith extends Matcher {
       if (value != null) 'value "$value"',
       if (hint != null) 'hint "$hint"',
       if (textDirection != null) ' (${textDirection!.name})',
-      if (actions != null) 'actions "${actions!.join(', ')}"',
+      // TODO(gspencergoog): Remove focus filter once customer tests have been
+      // updated with the proper actions information for focus.
+      // https://github.com/flutter/flutter/issues/149842
+      if (actions != null) 'actions "${actions!.where((SemanticsAction action) => action != SemanticsAction.focus).join(', ')}"',
       if (flags != null) 'flags "${flags!.join(', ')}"',
       if (tags != null) 'tags "${tags!.join(', ')}"',
       if (scrollPosition != null) 'scrollPosition "$scrollPosition"',

@@ -55,6 +55,7 @@ abstract class FlutterTestRunner {
     String? reporter,
     String? fileReporter,
     String? timeout,
+    bool failFast = false,
     bool runSkipped = false,
     int? shardIndex,
     int? totalShards,
@@ -83,6 +84,7 @@ abstract class FlutterTestRunner {
     String? reporter,
     String? fileReporter,
     String? timeout,
+    bool failFast = false,
     bool runSkipped = false,
     int? shardIndex,
     int? totalShards,
@@ -119,6 +121,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
     String? reporter,
     String? fileReporter,
     String? timeout,
+    bool failFast = false,
     bool runSkipped = false,
     int? shardIndex,
     int? totalShards,
@@ -156,6 +159,8 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
         ...<String>['--tags', tags],
       if (excludeTags != null)
         ...<String>['--exclude-tags', excludeTags],
+      if (failFast)
+        '--fail-fast',
       if (runSkipped)
         '--run-skipped',
       if (totalShards != null)
@@ -663,6 +668,7 @@ class SpawnPlugin extends PlatformPlugin {
     String? reporter,
     String? fileReporter,
     String? timeout,
+    bool failFast = false,
     bool runSkipped = false,
     int? shardIndex,
     int? totalShards,
@@ -732,6 +738,8 @@ class SpawnPlugin extends PlatformPlugin {
         ...<String>['--tags', tags],
       if (excludeTags != null)
         ...<String>['--exclude-tags', excludeTags],
+      if (failFast)
+        '--fail-fast',
       if (runSkipped)
         '--run-skipped',
       if (totalShards != null)
