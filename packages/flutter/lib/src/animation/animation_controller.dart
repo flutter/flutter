@@ -707,13 +707,22 @@ class AnimationController extends Animation<double>
   /// provided, [duration] will be used instead, which has to be set before [repeat] is
   /// called either in the constructor or later by using the [duration] setter.
   ///
+  /// With [repeatTimes] set as valid value, animation will be executed by given times.
+  /// If value not given, infinite animation shall be simulated.
+  ///
   /// Returns a [TickerFuture] that never completes. The [TickerFuture.orCancel] future
   /// completes with an error when the animation is stopped (e.g. with [stop]).
   ///
   /// The most recently returned [TickerFuture], if any, is marked as having been
   /// canceled, meaning the future never completes and its [TickerFuture.orCancel]
   /// derivative future completes with a [TickerCanceled] error.
-  TickerFuture repeat({ double? min, double? max, bool reverse = false, Duration? period }) {
+  TickerFuture repeat({
+    double? min,
+    double? max,
+    bool reverse = false,
+    Duration? period,
+    int? repeatTimes,
+  }) {
     min ??= lowerBound;
     max ??= upperBound;
     period ??= duration;
@@ -730,8 +739,9 @@ class AnimationController extends Animation<double>
     }());
     assert(max >= min);
     assert(max <= upperBound && min >= lowerBound);
+    assert(repeatTimes == null || repeatTimes > 0, 'Repeat times shall be greater than zero if not null');
     stop();
-    return _startSimulation(_RepeatingSimulation(_value, min, max, reverse, period!, _directionSetter));
+    return _startSimulation(_RepeatingSimulation(_value, min, max, reverse, period!, _directionSetter, repeatTimes,));
   }
 
   void _directionSetter(_AnimationDirection direction) {
@@ -959,8 +969,19 @@ class _InterpolationSimulation extends Simulation {
 typedef _DirectionSetter = void Function(_AnimationDirection direction);
 
 class _RepeatingSimulation extends Simulation {
-  _RepeatingSimulation(double initialValue, this.min, this.max, this.reverse, Duration period, this.directionSetter)
-      : _periodInSeconds = period.inMicroseconds / Duration.microsecondsPerSecond,
+  _RepeatingSimulation(
+    double initialValue,
+    this.min,
+    this.max,
+    this.reverse,
+    Duration period,
+    this.directionSetter, [
+    this.repeatTimes,
+  ])  : assert(
+          repeatTimes == null || repeatTimes > 0,
+          'Repeat times shall be greater than zero if not null',
+        ),
+        _periodInSeconds = period.inMicroseconds / Duration.microsecondsPerSecond,
         _initialT = (max == min) ? 0.0 : ((clampDouble(initialValue, min, max) - min) / (max - min)) * (period.inMicroseconds / Duration.microsecondsPerSecond) {
     assert(_periodInSeconds > 0.0);
     assert(_initialT >= 0.0);
@@ -969,6 +990,7 @@ class _RepeatingSimulation extends Simulation {
   final double min;
   final double max;
   final bool reverse;
+  final int? repeatTimes;
   final _DirectionSetter directionSetter;
 
   final double _periodInSeconds;
@@ -995,5 +1017,29 @@ class _RepeatingSimulation extends Simulation {
   double dx(double timeInSeconds) => (max - min) / _periodInSeconds;
 
   @override
-  bool isDone(double timeInSeconds) => false;
+  bool isDone(double timeInSeconds) {
+    if (repeatTimes == null) {
+      // if repeat times is null it is to be consider as repeated simulation
+      return false;
+    }
+
+    // total simulation elapsed time [Fixed to 3 decimal points]
+    final double totalTimeInSeconds = double.parse(
+      (timeInSeconds + _initialT).toStringAsFixed(3),
+    );
+
+    // if reverse simulation is [true], then we shall double the repeat times
+    // else, use the given value
+    final int effectiveRepeatTimes = repeatTimes! * (reverse ? 2 : 1);
+
+    // [exitTimeInSeconds] is the time in seconds which will help
+    // to determine when to complete the simulation. [Fixed to 3 decimal points]
+    final double exitTimeInSeconds = double.parse(
+      (effectiveRepeatTimes * _periodInSeconds).toStringAsFixed(3),
+    );
+
+    // if [totalTimeInSeconds] elapsed the [exitTimeInSeconds],
+    // consider marking the simulation as "DONE"
+    return totalTimeInSeconds >= exitTimeInSeconds;
+  }
 }
