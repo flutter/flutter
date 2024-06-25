@@ -29,7 +29,7 @@ static VerticesGeometry::VertexMode ToVertexMode(flutter::DlVertexMode mode) {
 }
 
 std::shared_ptr<impeller::VerticesGeometry> MakeVertices(
-    const flutter::DlVertices* vertices) {
+    const std::shared_ptr<const flutter::DlVertices>& vertices) {
   auto bounds = ToRect(vertices->bounds());
   auto mode = ToVertexMode(vertices->mode());
   std::vector<Point> positions(vertices->vertex_count());

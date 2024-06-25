@@ -680,17 +680,17 @@ std::vector<DisplayListInvocationGroup> CreateAllRenderingOps() {
        }},
       {"DrawVertices",
        {
-           {1, 112, 1,
+           {1, 24, 1,
             [](DlOpReceiver& r) {
-              r.drawVertices(TestVertices1.get(), DlBlendMode::kSrcIn);
+              r.drawVertices(kTestVertices1, DlBlendMode::kSrcIn);
             }},
-           {1, 112, 1,
+           {1, 24, 1,
             [](DlOpReceiver& r) {
-              r.drawVertices(TestVertices1.get(), DlBlendMode::kDstIn);
+              r.drawVertices(kTestVertices1, DlBlendMode::kDstIn);
             }},
-           {1, 112, 1,
+           {1, 24, 1,
             [](DlOpReceiver& r) {
-              r.drawVertices(TestVertices2.get(), DlBlendMode::kSrcIn);
+              r.drawVertices(kTestVertices2, DlBlendMode::kSrcIn);
             }},
        }},
       {"DrawImage",

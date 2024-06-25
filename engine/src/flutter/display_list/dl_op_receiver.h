@@ -358,7 +358,8 @@ class DlOpReceiver {
   virtual void drawPoints(PointMode mode,
                           uint32_t count,
                           const SkPoint points[]) = 0;
-  virtual void drawVertices(const DlVertices* vertices, DlBlendMode mode) = 0;
+  virtual void drawVertices(const std::shared_ptr<DlVertices>& vertices,
+                            DlBlendMode mode) = 0;
   virtual void drawImage(const sk_sp<DlImage> image,
                          const SkPoint point,
                          DlImageSampling sampling,

@@ -234,8 +234,7 @@ void DisplayList::DisposeOps(const uint8_t* ptr, const uint8_t* end) {
 #undef DL_OP_DISPOSE
 
       default:
-        FML_DCHECK(false);
-        return;
+        FML_UNREACHABLE();
     }
   }
 }

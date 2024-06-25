@@ -72,7 +72,8 @@ class DlSkCanvasDispatcher : public virtual DlOpReceiver,
                SkScalar sweep,
                bool useCenter) override;
   void drawPoints(PointMode mode, uint32_t count, const SkPoint pts[]) override;
-  void drawVertices(const DlVertices* vertices, DlBlendMode mode) override;
+  void drawVertices(const std::shared_ptr<DlVertices>& vertices,
+                    DlBlendMode mode) override;
   void drawImage(const sk_sp<DlImage> image,
                  const SkPoint point,
                  DlImageSampling sampling,

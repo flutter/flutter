@@ -12,7 +12,7 @@ namespace flutter {
 namespace testing {
 
 TEST(DisplayListVertices, MakeWithZeroAndNegativeVerticesAndIndices) {
-  std::shared_ptr<const DlVertices> vertices1 = DlVertices::Make(
+  std::shared_ptr<DlVertices> vertices1 = DlVertices::Make(
       DlVertexMode::kTriangles, 0, nullptr, nullptr, nullptr, 0, nullptr);
   EXPECT_NE(vertices1, nullptr);
   EXPECT_EQ(vertices1->vertex_count(), 0);
@@ -22,7 +22,7 @@ TEST(DisplayListVertices, MakeWithZeroAndNegativeVerticesAndIndices) {
   EXPECT_EQ(vertices1->index_count(), 0);
   EXPECT_EQ(vertices1->indices(), nullptr);
 
-  std::shared_ptr<const DlVertices> vertices2 = DlVertices::Make(
+  std::shared_ptr<DlVertices> vertices2 = DlVertices::Make(
       DlVertexMode::kTriangles, -1, nullptr, nullptr, nullptr, -1, nullptr);
   EXPECT_NE(vertices2, nullptr);
   EXPECT_EQ(vertices2->vertex_count(), 0);
@@ -56,7 +56,7 @@ TEST(DisplayListVertices, MakeWithTexAndColorAndIndices) {
       1, 2, 0,
   };
 
-  std::shared_ptr<const DlVertices> vertices = DlVertices::Make(
+  std::shared_ptr<DlVertices> vertices = DlVertices::Make(
       DlVertexMode::kTriangles, 3, coords, texture_coords, colors, 6, indices);
 
   ASSERT_NE(vertices, nullptr);
@@ -96,7 +96,7 @@ TEST(DisplayListVertices, MakeWithTexAndColor) {
       DlColor::kGreen(),
   };
 
-  std::shared_ptr<const DlVertices> vertices = DlVertices::Make(
+  std::shared_ptr<DlVertices> vertices = DlVertices::Make(
       DlVertexMode::kTriangles, 3, coords, texture_coords, colors, 6, nullptr);
 
   ASSERT_NE(vertices, nullptr);
@@ -132,7 +132,7 @@ TEST(DisplayListVertices, MakeWithTexAndIndices) {
       1, 2, 0,
   };
 
-  std::shared_ptr<const DlVertices> vertices = DlVertices::Make(
+  std::shared_ptr<DlVertices> vertices = DlVertices::Make(
       DlVertexMode::kTriangles, 3, coords, texture_coords, nullptr, 6, indices);
 
   ASSERT_NE(vertices, nullptr);
@@ -170,7 +170,7 @@ TEST(DisplayListVertices, MakeWithColorAndIndices) {
       1, 2, 0,
   };
 
-  std::shared_ptr<const DlVertices> vertices = DlVertices::Make(
+  std::shared_ptr<DlVertices> vertices = DlVertices::Make(
       DlVertexMode::kTriangles, 3, coords, nullptr, colors, 6, indices);
 
   ASSERT_NE(vertices, nullptr);
@@ -204,7 +204,7 @@ TEST(DisplayListVertices, MakeWithTex) {
       SkPoint::Make(115, 120),
   };
 
-  std::shared_ptr<const DlVertices> vertices = DlVertices::Make(
+  std::shared_ptr<DlVertices> vertices = DlVertices::Make(
       DlVertexMode::kTriangles, 3, coords, texture_coords, nullptr, 6, nullptr);
 
   ASSERT_NE(vertices, nullptr);
@@ -235,7 +235,7 @@ TEST(DisplayListVertices, MakeWithColor) {
       DlColor::kGreen(),
   };
 
-  std::shared_ptr<const DlVertices> vertices = DlVertices::Make(
+  std::shared_ptr<DlVertices> vertices = DlVertices::Make(
       DlVertexMode::kTriangles, 3, coords, nullptr, colors, 6, nullptr);
 
   ASSERT_NE(vertices, nullptr);
@@ -265,7 +265,7 @@ TEST(DisplayListVertices, MakeWithIndices) {
       1, 2, 0,
   };
 
-  std::shared_ptr<const DlVertices> vertices = DlVertices::Make(
+  std::shared_ptr<DlVertices> vertices = DlVertices::Make(
       DlVertexMode::kTriangles, 3, coords, nullptr, nullptr, 6, indices);
 
   ASSERT_NE(vertices, nullptr);
@@ -293,7 +293,7 @@ TEST(DisplayListVertices, MakeWithNoOptionalData) {
       SkPoint::Make(15, 20),
   };
 
-  std::shared_ptr<const DlVertices> vertices = DlVertices::Make(
+  std::shared_ptr<DlVertices> vertices = DlVertices::Make(
       DlVertexMode::kTriangles, 3, coords, nullptr, nullptr, 6, nullptr);
 
   ASSERT_NE(vertices, nullptr);
@@ -322,7 +322,7 @@ TEST(DisplayListVertices, MakeWithIndicesButZeroIndexCount) {
       1, 2, 0,
   };
 
-  std::shared_ptr<const DlVertices> vertices = DlVertices::Make(
+  std::shared_ptr<DlVertices> vertices = DlVertices::Make(
       DlVertexMode::kTriangles, 3, coords, nullptr, nullptr, 0, indices);
 
   ASSERT_NE(vertices, nullptr);
@@ -351,7 +351,7 @@ TEST(DisplayListVertices, MakeWithIndicesButNegativeIndexCount) {
       1, 2, 0,
   };
 
-  std::shared_ptr<const DlVertices> vertices = DlVertices::Make(
+  std::shared_ptr<DlVertices> vertices = DlVertices::Make(
       DlVertexMode::kTriangles, 3, coords, nullptr, nullptr, -5, indices);
 
   ASSERT_NE(vertices, nullptr);
@@ -464,7 +464,7 @@ TEST(DisplayListVertices, BuildWithTexAndColorAndIndices) {
   builder.store_texture_coordinates(texture_coords);
   builder.store_colors(colors);
   builder.store_indices(indices);
-  std::shared_ptr<const DlVertices> vertices = builder.build();
+  std::shared_ptr<DlVertices> vertices = builder.build();
 
   ASSERT_NE(vertices, nullptr);
   ASSERT_NE(vertices->vertices(), nullptr);
@@ -491,11 +491,11 @@ TEST(DisplayListVertices, BuildWithTexAndColorAndIndices) {
   builder2.store_texture_coordinates(texture_coords);
   builder2.store_colors(colors);
   builder2.store_indices(indices);
-  std::shared_ptr<const DlVertices> vertices2 = builder2.build();
+  std::shared_ptr<DlVertices> vertices2 = builder2.build();
 
   TestEquals(*vertices, *vertices2);
 
-  std::shared_ptr<const DlVertices> vertices3 = DlVertices::Make(
+  std::shared_ptr<DlVertices> vertices3 = DlVertices::Make(
       DlVertexMode::kTriangles, 3, coords, texture_coords, colors, 6, indices);
 
   TestEquals(*vertices, *vertices3);
@@ -523,7 +523,7 @@ TEST(DisplayListVertices, BuildWithTexAndColor) {
   builder.store_vertices(coords);
   builder.store_texture_coordinates(texture_coords);
   builder.store_colors(colors);
-  std::shared_ptr<const DlVertices> vertices = builder.build();
+  std::shared_ptr<DlVertices> vertices = builder.build();
 
   ASSERT_NE(vertices, nullptr);
   ASSERT_NE(vertices->vertices(), nullptr);
@@ -563,7 +563,7 @@ TEST(DisplayListVertices, BuildWithTexAndIndices) {
   builder.store_vertices(coords);
   builder.store_texture_coordinates(texture_coords);
   builder.store_indices(indices);
-  std::shared_ptr<const DlVertices> vertices = builder.build();
+  std::shared_ptr<DlVertices> vertices = builder.build();
 
   ASSERT_NE(vertices, nullptr);
   ASSERT_NE(vertices->vertices(), nullptr);
@@ -605,7 +605,7 @@ TEST(DisplayListVertices, BuildWithColorAndIndices) {
   builder.store_vertices(coords);
   builder.store_colors(colors);
   builder.store_indices(indices);
-  std::shared_ptr<const DlVertices> vertices = builder.build();
+  std::shared_ptr<DlVertices> vertices = builder.build();
 
   ASSERT_NE(vertices, nullptr);
   ASSERT_NE(vertices->vertices(), nullptr);
@@ -642,7 +642,7 @@ TEST(DisplayListVertices, BuildWithTexUsingPoints) {
                   Builder::kHasTextureCoordinates, 0);
   builder.store_vertices(coords);
   builder.store_texture_coordinates(texture_coords);
-  std::shared_ptr<const DlVertices> vertices = builder.build();
+  std::shared_ptr<DlVertices> vertices = builder.build();
 
   ASSERT_NE(vertices, nullptr);
   ASSERT_NE(vertices->vertices(), nullptr);
@@ -676,7 +676,7 @@ TEST(DisplayListVertices, BuildWithTexUsingFloats) {
                   Builder::kHasTextureCoordinates, 0);
   builder.store_vertices(coords);
   builder.store_texture_coordinates(texture_coords);
-  std::shared_ptr<const DlVertices> vertices = builder.build();
+  std::shared_ptr<DlVertices> vertices = builder.build();
 
   ASSERT_NE(vertices, nullptr);
   ASSERT_NE(vertices->vertices(), nullptr);
@@ -723,13 +723,13 @@ TEST(DisplayListVertices, BuildUsingFloatsSameAsPoints) {
                          Builder::kHasTextureCoordinates, 0);
   builder_points.store_vertices(coord_points);
   builder_points.store_texture_coordinates(texture_coord_points);
-  std::shared_ptr<const DlVertices> vertices_points = builder_points.build();
+  std::shared_ptr<DlVertices> vertices_points = builder_points.build();
 
   Builder builder_floats(DlVertexMode::kTriangles, 3,  //
                          Builder::kHasTextureCoordinates, 0);
   builder_floats.store_vertices(coord_floats);
   builder_floats.store_texture_coordinates(texture_coord_floats);
-  std::shared_ptr<const DlVertices> vertices_floats = builder_floats.build();
+  std::shared_ptr<DlVertices> vertices_floats = builder_floats.build();
 
   TestEquals(*vertices_points, *vertices_floats);
 }
@@ -750,7 +750,7 @@ TEST(DisplayListVertices, BuildWithColor) {
                   Builder::kHasColors, 0);
   builder.store_vertices(coords);
   builder.store_colors(colors);
-  std::shared_ptr<const DlVertices> vertices = builder.build();
+  std::shared_ptr<DlVertices> vertices = builder.build();
 
   ASSERT_NE(vertices, nullptr);
   ASSERT_NE(vertices->vertices(), nullptr);
@@ -782,7 +782,7 @@ TEST(DisplayListVertices, BuildWithIndices) {
   Builder builder(DlVertexMode::kTriangles, 3, Builder::kNone, 6);
   builder.store_vertices(coords);
   builder.store_indices(indices);
-  std::shared_ptr<const DlVertices> vertices = builder.build();
+  std::shared_ptr<DlVertices> vertices = builder.build();
 
   ASSERT_NE(vertices, nullptr);
   ASSERT_NE(vertices->vertices(), nullptr);
@@ -811,7 +811,7 @@ TEST(DisplayListVertices, BuildWithNoOptionalData) {
 
   Builder builder(DlVertexMode::kTriangles, 3, Builder::kNone, 0);
   builder.store_vertices(coords);
-  std::shared_ptr<const DlVertices> vertices = builder.build();
+  std::shared_ptr<DlVertices> vertices = builder.build();
 
   ASSERT_NE(vertices, nullptr);
   ASSERT_NE(vertices->vertices(), nullptr);
@@ -837,7 +837,7 @@ TEST(DisplayListVertices, BuildWithNegativeIndexCount) {
 
   Builder builder(DlVertexMode::kTriangles, 3, Builder::kNone, -5);
   builder.store_vertices(coords);
-  std::shared_ptr<const DlVertices> vertices = builder.build();
+  std::shared_ptr<DlVertices> vertices = builder.build();
 
   ASSERT_NE(vertices, nullptr);
   ASSERT_NE(vertices->vertices(), nullptr);
@@ -875,9 +875,9 @@ TEST(DisplayListVertices, TestEquals) {
       1, 2, 0,
   };
 
-  std::shared_ptr<const DlVertices> vertices1 = DlVertices::Make(
+  std::shared_ptr<DlVertices> vertices1 = DlVertices::Make(
       DlVertexMode::kTriangles, 3, coords, texture_coords, colors, 6, indices);
-  std::shared_ptr<const DlVertices> vertices2 = DlVertices::Make(
+  std::shared_ptr<DlVertices> vertices2 = DlVertices::Make(
       DlVertexMode::kTriangles, 3, coords, texture_coords, colors, 6, indices);
   TestEquals(*vertices1, *vertices2);
 }
@@ -930,47 +930,47 @@ TEST(DisplayListVertices, TestNotEquals) {
       2, 3, 1,
   };
 
-  std::shared_ptr<const DlVertices> vertices1 = DlVertices::Make(
+  std::shared_ptr<DlVertices> vertices1 = DlVertices::Make(
       DlVertexMode::kTriangles, 4, coords, texture_coords, colors, 9, indices);
 
   {
-    std::shared_ptr<const DlVertices> vertices2 =
+    std::shared_ptr<DlVertices> vertices2 =
         DlVertices::Make(DlVertexMode::kTriangleFan, 4, coords,  //
                          texture_coords, colors, 9, indices);
     TestNotEquals(*vertices1, *vertices2, "vertex mode differs");
   }
   {
-    std::shared_ptr<const DlVertices> vertices2 =
+    std::shared_ptr<DlVertices> vertices2 =
         DlVertices::Make(DlVertexMode::kTriangles, 3, coords,  //
                          texture_coords, colors, 9, indices);
     TestNotEquals(*vertices1, *vertices2, "vertex count differs");
   }
   {
-    std::shared_ptr<const DlVertices> vertices2 =
+    std::shared_ptr<DlVertices> vertices2 =
         DlVertices::Make(DlVertexMode::kTriangles, 4, wrong_coords,  //
                          texture_coords, colors, 9, indices);
     TestNotEquals(*vertices1, *vertices2, "vertex coordinates differ");
   }
   {
-    std::shared_ptr<const DlVertices> vertices2 =
+    std::shared_ptr<DlVertices> vertices2 =
         DlVertices::Make(DlVertexMode::kTriangles, 4, coords,  //
                          wrong_texture_coords, colors, 9, indices);
     TestNotEquals(*vertices1, *vertices2, "texture coordinates differ");
   }
   {
-    std::shared_ptr<const DlVertices> vertices2 =
+    std::shared_ptr<DlVertices> vertices2 =
         DlVertices::Make(DlVertexMode::kTriangles, 4, coords,  //
                          texture_coords, wrong_colors, 9, indices);
     TestNotEquals(*vertices1, *vertices2, "colors differ");
   }
   {
-    std::shared_ptr<const DlVertices> vertices2 =
+    std::shared_ptr<DlVertices> vertices2 =
         DlVertices::Make(DlVertexMode::kTriangles, 4, coords,  //
                          texture_coords, colors, 6, indices);
     TestNotEquals(*vertices1, *vertices2, "index count differs");
   }
   {
-    std::shared_ptr<const DlVertices> vertices2 =
+    std::shared_ptr<DlVertices> vertices2 =
         DlVertices::Make(DlVertexMode::kTriangles, 4, coords,  //
                          texture_coords, colors, 9, wrong_indices);
     TestNotEquals(*vertices1, *vertices2, "indices differ");

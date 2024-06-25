@@ -390,7 +390,7 @@ TEST(DlOpSpy, DrawVertices) {
     };
     auto dl_vertices = DlVertices::Make(DlVertexMode::kTriangles, 3, vertices,
                                         texture_coordinates, colors, 0);
-    builder.DrawVertices(dl_vertices.get(), DlBlendMode::kSrc, paint);
+    builder.DrawVertices(dl_vertices, DlBlendMode::kSrc, paint);
     sk_sp<DisplayList> dl = builder.Build();
     DlOpSpy dl_op_spy;
     dl->Dispatch(dl_op_spy);
@@ -416,7 +416,7 @@ TEST(DlOpSpy, DrawVertices) {
     };
     auto dl_vertices = DlVertices::Make(DlVertexMode::kTriangles, 3, vertices,
                                         texture_coordinates, colors, 0);
-    builder.DrawVertices(dl_vertices.get(), DlBlendMode::kSrc, paint);
+    builder.DrawVertices(dl_vertices, DlBlendMode::kSrc, paint);
     sk_sp<DisplayList> dl = builder.Build();
     DlOpSpy dl_op_spy;
     dl->Dispatch(dl_op_spy);

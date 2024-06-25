@@ -823,7 +823,7 @@ void DisplayListStreamDispatcher::drawPoints(PointMode mode,
                           out_array("points", count, points)
            << ");" << std::endl;
 }
-void DisplayListStreamDispatcher::drawVertices(const DlVertices* vertices,
+void DisplayListStreamDispatcher::drawVertices(const std::shared_ptr<DlVertices>& vertices,
                                                DlBlendMode mode) {
   startl() << "drawVertices("
                << "DlVertices("

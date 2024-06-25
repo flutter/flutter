@@ -182,7 +182,7 @@ class DlDispatcherBase : public flutter::DlOpReceiver {
                   const SkPoint points[]) override;
 
   // |flutter::DlOpReceiver|
-  void drawVertices(const flutter::DlVertices* vertices,
+  void drawVertices(const std::shared_ptr<flutter::DlVertices>& vertices,
                     flutter::DlBlendMode dl_mode) override;
 
   // |flutter::DlOpReceiver|

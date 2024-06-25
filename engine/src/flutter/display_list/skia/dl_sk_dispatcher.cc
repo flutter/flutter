@@ -192,8 +192,9 @@ void DlSkCanvasDispatcher::drawPoints(PointMode mode,
                                       const SkPoint pts[]) {
   canvas_->drawPoints(ToSk(mode), count, pts, paint());
 }
-void DlSkCanvasDispatcher::drawVertices(const DlVertices* vertices,
-                                        DlBlendMode mode) {
+void DlSkCanvasDispatcher::drawVertices(
+    const std::shared_ptr<DlVertices>& vertices,
+    DlBlendMode mode) {
   canvas_->drawVertices(ToSk(vertices), ToSk(mode), paint());
 }
 void DlSkCanvasDispatcher::drawImage(const sk_sp<DlImage> image,

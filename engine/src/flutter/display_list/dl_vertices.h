@@ -112,7 +112,7 @@ class DlVertices {
     Builder(DlVertexMode mode, int vertex_count, Flags flags, int index_count);
 
     /// Returns true iff the underlying object was successfully allocated.
-    bool is_valid() { return vertices_ != nullptr; }
+    bool is_valid() const { return vertices_ != nullptr; }
 
     /// @brief Copies the indicated list of points as vertices.
     ///

@@ -295,7 +295,7 @@ TEST(DisplayListComplexity, DrawVertices) {
   auto vertices = DlVertices::Make(DlVertexMode::kTriangles, points.size(),
                                    points.data(), nullptr, nullptr);
   DisplayListBuilder builder;
-  builder.DrawVertices(vertices.get(), DlBlendMode::kSrc, DlPaint());
+  builder.DrawVertices(vertices, DlBlendMode::kSrc, DlPaint());
   auto display_list = builder.Build();
 
   auto calculators = AccumulatorCalculators();

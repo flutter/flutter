@@ -254,9 +254,10 @@ void DlSkCanvasAdapter::DrawPoints(PointMode mode,
   delegate_->drawPoints(ToSk(mode), count, pts, ToStrokedSk(paint));
 }
 
-void DlSkCanvasAdapter::DrawVertices(const DlVertices* vertices,
-                                     DlBlendMode mode,
-                                     const DlPaint& paint) {
+void DlSkCanvasAdapter::DrawVertices(
+    const std::shared_ptr<DlVertices>& vertices,
+    DlBlendMode mode,
+    const DlPaint& paint) {
   delegate_->drawVertices(ToSk(vertices), ToSk(mode), ToSk(paint));
 }
 
