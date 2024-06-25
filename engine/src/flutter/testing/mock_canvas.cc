@@ -312,7 +312,9 @@ void MockCanvas::DrawImageNine(const sk_sp<DlImage>& image,
   FML_DCHECK(false);
 }
 
-void MockCanvas::DrawVertices(const DlVertices*, DlBlendMode, const DlPaint&) {
+void MockCanvas::DrawVertices(const std::shared_ptr<DlVertices>&,
+                              DlBlendMode,
+                              const DlPaint&) {
   FML_DCHECK(false);
 }
 

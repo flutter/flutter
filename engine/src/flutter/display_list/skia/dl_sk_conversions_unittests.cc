@@ -194,12 +194,12 @@ TEST(DisplayListSkConversions, BlendColorFilterModifiesTransparency) {
 #undef FOR_EACH_BLEND_MODE_ENUM
 
 TEST(DisplayListSkConversions, ConvertWithZeroAndNegativeVerticesAndIndices) {
-  std::shared_ptr<const DlVertices> vertices1 = DlVertices::Make(
+  std::shared_ptr<DlVertices> vertices1 = DlVertices::Make(
       DlVertexMode::kTriangles, 0, nullptr, nullptr, nullptr, 0, nullptr);
   EXPECT_NE(vertices1, nullptr);
   EXPECT_NE(ToSk(vertices1), nullptr);
 
-  std::shared_ptr<const DlVertices> vertices2 = DlVertices::Make(
+  std::shared_ptr<DlVertices> vertices2 = DlVertices::Make(
       DlVertexMode::kTriangles, -1, nullptr, nullptr, nullptr, -1, nullptr);
   EXPECT_NE(vertices2, nullptr);
   EXPECT_NE(ToSk(vertices2), nullptr);

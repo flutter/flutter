@@ -274,7 +274,7 @@ sk_sp<SkMaskFilter> ToSk(const DlMaskFilter* filter) {
   }
 }
 
-sk_sp<SkVertices> ToSk(const DlVertices* vertices) {
+sk_sp<SkVertices> ToSk(const std::shared_ptr<DlVertices>& vertices) {
   const SkColor* sk_colors =
       reinterpret_cast<const SkColor*>(vertices->colors());
   return SkVertices::MakeCopy(ToSk(vertices->mode()), vertices->vertex_count(),

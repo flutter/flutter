@@ -12,7 +12,7 @@
 namespace impeller {
 
 std::shared_ptr<VerticesGeometry> MakeVertices(
-    const flutter::DlVertices* vertices);
+    const std::shared_ptr<const flutter::DlVertices>& vertices);
 
 }  // namespace impeller
 

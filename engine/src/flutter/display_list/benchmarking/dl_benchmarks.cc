@@ -806,7 +806,7 @@ void BM_DrawVertices(benchmark::State& state,
     std::shared_ptr<DlVertices> vertices =
         GetTestVertices(p, radius, 50, mode, vertex_count);
     total_vertex_count += vertex_count;
-    builder.DrawVertices(vertices.get(), DlBlendMode::kSrc, paint);
+    builder.DrawVertices(vertices, DlBlendMode::kSrc, paint);
   }
 
   state.counters["VertexCount"] = total_vertex_count;

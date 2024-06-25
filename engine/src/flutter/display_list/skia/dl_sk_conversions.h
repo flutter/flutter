@@ -114,14 +114,7 @@ inline sk_sp<SkMaskFilter> ToSk(const DlMaskFilter& filter) {
   return ToSk(&filter);
 }
 
-extern sk_sp<SkVertices> ToSk(const DlVertices* vertices);
-inline sk_sp<SkVertices> ToSk(
-    const std::shared_ptr<const DlVertices>& vertices) {
-  return ToSk(vertices.get());
-}
-inline sk_sp<SkVertices> ToSk(const DlVertices& vertices) {
-  return ToSk(&vertices);
-}
+extern sk_sp<SkVertices> ToSk(const std::shared_ptr<DlVertices>& vertices);
 
 }  // namespace flutter
 

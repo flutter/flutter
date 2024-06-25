@@ -494,7 +494,7 @@ void DisplayListGLComplexityCalculator::GLHelper::drawPoints(
 }
 
 void DisplayListGLComplexityCalculator::GLHelper::drawVertices(
-    const DlVertices* vertices,
+    const std::shared_ptr<DlVertices>& vertices,
     DlBlendMode mode) {
   // There is currently no way for us to get the VertexMode from the SkVertices
   // object, but for future reference:

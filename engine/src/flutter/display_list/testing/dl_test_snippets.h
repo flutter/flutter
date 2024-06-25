@@ -192,13 +192,13 @@ static const SkPath kTestPath3 =
 static const SkMatrix kTestMatrix1 = SkMatrix::Scale(2, 2);
 static const SkMatrix kTestMatrix2 = SkMatrix::RotateDeg(45);
 
-static std::shared_ptr<const DlVertices> TestVertices1 =
+static const std::shared_ptr<DlVertices> kTestVertices1 =
     DlVertices::Make(DlVertexMode::kTriangles,  //
                      3,
                      kTestPoints,
                      nullptr,
                      kColors);
-static std::shared_ptr<const DlVertices> TestVertices2 =
+static const std::shared_ptr<DlVertices> kTestVertices2 =
     DlVertices::Make(DlVertexMode::kTriangleFan,  //
                      3,
                      kTestPoints,
