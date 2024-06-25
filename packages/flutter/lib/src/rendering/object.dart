@@ -2196,7 +2196,13 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   ///
   /// This is set in [layout], and consulted by [markNeedsLayout] in deciding
   /// whether to recursively mark the parent as also needing layout.
-  // TODO(gnprice): Just when is _relayoutBoundary null, and what does that mean?
+  ///
+  /// This property is initially null, and becomes null again if this
+  /// render object is removed from the tree (with [dropChild]);
+  /// it remains null until the first layout of this render object
+  /// after it was most recently added to the tree.
+  /// This property can also be null while an ancestor in the tree is
+  /// currently doing layout, until this render object itself does layout.
   RenderObject? _relayoutBoundary;
 
   /// Whether [invokeLayoutCallback] for this render object is currently running.
