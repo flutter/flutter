@@ -1233,35 +1233,36 @@ void main() {
   });
 
   testWidgets('CheckboxListTile use ListTileTheme controlAffinity', (WidgetTester tester) async {
-    Widget buildView(ListTileControlAffinity controlAffinity) {
+    Widget buildListTile(ListTileControlAffinity controlAffinity) {
       return MaterialApp(
-        home: Builder(builder: (BuildContext context) {
-          return Theme(
-            data: ThemeData.light().copyWith(
-              listTileTheme: ListTileTheme.of(context).copyWith(
-                controlAffinity: controlAffinity,
-              ),
+        home: Material(
+          child: ListTileTheme(
+            data: ListTileThemeData(
+              controlAffinity: controlAffinity,
             ),
-            child: Material(
-              child: CheckboxListTile(
-                value: false,
-                onChanged: (bool? value) {},
-              ),
+            child: CheckboxListTile(
+              value: false,
+              onChanged: (bool? value) {},
             ),
-          );
-        }),
+          ),
+        ),
       );
     }
 
-    await tester.pumpWidget(buildView(ListTileControlAffinity.leading));
+    await tester.pumpWidget(buildListTile(ListTileControlAffinity.trailing));
+    final Finder trailing = find.byType(Checkbox);
+    final Offset offsetTrailing = tester.getTopLeft(trailing);
+    expect(offsetTrailing, const Offset(736.0, 8.0));
+
+    await tester.pumpWidget(buildListTile(ListTileControlAffinity.leading));
     final Finder leading = find.byType(Checkbox);
     final Offset offsetLeading = tester.getTopLeft(leading);
     expect(offsetLeading, const Offset(16.0, 8.0));
 
-    await tester.pumpWidget(buildView(ListTileControlAffinity.trailing));
-    final Finder trailing = find.byType(Checkbox);
-    final Offset offsetTrailing = tester.getTopLeft(trailing);
-    expect(offsetTrailing, const Offset(736.0, 8.0));
+    await tester.pumpWidget(buildListTile(ListTileControlAffinity.platform));
+    final Finder platform = find.byType(Checkbox);
+    final Offset offsetPlatform = tester.getTopLeft(platform);
+    expect(offsetPlatform, const Offset(736.0, 8.0));
   });
 }
 

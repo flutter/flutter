@@ -1589,20 +1589,16 @@ void main() {
   testWidgets('ExpansionTile use ListTileTheme controlAffinity', (WidgetTester tester) async {
     Widget buildView(ListTileControlAffinity controlAffinity) {
       return MaterialApp(
-        home: Builder(builder: (BuildContext context) {
-          return Theme(
-            data: ThemeData.light().copyWith(
-              listTileTheme: ListTileTheme.of(context).copyWith(
-                controlAffinity: controlAffinity,
-              ),
+        home: ListTileTheme(
+          data: ListTileThemeData(
+            controlAffinity: controlAffinity,
+          ),
+          child: const Material(
+            child: ExpansionTile(
+              title: Text('ExpansionTile'),
             ),
-            child: const Material(
-              child: ExpansionTile(
-                title: Text('ExpansionTile'),
-              ),
-            ),
-          );
-        }),
+          ),
+        ),
       );
     }
 
@@ -1615,5 +1611,10 @@ void main() {
     final Finder trailing = find.text('ExpansionTile');
     final Offset offsetTrailing = tester.getTopLeft(trailing);
     expect(offsetTrailing, const Offset(16.0, 17.0));
+
+    await tester.pumpWidget(buildView(ListTileControlAffinity.platform));
+    final Finder platform = find.text('ExpansionTile');
+    final Offset offsetPlatform = tester.getTopLeft(platform);
+    expect(offsetPlatform, const Offset(16.0, 17.0));
   });
 }

@@ -1695,22 +1695,18 @@ void main() {
   testWidgets('SwitchListTile use ListTileTheme controlAffinity', (WidgetTester tester) async {
     Widget buildView(ListTileControlAffinity controlAffinity) {
       return MaterialApp(
-        home: Builder(builder: (BuildContext context) {
-          return Theme(
-            data: ThemeData.light().copyWith(
-              listTileTheme: ListTileTheme.of(context).copyWith(
-                controlAffinity: controlAffinity,
-              ),
+        home: Material(
+          child: ListTileTheme(
+            data: ListTileThemeData(
+              controlAffinity: controlAffinity,
             ),
-            child: Material(
-              child: SwitchListTile(
-                value: true,
-                title: const Text('SwitchListTile'),
-                onChanged: (bool value) {},
-              ),
+            child: SwitchListTile(
+              value: true,
+              title: const Text('SwitchListTile'),
+              onChanged: (bool value) {},
             ),
-          );
-        }),
+          ),
+        ),
       );
     }
 
@@ -1723,5 +1719,10 @@ void main() {
     final Finder trailing = find.text('SwitchListTile');
     final Offset offsetTrailing = tester.getTopLeft(trailing);
     expect(offsetTrailing, const Offset(16.0, 16.0));
+
+    await tester.pumpWidget(buildView(ListTileControlAffinity.platform));
+    final Finder platform = find.text('SwitchListTile');
+    final Offset offsetPlatform = tester.getTopLeft(platform);
+    expect(offsetPlatform, const Offset(16.0, 16.0));
   });
 }

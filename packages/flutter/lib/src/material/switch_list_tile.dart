@@ -565,14 +565,16 @@ class SwitchListTile extends StatelessWidget {
           ),
         );
     }
-    final ThemeData theme = Theme.of(context);
-    final ListTileControlAffinity controlAffinity = this.controlAffinity ?? theme.listTileTheme.controlAffinity ?? ListTileControlAffinity.platform;
+
+    final ListTileThemeData listTileTheme = ListTileTheme.of(context);
+    final ListTileControlAffinity controlAffinity = this.controlAffinity ?? listTileTheme.controlAffinity ?? ListTileControlAffinity.platform;
     Widget? leading, trailing;
     (leading, trailing) = switch (controlAffinity) {
       ListTileControlAffinity.leading => (control, secondary),
       ListTileControlAffinity.trailing || ListTileControlAffinity.platform => (secondary, control),
     };
 
+    final ThemeData theme = Theme.of(context);
     final SwitchThemeData switchTheme = SwitchTheme.of(context);
     final Set<MaterialState> states = <MaterialState>{
       if (selected) MaterialState.selected,
