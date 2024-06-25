@@ -23,7 +23,8 @@ const double _kCupertinoFocusColorOpacity = 0.80;
 const double _kCupertinoFocusColorBrightness = 0.69;
 const double _kCupertinoFocusColorSaturation = 0.835;
 
-// Eyeballed from Apple Design Resources figma files for macOS Sonoma.
+// Eyeballed from Apple Design Resources figma files for macOS Sonoma:
+// https://www.figma.com/design/vmIRIt4jgAmSFvXO0SAxU2/Apple-Design-Resources---macOS-(Community)
 final Color _kDisabledOuterColor = CupertinoColors.white.withOpacity(0.58);
 final Color _kDisabledInnerColor = CupertinoColors.black.withOpacity(0.25);
 
