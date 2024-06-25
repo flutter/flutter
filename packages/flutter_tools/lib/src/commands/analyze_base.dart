@@ -208,7 +208,6 @@ class PackageDependencyTracker {
       }
     }
 
-    // prepare a union of all the .packages files
     if (dependencies.hasConflicts) {
       final StringBuffer message = StringBuffer();
       message.writeln(dependencies.generateConflictReport());
