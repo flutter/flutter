@@ -783,7 +783,7 @@ mixin SchedulerBinding on BindingBase {
   ///
   /// In debug mode, if [debugTracePostFrameCallbacks] is set to true, then the
   /// registered callback will show up in the timeline events chart, which can
-  /// be viewed in [DevTools](https://docs.flutter.dev/tools/devtools/overview).
+  /// be viewed in [DevTools](https://docs.flutter.dev/tools/devtools).
   /// In that case, the `debugLabel` argument specifies the name of the callback
   /// as it will appear in the timeline. In profile and release builds,
   /// post-frame are never traced, and the `debugLabel` argument is ignored.
