@@ -13,6 +13,10 @@ static NSString* const kCanRedo = @"canRedo";
 
 @interface FlutterUndoManagerPlugin ()
 @property(nonatomic, weak, readonly) id<FlutterUndoManagerDelegate> undoManagerDelegate;
+
+// When the delegate is `FlutterEngine` this will be the `FlutterViewController`'s undo manager.
+// Strongly retain to ensure this target's actions are completely removed during dealloc.
+@property(nonatomic) NSUndoManager* undoManager;
 @end
 
 @implementation FlutterUndoManagerPlugin
@@ -28,13 +32,14 @@ static NSString* const kCanRedo = @"canRedo";
 }
 
 - (void)dealloc {
-  [_undoManagerDelegate.undoManager removeAllActionsWithTarget:self];
+  [_undoManager removeAllActionsWithTarget:self];
 }
 
 - (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result {
   NSString* method = call.method;
   id args = call.arguments;
   if ([method isEqualToString:kSetUndoStateMethod]) {
+    self.undoManager = self.undoManagerDelegate.undoManager;
     [self setUndoState:args];
     result(nil);
   } else {
@@ -43,11 +48,11 @@ static NSString* const kCanRedo = @"canRedo";
 }
 
 - (void)resetUndoManager {
-  [self.undoManagerDelegate.undoManager removeAllActionsWithTarget:self];
+  [self.undoManager removeAllActionsWithTarget:self];
 }
 
 - (void)registerUndoWithDirection:(FlutterUndoRedoDirection)direction {
-  NSUndoManager* undoManager = self.undoManagerDelegate.undoManager;
+  NSUndoManager* undoManager = self.undoManager;
   [undoManager beginUndoGrouping];
   [undoManager registerUndoWithTarget:self
                               handler:^(FlutterUndoManagerPlugin* target) {
@@ -64,7 +69,7 @@ static NSString* const kCanRedo = @"canRedo";
 }
 
 - (void)registerRedo {
-  NSUndoManager* undoManager = self.undoManagerDelegate.undoManager;
+  NSUndoManager* undoManager = self.undoManager;
   [undoManager beginUndoGrouping];
   [undoManager registerUndoWithTarget:self
                               handler:^(id target) {
@@ -76,7 +81,7 @@ static NSString* const kCanRedo = @"canRedo";
 }
 
 - (void)setUndoState:(NSDictionary*)dictionary {
-  NSUndoManager* undoManager = self.undoManagerDelegate.undoManager;
+  NSUndoManager* undoManager = self.undoManager;
   BOOL groupsByEvent = undoManager.groupsByEvent;
   undoManager.groupsByEvent = NO;
   BOOL canUndo = [dictionary[kCanUndo] boolValue];
