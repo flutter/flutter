@@ -1160,7 +1160,7 @@ abstract class ResidentRunner extends ResidentHandlers {
 
   final CommandHelp commandHelp;
   final bool machine;
- 
+
   // TODO(bkonyi): remove when ready to serve DevTools from DDS.
   @override
   ResidentDevtoolsHandler? get residentDevtoolsHandler => _residentDevtoolsHandler;
