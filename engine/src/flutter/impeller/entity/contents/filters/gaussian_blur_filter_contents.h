@@ -56,8 +56,8 @@ class GaussianBlurFilterContents final : public FilterContents {
       BlurStyle mask_blur_style,
       const std::shared_ptr<Geometry>& mask_geometry);
 
-  Scalar GetSigmaX() const { return sigma_x_; }
-  Scalar GetSigmaY() const { return sigma_y_; }
+  Scalar GetSigmaX() const { return sigma_.x; }
+  Scalar GetSigmaY() const { return sigma_.y; }
 
   // |FilterContents|
   std::optional<Rect> GetFilterSourceCoverage(
@@ -108,8 +108,7 @@ class GaussianBlurFilterContents final : public FilterContents {
       const Rect& coverage,
       const std::optional<Rect>& coverage_hint) const override;
 
-  const Scalar sigma_x_ = 0.0;
-  const Scalar sigma_y_ = 0.0;
+  const Vector2 sigma_ = Vector2(0.0, 0.0);
   const Entity::TileMode tile_mode_;
   const BlurStyle mask_blur_style_;
   std::shared_ptr<Geometry> mask_geometry_;
