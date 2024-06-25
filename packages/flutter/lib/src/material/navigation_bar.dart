@@ -104,6 +104,7 @@ class NavigationBar extends StatelessWidget {
     this.indicatorColor,
     this.indicatorShape,
     this.height,
+    this.safeAreaVerticalOffset,
     this.labelBehavior,
     this.overlayColor,
   }) :  assert(destinations.length >= 2),
@@ -203,6 +204,20 @@ class NavigationBar extends StatelessWidget {
   /// is also null, the default is 80.
   final double? height;
 
+  /// The adjustment on the bottom padding of the [SafeArea].
+  ///
+  /// [NavigationBar] respects the [SafeArea], so its height includes its own
+  /// default height plus the bottom padding of the [SafeArea]. To display more
+  /// content in the main body, [NavigationBar.height] can be updated to a smaller
+  /// value, but this may cause an overlap with the bottom [SafeArea], making
+  /// part of the navigation bar untappable. In this case, this property can be
+  /// used to decrease the bottom padding of the [SafeArea] and ensure that the
+  /// navigtation bar remain tappable.
+  ///
+  /// defaults to 0.0. A positive value means more bottom padding in [SafeArea];
+  /// A negative value means less bottom padding in [SafeArea].
+  final double? safeAreaVerticalOffset;
+
   /// Defines how the [destinations]' labels will be laid out and when they'll
   /// be displayed.
   ///
@@ -234,6 +249,11 @@ class NavigationBar extends StatelessWidget {
       ?? navigationBarTheme.labelBehavior
       ?? defaults.labelBehavior!;
 
+    final double bottomPadding = MediaQuery.paddingOf(context).bottom;
+    final double effectiveSafeAreaVerticalOffset = safeAreaVerticalOffset
+      ?? navigationBarTheme.safeAreaVerticalOffset
+      ?? defaults.safeAreaVerticalOffset!;
+
     return Material(
       color: backgroundColor
         ?? navigationBarTheme.backgroundColor
@@ -242,6 +262,8 @@ class NavigationBar extends StatelessWidget {
       shadowColor: shadowColor ?? navigationBarTheme.shadowColor ?? defaults.shadowColor,
       surfaceTintColor: surfaceTintColor ?? navigationBarTheme.surfaceTintColor ?? defaults.surfaceTintColor,
       child: SafeArea(
+        bottom: false,
+        minimum: EdgeInsets.only(bottom: bottomPadding + effectiveSafeAreaVerticalOffset),
         child: SizedBox(
           height: effectiveHeight,
           child: Row(
@@ -1312,6 +1334,7 @@ class _NavigationBarDefaultsM2 extends NavigationBarThemeData {
         _colors = Theme.of(context).colorScheme,
         super(
           height: 80.0,
+          safeAreaVerticalOffset: 0.0,
           elevation: 0.0,
           indicatorShape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16))),
           labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
@@ -1347,6 +1370,7 @@ class _NavigationBarDefaultsM3 extends NavigationBarThemeData {
   _NavigationBarDefaultsM3(this.context)
       : super(
           height: 80.0,
+          safeAreaVerticalOffset: 0.0,
           elevation: 3.0,
           labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
         );
