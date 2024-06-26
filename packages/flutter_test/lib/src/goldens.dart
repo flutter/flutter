@@ -148,7 +148,7 @@ abstract class GoldenFileComparator {
 ///     super.testFile, {
 ///     required double precisionTolerance,
 ///   })  : assert(
-///         0 <= precisionTolerance || precisionTolerance <= 1,
+///         0 <= precisionTolerance && precisionTolerance <= 1,
 ///         'precisionTolerance must be between 0 and 1',
 ///         ),
 ///         _precisionTolerance = precisionTolerance;
