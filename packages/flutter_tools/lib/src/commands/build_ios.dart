@@ -584,7 +584,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
   String _getVersionAppropriateExportMethod(String method) {
     final Version? currVersion = globals.xcode!.currentVersion;
     if (currVersion != null) {
-      if (currVersion.major >= 16 || (currVersion.major == 15 && currVersion.minor > 3)) {
+      if (currVersion >= Version(15, 4, 0)) {
         switch (method) {
           case 'app-store':
             return 'app-store-connect';
