@@ -792,16 +792,6 @@ deps = {
      'dep_type': 'cipd',
    },
 
-  'src/third_party/web_dependencies': {
-     'packages': [
-       {
-         'package': 'flutter/web/canvaskit_bundle',
-         'version': Var('canvaskit_cipd_instance')
-       }
-     ],
-     'dep_type': 'cipd',
-   },
-
   'src/third_party/java/openjdk': {
      'packages': [
        {

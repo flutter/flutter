@@ -223,7 +223,6 @@ final Set<String> skippedPaths = <String>{
   r'third_party/android_tools', // excluded on advice
   r'third_party/java', // only used for Android builds
   r'third_party/libxml', // dependency of the testing system that we don't actually use
-  r'third_party/web_dependencies/canvaskit', // redundant; covered by Skia dependencies
   r'tools', // not distributed in binary
 };
 
