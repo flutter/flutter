@@ -1373,8 +1373,7 @@ void main() {
     });
   });
 
-  testWidgets('Get the page value before the content dimension is determined,do not throw an assertion and return null',
-      (WidgetTester tester) async {
+  testWidgets('Get the page value before the content dimension is determined,do not throw an assertion and return null', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/146986.
     final PageController controller = PageController();
     addTearDown(controller.dispose);
@@ -1385,7 +1384,7 @@ void main() {
           children: <Widget>[
             Builder(
               builder: (BuildContext context) {
-                final String currentPage = controller.hasClients ? '${controller.page}' : 'not empty';
+                final String currentPage = controller.page == null ? 'null' : 'not empty';
                 return Center(child: Text(currentPage));
               },
             ),
@@ -1394,5 +1393,9 @@ void main() {
       ),
     ));
     expect(find.text('null'), findsOneWidget);
+
+    await tester.pump();
+    final String currentPage = controller.page == null ? 'null' : 'not empty';
+    expect(currentPage, 'not empty');
   });
 }
