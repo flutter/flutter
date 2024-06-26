@@ -134,6 +134,7 @@ class SegmentedButton<T> extends StatefulWidget {
     this.style,
     this.showSelectedIcon = true,
     this.selectedIcon,
+    this.direction = Axis.horizontal,
   })  : assert(segments.length > 0),
         assert(selected.length > 0 || emptySelectionAllowed),
         assert(selected.length < 2 || multiSelectionEnabled);
@@ -146,6 +147,11 @@ class SegmentedButton<T> extends StatefulWidget {
   /// If you need more than five options, consider using [FilterChip] or
   /// [ChoiceChip] widgets.
   final List<ButtonSegment<T>> segments;
+
+  /// How the [segments] get aligned, by default its [Axis.horizontal]
+  /// if [Axis.vertical] the segments buttons will aligned in the "y" axis
+  /// and the first item in [segments] will be on the top.
+  final Axis direction;
 
   /// The set of [ButtonSegment.value]s that indicate which [segments] are
   /// selected.
@@ -285,20 +291,30 @@ class SegmentedButton<T> extends StatefulWidget {
     InteractiveInkFeatureFactory? splashFactory,
   }) {
     final MaterialStateProperty<Color?>? foregroundColorProp =
-      (foregroundColor == null && disabledForegroundColor == null && selectedForegroundColor == null)
-        ? null
-        : _SegmentButtonDefaultColor(foregroundColor, disabledForegroundColor, selectedForegroundColor);
+        (foregroundColor == null &&
+                disabledForegroundColor == null &&
+                selectedForegroundColor == null)
+            ? null
+            : _SegmentButtonDefaultColor(foregroundColor,
+                disabledForegroundColor, selectedForegroundColor);
     final MaterialStateProperty<Color?>? backgroundColorProp =
-      (backgroundColor == null && disabledBackgroundColor == null && selectedBackgroundColor == null)
-        ? null
-        : _SegmentButtonDefaultColor(backgroundColor, disabledBackgroundColor, selectedBackgroundColor);
-    final MaterialStateProperty<Color?>? overlayColorProp = (foregroundColor == null &&
-      selectedForegroundColor == null && overlayColor == null)
-        ? null
-        : switch (overlayColor) {
-            (final Color overlayColor) when overlayColor.value == 0 => const MaterialStatePropertyAll<Color?>(Colors.transparent),
-            _ => _SegmentedButtonDefaultsM3.resolveStateColor(foregroundColor, selectedForegroundColor, overlayColor),
-          };
+        (backgroundColor == null &&
+                disabledBackgroundColor == null &&
+                selectedBackgroundColor == null)
+            ? null
+            : _SegmentButtonDefaultColor(backgroundColor,
+                disabledBackgroundColor, selectedBackgroundColor);
+    final MaterialStateProperty<Color?>? overlayColorProp =
+        (foregroundColor == null &&
+                selectedForegroundColor == null &&
+                overlayColor == null)
+            ? null
+            : switch (overlayColor) {
+                (final Color overlayColor) when overlayColor.value == 0 =>
+                  const MaterialStatePropertyAll<Color?>(Colors.transparent),
+                _ => _SegmentedButtonDefaultsM3.resolveStateColor(
+                    foregroundColor, selectedForegroundColor, overlayColor),
+              };
     return TextButton.styleFrom(
       textStyle: textStyle,
       shadowColor: shadowColor,
@@ -393,13 +409,15 @@ class SegmentedButtonState<T> extends State<SegmentedButton<T>> {
 
   /// Controllers for the [ButtonSegment]s.
   @visibleForTesting
-  final Map<ButtonSegment<T>, MaterialStatesController> statesControllers = <ButtonSegment<T>, MaterialStatesController>{};
+  final Map<ButtonSegment<T>, MaterialStatesController> statesControllers =
+      <ButtonSegment<T>, MaterialStatesController>{};
 
   @override
   void didUpdateWidget(covariant SegmentedButton<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget != widget) {
-      statesControllers.removeWhere((ButtonSegment<T> segment, MaterialStatesController controller) {
+      statesControllers.removeWhere(
+          (ButtonSegment<T> segment, MaterialStatesController controller) {
         if (widget.segments.contains(segment)) {
           return false;
         } else {
@@ -414,16 +432,19 @@ class SegmentedButtonState<T> extends State<SegmentedButton<T>> {
     if (!_enabled) {
       return;
     }
-    final bool onlySelectedSegment = widget.selected.length == 1 && widget.selected.contains(segmentValue);
-    final bool validChange = widget.emptySelectionAllowed || !onlySelectedSegment;
+    final bool onlySelectedSegment =
+        widget.selected.length == 1 && widget.selected.contains(segmentValue);
+    final bool validChange =
+        widget.emptySelectionAllowed || !onlySelectedSegment;
     if (validChange) {
-      final bool toggle = widget.multiSelectionEnabled || (widget.emptySelectionAllowed && onlySelectedSegment);
+      final bool toggle = widget.multiSelectionEnabled ||
+          (widget.emptySelectionAllowed && onlySelectedSegment);
       final Set<T> pressedSegment = <T>{segmentValue};
       late final Set<T> updatedSelection;
       if (toggle) {
         updatedSelection = widget.selected.contains(segmentValue)
-          ? widget.selected.difference(pressedSegment)
-          : widget.selected.union(pressedSegment);
+            ? widget.selected.difference(pressedSegment)
+            : widget.selected.union(pressedSegment);
       } else {
         updatedSelection = pressedSegment;
       }
@@ -436,23 +457,30 @@ class SegmentedButtonState<T> extends State<SegmentedButton<T>> {
   @override
   Widget build(BuildContext context) {
     final SegmentedButtonThemeData theme = SegmentedButtonTheme.of(context);
-    final SegmentedButtonThemeData defaults = _SegmentedButtonDefaultsM3(context);
-    final TextDirection direction = Directionality.of(context);
+    final SegmentedButtonThemeData defaults =
+        _SegmentedButtonDefaultsM3(context);
+    final TextDirection textDirection = Directionality.of(context);
 
     const Set<MaterialState> enabledState = <MaterialState>{};
-    const Set<MaterialState> disabledState = <MaterialState>{ MaterialState.disabled };
-    final Set<MaterialState> currentState = _enabled ? enabledState : disabledState;
+    const Set<MaterialState> disabledState = <MaterialState>{
+      MaterialState.disabled
+    };
+    final Set<MaterialState> currentState =
+        _enabled ? enabledState : disabledState;
 
     P? effectiveValue<P>(P? Function(ButtonStyle? style) getProperty) {
-      late final P? widgetValue  = getProperty(widget.style);
-      late final P? themeValue   = getProperty(theme.style);
+      late final P? widgetValue = getProperty(widget.style);
+      late final P? themeValue = getProperty(theme.style);
       late final P? defaultValue = getProperty(defaults.style);
       return widgetValue ?? themeValue ?? defaultValue;
     }
 
-    P? resolve<P>(MaterialStateProperty<P>? Function(ButtonStyle? style) getProperty, [Set<MaterialState>? states]) {
+    P? resolve<P>(
+        MaterialStateProperty<P>? Function(ButtonStyle? style) getProperty,
+        [Set<MaterialState>? states]) {
       return effectiveValue(
-        (ButtonStyle? style) => getProperty(style)?.resolve(states ?? currentState),
+        (ButtonStyle? style) =>
+            getProperty(style)?.resolve(states ?? currentState),
       );
     }
 
@@ -467,7 +495,8 @@ class SegmentedButtonState<T> extends State<SegmentedButton<T>> {
         padding: style?.padding,
         iconColor: style?.iconColor,
         iconSize: style?.iconSize,
-        shape: const MaterialStatePropertyAll<OutlinedBorder>(RoundedRectangleBorder()),
+        shape: const MaterialStatePropertyAll<OutlinedBorder>(
+            RoundedRectangleBorder()),
         mouseCursor: style?.mouseCursor,
         visualDensity: style?.visualDensity,
         tapTargetSize: style?.tapTargetSize,
@@ -479,43 +508,50 @@ class SegmentedButtonState<T> extends State<SegmentedButton<T>> {
     }
 
     final ButtonStyle segmentStyle = segmentStyleFor(widget.style);
-    final ButtonStyle segmentThemeStyle = segmentStyleFor(theme.style).merge(segmentStyleFor(defaults.style));
+    final ButtonStyle segmentThemeStyle =
+        segmentStyleFor(theme.style).merge(segmentStyleFor(defaults.style));
     final Widget? selectedIcon = widget.showSelectedIcon
-      ? widget.selectedIcon ?? theme.selectedIcon ?? defaults.selectedIcon
-      : null;
+        ? widget.selectedIcon ?? theme.selectedIcon ?? defaults.selectedIcon
+        : null;
 
     Widget buttonFor(ButtonSegment<T> segment) {
-      final Widget label = segment.label ?? segment.icon ?? const SizedBox.shrink();
+      final Widget label =
+          segment.label ?? segment.icon ?? const SizedBox.shrink();
       final bool segmentSelected = widget.selected.contains(segment.value);
       final Widget? icon = (segmentSelected && widget.showSelectedIcon)
-        ? selectedIcon
-        : segment.label != null
-          ? segment.icon
-          : null;
-      final MaterialStatesController controller = statesControllers.putIfAbsent(segment, () => MaterialStatesController());
+          ? selectedIcon
+          : segment.label != null
+              ? segment.icon
+              : null;
+      final MaterialStatesController controller = statesControllers.putIfAbsent(
+          segment, () => MaterialStatesController());
       controller.update(MaterialState.selected, segmentSelected);
 
       final Widget button = icon != null
-        ? TextButton.icon(
-            style: segmentStyle,
-            statesController: controller,
-            onPressed: (_enabled && segment.enabled) ? () => _handleOnPressed(segment.value) : null,
-            icon: icon,
-            label: label,
-          )
-        : TextButton(
-            style: segmentStyle,
-            statesController: controller,
-            onPressed: (_enabled && segment.enabled) ? () => _handleOnPressed(segment.value) : null,
-            child: label,
-          );
+          ? TextButton.icon(
+              style: segmentStyle,
+              statesController: controller,
+              onPressed: (_enabled && segment.enabled)
+                  ? () => _handleOnPressed(segment.value)
+                  : null,
+              icon: icon,
+              label: label,
+            )
+          : TextButton(
+              style: segmentStyle,
+              statesController: controller,
+              onPressed: (_enabled && segment.enabled)
+                  ? () => _handleOnPressed(segment.value)
+                  : null,
+              child: label,
+            );
 
       final Widget buttonWithTooltip = segment.tooltip != null
-        ? Tooltip(
-            message: segment.tooltip,
-            child: button,
-          )
-        : button;
+          ? Tooltip(
+              message: segment.tooltip,
+              child: button,
+            )
+          : button;
 
       return MergeSemantics(
         child: Semantics(
@@ -526,35 +562,63 @@ class SegmentedButtonState<T> extends State<SegmentedButton<T>> {
       );
     }
 
-    final OutlinedBorder resolvedEnabledBorder = resolve<OutlinedBorder?>((ButtonStyle? style) => style?.shape, disabledState) ?? const RoundedRectangleBorder();
-    final OutlinedBorder resolvedDisabledBorder = resolve<OutlinedBorder?>((ButtonStyle? style) => style?.shape, disabledState)?? const RoundedRectangleBorder();
-    final BorderSide enabledSide = resolve<BorderSide?>((ButtonStyle? style) => style?.side, enabledState) ?? BorderSide.none;
-    final BorderSide disabledSide = resolve<BorderSide?>((ButtonStyle? style) => style?.side, disabledState) ?? BorderSide.none;
-    final OutlinedBorder enabledBorder = resolvedEnabledBorder.copyWith(side: enabledSide);
-    final OutlinedBorder disabledBorder = resolvedDisabledBorder.copyWith(side: disabledSide);
-    final VisualDensity resolvedVisualDensity = segmentStyle.visualDensity ?? segmentThemeStyle.visualDensity ?? Theme.of(context).visualDensity;
-    final EdgeInsetsGeometry resolvedPadding = resolve<EdgeInsetsGeometry?>((ButtonStyle? style) => style?.padding, enabledState) ?? EdgeInsets.zero;
-    final MaterialTapTargetSize resolvedTapTargetSize = segmentStyle.tapTargetSize ?? segmentThemeStyle.tapTargetSize ?? Theme.of(context).materialTapTargetSize;
-    final double fontSize = resolve<TextStyle?>((ButtonStyle? style) => style?.textStyle, enabledState)?.fontSize ?? 20.0;
+    final OutlinedBorder resolvedEnabledBorder = resolve<OutlinedBorder?>(
+            (ButtonStyle? style) => style?.shape, disabledState) ??
+        const RoundedRectangleBorder();
+    final OutlinedBorder resolvedDisabledBorder = resolve<OutlinedBorder?>(
+            (ButtonStyle? style) => style?.shape, disabledState) ??
+        const RoundedRectangleBorder();
+    final BorderSide enabledSide = resolve<BorderSide?>(
+            (ButtonStyle? style) => style?.side, enabledState) ??
+        BorderSide.none;
+    final BorderSide disabledSide = resolve<BorderSide?>(
+            (ButtonStyle? style) => style?.side, disabledState) ??
+        BorderSide.none;
+    final OutlinedBorder enabledBorder =
+        resolvedEnabledBorder.copyWith(side: enabledSide);
+    final OutlinedBorder disabledBorder =
+        resolvedDisabledBorder.copyWith(side: disabledSide);
+    final VisualDensity resolvedVisualDensity = segmentStyle.visualDensity ??
+        segmentThemeStyle.visualDensity ??
+        Theme.of(context).visualDensity;
+    final EdgeInsetsGeometry resolvedPadding = resolve<EdgeInsetsGeometry?>(
+            (ButtonStyle? style) => style?.padding, enabledState) ??
+        EdgeInsets.zero;
+    final MaterialTapTargetSize resolvedTapTargetSize =
+        segmentStyle.tapTargetSize ??
+            segmentThemeStyle.tapTargetSize ??
+            Theme.of(context).materialTapTargetSize;
+    final double fontSize = resolve<TextStyle?>(
+                (ButtonStyle? style) => style?.textStyle, enabledState)
+            ?.fontSize ??
+        20.0;
 
     final List<Widget> buttons = widget.segments.map(buttonFor).toList();
 
     final Offset densityAdjustment = resolvedVisualDensity.baseSizeAdjustment;
     const double textButtonMinHeight = 40.0;
 
-    final double adjustButtonMinHeight = textButtonMinHeight + densityAdjustment.dy;
-    final double effectiveVerticalPadding = resolvedPadding.vertical + densityAdjustment.dy * 2;
-    final double effectedButtonHeight = max(fontSize + effectiveVerticalPadding, adjustButtonMinHeight);
+    final double adjustButtonMinHeight =
+        textButtonMinHeight + densityAdjustment.dy;
+    final double effectiveVerticalPadding =
+        resolvedPadding.vertical + densityAdjustment.dy * 2;
+    final double effectedButtonHeight =
+        max(fontSize + effectiveVerticalPadding, adjustButtonMinHeight);
     final double tapTargetVerticalPadding = switch (resolvedTapTargetSize) {
       MaterialTapTargetSize.shrinkWrap => 0.0,
-      MaterialTapTargetSize.padded => max(0, kMinInteractiveDimension + densityAdjustment.dy - effectedButtonHeight)
+      MaterialTapTargetSize.padded => max(
+          0,
+          kMinInteractiveDimension +
+              densityAdjustment.dy -
+              effectedButtonHeight)
     };
 
     return Material(
       type: MaterialType.transparency,
       elevation: resolve<double?>((ButtonStyle? style) => style?.elevation)!,
       shadowColor: resolve<Color?>((ButtonStyle? style) => style?.shadowColor),
-      surfaceTintColor: resolve<Color?>((ButtonStyle? style) => style?.surfaceTintColor),
+      surfaceTintColor:
+          resolve<Color?>((ButtonStyle? style) => style?.surfaceTintColor),
       child: TextButtonTheme(
         data: TextButtonThemeData(style: segmentThemeStyle),
         child: Padding(
@@ -564,7 +628,8 @@ class SegmentedButtonState<T> extends State<SegmentedButton<T>> {
             segments: widget.segments,
             enabledBorder: _enabled ? enabledBorder : disabledBorder,
             disabledBorder: disabledBorder,
-            direction: direction,
+            direction: widget.direction,
+            textDirection: textDirection,
             isExpanded: widget.expandedInsets != null,
             children: buttons,
           ),
@@ -575,7 +640,8 @@ class SegmentedButtonState<T> extends State<SegmentedButton<T>> {
 
   @override
   void dispose() {
-    for (final MaterialStatesController controller in statesControllers.values) {
+    for (final MaterialStatesController controller
+        in statesControllers.values) {
       controller.dispose();
     }
     super.dispose();
@@ -583,7 +649,8 @@ class SegmentedButtonState<T> extends State<SegmentedButton<T>> {
 }
 
 @immutable
-class _SegmentButtonDefaultColor extends MaterialStateProperty<Color?> with Diagnosticable {
+class _SegmentButtonDefaultColor extends MaterialStateProperty<Color?>
+    with Diagnosticable {
   _SegmentButtonDefaultColor(this.color, this.disabled, this.selected);
 
   final Color? color;
@@ -609,6 +676,7 @@ class _SegmentedButtonRenderWidget<T> extends MultiChildRenderObjectWidget {
     required this.enabledBorder,
     required this.disabledBorder,
     required this.direction,
+    required this.textDirection,
     required this.tapTargetVerticalPadding,
     required this.isExpanded,
     required super.children,
@@ -617,41 +685,48 @@ class _SegmentedButtonRenderWidget<T> extends MultiChildRenderObjectWidget {
   final List<ButtonSegment<T>> segments;
   final OutlinedBorder enabledBorder;
   final OutlinedBorder disabledBorder;
-  final TextDirection direction;
+  final Axis direction;
+  final TextDirection textDirection;
   final double tapTargetVerticalPadding;
   final bool isExpanded;
 
   @override
   RenderObject createRenderObject(BuildContext context) {
     return _RenderSegmentedButton<T>(
-      segments: segments,
-      enabledBorder: enabledBorder,
-      disabledBorder: disabledBorder,
-      textDirection: direction,
-      tapTargetVerticalPadding: tapTargetVerticalPadding,
-      isExpanded: isExpanded,
-    );
+        segments: segments,
+        enabledBorder: enabledBorder,
+        disabledBorder: disabledBorder,
+        textDirection: textDirection,
+        tapTargetVerticalPadding: tapTargetVerticalPadding,
+        isExpanded: isExpanded,
+        direction: direction);
   }
 
   @override
-  void updateRenderObject(BuildContext context, _RenderSegmentedButton<T> renderObject) {
+  void updateRenderObject(
+      BuildContext context, _RenderSegmentedButton<T> renderObject) {
     renderObject
       ..segments = segments
       ..enabledBorder = enabledBorder
       ..disabledBorder = disabledBorder
-      ..textDirection = direction;
+      ..direction = direction
+      ..textDirection = textDirection;
   }
 }
 
-class _SegmentedButtonContainerBoxParentData extends ContainerBoxParentData<RenderBox> {
+class _SegmentedButtonContainerBoxParentData
+    extends ContainerBoxParentData<RenderBox> {
   RRect? surroundingRect;
 }
 
 typedef _NextChild = RenderBox? Function(RenderBox child);
 
-class _RenderSegmentedButton<T> extends RenderBox with
-     ContainerRenderObjectMixin<RenderBox, ContainerBoxParentData<RenderBox>>,
-     RenderBoxContainerDefaultsMixin<RenderBox, ContainerBoxParentData<RenderBox>> {
+class _RenderSegmentedButton<T> extends RenderBox
+    with
+        ContainerRenderObjectMixin<RenderBox,
+            ContainerBoxParentData<RenderBox>>,
+        RenderBoxContainerDefaultsMixin<RenderBox,
+            ContainerBoxParentData<RenderBox>> {
   _RenderSegmentedButton({
     required List<ButtonSegment<T>> segments,
     required OutlinedBorder enabledBorder,
@@ -659,12 +734,14 @@ class _RenderSegmentedButton<T> extends RenderBox with
     required TextDirection textDirection,
     required double tapTargetVerticalPadding,
     required bool isExpanded,
-  }) : _segments = segments,
-       _enabledBorder = enabledBorder,
-       _disabledBorder = disabledBorder,
-       _textDirection = textDirection,
-       _tapTargetVerticalPadding = tapTargetVerticalPadding,
-       _isExpanded = isExpanded;
+    required Axis direction,
+  })  : _segments = segments,
+        _enabledBorder = enabledBorder,
+        _disabledBorder = disabledBorder,
+        _textDirection = textDirection,
+        _direction = direction,
+        _tapTargetVerticalPadding = tapTargetVerticalPadding,
+        _isExpanded = isExpanded;
 
   List<ButtonSegment<T>> get segments => _segments;
   List<ButtonSegment<T>> _segments;
@@ -706,6 +783,16 @@ class _RenderSegmentedButton<T> extends RenderBox with
     markNeedsLayout();
   }
 
+  Axis get direction => _direction;
+  Axis _direction;
+  set direction(Axis value) {
+    if (value == _direction) {
+      return;
+    }
+    _direction = value;
+    markNeedsLayout();
+  }
+
   double get tapTargetVerticalPadding => _tapTargetVerticalPadding;
   double _tapTargetVerticalPadding;
   set tapTargetVerticalPadding(double value) {
@@ -731,7 +818,8 @@ class _RenderSegmentedButton<T> extends RenderBox with
     RenderBox? child = firstChild;
     double minWidth = 0.0;
     while (child != null) {
-      final _SegmentedButtonContainerBoxParentData childParentData = child.parentData! as _SegmentedButtonContainerBoxParentData;
+      final _SegmentedButtonContainerBoxParentData childParentData =
+          child.parentData! as _SegmentedButtonContainerBoxParentData;
       final double childWidth = child.getMinIntrinsicWidth(height);
       minWidth = math.max(minWidth, childWidth);
       child = childParentData.nextSibling;
@@ -744,7 +832,8 @@ class _RenderSegmentedButton<T> extends RenderBox with
     RenderBox? child = firstChild;
     double maxWidth = 0.0;
     while (child != null) {
-      final _SegmentedButtonContainerBoxParentData childParentData = child.parentData! as _SegmentedButtonContainerBoxParentData;
+      final _SegmentedButtonContainerBoxParentData childParentData =
+          child.parentData! as _SegmentedButtonContainerBoxParentData;
       final double childWidth = child.getMaxIntrinsicWidth(height);
       maxWidth = math.max(maxWidth, childWidth);
       child = childParentData.nextSibling;
@@ -757,7 +846,8 @@ class _RenderSegmentedButton<T> extends RenderBox with
     RenderBox? child = firstChild;
     double minHeight = 0.0;
     while (child != null) {
-      final _SegmentedButtonContainerBoxParentData childParentData = child.parentData! as _SegmentedButtonContainerBoxParentData;
+      final _SegmentedButtonContainerBoxParentData childParentData =
+          child.parentData! as _SegmentedButtonContainerBoxParentData;
       final double childHeight = child.getMinIntrinsicHeight(width);
       minHeight = math.max(minHeight, childHeight);
       child = childParentData.nextSibling;
@@ -770,7 +860,8 @@ class _RenderSegmentedButton<T> extends RenderBox with
     RenderBox? child = firstChild;
     double maxHeight = 0.0;
     while (child != null) {
-      final _SegmentedButtonContainerBoxParentData childParentData = child.parentData! as _SegmentedButtonContainerBoxParentData;
+      final _SegmentedButtonContainerBoxParentData childParentData =
+          child.parentData! as _SegmentedButtonContainerBoxParentData;
       final double childHeight = child.getMaxIntrinsicHeight(width);
       maxHeight = math.max(maxHeight, childHeight);
       child = childParentData.nextSibling;
@@ -790,22 +881,47 @@ class _RenderSegmentedButton<T> extends RenderBox with
     }
   }
 
-  void _layoutRects(_NextChild nextChild, RenderBox? leftChild, RenderBox? rightChild) {
+  void _layoutRects(
+      _NextChild nextChild, RenderBox? leftChild, RenderBox? rightChild) {
     RenderBox? child = leftChild;
     double start = 0.0;
+
     while (child != null) {
-      final _SegmentedButtonContainerBoxParentData childParentData = child.parentData! as _SegmentedButtonContainerBoxParentData;
-      final Offset childOffset = Offset(start, 0.0);
+      final _SegmentedButtonContainerBoxParentData childParentData =
+          child.parentData! as _SegmentedButtonContainerBoxParentData;
+      late final Offset childOffset;
+      if (direction == Axis.vertical) {
+        childOffset = Offset(0.0, start);
+      } else {
+        childOffset = Offset(start, 0.0);
+      }
       childParentData.offset = childOffset;
-      final Rect childRect = Rect.fromLTWH(start, 0.0, child.size.width, child.size.height);
+      late final Rect childRect;
+      if (direction == Axis.vertical) {
+        childRect = Rect.fromLTWH(0.0, childParentData.offset.dy,
+            child.size.width, child.size.height);
+      } else {
+        childRect =
+            Rect.fromLTWH(start, 0.0, child.size.width, child.size.height);
+      }
       final RRect rChildRect = RRect.fromRectAndCorners(childRect);
       childParentData.surroundingRect = rChildRect;
-      start += child.size.width;
+      if (direction == Axis.vertical) {
+        start += child.size.height;
+      } else {
+        start += child.size.width;
+      }
       child = nextChild(child);
     }
   }
 
   Size _calculateChildSize(BoxConstraints constraints) {
+    return direction == Axis.horizontal
+        ? _calculateHorizontalChildSize(constraints)
+        : _calculateVerticalChildSize(constraints);
+  }
+
+  Size _calculateHorizontalChildSize(BoxConstraints constraints) {
     double maxHeight = 0;
     RenderBox? child = firstChild;
     double childWidth;
@@ -814,7 +930,8 @@ class _RenderSegmentedButton<T> extends RenderBox with
     } else {
       childWidth = constraints.minWidth / childCount;
       while (child != null) {
-        childWidth = math.max(childWidth, child.getMaxIntrinsicWidth(double.infinity));
+        childWidth =
+            math.max(childWidth, child.getMaxIntrinsicWidth(double.infinity));
         child = childAfter(child);
       }
       childWidth = math.min(childWidth, constraints.maxWidth / childCount);
@@ -828,8 +945,37 @@ class _RenderSegmentedButton<T> extends RenderBox with
     return Size(childWidth, maxHeight);
   }
 
+  Size _calculateVerticalChildSize(BoxConstraints constraints) {
+    double maxWidth = 0;
+    RenderBox? child = firstChild;
+    double childHeight;
+    if (_isExpanded) {
+      childHeight = constraints.maxWidth / childCount;
+    } else {
+      childHeight = constraints.minWidth / childCount;
+      while (child != null) {
+        childHeight =
+            math.max(childHeight, child.getMaxIntrinsicHeight(double.infinity));
+        child = childAfter(child);
+      }
+      childHeight = math.min(childHeight, constraints.maxWidth / childCount);
+    }
+    child = firstChild;
+    while (child != null) {
+      final double boxHeight = child.getMaxIntrinsicWidth(maxWidth);
+      maxWidth = math.max(maxWidth, boxHeight);
+      child = childAfter(child);
+    }
+    return Size(maxWidth, childHeight);
+  }
+
   Size _computeOverallSizeFromChildSize(Size childSize) {
-    return constraints.constrain(Size(childSize.width * childCount, childSize.height));
+    if (direction == Axis.vertical) {
+      return constraints
+          .constrain(Size(childSize.width, childSize.height * childCount));
+    }
+    return constraints
+        .constrain(Size(childSize.width * childCount, childSize.height));
   }
 
   @override
@@ -839,13 +985,17 @@ class _RenderSegmentedButton<T> extends RenderBox with
   }
 
   @override
-  double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
+  double? computeDryBaseline(
+      covariant BoxConstraints constraints, TextBaseline baseline) {
     final Size childSize = _calculateChildSize(constraints);
     final BoxConstraints childConstraints = BoxConstraints.tight(childSize);
 
     BaselineOffset baselineOffset = BaselineOffset.noBaseline;
-    for (RenderBox? child = firstChild; child != null; child = childAfter(child)) {
-      baselineOffset = baselineOffset.minOf(BaselineOffset(child.getDryBaseline(childConstraints, baseline)));
+    for (RenderBox? child = firstChild;
+        child != null;
+        child = childAfter(child)) {
+      baselineOffset = baselineOffset.minOf(
+          BaselineOffset(child.getDryBaseline(childConstraints, baseline)));
     }
     return baselineOffset.offset;
   }
@@ -886,9 +1036,10 @@ class _RenderSegmentedButton<T> extends RenderBox with
 
   @override
   void paint(PaintingContext context, Offset offset) {
-
-    final Rect borderRect = (offset + Offset(0, tapTargetVerticalPadding / 2)) & (Size(size.width, size.height - tapTargetVerticalPadding));
-    final Path borderClipPath = enabledBorder.getInnerPath(borderRect, textDirection: textDirection);
+    final Rect borderRect = (offset + Offset(0, tapTargetVerticalPadding / 2)) &
+        (Size(size.width, size.height - tapTargetVerticalPadding));
+    final Path borderClipPath =
+        enabledBorder.getInnerPath(borderRect, textDirection: textDirection);
     RenderBox? child = firstChild;
     RenderBox? previousChild;
     int index = 0;
@@ -896,10 +1047,14 @@ class _RenderSegmentedButton<T> extends RenderBox with
     Path? disabledClipPath;
 
     while (child != null) {
-      final _SegmentedButtonContainerBoxParentData childParentData = child.parentData! as _SegmentedButtonContainerBoxParentData;
-      final Rect childRect = childParentData.surroundingRect!.outerRect.shift(offset);
+      final _SegmentedButtonContainerBoxParentData childParentData =
+          child.parentData! as _SegmentedButtonContainerBoxParentData;
+      final Rect childRect =
+          childParentData.surroundingRect!.outerRect.shift(offset);
 
-      context.canvas..save()..clipPath(borderClipPath);
+      context.canvas
+        ..save()
+        ..clipPath(borderClipPath);
       context.paintChild(child, childParentData.offset + offset);
       context.canvas.restore();
 
@@ -907,36 +1062,59 @@ class _RenderSegmentedButton<T> extends RenderBox with
       final double segmentLeft;
       final double segmentRight;
       final double dividerPos;
-      final double borderOutset = math.max(enabledBorder.side.strokeOutset, disabledBorder.side.strokeOutset);
+      final double borderOutset = math.max(
+          enabledBorder.side.strokeOutset, disabledBorder.side.strokeOutset);
+
       switch (textDirection) {
         case TextDirection.rtl:
-          segmentLeft = child == lastChild ? borderRect.left - borderOutset : childRect.left;
-          segmentRight = child == firstChild ? borderRect.right + borderOutset : childRect.right;
+          segmentLeft = child == lastChild
+              ? borderRect.left - borderOutset
+              : childRect.left;
+          segmentRight = child == firstChild
+              ? borderRect.right + borderOutset
+              : childRect.right;
           dividerPos = segmentRight;
         case TextDirection.ltr:
-          segmentLeft = child == firstChild ? borderRect.left - borderOutset : childRect.left;
-          segmentRight = child == lastChild ? borderRect.right + borderOutset : childRect.right;
+          segmentLeft = child == firstChild
+              ? borderRect.left - borderOutset
+              : childRect.left;
+          segmentRight = child == lastChild
+              ? borderRect.right + borderOutset
+              : childRect.right;
           dividerPos = segmentLeft;
       }
+
       final Rect segmentClipRect = Rect.fromLTRB(
-        segmentLeft, borderRect.top - borderOutset,
-        segmentRight, borderRect.bottom + borderOutset);
+          segmentLeft,
+          borderRect.top - borderOutset,
+          segmentRight,
+          borderRect.top + borderOutset);
 
       // Add the clip rect to the appropriate border clip path
       if (segments[index].enabled) {
         enabledClipPath = (enabledClipPath ?? Path())..addRect(segmentClipRect);
       } else {
-        disabledClipPath = (disabledClipPath ?? Path())..addRect(segmentClipRect);
+        disabledClipPath = (disabledClipPath ?? Path())
+          ..addRect(segmentClipRect);
       }
 
       // Paint the divider between this segment and the previous one.
       if (previousChild != null) {
-        final BorderSide divider = segments[index - 1].enabled || segments[index].enabled
-          ? enabledBorder.side.copyWith(strokeAlign: 0.0)
-          : disabledBorder.side.copyWith(strokeAlign: 0.0);
-        final Offset top = Offset(dividerPos, borderRect.top);
-        final Offset bottom = Offset(dividerPos, borderRect.bottom);
-        context.canvas.drawLine(top, bottom, divider.toPaint());
+        final BorderSide divider =
+            segments[index - 1].enabled || segments[index].enabled
+                ? enabledBorder.side.copyWith(strokeAlign: 0.0)
+                : disabledBorder.side.copyWith(strokeAlign: 0.0);
+
+        if (direction == Axis.horizontal) {
+          final Offset top = Offset(dividerPos, borderRect.top);
+          final Offset bottom = Offset(dividerPos, borderRect.bottom);
+          context.canvas.drawLine(top, bottom, divider.toPaint());
+        } else if (direction == Axis.vertical) {
+          final topPosition = childRect.top;
+          final Offset start = Offset(borderRect.left, topPosition);
+          final Offset end = Offset(borderRect.right, topPosition);
+          context.canvas.drawLine(start, end, divider.toPaint());
+        }
       }
 
       previousChild = child;
@@ -947,25 +1125,35 @@ class _RenderSegmentedButton<T> extends RenderBox with
     // Paint the outer border for both disabled and enabled clip rect if needed.
     if (disabledClipPath == null) {
       // Just paint the enabled border with no clip.
-      enabledBorder.paint(context.canvas, borderRect, textDirection: textDirection);
+      enabledBorder.paint(context.canvas, borderRect,
+          textDirection: textDirection);
     } else if (enabledClipPath == null) {
       // Just paint the disabled border with no.
-      disabledBorder.paint(context.canvas, borderRect, textDirection: textDirection);
+      disabledBorder.paint(context.canvas, borderRect,
+          textDirection: textDirection);
     } else {
       // Paint both of them clipped appropriately for the children segments.
-      context.canvas..save()..clipPath(enabledClipPath);
-      enabledBorder.paint(context.canvas, borderRect, textDirection: textDirection);
-      context.canvas..restore()..save()..clipPath(disabledClipPath);
-      disabledBorder.paint(context.canvas, borderRect, textDirection: textDirection);
+      context.canvas
+        ..save()
+        ..clipPath(enabledClipPath);
+      enabledBorder.paint(context.canvas, borderRect,
+          textDirection: textDirection);
+      context.canvas
+        ..restore()
+        ..save()
+        ..clipPath(disabledClipPath);
+      disabledBorder.paint(context.canvas, borderRect,
+          textDirection: textDirection);
       context.canvas.restore();
     }
   }
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
+  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
     RenderBox? child = lastChild;
     while (child != null) {
-      final _SegmentedButtonContainerBoxParentData childParentData = child.parentData! as _SegmentedButtonContainerBoxParentData;
+      final _SegmentedButtonContainerBoxParentData childParentData =
+          child.parentData! as _SegmentedButtonContainerBoxParentData;
       if (childParentData.surroundingRect!.contains(position)) {
         return result.addWithPaintOffset(
           offset: childParentData.offset,
