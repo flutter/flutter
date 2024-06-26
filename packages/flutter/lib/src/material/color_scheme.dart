@@ -1833,7 +1833,7 @@ class ColorScheme with Diagnosticable {
   static Future<ui.Image> _imageProviderToScaled(ImageProvider imageProvider) async {
     const int maxDimension = 112;
     final Completer<ui.Image> completer = Completer();
-    final ImageProvider image = ResizeImage(
+    final ImageProvider resizedImageProvider = ResizeImage(
       imageProvider,
       policy: ResizeImagePolicy.fit,
       width: maxDimension,
@@ -1844,7 +1844,7 @@ class ColorScheme with Diagnosticable {
       onError: completer.completeError,
     );
 
-    final ImageStream stream = image.resolve(ImageConfiguration.empty);
+    final ImageStream stream = resizedImageProvider.resolve(ImageConfiguration.empty);
     stream.addListener(listener);
 
     return completer.future
