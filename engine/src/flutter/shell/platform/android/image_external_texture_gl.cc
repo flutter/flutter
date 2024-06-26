@@ -87,7 +87,11 @@ impeller::UniqueEGLImageKHR ImageExternalTextureGL::CreateEGLImage(
   }
 
   EGLDisplay display = eglGetCurrentDisplay();
-  FML_CHECK(display != EGL_NO_DISPLAY);
+  if (display == EGL_NO_DISPLAY) {
+    // This could happen when running in a deferred task that executes after
+    // the thread has lost its EGL state.
+    return impeller::UniqueEGLImageKHR();
+  }
 
   EGLClientBuffer client_buffer =
       impeller::android::GetProcTable().eglGetNativeClientBufferANDROID(
