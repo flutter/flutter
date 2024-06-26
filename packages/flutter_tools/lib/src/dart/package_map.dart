@@ -6,7 +6,6 @@ import 'dart:isolate';
 import 'dart:typed_data';
 
 import 'package:package_config/package_config.dart';
-import 'package:path/path.dart';
 
 import '../base/common.dart';
 import '../base/file_system.dart';
@@ -24,22 +23,21 @@ Future<PackageConfig> currentPackageConfig() async {
 /// Returns `null` if no package_config.json was found.
 File? findPackageConfigFile(Directory dir) {
   final FileSystem fileSystem = dir.fileSystem;
-  final Context path = fileSystem.path;
 
   String candidateDir = fileSystem.path.absolute(dir.path);
   while (true) {
     final File candidatePackageConfigFile = fileSystem.file(
-      path.join(candidateDir, '.dart_tool', 'package_config.json'),
+      fileSystem.path.join(candidateDir, '.dart_tool', 'package_config.json'),
     );
     if (fileSystem.file(candidatePackageConfigFile).existsSync()) {
       return candidatePackageConfigFile;
     }
     // TODO(sigurdm): we should not need to check this file, it is obsolete.
-    final File candidatePackagesFile = fileSystem.file(path.join(candidateDir, '.packages'));
+    final File candidatePackagesFile = fileSystem.file(fileSystem.path.join(candidateDir, '.packages'));
     if (fileSystem.file(candidatePackagesFile).existsSync()) {
       return candidatePackagesFile;
     }
-    final String nextDir = path.dirname(candidateDir);
+    final String nextDir = fileSystem.path.dirname(candidateDir);
     if (nextDir == candidateDir) {
       return null;
     }
