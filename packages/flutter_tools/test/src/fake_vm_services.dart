@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:test/test.dart' hide test;
@@ -22,7 +23,7 @@ class FakeVmServiceHost {
     _vmService = FlutterVmService(vm_service.VmService(
       _input.stream,
       _output.add,
-    ), httpAddress: httpAddress, wsAddress: wsAddress);
+    ), httpAddress: httpAddress, wsAddress: wsAddress, logger: BufferLogger.test());
     _applyStreamListen();
     _output.stream.listen((String data) {
       final Map<String, Object?> request = json.decode(data) as Map<String, Object?>;

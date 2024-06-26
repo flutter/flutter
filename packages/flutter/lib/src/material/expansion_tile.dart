@@ -613,6 +613,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
   void dispose() {
     _tileController._state = null;
     _animationController.dispose();
+    _heightFactor.dispose();
     _timer?.cancel();
     _timer = null;
     super.dispose();

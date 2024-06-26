@@ -66,7 +66,8 @@ class _AnimatedListSampleState extends State<AnimatedListSample> {
   // Insert the "next item" into the list model.
   void _insert() {
     final int index = _selectedItem == null ? _list.length : _list.indexOf(_selectedItem!);
-    _list.insert(index, _nextItem++);
+    _list.insert(index, _nextItem);
+    _nextItem++;
   }
 
   // Remove the selected item from the list model.

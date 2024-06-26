@@ -295,16 +295,9 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
   }
 
   void _removeEmptyGaps() {
-    int j = 0;
-
-    while (j < _children.length) {
-      if (
-        _children[j] is MaterialGap &&
-        _animationTuples[_children[j].key]!.controller.status == AnimationStatus.dismissed
-      ) {
+    for (int j = _children.length - 1; j >= 0; j -= 1) {
+      if (_children[j] is MaterialGap && _animationTuples[_children[j].key]!.controller.isDismissed) {
         _removeChild(j);
-      } else {
-        j += 1;
       }
     }
   }

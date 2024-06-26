@@ -675,12 +675,10 @@ class BouncingScrollPhysics extends ScrollPhysics {
   /// as more of the area past the edge is dragged in (represented by an increasing
   /// `overscrollFraction` which starts at 0 when there is no overscroll).
   double frictionFactor(double overscrollFraction) {
-    switch (decelerationRate) {
-      case ScrollDecelerationRate.fast:
-        return 0.26 * math.pow(1 - overscrollFraction, 2);
-      case ScrollDecelerationRate.normal:
-        return 0.52 * math.pow(1 - overscrollFraction, 2);
-    }
+    return math.pow(1 - overscrollFraction, 2) * switch (decelerationRate) {
+      ScrollDecelerationRate.fast   => 0.26,
+      ScrollDecelerationRate.normal => 0.52,
+    };
   }
 
   @override

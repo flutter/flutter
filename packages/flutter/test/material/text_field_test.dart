@@ -26,11 +26,11 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/clipboard_utils.dart';
 import '../widgets/editable_text_utils.dart';
+import '../widgets/feedback_tester.dart';
 import '../widgets/live_text_utils.dart';
 import '../widgets/process_text_utils.dart';
 import '../widgets/semantics_tester.dart';
 import '../widgets/text_selection_toolbar_utils.dart';
-import 'feedback_tester.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -796,6 +796,92 @@ void main() {
     final EditableText editableTextWidget = tester.widget(editableTextFinder);
     expect(editableTextWidget.onEditingComplete, onEditingComplete);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/127597.
+  testWidgets(
+    'The second TextField is clicked, triggers the onTapOutside callback of the previous TextField',
+        (WidgetTester tester) async {
+      final GlobalKey keyA = GlobalKey();
+      final GlobalKey keyB = GlobalKey();
+      final GlobalKey keyC = GlobalKey();
+      bool outsideClickA = false;
+      bool outsideClickB = false;
+      bool outsideClickC = false;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Align(
+            alignment: Alignment.topLeft,
+            child: Column(
+              children: <Widget>[
+                const Text('Outside'),
+                Material(
+                  child: TextField(
+                    key: keyA,
+                    groupId: 'Group A',
+                    onTapOutside: (PointerDownEvent event) {
+                      outsideClickA = true;
+                    },
+                  ),
+                ),
+                Material(
+                  child: TextField(
+                    key: keyB,
+                    groupId: 'Group B',
+                    onTapOutside: (PointerDownEvent event) {
+                      outsideClickB = true;
+                    },
+                  ),
+                ),
+                Material(
+                  child: TextField(
+                    key: keyC,
+                    groupId: 'Group C',
+                    onTapOutside: (PointerDownEvent event) {
+                      outsideClickC = true;
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump();
+
+      Future<void> click(Finder finder) async {
+        await tester.tap(finder);
+        await tester.enterText(finder, 'Hello');
+        await tester.pump();
+      }
+
+      expect(outsideClickA, false);
+      expect(outsideClickB, false);
+      expect(outsideClickC, false);
+
+      await click(find.byKey(keyA));
+      await tester.showKeyboard(find.byKey(keyA));
+      await tester.idle();
+      expect(outsideClickA, false);
+      expect(outsideClickB, false);
+      expect(outsideClickC, false);
+
+      await click(find.byKey(keyB));
+      expect(outsideClickA, true);
+      expect(outsideClickB, false);
+      expect(outsideClickC, false);
+
+      await click(find.byKey(keyC));
+      expect(outsideClickA, true);
+      expect(outsideClickB, true);
+      expect(outsideClickC, false);
+
+      await tester.tap(find.text('Outside'));
+      expect(outsideClickA, true);
+      expect(outsideClickB, true);
+      expect(outsideClickC, true);
+    },
+  );
 
   testWidgets('TextField has consistent size', (WidgetTester tester) async {
     final Key textFieldKey = UniqueKey();
@@ -1789,6 +1875,48 @@ void main() {
     expect(find.text('Paste'), findsOneWidget);
   }, skip: isContextMenuProvidedByPlatform); // [intended] only applies to platforms where we supply the context menu.
 
+  testWidgets('infinite multi-line text hint text is not ellipsized by default', (WidgetTester tester) async {
+    const String kLongString =
+      'Enter your email Enter your email Enter your '
+      'email Enter your email Enter your email Enter '
+      'your email Enter your email';
+    const double defaultLineHeight = 24;
+    await tester.pumpWidget(overlay(
+      child: const TextField(
+        maxLines: null,
+        decoration: InputDecoration(
+          labelText: 'Email',
+          hintText: kLongString,
+        ),
+      ),
+    ));
+    final Text hintText = tester.widget<Text>(find.text(kLongString));
+    expect(hintText.overflow, isNull);
+    final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.text(kLongString));
+    expect(paragraph.size.height > defaultLineHeight * 2, isTrue);
+  });
+
+  testWidgets('non-infinite multi-line hint text is  ellipsized by default', (WidgetTester tester) async {
+    const String kLongString =
+        'Enter your email Enter your email Enter your '
+        'email Enter your email Enter your email Enter '
+        'your email Enter your email';
+    const double defaultLineHeight = 24;
+    await tester.pumpWidget(overlay(
+      child: const TextField(
+        maxLines: 2,
+        decoration: InputDecoration(
+          labelText: 'Email',
+          hintText: kLongString,
+        ),
+      ),
+    ));
+    final Text hintText = tester.widget<Text>(find.text(kLongString));
+    expect(hintText.overflow, TextOverflow.ellipsis);
+    final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.text(kLongString));
+    expect(paragraph.size.height < defaultLineHeight * 2 + precisionErrorTolerance, isTrue);
+  });
+
   testWidgets('Entering text hides selection handle caret', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController();
 
@@ -1829,6 +1957,56 @@ void main() {
     expect(controller.selection.isCollapsed, true);
     handle = tester.widget(fadeFinder.at(0));
     expect(handle.opacity.value, equals(0.0));
+  });
+
+  testWidgets('multiple text fields with prefix and suffix have correct semantics order.', (WidgetTester tester) async {
+    final TextEditingController controller1 = _textEditingController(
+      text: 'abc',
+    );
+    final TextEditingController controller2 = _textEditingController(
+      text: 'def',
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Column(
+            children: <Widget>[
+              TextField(
+                decoration: const InputDecoration(
+                  prefixText: 'prefix1',
+                  suffixText: 'suffix1',
+                ),
+                enabled: false,
+                controller: controller1,
+              ),
+              TextField(
+                decoration: const InputDecoration(
+                  prefixText: 'prefix2',
+                  suffixText: 'suffix2',
+                ),
+                enabled: false,
+                controller: controller2,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    final List<String> orders = tester.semantics.simulatedAccessibilityTraversal(
+      startNode: find.semantics.byLabel('prefix1'),
+    ).map((SemanticsNode node) => node.label + node.value).toList();
+
+    expect(
+      orders,
+      <String>[
+        'prefix1',
+        'abc',
+        'suffix1',
+        'prefix2',
+        'def',
+        'suffix2',
+      ],
+    );
   });
 
   testWidgets('selection handles are excluded from the semantics', (WidgetTester tester) async {
@@ -2511,6 +2689,7 @@ void main() {
     // https://github.com/flutter/flutter/issues/142624.
     final TextEditingController controller = _textEditingController();
     final PageController pageController = PageController();
+    addTearDown(pageController.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -5276,7 +5455,34 @@ void main() {
       color: Colors.pink[500],
       fontSize: 10.0,
     );
+    final ThemeData themeData = ThemeData();
+
+    await tester.pumpWidget(
+      overlay(
+        child: Theme(
+          data: themeData,
+          child: TextField(
+            decoration: const InputDecoration(
+              hintText: 'Placeholder',
+            ),
+            style: style,
+          ),
+        ),
+      ),
+    );
+
+    final Text hintText = tester.widget(find.text('Placeholder'));
+    expect(hintText.style!.color, themeData.colorScheme.onSurfaceVariant);
+    expect(hintText.style!.fontSize, style.fontSize);
+  });
+
+  testWidgets('Material2 - TextField with default hintStyle', (WidgetTester tester) async {
+    final TextStyle style = TextStyle(
+      color: Colors.pink[500],
+      fontSize: 10.0,
+    );
     final ThemeData themeData = ThemeData(
+      useMaterial3: false,
       hintColor: Colors.blue[500],
     );
 
@@ -6785,7 +6991,7 @@ void main() {
       ),
     );
 
-    expect(semantics, isNot(includesNodeWith(actions: <SemanticsAction>[SemanticsAction.tap])));
+    expect(semantics, isNot(includesNodeWith(actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus])));
     semantics.dispose();
   });
 
@@ -6826,7 +7032,7 @@ void main() {
       ),
     );
 
-    expect(semantics, isNot(includesNodeWith(actions: <SemanticsAction>[SemanticsAction.tap])));
+    expect(semantics, isNot(includesNodeWith(actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus])));
 
     semantics.dispose();
   });

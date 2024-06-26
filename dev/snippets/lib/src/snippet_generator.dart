@@ -43,30 +43,9 @@ class SnippetGenerator {
   static DartFormatter formatter =
       DartFormatter(pageWidth: 80, fixes: StyleFix.all);
 
-  /// Gets the path to the template file requested.
-  File? getTemplatePath(String templateName, {Directory? templatesDir}) {
-    final Directory templateDir =
-        templatesDir ?? configuration.templatesDirectory;
-    final File templateFile = configuration.filesystem
-        .file(path.join(templateDir.path, '$templateName.tmpl'));
-    return templateFile.existsSync() ? templateFile : null;
-  }
-
-  /// Returns an iterable over the template files available in the templates
-  /// directory in the configuration.
-  Iterable<File> getAvailableTemplates() sync* {
-    final Directory templatesDir = configuration.templatesDirectory;
-    for (final File file in templatesDir.listSync().whereType<File>()) {
-      if (file.basename.endsWith('.tmpl')) {
-        yield file;
-      }
-    }
-  }
-
   /// Interpolates the [injections] into an HTML skeleton file.
   ///
-  /// Similar to interpolateTemplate, but we are only looking for `code-`
-  /// components, and we care about the order of the injections.
+  /// The order of the injections is important.
   ///
   /// Takes into account the [type] and doesn't substitute in the id and the app
   /// if not a [SnippetType.sample] snippet.
@@ -77,7 +56,7 @@ class SnippetGenerator {
     final List<String> codeParts = <String>[];
     const HtmlEscape htmlEscape = HtmlEscape();
     String? language;
-    for (final TemplateInjection injection in sample.parts) {
+    for (final SkeletonInjection injection in sample.parts) {
       if (!injection.name.startsWith('code')) {
         continue;
       }
@@ -165,7 +144,7 @@ class SnippetGenerator {
   /// into valid Dart code.
   List<SourceLine> _processBlocks(CodeSample sample) {
     final List<SourceLine> block = sample.parts
-        .expand<SourceLine>((TemplateInjection injection) => injection.contents)
+        .expand<SourceLine>((SkeletonInjection injection) => injection.contents)
         .toList();
     if (block.isEmpty) {
       return <SourceLine>[];
@@ -233,11 +212,11 @@ class SnippetGenerator {
   }
 
   /// Parses the input for the various code and description segments, and
-  /// returns a set of template injections in the order found.
-  List<TemplateInjection> parseInput(CodeSample sample) {
+  /// returns a set of skeleton injections in the order found.
+  List<SkeletonInjection> parseInput(CodeSample sample) {
     bool inCodeBlock = false;
     final List<SourceLine> description = <SourceLine>[];
-    final List<TemplateInjection> components = <TemplateInjection>[];
+    final List<SkeletonInjection> components = <SkeletonInjection>[];
     String? language;
     final RegExp codeStartEnd =
         RegExp(r'^\s*```(?<language>[-\w]+|[-\w]+ (?<section>[-\w]+))?\s*$');
@@ -249,12 +228,12 @@ class SnippetGenerator {
         if (match.namedGroup('language') != null) {
           language = match[1];
           if (match.namedGroup('section') != null) {
-            components.add(TemplateInjection(
+            components.add(SkeletonInjection(
                 'code-${match.namedGroup('section')}', <SourceLine>[],
                 language: language!));
           } else {
             components.add(
-                TemplateInjection('code', <SourceLine>[], language: language!));
+                SkeletonInjection('code', <SourceLine>[], language: language!));
           }
         } else {
           language = null;
@@ -286,9 +265,9 @@ class SnippetGenerator {
       lastWasWhitespace = onlyWhitespace;
     }
     sample.description = descriptionLines.join('\n').trimRight();
-    sample.parts = <TemplateInjection>[
+    sample.parts = <SkeletonInjection>[
       if (sample is SnippetSample)
-        TemplateInjection('#assumptions', sample.assumptions),
+        SkeletonInjection('#assumptions', sample.assumptions),
       ...components,
     ];
     return sample.parts;
@@ -327,10 +306,6 @@ class SnippetGenerator {
   ///
   /// The optional `output` is the file to write the generated sample code to.
   ///
-  /// If `addSectionMarkers` is true, then markers will be added before and
-  /// after each template section in the output.  This is intended to facilitate
-  /// editing of the sample during the authoring process.
-  ///
   /// If `includeAssumptions` is true, then the block in the "Examples can
   /// assume:" block will also be included in the output.
   ///
@@ -341,58 +316,16 @@ class SnippetGenerator {
     String? copyright,
     String? description,
     bool formatOutput = true,
-    bool addSectionMarkers = false,
     bool includeAssumptions = false,
   }) {
     sample.metadata['copyright'] ??= copyright;
-    final List<TemplateInjection> snippetData = parseInput(sample);
+    final List<SkeletonInjection> snippetData = parseInput(sample);
     sample.description = description ?? sample.description;
     sample.metadata['description'] = _getDescription(sample);
-    switch (sample.runtimeType) {
+    switch (sample) {
       case DartpadSample _:
       case ApplicationSample _:
-        String app;
-        if (sample.sourceFile == null) {
-          final String templateName = sample.template;
-          if (templateName.isEmpty) {
-            io.stderr
-                .writeln('Non-linked samples must have a --template argument.');
-            io.exit(1);
-          }
-          final Directory templatesDir = configuration.templatesDirectory;
-          File? templateFile;
-          templateFile =
-              getTemplatePath(templateName, templatesDir: templatesDir);
-          if (templateFile == null) {
-            io.stderr.writeln(
-                'The template $templateName was not found in the templates '
-                'directory ${templatesDir.path}');
-            io.exit(1);
-          }
-          final String templateContents = _loadFileAsUtf8(templateFile);
-          final String templateRelativePath =
-              templateFile.absolute.path.contains(flutterRoot.absolute.path)
-                  ? path.relative(templateFile.absolute.path,
-                      from: flutterRoot.absolute.path)
-                  : templateFile.absolute.path;
-          final String templateHeader = '''
-// Template: $templateRelativePath
-//
-// Comment lines marked with "▼▼▼" and "▲▲▲" are used for authoring
-// of samples, and may be ignored if you are just exploring the sample.
-''';
-          app = interpolateTemplate(
-            snippetData,
-            addSectionMarkers
-                ? '$templateHeader\n$templateContents'
-                : templateContents,
-            sample.metadata,
-            addSectionMarkers: addSectionMarkers,
-            addCopyright: copyright != null,
-          );
-        } else {
-          app = sample.sourceFileContents;
-        }
+        final String app = sample.sourceFileContents;
         sample.output = app;
         if (formatOutput) {
           final DartFormatter formatter =
@@ -421,13 +354,14 @@ class SnippetGenerator {
           metadataFile.writeAsStringSync(jsonEncoder.convert(metadata));
         }
       case SnippetSample _:
-        if (sample is SnippetSample) {
           String app;
           if (sample.sourceFile == null) {
             String templateContents;
             if (includeAssumptions) {
               templateContents =
-                  '${headers.map<String>((SourceLine line) => line.text).join('\n')}\n{{#assumptions}}\n{{description}}\n{{code}}';
+                  '${headers.map<String>((SourceLine line) {
+                    return line.text;
+                  }).join('\n')}\n{{#assumptions}}\n{{description}}\n{{code}}';
             } else {
               templateContents = '{{description}}\n{{code}}';
             }
@@ -435,14 +369,12 @@ class SnippetGenerator {
               snippetData,
               templateContents,
               sample.metadata,
-              addSectionMarkers: addSectionMarkers,
               addCopyright: copyright != null,
             );
           } else {
             app = sample.inputAsString;
           }
           sample.output = app;
-        }
     }
     return sample.output;
   }
