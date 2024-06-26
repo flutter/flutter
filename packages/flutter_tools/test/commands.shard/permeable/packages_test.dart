@@ -315,6 +315,48 @@ flutter:
       ),
     });
 
+    testUsingContext('get fetches packages for a workspace', () async {
+      final String projectPath = await createProject(tempDir,
+        arguments: <String>['--no-pub', '--template=module']);
+      removeGeneratedFiles(projectPath);
+
+      await runCommandIn(projectPath, 'get');
+
+      expect(mockStdio.stdout.writes.map(utf8.decode),
+        allOf(
+          // The output of pub changed, adding backticks around the directory name.
+          // These regexes are tolerant of the backticks being present or absent.
+          contains(matches(RegExp(r'Resolving dependencies in .+flutter_project`?\.\.\.'))),
+          contains(matches(RegExp(r'\+ flutter 0\.0\.0 from sdk flutter'))),
+          contains(matches(RegExp(r'Changed \d+ dependencies in .+flutter_project`?!'))),
+        ),
+      );
+
+      expectDependenciesResolved(projectPath);
+      expectZeroPluginsInjected(projectPath);
+      expect(
+        analyticsTimingEventExists(
+          sentEvents: fakeAnalytics.sentEvents,
+          workflow: 'pub',
+          variableName: 'get',
+          label: 'success',
+        ),
+        true,
+      );
+    }, overrides: <Type, Generator>{
+      Stdio: () => mockStdio,
+      Pub: () => Pub.test(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        processManager: globals.processManager,
+        usage: globals.flutterUsage,
+        botDetector: globals.botDetector,
+        platform: globals.platform,
+        stdio: mockStdio,
+      ),
+      Analytics: () => fakeAnalytics,
+    });
+
     testUsingContext('get generates normal files when l10n.yaml has synthetic-package: false', () async {
       final String projectPath = await createProject(tempDir,
         arguments: <String>['--no-pub', '--template=module']);

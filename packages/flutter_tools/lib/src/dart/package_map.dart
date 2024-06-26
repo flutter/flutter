@@ -27,7 +27,7 @@ File? findPackageConfigFile(Directory dir) {
   final Context path = fileSystem.path;
 
   String candidateDir = fileSystem.path.absolute(dir.path);
-  while(true) {
+  while (true) {
     final File candidatePackageConfigFile = fileSystem.file(
       path.join(candidateDir, '.dart_tool', 'package_config.json'),
     );
