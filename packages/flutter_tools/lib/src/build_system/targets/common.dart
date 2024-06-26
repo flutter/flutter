@@ -242,7 +242,6 @@ class KernelSnapshotProgram extends Target {
       logger: environment.logger,
     );
 
-
     final String dillPath = environment.buildDir.childFile(dillName).path;
 
     final CompilerOutput? output = await compiler.compile(
