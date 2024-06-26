@@ -174,6 +174,7 @@ Future<void> _runGeneralToolTests() async {
     _toolsPath,
     testPaths: <String>[path.join('test', 'general.shard')],
     enableFlutterToolAsserts: false,
+    reporter: 'failures-only',
 
     // Detect unit test time regressions (poor time delay handling, etc).
     // This overrides the 15 minute default for tools tests.
@@ -187,6 +188,7 @@ Future<void> _runCommandsToolTests() async {
     _toolsPath,
     forceSingleCore: true,
     testPaths: <String>[path.join('test', 'commands.shard')],
+    reporter: 'failures-only',
   );
 }
 
@@ -204,6 +206,7 @@ Future<void> _runWebToolTests() async {
     forceSingleCore: true,
     testPaths: selectIndexOfTotalSubshard<String>(allTests),
     includeLocalEngineEnv: true,
+    reporter: 'failures-only',
   );
 }
 
@@ -213,6 +216,7 @@ Future<void> _runToolHostCrossArchTests() {
     // These are integration tests
     forceSingleCore: true,
     testPaths: <String>[path.join('test', 'host_cross_arch.shard')],
+    reporter: 'failures-only',
   );
 }
 
@@ -227,6 +231,7 @@ Future<void> _runIntegrationToolTests() async {
     forceSingleCore: true,
     testPaths: selectIndexOfTotalSubshard<String>(allTests),
     collectMetrics: true,
+    reporter: 'failures-only',
   );
 }
 

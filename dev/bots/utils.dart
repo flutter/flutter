@@ -341,6 +341,7 @@ Future<void> runDartTest(String workingDirectory, {
   bool ensurePrecompiledTool = true,
   bool shuffleTests = true,
   bool collectMetrics = false,
+  String? reporter = 'expanded', // TODO-dontmerge-should we just always use --failures-only?
 }) async {
   int? cpus;
   final String? cpuVariable = Platform.environment['CPU']; // CPU is set in cirrus.yml
@@ -368,7 +369,7 @@ Future<void> runDartTest(String workingDirectory, {
   final List<String> args = <String>[
     'run',
     'test',
-    '--reporter=expanded',
+    '--reporter=$reporter',
     '--file-reporter=json:${metricFile.path}',
     if (shuffleTests) '--test-randomize-ordering-seed=$shuffleSeed',
     '-j$cpus',
