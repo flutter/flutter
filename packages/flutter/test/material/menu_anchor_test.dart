@@ -2227,13 +2227,12 @@ void main() {
 
       expect(find.text('leadingIcon'), findsOneWidget);
     });
+
     testWidgets('autofocus is used when set and widget is enabled',
         (WidgetTester tester) async {
 
       listenForFocusChanges();
 
-      // Note: This DOES NOT WORK WITH MenuBar!
-      // Focus does not work under any circumstance with MenuBar!
 
       await tester.pumpWidget(
         MaterialApp(
