@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:dual_screen/dual_screen.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'deferred_widget.dart';
@@ -24,7 +25,7 @@ import 'studies/starter/routes.dart' as starter_app_routes;
 typedef PathWidgetBuilder = Widget Function(BuildContext, String?);
 
 class Path {
-  const Path(this.pattern, this.builder);
+  const Path(this.pattern, this.builder, {this.openInSecondScreen = false});
 
   /// A RegEx string for route matching.
   final String pattern;
@@ -40,6 +41,9 @@ class Path {
   /// )
   /// ```
   final PathWidgetBuilder builder;
+
+  /// If the route should open on the second screen on foldables.
+  final bool openInSecondScreen;
 }
 
 class RouteConfiguration {
@@ -59,6 +63,7 @@ class RouteConfiguration {
         study: DeferredWidget(rally.loadLibrary,
             () => rally.RallyApp()), // ignore: prefer_const_constructors
       ),
+      openInSecondScreen: true,
     ),
     Path(
       r'^' + shrine_routes.homeRoute,
@@ -66,6 +71,7 @@ class RouteConfiguration {
         study: DeferredWidget(shrine.loadLibrary,
             () => shrine.ShrineApp()), // ignore: prefer_const_constructors
       ),
+      openInSecondScreen: true,
     ),
     Path(
       r'^' + crane_routes.defaultRoute,
@@ -74,6 +80,7 @@ class RouteConfiguration {
             () => crane.CraneApp(), // ignore: prefer_const_constructors
             placeholder: const DeferredLoadingPlaceholder(name: 'Crane')),
       ),
+      openInSecondScreen: true,
     ),
     Path(
       r'^' + fortnightly_routes.defaultRoute,
@@ -83,18 +90,21 @@ class RouteConfiguration {
             // ignore: prefer_const_constructors
             () => fortnightly.FortnightlyApp()),
       ),
+      openInSecondScreen: true,
     ),
     Path(
       r'^' + reply_routes.homeRoute,
       // ignore: prefer_const_constructors
       (BuildContext context, String? match) =>
           const StudyWrapper(study: reply.ReplyApp(), hasBottomNavBar: true),
+      openInSecondScreen: true,
     ),
     Path(
       r'^' + starter_app_routes.defaultRoute,
       (BuildContext context, String? match) => const StudyWrapper(
         study: starter_app.StarterApp(),
       ),
+      openInSecondScreen: true,
     ),
     Path(
       r'^/',
@@ -108,6 +118,7 @@ class RouteConfiguration {
   /// matching.
   static Route<dynamic>? onGenerateRoute(
     RouteSettings settings,
+    bool hasHinge,
   ) {
     for (final Path path in paths) {
       final RegExp regExpPattern = RegExp(path.pattern);
@@ -120,10 +131,17 @@ class RouteConfiguration {
             settings: settings,
           );
         }
-        return MaterialPageRoute<void>(
-          builder: (BuildContext context) => path.builder(context, match),
-          settings: settings,
-        );
+        if (path.openInSecondScreen && hasHinge) {
+          return TwoPanePageRoute<void>(
+            builder: (BuildContext context) => path.builder(context, match),
+            settings: settings,
+          );
+        } else {
+          return MaterialPageRoute<void>(
+            builder: (BuildContext context) => path.builder(context, match),
+            settings: settings,
+          );
+        }
       }
     }
 
@@ -160,7 +178,17 @@ class TwoPanePageRoute<T> extends OverlayRoute<T> {
   @override
   Iterable<OverlayEntry> createOverlayEntries() sync* {
     yield OverlayEntry(builder: (BuildContext context) {
-      return builder.call(context);
+      final Rect? hinge = MediaQuery.of(context).hinge?.bounds;
+      if (hinge == null) {
+        return builder.call(context);
+      } else {
+        return Positioned(
+            top: 0,
+            left: hinge.right,
+            right: 0,
+            bottom: 0,
+            child: builder.call(context));
+      }
     });
   }
 }
