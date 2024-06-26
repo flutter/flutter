@@ -5455,7 +5455,34 @@ void main() {
       color: Colors.pink[500],
       fontSize: 10.0,
     );
+    final ThemeData themeData = ThemeData();
+
+    await tester.pumpWidget(
+      overlay(
+        child: Theme(
+          data: themeData,
+          child: TextField(
+            decoration: const InputDecoration(
+              hintText: 'Placeholder',
+            ),
+            style: style,
+          ),
+        ),
+      ),
+    );
+
+    final Text hintText = tester.widget(find.text('Placeholder'));
+    expect(hintText.style!.color, themeData.colorScheme.onSurfaceVariant);
+    expect(hintText.style!.fontSize, style.fontSize);
+  });
+
+  testWidgets('Material2 - TextField with default hintStyle', (WidgetTester tester) async {
+    final TextStyle style = TextStyle(
+      color: Colors.pink[500],
+      fontSize: 10.0,
+    );
     final ThemeData themeData = ThemeData(
+      useMaterial3: false,
       hintColor: Colors.blue[500],
     );
 
