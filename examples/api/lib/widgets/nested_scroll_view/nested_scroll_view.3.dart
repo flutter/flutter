@@ -34,7 +34,7 @@ class NestedScrollViewExample extends StatelessWidget {
               pinned: true,
               stretch: true,
               backgroundColor: Colors.green,
-              title: Text('SliverAppBar stretch Example'),
+              title: Text('Stretch Nested SliverAppBar'),
             ),
           ];
         },
