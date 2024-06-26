@@ -1393,6 +1393,7 @@
 ../../../flutter/third_party/dart/runtime/bin/process_test.cc
 ../../../flutter/third_party/dart/runtime/bin/secure_socket_utils_test.cc
 ../../../flutter/third_party/dart/runtime/bin/snapshot_utils_test.cc
+../../../flutter/third_party/dart/runtime/bin/uri_test.cc
 ../../../flutter/third_party/dart/runtime/codereview.settings
 ../../../flutter/third_party/dart/runtime/docs
 ../../../flutter/third_party/dart/runtime/observatory/.gitignore
@@ -1403,7 +1404,6 @@
 ../../../flutter/third_party/dart/runtime/observatory/tests
 ../../../flutter/third_party/dart/runtime/observatory/update_sources.py
 ../../../flutter/third_party/dart/runtime/observatory/web/third_party/README.md
-../../../flutter/third_party/dart/runtime/platform/uri_test.cc
 ../../../flutter/third_party/dart/runtime/tests
 ../../../flutter/third_party/dart/runtime/tools/.gitignore
 ../../../flutter/third_party/dart/runtime/tools/android_finder.py
