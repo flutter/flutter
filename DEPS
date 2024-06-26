@@ -682,7 +682,7 @@ deps = {
 
    # Dart packages
   'src/flutter/third_party/pkg/archive':
-  Var('chromium_git') + '/external/github.com/brendan-duncan/archive.git' + '@' + '9de7a0544457c6aba755ccb65abb41b0dc1db70d', # 3.1.2
+  Var('chromium_git') + '/external/github.com/brendan-duncan/archive.git' + '@' + 'f1d164f8f5d8aea0be620a9b1e8d300b75a29388', # 3.6.1
 
   'src/flutter/third_party/pkg/coverage':
   Var('flutter_git') + '/third_party/coverage.git' + '@' + 'bb0ab721ee4ceef1abfa413d8d6fd46013b583b9', # 1.7.2
