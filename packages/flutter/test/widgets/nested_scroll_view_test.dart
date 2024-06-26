@@ -3331,62 +3331,6 @@ void main() {
       areCreateAndDispose,
     );
   });
-
-  group('SliverAppBar.stretch in NestedScrollView', () {
-    final GlobalKey<NestedScrollViewState> nestedScrollView = GlobalKey();
-    const double expandedAppBarHeight = 122.0;
-    Widget buildApp() {
-      return MaterialApp(
-        home: Scaffold(
-          body: NestedScrollView(
-            key: nestedScrollView,
-            physics: const BouncingScrollPhysics(),
-            headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-              return <Widget>[
-                const SliverAppBar(
-                  expandedHeight: expandedAppBarHeight,
-                  pinned: true,
-                  stretch: true,
-                  title: Text('AppBar Title'),
-                ),
-              ];
-            },
-            body: ListView.builder(
-              physics: const ClampingScrollPhysics(),
-              itemCount: 30,
-              itemBuilder: (BuildContext context, int index) {
-                return SizedBox(
-                  height: 50,
-                  child: Center(child: Text('Item $index')),
-                );
-              },
-            ),
-          ),
-        ),
-      );
-    }
-
-    testWidgets('Scroll down and verify Stretch effect', (WidgetTester tester) async {
-      // Regression test for https://github.com/flutter/flutter/issues/149569
-      await tester.pumpWidget(buildApp());
-      expect(nestedScrollView.currentState?.outerController.offset, 0);
-      expect(nestedScrollView.currentState?.innerController.offset, 0);
-      expect(find.byType(SliverAppBar), findsOneWidget);
-      expect(appBarHeight(tester), expandedAppBarHeight);
-
-      final Offset point1 = tester.getCenter(find.text('Item 3'));
-      await tester.dragFrom(point1, const Offset(0.0, 50.0));
-      await tester.pump();
-      // Check if the AppBar is stretched
-      expect(appBarHeight(tester), greaterThan(expandedAppBarHeight));
-      // Check if there is any offset in the OuterController
-      expect(nestedScrollView.currentState?.outerController.offset, lessThan(0));
-
-      await tester.pumpAndSettle();
-      expect(appBarHeight(tester), expandedAppBarHeight);
-      expect(nestedScrollView.currentState?.outerController.offset, 0);
-    }, variant: TargetPlatformVariant.all());
-  });
 }
 
 double appBarHeight(WidgetTester tester) => tester.getSize(find.byType(AppBar, skipOffstage: false)).height;

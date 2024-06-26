@@ -160,13 +160,20 @@ typedef NestedScrollViewHeaderSliversBuilder = List<Widget> Function(BuildContex
 ///
 /// ### Stretching [SliverAppBar]s
 ///
-// See https://github.com/flutter/flutter/issues/54059
 /// Currently, [NestedScrollView] does not support stretching the outer
 /// scrollable by default, e.g. when using [SliverAppBar.stretch].
 ///
-/// If need to support stretching the outer scrollable, you need to set the
+/// If need to support stretching the outer scrollable, will need to set the
 /// bouncing scroll physics to NestedScrollView.physics, and set
 /// ClampingScrollPhysics to the body's scroll view.
+///
+/// {@tool dartpad}
+/// This simple example shows a [NestedScrollView] whose header contains a
+/// stretch [SliverAppBar]. set the bouncing scroll physics to
+/// NestedScrollView.physics, and set ClampingScrollPhysics to the body's scroll view.
+///
+/// ** See code in examples/api/lib/widgets/nested_scroll_view/nested_scroll_view.3.dart **
+/// {@end-tool}
 ///
 /// See also:
 ///
