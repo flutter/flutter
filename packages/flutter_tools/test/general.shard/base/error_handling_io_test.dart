@@ -866,7 +866,7 @@ void main() {
     });
   });
 
-  testWithoutContext('ErrorHandlingFileSystem.systemTempDirectory wraps systemTempDirectory of delegate', () {
+  testWithoutContext("ErrorHandlingFileSystem.systemTempDirectory wraps delegates filesystem's systemTempDirectory", () {
     final FileExceptionHandler exceptionHandler = FileExceptionHandler();
 
     final MemoryFileSystem delegate = MemoryFileSystem.test(
