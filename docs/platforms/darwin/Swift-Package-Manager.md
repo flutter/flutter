@@ -185,13 +185,13 @@ let package = Package(
 ```
 6. Move any resource files from `ios/Assets` to `Sources/plugin_name_ios` (or a subdirectory). Then add them to your Package.swift if applicable. See https://developer.apple.com/documentation/xcode/bundling-resources-with-a-swift-package for more instructions.
 7. Move any public headers from `ios/Classes` to `Sources/plugin_name_ios/include/plugin_name_ios`
-    * If you're unsure what headers are public, check your `podspec` for `public_header_files`. If not found, that means all of your headers were public. You should consider whether or not you want all of your headers to be public.
+    * If you're unsure which headers are public, check your `podspec` for `public_header_files`. If not found, that means all of your headers were public. You should consider whether or not you want all of your headers to be public.
     * The `pluginClass` defined in your pubspec.yaml must be public and within this directory.
 8. Handling modulemap (skip this step if not using a custom modulemap)
 
     If you're using a modulemap for CocoaPods to create a Test submodule, consider removing it for Swift Package Manager. Note that this will make all public headers available via the module.
 
-    To remove it for Swift Package Manager but keep it for CocoaPods, exclude the modulemap and umbrella header in the plugin's Package.swift. The example below assumes they are located within the `Sources/plugin_name_ios/include` directory.
+    To remove the modulemap for Swift Package Manager but keep it for CocoaPods, exclude the modulemap and umbrella header in the plugin's Package.swift. The example below assumes they are located within the `Sources/plugin_name_ios/include` directory.
 
     ```diff
             .target(
