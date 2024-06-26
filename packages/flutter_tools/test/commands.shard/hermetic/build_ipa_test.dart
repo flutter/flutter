@@ -454,6 +454,7 @@ void main() {
 ''';
 
     final String actualIpaPlistContents = fileSystem.file(cachedExportOptionsPlist).readAsStringSync();
+
     expect(actualIpaPlistContents, expectedIpaPlistContents);
     expect(logger.statusText, contains('Building debugging IPA'));
   }, overrides: <Type, Generator>{
