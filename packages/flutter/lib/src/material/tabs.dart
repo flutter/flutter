@@ -554,7 +554,7 @@ class _IndicatorPainter extends CustomPainter {
     _currentRect = Rect.lerp(fromRect, toRect, (value - from).abs());
 
     _currentRect = switch (indicatorSize) {
-      TabBarIndicatorSize.label => _applyStretchEffect(_currentRect!),
+      TabBarIndicatorSize.label => _applyStretchEffect(_currentRect!, fromRect),
       // Do nothing.
       TabBarIndicatorSize.tab => _currentRect,
     };
@@ -575,8 +575,18 @@ class _IndicatorPainter extends CustomPainter {
     _painter!.paint(canvas, _currentRect!.topLeft, configuration);
   }
 
+  // Ease out sine (decelerating).
+  double decelerateIntepolation(double fraction) {
+    return math.sin((fraction * math.pi) / 2.0);
+  }
+
+  // Ease in sine (accelerating).
+  double accelerateIntepolation(double fraction) {
+    return 1.0 - math.cos((fraction * math.pi) / 2.0);
+  }
+
   /// Applies the stretch effect to the indicator.
-  Rect _applyStretchEffect(Rect rect) {
+  Rect _applyStretchEffect(Rect rect, Rect targetRect) {
     // If the tab animation is completed, there is no need to stretch the indicator
     // This only works for the tab change animation via tab index, not when
     // dragging a [TabBarView], but it's still ok, to avoid unnecessary calculations.
@@ -586,57 +596,37 @@ class _IndicatorPainter extends CustomPainter {
 
     final double index = controller.index.toDouble();
     final double value = controller.animation!.value;
-
-    // The progress of the animation from 0 to 1.
-    late double tabChangeProgress;
-
-    // If we are changing tabs via index, we want to map the progress between 0 and 1.
-    if (controller.indexIsChanging) {
-      double progressLeft = (index - value).abs();
-      final int tabsDelta = (controller.index - controller.previousIndex).abs();
-      if (tabsDelta != 0) {
-        progressLeft /= tabsDelta;
-      }
-      tabChangeProgress = 1 - clampDouble(progressLeft, 0.0, 1.0);
-    } else {
-      // Otherwise, the progress is how close we are to the current tab.
-      tabChangeProgress = (index - value).abs();
-    }
+    final double tabChangeProgress = (index - value).abs();
 
     // If the animation has finished, there is no need to apply the stretch effect.
     if (tabChangeProgress == 1.0) {
       return rect;
     }
 
-    // The maximum amount of extra width to add to the indicator.
-    final double stretchSize = rect.width;
+    final bool isMovingRight = rect.left < targetRect.left;
+    final double leftFraction;
+    final double rightFraction;
 
-    final double inflationPerSide = stretchSize * _stretchAnimation.transform(tabChangeProgress) / 2;
-    final Rect stretchedRect = _inflateRectHorizontally(rect, inflationPerSide);
+    if (isMovingRight) {
+      leftFraction = accelerateIntepolation(tabChangeProgress);
+      rightFraction = accelerateIntepolation(tabChangeProgress);
+    } else {
+      leftFraction = decelerateIntepolation(tabChangeProgress);
+      rightFraction = decelerateIntepolation(tabChangeProgress);
+    }
+
+    final Rect stretchedRect = _inflateRectHorizontally(rect, targetRect, leftFraction, rightFraction);
     return stretchedRect;
   }
 
-  /// The animatable that stretches the indicator horizontally when changing tabs.
-  /// Value range is from 0 to 1, so we can multiply it by an stretch factor.
-  ///
-  /// Animation starts with no stretch, then quickly goes to the max stretch amount
-  /// and then goes back to no stretch.
-  late final Animatable<double> _stretchAnimation = TweenSequence<double>(
-    <TweenSequenceItem<double>>[
-      TweenSequenceItem<double>(
-        tween: Tween<double>(begin: 0.0, end: 1.0),
-        weight: 20,
-      ),
-      TweenSequenceItem<double>(
-        tween: Tween<double>(begin: 1.0, end: 0.0),
-        weight: 80,
-      ),
-    ],
-  );
-
   /// Same as [Rect.inflate], but only inflates in the horizontal direction.
-  Rect _inflateRectHorizontally(Rect r, double delta) {
-    return Rect.fromLTRB(r.left - delta, r.top, r.right + delta, r.bottom);
+  Rect _inflateRectHorizontally(Rect rect, Rect targetRect, double leftFraction, double rightFraction) {
+    return Rect.fromLTRB(
+      lerpDouble(rect.left, targetRect.left, leftFraction)!,
+      rect.top,
+      lerpDouble(rect.right, targetRect.right, rightFraction)!,
+      rect.bottom,
+    );
   }
 
   @override
