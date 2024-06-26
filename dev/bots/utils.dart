@@ -341,7 +341,6 @@ Future<void> runDartTest(String workingDirectory, {
   bool ensurePrecompiledTool = true,
   bool shuffleTests = true,
   bool collectMetrics = false,
-  String? reporter = 'expanded', // TODO-dontmerge-should we just always use --failures-only?
 }) async {
   int? cpus;
   final String? cpuVariable = Platform.environment['CPU']; // CPU is set in cirrus.yml
@@ -369,7 +368,7 @@ Future<void> runDartTest(String workingDirectory, {
   final List<String> args = <String>[
     'run',
     'test',
-    '--reporter=$reporter',
+    '--reporter=failures-only',
     '--file-reporter=json:${metricFile.path}',
     if (shuffleTests) '--test-randomize-ordering-seed=$shuffleSeed',
     '-j$cpus',
@@ -429,9 +428,9 @@ Future<void> runDartTest(String workingDirectory, {
     }
   }
 
-  // metriciFile is a transitional file that needs to be deleted once it is parsed.
+  // metricFile is a transitional file that needs to be deleted once it is parsed.
   // TODO(godofredoc): Ensure metricFile is parsed and aggregated before deleting.
-  // https://github.com/flutter/flutter/issues/146003
+  //  https://github.com/flutter/flutter/issues/146003
   metricFile.deleteSync();
 }
 
@@ -460,7 +459,7 @@ Future<void> runFlutterTest(String workingDirectory, {
   final File metricFile = fileSystem.systemTempDirectory.childFile('metrics_$suffix.json');
   final List<String> args = <String>[
     'test',
-    '--reporter=expanded',
+    '--reporter=failures-only',
     '--file-reporter=json:${metricFile.path}',
     if (shuffleTests && !_isRandomizationOff) '--test-randomize-ordering-seed=$shuffleSeed',
     if (fatalWarnings) '--fatal-warnings',
