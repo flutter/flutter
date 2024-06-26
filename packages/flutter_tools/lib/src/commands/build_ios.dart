@@ -24,7 +24,6 @@ import '../ios/application_package.dart';
 import '../ios/mac.dart';
 import '../ios/plist_parser.dart';
 import '../project.dart';
-import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
 import 'build.dart';
 
@@ -769,7 +768,8 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
       );
 
       // When an app is successfully built, record to analytics whether Impeller
-      // is enabled or disabled.
+      // is enabled or disabled. Note that we report the _lack_ of an explicit
+      // flag set as "enabled" because the default is to enable Impeller on iOS.
       final BuildableIOSApp app = await buildableIOSApp;
       final String plistPath = app.project.infoPlist.path;
       final bool? impellerEnabled = globals.plistParser.getValueFromFile<bool>(
@@ -779,11 +779,6 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
       final String buildLabel = impellerEnabled == false
           ? 'plist-impeller-disabled'
           : 'plist-impeller-enabled';
-      BuildEvent(
-        buildLabel,
-        type: 'ios',
-        flutterUsage: globals.flutterUsage,
-      ).send();
       globals.analytics.send(Event.flutterBuildInfo(
         label: buildLabel,
         buildType: 'ios',
