@@ -19,7 +19,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
-  testWidgets('Overall looks correctly under light theme', (WidgetTester tester) async {
+  testWidgets('Overall appearance is correct for the light theme', (WidgetTester tester) async {
     await tester.pumpWidget(
       TestScaffoldApp(
         theme: const CupertinoThemeData(brightness: Brightness.light),
@@ -49,7 +49,7 @@ void main() {
     await gesture.up();
   });
 
-  testWidgets('Overall looks correctly under dark theme', (WidgetTester tester) async {
+  testWidgets('Overall appearance is correct for the dark theme', (WidgetTester tester) async {
     await tester.pumpWidget(
       TestScaffoldApp(
         theme: const CupertinoThemeData(brightness: Brightness.dark),
@@ -244,8 +244,8 @@ void main() {
 
   testWidgets('Has semantic annotations', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
-    await tester.pumpWidget(const MaterialApp(home: Material(
-      child: CupertinoAlertDialog(
+    await tester.pumpWidget(const CupertinoApp(
+      home: CupertinoAlertDialog(
         title: Text('The Title'),
         content: Text('Content'),
         actions: <Widget>[
@@ -253,7 +253,7 @@ void main() {
           CupertinoDialogAction(child: Text('OK')),
         ],
       ),
-    )));
+    ));
 
     expect(
       semantics,
@@ -1156,7 +1156,7 @@ void main() {
 
   testWidgets('Dialog widget insets by MediaQuery viewInsets', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(
+      const CupertinoApp(
         home: MediaQuery(
           data: MediaQueryData(),
           child: CupertinoAlertDialog(content: Placeholder(fallbackHeight: 200.0)),
@@ -1167,7 +1167,7 @@ void main() {
     final Rect placeholderRectWithoutInsets = tester.getRect(find.byType(Placeholder));
 
     await tester.pumpWidget(
-      const MaterialApp(
+      const CupertinoApp(
         home: MediaQuery(
           data: MediaQueryData(viewInsets: EdgeInsets.fromLTRB(40.0, 30.0, 20.0, 10.0)),
           child: CupertinoAlertDialog(content: Placeholder(fallbackHeight: 200.0)),
@@ -1182,70 +1182,6 @@ void main() {
 
     // once animation settles the dialog is padded by the new viewInsets
     expect(tester.getRect(find.byType(Placeholder)), placeholderRectWithoutInsets.translate(10, 10));
-  });
-
-  testWidgets('Material2 - Default cupertino dialog golden', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      createAppWithButtonThatLaunchesDialog(
-        useMaterial3: false,
-        dialogBuilder: (BuildContext context) {
-          return MediaQuery.withClampedTextScaling(
-            minScaleFactor: 3.0,
-            maxScaleFactor: 3.0,
-            child: const RepaintBoundary(
-              child: CupertinoAlertDialog(
-                title: Text('Title'),
-                content: Text('text'),
-                actions: <Widget>[
-                  CupertinoDialogAction(child: Text('No')),
-                  CupertinoDialogAction(child: Text('OK')),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
-    );
-
-    await tester.tap(find.text('Go'));
-    await tester.pumpAndSettle();
-
-    await expectLater(
-      find.byType(CupertinoAlertDialog),
-      matchesGoldenFile('m2_dialog_test.cupertino.default.png'),
-    );
-  });
-
-  testWidgets('Material3 - Default cupertino dialog golden', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      createAppWithButtonThatLaunchesDialog(
-        useMaterial3: true,
-        dialogBuilder: (BuildContext context) {
-          return MediaQuery.withClampedTextScaling(
-            minScaleFactor: 3.0,
-            maxScaleFactor: 3.0,
-            child: const RepaintBoundary(
-              child: CupertinoAlertDialog(
-                title: Text('Title'),
-                content: Text('text'),
-                actions: <Widget>[
-                  CupertinoDialogAction(child: Text('No')),
-                  CupertinoDialogAction(child: Text('OK')),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
-    );
-
-    await tester.tap(find.text('Go'));
-    await tester.pumpAndSettle();
-
-    await expectLater(
-      find.byType(CupertinoAlertDialog),
-      matchesGoldenFile('m3_dialog_test.cupertino.default.png'),
-    );
   });
 
   testWidgets('showCupertinoDialog - custom barrierLabel', (WidgetTester tester) async {
@@ -1359,7 +1295,7 @@ void main() {
   testWidgets('CupertinoAlertDialog scrollbars controllers should be different', (WidgetTester tester) async {
     // https://github.com/flutter/flutter/pull/81278
     await tester.pumpWidget(
-      const MaterialApp(
+      const CupertinoApp(
         home: MediaQuery(
           data: MediaQueryData(),
           child: CupertinoAlertDialog(
@@ -1561,7 +1497,6 @@ RenderBox findScrollableActionsSectionRenderBox(WidgetTester tester) {
 
 Widget createAppWithButtonThatLaunchesDialog({
   required WidgetBuilder dialogBuilder,
-  bool? useMaterial3,
 }) {
   return CupertinoApp(
     home: Center(
@@ -1588,13 +1523,11 @@ Widget boilerplate(Widget child) {
 }
 
 Widget createAppWithCenteredButton(Widget child) {
-  return MaterialApp(
-    home: Material(
-      child: Center(
-        child: ElevatedButton(
-          onPressed: null,
-          child: child,
-        ),
+  return CupertinoApp(
+    home: Center(
+      child: CupertinoButton(
+        onPressed: null,
+        child: child,
       ),
     ),
   );

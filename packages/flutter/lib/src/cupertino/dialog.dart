@@ -430,6 +430,14 @@ class _CupertinoAlertDialogState extends State<CupertinoAlertDialog> {
 /// Additionally, the white paint can be disabled to render a blurred rounded
 /// rectangle without any color (similar to iOS's volume control popup).
 ///
+/// {@tool dartpad}
+/// This sample shows how to use a [CupertinoPopupSurface]. The [CupertinoPopupSurface]
+/// shows a model popup from the bottom of the screen.
+/// Toggling the switch to configure its surface color.
+///
+/// ** See code in examples/api/lib/cupertino/dialog/cupertino_popup_surface.0.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [CupertinoAlertDialog], which is a dialog with a title, content, and
