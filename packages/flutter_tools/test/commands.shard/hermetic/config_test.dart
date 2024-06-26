@@ -265,16 +265,19 @@ void main() {
       final ConfigCommand configCommand = ConfigCommand();
       createTestCommandRunner(configCommand);
 
+      await fakeAnalytics.setTelemetry(false);
       expect(
         configCommand.usage,
         containsIgnoringWhitespace('Analytics reporting is currently disabled'),
       );
 
+      await fakeAnalytics.setTelemetry(true);
       expect(
         configCommand.usage,
         containsIgnoringWhitespace('Analytics reporting is currently enabled'),
       );
     }, overrides: <Type, Generator>{
+      Analytics: () => fakeAnalytics,
     });
   });
 }
