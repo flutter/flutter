@@ -2,17 +2,18 @@
 
 ## Background
 
-Flutter is migrating to use Swift Package Manager for iOS and macOS native dependencies.
+Flutter is migrating to Swift Package Manager to manage iOS and macOS native dependencies.
 This is an experimental feature that may change in the future.
-It is currently only available in the [`master` channel](https://docs.flutter.dev/release/upgrade#switching-flutter-channels).
-We recommend plugin authors add Swift Package Manager support to their packages.
+It is currently only available on the [`master` channel](https://docs.flutter.dev/release/upgrade#switching-flutter-channels).
 Flutter will continue to support CocoaPods until further notice.
 
+We recommend plugin authors add Swift Package Manager support to their packages.
+
 > [!TIP]
-> If you found a bug in Flutter's Swift Package Manager feature,
+> If you find a bug in Flutter's Swift Package Manager feature,
 > please [open an issue](https://github.com/flutter/flutter/issues/new?template=2_bug.yml).
 
-Tracking issue: https://github.com/flutter/flutter/issues/126005.
+Issue tracking Flutter's Swift Package Manager migration: https://github.com/flutter/flutter/issues/126005.
 
 ## For plugin authors
 
