@@ -15,35 +15,36 @@ void main() {
     debugPrint = (String? message, {int? wrapWidth}) {
       log.add(message);
     };
+    try {
+      await tester.pumpWidget(
+        const example.ActionListenerExampleApp(),
+      );
 
-    await tester.pumpWidget(
-      const example.ActionListenerExampleApp(),
-    );
+      expect(find.widgetWithText(AppBar, 'ActionListener Sample'), findsOne);
+      expect(find.widgetWithText(OutlinedButton, 'Enable'), findsOne);
 
-    expect(find.widgetWithText(AppBar, 'ActionListener Sample'), findsOne);
-    expect(find.widgetWithText(OutlinedButton, 'Enable'), findsOne);
+      await tester.tap(find.byType(OutlinedButton));
+      await tester.pump();
 
-    await tester.tap(find.byType(OutlinedButton));
-    await tester.pump();
+      expect(find.widgetWithText(OutlinedButton, 'Disable'), findsOne);
+      expect(find.widgetWithText(ElevatedButton, 'Call Action Listener'), findsOne);
+      expect(log, const <String?>['Action Listener was added']);
 
-    expect(find.widgetWithText(OutlinedButton, 'Disable'), findsOne);
-    expect(find.widgetWithText(ElevatedButton, 'Call Action Listener'), findsOne);
-    expect(log, const <String?>['Action Listener was added']);
+      await tester.tap(find.text('Call Action Listener'));
+      await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Call Action Listener'));
-    await tester.pumpAndSettle();
+      expect(find.widgetWithText(SnackBar, 'Action Listener Called'), findsOne);
 
-    expect(find.widgetWithText(SnackBar, 'Action Listener Called'), findsOne);
+      await tester.tap(find.text('Disable'));
+      await tester.pump();
 
-    await tester.tap(find.text('Disable'));
-    await tester.pump();
-
-    expect(find.widgetWithText(OutlinedButton, 'Enable'), findsOne);
-    expect(
-      log,
-      const <String?>['Action Listener was added', 'Action Listener was removed'],
-    );
-
+      expect(find.widgetWithText(OutlinedButton, 'Enable'), findsOne);
+      expect(
+        log,
+        const <String?>['Action Listener was added', 'Action Listener was removed'],
+      );
+    } finally {
       debugPrint = originalDebugPrint;
+    }
   });
 }
