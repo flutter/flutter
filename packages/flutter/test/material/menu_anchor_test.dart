@@ -2244,7 +2244,7 @@ void main() {
                   menuChildren: <Widget>[
                     MenuItemButton(
                       autofocus: true,
-                      // required for clickability
+                      // Required for clickability.
                       onPressed: () {},
                       child: Text(TestMenu.mainMenu0.label),
                     ),
@@ -2265,8 +2265,7 @@ void main() {
       await tester.pump();
 
       expect(controller.isOpen, equals(true));
-
-      expect(focusedMenu, equals('MenuItemButton(Text("Menu 0"))'));
+      expect(focusedMenu, equals('MenuItemButton(Text("${TestMenu.mainMenu0.label}"))'));
     });
 
     testWidgets('trailingIcon is used when set', (WidgetTester tester) async {
