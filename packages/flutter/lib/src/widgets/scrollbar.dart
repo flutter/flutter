@@ -1976,6 +1976,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     if (!_canHandleScrollGestures()) {
       return gestures;
     }
+
     switch (_axis) {
       case Axis.horizontal:
         gestures[_HorizontalThumbDragGestureRecognizer] =
