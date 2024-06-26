@@ -325,7 +325,7 @@ void main() {
     expect(inner.offset, 0.0);
   });
 
-  testWidgets('NestedScrollView allows taps on children while over-scrolled to the top #145330', (WidgetTester tester) async {
+  testWidgets('NestedScrollView allows taps on children while over-scrolled to the top', (WidgetTester tester) async {
     final Key innerKey = UniqueKey();
     final GlobalKey<NestedScrollViewState> outerKey = GlobalKey();
 
@@ -412,7 +412,7 @@ void main() {
     tapped = false;
   });
 
-  testWidgets('NestedScrollView absorbs touch to stop scrolling when not at the edge, #145330', (WidgetTester tester) async {
+  testWidgets('NestedScrollView absorbs touch to stop scrolling when not at the edge', (WidgetTester tester) async {
     final Key innerKey = UniqueKey();
     final GlobalKey<NestedScrollViewState> outerKey = GlobalKey();
 
@@ -531,7 +531,7 @@ void main() {
     expect(tapped, isTrue);
   });
 
-  testWidgets('NestedScrollView when over-scrolled at the end allows touches on children, #145330', (WidgetTester tester) async {
+  testWidgets('NestedScrollView when over-scrolled at the end allows touches on children', (WidgetTester tester) async {
     final Key innerKey = UniqueKey();
     final GlobalKey<NestedScrollViewState> outerKey = GlobalKey();
 

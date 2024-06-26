@@ -545,7 +545,7 @@ void main() {
     expect(find.byType(Viewport), paints..clipRect());
   });
 
-  testWidgets('ListView allows touch on children when reaching an edge and over-scrolling / settling, #145330', (WidgetTester tester) async {
+  testWidgets('ListView allows touch on children when reaching an edge and over-scrolling / settling', (WidgetTester tester) async {
     bool tapped = false;
     final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
@@ -638,7 +638,7 @@ void main() {
     tapped = false;
   });
 
-  testWidgets('ListView absorbs touch to stop scrolling when not at the edge, #145330', (WidgetTester tester) async {
+  testWidgets('ListView absorbs touch to stop scrolling when not at the edge', (WidgetTester tester) async {
     bool tapped = false;
     final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
@@ -702,7 +702,7 @@ void main() {
     tapped = false;
   });
 
-  testWidgets('Horizontal ListView, when over-scrolled at the end allows touches on children #145330', (WidgetTester tester) async {
+  testWidgets('Horizontal ListView, when over-scrolled at the end allows touches on children', (WidgetTester tester) async {
     bool tapped = false;
     final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
