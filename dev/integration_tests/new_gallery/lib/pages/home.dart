@@ -1154,8 +1154,6 @@ class StudyWrapper extends StatefulWidget {
 class _StudyWrapperState extends State<StudyWrapper> {
   @override
   Widget build(BuildContext context) {
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    final TextTheme textTheme = Theme.of(context).textTheme;
     return ApplyTextOptions(
       child: Stack(
         children: <Widget>[
@@ -1166,47 +1164,8 @@ class _StudyWrapperState extends State<StudyWrapper> {
               child: widget.study,
             ),
           ),
-          if (!isDisplayFoldable(context))
-            SafeArea(
-              child: Align(
-                alignment: widget.alignment,
-                child: Padding(
-                  padding: EdgeInsets.symmetric(
-                      horizontal: 16.0,
-                      vertical: widget.hasBottomNavBar
-                          ? kBottomNavigationBarHeight + 16.0
-                          : 16.0),
-                  child: Semantics(
-                    sortKey: const OrdinalSortKey(0),
-                    label: GalleryLocalizations.of(context)!.backToGallery,
-                    button: true,
-                    enabled: true,
-                    excludeSemantics: true,
-                    child: FloatingActionButton.extended(
-                      heroTag: _BackButtonHeroTag(),
-                      key: const ValueKey<String>('Back'),
-                      onPressed: () {
-                        Navigator.of(context)
-                            .popUntil((Route<void> route) => route.settings.name == '/');
-                      },
-                      icon: IconTheme(
-                        data: IconThemeData(color: colorScheme.onPrimary),
-                        child: const BackButtonIcon(),
-                      ),
-                      label: Text(
-                        MaterialLocalizations.of(context).backButtonTooltip,
-                        style: textTheme.labelLarge!
-                            .apply(color: colorScheme.onPrimary),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
         ],
       ),
     );
   }
 }
-
-class _BackButtonHeroTag {}
