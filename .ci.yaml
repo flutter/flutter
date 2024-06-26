@@ -2727,7 +2727,7 @@ targets:
   # linux motog4 benchmark
   - name: Linux_android new_gallery__crane_perf
     recipe: devicelab/devicelab_drone
-    presubmit: true
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -2794,7 +2794,7 @@ targets:
   # MotoG4, Skia
   - name: Linux_android new_gallery__transition_perf
     recipe: devicelab/devicelab_drone
-    presubmit: true
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -2804,7 +2804,7 @@ targets:
   # Mokey, Impeller
   - name: Linux_mokey new_gallery_impeller__transition_perf
     recipe: devicelab/devicelab_drone
-    presubmit: true
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -2814,7 +2814,7 @@ targets:
   # Mokey, Impeller (OpenGL)
   - name: Linux_mokey new_gallery_opengles_impeller__transition_perf
     recipe: devicelab/devicelab_drone
-    presubmit: true
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -2824,7 +2824,7 @@ targets:
   # Mokey, Skia
   - name: Linux_mokey new_gallery__transition_perf
     recipe: devicelab/devicelab_drone
-    presubmit: true
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -2834,7 +2834,7 @@ targets:
   # Pixel 7 Pro, Skia
   - name: Linux_pixel_7pro new_gallery__transition_perf
     recipe: devicelab/devicelab_drone
-    presubmit: true
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -2846,7 +2846,7 @@ targets:
   - name: Linux_android new_gallery_opengles_impeller__transition_perf
     recipe: devicelab/devicelab_drone
     bringup: true
-    presubmit: true
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -2856,7 +2856,7 @@ targets:
   # Pixel 7 Pro, Impeller (Vulkan)
   - name: Linux_pixel_7pro new_gallery_impeller_old_zoom__transition_perf
     recipe: devicelab/devicelab_drone
-    presubmit: true
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -2867,7 +2867,7 @@ targets:
   - name: Linux_pixel_7pro new_gallery_impeller__transition_perf
     bringup: true # Flaky https://github.com/flutter/flutter/issues/139643
     recipe: devicelab/devicelab_drone
-    presubmit: true
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -2877,7 +2877,7 @@ targets:
   # Pixel 7 Pro, Impeller (OpenGL)
   - name: Linux_pixel_7pro new_gallery_opengles_impeller__transition_perf
     recipe: devicelab/devicelab_drone
-    presubmit: true
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -4730,7 +4730,7 @@ targets:
 
   - name: Mac_ios new_gallery_ios__transition_perf
     recipe: devicelab/devicelab_drone
-    presubmit: true
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -4739,7 +4739,7 @@ targets:
 
   - name: Mac_ios new_gallery_skia_ios__transition_perf
     recipe: devicelab/devicelab_drone
-    presubmit: true
+    presubmit: false
     timeout: 60
     properties:
       tags: >
