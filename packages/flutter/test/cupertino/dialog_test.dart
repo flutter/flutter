@@ -854,15 +854,18 @@ void main() {
           return CupertinoAlertDialog(
             title: const Text('The Title'),
             content: const Text('The message'),
-            actions: const <Widget>[
+            actions: <Widget>[
               CupertinoDialogAction(
-                child: Text('Option 1'),
+                child: const Text('Option 1'),
+                onPressed: (){ },
               ),
               CupertinoDialogAction(
-                child: Text('Option 2'),
+                child: const Text('Option 2'),
+                onPressed: (){ },
               ),
               CupertinoDialogAction(
-                child: Text('Option 3'),
+                child: const Text('Option 3'),
+                onPressed: (){ },
               ),
             ],
             scrollController: scrollController,
@@ -897,9 +900,9 @@ void main() {
     );
 
     // Before pressing the button, verify following expectations:
-    // - Background includes the button that will be pressed
-    // - Background excludes the divider above and below the button that will be pressed
-    // - Pressed button background does NOT include the button that will be pressed
+    // - Background includes the button.
+    // - Background excludes the divider above and below the button.
+    // - Pressed button background does NOT include the button.
     expect(actionsSectionBox, paints
       ..path(
         color: normalButtonBackgroundColor,
@@ -921,12 +924,12 @@ void main() {
 
     // Press down on the button.
     final TestGesture gesture = await tester.press(find.widgetWithText(CupertinoDialogAction, 'Option 2'));
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     // While pressing the button, verify following expectations:
-    // - Background excludes the pressed button
-    // - Background includes the divider above and below the pressed button
-    // - Pressed button background includes the pressed
+    // - Background excludes the pressed button.
+    // - Background includes the divider above and below the pressed button.
+    // - Pressed button background includes the button.
     expect(actionsSectionBox, paints
       ..path(
         color: normalButtonBackgroundColor,
@@ -954,6 +957,102 @@ void main() {
 
     // We must explicitly cause an "up" gesture to avoid a crash.
     // TODO(mattcarroll): remove this call, https://github.com/flutter/flutter/issues/19540
+    await gesture.up();
+  });
+
+  testWidgets('Disabled button does not change appearance on press', (WidgetTester tester) async {
+    const Color normalButtonBackgroundColor = Color(0xCCF2F2F2);
+    const Color pressedButtonBackgroundColor = Color(0xFFE1E1E1);
+    const double dividerThickness = 0.3;
+
+    await tester.pumpWidget(
+      createAppWithButtonThatLaunchesDialog(
+        dialogBuilder: (BuildContext context) {
+          return const CupertinoAlertDialog(
+            title: Text('The Title'),
+            content: Text('The message'),
+            actions: <Widget>[
+              CupertinoDialogAction(
+                child: Text('Option 1'),
+              ),
+              CupertinoDialogAction(
+                child: Text('Option 2'),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+    await tester.pump();
+
+    final RenderBox firstButtonBox = findActionButtonRenderBoxByTitle(tester, 'Option 1');
+    final RenderBox secondButtonBox = findActionButtonRenderBoxByTitle(tester, 'Option 2');
+    final RenderBox actionsSectionBox = findScrollableActionsSectionRenderBox(tester);
+
+    final Offset pressedButtonCenter = Offset(
+      secondButtonBox.size.width / 2.0,
+      firstButtonBox.size.height + dividerThickness + (secondButtonBox.size.height / 2.0),
+    );
+    final Offset topDividerCenter = Offset(
+      secondButtonBox.size.width / 2.0,
+      firstButtonBox.size.height + (0.5 * dividerThickness),
+    );
+    final Offset bottomDividerCenter = Offset(
+      secondButtonBox.size.width / 2.0,
+      firstButtonBox.size.height +
+          dividerThickness +
+          secondButtonBox.size.height +
+          (0.5 * dividerThickness),
+    );
+
+    // Before pressing the button, verify the following expectations:
+    // - Background includes the button.
+    // - Background excludes the divider above and below the button.
+    // - Pressed button background does NOT include the button.
+    expect(actionsSectionBox, paints
+      ..path(
+        color: normalButtonBackgroundColor,
+        includes: <Offset>[
+          pressedButtonCenter,
+        ],
+        excludes: <Offset>[
+          topDividerCenter,
+          bottomDividerCenter,
+        ],
+      )
+      ..path(
+        color: pressedButtonBackgroundColor,
+        excludes: <Offset>[
+          pressedButtonCenter,
+        ],
+      ),
+    );
+
+    // Press down on the button.
+    final TestGesture gesture = await tester.press(find.widgetWithText(CupertinoDialogAction, 'Option 2'));
+    await tester.pumpAndSettle();
+
+    // While pressing the button, verify that the background remains the same.
+    expect(actionsSectionBox, paints
+      ..path(
+        color: normalButtonBackgroundColor,
+        includes: <Offset>[
+          pressedButtonCenter,
+        ],
+        excludes: <Offset>[
+          topDividerCenter,
+          bottomDividerCenter,
+        ],
+      )
+      ..path(
+        color: pressedButtonBackgroundColor,
+        excludes: <Offset>[
+          pressedButtonCenter,
+        ],
+      ),
+    );
     await gesture.up();
   });
 
