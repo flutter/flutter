@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/painting.dart';
 import 'package:flutter/widgets.dart';
 import 'package:material_color_utilities/material_color_utilities.dart';
 
@@ -1830,58 +1831,24 @@ class ColorScheme with Diagnosticable {
 
   // Scale image size down to reduce computation time of color extraction.
   static Future<ui.Image> _imageProviderToScaled(ImageProvider imageProvider) async {
-    const double maxDimension = 112.0;
-    final ImageStream stream = imageProvider.resolve(
-        const ImageConfiguration(size: Size(maxDimension, maxDimension)));
-    final Completer<ui.Image> imageCompleter = Completer<ui.Image>();
-    late ImageStreamListener listener;
-    late ui.Image scaledImage;
+    const int maxDimension = 112;
+    final Completer<ui.Image> completer = Completer();
+    final ImageProvider image = ResizeImage(
+      imageProvider,
+      policy: ResizeImagePolicy.fit,
+      width: maxDimension,
+      height: maxDimension
+    );
+    final ImageStreamListener listener = ImageStreamListener(
+          (info, _) => completer.complete(info.image),
+      onError: completer.completeError,
+    );
 
-    listener = ImageStreamListener((ImageInfo info, bool sync) async {
-      final ui.Image image = info.image;
-      final int width = image.width;
-      final int height = image.height;
-      double paintWidth = width.toDouble();
-      double paintHeight = height.toDouble();
-      assert(width > 0 && height > 0);
-
-      final bool rescale = width > maxDimension || height > maxDimension;
-      if (rescale) {
-        paintWidth = (width > height) ? maxDimension : (maxDimension / height) * width;
-        paintHeight = (height > width) ? maxDimension : (maxDimension / width) * height;
-      }
-      final ui.PictureRecorder pictureRecorder = ui.PictureRecorder();
-      final Canvas canvas = Canvas(pictureRecorder);
-      paintImage(
-        canvas: canvas,
-        rect: Rect.fromLTRB(0, 0, paintWidth, paintHeight),
-        image: image,
-        filterQuality: FilterQuality.none,
-      );
-
-      final ui.Picture picture = pictureRecorder.endRecording();
-      scaledImage = await picture.toImage(paintWidth.toInt(), paintHeight.toInt());
-      imageCompleter.complete(info.image);
-    }, onError: (Object exception, StackTrace? stackTrace) {
-      throw Exception('Failed to render image: $exception');
-    });
-
-    final loadFailureTimeout = Timer(const Duration(seconds: 5), () {
-      imageCompleter.completeError(
-        TimeoutException('Timeout occurred trying to load image'));
-    });
-
+    final ImageStream stream = image.resolve(ImageConfiguration.empty);
     stream.addListener(listener);
 
-    try {
-      await imageCompleter.future;
-      return scaledImage;
-    } on Exception catch (error, _) {
-      rethrow;
-    } finally {
-      loadFailureTimeout.cancel();
-      stream.removeListener(listener);
-    }
+    return completer.future
+        .whenComplete(() => stream.removeListener(listener));
   }
 
   // Converts AABBGGRR color int to AARRGGBB format.
