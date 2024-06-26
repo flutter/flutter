@@ -911,7 +911,7 @@ void printHowToConsumeAar({
 ''');
   }
 
-  logger.printStatus('To learn more, visit https://flutter.dev/go/build-aar');
+  logger.printStatus('To learn more, visit https://flutter.dev/to/integrate-android-archive');
 }
 
 String _hex(List<int> bytes) {

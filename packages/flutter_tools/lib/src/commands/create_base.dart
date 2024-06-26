@@ -708,11 +708,11 @@ abstract class CreateBase extends FlutterCommand {
 
 // A valid Dart identifier that can be used for a package, i.e. no
 // capital letters.
-// https://dart.dev/guides/language/language-tour#important-concepts
+// https://dart.dev/language#important-concepts
 final RegExp _identifierRegExp = RegExp('[a-z_][a-z0-9_]*');
 
 // non-contextual dart keywords.
-//' https://dart.dev/guides/language/language-tour#keywords
+// https://dart.dev/language/keywords
 const Set<String> _keywords = <String>{
   'abstract',
   'as',

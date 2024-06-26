@@ -571,7 +571,7 @@ end''');
         logger.errorText,
         contains(
           "To build, increase your application's deployment target to at least "
-          '15.0 as described at https://docs.flutter.dev/deployment/ios'
+          '15.0 as described at https://flutter.dev/to/ios-deploy'
         ),
       );
     });
@@ -631,7 +631,7 @@ end''');
         logger.errorText,
         contains(
           "To build, increase your application's deployment target to at least "
-          '15.0 as described at https://docs.flutter.dev/deployment/ios'
+          '15.0 as described at https://flutter.dev/to/ios-deploy'
         ),
       );
     });
@@ -692,7 +692,7 @@ end''');
         logger.errorText,
         contains(
           "To build, increase your application's deployment target to at least "
-          '15.0 as described at https://docs.flutter.dev/deployment/ios'
+          '15.0 as described at https://flutter.dev/to/ios-deploy'
         ),
       );
     });
@@ -756,7 +756,7 @@ end''');
         logger.errorText,
         contains(
           "To build, increase your application's deployment target as "
-          'described at https://docs.flutter.dev/deployment/ios',
+          'described at https://flutter.dev/to/ios-deploy',
         ),
       );
       expect(
@@ -961,7 +961,7 @@ end''');
         logger.errorText,
         contains(
           "To build, increase your application's deployment target to at least "
-          '12.7 as described at https://docs.flutter.dev/deployment/macos'
+          '12.7 as described at https://flutter.dev/to/macos-deploy'
         ),
       );
     });
@@ -1022,7 +1022,7 @@ end''');
         logger.errorText,
         contains(
           "To build, increase your application's deployment target to at least "
-          '12.7 as described at https://docs.flutter.dev/deployment/macos'
+          '12.7 as described at https://flutter.dev/to/macos-deploy'
         ),
       );
     });

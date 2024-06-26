@@ -152,7 +152,7 @@ void main() {
     expect(createTestCommandRunner(command).run(
       const <String>['windows', '--no-pub']
     ), throwsToolExit(message: 'No Windows desktop project configured. See '
-      'https://docs.flutter.dev/desktop#add-desktop-support-to-an-existing-flutter-app '
+      'https://flutter.dev/to/add-desktop-support '
       'to learn about adding Windows support to a project.'));
   }, overrides: <Type, Generator>{
     Platform: () => windowsPlatform,

@@ -141,7 +141,7 @@ void main() {
     expect(createTestCommandRunner(command).run(
       const <String>['build', 'linux', '--no-pub']
     ), throwsToolExit(message: 'No Linux desktop project configured. See '
-      'https://docs.flutter.dev/desktop#add-desktop-support-to-an-existing-flutter-app '
+      'https://flutter.dev/to/add-desktop-support '
       'to learn about adding Linux support to a project.'));
   }, overrides: <Type, Generator>{
     Platform: () => linuxPlatform,

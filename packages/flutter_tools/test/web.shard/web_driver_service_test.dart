@@ -22,7 +22,7 @@ void main() {
       ),
       dartSdkPath: 'dart',
     );
-    const String link = 'https://flutter.dev/docs/testing/integration-tests#running-in-a-browser';
+    const String link = 'https://flutter.dev/to/integration-test-on-web';
     try {
       await service.startTest(
         'foo.test',

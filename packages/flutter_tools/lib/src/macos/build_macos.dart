@@ -70,7 +70,7 @@ Future<void> buildMacOS({
   final Directory? xcodeWorkspace = flutterProject.macos.xcodeWorkspace;
   if (xcodeWorkspace == null) {
     throwToolExit('No macOS desktop project configured. '
-      'See https://docs.flutter.dev/desktop#add-desktop-support-to-an-existing-flutter-app '
+      'See https://flutter.dev/to/add-desktop-support '
       'to learn about adding macOS support to a project.');
   }
 

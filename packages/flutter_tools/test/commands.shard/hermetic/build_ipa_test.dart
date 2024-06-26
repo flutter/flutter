@@ -1147,7 +1147,7 @@ void main() {
     ));
     expect(
       logger.statusText,
-      contains('To update the settings, please refer to https://docs.flutter.dev/deployment/ios')
+      contains('To update the settings, please refer to https://flutter.dev/to/ios-deploy')
     );
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -1206,7 +1206,7 @@ void main() {
     );
     expect(
       logger.statusText,
-      contains('To update the settings, please refer to https://docs.flutter.dev/deployment/ios')
+      contains('To update the settings, please refer to https://flutter.dev/to/ios-deploy')
     );
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -1264,7 +1264,7 @@ void main() {
     );
     expect(
       logger.statusText,
-      contains('To update the settings, please refer to https://docs.flutter.dev/deployment/ios'),
+      contains('To update the settings, please refer to https://flutter.dev/to/ios-deploy'),
     );
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
