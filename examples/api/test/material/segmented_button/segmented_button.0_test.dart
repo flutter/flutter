@@ -9,10 +9,19 @@ import 'package:flutter_api_samples/material/segmented_button/segmented_button.0
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Segmented button can be used for with a single selection', (WidgetTester tester) async {
+  testWidgets('Segmented button can be used with a single selection', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.SegmentedButtonApp(),
     );
+
+    void expectOneCalendarButton(example.Calendar period) {
+      expect(
+        find.byWidgetPredicate(
+          (Widget widget) => widget is SegmentedButton<example.Calendar> && setEquals(widget.selected, <example.Calendar>{period}),
+        ),
+        findsOne,
+      );
+    }
 
     expect(find.text('Single choice'), findsOne);
     expect(find.text('Day'), findsOne);
@@ -20,56 +29,52 @@ void main() {
     expect(find.text('Month'), findsOne);
     expect(find.text('Year'), findsOne);
 
-    expect(find.byWidgetPredicate(
-      (Widget widget) => widget is SegmentedButton<example.Calendar> && setEquals(widget.selected, const <example.Calendar>{example.Calendar.day}),
-    ), findsOne);
+    expectOneCalendarButton(example.Calendar.day);
 
     // Select the day.
     await tester.tap(find.text('Week'));
     await tester.pump();
 
-    expect(find.byWidgetPredicate(
-      (Widget widget) => widget is SegmentedButton<example.Calendar> && setEquals(widget.selected, const <example.Calendar>{example.Calendar.week}),
-    ), findsOne);
+    expectOneCalendarButton(example.Calendar.week);
 
     // Select the month.
     await tester.tap(find.text('Month'));
     await tester.pump();
 
-    expect(find.byWidgetPredicate(
-      (Widget widget) => widget is SegmentedButton<example.Calendar> && setEquals(widget.selected, const <example.Calendar>{example.Calendar.month}),
-    ), findsOne);
+    expectOneCalendarButton(example.Calendar.month);
 
     // Select the year.
     await tester.tap(find.text('Year'));
     await tester.pump();
 
-    expect(find.byWidgetPredicate(
-      (Widget widget) => widget is SegmentedButton<example.Calendar> && setEquals(widget.selected, const <example.Calendar>{example.Calendar.year}),
-    ), findsOne);
+    expectOneCalendarButton(example.Calendar.year);
 
     // Select the day.
     await tester.tap(find.text('Day'));
     await tester.pump();
 
-    expect(find.byWidgetPredicate(
-      (Widget widget) => widget is SegmentedButton<example.Calendar> && setEquals(widget.selected, const <example.Calendar>{example.Calendar.day}),
-    ), findsOne);
+    expectOneCalendarButton(example.Calendar.day);
 
     // Try to unselect the day.
     await tester.tap(find.text('Day'));
     await tester.pump();
 
-    expect(find.byWidgetPredicate(
-      (Widget widget) => widget is SegmentedButton<example.Calendar> && setEquals(widget.selected, const <example.Calendar>{example.Calendar.day}),
-    ), findsOne);
-
+    expectOneCalendarButton(example.Calendar.day);
   });
 
-  testWidgets('Segmented button can be used for with a multiple selection', (WidgetTester tester) async {
+  testWidgets('Segmented button can be used with a multiple selection', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.SegmentedButtonApp(),
     );
+
+    void expectSizeButtons(Set<example.Sizes> sizes) {
+      expect(
+        find.byWidgetPredicate(
+          (Widget widget) => widget is SegmentedButton<example.Sizes> && setEquals(widget.selected, sizes),
+        ),
+        findsOne,
+      );
+    }
 
     expect(find.text('Multiple choice'), findsOne);
     expect(find.text('XS'), findsOne);
@@ -78,9 +83,7 @@ void main() {
     expect(find.text('L'), findsOne);
     expect(find.text('XL'), findsOne);
 
-    expect(find.byWidgetPredicate(
-      (Widget widget) => widget is SegmentedButton<example.Sizes> && setEquals(widget.selected, const <example.Sizes>{example.Sizes.large, example.Sizes.extraLarge}),
-    ), findsOne);
+    expectSizeButtons(const <example.Sizes>{example.Sizes.large, example.Sizes.extraLarge});
 
     // Select everything.
     await tester.tap(find.text('XS'));
@@ -90,9 +93,7 @@ void main() {
     await tester.tap(find.text('M'));
     await tester.pump();
 
-    expect(find.byWidgetPredicate(
-      (Widget widget) => widget is SegmentedButton<example.Sizes> && setEquals(widget.selected, example.Sizes.values.toSet()),
-    ), findsOne);
+    expectSizeButtons(example.Sizes.values.toSet());
 
     // Unselect everything but XS.
     await tester.tap(find.text('S'));
@@ -104,8 +105,6 @@ void main() {
     await tester.tap(find.text('XL'));
     await tester.pump();
 
-    expect(find.byWidgetPredicate(
-      (Widget widget) => widget is SegmentedButton<example.Sizes> && setEquals(widget.selected, const <example.Sizes>{example.Sizes.extraSmall}),
-    ), findsOne);
+    expectSizeButtons(const <example.Sizes>{example.Sizes.extraSmall});
   });
 }
