@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/painting.dart';
 import 'package:flutter/widgets.dart';
 import 'package:material_color_utilities/material_color_utilities.dart';
 
@@ -1829,10 +1828,10 @@ class ColorScheme with Diagnosticable {
     return quantizerResult;
   }
 
-  // Scale image size down to reduce computation time of color extraction.
+  // Scale image size down to a maximum dimension of 112px to reduce computation time of color extraction.
   static Future<ui.Image> _imageProviderToScaled(ImageProvider imageProvider) async {
     const int maxDimension = 112;
-    final Completer<ui.Image> completer = Completer();
+    final Completer<ui.Image> completer = Completer<ui.Image>();
     final ImageProvider resizedImageProvider = ResizeImage(
       imageProvider,
       policy: ResizeImagePolicy.fit,
