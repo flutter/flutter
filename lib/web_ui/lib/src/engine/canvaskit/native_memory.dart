@@ -22,6 +22,7 @@ import 'package:ui/src/engine.dart';
 /// 6. We call `delete` on SkPaint.
 DomFinalizationRegistry _finalizationRegistry = DomFinalizationRegistry(
   (ExternalDartReference boxedUniq) {
+    // ignore: cast_nullable_to_non_nullable
     final UniqueRef<Object> uniq = boxedUniq.toDartObject as UniqueRef<Object>;
     uniq.collect();
   }.toJS
