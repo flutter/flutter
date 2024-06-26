@@ -866,6 +866,17 @@ void main() {
     });
   });
 
+  testWithoutContext('ErrorHandlingFileSystem.systemTempDirectory wraps systemTempDirectory of delegate', () {
+    final MemoryFileSystem delegate = MemoryFileSystem.test();
+    final FileSystem fs = ErrorHandlingFileSystem(
+      delegate: delegate,
+      platform: const LocalPlatform(),
+    );
+
+    expect(fs.systemTempDirectory, isA<ErrorHandlingDirectory>());
+    expect(fs.systemTempDirectory.path, delegate.systemTempDirectory.path);
+  });
+
   group('ProcessManager on windows throws tool exit', () {
     const int kDeviceFull = 112;
     const int kUserMappedSectionOpened = 1224;

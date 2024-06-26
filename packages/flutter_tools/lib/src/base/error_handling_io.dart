@@ -115,6 +115,11 @@ class ErrorHandlingFileSystem extends ForwardingFileSystem {
   }
 
   @override
+  Directory get systemTempDirectory {
+    return directory(delegate.systemTempDirectory);
+  }
+
+  @override
   File file(dynamic path) => ErrorHandlingFile(
     platform: _platform,
     fileSystem: this,
