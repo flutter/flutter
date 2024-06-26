@@ -1419,8 +1419,6 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
     if (simulation == null) {
       return IdleScrollActivity(this);
     }
-    final bool shouldIgnorePointer = !outOfRange
-      && (activity?.shouldIgnorePointer ?? true);
 
     switch (mode) {
       case _NestedBallisticScrollActivityMode.outer:

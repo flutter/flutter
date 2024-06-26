@@ -270,6 +270,15 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   bool get haveDimensions => _haveDimensions;
   bool _haveDimensions = false;
 
+  /// Whether scrollables should absorb pointer events at this position.
+  /// This is mainly driven by which [ScrollActivity] is currently active.
+  /// Which determines if touches should stop the scroll or interact with the content.
+  /// Apart from that, we check for when the position is out of bounds.
+  /// This is possible with [BouncingScrollPhysics]. iOS allows propagation of
+  /// tap events to the child/children of the scrollable view directly
+  /// when the scroll view is out of bounds and settling.
+  bool get shouldIgnorePointer => !outOfRange && (activity?.shouldIgnorePointer ?? true);
+
   /// Take any current applicable state from the given [ScrollPosition].
   ///
   /// This method is called by the constructor if it is given an `oldPosition`.
