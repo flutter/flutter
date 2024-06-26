@@ -824,7 +824,7 @@ def to_gn_wasm_args(args, gn_args):
 
 
 def run_impeller_cmake(args):
-  impeller_cmake_dir = os.path.join('third_party', 'impeller-cmake-example')
+  impeller_cmake_dir = os.path.join('flutter', 'third_party', 'impeller-cmake-example')
   if not os.path.isdir(os.path.join(SRC_ROOT, impeller_cmake_dir)):
     print('The Impeller cmake example directory "{}" does not exist'.format(impeller_cmake_dir))
     return 1

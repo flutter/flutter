@@ -1008,7 +1008,7 @@ deps = {
      'dep_type': 'cipd',
    },
 
-  'src/third_party/impeller-cmake-example': {
+  'src/flutter/third_party/impeller-cmake-example': {
      'url': Var('flutter_git') + '/third_party/impeller-cmake-example.git' + '@' + '9f8298ec31dcbebbf019bd487888166abf2f55e6',
      'condition': 'download_impeller_cmake_example',
   },
@@ -1136,7 +1136,7 @@ hooks = [
       'python3',
       'src/flutter/ci/impeller_cmake_build_test.py',
       '--path',
-      'third_party/impeller-cmake-example',
+      'flutter/third_party/impeller-cmake-example',
       '--setup',
     ]
   },
