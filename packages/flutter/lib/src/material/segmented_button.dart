@@ -1134,9 +1134,8 @@ class _RenderSegmentedButton<T> extends RenderBox
           final Offset bottom = Offset(dividerPos, borderRect.bottom);
           context.canvas.drawLine(top, bottom, divider.toPaint());
         } else if (direction == Axis.vertical) {
-          final topPosition = childRect.top;
-          final Offset start = Offset(borderRect.left, topPosition);
-          final Offset end = Offset(borderRect.right, topPosition);
+          final Offset start = Offset(borderRect.left, childRect.top);
+          final Offset end = Offset(borderRect.right, childRect.top);
           context.canvas.drawLine(start, end, divider.toPaint());
         }
       }
