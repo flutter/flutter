@@ -150,8 +150,8 @@ abstract class GoldenFileComparator {
 ///   })  : assert(
 ///         0 <= precisionTolerance || precisionTolerance <= 1,
 ///         'precisionTolerance must be between 0 and 1',
-///       ),
-///       _precisionTolerance = precisionTolerance;
+///         ),
+///         _precisionTolerance = precisionTolerance;
 ///
 ///   /// How much the golden image can differ from the test image.
 ///   ///
