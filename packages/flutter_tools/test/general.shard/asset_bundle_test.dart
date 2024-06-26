@@ -41,6 +41,7 @@ void main() {
       final AssetBundle ab = AssetBundleFactory.instance.createBundle();
       expect(await ab.build(packagesPath: '.packages'), 0);
       expect(ab.entries.length, greaterThan(0));
+      expect(ab.entries, hasLength(lessThan(3))); // TODO-dontmerge-deleteme
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
       Platform: () => platform,

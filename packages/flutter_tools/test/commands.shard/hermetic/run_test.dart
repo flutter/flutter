@@ -594,6 +594,8 @@ void main() {
             throwsToolExit(),
           );
           expect(command.appDomain.userIdentifier, '10');
+          // TODO-dontmerge-deleteme
+          expect(2, 4, reason: 'ough nough!');
         }, overrides: <Type, Generator>{
           Artifacts: () => artifacts,
           Cache: () => Cache.test(processManager: FakeProcessManager.any()),
