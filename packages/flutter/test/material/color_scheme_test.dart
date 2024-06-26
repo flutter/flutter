@@ -658,7 +658,7 @@ void main() {
     expect(() => ColorScheme.fromImageProvider(provider: image, contrastLevel: 1.5), throwsAssertionError);
   });
 
-  test('fromImageProvider() propagates TimeoutException when image cannot be rendered', () async {
+  test('fromImageProvider() throws an Exception when image cannot be rendered', () async {
     final Uint8List blueSquareBytes = Uint8List.fromList(kBlueSquarePng);
 
     // Corrupt the image's bytelist so it cannot be read.
@@ -666,8 +666,8 @@ void main() {
     final ImageProvider image = MemoryImage(corruptImage);
 
     expect(() async => ColorScheme.fromImageProvider(provider: image), throwsA(
-      isA<Exception>().having((Exception e) => e.toString(),
-        'Timeout occurred trying to load image', contains('TimeoutException')),
+      isException.having((Exception e) => e.toString(),
+        'Exception message', contains('Invalid image data')),
       ),
     );
   });
