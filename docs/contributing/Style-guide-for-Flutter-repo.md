@@ -2,7 +2,10 @@
 
 ## Summary
 
-Optimize for readability. Write detailed documentation. Make error messages useful. Never use timeouts or timers. Avoid `is`, `print`, `part of`, `extension` and `_`.
+Optimize for readability. Write detailed documentation.
+Make error messages useful.
+Never use timeouts or timers.
+Avoid `is`, `print`, `part of`, `extension` and `_`.
 
 ## Introduction
 
@@ -27,8 +30,9 @@ understanding with new team members.
 The primary goal of these style guidelines is to improve code readability so
 that everyone, whether reading the code for the first time or
 maintaining it for years, can quickly determine what the code does.
-Secondary goals are to design systems that are simple, to increase the
-likelihood of catching bugs quickly, and to avoid arguments over subjective matters.
+Secondary goals are to design systems that are simple; to increase the
+likelihood of catching bugs quickly; and to avoid arguments when there are
+disagreements over subjective matters.
 
 For anything not covered by this document, check the
 [Dart style guide](https://www.dartlang.org/guides/language/effective-dart/)
@@ -50,7 +54,7 @@ use in general.)
 
 ### A word on designing APIs
 
-API design is an art. Like all forms of art, one learns by practicing. The best way to get good at designing APIs is to spend a decade or more designing them, while working closely with people who are using your APIs. Ideally, one would first do this in very controlled situations, with small numbers of developers using one's APIs, before graduating to writing APIs that will be used by hundreds of thousands or even millions of developers.
+Designing an API is an art. Like all forms of art, one learns by practicing. The best way to get good at designing APIs is to spend a decade or more designing them, while working closely with people who are using your APIs. Ideally, one would first do this in very controlled situations, with small numbers of developers using one's APIs, before graduating to writing APIs that will be used by hundreds of thousands or even millions of developers.
 
 In the absence of one's own experience, one can attempt to rely on the experience of others. The biggest problem with this is that sometimes explaining why an API isn't optimal is a very difficult and subtle task, and sometimes the reasoning doesn't sound convincing unless you already have a lot of experience designing them.
 
@@ -1895,9 +1899,9 @@ The `dart:math` library is always imported `as math`.
 
 As a general rule, if a feature is entirely self-contained (not requiring low-level integration into the Flutter framework) and is not something with universal appeal, we would encourage that that feature be provided as a package.
 
-We try to be conservative with what we add to the framework because we have to support it. We have to document it, test it, and create samples. We have to consider the many ways people may use it. We have to fix bugs. If there are design problems, we may not find out for a long time. Once we do, we have to figure out how to fix them without breaking downstream code, or we have to migrate all our existing widgets to the new design.
+We try to be very conservative with what we put in the core framework, because there's a high cost to having anything there. We have to commit to supporting it for years to come, we have to document it, test it, create samples, we have to consider everyone's varied desires which they may have as they use the feature, we have to fix bugs. If there are design problems, we may not find out for a long time but then once we do we then have to figure out how to fix them without breaking downstream code, or we have to migrate all our existing widgets to the new architecture, etc.
 
-Basically, code is expensive. So before we take it, if possible, we like to see if we can prove the code's value. By creating a package, we can see if people use the feature, how they like it, and whether it would be useful for the framework, all without incurring support costs.
+Basically, code is expensive. So before we take it, if possible, we like to see if we can prove the code's value. By creating a package, we can see if people use the feature, how they like it, whether it would be useful for the framework, etc, without having to take on the costs.
 
 We have two main kinds of packages that are maintained by the Flutter team, both of which live in [flutter/packages](https://github.com/flutter/packages):
 
