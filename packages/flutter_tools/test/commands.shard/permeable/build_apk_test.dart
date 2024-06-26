@@ -440,7 +440,7 @@ void main() {
         analytics.sentEvents,
         contains(
           Event.flutterBuildInfo(
-              label: 'gradle-random-event-label-success', buildType: 'gradle'),
+              label: 'app-not-using-android-x', buildType: 'gradle'),
         ),
       );
       expect(processManager, hasNoRemainingExpectations);
