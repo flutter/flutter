@@ -32,6 +32,7 @@ void main() {
 
     testWidgets('UndoHistory widget registers as global undo/redo client', (WidgetTester tester) async {
       final FocusNode focusNode = FocusNode(debugLabel: 'UndoHistory Node');
+      addTearDown(focusNode.dispose);
       final GlobalKey undoHistoryGlobalKey = GlobalKey();
       final ValueNotifier<int> value = ValueNotifier<int>(0);
       addTearDown(value.dispose);
@@ -68,6 +69,7 @@ void main() {
     testWidgets('UndoHistory widget deregisters as global undo/redo client when it loses focus',
             (WidgetTester tester) async {
           final FocusNode focusNode = FocusNode(debugLabel: 'UndoHistory Node');
+          addTearDown(focusNode.dispose);
           final GlobalKey undoHistoryGlobalKey = GlobalKey();
           final ValueNotifier<int> value = ValueNotifier<int>(0);
           addTearDown(value.dispose);
@@ -105,6 +107,7 @@ void main() {
 
     testWidgets('UndoHistory widget deregisters as global undo/redo client when disposed', (WidgetTester tester) async {
       final FocusNode focusNode = FocusNode(debugLabel: 'UndoHistory Node');
+      addTearDown(focusNode.dispose);
       final GlobalKey undoHistoryGlobalKey = GlobalKey();
       final ValueNotifier<int> value = ValueNotifier<int>(0);
       addTearDown(value.dispose);

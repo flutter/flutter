@@ -492,6 +492,8 @@ void main() {
 
   testWidgets('Button can be focused and has default colors', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'Button');
+    addTearDown(focusNode.dispose);
+
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     const Border defaultFocusBorder = Border.fromBorderSide(
       BorderSide(
@@ -540,6 +542,8 @@ void main() {
 
   testWidgets('Button configures focus color', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'Button');
+    addTearDown(focusNode.dispose);
+
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     const Color focusColor = CupertinoColors.systemGreen;
 
@@ -576,6 +580,8 @@ void main() {
 
   testWidgets('CupertinoButton.onFocusChange callback', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'CupertinoButton');
+    addTearDown(focusNode.dispose);
+
     bool focused = false;
     await tester.pumpWidget(
       CupertinoApp(
