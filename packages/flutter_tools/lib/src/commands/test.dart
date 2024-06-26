@@ -689,7 +689,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
   }) async {
     final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
     final int build = await assetBundle.build(
-      packagesPath: '.packages',
+      packagesPath: '.dart_tool/package_config.json',
       flavor: flavor,
     );
     if (build != 0) {

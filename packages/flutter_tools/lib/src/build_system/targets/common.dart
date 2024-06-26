@@ -181,9 +181,7 @@ class KernelSnapshotProgram extends Target {
     }
     final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
     final String targetFile = environment.defines[kTargetFile] ?? environment.fileSystem.path.join('lib', 'main.dart');
-    final File packagesFile = environment.projectDir
-      .childDirectory('.dart_tool')
-      .childFile('package_config.json');
+    final File packagesFile = findPackageConfigFileOrDefault(environment.projectDir);
     final String targetFileAbsolute = environment.fileSystem.file(targetFile).absolute.path;
     // everything besides 'false' is considered to be enabled.
     final bool trackWidgetCreation = environment.defines[kTrackWidgetCreation] != 'false';
@@ -243,6 +241,7 @@ class KernelSnapshotProgram extends Target {
       packagesFile,
       logger: environment.logger,
     );
+
 
     final String dillPath = environment.buildDir.childFile(dillName).path;
 
@@ -340,9 +339,7 @@ class KernelSnapshotNativeAssets extends Target {
       throw MissingDefineException(kTargetPlatform, 'kernel_snapshot');
     }
     final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
-    final File packagesFile = environment.projectDir
-      .childDirectory('.dart_tool')
-      .childFile('package_config.json');
+    final File packageConfigFile = findPackageConfigFileOrDefault(environment.projectDir);
 
     final TargetPlatform targetPlatform = getTargetPlatformForName(targetPlatformEnvironment);
 
@@ -355,7 +352,7 @@ class KernelSnapshotNativeAssets extends Target {
     environment.logger.printTrace('Embedding native assets mapping $nativeAssets in kernel.');
 
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-      packagesFile,
+      packageConfigFile,
       logger: environment.logger,
     );
 
@@ -371,7 +368,7 @@ class KernelSnapshotNativeAssets extends Target {
       buildMode: buildMode,
       trackWidgetCreation: false,
       outputFilePath: dillPath,
-      packagesPath: packagesFile.path,
+      packagesPath: packageConfigFile.path,
       frontendServerStarterPath: frontendServerStarterPath,
       packageConfig: packageConfig,
       buildDir: environment.buildDir,

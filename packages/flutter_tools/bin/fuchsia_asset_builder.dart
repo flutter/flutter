@@ -63,7 +63,7 @@ Future<void> run(List<String> args) async {
   final AssetBundle? assets = await buildAssets(
     manifestPath: argResults[_kOptionManifest] as String? ?? defaultManifestPath,
     assetDirPath: assetDir,
-    packagesPath: argResults[_kOptionPackages] as String?,
+    packageConfigPath: argResults[_kOptionPackages] as String?,
     targetPlatform: TargetPlatform.fuchsia_arm64 // This is not arch specific.
   );
 

@@ -6,6 +6,7 @@ import 'dart:isolate';
 import 'dart:typed_data';
 
 import 'package:package_config/package_config.dart';
+import 'package:path/path.dart';
 
 import '../base/common.dart';
 import '../base/file_system.dart';
@@ -14,6 +15,45 @@ import '../base/logger.dart';
 /// Loads the package configuration of the current isolate.
 Future<PackageConfig> currentPackageConfig() async {
   return loadPackageConfigUri(Isolate.packageConfigSync!);
+}
+
+/// Locates the `.dart_tool/package_config.json` relevant to [dir].
+///
+/// Searches [dir] and all parent directories.
+///
+/// Returns `null` if no package_config.json was found.
+File? findPackageConfigFile(Directory dir) {
+  final FileSystem fileSystem = dir.fileSystem;
+  final Context path = fileSystem.path;
+
+  String candidateDir = fileSystem.path.absolute(dir.path);
+  while(true) {
+    final File candidatePackageConfigFile = fileSystem.file(
+      path.join(candidateDir, '.dart_tool', 'package_config.json'),
+    );
+    if (fileSystem.file(candidatePackageConfigFile).existsSync()) {
+      return candidatePackageConfigFile;
+    }
+    // TODO(sigurdm): remove this.
+    final File candidatePackagesFile = fileSystem.file(path.join(candidateDir, '.packages'));
+    if (fileSystem.file(candidatePackagesFile).existsSync()) {
+      return candidatePackagesFile;
+    }
+    final String nextDir = path.dirname(candidateDir);
+    if (nextDir == candidateDir) {
+      return null;
+    }
+    candidateDir = nextDir;
+  }
+}
+
+/// Locates the `.dart_tool/package_config.json` relevant to [dir].
+///
+/// Like [findPackageConfigFile] but returns
+/// `$dir/.dart_tool/package_config.json` if no package config could be found.
+File findPackageConfigFileOrDefault(Directory dir) {
+  return findPackageConfigFile(dir) ??
+      dir.childDirectory('.dart_tool').childFile('package_config.json');
 }
 
 /// Load the package configuration from [file] or throws a [ToolExit]

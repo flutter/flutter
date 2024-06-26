@@ -1182,7 +1182,10 @@ abstract class FlutterCommand extends Command<void> {
       ? stringArg('build-number')
       : null;
 
-    final File packageConfigFile = globals.fs.file(packagesPath ?? project.packageConfigFile);
+    final File packageConfigFile = packagesPath != null
+        ? globals.fs.file(packagesPath)
+        : findPackageConfigFileOrDefault(project.directory);
+
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
       packageConfigFile,
       logger: globals.logger,
@@ -1731,16 +1734,16 @@ Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and 
         generateDartPluginRegistry: true,
       );
 
-      await generateLocalizationsSyntheticPackage(
-        environment: environment,
-        buildSystem: globals.buildSystem,
-        buildTargets: globals.buildTargets,
-      );
-
       await pub.get(
         context: PubContext.getVerifyContext(name),
         project: project,
         checkUpToDate: cachePubGet,
+      );
+
+      await generateLocalizationsSyntheticPackage(
+        environment: environment,
+        buildSystem: globals.buildSystem,
+        buildTargets: globals.buildTargets,
       );
 
       // null implicitly means all plugins are allowed

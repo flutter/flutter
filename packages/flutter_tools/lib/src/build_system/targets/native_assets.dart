@@ -64,12 +64,11 @@ class NativeAssets extends Target {
       }
       final TargetPlatform targetPlatform = getTargetPlatformForName(targetPlatformEnvironment);
       final Uri projectUri = environment.projectDir.uri;
-      final File packagesFile = fileSystem
-          .directory(projectUri)
-          .childDirectory('.dart_tool')
-          .childFile('package_config.json');
+
+      final File packageConfigFile = findPackageConfigFileOrDefault(environment.projectDir);
+
       final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-        packagesFile,
+        packageConfigFile,
         logger: environment.logger,
       );
       final NativeAssetsBuildRunner buildRunner = _buildRunner ??

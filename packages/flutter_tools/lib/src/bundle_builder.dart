@@ -115,18 +115,18 @@ class BundleBuilder {
 Future<AssetBundle?> buildAssets({
   required String manifestPath,
   String? assetDirPath,
-  String? packagesPath,
+  String? packageConfigPath,
   TargetPlatform? targetPlatform,
   String? flavor,
 }) async {
   assetDirPath ??= getAssetBuildDirectory();
-  packagesPath ??= globals.fs.path.absolute('.packages');
+  packageConfigPath ??= globals.fs.path.absolute('.dart_tool', 'package_config.json');
 
   // Build the asset bundle.
   final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
   final int result = await assetBundle.build(
     manifestPath: manifestPath,
-    packagesPath: packagesPath,
+    packagesPath: packageConfigPath,
     targetPlatform: targetPlatform,
     flavor: flavor,
   );
