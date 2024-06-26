@@ -147,7 +147,8 @@ abstract class GoldenFileComparator {
 ///   _TolerantGoldenFileComparator(
 ///     super.testFile, {
 ///     required double precisionTolerance,
-///   }) : _precisionTolerance = precisionTolerance;
+///   }) : assert(precisionTolerance <= 1 || precisionTolerance  0),
+            _precisionTolerance = precisionTolerance;
 ///
 ///   /// How much the golden image can differ from the test image.
 ///   ///
