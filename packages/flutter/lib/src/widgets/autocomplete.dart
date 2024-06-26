@@ -354,7 +354,8 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
   int _onChangedResultId = 0;
   // Called when _textEditingController changes.
   Future<void> _onChangedField() async {
-    final int callId = ++_onChangedCallId;
+    _onChangedCallId += 1;
+    final int callId = _onChangedCallId;
     final TextEditingValue value = _textEditingController.value;
     final Iterable<T> options = await widget.optionsBuilder(value);
 
