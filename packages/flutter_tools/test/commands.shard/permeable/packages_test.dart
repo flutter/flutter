@@ -24,7 +24,9 @@ import 'package:flutter_tools/src/commands/packages.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:unified_analytics/unified_analytics.dart';
+import 'package:yaml/yaml.dart';
 
+import '../../integration.shard/test_utils.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
@@ -316,23 +318,43 @@ flutter:
     });
 
     testUsingContext('get fetches packages for a workspace', () async {
+      tempDir.childFile('pubspec.yaml').writeAsStringSync('''
+name: workspace
+environment:
+  sdk: ^3.5.0-0
+workspace:
+  - flutter_project
+''');
       final String projectPath = await createProject(tempDir,
         arguments: <String>['--no-pub', '--template=module']);
-      removeGeneratedFiles(projectPath);
-
+      final File pubspecFile = fileSystem.file(
+        fileSystem.path.join(
+          projectPath,
+          'pubspec.yaml',
+        ),
+      );
+      final YamlMap pubspecYaml = loadYaml(pubspecFile.readAsStringSync()) as YamlMap;
+      final Map<String, Object?> pubspec = <String, Object?>{
+        ...pubspecYaml.value.cast<String, Object?>(),
+        'resolution': 'workspace',
+        'environment': <String, Object?>{
+          ...(pubspecYaml['environment'] as YamlMap).value.cast<String, Object?>(),
+          'sdk': '^3.5.0-0',
+        }
+      };
+      pubspecFile.writeAsStringSync(jsonEncode(pubspec));
       await runCommandIn(projectPath, 'get');
 
       expect(mockStdio.stdout.writes.map(utf8.decode),
         allOf(
           // The output of pub changed, adding backticks around the directory name.
           // These regexes are tolerant of the backticks being present or absent.
-          contains(matches(RegExp(r'Resolving dependencies in .+flutter_project`?\.\.\.'))),
+          contains(matches(RegExp(r'Resolving dependencies in .+' + RegExp.escape(tempDir.path) + r'`?\.\.\.'))),
           contains(matches(RegExp(r'\+ flutter 0\.0\.0 from sdk flutter'))),
-          contains(matches(RegExp(r'Changed \d+ dependencies in .+flutter_project`?!'))),
+          contains(matches(RegExp(r'Changed \d+ dependencies in .+' + RegExp.escape(tempDir.path) + r'`?!'))),
         ),
       );
-
-      expectDependenciesResolved(projectPath);
+      expectDependenciesResolved(tempDir.path);
       expectZeroPluginsInjected(projectPath);
       expect(
         analyticsTimingEventExists(
