@@ -64,7 +64,7 @@ class CupertinoButton extends StatefulWidget {
     this.autofocus = false,
     required this.onPressed,
   }) : assert(pressedOpacity == null || (pressedOpacity >= 0.0 && pressedOpacity <= 1.0)),
-        _filled = false;
+       _filled = false;
 
   /// Creates an iOS-style button with a filled background.
   ///
@@ -87,8 +87,8 @@ class CupertinoButton extends StatefulWidget {
     this.autofocus = false,
     required this.onPressed,
   }) : assert(pressedOpacity == null || (pressedOpacity >= 0.0 && pressedOpacity <= 1.0)),
-        color = null,
-        _filled = true;
+       color = null,
+       _filled = true;
 
   /// The widget below this widget in the tree.
   ///
@@ -277,22 +277,22 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
     final CupertinoThemeData themeData = CupertinoTheme.of(context);
     final Color primaryColor = themeData.primaryColor;
     final Color? backgroundColor = widget.color == null
-        ? (widget._filled ? primaryColor : null)
-        : CupertinoDynamicColor.maybeResolve(widget.color, context);
+      ? (widget._filled ? primaryColor : null)
+      : CupertinoDynamicColor.maybeResolve(widget.color, context);
 
     final Color foregroundColor = backgroundColor != null
-        ? themeData.primaryContrastingColor
-        : enabled
+      ? themeData.primaryContrastingColor
+      : enabled
         ? primaryColor
         : CupertinoDynamicColor.resolve(CupertinoColors.placeholderText, context);
 
     final Color effectiveFocusOutlineColor = widget.focusColor ??
-        HSLColor
-            .fromColor((backgroundColor ?? CupertinoColors.activeBlue)
-            .withOpacity(_kCupertinoFocusColorOpacity))
-            .withLightness(_kCupertinoFocusColorBrightness)
-            .withSaturation(_kCupertinoFocusColorSaturation)
-            .toColor();
+      HSLColor
+        .fromColor((backgroundColor ?? CupertinoColors.activeBlue)
+        .withOpacity(_kCupertinoFocusColorOpacity))
+        .withLightness(_kCupertinoFocusColorBrightness)
+        .withSaturation(_kCupertinoFocusColorSaturation)
+        .toColor();
 
     final TextStyle textStyle = themeData.textTheme.textStyle.copyWith(color: foregroundColor);
     final IconThemeData iconTheme = IconTheme.of(context).copyWith(color: foregroundColor);
@@ -315,33 +315,33 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
             button: true,
             child: ConstrainedBox(
               constraints: widget.minSize == null
-                  ? const BoxConstraints()
-                  : BoxConstraints(
-                minWidth: widget.minSize!,
-                minHeight: widget.minSize!,
-              ),
+                ? const BoxConstraints()
+                : BoxConstraints(
+                    minWidth: widget.minSize!,
+                    minHeight: widget.minSize!,
+                  ),
               child: FadeTransition(
                 opacity: _opacityAnimation,
                 child: DecoratedBox(
                   decoration: BoxDecoration(
                     border: enabled && isFocused
-                        ? Border.fromBorderSide(
-                      BorderSide(
-                        color: effectiveFocusOutlineColor,
-                        width: 3.5,
-                        strokeAlign: BorderSide.strokeAlignOutside,
-                      ),
-                    )
-                        : null,
+                      ? Border.fromBorderSide(
+                          BorderSide(
+                            color: effectiveFocusOutlineColor,
+                            width: 3.5,
+                            strokeAlign: BorderSide.strokeAlignOutside,
+                          ),
+                        )
+                      : null,
                     borderRadius: widget.borderRadius,
                     color: backgroundColor != null && !enabled
-                        ? CupertinoDynamicColor.resolve(widget.disabledColor, context)
-                        : backgroundColor,
+                      ? CupertinoDynamicColor.resolve(widget.disabledColor, context)
+                      : backgroundColor,
                   ),
                   child: Padding(
                     padding: widget.padding ?? (backgroundColor != null
-                        ? _kBackgroundButtonPadding
-                        : _kButtonPadding),
+                      ? _kBackgroundButtonPadding
+                      : _kButtonPadding),
                     child: Align(
                       alignment: widget.alignment,
                       widthFactor: 1.0,
