@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:isolate';
 import 'dart:typed_data';
 
 import 'package:package_config/package_config.dart';
@@ -9,6 +10,11 @@ import 'package:package_config/package_config.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
+
+/// Loads the package configuration of the current isolate.
+Future<PackageConfig> currentPackageConfig() async {
+  return loadPackageConfigUri(Isolate.packageConfigSync!);
+}
 
 /// Load the package configuration from [file] or throws a [ToolExit]
 /// if the operation would fail.

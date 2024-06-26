@@ -800,6 +800,26 @@ void main() {
           contains('<html> ...'),
         ));
   });
+
+  test('Chromium close sends browser close command', () async {
+    final BufferLogger logger = BufferLogger.test();
+    final List<String> commands = <String>[];
+    void onSendCommand(String cmd) { commands.add(cmd); }
+    final FakeChromeConnectionWithTab chromeConnection = FakeChromeConnectionWithTab(onSendCommand: onSendCommand);
+    final ChromiumLauncher chromiumLauncher = ChromiumLauncher(
+      fileSystem: fileSystem,
+      platform: platform,
+      processManager: processManager,
+      operatingSystemUtils: operatingSystemUtils,
+      browserFinder: findChromeExecutable,
+      logger: logger,
+    );
+    final FakeProcess process = FakeProcess();
+    final Chromium chrome = Chromium(0, chromeConnection, chromiumLauncher: chromiumLauncher, process: process, logger: logger);
+    expect(await chromiumLauncher.connect(chrome, false), equals(chrome));
+    await chrome.close();
+    expect(commands, contains('Browser.close'));
+  });
 }
 
 /// Fake chrome connection that fails to get tabs a few times.
@@ -833,4 +853,53 @@ class FakeChromeConnection extends Fake implements ChromeConnection {
 
   @override
   void close() {}
+}
+
+typedef OnSendCommand = void Function(String);
+
+/// Fake chrome connection that returns a tab.
+class FakeChromeConnectionWithTab extends Fake implements ChromeConnection {
+  FakeChromeConnectionWithTab({OnSendCommand? onSendCommand})
+      : _tab = FakeChromeTab(onSendCommand);
+
+  final FakeChromeTab _tab;
+
+  @override
+  Future<ChromeTab?> getTab(bool Function(ChromeTab tab) accept, {Duration? retryFor}) async {
+    return _tab;
+  }
+
+  @override
+  Future<List<ChromeTab>> getTabs({Duration? retryFor}) async {
+    return <ChromeTab>[_tab];
+  }
+
+  @override
+  void close() {}
+}
+
+class FakeChromeTab extends Fake implements ChromeTab {
+  FakeChromeTab(this.onSendCommand);
+
+  OnSendCommand? onSendCommand;
+
+  @override
+  Future<WipConnection> connect({Function? onError}) async {
+    return FakeWipConnection(onSendCommand);
+  }
+}
+
+class FakeWipConnection extends Fake implements WipConnection {
+  FakeWipConnection(this.onSendCommand);
+
+  OnSendCommand? onSendCommand;
+
+  @override
+  Future<WipResponse> sendCommand(String method, [Map<String, dynamic>? params]) async {
+    onSendCommand?.call(method);
+    return WipResponse(<String, dynamic>{'id': 0, 'result': <String, dynamic>{}});
+  }
+
+  @override
+  Future<void> close() async {}
 }

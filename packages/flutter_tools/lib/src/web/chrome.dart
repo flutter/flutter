@@ -415,7 +415,7 @@ class ChromiumLauncher {
     // connection is valid.
     if (!skipCheck) {
       try {
-        await _getFirstTab(chrome);
+        await chrome._validateChromeConnection();
       } on Exception catch (error, stackTrace) {
         _logger.printError('$error', stackTrace: stackTrace);
         await chrome.close();
@@ -425,40 +425,6 @@ class ChromiumLauncher {
     }
     currentCompleter.complete(chrome);
     return chrome;
-  }
-
-  /// Gets the first [chrome] tab.
-  ///
-  /// Retries getting tabs from Chrome for a few seconds and retries finding
-  /// the tab a few times. This reduces flakes caused by Chrome not returning
-  /// correct output if the call was too close to the start.
-  //
-  // TODO(ianh): remove the timeouts here, they violate our style guide.
-  // (We should just keep waiting forever, and print a warning when it's
-  // taking too long.)
-  Future<ChromeTab?> _getFirstTab(Chromium chrome) async {
-    const Duration retryFor = Duration(seconds: 2);
-    const int attempts = 5;
-
-    for (int i = 1; i <= attempts; i++) {
-      try {
-        final List<ChromeTab> tabs =
-          await chrome.chromeConnection.getTabs(retryFor: retryFor);
-
-        if (tabs.isNotEmpty) {
-          return tabs.first;
-        }
-        if (i == attempts) {
-          return null;
-        }
-      } on ConnectionException catch (_) {
-        if (i == attempts) {
-          rethrow;
-        }
-      }
-      await Future<void>.delayed(const Duration(milliseconds: 25));
-    }
-    return null;
   }
 
   Future<Chromium> get connectedInstance => currentCompleter.future;
@@ -483,6 +449,7 @@ class Chromium {
   final ChromeConnection chromeConnection;
   final ChromiumLauncher _chromiumLauncher;
   final Logger _logger;
+  bool _hasValidChromeConnection = false;
 
   /// Resolves to browser's main process' exit code, when the browser exits.
   Future<int> get onExit async => _process.exitCode;
@@ -493,6 +460,41 @@ class Chromium {
   @visibleForTesting
   Process get process => _process;
 
+  /// Gets the first [chrome] tab in order to verify that the connection to
+  /// the Chrome debug protocol is working properly.
+  ///
+  /// Retries getting tabs from Chrome for a few seconds and retries finding
+  /// the tab a few times. This reduces flakes caused by Chrome not returning
+  /// correct output if the call was too close to the start.
+  //
+  // TODO(ianh): remove the timeouts here, they violate our style guide.
+  // (We should just keep waiting forever, and print a warning when it's
+  // taking too long.)
+  Future<void> _validateChromeConnection() async {
+    const Duration retryFor = Duration(seconds: 2);
+    const int attempts = 5;
+
+    for (int i = 1; i <= attempts; i++) {
+      try {
+        final List<ChromeTab> tabs =
+          await chromeConnection.getTabs(retryFor: retryFor);
+
+        if (tabs.isNotEmpty) {
+          _hasValidChromeConnection = true;
+          return;
+        }
+        if (i == attempts) {
+          return;
+        }
+      } on ConnectionException catch (_) {
+        if (i == attempts) {
+          rethrow;
+        }
+      }
+      await Future<void>.delayed(const Duration(milliseconds: 25));
+    }
+  }
+
   /// Closes all connections to the browser and asks the browser to exit.
   Future<void> close() async {
     if (_logger.isVerbose) {
@@ -501,12 +503,31 @@ class Chromium {
     if (_chromiumLauncher.hasChromeInstance) {
       _chromiumLauncher.currentCompleter = Completer<Chromium>();
     }
-    chromeConnection.close();
 
-    // Try to exit Chromium nicely using SIGTERM, before exiting it rudely using
-    // SIGKILL. Wait no longer than 5 seconds for Chromium to exit before
-    // falling back to SIGKILL, and then to a warning message.
-    ProcessSignal.sigterm.kill(_process);
+    // Send a command to shut down the browser cleanly.
+    Duration sigtermDelay = Duration.zero;
+    if (_hasValidChromeConnection) {
+      final ChromeTab? tab = await chromeConnection.getTab(
+          (_) => true, retryFor: const Duration(seconds: 1));
+      if (tab != null) {
+        final WipConnection wipConnection = await tab.connect();
+        await wipConnection.sendCommand('Browser.close');
+        await wipConnection.close();
+        sigtermDelay = const Duration(seconds: 1);
+      }
+    }
+    chromeConnection.close();
+    _hasValidChromeConnection = false;
+
+    // If the browser close command did not shut down the process, then try to
+    // exit Chromium using SIGTERM.
+    await _process.exitCode.timeout(sigtermDelay, onTimeout: () {
+      ProcessSignal.sigterm.kill(_process);
+      return 0;
+    });
+    // If the process still has not ended, then use SIGKILL. Wait up to 5
+    // seconds for Chromium to exit before falling back to SIGKILL and then to
+    // a warning message.
     await _process.exitCode.timeout(const Duration(seconds: 5), onTimeout: () {
       _logger.printWarning(
         'Failed to exit Chromium (pid: ${_process.pid}) using SIGTERM. Will try '
