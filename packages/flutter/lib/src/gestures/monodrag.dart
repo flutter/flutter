@@ -81,8 +81,8 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     this.velocityTrackerBuilder = _defaultBuilder,
     this.onlyAcceptDragOnThreshold = false,
     super.supportedDevices,
-    AllowedButtonsFilter? allowedButtonsFilter,
-  }) : super(allowedButtonsFilter: allowedButtonsFilter ?? _defaultButtonAcceptBehavior);
+    super.allowedButtonsFilter = _defaultButtonAcceptBehavior,
+  });
 
   static VelocityTracker _defaultBuilder(PointerEvent event) => VelocityTracker.withKind(event.kind);
 
@@ -99,7 +99,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   /// no difference in behavior between the two settings.
   ///
   /// For more information about the gesture arena:
-  /// https://docs.flutter.dev/ui/interactivity/gestures#gesture-disambiguation
+  /// https://flutter.dev/to/gesture-disambiguation
   ///
   /// By default, the drag start behavior is [DragStartBehavior.start].
   ///
