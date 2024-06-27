@@ -126,6 +126,12 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
   // Font weight adjustment for bold text. FontWeight.Bold - FontWeight.Normal = w700 - w400 = 300.
   private static final int BOLD_TEXT_WEIGHT_ADJUSTMENT = 300;
 
+  // Default transition animation scale (animations enabled)
+  private static final float DEFAULT_TRANSITION_ANIMATION_SCALE = 1.0f;
+
+  // Transition animation scale when animations are disabled
+  private static final float DISABLED_TRANSITION_ANIMATION_SCALE = 0.0f;
+
   /// Value is derived from ACTION_TYPE_MASK in AccessibilityNodeInfo.java
   private static int FIRST_RESOURCE_ID = 267386881;
 
@@ -399,11 +405,13 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
             return;
           }
           // Retrieve the current value of TRANSITION_ANIMATION_SCALE from the OS.
-          String value =
-              Settings.Global.getString(
-                  contentResolver, Settings.Global.TRANSITION_ANIMATION_SCALE);
+          float value =
+              Settings.Global.getFloat(
+                  contentResolver,
+                  Settings.Global.TRANSITION_ANIMATION_SCALE,
+                  DEFAULT_TRANSITION_ANIMATION_SCALE);
 
-          boolean shouldAnimationsBeDisabled = value != null && value.equals("0");
+          boolean shouldAnimationsBeDisabled = value == DISABLED_TRANSITION_ANIMATION_SCALE;
           if (shouldAnimationsBeDisabled) {
             accessibilityFeatureFlags |= AccessibilityFeature.DISABLE_ANIMATIONS.value;
           } else {
@@ -560,7 +568,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     if (shouldBold) {
       accessibilityFeatureFlags |= AccessibilityFeature.BOLD_TEXT.value;
     } else {
-      accessibilityFeatureFlags &= AccessibilityFeature.BOLD_TEXT.value;
+      accessibilityFeatureFlags &= ~AccessibilityFeature.BOLD_TEXT.value;
     }
     sendLatestAccessibilityFlagsToFlutter();
   }
