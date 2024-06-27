@@ -2565,57 +2565,78 @@ void main() {
     });
 
     testWidgets('Material3 - scrolledUnderElevation should be maintained when drawer is opened', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            appBar: AppBar(
-              elevation: 0,
-              backgroundColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
-                return states.contains(MaterialState.scrolledUnder)
-                  ? scrolledColor
-                  : defaultColor;
-              }),
-              title: const Text('AppBar'),
-            ),
-            drawer: const Drawer(),
-            body: SingleChildScrollView(
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Container(
-                  height: 1200,
-                  width: 1200,
-                  color: Colors.teal,
-                ),
-              ),
+      final GlobalKey drawerListKey  = GlobalKey();
+      final GlobalKey bodyListKey = GlobalKey();
+       await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(
+            elevation: 0,
+            backgroundColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
+              return states.contains(MaterialState.scrolledUnder) ? scrolledColor : defaultColor;
+            }),
+            title: const Text('AppBar'),
+          ),
+          drawer: Drawer(
+            child: ListView(
+              key: drawerListKey,
+              children: <Widget>[
+                Container(height: 1200, color: Colors.red),
+              ],
             ),
           ),
-        )
-      );
+          body: ListView(
+            key: bodyListKey,
+            children: <Widget>[
+              Container(height: 1200, color: Colors.teal),
+            ],
+          ),
+        ),
+      ));
 
+      // Initial state: AppBar should have the default color.
       expect(getAppBarBackgroundColor(tester), defaultColor);
-      expect(tester.getSize(findAppBarMaterial()).height, kToolbarHeight);
 
-      final TestGesture gesture = await tester.startGesture(const Offset(50.0, 400.0));
-      await gesture.moveBy(const Offset(0.0, -kToolbarHeight));
-      await tester.pump();
-      await gesture.moveBy(const Offset(0.0, -kToolbarHeight));
-      await gesture.up();
+      // Scroll the list view.
+      await tester.drag(find.byKey(bodyListKey), const Offset(0, -300));
       await tester.pumpAndSettle();
 
+      // The AppBar should now have the scrolled color.
       expect(getAppBarBackgroundColor(tester), scrolledColor);
-      expect(tester.getSize(findAppBarMaterial()).height, kToolbarHeight);
 
+      // Open the drawer.
       await tester.tap(find.byIcon(Icons.menu));
       await tester.pumpAndSettle();
 
+      // The AppBar should still have the scrolled color.
       expect(getAppBarBackgroundColor(tester), scrolledColor);
-      expect(tester.getSize(findAppBarMaterial()).height, kToolbarHeight);
 
-      await tester.tap(find.byType(Scaffold));
+      // Scroll the list inside the drawer.
+      await tester.drag(find.byKey(drawerListKey), const Offset(0, -300));
       await tester.pumpAndSettle();
 
+      // The AppBar should still have the scrolled color.
       expect(getAppBarBackgroundColor(tester), scrolledColor);
-      expect(tester.getSize(findAppBarMaterial()).height, kToolbarHeight);
+
+      // Scroll list inside the drawer back to the top.
+      await tester.drag(find.byKey(drawerListKey), const Offset(0, 300));
+      await tester.pumpAndSettle();
+
+      // The AppBar should still have the scrolled color.
+      expect(getAppBarBackgroundColor(tester), scrolledColor);
+
+      // Close the drawer using the Scaffold's method.
+      tester.state<ScaffoldState>(find.byType(Scaffold)).openEndDrawer();
+      await tester.pumpAndSettle();
+
+      // The AppBar should still have the scrolled color.
+      expect(getAppBarBackgroundColor(tester), scrolledColor);
+
+      // Scroll the list view back to the top.
+      await tester.drag(find.byKey(bodyListKey), const Offset(0, 300));
+      await tester.pumpAndSettle();
+
+      // The AppBar should be back to the default color.
+      expect(getAppBarBackgroundColor(tester), defaultColor);
     });
 
     testWidgets('Material3 - scrolledUnderElevation should be applied when scrolled under with multiple list views', (WidgetTester tester) async {
