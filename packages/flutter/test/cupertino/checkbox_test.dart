@@ -466,7 +466,7 @@ void main() {
     );
   });
 
-  testWidgets('Checkbox default shadows, colors, and size', (WidgetTester tester) async {
+  testWidgets('Checkbox default colors, and size', (WidgetTester tester) async {
     const Color enabledCheckColor = Color(0xffffffff);
     const Color disabledCheckColor = Color(0xffacacac);
     const Color inactiveFillColor = Color(0xffffffff);
@@ -495,7 +495,7 @@ void main() {
       paints
       ..path(color: inactiveFillColor)
       ..drrect(color: inactiveBorderColor),
-      reason: 'Inactive enabled checkbox should have default fill color and shadow',
+      reason: 'Inactive enabled checkbox should have default fill color',
     );
 
     await tester.pumpWidget(Container());
@@ -520,7 +520,7 @@ void main() {
       paints
       ..path(color: disabledFillColor)
       ..drrect(color: inactiveBorderColor),
-      reason: 'Inactive disabled checkbox should have default shadow and fill colors',
+      reason: 'Inactive disabled checkbox should have default fill color',
     );
 
     await tester.pumpWidget(Container());
@@ -533,7 +533,7 @@ void main() {
         ..drrect(color: inactiveBorderColor)
         ..path(color: disabledCheckColor)
         ..path(color: disabledCheckColor),
-      reason: 'Active disabled checkbox should have default shadow and fill colors',
+      reason: 'Active disabled checkbox should have default fill color',
     );
   });
 

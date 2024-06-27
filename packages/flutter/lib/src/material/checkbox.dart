@@ -469,6 +469,17 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
 
   @override
   Widget build(BuildContext context) {
+    final CheckboxThemeData checkboxTheme = CheckboxTheme.of(context);
+
+    // Colors need to be resolved in selected and non selected states separately
+    final Set<MaterialState> activeStates = states..add(MaterialState.selected);
+    final Set<MaterialState> inactiveStates = states..remove(MaterialState.selected);
+    if (widget.isError) {
+      activeStates.add(MaterialState.error);
+      inactiveStates.add(MaterialState.error);
+    }
+    final Set<MaterialState> checkStates = widget.isError ? (states..add(MaterialState.error)) : states;
+
     switch (widget._checkboxType) {
       case _CheckboxType.material:
         break;
@@ -487,15 +498,15 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
               value: value,
               tristate: tristate,
               onChanged: onChanged,
-              mouseCursor: widget.mouseCursor,
+              mouseCursor: widget.mouseCursor ?? checkboxTheme.mouseCursor?.resolve(states),
               activeColor: widget.activeColor,
-              fillColor: widget.fillColor,
-              checkColor: widget.checkColor,
+              fillColor: widget.fillColor ?? checkboxTheme.fillColor,
+              checkColor: widget.checkColor ?? checkboxTheme.checkColor?.resolve(checkStates),
               focusColor: widget.focusColor,
               focusNode: widget.focusNode,
               autofocus: widget.autofocus,
-              side: widget.side,
-              shape: widget.shape,
+              side: widget.side ?? checkboxTheme.side,
+              shape: widget.shape ?? checkboxTheme.shape,
               isError: widget.isError,
               semanticLabel: widget.semanticLabel,
             );
@@ -503,7 +514,6 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
     }
 
     assert(debugCheckHasMaterial(context));
-    final CheckboxThemeData checkboxTheme = CheckboxTheme.of(context);
     final CheckboxThemeData defaults = Theme.of(context).useMaterial3
       ? _CheckboxDefaultsM3(context)
       : _CheckboxDefaultsM2(context);
@@ -525,13 +535,6 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
         ?? MaterialStateMouseCursor.clickable.resolve(states);
     });
 
-    // Colors need to be resolved in selected and non selected states separately
-    final Set<MaterialState> activeStates = states..add(MaterialState.selected);
-    final Set<MaterialState> inactiveStates = states..remove(MaterialState.selected);
-    if (widget.isError) {
-      activeStates.add(MaterialState.error);
-      inactiveStates.add(MaterialState.error);
-    }
     final Color? activeColor = widget.fillColor?.resolve(activeStates)
       ?? _widgetFillColor.resolve(activeStates)
       ?? checkboxTheme.fillColor?.resolve(activeStates);
@@ -589,7 +592,6 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
         : effectiveInactivePressedOverlayColor;
     }
 
-    final Set<MaterialState> checkStates = widget.isError ? (states..add(MaterialState.error)) : states;
     final Color effectiveCheckColor = widget.checkColor
       ?? checkboxTheme.checkColor?.resolve(checkStates)
       ?? defaults.checkColor!.resolve(checkStates)!;
