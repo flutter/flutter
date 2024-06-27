@@ -15,16 +15,15 @@ import 'theme.dart';
 
 // Hand coded defaults eyeballed from iOS simulator on Mac.
 const double _kDisabledOpacity = 0.5;
-const double _kActiveThumbRadius = 14.0;
-const double _kInactiveThumbRadius = 14.0;
-const double _kPressedThumbRadius = 14.0;
+const double _kThumbRadius = 14.0;
 const double _kThumbRadiusWithIcon = 14.0;
 const double _kTrackHeight = 31.0;
 const double _kTrackWidth = 51.0;
 const Size _kSwitchSize = Size(59.0, 39.0);
+const double _kThumbExtensionFactor = 7.0;
 // The thumb size at the middle of the track.
 const Size _kTransitionalThumbSize = Size(28.0, 28.0);
-const List<BoxShadow> _kThumbShadow = <BoxShadow> [
+const List<BoxShadow> _kThumbShadow = <BoxShadow>[
   BoxShadow(
     color: Color(0x26000000),
     offset: Offset(0, 3),
@@ -45,7 +44,8 @@ const double _kOnLabelPaddingHorizontal = 11.0;
 const double _kOffLabelWidth = 1.0;
 const double _kOffLabelPaddingHorizontal = 12.0;
 const double _kOffLabelRadius = 5.0;
-const CupertinoDynamicColor _kOffLabelColor = CupertinoDynamicColor.withBrightnessAndContrast(
+const CupertinoDynamicColor _kOffLabelColor =
+    CupertinoDynamicColor.withBrightnessAndContrast(
   debugLabel: 'offSwitchLabel',
   // Source: https://github.com/flutter/flutter/pull/39993#discussion_r321946033
   color: Color.fromARGB(255, 179, 179, 179),
@@ -375,10 +375,10 @@ class CupertinoSwitch extends StatefulWidget {
   /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode? focusNode;
 
-   /// Handler called when the focus changes.
-   ///
-   /// Called with true if this widget's node gains focus, and false if it loses
-   /// focus.
+  /// Handler called when the focus changes.
+  ///
+  /// Called with true if this widget's node gains focus, and false if it loses
+  /// focus.
   final ValueChanged<bool>? onFocusChange;
 
   /// {@macro flutter.widgets.Focus.autofocus}
@@ -455,7 +455,8 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
   }
 
   @override
-  ValueChanged<bool?>? get onChanged => widget.onChanged != null ? _handleChanged : null;
+  ValueChanged<bool?>? get onChanged =>
+      widget.onChanged != null ? _handleChanged : null;
 
   @override
   bool get tristate => false;
@@ -489,15 +490,15 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
       return kIsWeb ? SystemMouseCursors.click : MouseCursor.defer;
     });
 
-  Color? _resolveTrackColor (Color? trackColor, Set<WidgetState> states){
-    if (trackColor is WidgetStateColor){
+  Color? _resolveTrackColor(Color? trackColor, Set<WidgetState> states) {
+    if (trackColor is WidgetStateColor) {
       return WidgetStateProperty.resolveAs<Color?>(trackColor, states);
     }
     return trackColor;
   }
 
-  Color? _resolveThumbColor (Color? thumbColor, Set<WidgetState> states){
-    if (thumbColor is WidgetStateColor){
+  Color? _resolveThumbColor(Color? thumbColor, Set<WidgetState> states) {
+    if (thumbColor is WidgetStateColor) {
       return WidgetStateProperty.resolveAs<Color?>(thumbColor, states);
     }
     return thumbColor;
@@ -604,52 +605,67 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
     final Set<WidgetState> activeStates = states..add(WidgetState.selected);
     final Set<WidgetState> inactiveStates = states..remove(WidgetState.selected);
 
-    final Color effectiveActiveThumbColor = _resolveThumbColor(widget.thumbColor, activeStates)
+    final Color effectiveActiveThumbColor =
+      _resolveThumbColor(widget.thumbColor, activeStates)
       ?? _widgetThumbColor.resolve(activeStates)
       ?? CupertinoColors.white;
 
-    final Color effectiveInactiveThumbColor = _resolveThumbColor(widget.inactiveThumbColor, inactiveStates)
+    final Color effectiveInactiveThumbColor =
+      _resolveThumbColor(widget.inactiveThumbColor, inactiveStates)
       ?? _widgetThumbColor.resolve(inactiveStates)
       ?? effectiveActiveThumbColor;
 
-    final Color effectiveActiveTrackColor = _widgetTrackColor.resolve(activeStates)
-      ?? activeColor;
+    final Color effectiveActiveTrackColor =
+      _widgetTrackColor.resolve(activeStates) ?? activeColor;
 
-    final Color? effectiveActiveTrackOutlineColor = widget.trackOutlineColor?.resolve(activeStates);
+    final Color? effectiveActiveTrackOutlineColor =
+      widget.trackOutlineColor?.resolve(activeStates);
 
-    final double? effectiveActiveTrackOutlineWidth = widget.trackOutlineWidth?.resolve(activeStates);
+    final double? effectiveActiveTrackOutlineWidth =
+      widget.trackOutlineWidth?.resolve(activeStates);
 
-    final Color effectiveInactiveTrackColor = _resolveTrackColor(widget.trackColor, inactiveStates)
+    final Color effectiveInactiveTrackColor =
+      _resolveTrackColor(widget.trackColor, inactiveStates)
       ?? CupertinoDynamicColor.resolve(CupertinoColors.secondarySystemFill, context);
 
-    final Color? effectiveInactiveTrackOutlineColor = widget.trackOutlineColor?.resolve(inactiveStates);
+    final Color? effectiveInactiveTrackOutlineColor =
+      widget.trackOutlineColor?.resolve(inactiveStates);
 
-    final double? effectiveInactiveTrackOutlineWidth = widget.trackOutlineWidth?.resolve(inactiveStates);
+    final double? effectiveInactiveTrackOutlineWidth =
+      widget.trackOutlineWidth?.resolve(inactiveStates);
 
     final Icon? effectiveActiveIcon = widget.thumbIcon?.resolve(activeStates);
 
-    final Icon? effectiveInactiveIcon = widget.thumbIcon?.resolve(inactiveStates);
+    final Icon? effectiveInactiveIcon =
+      widget.thumbIcon?.resolve(inactiveStates);
 
-    final Color effectiveActiveIconColor = effectiveActiveIcon?.color ?? CupertinoColors.black;
+    final Color effectiveActiveIconColor =
+      effectiveActiveIcon?.color ?? CupertinoColors.black;
 
-    final Color effectiveInactiveIconColor = effectiveInactiveIcon?.color ?? CupertinoColors.black;
+    final Color effectiveInactiveIconColor =
+      effectiveInactiveIcon?.color ?? CupertinoColors.black;
 
     final Set<WidgetState> activePressedStates = activeStates..add(WidgetState.pressed);
-    final Color effectiveActivePressedThumbColor = _resolveThumbColor(widget.thumbColor, activePressedStates)
+    final Color effectiveActivePressedThumbColor =
+      _resolveThumbColor(widget.thumbColor, activePressedStates)
       ?? _widgetThumbColor.resolve(activePressedStates)
       ?? CupertinoColors.white;
 
     final Set<WidgetState> inactivePressedStates = inactiveStates..add(WidgetState.pressed);
-    final Color effectiveInactivePressedThumbColor = _resolveThumbColor(widget.thumbColor, inactivePressedStates)
+    final Color effectiveInactivePressedThumbColor =
+      _resolveThumbColor(widget.thumbColor, inactivePressedStates)
       ?? _widgetThumbColor.resolve(inactivePressedStates)
       ?? CupertinoColors.white;
 
-    final WidgetStateProperty<MouseCursor> effectiveMouseCursor = widget.mouseCursor ?? _defaultMouseCursor;
+    final WidgetStateProperty<MouseCursor> effectiveMouseCursor =
+      widget.mouseCursor ?? _defaultMouseCursor;
 
-    final double effectiveActiveThumbRadius = effectiveActiveIcon == null ? _kActiveThumbRadius : _kThumbRadiusWithIcon;
+    final double effectiveActiveThumbRadius =
+      effectiveActiveIcon == null ? _kThumbRadius : _kThumbRadiusWithIcon;
 
-    final double effectiveInactiveThumbRadius = effectiveInactiveIcon == null && widget.inactiveThumbImage == null
-      ? _kInactiveThumbRadius : _kThumbRadiusWithIcon;
+    final double effectiveInactiveThumbRadius =
+      effectiveInactiveIcon == null && widget.inactiveThumbImage == null
+        ? _kThumbRadius : _kThumbRadiusWithIcon;
 
     return Semantics(
       toggled: widget.value,
@@ -705,7 +721,6 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
               ..textDirection = Directionality.of(context)
               ..inactiveThumbRadius = effectiveInactiveThumbRadius
               ..activeThumbRadius = effectiveActiveThumbRadius
-              ..pressedThumbRadius = _kPressedThumbRadius
               ..thumbOffset = thumbOffset
               ..trackHeight = _kTrackHeight
               ..trackWidth = _kTrackWidth
@@ -735,7 +750,11 @@ class _SwitchPainter extends ToggleablePainter {
     }
     _positionController = value;
     _colorAnimation?.dispose();
-    _colorAnimation = CurvedAnimation(parent: positionController, curve: Curves.easeOut, reverseCurve: Curves.easeIn);
+    _colorAnimation = CurvedAnimation(
+      parent: positionController,
+      curve: Curves.easeOut,
+      reverseCurve: Curves.easeIn
+    );
     notifyListeners();
   }
 
@@ -830,16 +849,6 @@ class _SwitchPainter extends ToggleablePainter {
       return;
     }
     _inactiveThumbRadius = value;
-    notifyListeners();
-  }
-
-  double get pressedThumbRadius => _pressedThumbRadius!;
-  double? _pressedThumbRadius;
-  set pressedThumbRadius(double value) {
-    if (value == _pressedThumbRadius) {
-      return;
-    }
-    _pressedThumbRadius = value;
     notifyListeners();
   }
 
@@ -1062,7 +1071,9 @@ class _SwitchPainter extends ToggleablePainter {
   ShapeDecoration _createDefaultThumbDecoration(Color color, ImageProvider? image, ImageErrorListener? errorListener) {
     return ShapeDecoration(
       color: color,
-      image: image == null ? null : DecorationImage(image: image, onError: errorListener),
+      image: image == null
+        ? null
+        : DecorationImage(image: image, onError: errorListener),
       shape: const StadiumBorder(),
     );
   }
@@ -1080,8 +1091,6 @@ class _SwitchPainter extends ToggleablePainter {
   }
 
   bool _stopPressAnimation = false;
-  double? _pressedInactiveThumbRadius;
-  double? _pressedActiveThumbRadius;
   late double? _pressedThumbExtension;
 
   @override
@@ -1098,47 +1107,27 @@ class _SwitchPainter extends ToggleablePainter {
       _stopPressAnimation = false;
     }
 
-    // To get the thumb radius when the press ends, the value can be any number
-    // between activeThumbRadius/inactiveThumbRadius and pressedThumbRadius.
-    if (!_stopPressAnimation) {
-      _pressedThumbExtension = reaction.value * 7;
-      if (reaction.isCompleted) {
-        // This happens when the thumb is dragged instead of being tapped.
-        _pressedInactiveThumbRadius = lerpDouble(inactiveThumbRadius, pressedThumbRadius, reaction.value);
-        _pressedActiveThumbRadius = lerpDouble(activeThumbRadius, pressedThumbRadius, reaction.value);
-      }
-      if (currentValue == 0) {
-        _pressedInactiveThumbRadius = lerpDouble(inactiveThumbRadius, pressedThumbRadius, reaction.value);
-        _pressedActiveThumbRadius = activeThumbRadius;
-      }
-      if (currentValue == 1) {
-        _pressedActiveThumbRadius = lerpDouble(activeThumbRadius, pressedThumbRadius, reaction.value);
-        _pressedInactiveThumbRadius = inactiveThumbRadius;
-      }
-    }
-    final Size inactiveThumbSize = Size(_pressedInactiveThumbRadius! * 2 + _pressedThumbExtension!, _pressedInactiveThumbRadius! * 2);
-    final Size activeThumbSize = Size(_pressedActiveThumbRadius! * 2 + _pressedThumbExtension!, _pressedActiveThumbRadius! * 2);
-
-    final Size? uncontractedThumbSize;
-
-    if (reaction.isCompleted) {
-      uncontractedThumbSize = Size(_pressedInactiveThumbRadius! * 2 + _pressedThumbExtension!, _pressedInactiveThumbRadius! * 2);
-    } else {
-      if (position.isDismissed || position.status == AnimationStatus.forward) {
-        uncontractedThumbSize = Size.lerp(inactiveThumbSize, activeThumbSize, position.value);
-      } else {
-        uncontractedThumbSize = Size.lerp(inactiveThumbSize, activeThumbSize, position.value);
-      }
-    }
-
-    // The thumb contracts slightly during the animation.
+    _pressedThumbExtension = reaction.value * _kThumbExtensionFactor;
+    final Size inactiveThumbSize = Size(
+      _inactiveThumbRadius! * 2 + _pressedThumbExtension!,
+      _inactiveThumbRadius! * 2,
+    );
+    final Size activeThumbSize = Size(
+      _activeThumbRadius! * 2 + _pressedThumbExtension!,
+      _activeThumbRadius! * 2,
+    );
+    final Size? uncontractedThumbSize = reaction.isCompleted
+      ? inactiveThumbSize
+      : Size.lerp(inactiveThumbSize, activeThumbSize, position.value);
     final Size thumbSize = Size(uncontractedThumbSize!.width, uncontractedThumbSize.height);
 
     final double colorValue = _colorAnimation!.value;
     final Color trackColor = Color.lerp(inactiveTrackColor, activeTrackColor, position.value)!;
-    final Color? trackOutlineColor = inactiveTrackOutlineColor == null || activeTrackOutlineColor == null ? null
-        : Color.lerp(inactiveTrackOutlineColor, activeTrackOutlineColor, colorValue);
+    final Color? trackOutlineColor = inactiveTrackOutlineColor == null || activeTrackOutlineColor == null
+      ? null
+      : Color.lerp(inactiveTrackOutlineColor, activeTrackOutlineColor, colorValue);
     final double? trackOutlineWidth = lerpDouble(inactiveTrackOutlineWidth, activeTrackOutlineWidth, colorValue);
+
     final Color lerpedThumbColor;
     if (!reaction.isDismissed) {
       lerpedThumbColor = Color.lerp(inactivePressedColor, activePressedColor, colorValue)!;
@@ -1159,10 +1148,11 @@ class _SwitchPainter extends ToggleablePainter {
 
     final ImageProvider? thumbImage = currentValue < 0.5 ? inactiveThumbImage : activeThumbImage;
 
-    final ImageErrorListener? thumbErrorListener = currentValue < 0.5 ? onInactiveThumbImageError : onActiveThumbImageError;
+    final ImageErrorListener? thumbErrorListener = currentValue < 0.5
+      ? onInactiveThumbImageError
+      : onActiveThumbImageError;
 
-    final Paint paint = Paint()
-      ..color = trackColor;
+    final Paint paint = Paint()..color = trackColor;
 
     final Offset trackPaintOffset = _computeTrackPaintOffset(size, trackWidth, trackHeight);
     final Offset thumbPaintOffset = _computeThumbPaintOffset(trackPaintOffset, thumbSize, visualPosition);
@@ -1297,15 +1287,15 @@ class _SwitchPainter extends ToggleablePainter {
   }
 
   void _paintThumbWith(
-      Offset thumbPaintOffset,
-      Canvas canvas,
-      double currentValue,
-      Color thumbColor,
-      ImageProvider? thumbImage,
-      ImageErrorListener? thumbErrorListener,
-      Icon? thumbIcon,
-      Size thumbSize,
-    ) {
+    Offset thumbPaintOffset,
+    Canvas canvas,
+    double currentValue,
+    Color thumbColor,
+    ImageProvider? thumbImage,
+    ImageErrorListener? thumbErrorListener,
+    Icon? thumbIcon,
+    Size thumbSize,
+  ) {
     try {
       _isPainting = true;
       if (_cachedThumbPainter == null || thumbColor != _cachedThumbColor || thumbImage != _cachedThumbImage || thumbErrorListener != _cachedThumbErrorListener) {
@@ -1313,7 +1303,8 @@ class _SwitchPainter extends ToggleablePainter {
         _cachedThumbImage = thumbImage;
         _cachedThumbErrorListener = thumbErrorListener;
         _cachedThumbPainter?.dispose();
-        _cachedThumbPainter = _createDefaultThumbDecoration(thumbColor, thumbImage, thumbErrorListener).createBoxPainter(_handleDecorationChanged);
+        _cachedThumbPainter = _createDefaultThumbDecoration(thumbColor, thumbImage, thumbErrorListener)
+          .createBoxPainter(_handleDecorationChanged);
       }
       final BoxPainter thumbPainter = _cachedThumbPainter!;
 
