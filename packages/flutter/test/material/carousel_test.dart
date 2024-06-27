@@ -199,7 +199,7 @@ void main() {
       return MaterialApp(
         home: Scaffold(
           body: CarouselView.weighted(
-            layoutWeights: weights,
+            flexWeights: weights,
             children: List<Widget>.generate(10, (int index) {
               return Center(
                 child: Text('Item $index'),
@@ -295,7 +295,7 @@ void main() {
         home: Scaffold(
           body: CarouselView.weighted(
             controller: CarouselController(initialItem: 5),
-            layoutWeights: const <int>[7, 1],
+            flexWeights: const <int>[7, 1],
             children: List<Widget>.generate(10, (int index) {
               return Center(
                 child: Text('Item $index'),
@@ -329,7 +329,7 @@ void main() {
         home: Scaffold(
           body: CarouselView.weighted(
             controller: CarouselController(initialItem: 5),
-            layoutWeights: const <int>[1, 8, 1],
+            flexWeights: const <int>[1, 8, 1],
             children: List<Widget>.generate(10, (int index) {
               return Center(
                 child: Text('Item $index'),
@@ -417,7 +417,7 @@ void main() {
           body: CarouselView.weighted(
             itemSnapping: true,
             consumeMaxWeight: false,
-            layoutWeights: const <int>[1, 7],
+            flexWeights: const <int>[1, 7],
             children: List<Widget>.generate(10, (int index) {
               return Center(
                 child: Text('Item $index'),
@@ -519,7 +519,7 @@ void main() {
           body: CarouselView.weighted(
             itemSnapping: true,
             consumeMaxWeight: false,
-            layoutWeights: const <int>[1, 8, 1],
+            flexWeights: const <int>[1, 8, 1],
             children: List<Widget>.generate(10, (int index) {
               return Center(
                 child: Text('$index'),
@@ -693,7 +693,7 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: CarouselView.weighted(
-            layoutWeights: const <int>[1, 2, 4, 2, 1],
+            flexWeights: const <int>[1, 2, 4, 2, 1],
             itemSnapping: true,
             children: List<Widget>.generate(10, (int index) {
               return Center(
@@ -735,7 +735,7 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: CarouselView.weighted(
-            layoutWeights: const <int>[1, 2, 4, 2, 1],
+            flexWeights: const <int>[1, 2, 4, 2, 1],
             consumeMaxWeight: false,
             children: List<Widget>.generate(10, (int index) {
               return Center(
