@@ -409,7 +409,7 @@ void main() {
 
     expect(response.statusCode, 200);
     final String body = await response.readAsString();
-    expect(body, isNot(contains('"useLocalCanvasKit":true')));
+    expect(body, isNot(contains('useLocalCanvasKit')));
   }));
 
   test('serves flutter_bootstrap.js with useLocalCanvasKit', () => testbed.run(() async {

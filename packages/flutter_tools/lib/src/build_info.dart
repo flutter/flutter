@@ -181,7 +181,7 @@ class BuildInfo {
   /// If set, builds native assets with `build.dart` from all packages.
   final bool buildNativeAssets;
 
-  /// If set, web builds will use the locally build CanvasKit instead of using the CDN
+  /// If set, web builds will use the locally built CanvasKit instead of using the CDN
   final bool useLocalCanvasKit;
 
   static const BuildInfo debug = BuildInfo(BuildMode.debug, null, trackWidgetCreation: true, treeShakeIcons: false);

@@ -104,12 +104,13 @@ abstract class Dart2WebTarget extends Target {
   Iterable<File> buildFiles(Environment environment);
   Iterable<String> get buildPatternStems;
 
-  List<String> dartDefines(Environment environment) {
+  List<String> computeDartDefines(Environment environment) {
     final List<String> dartDefines = compilerConfig.renderer.updateDartDefines(
       decodeDartDefines(environment.defines, kDartDefines),
     );
     if (environment.defines[kUseLocalCanvasKitFlag] != 'true') {
-      if (!dartDefines.any((String define) => define.startsWith('FLUTTER_WEB_CANVASKIT_URL='))) {
+      final bool canvasKitUrlAlreadySet = dartDefines.any((String define) => define.startsWith('FLUTTER_WEB_CANVASKIT_URL='));
+      if (!canvasKitUrlAlreadySet) {
         dartDefines.add('FLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/${globals.flutterVersion.engineRevision}/');
       }
     }
@@ -178,7 +179,7 @@ class Dart2JSTarget extends Dart2WebTarget {
         '-Ddart.vm.profile=true'
       else
         '-Ddart.vm.product=true',
-      for (final String dartDefine in dartDefines(environment))
+      for (final String dartDefine in computeDartDefines(environment))
         '-D$dartDefine',
     ];
 
@@ -315,7 +316,7 @@ class Dart2WasmTarget extends Dart2WebTarget {
       else
         '-Ddart.vm.product=true',
       ...decodeCommaSeparated(environment.defines, kExtraFrontEndOptions),
-      for (final String dartDefine in dartDefines(environment))
+      for (final String dartDefine in computeDartDefines(environment))
         '-D$dartDefine',
       '--extra-compiler-option=--depfile=${depFile.path}',
 
@@ -526,7 +527,7 @@ class WebTemplatedFiles extends Target {
   }
 
   String buildConfigString(Environment environment) {
-    final Map<String, Object?> buildConfig = <String, Object?>{
+    final Map<String, Object> buildConfig = <String, Object>{
       'engineRevision': globals.flutterVersion.engineRevision,
       'builds': buildDescriptions,
       if (environment.defines[kUseLocalCanvasKitFlag] == 'true')
