@@ -4,6 +4,8 @@
 
 #include "flutter/fml/synchronization/sync_switch.h"
 
+#include <algorithm>
+
 namespace fml {
 
 SyncSwitch::Handlers& SyncSwitch::Handlers::SetIfTrue(
