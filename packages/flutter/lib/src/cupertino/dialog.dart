@@ -8,6 +8,7 @@ import 'dart:ui' show ImageFilter;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
@@ -582,7 +583,7 @@ abstract class _ActionSheetSlideTarget {
   //  * The point has contacted the screen in this region. In this case, this
   //    method is called as soon as the pointer down event occurs regardless of
   //    whether the gesture wins the arena immediately.
-  void didEnter();
+  void didEnter({required bool fromPointerDown});
 
   // A pointer has exited this region.
   //
@@ -647,7 +648,7 @@ class _TargetSelectionGestureRecognizer extends GestureRecognizer {
   // Collect the `_ActionSheetSlideTarget`s that are currently hit by the
   // pointer, check whether the current target have changed, and invoke their
   // methods if necessary.
-  void _updateDrag(Offset pointerPosition) {
+  void _updateDrag(Offset pointerPosition, {required bool fromPointerDown}) {
     final HitTestResult result = hitTest(pointerPosition);
 
     // A slide target might nest other targets, therefore multiple targets might
@@ -673,21 +674,21 @@ class _TargetSelectionGestureRecognizer extends GestureRecognizer {
         ..clear()
         ..addAll(foundTargets);
       for (final _ActionSheetSlideTarget target in _currentTargets) {
-        target.didEnter();
+        target.didEnter(fromPointerDown: fromPointerDown);
       }
     }
   }
 
   void _onDown(DragDownDetails details) {
-    _updateDrag(details.globalPosition);
+    _updateDrag(details.globalPosition, fromPointerDown: true);
   }
 
   void _onUpdate(Offset globalPosition) {
-    _updateDrag(globalPosition);
+    _updateDrag(globalPosition, fromPointerDown: false);
   }
 
   void _onEnd(Offset globalPosition) {
-    _updateDrag(globalPosition);
+    _updateDrag(globalPosition, fromPointerDown: false);
     for (final _ActionSheetSlideTarget target in _currentTargets) {
       target.didConfirm();
     }
@@ -1118,7 +1119,7 @@ class _CupertinoActionSheetActionState extends State<CupertinoActionSheetAction>
     implements _ActionSheetSlideTarget {
   // |_ActionSheetSlideTarget|
   @override
-  void didEnter() {}
+  void didEnter({required bool fromPointerDown}) {}
 
   // |_ActionSheetSlideTarget|
   @override
@@ -1200,11 +1201,27 @@ class _ActionSheetButtonBackground extends StatefulWidget {
 class _ActionSheetButtonBackgroundState extends State<_ActionSheetButtonBackground> implements _ActionSheetSlideTarget {
   bool isBeingPressed = false;
 
+  void _emitVibration(){
+    switch(defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+        HapticFeedback.selectionClick();
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        break;
+    }
+  }
+
   // |_ActionSheetSlideTarget|
   @override
-  void didEnter() {
+  void didEnter({required bool fromPointerDown}) {
     setState(() { isBeingPressed = true; });
     widget.onPressStateChange?.call(true);
+    if (!fromPointerDown) {
+      _emitVibration();
+    }
   }
 
   // |_ActionSheetSlideTarget|
