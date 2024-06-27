@@ -17,7 +17,7 @@ const double _kCupertinoFocusColorOpacity = 0.80;
 const double _kCupertinoFocusColorBrightness = 0.69;
 const double _kCupertinoFocusColorSaturation = 0.835;
 
-// Eyeballed from Apple's Design Resources (macOS Sonoma) figma template:
+// Obtained from Apple's Design Resources (macOS Sonoma) figma template:
 // https://www.figma.com/design/vmIRIt4jgAmSFvXO0SAxU2/Apple-Design-Resources---macOS-(Community)
 const Color _kDisabledCheckColor = Color.fromARGB(255, 172, 172, 172);
 
@@ -25,7 +25,7 @@ const Color _kDisabledCheckColor = Color.fromARGB(255, 172, 172, 172);
 const CupertinoDynamicColor _kDefaultFillColor = CupertinoDynamicColor.withBrightness(
     color: CupertinoColors.white,
     darkColor: Color.fromARGB(255, 87, 87, 87),
-  );
+);
 
 /// A macOS style checkbox.
 ///
@@ -533,7 +533,7 @@ class _CheckboxPainter extends ToggleablePainter {
     final Rect outer = _outerRectAt(origin);
     final Paint paint = Paint()..color = _colorAt(value ?? true);
 
-    switch (value){
+    switch (value) {
       case false:
         _drawBox(canvas, outer, paint, side);
       case true:

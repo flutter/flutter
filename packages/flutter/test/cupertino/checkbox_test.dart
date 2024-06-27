@@ -26,7 +26,7 @@ void main() {
             value: false,
             onChanged: (bool? b) { },
           ),
-        )
+        ),
       ),
     );
 
@@ -46,7 +46,7 @@ void main() {
             value: true,
             onChanged: (bool? b) { },
           ),
-        )
+        ),
       ),
     );
 
@@ -67,7 +67,7 @@ void main() {
             value: false,
             onChanged: null,
           ),
-        )
+        ),
       ),
     );
 
@@ -93,7 +93,7 @@ void main() {
             value: true,
             onChanged: null,
           ),
-        )
+        ),
       ),
     );
 
@@ -111,7 +111,7 @@ void main() {
             tristate: true,
             onChanged: null,
           ),
-        )
+        ),
       ),
     );
 
@@ -129,7 +129,7 @@ void main() {
             tristate: true,
             onChanged: null,
           ),
-        )
+        ),
       ),
     );
 
@@ -147,7 +147,7 @@ void main() {
             tristate: true,
             onChanged: null,
           ),
-        )
+        ),
       ),
     );
 
@@ -350,7 +350,7 @@ void main() {
             onChanged: (bool? b) { },
             semanticLabel: 'checkbox',
           ),
-        )
+        ),
       ),
     );
     expect(tester.getSemantics(find.byType(Focus).last), matchesSemantics(
@@ -487,8 +487,6 @@ void main() {
         ),
       );
     }
-
-    await tester.pumpWidget(Container());
     await tester.pumpWidget(buildApp(value: false));
     expect(
       find.byType(CupertinoCheckbox),
@@ -498,7 +496,6 @@ void main() {
       reason: 'Inactive enabled checkbox should have default fill color',
     );
 
-    await tester.pumpWidget(Container());
     await tester.pumpWidget(buildApp());
     await tester.pump();
     expect(
@@ -512,7 +509,6 @@ void main() {
     );
 
     // Test disabled checkbox.
-    await tester.pumpWidget(Container());
     await tester.pumpWidget(buildApp(enabled: false, value: false));
     await tester.pump();
     expect(
@@ -523,7 +519,6 @@ void main() {
       reason: 'Inactive disabled checkbox should have default fill color',
     );
 
-    await tester.pumpWidget(Container());
     await tester.pumpWidget(buildApp(enabled: false));
     await tester.pump();
     expect(
@@ -615,54 +610,55 @@ void main() {
         ),
       );
     }
-      await tester.pumpWidget(buildApp(value: false));
-      final TestGesture gesture = await tester.createGesture(
-        kind: PointerDeviceKind.mouse,
-        pointer: 1
-      );
-      await gesture.addPointer(location: tester.getCenter(find.byType(CupertinoCheckbox)));
-      await tester.pump();
-      await gesture.moveTo(tester.getCenter(find.byType(CupertinoCheckbox)));
-      expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-          SystemMouseCursors.basic);
+    await tester.pumpWidget(buildApp(value: false));
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+      pointer: 1
+    );
+    await gesture.addPointer(location: tester.getCenter(find.byType(CupertinoCheckbox)));
+    await tester.pump();
+    await gesture.moveTo(tester.getCenter(find.byType(CupertinoCheckbox)));
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+        SystemMouseCursors.basic);
 
-      await tester.pumpWidget(buildApp());
-      expect(
-        RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-        SystemMouseCursors.basic,
-      );
+    await tester.pumpWidget(buildApp());
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.basic,
+    );
 
-      // Test disabled checkbox.
-      await tester.pumpWidget(buildApp(enabled: false, value: false));
-      expect(
-        RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-        SystemMouseCursors.basic,
-      );
+    // Test disabled checkbox.
+    await tester.pumpWidget(buildApp(enabled: false, value: false));
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.basic,
+    );
 
-      // Test mouse cursor can be configured.
-      await tester.pumpWidget(buildApp(mouseCursor: SystemMouseCursors.click));
-      expect(
-        RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-        SystemMouseCursors.click,
-      );
-      await gesture.removePointer(location: tester.getCenter(find.byType(CupertinoCheckbox)));
-      await tester.pump();
+    // Test mouse cursor can be configured.
+    await tester.pumpWidget(buildApp(mouseCursor: SystemMouseCursors.click));
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.click,
+    );
+    await gesture.removePointer(location: tester.getCenter(find.byType(CupertinoCheckbox)));
   });
 
   testWidgets('Mouse cursor resolves in disabled/hovered/focused states', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'Checkbox');
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
-    await tester.pumpWidget(CupertinoApp(
-      home: Center(
-        child: CupertinoCheckbox(
-          value: false,
-          onChanged: (_) => true,
-          mouseCursor: const CheckboxMouseCursor(),
-          focusNode: focusNode
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoCheckbox(
+            value: false,
+            onChanged: (_) => true,
+            mouseCursor: const CheckboxMouseCursor(),
+            focusNode: focusNode
+          ),
         ),
       ),
-    ));
+    );
     final TestGesture gesture = await tester.createGesture(
       kind: PointerDeviceKind.mouse,
       pointer: 1
@@ -687,15 +683,17 @@ void main() {
     );
 
     // Test disabled case.
-    await tester.pumpWidget(const CupertinoApp(
-      home: Center(
-        child: CupertinoCheckbox(
-          value: true,
-          onChanged: null,
-          mouseCursor: CheckboxMouseCursor(),
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(
+          child: CupertinoCheckbox(
+            value: true,
+            onChanged: null,
+            mouseCursor: CheckboxMouseCursor(),
+          ),
         ),
       ),
-    ));
+    );
 
     await tester.pump();
     expect(
@@ -728,7 +726,8 @@ void main() {
       return defaultColor;
     }
 
-    await tester.pumpWidget(CupertinoApp(
+    await tester.pumpWidget(
+      CupertinoApp(
         home: Center(
           child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
             return CupertinoCheckbox(
@@ -740,7 +739,7 @@ void main() {
             );
           }),
         ),
-      )
+      ),
     );
     await tester.pump();
 
@@ -767,7 +766,8 @@ void main() {
       reason: 'Hovered Checkbox should use $hoverColor',
     );
 
-    await tester.pumpWidget(CupertinoApp(
+    await tester.pumpWidget(
+      CupertinoApp(
         home: Center(
           child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
             return CupertinoCheckbox(
@@ -777,7 +777,7 @@ void main() {
             );
           }),
         ),
-      )
+      ),
     );
 
     expect(
@@ -794,7 +794,8 @@ void main() {
     const Color defaultInactiveFillColor = Color(0xffffffff);
     const Color pressedDarkShadow = Color(0x0d000000);
 
-    await tester.pumpWidget(CupertinoApp(
+    await tester.pumpWidget(
+      CupertinoApp(
         home: Center(
           child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
             return CupertinoCheckbox(
@@ -803,7 +804,7 @@ void main() {
             );
           }),
         ),
-      )
+      ),
     );
 
     final TestGesture gesture1 =
@@ -819,7 +820,8 @@ void main() {
       reason: 'Inactive pressed Checkbox is slightly darkened',
     );
 
-    await tester.pumpWidget(CupertinoApp(
+    await tester.pumpWidget(
+      CupertinoApp(
         home: Center(
           child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
             return CupertinoCheckbox(
@@ -828,8 +830,9 @@ void main() {
             );
           }),
         ),
-      )
+      ),
     );
+
     final TestGesture gesture2 =
       await tester.startGesture(tester.getCenter(find.byType(CupertinoCheckbox)));
     await tester.pumpAndSettle();
