@@ -32,7 +32,8 @@ File? findPackageConfigFile(Directory dir) {
     if (fileSystem.file(candidatePackageConfigFile).existsSync()) {
       return candidatePackageConfigFile;
     }
-    // TODO(https://github.com/flutter/flutter/issues/150908): we should not need to check this file, it is obsolete.
+    // TODO(sigurdm): we should not need to check this file, it is obsolete,
+    // https://github.com/flutter/flutter/issues/150908.
     final File candidatePackagesFile = fileSystem.file(fileSystem.path.join(candidateDir, '.packages'));
     if (fileSystem.file(candidatePackagesFile).existsSync()) {
       return candidatePackagesFile;
