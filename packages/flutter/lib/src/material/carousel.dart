@@ -93,7 +93,7 @@ class CarouselView extends StatefulWidget {
     this.onTap,
     required double this.itemExtent,
     required this.children,
-  }) : allowFullyExpand = true,
+  }) : consumeMaxWeight = true,
        layoutWeights = null;
 
 /// Creates a scrollable list where the size of each child widget is dynamically
@@ -120,7 +120,7 @@ class CarouselView extends StatefulWidget {
     this.controller,
     this.scrollDirection = Axis.horizontal,
     this.reverse = false,
-    this.allowFullyExpand = true,
+    this.consumeMaxWeight = true,
     this.onTap,
     required List<int> this.layoutWeights,
     required this.children,
@@ -206,17 +206,18 @@ class CarouselView extends StatefulWidget {
   /// Defaults to false.
   final bool reverse;
 
-  /// Whether the "squished" item is allowed to expand to the max size.
+  /// Whether the "squished" items are allowed to expand to the max size.
   ///
   /// If this is false, the layout of the carousel doesn't change. This is especially
   /// useful when a weight list in [CarouselView.weighted] has a max item in the
-  /// middle and at least one small item on either side, such as `[1, 7, 1]`,
-  /// the first or the last item cannot expand to the max size. If this is true,
-  /// there will be some space before the first item or after the last item
-  /// coming so every item has a chance to be fully expanded.
+  /// middle and at least one small item on either side, such as `[1, 7, 1, 1]`.
+  /// In this case, if this is false, the first and the last two items cannot
+  /// expand to the max size. If this is true, there will be some space before
+  /// the first item or after the last item coming so every item has a chance to
+  /// be fully expanded.
   ///
   /// Defaults to true.
-  final bool allowFullyExpand;
+  final bool consumeMaxWeight;
 
   /// Called when one of the [children] is tapped.
   final ValueChanged<int>? onTap;
@@ -252,7 +253,7 @@ class _CarouselViewState extends State<CarouselView> {
   List<int>? _weights;
   CarouselController? _internalController;
   CarouselController get _controller => widget.controller ?? _internalController!;
-  late bool _allowFullyExpand;
+  late bool _consumeMaxWeight;
 
   @override
   void initState() {
@@ -267,7 +268,7 @@ class _CarouselViewState extends State<CarouselView> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _allowFullyExpand = widget.allowFullyExpand;
+    _consumeMaxWeight = widget.consumeMaxWeight;
     _itemExtent = widget.itemExtent;
   }
 
@@ -292,8 +293,8 @@ class _CarouselViewState extends State<CarouselView> {
     if (widget.itemExtent != oldWidget.itemExtent) {
       _itemExtent = widget.itemExtent;
     }
-    if (widget.allowFullyExpand != oldWidget.allowFullyExpand) {
-      _allowFullyExpand = widget.allowFullyExpand;
+    if (widget.consumeMaxWeight != oldWidget.consumeMaxWeight) {
+      _consumeMaxWeight = widget.consumeMaxWeight;
     }
   }
 
@@ -396,7 +397,7 @@ class _CarouselViewState extends State<CarouselView> {
                   ),
                 ),
                 if (_weights != null) _SliverWeightedCarousel(
-                  allowFullyExpand: _allowFullyExpand,
+                  consumeMaxWeight: _consumeMaxWeight,
                   shrinkExtent: widget.shrinkExtent,
                   weights: _weights!,
                   delegate: SliverChildBuilderDelegate(
@@ -672,7 +673,7 @@ class _RenderSliverFixedExtentCarousel extends RenderSliverFixedExtentBoxAdaptor
 class _SliverWeightedCarousel extends SliverMultiBoxAdaptorWidget {
   const _SliverWeightedCarousel({
     required super.delegate,
-    required this.allowFullyExpand,
+    required this.consumeMaxWeight,
     required this.shrinkExtent,
     required this.weights,
   });
@@ -680,9 +681,9 @@ class _SliverWeightedCarousel extends SliverMultiBoxAdaptorWidget {
   // Determine whether extra scroll offset should be calculate so that every
   // item have a chance to scroll to the maximum extent.
   //
-  // This is useful when the leading/trailing items has smaller weights than
-  // the middle items, such as [1,7], [3,2,1].
-  final bool allowFullyExpand;
+  // This is useful when the leading/trailing items have smaller weights, such
+  // as [1, 7], and [3, 2, 1].
+  final bool consumeMaxWeight;
 
   // The starting extent for items when they gradually show on/off screen.
   //
@@ -704,7 +705,7 @@ class _SliverWeightedCarousel extends SliverMultiBoxAdaptorWidget {
     final SliverMultiBoxAdaptorElement element = context as SliverMultiBoxAdaptorElement;
     return _RenderSliverWeightedCarousel(
       childManager: element,
-      allowFullyExpand: allowFullyExpand,
+      consumeMaxWeight: consumeMaxWeight,
       shrinkExtent: shrinkExtent,
       weights: weights,
     );
@@ -713,7 +714,7 @@ class _SliverWeightedCarousel extends SliverMultiBoxAdaptorWidget {
   @override
   void updateRenderObject(BuildContext context, _RenderSliverWeightedCarousel renderObject) {
     renderObject
-      ..allowFullyExpand = allowFullyExpand
+      ..consumeMaxWeight = consumeMaxWeight
       ..shrinkExtent = shrinkExtent
       ..weights = weights;
   }
@@ -724,20 +725,20 @@ class _SliverWeightedCarousel extends SliverMultiBoxAdaptorWidget {
 class _RenderSliverWeightedCarousel extends RenderSliverFixedExtentBoxAdaptor {
   _RenderSliverWeightedCarousel({
     required super.childManager,
-    required bool allowFullyExpand,
+    required bool consumeMaxWeight,
     required double shrinkExtent,
     required List<int> weights,
-  }) : _allowFullyExpand = allowFullyExpand,
+  }) : _consumeMaxWeight = consumeMaxWeight,
        _shrinkExtent = shrinkExtent,
        _weights = weights;
 
-  bool get allowFullyExpand => _allowFullyExpand;
-  bool _allowFullyExpand;
-  set allowFullyExpand(bool value) {
-    if (_allowFullyExpand == value) {
+  bool get consumeMaxWeight => _consumeMaxWeight;
+  bool _consumeMaxWeight;
+  set consumeMaxWeight(bool value) {
+    if (_consumeMaxWeight == value) {
       return;
     }
-    _allowFullyExpand = value;
+    _consumeMaxWeight = value;
     markNeedsLayout();
   }
 
@@ -845,7 +846,7 @@ class _RenderSliverWeightedCarousel extends RenderSliverFixedExtentBoxAdaptor {
     } else {
       index = actual.floor();
     }
-    return allowFullyExpand ? index - smallerWeightCount : index;
+    return consumeMaxWeight ? index - smallerWeightCount : index;
   }
 
   // This value indicates the scrolling progress of items following the first
@@ -1031,7 +1032,7 @@ class _RenderSliverWeightedCarousel extends RenderSliverFixedExtentBoxAdaptor {
 
     // From the last item to the firstly encountered max item
     double extraLayoutOffset = 0;
-    if (allowFullyExpand) {
+    if (consumeMaxWeight) {
       for (int i = weights.length - 1; i >= 0; i--) {
         if (weights[i] == weights.max) {
           break;
@@ -1090,13 +1091,13 @@ class _RenderSliverWeightedCarousel extends RenderSliverFixedExtentBoxAdaptor {
 
     final double paintExtent = calculatePaintOffset(
       constraints,
-      from: allowFullyExpand ? 0 : leadingScrollOffset,
+      from: consumeMaxWeight ? 0 : leadingScrollOffset,
       to: trailingScrollOffset,
     );
 
     final double cacheExtent = calculateCacheOffset(
       constraints,
-      from: allowFullyExpand ? 0 : leadingScrollOffset,
+      from: consumeMaxWeight ? 0 : leadingScrollOffset,
       to: trailingScrollOffset,
     );
 
@@ -1409,7 +1410,7 @@ class CarouselController extends ScrollController {
     final double? itemExtent = _carouselState!._itemExtent;
     int expandedItem = initialItem;
 
-    if (weights != null && !_carouselState!._allowFullyExpand) {
+    if (weights != null && !_carouselState!._consumeMaxWeight) {
       int smallerWeights = 0;
       for (final int weight in weights) {
         if (weight == weights.max) {
