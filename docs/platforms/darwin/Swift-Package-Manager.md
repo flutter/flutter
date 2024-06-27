@@ -667,7 +667,7 @@ To still be able to use the plugin, you'll need to increase the Minimum Deployme
   <summary>How to add Swift Package Manager integration to a custom target</summary>
 
 ### How to add Swift Package Manager integration to a custom target
-Follow the steps in `How to manually add Swift Package Manager integration to iOS/macOS project if Flutter CLI fails to automatically migrate`.
+Follow the steps in `How to manually add Swift Package Manager integration to iOS/macOS project if Flutter CLI fails to migrate automatically`.
 
 In Part 1, Step 6 use your custom target instead of the Flutter target.
 
