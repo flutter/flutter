@@ -539,6 +539,43 @@ Swift Package Manager.
 <!-- The 'Enable Swift Package Manager' section is copied in the
 For app developers' and 'For plugin authors' sections. Keep these in sync! -->
 
+<!-- The 'Disable Swift Package Manager' section is copied in the
+For app developers' and 'For plugin authors' sections. Keep these in sync! -->
+<details>
+  <summary>Disable Swift Package Manager</summary>
+
+### Disable Swift Package Manager
+
+Disabling Swift Package Manager will cause Flutter to use CocoaPods for all dependencies.
+However, Swift Package Manager will remain intregrated with your project.
+To remove integration, follow "How to remove Swift Package Manager integration" instructions below.
+
+> 💡 **Tip**:
+> If you find a bug in Flutter's Swift Package Manager feature,
+> please [open an issue](https://github.com/flutter/flutter/issues/new?template=2_bug.yml).
+
+#### Disable for a single project
+
+In the project's pubspec.yaml, under the `flutter` section,
+add `disable-swift-package-manager: true`.
+
+```yaml
+# The following section is specific to Flutter packages.
+flutter:
+  disable-swift-package-manager: true
+```
+
+#### Disable globally for all projects
+
+Run the following command:
+
+```sh
+flutter config --no-enable-swift-package-manager
+```
+</details>
+<!-- The 'Disable Swift Package Manager' section is copied in the
+For app developers' and 'For plugin authors' sections. Keep these in sync! -->
+
 <details>
   <summary>How to manually add Swift Package Manager integration to iOS project if Flutter CLI fails to migrate automatically</summary>
 
@@ -674,43 +711,6 @@ In Part 1, Step 6 use your custom target instead of the Flutter target.
 In Part 2, Step 6 use your custom target instead of the Flutter target.
 
 </details>
-
-<!-- The 'Disable Swift Package Manager' section is copied in the
-For app developers' and 'For plugin authors' sections. Keep these in sync! -->
-<details>
-  <summary>Disable Swift Package Manager</summary>
-
-### Disable Swift Package Manager
-
-Disabling Swift Package Manager will cause Flutter to use CocoaPods for all dependencies.
-However, Swift Package Manager will remain intregrated with your project.
-To remove integration, follow "How to remove Swift Package Manager integration" instructions below.
-
-> 💡 **Tip**:
-> If you find a bug in Flutter's Swift Package Manager feature,
-> please [open an issue](https://github.com/flutter/flutter/issues/new?template=2_bug.yml).
-
-#### Disable for a single project
-
-In the project's pubspec.yaml, under the `flutter` section,
-add `disable-swift-package-manager: true`.
-
-```yaml
-# The following section is specific to Flutter packages.
-flutter:
-  disable-swift-package-manager: true
-```
-
-#### Disable globally for all projects
-
-Run the following command:
-
-```sh
-flutter config --no-enable-swift-package-manager
-```
-</details>
-<!-- The 'Disable Swift Package Manager' section is copied in the
-For app developers' and 'For plugin authors' sections. Keep these in sync! -->
 
 <details>
   <summary>How to remove Swift Package Manager integration</summary>
