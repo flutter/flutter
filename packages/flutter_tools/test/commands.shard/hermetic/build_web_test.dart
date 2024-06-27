@@ -156,6 +156,7 @@ void main() {
         'DartObfuscation': 'false',
         'TrackWidgetCreation': 'false',
         'TreeShakeIcons': 'true',
+        'UseLocalCanvasKit': 'true',
       });
     }),
   });
@@ -252,6 +253,7 @@ void main() {
         'DartObfuscation': 'false',
         'TrackWidgetCreation': 'false',
         'TreeShakeIcons': 'true',
+        'UseLocalCanvasKit': 'true',
       });
     }),
   });
@@ -330,22 +332,6 @@ void main() {
         .getBuildInfo(forcedBuildMode: BuildMode.debug);
     expect(buildInfo.buildNumber, '42');
     expect(buildInfo.buildName, '1.2.3');
-  }, overrides: <Type, Generator>{
-    Platform: () => fakePlatform,
-    FileSystem: () => fileSystem,
-    FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
-    ProcessManager: () => processManager,
-    BuildSystem: () => TestBuildSystem.all(BuildResult(success: true)),
-  });
-
-  testUsingContext('Defaults to gstatic CanvasKit artifacts', () async {
-    final TestWebBuildCommand buildCommand = TestWebBuildCommand(fileSystem: fileSystem);
-    final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
-    setupFileSystemForEndToEndTest(fileSystem);
-    await runner.run(<String>['build', 'web', '--no-pub', '--web-resources-cdn']);
-    final BuildInfo buildInfo =
-        await buildCommand.webCommand.getBuildInfo(forcedBuildMode: BuildMode.debug);
-    expect(buildInfo.dartDefines, contains(startsWith('FLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/')));
   }, overrides: <Type, Generator>{
     Platform: () => fakePlatform,
     FileSystem: () => fileSystem,

@@ -69,6 +69,7 @@ void main() {
         NullSafetyMode.unsound,
         usesDdcModuleSystem,
         webRenderer: WebRendererMode.canvaskit,
+        useLocalCanvasKit: false,
       );
       releaseAssetServer = ReleaseAssetServer(
         globals.fs.file('main.dart').uri,
@@ -306,6 +307,7 @@ void main() {
       NullSafetyMode.unsound,
       usesDdcModuleSystem,
       webRenderer: WebRendererMode.canvaskit,
+      useLocalCanvasKit: false,
     );
 
     expect(webAssetServer.basePath, 'foo/bar');
@@ -327,6 +329,7 @@ void main() {
       NullSafetyMode.unsound,
       usesDdcModuleSystem,
       webRenderer: WebRendererMode.canvaskit,
+      useLocalCanvasKit: false,
     );
 
     // Defaults to "/" when there's no base element.
@@ -350,6 +353,7 @@ void main() {
         NullSafetyMode.unsound,
         usesDdcModuleSystem,
         webRenderer: WebRendererMode.canvaskit,
+        useLocalCanvasKit: false,
       ),
       throwsToolExit(),
     );
@@ -372,6 +376,7 @@ void main() {
         NullSafetyMode.unsound,
         usesDdcModuleSystem,
         webRenderer: WebRendererMode.canvaskit,
+        useLocalCanvasKit: false,
       ),
       throwsToolExit(),
     );
@@ -390,6 +395,48 @@ void main() {
       containsPair(HttpHeaders.cacheControlHeader, 'max-age=0, must-revalidate'),
     ]));
     expect((await response.read().toList()).first, utf8.encode('main() {}'));
+  }));
+
+  test('serves flutter_bootstrap.js without useLocalCanvasKit', () => testbed.run(() async {
+    globals.fs.file(globals.fs.path.join(
+      globals.artifacts!.getHostArtifact(HostArtifact.flutterJsDirectory).path,
+      'flutter.js',
+    ))..createSync(recursive: true)..writeAsStringSync('flutter.js content');
+
+    final Response response = await webAssetServer.handleRequest(
+      Request('GET', Uri.parse('http://foobar/flutter_bootstrap.js'))
+    );
+
+    expect(response.statusCode, 200);
+    final String body = await response.readAsString();
+    expect(body, isNot(contains('useLocalCanvasKit')));
+  }));
+
+  test('serves flutter_bootstrap.js with useLocalCanvasKit', () => testbed.run(() async {
+    globals.fs.file(globals.fs.path.join(
+      globals.artifacts!.getHostArtifact(HostArtifact.flutterJsDirectory).path,
+      'flutter.js',
+    ))..createSync(recursive: true)..writeAsStringSync('flutter.js content');
+
+    webAssetServer = WebAssetServer(
+      httpServer,
+      packages,
+      InternetAddress.loopbackIPv4,
+      <String, String>{},
+      <String, String>{},
+      NullSafetyMode.unsound,
+      usesDdcModuleSystem,
+      webRenderer: WebRendererMode.canvaskit,
+      useLocalCanvasKit: true,
+    );
+
+    final Response response = await webAssetServer.handleRequest(
+      Request('GET', Uri.parse('http://foobar/flutter_bootstrap.js'))
+    );
+
+    expect(response.statusCode, 200);
+    final String body = await response.readAsString();
+    expect(body, contains('"useLocalCanvasKit":true'));
   }));
 
   test('Returns notModified when the ifNoneMatch header matches the etag', () => testbed.run(() async {
@@ -717,6 +764,7 @@ void main() {
       ddcModuleSystem: usesDdcModuleSystem,
       webRenderer: WebRendererMode.html,
       isWasm: false,
+      useLocalCanvasKit: false,
       rootDirectory: globals.fs.currentDirectory,
     );
     webDevFS.requireJS.createSync(recursive: true);
@@ -830,6 +878,7 @@ void main() {
       ddcModuleSystem: usesDdcModuleSystem,
       webRenderer: WebRendererMode.html,
       isWasm: false,
+      useLocalCanvasKit: false,
       rootDirectory: globals.fs.currentDirectory,
     );
     webDevFS.requireJS.createSync(recursive: true);
@@ -949,6 +998,7 @@ void main() {
         ddcModuleSystem: usesDdcModuleSystem,
         webRenderer: WebRendererMode.canvaskit,
         isWasm: false,
+        useLocalCanvasKit: false,
         rootDirectory: globals.fs.currentDirectory,
       );
       webDevFS.requireJS.createSync(recursive: true);
@@ -1014,6 +1064,7 @@ void main() {
       ddcModuleSystem: usesDdcModuleSystem,
       webRenderer: WebRendererMode.canvaskit,
       isWasm: false,
+      useLocalCanvasKit: false,
       rootDirectory: globals.fs.currentDirectory,
     );
     webDevFS.requireJS.createSync(recursive: true);
@@ -1063,6 +1114,7 @@ void main() {
       ddcModuleSystem: usesDdcModuleSystem,
       webRenderer: WebRendererMode.canvaskit,
       isWasm: false,
+      useLocalCanvasKit: false,
       rootDirectory: globals.fs.currentDirectory,
     );
     webDevFS.requireJS.createSync(recursive: true);
@@ -1113,6 +1165,7 @@ void main() {
       ddcModuleSystem: usesDdcModuleSystem,
       webRenderer: WebRendererMode.auto,
       isWasm: false,
+      useLocalCanvasKit: false,
       rootDirectory: globals.fs.currentDirectory,
     );
     webDevFS.requireJS.createSync(recursive: true);
@@ -1164,6 +1217,7 @@ void main() {
       ddcModuleSystem: usesDdcModuleSystem,
       webRenderer: WebRendererMode.canvaskit,
       isWasm: false,
+      useLocalCanvasKit: false,
       rootDirectory: globals.fs.currentDirectory,
     );
     webDevFS.requireJS.createSync(recursive: true);
@@ -1203,6 +1257,7 @@ void main() {
       NullSafetyMode.unsound,
       webRenderer: WebRendererMode.canvaskit,
       isWasm: false,
+      useLocalCanvasKit: false,
       testMode: true
     );
 
@@ -1238,6 +1293,7 @@ void main() {
       NullSafetyMode.unsound,
       webRenderer: WebRendererMode.canvaskit,
       isWasm: false,
+      useLocalCanvasKit: false,
       testMode: true
     );
 
@@ -1276,6 +1332,7 @@ void main() {
       NullSafetyMode.sound,
       usesDdcModuleSystem,
       webRenderer: WebRendererMode.canvaskit,
+      useLocalCanvasKit: false,
     );
 
     expect(await webAssetServer.metadataContents('foo/main_module.ddc_merged_metadata'), null);
@@ -1321,6 +1378,7 @@ void main() {
       ddcModuleSystem: usesDdcModuleSystem,
       webRenderer: WebRendererMode.canvaskit,
       isWasm: false,
+      useLocalCanvasKit: false,
       rootDirectory: globals.fs.currentDirectory,
     );
     webDevFS.requireJS.createSync(recursive: true);
