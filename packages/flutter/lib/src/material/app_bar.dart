@@ -767,14 +767,10 @@ class _AppBarState extends State<AppBar> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (Scaffold.maybeOf(context)?.isDrawerOpen ?? false) {
-      _scrollNotificationObserver?.removeListener(_handleScrollNotification);
-      _scrollNotificationObserver = null;
-      return;
+    if (Scaffold.maybeOf(context)?.isDrawerOpen == false) {
+      _scrollNotificationObserver = ScrollNotificationObserver.maybeOf(context);
+      _scrollNotificationObserver?.addListener(_handleScrollNotification);
     }
-    _scrollNotificationObserver?.removeListener(_handleScrollNotification);
-    _scrollNotificationObserver = ScrollNotificationObserver.maybeOf(context);
-    _scrollNotificationObserver?.addListener(_handleScrollNotification);
   }
 
   @override
@@ -789,6 +785,7 @@ class _AppBarState extends State<AppBar> {
 
   void _handleScrollNotification(ScrollNotification notification) {
     if (notification is ScrollUpdateNotification && widget.notificationPredicate(notification)) {
+      // Each RawGestureDetector has its own scroll offset, so we need to keep track of them separately.
       final RawGestureDetector? rawGestureDetector = notification.context?.widget as RawGestureDetector?;
 
       if (rawGestureDetector != null) {

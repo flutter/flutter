@@ -2576,11 +2576,6 @@ void main() {
                   : defaultColor;
               }),
               title: const Text('AppBar'),
-              notificationPredicate: (ScrollNotification notification) {
-                // Represents both scroll views below being treated as a
-                // single viewport.
-                return notification.depth <= 1;
-              },
             ),
             drawer: const Drawer(),
             body: SingleChildScrollView(
@@ -2638,11 +2633,6 @@ void main() {
                   : defaultColor;
               }),
               title: const Text('AppBar'),
-              notificationPredicate: (ScrollNotification notification) {
-                // Represents both scroll views below being treated as a
-                // single viewport.
-                return notification.depth <= 1;
-              },
             ),
             body: Row(
               children: <Widget>[
@@ -2714,11 +2704,6 @@ void main() {
                   : defaultColor;
               }),
               title: const Text('AppBar'),
-              notificationPredicate: (ScrollNotification notification) {
-                // Represents both scroll views below being treated as a
-                // single viewport.
-                return notification.depth <= 1;
-              },
             ),
             body: Row(
               children: <Widget>[
