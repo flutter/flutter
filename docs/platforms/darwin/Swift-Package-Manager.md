@@ -503,7 +503,7 @@ Note: OCMock uses unsafe build flags and can only be used if targeted by commit.
    6. Navigate to `plugin_name/plugin_name_ios/ios/plugin_name_ios` and click the `Add Package` button
    7. Ensure it is added to the `RunnerTests` target and click the `Add Package` button
 
-7. Ensure tests pass Product > Test
+7. Ensure tests pass `Product` > `Test`
 </details>
 
 ## For app developers
