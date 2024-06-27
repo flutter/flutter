@@ -349,9 +349,9 @@ workspace:
         allOf(
           // The output of pub changed, adding backticks around the directory name.
           // These regexes are tolerant of the backticks being present or absent.
-          contains(matches(RegExp(r'Resolving dependencies in .+' + RegExp.escape(tempDir.path) + r'`?\.\.\.'))),
+          contains(matches(RegExp(r'Resolving dependencies in .+' + RegExp.escape(tempDir.basename) + r'`?\.\.\.'))),
           contains(matches(RegExp(r'\+ flutter 0\.0\.0 from sdk flutter'))),
-          contains(matches(RegExp(r'Changed \d+ dependencies in .+' + RegExp.escape(tempDir.path) + r'`?!'))),
+          contains(matches(RegExp(r'Changed \d+ dependencies in .+' + RegExp.escape(tempDir.basename) + r'`?!'))),
         ),
       );
       expectDependenciesResolved(tempDir.path);
