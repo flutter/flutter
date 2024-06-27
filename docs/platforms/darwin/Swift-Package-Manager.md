@@ -301,6 +301,13 @@ let package = Package(
       flutter config --no-enable-swift-package-manager
       ```
     2. Run `flutter run` with the example app and ensure it builds and runs
+    3. Run CocoaPods validation lints
+    ```
+    pod lib lint ios/plugin_name_ios.podspec  --configuration=Debug --skip-tests --use-modular-headers --use-libraries
+    ```
+    ```
+    pod lib lint ios/plugin_name_ios.podspec  --configuration=Debug --skip-tests --use-modular-headers
+    ```
 18. Verify plugin works with Swift Package Manager
     1. Enable Swift Package Manager
       ```
@@ -443,6 +450,13 @@ let package = Package(
     flutter config --no-enable-swift-package-manager
     ```
     2. Run `flutter run` with the example app and ensure it builds and runs
+    3. Run CocoaPods validation lints
+    ```
+    pod lib lint ios/plugin_name_ios.podspec  --configuration=Debug --skip-tests --use-modular-headers --use-libraries
+    ```
+    ```
+    pod lib lint ios/plugin_name_ios.podspec  --configuration=Debug --skip-tests --use-modular-headers
+    ```
 14. Verify plugin works with Swift Package Manager
     1. Enable Swift Package Manager
     ```
