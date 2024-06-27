@@ -118,7 +118,7 @@ class FlutterErrorFormatter {
     final bool allChildrenAreLeaf = node.children.isNotEmpty &&
         !node.children.any((_ErrorNode child) => child.children.isNotEmpty);
     if (node.level == _DiagnosticsNodeLevel.summary || allChildrenAreLeaf) {
-      // DiagnosticsBlock is a container, so recursive into its children if
+      // DiagnosticsBlock is a container, so recurse into its children if
       // there's only a single level. The container may be
       // "The relevant error-causing widget was" and the child may be
       // the specific widget details.
