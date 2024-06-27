@@ -1097,6 +1097,7 @@ class _MenuItemButtonState extends State<MenuItemButton> {
   FocusNode? _internalFocusNode;
   FocusNode get _focusNode => widget.focusNode ?? _internalFocusNode!;
   _MenuAnchorState? get _anchor => _MenuAnchorState._maybeOf(context);
+  bool _isHovered = false;
 
   @override
   void initState() {
@@ -1140,11 +1141,9 @@ class _MenuItemButtonState extends State<MenuItemButton> {
 
     Widget child = TextButton(
       onPressed: widget.enabled ? _handleSelect : null,
-      onHover: widget.enabled ? _handleHover : null,
       onFocusChange: widget.enabled ? widget.onFocusChange : null,
       focusNode: _focusNode,
       style: mergedStyle,
-      autofocus: widget.enabled && widget.autofocus,
       statesController: widget.statesController,
       clipBehavior: widget.clipBehavior,
       isSemanticButton: null,
@@ -1166,6 +1165,14 @@ class _MenuItemButtonState extends State<MenuItemButton> {
       );
     }
 
+    if (widget.onHover != null || widget.requestFocusOnHover) {
+      child = MouseRegion(
+        onHover: _handlePointerHover,
+        onExit: _handlePointerExit,
+        child: child,
+      );
+    }
+
     return MergeSemantics(child: child);
   }
 
@@ -1176,11 +1183,29 @@ class _MenuItemButtonState extends State<MenuItemButton> {
     }
   }
 
-  void _handleHover(bool hovering) {
-    widget.onHover?.call(hovering);
-    if (hovering && widget.requestFocusOnHover) {
-      assert(_debugMenuInfo('Requesting focus for $_focusNode from hover'));
-      _focusNode.requestFocus();
+  void _handlePointerExit(PointerExitEvent event) {
+    if (_isHovered) {
+      widget.onHover?.call(false);
+      _isHovered = false;
+    }
+  }
+
+  // TextButton.onHover and MouseRegion.onHover can't be used without triggering
+  // focus on scroll.
+  void _handlePointerHover(PointerHoverEvent event) {
+    if (!_isHovered) {
+      _isHovered = true;
+      widget.onHover?.call(true);
+      if (widget.requestFocusOnHover) {
+        assert(_debugMenuInfo('Requesting focus for $_focusNode from hover'));
+        _focusNode.requestFocus();
+
+        // Without invalidating the focus policy, switching to directional focus
+        // may not originate at this node.
+        FocusTraversalGroup.of(context).invalidateScopeData(
+          FocusScope.of(context),
+        );
+      }
     }
   }
 
@@ -1863,6 +1888,7 @@ class _SubmenuButtonState extends State<SubmenuButton> {
   _MenuAnchorState? get _anchor => _MenuAnchorState._maybeOf(context);
   FocusNode get _buttonFocusNode => widget.focusNode ?? _internalFocusNode!;
   bool get _enabled => widget.menuChildren.isNotEmpty;
+  bool _isHovered = false;
 
   @override
   void initState() {
@@ -1958,7 +1984,7 @@ class _SubmenuButtonState extends State<SubmenuButton> {
           ?? widget.defaultStyleOf(context);
         mergedStyle = widget.style?.merge(mergedStyle) ?? mergedStyle;
 
-        void toggleShowMenu(BuildContext context) {
+        void toggleShowMenu() {
           if (controller._anchor == null) {
             return;
           }
@@ -1969,18 +1995,29 @@ class _SubmenuButtonState extends State<SubmenuButton> {
           }
         }
 
-        // Called when the pointer is hovering over the menu button.
-        void handleHover(bool hovering, BuildContext context) {
-          widget.onHover?.call(hovering);
-          // Don't open the root menu bar menus on hover unless something else
-          // is already open. This means that the user has to first click to
-          // open a menu on the menu bar before hovering allows them to traverse
-          // it.
-          if (controller._anchor!._root._orientation == Axis.horizontal && !controller._anchor!._root._isOpen) {
-            return;
+        void handlePointerExit(PointerExitEvent event) {
+          if (_isHovered) {
+            widget.onHover?.call(false);
+            _isHovered = false;
           }
+        }
 
-          if (hovering) {
+        // MouseRegion.onEnter and TextButton.onHover are called
+        // if a button is hovered after scrolling. This interferes with
+        // focus traversal and scroll position. MouseRegion.onHover avoids
+        // this issue.
+        void handlePointerHover(PointerHoverEvent event) {
+          if (!_isHovered) {
+            _isHovered = true;
+            widget.onHover?.call(true);
+            // Don't open the root menu bar menus on hover unless something else
+            // is already open. This means that the user has to first click to
+            // open a menu on the menu bar before hovering allows them to traverse
+            // it.
+            if (controller._anchor!._root._orientation == Axis.horizontal && !controller._anchor!._root._isOpen) {
+              return;
+            }
+
             controller.open();
             controller._anchor!._focusButton();
           }
@@ -1992,8 +2029,7 @@ class _SubmenuButtonState extends State<SubmenuButton> {
               style: mergedStyle,
               focusNode: _buttonFocusNode,
               onFocusChange: _enabled ? widget.onFocusChange : null,
-              onHover: _enabled ? (bool hovering) => handleHover(hovering, context) : null,
-              onPressed: _enabled ? () => toggleShowMenu(context) : null,
+              onPressed: _enabled ? toggleShowMenu : null,
               isSemanticButton: null,
               child: _MenuItemLabel(
                 leadingIcon: widget.leadingIcon,
@@ -2006,13 +2042,22 @@ class _SubmenuButtonState extends State<SubmenuButton> {
           ),
         );
 
-        if (_enabled && _platformSupportsAccelerators) {
-          return MenuAcceleratorCallbackBinding(
-            onInvoke: () => toggleShowMenu(context),
-            hasSubmenu: true,
+        if (_enabled) {
+          child = MouseRegion(
+            onHover: handlePointerHover,
+            onExit: handlePointerExit,
             child: child,
           );
+
+          if (_platformSupportsAccelerators) {
+            return MenuAcceleratorCallbackBinding(
+              onInvoke: toggleShowMenu,
+              hasSubmenu: true,
+              child: child,
+            );
+          }
         }
+
         return child;
       },
       menuChildren: widget.menuChildren,
