@@ -13,7 +13,6 @@ import 'material_state.dart';
 import 'radio_theme.dart';
 import 'theme.dart';
 import 'theme_data.dart';
-import 'toggleable.dart';
 
 // Examples can assume:
 // late BuildContext context;
@@ -412,6 +411,9 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin, Togg
   @override
   bool? get value => widget._selected;
 
+  @override
+  Duration? get reactionAnimationDuration => kRadialReactionDuration;
+
   MaterialStateProperty<Color?> get _widgetFillColor {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
@@ -445,6 +447,7 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin, Togg
               value: widget.value,
               groupValue: widget.groupValue,
               onChanged: widget.onChanged,
+              mouseCursor: widget.mouseCursor,
               toggleable: widget.toggleable,
               activeColor: widget.activeColor,
               focusColor: widget.focusColor,

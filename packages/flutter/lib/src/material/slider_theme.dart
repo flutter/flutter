@@ -1619,20 +1619,18 @@ class RectangularSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
       context.canvas.drawRect(rightTrackSegment, rightTrackPaint);
     }
 
-    final bool showSecondaryTrack = (secondaryOffset != null) &&
-        ((textDirection == TextDirection.ltr)
-            ? (secondaryOffset.dx > thumbCenter.dx)
-            : (secondaryOffset.dx < thumbCenter.dx));
+    final bool showSecondaryTrack = secondaryOffset != null && switch (textDirection) {
+      TextDirection.rtl => secondaryOffset.dx < thumbCenter.dx,
+      TextDirection.ltr => secondaryOffset.dx > thumbCenter.dx,
+    };
 
     if (showSecondaryTrack) {
       final ColorTween secondaryTrackColorTween = ColorTween(begin: sliderTheme.disabledSecondaryActiveTrackColor, end: sliderTheme.secondaryActiveTrackColor);
       final Paint secondaryTrackPaint = Paint()..color = secondaryTrackColorTween.evaluate(enableAnimation)!;
-      final Rect secondaryTrackSegment = Rect.fromLTRB(
-        (textDirection == TextDirection.ltr) ? thumbCenter.dx : secondaryOffset.dx,
-        trackRect.top,
-        (textDirection == TextDirection.ltr) ? secondaryOffset.dx : thumbCenter.dx,
-        trackRect.bottom,
-      );
+      final Rect secondaryTrackSegment = switch (textDirection) {
+        TextDirection.rtl => Rect.fromLTRB(secondaryOffset.dx, trackRect.top, thumbCenter.dx, trackRect.bottom),
+        TextDirection.ltr => Rect.fromLTRB(thumbCenter.dx, trackRect.top, secondaryOffset.dx, trackRect.bottom),
+      };
       if (!secondaryTrackSegment.isEmpty) {
         context.canvas.drawRect(secondaryTrackSegment, secondaryTrackPaint);
       }
@@ -3487,7 +3485,6 @@ class _DropSliderValueIndicatorPathPainter {
       return;
     }
     assert(!sizeWithOverflow.isEmpty);
-
     final double rectangleWidth = _upperRectangleWidth(labelPainter, scale);
     final double horizontalShift = getHorizontalShift(
       parentBox: parentBox,

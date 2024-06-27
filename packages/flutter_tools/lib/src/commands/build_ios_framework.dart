@@ -112,19 +112,11 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
   late final FlutterProject project = FlutterProject.current();
 
   Future<List<BuildInfo>> getBuildInfos() async {
-    final List<BuildInfo> buildInfos = <BuildInfo>[];
-
-    if (boolArg('debug')) {
-      buildInfos.add(await getBuildInfo(forcedBuildMode: BuildMode.debug));
-    }
-    if (boolArg('profile')) {
-      buildInfos.add(await getBuildInfo(forcedBuildMode: BuildMode.profile));
-    }
-    if (boolArg('release')) {
-      buildInfos.add(await getBuildInfo(forcedBuildMode: BuildMode.release));
-    }
-
-    return buildInfos;
+    return <BuildInfo>[
+      if (boolArg('debug'))   await getBuildInfo(forcedBuildMode: BuildMode.debug),
+      if (boolArg('profile')) await getBuildInfo(forcedBuildMode: BuildMode.profile),
+      if (boolArg('release')) await getBuildInfo(forcedBuildMode: BuildMode.release),
+    ];
   }
 
   @override
@@ -335,12 +327,8 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
           .path);
       globals.printStatus(
           '\nCopy the ${globals.fs.path.basenameWithoutExtension(pluginRegistrantHeader.path)} class into your project.\n'
-          'See https://flutter.dev/docs/development/add-to-app/ios/add-flutter-screen#create-a-flutterengine for more information.');
+          'See https://flutter.dev/to/ios-create-flutter-engine for more information.');
     }
-
-    globals.printWarning(
-        'Bitcode support has been deprecated. Turn off the "Enable Bitcode" build setting in your Xcode project or you may encounter compilation errors.\n'
-        'See https://developer.apple.com/documentation/xcode-release-notes/xcode-14-release-notes for details.');
 
     return FlutterCommandResult.success();
   }
@@ -387,7 +375,7 @@ LICENSE
   }
   s.author                = { 'Flutter Dev Team' => 'flutter-dev@googlegroups.com' }
   s.source                = { :http => '${cache.storageBaseUrl}/flutter_infra_release/flutter/${cache.engineRevision}/$artifactsMode/artifacts.zip' }
-  s.documentation_url     = 'https://flutter.dev/docs'
+  s.documentation_url     = 'https://docs.flutter.dev'
   s.platform              = :ios, '12.0'
   s.vendored_frameworks   = 'Flutter.xcframework'
 end
@@ -437,22 +425,17 @@ end
     Directory simulatorBuildOutput,
   ) async {
     const String appFrameworkName = 'App.framework';
-
     final Status status = globals.logger.startProgress(
       ' ├─Building App.xcframework...',
     );
-    final List<EnvironmentType> environmentTypes = <EnvironmentType>[
-      EnvironmentType.physical,
-      EnvironmentType.simulator,
-    ];
     final List<Directory> frameworks = <Directory>[];
 
     try {
-      for (final EnvironmentType sdkType in environmentTypes) {
-        final Directory outputBuildDirectory =
-            sdkType == EnvironmentType.physical
-                ? iPhoneBuildOutput
-                : simulatorBuildOutput;
+      for (final EnvironmentType sdkType in EnvironmentType.values) {
+        final Directory outputBuildDirectory = switch (sdkType) {
+          EnvironmentType.physical  => iPhoneBuildOutput,
+          EnvironmentType.simulator => simulatorBuildOutput,
+        };
         frameworks.add(outputBuildDirectory.childDirectory(appFrameworkName));
         final Environment environment = Environment(
           projectDir: globals.fs.currentDirectory,

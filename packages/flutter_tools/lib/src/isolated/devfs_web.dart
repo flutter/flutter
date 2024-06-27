@@ -292,7 +292,7 @@ class WebAssetServer implements AssetReader {
       },
       toolConfiguration: ToolConfiguration(
         loadStrategy: ddcModuleSystem
-            ? FrontendServerLegacyStrategyProvider(
+            ? FrontendServerDdcStrategyProvider(
         ReloadConfiguration.none,
         server,
         PackageUriMapper(packageConfig),
@@ -1003,6 +1003,7 @@ class WebDevFS implements DevFS {
           artifacts: globals.artifacts!,
           logger: globals.logger,
           projectDir: rootDirectory,
+          buildMode: buildInfo.mode,
         );
       }
     }
@@ -1221,14 +1222,7 @@ void log(logging.LogRecord event) {
 
 Future<Directory> _loadDwdsDirectory(
     FileSystem fileSystem, Logger logger) async {
-  final String toolPackagePath =
-      fileSystem.path.join(Cache.flutterRoot!, 'packages', 'flutter_tools');
-  final String packageFilePath =
-      fileSystem.path.join(toolPackagePath, '.dart_tool', 'package_config.json');
-  final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-    fileSystem.file(packageFilePath),
-    logger: logger,
-  );
+  final PackageConfig packageConfig = await currentPackageConfig();
   return fileSystem.directory(packageConfig['dwds']!.packageUriRoot);
 }
 

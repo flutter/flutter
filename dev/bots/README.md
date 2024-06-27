@@ -10,7 +10,7 @@ Flutter build results are available at:
 
 Flutter infra requires special permissions to retrigger builds on the
 [build dashboard](https://flutter-dashboard.appspot.com/#/build). File an
-[infra ticket](https://github.com/flutter/flutter/wiki/Infra-Ticket-Queue) to
+[infra ticket](../../docs/infra/Infra-Ticket-Queue.md) to
 request permission.
 
 The [Cirrus](https://cirrus-ci.org)-based bots run the [`test.dart`](test.dart)
@@ -28,7 +28,7 @@ The build dashboard includes post-commit testing run on physical devices. See
 A [set of infra scripts](https://flutter.googlesource.com/recipes/)
 run on Windows, Linux, and Mac machines. The configuration for how many
 machines and what kind are managed internally by Google. File an
-[infra ticket](https://github.com/flutter/flutter/wiki/Infra-Ticket-Queue)
+[infra ticket](../../docs/infra/Infra-Ticket-Queue.md)
 to request new machine types to be added. Both of these technologies are highly
 specific to the [LUCI](https://github.com/luci) project, which is the successor
 to Chromium's infra and the foundation to Flutter's infrastructure.
@@ -165,15 +165,15 @@ For example To remove a published package corresponding to the git hash
 `d444a455de87a2e40b7f576dc12ffd9ab82fd491`, first do a dry run of the script to
 see what it will do:
 
-```
-$ dart ./unpublish_package.dart --temp_dir=/tmp/foo --revision d444a455de87a2e40b7f576dc12ffd9ab82fd491
+```sh
+dart ./unpublish_package.dart --temp_dir=/tmp/foo --revision d444a455de87a2e40b7f576dc12ffd9ab82fd491
 ```
 
 And once you've verified the output of the dry run to be sure it is what you
 want to do, run:
 
-```
-$ dart ./unpublish_package.dart --confirm --temp_dir=/tmp/foo --revision d444a455de87a2e40b7f576dc12ffd9ab82fd491
+```sh
+dart ./unpublish_package.dart --confirm --temp_dir=/tmp/foo --revision d444a455de87a2e40b7f576dc12ffd9ab82fd491
 ```
 
 and it will perform the actions. You will of course need to have access

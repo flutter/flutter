@@ -285,7 +285,6 @@ class Dart2WasmTarget extends Dart2WebTarget {
     final File outputWasmFile =
         environment.buildDir.childFile('main.dart.wasm');
     final File depFile = environment.buildDir.childFile('dart2wasm.d');
-    final String dartSdkPath = artifacts.getArtifactPath(Artifact.engineDartSdkPath, platform: TargetPlatform.web_javascript);
     final String platformBinariesPath = artifacts.getHostArtifact(HostArtifact.webPlatformKernelFolder).path;
     final String platformFilePath = environment.fileSystem.path.join(platformBinariesPath, 'dart2wasm_platform.dill');
     final List<String> dartDefines = compilerConfig.renderer.updateDartDefines(
@@ -298,7 +297,6 @@ class Dart2WasmTarget extends Dart2WebTarget {
       'compile',
       'wasm',
       '--packages=.dart_tool/package_config.json',
-      '--extra-compiler-option=--dart-sdk=$dartSdkPath',
       '--extra-compiler-option=--platform=$platformFilePath',
       '--extra-compiler-option=--delete-tostring-package-uri=dart:ui',
       '--extra-compiler-option=--delete-tostring-package-uri=package:flutter',
@@ -444,13 +442,21 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
       }
     }
 
+    final String? buildModeEnvironment = environment.defines[kBuildMode];
+    if (buildModeEnvironment == null) {
+      throw MissingDefineException(kBuildMode, name);
+    }
+    final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
+
     createVersionFile(environment, environment.defines);
     final Directory outputDirectory = environment.outputDir.childDirectory('assets');
     outputDirectory.createSync(recursive: true);
+
     final Depfile depfile = await copyAssets(
       environment,
       environment.outputDir.childDirectory('assets'),
       targetPlatform: TargetPlatform.web_javascript,
+      buildMode: buildMode,
     );
     final DepfileService depfileService = environment.depFileService;
     depfileService.writeToFile(

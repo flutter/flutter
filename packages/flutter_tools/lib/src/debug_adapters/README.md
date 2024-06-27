@@ -53,7 +53,7 @@ Some custom requests are available for clients to call. Below are the Flutter-sp
 
 `hotReload` injects updated source code files into the running VM and then rebuilds the widget tree. An optional `reason` can be provided and should usually be `"manual"` or `"save"` to indicate what how the reload was triggered (for example by the user clicking a button, versus a hot-reload-on-save feature).
 
-```
+```json
 {
 	"reason": "manual"
 }
@@ -63,7 +63,7 @@ Some custom requests are available for clients to call. Below are the Flutter-sp
 
 `hotRestart` updates the code on the device and performs a full restart (which does not preserve state). An optional `reason` can be provided and should usually be `"manual"` or `"save"` to indicate what how the reload was triggered (for example by the user clicking a button, versus a hot-reload-on-save feature).
 
-```
+```json
 {
 	"reason": "manual"
 }
@@ -81,7 +81,7 @@ This event is emitted when the application has started up. Unlike `dart.debugger
 
 When the value of a Flutter service extension changes, this event is emitted and includes the new value. Values are always encoded as strings, even if numeric/boolean.
 
-```
+```json
 {
 	"type": "event",
 	"event": "flutter.serviceExtensionStateChanged",

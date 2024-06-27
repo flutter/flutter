@@ -10,7 +10,6 @@ library;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 /// Adds the basic requirements for a Chip.
 Widget wrapForChip({
@@ -457,10 +456,7 @@ void main() {
     await expectLater(find.byType(RawChip), matchesGoldenFile('input_chip.disabled.delete_button.png'));
   });
 
-  testWidgets('Delete button tooltip is not shown on disabled InputChip',
-  // TODO(polina-c): remove when fixed https://github.com/flutter/flutter/issues/145600 [leak-tracking-opt-in]
-  experimentalLeakTesting: LeakTesting.settings.withTracked(classes: const <String>['CurvedAnimation']),
-  (WidgetTester tester) async {
+  testWidgets('Delete button tooltip is not shown on disabled InputChip', (WidgetTester tester) async {
     Widget buildChip({ bool enabled = true }) {
       return wrapForChip(
         child: InputChip(
@@ -525,7 +521,7 @@ void main() {
     expect(chipTopLeft.dx, avatarCenter.dx - (labelSize.width / 2) - padding - border);
     expect(chipTopLeft.dy, avatarCenter.dy - (labelSize.width / 2) - padding - border);
 
-    // Calculate the distnance between avatar and label.
+    // Calculate the distance between avatar and label.
     Offset labelTopLeft = tester.getTopLeft(find.byType(Container));
     expect(labelTopLeft.dx, avatarCenter.dx + (labelSize.width / 2) + labelPadding);
 
@@ -541,7 +537,7 @@ void main() {
     expect(chipTopLeft.dx, avatarCenter.dx - (iconSize / 2) - padding - border);
     expect(chipTopLeft.dy, avatarCenter.dy - (labelSize.width / 2) - padding - border);
 
-    // Calculate the distnance between avatar and label.
+    // Calculate the distance between avatar and label.
     labelTopLeft = tester.getTopLeft(find.byType(Container));
     expect(labelTopLeft.dx, avatarCenter.dx + (iconSize / 2) + labelPadding);
   });
@@ -602,5 +598,23 @@ void main() {
     // Calculate the distance between delete icon and label.
     labelTopRight = tester.getTopRight(find.byType(Container));
     expect(labelTopRight.dx, deleteIconCenter.dx - (iconSize / 2) - labelPadding);
+  });
+
+  testWidgets('InputChip.chipAnimationStyle is passed to RawChip', (WidgetTester tester) async {
+    final ChipAnimationStyle chipAnimationStyle = ChipAnimationStyle(
+      enableAnimation: AnimationStyle(duration: Durations.short2),
+      selectAnimation: AnimationStyle.noAnimation,
+    );
+
+    await tester.pumpWidget(wrapForChip(
+      child: Center(
+        child: InputChip(
+          chipAnimationStyle: chipAnimationStyle,
+          label: const Text('InputChip'),
+        ),
+      ),
+    ));
+
+    expect(tester.widget<RawChip>(find.byType(RawChip)).chipAnimationStyle, chipAnimationStyle);
   });
 }

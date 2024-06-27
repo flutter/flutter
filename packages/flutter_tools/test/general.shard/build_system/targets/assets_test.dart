@@ -38,7 +38,9 @@ void main() {
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       platform: FakePlatform(),
-      defines: <String, String>{},
+      defines: <String, String>{
+        kBuildMode: BuildMode.debug.cliName,
+      },
     );
     fileSystem.file(environment.buildDir.childFile('app.dill')).createSync(recursive: true);
     fileSystem.file('packages/flutter_tools/lib/src/build_system/targets/assets.dart')
@@ -178,7 +180,9 @@ flutter:
       fileSystem: fileSystem,
       logger: logger,
       platform: globals.platform,
-      defines: <String, String>{},
+      defines: <String, String>{
+        kBuildMode: BuildMode.debug.cliName,
+      },
     );
 
     await fileSystem.file('.packages').create();
@@ -262,7 +266,9 @@ flutter:
       fileSystem: fileSystem,
       logger: logger,
       platform: globals.platform,
-      defines: <String, String>{},
+      defines: <String, String>{
+        kBuildMode: BuildMode.debug.cliName,
+      },
     );
 
     await fileSystem.file('.packages').create();

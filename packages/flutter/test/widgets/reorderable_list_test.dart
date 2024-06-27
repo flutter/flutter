@@ -1528,6 +1528,48 @@ void main() {
     await testFor(prototypeItem: const SizedBox(height: 100, width: 100, child: Text('prototype')));
     await testFor(itemExtent: 100);
   });
+
+  testWidgets('The item being dragged will not be affected by layout constraints.', (WidgetTester tester) async {
+    final Map<int, BoxConstraints> itemLayoutConstraints = <int, BoxConstraints>{};
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: CustomScrollView(
+            slivers: <Widget>[
+              SliverReorderableList(
+                itemBuilder: (BuildContext context, int index) {
+                  return LayoutBuilder(
+                    key: ValueKey<int>(index),
+                    builder: (BuildContext context, BoxConstraints constraints) {
+                      itemLayoutConstraints[index] = constraints;
+                      return SizedBox(
+                        height: 100,
+                        child: ReorderableDragStartListener(
+                          index: index,
+                          child: Text('$index'),
+                        ),
+                      );
+                    }
+                  );
+                },
+                itemCount: 5,
+                onReorder: (int fromIndex, int toIndex) {},
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    final Map<int, BoxConstraints> preDragLayoutConstraints = Map<int, BoxConstraints>.of(itemLayoutConstraints);
+    itemLayoutConstraints.clear();
+    final TestGesture drag = await tester.startGesture(tester.getCenter(find.text('0')));
+    await tester.pump(kLongPressTimeout);
+    await drag.moveBy(const Offset(0, 20));
+    await tester.pump();
+    expect(itemLayoutConstraints, preDragLayoutConstraints);
+    await drag.up();
+    await tester.pumpAndSettle();
+  });
 }
 
 class TestList extends StatelessWidget {

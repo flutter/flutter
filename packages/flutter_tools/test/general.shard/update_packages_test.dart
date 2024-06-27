@@ -24,6 +24,7 @@ dependencies:
   # To update these, use "flutter update-packages --force-upgrade".
   collection: 1.14.11
   meta: 1.1.8
+  macros: 0.0.1
   typed_data: 1.1.6
   vector_math: 2.0.8
 
@@ -197,6 +198,7 @@ void main() {
         equals(<String>{
           'collection: 1.14.11',
           'meta: 1.1.8',
+          'macros: 0.0.1',
           'typed_data: 1.1.6',
           'vector_math: 2.0.8',
           'sky_engine: ',
@@ -212,6 +214,7 @@ void main() {
         equals(<String>{
           'collection: 1.14.11',
           'meta: 1.1.8',
+          'macros: 0.0.1',
           'typed_data: 1.1.6',
           'vector_math: 2.0.8',
           'sky_engine: ',
@@ -226,10 +229,32 @@ void main() {
         equals(<String>{
           'collection: 1.14.11',
           'meta: 1.1.8',
+          'macros: 0.0.1',
           'typed_data: 1.1.6',
           'vector_math: 2.0.8',
           'sky_engine: ',
           'gallery: ',
         }));
+  });
+
+  testWithoutContext('PubspecYaml apply skips explicitly excluded packages', () async {
+      final PubspecYaml flutterPubspec = PubspecYaml(flutter);
+      final PubDependencyTree flutterTree = PubDependencyTree();
+      final List<String> depsLines = <String>[
+        // Have to add these first so that flutterTree.fill ignores the one in
+        // the pubspec.
+        '- macros 0.0.1 [_macros]',
+        '- _macros 0.0.1',
+        for (final PubspecDependency dependency in flutterPubspec.allDependencies)
+          '- ${dependency.name} ${dependency.version}',
+      ];
+
+      final Set<String> dependencies = flutterPubspec.allDependencies.map<String>(
+        (PubspecDependency dep) => dep.name).toSet();
+      depsLines.add('- flutter 1.0.0 [${dependencies.join(' ')}}]');
+      depsLines.forEach(flutterTree.fill);
+      flutterPubspec.apply(flutterTree, <String>{});
+      final String contents = flutter.childFile('pubspec.yaml').readAsStringSync();
+      expect(contents, isNot(contains('_macros: 0.0.1')));
   });
 }

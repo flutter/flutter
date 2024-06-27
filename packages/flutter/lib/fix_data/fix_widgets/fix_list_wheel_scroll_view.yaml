@@ -3,7 +3,7 @@
 # found in the LICENSE file.
 
 # For details regarding the *Flutter Fix* feature, see
-# https://flutter.dev/docs/development/tools/flutter-fix
+# https://flutter.dev/to/flutter-fix
 
 # Please add new fixes to the top of the file, separated by one blank line
 # from other fixes. In a comment, include a link to the PR where the change
@@ -23,7 +23,7 @@
 #     * Widgets (general): fix_widgets.yaml
 version: 1
 transforms:
-  # Changes made in https://flutter.dev/docs/release/breaking-changes/clip-behavior
+  # Changes made in https://docs.flutter.dev/release/breaking-changes/clip-behavior
   - title: "Migrate to 'clipBehavior'"
     date: 2020-08-20
     element:
@@ -58,7 +58,7 @@ transforms:
         kind: 'fragment'
         value: 'arguments[clipToSize]'
 
-  # Changes made in https://flutter.dev/docs/release/breaking-changes/clip-behavior
+  # Changes made in https://docs.flutter.dev/release/breaking-changes/clip-behavior
   - title: "Migrate to 'clipBehavior'"
     date: 2020-08-20
     element:
@@ -69,7 +69,7 @@ transforms:
       - kind: 'rename'
         newName: 'clipBehavior'
 
-  # Changes made in https://flutter.dev/docs/release/breaking-changes/clip-behavior
+  # Changes made in https://docs.flutter.dev/release/breaking-changes/clip-behavior
   - title: "Migrate to 'clipBehavior'"
     date: 2020-08-20
     element:

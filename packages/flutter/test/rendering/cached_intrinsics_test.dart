@@ -222,7 +222,7 @@ void main() {
       );
     });
 
-    test('Cactches inconsistencies between computeDryBaseline and computeDistanceToActualBaseline', () {
+    test('Catches inconsistencies between computeDryBaseline and computeDistanceToActualBaseline', () {
       final RenderDryBaselineTestBox test = RenderDryBaselineTestBox();
       layout(test, phase: EnginePhase.composite);
 

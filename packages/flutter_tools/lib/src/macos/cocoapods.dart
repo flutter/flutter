@@ -27,7 +27,7 @@ import '../reporting/reporting.dart';
 const String noCocoaPodsConsequence = '''
   CocoaPods is a package manager for iOS or macOS platform code.
   Without CocoaPods, plugins will not work on iOS or macOS.
-  For more info, see https://flutter.dev/platform-plugins''';
+  For more info, see https://flutter.dev/to/platform-plugins''';
 
 const String unknownCocoaPodsConsequence = '''
   Flutter is unable to determine the installed CocoaPods's version.
@@ -44,7 +44,7 @@ const String outOfDateFrameworksPodfileConsequence = '''
 
 const String outOfDatePluginsPodfileConsequence = '''
   This can cause issues if your application depends on plugins that do not support iOS or macOS.
-  See https://flutter.dev/docs/development/packages-and-plugins/developing-packages#plugin-platforms for details.
+  See https://flutter.dev/to/pubspec-plugin-platforms for details.
   If you have local Podfile edits you would like to keep, see https://github.com/flutter/flutter/issues/45197 for instructions.''';
 
 const String cocoaPodsInstallInstructions = 'see https://guides.cocoapods.org/using/getting-started.html#installation';
@@ -84,7 +84,7 @@ const Version cocoaPodsRecommendedVersion = Version.withText(1, 13, 0, '1.13.0')
 ///
 /// See also:
 ///   * https://cocoapods.org/ - the cocoapods website.
-///   * https://flutter.dev/docs/get-started/install/macos#deploy-to-ios-devices - instructions for
+///   * https://flutter.dev/to/macos-ios-setup - instructions for
 ///     installing iOS/macOS dependencies.
 class CocoaPods {
   CocoaPods({
@@ -427,6 +427,24 @@ class CocoaPods {
       final ({String failingPod, String sourcePlugin, String podPluginSubdir})?
           podInfo = _parseMinDeploymentFailureInfo(stdout);
       if (podInfo != null) {
+        final Directory symlinksDir;
+        final String podPlatformString;
+        final String platformName;
+        final String docsLink;
+        if (xcodeProject is IosProject) {
+          symlinksDir = xcodeProject.symlinks;
+          podPlatformString = 'ios';
+          platformName = 'iOS';
+          docsLink = 'https://flutter.dev/to/ios-deploy';
+        } else if (xcodeProject is MacOSProject) {
+          symlinksDir = xcodeProject.ephemeralDirectory.childDirectory('.symlinks');
+          podPlatformString = 'osx';
+          platformName = 'macOS';
+          docsLink = 'https://flutter.dev/to/macos-deploy';
+        } else {
+          return;
+        }
+
         final String sourcePlugin = podInfo.sourcePlugin;
         // If the plugin's podfile has set its own minimum version correctly
         // based on the requirements of its dependencies the failing pod should
@@ -435,23 +453,6 @@ class CocoaPods {
         // with a minimum version of 12, then building for 11 will report that
         // pod as failing.)
         if (podInfo.failingPod == podInfo.sourcePlugin) {
-          final Directory symlinksDir;
-          final String podPlatformString;
-          final String platformName;
-          final String docsLink;
-          if (xcodeProject is IosProject) {
-            symlinksDir = xcodeProject.symlinks;
-            podPlatformString = 'ios';
-            platformName = 'iOS';
-            docsLink = 'https://docs.flutter.dev/deployment/ios';
-          } else if (xcodeProject is MacOSProject) {
-            symlinksDir = xcodeProject.ephemeralDirectory.childDirectory('.symlinks');
-            podPlatformString = 'osx';
-            platformName = 'macOS';
-            docsLink = 'https://docs.flutter.dev/deployment/macos';
-          } else {
-            return;
-          }
           final File podspec = symlinksDir
               .childDirectory('plugins')
               .childDirectory(sourcePlugin)
@@ -493,8 +494,8 @@ class CocoaPods {
           // with the plugin developer.
           _logger.printError(
             'Error: The pod "${podInfo.failingPod}" required by the plugin '
-            '"$sourcePlugin" requires a higher minimum iOS deployment version '
-            "than the plugin's reported minimum version.\n"
+            '"$sourcePlugin" requires a higher minimum $platformName deployment '
+            "version than the plugin's reported minimum version.\n"
             'To build, remove the plugin "$sourcePlugin", or contact the plugin\'s '
             'developers for assistance.',
             emphasis: true,

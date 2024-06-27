@@ -348,14 +348,14 @@ class _TextLayout {
     final int lastLineIndex = _paragraph.numberOfLines - 1;
     assert(lastLineIndex >= 0);
     final ui.LineMetrics lineMetrics = _paragraph.getLineMetricsAt(lastLineIndex)!;
-    // SkParagraph currently treats " " and "\t" as white spaces. Trailing white
-    // spaces don't contribute to the line width and thus require special handling
+    // Trailing white spaces don't contribute to the line width and thus require special handling
     // when they're present.
     // Luckily they have the same bidi embedding level as the paragraph as per
     // https://unicode.org/reports/tr9/#L1, so we can anchor the caret to the
     // last logical trailing space.
     final bool hasTrailingSpaces = switch (rawString.codeUnitAt(rawString.length - 1)) {
       0x9 ||        // horizontal tab
+      0x3000 ||     // ideographic space
       0x20 => true, // space
       _ => false,
     };
@@ -1470,13 +1470,13 @@ class TextPainter {
       .getBoxesForRange(graphemeRange.start, graphemeRange.end, boxHeightStyle: ui.BoxHeightStyle.strut);
 
     if (boxes.isNotEmpty) {
-      final bool ahchorToLeft = switch (glyphInfo.writingDirection) {
+      final bool anchorToLeft = switch (glyphInfo.writingDirection) {
         TextDirection.ltr => anchorToLeadingEdge,
         TextDirection.rtl => !anchorToLeadingEdge,
       };
-      final TextBox box = ahchorToLeft ? boxes.first : boxes.last;
+      final TextBox box = anchorToLeft ? boxes.first : boxes.last;
       metrics = _LineCaretMetrics(
-        offset: Offset(ahchorToLeft ? box.left : box.right, box.top),
+        offset: Offset(anchorToLeft ? box.left : box.right, box.top),
         writingDirection: box.direction,
       );
     } else {

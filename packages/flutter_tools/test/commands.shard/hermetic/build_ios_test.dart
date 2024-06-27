@@ -70,7 +70,7 @@ final Platform notMacosPlatform = FakePlatform(
 );
 
 void main() {
-  late FileSystem fileSystem;
+  late MemoryFileSystem fileSystem;
   late TestUsage usage;
   late FakeAnalytics fakeAnalytics;
   late BufferLogger logger;
@@ -621,14 +621,6 @@ void main() {
         const <String>['build', 'ios', '--no-pub']
       );
 
-      expect(usage.events, contains(
-        const TestUsageEvent(
-          'build', 'ios',
-          label:'plist-impeller-enabled',
-          parameters:CustomDimensions(),
-        ),
-      ));
-
       expect(fakeAnalytics.sentEvents, contains(
         Event.flutterBuildInfo(
           label: 'plist-impeller-enabled',
@@ -683,14 +675,6 @@ void main() {
       await createTestCommandRunner(command).run(
         const <String>['build', 'ios', '--no-pub']
       );
-
-      expect(usage.events, contains(
-        const TestUsageEvent(
-          'build', 'ios',
-          label:'plist-impeller-disabled',
-          parameters:CustomDimensions(),
-        ),
-      ));
 
       expect(fakeAnalytics.sentEvents, contains(
         Event.flutterBuildInfo(

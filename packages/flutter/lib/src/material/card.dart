@@ -224,8 +224,8 @@ class Card extends StatelessWidget {
 
     return Semantics(
       container: semanticContainer,
-      child: Container(
-        margin: margin ?? cardTheme.margin ?? defaults.margin!,
+      child: Padding(
+        padding: margin ?? cardTheme.margin ?? defaults.margin!,
         child: Material(
           type: MaterialType.card,
           color: color ?? cardTheme.color ?? defaults.color,

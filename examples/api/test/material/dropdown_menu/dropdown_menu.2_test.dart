@@ -10,7 +10,7 @@ import 'package:flutter_api_samples/material/dropdown_menu/dropdown_menu.2.dart'
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('DropdownMenu cursor behavoir', (WidgetTester tester) async {
+  testWidgets('DropdownMenu cursor behavior', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.DropdownMenuApp(),
     );

@@ -151,6 +151,7 @@ class SingleChildScrollView extends StatelessWidget {
     this.child,
     this.dragStartBehavior = DragStartBehavior.start,
     this.clipBehavior = Clip.hardEdge,
+    this.hitTestBehavior = HitTestBehavior.opaque,
     this.restorationId,
     this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
   }) : assert(
@@ -218,6 +219,11 @@ class SingleChildScrollView extends StatelessWidget {
   /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
 
+  /// {@macro flutter.widgets.scrollable.hitTestBehavior}
+  ///
+  /// Defaults to [HitTestBehavior.opaque].
+  final HitTestBehavior hitTestBehavior;
+
   /// {@macro flutter.widgets.scrollable.restorationId}
   final String? restorationId;
 
@@ -249,6 +255,7 @@ class SingleChildScrollView extends StatelessWidget {
       physics: physics,
       restorationId: restorationId,
       clipBehavior: clipBehavior,
+      hitTestBehavior: hitTestBehavior,
       viewportBuilder: (BuildContext context, ViewportOffset offset) {
         return _SingleChildViewport(
           axisDirection: axisDirection,
@@ -263,9 +270,9 @@ class SingleChildScrollView extends StatelessWidget {
       scrollable = NotificationListener<ScrollUpdateNotification>(
         child: scrollable,
         onNotification: (ScrollUpdateNotification notification) {
-          final FocusScopeNode focusNode = FocusScope.of(context);
-          if (notification.dragDetails != null && focusNode.hasFocus) {
-            focusNode.unfocus();
+          final FocusScopeNode currentScope = FocusScope.of(context);
+          if (notification.dragDetails != null && !currentScope.hasPrimaryFocus && currentScope.hasFocus) {
+            FocusManager.instance.primaryFocus?.unfocus();
           }
           return false;
         },

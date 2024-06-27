@@ -728,6 +728,7 @@ void main() {
       tester.getSemantics(find.byType(ListTile).first),
       matchesSemantics(
         hasTapAction: true,
+        hasFocusAction: true,
         hasEnabledState: true,
         isEnabled: true,
         isFocused: true,
@@ -742,6 +743,7 @@ void main() {
       tester.getSemantics(find.byType(ListTile).last),
       matchesSemantics(
         hasTapAction: true,
+        hasFocusAction: true,
         hasEnabledState: true,
         isEnabled: true,
         isFocusable: true,
@@ -1149,7 +1151,10 @@ void main() {
     await tester.pumpAndSettle();
 
     // Override the animation curve.
-    await tester.pumpWidget(buildExpansionTile(animationStyle: AnimationStyle(curve: Easing.emphasizedDecelerate)));
+    await tester.pumpWidget(buildExpansionTile(animationStyle: AnimationStyle(
+      curve: Easing.emphasizedDecelerate,
+      reverseCurve: Easing.emphasizedAccelerate,
+    )));
     await tester.pumpAndSettle();
 
     // Test the overridden animation curve.
@@ -1167,8 +1172,20 @@ void main() {
 
     expect(getHeight(expansionTileKey), 158.0);
 
-    // Tap to collapse the ExpansionTile.
+    // Test the overridden reverse (collapse) animation curve.
     await tester.tap(find.text('title'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50)); // Advance the animation by 1/4 of its duration.
+
+    expect(getHeight(expansionTileKey), closeTo(98.6, 0.1));
+
+    await tester.pump(const Duration(milliseconds: 50)); // Advance the animation by 2/4 of its duration.
+
+    expect(getHeight(expansionTileKey), closeTo(73.4, 0.1));
+
+    await tester.pumpAndSettle(); // Advance the animation to the end.
+
+    expect(getHeight(expansionTileKey), 58.0);
 
     // Test no animation.
     await tester.pumpWidget(buildExpansionTile(animationStyle: AnimationStyle.noAnimation));

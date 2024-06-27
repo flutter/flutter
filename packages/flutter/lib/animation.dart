@@ -148,9 +148,9 @@
 ///
 /// See also:
 ///
-///  * [Introduction to animations](https://flutter.dev/docs/development/ui/animations)
+///  * [Introduction to animations](https://docs.flutter.dev/ui/animations)
 ///    on flutter.dev.
-///  * [Animations tutorial](https://flutter.dev/docs/development/ui/animations/tutorial)
+///  * [Animations tutorial](https://docs.flutter.dev/ui/animations/tutorial)
 ///    on flutter.dev.
 ///  * [Sample app](https://github.com/flutter/samples/tree/main/animations),
 ///    which showcases Flutter's animation features.

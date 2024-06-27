@@ -442,6 +442,7 @@ class DevFS {
     required FileSystem fileSystem,
     required ProcessManager processManager,
     required Artifacts artifacts,
+    required BuildMode buildMode,
     HttpClient? httpClient,
     Duration? uploadRetryThrottle,
     StopwatchFactory stopwatchFactory = const StopwatchFactory(),
@@ -465,6 +466,7 @@ class DevFS {
             processManager: processManager,
             fileSystem: fileSystem,
             dartBinaryPath: artifacts.getArtifactPath(Artifact.engineDartBinary),
+            buildMode: buildMode,
           ),
           fileSystem: fileSystem,
           logger: logger,
@@ -730,6 +732,7 @@ class DevFS {
       return UpdateFSReport();
     }
 
+    _logger.printTrace('Pending asset builds completed. Writing dirty entries.');
     if (dirtyEntries.isNotEmpty) {
       await (devFSWriter ?? _httpWriter).write(dirtyEntries, _baseUri!, _httpWriter);
     }
