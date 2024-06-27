@@ -665,7 +665,7 @@ void main() {
     final Uint8List corruptImage = blueSquareBytes.sublist(5);
     final ImageProvider image = MemoryImage(corruptImage);
 
-    expect(() async => ColorScheme.fromImageProvider(provider: image), throwsA(isA<Exception>()));
+    expect(() async => ColorScheme.fromImageProvider(provider: image), throwsException);
   });
 
   testWidgets('generated scheme "on" colors meet a11y contrast guidelines', (WidgetTester tester) async {
