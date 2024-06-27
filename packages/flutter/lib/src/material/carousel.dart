@@ -19,7 +19,7 @@ import 'theme.dart';
 /// The [CarouselView] presents a scrollable list of items, each of which can dynamically
 /// change size based on the chosen layout.
 ///
-/// Material Design 3 introduces 4 carousel layouts:
+/// Material Design 3 introduced 4 carousel layouts:
 ///  * Multi-browse: This layout shows at least one large, medium, and small
 ///    carousel item at a time. This layout is supported by [CarouselView.weighted].
 ///  * Uncontained (default): This layout show items that scroll to the edge of the
@@ -34,7 +34,7 @@ import 'theme.dart';
 /// items that scroll to the edge of the container, behaving similarly to a
 /// [ListView] where all children are a uniform size. [CarouselView.weighted]
 /// enables dynamic item sizing. Each item is assigned a weight that determines
-/// the portion of the viewport it occupies. This allows you to easily create
+/// the portion of the viewport it occupies. This constructor helps to create
 /// layouts like multi-browse, and hero. In order to have a full-screen layout,
 /// if [CarouselView] is used, then set the [itemExtent] to screen size; if
 /// [CarouselView.weighted] is used, then set the [layoutWeights] to only have
@@ -46,7 +46,7 @@ import 'theme.dart';
 /// the last visible item occupies 1/6 of the viewport. As the carousel scrolls,
 /// the size of the latter one gradually changes to the size of the former one.
 /// As a result, when the first visible item is completely off-screen, the
-/// following items should stay the same layout as before. Using [CarouselView.weighted]
+/// following items will follow the same layout as before. Using [CarouselView.weighted]
 /// helps build the multi-browse, hero, center-aligned hero and full-screen layouts,
 /// as indicated in [Carousel sepcs](https://m3.material.io/components/carousel/specs).
 ///
