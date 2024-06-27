@@ -2509,19 +2509,49 @@ abstract class PopEntry<T> {
   }
 }
 
+typedef BuildTransitionsFunction = Widget Function(
+  BuildContext context,
+  Animation<double> animation,
+  Animation<double> secondaryAnimation,
+  Widget child,
+);
+
 /// Mixin for a route that can provide a delegated secondary transition to the
 /// outgoing route.
-mixin FlexibleTransitionRouteMixin<T> on TransitionRoute<T> {
+mixin FlexibleTransitionRouteMixin<T> on ModalRoute<T> {
   /// The delegated transition provided to the previous route.
   DelegatedTransitionBuilder? get delegatedTransition;
 
   /// The delegated transition received from an incoming route.
   DelegatedTransitionBuilder? receivedTransition;
 
+  BuildTransitionsFunction _originalBuildTransitions = (
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    return child;
+  };
+
+  @override
+  BuildTransitionsFunction get buildTransitions {
+    return _originalBuildTransitions;
+  }
+
+  @override
+  set buildTransitions(BuildTransitionsFunction newBuildTransitions) {
+    if (newBuildTransitions != _originalBuildTransitions) {
+      _originalBuildTransitions = newBuildTransitions;
+    }
+  }
+
   @override
   void didChangeNext(Route<dynamic>? nextRoute) {
     if (nextRoute is FlexibleTransitionRouteMixin<T> && canTransitionTo(nextRoute) && navigator != null) {
       receivedTransition = nextRoute.delegatedTransition;
+    } else {
+      receivedTransition = null;
     }
     super.didChangeNext(nextRoute);
   }
@@ -2530,6 +2560,8 @@ mixin FlexibleTransitionRouteMixin<T> on TransitionRoute<T> {
   void didPopNext(Route<dynamic> nextRoute) {
     if (nextRoute is FlexibleTransitionRouteMixin<T> && canTransitionTo(nextRoute) && navigator != null) {
       receivedTransition = nextRoute.delegatedTransition;
+    } else {
+      receivedTransition = null;
     }
     super.didPopNext(nextRoute);
   }
