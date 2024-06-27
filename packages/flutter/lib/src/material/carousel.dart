@@ -37,7 +37,7 @@ import 'theme.dart';
 /// the portion of the viewport it occupies. This constructor helps to create
 /// layouts like multi-browse, and hero. In order to have a full-screen layout,
 /// if [CarouselView] is used, then set the [itemExtent] to screen size; if
-/// [CarouselView.weighted] is used, then set the [layoutWeights] to only have
+/// [CarouselView.weighted] is used, then set the [flexWeights] to only have
 /// one integer in the array.
 ///
 /// In [CarouselView.weighted], weights are relative proportions. For example,
@@ -94,18 +94,18 @@ class CarouselView extends StatefulWidget {
     required double this.itemExtent,
     required this.children,
   }) : consumeMaxWeight = true,
-       layoutWeights = null;
+       flexWeights = null;
 
 /// Creates a scrollable list where the size of each child widget is dynamically
-/// determined by the provided [layoutWeights].
+/// determined by the provided [flexWeights].
 ///
-/// The `layoutWeights` parameter is required and defines the relative size
+/// The `flexWeights` parameter is required and defines the relative size
 /// proportions of each child widget.
 ///
-/// When [allowFullyExpand] is set to `true`, each child can be expanded to its
-/// maximum size while scrolling. For example, with [layoutWeights] of `[1, 7, 1]`,
+/// When [consumeMaxWeight] is set to `true`, each child can be expanded to its
+/// maximum size while scrolling. For example, with [flexWeights] of `[1, 7, 1]`,
 /// the initial weight of the first item is 1. However, by enabling
-/// [allowFullyExpand] and scrolling forward, the first item can expand to occupy
+/// [consumeMaxWeight] and scrolling forward, the first item can expand to occupy
 /// a weight of 7, leaving a weight of 1 as white space before it. This feature
 /// is particularly useful for achieving "hero" and "center-aligned hero" layouts.
   const CarouselView.weighted({
@@ -122,7 +122,7 @@ class CarouselView extends StatefulWidget {
     this.reverse = false,
     this.consumeMaxWeight = true,
     this.onTap,
-    required List<int> this.layoutWeights,
+    required List<int> this.flexWeights,
     required this.children,
   }) : itemExtent = null;
 
@@ -232,14 +232,14 @@ class CarouselView extends StatefulWidget {
 
   /// The weights that each visible child should occupy the viewport.
   ///
-  /// The length of [layoutWeights] means how many items we want to lay out on
-  /// the viewport. For example, setting [layoutWeights] to `<int>[3,2,1]` means
+  /// The length of [flexWeights] means how many items we want to lay out on
+  /// the viewport. For example, setting [flexWeights] to `<int>[3, 2, 1]` means
   /// there are 3 carousel items and their extents are 3/6, 2/6 and 1/6 of the
   /// viewport extent.
   ///
   /// This is a required property in [CarouselView.weighted]. This is null
   /// for default [CarouselView].
-  final List<int>? layoutWeights;
+  final List<int>? flexWeights;
 
   /// The child widgets for the carousel.
   final List<Widget> children;
@@ -258,7 +258,7 @@ class _CarouselViewState extends State<CarouselView> {
   @override
   void initState() {
     super.initState();
-    _weights = widget.layoutWeights;
+    _weights = widget.flexWeights;
     if (widget.controller == null) {
       _internalController = CarouselController();
     }
@@ -287,8 +287,8 @@ class _CarouselViewState extends State<CarouselView> {
         _controller._attach(this);
       }
     }
-    if (widget.layoutWeights != oldWidget.layoutWeights) {
-      _weights = widget.layoutWeights;
+    if (widget.flexWeights != oldWidget.flexWeights) {
+      _weights = widget.flexWeights;
     }
     if (widget.itemExtent != oldWidget.itemExtent) {
       _itemExtent = widget.itemExtent;
@@ -1162,8 +1162,8 @@ class CarouselScrollPhysics extends ScrollPhysics {
     if (position.itemExtent != null) {
       fraction = position.itemExtent! / position.viewportDimension;
     } else {
-      assert(position.layoutWeights != null);
-      fraction = position.layoutWeights!.first / position.layoutWeights!.sum;
+      assert(position.flexWeights != null);
+      fraction = position.flexWeights!.first / position.flexWeights!.sum;
     }
 
     final double itemWidth = position.viewportDimension * fraction;
@@ -1229,7 +1229,7 @@ class _CarouselMetrics extends FixedScrollMetrics {
     required super.viewportDimension,
     required super.axisDirection,
     this.itemExtent,
-    this.layoutWeights,
+    this.flexWeights,
     required super.devicePixelRatio,
   });
 
@@ -1241,7 +1241,7 @@ class _CarouselMetrics extends FixedScrollMetrics {
   /// The fraction of the viewport that the first item occupies.
   ///
   /// Used to compute [item] from the current [pixels].
-  final List<int>? layoutWeights;
+  final List<int>? flexWeights;
 
   @override
   _CarouselMetrics copyWith({
@@ -1251,7 +1251,7 @@ class _CarouselMetrics extends FixedScrollMetrics {
     double? viewportDimension,
     AxisDirection? axisDirection,
     double? itemExtent,
-    List<int>? layoutWeights,
+    List<int>? flexWeights,
     double? devicePixelRatio,
   }) {
     return _CarouselMetrics(
@@ -1261,7 +1261,7 @@ class _CarouselMetrics extends FixedScrollMetrics {
       viewportDimension: viewportDimension ?? (hasViewportDimension ? this.viewportDimension : null),
       axisDirection: axisDirection ?? this.axisDirection,
       itemExtent: itemExtent ?? this.itemExtent,
-      layoutWeights: layoutWeights ?? this.layoutWeights,
+      flexWeights: flexWeights ?? this.flexWeights,
       devicePixelRatio: devicePixelRatio ?? this.devicePixelRatio,
     );
   }
@@ -1273,10 +1273,10 @@ class _CarouselPosition extends ScrollPositionWithSingleContext implements _Caro
     required super.context,
     this.initialItem = 0,
     this.itemExtent,
-    this.layoutWeights,
+    this.flexWeights,
     super.oldPosition,
-  }) : assert(layoutWeights != null && itemExtent == null
-       || layoutWeights == null && itemExtent != null),
+  }) : assert(flexWeights != null && itemExtent == null
+       || flexWeights == null && itemExtent != null),
        _itemToShowOnStartup = initialItem.toDouble(),
        super(
          initialPixels: null,
@@ -1293,15 +1293,15 @@ class _CarouselPosition extends ScrollPositionWithSingleContext implements _Caro
   double? itemExtent;
 
   @override
-  List<int>? layoutWeights;
+  List<int>? flexWeights;
   double getItemFromPixels(double pixels, double viewportDimension) {
     assert(viewportDimension > 0.0);
     double fraction;
     if (itemExtent != null) {
       fraction = itemExtent! / viewportDimension;
-    } else { // If itemExtent is null, layoutWeights cannot be null.
-      assert(layoutWeights != null);
-      fraction = layoutWeights!.first / layoutWeights!.sum;
+    } else { // If itemExtent is null, flexWeights cannot be null.
+      assert(flexWeights != null);
+      fraction = flexWeights!.first / flexWeights!.sum;
     }
 
     final double actual = math.max(0.0, pixels) / (viewportDimension * fraction);
@@ -1316,9 +1316,9 @@ class _CarouselPosition extends ScrollPositionWithSingleContext implements _Caro
     double fraction;
     if (itemExtent != null) {
       fraction = itemExtent! / viewportDimension;
-    } else { // If itemExtent is null, layoutWeights cannot be null.
-      assert(layoutWeights != null);
-      fraction = layoutWeights!.first / layoutWeights!.sum;
+    } else { // If itemExtent is null, flexWeights cannot be null.
+      assert(flexWeights != null);
+      fraction = flexWeights!.first / flexWeights!.sum;
     }
 
     return item * viewportDimension * fraction;
@@ -1361,7 +1361,7 @@ class _CarouselPosition extends ScrollPositionWithSingleContext implements _Caro
     double? viewportDimension,
     AxisDirection? axisDirection,
     double? itemExtent,
-    List<int>? layoutWeights,
+    List<int>? flexWeights,
     double? devicePixelRatio,
   }) {
     return _CarouselMetrics(
@@ -1371,7 +1371,7 @@ class _CarouselPosition extends ScrollPositionWithSingleContext implements _Caro
       viewportDimension: viewportDimension ?? (hasViewportDimension ? this.viewportDimension : null),
       axisDirection: axisDirection ?? this.axisDirection,
       itemExtent: itemExtent ?? this.itemExtent,
-      layoutWeights: layoutWeights ?? this.layoutWeights,
+      flexWeights: flexWeights ?? this.flexWeights,
       devicePixelRatio: devicePixelRatio ?? this.devicePixelRatio,
     );
   }
@@ -1426,7 +1426,7 @@ class CarouselController extends ScrollController {
       context: context,
       initialItem: expandedItem,
       itemExtent: itemExtent,
-      layoutWeights: weights,
+      flexWeights: weights,
       oldPosition: oldPosition,
     );
   }
@@ -1435,7 +1435,7 @@ class CarouselController extends ScrollController {
   void attach(ScrollPosition position) {
     super.attach(position);
     final _CarouselPosition carouselPosition = position as _CarouselPosition;
-    carouselPosition.layoutWeights = _carouselState!._weights;
+    carouselPosition.flexWeights = _carouselState!._weights;
     carouselPosition.itemExtent = _carouselState!._itemExtent;
   }
 }
