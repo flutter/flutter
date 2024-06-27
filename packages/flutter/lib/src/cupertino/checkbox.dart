@@ -268,7 +268,7 @@ class CupertinoCheckbox extends StatefulWidget {
   final String? semanticLabel;
 
   /// The width of a checkbox widget.
-  static const double width = 18.0;
+  static const double width = 14.0;
 
   @override
   State<CupertinoCheckbox> createState() => _CupertinoCheckboxState();
@@ -491,7 +491,7 @@ class _CheckboxPainter extends ToggleablePainter {
     return Paint()
       ..color = checkColor
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.5
+      ..strokeWidth = 2.0
       ..strokeCap = StrokeCap.round;
   }
 
@@ -507,9 +507,9 @@ class _CheckboxPainter extends ToggleablePainter {
     // The ratios for the offsets below were found from looking at the checkbox
     // examples on in the HIG docs. The distance from the needed point to the
     // edge was measured, then divided by the total width.
-    const Offset start = Offset(CupertinoCheckbox.width * 0.25, CupertinoCheckbox.width * 0.52);
-    const Offset mid = Offset(CupertinoCheckbox.width * 0.46, CupertinoCheckbox.width * 0.75);
-    const Offset end = Offset(CupertinoCheckbox.width * 0.72, CupertinoCheckbox.width * 0.29);
+    const Offset start = Offset(CupertinoCheckbox.width * 0.22, CupertinoCheckbox.width * 0.54);
+    const Offset mid = Offset(CupertinoCheckbox.width * 0.40, CupertinoCheckbox.width * 0.75);
+    const Offset end = Offset(CupertinoCheckbox.width * 0.78, CupertinoCheckbox.width * 0.25);
     path.moveTo(origin.dx + start.dx, origin.dy + start.dy);
     path.lineTo(origin.dx + mid.dx, origin.dy + mid.dy);
     canvas.drawPath(path, paint);
