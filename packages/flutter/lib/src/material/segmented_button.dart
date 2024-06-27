@@ -134,6 +134,7 @@ class SegmentedButton<T> extends StatefulWidget {
     this.style,
     this.showSelectedIcon = true,
     this.selectedIcon,
+    this.direction = Axis.horizontal,
   })  : assert(segments.length > 0),
         assert(selected.length > 0 || emptySelectionAllowed),
         assert(selected.length < 2 || multiSelectionEnabled);
@@ -146,6 +147,11 @@ class SegmentedButton<T> extends StatefulWidget {
   /// If you need more than five options, consider using [FilterChip] or
   /// [ChoiceChip] widgets.
   final List<ButtonSegment<T>> segments;
+
+  /// How the [segments] get aligned, by default its [Axis.horizontal]
+  /// if [Axis.vertical] the segments buttons will aligned in the "y" axis
+  /// and the first item in [segments] will be on the top.
+  final Axis direction;
 
   /// The set of [ButtonSegment.value]s that indicate which [segments] are
   /// selected.
@@ -657,12 +663,14 @@ class _RenderSegmentedButton<T> extends RenderBox with
     required OutlinedBorder enabledBorder,
     required OutlinedBorder disabledBorder,
     required TextDirection textDirection,
+    required Axis direction,
     required double tapTargetVerticalPadding,
     required bool isExpanded,
   }) : _segments = segments,
        _enabledBorder = enabledBorder,
        _disabledBorder = disabledBorder,
        _textDirection = textDirection,
+       _direction = direction,
        _tapTargetVerticalPadding = tapTargetVerticalPadding,
        _isExpanded = isExpanded;
 
@@ -703,6 +711,16 @@ class _RenderSegmentedButton<T> extends RenderBox with
       return;
     }
     _textDirection = value;
+    markNeedsLayout();
+  }
+
+  Axis get direction => _direction;
+  Axis _direction;
+  set direction(Axis value) {
+    if (value == _direction) {
+      return;
+    }
+    _direction = value;
     markNeedsLayout();
   }
 
@@ -795,17 +813,35 @@ class _RenderSegmentedButton<T> extends RenderBox with
     double start = 0.0;
     while (child != null) {
       final _SegmentedButtonContainerBoxParentData childParentData = child.parentData! as _SegmentedButtonContainerBoxParentData;
-      final Offset childOffset = Offset(start, 0.0);
+      late final Offset childOffset;
+      if (direction == Axis.vertical) {
+        childOffset = Offset(0.0, start);
+      } else {
+        childOffset = Offset(start, 0.0);
+      }
       childParentData.offset = childOffset;
-      final Rect childRect = Rect.fromLTWH(start, 0.0, child.size.width, child.size.height);
+      late final Rect childRect;
+      if (direction == Axis.vertical) {
+        childRect = Rect.fromLTWH(0.0, childParentData.offset.dy, child.size.width, child.size.height);
+      } else {
+        childRect = Rect.fromLTWH(start, 0.0, child.size.width, child.size.height);
+      }
       final RRect rChildRect = RRect.fromRectAndCorners(childRect);
       childParentData.surroundingRect = rChildRect;
-      start += child.size.width;
+      if (direction == Axis.vertical) {
+        start += child.size.height;
+      } else {
+        start += child.size.width;
+      }
       child = nextChild(child);
     }
   }
 
   Size _calculateChildSize(BoxConstraints constraints) {
+    return direction == Axis.horizontal ? _calculateHorizontalChildSize(constraints) : _calculateVerticalChildSize(constraints);
+  }
+
+  Size _calculateHorizontalChildSize(BoxConstraints constraints) {
     double maxHeight = 0;
     RenderBox? child = firstChild;
     double childWidth;
@@ -828,7 +864,33 @@ class _RenderSegmentedButton<T> extends RenderBox with
     return Size(childWidth, maxHeight);
   }
 
+  Size _calculateVerticalChildSize(BoxConstraints constraints) {
+    double maxWidth = 0;
+    RenderBox? child = firstChild;
+    double childHeight;
+    if (_isExpanded) {
+      childHeight = constraints.maxWidth / childCount;
+    } else {
+      childHeight = constraints.minWidth / childCount;
+      while (child != null) {
+        childHeight = math.max(childHeight, child.getMaxIntrinsicHeight(double.infinity));
+        child = childAfter(child);
+      }
+      childHeight = math.min(childHeight, constraints.maxWidth / childCount);
+    }
+    child = firstChild;
+    while (child != null) {
+      final double boxHeight = child.getMaxIntrinsicWidth(maxWidth);
+      maxWidth = math.max(maxWidth, boxHeight);
+      child = childAfter(child);
+    }
+    return Size(maxWidth, childHeight);
+  }
+
   Size _computeOverallSizeFromChildSize(Size childSize) {
+    if (direction == Axis.vertical) {
+      return constraints.constrain(Size(childSize.width, childSize.height * childCount));
+    }
     return constraints.constrain(Size(childSize.width * childCount, childSize.height));
   }
 
@@ -931,7 +993,6 @@ class _RenderSegmentedButton<T> extends RenderBox with
 
       // Paint the divider between this segment and the previous one.
       if (previousChild != null) {
-<<<<<<< HEAD
         final BorderSide divider =
             segments[index - 1].enabled || segments[index].enabled
                 ? enabledBorder.side.copyWith(strokeAlign: 0.0)
@@ -946,14 +1007,12 @@ class _RenderSegmentedButton<T> extends RenderBox with
           final Offset end = Offset(borderRect.right, childRect.top);
           context.canvas.drawLine(start, end, divider.toPaint());
         }
-=======
         final BorderSide divider = segments[index - 1].enabled || segments[index].enabled
           ? enabledBorder.side.copyWith(strokeAlign: 0.0)
           : disabledBorder.side.copyWith(strokeAlign: 0.0);
         final Offset top = Offset(dividerPos, borderRect.top);
         final Offset bottom = Offset(dividerPos, borderRect.bottom);
         context.canvas.drawLine(top, bottom, divider.toPaint());
->>>>>>> parent of fdd1892802 (Add 'direction' allow to 'SegmentedButton' vertically)
       }
 
       previousChild = child;
