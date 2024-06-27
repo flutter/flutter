@@ -1424,7 +1424,7 @@ abstract class FlutterCommand extends Command<void> {
   String get deprecationWarning {
     return '${globals.logger.terminal.warningMark} The "$name" command is '
            'deprecated and will be removed in a future version of Flutter. '
-           'See https://flutter.dev/docs/development/tools/sdk/releases '
+           'See https://flutter.dev/to/previous-releases '
            'for previous releases of Flutter.\n';
   }
 
