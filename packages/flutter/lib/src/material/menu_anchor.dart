@@ -574,7 +574,6 @@ _MenuAnchorState? get _previousFocusableSibling {
     if (!_isOpen) {
       return;
     }
-   
     _closeChildren(inDispose: inDispose);
     // Don't hide if we're in the middle of a build.
     if (SchedulerBinding.instance.schedulerPhase != SchedulerPhase.persistentCallbacks) {
