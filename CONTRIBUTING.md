@@ -196,3 +196,5 @@ Finally, one area where you could have a lot of impact is in contributing to soc
 This could take the form of organizing weekly video chats on our Discord, or planning tech talks from contributors, for example.
 If this is an area that is of interest to you, please join our [Discord](./docs/contributing/Chat.md) and ping Hixie on the #hackers
 channel!
+
+NOOP
