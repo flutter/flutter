@@ -182,8 +182,8 @@ import '${Uri.file(testConfigFile.path)}' as test_config;
 ''');
   }
 
-  // IMPORTANT: DO NOT RENAME, REMOVE, OR MODIFY THE 'packageConfigLocation'
-  // VARAIBLE.
+  // IMPORTANT: DO NOT RENAME, REMOVE, OR MODIFY THE
+  // 'const packageConfigLocation' VARIABLE.
   // Dash tooling like Dart DevTools performs an evaluation on this variable at
   // runtime to get the package config location for Flutter test targets.
   buffer.write('''
@@ -659,6 +659,7 @@ class FlutterPlatform extends PlatformPlugin {
     return generateTestBootstrap(
       testUrl: testUrl,
       testConfigFile: findTestConfigFile(globals.fs.file(testUrl), globals.logger),
+      // This MUST be a file URI.
       packageConfigUri: buildInfo != null ? globals.fs.path.toUri(buildInfo!.packagesPath) : null,
       host: host!,
       updateGoldens: updateGoldens!,
