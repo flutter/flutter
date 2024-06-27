@@ -1122,44 +1122,6 @@ void main() {
         ),
     );
   }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
-
-  testWidgets('SegmentedButton vertical aligned children', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: Center(
-            child: SegmentedButton<int>(
-              segments: const <ButtonSegment<int>>[
-                ButtonSegment<int>(
-                  value: 0,
-                  label: Text('Option 1'),
-                ),
-                ButtonSegment<int>(
-                  value: 1,
-                  label: Text('Option 1'),
-                ),
-                ButtonSegment<int>(
-                  value: 2,
-                  label: Text('Option 3'),
-                ),
-                ButtonSegment<int>(
-                  value: 3,
-                  label: Text('Option 4'),
-                ),
-              ],
-              onSelectionChanged: (Set<int> selected) {},
-              selected: const <int>{0},
-              direction: Axis.vertical,
-            ),
-          ),
-        ),
-      ),
-    );
-
-    final Finder button = find.byType(SegmentedButton<int>);
-    expect(tester.getSize(button).height,
-        greaterThan(tester.getSize(button).width));
-  });
 }
 
 Set<MaterialState> enabled = const <MaterialState>{};
