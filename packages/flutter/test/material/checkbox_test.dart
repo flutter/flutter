@@ -2299,8 +2299,8 @@ void main() {
         paints
           ..drrect(
             color: const Color(0xffd1d1d6),
-            outer: RRect.fromLTRBR(15.0, 15.0, 29.0, 29.0, const Radius.circular(4.0)),
-            inner: RRect.fromLTRBR(16.0, 16.0, 28.0, 28.0, const Radius.circular(3.0)),
+            outer: RRect.fromLTRBR(13.0, 13.0, 31.0, 31.0, const Radius.circular(4.0)),
+            inner: RRect.fromLTRBR(14.0, 14.0, 30.0, 30.0, const Radius.circular(3.0)),
           ),
       );
 
@@ -2328,8 +2328,8 @@ void main() {
         paints
           ..drrect(
             color: const Color(0x0000000A),
-            outer: RRect.fromLTRBR(15.0, 15.0, 29.0, 29.0, const Radius.circular(10.0)),
-            inner: RRect.fromLTRBR(17.0, 17.0, 27.0, 27.0, const Radius.circular(8.0)),
+            outer: RRect.fromLTRBR(13.0, 13.0, 31.0, 31.0, const Radius.circular(10.0)),
+            inner: RRect.fromLTRBR(15.0, 15.0, 29.0, 29.0, const Radius.circular(8.0)),
           ),
       );
     }

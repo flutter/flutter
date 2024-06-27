@@ -268,7 +268,7 @@ class CupertinoCheckbox extends StatefulWidget {
   final String? semanticLabel;
 
   /// The width of a checkbox widget.
-  static const double width = 14.0;
+  static const double width = 18.0;
 
   @override
   State<CupertinoCheckbox> createState() => _CupertinoCheckboxState();
