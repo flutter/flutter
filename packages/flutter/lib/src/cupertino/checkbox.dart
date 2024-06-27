@@ -315,9 +315,10 @@ class _CupertinoCheckboxState extends State<CupertinoCheckbox> with TickerProvid
         return CupertinoColors.white.withOpacity(0.5);
       }
       if (states.contains(WidgetState.selected)) {
-        return widget.activeColor ?? CupertinoColors.activeBlue;
+        return widget.activeColor
+          ?? CupertinoDynamicColor.resolve(CupertinoColors.activeBlue, context);
       }
-      return _kDefaultFillColor;
+      return CupertinoDynamicColor.resolve(_kDefaultFillColor, context);
     });
   }
 
@@ -334,15 +335,18 @@ class _CupertinoCheckboxState extends State<CupertinoCheckbox> with TickerProvid
   }
 
   WidgetStateProperty<BorderSide> get _widgetSide {
-    const Color borderColor = CupertinoColors.systemGrey4;
+    final Color borderColor = CupertinoDynamicColor.resolve(
+      CupertinoColors.systemGrey4,
+      context,
+    );
     return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
       if (states.contains(WidgetState.disabled)){
-        return const BorderSide(color: borderColor);
+        return BorderSide(color: borderColor);
       }
       if (states.contains(WidgetState.selected) || states.contains(WidgetState.focused)) {
         return const BorderSide(width: 0.0, color: CupertinoColors.transparent);
       }
-      return const BorderSide(color: borderColor);
+      return BorderSide(color: borderColor);
     });
   }
 
