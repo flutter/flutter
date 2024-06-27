@@ -1702,8 +1702,9 @@ void main() {
       await tester.pump();
       expect(focusedMenu, equals(TestMenu.anchorButton.label));
 
-      // Arrow-down moves focus to the first menu item.
-      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      // Directional traversal doesn't work until a menu item is focused.
+      // To start focusing, hover over the first menu item.
+      await hoverOver(tester, find.text('start'));
       await tester.pump();
       expect(focusedMenu, equals('MenuItemButton(Text("start"))'));
 
