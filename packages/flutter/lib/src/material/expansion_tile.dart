@@ -662,7 +662,8 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
   // Platform or null affinity defaults to trailing.
   ListTileControlAffinity _effectiveAffinity() {
     final ListTileThemeData listTileTheme = ListTileTheme.of(context);
-    final ListTileControlAffinity affinity = widget.controlAffinity ?? listTileTheme.controlAffinity ?? ListTileControlAffinity.trailing;
+    final ListTileControlAffinity affinity =
+        widget.controlAffinity ?? listTileTheme.controlAffinity ?? ListTileControlAffinity.trailing;
     switch (affinity) {
       case ListTileControlAffinity.leading:
         return ListTileControlAffinity.leading;

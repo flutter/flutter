@@ -519,7 +519,8 @@ class CheckboxListTile extends StatelessWidget {
     }
 
     final ListTileThemeData listTileTheme = ListTileTheme.of(context);
-    final ListTileControlAffinity effectiveControlAffinity = controlAffinity ?? listTileTheme.controlAffinity ?? ListTileControlAffinity.platform;
+    final ListTileControlAffinity effectiveControlAffinity =
+        controlAffinity ?? listTileTheme.controlAffinity ?? ListTileControlAffinity.platform;
     final (Widget? leading, Widget? trailing) = switch (effectiveControlAffinity) {
       ListTileControlAffinity.leading => (control, secondary),
       ListTileControlAffinity.trailing || ListTileControlAffinity.platform => (secondary, control),
