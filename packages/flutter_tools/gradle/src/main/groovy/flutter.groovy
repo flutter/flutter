@@ -1371,6 +1371,11 @@ class FlutterPlugin implements Plugin<Project> {
                 bundleAarTask.dependsOn(copyFlutterAssetsTask)
             }
 
+            def bundleAarTaskWithLint = project.tasks.findByName("bundle${variant.name.capitalize()}LocalLintAar")
+            if (bundleAarTaskWithLint) {
+                bundleAarTaskWithLint.dependsOn(copyFlutterAssetsTask)
+            }
+
             return copyFlutterAssetsTask
         } // end def addFlutterDeps
 
