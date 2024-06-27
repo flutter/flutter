@@ -534,14 +534,6 @@ _MenuAnchorState? get _previousFocusableSibling {
     }
   }
 
-  KeyEventResult _checkForEscape(KeyEvent event) {
-    if (event is KeyDownEvent && event.logicalKey == LogicalKeyboardKey.escape) {
-      _close();
-      return KeyEventResult.handled;
-    }
-    return KeyEventResult.ignored;
-  }
-
   /// Open the menu, optionally at a position relative to the [MenuAnchor].
   ///
   /// Call this when the menu should be shown to the user.
@@ -582,9 +574,7 @@ _MenuAnchorState? get _previousFocusableSibling {
     if (!_isOpen) {
       return;
     }
-    if (_isRoot) {
-      FocusManager.instance.removeEarlyKeyEventHandler(_checkForEscape);
-    }
+   
     _closeChildren(inDispose: inDispose);
     // Don't hide if we're in the middle of a build.
     if (SchedulerBinding.instance.schedulerPhase != SchedulerPhase.persistentCallbacks) {
