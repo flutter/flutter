@@ -416,7 +416,7 @@ void main() {
         home: Scaffold(
           body: CarouselView.weighted(
             itemSnapping: true,
-            allowFullyExpand: false,
+            consumeMaxWeight: false,
             layoutWeights: const <int>[1, 7],
             children: List<Widget>.generate(10, (int index) {
               return Center(
@@ -518,7 +518,7 @@ void main() {
         home: Scaffold(
           body: CarouselView.weighted(
             itemSnapping: true,
-            allowFullyExpand: false,
+            consumeMaxWeight: false,
             layoutWeights: const <int>[1, 8, 1],
             children: List<Widget>.generate(10, (int index) {
               return Center(
@@ -736,7 +736,7 @@ void main() {
         home: Scaffold(
           body: CarouselView.weighted(
             layoutWeights: const <int>[1, 2, 4, 2, 1],
-            allowFullyExpand: false,
+            consumeMaxWeight: false,
             children: List<Widget>.generate(10, (int index) {
               return Center(
                 child: Text('Item $index'),

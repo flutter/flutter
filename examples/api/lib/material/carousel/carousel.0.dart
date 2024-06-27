@@ -74,7 +74,7 @@ class _CarouselExampleState extends State<CarouselExample> {
           constraints: const BoxConstraints(maxHeight: 50),
           child: CarouselView.weighted(
             layoutWeights: const <int>[1,2,3,2,1],
-            allowFullyExpand: false,
+            consumeMaxWeight: false,
             children: List<Widget>.generate(20, (int index) {
               return ColoredBox(
                 color: Colors.primaries[index % Colors.primaries.length].withOpacity(0.8),
@@ -88,7 +88,7 @@ class _CarouselExampleState extends State<CarouselExample> {
           constraints: const BoxConstraints(maxHeight: 200),
           child: CarouselView.weighted(
             layoutWeights: const <int>[3, 3, 3, 2, 1],
-            allowFullyExpand: false,
+            consumeMaxWeight: false,
             children: CardInfo.values.map((CardInfo info) {
               return ColoredBox(
                 color: info.backgroundColor,
