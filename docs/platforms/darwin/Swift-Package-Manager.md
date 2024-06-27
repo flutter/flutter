@@ -540,9 +540,9 @@ Swift Package Manager.
 For app developers' and 'For plugin authors' sections. Keep these in sync! -->
 
 <details>
-  <summary>How to manually add Swift Package Manager integration to iOS project if Flutter CLI fails to automatically migrate</summary>
+  <summary>How to manually add Swift Package Manager integration to iOS project if Flutter CLI fails to migrate automatically</summary>
 
-### How to manually add Swift Package Manager integration to iOS project if Flutter CLI fails to automatically migrate
+### How to manually add Swift Package Manager integration to iOS project if Flutter CLI fails to migrate automatically
 
 Please [file a bug](https://github.com/flutter/flutter/issues/new?template=1_activation.yml) before manually migrating to help the Flutter team improve the automatic migration. Please include the error message you received and consider including a copy of the of the following files in your bug report:
 * ios/Runner.xcodeproj/project.pbxproj
