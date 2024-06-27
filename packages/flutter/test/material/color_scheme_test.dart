@@ -658,9 +658,14 @@ void main() {
     expect(() => ColorScheme.fromImageProvider(provider: image, contrastLevel: 1.5), throwsAssertionError);
   });
 
-  test('fromImageProvider() throws an Exception when image cannot be rendered', () async {
-    final ImageProvider image = MemoryImage(Uint8List.fromList([-1, -2, -3]));
-    expect(() async => ColorScheme.fromImageProvider(provider: image), throwsA(isException));
+  test('fromImageProvider() propagates TimeoutException when image cannot be rendered', () async {
+    final Uint8List blueSquareBytes = Uint8List.fromList(kBlueSquarePng);
+
+    // Corrupt the image's bytelist so it cannot be read.
+    final Uint8List corruptImage = blueSquareBytes.sublist(5);
+    final ImageProvider image = MemoryImage(corruptImage);
+
+    await expectLater(ColorScheme.fromImageProvider(provider: image), throwsA(isException));
   });
 
   testWidgets('generated scheme "on" colors meet a11y contrast guidelines', (WidgetTester tester) async {
