@@ -62,7 +62,7 @@ const String maxKnownAndSupportedGradleVersion = '8.0.2';
 // Supported here means tooling is aware of this version's Java <-> AGP
 // compatibility.
 @visibleForTesting
-const String maxKnownAndSupportedAgpVersion = '8.1';
+const String maxKnownAndSupportedAgpVersion = '8.4.0';
 
 // Update this when new versions of AGP come out.
 const String maxKnownAgpVersion = '8.3';
