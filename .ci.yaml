@@ -4811,6 +4811,7 @@ targets:
   - name: Mac_ios platform_views_scroll_perf_bottom_ad_banner__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true
     timeout: 60
     properties:
       tags: >
