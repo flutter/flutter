@@ -36,16 +36,17 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  final List<SelectedContentRange<Object>> _activeSelections = <SelectedContentRange<Object>>[];
   final ContextMenuController _menuController = ContextMenuController();
   final SelectionController _selectionController = SelectionController();
-  final int _text1Id = SelectableRegionState.nextSelectableId;
-  final int _text2Id = SelectableRegionState.nextSelectableId;
-  final int _text3Id = SelectableRegionState.nextSelectableId;
+  final Key _text1Id = UniqueKey();
+  final Key _text2Id = UniqueKey();
+  final Key _text3Id = UniqueKey();
 
-  Map<int, TextSpan> dataSourceMap = <int, TextSpan>{};
-  Map<int, TextSpan> bulletSourceMap = <int, TextSpan>{};
-  late final Map<int, TextSpan> originSourceData;
-  late final Map<int, TextSpan> originBulletSourceData;
+  Map<Key, TextSpan> dataSourceMap = <Key, TextSpan>{};
+  Map<Key, TextSpan> bulletSourceMap = <Key, TextSpan>{};
+  late final Map<Key, TextSpan> originSourceData;
+  late final Map<Key, TextSpan> originBulletSourceData;
 
   @override
   void initState() {
@@ -56,12 +57,13 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void dispose() {
     _selectionController.dispose();
+    _activeSelections.clear();
     super.dispose();
   }
 
   void _initData() {
     for (int i = 1; i <= 7; i += 1) {
-      final int currentSelectableId = SelectableRegionState.nextSelectableId;
+      final Key currentSelectableId = UniqueKey();
       bulletSourceMap[currentSelectableId] = TextSpan(text: '• Bullet $i');
     }
     dataSourceMap[_text1Id] = TextSpan(
@@ -70,12 +72,12 @@ class _MyHomePageState extends State<MyHomePage> {
         WidgetSpan(
           child: Column(
             children: <Widget>[
-              for (final MapEntry<int, TextSpan> entry in bulletSourceMap.entries)
+              for (final MapEntry<Key, TextSpan> entry in bulletSourceMap.entries)
                 Padding(
                   padding: const EdgeInsets.only(left: 20.0),
                   child: Text.rich(
                     bulletSourceMap[entry.key]!,
-                    selectableId: entry.key,
+                    key: entry.key,
                   ),
                 )
             ],
@@ -89,19 +91,22 @@ class _MyHomePageState extends State<MyHomePage> {
     );
     dataSourceMap[_text3Id] = const TextSpan(text: 'This is some text in another text widget.');
     // Save the origin data so we can revert our changes.
-    originSourceData = <int, TextSpan>{};
-    originBulletSourceData = <int, TextSpan>{};
-    for (final MapEntry<int, TextSpan> entry in dataSourceMap.entries) {
+    originSourceData = <Key, TextSpan>{};
+    originBulletSourceData = <Key, TextSpan>{};
+    for (final MapEntry<Key, TextSpan> entry in dataSourceMap.entries) {
       originSourceData[entry.key] = entry.value;
     }
-    for (final MapEntry<int, TextSpan> entry in bulletSourceMap.entries) {
+    for (final MapEntry<Key, TextSpan> entry in bulletSourceMap.entries) {
       originBulletSourceData[entry.key] = entry.value;
     }
   }
 
   void _colorSelectionRed(
     List<SelectedContentRange<Object>>? ranges,
-    { required Map<int, TextSpan> dataMap }
+    {
+      required Map<Key, TextSpan> dataMap,
+      required bool coloringChildSpan,
+    }
   ) {
     if (ranges == null || ranges.isEmpty) {
       return;
@@ -183,6 +188,7 @@ class _MyHomePageState extends State<MyHomePage> {
               _colorSelectionRed(
                 <SelectedContentRange<Object>>[range],
                 dataMap: bulletSourceMap,
+                coloringChildSpan: true,
               );
             }
             // Re-create bulleted list.
@@ -190,12 +196,12 @@ class _MyHomePageState extends State<MyHomePage> {
               WidgetSpan(
                 child: Column(
                   children: <Widget>[
-                    for (final MapEntry<int, TextSpan> entry in bulletSourceMap.entries)
+                    for (final MapEntry<Key, TextSpan> entry in bulletSourceMap.entries)
                       Padding(
                         padding: const EdgeInsets.only(left: 20.0),
                         child: Text.rich(
                           bulletSourceMap[entry.key]!,
-                          selectableId: entry.key,
+                          key: entry.key,
                         ),
                       )
                   ],
@@ -207,7 +213,7 @@ class _MyHomePageState extends State<MyHomePage> {
         }
         return true;
       });
-      dataMap[contentRange.selectableId!] = TextSpan(
+      dataMap[contentRange.selectableId! as Key] = TextSpan(
         style: (contentRange.content as TextSpan).style,
         children: <InlineSpan>[
           ...beforeSelection,
@@ -216,8 +222,12 @@ class _MyHomePageState extends State<MyHomePage> {
         ],
       );
     }
-    _selectionController.clear();
-    setState(() {});
+    // Avoid clearing the selection and setting the state
+    // before we have colored all parts of the selection.
+    if (!coloringChildSpan) {
+      _selectionController.clear();
+      setState(() {});
+    }
   }
 
   @override
@@ -233,7 +243,8 @@ class _MyHomePageState extends State<MyHomePage> {
           if (selectedContent == null
              || selectedContent.plainText.isEmpty
              || selectedContent.geometry.startSelectionPoint == null
-             || selectedContent.geometry.endSelectionPoint == null) {
+             || selectedContent.geometry.endSelectionPoint == null
+             || _activeSelections.isEmpty) {
             return;
           }
           _menuController.show(
@@ -251,8 +262,9 @@ class _MyHomePageState extends State<MyHomePage> {
                       onPressed: () {
                         ContextMenuController.removeAny();
                         _colorSelectionRed(
-                          selectedContent.ranges,
+                          _activeSelections,
                           dataMap: dataSourceMap,
+                          coloringChildSpan: false,
                         );
                         _selectionController.clear();
                       },
@@ -267,23 +279,32 @@ class _MyHomePageState extends State<MyHomePage> {
             },
           );
         },
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Text.rich(
-                selectableId: _text1Id,
-                dataSourceMap[_text1Id]!,
-              ),
-              Text.rich(
-                selectableId: _text2Id,
-                dataSourceMap[_text2Id]!,
-              ),
-              Text.rich(
-                selectableId: _text3Id,
-                dataSourceMap[_text3Id]!,
-              ),
-            ],
+        child: SelectionListener(
+          onSelectionChanged: (List<SelectedContentRange<Object>>? selections) {
+            _activeSelections.clear();
+            if (selections == null) {
+              return;
+            }
+            _activeSelections.addAll(selections);
+          },
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Text.rich(
+                  key: _text1Id,
+                  dataSourceMap[_text1Id]!,
+                ),
+                Text.rich(
+                  key: _text2Id,
+                  dataSourceMap[_text2Id]!,
+                ),
+                Text.rich(
+                  key: _text3Id,
+                  dataSourceMap[_text3Id]!,
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -291,10 +312,10 @@ class _MyHomePageState extends State<MyHomePage> {
         onPressed: () {
           setState(() {
             // Resets the state to the origin data.
-            for (final MapEntry<int, TextSpan> entry in originSourceData.entries) {
+            for (final MapEntry<Key, TextSpan> entry in originSourceData.entries) {
               dataSourceMap[entry.key] = entry.value;
             }
-            for (final MapEntry<int, TextSpan> entry in originBulletSourceData.entries) {
+            for (final MapEntry<Key, TextSpan> entry in originBulletSourceData.entries) {
               bulletSourceMap[entry.key] = entry.value;
             }
           });

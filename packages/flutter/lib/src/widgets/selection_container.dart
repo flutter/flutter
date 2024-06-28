@@ -178,6 +178,12 @@ class _SelectionContainerState extends State<SelectionContainer> with Selectable
   }
 
   @override
+  List<SelectedContentRange<Object>>? getSelections() {
+    assert(!widget._disabled);
+    return widget.delegate!.getSelections();
+  }
+
+  @override
   SelectionResult dispatchSelectionEvent(SelectionEvent event) {
     assert(!widget._disabled);
     return widget.delegate!.dispatchSelectionEvent(event);

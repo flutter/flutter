@@ -63,10 +63,11 @@ class _MyHomePageState extends State<MyHomePage> {
     'eleifend orci justo id lectus. Integer sagittis, lorem nec molestie condimentum, tortor nisl '
     'aliquam velit, eget efficitur justo mauris a ante.';
 
+  final List<SelectedContentRange<Object>> _activeSelections = <SelectedContentRange<Object>>[];
   final ContextMenuController _menuController = ContextMenuController();
   final SelectionController _selectionController = SelectionController();
   late final List<Widget> _textWidgets;
-  final Map<int, TextSpan> dataSourceMap = <int, TextSpan>{};
+  final Map<Key, TextSpan> dataSourceMap = <Key, TextSpan>{};
 
   @override
   void initState() {
@@ -77,6 +78,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void dispose() {
     _selectionController.dispose();
+    _activeSelections.clear();
     super.dispose();
   }
 
@@ -92,12 +94,12 @@ class _MyHomePageState extends State<MyHomePage> {
         break;
       }
       final String paragraphText = text.substring(start, end);
-      final int currentSelectableId = SelectableRegionState.nextSelectableId;
+      final Key currentSelectableId = UniqueKey();
       dataSourceMap[currentSelectableId] = TextSpan(text: paragraphText.trim());
       paragraphWidgets.add(
         Text.rich(
           dataSourceMap[currentSelectableId]!,
-          selectableId: currentSelectableId,
+          key: currentSelectableId,
         ),
       );
       currentPosition = end;
@@ -218,7 +220,7 @@ class _MyHomePageState extends State<MyHomePage> {
         }
         return true;
       });
-      dataSourceMap[contentRange.selectableId!] = TextSpan(
+      dataSourceMap[contentRange.selectableId! as Key] = TextSpan(
         style: (contentRange.content as TextSpan).style,
         children: <InlineSpan>[
           ...beforeSelection,
@@ -229,11 +231,11 @@ class _MyHomePageState extends State<MyHomePage> {
       rangeIndex += 1;
     }
     // Rebuild column contents.
-    for (final MapEntry<int, TextSpan> entry in dataSourceMap.entries) {
+    for (final MapEntry<Key, TextSpan> entry in dataSourceMap.entries) {
       newText.add(
         Text.rich(
           entry.value,
-          selectableId: entry.key,
+          key: entry.key,
         ),
       );
     }
@@ -252,7 +254,8 @@ class _MyHomePageState extends State<MyHomePage> {
             if (selectedContent == null
                || selectedContent.plainText.isEmpty
                || selectedContent.geometry.startSelectionPoint == null
-               || selectedContent.geometry.endSelectionPoint == null) {
+               || selectedContent.geometry.endSelectionPoint == null
+               || _activeSelections.isEmpty) {
             return;
           }
           _menuController.show(
@@ -269,9 +272,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     ContextMenuButtonItem(
                       onPressed: () {
                         ContextMenuController.removeAny();
-                        if (selectedContent.ranges != null) {
-                          _insertContent(selectedContent.ranges!, selectedContent.plainText);
-                        }
+                        _insertContent(_activeSelections, selectedContent.plainText);
                         _selectionController.clear();
                       },
                       label: 'Insert Content',
@@ -285,19 +286,28 @@ class _MyHomePageState extends State<MyHomePage> {
             },
           );
         },
-        child: Center(
-          child: Container(
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.all(Radius.circular(4.0)),
-            ),
-            height: 300.0,
-            width: 300.0,
-            child: SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: Column(
-                  children: _textWidgets,
+        child: SelectionListener(
+          onSelectionChanged: (List<SelectedContentRange<Object>>? selections) {
+            _activeSelections.clear();
+            if (selections == null) {
+              return;
+            }
+            _activeSelections.addAll(selections);
+          },
+          child: Center(
+            child: Container(
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.all(Radius.circular(4.0)),
+              ),
+              height: 300.0,
+              width: 300.0,
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: Column(
+                    children: _textWidgets,
+                  ),
                 ),
               ),
             ),
