@@ -737,3 +737,13 @@ class FakeDevtoolsLauncher extends Fake implements DevtoolsLauncher {
     closed = true;
   }
 }
+
+class ClosedStdinController extends Fake implements StreamSink<List<int>> {
+  @override
+  Future<Object?> addStream(Stream<List<int>> stream) async => throw const SocketException('Bad pipe');
+
+  @override
+  Future<Object?> close() async {
+    return null;
+  }
+}

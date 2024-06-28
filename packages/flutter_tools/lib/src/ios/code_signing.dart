@@ -231,7 +231,15 @@ Future<String?> _getCodeSigningIdentityDevelopmentTeam({
 
   final Process opensslProcess = await processUtils.start(
     const <String>['openssl', 'x509', '-subject']);
-  await (opensslProcess.stdin..write(signingCertificateStdout)).close();
+
+  await ProcessUtils.writeToStdinGuarded(
+    stdin: opensslProcess.stdin,
+    content: signingCertificateStdout,
+    onError: (Object? error, _) {
+      throw Exception('Unexpected error when writing to openssl: $error');
+    },
+  );
+  await opensslProcess.stdin.close();
 
   final String opensslOutput = await utf8.decodeStream(opensslProcess.stdout);
   // Fire and forget discard of the stderr stream so we don't hold onto resources.
