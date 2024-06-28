@@ -257,7 +257,7 @@ class Plugin {
       const String errorMessage =
           'The flutter.plugin.platforms key cannot be used in combination with the old '
           'flutter.plugin.{androidPackage,iosPrefix,pluginClass} keys. '
-          'See: https://flutter.dev/docs/development/packages-and-plugins/developing-packages#plugin';
+          'See: https://flutter.dev/to/pubspec-plugin-platforms';
       return <String>[errorMessage];
     }
 
@@ -265,7 +265,7 @@ class Plugin {
       const String errorMessage =
           'Cannot find the `flutter.plugin.platforms` key in the `pubspec.yaml` file. '
           'An instruction to format the `pubspec.yaml` can be found here: '
-          'https://flutter.dev/docs/development/packages-and-plugins/developing-packages#plugin-platforms';
+          'https://flutter.dev/to/pubspec-plugin-platforms';
       return <String>[errorMessage];
     }
 

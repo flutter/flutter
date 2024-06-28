@@ -118,7 +118,11 @@ class FlutterErrorFormatter {
     final bool allChildrenAreLeaf = node.children.isNotEmpty &&
         !node.children.any((_ErrorNode child) => child.children.isNotEmpty);
     if (node.level == _DiagnosticsNodeLevel.summary || allChildrenAreLeaf) {
-      _writeNode(node, recursive: false);
+      // DiagnosticsBlock is a container, so recurse into its children if
+      // there's only a single level. The container may be
+      // "The relevant error-causing widget was" and the child may be
+      // the specific widget details.
+      _writeNode(node, recursive: node.type == _DiagnosticsNodeType.DiagnosticsBlock && allChildrenAreLeaf);
     }
   }
 }
@@ -148,6 +152,10 @@ enum _DiagnosticsNodeStyle {
   flat,
 }
 
+enum _DiagnosticsNodeType {
+  DiagnosticsBlock,
+}
+
 class _ErrorData extends _ErrorNode {
   _ErrorData(super.data);
 
@@ -167,6 +175,7 @@ class _ErrorNode {
   List<_ErrorNode> get properties => asList('properties', _ErrorNode.new);
   bool get showName => data['showName'] != false;
   _DiagnosticsNodeStyle? get style => asEnum('style', _DiagnosticsNodeStyle.values);
+  _DiagnosticsNodeType? get type => asEnum('type', _DiagnosticsNodeType.values);
 
   String? asString(String field) {
     final Object? value = data[field];

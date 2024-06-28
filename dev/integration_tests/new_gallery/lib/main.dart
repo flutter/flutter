@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:dual_screen/dual_screen.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart' show timeDilation;
@@ -50,7 +49,6 @@ class GalleryApp extends StatelessWidget {
       child: Builder(
         builder: (BuildContext context) {
           final GalleryOptions options = GalleryOptions.of(context);
-          final bool hasHinge = MediaQuery.of(context).hinge?.bounds != null;
           return MaterialApp(
             restorationScopeId: 'rootGallery',
             title: 'Flutter Gallery',
@@ -74,7 +72,7 @@ class GalleryApp extends StatelessWidget {
               return basicLocaleListResolution(locales, supportedLocales);
             },
             onGenerateRoute: (RouteSettings settings) =>
-                RouteConfiguration.onGenerateRoute(settings, hasHinge),
+                RouteConfiguration.onGenerateRoute(settings),
           );
         },
       ),

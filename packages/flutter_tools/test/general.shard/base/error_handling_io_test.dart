@@ -884,6 +884,43 @@ void main() {
     });
   });
 
+  testWithoutContext("ErrorHandlingFileSystem.systemTempDirectory wraps delegates filesystem's systemTempDirectory", () {
+    final FileExceptionHandler exceptionHandler = FileExceptionHandler();
+
+    final MemoryFileSystem delegate = MemoryFileSystem.test(
+      style: FileSystemStyle.windows,
+      opHandle: exceptionHandler.opHandle,
+    );
+
+    final FileSystem fs = ErrorHandlingFileSystem(
+      delegate: delegate,
+      platform: FakePlatform(operatingSystem: 'windows'),
+    );
+
+    expect(fs.systemTempDirectory, isA<ErrorHandlingDirectory>());
+    expect(fs.systemTempDirectory.path, delegate.systemTempDirectory.path);
+
+    final File tempFile = delegate.systemTempDirectory.childFile('hello')
+      ..createSync(recursive: true);
+
+    exceptionHandler.addError(
+      tempFile,
+      FileSystemOp.write,
+      FileSystemException(
+        'Oh no!',
+        tempFile.path,
+        const OSError('Access denied ):', 5),
+      ),
+    );
+
+    expect(
+      () => fs.file(tempFile.path).writeAsStringSync('world'),
+      throwsToolExit(message: r'''
+Flutter failed to write to a file at "C:\.tmp_rand0\hello". The flutter tool cannot access the file or directory.
+Please ensure that the SDK and/or project is installed in a location that has read/write permissions for the current user.'''),
+    );
+  });
+
   group('ProcessManager on windows throws tool exit', () {
     const int kDeviceFull = 112;
     const int kUserMappedSectionOpened = 1224;

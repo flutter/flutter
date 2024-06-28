@@ -397,7 +397,7 @@ void main() {
         '    ! App icon is set to the default placeholder icon. Replace with unique icons.\n',
         '    ! App icon is using the incorrect size (e.g. Icon-App-20x20@1x.png).\n',
         '    ! Launch image is set to the default placeholder icon. Replace with unique launch image.\n',
-        'To update the settings, please refer to https://docs.flutter.dev/deployment/ios\n',
+        'To update the settings, please refer to https://flutter.dev/to/ios-deploy\n',
       ];
       expect(expectedValidationMessages, unorderedEquals(expectedValidationMessages));
 

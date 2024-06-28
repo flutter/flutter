@@ -9,3 +9,7 @@
 /packages/flutter_tools/pubspec.yaml @christopherfujino
 /packages/flutter_tools/templates/module/ios/ @jmagman
 /packages/flutter_tools/templates/**/Podfile* @jmagman
+
+# In the process of moving to flutter/engine, so ask matan if
+# modifying anything here (https://github.com/flutter/flutter/issues/150869).
+/docs/engine/** @matanlurey

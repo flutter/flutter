@@ -1183,7 +1183,7 @@ void main() {
             'Invalid plugin specification url_launcher_macos.\n'
             'Cannot find the `flutter.plugin.platforms` key in the `pubspec.yaml` file. '
             'An instruction to format the `pubspec.yaml` can be found here: '
-            'https://flutter.dev/docs/development/packages-and-plugins/developing-packages#plugin-platforms'
+            'https://flutter.dev/to/pubspec-plugin-platforms'
           ),
         );
       }, overrides: <Type, Generator>{

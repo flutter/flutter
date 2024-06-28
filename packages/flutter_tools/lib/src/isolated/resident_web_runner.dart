@@ -318,6 +318,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
           ddcModuleSystem: debuggingOptions.buildInfo.ddcModuleFormat == DdcModuleFormat.ddc,
           webRenderer: debuggingOptions.webRenderer,
           isWasm: debuggingOptions.webUseWasm,
+          useLocalCanvasKit: debuggingOptions.webUseLocalCanvaskit,
           rootDirectory: fileSystem.directory(projectRootPath),
         );
         Uri url = await device!.devFS!.create();
