@@ -2,54 +2,928 @@ Flutter postmortem: Platform-View-android-14-regression
 Status: {draft}
 Owners: johnmccutchen, reidbaker, jrect
 
-Summary
-Description: Platform views on android 14 stopped displaying when apps were backgrounded. 
-Component: Android, Platform Views 
-Date/time: 2024-05-28
-Duration: 6 months
-User impact: All flutter customers using platform views on android 14
+### go/flutter-android-14-postmortem
 
-Timeline (all times in PST/PDT)
-1900-01-01
-14:44 - something happened
-14:45 - next thing happened <START OF OUTAGE>
 
-1900-01-02
-09:12 - another thing happened <END OF OUTAGE>
+<table>
+  <tr>
+   <td colspan="2">
+<h2>Dash Postmortem: Android 14 Platform View Regression</h2>
 
-Impact
-{summarize the problems that the outage caused}
 
-Root causes
-{without blame, describe the root cause of the outage}
+   </td>
+   <td><strong>Summary</strong>
+<p>
+Flutter “Platform Views” on Android 14 stopped displaying when apps were backgrounded and <code>onMemoryTrim</code> was called. Confounding investigation, Samsung had a different but related issue that impacted viewing Platform Views. Platform Views are particularly important because they are the mechanism used to display ads.
+   </td>
+  </tr>
+  <tr>
+   <td><strong>Author</strong>: <a href="http://who/reidbaker">Reid Baker</a>
+<p>
+<strong>Contributors</strong>: <a href="http://who/johnmccutchan">John McCutchan</a>, <a href="http://who/jreck">John Reck</a><a href="http://who/zra">Zach Anderson</a>
+   </td>
+   <td><strong>Status</strong>: In Review \
+<strong>Created</strong>: May 28, 2024
+<p>
+<strong>Updated</strong>: Jun 5, 2024
+   </td>
+   <td><strong>Self Link</strong>: <a href="http://go/flutter-android-14-postmortem">go/flutter-android-14-postmortem</a>
+   </td>
+  </tr>
+  <tr>
+   <td colspan="3">Intentionally left blank, for spacing.
+   </td>
+  </tr>
+</table>
 
-Lessons learned
-What worked
-{list things where things worked as expected in a positive manner}
 
-Where we got lucky
-{list things that mitigated this incident but not because of our foresight}
 
-What didn't work
-{list things that failed, with github issues from the action items section}
+## Purpose of this doc
 
-Action items
-{each item here should have an owner}
+This is a postmortem for the regression in Flutter Platform Views on Android 14. The purpose is to understand what went wrong, why it took so long to diagnose and/or fix, and how to avoid such breakages and long resolution periods in the future.
 
-Prevention
-{link to github issues for things that would have prevented this failure from happening in the first place, such as input validation, pinning dependencies, etc}
 
-Detection
-{link to github issues for things that would have detected this failure before it became An Incident, such as better testing, monitoring, etc}
+## Issue Summary
 
-Mitigation
-{link to github issues for things that would have made this failure less serious, such as graceful degradation, better exception handling, etc}
+Flutter “Platform Views” on Android 14 stopped displaying when apps were backgrounded and `onMemoryTrim` was called. Confounding investigation, Samsung had a different but related issue that impacted viewing Platform Views. Platform Views are particularly important because they are the mechanism Flutter on Android uses to display ads.
 
-Process
-{link to github issues for things that would have helped us resolve this failure faster, such as documented processes and protocols, etc}
+A public summary of this issue has also been communicated to Flutter users on the GitHub issue [here](https://github.com/flutter/flutter/issues/146499#issuecomment-2082873125).
 
-Fixes
-{link to github issues or PRs/commits for the actual fixes that were necessary to resolve this incident}
 
-Appendix
-{any other useful information, such as relevant chat logs}
+## User Impact
+
+All Flutter customers using Platform Views on Android 14, including apps that use ads for revenue.
+
+
+## Root Cause(s)
+
+An AOSP public Android API was subtly broken in the [commit here](https://googleplex-android.googlesource.com/platform%2Fframeworks%2Fbase/+/20a4d68338ca000e3ee0c5c71a01552eab1061e1).
+
+A Samsung specific broken public API that was caused by similar roots but had different observable outcomes. 
+
+Flutter integration tests did not catch this class of error.
+
+
+## Timeline of breakage and fix
+
+
+<table>
+  <tr>
+   <td><strong>Date</strong>
+   </td>
+   <td><strong>Time (ET)</strong>
+   </td>
+   <td><strong>What happened?</strong>
+   </td>
+   <td><strong>Notes:</strong>
+   </td>
+  </tr>
+  <tr>
+   <td>Jul 11, 2023
+   </td>
+   <td>17:11
+   </td>
+   <td><a href="https://googleplex-android.googlesource.com/platform%2Fframeworks%2Fbase/+/20a4d68338ca000e3ee0c5c71a01552eab1061e1">A commit lands in Android</a> to “prefetch layers when the context is destroyed"
+   </td>
+   <td>Start of outage
+   </td>
+  </tr>
+  <tr>
+   <td>Nov 27, 2023
+   </td>
+   <td>00:00
+   </td>
+   <td><a href="https://github.com/flutter/flutter/issues/139039">Flutter issue filed</a> describing <code>WebViewWidget</code> showing as white on Samsung devices. "With android 14 device, WebViewWidget show white screen after foregrounded. (test with Samsung Galaxy s23 android 14)"
+   </td>
+   <td>
+   </td>
+  </tr>
+  <tr>
+   <td>Nov 30, 2023
+   </td>
+   <td>15:00
+   </td>
+   <td><a href="https://github.com/flutter/flutter/issues/139039#issuecomment-1834483618">Triaged</a> as a potential Platform View issue
+   </td>
+   <td>Issue also gets an unusual amount of community attention (thumbs up, etc.)
+   </td>
+  </tr>
+  <tr>
+   <td>
+   </td>
+   <td>20:30
+   </td>
+   <td>Reproduction <a href="https://github.com/flutter/flutter/issues/139039#issuecomment-1835256092">is claimed</a> to be on some Samsung Android 14 devices but not all.
+   </td>
+   <td>Beginning of the period in which the Flutter team believes the issue is Samsung specific because only Samsung has rolled out the version of Android 14 that contains <a href="https://googleplex-android.googlesource.com/platform%2Fframeworks%2Fbase/+/20a4d68338ca000e3ee0c5c71a01552eab1061e1">the root cause commit</a>.
+   </td>
+  </tr>
+  <tr>
+   <td>Dec 6, 2023
+   </td>
+   <td>02:30
+   </td>
+   <td>First <a href="https://github.com/flutter/flutter/issues/139630">duplicate issue</a> filed.
+   </td>
+   <td>
+   </td>
+  </tr>
+  <tr>
+   <td>Dec 7, 2023
+   </td>
+   <td>15:30
+   </td>
+   <td>Flutter team acquires a Samsung S23 since the issue <a href="https://github.com/flutter/flutter/issues/139039#issuecomment-1846052563">appears to be device specific</a>.
+   </td>
+   <td>
+   </td>
+  </tr>
+  <tr>
+   <td>Dec 8, 2023
+   </td>
+   <td>15:45
+   </td>
+   <td><a href="https://github.com/flutter/flutter/issues/139039#issuecomment-1847822918">The bug is reproduced</a> by the Flutter team, and the GitHub issue title is changed to "Samsung Galaxy S23 On Android 14 stops drawing platform views on resume"
+   </td>
+   <td>
+   </td>
+  </tr>
+  <tr>
+   <td>
+   </td>
+   <td>
+   </td>
+   <td>The bug that was closed as a duplicate <a href="https://github.com/flutter/flutter/issues/139630#issuecomment-1847795930">is not reproducible</a>.
+   </td>
+   <td>
+   </td>
+  </tr>
+  <tr>
+   <td>Dec 15, 2023
+   </td>
+   <td>06:30
+   </td>
+   <td><a href="https://github.com/flutter/flutter/issues/139039#issuecomment-1857737055">The user reports</a> that the issue has appeared on multiple Samsung devices that were all recently updated to Android 14.
+   </td>
+   <td>
+   </td>
+  </tr>
+  <tr>
+   <td>
+   </td>
+   <td>15:45
+   </td>
+   <td><a href="https://github.com/flutter/flutter/issues/139630#issuecomment-1858465706">Flutter team finds</a> that rotation and <code>requestLayout</code> can avoid the issue and posts a work around.
+   </td>
+   <td>
+   </td>
+  </tr>
+  <tr>
+   <td>
+   </td>
+   <td>19:00
+   </td>
+   <td>The Flutter team filed <b>>>>>>GDCALERT:Found UNSUPPORTED element which lacks an apps script API.>>>>></b> as a P0 referencing <a href="https://github.com/flutter/flutter/issues/139039">#139039</a> in the Samsung component. 
+   </td>
+   <td>
+   </td>
+  </tr>
+  <tr>
+   <td>Dec 19, 2023
+   </td>
+   <td>09:00
+   </td>
+   <td><a href="https://github.com/flutter/flutter/issues/139039">GitHub issue</a> is retitled “Samsung phones running Android 14 stops drawing entire app on resume”
+   </td>
+   <td>
+   </td>
+  </tr>
+  <tr>
+   <td>Dec 29, 2023
+   </td>
+   <td>0:830
+   </td>
+   <td><a href="https://github.com/flutter/flutter/issues/139039#issuecomment-1872081990">User reports</a> escalation to Samsung on a <a href="https://forum.developer.samsung.com/t/emergency-about-compatibility-between-flutter-and-samsung/28701">Samsung support Forum</a>.
+   </td>
+   <td>
+   </td>
+  </tr>
+  <tr>
+   <td>Jan 4, 2024
+   </td>
+   <td>14:30
+   </td>
+   <td><a href="https://b.corp.google.com/issues/316626640#comment5">First acknowledgement</a> from Samsung partner.
+   </td>
+   <td>
+   </td>
+  </tr>
+  <tr>
+   <td>Jan 19, 2024
+   </td>
+   <td>15:00
+   </td>
+   <td><a href="https://github.com/flutter/flutter/issues/139039#issuecomment-1901033982">Flutter updates users</a> that we believe this is a Samsung issue and that they are working on it.
+   </td>
+   <td>
+   </td>
+  </tr>
+  <tr>
+   <td>Jan 22, 2024
+   </td>
+   <td>15:00
+   </td>
+   <td>After multiple pings on the bug, <a href="https://b.corp.google.com/issues/316626640#comment13">Samsung responds</a> saying they have a fix and it will ship in the end of March release.
+   </td>
+   <td>
+   </td>
+  </tr>
+  <tr>
+   <td>
+   </td>
+   <td>
+   </td>
+   <td>The Flutter team <a href="https://b.corp.google.com/issues/316626640#comment14">requests a build</a> so we can validate the issue.
+   </td>
+   <td>
+   </td>
+  </tr>
+  <tr>
+   <td>Jan 23, 2024
+   </td>
+   <td>19:00
+   </td>
+   <td>Samsung acknowledges the request and <a href="https://b.corp.google.com/issues/316626640#comment18">asks for device info</a> to share a build.
+   </td>
+   <td>
+   </td>
+  </tr>
+  <tr>
+   <td>Jan 24, 2024
+   </td>
+   <td>13:00
+   </td>
+   <td>The Flutter team <a href="https://b.corp.google.com/issues/316626640#comment19">shares the model information</a>.
+   </td>
+   <td>
+   </td>
+  </tr>
+  <tr>
+   <td>Jan 31, 2024
+   </td>
+   <td>11:00
+   </td>
+   <td>On an external bug with active commentary from multiple Flutter contributors, Flutter <a href="https://github.com/pichillilorenzo/flutter_inappwebview/issues/1981#issuecomment-1919487322">still believes</a> the issue to be Samsung only.
+   </td>
+   <td>
+   </td>
+  </tr>
+  <tr>
+   <td>Feb 16, 2024
+   </td>
+   <td>15:00
+   </td>
+   <td>After ~7 attempts to flash a device by the Flutter team, director level escalation and a GVC with Samsung, the Flutter team is able to flash the build. The bug is “verified” but also flakey so the Flutter team members will keep testing. As of May 29, 2024, the Flutter team has not received either an explanation of the fix or a CTS test.
+   </td>
+   <td>
+   </td>
+  </tr>
+  <tr>
+   <td>
+   </td>
+   <td>17:00
+   </td>
+   <td>A Flutter developer <a href="https://github.com/flutter/engine/pull/50734">puts up a PR</a> to modify <code>ImageReader</code> on memory pressure. The PR is closed as it is not the right approach and has first frame regressions.
+   </td>
+   <td>
+   </td>
+  </tr>
+  <tr>
+   <td>Feb 20, 2024
+   </td>
+   <td>15:00
+   </td>
+   <td><a href="https://github.com/flutter/engine/pull/50792">A Flutter PR</a> is created to close image readers when <code>onMemoryTrim</code> is called.
+   </td>
+   <td>
+   </td>
+  </tr>
+  <tr>
+   <td>Feb 27, 2024
+   </td>
+   <td>05:30
+   </td>
+   <td><a href="https://github.com/flutter/flutter/issues/144219">Issue is filed</a> that points to <a href="https://github.com/flutter/engine/pull/50792">pr/50792</a> as the cause of more issues.
+   </td>
+   <td>
+   </td>
+  </tr>
+  <tr>
+   <td>Feb 28, 2024
+   </td>
+   <td>14:00
+   </td>
+   <td>Issue <a href="https://github.com/flutter/flutter/issues/144219">#144219</a> is <a href="https://github.com/flutter/flutter/issues/144219#issuecomment-1969628748">reproduced</a>.
+   </td>
+   <td>
+   </td>
+  </tr>
+  <tr>
+   <td>
+   </td>
+   <td>
+   </td>
+   <td><a href="http://b/327419893">b/327419893</a> was filed against Samsung “ImageReaders stop working when app is backgrounded Samsung Android 14”
+   </td>
+   <td>
+   </td>
+  </tr>
+  <tr>
+   <td>Mar 6, 2024
+   </td>
+   <td>23:00
+   </td>
+   <td>The Flutter team <a href="https://github.com/flutter/flutter/issues/139039#issuecomment-1982309350">is waiting on Samsung</a> to respond.
+   </td>
+   <td>
+   </td>
+  </tr>
+  <tr>
+   <td>Mar 13, 2024
+   </td>
+   <td>00:00
+   </td>
+   <td>Samsung finally responds to <a href="http://b/327419893">b/327419893</a> asking if it is the same as <a href="http://b/316626640">b/316626640</a>.
+   </td>
+   <td>
+   </td>
+  </tr>
+  <tr>
+   <td>
+   </td>
+   <td>18:30
+   </td>
+   <td><a href="https://github.com/flutter/engine/pull/51391">PR is merged</a> to revert "Samsung specific fix" and fixes issue <a href="https://github.com/flutter/flutter/issues/144219">#144219</a>.
+   </td>
+   <td>
+   </td>
+  </tr>
+  <tr>
+   <td>Mar 18, 2024
+   </td>
+   <td>14:30
+   </td>
+   <td>Gpay files a bug <a href="http://b/330184547">b/330184547</a> "After maximizing the Gpay app the blank screen showed and if tapping back button its navigating to home screen" which is marked as a blocker of their release.
+   </td>
+   <td>
+   </td>
+  </tr>
+  <tr>
+   <td>Mar 22, 2024
+   </td>
+   <td>19:00
+   </td>
+   <td><a href="https://b.corp.google.com/issues/327419893#comment10">Samsung claims</a> to have a fix that will be available in the early april release.
+   </td>
+   <td>
+   </td>
+  </tr>
+  <tr>
+   <td>
+   </td>
+   <td>
+   </td>
+   <td><a href="https://b.corp.google.com/issues/327419893#comment11">Android team member asks</a> Samsung for an explanation as of May 29, 2024, no explanation has been given.
+   </td>
+   <td>
+   </td>
+  </tr>
+  <tr>
+   <td>Apr 3, 2024
+   </td>
+   <td>16:30
+   </td>
+   <td>The Flutter team <a href="https://github.com/flutter/flutter/issues/139039#issuecomment-2035508888">tells the community we believe this is a Samsung specific issue again</a>.
+   </td>
+   <td>
+   </td>
+  </tr>
+  <tr>
+   <td>Apr 9, 2024
+   </td>
+   <td>07:00
+   </td>
+   <td><a href="https://github.com/flutter/flutter/issues/146499#issue-2233188697">First bug is filed</a> that indicates the issue appears on pixel devices. "Platform views with FlutterEngineCache freeze/disappear on resume"
+   </td>
+   <td>The first indication (5 months later) that the issue is not Samsung-specific.
+   </td>
+  </tr>
+  <tr>
+   <td>Apr 11, 2024
+   </td>
+   <td>19:00
+   </td>
+   <td><a href="https://github.com/flutter/flutter/issues/146499#issuecomment-2050686706">First reproduction</a> on a non samsung device.
+   </td>
+   <td>
+   </td>
+  </tr>
+  <tr>
+   <td>Apr 15, 2024
+   </td>
+   <td>
+   </td>
+   <td><a href="https://chat.google.com/room/AAAA2HILVWw/AZzn5F4REbw">Flutter  team reaches out to Android team</a> for help debugging why “ImageReader.OnImageAvailableListener“ is not firing after backgrounding, and sharing <a href="http://b/327502995">b/327502995</a>
+   </td>
+   <td>Much of the discussion below is from the linked chat thread.
+   </td>
+  </tr>
+  <tr>
+   <td>
+   </td>
+   <td>
+   </td>
+   <td>Android team tells Flutter team that “ImageReader has zero interaction with activity lifecycle”
+   </td>
+   <td>
+   </td>
+  </tr>
+  <tr>
+   <td>
+   </td>
+   <td>
+   </td>
+   <td>Based on that advice, the Flutter team suspects that <a href="https://github.com/flutter/engine/pull/50792">this Flutter Engine PR</a> might be the cause based on a Flutter bisect.
+   </td>
+   <td>
+   </td>
+  </tr>
+  <tr>
+   <td>Apr 16, 2024
+   </td>
+   <td>
+   </td>
+   <td>Flutter team “confirmed that we background/resume the app that <code>android.media.ImageReader$1.run</code> is never invoked <a href="https://screenshot.googleplex.com/oHSDvH23MQCbhVT">https://screenshot.googleplex.com/oHSDvH23MQCbhVT</a>”.
+   </td>
+   <td>The Flutter team is running out of ways to validate that the underlying Android code is working as expected.
+   </td>
+  </tr>
+  <tr>
+   <td>
+   </td>
+   <td>
+   </td>
+   <td>The Android team reiterates that the bug must be in Flutter. “The only thing that ever happens to an ImageReader is what you do to it. Zero interaction with any system anything.”
+   </td>
+   <td>
+   </td>
+  </tr>
+  <tr>
+   <td>Apr 17, 2024
+   </td>
+   <td>
+   </td>
+   <td>A Flutter team member <a href="https://github.com/flutter/flutter/issues/146499#issuecomment-2062321046">was able to</a> reproduce the bug on a Pixel but not a Pixel fold running 2 different versions of Android 14.
+   </td>
+   <td>
+   </td>
+  </tr>
+  <tr>
+   <td>
+   </td>
+   <td>
+   </td>
+   <td>The Flutter team <a href="https://github.com/flutter/flutter/issues/146499#issuecomment-2062787817">verifies</a> that no version of Flutter going back 2+ years works correctly on Android 14. The issue is not found to reproduce on Android &lt;14.
+   </td>
+   <td>
+   </td>
+  </tr>
+  <tr>
+   <td>
+   </td>
+   <td>
+   </td>
+   <td>The Flutter team is convinced that this is an Android 14 issue. “We've been trying different versions of Android and this behavior is only happening on Android 14”.
+<p>
+The Android team suggests that the Flutter team bisect to find the problem: “If you're certain it's an Android regression a repro case & a bug works. If you want to bisect on your own go/flash”
+   </td>
+   <td>
+   </td>
+  </tr>
+  <tr>
+   <td>
+   </td>
+   <td>
+   </td>
+   <td>A Flutter team member bisects on an emulator using <a href="http://goto.google.com/ab">go/ab</a>
+<p>
+“Finished the bisect on the git_trunk-release branch using the emulator.
+<p>
+The change in behavior happened between build 10480234 (from 7/11/2023) and build 10488473 (from 7/12/2023)”
+   </td>
+   <td>A bisect confirms that the issue is in Android.
+   </td>
+  </tr>
+  <tr>
+   <td>Apr 18, 2024
+   </td>
+   <td>
+   </td>
+   <td>The Android team <a href="https://android-build.corp.google.com/range_search/cls/from_id/10488473/to_id/10480234/?s=menu&includeTo=0&includeFrom=1">shares a link</a> to search for commits.
+   </td>
+   <td>
+   </td>
+  </tr>
+  <tr>
+   <td>
+   </td>
+   <td>
+   </td>
+   <td>Flutter team in chat: “I'm now wondering if some of the Samsung-specific issues we've been dealing with was just Samsung shipping this build of Android earlier than Google did. We have a cluster of bugs around this area that have been popping up since December.”
+   </td>
+   <td>
+   </td>
+  </tr>
+  <tr>
+   <td>
+   </td>
+   <td>
+   </td>
+   <td>Flutter team files <a href="http://b/335646931">b/335646931</a> "ImageReader stops producing images after suspend/resume of Flutter applications"
+   </td>
+   <td>
+   </td>
+  </tr>
+  <tr>
+   <td>
+   </td>
+   <td>
+   </td>
+   <td>The Flutter team <a href="https://github.com/flutter/flutter/issues/139039#issuecomment-2064675344">communicate</a>s to users that we believe this is an Android-wide issue. Primary tracking bug is now <a href="https://github.com/flutter/flutter/issues/146499">#146499</a>.
+   </td>
+   <td>
+   </td>
+  </tr>
+  <tr>
+   <td>
+   </td>
+   <td>
+   </td>
+   <td>Flutter team marks Samsung Android 14 background issue <a href="http://b/327419893">b/327419893</a> as duplicate of <a href="http://b/335646931">b/335646931</a>.
+   </td>
+   <td>
+   </td>
+  </tr>
+  <tr>
+   <td>
+   </td>
+   <td>
+   </td>
+   <td>Based on the range of dates/commits from the Flutter team’s bisect, an Android team member eyeballs <a href="https://googleplex-android.googlesource.com/platform%2Fframeworks%2Fbase/+/20a4d68338ca000e3ee0c5c71a01552eab1061e1">the commit</a> that broke things.
+   </td>
+   <td>The root cause is identified.
+   </td>
+  </tr>
+  <tr>
+   <td>
+   </td>
+   <td>
+   </td>
+   <td>The Android team <a href="https://googleplex-android-review.git.corp.google.com/c/platform/frameworks/base/+/27015418">puts up a patch for review</a>.
+   </td>
+   <td>
+   </td>
+  </tr>
+  <tr>
+   <td>
+   </td>
+   <td>
+   </td>
+   <td>Android team “good news: easy fix
+<p>
+bad news: you'll need a workaround
+<p>
+medium (?) news: workaround isn't that bad at least, you'll need to switch to HardwareRenderer instead and make sure you either call setContentRoot after a resume orrrr just call it every frame it's not that big of a hit”, “well, bad news pt2: this bug already shipped”
+   </td>
+   <td>
+   </td>
+  </tr>
+  <tr>
+   <td>Apr 19, 2024
+   </td>
+   <td>
+   </td>
+   <td>The Android team <a href="https://googleplex-android-review.git.corp.google.com/c/platform/frameworks/base/+/27015418">merges the fix</a>.
+   </td>
+   <td>
+   </td>
+  </tr>
+  <tr>
+   <td>Apr 24, 2024
+   </td>
+   <td>
+   </td>
+   <td>The Android team confirms the fix is in Android 15.
+   </td>
+   <td>
+   </td>
+  </tr>
+  <tr>
+   <td>Apr 26, 2024
+   </td>
+   <td>
+   </td>
+   <td><a href="https://github.com/flutter/flutter/issues/146499#issuecomment-2080030263">Lots of hate</a> on the Flutter GitHub issue.
+   </td>
+   <td>
+   </td>
+  </tr>
+  <tr>
+   <td>Apr 29, 2024
+   </td>
+   <td>
+   </td>
+   <td><a href="https://github.com/flutter/engine/pull/52370">PR landed</a> with work around for flutter users. 
+   </td>
+   <td>
+   </td>
+  </tr>
+  <tr>
+   <td>May 1, 2024
+   </td>
+   <td>
+   </td>
+   <td>Flutter <a href="https://github.com/flutter/flutter/issues/147644">cherry pick request</a> to avoid issue in flutter engine.
+   </td>
+   <td>
+   </td>
+  </tr>
+  <tr>
+   <td>May 9, 2024
+   </td>
+   <td>
+   </td>
+   <td><a href="https://b.corp.google.com/issues/335646931#comment9">Escalation</a> to pixel release team
+   </td>
+   <td>
+   </td>
+  </tr>
+  <tr>
+   <td>
+   </td>
+   <td>
+   </td>
+   <td>Android Partner update ticket filed by flutter team. <a href="http://b/339659092">b/339659092</a>
+   </td>
+   <td>
+   </td>
+  </tr>
+  <tr>
+   <td>May 14, 2024
+   </td>
+   <td>
+   </td>
+   <td>Flutter 3.22 <a href="https://medium.com/flutter/whats-new-in-flutter-3-22-fbde6c164fe3">released</a>. It contains the workaround for Flutter.
+   </td>
+   <td>Partial end of outage. The Flutter team believes that the Samsung-specific workaround implies changes to Flutter public APIs, and is therefore not sustainable to retain on the stable branch.
+<p>
+Flutter Users were still broken but now Developers had an option to republish their app to avoid the bug. 
+   </td>
+  </tr>
+  <tr>
+   <td>May 20, 2024
+   </td>
+   <td>
+   </td>
+   <td><a href="https://github.com/flutter/flutter/issues/148662">Flutter issue filed</a> indicating platform views still break in multi activity apps. 
+   </td>
+   <td>
+   </td>
+  </tr>
+  <tr>
+   <td>May 21, 2024
+   </td>
+   <td>
+   </td>
+   <td><a href="https://b.corp.google.com/issues/335646931#comment18">Android patch lands</a> in July MPR for Pixel devices.
+   </td>
+   <td>
+   </td>
+  </tr>
+  <tr>
+   <td>May 22, 2024
+   </td>
+   <td>
+   </td>
+   <td><a href="https://github.com/flutter/engine/pull/52980">Second Flutter patch</a> to handle the corner case where a non flutter activity was in the foreground. <a href="https://github.com/flutter/flutter/issues/148885">Cherry-pick</a> to Flutter 3.22.
+   </td>
+   <td>
+   </td>
+  </tr>
+  <tr>
+   <td>May 30, 2024
+   </td>
+   <td>
+   </td>
+   <td><a href="https://buganizer.corp.google.com/issues/339659092#comment12">Android rejected</a> AOSP patch for partners due to divergence of different branches of Android 14 and the lack of tests in the fix.  
+   </td>
+   <td>
+   </td>
+  </tr>
+  <tr>
+   <td>
+   </td>
+   <td>
+   </td>
+   <td>Android <a href="https://buganizer.corp.google.com/issues/343765967">files an issue</a> to write tests for the fix of the issue.
+   </td>
+   <td>
+   </td>
+  </tr>
+  <tr>
+   <td>Jun 6, 2024
+   </td>
+   <td>
+   </td>
+   <td>Discussion among Flutter leads about whether the Samsung-specific workaround(s) that were CP’d into Flutter 3.22 should be reverted. The workarounds imply additional Flutter public APIs that are not believed to be sustainable.  \
+<a href="https://github.com/flutter/flutter/issues/148417">https://github.com/flutter/flutter/issues/148417</a> 
+   </td>
+   <td>
+   </td>
+  </tr>
+  <tr>
+   <td>
+   </td>
+   <td>
+   </td>
+   <td>3.22.2 released to the public with the second mitigation. Flutter apps need to recompile and republish. <a href="https://groups.google.com/g/flutter-announce/c/0PEE5AvDZqc">https://groups.google.com/g/flutter-announce/c/0PEE5AvDZqc</a> 
+   </td>
+   <td>End of outage. 
+   </td>
+  </tr>
+  <tr>
+   <td>Jun 16, 2024
+   </td>
+   <td>
+   </td>
+   <td>Request for android team to review for internal feedback 
+   </td>
+   <td>
+   </td>
+  </tr>
+  <tr>
+   <td>Jun 24, 2024
+   </td>
+   <td>
+   </td>
+   <td>Request for android team to review for publishing. 
+   </td>
+   <td><a href="https://chat.google.com/room/AAAA2HILVWw/d-e3vWRrY4c">https://chat.google.com/room/AAAA2HILVWw/d-e3vWRrY4c</a> 
+   </td>
+  </tr>
+</table>
+
+
+
+## What went well:
+
+
+
+*   Once the Flutter team found the build range, the Android team fixed the problem for AOSP quickly.
+
+
+## Where we got lucky:
+
+
+
+*   The issue did not affect all Platform Views on launch.
+*   Drawing on prior experience, the Flutter team was able to quickly bisect on Android builds. Presumably, most Android customers wouldn’t be able to do this.
+
+
+## What could have gone better?
+
+
+
+*   The Flutter team struggled _for several months_ to identify the difference between an Android issue from one manufacturer and an Android issue in AOSP.
+*   The root-causing effort could have been more collaborative.
+*   Platform Views are high risk and high value.
+*   The fix could have been cherry-picked into AOSP.
+*   The initial fix from the Android team could have included a test in the same patch.
+*   With the original patch author out on leave, another expert in this API area on the Android team could have been available to write a test for the fix.
+
+
+## AIs?
+
+
+<table>
+  <tr>
+   <td><strong>Priority</strong>
+   </td>
+   <td><strong>Description</strong>
+   </td>
+   <td><strong>How much work?</strong>
+   </td>
+   <td><strong>Owner </strong>
+   </td>
+   <td><strong>Status</strong>
+   </td>
+  </tr>
+  <tr>
+   <td>P1
+   </td>
+   <td>Add a test as described in <a href="http://b/343765967">b/343765967</a>
+   </td>
+   <td>?
+   </td>
+   <td><a href="http://who/jreck">John Reck</a>
+   </td>
+   <td>Blocked
+   </td>
+  </tr>
+  <tr>
+   <td>P1
+   </td>
+   <td>Revert the workaround from the Flutter Engine and CP into Flutter 3.22.
+   </td>
+   <td>Button clicking
+   </td>
+   <td><a href="http://who/johnmccutchan">John McCutchan</a>
+   </td>
+   <td>Not started
+   </td>
+  </tr>
+  <tr>
+   <td>P1
+   </td>
+   <td>Plugins that use Texture will have a new SurfaceProducerHolder object they can use for lifecycle awareness. <a href="https://docs.google.com/document/d/1XCbLTgIqQ3scFCQMey3uV3zJqgIYCMA-gmfeclRydKk/edit?resourcekey=0-ihFgSvqjA0qiFB_xA_AglQ&tab=t.0#heading=h.inwaude7zuja">Notes - ImageReader</a>
+   </td>
+   <td><a href="https://github.com/flutter/flutter/issues/148417">#148417</a>, ~week
+   </td>
+   <td><a href="http://who/matanl">Matan Lurey</a>
+   </td>
+   <td>Not started
+   </td>
+  </tr>
+  <tr>
+   <td>P1
+   </td>
+   <td>CTS Test for ImageReader behavior as it responds to android lifecycle events (memoryTrim). 
+   </td>
+   <td><a href="http://b/343765967">b/343765967</a> 
+   </td>
+   <td>
+   </td>
+   <td>
+   </td>
+  </tr>
+  <tr>
+   <td>P1
+   </td>
+   <td>Screenshot Integration test for an arbitrary version of android that displays a platform view. 
+   </td>
+   <td>
+   </td>
+   <td><a href="http://who/matanl">Matan Lurey</a>
+   </td>
+   <td>Not started
+   </td>
+  </tr>
+  <tr>
+   <td>P2
+   </td>
+   <td>Screenshot Integration test for an arbitrary version of android that displays a platform view after backgrounding the activity and triggering memory trim
+   </td>
+   <td>
+   </td>
+   <td><a href="http://who/matanl">Matan Lurey</a>
+   </td>
+   <td>Not started
+   </td>
+  </tr>
+</table>
+
+
+
+## Appendix
+
+
+### Process
+
+go/critical-partner-patches this document describes the work to escalate android patches to other android manufacturers. 
+
+go/pr-bug form required to get a patch shipped to pixel devices. 
+
+
+### Fixes
+
+https://googleplex-android-review.git.corp.google.com/c/platform/frameworks/base/+/27015418
+
+https://github.com/flutter/engine/pull/52370  
+
+
+### Chat threads
+
+https://chat.google.com/room/AAAA2HILVWw/AZzn5F4REbw
+
+https://chat.google.com/room/AAAA2HILVWw/As71eLhXAfM
+
