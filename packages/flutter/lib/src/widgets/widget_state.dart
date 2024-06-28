@@ -815,7 +815,7 @@ class _WidgetStatePropertyWith<T> implements WidgetStateProperty<T> {
 /// );
 ///
 /// // MaterialPropertyResolver implementation:
-/// final WidgetStateProperty<Color> color = WidgetStateProperty.resolveWith<Color>(
+/// final WidgetStateProperty<Color> colorResolveWith = WidgetStateProperty.resolveWith<Color>(
 ///   (Set<WidgetState> states) {
 ///     if (states.containsAll(<WidgetState>{WidgetState.selected, WidgetState.error})) {
 ///       if (states.contains(WidgetState.hovered)) {
