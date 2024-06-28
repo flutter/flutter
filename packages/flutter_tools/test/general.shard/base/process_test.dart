@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -444,4 +446,55 @@ void main() {
       );
     });
   });
+
+  group('writeToStdinGuarded', () {
+    testWithoutContext('handles any error thrown by stdin.flush', () async {
+      final _ThrowsOnFlushIOSink stdin = _ThrowsOnFlushIOSink();
+      final Completer<bool> fooCommandCompleter = Completer<bool>();
+      final Future<bool> onErrorCalled = fooCommandCompleter.future;
+
+      void fooOnRun(List<String> command) {
+        ProcessUtils.writeToStdinGuarded(
+          stdin: stdin,
+          content: 'message to stdin',
+          onError: (Object error, StackTrace stackTrace) {
+            fooCommandCompleter.complete(true);
+          },
+        ).then((_) => fooCommandCompleter.complete(false))
+         .onError((_, __) {
+          // Fail the test.
+          throw Exception("writeToStdinGuarded shouldn't have thrown.");
+        });
+      }
+
+      final FakeProcessManager processManager = FakeProcessManager.list(
+        <FakeCommand>[
+          FakeCommand(
+            command: const <String>['foo'],
+            stdin: stdin,
+            onRun: fooOnRun,
+            completer: fooCommandCompleter,
+          ),
+        ],
+      );
+
+      await processManager.run(<String>['foo']);
+
+      expect(
+        await onErrorCalled,
+        isTrue,
+        reason: 'onError argument to writeToStdinGuarded should have been called',
+      );
+    });
+  });
+}
+
+class _ThrowsOnFlushIOSink extends MemoryIOSink {
+  @override
+  Future<Object?> flush() async {
+    throw const SocketException(
+      'Write failed',
+      osError: OSError('Broken pipe', 32),
+    );
+  }
 }

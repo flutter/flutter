@@ -286,6 +286,17 @@ abstract class ProcessUtils {
   }) async {
     final Completer<void> completer = Completer<void>();
 
+    // Future.onError specifically requires a return type of FutureOr<Null>, so
+    // we can't use void here.
+    // ignore: prefer_void_to_null
+    Null handleError(Object error, StackTrace stackTrace) {
+      try {
+        onError(error, stackTrace);
+      } on Exception catch (e) {
+        completer.completeError(e);
+      }
+    }
+
     void writeFlushAndComplete() {
       if (isLine) {
         stdin.writeln(content);
@@ -294,17 +305,13 @@ abstract class ProcessUtils {
       }
       stdin.flush().then((_) {
         completer.complete();
-      });
+      }).onError(handleError);
     }
 
     runZonedGuarded(
       writeFlushAndComplete,
       (Object error, StackTrace stackTrace) {
-        try {
-          onError(error, stackTrace);
-        } on Exception catch (e) {
-          completer.completeError(e);
-        }
+        handleError(error, stackTrace);
 
         // We may have already completed with an error in the above catch block.
         if (!completer.isCompleted) {
