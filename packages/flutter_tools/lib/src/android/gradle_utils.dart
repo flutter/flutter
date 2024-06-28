@@ -55,7 +55,7 @@ const String oneMajorVersionHigherJavaVersion = '20';
 //
 // Supported here means supported by the tooling for
 // flutter analyze --suggestions and does not imply broader flutter support.
-const String maxKnownAndSupportedGradleVersion = '8.0.2';
+const String maxKnownAndSupportedGradleVersion = '8.7';
 
 // Update this when new versions of AGP come out.
 //
