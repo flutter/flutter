@@ -466,7 +466,7 @@ void main() {
           }
         }).onError((Exception error, StackTrace stackTrace) {
           // onError should have handled any error, so either the onError callback
-          // or the .then callback threw.
+          // or the .then callback threw. Fail the test.
           throw error;
         });
       }
