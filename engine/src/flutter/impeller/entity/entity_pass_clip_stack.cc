@@ -4,7 +4,6 @@
 
 #include "impeller/entity/entity_pass_clip_stack.h"
 #include "impeller/entity/contents/clip_contents.h"
-#include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/entity.h"
 
 namespace impeller {
