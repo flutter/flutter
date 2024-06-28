@@ -119,6 +119,13 @@ typedef MenuAnchorChildBuilder = Widget Function(
 ///
 /// ** See code in examples/api/lib/material/menu_anchor/menu_anchor.1.dart **
 /// {@end-tool}
+///
+/// {@tool dartpad}
+/// This example demonstrates a simplified cascading menu using the [MenuAnchor]
+/// widget.
+///
+/// ** See code in examples/api/lib/material/menu_anchor/menu_anchor.3.dart **
+/// {@end-tool}
 class MenuAnchor extends StatefulWidget {
   /// Creates a const [MenuAnchor].
   ///
@@ -321,8 +328,10 @@ class _MenuAnchorState extends State<MenuAnchor> {
     assert(_debugMenuInfo('Disposing of $this'));
     if (_isOpen) {
       _close(inDispose: true);
-      _parent?._removeChild(this);
     }
+
+    _parent?._removeChild(this);
+    _parent = null;
     _anchorChildren.clear();
     _menuController._detach(this);
     _internalMenuController = null;
@@ -847,6 +856,7 @@ class MenuItemButton extends StatefulWidget {
     this.requestFocusOnHover = true,
     this.onFocusChange,
     this.focusNode,
+    this.autofocus = false,
     this.shortcut,
     this.semanticsLabel,
     this.style,
@@ -887,6 +897,9 @@ class MenuItemButton extends StatefulWidget {
 
   /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode? focusNode;
+
+  /// {@macro flutter.widgets.Focus.autofocus}
+  final bool autofocus;
 
   /// The optional shortcut that selects this [MenuItemButton].
   ///
@@ -1131,6 +1144,7 @@ class _MenuItemButtonState extends State<MenuItemButton> {
       onFocusChange: widget.enabled ? widget.onFocusChange : null,
       focusNode: _focusNode,
       style: mergedStyle,
+      autofocus: widget.enabled && widget.autofocus,
       statesController: widget.statesController,
       clipBehavior: widget.clipBehavior,
       isSemanticButton: null,

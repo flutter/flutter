@@ -301,10 +301,7 @@ Future<void> main() async {
     expect(find.byKey(thirdKey), isInCard);
   });
 
-  testWidgets('Heroes still animate after hero controller is swapped.',
-    // TODO(polina-c): remove when fixed https://github.com/flutter/flutter/issues/145600 [leak-tracking-opt-in]
-    experimentalLeakTesting: LeakTesting.settings.withTracked(classes: const <String>['CurvedAnimation']),
-    (WidgetTester tester) async {
+  testWidgets('Heroes still animate after hero controller is swapped.', (WidgetTester tester) async {
     final GlobalKey<NavigatorState> key = GlobalKey<NavigatorState>();
     final UniqueKey heroKey = UniqueKey();
     final HeroController controller1 = HeroController();

@@ -136,8 +136,10 @@ class SwiftPackageManagerUtils {
       }
       remainingExpectedLines.remove(trimmedLine);
       remainingExpectedLines.removeWhere((Pattern expectedLine) => trimmedLine.contains(expectedLine));
-      if (unexpectedLines != null && unexpectedLines.contains(trimmedLine)) {
-        unexpectedLinesFound.add(trimmedLine);
+      if (unexpectedLines != null) {
+        if (unexpectedLines.where((String unexpectedLine) => trimmedLine.contains(unexpectedLine)).firstOrNull != null) {
+          unexpectedLinesFound.add(trimmedLine);
+        }
       }
     }
     expect(

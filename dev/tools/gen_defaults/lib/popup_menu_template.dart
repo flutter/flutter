@@ -44,8 +44,13 @@ class _${blockName}DefaultsM3 extends PopupMenuThemeData {
   @override
   ShapeBorder? get shape => ${shape("md.comp.menu.container")};
 
+  // TODO(bleroux): This is taken from https://m3.material.io/components/menus/specs
+  // Update this when the token is available.
+  @override
+  EdgeInsets? get menuPadding => const EdgeInsets.symmetric(vertical: 8.0);
+
   // TODO(tahatesser): This is taken from https://m3.material.io/components/menus/specs
   // Update this when the token is available.
-  static EdgeInsets menuHorizontalPadding  = const EdgeInsets.symmetric(horizontal: 12.0);
+  static EdgeInsets menuItemPadding  = const EdgeInsets.symmetric(horizontal: 12.0);
 }''';
 }

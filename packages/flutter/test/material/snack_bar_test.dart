@@ -4078,6 +4078,66 @@ testWidgets('SnackBarAction backgroundColor works as a Color', (WidgetTester tes
       theme.colorScheme.inversePrimary.withOpacity(0.08),
     );
   });
+
+  testWidgets('Can interact with widgets behind SnackBar when insetPadding is set in SnackBarThemeData', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/148566.
+    tester.view.physicalSize = const Size.square(200);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    const String buttonText = 'Show snackbar';
+    const String snackbarContent = 'Snackbar';
+    const String buttonText2 = 'Try press me';
+
+    final Completer<void> completer = Completer<void>();
+
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(
+        snackBarTheme: const SnackBarThemeData(
+          insetPadding: EdgeInsets.only(left: 100),
+        ),
+      ),
+      home: Scaffold(
+        body: Builder(
+          builder: (BuildContext context) {
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                ElevatedButton(
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        behavior: SnackBarBehavior.floating,
+                        content: Text(snackbarContent),
+                      ),
+                    );
+                  },
+                  child: const Text(buttonText),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    completer.complete();
+                  },
+                  child: const Text(buttonText2),
+                ),
+              ],
+            );
+          },
+        ),
+      ),
+    ));
+
+    await tester.tap(find.text(buttonText));
+    await tester.pumpAndSettle();
+
+    expect(find.text(snackbarContent), findsOneWidget);
+    await tester.tapAt(tester.getTopLeft(find.text(buttonText2)));
+    expect(find.text(snackbarContent), findsOneWidget);
+
+    expect(completer.isCompleted, true);
+  });
 }
 
 /// Start test for "SnackBar dismiss test".

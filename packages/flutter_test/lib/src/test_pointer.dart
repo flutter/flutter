@@ -288,6 +288,7 @@ class TestPointer {
   PointerScrollEvent scroll(
     Offset scrollDelta, {
     Duration timeStamp = Duration.zero,
+    RespondPointerEventCallback? onRespond,
   }) {
     assert(kind != PointerDeviceKind.touch, "Touch pointers can't generate pointer signal events");
     assert(location != null);
@@ -297,6 +298,7 @@ class TestPointer {
       device: _device,
       position: location!,
       scrollDelta: scrollDelta,
+      onRespond: onRespond,
     );
   }
 

@@ -18,6 +18,7 @@ import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'focus_traversal.dart';
 import 'framework.dart';
+import 'inherited_model.dart';
 import 'modal_barrier.dart';
 import 'navigator.dart';
 import 'overlay.dart';
@@ -883,7 +884,16 @@ class _DismissModalAction extends DismissAction {
   }
 }
 
-class _ModalScopeStatus extends InheritedWidget {
+enum _ModalRouteAspect {
+  /// Specifies the aspect corresponding to [ModalRoute.isCurrent].
+  isCurrent,
+  /// Specifies the aspect corresponding to [ModalRoute.canPop].
+  canPop,
+  /// Specifies the aspect corresponding to [ModalRoute.settings].
+  settings,
+}
+
+class _ModalScopeStatus extends InheritedModel<_ModalRouteAspect> {
   const _ModalScopeStatus({
     required this.isCurrent,
     required this.canPop,
@@ -911,6 +921,15 @@ class _ModalScopeStatus extends InheritedWidget {
     description.add(FlagProperty('isCurrent', value: isCurrent, ifTrue: 'active', ifFalse: 'inactive'));
     description.add(FlagProperty('canPop', value: canPop, ifTrue: 'can pop'));
     description.add(FlagProperty('impliesAppBarDismissal', value: impliesAppBarDismissal, ifTrue: 'implies app bar dismissal'));
+  }
+
+  @override
+  bool updateShouldNotifyDependent(covariant _ModalScopeStatus oldWidget, Set<_ModalRouteAspect> dependencies) {
+    return dependencies.any((_ModalRouteAspect dependency) => switch (dependency) {
+      _ModalRouteAspect.isCurrent => isCurrent != oldWidget.isCurrent,
+      _ModalRouteAspect.canPop    => canPop != oldWidget.canPop,
+      _ModalRouteAspect.settings  => route.settings != oldWidget.route.settings,
+    });
   }
 }
 
@@ -1146,9 +1165,39 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// while it is visible (specifically, if [isCurrent] or [canPop] change value).
   @optionalTypeArgs
   static ModalRoute<T>? of<T extends Object?>(BuildContext context) {
-    final _ModalScopeStatus? widget = context.dependOnInheritedWidgetOfExactType<_ModalScopeStatus>();
-    return widget?.route as ModalRoute<T>?;
+    return _of<T>(context);
   }
+
+  static ModalRoute<T>? _of<T extends Object?>(BuildContext context, [_ModalRouteAspect? aspect]) {
+    return InheritedModel.inheritFrom<_ModalScopeStatus>(context, aspect: aspect)?.route as ModalRoute<T>?;
+  }
+
+  /// Returns [ModalRoute.isCurrent] for the modal route most closely associated
+  /// with the given context.
+  ///
+  /// Returns null if the given context is not associated with a modal route.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the [ModalRoute.isCurrent] property of the ancestor [_ModalScopeStatus] changes.
+  static bool? isCurrentOf(BuildContext context) => _of(context, _ModalRouteAspect.isCurrent)?.isCurrent;
+
+  /// Returns [ModalRoute.canPop] for the modal route most closely associated
+  /// with the given context.
+  ///
+  /// Returns null if the given context is not associated with a modal route.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the [ModalRoute.canPop] property of the ancestor [_ModalScopeStatus] changes.
+  static bool? canPopOf(BuildContext context) => _of(context, _ModalRouteAspect.canPop)?.canPop;
+
+  /// Returns [ModalRoute.settings] for the modal route most closely associated
+  /// with the given context.
+  ///
+  /// Returns null if the given context is not associated with a modal route.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the [ModalRoute.settings] property of the ancestor [_ModalScopeStatus] changes.
+  static RouteSettings? settingsOf(BuildContext context) => _of(context, _ModalRouteAspect.settings)?.settings;
 
   /// Schedule a call to [buildTransitions].
   ///
