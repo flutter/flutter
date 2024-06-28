@@ -328,7 +328,6 @@ class DlOpReceiver {
   virtual void transformReset() = 0;
 
   virtual void clipRect(const SkRect& rect, ClipOp clip_op, bool is_aa) = 0;
-  virtual void clipOval(const SkRect& bounds, ClipOp clip_op, bool is_aa) = 0;
   virtual void clipRRect(const SkRRect& rrect, ClipOp clip_op, bool is_aa) = 0;
   virtual void clipPath(const SkPath& path, ClipOp clip_op, bool is_aa) = 0;
 
