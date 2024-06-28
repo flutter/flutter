@@ -57,17 +57,17 @@ class PlatformViewAppState extends State<PlatformViewApp> {
       home: Scaffold(
         appBar: AppBar(title: const Text('Platform View Bottom Ad Banner')),
         body: Column(
-          children: [
+          children: <Widget>[
             Expanded(
               child: ListView.builder(
                 key: const Key('platform-views-scroll'), // This key is used by the driver test.
                 itemCount: 250,
                 itemBuilder: (BuildContext context, int index) {
-                  return Card(
+                  return const Card(
                     elevation: 2,
                     child: ListTile(
                       title: Text('Breaking News!'),
-                      subtitle: Text("Huge breaking news! Here is huge and breaking news which is both huge and breaking."),
+                      subtitle: Text('Huge breaking news! Here is huge and breaking news which is both huge and breaking.'),
                       leading: FlutterLogo(),
                     ),
                   );
