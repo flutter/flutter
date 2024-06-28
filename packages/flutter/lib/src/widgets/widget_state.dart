@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 
 // Examples can assume:
 // late BuildContext context;
+// late Set<WidgetState> states;
 
 /// This class allows [WidgetState] enum values to be combined
 /// and resolved using [WidgetStateProperty.map].
@@ -18,9 +19,24 @@ abstract class WidgetStateMapKey with WidgetStateOperators {
   /// const constructors so that they can be used in const expressions.
   const WidgetStateMapKey();
 
-  /// A function used by [WidgetStateProperty.map] to check whether
-  /// each key matches the current set of states.
-  bool call(Set<WidgetState> states);
+  /// Whether this key should apply, given the current [states].
+  ///
+  /// If the key is a single [WidgetState] object,
+  /// it matches the set if the set contains the object.
+  ///
+  /// The key could also be created using one or more operators, for example:
+  ///
+  /// ```dart
+  /// final WidgetStateMapKey mapKey = WidgetState.focused | WidgetState.hovered;
+  /// ```
+  ///
+  /// In the above case, the output of `mapKey.matchesSet(states)`
+  /// is equivalent to:
+  ///
+  /// ```dart
+  /// states.contains(WidgetState.focused) || states.contains(WidgetState.hovered);
+  /// ```
+  bool matchesSet(Set<WidgetState> states);
 }
 
 // A private class, used in [WidgetStateOperators].
@@ -30,7 +46,7 @@ class _WidgetStateOperation extends WidgetStateMapKey {
   final bool Function(Set<WidgetState> states) _call;
 
   @override
-  bool call(Set<WidgetState> states) => _call(states);
+  bool matchesSet(Set<WidgetState> states) => _call(states);
 }
 
 /// These operators can be used inside a [WidgetStateMap] to combine states
@@ -45,17 +61,23 @@ mixin WidgetStateOperators {
 
   /// Combines two [WidgetStateMapKey] values using logical "and".
   WidgetStateMapKey operator &(WidgetStateMapKey other) {
-    return _WidgetStateOperation((Set<WidgetState> states) => _this(states) && other(states));
+    return _WidgetStateOperation(
+      (Set<WidgetState> states) => _this.matchesSet(states) && other.matchesSet(states),
+    );
   }
 
   /// Combines two [WidgetStateMapKey] values using logical "or".
   WidgetStateMapKey operator |(WidgetStateMapKey other) {
-    return _WidgetStateOperation((Set<WidgetState> states) => _this(states) || other(states));
+    return _WidgetStateOperation(
+      (Set<WidgetState> states) => _this.matchesSet(states) || other.matchesSet(states),
+    );
   }
 
   /// Takes a [WidgetStateMapKey] and applies the logical "not".
   WidgetStateMapKey operator ~() {
-    return _WidgetStateOperation((Set<WidgetState> states) => !_this(states));
+    return _WidgetStateOperation(
+      (Set<WidgetState> states) => !_this.matchesSet(states),
+    );
   }
 }
 
@@ -64,7 +86,7 @@ class _AlwaysMatch extends WidgetStateMapKey {
   const _AlwaysMatch();
 
   @override
-  bool call(Set<WidgetState> states) => true;
+  bool matchesSet(Set<WidgetState> states) => true;
 }
 
 /// Interactive states that some of the widgets can take on when receiving input
@@ -153,7 +175,7 @@ enum WidgetState with WidgetStateOperators implements WidgetStateMapKey {
   static const WidgetStateMapKey any = _AlwaysMatch();
 
   @override
-  bool call(Set<WidgetState> states) => states.contains(this);
+  bool matchesSet(Set<WidgetState> states) => states.contains(this);
 }
 
 /// Signature for the function that returns a value of type `T` based on a given
@@ -757,19 +779,19 @@ class _WidgetStatePropertyWith<T> implements WidgetStateProperty<T> {
 ///
 /// ```dart
 /// WidgetStateProperty<Color?>.map(<WidgetStateMapKey, Color?>{
-///   WidgetState.error & WidgetState.selected: Colors.red,
-///   WidgetState.selected & ~WidgetState.focused: Colors.blueAccent,
-///   WidgetState.hovered | WidgetState.focused: Colors.blue,
+///   WidgetState.error: Colors.red,
+///   WidgetState.hovered & WidgetState.focused: Colors.blueAccent,
+///   WidgetState.focused: Colors.blue,
 ///   ~WidgetState.disabled: Colors.black,
 /// });
 ///
 /// // the same implementation, but with a MaterialPropertyResolver:
 /// WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
-///   if (states.containsAll(<WidgetState>{WidgetState.error, WidgetState.selected})) {
+///   if (states.contains(WidgetState.error)) {
 ///     return Colors.red;
-///   } else if (states.contains(WidgetState.selected) && !states.contains(WidgetState.focused)) {
+///   } else if (states.contains(WidgetState.hovered) && states.contains(WidgetState.focused)) {
 ///     return Colors.blueAccent;
-///   } else if (states.contains(WidgetState.hovered) || states.contains(WidgetState.focused)) {
+///   } else if (states.contains(WidgetState.focused)) {
 ///     return Colors.blue;
 ///   } else if (!states.contains(WidgetState.disabled)) {
 ///     return Colors.black;
@@ -778,30 +800,26 @@ class _WidgetStatePropertyWith<T> implements WidgetStateProperty<T> {
 /// });
 /// ```
 ///
-/// A Widget state combination can be stored in a variable,
+/// A widget state combination can be stored in a variable,
 /// and [WidgetState.any] can be used for non-nullable types:
 ///
 /// ```dart
 /// final WidgetStateMapKey selectedError = WidgetState.selected & WidgetState.error;
 ///
-/// final WidgetStateProperty<Color> color = WidgetStateProperty<Color>.map(<WidgetStateMapKey, Color>{
+/// WidgetStateProperty<Color>.map(<WidgetStateMapKey, Color>{
 ///   selectedError & WidgetState.hovered: Colors.redAccent,
 ///   selectedError: Colors.red,
-///   WidgetState.disabled: Colors.grey,
 ///   WidgetState.any: Colors.black,
 /// });
 ///
 /// // MaterialPropertyResolver implementation:
-/// final WidgetStateProperty<Color> colorResolveWith = WidgetStateProperty.resolveWith<Color>(
+/// WidgetStateProperty.resolveWith<Color>(
 ///   (Set<WidgetState> states) {
 ///     if (states.containsAll(<WidgetState>{WidgetState.selected, WidgetState.error})) {
 ///       if (states.contains(WidgetState.hovered)) {
 ///         return Colors.redAccent;
 ///       }
 ///       return Colors.red;
-///     }
-///     if (states.contains(WidgetState.disabled)) {
-///       return Colors.grey;
 ///     }
 ///     return Colors.black;
 ///   },
@@ -818,15 +836,14 @@ class _WidgetStateMapper<T> implements WidgetStateProperty<T> {
 
   @override
   T resolve(Set<WidgetState> states) {
-    for (final MapEntry<WidgetStateMapKey, T>(:WidgetStateMapKey key, :T value) in map.entries) {
-      if (key(states)) {
-        return value;
+    for (final MapEntry<WidgetStateMapKey, T> entry in map.entries) {
+      if (entry.key.matchesSet(states)) {
+        return entry.value;
       }
     }
 
     final String errorMessage = 'The current set of material states is $states.\n'
-        'None of the provided map keys matched this set, '
-        'and "$T" isn\'t a nullable type.';
+        'None of the provided map keys matched this set, and the type "$T" is non-nullable.';
     assert(
       null is T,
       '$errorMessage\n'
