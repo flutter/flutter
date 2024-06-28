@@ -424,6 +424,30 @@ std::vector<DisplayListInvocationGroup> CreateAllClipOps() {
               r.clipRect(kTestBounds, DlCanvas::ClipOp::kDifference, false);
             }},
        }},
+      {"ClipOval",
+       {
+           {1, 24, 0,
+            [](DlOpReceiver& r) {
+              r.clipOval(kTestBounds, DlCanvas::ClipOp::kIntersect, true);
+            }},
+           {1, 24, 0,
+            [](DlOpReceiver& r) {
+              r.clipOval(kTestBounds.makeOffset(1, 1),
+                         DlCanvas::ClipOp::kIntersect, true);
+            }},
+           {1, 24, 0,
+            [](DlOpReceiver& r) {
+              r.clipOval(kTestBounds, DlCanvas::ClipOp::kIntersect, false);
+            }},
+           {1, 24, 0,
+            [](DlOpReceiver& r) {
+              r.clipOval(kTestBounds, DlCanvas::ClipOp::kDifference, true);
+            }},
+           {1, 24, 0,
+            [](DlOpReceiver& r) {
+              r.clipOval(kTestBounds, DlCanvas::ClipOp::kDifference, false);
+            }},
+       }},
       {"ClipRRect",
        {
            {1, 64, 0,
@@ -479,10 +503,15 @@ std::vector<DisplayListInvocationGroup> CreateAllClipOps() {
             [](DlOpReceiver& r) {
               r.clipPath(kTestPathRect, DlCanvas::ClipOp::kIntersect, true);
             }},
-           // clipPath(oval) becomes clipRRect
-           {1, 64, 0,
+           // clipPath(oval) becomes clipOval
+           {1, 24, 0,
             [](DlOpReceiver& r) {
               r.clipPath(kTestPathOval, DlCanvas::ClipOp::kIntersect, true);
+            }},
+           // clipPath(rrect) becomes clipRRect
+           {1, 64, 0,
+            [](DlOpReceiver& r) {
+              r.clipPath(kTestPathRRect, DlCanvas::ClipOp::kIntersect, true);
             }},
        }},
   };
@@ -637,8 +666,11 @@ std::vector<DisplayListInvocationGroup> CreateAllRenderingOps() {
            {1, 40, 1, [](DlOpReceiver& r) { r.drawPath(kTestPath1); }},
            {1, 40, 1, [](DlOpReceiver& r) { r.drawPath(kTestPath2); }},
            {1, 40, 1, [](DlOpReceiver& r) { r.drawPath(kTestPath3); }},
-           {1, 40, 1, [](DlOpReceiver& r) { r.drawPath(kTestPathRect); }},
-           {1, 40, 1, [](DlOpReceiver& r) { r.drawPath(kTestPathOval); }},
+           // oval and rect paths are redirected to drawRect and drawOval
+           {1, 24, 1, [](DlOpReceiver& r) { r.drawPath(kTestPathRect); }},
+           {1, 24, 1, [](DlOpReceiver& r) { r.drawPath(kTestPathOval); }},
+           // rrect path is redirected to drawRRect
+           {1, 56, 1, [](DlOpReceiver& r) { r.drawPath(kTestPathRRect); }},
        }},
       {"DrawArc",
        {
