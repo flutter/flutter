@@ -749,6 +749,7 @@ void main() {
                         flags: <SemanticsFlag>[SemanticsFlag.isTextField, SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled],
                         actions: <SemanticsAction>[
                           SemanticsAction.tap,
+                          SemanticsAction.focus,
                           SemanticsAction.didGainAccessibilityFocus,
                           SemanticsAction.didLoseAccessibilityFocus,
                         ],
@@ -2042,6 +2043,7 @@ void main() {
             ],
             actions: <SemanticsAction>[
               SemanticsAction.tap,
+              SemanticsAction.focus,
               SemanticsAction.moveCursorBackwardByCharacter,
               SemanticsAction.setSelection,
               SemanticsAction.paste,
@@ -5576,6 +5578,7 @@ void main() {
           value: 'some text',
           actions: <SemanticsAction>[
             SemanticsAction.tap,
+            SemanticsAction.focus,
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
@@ -8410,6 +8413,7 @@ void main() {
           textDirection: TextDirection.ltr,
           actions: <SemanticsAction>[
             SemanticsAction.tap,
+            SemanticsAction.focus,
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
@@ -8431,6 +8435,7 @@ void main() {
           value: 'Guten Tag',
           actions: <SemanticsAction>[
             SemanticsAction.tap,
+            SemanticsAction.focus,
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
@@ -8453,6 +8458,7 @@ void main() {
           textSelection: const TextSelection.collapsed(offset: 9),
           actions: <SemanticsAction>[
             SemanticsAction.tap,
+            SemanticsAction.focus,
             SemanticsAction.moveCursorBackwardByCharacter,
             SemanticsAction.moveCursorBackwardByWord,
             SemanticsAction.setSelection,
@@ -8481,6 +8487,7 @@ void main() {
           value: 'Guten Tag',
           actions: <SemanticsAction>[
             SemanticsAction.tap,
+            SemanticsAction.focus,
             SemanticsAction.moveCursorBackwardByCharacter,
             SemanticsAction.moveCursorForwardByCharacter,
             SemanticsAction.moveCursorBackwardByWord,
@@ -8512,6 +8519,7 @@ void main() {
           value: 'Schönen Feierabend',
           actions: <SemanticsAction>[
             SemanticsAction.tap,
+            SemanticsAction.focus,
             SemanticsAction.moveCursorForwardByCharacter,
             SemanticsAction.moveCursorForwardByWord,
             SemanticsAction.setSelection,
@@ -8616,6 +8624,7 @@ void main() {
           textDirection: TextDirection.ltr,
           actions: <SemanticsAction>[
             SemanticsAction.tap,
+            SemanticsAction.focus,
             SemanticsAction.setText,
             // Absent the following because enableInteractiveSelection: false
             // SemanticsAction.moveCursorBackwardByCharacter,
@@ -8659,6 +8668,7 @@ void main() {
           textDirection: TextDirection.ltr,
           actions: <SemanticsAction>[
             SemanticsAction.tap,
+            SemanticsAction.focus,
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
@@ -8682,6 +8692,7 @@ void main() {
           textDirection: TextDirection.ltr,
           actions: <SemanticsAction>[
             SemanticsAction.tap,
+            SemanticsAction.focus,
             SemanticsAction.moveCursorBackwardByCharacter,
             SemanticsAction.moveCursorBackwardByWord,
             SemanticsAction.setSelection,
@@ -8710,6 +8721,7 @@ void main() {
           textDirection: TextDirection.ltr,
           actions: <SemanticsAction>[
             SemanticsAction.tap,
+            SemanticsAction.focus,
             SemanticsAction.moveCursorBackwardByCharacter,
             SemanticsAction.moveCursorForwardByCharacter,
             SemanticsAction.moveCursorBackwardByWord,
@@ -8765,6 +8777,7 @@ void main() {
           textDirection: TextDirection.ltr,
           actions: <SemanticsAction>[
             SemanticsAction.tap,
+            SemanticsAction.focus,
             SemanticsAction.moveCursorBackwardByCharacter,
             SemanticsAction.moveCursorBackwardByWord,
             SemanticsAction.setSelection,
@@ -8813,6 +8826,7 @@ void main() {
           textDirection: TextDirection.ltr,
           actions: <SemanticsAction>[
             SemanticsAction.tap,
+            SemanticsAction.focus,
             SemanticsAction.moveCursorBackwardByCharacter,
             SemanticsAction.moveCursorBackwardByWord,
             SemanticsAction.setSelection,
@@ -8862,7 +8876,7 @@ void main() {
           TestSemantics(
             id: inputFieldId,
             flags: <SemanticsFlag>[SemanticsFlag.isTextField, SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled],
-            actions: <SemanticsAction>[SemanticsAction.tap],
+            actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
             value: textInTextField,
             textDirection: TextDirection.ltr,
           ),
@@ -8887,6 +8901,7 @@ void main() {
             ],
             actions: <SemanticsAction>[
               SemanticsAction.tap,
+              SemanticsAction.focus,
               SemanticsAction.moveCursorBackwardByCharacter,
               SemanticsAction.moveCursorBackwardByWord,
               SemanticsAction.setSelection,
@@ -8937,7 +8952,7 @@ void main() {
           TestSemantics(
             id: inputFieldId,
             flags: <SemanticsFlag>[SemanticsFlag.isTextField, SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled],
-            actions: <SemanticsAction>[SemanticsAction.tap],
+            actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
             value: textInTextField,
             textDirection: TextDirection.ltr,
           ),
@@ -8962,6 +8977,7 @@ void main() {
             ],
             actions: <SemanticsAction>[
               SemanticsAction.tap,
+              SemanticsAction.focus,
               SemanticsAction.moveCursorBackwardByCharacter,
               SemanticsAction.moveCursorBackwardByWord,
               SemanticsAction.setSelection,
@@ -9135,6 +9151,7 @@ void main() {
           textDirection: TextDirection.ltr,
           actions: <SemanticsAction>[
             SemanticsAction.tap,
+            SemanticsAction.focus,
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
@@ -9169,6 +9186,7 @@ void main() {
           textSelection: const TextSelection(baseOffset: 0, extentOffset: 0),
           actions: <SemanticsAction>[
             SemanticsAction.tap,
+            SemanticsAction.focus,
             SemanticsAction.setSelection,
             SemanticsAction.setText,
             SemanticsAction.paste,
@@ -9231,6 +9249,7 @@ void main() {
           textDirection: TextDirection.ltr,
           actions: <SemanticsAction>[
             SemanticsAction.tap,
+            SemanticsAction.focus,
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
@@ -9280,6 +9299,7 @@ void main() {
           textDirection: TextDirection.ltr,
           actions: <SemanticsAction>[
             SemanticsAction.tap,
+            SemanticsAction.focus,
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
@@ -18392,8 +18412,7 @@ void main() {
                             SemanticsAction.didGainAccessibilityFocus,
                           if (defaultTargetPlatform == TargetPlatform.windows || defaultTargetPlatform == TargetPlatform.macOS || defaultTargetPlatform == TargetPlatform.linux)
                             SemanticsAction.didLoseAccessibilityFocus,
-                          // TODO(gspencergoog): also test for the presence of SemanticsAction.focus when
-                          // this iOS issue is addressed: https://github.com/flutter/flutter/issues/150030
+                          SemanticsAction.focus
                         ],
                       ),
                     ],

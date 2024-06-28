@@ -146,10 +146,7 @@ void main() {
           SemanticsFlag.isChecked,
           if (isApple) SemanticsFlag.isSelected,
         ],
-        actions: <SemanticsAction>[
-          SemanticsAction.tap,
-          SemanticsAction.focus,
-        ],
+        actions: <SemanticsAction>[SemanticsAction.tap],
       ),
     );
     semantics.dispose();
