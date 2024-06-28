@@ -455,7 +455,6 @@ class Text extends StatelessWidget {
   const Text(
     String this.data, {
     super.key,
-    this.selectableId,
     this.style,
     this.strutStyle,
     this.textAlign,
@@ -492,7 +491,6 @@ class Text extends StatelessWidget {
   const Text.rich(
     InlineSpan this.textSpan, {
     super.key,
-    this.selectableId,
     this.style,
     this.strutStyle,
     this.textAlign,
@@ -642,18 +640,6 @@ class Text extends StatelessWidget {
   /// (semi-transparent grey).
   final Color? selectionColor;
 
-  /// A unique id used to identify this [Selectable] widget.
-  ///
-  /// This is ignored if [SelectionContainer.maybeOf] returns null
-  /// in the [BuildContext] of the [Text] widget.
-  ///
-  /// When creating this widget you can request a unique id
-  /// through [SelectableRegionState.nextSelectableId].
-  ///
-  /// When this is null, the [SelectedContentRange] created
-  /// by this widget will not be identifiable.
-  final int? selectableId;
-
   @override
   Widget build(BuildContext context) {
     final DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(context);
@@ -676,7 +662,7 @@ class Text extends StatelessWidget {
       result = MouseRegion(
         cursor: DefaultSelectionStyle.of(context).mouseCursor ?? SystemMouseCursors.text,
         child: _SelectableTextContainer(
-          selectableId: selectableId,
+          selectableId: key,
           textAlign: textAlign ?? defaultTextStyle.textAlign ?? TextAlign.start,
           textDirection: textDirection, // RichText uses Directionality.of to obtain a default if this is null.
           locale: locale, // RichText uses Localizations.localeOf to obtain a default if this is null
@@ -767,7 +753,7 @@ class _SelectableTextContainer extends StatefulWidget {
     required this.selectionColor,
   });
 
-  final int? selectableId;
+  final Object? selectableId;
   final TextSpan text;
   final TextAlign textAlign;
   final TextDirection? textDirection;
@@ -909,7 +895,7 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
   ) : _textKey = textKey;
 
   TextSpan textState;
-  int? selectableId;
+  Object? selectableId;
   final GlobalKey _textKey;
   RenderParagraph get paragraph => _textKey.currentContext!.findRenderObject()! as RenderParagraph;
 
@@ -919,7 +905,7 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
   }
 
   // ignore: avoid_setters_without_getters
-  set _attachId(int? newId) {
+  set _attachId(Object? newId) {
     selectableId = newId;
   }
 
@@ -1278,6 +1264,34 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
     if (selections.isEmpty) {
       return null;
     }
+    final StringBuffer buffer = StringBuffer();
+    for (final SelectedContent selection in selections.values) {
+      buffer.write(selection.plainText);
+    }
+    return SelectedContent(
+      plainText: buffer.toString(),
+      geometry: value,
+    );
+  }
+
+  /// Copies the selections of all [Selectable]s.
+  @override
+  List<SelectedContentRange<Object>>? getSelections() {
+    if (currentSelectionStartIndex == -1 || currentSelectionEndIndex == -1) {
+      return null;
+    }
+    final int selectionStart = min(currentSelectionStartIndex, currentSelectionEndIndex);
+    final int selectionEnd = max(currentSelectionStartIndex, currentSelectionEndIndex);
+    final LinkedHashMap<int, List<SelectedContentRange<Object>>> selections = LinkedHashMap<int, List<SelectedContentRange<Object>>>();
+    for (int index = selectionStart; index <= selectionEnd; index += 1) {
+      final List<SelectedContentRange<Object>>? selectedContentRanges = selectables[index].getSelections();
+      if (selectedContentRanges != null) {
+        selections[index] = selectedContentRanges;
+      }
+    }
+    if (selections.isEmpty) {
+      return null;
+    }
     // Accurately find the selection endpoints, selections.first.startOffset and
     // selections.last.endOffset are only accurate when the selections.first and
     // selections.last are root selectables with regards to the text. When the
@@ -1289,47 +1303,44 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
     late final int startOffset;
     late final int endOffset;
     if (paragraph.selectableBelongsToParagraph(selectables[currentSelectionStartIndex])) {
-      startOffset = selections[currentSelectionStartIndex]!.startOffset;
+      // A [_SelectableFragment] will only have one [SelectedContentRange].
+      startOffset = selectables[currentSelectionStartIndex].getSelections()!.first.startOffset;
     } else {
-      final bool localSelectionForward = selections[currentSelectionStartIndex]!.endOffset >= selections[currentSelectionStartIndex]!.startOffset;
+      final bool localSelectionForward = selectables[currentSelectionStartIndex].getSelections()!.first.endOffset >= selectables[currentSelectionStartIndex].getSelections()!.first.startOffset;
       final TextPosition positionBeforeStart = localSelectionForward
                                              ? paragraph.getPositionForOffset(selectables[currentSelectionStartIndex].boundingBoxes.first.bottomLeft)
                                              : paragraph.getPositionForOffset(selectables[currentSelectionStartIndex].boundingBoxes.last.bottomRight);
       startOffset = positionBeforeStart.offset;
     }
     if (paragraph.selectableBelongsToParagraph(selectables[currentSelectionEndIndex])) {
-      endOffset = selections[currentSelectionEndIndex]!.endOffset;
+      // A [_SelectableFragment] will only have one [SelectedContentRange].
+      endOffset = selectables[currentSelectionEndIndex].getSelections()!.first.endOffset;
     } else {
-      final bool localSelectionForward = selections[currentSelectionEndIndex]!.endOffset >= selections[currentSelectionEndIndex]!.startOffset;
+      final bool localSelectionForward = selectables[currentSelectionEndIndex].getSelections()!.first.endOffset >= selectables[currentSelectionEndIndex].getSelections()!.first.startOffset;
       final TextPosition positionAfterEnd = localSelectionForward
                                           ? paragraph.getPositionForOffset(selectables[currentSelectionEndIndex].boundingBoxes.last.bottomRight)
                                           : paragraph.getPositionForOffset(selectables[currentSelectionEndIndex].boundingBoxes.first.bottomLeft);
       endOffset = positionAfterEnd.offset;
     }
-    // A [_SelectableFragment] does not typically provide a [SelectedContentRange],
-    // so this pass should collect all [PlaceholderSpan] child ranges.
-    final List<SelectedContentRange<Object>> childRanges = <SelectedContentRange<Object>>[
-      for (final SelectedContent selectedContent in selections.values)
-        if (selectedContent.ranges case final List<SelectedContentRange<Object>> data) ...data,
-    ];
+    // Collect any child ranges.
+    final List<SelectedContentRange<Object>> childSelections = <SelectedContentRange<Object>>[];
+    for (int index = selectionStart; index <= selectionEnd; index += 1) {
+      if (paragraph.selectableBelongsToParagraph(selectables[index])) {
+        continue;
+      }
+      final List<SelectedContentRange<Object>>? selectedContentRanges = selectables[index].getSelections();
+      if (selectedContentRanges != null) {
+        childSelections.addAll(selectedContentRanges);
+      }
+    }
     final _TextSpanContentRange range = _TextSpanContentRange(
       content: textState,
       selectableId: selectableId,
       start: startOffset,
       end: endOffset,
-      children: childRanges,
+      children: childSelections,
     );
-    final StringBuffer buffer = StringBuffer();
-    for (final SelectedContent selection in selections.values) {
-      buffer.write(selection.plainText);
-    }
-    return SelectedContent(
-      plainText: buffer.toString(),
-      geometry: value,
-      startOffset: range.startOffset,
-      endOffset: range.endOffset,
-      ranges: <SelectedContentRange<Object>>[range],
-    );
+    return <SelectedContentRange<Object>>[range];
   }
 
   // From [SelectableRegion].

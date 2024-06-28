@@ -86,6 +86,11 @@ abstract class SelectionHandler implements ValueListenable<SelectionGeometry> {
   /// Return `null` if nothing is selected.
   SelectedContent? getSelectedContent();
 
+  /// Gets the list of selections in this object.
+  ///
+  /// Return `null` if nothing is selected.
+  List<SelectedContentRange<Object>>? getSelections();
+
   /// Handles the [SelectionEvent] sent to this object.
   ///
   /// The subclasses need to update their selections or delegate the
@@ -100,8 +105,6 @@ abstract class SelectionHandler implements ValueListenable<SelectionGeometry> {
   SelectionResult dispatchSelectionEvent(SelectionEvent event);
 }
 
-/// Represents a range of content for a given [SelectedContent].
-///
 /// This class stores the information of an active selection under
 /// a [Selectable] or [SelectionHandler], including the start and
 /// end positions of a selection relative to the content, as well
@@ -110,27 +113,14 @@ abstract class SelectionHandler implements ValueListenable<SelectionGeometry> {
 /// selection, and the content itself.
 ///
 /// [SelectionArea] and [SelectableRegion] provide access to this
-/// information through the [SelectedContent] passed to their
-/// [SelectionArea.onSelectionChanged] and
-/// [SelectableRegion.onSelectionChanged] members.
-///
-/// {@tool dartpad}
-/// This example shows how to color red the active selection
-/// under a [SelectionArea] or [SelectableRegion].
-///
-/// ** See code in examples/api/lib/material/selection_area/selection_area.1.dart **
-/// {@end-tool}
-///
-/// {@tool dartpad}
-/// This example shows how to replace the active selection
-/// under a [SelectionArea] or [SelectableRegion] with a widget.
-///
-/// ** See code in examples/api/lib/material/selection_area/selection_area.2.dart **
-/// {@end-tool}
+/// information through the [SelectionListener] passed to their
+/// [SelectionListener.onSelectionChanged] member.
 ///
 /// See also:
 ///
-///   * [SelectedContent], which contains the [SelectedContentRange] for a given [Selectable] or [SelectionHandler].
+///   * [SelectionListener], which provides the [SelectedContentRange]s representing
+///     the active selection for a given subtree contained under a [SelectionArea] 
+///     or [SelectableRegion].
 abstract class SelectedContentRange<T extends Object> {
   /// Creates a range for the content of a [Selectable] or [SelectionHandler].
   SelectedContentRange({
@@ -140,7 +130,7 @@ abstract class SelectedContentRange<T extends Object> {
   });
 
   /// The unique id for the [Selectable] that created the range.
-  final int? selectableId;
+  final Object? selectableId;
 
   /// The content that contains the selection.
   final T content;
@@ -179,9 +169,6 @@ class SelectedContent {
   const SelectedContent({
     required this.plainText,
     required this.geometry,
-    this.startOffset = -1,
-    this.endOffset = -1,
-    this.ranges,
   });
 
   /// The selected content in plain text format.
@@ -191,30 +178,11 @@ class SelectedContent {
   /// the selection.
   final SelectionGeometry geometry;
 
-  /// The value representing the beginning of the selection, defaults to -1.
-  ///
-  /// If the [Selectable] contains text, then the offset represents
-  /// character offsets.
-  final int startOffset;
-
-  /// The value representing the end of the selection, defaults to -1.
-  ///
-  /// If the [Selectable] contains text, then the offset represents
-  /// character offsets.
-  final int endOffset;
-
-  /// A list of [SelectedContentRange]s that represent the content under
-  /// the active selection.
-  final List<SelectedContentRange<Object>>? ranges;
-
   @override
   String toString() {
     return 'SelectedContent(\n'
            '  plainText: $plainText,\n'
            '  geometry: $geometry,\n'
-           '  startOffset: $startOffset,\n'
-           '  endOffset: $endOffset,\n'
-           '  ranges: $ranges,\n'
            ')';
   }
 }

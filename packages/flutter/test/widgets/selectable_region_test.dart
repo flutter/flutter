@@ -4531,36 +4531,44 @@ void main() {
     expect(paragraph3.selections[0], const TextSelection(baseOffset: 0, extentOffset: 16));
   });
 
-  testWidgets('onSelectionChanged SelectedContentRange is accurate with WidgetSpans', (WidgetTester tester) async {
-    SelectedContent? content;
+  testWidgets('SelectionListener onSelectionChanged is accurate with WidgetSpans', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
-    final int textId1 = SelectableRegionState.nextSelectableId;
-    final int textId2 = SelectableRegionState.nextSelectableId;
+    final Key textId1 = UniqueKey();
+    final Key textId2 = UniqueKey();
+    final List<SelectedContentRange<Object>> activeSelections = <SelectedContentRange<Object>>[];
     addTearDown(focusNode.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
         home: SelectableRegion(
-          onSelectionChanged: (SelectedContent? selectedContent) => content = selectedContent,
           focusNode: focusNode,
           selectionControls: materialTextSelectionControls,
-          child: Column(
-            children: <Widget>[
-              Text.rich(
-                TextSpan(
-                  text: 'Hello world, ',
-                  children: <InlineSpan>[
-                    WidgetSpan(
-                      child: Text(
-                        'how are you today.',
-                        selectableId: textId2,
+          child: SelectionListener(
+            onSelectionChanged: (List<SelectedContentRange<Object>>? selections) {
+              activeSelections.clear();
+              if (selections == null || selections.isEmpty) {
+                return;
+              }
+              activeSelections.addAll(selections);
+            },
+            child: Column(
+              children: <Widget>[
+                Text.rich(
+                  TextSpan(
+                    text: 'Hello world, ',
+                    children: <InlineSpan>[
+                      WidgetSpan(
+                        child: Text(
+                          'how are you today.',
+                          key: textId2,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
+                  key: textId1,
                 ),
-                selectableId: textId1,
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -4570,150 +4578,145 @@ void main() {
     final RenderParagraph paragraph2 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('how are you today.'), matching: find.byType(RichText)));
     final TestGesture mouseGesture = await tester.startGesture(textOffsetToPosition(paragraph1, 0), kind: PointerDeviceKind.mouse);
 
-    expect(content, isNull);
     addTearDown(mouseGesture.removePointer);
     await tester.pump();
 
     // Selection on paragraph1.
     await mouseGesture.moveTo(textOffsetToPosition(paragraph1, 1));
     await tester.pumpAndSettle();
-    expect(content, isNotNull);
-    expect(content!.plainText, 'H');
-    expect(content!.ranges, isNotNull);
-    expect(content!.ranges!.length, 1);
-    expect(content!.ranges![0].startOffset, 0);
-    expect(content!.ranges![0].endOffset, 1);
-    expect((content!.ranges![0].content as TextSpan).children, isNotNull);
-    expect(((content!.ranges![0].content as TextSpan).children!.first as TextSpan).text, isNotNull);
-    expect(((content!.ranges![0].content as TextSpan).children!.first as TextSpan).text, 'Hello world, ');
+    expect(activeSelections, isNotEmpty);
+    expect(activeSelections.length, 1);
+    expect(activeSelections[0].startOffset, 0);
+    expect(activeSelections[0].endOffset, 1);
+    expect((activeSelections[0].content as TextSpan).children, isNotNull);
+    expect(((activeSelections[0].content as TextSpan).children!.first as TextSpan).text, isNotNull);
+    expect(((activeSelections[0].content as TextSpan).children!.first as TextSpan).text, 'Hello world, ');
 
     // Selection on paragraph1.
     await mouseGesture.moveTo(textOffsetToPosition(paragraph1, 10));
     await tester.pumpAndSettle();
-    expect(content, isNotNull);
-    expect(content!.plainText, 'Hello worl');
-    expect(content!.ranges, isNotNull);
-    expect(content!.ranges!.length, 1);
-    expect(content!.ranges![0].startOffset, 0);
-    expect(content!.ranges![0].endOffset, 10);
-    expect((content!.ranges![0].content as TextSpan).children, isNotNull);
-    expect(((content!.ranges![0].content as TextSpan).children!.first as TextSpan).text, isNotNull);
-    expect(((content!.ranges![0].content as TextSpan).children!.first as TextSpan).text, 'Hello world, ');
+    expect(activeSelections, isNotEmpty);
+    expect(activeSelections.length, 1);
+    expect(activeSelections[0].startOffset, 0);
+    expect(activeSelections[0].endOffset, 10);
+    expect((activeSelections[0].content as TextSpan).children, isNotNull);
+    expect(((activeSelections[0].content as TextSpan).children!.first as TextSpan).text, isNotNull);
+    expect(((activeSelections[0].content as TextSpan).children!.first as TextSpan).text, 'Hello world, ');
 
     // Selection on paragraph1 and paragraph2.
     await mouseGesture.moveTo(textOffsetToPosition(paragraph2, 10));
     await tester.pumpAndSettle();
-    expect(content, isNotNull);
-    expect(content!.plainText, 'Hello world, how are yo');
-    expect(content!.ranges, isNotNull);
-    expect(content!.ranges!.length, 1);
-    expect(content!.ranges![0].startOffset, 0);
-    expect(content!.ranges![0].endOffset, 14);
-    expect((content!.ranges![0].content as TextSpan).children, isNotNull);
-    expect(((content!.ranges![0].content as TextSpan).children!.first as TextSpan).text, isNotNull);
-    expect(((content!.ranges![0].content as TextSpan).children!.first as TextSpan).text, 'Hello world, ');
-    expect(content!.ranges![0].children, isNotNull);
-    expect(content!.ranges![0].children!.length, 1);
-    expect(content!.ranges![0].children![0].startOffset, 0);
-    expect(content!.ranges![0].children![0].endOffset, 10);
-    expect((content!.ranges![0].children![0].content as TextSpan).text, isNotNull);
-    expect((content!.ranges![0].children![0].content as TextSpan).text, 'how are you today.');
+    expect(activeSelections, isNotEmpty);
+    expect(activeSelections.length, 1);
+    expect(activeSelections[0].startOffset, 0);
+    expect(activeSelections[0].endOffset, 14);
+    expect((activeSelections[0].content as TextSpan).children, isNotNull);
+    expect(((activeSelections[0].content as TextSpan).children!.first as TextSpan).text, isNotNull);
+    expect(((activeSelections[0].content as TextSpan).children!.first as TextSpan).text, 'Hello world, ');
+    expect(activeSelections[0].children, isNotNull);
+    expect(activeSelections[0].children!.length, 1);
+    expect(activeSelections[0].children![0].startOffset, 0);
+    expect(activeSelections[0].children![0].endOffset, 10);
+    expect((activeSelections[0].children![0].content as TextSpan).text, isNotNull);
+    expect((activeSelections[0].children![0].content as TextSpan).text, 'how are you today.');
     await mouseGesture.up();
     await tester.pump();
-    expect(content, isNotNull);
-    expect(content!.plainText, 'Hello world, how are yo');
+    expect(activeSelections, isNotEmpty);
+    expect(activeSelections.length, 1);
 
     // Collapsed selection.
     await mouseGesture.down(textOffsetToPosition(paragraph2, 3));
     await tester.pump();
     await mouseGesture.up();
     await tester.pumpAndSettle(kDoubleTapTimeout);
-    expect(content, isNotNull);
-    expect(content!.plainText, '');
-    expect(content!.ranges, isNotNull);
-    expect(content!.ranges!.length, 1);
-    expect(content!.ranges![0].startOffset, 13);
-    expect(content!.ranges![0].endOffset, 14);
-    expect((content!.ranges![0].content as TextSpan).children, isNotNull);
-    expect(((content!.ranges![0].content as TextSpan).children!.first as TextSpan).text, isNotNull);
-    expect(((content!.ranges![0].content as TextSpan).children!.first as TextSpan).text, 'Hello world, ');
-    expect(content!.ranges![0].children, isNotNull);
-    expect(content!.ranges![0].children!.length, 1);
-    expect(content!.ranges![0].children![0].startOffset, 3);
-    expect(content!.ranges![0].children![0].endOffset, 3);
-    expect((content!.ranges![0].children![0].content as TextSpan).text, isNotNull);
-    expect((content!.ranges![0].children![0].content as TextSpan).text, 'how are you today.');
+    expect(activeSelections, isNotEmpty);
+    expect(activeSelections.length, 1);
+    expect(activeSelections[0].startOffset, 13);
+    expect(activeSelections[0].endOffset, 14);
+    expect((activeSelections[0].content as TextSpan).children, isNotNull);
+    expect(((activeSelections[0].content as TextSpan).children!.first as TextSpan).text, isNotNull);
+    expect(((activeSelections[0].content as TextSpan).children!.first as TextSpan).text, 'Hello world, ');
+    expect(activeSelections[0].children, isNotNull);
+    expect(activeSelections[0].children!.length, 1);
+    expect(activeSelections[0].children![0].startOffset, 3);
+    expect(activeSelections[0].children![0].endOffset, 3);
+    expect((activeSelections[0].children![0].content as TextSpan).text, isNotNull);
+    expect((activeSelections[0].children![0].content as TextSpan).text, 'how are you today.');
 
     // Backwards selection.
     await mouseGesture.down(textOffsetToPosition(paragraph2, 4));
     await tester.pump();
     await mouseGesture.moveTo(textOffsetToPosition(paragraph1, 0));
     await tester.pumpAndSettle();
-    expect(content, isNotNull);
-    expect(content!.plainText, 'Hello world, how ');
-    expect(content!.ranges, isNotNull);
-    expect(content!.ranges!.length, 1);
-    expect(content!.ranges![0].startOffset, 14);
-    expect(content!.ranges![0].endOffset, 0);
-    expect((content!.ranges![0].content as TextSpan).children, isNotNull);
-    expect(((content!.ranges![0].content as TextSpan).children!.first as TextSpan).text, isNotNull);
-    expect(((content!.ranges![0].content as TextSpan).children!.first as TextSpan).text, 'Hello world, ');
-    expect(content!.ranges![0].children, isNotNull);
-    expect(content!.ranges![0].children!.length, 1);
-    expect(content!.ranges![0].children![0].startOffset, 4);
-    expect(content!.ranges![0].children![0].endOffset, 0);
-    expect((content!.ranges![0].children![0].content as TextSpan).text, isNotNull);
-    expect((content!.ranges![0].children![0].content as TextSpan).text, 'how are you today.');
+    expect(activeSelections, isNotEmpty);
+    expect(activeSelections.length, 1);
+    expect(activeSelections[0].startOffset, 14);
+    expect(activeSelections[0].endOffset, 0);
+    expect((activeSelections[0].content as TextSpan).children, isNotNull);
+    expect(((activeSelections[0].content as TextSpan).children!.first as TextSpan).text, isNotNull);
+    expect(((activeSelections[0].content as TextSpan).children!.first as TextSpan).text, 'Hello world, ');
+    expect(activeSelections[0].children, isNotNull);
+    expect(activeSelections[0].children!.length, 1);
+    expect(activeSelections[0].children![0].startOffset, 4);
+    expect(activeSelections[0].children![0].endOffset, 0);
+    expect((activeSelections[0].children![0].content as TextSpan).text, isNotNull);
+    expect((activeSelections[0].children![0].content as TextSpan).text, 'how are you today.');
     await mouseGesture.up();
     await tester.pump();
-    expect(content, isNotNull);
-    expect(content!.plainText, 'Hello world, how ');
+    expect(activeSelections, isNotEmpty);
+    expect(activeSelections.length, 1);
 
     // Collapsed selection.
     await mouseGesture.down(textOffsetToPosition(paragraph1, 0));
     await tester.pumpAndSettle();
     await mouseGesture.up();
     await tester.pumpAndSettle(kDoubleTapTimeout);
-    expect(content, isNotNull);
-    expect(content!.plainText, '');
-    expect(content!.ranges, isNotNull);
-    expect(content!.ranges!.length, 1);
-    expect(content!.ranges![0].startOffset, 0);
-    expect(content!.ranges![0].endOffset, 0);
-    expect((content!.ranges![0].content as TextSpan).children, isNotNull);
-    expect(((content!.ranges![0].content as TextSpan).children!.first as TextSpan).text, isNotNull);
-    expect(((content!.ranges![0].content as TextSpan).children!.first as TextSpan).text, 'Hello world, ');
+    expect(activeSelections, isNotEmpty);
+    expect(activeSelections.length, 1);
+    expect(activeSelections[0].startOffset, 0);
+    expect(activeSelections[0].endOffset, 0);
+    expect((activeSelections[0].content as TextSpan).children, isNotNull);
+    expect(((activeSelections[0].content as TextSpan).children!.first as TextSpan).text, isNotNull);
+    expect(((activeSelections[0].content as TextSpan).children!.first as TextSpan).text, 'Hello world, ');
   });
 
   testWidgets('onSelectionChanged SelectedContentRange is accurate', (WidgetTester tester) async {
-    SelectedContent? content;
     final FocusNode focusNode = FocusNode();
-    final int textKey1 = SelectableRegionState.nextSelectableId;
-    final int textKey2 = SelectableRegionState.nextSelectableId;
-    final int textKey3 = SelectableRegionState.nextSelectableId;
+    final Key textKey1 = UniqueKey();
+    final Key textKey2 = UniqueKey();
+    final Key textKey3 = UniqueKey();
+    final List<SelectedContentRange<Object>> activeSelections = <SelectedContentRange<Object>>[];
     addTearDown(focusNode.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
         home: SelectableRegion(
-          onSelectionChanged: (SelectedContent? selectedContent) => content = selectedContent,
           focusNode: focusNode,
           selectionControls: materialTextSelectionControls,
-          child: Column(
-            children: <Widget>[
-              Text(
-                'How are you?',
-                selectableId: textKey1,
-              ),
-              Text(
-                'Good, and you?',
-                selectableId: textKey2,
-              ),
-              Text(
-                'Fine, thank you.',
-                selectableId: textKey3,
-              ),
-            ],
+          child: SelectionListener(
+            onSelectionChanged: (List<SelectedContentRange<Object>>? selections) {
+              activeSelections.clear();
+              if (selections == null || selections.isEmpty) {
+                return;
+              }
+              activeSelections.addAll(selections);
+            },
+            child: Column(
+              children: <Widget>[
+                Text(
+                  'How are you?',
+                  key: textKey1,
+                ),
+                Text(
+                  'Good, and you?',
+                  key: textKey2,
+                ),
+                Text(
+                  'Fine, thank you.',
+                  key: textKey3,
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -4724,127 +4727,112 @@ void main() {
     final RenderParagraph paragraph3 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Fine, thank you.'), matching: find.byType(RichText)));
     final TestGesture mouseGesture = await tester.startGesture(textOffsetToPosition(paragraph1, 4), kind: PointerDeviceKind.mouse);
 
-    expect(content, isNull);
     addTearDown(mouseGesture.removePointer);
     await tester.pump();
 
     // Selection on paragraph1.
     await mouseGesture.moveTo(textOffsetToPosition(paragraph1, 7));
     await tester.pumpAndSettle();
-    expect(content, isNotNull);
-    expect(content!.plainText, 'are');
-    expect(content!.ranges, isNotNull);
-    expect(content!.ranges!.length, 1);
-    expect(content!.ranges![0].startOffset, 4);
-    expect(content!.ranges![0].endOffset, 7);
-    expect((content!.ranges![0].content as TextSpan).text, isNotNull);
-    expect((content!.ranges![0].content as TextSpan).text, 'How are you?');
+    expect(activeSelections, isNotEmpty);
+    expect(activeSelections.length, 1);
+    expect(activeSelections[0].startOffset, 4);
+    expect(activeSelections[0].endOffset, 7);
+    expect((activeSelections[0].content as TextSpan).text, isNotNull);
+    expect((activeSelections[0].content as TextSpan).text, 'How are you?');
 
     // Selection on paragraph1.
     await mouseGesture.moveTo(textOffsetToPosition(paragraph1, 10));
     await tester.pumpAndSettle();
-    expect(content, isNotNull);
-    expect(content!.plainText, 'are yo');
-    expect(content!.ranges, isNotNull);
-    expect(content!.ranges!.length, 1);
-    expect(content!.ranges![0].startOffset, 4);
-    expect(content!.ranges![0].endOffset, 10);
-    expect((content!.ranges![0].content as TextSpan).text, isNotNull);
-    expect((content!.ranges![0].content as TextSpan).text, 'How are you?');
+    expect(activeSelections, isNotEmpty);
+    expect(activeSelections.length, 1);
+    expect(activeSelections[0].startOffset, 4);
+    expect(activeSelections[0].endOffset, 10);
+    expect((activeSelections[0].content as TextSpan).text, isNotNull);
+    expect((activeSelections[0].content as TextSpan).text, 'How are you?');
 
     // Selection on paragraph1 and paragraph2.
     await mouseGesture.moveTo(textOffsetToPosition(paragraph2, 10));
     await tester.pumpAndSettle();
-    expect(content, isNotNull);
-    expect(content!.plainText, 'are you?Good, and ');
-    expect(content!.ranges, isNotNull);
-    expect(content!.ranges!.length, 2);
-    expect(content!.ranges![0].startOffset, 4);
-    expect(content!.ranges![0].endOffset, 12);
-    expect((content!.ranges![0].content as TextSpan).text, isNotNull);
-    expect((content!.ranges![0].content as TextSpan).text, 'How are you?');
-    expect(content!.ranges![1].startOffset, 0);
-    expect(content!.ranges![1].endOffset, 10);
-    expect((content!.ranges![1].content as TextSpan).text, isNotNull);
-    expect((content!.ranges![1].content as TextSpan).text, 'Good, and you?');
+    expect(activeSelections, isNotEmpty);
+    expect(activeSelections.length, 2);
+    expect(activeSelections[0].startOffset, 4);
+    expect(activeSelections[0].endOffset, 12);
+    expect((activeSelections[0].content as TextSpan).text, isNotNull);
+    expect((activeSelections[0].content as TextSpan).text, 'How are you?');
+    expect(activeSelections[1].startOffset, 0);
+    expect(activeSelections[1].endOffset, 10);
+    expect((activeSelections[1].content as TextSpan).text, isNotNull);
+    expect((activeSelections[1].content as TextSpan).text, 'Good, and you?');
 
     // Selection on paragraph1, paragraph2, and paragraph3.
     await mouseGesture.moveTo(textOffsetToPosition(paragraph3, 10));
     await tester.pumpAndSettle();
-    expect(content, isNotNull);
-    expect(content!.plainText, 'are you?Good, and you?Fine, than');
-    expect(content!.ranges, isNotNull);
-    expect(content!.ranges!.length, 3);
-    expect(content!.ranges![0].startOffset, 4);
-    expect(content!.ranges![0].endOffset, 12);
-    expect((content!.ranges![0].content as TextSpan).text, isNotNull);
-    expect((content!.ranges![0].content as TextSpan).text, 'How are you?');
-    expect(content!.ranges![1].startOffset, 0);
-    expect(content!.ranges![1].endOffset, 14);
-    expect((content!.ranges![1].content as TextSpan).text, isNotNull);
-    expect((content!.ranges![1].content as TextSpan).text, 'Good, and you?');
-    expect(content!.ranges![2].startOffset, 0);
-    expect(content!.ranges![2].endOffset, 10);
-    expect((content!.ranges![2].content as TextSpan).text, isNotNull);
-    expect((content!.ranges![2].content as TextSpan).text, 'Fine, thank you.');
+    expect(activeSelections, isNotEmpty);
+    expect(activeSelections.length, 3);
+    expect(activeSelections[0].startOffset, 4);
+    expect(activeSelections[0].endOffset, 12);
+    expect((activeSelections[0].content as TextSpan).text, isNotNull);
+    expect((activeSelections[0].content as TextSpan).text, 'How are you?');
+    expect(activeSelections[1].startOffset, 0);
+    expect(activeSelections[1].endOffset, 14);
+    expect((activeSelections[1].content as TextSpan).text, isNotNull);
+    expect((activeSelections[1].content as TextSpan).text, 'Good, and you?');
+    expect(activeSelections[2].startOffset, 0);
+    expect(activeSelections[2].endOffset, 10);
+    expect((activeSelections[2].content as TextSpan).text, isNotNull);
+    expect((activeSelections[2].content as TextSpan).text, 'Fine, thank you.');
     await mouseGesture.up();
     await tester.pump();
-    expect(content, isNotNull);
-    expect(content!.plainText, 'are you?Good, and you?Fine, than');
+    expect(activeSelections, isNotEmpty);
+    expect(activeSelections.length, 3);
 
     // Collapsed selection.
     await mouseGesture.down(textOffsetToPosition(paragraph1, 3));
     await tester.pump();
     await mouseGesture.up();
     await tester.pumpAndSettle(kDoubleTapTimeout);
-    expect(content, isNotNull);
-    expect(content!.plainText, '');
-    expect(content!.ranges, isNotNull);
-    expect(content!.ranges!.length, 1);
-    expect(content!.ranges![0].startOffset, 3);
-    expect(content!.ranges![0].endOffset, 3);
-    expect((content!.ranges![0].content as TextSpan).text, isNotNull);
-    expect((content!.ranges![0].content as TextSpan).text, 'How are you?');
+    expect(activeSelections, isNotEmpty);
+    expect(activeSelections.length, 1);
+    expect(activeSelections[0].startOffset, 3);
+    expect(activeSelections[0].endOffset, 3);
+    expect((activeSelections[0].content as TextSpan).text, isNotNull);
+    expect((activeSelections[0].content as TextSpan).text, 'How are you?');
 
     // Backwards selection.
     await mouseGesture.down(textOffsetToPosition(paragraph3, 4));
     await tester.pump();
     await mouseGesture.moveTo(textOffsetToPosition(paragraph1, 0));
     await tester.pumpAndSettle();
-    expect(content, isNotNull);
-    expect(content!.plainText, 'How are you?Good, and you?Fine');
-    expect(content!.ranges, isNotNull);
-    expect(content!.ranges!.length, 3);
-    expect(content!.ranges![0].startOffset, 12);
-    expect(content!.ranges![0].endOffset, 0);
-    expect((content!.ranges![0].content as TextSpan).text, isNotNull);
-    expect((content!.ranges![0].content as TextSpan).text, 'How are you?');
-    expect(content!.ranges![1].startOffset, 14);
-    expect(content!.ranges![1].endOffset, 0);
-    expect((content!.ranges![1].content as TextSpan).text, isNotNull);
-    expect((content!.ranges![1].content as TextSpan).text, 'Good, and you?');
-    expect(content!.ranges![2].startOffset, 4);
-    expect(content!.ranges![2].endOffset, 0);
-    expect((content!.ranges![2].content as TextSpan).text, isNotNull);
-    expect((content!.ranges![2].content as TextSpan).text, 'Fine, thank you.');
+    expect(activeSelections, isNotEmpty);
+    expect(activeSelections.length, 3);
+    expect(activeSelections[0].startOffset, 12);
+    expect(activeSelections[0].endOffset, 0);
+    expect((activeSelections[0].content as TextSpan).text, isNotNull);
+    expect((activeSelections[0].content as TextSpan).text, 'How are you?');
+    expect(activeSelections[1].startOffset, 14);
+    expect(activeSelections[1].endOffset, 0);
+    expect((activeSelections[1].content as TextSpan).text, isNotNull);
+    expect((activeSelections[1].content as TextSpan).text, 'Good, and you?');
+    expect(activeSelections[2].startOffset, 4);
+    expect(activeSelections[2].endOffset, 0);
+    expect((activeSelections[2].content as TextSpan).text, isNotNull);
+    expect((activeSelections[2].content as TextSpan).text, 'Fine, thank you.');
     await mouseGesture.up();
     await tester.pump();
-    expect(content, isNotNull);
-    expect(content!.plainText, 'How are you?Good, and you?Fine');
+    expect(activeSelections, isNotEmpty);
+    expect(activeSelections.length, 3);
 
     // Collapsed selection.
     await mouseGesture.down(textOffsetToPosition(paragraph1, 0));
     await tester.pumpAndSettle();
     await mouseGesture.up();
     await tester.pumpAndSettle(kDoubleTapTimeout);
-    expect(content, isNotNull);
-    expect(content!.plainText, '');
-    expect(content!.ranges, isNotNull);
-    expect(content!.ranges!.length, 1);
-    expect(content!.ranges![0].startOffset, 0);
-    expect(content!.ranges![0].endOffset, 0);
-    expect((content!.ranges![0].content as TextSpan).text, isNotNull);
-    expect((content!.ranges![0].content as TextSpan).text, 'How are you?');
+    expect(activeSelections, isNotEmpty);
+    expect(activeSelections.length, 1);
+    expect(activeSelections[0].startOffset, 0);
+    expect(activeSelections[0].endOffset, 0);
+    expect((activeSelections[0].content as TextSpan).text, isNotNull);
+    expect((activeSelections[0].content as TextSpan).text, 'How are you?');
   });
 
   testWidgets('onSelectionChange is called when the selection changes through gestures', (WidgetTester tester) async {
@@ -5292,6 +5280,11 @@ class RenderSelectionSpy extends RenderProxyBox
   }
 
   @override
+  List<SelectedContentRange<Object>>? getSelections() {
+    return null;
+  }
+
+  @override
   final SelectionGeometry value = const SelectionGeometry(
     hasContent: true,
     status: SelectionStatus.uncollapsed,
@@ -5374,6 +5367,11 @@ class RenderSelectAll extends RenderProxyBox
       plainText: 'content',
       geometry: value,
     );
+  }
+
+  @override
+  List<SelectedContentRange<Object>>? getSelections() {
+    return null;
   }
 
   @override

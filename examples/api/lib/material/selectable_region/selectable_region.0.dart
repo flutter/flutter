@@ -274,6 +274,15 @@ class _RenderSelectableAdapter extends RenderProxyBox with Selectable, Selection
     ) : null;
   }
 
+  @override
+  List<SelectedContentRange<Object>>? getSelections() {
+    if (!value.hasSelection) {
+      return null;
+    }
+    // TODO(Renzo-Olivares): return a SelectedContentRange here.
+    return null;
+  }
+
   LayerLink? _startHandle;
   LayerLink? _endHandle;
 

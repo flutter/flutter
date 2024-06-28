@@ -1469,9 +1469,20 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
     return SelectedContent(
       plainText: fullText.substring(start, end),
       geometry: value,
-      startOffset: _textSelectionStart!.offset,
-      endOffset: _textSelectionEnd!.offset,
     );
+  }
+
+  @override
+  List<SelectedContentRange<Object>>? getSelections() {
+    if (_textSelectionStart == null || _textSelectionEnd == null) {
+      return null;
+    }
+    final SelectedContentRange<Object> localSelectedContentRange = _SelectableFragmentSelectedContentRange(
+      content: fullText,
+      start: _textSelectionStart!.offset,
+      end: _textSelectionEnd!.offset,
+    );
+    return <SelectedContentRange<Object>>[localSelectedContentRange];
   }
 
   void _didChangeSelection() {
@@ -3105,4 +3116,21 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
     properties.add(DiagnosticsProperty<TextRange>('range', range));
     properties.add(DiagnosticsProperty<String>('fullText', fullText));
   }
+}
+
+class _SelectableFragmentSelectedContentRange extends SelectedContentRange<String> {
+  _SelectableFragmentSelectedContentRange({
+    int start = -1,
+    int end = -1,
+    required super.content,
+  }) : _start = start,
+       _end = end;
+
+  @override
+  int get startOffset => _start;
+  final int _start;
+
+  @override
+  int get endOffset => _end;
+  final int _end;
 }
