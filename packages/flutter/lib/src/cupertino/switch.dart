@@ -16,13 +16,10 @@ import 'theme.dart';
 // Hand coded defaults eyeballed from iOS simulator on Mac.
 const double _kDisabledOpacity = 0.5;
 const double _kThumbRadius = 14.0;
-const double _kThumbRadiusWithIcon = 14.0;
 const double _kTrackHeight = 31.0;
 const double _kTrackWidth = 51.0;
 const Size _kSwitchSize = Size(59.0, 39.0);
 const double _kThumbExtensionFactor = 7.0;
-// The thumb size at the middle of the track.
-const Size _kTransitionalThumbSize = Size(28.0, 28.0);
 const List<BoxShadow> _kThumbShadow = <BoxShadow>[
   BoxShadow(
     color: Color(0x26000000),
@@ -45,16 +42,16 @@ const double _kOffLabelWidth = 1.0;
 const double _kOffLabelPaddingHorizontal = 12.0;
 const double _kOffLabelRadius = 5.0;
 const CupertinoDynamicColor _kOffLabelColor =
-    CupertinoDynamicColor.withBrightnessAndContrast(
-  debugLabel: 'offSwitchLabel',
-  // Source: https://github.com/flutter/flutter/pull/39993#discussion_r321946033
-  color: Color.fromARGB(255, 179, 179, 179),
-  // Source: https://github.com/flutter/flutter/pull/39993#issuecomment-535196665
-  darkColor: Color.fromARGB(255, 179, 179, 179),
-  // Source: https://github.com/flutter/flutter/pull/127776#discussion_r1244208264
-  highContrastColor: Color.fromARGB(255, 255, 255, 255),
-  darkHighContrastColor: Color.fromARGB(255, 255, 255, 255),
-);
+  CupertinoDynamicColor.withBrightnessAndContrast(
+    debugLabel: 'offSwitchLabel',
+    // Source: https://github.com/flutter/flutter/pull/39993#discussion_r321946033
+    color: Color.fromARGB(255, 179, 179, 179),
+    // Source: https://github.com/flutter/flutter/pull/39993#issuecomment-535196665
+    darkColor: Color.fromARGB(255, 179, 179, 179),
+    // Source: https://github.com/flutter/flutter/pull/127776#discussion_r1244208264
+    highContrastColor: Color.fromARGB(255, 255, 255, 255),
+    darkHighContrastColor: Color.fromARGB(255, 255, 255, 255),
+  );
 
 // The relative values needed to transform a color to it's equivalent focus
 // outline color.
@@ -455,8 +452,9 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
   }
 
   @override
-  ValueChanged<bool?>? get onChanged =>
-      widget.onChanged != null ? _handleChanged : null;
+  ValueChanged<bool?>? get onChanged => widget.onChanged != null
+    ? _handleChanged
+    : null;
 
   @override
   bool get tristate => false;
@@ -505,10 +503,8 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
   }
 
   double get _trackInnerLength {
-    const double trackHeight = 31.0;
-    const double trackWidth = 51.0;
-    const double trackInnerStart = trackHeight / 2.0;
-    const double trackInnerEnd = trackWidth - trackInnerStart;
+    const double trackInnerStart = _kTrackHeight / 2.0;
+    const double trackInnerEnd = _kTrackWidth - trackInnerStart;
     const double trackInnerLength = trackInnerEnd - trackInnerStart;
     return trackInnerLength;
   }
@@ -585,8 +581,6 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
       context,
     );
 
-    const double? thumbOffset = null;
-
     final (Color onLabelColor, Color offLabelColor)? onOffLabelColors =
       MediaQuery.onOffSwitchLabelsOf(context)
         ? (CupertinoDynamicColor.resolve(
@@ -660,13 +654,6 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
     final WidgetStateProperty<MouseCursor> effectiveMouseCursor =
       widget.mouseCursor ?? _defaultMouseCursor;
 
-    final double effectiveActiveThumbRadius =
-      effectiveActiveIcon == null ? _kThumbRadius : _kThumbRadiusWithIcon;
-
-    final double effectiveInactiveThumbRadius =
-      effectiveInactiveIcon == null && widget.inactiveThumbImage == null
-        ? _kThumbRadius : _kThumbRadiusWithIcon;
-
     return Semantics(
       toggled: widget.value,
       child: GestureDetector(
@@ -719,9 +706,7 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
               ..isInteractive = isInteractive
               ..trackInnerLength = _trackInnerLength
               ..textDirection = Directionality.of(context)
-              ..inactiveThumbRadius = effectiveInactiveThumbRadius
-              ..activeThumbRadius = effectiveActiveThumbRadius
-              ..thumbOffset = thumbOffset
+              ..thumbRadius = _kThumbRadius
               ..trackHeight = _kTrackHeight
               ..trackWidth = _kTrackWidth
               ..activeIconColor = effectiveActiveIconColor
@@ -731,7 +716,6 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
               ..iconTheme = IconTheme.of(context)
               ..thumbShadow = _kThumbShadow
               ..surfaceColor = theme.scaffoldBackgroundColor
-              ..transitionalThumbSize = _kTransitionalThumbSize
               ..positionController = positionController
           ),
         ),
@@ -832,43 +816,13 @@ class _SwitchPainter extends ToggleablePainter {
     notifyListeners();
   }
 
-  double get activeThumbRadius => _activeThumbRadius!;
-  double? _activeThumbRadius;
-  set activeThumbRadius(double value) {
-    if (value == _activeThumbRadius) {
+  double get thumbRadius => _thumbRadius!;
+  double? _thumbRadius;
+  set thumbRadius(double value) {
+    if (value == _thumbRadius) {
       return;
     }
-    _activeThumbRadius = value;
-    notifyListeners();
-  }
-
-  double get inactiveThumbRadius => _inactiveThumbRadius!;
-  double? _inactiveThumbRadius;
-  set inactiveThumbRadius(double value) {
-    if (value == _inactiveThumbRadius) {
-      return;
-    }
-    _inactiveThumbRadius = value;
-    notifyListeners();
-  }
-
-  double? get thumbOffset => _thumbOffset;
-  double? _thumbOffset;
-  set thumbOffset(double? value) {
-    if (value == _thumbOffset) {
-      return;
-    }
-    _thumbOffset = value;
-    notifyListeners();
-  }
-
-  Size get transitionalThumbSize => _transitionalThumbSize!;
-  Size? _transitionalThumbSize;
-  set transitionalThumbSize(Size value) {
-    if (value == _transitionalThumbSize) {
-      return;
-    }
-    _transitionalThumbSize = value;
+    _thumbRadius = value;
     notifyListeners();
   }
 
@@ -1108,18 +1062,10 @@ class _SwitchPainter extends ToggleablePainter {
     }
 
     _pressedThumbExtension = reaction.value * _kThumbExtensionFactor;
-    final Size inactiveThumbSize = Size(
-      _inactiveThumbRadius! * 2 + _pressedThumbExtension!,
-      _inactiveThumbRadius! * 2,
+    final Size thumbSize = Size(
+      _thumbRadius! * 2 + _pressedThumbExtension!,
+      _thumbRadius! * 2,
     );
-    final Size activeThumbSize = Size(
-      _activeThumbRadius! * 2 + _pressedThumbExtension!,
-      _activeThumbRadius! * 2,
-    );
-    final Size? uncontractedThumbSize = reaction.isCompleted
-      ? inactiveThumbSize
-      : Size.lerp(inactiveThumbSize, activeThumbSize, position.value);
-    final Size thumbSize = Size(uncontractedThumbSize!.width, uncontractedThumbSize.height);
 
     final double colorValue = _colorAnimation!.value;
     final Color trackColor = Color.lerp(inactiveTrackColor, activeTrackColor, position.value)!;
