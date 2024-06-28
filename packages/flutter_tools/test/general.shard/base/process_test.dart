@@ -450,45 +450,23 @@ void main() {
   group('writeToStdinGuarded', () {
     testWithoutContext('handles any error thrown by stdin.flush', () async {
       final _ThrowsOnFlushIOSink stdin = _ThrowsOnFlushIOSink();
-      final Completer<bool> fooCommandCompleter = Completer<bool>();
-      final Future<bool> onErrorCalled = fooCommandCompleter.future;
+      Object? errorPassedToCallback;
 
-      void fooOnRun(List<String> command) {
-        ProcessUtils.writeToStdinGuarded(
-          stdin: stdin,
-          content: 'message to stdin',
-          onError: (Object error, StackTrace stackTrace) {
-            fooCommandCompleter.complete(true);
-          },
-        ).then((_) {
-          if (!fooCommandCompleter.isCompleted) {
-            fooCommandCompleter.complete(false);
-          }
-        }).onError((Exception error, StackTrace stackTrace) {
-          // onError should have handled any error, so either the onError callback
-          // or the .then callback threw. Fail the test.
-          throw error;
-        });
-      }
-
-      final FakeProcessManager processManager = FakeProcessManager.list(
-        <FakeCommand>[
-          FakeCommand(
-            command: const <String>['foo'],
-            stdin: stdin,
-            onRun: fooOnRun,
-            completer: fooCommandCompleter,
-          ),
-        ],
+      await ProcessUtils.writeToStdinGuarded(
+        stdin: stdin,
+        content: 'message to stdin',
+        onError: (Object error, StackTrace stackTrace) {
+          errorPassedToCallback = error;
+        },
       );
-
-      await processManager.run(<String>['foo']);
 
       expect(
-        await onErrorCalled,
-        isTrue,
-        reason: 'onError argument to writeToStdinGuarded should have been called',
+        errorPassedToCallback,
+        isNotNull,
+        reason: 'onError callback should have been invoked.',
       );
+
+      expect(errorPassedToCallback, const TypeMatcher<SocketException>());
     });
   });
 }
