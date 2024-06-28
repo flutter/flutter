@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TBD:
+// - showOnScreen
+// - animationStyle, including null for no snap
+// - snapThreshold as a percentage of childExtent
+// - tests
+
 
 import 'dart:math' as math;
 
@@ -13,6 +19,26 @@ import 'framework.dart';
 import 'scroll_position.dart';
 import 'scrollable.dart';
 import 'ticker_provider.dart';
+
+/// A sliver that keeps its Widget child at the top of the a [CustomScrollView].
+///
+/// This sliver is preferable to the general purpose [SliverPersistentHeader]
+/// for its relatively narrow use case because there's no need to create a
+/// [SliverPersistentHeaderDelegate] or to predict the header's size.
+///
+/// {@tool dartpad}
+/// This example ...
+///
+/// ** See code in examples/api/lib/widgets/sliver/floating_header_sliver.0.dart **
+/// {@end-tool}
+class SliverFloatingHeader extends StatefulWidget {
+  const SliverFloatingHeader({ super.key, required this.child });
+
+  final Widget child;
+
+  @override
+  State<SliverFloatingHeader> createState() => _SliverFloatingHeaderState();
+}
 
 class _SnapTrigger extends StatefulWidget {
   const _SnapTrigger(this.child);
@@ -57,27 +83,6 @@ class _SnapTriggerState extends State<_SnapTrigger> {
   Widget build(BuildContext context) => widget.child;
 }
 
-/// A sliver that keeps its Widget child at the top of the a [CustomScrollView].
-///
-/// This sliver is preferable to the general purpose [SliverPersistentHeader]
-/// for its relatively narrow use case because there's no need to create a
-/// [SliverPersistentHeaderDelegate] or to predict the header's size.
-///
-/// {@tool dartpad}
-/// This example demonstrates that the sliver's size can change. Pressing the
-/// floating action button replaces the one line of header text with two lines.
-///
-/// ** See code in examples/api/lib/widgets/sliver/pinned_header_sliver.0.dart **
-/// {@end-tool}
-class SliverFloatingHeader extends StatefulWidget {
-  const SliverFloatingHeader({ super.key, required this.child });
-
-  final Widget child;
-
-  @override
-  State<SliverFloatingHeader> createState() => _SliverFloatingHeaderState();
-}
-
 class _SliverFloatingHeaderState extends State<SliverFloatingHeader> with SingleTickerProviderStateMixin {
   ScrollPosition? position;
 
@@ -118,10 +123,15 @@ class _RenderSliverFloatingHeader extends RenderSliverSingleBoxAdapter {
     super.child
   }) : _vsync = vsync;
 
+  late Animation<double> snapAnimation;
   AnimationController? snapController;
   double? lastScrollOffset;
+
+  // The distance from the start of the header to the start of the viewport. Whent the
+  // header is showing it varies between 0 (completely visible) and childExtent (not visible
+  // because it's just abopve the viewport's starting edge). It's used to compute the
+  // header's paintExtent which defines where the header will appear - see paint().
   late double effectiveScrollOffset;
-  bool isScrolling = false;
 
   TickerProvider? get vsync => _vsync;
   TickerProvider? _vsync;
@@ -138,9 +148,40 @@ class _RenderSliverFloatingHeader extends RenderSliverSingleBoxAdapter {
     }
   }
 
+  // Called each time the position's isScrollingNotifier indicates that scrolling has
+  // stopped or started, i.e. if the sliver "is scrolling".
   void isScrollingUpdate(ScrollPosition position) {
-    isScrolling = position.isScrollingNotifier.value;
+    if (position.isScrollingNotifier.value) {
+      snapController?.stop();
+    } else {
+      final ScrollDirection direction = position.userScrollDirection;
+      final bool headerIsPartiallyVisible = switch (direction) {
+        ScrollDirection.forward when effectiveScrollOffset! <= 0 => false, // completely visible
+        ScrollDirection.reverse when effectiveScrollOffset! >= childExtent => false, // not visible
+        _ => true,
+      };
+      if (headerIsPartiallyVisible) {
+        snapController ??= AnimationController(vsync: vsync!, duration: Duration(milliseconds: 500))
+          ..addListener(() {
+            if (effectiveScrollOffset != snapAnimation.value) {
+              effectiveScrollOffset = snapAnimation.value;
+              markNeedsLayout();
+            }
+          });
+        snapAnimation = snapController!.drive(
+          Tween<double>(
+            begin: effectiveScrollOffset,
+            end: switch (direction) {
+              ScrollDirection.forward => 0,
+              _ => childExtent,
+            },
+          ).chain(CurveTween(curve: Curves.easeInOut)),
+        );
+        snapController!.forward(from: 0.0);
+      }
+    }
   }
+
   double get childExtent {
     if (child == null) {
       return 0.0;
@@ -159,30 +200,31 @@ class _RenderSliverFloatingHeader extends RenderSliverSingleBoxAdapter {
     super.detach();
   }
 
+  // True if the header has been laid at at least once (lastScrollOffset != null) and either:
+  // - We're scrolling forward: constraints.scrollOffset < lastScrollOffset
+  // - The header's already partially visible: effectiveScrollOffset < childExtent
+  // Scrolling forwards (towards the scrollable's start) is the trigger that causes the
+  // header to be shown.
+  bool get floatingHeaderNeedsToBeUpdated {
+    return lastScrollOffset != null &&
+      (constraints.scrollOffset < lastScrollOffset! || effectiveScrollOffset < childExtent);
+  }
+
   @override
   void performLayout() {
-    // TBD make this a bool getter with a long explanation
-    if (lastScrollOffset != null && (constraints.scrollOffset < lastScrollOffset! || effectiveScrollOffset < childExtent)) {
-      double delta = lastScrollOffset! - constraints.scrollOffset;
-
-      // TBD make this a bool getter with a long explanation
-      final bool allowFloatingExpansion = constraints.userScrollDirection == ScrollDirection.forward;
-        //|| (_lastStartedScrollDirection != null && _lastStartedScrollDirection == ScrollDirection.forward);
-      if (allowFloatingExpansion) {
+    if (!floatingHeaderNeedsToBeUpdated) {
+      effectiveScrollOffset = constraints.scrollOffset;
+    } else {
+      double delta = lastScrollOffset! - constraints.scrollOffset; // > 0 when the header is growing
+      if (constraints.userScrollDirection == ScrollDirection.forward) {
         if (effectiveScrollOffset > childExtent) {
-          // We're scrolled off-screen, but should reveal, so pretend we're just at the limit.
-          effectiveScrollOffset = childExtent;
+          effectiveScrollOffset = childExtent; // The header is now just above the start edge of viewport.
         }
       } else {
-        if (delta > 0.0) { // TBD: clamp delta instead?
-          // Disallow the expansion. (But allow shrinking, i.e. delta < 0.0 is fine.)
-          delta = 0.0;
-        }
+        // delta > 0 and scrolling forward is a contradiction. Assume that it's noise (set delta to 0).
+        delta = clampDouble(delta, -double.infinity, 0);
       }
       effectiveScrollOffset = clampDouble(effectiveScrollOffset - delta, 0.0, constraints.scrollOffset);
-    } else {
-      // Change the if logic so this is first.
-      effectiveScrollOffset = constraints.scrollOffset;
     }
 
     child?.layout(constraints.asBoxConstraints(), parentUsesSize: true);
