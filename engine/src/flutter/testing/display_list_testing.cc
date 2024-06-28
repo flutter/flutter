@@ -742,6 +742,14 @@ void DisplayListStreamDispatcher::clipRect(const SkRect& rect, ClipOp clip_op,
            << "isaa: " << is_aa
            << ");" << std::endl;
 }
+void DisplayListStreamDispatcher::clipOval(const SkRect& bounds, ClipOp clip_op,
+                                           bool is_aa) {
+  startl() << "clipOval("
+           << bounds << ", "
+           << clip_op << ", "
+           << "isaa: " << is_aa
+           << ");" << std::endl;
+}
 void DisplayListStreamDispatcher::clipRRect(const SkRRect& rrect,
                          ClipOp clip_op,
                          bool is_aa) {

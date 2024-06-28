@@ -122,6 +122,11 @@ void DlSkCanvasDispatcher::clipRect(const SkRect& rect,
                                     bool is_aa) {
   canvas_->clipRect(rect, ToSk(clip_op), is_aa);
 }
+void DlSkCanvasDispatcher::clipOval(const SkRect& bounds,
+                                    ClipOp clip_op,
+                                    bool is_aa) {
+  canvas_->clipRRect(SkRRect::MakeOval(bounds), ToSk(clip_op), is_aa);
+}
 void DlSkCanvasDispatcher::clipRRect(const SkRRect& rrect,
                                      ClipOp clip_op,
                                      bool is_aa) {

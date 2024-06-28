@@ -2073,6 +2073,39 @@ class CanvasCompareTester {
                      ctx.canvas->ClipRect(r_clip, ClipOp::kDifference, false);
                    })
                    .with_diff_clip());
+    // Skia lacks clipOval and requires us to make an oval SkRRect
+    SkRRect rr_oval_clip = SkRRect::MakeOval(r_clip);
+    RenderWith(testP, env, intersect_tolerance,
+               CaseParameters(
+                   "Hard ClipOval",
+                   [=](const SkSetupContext& ctx) {
+                     ctx.canvas->clipRRect(rr_oval_clip, SkClipOp::kIntersect,
+                                           false);
+                   },
+                   [=](const DlSetupContext& ctx) {
+                     ctx.canvas->ClipOval(r_clip, ClipOp::kIntersect, false);
+                   }));
+    RenderWith(testP, env, intersect_tolerance,
+               CaseParameters(
+                   "AntiAlias ClipOval",
+                   [=](const SkSetupContext& ctx) {
+                     ctx.canvas->clipRRect(rr_oval_clip, SkClipOp::kIntersect,
+                                           true);
+                   },
+                   [=](const DlSetupContext& ctx) {
+                     ctx.canvas->ClipOval(r_clip, ClipOp::kIntersect, true);
+                   }));
+    RenderWith(testP, env, diff_tolerance,
+               CaseParameters(
+                   "Hard ClipOval Diff",
+                   [=](const SkSetupContext& ctx) {
+                     ctx.canvas->clipRRect(rr_oval_clip, SkClipOp::kDifference,
+                                           false);
+                   },
+                   [=](const DlSetupContext& ctx) {
+                     ctx.canvas->ClipOval(r_clip, ClipOp::kDifference, false);
+                   })
+                   .with_diff_clip());
     // This test RR clip used to use very small radii, but due to
     // optimizations in the HW rrect rasterization, this caused small
     // bulges in the corners of the RRect which were interpreted as
@@ -2850,12 +2883,14 @@ TEST_F(DisplayListRendering, DrawDiagonalLines) {
   SkPoint p2 = SkPoint::Make(kRenderRight, kRenderBottom);
   SkPoint p3 = SkPoint::Make(kRenderLeft, kRenderBottom);
   SkPoint p4 = SkPoint::Make(kRenderRight, kRenderTop);
+  // Adding some edge to edge diagonals that run through the points about
+  // 16 units in from the center of that edge.
   // Adding some edge center to edge center diagonals to better fill
   // out the RRect Clip so bounds checking sees less empty bounds space.
-  SkPoint p5 = SkPoint::Make(kRenderCenterX, kRenderTop);
-  SkPoint p6 = SkPoint::Make(kRenderRight, kRenderCenterY);
-  SkPoint p7 = SkPoint::Make(kRenderLeft, kRenderCenterY);
-  SkPoint p8 = SkPoint::Make(kRenderCenterX, kRenderBottom);
+  SkPoint p5 = SkPoint::Make(kRenderCenterX, kRenderTop + 15);
+  SkPoint p6 = SkPoint::Make(kRenderRight - 15, kRenderCenterY);
+  SkPoint p7 = SkPoint::Make(kRenderCenterX, kRenderBottom - 15);
+  SkPoint p8 = SkPoint::Make(kRenderLeft + 15, kRenderCenterY);
 
   CanvasCompareTester::RenderAll(  //
       TestParameters(
@@ -2880,9 +2915,13 @@ TEST_F(DisplayListRendering, DrawDiagonalLines) {
           .set_draw_line());
 }
 
-TEST_F(DisplayListRendering, DrawHorizontalLine) {
-  SkPoint p1 = SkPoint::Make(kRenderLeft, kRenderCenterY);
-  SkPoint p2 = SkPoint::Make(kRenderRight, kRenderCenterY);
+TEST_F(DisplayListRendering, DrawHorizontalLines) {
+  SkPoint p1 = SkPoint::Make(kRenderLeft, kRenderTop + 16);
+  SkPoint p2 = SkPoint::Make(kRenderRight, kRenderTop + 16);
+  SkPoint p3 = SkPoint::Make(kRenderLeft, kRenderCenterY);
+  SkPoint p4 = SkPoint::Make(kRenderRight, kRenderCenterY);
+  SkPoint p5 = SkPoint::Make(kRenderLeft, kRenderBottom - 16);
+  SkPoint p6 = SkPoint::Make(kRenderRight, kRenderBottom - 16);
 
   CanvasCompareTester::RenderAll(  //
       TestParameters(
@@ -2893,18 +2932,26 @@ TEST_F(DisplayListRendering, DrawHorizontalLine) {
             SkPaint p = ctx.paint;
             p.setStyle(SkPaint::kStroke_Style);
             ctx.canvas->drawLine(p1, p2, p);
+            ctx.canvas->drawLine(p3, p4, p);
+            ctx.canvas->drawLine(p5, p6, p);
           },
           [=](const DlRenderContext& ctx) {  //
             ctx.canvas->DrawLine(p1, p2, ctx.paint);
+            ctx.canvas->DrawLine(p3, p4, ctx.paint);
+            ctx.canvas->DrawLine(p5, p6, ctx.paint);
           },
           kDrawHVLineFlags)
           .set_draw_line()
           .set_horizontal_line());
 }
 
-TEST_F(DisplayListRendering, DrawVerticalLine) {
-  SkPoint p1 = SkPoint::Make(kRenderCenterX, kRenderTop);
-  SkPoint p2 = SkPoint::Make(kRenderCenterY, kRenderBottom);
+TEST_F(DisplayListRendering, DrawVerticalLines) {
+  SkPoint p1 = SkPoint::Make(kRenderLeft + 16, kRenderTop);
+  SkPoint p2 = SkPoint::Make(kRenderLeft + 16, kRenderBottom);
+  SkPoint p3 = SkPoint::Make(kRenderCenterX, kRenderTop);
+  SkPoint p4 = SkPoint::Make(kRenderCenterX, kRenderBottom);
+  SkPoint p5 = SkPoint::Make(kRenderRight - 16, kRenderTop);
+  SkPoint p6 = SkPoint::Make(kRenderRight - 16, kRenderBottom);
 
   CanvasCompareTester::RenderAll(  //
       TestParameters(
@@ -2915,9 +2962,13 @@ TEST_F(DisplayListRendering, DrawVerticalLine) {
             SkPaint p = ctx.paint;
             p.setStyle(SkPaint::kStroke_Style);
             ctx.canvas->drawLine(p1, p2, p);
+            ctx.canvas->drawLine(p3, p4, p);
+            ctx.canvas->drawLine(p5, p6, p);
           },
           [=](const DlRenderContext& ctx) {  //
             ctx.canvas->DrawLine(p1, p2, ctx.paint);
+            ctx.canvas->DrawLine(p3, p4, ctx.paint);
+            ctx.canvas->DrawLine(p5, p6, ctx.paint);
           },
           kDrawHVLineFlags)
           .set_draw_line()
@@ -2929,12 +2980,14 @@ TEST_F(DisplayListRendering, DrawDiagonalDashedLines) {
   SkPoint p2 = SkPoint::Make(kRenderRight, kRenderBottom);
   SkPoint p3 = SkPoint::Make(kRenderLeft, kRenderBottom);
   SkPoint p4 = SkPoint::Make(kRenderRight, kRenderTop);
+  // Adding some edge to edge diagonals that run through the points about
+  // 16 units in from the center of that edge.
   // Adding some edge center to edge center diagonals to better fill
   // out the RRect Clip so bounds checking sees less empty bounds space.
-  SkPoint p5 = SkPoint::Make(kRenderCenterX, kRenderTop);
-  SkPoint p6 = SkPoint::Make(kRenderRight, kRenderCenterY);
-  SkPoint p7 = SkPoint::Make(kRenderLeft, kRenderCenterY);
-  SkPoint p8 = SkPoint::Make(kRenderCenterX, kRenderBottom);
+  SkPoint p5 = SkPoint::Make(kRenderCenterX, kRenderTop + 15);
+  SkPoint p6 = SkPoint::Make(kRenderRight - 15, kRenderCenterY);
+  SkPoint p7 = SkPoint::Make(kRenderCenterX, kRenderBottom - 15);
+  SkPoint p8 = SkPoint::Make(kRenderLeft + 15, kRenderCenterY);
 
   // Full diagonals are 100x100 which are 140 in length
   // Dashing them with 25 on, 5 off means that the last
@@ -2955,7 +3008,7 @@ TEST_F(DisplayListRendering, DrawDiagonalDashedLines) {
             SkPaint p = ctx.paint;
             p.setStyle(SkPaint::kStroke_Style);
             SkScalar intervals[2] = {25.0f, 5.0f};
-            p.setPathEffect(SkDashPathEffect::Make(intervals, 2.0f, 0.0f));
+            p.setPathEffect(SkDashPathEffect::Make(intervals, 2, 0.0f));
             ctx.canvas->drawLine(p1, p2, p);
             ctx.canvas->drawLine(p3, p4, p);
             ctx.canvas->drawLine(p5, p6, p);
@@ -3125,7 +3178,7 @@ TEST_F(DisplayListRendering, DrawPointsAsPoints) {
   const SkScalar x3 = kRenderCenterX + 0.1;
   const SkScalar x4 = (kRenderRight + kRenderCenterX) * 0.5;
   const SkScalar x5 = kRenderRight - 16;
-  const SkScalar x6 = kRenderRight;
+  const SkScalar x6 = kRenderRight - 1;
 
   const SkScalar y0 = kRenderTop;
   const SkScalar y1 = kRenderTop + 16;
@@ -3133,7 +3186,7 @@ TEST_F(DisplayListRendering, DrawPointsAsPoints) {
   const SkScalar y3 = kRenderCenterY + 0.1;
   const SkScalar y4 = (kRenderBottom + kRenderCenterY) * 0.5;
   const SkScalar y5 = kRenderBottom - 16;
-  const SkScalar y6 = kRenderBottom;
+  const SkScalar y6 = kRenderBottom - 1;
 
   // clang-format off
   const SkPoint points[] = {
@@ -3177,7 +3230,7 @@ TEST_F(DisplayListRendering, DrawPointsAsLines) {
   const SkScalar y0 = kRenderTop;
   const SkScalar y1 = kRenderTop + 16;
   const SkScalar y2 = kRenderBottom - 16;
-  const SkScalar y3 = kRenderBottom;
+  const SkScalar y3 = kRenderBottom - 1;
 
   // clang-format off
   const SkPoint points[] = {
@@ -3226,10 +3279,12 @@ TEST_F(DisplayListRendering, DrawPointsAsPolygon) {
       SkPoint::Make(kRenderRight, kRenderBottom),
       SkPoint::Make(kRenderLeft, kRenderBottom),
       SkPoint::Make(kRenderLeft, kRenderTop),
-      SkPoint::Make(kRenderCenterX, kRenderTop),
-      SkPoint::Make(kRenderRight, kRenderCenterY),
-      SkPoint::Make(kRenderCenterX, kRenderBottom),
-      SkPoint::Make(kRenderLeft, kRenderCenterY),
+
+      SkPoint::Make(kRenderCenterX, kRenderTop + 15),
+      SkPoint::Make(kRenderRight - 15, kRenderCenterY),
+      SkPoint::Make(kRenderCenterX, kRenderBottom - 15),
+      SkPoint::Make(kRenderLeft + 15, kRenderCenterY),
+      SkPoint::Make(kRenderCenterX, kRenderTop + 15),
   };
   const int count1 = sizeof(points1) / sizeof(points1[0]);
 
@@ -3730,7 +3785,7 @@ TEST_F(DisplayListRendering, DrawShadow) {
       },
       kRenderCornerRadius, kRenderCornerRadius);
   const DlColor color = DlColor::kDarkGrey();
-  const SkScalar elevation = 5;
+  const SkScalar elevation = 7;
 
   CanvasCompareTester::RenderAll(  //
       TestParameters(
@@ -3756,7 +3811,7 @@ TEST_F(DisplayListRendering, DrawShadowTransparentOccluder) {
       },
       kRenderCornerRadius, kRenderCornerRadius);
   const DlColor color = DlColor::kDarkGrey();
-  const SkScalar elevation = 5;
+  const SkScalar elevation = 7;
 
   CanvasCompareTester::RenderAll(  //
       TestParameters(
@@ -3782,7 +3837,7 @@ TEST_F(DisplayListRendering, DrawShadowDpr) {
       },
       kRenderCornerRadius, kRenderCornerRadius);
   const DlColor color = DlColor::kDarkGrey();
-  const SkScalar elevation = 5;
+  const SkScalar elevation = 7;
 
   CanvasCompareTester::RenderAll(  //
       TestParameters(

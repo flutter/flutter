@@ -105,6 +105,9 @@ class DlCanvas {
   virtual void ClipRect(const SkRect& rect,
                         ClipOp clip_op = ClipOp::kIntersect,
                         bool is_aa = false) = 0;
+  virtual void ClipOval(const SkRect& bounds,
+                        ClipOp clip_op = ClipOp::kIntersect,
+                        bool is_aa = false) = 0;
   virtual void ClipRRect(const SkRRect& rrect,
                          ClipOp clip_op = ClipOp::kIntersect,
                          bool is_aa = false) = 0;

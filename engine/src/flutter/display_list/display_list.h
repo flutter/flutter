@@ -98,9 +98,11 @@ namespace flutter {
   V(TransformReset)                 \
                                     \
   V(ClipIntersectRect)              \
+  V(ClipIntersectOval)              \
   V(ClipIntersectRRect)             \
   V(ClipIntersectPath)              \
   V(ClipDifferenceRect)             \
+  V(ClipDifferenceOval)             \
   V(ClipDifferenceRRect)            \
   V(ClipDifferencePath)             \
                                     \
