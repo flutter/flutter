@@ -292,6 +292,7 @@ abstract class ProcessUtils {
     Null handleError(Object error, StackTrace stackTrace) {
       try {
         onError(error, stackTrace);
+        completer.complete();
       } on Exception catch (e) {
         completer.completeError(e);
       }
@@ -319,6 +320,7 @@ abstract class ProcessUtils {
         }
       },
     );
+
     return completer.future;
   }
 }
