@@ -286,10 +286,7 @@ abstract class ProcessUtils {
   }) async {
     final Completer<void> completer = Completer<void>();
 
-    // Future.onError specifically requires a return type of FutureOr<Null>, so
-    // we can't use void here.
-    // ignore: prefer_void_to_null
-    Null handleError(Object error, StackTrace stackTrace) {
+    void handleError(Object error, StackTrace stackTrace) {
       try {
         onError(error, stackTrace);
         completer.complete();
@@ -304,9 +301,12 @@ abstract class ProcessUtils {
       } else {
         stdin.write(content);
       }
-      stdin.flush().then((_) {
-        completer.complete();
-      }).onError(handleError);
+      stdin.flush().then(
+        (_) {
+          completer.complete();
+        },
+        onError: handleError,
+      );
     }
 
     runZonedGuarded(
