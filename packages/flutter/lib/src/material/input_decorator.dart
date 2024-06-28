@@ -859,6 +859,8 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
     return !decoration.isCollapsed && decoration.border.isOutline;
   }
 
+  Offset get _densityOffset => decoration.visualDensity.baseSizeAdjustment;
+
   @override
   void visitChildrenForSemantics(RenderObjectVisitor visitor) {
     if (icon != null) {
@@ -1025,9 +1027,8 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
     // The height of the input needs to accommodate label above and counter and
     // helperError below, when they exist.
     final double bottomHeight = subtextSize?.bottomHeight ?? 0.0;
-    final Offset densityOffset = decoration.visualDensity.baseSizeAdjustment;
     final BoxConstraints inputConstraints = boxConstraints
-      .deflate(EdgeInsets.only(top: contentPadding.vertical + topHeight + bottomHeight + densityOffset.dy))
+      .deflate(EdgeInsets.only(top: contentPadding.vertical + topHeight + bottomHeight + _densityOffset.dy))
       .tighten(width: inputWidth);
 
     final RenderBox? input = this.input;
@@ -1067,10 +1068,10 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
       + inputHeight
       + fixBelowInput
       + contentPadding.bottom
-      + densityOffset.dy,
+      + _densityOffset.dy,
     );
     final double minContainerHeight = decoration.isDense! || decoration.isCollapsed || expands
-      ? 0.0
+      ? inputHeight
       : kMinInteractiveDimension;
     final double maxContainerHeight = math.max(0.0, boxConstraints.maxHeight - bottomHeight);
     final double containerHeight = expands
@@ -1101,8 +1102,8 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
       + inputInternalBaseline
       + baselineAdjustment
       + interactiveAdjustment
-      + densityOffset.dy / 2.0;
-    final double maxContentHeight = containerHeight - contentPadding.vertical - topHeight - densityOffset.dy;
+      + _densityOffset.dy / 2.0;
+    final double maxContentHeight = containerHeight - contentPadding.vertical - topHeight - _densityOffset.dy;
     final double alignableHeight = fixAboveInput + inputHeight + fixBelowInput;
     final double maxVerticalOffset = maxContentHeight - alignableHeight;
 
@@ -1234,12 +1235,11 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
     final double inputHeight = _lineHeight(availableInputWidth, <RenderBox?>[input, hint]);
     final double inputMaxHeight = <double>[inputHeight, prefixHeight, suffixHeight].reduce(math.max);
 
-    final Offset densityOffset = decoration.visualDensity.baseSizeAdjustment;
     final double contentHeight = contentPadding.top
       + (label == null ? 0.0 : decoration.floatingLabelHeight)
       + inputMaxHeight
       + contentPadding.bottom
-      + densityOffset.dy;
+      + _densityOffset.dy;
     final double containerHeight = <double>[iconHeight, contentHeight, prefixIconHeight, suffixIconHeight].reduce(math.max);
     final double minContainerHeight = decoration.isDense! || expands
       ? 0.0
@@ -1491,8 +1491,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
       // Temporary opt-in fix for https://github.com/flutter/flutter/issues/54028
       // Center the scaled label relative to the border.
       final double outlinedFloatingY = (-labelHeight * _kFinalLabelScale) / 2.0 + borderWeight / 2.0;
-      final Offset densityOffset = decoration.visualDensity.baseSizeAdjustment;
-      final double floatingY = isOutlineBorder ? outlinedFloatingY : contentPadding.top + densityOffset.dy / 2;
+      final double floatingY = isOutlineBorder ? outlinedFloatingY : contentPadding.top + _densityOffset.dy / 2;
       final double scale = lerpDouble(1.0, _kFinalLabelScale, t)!;
       final double centeredFloatX = _boxParentData(container!).offset.dx +
           _boxSize(container).width / 2.0 - floatWidth / 2.0;
@@ -2517,10 +2516,9 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 ///
 /// {@tool dartpad}
 /// This sample shows how to style a `TextField` with a prefixIcon that changes color
-/// based on the `MaterialState`. The color defaults to gray, be blue while focused
-/// and red if in an error state.
+/// based on the `MaterialState`. The color defaults to gray and is green while focused.
 ///
-/// ** See code in examples/api/lib/material/input_decorator/input_decoration.material_state.0.dart **
+/// ** See code in examples/api/lib/material/input_decorator/input_decoration.widget_state.0.dart **
 /// {@end-tool}
 ///
 /// {@tool dartpad}
@@ -2528,7 +2526,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 /// based on the `MaterialState` through the use of `ThemeData`. The color defaults
 /// to gray, be blue while focused and red if in an error state.
 ///
-/// ** See code in examples/api/lib/material/input_decorator/input_decoration.material_state.1.dart **
+/// ** See code in examples/api/lib/material/input_decorator/input_decoration.widget_state.1.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -4672,9 +4670,9 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
   @override
   TextStyle? get hintStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
     if (states.contains(MaterialState.disabled)) {
-      return TextStyle(color: Theme.of(context).disabledColor);
+      return TextStyle(color: _colors.onSurface.withOpacity(0.38));
     }
-    return TextStyle(color: Theme.of(context).hintColor);
+    return TextStyle(color: _colors.onSurfaceVariant);
   });
 
   @override

@@ -2381,7 +2381,7 @@ class CustomMultiChildLayout extends MultiChildRenderObjectWidget {
 ///  * [FittedBox], which sizes and positions its child widget to fit the parent
 ///    according to a given [BoxFit] discipline.
 ///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
-///  * [Understanding constraints](https://flutter.dev/docs/development/ui/layout/constraints),
+///  * [Understanding constraints](https://docs.flutter.dev/ui/layout/constraints),
 ///    an in-depth article about layout in Flutter.
 class SizedBox extends SingleChildRenderObjectWidget {
   /// Creates a fixed size box. The [width] and [height] parameters can be null
@@ -5934,8 +5934,8 @@ class RichText extends MultiChildRenderObjectWidget {
 /// various fields on this class in more detail.
 ///
 /// The [image] is not disposed of by this widget. Creators of the widget are
-/// expected to call [Image.dispose] on the [image] once the [RawImage] is no
-/// longer buildable.
+/// expected to call [dart:ui.Image.dispose] on the [image] once the [RawImage]
+/// is no longer buildable.
 ///
 /// This widget is rarely used directly. Instead, consider using [Image].
 class RawImage extends LeafRenderObjectWidget {
@@ -5966,8 +5966,8 @@ class RawImage extends LeafRenderObjectWidget {
   /// The image to display.
   ///
   /// Since a [RawImage] is stateless, it does not ever dispose this image.
-  /// Creators of a [RawImage] are expected to call [Image.dispose] on this
-  /// image handle when the [RawImage] will no longer be needed.
+  /// Creators of a [RawImage] are expected to call [dart:ui.Image.dispose] on
+  /// this image handle when the [RawImage] will no longer be needed.
   final ui.Image? image;
 
   /// A string identifying the source of the image.

@@ -923,7 +923,7 @@ void main() {
     // Import for the new embedding class.
     expect(mainActivity.contains('import io.flutter.embedding.android.FlutterActivity'), true);
 
-    expect(logger.statusText, isNot(contains('https://github.com/flutter/flutter/wiki/Upgrading-pre-1.12-Android-projects')));
+    expect(logger.statusText, isNot(contains('https://github.com/flutter/flutter/blob/main/docs/platforms/android/Upgrading-pre-1.12-Android-projects.md')));
   }, overrides: <Type, Generator>{
     Logger: () => logger,
   });
@@ -3288,7 +3288,7 @@ void main() {
     await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
     expect(logger.errorText, contains(_kNoPlatformsMessage));
     expect(logger.statusText, contains('To add platforms, run `flutter create -t plugin --platforms <platforms> .` under ${globals.fs.path.normalize(globals.fs.path.relative(projectDir.path))}.'));
-    expect(logger.statusText, contains('For more information, see https://flutter.dev/go/plugin-platforms.'));
+    expect(logger.statusText, contains('For more information, see https://flutter.dev/to/pubspec-plugin-platforms.'));
 
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(),
@@ -3304,7 +3304,7 @@ void main() {
     await runner.run(<String>['create', '--no-pub', '--template=plugin_ffi', projectDir.path]);
     expect(logger.errorText, contains(_kNoPlatformsMessage));
     expect(logger.statusText, contains('To add platforms, run `flutter create -t plugin_ffi --platforms <platforms> .` under ${globals.fs.path.normalize(globals.fs.path.relative(projectDir.path))}.'));
-    expect(logger.statusText, contains('For more information, see https://flutter.dev/go/plugin-platforms.'));
+    expect(logger.statusText, contains('For more information, see https://flutter.dev/to/pubspec-plugin-platforms.'));
 
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(),
