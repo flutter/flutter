@@ -460,10 +460,14 @@ void main() {
           onError: (Object error, StackTrace stackTrace) {
             fooCommandCompleter.complete(true);
           },
-        ).then((_) => fooCommandCompleter.complete(false))
-         .onError((_, __) {
-          // Fail the test.
-          throw Exception("writeToStdinGuarded shouldn't have thrown.");
+        ).then((_) {
+          if (!fooCommandCompleter.isCompleted) {
+            fooCommandCompleter.complete(false);
+          }
+        }).onError((Exception error, StackTrace stackTrace) {
+          // onError should have handled any error, so either the onError callback
+          // or the .then callback threw.
+          throw error;
         });
       }
 
