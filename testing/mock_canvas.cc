@@ -214,6 +214,13 @@ void MockCanvas::ClipRect(const SkRect& rect, ClipOp op, bool is_aa) {
   state_stack_.back().clipRect(rect, op, is_aa);
 }
 
+void MockCanvas::ClipOval(const SkRect& bounds, ClipOp op, bool is_aa) {
+  ClipEdgeStyle style = is_aa ? kSoftClipEdgeStyle : kHardClipEdgeStyle;
+  draw_calls_.emplace_back(
+      DrawCall{current_layer_, ClipOvalData{bounds, op, style}});
+  state_stack_.back().clipOval(bounds, op, is_aa);
+}
+
 void MockCanvas::ClipRRect(const SkRRect& rrect, ClipOp op, bool is_aa) {
   ClipEdgeStyle style = is_aa ? kSoftClipEdgeStyle : kHardClipEdgeStyle;
   draw_calls_.emplace_back(
@@ -518,6 +525,16 @@ static std::ostream& operator<<(std::ostream& os,
 std::ostream& operator<<(std::ostream& os,
                          const MockCanvas::ClipRectData& data) {
   return os << data.rect << " " << data.clip_op << " " << data.style;
+}
+
+bool operator==(const MockCanvas::ClipOvalData& a,
+                const MockCanvas::ClipOvalData& b) {
+  return a.bounds == b.bounds && a.clip_op == b.clip_op && a.style == b.style;
+}
+
+std::ostream& operator<<(std::ostream& os,
+                         const MockCanvas::ClipOvalData& data) {
+  return os << data.bounds << " " << data.clip_op << " " << data.style;
 }
 
 bool operator==(const MockCanvas::ClipRRectData& a,
