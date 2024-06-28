@@ -1227,9 +1227,9 @@ void main() {
     );
   });
 
-  group('repeatTimes tests for repeated animation', () {
+  group('repeatCount tests for repeated animation', () {
     test(
-      'calling repeat by setting repeatTimes as zero shall throw Assertion',
+      'calling repeat by setting repeatCount as zero shall throw Assertion',
       () {
         final AnimationController controller = AnimationController(
           duration: const Duration(milliseconds: 100),
@@ -1239,14 +1239,14 @@ void main() {
 
         expect(controller.value, 0.0);
         expect(
-          () => controller.repeat(reverse: true, repeatTimes: 0),
+          () => controller.repeat(reverse: true, repeatCount: 0),
           throwsAssertionError,
         );
       },
     );
 
     test(
-      'calling repeat by setting repeatTimes as negative shall throw Assertion',
+      'calling repeat by setting repeatCount as negative shall throw Assertion',
       () {
         final AnimationController controller = AnimationController(
           duration: const Duration(milliseconds: 100),
@@ -1256,14 +1256,14 @@ void main() {
 
         expect(controller.value, 0.0);
         expect(
-          () => controller.repeat(reverse: true, repeatTimes: -1),
+          () => controller.repeat(reverse: true, repeatCount: -1),
           throwsAssertionError,
         );
       },
     );
 
     test(
-      'calling repeat by setting repeatTimes as valid with reverse as false, shall run animation accordingly',
+      'calling repeat by setting repeatCount as valid with reverse as false, shall run animation accordingly',
       () {
         final AnimationController controller = AnimationController(
           duration: const Duration(milliseconds: 100),
@@ -1272,7 +1272,7 @@ void main() {
         );
 
         expect(controller.value, 0.0);
-        controller.repeat(repeatTimes: 1);
+        controller.repeat(repeatCount: 1);
         tick(Duration.zero);
         tick(const Duration(milliseconds: 25));
         expect(controller.value, 0.25);
@@ -1286,7 +1286,7 @@ void main() {
         controller.reset();
 
         expect(controller.value, 0.0);
-        controller.repeat(repeatTimes: 2);
+        controller.repeat(repeatCount: 2);
         tick(Duration.zero);
         tick(const Duration(milliseconds: 25));
         expect(controller.value, 0.25);
@@ -1301,7 +1301,7 @@ void main() {
     );
 
     test(
-      'calling repeat by setting repeatTimes as valid with reverse as true, shall run animation accordingly',
+      'calling repeat by setting repeatCount as valid with reverse as true, shall run animation accordingly',
       () {
         final AnimationController controller = AnimationController(
           duration: const Duration(milliseconds: 100),
@@ -1310,7 +1310,7 @@ void main() {
         );
 
         expect(controller.value, 0.0);
-        controller.repeat(reverse: true, repeatTimes: 2);
+        controller.repeat(reverse: true, repeatCount: 2);
         tick(Duration.zero);
         tick(const Duration(milliseconds: 25));
         expect(controller.value, 0.25);
