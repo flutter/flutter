@@ -2625,7 +2625,7 @@ void main() {
       expect(getAppBarBackgroundColor(tester), scrolledColor);
 
       // Close the drawer using the Scaffold's method.
-      tester.state<ScaffoldState>(find.byType(Scaffold)).openEndDrawer();
+      tester.state<ScaffoldState>(find.byType(Scaffold)).closeDrawer();
       await tester.pumpAndSettle();
 
       // The AppBar should still have the scrolled color.

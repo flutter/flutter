@@ -767,10 +767,13 @@ class _AppBarState extends State<AppBar> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (Scaffold.maybeOf(context)?.isDrawerOpen == false) {
-      _scrollNotificationObserver = ScrollNotificationObserver.maybeOf(context);
-      _scrollNotificationObserver?.addListener(_handleScrollNotification);
+    _scrollNotificationObserver?.removeListener(_handleScrollNotification);
+    if (Scaffold.maybeOf(context)?.isDrawerOpen ?? false) {
+      _scrollNotificationObserver = null;
+      return;
     }
+    _scrollNotificationObserver = ScrollNotificationObserver.maybeOf(context);
+    _scrollNotificationObserver?.addListener(_handleScrollNotification);
   }
 
   @override
