@@ -117,10 +117,6 @@ class DisplayListBuilder final : public virtual DlCanvas,
                 ClipOp clip_op = ClipOp::kIntersect,
                 bool is_aa = false) override;
   // |DlCanvas|
-  void ClipOval(const SkRect& bounds,
-                ClipOp clip_op = ClipOp::kIntersect,
-                bool is_aa = false) override;
-  // |DlCanvas|
   void ClipRRect(const SkRRect& rrect,
                  ClipOp clip_op = ClipOp::kIntersect,
                  bool is_aa = false) override;
@@ -402,10 +398,6 @@ class DisplayListBuilder final : public virtual DlCanvas,
   // |DlOpReceiver|
   void clipRect(const SkRect& rect, ClipOp clip_op, bool is_aa) override {
     ClipRect(rect, clip_op, is_aa);
-  }
-  // |DlOpReceiver|
-  void clipOval(const SkRect& bounds, ClipOp clip_op, bool is_aa) override {
-    ClipOval(bounds, clip_op, is_aa);
   }
   // |DlOpReceiver|
   void clipRRect(const SkRRect& rrect, ClipOp clip_op, bool is_aa) override {

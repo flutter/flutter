@@ -51,7 +51,6 @@ class DlSkCanvasDispatcher : public virtual DlOpReceiver,
   void transformReset() override;
 
   void clipRect(const SkRect& rect, ClipOp clip_op, bool is_aa) override;
-  void clipOval(const SkRect& bounds, ClipOp clip_op, bool is_aa) override;
   void clipRRect(const SkRRect& rrect, ClipOp clip_op, bool is_aa) override;
   void clipPath(const SkPath& path, ClipOp clip_op, bool is_aa) override;
 

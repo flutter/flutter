@@ -566,11 +566,11 @@ struct TransformResetOp final : TransformClipOpBase {
 // the header, but the Windows compiler keeps wanting to expand that
 // packing into more bytes than needed (even when they are declared as
 // packed bit fields!)
-#define DEFINE_CLIP_SHAPE_OP(shapename, shapetype, clipop)                     \
-  struct Clip##clipop##shapename##Op final : TransformClipOpBase {             \
-    static constexpr auto kType = DisplayListOpType::kClip##clipop##shapename; \
+#define DEFINE_CLIP_SHAPE_OP(shapetype, clipop)                                \
+  struct Clip##clipop##shapetype##Op final : TransformClipOpBase {             \
+    static constexpr auto kType = DisplayListOpType::kClip##clipop##shapetype; \
                                                                                \
-    Clip##clipop##shapename##Op(Sk##shapetype shape, bool is_aa)               \
+    Clip##clipop##shapetype##Op(Sk##shapetype shape, bool is_aa)               \
         : is_aa(is_aa), shape(shape) {}                                        \
                                                                                \
     const bool is_aa;                                                          \
@@ -578,17 +578,15 @@ struct TransformResetOp final : TransformClipOpBase {
                                                                                \
     void dispatch(DispatchContext& ctx) const {                                \
       if (op_needed(ctx)) {                                                    \
-        ctx.receiver.clip##shapename(shape, DlCanvas::ClipOp::k##clipop,       \
+        ctx.receiver.clip##shapetype(shape, DlCanvas::ClipOp::k##clipop,       \
                                      is_aa);                                   \
       }                                                                        \
     }                                                                          \
   };
-DEFINE_CLIP_SHAPE_OP(Rect, Rect, Intersect)
-DEFINE_CLIP_SHAPE_OP(Oval, Rect, Intersect)
-DEFINE_CLIP_SHAPE_OP(RRect, RRect, Intersect)
-DEFINE_CLIP_SHAPE_OP(Rect, Rect, Difference)
-DEFINE_CLIP_SHAPE_OP(Oval, Rect, Difference)
-DEFINE_CLIP_SHAPE_OP(RRect, RRect, Difference)
+DEFINE_CLIP_SHAPE_OP(Rect, Intersect)
+DEFINE_CLIP_SHAPE_OP(RRect, Intersect)
+DEFINE_CLIP_SHAPE_OP(Rect, Difference)
+DEFINE_CLIP_SHAPE_OP(RRect, Difference)
 #undef DEFINE_CLIP_SHAPE_OP
 
 #define DEFINE_CLIP_PATH_OP(clipop)                                       \
