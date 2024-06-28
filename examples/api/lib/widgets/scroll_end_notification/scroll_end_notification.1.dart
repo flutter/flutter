@@ -51,11 +51,11 @@ class _SliverAutoScrollExampleState extends State<SliverAutoScrollExample> {
     );
   }
 
-  // After an interactive scroll "ends", if the alignedItem is partially visible
-  // at the top of bottom of the viewport, then auto-scroll so that it's
+  // After an interactive scroll ends, if the alignedItem is partially visible
+  // at the top or bottom of the viewport, then auto-scroll so that it's
   // completely visible. To accomodate mouse-wheel scrolls and other small
-  // adjustments, scrolls that change the scroll offset by less than item's
-  // extent don't trigger an auto-scroll.
+  // adjustments, scrolls that change the scroll offset by less than
+  // the alignedItem's extent don't trigger an auto-scroll.
   void maybeAutoScrollAlignedItem(RenderSliver alignedItem) {
     final SliverConstraints constraints = alignedItem.constraints;
     final SliverGeometry geometry = alignedItem.geometry!;
@@ -75,7 +75,7 @@ class _SliverAutoScrollExampleState extends State<SliverAutoScrollExample> {
     }
   }
 
-  // Calls maybeAutoScrollAlignedItem in a post-frame callback that
+  // Calls maybeAutoScrollAlignedItem in a post-frame callback so that
   // auto-scrolls are triggered _after_ the current scroll activity
   // has completed. Otherwise auto-scrolling would be a no-op.
   bool handleScrollNotification(ScrollNotification notification) {
@@ -132,9 +132,9 @@ class _SliverAutoScrollExampleState extends State<SliverAutoScrollExample> {
   }
 }
 
-// A big list item sliver that's easy to spot. The provided key is
-// assigned to the aligned sliver's child so that we can find the
-// RenderSliver later with BuildContext.findAncestorRenderObjectOfType.
+// A big list item that's easy to spot. The provided key is assigned to
+// the aligned sliver's child so that we can find the this item's RenderSliver
+// later with BuildContext.findAncestorRenderObjectOfType.
 class BigOrangeSliver extends StatelessWidget {
   const BigOrangeSliver({ super.key, required this.sliverChildKey });
 
