@@ -314,7 +314,7 @@ abstract class ProcessUtils {
       (Object error, StackTrace stackTrace) {
         handleError(error, stackTrace);
 
-        // We may have already completed with an error in the above catch block.
+        // We may have already completed with an error in `handleError`.
         if (!completer.isCompleted) {
           completer.complete();
         }
