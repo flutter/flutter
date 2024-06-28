@@ -706,11 +706,12 @@ class AnimationController extends Animation<double>
   /// provided, [duration] will be used instead, which has to be set before [repeat] is
   /// called either in the constructor or later by using the [duration] setter.
   ///
-  /// With [repeatTimes] set as valid value, animation will be executed by given times.
-  /// If value not given, infinite animation shall be simulated.
+  /// If a value is passed to [repeatCount], the animation will perform that many
+  /// iterations before stopping. Otherwise, the animation repeats indefinitely.
   ///
-  /// Returns a [TickerFuture] that never completes. The [TickerFuture.orCancel] future
-  /// completes with an error when the animation is stopped (e.g. with [stop]).
+  /// Returns a [TickerFuture] that never completes, unless a [repeatCount] is specified.
+  /// The [TickerFuture.orCancel] future completes with an error when the animation is
+  /// stopped (e.g. with [stop]).
   ///
   /// The most recently returned [TickerFuture], if any, is marked as having been
   /// canceled, meaning the future never completes and its [TickerFuture.orCancel]
@@ -720,7 +721,7 @@ class AnimationController extends Animation<double>
     double? max,
     bool reverse = false,
     Duration? period,
-    int? repeatTimes,
+    int? repeatCount,
   }) {
     min ??= lowerBound;
     max ??= upperBound;
@@ -738,9 +739,9 @@ class AnimationController extends Animation<double>
     }());
     assert(max >= min);
     assert(max <= upperBound && min >= lowerBound);
-    assert(repeatTimes == null || repeatTimes > 0, 'Repeat times shall be greater than zero if not null');
+    assert(repeatCount == null || repeatCount > 0, 'Repeat times shall be greater than zero if not null');
     stop();
-    return _startSimulation(_RepeatingSimulation(_value, min, max, reverse, period!, _directionSetter, repeatTimes,));
+    return _startSimulation(_RepeatingSimulation(_value, min, max, reverse, period!, _directionSetter, repeatCount));
   }
 
   void _directionSetter(_AnimationDirection direction) {
@@ -974,11 +975,11 @@ class _RepeatingSimulation extends Simulation {
     this.max,
     this.reverse,
     Duration period,
-    this.directionSetter, [
-    this.repeatTimes,
-  ])  : assert(
-          repeatTimes == null || repeatTimes > 0,
-          'Repeat times shall be greater than zero if not null',
+    this.directionSetter,
+    this.repeatCount,
+  )  : assert(
+          repeatCount == null || repeatCount > 0,
+          'Repeat count shall be greater than zero if not null',
         ),
         _periodInSeconds = period.inMicroseconds / Duration.microsecondsPerSecond,
         _initialT = (max == min) ? 0.0 : ((clampDouble(initialValue, min, max) - min) / (max - min)) * (period.inMicroseconds / Duration.microsecondsPerSecond) {
@@ -989,11 +990,25 @@ class _RepeatingSimulation extends Simulation {
   final double min;
   final double max;
   final bool reverse;
-  final int? repeatTimes;
+  final int? repeatCount;
   final _DirectionSetter directionSetter;
 
   final double _periodInSeconds;
   final double _initialT;
+
+  double get _calculateSimulationExitTime {
+    // if reverse simulation is [true], then we shall double the repeat times
+    // else, use the given value
+    final int effectiveRepeatTimes = repeatCount! * (reverse ? 2 : 1);
+
+    // [exitTimeInSeconds] is the time in seconds which will help
+    // to determine when to complete the simulation. [Fixed to 3 decimal points]
+    return double.parse(
+      (effectiveRepeatTimes * _periodInSeconds).toStringAsFixed(3),
+    );
+  }
+
+  late final double _exitTimeInSeconds = _calculateSimulationExitTime;
 
   @override
   double x(double timeInSeconds) {
@@ -1017,8 +1032,8 @@ class _RepeatingSimulation extends Simulation {
 
   @override
   bool isDone(double timeInSeconds) {
-    if (repeatTimes == null) {
-      // if repeat times is null it is to be consider as repeated simulation
+    if (repeatCount == null) {
+      // if repeat count is null it is to be consider as repeated simulation
       return false;
     }
 
@@ -1027,18 +1042,8 @@ class _RepeatingSimulation extends Simulation {
       (timeInSeconds + _initialT).toStringAsFixed(3),
     );
 
-    // if reverse simulation is [true], then we shall double the repeat times
-    // else, use the given value
-    final int effectiveRepeatTimes = repeatTimes! * (reverse ? 2 : 1);
-
-    // [exitTimeInSeconds] is the time in seconds which will help
-    // to determine when to complete the simulation. [Fixed to 3 decimal points]
-    final double exitTimeInSeconds = double.parse(
-      (effectiveRepeatTimes * _periodInSeconds).toStringAsFixed(3),
-    );
-
     // if [totalTimeInSeconds] elapsed the [exitTimeInSeconds],
     // consider marking the simulation as "DONE"
-    return totalTimeInSeconds >= exitTimeInSeconds;
+    return totalTimeInSeconds >= _exitTimeInSeconds;
   }
 }
