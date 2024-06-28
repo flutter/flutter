@@ -806,14 +806,16 @@ class _WidgetStatePropertyWith<T> implements WidgetStateProperty<T> {
 /// ```dart
 /// final WidgetStateMapKey selectedError = WidgetState.selected & WidgetState.error;
 ///
-/// WidgetStateProperty<Color>.map(<WidgetStateMapKey, Color>{
-///   selectedError & WidgetState.hovered: Colors.redAccent,
-///   selectedError: Colors.red,
-///   WidgetState.any: Colors.black,
-/// });
+/// final WidgetStateProperty<Color> color = WidgetStateProperty<Color>.map(
+///   <WidgetStateMapKey, Color>{
+///     selectedError & WidgetState.hovered: Colors.redAccent,
+///     selectedError: Colors.red,
+///     WidgetState.any: Colors.black,
+///   },
+/// );
 ///
 /// // MaterialPropertyResolver implementation:
-/// WidgetStateProperty.resolveWith<Color>(
+/// final WidgetStateProperty<Color> color = WidgetStateProperty.resolveWith<Color>(
 ///   (Set<WidgetState> states) {
 ///     if (states.containsAll(<WidgetState>{WidgetState.selected, WidgetState.error})) {
 ///       if (states.contains(WidgetState.hovered)) {
