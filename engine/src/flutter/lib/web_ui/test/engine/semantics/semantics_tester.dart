@@ -75,6 +75,7 @@ class SemanticsTester {
     bool? hasPaste,
     bool? hasDidGainAccessibilityFocus,
     bool? hasDidLoseAccessibilityFocus,
+    bool? hasFocus,
     bool? hasCustomAction,
     bool? hasDismiss,
     bool? hasMoveCursorForwardByWord,
@@ -241,6 +242,9 @@ class SemanticsTester {
     }
     if (hasDidLoseAccessibilityFocus ?? false) {
       actions |= ui.SemanticsAction.didLoseAccessibilityFocus.index;
+    }
+    if (hasFocus ?? false) {
+      actions |= ui.SemanticsAction.focus.index;
     }
     if (hasCustomAction ?? false) {
       actions |= ui.SemanticsAction.customAction.index;

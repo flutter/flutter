@@ -81,9 +81,6 @@ typedef _FocusTarget = ({
 
   /// The listener for the "focus" DOM event.
   DomEventListener domFocusListener,
-
-  /// The listener for the "blur" DOM event.
-  DomEventListener domBlurListener,
 });
 
 /// Implements accessibility focus management for arbitrary elements.
@@ -135,7 +132,6 @@ class AccessibilityFocusManager {
         semanticsNodeId: semanticsNodeId,
         element: previousTarget.element,
         domFocusListener: previousTarget.domFocusListener,
-        domBlurListener: previousTarget.domBlurListener,
       );
       return;
     }
@@ -148,14 +144,12 @@ class AccessibilityFocusManager {
     final _FocusTarget newTarget = (
       semanticsNodeId: semanticsNodeId,
       element: element,
-      domFocusListener: createDomEventListener((_) => _setFocusFromDom(true)),
-      domBlurListener: createDomEventListener((_) => _setFocusFromDom(false)),
+      domFocusListener: createDomEventListener((_) => _didReceiveDomFocus()),
     );
     _target = newTarget;
 
     element.tabIndex = 0;
     element.addEventListener('focus', newTarget.domFocusListener);
-    element.addEventListener('blur', newTarget.domBlurListener);
   }
 
   /// Stops managing the focus of the current element, if any.
@@ -170,10 +164,9 @@ class AccessibilityFocusManager {
     }
 
     target.element.removeEventListener('focus', target.domFocusListener);
-    target.element.removeEventListener('blur', target.domBlurListener);
   }
 
-  void _setFocusFromDom(bool acquireFocus) {
+  void _didReceiveDomFocus() {
     final _FocusTarget? target = _target;
 
     if (target == null) {
@@ -184,9 +177,7 @@ class AccessibilityFocusManager {
 
     EnginePlatformDispatcher.instance.invokeOnSemanticsAction(
       target.semanticsNodeId,
-      acquireFocus
-        ? ui.SemanticsAction.didGainAccessibilityFocus
-        : ui.SemanticsAction.didLoseAccessibilityFocus,
+      ui.SemanticsAction.focus,
       null,
     );
   }
@@ -229,7 +220,7 @@ class AccessibilityFocusManager {
       // a dialog, and nothing else in the dialog is focused. The Flutter
       // framework expects that the screen reader will focus on the first (in
       // traversal order) focusable element inside the dialog and send a
-      // didGainAccessibilityFocus action. Screen readers on the web do not do
+      // SemanticsAction.focus action. Screen readers on the web do not do
       // that, and so the web engine has to implement this behavior directly. So
       // the dialog will look for a focusable element and request focus on it,
       // but now there may be a race between this method unsetting the focus and
