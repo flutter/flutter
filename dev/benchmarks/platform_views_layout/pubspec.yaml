@@ -88,6 +88,5 @@ flutter:
   assets:
     - packages/flutter_gallery_assets/people/square/ali.png
     - packages/flutter_gallery_assets/places/india_chettinad_silk_maker.png
-    - assets/image.png
 
 # PUBSPEC CHECKSUM: a6ba

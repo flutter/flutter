@@ -68,7 +68,7 @@ class PlatformViewAppState extends State<PlatformViewApp> {
                     child: ListTile(
                       title: Text('Breaking News!'),
                       subtitle: Text("Huge breaking news! Here is huge and breaking news which is both huge and breaking."),
-                      leading: Image(image: AssetImage('assets/image.png'),),
+                      leading: FlutterLogo(),
                     ),
                   );
                 },
