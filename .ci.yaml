@@ -2843,6 +2843,7 @@ targets:
   # linux motog4 benchmark
   # Moto G4, Impeller (OpenGL)
   - name: Linux_android new_gallery_opengles_impeller__transition_perf
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/148394
     recipe: devicelab/devicelab_drone
     bringup: true
     presubmit: false
