@@ -102,12 +102,14 @@ class CarouselView extends StatefulWidget {
 /// The `flexWeights` parameter is required and defines the relative size
 /// proportions of each child widget.
 ///
-/// When [consumeMaxWeight] is set to `true`, each child can be expanded to its
-/// maximum size while scrolling. For example, with [flexWeights] of `[1, 7, 1]`,
+/// When [consumeMaxWeight] is set to `true`, each child can be expanded to occupy
+/// the maximum weight while scrolling. For example, with [flexWeights] of `[1, 7, 1]`,
 /// the initial weight of the first item is 1. However, by enabling
 /// [consumeMaxWeight] and scrolling forward, the first item can expand to occupy
-/// a weight of 7, leaving a weight of 1 as white space before it. This feature
-/// is particularly useful for achieving "hero" and "center-aligned hero" layouts.
+/// a weight of 7, leaving a weight of 1 as some empty space before it. This feature
+/// is particularly useful for achieving [Hero](https://m3.material.io/components/carousel/specs#b33a5579-d648-42a9-b934-98718d65454f)
+/// and [Center-aligned hero](https://m3.material.io/components/carousel/specs#92c779ce-de8b-4dee-8201-95d3e429204f)
+/// layouts indicated in the Material Design 3.
   const CarouselView.weighted({
     super.key,
     this.padding,
@@ -128,7 +130,7 @@ class CarouselView extends StatefulWidget {
 
   /// The amount of space to surround each carousel item with.
   ///
-  /// Defaults to EdgeInsets.all(4.0).
+  /// Defaults to [EdgeInsets.all] of 4 pixels.
   final EdgeInsets? padding;
 
   /// The background color for each carousel item.
@@ -230,12 +232,12 @@ class CarouselView extends StatefulWidget {
   /// This is required for [CarouselView]. In [CarouselView.weighted], this is null.
   final double? itemExtent;
 
-  /// The weights that each visible child should occupy the viewport.
+  /// The weights that each visible child should occupy in the viewport.
   ///
-  /// The length of [flexWeights] means how many items we want to lay out on
-  /// the viewport. For example, setting [flexWeights] to `<int>[3, 2, 1]` means
-  /// there are 3 carousel items and their extents are 3/6, 2/6 and 1/6 of the
-  /// viewport extent.
+  /// The length of [flexWeights] represents how many items should be visible
+  /// at a time in the viewport. For example, setting [flexWeights] to
+  /// `<int>[3, 2, 1]` means there are 3 carousel items and their extents are
+  /// 3/6, 2/6 and 1/6 of the viewport extent.
   ///
   /// This is a required property in [CarouselView.weighted]. This is null
   /// for default [CarouselView].
@@ -317,13 +319,7 @@ class _CarouselViewState extends State<CarouselView> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final AxisDirection axisDirection = _getDirection(context);
-    final ScrollPhysics physics = widget.itemSnapping
-      ? const CarouselScrollPhysics()
-      : ScrollConfiguration.of(context).getScrollPhysics(context);
+  Widget _buildCarouselItem(ThemeData theme, int index) {
     final EdgeInsets effectivePadding = widget.padding ?? const EdgeInsets.all(4.0);
     final Color effectiveBackgroundColor = widget.backgroundColor ?? Theme.of(context).colorScheme.surface;
     final double effectiveElevation = widget.elevation ?? 0.0;
@@ -331,6 +327,81 @@ class _CarouselViewState extends State<CarouselView> {
       ?? const RoundedRectangleBorder(
         borderRadius: BorderRadius.all(Radius.circular(28.0))
       );
+    final WidgetStateProperty<Color?> effectiveOverlayColor = widget.overlayColor
+      ?? WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+        if (states.contains(WidgetState.pressed)) {
+          return theme.colorScheme.onSurface.withOpacity(0.1);
+        }
+        if (states.contains(WidgetState.hovered)) {
+          return theme.colorScheme.onSurface.withOpacity(0.08);
+        }
+        if (states.contains(WidgetState.focused)) {
+          return theme.colorScheme.onSurface.withOpacity(0.1);
+        }
+        return null;
+      });
+
+    return Padding(
+      padding: effectivePadding,
+      child: Material(
+        clipBehavior: Clip.antiAlias,
+        color: effectiveBackgroundColor,
+        elevation: effectiveElevation,
+        shape: effectiveShape,
+        child: Stack(
+          fit: StackFit.expand,
+          children: <Widget>[
+            widget.children[index],
+            Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () {
+                  widget.onTap?.call(index);
+                },
+                overlayColor: effectiveOverlayColor,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSliverCarousel(ThemeData theme) {
+    if (_itemExtent != null) {
+      return _SliverFixedExtentCarousel(
+        itemExtent: _itemExtent!,
+        minExtent: widget.shrinkExtent,
+        delegate: SliverChildBuilderDelegate(
+          (BuildContext context, int index) {
+            return _buildCarouselItem(theme, index);
+          },
+          childCount: widget.children.length,
+        ),
+      );
+    }
+
+    assert(_weights != null);
+    return _SliverWeightedCarousel(
+      consumeMaxWeight: _consumeMaxWeight,
+      shrinkExtent: widget.shrinkExtent,
+      weights: _weights!,
+      delegate: SliverChildBuilderDelegate(
+        (BuildContext context, int index) {
+          return _buildCarouselItem(theme, index);
+        },
+        childCount: widget.children.length,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final AxisDirection axisDirection = _getDirection(context);
+    final ScrollPhysics physics = widget.itemSnapping
+      ? const CarouselScrollPhysics()
+      : ScrollConfiguration.of(context).getScrollPhysics(context);
 
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
@@ -352,95 +423,7 @@ class _CarouselViewState extends State<CarouselView> {
               offset: position,
               clipBehavior: Clip.antiAlias,
               slivers: <Widget>[
-                if (_itemExtent != null) _SliverFixedExtentCarousel(
-                  itemExtent: _itemExtent!,
-                  minExtent: widget.shrinkExtent,
-                  delegate: SliverChildBuilderDelegate(
-                    (BuildContext context, int index) {
-                      return Padding(
-                        padding: effectivePadding,
-                        child: Material(
-                          clipBehavior: Clip.antiAlias,
-                          color: effectiveBackgroundColor,
-                          elevation: effectiveElevation,
-                          shape: effectiveShape,
-                          child: Stack(
-                            fit: StackFit.expand,
-                            children: <Widget>[
-                              widget.children[index],
-                              Material(
-                                color: Colors.transparent,
-                                child: InkWell(
-                                  onTap: () {
-                                    widget.onTap?.call(index);
-                                  },
-                                  overlayColor: widget.overlayColor ?? WidgetStateProperty.resolveWith((Set<WidgetState> states) {
-                                    if (states.contains(WidgetState.pressed)) {
-                                      return theme.colorScheme.onSurface.withOpacity(0.1);
-                                    }
-                                    if (states.contains(WidgetState.hovered)) {
-                                      return theme.colorScheme.onSurface.withOpacity(0.08);
-                                    }
-                                    if (states.contains(WidgetState.focused)) {
-                                      return theme.colorScheme.onSurface.withOpacity(0.1);
-                                    }
-                                    return null;
-                                  }),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                    childCount: widget.children.length,
-                  ),
-                ),
-                if (_weights != null) _SliverWeightedCarousel(
-                  consumeMaxWeight: _consumeMaxWeight,
-                  shrinkExtent: widget.shrinkExtent,
-                  weights: _weights!,
-                  delegate: SliverChildBuilderDelegate(
-                    (BuildContext context, int index) {
-                      return Padding(
-                        padding: effectivePadding,
-                        child: Material(
-                          clipBehavior: Clip.antiAlias,
-                          color: effectiveBackgroundColor,
-                          elevation: effectiveElevation,
-                          shape: effectiveShape,
-                          child: Stack(
-                            fit: StackFit.expand,
-                            children: <Widget>[
-                              widget.children[index],
-                              Material(
-                                color: Colors.transparent,
-                                child: InkWell(
-                                  onTap: () {
-                                    widget.onTap?.call(index);
-                                  },
-                                  overlayColor: widget.overlayColor ?? WidgetStateProperty.resolveWith((Set<WidgetState> states) {
-                                    if (states.contains(WidgetState.pressed)) {
-                                      return theme.colorScheme.onSurface.withOpacity(0.1);
-                                    }
-                                    if (states.contains(WidgetState.hovered)) {
-                                      return theme.colorScheme.onSurface.withOpacity(0.08);
-                                    }
-                                    if (states.contains(WidgetState.focused)) {
-                                      return theme.colorScheme.onSurface.withOpacity(0.1);
-                                    }
-                                    return null;
-                                  }),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                    childCount: widget.children.length,
-                  ),
-                ),
+                _buildSliverCarousel(theme),
               ],
             );
           },
@@ -646,13 +629,13 @@ class _RenderSliverFixedExtentCarousel extends RenderSliverFixedExtentBoxAdaptor
 /// along the cross axis.
 ///
 /// While scrolling, the extent (size) of each visible item changes dynamically
-/// based on the scrolling progress.  As the first visible item scrolls completely
+/// based on the scrolling progress. As the first visible item scrolls completely
 /// off-screen, the next item becomes the first visible item, and has the same
 /// size as the previously first item. The rest of the visible items maintain
 /// their relative layout.
 ///
-/// For example, the layout weights is [1, 6, 1]. The length of [weights] array
-/// indicates three items should be visible at a time. The layout of these items
+/// For example, if the layout weights are [1, 6, 1], the length of [weights] array
+/// indicates three items will be visible at a time. The layout of these items
 /// would be:
 ///  * First item: Extent is (1 / (1 + 6 + 1)) * viewport extent.
 ///  * Second item: Extent is (6 / (1 + 6 + 1)) * viewport extent.
@@ -951,6 +934,7 @@ class _RenderSliverWeightedCarousel extends RenderSliverFixedExtentBoxAdaptor {
   // This method is mostly the same as its parent class [RenderSliverFixedExtentList].
   // The difference is when we allow some space before the leading items or after
   // the trailing items with smaller weights, we leave extra scroll offset.
+  // TODO(quncCccccc): add the calculation for the extra scroll offset on the super class to simplify the implementation here.
   @override
   void performLayout() {
     assert((itemExtent != null && itemExtentBuilder == null) ||
