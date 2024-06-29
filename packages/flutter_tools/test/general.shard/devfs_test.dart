@@ -435,7 +435,7 @@ void main() {
   });
 
   testWithoutContext('Local DevFSWriter turns FileSystemException into DevFSException', () async {
-    final FileExceptionHandler handler = FileExceptionHandler();
+    final MutableFileSystemOpHandle handler = MutableFileSystemOpHandle();
     final FileSystem fileSystem = MemoryFileSystem.test(opHandle: handler.opHandle);
     final LocalDevFSWriter writer = LocalDevFSWriter(fileSystem: fileSystem);
     final File file = fileSystem.file('foo');

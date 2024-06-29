@@ -179,11 +179,11 @@ void main() {
     group('Windows', () {
       late FakePlatform windowsPlatform;
       late MemoryFileSystem fileSystem;
-      late FileExceptionHandler exceptionHandler;
+      late MutableFileSystemOpHandle exceptionHandler;
 
       setUp(() {
         windowsPlatform = FakePlatform(operatingSystem: 'windows');
-        exceptionHandler = FileExceptionHandler();
+        exceptionHandler = MutableFileSystemOpHandle();
         fileSystem = MemoryFileSystem.test(opHandle: exceptionHandler.opHandle);
       });
 
@@ -208,7 +208,7 @@ void main() {
       });
 
       testUsingContext('$CleanCommand handles missing delete permissions', () async {
-        final FileExceptionHandler handler = FileExceptionHandler();
+        final MutableFileSystemOpHandle handler = MutableFileSystemOpHandle();
         final FileSystem fileSystem = MemoryFileSystem.test(opHandle: handler.opHandle);
         final File throwingFile = fileSystem.file('bad')
           ..createSync();

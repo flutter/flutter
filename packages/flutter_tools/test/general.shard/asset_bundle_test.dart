@@ -618,7 +618,7 @@ flutter:
   });
 
   testUsingContext('Failed directory delete shows message', () async {
-    final FileExceptionHandler handler = FileExceptionHandler();
+    final MutableFileSystemOpHandle handler = MutableFileSystemOpHandle();
     final FileSystem fileSystem = MemoryFileSystem.test(opHandle: handler.opHandle);
 
     final Directory directory = fileSystem.directory('foo')

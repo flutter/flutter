@@ -153,7 +153,7 @@ void main() {
   });
 
   testWithoutContext('FileStore handles failure to persist file cache', () async {
-    final FileExceptionHandler handler = FileExceptionHandler();
+    final MutableFileSystemOpHandle handler = MutableFileSystemOpHandle();
     final FileSystem fileSystem = MemoryFileSystem.test(opHandle: handler.opHandle);
     final BufferLogger logger = BufferLogger.test();
 
@@ -173,7 +173,7 @@ void main() {
   });
 
   testWithoutContext('FileStore handles failure to restore file cache', () async {
-    final FileExceptionHandler handler = FileExceptionHandler();
+    final MutableFileSystemOpHandle handler = MutableFileSystemOpHandle();
     final FileSystem fileSystem = MemoryFileSystem.test(opHandle: handler.opHandle);
     final BufferLogger logger = BufferLogger.test();
 

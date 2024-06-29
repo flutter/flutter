@@ -265,7 +265,7 @@ class _NoContext implements AppContext {
 ///
 /// ```dart
 /// void main() {
-///   var handler = FileExceptionHandler();
+///   var handler = MutableFileSystemOpHandle();
 ///   var fs = MemoryFileSystem(opHandle: handler.opHandle);
 ///
 ///   var file = fs.file('foo')..createSync();
@@ -274,7 +274,7 @@ class _NoContext implements AppContext {
 ///   expect(() => file.writeAsStringSync('A'), throwsA(isA<FileSystemException>()));
 /// }
 /// ```
-class FileExceptionHandler {
+class MutableFileSystemOpHandle {
   final Map<String, Map<FileSystemOp, FileSystemException>> _contextErrors = <String, Map<FileSystemOp, FileSystemException>>{};
   final Map<FileSystemOp, FileSystemException> _tempErrors = <FileSystemOp, FileSystemException>{};
   static final RegExp _tempDirectoryEnd = RegExp('rand[0-9]+');

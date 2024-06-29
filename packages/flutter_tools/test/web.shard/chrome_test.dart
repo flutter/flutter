@@ -41,7 +41,7 @@ const List<String> kCodeCache = <String>[
 const String kDevtoolsStderr = '\n\nDevTools listening\n\n';
 
 void main() {
-  late FileExceptionHandler exceptionHandler;
+  late MutableFileSystemOpHandle exceptionHandler;
   late ChromiumLauncher chromeLauncher;
   late FileSystem fileSystem;
   late Platform platform;
@@ -50,7 +50,7 @@ void main() {
   late BufferLogger testLogger;
 
   setUp(() {
-    exceptionHandler = FileExceptionHandler();
+    exceptionHandler = MutableFileSystemOpHandle();
     operatingSystemUtils = FakeOperatingSystemUtils();
     platform = FakePlatform(operatingSystem: 'macos', environment: <String, String>{
       kChromeEnvironment: 'example_chrome',

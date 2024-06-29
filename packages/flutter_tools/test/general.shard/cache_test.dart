@@ -891,7 +891,7 @@ void main() {
   });
 
   testWithoutContext('FlutterWebSdk uses tryToDelete to handle directory edge cases', () async {
-    final FileExceptionHandler handler = FileExceptionHandler();
+    final MutableFileSystemOpHandle handler = MutableFileSystemOpHandle();
     final MemoryFileSystem fileSystem = MemoryFileSystem.test(opHandle: handler.opHandle);
     final Cache cache = Cache.test(processManager: FakeProcessManager.any(), fileSystem: fileSystem);
     final Directory webCacheDirectory = cache.getWebSdkDirectory();
@@ -911,7 +911,7 @@ void main() {
   });
 
   testWithoutContext('LegacyCanvasKitRemover removes old canvaskit artifacts if they exist', () async {
-    final FileExceptionHandler handler = FileExceptionHandler();
+    final MutableFileSystemOpHandle handler = MutableFileSystemOpHandle();
     final MemoryFileSystem fileSystem = MemoryFileSystem.test(opHandle: handler.opHandle);
     final Cache cache = Cache.test(processManager: FakeProcessManager.any(), fileSystem: fileSystem);
     final File canvasKitWasm = fileSystem.file(fileSystem.path.join(
@@ -936,7 +936,7 @@ void main() {
   });
 
   testWithoutContext('Cache handles exception thrown if stamp file cannot be parsed', () {
-    final FileExceptionHandler exceptionHandler = FileExceptionHandler();
+    final MutableFileSystemOpHandle exceptionHandler = MutableFileSystemOpHandle();
     final FileSystem fileSystem = MemoryFileSystem.test(opHandle: exceptionHandler.opHandle);
     final Logger logger = BufferLogger.test();
     final FakeCache cache = FakeCache(

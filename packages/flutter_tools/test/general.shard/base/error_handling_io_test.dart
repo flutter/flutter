@@ -60,7 +60,7 @@ void main() {
   });
 
   testWithoutContext('deleteIfExists throws tool exit if file exists on read-only volume', () {
-    final FileExceptionHandler exceptionHandler = FileExceptionHandler();
+    final MutableFileSystemOpHandle exceptionHandler = MutableFileSystemOpHandle();
     final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
       delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
       platform: linuxPlatform,
@@ -78,7 +78,7 @@ void main() {
 
   testWithoutContext('deleteIfExists does not tool exit if file exists on read-only '
     'volume and it is run under noExitOnFailure', () {
-    final FileExceptionHandler exceptionHandler = FileExceptionHandler();
+    final MutableFileSystemOpHandle exceptionHandler = MutableFileSystemOpHandle();
     final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
       delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
       platform: linuxPlatform,
@@ -99,7 +99,7 @@ void main() {
   });
 
   testWithoutContext('deleteIfExists throws tool exit if the path is not found on Windows', () {
-    final FileExceptionHandler exceptionHandler = FileExceptionHandler();
+    final MutableFileSystemOpHandle exceptionHandler = MutableFileSystemOpHandle();
     final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
       delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
       platform: windowsPlatform,
@@ -123,10 +123,10 @@ void main() {
     const int kFatalDeviceHardwareError =  483;
     const int kDeviceDoesNotExist = 433;
 
-    late FileExceptionHandler exceptionHandler;
+    late MutableFileSystemOpHandle exceptionHandler;
 
     setUp(() {
-      exceptionHandler = FileExceptionHandler();
+      exceptionHandler = MutableFileSystemOpHandle();
     });
 
     testWithoutContext('bypasses error handling when noExitOnFailure is used', () {
@@ -412,10 +412,10 @@ void main() {
     const int enospc = 28;
     const int eacces = 13;
 
-    late FileExceptionHandler exceptionHandler;
+    late MutableFileSystemOpHandle exceptionHandler;
 
     setUp(() {
-      exceptionHandler = FileExceptionHandler();
+      exceptionHandler = MutableFileSystemOpHandle();
     });
 
     testWithoutContext('when access is denied', () async {
@@ -618,10 +618,10 @@ void main() {
     const int eperm = 1;
     const int enospc = 28;
     const int eacces = 13;
-    late FileExceptionHandler exceptionHandler;
+    late MutableFileSystemOpHandle exceptionHandler;
 
     setUp(() {
-      exceptionHandler = FileExceptionHandler();
+      exceptionHandler = MutableFileSystemOpHandle();
     });
 
     testWithoutContext('when access is denied', () async {
@@ -885,7 +885,7 @@ void main() {
   });
 
   testWithoutContext("ErrorHandlingFileSystem.systemTempDirectory wraps delegates filesystem's systemTempDirectory", () {
-    final FileExceptionHandler exceptionHandler = FileExceptionHandler();
+    final MutableFileSystemOpHandle exceptionHandler = MutableFileSystemOpHandle();
 
     final MemoryFileSystem delegate = MemoryFileSystem.test(
       style: FileSystemStyle.windows,
@@ -1228,11 +1228,11 @@ Please ensure that the SDK and/or project is installed in a location that has re
 
   group('CopySync' , () {
     const int eaccess = 13;
-    late FileExceptionHandler exceptionHandler;
+    late MutableFileSystemOpHandle exceptionHandler;
     late ErrorHandlingFileSystem fileSystem;
 
     setUp(() {
-      exceptionHandler = FileExceptionHandler();
+      exceptionHandler = MutableFileSystemOpHandle();
       fileSystem = ErrorHandlingFileSystem(
         delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
         platform: linuxPlatform,

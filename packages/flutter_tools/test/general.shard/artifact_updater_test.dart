@@ -499,7 +499,7 @@ void main() {
 
   testWithoutContext('ArtifactUpdater will tool exit if deleting the existing artifacts fails with 32 on windows', () async {
     const int kSharingViolation = 32;
-    final FileExceptionHandler handler = FileExceptionHandler();
+    final MutableFileSystemOpHandle handler = MutableFileSystemOpHandle();
     final FakeOperatingSystemUtils operatingSystemUtils = FakeOperatingSystemUtils();
     final MemoryFileSystem fileSystem = MemoryFileSystem.test(opHandle: handler.opHandle);
     final BufferLogger logger = BufferLogger.test();

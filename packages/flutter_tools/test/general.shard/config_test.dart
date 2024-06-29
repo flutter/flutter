@@ -133,7 +133,7 @@ void main() {
   testWithoutContext('Config.createForTesting does not error when failing to delete a file', () {
     final BufferLogger bufferLogger = BufferLogger.test();
 
-    final FileExceptionHandler handler = FileExceptionHandler();
+    final MutableFileSystemOpHandle handler = MutableFileSystemOpHandle();
     final MemoryFileSystem fs = MemoryFileSystem.test(opHandle: handler.opHandle);
     final File file = fs.file('testfile')
         // We write invalid JSON so that we test catching a `FormatException`
