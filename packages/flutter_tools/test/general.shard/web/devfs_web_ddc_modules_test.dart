@@ -130,6 +130,7 @@ void main() {
             NullSafetyMode.unsound,
             usesDdcModuleSystem,
             webRenderer: WebRendererMode.canvaskit,
+            useLocalCanvasKit: false,
           );
           releaseAssetServer = ReleaseAssetServer(
             globals.fs.file('main.dart').uri,
@@ -414,6 +415,7 @@ void main() {
               NullSafetyMode.unsound,
               usesDdcModuleSystem,
               webRenderer: WebRendererMode.canvaskit,
+              useLocalCanvasKit: false,
             );
 
             expect(webAssetServer.basePath, 'foo/bar');
@@ -437,6 +439,7 @@ void main() {
               NullSafetyMode.unsound,
               usesDdcModuleSystem,
               webRenderer: WebRendererMode.canvaskit,
+              useLocalCanvasKit: false,
             );
 
             // Defaults to "/" when there's no base element.
@@ -462,6 +465,7 @@ void main() {
                 NullSafetyMode.unsound,
                 usesDdcModuleSystem,
                 webRenderer: WebRendererMode.canvaskit,
+                useLocalCanvasKit: false,
               ),
               throwsToolExit(),
             );
@@ -486,6 +490,7 @@ void main() {
                 NullSafetyMode.unsound,
                 usesDdcModuleSystem,
                 webRenderer: WebRendererMode.canvaskit,
+                useLocalCanvasKit: false,
               ),
               throwsToolExit(),
             );
@@ -929,6 +934,7 @@ void main() {
               ddcModuleSystem: usesDdcModuleSystem,
               webRenderer: WebRendererMode.html,
               isWasm: false,
+              useLocalCanvasKit: false,
               rootDirectory: globals.fs.currentDirectory,
             );
             webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
@@ -1066,6 +1072,7 @@ void main() {
               ddcModuleSystem: usesDdcModuleSystem,
               webRenderer: WebRendererMode.html,
               isWasm: false,
+              useLocalCanvasKit: false,
               rootDirectory: globals.fs.currentDirectory,
             );
             webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
@@ -1203,6 +1210,7 @@ void main() {
                 ddcModuleSystem: usesDdcModuleSystem,
                 webRenderer: WebRendererMode.canvaskit,
                 isWasm: false,
+                useLocalCanvasKit: false,
                 rootDirectory: globals.fs.currentDirectory,
               );
               webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
@@ -1277,6 +1285,7 @@ void main() {
               ddcModuleSystem: usesDdcModuleSystem,
               webRenderer: WebRendererMode.canvaskit,
               isWasm: false,
+              useLocalCanvasKit: false,
               rootDirectory: globals.fs.currentDirectory,
             );
             webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
@@ -1327,6 +1336,7 @@ void main() {
               ddcModuleSystem: usesDdcModuleSystem,
               webRenderer: WebRendererMode.canvaskit,
               isWasm: false,
+              useLocalCanvasKit: false,
               rootDirectory: globals.fs.currentDirectory,
             );
             webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
@@ -1379,6 +1389,7 @@ void main() {
               ddcModuleSystem: usesDdcModuleSystem,
               webRenderer: WebRendererMode.auto,
               isWasm: false,
+              useLocalCanvasKit: false,
               rootDirectory: globals.fs.currentDirectory,
             );
             webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
@@ -1433,6 +1444,7 @@ void main() {
               ddcModuleSystem: usesDdcModuleSystem,
               webRenderer: WebRendererMode.canvaskit,
               isWasm: false,
+              useLocalCanvasKit: false,
               rootDirectory: globals.fs.currentDirectory,
             );
             webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
@@ -1472,6 +1484,7 @@ void main() {
         NullSafetyMode.unsound,
         webRenderer: WebRendererMode.canvaskit,
         isWasm: false,
+        useLocalCanvasKit: false,
         testMode: true);
 
     expect(webAssetServer.defaultResponseHeaders['x-frame-options'], null);
@@ -1506,6 +1519,7 @@ void main() {
         NullSafetyMode.unsound,
         webRenderer: WebRendererMode.canvaskit,
         isWasm: false,
+        useLocalCanvasKit: false,
         testMode: true);
 
     expect(webAssetServer.defaultResponseHeaders[extraHeaderKey],
@@ -1551,6 +1565,7 @@ void main() {
               NullSafetyMode.sound,
               usesDdcModuleSystem,
               webRenderer: WebRendererMode.canvaskit,
+              useLocalCanvasKit: false,
             );
 
             expect(
@@ -1607,6 +1622,7 @@ void main() {
               ddcModuleSystem: usesDdcModuleSystem,
               webRenderer: WebRendererMode.canvaskit,
               isWasm: false,
+              useLocalCanvasKit: false,
               rootDirectory: globals.fs.currentDirectory,
             );
             webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
