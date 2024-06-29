@@ -527,4 +527,98 @@ FlutterError
       areCreateAndDispose,
     );
   });
+
+  group('CurvedAnimation value test', () {
+    const List<Curve> curves = <Curve>[
+      Curves.linear,
+      Curves.decelerate,
+      Curves.fastLinearToSlowEaseIn,
+      Curves.fastEaseInToSlowEaseOut,
+      Curves.ease,
+      Curves.easeIn,
+      Curves.easeInToLinear,
+      Curves.easeInSine,
+      Curves.easeInQuad,
+      Curves.easeInCubic,
+      Curves.easeInQuart,
+      Curves.easeInQuint,
+      Curves.easeInExpo,
+      Curves.easeInCirc,
+      Curves.easeInBack,
+      Curves.easeOut,
+      Curves.linearToEaseOut,
+      Curves.easeOutSine,
+      Curves.easeOutQuad,
+      Curves.easeOutCubic,
+      Curves.easeOutQuart,
+      Curves.easeOutQuint,
+      Curves.easeOutExpo,
+      Curves.easeOutCirc,
+      Curves.easeOutBack,
+      Curves.easeInOut,
+      Curves.easeInOutSine,
+      Curves.easeInOutQuad,
+      Curves.easeInOutCubic,
+      Curves.easeInOutCubicEmphasized,
+      Curves.easeInOutQuart,
+      Curves.easeInOutQuint,
+      Curves.easeInOutExpo,
+      Curves.easeInOutCirc,
+      Curves.easeInOutBack,
+      Curves.fastOutSlowIn,
+      Curves.slowMiddle,
+      Curves.bounceIn,
+      Curves.bounceOut,
+      Curves.bounceInOut,
+      Curves.elasticIn,
+      Curves.elasticOut,
+      Curves.elasticInOut,
+    ];
+
+    test('Value should always be between 0 and 1 for bounded controller',
+            () async {
+          final AnimationController controller = AnimationController(
+            duration: const Duration(milliseconds: 200),
+            vsync: const TestVSync(),
+          );
+
+          for (final Curve curve in curves) {
+            final CurvedAnimation curved = CurvedAnimation(
+              parent: controller,
+              curve: curve,
+            );
+
+            // Let the controller animate from 0 to 1 and check values at some points in between.
+            for (double t = 0; t <= 1; t += 0.1) {
+              controller.value = t;
+              expect(curved.value,
+                  inInclusiveRange(controller.lowerBound, controller.upperBound),
+                  reason: 'Failed for curve $curve at parent value $t');
+            }
+          }
+        });
+
+    test(
+        'Value should always be between negativeInfinity and infinity for bounded controller',
+            () async {
+          final AnimationController controller = AnimationController.unbounded(
+              duration: const Duration(milliseconds: 200),
+              vsync: const TestVSync());
+
+          for (final Curve curve in curves) {
+            final CurvedAnimation curved = CurvedAnimation(
+              parent: controller,
+              curve: curve,
+            );
+
+            // Let the controller animate from 0 to 1 and check values at some points in between.
+            for (double t = 0; t <= 1; t += 0.1) {
+              controller.value = t;
+              expect(curved.value,
+                  inInclusiveRange(controller.lowerBound, controller.upperBound),
+                  reason: 'Failed for curve $curve at parent value $t');
+            }
+          }
+        });
+  });
 }

@@ -7,6 +7,7 @@ library;
 
 import 'dart:math' as math;
 
+import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 
 import 'animation.dart';
@@ -468,6 +469,11 @@ class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<do
         return true;
       }());
       return t;
+    }
+    if (parent is AnimationController) {
+      final AnimationController controller = parent as AnimationController;
+      return clampDouble(activeCurve.transform(t), controller.lowerBound,
+          controller.upperBound);
     }
     return activeCurve.transform(t);
   }
