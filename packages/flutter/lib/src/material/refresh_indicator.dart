@@ -140,6 +140,7 @@ class RefreshIndicator extends StatefulWidget {
     this.semanticsValue,
     this.strokeWidth = RefreshProgressIndicator.defaultStrokeWidth,
     this.triggerMode = RefreshIndicatorTriggerMode.onEdge,
+    this.elevation = 2,
   }) : _indicatorType = _IndicatorType.material;
 
   /// Creates an adaptive [RefreshIndicator] based on whether the target
@@ -171,6 +172,7 @@ class RefreshIndicator extends StatefulWidget {
     this.semanticsValue,
     this.strokeWidth = RefreshProgressIndicator.defaultStrokeWidth,
     this.triggerMode = RefreshIndicatorTriggerMode.onEdge,
+    this.elevation = 2,
   }) : _indicatorType = _IndicatorType.adaptive;
 
   /// The widget below this widget in the tree.
@@ -256,6 +258,11 @@ class RefreshIndicator extends StatefulWidget {
   ///
   /// Defaults to [RefreshIndicatorTriggerMode.onEdge].
   final RefreshIndicatorTriggerMode triggerMode;
+
+  /// Defines [elevation] for `RefreshIndicator`.
+  ///
+  /// By default, the value of [elevation] is 2.0.
+  final double elevation;
 
   @override
   RefreshIndicatorState createState() => RefreshIndicatorState();
@@ -591,6 +598,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
                       valueColor: _valueColor,
                       backgroundColor: widget.backgroundColor,
                       strokeWidth: widget.strokeWidth,
+                        elevation: widget.elevation,
                     );
 
                     final Widget cupertinoIndicator = CupertinoActivityIndicator(
