@@ -996,19 +996,11 @@ class _RepeatingSimulation extends Simulation {
   final double _periodInSeconds;
   final double _initialT;
 
-  double get _calculateSimulationExitTime {
-    // if reverse simulation is [true], then we shall double the repeat times
-    // else, use the given value
-    final int effectiveRepeatTimes = repeatCount! * (reverse ? 2 : 1);
+  /// If [reverse] is true, the duration of a full cycle is doubled.
+  late final int _effectiveRepeatCount = repeatCount! * (reverse ? 2 : 1);
 
-    // [exitTimeInSeconds] is the time in seconds which will help
-    // to determine when to complete the simulation. [Fixed to 3 decimal points]
-    return double.parse(
-      (effectiveRepeatTimes * _periodInSeconds).toStringAsFixed(3),
-    );
-  }
-
-  late final double _exitTimeInSeconds = _calculateSimulationExitTime;
+  late final double _exitTimeInSeconds =
+      (_effectiveRepeatCount * _periodInSeconds) - _initialT;
 
   @override
   double x(double timeInSeconds) {
@@ -1032,18 +1024,8 @@ class _RepeatingSimulation extends Simulation {
 
   @override
   bool isDone(double timeInSeconds) {
-    if (repeatCount == null) {
-      // if repeat count is null it is to be consider as repeated simulation
-      return false;
-    }
-
-    // total simulation elapsed time [Fixed to 3 decimal points]
-    final double totalTimeInSeconds = double.parse(
-      (timeInSeconds + _initialT).toStringAsFixed(3),
-    );
-
-    // if [totalTimeInSeconds] elapsed the [exitTimeInSeconds],
+    // if [totalTimeInSeconds] elapsed the [exitTimeInSeconds] && repeatCount is not null,
     // consider marking the simulation as "DONE"
-    return totalTimeInSeconds >= _exitTimeInSeconds;
+    return repeatCount != null && (timeInSeconds >= _exitTimeInSeconds);
   }
 }
