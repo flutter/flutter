@@ -20,6 +20,22 @@ void createGetter(JSAny mock, String key, JSAny? Function() get) {
   );
 }
 
+void createGetterAndSetter(
+  JSAny mock,
+  String key,
+  JSAny? Function() get,
+  void Function(JSAny value) set,
+) {
+  objectDefineProperty(
+    mock,
+    key,
+    <String, JSFunction>{
+      'get': (() => get()).toJS,
+      'set': ((JSAny value) => set(value)).toJS,
+    }.jsify()!,
+  );
+}
+
 @JS()
 @staticInterop
 @anonymous
@@ -40,15 +56,22 @@ typedef _DartDomEventListener = JSVoid Function(web.Event event);
 class TestHttpRequest {
   TestHttpRequest() {
     _mock = DomXMLHttpRequestMock(
-        open: open.toJS,
-        send: send.toJS,
-        setRequestHeader: setRequestHeader.toJS,
-        addEventListener: addEventListener.toJS,
+      open: open.toJS,
+      send: send.toJS,
+      setRequestHeader: setRequestHeader.toJS,
+      addEventListener: addEventListener.toJS,
     );
     final JSAny mock = _mock as JSAny;
     createGetter(mock, 'headers', () => headers.jsify());
-    createGetter(mock,
-        'responseHeaders', () => responseHeaders.jsify());
+    createGetter(mock, 'responseHeaders', () => responseHeaders.jsify());
+    createGetterAndSetter(
+      mock,
+      'withCredentials',
+      () => withCredentials.toJS,
+      (JSAny value) {
+        withCredentials = value.isTruthy;
+      },
+    );
     createGetter(mock, 'status', () => status.toJS);
     createGetter(mock, 'response', () => response.jsify());
   }
@@ -57,6 +80,7 @@ class TestHttpRequest {
   MockEvent? mockEvent;
   Map<String, String> headers = <String, String>{};
   int status = -1;
+  bool withCredentials = false;
   Object? response;
 
   Map<String, String> get responseHeaders => headers;
