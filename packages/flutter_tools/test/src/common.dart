@@ -287,7 +287,7 @@ class MutableFileSystemOpHandle {
   void setHandler(
     FileSystemEntity entity,
     FileSystemOp operation,
-    void Function() handler,
+    Null Function() handler,
   ) {
     final String path = entity.path;
     _handlers[path] ??= <FileSystemOp, void Function()>{};
@@ -297,7 +297,6 @@ class MutableFileSystemOpHandle {
   void removeHandler(
     FileSystemEntity entity,
     FileSystemOp operation,
-    void Function() handler,
   ) {
     final String path = entity.path;
     _handlers[path] ??= <FileSystemOp, void Function()>{};

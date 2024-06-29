@@ -70,7 +70,7 @@ void main() {
     exceptionHandler.setHandler(
       file,
       FileSystemOp.delete,
-      () => FileSystemException('', file.path, const OSError('', 2)),
+      () => throw FileSystemException('', file.path, const OSError('', 2)),
     );
 
     expect(() => ErrorHandlingFileSystem.deleteIfExists(file), throwsToolExit());
@@ -110,7 +110,7 @@ void main() {
     exceptionHandler.setHandler(
       file,
       FileSystemOp.delete,
-      () => FileSystemException('', file.path, const OSError('', 2)),
+      () => throw FileSystemException('', file.path, const OSError('', 2)),
     );
 
     expect(() => ErrorHandlingFileSystem.deleteIfExists(file), throwsToolExit());
@@ -209,7 +209,7 @@ void main() {
       opHandle.setHandler(
         file,
         FileSystemOp.write,
-        () => FileSystemException('', file.path, const OSError('', kDeviceFull)),
+        () => throw FileSystemException('', file.path, const OSError('', kDeviceFull)),
       );
 
       const String expectedMessage = 'The target device is full';
@@ -359,7 +359,7 @@ void main() {
       opHandle.setHandler(
         directory,
         FileSystemOp.create,
-        () => FileSystemException(
+        () => throw FileSystemException(
             '', directory.path, const OSError('', kUserPermissionDenied)),
       );
 
@@ -656,17 +656,17 @@ void main() {
       exceptionHandler.setHandler(
         file,
         FileSystemOp.write,
-        () => FileSystemException('', file.path, const OSError('', eacces)),
+        () => throw FileSystemException('', file.path, const OSError('', eacces)),
       );
       exceptionHandler.setHandler(
         file,
         FileSystemOp.read,
-        () => FileSystemException('', file.path, const OSError('', eacces)),
+        () => throw FileSystemException('', file.path, const OSError('', eacces)),
       );
       exceptionHandler.setHandler(
         file,
         FileSystemOp.delete,
-        () => FileSystemException('', file.path, const OSError('', eacces)),
+        () => throw FileSystemException('', file.path, const OSError('', eacces)),
       );
       const String writeMessage =
           'Flutter failed to write to a file at "dir/file".\n'
@@ -713,7 +713,7 @@ void main() {
       exceptionHandler.setHandler(
         directory,
         FileSystemOp.delete,
-        () => FileSystemException('', directory.path, const OSError('', eperm)),
+        () => throw FileSystemException('', directory.path, const OSError('', eperm)),
       );
 
       const String createMessage =
