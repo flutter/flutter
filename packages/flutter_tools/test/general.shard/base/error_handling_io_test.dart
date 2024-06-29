@@ -417,6 +417,31 @@ void main() {
       expect(() => fileSystem.currentDirectory,
              throwsToolExit(message: 'The flutter tool cannot access the file or directory'));
     });
+
+    // TODOadd this test for Linux/macOS
+    testWithoutContext('When creating a file with recursive:true and a PathNotFoundException is thrown on a parent directory', () async {
+      final FileSystem delegate = MemoryFileSystem.test(
+        opHandle: opHandle.opHandle,
+        style: FileSystemStyle.windows,
+      );
+      final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
+        delegate: delegate,
+        platform: windowsPlatform,
+      );
+      final Directory parentDirectory = fileSystem.directory('parent');
+      final File file = parentDirectory.childFile('file');
+
+      // Simulates the parent directory being deleted/moved as soon it was created.
+      opHandle.setHandler(file, FileSystemOp.create, () {
+        parentDirectory.deleteSync();
+      });
+
+      expect(file, isNot(exists));
+      expect(
+        () => file.createSync(recursive: true),
+        throwsToolExit(message: 'TODO write a message here'), // TODO
+      );
+    });
   });
 
   group('throws ToolExit on Linux', () {
