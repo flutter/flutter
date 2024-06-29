@@ -305,6 +305,18 @@ void testMain() {
     },
   );
 
+  test('prevents default on touchstart events', () async {
+    final event = createDomEvent('Event', 'touchstart');
+
+    rootElement.dispatchEvent(event);
+
+    expect(
+      event.defaultPrevented,
+      isTrue,
+      reason: 'touchstart events should be prevented so pointer events are not cancelled later.',
+    );
+  });
+
   test(
     'can receive pointer events on the app root',
     () {
@@ -2668,6 +2680,60 @@ void testMain() {
       () => PointerBinding(view, detector: MockPointerSupportDetector(false)),
       throwsUnsupportedError,
     );
+  });
+
+  group('Listener', () {
+    late DomElement eventTarget;
+    late DomEvent expected;
+    late bool handled;
+
+    setUp(() {
+      eventTarget = createDomElement('div');
+      expected = createDomEvent('Event', 'custom-event');
+      handled = false;
+    });
+
+    test('listeners can be registered', () {
+      Listener.register(
+        event: 'custom-event',
+        target: eventTarget,
+        handler: (event) {
+          expect(event, expected);
+          handled = true;
+        },
+      );
+
+      // Trigger the event...
+      eventTarget.dispatchEvent(expected);
+      expect(handled, isTrue);
+    });
+
+    test('listeners can be unregistered', () {
+      final Listener listener = Listener.register(
+        event: 'custom-event',
+        target: eventTarget,
+        handler: (event) {
+          handled = true;
+        },
+      );
+      listener.unregister();
+
+      eventTarget.dispatchEvent(expected);
+      expect(handled, isFalse);
+    });
+
+    test('listeners are registered only once', () {
+      int timesHandled = 0;
+      Listener.register(
+        event: 'custom-event',
+        target: eventTarget,
+        handler: (event) {
+          timesHandled++;
+        },
+      );
+      eventTarget.dispatchEvent(expected);
+      expect(timesHandled, 1, reason: 'The handler ran multiple times for a single event.');
+    });
   });
 
   group('ClickDebouncer', () {
