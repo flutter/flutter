@@ -518,7 +518,13 @@ void main() {
       .childDirectory('out')
       .childDirectory('test')
       ..createSync(recursive: true);
-    handler.addError(errorDirectory, FileSystemOp.delete, const FileSystemException('', '', OSError('', kSharingViolation)));
+
+    handler.setHandler(
+      errorDirectory,
+      FileSystemOp.delete,
+      () => throw const FileSystemException(
+          '', '', OSError('', kSharingViolation)),
+    );
 
     await expectLater(() async => artifactUpdater.downloadZippedTarball(
       'test message',

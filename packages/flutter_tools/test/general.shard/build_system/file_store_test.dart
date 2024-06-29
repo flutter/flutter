@@ -153,13 +153,17 @@ void main() {
   });
 
   testWithoutContext('FileStore handles failure to persist file cache', () async {
-    final MutableFileSystemOpHandle handler = MutableFileSystemOpHandle();
-    final FileSystem fileSystem = MemoryFileSystem.test(opHandle: handler.opHandle);
+    final MutableFileSystemOpHandle fileSystemOpHandle = MutableFileSystemOpHandle();
+    final FileSystem fileSystem = MemoryFileSystem.test(opHandle: fileSystemOpHandle.opHandle);
     final BufferLogger logger = BufferLogger.test();
 
     final File cacheFile = fileSystem.file('foo')
       ..createSync();
-    handler.addError(cacheFile, FileSystemOp.write, const FileSystemException('Out of space!'));
+    fileSystemOpHandle.setHandler(
+      cacheFile,
+      FileSystemOp.write,
+      () => throw const FileSystemException('Out of space!'),
+    );
 
     final FileStore fileCache = FileStore(
       cacheFile: cacheFile,
@@ -173,13 +177,17 @@ void main() {
   });
 
   testWithoutContext('FileStore handles failure to restore file cache', () async {
-    final MutableFileSystemOpHandle handler = MutableFileSystemOpHandle();
-    final FileSystem fileSystem = MemoryFileSystem.test(opHandle: handler.opHandle);
+    final MutableFileSystemOpHandle fileSystemOpHandle = MutableFileSystemOpHandle();
+    final FileSystem fileSystem = MemoryFileSystem.test(opHandle: fileSystemOpHandle.opHandle);
     final BufferLogger logger = BufferLogger.test();
 
     final File cacheFile = fileSystem.file('foo')
       ..createSync();
-    handler.addError(cacheFile, FileSystemOp.read, const FileSystemException('Out of space!'));
+    fileSystemOpHandle.setHandler(
+      cacheFile,
+      FileSystemOp.read,
+      () => throw const FileSystemException('Out of space!'),
+    );
 
     final FileStore fileCache = FileStore(
       cacheFile: cacheFile,

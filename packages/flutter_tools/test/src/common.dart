@@ -258,6 +258,7 @@ class _NoContext implements AppContext {
   }
 }
 
+
 /// Allows inserting file system exceptions into certain
 /// [MemoryFileSystem] operations by tagging path/op combinations.
 ///
@@ -275,39 +276,53 @@ class _NoContext implements AppContext {
 /// }
 /// ```
 class MutableFileSystemOpHandle {
-  final Map<String, Map<FileSystemOp, FileSystemException>> _contextErrors = <String, Map<FileSystemOp, FileSystemException>>{};
-  final Map<FileSystemOp, FileSystemException> _tempErrors = <FileSystemOp, FileSystemException>{};
+  final Map<FileSystemOp, void Function(String path)> _tempHandlers = <FileSystemOp, void Function(String)>{};
+
+  final Map<String, Map<FileSystemOp, void Function()>> _handlers = <String, Map<FileSystemOp, void Function()>>{};
+
   static final RegExp _tempDirectoryEnd = RegExp('rand[0-9]+');
 
-  /// Add an exception that will be thrown whenever the file system attached to this
-  /// handler performs the [operation] on the [entity].
-  void addError(FileSystemEntity entity, FileSystemOp operation, FileSystemException exception) {
+  /// Sets the handler that will be called when file system performs the
+  /// [operation] on the [entity].
+  void setHandler(
+    FileSystemEntity entity,
+    FileSystemOp operation,
+    void Function() handler,
+  ) {
     final String path = entity.path;
-    _contextErrors[path] ??= <FileSystemOp, FileSystemException>{};
-    _contextErrors[path]![operation] = exception;
+    _handlers[path] ??= <FileSystemOp, void Function()>{};
+    _handlers[path]![operation] = handler;
   }
 
-  void addTempError(FileSystemOp operation, FileSystemException exception) {
-    _tempErrors[operation] = exception;
+  void removeHandler(
+    FileSystemEntity entity,
+    FileSystemOp operation,
+    void Function() handler,
+  ) {
+    final String path = entity.path;
+    _handlers[path] ??= <FileSystemOp, void Function()>{};
+    _handlers[path]!.remove(operation);
   }
 
-  /// Tear-off this method and pass it to the memory filesystem `opHandle` parameter.
+  void setTempHandler(FileSystemOp operation, void Function(String path) handler) {
+    _tempHandlers[operation] = handler;
+  }
+
+  /// Tear-off this method and pass it to the memory filesystem `opHandle`
+  /// parameter.
   void opHandle(String path, FileSystemOp operation) {
     if (path.startsWith('.tmp_') || _tempDirectoryEnd.firstMatch(path) != null) {
-      final FileSystemException? exception = _tempErrors[operation];
-      if (exception != null) {
-        throw exception;
+      final void Function(String)? handler = _tempHandlers[operation];
+      if (handler != null) {
+        handler(path);
+        return;
       }
     }
-    final Map<FileSystemOp, FileSystemException>? exceptions = _contextErrors[path];
-    if (exceptions == null) {
-      return;
+
+    final void Function()? handler = _handlers[path]?[operation];
+    if (handler != null) {
+      handler();
     }
-    final FileSystemException? exception = exceptions[operation];
-    if (exception == null) {
-      return;
-    }
-    throw exception;
   }
 }
 

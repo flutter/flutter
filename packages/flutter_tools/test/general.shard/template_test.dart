@@ -30,8 +30,8 @@ void main() {
   });
 
   testWithoutContext('Template.render throws ToolExit when FileSystem exception is raised', () {
-    final MutableFileSystemOpHandle handler = MutableFileSystemOpHandle();
-    final MemoryFileSystem fileSystem = MemoryFileSystem.test(opHandle: handler.opHandle);
+    final MutableFileSystemOpHandle fileSystemOpHandle = MutableFileSystemOpHandle();
+    final MemoryFileSystem fileSystem = MemoryFileSystem.test(opHandle: fileSystemOpHandle.opHandle);
     final Template template = Template(
       fileSystem.directory('examples')..createSync(recursive: true),
       fileSystem.currentDirectory,
@@ -40,7 +40,11 @@ void main() {
       templateRenderer: FakeTemplateRenderer(),
     );
     final Directory directory = fileSystem.directory('foo');
-    handler.addError(directory, FileSystemOp.create, const FileSystemException());
+    fileSystemOpHandle.setHandler(
+      directory,
+      FileSystemOp.create,
+      () => throw const FileSystemException(),
+    );
 
     expect(() => template.render(directory, <String, Object>{}),
       throwsToolExit());

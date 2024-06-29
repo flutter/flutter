@@ -191,10 +191,10 @@ void main() {
         xcodeProjectInterpreter.isInstalled = false;
 
         final File file = fileSystem.file('file')..createSync();
-        exceptionHandler.addError(
+        exceptionHandler.setHandler(
           file,
           FileSystemOp.delete,
-          const FileSystemException('Deletion failed'),
+          () => throw const FileSystemException('Deletion failed'),
         );
 
         final CleanCommand command = CleanCommand();
@@ -212,7 +212,11 @@ void main() {
         final FileSystem fileSystem = MemoryFileSystem.test(opHandle: handler.opHandle);
         final File throwingFile = fileSystem.file('bad')
           ..createSync();
-        handler.addError(throwingFile, FileSystemOp.delete, const FileSystemException('OS error: Access Denied'));
+        handler.setHandler(
+          throwingFile,
+          FileSystemOp.delete,
+          () => throw const FileSystemException('OS error: Access Denied'),
+        );
 
         xcodeProjectInterpreter.isInstalled = false;
 

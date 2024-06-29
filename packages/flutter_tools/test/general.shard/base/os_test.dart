@@ -514,13 +514,17 @@ void main() {
     });
 
     testWithoutContext('Linux name when reading "/etc/os-release" fails', () async {
-      final MutableFileSystemOpHandle handler = MutableFileSystemOpHandle();
-      final FileSystem fileSystem = MemoryFileSystem.test(opHandle: handler.opHandle);
+      final MutableFileSystemOpHandle fileSystemOpHandle = MutableFileSystemOpHandle();
+      final FileSystem fileSystem = MemoryFileSystem.test(opHandle: fileSystemOpHandle.opHandle);
 
       fileSystem.directory('/etc').createSync();
       final File osRelease = fileSystem.file('/etc/os-release');
 
-      handler.addError(osRelease, FileSystemOp.read, const FileSystemException());
+      fileSystemOpHandle.setHandler(
+        osRelease,
+        FileSystemOp.read,
+        () => throw const FileSystemException(),
+      );
 
       final OperatingSystemUtils utils = OperatingSystemUtils(
         fileSystem: fileSystem,
@@ -592,8 +596,8 @@ void main() {
 
   testWithoutContext('If unzip fails, include stderr in exception text', () {
     const String exceptionMessage = 'Something really bad happened.';
-    final MutableFileSystemOpHandle handler = MutableFileSystemOpHandle();
-    final FileSystem fileSystem = MemoryFileSystem.test(opHandle: handler.opHandle);
+    final MutableFileSystemOpHandle fileSystemOpHandle = MutableFileSystemOpHandle();
+    final FileSystem fileSystem = MemoryFileSystem.test(opHandle: fileSystemOpHandle.opHandle);
 
     fakeProcessManager.addCommand(
       const FakeCommand(command: <String>[
@@ -610,7 +614,11 @@ void main() {
       ..createSync();
     final File bar = fileSystem.file('bar.zip')
       ..createSync();
-    handler.addError(bar, FileSystemOp.read, const FileSystemException(exceptionMessage));
+    fileSystemOpHandle.setHandler(
+      bar,
+      FileSystemOp.read,
+      () => throw const FileSystemException(exceptionMessage),
+    );
 
     final OperatingSystemUtils osUtils = OperatingSystemUtils(
       fileSystem: fileSystem,

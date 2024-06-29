@@ -623,7 +623,11 @@ flutter:
 
     final Directory directory = fileSystem.directory('foo')
       ..createSync();
-    handler.addError(directory, FileSystemOp.delete, const FileSystemException('Expected Error Text'));
+    handler.setHandler(
+      directory,
+      FileSystemOp.delete,
+      () => throw const FileSystemException('Expected Error Text'),
+    );
 
     await writeBundle(
       directory,

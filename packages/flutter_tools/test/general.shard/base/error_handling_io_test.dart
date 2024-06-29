@@ -67,10 +67,10 @@ void main() {
     );
     final File file = fileSystem.file('file')..createSync();
 
-    exceptionHandler.addError(
+    exceptionHandler.setHandler(
       file,
       FileSystemOp.delete,
-      FileSystemException('', file.path, const OSError('', 2)),
+      () => FileSystemException('', file.path, const OSError('', 2)),
     );
 
     expect(() => ErrorHandlingFileSystem.deleteIfExists(file), throwsToolExit());
@@ -85,10 +85,10 @@ void main() {
     );
     final File file = fileSystem.file('file')..createSync();
 
-    exceptionHandler.addError(
+    exceptionHandler.setHandler(
       file,
       FileSystemOp.delete,
-      FileSystemException('', file.path, const OSError('', 2)),
+      () => throw FileSystemException('', file.path, const OSError('', 2)),
     );
 
     expect(() {
@@ -107,10 +107,10 @@ void main() {
     final File file = fileSystem.file(fileSystem.path.join('directory', 'file'))
       ..createSync(recursive: true);
 
-    exceptionHandler.addError(
+    exceptionHandler.setHandler(
       file,
       FileSystemOp.delete,
-      FileSystemException('', file.path, const OSError('', 2)),
+      () => FileSystemException('', file.path, const OSError('', 2)),
     );
 
     expect(() => ErrorHandlingFileSystem.deleteIfExists(file), throwsToolExit());
@@ -123,23 +123,24 @@ void main() {
     const int kFatalDeviceHardwareError =  483;
     const int kDeviceDoesNotExist = 433;
 
-    late MutableFileSystemOpHandle exceptionHandler;
+    late MutableFileSystemOpHandle opHandle;
 
     setUp(() {
-      exceptionHandler = MutableFileSystemOpHandle();
+      opHandle = MutableFileSystemOpHandle();
     });
 
     testWithoutContext('bypasses error handling when noExitOnFailure is used', () {
       final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
-        delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
+        delegate: MemoryFileSystem.test(opHandle: opHandle.opHandle),
         platform: windowsPlatform,
       );
       final File file = fileSystem.file('file');
 
-      exceptionHandler.addError(
+      opHandle.setHandler(
         file,
         FileSystemOp.write,
-        FileSystemException('', file.path, const OSError('', kUserPermissionDenied)),
+        () => throw FileSystemException(
+            '', file.path, const OSError('', kUserPermissionDenied)),
       );
       final Matcher throwsNonToolExit = throwsA(isNot(isA<ToolExit>()));
       expect(() => ErrorHandlingFileSystem.noExitOnFailure(
@@ -159,25 +160,28 @@ void main() {
 
     testWithoutContext('when access is denied', () async {
       final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
-        delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
+        delegate: MemoryFileSystem.test(opHandle: opHandle.opHandle),
         platform: windowsPlatform,
       );
       final File file = fileSystem.file('file');
 
-      exceptionHandler.addError(
+      opHandle.setHandler(
         file,
         FileSystemOp.write,
-        FileSystemException('', file.path, const OSError('', kUserPermissionDenied)),
+        () => throw FileSystemException(
+            '', file.path, const OSError('', kUserPermissionDenied)),
       );
-      exceptionHandler.addError(
+      opHandle.setHandler(
         file,
         FileSystemOp.open,
-        FileSystemException('', file.path, const OSError('', kUserPermissionDenied)),
+        () => throw FileSystemException(
+            '', file.path, const OSError('', kUserPermissionDenied)),
       );
-      exceptionHandler.addError(
+      opHandle.setHandler(
         file,
         FileSystemOp.create,
-        FileSystemException('', file.path, const OSError('', kUserPermissionDenied)),
+        () => throw FileSystemException(
+            '', file.path, const OSError('', kUserPermissionDenied)),
       );
 
       const String expectedMessage = 'The flutter tool cannot access the file';
@@ -197,15 +201,15 @@ void main() {
 
     testWithoutContext('when writing to a full device', () async {
       final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
-        delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
+        delegate: MemoryFileSystem.test(opHandle: opHandle.opHandle),
         platform: windowsPlatform,
       );
       final File file = fileSystem.file('file');
 
-      exceptionHandler.addError(
+      opHandle.setHandler(
         file,
         FileSystemOp.write,
-        FileSystemException('', file.path, const OSError('', kDeviceFull)),
+        () => FileSystemException('', file.path, const OSError('', kDeviceFull)),
       );
 
       const String expectedMessage = 'The target device is full';
@@ -221,15 +225,16 @@ void main() {
 
     testWithoutContext('when the file is being used by another program', () async {
       final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
-        delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
+        delegate: MemoryFileSystem.test(opHandle: opHandle.opHandle),
         platform: windowsPlatform,
       );
       final File file = fileSystem.file('file');
 
-      exceptionHandler.addError(
+      opHandle.setHandler(
         file,
         FileSystemOp.write,
-        FileSystemException('', file.path, const OSError('', kUserMappedSectionOpened)),
+        () => throw FileSystemException(
+            '', file.path, const OSError('', kUserMappedSectionOpened)),
       );
 
       const String expectedMessage = 'The file is being used by another program';
@@ -245,25 +250,28 @@ void main() {
 
     testWithoutContext('when the device driver has a fatal error', () async {
       final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
-        delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
+        delegate: MemoryFileSystem.test(opHandle: opHandle.opHandle),
         platform: windowsPlatform,
       );
       final File file = fileSystem.file('file');
 
-      exceptionHandler.addError(
+      opHandle.setHandler(
         file,
         FileSystemOp.write,
-        FileSystemException('', file.path, const OSError('', kFatalDeviceHardwareError)),
+        () => throw FileSystemException(
+            '', file.path, const OSError('', kFatalDeviceHardwareError)),
       );
-      exceptionHandler.addError(
+      opHandle.setHandler(
         file,
         FileSystemOp.open,
-        FileSystemException('', file.path, const OSError('', kFatalDeviceHardwareError)),
+        () => throw FileSystemException(
+            '', file.path, const OSError('', kFatalDeviceHardwareError)),
       );
-      exceptionHandler.addError(
+      opHandle.setHandler(
         file,
         FileSystemOp.create,
-        FileSystemException('', file.path, const OSError('', kFatalDeviceHardwareError)),
+        () => throw FileSystemException(
+            '', file.path, const OSError('', kFatalDeviceHardwareError)),
       );
 
       const String expectedMessage = 'There is a problem with the device driver '
@@ -284,25 +292,25 @@ void main() {
 
     testWithoutContext('when the device does not exist', () async {
       final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
-        delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
+        delegate: MemoryFileSystem.test(opHandle: opHandle.opHandle),
         platform: windowsPlatform,
       );
       final File file = fileSystem.file('file');
 
-      exceptionHandler.addError(
+      opHandle.setHandler(
         file,
         FileSystemOp.write,
-        FileSystemException('', file.path, const OSError('', kDeviceDoesNotExist)),
+        () => throw FileSystemException('', file.path, const OSError('', kDeviceDoesNotExist)),
       );
-      exceptionHandler.addError(
+      opHandle.setHandler(
         file,
         FileSystemOp.open,
-        FileSystemException('', file.path, const OSError('', kDeviceDoesNotExist)),
+        () => throw FileSystemException('', file.path, const OSError('', kDeviceDoesNotExist)),
       );
-      exceptionHandler.addError(
+      opHandle.setHandler(
         file,
         FileSystemOp.create,
-        FileSystemException('', file.path, const OSError('', kDeviceDoesNotExist)),
+        () => throw FileSystemException('', file.path, const OSError('', kDeviceDoesNotExist)),
       );
 
       const String expectedMessage = 'The device was not found.';
@@ -322,15 +330,16 @@ void main() {
 
     testWithoutContext('when creating a temporary dir on a full device', () async {
       final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
-        delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
+        delegate: MemoryFileSystem.test(opHandle: opHandle.opHandle),
         platform: windowsPlatform,
       );
       final Directory directory = fileSystem.directory('directory')
         ..createSync();
 
-      exceptionHandler.addTempError(
+      opHandle.setTempHandler(
         FileSystemOp.create,
-        FileSystemException('', directory.path, const OSError('', kDeviceFull)),
+        (String path) => throw FileSystemException(
+            '', directory.path, const OSError('', kDeviceFull)),
       );
 
       const String expectedMessage = 'The target device is full';
@@ -342,15 +351,16 @@ void main() {
 
     testWithoutContext('when creating a directory with permission issues', () async {
       final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
-        delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
+        delegate: MemoryFileSystem.test(opHandle: opHandle.opHandle),
         platform: windowsPlatform,
       );
       final Directory directory = fileSystem.directory('directory');
 
-      exceptionHandler.addError(
+      opHandle.setHandler(
         directory,
         FileSystemOp.create,
-        FileSystemException('', directory.path, const OSError('', kUserPermissionDenied)),
+        () => FileSystemException(
+            '', directory.path, const OSError('', kUserPermissionDenied)),
       );
 
       const String expectedMessage = 'Flutter failed to create a directory at';
@@ -360,17 +370,18 @@ void main() {
 
     testWithoutContext('when checking for directory existence with permission issues', () async {
       final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
-        delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
+        delegate: MemoryFileSystem.test(opHandle: opHandle.opHandle),
         platform: windowsPlatform,
       );
 
       final Directory directory = fileSystem.directory('directory')
         ..createSync();
 
-      exceptionHandler.addError(
+      opHandle.setHandler(
         directory,
         FileSystemOp.exists,
-        FileSystemException('', directory.path, const OSError('', kDeviceFull)),
+        () => throw FileSystemException(
+            '', directory.path, const OSError('', kDeviceFull)),
       );
 
       const String expectedMessage = 'Flutter failed to check for directory existence at';
@@ -380,15 +391,16 @@ void main() {
 
     testWithoutContext('When reading from a file without permission', () {
        final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
-        delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
+        delegate: MemoryFileSystem.test(opHandle: opHandle.opHandle),
         platform: windowsPlatform,
       );
       final File file = fileSystem.file('file');
 
-      exceptionHandler.addError(
+      opHandle.setHandler(
         file,
         FileSystemOp.read,
-        FileSystemException('', file.path, const OSError('', kUserPermissionDenied)),
+        () => throw FileSystemException(
+            '', file.path, const OSError('', kUserPermissionDenied)),
       );
 
       const String expectedMessage = 'Flutter failed to read a file at';
@@ -412,40 +424,41 @@ void main() {
     const int enospc = 28;
     const int eacces = 13;
 
-    late MutableFileSystemOpHandle exceptionHandler;
+    late MutableFileSystemOpHandle opHandle;
 
     setUp(() {
-      exceptionHandler = MutableFileSystemOpHandle();
+      opHandle = MutableFileSystemOpHandle();
     });
 
     testWithoutContext('when access is denied', () async {
       final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
-        delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
+        delegate: MemoryFileSystem.test(opHandle: opHandle.opHandle),
         platform: linuxPlatform,
       );
       final Directory directory = fileSystem.directory('dir')..createSync();
       final File file = directory.childFile('file');
 
-      exceptionHandler.addError(
+      opHandle.setHandler(
         file,
         FileSystemOp.create,
-        FileSystemException('', file.path, const OSError('', eacces)),
+        () => throw FileSystemException('', file.path, const OSError('', eacces)),
       );
-      exceptionHandler.addError(
+      opHandle.setHandler(
         file,
         FileSystemOp.write,
-        FileSystemException('', file.path, const OSError('', eacces)),
+        () => throw FileSystemException('', file.path, const OSError('', eacces)),
       );
-      exceptionHandler.addError(
+      opHandle.setHandler(
         file,
         FileSystemOp.read,
-        FileSystemException('', file.path, const OSError('', eacces)),
+        () => throw FileSystemException('', file.path, const OSError('', eacces)),
       );
-      exceptionHandler.addError(
+      opHandle.setHandler(
         file,
         FileSystemOp.delete,
-        FileSystemException('', file.path, const OSError('', eacces)),
+        () => throw FileSystemException('', file.path, const OSError('', eacces)),
       );
+
       const String writeMessage =
           'Flutter failed to write to a file at "dir/file".\n'
           'Please ensure that the SDK and/or project is installed in a location that has read/write permissions for the current user.\n'
@@ -476,21 +489,23 @@ void main() {
 
     testWithoutContext('when access is denied for directories', () async {
       final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
-        delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
+        delegate: MemoryFileSystem.test(opHandle: opHandle.opHandle),
         platform: linuxPlatform,
       );
       final Directory parent = fileSystem.directory('parent')..createSync();
       final Directory directory = parent.childDirectory('childDir');
 
-      exceptionHandler.addError(
+      opHandle.setHandler(
         directory,
         FileSystemOp.create,
-        FileSystemException('', directory.path, const OSError('', eperm)),
+        () => throw FileSystemException(
+            '', directory.path, const OSError('', eperm)),
       );
-      exceptionHandler.addError(
+      opHandle.setHandler(
         directory,
         FileSystemOp.delete,
-        FileSystemException('', directory.path, const OSError('', eperm)),
+        () => throw FileSystemException(
+            '', directory.path, const OSError('', eperm)),
       );
 
       const String createMessage =
@@ -524,15 +539,15 @@ void main() {
 
     testWithoutContext('when writing to a full device', () async {
       final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
-        delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
+        delegate: MemoryFileSystem.test(opHandle: opHandle.opHandle),
         platform: linuxPlatform,
       );
       final File file = fileSystem.file('file');
 
-      exceptionHandler.addError(
+      opHandle.setHandler(
         file,
         FileSystemOp.write,
-        FileSystemException('', file.path, const OSError('', enospc)),
+        () => throw FileSystemException('', file.path, const OSError('', enospc)),
       );
 
       const String expectedMessage = 'The target device is full';
@@ -548,16 +563,16 @@ void main() {
 
     testWithoutContext('when creating a temporary dir on a full device', () async {
       final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
-        delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
+        delegate: MemoryFileSystem.test(opHandle: opHandle.opHandle),
         platform: linuxPlatform,
       );
 
       final Directory directory = fileSystem.directory('directory')
         ..createSync();
 
-      exceptionHandler.addTempError(
+      opHandle.setTempHandler(
         FileSystemOp.create,
-        FileSystemException('', directory.path, const OSError('', enospc)),
+        (String path) => throw FileSystemException('', path, const OSError('', enospc)),
       );
 
       const String expectedMessage = 'The target device is full';
@@ -569,17 +584,17 @@ void main() {
 
     testWithoutContext('when checking for directory existence with permission issues', () async {
       final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
-        delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
+        delegate: MemoryFileSystem.test(opHandle: opHandle.opHandle),
         platform: linuxPlatform,
       );
 
       final Directory directory = fileSystem.directory('directory')
         ..createSync();
 
-      exceptionHandler.addError(
+      opHandle.setHandler(
         directory,
         FileSystemOp.exists,
-        FileSystemException('', directory.path, const OSError('', eacces)),
+        () => throw FileSystemException('', directory.path, const OSError('', eacces)),
       );
 
       const String expectedMessage = 'Flutter failed to check for directory existence at';
@@ -598,15 +613,16 @@ void main() {
 
     testWithoutContext('Rethrows os error $kSystemCodeCannotFindFile', () {
        final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
-        delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
+        delegate: MemoryFileSystem.test(opHandle: opHandle.opHandle),
         platform: linuxPlatform,
       );
       final File file = fileSystem.file('file');
 
-      exceptionHandler.addError(
+      opHandle.setHandler(
         file,
         FileSystemOp.read,
-        FileSystemException('', file.path, const OSError('', kSystemCodeCannotFindFile)),
+        () => throw FileSystemException(
+            '', file.path, const OSError('', kSystemCodeCannotFindFile)),
       );
 
       // Error is not caught by other operations.
@@ -632,25 +648,25 @@ void main() {
       final Directory directory = fileSystem.directory('dir')..createSync();
       final File file = directory.childFile('file');
 
-      exceptionHandler.addError(
+      exceptionHandler.setHandler(
         file,
         FileSystemOp.create,
-        FileSystemException('', file.path, const OSError('', eacces)),
+        () => throw FileSystemException('', file.path, const OSError('', eacces)),
       );
-      exceptionHandler.addError(
+      exceptionHandler.setHandler(
         file,
         FileSystemOp.write,
-        FileSystemException('', file.path, const OSError('', eacces)),
+        () => FileSystemException('', file.path, const OSError('', eacces)),
       );
-      exceptionHandler.addError(
+      exceptionHandler.setHandler(
         file,
         FileSystemOp.read,
-        FileSystemException('', file.path, const OSError('', eacces)),
+        () => FileSystemException('', file.path, const OSError('', eacces)),
       );
-      exceptionHandler.addError(
+      exceptionHandler.setHandler(
         file,
         FileSystemOp.delete,
-        FileSystemException('', file.path, const OSError('', eacces)),
+        () => FileSystemException('', file.path, const OSError('', eacces)),
       );
       const String writeMessage =
           'Flutter failed to write to a file at "dir/file".\n'
@@ -689,15 +705,15 @@ void main() {
       final Directory parent = fileSystem.directory('parent')..createSync();
       final Directory directory = parent.childDirectory('childDir');
 
-      exceptionHandler.addError(
+      exceptionHandler.setHandler(
         directory,
         FileSystemOp.create,
-        FileSystemException('', directory.path, const OSError('', eperm)),
+        () => throw FileSystemException('', directory.path, const OSError('', eperm)),
       );
-      exceptionHandler.addError(
+      exceptionHandler.setHandler(
         directory,
         FileSystemOp.delete,
-        FileSystemException('', directory.path, const OSError('', eperm)),
+        () => FileSystemException('', directory.path, const OSError('', eperm)),
       );
 
       const String createMessage =
@@ -735,10 +751,10 @@ void main() {
       );
       final File file = fileSystem.file('file');
 
-      exceptionHandler.addError(
+      exceptionHandler.setHandler(
         file,
         FileSystemOp.write,
-        FileSystemException('', file.path, const OSError('', enospc)),
+        () => throw FileSystemException('', file.path, const OSError('', enospc)),
       );
 
       const String expectedMessage = 'The target device is full';
@@ -761,9 +777,9 @@ void main() {
       final Directory directory = fileSystem.directory('directory')
         ..createSync();
 
-      exceptionHandler.addTempError(
+      exceptionHandler.setTempHandler(
         FileSystemOp.create,
-        FileSystemException('', directory.path, const OSError('', enospc)),
+        (String path) => throw FileSystemException('', path, const OSError('', enospc)),
       );
 
       const String expectedMessage = 'The target device is full';
@@ -781,10 +797,11 @@ void main() {
 
       final Directory directory = fileSystem.directory('directory');
 
-      exceptionHandler.addError(
+      exceptionHandler.setHandler(
         directory,
         FileSystemOp.exists,
-        FileSystemException('', directory.path, const OSError('', eacces)),
+        () => throw FileSystemException(
+            '', directory.path, const OSError('', eacces)),
       );
 
       const String expectedMessage = 'Flutter failed to check for directory existence at';
@@ -799,10 +816,10 @@ void main() {
       );
       final File file = fileSystem.file('file');
 
-      exceptionHandler.addError(
+      exceptionHandler.setHandler(
         file,
         FileSystemOp.read,
-        FileSystemException('', file.path, const OSError('', eacces)),
+        () => throw FileSystemException('', file.path, const OSError('', eacces)),
       );
 
       const String expectedMessage = 'Flutter failed to read a file at';
@@ -903,10 +920,10 @@ void main() {
     final File tempFile = delegate.systemTempDirectory.childFile('hello')
       ..createSync(recursive: true);
 
-    exceptionHandler.addError(
+    exceptionHandler.setHandler(
       tempFile,
       FileSystemOp.write,
-      FileSystemException(
+      () => throw FileSystemException(
         'Oh no!',
         tempFile.path,
         const OSError('Access denied ):', 5),
@@ -1242,10 +1259,10 @@ Please ensure that the SDK and/or project is installed in a location that has re
     testWithoutContext('copySync handles error if openSync on source file fails', () {
       final File source = fileSystem.file('source');
 
-      exceptionHandler.addError(
+      exceptionHandler.setHandler(
         source,
         FileSystemOp.open,
-        FileSystemException('', source.path, const OSError('', eaccess)),
+        () => throw FileSystemException('', source.path, const OSError('', eaccess)),
       );
 
       const String expectedMessage =
@@ -1260,10 +1277,10 @@ Please ensure that the SDK and/or project is installed in a location that has re
       fileSystem.file('source').createSync();
       final File dest = fileSystem.file('dest');
 
-      exceptionHandler.addError(
+      exceptionHandler.setHandler(
         dest,
         FileSystemOp.create,
-        FileSystemException('', dest.path, const OSError('', eaccess)),
+        () => throw FileSystemException('', dest.path, const OSError('', eaccess)),
       );
 
       const String expectedMessage =
@@ -1277,10 +1294,10 @@ Please ensure that the SDK and/or project is installed in a location that has re
       fileSystem.file('source').createSync();
       final File dest = fileSystem.file('dest');
 
-      exceptionHandler.addError(
+      exceptionHandler.setHandler(
         dest,
         FileSystemOp.open,
-        FileSystemException('', dest.path, const OSError('', eaccess)),
+        () => throw FileSystemException('', dest.path, const OSError('', eaccess)),
       );
 
       expect(dest, isNot(exists));
@@ -1302,10 +1319,10 @@ Please ensure that the SDK and/or project is installed in a location that has re
       fileSystem.file('source').writeAsBytesSync(expectedBytes);
       final File dest = fileSystem.file('dest');
 
-      exceptionHandler.addError(
+      exceptionHandler.setHandler(
         dest,
         FileSystemOp.copy,
-        FileSystemException('', dest.path, const OSError('', eaccess)),
+        () => throw FileSystemException('', dest.path, const OSError('', eaccess)),
       );
 
       fileSystem.file('source').copySync('dest');
