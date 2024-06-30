@@ -1245,8 +1245,8 @@ Map<String, List<Plugin>> _resolvePluginImplementations(
       final Plugin? defaultPackage = plugins.where((Plugin plugin) => plugin.name == defaultImplPluginName).firstOrNull;
       if (defaultPackage != null) {
         if (_hasPluginInlineImpl(defaultPackage, platformKey, pluginType: _PluginType.nativeOrDart)) {
-          if(pluginType == _PluginType.nativeOrDart
-              || _hasPluginInlineImpl(defaultPackage, platformKey, pluginType: pluginType)) {
+          if (pluginType == _PluginType.nativeOrDart ||
+              _hasPluginInlineImpl(defaultPackage, platformKey, pluginType: pluginType)) {
             // Each plugin can only have one default implementation for this [platformKey].
             defaultImplementations[plugin.name] = defaultPackage;
             // No need to add the default plugin to `pluginImplCandidates`,
