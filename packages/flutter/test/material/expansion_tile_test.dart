@@ -6,6 +6,7 @@
 // machines.
 @Tags(<String>['reduced-test-set'])
 library;
+import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -679,6 +680,31 @@ void main() {
     final ListTile listTile = tester.widget(find.byType(ListTile));
     expect(listTile.leading.runtimeType, RotationTransition);
     expect(listTile.trailing, isNull);
+  });
+
+  testWidgets('ExpansionTile respects hoverColor', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+        home: Material(
+          child: Center(
+            child: ExpansionTile(
+              overlayColor: MaterialStateProperty.resolveWith((Set<MaterialState> state){
+                if (state.contains(MaterialState.hovered)) {
+                  return const Color(0xff00ff00);
+                }
+                return null;
+              }),
+              title: const SizedBox.shrink(),
+            ),
+          ),
+        ),
+      ),
+    );
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.moveTo(tester.getCenter(find.byType(ExpansionTile)));
+    await tester.pumpAndSettle();
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    expect(inkFeatures, paints..rect(rect: const Rect.fromLTRB(0.0, 272.0, 800.0, 328.0), color: const Color(0xff00ff00)));
   });
 
   testWidgets('ExpansionTile override rotating icon test', (WidgetTester tester) async {
