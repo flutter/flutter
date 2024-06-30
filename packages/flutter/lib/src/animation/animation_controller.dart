@@ -999,8 +999,7 @@ class _RepeatingSimulation extends Simulation {
   /// If [reverse] is true, the duration of a full cycle is doubled.
   late final int _effectiveRepeatCount = repeatCount! * (reverse ? 2 : 1);
 
-  late final double _exitTimeInSeconds =
-      (_effectiveRepeatCount * _periodInSeconds) - _initialT;
+  late final double _exitTimeInSeconds = (_effectiveRepeatCount * _periodInSeconds) - _initialT;
 
   @override
   double x(double timeInSeconds) {
@@ -1024,7 +1023,7 @@ class _RepeatingSimulation extends Simulation {
 
   @override
   bool isDone(double timeInSeconds) {
-    // if [totalTimeInSeconds] elapsed the [exitTimeInSeconds] && repeatCount is not null,
+    // if [timeInSeconds] elapsed the [_exitTimeInSeconds] && repeatCount is not null,
     // consider marking the simulation as "DONE"
     return repeatCount != null && (timeInSeconds >= _exitTimeInSeconds);
   }
