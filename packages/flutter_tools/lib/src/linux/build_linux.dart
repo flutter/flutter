@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../artifacts.dart';
@@ -146,6 +148,45 @@ Future<void> _runCmake(String buildModeName, Directory sourceDir, Directory buil
   if (!globals.processManager.canRun('cmake')) {
     throwToolExit(globals.userMessages.cmakeMissing);
   }
+
+  final String? cc = Platform.environment['CC'];
+  final String? cxx = Platform.environment['CXX'];
+
+  final String? clang = _which(cc ?? 'clang');
+  if (clang == null) {
+    if (cc != null) {
+      throwToolExit('Unable to locate $cc for CC environment variable.'
+          ' Please ensure that $cc is installed and in your PATH.');
+    } else {
+      throwToolExit('Unable to locate clang');
+    }
+  }
+  final String? clangPlusPlus = _which(cxx ?? 'clang++');
+  if (clangPlusPlus == null) {
+    if (cxx != null) {
+      throwToolExit('Unable to locate $cxx for CXX environment variable.'
+          ' Please ensure that $cxx is installed and in your PATH.');
+    } else {
+      throwToolExit('Unable to locate clang++');
+    }
+  }
+  // Warn user if C/C++ compilers are not the system default clang/clang++.
+  if (!clang.startsWith('/usr/bin/clang')) {
+    globals.printStatus(
+      'Warning: C compiler is set to $clang.${(cc != null) ? ' CC environment variable is set to $cc.' : ''} '
+      'Please consider using the distribution-provided clang',
+      color: TerminalColor.yellow,
+    );
+  }
+
+  if (!clangPlusPlus.startsWith('/usr/bin/clang++')) {
+    globals.printStatus(
+      'Warning: C++ compiler is set to $clangPlusPlus.${(cxx != null) ? ' CXX environment variable is set to $cxx.' : ''} '
+      'Please consider using the distribution-provided clang++',
+      color: TerminalColor.yellow,
+    );
+  }
+
   result = await globals.processUtils.stream(
     <String>[
       'cmake',
@@ -165,8 +206,8 @@ Future<void> _runCmake(String buildModeName, Directory sourceDir, Directory buil
     ],
     workingDirectory: buildDir.path,
     environment: <String, String>{
-      'CC': 'clang',
-      'CXX': 'clang++',
+      'CC': clang,
+      'CXX': clangPlusPlus,
     },
     trace: true,
   );
@@ -216,4 +257,43 @@ Future<void> _runBuild(Directory buildDir) async {
     variableName: 'linux-ninja',
     elapsedMilliseconds: elapsedDuration.inMilliseconds,
   ));
+}
+
+// This is a simplified version of the 'which' command.
+String? _which(String executable) {
+  if (executable.isEmpty) {
+    return null;
+  }
+
+  if (executable.contains('/')) {
+    final File file = globals.fs.file(executable);
+    if (file.existsSync() && _checkIfExecutable(file)) {
+      return file.path;
+    }
+    return null;
+  }
+
+  final String? envPath = globals.platform.environment['PATH'];
+  if (envPath == null) {
+    return null;
+  }
+
+  final List<String> pathSegments = envPath.split(':');
+  for (final String pathSegment in pathSegments) {
+    final File file =
+        globals.fs.file(globals.fs.path.join(pathSegment, executable));
+    if (file.existsSync() && _checkIfExecutable(file)) {
+      return file.path;
+    }
+  }
+
+  return null;
+}
+
+bool _checkIfExecutable(File file) {
+  final FileStat stat = file.statSync();
+  const int isExecutable = 0x40;
+  const int isReadable = 0x100;
+  const int isExecutableAndReadable = isExecutable | isReadable;
+  return (stat.mode & isExecutableAndReadable) == isExecutableAndReadable;
 }
