@@ -6,6 +6,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart' show clampDouble, precisionErrorTolerance;
 import 'package:flutter/gestures.dart' show DragStartBehavior;
+import 'package:flutter/material.dart' show Durations, Easing;
 import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
@@ -182,11 +183,12 @@ class PageController extends ScrollController {
   /// Animates the controlled [PageView] from the current page to the given page.
   ///
   /// The animation lasts for the given duration and follows the given curve.
+  /// By default, [curve] is [Easing.standard] and [duration] is 400ms.
   /// The returned [Future] resolves when the animation completes.
   Future<void> animateToPage(
     int page, {
-    required Duration duration,
-    required Curve curve,
+    Duration duration = Durations.medium2,
+    Curve curve = Easing.standard,
   }) {
     final _PagePosition position = this.position as _PagePosition;
     if (position._cachedPage != null) {
@@ -218,16 +220,24 @@ class PageController extends ScrollController {
   /// Animates the controlled [PageView] to the next page.
   ///
   /// The animation lasts for the given duration and follows the given curve.
+  /// By default, [curve] is [Easing.standard] and [duration] is 400ms.
   /// The returned [Future] resolves when the animation completes.
-  Future<void> nextPage({ required Duration duration, required Curve curve }) {
+  Future<void> nextPage({
+    Duration duration = Durations.medium2,
+    Curve curve = Easing.standard,
+  }) {
     return animateToPage(page!.round() + 1, duration: duration, curve: curve);
   }
 
   /// Animates the controlled [PageView] to the previous page.
   ///
   /// The animation lasts for the given duration and follows the given curve.
+  /// By default, [curve] is [Easing.standard] and [duration] is 400ms.
   /// The returned [Future] resolves when the animation completes.
-  Future<void> previousPage({ required Duration duration, required Curve curve }) {
+  Future<void> previousPage({
+    Duration duration = Durations.medium2,
+    Curve curve = Easing.standard,
+  }) {
     return animateToPage(page!.round() - 1, duration: duration, curve: curve);
   }
 
