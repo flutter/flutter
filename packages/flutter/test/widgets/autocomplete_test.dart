@@ -700,6 +700,82 @@ void main() {
     expect(lastOptions.elementAt(1), 'elephant');
   });
 
+    testWidgets('can show options even when empty iterable is returned', (WidgetTester tester) async {
+    final GlobalKey fieldKey = GlobalKey();
+    final GlobalKey optionsKey = GlobalKey();
+    late Iterable<String> lastOptions;
+    late FocusNode focusNode;
+    late TextEditingController textEditingController;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: RawAutocomplete<String>(
+            optionsBuilder: (TextEditingValue textEditingValue) {
+              if (textEditingValue.text == '') {
+                return const Iterable<String>.empty();
+              }
+              return kOptions.where((String option) {
+                return option.contains(textEditingValue.text.toLowerCase());
+              });
+            },
+            showOptionsViewOnEmptyOptions: true,
+            fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController, FocusNode fieldFocusNode, VoidCallback onFieldSubmitted) {
+              focusNode = fieldFocusNode;
+              textEditingController = fieldTextEditingController;
+              return TextField(
+                key: fieldKey,
+                focusNode: focusNode,
+                controller: fieldTextEditingController,
+              );
+            },
+            optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
+              lastOptions = options;
+              return Container(key: optionsKey);
+            },
+          ),
+        ),
+      ),
+    );
+
+    // The field is always rendered, but the options are not unless needed.
+    expect(find.byKey(fieldKey), findsOneWidget);
+    expect(find.byKey(optionsKey), findsNothing);
+
+    // Focus the empty field. The options are now displayed because
+    // showOptionsViewOnEmptyOptions has been set to true.
+    focusNode.requestFocus();
+    textEditingController.value = const TextEditingValue(
+      selection: TextSelection(baseOffset: 0, extentOffset: 0),
+    );
+    await tester.pump();
+    expect(find.byKey(optionsKey), findsOneWidget);
+
+    // Enter text. Now the options appear, filtered by the text.
+    textEditingController.value = const TextEditingValue(
+      text: 'ele',
+      selection: TextSelection(baseOffset: 3, extentOffset: 3),
+    );
+    await tester.pump();
+    expect(find.byKey(fieldKey), findsOneWidget);
+    expect(find.byKey(optionsKey), findsOneWidget);
+    expect(lastOptions.length, 2);
+    expect(lastOptions.elementAt(0), 'chameleon');
+    expect(lastOptions.elementAt(1), 'elephant');
+
+    // Enter more text so that no options are returned. The options view is
+    // still displayed because showOptionsViewOnEmptyOptions has been set to
+    // true.
+    textEditingController.value = const TextEditingValue(
+      text: 'elex',
+      selection: TextSelection(baseOffset: 4, extentOffset: 4),
+    );
+    await tester.pump();
+    expect(find.byKey(fieldKey), findsOneWidget);
+    expect(find.byKey(optionsKey), findsOneWidget);
+    expect(lastOptions.length, 0);
+  });
+
   testWidgets('can create a field outside of fieldViewBuilder', (WidgetTester tester) async {
     final GlobalKey fieldKey = GlobalKey();
     final GlobalKey optionsKey = GlobalKey();
@@ -921,6 +997,93 @@ void main() {
     await tester.enterText(find.byKey(fieldKey), 'ngo');
     await tester.pump();
     expect(lastOptions, <String>['dingo', 'flamingo']);
+  });
+
+  testWidgets('can show options view while awaiting options builder future', (WidgetTester tester) async {
+    final GlobalKey fieldKey = GlobalKey();
+    final GlobalKey optionsKey = GlobalKey();
+    final GlobalKey optionsLoadingKey = GlobalKey();
+    late FocusNode focusNode;
+    late TextEditingController textEditingController;
+    Iterable<String>? lastOptions;
+    Duration? delay;
+    bool isLoading = false;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: RawAutocomplete<String>(
+            showOptionsViewOnPendingOptions: true,
+            optionsBuilder: (TextEditingValue textEditingValue) async {
+              final Iterable<String> options = kOptions.where((String option) {
+                return option.contains(textEditingValue.text.toLowerCase());
+              });
+              if (delay == null) {
+                return options;
+              }
+              isLoading = true;
+              final Iterable<String> optionsAfterDelay = await Future<Iterable<String>>.delayed(delay, () => options);
+              isLoading = false;
+              return optionsAfterDelay;
+            },
+            fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController, FocusNode fieldFocusNode, VoidCallback onFieldSubmitted) {
+              focusNode = fieldFocusNode;
+              textEditingController = fieldTextEditingController;
+              return TextField(
+                key: fieldKey,
+                focusNode: focusNode,
+                controller: textEditingController,
+              );
+            },
+            optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
+              if (isLoading){
+                return Container(key: optionsLoadingKey);
+              }
+              lastOptions = options;
+              return Container(key: optionsKey);
+            },
+          ),
+        ),
+      )
+    );
+
+    // The field is always rendered, but the options are not unless needed.
+    expect(find.byKey(fieldKey), findsOneWidget);
+    expect(find.byKey(optionsKey), findsNothing);
+    expect(find.byKey(optionsLoadingKey), findsNothing);
+
+    // Enter text to build the options with delay.
+    focusNode.requestFocus();
+    delay = const Duration(milliseconds: 500);
+    await tester.enterText(find.byKey(fieldKey), 'go');
+    await tester.pump();
+
+    // The options have not yet been built.
+    //
+    // However, the options view is now displayed in the interval between
+    // the field being focused and the options being built since
+    // showOptionsViewOnPendingOptions is set to true.
+    expect(find.byKey(optionsKey), findsNothing);
+    expect(find.byKey(optionsLoadingKey), findsOneWidget);
+    expect(lastOptions, isNull);
+
+    // Await asynchronous options builder.
+    await tester.pump(delay);
+    expect(lastOptions, <String>['dingo', 'flamingo', 'goose']);
+
+    // Loading view has been replaced with options results.
+    expect(find.byKey(optionsLoadingKey), findsNothing);
+    expect(find.byKey(optionsKey), findsOneWidget);
+
+    // Enter text to rebuild the options without delay.
+    delay = null;
+    await tester.enterText(find.byKey(fieldKey), 'ngo');
+    await tester.pump();
+    expect(lastOptions, <String>['dingo', 'flamingo']);
+
+    // Only options results are displayed.
+    expect(find.byKey(optionsLoadingKey), findsNothing);
+    expect(find.byKey(optionsKey), findsOneWidget);
   });
 
   testWidgets('can navigate options with the keyboard', (WidgetTester tester) async {
