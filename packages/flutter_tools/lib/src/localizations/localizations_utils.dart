@@ -321,7 +321,7 @@ class LocalizationOptions {
   LocalizationOptions({
     required this.arbDir,
     this.outputDir,
-    String? templateArbFile,
+    String? templateLocale,
     String? outputLocalizationFile,
     this.untranslatedMessagesFile,
     String? outputClass,
@@ -339,7 +339,7 @@ class LocalizationOptions {
     bool? suppressWarnings,
     bool? relaxSyntax,
     bool? useNamedParameters,
-  }) : templateArbFile = templateArbFile ?? 'app_en.arb',
+  }) : templateLocale = templateLocale ?? 'en',
        outputLocalizationFile = outputLocalizationFile ?? 'app_localizations.dart',
        outputClass = outputClass ?? 'AppLocalizations',
        useDeferredLoading = useDeferredLoading ?? false,
@@ -363,10 +363,10 @@ class LocalizationOptions {
   final String? outputDir;
 
 
-  /// The `--template-arb-file` argument.
+  /// The `--template-locale` argument.
   ///
-  /// This path is relative to [arbDirectory].
-  final String templateArbFile;
+  /// The locale that should be used as the basis for generating the files
+  final String templateLocale;
 
   /// The `--output-localization-file` argument.
   ///
@@ -489,7 +489,7 @@ LocalizationOptions parseLocalizationsOptionsFromYAML({
   return LocalizationOptions(
     arbDir: _tryReadUri(yamlNode, 'arb-dir', logger)?.path ?? defaultArbDir,
     outputDir: _tryReadUri(yamlNode, 'output-dir', logger)?.path,
-    templateArbFile: _tryReadUri(yamlNode, 'template-arb-file', logger)?.path,
+    templateLocale: _tryReadString(yamlNode, 'template-locale', logger),
     outputLocalizationFile: _tryReadUri(yamlNode, 'output-localization-file', logger)?.path,
     untranslatedMessagesFile: _tryReadUri(yamlNode, 'untranslated-messages-file', logger)?.path,
     outputClass: _tryReadString(yamlNode, 'output-class', logger),
@@ -517,7 +517,7 @@ LocalizationOptions parseLocalizationsOptionsFromCommand({
     arbDir: command.stringArg('arb-dir') ?? defaultArbDir,
     outputDir: command.stringArg('output-dir'),
     outputLocalizationFile: command.stringArg('output-localization-file'),
-    templateArbFile: command.stringArg('template-arb-file'),
+    templateLocale: command.stringArg('template-locale'),
     untranslatedMessagesFile: command.stringArg('untranslated-messages-file'),
     outputClass: command.stringArg('output-class'),
     header: command.stringArg('header'),
