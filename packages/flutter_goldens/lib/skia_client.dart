@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io' as io;
 
@@ -38,6 +39,8 @@ class SkiaException implements Exception {
   @override
   String toString() => 'SkiaException: $message';
 }
+
+enum _SkiaInitState { none, tryJobs, postSubmitTests }
 
 /// A client for uploading image tests and making baseline requests to the
 /// Flutter Gold Dashboard.
@@ -130,69 +133,73 @@ class SkiaGoldClient {
     }
   }
 
-  /// Signals if this client is initialized for uploading images to the Gold
-  /// service.
-  ///
-  /// Since Flutter framework tests are executed in parallel, and in random
-  /// order, this will signal is this instance of the Gold client has been
-  /// initialized.
-  bool _initialized = false;
+  _SkiaInitState _debugInitState = _SkiaInitState.none;
+  Future<void>? _initFuture;
 
   /// Executes the `imgtest init` command in the goldctl tool.
   ///
   /// The `imgtest` command collects and uploads test results to the Skia Gold
   /// backend, the `init` argument initializes the current test. Used by the
   /// [FlutterPostSubmitFileComparator].
-  Future<void> imgtestInit() async {
-    // This client has already been initialized
-    if (_initialized) {
-      return;
+  ///
+  /// It is safe to call this multiple times, including reentrantly; all calls
+  /// will return the same future and initialization will only happen once.
+  ///
+  /// This method is mutually exclusive with [tryjobInit].
+  Future<void> imgtestInit() {
+    if (_initFuture != null) {
+      assert(_debugInitState == _SkiaInitState.postSubmitTests, 'Cannot call both imgtestInit and tryjobInit');
+      return _initFuture!;
     }
+    assert(_debugInitState == _SkiaInitState.none);
+    assert(() { _debugInitState = _SkiaInitState.postSubmitTests; return true; }());
+    final Completer<void> completer = Completer<void>();
+    _initFuture = completer.future;
+    completer.complete(() async {
+      final File keys = workDirectory.childFile('keys.json');
+      final File failures = workDirectory.childFile('failures.json');
 
-    final File keys = workDirectory.childFile('keys.json');
-    final File failures = workDirectory.childFile('failures.json');
+      await keys.writeAsString(_getKeysJSON());
+      await failures.create();
+      final String commitHash = await _getCurrentCommit();
 
-    await keys.writeAsString(_getKeysJSON());
-    await failures.create();
-    final String commitHash = await _getCurrentCommit();
+      final List<String> imgtestInitCommand = <String>[
+        _goldctl,
+        'imgtest', 'init',
+        '--instance', 'flutter',
+        '--work-dir', workDirectory
+          .childDirectory('temp')
+          .path,
+        '--commit', commitHash,
+        '--keys-file', keys.path,
+        '--failure-file', failures.path,
+        '--passfail',
+      ];
 
-    final List<String> imgtestInitCommand = <String>[
-      _goldctl,
-      'imgtest', 'init',
-      '--instance', 'flutter',
-      '--work-dir', workDirectory
-        .childDirectory('temp')
-        .path,
-      '--commit', commitHash,
-      '--keys-file', keys.path,
-      '--failure-file', failures.path,
-      '--passfail',
-    ];
+      if (imgtestInitCommand.contains(null)) {
+        final StringBuffer buf = StringBuffer()
+          ..writeln('A null argument was provided for Skia Gold imgtest init.')
+          ..writeln('Please confirm the settings of your golden file test.')
+          ..writeln('Arguments provided:');
+        imgtestInitCommand.forEach(buf.writeln);
+        throw SkiaException(buf.toString());
+      }
 
-    if (imgtestInitCommand.contains(null)) {
-      final StringBuffer buf = StringBuffer()
-        ..writeln('A null argument was provided for Skia Gold imgtest init.')
-        ..writeln('Please confirm the settings of your golden file test.')
-        ..writeln('Arguments provided:');
-      imgtestInitCommand.forEach(buf.writeln);
-      throw SkiaException(buf.toString());
-    }
+      final io.ProcessResult result = await process.run(imgtestInitCommand);
 
-    final io.ProcessResult result = await process.run(imgtestInitCommand);
-
-    if (result.exitCode != 0) {
-      _initialized = false;
-      final StringBuffer buf = StringBuffer()
-        ..writeln('Skia Gold imgtest init failed.')
-        ..writeln('An error occurred when initializing golden file test with ')
-        ..writeln('goldctl.')
-        ..writeln()
-        ..writeln('Debug information for Gold --------------------------------')
-        ..writeln('stdout: ${result.stdout}')
-        ..writeln('stderr: ${result.stderr}');
-      throw SkiaException(buf.toString());
-    }
-    _initialized = true;
+      if (result.exitCode != 0) {
+        final StringBuffer buf = StringBuffer()
+          ..writeln('Skia Gold imgtest init failed.')
+          ..writeln('An error occurred when initializing golden file test with ')
+          ..writeln('goldctl.')
+          ..writeln()
+          ..writeln('Debug information for Gold --------------------------------')
+          ..writeln('stdout: ${result.stdout}')
+          ..writeln('stderr: ${result.stderr}');
+        throw SkiaException(buf.toString());
+      }
+    }());
+    return _initFuture!;
   }
 
   /// Executes the `imgtest add` command in the goldctl tool.
@@ -251,72 +258,73 @@ class SkiaGoldClient {
     return true;
   }
 
-  /// Signals if this client is initialized for uploading tryjobs to the Gold
-  /// service.
-  ///
-  /// Since Flutter framework tests are executed in parallel, and in random
-  /// order, this will signal is this instance of the Gold client has been
-  /// initialized for tryjobs.
-  bool _tryjobInitialized = false;
-
   /// Executes the `imgtest init` command in the goldctl tool for tryjobs.
   ///
   /// The `imgtest` command collects and uploads test results to the Skia Gold
   /// backend, the `init` argument initializes the current tryjob. Used by the
   /// [FlutterPreSubmitFileComparator].
-  Future<void> tryjobInit() async {
-    // This client has already been initialized
-    if (_tryjobInitialized) {
-      return;
+  ///
+  /// It is safe to call this multiple times, including reentrantly; all calls
+  /// will return the same future and initialization will only happen once.
+  ///
+  /// This method is mutually exclusive with [imgtestInit].
+  Future<void> tryjobInit() {
+    if (_initFuture != null) {
+      assert(_debugInitState == _SkiaInitState.tryJobs, 'Cannot call both imgtestInit and tryjobInit');
+      return _initFuture!;
     }
+    assert(_debugInitState == _SkiaInitState.none);
+    assert(() { _debugInitState = _SkiaInitState.tryJobs; return true; }());
+    final Completer<void> completer = Completer<void>();
+    _initFuture = completer.future;
+    completer.complete(() async {
+      final File keys = workDirectory.childFile('keys.json');
+      final File failures = workDirectory.childFile('failures.json');
 
-    final File keys = workDirectory.childFile('keys.json');
-    final File failures = workDirectory.childFile('failures.json');
+      await keys.writeAsString(_getKeysJSON());
+      await failures.create();
+      final String commitHash = await _getCurrentCommit();
 
-    await keys.writeAsString(_getKeysJSON());
-    await failures.create();
-    final String commitHash = await _getCurrentCommit();
+      final List<String> imgtestInitCommand = <String>[
+        _goldctl,
+        'imgtest', 'init',
+        '--instance', 'flutter',
+        '--work-dir', workDirectory
+          .childDirectory('temp')
+          .path,
+        '--commit', commitHash,
+        '--keys-file', keys.path,
+        '--failure-file', failures.path,
+        '--passfail',
+        '--crs', 'github',
+        '--patchset_id', commitHash,
+        ...getCIArguments(),
+      ];
 
-    final List<String> imgtestInitCommand = <String>[
-      _goldctl,
-      'imgtest', 'init',
-      '--instance', 'flutter',
-      '--work-dir', workDirectory
-        .childDirectory('temp')
-        .path,
-      '--commit', commitHash,
-      '--keys-file', keys.path,
-      '--failure-file', failures.path,
-      '--passfail',
-      '--crs', 'github',
-      '--patchset_id', commitHash,
-      ...getCIArguments(),
-    ];
+      if (imgtestInitCommand.contains(null)) {
+        final StringBuffer buf = StringBuffer()
+          ..writeln('A null argument was provided for Skia Gold tryjob init.')
+          ..writeln('Please confirm the settings of your golden file test.')
+          ..writeln('Arguments provided:');
+        imgtestInitCommand.forEach(buf.writeln);
+        throw SkiaException(buf.toString());
+      }
 
-    if (imgtestInitCommand.contains(null)) {
-      final StringBuffer buf = StringBuffer()
-        ..writeln('A null argument was provided for Skia Gold tryjob init.')
-        ..writeln('Please confirm the settings of your golden file test.')
-        ..writeln('Arguments provided:');
-      imgtestInitCommand.forEach(buf.writeln);
-      throw SkiaException(buf.toString());
-    }
+      final io.ProcessResult result = await process.run(imgtestInitCommand);
 
-    final io.ProcessResult result = await process.run(imgtestInitCommand);
-
-    if (result.exitCode != 0) {
-      _tryjobInitialized = false;
-      final StringBuffer buf = StringBuffer()
-        ..writeln('Skia Gold tryjobInit failure.')
-        ..writeln('An error occurred when initializing golden file tryjob with ')
-        ..writeln('goldctl.')
-        ..writeln()
-        ..writeln('Debug information for Gold --------------------------------')
-        ..writeln('stdout: ${result.stdout}')
-        ..writeln('stderr: ${result.stderr}');
-      throw SkiaException(buf.toString());
-    }
-    _tryjobInitialized = true;
+      if (result.exitCode != 0) {
+        final StringBuffer buf = StringBuffer()
+          ..writeln('Skia Gold tryjobInit failure.')
+          ..writeln('An error occurred when initializing golden file tryjob with ')
+          ..writeln('goldctl.')
+          ..writeln()
+          ..writeln('Debug information for Gold --------------------------------')
+          ..writeln('stdout: ${result.stdout}')
+          ..writeln('stderr: ${result.stderr}');
+        throw SkiaException(buf.toString());
+      }
+    }());
+    return _initFuture!;
   }
 
   /// Executes the `imgtest add` command in the goldctl tool for tryjobs.
