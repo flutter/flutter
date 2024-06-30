@@ -246,4 +246,38 @@ void main() {
     expect(fullLerp.horizontal, 2.0);
     expect(fullLerp.vertical, 1.0);
   });
+
+  test('displayFontFamily and bodyFontFamily works and expected', () {
+    // The `displayFontFamily` is applied to [displayLarge], [displayMedium],
+    // [displaySmall], [headlineLarge], [headlineMedium], and [bodySmall]. The
+    // `bodyFontFamily` is applied to the remaining text styles.
+    const String displayFontFamily = 'displayFontFamily';
+    const List<String> displayFontFamilyFallback = <String>['display', 'font', 'family', 'fallback'];
+    const String bodyFontFamily= 'bodyFontFamily';
+    const List<String> bodyFontFamilyFallback = <String>['body', 'font', 'family', 'fallback'];
+
+    final Typography typography = Typography.material2018();
+    final TextTheme theme = typography.black.apply(
+      displayFontFamily: displayFontFamily,
+      displayFontFamilyFallback: displayFontFamilyFallback,
+      bodyFontFamily: bodyFontFamily,
+      bodyFontFamilyFallback: bodyFontFamilyFallback,
+    );
+
+    expect(theme.displayLarge!.fontFamily, displayFontFamily);
+    expect(theme.displayMedium!.fontFamily, displayFontFamily);
+    expect(theme.displaySmall!.fontFamily, displayFontFamily);
+    expect(theme.headlineLarge!.fontFamily, displayFontFamily);
+    expect(theme.headlineMedium!.fontFamily, displayFontFamily);
+    expect(theme.headlineSmall!.fontFamily, bodyFontFamily);
+    expect(theme.titleLarge!.fontFamily, bodyFontFamily);
+    expect(theme.titleMedium!.fontFamily, bodyFontFamily);
+    expect(theme.titleSmall!.fontFamily, bodyFontFamily);
+    expect(theme.bodyLarge!.fontFamily, bodyFontFamily);
+    expect(theme.bodyMedium!.fontFamily, bodyFontFamily);
+    expect(theme.bodySmall!.fontFamily, displayFontFamily);
+    expect(theme.labelLarge!.fontFamily, bodyFontFamily);
+    expect(theme.labelMedium!.fontFamily, bodyFontFamily);
+    expect(theme.labelSmall!.fontFamily, bodyFontFamily);
+  });
 }
