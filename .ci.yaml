@@ -4303,6 +4303,7 @@ targets:
 
   # mac motog4 benchmark
   - name: Mac_android microbenchmarks
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/150093
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
