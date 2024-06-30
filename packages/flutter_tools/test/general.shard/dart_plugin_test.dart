@@ -78,7 +78,7 @@ void main() {
               appDependencies: directDependencies,
             ),
           ],
-          selectDartPlugins: true,
+          selectDartPluginsOnly: true,
         );
 
         expect(resolutions.length, equals(2));
@@ -142,7 +142,7 @@ void main() {
               appDependencies: directDependencies,
             ),
           ],
-          selectDartPlugins: true,
+          selectDartPluginsOnly: true,
         );
 
         expect(resolutions.length, equals(1));
@@ -194,7 +194,7 @@ void main() {
               appDependencies: directDependencies,
             ),
           ],
-          selectDartPlugins: true,
+          selectDartPluginsOnly: true,
         );
 
         expect(resolutions.length, equals(2));
@@ -238,7 +238,7 @@ void main() {
               appDependencies: directDependencies,
             ),
           ],
-          selectDartPlugins: true,
+          selectDartPluginsOnly: true,
         );
         expect(resolutions.length, equals(2));
         expect(resolutions[0].toMap(), equals(
@@ -286,7 +286,7 @@ void main() {
               appDependencies: directDependencies,
             ),
           ],
-          selectDartPlugins: true,
+          selectDartPluginsOnly: true,
         );
         expect(resolutions.length, equals(0));
       });
@@ -320,7 +320,7 @@ void main() {
               appDependencies: directDependencies,
             ),
           ],
-          selectDartPlugins: true,
+          selectDartPluginsOnly: true,
         );
         expect(resolutions.length, equals(0));
       });
@@ -353,7 +353,7 @@ void main() {
               appDependencies: directDependencies,
             ),
           ],
-          selectDartPlugins: true,
+          selectDartPluginsOnly: true,
         );
         expect(resolutions.length, equals(3));
         expect(
@@ -450,7 +450,7 @@ void main() {
               appDependencies: directDependencies,
             ),
           ],
-          selectDartPlugins: true,
+          selectDartPluginsOnly: true,
         );
         expect(resolutions.length, equals(1));
         expect(resolutions[0].toMap(), equals(
@@ -499,7 +499,7 @@ void main() {
               appDependencies: directDependencies,
             ),
           ],
-          selectDartPlugins: true,
+          selectDartPluginsOnly: true,
         );
         expect(resolutions.length, equals(1));
         expect(resolutions[0].toMap(), equals(
@@ -567,7 +567,7 @@ void main() {
               appDependencies: directDependencies,
             ),
           ],
-          selectDartPlugins: true,
+          selectDartPluginsOnly: true,
         );
         expect(resolutions.length, equals(1));
         expect(resolutions[0].toMap(), equals(
@@ -622,7 +622,7 @@ void main() {
               appDependencies: directDependencies,
             ),
           ],
-          selectDartPlugins: true,
+          selectDartPluginsOnly: true,
         );
         expect(resolutions.length, equals(2));
         expect(resolutions[0].toMap(), equals(
@@ -698,7 +698,7 @@ void main() {
                 appDependencies: directDependencies,
               ),
             ],
-            selectDartPlugins: true,
+            selectDartPluginsOnly: true,
           );
         },
             throwsToolExit(
@@ -756,7 +756,7 @@ void main() {
                 appDependencies: directDependencies,
               ),
             ],
-            selectDartPlugins: true,
+            selectDartPluginsOnly: true,
           );
         },
             throwsToolExit(
@@ -805,7 +805,7 @@ void main() {
               appDependencies: directDependencies,
             ),
           ],
-          selectDartPlugins: true,
+          selectDartPluginsOnly: true,
         );
 
         expect(resolutions.length, equals(0));
@@ -855,7 +855,7 @@ void main() {
               appDependencies: directDependencies,
             ),
           ],
-          selectDartPlugins: true,
+          selectDartPluginsOnly: true,
         );
 
         expect(resolutions.length, equals(0));
@@ -901,7 +901,7 @@ void main() {
           ],
           // Select native plugins, to test avoiding trigger a warning for
           // default plugins, while no dart plugins are selected.
-          selectDartPlugins: false,
+          selectDartPluginsOnly: false,
         );
 
         expect(resolutions.length, equals(0));
@@ -929,7 +929,7 @@ void main() {
               appDependencies: directDependencies,
             ),
           ],
-          selectDartPlugins: true,
+          selectDartPluginsOnly: true,
         );
 
         expect(resolutions.length, equals(0));
@@ -983,7 +983,7 @@ void main() {
                 appDependencies: directDependencies,
               ),
             ],
-            selectDartPlugins: true,
+            selectDartPluginsOnly: true,
           );
         },
         throwsToolExit(
@@ -1075,7 +1075,7 @@ void main() {
                 appDependencies: directDependencies,
               ),
             ],
-            selectDartPlugins: true,
+            selectDartPluginsOnly: true,
           );
         },
         throwsToolExit(
@@ -1135,7 +1135,7 @@ void main() {
                 appDependencies: directDependencies,
               ),
             ],
-            selectDartPlugins: true,
+            selectDartPluginsOnly: true,
           );
         },
         throwsToolExit(
