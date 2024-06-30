@@ -1795,10 +1795,8 @@ The Flutter Preview device does not support the following plugins from your pubs
         featureFlagsOverride: TestFeatureFlags(isWindowsEnabled: true),
       ),
       throwsToolExit(
-          message: r'The Flutter tool tried to delete the file or '
-              r'directory C:\app\windows\flutter\ephemeral\.plugin_symlinks but was '
-              r"unable to. This may be due to the file and/or project's location on a "
-              r'read-only volume. Consider relocating the project and trying again'),
+          message: RegExp('Unable to delete file or directory at '
+              r'"C:\\app\\windows\\flutter\\ephemeral\\\.plugin_symlinks"')),
     );
   }, overrides: <Type, Generator>{
     FileSystem: () {
