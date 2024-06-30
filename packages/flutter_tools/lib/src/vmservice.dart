@@ -571,22 +571,19 @@ class FlutterVmService {
     required Uri main,
     required Uri assetsDirectory,
   }) async {
-    _logger.printTrace('Running $main in view $viewId...');
     try {
       await service.streamListen(vm_service.EventStreams.kIsolate);
     } on vm_service.RPCError catch (e) {
-      _logger.printTrace(
-        'Unable to listen to VM service stream "${vm_service.EventStreams.kIsolate}".\n'
-        'Error: $e',
-      );
-      // Do nothing, since the tool is already subscribed.
+      // Do nothing if the tool is already subscribed.
+      const int streamAlreadySubscribed = 103;
+      if (e.code != streamAlreadySubscribed) {
+        rethrow;
+      }
     }
 
     final Future<void> onRunnable = service.onIsolateEvent.firstWhere((vm_service.Event event) {
-      _logger.printTrace('runInView VM service onIsolateEvent listener received $event');
       return event.kind == vm_service.EventKind.kIsolateRunnable;
     });
-    _logger.printTrace('Calling $kRunInViewMethod...');
     await callMethodWrapper(
       kRunInViewMethod,
       args: <String, Object>{
@@ -595,9 +592,7 @@ class FlutterVmService {
         'assetDirectory': assetsDirectory.toString(),
       },
     );
-    _logger.printTrace('Finished $kRunInViewMethod');
     await onRunnable;
-    _logger.printTrace('Finished running $main in view $viewId');
   }
 
   /// Renders the last frame with additional raster tracing enabled.
