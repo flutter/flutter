@@ -46,6 +46,7 @@ class BuildInfo {
     this.initializeFromDill,
     this.assumeInitializeFromDillUpToDate = false,
     this.buildNativeAssets = true,
+    this.useLocalCanvasKit = false,
   }) : extraFrontEndOptions = extraFrontEndOptions ?? const <String>[],
        extraGenSnapshotOptions = extraGenSnapshotOptions ?? const <String>[],
        fileSystemRoots = fileSystemRoots ?? const <String>[],
@@ -180,6 +181,9 @@ class BuildInfo {
   /// If set, builds native assets with `build.dart` from all packages.
   final bool buildNativeAssets;
 
+  /// If set, web builds will use the locally built CanvasKit instead of using the CDN
+  final bool useLocalCanvasKit;
+
   static const BuildInfo debug = BuildInfo(BuildMode.debug, null, trackWidgetCreation: true, treeShakeIcons: false);
   static const BuildInfo profile = BuildInfo(BuildMode.profile, null, treeShakeIcons: kIconTreeShakerEnabledDefault);
   static const BuildInfo jitRelease = BuildInfo(BuildMode.jitRelease, null, treeShakeIcons: kIconTreeShakerEnabledDefault);
@@ -260,6 +264,8 @@ class BuildInfo {
         kBuildName: buildName!,
       if (buildNumber != null)
         kBuildNumber: buildNumber!,
+      if (useLocalCanvasKit)
+        kUseLocalCanvasKitFlag: useLocalCanvasKit.toString(),
     };
   }
 
@@ -941,6 +947,9 @@ const String kCodesignIdentity = 'CodesignIdentity';
 /// only the glyphs used by the application.
 const String kIconTreeShakerFlag = 'TreeShakeIcons';
 
+/// Controls whether a web build should use local canvaskit or the CDN
+const String kUseLocalCanvasKitFlag = 'UseLocalCanvasKit';
+
 /// The input key for an SkSL bundle path.
 const String kBundleSkSLPath = 'BundleSkSLPath';
 
@@ -957,6 +966,12 @@ const String kBuildNumber = 'BuildNumber';
 ///
 /// Will be "build" when building and "install" when archiving.
 const String kXcodeAction = 'Action';
+
+/// The define of the Xcode build Pre-action.
+///
+/// Will be "PrepareFramework" when copying the Flutter/FlutterMacOS framework
+/// to the BUILT_PRODUCTS_DIR prior to the build.
+const String kXcodePreAction = 'PreBuildAction';
 
 final Converter<String, String> _defineEncoder = utf8.encoder.fuse(base64.encoder);
 final Converter<String, String> _defineDecoder = base64.decoder.fuse(utf8.decoder);

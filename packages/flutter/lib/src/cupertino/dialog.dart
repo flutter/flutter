@@ -65,8 +65,9 @@ const TextStyle _kActionSheetContentStyle = TextStyle(
   inherit: false,
   fontSize: 13.0,
   fontWeight: FontWeight.w400,
-  color: _kActionSheetContentTextColor,
   textBaseline: TextBaseline.alphabetic,
+  // The `color` is configured by _kActionSheetContentTextColor to be dynamic on
+  // context.
 );
 
 // Generic constants shared between Dialog and ActionSheet.
@@ -85,13 +86,12 @@ const double _kDialogMinButtonHeight = 45.0;
 const double _kDialogMinButtonFontSize = 10.0;
 
 // ActionSheet specific constants.
-const double _kActionSheetEdgeHorizontalPadding = 8.0;
+const double _kActionSheetEdgePadding = 8.0;
 const double _kActionSheetCancelButtonPadding = 8.0;
-const double _kActionSheetEdgeVerticalPadding = 10.0;
 const double _kActionSheetContentHorizontalPadding = 16.0;
-const double _kActionSheetContentVerticalPadding = 12.0;
-const double _kActionSheetButtonHeight = 56.0;
-const double _kActionSheetActionsSectionMinHeight = 84.3;
+const double _kActionSheetContentVerticalPadding = 13.5;
+const double _kActionSheetButtonHeight = 57.0;
+const double _kActionSheetActionsSectionMinHeight = 84.0;
 
 // A translucent color that is painted on top of the blurred backdrop as the
 // dialog's background color
@@ -112,27 +112,45 @@ const Color _kDialogPressedColor = CupertinoDynamicColor.withBrightness(
 // Translucent light gray that is painted on top of the blurred backdrop as the
 // background color of a pressed button.
 // Eyeballed from iOS 17 simulator.
-const Color _kActionSheetPressedColor = Color(0xCAE0E0E0);
+const Color _kActionSheetPressedColor = CupertinoDynamicColor.withBrightness(
+  color: Color(0xCAE0E0E0),
+  darkColor: Color(0xC1515151),
+);
 
-const Color _kActionSheetCancelColor = Color(0xFFFFFFFF);
-const Color _kActionSheetCancelPressedColor = Color(0xFFECECEC);
+const Color _kActionSheetCancelColor = CupertinoDynamicColor.withBrightness(
+  color: Color(0xFFFFFFFF),
+  darkColor: Color(0xFF2C2C2C),
+);
+const Color _kActionSheetCancelPressedColor = CupertinoDynamicColor.withBrightness(
+  color: Color(0xFFECECEC),
+  darkColor: Color(0xFF494949),
+);
 
 // Translucent, very light gray that is painted on top of the blurred backdrop
 // as the action sheet's background color.
 // TODO(LongCatIsLooong): https://github.com/flutter/flutter/issues/39272. Use
 // System Materials once we have them.
 // Eyeballed from iOS 17 simulator.
-const Color _kActionSheetBackgroundColor = Color(0xC8FCFCFC);
+const Color _kActionSheetBackgroundColor = CupertinoDynamicColor.withBrightness(
+  color: Color(0xC8FCFCFC),
+  darkColor: Color(0xBE292929),
+);
 
 // The gray color used for text that appears in the title area.
 // Eyeballed from iOS 17 simulator.
-const Color _kActionSheetContentTextColor = Color(0x851D1D1D);
+const Color _kActionSheetContentTextColor = CupertinoDynamicColor.withBrightness(
+  color: Color(0x851D1D1D),
+  darkColor: Color(0x96F1F1F1),
+);
 
 // Translucent gray that is painted on top of the blurred backdrop in the gap
 // areas between the content section and actions section, as well as between
 // buttons.
 // Eyeballed from iOS 17 simulator.
-const Color _kActionSheetButtonDividerColor = Color(0xD4C9C9C9);
+const Color _kActionSheetButtonDividerColor = CupertinoDynamicColor.withBrightness(
+  color: Color(0xD4C9C9C9),
+  darkColor: Color(0xD57D7D7D),
+);
 
 // The alert dialog layout policy changes depending on whether the user is using
 // a "regular" font size vs a "large" font size. This is a spectrum. There are
@@ -400,6 +418,14 @@ class _CupertinoAlertDialogState extends State<CupertinoAlertDialog> {
 /// rendering divider gaps for a more complicated layout, e.g., [CupertinoAlertDialog].
 /// Additionally, the white paint can be disabled to render a blurred rounded
 /// rectangle without any color (similar to iOS's volume control popup).
+///
+/// {@tool dartpad}
+/// This sample shows how to use a [CupertinoPopupSurface]. The [CupertinoPopupSurface]
+/// shows a model popup from the bottom of the screen.
+/// Toggling the switch to configure its surface color.
+///
+/// ** See code in examples/api/lib/cupertino/dialog/cupertino_popup_surface.0.dart **
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -841,6 +867,9 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
 
   Widget _buildContent(BuildContext context) {
     final List<Widget> content = <Widget>[];
+    final TextStyle textStyle = _kActionSheetContentStyle.copyWith(
+      color: CupertinoDynamicColor.resolve(_kActionSheetContentTextColor, context),
+    );
     if (hasContent) {
       final Widget titleSection = _CupertinoAlertContentSection(
         title: widget.title,
@@ -859,11 +888,11 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
           top: widget.title == null ? _kActionSheetContentVerticalPadding : 0.0,
         ),
         titleTextStyle: widget.message == null
-            ? _kActionSheetContentStyle
-            : _kActionSheetContentStyle.copyWith(fontWeight: FontWeight.w600),
+            ? textStyle
+            : textStyle.copyWith(fontWeight: FontWeight.w600),
         messageTextStyle: widget.title == null
-            ? _kActionSheetContentStyle.copyWith(fontWeight: FontWeight.w600)
-            : _kActionSheetContentStyle,
+            ? textStyle.copyWith(fontWeight: FontWeight.w600)
+            : textStyle,
         additionalPaddingBetweenTitleAndMessage: const EdgeInsets.only(top: 4.0),
       );
       content.add(Flexible(child: titleSection));
@@ -893,9 +922,88 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
     );
   }
 
+  // Given data point (x1, y1) and (x2, y2), derive the y corresponding to x
+  // using linear interpolation between the two data points, and extrapolates
+  // flatly beyond these points.
+  //
+  //              (x2, y2)
+  //                _____________
+  //               /
+  //              /
+  //    _________/
+  //           (x1, y1)
+  static double _lerp(double x, double x1, double y1, double x2, double y2) {
+    if (x <= x1) {
+      return y1;
+    } else if (x >= x2) {
+      return y2;
+    } else {
+      return Tween<double>(begin: y1, end: y2).transform(
+        (x - x1) / (x2 - x1)
+      );
+    }
+  }
+
+  // Derive the top padding, which is the distance between the top of a
+  // full-height action sheet and the top of the safe area.
+  //
+  // The algorithm and its values are derived from measuring on the simulator.
+  double _topPadding(BuildContext context) {
+    if (MediaQuery.orientationOf(context) == Orientation.landscape) {
+      return _kActionSheetEdgePadding;
+    }
+
+    // The top padding in portrait mode is in general close to the top view
+    // padding, but not always equal:
+    //
+    //                            | view padding | action sheet padding | ratio
+    //   No notch (eg. iPhone SE) |     20.0     |        20.0          | 1.0
+    //   Notch (eg. iPhone 13)    |     47.0     |        47.0          | 1.0
+    //   Capsule (eg. iPhone 15)  |     59.0     |        54.0          | 0.915
+    //
+    // Currently, we cannot determine why the result changes on "capsules."
+    // Therefore, we'll hard code this rule, given the limited types of actual
+    // devices. To provide an algorithm that accepts arbitrary view padding, this
+    // function calculates the ratio as a continuous curve with linear
+    // interpolation.
+
+    // The x for lerp is the top view padding, while the y is ratio of
+    // action sheet padding versus top view padding.
+    const double viewPaddingData1 = 47.0;
+    const double paddingRatioData1 = 1.0;
+    const double viewPaddingData2 = 59.0;
+    const double paddingRatioData2 = 54.0 / 59.0;
+
+    final double currentViewPadding = MediaQuery.viewPaddingOf(context).top;
+
+    final double currentPaddingRatio = _lerp(
+      /* x= */currentViewPadding,
+      /* x1, y1= */viewPaddingData1, paddingRatioData1,
+      /* x2, y2= */viewPaddingData2, paddingRatioData2,
+    );
+    final double padding = (currentPaddingRatio * currentViewPadding).roundToDouble();
+    // In case there is no view padding, there should still be some space
+    // between the action sheet and the edge.
+    return math.max(padding, _kDialogEdgePadding);
+  }
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
+
+    /*
+     *  ╭─────────────────╮  ↑                ↑
+     *  │    The title    │ Content section   |
+     *  │   The message   │  ↓                |
+     *  ├─────────────────┤  ↑             Main sheet
+     *  │    Action 1     │  |                |
+     *  ├─────────────────┤ Actions section   |
+     *  │    Action 2     │  |                |
+     *  ╰─────────────────╯  ↓                ↓
+     *  ╭─────────────────╮
+     *  │     Cancel      │
+     *  ╰─────────────────╯
+     */
 
     final List<Widget> children = <Widget>[
       Flexible(
@@ -908,7 +1016,7 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
               hasContent: hasContent,
               contentSection: Builder(builder: _buildContent),
               actions: widget.actions,
-              dividerColor: _kActionSheetButtonDividerColor,
+              dividerColor: CupertinoDynamicColor.resolve(_kActionSheetButtonDividerColor, context),
             ),
           ),
         ),
@@ -921,6 +1029,7 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
     };
 
     return SafeArea(
+      minimum: const EdgeInsets.only(bottom: _kActionSheetEdgePadding),
       child: ScrollConfiguration(
         // A CupertinoScrollbar is built-in below
         behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
@@ -932,12 +1041,15 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
           child: CupertinoUserInterfaceLevel(
             data: CupertinoUserInterfaceLevelData.elevated,
             child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: _kActionSheetEdgeHorizontalPadding,
-                vertical: _kActionSheetEdgeVerticalPadding,
+              padding: EdgeInsets.only(
+                left: _kActionSheetEdgePadding,
+                right: _kActionSheetEdgePadding,
+                top: _topPadding(context),
+                // The bottom padding is set on SafeArea.minimum, allowing it to
+                // be consumed by bottom view padding.
               ),
               child: SizedBox(
-                width: actionSheetWidth - _kActionSheetEdgeHorizontalPadding * 2,
+                width: actionSheetWidth - _kActionSheetEdgePadding * 2,
                 child: _ActionSheetGestureDetector(
                   child: Semantics(
                     explicitChildNodes: true,
