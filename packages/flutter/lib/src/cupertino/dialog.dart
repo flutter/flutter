@@ -532,21 +532,24 @@ class _SlidingTapGestureRecognizer extends VerticalDragGestureRecognizer {
       if (event is PointerMoveEvent) {
         onResponsiveUpdate?.call(event.position);
       }
-      // If this gesture has a competing gesture (such as scrolling), and the
-      // pointer has not moved far enough to get this panning accepted, a
-      // pointer up event should still be considered as an accepted tap up.
-      // Manually accept this gesture here, which triggers onDragEnd.
+      // This gesture handles up events differently from normal drag gestures:
+      // if this gesture has a competing gesture (such as scrolling), and the
+      // pointer has not moved farther than the slop, this gesture should still
+      // be accepted.
+      //
+      //Therefore this `if` branch must return without executing
+      // `super.handleEvent`.
       if (event is PointerUpEvent) {
-        resolve(GestureDisposition.accepted);
         stopTrackingPointer(_primaryPointer!);
         onResponsiveEnd?.call(event.position);
-      } else {
-        super.handleEvent(event);
+        _primaryPointer = null;
+        return;
       }
-      if (event is PointerUpEvent || event is PointerCancelEvent) {
+      if (event is PointerCancelEvent) {
         _primaryPointer = null;
       }
     }
+    super.handleEvent(event);
   }
 
   @override
