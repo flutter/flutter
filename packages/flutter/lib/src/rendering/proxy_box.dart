@@ -2729,18 +2729,23 @@ class RenderFittedBox extends RenderProxyBox {
   void performLayout() {
     if (child != null) {
       child!.layout(const BoxConstraints(), parentUsesSize: true);
-      switch (fit) {
-        case BoxFit.scaleDown:
-          final BoxConstraints sizeConstraints = constraints.loosen();
-          final Size unconstrainedSize = sizeConstraints.constrainSizeAndAttemptToPreserveAspectRatio(child!.size);
-          size = constraints.constrain(unconstrainedSize);
-        case BoxFit.contain:
-        case BoxFit.cover:
-        case BoxFit.fill:
-        case BoxFit.fitHeight:
-        case BoxFit.fitWidth:
-        case BoxFit.none:
-          size = constraints.constrainSizeAndAttemptToPreserveAspectRatio(child!.size);
+      if (child!.size.isEmpty) {
+        size = constraints.biggest;
+      } else {
+        switch (fit) {
+          case BoxFit.scaleDown:
+            final BoxConstraints sizeConstraints = constraints.loosen();
+            final Size unconstrainedSize =
+                sizeConstraints.constrainSizeAndAttemptToPreserveAspectRatio(child!.size);
+            size = constraints.constrain(unconstrainedSize);
+          case BoxFit.contain:
+          case BoxFit.cover:
+          case BoxFit.fill:
+          case BoxFit.fitHeight:
+          case BoxFit.fitWidth:
+          case BoxFit.none:
+            size = constraints.constrainSizeAndAttemptToPreserveAspectRatio(child!.size);
+        }
       }
       _clearPaintData();
     } else {
