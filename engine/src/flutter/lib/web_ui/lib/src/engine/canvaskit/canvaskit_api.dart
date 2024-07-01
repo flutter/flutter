@@ -259,13 +259,12 @@ extension CanvasKitExtension on CanvasKit {
   );
 }
 
-@JS()
-@staticInterop
-class CanvasKitModule {}
+@JS('window.CanvasKitInit')
+external JSAny _CanvasKitInit(CanvasKitInitOptions options);
 
-extension CanvasKitModuleExtension on CanvasKitModule {
-  @JS('default')
-  external JSPromise<JSAny> defaultExport(CanvasKitInitOptions options);
+Future<CanvasKit> CanvasKitInit(CanvasKitInitOptions options) {
+  return js_util.promiseToFuture<CanvasKit>(
+          _CanvasKitInit(options).toObjectShallow);
 }
 
 typedef LocateFileCallback = String Function(String file, String unusedBase);
@@ -3662,11 +3661,11 @@ String canvasKitWasmModuleUrl(String file, String canvasKitBase) =>
 /// Downloads the CanvasKit JavaScript, then calls `CanvasKitInit` to download
 /// and intialize the CanvasKit wasm.
 Future<CanvasKit> downloadCanvasKit() async {
-  final CanvasKitModule canvasKitModule = await _downloadOneOf(_canvasKitJsUrls);
+  await _downloadOneOf(_canvasKitJsUrls);
 
-  final CanvasKit canvasKit = (await canvasKitModule.defaultExport(CanvasKitInitOptions(
+  final CanvasKit canvasKit = await CanvasKitInit(CanvasKitInitOptions(
     locateFile: createLocateFileCallback(canvasKitWasmModuleUrl),
-  )).toDart) as CanvasKit;
+  ));
 
   if (canvasKit.ParagraphBuilder.RequiresClientICU() && !browserSupportsCanvaskitChromium) {
     throw Exception(
@@ -3682,12 +3681,10 @@ Future<CanvasKit> downloadCanvasKit() async {
 /// downloads it.
 ///
 /// If none of the URLs can be downloaded, throws an [Exception].
-Future<CanvasKitModule> _downloadOneOf(Iterable<String> urls) async {
+Future<void> _downloadOneOf(Iterable<String> urls) async {
   for (final String url in urls) {
-    try {
-      return await _downloadCanvasKitJs(url);
-    } catch (_) {
-      continue;
+    if (await _downloadCanvasKitJs(url)) {
+      return;
     }
   }
 
@@ -3701,7 +3698,32 @@ Future<CanvasKitModule> _downloadOneOf(Iterable<String> urls) async {
 ///
 /// Returns a [Future] that completes with `true` if the CanvasKit JavaScript
 /// file was successfully downloaded, or `false` if it failed.
-Future<CanvasKitModule> _downloadCanvasKitJs(String url) async {
-  final JSAny scriptUrl = createTrustedScriptUrl(url);
-  return (await importModule(scriptUrl).toDart) as CanvasKitModule;
+Future<bool> _downloadCanvasKitJs(String url) {
+  final DomHTMLScriptElement canvasKitScript =
+      createDomHTMLScriptElement(configuration.nonce);
+  canvasKitScript.src = createTrustedScriptUrl(url);
+
+  final Completer<bool> canvasKitLoadCompleter = Completer<bool>();
+
+  late final DomEventListener loadCallback;
+  late final DomEventListener errorCallback;
+
+  void loadEventHandler(DomEvent _) {
+    canvasKitScript.remove();
+    canvasKitLoadCompleter.complete(true);
+  }
+  void errorEventHandler(DomEvent errorEvent) {
+    canvasKitScript.remove();
+    canvasKitLoadCompleter.complete(false);
+  }
+
+  loadCallback = createDomEventListener(loadEventHandler);
+  errorCallback = createDomEventListener(errorEventHandler);
+
+  canvasKitScript.addEventListener('load', loadCallback);
+  canvasKitScript.addEventListener('error', errorCallback);
+
+  domDocument.head!.appendChild(canvasKitScript);
+
+  return canvasKitLoadCompleter.future;
 }
