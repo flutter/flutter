@@ -417,7 +417,7 @@ Future<FlutterVmService> _connect(
   // This call is to ensure we are able to establish a connection instead of
   // keeping on trucking and failing farther down the process.
   await delegateService.getVersion();
-  return FlutterVmService(service, httpAddress: httpUri, wsAddress: wsUri, logger: logger);
+  return FlutterVmService(service, httpAddress: httpUri, wsAddress: wsUri);
 }
 
 String _validateRpcStringParam(String methodName, Map<String, Object?> params, String paramName) {
@@ -486,13 +486,11 @@ class FlutterVmService {
     this.service, {
     this.wsAddress,
     this.httpAddress,
-    required Logger logger,
-  }) : _logger = logger;
+  });
 
   final vm_service.VmService service;
   final Uri? wsAddress;
   final Uri? httpAddress;
-  final Logger _logger;
 
   Future<vm_service.Response?> callMethodWrapper(
     String method, {
