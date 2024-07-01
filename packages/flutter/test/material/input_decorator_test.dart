@@ -264,12 +264,10 @@ BorderSide? getBorderSide(WidgetTester tester) {
 }
 
 BorderRadius? getBorderRadius(WidgetTester tester) {
-  final InputBorder border = getBorder(tester)!;
-  if (border is UnderlineInputBorder) {
-    return border.borderRadius;
-  }
-  if (border is OutlineInputBorder) {
-    return border.borderRadius;
+  switch (getBorder(tester)!) {
+    case UnderlineInputBorder(:final BorderRadius borderRadius):
+    case OutlineInputBorder(:final BorderRadius borderRadius):
+      return borderRadius;
   }
   return null;
 }

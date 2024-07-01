@@ -1884,14 +1884,9 @@ Stream<File> _allFiles(String workingDirectory, String? extension, { required in
       if (_isGeneratedPluginRegistrant(entity)) {
         continue;
       }
-      if (path.basename(entity.path) == 'flutter_export_environment.sh') {
-        continue;
-      }
-      if (path.basename(entity.path) == 'gradlew.bat') {
-        continue;
-      }
-      if (path.basename(entity.path) == '.DS_Store') {
-        continue;
+      switch (path.basename(entity.path)) {
+        case 'flutter_export_environment.sh' || 'gradlew.bat' || '.DS_Store':
+          continue;
       }
       if (extension == null || path.extension(entity.path) == '.$extension') {
         matches += 1;
@@ -1901,23 +1896,9 @@ Stream<File> _allFiles(String workingDirectory, String? extension, { required in
       if (File(path.join(entity.path, '.dartignore')).existsSync()) {
         continue;
       }
-      if (path.basename(entity.path) == '.git') {
-        continue;
-      }
-      if (path.basename(entity.path) == '.idea') {
-        continue;
-      }
-      if (path.basename(entity.path) == '.gradle') {
-        continue;
-      }
-      if (path.basename(entity.path) == '.dart_tool') {
-        continue;
-      }
-      if (path.basename(entity.path) == '.idea') {
-        continue;
-      }
-      if (path.basename(entity.path) == 'build') {
-        continue;
+      switch (path.basename(entity.path)) {
+        case '.git' || '.idea' || '.gradle' || '.dart_tool' || 'build':
+          continue;
       }
       pending.addAll(entity.listSync());
     }
