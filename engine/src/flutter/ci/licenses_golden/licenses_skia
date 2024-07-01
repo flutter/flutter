@@ -1,4 +1,4 @@
-Signature: fb916e52b5757b9b363cd2175740a33b
+Signature: 2856c45f73ed1da0f00d150abb3fcc36
 
 ====================================================================================================
 LIBRARY: etc1
@@ -9565,6 +9565,7 @@ ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/precompile/Precompile
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/precompile/PrecompileColorFiltersPriv.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/precompile/PrecompileImageFilter.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/precompile/PrecompileImageFilterPriv.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/precompile/PrecompileImageFiltersPriv.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/precompile/PrecompileMaskFilter.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/precompile/PrecompileShader.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/precompile/PrecompileShaderPriv.h + ../../../flutter/third_party/skia/LICENSE
@@ -9657,6 +9658,7 @@ FILE: ../../../flutter/third_party/skia/src/gpu/graphite/precompile/PrecompileCo
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/precompile/PrecompileColorFiltersPriv.h
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/precompile/PrecompileImageFilter.cpp
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/precompile/PrecompileImageFilterPriv.h
+FILE: ../../../flutter/third_party/skia/src/gpu/graphite/precompile/PrecompileImageFiltersPriv.h
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/precompile/PrecompileMaskFilter.cpp
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/precompile/PrecompileShader.cpp
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/precompile/PrecompileShaderPriv.h
