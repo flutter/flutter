@@ -65,10 +65,14 @@ impeller_component("metal") {
 impeller_component("metal_unittests") {
   testonly = true
 
-  sources = [ "texture_mtl_unittests.mm" ]
+  sources = [
+    "allocator_mtl_unittests.mm",
+    "texture_mtl_unittests.mm",
+  ]
 
   deps = [
     ":metal",
+    "//flutter/impeller/playground:playground_test",
     "//flutter/testing:testing_lib",
   ]
 

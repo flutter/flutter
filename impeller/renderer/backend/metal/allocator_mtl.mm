@@ -6,7 +6,9 @@
 
 #include "flutter/fml/build_config.h"
 #include "flutter/fml/logging.h"
+#include "fml/trace_event.h"
 #include "impeller/base/validation.h"
+#include "impeller/core/formats.h"
 #include "impeller/renderer/backend/metal/device_buffer_mtl.h"
 #include "impeller/renderer/backend/metal/formats_mtl.h"
 #include "impeller/renderer/backend/metal/texture_mtl.h"
@@ -86,6 +88,19 @@ static bool SupportsLossyTextureCompression(id<MTLDevice> device) {
   }
   return false;
 #endif
+}
+
+void DebugAllocatorStats::Increment(size_t size) {
+  size_.fetch_add(size, std::memory_order_relaxed);
+}
+
+void DebugAllocatorStats::Decrement(size_t size) {
+  size_.fetch_sub(size, std::memory_order_relaxed);
+}
+
+size_t DebugAllocatorStats::GetAllocationSizeMB() {
+  size_t new_value = size_ / 1000000;
+  return new_value;
 }
 
 AllocatorMTL::AllocatorMTL(id<MTLDevice> device, std::string label)
@@ -212,11 +227,23 @@ std::shared_ptr<Texture> AllocatorMTL::OnCreateTexture(
     }
   }
 
+#ifdef IMPELLER_DEBUG
+  if (desc.storage_mode != StorageMode::kDeviceTransient) {
+    debug_allocater_->Increment(desc.GetByteSizeOfAllMipLevels());
+  }
+#endif  // IMPELLER_DEBUG
+
   auto texture = [device_ newTextureWithDescriptor:mtl_texture_desc];
   if (!texture) {
     return nullptr;
   }
-  return TextureMTL::Create(desc, texture);
+  std::shared_ptr<TextureMTL> result_texture =
+      TextureMTL::Create(desc, texture);
+#ifdef IMPELLER_DEBUG
+  result_texture->SetDebugAllocator(debug_allocater_);
+#endif  // IMPELLER_DEBUG
+
+  return result_texture;
 }
 
 uint16_t AllocatorMTL::MinimumBytesPerRow(PixelFormat format) const {
@@ -226,6 +253,23 @@ uint16_t AllocatorMTL::MinimumBytesPerRow(PixelFormat format) const {
 
 ISize AllocatorMTL::GetMaxTextureSizeSupported() const {
   return max_texture_supported_;
+}
+
+size_t AllocatorMTL::DebugGetHeapUsage() const {
+#ifdef IMPELLER_DEBUG
+  return debug_allocater_->GetAllocationSizeMB();
+#else
+  return 0u;
+#endif  // IMPELLER_DEBUG
+}
+
+void AllocatorMTL::DebugTraceMemoryStatistics() const {
+#ifdef IMPELLER_DEBUG
+  size_t allocated_size = DebugGetHeapUsage();
+  FML_TRACE_COUNTER("flutter", "AllocatorMTL",
+                    reinterpret_cast<int64_t>(this),  // Trace Counter ID
+                    "MemoryBudgetUsageMB", allocated_size);
+#endif  // IMPELLER_DEBUG
 }
 
 }  // namespace impeller
