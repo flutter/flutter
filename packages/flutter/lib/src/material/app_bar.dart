@@ -760,6 +760,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
 }
 
 class _AppBarState extends State<AppBar> {
+  final Map<RawGestureDetector?, double> _notificationListenerStates = <RawGestureDetector?, double>{};
   ScrollNotificationObserverState? _scrollNotificationObserver;
   bool _scrolledUnder = false;
 
@@ -767,6 +768,10 @@ class _AppBarState extends State<AppBar> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _scrollNotificationObserver?.removeListener(_handleScrollNotification);
+    if (Scaffold.maybeOf(context)?.isDrawerOpen ?? false) {
+      _scrollNotificationObserver = null;
+      return;
+    }
     _scrollNotificationObserver = ScrollNotificationObserver.maybeOf(context);
     _scrollNotificationObserver?.addListener(_handleScrollNotification);
   }
@@ -777,11 +782,26 @@ class _AppBarState extends State<AppBar> {
       _scrollNotificationObserver!.removeListener(_handleScrollNotification);
       _scrollNotificationObserver = null;
     }
+    _notificationListenerStates.clear();
     super.dispose();
   }
 
   void _handleScrollNotification(ScrollNotification notification) {
     if (notification is ScrollUpdateNotification && widget.notificationPredicate(notification)) {
+      // Each RawGestureDetector has its own scroll offset, so we need to keep track of them separately.
+      final RawGestureDetector? rawGestureDetector = notification.context?.widget as RawGestureDetector?;
+
+      if (rawGestureDetector != null) {
+        _notificationListenerStates[rawGestureDetector] = notification.metrics.axisDirection == AxisDirection.down
+        ? notification.metrics.extentBefore
+        : notification.metrics.extentAfter;
+
+        // If any of the scroll offsets are greater than 0, then the MaterialState.scrolledUnder
+        if (_notificationListenerStates.values.toList().any((double element) => element > 0) && _scrolledUnder) {
+          return;
+        }
+      }
+
       final bool oldScrolledUnder = _scrolledUnder;
       final ScrollMetrics metrics = notification.metrics;
       switch (metrics.axisDirection) {
