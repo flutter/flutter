@@ -552,6 +552,8 @@ class _SlidingTapGestureRecognizer extends VerticalDragGestureRecognizer {
         stopTrackingPointer(_primaryPointer!);
         onResponsiveEnd?.call(event.position);
         _primaryPointer = null;
+        // Do not call `super.handleEvent`, which gives up the pointer and thus
+        // rejects the gesture.
         return;
       }
       if (event is PointerCancelEvent) {
