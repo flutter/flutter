@@ -118,6 +118,7 @@ void main() {
       if (result != 0) {
         throw 'Received unexpected exit code $result from run process.';
       }
+      await device.uninstallApp();
     });
     return TaskResult.success(null);
   });

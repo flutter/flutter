@@ -66,6 +66,7 @@ Future<TaskResult> run() async {
     await Future<void>.delayed(const Duration(seconds: 30));
     process.stdin.write('q');
     await adb.cancel();
+    await device.uninstallApp();
   });
 
   if (!isUsingValidationLayers || impellerBackendCount != 1) {

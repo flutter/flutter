@@ -102,6 +102,7 @@ TaskFunction createNativeAssetsTest({
           if (runFlutterResult != 0) {
             print('Flutter run returned non-zero exit code: $runFlutterResult.');
           }
+          await flutter('install', options: <String>['--uninstall-only', '-d', deviceIdOverride!]);
         });
 
         final int expectedNumberOfTransitions = buildMode == 'debug' ? 4 : 1;

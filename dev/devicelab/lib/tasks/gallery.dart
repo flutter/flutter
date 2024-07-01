@@ -80,7 +80,6 @@ TaskFunction createGalleryTransitionHybridTest({bool semanticsEnabled = false}) 
 }
 
 class GalleryTransitionTest {
-
   GalleryTransitionTest({
     this.semanticsEnabled = false,
     this.testFile = 'transitions_perf',
@@ -154,6 +153,7 @@ class GalleryTransitionTest {
         '-v',
         '--verbose-system-logs'
       ]);
+      await flutter('install', options: <String>['--uninstall-only', '-d', deviceId]);
     });
 
     final String testOutputDirectory = Platform.environment['FLUTTER_TEST_OUTPUTS_DIR'] ?? '${galleryDirectory.path}/build';

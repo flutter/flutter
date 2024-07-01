@@ -29,7 +29,7 @@ TaskFunction createMicrobenchmarkTask({
         print('Running $benchmarkPath');
         final Directory appDir = dir(
             path.join(flutterDirectory.path, 'dev/benchmarks/microbenchmarks'));
-        final Process flutterProcess = await inDirectory(appDir, () async {
+        return inDirectory(appDir, () async {
           final List<String> options = <String>[
             '-v',
             // --release doesn't work on iOS due to code signing issues
@@ -41,13 +41,15 @@ TaskFunction createMicrobenchmarkTask({
             device.deviceId,
             benchmarkPath,
           ];
-          return startFlutter(
+          final Process flutterProcess = await startFlutter(
             'run',
             options: options,
             environment: environment,
           );
+          final Future<Map<String, double>> result = readJsonResults(flutterProcess);
+          await device.uninstallApp();
+          return result;
         });
-        return readJsonResults(flutterProcess);
       }
 
       return run();

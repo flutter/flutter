@@ -53,7 +53,7 @@ class DriverTest {
         ...extraOptions,
       ];
       await flutter('drive', options: options, environment: environment);
-
+      await flutter('install', options: <String>['--uninstall-only', '-d', deviceId], environment: environment);
       return TaskResult.success(null);
     });
   }

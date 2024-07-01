@@ -82,6 +82,7 @@ Future<TaskResult> _runWithTempDir(Directory tempDir) async {
     process.stdin.write('q');
     await process.stdin.flush();
     process.kill(ProcessSignal.sigint);
+    await device.uninstallApp();
     return entrypoint;
   });
   if (entrypoint.contains('$_messagePrefix $_entrypointName')) {

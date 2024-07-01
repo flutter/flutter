@@ -125,7 +125,6 @@ TaskFunction createWebDevModeTest(String webDevice, bool enableIncrementalCompil
         // Start `flutter run` again to make sure it loads from the previous
         // state. dev compilers loads up from previously compiled JavaScript.
         {
-
           final Stopwatch sw = Stopwatch()..start();
           final Process process = await startFlutter(
             'run',
