@@ -1032,7 +1032,7 @@ void main() {
     expect(pressed, null);
   });
 
-  testWidgets('Taps on legacy button calls onPressed', (WidgetTester tester) async {
+  testWidgets('Taps on legacy button calls onPressed and renders correctly', (WidgetTester tester) async {
     // Legacy buttons are implemented with [GestureDetector.onTap]. Apps that
     // use customized legacy buttons should continue to work.
     //
@@ -1052,6 +1052,7 @@ void main() {
                 },
               ),
               CupertinoActionSheetAction(child: const Text('One'), onPressed: () {}),
+              CupertinoActionSheetAction(child: const Text('Two'), onPressed: () {}),
             ],
           );
         }),
@@ -1059,17 +1060,21 @@ void main() {
     );
 
     await tester.tap(find.text('Go'));
-
     await tester.pumpAndSettle();
-
     expect(wasPressed, isFalse);
 
-    await tester.tap(find.text('Legacy'));
+    // Push the legacy button and hold for a while to activate the pressing effect.
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('Legacy')));
+    await tester.pump(const Duration(seconds: 1));
+    expect(wasPressed, isFalse);
+    await expectLater(
+      find.byType(CupertinoActionSheet),
+      matchesGoldenFile('cupertinoActionSheet.legacyButton.png'),
+    );
 
-    expect(wasPressed, isTrue);
-
+    await gesture.up();
     await tester.pumpAndSettle();
-
+    expect(wasPressed, isTrue);
     expect(find.text('Legacy'), findsNothing);
   });
 
