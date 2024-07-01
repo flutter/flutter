@@ -567,7 +567,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
           (TapAndHorizontalDragGestureRecognizer instance) {
         instance
           // iOS does not provide a device specific touch slop
-          // unlike Android, so the touch slop for a [Scrollable]
+          // unlike Android (~8.0), so the touch slop for a [Scrollable]
           // always default to kTouchSlop which is 18.0. When
           // [SelectableRegion] is the child of a horizontal
           // scrollable that means the [SelectableRegion] will
