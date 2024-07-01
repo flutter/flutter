@@ -1692,7 +1692,7 @@ void main() {
     expect(Focus.of(secondChildKey.currentContext!).hasPrimaryFocus, isTrue);
   });
 
-  testWidgets('SwitchListTile use ListTileTheme controlAffinity', (WidgetTester tester) async {
+  testWidgets('SwitchListTile uses ListTileTheme controlAffinity', (WidgetTester tester) async {
     Widget buildView(ListTileControlAffinity controlAffinity) {
       return MaterialApp(
         home: Material(

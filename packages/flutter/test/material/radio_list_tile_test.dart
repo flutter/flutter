@@ -1548,7 +1548,7 @@ void main() {
     });
   });
 
-  testWidgets('RadioListTile use ListTileTheme controlAffinity', (WidgetTester tester) async {
+  testWidgets('RadioListTile uses ListTileTheme controlAffinity', (WidgetTester tester) async {
     Widget buildListTile(ListTileControlAffinity controlAffinity) {
       return MaterialApp(
         home: Material(

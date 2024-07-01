@@ -129,7 +129,7 @@ class ListTileThemeData with Diagnosticable {
   final ListTileTitleAlignment? titleAlignment;
 
   /// If specified, overrides the default value of [CheckboxListTile.controlAffinity]
-  ///  or [ExpansionTile.controlAffinity] or [SwitchListTile.controlAffinity] or [RadioListTile.controlAffinity].
+  /// or [ExpansionTile.controlAffinity] or [SwitchListTile.controlAffinity] or [RadioListTile.controlAffinity].
   final ListTileControlAffinity? controlAffinity;
 
   /// Creates a copy of this object with the given fields replaced with the
@@ -481,7 +481,7 @@ class ListTileTheme extends InheritedTheme {
   bool? get enableFeedback => _data != null ? _data.enableFeedback : _enableFeedback;
 
   /// Overrides the default value of [CheckboxListTile.controlAffinity]
-  ///  or [ExpansionTile.controlAffinity] or [SwitchListTile.controlAffinity] or [RadioListTile.controlAffinity]
+  /// or [ExpansionTile.controlAffinity] or [SwitchListTile.controlAffinity] or [RadioListTile.controlAffinity]
   ///
   /// This property is obsolete: please use the [data]
   /// [ListTileThemeData.controlAffinity] property instead.

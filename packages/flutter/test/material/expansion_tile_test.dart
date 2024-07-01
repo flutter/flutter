@@ -1586,7 +1586,7 @@ void main() {
     expect(titleSize.width, materialAppSize.width - 32.0);
   });
 
-  testWidgets('ExpansionTile use ListTileTheme controlAffinity', (WidgetTester tester) async {
+  testWidgets('ExpansionTile uses ListTileTheme controlAffinity', (WidgetTester tester) async {
     Widget buildView(ListTileControlAffinity controlAffinity) {
       return MaterialApp(
         home: ListTileTheme(

@@ -1232,7 +1232,7 @@ void main() {
     expect(Focus.of(secondChildKey.currentContext!).hasPrimaryFocus, isTrue);
   });
 
-  testWidgets('CheckboxListTile use ListTileTheme controlAffinity', (WidgetTester tester) async {
+  testWidgets('CheckboxListTile uses ListTileTheme controlAffinity', (WidgetTester tester) async {
     Widget buildListTile(ListTileControlAffinity controlAffinity) {
       return MaterialApp(
         home: Material(
