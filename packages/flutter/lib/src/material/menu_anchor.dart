@@ -1998,8 +1998,8 @@ class _SubmenuButtonState extends State<SubmenuButton> {
     // After closing the children of this submenu, this submenu button will
     // regain focus. Because submenu buttons open on focus, this submenu will
     // immediately reopen. To prevent this from happening, we prevent focus on
-    // SubmenuButtons that do not already have focus using the _openOnFocus
-    // flag. This flag is reset after one frame.
+    // SubmenuButtons that do not already have focus using the
+    // _isOpenOnFocusEnabled flag. This flag is reset after one frame.
     if (!_buttonFocusNode.hasFocus) {
       _isOpenOnFocusEnabled = false;
       SchedulerBinding.instance.addPostFrameCallback((Duration timestamp) {
@@ -2063,73 +2063,83 @@ class _SubmenuDirectionalFocusAction extends DirectionalFocusAction {
 
   @override
   void invoke(DirectionalFocusIntent intent) {
-    assert(_debugMenuInfo('$runtimeType: Invoking directional focus intent.'));
+    assert(_debugMenuInfo('${intent.direction}: Invoking directional focus intent.'));
     final TextDirection directionality = Directionality.of(submenu.context);
     switch ((_orientation, directionality, intent.direction)) {
       case (Axis.horizontal, TextDirection.ltr, TraversalDirection.left): // Fallthrough
       case (Axis.horizontal, TextDirection.rtl, TraversalDirection.right):
-        // Set this menubar button as the focused child within the FocusScope,
-        // then move focus to the previous focusable widget.
+        assert(_debugMenuInfo('Moving to previous $MenuBar item'));
+        // Focus this MenuBar SubmenuButton, then move focus to the previous focusable
+        // MenuBar item.
         _buttonFocusNode
           ..requestFocus()
           ..previousFocus();
         return;
       case (Axis.horizontal, TextDirection.ltr, TraversalDirection.right): // Fallthrough
       case (Axis.horizontal, TextDirection.rtl, TraversalDirection.left):
-        // Set this button as the focused child within the FocusScope,
-        // then move focus to the previous focusable widget.
+        assert(_debugMenuInfo('Moving to next $MenuBar item'));
+        // Focus this MenuBar SubmenuButton, then move focus to the next focusable
+        // MenuBar item.
         _buttonFocusNode
           ..requestFocus()
           ..nextFocus();
         return;
-      case (Axis.horizontal, _, TraversalDirection.down):
-        if (isSubmenu) {
-          // If this is a top-level (horizontal) button in a menubar, focus the
-          // first item in this button's submenu.
-          final FocusNode? firstItem = _anchor._firstItemFocusNode;
-          if (firstItem?.canRequestFocus ?? false) {
-            firstItem!.requestFocus();
-          }
-          return;
+      case (Axis.horizontal, _, TraversalDirection.down) when isSubmenu:
+        // Focus is on a SubmenuButton within a MenuBar. Focus will move to the
+        // first item in this SubmenuButton's menu.
+        final FocusNode? firstItem = _anchor._firstItemFocusNode;
+        if (firstItem?.canRequestFocus ?? false) {
+          assert(_debugMenuInfo('Focusing first submenu item: $firstItem'));
+          firstItem!.requestFocus();
         }
-      case (Axis.horizontal, _, TraversalDirection.up):
-        if (isSubmenu) {
-          // If this is a top-level (horizontal) button in a menubar, focus the
-          // last item in this button's submenu. This makes navigating into
-          // upward-oriented submenus more intuitive.
-          final FocusNode? lastItem = _anchor._lastItemFocusNode;
-          if (lastItem?.canRequestFocus ?? false) {
-            lastItem!.requestFocus();
-          }
-          return;
+        return;
+      case (Axis.horizontal, _, TraversalDirection.up) when isSubmenu:
+        // Focus is on a SubmenuButton within a MenuBar. Focus will move to the
+        // last item in this SubmenuButton's menu.
+        final FocusNode? lastItem = _anchor._lastItemFocusNode;
+        if (lastItem?.canRequestFocus ?? false) {
+          assert(_debugMenuInfo('Focusing last submenu item: $lastItem'));
+          lastItem!.requestFocus();
         }
+        return;
       case (Axis.vertical, TextDirection.ltr, TraversalDirection.left): // Fallthrough
       case (Axis.vertical, TextDirection.rtl, TraversalDirection.right):
         if (_parent?._parent?._orientation == Axis.horizontal) {
           if (isSubmenu) {
-            if (!_parent!._isRoot) {
-              _parent!.widget.childFocusNode
-                ?..requestFocus()
-                ..previousFocus();
-            }
+            // MenuBar SubmenuButton => SubmenuButton
+            // Focus the previous MenuBar item.
+            assert(_debugMenuInfo('Focusing previous menubar item'));
+            _parent!.widget.childFocusNode
+              ?..requestFocus()
+              ..previousFocus();
           } else {
+            assert(_debugMenuInfo('Exiting submenu'));
+            // MenuBar SubmenuButton => SubmenuButton => child
+            // Focus the parent SubmenuButton anchor attached to this child.
             _buttonFocusNode.requestFocus();
           }
         } else {
           if (isSubmenu) {
             if (_isParentRoot) {
+              // Moving in the closing direction while focused on a
+              // SubmenuButton within a root MenuAnchor menu should not close
+              // the menu.
               return;
             }
             _parent
               ?.._focusButton()
               .._close();
           } else {
+            // If focus is not on a submenu button, closing the anchor this item
+            // presides in will close the menu and focus the anchor button.
             _anchor._close();
           }
+          assert(_debugMenuInfo('Exiting submenu'));
         }
         return;
       case (Axis.vertical, TextDirection.ltr, TraversalDirection.right) when isSubmenu: // Fallthrough
       case (Axis.vertical, TextDirection.rtl, TraversalDirection.left) when isSubmenu:
+        assert(_debugMenuInfo('Entering submenu'));
         if (_anchor._isOpen) {
           _anchor._firstItemFocusNode?.requestFocus();
         } else {
@@ -2145,7 +2155,7 @@ class _SubmenuDirectionalFocusAction extends DirectionalFocusAction {
         break;
     }
 
-    Actions.invoke(submenu.context, intent);
+    Actions.maybeInvoke(submenu.context, intent);
   }
 }
 
