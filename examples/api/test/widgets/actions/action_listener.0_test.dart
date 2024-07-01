@@ -8,7 +8,7 @@ import 'package:flutter_api_samples/widgets/actions/action_listener.0.dart' as e
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('It should enable the action listener, trigger it and disable it', (WidgetTester tester) async {
+  testWidgets(''ActionListener can be enabled, triggered, and disabled', (WidgetTester tester) async {
     final List<String?> log = <String?>[];
 
     final DebugPrintCallback originalDebugPrint = debugPrint;
