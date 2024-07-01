@@ -47,8 +47,11 @@ class Allocator {
   /// @brief Write debug memory usage information to the dart timeline in debug
   ///        and profile modes.
   ///
-  ///        This is only supported on the Vulkan backend.
+  ///        This is supported on both the Metal and Vulkan backends.
   virtual void DebugTraceMemoryStatistics() const {};
+
+  // Visible for testing.
+  virtual size_t DebugGetHeapUsage() const { return 0; }
 
  protected:
   Allocator();

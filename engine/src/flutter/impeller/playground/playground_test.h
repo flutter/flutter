@@ -42,7 +42,7 @@ class PlaygroundTest : public Playground,
 
  private:
   // |Playground|
-  bool ShouldKeepRendering() const;
+  bool ShouldKeepRendering() const override;
 
 #if FML_OS_MACOSX
   fml::ScopedNSAutoreleasePool autorelease_pool_;
