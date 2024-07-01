@@ -3446,6 +3446,27 @@ void main() {
     expect(pubspec.description, 'a: b');
   });
 
+  testUsingContext('should use caret syntax in SDK version', () async {
+    await _createProject(
+      projectDir,
+      <String>[
+        '--no-pub',
+      ],
+      <String>[
+        'pubspec.yaml',
+      ],
+    );
+
+    final String rawPubspec = await projectDir.childFile('pubspec.yaml').readAsString();
+    final Pubspec pubspec = Pubspec.parse(rawPubspec);
+
+    expect(
+      pubspec.environment!['sdk'].toString(),
+      startsWith('^'),
+      reason: 'The caret syntax is recommended over the traditional syntax.',
+    );
+  });
+
   testUsingContext('create an FFI plugin with ios, then add macos', () async {
     Cache.flutterRoot = '../..';
 
