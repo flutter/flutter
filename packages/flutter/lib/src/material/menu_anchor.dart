@@ -1998,8 +1998,8 @@ class _SubmenuButtonState extends State<SubmenuButton> {
     // After closing the children of this submenu, this submenu button will
     // regain focus. Because submenu buttons open on focus, this submenu will
     // immediately reopen. To prevent this from happening, we prevent focus on
-    // SubmenuButtons that do not already have focus using the
-    // _isOpenOnFocusEnabled flag. This flag is reset after one frame.
+    // SubmenuButtons that do not already have focus using the _openOnFocus
+    // flag. This flag is reset after one frame.
     if (!_buttonFocusNode.hasFocus) {
       _isOpenOnFocusEnabled = false;
       SchedulerBinding.instance.addPostFrameCallback((Duration timestamp) {
@@ -2084,34 +2084,36 @@ class _SubmenuDirectionalFocusAction extends DirectionalFocusAction {
           ..requestFocus()
           ..nextFocus();
         return;
-      case (Axis.horizontal, _, TraversalDirection.down) when isSubmenu:
-        // Focus is on a SubmenuButton within a MenuBar. Focus will move to the
-        // first item in this SubmenuButton's menu.
-        final FocusNode? firstItem = _anchor._firstItemFocusNode;
-        if (firstItem?.canRequestFocus ?? false) {
-          assert(_debugMenuInfo('Focusing first submenu item: $firstItem'));
-          firstItem!.requestFocus();
+      case (Axis.horizontal, _, TraversalDirection.down):
+        if (isSubmenu) {
+          // If this is a top-level (horizontal) button in a menubar, focus the
+          // first item in this button's submenu.
+          final FocusNode? firstItem = _anchor._firstItemFocusNode;
+          if (firstItem?.canRequestFocus ?? false) {
+            firstItem!.requestFocus();
+          }
+          return;
         }
-        return;
-      case (Axis.horizontal, _, TraversalDirection.up) when isSubmenu:
-        // Focus is on a SubmenuButton within a MenuBar. Focus will move to the
-        // last item in this SubmenuButton's menu.
-        final FocusNode? lastItem = _anchor._lastItemFocusNode;
-        if (lastItem?.canRequestFocus ?? false) {
-          assert(_debugMenuInfo('Focusing last submenu item: $lastItem'));
-          lastItem!.requestFocus();
+      case (Axis.horizontal, _, TraversalDirection.up):
+        if (isSubmenu) {
+          // If this is a top-level (horizontal) button in a menubar, focus the
+          // last item in this button's submenu. This makes navigating into
+          // upward-oriented submenus more intuitive.
+          final FocusNode? lastItem = _anchor._lastItemFocusNode;
+          if (lastItem?.canRequestFocus ?? false) {
+            lastItem!.requestFocus();
+          }
+          return;
         }
-        return;
       case (Axis.vertical, TextDirection.ltr, TraversalDirection.left): // Fallthrough
       case (Axis.vertical, TextDirection.rtl, TraversalDirection.right):
         if (_parent?._parent?._orientation == Axis.horizontal) {
           if (isSubmenu) {
-            // MenuBar SubmenuButton => SubmenuButton
-            // Focus the previous MenuBar item.
-            assert(_debugMenuInfo('Focusing previous menubar item'));
-            _parent!.widget.childFocusNode
-              ?..requestFocus()
-              ..previousFocus();
+            if (!_parent!._isRoot) {
+              _parent!.widget.childFocusNode
+                ?..requestFocus()
+                ..previousFocus();
+            }
           } else {
             assert(_debugMenuInfo('Exiting submenu'));
             // MenuBar SubmenuButton => SubmenuButton => child
