@@ -179,9 +179,9 @@ String _jsonToObject(dynamic json) {
       return buffer.toString();
     case Map<String, dynamic>():
       final StringBuffer buffer = StringBuffer('<String, Object>{');
-      for (final MapEntry<String, dynamic>(:String key, :dynamic value) in json.entries) {
+      json.forEach((String key, dynamic value) {
         buffer.writeln(_jsonToMapEntry(key, value));
-      }
+      });
       buffer.write('}');
       return buffer.toString();
   }

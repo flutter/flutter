@@ -1215,13 +1215,13 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
           ..textDirection = initialDirection
           ..attributedLabel = AttributedString(info.semanticsLabel ?? info.text, attributes: info.stringAttributes);
         switch (info.recognizer) {
-          case TapGestureRecognizer(:final VoidCallback? onTap):
+          case TapGestureRecognizer(onTap: final VoidCallback? onTap):
           case DoubleTapGestureRecognizer(onDoubleTap: final VoidCallback? onTap):
             if (onTap != null) {
               configuration.onTap = onTap;
               configuration.isLink = true;
             }
-          case LongPressGestureRecognizer(:final GestureLongPressCallback? onLongPress):
+          case LongPressGestureRecognizer(onLongPress: final GestureLongPressCallback? onLongPress):
             if (onLongPress != null) {
               configuration.onLongPress = onLongPress;
             }
