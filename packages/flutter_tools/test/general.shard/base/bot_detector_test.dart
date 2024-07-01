@@ -95,7 +95,6 @@ void main() {
 
       testWithoutContext('can test analytics outputs on bots when outputting to a file', () async {
         fakePlatform.environment['TRAVIS'] = 'true';
-        fakePlatform.environment['FLUTTER_ANALYTICS_LOG_FILE'] = '/some/file';
 
         final BotDetector botDetector = BotDetector(
           platform: fakePlatform,
