@@ -96,7 +96,7 @@ class ErrorHandlingFileSystem extends ForwardingFileSystem {
       if (entity.existsSync()) {
         throwToolExit(
           'Unable to delete file or directory at "${entity.path}". '
-          'This may be due it and/or the project being in a read-only '
+          'This may be due to the project being in a read-only '
           'volume. Consider relocating the project and trying again.',
         );
       }
