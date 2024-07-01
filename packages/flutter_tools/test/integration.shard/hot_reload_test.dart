@@ -81,6 +81,7 @@ void main() {
   });
 
   testWithoutContext('hot restart works without error', () async {
+    await Future<void>.delayed(const Duration(hours: 1));
     await flutter.run(verbose: true);
     await flutter.hotRestart();
   });
