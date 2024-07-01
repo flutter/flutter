@@ -526,7 +526,7 @@ class SemanticsTester {
 
       if (actions != null) {
         final int expectedActions = actions.fold<int>(0, (int value, SemanticsAction action) => value | action.index);
-        final int actualActions = node.getSemanticsData().actions & ~SemanticsAction.focus.index;
+        final int actualActions = node.getSemanticsData().actions;
         if (expectedActions != actualActions) {
           return false;
         }
@@ -652,7 +652,7 @@ class SemanticsTester {
       list = SemanticsAction.values
           .where((SemanticsAction action) => (action.index & actions) != 0);
     } else {
-      list = (actions as List<SemanticsAction>).where((SemanticsAction action) => action != SemanticsAction.focus);
+      list = actions as List<SemanticsAction>;
     }
     return '<SemanticsAction>[${list.join(', ')}]';
   }
