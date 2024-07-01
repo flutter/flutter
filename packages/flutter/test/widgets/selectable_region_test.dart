@@ -323,7 +323,7 @@ void main() {
         MaterialApp(
           home: PageView(
             controller: pageController,
-            children: const <Widget>[
+            children: <Widget>[
               Center(
                 child: SelectableRegion(
                   focusNode: focusNode,
@@ -439,7 +439,7 @@ void main() {
       await gesture.moveTo(selectableTextRect.center + const Offset(5.0, -300.0));
       await gesture.moveTo(selectableTextRect.center + const Offset(-10.0, -400.0));
       // Continue dragging vertically.
-      await gesture.moveTo(selectableTextRect.center + const Offset(0.0, -500.0)); 
+      await gesture.moveTo(selectableTextRect.center + const Offset(0.0, -500.0));
       await tester.pump();
       await gesture.up();
       await tester.pumpAndSettle();
