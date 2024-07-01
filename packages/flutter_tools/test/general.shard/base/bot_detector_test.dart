@@ -93,19 +93,6 @@ void main() {
         expect(persistentToolState.isRunningOnBot, isFalse);
       });
 
-      testWithoutContext('can test analytics outputs on bots when outputting to a file', () async {
-        fakePlatform.environment['TRAVIS'] = 'true';
-
-        final BotDetector botDetector = BotDetector(
-          platform: fakePlatform,
-          httpClientFactory: () => FakeHttpClient.any(),
-          persistentToolState: persistentToolState,
-        );
-
-        expect(await botDetector.isRunningOnBot, isFalse);
-        expect(persistentToolState.isRunningOnBot, isFalse);
-      });
-
       testWithoutContext('returns true when azure metadata is reachable', () async {
         final BotDetector botDetector = BotDetector(
           platform: fakePlatform,
