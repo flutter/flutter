@@ -107,6 +107,47 @@ void main() {
     expect(context.clipBehavior, equals(Clip.hardEdge));
   });
 
+  testWidgets('SingleChildScrollView ScrollViewKeyboardDismissBehavior.onDrag test',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                ...List<Widget>.generate(
+                  10,
+                  (int index) => Text(index.toString()),
+                ),
+                Autocomplete<String>(
+                  optionsBuilder: (TextEditingValue textEditingValue) {
+                    return <String>[
+                      'flutter',
+                      'dart',
+                      'pub',
+                    ].where((String option) {
+                      return option
+                          .contains(textEditingValue.text.toLowerCase());
+                    }).toList();
+                  },
+                ),
+                ...List<Widget>.generate(
+                  50,
+                  (int index) => Text(index.toString()),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    for (int i = 10; i < 20; i++) {
+      expect(find.text(i.toString()), findsOneWidget);
+    }
+  });
+
   testWidgets('SingleChildScrollView respects clipBehavior', (WidgetTester tester) async {
     await tester.pumpWidget(SingleChildScrollView(child: Container(height: 2000.0)));
 
