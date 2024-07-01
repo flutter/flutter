@@ -21,8 +21,8 @@ class AllocatorVK final : public Allocator {
   // |Allocator|
   ~AllocatorVK() override;
 
-  // Visible for testing
-  size_t DebugGetHeapUsage() const;
+  // |Allocator|
+  size_t DebugGetHeapUsage() const override;
 
   /// @brief Select a matching memory type for the given
   ///        [memory_type_bits_requirement], or -1 if none is found.

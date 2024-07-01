@@ -6,10 +6,31 @@
 #define FLUTTER_IMPELLER_RENDERER_BACKEND_METAL_ALLOCATOR_MTL_H_
 
 #include <Metal/Metal.h>
+#include <atomic>
 
+#include "impeller/base/thread.h"
 #include "impeller/core/allocator.h"
 
 namespace impeller {
+
+class DebugAllocatorStats {
+ public:
+  DebugAllocatorStats() {}
+
+  ~DebugAllocatorStats() {}
+
+  /// Increment the tracked allocation size in bytes.
+  void Increment(size_t size);
+
+  /// Decrement the tracked allocation size in bytes.
+  void Decrement(size_t size);
+
+  /// Get the current tracked allocation size in MB.
+  size_t GetAllocationSizeMB();
+
+ private:
+  std::atomic<size_t> size_ = 0;
+};
 
 class AllocatorMTL final : public Allocator {
  public:
@@ -17,6 +38,9 @@ class AllocatorMTL final : public Allocator {
 
   // |Allocator|
   ~AllocatorMTL() override;
+
+  // |Allocator|
+  size_t DebugGetHeapUsage() const override;
 
  private:
   friend class ContextMTL;
@@ -26,6 +50,12 @@ class AllocatorMTL final : public Allocator {
   bool supports_memoryless_targets_ = false;
   bool supports_uma_ = false;
   bool is_valid_ = false;
+
+#ifdef IMPELLER_DEBUG
+  std::shared_ptr<DebugAllocatorStats> debug_allocater_ =
+      std::make_shared<DebugAllocatorStats>();
+#endif  // IMPELLER_DEBUG
+
   ISize max_texture_supported_;
 
   AllocatorMTL(id<MTLDevice> device, std::string label);
@@ -46,6 +76,9 @@ class AllocatorMTL final : public Allocator {
 
   // |Allocator|
   ISize GetMaxTextureSizeSupported() const override;
+
+  // |Allocator|
+  void DebugTraceMemoryStatistics() const override;
 
   AllocatorMTL(const AllocatorMTL&) = delete;
 

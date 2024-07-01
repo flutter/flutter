@@ -9,6 +9,7 @@
 
 #include "impeller/base/backend_cast.h"
 #include "impeller/core/texture.h"
+#include "impeller/renderer/backend/metal/allocator_mtl.h"
 
 namespace impeller {
 
@@ -47,7 +48,16 @@ class TextureMTL final : public Texture,
 
   bool GenerateMipmap(id<MTLBlitCommandEncoder> encoder);
 
+#ifdef IMPELLER_DEBUG
+  void SetDebugAllocator(
+      const std::shared_ptr<DebugAllocatorStats>& debug_allocator);
+#endif  // IMPELLER_DEBUG
+
  private:
+#ifdef IMPELLER_DEBUG
+  std::shared_ptr<DebugAllocatorStats> debug_allocator_ = nullptr;
+#endif  // IMPELLER_DEBUG
+
   AcquireTextureProc aquire_proc_ = {};
   bool is_valid_ = false;
   bool is_wrapped_ = false;

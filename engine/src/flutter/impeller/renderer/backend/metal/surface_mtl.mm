@@ -229,6 +229,10 @@ bool SurfaceMTL::Present() const {
     return false;
   }
 
+#ifdef IMPELLER_DEBUG
+  context->GetResourceAllocator()->DebugTraceMemoryStatistics();
+#endif  // IMPELLER_DEBUG
+
   if (requires_blit_) {
     if (!(source_texture_ && destination_texture_)) {
       return false;
