@@ -101,7 +101,7 @@ class RemoveFrameworkLinkAndEmbeddingMigration extends ProjectMigrator {
         parameter: 'remove-frameworks',
         result: 'failure',
       ));
-      throwToolExit('Your Xcode project requires migration. See https://flutter.dev/docs/development/ios-project-migration for details.');
+      throwToolExit('Your Xcode project requires migration. See https://docs.flutter.dev/ios-project-migration for details.');
     }
 
     return line;

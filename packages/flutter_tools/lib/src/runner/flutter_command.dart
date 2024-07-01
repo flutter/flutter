@@ -1292,16 +1292,14 @@ abstract class FlutterCommand extends Command<void> {
     final Map<String, Object?> defineConfigJsonMap = extractDartDefineConfigJsonMap();
     final List<String> dartDefines = extractDartDefines(defineConfigJsonMap: defineConfigJsonMap);
 
-    if (argParser.options.containsKey(FlutterOptions.kWebResourcesCdnFlag)) {
-      final bool hasLocalWebSdk = argParser.options.containsKey('local-web-sdk') && stringArg('local-web-sdk') != null;
-      if (boolArg(FlutterOptions.kWebResourcesCdnFlag) && !hasLocalWebSdk) {
-        if (!dartDefines.any((String define) => define.startsWith('FLUTTER_WEB_CANVASKIT_URL='))) {
-          dartDefines.add('FLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/${globals.flutterVersion.engineRevision}/');
-        }
-      }
-    }
+    final bool useCdn = !argParser.options.containsKey(FlutterOptions.kWebResourcesCdnFlag)
+      || boolArg(FlutterOptions.kWebResourcesCdnFlag);
+    final bool useLocalWebSdk = argParser.options.containsKey(FlutterGlobalOptions.kLocalWebSDKOption)
+      && stringArg(FlutterGlobalOptions.kLocalWebSDKOption, global: true) != null;
+    final bool useLocalCanvasKit = !useCdn || useLocalWebSdk;
 
-    final String? defaultFlavor = project.manifest.defaultFlavor;
+    final String? defaultFlavor = FlutterProject.current().manifest.defaultFlavor;
+
     final String? cliFlavor = argParser.options.containsKey('flavor') ? stringArg('flavor') : null;
     final String? flavor = cliFlavor ?? defaultFlavor;
     if (flavor != null) {
@@ -1353,6 +1351,7 @@ abstract class FlutterCommand extends Command<void> {
           : null,
       assumeInitializeFromDillUpToDate: argParser.options.containsKey(FlutterOptions.kAssumeInitializeFromDillUpToDate)
           && boolArg(FlutterOptions.kAssumeInitializeFromDillUpToDate),
+      useLocalCanvasKit: useLocalCanvasKit,
     );
   }
 
@@ -1434,7 +1433,7 @@ abstract class FlutterCommand extends Command<void> {
   String get deprecationWarning {
     return '${globals.logger.terminal.warningMark} The "$name" command is '
            'deprecated and will be removed in a future version of Flutter. '
-           'See https://flutter.dev/docs/development/tools/sdk/releases '
+           'See https://flutter.dev/to/previous-releases '
            'for previous releases of Flutter.\n';
   }
 
