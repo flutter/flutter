@@ -1447,7 +1447,7 @@ class _ActionSheetMainSheetState extends State<_ActionSheetMainSheet> {
         return _PriorityColumn(
           top: widget.contentSection ?? _empty,
           bottom: _dividerAndActionsSection(context),
-          bottomMinHeight: _kActionSheetActionsSectionMinHeight + _kDividerThickness,
+          bottomMaxHeight: _kActionSheetActionsSectionMinHeight + _kDividerThickness,
         );
       },
     );
@@ -2927,6 +2927,8 @@ class _RenderCupertinoDialogActions extends RenderBox
   }
 }
 
+typedef _TwoChildrenHeights = (double topChildHeight, double bottomChildHeight);
+
 // A column layout with two widgets, where the top widget expands vertically as
 // needed, and the bottom widget has a minimum height.
 //
@@ -2934,7 +2936,7 @@ class _RenderCupertinoDialogActions extends RenderBox
 // constraint, with vertical space allocated in this priority:
 //
 //  1. The `bottom` widget receives its requested height, up to a
-//     `bottomMinHeight` limit.
+//     `bottomMaxHeight` limit.
 //  2. The `top` widget receives its requested height.
 //  3. The `bottom` widget receives additional height as needed.
 //
@@ -2944,38 +2946,38 @@ class _RenderCupertinoDialogActions extends RenderBox
 // Implementing this layout with simple compositing widgets is challenging
 // because:
 //
-//  * The bottom widget should take more than `bottomMinHeight` if the top
+//  * The bottom widget should take more than `bottomMaxHeight` if the top
 //    widget is short.
-//  * The bottom widget should take less than `bottomMinHeight` if it is
+//  * The bottom widget should take less than `bottomMaxHeight` if it is
 //    naturally shorter.
 class _PriorityColumn extends MultiChildRenderObjectWidget {
   _PriorityColumn({
     required Widget top,
     required Widget bottom,
-    required this.bottomMinHeight,
+    required this.bottomMaxHeight,
   }) : super(children: <Widget>[top, bottom]);
 
-  final double bottomMinHeight;
+  final double bottomMaxHeight;
 
   @override
   RenderObject createRenderObject(BuildContext context) {
     return _RenderPriorityColumn(
-      bottomMinHeight: bottomMinHeight,
+      bottomMaxHeight: bottomMaxHeight,
     );
   }
 
   @override
   void updateRenderObject(BuildContext context, _RenderPriorityColumn renderObject) {
     renderObject
-      .bottomMinHeight = bottomMinHeight;
+      .bottomMaxHeight = bottomMaxHeight;
   }
 }
 
 class _RenderPriorityColumn extends RenderFlex {
   _RenderPriorityColumn({
     List<RenderBox>? children,
-    required double bottomMinHeight,
-  }) : _bottomMinHeight = bottomMinHeight,
+    required double bottomMaxHeight,
+  }) : _bottomMaxHeight = bottomMaxHeight,
        super(
          direction: Axis.vertical,
          mainAxisSize: MainAxisSize.min,
@@ -2984,11 +2986,11 @@ class _RenderPriorityColumn extends RenderFlex {
     addAll(children);
   }
 
-  double get bottomMinHeight => _bottomMinHeight;
-  double _bottomMinHeight;
-  set bottomMinHeight(double newValue) {
-    if (newValue != _bottomMinHeight) {
-      _bottomMinHeight = newValue;
+  double get bottomMaxHeight => _bottomMaxHeight;
+  double _bottomMaxHeight;
+  set bottomMaxHeight(double newValue) {
+    if (newValue != _bottomMaxHeight) {
+      _bottomMaxHeight = newValue;
       markNeedsLayout();
     }
   }
@@ -3028,7 +3030,7 @@ class _RenderPriorityColumn extends RenderFlex {
     (lastChild!.parentData! as FlexParentData).offset = Offset(0, topHeight);
   }
 
-  (double, double) _childrenHeights(double width, double maxHeight) {
+  _TwoChildrenHeights _childrenHeights(double width, double maxHeight) {
     assert(childCount == 2);
     final double topIntrinsic = firstChild!.getMinIntrinsicHeight(width);
     final double bottomIntrinsic = lastChild!.getMinIntrinsicHeight(width);
@@ -3036,17 +3038,17 @@ class _RenderPriorityColumn extends RenderFlex {
     if (topIntrinsic + bottomIntrinsic <= maxHeight) {
       return (topIntrinsic, bottomIntrinsic);
     }
-    // _bottomMinHeight is only effective when bottom actually needs that much.
-    final double effectiveBottomMinHeight = math.min(_bottomMinHeight, bottomIntrinsic);
+    // _bottomMaxHeight is only effective when bottom actually needs that much.
+    final double effectiveBottomMaxHeight = math.min(_bottomMaxHeight, bottomIntrinsic);
     // Try to layout top as intrinsics, as long as the bottom has at least
-    // effectiveBottomMinHeight.
-    if (maxHeight - topIntrinsic >= effectiveBottomMinHeight) {
+    // effectiveBottomMaxHeight.
+    if (maxHeight - topIntrinsic >= effectiveBottomMaxHeight) {
       return (topIntrinsic, maxHeight - topIntrinsic);
     }
-    // Try to layout bottom as effectiveBottomMinHeight, as long as top has at
+    // Try to layout bottom as effectiveBottomMaxHeight, as long as top has at
     // least 0.
-    if (maxHeight >= effectiveBottomMinHeight) {
-      return (maxHeight - effectiveBottomMinHeight, effectiveBottomMinHeight);
+    if (maxHeight >= effectiveBottomMaxHeight) {
+      return (maxHeight - effectiveBottomMaxHeight, effectiveBottomMaxHeight);
     }
     return (0, maxHeight);
   }
