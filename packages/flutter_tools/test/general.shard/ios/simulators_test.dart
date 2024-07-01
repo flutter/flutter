@@ -1332,7 +1332,7 @@ class FakeIosProject extends Fake implements IosProject {
   Future<String> productBundleIdentifier(BuildInfo? buildInfo) async => 'com.example.test';
 
   @override
-  Future<String> hostAppBundleName(BuildInfo? buildInfo) async => 'My Super Awesome App.app';
+  Future<String> productName(BuildInfo? buildInfo) async => 'My Super Awesome App';
 }
 
 class FakeSimControl extends Fake implements SimControl {
