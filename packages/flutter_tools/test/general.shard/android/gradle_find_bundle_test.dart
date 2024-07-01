@@ -4,6 +4,7 @@
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/gradle.dart';
+import 'package:flutter_tools/src/android/gradle_utils.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -559,7 +560,7 @@ void main() {
         'gradle',
         label: 'gradle-expected-file-not-found',
         parameters: CustomDimensions.fromMap(<String, String> {
-          'cd37': 'androidGradlePluginVersion: 7.6.3, fileExtension: .aab',
+          'cd37': 'androidGradlePluginVersion: $templateDefaultGradleVersion, fileExtension: .aab',
         }),
       ),
     ));
@@ -570,7 +571,7 @@ void main() {
         Event.flutterBuildInfo(
           label: 'gradle-expected-file-not-found',
           buildType: 'gradle',
-          settings: 'androidGradlePluginVersion: 7.6.3, fileExtension: .aab',
+          settings: 'androidGradlePluginVersion: $templateDefaultGradleVersion, fileExtension: .aab',
         ),
       ),
     );
