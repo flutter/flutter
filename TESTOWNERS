@@ -332,6 +332,8 @@
 # test_ownership @keyonghan
 # tool_host_cross_arch_tests @andrewkolos @flutter/tool
 # tool_integration_tests @christopherfujino @flutter/tool
+# android_preview_tool_integration_tests @gmackall @flutter/android
+# android_java11_tool_integration_tests @gmackall @flutter/android
 # tool_tests @andrewkolos @flutter/tool
 # verify_binaries_codesigned @cbracken @flutter/releases
 # web_canvaskit_tests @yjbanov @flutter/web
