@@ -323,12 +323,12 @@ void main() {
         MaterialApp(
           home: PageView(
             controller: pageController,
-            children: <Widget>[
+            children: const <Widget>[
               Center(
                 child: SelectableRegion(
                   focusNode: focusNode,
                   selectionControls: materialTextSelectionControls,
-                  child: Text(testValue),
+                  child: const Text(testValue),
                 ),
               ),
               const SizedBox(
@@ -372,6 +372,7 @@ void main() {
       expect(pageController.page, 1.0);
     },
       variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+      skip: kIsWeb, // https://github.com/flutter/flutter/issues/125582.
     );
 
     testWidgets('Vertical PageView beats SelectionArea child touch drag gestures', (WidgetTester tester) async {
@@ -392,7 +393,7 @@ void main() {
                 child: SelectableRegion(
                   focusNode: focusNode,
                   selectionControls: materialTextSelectionControls,
-                  child: Text(testValue),
+                  child: const Text(testValue),
                 ),
               ),
               const SizedBox(
@@ -446,6 +447,7 @@ void main() {
       expect(pageController.page, 1.0);
     },
       variant: TargetPlatformVariant.mobile(),
+      skip: kIsWeb, // https://github.com/flutter/flutter/issues/125582.
     );
 
     testWidgets('mouse single-click selection collapses the selection', (WidgetTester tester) async {
