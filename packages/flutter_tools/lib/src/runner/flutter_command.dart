@@ -1182,7 +1182,8 @@ abstract class FlutterCommand extends Command<void> {
       ? stringArg('build-number')
       : null;
 
-    final File packageConfigFile = globals.fs.file(packagesPath ?? project.packageConfigFile);
+    final File packageConfigFile = globals.fs.file(packagesPath ??
+        globals.fs.path.absolute(project.packageConfigFile.path));
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
       packageConfigFile,
       logger: globals.logger,
