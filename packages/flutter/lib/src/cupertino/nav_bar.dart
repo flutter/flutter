@@ -33,6 +33,8 @@ const double _kNavBarShowLargeTitleThreshold = 10.0;
 
 /// Number of logical pixels scrolled during which the navigation bar's background
 /// fades in or out.
+///
+/// Eyeballed on the native Settings app on an iPhone 15 simulator running iOS 17.4.
 const double _kNavBarScrollUnderAnimationExtent = 10.0;
 
 const double _kNavBarEdgePadding = 16.0;
@@ -52,6 +54,8 @@ const Border _kDefaultNavBarBorder = Border(
     width: 0.0, // 0.0 means one physical pixel
   ),
 );
+
+const Border _kTransparentNavBarBorder = Border(bottom: BorderSide(color: Color(0x00000000), width: 0.0));
 
 // There's a single tag for all instances of navigation bars because they can
 // all transition between each other (per Navigator) via Hero transitions.
@@ -519,7 +523,7 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
     final Color? parentPageScaffoldBackgroundColor = CupertinoPageScaffoldBackgroundColor.maybeOf(context);
 
     final Border? initialBorder = widget.automaticBackgroundVisibility && parentPageScaffoldBackgroundColor != null
-      ? const Border(bottom: BorderSide(width: 0.0, color: Color(0x00000000)))
+      ? _kTransparentNavBarBorder
       : widget.border;
     final Border? effectiveBorder = widget.border == null ? null : Border.lerp(initialBorder, widget.border, _scrollAnimationValue,);
 
@@ -903,7 +907,7 @@ class _LargeTitleNavigationBarSliverDelegate
     final Color? parentPageScaffoldBackgroundColor = CupertinoPageScaffoldBackgroundColor.maybeOf(context);
 
     final Border? initialBorder = automaticBackgroundVisibility && parentPageScaffoldBackgroundColor != null
-        ? const Border(bottom: BorderSide(width: 0.0, color: Color(0x00000000)))
+        ? _kTransparentNavBarBorder
         : border;
     final Border? effectiveBorder = border == null ? null : Border.lerp(initialBorder, border, shrinkAnimationValue);
 
