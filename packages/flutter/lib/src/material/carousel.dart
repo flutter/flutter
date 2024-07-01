@@ -14,6 +14,9 @@ import 'ink_well.dart';
 import 'material.dart';
 import 'theme.dart';
 
+// Examples can assume:
+// BuildContext context;
+
 /// A Material Design carousel widget.
 ///
 /// The [CarouselView] presents a scrollable list of items, each of which can dynamically
