@@ -27,6 +27,7 @@ import 'text_span.dart';
 import 'text_style.dart';
 
 export 'dart:ui' show LineMetrics;
+
 export 'package:flutter/services.dart' show TextRange, TextSelection;
 
 /// The default font size if none is specified.
@@ -686,6 +687,78 @@ class TextPainter {
     } finally {
       painter.dispose();
     }
+  }
+
+  /// Computes the widest word in the given text.
+  ///
+  /// This is a convenience method that creates a text painter with the supplied
+  /// parameters, lays it out with the supplied [minWidth] and [maxWidth], and
+  /// returns the widest word in the text making sure to dispose the
+  /// underlying resources. Doing this operation is expensive and should be avoided
+  /// whenever it is possible to preserve the [TextPainter] to paint the
+  /// text or get other information about it.
+  static String computeWidestWord({required InlineSpan text, required TextDirection textDirection}) {
+    double maxWidth = 0.0;
+    String widestWord = '';
+    final Map<String, double> widthCache = <String, double>{};
+
+    final List<String> words = text.toPlainText().split(' ').map((String word) => word.replaceAll(RegExp(r'[^\w\s]'), '')).toList();
+    for (int i  = 0; i < words.length; i++) {
+      final String word = words[i];
+
+      if (!widthCache.containsKey(word)) {
+        final TextPainter painter = TextPainter(
+          text: TextSpan(text: word, style: text.style),
+          textDirection: textDirection,
+        );
+
+        painter.layout();
+        widthCache[word] = painter.width;
+      }
+
+      final double width = widthCache[word]!;
+      if (width > maxWidth) {
+        maxWidth = width;
+        widestWord = word;
+      }
+    }
+
+    widthCache.clear();
+    return widestWord;
+  }
+
+  // TODO(Mairramer): - Verify if this method is still needed.
+
+  /// Computes the width of the widest character in the given text.
+  ///
+  /// This is a convenience method that computes the width of the widest character
+  /// in the given text. This method is useful when the text is not available as
+  /// an [InlineSpan] tree, and the width of the widest character is needed.
+  static double findWidestCharacter(String text, TextStyle? textStyle, TextDirection textDirection) {
+    double maxWidth = 0.0;
+    final Map<String, double> widthCache = <String, double>{};
+
+    for (int i = 0; i < text.length; i++) {
+      final String character = text[i];
+
+      if (!widthCache.containsKey(character)) {
+        final TextPainter painter = TextPainter(
+          text: TextSpan(text: character,style: textStyle),
+          textDirection: textDirection,
+        );
+
+        painter.layout();
+        widthCache[character] = painter.width;
+      }
+
+      final double width = widthCache[character]!;
+      if (width > maxWidth) {
+        maxWidth = width;
+      }
+    }
+
+    widthCache.clear();
+    return maxWidth;
   }
 
   // Whether textWidthBasis has changed after the most recent `layout` call.
