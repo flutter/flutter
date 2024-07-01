@@ -830,6 +830,7 @@ class _DragAvatar<T extends Object> extends Drag {
   final List<_DragTargetState<Object>> _enteredTargets = <_DragTargetState<Object>>[];
   Offset _position;
   Offset? _lastOffset;
+  late Offset _overlayOffset;
   OverlayEntry? _entry;
 
   @override
@@ -855,7 +856,14 @@ class _DragAvatar<T extends Object> extends Drag {
 
   void updateDrag(Offset globalPosition) {
     _lastOffset = globalPosition - dragStartPoint;
-    _entry!.markNeedsBuild();
+    if (overlayState.mounted) {
+      final RenderBox box = overlayState.context.findRenderObject()! as RenderBox;
+      final Offset overlaySpaceOffset = box.globalToLocal(globalPosition);
+      _overlayOffset = overlaySpaceOffset - dragStartPoint;
+
+      _entry!.markNeedsBuild();
+    }
+
     final HitTestResult result = HitTestResult();
     WidgetsBinding.instance.hitTestInView(result, globalPosition + feedbackOffset, viewId);
 
@@ -940,11 +948,9 @@ class _DragAvatar<T extends Object> extends Drag {
   }
 
   Widget _build(BuildContext context) {
-    final RenderBox box = overlayState.context.findRenderObject()! as RenderBox;
-    final Offset overlayTopLeft = box.localToGlobal(Offset.zero);
     return Positioned(
-      left: _lastOffset!.dx - overlayTopLeft.dx,
-      top: _lastOffset!.dy - overlayTopLeft.dy,
+      left: _overlayOffset.dx,
+      top: _overlayOffset.dy,
       child: ExcludeSemantics(
         excluding: ignoringFeedbackSemantics,
         child: IgnorePointer(
