@@ -17,50 +17,37 @@ void main() {
     HttpOverrides.global = null;
   });
 
-  testWidgets('Displays two images', (WidgetTester tester) async {
+  testWidgets('Color filters are applied to the images', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.ColorFilteredExampleApp(),
     );
 
     await tester.pumpAndSettle();
 
+    // Verify that two images are displayed.
     expect(find.byType(Image), findsNWidgets(2));
-  });
 
-  testWidgets('Applies red color filter with modulate blend mode to the first image', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.ColorFilteredExampleApp(),
-    );
-
-    await tester.pumpAndSettle();
-
-    final RenderObject renderObject = tester.firstRenderObject(
+    final RenderObject renderObject1 = tester.firstRenderObject(
       find.byType(ColorFiltered).first,
     );
-    final ColorFilterLayer colorFilterLayer =
-        renderObject.debugLayer! as ColorFilterLayer;
+    final ColorFilterLayer colorFilterLayer1 =
+        renderObject1.debugLayer! as ColorFilterLayer;
 
+    // Verify that red colored filter with modulate blend mode is applied to the first image.
     expect(
-      colorFilterLayer.colorFilter,
+      colorFilterLayer1.colorFilter,
       equals(const ColorFilter.mode(Colors.red, BlendMode.modulate)),
     );
-  });
 
-  testWidgets('Applies grey color filter with saturation blend mode to the second image', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.ColorFilteredExampleApp(),
-    );
-
-    await tester.pumpAndSettle();
-
-    final RenderObject renderObject = tester.firstRenderObject(
+    final RenderObject renderObject2 = tester.firstRenderObject(
       find.byType(ColorFiltered).last,
     );
-    final ColorFilterLayer colorFilterLayer =
-        renderObject.debugLayer! as ColorFilterLayer;
+    final ColorFilterLayer colorFilterLayer2 =
+        renderObject2.debugLayer! as ColorFilterLayer;
 
+    // Verify that grey colored filter with saturation blend mode is applied to the first image.
     expect(
-      colorFilterLayer.colorFilter,
+      colorFilterLayer2.colorFilter,
       equals(const ColorFilter.mode(Colors.grey, BlendMode.saturation)),
     );
   });
