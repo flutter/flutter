@@ -1934,6 +1934,7 @@
 ../../../flutter/third_party/icu/fuzzers
 ../../../flutter/third_party/icu/icu4c.css
 ../../../flutter/third_party/icu/license.html
+../../../flutter/third_party/icu/patches
 ../../../flutter/third_party/icu/readme.html
 ../../../flutter/third_party/icu/scripts
 ../../../flutter/third_party/icu/source/.clang-format
