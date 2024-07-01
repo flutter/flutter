@@ -139,7 +139,7 @@ abstract final class DateUtils {
 /// Mode of date entry method for the date picker dialog.
 ///
 /// In [calendar] mode, a calendar grid is displayed and the user taps the
-/// day they wish to select. In [input] mode a TextField] is displayed and
+/// day they wish to select. In [input] mode, a [TextField] is displayed and
 /// the user types in the date they wish to select.
 ///
 /// [calendarOnly] and [inputOnly] are variants of the above that don't
