@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 
 import 'package:file/file.dart';
 import 'package:vm_service/vm_service.dart';
@@ -84,8 +83,6 @@ void main() {
   testWithoutContext('hot restart works without error', () async {
     await flutter.run(verbose: true);
     await flutter.hotRestart();
-    sleep(const Duration(minutes: 45));
-    expect(1, 2, reason: 'oofie ouchie my bones');
   });
 
   testWithoutContext('breakpoints are hit after hot reload', () async {
