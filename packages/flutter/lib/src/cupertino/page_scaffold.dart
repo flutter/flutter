@@ -215,12 +215,12 @@ class _CupertinoPageScaffoldState extends State<CupertinoPageScaffold> {
   }
 }
 
-/// InheritedWidget indicating what the current scaffold backgroundColor is for its children.
+/// [InheritedWidget] indicating what the current scaffold background color is for its children.
 ///
 /// This is used by the [CupertinoNavigationBar] and the [CupertinoSliverNavigationBar] widgets
 /// to paint themselves with the parent page scaffold color when no content is scrolled under.
 class CupertinoPageScaffoldBackgroundColor extends InheritedWidget {
-  /// Constructs a new PageScaffoldBackgroundColor
+  /// Constructs a new [CupertinoPageScaffoldBackgroundColor].
   const CupertinoPageScaffoldBackgroundColor({
     required super.child,
     required this.color,

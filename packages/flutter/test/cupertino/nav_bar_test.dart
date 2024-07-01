@@ -1119,7 +1119,7 @@ void main() {
       final BorderSide side = decoration.border!.bottom;
       expect(side.color.opacity, 0.0);
 
-      // appears transparent since the background color is the same as the scaffold.
+      // Appears transparent since the background color is the same as the scaffold.
       expect(find.byType(CupertinoNavigationBar), paints..rect(color: const Color(0xFFFFFFFF)));
 
       scrollController.jumpTo(100.0);
@@ -1292,7 +1292,7 @@ void main() {
       final BorderSide side = decoration.border!.bottom;
       expect(side.color.opacity, 0.0);
 
-      // appears transparent since the background color is the same as the scaffold.
+      // Appears transparent since the background color is the same as the scaffold.
       expect(find.byType(CupertinoSliverNavigationBar), paints..rect(color: const Color(0xFFFFFFFF)));
 
       scrollController.jumpTo(400.0);
