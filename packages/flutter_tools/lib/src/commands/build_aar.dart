@@ -12,6 +12,7 @@ import '../base/file_system.dart';
 import '../base/os.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../globals.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart' show FlutterCommandResult;
@@ -174,6 +175,19 @@ class BuildAarCommand extends BuildSubCommand {
       outputDirectoryPath: stringArg('output'),
       buildNumber: buildNumber,
     );
+
+    // When an aar is successfully built, record to analytics whether Impeller
+    // is enabled or disabled. Note that 'computeImpellerEnabled' will default
+    // to false if not enabled explicitly in the manifest.
+    final bool impellerEnabled = project.android.computeImpellerEnabled();
+    final String buildLabel = impellerEnabled
+          ? 'manifest-aar-impeller-enabled'
+          : 'manifest-aar-impeller-disabled';
+    globals.analytics.send(Event.flutterBuildInfo(
+      label: buildLabel,
+      buildType: 'android',
+    ));
+
     return FlutterCommandResult.success();
   }
 
