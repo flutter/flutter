@@ -146,7 +146,10 @@ void main() {
           SemanticsFlag.isChecked,
           if (isApple) SemanticsFlag.isSelected,
         ],
-        actions: <SemanticsAction>[SemanticsAction.tap],
+        actions: <SemanticsAction>[
+          SemanticsAction.tap,
+          if (defaultTargetPlatform != TargetPlatform.iOS) SemanticsAction.focus,
+        ],
       ),
     );
     semantics.dispose();

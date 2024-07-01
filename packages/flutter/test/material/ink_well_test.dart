@@ -1178,7 +1178,7 @@ testWidgets('InkResponse radius can be updated', (WidgetTester tester) async {
         ),
       ),
     ));
-    expect(semantics, includesNodeWith(label: 'Button', actions: <SemanticsAction>[SemanticsAction.tap]));
+    expect(semantics, includesNodeWith(label: 'Button', actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus]));
 
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,

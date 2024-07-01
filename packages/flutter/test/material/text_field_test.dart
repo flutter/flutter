@@ -8551,7 +8551,10 @@ void main() {
     expect(
         semantics,
         includesNodeWith(
-          actions: <SemanticsAction>[SemanticsAction.tap],
+          actions: <SemanticsAction>[
+            SemanticsAction.tap,
+            SemanticsAction.focus,
+          ],
           textDirection: TextDirection.ltr,
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
@@ -8568,7 +8571,10 @@ void main() {
     expect(
       semantics,
       includesNodeWith(
-        actions: <SemanticsAction>[SemanticsAction.tap],
+        actions: <SemanticsAction>[
+          SemanticsAction.tap,
+          SemanticsAction.focus,
+        ],
         textDirection: TextDirection.ltr,
         flags: <SemanticsFlag>[
           SemanticsFlag.isTextField,
@@ -8585,7 +8591,10 @@ void main() {
     expect(
         semantics,
         includesNodeWith(
-          actions: <SemanticsAction>[SemanticsAction.tap],
+          actions: <SemanticsAction>[
+            SemanticsAction.tap,
+            SemanticsAction.focus,
+          ],
           textDirection: TextDirection.ltr,
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
