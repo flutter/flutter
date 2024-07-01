@@ -224,9 +224,9 @@ class BuildInfo {
   static const BuildInfo release = BuildInfo(
     BuildMode.release,
     null,
-  static const BuildInfo jitRelease = BuildInfo(BuildMode.jitRelease, null, treeShakeIcons: kIconTreeShakerEnabledDefault);
-  static const BuildInfo release = BuildInfo(BuildMode.release, null, treeShakeIcons: kIconTreeShakerEnabledDefault);
->>>>>>> origin/master
+    treeShakeIcons: kIconTreeShakerEnabledDefault,
+    packageConfigPath: '.dart_tool/package_config.json',
+  );
 
   /// Returns whether a debug build is requested.
   ///
