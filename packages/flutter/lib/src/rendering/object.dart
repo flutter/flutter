@@ -8,7 +8,6 @@ import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/painting.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/semantics.dart';
 
@@ -5169,6 +5168,8 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
       Matrix4? transform;
       Rect? semanticsClipRect;
       Rect? paintClipRect;
+      bool hidden = false;
+
       final bool mergeIntoParent = entry.value.first._mergeIntoParent;
       assert(entry.value.every((_SwitchableSemanticsFragment fragment) => fragment._mergeIntoParent == mergeIntoParent));
       for (final _SwitchableSemanticsFragment fragment in entry.value) {
@@ -5181,6 +5182,7 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
           transform = geometry.transform;
           semanticsClipRect = geometry.semanticsClipRect;
           paintClipRect = geometry.paintClipRect;
+          hidden = geometry.markAsHidden;
           continue;
         }
         // There are at least two fragments that contribute this. This is likely
@@ -5206,17 +5208,21 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
         }
         final Rect fragmentRect = MatrixUtils.transformRect(geometry.transform, geometry.rect);
         rect = rect.expandToInclude(fragmentRect);
+        hidden = hidden && geometry.markAsHidden;
       }
-      // if (owner is RenderIndexedSemantics && (owner as RenderIndexedSemantics).index == 3) {
-      //   print('recalculation calculation, rect ${rect}, transform ${transform}');
-      // }
       final SemanticsNode node = entry.key;
+      final bool sizeChanged = rect!.size != node.rect.size;
       node
-        ..rect = rect!
+        ..rect = rect
         ..transform = transform
         ..parentSemanticsClipRect = semanticsClipRect
         ..parentPaintClipRect = paintClipRect
-        ..isHidden = !mergeIntoParent && rect.isEmpty;
+        ..isHidden = !mergeIntoParent && hidden;
+      if (sizeChanged) {
+        for (final _SwitchableSemanticsFragment fragment in entry.value) {
+          fragment._updateProducedNodeGeometries(node.parentSemanticsClipRect, node.parentPaintClipRect);
+        }
+      }
     }
   }
 
@@ -5391,7 +5397,6 @@ class _SemanticsGeometry {
     }
 
     final RenderObject owner = ancestors.first;
-    print('_semanticsClipRect $_semanticsClipRect');
     _rect = _semanticsClipRect?.intersect(owner.semanticBounds) ?? owner.semanticBounds;
     if (_paintClipRect != null) {
       final Rect paintRect = _paintClipRect!.intersect(_rect);
