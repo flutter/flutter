@@ -58,6 +58,7 @@ void main() {
 
   testWidgets('Can place app inside FocusScope', (WidgetTester tester) async {
     final FocusScopeNode focusScopeNode = FocusScopeNode();
+    addTearDown(focusScopeNode.dispose);
 
     await tester.pumpWidget(FocusScope(
       autofocus: true,
@@ -68,7 +69,6 @@ void main() {
     ));
 
     expect(find.text('Home'), findsOneWidget);
-    focusScopeNode.dispose();
   });
 
   testWidgets('Can show grid without losing sync', (WidgetTester tester) async {
