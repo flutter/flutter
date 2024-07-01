@@ -2927,6 +2927,8 @@ class _RenderCupertinoDialogActions extends RenderBox
   }
 }
 
+typedef _TwoChildrenHeights = ({double topChildHeight, double bottomChildHeight});
+
 // A column layout with two widgets, where the top widget expands vertically as
 // needed, and the bottom widget has a minimum height.
 //
@@ -3012,44 +3014,53 @@ class _RenderPriorityColumn extends RenderFlex {
   Size computeDryLayout(covariant BoxConstraints constraints) {
     final double width = constraints.maxWidth;
     final double maxHeight = constraints.maxHeight;
-    final (double topHeight, double bottomHeight) = _childrenHeights(width, maxHeight);
-    return Size(width, topHeight + bottomHeight);
+    final (:double topChildHeight, :double bottomChildHeight) = _childrenHeights(width, maxHeight);
+    return Size(width, topChildHeight + bottomChildHeight);
   }
 
   @override
   void performLayout() {
     final double width = constraints.maxWidth;
     final double maxHeight = constraints.maxHeight;
-    final (double topHeight, double bottomHeight) = _childrenHeights(width, maxHeight);
-    size = Size(width, topHeight + bottomHeight);
+    final (:double topChildHeight, :double bottomChildHeight) = _childrenHeights(width, maxHeight);
+    size = Size(width, topChildHeight + bottomChildHeight);
 
-    firstChild!.layout(BoxConstraints.tight(Size(width, topHeight)), parentUsesSize: true);
+    firstChild!.layout(BoxConstraints.tight(Size(width, topChildHeight)), parentUsesSize: true);
     (firstChild!.parentData! as FlexParentData).offset = Offset.zero;
 
-    lastChild!.layout(BoxConstraints.tight(Size(width, bottomHeight)), parentUsesSize: true);
-    (lastChild!.parentData! as FlexParentData).offset = Offset(0, topHeight);
+    lastChild!.layout(BoxConstraints.tight(Size(width, bottomChildHeight)), parentUsesSize: true);
+    (lastChild!.parentData! as FlexParentData).offset = Offset(0, topChildHeight);
   }
 
-  (double, double) _childrenHeights(double width, double maxHeight) {
+  _TwoChildrenHeights _childrenHeights(double width, double maxHeight) {
     assert(childCount == 2);
     final double topIntrinsic = firstChild!.getMinIntrinsicHeight(width);
     final double bottomIntrinsic = lastChild!.getMinIntrinsicHeight(width);
     // Try to layout both children as their intrinsic height.
     if (topIntrinsic + bottomIntrinsic <= maxHeight) {
-      return (topIntrinsic, bottomIntrinsic);
+      return (
+        topChildHeight: topIntrinsic,
+        bottomChildHeight: bottomIntrinsic,
+      );
     }
     // _bottomMinHeight is only effective when bottom actually needs that much.
     final double effectiveBottomMinHeight = math.min(_bottomMinHeight, bottomIntrinsic);
     // Try to layout top as intrinsics, as long as the bottom has at least
     // effectiveBottomMinHeight.
     if (maxHeight - topIntrinsic >= effectiveBottomMinHeight) {
-      return (topIntrinsic, maxHeight - topIntrinsic);
+      return (
+        topChildHeight: topIntrinsic,
+        bottomChildHeight: maxHeight - topIntrinsic,
+      );
     }
     // Try to layout bottom as effectiveBottomMinHeight, as long as top has at
     // least 0.
     if (maxHeight >= effectiveBottomMinHeight) {
-      return (maxHeight - effectiveBottomMinHeight, effectiveBottomMinHeight);
+      return (
+        topChildHeight: maxHeight - effectiveBottomMinHeight,
+        bottomChildHeight: effectiveBottomMinHeight,
+      );
     }
-    return (0, maxHeight);
+    return (topChildHeight: 0, bottomChildHeight: maxHeight);
   }
 }
