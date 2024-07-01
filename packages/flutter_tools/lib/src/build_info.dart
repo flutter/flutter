@@ -48,6 +48,7 @@ class BuildInfo {
     this.initializeFromDill,
     this.assumeInitializeFromDillUpToDate = false,
     this.buildNativeAssets = true,
+    this.useLocalCanvasKit = false,
   }) : extraFrontEndOptions = extraFrontEndOptions ?? const <String>[],
        extraGenSnapshotOptions = extraGenSnapshotOptions ?? const <String>[],
        fileSystemRoots = fileSystemRoots ?? const <String>[],
@@ -182,6 +183,9 @@ class BuildInfo {
   /// If set, builds native assets with `build.dart` from all packages.
   final bool buildNativeAssets;
 
+  /// If set, web builds will use the locally built CanvasKit instead of using the CDN
+  final bool useLocalCanvasKit;
+
   /// Can be used when the actual information is not needed.
   static const BuildInfo dummy = BuildInfo(
     BuildMode.debug,
@@ -220,9 +224,9 @@ class BuildInfo {
   static const BuildInfo release = BuildInfo(
     BuildMode.release,
     null,
-    treeShakeIcons: kIconTreeShakerEnabledDefault,
-    packageConfigPath: '.dart_tool/package_config.json',
-  );
+  static const BuildInfo jitRelease = BuildInfo(BuildMode.jitRelease, null, treeShakeIcons: kIconTreeShakerEnabledDefault);
+  static const BuildInfo release = BuildInfo(BuildMode.release, null, treeShakeIcons: kIconTreeShakerEnabledDefault);
+>>>>>>> origin/master
 
   /// Returns whether a debug build is requested.
   ///
@@ -299,6 +303,8 @@ class BuildInfo {
         kBuildName: buildName!,
       if (buildNumber != null)
         kBuildNumber: buildNumber!,
+      if (useLocalCanvasKit)
+        kUseLocalCanvasKitFlag: useLocalCanvasKit.toString(),
     };
   }
 
@@ -979,6 +985,9 @@ const String kCodesignIdentity = 'CodesignIdentity';
 /// The build define controlling whether icon fonts should be stripped down to
 /// only the glyphs used by the application.
 const String kIconTreeShakerFlag = 'TreeShakeIcons';
+
+/// Controls whether a web build should use local canvaskit or the CDN
+const String kUseLocalCanvasKitFlag = 'UseLocalCanvasKit';
 
 /// The input key for an SkSL bundle path.
 const String kBundleSkSLPath = 'BundleSkSLPath';
