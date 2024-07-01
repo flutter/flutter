@@ -20,24 +20,46 @@ import 'scroll_position.dart';
 import 'scrollable.dart';
 import 'ticker_provider.dart';
 
-/// A sliver that keeps its Widget child at the top of the a [CustomScrollView].
+/// A sliver that shows its [child] when the user scrolls forward and hides it
+/// when the user scrolls backwards.
 ///
 /// This sliver is preferable to the general purpose [SliverPersistentHeader]
 /// for its relatively narrow use case because there's no need to create a
 /// [SliverPersistentHeaderDelegate] or to predict the header's size.
-///
-/// {@tool dartpad}
-/// This example ...
-///
-/// ** See code in examples/api/lib/widgets/sliver/floating_header_sliver.0.dart **
-/// {@end-tool}
 class SliverFloatingHeader extends StatefulWidget {
-  const SliverFloatingHeader({ super.key, required this.child });
+  /// Create a floating header sliver that animates into view when the user
+  /// scrolls forward, and disappears the user starts scrolling in the
+  /// opposite direction.
+  const SliverFloatingHeader({
+    super.key,
+    this.animationStyle,
+    required this.child
+  });
 
+  /// Non null properties override the default durations (300ms) and
+  /// curves (Curves.easeInOut) for subsequent header animations.
+  ///
+  /// The reverse duration and curve apply to the animation that hides the header.
+  final AnimationStyle? animationStyle;
+
+  /// The widget contained by this sliver.
   final Widget child;
 
   @override
   State<SliverFloatingHeader> createState() => _SliverFloatingHeaderState();
+}
+
+class _SliverFloatingHeaderState extends State<SliverFloatingHeader> with SingleTickerProviderStateMixin {
+  ScrollPosition? position;
+
+  @override
+  Widget build(BuildContext context) {
+    return _SliverFloatingHeader(
+      vsync: this,
+      animationStyle: widget.animationStyle,
+      child: _SnapTrigger(widget.child),
+    );
+  }
 }
 
 class _SnapTrigger extends StatefulWidget {
@@ -72,7 +94,7 @@ class _SnapTriggerState extends State<_SnapTrigger> {
     super.dispose();
   }
 
-  // Called when the sliver "is scrolling".
+  // Called when the sliver starts or ends scrolling.
   void isScrollingListener() {
     assert(position != null);
     final _RenderSliverFloatingHeader? renderer = context.findAncestorRenderObjectOfType<_RenderSliverFloatingHeader>();
@@ -83,44 +105,36 @@ class _SnapTriggerState extends State<_SnapTrigger> {
   Widget build(BuildContext context) => widget.child;
 }
 
-class _SliverFloatingHeaderState extends State<SliverFloatingHeader> with SingleTickerProviderStateMixin {
-  ScrollPosition? position;
-
-  @override
-  Widget build(BuildContext context) {
-    return _SliverFloatingHeader(
-      vsync: this,
-      child: _SnapTrigger(widget.child),
-    );
-  }
-}
-
 class _SliverFloatingHeader extends SingleChildRenderObjectWidget {
   const _SliverFloatingHeader({
-    super.key,
     this.vsync,
+    this.animationStyle,
     super.child,
   });
 
   final TickerProvider? vsync;
+  final AnimationStyle? animationStyle;
 
   @override
   _RenderSliverFloatingHeader createRenderObject(BuildContext context) {
     return _RenderSliverFloatingHeader(
       vsync: vsync,
+      animationStyle: animationStyle,
     );
   }
 
   @override
   void updateRenderObject(BuildContext context, _RenderSliverFloatingHeader renderObject) {
-    renderObject.vsync = vsync;
+    renderObject
+      ..vsync = vsync
+      ..animationStyle = animationStyle;
   }
 }
 
 class _RenderSliverFloatingHeader extends RenderSliverSingleBoxAdapter {
   _RenderSliverFloatingHeader({
     TickerProvider? vsync,
-    super.child
+    this.animationStyle,
   }) : _vsync = vsync;
 
   late Animation<double> snapAnimation;
@@ -148,7 +162,9 @@ class _RenderSliverFloatingHeader extends RenderSliverSingleBoxAdapter {
     }
   }
 
-  // Called each time the position's isScrollingNotifier indicates that scrolling has
+  AnimationStyle? animationStyle;
+
+  // Called each time the position's isScrollingNotifier indicates that user scrolling has
   // stopped or started, i.e. if the sliver "is scrolling".
   void isScrollingUpdate(ScrollPosition position) {
     if (position.isScrollingNotifier.value) {
@@ -156,18 +172,22 @@ class _RenderSliverFloatingHeader extends RenderSliverSingleBoxAdapter {
     } else {
       final ScrollDirection direction = position.userScrollDirection;
       final bool headerIsPartiallyVisible = switch (direction) {
-        ScrollDirection.forward when effectiveScrollOffset! <= 0 => false, // completely visible
-        ScrollDirection.reverse when effectiveScrollOffset! >= childExtent => false, // not visible
+        ScrollDirection.forward when effectiveScrollOffset <= 0 => false, // completely visible
+        ScrollDirection.reverse when effectiveScrollOffset >= childExtent => false, // not visible
         _ => true,
       };
       if (headerIsPartiallyVisible) {
-        snapController ??= AnimationController(vsync: vsync!, duration: Duration(milliseconds: 500))
+        snapController ??= AnimationController(vsync: vsync!)
           ..addListener(() {
             if (effectiveScrollOffset != snapAnimation.value) {
               effectiveScrollOffset = snapAnimation.value;
               markNeedsLayout();
             }
           });
+        snapController!.duration = switch (direction) {
+          ScrollDirection.forward => animationStyle?.duration ?? const Duration(milliseconds: 300),
+          _ => animationStyle?.reverseDuration ?? const Duration(milliseconds: 300),
+        };
         snapAnimation = snapController!.drive(
           Tween<double>(
             begin: effectiveScrollOffset,
@@ -175,7 +195,14 @@ class _RenderSliverFloatingHeader extends RenderSliverSingleBoxAdapter {
               ScrollDirection.forward => 0,
               _ => childExtent,
             },
-          ).chain(CurveTween(curve: Curves.easeInOut)),
+          ).chain(
+            CurveTween(
+              curve: switch (direction) {
+                ScrollDirection.forward => animationStyle?.curve ?? Curves.easeInOut,
+                _ => animationStyle?.reverseCurve ?? Curves.easeInOut,
+              }
+            ),
+          ),
         );
         snapController!.forward(from: 0.0);
       }
@@ -228,7 +255,7 @@ class _RenderSliverFloatingHeader extends RenderSliverSingleBoxAdapter {
     }
 
     child?.layout(constraints.asBoxConstraints(), parentUsesSize: true);
-    final double paintExtent = childExtent - effectiveScrollOffset!; // TBD: move these expressions into the ctor
+    final double paintExtent = childExtent - effectiveScrollOffset;
     final double layoutExtent = childExtent - constraints.scrollOffset;
     geometry = SliverGeometry(
       paintOrigin: math.min(constraints.overlap, 0.0),
@@ -265,5 +292,4 @@ class _RenderSliverFloatingHeader extends RenderSliverSingleBoxAdapter {
       context.paintChild(child!, offset);
     }
   }
-
 }
