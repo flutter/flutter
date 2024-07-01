@@ -27,27 +27,26 @@ void main() {
     // Verify that two images are displayed.
     expect(find.byType(Image), findsNWidgets(2));
 
-    final RenderObject renderObject1 = tester.firstRenderObject(
+    RenderObject renderObject = tester.firstRenderObject(
       find.byType(ColorFiltered).first,
     );
-    final ColorFilterLayer colorFilterLayer1 =
-        renderObject1.debugLayer! as ColorFilterLayer;
+    ColorFilterLayer colorFilterLayer =
+        renderObject.debugLayer! as ColorFilterLayer;
 
     // Verify that red colored filter with modulate blend mode is applied to the first image.
     expect(
-      colorFilterLayer1.colorFilter,
+      colorFilterLayer.colorFilter,
       equals(const ColorFilter.mode(Colors.red, BlendMode.modulate)),
     );
 
-    final RenderObject renderObject2 = tester.firstRenderObject(
+    renderObject = tester.firstRenderObject(
       find.byType(ColorFiltered).last,
     );
-    final ColorFilterLayer colorFilterLayer2 =
-        renderObject2.debugLayer! as ColorFilterLayer;
+    colorFilterLayer = renderObject.debugLayer! as ColorFilterLayer;
 
     // Verify that grey colored filter with saturation blend mode is applied to the first image.
     expect(
-      colorFilterLayer2.colorFilter,
+      colorFilterLayer.colorFilter,
       equals(const ColorFilter.mode(Colors.grey, BlendMode.saturation)),
     );
   });
