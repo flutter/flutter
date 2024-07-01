@@ -208,7 +208,7 @@ class CarouselView extends StatefulWidget {
   /// Defaults to false.
   final bool reverse;
 
-  /// Whether the "squished" items are allowed to expand to the max size.
+  /// Whether the collapsed items are allowed to expand to the max size.
   ///
   /// If this is false, the layout of the carousel doesn't change. This is especially
   /// useful when a weight list in [CarouselView.weighted] has a max item in the
@@ -442,7 +442,7 @@ class _CarouselViewState extends State<CarouselView> {
 /// at offset zero and without gaps. Each child is constrained to a fixed extent
 /// along the main axis and the [SliverConstraints.crossAxisExtent]
 /// along the cross axis. The difference between this and a list view with a fixed
-/// extent is the first item and last item can be squished a little during scrolling
+/// extent is the first item and last item can be collapsed a little during scrolling
 /// transition. This compression is controlled by the `minExtent` property and
 /// aligns with the [Material Design Carousel specifications]
 /// (https://m3.material.io/components/carousel/guidelines#96c5c157-fe5b-4ee3-a9b4-72bf8efab7e9).
@@ -566,7 +566,7 @@ class _RenderSliverFixedExtentCarousel extends RenderSliverFixedExtentBoxAdaptor
     if (index == firstVisibleIndex) {
       final double firstVisibleItemExtent = _buildItemExtent(index, _currentLayoutDimensions);
 
-      // If the first item is squished to be less than `effectievMinExtent`,
+      // If the first item is collapsed to be less than `effectievMinExtent`,
       // then it should stop changinng its size and should start to scroll off screen.
       if (firstVisibleItemExtent <= effectiveMinExtent) {
         return maxExtent * index - effectiveMinExtent + maxExtent;
