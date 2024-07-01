@@ -40,6 +40,57 @@ import 'theme.dart';
 /// [CarouselView.weighted] is used, then set the [flexWeights] to only have
 /// one integer in the array.
 ///
+/// {@tool snippet}
+///
+/// This code snippet shows how to get a vertical full-screen carousel by using
+/// [itemExtent] in [CarouselView].
+///
+/// ```dart
+/// class CarouselExample extends StatelessWidget {
+///   const CarouselExample({super.key});
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return MaterialApp(
+///       home: Scaffold(
+///         body: CarouselView(
+///           scrollDirection: Axis.vertical,
+///           itemExtent: MediaQuery.sizeOf(context).height,
+///           children: List<Widget>.generate(10, (int index) {
+///             return Center(child: Text('Item $index'));
+///           }),
+///         ),
+///       ),
+///     );
+///   }
+/// }
+/// ```
+///
+/// This code snippet below shows how to achieve the same vertical full-screen
+/// carousel by using [flexWeights] in [CarouselView.weighted].
+///
+/// ```dart
+/// class CarouselExample extends StatelessWidget {
+///   const CarouselExample({super.key});
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return MaterialApp(
+///       home: Scaffold(
+///         body: CarouselView.weighted(
+///           scrollDirection: Axis.vertical,
+///           flexWeights: const <int>[1], // Or any positive integers as long as the length of the array is 1.
+///           children: List<Widget>.generate(10, (int index) {
+///             return Center(child: Text('Item $index'));
+///           }),
+///         ),
+///       ),
+///     );
+///   }
+/// }
+/// ```
+/// {@end-tool}
+///
 /// In [CarouselView.weighted], weights are relative proportions. For example,
 /// if the layout weights is `[3, 2, 1]`, it means the first visible item occupies
 /// 3/6 of the viewport; the second visible item occupies 2/6 of the viewport;
@@ -240,7 +291,7 @@ class CarouselView extends StatefulWidget {
   /// 3/6, 2/6 and 1/6 of the viewport extent.
   ///
   /// This is a required property in [CarouselView.weighted]. This is null
-  /// for default [CarouselView].
+  /// for default [CarouselView]. The integers must be greater than 0.
   final List<int>? flexWeights;
 
   /// The child widgets for the carousel.
@@ -381,7 +432,7 @@ class _CarouselViewState extends State<CarouselView> {
       );
     }
 
-    assert(_weights != null);
+    assert(_weights != null && _weights!.every((int weight) => weight > 0), '_weights is null or it contains non-positive integers');
     return _SliverWeightedCarousel(
       consumeMaxWeight: _consumeMaxWeight,
       shrinkExtent: widget.shrinkExtent,
