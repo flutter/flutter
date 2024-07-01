@@ -2937,10 +2937,10 @@ typedef _TwoChildrenHeights = (double topChildHeight, double bottomChildHeight);
 //
 //  1. The `bottom` widget receives its requested height, up to a
 //     `bottomMaxHeight` limit and the container's constraint.
-//  2. The `top` widget receives its requested height, as much as the container
-//     allows.
-//  3. The `bottom` widget receives its requested height, as much as the
-//     container allows.
+//  2. The `top` widget receives its requested height, up to the remaining space
+//     in the container.
+//  3. The `bottom` widget receives its requested height, up to any remaining
+//     space in the container.
 //
 // This mirrors the behavior seen in iOS components like action sheets and
 // alerts.
