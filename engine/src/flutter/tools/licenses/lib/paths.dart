@@ -92,6 +92,7 @@ final Set<String> skippedPaths = <String>{
   r'flutter/third_party/harfbuzz/util', // utils are command line tools that do not end up in the binary
   r'flutter/third_party/icu/filters',
   r'flutter/third_party/icu/fuzzers',
+  r'flutter/third_party/icu/patches', // patches added by Chromium that are already applied to the code base
   r'flutter/third_party/icu/scripts',
   r'flutter/third_party/icu/source/common/unicode/uvernum.h', // this file contains strings that confuse the analysis
   r'flutter/third_party/icu/source/config',
