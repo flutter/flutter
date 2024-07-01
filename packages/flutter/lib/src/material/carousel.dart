@@ -49,48 +49,30 @@ import 'theme.dart';
 /// [itemExtent] in [CarouselView].
 ///
 /// ```dart
-/// class CarouselExample extends StatelessWidget {
-///   const CarouselExample({super.key});
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return MaterialApp(
-///       home: Scaffold(
-///         body: CarouselView(
-///           scrollDirection: Axis.vertical,
-///           itemExtent: MediaQuery.sizeOf(context).height,
-///           children: List<Widget>.generate(10, (int index) {
-///             return Center(child: Text('Item $index'));
-///           }),
-///         ),
-///       ),
-///     );
-///   }
-/// }
+/// Scaffold(
+///   body: CarouselView(
+///     scrollDirection: Axis.vertical,
+///     itemExtent: MediaQuery.sizeOf(context).height,
+///     children: List<Widget>.generate(10, (int index) {
+///       return Center(child: Text('Item $index'));
+///     }),
+///   ),
+/// ),
 /// ```
 ///
 /// This code snippet below shows how to achieve the same vertical full-screen
 /// carousel by using [flexWeights] in [CarouselView.weighted].
 ///
 /// ```dart
-/// class CarouselExample extends StatelessWidget {
-///   const CarouselExample({super.key});
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return MaterialApp(
-///       home: Scaffold(
-///         body: CarouselView.weighted(
-///           scrollDirection: Axis.vertical,
-///           flexWeights: const <int>[1], // Or any positive integers as long as the length of the array is 1.
-///           children: List<Widget>.generate(10, (int index) {
-///             return Center(child: Text('Item $index'));
-///           }),
-///         ),
-///       ),
-///     );
-///   }
-/// }
+/// Scaffold(
+///   body: CarouselView.weighted(
+///     scrollDirection: Axis.vertical,
+///     flexWeights: const <int>[1], // Or any positive integers as long as the length of the array is 1.
+///     children: List<Widget>.generate(10, (int index) {
+///       return Center(child: Text('Item $index'));
+///     }),
+///   ),
+/// ),
 /// ```
 /// {@end-tool}
 ///
