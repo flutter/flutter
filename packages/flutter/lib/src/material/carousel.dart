@@ -15,7 +15,7 @@ import 'material.dart';
 import 'theme.dart';
 
 // Examples can assume:
-// BuildContext context;
+// late BuildContext context;
 
 /// A Material Design carousel widget.
 ///
