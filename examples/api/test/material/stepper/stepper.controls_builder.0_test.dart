@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/material/stepper/stepper.controls_builder.0.
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('The control builder can be overridden to display custom buttons', (WidgetTester tester) async {
+  testWidgets('Stepper control builder can be overridden to display custom buttons', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.ControlsBuilderExampleApp(),
     );
