@@ -36,7 +36,7 @@ TEST_P(AllocatorMTLTest, DebugTraceMemoryStatistics) {
     TextureDescriptor desc;
     desc.format = PixelFormat::kR8G8B8A8UNormInt;
     desc.storage_mode = StorageMode::kDeviceTransient;
-    desc.size = {1000, 1000};
+    desc.size = {1024, 1024};
     auto texture_1 = allocator->CreateTexture(desc);
 
     EXPECT_EQ(allocator->DebugGetHeapUsage(), 0u);
