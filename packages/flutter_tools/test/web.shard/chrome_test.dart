@@ -40,7 +40,7 @@ const List<String> kCodeCache = <String>[
 const String kDevtoolsStderr = '\n\nDevTools listening\n\n';
 
 void main() {
-  late FileExceptionHandler exceptionHandler;
+  late MutableFileSystemOpHandle fileSystemOpHandle;
   late ChromiumLauncher chromeLauncher;
   late FileSystem fileSystem;
   late Platform platform;
@@ -49,12 +49,12 @@ void main() {
   late BufferLogger testLogger;
 
   setUp(() {
-    exceptionHandler = FileExceptionHandler();
+    fileSystemOpHandle = MutableFileSystemOpHandle();
     operatingSystemUtils = FakeOperatingSystemUtils();
     platform = FakePlatform(operatingSystem: 'macos', environment: <String, String>{
       kChromeEnvironment: 'example_chrome',
     });
-    fileSystem = MemoryFileSystem.test(opHandle: exceptionHandler.opHandle);
+    fileSystem = MemoryFileSystem.test(opHandle: fileSystemOpHandle.opHandle);
     processManager = FakeProcessManager.empty();
     chromeLauncher = ChromiumLauncher(
       fileSystem: fileSystem,
@@ -311,10 +311,10 @@ void main() {
       .createSync(recursive: true);
     final File file = fileSystem.file('$directoryPrefix/Local Storage/foo')
       ..createSync(recursive: true);
-    exceptionHandler.addError(
+    fileSystemOpHandle.setHandler(
       file,
       FileSystemOp.read,
-      const FileSystemException(),
+      () => throw const FileSystemException(),
     );
 
     await chrome.close(); // does not exit with error.
@@ -325,10 +325,10 @@ void main() {
     final BufferLogger logger = BufferLogger.test();
     final File file = fileSystem.file('/Default/foo')
       ..createSync(recursive: true);
-    exceptionHandler.addError(
+    fileSystemOpHandle.setHandler(
       file,
       FileSystemOp.read,
-      const FileSystemException(),
+      () => throw const FileSystemException(),
     );
     chromeLauncher = ChromiumLauncher(
       fileSystem: fileSystem,
