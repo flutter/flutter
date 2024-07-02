@@ -234,8 +234,7 @@ class FormState extends State<Form> {
   void _fieldDidChange() {
     widget.onChanged?.call();
 
-    _hasInteractedByUser = _fields
-        .any((FormFieldState<dynamic> field) => field._hasInteractedByUser.value);
+    _hasInteractedByUser = _fields.any((FormFieldState<dynamic> field) => field._hasInteractedByUser.value);
     _forceRebuild();
   }
 
@@ -337,7 +336,6 @@ class FormState extends State<Form> {
     return _validate();
   }
 
-
   /// Validates every [FormField] that is a descendant of this [Form], and
   /// returns a [Set] of [FormFieldState] of the invalid field(s) only, if any.
   ///
@@ -393,8 +391,8 @@ class _FormScope extends InheritedWidget {
     required super.child,
     required FormState formState,
     required int generation,
-  }) : _formState = formState,
-       _generation = generation;
+  })  : _formState = formState,
+        _generation = generation;
 
   final FormState _formState;
 
@@ -454,6 +452,7 @@ class FormField<T> extends StatefulWidget {
     super.key,
     required this.builder,
     this.onSaved,
+    this.forceErrorText,
     this.validator,
     this.initialValue,
     this.enabled = true,
@@ -464,6 +463,24 @@ class FormField<T> extends StatefulWidget {
   /// An optional method to call with the final value when the form is saved via
   /// [FormState.save].
   final FormFieldSetter<T>? onSaved;
+
+  /// An optional property that forces the [FormFieldState] into an error state
+  /// by directly setting the [FormFieldState.errorText] property without
+  /// running the validator function.
+  ///
+  /// When the [forceErrorText] property is provided, the [FormFieldState.errorText]
+  /// will be set to the provided value, causing the form field to be considered
+  /// invalid and to display the error message specified.
+  ///
+  /// When [validator] is provided, [forceErrorText] will override any error that it
+  /// returns. [validator] will not be called unless [forceErrorText] is null.
+  ///
+  /// See also:
+  ///
+  /// * [InputDecoration.errorText], which is used to display error messages in the text
+  /// field's decoration without effecting the field's state. When [forceErrorText] is
+  /// not null, it will override [InputDecoration.errorText] value.
+  final String? forceErrorText;
 
   /// An optional method that validates an input. Returns an error string to
   /// display if the input is invalid, or null otherwise.
@@ -533,7 +550,9 @@ class FormField<T> extends StatefulWidget {
 /// for use in constructing the form field's widget.
 class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
   late T? _value = widget.initialValue;
-  final RestorableStringN _errorText = RestorableStringN(null);
+  // Marking it as late, so it can be registered
+  // with the value provided by [forceErrorText].
+  late final RestorableStringN _errorText;
   final RestorableBool _hasInteractedByUser = RestorableBool(false);
   final FocusNode _focusNode = FocusNode();
 
@@ -541,8 +560,12 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
   T? get value => _value;
 
   /// The current validation error returned by the [FormField.validator]
-  /// callback, or null if no errors have been triggered. This only updates when
-  /// [validate] is called.
+  /// callback, or the manually provided error message using the
+  /// [FormField.forceErrorText] property.
+  ///
+  /// This property is automatically updated when [validate] is called and the
+  /// [FormField.validator] callback is invoked, or If [FormField.forceErrorText] is set
+  /// directly to a non-null value.
   String? get errorText => _errorText.value;
 
   /// True if this field has any validation errors.
@@ -562,7 +585,9 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
   /// See also:
   ///
   ///  * [validate], which may update [errorText] and [hasError].
-  bool get isValid => widget.validator?.call(_value) == null;
+  ///
+  ///  * [FormField.forceErrorText], which also may update [errorText] and [hasError].
+  bool get isValid => widget.forceErrorText == null && widget.validator?.call(_value) == null;
 
   /// Calls the [FormField]'s onSaved method with the current value.
   void save() {
@@ -579,9 +604,10 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
     Form.maybeOf(context)?._fieldDidChange();
   }
 
-  /// Calls [FormField.validator] to set the [errorText]. Returns true if there
-  /// were no errors.
+  /// Calls [FormField.validator] to set the [errorText] only if [FormField.forceErrorText] is null.
+  /// When [FormField.forceErrorText] is not null, [FormField.validator] will not be called.
   ///
+  /// Returns true if there were no errors.
   /// See also:
   ///
   ///  * [isValid], which passively gets the validity without setting
@@ -594,6 +620,11 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
   }
 
   void _validate() {
+    if (widget.forceErrorText != null) {
+      _errorText.value = widget.forceErrorText;
+      // Skip validating if error is forced.
+      return;
+    }
     if (widget.validator != null) {
       _errorText.value = widget.validator!(_value);
     } else {
@@ -641,6 +672,20 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
   void deactivate() {
     Form.maybeOf(context)?._unregister(this);
     super.deactivate();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _errorText = RestorableStringN(widget.forceErrorText);
+  }
+
+  @override
+  void didUpdateWidget(FormField<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.forceErrorText != oldWidget.forceErrorText) {
+      _errorText.value = widget.forceErrorText;
+    }
   }
 
   @override

@@ -59,7 +59,7 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
   /// See also:
   ///
   ///  * [ShaderWarmUp], the interface for implementing custom warm-up scenes.
-  ///  * <https://flutter.dev/docs/perf/rendering/shader>
+  ///  * <https://docs.flutter.dev/perf/shader>
   static ShaderWarmUp? shaderWarmUp;
 
   /// The singleton that implements the Flutter framework's image cache.
