@@ -1298,8 +1298,7 @@ abstract class FlutterCommand extends Command<void> {
       && stringArg(FlutterGlobalOptions.kLocalWebSDKOption, global: true) != null;
     final bool useLocalCanvasKit = !useCdn || useLocalWebSdk;
 
-    final String? defaultFlavor = FlutterProject.current().manifest.defaultFlavor;
-
+    final String? defaultFlavor = project.manifest.defaultFlavor;
     final String? cliFlavor = argParser.options.containsKey('flavor') ? stringArg('flavor') : null;
     final String? flavor = cliFlavor ?? defaultFlavor;
     if (flavor != null) {
@@ -1339,7 +1338,7 @@ abstract class FlutterCommand extends Command<void> {
       bundleSkSLPath: bundleSkSLPath,
       dartExperiments: experiments,
       performanceMeasurementFile: performanceMeasurementFile,
-      packageConfigPath: packageConfigFile.path,
+      packageConfigPath: packagesPath ?? packageConfigFile.path,
       nullSafetyMode: nullSafetyMode,
       codeSizeDirectory: codeSizeDirectory,
       androidGradleDaemon: androidGradleDaemon,

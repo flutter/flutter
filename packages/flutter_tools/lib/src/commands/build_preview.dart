@@ -59,6 +59,7 @@ class BuildPreviewCommand extends BuildSubCommand {
     final Directory targetDir = fs.systemTempDirectory.createTempSync('flutter-build-preview');
     try {
       final FlutterProject flutterProject = await _createProject(targetDir);
+<<<<<<< HEAD
 
       final File packageConfigFile = findPackageConfigFileOrDefault(flutterProject.directory);
 
@@ -74,6 +75,22 @@ class BuildPreviewCommand extends BuildSubCommand {
         treeShakeIcons: false,
       );
 
+||||||| parent of 21d996929b (Refactor BuildInfo to always require packageConfigPath (#150559))
+=======
+
+      final BuildInfo buildInfo = BuildInfo(
+        BuildMode.debug,
+        null, // no flavor
+        // users may add icons later
+        packageConfigPath: flutterProject.packageConfigFile.path,
+        packageConfig: await loadPackageConfigWithLogging(
+          flutterProject.packageConfigFile,
+          logger: logger,
+        ),
+        treeShakeIcons: false,
+      );
+
+>>>>>>> 21d996929b (Refactor BuildInfo to always require packageConfigPath (#150559))
       // TODO(loic-sharma): Support windows-arm64 preview device, https://github.com/flutter/flutter/issues/139949.
       await buildWindows(
         flutterProject.windows,
