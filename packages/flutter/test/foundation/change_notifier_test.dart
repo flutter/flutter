@@ -640,4 +640,160 @@ void main() {
     test.notify();
     expect(log, <String>[]);
   });
+
+  group('ComputedNotifier', () {
+    test('emits notification for all listenables', () {
+      final ValueNotifier<int> firstNotifier = ValueNotifier<int>(5);
+      final ValueNotifier<int> secondNotifier = ValueNotifier<int>(10);
+      final ComputedNotifier<String> computedNotifier =
+          ComputedNotifier<String>(
+        <ValueNotifier<int>>[firstNotifier, secondNotifier],
+        () => '42',
+      );
+
+      int listenerCallCount = 0;
+      computedNotifier.addListener(() => listenerCallCount++);
+
+      firstNotifier.value = 10;
+      expect(listenerCallCount, 1);
+
+      secondNotifier.value = 20;
+      expect(listenerCallCount, 2);
+    });
+
+    test('handles errors in compute function', () {
+      final ValueNotifier<int> notifier = ValueNotifier<int>(5);
+      final ComputedNotifier<int> computedNotifier =
+          ComputedNotifier<int>(<ValueNotifier<int>>[notifier], () {
+        if (notifier.value < 0) {
+          throw ArgumentError('Value must be non-negative');
+        }
+        return notifier.value * 2;
+      });
+
+      expect(computedNotifier.value, 10);
+
+      notifier.value = -1;
+      expect(
+        () => computedNotifier.value,
+        throwsA(
+          isA<ArgumentError>().having(
+            (ArgumentError e) => e.message,
+            'message',
+            'Value must be non-negative',
+          ),
+        ),
+      );
+    });
+
+    test('throws FlutterError when disposed and called', () {
+      final ValueNotifier<int> notifier = ValueNotifier<int>(5);
+      final ComputedNotifier<int> computedNotifier = ComputedNotifier<int>(
+        <ValueListenable<int>>[notifier],
+        () => notifier.value * 2,
+      );
+
+      computedNotifier.dispose();
+      FlutterError? error;
+      try {
+        computedNotifier.dispose();
+      } on FlutterError catch (e) {
+        error = e;
+      }
+      expect(error, isNotNull);
+      expect(error, isFlutterError);
+      expect(
+        error!.toStringDeep(),
+        equalsIgnoringHashCodes(
+          'FlutterError\n'
+          '   A ComputedNotifier<int> was used after being disposed.\n'
+          '   Once you have called dispose() on a ComputedNotifier<int>, it can\n'
+          '   no longer be used.\n',
+        ),
+      );
+    });
+
+    test('disposal', () {
+      final ValueNotifier<int> notifier = ValueNotifier<int>(5);
+      final ComputedNotifier<int> computedNotifier = ComputedNotifier<int>(
+        <ValueListenable<int>>[notifier],
+        () => notifier.value * 2,
+      );
+
+      int listenerCallCount = 0;
+      computedNotifier.addListener(() => listenerCallCount++);
+
+      notifier.value = 10;
+      expect(listenerCallCount, 1);
+
+      computedNotifier.dispose();
+
+      notifier.value = 15;
+      expect(listenerCallCount, 1);
+    });
+
+    test('with multiple listenables', () {
+      final ValueNotifier<String> notifier1 = ValueNotifier<String>('Hello');
+      final ValueNotifier<String> notifier2 = ValueNotifier<String>(' ');
+      final ValueNotifier<String> notifier3 = ValueNotifier<String>('world!');
+      final ComputedNotifier<String> computedNotifier =
+          ComputedNotifier<String>(
+        <ValueNotifier<String>>[notifier1, notifier2, notifier3],
+        () => notifier1.value + notifier2.value + notifier3.value,
+      );
+
+      String valueListener = computedNotifier.value;
+      computedNotifier.addListener(
+        () => valueListener = computedNotifier.value,
+      );
+
+      expect(computedNotifier.value, 'Hello world!');
+      expect(valueListener, 'Hello world!');
+
+      notifier2.value = ', ';
+      expect(computedNotifier.value, 'Hello, world!');
+      expect(valueListener, 'Hello, world!');
+    });
+
+    test('with empty listenable list', () {
+      final ComputedNotifier<int> computedNotifier =
+          ComputedNotifier<int>(<ValueNotifier<String>>[], () => 42);
+      expect(computedNotifier.value, 42);
+    });
+
+    test('with null value', () {
+      final ValueNotifier<int?> notifier = ValueNotifier<int?>(null);
+      final ComputedNotifier<int?> computedNotifier = ComputedNotifier<int?>(
+        <ValueListenable<int?>>[notifier],
+        () => null,
+      );
+      expect(computedNotifier.value, null);
+    });
+
+    test(
+      'when dispose some listenable and change another should emit normally',
+      () {
+        final ValueNotifier<int> notifier1 = ValueNotifier<int>(5);
+        final ValueNotifier<int> notifier2 = ValueNotifier<int>(10);
+
+        final ComputedNotifier<int> computedNotifier = ComputedNotifier<int>(
+            <ValueNotifier<int>>[notifier1, notifier2], () {
+          return notifier1.value + notifier2.value;
+        });
+
+        int listenerValue = computedNotifier.value;
+        computedNotifier.addListener(
+          () => listenerValue = computedNotifier.value,
+        );
+        expect(listenerValue, 15);
+
+        notifier1.value = 10;
+        expect(listenerValue, 20);
+
+        notifier1.dispose();
+        notifier2.value = 20;
+        expect(listenerValue, 30);
+      },
+    );
+  });
 }

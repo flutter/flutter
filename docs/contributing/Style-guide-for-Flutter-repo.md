@@ -1821,7 +1821,7 @@ In general we avoid the use of `Stream` classes in Flutter framework code (and `
 
 * The APIs for manipulating streams are non-trivial (e.g. transformers).
 
-We generally prefer `Listenable` subclasses (e.g. `ValueNotifier` or `ChangeNotifier`).
+We generally prefer `Listenable` subclasses (e.g. `ValueNotifier`, `ChangeNotifier` or `ComputedNotifier`).
 
 In the specific case of exposing a value from `dart:ui` via a callback, we expect the bindings in the framework to register a single listener and then provide a mechanism to fan the notification to multiple listeners. Sometimes this is a rather involved process (e.g. the `SchedulerBinding` exists almost entirely for the purpose of doing this for `onBeginFrame`/`onDrawFrame`, and the `GesturesBinding` exists exclusively for the purpose of doing this for pointer events). Sometimes it's simpler (e.g. propagating changes to life cycle events).
 
