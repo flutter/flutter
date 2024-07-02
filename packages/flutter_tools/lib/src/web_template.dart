@@ -72,15 +72,15 @@ class WebTemplate {
     return <WebTemplateWarning>[
       ..._getWarningsForPattern(
         RegExp('(const|var) serviceWorkerVersion = null'),
-        'Local variable for "serviceWorkerVersion" is deprecated. Use "{{flutter_service_worker_version}}" template token instead.',
+        'Local variable for "serviceWorkerVersion" is deprecated. Use "{{flutter_service_worker_version}}" template token instead. See https://docs.flutter.dev/platform-integration/web/initialization for more details.',
       ),
       ..._getWarningsForPattern(
         "navigator.serviceWorker.register('flutter_service_worker.js')",
-        'Manual service worker registration deprecated. Use flutter.js service worker bootstrapping instead.',
+        'Manual service worker registration deprecated. Use flutter.js service worker bootstrapping instead. See https://docs.flutter.dev/platform-integration/web/initialization for more details.',
       ),
       ..._getWarningsForPattern(
         '_flutter.loader.loadEntrypoint(',
-        '"FlutterLoader.loadEntrypoint" is deprecated. Use "FlutterLoader.load" instead.',
+        '"FlutterLoader.loadEntrypoint" is deprecated. Use "FlutterLoader.load" instead. See https://docs.flutter.dev/platform-integration/web/initialization for more details.',
       ),
     ];
   }

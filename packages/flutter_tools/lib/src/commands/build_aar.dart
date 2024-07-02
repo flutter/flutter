@@ -12,6 +12,7 @@ import '../base/file_system.dart';
 import '../base/os.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../globals.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart' show FlutterCommandResult;
@@ -119,7 +120,7 @@ class BuildAarCommand extends BuildSubCommand {
   final String description = 'Build a repository containing an AAR and a POM file.\n\n'
       'By default, AARs are built for `release`, `debug` and `profile`.\n'
       'The POM file is used to include the dependencies that the AAR was compiled against.\n'
-      'To learn more about how to use these artifacts, see: https://flutter.dev/go/build-aar\n'
+      'To learn more about how to use these artifacts, see: https://flutter.dev/to/integrate-android-archive\n'
       'This command assumes that the entrypoint is "lib/main.dart". '
       'This cannot currently be configured.';
 
@@ -174,6 +175,19 @@ class BuildAarCommand extends BuildSubCommand {
       outputDirectoryPath: stringArg('output'),
       buildNumber: buildNumber,
     );
+
+    // When an aar is successfully built, record to analytics whether Impeller
+    // is enabled or disabled. Note that 'computeImpellerEnabled' will default
+    // to false if not enabled explicitly in the manifest.
+    final bool impellerEnabled = project.android.computeImpellerEnabled();
+    final String buildLabel = impellerEnabled
+          ? 'manifest-aar-impeller-enabled'
+          : 'manifest-aar-impeller-disabled';
+    globals.analytics.send(Event.flutterBuildInfo(
+      label: buildLabel,
+      buildType: 'android',
+    ));
+
     return FlutterCommandResult.success();
   }
 
