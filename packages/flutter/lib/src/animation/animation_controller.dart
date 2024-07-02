@@ -706,13 +706,23 @@ class AnimationController extends Animation<double>
   /// provided, [duration] will be used instead, which has to be set before [repeat] is
   /// called either in the constructor or later by using the [duration] setter.
   ///
-  /// Returns a [TickerFuture] that never completes. The [TickerFuture.orCancel] future
-  /// completes with an error when the animation is stopped (e.g. with [stop]).
+  /// If a value is passed to [repeatCount], the animation will perform that many
+  /// iterations before stopping. Otherwise, the animation repeats indefinitely.
+  ///
+  /// Returns a [TickerFuture] that never completes, unless a [repeatCount] is specified.
+  /// The [TickerFuture.orCancel] future completes with an error when the animation is
+  /// stopped (e.g. with [stop]).
   ///
   /// The most recently returned [TickerFuture], if any, is marked as having been
   /// canceled, meaning the future never completes and its [TickerFuture.orCancel]
   /// derivative future completes with a [TickerCanceled] error.
-  TickerFuture repeat({ double? min, double? max, bool reverse = false, Duration? period }) {
+  TickerFuture repeat({
+    double? min,
+    double? max,
+    bool reverse = false,
+    Duration? period,
+    int? repeatCount,
+  }) {
     min ??= lowerBound;
     max ??= upperBound;
     period ??= duration;
@@ -729,8 +739,9 @@ class AnimationController extends Animation<double>
     }());
     assert(max >= min);
     assert(max <= upperBound && min >= lowerBound);
+    assert(repeatCount == null || repeatCount > 0, 'Repeat times shall be greater than zero if not null');
     stop();
-    return _startSimulation(_RepeatingSimulation(_value, min, max, reverse, period!, _directionSetter));
+    return _startSimulation(_RepeatingSimulation(_value, min, max, reverse, period!, _directionSetter, repeatCount));
   }
 
   void _directionSetter(_AnimationDirection direction) {
@@ -958,8 +969,19 @@ class _InterpolationSimulation extends Simulation {
 typedef _DirectionSetter = void Function(_AnimationDirection direction);
 
 class _RepeatingSimulation extends Simulation {
-  _RepeatingSimulation(double initialValue, this.min, this.max, this.reverse, Duration period, this.directionSetter)
-      : _periodInSeconds = period.inMicroseconds / Duration.microsecondsPerSecond,
+  _RepeatingSimulation(
+    double initialValue,
+    this.min,
+    this.max,
+    this.reverse,
+    Duration period,
+    this.directionSetter,
+    this.repeatCount,
+  )  : assert(
+          repeatCount == null || repeatCount > 0,
+          'Repeat count shall be greater than zero if not null',
+        ),
+        _periodInSeconds = period.inMicroseconds / Duration.microsecondsPerSecond,
         _initialT = (max == min) ? 0.0 : ((clampDouble(initialValue, min, max) - min) / (max - min)) * (period.inMicroseconds / Duration.microsecondsPerSecond) {
     assert(_periodInSeconds > 0.0);
     assert(_initialT >= 0.0);
@@ -968,10 +990,16 @@ class _RepeatingSimulation extends Simulation {
   final double min;
   final double max;
   final bool reverse;
+  final int? repeatCount;
   final _DirectionSetter directionSetter;
 
   final double _periodInSeconds;
   final double _initialT;
+
+  /// If [reverse] is true, the duration of a full cycle is doubled.
+  late final int _effectiveRepeatCount = repeatCount! * (reverse ? 2 : 1);
+
+  late final double _exitTimeInSeconds = (_effectiveRepeatCount * _periodInSeconds) - _initialT;
 
   @override
   double x(double timeInSeconds) {
@@ -994,5 +1022,9 @@ class _RepeatingSimulation extends Simulation {
   double dx(double timeInSeconds) => (max - min) / _periodInSeconds;
 
   @override
-  bool isDone(double timeInSeconds) => false;
+  bool isDone(double timeInSeconds) {
+    // if [timeInSeconds] elapsed the [_exitTimeInSeconds] && repeatCount is not null,
+    // consider marking the simulation as "DONE"
+    return repeatCount != null && (timeInSeconds >= _exitTimeInSeconds);
+  }
 }
