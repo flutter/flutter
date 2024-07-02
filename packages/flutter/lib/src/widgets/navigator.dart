@@ -161,6 +161,11 @@ abstract class Route<T> extends _RoutePlaceholder {
     }
   }
 
+  /// When the route state is updated, request focus if the current route is at the top.
+  ///
+  /// Defaults to [Navigator.requestFocus].
+  bool get requestFocus => navigator?.widget.requestFocus ?? false;
+
   /// The navigator that the route is in, if any.
   NavigatorState? get navigator => _navigator;
   NavigatorState? _navigator;
@@ -245,7 +250,7 @@ abstract class Route<T> extends _RoutePlaceholder {
   @mustCallSuper
   TickerFuture didPush() {
     return TickerFuture.complete()..then<void>((void _) {
-      if (navigator?.widget.requestFocus ?? false) {
+      if (requestFocus) {
         navigator!.focusNode.enclosingScope?.requestFocus();
       }
     });
@@ -261,7 +266,7 @@ abstract class Route<T> extends _RoutePlaceholder {
   @protected
   @mustCallSuper
   void didAdd() {
-    if (navigator?.widget.requestFocus ?? false) {
+    if (requestFocus) {
       // This TickerFuture serves two purposes. First, we want to make sure that
       // animations triggered by other operations will finish before focusing
       // the navigator. Second, navigator.focusNode might acquire more focused
@@ -1746,8 +1751,9 @@ class Navigator extends StatefulWidget {
   /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
 
-  /// Whether or not the navigator and it's new topmost route should request focus
-  /// when the new route is pushed onto the navigator.
+  /// [Route.requestFocus] takes this property as its default value. When a
+  /// route is updated on the navigator, the [Route.requestFocus] of the topmost
+  /// route will determine whether it should request focus.
   ///
   /// Defaults to true.
   final bool requestFocus;

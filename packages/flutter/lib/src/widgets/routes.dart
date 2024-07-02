@@ -1018,7 +1018,7 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
   }
 
   bool get _shouldRequestFocus {
-    return widget.route.navigator!.widget.requestFocus;
+    return widget.route.requestFocus;
   }
 
   // This should be called to wrap any changes to route.isCurrent, route.canPop,

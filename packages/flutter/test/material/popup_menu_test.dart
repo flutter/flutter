@@ -4242,6 +4242,40 @@ void main() {
     ));
     expect(iconText.text.style?.color, Colors.red);
   });
+
+  testWidgets('If requestFocus is false, the original focus should be preserved upon menu appearance.', (WidgetTester tester) async {
+    final FocusNode fieldFocusNode = FocusNode();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Column(
+            children: <Widget>[
+              TextField(focusNode: fieldFocusNode, autofocus: true),
+              PopupMenuButton<int>(
+                style: const ButtonStyle(
+                  iconColor: MaterialStatePropertyAll<Color>(Colors.red),
+                ),
+                itemBuilder: (BuildContext context) {
+                  return <PopupMenuItem<int>>[
+                    const PopupMenuItem<int>(
+                      value: 1,
+                      child: Text('One'),
+                    ),
+                  ];
+                },
+                requestFocus: false,
+                child: const Text('click here'),
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+    expect(fieldFocusNode.hasFocus, isTrue);
+    await tester.tap(find.text('click here'));
+    await tester.pump();
+    expect(fieldFocusNode.hasFocus, isTrue);
+  });
 }
 
 Matcher overlaps(Rect other) => OverlapsMatcher(other);
