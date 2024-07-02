@@ -13,8 +13,8 @@ buildscript {
     }
 }
 
-allprojects {
-    repositories {
+[rootProject, project(':app')].each { project ->
+    project.repositories {
         google()
         mavenCentral()
     }
