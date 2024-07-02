@@ -765,10 +765,7 @@ void main() {
 
     final RenderBox actionsSectionBox = findScrollableActionsSectionRenderBox(tester);
 
-    expect(
-      actionsSectionBox.size.height,
-      67.80000000000001,
-    );
+    expect(actionsSectionBox.size.height, 67.8);
   });
 
   testWidgets('Actions section height for 2 stacked buttons without enough room and large accessibility font is 50% of dialog height.', (WidgetTester tester) async {
@@ -858,166 +855,102 @@ void main() {
     );
   });
 
-  testWidgets('Actions section overscroll is painted white.', (WidgetTester tester) async {
-    final ScrollController scrollController = ScrollController();
-    addTearDown(scrollController.dispose);
+  testWidgets('Actions section correctly renders overscrolls', (WidgetTester tester) async {
+    // Verifies that when the actions section overscrolls, the overscroll part
+    // is correctly covered with background.
+    final ScrollController actionScrollController = ScrollController();
+    addTearDown(actionScrollController.dispose);
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesDialog(
         dialogBuilder: (BuildContext context) {
           return CupertinoAlertDialog(
-            title: const Text('The Title'),
-            content: const Text('The message'),
-            actions: const <Widget>[
+            actions: List<Widget>.generate(12, (int i) =>
               CupertinoDialogAction(
-                child: Text('Option 1'),
+                onPressed: () {},
+                child: Text('Button ${'*' * i}'),
               ),
-              CupertinoDialogAction(
-                child: Text('Option 2'),
-              ),
-              CupertinoDialogAction(
-                child: Text('Option 3'),
-              ),
-            ],
-            scrollController: scrollController,
+            ),
           );
         },
       ),
     );
 
     await tester.tap(find.text('Go'));
+    await tester.pumpAndSettle();
+
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('Button *')));
+    await tester.pumpAndSettle();
+    // The button should be pressed now, since the scrolling gesture has not
+    // taken over.
+    await expectLater(
+      find.byType(CupertinoAlertDialog),
+      matchesGoldenFile('cupertinoAlertDialog.overscroll.0.png'),
+    );
+    // The dragging gesture must be dispatched in at least two segments.
+    // After the first movement, the gesture is started, but the delta is still
+    // zero. The second movement gives the delta.
+    await gesture.moveBy(const Offset(0, 40));
+    await tester.pumpAndSettle();
+    await gesture.moveBy(const Offset(0, 100));
+    // Test the top overscroll. Use `pump` not `pumpAndSettle` to verify the
+    // rendering result of the immediate next frame.
     await tester.pump();
+    await expectLater(
+      find.byType(CupertinoAlertDialog),
+      matchesGoldenFile('cupertinoAlertDialog.overscroll.1.png'),
+    );
 
-    final RenderBox actionsSectionBox = findScrollableActionsSectionRenderBox(tester);
-
-    // The way that overscroll white is accomplished in a scrollable action
-    // section is that the custom RenderBox that lays out the buttons and draws
-    // the dividers also paints a white background the size of Rect.largest.
-    // That background ends up being clipped by the containing ScrollView.
-    //
-    // Here we test that the Rect(0.0, 0.0, renderBox.size.width, renderBox.size.height)
-    // is contained within the painted Path.
-    // We don't test for exclusion because for some reason the Path is reporting
-    // that even points beyond Rect.largest are within the Path. That's not an
-    // issue for our use-case, so we don't worry about it.
-    expect(actionsSectionBox, paints..path(
-      includes: <Offset>[
-        Offset.zero,
-        Offset(actionsSectionBox.size.width, actionsSectionBox.size.height),
-      ],
-    ));
+    await gesture.moveBy(const Offset(0, -300));
+    // Test the bottom overscroll. Use `pump` not `pumpAndSettle` to verify the
+    // rendering result of the immediate next frame.
+    await tester.pump();
+    await expectLater(
+      find.byType(CupertinoAlertDialog),
+      matchesGoldenFile('cupertinoAlertDialog.overscroll.2.png'),
+    );
+    await gesture.up();
   });
 
-  testWidgets('Pressed button changes appearance and dividers disappear.', (WidgetTester tester) async {
-    final ScrollController scrollController = ScrollController();
-    addTearDown(scrollController.dispose);
-    const double dividerThickness = 0.3;
+  testWidgets('Actions section correctly renders overscrolls with very far scrolls', (WidgetTester tester) async {
+    // When the scroll is really far, the overscroll might be longer than the
+    // actions section, causing overflow if not controlled.
+    final ScrollController actionScrollController = ScrollController();
+    addTearDown(actionScrollController.dispose);
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesDialog(
         dialogBuilder: (BuildContext context) {
           return CupertinoAlertDialog(
-            title: const Text('The Title'),
-            content: const Text('The message'),
-            actions: const <Widget>[
-              CupertinoDialogAction(
-                child: Text('Option 1'),
+            content: Text('content' * 1000),
+            actions: List<Widget>.generate(4, (int i) =>
+              CupertinoActionSheetAction(
+                onPressed: () {},
+                child: Text('Button $i'),
               ),
-              CupertinoDialogAction(
-                child: Text('Option 2'),
-              ),
-              CupertinoDialogAction(
-                child: Text('Option 3'),
-              ),
-            ],
-            scrollController: scrollController,
+            ),
           );
         },
       ),
     );
 
     await tester.tap(find.text('Go'));
-    await tester.pump();
+    await tester.pumpAndSettle();
 
-    const Color normalButtonBackgroundColor = Color(0xCCF2F2F2);
-    const Color pressedButtonBackgroundColor = Color(0xFFE1E1E1);
-    final RenderBox firstButtonBox = findActionButtonRenderBoxByTitle(tester, 'Option 1');
-    final RenderBox secondButtonBox = findActionButtonRenderBoxByTitle(tester, 'Option 2');
-    final RenderBox actionsSectionBox = findScrollableActionsSectionRenderBox(tester);
-
-    final Offset pressedButtonCenter = Offset(
-      secondButtonBox.size.width / 2.0,
-      firstButtonBox.size.height + dividerThickness + (secondButtonBox.size.height / 2.0),
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('Button 0')));
+    await tester.pumpAndSettle();
+    await gesture.moveBy(const Offset(0, 40)); // A short drag to start the gesture.
+    await tester.pumpAndSettle();
+    // The drag is far enough to make the overscroll longer than the section.
+    await gesture.moveBy(const Offset(0, 1000));
+    await tester.pumpAndSettle();
+    // The buttons should be out of the screen
+    expect(
+      tester.getTopLeft(find.text('Button 0')).dy,
+      greaterThan(tester.getBottomLeft(find.byType(ClipRRect)).dy)
     );
-    final Offset topDividerCenter = Offset(
-      secondButtonBox.size.width / 2.0,
-      firstButtonBox.size.height + (0.5 * dividerThickness),
+    await expectLater(
+      find.byType(CupertinoAlertDialog),
+      matchesGoldenFile('cupertinoAlertDialog.long-overscroll.0.png'),
     );
-    final Offset bottomDividerCenter = Offset(
-      secondButtonBox.size.width / 2.0,
-      firstButtonBox.size.height +
-          dividerThickness +
-          secondButtonBox.size.height +
-          (0.5 * dividerThickness),
-    );
-
-    // Before pressing the button, verify following expectations:
-    // - Background includes the button that will be pressed
-    // - Background excludes the divider above and below the button that will be pressed
-    // - Pressed button background does NOT include the button that will be pressed
-    expect(actionsSectionBox, paints
-      ..path(
-        color: normalButtonBackgroundColor,
-        includes: <Offset>[
-          pressedButtonCenter,
-        ],
-        excludes: <Offset>[
-          topDividerCenter,
-          bottomDividerCenter,
-        ],
-      )
-      ..path(
-        color: pressedButtonBackgroundColor,
-        excludes: <Offset>[
-          pressedButtonCenter,
-        ],
-      ),
-    );
-
-    // Press down on the button.
-    final TestGesture gesture = await tester.press(find.widgetWithText(CupertinoDialogAction, 'Option 2'));
-    await tester.pump();
-
-    // While pressing the button, verify following expectations:
-    // - Background excludes the pressed button
-    // - Background includes the divider above and below the pressed button
-    // - Pressed button background includes the pressed
-    expect(actionsSectionBox, paints
-      ..path(
-        color: normalButtonBackgroundColor,
-        // The background should contain the divider above and below the pressed
-        // button. While pressed, surrounding dividers disappear, which means
-        // they become part of the background.
-        includes: <Offset>[
-          topDividerCenter,
-          bottomDividerCenter,
-        ],
-        // The background path should not include the tapped button background...
-        excludes: <Offset>[
-          pressedButtonCenter,
-        ],
-      )
-      // For a pressed button, a dedicated path is painted with a pressed button
-      // background color...
-      ..path(
-        color: pressedButtonBackgroundColor,
-        includes: <Offset>[
-          pressedButtonCenter,
-        ],
-      ),
-    );
-
-    // We must explicitly cause an "up" gesture to avoid a crash.
-    // TODO(mattcarroll): remove this call, https://github.com/flutter/flutter/issues/19540
-    await gesture.up();
   });
 
   testWidgets('ScaleTransition animation for showCupertinoDialog()', (WidgetTester tester) async {
