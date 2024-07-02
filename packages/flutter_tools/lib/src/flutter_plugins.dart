@@ -397,7 +397,10 @@ const String _objcPluginRegistryImplementationTemplate = '''
 
 + (void)registerWithRegistry:(NSObject<FlutterPluginRegistry>*)registry {
 {{#methodChannelPlugins}}
-  [{{prefix}}{{class}} registerWithRegistrar:[registry registrarForPlugin:@"{{prefix}}{{class}}"]];
+  id<FlutterPluginRegistrar> registrar{{prefix}}{{class}} = [registry registrarForPlugin:@"{{prefix}}{{class}}"];
+  if (registrar{{prefix}}{{class}} != nil) {
+    [{{prefix}}{{class}} registerWithRegistrar:registrar{{prefix}}{{class}}];
+  }
 {{/methodChannelPlugins}}
 }
 
