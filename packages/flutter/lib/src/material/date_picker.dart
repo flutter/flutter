@@ -1451,23 +1451,19 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> with Rest
           // Validate the range dates
 
           // If start date after end date, then just use the start date
-          if (_selectedStart.value != null && _selectedEnd.value != null && _selectedStart.value!.isAfter(_selectedEnd.value!)) {
+          final DateTime? selectedStart = _selectedStart.value;
+          final DateTime? selectedEnd = _selectedEnd.value;
+          if (selectedStart != null && selectedEnd != null && selectedStart.isAfter(selectedEnd)) {
             _selectedEnd.value = null;
           }
           // If start date is outside expected start and end date range, or is not selectable, then clear both start and end dates
-          if (_selectedStart.value != null &&
-              (_selectedStart.value!.isBefore(widget.firstDate) || _selectedStart.value!.isAfter(widget.lastDate) ||
-                  widget.selectableDayPredicate != null && !widget.selectableDayPredicate!(_selectedStart.value!, _selectedStart.value, _selectedEnd.value))) {
+          if (selectedStart != null && !_isDaySelectable(selectedStart)) {
             _selectedStart.value = null;
             // With no valid start date, having an end date makes no sense for the UI.
             _selectedEnd.value = null;
           }
           // If end date is outside expected start and end date range, or is not selectable, then clear the end date
-          if (_selectedEnd.value != null &&
-              (_selectedStart.value!.isBefore(widget.firstDate) ||
-              _selectedStart.value!.isAfter(widget.lastDate) ||
-              widget.selectableDayPredicate != null &&
-              !widget.selectableDayPredicate!(_selectedStart.value!, _selectedStart.value, _selectedEnd.value))) {
+          if (selectedEnd != null && !_isDaySelectable(selectedEnd)) {
             _selectedEnd.value = null;
           }
           _entryMode.value = DatePickerEntryMode.calendar;
@@ -1477,6 +1473,16 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> with Rest
           assert(false, 'Can not change entry mode from $_entryMode');
       }
     });
+  }
+
+  bool _isDaySelectable(DateTime day) {
+    if (day.isBefore(widget.firstDate) || day.isAfter(widget.lastDate)) {
+      return false;
+    }
+    if (widget.selectableDayPredicate == null) {
+      return true;
+    }
+    return widget.selectableDayPredicate!(day, _selectedStart.value, _selectedEnd.value);
   }
 
   void _handleStartDateChanged(DateTime? date) {
@@ -3182,11 +3188,20 @@ class _InputDateRangePickerState extends State<_InputDateRangePicker> {
   String? _validateDate(DateTime? date) {
     if (date == null) {
       return widget.errorFormatText ?? MaterialLocalizations.of(context).invalidDateFormatLabel;
-    } else if (date.isBefore(widget.firstDate) || date.isAfter(widget.lastDate) ||
-        widget.selectableDayPredicate != null && !widget.selectableDayPredicate!(date, _startDate, _endDate)) {
+    } else if (!_isDaySelectable(date)) {
       return widget.errorInvalidText ?? MaterialLocalizations.of(context).dateOutOfRangeLabel;
     }
     return null;
+  }
+
+  bool _isDaySelectable(DateTime day) {
+    if (day.isBefore(widget.firstDate) || day.isAfter(widget.lastDate)) {
+      return false;
+    }
+    if (widget.selectableDayPredicate == null) {
+      return true;
+    }
+    return widget.selectableDayPredicate!(day, _startDate, _endDate);
   }
 
   void _updateController(TextEditingController controller, String text, bool selectText) {
