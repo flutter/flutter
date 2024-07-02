@@ -4,7 +4,6 @@
 
 import 'package:flutter/widgets.dart';
 
-import 'material.dart';
 import 'material_localizations.dart';
 import 'scaffold.dart' show Scaffold, ScaffoldMessenger;
 
@@ -31,38 +30,12 @@ import 'scaffold.dart' show Scaffold, ScaffoldMessenger;
 /// This method can be expensive (it walks the element tree).
 ///
 /// Does nothing if asserts are disabled. Always returns true.
-bool debugCheckHasMaterial(BuildContext context) {
-  assert(() {
-    if (LookupBoundary.findAncestorWidgetOfExactType<Material>(context) == null) {
-      final bool hiddenByBoundary = LookupBoundary.debugIsHidingAncestorWidgetOfExactType<Material>(context);
-      throw FlutterError.fromParts(<DiagnosticsNode>[
-        ErrorSummary('No Material widget found${hiddenByBoundary ? ' within the closest LookupBoundary' : ''}.'),
-        if (hiddenByBoundary)
-          ErrorDescription(
-            'There is an ancestor Material widget, but it is hidden by a LookupBoundary.'
-          ),
-        ErrorDescription(
-          '${context.widget.runtimeType} widgets require a Material '
-          'widget ancestor within the closest LookupBoundary.\n'
-          'In Material Design, most widgets are conceptually "printed" on '
-          "a sheet of material. In Flutter's material library, that "
-          'material is represented by the Material widget. It is the '
-          'Material widget that renders ink splashes, for instance. '
-          'Because of this, many material library widgets require that '
-          'there be a Material widget in the tree above them.',
-        ),
-        ErrorHint(
-          'To introduce a Material widget, you can either directly '
-          'include one, or use a widget that contains Material itself, '
-          'such as a Card, Dialog, Drawer, or Scaffold.',
-        ),
-        ...context.describeMissingAncestor(expectedAncestorType: Material),
-      ]);
-    }
-    return true;
-  }());
-  return true;
-}
+@Deprecated(
+  'Use debugCheckSplash instead. '
+  'With the addition of SplashBox, a Material widget is no longer required. '
+  'This feature was deprecated after v3.23.0-0.1.pre.',
+)
+bool debugCheckHasMaterial(BuildContext context) => debugCheckSplash(context);
 
 /// Asserts that the given context has a [Localizations] ancestor that contains
 /// a [MaterialLocalizations] delegate.

@@ -6,17 +6,13 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+import 'colors.dart';
 import 'constants.dart';
 import 'elevation_overlay.dart';
 import 'theme.dart';
 
 // Examples can assume:
 // late BuildContext context;
-
-/// Signature for the callback used by ink effects to obtain the rectangle for the effect.
-///
-/// Used by [InkHighlight] and [InkSplash], for example.
-typedef RectCallback = Rect Function();
 
 /// The various kinds of material in Material Design. Used to
 /// configure the default behavior of [Material] widgets.
@@ -40,14 +36,8 @@ enum MaterialType {
 
   /// A transparent piece of material that draws ink splashes and highlights.
   ///
-  /// While the material metaphor describes child widgets as printed on the
-  /// material itself and do not hide ink effects, in practice the [Material]
-  /// widget draws child widgets on top of the ink effects.
-  /// A [Material] with type transparency can be placed on top of opaque widgets
-  /// to show ink effects on top of them.
-  ///
-  /// Prefer using the [Ink] widget for showing ink effects on top of opaque
-  /// widgets.
+  /// A [Material] with the transparency type is similar to a [SplashBox],
+  /// and includes configuration for elevation, border, and text style.
   transparency
 }
 
@@ -65,27 +55,13 @@ const Map<MaterialType, BorderRadius?> kMaterialEdges = <MaterialType, BorderRad
   MaterialType.transparency: null,
 };
 
-/// An interface for creating [InkSplash]s and [InkHighlight]s on a [Material].
-///
-/// Typically obtained via [Material.of].
-abstract class MaterialInkController {
-  /// The color of the material.
-  Color? get color;
-
-  /// The ticker provider used by the controller.
-  ///
-  /// Ink features that are added to this controller with [addInkFeature] should
-  /// use this vsync to drive their animations.
-  TickerProvider get vsync;
-
-  /// Add an [InkFeature], such as an [InkSplash] or an [InkHighlight].
-  ///
-  /// The ink feature will paint as part of this controller.
-  void addInkFeature(InkFeature feature);
-
-  /// Notifies the controller that one of its ink features needs to repaint.
-  void markNeedsPaint();
-}
+@Deprecated(
+  'Use SplashController instead. '
+  'Both Material and SplashBox can be used for Splash effects. '
+  'This feature was deprecated after v3.23.0-0.1.pre.',
+)
+/// An interface for creating ink effects on a [Material].
+typedef MaterialInkController = SplashController;
 
 /// A piece of material.
 ///
@@ -110,7 +86,7 @@ abstract class MaterialInkController {
 /// Most user interface elements are either conceptually printed on a piece of
 /// material or themselves made of material. Material reacts to user input using
 /// [InkSplash] and [InkHighlight] effects. To trigger a reaction on the
-/// material, use a [MaterialInkController] obtained via [Material.of].
+/// material, use a [SplashController] obtained via [Material.of].
 ///
 /// In general, the features of a [Material] should not change over time (e.g. a
 /// [Material] should not change its [color], [shadowColor] or [type]).
@@ -168,7 +144,7 @@ abstract class MaterialInkController {
 ///  * [Card], a wrapper for a [Material] of [type] [MaterialType.card].
 ///  * <https://material.io/design/>
 ///  * <https://m3.material.io/styles/color/the-color-system/color-roles>
-class Material extends StatefulWidget {
+class Material extends StatelessWidget {
   /// Creates a piece of material.
   ///
   /// The [elevation] must be non-negative.
@@ -348,18 +324,17 @@ class Material extends StatefulWidget {
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// MaterialInkController? inkController = Material.maybeOf(context);
+  /// SplashController? splashController = Material.maybeOf(context);
   /// ```
   ///
   /// This method can be expensive (it walks the element tree).
   ///
   /// See also:
   ///
+  /// * [Splash.maybeOf], which is identical to this method.
   /// * [Material.of], which is similar to this method, but asserts if
-  ///   no [Material] ancestor is found.
-  static MaterialInkController? maybeOf(BuildContext context) {
-    return LookupBoundary.findAncestorRenderObjectOfType<_RenderInkFeatures>(context);
-  }
+  ///   no [SplashController] ancestor is found.
+  static SplashController? maybeOf(BuildContext context) => Splash.maybeOf(context);
 
   /// The ink controller from the closest instance of [Material] that encloses
   /// the given context within the closest [LookupBoundary].
@@ -370,20 +345,21 @@ class Material extends StatefulWidget {
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// MaterialInkController inkController = Material.of(context);
+  /// SplashController splashController = Material.of(context);
   /// ```
   ///
   /// This method can be expensive (it walks the element tree).
   ///
   /// See also:
   ///
+  /// * [Splash.of], which is identical to this method.
   /// * [Material.maybeOf], which is similar to this method, but returns null if
   ///   no [Material] ancestor is found.
-  static MaterialInkController of(BuildContext context) {
-    final MaterialInkController? controller = maybeOf(context);
+  static SplashController of(BuildContext context) {
+    final SplashController? controller = maybeOf(context);
     assert(() {
       if (controller == null) {
-        if (LookupBoundary.debugIsHidingAncestorRenderObjectOfType<_RenderInkFeatures>(context)) {
+        if (LookupBoundary.debugIsHidingAncestorRenderObjectOfType<SplashController>(context)) {
           throw FlutterError(
             'Material.of() was called with a context that does not have access to a Material widget.\n'
             'The context provided to Material.of() does have a Material widget ancestor, but it is '
@@ -408,9 +384,6 @@ class Material extends StatefulWidget {
   }
 
   @override
-  State<Material> createState() => _MaterialState();
-
-  @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(EnumProperty<MaterialType>('type', type));
@@ -426,55 +399,42 @@ class Material extends StatefulWidget {
 
   /// The default radius of an ink splash in logical pixels.
   static const double defaultSplashRadius = 35.0;
-}
-
-class _MaterialState extends State<Material> with TickerProviderStateMixin {
-  final GlobalKey _inkFeatureRenderer = GlobalKey(debugLabel: 'ink renderer');
 
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final Color? backgroundColor = widget.color ?? switch (widget.type) {
+    final Color? backgroundColor = color ?? switch (type) {
       MaterialType.canvas => theme.canvasColor,
       MaterialType.card => theme.cardColor,
       MaterialType.button || MaterialType.circle || MaterialType.transparency => null,
     };
-    final Color modelShadowColor = widget.shadowColor
+    final Color modelShadowColor = shadowColor
         ?? (theme.useMaterial3 ? theme.colorScheme.shadow : theme.shadowColor);
+    final bool isTransparent = type == MaterialType.transparency;
     assert(
-      backgroundColor != null || widget.type == MaterialType.transparency,
+      backgroundColor != null || isTransparent,
       'If Material type is not MaterialType.transparency, a color must '
       'either be passed in through the `color` property, or be defined '
       'in the theme (ex. canvasColor != null if type is set to '
       'MaterialType.canvas)',
     );
 
-    Widget? contents = widget.child;
+    Widget? contents = child;
     if (contents != null) {
       contents = AnimatedDefaultTextStyle(
-        style: widget.textStyle ?? Theme.of(context).textTheme.bodyMedium!,
-        duration: widget.animationDuration,
+        style: textStyle ?? theme.textTheme.bodyMedium!,
+        duration: animationDuration,
         child: contents,
       );
     }
-    contents = NotificationListener<LayoutChangedNotification>(
-      onNotification: (LayoutChangedNotification notification) {
-        final _RenderInkFeatures renderer = _inkFeatureRenderer.currentContext!.findRenderObject()! as _RenderInkFeatures;
-        renderer._didChangeLayout();
-        return false;
-      },
-      child: _InkFeatures(
-        key: _inkFeatureRenderer,
-        absorbHitTest: widget.type != MaterialType.transparency,
-        color: backgroundColor,
-        vsync: this,
-        child: contents,
-      ),
+    contents = SplashBox(
+      color: isTransparent ? null : backgroundColor,
+      child: contents,
     );
 
-    ShapeBorder? shape = widget.borderRadius != null
-        ? RoundedRectangleBorder(borderRadius: widget.borderRadius!)
-        : widget.shape;
+    ShapeBorder? shape = borderRadius != null
+        ? RoundedRectangleBorder(borderRadius: borderRadius!)
+        : this.shape;
 
     // PhysicalModel has a temporary workaround for a performance issue that
     // speeds up rectangular non transparent material (the workaround is to
@@ -485,16 +445,16 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
     // specified rectangles (e.g shape RoundedRectangleBorder with radius 0, but
     // we choose not to as we want the change from the fast-path to the
     // slow-path to be noticeable in the construction site of Material.
-    if (widget.type == MaterialType.canvas && shape == null) {
+    if (type == MaterialType.canvas && shape == null) {
       final Color color = theme.useMaterial3
-        ? ElevationOverlay.applySurfaceTint(backgroundColor!, widget.surfaceTintColor, widget.elevation)
-        : ElevationOverlay.applyOverlay(context, backgroundColor!, widget.elevation);
+        ? ElevationOverlay.applySurfaceTint(backgroundColor!, surfaceTintColor, elevation)
+        : ElevationOverlay.applyOverlay(context, backgroundColor!, elevation);
 
       return AnimatedPhysicalModel(
         curve: Curves.fastOutSlowIn,
-        duration: widget.animationDuration,
-        clipBehavior: widget.clipBehavior,
-        elevation: widget.elevation,
+        duration: animationDuration,
+        clipBehavior: clipBehavior,
+        elevation: elevation,
         color: color,
         shadowColor: modelShadowColor,
         animateColor: false,
@@ -502,7 +462,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
       );
     }
 
-    shape ??= switch (widget.type) {
+    shape ??= switch (type) {
       MaterialType.circle => const CircleBorder(),
       MaterialType.canvas || MaterialType.transparency => const RoundedRectangleBorder(),
       MaterialType.card || MaterialType.button => const RoundedRectangleBorder(
@@ -510,138 +470,29 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
         ),
     };
 
-    if (widget.type == MaterialType.transparency) {
+    if (isTransparent) {
       return ClipPath(
         clipper: ShapeBorderClipper(
           shape: shape,
           textDirection: Directionality.maybeOf(context),
         ),
-        clipBehavior: widget.clipBehavior,
+        clipBehavior: clipBehavior,
         child: _ShapeBorderPaint(shape: shape, child: contents),
       );
     }
 
     return _MaterialInterior(
       curve: Curves.fastOutSlowIn,
-      duration: widget.animationDuration,
+      duration: animationDuration,
       shape: shape,
-      borderOnForeground: widget.borderOnForeground,
-      clipBehavior: widget.clipBehavior,
-      elevation: widget.elevation,
+      borderOnForeground: borderOnForeground,
+      clipBehavior: clipBehavior,
+      elevation: elevation,
       color: backgroundColor!,
       shadowColor: modelShadowColor,
-      surfaceTintColor: widget.surfaceTintColor,
+      surfaceTintColor: surfaceTintColor,
       child: contents,
     );
-  }
-}
-
-class _RenderInkFeatures extends RenderProxyBox implements MaterialInkController {
-  _RenderInkFeatures({
-    RenderBox? child,
-    required this.vsync,
-    required this.absorbHitTest,
-    this.color,
-  }) : super(child);
-
-  // This class should exist in a 1:1 relationship with a MaterialState object,
-  // since there's no current support for dynamically changing the ticker
-  // provider.
-  @override
-  final TickerProvider vsync;
-
-  // This is here to satisfy the MaterialInkController contract.
-  // The actual painting of this color is done by a Container in the
-  // MaterialState build method.
-  @override
-  Color? color;
-
-  bool absorbHitTest;
-
-  @visibleForTesting
-  List<InkFeature>? get debugInkFeatures {
-    if (kDebugMode) {
-      return _inkFeatures;
-    }
-    return null;
-  }
-  List<InkFeature>? _inkFeatures;
-
-  @override
-  void addInkFeature(InkFeature feature) {
-    assert(!feature._debugDisposed);
-    assert(feature._controller == this);
-    _inkFeatures ??= <InkFeature>[];
-    assert(!_inkFeatures!.contains(feature));
-    _inkFeatures!.add(feature);
-    markNeedsPaint();
-  }
-
-  void _removeFeature(InkFeature feature) {
-    assert(_inkFeatures != null);
-    _inkFeatures!.remove(feature);
-    markNeedsPaint();
-  }
-
-  void _didChangeLayout() {
-    if (_inkFeatures?.isNotEmpty ?? false) {
-      markNeedsPaint();
-    }
-  }
-
-  @override
-  bool hitTestSelf(Offset position) => absorbHitTest;
-
-  @override
-  void paint(PaintingContext context, Offset offset) {
-    final List<InkFeature>? inkFeatures = _inkFeatures;
-    if (inkFeatures != null && inkFeatures.isNotEmpty) {
-      final Canvas canvas = context.canvas;
-      canvas.save();
-      canvas.translate(offset.dx, offset.dy);
-      canvas.clipRect(Offset.zero & size);
-      for (final InkFeature inkFeature in inkFeatures) {
-        inkFeature._paint(canvas);
-      }
-      canvas.restore();
-    }
-    assert(inkFeatures == _inkFeatures);
-    super.paint(context, offset);
-  }
-}
-
-class _InkFeatures extends SingleChildRenderObjectWidget {
-  const _InkFeatures({
-    super.key,
-    this.color,
-    required this.vsync,
-    required this.absorbHitTest,
-    super.child,
-  });
-
-  // This widget must be owned by a MaterialState, which must be provided as the vsync.
-  // This relationship must be 1:1 and cannot change for the lifetime of the MaterialState.
-
-  final Color? color;
-
-  final TickerProvider vsync;
-
-  final bool absorbHitTest;
-
-  @override
-  _RenderInkFeatures createRenderObject(BuildContext context) {
-    return _RenderInkFeatures(
-      color: color,
-      absorbHitTest: absorbHitTest,
-      vsync: vsync,
-    );
-  }
-
-  @override
-  void updateRenderObject(BuildContext context, _RenderInkFeatures renderObject) {
-    renderObject..color = color
-                ..absorbHitTest = absorbHitTest;
-    assert(vsync == renderObject.vsync);
   }
 }
 
@@ -650,132 +501,24 @@ class _InkFeatures extends SingleChildRenderObjectWidget {
 /// To add an ink feature to a piece of [Material], obtain the
 /// [MaterialInkController] via [Material.of] and call
 /// [MaterialInkController.addInkFeature].
-abstract class InkFeature {
+@Deprecated(
+  'Use Splash instead. '
+  'Splash effects no longer rely on a MaterialInkController. '
+  'This feature was deprecated after v3.23.0-0.1.pre.',
+)
+abstract class InkFeature extends Splash {
   /// Initializes fields for subclasses.
+  @Deprecated(
+    'Use Splash instead. '
+    'Splash effects no longer rely on a MaterialInkController. '
+    'This feature was deprecated after v3.23.0-0.1.pre.',
+  )
   InkFeature({
-    required MaterialInkController controller,
-    required this.referenceBox,
-    this.onRemoved,
-  }) : _controller = controller as _RenderInkFeatures {
-    // TODO(polina-c): stop duplicating code across disposables
-    // https://github.com/flutter/flutter/issues/137435
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectCreated(
-        library: 'package:flutter/material.dart',
-        className: '$InkFeature',
-        object: this,
-      );
-    }
-  }
-
-  /// The [MaterialInkController] associated with this [InkFeature].
-  ///
-  /// Typically used by subclasses to call
-  /// [MaterialInkController.markNeedsPaint] when they need to repaint.
-  MaterialInkController get controller => _controller;
-  final _RenderInkFeatures _controller;
-
-  /// The render box whose visual position defines the frame of reference for this ink feature.
-  final RenderBox referenceBox;
-
-  /// Called when the ink feature is no longer visible on the material.
-  final VoidCallback? onRemoved;
-
-  bool _debugDisposed = false;
-
-  /// Free up the resources associated with this ink feature.
-  @mustCallSuper
-  void dispose() {
-    assert(!_debugDisposed);
-    assert(() {
-      _debugDisposed = true;
-      return true;
-    }());
-    // TODO(polina-c): stop duplicating code across disposables
-    // https://github.com/flutter/flutter/issues/137435
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
-    }
-    _controller._removeFeature(this);
-    onRemoved?.call();
-  }
-
-  // Returns the paint transform that allows `fromRenderObject` to perform paint
-  // in `toRenderObject`'s coordinate space.
-  //
-  // Returns null if either `fromRenderObject` or `toRenderObject` is not in the
-  // same render tree, or either of them is in an offscreen subtree (see
-  // RenderObject.paintsChild).
-  static Matrix4? _getPaintTransform(
-    RenderObject fromRenderObject,
-    RenderObject toRenderObject,
-  ) {
-    // The paths to fromRenderObject and toRenderObject's common ancestor.
-    final List<RenderObject> fromPath = <RenderObject>[fromRenderObject];
-    final List<RenderObject> toPath = <RenderObject>[toRenderObject];
-
-    RenderObject from = fromRenderObject;
-    RenderObject to = toRenderObject;
-
-    while (!identical(from, to)) {
-      final int fromDepth = from.depth;
-      final int toDepth = to.depth;
-
-      if (fromDepth >= toDepth) {
-        final RenderObject? fromParent = from.parent;
-        // Return early if the 2 render objects are not in the same render tree,
-        // or either of them is offscreen and thus won't get painted.
-        if (fromParent is! RenderObject || !fromParent.paintsChild(from)) {
-          return null;
-        }
-        fromPath.add(fromParent);
-        from = fromParent;
-      }
-
-      if (fromDepth <= toDepth) {
-        final RenderObject? toParent = to.parent;
-        if (toParent is! RenderObject || !toParent.paintsChild(to)) {
-          return null;
-        }
-        toPath.add(toParent);
-        to = toParent;
-      }
-    }
-    assert(identical(from, to));
-
-    final Matrix4 transform = Matrix4.identity();
-    final Matrix4 inverseTransform = Matrix4.identity();
-
-    for (int index = toPath.length - 1; index > 0; index -= 1) {
-      toPath[index].applyPaintTransform(toPath[index - 1], transform);
-    }
-    for (int index = fromPath.length - 1; index > 0; index -= 1) {
-      fromPath[index].applyPaintTransform(fromPath[index - 1], inverseTransform);
-    }
-
-    final double det = inverseTransform.invert();
-    return det != 0 ? (inverseTransform..multiply(transform)) : null;
-  }
-
-  void _paint(Canvas canvas) {
-    assert(referenceBox.attached);
-    assert(!_debugDisposed);
-    // determine the transform that gets our coordinate system to be like theirs
-    final Matrix4? transform = _getPaintTransform(_controller, referenceBox);
-    if (transform != null) {
-      paintFeature(canvas, transform);
-    }
-  }
-
-  /// Override this method to paint the ink feature.
-  ///
-  /// The transform argument gives the coordinate conversion from the coordinate
-  /// system of the canvas to the coordinate system of the [referenceBox].
-  @protected
-  void paintFeature(Canvas canvas, Matrix4 transform);
-
-  @override
-  String toString() => describeIdentity(this);
+    required super.controller,
+    required super.referenceBox,
+    super.color = Colors.transparent,
+    super.onRemoved,
+  });
 }
 
 /// An interpolation between two [ShapeBorder]s.

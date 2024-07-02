@@ -13,6 +13,7 @@ import 'localizations.dart';
 import 'lookup_boundary.dart';
 import 'media_query.dart';
 import 'overlay.dart';
+import 'splash.dart';
 import 'table.dart';
 
 // Examples can assume:
@@ -239,6 +240,54 @@ bool debugItemsHaveDuplicateKeys(Iterable<Widget> items) {
     return true;
   }());
   return false;
+}
+
+/// Asserts that the given context has a [SplashBox] ancestor within the closest
+/// [LookupBoundary].
+///
+/// Used by many widgets to make sure that they are only used in contexts where
+/// they have a [SplashBox] or other widget that enables [Splash] effects.
+///
+/// To call this function, use the following pattern, typically in the
+/// relevant Widget's build method:
+///
+/// ```dart
+/// assert(debugCheckSplash(context));
+/// ```
+///
+/// Always place this before any early returns, so that the invariant is checked
+/// in all cases. This prevents bugs from hiding until a particular codepath is
+/// hit.
+///
+/// This method can be expensive (it walks the element tree).
+///
+/// Does nothing if asserts are disabled. Always returns true.
+bool debugCheckSplash(BuildContext context) {
+  assert(() {
+    if (Splash.maybeOf(context) == null) {
+      final bool hiddenByBoundary = LookupBoundary.debugIsHidingAncestorRenderObjectOfType<SplashController>(context);
+      throw FlutterError.fromParts(<DiagnosticsNode>[
+        ErrorSummary('No SplashController found${hiddenByBoundary ? ' within the closest LookupBoundary' : ''}.'),
+        if (hiddenByBoundary)
+          ErrorDescription(
+            "There is an ancestor SplashController, but it's hidden by a LookupBoundary.",
+          ),
+        ErrorDescription(
+          '${context.widget.runtimeType} widgets use a SplashController to show '
+          'Splash effects, and no SplashController ancestor was found within '
+          'the closest LookupBoundary.\n',
+        ),
+        ErrorHint(
+          'A SplashController can be provided by an ancestor SplashBox; alternatively, '
+          'there are several viable options from the Material libary, including '
+          'Material, Card, Dialog, Drawer, and Scaffold.',
+        ),
+        ...context.describeMissingAncestor(expectedAncestorType: SplashController),
+      ]);
+    }
+    return true;
+  }());
+  return true;
 }
 
 /// Asserts that the given context has a [Table] ancestor.

@@ -174,6 +174,35 @@ void main() {
     expect(inkFeatures, paints..rect(rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0), color: const Color(0xff00ff00)));
   });
 
+  testWidgets('ink well works with SplashBox', (WidgetTester tester) async {
+    await tester.pumpWidget(SplashBox(
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox(
+            width: 100,
+            height: 100,
+            child: InkWell(
+              hoverColor: const Color(0xff00ff00),
+              splashColor: const Color(0xffff0000),
+              focusColor: const Color(0xff0000ff),
+              highlightColor: const Color(0xf00fffff),
+              onTap: () { },
+              onLongPress: () { },
+              onHover: (bool hover) { },
+            ),
+          ),
+        ),
+      ),
+    ));
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.moveTo(tester.getCenter(find.byType(SizedBox)));
+    await tester.pumpAndSettle();
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    expect(inkFeatures, paints..rect(rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0), color: const Color(0xff00ff00)));
+  });
+
   testWidgets('ink well changes color on hover with overlayColor', (WidgetTester tester) async {
     // Same test as 'ink well changes color on hover' except that the
     // hover color is specified with the overlayColor parameter.
