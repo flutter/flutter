@@ -881,22 +881,20 @@ class FakeChromeConnectionWithTab extends Fake implements ChromeConnection {
       : _tab = FakeChromeTab(onSendCommand);
 
   final FakeChromeTab _tab;
-  bool _throwSocketExceptions = false;
-
-  set throwSocketExceptions(bool value) { _throwSocketExceptions = value; }
+  bool throwSocketExceptions = false;
 
   @override
   Future<ChromeTab?> getTab(bool Function(ChromeTab tab) accept, {Duration? retryFor}) async {
-    if (_throwSocketExceptions) {
-      throw io.SocketException('test');
+    if (throwSocketExceptions) {
+      throw const io.SocketException('test');
     }
     return _tab;
   }
 
   @override
   Future<List<ChromeTab>> getTabs({Duration? retryFor}) async {
-    if (_throwSocketExceptions) {
-      throw io.SocketException('test');
+    if (throwSocketExceptions) {
+      throw const io.SocketException('test');
     }
     return <ChromeTab>[_tab];
   }
