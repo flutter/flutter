@@ -1228,7 +1228,7 @@ abstract class DefaultTextEditingStrategy with CompositionAwareMixin implements 
   }
 
   /// The [FlutterView] in which [activeDomElement] is contained.
-  EngineFlutterView? get activeDomElementView => _viewForElement(activeDomElement);
+  EngineFlutterView? get _activeDomElementView => _viewForElement(activeDomElement);
 
   EngineFlutterView? _viewForElement(DomElement element) =>
     EnginePlatformDispatcher.instance.viewManager.findViewForElement(element);
@@ -1411,9 +1411,9 @@ abstract class DefaultTextEditingStrategy with CompositionAwareMixin implements 
         inputConfiguration.autofillGroup?.formElement != null) {
       _styleAutofillElements(activeDomElement, isOffScreen: true);
       inputConfiguration.autofillGroup?.storeForm();
-      scheduleFocusFlutterView(activeDomElement, activeDomElementView);
+      _moveFocusToFlutterView(activeDomElement, _activeDomElementView);
     } else {
-      scheduleFocusFlutterView(activeDomElement, activeDomElementView, removeElement: true);
+      _moveFocusToFlutterView(activeDomElement, _activeDomElementView, removeElement: true);
 		}
     domElement = null;
   }
@@ -1498,7 +1498,7 @@ abstract class DefaultTextEditingStrategy with CompositionAwareMixin implements 
     event as DomFocusEvent;
 
     final DomElement? willGainFocusElement = event.relatedTarget as DomElement?;
-    if (willGainFocusElement == null || _viewForElement(willGainFocusElement) == activeDomElementView) {
+    if (willGainFocusElement == null || _viewForElement(willGainFocusElement) == _activeDomElementView) {
       moveFocusToActiveDomElement();
     }
   }
@@ -1574,20 +1574,17 @@ abstract class DefaultTextEditingStrategy with CompositionAwareMixin implements 
     activeDomElement.focus(preventScroll: true);
   }
 
-  /// Move the focus to the given [EngineFlutterView] in the next timer event.
+  /// Moves the focus to the [EngineFlutterView].
   ///
-  /// The timer gives the engine the opportunity to focus on another element.
-  /// Shifting focus immediately can cause the keyboard to jump.
-  static void scheduleFocusFlutterView(
+  /// The delay gives the engine the opportunity to focus another <input /> element.
+  /// The delay should help prevent the keyboard from jumping when the focus goes from
+  /// one text field to another.
+  static void _moveFocusToFlutterView(
     DomElement element,
     EngineFlutterView? view, {
     bool removeElement = false,
   }) {
     Timer(Duration.zero, () {
-      // If by the time the timer fired the focused element is no longer the
-      // editing element whose editing session was disabled, there's no need to
-      // move the focus, as it is likely that another widget already took the
-      // focus.
       if (element == domDocument.activeElement) {
         view?.dom.rootElement.focus(preventScroll: true);
       }
@@ -2207,9 +2204,6 @@ class TextEditingChannel {
         command = const TextInputSetCaretRect();
 
       default:
-        if (_debugPrintTextInputCommands) {
-          print('Received unknown command on flutter/textinput channel: ${call.method}');
-        }
         EnginePlatformDispatcher.instance.replyToPlatformMessage(callback, null);
         return;
     }

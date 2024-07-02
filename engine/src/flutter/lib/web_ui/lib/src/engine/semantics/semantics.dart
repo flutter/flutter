@@ -2218,6 +2218,8 @@ class EngineSemantics {
       'mousemove',
       'mouseleave',
       'mouseup',
+      'keyup',
+      'keydown',
     ];
 
     if (pointerEventTypes.contains(event.type)) {
