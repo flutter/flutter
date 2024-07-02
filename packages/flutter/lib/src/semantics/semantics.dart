@@ -1829,6 +1829,15 @@ class SemanticsNode with DiagnosticableTreeMixin {
     }
   }
 
+  /// The bounding box for this node in its coordinate system.
+  bool get isHidden => hasFlag(SemanticsFlag.isHidden);
+  set isHidden(bool value) {
+    if (hasFlag(SemanticsFlag.isHidden) != value) {
+      _flags = _flags ^ SemanticsFlag.isHidden.index;
+      _markDirty();
+    }
+  }
+
   /// The semantic clip from an ancestor that was applied to this node.
   ///
   /// Expressed in the coordinate system of the node. May be null if no clip has

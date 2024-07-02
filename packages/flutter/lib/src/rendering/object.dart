@@ -3608,6 +3608,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     assert(!_debugDisposed);
     assert(!attached || !owner!._debugDoingSemantics);
     if (!attached || owner!._semanticsOwner == null) {
+      _cachedSemanticFragment = null;
       _cachedSemanticsConfiguration = null;
       return;
     }
@@ -3636,6 +3637,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
         break;
       }
       node._needsSemanticsUpdate = true;
+      node._cachedSemanticFragment = null;
       // Since this node is a semantics boundary, the produced sibling nodes will
       // be attached to the parent semantics boundary. Thus, these sibling nodes
       // will not be carried to the next loop.
@@ -3664,6 +3666,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     }
     if (!node._needsSemanticsUpdate) {
       node._needsSemanticsUpdate = true;
+      node._cachedSemanticFragment = null;
       if (owner != null) {
         assert(node._semanticsConfiguration.isSemanticBoundary || node.parent == null);
         owner!._nodesNeedingSemantics.add(node);
@@ -3712,8 +3715,33 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     assert(interestingFragment.config == null && result.any((SemanticsNode node) => node == _semantics));
   }
 
-  /// Returns the semantics that this node would like to add to its parent.
+
+  _SemanticsFragment? _cachedSemanticFragment;
   _SemanticsFragment _getSemanticsForParent({
+    required bool mergeIntoParent,
+    required bool blockUserActions,
+  }) {
+    final _SemanticsFragment? cached = _cachedSemanticFragment;
+    if (cached != null) {
+      if (cached is _InterestingSemanticsFragment) {
+        // Need to make sure the cached copy and its fragment subtree are
+        // updated.
+        cached.markBlocksUserActions(blockUserActions);
+        cached.markMergesToParent(mergeIntoParent);
+        // Restored the explicitness for now since the existing value may
+        // set by the parent.
+        cached.markExplicitness(_semanticsConfiguration.isSemanticBoundary);
+      }
+      // The _ContainerSemanticsFrag
+      return cached;
+    }
+    return _cachedSemanticFragment = _computeSemanticsForParent(
+      mergeIntoParent: mergeIntoParent,
+      blockUserActions: blockUserActions,
+    );
+  }
+  /// Returns the semantics that this node would like to add to its parent.
+  _SemanticsFragment _computeSemanticsForParent({
     required bool mergeIntoParent,
     required bool blockUserActions,
   }) {
@@ -3734,9 +3762,10 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     visitChildrenForSemantics((RenderObject renderChild) {
       assert(!_needsLayout);
       final _SemanticsFragment parentFragment = renderChild._getSemanticsForParent(
-        mergeIntoParent: childrenMergeIntoParent,
-        blockUserActions: blockChildInteractions,
+          mergeIntoParent: childrenMergeIntoParent,
+          blockUserActions: blockChildInteractions
       );
+
       if (parentFragment.dropsSemanticsOfPreviousSiblings) {
         childConfigurations.clear();
         mergeUpFragments.clear();
@@ -3746,6 +3775,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
         }
       }
       for (final _InterestingSemanticsFragment fragment in parentFragment.mergeUpFragments) {
+        fragment._resetAncestors();
         fragment.addAncestor(this);
         if (hasTags) {
           fragment.addTags(config.tagsForChildren!);
@@ -3764,6 +3794,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
         // compiled by _SwitchableSemanticsFragment.
         for (final List<_InterestingSemanticsFragment> siblingMergeGroup in parentFragment.siblingMergeGroups) {
           for (final _InterestingSemanticsFragment siblingMergingFragment in siblingMergeGroup) {
+            siblingMergingFragment._resetAncestors();
             siblingMergingFragment.addAncestor(this);
             if (hasTags) {
               siblingMergingFragment.addTags(config.tagsForChildren!);
@@ -3775,12 +3806,12 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     });
 
     assert(childConfigurationsDelegate != null || configToFragment.isEmpty);
-
     if (explicitChildNode) {
       for (final _InterestingSemanticsFragment fragment in mergeUpFragments) {
-        fragment.markAsExplicit();
+        fragment.markExplicitness(true);
       }
-    } else if (childConfigurationsDelegate != null) {
+    }
+    if (!explicitChildNode && childConfigurationsDelegate != null) {
       final ChildSemanticsConfigurationsResult result = childConfigurationsDelegate(childConfigurations);
       mergeUpFragments.addAll(
         result.mergeUp.map<_InterestingSemanticsFragment>((SemanticsConfiguration config) {
@@ -3808,7 +3839,6 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     final _SemanticsFragment result;
     if (parent == null) {
       assert(!config.hasBeenAnnotated);
-      assert(!mergeIntoParent);
       assert(siblingMergeFragmentGroups.isEmpty);
       _marksExplicitInMergeGroup(mergeUpFragments, isMergeUp: true);
       siblingMergeFragmentGroups.forEach(_marksExplicitInMergeGroup);
@@ -3834,7 +3864,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
       );
       if (config.isSemanticBoundary) {
         final _SwitchableSemanticsFragment fragment = result as _SwitchableSemanticsFragment;
-        fragment.markAsExplicit();
+        fragment.markExplicitness(true);
       }
     }
     result.addAll(mergeUpFragments);
@@ -3861,7 +3891,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
       }
     }
     for (final _InterestingSemanticsFragment fragment in toBeExplicit) {
-      fragment.markAsExplicit();
+      fragment.markExplicitness(true);
     }
   }
 
@@ -4634,7 +4664,7 @@ abstract class _InterestingSemanticsFragment extends _SemanticsFragment {
   ///    of the `parentPaintClipRect` argument.
   ///  * [SemanticsNode.elevationAdjustment] for the source and definition
   ///    of the `elevationAdjustment` argument.
-  void compileChildren({
+  bool compileChildren({
     required Rect? parentSemanticsClipRect,
     required Rect? parentPaintClipRect,
     required double elevationAdjustment,
@@ -4646,12 +4676,20 @@ abstract class _InterestingSemanticsFragment extends _SemanticsFragment {
   /// [SemanticsNode] or null if it doesn't want to merge anything.
   SemanticsConfiguration? get config;
 
-  /// Disallows this fragment to merge any configuration into its parent's
+  /// Chooses whether this fragment to merge any configuration into its parent's
   /// [SemanticsNode].
   ///
-  /// After calling this, the fragment will only produce children to be added
-  /// to the parent and it will return null for [config].
-  void markAsExplicit();
+  /// After marking this as explicit, the fragment will only produce children to
+  /// be added to the parent and it will return null for [config].
+  void markExplicitness(bool explicit);
+
+  /// Chooses whether the semantics node that produced by this fragment will
+  /// be forced to merge into one node.
+  void markMergesToParent(bool merges);
+
+  /// Chooses whether the semantics node that produced by this fragment will
+  /// drop user actions such as tap or long press.
+  void markBlocksUserActions(bool blocks);
 
   /// Consume the fragments of children.
   ///
@@ -4660,7 +4698,7 @@ abstract class _InterestingSemanticsFragment extends _SemanticsFragment {
   /// fragment's [config] into this fragment's [config].
   ///
   /// If a provided fragment should not merge anything into [config] call
-  /// [markAsExplicit] before passing the fragment to this method.
+  /// [markExplicitness] before passing the fragment to this method.
   @override
   void addAll(Iterable<_InterestingSemanticsFragment> fragments);
 
@@ -4693,6 +4731,11 @@ abstract class _InterestingSemanticsFragment extends _SemanticsFragment {
   void addAncestor(RenderObject ancestor) {
     _ancestorChain.add(ancestor);
   }
+
+  void _resetAncestors() {
+    // Only keep the owner.
+    _ancestorChain.removeRange(1, _ancestorChain.length);
+  }
 }
 
 /// An [_InterestingSemanticsFragment] that produces the root [SemanticsNode] of
@@ -4707,7 +4750,7 @@ class _RootSemanticsFragment extends _InterestingSemanticsFragment {
   });
 
   @override
-  void compileChildren({
+  bool compileChildren({
     Rect? parentSemanticsClipRect,
     Rect? parentPaintClipRect,
     required double elevationAdjustment,
@@ -4753,6 +4796,7 @@ class _RootSemanticsFragment extends _InterestingSemanticsFragment {
     // tree).
     assert(!node.isInvisible || children.isEmpty);
     result.add(node);
+    return true;
   }
 
   @override
@@ -4761,13 +4805,25 @@ class _RootSemanticsFragment extends _InterestingSemanticsFragment {
   final List<_InterestingSemanticsFragment> _children = <_InterestingSemanticsFragment>[];
 
   @override
-  void markAsExplicit() {
+  void markExplicitness(bool explicit) {
     // nothing to do, we are always explicit.
   }
 
   @override
   void addAll(Iterable<_InterestingSemanticsFragment> fragments) {
     _children.addAll(fragments);
+  }
+
+  @override
+  void markBlocksUserActions(bool blocks) {
+    // should never be called with true
+    assert(!blocks);
+  }
+
+  @override
+  void markMergesToParent(bool merges) {
+    // should never be called with true
+    assert(!merges);
   }
 }
 
@@ -4788,7 +4844,7 @@ class _IncompleteSemanticsFragment extends _InterestingSemanticsFragment {
   }
 
   @override
-  void compileChildren({
+  bool compileChildren({
     required Rect? parentSemanticsClipRect,
     required Rect? parentPaintClipRect,
     required double elevationAdjustment,
@@ -4797,61 +4853,79 @@ class _IncompleteSemanticsFragment extends _InterestingSemanticsFragment {
   }) {
     // There is nothing to do because this fragment must be a leaf node and
     // must not be explicit.
+    return true;
   }
 
   @override
   final SemanticsConfiguration config;
 
   @override
-  void markAsExplicit() {
+  void markExplicitness(bool explicit) {
     assert(
-      false,
+      !explicit,
       'SemanticsConfiguration created in '
       'SemanticsConfiguration.childConfigurationsDelegate must not produce '
       'its own semantics node'
     );
+  }
+
+  @override
+  void markBlocksUserActions(bool blocks) {
+    // nothing to do.
+  }
+
+  @override
+  void markMergesToParent(bool merges) {
+    // nothing to do, this fragment will never form a semantics node by itself.
   }
 }
 
 /// An [_InterestingSemanticsFragment] that can be told to only add explicit
 /// [SemanticsNode]s to the parent.
 ///
-/// If [markAsExplicit] was not called before this fragment is added to
+/// If [markExplicitness] was not called before this fragment is added to
 /// another fragment it will merge [config] into the parent's [SemanticsNode]
 /// and add its [children] to it.
 ///
-/// If [markAsExplicit] was called before adding this fragment to another
+/// If [markExplicitness] was called before adding this fragment to another
 /// fragment it will create a new [SemanticsNode]. The newly created node will
 /// be annotated with the [SemanticsConfiguration] that - without the call to
-/// [markAsExplicit] - would have been merged into the parent's [SemanticsNode].
+/// [markExplicitness] - would have been merged into the parent's [SemanticsNode].
 /// Similarly, the new node will also take over the children that otherwise
 /// would have been added to the parent's [SemanticsNode].
 ///
-/// After a call to [markAsExplicit] the only element returned by [children]
+/// After a call to [markExplicitness] the only element returned by [children]
 /// is the newly created node and [config] will return null as the fragment
 /// no longer wants to merge any semantic information into the parent's
 /// [SemanticsNode].
 class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
   _SwitchableSemanticsFragment({
-    required bool mergeIntoParent,
-    required bool blockUserActions,
     required SemanticsConfiguration config,
     required List<List<_InterestingSemanticsFragment>> siblingMergeGroups,
+    required bool mergeIntoParent,
+    required bool blockUserActions,
     required super.owner,
     required super.dropsSemanticsOfPreviousSiblings,
   }) : _siblingMergeGroups = siblingMergeGroups,
        _mergeIntoParent = mergeIntoParent,
-       _config = config {
-    if (blockUserActions && !_config.isBlockingUserActions) {
+       _originalConfig = config,
+       _effectiveConfig = config {
+    if (blockUserActions && !_effectiveConfig.isBlockingUserActions) {
       _ensureConfigIsWritable();
-      _config.isBlockingUserActions = true;
+      _effectiveConfig.isBlockingUserActions = true;
     }
   }
 
-  final bool _mergeIntoParent;
-  SemanticsConfiguration _config;
-  bool _isConfigWritable = false;
+  bool _mergeIntoParent;
+  final SemanticsConfiguration _originalConfig;
+  SemanticsConfiguration _effectiveConfig;
+  bool _isEffectiveConfigWritable = false;
   bool _mergesToSibling = false;
+
+  bool _compiled = false;
+  final List<SemanticsNode> _producedNode = <SemanticsNode>[];
+  final List<SemanticsNode> _producedSibling = <SemanticsNode>[];
+  final Map<SemanticsNode, List<_SwitchableSemanticsFragment>> _producedNodeOwners = <SemanticsNode, List<_SwitchableSemanticsFragment>>{};
 
   final List<List<_InterestingSemanticsFragment>> _siblingMergeGroups;
 
@@ -4921,13 +4995,41 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
   final List<_InterestingSemanticsFragment> _children = <_InterestingSemanticsFragment>[];
 
   @override
-  void compileChildren({
+  bool compileChildren({
     Rect? parentSemanticsClipRect,
     Rect? parentPaintClipRect,
     required double elevationAdjustment,
     required List<SemanticsNode> result,
     required List<SemanticsNode> siblingNodes,
   }) {
+    if (!_compiled) {
+      _producedNode.clear();
+      _producedSibling.clear();
+      _compiled = _compileChildren(
+        parentSemanticsClipRect: parentSemanticsClipRect,
+        parentPaintClipRect: parentPaintClipRect,
+        elevationAdjustment: elevationAdjustment,
+        siblingNodes: siblingNodes,
+      );
+    } else {
+      _updateProducedNodeGeometries(parentSemanticsClipRect, parentPaintClipRect);
+    }
+    result.addAll(_producedNode);
+    siblingNodes.addAll(_producedSibling);
+    return _compiled;
+  }
+
+  bool _compileChildren({
+    Rect? parentSemanticsClipRect,
+    Rect? parentPaintClipRect,
+    required double elevationAdjustment,
+    required List<SemanticsNode> siblingNodes,
+  }) {
+    assert(!_compiled);
+    // This will be set to false if any of the child fragment doesn't compile.
+    // This means part of the semantics node may be dropped due to geometric
+    // constraints.
+    bool compiled = true;
     final Set<int> usedSemanticsIds = <int>{};
     Iterable<_InterestingSemanticsFragment> compilingFragments = _children;
     for (final List<_InterestingSemanticsFragment> siblingGroup in _siblingMergeGroups) {
@@ -4940,7 +5042,7 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
       _mergeSiblingGroup(
         parentSemanticsClipRect,
         parentPaintClipRect,
-        siblingNodes,
+        _producedSibling,
         usedSemanticsIds,
       );
       for (final _InterestingSemanticsFragment fragment in compilingFragments) {
@@ -4956,18 +5058,19 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
           }
         }
         fragment._ancestorChain.addAll(_ancestorChain.skip(1));
-        fragment.compileChildren(
+        compiled = compiled && fragment.compileChildren(
           parentSemanticsClipRect: parentSemanticsClipRect,
           parentPaintClipRect: parentPaintClipRect,
           // The fragment is not explicit, its elevation has been absorbed by
           // the parent config (as thickness). We still need to make sure that
           // its children are placed at the elevation dictated by this config.
-          elevationAdjustment: elevationAdjustment + _config.elevation,
-          result: result,
-          siblingNodes: siblingNodes,
+          elevationAdjustment: elevationAdjustment + _effectiveConfig.elevation,
+          result: _producedNode,
+          siblingNodes: _producedSibling,
         );
       }
-      return;
+
+      return compiled;
     }
 
     final _SemanticsGeometry? geometry = _computeSemanticsGeometry(
@@ -4975,8 +5078,14 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
       parentPaintClipRect: parentPaintClipRect,
     );
 
+    // if (owner.runtimeType.toString().contains('RenderIndexedSemantics')) {
+    //   print('RenderIndexedSemantics${owner.hashCode} first calculation. geometry.rect ${geometry?.rect}, semanticBounds ${owner.semanticBounds}');
+    //   print('ancestor chain\n${_ancestorChain}');
+    //   print('geometry.transform\n${geometry?.transform}');
+    // }
+
     if (!_mergeIntoParent && (geometry?.dropFromTree ?? false)) {
-      return; // Drop the node, it's not going to be visible.
+      return false; // Drop the node, it's not going to be visible.
     }
 
     final SemanticsNode node = (owner._semantics ??= SemanticsNode(showOnScreen: owner.showOnScreen))
@@ -4985,7 +5094,7 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
     node.elevationAdjustment = elevationAdjustment;
     if (elevationAdjustment != 0.0) {
       _ensureConfigIsWritable();
-      _config.elevation += elevationAdjustment;
+      _effectiveConfig.elevation += elevationAdjustment;
     }
 
     if (geometry != null) {
@@ -4997,7 +5106,7 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
         ..parentPaintClipRect = geometry.paintClipRect;
       if (!_mergeIntoParent && geometry.markAsHidden) {
         _ensureConfigIsWritable();
-        _config.isHidden = true;
+        _effectiveConfig.isHidden = true;
       }
     }
     final List<SemanticsNode> children = <SemanticsNode>[];
@@ -5019,7 +5128,7 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
         }
       }
       final List<SemanticsNode> childSiblingNodes = <SemanticsNode>[];
-      fragment.compileChildren(
+      compiled = compiled && fragment.compileChildren(
         parentSemanticsClipRect: node.parentSemanticsClipRect,
         parentPaintClipRect: node.parentPaintClipRect,
         elevationAdjustment: 0.0,
@@ -5029,12 +5138,13 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
       siblingNodes.addAll(childSiblingNodes);
     }
 
-    if (_config.isSemanticBoundary) {
-      owner.assembleSemanticsNode(node, _config, children);
+    if (_effectiveConfig.isSemanticBoundary) {
+      owner.assembleSemanticsNode(node, _effectiveConfig, children);
     } else {
-      node.updateWith(config: _config, childrenInInversePaintOrder: children);
+      node.updateWith(config: _effectiveConfig, childrenInInversePaintOrder: children);
     }
-    result.add(node);
+    _producedNode.add(node);
+    _producedNodeOwners[node] = <_SwitchableSemanticsFragment>[this];
     // Sibling node needs to attach to the parent of an explicit node.
     for (final SemanticsNode siblingNode in siblingNodes) {
       // sibling nodes are in the same coordinate of the immediate explicit node.
@@ -5047,8 +5157,73 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
         siblingNode.tags!.addAll(_tagsForChildren!);
       }
     }
-    result.addAll(siblingNodes);
+    _producedNode.addAll(siblingNodes);
     siblingNodes.clear();
+    return compiled;
+  }
+
+  void _updateProducedNodeGeometries(Rect? parentSemanticsClipRect, Rect? parentPaintClipRect) {
+    for (final MapEntry<SemanticsNode, List<_SwitchableSemanticsFragment>> entry in _producedNodeOwners.entries) {
+      Rect? rect;
+      Matrix4? transform;
+      Rect? semanticsClipRect;
+      Rect? paintClipRect;
+      bool hidden = false;
+
+      final bool mergeIntoParent = entry.value.first._mergeIntoParent;
+      assert(entry.value.every((_SwitchableSemanticsFragment fragment) => fragment._mergeIntoParent == mergeIntoParent));
+      for (final _SwitchableSemanticsFragment fragment in entry.value) {
+        final _SemanticsGeometry geometry = fragment._computeSemanticsGeometry(
+          parentSemanticsClipRect: parentSemanticsClipRect,
+          parentPaintClipRect: parentPaintClipRect,
+        )!;
+        if (rect == null) {
+          rect = geometry.rect;
+          transform = geometry.transform;
+          semanticsClipRect = geometry.semanticsClipRect;
+          paintClipRect = geometry.paintClipRect;
+          hidden = geometry.markAsHidden;
+          continue;
+        }
+        // There are at least two fragments that contribute this. This is likely
+        // a sibling merge group. They can come from different branches of
+        // fragments, so everything has to be transform into parent coordinates.
+        if (transform != null) {
+          rect = MatrixUtils.transformRect(transform, rect);
+          if (semanticsClipRect != null) {
+            semanticsClipRect = MatrixUtils.transformRect(transform, semanticsClipRect);
+          }
+          if (paintClipRect != null) {
+            paintClipRect = MatrixUtils.transformRect(transform, paintClipRect);
+          }
+          transform = null;
+        }
+        if (geometry.semanticsClipRect != null) {
+          final Rect rect = MatrixUtils.transformRect(geometry.transform, geometry.semanticsClipRect!);
+          semanticsClipRect = semanticsClipRect?.intersect(rect) ?? rect;
+        }
+        if (geometry.paintClipRect != null) {
+          final Rect rect = MatrixUtils.transformRect(geometry.transform, geometry.paintClipRect!);
+          paintClipRect = paintClipRect?.intersect(rect) ?? rect;
+        }
+        final Rect fragmentRect = MatrixUtils.transformRect(geometry.transform, geometry.rect);
+        rect = rect.expandToInclude(fragmentRect);
+        hidden = hidden && geometry.markAsHidden;
+      }
+      final SemanticsNode node = entry.key;
+      final bool sizeChanged = rect!.size != node.rect.size;
+      node
+        ..rect = rect
+        ..transform = transform
+        ..parentSemanticsClipRect = semanticsClipRect
+        ..parentPaintClipRect = paintClipRect
+        ..isHidden = !mergeIntoParent && hidden;
+      if (sizeChanged) {
+        for (final _SwitchableSemanticsFragment fragment in entry.value) {
+          fragment._updateProducedNodeGeometries(node.parentSemanticsClipRect, node.parentPaintClipRect);
+        }
+      }
+    }
   }
 
   _SemanticsGeometry? _computeSemanticsGeometry({
@@ -5062,7 +5237,7 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
 
   @override
   SemanticsConfiguration? get config {
-    return _isExplicit ? null : _config;
+    return _isExplicit ? null : _effectiveConfig;
   }
 
   @override
@@ -5073,7 +5248,7 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
         continue;
       }
       _ensureConfigIsWritable();
-      _config.absorb(fragment.config!);
+      _effectiveConfig.absorb(fragment.config!);
     }
   }
 
@@ -5084,25 +5259,55 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
     // this method. This fragment must make sure its _config is in sync.
     if (tags.isNotEmpty) {
       _ensureConfigIsWritable();
-      tags.forEach(_config.addTagForChildren);
+      tags.forEach(_effectiveConfig.addTagForChildren);
     }
   }
 
   void _ensureConfigIsWritable() {
-    if (!_isConfigWritable) {
-      _config = _config.copy();
-      _isConfigWritable = true;
+    if (!_isEffectiveConfigWritable) {
+      _effectiveConfig = _effectiveConfig.copy();
+      _isEffectiveConfigWritable = true;
     }
   }
 
   bool _isExplicit = false;
 
   @override
-  void markAsExplicit() {
-    _isExplicit = true;
+  void markExplicitness(bool explicit) {
+    _isExplicit = explicit;
   }
 
   bool get _needsGeometryUpdate => _ancestorChain.length > 1;
+
+  @override
+  void markBlocksUserActions(bool blocks) {
+    if (blocks == _effectiveConfig.isBlockingUserActions) {
+      return;
+    }
+    final bool wasBlockingUserActions = _effectiveConfig.isBlockingUserActions;
+    _ensureConfigIsWritable();
+    if (blocks) {
+      _effectiveConfig.isBlockingUserActions = true;
+    } else {
+      _effectiveConfig.isBlockingUserActions = _originalConfig.isBlockingUserActions || blocks;
+    }
+    if (wasBlockingUserActions != _effectiveConfig.isBlockingUserActions) {
+      for (final _InterestingSemanticsFragment child in _children) {
+        child.markBlocksUserActions(_effectiveConfig.isBlockingUserActions);
+      }
+    }
+  }
+
+  @override
+  void markMergesToParent(bool merges) {
+    if (merges == _mergeIntoParent) {
+      return;
+    }
+    _mergeIntoParent = merges;
+    for (final _InterestingSemanticsFragment child in _children) {
+      child.markMergesToParent(_mergeIntoParent || _originalConfig.isMergingSemanticsOfDescendants);
+    }
+  }
 }
 
 /// Helper class that keeps track of the geometry of a [SemanticsNode].
