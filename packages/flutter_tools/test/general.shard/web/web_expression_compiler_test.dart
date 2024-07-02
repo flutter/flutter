@@ -67,7 +67,7 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
   final CompilerOutput? output;
 
   @override
-  Future<CompilerOutput?> compileExpressionToJs(
+  CompilerOp compileExpressionToJs(
     String libraryUri,
     int line,
     int column,
@@ -75,7 +75,7 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
     Map<String, String> jsFrameValues,
     String moduleName,
     String expression,
-  ) async {
-    return output;
+  ) {
+    return CompilerOp.value(output);
   }
 }

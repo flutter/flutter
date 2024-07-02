@@ -98,14 +98,14 @@ void main() {
       stdin: frontendServerStdIn,
     ));
 
-    final CompilerOutput? output = await generator.recompile(
+    final CompilerOutput? output = await (await generator.recompile(
       Uri.parse('/path/to/main.dart'),
-        null /* invalidatedFiles */,
+      null,
       outputPath: '/build/',
       packageConfig: PackageConfig.empty,
       fs: MemoryFileSystem(),
       projectRootPath: '',
-    );
+    )).result;
     expect(frontendServerStdIn.getAndClear(), 'compile /path/to/main.dart\n');
     expect(testLogger.errorText, equals('line1\nline2\n'));
     expect(output?.outputFilename, equals('/path/to/main.dart.dill'));
@@ -126,14 +126,14 @@ void main() {
       stdin: frontendServerStdIn,
     ));
 
-    final CompilerOutput? output = await generatorWithScheme.recompile(
+    final CompilerOutput? output = await (await generatorWithScheme.recompile(
       Uri.parse('file:///foo/bar/fizz/main.dart'),
-        null /* invalidatedFiles */,
+      null,
       outputPath: '/build/',
       packageConfig: PackageConfig.empty,
       fs: MemoryFileSystem(),
       projectRootPath: '',
-    );
+    )).result;
     expect(frontendServerStdIn.getAndClear(), 'compile scheme:///main.dart\n');
     expect(testLogger.errorText, equals('line1\nline2\n'));
     expect(output?.outputFilename, equals('/path/to/main.dart.dill'));
@@ -148,12 +148,12 @@ void main() {
 
     expect(asyncGuard(() => generator.recompile(
       Uri.parse('/path/to/main.dart'),
-      null, /* invalidatedFiles */
+      null,
       outputPath: '/build/',
       packageConfig: PackageConfig.empty,
       fs: MemoryFileSystem(),
       projectRootPath: '',
-    )), throwsToolExit());
+    ).result), throwsToolExit());
   });
 
   testWithoutContext('incremental compile single dart compile abnormally terminates via exitCode', () async {
@@ -165,12 +165,12 @@ void main() {
 
     expect(asyncGuard(() => generator.recompile(
       Uri.parse('/path/to/main.dart'),
-      null, /* invalidatedFiles */
+      null,
       outputPath: '/build/',
       packageConfig: PackageConfig.empty,
       fs: MemoryFileSystem(),
       projectRootPath: '',
-    )), throwsToolExit(message: 'the Dart compiler exited unexpectedly.'));
+    ).result), throwsToolExit(message: 'the Dart compiler exited unexpectedly.'));
   });
 
   testWithoutContext('incremental compile and recompile', () async {
@@ -184,12 +184,12 @@ void main() {
 
     await generator.recompile(
       Uri.parse('/path/to/main.dart'),
-      null, /* invalidatedFiles */
+      null,
       outputPath: '/build/',
       packageConfig: PackageConfig.empty,
       projectRootPath: '',
       fs: MemoryFileSystem(),
-    );
+    ).result;
     expect(frontendServerStdIn.getAndClear(), 'compile /path/to/main.dart\n');
 
     // No accept or reject commands should be issued until we
@@ -233,12 +233,12 @@ void main() {
     ));
     await generatorWithScheme.recompile(
       Uri.parse('file:///foo/bar/fizz/main.dart'),
-      null, /* invalidatedFiles */
+      null,
       outputPath: '/build/',
       packageConfig: PackageConfig.empty,
       fs: MemoryFileSystem(),
       projectRootPath: '',
-    );
+    ).result;
     expect(frontendServerStdIn.getAndClear(), 'compile scheme:///main.dart\n');
 
     // No accept or reject commands should be issued until we
@@ -302,7 +302,7 @@ void main() {
       packageConfig: PackageConfig.empty,
       fs: MemoryFileSystem(),
       projectRootPath: '',
-    );
+    ).result;
     expect(frontendServerStdIn.getAndClear(), 'compile scheme:///main.dart\n');
 
     // No accept or reject commands should be issued until we
@@ -353,7 +353,7 @@ void main() {
       packageConfig: PackageConfig.empty,
       fs: MemoryFileSystem(),
       projectRootPath: '',
-    );
+    ).result;
     expect(frontendServerStdIn.getAndClear(), 'compile /path/to/main.dart\n');
 
     await _recompile(generatorStdoutHandler, generator, frontendServerStdIn,
@@ -391,7 +391,7 @@ void main() {
       packageConfig: PackageConfig.empty,
       fs: MemoryFileSystem(),
       projectRootPath: '',
-    );
+    ).result;
     expect(frontendServerStdIn.getAndClear(), 'compile /path/to/main.dart\n');
 
     await _recompile(generatorStdoutHandler, generator, frontendServerStdIn,
@@ -429,16 +429,16 @@ void main() {
 
     final MemoryFileSystem fs = MemoryFileSystem();
     final File dartPluginRegistrant = fs.file('some/dir/plugin_registrant.dart')..createSync(recursive: true);
-    final CompilerOutput? output = await generatorWithScheme.recompile(
+    final CompilerOutput? output = await (await generatorWithScheme.recompile(
       Uri.parse('file:///foo/bar/fizz/main.dart'),
-        null /* invalidatedFiles */,
+      null,
       outputPath: '/build/',
       packageConfig: PackageConfig.empty,
       fs: fs,
       projectRootPath: '',
       checkDartPluginRegistry: true,
       dartPluginRegistrant: dartPluginRegistrant,
-    );
+    )).result;
     expect(frontendServerStdIn.getAndClear(), 'compile scheme:///main.dart\n');
     expect(testLogger.errorText, equals('line1\nline2\n'));
     expect(output?.outputFilename, equals('/path/to/main.dart.dill'));
@@ -457,14 +457,14 @@ void main() {
       stdin: frontendServerStdIn,
     ));
 
-    final CompilerOutput? output = await generatorWithPlatformDillAndLibrariesSpec.recompile(
+    final CompilerOutput? output = await (await generatorWithPlatformDillAndLibrariesSpec.recompile(
       Uri.parse('/path/to/main.dart'),
-        null /* invalidatedFiles */,
+      null,
       outputPath: '/build/',
       packageConfig: PackageConfig.empty,
       fs: MemoryFileSystem(),
       projectRootPath: '',
-    );
+    )).result;
     expect(frontendServerStdIn.getAndClear(), 'compile /path/to/main.dart\n');
     expect(testLogger.errorText, equals('line1\nline2\n'));
     expect(output?.outputFilename, equals('/path/to/main.dart.dill'));
@@ -495,7 +495,7 @@ Future<void> _recompile(
     suppressErrors: suppressErrors,
     fs: MemoryFileSystem(),
     projectRootPath: '',
-  );
+  ).result;
 
   // Put content into the output stream after generator.recompile gets
   // going few lines below, resets completer.
