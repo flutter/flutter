@@ -2043,22 +2043,23 @@ class _SubmenuButtonState extends State<SubmenuButton> {
           ),
         );
 
-        if (_enabled) {
-          child = MouseRegion(
-            onHover: handlePointerHover,
-            onExit: handlePointerExit,
-            child: child,
-          );
-
-          if (_platformSupportsAccelerators) {
-            return MenuAcceleratorCallbackBinding(
-              onInvoke: toggleShowMenu,
-              hasSubmenu: true,
-              child: child,
-            );
-          }
+        if (!_enabled) {
+          return child;
         }
 
+        child = MouseRegion(
+          onHover: handlePointerHover,
+          onExit: handlePointerExit,
+          child: child,
+        );
+
+        if (_platformSupportsAccelerators) {
+          return MenuAcceleratorCallbackBinding(
+            onInvoke: toggleShowMenu,
+            hasSubmenu: true,
+            child: child,
+          );
+        }
         return child;
       },
       menuChildren: widget.menuChildren,
