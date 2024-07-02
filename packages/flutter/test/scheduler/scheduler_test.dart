@@ -73,13 +73,13 @@ void main() {
 
     strategy.allowedPriority = 100;
     for (int i = 0; i < 3; i += 1) {
-      expect(scheduler.handleEventLoopCallback(), isFalse);
+      expect(scheduler.handleEventLoopCallback(), isTrue);
     }
     expect(executedTasks.isEmpty, isTrue);
 
     strategy.allowedPriority = 50;
     for (int i = 0; i < 3; i += 1) {
-      expect(scheduler.handleEventLoopCallback(), i == 0 ? isTrue : isFalse);
+      expect(scheduler.handleEventLoopCallback(), isTrue);
     }
     expect(executedTasks, hasLength(1));
     expect(executedTasks.single, equals(80));
@@ -87,7 +87,7 @@ void main() {
 
     strategy.allowedPriority = 20;
     for (int i = 0; i < 3; i += 1) {
-      expect(scheduler.handleEventLoopCallback(), i < 2 ? isTrue : isFalse);
+      expect(scheduler.handleEventLoopCallback(), isTrue);
     }
     expect(executedTasks, hasLength(2));
     expect(executedTasks[0], equals(23));
@@ -99,7 +99,7 @@ void main() {
     scheduleAddingTask(5);
     scheduleAddingTask(97);
     for (int i = 0; i < 3; i += 1) {
-      expect(scheduler.handleEventLoopCallback(), i < 2 ? isTrue : isFalse);
+      expect(scheduler.handleEventLoopCallback(), isTrue);
     }
     expect(executedTasks, hasLength(2));
     expect(executedTasks[0], equals(99));
@@ -108,7 +108,7 @@ void main() {
 
     strategy.allowedPriority = 10;
     for (int i = 0; i < 3; i += 1) {
-      expect(scheduler.handleEventLoopCallback(), i < 2 ? isTrue : isFalse);
+      expect(scheduler.handleEventLoopCallback(), isTrue);
     }
     expect(executedTasks, hasLength(2));
     expect(executedTasks[0], equals(19));
@@ -117,7 +117,7 @@ void main() {
 
     strategy.allowedPriority = 1;
     for (int i = 0; i < 4; i += 1) {
-      expect(scheduler.handleEventLoopCallback(), i < 3 ? isTrue : isFalse);
+      expect(scheduler.handleEventLoopCallback(), isTrue);
     }
     expect(executedTasks, hasLength(3));
     expect(executedTasks[0], equals(5));

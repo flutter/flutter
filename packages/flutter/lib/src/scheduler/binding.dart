@@ -553,7 +553,7 @@ mixin SchedulerBinding on BindingBase {
       }
       return _taskQueue.isNotEmpty;
     }
-    return false;
+    return true;
   }
 
   int _nextFrameCallbackId = 0; // positive
