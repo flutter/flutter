@@ -2887,11 +2887,15 @@ typedef SelectableRegionContextMenuBuilder = Widget Function(
 /// under a [SelectionListener].
 typedef SelectionListenerSelectionChangedCallback = void Function(List<SelectedContentRange<Object>>? selections);
 
-/// A widget that allows the user to listen to selection changes
+/// A [SelectionContainer] that allows the user to listen to selection changes
 /// for the child subtree it wraps under a [SelectionArea] or [SelectableRegion].
 ///
 /// This widget should have an ancestor [SelectionArea] or [SelectableRegion]
-/// to be able to listen to selection changes in its subtree.
+/// to be able to listen to selection changes in this widgets subtree.
+///
+/// This widget does not listen to selection changes of nested [SelectionArea]s
+/// or [SelectableRegion]s in its subtree because those widgets create their own
+/// [SelectionRegistrar]s that do not register to any ancestor registrar.
 ///
 /// {@tool dartpad}
 /// This example shows how to color red the active selection
@@ -2909,8 +2913,8 @@ typedef SelectionListenerSelectionChangedCallback = void Function(List<SelectedC
 ///
 /// See also:
 ///
-///   * [SelectionArea] which provides an overview of the selection system.
-///   * [SelectableRegion] which provides an overview of the selection system.
+///   * [SelectionArea], which provides an overview of the selection system.
+///   * [SelectableRegion], which provides an overview of the selection system.
 class SelectionListener extends StatefulWidget {
   /// Create a new [SelectionListener] widget.
   const SelectionListener({
@@ -2919,7 +2923,8 @@ class SelectionListener extends StatefulWidget {
     required this.child,
   });
 
-  /// Called when the user changes the selection of its child.
+  /// Called when the user changes the selection of children selectables
+  /// registered to its local [SelectionRegistrar].
   final SelectionListenerSelectionChangedCallback onSelectionChanged;
 
   /// The child widget this selection listener applies to.

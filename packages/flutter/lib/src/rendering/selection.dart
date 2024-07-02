@@ -136,9 +136,46 @@ abstract class SelectedContentRange<T extends Object> {
   final T content;
 
   /// The start of the selection relative to the [content].
+  ///
+  /// {@template flutter.rendering.selection.SelectedContentRange.selectionOffsets}
+  /// For example a [Text] widgets content is in the format
+  /// of an [InlineSpan] tree.
+  ///
+  /// Take the [Text] widget and [InlineSpan] tree below:
+  ///
+  /// {@tool snippet}
+  /// ```dart
+  /// Text.rich(
+  ///   TextSpan(
+  ///     text: 'Hello world, ',
+  ///     children: <InlineSpan>[
+  ///       WidgetSpan(
+  ///         child: Text('how are you today?'),
+  ///       ),
+  ///     ],
+  ///   ),
+  /// )
+  /// ```
+  /// {@end-tool}
+  ///
+  /// If we select from the beginning of 'world' to the
+  /// end of the '?' in the [WidgetSpan] the startOffset
+  /// in the root [SelectedContentRange] will be 6,
+  /// and endOffset will be 14. This is because the
+  /// [WidgetSpan] begins at index 13 in the root text
+  /// and ends at index 14. In this example, the root
+  /// [SelectedContentRange] will have one child
+  /// which represents the selection inside the [WidgetSpan].
+  /// In the child [SelectedContentRange] the startOffset
+  /// will be 0 and the endOffset will be 18. These offsets
+  /// are relative to the content in the child [SelectedContentRange]
+  /// and not the root text.
+  /// {@endtemplate}
   int get startOffset;
 
   /// The end of the selection relative to the [content].
+  ///
+  /// {@macro flutter.rendering.selection.SelectedContentRange.selectionOffsets}
   int get endOffset;
 
   /// Additional ranges to include as children.
