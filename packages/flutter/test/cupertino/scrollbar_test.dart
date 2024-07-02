@@ -1316,4 +1316,40 @@ void main() {
         ),
     );
   });
+
+  testWidgets('CupertinoScrollbar should have zero padding by default', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: CupertinoScrollbar(
+            controller: scrollController,
+            child: SingleChildScrollView(
+              controller: scrollController,
+              child: const SizedBox(
+                height: 1000.0,
+                width: 1000.0,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    // Find the CupertinoScrollbar
+    final Finder scrollbarFinder = find.byType(CupertinoScrollbar);
+    expect(scrollbarFinder, findsOneWidget);
+
+    // Get the CupertinoScrollbar widget
+    final CupertinoScrollbar scrollbarWidget = tester.widget<CupertinoScrollbar>(scrollbarFinder);
+
+    // Check the padding property
+    expect(scrollbarWidget.padding, isNull);
+  });
 }

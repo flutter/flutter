@@ -244,7 +244,7 @@ void main() {
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
-                return const Scrollbar(
+                return  const Scrollbar(
                   thumbVisibility: true,
                   child: SingleChildScrollView(
                     primary: true,
@@ -1903,4 +1903,57 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
 
     scrollController.dispose();
   });
+
+
+  testWidgets('Scrollbar without padding', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+
+    Widget buildScrollWithOrientation(ScrollbarOrientation orientation) {
+      return MaterialApp(
+        home: Scaffold(
+          body: Theme(
+            data: ThemeData(
+              platform: TargetPlatform.android,
+            ),
+            child: PrimaryScrollController(
+              controller: scrollController,
+              child: Scrollbar(
+                interactive: true,
+                thumbVisibility: true,
+                scrollbarOrientation: orientation,
+                controller: scrollController,
+                child: const SingleChildScrollView(
+                  child: SizedBox(width: 4000.0, height: 4000.0)
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildScrollWithOrientation(ScrollbarOrientation.left));
+    await tester.pumpAndSettle();
+
+
+    // This ensures there is no padding between the scrollbar and the viewport edge
+    final RenderBox renderBox = tester.renderObject(find.byType(Scrollbar));
+    final Offset topLeft = renderBox.localToGlobal(Offset.zero);
+
+    // The left edge of the scrollbar should be at the very left of the viewport
+    expect(topLeft.dx, 0.0);
+
+
+    await tester.pumpWidget(buildScrollWithOrientation(ScrollbarOrientation.right));
+    await tester.pumpAndSettle();
+
+    final RenderBox renderBoxRight = tester.renderObject(find.byType(Scrollbar));
+    final Offset topRight = renderBoxRight.localToGlobal(Offset(renderBoxRight.size.width, 0.0));
+    final double screenWidth = tester.binding.window.physicalSize.width / tester.binding.window.devicePixelRatio;
+    // The right edge of the scrollbar should be at the very right of the viewport
+    expect(topRight.dx, screenWidth);
+    expect(scrollController.offset, equals(0));
+    scrollController.dispose();
+  });
+
 }

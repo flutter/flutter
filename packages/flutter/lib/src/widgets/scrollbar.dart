@@ -1297,7 +1297,7 @@ class RawScrollbar extends StatefulWidget {
 
   /// The insets by which the scrollbar thumb and track should be padded.
   ///
-  /// When null, the inherited [MediaQueryData.padding] is used.
+  /// When null, [EdgeInsets.zero] is used.
   ///
   /// Defaults to null.
   final EdgeInsets? padding;
@@ -1541,7 +1541,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       ..textDirection = Directionality.of(context)
       ..thickness = widget.thickness ?? _kScrollbarThickness
       ..radius = widget.radius
-      ..padding = widget.padding ?? MediaQuery.paddingOf(context)
+      ..padding = widget.padding ?? EdgeInsets.zero
       ..scrollbarOrientation = widget.scrollbarOrientation
       ..mainAxisMargin = widget.mainAxisMargin
       ..shape = widget.shape
