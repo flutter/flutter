@@ -113,7 +113,7 @@ bool SolidRRectBlurContents::Render(const ContentContext& renderer,
   frag_info.rect_size = Point(positive_rect.GetSize());
   frag_info.corner_radii = {std::clamp(corner_radii_.width, kEhCloseEnough,
                                        positive_rect.GetWidth() * 0.5f),
-                            std::clamp(corner_radii_.width, kEhCloseEnough,
+                            std::clamp(corner_radii_.height, kEhCloseEnough,
                                        positive_rect.GetHeight() * 0.5f)};
 
   pass.SetCommandLabel("RRect Shadow");
