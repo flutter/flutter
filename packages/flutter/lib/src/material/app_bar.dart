@@ -760,7 +760,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
 }
 
 class _AppBarState extends State<AppBar> {
-  final Map<RawGestureDetector?, double> _notificationListenerStates = <RawGestureDetector?, double>{};
+  final Map<Widget?, double> _notificationListenerStates = <Widget?, double>{};
   ScrollNotificationObserverState? _scrollNotificationObserver;
   bool _scrolledUnder = false;
 
@@ -788,11 +788,11 @@ class _AppBarState extends State<AppBar> {
 
   void _handleScrollNotification(ScrollNotification notification) {
     if (notification is ScrollUpdateNotification && widget.notificationPredicate(notification)) {
-      // Each RawGestureDetector has its own scroll offset, so we need to keep track of them separately.
-      final RawGestureDetector? rawGestureDetector = notification.context?.widget as RawGestureDetector?;
+      // Each notification has a context, which is the widget that was visible
+      final Widget? widget = notification.context?.widget;
 
-      if (rawGestureDetector != null) {
-        _notificationListenerStates[rawGestureDetector] = notification.metrics.axisDirection == AxisDirection.down
+      if (widget != null) {
+        _notificationListenerStates[widget] = notification.metrics.axisDirection == AxisDirection.down
         ? notification.metrics.extentBefore
         : notification.metrics.extentAfter;
 
