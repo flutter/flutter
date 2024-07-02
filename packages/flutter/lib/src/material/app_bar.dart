@@ -796,7 +796,7 @@ class _AppBarState extends State<AppBar> {
         ? notification.metrics.extentBefore
         : notification.metrics.extentAfter;
 
-        // If any of the scroll offsets are greater than 0, then the MaterialState.scrolledUnder
+        // If there are any of the scroll positions greater than 0 on the vertical axis, we cannot change until they are all 0.
         if (_notificationListenerStates.values.toList().any((double element) => element > 0) && _scrolledUnder) {
           return;
         }
