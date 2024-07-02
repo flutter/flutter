@@ -534,14 +534,21 @@ class CupertinoDatePicker extends StatefulWidget {
           }
         }
       case _PickerColumnType.month:
+        final List<String> months = <String>[];
         for (int i = 1; i <= 12; i++) {
           final String month = standaloneMonth
               ? localizations.datePickerStandaloneMonth(i)
               : localizations.datePickerMonth(i);
-          if (longestText.length < month.length) {
-            longestText = month;
-          }
+          months.add(month);
         }
+
+        longestText = TextPainter.computeWidestWord(
+          text: TextSpan(
+            style: _themeTextStyle(context),
+            text: months.join(' '),
+          ),
+          textDirection: Directionality.of(context),
+        );
       case _PickerColumnType.year:
         longestText = localizations.datePickerYear(2018);
     }
