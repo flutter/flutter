@@ -2,6 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/widgets.dart';
+///
+/// @docImport '_goldens_web.dart';
+/// @docImport 'binding.dart';
+/// @docImport 'matchers.dart';
+/// @docImport 'widget_tester.dart';
+library;
+
 import 'dart:typed_data';
 import 'dart:ui';
 
@@ -141,7 +149,7 @@ GoldenFileComparator goldenFileComparator = const TrivialComparator._();
 /// fake async constraints that are normally imposed on widget tests (i.e. the
 /// need or the ability to call [WidgetTester.pump] to advance the microtask
 /// queue). Prior to the invocation, the test framework will render only the
-/// [widgets.Element] to be compared on the screen.
+/// [Element] to be compared on the screen.
 ///
 /// See also:
 ///
