@@ -19,6 +19,7 @@ import 'automatic_keep_alive.dart';
 import 'basic.dart';
 import 'binding.dart';
 import 'constants.dart';
+import 'container.dart';
 import 'context_menu_button_item.dart';
 import 'debug.dart';
 import 'default_selection_style.dart';
@@ -27,6 +28,7 @@ import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'focus_traversal.dart';
 import 'framework.dart';
+import 'gesture_detector.dart';
 import 'localizations.dart';
 import 'magnifier.dart';
 import 'media_query.dart';
@@ -41,6 +43,7 @@ import 'scrollable.dart';
 import 'scrollable_helpers.dart';
 import 'shortcuts.dart';
 import 'size_changed_layout_notifier.dart';
+import 'slotted_render_object_widget.dart';
 import 'spell_check.dart';
 import 'tap_region.dart';
 import 'text.dart';
@@ -866,7 +869,12 @@ class EditableText extends StatefulWidget {
     this.clipBehavior = Clip.hardEdge,
     this.restorationId,
     this.scrollBehavior,
+    @Deprecated(
+      'Use `stylusHandwritingEnabled` instead. '
+      'This feature was deprecated after v3.22.0-0.3.pre.',
+    )
     this.scribbleEnabled = true,
+    this.stylusHandwritingEnabled = true,
     this.enableIMEPersonalizedLearning = true,
     this.contentInsertionConfiguration,
     this.contextMenuBuilder,
@@ -1699,7 +1707,22 @@ class EditableText extends StatefulWidget {
   ///
   /// Defaults to true.
   /// {@endtemplate}
+  @Deprecated(
+    'Use `stylusHandwritingEnabled` instead. '
+    'This feature was deprecated after v3.22.0-0.3.pre.',
+  )
   final bool scribbleEnabled;
+
+  /// {@template flutter.widgets.editableText.stylusHandwritingEnabled}
+  /// Whether this input supports stylus handwriting, where the user can write
+  /// directly on top of a field.
+  ///
+  /// Currently only the following devices are supported:
+  ///
+  ///  * iPads running iOS 14 and above using an Apple Pencil.
+  ///  * Android devices running API 34 and above and using an active stylus.
+  /// {@endtemplate}
+  final bool stylusHandwritingEnabled;
 
   /// {@template flutter.widgets.editableText.selectionEnabled}
   /// Same as [enableInteractiveSelection].
@@ -2206,6 +2229,7 @@ class EditableText extends StatefulWidget {
     properties.add(DiagnosticsProperty<Iterable<String>>('autofillHints', autofillHints, defaultValue: null));
     properties.add(DiagnosticsProperty<TextHeightBehavior>('textHeightBehavior', textHeightBehavior, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('scribbleEnabled', scribbleEnabled, defaultValue: true));
+    properties.add(DiagnosticsProperty<bool>('stylusHandwritingEnabled', stylusHandwritingEnabled, defaultValue: false));
     properties.add(DiagnosticsProperty<bool>('enableIMEPersonalizedLearning', enableIMEPersonalizedLearning, defaultValue: true));
     properties.add(DiagnosticsProperty<bool>('enableInteractiveSelection', enableInteractiveSelection, defaultValue: true));
     properties.add(DiagnosticsProperty<UndoHistoryController>('undoController', undoController, defaultValue: null));
@@ -2326,6 +2350,15 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   AnimationController? _floatingCursorResetController;
 
   Orientation? _lastOrientation;
+
+  bool get _stylusHandwritingEnabled {
+    // During the deprecation period, respect scribbleEnabled being explicitly
+    // set.
+    if (!widget.scribbleEnabled) {
+      return widget.scribbleEnabled;
+    }
+    return widget.stylusHandwritingEnabled;
+  }
 
   @override
   bool get wantKeepAlive => widget.focusNode.hasFocus;
@@ -4412,7 +4445,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   _ScribbleCacheKey? _scribbleCacheKey;
 
   void _updateSelectionRects({bool force = false}) {
-    if (!widget.scribbleEnabled || defaultTargetPlatform != TargetPlatform.iOS) {
+    if (!_stylusHandwritingEnabled || defaultTargetPlatform != TargetPlatform.iOS) {
       return;
     }
 
@@ -4703,7 +4736,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @override
   void insertTextPlaceholder(Size size) {
-    if (!widget.scribbleEnabled) {
+    if (!_stylusHandwritingEnabled) {
       return;
     }
 
@@ -4718,7 +4751,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @override
   void removeTextPlaceholder() {
-    if (!widget.scribbleEnabled || _placeholderLocation == -1) {
+    if (!_stylusHandwritingEnabled || _placeholderLocation == -1) {
       return;
     }
 
@@ -5251,10 +5284,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                           onCopy: _semanticsOnCopy(controls),
                           onCut: _semanticsOnCut(controls),
                           onPaste: _semanticsOnPaste(controls),
-                          child: _ScribbleFocusable(
-                            focusNode: widget.focusNode,
+                          child: _StylusHandwriting(
                             editableKey: _editableKey,
-                            enabled: widget.scribbleEnabled,
+                            enabled: _stylusHandwritingEnabled,
+                            focusNode: widget.focusNode,
                             updateSelectionRects: () {
                               _openInputConnection();
                               _updateSelectionRects(force: true);
@@ -5694,6 +5727,158 @@ class _ScribbleFocusableState extends State<_ScribbleFocusable> implements Scrib
   }
 }
 
+// TODO(justinmc): Some vertical handwriting seems to want to change the
+// selection instead of writing...
+class _Scribe extends StatefulWidget {
+  const _Scribe({
+    required this.child,
+    required this.editableKey,
+    required this.focusNode,
+  });
+
+  final Widget child;
+  final GlobalKey editableKey;
+  final FocusNode focusNode;
+
+  @override
+  State<_Scribe> createState() => _ScribeState();
+}
+
+class _ScribeState extends State<_Scribe> implements ScribeClient {
+  // The handwriting bounds padding of EditText in Android API 34.
+  static const EdgeInsets _handwritingPadding = EdgeInsets.symmetric(
+    horizontal: 10.0,
+    vertical: 40.0,
+  );
+
+  RenderEditable get _renderEditable => widget.editableKey.currentContext!.findRenderObject()! as RenderEditable;
+
+  @override
+  void initState() {
+    super.initState();
+    Scribe.registerScribeClient(this);
+  }
+
+  @override
+  void dispose() {
+    Scribe.unregisterScribeClient(this);
+    super.dispose();
+  }
+
+  // Begin ScribeClient.
+
+  @override
+  double get devicePixelRatio => MediaQuery.devicePixelRatioOf(context);
+
+  // TODO(justinmc): ScribbleClient does this in EditableText, setting the
+  // active client on Scribble. Maybe that's better? Reconcile?
+  @override
+  bool get isActive => widget.focusNode.hasFocus;
+
+  @override
+  bool performSelectionGesture(Rect selectionArea) {
+    // TODO(justinmc): Works, but selects even if only a tiny corner of a
+    // character is covered. I think by Android's definition, should have to
+    // cover the center of the granularity.
+    _renderEditable.selectPositionAt(
+      from: selectionArea.topLeft,
+      to: selectionArea.bottomRight,
+      // TODO(justinmc): Should this cause be generic or should there also be a scribe value?
+      cause: SelectionChangedCause.scribble,
+    );
+    return true;
+  }
+
+  // End ScribeClient.
+
+  void _handlePanDown(DragDownDetails details) {
+  }
+
+  void _handlePointerDown(PointerDownEvent event) {
+    print('justin _handlePointerDown.');
+    if (event.kind != ui.PointerDeviceKind.stylus) {
+      return;
+    }
+
+    if (!widget.focusNode.hasFocus) {
+      // TODO(justinmc): But don't show the keyboard!
+      widget.focusNode.requestFocus();
+    }
+    Scribe.startStylusHandwriting();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Listener(
+      onPointerDown: _handlePointerDown,
+      child: widget.child,
+    );
+    /*
+    return _EmbiggenerMultiChildRenderObjectWidget(
+      margin: _handwritingPadding,
+      overflow: Listener(
+        onPointerDown: _handlePointerDown,
+        child: Container(
+          color: const Color(0x99ff0000),
+        ),
+      ),
+      child: widget.child,
+    );
+    */
+    /*
+    return OverflowBox(
+      fit: OverflowBoxFit.deferToChild,
+      child: Listener(
+        onPointerDown: _handlePointerDown,
+        child: Container(
+          alignment: Alignment.center,
+          color: const Color(0x99ff0000),
+          child: Padding(
+            padding: _handwritingPadding,
+            child: widget.child,
+          ),
+        ),
+      ),
+    );
+    */
+  }
+}
+
+class _StylusHandwriting extends StatelessWidget {
+  const _StylusHandwriting({
+    required this.child,
+    required this.editableKey,
+    required this.enabled,
+    required this.focusNode,
+    required this.updateSelectionRects,
+  });
+
+  final Widget child;
+  final GlobalKey editableKey;
+  final bool enabled;
+  final FocusNode focusNode;
+  final VoidCallback updateSelectionRects;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!enabled) {
+      return child;
+    }
+
+    return _ScribbleFocusable(
+      focusNode: focusNode,
+      editableKey: editableKey,
+      enabled: enabled,
+      updateSelectionRects: updateSelectionRects,
+      child: _Scribe(
+        focusNode: focusNode,
+        editableKey: editableKey,
+        child: child,
+      ),
+    );
+  }
+}
+
 class _ScribblePlaceholder extends WidgetSpan {
   const _ScribblePlaceholder({
     required super.child,
@@ -6044,4 +6229,381 @@ class _WebClipboardStatusNotifier extends ClipboardStatusNotifier {
   Future<void> update() {
     return Future<void>.value();
   }
+}
+
+class EmbiggeningLayoutDelegate extends SingleChildLayoutDelegate {
+  EmbiggeningLayoutDelegate({
+    required this.margin,
+  });
+
+  final EdgeInsets margin;
+
+  @override
+  Size getSize(BoxConstraints constraints) {
+    print('justin getSize for constraints $constraints.');
+    return constraints.smallest;
+  }
+
+  @override
+  BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
+    print('justin getConstraints. $constraints');
+    return constraints;
+  }
+
+  @override
+  Offset getPositionForChild(Size size, Size childSize) {
+    return Offset.zero;
+    return Offset(
+      -margin.left,
+      -margin.top,
+    );
+  }
+
+  @override
+  bool shouldRelayout(EmbiggeningLayoutDelegate oldDelegate) {
+    return margin != oldDelegate.margin;
+  }
+}
+
+class Embiggener extends StatelessWidget {
+  const Embiggener({
+    required this.margin,
+    required this.child,
+  });
+
+  final EdgeInsets margin;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: margin,
+      child: EmbiggenerRenderObjectWidget(
+        margin: margin,
+        child: child,
+      ),
+    );
+  }
+}
+
+class EmbiggenerRenderObjectWidget extends SingleChildRenderObjectWidget {
+  const EmbiggenerRenderObjectWidget({
+    super.key,
+    required this.margin,
+    required Widget child,
+  }) : super(
+    child: child,
+  );
+
+  final EdgeInsets margin;
+
+  @override
+  RenderEmbiggener createRenderObject(BuildContext context) {
+    return RenderEmbiggener(
+      margin: margin,
+    );
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, RenderEmbiggener renderObject) {
+    renderObject
+      ..margin = margin;
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<EdgeInsets>('margin', margin));
+  }
+}
+
+class RenderEmbiggener extends RenderAligningShiftedBox {
+  /// Creates a render object that lets its child overflow itself.
+  RenderEmbiggener({
+    super.child,
+    super.textDirection = TextDirection.ltr,
+    required EdgeInsets margin,
+  }) : _margin = margin;
+
+  EdgeInsets get margin => _margin;
+  EdgeInsets _margin;
+  set margin(EdgeInsets value) {
+    if (_margin == value) {
+      return;
+    }
+    _margin = value;
+    markNeedsLayout();
+  }
+
+  static BoxConstraints _getChildConstraints(BoxConstraints constraints, EdgeInsets margin) {
+    return BoxConstraints(
+      minWidth: constraints.minWidth,
+      maxWidth: math.max(constraints.minWidth, constraints.maxWidth - margin.horizontal),
+      minHeight: constraints.minHeight,
+      maxHeight: math.max(constraints.minHeight, constraints.maxHeight - margin.vertical),
+    );
+  }
+
+  @override
+  @protected
+  Size computeDryLayout(covariant BoxConstraints constraints) {
+    return child?.getDryLayout(constraints) ?? constraints.smallest;
+  }
+
+  @override
+  double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
+    final RenderBox? child = this.child;
+    if (child == null) {
+      return null;
+    }
+    final BoxConstraints childConstraints = _getChildConstraints(constraints, margin);
+    final double? result = child.getDryBaseline(childConstraints, baseline);
+    if (result == null) {
+      return null;
+    }
+    final Size childSize = child.getDryLayout(childConstraints);
+    final Size size = getDryLayout(constraints);
+    return result + resolvedAlignment.alongOffset(size - childSize as Offset).dy;
+  }
+
+  @override
+  void performLayout() {
+    if (child != null) {
+      final BoxConstraints childConstraints = _getChildConstraints(constraints, margin);
+      child!.layout(childConstraints, parentUsesSize: true);
+      size = constraints.constrain(child!.size);
+      alignChild();
+    } else {
+      size = constraints.smallest;
+    }
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<EdgeInsets>('margin', margin));
+  }
+}
+
+enum _EmbiggenerSlot {
+  child,
+  overflow,
+}
+
+class _EmbiggenerMultiChildRenderObjectWidget extends SlottedMultiChildRenderObjectWidget<_EmbiggenerSlot, RenderBox> {
+  const _EmbiggenerMultiChildRenderObjectWidget({
+    required this.child,
+    required this.margin,
+    required this.overflow,
+  });
+
+  final Widget child;
+  final EdgeInsets margin;
+  final Widget overflow;
+
+  @override
+  Iterable<_EmbiggenerSlot> get slots => _EmbiggenerSlot.values;
+
+  @override
+  Widget childForSlot(_EmbiggenerSlot slot) {
+    return switch (slot) {
+      _EmbiggenerSlot.child    => child,
+      _EmbiggenerSlot.overflow => overflow,
+    };
+  }
+
+  @override
+  _RenderEmbiggener createRenderObject(BuildContext context) {
+    return _RenderEmbiggener(
+      margin: margin,
+    );
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderEmbiggener renderObject) {
+    renderObject.margin = margin;
+  }
+}
+
+class _RenderEmbiggener extends RenderBox with SlottedContainerRenderObjectMixin<_EmbiggenerSlot, RenderBox> {
+  _RenderEmbiggener({
+    required EdgeInsets margin,
+  }) : _margin = margin;
+
+  RenderBox? get child => childForSlot(_EmbiggenerSlot.child);
+  RenderBox? get overflow => childForSlot(_EmbiggenerSlot.overflow);
+
+  // The returned list is ordered for hit testing.
+  @override
+  Iterable<RenderBox> get children {
+    return <RenderBox>[
+      if (child != null)
+        child!,
+      if (overflow != null)
+        overflow!,
+    ];
+  }
+
+  EdgeInsets get margin => _margin;
+  EdgeInsets _margin;
+  set margin(EdgeInsets value) {
+    if (_margin == value) {
+      return;
+    }
+    _margin = value;
+    markNeedsLayout();
+  }
+
+  @override
+  void visitChildrenForSemantics(RenderObjectVisitor visitor) {
+    if (child != null) {
+      visitor(child!);
+    }
+    if (overflow != null) {
+      visitor(overflow!);
+    }
+  }
+
+  @override
+  double computeMinIntrinsicWidth(double height) {
+    if (child == null) {
+      return margin.horizontal;
+    }
+    return child!.getMinIntrinsicWidth(height) + margin.horizontal;
+  }
+
+  @override
+  double computeMaxIntrinsicWidth(double height) {
+    if (child == null) {
+      return margin.horizontal;
+    }
+    return child!.getMaxIntrinsicWidth(height) + margin.horizontal;
+  }
+
+  @override
+  double computeMinIntrinsicHeight(double width) {
+    if (child == null) {
+      return margin.vertical;
+    }
+    return child!.getMinIntrinsicHeight(width) + margin.vertical;
+  }
+
+  @override
+  double computeMaxIntrinsicHeight(double width) {
+    if (child == null) {
+      return margin.vertical;
+    }
+    return child!.getMaxIntrinsicHeight(width) + margin.vertical;
+  }
+
+  @override
+  double computeDistanceToActualBaseline(TextBaseline baseline) {
+    return child?.getDistanceToActualBaseline(baseline) ?? 0.0;
+  }
+
+  @override
+  double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
+    if (child == null) {
+      return 0.0;
+    }
+    return ChildLayoutHelper.getDryBaseline(child!, constraints, baseline);
+  }
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    if (child != null) {
+      final Size childSize = ChildLayoutHelper.dryLayoutChild(child!, constraints);
+      return constraints.constrain(childSize);
+    }
+    return constraints.smallest;
+  }
+
+  @override
+  void performLayout() {
+    if (child != null) {
+      child!.layout(constraints, parentUsesSize: true);
+      size = constraints.constrain(child!.size);
+    } else {
+      size = constraints.smallest;
+    }
+    if (overflow != null) {
+      final BoxConstraints overflowConstraints = BoxConstraints.tight(Size(
+        size.width + margin.horizontal,
+        size.height + margin.vertical,
+      ));
+      overflow!.layout(overflowConstraints);
+    }
+
+
+
+
+    /*
+    // TODO(justinmc): If you make the size accurate, so that it includes both
+    // child and overflow, then everything else will treat this widget as if it
+    // has its real size, but I want everything to think it's just childSize.
+    late final Size childSize;
+    if (child != null) {
+      child!.layout(constraints, parentUsesSize: true);
+      childSize = constraints.constrain(child!.size);
+    } else {
+      childSize = Size.zero;
+    }
+    final Size nextSize;
+    if (overflow != null) {
+      size = Size(
+        childSize.width + margin.horizontal,
+        childSize.height + margin.vertical,
+      );
+      final BoxConstraints overflowConstraints = BoxConstraints.tight(size);
+      overflow!.layout(overflowConstraints);
+    } else {
+      size = childSize;
+    }
+    */
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (overflow != null) {
+      context.paintChild(overflow!, Offset(-margin.left, -margin.top));
+    }
+    if (child != null) {
+      context.paintChild(child!, Offset.zero);
+    }
+  }
+
+  @override
+  bool hitTest(BoxHitTestResult result, { required Offset position }) {
+    print('justin hitTest.');
+    return super.hitTest(result, position: position);
+  }
+
+  /*
+  @override
+  bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
+    if (child != null) {
+      final bool isHit = position.dx <= child!.size.width
+          && position.dy <= child!.size.height;
+      print('justin hitTestChildren:child. Hit? $isHit');
+      if (isHit) {
+        return true;
+      }
+    }
+    if (overflow != null) {
+      final bool isHit = result.addWithPaintOffset(
+        offset: -margin.topLeft,
+        position: position,
+        hitTest: (BoxHitTestResult result, Offset transformed) {
+          assert(transformed == position - margin.topLeft);
+          return child!.hitTest(result, position: transformed);
+        },
+      );
+      print('justin hitTestChildren:overflow. Hit? $isHit');
+      if (isHit) {
+        return true;
+      }
+    }
+    return false;
+  }
+  */
 }
