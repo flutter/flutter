@@ -80,6 +80,7 @@ class Icon extends StatelessWidget {
     this.semanticLabel,
     this.textDirection,
     this.applyTextScaling,
+    this.foreground,
   }) : assert(fill == null || (0.0 <= fill && fill <= 1.0)),
        assert(weight == null || (0.0 < weight)),
        assert(opticalSize == null || (0.0 < opticalSize));
@@ -241,6 +242,11 @@ class Icon extends StatelessWidget {
   /// [IconThemeData.applyTextScaling].
   final bool? applyTextScaling;
 
+  /// The paint object to use for the icon's foreground.
+  ///
+  /// This is useful for applying effects like blur or color filters to the icon.
+  final Paint? foreground;
+
   @override
   Widget build(BuildContext context) {
     assert(this.textDirection != null || debugCheckHasDirectionality(context));
@@ -294,6 +300,7 @@ class Icon extends StatelessWidget {
       shadows: iconShadows,
       height: 1.0,  // Makes sure the font's body is vertically centered within the iconSize x iconSize square.
       leadingDistribution: TextLeadingDistribution.even,
+      foreground: foreground,
     );
 
     Widget iconWidget = RichText(
