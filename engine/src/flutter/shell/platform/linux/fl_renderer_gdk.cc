@@ -39,6 +39,7 @@ static void fl_renderer_gdk_clear_current(FlRenderer* renderer) {
   gdk_gl_context_clear_current();
 }
 
+// Implements FlRenderer::get_refresh_rate.
 static gdouble fl_renderer_gdk_get_refresh_rate(FlRenderer* renderer) {
   FlRendererGdk* self = FL_RENDERER_GDK(renderer);
   GdkDisplay* display = gdk_window_get_display(self->window);
@@ -78,14 +79,22 @@ static void fl_renderer_gdk_class_init(FlRendererGdkClass* klass) {
 
 static void fl_renderer_gdk_init(FlRendererGdk* self) {}
 
-FlRendererGdk* fl_renderer_gdk_new(GdkWindow* window) {
+FlRendererGdk* fl_renderer_gdk_new() {
   FlRendererGdk* self =
       FL_RENDERER_GDK(g_object_new(fl_renderer_gdk_get_type(), nullptr));
-  self->window = window;
   return self;
 }
 
+void fl_renderer_gdk_set_window(FlRendererGdk* self, GdkWindow* window) {
+  g_return_if_fail(FL_IS_RENDERER_GDK(self));
+
+  g_assert(self->window == nullptr);
+  self->window = window;
+}
+
 gboolean fl_renderer_gdk_create_contexts(FlRendererGdk* self, GError** error) {
+  g_return_val_if_fail(FL_IS_RENDERER_GDK(self), FALSE);
+
   self->gdk_context = gdk_window_create_gl_context(self->window, error);
   if (self->gdk_context == nullptr) {
     return FALSE;

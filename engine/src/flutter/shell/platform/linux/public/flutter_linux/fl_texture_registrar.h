@@ -37,6 +37,8 @@ struct _FlTextureRegistrarInterface {
 
   gboolean (*unregister_texture)(FlTextureRegistrar* registrar,
                                  FlTexture* texture);
+
+  void (*shutdown)(FlTextureRegistrar* registrar);
 };
 
 /**

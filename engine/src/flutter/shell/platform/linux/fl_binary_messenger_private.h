@@ -22,6 +22,14 @@ G_BEGIN_DECLS
  */
 FlBinaryMessenger* fl_binary_messenger_new(FlEngine* engine);
 
+/**
+ * fl_binary_messenger_shutdown:
+ * @messenger: an #FlBinaryMessenger.
+ *
+ * Shutdown the messenger closing any open channels.
+ */
+void fl_binary_messenger_shutdown(FlBinaryMessenger* messenger);
+
 G_END_DECLS
 
 #endif  // FLUTTER_SHELL_PLATFORM_LINUX_FL_BINARY_MESSENGER_PRIVATE_H_

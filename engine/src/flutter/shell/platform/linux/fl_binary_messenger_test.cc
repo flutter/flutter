@@ -634,7 +634,7 @@ static void kill_handler_notify_cb(gpointer was_called) {
 
 TEST(FlBinaryMessengerTest, DeletingEngineClearsHandlers) {
   FlEngine* engine = make_mock_engine();
-  g_autoptr(FlBinaryMessenger) messenger = fl_binary_messenger_new(engine);
+  FlBinaryMessenger* messenger = fl_engine_get_binary_messenger(engine);
   gboolean was_killed = FALSE;
 
   // Listen for messages from the engine.

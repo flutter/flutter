@@ -11,7 +11,7 @@ static constexpr int kMillisecondsPerMicrosecond = 1000;
 struct _FlTaskRunner {
   GObject parent_instance;
 
-  FlEngine* engine;
+  GWeakRef engine;
 
   GMutex mutex;
   GCond cond;
@@ -51,11 +51,14 @@ static void fl_task_runner_process_expired_tasks_locked(FlTaskRunner* self) {
 
   g_mutex_unlock(&self->mutex);
 
-  l = expired_tasks;
-  while (l != nullptr && self->engine) {
-    FlTaskRunnerTask* task = static_cast<FlTaskRunnerTask*>(l->data);
-    fl_engine_execute_task(self->engine, &task->task);
-    l = l->next;
+  g_autoptr(FlEngine) engine = FL_ENGINE(g_weak_ref_get(&self->engine));
+  if (engine != nullptr) {
+    l = expired_tasks;
+    while (l != nullptr) {
+      FlTaskRunnerTask* task = static_cast<FlTaskRunnerTask*>(l->data);
+      fl_engine_execute_task(engine, &task->task);
+      l = l->next;
+    }
   }
 
   g_list_free_full(expired_tasks, g_free);
@@ -120,12 +123,6 @@ static void fl_task_runner_tasks_did_change_locked(FlTaskRunner* self) {
   }
 }
 
-static void engine_weak_notify_cb(gpointer user_data,
-                                  GObject* where_the_object_was) {
-  FlTaskRunner* self = FL_TASK_RUNNER(user_data);
-  self->engine = nullptr;
-}
-
 void fl_task_runner_dispose(GObject* object) {
   FlTaskRunner* self = FL_TASK_RUNNER(object);
 
@@ -133,11 +130,7 @@ void fl_task_runner_dispose(GObject* object) {
   // main thread
   g_assert(!self->blocking_main_thread);
 
-  if (self->engine != nullptr) {
-    g_object_weak_unref(G_OBJECT(self->engine), engine_weak_notify_cb, self);
-    self->engine = nullptr;
-  }
-
+  g_weak_ref_clear(&self->engine);
   g_mutex_clear(&self->mutex);
   g_cond_clear(&self->cond);
 
@@ -159,11 +152,10 @@ static void fl_task_runner_init(FlTaskRunner* self) {
 }
 
 FlTaskRunner* fl_task_runner_new(FlEngine* engine) {
-  FlTaskRunner* res =
+  FlTaskRunner* self =
       FL_TASK_RUNNER(g_object_new(fl_task_runner_get_type(), nullptr));
-  res->engine = engine;
-  g_object_weak_ref(G_OBJECT(engine), engine_weak_notify_cb, res);
-  return res;
+  g_weak_ref_init(&self->engine, G_OBJECT(engine));
+  return self;
 }
 
 void fl_task_runner_post_task(FlTaskRunner* self,

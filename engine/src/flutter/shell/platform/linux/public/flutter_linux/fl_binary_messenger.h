@@ -104,6 +104,8 @@ struct _FlBinaryMessengerInterface {
   void (*set_warns_on_channel_overflow)(FlBinaryMessenger* messenger,
                                         const gchar* channel,
                                         bool warns);
+
+  void (*shutdown)(FlBinaryMessenger* messenger);
 };
 
 struct _FlBinaryMessengerResponseHandleClass {
