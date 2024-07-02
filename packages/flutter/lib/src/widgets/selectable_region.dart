@@ -211,11 +211,12 @@ class SelectableRegion extends StatefulWidget {
   const SelectableRegion({
     super.key,
     this.contextMenuBuilder,
+    this.magnifierConfiguration = TextMagnifierConfiguration.disabled,
+    this.onSelectionChanged,
+    this.controller,
     required this.focusNode,
     required this.selectionControls,
     required this.child,
-    this.magnifierConfiguration = TextMagnifierConfiguration.disabled,
-    this.onSelectionChanged,
   });
 
   /// The configuration for the magnifier used with selections in this region.
@@ -247,6 +248,10 @@ class SelectableRegion extends StatefulWidget {
 
   /// Called when the selected content changes.
   final ValueChanged<SelectedContent?>? onSelectionChanged;
+
+  /// An optional controller to clear or select all contents under this
+  /// [SelectableRegion].
+  final SelectionController? controller;
 
   /// Returns the [ContextMenuButtonItem]s representing the buttons in this
   /// platform's default selection menu.
@@ -370,6 +375,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   void initState() {
     super.initState();
     widget.focusNode.addListener(_handleFocusChanged);
+    widget.controller?.addListener(_handleSelectionEventReceived);
     _initMouseGestureRecognizer();
     _initTouchGestureRecognizer();
     // Right clicks.
@@ -380,6 +386,26 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
       },
     );
     _initProcessTextActions();
+  }
+
+  void _handleSelectionEventReceived() {
+    final SelectionEvent? event = widget.controller?._lastSelectionEvent;
+    if (event == null) {
+      return;
+    }
+    switch (event.type) {
+      case SelectionEventType.clear:
+        _clearSelection();
+      case SelectionEventType.selectAll:
+        selectAll();
+      case SelectionEventType.startEdgeUpdate:
+      case SelectionEventType.endEdgeUpdate:
+      case SelectionEventType.selectWord:
+      case SelectionEventType.selectParagraph:
+      case SelectionEventType.granularlyExtendSelection:
+      case SelectionEventType.directionallyExtendSelection:
+        break;
+    }
   }
 
   /// Query the engine to initialize the list of text processing actions to show
@@ -2392,7 +2418,29 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     }
     return SelectedContent(
       plainText: buffer.toString(),
+      geometry: value,
     );
+  }
+
+  /// Copies the selections of all [Selectable]s.
+  @override
+  List<SelectedContentRange<Object>>? getSelections() {
+    if (currentSelectionStartIndex == -1 || currentSelectionEndIndex == -1) {
+      return null;
+    }
+    final int selectionStart = min(currentSelectionStartIndex, currentSelectionEndIndex);
+    final int selectionEnd = max(currentSelectionStartIndex, currentSelectionEndIndex);
+    final List<SelectedContentRange<Object>> selections = <SelectedContentRange<Object>>[];
+    for (int index = selectionStart; index <= selectionEnd; index += 1) {
+      final List<SelectedContentRange<Object>>? selectedContentRanges = selectables[index].getSelections();
+      if (selectedContentRanges != null) {
+        selections.addAll(selectedContentRanges);
+      }
+    }
+    if (selections.isEmpty) {
+      return null;
+    }
+    return selections;
   }
 
   // Clears the selection on all selectables not in the range of
@@ -2834,3 +2882,277 @@ typedef SelectableRegionContextMenuBuilder = Widget Function(
   BuildContext context,
   SelectableRegionState selectableRegionState,
 );
+
+/// Signature for the callback that reports when the user changes the selection
+/// under a [SelectionListener].
+typedef SelectionListenerSelectionChangedCallback = void Function(List<SelectedContentRange<Object>>? selections);
+
+/// A widget that allows the user to listen to selection changes
+/// for the child subtree it wraps under a [SelectionArea] or [SelectableRegion].
+///
+/// This widget should have an ancestor [SelectionArea] or [SelectableRegion]
+/// to be able to listen to selection changes in its subtree.
+///
+/// {@tool dartpad}
+/// This example shows how to color red the active selection
+/// under a [SelectionArea] or [SelectableRegion].
+///
+/// ** See code in examples/api/lib/material/selection_area/selection_area.1.dart **
+/// {@end-tool}
+///
+/// {@tool dartpad}
+/// This example shows how to replace the active selection
+/// under a [SelectionArea] or [SelectableRegion] with a widget.
+///
+/// ** See code in examples/api/lib/material/selection_area/selection_area.2.dart **
+/// {@end-tool}
+///
+/// See also:
+///
+///   * [SelectionArea] which provides an overview of the selection system.
+///   * [SelectableRegion] which provides an overview of the selection system.
+class SelectionListener extends StatefulWidget {
+  /// Create a new [SelectionListener] widget.
+  const SelectionListener({
+    super.key,
+    required this.onSelectionChanged,
+    required this.child,
+  });
+
+  /// Called when the user changes the selection of its child.
+  final SelectionListenerSelectionChangedCallback onSelectionChanged;
+
+  /// The child widget this selection listener applies to.
+  ///
+  /// {@macro flutter.widgets.ProxyWidget.child}
+  final Widget child;
+
+  @override
+  State<SelectionListener> createState() => _SelectionListenerState();
+}
+
+class _SelectionListenerState extends State<SelectionListener> {
+  late final _SelectionListenerDelegate _selectionDelegate;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectionDelegate = _SelectionListenerDelegate(onSelectionChanged: widget.onSelectionChanged);
+  }
+
+  @override
+  void dispose() {
+    _selectionDelegate.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SelectionContainer(
+      delegate: _selectionDelegate,
+      child: widget.child,
+    );
+  }
+}
+
+class _SelectionListenerDelegate extends MultiSelectableSelectionContainerDelegate {
+  _SelectionListenerDelegate({required this.onSelectionChanged});
+
+  final SelectionListenerSelectionChangedCallback onSelectionChanged;
+
+  @override
+  SelectionResult dispatchSelectionEvent(SelectionEvent event) {
+    final SelectionResult result = super.dispatchSelectionEvent(event);
+    onSelectionChanged(getSelections());
+    return result;
+  }
+
+  final Set<Selectable> _hasReceivedStartEvent = <Selectable>{};
+  final Set<Selectable> _hasReceivedEndEvent = <Selectable>{};
+
+  Offset? _lastStartEdgeUpdateGlobalPosition;
+  Offset? _lastEndEdgeUpdateGlobalPosition;
+
+  @override
+  void remove(Selectable selectable) {
+    _hasReceivedStartEvent.remove(selectable);
+    _hasReceivedEndEvent.remove(selectable);
+    super.remove(selectable);
+  }
+
+  void _updateLastEdgeEventsFromGeometries() {
+    if (currentSelectionStartIndex != -1 && selectables[currentSelectionStartIndex].value.hasSelection) {
+      final Selectable start = selectables[currentSelectionStartIndex];
+      final Offset localStartEdge = start.value.startSelectionPoint!.localPosition +
+          Offset(0, - start.value.startSelectionPoint!.lineHeight / 2);
+      _lastStartEdgeUpdateGlobalPosition = MatrixUtils.transformPoint(start.getTransformTo(null), localStartEdge);
+    }
+    if (currentSelectionEndIndex != -1 && selectables[currentSelectionEndIndex].value.hasSelection) {
+      final Selectable end = selectables[currentSelectionEndIndex];
+      final Offset localEndEdge = end.value.endSelectionPoint!.localPosition +
+          Offset(0, -end.value.endSelectionPoint!.lineHeight / 2);
+      _lastEndEdgeUpdateGlobalPosition = MatrixUtils.transformPoint(end.getTransformTo(null), localEndEdge);
+    }
+  }
+
+  @override
+  SelectionResult handleSelectAll(SelectAllSelectionEvent event) {
+    final SelectionResult result = super.handleSelectAll(event);
+    for (final Selectable selectable in selectables) {
+      _hasReceivedStartEvent.add(selectable);
+      _hasReceivedEndEvent.add(selectable);
+    }
+    // Synthesize last update event so the edge updates continue to work.
+    _updateLastEdgeEventsFromGeometries();
+    return result;
+  }
+
+  /// Selects a word in a [Selectable] at the location
+  /// [SelectWordSelectionEvent.globalPosition].
+  @override
+  SelectionResult handleSelectWord(SelectWordSelectionEvent event) {
+    final SelectionResult result = super.handleSelectWord(event);
+    if (currentSelectionStartIndex != -1) {
+      _hasReceivedStartEvent.add(selectables[currentSelectionStartIndex]);
+    }
+    if (currentSelectionEndIndex != -1) {
+      _hasReceivedEndEvent.add(selectables[currentSelectionEndIndex]);
+    }
+    _updateLastEdgeEventsFromGeometries();
+    return result;
+  }
+
+  /// Selects a paragraph in a [Selectable] at the location
+  /// [SelectParagraphSelectionEvent.globalPosition].
+  @override
+  SelectionResult handleSelectParagraph(SelectParagraphSelectionEvent event) {
+    final SelectionResult result = super.handleSelectParagraph(event);
+    if (currentSelectionStartIndex != -1) {
+      _hasReceivedStartEvent.add(selectables[currentSelectionStartIndex]);
+    }
+    if (currentSelectionEndIndex != -1) {
+      _hasReceivedEndEvent.add(selectables[currentSelectionEndIndex]);
+    }
+    _updateLastEdgeEventsFromGeometries();
+    return result;
+  }
+
+  @override
+  SelectionResult handleClearSelection(ClearSelectionEvent event) {
+    final SelectionResult result = super.handleClearSelection(event);
+    _hasReceivedStartEvent.clear();
+    _hasReceivedEndEvent.clear();
+    _lastStartEdgeUpdateGlobalPosition = null;
+    _lastEndEdgeUpdateGlobalPosition = null;
+    return result;
+  }
+
+  @override
+  SelectionResult handleSelectionEdgeUpdate(SelectionEdgeUpdateEvent event) {
+    if (event.type == SelectionEventType.endEdgeUpdate) {
+      _lastEndEdgeUpdateGlobalPosition = event.globalPosition;
+    } else {
+      _lastStartEdgeUpdateGlobalPosition = event.globalPosition;
+    }
+    return super.handleSelectionEdgeUpdate(event);
+  }
+
+  @override
+  void dispose() {
+    _hasReceivedStartEvent.clear();
+    _hasReceivedEndEvent.clear();
+    super.dispose();
+  }
+
+  @override
+  SelectionResult dispatchSelectionEventToChild(Selectable selectable, SelectionEvent event) {
+    switch (event.type) {
+      case SelectionEventType.startEdgeUpdate:
+        _hasReceivedStartEvent.add(selectable);
+        ensureChildUpdated(selectable);
+      case SelectionEventType.endEdgeUpdate:
+        _hasReceivedEndEvent.add(selectable);
+        ensureChildUpdated(selectable);
+      case SelectionEventType.clear:
+        _hasReceivedStartEvent.remove(selectable);
+        _hasReceivedEndEvent.remove(selectable);
+      case SelectionEventType.selectAll:
+      case SelectionEventType.selectWord:
+      case SelectionEventType.selectParagraph:
+        break;
+      case SelectionEventType.granularlyExtendSelection:
+      case SelectionEventType.directionallyExtendSelection:
+        _hasReceivedStartEvent.add(selectable);
+        _hasReceivedEndEvent.add(selectable);
+        ensureChildUpdated(selectable);
+    }
+    return super.dispatchSelectionEventToChild(selectable, event);
+  }
+
+  @override
+  void ensureChildUpdated(Selectable selectable) {
+    if (_lastEndEdgeUpdateGlobalPosition != null && _hasReceivedEndEvent.add(selectable)) {
+      final SelectionEdgeUpdateEvent synthesizedEvent = SelectionEdgeUpdateEvent.forEnd(
+        globalPosition: _lastEndEdgeUpdateGlobalPosition!,
+      );
+      if (currentSelectionEndIndex == -1) {
+        handleSelectionEdgeUpdate(synthesizedEvent);
+      }
+      selectable.dispatchSelectionEvent(synthesizedEvent);
+    }
+    if (_lastStartEdgeUpdateGlobalPosition != null && _hasReceivedStartEvent.add(selectable)) {
+      final SelectionEdgeUpdateEvent synthesizedEvent = SelectionEdgeUpdateEvent.forStart(
+          globalPosition: _lastStartEdgeUpdateGlobalPosition!,
+      );
+      if (currentSelectionStartIndex == -1) {
+        handleSelectionEdgeUpdate(synthesizedEvent);
+      }
+      selectable.dispatchSelectionEvent(synthesizedEvent);
+    }
+  }
+
+  @override
+  void didChangeSelectables() {
+    if (_lastEndEdgeUpdateGlobalPosition != null) {
+      handleSelectionEdgeUpdate(
+        SelectionEdgeUpdateEvent.forEnd(
+          globalPosition: _lastEndEdgeUpdateGlobalPosition!,
+        ),
+      );
+    }
+    if (_lastStartEdgeUpdateGlobalPosition != null) {
+      handleSelectionEdgeUpdate(
+        SelectionEdgeUpdateEvent.forStart(
+          globalPosition: _lastStartEdgeUpdateGlobalPosition!,
+        ),
+      );
+    }
+    final Set<Selectable> selectableSet = selectables.toSet();
+    _hasReceivedEndEvent.removeWhere((Selectable selectable) => !selectableSet.contains(selectable));
+    _hasReceivedStartEvent.removeWhere((Selectable selectable) => !selectableSet.contains(selectable));
+    super.didChangeSelectables();
+  }
+}
+
+/// A controller for a [SelectionArea] or [SelectableRegion].
+///
+/// Utilize this controller to programatically clear the content of a
+/// [SelectionArea] or [SelectableRegion], or select all the contents under it.
+class SelectionController with ChangeNotifier {
+  /// The last [SelectionEvent] provided to this controller.
+  SelectionEvent? _lastSelectionEvent;
+
+  /// Call this method to clear the selection under the [SelectionArea] or
+  /// [SelectableRegion].
+  void clear() {
+    _lastSelectionEvent = const ClearSelectionEvent();
+    notifyListeners();
+  }
+
+  /// Call this method to select all content under the [SelectionArea] or
+  /// [SelectableRegion].
+  void selectAll() {
+    _lastSelectionEvent = const SelectAllSelectionEvent();
+    notifyListeners();
+  }
+}

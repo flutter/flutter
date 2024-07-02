@@ -86,6 +86,11 @@ abstract class SelectionHandler implements ValueListenable<SelectionGeometry> {
   /// Return `null` if nothing is selected.
   SelectedContent? getSelectedContent();
 
+  /// Gets the list of selections in this object.
+  ///
+  /// Return `null` if nothing is selected.
+  List<SelectedContentRange<Object>>? getSelections();
+
   /// Handles the [SelectionEvent] sent to this object.
   ///
   /// The subclasses need to update their selections or delegate the
@@ -100,6 +105,60 @@ abstract class SelectionHandler implements ValueListenable<SelectionGeometry> {
   SelectionResult dispatchSelectionEvent(SelectionEvent event);
 }
 
+/// This class stores the information of an active selection under
+/// a [Selectable] or [SelectionHandler], including the start and
+/// end positions of a selection relative to the content, as well
+/// as an identifier to identify the owner of the content, any
+/// children selection ranges that may be contained within the active
+/// selection, and the content itself.
+///
+/// [SelectionArea] and [SelectableRegion] provide access to this
+/// information through the [SelectionListener] passed to their
+/// [SelectionListener.onSelectionChanged] member.
+///
+/// See also:
+///
+///   * [SelectionListener], which provides the [SelectedContentRange]s representing
+///     the active selection for a given subtree contained under a [SelectionArea] 
+///     or [SelectableRegion].
+abstract class SelectedContentRange<T extends Object> {
+  /// Creates a range for the content of a [Selectable] or [SelectionHandler].
+  SelectedContentRange({
+    this.selectableId,
+    required this.content,
+    this.children,
+  });
+
+  /// The unique id for the [Selectable] that created the range.
+  final Object? selectableId;
+
+  /// The content that contains the selection.
+  final T content;
+
+  /// The start of the selection relative to the [content].
+  int get startOffset;
+
+  /// The end of the selection relative to the [content].
+  int get endOffset;
+
+  /// Additional ranges to include as children.
+  ///
+  /// Children of a given range enable more granular modification of the
+  /// selection.
+  final List<SelectedContentRange<Object>>? children;
+
+  @override
+  String toString() {
+    return 'SelectedContentRange(\n'
+           '  selectableId: $selectableId,\n'
+           '  content: $content,\n'
+           '  startOffset: $startOffset,\n'
+           '  endOffset: $endOffset,\n'
+           '  children: $children,\n'
+           ')';
+  }
+}
+
 /// The selected content in a [Selectable] or [SelectionHandler].
 // TODO(chunhtai): Add more support for rich content.
 // https://github.com/flutter/flutter/issues/104206.
@@ -107,10 +166,25 @@ class SelectedContent {
   /// Creates a selected content object.
   ///
   /// Only supports plain text.
-  const SelectedContent({required this.plainText});
+  const SelectedContent({
+    required this.plainText,
+    required this.geometry,
+  });
 
   /// The selected content in plain text format.
   final String plainText;
+
+  /// The [SelectionGeometry] of the [Selectable] or [SelectionHandler] containing
+  /// the selection.
+  final SelectionGeometry geometry;
+
+  @override
+  String toString() {
+    return 'SelectedContent(\n'
+           '  plainText: $plainText,\n'
+           '  geometry: $geometry,\n'
+           ')';
+  }
 }
 
 /// A mixin that can be selected by users when under a [SelectionArea] widget.

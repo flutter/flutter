@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:collection' show LinkedHashMap;
 import 'dart:math';
 import 'dart:ui' as ui show TextHeightBehavior;
 
@@ -661,6 +662,7 @@ class Text extends StatelessWidget {
       result = MouseRegion(
         cursor: DefaultSelectionStyle.of(context).mouseCursor ?? SystemMouseCursors.text,
         child: _SelectableTextContainer(
+          selectableId: key,
           textAlign: textAlign ?? defaultTextStyle.textAlign ?? TextAlign.start,
           textDirection: textDirection, // RichText uses Directionality.of to obtain a default if this is null.
           locale: locale, // RichText uses Localizations.localeOf to obtain a default if this is null
@@ -736,6 +738,7 @@ class Text extends StatelessWidget {
 
 class _SelectableTextContainer extends StatefulWidget {
   const _SelectableTextContainer({
+    this.selectableId,
     required this.text,
     required this.textAlign,
     this.textDirection,
@@ -750,7 +753,8 @@ class _SelectableTextContainer extends StatefulWidget {
     required this.selectionColor,
   });
 
-  final InlineSpan text;
+  final Object? selectableId;
+  final TextSpan text;
   final TextAlign textAlign;
   final TextDirection? textDirection;
   final bool softWrap;
@@ -774,7 +778,22 @@ class _SelectableTextContainerState extends State<_SelectableTextContainer> {
   @override
   void initState() {
     super.initState();
-    _selectionDelegate = _SelectableTextContainerDelegate(_textKey);
+    _selectionDelegate = _SelectableTextContainerDelegate(
+      _textKey,
+      textState: widget.text,
+      selectableId: widget.selectableId,
+    );
+  }
+
+  @override
+  void didUpdateWidget(covariant _SelectableTextContainer oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.text != oldWidget.text) {
+      _selectionDelegate._attachState = widget.text;
+    }
+    if (widget.selectableId != oldWidget.selectableId) {
+      _selectionDelegate._attachId = widget.selectableId;
+    }
   }
 
   @override
@@ -869,10 +888,26 @@ const double _kSelectableVerticalComparingThreshold = 3.0;
 class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainerDelegate {
   _SelectableTextContainerDelegate(
     GlobalKey textKey,
+    {
+      required this.textState,
+      this.selectableId,
+    }
   ) : _textKey = textKey;
 
+  TextSpan textState;
+  Object? selectableId;
   final GlobalKey _textKey;
   RenderParagraph get paragraph => _textKey.currentContext!.findRenderObject()! as RenderParagraph;
+
+  // ignore: avoid_setters_without_getters
+  set _attachState(TextSpan newState) {
+    textState = newState;
+  }
+
+  // ignore: avoid_setters_without_getters
+  set _attachId(Object? newId) {
+    selectableId = newId;
+  }
 
   @override
   SelectionResult handleSelectParagraph(SelectParagraphSelectionEvent event) {
@@ -1212,6 +1247,102 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
     return a.right > b.right ? 1 : -1;
   }
 
+  @override
+  SelectedContent? getSelectedContent() {
+    if (currentSelectionStartIndex == -1 || currentSelectionEndIndex == -1) {
+      return null;
+    }
+    final int selectionStart = min(currentSelectionStartIndex, currentSelectionEndIndex);
+    final int selectionEnd = max(currentSelectionStartIndex, currentSelectionEndIndex);
+    final LinkedHashMap<int, SelectedContent> selections = LinkedHashMap<int, SelectedContent>();
+    for (int index = selectionStart; index <= selectionEnd; index += 1) {
+      final SelectedContent? selectedContent = selectables[index].getSelectedContent();
+      if (selectedContent != null) {
+        selections[index] = selectedContent;
+      }
+    }
+    if (selections.isEmpty) {
+      return null;
+    }
+    final StringBuffer buffer = StringBuffer();
+    for (final SelectedContent selection in selections.values) {
+      buffer.write(selection.plainText);
+    }
+    return SelectedContent(
+      plainText: buffer.toString(),
+      geometry: value,
+    );
+  }
+
+  /// Copies the selections of all [Selectable]s.
+  @override
+  List<SelectedContentRange<Object>>? getSelections() {
+    if (currentSelectionStartIndex == -1 || currentSelectionEndIndex == -1) {
+      return null;
+    }
+    final int selectionStart = min(currentSelectionStartIndex, currentSelectionEndIndex);
+    final int selectionEnd = max(currentSelectionStartIndex, currentSelectionEndIndex);
+    final LinkedHashMap<int, List<SelectedContentRange<Object>>> selections = LinkedHashMap<int, List<SelectedContentRange<Object>>>();
+    for (int index = selectionStart; index <= selectionEnd; index += 1) {
+      final List<SelectedContentRange<Object>>? selectedContentRanges = selectables[index].getSelections();
+      if (selectedContentRanges != null) {
+        selections[index] = selectedContentRanges;
+      }
+    }
+    if (selections.isEmpty) {
+      return null;
+    }
+    // Accurately find the selection endpoints, selections.first.startOffset and
+    // selections.last.endOffset are only accurate when the selections.first and
+    // selections.last are root selectables with regards to the text. When the
+    // selection begins or ends at a placeholder, one should consider that a
+    // placeholder signifies that a WidgetSpan is intertwined with the given text.
+    // A placeholder only spans one character unit in the text. So when the selection
+    // begins or ends on a placeholder, we should consider its position relative
+    // to the root text.
+    late final int startOffset;
+    late final int endOffset;
+    if (paragraph.selectableBelongsToParagraph(selectables[currentSelectionStartIndex])) {
+      // A [_SelectableFragment] will only have one [SelectedContentRange].
+      startOffset = selectables[currentSelectionStartIndex].getSelections()!.first.startOffset;
+    } else {
+      final bool localSelectionForward = selectables[currentSelectionStartIndex].getSelections()!.first.endOffset >= selectables[currentSelectionStartIndex].getSelections()!.first.startOffset;
+      final TextPosition positionBeforeStart = localSelectionForward
+                                             ? paragraph.getPositionForOffset(selectables[currentSelectionStartIndex].boundingBoxes.first.bottomLeft)
+                                             : paragraph.getPositionForOffset(selectables[currentSelectionStartIndex].boundingBoxes.last.bottomRight);
+      startOffset = positionBeforeStart.offset;
+    }
+    if (paragraph.selectableBelongsToParagraph(selectables[currentSelectionEndIndex])) {
+      // A [_SelectableFragment] will only have one [SelectedContentRange].
+      endOffset = selectables[currentSelectionEndIndex].getSelections()!.first.endOffset;
+    } else {
+      final bool localSelectionForward = selectables[currentSelectionEndIndex].getSelections()!.first.endOffset >= selectables[currentSelectionEndIndex].getSelections()!.first.startOffset;
+      final TextPosition positionAfterEnd = localSelectionForward
+                                          ? paragraph.getPositionForOffset(selectables[currentSelectionEndIndex].boundingBoxes.last.bottomRight)
+                                          : paragraph.getPositionForOffset(selectables[currentSelectionEndIndex].boundingBoxes.first.bottomLeft);
+      endOffset = positionAfterEnd.offset;
+    }
+    // Collect any child ranges.
+    final List<SelectedContentRange<Object>> childSelections = <SelectedContentRange<Object>>[];
+    for (int index = selectionStart; index <= selectionEnd; index += 1) {
+      if (paragraph.selectableBelongsToParagraph(selectables[index])) {
+        continue;
+      }
+      final List<SelectedContentRange<Object>>? selectedContentRanges = selectables[index].getSelections();
+      if (selectedContentRanges != null) {
+        childSelections.addAll(selectedContentRanges);
+      }
+    }
+    final _TextSpanContentRange range = _TextSpanContentRange(
+      content: textState,
+      selectableId: selectableId,
+      start: startOffset,
+      end: endOffset,
+      children: childSelections,
+    );
+    return <SelectedContentRange<Object>>[range];
+  }
+
   // From [SelectableRegion].
 
   // Clears the selection on all selectables not in the range of
@@ -1400,4 +1531,23 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
     _hasReceivedStartEvent.removeWhere((Selectable selectable) => !selectableSet.contains(selectable));
     super.didChangeSelectables();
   }
+}
+
+class _TextSpanContentRange extends SelectedContentRange<TextSpan> {
+  _TextSpanContentRange({
+    int start = -1,
+    int end = -1,
+    super.selectableId,
+    required super.content,
+    super.children,
+  }) : _start = start,
+       _end = end;
+
+  @override
+  int get startOffset => _start;
+  final int _start;
+
+  @override
+  int get endOffset => _end;
+  final int _end;
 }

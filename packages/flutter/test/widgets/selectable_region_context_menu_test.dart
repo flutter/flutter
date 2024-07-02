@@ -158,7 +158,15 @@ class RenderSelectionSpy extends RenderProxyBox
 
   @override
   SelectedContent? getSelectedContent() {
-    return const SelectedContent(plainText: 'content');
+    return SelectedContent(
+      plainText: 'content',
+      geometry: value,
+    );
+  }
+
+  @override
+  List<SelectedContentRange<Object>>? getSelections() {
+    return null;
   }
 
   @override
