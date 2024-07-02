@@ -29,6 +29,8 @@ import 'framework.dart';
 ///  * [SliverResizingHeader] - which similarly pins the header at the top
 ///    of the [CustomScrollView] but reacts to scrolling by resizing the header
 ///    between its minimum and maximum extent limits.
+///  * [SliverFloatingHeader] - which animates the header in and out of view
+///    in response to downward and upwards scrolls.
 ///  * [SliverPersistentHeader] - a general purpose header that can be
 ///    configured as a pinned, resizing, or floating header.
 class PinnedHeaderSliver extends SingleChildRenderObjectWidget {
