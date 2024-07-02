@@ -215,7 +215,7 @@ abstract class Animation<T> extends Listenable implements ValueListenable<T> {
   /// {@end-tool}
   /// {@tool snippet}
   ///
-  /// The `_alignment.value` could then be used in a widget's build method, for
+  /// The `alignment1.value` could then be used in a widget's build method, for
   /// instance, to position a child using an [Align] widget such that the
   /// position of the child shifts over time from the top left to the top right.
   ///
