@@ -660,7 +660,7 @@ class FlutterPlatform extends PlatformPlugin {
       testUrl: testUrl,
       testConfigFile: findTestConfigFile(globals.fs.file(testUrl), globals.logger),
       // This MUST be a file URI.
-      packageConfigUri: buildInfo != null ? globals.fs.path.toUri(buildInfo!.packagesPath) : null,
+      packageConfigUri: buildInfo != null ? globals.fs.path.toUri(buildInfo!.packageConfigPath) : null,
       host: host!,
       updateGoldens: updateGoldens!,
       flutterTestDep: packageConfig['flutter_test'] != null,
