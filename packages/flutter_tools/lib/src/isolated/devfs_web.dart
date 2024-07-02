@@ -462,16 +462,6 @@ class WebAssetServer implements AssetReader {
       file = globals.fs.file(potential);
     }
 
-    // If all of the lookups above failed, the file might have been an asset.
-    // Try and resolve the path relative to the built asset directory.
-    if (!file.existsSync()) {
-      final Uri potential = globals.fs
-          .directory(getAssetBuildDirectory())
-          .uri
-          .resolve(requestPath.replaceFirst('assets/', ''));
-      file = globals.fs.file(potential);
-    }
-
     if (!file.existsSync()) {
       final Uri webPath = globals.fs.currentDirectory
           .childDirectory('web')
