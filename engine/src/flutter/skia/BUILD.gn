@@ -218,12 +218,8 @@ optional("fontmgr_android") {
     ":typeface_freetype",
     "//flutter/third_party/expat",
   ]
-  public = [ "$_skia_root/include/ports/SkFontMgr_android.h" ]
-  sources = [
-    "$_skia_root/src/ports/SkFontMgr_android.cpp",
-    "$_skia_root/src/ports/SkFontMgr_android_parser.cpp",
-    "$_skia_root/src/ports/SkFontMgr_android_parser.h",
-  ]
+  public = skia_ports_fontmgr_android_public
+  sources = skia_ports_fontmgr_android_sources
 }
 
 optional("fontmgr_custom") {
@@ -232,8 +228,7 @@ optional("fontmgr_custom") {
       skia_enable_fontmgr_custom_embedded || skia_enable_fontmgr_custom_empty
 
   deps = [ ":typeface_freetype" ]
-  public = [ "$_skia_root/src/ports/SkFontMgr_custom.h" ]
-  sources = [ "$_skia_root/src/ports/SkFontMgr_custom.cpp" ]
+  sources = skia_ports_fontmgr_custom_sources
 }
 
 optional("fontmgr_custom_directory") {
@@ -243,8 +238,8 @@ optional("fontmgr_custom_directory") {
     ":fontmgr_custom",
     ":typeface_freetype",
   ]
-  public = [ "$_skia_root/include/ports/SkFontMgr_directory.h" ]
-  sources = [ "$_skia_root/src/ports/SkFontMgr_custom_directory.cpp" ]
+  public = skia_ports_fontmgr_directory_public
+  sources = skia_ports_fontmgr_directory_sources
 }
 
 optional("fontmgr_custom_embedded") {
@@ -255,7 +250,7 @@ optional("fontmgr_custom_embedded") {
     ":fontmgr_custom",
     ":typeface_freetype",
   ]
-  sources = [ "$_skia_root/src/ports/SkFontMgr_custom_embedded.cpp" ]
+  sources = skia_ports_fontmgr_embedded_sources
 }
 
 optional("fontmgr_custom_empty") {
@@ -266,8 +261,8 @@ optional("fontmgr_custom_empty") {
     ":fontmgr_custom",
     ":typeface_freetype",
   ]
-  public = [ "$_skia_root/include/ports/SkFontMgr_empty.h" ]
-  sources = [ "$_skia_root/src/ports/SkFontMgr_custom_empty.cpp" ]
+  public = skia_ports_fontmgr_empty_public
+  sources = skia_ports_fontmgr_empty_sources
 }
 
 optional("fontmgr_fontconfig") {
@@ -276,9 +271,9 @@ optional("fontmgr_fontconfig") {
 
   # The public header includes fontconfig.h and uses FcConfig*
   public_deps = [ "//third_party:fontconfig" ]
-  public = [ "$_skia_root/include/ports/SkFontMgr_fontconfig.h" ]
+  public = skia_ports_fontmgr_fontconfig_public
   deps = [ ":typeface_freetype" ]
-  sources = [ "$_skia_root/src/ports/SkFontMgr_fontconfig.cpp" ]
+  sources = skia_ports_fontmgr_fontconfig_sources
 }
 
 optional("fontmgr_fuchsia") {
@@ -292,8 +287,8 @@ optional("fontmgr_fuchsia") {
   } else {
     deps = [ "//sdk/fidl/fuchsia.fonts" ]
   }
-  public = [ "$_skia_root/src/ports/SkFontMgr_fuchsia.h" ]
-  sources = [ "$_skia_root/src/ports/SkFontMgr_fuchsia.cpp" ]
+  public = skia_ports_fontmgr_fuchsia_public
+  sources = skia_ports_fontmgr_fuchsia_sources
 }
 
 optional("fontmgr_mac_ct") {
@@ -303,17 +298,8 @@ optional("fontmgr_mac_ct") {
     "SK_TYPEFACE_FACTORY_CORETEXT",
     "SK_FONTMGR_CORETEXT_AVAILABLE",
   ]
-  public = [
-    "$_skia_root/include/ports/SkFontMgr_mac_ct.h",
-    "$_skia_root/include/ports/SkTypeface_mac.h",
-  ]
-  sources = [
-    "$_skia_root/src/ports/SkFontMgr_mac_ct.cpp",
-    "$_skia_root/src/ports/SkScalerContext_mac_ct.cpp",
-    "$_skia_root/src/ports/SkScalerContext_mac_ct.h",
-    "$_skia_root/src/ports/SkTypeface_mac_ct.cpp",
-    "$_skia_root/src/ports/SkTypeface_mac_ct.h",
-  ]
+  public = skia_ports_fontmgr_coretext_public
+  sources = skia_ports_fontmgr_coretext_sources
 
   if (is_mac) {
     frameworks = [
@@ -342,14 +328,8 @@ optional("fontmgr_win") {
     "SK_TYPEFACE_FACTORY_DIRECTWRITE",
     "SK_FONTMGR_DIRECTWRITE_AVAILABLE",
   ]
-  public = [ "$_skia_root/include/ports/SkTypeface_win.h" ]
-  sources = [
-    "$_skia_root/src/ports/SkFontMgr_win_dw.cpp",
-    "$_skia_root/src/ports/SkScalerContext_win_dw.cpp",
-    "$_skia_root/src/ports/SkScalerContext_win_dw.h",
-    "$_skia_root/src/ports/SkTypeface_win_dw.cpp",
-    "$_skia_root/src/ports/SkTypeface_win_dw.h",
-  ]
+  public = skia_ports_windows_fonts_public
+  sources = skia_ports_windows_fonts_sources
   if (skia_dwritecore_sdk != "") {
     defines = [ "DWRITE_CORE" ]
     if (is_win && is_clang) {
@@ -377,7 +357,9 @@ optional("gpu_shared") {
   public_deps = []
   frameworks = []
 
-  sources = skia_shared_gpu_sources + skia_sksl_gpu_sources
+  sources = skia_shared_gpu_sources
+  sources += skia_sksl_pipeline_sources
+  sources += skia_sksl_codegen_sources
 
   if (skia_use_vulkan) {
     public_defines += [ "SK_VULKAN" ]
@@ -565,11 +547,7 @@ optional("typeface_freetype") {
 
   public_defines = [ "SK_TYPEFACE_FACTORY_FREETYPE" ]
   deps = [ "//flutter/third_party/freetype2" ]
-  sources = [
-    "$_skia_root/src/ports/SkFontHost_FreeType.cpp",
-    "$_skia_root/src/ports/SkFontHost_FreeType_common.cpp",
-    "$_skia_root/src/ports/SkFontHost_FreeType_common.h",
-  ]
+  sources = skia_ports_freetype_sources
 }
 
 optional("webp_decode") {
@@ -663,7 +641,9 @@ skia_component("skia") {
   sources += skia_codec_core
   sources += skia_codec_decode_bmp
   sources += skia_encode_srcs
-  sources += skia_sksl_sources
+  sources += skia_sksl_core_sources
+  sources += skia_sksl_default_module_sources
+  sources += skia_ports_sources
   sources += [
     "$_skia_root/src/android/SkAndroidFrameworkUtils.cpp",
     "$_skia_root/src/android/SkAnimatedImage.cpp",
@@ -673,9 +653,7 @@ skia_component("skia") {
     "$_skia_root/src/codec/SkParseEncodedOrigin.cpp",
     "$_skia_root/src/codec/SkSampledCodec.cpp",
     "$_skia_root/src/ports/SkDiscardableMemory_none.cpp",
-    "$_skia_root/src/ports/SkGlobalInitialization_default.cpp",
     "$_skia_root/src/ports/SkMemory_malloc.cpp",
-    "$_skia_root/src/ports/SkOSFile_stdio.cpp",
     "$_skia_root/src/sfnt/SkOTTable_name.cpp",
     "$_skia_root/src/sfnt/SkOTUtils.cpp",
   ]
@@ -694,10 +672,10 @@ skia_component("skia") {
   }
 
   if (is_win) {
+    sources += skia_ports_windows_sources
     sources += [
       "$_skia_root/src/ports/SkDebug_win.cpp",
       "$_skia_root/src/ports/SkImageGeneratorWIC.cpp",
-      "$_skia_root/src/ports/SkOSFile_win.cpp",
       "$_skia_root/src/ports/SkOSLibrary_win.cpp",
     ]
     libs += [
