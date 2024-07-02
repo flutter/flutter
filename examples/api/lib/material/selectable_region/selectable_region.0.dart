@@ -67,7 +67,7 @@ class _SelectableAdapter extends SingleChildRenderObjectWidget {
   _RenderSelectableAdapter createRenderObject(BuildContext context) {
     return _RenderSelectableAdapter(
       DefaultSelectionStyle.of(context).selectionColor!,
-      child,
+      child!,
       registrar,
     );
   }
@@ -76,7 +76,7 @@ class _SelectableAdapter extends SingleChildRenderObjectWidget {
   void updateRenderObject(BuildContext context, _RenderSelectableAdapter renderObject) {
     renderObject
       ..selectionColor = DefaultSelectionStyle.of(context).selectionColor!
-      ..content = child
+      ..content = child!
       ..registrar = registrar;
   }
 }
@@ -361,7 +361,6 @@ class _SelectableAdapterSelectedContentRange extends SelectedContentRange<Widget
   _SelectableAdapterSelectedContentRange({
     int start = -1,
     int end = -1,
-    super.selectableId,
     required super.content,
     required super.contentLength,
   }) : _start = start,

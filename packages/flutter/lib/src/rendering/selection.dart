@@ -119,7 +119,7 @@ abstract class SelectionHandler implements ValueListenable<SelectionGeometry> {
 /// See also:
 ///
 ///   * [SelectionListener], which provides the [SelectedContentRange]s representing
-///     the active selection for a given subtree contained under a [SelectionArea] 
+///     the active selection for a given subtree contained under a [SelectionArea]
 ///     or [SelectableRegion].
 abstract class SelectedContentRange<T extends Object> {
   /// Creates a range for the content of a [Selectable] or [SelectionHandler].
@@ -154,7 +154,7 @@ abstract class SelectedContentRange<T extends Object> {
   ///
   /// {@tool snippet}
   /// ```dart
-  /// Text.rich(
+  /// const Text.rich(
   ///   TextSpan(
   ///     text: 'Hello world, ',
   ///     children: <InlineSpan>[
