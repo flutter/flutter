@@ -10,6 +10,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+import 'button.dart';
 import 'colors.dart';
 import 'interface_level.dart';
 import 'localizations.dart';
@@ -2326,16 +2327,14 @@ class CupertinoDialogAction extends StatelessWidget {
       cursor: onPressed != null && kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
       child: GestureDetector(
         excludeFromSemantics: true,
-        onTap: onPressed,
-        behavior: HitTestBehavior.opaque,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(
-            minHeight: _kDialogMinButtonHeight,
-          ),
-          child: Padding(
-            padding: EdgeInsets.all(padding),
-            child: Center(child: sizedContent),
-          ),
+        child: CupertinoButton(
+          minSize: _kDialogMinButtonHeight,
+          onPressed: onPressed,
+          disabledColor: CupertinoDynamicColor.resolve(_kDialogColor, context),
+          padding: EdgeInsets.all(padding),
+          color: CupertinoDynamicColor.resolve(_kDialogColor, context),
+          borderRadius: BorderRadius.zero,
+          child: Center(child: sizedContent),
         ),
       ),
     );
@@ -2353,13 +2352,10 @@ class _CupertinoDialogActionsRenderWidget extends MultiChildRenderObjectWidget {
   const _CupertinoDialogActionsRenderWidget({
     required List<Widget> actionButtons,
     double dividerThickness = 0.0,
-    bool hasCancelButton = false,
   }) : _dividerThickness = dividerThickness,
-       _hasCancelButton = hasCancelButton,
        super(children: actionButtons);
 
   final double _dividerThickness;
-  final bool _hasCancelButton;
 
   @override
   RenderObject createRenderObject(BuildContext context) {
@@ -2369,9 +2365,8 @@ class _CupertinoDialogActionsRenderWidget extends MultiChildRenderObjectWidget {
               : _kCupertinoDialogWidth,
       dividerThickness: _dividerThickness,
       dialogColor: CupertinoDynamicColor.resolve(_kDialogColor, context),
-      dialogPressedColor: CupertinoDynamicColor.resolve(_kDialogPressedColor, context),
+      //dialogPressedColor: CupertinoDynamicColor.resolve(_kDialogPressedColor, context),
       dividerColor: CupertinoDynamicColor.resolve(CupertinoColors.separator, context),
-      hasCancelButton: _hasCancelButton,
     );
   }
 
@@ -2383,9 +2378,7 @@ class _CupertinoDialogActionsRenderWidget extends MultiChildRenderObjectWidget {
             : _kCupertinoDialogWidth
       ..dividerThickness = _dividerThickness
       ..dialogColor = CupertinoDynamicColor.resolve(_kDialogColor, context)
-      ..dialogPressedColor = CupertinoDynamicColor.resolve(_kDialogPressedColor, context)
-      ..dividerColor = CupertinoDynamicColor.resolve(CupertinoColors.separator, context)
-      ..hasCancelButton = _hasCancelButton;
+      ..dividerColor = CupertinoDynamicColor.resolve(CupertinoColors.separator, context);
   }
 }
 
@@ -2431,22 +2424,16 @@ class _RenderCupertinoDialogActions extends RenderBox
     double? dialogWidth,
     double dividerThickness = 0.0,
     required Color dialogColor,
-    required Color dialogPressedColor,
     required Color dividerColor,
-    bool hasCancelButton = false,
   }) : assert(dialogWidth != null),
        _dialogWidth = dialogWidth,
        _buttonBackgroundPaint = Paint()
          ..color = dialogColor
          ..style = PaintingStyle.fill,
-       _pressedButtonBackgroundPaint = Paint()
-         ..color = dialogPressedColor
-         ..style = PaintingStyle.fill,
        _dividerPaint = Paint()
          ..color = dividerColor
          ..style = PaintingStyle.fill,
-       _dividerThickness = dividerThickness,
-       _hasCancelButton = hasCancelButton {
+       _dividerThickness = dividerThickness {
     addAll(children);
   }
 
@@ -2469,17 +2456,6 @@ class _RenderCupertinoDialogActions extends RenderBox
     }
   }
 
-  bool _hasCancelButton;
-  bool get hasCancelButton => _hasCancelButton;
-  set hasCancelButton(bool newValue) {
-    if (newValue == _hasCancelButton) {
-      return;
-    }
-
-    _hasCancelButton = newValue;
-    markNeedsLayout();
-  }
-
   Color get dialogColor => _buttonBackgroundPaint.color;
   final Paint _buttonBackgroundPaint;
   set dialogColor(Color value) {
@@ -2488,17 +2464,6 @@ class _RenderCupertinoDialogActions extends RenderBox
     }
 
     _buttonBackgroundPaint.color = value;
-    markNeedsPaint();
-  }
-
-  Color get dialogPressedColor => _pressedButtonBackgroundPaint.color;
-  final Paint _pressedButtonBackgroundPaint;
-  set dialogPressedColor(Color value) {
-    if (value == _pressedButtonBackgroundPaint.color) {
-      return;
-    }
-
-    _pressedButtonBackgroundPaint.color = value;
     markNeedsPaint();
   }
 
@@ -2795,43 +2760,6 @@ class _RenderCupertinoDialogActions extends RenderBox
           )
         : Rect.zero;
 
-    final List<Rect> pressedButtonRects = _pressedButtons.map<Rect>((RenderBox pressedButton) {
-      final MultiChildLayoutParentData buttonParentData = pressedButton.parentData! as MultiChildLayoutParentData;
-
-      return Rect.fromLTWH(
-        offset.dx + buttonParentData.offset.dx,
-        offset.dy + buttonParentData.offset.dy,
-        pressedButton.size.width,
-        pressedButton.size.height,
-      );
-    }).toList();
-
-    // Create the button backgrounds path and paint it.
-    final Path backgroundFillPath = Path()
-      ..fillType = PathFillType.evenOdd
-      ..addRect(Rect.fromLTWH(0.0, 0.0, size.width, size.height))
-      ..addRect(verticalDivider);
-
-    for (int i = 0; i < pressedButtonRects.length; i += 1) {
-      backgroundFillPath.addRect(pressedButtonRects[i]);
-    }
-
-    canvas.drawPath(
-      backgroundFillPath,
-      _buttonBackgroundPaint,
-    );
-
-    // Create the pressed buttons background path and paint it.
-    final Path pressedBackgroundFillPath = Path();
-    for (int i = 0; i < pressedButtonRects.length; i += 1) {
-      pressedBackgroundFillPath.addRect(pressedButtonRects[i]);
-    }
-
-    canvas.drawPath(
-      pressedBackgroundFillPath,
-      _pressedButtonBackgroundPaint,
-    );
-
     // Create the dividers path and paint it.
     final Path dividersPath = Path()
       ..addRect(verticalDivider);
@@ -2908,7 +2836,6 @@ class _RenderCupertinoDialogActions extends RenderBox
     }
 
     canvas.drawPath(backgroundFillPath, _buttonBackgroundPaint);
-    canvas.drawPath(pressedBackgroundFillPath, _pressedButtonBackgroundPaint);
     canvas.drawPath(dividersPath, _dividerPaint);
   }
 
