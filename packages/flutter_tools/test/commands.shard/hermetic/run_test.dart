@@ -1475,8 +1475,8 @@ class TestRunCommandForUsageValues extends RunCommand {
   }
 
   @override
-  Future<BuildInfo> getBuildInfo({ BuildMode? forcedBuildMode, File? forcedTargetFile }) async {
-    return const BuildInfo(BuildMode.debug, null, treeShakeIcons: false);
+  Future<BuildInfo> getBuildInfo({FlutterProject? project, BuildMode? forcedBuildMode, File? forcedTargetFile}) async {
+    return const BuildInfo(BuildMode.debug, null, treeShakeIcons: false, packageConfigPath: '.dart_tool/package_config.json');
   }
 }
 

@@ -643,7 +643,7 @@ void main() {
     testUsingContext('use packagesPath to generate BuildInfo', () async {
       final DummyFlutterCommand flutterCommand = DummyFlutterCommand(packagesPath: 'foo');
       final BuildInfo buildInfo = await flutterCommand.getBuildInfo(forcedBuildMode: BuildMode.debug);
-      expect(buildInfo.packagesPath, 'foo');
+      expect(buildInfo.packageConfigPath, 'foo');
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,

@@ -1097,7 +1097,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
         applicationPackage: mockDir,
       );
 
-      const BuildInfo mockInfo = BuildInfo(BuildMode.debug, 'flavor', treeShakeIcons: false);
+      const BuildInfo mockInfo = BuildInfo(BuildMode.debug, 'flavor', treeShakeIcons: false, packageConfigPath: '.dart_tool/package_config.json');
       final DebuggingOptions mockOptions = DebuggingOptions.disabled(mockInfo);
       await device.startApp(package, prebuiltApplication: true, debuggingOptions: mockOptions);
 
@@ -1125,7 +1125,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
         applicationPackage: mockDir,
       );
 
-      const BuildInfo mockInfo = BuildInfo(BuildMode.debug, 'flavor', treeShakeIcons: false);
+      const BuildInfo mockInfo = BuildInfo(BuildMode.debug, 'flavor', treeShakeIcons: false, packageConfigPath: '.dart_tool/package_config.json');
       final DebuggingOptions mockOptions = DebuggingOptions.disabled(mockInfo);
       final LaunchResult result = await device.startApp(package, prebuiltApplication: true, debuggingOptions: mockOptions);
 
@@ -1157,7 +1157,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
         applicationPackage: mockDir,
       );
 
-      const BuildInfo mockInfo = BuildInfo(BuildMode.debug, 'flavor', treeShakeIcons: false);
+      const BuildInfo mockInfo = BuildInfo(BuildMode.debug, 'flavor', treeShakeIcons: false, packageConfigPath: '.dart_tool/package_config.json');
       final DebuggingOptions mockOptions = DebuggingOptions.enabled(
         mockInfo,
         enableSoftwareRendering: true,
@@ -1229,7 +1229,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
         applicationPackage: mockDir,
       );
 
-      const BuildInfo mockInfo = BuildInfo(BuildMode.debug, 'flavor', treeShakeIcons: false);
+      const BuildInfo mockInfo = BuildInfo(BuildMode.debug, 'flavor', treeShakeIcons: false, packageConfigPath: '.dart_tool/package_config.json');
       final DebuggingOptions mockOptions = DebuggingOptions.enabled(mockInfo, enableSoftwareRendering: true);
       await device.startApp(package, prebuiltApplication: true, debuggingOptions: mockOptions, route: '/animation');
 

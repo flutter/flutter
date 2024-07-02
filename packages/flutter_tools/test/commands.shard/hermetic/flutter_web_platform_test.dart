@@ -84,7 +84,7 @@ void main() {
     fileSystem.directory('/test').createSync();
     final FlutterWebPlatform webPlatform = await FlutterWebPlatform.start(
       'ProjectRoot',
-      buildInfo: const BuildInfo(BuildMode.debug, '', treeShakeIcons: false),
+      buildInfo: BuildInfo.debug,
       webMemoryFS: WebMemoryFS(),
       fileSystem: fileSystem,
       buildDirectory: fileSystem.directory('build'),
@@ -131,6 +131,7 @@ void main() {
       buildInfo: const BuildInfo(
         BuildMode.debug,
         '',
+        packageConfigPath: '.dart_tool/package_config.json',
         treeShakeIcons: false,
         extraFrontEndOptions: <String>['--dartdevc-module-format=ddc'],
       ),
