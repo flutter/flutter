@@ -3175,7 +3175,7 @@ class _InputDateRangePickerState extends State<_InputDateRangePicker> {
     if (date == null) {
       return widget.errorFormatText ?? MaterialLocalizations.of(context).invalidDateFormatLabel;
     } else if (date.isBefore(widget.firstDate) || date.isAfter(widget.lastDate) ||
-               widget.selectableDayPredicate != null && !widget.selectableDayPredicate!(date, _startDate, _endDate)) {
+        widget.selectableDayPredicate != null && !widget.selectableDayPredicate!(date, _startDate, _endDate)) {
       return widget.errorInvalidText ?? MaterialLocalizations.of(context).dateOutOfRangeLabel;
     }
     return null;
