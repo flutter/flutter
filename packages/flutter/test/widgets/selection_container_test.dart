@@ -212,6 +212,8 @@ void main() {
 }
 
 class TestContainerDelegate extends MultiSelectableSelectionContainerDelegate {
+  TestContainerDelegate({required super.context});
+
   @override
   SelectionResult dispatchSelectionEventToChild(Selectable selectable, SelectionEvent event) {
     throw UnimplementedError();

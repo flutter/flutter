@@ -47,6 +47,7 @@ class SelectionArea extends StatefulWidget {
     this.contextMenuBuilder = _defaultContextMenuBuilder,
     this.magnifierConfiguration,
     this.onSelectionChanged,
+    this.copyIntercept = CopyIntercept.none,
     required this.child,
   });
 
@@ -86,6 +87,9 @@ class SelectionArea extends StatefulWidget {
 
   /// Called when the selected content changes.
   final ValueChanged<SelectedContent?>? onSelectionChanged;
+
+  /// {@macro flutter.widgets.SelectableRegion.copyIntercept}
+  final CopyIntercept copyIntercept;
 
   /// The child widget this selection area applies to.
   ///
@@ -127,6 +131,7 @@ class _SelectionAreaState extends State<SelectionArea> {
       contextMenuBuilder: widget.contextMenuBuilder,
       magnifierConfiguration: widget.magnifierConfiguration ?? TextMagnifier.adaptiveMagnifierConfiguration,
       onSelectionChanged: widget.onSelectionChanged,
+      copyIntercept: widget.copyIntercept,
       child: widget.child,
     );
   }

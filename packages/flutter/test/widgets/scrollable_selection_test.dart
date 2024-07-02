@@ -1201,7 +1201,7 @@ void main() {
       await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.keyC, meta: true));
 
       final Map<String, dynamic> clipboardData = mockClipboard.clipboardData as Map<String, dynamic>;
-      expect(clipboardData['text'], 'em 0It');
+      expect(clipboardData['text'], 'em 0\nIt');
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 
     testWidgets('can copy off screen selection - non-Apple', (WidgetTester tester) async {
@@ -1244,7 +1244,51 @@ void main() {
       await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.keyC, control: true));
 
       final Map<String, dynamic> clipboardData = mockClipboard.clipboardData as Map<String, dynamic>;
-      expect(clipboardData['text'], 'em 0It');
+      expect(clipboardData['text'], 'em 0\nIt');
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.windows, TargetPlatform.linux, TargetPlatform.fuchsia }));
+  });
+
+  testWidgets('horizontal axis copies with spaces', (WidgetTester tester) async {
+      final ScrollController controller = ScrollController();
+      addTearDown(controller.dispose);
+      final FocusNode focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+      await tester.pumpWidget(MaterialApp(
+        home: SelectionArea(
+          focusNode: focusNode,
+          selectionControls: materialTextSelectionControls,
+          child: ListView.builder(
+            controller: controller,
+            scrollDirection: Axis.horizontal,
+            itemCount: 100,
+            itemBuilder: (BuildContext context, int index) {
+              return Text('Item $index');
+            },
+          ),
+        ),
+      ));
+      focusNode.requestFocus();
+      await tester.pumpAndSettle();
+      final RenderParagraph paragraph0 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Item 0'), matching: find.byType(RichText)));
+      final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph0, 2) + const Offset(0, 5), kind: ui.PointerDeviceKind.mouse);
+      addTearDown(gesture.removePointer);
+      final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Item 1'), matching: find.byType(RichText)));
+      await gesture.moveTo(textOffsetToPosition(paragraph1, 2) + const Offset(0, 5));
+      await tester.pumpAndSettle();
+      await gesture.up();
+      expect(paragraph0.selections[0], const TextSelection(baseOffset: 2, extentOffset: 6));
+      expect(paragraph1.selections[0], const TextSelection(baseOffset: 0, extentOffset: 2));
+
+      // Scroll the selected text out off the screen.
+      controller.jumpTo(1000);
+      await tester.pumpAndSettle();
+      expect(find.descendant(of: find.text('Item 0'), matching: find.byType(RichText)), findsNothing);
+      expect(find.descendant(of: find.text('Item 1'), matching: find.byType(RichText)), findsNothing);
+
+      // Start copying.
+      await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.keyC, control: true));
+
+      final Map<String, dynamic> clipboardData = mockClipboard.clipboardData as Map<String, dynamic>;
+      expect(clipboardData['text'], 'em 0 It');
   });
 }
