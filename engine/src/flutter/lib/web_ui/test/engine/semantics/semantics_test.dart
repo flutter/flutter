@@ -1841,7 +1841,7 @@ void _testIncrementables() {
 
     pumpSemantics(isFocused: true);
     expect(capturedActions, <CapturedAction>[
-      (0, ui.SemanticsAction.focus, null),
+      (0, ui.SemanticsAction.didGainAccessibilityFocus, null),
     ]);
     capturedActions.clear();
 
@@ -1852,12 +1852,10 @@ void _testIncrementables() {
       isEmpty,
     );
 
-    // The web doesn't send didLoseAccessibilityFocus as on the web,
-    // accessibility focus is not observable, only input focus is. As of this
-    // writing, there is no SemanticsAction.unfocus action, so the test simply
-    // asserts that no actions are being sent as a result of blur.
     element.blur();
-    expect(capturedActions, isEmpty);
+    expect(capturedActions, <CapturedAction>[
+      (0, ui.SemanticsAction.didLoseAccessibilityFocus, null),
+    ]);
 
     semantics().semanticsEnabled = false;
   });
@@ -1888,14 +1886,15 @@ void _testTextField() {
 
 
     final SemanticsObject node = owner().debugSemanticsTree![0]!;
-    final TextField textFieldRole = node.primaryRole! as TextField;
-    final DomHTMLInputElement inputElement = textFieldRole.editableElement as DomHTMLInputElement;
 
     // TODO(yjbanov): this used to attempt to test that value="hello" but the
     //                test was a false positive. We should revise this test and
     //                make sure it tests the right things:
     //                https://github.com/flutter/flutter/issues/147200
-    expect(inputElement.value, '');
+    expect(
+      (node.element as DomHTMLInputElement).value,
+      isNull,
+    );
 
     expect(node.primaryRole?.role, PrimaryRole.textField);
     expect(
@@ -1906,6 +1905,42 @@ void _testTextField() {
 
     semantics().semanticsEnabled = false;
   });
+
+  // TODO(yjbanov): this test will need to be adjusted for Safari when we add
+  //                Safari testing.
+  test('sends a focus action when text field is activated', () async {
+    final SemanticsActionLogger logger = SemanticsActionLogger();
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
+    updateNode(
+      builder,
+      actions: 0 | ui.SemanticsAction.didGainAccessibilityFocus.index,
+      flags: 0 | ui.SemanticsFlag.isTextField.index,
+      value: 'hello',
+      transform: Matrix4.identity().toFloat64(),
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+    );
+
+    owner().updateSemantics(builder.build());
+
+    final DomElement textField =
+        owner().semanticsHost.querySelector('input[data-semantics-role="text-field"]')!;
+
+    expect(owner().semanticsHost.ownerDocument?.activeElement, isNot(textField));
+
+    textField.focus();
+
+    expect(owner().semanticsHost.ownerDocument?.activeElement, textField);
+    expect(await logger.idLog.first, 0);
+    expect(await logger.actionLog.first, ui.SemanticsAction.didGainAccessibilityFocus);
+
+    semantics().semanticsEnabled = false;
+  }, // TODO(yjbanov): https://github.com/flutter/flutter/issues/46638
+      // TODO(yjbanov): https://github.com/flutter/flutter/issues/50590
+      skip: ui_web.browser.browserEngine != ui_web.BrowserEngine.blink);
 }
 
 void _testCheckables() {
@@ -2186,7 +2221,7 @@ void _testCheckables() {
 
     pumpSemantics(isFocused: true);
     expect(capturedActions, <CapturedAction>[
-      (0, ui.SemanticsAction.focus, null),
+      (0, ui.SemanticsAction.didGainAccessibilityFocus, null),
     ]);
     capturedActions.clear();
 
@@ -2196,12 +2231,15 @@ void _testCheckables() {
     pumpSemantics(isFocused: false);
     expect(capturedActions, isEmpty);
 
-    // The web doesn't send didLoseAccessibilityFocus as on the web,
-    // accessibility focus is not observable, only input focus is. As of this
-    // writing, there is no SemanticsAction.unfocus action, so the test simply
-    // asserts that no actions are being sent as a result of blur.
+    // If the element is blurred by the browser, then we do want to notify the
+    // framework. This is because screen reader can be focused on something
+    // other than what the framework is focused on, and notifying the framework
+    // about the loss of focus on a node is information that the framework did
+    // not have before.
     element.blur();
-    expect(capturedActions, isEmpty);
+    expect(capturedActions, <CapturedAction>[
+      (0, ui.SemanticsAction.didLoseAccessibilityFocus, null),
+    ]);
 
     semantics().semanticsEnabled = false;
   });
@@ -2367,19 +2405,17 @@ void _testTappable() {
 
     pumpSemantics(isFocused: true);
     expect(capturedActions, <CapturedAction>[
-      (0, ui.SemanticsAction.focus, null),
+      (0, ui.SemanticsAction.didGainAccessibilityFocus, null),
     ]);
     capturedActions.clear();
 
     pumpSemantics(isFocused: false);
     expect(capturedActions, isEmpty);
 
-    // The web doesn't send didLoseAccessibilityFocus as on the web,
-    // accessibility focus is not observable, only input focus is. As of this
-    // writing, there is no SemanticsAction.unfocus action, so the test simply
-    // asserts that no actions are being sent as a result of blur.
     element.blur();
-    expect(capturedActions, isEmpty);
+    expect(capturedActions, <CapturedAction>[
+      (0, ui.SemanticsAction.didLoseAccessibilityFocus, null),
+    ]);
 
     semantics().semanticsEnabled = false;
   });
@@ -3209,7 +3245,7 @@ void _testDialog() {
     expect(
       capturedActions,
       <CapturedAction>[
-        (2, ui.SemanticsAction.focus, null),
+        (2, ui.SemanticsAction.didGainAccessibilityFocus, null),
       ],
     );
 
@@ -3271,7 +3307,7 @@ void _testDialog() {
     expect(
       capturedActions,
       <CapturedAction>[
-        (3, ui.SemanticsAction.focus, null),
+        (3, ui.SemanticsAction.didGainAccessibilityFocus, null),
       ],
     );
 
@@ -3421,7 +3457,7 @@ void _testFocusable() {
     pumpSemantics(); // triggers post-update callbacks
     expect(domDocument.activeElement, element);
     expect(capturedActions, <CapturedAction>[
-      (1, ui.SemanticsAction.focus, null),
+      (1, ui.SemanticsAction.didGainAccessibilityFocus, null),
     ]);
     capturedActions.clear();
 
@@ -3434,11 +3470,9 @@ void _testFocusable() {
     // Browser blurs the element
     element.blur();
     expect(domDocument.activeElement, isNot(element));
-    // The web doesn't send didLoseAccessibilityFocus as on the web,
-    // accessibility focus is not observable, only input focus is. As of this
-    // writing, there is no SemanticsAction.unfocus action, so the test simply
-    // asserts that no actions are being sent as a result of blur.
-    expect(capturedActions, isEmpty);
+    expect(capturedActions, <CapturedAction>[
+      (1, ui.SemanticsAction.didLoseAccessibilityFocus, null),
+    ]);
     capturedActions.clear();
 
     // Request focus again
@@ -3446,7 +3480,7 @@ void _testFocusable() {
     pumpSemantics(); // triggers post-update callbacks
     expect(domDocument.activeElement, element);
     expect(capturedActions, <CapturedAction>[
-      (1, ui.SemanticsAction.focus, null),
+      (1, ui.SemanticsAction.didGainAccessibilityFocus, null),
     ]);
     capturedActions.clear();
 
