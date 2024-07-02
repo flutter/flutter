@@ -319,13 +319,40 @@ abstract class CreateBase extends FlutterCommand {
     }
   }
 
-  /// Gets the project name based.
+  /// Gets the project name.
   ///
-  /// Use the current directory path name if the `--project-name` is not specified explicitly.
+  /// If the `--project-name` is not specified explicitly,
+  /// the `name` field from the pubspec.yaml file is used.
+  ///
+  /// If the pubspec.yaml file does not exist,
+  /// the current directory path name is used.
   @protected
   String get projectName {
-    final String projectName =
-        stringArg('project-name') ?? globals.fs.path.basename(projectDirPath);
+    String? projectName = stringArg('project-name');
+
+    if (projectName == null) {
+      final File pubspec = globals.fs
+        .directory(projectDirPath)
+        .childFile('pubspec.yaml');
+
+      if (pubspec.existsSync()) {
+        final RegExp nameRegex = RegExp('^name: ([a-z0-9_]+)');
+
+        final String pubspecContents = pubspec.readAsStringSync();
+
+        final Iterable<RegExpMatch> matches =
+          nameRegex.allMatches(pubspecContents);
+
+        if (matches.isNotEmpty) {
+          projectName = matches.first.group(1);
+        }
+      }
+
+      final String projectDirName = globals.fs.path.basename(projectDirPath);
+
+      projectName ??= projectDirName;
+    }
+
     if (!boolArg('skip-name-checks')) {
       final String? error = _validateProjectName(projectName);
       if (error != null) {
