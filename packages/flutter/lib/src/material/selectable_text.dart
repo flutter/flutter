@@ -243,11 +243,6 @@ class SelectableText extends StatefulWidget {
     this.textScaler,
     this.showCursor = false,
     this.autofocus = false,
-    @Deprecated(
-      'Use `contextMenuBuilder` instead. '
-      'This feature was deprecated after v3.3.0-0.5.pre.',
-    )
-    this.toolbarOptions,
     this.minLines,
     this.maxLines,
     this.cursorWidth = 2.0,
@@ -300,11 +295,6 @@ class SelectableText extends StatefulWidget {
     this.textScaler,
     this.showCursor = false,
     this.autofocus = false,
-    @Deprecated(
-      'Use `contextMenuBuilder` instead. '
-      'This feature was deprecated after v3.3.0-0.5.pre.',
-    )
-    this.toolbarOptions,
     this.minLines,
     this.maxLines,
     this.cursorWidth = 2.0,
@@ -448,17 +438,6 @@ class SelectableText extends StatefulWidget {
 
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
-
-  /// Configuration of toolbar options.
-  ///
-  /// Paste and cut will be disabled regardless.
-  ///
-  /// If not set, select all and copy will be enabled by default.
-  @Deprecated(
-    'Use `contextMenuBuilder` instead. '
-    'This feature was deprecated after v3.3.0-0.5.pre.',
-  )
-  final ToolbarOptions? toolbarOptions;
 
   /// {@macro flutter.widgets.editableText.selectionEnabled}
   bool get selectionEnabled => enableInteractiveSelection;
@@ -755,7 +734,6 @@ class _SelectableTextState extends State<SelectableText> implements TextSelectio
         key: editableTextKey,
         style: effectiveTextStyle,
         readOnly: true,
-        toolbarOptions: widget.toolbarOptions,
         textWidthBasis: widget.textWidthBasis ?? defaultTextStyle.textWidthBasis,
         textHeightBehavior: widget.textHeightBehavior ?? defaultTextStyle.textHeightBehavior,
         showSelectionHandles: _showSelectionHandles,

@@ -791,11 +791,17 @@ void main() {
   testWidgets('selectable text can disable toolbar options', (WidgetTester tester) async {
     await tester.pumpWidget(
       overlay(
-        child: const SelectableText(
+        child: SelectableText(
           'a selectable text',
-          toolbarOptions: ToolbarOptions(
-            selectAll: true,
-          ),
+          contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
+            return AdaptiveTextSelectionToolbar.buttonItems(
+              anchors: editableTextState.contextMenuAnchors,
+              buttonItems: editableTextState.contextMenuButtonItems
+                  .where((ContextMenuButtonItem buttonItem) {
+                    return buttonItem.type == ContextMenuButtonType.selectAll;
+                  }).toList(),
+            );
+          },
         ),
       ),
     );
@@ -3300,15 +3306,13 @@ void main() {
   );
 
   testWidgets(
-    'long press selects word and shows custom toolbar (Cupertino)',
+    'long press selects word and shows toolbar (iOS)',
     (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: Material(
             child: Center(
-              child: SelectableText('Atwater Peel Sherbrooke Bonaventure',
-                selectionControls: cupertinoTextSelectionControls,
-              ),
+              child: SelectableText('Atwater Peel Sherbrooke Bonaventure'),
             ),
           ),
         ),
@@ -3331,24 +3335,24 @@ void main() {
         ),
       );
 
-      // Toolbar shows one button (copy).
-      expect(find.byType(CupertinoButton), findsNWidgets(1));
+      expect(find.byType(CupertinoButton), findsNWidgets(4));
       expect(find.text('Copy'), findsOneWidget);
+      expect(find.text('Look Up'), findsOneWidget);
+      expect(find.text('Search Web'), findsOneWidget);
+      expect(find.text('Share...'), findsOneWidget);
     },
-    variant: TargetPlatformVariant.all(),
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
   );
 
   testWidgets(
-    'long press selects word and shows custom toolbar (Material)',
+    'long press selects word and shows toolbar (android)',
     (WidgetTester tester) async {
 
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: Material(
             child: Center(
-              child: SelectableText('Atwater Peel Sherbrooke Bonaventure',
-                selectionControls: materialTextSelectionControls,
-              ),
+              child: SelectableText('Atwater Peel Sherbrooke Bonaventure'),
             ),
           ),
         ),
@@ -3367,12 +3371,12 @@ void main() {
         const TextSelection(baseOffset: 0, extentOffset: 7),
       );
 
-      // Collapsed toolbar shows 2 buttons: copy, select all
-      expect(find.byType(TextButton), findsNWidgets(2));
+      expect(find.byType(TextButton), findsNWidgets(3));
       expect(find.text('Copy'), findsOneWidget);
+      expect(find.text('Share'), findsOneWidget);
       expect(find.text('Select all'), findsOneWidget);
     },
-    variant: TargetPlatformVariant.all(),
+    variant: TargetPlatformVariant.only(TargetPlatform.android),
   );
 
   testWidgets(

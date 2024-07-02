@@ -59,8 +59,8 @@ class _CupertinoTextSelectionHandlePainter extends CustomPainter {
 /// Specifically does not manage the toolbar, which is left to
 /// [EditableText.contextMenuBuilder].
 @Deprecated(
-  'Use `CupertinoTextSelectionControls`. '
-  'This feature was deprecated after v3.3.0-0.5.pre.',
+  'Use `CupertinoTextSelectionControls` instead. '
+  'This feature was deprecated after v3.19.0-0.1.pre.',
 )
 class CupertinoTextSelectionHandleControls extends CupertinoTextSelectionControls with TextSelectionHandleControls {
 }
@@ -76,35 +76,6 @@ class CupertinoTextSelectionControls extends TextSelectionControls {
     return Size(
       _kSelectionHandleRadius * 2,
       textLineHeight + _kSelectionHandleRadius * 2 - _kSelectionHandleOverlap,
-    );
-  }
-
-  /// Builder for iOS-style copy/paste text selection toolbar.
-  @Deprecated(
-    'Use `contextMenuBuilder` instead. '
-    'This feature was deprecated after v3.3.0-0.5.pre.',
-  )
-  @override
-  Widget buildToolbar(
-    BuildContext context,
-    Rect globalEditableRegion,
-    double textLineHeight,
-    Offset selectionMidpoint,
-    List<TextSelectionPoint> endpoints,
-    TextSelectionDelegate delegate,
-    ValueListenable<ClipboardStatus>? clipboardStatus,
-    Offset? lastSecondaryTapDownPosition,
-  ) {
-    return _CupertinoTextSelectionControlsToolbar(
-      clipboardStatus: clipboardStatus,
-      endpoints: endpoints,
-      globalEditableRegion: globalEditableRegion,
-      handleCut: canCut(delegate) ? () => handleCut(delegate) : null,
-      handleCopy: canCopy(delegate) ? () => handleCopy(delegate) : null,
-      handlePaste: canPaste(delegate) ? () => handlePaste(delegate) : null,
-      handleSelectAll: canSelectAll(delegate) ? () => handleSelectAll(delegate) : null,
-      selectionMidpoint: selectionMidpoint,
-      textLineHeight: textLineHeight,
     );
   }
 
@@ -182,10 +153,11 @@ class CupertinoTextSelectionControls extends TextSelectionControls {
   }
 }
 
-// TODO(justinmc): Deprecate this after TextSelectionControls.buildToolbar is
-// deleted, when users should migrate back to cupertinoTextSelectionControls.
-// See https://github.com/flutter/flutter/pull/124262
 /// Text selection handle controls that follow iOS design conventions.
+@Deprecated(
+  'Use `cupertinoTextSelectionControls` instead. '
+  'This feature was deprecated after v3.19.0-0.1.pre.',
+)
 final TextSelectionControls cupertinoTextSelectionHandleControls =
     CupertinoTextSelectionHandleControls();
 

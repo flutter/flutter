@@ -25,8 +25,8 @@ const double _kToolbarContentDistance = 8.0;
 /// Specifically does not manage the toolbar, which is left to
 /// [EditableText.contextMenuBuilder].
 @Deprecated(
-  'Use `MaterialTextSelectionControls`. '
-  'This feature was deprecated after v3.3.0-0.5.pre.',
+  'Use `MaterialTextSelectionControls` instead. '
+  'This feature was deprecated after v3.19.0-0.1.pre.',
 )
 class MaterialTextSelectionHandleControls extends MaterialTextSelectionControls with TextSelectionHandleControls {
 }
@@ -39,36 +39,6 @@ class MaterialTextSelectionControls extends TextSelectionControls {
   /// Returns the size of the Material handle.
   @override
   Size getHandleSize(double textLineHeight) => const Size(_kHandleSize, _kHandleSize);
-
-  /// Builder for material-style copy/paste text selection toolbar.
-  @Deprecated(
-    'Use `contextMenuBuilder` instead. '
-    'This feature was deprecated after v3.3.0-0.5.pre.',
-  )
-  @override
-  Widget buildToolbar(
-    BuildContext context,
-    Rect globalEditableRegion,
-    double textLineHeight,
-    Offset selectionMidpoint,
-    List<TextSelectionPoint> endpoints,
-    TextSelectionDelegate delegate,
-    ValueListenable<ClipboardStatus>? clipboardStatus,
-    Offset? lastSecondaryTapDownPosition,
-  ) {
-    return _TextSelectionControlsToolbar(
-      globalEditableRegion: globalEditableRegion,
-      textLineHeight: textLineHeight,
-      selectionMidpoint: selectionMidpoint,
-      endpoints: endpoints,
-      delegate: delegate,
-      clipboardStatus: clipboardStatus,
-      handleCut: canCut(delegate) ? () => handleCut(delegate) : null,
-      handleCopy: canCopy(delegate) ? () => handleCopy(delegate) : null,
-      handlePaste: canPaste(delegate) ? () => handlePaste(delegate) : null,
-      handleSelectAll: canSelectAll(delegate) ? () => handleSelectAll(delegate) : null,
-    );
-  }
 
   /// Builder for material-style text selection handles.
   @override
@@ -109,20 +79,6 @@ class MaterialTextSelectionControls extends TextSelectionControls {
       TextSelectionHandleType.left      => const Offset(_kHandleSize, 0),
       TextSelectionHandleType.right     => Offset.zero,
     };
-  }
-
-  @Deprecated(
-    'Use `contextMenuBuilder` instead. '
-    'This feature was deprecated after v3.3.0-0.5.pre.',
-  )
-  @override
-  bool canSelectAll(TextSelectionDelegate delegate) {
-    // Android allows SelectAll when selection is not collapsed, unless
-    // everything has already been selected.
-    final TextEditingValue value = delegate.textEditingValue;
-    return delegate.selectAllEnabled &&
-           value.text.isNotEmpty &&
-           !(value.selection.start == 0 && value.selection.end == value.text.length);
   }
 }
 
@@ -298,10 +254,11 @@ class _TextSelectionHandlePainter extends CustomPainter {
   }
 }
 
-// TODO(justinmc): Deprecate this after TextSelectionControls.buildToolbar is
-// deleted, when users should migrate back to materialTextSelectionControls.
-// See https://github.com/flutter/flutter/pull/124262
 /// Text selection handle controls that follow the Material Design specification.
+@Deprecated(
+  'Use `materialTextSelectionControls` instead. '
+  'This feature was deprecated after v3.19.0-0.1.pre.',
+)
 final TextSelectionControls materialTextSelectionHandleControls = MaterialTextSelectionHandleControls();
 
 /// Text selection controls that follow the Material Design specification.

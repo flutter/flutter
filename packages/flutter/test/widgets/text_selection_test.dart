@@ -1234,7 +1234,6 @@ void main() {
         onEndHandleDragUpdate: onEndDragUpdate,
         onEndHandleDragEnd: onEndDragEnd,
         clipboardStatus: clipboardStatus,
-        selectionDelegate: FakeTextSelectionDelegate(),
         selectionControls: selectionControls,
         selectionEndpoints: const <TextSelectionPoint>[],
         toolbarLayerLink: toolbarLayerLink,
@@ -1278,26 +1277,33 @@ void main() {
       expect(find.byKey(spy.leftHandleKey), findsNothing);
       expect(find.byKey(spy.rightHandleKey), findsNothing);
 
-      selectionOverlay.showToolbar();
+      final GlobalKey toolbarKey = GlobalKey();
+      selectionOverlay.showToolbar(
+        context: selectionOverlay.context,
+        contextMenuBuilder: (BuildContext context) => Placeholder(key: toolbarKey),
+      );
       await tester.pump();
-      expect(find.byKey(spy.toolBarKey), findsOneWidget);
+      expect(find.byKey(toolbarKey), findsOneWidget);
 
       selectionOverlay.hideToolbar();
       await tester.pump();
-      expect(find.byKey(spy.toolBarKey), findsNothing);
+      expect(find.byKey(toolbarKey), findsNothing);
 
       selectionOverlay.showHandles();
-      selectionOverlay.showToolbar();
+      selectionOverlay.showToolbar(
+        context: selectionOverlay.context,
+        contextMenuBuilder: (BuildContext context) => Placeholder(key: toolbarKey),
+      );
       await tester.pump();
       expect(find.byKey(spy.leftHandleKey), findsOneWidget);
       expect(find.byKey(spy.rightHandleKey), findsOneWidget);
-      expect(find.byKey(spy.toolBarKey), findsOneWidget);
+      expect(find.byKey(toolbarKey), findsOneWidget);
 
       selectionOverlay.hide();
       await tester.pump();
       expect(find.byKey(spy.leftHandleKey), findsNothing);
       expect(find.byKey(spy.rightHandleKey), findsNothing);
-      expect(find.byKey(spy.toolBarKey), findsNothing);
+      expect(find.byKey(toolbarKey), findsNothing);
 
       selectionOverlay.dispose();
       await tester.pumpAndSettle();
@@ -2012,7 +2018,6 @@ class TextSelectionControlsSpy extends TextSelectionControls {
   UniqueKey leftHandleKey = UniqueKey();
   UniqueKey rightHandleKey = UniqueKey();
   UniqueKey collapsedHandleKey = UniqueKey();
-  UniqueKey toolBarKey = UniqueKey();
 
   @override
   Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight, [VoidCallback? onTap]) {
@@ -2027,20 +2032,6 @@ class TextSelectionControlsSpy extends TextSelectionControls {
         'height ${textLineHeight.toInt()}',
       ),
     );
-  }
-
-  @override
-  Widget buildToolbar(
-    BuildContext context,
-    Rect globalEditableRegion,
-    double textLineHeight,
-    Offset position,
-    List<TextSelectionPoint> endpoints,
-    TextSelectionDelegate delegate,
-    ValueListenable<ClipboardStatus>? clipboardStatus,
-    Offset? lastSecondaryTapDownPosition,
-  ) {
-    return Text('dummy', key: toolBarKey);
   }
 
   @override

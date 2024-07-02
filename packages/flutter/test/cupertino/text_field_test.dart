@@ -31,20 +31,6 @@ class MockTextSelectionControls extends TextSelectionControls {
   }
 
   @override
-  Widget buildToolbar(
-    BuildContext context,
-    Rect globalEditableRegion,
-    double textLineHeight,
-    Offset position,
-    List<TextSelectionPoint> endpoints,
-    TextSelectionDelegate delegate,
-    ValueListenable<ClipboardStatus>? clipboardStatus,
-    Offset? lastSecondaryTapDownPosition,
-  ) {
-    throw UnimplementedError();
-  }
-
-  @override
   Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
     throw UnimplementedError();
   }
@@ -1920,113 +1906,6 @@ void main() {
     expect(text.style!.letterSpacing, -0.15);
     expect(text.style!.fontWeight, FontWeight.w400);
   }, skip: isContextMenuProvidedByPlatform); // [intended] only applies to platforms where we supply the context menu.
-
-  testWidgets('text field toolbar options correctly changes options on Apple Platforms', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(
-      text: 'Atwater Peel Sherbrooke Bonaventure',
-    );
-    addTearDown(controller.dispose);
-    await tester.pumpWidget(
-      CupertinoApp(
-        home: Column(
-          children: <Widget>[
-            CupertinoTextField(
-              autofocus: true,
-              controller: controller,
-              toolbarOptions: const ToolbarOptions(copy: true),
-            ),
-          ],
-        ),
-      ),
-    );
-
-    // This extra pump is so autofocus can propagate to renderEditable.
-    await tester.pump();
-
-    // Long press to put the cursor after the "w".
-    const int index = 3;
-    await tester.longPressAt(textOffsetToPosition(tester, index));
-    await tester.pumpAndSettle();
-    expect(
-      controller.selection,
-      const TextSelection.collapsed(offset: index),
-    );
-
-    // Double tap on the same location to select the word around the cursor.
-    await tester.tapAt(textOffsetToPosition(tester, index));
-    await tester.pump(const Duration(milliseconds: 50));
-    await tester.tapAt(textOffsetToPosition(tester, index));
-    await tester.pump();
-    expect(
-      controller.selection,
-      const TextSelection(baseOffset: 0, extentOffset: 7),
-    );
-
-    // Selected text shows 'Copy'.
-    expect(find.text('Paste'), findsNothing);
-    expect(find.text('Copy'), findsOneWidget);
-    expect(find.text('Cut'), findsNothing);
-    expect(find.text('Select All'), findsNothing);
-  },
-    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }),
-    skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
-  );
-
-  testWidgets('text field toolbar options correctly changes options on non-Apple platforms', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(
-      text: 'Atwater Peel Sherbrooke Bonaventure',
-    );
-    addTearDown(controller.dispose);
-    await tester.pumpWidget(
-      CupertinoApp(
-        home: Column(
-          children: <Widget>[
-            CupertinoTextField(
-              controller: controller,
-              toolbarOptions: const ToolbarOptions(copy: true),
-            ),
-          ],
-        ),
-      ),
-    );
-
-    // Long press to select 'Atwater'
-    const int index = 3;
-    await tester.longPressAt(textOffsetToPosition(tester, index));
-    await tester.pumpAndSettle();
-    expect(
-      controller.selection,
-      const TextSelection(baseOffset: 0, extentOffset: 7),
-    );
-
-    // Tap elsewhere to hide the context menu so that subsequent taps don't
-    // collide with it.
-    await tester.tapAt(textOffsetToPosition(tester, controller.text.length));
-    await tester.pump();
-    expect(
-      controller.selection,
-      const TextSelection.collapsed(offset: 35, affinity: TextAffinity.upstream),
-    );
-
-    // Double tap on the same location to select the word around the cursor.
-    await tester.tapAt(textOffsetToPosition(tester, 10));
-    await tester.pump(const Duration(milliseconds: 50));
-    await tester.tapAt(textOffsetToPosition(tester, 10));
-    await tester.pump();
-    expect(
-      controller.selection,
-      const TextSelection(baseOffset: 8, extentOffset: 12),
-    );
-
-    // Selected text shows 'Copy'.
-    expect(find.text('Paste'), findsNothing);
-    expect(find.text('Copy'), findsOneWidget);
-    expect(find.text('Cut'), findsNothing);
-    expect(find.text('Select All'), findsNothing);
-  },
-    variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }),
-    skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
-  );
 
   testWidgets('Read only text field', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(text: 'readonly');
@@ -8085,7 +7964,15 @@ void main() {
                     key: const Key('field0'),
                     controller: controller,
                     style: const TextStyle(height: 4, color: ui.Color.fromARGB(100, 0, 0, 0)),
-                    toolbarOptions: const ToolbarOptions(selectAll: true),
+                    contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
+                      return AdaptiveTextSelectionToolbar.buttonItems(
+                        anchors: editableTextState.contextMenuAnchors,
+                        buttonItems: editableTextState.contextMenuButtonItems
+                            .where((ContextMenuButtonItem buttonItem) {
+                              return buttonItem.type == ContextMenuButtonType.selectAll;
+                            }).toList(),
+                      );
+                    },
                     selectionHeightStyle: ui.BoxHeightStyle.includeLineSpacingTop,
                     selectionWidthStyle: ui.BoxWidthStyle.max,
                     maxLines: 3,
@@ -8140,7 +8027,15 @@ void main() {
                     key: const Key('field0'),
                     controller: controller,
                     style: const TextStyle(height: 4, color: ui.Color.fromARGB(100, 0, 0, 0)),
-                    toolbarOptions: const ToolbarOptions(selectAll: true),
+                    contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
+                      return AdaptiveTextSelectionToolbar.buttonItems(
+                        anchors: editableTextState.contextMenuAnchors,
+                        buttonItems: editableTextState.contextMenuButtonItems
+                            .where((ContextMenuButtonItem buttonItem) {
+                              return buttonItem.type == ContextMenuButtonType.selectAll;
+                            }).toList(),
+                      );
+                    },
                     selectionHeightStyle: ui.BoxHeightStyle.includeLineSpacingBottom,
                     maxLines: 3,
                   ),

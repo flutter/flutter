@@ -1071,11 +1071,13 @@ mixin TextSelectionDelegate {
   ///   updating the text editing state.
   void userUpdateTextEditingValue(TextEditingValue value, SelectionChangedCause cause);
 
+  /// {@template flutter.services.TextSelectionDelegate.hideToolbar}
   /// Hides the text selection toolbar.
   ///
   /// By default, hideHandles is true, and the toolbar is hidden along with its
   /// handles. If hideHandles is set to false, then the toolbar will be hidden
   /// but the handles will remain.
+  /// {@endtemplate}
   void hideToolbar([bool hideHandles = true]);
 
   /// Brings the provided [TextPosition] into the visible area of the text
@@ -1124,10 +1126,12 @@ mixin TextSelectionDelegate {
   /// will be hidden and the current selection will be scrolled into view.
   Future<void> pasteText(SelectionChangedCause cause);
 
+  /// {@template flutter.services.TextSelectionDelegate.selectAll}
   /// Set the current selection to contain the entire text value.
   ///
   /// If and only if [cause] is [SelectionChangedCause.toolbar], the selection
   /// will be scrolled into view.
+  /// {@endtemplate}
   void selectAll(SelectionChangedCause cause);
 
   /// Copy current selection to [Clipboard].

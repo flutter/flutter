@@ -117,11 +117,6 @@ class CupertinoTextFormFieldRow extends FormField<String> {
     TextAlignVertical? textAlignVertical,
     bool autofocus = false,
     bool readOnly = false,
-    @Deprecated(
-      'Use `contextMenuBuilder` instead. '
-      'This feature was deprecated after v3.3.0-0.5.pre.',
-    )
-    ToolbarOptions? toolbarOptions,
     bool? showCursor,
     String obscuringCharacter = '•',
     bool obscureText = false,
@@ -203,7 +198,6 @@ class CupertinoTextFormFieldRow extends FormField<String> {
                   textCapitalization: textCapitalization,
                   textDirection: textDirection,
                   autofocus: autofocus,
-                  toolbarOptions: toolbarOptions,
                   readOnly: readOnly,
                   showCursor: showCursor,
                   obscuringCharacter: obscuringCharacter,

@@ -1253,7 +1253,15 @@ void main() {
           child: Center(
             child: TextField(
               controller: controller,
-              toolbarOptions: const ToolbarOptions(copy: true),
+              contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
+                return AdaptiveTextSelectionToolbar.buttonItems(
+                  anchors: editableTextState.contextMenuAnchors,
+                  buttonItems: editableTextState.contextMenuButtonItems
+                      .where((ContextMenuButtonItem buttonItem) {
+                        return buttonItem.type == ContextMenuButtonType.copy;
+                      }).toList(),
+                );
+              },
             ),
           ),
         ),
@@ -1313,7 +1321,16 @@ void main() {
                       key: const Key('field0'),
                       controller: controller,
                       style: const TextStyle(height: 4, color: Colors.black45),
-                      toolbarOptions: const ToolbarOptions(copy: true, selectAll: true),
+                      contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
+                        return AdaptiveTextSelectionToolbar.buttonItems(
+                          anchors: editableTextState.contextMenuAnchors,
+                          buttonItems: editableTextState.contextMenuButtonItems
+                              .where((ContextMenuButtonItem buttonItem) {
+                                return buttonItem.type == ContextMenuButtonType.copy
+                                    || buttonItem.type == ContextMenuButtonType.selectAll;
+                              }).toList(),
+                        );
+                      },
                       selectionHeightStyle: ui.BoxHeightStyle.includeLineSpacingTop,
                       selectionWidthStyle: ui.BoxWidthStyle.max,
                       maxLines: 3,
@@ -1362,7 +1379,16 @@ void main() {
                       key: const Key('field0'),
                       controller: controller,
                       style: const TextStyle(height: 4, color: Colors.black45),
-                      toolbarOptions: const ToolbarOptions(copy: true, selectAll: true),
+                      contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
+                        return AdaptiveTextSelectionToolbar.buttonItems(
+                          anchors: editableTextState.contextMenuAnchors,
+                          buttonItems: editableTextState.contextMenuButtonItems
+                              .where((ContextMenuButtonItem buttonItem) {
+                                return buttonItem.type == ContextMenuButtonType.copy
+                                    || buttonItem.type == ContextMenuButtonType.selectAll;
+                              }).toList(),
+                        );
+                      },
                       selectionHeightStyle: ui.BoxHeightStyle.includeLineSpacingBottom,
                       maxLines: 3,
                     ),
@@ -1417,7 +1443,15 @@ void main() {
             child: Center(
               child: TextField(
                 controller: controller,
-                toolbarOptions: const ToolbarOptions(copy: true),
+                contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
+                  return AdaptiveTextSelectionToolbar.buttonItems(
+                    anchors: editableTextState.contextMenuAnchors,
+                    buttonItems: editableTextState.contextMenuButtonItems
+                        .where((ContextMenuButtonItem buttonItem) {
+                          return buttonItem.type == ContextMenuButtonType.copy;
+                        }).toList(),
+                  );
+                },
               ),
             ),
           ),
@@ -10251,78 +10285,6 @@ void main() {
       expectMaterialToolbarForPartialSelection();
     },
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows }),
-  );
-
-  testWidgets(
-    'Custom toolbar test - Android text selection controls',
-    (WidgetTester tester) async {
-      final TextEditingController controller = _textEditingController(
-        text: 'Atwater Peel Sherbrooke Bonaventure',
-      );
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Material(
-            child: Center(
-              child: TextField(
-                controller: controller,
-                selectionControls: materialTextSelectionControls,
-              ),
-            ),
-          ),
-        ),
-      );
-
-      final Offset textfieldStart = tester.getTopLeft(find.byType(TextField));
-
-      await tester.tapAt(textfieldStart + const Offset(150.0, 9.0));
-      await tester.pump(const Duration(milliseconds: 50));
-
-      await tester.tapAt(textfieldStart + const Offset(150.0, 9.0));
-      await tester.pumpAndSettle();
-
-      // Selected text shows 4 toolbar buttons: cut, copy, paste, select all
-      expect(find.byType(TextButton), findsNWidgets(4));
-      expect(find.text('Cut'), findsOneWidget);
-      expect(find.text('Copy'), findsOneWidget);
-      expect(find.text('Paste'), findsOneWidget);
-      expect(find.text('Select all'), findsOneWidget);
-    },
-    variant: TargetPlatformVariant.all(),
-    skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.,
-  );
-
-  testWidgets(
-    'Custom toolbar test - Cupertino text selection controls',
-    (WidgetTester tester) async {
-      final TextEditingController controller = _textEditingController(
-        text: 'Atwater Peel Sherbrooke Bonaventure',
-      );
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Material(
-            child: Center(
-              child: TextField(
-                controller: controller,
-                selectionControls: cupertinoTextSelectionControls,
-              ),
-            ),
-          ),
-        ),
-      );
-
-      final Offset textfieldStart = tester.getTopLeft(find.byType(TextField));
-
-      await tester.tapAt(textfieldStart + const Offset(150.0, 9.0));
-      await tester.pump(const Duration(milliseconds: 50));
-
-      await tester.tapAt(textfieldStart + const Offset(150.0, 9.0));
-      await tester.pumpAndSettle();
-
-      // Selected text shows 3 toolbar buttons: cut, copy, paste
-      expect(find.byType(CupertinoButton), findsNWidgets(3));
-    },
-    variant: TargetPlatformVariant.all(),
-    skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.,
   );
 
   testWidgets('selectionControls is passed to EditableText', (WidgetTester tester) async {
