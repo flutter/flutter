@@ -152,8 +152,28 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
 
   @override
   bool canTransitionTo(TransitionRoute<dynamic> nextRoute) {
+    if (controller != null && controller!.isAnimating) {
+      return false;
+    }
     // Don't perform outgoing animation if the next route is a fullscreen dialog.
-    return nextRoute is CupertinoRouteTransitionMixin && !nextRoute.fullscreenDialog;
+    return nextRoute is FlexibleTransitionRouteMixin<T> || nextRoute is CupertinoRouteTransitionMixin && !nextRoute.fullscreenDialog;
+  }
+
+  @override
+  bool canTransitionFrom(TransitionRoute<dynamic> previousRoute) {
+    return previousRoute is FlexibleTransitionRouteMixin<T> || previousRoute is CupertinoRouteTransitionMixin && !previousRoute.fullscreenDialog;
+  }
+
+  /// True if an iOS-style back swipe pop gesture is currently underway for [route].
+  ///
+  /// This just checks the route's [NavigatorState.userGestureInProgress].
+  ///
+  /// See also:
+  ///
+  ///  * [popGestureEnabled], which returns true if a user-triggered pop gesture
+  ///    would be allowed.
+  static bool isPopGestureInProgress(PageRoute<dynamic> route) {
+    return route.navigator!.userGestureInProgress;
   }
 
   @override
@@ -260,7 +280,7 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
 ///  * [CupertinoTabScaffold], for applications that have a tab bar at the
 ///    bottom with multiple pages.
 ///  * [CupertinoPage], for a [Page] version of this class.
-class CupertinoPageRoute<T> extends PageRoute<T> with CupertinoRouteTransitionMixin<T> {
+class CupertinoPageRoute<T> extends PageRoute<T> with CupertinoRouteTransitionMixin<T>, FlexibleTransitionRouteMixin<T> {
   /// Creates a page route for use in an iOS designed app.
   ///
   /// The [builder], [maintainState], and [fullscreenDialog] arguments must not
@@ -276,6 +296,9 @@ class CupertinoPageRoute<T> extends PageRoute<T> with CupertinoRouteTransitionMi
   }) {
     assert(opaque);
   }
+
+  @override
+  DelegatedTransitionBuilder? delegatedTransition = CupertinoPageTransition.delegateTransition;
 
   /// Builds the primary contents of the route.
   final WidgetBuilder builder;
@@ -297,13 +320,16 @@ class CupertinoPageRoute<T> extends PageRoute<T> with CupertinoRouteTransitionMi
 //
 // This route uses the builder from the page to build its content. This ensures
 // the content is up to date after page updates.
-class _PageBasedCupertinoPageRoute<T> extends PageRoute<T> with CupertinoRouteTransitionMixin<T> {
+class _PageBasedCupertinoPageRoute<T> extends PageRoute<T> with CupertinoRouteTransitionMixin<T>, FlexibleTransitionRouteMixin<T> {
   _PageBasedCupertinoPageRoute({
     required CupertinoPage<T> page,
     super.allowSnapshotting = true,
   }) : super(settings: page) {
     assert(opaque);
   }
+
+  @override
+  DelegatedTransitionBuilder? delegatedTransition = CupertinoPageTransition.delegateTransition;
 
   CupertinoPage<T> get _page => settings as CupertinoPage<T>;
 
@@ -406,6 +432,25 @@ class CupertinoPageTransition extends StatefulWidget {
   ///    Used to precisely track back gesture drags.
   final bool linearTransition;
 
+
+  /// The delegated transition.
+  static Widget delegateTransition(BuildContext context, Widget? child, Animation<double> secondaryAnimation) {
+    final Animation<Offset> delegatedPositionAnimation =
+      CurvedAnimation(
+        parent: secondaryAnimation,
+        curve: Curves.linearToEaseOut,
+        reverseCurve: Curves.easeInToLinear,
+      ).drive(_kMiddleLeftTween);
+    assert(debugCheckHasDirectionality(context));
+    final TextDirection textDirection = Directionality.of(context);
+    return SlideTransition(
+      position: delegatedPositionAnimation,
+      textDirection: textDirection,
+      transformHitTests: false,
+      child: child,
+    );
+  }
+
   @override
   State<CupertinoPageTransition> createState() => _CupertinoPageTransitionState();
 }
@@ -487,10 +532,17 @@ class _CupertinoPageTransitionState extends State<CupertinoPageTransition> {
   Widget build(BuildContext context) {
     assert(debugCheckHasDirectionality(context));
     final TextDirection textDirection = Directionality.of(context);
-    return SlideTransition(
-      position: _secondaryPositionAnimation,
-      textDirection: textDirection,
-      transformHitTests: false,
+    return DelegatedTransition(
+      context: context,
+      animation: widget.secondaryRouteAnimation,
+      builder: (BuildContext context, Widget? child) {
+        return SlideTransition(
+          position: _secondaryPositionAnimation,
+          textDirection: textDirection,
+          transformHitTests: false,
+          child: child,
+        );
+      },
       child: SlideTransition(
         position: _primaryPositionAnimation,
         textDirection: textDirection,

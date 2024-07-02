@@ -32,7 +32,7 @@ import 'theme.dart';
 ///  * [MaterialRouteTransitionMixin], which provides the material transition
 ///    for this route.
 ///  * [MaterialPage], which is a [Page] of this class.
-class MaterialPageRoute<T> extends PageRoute<T> with MaterialRouteTransitionMixin<T> {
+class MaterialPageRoute<T> extends PageRoute<T> with MaterialRouteTransitionMixin<T>, FlexibleTransitionRouteMixin<T> {
   /// Construct a MaterialPageRoute whose contents are defined by [builder].
   MaterialPageRoute({
     required this.builder,
@@ -80,7 +80,7 @@ class MaterialPageRoute<T> extends PageRoute<T> with MaterialRouteTransitionMixi
 ///    by the [PageTransitionsTheme].
 ///  * [CupertinoPageTransitionsBuilder], which is the default page transition
 ///    for iOS and macOS.
-mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
+mixin MaterialRouteTransitionMixin<T> on PageRoute<T> implements FlexibleTransitionRouteMixin<T>{
   /// Builds the primary contents of the route.
   @protected
   Widget buildContent(BuildContext context);
@@ -94,11 +94,28 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
   @override
   String? get barrierLabel => null;
 
+  DelegatedTransitionBuilder? _delegatedTransition;
+
+  @override
+  DelegatedTransitionBuilder? get delegatedTransition => _delegatedTransition;
+
+  set delegatedTransition(DelegatedTransitionBuilder? newTransition) {
+    _delegatedTransition = newTransition;
+  }
+
   @override
   bool canTransitionTo(TransitionRoute<dynamic> nextRoute) {
-    // Don't perform outgoing animation if the next route is a fullscreen dialog.
+    if (controller != null && controller!.isAnimating) {
+      return false;
+    }
     return (nextRoute is MaterialRouteTransitionMixin && !nextRoute.fullscreenDialog)
-      || (nextRoute is CupertinoRouteTransitionMixin && !nextRoute.fullscreenDialog);
+      || (nextRoute is CupertinoRouteTransitionMixin && !nextRoute.fullscreenDialog)
+      || (nextRoute is FlexibleTransitionRouteMixin<T>);
+  }
+
+  @override
+  bool canTransitionFrom(TransitionRoute<dynamic> previousRoute) {
+    return previousRoute is PageRoute;
   }
 
   @override
@@ -118,6 +135,7 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
   @override
   Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
     final PageTransitionsTheme theme = Theme.of(context).pageTransitionsTheme;
+    delegatedTransition = theme.delegatedTransition(context);
     return theme.buildTransitions<T>(this, context, animation, secondaryAnimation, child);
   }
 }
@@ -179,7 +197,7 @@ class MaterialPage<T> extends Page<T> {
 //
 // This route uses the builder from the page to build its content. This ensures
 // the content is up to date after page updates.
-class _PageBasedMaterialPageRoute<T> extends PageRoute<T> with MaterialRouteTransitionMixin<T> {
+class _PageBasedMaterialPageRoute<T> extends PageRoute<T> with MaterialRouteTransitionMixin<T>, FlexibleTransitionRouteMixin<T> {
   _PageBasedMaterialPageRoute({
     required MaterialPage<T> page,
     super.allowSnapshotting,

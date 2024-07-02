@@ -4,6 +4,7 @@
 
 import 'basic.dart';
 import 'framework.dart';
+import 'navigator.dart';
 import 'routes.dart';
 
 /// A modal route that replaces the entire screen.

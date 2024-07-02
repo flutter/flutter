@@ -2486,3 +2486,26 @@ abstract class PopEntry<T> {
     return 'PopEntry canPop: ${canPopNotifier.value}, onPopInvoked: $onPopInvokedWithResult';
   }
 }
+
+/// Mixin for a route that can provide a delegated secondary transition to the
+/// outgoing route.
+mixin FlexibleTransitionRouteMixin<T> on TransitionRoute<T> {
+  /// The delegated transition provided to the previous route.
+  DelegatedTransitionBuilder? get delegatedTransition;
+
+  @override
+  void didChangeNext(Route<dynamic>? nextRoute) {
+    if (nextRoute is FlexibleTransitionRouteMixin<T> && canTransitionTo(nextRoute) && navigator != null) {
+      navigator!.delegateTransitionBuilder = nextRoute.delegatedTransition;
+    }
+    super.didChangeNext(nextRoute);
+  }
+
+  @override
+  void didPopNext(Route<dynamic> nextRoute) {
+    if (nextRoute is FlexibleTransitionRouteMixin<T> && canTransitionTo(nextRoute) && navigator != null) {
+      navigator!.delegateTransitionBuilder = nextRoute.delegatedTransition;
+    }
+    super.didPopNext(nextRoute);
+  }
+}

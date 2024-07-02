@@ -290,28 +290,35 @@ class _ZoomPageTransition extends StatelessWidget {
           child: child,
         );
       },
-      child: DualTransitionBuilder(
-        animation: ReverseAnimation(secondaryAnimation),
-        forwardBuilder: (
-          BuildContext context,
-          Animation<double> animation,
-          Widget? child,
-        ) {
-          return _ZoomEnterTransition(
-            animation: animation,
-            allowSnapshotting: allowSnapshotting && allowEnterRouteSnapshotting ,
-            reverse: true,
-            child: child,
-          );
-        },
-        reverseBuilder: (
-          BuildContext context,
-          Animation<double> animation,
-          Widget? child,
-        ) {
-          return _ZoomExitTransition(
-            animation: animation,
-            allowSnapshotting: allowSnapshotting,
+      child: DelegatedTransition(
+        context: context,
+        animation: secondaryAnimation,
+        builder: (BuildContext context, Widget? child) {
+          return DualTransitionBuilder(
+            animation: ReverseAnimation(secondaryAnimation),
+            forwardBuilder: (
+              BuildContext context,
+              Animation<double> animation,
+              Widget? child,
+            ) {
+              return _ZoomEnterTransition(
+                animation: animation,
+                allowSnapshotting: allowSnapshotting && allowEnterRouteSnapshotting ,
+                reverse: true,
+                child: child,
+              );
+            },
+            reverseBuilder: (
+              BuildContext context,
+              Animation<double> animation,
+              Widget? child,
+            ) {
+              return _ZoomExitTransition(
+                animation: animation,
+                allowSnapshotting: allowSnapshotting,
+                child: child,
+              );
+            },
             child: child,
           );
         },
@@ -702,6 +709,37 @@ class ZoomPageTransitionsBuilder extends PageTransitionsBuilder {
   // for the Impeller backend.
   static const bool _kProfileForceDisableSnapshotting = bool.fromEnvironment('flutter.benchmarks.force_disable_snapshot');
 
+  /// The delegated transition.
+  static Widget delegateTransition(BuildContext context, Widget? child, Animation<double> secondaryAnimation) {
+    return DualTransitionBuilder(
+      animation: ReverseAnimation(secondaryAnimation),
+      forwardBuilder: (
+        BuildContext context,
+        Animation<double> animation,
+        Widget? child,
+      ) {
+        return _ZoomEnterTransition(
+          animation: animation,
+          allowSnapshotting: true ,
+          reverse: true,
+          child: child,
+        );
+      },
+      reverseBuilder: (
+        BuildContext context,
+        Animation<double> animation,
+        Widget? child,
+      ) {
+        return _ZoomExitTransition(
+          animation: animation,
+          allowSnapshotting: true,
+          child: child,
+        );
+      },
+      child: child,
+    );
+  }
+
   @override
   Widget buildTransitions<T>(
     PageRoute<T> route,
@@ -824,6 +862,19 @@ class PageTransitionsTheme with Diagnosticable {
       secondaryAnimation: secondaryAnimation,
       child: child,
     );
+  }
+
+  /// Provide delegate transition for platform.
+  DelegatedTransitionBuilder? delegatedTransition(BuildContext context) {
+    final TargetPlatform platform = Theme.of(context).platform;
+
+    final PageTransitionsBuilder matchingBuilder =
+      builders[platform] ?? const ZoomPageTransitionsBuilder();
+
+    if (matchingBuilder == const ZoomPageTransitionsBuilder()) {
+      return ZoomPageTransitionsBuilder.delegateTransition;
+    }
+    return null;
   }
 
   // Map the builders to a list with one PageTransitionsBuilder per platform for
