@@ -520,7 +520,7 @@ mixin SchedulerBinding on BindingBase {
   /// Returns false if the scheduler is [locked], or if there are no tasks
   /// remaining.
   ///
-  /// Returns true otherwise, including when no task is executed due to priory
+  /// Returns true otherwise, including when no task is executed due to priority
   /// being too low.
   @visibleForTesting
   @pragma('vm:notify-debugger-on-exception')
