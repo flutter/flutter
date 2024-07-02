@@ -17,6 +17,8 @@ dependencies:
   vector_math: 2.1.4
   sky_engine:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
 
 dev_dependencies:
   flutter_test:
