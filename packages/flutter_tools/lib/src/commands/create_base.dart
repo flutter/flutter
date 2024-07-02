@@ -4,6 +4,7 @@
 
 import 'package:meta/meta.dart';
 import 'package:uuid/uuid.dart';
+import 'package:yaml/yaml.dart';
 
 import '../android/android.dart' as android_common;
 import '../android/android_workflow.dart';
@@ -336,15 +337,20 @@ abstract class CreateBase extends FlutterCommand {
         .childFile('pubspec.yaml');
 
       if (pubspec.existsSync()) {
-        final RegExp nameRegex = RegExp('^name: ([a-z0-9_]+)');
-
         final String pubspecContents = pubspec.readAsStringSync();
 
-        final Iterable<RegExpMatch> matches =
-          nameRegex.allMatches(pubspecContents);
+        try {
+          final Object? pubspecYaml = loadYaml(pubspecContents);
 
-        if (matches.isNotEmpty) {
-          projectName = matches.first.group(1);
+          if (pubspecYaml is YamlMap) {
+            final Object? pubspecName = pubspecYaml['name'];
+
+            if (pubspecName is String) {
+              projectName = pubspecName;
+            }
+          }
+        } on YamlException {
+          // If the pubspec is malformed, fallback to using the directory name.
         }
       }
 
