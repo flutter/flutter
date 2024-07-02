@@ -2457,8 +2457,10 @@ class _MonthItemState extends State<_MonthItem> {
   Widget _buildDayItem(BuildContext context, DateTime dayToBuild, int firstDayOffset, int daysInMonth) {
     final int day = dayToBuild.day;
 
-    final bool isDisabled = dayToBuild.isAfter(widget.lastDate) || dayToBuild.isBefore(widget.firstDate) ||
-        widget.selectableDayPredicate != null && !widget.selectableDayPredicate!(dayToBuild, widget.selectedDateStart, widget.selectedDateEnd);
+    final bool isDisabled = dayToBuild.isAfter(widget.lastDate) ||
+      dayToBuild.isBefore(widget.firstDate) ||
+      widget.selectableDayPredicate != null &&
+      !widget.selectableDayPredicate!(dayToBuild, widget.selectedDateStart, widget.selectedDateEnd);
     final bool isRangeSelected = widget.selectedDateStart != null && widget.selectedDateEnd != null;
     final bool isSelectedDayStart = widget.selectedDateStart != null && dayToBuild.isAtSameMomentAs(widget.selectedDateStart!);
     final bool isSelectedDayEnd = widget.selectedDateEnd != null && dayToBuild.isAtSameMomentAs(widget.selectedDateEnd!);
