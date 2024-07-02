@@ -185,7 +185,7 @@ class CheckboxListTile extends StatelessWidget {
     this.dense,
     this.secondary,
     this.selected = false,
-    this.controlAffinity = ListTileControlAffinity.platform,
+    this.controlAffinity,
     this.contentPadding,
     this.tristate = false,
     this.checkboxShape,
@@ -229,7 +229,7 @@ class CheckboxListTile extends StatelessWidget {
     this.dense,
     this.secondary,
     this.selected = false,
-    this.controlAffinity = ListTileControlAffinity.platform,
+    this.controlAffinity,
     this.contentPadding,
     this.tristate = false,
     this.checkboxShape,
@@ -403,7 +403,7 @@ class CheckboxListTile extends StatelessWidget {
   final bool selected;
 
   /// Where to place the control relative to the text.
-  final ListTileControlAffinity controlAffinity;
+  final ListTileControlAffinity? controlAffinity;
 
   /// Defines insets surrounding the tile's contents.
   ///
@@ -518,10 +518,14 @@ class CheckboxListTile extends StatelessWidget {
         );
     }
 
-    final (Widget? leading, Widget? trailing) = switch (controlAffinity) {
+    final ListTileThemeData listTileTheme = ListTileTheme.of(context);
+    final ListTileControlAffinity effectiveControlAffinity =
+        controlAffinity ?? listTileTheme.controlAffinity ?? ListTileControlAffinity.platform;
+    final (Widget? leading, Widget? trailing) = switch (effectiveControlAffinity) {
       ListTileControlAffinity.leading => (control, secondary),
       ListTileControlAffinity.trailing || ListTileControlAffinity.platform => (secondary, control),
     };
+
     final ThemeData theme = Theme.of(context);
     final CheckboxThemeData checkboxTheme = CheckboxTheme.of(context);
     final Set<MaterialState> states = <MaterialState>{

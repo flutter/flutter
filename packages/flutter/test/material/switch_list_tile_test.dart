@@ -1691,4 +1691,38 @@ void main() {
     expect(Focus.of(firstChildKey.currentContext!).hasPrimaryFocus, isFalse);
     expect(Focus.of(secondChildKey.currentContext!).hasPrimaryFocus, isTrue);
   });
+
+  testWidgets('SwitchListTile uses ListTileTheme controlAffinity', (WidgetTester tester) async {
+    Widget buildView(ListTileControlAffinity controlAffinity) {
+      return MaterialApp(
+        home: Material(
+          child: ListTileTheme(
+            data: ListTileThemeData(
+              controlAffinity: controlAffinity,
+            ),
+            child: SwitchListTile(
+              value: true,
+              title: const Text('SwitchListTile'),
+              onChanged: (bool value) {},
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildView(ListTileControlAffinity.leading));
+    final Finder leading = find.text('SwitchListTile');
+    final Offset offsetLeading = tester.getTopLeft(leading);
+    expect(offsetLeading, const Offset(92.0, 16.0));
+
+    await tester.pumpWidget(buildView(ListTileControlAffinity.trailing));
+    final Finder trailing = find.text('SwitchListTile');
+    final Offset offsetTrailing = tester.getTopLeft(trailing);
+    expect(offsetTrailing, const Offset(16.0, 16.0));
+
+    await tester.pumpWidget(buildView(ListTileControlAffinity.platform));
+    final Finder platform = find.text('SwitchListTile');
+    final Offset offsetPlatform = tester.getTopLeft(platform);
+    expect(offsetPlatform, const Offset(16.0, 16.0));
+  });
 }
