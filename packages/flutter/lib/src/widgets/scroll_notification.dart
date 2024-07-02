@@ -274,6 +274,18 @@ class OverscrollNotification extends ScrollNotification {
 /// ** See code in examples/api/lib/widgets/scroll_end_notification/scroll_end_notification.0.dart **
 /// {@end-tool}
 ///
+///
+/// {@tool dartpad}
+/// This example auto-scrolls one special "aligned item" sliver to
+/// the top or bottom of the viewport, whenever it's partially visible
+/// (because it overlaps the top or bottom of the viewport). This
+/// example differs from the previous one in that the layout of an
+/// individual sliver is retrieved from its [RenderSliver] via a
+/// [GlobalKey]. The example does not rely on all of the list items
+/// having the same extent.
+///
+/// ** See code in examples/api/lib/widgets/scroll_end_notification/scroll_end_notification.1.dart **
+/// {@end-tool}
 /// See also:
 ///
 ///  * [ScrollStartNotification], which indicates that scrolling has started.
