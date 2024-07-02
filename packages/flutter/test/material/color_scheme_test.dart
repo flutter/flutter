@@ -658,7 +658,7 @@ void main() {
     expect(() => ColorScheme.fromImageProvider(provider: image, contrastLevel: 1.5), throwsAssertionError);
   });
 
-  test('fromImageProvider() propagates TimeoutException when image cannot be rendered', () async {
+  test('fromImageProvider() propagates exception thrown by imageProvider.resolve when image cannot be rendered', () async {
     final Uint8List blueSquareBytes = Uint8List.fromList(kBlueSquarePng);
 
     // Corrupt the image's bytelist so it cannot be read.
