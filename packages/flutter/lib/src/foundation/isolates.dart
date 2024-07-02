@@ -2,7 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:developer';
 /// @docImport 'dart:isolate';
+///
+/// @docImport 'package:flutter/scheduler.dart';
 library;
 
 import 'dart:async';
