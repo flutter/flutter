@@ -1288,4 +1288,63 @@ void main() {
     await tester.pump();
     expect(find.byKey(optionsKey), findsNothing);
   });
+
+  testWidgets('can prevent older optionsBuilder results from replacing the new ones', (WidgetTester tester) async {
+    final GlobalKey fieldKey = GlobalKey();
+    final GlobalKey optionsKey = GlobalKey();
+    late FocusNode focusNode;
+    late TextEditingController textEditingController;
+    Iterable<String>? lastOptions;
+    Duration? delay;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: RawAutocomplete<String>(
+            optionsBuilder: (TextEditingValue textEditingValue) async {
+              final Iterable<String> options = kOptions.where((String option) {
+                return option.contains(textEditingValue.text.toLowerCase());
+              });
+              if (delay == null) {
+                return options;
+              }
+              return Future<Iterable<String>>.delayed(delay, () => options);
+            },
+            fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController, FocusNode fieldFocusNode, VoidCallback onFieldSubmitted) {
+              focusNode = fieldFocusNode;
+              textEditingController = fieldTextEditingController;
+              return TextField(
+                key: fieldKey,
+                focusNode: focusNode,
+                controller: textEditingController,
+              );
+            },
+            optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
+              lastOptions = options;
+              return Container(key: optionsKey);
+            },
+          ),
+        ),
+      )
+    );
+
+    const Duration longReqDelay = Duration(milliseconds: 500);
+    const Duration shortReqDelay = Duration(milliseconds: 100);
+    focusNode.requestFocus();
+
+    // Enter first letter
+    delay = longReqDelay;
+    await tester.enterText(find.byKey(fieldKey), 'c');
+
+    // Enter the second letter which resolves faster
+    delay = shortReqDelay;
+    await tester.enterText(find.byKey(fieldKey), 'ch');
+
+    // wait for the first optionsBuilder call to resolve
+    await tester.pumpAndSettle(longReqDelay);
+
+    // lastOptions must contain the result from the last request
+    expect(find.byKey(optionsKey), findsOneWidget);
+    expect(lastOptions, <String>['chameleon']);
+  });
 }
