@@ -13,9 +13,9 @@ import 'bitfield.dart' as bitfield;
 /// does not have to guarantee efficiency.
 const int kMaxUnsignedSMI = -1;
 
-/// The web implementation of [bitfield.Bitfield].
+/// The web implementation of [bitfield.BitField].
 class BitField<T extends dynamic> implements bitfield.BitField<T> {
-  /// The web implementation of [bitfield.Bitfield].
+  /// The web implementation of [bitfield.BitField].
   // Can remove when we have metaclasses.
   // ignore: avoid_unused_constructor_parameters
   BitField(int length);

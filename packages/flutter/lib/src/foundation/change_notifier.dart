@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/animation.dart';
+/// @docImport 'package:flutter/widgets.dart';
+library;
+
 import 'dart:ui' show VoidCallback;
 
 import 'package:meta/meta.dart';
@@ -150,7 +154,7 @@ mixin class ChangeNotifier implements Listenable {
   /// If true, the event [ObjectCreated] for this instance was dispatched to
   /// [FlutterMemoryAllocations].
   ///
-  /// As [ChangedNotifier] is used as mixin, it does not have constructor,
+  /// As [ChangeNotifier] is used as mixin, it does not have constructor,
   /// so we use [addListener] to dispatch the event.
   bool _creationDispatched = false;
 
