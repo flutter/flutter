@@ -147,4 +147,44 @@ void main() {
     const Column();
     const Row();
   });
+
+  testWidgets('Accept num as flex value', (WidgetTester tester) async {
+    // both of these cases have failed in the past due to floating point issues
+    const Key key1 = Key('key1');
+    const Key key2 = Key('key2');
+    const Key key3 = Key('key3');
+    await tester.pumpWidget(
+      const Center(
+        child: SizedBox(
+          height: 450.0,
+          child: Column(
+            children: <Widget>[
+              Expanded(
+                flex: 0.5,
+                child: SizedBox(
+                  key: key1,
+                ),
+              ),
+              Expanded(
+                flex: 1.5,
+                child: SizedBox(
+                  key: key2,
+                ),
+              ),
+              Expanded(
+                flex:  2.5,
+                child: SizedBox(
+                  key: key3,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byKey(key1)).height, 50);
+    expect(tester.getSize(find.byKey(key2)).height, 150);
+    expect(tester.getSize(find.byKey(key3)).height, 250);
+  });
 }
