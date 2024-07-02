@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'button.dart';
+/// @docImport 'nav_bar.dart';
+/// @docImport 'tab_scaffold.dart';
+/// @docImport 'route.dart';
+library;
+
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
