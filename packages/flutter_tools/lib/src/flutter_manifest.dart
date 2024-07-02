@@ -87,6 +87,13 @@ class FlutterManifest {
     return dependencies != null ? <String>{...dependencies.keys.cast<String>()} : <String>{};
   }
 
+  /// Contains the name of the dev dependencies.
+  /// These are the keys specified in the `dev_dependencies` map.
+  Set<String> get devDependencies {
+    final YamlMap? devDependencies = _descriptor['dev_dependencies'] as YamlMap?;
+    return devDependencies != null ? <String>{...devDependencies.keys.cast<String>()} : <String>{};
+  }
+
   // Flag to avoid printing multiple invalid version messages.
   bool _hasShowInvalidVersionMsg = false;
 
