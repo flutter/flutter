@@ -93,6 +93,30 @@ typedef MenuAnchorChildBuilder = Widget Function(
   Widget? child,
 );
 
+/// The type of builder function used by [MenuAnchor.withOverlayBuilder] to build
+/// the overlay attached to a [MenuAnchor].
+///
+/// The `context` is the context that the overlay is being built in.
+///
+/// The `menuChildren` is the list of children containing the menu items that
+/// was passed to the [MenuAnchor].
+///
+/// The `menuFocusScopeNode` is the [FocusScopeNode] that should be provided to
+/// the [FocusScope.focusNode] for the menu.
+///
+/// The `menuPosition` should be used to position the menu at a specific
+/// location.
+///
+/// The `tapRegionGroupId` is the [TapRegion.groupId] that should be used to
+/// consume taps outside of the menu.
+typedef MenuOverlayBuilder = Widget Function(
+  BuildContext context,
+  List<Widget> menuChildren,
+  FocusScopeNode menuFocusScopeNode,
+  Offset? menuPosition,
+  Object? tapRegionGroupId,
+);
+
 /// A widget used to mark the "anchor" for a set of submenus, defining the
 /// rectangle used to position the menu, which can be done either with an
 /// explicit location, or with an alignment.
@@ -149,7 +173,46 @@ class MenuAnchor extends StatefulWidget {
     required this.menuChildren,
     this.builder,
     this.child,
-  });
+  }) : _overlayBuilder = null;
+
+
+  /// Builds a [MenuAnchor] that lays out it's [menuChildren] in a custom
+  /// overlay built by `overlayBuilder`.
+  ///
+  /// Because providing an `overlayBuilder` entails managing the positioning,
+  /// appearance, semantics, and interaction of the menu overlay, in most cases
+  /// the default overlay provided by [MenuAnchor] is sufficient. However, in
+  /// cases where a custom overlay is needed (e.g. an animated menu), this
+  /// constructor can be used to provide one.
+  ///
+  /// When defining an `overlayBuilder`, proper focus management can be achieved
+  /// by wrapping a [FocusScope] around your overlay and providing a
+  /// `menuFocusScopeNode` to the [FocusScope.focusNode] property. The
+  /// `menuPosition` property should be used to position the menu at the
+  /// user-specified location. If a [TapRegion] is used to consume taps outside
+  /// of the menu, the `tapRegionGroupId` should be used as the
+  /// [TapRegion.groupId].
+  const MenuAnchor.withOverlayBuilder({
+    super.key,
+    this.controller,
+    this.childFocusNode,
+    this.style,
+    this.alignmentOffset = Offset.zero,
+    this.clipBehavior = Clip.hardEdge,
+    @Deprecated(
+      'Use consumeOutsideTap instead. '
+      'This feature was deprecated after v3.16.0-8.0.pre.',
+    )
+    this.anchorTapClosesMenu = false,
+    this.consumeOutsideTap = false,
+    this.onOpen,
+    this.onClose,
+    this.crossAxisUnconstrained = true,
+    required this.menuChildren,
+    required MenuOverlayBuilder overlayBuilder,
+    this.builder,
+    this.child,
+  }) : _overlayBuilder = overlayBuilder;
 
   /// An optional controller that allows opening and closing of the menu from
   /// other widgets.
@@ -274,6 +337,19 @@ class MenuAnchor extends StatefulWidget {
   /// to rebuild this child when those change.
   final Widget? child;
 
+  /// A method that builds the overlay attached to this [MenuAnchor].
+  ///
+  /// If supplied, this function is responsible for building a widget that handles
+  /// the positioning, appearance, and interaction of the menu overlay.
+  ///
+  /// When providing a custom overlay builder, a [FocusScope] should wrap the
+  /// menu, and the [menuFocusScopeNode] should be provided to the
+  /// [FocusScope.focusNode]. The [menuPosition] should be used to position the
+  /// menu at the user-specified location. If a [TapRegion] is used to consume
+  /// taps outside of the menu, the [tapRegionGroupId] should be used as the
+  /// [TapRegion.groupId].
+  final MenuOverlayBuilder? _overlayBuilder;
+
   @override
   State<MenuAnchor> createState() => _MenuAnchorState();
 
@@ -380,17 +456,7 @@ class _MenuAnchorState extends State<MenuAnchor> {
   Widget build(BuildContext context) {
     Widget child = OverlayPortal(
       controller: _overlayController,
-      overlayChildBuilder: (BuildContext context) {
-       return _Submenu(
-          anchor: this,
-          menuStyle: widget.style,
-          alignmentOffset: widget.alignmentOffset ?? Offset.zero,
-          menuPosition: _menuPosition,
-          clipBehavior: widget.clipBehavior,
-          menuChildren: widget.menuChildren,
-          crossAxisUnconstrained: widget.crossAxisUnconstrained,
-        );
-      },
+      overlayChildBuilder: _buildOverlay,
       child: _buildContents(context),
     );
 
@@ -414,10 +480,32 @@ class _MenuAnchorState extends State<MenuAnchor> {
     );
   }
 
+  Widget _buildOverlay(BuildContext overlayContext) {
+    if (widget._overlayBuilder == null) {
+      return _Submenu(
+        anchor: this,
+        menuStyle: widget.style,
+        alignmentOffset: widget.alignmentOffset ?? Offset.zero,
+        menuPosition: _menuPosition,
+        clipBehavior: widget.clipBehavior,
+        menuChildren: widget.menuChildren,
+        crossAxisUnconstrained: widget.crossAxisUnconstrained,
+      );
+    }
+
+    return widget._overlayBuilder!(
+      overlayContext,
+      widget.menuChildren,
+      _menuScopeNode,
+      _menuPosition,
+      _root,
+    );
+  }
+
   Widget _buildContents(BuildContext context) {
     return Actions(
       actions: <Type, Action<Intent>>{
-        DirectionalFocusIntent: _MenuDirectionalFocusAction(),
+        DirectionalFocusIntent: MenuDirectionalFocusAction(),
         PreviousFocusIntent: _MenuPreviousFocusAction(),
         NextFocusIntent: _MenuNextFocusAction(),
         DismissIntent: DismissMenuAction(controller: _menuController),
@@ -439,7 +527,7 @@ class _MenuAnchorState extends State<MenuAnchor> {
       return null;
     }
     final FocusTraversalPolicy policy =
-        FocusTraversalGroup.maybeOf(_menuScopeNode.context!) ?? ReadingOrderTraversalPolicy();
+     FocusTraversalGroup.maybeOf(_menuScopeNode.context!) ?? ReadingOrderTraversalPolicy();
     return policy.findFirstFocus(_menuScopeNode, ignoreCurrentFocus: true);
   }
 
@@ -716,12 +804,13 @@ class MenuController {
 /// corresponding [SubmenuButton] child of the menu bar.
 ///
 /// {@template flutter.material.MenuBar.shortcuts_note}
-/// Menus using [MenuItemButton] can have a [SingleActivator] or
-/// [CharacterActivator] assigned to them as their [MenuItemButton.shortcut],
-/// which will display an appropriate shortcut hint. Even though the shortcut
-/// labels are displayed in the menu, shortcuts are not automatically handled.
-/// They must be available in whatever context they are appropriate, and handled
-/// via another mechanism.
+/// Menus using [MenuItemButton] or [CupertinoMenuItem] can have a
+/// [SingleActivator] or [CharacterActivator] assigned to them as their
+/// [MenuItemButton.shortcut] or [CupertinoMenuItem.shortcut] property, which will
+/// display an appropriate shortcut hint. Even though the shortcut labels are
+/// displayed in the menu, shortcuts are not automatically handled. They must be
+/// available in whatever context they are appropriate, and handled via another
+/// mechanism.
 ///
 /// If shortcuts should be generally enabled, but are not easily defined in a
 /// context surrounding the menu bar, consider registering them with a
@@ -1921,7 +2010,7 @@ class _SubmenuButtonState extends State<SubmenuButton> {
   Widget build(BuildContext context) {
     Offset menuPaddingOffset = widget.alignmentOffset ?? Offset.zero;
     final EdgeInsets menuPadding = _computeMenuPadding(context);
-    final Axis orientation = _anchor?._orientation ?? Axis.vertical;
+final Axis orientation = _anchor?._orientation ?? Axis.vertical;
     // Move the submenu over by the size of the menu padding, so that
     // the first menu item aligns with the submenu button that opens it.
     menuPaddingOffset += switch ((orientation, Directionality.of(context))) {
@@ -2031,7 +2120,7 @@ class _SubmenuButtonState extends State<SubmenuButton> {
   }
 
   void _handleFocusChange() {
-    if (_buttonFocusNode.hasPrimaryFocus) {
+    if (_buttonFocusNode.hasFocus) {
       if (!_menuController.isOpen) {
         _menuController.open();
       }
@@ -2082,10 +2171,10 @@ class DismissMenuAction extends DismissAction {
 /// For instance, calling [getShortcutLabel] with `SingleActivator(trigger:
 /// LogicalKeyboardKey.keyA, control: true)` would return "⌃ A" on macOS, "Ctrl
 /// A" in an US English locale, and "Strg A" in a German locale.
-class _LocalizedShortcutLabeler {
-  _LocalizedShortcutLabeler._();
+class LocalizedShortcutLabeler {
+  LocalizedShortcutLabeler._();
 
-  static _LocalizedShortcutLabeler? _instance;
+  static LocalizedShortcutLabeler? _instance;
 
   static final Map<LogicalKeyboardKey, String> _shortcutGraphicEquivalents = <LogicalKeyboardKey, String>{
     LogicalKeyboardKey.arrowLeft: '←',
@@ -2111,8 +2200,8 @@ class _LocalizedShortcutLabeler {
   };
 
   /// Return the instance for this singleton.
-  static _LocalizedShortcutLabeler get instance {
-    return _instance ??= _LocalizedShortcutLabeler._();
+  static LocalizedShortcutLabeler get instance {
+    return _instance ??= LocalizedShortcutLabeler._();
   }
 
   // Caches the created shortcut key maps so that creating one of these isn't
@@ -2370,7 +2459,7 @@ class _MenuBarAnchorState extends _MenuAnchorState {
           shortcuts: _kMenuTraversalShortcuts,
           child: Actions(
             actions: <Type, Action<Intent>>{
-              DirectionalFocusIntent: _MenuDirectionalFocusAction(),
+              DirectionalFocusIntent: MenuDirectionalFocusAction(),
               PreviousFocusIntent: _MenuPreviousFocusAction(),
               NextFocusIntent: _MenuNextFocusAction(),
               DismissIntent: DismissMenuAction(controller: _menuController),
@@ -2444,9 +2533,11 @@ class _MenuNextFocusAction extends NextFocusAction {
 
 }
 
-class _MenuDirectionalFocusAction extends DirectionalFocusAction {
+/// An action that moves focus in a menu in response to a [TextDirection], screen
+/// [Axis], and [TraversalDirection].
+class MenuDirectionalFocusAction extends DirectionalFocusAction {
   /// Creates a [DirectionalFocusAction].
-  _MenuDirectionalFocusAction();
+  MenuDirectionalFocusAction();
 
   @override
   void invoke(DirectionalFocusIntent intent) {
@@ -3083,7 +3174,7 @@ class _MenuItemLabel extends StatelessWidget {
           Padding(
             padding: EdgeInsetsDirectional.only(start: horizontalPadding),
             child: Text(
-              _LocalizedShortcutLabeler.instance.getShortcutLabel(
+              LocalizedShortcutLabeler.instance.getShortcutLabel(
                 shortcut!,
                 MaterialLocalizations.of(context),
               ),
@@ -3335,7 +3426,7 @@ class _MenuPanel extends StatefulWidget {
 }
 
 class _MenuPanelState extends State<_MenuPanel> {
-  ScrollController scrollController = ScrollController();
+ScrollController scrollController = ScrollController();
 
   @override
   void dispose() {
@@ -3580,7 +3671,7 @@ class _Submenu extends StatelessWidget {
                 skipTraversal: true,
                 child: Actions(
                   actions: <Type, Action<Intent>>{
-                    DirectionalFocusIntent: _MenuDirectionalFocusAction(),
+                    DirectionalFocusIntent: MenuDirectionalFocusAction(),
                     DismissIntent: DismissMenuAction(controller: anchor._menuController),
                   },
                   child: Shortcuts(
