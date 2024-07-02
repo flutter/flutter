@@ -1537,6 +1537,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
     }
 
     return IconButton(
+      key: StandardComponentType.moreButton.key,
       icon: widget.icon ?? Icon(Icons.adaptive.more),
       padding: widget.padding,
       splashRadius: widget.splashRadius,

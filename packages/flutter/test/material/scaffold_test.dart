@@ -875,7 +875,7 @@ void main() {
 
       final Icon icon = tester.widget(find.byType(Icon));
       expect(icon.icon, expectedIcon, reason: "didn't find close icon for $type");
-      expect(find.byType(CloseButton), findsOneWidget, reason: "didn't find close button for $type");
+      expect(find.byKey(StandardComponentType.closeButton.key), findsOneWidget, reason: "didn't find close button for $type");
     }
 
     PageRoute<void> materialRouteBuilder() {

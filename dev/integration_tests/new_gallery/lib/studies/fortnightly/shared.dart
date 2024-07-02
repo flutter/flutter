@@ -305,6 +305,7 @@ class NavigationMenu extends StatelessWidget {
           Row(
             children: <Widget>[
               IconButton(
+                key: StandardComponentType.closeButton.key,
                 icon: const Icon(Icons.close),
                 tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
                 onPressed: () => Navigator.pop(context),
