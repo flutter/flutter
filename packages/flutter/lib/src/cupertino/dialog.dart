@@ -53,9 +53,9 @@ const TextStyle _kCupertinoDialogActionStyle = TextStyle(
 
 // CupertinoActionSheet-specific text styles.
 const TextStyle _kActionSheetActionStyle = TextStyle(
-  fontFamily: 'CupertinoSystemText',
+  fontFamily: 'CupertinoSystemDisplay',
   inherit: false,
-  fontSize: 17.0,
+  fontSize: 20.0,
   fontWeight: FontWeight.w400,
   textBaseline: TextBaseline.alphabetic,
 );
