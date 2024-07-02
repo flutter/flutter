@@ -1246,6 +1246,32 @@ TEST_P(AiksTest, SolidColorCirclesOvalsRRectsMaskBlurCorrectly) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
+TEST_P(AiksTest, FastEllipticalRRectMaskBlursRenderCorrectly) {
+  Canvas canvas;
+  canvas.Scale(GetContentScale());
+  Paint paint;
+  paint.mask_blur_descriptor = Paint::MaskBlurDescriptor{
+      .style = FilterContents::BlurStyle::kNormal,
+      .sigma = Sigma{1},
+  };
+
+  canvas.DrawPaint({.color = Color::White()});
+
+  paint.color = Color::Blue();
+  for (int i = 0; i < 5; i++) {
+    Scalar y = i * 125;
+    Scalar y_radius = i * 15;
+    for (int j = 0; j < 5; j++) {
+      Scalar x = j * 125;
+      Scalar x_radius = j * 15;
+      canvas.DrawRRect(Rect::MakeXYWH(x + 50, y + 50, 100.0f, 100.0f),
+                       {x_radius, y_radius}, paint);
+    }
+  }
+
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
 TEST_P(AiksTest, FilledRoundRectPathsRenderCorrectly) {
   Canvas canvas;
   canvas.Scale(GetContentScale());
