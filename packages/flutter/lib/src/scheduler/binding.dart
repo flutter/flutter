@@ -517,11 +517,11 @@ mixin SchedulerBinding on BindingBase {
 
   /// Execute the highest-priority task, if it is of a high enough priority.
   ///
-  /// Returns true if a task was executed and there are other tasks remaining
-  /// (even if they are not high-enough priority).
-  ///
   /// Returns false if the scheduler is [locked], or if there are no tasks
   /// remaining.
+  ///
+  /// Returns true otherwise, including when no task is executed due to priory
+  /// being too low.
   @visibleForTesting
   @pragma('vm:notify-debugger-on-exception')
   bool handleEventLoopCallback() {
