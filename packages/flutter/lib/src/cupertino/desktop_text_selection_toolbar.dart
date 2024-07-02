@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'adaptive_text_selection_toolbar.dart';
+/// @docImport 'desktop_text_selection_toolbar_button.dart';
+library;
+
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';

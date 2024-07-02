@@ -2,6 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'button.dart';
+/// @docImport 'list_section.dart';
+/// @docImport 'switch.dart';
+library;
+
 import 'dart:async';
 
 import 'package:flutter/widgets.dart';
