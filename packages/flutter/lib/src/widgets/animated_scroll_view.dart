@@ -83,6 +83,7 @@ class AnimatedList extends _AnimatedScrollView {
     super.shrinkWrap = false,
     super.padding,
     super.clipBehavior = Clip.hardEdge,
+    super.lazyAnimation = false,
   }) : assert(initialItemCount >= 0);
 
   /// A scrolling container that animates items with separators when they are inserted or removed.
@@ -303,6 +304,7 @@ class AnimatedListState extends _AnimatedScrollViewState<AnimatedList> {
         key: _sliverAnimatedMultiBoxKey,
         itemBuilder: widget.itemBuilder,
         initialItemCount: widget.initialItemCount,
+        lazyAnimation: widget.lazyAnimation,
       ),
       widget.scrollDirection,
     );
@@ -380,6 +382,7 @@ class AnimatedGrid extends _AnimatedScrollView {
     super.physics,
     super.padding,
     super.clipBehavior = Clip.hardEdge,
+    super.lazyAnimation = false,
   })  : assert(initialItemCount >= 0);
 
   /// {@template flutter.widgets.AnimatedGrid.gridDelegate}
@@ -513,6 +516,7 @@ class AnimatedGridState extends _AnimatedScrollViewState<AnimatedGrid> {
         gridDelegate: widget.gridDelegate,
         itemBuilder: widget.itemBuilder,
         initialItemCount: widget.initialItemCount,
+        lazyAnimation: widget.lazyAnimation,
       ),
       widget.scrollDirection,
     );
@@ -535,6 +539,7 @@ abstract class _AnimatedScrollView extends StatefulWidget {
     this.shrinkWrap = false,
     this.padding,
     this.clipBehavior = Clip.hardEdge,
+    this.lazyAnimation = false,
   }) : assert(initialItemCount >= 0);
 
   /// {@template flutter.widgets.AnimatedScrollView.itemBuilder}
@@ -652,6 +657,14 @@ abstract class _AnimatedScrollView extends StatefulWidget {
   ///
   /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
+
+  /// Determines whether an item animation should be started the moment the
+  /// item is inserted in the [AnimatedList] or when the item is built for
+  /// the first time, that is, when it's rendered on screen. If set to true,
+  /// the animation is immediately started when the item is inserted.
+  ///
+  /// Defaults to false.
+  final bool lazyAnimation;
 }
 
 abstract class _AnimatedScrollViewState<T extends _AnimatedScrollView> extends State<T> with TickerProviderStateMixin {
@@ -928,6 +941,7 @@ class SliverAnimatedList extends _SliverAnimatedMultiBoxAdaptor {
     required super.itemBuilder,
     super.findChildIndexCallback,
     super.initialItemCount = 0,
+    super.lazyAnimation = false,
   }) : assert(initialItemCount >= 0);
 
   @override
@@ -1077,6 +1091,7 @@ class SliverAnimatedGrid extends _SliverAnimatedMultiBoxAdaptor {
     required this.gridDelegate,
     super.findChildIndexCallback,
     super.initialItemCount = 0,
+    super.lazyAnimation = false,
   })  : assert(initialItemCount >= 0);
 
   @override
@@ -1200,6 +1215,7 @@ abstract class _SliverAnimatedMultiBoxAdaptor extends StatefulWidget {
     required this.itemBuilder,
     this.findChildIndexCallback,
     this.initialItemCount = 0,
+    this.lazyAnimation = false,
   })  : assert(initialItemCount >= 0);
 
   /// {@macro flutter.widgets.AnimatedScrollView.itemBuilder}
@@ -1210,6 +1226,8 @@ abstract class _SliverAnimatedMultiBoxAdaptor extends StatefulWidget {
 
   /// {@macro flutter.widgets.AnimatedScrollView.initialItemCount}
   final int initialItemCount;
+
+  final bool lazyAnimation;
 }
 
 abstract class _SliverAnimatedMultiBoxAdaptorState<T extends _SliverAnimatedMultiBoxAdaptor> extends State<T> with TickerProviderStateMixin {
@@ -1298,6 +1316,11 @@ abstract class _SliverAnimatedMultiBoxAdaptorState<T extends _SliverAnimatedMult
 
     final _ActiveItem? incomingItem = _activeItemAt(_incomingItems, itemIndex);
     final Animation<double> animation = incomingItem?.controller?.view ?? kAlwaysCompleteAnimation;
+    if (widget.lazyAnimation) {
+      incomingItem?.controller?.forward().then<void>((_) {
+        _removeActiveItemAt(_incomingItems, incomingItem.itemIndex)!.controller!.dispose();
+      });
+    }
     return widget.itemBuilder(
       context,
       _itemIndexToIndex(itemIndex),
@@ -1346,9 +1369,11 @@ abstract class _SliverAnimatedMultiBoxAdaptorState<T extends _SliverAnimatedMult
       _itemsCount += 1;
     });
 
-    controller.forward().then<void>((_) {
-      _removeActiveItemAt(_incomingItems, incomingItem.itemIndex)!.controller!.dispose();
-    });
+    if (!widget.lazyAnimation) {
+      controller.forward().then<void>((_) {
+        _removeActiveItemAt(_incomingItems, incomingItem.itemIndex)!.controller!.dispose();
+      });
+    }
   }
 
   /// Insert multiple items at [index] and start an animation that will be passed
