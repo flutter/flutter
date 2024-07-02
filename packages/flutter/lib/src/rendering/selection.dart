@@ -126,6 +126,7 @@ abstract class SelectedContentRange<T extends Object> {
   SelectedContentRange({
     this.selectableId,
     required this.content,
+    required this.contentLength,
     this.children,
   });
 
@@ -134,6 +135,14 @@ abstract class SelectedContentRange<T extends Object> {
 
   /// The content that contains the selection.
   final T content;
+
+  /// The length of the content.
+  ///
+  /// The absolute value of the difference between
+  /// the start offset and end offset contained by
+  /// this [SelectedContentRange] should not exceed
+  /// the content length.
+  final int contentLength;
 
   /// The start of the selection relative to the [content].
   ///

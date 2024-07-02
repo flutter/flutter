@@ -67,6 +67,7 @@ class _SelectableAdapter extends SingleChildRenderObjectWidget {
   _RenderSelectableAdapter createRenderObject(BuildContext context) {
     return _RenderSelectableAdapter(
       DefaultSelectionStyle.of(context).selectionColor!,
+      child,
       registrar,
     );
   }
@@ -75,6 +76,7 @@ class _SelectableAdapter extends SingleChildRenderObjectWidget {
   void updateRenderObject(BuildContext context, _RenderSelectableAdapter renderObject) {
     renderObject
       ..selectionColor = DefaultSelectionStyle.of(context).selectionColor!
+      ..content = child
       ..registrar = registrar;
   }
 }
@@ -82,8 +84,10 @@ class _SelectableAdapter extends SingleChildRenderObjectWidget {
 class _RenderSelectableAdapter extends RenderProxyBox with Selectable, SelectionRegistrant {
   _RenderSelectableAdapter(
     Color selectionColor,
+    Widget content,
     SelectionRegistrar registrar,
   )   : _selectionColor = selectionColor,
+        _content = content,
         _geometry = ValueNotifier<SelectionGeometry>(_noSelection) {
     this.registrar = registrar;
     _geometry.addListener(markNeedsPaint);
@@ -100,6 +104,15 @@ class _RenderSelectableAdapter extends RenderProxyBox with Selectable, Selection
     }
     _selectionColor = value;
     markNeedsPaint();
+  }
+
+  Widget get content => _content;
+  late Widget _content;
+  set content(Widget value) {
+    if (_content == value) {
+      return;
+    }
+    _content = value;
   }
 
   // ValueListenable APIs
@@ -279,8 +292,14 @@ class _RenderSelectableAdapter extends RenderProxyBox with Selectable, Selection
     if (!value.hasSelection) {
       return null;
     }
-    // TODO(Renzo-Olivares): return a SelectedContentRange here.
-    return null;
+    return <SelectedContentRange<Object>>[
+      _SelectableAdapterSelectedContentRange(
+        content: content,
+        start: 0,
+        end: 1,
+        contentLength: 1,
+      ),
+    ];
   }
 
   LayerLink? _startHandle;
@@ -336,4 +355,23 @@ class _RenderSelectableAdapter extends RenderProxyBox with Selectable, Selection
     _geometry.dispose();
     super.dispose();
   }
+}
+
+class _SelectableAdapterSelectedContentRange extends SelectedContentRange<Widget> {
+  _SelectableAdapterSelectedContentRange({
+    int start = -1,
+    int end = -1,
+    super.selectableId,
+    required super.content,
+    required super.contentLength,
+  }) : _start = start,
+       _end = end;
+
+  @override
+  int get startOffset => _start;
+  final int _start;
+
+  @override
+  int get endOffset => _end;
+  final int _end;
 }

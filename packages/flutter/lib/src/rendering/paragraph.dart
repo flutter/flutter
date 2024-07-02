@@ -1479,6 +1479,7 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
     }
     final SelectedContentRange<Object> localSelectedContentRange = _SelectableFragmentSelectedContentRange(
       content: fullText,
+      contentLength: fullText.length,
       start: _textSelectionStart!.offset,
       end: _textSelectionEnd!.offset,
     );
@@ -3123,6 +3124,7 @@ class _SelectableFragmentSelectedContentRange extends SelectedContentRange<Strin
     int start = -1,
     int end = -1,
     required super.content,
+    required super.contentLength,
   }) : _start = start,
        _end = end;
 
