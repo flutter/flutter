@@ -586,20 +586,14 @@ The relevant error-causing widget was:
     });
 
     group('can step', () {
-      late BasicProject project;
-      late String breakpointFilePath;
-      late int breakpointLine;
-      late String expectedPrintLibraryPath;
-      setUp(() async {
-        project = BasicProject();
+      test('into SDK sources mapped to local files when debugSdkLibraries=true', () async {
+        final BasicProject project = BasicProject();
         await project.setUpIn(tempDir);
 
-        breakpointFilePath = globals.fs.path.join(project.dir.path, 'lib', 'main.dart');
-        breakpointLine = project.topLevelFunctionBreakpointLine;
-        expectedPrintLibraryPath = globals.fs.path.join('pkg', 'sky_engine', 'lib', 'core', 'print.dart');
-      });
+        final String breakpointFilePath = globals.fs.path.join(project.dir.path, 'lib', 'main.dart');
+        final int breakpointLine = project.topLevelFunctionBreakpointLine;
+        final String expectedPrintLibraryPath = globals.fs.path.join('pkg', 'sky_engine', 'lib', 'core', 'print.dart');
 
-      testWithoutContext('into SDK sources mapped to local files when debugSdkLibraries=true', () async {
         // Launch the app and wait for it to print "topLevelFunction".
         await Future.wait(<Future<void>>[
           dap.client.stdoutOutput.firstWhere((String output) => output.startsWith('topLevelFunction')),
