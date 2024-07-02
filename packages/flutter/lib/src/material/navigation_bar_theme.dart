@@ -53,6 +53,7 @@ class NavigationBarThemeData with Diagnosticable {
     this.iconTheme,
     this.labelBehavior,
     this.overlayColor,
+    this.safeAreaVerticalOffset,
   });
 
   /// Overrides the default value of [NavigationBar.height].
@@ -95,6 +96,9 @@ class NavigationBarThemeData with Diagnosticable {
   /// Overrides the default value of [NavigationBar.overlayColor].
   final MaterialStateProperty<Color?>? overlayColor;
 
+  /// Overrides the default value of [NavigationBar.safeAreaVerticalOffset].
+  final double? safeAreaVerticalOffset;
+
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   NavigationBarThemeData copyWith({
@@ -109,6 +113,7 @@ class NavigationBarThemeData with Diagnosticable {
     MaterialStateProperty<IconThemeData?>? iconTheme,
     NavigationDestinationLabelBehavior? labelBehavior,
     MaterialStateProperty<Color?>? overlayColor,
+    double? safeAreaVerticalOffset,
   }) {
     return NavigationBarThemeData(
       height: height ?? this.height,
@@ -122,6 +127,7 @@ class NavigationBarThemeData with Diagnosticable {
       iconTheme: iconTheme ?? this.iconTheme,
       labelBehavior: labelBehavior ?? this.labelBehavior,
       overlayColor: overlayColor ?? this.overlayColor,
+      safeAreaVerticalOffset: safeAreaVerticalOffset ?? this.safeAreaVerticalOffset,
     );
   }
 
@@ -146,6 +152,7 @@ class NavigationBarThemeData with Diagnosticable {
       iconTheme: MaterialStateProperty.lerp<IconThemeData?>(a?.iconTheme, b?.iconTheme, t, IconThemeData.lerp),
       labelBehavior: t < 0.5 ? a?.labelBehavior : b?.labelBehavior,
       overlayColor: MaterialStateProperty.lerp<Color?>(a?.overlayColor, b?.overlayColor, t, Color.lerp),
+      safeAreaVerticalOffset: lerpDouble(a?.safeAreaVerticalOffset, b?.safeAreaVerticalOffset, t),
     );
   }
 
@@ -162,6 +169,7 @@ class NavigationBarThemeData with Diagnosticable {
     iconTheme,
     labelBehavior,
     overlayColor,
+    safeAreaVerticalOffset,
   );
 
   @override
@@ -183,7 +191,8 @@ class NavigationBarThemeData with Diagnosticable {
       && other.labelTextStyle == labelTextStyle
       && other.iconTheme == iconTheme
       && other.labelBehavior == labelBehavior
-      && other.overlayColor == overlayColor;
+      && other.overlayColor == overlayColor
+      && other.safeAreaVerticalOffset == safeAreaVerticalOffset;
   }
 
   @override
@@ -200,6 +209,7 @@ class NavigationBarThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<MaterialStateProperty<IconThemeData?>>('iconTheme', iconTheme, defaultValue: null));
     properties.add(DiagnosticsProperty<NavigationDestinationLabelBehavior>('labelBehavior', labelBehavior, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('overlayColor', overlayColor, defaultValue: null));
+    properties.add(DoubleProperty('safeAreaVerticalOffset', safeAreaVerticalOffset, defaultValue: null));
   }
 }
 

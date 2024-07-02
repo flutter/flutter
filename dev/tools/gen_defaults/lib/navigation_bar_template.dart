@@ -16,6 +16,7 @@ class _${blockName}DefaultsM3 extends NavigationBarThemeData {
   _${blockName}DefaultsM3(this.context)
       : super(
           height: ${getToken("md.comp.navigation-bar.container.height")},
+          safeAreaVerticalOffset: 0.0,
           elevation: ${elevation("md.comp.navigation-bar.container")},
           labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
         );
