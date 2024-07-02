@@ -19,18 +19,6 @@ class MaterialStateOutlinedBorderExampleApp extends StatelessWidget {
   }
 }
 
-class SelectedBorder extends RoundedRectangleBorder implements MaterialStateOutlinedBorder {
-  const SelectedBorder();
-
-  @override
-  OutlinedBorder? resolve(Set<MaterialState> states) {
-    if (states.contains(MaterialState.selected)) {
-      return const RoundedRectangleBorder();
-    }
-    return null; // Defer to default value on the theme or widget.
-  }
-}
-
 class MaterialStateOutlinedBorderExample extends StatefulWidget {
   const MaterialStateOutlinedBorderExample({super.key});
 
@@ -52,7 +40,14 @@ class _MaterialStateOutlinedBorderExampleState extends State<MaterialStateOutlin
             isSelected = value;
           });
         },
-        shape: const SelectedBorder(),
+        shape: WidgetStateOutlinedBorder.resolveWith(
+              (Set<WidgetState> states) {
+            if (states.contains(WidgetState.selected)) {
+              return const RoundedRectangleBorder();
+            }
+            return null; // Defer to default value on the theme or widget.
+          },
+        ),
       ),
     );
   }
