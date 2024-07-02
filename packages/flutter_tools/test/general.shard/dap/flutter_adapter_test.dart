@@ -737,7 +737,7 @@ void main() {
 
       test('dart:core URI to file path', () async {
         expect(
-          adapter.convertOrgDartlangSdkToPath(Uri.parse('org-dartlang-sdk:///third_party/dart/sdk/lib/core/core.dart')),
+          adapter.convertOrgDartlangSdkToPath(Uri.parse('org-dartlang-sdk:///flutter/third_party/dart/sdk/lib/core/core.dart')),
           Uri.file(fs.path.join(flutterRoot, 'bin', 'cache', 'pkg', 'sky_engine', 'lib', 'core', 'core.dart')),
         );
       });
@@ -745,7 +745,7 @@ void main() {
       test('dart:core file path to URI', () async {
         expect(
           adapter.convertUriToOrgDartlangSdk(Uri.file(fs.path.join(flutterRoot, 'bin', 'cache', 'pkg', 'sky_engine', 'lib', 'core', 'core.dart'))),
-          Uri.parse('org-dartlang-sdk:///third_party/dart/sdk/lib/core/core.dart'),
+          Uri.parse('org-dartlang-sdk:///flutter/third_party/dart/sdk/lib/core/core.dart'),
         );
       });
     });

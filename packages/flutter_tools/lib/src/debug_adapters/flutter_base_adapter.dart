@@ -100,9 +100,9 @@ abstract class FlutterBaseDebugAdapter extends DartDebugAdapter<FlutterLaunchReq
     final String flutterRoot = fileSystem.path.join(flutterSdkRoot, 'bin', 'cache', 'pkg', 'sky_engine', 'lib', 'ui');
     orgDartlangSdkMappings[flutterRoot] = Uri.parse('org-dartlang-sdk:///flutter/lib/ui');
 
-    // The rest of the Dart SDK maps to /third_party/dart/sdk
+    // The rest of the Dart SDK maps to /flutter/third_party/dart/sdk
     final String dartRoot = fileSystem.path.join(flutterSdkRoot, 'bin', 'cache', 'pkg', 'sky_engine');
-    orgDartlangSdkMappings[dartRoot] = Uri.parse('org-dartlang-sdk:///third_party/dart/sdk');
+    orgDartlangSdkMappings[dartRoot] = Uri.parse('org-dartlang-sdk:///flutter/third_party/dart/sdk');
   }
 
   @override
