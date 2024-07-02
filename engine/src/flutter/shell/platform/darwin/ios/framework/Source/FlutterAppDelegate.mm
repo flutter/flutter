@@ -134,44 +134,47 @@ static NSString* const kRestorationStateAppModificationKey = @"mod-date";
   }
 }
 
-- (BOOL)openURL:(NSURL*)url {
+- (BOOL)isFlutterDeepLinkingEnabled {
   NSNumber* isDeepLinkingEnabled =
       [[NSBundle mainBundle] objectForInfoDictionaryKey:@"FlutterDeepLinkingEnabled"];
-  if (!isDeepLinkingEnabled.boolValue) {
-    // Not set or NO.
-    return NO;
-  } else {
-    FlutterViewController* flutterViewController = [self rootFlutterViewController];
-    if (flutterViewController) {
-      [flutterViewController.engine
-          waitForFirstFrame:3.0
-                   callback:^(BOOL didTimeout) {
-                     if (didTimeout) {
-                       FML_LOG(ERROR)
-                           << "Timeout waiting for the first frame when launching an URL.";
-                     } else {
-                       [flutterViewController.engine.navigationChannel
-                           invokeMethod:@"pushRouteInformation"
-                              arguments:@{
-                                @"location" : url.absoluteString ?: [NSNull null],
-                              }];
-                     }
-                   }];
-      return YES;
-    } else {
-      FML_LOG(ERROR) << "Attempting to open an URL without a Flutter RootViewController.";
-      return NO;
-    }
-  }
+  // if not set, return NO
+  return isDeepLinkingEnabled ? [isDeepLinkingEnabled boolValue] : NO;
 }
 
+// This method is called when opening an URL with custom schemes.
 - (BOOL)application:(UIApplication*)application
             openURL:(NSURL*)url
             options:(NSDictionary<UIApplicationOpenURLOptionsKey, id>*)options {
   if ([_lifeCycleDelegate application:application openURL:url options:options]) {
     return YES;
   }
-  return [self openURL:url];
+
+  // Relaying to the system here will case an infinite loop, so we don't do it here.
+  return [self handleOpenURL:url options:options relayToSystemIfUnhandled:NO];
+}
+
+// Helper function for opening an URL, either with a custom scheme or a http/https scheme.
+- (BOOL)handleOpenURL:(NSURL*)url
+                     options:(NSDictionary<UIApplicationOpenURLOptionsKey, id>*)options
+    relayToSystemIfUnhandled:(BOOL)throwBack {
+  if (![self isFlutterDeepLinkingEnabled]) {
+    return NO;
+  }
+
+  FlutterViewController* flutterViewController = [self rootFlutterViewController];
+  if (flutterViewController) {
+    [flutterViewController sendDeepLinkToFramework:url
+                                 completionHandler:^(BOOL success) {
+                                   if (!success && throwBack) {
+                                     // throw it back to iOS
+                                     [UIApplication.sharedApplication openURL:url];
+                                   }
+                                 }];
+  } else {
+    FML_LOG(ERROR) << "Attempting to open an URL without a Flutter RootViewController.";
+    return NO;
+  }
+  return YES;
 }
 
 - (BOOL)application:(UIApplication*)application handleOpenURL:(NSURL*)url {
@@ -204,6 +207,7 @@ static NSString* const kRestorationStateAppModificationKey = @"mod-date";
                         completionHandler:completionHandler];
 }
 
+// This method is called when opening an URL with a http/https scheme.
 - (BOOL)application:(UIApplication*)application
     continueUserActivity:(NSUserActivity*)userActivity
       restorationHandler:
@@ -214,7 +218,8 @@ static NSString* const kRestorationStateAppModificationKey = @"mod-date";
                    restorationHandler:restorationHandler]) {
     return YES;
   }
-  return [self openURL:userActivity.webpageURL];
+
+  return [self handleOpenURL:userActivity.webpageURL options:@{} relayToSystemIfUnhandled:YES];
 }
 
 #pragma mark - FlutterPluginRegistry methods. All delegating to the rootViewController
