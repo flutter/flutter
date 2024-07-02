@@ -88,7 +88,6 @@ Future<PackageConfig> loadPackageConfigWithLogging(File file, {
         message += '\nDid you run this command from the same directory as your pubspec.yaml file?';
       }
       logger.printError(message);
-      print('St ${StackTrace.current}');
       didError = true;
     }
   );
