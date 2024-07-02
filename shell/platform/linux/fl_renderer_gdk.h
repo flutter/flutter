@@ -23,13 +23,22 @@ G_DECLARE_FINAL_TYPE(FlRendererGdk,
 
 /**
  * fl_renderer_gdk_new:
- * @window: the window that is being rendered on.
  *
  * Creates an object that allows Flutter to render by OpenGL ES.
  *
  * Returns: a new #FlRendererGdk.
  */
-FlRendererGdk* fl_renderer_gdk_new(GdkWindow* window);
+FlRendererGdk* fl_renderer_gdk_new();
+
+/**
+ * fl_renderer_gdk_set_window:
+ * @renderer: an #FlRendererGdk.
+ * @window: the window that is being rendered on.
+ *
+ * Set the window that is being rendered on. This is only called once when the
+ * window is available.
+ */
+void fl_renderer_gdk_set_window(FlRendererGdk* renderer, GdkWindow* window);
 
 /**
  * fl_renderer_gdk_create_contexts:
