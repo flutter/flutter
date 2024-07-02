@@ -53,9 +53,11 @@ const TextStyle _kCupertinoDialogActionStyle = TextStyle(
 
 // CupertinoActionSheet-specific text styles.
 const TextStyle _kActionSheetActionStyle = TextStyle(
-  fontFamily: 'CupertinoSystemDisplay',
+  // The fontFamily, fontSize, and fontWeight will be adjusted when the text is
+  // rendered.
+  fontFamily: 'CupertinoSystemText',
   inherit: false,
-  fontSize: 20.0,
+  fontSize: 17.0,
   fontWeight: FontWeight.w400,
   textBaseline: TextBaseline.alphabetic,
 );
@@ -90,8 +92,20 @@ const double _kActionSheetEdgePadding = 8.0;
 const double _kActionSheetCancelButtonPadding = 8.0;
 const double _kActionSheetContentHorizontalPadding = 16.0;
 const double _kActionSheetContentVerticalPadding = 13.5;
-const double _kActionSheetButtonHeight = 57.0;
 const double _kActionSheetActionsSectionMinHeight = 84.0;
+
+// The height of action sheet buttons are determined in two ways:
+//
+//  * The button must be taller than a min height. This mostly affects smaller
+//    text scales.
+//  * The button must leave at least the specific padding to edges. According to
+//    eyeballing, the horizonal padding stays the same across text scales, while
+//    the vertical padding is proportional to text scale (which mostly affects
+//    larger text scales).
+const double _kActionSheetButtonMinHeight = 57.17;
+const double _kActionSheetButtonTopPaddingBase = 8.30;
+const double _kActionSheetButtonBottomPaddingBase = 6.80;
+const double _kActionSheetButtonHorizontalPadding = 10.0;
 
 // A translucent color that is painted on top of the blurred backdrop as the
 // dialog's background color
@@ -1130,9 +1144,39 @@ class _CupertinoActionSheetActionState extends State<CupertinoActionSheetAction>
     widget.onPressed();
   }
 
+  // Calculates the font size for action sheet buttons, which deviate from
+  // standard HIG specifications. Action sheet buttons has a non-linear
+  // relationship between context text scaling and the actual rendered size.
+  //
+  //  Text scale    | xs |  l | xl | xxl | xxxl | ax1 | ax2 | ax3 | ax4 | ax5
+  //  Measured size | 20 | 20 | 22 |  22 |  24  |  28 |  33 |  40 |  46 |  51
+  //  HIG body size | 14 | 17 | 19 |  21 |  23  |  28 |  33 |  40 |  47 |  53
+  //  (for reference)
+  //
+  // This function calculates font sizes using interpolation. The
+  // `contextScaleFactor` is the text scaling factor provided by context. The
+  // `defaultFontSize` is the base font size for the button. The return value
+  // is the calculated font size, including the effect of `contextScaleFactor`.
+  // Divide by `contextScaleFactor` before using in a `Text`.
+  static double _fontSizeMapper(double contextScaleFactor, double defaultFontSize) {
+    final double higfontSize = contextScaleFactor * defaultFontSize;
+    // The following curvie is cubic interpolated from the table above.
+    final double resultSize =
+      26 - 1.19 * higfontSize
+        * (1 - 0.0506 * higfontSize
+          * (1 - 0.00909 * higfontSize));
+    return resultSize.roundToDouble();
+  }
+
   @override
   Widget build(BuildContext context) {
+    const double defaultFontSize = 17.0; // Body font size in HIG for "large"
+    final double effectiveTextScaleFactor = MediaQuery.textScalerOf(context).scale(defaultFontSize) / defaultFontSize;
+    final double targetFontSize = _fontSizeMapper(effectiveTextScaleFactor, _kActionSheetActionStyle.fontSize!);
+
     TextStyle style = _kActionSheetActionStyle.copyWith(
+      fontFamily: targetFontSize >= 20 ? 'CupertinoSystemDisplay' : 'CupertinoSystemText',
+      fontSize: targetFontSize / effectiveTextScaleFactor,
       color: widget.isDestructiveAction
           ? CupertinoDynamicColor.resolve(CupertinoColors.systemRed, context)
           : CupertinoTheme.of(context).primaryColor,
@@ -1149,15 +1193,17 @@ class _CupertinoActionSheetActionState extends State<CupertinoActionSheetAction>
         behavior: HitTestBehavior.opaque,
         child: ConstrainedBox(
           constraints: const BoxConstraints(
-            minHeight: _kActionSheetButtonHeight,
+            minHeight: _kActionSheetButtonMinHeight,
           ),
           child: Semantics(
             button: true,
             onTap: widget.onPressed,
             child: Padding(
-              padding: const EdgeInsets.symmetric(
-                vertical: 16.0,
-                horizontal: 10.0,
+              padding: EdgeInsets.fromLTRB(
+                _kActionSheetButtonHorizontalPadding,
+                effectiveTextScaleFactor * _kActionSheetButtonTopPaddingBase,
+                _kActionSheetButtonHorizontalPadding,
+                effectiveTextScaleFactor * _kActionSheetButtonBottomPaddingBase,
               ),
               child: DefaultTextStyle(
                 style: style,
