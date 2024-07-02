@@ -2060,6 +2060,7 @@ class _SubmenuButtonState extends State<SubmenuButton> {
             child: child,
           );
         }
+
         return child;
       },
       menuChildren: widget.menuChildren,
