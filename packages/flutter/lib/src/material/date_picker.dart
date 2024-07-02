@@ -965,12 +965,14 @@ class _DatePickerHeader extends StatelessWidget {
 
 /// Signature for predicating enabled dates in date range pickers.
 ///
-/// The [selectedStartDay] and [selectedEndDay] are the currently selected start and end dates of a date range, which conditionally
-/// enables or disables each date in the picker based on the user selection. (Example: in a hostel's room selection,
-/// you are not able to select the end date after the next non-selectable day).
+/// The [selectedStartDay] and [selectedEndDay] are the currently selected start
+/// and end dates of a date range, which conditionally enables or disables each
+/// date in the picker based on the user selection. (Example: in a hostel's room
+/// selection, you are not able to select the end date after the next
+/// non-selectable day).
 ///
-/// See [showDateRangePicker], which has a [SelectableDayForRangePredicate] parameter used
-/// to specify allowable days in the date range picker.
+/// See [showDateRangePicker], which has a [SelectableDayForRangePredicate]
+/// parameter used to specify allowable days in the date range picker.
 typedef SelectableDayForRangePredicate = bool Function(DateTime day, DateTime? selectedStartDay, DateTime? selectedEndDay);
 
 /// Shows a full screen modal dialog containing a Material Design date range
@@ -1127,11 +1129,13 @@ Future<DateTimeRange?> showDateRangePicker({
     "initialDateRange's end date must be on or before lastDate $lastDate.",
   );
   assert(
-    initialDateRange == null || selectableDayPredicate == null || selectableDayPredicate(initialDateRange.start, initialDateRange.start, initialDateRange.end),
+    initialDateRange == null || selectableDayPredicate == null ||
+      selectableDayPredicate(initialDateRange.start, initialDateRange.start, initialDateRange.end),
     "initialDateRange's start date must be selectable.",
   );
   assert(
-    initialDateRange == null || selectableDayPredicate == null || selectableDayPredicate(initialDateRange.end, initialDateRange.start, initialDateRange.end),
+    initialDateRange == null || selectableDayPredicate == null ||
+      selectableDayPredicate(initialDateRange.end, initialDateRange.start, initialDateRange.end),
     "initialDateRange's end date must be selectable.",
   );
   currentDate = DateUtils.dateOnly(currentDate ?? DateTime.now());
@@ -1460,8 +1464,10 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> with Rest
           }
           // If end date is outside expected start and end date range, or is not selectable, then clear the end date
           if (_selectedEnd.value != null &&
-              (_selectedEnd.value!.isBefore(widget.firstDate) || _selectedEnd.value!.isAfter(widget.lastDate) ||
-                  widget.selectableDayPredicate != null && !widget.selectableDayPredicate!(_selectedEnd.value!, _selectedStart.value, _selectedEnd.value))) {
+              (_selectedStart.value!.isBefore(widget.firstDate) ||
+              _selectedStart.value!.isAfter(widget.lastDate) ||
+              widget.selectableDayPredicate != null &&
+              !widget.selectableDayPredicate!(_selectedStart.value!, _selectedStart.value, _selectedEnd.value))) {
             _selectedEnd.value = null;
           }
           _entryMode.value = DatePickerEntryMode.calendar;
