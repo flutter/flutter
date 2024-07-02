@@ -18,19 +18,19 @@ void main() {
     Offset switchTopLeft = tester.getTopLeft(find.byType(Switch).at(0));
 
     // The switch is centered vertically with the text.
-    expect(switchTopLeft - tileTopLeft, const Offset(716.0, 16.0));
+    expect(switchTopLeft - tileTopLeft, const Offset(724.0, 16.0));
 
     tileTopLeft = tester.getTopLeft(find.byType(SwitchListTile).at(1));
     switchTopLeft = tester.getTopLeft(find.byType(Switch).at(1));
 
     // The switch is centered vertically with the text.
-    expect(switchTopLeft - tileTopLeft, const Offset(716.0, 30.0));
+    expect(switchTopLeft - tileTopLeft, const Offset(724.0, 30.0));
 
     tileTopLeft = tester.getTopLeft(find.byType(SwitchListTile).at(2));
     switchTopLeft = tester.getTopLeft(find.byType(Switch).at(2));
 
     // The switch is aligned to the top vertically with the text.
-    expect(switchTopLeft - tileTopLeft, const Offset(716.0, 8.0));
+    expect(switchTopLeft - tileTopLeft, const Offset(724.0, 8.0));
   });
 
   testWidgets('Switches can be checked', (WidgetTester tester) async {

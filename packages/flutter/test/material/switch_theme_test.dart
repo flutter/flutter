@@ -207,7 +207,7 @@ void main() {
     expect(_getSwitchMaterial(tester), paints..circle(color: focusOverlayColor, radius: splashRadius));
   });
 
-  testWidgets('Material3 - Switch is themeable', (WidgetTester tester) async {
+  testWidgets('Switch is themeable', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
     const Color defaultThumbColor = Color(0xfffffff0);
@@ -227,7 +227,6 @@ void main() {
     const Icon icon2 = Icon(Icons.close);
 
     final ThemeData themeData = ThemeData(
-      useMaterial3: true,
       switchTheme: SwitchThemeData(
         thumbColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
           if (states.contains(MaterialState.selected)) {
@@ -299,7 +298,7 @@ void main() {
         ..paragraph()
     );
     // Size from MaterialTapTargetSize.shrinkWrap.
-    expect(tester.getSize(find.byType(Switch)), const Size(60.0, 40.0));
+    expect(tester.getSize(find.byType(Switch)), const Size(52.0, 40.0));
 
     // Selected switch.
     await tester.pumpWidget(buildSwitch(selected: true));
@@ -495,7 +494,7 @@ void main() {
     expect(_getSwitchMaterial(tester), paints..circle(color: focusColor, radius: splashRadius));
   });
 
-  testWidgets('Material3 - Switch properties are taken over the theme values', (WidgetTester tester) async {
+  testWidgets('Switch properties are taken over the theme values', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
     const Color themeDefaultThumbColor = Color(0xfffffff0);
@@ -527,7 +526,6 @@ void main() {
     const double splashRadius = 2.0;
 
     final ThemeData themeData = ThemeData(
-      useMaterial3: true,
       switchTheme: SwitchThemeData(
         thumbColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
           if (states.contains(MaterialState.selected)) {
@@ -630,10 +628,10 @@ void main() {
       paints
         ..rrect(color: defaultTrackColor)
         ..rrect(color: defaultOutlineColor, strokeWidth: defaultOutlineWidth)
-        ..rrect(color: defaultThumbColor)..paragraph(offset: const Offset(12, 12))
+        ..rrect(color: defaultThumbColor)..paragraph(offset: const Offset(8, 12))
     );
     // Size from MaterialTapTargetSize.shrinkWrap.
-    expect(tester.getSize(find.byType(Switch)), const Size(60.0, 40.0));
+    expect(tester.getSize(find.byType(Switch)), const Size(52.0, 40.0));
 
     // Selected switch.
     await tester.pumpWidget(buildSwitch(selected: true));
