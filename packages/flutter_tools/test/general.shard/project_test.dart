@@ -1109,7 +1109,7 @@ plugins {
             IosProject.kProductBundleIdKey: 'io.flutter.someProject',
           };
           xcodeProjectInterpreter.xcodeProjectInfo = XcodeProjectInfo(<String>[], <String>[], <String>['Free'], logger);
-          const BuildInfo buildInfo = BuildInfo(BuildMode.debug, 'free', treeShakeIcons: false);
+          const BuildInfo buildInfo = BuildInfo(BuildMode.debug, 'free', treeShakeIcons: false, packageConfigPath: '.dart_tool/package_config.json');
 
           expect(await project.ios.productBundleIdentifier(buildInfo), 'io.flutter.someProject');
         });
@@ -1118,7 +1118,7 @@ plugins {
           final FlutterProject project = await someProject();
           project.ios.xcodeProject.createSync();
           xcodeProjectInterpreter.xcodeProjectInfo = XcodeProjectInfo(<String>[], <String>[], <String>['Runner'], logger);
-          const BuildInfo buildInfo = BuildInfo(BuildMode.debug, 'free', treeShakeIcons: false);
+          const BuildInfo buildInfo = BuildInfo(BuildMode.debug, 'free', treeShakeIcons: false, packageConfigPath: '.dart_tool/package_config.json');
 
           await expectToolExitLater(
             project.ios.productBundleIdentifier(buildInfo),

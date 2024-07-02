@@ -1190,7 +1190,7 @@ class DeviceDomain extends Domain {
       debuggingOptions: DebuggingOptions.fromJson(
         castStringKeyedMap(args['debuggingOptions'])!,
         // We are using prebuilts, build info does not matter here.
-        BuildInfo.debug,
+        BuildInfo.dummy,
       ),
       mainPath: _getStringArg(args, 'mainPath'),
       route: _getStringArg(args, 'route'),

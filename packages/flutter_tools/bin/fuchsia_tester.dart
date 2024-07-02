@@ -145,7 +145,11 @@ Future<void> run(List<String> args) async {
           BuildMode.debug,
           '',
           treeShakeIcons: false,
-          packagesPath: globals.fs.path.normalize(globals.fs.path.absolute(argResults[_kOptionPackages] as String)),
+          packageConfigPath: globals.fs.path.normalize(
+            globals.fs.path.absolute(
+              argResults[_kOptionPackages] as String,
+            ),
+          ),
         ),
       ),
       watcher: collector,

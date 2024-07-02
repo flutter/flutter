@@ -69,6 +69,7 @@ void main() {
             '',
             treeShakeIcons: false,
             trackWidgetCreation: true,
+            packageConfigPath: '.dart_tool/package_config.json'
           )),
           target: 'main.dart',
           devtoolsHandler: createNoOpHandler,

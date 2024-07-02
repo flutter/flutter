@@ -78,6 +78,7 @@ class BuildAarCommand extends BuildSubCommand {
     DevelopmentArtifact.androidGenSnapshot,
   };
 
+  @override
   late final FlutterProject project = _getProject();
 
   @override
@@ -196,7 +197,7 @@ class BuildAarCommand extends BuildSubCommand {
   FlutterProject _getProject() {
     final List<String> remainingArguments = argResults!.rest;
     if (remainingArguments.isEmpty) {
-      return FlutterProject.current();
+      return super.project;
     }
     final File mainFile = _fileSystem.file(remainingArguments.first);
     final String path;
