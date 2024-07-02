@@ -1214,25 +1214,21 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
           ..sortKey = OrdinalSortKey(ordinal++)
           ..textDirection = initialDirection
           ..attributedLabel = AttributedString(info.semanticsLabel ?? info.text, attributes: info.stringAttributes);
-        final GestureRecognizer? recognizer = info.recognizer;
-        if (recognizer != null) {
-          if (recognizer is TapGestureRecognizer) {
-            if (recognizer.onTap != null) {
-              configuration.onTap = recognizer.onTap;
+        switch (info.recognizer) {
+          case TapGestureRecognizer(onTap: final VoidCallback? onTap):
+          case DoubleTapGestureRecognizer(onDoubleTap: final VoidCallback? onTap):
+            if (onTap != null) {
+              configuration.onTap = onTap;
               configuration.isLink = true;
             }
-          } else if (recognizer is DoubleTapGestureRecognizer) {
-            if (recognizer.onDoubleTap != null) {
-              configuration.onTap = recognizer.onDoubleTap;
-              configuration.isLink = true;
+          case LongPressGestureRecognizer(onLongPress: final GestureLongPressCallback? onLongPress):
+            if (onLongPress != null) {
+              configuration.onLongPress = onLongPress;
             }
-          } else if (recognizer is LongPressGestureRecognizer) {
-            if (recognizer.onLongPress != null) {
-              configuration.onLongPress = recognizer.onLongPress;
-            }
-          } else {
-            assert(false, '${recognizer.runtimeType} is not supported.');
-          }
+          case null:
+            break;
+          default:
+            assert(false, '${info.recognizer.runtimeType} is not supported.');
         }
         if (node.parentPaintClipRect != null) {
           final Rect paintRect = node.parentPaintClipRect!.intersect(currentRect);
