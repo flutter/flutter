@@ -293,6 +293,9 @@ class SliderThemeData with Diagnosticable {
     this.thumbSelector,
     this.mouseCursor,
     this.allowedInteraction,
+    this.barThumbSize,
+    this.trackGapSize,
+    this.use2024SliderShapes,
   });
 
   /// Generates a SliderThemeData from three main colors.
@@ -361,6 +364,12 @@ class SliderThemeData with Diagnosticable {
   }
 
   /// The height of the [Slider] track.
+  ///
+  /// If provided, this value will be used for the track height of the [Slider].
+  ///
+  /// If [SliderThemeData.use2024SliderShapes] is set to true or [SliderThemeData.trackShape]
+  /// is set to [GappedSliderTrackShape], the track height uses 16 pixels. Otherwise,
+  /// the default track height is 4 pixels.
   final double? trackHeight;
 
   /// The color of the [Slider] track between the [Slider.min] position and the
@@ -452,7 +461,8 @@ class SliderThemeData with Diagnosticable {
 
   /// The shape that will be used to draw the [Slider]'s thumb.
   ///
-  /// The default value is [RoundSliderThumbShape].
+  /// If [SliderThemeData.use2024SliderShapes] is set to true, the thumb shape
+  /// will be [BarSliderThumbShape]. Otherwise, defaults to [RoundSliderThumbShape].
   ///
   /// See also:
   ///
@@ -467,7 +477,9 @@ class SliderThemeData with Diagnosticable {
   /// track. It is also used to horizontally position tick marks, when the
   /// slider is discrete.
   ///
-  /// The default value is [RoundedRectSliderTrackShape].
+  /// If [SliderThemeData.use2024SliderShapes] is set to true, the track shape
+  /// will be [GappedSliderTrackShape]. Otherwise, the default
+  /// the value is [RoundedRectSliderTrackShape].
   ///
   /// See also:
   ///
@@ -478,7 +490,10 @@ class SliderThemeData with Diagnosticable {
   /// The shape that will be used to draw the [Slider]'s value
   /// indicator.
   ///
-  /// The default value is [PaddleSliderValueIndicatorShape].
+  /// If [SliderThemeData.use2024SliderShapes] is set to true, the value indicator
+  /// shape will be [RoundedRectSliderValueIndicatorShape]. Otherwise, defaults to
+  /// [DropSliderValueIndicatorShape]. If [ThemeData.useMaterial3] is set to false,
+  /// the value indicator shape will be [RectangularSliderValueIndicatorShape].
   ///
   /// See also:
   ///
@@ -585,7 +600,39 @@ class SliderThemeData with Diagnosticable {
   /// If specified, overrides the default value of [Slider.allowedInteraction].
   final SliderInteraction? allowedInteraction;
 
-  /// Creates a copy of this object but with the given fields replaced with the
+  /// The size of the [BarSliderThumbShape] thumb.
+  ///
+  /// If [SliderThemeData.thumbShape] is [BarSliderThumbShape], this property is used to
+  /// set the size of the thumb. Otherwise, the default thumb size is 4 pixels for the
+  /// width and 44 pixels for the height.
+  final MaterialStateProperty<Size?>? barThumbSize;
+
+  /// The size of the gap between the active and inactive track of [GappedSliderTrackShape].
+  ///
+  /// If [SliderThemeData.trackShape] is [GappedSliderTrackShape], this
+  /// property is used to set the gap between the active and inactive track. Otherwise,
+  /// the default gap size is 6 pixels.
+  final double? trackGapSize;
+
+  /// A temporary flag that can be used to opt-in to the new 2024 slider shapes.
+  ///
+  /// This flag is intended to migrate usages, eventually this flag will be defaulted to
+  /// _true_ and then deprecated and removed.
+  ///
+  /// This flag is _false_ by default. If true, then the [Slider]'s will use the
+  /// new 2024 slider shape, track shape will be [GappedSliderTrackShape],
+  /// thumb shape will be [BarSliderThumbShape], and value indicator shape will be
+  /// [RoundedRectSliderValueIndicatorShape].
+  ///
+  /// {@tool dartpad}
+  /// This example shows how to use [SliderThemeData.use2024SliderShapes] to enable
+  /// the updated Slider appearance as described in:
+  /// https://m3.material.io/components/sliders/overview
+  ///
+  /// ** See code in examples/api/lib/material/slider/slider.3.dart **
+  /// {@end-tool}
+  final bool? use2024SliderShapes;
+
   /// new values.
   SliderThemeData copyWith({
     double? trackHeight,
@@ -620,6 +667,10 @@ class SliderThemeData with Diagnosticable {
     RangeThumbSelector? thumbSelector,
     MaterialStateProperty<MouseCursor?>? mouseCursor,
     SliderInteraction? allowedInteraction,
+    MaterialStateProperty<Size?>? barThumbSize,
+    double? trackGapSize,
+    Color? stopIndicatorColor,
+    bool? use2024SliderShapes,
   }) {
     return SliderThemeData(
       trackHeight: trackHeight ?? this.trackHeight,
@@ -654,6 +705,9 @@ class SliderThemeData with Diagnosticable {
       thumbSelector: thumbSelector ?? this.thumbSelector,
       mouseCursor: mouseCursor ?? this.mouseCursor,
       allowedInteraction: allowedInteraction ?? this.allowedInteraction,
+      barThumbSize: barThumbSize ?? this.barThumbSize,
+      trackGapSize: trackGapSize ?? this.trackGapSize,
+      use2024SliderShapes: use2024SliderShapes ?? this.use2024SliderShapes,
     );
   }
 
@@ -697,6 +751,9 @@ class SliderThemeData with Diagnosticable {
       thumbSelector: t < 0.5 ? a.thumbSelector : b.thumbSelector,
       mouseCursor: t < 0.5 ? a.mouseCursor : b.mouseCursor,
       allowedInteraction: t < 0.5 ? a.allowedInteraction : b.allowedInteraction,
+      barThumbSize: MaterialStateProperty.lerp<Size?>(a.barThumbSize, b.barThumbSize, t, Size.lerp),
+      trackGapSize: lerpDouble(a.trackGapSize, b.trackGapSize, t),
+      use2024SliderShapes: t < 0.5 ? a.use2024SliderShapes : b.use2024SliderShapes,
     );
   }
 
@@ -734,6 +791,9 @@ class SliderThemeData with Diagnosticable {
       thumbSelector,
       mouseCursor,
       allowedInteraction,
+      barThumbSize,
+      trackGapSize,
+      use2024SliderShapes,
     ),
   );
 
@@ -777,7 +837,10 @@ class SliderThemeData with Diagnosticable {
         && other.minThumbSeparation == minThumbSeparation
         && other.thumbSelector == thumbSelector
         && other.mouseCursor == mouseCursor
-        && other.allowedInteraction == allowedInteraction;
+        && other.allowedInteraction == allowedInteraction
+        && other.barThumbSize == barThumbSize
+        && other.trackGapSize == trackGapSize
+        && other.use2024SliderShapes == use2024SliderShapes;
   }
 
   @override
@@ -816,6 +879,9 @@ class SliderThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<RangeThumbSelector>('thumbSelector', thumbSelector, defaultValue: defaultData.thumbSelector));
     properties.add(DiagnosticsProperty<MaterialStateProperty<MouseCursor?>>('mouseCursor', mouseCursor, defaultValue: defaultData.mouseCursor));
     properties.add(EnumProperty<SliderInteraction>('allowedInteraction', allowedInteraction, defaultValue: defaultData.allowedInteraction));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<Size?>>('barThumbSize', barThumbSize, defaultValue: null));
+    properties.add(DoubleProperty('trackGapSize', trackGapSize, defaultValue: defaultData.trackGapSize));
+    properties.add(FlagProperty('use2024SliderShapes', value: use2024SliderShapes, ifTrue: 'true', ifFalse: 'false', showName: true));
   }
 }
 
@@ -3529,6 +3595,426 @@ class _DropSliderValueIndicatorPathPainter {
     final double bottomTipToUpperRectTranslateY = -_preferredHalfHeight / 2 - upperRect.height;
     canvas.translate(0, bottomTipToUpperRectTranslateY);
     final Offset boxCenter = Offset(horizontalShift, upperRect.height / 1.75);
+    final Offset halfLabelPainterOffset = Offset(labelPainter.width / 2, labelPainter.height / 2);
+    final Offset labelOffset = boxCenter - halfLabelPainterOffset;
+    labelPainter.paint(canvas, labelOffset);
+    canvas.restore();
+  }
+}
+
+/// The bar shape of a [Slider]'s thumb.
+///
+/// When the slider is enabled, the [ColorScheme.primary] color is used for the
+/// thumb. When the slider is disabled, the [ColorScheme.onSurface] color with an
+/// opacity of 0.38 is used for the thumb.
+///
+/// The thumb bar shape width is reduced when the thumb is pressed.
+///
+/// If [SliderThemeData.barThumbSize] is null, then the thumb size is 4 pixels for the width
+/// and 44 pixels for the height.
+///
+/// This thumb shape was introduced in December 2023. If the [SliderThemeData.use2024SliderShapes]
+/// flag is set to true, then the slider will use this shape for the thumb.
+///
+/// See also:
+///
+///  * [Slider], which includes an overlay defined by this shape.
+///  * [SliderTheme], which can be used to configure the overlay shape of all
+///    sliders in a widget subtree.
+class BarSliderThumbShape extends SliderComponentShape {
+  /// Create a slider thumb that draws a bar.
+  const BarSliderThumbShape();
+
+  @override
+  Size getPreferredSize(bool isEnabled, bool isDiscrete) {
+    return const Size(10.0, 50.0);
+  }
+
+  @override
+  void paint(
+    PaintingContext context,
+    Offset center, {
+    required Animation<double> activationAnimation,
+    required Animation<double> enableAnimation,
+    required bool isDiscrete,
+    required TextPainter labelPainter,
+    required RenderBox parentBox,
+    required SliderThemeData sliderTheme,
+    required TextDirection textDirection,
+    required double value,
+    required double textScaleFactor,
+    required Size sizeWithOverflow,
+  }) {
+    assert(sliderTheme.disabledThumbColor != null);
+    assert(sliderTheme.thumbColor != null);
+    assert(sliderTheme.barThumbSize != null);
+
+    final ColorTween colorTween = ColorTween(
+      begin: sliderTheme.disabledThumbColor,
+      end: sliderTheme.thumbColor,
+    );
+    final Color color = colorTween.evaluate(enableAnimation)!;
+
+    final Canvas canvas = context.canvas;
+    final Size thumbSize = sliderTheme.barThumbSize!.resolve(<MaterialState>{})!; // This is resolved in the paint method.
+    final RRect rrect = RRect.fromRectAndRadius(
+      Rect.fromCenter(
+        center: center,
+        width: thumbSize.width,
+        height: thumbSize.height,
+      ),
+      Radius.circular(thumbSize.shortestSide /2),
+    );
+    canvas.drawRRect(rrect, Paint()..color = color);
+  }
+}
+
+/// The gapped shape of a [Slider]'s track.
+///
+/// The [GappedSliderTrackShape] consists of active and inactive
+/// tracks. The active track uses the [SliderThemeData.activeTrackColor] and the
+/// inactive track uses the [SliderThemeData.inactiveTrackColor].
+///
+/// The track shape uses circular corner radius for the edge corners and a corner radius
+/// of 2 pixels for the inside corners.
+///
+/// Between the active and inactive tracks there is a gap of size [SliderThemeData.trackGapSize].
+/// If the [SliderThemeData.thumbShape] is [BarSliderThumbShape] and the thumb is pressed, the thumb's
+/// width is reduced; as a result, the track gap size in [GappedSliderTrackShape]
+/// is also reduced.
+///
+/// If [SliderThemeData.trackGapSize] is null, then the track gap size defaults to 6 pixels.
+///
+/// This track shape was introduced in December 2023. If the [SliderThemeData.use2024SliderShapes]
+/// flag is set to true, then the slider will use this shape for the track.
+///
+/// See also:
+///
+///  * [Slider], which includes an overlay defined by this shape.
+///  * [SliderTheme], which can be used to configure the overlay shape of all
+///    sliders in a widget subtree.
+class GappedSliderTrackShape extends SliderTrackShape with BaseSliderTrackShape {
+  /// Create a slider track that draws two rectangles with rounded outer edges.
+  const GappedSliderTrackShape();
+
+  @override
+  void paint(
+    PaintingContext context,
+    Offset offset, {
+    required RenderBox parentBox,
+    required SliderThemeData sliderTheme,
+    required Animation<double> enableAnimation,
+    required TextDirection textDirection,
+    required Offset thumbCenter,
+    Offset? secondaryOffset,
+    bool isDiscrete = false,
+    bool isEnabled = false,
+    double additionalActiveTrackHeight = 2,
+  }) {
+    assert(sliderTheme.disabledActiveTrackColor != null);
+    assert(sliderTheme.disabledInactiveTrackColor != null);
+    assert(sliderTheme.activeTrackColor != null);
+    assert(sliderTheme.inactiveTrackColor != null);
+    assert(sliderTheme.thumbShape != null);
+    assert(sliderTheme.trackGapSize != null);
+    assert(!sliderTheme.trackGapSize!.isNegative);
+    // If the slider [SliderThemeData.trackHeight] is less than or equal to 0,
+    // then it makes no difference whether the track is painted or not,
+    // therefore the painting can be a no-op.
+    if (sliderTheme.trackHeight == null || sliderTheme.trackHeight! <= 0) {
+      return;
+    }
+
+    // Assign the track segment paints, which are left: active, right: inactive,
+    // but reversed for right to left text.
+    final ColorTween activeTrackColorTween = ColorTween(
+      begin: sliderTheme.disabledActiveTrackColor,
+      end: sliderTheme.activeTrackColor,
+    );
+    final ColorTween inactiveTrackColorTween = ColorTween(
+      begin: sliderTheme.disabledInactiveTrackColor,
+      end: sliderTheme.inactiveTrackColor,
+    );
+    final Paint activePaint = Paint()
+      ..color = activeTrackColorTween.evaluate(enableAnimation)!;
+    final Paint inactivePaint = Paint()
+      ..color = inactiveTrackColorTween.evaluate(enableAnimation)!;
+    final Paint leftTrackPaint;
+    final Paint rightTrackPaint;
+    switch (textDirection) {
+      case TextDirection.ltr:
+        leftTrackPaint = activePaint;
+        rightTrackPaint = inactivePaint;
+      case TextDirection.rtl:
+        leftTrackPaint = inactivePaint;
+        rightTrackPaint = activePaint;
+    }
+
+    // Gap, starting from the middle of the thumb.
+    final double thumbGapSize = sliderTheme.trackGapSize!;
+
+    final Rect trackRect = getPreferredRect(
+      parentBox: parentBox,
+      offset: offset,
+      sliderTheme: sliderTheme,
+      isEnabled: isEnabled,
+      isDiscrete: isDiscrete,
+    );
+
+    final Radius trackCornerRadius = Radius.circular(trackRect.shortestSide / 2);
+    final Radius activeTrackCornerRadius = Radius.circular(trackRect.shortestSide / 2);
+    const Radius trackInsideCornerRadius = Radius.circular(2.0);
+
+    final Radius topLeftRadius = (textDirection == TextDirection.ltr)
+      ? trackCornerRadius
+      : activeTrackCornerRadius;
+    final Radius bottomLeftRadius = (textDirection == TextDirection.ltr)
+      ? activeTrackCornerRadius
+      : trackCornerRadius;
+    final Radius topRightRadius = (textDirection == TextDirection.rtl)
+      ? activeTrackCornerRadius
+      : trackCornerRadius;
+    final Radius bottomRightRadius = (textDirection == TextDirection.rtl)
+      ? activeTrackCornerRadius
+      : trackCornerRadius;
+
+    final RRect trackRRect = RRect.fromRectAndCorners(
+      trackRect,
+      topLeft: topLeftRadius,
+      bottomLeft: bottomLeftRadius,
+      topRight: topRightRadius,
+      bottomRight: bottomRightRadius,
+    );
+
+    final RRect leftRRect = RRect.fromLTRBAndCorners(
+      trackRect.left,
+      trackRect.top,
+      math.max(trackRect.left, thumbCenter.dx - thumbGapSize),
+      trackRect.bottom,
+      topLeft: topLeftRadius,
+      bottomLeft: bottomLeftRadius,
+      topRight: trackInsideCornerRadius,
+      bottomRight: trackInsideCornerRadius,
+    );
+
+    final RRect rightRRect = RRect.fromLTRBAndCorners(
+      thumbCenter.dx + thumbGapSize,
+      trackRect.top,
+      trackRect.right,
+      trackRect.bottom,
+      topRight: topRightRadius,
+      bottomRight: bottomRightRadius,
+      topLeft: trackInsideCornerRadius,
+      bottomLeft: trackInsideCornerRadius,
+    );
+
+    context.canvas..save()..clipRRect(trackRRect);
+    context.canvas.drawRRect(leftRRect, leftTrackPaint);
+    context.canvas.drawRRect(rightRRect, rightTrackPaint);
+    context.canvas.restore();
+
+    // Draw stop indicator at the end of the track.
+    const double stopIndicatorRadius = 2.0;
+    const double stopIndicatorTrailingSpace = 6.0 + 2.0;
+    final Offset stopIndicatorOffset = Offset(
+      (textDirection == TextDirection.ltr)
+        ? trackRect.centerRight.dx - stopIndicatorTrailingSpace
+        : trackRect.centerLeft.dx + stopIndicatorTrailingSpace,
+      trackRect.center.dy,
+    );
+
+    final bool showStopIndicator = (textDirection == TextDirection.ltr)
+      ? thumbCenter.dx < stopIndicatorOffset.dx
+      : thumbCenter.dx > stopIndicatorOffset.dx;
+    if (showStopIndicator && !isDiscrete) {
+      final Rect stopIndicatorRect = Rect.fromCircle(center: stopIndicatorOffset, radius: stopIndicatorRadius);
+      context.canvas.drawCircle(stopIndicatorRect.center, stopIndicatorRadius, activePaint);
+    }
+  }
+}
+
+/// The rounded rectangle shape of a [Slider]'s value indicator.
+///
+/// If the [SliderThemeData.valueIndicatorColor] is null, then the shape uses the [ColorScheme.inverseSurface]
+/// color to draw the value indicator.
+///
+/// If the [SliderThemeData.valueIndicatorTextStyle] is null, then the indicator label text style
+/// defaults to [TextTheme.labelMedium] with the color set to [ColorScheme.onInverseSurface]. If the
+/// [ThemeData.useMaterial3] is set to false, then the indicator label text style defaults to
+/// [TextTheme.bodyLarge] with the color set to [ColorScheme.onInverseSurface].
+///
+/// If the [SliderThemeData.valueIndicatorStrokeColor] is provided, then the value indicator is drawn with a
+/// stroke border with the color provided.
+///
+/// This value indicator shape was introduced in December 2023. If the [SliderThemeData.use2024SliderShapes]
+/// flag is set to true, then the slider will use this shape for the value indicator.
+///
+/// See also:
+///
+///  * [Slider], which includes a value indicator defined by this shape.
+///  * [SliderTheme], which can be used to configure the slider value indicator
+///    of all sliders in a widget subtree.
+class RoundedRectSliderValueIndicatorShape extends SliderComponentShape {
+  /// Create a slider value indicator that resembles a rounded rectangle.
+  const RoundedRectSliderValueIndicatorShape();
+
+  static const _RoundedRectSliderValueIndicatorPathPainter _pathPainter = _RoundedRectSliderValueIndicatorPathPainter();
+
+  @override
+  Size getPreferredSize(
+    bool isEnabled,
+    bool isDiscrete, {
+    TextPainter? labelPainter,
+    double? textScaleFactor,
+  }) {
+    assert(labelPainter != null);
+    assert(textScaleFactor != null && textScaleFactor >= 0);
+    return _pathPainter.getPreferredSize(labelPainter!, textScaleFactor!);
+  }
+
+  @override
+  void paint(
+    PaintingContext context,
+    Offset center, {
+    required Animation<double> activationAnimation,
+    required Animation<double> enableAnimation,
+    required bool isDiscrete,
+    required TextPainter labelPainter,
+    required RenderBox parentBox,
+    required SliderThemeData sliderTheme,
+    required TextDirection textDirection,
+    required double value,
+    required double textScaleFactor,
+    required Size sizeWithOverflow,
+  }) {
+    final Canvas canvas = context.canvas;
+    final double scale = activationAnimation.value;
+    _pathPainter.paint(
+      parentBox: parentBox,
+      canvas: canvas,
+      center: center,
+      scale: scale,
+      labelPainter: labelPainter,
+      textScaleFactor: textScaleFactor,
+      sizeWithOverflow: sizeWithOverflow,
+      backgroundPaintColor: sliderTheme.valueIndicatorColor!,
+      strokePaintColor: sliderTheme.valueIndicatorStrokeColor,
+    );
+  }
+}
+
+class _RoundedRectSliderValueIndicatorPathPainter {
+  const _RoundedRectSliderValueIndicatorPathPainter();
+
+  static const double _labelPadding = 10.0;
+  static const double _preferredHeight = 32.0;
+  static const double _minLabelWidth = 16.0;
+  static const double _rectYOffset = 10.0;
+  static const double _bottomTipYOffset = 16.0;
+  static const double _preferredHalfHeight = _preferredHeight / 2;
+
+  Size getPreferredSize(
+    TextPainter labelPainter,
+    double textScaleFactor,
+  ) {
+    final double width = math.max(_minLabelWidth, labelPainter.width) + (_labelPadding * 2) * textScaleFactor;
+    return Size(width, _preferredHeight * textScaleFactor);
+  }
+
+  double getHorizontalShift({
+    required RenderBox parentBox,
+    required Offset center,
+    required TextPainter labelPainter,
+    required double textScaleFactor,
+    required Size sizeWithOverflow,
+    required double scale,
+  }) {
+    assert(!sizeWithOverflow.isEmpty);
+
+    const double edgePadding = 8.0;
+    final double rectangleWidth = _upperRectangleWidth(labelPainter, scale);
+    /// Value indicator draws on the Overlay and by using the global Offset
+    /// we are making sure we use the bounds of the Overlay instead of the Slider.
+    final Offset globalCenter = parentBox.localToGlobal(center);
+
+    // The rectangle must be shifted towards the center so that it minimizes the
+    // chance of it rendering outside the bounds of the render box. If the shift
+    // is negative, then the lobe is shifted from right to left, and if it is
+    // positive, then the lobe is shifted from left to right.
+    final double overflowLeft = math.max(0, rectangleWidth / 2 - globalCenter.dx + edgePadding);
+    final double overflowRight = math.max(0, rectangleWidth / 2 - (sizeWithOverflow.width - globalCenter.dx - edgePadding));
+
+    if (rectangleWidth < sizeWithOverflow.width) {
+      return overflowLeft - overflowRight;
+    } else if (overflowLeft - overflowRight > 0) {
+      return overflowLeft - (edgePadding * textScaleFactor);
+    } else {
+      return -overflowRight + (edgePadding * textScaleFactor);
+    }
+  }
+
+  double _upperRectangleWidth(TextPainter labelPainter, double scale) {
+    final double unscaledWidth = math.max(_minLabelWidth, labelPainter.width) + (_labelPadding * 2);
+    return unscaledWidth * scale;
+  }
+
+  void paint({
+    required RenderBox parentBox,
+    required Canvas canvas,
+    required Offset center,
+    required double scale,
+    required TextPainter labelPainter,
+    required double textScaleFactor,
+    required Size sizeWithOverflow,
+    required Color backgroundPaintColor,
+    Color? strokePaintColor,
+  }) {
+    if (scale == 0.0) {
+      // Zero scale essentially means "do not draw anything", so it's safe to just return.
+      return;
+    }
+    assert(!sizeWithOverflow.isEmpty);
+
+    final double rectangleWidth = _upperRectangleWidth(labelPainter, scale);
+    final double horizontalShift = getHorizontalShift(
+      parentBox: parentBox,
+      center: center,
+      labelPainter: labelPainter,
+      textScaleFactor: textScaleFactor,
+      sizeWithOverflow: sizeWithOverflow,
+      scale: scale,
+    );
+
+    final Rect upperRect = Rect.fromLTWH(
+      -rectangleWidth / 2 + horizontalShift,
+      -_rectYOffset - _preferredHeight,
+      rectangleWidth,
+      _preferredHeight,
+    );
+
+    final Paint fillPaint = Paint()..color = backgroundPaintColor;
+
+    canvas.save();
+    // Prepare the canvas for the base of the tooltip, which is relative to the
+    // center of the thumb.
+    canvas.translate(center.dx, center.dy - _bottomTipYOffset);
+    canvas.scale(scale, scale);
+
+    final RRect rrect = RRect.fromRectAndRadius(upperRect, Radius.circular(upperRect.height / 2));
+    if (strokePaintColor != null) {
+      final Paint strokePaint = Paint()
+        ..color = strokePaintColor
+        ..strokeWidth = 1.0
+        ..style = PaintingStyle.stroke;
+      canvas.drawRRect(rrect, strokePaint);
+    }
+
+    canvas.drawRRect(rrect, fillPaint);
+
+    // The label text is centered within the value indicator.
+    final double bottomTipToUpperRectTranslateY = -_preferredHalfHeight / 2 - upperRect.height;
+    canvas.translate(0, bottomTipToUpperRectTranslateY);
+    final Offset boxCenter = Offset(horizontalShift, upperRect.height / 2.3);
     final Offset halfLabelPainterOffset = Offset(labelPainter.width / 2, labelPainter.height / 2);
     final Offset labelOffset = boxCenter - halfLabelPainterOffset;
     labelPainter.paint(canvas, labelOffset);

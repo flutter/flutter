@@ -63,6 +63,9 @@ void main() {
       valueIndicatorTextStyle: TextStyle(color: Colors.black),
       mouseCursor: MaterialStateMouseCursor.clickable,
       allowedInteraction: SliderInteraction.tapOnly,
+      barThumbSize: MaterialStatePropertyAll<Size>( Size(20, 40)),
+      trackGapSize: 10.0,
+      use2024SliderShapes: true,
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -100,7 +103,10 @@ void main() {
       'showValueIndicator: always',
       'valueIndicatorTextStyle: TextStyle(inherit: true, color: Color(0xff000000))',
       'mouseCursor: WidgetStateMouseCursor(clickable)',
-      'allowedInteraction: tapOnly'
+      'allowedInteraction: tapOnly',
+      'barThumbSize: WidgetStatePropertyAll(Size(20.0, 40.0))',
+      'trackGapSize: 10.0',
+      'use2024SliderShapes: true'
     ]);
   });
 
@@ -2637,7 +2643,7 @@ void main() {
             ..rrect(color: const Color(0xff2196f3))
             ..rrect(color: const Color(0x3d2196f3))
             // Test that the value indicator text is painted with the correct color.
-            ..path(color: const Color(0xf55f5f5f))
+            ..path(color: const Color(0xf55f5f5f)),
         );
 
         // Finish gesture to release resources.
@@ -2647,6 +2653,993 @@ void main() {
         debugDisableShadows = true;
       }
     });
+  });
+
+  testWidgets('BarSliderThumbShape default size and color', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(
+      sliderTheme: const SliderThemeData(
+        thumbShape: BarSliderThumbShape(),
+      ),
+    );
+
+    const double value = 0.5;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Material(
+          child: Center(
+            child: Slider(
+              value: value,
+              label: '$value',
+              onChanged: (double newValue) {},
+            ),
+          ),
+        ),
+      ),
+    );
+
+    const Size thumbSize = Size(4.0, 44.0);
+    final Rect rect = Rect.fromLTRB(398.0, 278.0, 398.0 + thumbSize.width, 278.0 + thumbSize.height);
+    expect(
+      find.byType(Slider),
+      paints
+        ..rrect(color: theme.colorScheme.primary)
+        ..rrect(color: theme.colorScheme.surfaceContainerHighest)
+        ..rrect(
+          rrect: RRect.fromLTRBR(
+            rect.left, rect.top, rect.right, rect.bottom,
+            Radius.circular(rect.shortestSide / 2),
+          ),
+          color: theme.colorScheme.primary,
+        ),
+    );
+  });
+
+  testWidgets('Material2 - BarSliderThumbShape default size and color', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(
+      sliderTheme: const SliderThemeData(
+        thumbShape: BarSliderThumbShape(),
+      ),
+      useMaterial3: false,
+    );
+
+    const double value = 0.5;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Material(
+          child: Center(
+            child: Slider(
+              value: value,
+              label: '$value',
+              onChanged: (double newValue) {},
+            ),
+          ),
+        ),
+      ),
+    );
+
+    const Size thumbSize = Size(4.0, 44.0);
+    final Rect rect = Rect.fromLTRB(398.0, 278.0, 398.0 + thumbSize.width, 278.0 + thumbSize.height);
+    expect(
+      find.byType(Slider),
+      paints
+        ..rrect(color: Color(theme.colorScheme.primary.value))
+        ..rrect(color: theme.colorScheme.primary.withOpacity(0.24))
+        ..rrect(
+          rrect: RRect.fromLTRBR(
+            rect.left, rect.top, rect.right, rect.bottom,
+            Radius.circular(rect.shortestSide / 2),
+          ),
+          color: Color(theme.colorScheme.primary.value),
+        ),
+    );
+  });
+
+  testWidgets('Can override BarSliderThumbShape size', (WidgetTester tester) async {
+    const Size thumbSize = Size(20.0, 40.0);
+
+    final ThemeData theme = ThemeData(
+      sliderTheme: const SliderThemeData(
+        thumbShape: BarSliderThumbShape(),
+        barThumbSize: MaterialStatePropertyAll<Size>(thumbSize),
+      ),
+    );
+
+    const double value = 0.5;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Material(
+          child: Center(
+            child: Slider(
+              value: value,
+              label: '$value',
+              onChanged: (double newValue) {},
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Rect rect = Rect.fromLTRB(390.0, 280.0, 390.0 + thumbSize.width, 280.0 + thumbSize.height);
+    expect(
+      find.byType(Slider),
+      paints
+        ..rrect(color: theme.colorScheme.primary)
+        ..rrect(color: theme.colorScheme.surfaceContainerHighest)
+        ..rrect(
+          rrect: RRect.fromLTRBR(
+            rect.left, rect.top, rect.right, rect.bottom,
+            Radius.circular(rect.shortestSide / 2),
+          ),
+          color: theme.colorScheme.primary,
+        ),
+    );
+  });
+
+  testWidgets('BarSliderThumbShape width is updated when pressed', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(
+      sliderTheme: const SliderThemeData(
+        thumbShape: BarSliderThumbShape(),
+      ),
+    );
+
+    const double value = 0.5;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Material(
+          child: Center(
+            child: Slider(
+              value: value,
+              label: '$value',
+              onChanged: (double newValue) {},
+            ),
+          ),
+        ),
+      ),
+    );
+
+    const Size thumbSize = Size(4.0, 44.0);
+    final Rect rect = Rect.fromLTRB(398.0, 278.0, 398.0 + thumbSize.width, 278.0 + thumbSize.height);
+    RRect thumbRRect = RRect.fromRectAndRadius(rect, Radius.circular(rect.shortestSide / 2));
+    final Color thumbColor = theme.colorScheme.primary;
+    final Color activeTrackColor = theme.colorScheme.primary;
+    final Color inactiveTrackColor = theme.colorScheme.surfaceContainerHighest;
+
+    expect(
+      find.byType(Slider),
+      paints
+        ..rrect(color: activeTrackColor)
+        ..rrect(color: inactiveTrackColor)
+        ..rrect(rrect: thumbRRect, color: thumbColor),
+    );
+
+    final Offset center = tester.getCenter(find.byType(Slider));
+    final TestGesture gesture = await tester.startGesture(center);
+    await tester.pumpAndSettle();
+
+    const Size thumbSizePressed = Size(2.0, 44.0);
+    final Rect rectPressed = Rect.fromLTRB(399.0, 278.0, 399.0 + thumbSizePressed.width, 278.0 + thumbSizePressed.height);
+    thumbRRect = RRect.fromRectAndRadius(rectPressed, Radius.circular(rectPressed.shortestSide / 2));
+
+    expect(
+      find.byType(Slider),
+      paints
+        ..rrect(color: activeTrackColor)
+        ..rrect(color: inactiveTrackColor)
+        ..rrect(rrect: thumbRRect, color: thumbColor),
+    );
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    thumbRRect = RRect.fromRectAndRadius(rect, Radius.circular(rect.shortestSide / 2));
+
+    expect(
+      find.byType(Slider),
+      paints
+        ..rrect(color: activeTrackColor)
+        ..rrect(color: inactiveTrackColor)
+        ..rrect(rrect: thumbRRect, color: thumbColor),
+    );
+  });
+
+  testWidgets('BarSliderThumbShape draws transparent overlay', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(
+      sliderTheme: const SliderThemeData(
+        thumbShape: BarSliderThumbShape(),
+      ),
+    );
+
+    const double value = 0.5;
+
+    Widget buildSlider(Brightness brightness) {
+      return MaterialApp(
+        theme: theme.copyWith(brightness: brightness),
+        home: Material(
+          child: Center(
+            child: Slider(
+              value: value,
+              label: '$value',
+              onChanged: (double newValue) {},
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildSlider(Brightness.light));
+
+    final MaterialInkController material = Material.of(tester.element(find.byType(Slider)));
+    final Offset center = tester.getCenter(find.byType(Slider));
+    await tester.startGesture(center);
+    // Wait for overlay animation to finish.
+    await tester.pumpAndSettle();
+    // With no touch, paints only the thumb.
+
+    expect(
+      material,
+      paints
+        ..circle(
+          color: Colors.transparent,
+          x: 400.0,
+          y: 300.0,
+          radius: 24.0,
+        ),
+    );
+  });
+
+  testWidgets('RoundedRectSliderValueIndicatorShape default size and color', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(
+      sliderTheme: const SliderThemeData(
+        showValueIndicator: ShowValueIndicator.always,
+        valueIndicatorShape: RoundedRectSliderValueIndicatorShape(),
+      ),
+    );
+
+    const double value = 0.5;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Material(
+          child: Center(
+            child: Slider(
+              value: value,
+              label: '$value',
+              onChanged: (double newValue) {},
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
+
+    final Offset center = tester.getCenter(find.byType(Slider));
+    await tester.startGesture(center);
+    // Wait for value indicator animation to finish.
+    await tester.pumpAndSettle();
+
+    final RRect valueIndicatorRRect = RRect.fromLTRBR(-28.75, -42.0, 28.75, -10.0, const Radius.circular(16.0));
+    final Color valueIndicatorColor = theme.colorScheme.inverseSurface;
+
+    expect(
+      valueIndicatorBox,
+      paints
+        ..circle()
+        ..rrect(rrect: valueIndicatorRRect, color: valueIndicatorColor),
+    );
+  });
+
+  testWidgets('Material2 - RoundedRectSliderValueIndicatorShape default size and color', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(
+      sliderTheme: const SliderThemeData(
+        showValueIndicator: ShowValueIndicator.always,
+        valueIndicatorShape: RoundedRectSliderValueIndicatorShape(),
+      ),
+      useMaterial3: false,
+    );
+
+    const double value = 0.5;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Material(
+          child: Center(
+            child: Slider(
+              value: value,
+              label: '$value',
+              onChanged: (double newValue) {},
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
+
+    final Offset center = tester.getCenter(find.byType(Slider));
+    await tester.startGesture(center);
+    // Wait for value indicator animation to finish.
+    await tester.pumpAndSettle();
+
+    final RRect valueIndicatorRRect = RRect.fromLTRBR(-31.0, -42.0, 31.0, -10.0, const Radius.circular(16.0));
+    final Color valueIndicatorColor = theme.colorScheme.inverseSurface;
+
+    expect(
+      valueIndicatorBox,
+      paints
+        ..circle()
+        ..rrect(rrect: valueIndicatorRRect, color: valueIndicatorColor),
+    );
+  });
+
+  testWidgets('GappedSliderTrackShape default size and color', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(
+      sliderTheme: const SliderThemeData(
+        trackShape: GappedSliderTrackShape(),
+      ),
+    );
+
+    const double value = 0.5;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Material(
+          child: UnconstrainedBox(
+            constrainedAxis: Axis.horizontal,
+            child: Slider(
+              value: value,
+              label: '$value',
+              onChanged: (double newValue) {},
+            ),
+          ),
+        ),
+      ),
+    );
+
+    const double trackHeight = 16.0;
+
+    final RRect clipRRect = RRect.fromLTRBAndCorners(
+      24.0, 16.0, 776.0, 16.0 + trackHeight,
+      topLeft: const Radius.circular(8.0),
+      bottomLeft: const Radius.circular(8.0),
+      topRight: const Radius.circular(8.0),
+      bottomRight: const Radius.circular(8.0),
+    );
+    final RRect activeTrackRRect = RRect.fromLTRBAndCorners(
+      24.0, 16.0, 394.0, 16.0 + trackHeight,
+      topLeft: const Radius.circular(8.0),
+      bottomLeft: const Radius.circular(8.0),
+      topRight: const Radius.circular(2.0),
+      bottomRight: const Radius.circular(2.0),
+    );
+    final RRect inactiveTrackRRect = RRect.fromLTRBAndCorners(
+      406.0, 16.0, 776.0, 16.0 + trackHeight,
+      topLeft: const Radius.circular(2.0),
+      bottomLeft: const Radius.circular(2.0),
+      topRight: const Radius.circular(8.0),
+      bottomRight: const Radius.circular(8.0),
+    );
+    final Color activeTrackColor = theme.colorScheme.primary;
+    final Color inactiveTrackColor = theme.colorScheme.secondaryContainer;
+
+    expect(
+      find.byType(Slider),
+      paints
+        ..clipRRect(rrect: clipRRect)
+        ..rrect(rrect: activeTrackRRect, color: activeTrackColor)
+        ..rrect(rrect: inactiveTrackRRect, color: inactiveTrackColor),
+    );
+  });
+
+  testWidgets('Material2 - GappedSliderTrackShape default size and color', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(
+      sliderTheme: const SliderThemeData(
+        trackShape: GappedSliderTrackShape(),
+      ),
+      useMaterial3: false,
+    );
+
+    const double value = 0.5;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Material(
+          child: UnconstrainedBox(
+            constrainedAxis: Axis.horizontal,
+            child: Slider(
+              value: value,
+              label: '$value',
+              onChanged: (double newValue) {},
+            ),
+          ),
+        ),
+      ),
+    );
+
+    const double trackHeight = 16.0;
+
+    final RRect clipRRect = RRect.fromLTRBAndCorners(
+      24.0, 16.0, 776.0, 16.0 + trackHeight,
+      topLeft: const Radius.circular(8.0),
+      bottomLeft: const Radius.circular(8.0),
+      topRight: const Radius.circular(8.0),
+      bottomRight: const Radius.circular(8.0),
+    );
+    final RRect activeTrackRRect = RRect.fromLTRBAndCorners(
+      24.0, 16.0, 394.0, 16.0 + trackHeight,
+      topLeft: const Radius.circular(8.0),
+      bottomLeft: const Radius.circular(8.0),
+      topRight: const Radius.circular(2.0),
+      bottomRight: const Radius.circular(2.0),
+    );
+    final RRect inactiveTrackRRect = RRect.fromLTRBAndCorners(
+      406.0, 16.0, 776.0, 16.0 + trackHeight,
+      topLeft: const Radius.circular(2.0),
+      bottomLeft: const Radius.circular(2.0),
+      topRight: const Radius.circular(8.0),
+      bottomRight: const Radius.circular(8.0),
+    );
+    final Color activeTrackColor = Color(theme.colorScheme.primary.value);
+    final Color inactiveTrackColor = theme.colorScheme.primary.withOpacity(0.24);
+
+    expect(
+      find.byType(Slider),
+      paints
+        ..clipRRect(rrect: clipRRect)
+        ..rrect(rrect: activeTrackRRect, color: activeTrackColor)
+        ..rrect(rrect: inactiveTrackRRect, color: inactiveTrackColor),
+    );
+  });
+
+  testWidgets('GappedSliderTrackShape draws a stop indicator', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(
+      sliderTheme: const SliderThemeData(
+        trackShape: GappedSliderTrackShape(),
+      ),
+    );
+
+    const double value = 0.5;
+
+    Widget buildSlider(TextDirection textDirection) {
+      return MaterialApp(
+        theme: theme,
+        home: Directionality(
+          textDirection: textDirection,
+          child: Material(
+            child: UnconstrainedBox(
+              constrainedAxis: Axis.horizontal,
+              child: Slider(
+                value: value,
+                label: '$value',
+                onChanged: (double newValue) {},
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildSlider(TextDirection.ltr));
+
+    const double stopIndicatorRadius = 2.0;
+    expect(
+      find.byType(Slider),
+      paints
+        ..circle(
+          x: 768.0,
+          y: 24.0,
+          radius: stopIndicatorRadius,
+          color: theme.colorScheme.primary,
+        ),
+    );
+
+    await tester.pumpWidget(buildSlider(TextDirection.rtl));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byType(Slider),
+      paints
+        ..circle(
+          x: 32,
+          y: 24.0,
+          radius: stopIndicatorRadius,
+          color: theme.colorScheme.primary,
+        ),
+    );
+  });
+
+  testWidgets('Stop indicator is hidden on thumb overlap - LTR', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(
+      sliderTheme: const SliderThemeData(
+        trackShape: GappedSliderTrackShape(),
+        thumbShape: BarSliderThumbShape(),
+      ),
+    );
+
+    double value = 0.5;
+
+    await tester.pumpWidget(MaterialApp(
+      theme: theme,
+      home: Directionality(
+        textDirection: TextDirection.ltr,
+        child: Material(
+          child: UnconstrainedBox(
+            constrainedAxis: Axis.horizontal,
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return Slider(
+                  value: value,
+                  label: '$value',
+                  onChanged: (double newValue) {
+                    setState(() {
+                      value = newValue;
+                    });
+                  },
+                );
+              }
+            ),
+          ),
+        ),
+      ),
+    ));
+
+    const double stopIndicatorRadius = 2.0;
+    expect(
+      find.byType(Slider),
+      paints..circle(radius: stopIndicatorRadius, color: theme.colorScheme.primary),
+    );
+
+    final Offset center = tester.getCenter(find.byType(Slider));
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.down(Offset(center.dx + 395, center.dy));
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byType(Slider),
+      isNot(paints..circle(radius: stopIndicatorRadius, color: theme.colorScheme.primary)),
+    );
+  });
+
+  testWidgets('Stop indicator is hidden on thumb overlap - RTL', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(
+      sliderTheme: const SliderThemeData(
+        trackShape: GappedSliderTrackShape(),
+        thumbShape: BarSliderThumbShape(),
+      ),
+    );
+
+    double value = 0.5;
+
+    await tester.pumpWidget(MaterialApp(
+      theme: theme,
+      home: Directionality(
+        textDirection: TextDirection.rtl,
+        child: Material(
+          child: UnconstrainedBox(
+            constrainedAxis: Axis.horizontal,
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return Slider(
+                  value: value,
+                  label: '$value',
+                  onChanged: (double newValue) {
+                    setState(() {
+                      value = newValue;
+                    });
+                  },
+                );
+              }
+            ),
+          ),
+        ),
+      ),
+    ));
+
+    const double stopIndicatorRadius = 2.0;
+    expect(
+      find.byType(Slider),
+      paints..circle(radius: stopIndicatorRadius, color: theme.colorScheme.primary),
+    );
+
+    final Offset center = tester.getCenter(find.byType(Slider));
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.down(Offset(center.dx - 395, center.dy));
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byType(Slider),
+      isNot(paints..circle(radius: stopIndicatorRadius, color: theme.colorScheme.primary)),
+    );
+  });
+
+  testWidgets('Can override GappedSliderTrackShape track height', (WidgetTester tester) async {
+    const double trackHeight = 4.0;
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          sliderTheme: const SliderThemeData(
+            trackShape: GappedSliderTrackShape(),
+            trackHeight: trackHeight,
+          ),
+        ),
+        home: Scaffold(
+          body: UnconstrainedBox(
+            constrainedAxis: Axis.horizontal,
+            child: Slider(
+              max: 10,
+              value: 5,
+              onChanged: (double newValue) {},
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RRect clipRRect = RRect.fromLTRBAndCorners(
+      24.0, 22.0, 776.0, 22.0 + trackHeight,
+      topLeft: const Radius.circular(2.0),
+      bottomLeft: const Radius.circular(2.0),
+      topRight: const Radius.circular(2.0),
+      bottomRight: const Radius.circular(2.0),
+    );
+    final RRect activeTrackRRect = RRect.fromLTRBAndCorners(
+      24.0, 22.0, 394.0, 22.0 + trackHeight,
+      topLeft: const Radius.circular(2.0),
+      bottomLeft: const Radius.circular(2.0),
+      topRight: const Radius.circular(2.0),
+      bottomRight: const Radius.circular(2.0),
+    );
+    final RRect inactiveTrackRRect = RRect.fromLTRBAndCorners(
+      406.0, 22.0, 776.0, 22.0 + trackHeight,
+      topLeft: const Radius.circular(2.0),
+      bottomLeft: const Radius.circular(2.0),
+      topRight: const Radius.circular(2.0),
+      bottomRight: const Radius.circular(2.0),
+    );
+
+    expect(
+      find.byType(Slider),
+      paints
+        ..clipRRect(rrect: clipRRect)
+        ..rrect(rrect: activeTrackRRect)
+        ..rrect(rrect: inactiveTrackRRect),
+    );
+  });
+
+  testWidgets('Can override GappedSliderTrackShape track gap', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          sliderTheme: const SliderThemeData(
+            trackShape: GappedSliderTrackShape(),
+            trackGapSize: 16.0,
+          ),
+        ),
+        home: Scaffold(
+          body: UnconstrainedBox(
+            constrainedAxis: Axis.horizontal,
+            child: Slider(
+              max: 10,
+              value: 5,
+              onChanged: (double newValue) {},
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RRect activeTrackRRect = RRect.fromLTRBAndCorners(
+      24.0, 16.0, 384.0, 32.0,
+      topLeft: const Radius.circular(8.0),
+      bottomLeft: const Radius.circular(8.0),
+      topRight: const Radius.circular(2.0),
+      bottomRight: const Radius.circular(2.0),
+    );
+    final RRect inactiveTrackRRect = RRect.fromLTRBAndCorners(
+      416.0, 16.0, 776.0, 32.0,
+      topLeft: const Radius.circular(2.0),
+      bottomLeft: const Radius.circular(2.0),
+      topRight: const Radius.circular(8.0),
+      bottomRight: const Radius.circular(8.0),
+    );
+
+    expect(
+      find.byType(Slider),
+      paints
+        ..rrect(rrect: activeTrackRRect)
+        ..rrect(rrect: inactiveTrackRRect),
+    );
+
+    final Offset center = tester.getCenter(find.byType(Slider));
+    final TestGesture gesture = await tester.startGesture(center);
+    await tester.pumpAndSettle();
+
+    final RRect activeTrackRRectPressed = RRect.fromLTRBAndCorners(
+      24.0, 16.0, 385.0, 32.0,
+      topLeft: const Radius.circular(8.0),
+      bottomLeft: const Radius.circular(8.0),
+      topRight: const Radius.circular(2.0),
+      bottomRight: const Radius.circular(2.0),
+    );
+    final RRect inactiveTrackRRectPressed = RRect.fromLTRBAndCorners(
+      415.0, 16.0, 776.0, 32.0,
+      topLeft: const Radius.circular(2.0),
+      bottomLeft: const Radius.circular(2.0),
+      topRight: const Radius.circular(8.0),
+      bottomRight: const Radius.circular(8.0),
+    );
+
+    expect(
+      find.byType(Slider),
+      paints
+        ..rrect(rrect: activeTrackRRectPressed)
+        ..rrect(rrect: inactiveTrackRRectPressed),
+    );
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byType(Slider),
+      paints
+        ..rrect(rrect: activeTrackRRect)
+        ..rrect(rrect: inactiveTrackRRect),
+    );
+  });
+
+  testWidgets('GappedSliderTrackShape track gap shrinks when pressed', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          sliderTheme: const SliderThemeData(
+            trackShape: GappedSliderTrackShape(),
+          ),
+        ),
+        home: Scaffold(
+          body: UnconstrainedBox(
+            constrainedAxis: Axis.horizontal,
+            child: Slider(
+              max: 10,
+              value: 5,
+              onChanged: (double newValue) {},
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RRect activeTrackRRect = RRect.fromLTRBAndCorners(
+      24.0, 16.0, 394.0, 32.0,
+      topLeft: const Radius.circular(8.0),
+      bottomLeft: const Radius.circular(8.0),
+      topRight: const Radius.circular(2.0),
+      bottomRight: const Radius.circular(2.0),
+    );
+    final RRect inactiveTrackRRect = RRect.fromLTRBAndCorners(
+      406.0, 16.0, 776.0, 32.0,
+      topLeft: const Radius.circular(2.0),
+      bottomLeft: const Radius.circular(2.0),
+      topRight: const Radius.circular(8.0),
+      bottomRight: const Radius.circular(8.0),
+    );
+
+    expect(
+      find.byType(Slider),
+      paints
+        ..rrect(rrect: activeTrackRRect)
+        ..rrect(rrect: inactiveTrackRRect)
+    );
+
+    final Offset center = tester.getCenter(find.byType(Slider));
+    final TestGesture gesture = await tester.startGesture(center);
+    await tester.pumpAndSettle();
+
+    final RRect activeTrackRRectPressed = RRect.fromLTRBAndCorners(
+      24.0, 16.0, 395.0, 32.0,
+      topLeft: const Radius.circular(8.0),
+      bottomLeft: const Radius.circular(8.0),
+      topRight: const Radius.circular(2.0),
+      bottomRight: const Radius.circular(2.0),
+    );
+    final RRect inactiveTrackRRectPressed = RRect.fromLTRBAndCorners(
+      405.0, 16.0, 776.0, 32.0,
+      topLeft: const Radius.circular(2.0),
+      bottomLeft: const Radius.circular(2.0),
+      topRight: const Radius.circular(8.0),
+      bottomRight: const Radius.circular(8.0),
+    );
+
+    expect(
+      find.byType(Slider),
+      paints
+        ..rrect(rrect: activeTrackRRectPressed)
+        ..rrect(rrect: inactiveTrackRRectPressed),
+    );
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byType(Slider),
+      paints
+        ..rrect(rrect: activeTrackRRect)
+        ..rrect(rrect: inactiveTrackRRect),
+    );
+  });
+
+  testWidgets('RoundedRectSliderValueIndicatorShape supports SliderTheme valueIndicatorStrokeColor and valueIndicatorColor', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(
+      sliderTheme: const SliderThemeData(
+        showValueIndicator: ShowValueIndicator.always,
+        valueIndicatorShape: RoundedRectSliderValueIndicatorShape(),
+        valueIndicatorStrokeColor: Color(0xffff0000),
+        valueIndicatorColor: Color(0xff0000ff),
+      ),
+    );
+
+    const double value = 0.5;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Material(
+          child: Center(
+            child: Slider(
+              value: value,
+              label: '$value',
+              onChanged: (double newValue) {},
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
+
+    final Offset center = tester.getCenter(find.byType(Slider));
+    await tester.startGesture(center);
+    // Wait for value indicator animation to finish.
+    await tester.pumpAndSettle();
+
+    expect(
+      valueIndicatorBox,
+      paints
+        ..path(color: theme.colorScheme.shadow) // shadow
+        ..rrect(color: theme.sliderTheme.valueIndicatorStrokeColor)
+        ..rrect(color: theme.sliderTheme.valueIndicatorColor)
+    );
+  });
+
+  testWidgets('Negative SliderTheem.trackGapSize throws an error', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(
+      sliderTheme: const SliderThemeData(
+        trackShape: GappedSliderTrackShape(),
+        trackGapSize: -5.0,
+      ),
+    );
+
+    const double value = 0.5;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Material(
+          child: Center(
+            child: Slider(
+              value: value,
+              label: '$value',
+              onChanged: (double newValue) {},
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNotNull);
+  });
+
+  testWidgets('SliderThemeData.use2024SliderShapes enables 2024 Slider shapes', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(
+      sliderTheme: const SliderThemeData(
+        use2024SliderShapes: true,
+        showValueIndicator: ShowValueIndicator.always,
+      ),
+    );
+
+    const double value = 0.5;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Material(
+          child: UnconstrainedBox(
+            constrainedAxis: Axis.horizontal,
+            child: Slider(
+              value: value,
+              label: '$value',
+              onChanged: (double newValue) {},
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final ThemeData thene = Theme.of(tester.element(find.byType(Slider)));
+    expect(thene.sliderTheme.use2024SliderShapes, isTrue);
+
+    const Size thumbSize = Size(4.0, 44.0);
+    final Color thumbColor = theme.colorScheme.primary;
+    final Color activeTrackColor = theme.colorScheme.primary;
+    final Color inactiveTrackColor = theme.colorScheme.secondaryContainer;
+    const double trackHeight = 16.0;
+
+    final Rect rect = Rect.fromLTRB(398.0, 3.0, 398.0 + thumbSize.width, 3.0 + thumbSize.height);
+    final RRect thumbRRect = RRect.fromRectAndRadius(rect, Radius.circular(rect.shortestSide / 2));
+
+    final RRect clipRRect = RRect.fromLTRBAndCorners(
+      24.0, 17.0, 776.0, 17.0 + trackHeight,
+      topLeft: const Radius.circular(8.0),
+      bottomLeft: const Radius.circular(8.0),
+      topRight: const Radius.circular(8.0),
+      bottomRight: const Radius.circular(8.0),
+    );
+    final RRect activeTrackRRect = RRect.fromLTRBAndCorners(
+      24.0, 17.0, 394.0, 17.0 + trackHeight,
+      topLeft: const Radius.circular(8.0),
+      bottomLeft: const Radius.circular(8.0),
+      topRight: const Radius.circular(2.0),
+      bottomRight: const Radius.circular(2.0),
+    );
+    final RRect inactiveTrackRRect = RRect.fromLTRBAndCorners(
+      406.0, 17.0, 776.0, 17.0 + trackHeight,
+      topLeft: const Radius.circular(2.0),
+      bottomLeft: const Radius.circular(2.0),
+      topRight: const Radius.circular(8.0),
+      bottomRight: const Radius.circular(8.0),
+    );
+
+    expect(
+      find.byType(Slider),
+      paints
+        ..clipRRect(rrect: clipRRect)
+        ..rrect(rrect: activeTrackRRect, color: activeTrackColor)
+        ..rrect(rrect: inactiveTrackRRect, color: inactiveTrackColor)
+        ..rrect(rrect: thumbRRect, color: thumbColor),
+    );
+
+    final RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
+
+    final Offset center = tester.getCenter(find.byType(Slider));
+    await tester.startGesture(center);
+    // Wait for value indicator animation to finish.
+    await tester.pumpAndSettle();
+
+    final RRect valueIndicatorRRect = RRect.fromLTRBR(-31.149999618530273, -42.0, 31.149999618530273, -10.0, const Radius.circular(16.0));
+    final Color valueIndicatorColor = theme.colorScheme.inverseSurface;
+
+    expect(
+      valueIndicatorBox,
+      paints
+        ..scale()
+        ..rrect(rrect: valueIndicatorRRect, color: valueIndicatorColor)
+        ..translate(),
+    );
   });
 }
 
