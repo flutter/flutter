@@ -1450,19 +1450,16 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> with Rest
         case DatePickerEntryMode.input:
           // Validate the range dates
 
-          // If start date after end date, then just use the start date
           final DateTime? selectedStart = _selectedStart.value;
           final DateTime? selectedEnd = _selectedEnd.value;
           if (selectedStart != null && selectedEnd != null && selectedStart.isAfter(selectedEnd)) {
             _selectedEnd.value = null;
           }
-          // If start date is outside expected start and end date range, or is not selectable, then clear both start and end dates
           if (selectedStart != null && !_isDaySelectable(selectedStart)) {
             _selectedStart.value = null;
             // With no valid start date, having an end date makes no sense for the UI.
             _selectedEnd.value = null;
           }
-          // If end date is outside expected start and end date range, or is not selectable, then clear the end date
           if (selectedEnd != null && !_isDaySelectable(selectedEnd)) {
             _selectedEnd.value = null;
           }
