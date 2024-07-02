@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/widgets.dart';
+library;
+
 import 'dart:collection';
 import 'dart:ui' as ui show
   ParagraphStyle,
@@ -270,7 +273,7 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 ///
 /// {@tool snippet}
 /// The [foreground] property also allows effects such as gradients to be
-/// applied to the text. Here we provide a [Paint] with a [ui.Gradient]
+/// applied to the text. Here we provide a [Paint] with a [Gradient]
 /// shader.
 ///
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/widgets/text_gradient.png)
