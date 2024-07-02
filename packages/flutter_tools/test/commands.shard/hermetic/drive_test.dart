@@ -656,6 +656,7 @@ class NeverEndingDriverService extends Fake implements DriverService {
       List<String>? webBrowserFlags,
       List<String>? browserDimension,
       String? profileMemory,
+      Map<String, dynamic>? allBrowsersDesiredCapabilities,
     }) async {
       callback();
       // return a Future that will never complete.
@@ -686,6 +687,7 @@ class FailingFakeDriverService extends Fake implements DriverService {
       List<String>? webBrowserFlags,
       List<String>? browserDimension,
       String? profileMemory,
+      Map<String, dynamic>? allBrowsersDesiredCapabilities,
     }) async => 1;
 }
 

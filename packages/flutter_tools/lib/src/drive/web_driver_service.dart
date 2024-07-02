@@ -51,6 +51,9 @@ class WebDriverService extends DriverService {
   /// indicates a bug.
   int? _runResult;
 
+  @visibleForTesting
+  Map<String, Object?>? desiredCapabilities;
+
   @override
   Future<void> start(
     BuildInfo buildInfo,
@@ -154,18 +157,21 @@ class WebDriverService extends DriverService {
     List<String> webBrowserFlags = const <String>[],
     List<String>? browserDimension,
     String? profileMemory,
+    Map<String, Object?>? allBrowsersDesiredCapabilities,
   }) async {
     late async_io.WebDriver webDriver;
     final Browser browser = Browser.fromCliName(browserName);
     try {
+      desiredCapabilities = getDesiredCapabilities(
+        browser,
+        headless,
+        webBrowserFlags: webBrowserFlags,
+        chromeBinary: chromeBinary,
+        allAdditionalCapabilities: allBrowsersDesiredCapabilities,
+      );
       webDriver = await async_io.createDriver(
         uri: Uri.parse('http://localhost:$driverPort/'),
-        desired: getDesiredCapabilities(
-          browser,
-          headless,
-          webBrowserFlags: webBrowserFlags,
-          chromeBinary: chromeBinary,
-        ),
+        desired: desiredCapabilities,
       );
     } on SocketException catch (error) {
       _logger.printTrace('$error');
@@ -286,8 +292,9 @@ Map<String, dynamic> getDesiredCapabilities(
   bool? headless, {
   List<String> webBrowserFlags = const <String>[],
   String? chromeBinary,
-}) =>
-    switch (browser) {
+  Map<String, Object?>? allAdditionalCapabilities,
+}) {
+    Map<String, dynamic> capabilities = switch (browser) {
       Browser.chrome => <String, dynamic>{
           'acceptInsecureCerts': true,
           'browserName': 'chrome',
@@ -363,3 +370,26 @@ Map<String, dynamic> getDesiredCapabilities(
           },
         },
     };
+
+    if (allAdditionalCapabilities != null && allAdditionalCapabilities.containsKey(browser.name)) {
+      final Map<String, Object?> browserAdditionalCapabilities = allAdditionalCapabilities[browser.name]! as Map<String, Object?>;
+      capabilities = _mergeMaps(capabilities, browserAdditionalCapabilities);
+    }
+
+    return capabilities;
+}
+
+/// Merges two maps recursively.
+Map<String, Object?> _mergeMaps(Map<String, Object?> left, Map<String, Object?> right) {
+  final Map<String, Object?> mergedMap = Map<String, Object?>.from(left);
+
+  right.forEach((String key, Object? value) {
+    if (value is Map && left[key] is Map) {
+      mergedMap[key] = _mergeMaps(left[key]! as Map<String, Object?>, value as Map<String, Object?>);
+    } else {
+      mergedMap[key] = value;
+    }
+  });
+
+  return mergedMap;
+}

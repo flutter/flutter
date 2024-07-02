@@ -245,6 +245,53 @@ void main() {
     expect(getDesiredCapabilities(Browser.androidChrome, false, webBrowserFlags: webBrowserFlags), expected);
   });
 
+  testWithoutContext('getDesiredCapabilities Chrome with additional capabilities', () {
+    final Map<String, dynamic> expected = <String, dynamic>{
+      'acceptInsecureCerts': true,
+      'browserName': 'chrome',
+      'goog:loggingPrefs': <String, String>{
+        sync_io.LogType.browser: 'INFO',
+        sync_io.LogType.performance: 'ALL',
+      },
+      'goog:chromeOptions': <String, dynamic>{
+        'w3c': true,
+        'args': <String>[
+          ...kChromeArgs,
+          '--headless',
+        ],
+        'perfLoggingPrefs': <String, String>{
+          'traceCategories':
+          'devtools.timeline,'
+          'v8,blink.console,benchmark,blink,'
+          'blink.user_timing',
+        },
+        'prefs': <String, int>{
+          'profile.default_content_setting_values.media_stream_mic': 1,
+          'profile.default_content_setting_values.media_stream_camera': 1,
+          'profile.default_content_setting_values.midi_sysex': 1,
+        }
+      },
+    };
+
+    final Map<String, Object?> allAdditionalCapabilities = <String, Object?>{
+      Browser.chrome.name: <String, Map<String, Map<String, int>>>{
+        'goog:chromeOptions': <String, Map<String, int>>{
+          'prefs': <String, int>{
+            'profile.default_content_setting_values.media_stream_mic': 1,
+            'profile.default_content_setting_values.media_stream_camera': 1,
+            'profile.default_content_setting_values.midi_sysex': 1,
+          }
+        }
+      },
+    };
+
+    expect(getDesiredCapabilities(
+      Browser.chrome,
+      true,
+      allAdditionalCapabilities: allAdditionalCapabilities,
+    ), expected);
+  });
+
   testUsingContext('WebDriverService starts and stops an app', () async {
     final WebDriverService service = setUpDriverService();
     final FakeDevice device = FakeDevice();

@@ -19,6 +19,7 @@ import '../base/platform.dart';
 import '../base/signals.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
+import '../convert.dart';
 import '../dart/package_map.dart';
 import '../device.dart';
 import '../drive/drive_service.dart';
@@ -145,7 +146,10 @@ class DriveCommand extends RunCommandBase {
         help: 'Timeout the test after the given number of seconds. If the '
               '"--screenshot" option is provided, a screenshot will be taken '
               'before exiting. Defaults to no timeout.',
-        valueHelp: '360');
+        valueHelp: '360')
+      ..addOption('web-desired-capabilities-from-file',
+        help: 'The path of a json format file which define additional desired capabilities of browsers used in WebDriver.',
+          valueHelp: 'desired_capabilities.json');
   }
 
   final Signals signals;
@@ -299,6 +303,10 @@ class DriveCommand extends RunCommandBase {
         );
       }
 
+      final String? desiredCapabilitiesJsonFilePath =
+          stringArg('web-desired-capabilities-from-file');
+      final Map<String, Object?>? desiredCapabilities = _extractDesiredCapabilities(desiredCapabilitiesJsonFilePath);
+
       final Future<int> testResultFuture = driverService.startTest(
         testFile,
         stringsArg('test-arguments'),
@@ -314,6 +322,7 @@ class DriveCommand extends RunCommandBase {
           : null,
         androidEmulator: boolArg('android-emulator'),
         profileMemory: stringArg('profile-memory'),
+        allBrowsersDesiredCapabilities: desiredCapabilities,
       );
 
       if (screenshot != null) {
@@ -470,4 +479,15 @@ class DriveCommand extends RunCommandBase {
       _logger.printError('Error taking screenshot: $error');
     }
   }
+
+  /// Extracts desiredCapabilities from file if specifying --web-desired-capabilities-from-file.
+  Map<String, Object?>? _extractDesiredCapabilities(String? filepath) {
+    Map<String, Object?>? desiredCapabilitiesJsonMap;
+    if (filepath != null && _fileSystem.isFileSync(filepath)) {
+      final String desiredCapabilitiesJsonRaw = _fileSystem.file(filepath).readAsStringSync();
+      desiredCapabilitiesJsonMap = json.decode(desiredCapabilitiesJsonRaw) as Map<String, Object?>;
+    }
+    return desiredCapabilitiesJsonMap;
+  }
+
 }
