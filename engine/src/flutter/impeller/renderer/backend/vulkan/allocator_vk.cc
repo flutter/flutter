@@ -519,7 +519,7 @@ size_t AllocatorVK::DebugGetHeapUsage() const {
     total_usage += budget.usage;
   }
   // Convert bytes to MB.
-  total_usage *= 1e-6;
+  total_usage /= (1024 * 1024);
   return total_usage;
 }
 

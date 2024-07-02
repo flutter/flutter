@@ -99,7 +99,8 @@ void DebugAllocatorStats::Decrement(size_t size) {
 }
 
 size_t DebugAllocatorStats::GetAllocationSizeMB() {
-  size_t new_value = size_ / 1000000;
+  // RAM is measured in MiB, thus a divisor of 2^20 instead of 1,000,000.
+  size_t new_value = size_ / (1024 * 1024);
   return new_value;
 }
 
