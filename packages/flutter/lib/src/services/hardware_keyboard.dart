@@ -1160,7 +1160,24 @@ class KeyEventManager {
       handled = _rawKeyboard.handleRawKeyEvent(rawEvent);
 
       for (final KeyEvent event in _keyEventsSinceLastMessage) {
-        handled = _hardwareKeyboard.handleKeyEvent(event) || handled;
+        try {
+          handled = _hardwareKeyboard.handleKeyEvent(event) || handled;
+        } catch (e) {
+          InformationCollector? collector;
+          assert(() {
+            collector = () => <DiagnosticsNode>[
+              DiagnosticsProperty<KeyEvent>('Event', event),
+            ];
+            return true;
+          }());
+          FlutterError.reportError(FlutterErrorDetails(
+            exception: e,
+            stack: StackTrace.current,
+            library: 'services library',
+            context: ErrorDescription('while processing a key handler'),
+            informationCollector: collector,
+          ));
+        }
       }
       if (_transitMode == KeyDataTransitMode.rawKeyData) {
         assert(setEquals(_rawKeyboard.physicalKeysPressed, _hardwareKeyboard.physicalKeysPressed),
