@@ -434,6 +434,287 @@ void main() {
     await gesture.up();
   });
 
+  testWidgets('Radio has correct default active/inactive/fill/border colors', (WidgetTester tester) async {
+    const Color activeInnerColor = Color(0xffffffff);
+    const Color activeOuterColor = Color(0xff007aff);
+    const Color inactiveBorderColor = Color(0xff999999);
+    const Color inactiveOuterColor = Color(0xffffffff);
+    const double innerRadius = 2.975;
+    const double outerRadius = 7.0;
+
+    await tester.pumpWidget(Container());
+    await tester.pumpWidget(
+      CupertinoApp(
+          home: Center(
+            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+              return CupertinoListSection(
+                children: <Widget>[
+                  CupertinoRadio<int>(
+                    value: 1,
+                    groupValue: 2,
+                    onChanged: (int? i) { },
+                  ),
+                ],
+              );
+            }
+          ),
+        ),
+      )
+    );
+    expect(
+      find.byType(CupertinoRadio<int>),
+      paints
+      ..circle(radius: outerRadius, style: PaintingStyle.fill, color: inactiveOuterColor)
+      ..circle(radius: outerRadius, style: PaintingStyle.stroke, color: inactiveBorderColor),
+      reason: 'Unselected radio button should have default fill and border colors',
+    );
+
+    await tester.pumpWidget(Container());
+    await tester.pumpWidget(
+      CupertinoApp(
+          home: Center(
+            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+              return CupertinoListSection(
+                children: <Widget>[
+                  CupertinoRadio<int>(
+                    value: 1,
+                    groupValue: 1,
+                    onChanged: (int? i) { },
+                  ),
+                ],
+              );
+            }
+          ),
+        ),
+      )
+    );
+    expect(
+      find.byType(CupertinoRadio<int>),
+      paints
+      ..circle(radius: outerRadius, style: PaintingStyle.fill, color: activeOuterColor)
+      ..circle(radius: innerRadius, style: PaintingStyle.fill, color: activeInnerColor),
+      reason: 'Selected radio button should have default fill and border colors',
+    );
+  });
+
+  testWidgets('Radio can set inactive/active/fill colors', (WidgetTester tester) async {
+    const Color inactiveBorderColor = Color(0xff999999);
+    const Color activeColor = Color(0x0000000A);
+    const Color fillColor = Color(0x0000000B);
+    const Color inactiveColor = Color(0x0000000C);
+    const double innerRadius = 2.975;
+    const double outerRadius = 7.0;
+
+    await tester.pumpWidget(Container());
+    await tester.pumpWidget(
+      CupertinoApp(
+          home: Center(
+            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+              return CupertinoListSection(
+                children: <Widget>[
+                  CupertinoRadio<int>(
+                    value: 1,
+                    groupValue: 2,
+                    onChanged: (int? i) { },
+                    activeColor: activeColor,
+                    fillColor: fillColor,
+                    inactiveColor: inactiveColor,
+                  ),
+                ],
+              );
+            }
+          ),
+        ),
+      )
+    );
+    expect(
+      find.byType(CupertinoRadio<int>),
+      paints
+      ..circle(
+        radius: outerRadius,
+        style: PaintingStyle.fill,
+        color: inactiveColor
+      )
+      ..circle(
+        radius: outerRadius,
+        style: PaintingStyle.stroke,
+        color: inactiveBorderColor
+      ),
+      reason: 'Unselected radio button should use inactive and border colors',
+    );
+
+    await tester.pumpWidget(Container());
+    await tester.pumpWidget(
+      CupertinoApp(
+          home: Center(
+            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+              return CupertinoListSection(
+                children: <Widget>[
+                  CupertinoRadio<int>(
+                    value: 1,
+                    groupValue: 1,
+                    onChanged: (int? i) { },
+                    activeColor: activeColor,
+                    fillColor: fillColor,
+                    inactiveColor: inactiveColor,
+                  ),
+                ],
+              );
+            }
+          ),
+        ),
+      )
+    );
+    expect(
+      find.byType(CupertinoRadio<int>),
+      paints
+      ..circle(radius: outerRadius, style: PaintingStyle.fill, color: activeColor)
+      ..circle(radius: innerRadius, style: PaintingStyle.fill, color: fillColor),
+      reason: 'Selected radio button should use active and fill colors',
+    );
+  });
+
+  testWidgets('Radio is slightly darkened when pressed on macOS', (WidgetTester tester) async {
+    const Color activeInnerColor = Color(0xffffffff);
+    const Color activeOuterColor = Color(0xff007aff);
+    const Color inactiveBorderColor = Color(0xff999999);
+    const Color inactiveOuterColor = Color(0xffffffff);
+    const double innerRadius = 2.975;
+    const double outerRadius = 7.0;
+    const Color pressedDarkShadow = Color(0x0d000000);
+
+    await tester.pumpWidget(CupertinoApp(
+        home: Center(
+          child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+            return CupertinoRadio<int>(
+              value: 1,
+              groupValue: 2,
+              onChanged: (int? i) { },
+            );
+          }),
+        ),
+      )
+    );
+
+    final TestGesture gesture1 =
+      await tester.startGesture(tester.getCenter(find.byType(CupertinoRadio<int>)));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byType(CupertinoRadio<int>),
+      paints
+        ..circle(radius: outerRadius, style: PaintingStyle.fill, color: inactiveOuterColor)
+        ..circle(radius: outerRadius, style: PaintingStyle.stroke, color: inactiveBorderColor)
+        ..circle(radius: outerRadius, style: PaintingStyle.fill, color: pressedDarkShadow),
+      reason: 'Unselected pressed radio button is slightly darkened',
+    );
+
+    await tester.pumpWidget(CupertinoApp(
+        home: Center(
+          child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+            return CupertinoRadio<int>(
+              value: 2,
+              groupValue: 2,
+              onChanged: (int? i) { },
+            );
+          }),
+        ),
+      )
+    );
+    final TestGesture gesture2 =
+      await tester.startGesture(tester.getCenter(find.byType(CupertinoRadio<int>)));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byType(CupertinoRadio<int>),
+      paints
+        ..circle(radius: outerRadius, style: PaintingStyle.fill, color: activeOuterColor)
+        ..circle(radius: innerRadius, style: PaintingStyle.fill, color: activeInnerColor)
+        ..circle(radius: outerRadius, style: PaintingStyle.fill, color: pressedDarkShadow),
+      reason: 'Selected pressed radio button is slightly darkened',
+    );
+
+    // Finish gestures to release resources.
+    await gesture1.up();
+    await gesture2.up();
+    await tester.pumpAndSettle();
+  }, variant: TargetPlatformVariant.only(TargetPlatform.macOS));
+
+  testWidgets('Radio is focusable and has correct focus colors', (WidgetTester tester) async {
+    const Color activeInnerColor = Color(0xffffffff);
+    const Color activeOuterColor = Color(0xff007aff);
+    const Color defaultFocusColor = Color(0xcc6eadf2);
+    const double innerRadius = 2.975;
+    const double outerRadius = 7.0;
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    final FocusNode node = FocusNode();
+    addTearDown(node.dispose);
+
+    await tester.pumpWidget(
+      CupertinoApp(
+          home: Center(
+            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+              return CupertinoRadio<int>(
+                value: 1,
+                groupValue: 1,
+                onChanged: (int? i) { },
+                focusNode: node,
+                autofocus: true,
+              );
+            }
+          ),
+        ),
+      )
+    );
+    await tester.pumpAndSettle();
+    expect(node.hasPrimaryFocus, isTrue);
+    expect(
+      find.byType(CupertinoRadio<int>),
+      paints
+      ..circle(radius: outerRadius, style: PaintingStyle.fill, color: activeOuterColor)
+      ..circle(radius: innerRadius, style: PaintingStyle.fill, color: activeInnerColor)
+      ..circle(
+        color: defaultFocusColor,
+        strokeWidth: 3.0,
+        style: PaintingStyle.stroke
+      ), // Focused outline
+      reason: 'Radio is focusable and shows the default focus color',
+    );
+
+    await tester.pumpWidget(
+      CupertinoApp(
+          home: Center(
+            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+              return CupertinoRadio<int>(
+                value: 1,
+                groupValue: 1,
+                onChanged: (int? i) { },
+                focusColor: const Color(0xffaabbcc),
+                focusNode: node,
+                autofocus: true,
+              );
+            }
+          ),
+        ),
+      )
+    );
+
+    await tester.pumpAndSettle();
+    expect(node.hasPrimaryFocus, isTrue);
+    expect(
+      find.byType(CupertinoRadio<int>),
+      paints
+      ..circle(radius: outerRadius, style: PaintingStyle.fill, color: activeOuterColor)
+      ..circle(radius: innerRadius, style: PaintingStyle.fill, color: activeInnerColor)
+      ..circle(
+        color: const Color(0xffaabbcc),
+        strokeWidth: 3.0,
+        style: PaintingStyle.stroke
+      ), // Focused outline
+      reason: 'Radio can configure a focus color',
+    );
+  });
+
   testWidgets('Radio configures mouse cursor', (WidgetTester tester) async {
     await tester.pumpWidget(CupertinoApp(
       home: Center(

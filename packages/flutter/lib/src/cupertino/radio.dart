@@ -23,6 +23,17 @@ const double _kCupertinoFocusColorOpacity = 0.80;
 const double _kCupertinoFocusColorBrightness = 0.69;
 const double _kCupertinoFocusColorSaturation = 0.835;
 
+// Eyeballed from Apple's Design Resources (macOS Sonoma) figma template:
+// https://www.figma.com/design/vmIRIt4jgAmSFvXO0SAxU2/Apple-Design-Resources---macOS-(Community)
+final Color _kDisabledOuterColor = CupertinoColors.white.withOpacity(0.58);
+final Color _kDisabledInnerColor = CupertinoColors.black.withOpacity(0.25);
+
+// Eyeballed from a radio button on a physical Macbook Pro running macOS version 14.5.
+const CupertinoDynamicColor _kDefaultInactiveFillColor = CupertinoDynamicColor.withBrightness(
+  color: CupertinoColors.white,
+  darkColor: Color.fromARGB(255, 87, 87, 87),
+);
+
 /// A macOS-style radio button.
 ///
 /// Used to select between a number of mutually exclusive values. When one radio
@@ -245,20 +256,16 @@ class _CupertinoRadioState<T> extends State<CupertinoRadio<T>> with TickerProvid
 
   @override
   Widget build(BuildContext context) {
-    final Color effectiveActiveColor = widget.activeColor
-      ?? CupertinoColors.activeBlue;
+    final Color effectiveActiveColor = widget.activeColor ?? CupertinoColors.activeBlue;
+
     final Color effectiveInactiveColor = widget.inactiveColor
-      ?? CupertinoColors.white;
+      ?? CupertinoDynamicColor.resolve(_kDefaultInactiveFillColor, context);
 
-    final Color effectiveFocusOverlayColor = widget.focusColor
-      ?? HSLColor
-          .fromColor(effectiveActiveColor.withOpacity(_kCupertinoFocusColorOpacity))
-          .withLightness(_kCupertinoFocusColorBrightness)
-          .withSaturation(_kCupertinoFocusColorSaturation)
-          .toColor();
-
-    final Color effectiveActivePressedOverlayColor =
-      HSLColor.fromColor(effectiveActiveColor).withLightness(0.45).toColor();
+    final Color effectiveFocusOverlayColor = widget.focusColor ?? HSLColor
+      .fromColor(effectiveActiveColor.withOpacity(_kCupertinoFocusColorOpacity))
+      .withLightness(_kCupertinoFocusColorBrightness)
+      .withSaturation(_kCupertinoFocusColorSaturation)
+      .toColor();
 
     final Color effectiveFillColor = widget.fillColor ?? CupertinoColors.white;
 
@@ -296,14 +303,17 @@ class _CupertinoRadioState<T> extends State<CupertinoRadio<T>> with TickerProvid
         onFocusChange: onFocusChange,
         size: _size,
         painter: _painter
+          ..position = position
+          ..reaction = reaction
           ..focusColor = effectiveFocusOverlayColor
           ..downPosition = downPosition
           ..isFocused = focused
-          ..activeColor = downPosition != null ? effectiveActivePressedOverlayColor : effectiveActiveColor
+          ..activeColor = effectiveActiveColor
           ..inactiveColor = effectiveInactiveColor
           ..fillColor = effectiveFillColor
           ..value = value
-          ..checkmarkStyle = widget.useCheckmarkStyle,
+          ..checkmarkStyle = widget.useCheckmarkStyle
+          ..isActive = widget.onChanged != null,
       ),
     );
   }
@@ -344,18 +354,13 @@ class _RadioPainter extends ToggleablePainter {
   void paint(Canvas canvas, Size size) {
     final Offset center = (Offset.zero & size).center;
 
-    final Paint paint = Paint()
-        ..color = inactiveColor
-        ..style = PaintingStyle.fill
-        ..strokeWidth = 0.1;
-
     if (checkmarkStyle) {
       if (value ?? false) {
         final Path path = Path();
         final Paint checkPaint = Paint()
           ..color = activeColor
           ..style = PaintingStyle.stroke
-          ..strokeWidth = 2
+          ..strokeWidth = 2.0
           ..strokeCap = StrokeCap.round;
         final double width = _size.width;
         final Offset origin = Offset(center.dx - (width/2), center.dy - (width/2));
@@ -370,27 +375,38 @@ class _RadioPainter extends ToggleablePainter {
         canvas.drawPath(path, checkPaint);
       }
     } else {
-      // Outer border
-      canvas.drawCircle(center, _kOuterRadius, paint);
-
-      paint.style = PaintingStyle.stroke;
-      paint.color = CupertinoColors.inactiveGray;
-      canvas.drawCircle(center, _kOuterRadius, paint);
-
       if (value ?? false) {
-        paint.style = PaintingStyle.fill;
-        paint.color = activeColor;
+        final Paint outerPaint = Paint()
+          ..color = isActive ? activeColor : _kDisabledOuterColor;
+        canvas.drawCircle(center, _kOuterRadius, outerPaint);
+
+        final Paint innerPaint = Paint()
+          ..color = isActive ? fillColor : _kDisabledInnerColor;
+        canvas.drawCircle(center, _kInnerRadius, innerPaint);
+      } else {
+        final Paint paint = Paint();
+        paint.color = isActive ? inactiveColor : _kDisabledOuterColor;
         canvas.drawCircle(center, _kOuterRadius, paint);
-        paint.color = fillColor;
-        canvas.drawCircle(center, _kInnerRadius, paint);
+
+        final Paint borderPaint = Paint()
+          ..style = PaintingStyle.stroke
+          ..color = CupertinoColors.inactiveGray
+          ..strokeWidth = 0.3;
+        canvas.drawCircle(center, _kOuterRadius, borderPaint);
       }
     }
-
+    // Apply effect to darken radio button when pressed.
+    if (downPosition != null) {
+      final Paint innerReactionPaint = Paint()
+        ..color = CupertinoColors.black.withOpacity(0.05);
+      canvas.drawCircle(center, _kOuterRadius, innerReactionPaint);
+    }
     if (isFocused) {
-      paint.style = PaintingStyle.stroke;
-      paint.color = focusColor;
-      paint.strokeWidth = 3.0;
-      canvas.drawCircle(center, _kOuterRadius + 1.5, paint);
+      final Paint focusPaint = Paint()
+        ..style = PaintingStyle.stroke
+        ..color = focusColor
+        ..strokeWidth = 3.0;
+      canvas.drawCircle(center, _kOuterRadius + 1.5, focusPaint);
     }
   }
 }
