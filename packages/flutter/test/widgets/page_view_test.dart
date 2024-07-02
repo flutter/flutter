@@ -1372,4 +1372,35 @@ void main() {
       await tester.pumpWidget(createPageView(null));
     });
   });
+
+  testWidgets('Get the page value before the content dimension is determined,do not throw an assertion and return null', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/146986.
+    final PageController controller = PageController();
+    late String currentPage;
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: PageView(
+          controller: controller,
+          children: <Widget>[
+            Builder(
+              builder: (BuildContext context) {
+                currentPage = controller.page == null ? 'null' : 'not empty';
+                return Center(child: Text(currentPage));
+              },
+            ),
+          ],
+        ),
+      ),
+    ));
+    expect(find.text('null'), findsOneWidget);
+    expect(find.text('not empty'), findsNothing);
+    expect(currentPage, 'null');
+
+    await tester.pump();
+    currentPage = controller.page == null ? 'null' : 'not empty';
+    expect(find.text('not empty'), findsOneWidget);
+    expect(find.text('null'), findsNothing);
+    expect(currentPage, 'not empty');
+  });
 }
