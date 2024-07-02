@@ -1584,6 +1584,103 @@ void main() {
       expect(focusedMenu, equals('MenuItemButton(Text("Sub Sub Menu 110"))'));
     });
 
+
+    testWidgets('hover traversal invalidates directional focus scope data', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/150910
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: MenuBar(
+              controller: controller,
+              children: createTestMenus(
+                onPressed: onPressed,
+                onOpen: onOpen,
+                onClose: onClose,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      listenForFocusChanges();
+
+      // Have to open a menu initially to start things going.
+      await tester.tap(find.text(TestMenu.mainMenu1.label));
+      await tester.pump();
+      expect(focusedMenu, equals('SubmenuButton(Text("Menu 1"))'));
+
+      await hoverOver(tester, find.text(TestMenu.subMenu12.label));
+      await tester.pump();
+      expect(focusedMenu, equals('MenuItemButton(Text("Sub Menu 12"))'));
+
+      // Move pointer to disabled menu
+      await hoverOver(tester, find.text(TestMenu.mainMenu5.label));
+      await tester.pump();
+      expect(focusedMenu, equals('MenuItemButton(Text("Sub Menu 12"))'));
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+      await tester.pump();
+      expect(focusedMenu, equals('SubmenuButton(Text("Sub Menu 11"))'));
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+      expect(focusedMenu, equals('MenuItemButton(Text("Sub Menu 10"))'));
+
+      await hoverOver(tester, find.text(TestMenu.subMenu12.label));
+      await tester.pump();
+      expect(focusedMenu, equals('MenuItemButton(Text("Sub Menu 12"))'));
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      expect(focusedMenu, equals('MenuItemButton(Text("Sub Menu 12"))'));
+    });
+
+    testWidgets('scrolling does not trigger hover traversal', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/150911
+      final GlobalKey scrolledMenuItemKey = GlobalKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: MenuAnchor(
+              style: const MenuStyle(
+                fixedSize: WidgetStatePropertyAll<Size>(Size.fromHeight(200)),
+              ),
+              controller: controller,
+              menuChildren: <Widget>[
+                for (int i = 0; i < 20; i++)
+                  MenuItemButton(
+                    key: i == 15 ? scrolledMenuItemKey : null,
+                    onPressed: () {},
+                    child: Text('Item $i'),
+                  )
+              ]
+            ),
+          ),
+        ),
+      );
+
+      listenForFocusChanges();
+
+      controller.open();
+      await tester.pumpAndSettle();
+
+      await hoverOver(tester, find.text('Item 1'));
+      await tester.pump();
+      expect(focusedMenu, equals('MenuItemButton(Text("Item 1"))'));
+
+      // Scroll the menu while the pointer is over a menu item. The focus should
+      // not change.
+      tester.renderObject(find.text('Item 15')).showOnScreen();
+      await tester.pumpAndSettle();
+      expect(focusedMenu, equals('MenuItemButton(Text("Item 1"))'));
+
+      // Traverse with the keyboard to test that the menu scrolls without hover
+      // focus affecting the focused menu.
+      for (int i = 2; i < 20; i++) {
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+        await tester.pump();
+        expect(focusedMenu, equals('MenuItemButton(Text("Item $i"))'));
+      }
+    });
+
     testWidgets('menus close on ancestor scroll', (WidgetTester tester) async {
       final ScrollController scrollController = ScrollController();
       addTearDown(scrollController.dispose);
