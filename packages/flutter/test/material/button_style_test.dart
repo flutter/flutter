@@ -22,26 +22,30 @@ void main() {
 
   test('ButtonStyle defaults', () {
     const ButtonStyle style = ButtonStyle();
-    expect(style.textStyle, null);
-    expect(style.backgroundColor, null);
-    expect(style.foregroundColor, null);
-    expect(style.overlayColor, null);
-    expect(style.shadowColor, null);
-    expect(style.surfaceTintColor, null);
-    expect(style.elevation, null);
-    expect(style.padding, null);
-    expect(style.minimumSize, null);
-    expect(style.fixedSize, null);
-    expect(style.maximumSize, null);
-    expect(style.iconColor, null);
-    expect(style.iconSize, null);
-    expect(style.side, null);
-    expect(style.shape, null);
-    expect(style.mouseCursor, null);
-    expect(style.visualDensity, null);
-    expect(style.tapTargetSize, null);
-    expect(style.animationDuration, null);
-    expect(style.enableFeedback, null);
+    expect(style.textStyle, isNull);
+    expect(style.backgroundColor, isNull);
+    expect(style.foregroundColor, isNull);
+    expect(style.overlayColor, isNull);
+    expect(style.shadowColor, isNull);
+    expect(style.surfaceTintColor, isNull);
+    expect(style.elevation, isNull);
+    expect(style.padding, isNull);
+    expect(style.minimumSize, isNull);
+    expect(style.fixedSize, isNull);
+    expect(style.maximumSize, isNull);
+    expect(style.iconColor, isNull);
+    expect(style.iconSize, isNull);
+    expect(style.side, isNull);
+    expect(style.shape, isNull);
+    expect(style.mouseCursor, isNull);
+    expect(style.visualDensity, isNull);
+    expect(style.tapTargetSize, isNull);
+    expect(style.animationDuration, isNull);
+    expect(style.enableFeedback, isNull);
+    expect(style.alignment, isNull);
+    expect(style.splashFactory, isNull);
+    expect(style.backgroundBuilder, isNull);
+    expect(style.foregroundBuilder, isNull);
   });
 
   testWidgets('Default ButtonStyle debugFillProperties', (WidgetTester tester) async {

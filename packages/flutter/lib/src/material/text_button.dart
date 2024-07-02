@@ -634,6 +634,29 @@ class _TextButtonDefaultsM3 extends ButtonStyle {
   // No default fixedSize
 
   @override
+  MaterialStateProperty<double>? get iconSize =>
+    const MaterialStatePropertyAll<double>(18.0);
+
+  @override
+  MaterialStateProperty<Color>? get iconColor {
+    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled)) {
+        return _colors.onSurface.withOpacity(0.38);
+      }
+      if (states.contains(MaterialState.pressed)) {
+        return _colors.primary;
+      }
+      if (states.contains(MaterialState.hovered)) {
+        return _colors.primary;
+      }
+      if (states.contains(MaterialState.focused)) {
+        return _colors.primary;
+      }
+      return _colors.primary;
+    });
+  }
+
+  @override
   MaterialStateProperty<Size>? get maximumSize =>
     const MaterialStatePropertyAll<Size>(Size.infinite);
 
