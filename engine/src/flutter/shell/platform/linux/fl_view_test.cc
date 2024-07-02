@@ -7,6 +7,19 @@
 
 #include "gtest/gtest.h"
 
+TEST(FlViewTest, GetEngine) {
+  flutter::testing::fl_ensure_gtk_init();
+  g_autoptr(FlDartProject) project = fl_dart_project_new();
+  g_autoptr(FlView) view = fl_view_new(project);
+
+  // Check the engine is immediately available (i.e. before the widget is
+  // realized).
+  FlEngine* engine = fl_view_get_engine(view);
+  EXPECT_NE(engine, nullptr);
+
+  g_object_ref_sink(view);
+}
+
 TEST(FlViewTest, StateUpdateDoesNotHappenInInit) {
   flutter::testing::fl_ensure_gtk_init();
   g_autoptr(FlDartProject) project = fl_dart_project_new();

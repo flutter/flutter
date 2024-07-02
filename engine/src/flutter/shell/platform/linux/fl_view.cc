@@ -550,13 +550,8 @@ static gboolean window_state_event_cb(FlView* self, GdkEvent* event) {
 }
 
 static GdkGLContext* create_context_cb(FlView* self) {
-  self->renderer =
-      fl_renderer_gdk_new(gtk_widget_get_parent_window(GTK_WIDGET(self)));
-  self->engine = fl_engine_new(self->project, FL_RENDERER(self->renderer));
-  fl_engine_set_update_semantics_handler(self->engine, update_semantics_cb,
-                                         self, nullptr);
-  fl_engine_set_on_pre_engine_restart_handler(
-      self->engine, on_pre_engine_restart_cb, self, nullptr);
+  fl_renderer_gdk_set_window(self->renderer,
+                             gtk_widget_get_parent_window(GTK_WIDGET(self)));
 
   // Must initialize the keymap before the keyboard.
   self->keymap = gdk_keymap_get_for_display(gdk_display_get_default());
@@ -652,6 +647,17 @@ static void unrealize_cb(FlView* self) {
 
 static void size_allocate_cb(FlView* self) {
   handle_geometry_changed(self);
+}
+
+static void fl_view_constructed(GObject* object) {
+  FlView* self = FL_VIEW(object);
+
+  self->renderer = fl_renderer_gdk_new();
+  self->engine = fl_engine_new(self->project, FL_RENDERER(self->renderer));
+  fl_engine_set_update_semantics_handler(self->engine, update_semantics_cb,
+                                         self, nullptr);
+  fl_engine_set_on_pre_engine_restart_handler(
+      self->engine, on_pre_engine_restart_cb, self, nullptr);
 }
 
 static void fl_view_set_property(GObject* object,
@@ -750,6 +756,7 @@ static gboolean fl_view_key_release_event(GtkWidget* widget,
 
 static void fl_view_class_init(FlViewClass* klass) {
   GObjectClass* object_class = G_OBJECT_CLASS(klass);
+  object_class->constructed = fl_view_constructed;
   object_class->set_property = fl_view_set_property;
   object_class->get_property = fl_view_get_property;
   object_class->notify = fl_view_notify;
