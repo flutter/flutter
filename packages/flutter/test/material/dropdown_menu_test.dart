@@ -1212,7 +1212,11 @@ void main() {
   });
 
   testWidgets('The controller can access the value in the input field', (WidgetTester tester) async {
-    final ThemeData themeData = ThemeData();
+    final ThemeData themeData = ThemeData(
+      dropdownMenuTheme: DropdownMenuThemeData(
+        menuStyle: MenuStyle(sizeAnimationStyle: AnimationStyle.noAnimation),
+      )
+    );
     final TextEditingController controller = TextEditingController();
     addTearDown(controller.dispose);
 
@@ -1278,7 +1282,13 @@ void main() {
   testWidgets('The onSelected gets called only when a selection is made', (WidgetTester tester) async {
     int selectionCount = 0;
 
-    final ThemeData themeData = ThemeData();
+    final ThemeData themeData = ThemeData(
+      dropdownMenuTheme: DropdownMenuThemeData(
+        menuStyle: MenuStyle(
+          sizeAnimationStyle: AnimationStyle.noAnimation,
+        )
+      )
+    );
     final List<DropdownMenuEntry<TestMenu>> menuWithDisabledItems = <DropdownMenuEntry<TestMenu>>[
       const DropdownMenuEntry<TestMenu>(value: TestMenu.mainMenu0, label: 'Item 0'),
       const DropdownMenuEntry<TestMenu>(value: TestMenu.mainMenu0, label: 'Item 1', enabled: false),
@@ -1456,7 +1466,13 @@ void main() {
 
   testWidgets('If requestFocusOnTap is true, the text input field can request focus, '
     'otherwise it cannot request focus', (WidgetTester tester) async {
-    final ThemeData themeData = ThemeData();
+    final ThemeData themeData = ThemeData(
+      dropdownMenuTheme: DropdownMenuThemeData(
+        menuStyle: MenuStyle(
+          sizeAnimationStyle: AnimationStyle.noAnimation,
+        )
+      )
+    );
 
     Widget buildDropdownMenu({required bool requestFocusOnTap}) => MaterialApp(
       theme: themeData,
@@ -2057,7 +2073,18 @@ void main() {
    testWidgets('onSelected gets called when a selection is made in a nested menu', (WidgetTester tester) async {
     int selectionCount = 0;
 
-    final ThemeData themeData = ThemeData();
+    final ThemeData themeData = ThemeData(
+      menuTheme: MenuThemeData(
+        style: MenuStyle(
+          sizeAnimationStyle: AnimationStyle.noAnimation,
+        )
+      ),
+      dropdownMenuTheme: DropdownMenuThemeData(
+        menuStyle: MenuStyle(
+          sizeAnimationStyle: AnimationStyle.noAnimation,
+        )
+      )
+    );
     final List<DropdownMenuEntry<TestMenu>> menuWithDisabledItems = <DropdownMenuEntry<TestMenu>>[
       const DropdownMenuEntry<TestMenu>(value: TestMenu.mainMenu0, label: 'Item 0'),
     ];
@@ -2108,7 +2135,13 @@ void main() {
       (WidgetTester tester) async {
     int selectionCount = 0;
 
-    final ThemeData themeData = ThemeData();
+    final ThemeData themeData = ThemeData(
+      dropdownMenuTheme: DropdownMenuThemeData(
+        menuStyle: MenuStyle(
+          sizeAnimationStyle: AnimationStyle.noAnimation,
+        )
+      )
+    );
     final List<DropdownMenuEntry<TestMenu>> menuWithDisabledItems = <DropdownMenuEntry<TestMenu>>[
       const DropdownMenuEntry<TestMenu>(value: TestMenu.mainMenu0, label: 'Item 0'),
     ];
@@ -2118,6 +2151,9 @@ void main() {
       home: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
         return Scaffold(
           body: MenuAnchor(
+            style: MenuStyle(
+              sizeAnimationStyle: AnimationStyle.noAnimation,
+            ),
             menuChildren: <Widget>[
               DropdownMenu<TestMenu>(
                 dropdownMenuEntries: menuWithDisabledItems,
@@ -2296,6 +2332,101 @@ void main() {
     state.updateEditingValue(const TextEditingValue(text: 'Green2'));
     expect(called, 3);
     expect(controller.text, 'Green');
+  });
+
+  testWidgets('DropdownMenu default animation', (WidgetTester tester) async {
+    Widget buildDropdownMenu(TargetPlatform platform) {
+      return MaterialApp(
+        theme: ThemeData(platform: platform),
+        home: const Scaffold(
+          body: DropdownMenu<String>(
+            dropdownMenuEntries: <DropdownMenuEntry<String>>[
+              DropdownMenuEntry<String>(
+                value: 'Yolk',
+                label: 'Yolk',
+              ),
+              DropdownMenuEntry<String>(
+                value: 'Eggbert',
+                label: 'Eggbert',
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.iOS,
+      TargetPlatform.android, TargetPlatform.fuchsia]) {
+      await tester.pumpWidget(Container());
+      await tester.pumpWidget(buildDropdownMenu(platform));
+
+      await tester.tap(find.byType(TextField));
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(find.widgetWithText(MenuItemButton, 'Eggbert').hitTestable(), findsNothing);
+
+      await tester.pump(const Duration(milliseconds: 200));
+      expect(find.widgetWithText(MenuItemButton, 'Eggbert').hitTestable(), findsOneWidget);
+    }
+
+    for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.macOS, TargetPlatform.linux, TargetPlatform.windows ]) {
+      await tester.pumpWidget(buildDropdownMenu(platform));
+
+      await tester.tap(find.byType(TextField));
+      await tester.pump();
+
+      expect(find.widgetWithText(MenuItemButton, 'Eggbert').hitTestable(), findsOneWidget);
+    }
+  });
+
+  testWidgets('DropdownMenu with custom animation style', (WidgetTester tester) async {
+    Widget buildDropdownMenu(TargetPlatform platform) {
+      return MaterialApp(
+        theme: ThemeData(platform: platform),
+        home: Scaffold(
+          body: DropdownMenu<String>(
+            menuStyle: MenuStyle(
+              sizeAnimationStyle: AnimationStyle(
+                duration: const Duration(milliseconds: 500),
+                curve: Curves.linear,
+              )
+            ),
+            dropdownMenuEntries: const <DropdownMenuEntry<String>>[
+              DropdownMenuEntry<String>(
+                value: 'Yolk',
+                label: 'Yolk',
+              ),
+              DropdownMenuEntry<String>(
+                value: 'Eggbert',
+                label: 'Eggbert',
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.iOS,
+      TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.macOS,
+      TargetPlatform.linux, TargetPlatform.windows]) {
+      await tester.pumpWidget(Container());
+      await tester.pumpWidget(buildDropdownMenu(platform));
+
+      await tester.tap(find.byType(TextField));
+      await tester.pump(const Duration(milliseconds: 200));
+      expect(find.widgetWithText(MenuItemButton, 'Eggbert').hitTestable(), findsNothing);
+
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(find.widgetWithText(MenuItemButton, 'Eggbert').hitTestable(), findsOneWidget);
+    }
+
+    for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.macOS, TargetPlatform.linux, TargetPlatform.windows ]) {
+      await tester.pumpWidget(buildDropdownMenu(platform));
+
+      await tester.tap(find.byType(TextField));
+      await tester.pump();
+
+      expect(find.widgetWithText(MenuItemButton, 'Eggbert').hitTestable(), findsOneWidget);
+    }
   });
 
   // This is a regression test for https://github.com/flutter/flutter/issues/140596.

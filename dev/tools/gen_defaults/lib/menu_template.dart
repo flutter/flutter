@@ -262,6 +262,20 @@ class _MenuDefaultsM3 extends MenuStyle {
 
   @override
   VisualDensity get visualDensity => Theme.of(context).visualDensity;
+
+  @override
+  AnimationStyle get sizeAnimationStyle {
+    return switch (Theme.of(context).platform) {
+      TargetPlatform.iOS || TargetPlatform.android || TargetPlatform.fuchsia
+        => AnimationStyle(
+          curve: Curves.easeInOutCubicEmphasized,
+          reverseCurve: Curves.easeInOutCubicEmphasized.flipped,
+          duration: const Duration(milliseconds: ${(getToken('md.sys.motion.duration.long2Ms') as double).round()}),
+        ),
+      TargetPlatform.macOS || TargetPlatform.linux || TargetPlatform.windows
+        => AnimationStyle.noAnimation,
+    };
+  }
 }
 ''';
 }
