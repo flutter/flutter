@@ -531,7 +531,49 @@ void main() {
     );
   }
 
+  Widget buildStatusBarWithCallBackTestApp(TargetPlatform? platform) {
+    final ScrollController controller = ScrollController();
+    return MaterialApp(
+      theme: ThemeData(platform: platform),
+      home: MediaQuery(
+        data: const MediaQueryData(padding: EdgeInsets.only(top: 25.0)), // status bar
+        child: Scaffold(
+          onStatusBarTapped: () {
+            controller.animateTo(
+              300,
+              duration: const Duration(milliseconds: 500),
+              curve: Curves.easeOut,
+            );
+          },
+          body: CustomScrollView(
+            controller: controller,
+            slivers: <Widget>[
+              const SliverAppBar(
+                title: Text('Title'),
+              ),
+              SliverList(
+                delegate: SliverChildListDelegate(List<Widget>.generate(
+                  20, (int index) => SizedBox(height: 100.0, child: Text('$index')),
+                )),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   testWidgets('Tapping the status bar scrolls to top', (WidgetTester tester) async {
+    await tester.pumpWidget(buildStatusBarWithCallBackTestApp(debugDefaultTargetPlatformOverride));
+    final ScrollableState scrollable = tester.state(find.byType(Scrollable));
+    scrollable.position.jumpTo(500.0);
+    expect(scrollable.position.pixels, equals(500.0));
+    await tester.tapAt(const Offset(100.0, 10.0));
+    await tester.pumpAndSettle();
+    expect(scrollable.position.pixels, equals(300.0));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+
+  testWidgets('Tapping the status when onStatusBarTapped provided', (WidgetTester tester) async {
     await tester.pumpWidget(buildStatusBarTestApp(debugDefaultTargetPlatformOverride));
     final ScrollableState scrollable = tester.state(find.byType(Scrollable));
     scrollable.position.jumpTo(500.0);
