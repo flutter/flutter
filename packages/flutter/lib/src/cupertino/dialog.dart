@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'button.dart';
+/// @docImport 'route.dart';
+library;
+
 import 'dart:math' as math;
 import 'dart:ui' show ImageFilter;
 
@@ -2472,5 +2478,143 @@ class _RenderPriorityColumn extends RenderFlex {
       return (maxHeight - effectiveBottomMinHeight, effectiveBottomMinHeight);
     }
     return (0, maxHeight);
+  }
+}
+
+typedef _TwoChildrenHeights = ({double topChildHeight, double bottomChildHeight});
+
+// A column layout with two widgets, where the top widget expands vertically as
+// needed, and the bottom widget has a minimum height.
+//
+// Both child widgets stretch horizontally to the parent's maximum width
+// constraint, with vertical space allocated in this priority:
+//
+//  1. The `bottom` widget receives its requested height, up to a
+//     `bottomMaxHeight` limit and the container's constraint.
+//  2. The `top` widget receives its requested height, up to the remaining space
+//     in the container.
+//  3. The `bottom` widget receives its requested height, up to any remaining
+//     space in the container.
+//
+// This mirrors the behavior seen in iOS components like action sheets and
+// alerts.
+//
+// Implementing this layout with simple compositing widgets is challenging
+// because:
+//
+//  * The bottom widget should take more than `bottomMinHeight` if the top
+//    widget is short.
+//  * The bottom widget should take less than `bottomMinHeight` if it is
+//    naturally shorter.
+class _PriorityColumn extends MultiChildRenderObjectWidget {
+  _PriorityColumn({
+    required Widget top,
+    required Widget bottom,
+    required this.bottomMinHeight,
+  }) : super(children: <Widget>[top, bottom]);
+
+  final double bottomMinHeight;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return _RenderPriorityColumn(
+      bottomMinHeight: bottomMinHeight,
+    );
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderPriorityColumn renderObject) {
+    renderObject
+      .bottomMinHeight = bottomMinHeight;
+  }
+}
+
+class _RenderPriorityColumn extends RenderFlex {
+  _RenderPriorityColumn({
+    List<RenderBox>? children,
+    required double bottomMinHeight,
+  }) : _bottomMinHeight = bottomMinHeight,
+       super(
+         direction: Axis.vertical,
+         mainAxisSize: MainAxisSize.min,
+         crossAxisAlignment: CrossAxisAlignment.stretch,
+       ) {
+    addAll(children);
+  }
+
+  double get bottomMinHeight => _bottomMinHeight;
+  double _bottomMinHeight;
+  set bottomMinHeight(double newValue) {
+    if (newValue != _bottomMinHeight) {
+      _bottomMinHeight = newValue;
+      markNeedsLayout();
+    }
+  }
+
+  @override
+  double computeMinIntrinsicHeight(double width) {
+    assert(childCount == 2);
+    return firstChild!.getMinIntrinsicHeight(width) + lastChild!.getMinIntrinsicHeight(width);
+  }
+
+  @override
+  double computeMaxIntrinsicHeight(double width) {
+    assert(childCount == 2);
+    return firstChild!.getMaxIntrinsicHeight(width) + lastChild!.getMaxIntrinsicHeight(width);
+  }
+
+  @override
+  @protected
+  Size computeDryLayout(covariant BoxConstraints constraints) {
+    final double width = constraints.maxWidth;
+    final double maxHeight = constraints.maxHeight;
+    final (:double topChildHeight, :double bottomChildHeight) = _childrenHeights(width, maxHeight);
+    return Size(width, topChildHeight + bottomChildHeight);
+  }
+
+  @override
+  void performLayout() {
+    final double width = constraints.maxWidth;
+    final double maxHeight = constraints.maxHeight;
+    final (:double topChildHeight, :double bottomChildHeight) = _childrenHeights(width, maxHeight);
+    size = Size(width, topChildHeight + bottomChildHeight);
+
+    firstChild!.layout(BoxConstraints.tight(Size(width, topChildHeight)), parentUsesSize: true);
+    (firstChild!.parentData! as FlexParentData).offset = Offset.zero;
+
+    lastChild!.layout(BoxConstraints.tight(Size(width, bottomChildHeight)), parentUsesSize: true);
+    (lastChild!.parentData! as FlexParentData).offset = Offset(0, topChildHeight);
+  }
+
+  _TwoChildrenHeights _childrenHeights(double width, double maxHeight) {
+    assert(childCount == 2);
+    final double topIntrinsic = firstChild!.getMinIntrinsicHeight(width);
+    final double bottomIntrinsic = lastChild!.getMinIntrinsicHeight(width);
+    // Try to layout both children as their intrinsic height.
+    if (topIntrinsic + bottomIntrinsic <= maxHeight) {
+      return (
+        topChildHeight: topIntrinsic,
+        bottomChildHeight: bottomIntrinsic,
+      );
+    }
+    // _bottomMinHeight is only effective when bottom actually needs that much.
+    final double effectiveBottomMinHeight = math.min(_bottomMinHeight, bottomIntrinsic);
+    // Try to layout top as intrinsics, as long as the bottom has at least
+    // effectiveBottomMinHeight.
+    if (maxHeight - topIntrinsic >= effectiveBottomMinHeight) {
+      return (
+        topChildHeight: topIntrinsic,
+        bottomChildHeight: maxHeight - topIntrinsic,
+      );
+    }
+    // Try to layout bottom as effectiveBottomMinHeight, as long as top has at
+    // least 0.
+    if (maxHeight >= effectiveBottomMinHeight) {
+      return (
+        topChildHeight: maxHeight - effectiveBottomMinHeight,
+        bottomChildHeight: effectiveBottomMinHeight,
+      );
+    }
+    return (topChildHeight: 0, bottomChildHeight: maxHeight);
   }
 }
