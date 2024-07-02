@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'monodrag.dart';
+/// @docImport 'recognizer.dart';
+/// @docImport 'tap.dart';
+library;
 
 import 'arena.dart';
 import 'binding.dart';

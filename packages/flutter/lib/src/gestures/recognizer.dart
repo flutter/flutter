@@ -2,6 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/widgets.dart';
+///
+/// @docImport 'drag_details.dart';
+/// @docImport 'monodrag.dart';
+/// @docImport 'multitap.dart';
+/// @docImport 'tap.dart';
+library;
 
 import 'dart:async';
 import 'dart:collection';
