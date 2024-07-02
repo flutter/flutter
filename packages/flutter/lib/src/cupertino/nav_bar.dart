@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'refresh.dart';
+library;
+
 import 'dart:math' as math;
 import 'dart:ui' show ImageFilter;
 
@@ -1693,12 +1696,13 @@ class _TransitionableNavigationBar extends StatelessWidget {
 /// Similarly, the `bottomNavBar` parameter is the nav bar that was at the
 /// bottom regardless of the push/pop direction.
 ///
-/// If [MediaQuery.padding] is still present in this widget's [BuildContext],
-/// that padding will become part of the transitional navigation bar as well.
+/// If [MediaQueryData.padding] is still present in this widget's
+/// [BuildContext], that padding will become part of the transitional navigation
+/// bar as well.
 ///
-/// [MediaQuery.padding] should be consistent between the from/to routes and
-/// the Hero overlay. Inconsistent [MediaQuery.padding] will produce undetermined
-/// results.
+/// [MediaQueryData.padding] should be consistent between the from/to routes and
+/// the Hero overlay. Inconsistent [MediaQueryData.padding] will produce
+/// undetermined results.
 class _NavigationBarTransition extends StatelessWidget {
   _NavigationBarTransition({
     required this.animation,
