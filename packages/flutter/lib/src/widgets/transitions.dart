@@ -9,6 +9,7 @@ import 'package:flutter/rendering.dart';
 import 'basic.dart';
 import 'container.dart';
 import 'framework.dart';
+import 'navigator.dart';
 import 'text.dart';
 
 export 'package:flutter/rendering.dart' show RelativeRect;
@@ -136,6 +137,30 @@ class _AnimatedState extends State<AnimatedWidget> {
 
   @override
   Widget build(BuildContext context) => widget.build(context);
+}
+
+/// Delegates to transition from navigator if available, or returns default.
+class DelegatedTransition extends AnimatedBuilder {
+
+  /// Creates a DelegatedTransiton
+  const DelegatedTransition({
+    super.key,
+    super.child,
+    required super.animation,
+    required super.builder,
+    this.delegateTransitionBuilder,
+  });
+
+  /// Delegated transition builder
+  final DelegatedTransitionBuilder? delegateTransitionBuilder;
+
+  @override
+  Widget build(BuildContext context) {
+    if (delegateTransitionBuilder == null) {
+      return builder(context, child);
+    }
+    return delegateTransitionBuilder!(context, child, animation as Animation<double>);
+  }
 }
 
 /// Animates the position of a widget relative to its normal position.
