@@ -827,6 +827,8 @@ class _CupertinoBackGestureController<T> {
     }
 
     if (controller.isAnimating) {
+      navigator.popGestureStarted = true;
+
       // Keep the userGestureInProgress in true state so we don't change the
       // curve of the page transition mid-flight since CupertinoPageTransition
       // depends on userGestureInProgress.

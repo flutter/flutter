@@ -1079,8 +1079,9 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
                                 builder: (BuildContext context, Widget? child) {
                                   final bool ignoreEvents = _shouldIgnoreFocusRequest;
                                   focusScopeNode.canRequestFocus = !ignoreEvents;
+                                  final bool popGestureStarted = widget.route.navigator?.popGestureStarted ?? false;
                                   return IgnorePointer(
-                                    ignoring: ignoreEvents,
+                                    ignoring: !popGestureStarted && ignoreEvents,
                                     child: child,
                                   );
                                 },
