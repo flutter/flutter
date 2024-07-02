@@ -55,9 +55,10 @@ class WebEntrypointTarget extends Target {
     final String? targetFile = environment.defines[kTargetFile];
     final Uri importUri = environment.fileSystem.file(targetFile).absolute.uri;
     // TODO(zanderso): support configuration of this file.
-    const String packageFile = '.packages';
+    final File packageConfigFile = findPackageConfigFileOrDefault(environment.projectDir);
+
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-      environment.fileSystem.file(packageFile),
+      packageConfigFile,
       logger: environment.logger,
     );
     final FlutterProject flutterProject = FlutterProject.current();

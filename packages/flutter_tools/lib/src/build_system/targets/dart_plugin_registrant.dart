@@ -31,8 +31,9 @@ class DartPluginRegistrantTarget extends Target {
     assert(environment.generateDartPluginRegistry);
     final FlutterProject project = _project
       ?? FlutterProject.fromDirectory(environment.projectDir);
+    final File packageConfigFile = findPackageConfigFileOrDefault(environment.projectDir);
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-      project.packageConfigFile,
+      packageConfigFile,
       logger: environment.logger,
     );
     final String targetFilePath = environment.defines[kTargetFile] ??

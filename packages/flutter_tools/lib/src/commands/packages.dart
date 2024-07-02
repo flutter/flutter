@@ -13,6 +13,7 @@ import '../build_system/build_system.dart';
 import '../build_system/targets/localizations.dart';
 import '../cache.dart';
 import '../dart/generate_synthetic_packages.dart';
+import '../dart/package_map.dart';
 import '../dart/pub.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
@@ -413,7 +414,7 @@ class PackagesGetCommand extends FlutterCommand {
     int numberPlugins;
     // Do not send plugin analytics if pub has not run before.
     final bool hasPlugins = rootProject.flutterPluginsDependenciesFile.existsSync()
-      && rootProject.packageConfigFile.existsSync();
+      && findPackageConfigFile(rootProject.directory) != null;
     if (hasPlugins) {
       // Do not fail pub get if package config files are invalid before pub has
       // had a chance to run.
@@ -442,7 +443,7 @@ class PackagesGetCommand extends FlutterCommand {
     final int numberPlugins;
     // Do not send plugin analytics if pub has not run before.
     final bool hasPlugins = rootProject.flutterPluginsDependenciesFile.existsSync()
-      && rootProject.packageConfigFile.existsSync();
+      && findPackageConfigFile(rootProject.directory) != null;
     if (hasPlugins) {
       // Do not fail pub get if package config files are invalid before pub has
       // had a chance to run.
