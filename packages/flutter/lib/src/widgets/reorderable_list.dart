@@ -869,7 +869,7 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
     // Find the new index for inserting the item being dragged.
     int newIndex = _insertIndex!;
     for (final _ReorderableItemState item in _items.values) {
-      if (item.index == _dragIndex! || !item.mounted) {
+      if (!item.mounted) {
         continue;
       }
 
@@ -911,7 +911,11 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
           // The end of the proxy is in the ending half of the item, so
           // we should swap the item with the gap and we are done looking for
           // the new index.
-          newIndex = item.index + 1;
+           if (_dragIndex == item.index) {
+            newIndex = item.index;
+          } else {
+            newIndex = item.index + 1;
+          }
           break;
 
         } else if (itemEnd < proxyItemStart && newIndex < (item.index + 1)) {
