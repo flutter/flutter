@@ -1040,6 +1040,14 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
     setState(fn);
   }
 
+  RouteTransitionsBuilder get _buildTransitions {
+    if (widget.route.nextRouteTransition == null) {
+      return widget.route.buildTransitions;
+    } else {
+      return widget.route.nextRouteTransition!;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     // Only top most route can participate in focus traversal.
@@ -1076,7 +1084,7 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
                         child: ListenableBuilder(
                           listenable: _listenable, // immutable
                           builder: (BuildContext context, Widget? child) {
-                            return widget.route.buildTransitions(
+                            return _buildTransitions(
                               context,
                               widget.route.animation!,
                               widget.route.secondaryAnimation!,
@@ -1413,6 +1421,14 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ) {
     return child;
   }
+
+  /// Transition that matches with the next route. Will be null if there is no
+  /// next route or a next route is not provided. If a non-null value exists,
+  /// then it will be used in place of [buildTransitions].
+  ///
+  /// TODO: clean this up if viable
+  /// TODO: put in explaination how to never allow this behavior?
+  RouteTransitionsBuilder? get nextRouteTransition;
 
   @override
   void install() {
@@ -2104,6 +2120,9 @@ abstract class PopupRoute<T> extends ModalRoute<T> {
   bool get maintainState => true;
 
   @override
+  RouteTransitionsBuilder? get nextRouteTransition =>  null;
+
+  @override
   bool get allowSnapshotting => false;
 }
 
@@ -2504,13 +2523,6 @@ abstract class PopEntry<T> {
   }
 }
 
-typedef BuildTransitionsFunction = Widget Function(
-  BuildContext context,
-  Animation<double> animation,
-  Animation<double> secondaryAnimation,
-  Widget child,
-);
-
 /// Mixin for a route that can provide a delegated secondary transition to the
 /// outgoing route.
 mixin FlexibleTransitionRouteMixin<T> on ModalRoute<T> {
@@ -2520,26 +2532,17 @@ mixin FlexibleTransitionRouteMixin<T> on ModalRoute<T> {
   /// The delegated transition received from an incoming route.
   DelegatedTransitionBuilder? receivedTransition;
 
-  BuildTransitionsFunction _originalBuildTransitions = (
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-    Widget child,
-  ) {
-    return child;
-  };
-
   @override
-  BuildTransitionsFunction get buildTransitions {
-    return _originalBuildTransitions;
-  }
-
-  @override
-  set buildTransitions(BuildTransitionsFunction newBuildTransitions) {
-    if (newBuildTransitions != _originalBuildTransitions) {
-      _originalBuildTransitions = newBuildTransitions;
+  RouteTransitionsBuilder? get nextRouteTransition {
+    if (receivedTransition != null) {
+      return (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+        return receivedTransition!(context, child, animation);
+      };
+    } else {
+      return null;
     }
   }
+
 
   @override
   void didChangeNext(Route<dynamic>? nextRoute) {
