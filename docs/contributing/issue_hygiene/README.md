@@ -20,7 +20,7 @@ Within the bug database we try to make sure each issue is actionable and discove
 
 ## Comments
 
-### Do not add "me too" or "same" or "is there an update" comments to bugs
+### Do not add "me too" or "same" or "is there an update" comments to issues or PRs
 
 The Flutter team prioritizes issues in part based on the number of +1 (thumbs
 up) reactions on the top level comment of the bug. Adding comments like "me
