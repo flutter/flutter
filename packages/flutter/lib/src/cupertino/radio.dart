@@ -28,6 +28,12 @@ const double _kCupertinoFocusColorSaturation = 0.835;
 final Color _kDisabledOuterColor = CupertinoColors.white.withOpacity(0.58);
 final Color _kDisabledInnerColor = CupertinoColors.black.withOpacity(0.25);
 
+// Eyeballed from a radio button on a physical Macbook Pro running macOS version 14.5.
+const CupertinoDynamicColor _kDefaultInactiveFillColor = CupertinoDynamicColor.withBrightness(
+  color: CupertinoColors.white,
+  darkColor: Color.fromARGB(255, 87, 87, 87),
+);
+
 /// A macOS-style radio button.
 ///
 /// Used to select between a number of mutually exclusive values. When one radio
@@ -250,17 +256,16 @@ class _CupertinoRadioState<T> extends State<CupertinoRadio<T>> with TickerProvid
 
   @override
   Widget build(BuildContext context) {
-    final Color effectiveActiveColor = widget.activeColor
-      ?? CupertinoColors.activeBlue;
-    final Color effectiveInactiveColor = widget.inactiveColor
-      ?? CupertinoColors.white;
+    final Color effectiveActiveColor = widget.activeColor ?? CupertinoColors.activeBlue;
 
-    final Color effectiveFocusOverlayColor = widget.focusColor
-      ?? HSLColor
-          .fromColor(effectiveActiveColor.withOpacity(_kCupertinoFocusColorOpacity))
-          .withLightness(_kCupertinoFocusColorBrightness)
-          .withSaturation(_kCupertinoFocusColorSaturation)
-          .toColor();
+    final Color effectiveInactiveColor = widget.inactiveColor
+      ?? CupertinoDynamicColor.resolve(_kDefaultInactiveFillColor, context);
+
+    final Color effectiveFocusOverlayColor = widget.focusColor ?? HSLColor
+      .fromColor(effectiveActiveColor.withOpacity(_kCupertinoFocusColorOpacity))
+      .withLightness(_kCupertinoFocusColorBrightness)
+      .withSaturation(_kCupertinoFocusColorSaturation)
+      .toColor();
 
     final Color effectiveFillColor = widget.fillColor ?? CupertinoColors.white;
 
@@ -355,7 +360,7 @@ class _RadioPainter extends ToggleablePainter {
         final Paint checkPaint = Paint()
           ..color = activeColor
           ..style = PaintingStyle.stroke
-          ..strokeWidth = 2
+          ..strokeWidth = 2.0
           ..strokeCap = StrokeCap.round;
         final double width = _size.width;
         final Offset origin = Offset(center.dx - (width/2), center.dy - (width/2));
