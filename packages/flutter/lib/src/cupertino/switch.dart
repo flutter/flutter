@@ -2,6 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// Examples can assume:
+// bool _giveVerse = false;
+// bool _lights = false;
+// void setState(VoidCallback fn) { }
+
+/// @docImport 'package:flutter/material.dart';
+library;
+
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -41,28 +49,22 @@ const double _kOnLabelPaddingHorizontal = 11.0;
 const double _kOffLabelWidth = 1.0;
 const double _kOffLabelPaddingHorizontal = 12.0;
 const double _kOffLabelRadius = 5.0;
-const CupertinoDynamicColor _kOffLabelColor =
-  CupertinoDynamicColor.withBrightnessAndContrast(
-    debugLabel: 'offSwitchLabel',
-    // Source: https://github.com/flutter/flutter/pull/39993#discussion_r321946033
-    color: Color.fromARGB(255, 179, 179, 179),
-    // Source: https://github.com/flutter/flutter/pull/39993#issuecomment-535196665
-    darkColor: Color.fromARGB(255, 179, 179, 179),
-    // Source: https://github.com/flutter/flutter/pull/127776#discussion_r1244208264
-    highContrastColor: Color.fromARGB(255, 255, 255, 255),
-    darkHighContrastColor: Color.fromARGB(255, 255, 255, 255),
-  );
+const CupertinoDynamicColor _kOffLabelColor = CupertinoDynamicColor.withBrightnessAndContrast(
+  debugLabel: 'offSwitchLabel',
+  // Source: https://github.com/flutter/flutter/pull/39993#discussion_r321946033
+  color: Color.fromARGB(255, 179, 179, 179),
+  // Source: https://github.com/flutter/flutter/pull/39993#issuecomment-535196665
+  darkColor: Color.fromARGB(255, 179, 179, 179),
+  // Source: https://github.com/flutter/flutter/pull/127776#discussion_r1244208264
+  highContrastColor: Color.fromARGB(255, 255, 255, 255),
+  darkHighContrastColor: Color.fromARGB(255, 255, 255, 255),
+);
 
 // The relative values needed to transform a color to it's equivalent focus
 // outline color.
 const double _kCupertinoFocusColorOpacity = 0.80;
 const double _kCupertinoFocusColorBrightness = 0.69;
 const double _kCupertinoFocusColorSaturation = 0.835;
-
-// Examples can assume:
-// bool _giveVerse = false;
-// bool _lights = false;
-// void setState(VoidCallback fn) { }
 
 /// An iOS-style switch.
 ///
