@@ -453,6 +453,7 @@ class SemanticsData with Diagnosticable {
     required this.maxValueLength,
     required this.currentValueLength,
     required this.headingLevel,
+    this.linkUri,
     this.tags,
     this.transform,
     this.customSemanticsActionIds,
@@ -643,6 +644,13 @@ class SemanticsData with Diagnosticable {
   /// be set when [maxValueLength] is set.
   final int? currentValueLength;
 
+  /// The URI that this node links to.
+  ///
+  /// See also:
+  ///
+  /// * [SemanticsFlag.isLink], which indicates that this node is a link.
+  final String? linkUri;
+
   /// The bounding box for this node in its coordinate system.
   final Rect rect;
 
@@ -734,6 +742,7 @@ class SemanticsData with Diagnosticable {
     properties.add(DoubleProperty('scrollPosition', scrollPosition, defaultValue: null));
     properties.add(DoubleProperty('scrollExtentMax', scrollExtentMax, defaultValue: null));
     properties.add(IntProperty('headingLevel', headingLevel, defaultValue: 0));
+    properties.add(StringProperty('linkUri', linkUri, defaultValue: null));
   }
 
   @override
@@ -764,6 +773,7 @@ class SemanticsData with Diagnosticable {
         && other.elevation == elevation
         && other.thickness == thickness
         && other.headingLevel == headingLevel
+        && other.linkUri == linkUri
         && _sortedListsEqual(other.customSemanticsActionIds, customSemanticsActionIds);
   }
 
@@ -795,6 +805,7 @@ class SemanticsData with Diagnosticable {
       elevation,
       thickness,
       headingLevel,
+      linkUri,
       customSemanticsActionIds == null ? null : Object.hashAll(customSemanticsActionIds!),
     ),
   );
@@ -908,6 +919,7 @@ class SemanticsProperties extends DiagnosticableTree {
     this.toggled,
     this.button,
     this.link,
+    this.linkUri,
     this.header,
     this.headingLevel,
     this.textField,
@@ -1431,6 +1443,15 @@ class SemanticsProperties extends DiagnosticableTree {
   ///  * [SemanticsConfiguration.addTagForChildren], to which the tags provided
   ///    here will be passed.
   final SemanticsTag? tagForChildren;
+
+  /// The URI that this node links to.
+  ///
+  /// On the web, this is used to set the `href` attribute of the DOM element.
+  ///
+  /// See also:
+  ///
+  /// * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/a#href
+  final String? linkUri;
 
   /// The handler for [SemanticsAction.tap].
   ///
@@ -2267,7 +2288,8 @@ class SemanticsNode with DiagnosticableTreeMixin {
         || _currentValueLength != config._currentValueLength
         || _mergeAllDescendantsIntoThisNode != config.isMergingSemanticsOfDescendants
         || _areUserActionsBlocked != config.isBlockingUserActions
-        || _headingLevel != config._headingLevel;
+        || _headingLevel != config._headingLevel
+        || _linkUri != config._linkUri;
   }
 
   // TAGS, LABELS, ACTIONS
@@ -2577,6 +2599,10 @@ class SemanticsNode with DiagnosticableTreeMixin {
   int get headingLevel => _headingLevel;
   int _headingLevel = _kEmptyConfig._headingLevel;
 
+  /// The URI that this node links to.
+  String? get linkUri => _linkUri;
+  String? _linkUri = _kEmptyConfig._linkUri;
+
   bool _canPerformAction(SemanticsAction action) =>
       _actions.containsKey(action);
 
@@ -2637,6 +2663,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     _currentValueLength = config._currentValueLength;
     _areUserActionsBlocked = config.isBlockingUserActions;
     _headingLevel = config._headingLevel;
+    _linkUri = config._linkUri;
     _replaceChildren(childrenInInversePaintOrder ?? const <SemanticsNode>[]);
 
     if (mergeAllDescendantsIntoThisNodeValueChanged) {
@@ -2685,6 +2712,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     int headingLevel = _headingLevel;
     final double elevation = _elevation;
     double thickness = _thickness;
+    String? linkUri = _linkUri;
     final Set<int> customSemanticsActionIds = <int>{};
     for (final CustomSemanticsAction action in _customSemanticsActions.keys) {
       customSemanticsActionIds.add(CustomSemanticsAction.getIdentifier(action));
@@ -2723,6 +2751,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
         maxValueLength ??= node._maxValueLength;
         currentValueLength ??= node._currentValueLength;
         headingLevel = node._headingLevel;
+        linkUri ??= node._linkUri;
 
         if (identifier == '') {
           identifier = node._identifier;
@@ -2808,6 +2837,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
       currentValueLength: currentValueLength,
       customSemanticsActionIds: customSemanticsActionIds.toList()..sort(),
       headingLevel: headingLevel,
+      linkUri: linkUri,
     );
   }
 
@@ -2884,6 +2914,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
       childrenInHitTestOrder: childrenInHitTestOrder,
       additionalActions: customSemanticsActionIds ?? _kEmptyCustomSemanticsActionsList,
       headingLevel: data.headingLevel,
+      linkUri: data.linkUri ?? '',
     );
     _dirty = false;
   }
@@ -4747,6 +4778,18 @@ class SemanticsConfiguration {
     _setFlag(SemanticsFlag.isLink, value);
   }
 
+  /// The URI that the owning [RenderObject] links to.
+  String? get linkUri => _linkUri;
+  String? _linkUri;
+
+  set linkUri(String? value) {
+    if (value == _linkUri) {
+      return;
+    }
+    _linkUri = value;
+    _hasBeenAnnotated = true;
+  }
+
   /// Whether the owning [RenderObject] is a header (true) or not (false).
   bool get isHeader => _hasFlag(SemanticsFlag.isHeader);
   set isHeader(bool value) {
@@ -5102,7 +5145,8 @@ class SemanticsConfiguration {
       .._actions.addAll(_actions)
       .._customSemanticsActions.addAll(_customSemanticsActions)
       ..isBlockingUserActions = isBlockingUserActions
-      .._headingLevel = _headingLevel;
+      .._headingLevel = _headingLevel
+      .._linkUri = _linkUri;
   }
 }
 
