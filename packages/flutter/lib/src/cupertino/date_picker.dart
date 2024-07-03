@@ -585,7 +585,13 @@ class CupertinoDatePicker extends StatefulWidget {
 
   static double _calculateLongestTextWidth(List<String> longestTexts, BuildContext context) {
     double longestWidth = 0;
+    String lastText = '';
     for (final String text in longestTexts) {
+      if (text.length == lastText.length) {
+        // If the text has the same length as the last text, we can skip the
+        // calculation as it will have the same width.
+        continue;
+      }
       final TextPainter textPainter = TextPainter(
         text: TextSpan(
           style: _themeTextStyle(context),
@@ -593,6 +599,7 @@ class CupertinoDatePicker extends StatefulWidget {
         ),
         textDirection: Directionality.of(context),
       )..layout();
+      lastText = text;
       longestWidth = math.max(longestWidth, textPainter.size.width);
     }
     return longestWidth;
