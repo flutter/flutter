@@ -241,7 +241,7 @@ class FlutterConfiguration {
       _configuration?.canvasKitBaseUrl ?? _defaultCanvasKitBaseUrl;
   static const String _defaultCanvasKitBaseUrl = String.fromEnvironment(
     'FLUTTER_WEB_CANVASKIT_URL',
-    defaultValue: 'canvaskit/',
+    defaultValue: '/canvaskit/',
   );
 
   /// The variant of CanvasKit to download.

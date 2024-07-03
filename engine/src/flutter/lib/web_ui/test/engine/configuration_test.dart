@@ -22,16 +22,16 @@ void testMain() {
     test('initializes with null', () async {
       final FlutterConfiguration config = FlutterConfiguration.legacy(null);
 
-      expect(config.canvasKitBaseUrl, 'canvaskit/'); // _defaultCanvasKitBaseUrl
+      expect(config.canvasKitBaseUrl, '/canvaskit/'); // _defaultCanvasKitBaseUrl
     });
 
     test('legacy constructor initializes with a Js Object', () async {
       final FlutterConfiguration config = FlutterConfiguration.legacy(
         js_util.jsify(<String, Object?>{
-          'canvasKitBaseUrl': 'some_other_url/',
+          'canvasKitBaseUrl': '/some_other_url/',
         }) as JsFlutterConfiguration);
 
-      expect(config.canvasKitBaseUrl, 'some_other_url/');
+      expect(config.canvasKitBaseUrl, '/some_other_url/');
     });
   });
 
@@ -39,13 +39,13 @@ void testMain() {
     test('throws assertion error if already initialized from JS', () async {
       final FlutterConfiguration config = FlutterConfiguration.legacy(
         js_util.jsify(<String, Object?>{
-          'canvasKitBaseUrl': 'some_other_url/',
+          'canvasKitBaseUrl': '/some_other_url/',
         }) as JsFlutterConfiguration);
 
       expect(() {
         config.setUserConfiguration(
           js_util.jsify(<String, Object?>{
-            'canvasKitBaseUrl': 'yet_another_url/',
+            'canvasKitBaseUrl': '/yet_another_url/',
           }) as JsFlutterConfiguration);
       }, throwsAssertionError);
     });
@@ -55,10 +55,10 @@ void testMain() {
 
       config.setUserConfiguration(
         js_util.jsify(<String, Object?>{
-          'canvasKitBaseUrl': 'one_more_url/',
+          'canvasKitBaseUrl': '/one_more_url/',
         }) as JsFlutterConfiguration);
 
-      expect(config.canvasKitBaseUrl, 'one_more_url/');
+      expect(config.canvasKitBaseUrl, '/one_more_url/');
     });
 
     test('can receive non-existing properties without crashing', () async {
