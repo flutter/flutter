@@ -528,9 +528,9 @@ void main() {
 
   testWidgets('Disabled radio has correct default active/inactive/fill/border colors', (WidgetTester tester) async {
     const Color activeDisabledInnerColor = Color(0x40000000);
-    const Color activeDisabledOuterColor = Color(0x94ffffff);
+    const Color activeDisabledOuterColor = Color(0x80ffffff);
     const Color inactiveBorderColor = Color(0xff999999);
-    const Color inactiveDisabledOuterColor = Color(0x94ffffff);
+    const Color inactiveDisabledOuterColor = Color(0x80ffffff);
     const double innerRadius = 2.975;
     const double outerRadius = 7.0;
 

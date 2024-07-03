@@ -32,7 +32,7 @@ const double _kCupertinoFocusColorSaturation = 0.835;
 
 // Eyeballed from Apple's Design Resources (macOS Sonoma) figma template:
 // https://www.figma.com/design/vmIRIt4jgAmSFvXO0SAxU2/Apple-Design-Resources---macOS-(Community)
-final Color _kDisabledOuterColor = CupertinoColors.white.withOpacity(0.58);
+final Color _kDisabledOuterColor = CupertinoColors.white.withOpacity(0.50);
 final Color _kDisabledInnerColor = CupertinoColors.black.withOpacity(0.25);
 
 // Eyeballed from a radio button on a physical Macbook Pro running macOS version 14.5.
