@@ -24,16 +24,16 @@ import 'framework.dart';
 /// {@end-tool}
 ///
 /// {@tool dartpad}
-/// This more elaborate example creates an app bar that's similar to the one
+/// A more elaborate example which creates an app bar that's similar to the one
 /// that appears in the iOS Settings app. In this example the pinned header
 /// starts out transparent and the first item in the list serves as the app's
 /// "Settings" title. When the title item has been scrolled completely behind
 /// the pinned header, the header animates its opacity from 0 to 1 and its
 /// (centered) "Settings" title appears. The fact that the header's opacity
 /// depends on the height of the title item - which is unknown until the list
-/// has been laid out - necessitates monitoring its [SliverConstraints.scrollExtent]
-/// from a scroll [NotificationListener]. See the source code for more
-/// details.
+/// has been laid out - necessitates monitoring the title item's
+/// [SliverConstraints.scrollExtent] from a scroll [NotificationListener].
+/// See the source code for more details.
 ///
 /// ** See code in examples/api/lib/widgets/sliver/pinned_header_sliver.1.dart **
 /// {@end-tool}
