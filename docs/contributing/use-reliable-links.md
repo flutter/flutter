@@ -1,7 +1,8 @@
 ## Use reliable links
 
 If you would like to link to a website,
-do your best to link to a reliable link destination.
+do your best to link to a reliable link destination,
+sometimes known as a permalink.
 
 Even if you update the link in the repo if it changes or breaks,
 outdated versions might remain in older versions of tools, docs, etc.
