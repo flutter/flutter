@@ -3383,16 +3383,16 @@ final DomTrustedTypePolicy _ttPolicy = domWindow.trustedTypes!.createPolicy(
 
 /// Converts a String `url` into a [DomTrustedScriptURL] object when the
 /// Trusted Types API is available, else returns the unmodified `url`.
-JSAny createTrustedScriptUrl(String url) {
+Object createTrustedScriptUrl(String url) {
   if (domWindow.trustedTypes != null) {
     // Pass `url` through Flutter Engine's TrustedType policy.
     final DomTrustedScriptURL trustedUrl = _ttPolicy.createScriptURL(url);
 
     assert(trustedUrl.url != '', 'URL: $url rejected by TrustedTypePolicy');
 
-    return trustedUrl as JSAny;
+    return trustedUrl;
   }
-  return url.toJS;
+  return url;
 }
 
 DomMessageChannel createDomMessageChannel() => DomMessageChannel();
