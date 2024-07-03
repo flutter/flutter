@@ -1202,13 +1202,30 @@ class RenderBackdropFilter extends RenderProxyBox {
   /// Creates a backdrop filter.
   //
   /// The [blendMode] argument defaults to [BlendMode.srcOver].
-  RenderBackdropFilter({ RenderBox? child, required ui.ImageFilter filter, BlendMode blendMode = BlendMode.srcOver })
+  RenderBackdropFilter({
+    RenderBox? child,
+    required ui.ImageFilter filter,
+    BlendMode blendMode = BlendMode.srcOver,
+    bool enabled = true,
+  })
     : _filter = filter,
+      _enabled = enabled,
       _blendMode = blendMode,
       super(child);
 
   @override
   BackdropFilterLayer? get layer => super.layer as BackdropFilterLayer?;
+
+  /// Whether or not the backdrop filter operation will be applied to the child.
+  bool get enabled => _enabled;
+  bool _enabled;
+  set enabled(bool value) {
+    if (enabled == value) {
+      return;
+    }
+    _enabled = value;
+    markNeedsPaint();
+  }
 
   /// The image filter to apply to the existing painted content before painting
   /// the child.
@@ -1244,6 +1261,11 @@ class RenderBackdropFilter extends RenderProxyBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
+    if (!_enabled) {
+      super.paint(context, offset);
+      return;
+    }
+
     if (child != null) {
       assert(needsCompositing);
       layer ??= BackdropFilterLayer();
