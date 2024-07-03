@@ -789,10 +789,10 @@ class _SelectableTextContainerState extends State<_SelectableTextContainer> {
   void didUpdateWidget(covariant _SelectableTextContainer oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.text != oldWidget.text) {
-      _selectionDelegate._attachState = widget.text;
+      _selectionDelegate.textState = widget.text;
     }
     if (widget.selectableId != oldWidget.selectableId) {
-      _selectionDelegate._attachId = widget.selectableId;
+      _selectionDelegate.selectableId = widget.selectableId;
     }
   }
 
@@ -896,16 +896,6 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
   Object? selectableId;
   final GlobalKey _textKey;
   RenderParagraph get paragraph => _textKey.currentContext!.findRenderObject()! as RenderParagraph;
-
-  // ignore: avoid_setters_without_getters
-  set _attachState(TextSpan newState) {
-    textState = newState;
-  }
-
-  // ignore: avoid_setters_without_getters
-  set _attachId(Object? newId) {
-    selectableId = newId;
-  }
 
   @override
   SelectionResult handleSelectParagraph(SelectParagraphSelectionEvent event) {
