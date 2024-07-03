@@ -3603,6 +3603,28 @@ void _testLink() {
     expect(object.element.tagName.toLowerCase(), 'a');
     expect(object.element.hasAttribute('href'), isFalse);
   });
+
+  test('link nodes with linkUrl set the href attribute', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    SemanticsObject pumpSemantics() {
+      final SemanticsTester tester = SemanticsTester(owner());
+      tester.updateNode(
+        id: 0,
+        isLink: true,
+        linkUrl: 'https://flutter.dev',
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+      return tester.getSemanticsObject(0);
+    }
+
+    final SemanticsObject object = pumpSemantics();
+    expect(object.element.tagName.toLowerCase(), 'a');
+    expect(object.element.getAttribute('href'), 'https://flutter.dev');
+  });
 }
 
 /// A facade in front of [ui.SemanticsUpdateBuilder.updateNode] that
@@ -3645,6 +3667,7 @@ void updateNode(
   Int32List? childrenInHitTestOrder,
   Int32List? additionalActions,
   int headingLevel = 0,
+  String? linkUrl,
 }) {
   transform ??= Float64List.fromList(Matrix4.identity().storage);
   childrenInTraversalOrder ??= Int32List(0);
@@ -3685,6 +3708,7 @@ void updateNode(
     childrenInHitTestOrder: childrenInHitTestOrder,
     additionalActions: additionalActions,
     headingLevel: headingLevel,
+    linkUrl: linkUrl,
   );
 }
 

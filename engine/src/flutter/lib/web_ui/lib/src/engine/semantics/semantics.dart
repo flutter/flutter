@@ -234,6 +234,7 @@ class SemanticsNodeUpdate {
     required this.childrenInHitTestOrder,
     required this.additionalActions,
     required this.headingLevel,
+    this.linkUrl,
   });
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
@@ -337,6 +338,9 @@ class SemanticsNodeUpdate {
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   final int headingLevel;
+
+  /// See [ui.SemanticsUpdateBuilder.updateNode].
+  final String? linkUrl;
 }
 
 /// Identifies [PrimaryRoleManager] implementations.
@@ -1146,6 +1150,22 @@ class SemanticsObject {
     _dirtyFields |= _identifierIndex;
   }
 
+  /// See [ui.SemanticsUpdateBuilder.updateNode].
+  String? get linkUrl => _linkUrl;
+  String? _linkUrl;
+
+  /// Whether this object contains a non-empty link URL.
+  bool get hasLinkUrl => _linkUrl != null && _linkUrl!.isNotEmpty;
+
+  static const int _linkUrlIndex = 1 << 26;
+
+  /// Whether the [linkUrl] field has been updated but has not been
+  /// applied to the DOM yet.
+  bool get isLinkUrlDirty => _isDirty(_linkUrlIndex);
+  void _markLinkUrlDirty() {
+    _dirtyFields |= _linkUrlIndex;
+  }
+
   /// A unique permanent identifier of the semantics node in the tree.
   final int id;
 
@@ -1443,6 +1463,11 @@ class SemanticsObject {
     if (_platformViewId != update.platformViewId) {
       _platformViewId = update.platformViewId;
       _markPlatformViewIdDirty();
+    }
+
+    if (_linkUrl != update.linkUrl) {
+      _linkUrl = update.linkUrl;
+      _markLinkUrlDirty();
     }
 
     // Apply updates to the DOM.
