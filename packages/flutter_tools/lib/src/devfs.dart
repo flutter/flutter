@@ -595,7 +595,7 @@ class DevFS {
     // Await the compiler response after checking if the bundle is updated. This allows the file
     // stating to be done while waiting for the frontend_server response.
     final Stopwatch compileTimer = _stopwatchFactory.createStopwatch('compile')..start();
-    final Future<CompilerOutput?> pendingCompilerOutput = generator.recompile(
+    final CompilerOp compilation = generator.recompile(
       mainUri,
       invalidatedFiles,
       outputPath: dillOutputPath,
@@ -604,17 +604,16 @@ class DevFS {
       packageConfig: packageConfig,
       checkDartPluginRegistry: true, // The entry point is assumed not to have changed.
       dartPluginRegistrant: dartPluginRegistrant,
-    ).then((CompilerOutput? result) {
+    );
+    unawaited(compilation.result.then((_) {
       compileTimer.stop();
-      return result;
-    });
+    }));
+    await compilation.started;
 
     if (bundle != null) {
       // Mark processing of bundle started for testability of starting the compile
       // before processing bundle.
       _logger.printTrace('Processing bundle.');
-      // await null to give time for telling the compiler to compile.
-      await null;
 
       // The tool writes the assets into the AssetBundle working dir so that they
       // are in the same location in DevFS and the iOS simulator.
@@ -703,7 +702,7 @@ class DevFS {
       // before processing bundle.
       _logger.printTrace('Bundle processing done.');
     }
-    final CompilerOutput? compilerOutput = await pendingCompilerOutput;
+    final CompilerOutput? compilerOutput = await compilation.result;
     if (compilerOutput == null || compilerOutput.errorCount > 0) {
       return UpdateFSReport();
     }

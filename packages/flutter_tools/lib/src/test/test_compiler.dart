@@ -171,7 +171,7 @@ class TestCompiler {
 
       final Uri? nativeAssetsYaml = await _nativeAssetsBuilder?.build(buildInfo);
 
-      final CompilerOutput? compilerOutput = await compiler!.recompile(
+      final CompilerOutput? compilerOutput = await (await compiler!.recompile(
         request.mainUri,
         <Uri>[request.mainUri, ...invalidatedRegistrantFiles],
         outputPath: outputDill.path,
@@ -180,7 +180,7 @@ class TestCompiler {
         checkDartPluginRegistry: true,
         fs: globals.fs,
         nativeAssetsYaml: nativeAssetsYaml,
-      );
+      )).result;
       final String? outputPath = compilerOutput?.outputFilename;
 
       // In case compiler didn't produce output or reported compilation
