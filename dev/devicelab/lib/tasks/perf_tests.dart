@@ -1324,6 +1324,10 @@ class PerfTest {
       final String? localEngineSrcPath = localEngineSrcPathFromEnv;
 
       if (createPlatforms.isNotEmpty) {
+        // Ensure that the platform-specific manifests are freshly created and
+        // do not contain any settings from previous runs.
+        await exec('git', <String>['clean', '-f', testDirectory]);
+
         await flutter('create', options: <String>[
           '--platforms',
           createPlatforms.join(','),
