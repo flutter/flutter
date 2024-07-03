@@ -111,6 +111,7 @@ class Dismissible extends StatefulWidget {
     this.direction = DismissDirection.horizontal,
     this.resizeDuration = const Duration(milliseconds: 300),
     this.dismissThresholds = const <DismissDirection, double>{},
+    this.allowFlinging = true,
     this.movementDuration = const Duration(milliseconds: 200),
     this.crossAxisEndOffset = 0.0,
     this.dragStartBehavior = DragStartBehavior.start,
@@ -178,6 +179,14 @@ class Dismissible extends StatefulWidget {
   ///  * [direction], which controls the directions in which the items can
   ///    be dismissed.
   final Map<DismissDirection, double> dismissThresholds;
+
+  /// Controls whether the widget can be dismissed by flinging in the indicated [direction].
+  ///
+  /// Flinging is treated as being equivalent to dragging almost to 1.0, so
+  /// flinging can dismiss an item past any threshold less than 1.0.
+  ///
+  /// This defaults to [true]
+  final bool allowFlinging;
 
   /// Defines the duration for card to dismiss or to come back to original position if not dismissed.
   final Duration movementDuration;
@@ -507,8 +516,10 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
       _handleMoveCompleted();
       return;
     }
+
     final double flingVelocity = _directionIsXAxis ? details.velocity.pixelsPerSecond.dx : details.velocity.pixelsPerSecond.dy;
-    switch (_describeFlingGesture(details.velocity)) {
+    final _FlingGestureKind flingGesture = widget.allowFlinging ? _describeFlingGesture(details.velocity) :_FlingGestureKind.none;
+    switch (flingGesture) {
       case _FlingGestureKind.forward:
         assert(_dragExtent != 0.0);
         assert(!_moveController.isDismissed);
