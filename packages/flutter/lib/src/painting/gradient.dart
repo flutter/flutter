@@ -240,10 +240,7 @@ abstract class Gradient {
   /// Typically this is the same as interpolating from null (with [lerp]).
   Gradient scale(double factor);
 
-  /// Returns a new gradient that matches this gradient with the given opacity
-  ///
-  /// A factor of 0.0 (or less) should result in a variant of the gradient that
-  /// is fully transparent
+  //// Returns a new [Gradient] with each color set to the given opacity.
   Gradient withOpacity(double opacity);
 
   /// Linearly interpolates from another [Gradient] to `this`.
@@ -563,7 +560,6 @@ class LinearGradient extends Gradient {
     return '${objectRuntimeType(this, 'LinearGradient')}(${description.join(', ')})';
   }
 
-  /// Returns a new [LinearGradient] with its colors opacity changed to the given opacity.
   @override
   LinearGradient withOpacity(double opacity) {
     return LinearGradient(
@@ -864,7 +860,6 @@ class RadialGradient extends Gradient {
     return '${objectRuntimeType(this, 'RadialGradient')}(${description.join(', ')})';
   }
 
-  /// Returns a new [LinearGradient] with its colors opacity changed to the given opacity.
   @override
   RadialGradient withOpacity(double opacity) {
     return RadialGradient(
@@ -1143,7 +1138,6 @@ class SweepGradient extends Gradient {
     return '${objectRuntimeType(this, 'SweepGradient')}(${description.join(', ')})';
   }
 
-  /// Returns a new [LinearGradient] with its colors opacity changed to the given opacity.
   @override
   SweepGradient withOpacity(double opacity) {
     return SweepGradient(
