@@ -387,9 +387,14 @@ typedef struct {
 } FlutterOpenGLTexture;
 
 typedef struct {
-  /// The target of the color attachment of the frame-buffer. For example,
-  /// GL_TEXTURE_2D or GL_RENDERBUFFER. In case of ambiguity when dealing with
-  /// Window bound frame-buffers, 0 may be used.
+  /// The format of the color attachment of the frame-buffer. For example,
+  /// GL_RGBA8.
+  ///
+  /// In case of ambiguity when dealing with Window bound frame-buffers, 0 may
+  /// be used.
+  ///
+  /// @bug      This field is incorrectly named as "target" when it actually
+  ///           refers to a format.
   uint32_t target;
 
   /// The name of the framebuffer.
