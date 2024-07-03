@@ -760,7 +760,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
 }
 
 class _AppBarState extends State<AppBar> {
-  final Map<Widget?, double> _notificationListenerStates = <Widget?, double>{};
+  final Map<ScrollableState?, double> _notificationListenerStates = <ScrollableState?, double>{};
   ScrollNotificationObserverState? _scrollNotificationObserver;
   bool _scrolledUnder = false;
 
@@ -788,15 +788,17 @@ class _AppBarState extends State<AppBar> {
 
   void _handleScrollNotification(ScrollNotification notification) {
     if (notification is ScrollUpdateNotification && widget.notificationPredicate(notification)) {
-      // Each notification has a context, which is the widget that was visible
-      final Widget? widget = notification.context?.widget;
+      // The notification context of a ScrollNotification points to the RawGestureDetector
+      // of the Scrollable. We get the ScrollableState associated with this notification
+      // by looking up the tree.
+      final ScrollableState? notificationScrollableState = notification.context?.findAncestorStateOfType<ScrollableState>();
 
-      if (widget != null) {
-        _notificationListenerStates[widget] = notification.metrics.axisDirection == AxisDirection.down
-        ? notification.metrics.extentBefore
-        : notification.metrics.extentAfter;
+      if (notificationScrollableState != null) {
+        final double newPixels = notification.metrics.pixels;
+        _notificationListenerStates[notificationScrollableState] = newPixels;
 
-        // If there are any of the scroll positions greater than 0 on the vertical axis, we cannot change until they are all 0.
+        // Check if any scroll positions on the vertical axis are greater than 0
+        // If so, and if _scrolledUnder is true, return without further action
         if (_notificationListenerStates.values.toList().any((double element) => element > 0) && _scrolledUnder) {
           return;
         }
