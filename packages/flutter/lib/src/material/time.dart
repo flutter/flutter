@@ -128,7 +128,7 @@ class TimeOfDay implements Comparable<TimeOfDay> {
   ///
   /// A [compareTo] function returns:
   ///  * a negative value if this TimeOfDay [isBefore] [other].
-  ///  * `0` if this DateTime [isAtSameMomentAs] [other], and
+  ///  * `0` if this DateTime [isAtSameTimeAs] [other], and
   ///  * a positive value otherwise (when this TimeOfDay [isAfter] [other]).
   @override
   int compareTo(TimeOfDay other) {
