@@ -22,6 +22,7 @@ Widget buildTest({
   Axis scrollDirection = Axis.vertical,
   DismissDirection dismissDirection = defaultDismissDirection,
   double? startToEndThreshold,
+  bool allowFlinging = true,
   TextDirection textDirection = TextDirection.ltr,
   Future<bool?> Function(BuildContext context, DismissDirection direction)? confirmDismiss,
   ScrollController? controller,
@@ -60,6 +61,7 @@ Widget buildTest({
             dismissThresholds: startToEndThreshold == null
                 ? <DismissDirection, double>{}
                 : <DismissDirection, double>{DismissDirection.startToEnd: startToEndThreshold},
+            allowFlinging: allowFlinging,
             crossAxisEndOffset: crossAxisEndOffset,
             child: SizedBox(
               width: 100.0,
@@ -701,6 +703,19 @@ void main() {
     expect(dismissedItems, isEmpty);
 
     await checkFlingItemAfterMovement(tester, 1, gestureDirection: AxisDirection.right);
+    expect(find.text('1'), findsOneWidget);
+    expect(dismissedItems, isEmpty);
+  });
+
+  testWidgets('Flinging is disabled', (WidgetTester tester) async {
+    await tester.pumpWidget(buildTest(allowFlinging: false));
+    expect(dismissedItems, isEmpty);
+
+    await checkFlingItemAfterMovement(tester, 0, gestureDirection: AxisDirection.right, mechanism: flingElement);
+    expect(find.text('0'), findsOneWidget);
+    expect(dismissedItems, isEmpty);
+
+    await checkFlingItemAfterMovement(tester, 1, gestureDirection: AxisDirection.left, mechanism: flingElement);
     expect(find.text('1'), findsOneWidget);
     expect(dismissedItems, isEmpty);
   });
