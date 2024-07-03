@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
+import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -2190,6 +2191,7 @@ void main() {
       notifyCount++;
     }
     tester.binding.focusManager.addListener(handleFocusChange);
+    addTearDown(() => tester.binding.focusManager.removeListener(handleFocusChange));
 
     nodeA.requestFocus();
     await tester.pump();
@@ -2213,8 +2215,47 @@ void main() {
     expect(nodeB.hasPrimaryFocus, isFalse);
     expect(notifyCount, equals(1));
     notifyCount = 0;
+  });
 
-    tester.binding.focusManager.removeListener(handleFocusChange);
+    testWidgets('FocusManager notifies engine when that a view should have focus when a focus change occurs.', (WidgetTester tester) async {
+    final FocusNode nodeA = FocusNode(debugLabel: 'a');
+    addTearDown(nodeA.dispose);
+    final FocusNode nodeB = FocusNode(debugLabel: 'b');
+    addTearDown(nodeB.dispose);
+
+    FlutterView? view;
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.rtl,
+        child: Column(
+          children: <Widget>[
+            Focus(focusNode: nodeA, child: const Text('a')),
+            Focus(focusNode: nodeB, child: const Text('b')),
+            Builder(builder: (BuildContext context) {
+              view = View.of(context);
+              return const SizedBox.shrink();
+            }),
+          ],
+        ),
+      ),
+    );
+    int notifyCount = 0;
+    void handleFocusChange() {
+      notifyCount++;
+    }
+    tester.binding.focusManager.addListener(handleFocusChange);
+    addTearDown(() => tester.binding.focusManager.removeListener(handleFocusChange));
+
+    tester.binding.platformDispatcher.resetFocusedViewTestValues();
+    nodeA.requestFocus();
+    await tester.pump();
+    expect(tester.binding.platformDispatcher.focusedViewIdTestValue, isNotNull);
+    expect(tester.binding.platformDispatcher.focusedViewIdTestValue, equals(view?.viewId));
+    expect(tester.binding.platformDispatcher.focusedViewDirectionTestValue, equals(ViewFocusDirection.forward));
+    expect(tester.binding.platformDispatcher.focusedViewStateTestValue, equals(ViewFocusState.focused));
+    expect(nodeA.hasPrimaryFocus, isTrue);
+    expect(notifyCount, equals(1));
+    notifyCount = 0;
   });
 
   testWidgets('debugFocusChanges causes logging of focus changes', (WidgetTester tester) async {

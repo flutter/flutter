@@ -19,6 +19,7 @@ import 'binding.dart';
 import 'focus_scope.dart';
 import 'focus_traversal.dart';
 import 'framework.dart';
+import 'view.dart';
 
 /// Setting to true will cause extensive logging to occur when focus changes occur.
 ///
@@ -1877,6 +1878,16 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
     assert(_focusDebug(() => 'Notified ${_dirtyNodes.length} dirty nodes:', () => _dirtyNodes));
     _dirtyNodes.clear();
     if (previousFocus != _primaryFocus) {
+      if (_primaryFocus != null && (_primaryFocus!.context?.mounted ?? false)) {
+        final int? viewId = View.maybeOf(_primaryFocus!.context!)?.viewId;
+        if (viewId != null) {
+          WidgetsBinding.instance.platformDispatcher.requestViewFocusChange(
+            direction: ViewFocusDirection.forward,
+            state: ViewFocusState.focused,
+            viewId: viewId,
+          );
+        }
+      }
       notifyListeners();
     }
     assert(() {

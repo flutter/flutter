@@ -200,6 +200,38 @@ class TestPlatformDispatcher implements PlatformDispatcher {
     _onViewFocusChange?.call(event);
   }
 
+  /// Returns the last view ID given to [requestViewFocusChange].
+  int? get focusedViewIdTestValue => _focusedViewIdTestValue;
+  int? _focusedViewIdTestValue;
+
+  /// Returns the last focused view state given to [requestViewFocusChange].
+  ViewFocusState? get focusedViewStateTestValue => _focusedViewStateTestValue;
+  ViewFocusState? _focusedViewStateTestValue;
+
+  /// Returns the last focused view direction given to [requestViewFocusChange].
+  ViewFocusDirection? get focusedViewDirectionTestValue => _focusedViewDirectionTestValue;
+  ViewFocusDirection? _focusedViewDirectionTestValue;
+
+  /// Resets [focusedViewIdTestValue], [focusedViewStateTestValue], and
+  /// [focusedViewDirectionTestValue] to null.
+  void resetFocusedViewTestValues() {
+    _focusedViewIdTestValue = null;
+    _focusedViewStateTestValue = null;
+    _focusedViewDirectionTestValue = null;
+  }
+
+  @override
+  void requestViewFocusChange({
+    required int viewId,
+    required ViewFocusState state,
+    required ViewFocusDirection direction,
+  }) {
+    _focusedViewIdTestValue = viewId;
+    _focusedViewStateTestValue = state;
+    _focusedViewDirectionTestValue = direction;
+    _platformDispatcher.requestViewFocusChange(viewId: viewId, state: state, direction: direction);
+  }
+
   @override
   Locale get locale => _localeTestValue ?? _platformDispatcher.locale;
   Locale? _localeTestValue;
