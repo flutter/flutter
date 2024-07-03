@@ -7,6 +7,7 @@
 #include "flutter/fml/build_config.h"
 #include "flutter/fml/logging.h"
 #include "fml/trace_event.h"
+#include "impeller/base/allocation_size.h"
 #include "impeller/base/validation.h"
 #include "impeller/core/formats.h"
 #include "impeller/renderer/backend/metal/device_buffer_mtl.h"
@@ -98,10 +99,9 @@ void DebugAllocatorStats::Decrement(size_t size) {
   size_.fetch_sub(size, std::memory_order_relaxed);
 }
 
-size_t DebugAllocatorStats::GetAllocationSizeMB() {
+Bytes DebugAllocatorStats::GetAllocationSize() {
   // RAM is measured in MiB, thus a divisor of 2^20 instead of 1,000,000.
-  size_t new_value = size_ / (1024 * 1024);
-  return new_value;
+  return Bytes{static_cast<double>(size_)};
 }
 
 AllocatorMTL::AllocatorMTL(id<MTLDevice> device, std::string label)
@@ -256,20 +256,20 @@ ISize AllocatorMTL::GetMaxTextureSizeSupported() const {
   return max_texture_supported_;
 }
 
-size_t AllocatorMTL::DebugGetHeapUsage() const {
+Bytes AllocatorMTL::DebugGetHeapUsage() const {
 #ifdef IMPELLER_DEBUG
-  return debug_allocater_->GetAllocationSizeMB();
+  return debug_allocater_->GetAllocationSize();
 #else
-  return 0u;
+  return {};
 #endif  // IMPELLER_DEBUG
 }
 
 void AllocatorMTL::DebugTraceMemoryStatistics() const {
 #ifdef IMPELLER_DEBUG
-  size_t allocated_size = DebugGetHeapUsage();
   FML_TRACE_COUNTER("flutter", "AllocatorMTL",
                     reinterpret_cast<int64_t>(this),  // Trace Counter ID
-                    "MemoryBudgetUsageMB", allocated_size);
+                    "MemoryBudgetUsageMB",
+                    DebugGetHeapUsage().ConvertTo<MebiBytes>().GetSize());
 #endif  // IMPELLER_DEBUG
 }
 
