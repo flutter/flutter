@@ -293,10 +293,10 @@ class _RenderSelectableAdapter extends RenderProxyBox with Selectable, Selection
       return null;
     }
     return <SelectedContentRange<Object>>[
-      _SelectableAdapterSelectedContentRange(
+      SelectedContentRange<Widget>(
         content: content,
-        start: 0,
-        end: 1,
+        startOffset: 0,
+        endOffset: 1,
         contentLength: 1,
       ),
     ];
@@ -355,23 +355,4 @@ class _RenderSelectableAdapter extends RenderProxyBox with Selectable, Selection
     _geometry.dispose();
     super.dispose();
   }
-}
-
-@immutable
-class _SelectableAdapterSelectedContentRange extends SelectedContentRange<Widget> {
-  const _SelectableAdapterSelectedContentRange({
-    int start = -1,
-    int end = -1,
-    required super.content,
-    required super.contentLength,
-  }) : _start = start,
-       _end = end;
-
-  @override
-  int get startOffset => _start;
-  final int _start;
-
-  @override
-  int get endOffset => _end;
-  final int _end;
 }

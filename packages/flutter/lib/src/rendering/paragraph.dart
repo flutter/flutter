@@ -1477,11 +1477,11 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
     if (_textSelectionStart == null || _textSelectionEnd == null) {
       return null;
     }
-    final SelectedContentRange<Object> localSelectedContentRange = _SelectableFragmentSelectedContentRange(
+    final SelectedContentRange<String> localSelectedContentRange = SelectedContentRange<String>(
       content: fullText,
       contentLength: fullText.length,
-      start: _textSelectionStart!.offset,
-      end: _textSelectionEnd!.offset,
+      startOffset: _textSelectionStart!.offset,
+      endOffset: _textSelectionEnd!.offset,
     );
     return <SelectedContentRange<Object>>[localSelectedContentRange];
   }
@@ -3117,23 +3117,4 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
     properties.add(DiagnosticsProperty<TextRange>('range', range));
     properties.add(DiagnosticsProperty<String>('fullText', fullText));
   }
-}
-
-@immutable
-class _SelectableFragmentSelectedContentRange extends SelectedContentRange<String> {
-  const _SelectableFragmentSelectedContentRange({
-    int start = -1,
-    int end = -1,
-    required super.content,
-    required super.contentLength,
-  }) : _start = start,
-       _end = end;
-
-  @override
-  int get startOffset => _start;
-  final int _start;
-
-  @override
-  int get endOffset => _end;
-  final int _end;
 }

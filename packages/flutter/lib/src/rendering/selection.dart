@@ -123,12 +123,14 @@ abstract class SelectionHandler implements ValueListenable<SelectionGeometry> {
 ///     the active selection for a given subtree contained under a [SelectionArea]
 ///     or [SelectableRegion].
 @immutable
-abstract class SelectedContentRange<T extends Object> {
+class SelectedContentRange<T extends Object> {
   /// Creates a [SelectedContentRange] with the given values.
   const SelectedContentRange({
     this.selectableId,
     required this.content,
     required this.contentLength,
+    required this.startOffset,
+    required this.endOffset,
     this.children,
   });
 
@@ -181,12 +183,12 @@ abstract class SelectedContentRange<T extends Object> {
   /// are relative to the content in the child [SelectedContentRange]
   /// and not the root text.
   /// {@endtemplate}
-  int get startOffset;
+  final int startOffset;
 
   /// The end of the selection relative to the [content].
   ///
   /// {@macro flutter.rendering.selection.SelectedContentRange.selectionOffsets}
-  int get endOffset;
+  final int endOffset;
 
   /// Additional ranges to include as children.
   ///

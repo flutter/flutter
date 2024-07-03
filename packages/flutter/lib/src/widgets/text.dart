@@ -1333,12 +1333,12 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
         childSelections.addAll(selectedContentRanges);
       }
     }
-    final _TextSpanContentRange range = _TextSpanContentRange(
+    final SelectedContentRange<TextSpan> range = SelectedContentRange<TextSpan>(
       content: textState,
       contentLength: paragraph.text.toPlainText(includeSemanticsLabels: false).length,
       selectableId: selectableId,
-      start: startOffset,
-      end: endOffset,
+      startOffset: startOffset,
+      endOffset: endOffset,
       children: childSelections,
     );
     return <SelectedContentRange<Object>>[range];
@@ -1532,25 +1532,4 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
     _hasReceivedStartEvent.removeWhere((Selectable selectable) => !selectableSet.contains(selectable));
     super.didChangeSelectables();
   }
-}
-
-@immutable
-class _TextSpanContentRange extends SelectedContentRange<TextSpan> {
-  const _TextSpanContentRange({
-    int start = -1,
-    int end = -1,
-    super.selectableId,
-    required super.content,
-    required super.contentLength,
-    super.children,
-  }) : _start = start,
-       _end = end;
-
-  @override
-  int get startOffset => _start;
-  final int _start;
-
-  @override
-  int get endOffset => _end;
-  final int _end;
 }
