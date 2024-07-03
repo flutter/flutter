@@ -135,8 +135,35 @@ class CarouselView extends StatefulWidget {
 /// Creates a scrollable list where the size of each child widget is dynamically
 /// determined by the provided [flexWeights].
 ///
-/// The `flexWeights` parameter is required and defines the relative size
+/// The [flexWeights] parameter is required and defines the relative size
 /// proportions of each child widget.
+///
+/// While scrolling, the main-axis extent (size) of each visible item changes
+/// dynamically based on the scrolling progress. The cross-axis extent is determined
+/// by the parent constraints. As the first visible item scrolls completely
+/// off-screen, the next item becomes the first visible item, and has the same
+/// size as the previously first item. The rest of the visible items maintain
+/// their relative layout.
+///
+/// For example, if the layout weights are `[1, 6, 1]`, the length of [flexWeights]
+/// indicates three items will be visible at a time. The layout of these items
+/// would be:
+///  * First item: Extent is (1 / (1 + 6 + 1)) * viewport extent.
+///  * Second item: Extent is (6 / (1 + 6 + 1)) * viewport extent.
+///  * Third item: Extent is (1 / (1 + 6 + 1)) * viewport extent.
+///
+/// Assuming a viewport extent of 800 in the main axis and the first item is
+/// item 0, there would be three visible items with extents of 100, 600, and 100.
+/// As item 0 scrolls off-screen, the extent of item 1 smoothly decreases from 600
+/// to 100. For instance, if item 0 is 30% off-screen, item 1 should have decreased
+/// its size to 30% of the difference from 600 to 100; its extent would be
+/// 600 - 0.3 * (600 - 100). Similarly, item 2's extent would increase from 100
+/// to 600, becoming 100 + 0.3 * (600 - 100).
+///
+/// As the initially visible items change size during scrolling, item 3 enters
+/// the view to fill the remaining space. Its extent starts at a minimum of
+/// [shrinkExtent] (or 0 if [shrinkExtent] is not provided) and gradually
+/// increases to match the extent of the last visible item (100 in this example).
 ///
 /// When [consumeMaxWeight] is set to `true`, each child can be expanded to occupy
 /// the maximum weight while scrolling. For example, with [flexWeights] of `[1, 7, 1]`,
@@ -664,31 +691,7 @@ class _RenderSliverFixedExtentCarousel extends RenderSliverFixedExtentBoxAdaptor
 /// weight along the main axis and to the [SliverConstraints.crossAxisExtent]
 /// along the cross axis.
 ///
-/// While scrolling, the extent (size) of each visible item changes dynamically
-/// based on the scrolling progress. As the first visible item scrolls completely
-/// off-screen, the next item becomes the first visible item, and has the same
-/// size as the previously first item. The rest of the visible items maintain
-/// their relative layout.
-///
-/// For example, if the layout weights are [1, 6, 1], the length of [weights] array
-/// indicates three items will be visible at a time. The layout of these items
-/// would be:
-///  * First item: Extent is (1 / (1 + 6 + 1)) * viewport extent.
-///  * Second item: Extent is (6 / (1 + 6 + 1)) * viewport extent.
-///  * Third item: Extent is (1 / (1 + 6 + 1)) * viewport extent.
-///
-/// Assuming a viewport extent of 800 in the main axis and the first item is
-/// item 0, there would be three visible items with extents of 100, 600, and 100.
-/// As item 0 scrolls off-screen, the extent of item 1 smoothly decreases from 600
-/// to 100. For instance, if item 0 is 30% off-screen, item 1 should have decreased
-/// its size to 30% of the difference from 600 to 100; its extent would be
-/// 600 - 0.3 * (600 - 100). Similarly, item 2's extent would increase from 100
-/// to 600, becoming 100 + 0.3 * (600 - 100).
-///
-/// As the initially visible items change size during scrolling, item 3 enters
-/// the view to fill the remaining space. Its extent starts at a minimum of
-/// [shrinkExtent] (or 0 if [shrinkExtent] is not provided) and gradually
-/// increases to match the extent of the last visible item (100 in this example).
+/// See [CarouselView.weighted] to get more calculation explanations.
 class _SliverWeightedCarousel extends SliverMultiBoxAdaptorWidget {
   const _SliverWeightedCarousel({
     required super.delegate,
