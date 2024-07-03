@@ -239,6 +239,7 @@ To your `Info.plist` file, add under the top-level `<dict>` tag:
 * [Important Benchmarks](docs/benchmarks.md)
 * [Threading in the Vulkan Backend](docs/vulkan_threading.md)
 * [iOS CPU Profiling](docs/ios_cpu_profile.md)
+* [OpenGL ES Development Setup on macOS](docs/opengles_development_setup.md)
 * [Android CPU Profiling](docs/android_cpu_profile.md)
 * [Android Rendering Backend Selection](docs/android.md)
 * [Using Impeller as a Standalone Rendering Library (with OpenGL ES)](docs/standalone_gles.md)
