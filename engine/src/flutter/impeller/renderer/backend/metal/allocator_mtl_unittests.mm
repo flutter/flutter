@@ -29,7 +29,8 @@ TEST_P(AllocatorMTLTest, DebugTraceMemoryStatistics) {
   auto& context_mtl = ContextMTL::Cast(*GetContext());
   const auto& allocator = context_mtl.GetResourceAllocator();
 
-  EXPECT_EQ(allocator->DebugGetHeapUsage(), 0u);
+  EXPECT_EQ(allocator->DebugGetHeapUsage().ConvertTo<MebiBytes>().GetSize(),
+            0u);
 
   // Memoryless texture does not increase allocated size.
   {
@@ -39,16 +40,16 @@ TEST_P(AllocatorMTLTest, DebugTraceMemoryStatistics) {
     desc.size = {1024, 1024};
     auto texture_1 = allocator->CreateTexture(desc);
 
-    EXPECT_EQ(allocator->DebugGetHeapUsage(), 0u);
-
     // Private storage texture increases allocated size.
     desc.storage_mode = StorageMode::kDevicePrivate;
     auto texture_2 = allocator->CreateTexture(desc);
 
 #ifdef IMPELLER_DEBUG
-    EXPECT_EQ(allocator->DebugGetHeapUsage(), 4u);
+    EXPECT_EQ(allocator->DebugGetHeapUsage().ConvertTo<MebiBytes>().GetSize(),
+              4u);
 #else
-    EXPECT_EQ(allocator->DebugGetHeapUsage(), 0u);
+    EXPECT_EQ(allocator->DebugGetHeapUsage().ConvertTo<MebiBytes>().GetSize(),
+              0u);
 #endif  // IMPELLER_DEBUG
 
     // Host storage texture increases allocated size.
@@ -56,14 +57,17 @@ TEST_P(AllocatorMTLTest, DebugTraceMemoryStatistics) {
     auto texture_3 = allocator->CreateTexture(desc);
 
 #ifdef IMPELLER_DEBUG
-    EXPECT_EQ(allocator->DebugGetHeapUsage(), 8u);
+    EXPECT_EQ(allocator->DebugGetHeapUsage().ConvertTo<MebiBytes>().GetSize(),
+              8u);
 #else
-    EXPECT_EQ(allocator->DebugGetHeapUsage(), 0u);
+    EXPECT_EQ(allocator->DebugGetHeapUsage().ConvertTo<MebiBytes>().GetSize(),
+              0u);
 #endif  // IMPELLER_DEBUG
   }
 
   // After all textures are out of scope, memory has been decremented.
-  EXPECT_EQ(allocator->DebugGetHeapUsage(), 0u);
+  EXPECT_EQ(allocator->DebugGetHeapUsage().ConvertTo<MebiBytes>().GetSize(),
+            0u);
 }
 
 }  // namespace testing

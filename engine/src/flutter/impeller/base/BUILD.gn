@@ -8,6 +8,8 @@ impeller_component("base") {
   sources = [
     "allocation.cc",
     "allocation.h",
+    "allocation_size.cc",
+    "allocation_size.h",
     "backend_cast.h",
     "comparable.cc",
     "comparable.h",
@@ -33,7 +35,10 @@ impeller_component("base") {
 
 impeller_component("base_unittests") {
   testonly = true
-  sources = [ "base_unittests.cc" ]
+  sources = [
+    "allocation_size_unittests.cc",
+    "base_unittests.cc",
+  ]
   deps = [
     ":base",
     "//flutter/testing",

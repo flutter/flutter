@@ -8,6 +8,7 @@
 
 #include "flutter/fml/memory/ref_ptr.h"
 #include "flutter/fml/trace_event.h"
+#include "impeller/base/allocation_size.h"
 #include "impeller/core/formats.h"
 #include "impeller/renderer/backend/vulkan/device_buffer_vk.h"
 #include "impeller/renderer/backend/vulkan/formats_vk.h"
@@ -509,7 +510,7 @@ std::shared_ptr<DeviceBuffer> AllocatorVK::OnCreateBuffer(
   );
 }
 
-size_t AllocatorVK::DebugGetHeapUsage() const {
+Bytes AllocatorVK::DebugGetHeapUsage() const {
   auto count = memory_properties_.memoryHeapCount;
   std::vector<VmaBudget> budgets(count);
   vmaGetHeapBudgets(allocator_.get(), budgets.data());
@@ -518,16 +519,15 @@ size_t AllocatorVK::DebugGetHeapUsage() const {
     const VmaBudget& budget = budgets[i];
     total_usage += budget.usage;
   }
-  // Convert bytes to MB.
-  total_usage /= (1024 * 1024);
-  return total_usage;
+  return Bytes{static_cast<double>(total_usage)};
 }
 
 void AllocatorVK::DebugTraceMemoryStatistics() const {
 #ifdef IMPELLER_DEBUG
   FML_TRACE_COUNTER("flutter", "AllocatorVK",
                     reinterpret_cast<int64_t>(this),  // Trace Counter ID
-                    "MemoryBudgetUsageMB", DebugGetHeapUsage());
+                    "MemoryBudgetUsageMB",
+                    DebugGetHeapUsage().ConvertTo<MebiBytes>().GetSize());
 #endif  // IMPELLER_DEBUG
 }
 
