@@ -45,7 +45,7 @@ enum DayPeriod {
 ///  * [DateTime], which represents date and time, and is subject to eras and
 ///    time zones.
 @immutable
-class TimeOfDay {
+class TimeOfDay implements Comparable<TimeOfDay> {
   /// Creates a time of day.
   ///
   /// The [hour] argument must be between 0 and 23, inclusive. The [minute]
@@ -110,6 +110,30 @@ class TimeOfDay {
       this,
       alwaysUse24HourFormat: MediaQuery.alwaysUse24HourFormatOf(context),
     );
+  }
+
+  /// Whether this [TimeOfDay] occurs earlier than [other].
+  bool isBefore(TimeOfDay other) => compareTo(other) < 0;
+
+  /// Whether this [TimeOfDay] occurs later than [other].
+  bool isAfter(TimeOfDay other) => compareTo(other) > 0;
+
+  /// Whether this [TimeOfDay] occurs at the same time [other].
+  bool isAtSameTimeAs(TimeOfDay other) => compareTo(other) == 0;
+
+  /// Compares this [TimeOfDay] object to [other] independent of date.
+  ///
+  /// This means that "00:00" of the next day is still before "23:00" of this
+  /// day.
+  ///
+  /// A [compareTo] function returns:
+  ///  * a negative value if this TimeOfDay [isBefore] [other].
+  ///  * `0` if this DateTime [isAtSameMomentAs] [other], and
+  ///  * a positive value otherwise (when this TimeOfDay [isAfter] [other]).
+  @override
+  int compareTo(TimeOfDay other) {
+    final int hourComparison = hour.compareTo(other.hour);
+    return hourComparison == 0 ? minute.compareTo(other.minute) : hourComparison;
   }
 
   @override
