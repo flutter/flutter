@@ -25,8 +25,8 @@ class DebugAllocatorStats {
   /// Decrement the tracked allocation size in bytes.
   void Decrement(size_t size);
 
-  /// Get the current tracked allocation size in MB.
-  size_t GetAllocationSizeMB();
+  /// Get the current tracked allocation size.
+  Bytes GetAllocationSize();
 
  private:
   std::atomic<size_t> size_ = 0;
@@ -40,7 +40,7 @@ class AllocatorMTL final : public Allocator {
   ~AllocatorMTL() override;
 
   // |Allocator|
-  size_t DebugGetHeapUsage() const override;
+  Bytes DebugGetHeapUsage() const override;
 
  private:
   friend class ContextMTL;

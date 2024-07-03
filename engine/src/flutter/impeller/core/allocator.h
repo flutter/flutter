@@ -6,6 +6,7 @@
 #define FLUTTER_IMPELLER_CORE_ALLOCATOR_H_
 
 #include "flutter/fml/mapping.h"
+#include "impeller/base/allocation_size.h"
 #include "impeller/core/device_buffer_descriptor.h"
 #include "impeller/core/texture.h"
 #include "impeller/core/texture_descriptor.h"
@@ -51,7 +52,7 @@ class Allocator {
   virtual void DebugTraceMemoryStatistics() const {};
 
   // Visible for testing.
-  virtual size_t DebugGetHeapUsage() const { return 0; }
+  virtual Bytes DebugGetHeapUsage() const { return Bytes{0}; }
 
  protected:
   Allocator();
