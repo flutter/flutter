@@ -72,7 +72,6 @@ class DlSkCanvasAdapter final : public virtual DlCanvas {
   SkMatrix GetTransform() const override;
 
   void ClipRect(const SkRect& rect, ClipOp clip_op, bool is_aa) override;
-  void ClipOval(const SkRect& bounds, ClipOp clip_op, bool is_aa) override;
   void ClipRRect(const SkRRect& rrect, ClipOp clip_op, bool is_aa) override;
   void ClipPath(const SkPath& path, ClipOp clip_op, bool is_aa) override;
 
