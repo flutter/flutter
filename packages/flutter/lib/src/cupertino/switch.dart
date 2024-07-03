@@ -21,14 +21,14 @@ import 'package:flutter/widgets.dart';
 import 'colors.dart';
 import 'theme.dart';
 
-// Hand coded defaults eyeballed from iOS simulator on Mac.
+// Hand coded defaults eyeballed from an iOS simulator running iOS version 17.5.
 const double _kDisabledOpacity = 0.5;
 const double _kThumbRadius = 14.0;
 const double _kTrackHeight = 31.0;
 const double _kTrackWidth = 51.0;
 const Size _kSwitchSize = Size(59.0, 39.0);
 const double _kThumbExtensionFactor = 7.0;
-const List<BoxShadow> _kThumbShadow = <BoxShadow>[
+const List<BoxShadow> _kSwitchBoxShadows = <BoxShadow>[
   BoxShadow(
     color: Color(0x26000000),
     offset: Offset(0, 3),
@@ -192,8 +192,11 @@ class CupertinoSwitch extends StatefulWidget {
 
   /// The color to use for the thumb when the switch is on.
   ///
-  /// Defaults to [CupertinoColors.white] when null or if the color provided has
-  /// no opacity.
+  /// If this color is not opaque, it is blended against
+  /// [CupertinoThemeData.scaffoldBackgroundColor], so as not to see through the
+  /// thumb to the track underneath.
+  ///
+  /// Defaults to [CupertinoColors.white] when null.
   ///
   /// See also:
   ///
@@ -202,8 +205,12 @@ class CupertinoSwitch extends StatefulWidget {
 
   /// The color to use on the thumb when the switch is off.
   ///
-  /// If null, defaults to [thumbColor]. If that is also null, or the color
-  /// provided has no opacity, [CupertinoColors.white] is used.
+  /// If this color is not opaque, it is blended against
+  /// [CupertinoThemeData.scaffoldBackgroundColor], so as not to see through the
+  /// thumb to the track underneath.
+  ///
+  /// If null, defaults to [thumbColor]. If that is also null,
+  /// [CupertinoColors.white] is used.
   ///
   /// See also:
   ///
@@ -1254,7 +1261,7 @@ class _SwitchPainter extends ToggleablePainter {
       thumbPaintOffset.dy + thumbSize.height,
       Radius.circular(thumbSize.height / 2.0),
     );
-    for (final BoxShadow shadow in _kThumbShadow) {
+    for (final BoxShadow shadow in _kSwitchBoxShadows) {
       canvas.drawRRect(thumbBounds.shift(shadow.offset), shadow.toPaint());
     }
     canvas.drawRRect(

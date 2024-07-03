@@ -12,6 +12,19 @@ import 'colors.dart';
 
 const Color _kThumbBorderColor = Color(0x0A000000);
 
+const List<BoxShadow> _kSwitchBoxShadows = <BoxShadow> [
+  BoxShadow(
+    color: Color(0x26000000),
+    offset: Offset(0, 3),
+    blurRadius: 8.0,
+  ),
+  BoxShadow(
+    color: Color(0x0F000000),
+    offset: Offset(0, 3),
+    blurRadius: 1.0,
+  ),
+];
+
 const List<BoxShadow> _kSliderBoxShadows = <BoxShadow> [
   BoxShadow(
     color: Color(0x26000000),
@@ -30,7 +43,7 @@ const List<BoxShadow> _kSliderBoxShadows = <BoxShadow> [
   ),
 ];
 
-/// Paints an iOS-style slider thumb.
+/// Paints an iOS-style slider thumb or switch thumb.
 ///
 /// Used by [CupertinoSlider].
 class CupertinoThumbPainter {
@@ -39,6 +52,12 @@ class CupertinoThumbPainter {
     this.color = CupertinoColors.white,
     this.shadows = _kSliderBoxShadows,
   });
+
+  /// Creates an object that paints an iOS-style switch thumb.
+  const CupertinoThumbPainter.switchThumb({
+    Color color = CupertinoColors.white,
+    List<BoxShadow> shadows = _kSwitchBoxShadows,
+  }) : this(color: color, shadows: shadows);
 
   /// The color of the interior of the thumb.
   final Color color;
