@@ -127,21 +127,23 @@ abstract class GoldenFileComparator {
 /// levels for allowable differences:
 ///
 /// ```dart
-/// testWidgets('matches golden file with a 0.01 tolerance', (WidgetTester tester) async {
-///   final previousGoldenFileComparator = goldenFileComparator;
-///   goldenFileComparator = _TolerantGoldenFileComparator(
-///     Uri.parse('test/my_widget_test.dart'),
-///     precisionTolerance: 0.01,
-///   );
-///   addTearDown(() => goldenFileComparator = previousGoldenFileComparator);
+/// void main() {
+///   testWidgets('matches golden file with a 0.01 tolerance', (WidgetTester tester) async {
+///     final GoldenFileComparator previousGoldenFileComparator = goldenFileComparator;
+///     goldenFileComparator = _TolerantGoldenFileComparator(
+///       Uri.parse('test/my_widget_test.dart'),
+///       precisionTolerance: 0.01,
+///     );
+///     addTearDown(() => goldenFileComparator = previousGoldenFileComparator);
 ///
-///   await tester.pumpWidget(const ColoredBox(color: Color(0xff00ff00)));
+///     await tester.pumpWidget(const ColoredBox(color: Color(0xff00ff00)));
 ///
-///   await expectLater(
-///     find.byType(ColoredBox),
-///     matchesGoldenFile('my_golden.png'),
-///   );
-/// });
+///     await expectLater(
+///       find.byType(ColoredBox),
+///       matchesGoldenFile('my_golden.png'),
+///     );
+///   });
+/// }
 ///
 /// class _TolerantGoldenFileComparator extends LocalFileComparator {
 ///   _TolerantGoldenFileComparator(
@@ -161,18 +163,18 @@ abstract class GoldenFileComparator {
 ///
 ///   @override
 ///   Future<bool> compare(Uint8List imageBytes, Uri golden) async {
-///     final result = await GoldenFileComparator.compareLists(
+///     final ComparisonResult result = await GoldenFileComparator.compareLists(
 ///       imageBytes,
 ///       await getGoldenBytes(golden),
 ///     );
 ///
-///     final passed = result.passed || result.diffPercent <= _precisionTolerance;
+///     final bool passed = result.passed || result.diffPercent <= _precisionTolerance;
 ///     if (passed) {
 ///       result.dispose();
 ///       return true;
 ///     }
 ///
-///     final error = await generateFailureOutput(result, golden, basedir);
+///     final String error = await generateFailureOutput(result, golden, basedir);
 ///     result.dispose();
 ///     throw FlutterError(error);
 ///   }
