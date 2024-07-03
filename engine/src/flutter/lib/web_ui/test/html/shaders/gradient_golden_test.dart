@@ -635,6 +635,63 @@ Future<void> testMain() async {
       region: region,
     );
   }, skip: isFirefox);
+
+  test('Paints two gradient with same width and different height', () async {
+    final RecordingCanvas canvas =
+        RecordingCanvas(const Rect.fromLTRB(0, 0, 400, 300));
+    canvas.save();
+
+    const List<Color> colors = <Color>[
+      Color(0xFF000000),
+      Color(0xFFFF3C38),
+      Color(0xFFFF8C42),
+      Color(0xFFFFF275),
+      Color(0xFF6699CC),
+      Color(0xFF656D78),
+    ];
+
+    const List<double> stops = <double>[0.0, 0.05, 0.4, 0.6, 0.9, 1.0];
+
+    final Matrix4 transform = Matrix4.identity()
+      ..translate(100, 150)
+      ..scale(0.3, 0.7)
+      ..rotateZ(0.5);
+
+    final GradientSweep sweepGradient = GradientSweep(
+      const Offset(0.5, 0.5),
+      colors,
+      stops,
+      TileMode.clamp,
+      0.0,
+      2 * math.pi,
+      transform.storage,
+    );
+
+    const double kBoxWidth = 150;
+    const double kBoxHeight1 = 40;
+    const double kBoxHeight2 = 80;
+
+    const Rect rectBounds1 = Rect.fromLTWH(10, 20, kBoxWidth, kBoxHeight1);
+    const Rect rectBounds2 = Rect.fromLTWH(10, 80, kBoxWidth, kBoxHeight2);
+    canvas.drawRect(
+      rectBounds1,
+      SurfacePaint()
+        ..shader = engineGradientToShader(sweepGradient, rectBounds1),
+    );
+    canvas.drawRect(
+      rectBounds2,
+      SurfacePaint()
+        ..shader = engineGradientToShader(sweepGradient, rectBounds2),
+    );
+
+    canvas.restore();
+    await canvasScreenshot(
+      canvas,
+      'radial_gradient_double_item',
+      canvasRect: screenRect,
+      region: region,
+    );
+  }, skip: isFirefox);
 }
 
 Shader engineGradientToShader(GradientSweep gradient, Rect rect) {
