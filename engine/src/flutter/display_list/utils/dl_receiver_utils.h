@@ -44,9 +44,6 @@ class IgnoreClipDispatchHelper : public virtual DlOpReceiver {
   void clipRect(const SkRect& rect,
                 DlCanvas::ClipOp clip_op,
                 bool is_aa) override {}
-  void clipOval(const SkRect& bounds,
-                DlCanvas::ClipOp clip_op,
-                bool is_aa) override {}
   void clipRRect(const SkRRect& rrect,
                  DlCanvas::ClipOp clip_op,
                  bool is_aa) override {}

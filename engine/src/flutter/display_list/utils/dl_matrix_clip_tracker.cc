@@ -74,24 +74,6 @@ void DisplayListMatrixClipState::clipRect(const DlRect& rect,
   }
 }
 
-void DisplayListMatrixClipState::clipOval(const DlRect& bounds,
-                                          ClipOp op,
-                                          bool is_aa) {
-  if (!bounds.IsFinite()) {
-    return;
-  }
-  switch (op) {
-    case DlCanvas::ClipOp::kIntersect:
-      adjustCullRect(bounds, op, is_aa);
-      break;
-    case DlCanvas::ClipOp::kDifference:
-      if (oval_covers_cull(bounds)) {
-        cull_rect_ = DlRect();
-      }
-      break;
-  }
-}
-
 void DisplayListMatrixClipState::clipRRect(const SkRRect& rrect,
                                            ClipOp op,
                                            bool is_aa) {
