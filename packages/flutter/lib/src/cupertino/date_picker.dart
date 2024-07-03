@@ -481,7 +481,7 @@ class CupertinoDatePicker extends StatefulWidget {
   }
 
   // Get maximum three texts from the date picker texts.
-  // This is used t get the longest words from the date picker texts.
+  // This is used to get the longest words from the date picker texts.
   static void _updateLongestTexts(String newText, List<String> longestTexts) {
     final SplayTreeSet<String> sortedTexts = SplayTreeSet<String>((String a, String b) {
       return  (b.length - a.length).abs() > 1 ? b.length - a.length : a.compareTo(b);
