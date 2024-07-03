@@ -240,7 +240,7 @@ abstract class Gradient {
   /// Typically this is the same as interpolating from null (with [lerp]).
   Gradient scale(double factor);
 
-  //// Returns a new [Gradient] with each color set to the given opacity.
+  /// Returns a new [Gradient] with each color set to the given opacity.
   Gradient withOpacity(double opacity);
 
   /// Linearly interpolates from another [Gradient] to `this`.
