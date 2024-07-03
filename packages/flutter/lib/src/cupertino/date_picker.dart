@@ -482,21 +482,10 @@ class CupertinoDatePicker extends StatefulWidget {
 
   // Get maximum three texts from the date picker texts.
   // This is used to get the longest words from the date picker texts.
-  static void _updateLongestTexts(String newText, List<String> longestTexts) {
-    final SplayTreeSet<String> sortedTexts = SplayTreeSet<String>((String a, String b) {
-      return  (b.length - a.length).abs() > 1 ? b.length - a.length : a.compareTo(b);
-    }
-  );
-    sortedTexts.addAll(longestTexts);
-    sortedTexts.add(newText);
+  static List<String> _getLongestTexts(List<String> longestTexts) {
+    longestTexts.sort((String a, String b) => b.length.compareTo(a.length));
 
-    if (sortedTexts.length > 3) {
-      sortedTexts.remove(sortedTexts.last);
-    }
-
-    longestTexts
-      ..clear()
-      ..addAll(sortedTexts);
+    return longestTexts..removeRange(3, longestTexts.length);
   }
 
   // Estimate the minimum width that each column needs to layout its content.
@@ -563,7 +552,7 @@ class CupertinoDatePicker extends StatefulWidget {
           final String month = standaloneMonth
               ? localizations.datePickerStandaloneMonth(i)
               : localizations.datePickerMonth(i);
-          _updateLongestTexts(month, longestTexts);
+          longestTexts.add(month);
         }
       case _PickerColumnType.year:
         longestText = localizations.datePickerYear(2018);
@@ -571,7 +560,7 @@ class CupertinoDatePicker extends StatefulWidget {
 
     assert(longestText != '' || longestTexts.isNotEmpty, 'longestText or longestTexts should not be empty');
     if (longestTexts.isNotEmpty) {
-      return _calculateLongestTextWidth(longestTexts, context);
+      return _calculateLongestTextWidth(_getLongestTexts(longestTexts), context);
     }
 
     return TextPainter.computeMaxIntrinsicWidth(
