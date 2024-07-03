@@ -3119,8 +3119,9 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
   }
 }
 
+@immutable
 class _SelectableFragmentSelectedContentRange extends SelectedContentRange<String> {
-  _SelectableFragmentSelectedContentRange({
+  const _SelectableFragmentSelectedContentRange({
     int start = -1,
     int end = -1,
     required super.content,

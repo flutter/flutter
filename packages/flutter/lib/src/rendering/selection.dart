@@ -106,24 +106,26 @@ abstract class SelectionHandler implements ValueListenable<SelectionGeometry> {
 }
 
 /// This class stores the information of an active selection under
-/// a [Selectable] or [SelectionHandler], including the start and
-/// end positions of a selection relative to the content, as well
-/// as an identifier to identify the owner of the content, any
-/// children selection ranges that may be contained within the active
-/// selection, and the content itself.
+/// a [Selectable] or [SelectionHandler].
+/// 
+/// The [SelectedContentRange]s for a given [Selectable] or
+/// [SelectionHandler] can be retrieved by calling
+/// [SelectionHandler.getSelections].
 ///
-/// [SelectionArea] and [SelectableRegion] provide access to this
-/// information through the [SelectionListener] passed to their
-/// [SelectionListener.onSelectionChanged] member.
+/// [SelectionArea] and [SelectableRegion] provide access to the
+/// [SelectedContentRange]s that represent their active selection
+/// through the [SelectionListener] passed to their
+/// [SelectionListener.onSelectionChanged] callback.
 ///
 /// See also:
 ///
 ///   * [SelectionListener], which provides the [SelectedContentRange]s representing
 ///     the active selection for a given subtree contained under a [SelectionArea]
 ///     or [SelectableRegion].
+@immutable
 abstract class SelectedContentRange<T extends Object> {
-  /// Creates a range for the content of a [Selectable] or [SelectionHandler].
-  SelectedContentRange({
+  /// Creates a [SelectedContentRange] with the given values.
+  const SelectedContentRange({
     this.selectableId,
     required this.content,
     required this.contentLength,
@@ -138,10 +140,9 @@ abstract class SelectedContentRange<T extends Object> {
 
   /// The length of the content.
   ///
-  /// The absolute value of the difference between
-  /// the start offset and end offset contained by
-  /// this [SelectedContentRange] should not exceed
-  /// the content length.
+  /// The absolute value of the difference between the start
+  /// offset and end offset contained by this [SelectedContentRange]
+  /// must not exceed the content length.
   final int contentLength;
 
   /// The start of the selection relative to the [content].
@@ -150,7 +151,7 @@ abstract class SelectedContentRange<T extends Object> {
   /// For example a [Text] widgets content is in the format
   /// of an [InlineSpan] tree.
   ///
-  /// Take the [Text] widget and [InlineSpan] tree below:
+  /// Take the [Text] widget and [TextSpan] tree below:
   ///
   /// {@tool snippet}
   /// ```dart
@@ -168,15 +169,15 @@ abstract class SelectedContentRange<T extends Object> {
   /// {@end-tool}
   ///
   /// If we select from the beginning of 'world' to the
-  /// end of the '?' in the [WidgetSpan] the startOffset
+  /// end of the '?' in the [WidgetSpan], the [startOffset]
   /// in the root [SelectedContentRange] will be 6,
-  /// and endOffset will be 14. This is because the
+  /// and [endOffset] will be 14. This is because the
   /// [WidgetSpan] begins at index 13 in the root text
   /// and ends at index 14. In this example, the root
   /// [SelectedContentRange] will have one child
   /// which represents the selection inside the [WidgetSpan].
-  /// In the child [SelectedContentRange] the startOffset
-  /// will be 0 and the endOffset will be 18. These offsets
+  /// In the child [SelectedContentRange] the [startOffset]
+  /// will be 0 and the [endOffset] will be 18. These offsets
   /// are relative to the content in the child [SelectedContentRange]
   /// and not the root text.
   /// {@endtemplate}
@@ -208,6 +209,7 @@ abstract class SelectedContentRange<T extends Object> {
 /// The selected content in a [Selectable] or [SelectionHandler].
 // TODO(chunhtai): Add more support for rich content.
 // https://github.com/flutter/flutter/issues/104206.
+@immutable
 class SelectedContent {
   /// Creates a selected content object.
   ///

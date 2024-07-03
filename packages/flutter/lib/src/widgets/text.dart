@@ -887,12 +887,10 @@ const double _kSelectableVerticalComparingThreshold = 3.0;
 
 class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainerDelegate {
   _SelectableTextContainerDelegate(
-    GlobalKey textKey,
-    {
-      required this.textState,
-      this.selectableId,
-    }
-  ) : _textKey = textKey;
+    GlobalKey textKey, {
+    required this.textState,
+    this.selectableId,
+  }) : _textKey = textKey;
 
   TextSpan textState;
   Object? selectableId;
@@ -1254,18 +1252,18 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
     }
     final int selectionStart = min(currentSelectionStartIndex, currentSelectionEndIndex);
     final int selectionEnd = max(currentSelectionStartIndex, currentSelectionEndIndex);
-    final LinkedHashMap<int, SelectedContent> selections = LinkedHashMap<int, SelectedContent>();
+    final List<SelectedContent> selections = <SelectedContent>[];
     for (int index = selectionStart; index <= selectionEnd; index += 1) {
       final SelectedContent? selectedContent = selectables[index].getSelectedContent();
       if (selectedContent != null) {
-        selections[index] = selectedContent;
+        selections.add(selectedContent);
       }
     }
     if (selections.isEmpty) {
       return null;
     }
     final StringBuffer buffer = StringBuffer();
-    for (final SelectedContent selection in selections.values) {
+    for (final SelectedContent selection in selections) {
       buffer.write(selection.plainText);
     }
     return SelectedContent(
@@ -1300,13 +1298,15 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
     // A placeholder only spans one character unit in the text. So when the selection
     // begins or ends on a placeholder, we should consider its position relative
     // to the root text.
-    late final int startOffset;
-    late final int endOffset;
+    final int startOffset;
+    final int endOffset;
+    final List<SelectedContentRange<Object>>? startingSelectableSelections = selectables[currentSelectionStartIndex].getSelections();
+    final List<SelectedContentRange<Object>>? endingSelectableSelections = selectables[currentSelectionEndIndex].getSelections();
     if (paragraph.selectableBelongsToParagraph(selectables[currentSelectionStartIndex])) {
       // A [_SelectableFragment] will only have one [SelectedContentRange].
-      startOffset = selectables[currentSelectionStartIndex].getSelections()!.first.startOffset;
+      startOffset = startingSelectableSelections!.first.startOffset;
     } else {
-      final bool localSelectionForward = selectables[currentSelectionStartIndex].getSelections()!.first.endOffset >= selectables[currentSelectionStartIndex].getSelections()!.first.startOffset;
+      final bool localSelectionForward = startingSelectableSelections!.first.endOffset >= startingSelectableSelections!.first.startOffset;
       final TextPosition positionBeforeStart = localSelectionForward
                                              ? paragraph.getPositionForOffset(selectables[currentSelectionStartIndex].boundingBoxes.first.bottomLeft)
                                              : paragraph.getPositionForOffset(selectables[currentSelectionStartIndex].boundingBoxes.last.bottomRight);
@@ -1314,9 +1314,9 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
     }
     if (paragraph.selectableBelongsToParagraph(selectables[currentSelectionEndIndex])) {
       // A [_SelectableFragment] will only have one [SelectedContentRange].
-      endOffset = selectables[currentSelectionEndIndex].getSelections()!.first.endOffset;
+      endOffset = endingSelectableSelections!.first.endOffset;
     } else {
-      final bool localSelectionForward = selectables[currentSelectionEndIndex].getSelections()!.first.endOffset >= selectables[currentSelectionEndIndex].getSelections()!.first.startOffset;
+      final bool localSelectionForward = endingSelectableSelections!.first.endOffset >= endingSelectableSelections!.first.startOffset;
       final TextPosition positionAfterEnd = localSelectionForward
                                           ? paragraph.getPositionForOffset(selectables[currentSelectionEndIndex].boundingBoxes.last.bottomRight)
                                           : paragraph.getPositionForOffset(selectables[currentSelectionEndIndex].boundingBoxes.first.bottomLeft);
@@ -1534,8 +1534,9 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
   }
 }
 
+@immutable
 class _TextSpanContentRange extends SelectedContentRange<TextSpan> {
-  _TextSpanContentRange({
+  const _TextSpanContentRange({
     int start = -1,
     int end = -1,
     super.selectableId,

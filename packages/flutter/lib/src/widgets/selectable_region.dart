@@ -2937,12 +2937,21 @@ class SelectionListener extends StatefulWidget {
 }
 
 class _SelectionListenerState extends State<SelectionListener> {
-  late final _SelectionListenerDelegate _selectionDelegate;
+  late _SelectionListenerDelegate _selectionDelegate;
 
   @override
   void initState() {
     super.initState();
     _selectionDelegate = _SelectionListenerDelegate(onSelectionChanged: widget.onSelectionChanged);
+  }
+
+  @override
+  void didUpdateWidget(SelectionListener oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.onSelectionChanged != widget.onSelectionChanged) {
+      _selectionDelegate.dispose();
+      _selectionDelegate = _SelectionListenerDelegate(onSelectionChanged: widget.onSelectionChanged);
+    }
   }
 
   @override
@@ -2960,7 +2969,7 @@ class _SelectionListenerState extends State<SelectionListener> {
   }
 }
 
-class _SelectionListenerDelegate extends MultiSelectableSelectionContainerDelegate {
+class _SelectionListenerDelegate extends _SelectableRegionContainerDelegate {
   _SelectionListenerDelegate({required this.onSelectionChanged});
 
   final SelectionListenerSelectionChangedCallback onSelectionChanged;
@@ -2970,172 +2979,6 @@ class _SelectionListenerDelegate extends MultiSelectableSelectionContainerDelega
     final SelectionResult result = super.dispatchSelectionEvent(event);
     onSelectionChanged(getSelections());
     return result;
-  }
-
-  final Set<Selectable> _hasReceivedStartEvent = <Selectable>{};
-  final Set<Selectable> _hasReceivedEndEvent = <Selectable>{};
-
-  Offset? _lastStartEdgeUpdateGlobalPosition;
-  Offset? _lastEndEdgeUpdateGlobalPosition;
-
-  @override
-  void remove(Selectable selectable) {
-    _hasReceivedStartEvent.remove(selectable);
-    _hasReceivedEndEvent.remove(selectable);
-    super.remove(selectable);
-  }
-
-  void _updateLastEdgeEventsFromGeometries() {
-    if (currentSelectionStartIndex != -1 && selectables[currentSelectionStartIndex].value.hasSelection) {
-      final Selectable start = selectables[currentSelectionStartIndex];
-      final Offset localStartEdge = start.value.startSelectionPoint!.localPosition +
-          Offset(0, - start.value.startSelectionPoint!.lineHeight / 2);
-      _lastStartEdgeUpdateGlobalPosition = MatrixUtils.transformPoint(start.getTransformTo(null), localStartEdge);
-    }
-    if (currentSelectionEndIndex != -1 && selectables[currentSelectionEndIndex].value.hasSelection) {
-      final Selectable end = selectables[currentSelectionEndIndex];
-      final Offset localEndEdge = end.value.endSelectionPoint!.localPosition +
-          Offset(0, -end.value.endSelectionPoint!.lineHeight / 2);
-      _lastEndEdgeUpdateGlobalPosition = MatrixUtils.transformPoint(end.getTransformTo(null), localEndEdge);
-    }
-  }
-
-  @override
-  SelectionResult handleSelectAll(SelectAllSelectionEvent event) {
-    final SelectionResult result = super.handleSelectAll(event);
-    for (final Selectable selectable in selectables) {
-      _hasReceivedStartEvent.add(selectable);
-      _hasReceivedEndEvent.add(selectable);
-    }
-    // Synthesize last update event so the edge updates continue to work.
-    _updateLastEdgeEventsFromGeometries();
-    return result;
-  }
-
-  /// Selects a word in a [Selectable] at the location
-  /// [SelectWordSelectionEvent.globalPosition].
-  @override
-  SelectionResult handleSelectWord(SelectWordSelectionEvent event) {
-    final SelectionResult result = super.handleSelectWord(event);
-    if (currentSelectionStartIndex != -1) {
-      _hasReceivedStartEvent.add(selectables[currentSelectionStartIndex]);
-    }
-    if (currentSelectionEndIndex != -1) {
-      _hasReceivedEndEvent.add(selectables[currentSelectionEndIndex]);
-    }
-    _updateLastEdgeEventsFromGeometries();
-    return result;
-  }
-
-  /// Selects a paragraph in a [Selectable] at the location
-  /// [SelectParagraphSelectionEvent.globalPosition].
-  @override
-  SelectionResult handleSelectParagraph(SelectParagraphSelectionEvent event) {
-    final SelectionResult result = super.handleSelectParagraph(event);
-    if (currentSelectionStartIndex != -1) {
-      _hasReceivedStartEvent.add(selectables[currentSelectionStartIndex]);
-    }
-    if (currentSelectionEndIndex != -1) {
-      _hasReceivedEndEvent.add(selectables[currentSelectionEndIndex]);
-    }
-    _updateLastEdgeEventsFromGeometries();
-    return result;
-  }
-
-  @override
-  SelectionResult handleClearSelection(ClearSelectionEvent event) {
-    final SelectionResult result = super.handleClearSelection(event);
-    _hasReceivedStartEvent.clear();
-    _hasReceivedEndEvent.clear();
-    _lastStartEdgeUpdateGlobalPosition = null;
-    _lastEndEdgeUpdateGlobalPosition = null;
-    return result;
-  }
-
-  @override
-  SelectionResult handleSelectionEdgeUpdate(SelectionEdgeUpdateEvent event) {
-    if (event.type == SelectionEventType.endEdgeUpdate) {
-      _lastEndEdgeUpdateGlobalPosition = event.globalPosition;
-    } else {
-      _lastStartEdgeUpdateGlobalPosition = event.globalPosition;
-    }
-    return super.handleSelectionEdgeUpdate(event);
-  }
-
-  @override
-  void dispose() {
-    _hasReceivedStartEvent.clear();
-    _hasReceivedEndEvent.clear();
-    super.dispose();
-  }
-
-  @override
-  SelectionResult dispatchSelectionEventToChild(Selectable selectable, SelectionEvent event) {
-    switch (event.type) {
-      case SelectionEventType.startEdgeUpdate:
-        _hasReceivedStartEvent.add(selectable);
-        ensureChildUpdated(selectable);
-      case SelectionEventType.endEdgeUpdate:
-        _hasReceivedEndEvent.add(selectable);
-        ensureChildUpdated(selectable);
-      case SelectionEventType.clear:
-        _hasReceivedStartEvent.remove(selectable);
-        _hasReceivedEndEvent.remove(selectable);
-      case SelectionEventType.selectAll:
-      case SelectionEventType.selectWord:
-      case SelectionEventType.selectParagraph:
-        break;
-      case SelectionEventType.granularlyExtendSelection:
-      case SelectionEventType.directionallyExtendSelection:
-        _hasReceivedStartEvent.add(selectable);
-        _hasReceivedEndEvent.add(selectable);
-        ensureChildUpdated(selectable);
-    }
-    return super.dispatchSelectionEventToChild(selectable, event);
-  }
-
-  @override
-  void ensureChildUpdated(Selectable selectable) {
-    if (_lastEndEdgeUpdateGlobalPosition != null && _hasReceivedEndEvent.add(selectable)) {
-      final SelectionEdgeUpdateEvent synthesizedEvent = SelectionEdgeUpdateEvent.forEnd(
-        globalPosition: _lastEndEdgeUpdateGlobalPosition!,
-      );
-      if (currentSelectionEndIndex == -1) {
-        handleSelectionEdgeUpdate(synthesizedEvent);
-      }
-      selectable.dispatchSelectionEvent(synthesizedEvent);
-    }
-    if (_lastStartEdgeUpdateGlobalPosition != null && _hasReceivedStartEvent.add(selectable)) {
-      final SelectionEdgeUpdateEvent synthesizedEvent = SelectionEdgeUpdateEvent.forStart(
-          globalPosition: _lastStartEdgeUpdateGlobalPosition!,
-      );
-      if (currentSelectionStartIndex == -1) {
-        handleSelectionEdgeUpdate(synthesizedEvent);
-      }
-      selectable.dispatchSelectionEvent(synthesizedEvent);
-    }
-  }
-
-  @override
-  void didChangeSelectables() {
-    if (_lastEndEdgeUpdateGlobalPosition != null) {
-      handleSelectionEdgeUpdate(
-        SelectionEdgeUpdateEvent.forEnd(
-          globalPosition: _lastEndEdgeUpdateGlobalPosition!,
-        ),
-      );
-    }
-    if (_lastStartEdgeUpdateGlobalPosition != null) {
-      handleSelectionEdgeUpdate(
-        SelectionEdgeUpdateEvent.forStart(
-          globalPosition: _lastStartEdgeUpdateGlobalPosition!,
-        ),
-      );
-    }
-    final Set<Selectable> selectableSet = selectables.toSet();
-    _hasReceivedEndEvent.removeWhere((Selectable selectable) => !selectableSet.contains(selectable));
-    _hasReceivedStartEvent.removeWhere((Selectable selectable) => !selectableSet.contains(selectable));
-    super.didChangeSelectables();
   }
 }
 

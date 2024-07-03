@@ -357,8 +357,9 @@ class _RenderSelectableAdapter extends RenderProxyBox with Selectable, Selection
   }
 }
 
+@immutable
 class _SelectableAdapterSelectedContentRange extends SelectedContentRange<Widget> {
-  _SelectableAdapterSelectedContentRange({
+  const _SelectableAdapterSelectedContentRange({
     int start = -1,
     int end = -1,
     required super.content,
