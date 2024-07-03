@@ -150,6 +150,38 @@ Future<void> testMain() async {
       await canvasScreenshot(rc, 'mask_filter_transformed_$browser',
           region: screenRect);
     });
+
+    test('multiple MaskFilter.blur in $browser', () async {
+      const double screenWidth = 300.0;
+      const double screenHeight = 300.0;
+      const ui.Rect screenRect =
+          ui.Rect.fromLTWH(0, 0, screenWidth, screenHeight);
+
+      ContextStateHandle.debugEmulateWebKitMaskFilter = isWebkit;
+      final RecordingCanvas rc = RecordingCanvas(screenRect);
+
+      final SurfacePaint paint = SurfacePaint()
+        ..maskFilter = const ui.MaskFilter.blur(ui.BlurStyle.normal, 5);
+      rc.save();
+      rc.drawCircle(const ui.Offset(150, 150), 100,
+          paint..color = const ui.Color(0xFFC8C800));
+      rc.restore();
+      rc.save();
+      rc.drawCircle(const ui.Offset(150, 150), 50,
+          paint..color = const ui.Color(0xFFC800C8));
+      rc.restore();
+      rc.save();
+      rc.drawCircle(
+          const ui.Offset(150, 150),
+          20,
+          paint
+            ..color = const ui.Color(0xFF00C8C8)
+            ..maskFilter = const ui.MaskFilter.blur(ui.BlurStyle.normal, 10));
+      rc.restore();
+
+      await canvasScreenshot(rc, 'multiple_mask_filter_$browser',
+          region: screenRect);
+    });
   }
 
   testMaskFilterBlur();
