@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:collection';
 import 'dart:math' as math;
 
 import 'package:flutter/scheduler.dart';
@@ -475,6 +476,24 @@ class CupertinoDatePicker extends StatefulWidget {
     };
   }
 
+  // Get the 3 biggest words from the given text.
+  // This is used t get the longest words from the date picker texts.
+  static void _updateLongestTexts(String newText, List<String> longestTexts) {
+    final SplayTreeSet<String> sortedTexts = SplayTreeSet<String>(
+      (String a, String b) => a.length != b.length ? b.length - a.length : a.compareTo(b),
+    );
+    sortedTexts.addAll(longestTexts);
+    sortedTexts.add(newText);
+
+    if (sortedTexts.length > 3) {
+      sortedTexts.remove(sortedTexts.last);
+    }
+
+    longestTexts
+      ..clear()
+      ..addAll(sortedTexts);
+  }
+
   // Estimate the minimum width that each column needs to layout its content.
   static double _getColumnWidth(
     _PickerColumnType columnType,
@@ -483,6 +502,7 @@ class CupertinoDatePicker extends StatefulWidget {
     bool showDayOfWeek, {
     bool standaloneMonth = false,
   }) {
+    final List<String> longestTexts = <String>[];
     String longestText = '';
 
     switch (columnType) {
@@ -534,26 +554,20 @@ class CupertinoDatePicker extends StatefulWidget {
           }
         }
       case _PickerColumnType.month:
-        final List<String> months = <String>[];
         for (int i = 1; i <= 12; i++) {
           final String month = standaloneMonth
               ? localizations.datePickerStandaloneMonth(i)
               : localizations.datePickerMonth(i);
-          months.add(month);
+          _updateLongestTexts(month, longestTexts);
         }
-
-        longestText = TextPainter.computeWidestWord(
-          text: TextSpan(
-            style: _themeTextStyle(context),
-            text: months.join(' '),
-          ),
-          textDirection: Directionality.of(context),
-        );
       case _PickerColumnType.year:
         longestText = localizations.datePickerYear(2018);
     }
 
-    assert(longestText != '', 'column type is not appropriate');
+    assert(longestText != '' || longestTexts.isNotEmpty, 'longestText or longestTexts should not be empty');
+    if (longestTexts.isNotEmpty) {
+      return _calculateLongestTextWidth(longestTexts, context);
+    }
 
     return TextPainter.computeMaxIntrinsicWidth(
       text: TextSpan(
@@ -562,6 +576,21 @@ class CupertinoDatePicker extends StatefulWidget {
       ),
       textDirection: Directionality.of(context),
     );
+  }
+
+  static double _calculateLongestTextWidth(List<String> longestTexts, BuildContext context) {
+    double longestWidth = 0;
+    for (final String text in longestTexts) {
+      final TextPainter textPainter = TextPainter(
+        text: TextSpan(
+          style: _themeTextStyle(context),
+          text: text,
+        ),
+        textDirection: Directionality.of(context),
+      )..layout();
+      longestWidth = math.max(longestWidth, textPainter.size.width);
+    }
+    return longestWidth;
   }
 }
 
