@@ -224,7 +224,7 @@ As a reviewer, you are the last line of defense.
 5. Is it testable? Is it tested? **All code must be tested.** Are there asserts? Encourage liberal use of assertions.
 6. Look for mistakes in indenting the code and other trivial formatting problems.
 7. Is new code licensed correctly?
-8. Is the documentation thorough and useful? Look for useless documentation, empty prose, and breadcrumbs. See the [documentation section](hStyle-guide-for-Flutter-repo.md#documentation-dartdocs-javadocs-etc) of our style guide for what that means.
+8. Is the documentation thorough and useful? Look for useless documentation, empty prose, and breadcrumbs. See the [documentation section](Style-guide-for-Flutter-repo.md#documentation-dartdocs-javadocs-etc) of our style guide for what that means.
 9. Check for good grammar in API docs and comments. Check that identifiers are named according to our conventions.
 
 Once you are satisfied with the contribution, and _only_ once you are satisfied,
