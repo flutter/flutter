@@ -11,7 +11,9 @@ run:
 # From the root of the engine repository
 $ ./testing/run_ios_tests.sh ios_debug_sim_unopt
 ```
-or 
+
+or:
+
 ```sh
 # From the root of the engine repository
 $ ./testing/run_ios_tests.sh ios_debug_sim_unopt_arm64
