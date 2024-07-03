@@ -18,8 +18,8 @@ void main() {
 
   testWidgets('Carousel Smoke Test', (WidgetTester tester) async {
     await tester.pumpWidget(
-        const example.CarouselExampleApp(),
-      );
+      const example.CarouselExampleApp(),
+    );
 
     expect(find.widgetWithText(example.HeroLayoutCard, 'Through the Pane'), findsOneWidget);
     final Finder firstCarousel = find.byType(CarouselView).first;
