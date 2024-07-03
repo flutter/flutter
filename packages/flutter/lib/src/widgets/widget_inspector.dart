@@ -1591,22 +1591,15 @@ mixin WidgetInspectorService {
   /// API surface of methods called from the Flutter IntelliJ Plugin.
   @protected
   bool setSelection(Object? object, [ String? groupName ]) {
-    if (object is Element || object is RenderObject) {
-      if (object is Element) {
-        if (object == selection.currentElement) {
-          return false;
-        }
+    switch (object) {
+      case Element() when object != selection.currentElement:
         selection.currentElement = object;
         _sendInspectEvent(selection.currentElement);
-      } else {
-        if (object == selection.current) {
-          return false;
-        }
-        selection.current = object! as RenderObject;
+        return true;
+      case RenderObject() when object != selection.current:
+        selection.current = object;
         _sendInspectEvent(selection.current);
-      }
-
-      return true;
+        return true;
     }
     return false;
   }
@@ -3926,7 +3919,7 @@ class _WidgetFactory {
 ///
 /// See also:
 ///
-/// * the documentation for [Track widget creation](https://docs.flutter.dev/development/tools/devtools/inspector#track-widget-creation).
+/// * the documentation for [Track widget creation](https://flutter.dev/to/track-widget-creation).
 // The below ignore is needed because the static type of the annotation is used
 // by the CFE kernel transformer that implements the instrumentation to
 // recognize the annotation.

@@ -1015,14 +1015,11 @@ void main() {
     await tester.pump(const Duration(milliseconds: 750));
 
     final Element actionTextBox = tester.element(find.text('ACTION'));
-    final Widget textWidget = actionTextBox.widget;
-    final DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(actionTextBox);
-    if (textWidget is Text) {
-      final TextStyle effectiveStyle = defaultTextStyle.style.merge(textWidget.style);
-      expect(effectiveStyle.color, Colors.lightBlue);
-    } else {
-      expect(false, true);
-    }
+    expect(actionTextBox.widget, isA<Text>());
+    final Text(:TextStyle? style) = actionTextBox.widget as Text;
+
+    final TextStyle defaultStyle = DefaultTextStyle.of(actionTextBox).style;
+    expect(defaultStyle.merge(style).color, Colors.lightBlue);
   });
 
   testWidgets('Material3 - Snackbar labels can be colored as MaterialColor', (WidgetTester tester) async {
