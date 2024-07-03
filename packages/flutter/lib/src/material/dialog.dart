@@ -86,6 +86,7 @@ class Dialog extends StatelessWidget {
   /// This sets the [Material.color] on this [Dialog]'s [Material].
   ///
   /// If `null`, [ColorScheme.surfaceContainerHigh] is used in Material 3.
+  /// Otherwise, defaults to [ThemeData.dialogBackgroundColor].
   /// {@endtemplate}
   final Color? backgroundColor;
 
@@ -239,7 +240,7 @@ class Dialog extends StatelessWidget {
         child: ConstrainedBox(
           constraints: const BoxConstraints(minWidth: 280.0),
           child: Material(
-            color: backgroundColor ?? dialogTheme.backgroundColor ?? Theme.of(context).dialogBackgroundColor,
+            color: backgroundColor ?? dialogTheme.backgroundColor ?? defaults.backgroundColor,
             elevation: elevation ?? dialogTheme.elevation ?? defaults.elevation!,
             shadowColor: shadowColor ?? dialogTheme.shadowColor ?? defaults.shadowColor,
             surfaceTintColor: surfaceTintColor ?? dialogTheme.surfaceTintColor ?? defaults.surfaceTintColor,
