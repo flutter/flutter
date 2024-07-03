@@ -1042,14 +1042,6 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
     setState(fn);
   }
 
-  RouteTransitionsBuilder get _buildTransitions {
-    if (widget.route.nextRouteTransition == null) {
-      return widget.route.buildTransitions;
-    } else {
-      return widget.route.nextRouteTransition!;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     // Only top most route can participate in focus traversal.
@@ -1086,7 +1078,7 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
                         child: ListenableBuilder(
                           listenable: _listenable, // immutable
                           builder: (BuildContext context, Widget? child) {
-                            return _buildTransitions(
+                            return widget.route.buildFlexTransitions(
                               context,
                               widget.route.animation!,
                               widget.route.secondaryAnimation!,
@@ -1431,7 +1423,21 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///
   /// TODO: clean this up if viable
   /// TODO: put in explaination how to never allow this behavior?
-  RouteTransitionsBuilder? get nextRouteTransition;
+  DelegatedTransitionBuilder? get nextRouteTransition => null;
+
+  /// docs
+  Widget buildFlexTransitions(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    if (nextRouteTransition != null) {
+      return nextRouteTransition!(context, animation, secondaryAnimation, child);
+    } else {
+      return buildTransitions(context, animation, secondaryAnimation, child);
+    }
+  }
 
   @override
   void install() {
@@ -2124,9 +2130,6 @@ abstract class PopupRoute<T> extends ModalRoute<T> {
   bool get maintainState => true;
 
   @override
-  RouteTransitionsBuilder? get nextRouteTransition =>  null;
-
-  @override
   bool get allowSnapshotting => false;
 }
 
@@ -2538,20 +2541,26 @@ mixin FlexibleTransitionRouteMixin<T> on ModalRoute<T> {
   DelegatedTransitionBuilder? receivedTransition;
 
   @override
-  RouteTransitionsBuilder? get nextRouteTransition {
+  DelegatedTransitionBuilder? get nextRouteTransition {
     if (receivedTransition != null) {
-      return (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
-        return receivedTransition!(context, child, animation);
-      };
+      return receivedTransition;
     } else {
       return null;
     }
   }
 
+  @override
+  bool didPop(T? result) {
+    final bool popResult = super.didPop(result);
+    if (popResult && receivedTransition != null) {
+      receivedTransition = null;
+    }
+    return popResult;
+  }
 
   @override
   void didChangeNext(Route<dynamic>? nextRoute) {
-    if (nextRoute is FlexibleTransitionRouteMixin<T> && canTransitionTo(nextRoute) && navigator != null) {
+    if (nextRoute is FlexibleTransitionRouteMixin<T> && canTransitionTo(nextRoute)) {
       receivedTransition = nextRoute.delegatedTransition;
     } else {
       receivedTransition = null;
@@ -2561,7 +2570,7 @@ mixin FlexibleTransitionRouteMixin<T> on ModalRoute<T> {
 
   @override
   void didPopNext(Route<dynamic> nextRoute) {
-    if (nextRoute is FlexibleTransitionRouteMixin<T> && canTransitionTo(nextRoute) && navigator != null) {
+    if (nextRoute is FlexibleTransitionRouteMixin<T> && canTransitionTo(nextRoute)) {
       receivedTransition = nextRoute.delegatedTransition;
     } else {
       receivedTransition = null;

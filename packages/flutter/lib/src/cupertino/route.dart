@@ -436,7 +436,7 @@ class CupertinoPageTransition extends StatefulWidget {
   final DelegatedTransitionBuilder? receivedTransitionBuilder;
 
   /// The delegated transition.
-  static Widget delegateTransition(BuildContext context, Widget? child, Animation<double> secondaryAnimation) {
+  static Widget delegateTransition(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget? child) {
     final Animation<Offset> delegatedPositionAnimation =
       CurvedAnimation(
         parent: secondaryAnimation,
@@ -534,24 +534,17 @@ class _CupertinoPageTransitionState extends State<CupertinoPageTransition> {
   Widget build(BuildContext context) {
     assert(debugCheckHasDirectionality(context));
     final TextDirection textDirection = Directionality.of(context);
-    return DelegatedTransition(
-      animation: widget.secondaryRouteAnimation,
-      builder: (BuildContext context, Widget? child) {
-        return SlideTransition(
-          position: _secondaryPositionAnimation,
-          textDirection: textDirection,
-          transformHitTests: false,
-          child: child,
-        );
-      },
-      receivedTransitionBuilder: widget.receivedTransitionBuilder,
-      child: SlideTransition(
-        position: _primaryPositionAnimation,
+      return SlideTransition(
+        position: _secondaryPositionAnimation,
         textDirection: textDirection,
-        child: DecoratedBoxTransition(
-          decoration: _primaryShadowAnimation,
-          child: widget.child,
-        ),
+        transformHitTests: false,
+        child: SlideTransition(
+          position: _primaryPositionAnimation,
+          textDirection: textDirection,
+          child: DecoratedBoxTransition(
+            decoration: _primaryShadowAnimation,
+            child: widget.child,
+          ),
       ),
     );
   }

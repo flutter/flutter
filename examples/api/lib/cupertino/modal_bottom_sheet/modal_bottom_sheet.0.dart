@@ -161,7 +161,7 @@ class MBSTransition extends StatelessWidget {
   final Widget child;
 
   /// The primary delegated transition. Will slide a non MBS page down.
-  static Widget delegateTransition(BuildContext context, Widget? child, Animation<double> secondaryAnimation) {
+  static Widget delegateTransition(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget? child) {
     const Offset begin = Offset.zero;
     const Offset end = Offset(0.0, 0.05);
     const Curve curve = Curves.ease;
@@ -175,7 +175,7 @@ class MBSTransition extends StatelessWidget {
   }
 
   /// The secondary delegated transition. Will slide a MBS page up.
-  static Widget secondaryDelegateTransition(BuildContext context, Widget? child, Animation<double> secondaryAnimation) {
+  static Widget secondaryDelegateTransition(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget? child) {
     const Offset begin = Offset.zero;
     const Offset end = Offset(0.0, -0.05);
     const Curve curve = Curves.ease;
@@ -193,17 +193,11 @@ class MBSTransition extends StatelessWidget {
     assert(debugCheckHasDirectionality(context));
     final TextDirection textDirection = Directionality.of(context);
     final bool topLevelMBS = Navigator.of(context).widget is! MBSNavigator;
-    return DelegatedTransition(
-      animation: secondaryRouteAnimation,
-      builder: (BuildContext context, Widget? child) {
-        return SlideTransition(
-          position: _secondaryPositionAnimation,
-          textDirection: textDirection,
-          transformHitTests: false,
-          child: child,
-        );
-      },
-      child: SlideTransition(
+    return SlideTransition(
+      position: _secondaryPositionAnimation,
+      textDirection: textDirection,
+      transformHitTests: false,
+      child:  SlideTransition(
         position: topLevelMBS ? _primaryPositionAnimation : _primaryPositionAnimationMBS,
         textDirection: textDirection,
         child: ClipRRect(

@@ -766,7 +766,7 @@ class ZoomPageTransitionsBuilder extends PageTransitionsBuilder {
   static const bool _kProfileForceDisableSnapshotting = bool.fromEnvironment('flutter.benchmarks.force_disable_snapshot');
 
   /// The delegated transition.
-  static Widget delegateTransition(BuildContext context, Widget? child, Animation<double> secondaryAnimation) {
+  static Widget delegateTransition(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget? child) {
     return DualTransitionBuilder(
       animation: ReverseAnimation(secondaryAnimation),
       forwardBuilder: (
