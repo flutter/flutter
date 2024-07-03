@@ -97,7 +97,7 @@ class _RenderSelectableAdapter extends RenderProxyBox with Selectable, Selection
   final ValueNotifier<SelectionGeometry> _geometry;
 
   Color get selectionColor => _selectionColor;
-  late Color _selectionColor;
+  Color _selectionColor;
   set selectionColor(Color value) {
     if (_selectionColor == value) {
       return;
@@ -107,7 +107,7 @@ class _RenderSelectableAdapter extends RenderProxyBox with Selectable, Selection
   }
 
   Widget get content => _content;
-  late Widget _content;
+  Widget _content;
   set content(Widget value) {
     if (_content == value) {
       return;
