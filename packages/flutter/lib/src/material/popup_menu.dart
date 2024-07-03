@@ -1196,6 +1196,7 @@ class PopupMenuButton<T> extends StatefulWidget {
     this.padding = const EdgeInsets.all(8.0),
     this.menuPadding,
     this.child,
+    this.borderRadius,
     this.splashRadius,
     this.icon,
     this.iconSize,
@@ -1291,6 +1292,9 @@ class PopupMenuButton<T> extends StatefulWidget {
   /// If provided, [child] is the widget used for this button
   /// and the button will utilize an [InkWell] for taps.
   final Widget? child;
+
+  /// If [child] is provided, this property is used for the child's [InkWell].
+  final BorderRadius? borderRadius;
 
   /// If provided, the [icon] is used for this button
   /// and the button will behave like an [IconButton].
@@ -1527,6 +1531,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
       return Tooltip(
         message: widget.tooltip ?? MaterialLocalizations.of(context).showMenuTooltip,
         child: InkWell(
+          borderRadius: widget.borderRadius,
           onTap: widget.enabled ? showButtonMenu : null,
           canRequestFocus: _canRequestFocus,
           radius: widget.splashRadius,
