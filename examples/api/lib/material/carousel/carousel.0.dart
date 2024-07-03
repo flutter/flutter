@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-/// Flutter code sample for [Carousel].
+/// Flutter code sample for [CarouselView].
 
 void main() => runApp(const CarouselExampleApp());
 
