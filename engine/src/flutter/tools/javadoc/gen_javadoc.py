@@ -60,7 +60,9 @@ def main():
   classpath = [
       args.android_source_root,
       android_jar_path,
-      os.path.join(args.src_dir, 'third_party', 'android_embedding_dependencies', 'lib', '*'),
+      os.path.join(
+          args.src_dir, 'flutter', 'third_party', 'android_embedding_dependencies', 'lib', '*'
+      ),
   ]
   if args.build_config_path:
     classpath.append(args.build_config_path)
