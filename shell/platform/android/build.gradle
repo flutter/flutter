@@ -46,7 +46,7 @@ android {
     }
 
     dependencies {
-        implementation fileTree(include: ["*.jar"], dir: "../../../../third_party/android_embedding_dependencies/lib/")
+        implementation fileTree(include: ["*.jar"], dir: "../../../../flutter/third_party/android_embedding_dependencies/lib/")
 
         // These dependencies should be kept in line with those in the ./test_runner/build.gradle
         implementation "androidx.test:core:1.4.0"
