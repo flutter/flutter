@@ -466,7 +466,7 @@ void main() {
     );
   });
 
-  testWidgets('Checkbox default colors, and size', (WidgetTester tester) async {
+  testWidgets('Checkbox default colors, and size in light mode', (WidgetTester tester) async {
     const Color enabledCheckColor = Color(0xffffffff);
     const Color disabledCheckColor = Color(0xffacacac);
     const Color inactiveFillColor = Color(0xffffffff);
@@ -478,12 +478,10 @@ void main() {
     Widget buildApp({bool value = true, bool enabled = true}) {
       return CupertinoApp(
         home: Center(
-          child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
-            return CupertinoCheckbox(
-              value: value,
-              onChanged: enabled ? (_) {} : null,
-            );
-          }),
+          child: CupertinoCheckbox(
+            value: value,
+            onChanged: enabled ? (_) {} : null,
+          ),
         ),
       );
     }
@@ -491,9 +489,9 @@ void main() {
     expect(
       find.byType(CupertinoCheckbox),
       paints
-      ..path(color: inactiveFillColor)
-      ..drrect(color: inactiveBorderColor),
-      reason: 'Inactive enabled checkbox should have default fill color',
+        ..path(color: inactiveFillColor)
+        ..drrect(color: inactiveBorderColor),
+      reason: 'Inactive enabled checkbox should have default colors',
     );
 
     await tester.pumpWidget(buildApp());
@@ -501,11 +499,11 @@ void main() {
     expect(
       find.byType(CupertinoCheckbox),
       paints
-      ..path(color: activeFillColor)
-      ..rrect(color: activeBorderColor)
-      ..path(color: enabledCheckColor)
-      ..path(color: enabledCheckColor),
-      reason: 'Active enabled checkbox should have default fill and border colors',
+        ..path(color: activeFillColor)
+        ..rrect(color: activeBorderColor)
+        ..path(color: enabledCheckColor)
+        ..path(color: enabledCheckColor),
+      reason: 'Active enabled checkbox should have default colors',
     );
 
     // Test disabled checkbox.
@@ -514,9 +512,9 @@ void main() {
     expect(
       find.byType(CupertinoCheckbox),
       paints
-      ..path(color: disabledFillColor)
-      ..drrect(color: inactiveBorderColor),
-      reason: 'Inactive disabled checkbox should have default fill color',
+        ..path(color: disabledFillColor)
+        ..drrect(color: inactiveBorderColor),
+      reason: 'Inactive disabled checkbox should have default colors',
     );
 
     await tester.pumpWidget(buildApp(enabled: false));
@@ -528,7 +526,72 @@ void main() {
         ..drrect(color: inactiveBorderColor)
         ..path(color: disabledCheckColor)
         ..path(color: disabledCheckColor),
-      reason: 'Active disabled checkbox should have default fill color',
+      reason: 'Active disabled checkbox should have default colors',
+    );
+  });
+
+  testWidgets('Checkbox default colors, and size in dark mode', (WidgetTester tester) async {
+    const Color enabledCheckColor = Color(0xffffffff);
+    const Color disabledCheckColor = Color(0xffacacac);
+    const Color inactiveFillColor = Color(0xff575757);
+    const Color activeFillColor = Color(0xff0a84ff);
+    const Color disabledFillColor = Color(0x80ffffff);
+    const Color activeBorderColor = Color(0x00000000);
+    const Color inactiveBorderColor = Color(0xff3a3a3c);
+
+    Widget buildApp({bool value = true, bool enabled = true}) {
+      return CupertinoApp(
+        theme: const CupertinoThemeData(brightness: Brightness.dark),
+        home: Center(
+          child: CupertinoCheckbox(
+            value: value,
+            onChanged: enabled ? (_) {} : null,
+          ),
+        ),
+      );
+    }
+    await tester.pumpWidget(buildApp(value: false));
+    expect(
+      find.byType(CupertinoCheckbox),
+      paints
+        ..path(color: inactiveFillColor)
+        ..drrect(color: inactiveBorderColor),
+      reason: 'Inactive enabled checkbox should have default colors',
+    );
+
+    await tester.pumpWidget(buildApp());
+    await tester.pump();
+    expect(
+      find.byType(CupertinoCheckbox),
+      paints
+        ..path(color: activeFillColor)
+        ..rrect(color: activeBorderColor)
+        ..path(color: enabledCheckColor)
+        ..path(color: enabledCheckColor),
+      reason: 'Active enabled checkbox should have default colors',
+    );
+
+    // Test disabled checkbox.
+    await tester.pumpWidget(buildApp(enabled: false, value: false));
+    await tester.pump();
+    expect(
+      find.byType(CupertinoCheckbox),
+      paints
+        ..path(color: disabledFillColor)
+        ..drrect(color: inactiveBorderColor),
+      reason: 'Inactive disabled checkbox should have default colors',
+    );
+
+    await tester.pumpWidget(buildApp(enabled: false));
+    await tester.pump();
+    expect(
+      find.byType(CupertinoCheckbox),
+      paints
+        ..path(color: disabledFillColor)
+        ..drrect(color: inactiveBorderColor)
+        ..path(color: disabledCheckColor)
+        ..path(color: disabledCheckColor),
+      reason: 'Active disabled checkbox should have default colors',
     );
   });
 
@@ -556,7 +619,7 @@ void main() {
       );
     }
     await tester.pumpWidget(buildApp(focusNode: node, autofocus: true));
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(node.hasPrimaryFocus, isTrue);
     expect(
       find.byType(CupertinoCheckbox),
@@ -565,11 +628,7 @@ void main() {
         ..rrect()
         ..path(color: defaultCheckColor)
         ..path(color: defaultCheckColor)
-        ..path(
-          color: defaultFocusColor,
-          strokeWidth: 3.5,
-          style: PaintingStyle.stroke
-          ), // Focused outline
+        ..path(color: defaultFocusColor, strokeWidth: 3.5, style: PaintingStyle.stroke),
       reason: 'Checkbox shows the correct focus color',
     );
 
@@ -578,7 +637,7 @@ void main() {
       focusNode: node,
       autofocus: true,
     ));
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(node.hasPrimaryFocus, isTrue);
     expect(
       find.byType(CupertinoCheckbox),
@@ -587,11 +646,7 @@ void main() {
         ..rrect()
         ..path(color: defaultCheckColor)
         ..path(color: defaultCheckColor)
-        ..path(
-          color: const Color(0xffaabbcc),
-          strokeWidth: 3.5,
-          style: PaintingStyle.stroke
-        ), // Focused outline
+        ..path(color: const Color(0xffaabbcc), strokeWidth: 3.5, style: PaintingStyle.stroke),
         reason: 'Checkbox can configure a focus color',
     );
   });
@@ -600,51 +655,37 @@ void main() {
     Widget buildApp({MouseCursor? mouseCursor, bool enabled = true, bool value = true}) {
       return CupertinoApp(
         home: Center(
-          child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
-            return CupertinoCheckbox(
-              value: value,
-              onChanged: enabled ? (_) {} : null,
-              mouseCursor: mouseCursor,
-            );
-          }),
+          child: CupertinoCheckbox(
+            value: value,
+            onChanged: enabled ? (_) {} : null,
+            mouseCursor: mouseCursor,
+          ),
         ),
       );
     }
     await tester.pumpWidget(buildApp(value: false));
-    final TestGesture gesture = await tester.createGesture(
-      kind: PointerDeviceKind.mouse,
-      pointer: 1
-    );
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    addTearDown(gesture.removePointer);
     await gesture.addPointer(location: tester.getCenter(find.byType(CupertinoCheckbox)));
     await tester.pump();
     await gesture.moveTo(tester.getCenter(find.byType(CupertinoCheckbox)));
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-        SystemMouseCursors.basic);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
 
     await tester.pumpWidget(buildApp());
-    expect(
-      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.basic,
-    );
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
 
     // Test disabled checkbox.
     await tester.pumpWidget(buildApp(enabled: false, value: false));
-    expect(
-      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.basic,
-    );
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
 
     // Test mouse cursor can be configured.
     await tester.pumpWidget(buildApp(mouseCursor: SystemMouseCursors.click));
-    expect(
-      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.click,
-    );
-    await gesture.removePointer(location: tester.getCenter(find.byType(CupertinoCheckbox)));
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
   });
 
   testWidgets('Mouse cursor resolves in disabled/hovered/focused states', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'Checkbox');
+    addTearDown(focusNode.dispose);
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
     await tester.pumpWidget(
@@ -659,28 +700,19 @@ void main() {
         ),
       ),
     );
-    final TestGesture gesture = await tester.createGesture(
-      kind: PointerDeviceKind.mouse,
-      pointer: 1
-    );
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
     addTearDown(gesture.removePointer);
     await gesture.addPointer(location: tester.getCenter(find.byType(CupertinoCheckbox)));
     await tester.pump();
 
     // Test hovered case.
     await gesture.moveTo(tester.getCenter(find.byType(CupertinoCheckbox)));
-    expect(
-      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.click
-    );
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
 
     // Test focused case.
     focusNode.requestFocus();
     await tester.pump();
-    expect(
-      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.basic
-    );
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
 
     // Test disabled case.
     await tester.pumpWidget(
@@ -694,13 +726,8 @@ void main() {
         ),
       ),
     );
-
     await tester.pump();
-    expect(
-      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.forbidden
-    );
-    focusNode.dispose();
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.forbidden);
   });
 
   testWidgets('Checkbox fill color resolves in disabled/hovered/focused states', (WidgetTester tester) async {
@@ -729,20 +756,19 @@ void main() {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
-          child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
-            return CupertinoCheckbox(
-              value: true,
-              onChanged: (_) {},
-              fillColor: WidgetStateProperty.resolveWith(getFillColor),
-              autofocus: true,
-              focusNode: focusNode,
-            );
-          }),
+          child: CupertinoCheckbox(
+            value: true,
+            onChanged: (_) {},
+            fillColor: WidgetStateProperty.resolveWith(getFillColor),
+            autofocus: true,
+            focusNode: focusNode,
+          ),
         ),
       ),
     );
-    await tester.pump();
 
+    // Test focused case.
+    await tester.pump();
     expect(focusNode.hasPrimaryFocus, isTrue);
     expect(
       find.byType(CupertinoCheckbox),
@@ -751,14 +777,12 @@ void main() {
       reason: 'Focused Checkbox should use $focusColor',
     );
 
-    // Start hovering.
-    final TestGesture gesture5 =
-      await tester.createGesture(kind: PointerDeviceKind.mouse);
+    // Test hovered case.
+    final TestGesture gesture5 = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture5.addPointer();
     addTearDown(gesture5.removePointer);
     await gesture5.moveTo(tester.getCenter(find.byType(CupertinoCheckbox)));
     await tester.pump();
-
     expect(
       find.byType(CupertinoCheckbox),
       paints
@@ -766,20 +790,18 @@ void main() {
       reason: 'Hovered Checkbox should use $hoverColor',
     );
 
+    // Test disabled case.
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
-          child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
-            return CupertinoCheckbox(
-              value: true,
-              onChanged: null,
-              fillColor: WidgetStateProperty.resolveWith(getFillColor)
-            );
-          }),
+          child: CupertinoCheckbox(
+            value: true,
+            onChanged: null,
+            fillColor: WidgetStateProperty.resolveWith(getFillColor)
+          ),
         ),
       ),
     );
-
     expect(
       find.byType(CupertinoCheckbox),
       paints
@@ -797,19 +819,16 @@ void main() {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
-          child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
-            return CupertinoCheckbox(
-              value: false,
-              onChanged: (_) {},
-            );
-          }),
+          child: CupertinoCheckbox(
+            value: false,
+            onChanged: (_) {},
+          ),
         ),
       ),
     );
 
-    final TestGesture gesture1 =
-      await tester.startGesture(tester.getCenter(find.byType(CupertinoCheckbox)));
-    await tester.pumpAndSettle();
+    final TestGesture gesture1 = await tester.startGesture(tester.getCenter(find.byType(CupertinoCheckbox)));
+    await tester.pump();
 
     expect(
       find.byType(CupertinoCheckbox),
@@ -823,19 +842,16 @@ void main() {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
-          child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
-            return CupertinoCheckbox(
-              value: true,
-              onChanged: (_) {},
-            );
-          }),
+          child: CupertinoCheckbox(
+            value: true,
+            onChanged: (_) {},
+          ),
         ),
       ),
     );
 
-    final TestGesture gesture2 =
-      await tester.startGesture(tester.getCenter(find.byType(CupertinoCheckbox)));
-    await tester.pumpAndSettle();
+    final TestGesture gesture2 = await tester.startGesture(tester.getCenter(find.byType(CupertinoCheckbox)));
+    await tester.pump();
 
     expect(
       find.byType(CupertinoCheckbox),
@@ -851,7 +867,7 @@ void main() {
     // Finish gestures to release resources.
     await gesture1.up();
     await gesture2.up();
-    await tester.pumpAndSettle();
+    await tester.pump();
   });
 }
 
