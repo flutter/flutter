@@ -144,31 +144,7 @@ class _AnimatedState extends State<AnimatedWidget> {
 }
 
 /// Convenience function for passing around a builder for a transiton's secondary animation.
-typedef DelegatedTransitionBuilder = Widget Function(BuildContext context, Widget? child, Animation<double> animation);
-
-/// Delegates to transition from navigator if available, or returns default.
-class DelegatedTransition extends AnimatedBuilder {
-
-  /// Creates a DelegatedTransiton
-  const DelegatedTransition({
-    super.key,
-    super.child,
-    required super.animation,
-    required super.builder,
-    this.receivedTransitionBuilder,
-  });
-
-  /// Delegated transition builder
-  final DelegatedTransitionBuilder? receivedTransitionBuilder;
-
-  @override
-  Widget build(BuildContext context) {
-    if (receivedTransitionBuilder == null) {
-      return builder(context, child);
-    }
-    return receivedTransitionBuilder!(context, child, animation as Animation<double>);
-  }
-}
+typedef DelegatedTransitionBuilder = Widget Function(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget? child);
 
 /// Animates the position of a widget relative to its normal position.
 ///
