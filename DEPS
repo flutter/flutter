@@ -781,7 +781,7 @@ deps = {
      'dep_type': 'cipd',
    },
 
-  'src/third_party/android_embedding_dependencies': {
+  'src/flutter/third_party/android_embedding_dependencies': {
      'packages': [
        {
         'package': 'flutter/android/embedding_bundle',
