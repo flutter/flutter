@@ -18,6 +18,13 @@ void testMain() {
       // Initialize CanvasKit...
       await bootstrapAndRunApp();
 
+      // CanvasKitInit should be defined...
+      expect(
+        js_util.hasProperty(domWindow, 'CanvasKitInit'),
+        isTrue,
+        reason: 'CanvasKitInit should be defined on Window',
+      );
+
       // window.exports and window.module should be undefined!
       expect(
         js_util.hasProperty(domWindow, 'exports'),
