@@ -248,7 +248,15 @@ final class SizedSpanRepresentation extends LabelRepresentationBehavior {
 
       // The origin of the coordinate system is the top-left corner of the
       // parent element.
-      ..transformOrigin = '0 0 0';
+      ..transformOrigin = '0 0 0'
+
+      // The node may be tappable without having a more concrete role set on it,
+      // such as "button". It will just have a tap handler. This could lead to
+      // sized span to be chosen as the label representation strategy. However,
+      // when pointer events land on the span the DOM `target` becomes the span
+      // rather than the tappable element, and that breaks the debouncing logic
+      // in `pointer_binding.dart`.
+      ..pointerEvents = 'none';
     semanticsObject.element.appendChild(_domText);
   }
 

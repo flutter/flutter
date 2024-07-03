@@ -285,4 +285,27 @@ Future<void> testMain() async {
 
     semantics().semanticsEnabled = false;
   });
+
+  test('The <span> ignores pointer events', () async {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    final SemanticsTester tester = SemanticsTester(owner());
+    tester.updateNode(
+      id: 0,
+      label: 'Ignore pointer events',
+      transform: Matrix4.identity().toFloat64(),
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+    );
+    tester.apply();
+
+    expectSemanticsTree(owner(), '''
+      <sem>
+        <span style="pointer-events: none">Ignore pointer events</span>
+      </sem>'''
+    );
+
+    semantics().semanticsEnabled = false;
+  });
 }
