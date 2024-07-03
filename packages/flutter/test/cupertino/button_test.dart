@@ -492,6 +492,8 @@ void main() {
 
   testWidgets('Button can be focused and has default colors', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'Button');
+    addTearDown(focusNode.dispose);
+
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     const Border defaultFocusBorder = Border.fromBorderSide(
       BorderSide(
@@ -540,6 +542,8 @@ void main() {
 
   testWidgets('Button configures focus color', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'Button');
+    addTearDown(focusNode.dispose);
+
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     const Color focusColor = CupertinoColors.systemGreen;
 
@@ -576,6 +580,8 @@ void main() {
 
   testWidgets('CupertinoButton.onFocusChange callback', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'CupertinoButton');
+    addTearDown(focusNode.dispose);
+
     bool focused = false;
     await tester.pumpWidget(
       CupertinoApp(
@@ -601,6 +607,34 @@ void main() {
     await tester.pump();
     expect(focused, isFalse);
     expect(focusNode.hasFocus, isFalse);
+  });
+
+  testWidgets('IconThemeData is not replaced by CupertinoButton', (WidgetTester tester) async {
+    const IconThemeData givenIconTheme = IconThemeData(size: 12.0);
+
+    IconThemeData? actualIconTheme;
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: IconTheme(
+            data: givenIconTheme,
+            child: CupertinoButton(
+              onPressed: () {},
+              child: Builder(
+                  builder: (BuildContext context) {
+                    actualIconTheme = IconTheme.of(context);
+
+                    return const Placeholder();
+                  }
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(actualIconTheme?.size, givenIconTheme.size);
   });
 }
 

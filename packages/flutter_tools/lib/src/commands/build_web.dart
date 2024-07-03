@@ -8,7 +8,6 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
-import '../project.dart';
 import '../runner/flutter_command.dart'
     show DevelopmentArtifact, FlutterCommandResult, FlutterOptions;
 import '../web/compile.dart';
@@ -184,7 +183,6 @@ class BuildWebCommand extends BuildSubCommand {
       )];
     }
 
-    final FlutterProject flutterProject = FlutterProject.current();
     final String target = stringArg('target')!;
     final BuildInfo buildInfo = await getBuildInfo();
     if (buildInfo.isDebug) {
@@ -197,7 +195,7 @@ class BuildWebCommand extends BuildSubCommand {
         '--base-href should start and end with /',
       );
     }
-    if (!flutterProject.web.existsSync()) {
+    if (!project.web.existsSync()) {
       throwToolExit('Missing index.html.');
     }
     if (!_fileSystem.currentDirectory
@@ -227,7 +225,7 @@ class BuildWebCommand extends BuildSubCommand {
       analytics: globals.analytics,
     );
     await webBuilder.buildWeb(
-      flutterProject,
+      project,
       target,
       buildInfo,
       ServiceWorkerStrategy.fromCliName(stringArg('pwa-strategy')),
