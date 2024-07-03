@@ -32,8 +32,8 @@ import 'framework.dart';
 /// (centered) "Settings" title appears. The fact that the header's opacity
 /// depends on the height of the title item - which is unknown until the list
 /// has been laid out - necessitates monitoring the title item's
-/// [SliverConstraints.scrollExtent] from a scroll [NotificationListener].
-/// See the source code for more details.
+/// [SliverGeometry.scrollExtent] and the header's [SliverConstraints.scrollOffset]
+/// from a scroll [NotificationListener]. See the source code for more details.
 ///
 /// ** See code in examples/api/lib/widgets/sliver/pinned_header_sliver.1.dart **
 /// {@end-tool}
