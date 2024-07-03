@@ -3923,7 +3923,7 @@ class _MenuDefaultsM3 extends MenuStyle {
   @override
   MaterialStateProperty<EdgeInsetsGeometry?>? get padding {
     return const MaterialStatePropertyAll<EdgeInsetsGeometry>(
-      EdgeInsetsDirectional.symmetric(vertical: _kMenuVerticalMinPadding),
+      EdgeInsetsDirectional.symmetric(vertical: kIsWeb ? 0 : _kMenuVerticalMinPadding),
     );
   }
 
