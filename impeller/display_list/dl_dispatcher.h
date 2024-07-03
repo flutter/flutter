@@ -124,9 +124,6 @@ class DlDispatcherBase : public flutter::DlOpReceiver {
   void clipRect(const SkRect& rect, ClipOp clip_op, bool is_aa) override;
 
   // |flutter::DlOpReceiver|
-  void clipOval(const SkRect& bounds, ClipOp clip_op, bool is_aa) override;
-
-  // |flutter::DlOpReceiver|
   void clipRRect(const SkRRect& rrect, ClipOp clip_op, bool is_aa) override;
 
   // |flutter::DlOpReceiver|
