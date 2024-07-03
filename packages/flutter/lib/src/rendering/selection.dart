@@ -107,7 +107,7 @@ abstract class SelectionHandler implements ValueListenable<SelectionGeometry> {
 
 /// This class stores the information of an active selection under
 /// a [Selectable] or [SelectionHandler].
-/// 
+///
 /// The [SelectedContentRange]s for a given [Selectable] or
 /// [SelectionHandler] can be retrieved by calling
 /// [SelectionHandler.getSelections].
