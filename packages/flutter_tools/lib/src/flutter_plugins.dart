@@ -966,9 +966,9 @@ void handleSymlinkException(FileSystemException e, {
 ///
 /// If [force] is true, the directory will be created only if missing.
 void _createPlatformPluginSymlinks(Directory symlinkDirectory, List<Object?>? platformPlugins, {bool force = false}) {
-  if (force && symlinkDirectory.existsSync()) {
+  if (force) {
     // Start fresh to avoid stale links.
-    symlinkDirectory.deleteSync(recursive: true);
+    ErrorHandlingFileSystem.deleteIfExists(symlinkDirectory, recursive: true);
   }
   symlinkDirectory.createSync(recursive: true);
   if (platformPlugins == null) {
