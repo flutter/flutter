@@ -233,6 +233,7 @@ void sendSemanticsUpdate() {
     childrenInHitTestOrder: childrenInHitTestOrder,
     additionalActions: additionalActions,
     headingLevel: 0,
+    linkUrl: '',
   );
   _semanticsUpdate(builder.build());
 }
