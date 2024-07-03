@@ -1380,23 +1380,33 @@ void main() {
     addTearDown(controller.dispose);
     await tester.pumpWidget(MaterialApp(
       home: Material(
-        child: PageView(
-          controller: controller,
-          children: <Widget>[
-            Builder(
-              builder: (BuildContext context) {
-                currentPage = controller.page == null ? 'null' : 'not empty';
-                return Center(child: Text(currentPage));
+        child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+          return Scaffold(
+            body: PageView(
+              controller: controller,
+              children: <Widget>[
+                Builder(
+                  builder: (BuildContext context) {
+                    currentPage = controller.page == null ? 'null' : 'not empty';
+                    return Center(child: Text(currentPage));
+                  },
+                ),
+              ],
+            ),
+            floatingActionButton: FloatingActionButton(
+              onPressed: () {
+                setState(() {});
               },
             ),
-          ],
-        ),
+          );
+        }),
       ),
     ));
     expect(find.text('null'), findsOneWidget);
     expect(find.text('not empty'), findsNothing);
     expect(currentPage, 'null');
 
+    await tester.tap(find.byType(FloatingActionButton));
     await tester.pump();
     currentPage = controller.page == null ? 'null' : 'not empty';
     expect(find.text('not empty'), findsOneWidget);
