@@ -41,7 +41,7 @@ they can have a high impact:
 If you need a reliable link, consider
 adding a tooling redirect to the Flutter documentation site,
 and using that in place of the intended destination.
-Tooling redirects are added a similar fashion to design-doc go links,
+Tooling redirects are added in a similar fashion to design-doc go links,
 and the website team will do their best to keep it functional.
 Once created, a tooling redirect is accessed through a link like
 starting with `/to/`, such as `flutter.dev/to/gesture-disambiguation`.
