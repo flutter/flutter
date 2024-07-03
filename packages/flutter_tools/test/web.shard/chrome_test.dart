@@ -820,6 +820,24 @@ void main() {
     await chrome.close();
     expect(commands, contains('Browser.close'));
   });
+
+  test('Chromium close handles a SocketException when connecting to Chrome', () async {
+    final BufferLogger logger = BufferLogger.test();
+    final FakeChromeConnectionWithTab chromeConnection = FakeChromeConnectionWithTab();
+    final ChromiumLauncher chromiumLauncher = ChromiumLauncher(
+      fileSystem: fileSystem,
+      platform: platform,
+      processManager: processManager,
+      operatingSystemUtils: operatingSystemUtils,
+      browserFinder: findChromeExecutable,
+      logger: logger,
+    );
+    final FakeProcess process = FakeProcess();
+    final Chromium chrome = Chromium(0, chromeConnection, chromiumLauncher: chromiumLauncher, process: process, logger: logger);
+    expect(await chromiumLauncher.connect(chrome, false), equals(chrome));
+    chromeConnection.throwSocketExceptions = true;
+    await chrome.close();
+  });
 }
 
 /// Fake chrome connection that fails to get tabs a few times.
@@ -863,14 +881,21 @@ class FakeChromeConnectionWithTab extends Fake implements ChromeConnection {
       : _tab = FakeChromeTab(onSendCommand);
 
   final FakeChromeTab _tab;
+  bool throwSocketExceptions = false;
 
   @override
   Future<ChromeTab?> getTab(bool Function(ChromeTab tab) accept, {Duration? retryFor}) async {
+    if (throwSocketExceptions) {
+      throw const io.SocketException('test');
+    }
     return _tab;
   }
 
   @override
   Future<List<ChromeTab>> getTabs({Duration? retryFor}) async {
+    if (throwSocketExceptions) {
+      throw const io.SocketException('test');
+    }
     return <ChromeTab>[_tab];
   }
 
