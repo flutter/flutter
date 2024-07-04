@@ -9,18 +9,22 @@
 namespace impeller {
 namespace skia_conversions {
 
-bool IsNearlySimpleRRect(const SkRRect& rr) {
-  auto [a, b] = rr.radii(SkRRect::kUpperLeft_Corner);
-  auto [c, d] = rr.radii(SkRRect::kLowerLeft_Corner);
-  auto [e, f] = rr.radii(SkRRect::kUpperRight_Corner);
-  auto [g, h] = rr.radii(SkRRect::kLowerRight_Corner);
+static inline bool SkScalarsNearlyEqual(SkScalar a,
+                                        SkScalar b,
+                                        SkScalar c,
+                                        SkScalar d) {
   return SkScalarNearlyEqual(a, b, kEhCloseEnough) &&
          SkScalarNearlyEqual(a, c, kEhCloseEnough) &&
-         SkScalarNearlyEqual(a, d, kEhCloseEnough) &&
-         SkScalarNearlyEqual(a, e, kEhCloseEnough) &&
-         SkScalarNearlyEqual(a, f, kEhCloseEnough) &&
-         SkScalarNearlyEqual(a, g, kEhCloseEnough) &&
-         SkScalarNearlyEqual(a, h, kEhCloseEnough);
+         SkScalarNearlyEqual(a, d, kEhCloseEnough);
+}
+
+bool IsNearlySimpleRRect(const SkRRect& rr) {
+  auto [xa, ya] = rr.radii(SkRRect::kUpperLeft_Corner);
+  auto [xb, yb] = rr.radii(SkRRect::kLowerLeft_Corner);
+  auto [xc, yc] = rr.radii(SkRRect::kUpperRight_Corner);
+  auto [xd, yd] = rr.radii(SkRRect::kLowerRight_Corner);
+  return SkScalarsNearlyEqual(xa, xb, xc, xd) &&
+         SkScalarsNearlyEqual(ya, yb, yc, yd);
 }
 
 Rect ToRect(const SkRect& rect) {
