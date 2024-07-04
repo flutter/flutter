@@ -13,6 +13,26 @@ import 'scroll_position.dart';
 import 'scrollable.dart';
 import 'ticker_provider.dart';
 
+/// Specifies how a partially visible [SliverFloatingHeader] animates
+/// into a view when a user scroll gesture ends.
+///
+/// During a user scroll gesture the header and the rest of the scrollable
+/// content move in sync. If the header is partially visible when the
+/// scroll gesture ends, [SliverFloatingHeader.snapMode] specifies if
+/// the header should [FloatingHeaderSnapMode.overlay] the scrollable's
+/// content as it expands untill it's completely visible, or if the
+/// content should scroll out of the way as the header expands.
+enum FloatingHeaderSnapMode {
+  /// At the end of a user scroll gesture, the [SliverFloatingHeader] will
+  /// expand over the scrollable's content
+  overlay,
+
+  /// At the end of a user scroll gesture, the [SliverFloatingHeader] will
+  /// expand and the scrollable's content will continue to scroll out
+  /// of the way.
+  scroll,
+}
+
 /// A sliver that shows its [child] when the user scrolls forward and hides it
 /// when the user scrolls backwards.
 ///
@@ -42,6 +62,7 @@ class SliverFloatingHeader extends StatefulWidget {
   const SliverFloatingHeader({
     super.key,
     this.animationStyle,
+    this.snapMode,
     required this.child
   });
 
@@ -50,6 +71,13 @@ class SliverFloatingHeader extends StatefulWidget {
   ///
   /// The reverse duration and curve apply to the animation that hides the header.
   final AnimationStyle? animationStyle;
+
+  /// Specifies how a partially visible [SliverFloatingHeader] animates
+  /// into a view when a user scroll gesture ends.
+  ///
+  /// The default is [FloatingHeaderSnapMode.scroll]. This parameter doesn't
+  /// modify an animation in progress, just subsequent animations.
+  final FloatingHeaderSnapMode? snapMode;
 
   /// The widget contained by this sliver.
   final Widget child;
@@ -66,6 +94,7 @@ class _SliverFloatingHeaderState extends State<SliverFloatingHeader> with Single
     return _SliverFloatingHeader(
       vsync: this,
       animationStyle: widget.animationStyle,
+      snapMode: widget.snapMode,
       child: _SnapTrigger(widget.child),
     );
   }
@@ -118,17 +147,20 @@ class _SliverFloatingHeader extends SingleChildRenderObjectWidget {
   const _SliverFloatingHeader({
     this.vsync,
     this.animationStyle,
+    this.snapMode,
     super.child,
   });
 
   final TickerProvider? vsync;
   final AnimationStyle? animationStyle;
+  final FloatingHeaderSnapMode? snapMode;
 
   @override
   _RenderSliverFloatingHeader createRenderObject(BuildContext context) {
     return _RenderSliverFloatingHeader(
       vsync: vsync,
       animationStyle: animationStyle,
+      snapMode: snapMode,
     );
   }
 
@@ -136,7 +168,8 @@ class _SliverFloatingHeader extends SingleChildRenderObjectWidget {
   void updateRenderObject(BuildContext context, _RenderSliverFloatingHeader renderObject) {
     renderObject
       ..vsync = vsync
-      ..animationStyle = animationStyle;
+      ..animationStyle = animationStyle
+      ..snapMode = snapMode;
   }
 }
 
@@ -144,6 +177,7 @@ class _RenderSliverFloatingHeader extends RenderSliverSingleBoxAdapter {
   _RenderSliverFloatingHeader({
     TickerProvider? vsync,
     this.animationStyle,
+    this.snapMode,
   }) : _vsync = vsync;
 
   late Animation<double> snapAnimation;
@@ -172,6 +206,8 @@ class _RenderSliverFloatingHeader extends RenderSliverSingleBoxAdapter {
   }
 
   AnimationStyle? animationStyle;
+
+  FloatingHeaderSnapMode? snapMode;
 
   // Called each time the position's isScrollingNotifier indicates that user scrolling has
   // stopped or started, i.e. if the sliver "is scrolling".
@@ -265,7 +301,10 @@ class _RenderSliverFloatingHeader extends RenderSliverSingleBoxAdapter {
 
     child?.layout(constraints.asBoxConstraints(), parentUsesSize: true);
     final double paintExtent = childExtent - effectiveScrollOffset;
-    final double layoutExtent = childExtent - constraints.scrollOffset;
+    final double layoutExtent = switch(snapMode ?? FloatingHeaderSnapMode.overlay) {
+      FloatingHeaderSnapMode.overlay => childExtent - constraints.scrollOffset,
+      FloatingHeaderSnapMode.scroll => paintExtent,
+    };
     geometry = SliverGeometry(
       paintOrigin: math.min(constraints.overlap, 0.0),
       scrollExtent: childExtent,

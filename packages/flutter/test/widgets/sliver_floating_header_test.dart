@@ -234,4 +234,86 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
     expect(getHeaderRect(), const Rect.fromLTRB(0, 0, 800, 200));
   });
+
+  testWidgets('SliverFloatingHeader snapMode parameter', (WidgetTester tester) async {
+    Widget buildFrame(FloatingHeaderSnapMode snapMode) {
+      return MaterialApp(
+        home: Scaffold(
+          body: CustomScrollView(
+            slivers: <Widget>[
+              SliverFloatingHeader(
+                snapMode: snapMode,
+                child: const SizedBox(height: 200, child: Text('header')),
+              ),
+              SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (BuildContext context, int index) {
+                    return SizedBox(height: 100, child: Text('item $index'));
+                  },
+                  childCount: 100,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    Rect getHeaderRect() => tester.getRect(find.text('header'));
+    double getItem0Top() => tester.getRect(find.text('item 0')).topLeft.dy;
+
+    Future<void> scroll(Offset offset) async {
+      return tester.timedDrag(find.byType(CustomScrollView), offset, const Duration(milliseconds: 500));
+    }
+
+    // FloatingHeaderSnapMode.overlay
+    {
+      await tester.pumpWidget(buildFrame(FloatingHeaderSnapMode.overlay));
+      await tester.pumpAndSettle();
+      expect(getHeaderRect(), const Rect.fromLTRB(0, 0, 800, 200));
+      expect(getItem0Top(), 200);
+
+      await scroll(const Offset(0, -200));
+      await tester.pumpAndSettle();
+      expect(find.text('header'), findsNothing);
+      final double item0StartY = getItem0Top();
+      expect(item0StartY, lessThan(0));
+
+      // Trigger the appearance of the floating header.
+      await scroll(const Offset(0, 25));
+      await tester.pumpAndSettle();
+
+      // Item0 has only moved as far as the scroll because
+      // the snapMode is overlay
+      expect(getItem0Top(), item0StartY + 25);
+
+      // Return the header and item0 to their initial layout
+      await scroll(const Offset(0, 200));
+      await tester.pumpAndSettle();
+      expect(getHeaderRect(), const Rect.fromLTRB(0, 0, 800, 200));
+      expect(getItem0Top(), 200);
+    }
+
+    // FloatingHeaderSnapMode.scroll
+    {
+      await tester.pumpWidget(buildFrame(FloatingHeaderSnapMode.scroll));
+      await tester.pumpAndSettle();
+      expect(getHeaderRect(), const Rect.fromLTRB(0, 0, 800, 200));
+      expect(getItem0Top(), 200);
+
+      await scroll(const Offset(0, -200));
+      await tester.pumpAndSettle();
+      expect(find.text('header'), findsNothing);
+      final double item0StartY = getItem0Top();
+      expect(item0StartY, lessThan(0));
+
+      // Trigger the appearance of the floating header.
+      await scroll(const Offset(0, 25));
+      await tester.pumpAndSettle();
+
+      // Item0 has only moved as far as the scroll (25) plus
+      // the heaight of the (header) because the snapMode is scroll.
+      expect(getItem0Top(), item0StartY + 200 + 25);
+    }
+  });
 }
