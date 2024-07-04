@@ -560,7 +560,13 @@ class CupertinoDatePicker extends StatefulWidget {
 
     assert(longestText != '' || longestTexts.isNotEmpty, 'longestText or longestTexts should not be empty');
     if (longestTexts.isNotEmpty) {
-      return _calculateLongestTextWidth(_getLongestTexts(longestTexts), context);
+      return TextPainter.computeWidestWordWidth(
+        text: TextSpan(
+          style: _themeTextStyle(context),
+          text: _getLongestTexts(longestTexts).join(' '),
+        ),
+        textDirection: Directionality.of(context),
+      );
     }
 
     return TextPainter.computeMaxIntrinsicWidth(
@@ -570,21 +576,6 @@ class CupertinoDatePicker extends StatefulWidget {
       ),
       textDirection: Directionality.of(context),
     );
-  }
-
-  static double _calculateLongestTextWidth(List<String> longestTexts, BuildContext context) {
-    double longestWidth = 0;
-    for (final String text in longestTexts) {
-      final TextPainter textPainter = TextPainter(
-        text: TextSpan(
-          style: _themeTextStyle(context),
-          text: text,
-        ),
-        textDirection: Directionality.of(context),
-      )..layout();
-      longestWidth = math.max(longestWidth, textPainter.size.width);
-    }
-    return longestWidth;
   }
 }
 

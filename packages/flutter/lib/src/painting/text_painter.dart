@@ -30,6 +30,7 @@ import 'text_span.dart';
 import 'text_style.dart';
 
 export 'dart:ui' show LineMetrics;
+
 export 'package:flutter/services.dart' show TextRange, TextSelection;
 
 /// The default font size if none is specified.
@@ -689,6 +690,40 @@ class TextPainter {
     } finally {
       painter.dispose();
     }
+  }
+
+  /// Computes the widest word width of a configured [TextPainter].
+  ///
+  /// This method is useful for computing the width of the widest word in a
+  /// paragraph of text. It is a convenience method that creates a text painter
+  /// with the supplied parameters, lays it out, and returns the width of the
+  /// widest word in the text. This method is expensive and should be avoided
+  /// whenever it is possible to preserve the [TextPainter] to paint the text or
+  /// get other information about it.
+  static double computeWidestWordWidth({
+    required InlineSpan text,
+    required TextDirection textDirection,
+  }) {
+    final TextPainter painter = TextPainter(
+      text: text,
+      textDirection: textDirection,
+    )..layout();
+
+    final List<String> words = painter.plainText.split(RegExp(r'\s+'));
+    double maxWidth = 0;
+    for (final String word in words) {
+      final TextPainter wordPainter = TextPainter(
+        text: TextSpan(
+          text: word,
+          style: painter.text?.style,
+        ),
+        textDirection: textDirection,
+      )..layout();
+      maxWidth = max(maxWidth, wordPainter.width);
+    }
+
+    painter.dispose();
+    return maxWidth;
   }
 
   // Whether textWidthBasis has changed after the most recent `layout` call.
