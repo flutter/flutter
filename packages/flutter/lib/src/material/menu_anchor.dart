@@ -3386,7 +3386,6 @@ class _MenuPanelState extends State<_MenuPanel> {
     final EdgeInsetsGeometry resolvedPadding = padding
         .add(EdgeInsets.symmetric(horizontal: dx, vertical: dy))
         .clamp(EdgeInsets.zero, EdgeInsetsGeometry.infinity);
-
     BoxConstraints effectiveConstraints = visualDensity.effectiveConstraints(
       BoxConstraints(
         minWidth: minimumSize?.width ?? 0,
@@ -3529,12 +3528,6 @@ class _Submenu extends StatelessWidget {
     final VisualDensity visualDensity =
         effectiveValue((MenuStyle? style) => style?.visualDensity) ?? Theme.of(context).visualDensity;
     final AlignmentGeometry alignment = effectiveValue((MenuStyle? style) => style?.alignment)!;
-    final BuildContext anchorContext = anchor._anchorKey.currentContext!;
-    final RenderBox overlay = Overlay.of(anchorContext).context.findRenderObject()! as RenderBox;
-    final RenderBox anchorBox = anchorContext.findRenderObject()! as RenderBox;
-    final Offset upperLeft = anchorBox.localToGlobal(Offset.zero, ancestor: overlay);
-    final Offset bottomRight = anchorBox.localToGlobal(anchorBox.paintBounds.bottomRight, ancestor: overlay);
-    final Rect anchorRect = Rect.fromPoints(upperLeft, bottomRight);
     final EdgeInsetsGeometry padding =
         resolve<EdgeInsetsGeometry?>((MenuStyle? style) => style?.padding) ?? EdgeInsets.zero;
     final Offset densityAdjustment = visualDensity.baseSizeAdjustment;
@@ -3547,6 +3540,12 @@ class _Submenu extends StatelessWidget {
     final EdgeInsetsGeometry resolvedPadding = padding
         .add(EdgeInsets.fromLTRB(dx, dy, dx, dy))
         .clamp(EdgeInsets.zero, EdgeInsetsGeometry.infinity);
+    final BuildContext anchorContext = anchor._anchorKey.currentContext!;
+    final RenderBox overlay = Overlay.of(anchorContext).context.findRenderObject()! as RenderBox;
+    final RenderBox anchorBox = anchorContext.findRenderObject()! as RenderBox;
+    final Offset upperLeft = anchorBox.localToGlobal(Offset(dx, dy.abs()), ancestor: overlay);
+    final Offset bottomRight = anchorBox.localToGlobal(anchorBox.paintBounds.bottomRight, ancestor: overlay);
+    final Rect anchorRect = Rect.fromPoints(upperLeft, bottomRight);
 
     return Theme(
       data: Theme.of(context).copyWith(
@@ -3923,7 +3922,7 @@ class _MenuDefaultsM3 extends MenuStyle {
   @override
   MaterialStateProperty<EdgeInsetsGeometry?>? get padding {
     return const MaterialStatePropertyAll<EdgeInsetsGeometry>(
-      EdgeInsetsDirectional.symmetric(vertical: kIsWeb ? 0 : _kMenuVerticalMinPadding),
+      EdgeInsetsDirectional.symmetric(vertical: _kMenuVerticalMinPadding),
     );
   }
 
