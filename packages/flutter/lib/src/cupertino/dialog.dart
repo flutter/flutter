@@ -1151,14 +1151,16 @@ class _CupertinoActionSheetActionState extends State<CupertinoActionSheetAction>
   // value is the calculated font size, including the effect of context font
   // scale factor. Divide by context font scale factor before using in a `Text`.
   static double _fontSizeMapper(double contextBodySize) {
+    // Mapping at the small and large ends of text scale factors use simpler
+    // mapping rules.
     if (contextBodySize <= 17) {
       return 21;
     }
     if (contextBodySize >= 24.5) {
       return contextBodySize;
     }
-    // The break point is set at 24.5 instead of 28 because the irregular curve
-    // turns out to be easier to interpolate for a shorter range.
+    // Otherwise, use an interpolated curve. The break point is set to be closer
+    // (24.5 instead of 28) because a shorter range allows closer interpolation.
     final double resultSize = -18.8 + 3.68 * contextBodySize * (1 - 0.02128 * contextBodySize);
     return resultSize.roundToDouble();
   }
