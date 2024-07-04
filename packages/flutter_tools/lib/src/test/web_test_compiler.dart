@@ -174,7 +174,7 @@ class WebTestCompiler {
       platformDill: _fileSystem.file(platformDillPath).absolute.uri.toString(),
       dartDefines: dartDefines,
       librariesSpec: _artifacts.getHostArtifact(HostArtifact.flutterWebLibrariesJson).uri.toString(),
-      packagesPath: buildInfo.packagesPath,
+      packagesPath: buildInfo.packageConfigPath,
       artifacts: _artifacts,
       processManager: _processManager,
       logger: _logger,
