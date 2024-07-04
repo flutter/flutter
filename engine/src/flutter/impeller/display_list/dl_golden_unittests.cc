@@ -5,6 +5,7 @@
 #include "impeller/display_list/dl_golden_unittests.h"
 
 #include "flutter/display_list/dl_builder.h"
+#include "flutter/impeller/geometry/path_builder.h"
 #include "flutter/testing/testing.h"
 #include "gtest/gtest.h"
 
@@ -178,6 +179,68 @@ TEST_P(DlGoldenTest, GaussianVsRRectBlurScaledRotated) {
   DisplayListBuilder builder;
   std::vector<sk_sp<DlImage>> images;
   draw(&builder, images);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(DlGoldenTest, FastVsGeneralGaussianMaskBlur) {
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+  builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
+
+  auto blur_sigmas = std::array{5.0f, 10.0f, 20.0f};
+  auto blur_colors = std::array{
+      DlColor::kBlue(),
+      DlColor::kGreen(),
+      DlColor::kMaroon(),
+  };
+
+  auto make_rrect_path = [](const SkRect& rect, DlScalar rx,
+                            DlScalar ry) -> SkPath {
+    auto add_corner = [](SkPath& path, SkPoint rCorner, SkPoint rEnd) {
+      static const auto magic = impeller::PathBuilder::kArcApproximationMagic;
+      path.rCubicTo(rCorner.fX * (1.0f - magic), rCorner.fY * (1.0f - magic),
+                    rCorner.fX + rEnd.fX * magic, rCorner.fY + rEnd.fY * magic,
+                    rCorner.fX + rEnd.fX, rCorner.fY + rEnd.fY);
+    };
+
+    SkPath path;
+    path.moveTo(rect.fRight - rx, rect.fTop);
+    add_corner(path, {rx, 0.0f}, {0.0f, ry});
+    path.lineTo(rect.fRight, rect.fBottom - ry);
+    add_corner(path, {0.0f, ry}, {-rx, 0.0f});
+    path.lineTo(rect.fLeft + rx, rect.fBottom);
+    add_corner(path, {-rx, 0.0f}, {0.0f, -ry});
+    path.lineTo(rect.fLeft, rect.fTop + ry);
+    add_corner(path, {0.0f, -ry}, {rx, 0.0f});
+    path.close();
+    return path;
+  };
+
+  for (size_t i = 0; i < blur_sigmas.size(); i++) {
+    auto rect = SkRect::MakeXYWH(i * 320.0f + 50.0f, 50.0f, 100.0f, 100.0f);
+    DlPaint paint = DlPaint()  //
+                        .setColor(blur_colors[i])
+                        .setMaskFilter(DlBlurMaskFilter::Make(
+                            DlBlurStyle::kNormal, blur_sigmas[i]));
+
+    builder.DrawRRect(SkRRect::MakeRectXY(rect, 10.0f, 10.0f), paint);
+    rect = rect.makeOffset(150.0f, 0.0f);
+    builder.DrawPath(make_rrect_path(rect, 10.0f, 10.0f), paint);
+    rect = rect.makeOffset(-150.0f, 0.0f);
+
+    rect = rect.makeOffset(0.0f, 200.0f);
+    builder.DrawRRect(SkRRect::MakeRectXY(rect, 10.0f, 30.0f), paint);
+    rect = rect.makeOffset(150.0f, 0.0f);
+    builder.DrawPath(make_rrect_path(rect, 10.0f, 20.0f), paint);
+    rect = rect.makeOffset(-150.0f, 0.0f);
+
+    rect = rect.makeOffset(0.0f, 200.0f);
+    builder.DrawRRect(SkRRect::MakeRectXY(rect, 30.0f, 10.0f), paint);
+    rect = rect.makeOffset(150.0f, 0.0f);
+    builder.DrawPath(make_rrect_path(rect, 20.0f, 10.0f), paint);
+    rect = rect.makeOffset(-150.0f, 0.0f);
+  }
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
