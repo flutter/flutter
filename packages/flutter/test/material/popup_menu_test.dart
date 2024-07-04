@@ -4242,6 +4242,59 @@ void main() {
     ));
     expect(iconText.text.style?.color, Colors.red);
   });
+
+  testWidgets("Popup menu child's InkWell borderRadius",
+      (WidgetTester tester) async {
+    const double radius = 20;
+
+    Widget buildPopupMenu({required BorderRadius? borderRadius}) {
+      return MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: PopupMenuButton<String>(
+              borderRadius: borderRadius,
+              itemBuilder: (_) => <PopupMenuEntry<String>>[
+                const PopupMenuItem<String>(
+                  value: 'value',
+                  child: Text('Item 0'),
+                ),
+              ],
+              child: Ink(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(radius),
+                ),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Text('Pop up menu'),
+                    Icon(Icons.arrow_drop_down),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Popup menu with default null borderRadius.
+    await tester.pumpWidget(buildPopupMenu(borderRadius: null));
+
+    await tester.pumpAndSettle();
+
+    InkWell inkWell = tester.widget<InkWell>(find.byType(InkWell).last);
+    expect(inkWell.borderRadius, null);
+
+    // Popup menu with fixed borderRadius.
+    await tester.pumpWidget(
+        buildPopupMenu(borderRadius: BorderRadius.circular(radius)));
+
+    await tester.pumpAndSettle();
+
+    inkWell = tester.widget<InkWell>(find.byType(InkWell).last);
+    expect(inkWell.borderRadius, BorderRadius.circular(radius));
+  });
 }
 
 Matcher overlaps(Rect other) => OverlapsMatcher(other);
