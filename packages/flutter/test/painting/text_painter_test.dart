@@ -1731,18 +1731,18 @@ void main() {
     );
   });
 
-  test('TextPainter computeWidestWordWidth', () async {
+  test('TextPainter computeWidestWordWidth with different widths for each character', () async {
     await _loadFont();
-    // The word 'Fevereiro' is longer than 'Novembro' but in the font 'Roboto'
-    // 'Novembro' is wider than 'Fevereiro'.
+    // The word 'IIIIII' is longer than 'WWW' but in the font 'Roboto'
+    // 'WWW' is wider than 'IIIIII'.
     // This can occur when the font has a different width for each character
     // of the word and/or depending on the language.
     final List<String> words = <String>[
-      'Fevereiro',
-      'Novembro',
+      'IIIIII',
+      'WWW',
     ];
 
-    const TextStyle normalStyle = TextStyle(fontSize: 14.0, fontFamily: 'Roboto');
+    const TextStyle normalStyle = TextStyle(fontFamily: 'Roboto');
 
     final TextPainter normalPainter = TextPainter(
       text: TextSpan(text: words[0], style: normalStyle),
