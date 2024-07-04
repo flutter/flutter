@@ -75,7 +75,7 @@ class SliverFloatingHeader extends StatefulWidget {
   /// Specifies how a partially visible [SliverFloatingHeader] animates
   /// into a view when a user scroll gesture ends.
   ///
-  /// The default is [FloatingHeaderSnapMode.scroll]. This parameter doesn't
+  /// The default is [FloatingHeaderSnapMode.overlay]. This parameter doesn't
   /// modify an animation in progress, just subsequent animations.
   final FloatingHeaderSnapMode? snapMode;
 

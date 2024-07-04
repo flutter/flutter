@@ -260,7 +260,7 @@ void main() {
     }
 
     Rect getHeaderRect() => tester.getRect(find.text('header'));
-    double getItem0Top() => tester.getRect(find.text('item 0')).topLeft.dy;
+    double getItem0Y() => tester.getRect(find.text('item 0')).topLeft.dy;
 
     Future<void> scroll(Offset offset) async {
       return tester.timedDrag(find.byType(CustomScrollView), offset, const Duration(milliseconds: 500));
@@ -271,12 +271,12 @@ void main() {
       await tester.pumpWidget(buildFrame(FloatingHeaderSnapMode.overlay));
       await tester.pumpAndSettle();
       expect(getHeaderRect(), const Rect.fromLTRB(0, 0, 800, 200));
-      expect(getItem0Top(), 200);
+      expect(getItem0Y(), 200);
 
       await scroll(const Offset(0, -200));
       await tester.pumpAndSettle();
       expect(find.text('header'), findsNothing);
-      final double item0StartY = getItem0Top();
+      final double item0StartY = getItem0Y();
       expect(item0StartY, lessThan(0));
 
       // Trigger the appearance of the floating header.
@@ -284,14 +284,14 @@ void main() {
       await tester.pumpAndSettle();
 
       // Item0 has only moved as far as the scroll because
-      // the snapMode is overlay
-      expect(getItem0Top(), item0StartY + 25);
+      // the snapMode is overlay.
+      expect(getItem0Y(), item0StartY + 25);
 
       // Return the header and item0 to their initial layout
       await scroll(const Offset(0, 200));
       await tester.pumpAndSettle();
       expect(getHeaderRect(), const Rect.fromLTRB(0, 0, 800, 200));
-      expect(getItem0Top(), 200);
+      expect(getItem0Y(), 200);
     }
 
     // FloatingHeaderSnapMode.scroll
@@ -299,21 +299,22 @@ void main() {
       await tester.pumpWidget(buildFrame(FloatingHeaderSnapMode.scroll));
       await tester.pumpAndSettle();
       expect(getHeaderRect(), const Rect.fromLTRB(0, 0, 800, 200));
-      expect(getItem0Top(), 200);
+      expect(getItem0Y(), 200);
 
       await scroll(const Offset(0, -200));
       await tester.pumpAndSettle();
       expect(find.text('header'), findsNothing);
-      final double item0StartY = getItem0Top();
+      final double item0StartY = getItem0Y();
       expect(item0StartY, lessThan(0));
 
       // Trigger the appearance of the floating header.
       await scroll(const Offset(0, 25));
       await tester.pumpAndSettle();
 
-      // Item0 has only moved as far as the scroll (25) plus
-      // the heaight of the (header) because the snapMode is scroll.
-      expect(getItem0Top(), item0StartY + 200 + 25);
+      // Item0 has moved as far as the scroll (25) plus the heaight of
+      // the header (200) because the snapMode is scroll and the
+      // entire header had to snap in.
+      expect(getItem0Y(), item0StartY + 200 + 25);
     }
   });
 }
