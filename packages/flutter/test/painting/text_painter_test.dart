@@ -1761,7 +1761,7 @@ void main() {
 
     normalPainter.dispose();
     widePainter.dispose();
-  });
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/39998
 }
 
 class MockCanvas extends Fake implements Canvas {
