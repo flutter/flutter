@@ -119,7 +119,7 @@ void main() {
       final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('Button 1')));
       await tester.pumpAndSettle();
       await expectLater(
-        find.byType(CupertinoApp),
+        find.byType(CupertinoActionSheet),
         matchesGoldenFile('cupertinoActionSheet.textScaling.$name.png'),
       );
 
