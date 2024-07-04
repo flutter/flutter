@@ -117,9 +117,10 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceVulkanImpeller::AcquireFrame(
                   impeller_dispatcher,
                   SkIRect::MakeWH(cull_rect.width, cull_rect.height));
               auto picture = impeller_dispatcher.EndRecordingAsPicture();
-
+              const bool reset_host_buffer =
+                  surface_frame.submit_info().frame_boundary;
               return aiks_context->Render(picture, render_target,
-                                          /*reset_host_buffer=*/true);
+                                          reset_host_buffer);
 #endif
             }));
       });
