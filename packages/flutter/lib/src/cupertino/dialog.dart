@@ -53,7 +53,7 @@ const TextStyle _kCupertinoDialogActionStyle = TextStyle(
 
 // CupertinoActionSheet-specific text styles.
 const TextStyle _kActionSheetActionStyle = TextStyle(
-  // The fontSize, and fontWeight will be adjusted when the text is rendered.
+  // The fontSize and fontWeight may be adjusted when the text is rendered.
   fontFamily: 'CupertinoSystemDisplay',
   inherit: false,
   fontSize: 17.0,
@@ -94,8 +94,8 @@ const double _kActionSheetContentVerticalPadding = 13.5;
 const double _kActionSheetActionsSectionMinHeight = 84.0;
 const double _kActionSheetButtonHorizontalPadding = 10.0;
 
-// According experiment on simulator, the height of action sheet buttons is
-// proportional to the font size with a minimal height.
+// According to experimenting on the simulator, the height of action sheet
+// buttons is proportional to the font size down to a minimal height.
 const double _kActionSheetButtonMinHeight = 57.17;
 const double _kActionSheetButtonVerticalPaddingFactor = 0.4;
 const double _kActionSheetButtonVerticalPaddingBase = 1.8;
@@ -1140,13 +1140,12 @@ class _CupertinoActionSheetActionState extends State<CupertinoActionSheetAction>
   // Calculates the font size for action sheet buttons, which deviate from
   // standard HIG specifications.
   //
-  // There is a non-linear relationship between the body font size in other
-  // places and the font size for the action sheet buttons:
+  // There is a non-linear relationship between the font size for regular body
+  // text and the font size for the action sheet buttons:
   //
   //  Text scale  | xs |  s |  m |  l | xl | xxl | xxxl | ax1 | ax2 | ax3 | ax4 | ax5
   //  Body font   | 14 | 15 | 16 | 17 | 19 |  21 |  23  |  28 |  33 |  40 |  47 |  53
   //  Button font | 21 | 21 | 21 | 21 | 23 |  24 |  24  |  28 |  33 |  40 |  47 |  53
-  //                                                             15                23
   //
   // The `contextBodySize` is the body font size provided by context. The return
   // value is the calculated font size, including the effect of context font
