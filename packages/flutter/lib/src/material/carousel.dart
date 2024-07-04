@@ -323,6 +323,8 @@ class _CarouselViewState extends State<CarouselView> {
   @override
   void initState() {
     super.initState();
+    _consumeMaxWeight = widget.consumeMaxWeight;
+    _itemExtent = widget.itemExtent;
     _weights = widget.flexWeights;
     if (widget.controller == null) {
       _internalController = CarouselController();
@@ -330,11 +332,16 @@ class _CarouselViewState extends State<CarouselView> {
     _controller._attach(this);
   }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _consumeMaxWeight = widget.consumeMaxWeight;
-    _itemExtent = widget.itemExtent;
+  void updateController() {
+    if (widget.controller != null) {
+      _internalController?._detach(this);
+      _internalController = null;
+      widget.controller?._attach(this);
+    } else { // widget.controller == null && oldWidget.controller != null
+      assert(_internalController == null);
+      _internalController = CarouselController();
+      _controller._attach(this);
+    }
   }
 
   @override
@@ -354,9 +361,13 @@ class _CarouselViewState extends State<CarouselView> {
     }
     if (widget.flexWeights != oldWidget.flexWeights) {
       _weights = widget.flexWeights;
+      updateController();
+      // (_controller.position as _CarouselPosition)._cachedItem = _controller.initialItem.toDouble();
+      (_controller.position as _CarouselPosition).flexWeights = _weights;
     }
     if (widget.itemExtent != oldWidget.itemExtent) {
       _itemExtent = widget.itemExtent;
+      (_controller.position as _CarouselPosition).itemExtent = _itemExtent;
     }
     if (widget.consumeMaxWeight != oldWidget.consumeMaxWeight) {
       _consumeMaxWeight = widget.consumeMaxWeight;
@@ -1295,8 +1306,9 @@ class _CarouselPosition extends ScrollPositionWithSingleContext implements _Caro
     required super.physics,
     required super.context,
     this.initialItem = 0,
-    this.itemExtent,
-    this.flexWeights,
+    double? itemExtent,
+    List<int>? flexWeights,
+    this.consumeMaxWeight = true,
     super.oldPosition,
   }) : assert(flexWeights != null && itemExtent == null
        || flexWeights == null && itemExtent != null),
@@ -1305,18 +1317,66 @@ class _CarouselPosition extends ScrollPositionWithSingleContext implements _Caro
          initialPixels: null,
        );
 
-  final int initialItem;
+  int initialItem;
+  bool consumeMaxWeight;
   final double _itemToShowOnStartup;
   // When the viewport has a zero-size, the item can not
   // be retrieved by `getItemFromPixels`, so we need to cache the item
   // for use when resizing the viewport to non-zero next time.
   double? _cachedItem;
 
-  @override
-  double? itemExtent;
+  double updateLeadingItem(double initialItem, List<int>? flexWeights) {
+    if (flexWeights != null && !consumeMaxWeight) {
+      int smallerWeights = 0;
+      for (final int weight in flexWeights) {
+        if (weight == flexWeights.max) {
+          break;
+        }
+        smallerWeights += 1;
+      }
+      return initialItem - smallerWeights;
+    }
+    return initialItem;
+  }
 
   @override
-  List<int>? flexWeights;
+  double? get itemExtent => _itemExtent;
+  double? _itemExtent;
+  set itemExtent(double? value) {
+    if (_itemExtent == value) {
+      return;
+    }
+    _itemExtent = value;
+  }
+
+  @override
+  List<int>? get flexWeights => _flexWeights;
+  List<int>? _flexWeights;
+  set flexWeights(List<int>? value) {
+    if (flexWeights == value) {
+      return;
+    }
+    final List<int>? oldWeights = _flexWeights;
+    if (hasPixels && oldWeights != null) {
+      final double oldLeadingItem = getItemFromPixels(pixels, viewportDimension);
+      final double oldMaxItem = oldLeadingItem + oldWeights.indexOf(oldWeights.max);
+      final double leadingItem = updateLeadingItem(oldMaxItem, value);
+      final double newPixel = getPixelsFromItem(leadingItem, value);
+      forcePixels(newPixel);
+    }
+    _flexWeights = value;
+  }
+
+  double? get item {
+    assert(
+      !hasPixels || hasContentDimensions,
+      'The item value is only available after content dimensions are established.',
+    );
+    return !hasPixels || !hasContentDimensions
+      ? null
+      : _cachedItem ?? getItemFromPixels(clampDouble(pixels, minScrollExtent, maxScrollExtent), viewportDimension);
+  }
+
   double getItemFromPixels(double pixels, double viewportDimension) {
     assert(viewportDimension > 0.0);
     double fraction;
@@ -1326,6 +1386,8 @@ class _CarouselPosition extends ScrollPositionWithSingleContext implements _Caro
       assert(flexWeights != null);
       fraction = flexWeights!.first / flexWeights!.sum;
     }
+    print(flexWeights);
+    print('fraction: $fraction, pixels: $pixels, viewportDimension: $viewportDimension');
 
     final double actual = math.max(0.0, pixels) / (viewportDimension * fraction);
     final double round = actual.roundToDouble();
@@ -1335,7 +1397,7 @@ class _CarouselPosition extends ScrollPositionWithSingleContext implements _Caro
     return actual;
   }
 
-  double getPixelsFromItem(double item) {
+  double getPixelsFromItem(double item, List<int>? flexWeights) {
     double fraction;
     if (itemExtent != null) {
       fraction = itemExtent! / viewportDimension;
@@ -1357,14 +1419,14 @@ class _CarouselPosition extends ScrollPositionWithSingleContext implements _Caro
     final double? oldPixels = hasPixels ? pixels : null;
     double item;
     if (oldPixels == null) {
-      item = _itemToShowOnStartup;
+      item = updateLeadingItem(_itemToShowOnStartup, flexWeights);
     } else if (oldViewportDimensions == 0.0) {
       // If resize from zero, we should use the _cachedItem to recover the state.
       item = _cachedItem!;
     } else {
       item = getItemFromPixels(oldPixels, oldViewportDimensions!);
     }
-    final double newPixels = getPixelsFromItem(item);
+    final double newPixels = getPixelsFromItem(item, flexWeights);
     // If the viewportDimension is zero, cache the item
     // in case the viewport is resized to be non-zero.
     _cachedItem = (viewportDimension == 0.0) ? item : null;
@@ -1429,27 +1491,13 @@ class CarouselController extends ScrollController {
   @override
   ScrollPosition createScrollPosition(ScrollPhysics physics, ScrollContext context, ScrollPosition? oldPosition) {
     assert(_carouselState != null);
-    final List<int>? weights = _carouselState!._weights;
-    final double? itemExtent = _carouselState!._itemExtent;
-    int expandedItem = initialItem;
-
-    if (weights != null && !_carouselState!._consumeMaxWeight) {
-      int smallerWeights = 0;
-      for (final int weight in weights) {
-        if (weight == weights.max) {
-          break;
-        }
-        smallerWeights += 1;
-      }
-      expandedItem -= smallerWeights;
-    }
-
     return _CarouselPosition(
       physics: physics,
       context: context,
-      initialItem: expandedItem,
-      itemExtent: itemExtent,
-      flexWeights: weights,
+      initialItem: initialItem,
+      itemExtent: _carouselState!._itemExtent,
+      consumeMaxWeight: _carouselState!._consumeMaxWeight,
+      flexWeights: _carouselState!._weights,
       oldPosition: oldPosition,
     );
   }
