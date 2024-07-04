@@ -86,6 +86,8 @@ void main() {
   });
 
   for (final (String name, double textScaleFactor) in const <TextScaleInfo>[
+    // The font size scale factor reported by the iOS embedding is the current
+    // body font size over body font size in "large" font scale setting.
     ('xs',   14.0/17),
     ('xxxl', 23.0/17),
     ('ax1',  28.0/17),
