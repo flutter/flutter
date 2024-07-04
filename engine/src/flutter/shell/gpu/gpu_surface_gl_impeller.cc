@@ -127,14 +127,16 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceGLImpeller::AcquireFrame(
             impeller_dispatcher,
             SkIRect::MakeWH(cull_rect.width, cull_rect.height));
         auto picture = impeller_dispatcher.EndRecordingAsPicture();
+        const bool reset_host_buffer =
+            surface_frame.submit_info().frame_boundary;
 
         return renderer->Render(
             std::move(surface),
             fml::MakeCopyable(
-                [aiks_context, picture = std::move(picture)](
+                [aiks_context, picture = std::move(picture), reset_host_buffer](
                     impeller::RenderTarget& render_target) -> bool {
                   return aiks_context->Render(picture, render_target,
-                                              /*reset_host_buffer=*/true);
+                                              reset_host_buffer);
                 }));
       });
 
