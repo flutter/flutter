@@ -4284,7 +4284,7 @@ void main() {
     await tester.pumpAndSettle();
 
     InkWell inkWell = tester.widget<InkWell>(find.byType(InkWell).last);
-    expect(inkWell.borderRadius, null);
+    expect(inkWell.borderRadius, isNull);
 
     // Popup menu with fixed borderRadius.
     await tester.pumpWidget(
