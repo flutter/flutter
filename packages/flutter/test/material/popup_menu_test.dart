@@ -4244,8 +4244,7 @@ void main() {
   });
 
   testWidgets("Popup menu child's InkWell borderRadius", (WidgetTester tester) async {
-      (WidgetTester tester) async {
-    const double radius = 20;
+    final BorderRadius borderRadius = BorderRadius.circular(20);
 
     Widget buildPopupMenu({required BorderRadius? borderRadius}) {
       return MaterialApp(
@@ -4259,18 +4258,12 @@ void main() {
                   child: Text('Item 0'),
                 ),
               ],
-              child: Ink(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(radius),
-                ),
-                child: const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    Text('Pop up menu'),
-                    Icon(Icons.arrow_drop_down),
-                  ],
-                ),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Text('Pop up menu'),
+                  Icon(Icons.arrow_drop_down),
+                ],
               ),
             ),
           ),
@@ -4280,20 +4273,17 @@ void main() {
 
     // Popup menu with default null borderRadius.
     await tester.pumpWidget(buildPopupMenu(borderRadius: null));
-
     await tester.pumpAndSettle();
 
-    InkWell inkWell = tester.widget<InkWell>(find.byType(InkWell).last);
+    InkWell inkWell = tester.widget<InkWell>(find.byType(InkWell));
     expect(inkWell.borderRadius, isNull);
 
     // Popup menu with fixed borderRadius.
-    await tester.pumpWidget(
-        buildPopupMenu(borderRadius: BorderRadius.circular(radius)));
-
+    await tester.pumpWidget(buildPopupMenu(borderRadius: borderRadius));
     await tester.pumpAndSettle();
 
-    inkWell = tester.widget<InkWell>(find.byType(InkWell).last);
-    expect(inkWell.borderRadius, BorderRadius.circular(radius));
+    inkWell = tester.widget<InkWell>(find.byType(InkWell));
+    expect(inkWell.borderRadius, borderRadius);
   });
 }
 
