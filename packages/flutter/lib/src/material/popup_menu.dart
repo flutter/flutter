@@ -1293,7 +1293,9 @@ class PopupMenuButton<T> extends StatefulWidget {
   /// and the button will utilize an [InkWell] for taps.
   final Widget? child;
 
-  /// If [child] is provided, this property is used for the child's [InkWell].
+  /// The border radius for the [InkWell] that wraps the [child].
+  ///
+  /// Defaults to null, which indicates no border radius should be applied.
   final BorderRadius? borderRadius;
 
   /// If provided, the [icon] is used for this button
