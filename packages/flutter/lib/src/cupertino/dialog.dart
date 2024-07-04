@@ -1147,13 +1147,10 @@ class _CupertinoActionSheetActionState extends State<CupertinoActionSheetAction>
   //  Body font   | 14 | 15 | 16 | 17 | 19 |  21 |  23  |  28 |  33 |  40 |  47 |  53
   //  Button font | 21 | 21 | 21 | 21 | 23 |  24 |  24  |  28 |  33 |  40 |  47 |  53
   //
-  // The `contextBodySize` is the body font size provided by context. The return
-  // value is the calculated font size, including the effect of context font
+  // The `contextBodySize` is the body font size specified by context. The
+  // return value is the button font size, including the effect of context font
   // scale factor. Divide by context font scale factor before using in a `Text`.
-  static double _fontSizeMapper(double contextBodySize) {
-// Observed iOS text scaling behavior:
-
-
+  static double _buttonFontSize(double contextBodySize) {
     // For very small or very large text, simpler scaling mappings are used.
     if (contextBodySize <= 17) {
       return 21;
@@ -1161,9 +1158,9 @@ class _CupertinoActionSheetActionState extends State<CupertinoActionSheetAction>
     if (contextBodySize >= 24.5) {
       return contextBodySize;
     }
-    // For mid-sized text, a smoother, interpolated curve is used. The
-    // breakpoint for switching between these behaviors is 24.5 instead of 28 to
-    // allow closer interpolation over a smaller range.
+    // For mid-sized text, an interpolated curve is used. The breakpoint for
+    // switching between these behaviors is 24.5 instead of 28 to allow closer
+    // interpolation over a smaller range.
     final double resultSize = -18.8 + 3.68 * contextBodySize * (1 - 0.02128 * contextBodySize);
     return resultSize.roundToDouble();
   }
@@ -1175,7 +1172,7 @@ class _CupertinoActionSheetActionState extends State<CupertinoActionSheetAction>
     const double higLargeBodySize = 17.0;
     final double contextBodySize = MediaQuery.textScalerOf(context).scale(higLargeBodySize);
     final double contextScaleFactor = contextBodySize / higLargeBodySize;
-    final double fontSize = _fontSizeMapper(contextBodySize);
+    final double fontSize = _buttonFontSize(contextBodySize);
 
     TextStyle style = _kActionSheetActionStyle.copyWith(
       // `Text` will scale the provided font size inside, so its parameter is
