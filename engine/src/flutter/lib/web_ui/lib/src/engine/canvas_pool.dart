@@ -934,7 +934,6 @@ class ContextStateHandle {
   }
 
   ui.MaskFilter? _currentFilter;
-  String? _currentFilterCss;
   SurfacePaintData? _lastUsedPaint;
 
   /// Currently active shader bounds.
@@ -1004,20 +1003,19 @@ class ContextStateHandle {
     }
 
     final ui.MaskFilter? maskFilter = paint.maskFilter;
-    if (maskFilter != null) {
-      if (!_renderMaskFilterForWebkit) {
-        if (_currentFilter != maskFilter) {
-          _currentFilter = maskFilter;
-          _currentFilterCss = maskFilterToCanvasFilter(maskFilter);
-        }
-        context.filter = _currentFilterCss;
-      } else {
-        // WebKit does not support the `filter` property. Instead we apply a
-        // shadow to the shape of the same color as the paint and the same blur
-        // as the mask filter.
-        //
-        // Note that on WebKit the cached value of _currentFilter is not useful.
-        // Instead we destructure it into the shadow properties and cache those.
+    if (!_renderMaskFilterForWebkit) {
+      if (_currentFilter != maskFilter) {
+        _currentFilter = maskFilter;
+        context.filter = maskFilterToCanvasFilter(maskFilter);
+      }
+    } else {
+      // WebKit does not support the `filter` property. Instead we apply a
+      // shadow to the shape of the same color as the paint and the same blur
+      // as the mask filter.
+      //
+      // Note that on WebKit the cached value of _currentFilter is not useful.
+      // Instead we destructure it into the shadow properties and cache those.
+      if (maskFilter != null) {
         context.save();
         context.shadowBlur = convertSigmaToRadius(maskFilter.webOnlySigma);
         // Shadow color must be fully opaque.
