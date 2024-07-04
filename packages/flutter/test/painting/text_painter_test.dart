@@ -1752,10 +1752,10 @@ void main() {
       textDirection: TextDirection.ltr,
     )..layout();
 
-    final double widestWord = TextPainter.computeWidestWordWidth(text: TextSpan(text: words.join(' '), style: normalStyle), textDirection: TextDirection.ltr);
+    final double widestWordWidth = TextPainter.computeWidestWordWidth(text: TextSpan(text: words.join(' '), style: normalStyle), textDirection: TextDirection.ltr);
 
-    expect(widePainter.width, widestWord);
-    expect(widestWord, greaterThan(normalPainter.width));
+    expect(widePainter.width, widestWordWidth);
+    expect(normalPainter.width, lessThan(widestWordWidth));
 
     normalPainter.dispose();
     widePainter.dispose();
