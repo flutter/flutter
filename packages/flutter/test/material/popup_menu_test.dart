@@ -4243,7 +4243,7 @@ void main() {
     expect(iconText.text.style?.color, Colors.red);
   });
 
-  testWidgets("Popup menu child's InkWell borderRadius",
+  testWidgets("Popup menu child's InkWell borderRadius", (WidgetTester tester) async {
       (WidgetTester tester) async {
     const double radius = 20;
 
