@@ -6,7 +6,6 @@
 /// @docImport 'text_theme.dart';
 library;
 
-import 'dart:collection';
 import 'dart:math' as math;
 
 import 'package:flutter/scheduler.dart';
