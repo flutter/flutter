@@ -1735,6 +1735,8 @@ void main() {
     await _loadFont();
     // The word 'Fevereiro' is longer than 'Novembro' but in the font 'Roboto'
     // 'Novembro' is wider than 'Fevereiro'.
+    // This can occur when the font has a different width for each character
+    // of the word and/or depending on the language.
     final List<String> words = <String>[
       'Fevereiro',
       'Novembro',
