@@ -17,6 +17,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/semantics_tester.dart';
 
+typedef TextScaleInfo = (String name, double scale);
+
 void main() {
   testWidgets('Overall looks correctly under light theme', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -82,6 +84,48 @@ void main() {
 
     await gesture.up();
   });
+
+  for (final (String name, double textScaleFactor) in const <TextScaleInfo>[
+    ('xs',   14.0/17),
+    ('xxxl', 23.0/17),
+    ('ax1',  28.0/17),
+    ('ax5',  53.0/17),
+  ]) {
+    testWidgets('Looks correctly with text scaling: $name', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        OverrideMediaQuery(
+          transformer: (MediaQueryData data) {
+            return data.copyWith(
+              textScaler: TextScaler.linear(textScaleFactor),
+            );
+          },
+          child: createAppWithButtonThatLaunchesActionSheet(
+            CupertinoActionSheet(
+              actions: List<Widget>.generate(20, (int i) =>
+                CupertinoActionSheetAction(
+                  onPressed: () {},
+                  child: Text('Button $i'),
+                ),
+              ),
+              cancelButton: CupertinoActionSheetAction(child: const Text('Cancel'), onPressed: () {}),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Go'));
+      await tester.pumpAndSettle();
+
+      final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('Button 1')));
+      await tester.pumpAndSettle();
+      await expectLater(
+        find.byType(CupertinoApp),
+        matchesGoldenFile('cupertinoActionSheet.textScaling.$name.png'),
+      );
+
+      await gesture.up();
+    });
+  }
 
   testWidgets('Verify that a tap on modal barrier dismisses an action sheet', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -417,11 +461,11 @@ void main() {
     expect(tester.getCenter(find.widgetWithText(CupertinoActionSheetAction, 'Five')).dx, equals(400.0));
 
     // Check that the action buttons are the correct heights.
-    expect(tester.getSize(find.widgetWithText(CupertinoActionSheetAction, 'One')).height, equals(83.0));
-    expect(tester.getSize(find.widgetWithText(CupertinoActionSheetAction, 'Two')).height, equals(83.0));
-    expect(tester.getSize(find.widgetWithText(CupertinoActionSheetAction, 'Three')).height, equals(83.0));
-    expect(tester.getSize(find.widgetWithText(CupertinoActionSheetAction, 'Four')).height, equals(83.0));
-    expect(tester.getSize(find.widgetWithText(CupertinoActionSheetAction, 'Five')).height, equals(83.0));
+    expect(tester.getSize(find.widgetWithText(CupertinoActionSheetAction, 'One')).height, equals(95.4));
+    expect(tester.getSize(find.widgetWithText(CupertinoActionSheetAction, 'Two')).height, equals(95.4));
+    expect(tester.getSize(find.widgetWithText(CupertinoActionSheetAction, 'Three')).height, equals(95.4));
+    expect(tester.getSize(find.widgetWithText(CupertinoActionSheetAction, 'Four')).height, equals(95.4));
+    expect(tester.getSize(find.widgetWithText(CupertinoActionSheetAction, 'Five')).height, equals(95.4));
   });
 
   testWidgets('Content section is scrollable', (WidgetTester tester) async {
@@ -1085,7 +1129,7 @@ void main() {
     await tester.tap(find.text('Go'));
     await tester.pump();
 
-    expect(tester.getSize(find.byType(CupertinoActionSheet)).height, moreOrLessEquals(130.3));
+    expect(tester.getSize(find.byType(CupertinoActionSheet)).height, moreOrLessEquals(130.64));
   });
 
   testWidgets('1 action button with cancel button', (WidgetTester tester) async {
@@ -1112,7 +1156,7 @@ void main() {
     await tester.pump();
 
     // Action section is size of one action button.
-    expect(findScrollableActionsSectionRenderBox(tester).size.height, 57.0);
+    expect(findScrollableActionsSectionRenderBox(tester).size.height, 57.17);
   });
 
   testWidgets('2 action buttons with cancel button', (WidgetTester tester) async {
@@ -1236,7 +1280,7 @@ void main() {
     await tester.tap(find.text('Go'));
     await tester.pump();
 
-    expect(findScrollableActionsSectionRenderBox(tester).size.height, 57.0);
+    expect(findScrollableActionsSectionRenderBox(tester).size.height, 57.17);
   });
 
   testWidgets('2+ action buttons without cancel button', (WidgetTester tester) async {
@@ -1282,7 +1326,7 @@ void main() {
 
     // The action sheet consists of only a cancel button, so the height should
     // be cancel button height + padding.
-    const double expectedHeight = 57 // button height
+    const double expectedHeight = 57.17 // button height
       + 8 // bottom edge padding
       + 8; // top edge padding, since the screen has no top view padding
     expect(tester.getSize(find.byType(CupertinoActionSheet)).height, expectedHeight);
@@ -1354,12 +1398,9 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
 
-    expect(tester.getBottomLeft(find.widgetWithText(CupertinoActionSheetAction, 'Cancel')).dy, 592.0);
-    expect(
-      tester.getBottomLeft(find.widgetWithText(CupertinoActionSheetAction, 'One')).dy,
-      moreOrLessEquals(469.7),
-    );
-    expect(tester.getBottomLeft(find.widgetWithText(CupertinoActionSheetAction, 'Two')).dy, 527.0);
+    expect(tester.getBottomLeft(find.widgetWithText(CupertinoActionSheetAction, 'Cancel')).dy, moreOrLessEquals(592.0));
+    expect(tester.getBottomLeft(find.widgetWithText(CupertinoActionSheetAction, 'One')).dy, moreOrLessEquals(469.36));
+    expect(tester.getBottomLeft(find.widgetWithText(CupertinoActionSheetAction, 'Two')).dy, moreOrLessEquals(526.83));
   });
 
   // Verify that on a phone with the given `viewSize` and `viewPadding`, the the
@@ -1387,8 +1428,7 @@ void main() {
             padding: viewPadding,
           );
         },
-        child:
-        createAppWithButtonThatLaunchesActionSheet(
+        child: createAppWithButtonThatLaunchesActionSheet(
           CupertinoActionSheet(
             actions: List<Widget>.generate(20, (int i) =>
               CupertinoActionSheetAction(
