@@ -53,9 +53,8 @@ const TextStyle _kCupertinoDialogActionStyle = TextStyle(
 
 // CupertinoActionSheet-specific text styles.
 const TextStyle _kActionSheetActionStyle = TextStyle(
-  // The fontFamily, fontSize, and fontWeight will be adjusted when the text is
-  // rendered.
-  fontFamily: 'CupertinoSystemText',
+  // The fontSize, and fontWeight will be adjusted when the text is rendered.
+  fontFamily: 'CupertinoSystemDisplay',
   inherit: false,
   fontSize: 17.0,
   fontWeight: FontWeight.w400,
@@ -93,19 +92,13 @@ const double _kActionSheetCancelButtonPadding = 8.0;
 const double _kActionSheetContentHorizontalPadding = 16.0;
 const double _kActionSheetContentVerticalPadding = 13.5;
 const double _kActionSheetActionsSectionMinHeight = 84.0;
-
-// The height of action sheet buttons are determined in two ways:
-//
-//  * The button must be taller than a min height. This mostly affects smaller
-//    text scales.
-//  * The button must leave at least the specific padding to edges. According to
-//    eyeballing, the horizonal padding stays the same across text scales, while
-//    the vertical padding is proportional to text scale (which mostly affects
-//    larger text scales).
-const double _kActionSheetButtonMinHeight = 57.17;
-const double _kActionSheetButtonTopPaddingBase = 8.30;
-const double _kActionSheetButtonBottomPaddingBase = 6.80;
 const double _kActionSheetButtonHorizontalPadding = 10.0;
+
+// According experiment on simulator, the height of action sheet buttons is
+// proportional to the font size with a minimal height.
+const double _kActionSheetButtonMinHeight = 57.17;
+const double _kActionSheetButtonVerticalPaddingFactor = 0.4;
+const double _kActionSheetButtonVerticalPaddingBase = 1.8;
 
 // A translucent color that is painted on top of the blurred backdrop as the
 // dialog's background color
@@ -1145,38 +1138,45 @@ class _CupertinoActionSheetActionState extends State<CupertinoActionSheetAction>
   }
 
   // Calculates the font size for action sheet buttons, which deviate from
-  // standard HIG specifications. Action sheet buttons has a non-linear
-  // relationship between context text scaling and the actual rendered size.
+  // standard HIG specifications.
   //
-  //  Text scale    | xs |  l | xl | xxl | xxxl | ax1 | ax2 | ax3 | ax4 | ax5
-  //  Measured size | 20 | 20 | 22 |  22 |  24  |  28 |  33 |  40 |  46 |  51
-  //  HIG body size | 14 | 17 | 19 |  21 |  23  |  28 |  33 |  40 |  47 |  53
-  //  (for reference)
+  // There is a non-linear relationship between the body font size in other
+  // places and the font size for the action sheet buttons:
   //
-  // This function calculates font sizes using interpolation. The
-  // `contextScaleFactor` is the text scaling factor provided by context. The
-  // `defaultFontSize` is the base font size for the button. The return value
-  // is the calculated font size, including the effect of `contextScaleFactor`.
-  // Divide by `contextScaleFactor` before using in a `Text`.
-  static double _fontSizeMapper(double contextScaleFactor, double defaultFontSize) {
-    final double higfontSize = contextScaleFactor * defaultFontSize;
-    // The following curvie is cubic interpolated from the table above.
-    final double resultSize =
-      26 - 1.19 * higfontSize
-        * (1 - 0.0506 * higfontSize
-          * (1 - 0.00909 * higfontSize));
+  //  Text scale  | xs |  s |  m |  l | xl | xxl | xxxl | ax1 | ax2 | ax3 | ax4 | ax5
+  //  Body font   | 14 | 15 | 16 | 17 | 19 |  21 |  23  |  28 |  33 |  40 |  47 |  53
+  //  Button font | 21 | 21 | 21 | 21 | 23 |  24 |  24  |  28 |  33 |  40 |  47 |  53
+  //                                                             15                23
+  //
+  // The `contextBodySize` is the body font size provided by context. The return
+  // value is the calculated font size, including the effect of context font
+  // scale factor. Divide by context font scale factor before using in a `Text`.
+  static double _fontSizeMapper(double contextBodySize) {
+    if (contextBodySize <= 17) {
+      return 21;
+    }
+    if (contextBodySize >= 24.5) {
+      return contextBodySize;
+    }
+    // The break point is set at 24.5 instead of 28 because the irregular curve
+    // turns out to be easier to interpolate for a shorter range.
+    final double resultSize = -18.8 + 3.68 * contextBodySize * (1 - 0.02128 * contextBodySize);
     return resultSize.roundToDouble();
   }
 
   @override
   Widget build(BuildContext context) {
-    const double defaultFontSize = 17.0; // Body font size in HIG for "large"
-    final double effectiveTextScaleFactor = MediaQuery.textScalerOf(context).scale(defaultFontSize) / defaultFontSize;
-    final double targetFontSize = _fontSizeMapper(effectiveTextScaleFactor, _kActionSheetActionStyle.fontSize!);
+    // The context scale factor is derived from the current body size and the
+    // standard body size in "large".
+    const double higLargeBodySize = 17.0;
+    final double contextBodySize = MediaQuery.textScalerOf(context).scale(higLargeBodySize);
+    final double contextScaleFactor = contextBodySize / higLargeBodySize;
+    final double fontSize = _fontSizeMapper(contextBodySize);
 
     TextStyle style = _kActionSheetActionStyle.copyWith(
-      fontFamily: targetFontSize >= 20 ? 'CupertinoSystemDisplay' : 'CupertinoSystemText',
-      fontSize: targetFontSize / effectiveTextScaleFactor,
+      // `Text` will scale the provided font size inside, so its parameter is
+      // unscaled first.
+      fontSize: fontSize / contextScaleFactor,
       color: widget.isDestructiveAction
           ? CupertinoDynamicColor.resolve(CupertinoColors.systemRed, context)
           : CupertinoTheme.of(context).primaryColor,
@@ -1185,6 +1185,9 @@ class _CupertinoActionSheetActionState extends State<CupertinoActionSheetAction>
     if (widget.isDefaultAction) {
       style = style.copyWith(fontWeight: FontWeight.w600);
     }
+
+    final double verticalPadding = _kActionSheetButtonVerticalPaddingBase
+        + fontSize * _kActionSheetButtonVerticalPaddingFactor;
 
     return MouseRegion(
       cursor: kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
@@ -1201,9 +1204,9 @@ class _CupertinoActionSheetActionState extends State<CupertinoActionSheetAction>
             child: Padding(
               padding: EdgeInsets.fromLTRB(
                 _kActionSheetButtonHorizontalPadding,
-                effectiveTextScaleFactor * _kActionSheetButtonTopPaddingBase,
+                verticalPadding,
                 _kActionSheetButtonHorizontalPadding,
-                effectiveTextScaleFactor * _kActionSheetButtonBottomPaddingBase,
+                verticalPadding,
               ),
               child: DefaultTextStyle(
                 style: style,
