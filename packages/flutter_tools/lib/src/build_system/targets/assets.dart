@@ -61,7 +61,7 @@ Future<Depfile> copyAssets(
   ).createBundle();
   final int resultCode = await assetBundle.build(
     manifestPath: pubspecFile.path,
-    packagesPath: findPackageConfigFileOrDefault(environment.projectDir).path,
+    packageConfigPath: findPackageConfigFileOrDefault(environment.projectDir).path,
     deferredComponentsEnabled: environment.defines[kDeferredComponents] == 'true',
     targetPlatform: targetPlatform,
     flavor: flavor,

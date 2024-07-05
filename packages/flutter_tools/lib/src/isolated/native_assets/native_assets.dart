@@ -97,12 +97,14 @@ abstract class NativeAssetsBuildRunner {
 class NativeAssetsBuildRunnerImpl implements NativeAssetsBuildRunner {
   NativeAssetsBuildRunnerImpl(
     this.projectUri,
+    this.packageConfigPath,
     this.packageConfig,
     this.fileSystem,
     this.logger,
   );
 
   final Uri projectUri;
+  final String packageConfigPath;
   final PackageConfig packageConfig;
   final FileSystem fileSystem;
   final Logger logger;
@@ -402,11 +404,13 @@ class HotRunnerNativeAssetsBuilderImpl implements HotRunnerNativeAssetsBuilder {
     required Uri projectUri,
     required FileSystem fileSystem,
     required List<FlutterDevice> flutterDevices,
+    required String packageConfigPath,
     required PackageConfig packageConfig,
     required Logger logger,
   }) async {
     final NativeAssetsBuildRunner buildRunner = NativeAssetsBuildRunnerImpl(
       projectUri,
+      packageConfigPath,
       packageConfig,
       fileSystem,
       globals.logger,

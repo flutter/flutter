@@ -949,7 +949,7 @@ class FakeBundle extends AssetBundle {
   Future<int> build({
     String manifestPath = defaultManifestPath,
     String? assetDirPath,
-    String? packagesPath,
+    String? packageConfigPath,
     bool deferredComponentsEnabled = false,
     TargetPlatform? targetPlatform,
     String? flavor,

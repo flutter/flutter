@@ -334,6 +334,7 @@ class Environment {
   /// [engineVersion] should be set to null for local engine builds.
   factory Environment({
     required Directory projectDir,
+    required BuildInfo buildInfo,
     required Directory outputDir,
     required Directory cacheDir,
     required Directory flutterRootDir,
@@ -371,9 +372,11 @@ class Environment {
 
     final Directory rootBuildDir = buildDir ?? projectDir.childDirectory('build');
     final Directory buildDirectory = rootBuildDir.childDirectory(buildPrefix);
+    // final File packageConfigFile = findPackageConfigFileOrDefault(projectDir);
     return Environment._(
       outputDir: outputDir,
       projectDir: projectDir,
+      buildInfo: buildInfo,
       buildDir: buildDirectory,
       rootBuildDir: rootBuildDir,
       cacheDir: cacheDir,
@@ -398,6 +401,7 @@ class Environment {
   @visibleForTesting
   factory Environment.test(Directory testDirectory, {
     Directory? projectDir,
+    BuildInfo? buildInfo,
     Directory? outputDir,
     Directory? cacheDir,
     Directory? flutterRootDir,
@@ -416,6 +420,7 @@ class Environment {
   }) {
     return Environment(
       projectDir: projectDir ?? testDirectory,
+      buildInfo: buildInfo ?? BuildInfo.dummy,
       outputDir: outputDir ?? testDirectory,
       cacheDir: cacheDir ?? testDirectory,
       flutterRootDir: flutterRootDir ?? testDirectory,
@@ -437,6 +442,7 @@ class Environment {
   Environment._({
     required this.outputDir,
     required this.projectDir,
+    required this.buildInfo,
     required this.buildDir,
     required this.rootBuildDir,
     required this.cacheDir,
@@ -457,6 +463,10 @@ class Environment {
   /// The [Source] value which is substituted with the path to [projectDir].
   static const String kProjectDirectory = '{PROJECT_DIR}';
 
+  /// The [Source] value which is substituted with the path to the parent of
+  /// [buildInfo.packageConfigPath].
+  static const String kWorkspaceDirectory = '{WORKSPACE_DIR}';
+
   /// The [Source] value which is substituted with the path to [buildDir].
   static const String kBuildDirectory = '{BUILD_DIR}';
 
@@ -475,10 +485,15 @@ class Environment {
   /// can be located.
   final Directory projectDir;
 
+  /// The [BuildInfo] configuration of the current build.
+  ///
+  /// Among other things this contains the package configuration.
+  final BuildInfo buildInfo;
+
   /// The `BUILD_DIR` environment variable.
   ///
   /// The root of the output directory where build step intermediates and
-  /// outputs are written. Current usages of assemble configure ths to be
+  /// outputs are written. Current usages of assemble configure this to be
   /// a unique directory under `.dart_tool/flutter_build`, though it can
   /// be placed anywhere. The uniqueness is only enforced by callers, and
   /// is currently done by hashing the build configuration.

@@ -1066,15 +1066,19 @@ abstract class FlutterCommand extends Command<void> {
   BuildMode defaultBuildMode = BuildMode.debug;
 
   BuildMode getBuildMode() {
-    // No debug when _excludeDebug is true.
-    // If debug is not excluded, then take the command line flag.
-    final bool debugResult = !_excludeDebug && boolArg('debug');
-    final bool jitReleaseResult = !_excludeRelease && boolArg('jit-release');
-    final bool releaseResult = !_excludeRelease && boolArg('release');
+    // No debug when _excludeDebug is true. If debug is not excluded, then take
+    // the command line flag (if such exists for this command).
+    bool argIfDefined(String flagName, bool ifNotDefined) {
+      return argParser.options.containsKey(flagName) ? boolArg(flagName) : ifNotDefined;
+    }
+    final bool debugResult = !_excludeDebug && argIfDefined('debug', true);
+    final bool jitReleaseResult = !_excludeRelease && argIfDefined('jit-release', false);
+    final bool releaseResult = !_excludeRelease && argIfDefined('release', false);
+    final bool profileResult = argIfDefined('profile', false);
     final List<bool> modeFlags = <bool>[
       debugResult,
+      profileResult,
       jitReleaseResult,
-      boolArg('profile'),
       releaseResult,
     ];
     if (modeFlags.where((bool flag) => flag).length > 1) {
@@ -1084,7 +1088,7 @@ abstract class FlutterCommand extends Command<void> {
     if (debugResult) {
       return BuildMode.debug;
     }
-    if (boolArg('profile')) {
+    if (profileResult) {
       return BuildMode.profile;
     }
     if (releaseResult) {
@@ -1729,6 +1733,7 @@ Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and 
         usage: globals.flutterUsage,
         analytics: analytics,
         projectDir: project.directory,
+        buildInfo: await getBuildInfo(),
         generateDartPluginRegistry: true,
       );
 

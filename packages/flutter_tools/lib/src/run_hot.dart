@@ -376,6 +376,7 @@ class HotRunner extends ResidentRunner {
         fileSystem: fileSystem,
         flutterDevices: flutterDevices,
         logger: logger,
+        packageConfigPath: debuggingOptions.buildInfo.packageConfigPath,
         packageConfig: debuggingOptions.buildInfo.packageConfig,
       );
     }
@@ -491,7 +492,7 @@ class HotRunner extends ResidentRunner {
     if (rebuildBundle) {
       globals.printTrace('Updating assets');
       final int result = await assetBundle.build(
-        packagesPath: debuggingOptions.buildInfo.packageConfigPath,
+        packageConfigPath: debuggingOptions.buildInfo.packageConfigPath,
         flavor: debuggingOptions.buildInfo.flavor,
       );
       if (result != 0) {
@@ -1708,6 +1709,7 @@ abstract class HotRunnerNativeAssetsBuilder {
     required Uri projectUri,
     required FileSystem fileSystem,
     required List<FlutterDevice> flutterDevices,
+    required String packageConfigPath,
     required PackageConfig packageConfig,
     required Logger logger,
   });

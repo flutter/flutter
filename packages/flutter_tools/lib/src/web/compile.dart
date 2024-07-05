@@ -102,6 +102,7 @@ class WebBuilder {
               kServiceWorkerStrategy: serviceWorkerStrategy.cliName,
               ...buildInfo.toBuildSystemEnvironment(),
             },
+            buildInfo: buildInfo,
             artifacts: globals.artifacts!,
             fileSystem: _fileSystem,
             logger: _logger,
