@@ -347,7 +347,7 @@ class SemanticsTester {
 /// Verifies the HTML structure of the current semantics tree.
 void expectSemanticsTree(EngineSemanticsOwner owner, String semanticsHtml) {
   expect(
-    owner.semanticsHost.querySelector('flt-semantics'),
+    owner.semanticsHost.children.single,
     hasHtml(semanticsHtml),
   );
 }
