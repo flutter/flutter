@@ -46,8 +46,8 @@ const String _kIntegrationTestDirectory = 'integration_test';
 /// the `*_test.dart` suffix, and run them in a single invocation.
 ///
 /// See:
-/// - https://flutter.dev/docs/cookbook/testing/unit/introduction
-/// - https://flutter.dev/docs/cookbook/testing/widget/introduction
+/// - https://flutter.dev/to/unit-testing
+/// - https://flutter.dev/to/widget-testing
 ///
 /// ## Integration Tests
 ///
@@ -59,7 +59,7 @@ const String _kIntegrationTestDirectory = 'integration_test';
 /// your package. To run these tests, use `flutter test integration_test`.
 ///
 /// See:
-/// - https://flutter.dev/docs/testing/integration-tests
+/// - https://flutter.dev/to/integration-testing
 class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
   TestCommand({
     bool verboseHelp = false,
@@ -412,6 +412,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       debugLogsDirectoryPath: debugLogsDirectoryPath,
       webRenderer: webRenderer,
       webUseWasm: useWasm,
+      webUseLocalCanvaskit: true,
     );
 
     String? testAssetDirectory;
@@ -504,8 +505,8 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       collector = CoverageCollector(
         verbose: !machine,
         libraryNames: packagesToInclude,
-        packagesPath: buildInfo.packagesPath,
-        resolver: await CoverageCollector.getResolver(buildInfo.packagesPath),
+        packagesPath: buildInfo.packageConfigPath,
+        resolver: await CoverageCollector.getResolver(buildInfo.packageConfigPath),
         testTimeRecorder: testTimeRecorder,
         branchCoverage: boolArg('branch-coverage'),
       );
