@@ -2222,6 +2222,9 @@ FocusNode? get primaryFocus => WidgetsBinding.instance.focusManager.primaryFocus
 String debugDescribeFocusTree() {
   String? result;
   assert(() {
+    // TODO(yjbanov): remove this once https://github.com/dart-lang/sdk/issues/56129 has been fixed.
+    // ignore: unnecessary_statements
+    FocusManager.instance.toStringDeep;
     result = FocusManager.instance.toStringDeep();
     return true;
   }());
