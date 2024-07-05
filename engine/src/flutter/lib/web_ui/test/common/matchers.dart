@@ -477,8 +477,13 @@ class HtmlPatternMatcher extends Matcher {
     Map<Object?, Object?> matchState,
     bool verbose,
   ) {
+    if (object == null) {
+      mismatchDescription.add('Expected a DOM element, but got null.');
+      return mismatchDescription;
+    }
+
     mismatchDescription.add('The following DOM structure did not match the expected pattern:\n');
-    mismatchDescription.add('${(object! as DomElement).outerHTML!}\n\n');
+    mismatchDescription.add('${(object as DomElement).outerHTML!}\n\n');
     mismatchDescription.add('Specifically:\n');
 
     final List<String> mismatches = matchState['mismatches']! as List<String>;
