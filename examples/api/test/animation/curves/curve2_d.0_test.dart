@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/animation/curves/curve2_d.0.dart' as example
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('The buzz buzz widget should move around', (WidgetTester tester) async {
+  testWidgets('The buzz widget should move around', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.Curve2DExampleApp(),
     );
