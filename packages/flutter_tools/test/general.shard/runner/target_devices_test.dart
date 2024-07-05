@@ -1262,6 +1262,84 @@ target-device (mobile) • xxx • ios • iOS 16 (unsupported)
           expect(deviceManager.iosDiscoverer.xcdevice.waitedForDeviceToConnect, isFalse);
         });
 
+        testUsingContext('when only matching device is dev mode disabled', () async {
+          deviceManager.iosDiscoverer.deviceList = <Device>[FakeIOSDevice(deviceName: 'target-device', devModeEnabled: false)];
+
+          final List<Device>? devices = await targetDevices.findAllTargetDevices();
+
+          expect(logger.statusText, equals('''
+To use 'target-device' for development, enable Developer Mode in Settings → Privacy & Security.
+'''));
+          expect(devices, isNull);
+        });
+
+        testUsingContext('when one of the matching devices has dev mode disabled', () async {
+          deviceManager.iosDiscoverer.deviceList = <Device>[FakeIOSDevice(deviceName: 'target-device-1', devModeEnabled: false, isConnected: false),
+            FakeIOSDevice(deviceName: 'target-device-2')];
+
+          final List<Device>? devices = await targetDevices.findAllTargetDevices();
+          expect(logger.statusText, equals('''
+To use 'target-device-1' for development, enable Developer Mode in Settings → Privacy & Security.
+Checking for wireless devices...
+'''));
+          expect(devices, isNotNull);
+        });
+
+        testUsingContext('when all matching devices are dev mode disabled', () async {
+          deviceManager.iosDiscoverer.deviceList = <Device>[FakeIOSDevice(deviceName: 'target-device-1', devModeEnabled: false, isConnected: false),
+            FakeIOSDevice(deviceName: 'target-device-2', devModeEnabled: false, isConnected: false)];
+
+          final List<Device>? devices = await targetDevices.findAllTargetDevices();
+
+          expect(logger.statusText, equals('''
+To use 'target-device-1' for development, enable Developer Mode in Settings → Privacy & Security.
+To use 'target-device-2' for development, enable Developer Mode in Settings → Privacy & Security.
+No devices found yet. Checking for wireless devices...
+
+No supported devices found with name or id matching 'target-device'.
+'''));
+          expect(devices, isNull);
+        });
+
+        testUsingContext('when only matching device is unpaired', () async {
+          deviceManager.iosDiscoverer.deviceList = <Device>[FakeIOSDevice(deviceName: 'target-device', isPaired: false)];
+
+          final List<Device>? devices = await targetDevices.findAllTargetDevices();
+
+          expect(logger.statusText, equals('''
+'target-device' is not paired. Open Xcode and trust this computer when prompted.
+'''));
+          expect(devices, isNull);
+        });
+
+        testUsingContext('when one of the matching devices is unpaired', () async {
+          deviceManager.iosDiscoverer.deviceList = <Device>[FakeIOSDevice(deviceName: 'target-device-1', isPaired: false, isConnected: false),
+            FakeIOSDevice(deviceName: 'target-device-2')];
+
+          final List<Device>? devices = await targetDevices.findAllTargetDevices();
+          expect(logger.statusText, contains('''
+'target-device-1' is not paired. Open Xcode and trust this computer when prompted.
+Checking for wireless devices...
+'''));
+          expect(devices, isNotNull);
+        });
+
+        testUsingContext('when all matching devices are unpaired', () async {
+          deviceManager.iosDiscoverer.deviceList = <Device>[FakeIOSDevice(deviceName: 'target-device-1', isPaired: false, isConnected: false),
+            FakeIOSDevice(deviceName: 'target-device-2', isPaired: false, isConnected: false)];
+
+          final List<Device>? devices = await targetDevices.findAllTargetDevices();
+
+          expect(logger.statusText, contains('''
+'target-device-1' is not paired. Open Xcode and trust this computer when prompted.
+'target-device-2' is not paired. Open Xcode and trust this computer when prompted.
+No devices found yet. Checking for wireless devices...
+
+No supported devices found with name or id matching 'target-device'.
+'''));
+          expect(devices, isNull);
+        });
+
         group('when deviceConnectionInterface does not match', () {
           testUsingContext('filter of wireless', () async {
             final FakeIOSDevice device1 = FakeIOSDevice.notConnectedWireless(deviceName: 'not-a-match');
@@ -1420,7 +1498,7 @@ No devices found yet. Checking for wireless devices...
               logger: logger,
             );
             targetDevices.waitForWirelessBeforeInput = true;
-            targetDevices.deviceSelection.input = '1';
+            targetDevices.deviceSelection.input = <String>['1'];
             logger.originalStatusText = '''
 Connected devices:
 target-device-9 (mobile) • xxx • ios • iOS 16
@@ -1444,6 +1522,49 @@ Please choose one (or "q" to quit): '''));
             expect(deviceManager.iosDiscoverer.devicesCalled, 2);
             expect(deviceManager.iosDiscoverer.discoverDevicesCalled, 1);
             expect(deviceManager.iosDiscoverer.numberOfTimesPolled, 2);
+          }, overrides: <Type, Generator>{
+            AnsiTerminal: () => terminal,
+          });
+
+
+          testUsingContext('handle invalid options for device', () async {
+            deviceManager.iosDiscoverer.deviceList = <Device>[nonEphemeralDevice];
+
+            final TestTargetDevicesWithExtendedWirelessDeviceDiscovery targetDevices = TestTargetDevicesWithExtendedWirelessDeviceDiscovery(
+              deviceManager: deviceManager,
+              logger: logger,
+            );
+            targetDevices.waitForWirelessBeforeInput = true;
+
+            // Having the '0' first is an invalid choice for a device, the second
+            // item in the list is a '2' which is out of range since we only have
+            // one item in the deviceList. The final item in the list, is '1'
+            // which is a valid option though which will return a valid device
+            //
+            // Important: if none of the values in the list are valid, the test will
+            // hang indefinitely since the [userSelectDevice()] method uses a while
+            // loop to listen for valid devices
+            targetDevices.deviceSelection.input = <String>['0', '2', '1'];
+            logger.originalStatusText = '''
+Connected devices:
+target-device-9 (mobile) • xxx • ios • iOS 16
+
+Checking for wireless devices...
+
+[1]: target-device-9 (xxx)
+''';
+
+            final List<Device>? devices = await targetDevices.findAllTargetDevices();
+
+            expect(logger.statusText, equals('''
+Connected devices:
+target-device-9 (mobile) • xxx • ios • iOS 16
+
+No wireless devices were found.
+
+[1]: target-device-9 (xxx)
+Please choose one (or "q" to quit): '''));
+            expect(devices, <Device>[nonEphemeralDevice]);
           }, overrides: <Type, Generator>{
             AnsiTerminal: () => terminal,
           });
@@ -1714,7 +1835,7 @@ Checking for wireless devices...
             ];
 
             targetDevices.waitForWirelessBeforeInput = true;
-            targetDevices.deviceSelection.input = '3';
+            targetDevices.deviceSelection.input = <String>['3'];
             logger.originalStatusText = '''
 Connected devices:
 target-device-1 (mobile) • xxx • ios • iOS 16
@@ -1752,7 +1873,7 @@ Please choose one (or "q" to quit): '''));
             deviceManager.iosDiscoverer.deviceList = <Device>[attachedIOSDevice1, attachedIOSDevice2];
 
             targetDevices.waitForWirelessBeforeInput = true;
-            targetDevices.deviceSelection.input = '2';
+            targetDevices.deviceSelection.input = <String>['2'];
             logger.originalStatusText = '''
 Connected devices:
 target-device-1 (mobile) • xxx • ios • iOS 16
@@ -1789,7 +1910,7 @@ Please choose one (or "q" to quit): '''));
             deviceManager.iosDiscoverer.refreshDeviceList = <Device>[connectedWirelessIOSDevice1, connectedWirelessIOSDevice2];
 
             targetDevices.waitForWirelessBeforeInput = true;
-            targetDevices.deviceSelection.input = '2';
+            targetDevices.deviceSelection.input = <String>['2'];
             terminal.setPrompt(<String>['1', '2', 'q', 'Q'], '1');
 
             final List<Device>? devices = await targetDevices.findAllTargetDevices();
@@ -1867,7 +1988,7 @@ target-device-5 (mobile) • xxx • ios • iOS 16
               deviceManager.iosDiscoverer.deviceList = <Device>[attachedIOSDevice1, attachedIOSDevice2];
 
               targetDevices.waitForWirelessBeforeInput = true;
-              targetDevices.deviceSelection.input = '2';
+              targetDevices.deviceSelection.input = <String>['2'];
               logger.originalStatusText = '''
 Connected devices:
 target-device-1 (mobile) • xxx • ios • iOS 16
@@ -1912,7 +2033,7 @@ Please choose one (or "q" to quit): '''));
               deviceManager.iosDiscoverer.refreshDeviceList = <Device>[attachedIOSDevice1, attachedIOSDevice2, connectedWirelessIOSDevice1];
 
               targetDevices.waitForWirelessBeforeInput = true;
-              targetDevices.deviceSelection.input = '2';
+              targetDevices.deviceSelection.input = <String>['2'];
               logger.originalStatusText = '''
 Connected devices:
 target-device-1 (mobile) • xxx • ios • iOS 16
@@ -2094,7 +2215,7 @@ target-device-6 (mobile) • xxx • ios • iOS 16
             ];
 
             targetDevices.waitForWirelessBeforeInput = true;
-            targetDevices.deviceSelection.input = '3';
+            targetDevices.deviceSelection.input = <String>['3'];
             logger.originalStatusText = '''
 Found multiple devices with name or id matching target-device:
 target-device-1 (mobile) • xxx • ios • iOS 16
@@ -2134,7 +2255,7 @@ Please choose one (or "q" to quit): '''));
             deviceManager.iosDiscoverer.deviceList = <Device>[attachedIOSDevice1, attachedIOSDevice2];
 
             targetDevices.waitForWirelessBeforeInput = true;
-            targetDevices.deviceSelection.input = '2';
+            targetDevices.deviceSelection.input = <String>['2'];
             logger.originalStatusText = '''
 Found multiple devices with name or id matching target-device:
 target-device-1 (mobile) • xxx • ios • iOS 16
@@ -2404,11 +2525,21 @@ class TestTargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices
 class TestTargetDeviceSelection extends TargetDeviceSelection {
   TestTargetDeviceSelection(super.logger);
 
-  String input = '';
+  List<String> input = <String>[];
 
   @override
   Future<String> readUserInput() async {
-    return input;
+    // If only one value is provided for the input, continue
+    // to return that one input value without popping
+    //
+    // If more than one input values are provided, we are simulating
+    // the user selecting more than one option for a device, so we will pop
+    // them out from the front
+    if (input.length > 1) {
+      return input.removeAt(0);
+    }
+
+    return input[0];
   }
 }
 
@@ -2585,9 +2716,6 @@ class FakeXcdevice extends Fake implements XCDevice {
 
 class FakeIOSWorkflow extends Fake implements IOSWorkflow {}
 
-// Unfortunately Device, despite not being immutable, has an `operator ==`.
-// Until we fix that, we have to also ignore related lints here.
-// ignore: avoid_implementing_value_types
 class FakeDevice extends Fake implements Device {
   FakeDevice({
     String? deviceId,
@@ -2684,9 +2812,6 @@ class FakeDevice extends Fake implements Device {
       getNameForTargetPlatform(await targetPlatform);
 }
 
-// Unfortunately Device, despite not being immutable, has an `operator ==`.
-// Until we fix that, we have to also ignore related lints here.
-// ignore: avoid_implementing_value_types
 class FakeIOSDevice extends Fake implements IOSDevice {
   FakeIOSDevice({
     String? deviceId,
@@ -2695,6 +2820,8 @@ class FakeIOSDevice extends Fake implements IOSDevice {
     bool deviceSupportForProject = true,
     this.ephemeral = true,
     this.isConnected = true,
+    this.devModeEnabled = true,
+    this.isPaired = true,
     this.platformType = PlatformType.ios,
     this.connectionInterface = DeviceConnectionInterface.attached,
   })  : id = deviceId ?? 'xxx',
@@ -2710,6 +2837,8 @@ class FakeIOSDevice extends Fake implements IOSDevice {
     this.ephemeral = true,
     this.isConnected = false,
     this.platformType = PlatformType.ios,
+    this.devModeEnabled = true,
+    this.isPaired = true,
     this.connectionInterface = DeviceConnectionInterface.wireless,
   })  : id = deviceId ?? 'xxx',
         name = deviceName ?? 'test',
@@ -2723,6 +2852,8 @@ class FakeIOSDevice extends Fake implements IOSDevice {
     bool deviceSupportForProject = true,
     this.ephemeral = true,
     this.isConnected = true,
+    this.devModeEnabled = true,
+    this.isPaired = true,
     this.platformType = PlatformType.ios,
     this.connectionInterface = DeviceConnectionInterface.wireless,
   })  : id = deviceId ?? 'xxx',
@@ -2738,6 +2869,12 @@ class FakeIOSDevice extends Fake implements IOSDevice {
 
   @override
   final bool ephemeral;
+
+  @override
+  final bool devModeEnabled;
+
+  @override
+  final bool isPaired;
 
   @override
   String id;
@@ -2784,6 +2921,9 @@ class FakeTerminal extends Fake implements AnsiTerminal {
 
   @override
   final bool supportsColor;
+
+  @override
+  bool get isCliAnimationEnabled => supportsColor;
 
   @override
   bool usesTerminalUi = true;

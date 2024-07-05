@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:unified_analytics/unified_analytics.dart';
+
 import '../../artifacts.dart';
 import '../../base/build.dart';
 import '../../base/file_system.dart';
@@ -16,7 +18,6 @@ import '../exceptions.dart';
 import 'assets.dart';
 import 'common.dart';
 import 'icon_tree_shaker.dart';
-import 'shader_compiler.dart';
 
 /// Copy the macOS framework to the correct copy dir by invoking 'rsync'.
 ///
@@ -50,7 +51,7 @@ abstract class UnpackMacOS extends Target {
     if (buildModeEnvironment == null) {
       throw MissingDefineException(kBuildMode, 'unpack_macos');
     }
-    final BuildMode buildMode = getBuildModeForName(buildModeEnvironment);
+    final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
     final String basePath = environment.artifacts.getArtifactPath(Artifact.flutterMacOSFramework, mode: buildMode);
 
     final ProcessResult result = environment.processManager.runSync(<String>[
@@ -59,9 +60,12 @@ abstract class UnpackMacOS extends Target {
       '--delete',
       '--filter',
       '- .DS_Store/',
+      '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
       basePath,
       environment.outputDir.path,
     ]);
+
+    _removeDenylistedFiles(environment.outputDir);
     if (result.exitCode != 0) {
       throw Exception(
         'Failed to copy framework (exit ${result.exitCode}:\n'
@@ -78,20 +82,37 @@ abstract class UnpackMacOS extends Target {
     if (!frameworkBinary.existsSync()) {
       throw Exception('Binary $frameworkBinaryPath does not exist, cannot thin');
     }
-    _thinFramework(environment, frameworkBinaryPath);
+    await _thinFramework(environment, frameworkBinaryPath);
   }
 
-  void _thinFramework(Environment environment, String frameworkBinaryPath) {
+  static const List<String> _copyDenylist = <String>['entitlements.txt', 'without_entitlements.txt'];
+
+  void _removeDenylistedFiles(Directory directory) {
+    for (final FileSystemEntity entity in directory.listSync(recursive: true)) {
+      if (entity is! File) {
+        continue;
+      }
+      if (_copyDenylist.contains(entity.basename)) {
+        entity.deleteSync();
+      }
+    }
+  }
+
+  Future<void> _thinFramework(
+    Environment environment,
+    String frameworkBinaryPath,
+  ) async {
     final String archs = environment.defines[kDarwinArchs] ?? 'x86_64 arm64';
     final List<String> archList = archs.split(' ').toList();
-    final ProcessResult infoResult = environment.processManager.runSync(<String>[
+    final ProcessResult infoResult =
+        await environment.processManager.run(<String>[
       'lipo',
       '-info',
       frameworkBinaryPath,
     ]);
     final String lipoInfo = infoResult.stdout as String;
 
-    final ProcessResult verifyResult = environment.processManager.runSync(<String>[
+    final ProcessResult verifyResult = await environment.processManager.run(<String>[
       'lipo',
       frameworkBinaryPath,
       '-verify_arch',
@@ -137,7 +158,7 @@ class ReleaseUnpackMacOS extends UnpackMacOS {
   @override
   List<Source> get inputs => <Source>[
     ...super.inputs,
-    const Source.artifact(Artifact.flutterMacOSFramework, mode: BuildMode.release),
+    const Source.artifact(Artifact.flutterMacOSXcframework, mode: BuildMode.release),
   ];
 }
 
@@ -151,7 +172,7 @@ class ProfileUnpackMacOS extends UnpackMacOS {
   @override
   List<Source> get inputs => <Source>[
     ...super.inputs,
-    const Source.artifact(Artifact.flutterMacOSFramework, mode: BuildMode.profile),
+    const Source.artifact(Artifact.flutterMacOSXcframework, mode: BuildMode.profile),
   ];
 }
 
@@ -165,7 +186,7 @@ class DebugUnpackMacOS extends UnpackMacOS {
   @override
   List<Source> get inputs => <Source>[
     ...super.inputs,
-    const Source.artifact(Artifact.flutterMacOSFramework, mode: BuildMode.debug),
+    const Source.artifact(Artifact.flutterMacOSXcframework, mode: BuildMode.debug),
   ];
 }
 
@@ -191,7 +212,7 @@ class DebugMacOSFramework extends Target {
       ?? <DarwinArch>[DarwinArch.x86_64, DarwinArch.arm64];
 
     final Iterable<String> darwinArchArguments =
-        darwinArchs.expand((DarwinArch arch) => <String>['-arch', getNameForDarwinArch(arch)]);
+        darwinArchs.expand((DarwinArch arch) => <String>['-arch', arch.name]);
 
     outputFile.createSync(recursive: true);
     final File debugApp = environment.buildDir.childFile('debug_app.cc')
@@ -245,7 +266,7 @@ class CompileMacOSFramework extends Target {
     if (targetPlatformEnvironment == null) {
       throw MissingDefineException(kTargetPlatform, 'kernel_snapshot');
     }
-    final BuildMode buildMode = getBuildModeForName(buildModeEnvironment);
+    final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
     if (buildMode == BuildMode.debug) {
       throw Exception('precompiled macOS framework only supported in release/profile builds.');
     }
@@ -277,10 +298,10 @@ class CompileMacOSFramework extends Target {
       if (codeSizeDirectory != null) {
         final File codeSizeFile = environment.fileSystem
           .directory(codeSizeDirectory)
-          .childFile('snapshot.${getNameForDarwinArch(darwinArch)}.json');
+          .childFile('snapshot.${darwinArch.name}.json');
         final File precompilerTraceFile = environment.fileSystem
           .directory(codeSizeDirectory)
-          .childFile('trace.${getNameForDarwinArch(darwinArch)}.json');
+          .childFile('trace.${darwinArch.name}.json');
         extraGenSnapshotOptions.add('--write-v8-snapshot-profile-to=${codeSizeFile.path}');
         extraGenSnapshotOptions.add('--trace-precompiler-to=${precompilerTraceFile.path}');
       }
@@ -288,7 +309,7 @@ class CompileMacOSFramework extends Target {
       pending.add(snapshotter.build(
         buildMode: buildMode,
         mainPath: environment.buildDir.childFile('app.dill').path,
-        outputPath: environment.fileSystem.path.join(buildOutputPath, getNameForDarwinArch(darwinArch)),
+        outputPath: environment.fileSystem.path.join(buildOutputPath, darwinArch.name),
         platform: TargetPlatform.darwin,
         darwinArch: darwinArch,
         splitDebugInfo: splitDebugInfo,
@@ -372,7 +393,8 @@ abstract class MacOSBundleFlutterAssets extends Target {
     if (buildModeEnvironment == null) {
       throw MissingDefineException(kBuildMode, 'compile_macos_framework');
     }
-    final BuildMode buildMode = getBuildModeForName(buildModeEnvironment);
+
+    final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
     final Directory frameworkRootDirectory = environment
         .outputDir
         .childDirectory('App.framework');
@@ -417,13 +439,9 @@ abstract class MacOSBundleFlutterAssets extends Target {
       environment,
       assetDirectory,
       targetPlatform: TargetPlatform.darwin,
-      shaderTarget: ShaderTarget.sksl,
+      flavor: environment.defines[kFlavor],
     );
-    final DepfileService depfileService = DepfileService(
-      fileSystem: environment.fileSystem,
-      logger: environment.logger,
-    );
-    depfileService.writeToFile(
+    environment.depFileService.writeToFile(
       assetDepfile,
       environment.buildDir.childFile('flutter_assets.d'),
     );
@@ -436,22 +454,22 @@ abstract class MacOSBundleFlutterAssets extends Target {
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>CFBundleDevelopmentRegion</key>
-	<string>en</string>
-	<key>CFBundleExecutable</key>
-	<string>App</string>
-	<key>CFBundleIdentifier</key>
-	<string>io.flutter.flutter.app</string>
-	<key>CFBundleInfoDictionaryVersion</key>
-	<string>6.0</string>
-	<key>CFBundleName</key>
-	<string>App</string>
-	<key>CFBundlePackageType</key>
-	<string>FMWK</string>
-	<key>CFBundleShortVersionString</key>
-	<string>1.0</string>
-	<key>CFBundleVersion</key>
-	<string>1.0</string>
+  <key>CFBundleDevelopmentRegion</key>
+  <string>en</string>
+  <key>CFBundleExecutable</key>
+  <string>App</string>
+  <key>CFBundleIdentifier</key>
+  <string>io.flutter.flutter.app</string>
+  <key>CFBundleInfoDictionaryVersion</key>
+  <string>6.0</string>
+  <key>CFBundleName</key>
+  <string>App</string>
+  <key>CFBundlePackageType</key>
+  <string>FMWK</string>
+  <key>CFBundleShortVersionString</key>
+  <string>1.0</string>
+  <key>CFBundleVersion</key>
+  <string>1.0</string>
 </dict>
 </plist>
 
@@ -613,6 +631,11 @@ class ReleaseMacOSBundleFlutterAssets extends MacOSBundleFlutterAssets {
           label: buildSuccess ? 'success' : 'fail',
           flutterUsage: environment.usage,
         ).send();
+        environment.analytics.send(Event.appleUsageEvent(
+          workflow: 'assemble',
+          parameter: 'macos-archive',
+          result: buildSuccess ? 'success' : 'fail',
+        ));
       }
     }
   }

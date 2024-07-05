@@ -52,6 +52,12 @@ void main() {
       );
     });
 
+    testWidgets('updating devicePixelRatio also updates display.devicePixelRatio', (WidgetTester tester) async {
+      tester.view.devicePixelRatio = tester.view.devicePixelRatio + 1;
+
+      expect(tester.view.display.devicePixelRatio, tester.view.devicePixelRatio);
+    });
+
     testWidgets('can fake displayFeatures', (WidgetTester tester) async {
       verifyPropertyFaked<List<DisplayFeature>>(
         tester: tester,
@@ -106,39 +112,6 @@ void main() {
       );
     });
 
-    testWidgets('can fake physicalGeometry', (WidgetTester tester) async {
-      verifyPropertyFaked<Rect>(
-        tester: tester,
-        realValue: trueImplicitView().physicalGeometry,
-        fakeValue: const Rect.fromLTWH(0, 0, 550, 850),
-        propertyRetriever: () => boundImplicitView().physicalGeometry,
-        propertyFaker: (_, Rect fakeValue) {
-          tester.view.physicalGeometry = fakeValue;
-        },
-      );
-    });
-
-    testWidgets('can reset physicalGeometry', (WidgetTester tester) async {
-      verifyPropertyReset<Rect>(
-        tester: tester,
-        fakeValue: const Rect.fromLTWH(0, 0, 35, 475),
-        propertyRetriever: () => boundImplicitView().physicalGeometry,
-        propertyResetter: () {
-          tester.view.resetPhysicalGeometry();
-        },
-        propertyFaker: (Rect fakeValue) {
-          tester.view.physicalGeometry = fakeValue;
-        },
-      );
-    });
-
-    testWidgets('updating physicalGeometry also updates physicalSize', (WidgetTester tester) async {
-      const Rect testGeometry = Rect.fromLTWH(0, 0, 450, 575);
-      tester.view.physicalGeometry = testGeometry;
-
-      expect(tester.view.physicalSize, testGeometry.size);
-    });
-
     testWidgets('can fake physicalSize', (WidgetTester tester) async {
       verifyPropertyFaked<Size>(
         tester: tester,
@@ -147,6 +120,19 @@ void main() {
         propertyRetriever: () => boundImplicitView().physicalSize,
         propertyFaker: (_, Size fakeValue) {
           tester.view.physicalSize = fakeValue;
+        },
+      );
+    });
+
+    testWidgets('faking physicalSize fakes physicalConstraints', (WidgetTester tester) async {
+      const Size fakeSize = Size(50, 50);
+      verifyPropertyFaked<ViewConstraints>(
+        tester: tester,
+        realValue: trueImplicitView().physicalConstraints,
+        fakeValue: ViewConstraints.tight(fakeSize),
+        propertyRetriever: () => boundImplicitView().physicalConstraints,
+        propertyFaker: (_, __) {
+          tester.view.physicalSize = fakeSize;
         },
       );
     });
@@ -165,15 +151,45 @@ void main() {
       );
     });
 
-    testWidgets('updating physicalSize also updates physicalGeometry', (WidgetTester tester) async {
-      const Rect testGeometry = Rect.fromLTWH(0, 0, 450, 575);
-      const Size testSize = Size(50, 50);
-      const Rect expectedGeometry = Rect.fromLTWH(0, 0, 50, 50);
+    testWidgets('resetting physicalSize resets physicalConstraints', (WidgetTester tester) async {
+      const Size fakeSize = Size(50, 50);
+      verifyPropertyReset<ViewConstraints>(
+        tester: tester,
+        fakeValue: ViewConstraints.tight(fakeSize),
+        propertyRetriever: () => boundImplicitView().physicalConstraints,
+        propertyResetter: () {
+          tester.view.resetPhysicalSize();
+        },
+        propertyFaker: (_) {
+          tester.view.physicalSize = fakeSize;
+        },
+      );
+    });
 
-      tester.view.physicalGeometry = testGeometry;
-      tester.view.physicalSize = testSize;
+    testWidgets('can fake physicalConstraints', (WidgetTester tester) async {
+      verifyPropertyFaked<ViewConstraints>(
+        tester: tester,
+        realValue: trueImplicitView().physicalConstraints,
+        fakeValue: const ViewConstraints(minWidth: 1, maxWidth: 2, minHeight: 3, maxHeight: 4),
+        propertyRetriever: () => boundImplicitView().physicalConstraints,
+        propertyFaker: (_, ViewConstraints fakeValue) {
+          tester.view.physicalConstraints = fakeValue;
+        },
+      );
+    });
 
-      expect(tester.view.physicalGeometry, expectedGeometry);
+    testWidgets('can reset physicalConstraints', (WidgetTester tester) async {
+      verifyPropertyReset<ViewConstraints>(
+        tester: tester,
+        fakeValue: const ViewConstraints(minWidth: 1, maxWidth: 2, minHeight: 3, maxHeight: 4),
+        propertyRetriever: () => boundImplicitView().physicalConstraints,
+        propertyResetter: () {
+          tester.view.resetPhysicalConstraints();
+        },
+        propertyFaker: (ViewConstraints fakeValue) {
+          tester.view.physicalConstraints = fakeValue;
+        },
+      );
     });
 
     testWidgets('can fake systemGestureInsets', (WidgetTester tester) async {
@@ -266,7 +282,6 @@ void main() {
       tester.view.devicePixelRatio = 7;
       tester.view.displayFeatures = <DisplayFeature>[const DisplayFeature(bounds: Rect.fromLTWH(0, 0, 20, 300), type: DisplayFeatureType.unknown, state: DisplayFeatureState.unknown)];
       tester.view.padding = FakeViewPadding.zero;
-      tester.view.physicalGeometry = const Rect.fromLTWH(0, 0, 505, 805);
       tester.view.systemGestureInsets = FakeViewPadding.zero;
       tester.view.viewInsets = FakeViewPadding.zero;
       tester.view.viewPadding = FakeViewPadding.zero;
@@ -288,6 +303,7 @@ void main() {
       final TestFlutterView view = TestFlutterView(
         view: backingView,
         platformDispatcher: tester.binding.platformDispatcher,
+        display: _FakeDisplay(),
       );
 
       view.render(expectedScene);
@@ -302,6 +318,7 @@ void main() {
       final TestFlutterView view = TestFlutterView(
         view: backingView,
         platformDispatcher: tester.binding.platformDispatcher,
+        display: _FakeDisplay(),
       );
 
       view.updateSemantics(expectedUpdate);
@@ -311,7 +328,6 @@ void main() {
     });
   });
 }
-
 
 Matcher matchesSnapshot(FlutterViewSnapshot expected) => _FlutterViewSnapshotMatcher(expected);
 
@@ -349,9 +365,6 @@ class _FlutterViewSnapshotMatcher extends Matcher {
       paddingMatcher.describeMismatch(actual.padding, mismatchDescription, matchState, verbose);
     }
 
-    if (actual.physicalGeometry != expected.physicalGeometry) {
-      mismatchDescription.add('actual.physicalGeometry (${actual.physicalGeometry}) did not match expected.physicalGeometry (${expected.physicalGeometry})');
-    }
     if (actual.physicalSize != expected.physicalSize) {
       mismatchDescription.add('actual.physicalSize (${actual.physicalSize}) did not match expected.physicalSize (${expected.physicalSize})');
     }
@@ -390,7 +403,6 @@ class _FlutterViewSnapshotMatcher extends Matcher {
       actual.displayFeatures.equals(expected.displayFeatures) &&
       actual.gestureSettings == expected.gestureSettings &&
       matchesViewPadding(expected.padding).matches(actual.padding, matchState) &&
-      actual.physicalGeometry == expected.physicalGeometry &&
       actual.physicalSize == expected.physicalSize &&
       matchesViewPadding(expected.systemGestureInsets).matches(actual.padding, matchState) &&
       actual.viewId == expected.viewId &&
@@ -405,7 +417,6 @@ class FlutterViewSnapshot {
     displayFeatures = <DisplayFeature>[...view.displayFeatures],
     gestureSettings = view.gestureSettings,
     padding = view.padding,
-    physicalGeometry = view.physicalGeometry,
     physicalSize = view.physicalSize,
     systemGestureInsets = view.systemGestureInsets,
     viewId = view.viewId,
@@ -416,7 +427,6 @@ class FlutterViewSnapshot {
   final List<DisplayFeature> displayFeatures;
   final GestureSettings  gestureSettings;
   final ViewPadding  padding;
-  final Rect physicalGeometry;
   final Size physicalSize;
   final ViewPadding systemGestureInsets;
   final Object viewId;
@@ -424,7 +434,7 @@ class FlutterViewSnapshot {
   final ViewPadding viewPadding;
 }
 
-class _FakeFlutterView implements FlutterView {
+class _FakeFlutterView extends Fake implements FlutterView {
   SemanticsUpdate? lastSemanticsUpdate;
   Scene? lastRenderedScene;
 
@@ -434,12 +444,9 @@ class _FakeFlutterView implements FlutterView {
   }
 
   @override
-  void render(Scene scene) {
+  void render(Scene scene, {Size? size}) {
     lastRenderedScene = scene;
   }
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) {
-    return null;
-  }
 }
+
+class _FakeDisplay extends Fake implements TestDisplay { }

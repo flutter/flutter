@@ -60,7 +60,7 @@ void main() {
     pubspecFile.writeAsStringSync('''
   name: foo_project
   environment:
-    sdk: '>=3.0.0-0 <4.0.0'
+    sdk: '>=3.2.0-0 <4.0.0'
   ''');
 
     final File dartFile = fileSystem.file(fileSystem.path.join(directory.path, 'lib', 'main.dart'));
@@ -103,7 +103,7 @@ void main() {
       );
 
       int errorCount = 0;
-      final Future<bool> onDone = server.onAnalyzing.where((bool analyzing) => analyzing == false).first;
+      final Future<bool> onDone = server.onAnalyzing.where((bool analyzing) => !analyzing).first;
       server.onErrors.listen((FileAnalysisErrors errors) => errorCount += errors.errors.length);
 
       await server.start();
@@ -144,7 +144,7 @@ void main() {
     );
 
     int errorCount = 0;
-    final Future<bool> onDone = server.onAnalyzing.where((bool analyzing) => analyzing == false).first;
+    final Future<bool> onDone = server.onAnalyzing.where((bool analyzing) => !analyzing).first;
     server.onErrors.listen((FileAnalysisErrors errors) {
       errorCount += errors.errors.length;
     });
@@ -172,7 +172,7 @@ void main() {
     );
 
     int errorCount = 0;
-    final Future<bool> onDone = server.onAnalyzing.where((bool analyzing) => analyzing == false).first;
+    final Future<bool> onDone = server.onAnalyzing.where((bool analyzing) => !analyzing).first;
     server.onErrors.listen((FileAnalysisErrors errors) {
       errorCount += errors.errors.length;
     });

@@ -7,8 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
-
 void main() {
   test('RadioThemeData copyWith, ==, hashCode basics', () {
     expect(const RadioThemeData(), const RadioThemeData().copyWith());
@@ -70,9 +68,9 @@ void main() {
     expect(
       description,
       equalsIgnoringHashCodes(<String>[
-        'mouseCursor: MaterialStatePropertyAll(SystemMouseCursor(click))',
-        'fillColor: MaterialStatePropertyAll(Color(0xfffffff0))',
-        'overlayColor: MaterialStatePropertyAll(Color(0xfffffff1))',
+        'mouseCursor: WidgetStatePropertyAll(SystemMouseCursor(click))',
+        'fillColor: WidgetStatePropertyAll(Color(0xfffffff0))',
+        'overlayColor: WidgetStatePropertyAll(Color(0xfffffff1))',
         'splashRadius: 1.0',
         'materialTapTargetSize: MaterialTapTargetSize.shrinkWrap',
         'visualDensity: VisualDensity#00000(h: 0.0, v: 0.0)',

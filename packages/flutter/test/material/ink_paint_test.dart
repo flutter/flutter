@@ -2,11 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This file is run as part of a reduced test set in CI on Mac and Windows
+// machines.
+@Tags(<String>['reduced-test-set'])
+library;
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../rendering/mock_canvas.dart';
 
 void main() {
   testWidgets('The Ink widget expands when no dimensions are set', (WidgetTester tester) async {
@@ -53,22 +57,20 @@ void main() {
     expect(tester.getSize(find.byType(Ink)), const Size(800, height));
   });
 
-  testWidgets('The InkWell widget renders an ink splash', (WidgetTester tester) async {
-    const Color highlightColor = Color(0xAAFF0000);
+  testWidgets('Material2 - InkWell widget renders an ink splash', (WidgetTester tester) async {
     const Color splashColor = Color(0xAA0000FF);
     const BorderRadius borderRadius = BorderRadius.all(Radius.circular(6.0));
 
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: Material(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: false),
+        home: Material(
           child: Center(
             child: SizedBox(
               width: 200.0,
               height: 60.0,
               child: InkWell(
                 borderRadius: borderRadius,
-                highlightColor: highlightColor,
                 splashColor: splashColor,
                 onTap: () { },
               ),
@@ -93,14 +95,76 @@ void main() {
         ..clipRRect(rrect: RRect.fromLTRBR(0.0, 0.0, 200.0, 60.0, const Radius.circular(6.0)))
         ..circle(x: 100.0, y: 30.0, radius: 21.0, color: splashColor)
         ..restore()
-        ..rrect(
-          rrect: RRect.fromLTRBR(300.0, 270.0, 500.0, 330.0, const Radius.circular(6.0)),
-          color: highlightColor,
-        ),
     );
 
     await gesture.up();
   });
+
+  testWidgets('Material3 - InkWell widget renders an ink splash', (WidgetTester tester) async {
+    const Key inkWellKey = Key('InkWell');
+    const Color splashColor = Color(0xAA0000FF);
+    const BorderRadius borderRadius = BorderRadius.all(Radius.circular(6.0));
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: SizedBox(
+              width: 200.0,
+              height: 60.0,
+              child: InkWell(
+                key: inkWellKey,
+                borderRadius: borderRadius,
+                splashColor: splashColor,
+                onTap: () { },
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Offset center = tester.getCenter(find.byType(InkWell));
+    final TestGesture gesture = await tester.startGesture(center);
+    await tester.pump(); // start gesture
+    await tester.pump(const Duration(milliseconds: 200)); // wait for splash to be well under way
+
+    final RenderBox box = Material.of(tester.element(find.byType(InkWell))) as RenderBox;
+    if (kIsWeb && isCanvasKit) {
+      expect(
+        box,
+        paints
+          ..save()
+          ..translate(x: 0.0, y: 0.0)
+          ..clipRect()
+          ..save()
+          ..translate(x: 300.0, y: 270.0)
+          ..clipRRect(rrect: RRect.fromLTRBR(0.0, 0.0, 200.0, 60.0, const Radius.circular(6.0)))
+          ..circle()
+          ..restore()
+      );
+    } else {
+      expect(
+        box,
+        paints
+          ..translate(x: 0.0, y: 0.0)
+          ..save()
+          ..translate(x: 300.0, y: 270.0)
+          ..clipRRect(rrect: RRect.fromLTRBR(0.0, 0.0, 200.0, 60.0, const Radius.circular(6.0)))
+          ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 200, 60))
+          ..restore()
+      );
+    }
+
+    // Material 3 uses the InkSparkle which uses a shader, so we can't capture
+    // the effect with paint methods. Use a golden test instead.
+    await expectLater(
+      find.byKey(inkWellKey),
+      matchesGoldenFile('m3_ink_well.renders.ink_splash.png'),
+    );
+
+    await gesture.up();
+  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
 
   testWidgets('The InkWell widget renders an ink ripple', (WidgetTester tester) async {
     const Color highlightColor = Color(0xAAFF0000);
@@ -188,11 +252,11 @@ void main() {
     expect(box, ripplePattern(inkWellCenter - tapDownOffset, 105.0, 0));
   });
 
-  testWidgets('Does the Ink widget render anything', (WidgetTester tester) async {
+  testWidgets('Material2 - Does the Ink widget render anything', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: Material(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: false),
+        home: Material(
           child: Center(
             child: Ink(
               color: Colors.blue,
@@ -222,9 +286,9 @@ void main() {
     );
 
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: Material(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: false),
+        home: Material(
           child: Center(
             child: Ink(
               color: Colors.red,
@@ -250,9 +314,9 @@ void main() {
     );
 
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: Material(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: false),
+        home: Material(
           child: Center(
             child: InkWell( // this is at a different depth in the tree so it's now a new InkWell
               splashColor: Colors.green,
@@ -271,12 +335,101 @@ void main() {
     await gesture.up();
   });
 
+  testWidgets('Material3 - Does the Ink widget render anything', (WidgetTester tester) async {
+    const Key inkWellKey = Key('InkWell');
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: Ink(
+              color: Colors.blue,
+              width: 200.0,
+              height: 200.0,
+              child: InkWell(
+                key: inkWellKey,
+                splashColor: Colors.green,
+                onTap: () { },
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Offset center = tester.getCenter(find.byType(InkWell));
+    final TestGesture gesture = await tester.startGesture(center);
+    await tester.pump(); // start gesture
+    await tester.pump(const Duration(milliseconds: 200)); // wait for splash to be well under way
+
+    final RenderBox box = Material.of(tester.element(find.byType(InkWell)))as RenderBox;
+    expect(box, paints..rect(rect: const Rect.fromLTRB(300.0, 200.0, 500.0, 400.0), color: Color(Colors.blue.value)));
+
+    // Material 3 uses the InkSparkle which uses a shader, so we can't capture
+    // the effect with paint methods. Use a golden test instead.
+    await expectLater(
+      find.byKey(inkWellKey),
+      matchesGoldenFile('m3_ink.renders.anything.0.png'),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: Ink(
+              color: Colors.red,
+              width: 200.0,
+              height: 200.0,
+              child: InkWell(
+                key: inkWellKey,
+                splashColor: Colors.green,
+                onTap: () { },
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(Material.of(tester.element(find.byType(InkWell))), same(box));
+
+    expect(box, paints..rect(rect: const Rect.fromLTRB(300.0, 200.0, 500.0, 400.0), color: Color(Colors.red.value)));
+
+    // Material 3 uses the InkSparkle which uses a shader, so we can't capture
+    // the effect with paint methods. Use a golden test instead.
+    await expectLater(
+      find.byKey(inkWellKey),
+      matchesGoldenFile('m3_ink.renders.anything.1.png'),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: InkWell( // This is at a different depth in the tree so it's now a new InkWell.
+              key: inkWellKey,
+              splashColor: Colors.green,
+              onTap: () { },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(Material.of(tester.element(find.byType(InkWell))), same(box));
+
+    expect(box, isNot(paints..rect()));
+    expect(box, isNot(paints..rect()));
+
+    await gesture.up();
+  });
+
   testWidgets('The InkWell widget renders an SelectAction or ActivateAction-induced ink ripple', (WidgetTester tester) async {
     const Color highlightColor = Color(0xAAFF0000);
     const Color splashColor = Color(0xB40000FF);
     const BorderRadius borderRadius = BorderRadius.all(Radius.circular(6.0));
 
     final FocusNode focusNode = FocusNode(debugLabel: 'Test Node');
+    addTearDown(focusNode.dispose);
     Future<void> buildTest(Intent intent) async {
       return tester.pumpWidget(
         Shortcuts(
@@ -457,6 +610,10 @@ void main() {
   testWidgets('The InkWell widget on OverlayPortal does not throw', (WidgetTester tester) async {
     final OverlayPortalController controller = OverlayPortalController();
     controller.show();
+
+    late OverlayEntry overlayEntry;
+    addTearDown(() => overlayEntry..remove()..dispose());
+
     await tester.pumpWidget(
       Center(
         child: RepaintBoundary(
@@ -466,7 +623,7 @@ void main() {
               textDirection: TextDirection.ltr,
               child: Overlay(
                 initialEntries: <OverlayEntry>[
-                  OverlayEntry(
+                  overlayEntry = OverlayEntry(
                     builder: (BuildContext context) {
                       return Center(
                         child: SizedBox.square(
@@ -514,13 +671,13 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('Custom rectCallback renders an ink splash from its center', (WidgetTester tester) async {
+  testWidgets('Material2 - Custom rectCallback renders an ink splash from its center', (WidgetTester tester) async {
     const Color splashColor = Color(0xff00ff00);
 
     Widget buildWidget({InteractiveInkFeatureFactory? splashFactory}) {
-      return Directionality(
-        textDirection: TextDirection.ltr,
-        child: Material(
+      return MaterialApp(
+        theme: ThemeData(useMaterial3: false),
+        home: Material(
           child: Center(
             child: SizedBox(
               width: 100.0,
@@ -566,6 +723,62 @@ void main() {
       box,
       paints
         ..circle(x: 50.0, y: 50.0, color: splashColor)
+    );
+  });
+
+  testWidgets('Material3 - Custom rectCallback renders an ink splash from its center', (WidgetTester tester) async {
+    const Key inkWResponseKey = Key('InkResponse');
+    const Color splashColor = Color(0xff00ff00);
+
+    Widget buildWidget({InteractiveInkFeatureFactory? splashFactory}) {
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: SizedBox(
+              width: 100.0,
+              height: 200.0,
+              child: InkResponse(
+                key: inkWResponseKey,
+                splashColor: splashColor,
+                containedInkWell: true,
+                highlightShape: BoxShape.rectangle,
+                splashFactory: splashFactory,
+                onTap: () { },
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildWidget());
+
+    final Offset center = tester.getCenter(find.byType(SizedBox));
+    TestGesture gesture = await tester.startGesture(center);
+    await tester.pump(); // start gesture
+    await tester.pumpAndSettle(); // Finish rendering ink splash.
+
+    // Material 3 uses the InkSparkle which uses a shader, so we can't capture
+    // the effect with paint methods. Use a golden test instead.
+    await expectLater(
+      find.byKey(inkWResponseKey),
+      matchesGoldenFile('m3_ink_response.renders.ink_splash_from_its_center.0.png'),
+    );
+
+    await gesture.up();
+
+    await tester.pumpWidget(buildWidget(splashFactory: _InkRippleFactory()));
+    await tester.pumpAndSettle(); // Finish rendering ink splash.
+
+    gesture = await tester.startGesture(center);
+    await tester.pump(); // start gesture
+    await tester.pumpAndSettle(); // Finish rendering ink splash.
+
+    // Material 3 uses the InkSparkle which uses a shader, so we can't capture
+    // the effect with paint methods. Use a golden test instead.
+    await expectLater(
+      find.byKey(inkWResponseKey),
+      matchesGoldenFile('m3_ink_response.renders.ink_splash_from_its_center.1.png'),
     );
   });
 

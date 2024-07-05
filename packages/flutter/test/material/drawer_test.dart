@@ -9,11 +9,12 @@ import 'package:flutter_test/flutter_test.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
-  testWidgets('Drawer control test', (WidgetTester tester) async {
+  testWidgets('Material2 - Drawer control test', (WidgetTester tester) async {
     const Key containerKey = Key('container');
 
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           drawer: Drawer(
             child: ListView(
@@ -52,6 +53,54 @@ void main() {
     box = tester.renderObject(find.byKey(containerKey));
     expect(box.size.width, equals(drawerWidth - 2 * 16.0));
     expect(box.size.height, equals(drawerHeight - 2 * 16.0));
+
+    expect(find.text('header'), findsOneWidget);
+  });
+
+  testWidgets('Material3 - Drawer control test', (WidgetTester tester) async {
+    const Key containerKey = Key('container');
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: true),
+        home: Scaffold(
+          drawer: Drawer(
+            child: ListView(
+              children: <Widget>[
+                DrawerHeader(
+                  child: Container(
+                    key: containerKey,
+                    child: const Text('header'),
+                  ),
+                ),
+                const ListTile(
+                  leading: Icon(Icons.archive),
+                  title: Text('Archive'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Archive'), findsNothing);
+    final ScaffoldState state = tester.firstState(find.byType(Scaffold));
+    state.openDrawer();
+
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.text('Archive'), findsOneWidget);
+
+    RenderBox box = tester.renderObject(find.byType(DrawerHeader));
+    expect(box.size.height, equals(160.0 + 8.0 + 1.0)); // height + bottom margin + bottom edge
+
+    final double drawerWidth = box.size.width;
+    final double drawerHeight = box.size.height;
+
+    box = tester.renderObject(find.byKey(containerKey));
+    expect(box.size.width, equals(drawerWidth - 2 * 16.0));
+    expect(box.size.height, equals(drawerHeight - 2 * 16.0 - 1.0)); // Header divider thickness is 1.0 in Material 3.
 
     expect(find.text('header'), findsOneWidget);
   });
@@ -568,7 +617,7 @@ void main() {
     expect(box.size.width, equals(smallWidth));
   });
 
-  testWidgets('Drawer default shape (ltr)', (WidgetTester tester) async {
+  testWidgets('Material3 - Drawer default shape (ltr)', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(useMaterial3: true),
@@ -628,7 +677,7 @@ void main() {
     );
   });
 
-  testWidgets('Drawer default shape (rtl)', (WidgetTester tester) async {
+  testWidgets('Material3 - Drawer default shape (rtl)', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(useMaterial3: true),
@@ -688,7 +737,7 @@ void main() {
     );
   });
 
-  testWidgets('Drawer clip behavior', (WidgetTester tester) async {
+  testWidgets('Material3 - Drawer clip behavior', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(useMaterial3: true),
@@ -740,10 +789,11 @@ void main() {
   });
 
   group('Material 2', () {
-    // Tests that are only relevant for Material 2. Once ThemeData.useMaterial3
-    // is turned on by default, these tests can be removed.
+    // These tests are only relevant for Material 2. Once Material 2
+    // support is deprecated and the APIs are removed, these tests
+    // can be deleted.
 
-    testWidgets('Drawer default shape', (WidgetTester tester) async {
+    testWidgets('Material2 - Drawer default shape', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(useMaterial3: false),
@@ -784,7 +834,7 @@ void main() {
       expect(material.shape, null);
     });
 
-    testWidgets('Drawer clip behavior', (WidgetTester tester) async {
+    testWidgets('Material2 - Drawer clip behavior', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(useMaterial3: false),

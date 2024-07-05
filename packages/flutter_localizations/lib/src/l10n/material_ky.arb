@@ -25,6 +25,7 @@
   "continueButtonLabel": "Улантуу",
   "copyButtonLabel": "Көчүрүү",
   "cutButtonLabel": "Кесүү",
+  "scanTextButtonLabel": "Текстти скандоо",
   "okButtonLabel": "Макул",
   "pasteButtonLabel": "Чаптоо",
   "selectAllButtonLabel": "Баарын тандоо",
@@ -133,5 +134,17 @@
   "scrimLabel": "Кенеп",
   "bottomSheetLabel": "Ылдыйкы экран",
   "scrimOnTapHint": "$modalRouteContentName жабуу",
-  "keyboardKeyShift": "Shift"
+  "keyboardKeyShift": "Shift",
+  "expansionTileExpandedHint": "жыйыштыруу үчүн эки жолу таптаңыз",
+  "expansionTileCollapsedHint": "жайып көрсөтүү үчүн эки жолу таптаңыз",
+  "expansionTileExpandedTapHint": "Жыйыштыруу",
+  "expansionTileCollapsedTapHint": "Толук маалымат алуу үчүн жайып көрүңүз",
+  "expandedHint": "Жыйыштырылды",
+  "collapsedHint": "Жайылып көрсөтүлдү",
+  "menuDismissLabel": "Менюну жабуу",
+  "lookUpButtonLabel": "Издөө",
+  "searchWebButtonLabel": "Интернеттен издөө",
+  "shareButtonLabel": "Бөлүшүү…",
+  "clearButtonTooltip": "Clear text",
+  "selectedDateLabel": "Selected"
 }

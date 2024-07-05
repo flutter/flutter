@@ -76,4 +76,26 @@ void main() {
       expect(selectorNames, isNull);
     }
   }, variant: TargetPlatformVariant.all());
+
+  testWidgets('selector is called for ctrl + backspace on macOS', (WidgetTester tester) async {
+    List<dynamic>? selectorNames;
+    await SystemChannels.textInput.invokeMethod('TextInput.setClient', <dynamic>[1, <String, dynamic>{}]);
+    await SystemChannels.textInput.invokeMethod('TextInput.show');
+    SystemChannels.textInput.setMethodCallHandler((MethodCall call) async {
+      if (call.method == 'TextInputClient.performSelectors') {
+        selectorNames = (call.arguments as List<dynamic>)[1] as List<dynamic>;
+      }
+    });
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.control);
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.backspace);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.backspace);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.control);
+    await SystemChannels.textInput.invokeMethod('TextInput.clearClient');
+
+    if (defaultTargetPlatform == TargetPlatform.macOS) {
+      expect(selectorNames, <dynamic>['deleteBackwardByDecomposingPreviousCharacter:']);
+    } else {
+      expect(selectorNames, isNull);
+    }
+  }, variant: TargetPlatformVariant.all());
 }

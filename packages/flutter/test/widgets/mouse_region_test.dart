@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class HoverClient extends StatefulWidget {
   const HoverClient({
@@ -1768,7 +1769,11 @@ void main() {
 
   testWidgets("RenderMouseRegion's debugFillProperties when default", (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
-    RenderMouseRegion().debugFillProperties(builder);
+
+    final RenderMouseRegion renderMouseRegion = RenderMouseRegion();
+    addTearDown(renderMouseRegion.dispose);
+
+    renderMouseRegion.debugFillProperties(builder);
 
     final List<String> description = builder.properties.where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info)).map((DiagnosticsNode node) => node.toString()).toList();
 
@@ -1783,14 +1788,21 @@ void main() {
 
   testWidgets("RenderMouseRegion's debugFillProperties when full", (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
-    RenderMouseRegion(
+
+    final RenderErrorBox renderErrorBox = RenderErrorBox();
+    addTearDown(renderErrorBox.dispose);
+
+    final RenderMouseRegion renderMouseRegion = RenderMouseRegion(
       onEnter: (PointerEnterEvent event) {},
       onExit: (PointerExitEvent event) {},
       onHover: (PointerHoverEvent event) {},
       cursor: SystemMouseCursors.click,
       validForMouseTracker: false,
-      child: RenderErrorBox(),
-    ).debugFillProperties(builder);
+      child: renderErrorBox,
+    );
+    addTearDown(renderMouseRegion.dispose);
+
+    renderMouseRegion.debugFillProperties(builder);
 
     final List<String> description = builder.properties.where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info)).map((DiagnosticsNode node) => node.toString()).toList();
 
@@ -1825,7 +1837,10 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/67044
-  testWidgets('Handle mouse events should ignore the detached MouseTrackerAnnotation', (WidgetTester tester) async {
+  testWidgets('Handle mouse events should ignore the detached MouseTrackerAnnotation',
+  // TODO(polina-c): dispose gesture recognizers https://github.com/flutter/flutter/issues/145605 [leaks-to-clean]
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+  (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Center(
         child: Draggable<int>(

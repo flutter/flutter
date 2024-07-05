@@ -15,8 +15,8 @@ request permission.
 
 The [Cirrus](https://cirrus-ci.org)-based bots run the [`test.dart`](test.dart)
 script for each PR and submission. This does testing for the tools, for the
-framework, and (for submitted changes only) rebuilds and updates the master
-branch API docs [staging site](https://master-docs.flutter.dev/).
+framework, and (for submitted changes only) rebuilds and updates the main
+branch API docs [staging site](https://main-api.flutter.dev/).
 For tagged dev and beta builds, it also builds and deploys the gallery app to
 the app stores. It is configured by the [.cirrus.yml](/.cirrus.yml).
 

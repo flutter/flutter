@@ -14,6 +14,7 @@ void main() {
         restorationId: 'foo',
         debugOwner: 'owner',
       );
+      addTearDown(bucket1.dispose);
 
       await tester.pumpWidget(
         UnmanagedRestorationScope(
@@ -30,6 +31,8 @@ void main() {
         restorationId: 'foo2',
         debugOwner: 'owner',
       );
+      addTearDown(bucket2.dispose);
+
       await tester.pumpWidget(
         UnmanagedRestorationScope(
           bucket: bucket2,
@@ -51,11 +54,59 @@ void main() {
   });
 
   group('RestorationScope', () {
+    testWidgets('asserts when none is found', (WidgetTester tester) async {
+      late BuildContext capturedContext;
+      await tester.pumpWidget(WidgetsApp(
+        color: const Color(0xD0FF0000),
+        builder: (_, __) {
+          return RestorationScope(
+            restorationId: 'test',
+            child: Builder(
+              builder: (BuildContext context) {
+                capturedContext = context;
+                return Container();
+              }
+            )
+          );
+        },
+      ));
+      expect(
+        () {
+          RestorationScope.of(capturedContext);
+        },
+        throwsA(isA<FlutterError>().having(
+          (FlutterError error) => error.message,
+          'message',
+          contains('State restoration must be enabled for a RestorationScope'),
+        )),
+      );
+
+      await tester.pumpWidget(WidgetsApp(
+        restorationScopeId: 'test scope',
+        color: const Color(0xD0FF0000),
+        builder: (_, __) {
+          return RestorationScope(
+            restorationId: 'test',
+            child: Builder(
+              builder: (BuildContext context) {
+                capturedContext = context;
+                return Container();
+              }
+            )
+          );
+        },
+      ));
+      final UnmanagedRestorationScope scope = tester.widget(find.byType(UnmanagedRestorationScope).last);
+      expect(RestorationScope.of(capturedContext), scope.bucket);
+    });
+
     testWidgets('makes bucket available to descendants', (WidgetTester tester) async {
       const String id = 'hello world 1234';
       final MockRestorationManager manager = MockRestorationManager();
+      addTearDown(manager.dispose);
       final Map<String, dynamic> rawData = <String, dynamic>{};
       final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
+      addTearDown(root.dispose);
       expect(rawData, isEmpty);
 
       await tester.pumpWidget(
@@ -76,7 +127,9 @@ void main() {
 
     testWidgets('bucket for descendants contains data claimed from parent', (WidgetTester tester) async {
       final MockRestorationManager manager = MockRestorationManager();
+      addTearDown(manager.dispose);
       final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: _createRawDataSet());
+      addTearDown(root.dispose);
 
       await tester.pumpWidget(
         UnmanagedRestorationScope(
@@ -96,7 +149,9 @@ void main() {
 
     testWidgets('renames existing bucket when new ID is provided', (WidgetTester tester) async {
       final MockRestorationManager manager = MockRestorationManager();
+      addTearDown(manager.dispose);
       final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: _createRawDataSet());
+      addTearDown(root.dispose);
 
       await tester.pumpWidget(
         UnmanagedRestorationScope(
@@ -134,8 +189,10 @@ void main() {
 
     testWidgets('Disposing a scope removes its data', (WidgetTester tester) async {
       final MockRestorationManager manager = MockRestorationManager();
+      addTearDown(manager.dispose);
       final Map<String, dynamic> rawData = _createRawDataSet();
       final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
+      addTearDown(root.dispose);
 
       expect((rawData[childrenMapKey] as Map<String, dynamic>).containsKey('child1'), isTrue);
       await tester.pumpWidget(
@@ -163,7 +220,9 @@ void main() {
 
     testWidgets('no bucket for descendants when id is null', (WidgetTester tester) async {
       final MockRestorationManager manager = MockRestorationManager();
+      addTearDown(manager.dispose);
       final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: <String, dynamic>{});
+      addTearDown(root.dispose);
 
       await tester.pumpWidget(
         UnmanagedRestorationScope(
@@ -220,7 +279,10 @@ void main() {
 
       // Move it under a valid scope.
       final MockRestorationManager manager = MockRestorationManager();
+      addTearDown(manager.dispose);
       final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: <String, dynamic>{});
+      addTearDown(root.dispose);
+
       await tester.pumpWidget(
         UnmanagedRestorationScope(
           bucket: root,
@@ -260,8 +322,10 @@ void main() {
 
     testWidgets('moving scope moves its data', (WidgetTester tester) async {
       final MockRestorationManager manager = MockRestorationManager();
+      addTearDown(manager.dispose);
       final Map<String, dynamic> rawData = <String, dynamic>{};
       final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
+      addTearDown(root.dispose);
       final Key scopeKey = GlobalKey();
 
       await tester.pumpWidget(

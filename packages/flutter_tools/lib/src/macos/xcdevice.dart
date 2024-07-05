@@ -6,21 +6,26 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../artifacts.dart';
+import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
+import '../base/version.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../globals.dart' as globals;
+import '../ios/core_devices.dart';
 import '../ios/devices.dart';
 import '../ios/ios_deploy.dart';
 import '../ios/iproxy.dart';
 import '../ios/mac.dart';
+import '../ios/xcode_debug.dart';
 import '../reporting/reporting.dart';
 import 'xcode.dart';
 
@@ -64,6 +69,11 @@ class XCDevice {
     required Xcode xcode,
     required Platform platform,
     required IProxy iproxy,
+    required FileSystem fileSystem,
+    required Analytics analytics,
+    @visibleForTesting
+    IOSCoreDeviceControl? coreDeviceControl,
+    XcodeDebug? xcodeDebug,
   }) : _processUtils = ProcessUtils(logger: logger, processManager: processManager),
       _logger = logger,
       _iMobileDevice = IMobileDevice(
@@ -79,8 +89,21 @@ class XCDevice {
         platform: platform,
         processManager: processManager,
       ),
+      _coreDeviceControl = coreDeviceControl ?? IOSCoreDeviceControl(
+        logger: logger,
+        processManager: processManager,
+        xcode: xcode,
+        fileSystem: fileSystem,
+      ),
+      _xcodeDebug = xcodeDebug ?? XcodeDebug(
+        logger: logger,
+        processManager: processManager,
+        xcode: xcode,
+        fileSystem: fileSystem,
+      ),
       _iProxy = iproxy,
-      _xcode = xcode {
+      _xcode = xcode,
+      _analytics = analytics {
 
     _setupDeviceIdentifierByEventStream();
   }
@@ -98,6 +121,9 @@ class XCDevice {
   final IOSDeploy _iosDeploy;
   final Xcode _xcode;
   final IProxy _iProxy;
+  final IOSCoreDeviceControl _coreDeviceControl;
+  final XcodeDebug _xcodeDebug;
+  final Analytics _analytics;
 
   List<Object>? _cachedListResults;
 
@@ -170,7 +196,7 @@ class XCDevice {
   /// Observe identifiers (UDIDs) of devices as they attach and detach.
   ///
   /// Each attach and detach event contains information on the event type,
-  /// the event interface, and the device identifer.
+  /// the event interface, and the device identifier.
   Stream<XCDeviceEventNotification>? observedDeviceEvents() {
     if (!isInstalled) {
       _logger.printTrace("Xcode not found. Run 'flutter doctor' for more information.");
@@ -456,6 +482,17 @@ class XCDevice {
       return const <IOSDevice>[];
     }
 
+    final Map<String, IOSCoreDevice> coreDeviceMap = <String, IOSCoreDevice>{};
+    if (_xcode.isDevicectlInstalled) {
+      final List<IOSCoreDevice> coreDevices = await _coreDeviceControl.getCoreDevices();
+      for (final IOSCoreDevice device in coreDevices) {
+        if (device.udid == null) {
+          continue;
+        }
+        coreDeviceMap[device.udid!] = device;
+      }
+    }
+
     // [
     //  {
     //    "simulator" : true,
@@ -493,7 +530,7 @@ class XCDevice {
     //  },
     // ...
 
-    final List<IOSDevice> devices = <IOSDevice>[];
+    final Map<String, IOSDevice> deviceMap = <String, IOSDevice>{};
     for (final Object device in allAvailableDevices) {
       if (device is Map<String, Object?>) {
         // Only include iPhone, iPad, iPod, or other iOS devices.
@@ -505,14 +542,17 @@ class XCDevice {
         if (identifier == null || name == null) {
           continue;
         }
-
+        bool devModeEnabled = true;
         bool isConnected = true;
+        bool isPaired = true;
         final Map<String, Object?>? errorProperties = _errorProperties(device);
         if (errorProperties != null) {
           final String? errorMessage = _parseErrorMessage(errorProperties);
           if (errorMessage != null) {
             if (errorMessage.contains('not paired')) {
               UsageEvent('device', 'ios-trust-failure', flutterUsage: globals.flutterUsage).send();
+              _analytics.send(Event.appleUsageEvent(workflow: 'device', parameter: 'ios-trust-failure'));
+
             }
             _logger.printTrace(errorMessage);
           }
@@ -525,34 +565,87 @@ class XCDevice {
           if (code != -10) {
             isConnected = false;
           }
-        }
+          // Error: iPhone is not paired with your computer. To use iPhone with Xcode, unlock it and choose to trust this computer when prompted. (code -9)
+          if (code == -9) {
+            isPaired = false;
+          }
 
-        String? sdkVersion = _sdkVersion(device);
-
-        if (sdkVersion != null) {
-          final String? buildVersion = _buildVersion(device);
-          if (buildVersion != null) {
-            sdkVersion = '$sdkVersion $buildVersion';
+          if (code == 6) {
+            devModeEnabled = false;
           }
         }
 
-        devices.add(IOSDevice(
+        String? sdkVersionString = _sdkVersion(device);
+
+        if (sdkVersionString != null) {
+          final String? buildVersion = _buildVersion(device);
+          if (buildVersion != null) {
+            sdkVersionString = '$sdkVersionString $buildVersion';
+          }
+        }
+
+        // Duplicate entries started appearing in Xcode 15, possibly due to
+        // Xcode's new device connectivity stack.
+        // If a duplicate entry is found in `xcdevice list`, don't overwrite
+        // existing entry when the existing entry indicates the device is
+        // connected and the current entry indicates the device is not connected.
+        // Don't overwrite if current entry's sdkVersion is null.
+        // Don't overwrite if both entries indicate the device is not
+        // connected and the existing entry has a higher sdkVersion.
+        if (deviceMap.containsKey(identifier)) {
+          final IOSDevice deviceInMap = deviceMap[identifier]!;
+          if ((deviceInMap.isConnected && !isConnected) || sdkVersionString == null) {
+            continue;
+          }
+
+          final Version? sdkVersion = Version.parse(sdkVersionString);
+          if (!deviceInMap.isConnected &&
+              !isConnected &&
+              sdkVersion != null &&
+              deviceInMap.sdkVersion != null &&
+              deviceInMap.sdkVersion!.compareTo(sdkVersion) > 0) {
+            continue;
+          }
+        }
+
+        DeviceConnectionInterface connectionInterface = _interfaceType(device);
+
+        // CoreDevices (devices with iOS 17 and greater) no longer reflect the
+        // correct connection interface or developer mode status in `xcdevice`.
+        // Use `devicectl` to get that information for CoreDevices.
+        final IOSCoreDevice? coreDevice = coreDeviceMap[identifier];
+        if (coreDevice != null) {
+          if (coreDevice.connectionInterface != null) {
+            connectionInterface = coreDevice.connectionInterface!;
+          }
+
+          if (coreDevice.deviceProperties?.developerModeStatus != 'enabled') {
+            devModeEnabled = false;
+          }
+        }
+
+        deviceMap[identifier] = IOSDevice(
           identifier,
           name: name,
           cpuArchitecture: _cpuArchitecture(device),
-          connectionInterface: _interfaceType(device),
+          connectionInterface: connectionInterface,
           isConnected: isConnected,
-          sdkVersion: sdkVersion,
+          sdkVersion: sdkVersionString,
           iProxy: _iProxy,
           fileSystem: globals.fs,
           logger: _logger,
           iosDeploy: _iosDeploy,
           iMobileDevice: _iMobileDevice,
+          coreDeviceControl: _coreDeviceControl,
+          xcodeDebug: _xcodeDebug,
           platform: globals.platform,
-        ));
+          devModeEnabled: devModeEnabled,
+          isPaired: isPaired,
+          isCoreDevice: coreDevice != null,
+        );
       }
     }
-    return devices;
+    return deviceMap.values.toList();
   }
 
   /// Despite the name, com.apple.platform.iphoneos includes iPhone, iPads, and all iOS devices.
@@ -632,7 +725,7 @@ class XCDevice {
         }
         _logger.printWarning(
           'Unknown architecture $architecture, defaulting to '
-          '${getNameForDarwinArch(cpuArchitecture)}',
+          '${cpuArchitecture.name}',
         );
       }
     }

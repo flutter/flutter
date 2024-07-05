@@ -4,7 +4,7 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart' show clampDouble;
+import 'package:flutter/foundation.dart' show ValueListenable, clampDouble;
 import 'package:flutter/widgets.dart';
 
 import 'localizations.dart';
@@ -23,8 +23,8 @@ const double _kSelectionHandleRadius = 6;
 const double _kArrowScreenPadding = 26.0;
 
 /// Draws a single text selection handle with a bar and a ball.
-class _TextSelectionHandlePainter extends CustomPainter {
-  const _TextSelectionHandlePainter(this.color);
+class _CupertinoTextSelectionHandlePainter extends CustomPainter {
+  const _CupertinoTextSelectionHandlePainter(this.color);
 
   final Color color;
 
@@ -51,7 +51,7 @@ class _TextSelectionHandlePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_TextSelectionHandlePainter oldPainter) => color != oldPainter.color;
+  bool shouldRepaint(_CupertinoTextSelectionHandlePainter oldPainter) => color != oldPainter.color;
 }
 
 /// iOS Cupertino styled text selection handle controls.
@@ -92,7 +92,7 @@ class CupertinoTextSelectionControls extends TextSelectionControls {
     Offset selectionMidpoint,
     List<TextSelectionPoint> endpoints,
     TextSelectionDelegate delegate,
-    ValueNotifier<ClipboardStatus>? clipboardStatus,
+    ValueListenable<ClipboardStatus>? clipboardStatus,
     Offset? lastSecondaryTapDownPosition,
   ) {
     return _CupertinoTextSelectionControlsToolbar(
@@ -116,7 +116,7 @@ class CupertinoTextSelectionControls extends TextSelectionControls {
     final Widget handle;
 
     final Widget customPaint = CustomPaint(
-      painter: _TextSelectionHandlePainter(CupertinoTheme.of(context).primaryColor),
+      painter: _CupertinoTextSelectionHandlePainter(CupertinoTheme.of(context).primaryColor),
     );
 
     // [buildHandle]'s widget is positioned at the selection cursor's bottom
@@ -184,11 +184,10 @@ class CupertinoTextSelectionControls extends TextSelectionControls {
   }
 }
 
+// TODO(justinmc): Deprecate this after TextSelectionControls.buildToolbar is
+// deleted, when users should migrate back to cupertinoTextSelectionControls.
+// See https://github.com/flutter/flutter/pull/124262
 /// Text selection handle controls that follow iOS design conventions.
-@Deprecated(
-  'Use `cupertinoTextSelectionControls` instead. '
-  'This feature was deprecated after v3.3.0-0.5.pre.',
-)
 final TextSelectionControls cupertinoTextSelectionHandleControls =
     CupertinoTextSelectionHandleControls();
 
@@ -210,7 +209,7 @@ class _CupertinoTextSelectionControlsToolbar extends StatefulWidget {
     required this.textLineHeight,
   });
 
-  final ValueNotifier<ClipboardStatus>? clipboardStatus;
+  final ValueListenable<ClipboardStatus>? clipboardStatus;
   final List<TextSelectionPoint> endpoints;
   final Rect globalEditableRegion;
   final VoidCallback? handleCopy;

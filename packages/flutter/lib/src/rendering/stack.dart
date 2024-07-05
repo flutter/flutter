@@ -18,21 +18,19 @@ import 'object.dart';
 /// container, this class has no width and height members. To determine the
 /// width or height of the rectangle, convert it to a [Rect] using [toRect()]
 /// (passing the container's own Rect), and then examine that object.
-///
-/// The fields [left], [right], [bottom], and [top] must not be null.
 @immutable
 class RelativeRect {
   /// Creates a RelativeRect with the given values.
-  ///
-  /// The arguments must not be null.
   const RelativeRect.fromLTRB(this.left, this.top, this.right, this.bottom);
 
   /// Creates a RelativeRect from a Rect and a Size. The Rect (first argument)
   /// and the RelativeRect (the output) are in the coordinate space of the
   /// rectangle described by the Size, with 0,0 being at the top left.
-  factory RelativeRect.fromSize(Rect rect, Size container) {
-    return RelativeRect.fromLTRB(rect.left, rect.top, container.width - rect.right, container.height - rect.bottom);
-  }
+  RelativeRect.fromSize(Rect rect, Size container)
+      : left = rect.left,
+        top = rect.top,
+        right = container.width - rect.right,
+        bottom = container.height - rect.bottom;
 
   /// Creates a RelativeRect from two Rects. The second Rect provides the
   /// container, the first provides the rectangle, in the same coordinate space,
@@ -46,14 +44,11 @@ class RelativeRect {
   /// If the first rect is actually in the container's coordinate space, then
   /// use [RelativeRect.fromSize] and pass the container's size as the second
   /// argument instead.
-  factory RelativeRect.fromRect(Rect rect, Rect container) {
-    return RelativeRect.fromLTRB(
-      rect.left - container.left,
-      rect.top - container.top,
-      container.right - rect.right,
-      container.bottom - rect.bottom,
-    );
-  }
+  RelativeRect.fromRect(Rect rect, Rect container)
+      : left = rect.left - container.left,
+        top = rect.top - container.top,
+        right = container.right - rect.right,
+        bottom = container.bottom - rect.bottom;
 
   /// Creates a RelativeRect from horizontal position using `start` and `end`
   /// rather than `left` and `right`.
@@ -70,17 +65,10 @@ class RelativeRect {
     required double end,
     required double bottom,
   }) {
-    double left;
-    double right;
-    switch (textDirection) {
-      case TextDirection.rtl:
-        left = end;
-        right = start;
-      case TextDirection.ltr:
-        left = start;
-        right = end;
-    }
-
+    final (double left, double right) = switch (textDirection) {
+      TextDirection.rtl => (end, start),
+      TextDirection.ltr => (start, end),
+    };
     return RelativeRect.fromLTRB(left, top, right, bottom);
   }
 
@@ -435,7 +423,16 @@ class RenderStack extends RenderBox
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
-  /// Defaults to [Clip.hardEdge], and must not be null.
+  /// Stacks only clip children whose geometry overflow the stack. A child that
+  /// paints outside its bounds (e.g. a box with a shadow) will not be clipped,
+  /// regardless of the value of this property. Similarly, a child that itself
+  /// has a descendant that overflows the stack will not be clipped, as only the
+  /// geometry of the stack's direct children are considered.
+  ///
+  /// To clip children whose geometry does not overflow the stack, consider
+  /// using a [RenderClipRect] render object.
+  ///
+  /// Defaults to [Clip.hardEdge].
   Clip get clipBehavior => _clipBehavior;
   Clip _clipBehavior = Clip.hardEdge;
   set clipBehavior(Clip value) {
@@ -542,7 +539,8 @@ class RenderStack extends RenderBox
   }
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  @protected
+  Size computeDryLayout(covariant BoxConstraints constraints) {
     return _computeSize(
       constraints: constraints,
       layoutChild: ChildLayoutHelper.dryLayoutChild,
@@ -560,15 +558,11 @@ class RenderStack extends RenderBox
     double width = constraints.minWidth;
     double height = constraints.minHeight;
 
-    final BoxConstraints nonPositionedConstraints;
-    switch (fit) {
-      case StackFit.loose:
-        nonPositionedConstraints = constraints.loosen();
-      case StackFit.expand:
-        nonPositionedConstraints = BoxConstraints.tight(constraints.biggest);
-      case StackFit.passthrough:
-        nonPositionedConstraints = constraints;
-    }
+    final BoxConstraints nonPositionedConstraints = switch (fit) {
+      StackFit.loose => constraints.loosen(),
+      StackFit.expand => BoxConstraints.tight(constraints.biggest),
+      StackFit.passthrough => constraints,
+    };
 
     RenderBox? child = firstChild;
     while (child != null) {
@@ -706,8 +700,9 @@ class RenderIndexedStack extends RenderStack {
 
   @override
   void visitChildrenForSemantics(RenderObjectVisitor visitor) {
-    if (index != null && firstChild != null) {
-      visitor(_childAtIndex());
+    final RenderBox? displayedChild = _childAtIndex();
+    if (displayedChild != null) {
+      visitor(displayedChild);
     }
   }
 
@@ -721,45 +716,55 @@ class RenderIndexedStack extends RenderStack {
     }
   }
 
-  RenderBox _childAtIndex() {
-    assert(index != null);
-    RenderBox? child = firstChild;
-    int i = 0;
-    while (child != null && i < index!) {
-      final StackParentData childParentData = child.parentData! as StackParentData;
-      child = childParentData.nextSibling;
-      i += 1;
+  RenderBox? _childAtIndex() {
+    final int? index = this.index;
+    if (index == null) {
+      return null;
     }
-    assert(i == index);
-    assert(child != null);
-    return child!;
+    RenderBox? child = firstChild;
+    for (int i = 0; i < index && child != null; i += 1) {
+      child = childAfter(child);
+    }
+    assert(firstChild == null || child != null);
+    return child;
+  }
+
+  @override
+  double? computeDistanceToActualBaseline(TextBaseline baseline) {
+    final RenderBox? displayedChild = _childAtIndex();
+    if (displayedChild == null) {
+      return null;
+    }
+    final StackParentData childParentData = displayedChild.parentData! as StackParentData;
+    final BaselineOffset offset = BaselineOffset(displayedChild.getDistanceToActualBaseline(baseline)) + childParentData.offset.dy;
+    return offset.offset;
   }
 
   @override
   bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
-    if (firstChild == null || index == null) {
+    final RenderBox? displayedChild = _childAtIndex();
+    if (displayedChild == null) {
       return false;
     }
-    final RenderBox child = _childAtIndex();
-    final StackParentData childParentData = child.parentData! as StackParentData;
+    final StackParentData childParentData = displayedChild.parentData! as StackParentData;
     return result.addWithPaintOffset(
       offset: childParentData.offset,
       position: position,
       hitTest: (BoxHitTestResult result, Offset transformed) {
         assert(transformed == position - childParentData.offset);
-        return child.hitTest(result, position: transformed);
+        return displayedChild.hitTest(result, position: transformed);
       },
     );
   }
 
   @override
   void paintStack(PaintingContext context, Offset offset) {
-    if (firstChild == null || index == null) {
+    final RenderBox? displayedChild = _childAtIndex();
+    if (displayedChild == null) {
       return;
     }
-    final RenderBox child = _childAtIndex();
-    final StackParentData childParentData = child.parentData! as StackParentData;
-    context.paintChild(child, childParentData.offset + offset);
+    final StackParentData childParentData = displayedChild.parentData! as StackParentData;
+    context.paintChild(displayedChild, childParentData.offset + offset);
   }
 
   @override

@@ -6,10 +6,10 @@ import 'package:flutter/material.dart';
 
 /// Flutter code sample for [CustomMultiChildLayout].
 
-void main() => runApp(const ExampleApp());
+void main() => runApp(const CustomMultiChildLayoutApp());
 
-class ExampleApp extends StatelessWidget {
-  const ExampleApp({super.key});
+class CustomMultiChildLayoutApp extends StatelessWidget {
+  const CustomMultiChildLayoutApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +19,7 @@ class ExampleApp extends StatelessWidget {
         // see the layout change.
         textDirection: TextDirection.ltr,
         child: Scaffold(
-          body: ExampleWidget(),
+          body: CustomMultiChildLayoutExample(),
         ),
       ),
     );
@@ -82,8 +82,8 @@ class _CascadeLayoutDelegate extends MultiChildLayoutDelegate {
   }
 }
 
-class ExampleWidget extends StatelessWidget {
-  const ExampleWidget({super.key});
+class CustomMultiChildLayoutExample extends StatelessWidget {
+  const CustomMultiChildLayoutExample({super.key});
 
   static const Map<String, Color> _colors = <String, Color>{
     'Red': Colors.red,
@@ -102,7 +102,7 @@ class ExampleWidget extends StatelessWidget {
       ),
       children: <Widget>[
         // Create all of the colored boxes in the colors map.
-        for (MapEntry<String, Color> entry in _colors.entries)
+        for (final MapEntry<String, Color> entry in _colors.entries)
           // The "id" can be any Object, not just a String.
           LayoutId(
             id: entry.key,

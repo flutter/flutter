@@ -13,8 +13,9 @@ class CustomListItemApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: CustomListItemExample(),
+    return MaterialApp(
+      theme: ThemeData(useMaterial3: true),
+      home: const CustomListItemExample(),
     );
   }
 }
@@ -39,51 +40,38 @@ class _ArticleDescription extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Text(
-                title,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const Padding(padding: EdgeInsets.only(bottom: 2.0)),
-              Text(
-                subtitle,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontSize: 12.0,
-                  color: Colors.black54,
-                ),
-              ),
-            ],
+        Text(
+          title,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
           ),
         ),
+        const Padding(padding: EdgeInsets.only(bottom: 2.0)),
         Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: <Widget>[
-              Text(
-                author,
-                style: const TextStyle(
-                  fontSize: 12.0,
-                  color: Colors.black87,
-                ),
-              ),
-              Text(
-                '$publishDate - $readDuration',
-                style: const TextStyle(
-                  fontSize: 12.0,
-                  color: Colors.black54,
-                ),
-              ),
-            ],
+          child: Text(
+            subtitle,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              fontSize: 12.0,
+              color: Colors.black54,
+            ),
+          ),
+        ),
+        Text(
+          author,
+          style: const TextStyle(
+            fontSize: 12.0,
+            color: Colors.black87,
+          ),
+        ),
+        Text(
+          '$publishDate - $readDuration',
+          style: const TextStyle(
+            fontSize: 12.0,
+            color: Colors.black54,
           ),
         ),
       ],

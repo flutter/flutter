@@ -89,8 +89,6 @@ class IconButtonThemeData with Diagnosticable {
 ///    [ButtonStyle] for [IconButton]s below the overall [Theme].
 class IconButtonTheme extends InheritedTheme {
   /// Create a [IconButtonTheme].
-  ///
-  /// The [data] parameter must not be null.
   const IconButtonTheme({
     super.key,
     required this.data,

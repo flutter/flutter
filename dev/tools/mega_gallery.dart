@@ -85,8 +85,16 @@ void main(List<String> args) {
   pubspec = pubspec.replaceAll('../../packages/flutter', '../../../packages/flutter');
   _file(out, 'pubspec.yaml').writeAsStringSync(pubspec);
 
-  // Remove the (flutter_gallery specific) analysis_options.yaml file.
-  _file(out, 'analysis_options.yaml').deleteSync();
+  // Replace the (flutter_gallery specific) analysis_options.yaml file with a default one.
+  _file(out, 'analysis_options.yaml').writeAsStringSync(
+    '''
+analyzer:
+  errors:
+    # See analysis_options.yaml in the flutter root for context.
+    deprecated_member_use: ignore
+    deprecated_member_use_from_same_package: ignore
+'''
+  );
 
   _file(out, '.dartignore').writeAsStringSync('');
 

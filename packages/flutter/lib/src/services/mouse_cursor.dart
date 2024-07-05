@@ -102,8 +102,6 @@ class MouseCursorManager {
 ///    will no longer be used in the future.
 abstract class MouseCursorSession {
   /// Create a session.
-  ///
-  /// All arguments must be non-null.
   MouseCursorSession(this.cursor, this.device);
 
   /// The cursor that created this session.
@@ -207,7 +205,7 @@ abstract class MouseCursor with Diagnosticable {
   /// to make debug information more readable. It is returned as the [toString]
   /// when the diagnostic level is at or above [DiagnosticLevel.info].
   ///
-  /// The [debugDescription] must not be null or empty string.
+  /// The [debugDescription] must not be empty.
   String get debugDescription;
 
   @override
@@ -401,11 +399,7 @@ class SystemMouseCursor extends MouseCursor {
 /// The cursors should be named based on the cursors' use cases instead of their
 /// appearance, because different platforms might (although not commonly) use
 /// different shapes for the same use case.
-class SystemMouseCursors {
-  // This class only contains static members, and should not be instantiated or
-  // extended.
-  SystemMouseCursors._();
-
+abstract final class SystemMouseCursors {
   // The mapping in this class must be kept in sync with the following files in
   // the engine:
   //

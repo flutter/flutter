@@ -30,6 +30,7 @@ void main() {
     }
 
     final ForcePressGestureRecognizer force = ForcePressGestureRecognizer();
+    addTearDown(force.dispose);
 
     force.onStart = onStart;
     force.onPeak = (ForcePressDetails details) => peaked += 1;
@@ -113,6 +114,7 @@ void main() {
       int ended = 0;
 
       final ForcePressGestureRecognizer force = ForcePressGestureRecognizer();
+      addTearDown(force.dispose);
 
       force.onStart = (ForcePressDetails details) => started += 1;
       force.onPeak = (ForcePressDetails details) => peaked += 1;
@@ -167,6 +169,7 @@ void main() {
     int ended = 0;
 
     final ForcePressGestureRecognizer force = ForcePressGestureRecognizer();
+    addTearDown(force.dispose);
 
     force.onStart = (_) => started += 1;
     force.onPeak = (_) => peaked += 1;
@@ -204,6 +207,7 @@ void main() {
 
   testGesture('Should recognize drag and not force touch if there is a drag recognizer', (GestureTester tester) {
     final PanGestureRecognizer drag = PanGestureRecognizer();
+    addTearDown(drag.dispose);
 
     // Device specific constants that represent those from the iPhone X
     const double pressureMin = 0;
@@ -215,6 +219,7 @@ void main() {
     int ended = 0;
 
     final ForcePressGestureRecognizer force = ForcePressGestureRecognizer();
+    addTearDown(force.dispose);
 
     force.onStart = (_) => started += 1;
     force.onPeak = (_) => peaked += 1;
@@ -276,6 +281,7 @@ void main() {
 
   testGesture('Should not call ended on pointer up if the gesture was never accepted', (GestureTester tester) {
     final PanGestureRecognizer drag = PanGestureRecognizer();
+    addTearDown(drag.dispose);
 
     // Device specific constants that represent those from the iPhone X
     const double pressureMin = 0;
@@ -287,6 +293,7 @@ void main() {
     int ended = 0;
 
     final ForcePressGestureRecognizer force = ForcePressGestureRecognizer();
+    addTearDown(force.dispose);
 
     force.onStart = (_) => started += 1;
     force.onPeak = (_) => peaked += 1;
@@ -321,6 +328,7 @@ void main() {
 
   testGesture('Should call start only once if there is a competing gesture recognizer', (GestureTester tester) {
     final PanGestureRecognizer drag = PanGestureRecognizer();
+    addTearDown(drag.dispose);
 
     // Device specific constants that represent those from the iPhone X
     const double pressureMin = 0;
@@ -332,6 +340,7 @@ void main() {
     int ended = 0;
 
     final ForcePressGestureRecognizer force = ForcePressGestureRecognizer();
+    addTearDown(force.dispose);
 
     force.onStart = (_) => started += 1;
     force.onPeak = (_) => peaked += 1;
@@ -398,6 +407,7 @@ void main() {
     }
 
     final ForcePressGestureRecognizer force = ForcePressGestureRecognizer(interpolation: interpolateWithEasing);
+    addTearDown(force.dispose);
 
     force.onStart = onStart;
     force.onPeak = (ForcePressDetails details) => peaked += 1;
@@ -488,6 +498,7 @@ void main() {
     int ended = 0;
 
     final ForcePressGestureRecognizer force = ForcePressGestureRecognizer();
+    addTearDown(force.dispose);
 
     force.onStart = (_) => started += 1;
     force.onPeak = (_) => peaked += 1;
@@ -536,6 +547,7 @@ void main() {
     int ended = 0;
 
     final ForcePressGestureRecognizer force = ForcePressGestureRecognizer();
+    addTearDown(force.dispose);
 
     force.onStart = (_) => started += 1;
     force.onPeak = (_) => peaked += 1;

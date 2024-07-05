@@ -74,8 +74,6 @@ typedef ExpansionPanelHeaderBuilder = Widget Function(BuildContext context, bool
 class ExpansionPanel {
   /// Creates an expansion panel to be used as a child for [ExpansionPanelList].
   /// See [ExpansionPanelList] for an example on how to use this widget.
-  ///
-  /// The [headerBuilder], [body], and [isExpanded] arguments must not be null.
   ExpansionPanel({
     required this.headerBuilder,
     required this.body,
@@ -120,8 +118,7 @@ class ExpansionPanel {
 class ExpansionPanelRadio extends ExpansionPanel {
   /// An expansion panel that allows for radio functionality.
   ///
-  /// A unique [value] must be passed into the constructor. The
-  /// [headerBuilder], [body], [value] must not be null.
+  /// A unique [value] must be passed into the constructor.
   ExpansionPanelRadio({
     required this.value,
     required super.headerBuilder,
@@ -160,8 +157,6 @@ class ExpansionPanelRadio extends ExpansionPanel {
 class ExpansionPanelList extends StatefulWidget {
   /// Creates an expansion panel list widget. The [expansionCallback] is
   /// triggered when an expansion panel expand/collapse button is pushed.
-  ///
-  /// The [children] and [animationDuration] arguments must not be null.
   const ExpansionPanelList({
     super.key,
     this.children = const <ExpansionPanel>[],
@@ -171,15 +166,15 @@ class ExpansionPanelList extends StatefulWidget {
     this.dividerColor,
     this.elevation = 2,
     this.expandIconColor,
+    this.materialGapSize = 16.0,
   }) : _allowOnlyOnePanelOpen = false,
        initialOpenPanelValue = null;
 
   /// Creates a radio expansion panel list widget.
   ///
-  /// This widget allows for at most one panel in the list to be open.
-  /// The expansion panel callback is triggered when an expansion panel
-  /// expand/collapse button is pushed. The [children] and [animationDuration]
-  /// arguments must not be null. The [children] objects must be instances
+  /// This widget allows for at most one panel in the list to be open. The
+  /// expansion panel callback is triggered when an expansion panel
+  /// expand/collapse button is pushed. The [children] objects must be instances
   /// of [ExpansionPanelRadio].
   ///
   /// {@tool dartpad}
@@ -197,6 +192,7 @@ class ExpansionPanelList extends StatefulWidget {
     this.dividerColor,
     this.elevation = 2,
     this.expandIconColor,
+    this.materialGapSize = 16.0,
   }) : _allowOnlyOnePanelOpen = true;
 
   /// The children of the expansion panel list. They are laid out in a similar
@@ -253,6 +249,12 @@ class ExpansionPanelList extends StatefulWidget {
   /// {@macro flutter.material.ExpandIcon.color}
   final Color? expandIconColor;
 
+  /// Defines the [MaterialGap.size] of the [MaterialGap] which is placed
+  /// between the [ExpansionPanelList.children] when they're expanded.
+  ///
+  /// Defaults to `16.0`.
+  final double materialGapSize;
+
   @override
   State<StatefulWidget> createState() => _ExpansionPanelListState();
 }
@@ -305,9 +307,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
     return widget.children[index].isExpanded;
   }
 
-  void _handlePressed(bool isExpanded, int index) {
-    widget.expansionCallback?.call(index, isExpanded);
-
+ void _handlePressed(bool isExpanded, int index) {
     if (widget._allowOnlyOnePanelOpen) {
       final ExpansionPanelRadio pressedChild = widget.children[index] as ExpansionPanelRadio;
 
@@ -326,6 +326,8 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
         _currentOpenPanel = isExpanded ? null : pressedChild;
       });
     }
+    // !isExpanded is passed because, when _handlePressed, the state of the panel to expand is not yet expanded.
+    widget.expansionCallback?.call(index, !isExpanded);
   }
 
   ExpansionPanelRadio? searchPanelByValue(List<ExpansionPanelRadio> panels, Object? value)  {
@@ -348,7 +350,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
 
     for (int index = 0; index < widget.children.length; index += 1) {
       if (_isChildExpanded(index) && index != 0 && !_isChildExpanded(index - 1)) {
-        items.add(MaterialGap(key: _SaltedKey<BuildContext, int>(context, index * 2 - 1)));
+        items.add(MaterialGap(key: _SaltedKey<BuildContext, int>(context, index * 2 - 1), size: widget.materialGapSize));
       }
 
       final ExpansionPanel child = widget.children[index];
@@ -422,7 +424,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
       );
 
       if (_isChildExpanded(index) && index != widget.children.length - 1) {
-        items.add(MaterialGap(key: _SaltedKey<BuildContext, int>(context, index * 2 + 1)));
+        items.add(MaterialGap(key: _SaltedKey<BuildContext, int>(context, index * 2 + 1), size: widget.materialGapSize));
       }
     }
 

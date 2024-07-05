@@ -10,7 +10,7 @@ void main() {
       (WidgetTester tester) async {
     int mutatedIndex = -1;
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
-    final ThemeData theme= ThemeData.from(colorScheme: const ColorScheme.light());
+    final ThemeData theme = ThemeData();
     widgetSetup(tester, 3000, viewHeight: 3000);
     final Widget widget = _buildWidget(
       scaffoldKey,
@@ -53,7 +53,7 @@ void main() {
       (WidgetTester tester) async {
     const Color color = Colors.yellow;
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
-    final ThemeData theme= ThemeData.from(colorScheme: const ColorScheme.light());
+    final ThemeData theme = ThemeData();
 
     await tester.pumpWidget(
       _buildWidget(
@@ -82,11 +82,49 @@ void main() {
     expect(_getMaterial(tester).color, equals(color));
   });
 
+  testWidgets('NavigationDrawer can update destination background color',
+      (WidgetTester tester) async {
+    const Color color = Colors.yellow;
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    final ThemeData theme = ThemeData();
+
+    await tester.pumpWidget(
+      _buildWidget(
+        scaffoldKey,
+        NavigationDrawer(
+          children: <Widget>[
+            Text('Headline', style: theme.textTheme.bodyLarge),
+            NavigationDrawerDestination(
+              icon: Icon(Icons.ac_unit, color: theme.iconTheme.color),
+              label: Text('AC', style: theme.textTheme.bodySmall),
+              backgroundColor: color,
+            ),
+            NavigationDrawerDestination(
+              icon: Icon(Icons.access_alarm, color: theme.iconTheme.color),
+              label: Text('Alarm', style: theme.textTheme.bodySmall),
+              backgroundColor: color,
+            ),
+          ],
+          onDestinationSelected: (int i) {},
+        ),
+      ),
+    );
+
+    scaffoldKey.currentState!.openDrawer();
+    await tester.pump(const Duration(seconds: 1)); // animation done
+    final Container destinationColor = tester.firstWidget<Container>(
+      find.descendant(
+          of: find.byType(NavigationDrawerDestination), matching: find.byType(Container)),
+    );
+
+    expect(destinationColor.color, equals(color));
+  });
+
   testWidgets('NavigationDrawer can update elevation',
       (WidgetTester tester) async {
     const double elevation = 42.0;
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
-    final ThemeData theme= ThemeData.from(colorScheme: const ColorScheme.light());
+    final ThemeData theme = ThemeData();
     final NavigationDrawer drawer = NavigationDrawer(
       elevation: elevation,
       children: <Widget>[
@@ -115,41 +153,52 @@ void main() {
   });
 
   testWidgets(
-      'NavigationDrawer uses proper defaults when no parameters are given',
+    'NavigationDrawer uses proper defaults when no parameters are given',
       (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
-    final ThemeData theme= ThemeData.from(colorScheme: const ColorScheme.light());
-    // M3 settings from the token database.
+    final ThemeData theme = ThemeData(useMaterial3: true);
     await tester.pumpWidget(
       _buildWidget(
         scaffoldKey,
-        Theme(
-          data: ThemeData.light().copyWith(useMaterial3: true),
-          child: NavigationDrawer(
-            children: <Widget>[
-              Text('Headline', style: theme.textTheme.bodyLarge),
-              NavigationDrawerDestination(
-                icon: Icon(Icons.ac_unit, color: theme.iconTheme.color),
-                label: Text('AC', style: theme.textTheme.bodySmall),
-              ),
-              NavigationDrawerDestination(
-                icon: Icon(Icons.access_alarm, color: theme.iconTheme.color),
-                label: Text('Alarm', style: theme.textTheme.bodySmall),
-              ),
-            ],
-            onDestinationSelected: (int i) {},
-          ),
+        NavigationDrawer(
+          children: <Widget>[
+            Text('Headline', style: theme.textTheme.bodyLarge),
+            const NavigationDrawerDestination(
+              icon: Icon(Icons.ac_unit),
+              label: Text('AC'),
+            ),
+            const NavigationDrawerDestination(
+              icon: Icon(Icons.access_alarm),
+              label: Text('Alarm'),
+            ),
+          ],
+          onDestinationSelected: (int i) {},
         ),
+        useMaterial3: theme.useMaterial3,
       ),
     );
     scaffoldKey.currentState!.openDrawer();
     await tester.pump(const Duration(seconds: 1));
 
-    expect(_getMaterial(tester).color, ThemeData().colorScheme.surface);
-    expect(_getMaterial(tester).surfaceTintColor, ThemeData().colorScheme.surfaceTint);
+    // Test drawer Material.
+    expect(_getMaterial(tester).color, theme.colorScheme.surfaceContainerLow);
+    expect(_getMaterial(tester).surfaceTintColor, Colors.transparent);
+    expect(_getMaterial(tester).shadowColor, Colors.transparent);
     expect(_getMaterial(tester).elevation, 1);
-    expect(_getIndicatorDecoration(tester)?.color, const Color(0xff2196f3));
+    // Test indicator decoration.
+    expect(_getIndicatorDecoration(tester)?.color, theme.colorScheme.secondaryContainer);
     expect(_getIndicatorDecoration(tester)?.shape, const StadiumBorder());
+    // Test selected and unselected icon colors.
+    expect(_iconStyle(tester, Icons.ac_unit)?.color, theme.colorScheme.onSecondaryContainer);
+    expect(_iconStyle(tester, Icons.access_alarm)?.color, theme.colorScheme.onSurfaceVariant);
+    // Test selected and unselected label colors.
+    expect(_labelStyle(tester, 'AC')?.color, theme.colorScheme.onSecondaryContainer);
+    expect(_labelStyle(tester, 'Alarm')?.color, theme.colorScheme.onSurfaceVariant);
+    // Test that the icon and label are the correct size.
+    RenderBox iconBox = tester.renderObject(find.byIcon(Icons.ac_unit));
+    expect(iconBox.size, const Size(24.0, 24.0));
+    iconBox = tester.renderObject(find.byIcon(Icons.access_alarm));
+    expect(iconBox.size, const Size(24.0, 24.0));
   });
 
   testWidgets('Navigation drawer is scrollable', (WidgetTester tester) async {
@@ -160,7 +209,7 @@ void main() {
         scaffoldKey,
         NavigationDrawer(
           children: <Widget>[
-            for(int i = 0; i < 100; i++)
+            for (int i = 0; i < 100; i++)
               NavigationDrawerDestination(
                 icon: const Icon(Icons.ac_unit),
                 label: Text('Label$i'),
@@ -213,7 +262,7 @@ void main() {
             key: scaffoldKey,
             drawer: NavigationDrawer(
                   children: <Widget>[
-                    for(int i = 0; i < 10; i++)
+                    for (int i = 0; i < 10; i++)
                       NavigationDrawerDestination(
                         icon: const Icon(Icons.ac_unit),
                         label: Text('Label$i'),
@@ -242,7 +291,7 @@ void main() {
 
   testWidgets('Navigation drawer semantics', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
-    final ThemeData theme= ThemeData.from(colorScheme: const ColorScheme.light());
+    final ThemeData theme = ThemeData();
     Widget widget({int selectedIndex = 0}) {
       return _buildWidget(
         scaffoldKey,
@@ -360,11 +409,85 @@ void main() {
     // Test that InkWell for hover, focus and pressed use custom shape.
     expect(_getInkWell(tester)?.customBorder, shape);
   });
+
+  testWidgets('NavigationDrawer.tilePadding defaults to EdgeInsets.symmetric(horizontal: 12.0)', (WidgetTester tester) async {
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    widgetSetup(tester, 3000, viewHeight: 3000);
+    final Widget widget = _buildWidget(
+      scaffoldKey,
+      NavigationDrawer(
+        children: const <Widget>[
+          NavigationDrawerDestination(
+            icon: Icon(Icons.ac_unit),
+            label: Text('AC'),
+          ),
+        ],
+        onDestinationSelected: (int i) {},
+      ),
+    );
+
+    await tester.pumpWidget(widget);
+    scaffoldKey.currentState?.openDrawer();
+    await tester.pump();
+    final NavigationDrawer drawer = tester.widget(find.byType(NavigationDrawer));
+    expect(drawer.tilePadding, const EdgeInsets.symmetric(horizontal: 12.0));
+  });
+
+  testWidgets('Destinations respect their disabled state', (WidgetTester tester) async {
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    int selectedIndex = 0;
+
+    widgetSetup(tester, 800);
+
+    final Widget widget = _buildWidget(
+      scaffoldKey,
+      NavigationDrawer(
+        children: const <Widget>[
+          NavigationDrawerDestination(
+            icon: Icon(Icons.ac_unit),
+            label: Text('AC'),
+          ),
+          NavigationDrawerDestination(
+            icon: Icon(Icons.access_alarm),
+            label: Text('Alarm'),
+          ),
+          NavigationDrawerDestination(
+            icon: Icon(Icons.accessible),
+            label: Text('Accessible'),
+            enabled: false,
+          ),
+        ],
+        onDestinationSelected: (int i) {
+          selectedIndex = i;
+        },
+      ),
+    );
+
+    await tester.pumpWidget(widget);
+    scaffoldKey.currentState!.openDrawer();
+    await tester.pump();
+
+    expect(find.text('AC'), findsOneWidget);
+    expect(find.text('Alarm'), findsOneWidget);
+    expect(find.text('Accessible'), findsOneWidget);
+
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(selectedIndex, 0);
+
+    await tester.tap(find.text('Alarm'));
+    expect(selectedIndex, 1);
+
+    await tester.tap(find.text('Accessible'));
+    expect(selectedIndex, 1);
+
+    tester.pumpAndSettle();
+  });
 }
 
-Widget _buildWidget(GlobalKey<ScaffoldState> scaffoldKey, Widget child) {
+Widget _buildWidget(GlobalKey<ScaffoldState> scaffoldKey, Widget child, { bool? useMaterial3 }) {
   return MaterialApp(
-    theme: ThemeData.light(),
+    theme: ThemeData(useMaterial3: useMaterial3),
     home: Scaffold(
       key: scaffoldKey,
       drawer: child,
@@ -396,6 +519,20 @@ ShapeDecoration? _getIndicatorDecoration(WidgetTester tester) {
         ),
       )
       .decoration as ShapeDecoration?;
+}
+
+TextStyle? _iconStyle(WidgetTester tester, IconData icon) {
+  final RichText iconRichText = tester.widget<RichText>(
+    find.descendant(of: find.byIcon(icon), matching: find.byType(RichText)),
+  );
+  return iconRichText.text.style;
+}
+
+TextStyle? _labelStyle(WidgetTester tester, String label) {
+  final RichText labelRichText = tester.widget<RichText>(
+    find.descendant(of: find.text(label), matching: find.byType(RichText)),
+  );
+  return labelRichText.text.style;
 }
 
 void widgetSetup(WidgetTester tester, double viewWidth, {double viewHeight = 1000}) {

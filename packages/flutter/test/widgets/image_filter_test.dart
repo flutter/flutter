@@ -95,7 +95,8 @@ void main() {
           imageFilter: matrix,
           child: MaterialApp(
             title: 'Flutter Demo',
-            theme: ThemeData(primarySwatch: Colors.blue),
+            theme: ThemeData(useMaterial3: false, primarySwatch: Colors.blue),
+            debugShowCheckedModeBanner: false, // https://github.com/flutter/flutter/issues/143616
             home: Scaffold(
               appBar: AppBar(
                 title: const Text('Matrix ImageFilter Test'),
@@ -132,7 +133,8 @@ void main() {
             imageFilter: matrixFilter,
             child: MaterialApp(
               title: 'Flutter Demo',
-              theme: ThemeData(primarySwatch: Colors.blue),
+              theme: ThemeData(useMaterial3: false, primarySwatch: Colors.blue),
+              debugShowCheckedModeBanner: false, // https://github.com/flutter/flutter/issues/143616
               home: Scaffold(
                 appBar: AppBar(
                   title: const Text('Matrix ImageFilter Test'),

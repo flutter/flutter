@@ -4,8 +4,8 @@
 
 import 'package:flutter_test/flutter_test.dart';
 
-import './apps/button_matrix_app.dart' as button_matrix;
 import '../common.dart';
+import 'apps/button_matrix_app.dart' as button_matrix;
 
 const int _kNumWarmUpIters = 20;
 const int _kNumIters = 300;

@@ -212,6 +212,7 @@ void main([List<String> args = const <String>[]]) {
           TimelineStream.embedder,
           TimelineStream.gc,
         ],
+        retainPriorEvents: true,
       );
 
       // Save the duration (in microseconds) of the first timeline Frame event

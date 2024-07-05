@@ -21,6 +21,7 @@ import '../convert.dart';
 import '../dart/language_version.dart';
 import '../device.dart';
 import '../globals.dart' as globals;
+import '../native_assets.dart';
 import '../project.dart';
 import '../test/test_wrapper.dart';
 
@@ -69,6 +70,7 @@ FlutterPlatform installHook({
   String? integrationTestUserIdentifier,
   TestTimeRecorder? testTimeRecorder,
   UriConverter? uriConverter,
+  TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
 }) {
   assert(enableVmService || enableObservatory || (!debuggingOptions.startPaused && debuggingOptions.hostVmServicePort == null));
 
@@ -99,6 +101,7 @@ FlutterPlatform installHook({
     integrationTestUserIdentifier: integrationTestUserIdentifier,
     testTimeRecorder: testTimeRecorder,
     uriConverter: uriConverter,
+    nativeAssetsBuilder: nativeAssetsBuilder,
   );
   platformPluginRegistration(platform);
   return platform;
@@ -139,7 +142,6 @@ String generateTestBootstrap({
   final String websocketUrl = host.type == InternetAddressType.IPv4
       ? 'ws://${host.address}'
       : 'ws://[${host.address}]';
-  final String encodedWebsocketUrl = Uri.encodeComponent(websocketUrl);
 
   final StringBuffer buffer = StringBuffer();
   buffer.write('''
@@ -161,7 +163,7 @@ import 'dart:developer' as developer;
 ''');
   }
   buffer.write('''
-import 'package:test_api/src/remote_listener.dart';
+import 'package:test_api/backend.dart';
 import 'package:stream_channel/stream_channel.dart';
 import 'package:stack_trace/stack_trace.dart';
 
@@ -212,8 +214,8 @@ void catchIsolateErrors() {
 }
 
 void main() {
-  String serverPort = Platform.environment['SERVER_PORT'] ?? '';
-  String server = Uri.decodeComponent('$encodedWebsocketUrl:\$serverPort');
+  final String serverPort = Platform.environment['SERVER_PORT'] ?? '';
+  final String server = '$websocketUrl:\$serverPort';
   StreamChannel<dynamic> testChannel = serializeSuite(() {
     catchIsolateErrors();
 ''');
@@ -292,6 +294,7 @@ class FlutterPlatform extends PlatformPlugin {
     this.integrationTestUserIdentifier,
     this.testTimeRecorder,
     this.uriConverter,
+    this.nativeAssetsBuilder,
   });
 
   final String shellPath;
@@ -308,6 +311,7 @@ class FlutterPlatform extends PlatformPlugin {
   final FlutterProject? flutterProject;
   final String? icudtlPath;
   final TestTimeRecorder? testTimeRecorder;
+  final TestCompilerNativeAssetsBuilder? nativeAssetsBuilder;
 
   // This can be used by internal projects that require custom logic for converting package: URIs to local paths.
   final UriConverter? uriConverter;
@@ -392,9 +396,13 @@ class FlutterPlatform extends PlatformPlugin {
     String isolateId,
     String expression,
     List<String> definitions,
+    List<String> definitionTypes,
     List<String> typeDefinitions,
+    List<String> typeBounds,
+    List<String> typeDefaults,
     String libraryUri,
     String? klass,
+    String? method,
     bool isStatic,
   ) async {
     if (compiler == null || compiler!.compiler == null) {
@@ -402,7 +410,8 @@ class FlutterPlatform extends PlatformPlugin {
     }
     final CompilerOutput? compilerOutput =
       await compiler!.compiler!.compileExpression(expression, definitions,
-        typeDefinitions, libraryUri, klass, isStatic);
+        definitionTypes, typeDefinitions, typeBounds, typeDefaults, libraryUri,
+        klass, method, isStatic);
     if (compilerOutput != null && compilerOutput.expressionData != null) {
       return base64.encode(compilerOutput.expressionData!);
     }
@@ -461,7 +470,13 @@ class FlutterPlatform extends PlatformPlugin {
         // running this with a debugger attached. Initialize the resident
         // compiler in this case.
         if (debuggingOptions.startPaused) {
-          compiler ??= TestCompiler(debuggingOptions.buildInfo, flutterProject, precompiledDillPath: precompiledDillPath, testTimeRecorder: testTimeRecorder);
+          compiler ??= TestCompiler(
+            debuggingOptions.buildInfo,
+            flutterProject,
+            precompiledDillPath: precompiledDillPath,
+            testTimeRecorder: testTimeRecorder,
+            nativeAssetsBuilder: nativeAssetsBuilder,
+          );
           final Uri uri = globals.fs.file(path).uri;
           // Trigger a compilation to initialize the resident compiler.
           unawaited(compiler!.compile(uri));
@@ -483,7 +498,12 @@ class FlutterPlatform extends PlatformPlugin {
         // Integration test device takes care of the compilation.
         if (integrationTestDevice == null) {
           // Lazily instantiate compiler so it is built only if it is actually used.
-          compiler ??= TestCompiler(debuggingOptions.buildInfo, flutterProject, testTimeRecorder: testTimeRecorder);
+          compiler ??= TestCompiler(
+            debuggingOptions.buildInfo,
+            flutterProject,
+            testTimeRecorder: testTimeRecorder,
+            nativeAssetsBuilder: nativeAssetsBuilder,
+          );
           mainDart = await compiler!.compile(globals.fs.file(mainDart).uri);
 
           if (mainDart == null) {

@@ -69,7 +69,7 @@ class GenSnapshot {
     // one for the target architecture in question.
     if (snapshotType.platform == TargetPlatform.ios ||
         snapshotType.platform == TargetPlatform.darwin) {
-      snapshotterPath += '_${getDartNameForDarwinArch(darwinArch!)}';
+      snapshotterPath += '_${darwinArch!.dartName}';
     }
 
     return _processUtils.stream(
@@ -259,7 +259,7 @@ class AOTSnapshotter {
     required bool stripAfterBuild,
     required bool extractAppleDebugSymbols
   }) async {
-    final String targetArch = getNameForDarwinArch(appleArch);
+    final String targetArch = appleArch.name;
     if (!quiet) {
       _logger.printStatus('Building App.framework for $targetArch...');
     }
@@ -271,7 +271,7 @@ class AOTSnapshotter {
         // When the minimum version is updated, remember to update
         // template MinimumOSVersion.
         // https://github.com/flutter/flutter/pull/62902
-        '-miphoneos-version-min=11.0',
+        '-miphoneos-version-min=12.0',
       if (sdkRoot != null) ...<String>[
         '-isysroot',
         sdkRoot,
@@ -328,7 +328,7 @@ class AOTSnapshotter {
         }
       }
     } else {
-      assert(stripAfterBuild == false);
+      assert(!stripAfterBuild);
     }
 
     return 0;
@@ -347,6 +347,7 @@ class AOTSnapshotter {
       TargetPlatform.linux_x64,
       TargetPlatform.linux_arm64,
       TargetPlatform.windows_x64,
+      TargetPlatform.windows_arm64,
     ].contains(platform);
   }
 }

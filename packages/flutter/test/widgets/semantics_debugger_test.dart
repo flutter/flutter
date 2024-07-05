@@ -325,7 +325,7 @@ void main() {
     // interpreted as a gesture by the semantics debugger and sent to the widget
     // as a semantic action that always moves by 10% of the complete track.
     await tester.fling(find.byType(Slider), const Offset(-100.0, 0.0), 2000.0, warnIfMissed: false); // hitting the debugger
-    switch(defaultTargetPlatform) {
+    switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
         expect(value, equals(0.65));
@@ -523,6 +523,27 @@ void main() {
 
     // ignore: avoid_dynamic_calls
     expect(_getSemanticsDebuggerPainter(debuggerKey: debugger, tester: tester).labelStyle, labelStyle);
+  });
+
+  testWidgets('SemanticsDebugger label for rtl.', (WidgetTester tester) async {
+    final UniqueKey debugger = UniqueKey();
+    final Key label = UniqueKey();
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.rtl,
+        child: SemanticsDebugger(
+          key: debugger,
+          child: Semantics(
+            label: 'ملصق',
+            textDirection: TextDirection.rtl,
+            key: label,
+          ),
+        ),
+      ),
+    );
+
+    expect(_getMessageShownInSemanticsDebugger(widgetKey: label, debuggerKey: debugger, tester: tester), '\u2067ملصق\u2069');
   });
 }
 

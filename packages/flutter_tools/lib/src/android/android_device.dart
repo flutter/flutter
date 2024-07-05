@@ -234,6 +234,7 @@ class AndroidDevice extends Device {
       case TargetPlatform.tester:
       case TargetPlatform.web_javascript:
       case TargetPlatform.windows_x64:
+      case TargetPlatform.windows_arm64:
         throw UnsupportedError('Invalid target platform for Android');
     }
   }
@@ -371,6 +372,9 @@ class AndroidDevice extends Device {
 
   @override
   String get name => modelID;
+
+  @override
+  bool get supportsFlavors => true;
 
   @override
   Future<bool> isAppInstalled(
@@ -567,6 +571,7 @@ class AndroidDevice extends Device {
       case TargetPlatform.linux_x64:
       case TargetPlatform.tester:
       case TargetPlatform.web_javascript:
+      case TargetPlatform.windows_arm64:
       case TargetPlatform.windows_x64:
         _logger.printError('Android platforms are only supported.');
         return LaunchResult.failed();
@@ -582,7 +587,6 @@ class AndroidDevice extends Device {
             debuggingOptions.buildInfo,
             targetArchs: <AndroidArch>[androidArch],
             fastStart: debuggingOptions.fastStart,
-            multidexEnabled: (platformArgs['multidex'] as bool?) ?? false,
           ),
       );
       // Package has been built, so we can get the updated application ID and
@@ -608,7 +612,7 @@ class AndroidDevice extends Device {
     if (debuggingOptions.debuggingEnabled) {
       vmServiceDiscovery = ProtocolDiscovery.vmService(
         // Avoid using getLogReader, which returns a singleton instance, because the
-        // VM Service discovery will dipose at the end. creating a new logger here allows
+        // VM Service discovery will dispose at the end. creating a new logger here allows
         // logs to be surfaced normally during `flutter drive`.
         await AdbLogReader.createLogReader(
           this,
@@ -625,6 +629,7 @@ class AndroidDevice extends Device {
     final String dartVmFlags = computeDartVmFlags(debuggingOptions);
     final String? traceAllowlist = debuggingOptions.traceAllowlist;
     final String? traceSkiaAllowlist = debuggingOptions.traceSkiaAllowlist;
+    final String? traceToFile = debuggingOptions.traceToFile;
     final List<String> cmd = <String>[
       'shell', 'am', 'start',
       '-a', 'android.intent.action.MAIN',
@@ -648,6 +653,8 @@ class AndroidDevice extends Device {
         ...<String>['--es', 'trace-skia-allowlist', traceSkiaAllowlist],
       if (debuggingOptions.traceSystrace)
         ...<String>['--ez', 'trace-systrace', 'true'],
+      if (traceToFile != null)
+        ...<String>['--es', 'trace-to-file', traceToFile],
       if (debuggingOptions.endlessTraceBuffer)
         ...<String>['--ez', 'endless-trace-buffer', 'true'],
       if (debuggingOptions.dumpSkpOnShaderCompilation)
@@ -662,8 +669,6 @@ class AndroidDevice extends Device {
         ...<String>['--ez', 'enable-impeller', 'false'],
       if (debuggingOptions.enableVulkanValidation)
         ...<String>['--ez', 'enable-vulkan-validation', 'true'],
-      if (debuggingOptions.impellerForceGL)
-        ...<String>['--ez', 'impeller-force-gl', 'true'],
       if (debuggingOptions.debuggingEnabled) ...<String>[
         if (debuggingOptions.buildInfo.isDebug) ...<String>[
           ...<String>['--ez', 'enable-checked-mode', 'true'],

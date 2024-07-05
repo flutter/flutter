@@ -9,6 +9,7 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/os.dart' show HostPlatform, OperatingSystemUtils;
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/version.dart';
@@ -21,15 +22,18 @@ class VisualStudio {
     required ProcessManager processManager,
     required Platform platform,
     required Logger logger,
+    required OperatingSystemUtils osUtils,
   }) : _platform = platform,
        _fileSystem = fileSystem,
        _processUtils = ProcessUtils(processManager: processManager, logger: logger),
-       _logger = logger;
+       _logger = logger,
+       _osUtils = osUtils;
 
   final FileSystem _fileSystem;
   final Platform _platform;
   final ProcessUtils _processUtils;
   final Logger _logger;
+  final OperatingSystemUtils _osUtils;
 
   /// Matches the description property from the vswhere.exe JSON output.
   final RegExp _vswhereDescriptionProperty = RegExp(r'\s*"description"\s*:\s*".*"\s*,?');
@@ -81,7 +85,7 @@ class VisualStudio {
     if (_bestVisualStudioDetails == null) {
       return false;
     }
-    return _bestVisualStudioDetails!.isComplete ?? true;
+    return _bestVisualStudioDetails.isComplete ?? true;
   }
 
   /// True if Visual Studio is launchable.
@@ -91,7 +95,7 @@ class VisualStudio {
     if (_bestVisualStudioDetails == null) {
       return false;
     }
-    return _bestVisualStudioDetails!.isLaunchable ?? true;
+    return _bestVisualStudioDetails.isLaunchable ?? true;
   }
 
   /// True if the Visual Studio installation is a pre-release version.
@@ -182,6 +186,64 @@ class VisualStudio {
       default:
         return 'Visual Studio 16 2019';
     }
+  }
+
+  /// The path to cl.exe, or null if no Visual Studio installation has
+  /// the components necessary to build.
+  String? get clPath {
+    return _getMsvcBinPath('cl.exe');
+  }
+
+  /// The path to lib.exe, or null if no Visual Studio installation has
+  /// the components necessary to build.
+  String? get libPath {
+    return _getMsvcBinPath('lib.exe');
+  }
+
+  /// The path to link.exe, or null if no Visual Studio installation has
+  /// the components necessary to build.
+  String? get linkPath {
+    return _getMsvcBinPath('link.exe');
+  }
+
+  String? _getMsvcBinPath(String executable) {
+    final VswhereDetails? details = _bestVisualStudioDetails;
+    if (details == null || !details.isUsable || details.installationPath == null || details.msvcVersion == null) {
+      return null;
+    }
+
+    final String arch = _osUtils.hostPlatform == HostPlatform.windows_arm64 ? 'arm64': 'x64';
+
+    return _fileSystem.path.joinAll(<String>[
+      details.installationPath!,
+      'VC',
+      'Tools',
+      'MSVC',
+      details.msvcVersion!,
+      'bin',
+      'Host$arch',
+      arch,
+      executable,
+    ]);
+  }
+
+  /// The path to vcvars64.exe, or null if no Visual Studio installation has
+  /// the components necessary to build.
+  String? get vcvarsPath {
+    final VswhereDetails? details = _bestVisualStudioDetails;
+    if (details == null || !details.isUsable || details.installationPath == null) {
+      return null;
+    }
+
+    final String arch = _osUtils.hostPlatform == HostPlatform.windows_arm64 ? 'arm64': '64';
+
+    return _fileSystem.path.joinAll(<String>[
+      details.installationPath!,
+      'VC',
+      'Auxiliary',
+      'Build',
+      'vcvars$arch.bat',
+    ]);
   }
 
   /// The major version of the Visual Studio install, as an integer.
@@ -301,7 +363,12 @@ class VisualStudio {
       if (whereResult.exitCode == 0) {
         final List<Map<String, dynamic>>? installations = _tryDecodeVswhereJson(whereResult.stdout);
         if (installations != null && installations.isNotEmpty) {
-          return VswhereDetails.fromJson(validateRequirements, installations[0]);
+          final String? msvcVersion = _findMsvcVersion(installations);
+          return VswhereDetails.fromJson(
+            validateRequirements,
+            installations[0],
+            msvcVersion,
+          );
         }
       }
     } on ArgumentError {
@@ -310,6 +377,28 @@ class VisualStudio {
       // Ignored, return null below.
     }
     return null;
+  }
+
+  String? _findMsvcVersion(List<Map<String, dynamic>> installations) {
+    final String? installationPath = installations[0]['installationPath'] as String?;
+    String? msvcVersion;
+    if (installationPath != null) {
+      final Directory installationDir = _fileSystem.directory(installationPath);
+      final Directory msvcDir = installationDir
+          .childDirectory('VC')
+          .childDirectory('Tools')
+          .childDirectory('MSVC');
+      if (msvcDir.existsSync()) {
+        final Iterable<Directory> msvcVersionDirs = msvcDir.listSync().whereType<Directory>();
+        if (msvcVersionDirs.isEmpty) {
+          return null;
+        }
+        msvcVersion = msvcVersionDirs.last.uri.pathSegments
+            .where((String e) => e.isNotEmpty)
+            .last;
+      }
+    }
+    return msvcVersion;
   }
 
   List<Map<String, dynamic>>? _tryDecodeVswhereJson(String vswhereJson) {
@@ -443,12 +532,14 @@ class VswhereDetails {
     required this.isRebootRequired,
     required this.isPrerelease,
     required this.catalogDisplayVersion,
+    required this.msvcVersion,
   });
 
   /// Create a `VswhereDetails` from the JSON output of vswhere.exe.
   factory VswhereDetails.fromJson(
     bool meetsRequirements,
-    Map<String, dynamic> details
+    Map<String, dynamic> details,
+    String? msvcVersion,
   ) {
     final Map<String, dynamic>? catalog = details['catalog'] as Map<String, dynamic>?;
 
@@ -467,6 +558,8 @@ class VswhereDetails {
       // contain replacement characters.
       displayName: details['displayName'] as String?,
       catalogDisplayVersion: catalog == null ? null : catalog['productDisplayVersion'] as String?,
+
+      msvcVersion: msvcVersion,
     );
   }
 
@@ -510,6 +603,9 @@ class VswhereDetails {
 
   /// The user-friendly version.
   final String? catalogDisplayVersion;
+
+  /// The MSVC versions.
+  final String? msvcVersion;
 
   /// Checks if the Visual Studio installation can be used by Flutter.
   ///

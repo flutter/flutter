@@ -18,8 +18,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
-
 void main() {
   final ThemeData theme = ThemeData();
 
@@ -433,7 +431,7 @@ void main() {
     expect(layers1, isNot(equals(layers2)));
   });
 
-  testWidgets('CircularProgressIndicator stoke width', (WidgetTester tester) async {
+  testWidgets('CircularProgressIndicator stroke width', (WidgetTester tester) async {
     await tester.pumpWidget(Theme(data: theme, child: const CircularProgressIndicator()));
 
     expect(find.byType(CircularProgressIndicator), paints..arc(strokeWidth: 4.0));
@@ -441,6 +439,104 @@ void main() {
     await tester.pumpWidget(Theme(data: theme, child: const CircularProgressIndicator(strokeWidth: 16.0)));
 
     expect(find.byType(CircularProgressIndicator), paints..arc(strokeWidth: 16.0));
+  });
+
+  testWidgets('CircularProgressIndicator strokeAlign', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Theme(
+        data: theme,
+        child: const CircularProgressIndicator(),
+      ),
+    );
+    expect(find.byType(CircularProgressIndicator), paints..arc(rect: Offset.zero & const Size(800.0, 600.0)));
+
+    await tester.pumpWidget(
+      Theme(
+        data: theme,
+        child: const CircularProgressIndicator(
+          strokeAlign: CircularProgressIndicator.strokeAlignInside,
+        ),
+      ),
+    );
+    expect(find.byType(CircularProgressIndicator), paints..arc(rect: const Offset(2.0, 2.0) & const Size(796.0, 596.0)));
+
+    await tester.pumpWidget(
+      Theme(
+        data: theme,
+        child: const CircularProgressIndicator(
+          strokeAlign: CircularProgressIndicator.strokeAlignOutside,
+        ),
+      ),
+    );
+    expect(find.byType(CircularProgressIndicator), paints..arc(rect: const Offset(-2.0, -2.0) & const Size(804.0, 604.0)));
+
+    // Unbounded alignment.
+    await tester.pumpWidget(
+      Theme(
+        data: theme,
+        child: const CircularProgressIndicator(
+          strokeAlign: 2.0,
+        ),
+      ),
+    );
+    expect(find.byType(CircularProgressIndicator), paints..arc(rect: const Offset(-4.0, -4.0) & const Size(808.0, 608.0)));
+  });
+
+  testWidgets('CircularProgressIndicator with strokeCap', (WidgetTester tester) async {
+    await tester.pumpWidget(const CircularProgressIndicator());
+    expect(find.byType(CircularProgressIndicator),
+        paints..arc(strokeCap: StrokeCap.square),
+        reason: 'Default indeterminate strokeCap is StrokeCap.square.');
+
+    await tester.pumpWidget(const Directionality(
+        textDirection: TextDirection.ltr,
+        child: CircularProgressIndicator(value: 0.5)));
+    expect(find.byType(CircularProgressIndicator),
+        paints..arc(strokeCap: StrokeCap.butt),
+        reason: 'Default determinate strokeCap is StrokeCap.butt.');
+
+    await tester.pumpWidget(const CircularProgressIndicator(strokeCap: StrokeCap.butt));
+    expect(find.byType(CircularProgressIndicator),
+        paints..arc(strokeCap: StrokeCap.butt),
+        reason: 'strokeCap can be set to StrokeCap.butt, and will not be overridden.');
+
+    await tester.pumpWidget(const CircularProgressIndicator(strokeCap: StrokeCap.round));
+    expect(find.byType(CircularProgressIndicator), paints..arc(strokeCap: StrokeCap.round));
+  });
+
+  testWidgets('LinearProgressIndicator with indicatorBorderRadius', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Theme(
+        data: theme,
+        child: const Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: SizedBox(
+              width: 100.0,
+              height: 4.0,
+              child: LinearProgressIndicator(
+                value: 0.25,
+                borderRadius: BorderRadius.all(Radius.circular(10)),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(
+        find.byType(LinearProgressIndicator),
+        paints
+        ..rrect(
+          rrect: RRect.fromLTRBR(0.0, 0.0, 100.0, 4.0, const Radius.circular(10.0)),
+        )
+        ..rrect(
+          rrect: RRect.fromRectAndRadius(
+            const Rect.fromLTRB(0.0, 0.0, 25.0, 4.0),
+            const Radius.circular(10.0),
+          ),
+        ),
+    );
+    expect(tester.binding.transientCallbackCount, 0);
   });
 
   testWidgets('CircularProgressIndicator paint colors', (WidgetTester tester) async {
@@ -569,6 +665,29 @@ void main() {
     expect(themeBackgroundMaterial.color, blue);
   });
 
+  testWidgets('RefreshProgressIndicator with a round indicator', (WidgetTester tester) async {
+    await tester.pumpWidget(const RefreshProgressIndicator());
+    expect(find.byType(RefreshProgressIndicator),
+        paints..arc(strokeCap: StrokeCap.square),
+        reason: 'Default indeterminate strokeCap is StrokeCap.square');
+
+    await tester.pumpWidget(
+      Theme(
+        data: theme,
+        child: const Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: SizedBox(
+              width: 200.0,
+              child: RefreshProgressIndicator(strokeCap: StrokeCap.round),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(find.byType(RefreshProgressIndicator), paints..arc(strokeCap: StrokeCap.round));
+  });
+
   testWidgets('Indeterminate RefreshProgressIndicator keeps spinning until end of time (approximate)', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/13782
 
@@ -598,16 +717,37 @@ void main() {
     expect(tester.hasRunningAnimations, isTrue);
   });
 
-  testWidgets('RefreshProgressIndicator uses expected animation', (WidgetTester tester) async {
+  testWidgets('Material2 - RefreshProgressIndicator uses expected animation', (WidgetTester tester) async {
     final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(frameSize: const Size(50, 50));
+    addTearDown(animationSheet.dispose);
 
     await tester.pumpFrames(animationSheet.record(
-      const _RefreshProgressIndicatorGolden(),
+      Theme(
+        data: ThemeData(useMaterial3: false),
+        child: const _RefreshProgressIndicatorGolden()
+      ),
     ), const Duration(seconds: 3));
 
     await expectLater(
-      await animationSheet.collate(20),
-      matchesGoldenFile('material.refresh_progress_indicator.png'),
+      animationSheet.collate(20),
+      matchesGoldenFile('m2_material.refresh_progress_indicator.png'),
+    );
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
+
+  testWidgets('Material3 - RefreshProgressIndicator uses expected animation', (WidgetTester tester) async {
+    final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(frameSize: const Size(50, 50));
+    addTearDown(animationSheet.dispose);
+
+    await tester.pumpFrames(animationSheet.record(
+      Theme(
+          data: ThemeData(useMaterial3: true),
+          child: const _RefreshProgressIndicatorGolden()
+      ),
+    ), const Duration(seconds: 3));
+
+    await expectLater(
+      animationSheet.collate(20),
+      matchesGoldenFile('m3_material.refresh_progress_indicator.png'),
     );
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
 
@@ -876,22 +1016,49 @@ void main() {
     handle.dispose();
   });
 
-  testWidgets('Indeterminate CircularProgressIndicator uses expected animation', (WidgetTester tester) async {
+  testWidgets('Material2 - Indeterminate CircularProgressIndicator uses expected animation', (WidgetTester tester) async {
     final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(frameSize: const Size(40, 40));
+    addTearDown(animationSheet.dispose);
 
     await tester.pumpFrames(animationSheet.record(
-      const Directionality(
-        textDirection: TextDirection.ltr,
-        child: Padding(
-          padding: EdgeInsets.all(4),
-          child: CircularProgressIndicator(),
+      Theme(
+        data: ThemeData(useMaterial3: false),
+        child: const Directionality(
+          textDirection: TextDirection.ltr,
+          child: Padding(
+            padding: EdgeInsets.all(4),
+            child: CircularProgressIndicator(),
+          ),
         ),
       ),
     ), const Duration(seconds: 2));
 
     await expectLater(
-      await animationSheet.collate(20),
-      matchesGoldenFile('material.circular_progress_indicator.indeterminate.png'),
+      animationSheet.collate(20),
+      matchesGoldenFile('m2_material.circular_progress_indicator.indeterminate.png'),
+    );
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
+
+  testWidgets('Material3 - Indeterminate CircularProgressIndicator uses expected animation', (WidgetTester tester) async {
+    final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(frameSize: const Size(40, 40));
+    addTearDown(animationSheet.dispose);
+
+    await tester.pumpFrames(animationSheet.record(
+      Theme(
+        data: ThemeData(useMaterial3: true),
+        child: const Directionality(
+          textDirection: TextDirection.ltr,
+          child: Padding(
+            padding: EdgeInsets.all(4),
+            child: CircularProgressIndicator(),
+          ),
+        ),
+      ),
+    ), const Duration(seconds: 2));
+
+    await expectLater(
+      animationSheet.collate(20),
+      matchesGoldenFile('m3_material.circular_progress_indicator.indeterminate.png'),
     );
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
 
@@ -912,6 +1079,34 @@ void main() {
       expect(find.byType(CupertinoActivityIndicator), findsOneWidget);
     },
     variant: const TargetPlatformVariant(<TargetPlatform> {
+      TargetPlatform.iOS,
+      TargetPlatform.macOS,
+    }),
+  );
+
+  testWidgets(
+    'Adaptive CircularProgressIndicator displays CupertinoActivityIndicator in iOS/macOS',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(),
+          home: const Scaffold(
+            body: Material(
+              child: CircularProgressIndicator.adaptive(
+                value: 0.5,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byType(CupertinoActivityIndicator), findsOneWidget);
+      final double actualProgress = tester.widget<CupertinoActivityIndicator>(
+        find.byType(CupertinoActivityIndicator),
+      ).progress;
+      expect(actualProgress, 0.5);
+   },
+   variant: const TargetPlatformVariant(<TargetPlatform> {
       TargetPlatform.iOS,
       TargetPlatform.macOS,
     }),
@@ -1014,6 +1209,75 @@ void main() {
     );
 
     expect(tester.getSize(find.byType(CircularProgressIndicator)), const Size(36, 36));
+  });
+
+  testWidgets('RefreshProgressIndicator using fields correctly', (WidgetTester tester) async {
+    Future<void> pumpIndicator(RefreshProgressIndicator indicator) {
+      return tester.pumpWidget(Theme(data: theme, child: indicator));
+    }
+
+    // With default values.
+    await pumpIndicator(const RefreshProgressIndicator());
+    Material material = tester.widget(
+      find.descendant(
+        of: find.byType(RefreshProgressIndicator),
+        matching: find.byType(Material),
+      ),
+    );
+    Container container = tester.widget(
+      find.descendant(
+        of: find.byType(RefreshProgressIndicator),
+        matching: find.byType(Container),
+      ),
+    );
+    Padding padding = tester.widget(
+      find.descendant(
+        of: find.descendant(
+          of: find.byType(RefreshProgressIndicator),
+          matching: find.byType(Material),
+        ),
+        matching: find.byType(Padding),
+      ),
+    );
+    expect(material.elevation, 2.0);
+    expect(container.margin, const EdgeInsets.all(4.0));
+    expect(padding.padding, const EdgeInsets.all(12.0));
+
+    // With values provided.
+    const double testElevation = 1.0;
+    const EdgeInsetsGeometry testIndicatorMargin = EdgeInsets.all(6.0);
+    const EdgeInsetsGeometry testIndicatorPadding = EdgeInsets.all(10.0);
+    await pumpIndicator(
+      const RefreshProgressIndicator(
+        elevation: testElevation,
+        indicatorMargin: testIndicatorMargin,
+        indicatorPadding: testIndicatorPadding,
+      ),
+    );
+    material = tester.widget(
+      find.descendant(
+        of: find.byType(RefreshProgressIndicator),
+        matching: find.byType(Material),
+      ),
+    );
+    container = tester.widget(
+      find.descendant(
+        of: find.byType(RefreshProgressIndicator),
+        matching: find.byType(Container),
+      ),
+    );
+    padding = tester.widget(
+      find.descendant(
+        of: find.descendant(
+          of: find.byType(RefreshProgressIndicator),
+          matching: find.byType(Material),
+        ),
+        matching: find.byType(Padding),
+      ),
+    );
+    expect(material.elevation, testElevation);
+    expect(container.margin, testIndicatorMargin);
+    expect(padding.padding, testIndicatorPadding);
   });
 }
 

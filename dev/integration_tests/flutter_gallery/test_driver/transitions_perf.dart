@@ -26,7 +26,7 @@ Set<String> _unTestedDemos = Set<String>.from(_allDemos);
 class _MessageHandler {
   static LiveWidgetController? controller;
   Future<String> call(String message) async {
-    switch(message) {
+    switch (message) {
       case 'demoNames':
         return const JsonEncoder.withIndent('  ').convert(_allDemos);
       case 'profileDemos':

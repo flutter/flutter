@@ -4,7 +4,6 @@
 
 import 'dart:ui' as ui show FontFeature, FontVariation, ParagraphStyle, Shadow, TextStyle;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -30,9 +29,7 @@ class _DartUiTextStyleToStringMatcher extends Matcher {
     _propertyToString('letterSpacing', textStyle.letterSpacing),
     _propertyToString('wordSpacing', textStyle.wordSpacing),
     _propertyToString('height', textStyle.height),
-    // TODO(LongCatIsLooong): web support for
-    // https://github.com/flutter/flutter/issues/72521
-    if (!kIsWeb) _propertyToString('leadingDistribution', textStyle.leadingDistribution),
+    _propertyToString('leadingDistribution', textStyle.leadingDistribution),
     _propertyToString('locale', textStyle.locale),
     _propertyToString('background', textStyle.background),
     _propertyToString('foreground', textStyle.foreground),
@@ -74,12 +71,15 @@ class _DartUiTextStyleToStringMatcher extends Matcher {
   @override
   Description describeMismatch(dynamic item, Description mismatchDescription, Map<dynamic, dynamic> matchState, bool verbose) {
     final Description description = super.describeMismatch(item, mismatchDescription, matchState, verbose);
+    final String itemAsString = item.toString();
     final String? property = matchState['missingProperty'] as String?;
     if (property != null) {
       description.add("expect property: '$property'");
       final int propertyIndex = propertiesInOrder.indexOf(property);
       if (propertyIndex > 0) {
-        description.add(" after: '${propertiesInOrder[propertyIndex - 1]}'");
+        final String lastProperty = propertiesInOrder[propertyIndex - 1];
+        description.add(" after: '$lastProperty'\n");
+        description.add('but found: ${itemAsString.substring(itemAsString.indexOf(lastProperty))}');
       }
       description.add('\n');
     }
@@ -374,6 +374,7 @@ void main() {
     expect(unknown.debugLabel, null);
     expect(unknown.toString(), 'TextStyle(<all styles inherited>)');
     expect(unknown.copyWith().debugLabel, null);
+    expect(unknown.copyWith(debugLabel: '123').debugLabel, '123');
     expect(unknown.apply().debugLabel, null);
 
     expect(foo.debugLabel, 'foo');
@@ -459,7 +460,15 @@ void main() {
     expect(s2.toString(), 'TextStyle(inherit: true, backgroundColor: Color(0xff00ff00))');
 
     final ui.TextStyle ts2 = s2.getTextStyle();
-    expect(ts2.toString(), contains('background: Paint(Color(0xff00ff00))'));
+
+    // TODO(matanlurey): Remove when https://github.com/flutter/flutter/issues/112498 is resolved.
+    // The web implementation never includes "dither: ..." as a property, and after #112498 neither
+    // does non-web (as there will no longer be a user-visible "dither" property). So, relax the
+    // test to just check for the color by using a regular expression.
+    expect(
+      ts2.toString(),
+      matches(RegExp(r'background: Paint\(Color\(0xff00ff00\).*\)')),
+    );
   });
 
   test('TextStyle background and backgroundColor combos', () {
@@ -503,9 +512,9 @@ void main() {
     expect(TextStyle.lerp(redPaintTextStyle, bluePaintTextStyle, .75)!.background!.color, blue);
   });
 
-  test('TextStyle strut textScaleFactor', () {
+  test('TextStyle strut textScaler', () {
     const TextStyle style0 = TextStyle(fontSize: 10);
-    final ui.ParagraphStyle paragraphStyle0 = style0.getParagraphStyle(textScaleFactor: 2.5);
+    final ui.ParagraphStyle paragraphStyle0 = style0.getParagraphStyle(textScaler: const TextScaler.linear(2.5));
 
     const TextStyle style1 = TextStyle(fontSize: 25);
     final ui.ParagraphStyle paragraphStyle1 = style1.getParagraphStyle();
@@ -587,4 +596,63 @@ void main() {
     expect(TextStyle.lerp(fromStyle, toStyle, 1), toStyle);
   });
 
+  test('lerpFontVariations', () {
+    // nil cases
+    expect(lerpFontVariations(const <FontVariation>[], const <FontVariation>[], 0.0), const <FontVariation>[]);
+    expect(lerpFontVariations(const <FontVariation>[], const <FontVariation>[], 0.5), const <FontVariation>[]);
+    expect(lerpFontVariations(const <FontVariation>[], const <FontVariation>[], 1.0), const <FontVariation>[]);
+    expect(lerpFontVariations(null, const <FontVariation>[], 0.0), null);
+    expect(lerpFontVariations(const <FontVariation>[], null, 0.0), const <FontVariation>[]);
+    expect(lerpFontVariations(null, null, 0.0), null);
+    expect(lerpFontVariations(null, const <FontVariation>[], 0.5), const <FontVariation>[]);
+    expect(lerpFontVariations(const <FontVariation>[], null, 0.5), null);
+    expect(lerpFontVariations(null, null, 0.5), null);
+    expect(lerpFontVariations(null, const <FontVariation>[], 1.0), const <FontVariation>[]);
+    expect(lerpFontVariations(const <FontVariation>[], null, 1.0), null);
+    expect(lerpFontVariations(null, null, 1.0), null);
+
+    const FontVariation w100 = FontVariation.weight(100.0);
+    const FontVariation w120 = FontVariation.weight(120.0);
+    const FontVariation w150 = FontVariation.weight(150.0);
+    const FontVariation w200 = FontVariation.weight(200.0);
+    const FontVariation w300 = FontVariation.weight(300.0);
+    const FontVariation w1000 = FontVariation.weight(1000.0);
+
+    // one axis
+    expect(lerpFontVariations(const <FontVariation>[w100], const <FontVariation>[w200], 0.0), const <FontVariation>[w100]);
+    expect(lerpFontVariations(const <FontVariation>[w100], const <FontVariation>[w200], 0.2), const <FontVariation>[w120]);
+    expect(lerpFontVariations(const <FontVariation>[w100], const <FontVariation>[w200], 0.5), const <FontVariation>[w150]);
+    expect(lerpFontVariations(const <FontVariation>[w100], const <FontVariation>[w200], 2.0), const <FontVariation>[w300]);
+
+    // weird one axis cases
+    expect(lerpFontVariations(const <FontVariation>[w100, w1000], const <FontVariation>[w300], 0.0), const <FontVariation>[w100, w1000]);
+    expect(lerpFontVariations(const <FontVariation>[w100, w1000], const <FontVariation>[w300], 0.5), const <FontVariation>[w200]);
+    expect(lerpFontVariations(const <FontVariation>[w100, w1000], const <FontVariation>[w300], 1.0), const <FontVariation>[w300]);
+    expect(lerpFontVariations(const <FontVariation>[w100, w1000], const <FontVariation>[], 0.5), const <FontVariation>[]);
+
+    const FontVariation sn80 = FontVariation.slant(-80.0);
+    const FontVariation sn40 = FontVariation.slant(-40.0);
+    const FontVariation s0 = FontVariation.slant(0.0);
+    const FontVariation sp40 = FontVariation.slant(40.0);
+    const FontVariation sp80 = FontVariation.slant(80.0);
+
+    // two axis matched order
+    expect(lerpFontVariations(const <FontVariation>[w100, sn80], const <FontVariation>[w300, sp80], 0.5), const <FontVariation>[w200, s0]);
+
+    // two axis unmatched order
+    expect(lerpFontVariations(const <FontVariation>[sn80, w100], const <FontVariation>[w300, sp80], 0.0), const <FontVariation>[sn80, w100]);
+    expect(lerpFontVariations(const <FontVariation>[sn80, w100], const <FontVariation>[w300, sp80], 0.5), unorderedMatches(const <FontVariation>[s0, w200]));
+    expect(lerpFontVariations(const <FontVariation>[sn80, w100], const <FontVariation>[w300, sp80], 1.0), const <FontVariation>[w300, sp80]);
+
+    // two axis with duplicates
+    expect(lerpFontVariations(const <FontVariation>[sn80, w100, sp80], const <FontVariation>[w300, sp80], 0.5), unorderedMatches(const <FontVariation>[sp80, w200]));
+
+    // mixed axis counts
+    expect(lerpFontVariations(const <FontVariation>[sn80, w100], const <FontVariation>[w300], 0.5), const <FontVariation>[w200]);
+    expect(lerpFontVariations(const <FontVariation>[sn80], const <FontVariation>[w300], 0.0), const <FontVariation>[sn80]);
+    expect(lerpFontVariations(const <FontVariation>[sn80], const <FontVariation>[w300], 0.1), const <FontVariation>[sn80]);
+    expect(lerpFontVariations(const <FontVariation>[sn80], const <FontVariation>[w300], 0.9), const <FontVariation>[w300]);
+    expect(lerpFontVariations(const <FontVariation>[sn80], const <FontVariation>[w300], 1.0), const <FontVariation>[w300]);
+    expect(lerpFontVariations(const <FontVariation>[sn40, s0, w100], const <FontVariation>[sp40, w300, sp80], 0.5), anyOf(equals(const <FontVariation>[s0, w200, sp40]), equals(const <FontVariation>[s0, sp40, w200])));
+  });
 }

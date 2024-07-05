@@ -11,6 +11,7 @@ import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
 import 'material_state.dart';
+import 'slider.dart';
 import 'theme.dart';
 
 /// Applies a slider theme to descendant [Slider] widgets.
@@ -48,8 +49,6 @@ import 'theme.dart';
 ///    the [RangeSlider]'s tick marks.
 class SliderTheme extends InheritedTheme {
   /// Applies the given theme [data] to [child].
-  ///
-  /// The [data] and [child] arguments must not be null.
   const SliderTheme({
     super.key,
     required this.data,
@@ -278,6 +277,7 @@ class SliderThemeData with Diagnosticable {
     this.disabledThumbColor,
     this.overlayColor,
     this.valueIndicatorColor,
+    this.valueIndicatorStrokeColor,
     this.overlayShape,
     this.tickMarkShape,
     this.thumbShape,
@@ -292,6 +292,7 @@ class SliderThemeData with Diagnosticable {
     this.minThumbSeparation,
     this.thumbSelector,
     this.mouseCursor,
+    this.allowedInteraction,
   });
 
   /// Generates a SliderThemeData from three main colors.
@@ -344,6 +345,7 @@ class SliderThemeData with Diagnosticable {
       disabledThumbColor: primaryColorDark.withAlpha(disabledThumbAlpha),
       overlayColor: primaryColor.withAlpha(overlayAlpha),
       valueIndicatorColor: primaryColor.withAlpha(valueIndicatorAlpha),
+      valueIndicatorStrokeColor: primaryColor.withAlpha(valueIndicatorAlpha),
       overlayShape: const RoundSliderOverlayShape(),
       tickMarkShape: const RoundSliderTickMarkShape(),
       thumbShape: const RoundSliderThumbShape(),
@@ -423,6 +425,8 @@ class SliderThemeData with Diagnosticable {
   /// The color given to the [valueIndicatorShape] to draw itself with.
   final Color? valueIndicatorColor;
 
+  /// The color given to the [valueIndicatorShape] stroke.
+  final Color? valueIndicatorStrokeColor;
 
   /// The shape that will be used to draw the [Slider]'s overlay.
   ///
@@ -576,6 +580,11 @@ class SliderThemeData with Diagnosticable {
   /// If specified, overrides the default value of [Slider.mouseCursor].
   final MaterialStateProperty<MouseCursor?>? mouseCursor;
 
+  /// Allowed way for the user to interact with the [Slider].
+  ///
+  /// If specified, overrides the default value of [Slider.allowedInteraction].
+  final SliderInteraction? allowedInteraction;
+
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   SliderThemeData copyWith({
@@ -595,6 +604,7 @@ class SliderThemeData with Diagnosticable {
     Color? disabledThumbColor,
     Color? overlayColor,
     Color? valueIndicatorColor,
+    Color? valueIndicatorStrokeColor,
     SliderComponentShape? overlayShape,
     SliderTickMarkShape? tickMarkShape,
     SliderComponentShape? thumbShape,
@@ -609,6 +619,7 @@ class SliderThemeData with Diagnosticable {
     double? minThumbSeparation,
     RangeThumbSelector? thumbSelector,
     MaterialStateProperty<MouseCursor?>? mouseCursor,
+    SliderInteraction? allowedInteraction,
   }) {
     return SliderThemeData(
       trackHeight: trackHeight ?? this.trackHeight,
@@ -627,6 +638,7 @@ class SliderThemeData with Diagnosticable {
       disabledThumbColor: disabledThumbColor ?? this.disabledThumbColor,
       overlayColor: overlayColor ?? this.overlayColor,
       valueIndicatorColor: valueIndicatorColor ?? this.valueIndicatorColor,
+      valueIndicatorStrokeColor: valueIndicatorStrokeColor ?? this.valueIndicatorStrokeColor,
       overlayShape: overlayShape ?? this.overlayShape,
       tickMarkShape: tickMarkShape ?? this.tickMarkShape,
       thumbShape: thumbShape ?? this.thumbShape,
@@ -641,12 +653,11 @@ class SliderThemeData with Diagnosticable {
       minThumbSeparation: minThumbSeparation ?? this.minThumbSeparation,
       thumbSelector: thumbSelector ?? this.thumbSelector,
       mouseCursor: mouseCursor ?? this.mouseCursor,
+      allowedInteraction: allowedInteraction ?? this.allowedInteraction,
     );
   }
 
   /// Linearly interpolate between two slider themes.
-  ///
-  /// The arguments must not be null.
   ///
   /// {@macro dart.ui.shadow.lerp}
   static SliderThemeData lerp(SliderThemeData a, SliderThemeData b, double t) {
@@ -670,6 +681,7 @@ class SliderThemeData with Diagnosticable {
       disabledThumbColor: Color.lerp(a.disabledThumbColor, b.disabledThumbColor, t),
       overlayColor: Color.lerp(a.overlayColor, b.overlayColor, t),
       valueIndicatorColor: Color.lerp(a.valueIndicatorColor, b.valueIndicatorColor, t),
+      valueIndicatorStrokeColor: Color.lerp(a.valueIndicatorStrokeColor, b.valueIndicatorStrokeColor, t),
       overlayShape: t < 0.5 ? a.overlayShape : b.overlayShape,
       tickMarkShape: t < 0.5 ? a.tickMarkShape : b.tickMarkShape,
       thumbShape: t < 0.5 ? a.thumbShape : b.thumbShape,
@@ -684,6 +696,7 @@ class SliderThemeData with Diagnosticable {
       minThumbSeparation: lerpDouble(a.minThumbSeparation, b.minThumbSeparation, t),
       thumbSelector: t < 0.5 ? a.thumbSelector : b.thumbSelector,
       mouseCursor: t < 0.5 ? a.mouseCursor : b.mouseCursor,
+      allowedInteraction: t < 0.5 ? a.allowedInteraction : b.allowedInteraction,
     );
   }
 
@@ -720,6 +733,7 @@ class SliderThemeData with Diagnosticable {
       minThumbSeparation,
       thumbSelector,
       mouseCursor,
+      allowedInteraction,
     ),
   );
 
@@ -748,6 +762,7 @@ class SliderThemeData with Diagnosticable {
         && other.disabledThumbColor == disabledThumbColor
         && other.overlayColor == overlayColor
         && other.valueIndicatorColor == valueIndicatorColor
+        && other.valueIndicatorStrokeColor == valueIndicatorStrokeColor
         && other.overlayShape == overlayShape
         && other.tickMarkShape == tickMarkShape
         && other.thumbShape == thumbShape
@@ -761,7 +776,8 @@ class SliderThemeData with Diagnosticable {
         && other.valueIndicatorTextStyle == valueIndicatorTextStyle
         && other.minThumbSeparation == minThumbSeparation
         && other.thumbSelector == thumbSelector
-        && other.mouseCursor == mouseCursor;
+        && other.mouseCursor == mouseCursor
+        && other.allowedInteraction == allowedInteraction;
   }
 
   @override
@@ -784,6 +800,7 @@ class SliderThemeData with Diagnosticable {
     properties.add(ColorProperty('disabledThumbColor', disabledThumbColor, defaultValue: defaultData.disabledThumbColor));
     properties.add(ColorProperty('overlayColor', overlayColor, defaultValue: defaultData.overlayColor));
     properties.add(ColorProperty('valueIndicatorColor', valueIndicatorColor, defaultValue: defaultData.valueIndicatorColor));
+    properties.add(ColorProperty('valueIndicatorStrokeColor', valueIndicatorStrokeColor, defaultValue: defaultData.valueIndicatorStrokeColor));
     properties.add(DiagnosticsProperty<SliderComponentShape>('overlayShape', overlayShape, defaultValue: defaultData.overlayShape));
     properties.add(DiagnosticsProperty<SliderTickMarkShape>('tickMarkShape', tickMarkShape, defaultValue: defaultData.tickMarkShape));
     properties.add(DiagnosticsProperty<SliderComponentShape>('thumbShape', thumbShape, defaultValue: defaultData.thumbShape));
@@ -798,6 +815,7 @@ class SliderThemeData with Diagnosticable {
     properties.add(DoubleProperty('minThumbSeparation', minThumbSeparation, defaultValue: defaultData.minThumbSeparation));
     properties.add(DiagnosticsProperty<RangeThumbSelector>('thumbSelector', thumbSelector, defaultValue: defaultData.thumbSelector));
     properties.add(DiagnosticsProperty<MaterialStateProperty<MouseCursor?>>('mouseCursor', mouseCursor, defaultValue: defaultData.mouseCursor));
+    properties.add(EnumProperty<SliderInteraction>('allowedInteraction', allowedInteraction, defaultValue: defaultData.allowedInteraction));
   }
 }
 
@@ -884,7 +902,7 @@ abstract class SliderComponentShape {
   /// The `textScaleFactor` argument can be used to determine whether the
   /// component should paint larger or smaller, depending on whether
   /// [textScaleFactor] is greater than 1 for larger, and between 0 and 1 for
-  /// smaller. It usually comes from [MediaQueryData.textScaleFactor].
+  /// smaller. It's usually computed from [MediaQueryData.textScaler].
   /// {@endtemplate}
   ///
   /// {@template flutter.material.SliderComponentShape.paint.sizeWithOverflow}
@@ -1513,7 +1531,7 @@ mixin BaseSliderTrackShape {
     final double trackTop = offset.dy + (parentBox.size.height - trackHeight) / 2;
     final double trackRight = trackLeft + parentBox.size.width - math.max(thumbWidth, overlayWidth);
     final double trackBottom = trackTop + trackHeight;
-    // If the parentBox'size less than slider's size the trackRight will be less than trackLeft, so switch them.
+    // If the parentBox's size less than slider's size the trackRight will be less than trackLeft, so switch them.
     return Rect.fromLTRB(math.min(trackLeft, trackRight), trackTop, math.max(trackLeft, trackRight), trackBottom);
   }
 }
@@ -1579,16 +1597,10 @@ class RectangularSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
     final ColorTween inactiveTrackColorTween = ColorTween(begin: sliderTheme.disabledInactiveTrackColor, end: sliderTheme.inactiveTrackColor);
     final Paint activePaint = Paint()..color = activeTrackColorTween.evaluate(enableAnimation)!;
     final Paint inactivePaint = Paint()..color = inactiveTrackColorTween.evaluate(enableAnimation)!;
-    final Paint leftTrackPaint;
-    final Paint rightTrackPaint;
-    switch (textDirection) {
-      case TextDirection.ltr:
-        leftTrackPaint = activePaint;
-        rightTrackPaint = inactivePaint;
-      case TextDirection.rtl:
-        leftTrackPaint = inactivePaint;
-        rightTrackPaint = activePaint;
-    }
+    final (Paint leftTrackPaint, Paint rightTrackPaint) = switch (textDirection) {
+      TextDirection.ltr => (activePaint, inactivePaint),
+      TextDirection.rtl => (inactivePaint, activePaint),
+    };
 
     final Rect trackRect = getPreferredRect(
       parentBox: parentBox,
@@ -1690,16 +1702,10 @@ class RoundedRectSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
     final ColorTween inactiveTrackColorTween = ColorTween(begin: sliderTheme.disabledInactiveTrackColor, end: sliderTheme.inactiveTrackColor);
     final Paint activePaint = Paint()..color = activeTrackColorTween.evaluate(enableAnimation)!;
     final Paint inactivePaint = Paint()..color = inactiveTrackColorTween.evaluate(enableAnimation)!;
-    final Paint leftTrackPaint;
-    final Paint rightTrackPaint;
-    switch (textDirection) {
-      case TextDirection.ltr:
-        leftTrackPaint = activePaint;
-        rightTrackPaint = inactivePaint;
-      case TextDirection.rtl:
-        leftTrackPaint = inactivePaint;
-        rightTrackPaint = activePaint;
-    }
+    final (Paint leftTrackPaint, Paint rightTrackPaint) = switch (textDirection) {
+      TextDirection.ltr => (activePaint, inactivePaint),
+      TextDirection.rtl => (inactivePaint, activePaint),
+    };
 
     final Rect trackRect = getPreferredRect(
       parentBox: parentBox,
@@ -1771,6 +1777,52 @@ class RoundedRectSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
   }
 }
 
+
+/// Base range slider track shape that provides an implementation of [getPreferredRect] for
+/// default sizing.
+///
+/// The height is set from [SliderThemeData.trackHeight] and the width of the
+/// parent box less the larger of the widths of [SliderThemeData.rangeThumbShape] and
+/// [SliderThemeData.overlayShape].
+///
+/// See also:
+///
+///  * [RectangularRangeSliderTrackShape], which is a track shape with sharp
+///    rectangular edges
+mixin BaseRangeSliderTrackShape {
+  /// Returns a rect that represents the track bounds that fits within the
+  /// [Slider].
+  ///
+  /// The width is the width of the [RangeSlider], but padded by the max
+  /// of the overlay and thumb radius. The height is defined by the  [SliderThemeData.trackHeight].
+  ///
+  /// The [Rect] is centered both horizontally and vertically within the slider
+  /// bounds.
+  Rect getPreferredRect({
+    required RenderBox parentBox,
+    Offset offset = Offset.zero,
+    required SliderThemeData sliderTheme,
+    bool isEnabled = false,
+    bool isDiscrete = false,
+  }) {
+    assert(sliderTheme.rangeThumbShape != null);
+    assert(sliderTheme.overlayShape != null);
+    assert(sliderTheme.trackHeight != null);
+    final double thumbWidth = sliderTheme.rangeThumbShape!.getPreferredSize(isEnabled, isDiscrete).width;
+    final double overlayWidth = sliderTheme.overlayShape!.getPreferredSize(isEnabled, isDiscrete).width;
+    final double trackHeight = sliderTheme.trackHeight!;
+    assert(overlayWidth >= 0);
+    assert(trackHeight >= 0);
+
+    final double trackLeft = offset.dx + math.max(overlayWidth / 2, thumbWidth / 2);
+    final double trackTop = offset.dy + (parentBox.size.height - trackHeight) / 2;
+    final double trackRight = trackLeft + parentBox.size.width - math.max(thumbWidth, overlayWidth);
+    final double trackBottom = trackTop + trackHeight;
+    // If the parentBox's size less than slider's size the trackRight will be less than trackLeft, so switch them.
+    return Rect.fromLTRB(math.min(trackLeft, trackRight), trackTop, math.max(trackLeft, trackRight), trackBottom);
+  }
+}
+
 /// A [RangeSlider] track that's a simple rectangle.
 ///
 /// It paints a solid colored rectangle, vertically centered in the
@@ -1798,34 +1850,12 @@ class RoundedRectSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
 ///    the [RangeSlider]'s track.
 ///  * [RoundedRectRangeSliderTrackShape], for a similar track with rounded
 ///    edges.
-class RectangularRangeSliderTrackShape extends RangeSliderTrackShape {
+class RectangularRangeSliderTrackShape extends RangeSliderTrackShape with BaseRangeSliderTrackShape {
   /// Create a slider track with rectangular outer edges.
   ///
   /// The middle track segment is the selected range and is active, and the two
   /// outer track segments are inactive.
   const RectangularRangeSliderTrackShape();
-
-  @override
-  Rect getPreferredRect({
-    required RenderBox parentBox,
-    Offset offset = Offset.zero,
-    required SliderThemeData sliderTheme,
-    bool isEnabled = false,
-    bool isDiscrete = false,
-  }) {
-    assert(sliderTheme.overlayShape != null);
-    final double overlayWidth = sliderTheme.overlayShape!.getPreferredSize(isEnabled, isDiscrete).width;
-    final double trackHeight = sliderTheme.trackHeight!;
-    assert(overlayWidth >= 0);
-    assert(trackHeight >= 0);
-
-    final double trackLeft = offset.dx + overlayWidth / 2;
-    final double trackTop = offset.dy + (parentBox.size.height - trackHeight) / 2;
-    final double trackRight = trackLeft + parentBox.size.width - overlayWidth;
-    final double trackBottom = trackTop + trackHeight;
-    // If the parentBox'size less than slider's size the trackRight will be less than trackLeft, so switch them.
-    return Rect.fromLTRB(math.min(trackLeft, trackRight), trackTop, math.max(trackLeft, trackRight), trackBottom);
-  }
 
   @override
   void paint(
@@ -1853,16 +1883,10 @@ class RectangularRangeSliderTrackShape extends RangeSliderTrackShape {
     final Paint activePaint = Paint()..color = activeTrackColorTween.evaluate(enableAnimation!)!;
     final Paint inactivePaint = Paint()..color = inactiveTrackColorTween.evaluate(enableAnimation)!;
 
-    final Offset leftThumbOffset;
-    final Offset rightThumbOffset;
-    switch (textDirection) {
-      case TextDirection.ltr:
-        leftThumbOffset = startThumbCenter;
-        rightThumbOffset = endThumbCenter;
-      case TextDirection.rtl:
-        leftThumbOffset = endThumbCenter;
-        rightThumbOffset = startThumbCenter;
-    }
+    final (Offset leftThumbOffset, Offset rightThumbOffset) = switch (textDirection) {
+      TextDirection.ltr => (startThumbCenter, endThumbCenter),
+      TextDirection.rtl => (endThumbCenter, startThumbCenter),
+    };
 
     final Rect trackRect = getPreferredRect(
       parentBox: parentBox,
@@ -1913,35 +1937,12 @@ class RectangularRangeSliderTrackShape extends RangeSliderTrackShape {
 ///  * [RangeSliderTrackShape], which can be used to create custom shapes for
 ///    the [RangeSlider]'s track.
 ///  * [RectangularRangeSliderTrackShape], for a similar track with sharp edges.
-class RoundedRectRangeSliderTrackShape extends RangeSliderTrackShape {
+class RoundedRectRangeSliderTrackShape extends RangeSliderTrackShape with BaseRangeSliderTrackShape {
   /// Create a slider track with rounded outer edges.
   ///
   /// The middle track segment is the selected range and is active, and the two
   /// outer track segments are inactive.
   const RoundedRectRangeSliderTrackShape();
-
-  @override
-  Rect getPreferredRect({
-    required RenderBox parentBox,
-    Offset offset = Offset.zero,
-    required SliderThemeData sliderTheme,
-    bool isEnabled = false,
-    bool isDiscrete = false,
-  }) {
-    assert(sliderTheme.overlayShape != null);
-    assert(sliderTheme.trackHeight != null);
-    final double overlayWidth = sliderTheme.overlayShape!.getPreferredSize(isEnabled, isDiscrete).width;
-    final double trackHeight = sliderTheme.trackHeight!;
-    assert(overlayWidth >= 0);
-    assert(trackHeight >= 0);
-
-    final double trackLeft = offset.dx + overlayWidth / 2;
-    final double trackTop = offset.dy + (parentBox.size.height - trackHeight) / 2;
-    final double trackRight = trackLeft + parentBox.size.width - overlayWidth;
-    final double trackBottom = trackTop + trackHeight;
-    // If the parentBox'size less than slider's size the trackRight will be less than trackLeft, so switch them.
-    return Rect.fromLTRB(math.min(trackLeft, trackRight), trackTop, math.max(trackLeft, trackRight), trackBottom);
-  }
 
   @override
   void paint(
@@ -1982,16 +1983,10 @@ class RoundedRectRangeSliderTrackShape extends RangeSliderTrackShape {
     final Paint inactivePaint = Paint()
       ..color = inactiveTrackColorTween.evaluate(enableAnimation)!;
 
-    final Offset leftThumbOffset;
-    final Offset rightThumbOffset;
-    switch (textDirection) {
-      case TextDirection.ltr:
-        leftThumbOffset = startThumbCenter;
-        rightThumbOffset = endThumbCenter;
-      case TextDirection.rtl:
-        leftThumbOffset = endThumbCenter;
-        rightThumbOffset = startThumbCenter;
-    }
+    final (Offset leftThumbOffset, Offset rightThumbOffset) = switch (textDirection) {
+      TextDirection.ltr => (startThumbCenter, endThumbCenter),
+      TextDirection.rtl => (endThumbCenter, startThumbCenter),
+    };
     final Size thumbSize = sliderTheme.rangeThumbShape!.getPreferredSize(isEnabled, isDiscrete);
     final double thumbRadius = thumbSize.width / 2;
     assert(thumbRadius > 0);
@@ -2101,18 +2096,12 @@ class RoundSliderTickMarkShape extends SliderTickMarkShape {
     assert(sliderTheme.inactiveTickMarkColor != null);
     // The paint color of the tick mark depends on its position relative
     // to the thumb and the text direction.
-    Color? begin;
-    Color? end;
-    switch (textDirection) {
-      case TextDirection.ltr:
-        final bool isTickMarkRightOfThumb = center.dx > thumbCenter.dx;
-        begin = isTickMarkRightOfThumb ? sliderTheme.disabledInactiveTickMarkColor : sliderTheme.disabledActiveTickMarkColor;
-        end = isTickMarkRightOfThumb ? sliderTheme.inactiveTickMarkColor : sliderTheme.activeTickMarkColor;
-      case TextDirection.rtl:
-        final bool isTickMarkLeftOfThumb = center.dx < thumbCenter.dx;
-        begin = isTickMarkLeftOfThumb ? sliderTheme.disabledInactiveTickMarkColor : sliderTheme.disabledActiveTickMarkColor;
-        end = isTickMarkLeftOfThumb ? sliderTheme.inactiveTickMarkColor : sliderTheme.activeTickMarkColor;
-    }
+    final double xOffset = center.dx - thumbCenter.dx;
+    final (Color? begin, Color? end) = switch (textDirection) {
+      TextDirection.ltr when xOffset > 0 => (sliderTheme.disabledInactiveTickMarkColor, sliderTheme.inactiveTickMarkColor),
+      TextDirection.rtl when xOffset < 0 => (sliderTheme.disabledInactiveTickMarkColor, sliderTheme.inactiveTickMarkColor),
+      TextDirection.ltr || TextDirection.rtl => (sliderTheme.disabledActiveTickMarkColor, sliderTheme.activeTickMarkColor),
+    };
     final Paint paint = Paint()..color = ColorTween(begin: begin, end: end).evaluate(enableAnimation)!;
 
     // The tick marks are tiny circles that are the same height as the track.
@@ -2184,13 +2173,10 @@ class RoundRangeSliderTickMarkShape extends RangeSliderTickMarkShape {
     assert(sliderTheme.activeTickMarkColor != null);
     assert(sliderTheme.inactiveTickMarkColor != null);
 
-    final bool isBetweenThumbs;
-    switch (textDirection) {
-      case TextDirection.ltr:
-        isBetweenThumbs = startThumbCenter.dx < center.dx && center.dx < endThumbCenter.dx;
-      case TextDirection.rtl:
-        isBetweenThumbs = endThumbCenter.dx < center.dx && center.dx < startThumbCenter.dx;
-    }
+    final bool isBetweenThumbs = switch (textDirection) {
+      TextDirection.ltr => startThumbCenter.dx < center.dx && center.dx < endThumbCenter.dx,
+      TextDirection.rtl => endThumbCenter.dx < center.dx && center.dx < startThumbCenter.dx,
+    };
     final Color? begin = isBetweenThumbs ? sliderTheme.disabledActiveTickMarkColor : sliderTheme.disabledInactiveTickMarkColor;
     final Color? end = isBetweenThumbs ? sliderTheme.activeTickMarkColor : sliderTheme.inactiveTickMarkColor;
     final Paint paint = Paint()..color = ColorTween(begin: begin, end: end).evaluate(enableAnimation)!;
@@ -2321,7 +2307,7 @@ class RoundSliderThumbShape extends SliderComponentShape {
 
   @override
   Size getPreferredSize(bool isEnabled, bool isDiscrete) {
-    return Size.fromRadius(isEnabled == true ? enabledThumbRadius : _disabledThumbRadius);
+    return Size.fromRadius(isEnabled ? enabledThumbRadius : _disabledThumbRadius);
   }
 
   @override
@@ -2430,7 +2416,7 @@ class RoundRangeSliderThumbShape extends RangeSliderThumbShape {
 
   @override
   Size getPreferredSize(bool isEnabled, bool isDiscrete) {
-    return Size.fromRadius(isEnabled == true ? enabledThumbRadius : _disabledThumbRadius);
+    return Size.fromRadius(isEnabled ? enabledThumbRadius : _disabledThumbRadius);
   }
 
   @override
@@ -2615,6 +2601,7 @@ class RectangularSliderValueIndicatorShape extends SliderComponentShape {
       textScaleFactor: textScaleFactor,
       sizeWithOverflow: sizeWithOverflow,
       backgroundPaintColor: sliderTheme.valueIndicatorColor!,
+      strokePaintColor: sliderTheme.valueIndicatorStrokeColor,
     );
   }
 }
@@ -2694,7 +2681,7 @@ class RectangularRangeSliderValueIndicatorShape
       textScaleFactor: textScaleFactor!,
       sizeWithOverflow: sizeWithOverflow!,
       backgroundPaintColor: sliderTheme!.valueIndicatorColor!,
-      strokePaintColor: isOnTop! ? sliderTheme.overlappingShapeStrokeColor : null,
+      strokePaintColor: isOnTop! ? sliderTheme.overlappingShapeStrokeColor : sliderTheme.valueIndicatorStrokeColor,
     );
   }
 }
@@ -2882,7 +2869,7 @@ class PaddleSliderValueIndicatorShape extends SliderComponentShape {
       labelPainter,
       textScaleFactor,
       sizeWithOverflow,
-      null,
+      sliderTheme.valueIndicatorStrokeColor,
     );
   }
 }
@@ -2964,7 +2951,7 @@ class PaddleRangeSliderValueIndicatorShape extends RangeSliderValueIndicatorShap
       labelPainter,
       textScaleFactor!,
       sizeWithOverflow!,
-      isOnTop ? sliderTheme.overlappingShapeStrokeColor : null,
+      isOnTop ? sliderTheme.overlappingShapeStrokeColor : sliderTheme.valueIndicatorStrokeColor,
     );
   }
 }
@@ -3412,6 +3399,7 @@ class DropSliderValueIndicatorShape extends SliderComponentShape {
       textScaleFactor: textScaleFactor,
       sizeWithOverflow: sizeWithOverflow,
       backgroundPaintColor: sliderTheme.valueIndicatorColor!,
+      strokePaintColor: sliderTheme.valueIndicatorStrokeColor,
     );
   }
 }
@@ -3528,8 +3516,17 @@ class _DropSliderValueIndicatorPathPainter {
       ..lineTo(-_triangleHeight, -_triangleHeight)
       ..lineTo(_triangleHeight, -_triangleHeight)
       ..close();
+    trianglePath.addRRect(borderRect);
+
+    if (strokePaintColor != null) {
+      final Paint strokePaint = Paint()
+        ..color = strokePaintColor
+        ..strokeWidth = 1.0
+        ..style = PaintingStyle.stroke;
+      canvas.drawPath(trianglePath, strokePaint);
+    }
+
     canvas.drawPath(trianglePath, fillPaint);
-    canvas.drawRRect(borderRect, fillPaint);
 
     // The label text is centered within the value indicator.
     final double bottomTipToUpperRectTranslateY = -_preferredHalfHeight / 2 - upperRect.height;

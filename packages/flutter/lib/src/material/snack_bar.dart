@@ -11,6 +11,7 @@ import 'colors.dart';
 import 'icon_button.dart';
 import 'icons.dart';
 import 'material.dart';
+import 'material_localizations.dart';
 import 'material_state.dart';
 import 'scaffold.dart';
 import 'snack_bar_theme.dart';
@@ -83,8 +84,6 @@ enum SnackBarClosedReason {
 ///  * <https://material.io/design/components/snackbars.html>
 class SnackBarAction extends StatefulWidget {
   /// Creates an action for a [SnackBar].
-  ///
-  /// The [label] and [onPressed] arguments must be non-null.
   const SnackBarAction({
     super.key,
     this.textColor,
@@ -118,7 +117,7 @@ class SnackBarAction extends StatefulWidget {
   /// [SnackBarAction] is dismissed.
   final Color? disabledTextColor;
 
-  /// The button diabled background color. This color is shown after the
+  /// The button disabled background color. This color is shown after the
   /// [SnackBarAction] is dismissed.
   ///
   /// If not provided, defaults to [SnackBarThemeData.disabledActionBackgroundColor].
@@ -127,7 +126,7 @@ class SnackBarAction extends StatefulWidget {
   /// The button label.
   final String label;
 
-  /// The callback to be called when the button is pressed. Must not be null.
+  /// The callback to be called when the button is pressed.
   ///
   /// This callback will be called at most once each time this action is
   /// displayed in a [SnackBar].
@@ -250,6 +249,13 @@ class _SnackBarActionState extends State<SnackBarAction> {
 /// ** See code in examples/api/lib/material/snack_bar/snack_bar.1.dart **
 /// {@end-tool}
 ///
+/// {@tool dartpad}
+/// This example demonstrates the various [SnackBar] widget components,
+/// including an optional icon, in either floating or fixed format.
+///
+/// ** See code in examples/api/lib/material/snack_bar/snack_bar.2.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [ScaffoldMessenger.of], to obtain the current [ScaffoldMessengerState],
@@ -265,8 +271,7 @@ class _SnackBarActionState extends State<SnackBarAction> {
 class SnackBar extends StatefulWidget {
   /// Creates a snack bar.
   ///
-  /// The [content] argument must be non-null. The [elevation] must be null or
-  /// non-negative.
+  /// The [elevation] must be null or non-negative.
   const SnackBar({
     super.key,
     required this.content,
@@ -276,6 +281,7 @@ class SnackBar extends StatefulWidget {
     this.padding,
     this.width,
     this.shape,
+    this.hitTestBehavior,
     this.behavior,
     this.action,
     this.actionOverflowThreshold,
@@ -284,7 +290,7 @@ class SnackBar extends StatefulWidget {
     this.duration = _snackBarDisplayDuration,
     this.animation,
     this.onVisible,
-    this.dismissDirection = DismissDirection.down,
+    this.dismissDirection,
     this.clipBehavior = Clip.hardEdge,
   }) : assert(elevation == null || elevation >= 0.0),
        assert(width == null || margin == null,
@@ -324,6 +330,8 @@ class SnackBar extends StatefulWidget {
   /// If this property is null, then [SnackBarThemeData.insetPadding] of
   /// [ThemeData.snackBarTheme] is used. If that is also null, then the default is
   /// `EdgeInsets.fromLTRB(15.0, 5.0, 15.0, 10.0)`.
+  ///
+  /// If this property is not null and [hitTestBehavior] is null, then [hitTestBehavior] default is [HitTestBehavior.deferToChild].
   final EdgeInsetsGeometry? margin;
 
   /// The amount of padding to apply to the snack bar's content and optional
@@ -376,6 +384,13 @@ class SnackBar extends StatefulWidget {
   /// [SnackBarBehavior.floating], it uses a [RoundedRectangleBorder] with a
   /// circular corner radius of 4.0.
   final ShapeBorder? shape;
+
+  /// Defines how the snack bar area, including margin, will behave during hit testing.
+  ///
+  /// If this property is null and [margin] is not null, then [HitTestBehavior.deferToChild] is used by default.
+  ///
+  /// Please refer to [HitTestBehavior] for a detailed explanation of every behavior.
+  final HitTestBehavior? hitTestBehavior;
 
   /// This defines the behavior and location of the snack bar.
   ///
@@ -449,20 +464,27 @@ class SnackBar extends StatefulWidget {
 
   /// The direction in which the SnackBar can be dismissed.
   ///
-  /// Cannot be null, defaults to [DismissDirection.down].
-  final DismissDirection dismissDirection;
+  /// If this property is null, then [SnackBarThemeData.dismissDirection] of
+  /// [ThemeData.snackBarTheme] is used. If that is null, then the default is
+  /// [DismissDirection.down].
+  final DismissDirection? dismissDirection;
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
-  /// Defaults to [Clip.hardEdge], and must not be null.
+  /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
 
   // API for ScaffoldMessengerState.showSnackBar():
 
   /// Creates an animation controller useful for driving a snack bar's entrance and exit animation.
-  static AnimationController createAnimationController({ required TickerProvider vsync }) {
+  static AnimationController createAnimationController({
+    required TickerProvider vsync,
+    Duration? duration,
+    Duration? reverseDuration,
+  }) {
     return AnimationController(
-      duration: _snackBarTransitionDuration,
+      duration: duration ?? _snackBarTransitionDuration,
+      reverseDuration: reverseDuration,
       debugLabel: 'SnackBar',
       vsync: vsync,
     );
@@ -482,6 +504,7 @@ class SnackBar extends StatefulWidget {
       padding: padding,
       width: width,
       shape: shape,
+      hitTestBehavior: hitTestBehavior,
       behavior: behavior,
       action: action,
       actionOverflowThreshold: actionOverflowThreshold,
@@ -561,11 +584,9 @@ class _SnackBarState extends State<SnackBar> {
         : theme.copyWith(
             colorScheme: ColorScheme(
               primary: colorScheme.onPrimary,
-              primaryVariant: colorScheme.onPrimary,
               secondary: buttonColor,
-              secondaryVariant: colorScheme.onSecondary,
               surface: colorScheme.onSurface,
-              background: defaults.backgroundColor!,
+              background: defaults.backgroundColor,
               error: colorScheme.onError,
               onPrimary: colorScheme.primary,
               onSecondary: colorScheme.secondary,
@@ -636,6 +657,7 @@ class _SnackBarState extends State<SnackBar> {
             iconSize: 24.0,
             color: widget.closeIconColor ?? snackBarTheme.closeIconColor ?? defaults.closeIconColor,
             onPressed: () => ScaffoldMessenger.of(context).hideCurrentSnackBar(reason: SnackBarClosedReason.dismiss),
+            tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
           )
         : null;
 
@@ -651,6 +673,7 @@ class _SnackBarState extends State<SnackBar> {
     final double actionAndIconWidth = actionTextPainter.size.width +
         (widget.action != null ? actionHorizontalMargin : 0) +
         (showCloseIcon ? (iconButton?.iconSize ?? 0 + iconHorizontalMargin) : 0);
+    actionTextPainter.dispose();
 
     final EdgeInsets margin = widget.margin?.resolve(TextDirection.ltr) ?? snackBarTheme.insetPadding ?? defaults.insetPadding!;
 
@@ -723,11 +746,13 @@ class _SnackBarState extends State<SnackBar> {
     final double elevation = widget.elevation ?? snackBarTheme.elevation ?? defaults.elevation!;
     final Color backgroundColor = widget.backgroundColor ?? snackBarTheme.backgroundColor ?? defaults.backgroundColor!;
     final ShapeBorder? shape = widget.shape ?? snackBarTheme.shape ?? (isFloatingSnackBar ? defaults.shape : null);
+    final DismissDirection dismissDirection = widget.dismissDirection ?? snackBarTheme.dismissDirection ?? DismissDirection.down;
 
     snackBar = Material(
       shape: shape,
       elevation: elevation,
       color: backgroundColor,
+      clipBehavior: widget.clipBehavior,
       child: Theme(
         data: effectiveTheme,
         child: accessibleNavigation || theme.useMaterial3
@@ -768,8 +793,9 @@ class _SnackBarState extends State<SnackBar> {
       },
       child: Dismissible(
         key: const Key('dismissible'),
-        direction: widget.dismissDirection,
+        direction: dismissDirection,
         resizeDuration: null,
+        behavior: widget.hitTestBehavior ?? (widget.margin != null ? HitTestBehavior.deferToChild : HitTestBehavior.opaque),
         onDismissed: (DismissDirection direction) {
           ScaffoldMessenger.of(context).removeCurrentSnackBar(reason: SnackBarClosedReason.swipe);
         },
@@ -843,11 +869,12 @@ class _SnackbarDefaultsM2 extends SnackBarThemeData {
 
   @override
   TextStyle? get contentTextStyle => ThemeData(
-          brightness: _theme.brightness == Brightness.light
-              ? Brightness.dark
-              : Brightness.light)
-      .textTheme
-      .titleMedium;
+    useMaterial3: _theme.useMaterial3,
+    brightness: _theme.brightness == Brightness.light
+      ? Brightness.dark
+      : Brightness.light)
+    .textTheme
+    .titleMedium;
 
   @override
   SnackBarBehavior get behavior => SnackBarBehavior.fixed;
@@ -885,8 +912,6 @@ class _SnackbarDefaultsM2 extends SnackBarThemeData {
 // "END GENERATED" comments are generated from data in the Material
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
-
-// Token database version: v0_162
 
 class _SnackbarDefaultsM3 extends SnackBarThemeData {
     _SnackbarDefaultsM3(this.context);

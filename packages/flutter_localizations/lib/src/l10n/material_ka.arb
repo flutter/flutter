@@ -25,6 +25,7 @@
   "continueButtonLabel": "გაგრძელება",
   "copyButtonLabel": "კოპირება",
   "cutButtonLabel": "ამოჭრა",
+  "scanTextButtonLabel": "ტექსტის სკანირება",
   "okButtonLabel": "კარგი",
   "pasteButtonLabel": "ჩასმა",
   "selectAllButtonLabel": "ყველას არჩევა",
@@ -133,5 +134,17 @@
   "scrimLabel": "სკრიმი",
   "bottomSheetLabel": "ქვედა ფურცელი",
   "scrimOnTapHint": "$modalRouteContentName-ის დახურვა",
-  "keyboardKeyShift": "ცვლა"
+  "keyboardKeyShift": "ცვლა",
+  "expansionTileExpandedHint": "ორმაგად შეეხეთ ჩასაკეცად",
+  "expansionTileCollapsedHint": "გასაფართოებლად ორჯერ შეეხეთ",
+  "expansionTileExpandedTapHint": "ჩაკეცვა",
+  "expansionTileCollapsedTapHint": "მეტი დეტალებისთვის გააფართოეთ",
+  "expandedHint": "ჩაკეცილია",
+  "collapsedHint": "გაფართოებულია",
+  "menuDismissLabel": "მენიუს უარყოფა",
+  "lookUpButtonLabel": "აიხედეთ ზემოთ",
+  "searchWebButtonLabel": "ვებში ძიება",
+  "shareButtonLabel": "გაზიარება...",
+  "clearButtonTooltip": "Clear text",
+  "selectedDateLabel": "Selected"
 }

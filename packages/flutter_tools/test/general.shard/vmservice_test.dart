@@ -9,8 +9,6 @@ import 'package:flutter_tools/src/base/io.dart' as io;
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/ios/xcodeproj.dart';
-import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:test/fake.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
@@ -83,6 +81,7 @@ void main() {
     );
 
     expect(mockVMService.services, containsPair(kFlutterMemoryInfoServiceName, kFlutterToolAlias));
+<<<<<<< HEAD
   });
 
   testWithoutContext('VmService registers flutterGetIOSBuildOptions service', () async {
@@ -105,6 +104,8 @@ void main() {
     );
 
     expect(mockVMService.services, containsPair(kFlutterGetAndroidBuildVariantsServiceName, kFlutterToolAlias));
+=======
+>>>>>>> 761747bfc538b5af34aa0d3fac380f1bc331ec49
   });
 
   testWithoutContext('VM Service registers flutterGetSkSL service', () async {
@@ -288,6 +289,7 @@ void main() {
     ]));
   });
 
+<<<<<<< HEAD
   testWithoutContext('VmService forward flutterGetIOSBuildOptions request and response correctly', () async {
     final MockVMService vmService = MockVMService();
     final XcodeProjectInfo expectedProjectInfo = XcodeProjectInfo(
@@ -350,6 +352,8 @@ void main() {
     expect(result['schemes'], isNull);
   });
 
+=======
+>>>>>>> 761747bfc538b5af34aa0d3fac380f1bc331ec49
   testWithoutContext('runInView forwards arguments correctly', () async {
     final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
       requests: <VmServiceExpectation>[
@@ -387,7 +391,7 @@ void main() {
           args: <String, Object>{
             'isolateId': '1',
           },
-          errorCode: RPCErrorCodes.kMethodNotFound,
+          error: FakeRPCError(code: RPCErrorCodes.kMethodNotFound),
         ),
       ]
     );
@@ -406,7 +410,7 @@ void main() {
           args: <String, Object>{
             'isolateId': '1',
           },
-          errorCode: RPCErrorCodes.kMethodNotFound,
+          error: FakeRPCError(code: RPCErrorCodes.kMethodNotFound),
         ),
       ]
     );
@@ -425,7 +429,7 @@ void main() {
           args: <String, Object>{
             'isolateId': '1',
           },
-          errorCode: RPCErrorCodes.kMethodNotFound,
+          error: FakeRPCError(code: RPCErrorCodes.kMethodNotFound),
         ),
       ]
     );
@@ -444,7 +448,7 @@ void main() {
           args: <String, Object>{
             'isolateId': '1',
           },
-          errorCode: RPCErrorCodes.kMethodNotFound,
+          error: FakeRPCError(code: RPCErrorCodes.kMethodNotFound),
         ),
       ]
     );
@@ -463,7 +467,7 @@ void main() {
           args: <String, Object>{
             'isolateId': '1',
           },
-          errorCode: RPCErrorCodes.kMethodNotFound,
+          error: FakeRPCError(code: RPCErrorCodes.kMethodNotFound),
         ),
       ]
     );
@@ -482,7 +486,7 @@ void main() {
           args: <String, Object>{
             'isolateId': '1',
           },
-          errorCode: RPCErrorCodes.kMethodNotFound,
+          error: FakeRPCError(code: RPCErrorCodes.kMethodNotFound),
         ),
       ]
     );
@@ -522,30 +526,26 @@ void main() {
           args: <String, Object>{
             'viewId': '1234',
           },
-          errorCode: RPCErrorCodes.kServiceDisappeared,
+          error: FakeRPCError(code: RPCErrorCodes.kServiceDisappeared),
         ),
         const FakeVmServiceRequest(
           method: kListViewsMethod,
-          errorCode: RPCErrorCodes.kServiceDisappeared,
-        ),
-        const FakeVmServiceRequest(
-          method: kScreenshotMethod,
-          errorCode: RPCErrorCodes.kServiceDisappeared,
+          error: FakeRPCError(code: RPCErrorCodes.kServiceDisappeared),
         ),
         const FakeVmServiceRequest(
           method: kScreenshotSkpMethod,
-          errorCode: RPCErrorCodes.kServiceDisappeared,
+          error: FakeRPCError(code: RPCErrorCodes.kServiceDisappeared),
         ),
         const FakeVmServiceRequest(
           method: 'setVMTimelineFlags',
           args: <String, dynamic>{
             'recordedStreams': <String>['test'],
           },
-          errorCode: RPCErrorCodes.kServiceDisappeared,
+          error: FakeRPCError(code: RPCErrorCodes.kServiceDisappeared),
         ),
         const FakeVmServiceRequest(
           method: 'getVMTimeline',
-          errorCode: RPCErrorCodes.kServiceDisappeared,
+          error: FakeRPCError(code: RPCErrorCodes.kServiceDisappeared),
         ),
         const FakeVmServiceRequest(
           method: kRenderFrameWithRasterStatsMethod,
@@ -553,7 +553,7 @@ void main() {
             'viewId': '1',
             'isolateId': '12',
           },
-          errorCode: RPCErrorCodes.kServiceDisappeared,
+          error: FakeRPCError(code: RPCErrorCodes.kServiceDisappeared),
         ),
       ]
     );
@@ -565,9 +565,6 @@ void main() {
 
     final List<FlutterView> views = await fakeVmServiceHost.vmService.getFlutterViews();
     expect(views, isEmpty);
-
-    final vm_service.Response? screenshot = await fakeVmServiceHost.vmService.screenshot();
-    expect(screenshot, isNull);
 
     final vm_service.Response? screenshotSkp = await fakeVmServiceHost.vmService.screenshotSkp();
     expect(screenshotSkp, isNull);
@@ -588,9 +585,13 @@ void main() {
   testWithoutContext('getIsolateOrNull returns null if service disappears ', () async {
     final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
       requests: <VmServiceExpectation>[
-        const FakeVmServiceRequest(method: 'getIsolate', args: <String, Object>{
-          'isolateId': 'isolate/123',
-        }, errorCode: RPCErrorCodes.kServiceDisappeared),
+        const FakeVmServiceRequest(
+          method: 'getIsolate',
+          args: <String, Object>{
+            'isolateId': 'isolate/123',
+          },
+          error: FakeRPCError(code: RPCErrorCodes.kServiceDisappeared),
+        ),
       ]
     );
 
@@ -795,7 +796,7 @@ void main() {
           args: <String, Object>{
             'isolateId': '1',
           },
-          errorCode: RPCErrorCodes.kServiceDisappeared,
+          error: FakeRPCError(code: RPCErrorCodes.kServiceDisappeared),
         ),
         // Assume a different isolate returns.
         FakeVmServiceStreamResponse(
@@ -827,7 +828,7 @@ void main() {
             'streamId': 'Isolate',
           },
           // Stream already subscribed - https://github.com/dart-lang/sdk/blob/main/runtime/vm/service/service.md#streamlisten
-          errorCode: 103,
+          error: FakeRPCError(code: 103),
         ),
         listViewsRequest,
         FakeVmServiceRequest(
@@ -895,14 +896,14 @@ void main() {
         ),
         const FakeVmServiceRequest(
           method: kListViewsMethod,
-          errorCode: RPCErrorCodes.kServiceDisappeared,
+          error: FakeRPCError(code: RPCErrorCodes.kServiceDisappeared),
         ),
         const FakeVmServiceRequest(
           method: 'streamCancel',
           args: <String, Object>{
             'streamId': 'Isolate',
           },
-          errorCode: RPCErrorCodes.kServiceDisappeared,
+          error: FakeRPCError(code: RPCErrorCodes.kServiceDisappeared),
         ),
       ]);
 
@@ -937,6 +938,7 @@ void main() {
   });
 }
 
+<<<<<<< HEAD
 class MockFlutterProject extends Fake implements FlutterProject {
   MockFlutterProject({
     IosProject? mockedIos,
@@ -971,6 +973,8 @@ class MockAndroidProject extends Fake implements AndroidProject {
 
 class MockLogger extends Fake implements Logger { }
 
+=======
+>>>>>>> 761747bfc538b5af34aa0d3fac380f1bc331ec49
 class MockVMService extends Fake implements vm_service.VmService {
   final Map<String, String> services = <String, String>{};
   final Map<String, vm_service.ServiceCallback> serviceCallBacks = <String, vm_service.ServiceCallback>{};
@@ -1001,9 +1005,6 @@ class MockVMService extends Fake implements vm_service.VmService {
   }
 }
 
-// Unfortunately Device, despite not being immutable, has an `operator ==`.
-// Until we fix that, we have to also ignore related lints here.
-// ignore: avoid_implementing_value_types
 class FakeDevice extends Fake implements Device { }
 
 /// A [WebSocketConnector] that always throws an [io.SocketException].

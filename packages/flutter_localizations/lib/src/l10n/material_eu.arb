@@ -25,6 +25,7 @@
   "continueButtonLabel": "Egin aurrera",
   "copyButtonLabel": "Kopiatu",
   "cutButtonLabel": "Ebaki",
+  "scanTextButtonLabel": "Eskaneatu testua",
   "okButtonLabel": "Ados",
   "pasteButtonLabel": "Itsatsi",
   "selectAllButtonLabel": "Hautatu guztiak",
@@ -133,5 +134,17 @@
   "scrimLabel": "Barrera",
   "bottomSheetLabel": "Behealdeko orria",
   "scrimOnTapHint": "Itxi $modalRouteContentName",
-  "keyboardKeyShift": "Maius"
+  "keyboardKeyShift": "Maius",
+  "expansionTileExpandedHint": "tolesteko, sakatu birritan",
+  "expansionTileCollapsedHint": "zabaltzeko, sakatu birritan",
+  "expansionTileExpandedTapHint": "Tolestu",
+  "expansionTileCollapsedTapHint": "Zabaldu hau xehetasun gehiago lortzeko",
+  "expandedHint": "Tolestuta",
+  "collapsedHint": "Zabalduta",
+  "menuDismissLabel": "Baztertu menua",
+  "lookUpButtonLabel": "Bilatu",
+  "searchWebButtonLabel": "Bilatu sarean",
+  "shareButtonLabel": "Partekatu...",
+  "clearButtonTooltip": "Clear text",
+  "selectedDateLabel": "Selected"
 }

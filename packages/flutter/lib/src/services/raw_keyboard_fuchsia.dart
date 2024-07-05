@@ -10,20 +10,28 @@ import 'raw_keyboard.dart';
 export 'package:flutter/foundation.dart' show DiagnosticPropertiesBuilder;
 
 export 'keyboard_key.g.dart' show LogicalKeyboardKey, PhysicalKeyboardKey;
-export 'raw_keyboard.dart' show KeyboardSide, ModifierKey;
 
 /// Platform-specific key event data for Fuchsia.
+///
+/// This class is deprecated and will be removed. Platform specific key event
+/// data will no longer be available. See [KeyEvent] for what is available.
 ///
 /// This object contains information about key events obtained from Fuchsia's
 /// `KeyData` interface.
 ///
 /// See also:
 ///
-///  * [RawKeyboard], which uses this interface to expose key data.
+/// * [RawKeyboard], which uses this interface to expose key data.
+@Deprecated(
+  'Platform specific key event data is no longer available. See KeyEvent for what is available. '
+  'This feature was deprecated after v3.18.0-2.0.pre.',
+)
 class RawKeyEventDataFuchsia extends RawKeyEventData {
   /// Creates a key event data structure specific for Fuchsia.
-  ///
-  /// The [hidUsage], [codePoint], and [modifiers] arguments must not be null.
+  @Deprecated(
+    'Platform specific key event data is no longer available. See KeyEvent for what is available. '
+    'This feature was deprecated after v3.18.0-2.0.pre.',
+  )
   const RawKeyEventDataFuchsia({
     this.hidUsage = 0,
     this.codePoint = 0,
@@ -91,16 +99,12 @@ class RawKeyEventDataFuchsia extends RawKeyEventData {
     if (modifiers & anyMask == 0) {
       return false;
     }
-    switch (side) {
-      case KeyboardSide.any:
-        return true;
-      case KeyboardSide.all:
-        return modifiers & leftMask != 0 && modifiers & rightMask != 0;
-      case KeyboardSide.left:
-        return modifiers & leftMask != 0;
-      case KeyboardSide.right:
-        return modifiers & rightMask != 0;
-    }
+    return switch (side) {
+      KeyboardSide.any   => true,
+      KeyboardSide.all   => (modifiers & leftMask != 0) && (modifiers & rightMask != 0),
+      KeyboardSide.left  => modifiers & leftMask != 0,
+      KeyboardSide.right => modifiers & rightMask != 0,
+    };
   }
 
   @override

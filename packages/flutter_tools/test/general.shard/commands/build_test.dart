@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -51,7 +52,7 @@ void main() {
     final Platform platform = FakePlatform();
     final BufferLogger logger = BufferLogger.test();
     final List<FlutterCommand> commands = <FlutterCommand>[
-      BuildWindowsCommand(logger: BufferLogger.test()),
+      BuildWindowsCommand(logger: BufferLogger.test(), operatingSystemUtils: FakeOperatingSystemUtils()),
       BuildLinuxCommand(logger: BufferLogger.test(), operatingSystemUtils: FakeOperatingSystemUtils()),
       BuildMacosCommand(logger: BufferLogger.test(), verboseHelp: false),
       BuildWebCommand(fileSystem: fileSystem, logger: BufferLogger.test(), verboseHelp: false),
@@ -75,7 +76,6 @@ void main() {
         ),
       ),
       AttachCommand(
-        artifacts: Artifacts.test(),
         stdio: FakeStdio(),
         logger: logger,
         terminal: FakeTerminal(),
@@ -113,11 +113,19 @@ void main() {
   });
 
   testUsingContext('Include only supported sub commands', () {
+    final BufferLogger logger = BufferLogger.test();
+    final ProcessUtils processUtils = ProcessUtils(
+      logger: logger,
+      processManager: FakeProcessManager.empty(),
+    );
+    final MemoryFileSystem fs = MemoryFileSystem.test();
     final BuildCommand command = BuildCommand(
+      artifacts: Artifacts.test(fileSystem: fs),
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
+      fileSystem: fs,
+      logger: logger,
+      processUtils: processUtils,
       osUtils: FakeOperatingSystemUtils(),
     );
     for (final Command<void> x in command.subcommands.values) {

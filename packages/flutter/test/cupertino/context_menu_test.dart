@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:clock/clock.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -240,6 +241,61 @@ void main() {
       expect(findStatic(), findsOneWidget);
     });
 
+    testWidgets('_DecoyChild preserves the child color', (WidgetTester tester) async {
+      final Widget child = getChild();
+      await tester.pumpWidget(CupertinoApp(
+        home: CupertinoPageScaffold(
+          backgroundColor: CupertinoColors.black,
+            child: MediaQuery(
+              data: const MediaQueryData(size: Size(800, 600)),
+                child: Center(
+                  child: CupertinoContextMenu(
+                  actions: const <CupertinoContextMenuAction>[
+                    CupertinoContextMenuAction(
+                      child: Text('CupertinoContextMenuAction'),
+                    ),
+                  ],
+                child: child
+              ),
+            )
+          )
+        ),
+      ));
+
+      // Expect no _DecoyChild to be present before the gesture.
+      final Finder decoyChild = find
+          .byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DecoyChild');
+      expect(decoyChild, findsNothing);
+
+      // Start press gesture on the child.
+      final Rect childRect = tester.getRect(find.byWidget(child));
+      final TestGesture gesture = await tester.startGesture(childRect.center);
+      await tester.pump();
+
+      // Find the _DecoyChild by runtimeType,
+      // find the Container descendant with the BoxDecoration,
+      // then read the boxDecoration property.
+      final Finder decoyChildDescendant = find.descendant(
+          of: decoyChild,
+          matching: find.byType(Container));
+      final BoxDecoration? boxDecoration = (tester.firstWidget(decoyChildDescendant) as Container).decoration as BoxDecoration?;
+      const List<Color?> expectedColors = <Color?>[null, Color(0x00000000)];
+
+      // `Color(0x00000000)` -> Is `Colors.transparent`.
+      // `null`              -> Default when no color argument is given in `BoxDecoration`.
+      // Any other color won't preserve the child's property.
+      expect(expectedColors, contains(boxDecoration?.color));
+
+      // End the gesture.
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      // Expect no _DecoyChild to be present after ending the gesture.
+      final Finder decoyChildAfterEnding = find
+          .byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DecoyChild');
+      expect(decoyChildAfterEnding, findsNothing);
+    });
+
     testWidgets('CupertinoContextMenu with a basic builder opens and closes the same as when providing a child', (WidgetTester tester) async {
       final Widget child = getChild();
       await tester.pumpWidget(getBuilderContextMenu(builder: (BuildContext context, Animation<double> animation) {
@@ -295,7 +351,7 @@ void main() {
       expect(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DecoyChild'), findsNothing);
 
       // Start a press on the child.
-      await tester.startGesture(childRect.center);
+      final TestGesture gesture = await tester.startGesture(childRect.center);
       await tester.pump();
 
       Finder findBuilderDecoyChild() {
@@ -316,6 +372,11 @@ void main() {
       final Container decoyLaterContainer = tester.firstElement(findBuilderDecoyChild()).widget as Container;
       final BoxDecoration? decoyLaterDecoration = decoyLaterContainer.decoration as BoxDecoration?;
       expect(decoyLaterDecoration?.borderRadius, isNot(equals(BorderRadius.circular(0))));
+
+      // Finish gesture to release resources.
+      await tester.pumpAndSettle();
+      await gesture.up();
+      await tester.pumpAndSettle();
     });
 
     testWidgets('Hovering over Cupertino context menu updates cursor to clickable on Web', (WidgetTester tester) async {
@@ -626,6 +687,51 @@ void main() {
         expect(tester.getSize(find.byWidget(action)).width, 250);
       }
     });
+
+    testWidgets("ContextMenu route animation doesn't throw exception on dismiss", (WidgetTester tester) async {
+      // This is a regression test for https://github.com/flutter/flutter/issues/124597.
+      final List<int> items = List<int>.generate(2, (int index) => index).toList();
+
+      await tester.pumpWidget(CupertinoApp(
+        home: CupertinoPageScaffold(
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return ListView(
+                children: items.map((int index) => CupertinoContextMenu(
+                  actions: <CupertinoContextMenuAction>[
+                    CupertinoContextMenuAction(
+                      child: const Text('DELETE'),
+                      onPressed: () {
+                        setState(() {
+                          items.remove(index);
+                          Navigator.of(context).pop();
+                        });
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ],
+                  child: Text('Item $index'),
+                )).toList(),
+              );
+            }
+          ),
+        ),
+      ));
+
+      // Open the CupertinoContextMenu.
+      final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('Item 1')));
+      await tester.pumpAndSettle();
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      // Tap the delete action.
+      await tester.tap(find.text('DELETE'));
+      await tester.pumpAndSettle();
+
+      // The CupertinoContextMenu should be closed with no exception.
+      expect(find.text('DELETE'), findsNothing);
+      expect(tester.takeException(), null);
+    });
   });
 
   group("Open layout differs depending on child's position on screen", () {
@@ -764,5 +870,75 @@ void main() {
       final Offset right = tester.getTopLeft(find.byType(CupertinoContextMenuAction));
       expect(right.dx, lessThan(left.dx));
     });
+  });
+
+  testWidgets('Conflicting gesture detectors', (WidgetTester tester) async {
+    int? onPointerDownTime;
+    int? onPointerUpTime;
+    bool insideTapTriggered = false;
+    // The required duration of the route to be pushed in is [500, 900]ms.
+    // 500ms is calculated from kPressTimeout+_previewLongPressTimeout/2.
+    // 900ms is calculated from kPressTimeout+_previewLongPressTimeout.
+    const Duration pressDuration = Duration(milliseconds: 501);
+
+    int now() => clock.now().millisecondsSinceEpoch;
+
+    await tester.pumpWidget(Listener(
+      onPointerDown: (PointerDownEvent event) => onPointerDownTime = now(),
+      onPointerUp: (PointerUpEvent event) => onPointerUpTime = now(),
+      child: CupertinoApp(
+        home: Align(
+          child: CupertinoContextMenu(
+            actions: const <CupertinoContextMenuAction>[
+              CupertinoContextMenuAction(
+                child: Text('CupertinoContextMenuAction'),
+              ),
+            ],
+            child: GestureDetector(
+              onTap: () => insideTapTriggered = true,
+              child: Container(
+                width: 200,
+                height: 200,
+                key: const Key('container'),
+                color: const Color(0xFF00FF00),
+              ),
+            ),
+          ),
+        ),
+      ),
+    ));
+
+    // Start a press on the child.
+    final TestGesture gesture = await tester.createGesture();
+    await gesture.down(tester.getCenter(find.byKey(const Key('container'))));
+    // Simulate the actual situation:
+    // the user keeps pressing and requesting frames.
+    // If there is only one frame,
+    // the animation is mutant and cannot drive the value of the animation controller.
+    for (int i = 0; i < 100; i++) {
+      await tester.pump(pressDuration ~/ 100);
+    }
+    await gesture.up();
+    // Await pushing route.
+    await tester.pumpAndSettle();
+
+    // Judge whether _ContextMenuRouteStatic present on the screen.
+    final Finder routeStatic = find.byWidgetPredicate(
+          (Widget w) => '${w.runtimeType}' == '_ContextMenuRouteStatic',
+    );
+
+    // The insideTap and the route should not be triggered at the same time.
+    if (insideTapTriggered) {
+      // Calculate the actual duration.
+      final int actualDuration = onPointerUpTime! - onPointerDownTime!;
+
+      expect(routeStatic, findsNothing,
+          reason: 'When actualDuration($actualDuration) is in the range of 500ms~900ms, '
+              'which means the route is pushed, '
+              'but insideTap should not be triggered at the same time.');
+    } else {
+      // The route should be pushed when the insideTap is not triggered.
+      expect(routeStatic, findsOneWidget);
+    }
   });
 }

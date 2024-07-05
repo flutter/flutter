@@ -13,15 +13,29 @@ void main() {
     );
 
     await tester.tap(find.byType(TextButton));
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     expect(find.text('Show Message'), findsOneWidget);
     expect(find.text(example.MenuApp.kMessage), findsNothing);
 
     await tester.tap(find.text('Show Message'));
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     expect(find.text('Show Message'), findsNothing);
     expect(find.text(example.MenuApp.kMessage), findsOneWidget);
+  });
+
+  testWidgets('MenuAnchor is wrapped in a SafeArea', (WidgetTester tester) async {
+    const double safeAreaPadding = 100.0;
+    await tester.pumpWidget(
+      const MediaQuery(
+        data: MediaQueryData(
+          padding: EdgeInsets.symmetric(vertical: safeAreaPadding),
+        ),
+        child: example.MenuApp(),
+      ),
+    );
+
+    expect(tester.getTopLeft(find.byType(MenuAnchor)), const Offset(0.0, safeAreaPadding));
   });
 }

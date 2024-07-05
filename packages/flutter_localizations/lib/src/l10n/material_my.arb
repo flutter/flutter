@@ -25,6 +25,7 @@
   "continueButtonLabel": "ရှေ့ဆက်ရန်",
   "copyButtonLabel": "မိတ္တူကူးရန်",
   "cutButtonLabel": "ဖြတ်ယူရန်",
+  "scanTextButtonLabel": "စာသား စကင်ဖတ်ရန်",
   "okButtonLabel": "OK",
   "pasteButtonLabel": "ကူးထည့်ရန်",
   "selectAllButtonLabel": "အားလုံး ရွေးရန်",
@@ -133,5 +134,17 @@
   "scrimLabel": "Scrim",
   "bottomSheetLabel": "အောက်ခြေအပိုဆောင်း စာမျက်နှာ",
   "scrimOnTapHint": "$modalRouteContentName ပိတ်ရန်",
-  "keyboardKeyShift": "Shift"
+  "keyboardKeyShift": "Shift",
+  "expansionTileExpandedHint": "ခေါက်ရန် နှစ်ချက်တို့ပါ",
+  "expansionTileCollapsedHint": "ဖြန့်ရန် နှစ်ချက်တို့ပါ",
+  "expansionTileExpandedTapHint": "ခေါက်ရန်",
+  "expansionTileCollapsedTapHint": "အသေးစိတ်အတွက် ဖြန့်ရန်",
+  "expandedHint": "ခေါက်ထားသည်",
+  "collapsedHint": "ဖြန့်ထားသည်",
+  "menuDismissLabel": "မီနူးကိုပယ်ပါ",
+  "lookUpButtonLabel": "အပေါ်ကြည့်ရန်",
+  "searchWebButtonLabel": "ဝဘ်တွင်ရှာရန်",
+  "shareButtonLabel": "မျှဝေရန်...",
+  "clearButtonTooltip": "Clear text",
+  "selectedDateLabel": "Selected"
 }

@@ -52,6 +52,13 @@ typedef ScrollableWidgetBuilder = Widget Function(
 /// fire when [pixels] changes without [size] changing. For example, if the
 /// constraints provided to an attached sheet change.
 class DraggableScrollableController extends ChangeNotifier {
+  /// Creates a controller for [DraggableScrollableSheet].
+  DraggableScrollableController() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      ChangeNotifier.maybeDispatchObjectCreation(this);
+    }
+  }
+
   _DraggableScrollableSheetScrollController? _attachedController;
   final Set<AnimationController> _animationControllers = <AnimationController>{};
 
@@ -206,6 +213,7 @@ class DraggableScrollableController extends ChangeNotifier {
     } else {
       _attachedController?.extent._currentSize.removeListener(notifyListeners);
     }
+    _disposeAnimationControllers();
     _attachedController = null;
   }
 
@@ -252,7 +260,7 @@ class DraggableScrollableController extends ChangeNotifier {
 /// to position sheet based on the space it is taking, the [expand] property
 /// may be set to false.
 ///
-/// {@tool snippet}
+/// {@tool dartpad}
 ///
 /// This is a sample widget which shows a [ListView] that has 25 [ListTile]s.
 /// It starts out as taking up half the body of the [Scaffold], and can be
@@ -261,42 +269,19 @@ class DraggableScrollableController extends ChangeNotifier {
 /// scrolled up or down, until they reach the top of the list again and the user
 /// drags the sheet back down.
 ///
-/// ```dart
-/// class HomePage extends StatelessWidget {
-///   const HomePage({super.key});
+/// On desktop and web running on desktop platforms, dragging to scroll with a mouse is disabled by default
+/// to align with the natural behavior found in other desktop applications.
 ///
-///   @override
-///   Widget build(BuildContext context) {
-///     return Scaffold(
-///       appBar: AppBar(
-///         title: const Text('DraggableScrollableSheet'),
-///       ),
-///       body: SizedBox.expand(
-///         child: DraggableScrollableSheet(
-///           builder: (BuildContext context, ScrollController scrollController) {
-///             return Container(
-///               color: Colors.blue[100],
-///               child: ListView.builder(
-///                 controller: scrollController,
-///                 itemCount: 25,
-///                 itemBuilder: (BuildContext context, int index) {
-///                   return ListTile(title: Text('Item $index'));
-///                 },
-///               ),
-///             );
-///           },
-///         ),
-///       ),
-///     );
-///   }
-/// }
-/// ```
+/// This behavior is dictated by the [ScrollBehavior], and can be changed by adding
+/// [PointerDeviceKind.mouse] to [ScrollBehavior.dragDevices].
+/// For more info on this, please refer to https://docs.flutter.dev/release/breaking-changes/default-scroll-behavior-drag
+///
+/// Alternatively, this example illustrates how to add a drag handle for desktop applications.
+///
+/// ** See code in examples/api/lib/widgets/draggable_scrollable_sheet/draggable_scrollable_sheet.0.dart **
 /// {@end-tool}
 class DraggableScrollableSheet extends StatefulWidget {
   /// Creates a widget that can be dragged and scrolled in a single gesture.
-  ///
-  /// The [builder], [initialChildSize], [minChildSize], [maxChildSize] and
-  /// [expand] parameters must not be null.
   const DraggableScrollableSheet({
     super.key,
     this.initialChildSize = 0.5,
@@ -307,6 +292,7 @@ class DraggableScrollableSheet extends StatefulWidget {
     this.snapSizes,
     this.snapAnimationDuration,
     this.controller,
+    this.shouldCloseOnMinExtent = true,
     required this.builder,
   })  : assert(minChildSize >= 0.0),
         assert(maxChildSize <= 1.0),
@@ -390,6 +376,13 @@ class DraggableScrollableSheet extends StatefulWidget {
   /// A controller that can be used to programmatically control this sheet.
   final DraggableScrollableController? controller;
 
+  /// Whether the sheet, when dragged (or flung) to its minimum size, should
+  /// cause its parent sheet to close.
+  ///
+  /// Set on emitted [DraggableScrollableNotification]s. It is up to parent
+  /// classes to properly read and handle this value.
+  final bool shouldCloseOnMinExtent;
+
   /// The builder that creates a child to display in this widget, which will
   /// use the provided [ScrollController] to enable dragging and scrolling
   /// of the contents.
@@ -431,6 +424,7 @@ class DraggableScrollableNotification extends Notification with ViewportNotifica
     required this.maxExtent,
     required this.initialExtent,
     required this.context,
+    this.shouldCloseOnMinExtent = true,
   }) : assert(0.0 <= minExtent),
        assert(maxExtent <= 1.0),
        assert(minExtent <= extent),
@@ -456,6 +450,12 @@ class DraggableScrollableNotification extends Notification with ViewportNotifica
   /// of the viewport, for instance. A listener can only assume this context
   /// is live when it first gets the notification.
   final BuildContext context;
+
+  /// Whether the widget that fired this notification, when dragged (or flung)
+  /// to minExtent, should cause its parent sheet to close.
+  ///
+  /// It is up to parent classes to properly read and handle this value.
+  final bool shouldCloseOnMinExtent;
 
   @override
   void debugFillDescription(List<String> description) {
@@ -486,6 +486,7 @@ class _DraggableSheetExtent {
     ValueNotifier<double>? currentSize,
     bool? hasDragged,
     bool? hasChanged,
+    this.shouldCloseOnMinExtent = true,
   })  : assert(minSize >= 0),
         assert(maxSize <= 1),
         assert(minSize <= initialSize),
@@ -493,7 +494,17 @@ class _DraggableSheetExtent {
         _currentSize = currentSize ?? ValueNotifier<double>(initialSize),
         availablePixels = double.infinity,
         hasDragged = hasDragged ?? false,
-        hasChanged = hasChanged ?? false;
+        hasChanged = hasChanged ?? false {
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
+        library: 'package:flutter/widgets.dart',
+        className: '$_DraggableSheetExtent',
+        object: this,
+      );
+    }
+  }
 
   VoidCallback? _cancelActivity;
 
@@ -503,6 +514,7 @@ class _DraggableSheetExtent {
   final List<double> snapSizes;
   final Duration? snapAnimationDuration;
   final double initialSize;
+  final bool shouldCloseOnMinExtent;
   final ValueNotifier<double> _currentSize;
   double availablePixels;
 
@@ -575,6 +587,7 @@ class _DraggableSheetExtent {
       extent: currentSize,
       initialExtent: initialSize,
       context: context,
+      shouldCloseOnMinExtent: shouldCloseOnMinExtent,
     ).dispatch(context);
   }
 
@@ -587,6 +600,9 @@ class _DraggableSheetExtent {
   }
 
   void dispose() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
     _currentSize.dispose();
   }
 
@@ -597,6 +613,7 @@ class _DraggableSheetExtent {
     required List<double> snapSizes,
     required double initialSize,
     Duration? snapAnimationDuration,
+    bool shouldCloseOnMinExtent = true,
   }) {
     return _DraggableSheetExtent(
       minSize: minSize,
@@ -612,6 +629,7 @@ class _DraggableSheetExtent {
           : initialSize),
       hasDragged: hasDragged,
       hasChanged: hasChanged,
+      shouldCloseOnMinExtent: shouldCloseOnMinExtent,
     );
   }
 }
@@ -630,6 +648,7 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
       snapSizes: _impliedSnapSizes(),
       snapAnimationDuration: widget.snapAnimationDuration,
       initialSize: widget.initialChildSize,
+      shouldCloseOnMinExtent: widget.shouldCloseOnMinExtent,
     );
     _scrollController = _DraggableScrollableSheetScrollController(extent: _extent);
     widget.controller?._attach(_scrollController);
@@ -696,7 +715,11 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
 
   @override
   void dispose() {
-    widget.controller?._detach(disposeExtent: true);
+    if (widget.controller == null) {
+      _extent.dispose();
+    } else {
+      widget.controller!._detach(disposeExtent: true);
+    }
     _scrollController.dispose();
     super.dispose();
   }
@@ -733,7 +756,7 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
             _scrollController.positions.elementAt(index) as _DraggableScrollableSheetScrollPosition;
           position.goBallistic(0);
         }
-      });
+      }, debugLabel: 'DraggableScrollableSheet.snap');
     }
   }
 
@@ -781,7 +804,7 @@ class _DraggableScrollableSheetScrollController extends ScrollController {
     ScrollPosition? oldPosition,
   ) {
     return _DraggableScrollableSheetScrollPosition(
-      physics: const AlwaysScrollableScrollPhysics().applyTo(physics),
+      physics: physics.applyTo(const AlwaysScrollableScrollPhysics()),
       context: context,
       oldPosition: oldPosition,
       getExtent: () => extent,
@@ -993,23 +1016,20 @@ class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleCo
 /// in library users' code). Generally, it's easier to control the sheet
 /// directly by creating a controller and passing the controller to the sheet in
 /// its constructor (see [DraggableScrollableSheet.controller]).
-class DraggableScrollableActuator extends StatelessWidget {
+class DraggableScrollableActuator extends StatefulWidget {
   /// Creates a widget that can notify descendent [DraggableScrollableSheet]s
   /// to reset to their initial position.
   ///
   /// The [child] parameter is required.
-  DraggableScrollableActuator({
+  const DraggableScrollableActuator({
     super.key,
     required this.child,
   });
 
   /// This child's [DraggableScrollableSheet] descendant will be reset when the
   /// [reset] method is applied to a context that includes it.
-  ///
-  /// Must not be null.
   final Widget child;
 
-  final _ResetNotifier _notifier = _ResetNotifier();
 
   /// Notifies any descendant [DraggableScrollableSheet] that it should reset
   /// to its initial position.
@@ -1019,21 +1039,36 @@ class DraggableScrollableActuator extends StatelessWidget {
   /// otherwise.
   static bool reset(BuildContext context) {
     final _InheritedResetNotifier? notifier = context.dependOnInheritedWidgetOfExactType<_InheritedResetNotifier>();
-    if (notifier == null) {
-      return false;
-    }
-    return notifier._sendReset();
+    return notifier?._sendReset() ?? false;
   }
 
   @override
+  State<DraggableScrollableActuator> createState() => _DraggableScrollableActuatorState();
+}
+
+class _DraggableScrollableActuatorState extends State<DraggableScrollableActuator> {
+  final _ResetNotifier _notifier = _ResetNotifier();
+
+  @override
   Widget build(BuildContext context) {
-    return _InheritedResetNotifier(notifier: _notifier, child: child);
+    return _InheritedResetNotifier(notifier: _notifier, child: widget.child);
+  }
+
+  @override
+  void dispose() {
+    _notifier.dispose();
+    super.dispose();
   }
 }
 
 /// A [ChangeNotifier] to use with [InheritedResetNotifier] to notify
 /// descendants that they should reset to initial state.
 class _ResetNotifier extends ChangeNotifier {
+  _ResetNotifier() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      ChangeNotifier.maybeDispatchObjectCreation(this);
+    }
+  }
   /// Whether someone called [sendReset] or not.
   ///
   /// This flag should be reset after checking it.
@@ -1055,8 +1090,6 @@ class _ResetNotifier extends ChangeNotifier {
 class _InheritedResetNotifier extends InheritedNotifier<_ResetNotifier> {
   /// Creates an [InheritedNotifier] that the [DraggableScrollableSheet] will
   /// listen to for an indication that it should reset itself back to [DraggableScrollableSheet.initialChildSize].
-  ///
-  /// The [child] and [notifier] properties must not be null.
   const _InheritedResetNotifier({
     required super.child,
     required _ResetNotifier super.notifier,

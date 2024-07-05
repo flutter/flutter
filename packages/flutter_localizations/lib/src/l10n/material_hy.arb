@@ -30,6 +30,7 @@
   "continueButtonLabel": "Շարունակել",
   "copyButtonLabel": "Պատճենել",
   "cutButtonLabel": "Կտրել",
+  "scanTextButtonLabel": "Սկանավորել տեքստ",
   "okButtonLabel": "Եղավ",
   "pasteButtonLabel": "Տեղադրել",
   "selectAllButtonLabel": "Նշել բոլորը",
@@ -139,5 +140,17 @@
   "scrimLabel": "Դիմակ",
   "bottomSheetLabel": "Ներքևի էկրան",
   "scrimOnTapHint": "Փակել՝ $modalRouteContentName",
-  "keyboardKeyShift": "Shift"
+  "keyboardKeyShift": "Shift",
+  "expansionTileExpandedHint": "կրկնակի հպեք ծալելու համար",
+  "expansionTileCollapsedHint": "կրկնակի հպեք ծավալելու համար",
+  "expansionTileExpandedTapHint": "Ծալել",
+  "expansionTileCollapsedTapHint": "ծավալեք՝ մանրամասները տեսնելու համար",
+  "expandedHint": "Ծալված է",
+  "collapsedHint": "Ծավալված է",
+  "menuDismissLabel": "Փակել ընտրացանկը",
+  "lookUpButtonLabel": "Փնտրել",
+  "searchWebButtonLabel": "Որոնել համացանցում",
+  "shareButtonLabel": "Կիսվել...",
+  "clearButtonTooltip": "Clear text",
+  "selectedDateLabel": "Selected"
 }

@@ -41,7 +41,7 @@ class _ColorfulButtonState extends State<ColorfulButton> {
     super.initState();
     _node = FocusNode(debugLabel: 'Button');
     _node.addListener(_handleFocusChange);
-    _nodeAttachment = _node.attach(context, onKey: _handleKeyPress);
+    _nodeAttachment = _node.attach(context, onKeyEvent: _handleKeyPress);
   }
 
   void _handleFocusChange() {
@@ -52,27 +52,22 @@ class _ColorfulButtonState extends State<ColorfulButton> {
     }
   }
 
-  KeyEventResult _handleKeyPress(FocusNode node, RawKeyEvent event) {
-    if (event is RawKeyDownEvent) {
+  KeyEventResult _handleKeyPress(FocusNode node, KeyEvent event) {
+    if (event is KeyDownEvent) {
       debugPrint('Focus node ${node.debugLabel} got key event: ${event.logicalKey}');
-      if (event.logicalKey == LogicalKeyboardKey.keyR) {
-        debugPrint('Changing color to red.');
-        setState(() {
-          _color = Colors.red;
-        });
-        return KeyEventResult.handled;
-      } else if (event.logicalKey == LogicalKeyboardKey.keyG) {
-        debugPrint('Changing color to green.');
-        setState(() {
-          _color = Colors.green;
-        });
-        return KeyEventResult.handled;
-      } else if (event.logicalKey == LogicalKeyboardKey.keyB) {
-        debugPrint('Changing color to blue.');
-        setState(() {
-          _color = Colors.blue;
-        });
-        return KeyEventResult.handled;
+      switch (event.logicalKey) {
+        case LogicalKeyboardKey.keyR:
+          debugPrint('Changing color to red.');
+          setState(() { _color = Colors.red; });
+          return KeyEventResult.handled;
+        case LogicalKeyboardKey.keyG:
+          debugPrint('Changing color to green.');
+          setState(() { _color = Colors.green; });
+          return KeyEventResult.handled;
+        case LogicalKeyboardKey.keyB:
+          debugPrint('Changing color to blue.');
+          setState(() { _color = Colors.blue; });
+          return KeyEventResult.handled;
       }
     }
     return KeyEventResult.ignored;

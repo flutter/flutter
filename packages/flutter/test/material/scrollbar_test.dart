@@ -17,8 +17,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
-
 const Duration _kScrollbarFadeDuration = Duration(milliseconds: 300);
 const Duration _kScrollbarTimeToFade = Duration(milliseconds: 600);
 const Color _kAndroidThumbIdleColor = Color(0xffbcbcbc);
@@ -204,6 +202,8 @@ void main() {
     await tester.pumpWidget(viewWithScroll());
     final AssertionError exception = tester.takeException() as AssertionError;
     expect(exception, isAssertionError);
+
+    controller.dispose();
   });
 
   testWidgets('On first render with thumbVisibility: true, the thumb shows', (WidgetTester tester) async {
@@ -230,6 +230,8 @@ void main() {
     await tester.pumpWidget(viewWithScroll());
     await tester.pumpAndSettle();
     expect(find.byType(Scrollbar), paints..rect());
+
+    controller.dispose();
   });
 
   testWidgets('On first render with thumbVisibility: true, the thumb shows with PrimaryScrollController', (WidgetTester tester) async {
@@ -262,17 +264,19 @@ void main() {
     await tester.pumpWidget(viewWithScroll());
     await tester.pumpAndSettle();
     expect(find.byType(Scrollbar), paints..rect());
+
+    controller.dispose();
   });
 
   testWidgets(
-    'When isAlwaysShown is true, must pass a controller or find PrimaryScrollController',
+    'When thumbVisibility is true, must pass a controller or find PrimaryScrollController',
     (WidgetTester tester) async {
       Widget viewWithScroll() {
         return _buildBoilerplate(
           child: Theme(
             data: ThemeData(),
             child: const Scrollbar(
-              isAlwaysShown: true,
+              thumbVisibility: true,
               child: SingleChildScrollView(
                 child: SizedBox(
                   width: 4000.0,
@@ -291,7 +295,7 @@ void main() {
   );
 
   testWidgets(
-    'When isAlwaysShown is true, must pass a controller that is attached to a scroll view or find PrimaryScrollController',
+    'When thumbVisibility is true, must pass a controller that is attached to a scroll view or find PrimaryScrollController',
     (WidgetTester tester) async {
       final ScrollController controller = ScrollController();
       Widget viewWithScroll() {
@@ -299,7 +303,7 @@ void main() {
           child: Theme(
             data: ThemeData(),
             child: Scrollbar(
-              isAlwaysShown: true,
+              thumbVisibility: true,
               controller: controller,
               child: const SingleChildScrollView(
                 child: SizedBox(
@@ -315,17 +319,19 @@ void main() {
       await tester.pumpWidget(viewWithScroll());
       final AssertionError exception = tester.takeException() as AssertionError;
       expect(exception, isAssertionError);
+
+      controller.dispose();
     },
   );
 
-  testWidgets('On first render with isAlwaysShown: true, the thumb shows', (WidgetTester tester) async {
+  testWidgets('On first render with thumbVisibility: true, the thumb shows', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     Widget viewWithScroll() {
       return _buildBoilerplate(
         child: Theme(
           data: ThemeData(),
           child: Scrollbar(
-            isAlwaysShown: true,
+            thumbVisibility: true,
             controller: controller,
             child: SingleChildScrollView(
               controller: controller,
@@ -342,9 +348,11 @@ void main() {
     await tester.pumpWidget(viewWithScroll());
     await tester.pumpAndSettle();
     expect(find.byType(Scrollbar), paints..rect());
+
+    controller.dispose();
   });
 
-  testWidgets('On first render with isAlwaysShown: true, the thumb shows with PrimaryScrollController', (WidgetTester tester) async {
+  testWidgets('On first render with thumbVisibility: true, the thumb shows with PrimaryScrollController', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     Widget viewWithScroll() {
       return _buildBoilerplate(
@@ -355,7 +363,7 @@ void main() {
             child: Builder(
               builder: (BuildContext context) {
                 return const Scrollbar(
-                  isAlwaysShown: true,
+                  thumbVisibility: true,
                   child: SingleChildScrollView(
                     primary: true,
                     child: SizedBox(
@@ -374,16 +382,18 @@ void main() {
     await tester.pumpWidget(viewWithScroll());
     await tester.pumpAndSettle();
     expect(find.byType(Scrollbar), paints..rect());
+
+    controller.dispose();
   });
 
-  testWidgets('On first render with isAlwaysShown: false, the thumb is hidden', (WidgetTester tester) async {
+  testWidgets('On first render with thumbVisibility: false, the thumb is hidden', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     Widget viewWithScroll() {
       return _buildBoilerplate(
         child: Theme(
           data: ThemeData(),
           child: Scrollbar(
-            isAlwaysShown: false,
+            thumbVisibility: false,
             controller: controller,
             child: SingleChildScrollView(
               controller: controller,
@@ -400,13 +410,15 @@ void main() {
     await tester.pumpWidget(viewWithScroll());
     await tester.pumpAndSettle();
     expect(find.byType(Scrollbar), isNot(paints..rect()));
+
+    controller.dispose();
   });
 
   testWidgets(
-    'With isAlwaysShown: true, fling a scroll. While it is still scrolling, set isAlwaysShown: false. The thumb should not fade out until the scrolling stops.',
+    'With thumbVisibility: true, fling a scroll. While it is still scrolling, set thumbVisibility: false. The thumb should not fade out until the scrolling stops.',
     (WidgetTester tester) async {
       final ScrollController controller = ScrollController();
-      bool isAlwaysShown = true;
+      bool thumbVisibility = true;
       Widget viewWithScroll() {
         return _buildBoilerplate(
           child: StatefulBuilder(
@@ -418,12 +430,12 @@ void main() {
                     child: const Icon(Icons.threed_rotation),
                     onPressed: () {
                       setState(() {
-                        isAlwaysShown = !isAlwaysShown;
+                        thumbVisibility = !thumbVisibility;
                       });
                     },
                   ),
                   body: Scrollbar(
-                    isAlwaysShown: isAlwaysShown,
+                    thumbVisibility: thumbVisibility,
                     controller: controller,
                     child: SingleChildScrollView(
                       controller: controller,
@@ -453,14 +465,16 @@ void main() {
       await tester.pumpAndSettle();
       // Scrollbar is not showing after scroll finishes
       expect(find.byType(Scrollbar), isNot(paints..rect()));
+
+      controller.dispose();
     },
   );
 
   testWidgets(
-    'With isAlwaysShown: false, set isAlwaysShown: true. The thumb should be always shown directly',
+    'With thumbVisibility: false, set thumbVisibility: true. The thumb should be always shown directly',
     (WidgetTester tester) async {
       final ScrollController controller = ScrollController();
-      bool isAlwaysShown = false;
+      bool thumbVisibility = false;
       Widget viewWithScroll() {
         return _buildBoilerplate(
           child: StatefulBuilder(
@@ -472,12 +486,12 @@ void main() {
                     child: const Icon(Icons.threed_rotation),
                     onPressed: () {
                       setState(() {
-                        isAlwaysShown = !isAlwaysShown;
+                        thumbVisibility = !thumbVisibility;
                       });
                     },
                   ),
                   body: Scrollbar(
-                    isAlwaysShown: isAlwaysShown,
+                    thumbVisibility: thumbVisibility,
                     controller: controller,
                     child: SingleChildScrollView(
                       controller: controller,
@@ -502,14 +516,16 @@ void main() {
       await tester.pumpAndSettle();
       // Scrollbar is not showing after scroll finishes
       expect(find.byType(Scrollbar), paints..rect());
+
+      controller.dispose();
     },
   );
 
   testWidgets(
-    'With isAlwaysShown: false, fling a scroll. While it is still scrolling, set isAlwaysShown: true. The thumb should not fade even after the scrolling stops',
+    'With thumbVisibility: false, fling a scroll. While it is still scrolling, set thumbVisibility: true. The thumb should not fade even after the scrolling stops',
     (WidgetTester tester) async {
       final ScrollController controller = ScrollController();
-      bool isAlwaysShown = false;
+      bool thumbVisibility = false;
       Widget viewWithScroll() {
         return _buildBoilerplate(
           child: StatefulBuilder(
@@ -521,12 +537,12 @@ void main() {
                     child: const Icon(Icons.threed_rotation),
                     onPressed: () {
                       setState(() {
-                        isAlwaysShown = !isAlwaysShown;
+                        thumbVisibility = !thumbVisibility;
                       });
                     },
                   ),
                   body: Scrollbar(
-                    isAlwaysShown: isAlwaysShown,
+                    thumbVisibility: thumbVisibility,
                     controller: controller,
                     child: SingleChildScrollView(
                       controller: controller,
@@ -562,14 +578,16 @@ void main() {
       await tester.pumpAndSettle();
       // Scrollbar thumb is showing after scroll finishes and timer ends.
       expect(find.byType(Scrollbar), paints..rect());
+
+      controller.dispose();
     },
   );
 
   testWidgets(
-    'Toggling isAlwaysShown while not scrolling fades the thumb in/out. This works even when you have never scrolled at all yet',
+    'Toggling thumbVisibility while not scrolling fades the thumb in/out. This works even when you have never scrolled at all yet',
     (WidgetTester tester) async {
       final ScrollController controller = ScrollController();
-      bool isAlwaysShown = true;
+      bool thumbVisibility = true;
       Widget viewWithScroll() {
         return _buildBoilerplate(
           child: StatefulBuilder(
@@ -581,12 +599,12 @@ void main() {
                     child: const Icon(Icons.threed_rotation),
                     onPressed: () {
                       setState(() {
-                        isAlwaysShown = !isAlwaysShown;
+                        thumbVisibility = !thumbVisibility;
                       });
                     },
                   ),
                   body: Scrollbar(
-                    isAlwaysShown: isAlwaysShown,
+                    thumbVisibility: thumbVisibility,
                     controller: controller,
                     child: SingleChildScrollView(
                       controller: controller,
@@ -611,6 +629,8 @@ void main() {
       await tester.tap(find.byType(FloatingActionButton));
       await tester.pumpAndSettle();
       expect(materialScrollbar, isNot(paints..rect()));
+
+      controller.dispose();
     },
   );
 
@@ -674,6 +694,8 @@ void main() {
     ));
 
     await tester.pumpAndSettle();
+
+    controller.dispose();
   });
 
   testWidgets('Tapping the track area pages the Scroll View', (WidgetTester tester) async {
@@ -685,7 +707,7 @@ void main() {
           data: const MediaQueryData(),
           child: Scrollbar(
             interactive: true,
-            isAlwaysShown: true,
+            thumbVisibility: true,
             controller: scrollController,
             child: SingleChildScrollView(
               controller: scrollController,
@@ -764,6 +786,8 @@ void main() {
           color: _kAndroidThumbIdleColor,
         ),
     );
+
+    scrollController.dispose();
   });
 
   testWidgets('Scrollbar never goes away until finger lift', (WidgetTester tester) async {
@@ -851,11 +875,12 @@ void main() {
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: PrimaryScrollController(
           controller: scrollController,
           child: Scrollbar(
             interactive: true,
-            isAlwaysShown: true,
+            thumbVisibility: true,
             controller: scrollController,
             child: const SingleChildScrollView(
               child: SizedBox(width: 4000.0, height: 4000.0),
@@ -936,12 +961,17 @@ void main() {
           color: _kAndroidThumbIdleColor,
         ),
     );
+
+    scrollController.dispose();
   });
 
   testWidgets('Scrollbar thumb color completes a hover animation', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(scrollbarTheme: const ScrollbarThemeData(isAlwaysShown: true)),
+        theme: ThemeData(
+          useMaterial3: false,
+          scrollbarTheme: ScrollbarThemeData(thumbVisibility: MaterialStateProperty.all(true)),
+        ),
         home: const SingleChildScrollView(
           child: SizedBox(width: 4000.0, height: 4000.0),
         ),
@@ -986,10 +1016,18 @@ void main() {
   testWidgets('Hover animation is not triggered by tap gestures', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(scrollbarTheme: const ScrollbarThemeData(
-          isAlwaysShown: true,
-          showTrackOnHover: true,
-        )),
+        theme: ThemeData(
+          useMaterial3: false,
+          scrollbarTheme: ScrollbarThemeData(
+            thumbVisibility: MaterialStateProperty.all(true),
+            trackVisibility: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+              if (states.contains(MaterialState.hovered)) {
+                return true;
+              }
+              return false;
+            })
+          ),
+        ),
         home: const SingleChildScrollView(
           child: SizedBox(width: 4000.0, height: 4000.0),
         ),
@@ -1058,19 +1096,22 @@ void main() {
   testWidgets('ScrollbarThemeData.thickness replaces hoverThickness', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(scrollbarTheme: ScrollbarThemeData(
-          thumbVisibility: MaterialStateProperty.resolveWith((Set<MaterialState> states) => true),
-          trackVisibility: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-            return states.contains(MaterialState.hovered);
-          }),
-          thickness: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-            if (states.contains(MaterialState.hovered)) {
-              return 40.0;
-            }
-            // Default thickness
-            return 8.0;
-          }),
-        )),
+        theme: ThemeData(
+          useMaterial3: false,
+          scrollbarTheme: ScrollbarThemeData(
+            thumbVisibility: MaterialStateProperty.resolveWith((Set<MaterialState> states) => true),
+            trackVisibility: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+              return states.contains(MaterialState.hovered);
+            }),
+            thickness: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+              if (states.contains(MaterialState.hovered)) {
+                return 40.0;
+              }
+              // Default thickness
+              return 8.0;
+            }),
+          ),
+        ),
         home: const SingleChildScrollView(
           child: SizedBox(width: 4000.0, height: 4000.0),
         ),
@@ -1124,18 +1165,21 @@ void main() {
     }),
   );
 
-  testWidgets('ScrollbarThemeData.trackVisibility replaces showTrackOnHover', (WidgetTester tester) async {
+  testWidgets('ScrollbarThemeData.trackVisibility', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(scrollbarTheme: ScrollbarThemeData(
-          isAlwaysShown: true,
-          trackVisibility: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-            if (states.contains(MaterialState.hovered)) {
-              return true;
-            }
-            return false;
-          }),
-        )),
+        theme: ThemeData(
+          useMaterial3: false,
+          scrollbarTheme: ScrollbarThemeData(
+            thumbVisibility: MaterialStateProperty.all(true),
+            trackVisibility: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+              if (states.contains(MaterialState.hovered)) {
+                return true;
+              }
+              return false;
+            }),
+          ),
+        ),
         home: const SingleChildScrollView(
           child: SizedBox(width: 4000.0, height: 4000.0),
         ),
@@ -1189,13 +1233,21 @@ void main() {
     }),
   );
 
-  testWidgets('Scrollbar showTrackOnHover', (WidgetTester tester) async {
+  testWidgets('Scrollbar trackVisibility on hovered', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(scrollbarTheme: const ScrollbarThemeData(
-          isAlwaysShown: true,
-          showTrackOnHover: true,
-        )),
+        theme: ThemeData(
+          useMaterial3: false,
+          scrollbarTheme: ScrollbarThemeData(
+            thumbVisibility: MaterialStateProperty.all(true),
+            trackVisibility: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+              if (states.contains(MaterialState.hovered)) {
+                return true;
+              }
+              return false;
+            }),
+          ),
+        ),
         home: const SingleChildScrollView(
           child: SizedBox(width: 4000.0, height: 4000.0),
         ),
@@ -1316,6 +1368,8 @@ void main() {
     expect(find.byType(CupertinoScrollbar), paints..rrect());
     final CupertinoScrollbar scrollbar = tester.widget<CupertinoScrollbar>(find.byType(CupertinoScrollbar));
     expect(scrollbar.controller, isNotNull);
+
+    controller.dispose();
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
 
   testWidgets("Scrollbar doesn't show when scroll the inner scrollable widget", (WidgetTester tester) async {
@@ -1385,11 +1439,12 @@ void main() {
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: PrimaryScrollController(
           controller: scrollController,
           child: Scrollbar(
             interactive: false,
-            isAlwaysShown: true,
+            thumbVisibility: true,
             controller: scrollController,
             child: const SingleChildScrollView(
               child: SizedBox(width: 4000.0, height: 4000.0),
@@ -1447,6 +1502,8 @@ void main() {
     await tester.pumpAndSettle();
     // The offset should not have changed.
     expect(scrollController.offset, scrollAmount);
+
+    scrollController.dispose();
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.fuchsia }));
 
   testWidgets('Scrollbar dragging is disabled by default on Android', (WidgetTester tester) async {
@@ -1457,7 +1514,7 @@ void main() {
         home: PrimaryScrollController(
           controller: scrollController,
           child: Scrollbar(
-            isAlwaysShown: true,
+            thumbVisibility: true,
             controller: scrollController,
             child: SingleChildScrollView(
               dragStartBehavior: DragStartBehavior.down,
@@ -1541,6 +1598,8 @@ void main() {
     // The offset should not have changed.
     expect(scrollController.offset, scrollAmount * 2);
     expect(tapCount, 2);
+
+    scrollController.dispose();
   });
 
   testWidgets('Simultaneous dragging and pointer scrolling does not cause a crash', (WidgetTester tester) async {
@@ -1548,11 +1607,12 @@ void main() {
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: PrimaryScrollController(
           controller: scrollController,
           child: Scrollbar(
             interactive: true,
-            isAlwaysShown: true,
+            thumbVisibility: true,
             controller: scrollController,
             child: const SingleChildScrollView(
               child: SizedBox(width: 4000.0, height: 4000.0),
@@ -1712,12 +1772,14 @@ void main() {
           color: const Color(0xffbcbcbc),
         ),
     );
+
+    scrollController.dispose();
   });
 
-  testWidgets('Scrollbar.isAlwaysShown triggers assertion when multiple ScrollPositions are attached.', (WidgetTester tester) async {
+  testWidgets('Scrollbar.thumbVisibility triggers assertion when multiple ScrollPositions are attached.', (WidgetTester tester) async {
     Widget getTabContent({ ScrollController? scrollController }) {
       return Scrollbar(
-        isAlwaysShown: true,
+        thumbVisibility: true,
         controller: scrollController,
         child: ListView.builder(
           controller: scrollController,
@@ -1758,7 +1820,12 @@ void main() {
     FlutterError error = tester.takeException() as FlutterError;
     expect(
       error.message,
-      contains('The PrimaryScrollController is currently attached to more than one ScrollPosition.'),
+      '''
+The PrimaryScrollController is attached to more than one ScrollPosition.
+The Scrollbar requires a single ScrollPosition in order to be painted.
+When Scrollbar.thumbVisibility is true, the associated ScrollController must only have one ScrollPosition attached.
+If a ScrollController has not been provided, the PrimaryScrollController is used by default on mobile platforms for ScrollViews with an Axis.vertical scroll direction.
+More than one ScrollView may have tried to use the PrimaryScrollController of the current context. ScrollView.primary can override this behavior.''',
     );
 
     // Asserts when using the ScrollController provided by the user.
@@ -1777,8 +1844,14 @@ void main() {
     error = tester.takeException() as FlutterError;
     expect(
       error.message,
-      contains('The provided ScrollController is currently attached to more than one ScrollPosition.'),
+      '''
+The provided ScrollController is attached to more than one ScrollPosition.
+The Scrollbar requires a single ScrollPosition in order to be painted.
+When Scrollbar.thumbVisibility is true, the associated ScrollController must only have one ScrollPosition attached.
+The provided ScrollController cannot be shared by multiple ScrollView widgets.''',
     );
+
+    scrollController.dispose();
   });
 
   testWidgets('Scrollbar scrollOrientation works correctly', (WidgetTester tester) async {
@@ -1794,7 +1867,7 @@ void main() {
             controller: scrollController,
             child: Scrollbar(
               interactive: true,
-              isAlwaysShown: true,
+              thumbVisibility: true,
               scrollbarOrientation: orientation,
               controller: scrollController,
               child: const SingleChildScrollView(
@@ -1827,5 +1900,7 @@ void main() {
           color: _kAndroidThumbIdleColor,
         ),
     );
+
+    scrollController.dispose();
   });
 }

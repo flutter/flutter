@@ -8,8 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../rendering/mock_canvas.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class StateMarker extends StatefulWidget {
   const StateMarker({ super.key, this.child });
@@ -25,10 +24,7 @@ class StateMarkerState extends State<StateMarker> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.child != null) {
-      return widget.child!;
-    }
-    return Container();
+    return widget.child ?? Container();
   }
 }
 
@@ -47,6 +43,8 @@ void main() {
 
   testWidgets('Focus handling', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+
     await tester.pumpWidget(MaterialApp(
       home: Material(
         child: Center(
@@ -70,6 +68,7 @@ void main() {
     ));
 
     expect(find.text('Home'), findsOneWidget);
+    focusScopeNode.dispose();
   });
 
   testWidgets('Can show grid without losing sync', (WidgetTester tester) async {
@@ -371,7 +370,9 @@ void main() {
     expect(find.text('route "/b"', skipOffstage: false), findsNothing);
   });
 
-  testWidgets('onGenerateRoute / onUnknownRoute', (WidgetTester tester) async {
+  testWidgets('onGenerateRoute / onUnknownRoute',
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
+  (WidgetTester tester) async {
     final List<String> log = <String>[];
     await tester.pumpWidget(
       MaterialApp(
@@ -465,15 +466,14 @@ void main() {
   });
 
   testWidgets('Can get text scale from media query', (WidgetTester tester) async {
-    double? textScaleFactor;
+    TextScaler? textScaler;
     await tester.pumpWidget(MaterialApp(
       home: Builder(builder:(BuildContext context) {
-        textScaleFactor = MediaQuery.textScaleFactorOf(context);
+        textScaler = MediaQuery.textScalerOf(context);
         return Container();
       }),
     ));
-    expect(textScaleFactor, isNotNull);
-    expect(textScaleFactor, equals(1.0));
+    expect(textScaler, TextScaler.noScaling);
   });
 
   testWidgets('MaterialApp.navigatorKey', (WidgetTester tester) async {
@@ -980,7 +980,7 @@ void main() {
     expect(themeAfterBrightnessChange!.brightness, Brightness.dark);
   });
 
-  testWidgets('MaterialApp provides default overscroll color', (WidgetTester tester) async {
+  testWidgets('Material2 - MaterialApp provides default overscroll color', (WidgetTester tester) async {
     Future<void> slowDrag(WidgetTester tester, Offset start, Offset offset) async {
       final TestGesture gesture = await tester.startGesture(start);
       for (int index = 0; index < 10; index += 1) {
@@ -995,6 +995,7 @@ void main() {
     const Color secondaryColor = Color(0xff008800);
     final Color glowSecondaryColor = secondaryColor.withOpacity(0.05);
     final ThemeData theme = ThemeData.from(
+      useMaterial3: false,
       colorScheme: const ColorScheme.light().copyWith(secondary: secondaryColor),
     );
     await tester.pumpWidget(
@@ -1060,6 +1061,7 @@ void main() {
 
   testWidgets('MaterialApp does create HeroController with the MaterialRectArcTween', (WidgetTester tester) async {
     final HeroController controller = MaterialApp.createMaterialHeroController();
+    addTearDown(controller.dispose);
     final Tween<Rect?> tween = controller.createRectTween!(
       const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
       const Rect.fromLTRB(0.0, 0.0, 20.0, 20.0),
@@ -1085,21 +1087,23 @@ void main() {
 
   testWidgets('MaterialApp.router works', (WidgetTester tester) async {
     final PlatformRouteInformationProvider provider = PlatformRouteInformationProvider(
-      initialRouteInformation: const RouteInformation(
-        location: 'initial',
+      initialRouteInformation: RouteInformation(
+        uri: Uri.parse('initial'),
       ),
     );
+    addTearDown(provider.dispose);
     final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
       builder: (BuildContext context, RouteInformation information) {
-        return Text(information.location!);
+        return Text(information.uri.toString());
       },
       onPopPage: (Route<void> route, void result, SimpleNavigatorRouterDelegate delegate) {
-        delegate.routeInformation = const RouteInformation(
-          location: 'popped',
+        delegate.routeInformation = RouteInformation(
+          uri: Uri.parse('popped'),
         );
         return route.didPop(result);
       },
     );
+    addTearDown(delegate.dispose);
     await tester.pumpWidget(MaterialApp.router(
       routeInformationProvider: provider,
       routeInformationParser: SimpleRouteInformationParser(),
@@ -1109,24 +1113,71 @@ void main() {
 
     // Simulate android back button intent.
     final ByteData message = const JSONMethodCodec().encodeMethodCall(const MethodCall('popRoute'));
-    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
+    await tester.binding.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
     await tester.pumpAndSettle();
     expect(find.text('popped'), findsOneWidget);
+  });
+
+  testWidgets('MaterialApp.router works with onNavigationNotification', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/139903.
+    final PlatformRouteInformationProvider provider = PlatformRouteInformationProvider(
+      initialRouteInformation: RouteInformation(
+        uri: Uri.parse('initial'),
+      ),
+    );
+    addTearDown(provider.dispose);
+    final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
+      builder: (BuildContext context, RouteInformation information) {
+        return Text(information.uri.toString());
+      },
+      onPopPage: (Route<void> route, void result, SimpleNavigatorRouterDelegate delegate) {
+        delegate.routeInformation = RouteInformation(
+          uri: Uri.parse('popped'),
+        );
+        return route.didPop(result);
+      },
+    );
+    addTearDown(delegate.dispose);
+
+    int navigationCount = 0;
+
+    await tester.pumpWidget(MaterialApp.router(
+      routeInformationProvider: provider,
+      routeInformationParser: SimpleRouteInformationParser(),
+      routerDelegate: delegate,
+      onNavigationNotification: (NavigationNotification? notification) {
+        navigationCount += 1;
+        return true;
+      },
+    ));
+    expect(find.text('initial'), findsOneWidget);
+
+    expect(navigationCount, greaterThan(0));
+    final int navigationCountAfterBuild = navigationCount;
+
+    // Simulate android back button intent.
+    final ByteData message = const JSONMethodCodec().encodeMethodCall(const MethodCall('popRoute'));
+    await tester.binding.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
+    await tester.pumpAndSettle();
+    expect(find.text('popped'), findsOneWidget);
+
+    expect(navigationCount, greaterThan(navigationCountAfterBuild));
   });
 
   testWidgets('MaterialApp.router route information parser is optional', (WidgetTester tester) async {
     final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
       builder: (BuildContext context, RouteInformation information) {
-        return Text(information.location!);
+        return Text(information.uri.toString());
       },
       onPopPage: (Route<void> route, void result, SimpleNavigatorRouterDelegate delegate) {
-        delegate.routeInformation = const RouteInformation(
-          location: 'popped',
+        delegate.routeInformation = RouteInformation(
+          uri: Uri.parse('popped'),
         );
         return route.didPop(result);
       },
     );
-    delegate.routeInformation = const RouteInformation(location: 'initial');
+    addTearDown(delegate.dispose);
+    delegate.routeInformation = RouteInformation(uri: Uri.parse('initial'));
     await tester.pumpWidget(MaterialApp.router(
       routerDelegate: delegate,
     ));
@@ -1134,7 +1185,7 @@ void main() {
 
     // Simulate android back button intent.
     final ByteData message = const JSONMethodCodec().encodeMethodCall(const MethodCall('popRoute'));
-    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
+    await tester.binding.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
     await tester.pumpAndSettle();
     expect(find.text('popped'), findsOneWidget);
   });
@@ -1142,19 +1193,20 @@ void main() {
   testWidgets('MaterialApp.router throw if route information provider is provided but no route information parser', (WidgetTester tester) async {
     final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
       builder: (BuildContext context, RouteInformation information) {
-        return Text(information.location!);
+        return Text(information.uri.toString());
       },
       onPopPage: (Route<void> route, void result, SimpleNavigatorRouterDelegate delegate) {
-        delegate.routeInformation = const RouteInformation(
-          location: 'popped',
+        delegate.routeInformation = RouteInformation(
+          uri: Uri.parse('popped'),
         );
         return route.didPop(result);
       },
     );
-    delegate.routeInformation = const RouteInformation(location: 'initial');
+    addTearDown(delegate.dispose);
+    delegate.routeInformation = RouteInformation(uri: Uri.parse('initial'));
     final PlatformRouteInformationProvider provider = PlatformRouteInformationProvider(
-      initialRouteInformation: const RouteInformation(
-        location: 'initial',
+      initialRouteInformation: RouteInformation(
+        uri: Uri.parse('initial'),
       ),
     );
     await tester.pumpWidget(MaterialApp.router(
@@ -1162,21 +1214,23 @@ void main() {
       routerDelegate: delegate,
     ));
     expect(tester.takeException(), isAssertionError);
+    provider.dispose();
   });
 
   testWidgets('MaterialApp.router throw if route configuration is provided along with other delegate', (WidgetTester tester) async {
     final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
       builder: (BuildContext context, RouteInformation information) {
-        return Text(information.location!);
+        return Text(information.uri.toString());
       },
       onPopPage: (Route<void> route, void result, SimpleNavigatorRouterDelegate delegate) {
-        delegate.routeInformation = const RouteInformation(
-          location: 'popped',
+        delegate.routeInformation = RouteInformation(
+          uri: Uri.parse('popped'),
         );
         return route.didPop(result);
       },
     );
-    delegate.routeInformation = const RouteInformation(location: 'initial');
+    addTearDown(delegate.dispose);
+    delegate.routeInformation = RouteInformation(uri: Uri.parse('initial'));
     final RouterConfig<RouteInformation> routerConfig = RouterConfig<RouteInformation>(routerDelegate: delegate);
     await tester.pumpWidget(MaterialApp.router(
       routerDelegate: delegate,
@@ -1186,20 +1240,24 @@ void main() {
   });
 
   testWidgets('MaterialApp.router router config works', (WidgetTester tester) async {
+    late SimpleNavigatorRouterDelegate routerDelegate;
+    addTearDown(() => routerDelegate.dispose());
+    late PlatformRouteInformationProvider provider;
+    addTearDown(() => provider.dispose());
     final RouterConfig<RouteInformation> routerConfig = RouterConfig<RouteInformation>(
-        routeInformationProvider: PlatformRouteInformationProvider(
-          initialRouteInformation: const RouteInformation(
-            location: 'initial',
+        routeInformationProvider: provider = PlatformRouteInformationProvider(
+          initialRouteInformation: RouteInformation(
+            uri: Uri.parse('initial'),
           ),
         ),
         routeInformationParser: SimpleRouteInformationParser(),
-        routerDelegate: SimpleNavigatorRouterDelegate(
+        routerDelegate: routerDelegate = SimpleNavigatorRouterDelegate(
           builder: (BuildContext context, RouteInformation information) {
-            return Text(information.location!);
+            return Text(information.uri.toString());
           },
           onPopPage: (Route<void> route, void result, SimpleNavigatorRouterDelegate delegate) {
-            delegate.routeInformation = const RouteInformation(
-              location: 'popped',
+            delegate.routeInformation = RouteInformation(
+              uri: Uri.parse('popped'),
             );
             return route.didPop(result);
           },
@@ -1213,7 +1271,7 @@ void main() {
 
     // Simulate android back button intent.
     final ByteData message = const JSONMethodCodec().encodeMethodCall(const MethodCall('popRoute'));
-    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
+    await tester.binding.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
     await tester.pumpAndSettle();
     expect(find.text('popped'), findsOneWidget);
   });
@@ -1262,8 +1320,9 @@ void main() {
     expect(scrollBehavior.getScrollPhysics(capturedContext).runtimeType, NeverScrollableScrollPhysics);
   });
 
-  testWidgets('ScrollBehavior default android overscroll indicator', (WidgetTester tester) async {
+  testWidgets('Material2 - ScrollBehavior default android overscroll indicator', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(useMaterial3: false),
       scrollBehavior: const MaterialScrollBehavior(),
       home: ListView(
         children: const <Widget>[
@@ -1280,9 +1339,10 @@ void main() {
     expect(find.byType(GlowingOverscrollIndicator), findsOneWidget);
   }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
-  testWidgets('ScrollBehavior stretch android overscroll indicator', (WidgetTester tester) async {
+  testWidgets('Material3 - ScrollBehavior default android overscroll indicator', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
-      scrollBehavior: const MaterialScrollBehavior(androidOverscrollIndicator: AndroidOverscrollIndicator.stretch),
+      theme: ThemeData(useMaterial3: true),
+      scrollBehavior: const MaterialScrollBehavior(),
       home: ListView(
         children: const <Widget>[
           SizedBox(
@@ -1298,9 +1358,8 @@ void main() {
     expect(find.byType(GlowingOverscrollIndicator), findsNothing);
   }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
-  testWidgets('ScrollBehavior stretch android overscroll indicator via useMaterial3 flag', (WidgetTester tester) async {
+  testWidgets('MaterialScrollBehavior default stretch android overscroll indicator', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(useMaterial3: true),
       home: ListView(
         children: const <Widget>[
           SizedBox(
@@ -1318,8 +1377,8 @@ void main() {
 
   testWidgets('Overscroll indicator can be set by theme', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
-      // The current default is glowing, setting via the theme should override.
-      theme: ThemeData().copyWith(androidOverscrollIndicator: AndroidOverscrollIndicator.stretch),
+      // The current default is M3 and stretch overscroll, setting via the theme should override.
+      theme: ThemeData().copyWith(useMaterial3: false),
       home: ListView(
         children: const <Widget>[
           SizedBox(
@@ -1331,105 +1390,84 @@ void main() {
       ),
     ));
 
-    expect(find.byType(StretchingOverscrollIndicator), findsOneWidget);
-    expect(find.byType(GlowingOverscrollIndicator), findsNothing);
+    expect(find.byType(GlowingOverscrollIndicator), findsOneWidget);
+    expect(find.byType(StretchingOverscrollIndicator), findsNothing);
   }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
-  testWidgets('Overscroll indicator in MaterialScrollBehavior takes precedence over theme', (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(
-      // MaterialScrollBehavior.androidOverscrollIndicator takes precedence over theme.
-      scrollBehavior: const MaterialScrollBehavior(androidOverscrollIndicator: AndroidOverscrollIndicator.stretch),
-      theme: ThemeData().copyWith(androidOverscrollIndicator: AndroidOverscrollIndicator.glow),
-      home: ListView(
-        children: const <Widget>[
-          SizedBox(
-            height: 1000.0,
-            width: 1000.0,
-            child: Text('Test'),
-          ),
-        ],
-      ),
-    ));
+  testWidgets('Material3 - ListView clip behavior updates overscroll indicator clip behavior', (WidgetTester tester) async {
+    Widget buildFrame(Clip clipBehavior) {
+      return MaterialApp(
+        theme: ThemeData(useMaterial3: true),
+        home: Column(
+          children: <Widget>[
+            SizedBox(
+              height: 300,
+              child: ListView.builder(
+                itemCount: 20,
+                clipBehavior: clipBehavior,
+                itemBuilder: (BuildContext context, int index){
+                  return Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: Text('Index $index'),
+                  );
+                },
+              ),
+            ),
+            Opacity(
+              opacity: 0.5,
+              child: Container(
+                color: const Color(0xD0FF0000),
+                height: 100,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Test default clip behavior.
+    await tester.pumpWidget(buildFrame(Clip.hardEdge));
 
     expect(find.byType(StretchingOverscrollIndicator), findsOneWidget);
     expect(find.byType(GlowingOverscrollIndicator), findsNothing);
-  }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+    expect(find.text('Index 1'), findsOneWidget);
 
-  testWidgets(
-    'ListView clip behavior updates overscroll indicator clip behavior', (WidgetTester tester) async {
-      Widget buildFrame(Clip clipBehavior) {
-        return MaterialApp(
-          theme: ThemeData(useMaterial3: true),
-          home: Column(
-            children: <Widget>[
-              SizedBox(
-                height: 300,
-                child: ListView.builder(
-                  itemCount: 20,
-                  clipBehavior: clipBehavior,
-                  itemBuilder: (BuildContext context, int index){
-                    return Padding(
-                      padding: const EdgeInsets.all(10.0),
-                      child: Text('Index $index'),
-                    );
-                  },
-                ),
-              ),
-              Opacity(
-                opacity: 0.5,
-                child: Container(
-                  color: const Color(0xD0FF0000),
-                  height: 100,
-                ),
-              ),
-            ],
-          ),
-        );
-      }
+    RenderClipRect renderClip = tester.allRenderObjects.whereType<RenderClipRect>().first;
+    // Currently not clipping
+    expect(renderClip.clipBehavior, equals(Clip.none));
 
-      // Test default clip behavior.
-      await tester.pumpWidget(buildFrame(Clip.hardEdge));
+    TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('Index 1')));
+    // Overscroll the start.
+    await gesture.moveBy(const Offset(0.0, 200.0));
+    await tester.pumpAndSettle();
+    expect(find.text('Index 1'), findsOneWidget);
+    expect(tester.getCenter(find.text('Index 1')).dy, greaterThan(0));
+    renderClip = tester.allRenderObjects.whereType<RenderClipRect>().first;
+    // Now clipping
+    expect(renderClip.clipBehavior, equals(Clip.hardEdge));
 
-      expect(find.byType(StretchingOverscrollIndicator), findsOneWidget);
-      expect(find.byType(GlowingOverscrollIndicator), findsNothing);
-      expect(find.text('Index 1'), findsOneWidget);
+    await gesture.up();
+    await tester.pumpAndSettle();
 
-      RenderClipRect renderClip = tester.allRenderObjects.whereType<RenderClipRect>().first;
-      // Currently not clipping
-      expect(renderClip.clipBehavior, equals(Clip.none));
+    // Test custom clip behavior.
+    await tester.pumpWidget(buildFrame(Clip.none));
 
-      TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('Index 1')));
-      // Overscroll the start.
-      await gesture.moveBy(const Offset(0.0, 200.0));
-      await tester.pumpAndSettle();
-      expect(find.text('Index 1'), findsOneWidget);
-      expect(tester.getCenter(find.text('Index 1')).dy, greaterThan(0));
-      renderClip = tester.allRenderObjects.whereType<RenderClipRect>().first;
-      // Now clipping
-      expect(renderClip.clipBehavior, equals(Clip.hardEdge));
+    renderClip = tester.allRenderObjects.whereType<RenderClipRect>().first;
+    // Currently not clipping
+    expect(renderClip.clipBehavior, equals(Clip.none));
 
-      await gesture.up();
-      await tester.pumpAndSettle();
+    gesture = await tester.startGesture(tester.getCenter(find.text('Index 1')));
+    // Overscroll the start.
+    await gesture.moveBy(const Offset(0.0, 200.0));
+    await tester.pumpAndSettle();
+    expect(find.text('Index 1'), findsOneWidget);
+    expect(tester.getCenter(find.text('Index 1')).dy, greaterThan(0));
+    renderClip = tester.allRenderObjects.whereType<RenderClipRect>().first;
+    // Now clipping
+    expect(renderClip.clipBehavior, equals(Clip.none));
 
-      // Test custom clip behavior.
-      await tester.pumpWidget(buildFrame(Clip.none));
-
-      renderClip = tester.allRenderObjects.whereType<RenderClipRect>().first;
-      // Currently not clipping
-      expect(renderClip.clipBehavior, equals(Clip.none));
-
-      gesture = await tester.startGesture(tester.getCenter(find.text('Index 1')));
-      // Overscroll the start.
-      await gesture.moveBy(const Offset(0.0, 200.0));
-      await tester.pumpAndSettle();
-      expect(find.text('Index 1'), findsOneWidget);
-      expect(tester.getCenter(find.text('Index 1')).dy, greaterThan(0));
-      renderClip = tester.allRenderObjects.whereType<RenderClipRect>().first;
-      // Now clipping
-      expect(renderClip.clipBehavior, equals(Clip.none));
-
-      await gesture.up();
-      await tester.pumpAndSettle();
+    await gesture.up();
+    await tester.pumpAndSettle();
   }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
   testWidgets('When `useInheritedMediaQuery` is true an existing MediaQuery is used if one is available', (WidgetTester tester) async {
@@ -1476,7 +1514,7 @@ void main() {
     );
     final Widget child = Container();
 
-    switch(defaultTargetPlatform) {
+    switch (defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.iOS:
@@ -1522,7 +1560,7 @@ void main() {
     );
     final Widget child = Container();
 
-    switch(defaultTargetPlatform) {
+    switch (defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.iOS:
@@ -1534,6 +1572,96 @@ void main() {
         defaultBehavior.buildScrollbar(capturedContext, child, details);
     }
   }, variant: TargetPlatformVariant.all());
+
+  testWidgets('Override theme animation using AnimationStyle', (WidgetTester tester) async {
+    final ThemeData lightTheme = ThemeData.light();
+    final ThemeData darkTheme = ThemeData.dark();
+
+    Widget buildWidget({ ThemeMode themeMode = ThemeMode.light, AnimationStyle? animationStyle }) {
+      return MaterialApp(
+        theme: lightTheme,
+        darkTheme: darkTheme,
+        themeMode: themeMode,
+        themeAnimationStyle: animationStyle,
+        home: const Scaffold(body: Text('body')),
+      );
+    }
+
+    // Test the initial Scaffold background color.
+    await tester.pumpWidget(buildWidget());
+
+    expect(tester.widget<Material>(find.byType(Material)).color, lightTheme.colorScheme.surface);
+
+    // Test the Scaffold background color animation from light to dark theme.
+    await tester.pumpWidget(buildWidget(themeMode: ThemeMode.dark));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50)); // Advance animation by 50 milliseconds.
+
+    // Scaffold background color is slightly updated.
+    expect(tester.widget<Material>(find.byType(Material)).color, const Color(0xffc3bdc5));
+
+    // Let the animation finish.
+    await tester.pumpAndSettle();
+
+    // Scaffold background color is fully updated to dark theme.
+    expect(tester.widget<Material>(find.byType(Material)).color, darkTheme.colorScheme.surface);
+
+    // Reset to light theme to compare the Scaffold background color animation
+    // with the default animation curve.
+    await tester.pumpWidget(buildWidget());
+    await tester.pumpAndSettle();
+
+    // Switch to dark theme with overridden animation curve.
+    await tester.pumpWidget(buildWidget(
+      themeMode: ThemeMode.dark,
+      animationStyle: AnimationStyle(curve: Curves.easeIn,
+    )));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    // Scaffold background color is slightly updated but with a different
+    // color than the default animation curve.
+    expect(tester.widget<Material>(find.byType(Material)).color, const Color(0xffe7e1e9));
+
+    // Let the animation finish.
+    await tester.pumpAndSettle();
+
+    // Scaffold background color is fully updated to dark theme.
+    expect(tester.widget<Material>(find.byType(Material)).color, darkTheme.colorScheme.surface);
+
+    // Switch from dark to light theme with overridden animation duration.
+    await tester.pumpWidget(buildWidget(animationStyle: AnimationStyle.noAnimation));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 1));
+
+    expect(tester.widget<Material>(find.byType(Material)).color, isNot(darkTheme.colorScheme.surface));
+    expect(tester.widget<Material>(find.byType(Material)).color, lightTheme.colorScheme.surface);
+  });
+
+  testWidgets('AnimationStyle.noAnimation removes AnimatedTheme from the tree', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(themeAnimationStyle: AnimationStyle()));
+
+    expect(find.byType(AnimatedTheme), findsOneWidget);
+    expect(find.byType(Theme), findsOneWidget);
+
+    await tester.pumpWidget(MaterialApp(themeAnimationStyle: AnimationStyle.noAnimation));
+
+    expect(find.byType(AnimatedTheme), findsNothing);
+    expect(find.byType(Theme), findsOneWidget);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/137875.
+  testWidgets('MaterialApp works in an unconstrained environment', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const UnconstrainedBox(
+        child: MaterialApp(
+          home: SizedBox(width: 123, height: 456),
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byType(MaterialApp)), const Size(123, 456));
+  });
 }
 
 class MockScrollBehavior extends ScrollBehavior {
@@ -1543,7 +1671,7 @@ class MockScrollBehavior extends ScrollBehavior {
   ScrollPhysics getScrollPhysics(BuildContext context) => const NeverScrollableScrollPhysics();
 }
 
-typedef SimpleRouterDelegateBuilder = Widget Function(BuildContext, RouteInformation);
+typedef SimpleRouterDelegateBuilder = Widget Function(BuildContext context, RouteInformation information);
 typedef SimpleNavigatorRouterDelegatePopPage<T> = bool Function(Route<T> route, T result, SimpleNavigatorRouterDelegate delegate);
 
 class SimpleRouteInformationParser extends RouteInformationParser<RouteInformation> {
@@ -1564,7 +1692,9 @@ class SimpleNavigatorRouterDelegate extends RouterDelegate<RouteInformation> wit
   SimpleNavigatorRouterDelegate({
     required this.builder,
     required this.onPopPage,
-  });
+  }) {
+    ChangeNotifier.maybeDispatchObjectCreation(this);
+  }
 
   @override
   GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -1601,7 +1731,7 @@ class SimpleNavigatorRouterDelegate extends RouterDelegate<RouteInformation> wit
           child: Text('base'),
         ),
         MaterialPage<void>(
-          key: ValueKey<String>(routeInformation.location!),
+          key: ValueKey<String>(routeInformation.uri.toString()),
           child: builder(context, routeInformation),
         ),
       ],

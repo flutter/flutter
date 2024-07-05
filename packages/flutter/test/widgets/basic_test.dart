@@ -16,10 +16,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'semantics_tester.dart';
+
 void main() {
   group('RawImage', () {
     testWidgets('properties', (WidgetTester tester) async {
       final ui.Image image1 = (await tester.runAsync<ui.Image>(() => createTestImage()))!;
+      addTearDown(image1.dispose);
 
       await tester.pumpWidget(
         Directionality(
@@ -48,6 +51,7 @@ void main() {
       expect(renderObject.isAntiAlias, false);
 
       final ui.Image image2 = (await tester.runAsync<ui.Image>(() => createTestImage(width: 2, height: 2)))!;
+      addTearDown(image2.dispose);
       const String debugImageLabel = 'debugImageLabel';
       const double width = 1;
       const double height = 1;
@@ -461,6 +465,7 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
+          theme: ThemeData(useMaterial3: false),
           home: Scaffold(
             body: Row(
               crossAxisAlignment: CrossAxisAlignment.baseline,
@@ -468,11 +473,11 @@ void main() {
               children: <Widget>[
                 Text('big text',
                   key: key1,
-                  style: const TextStyle(fontFamily: 'FlutterTest', fontSize: fontSize1),
+                  style: const TextStyle(fontFamily: 'FlutterTest', fontSize: fontSize1, height: 1.0),
                 ),
                 Text('one\ntwo\nthree\nfour\nfive\nsix\nseven',
                   key: key2,
-                  style: const TextStyle(fontFamily: 'FlutterTest', fontSize: fontSize2),
+                  style: const TextStyle(fontFamily: 'FlutterTest', fontSize: fontSize2, height: 1.0),
                 ),
               ],
             ),
@@ -515,6 +520,7 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
+          theme: ThemeData(useMaterial3: false),
           home: Scaffold(
             body: Row(
               crossAxisAlignment: CrossAxisAlignment.baseline,
@@ -522,11 +528,11 @@ void main() {
               children: <Widget>[
                 Text('big text',
                   key: key1,
-                  style: const TextStyle(fontFamily: 'FlutterTest', fontSize: fontSize1),
+                  style: const TextStyle(fontFamily: 'FlutterTest', fontSize: fontSize1, height: 1.0),
                 ),
                 Text('one\ntwo\nthree\nfour\nfive\nsix\nseven',
                   key: key2,
-                  style: const TextStyle(fontFamily: 'FlutterTest', fontSize: fontSize2),
+                  style: const TextStyle(fontFamily: 'FlutterTest', fontSize: fontSize2, height: 1.0),
                 ),
                 const FlutterLogo(size: 250),
               ],
@@ -605,7 +611,7 @@ void main() {
       // Defaults to Clip.none
       expect(renderObject.clipBehavior, equals(clip ?? Clip.none), reason: 'for clip = $clip');
 
-      switch(clip) {
+      switch (clip) {
         case null:
         case Clip.none:
           // the UnconstrainedBox overflows.
@@ -738,12 +744,13 @@ void main() {
       expect(properties.properties.first.value, colorToPaint);
     });
   });
+
   testWidgets('Inconsequential golden test', (WidgetTester tester) async {
     // The test validates the Flutter Gold integration. Any changes to the
     // golden file can be approved at any time.
     await tester.pumpWidget(RepaintBoundary(
       child: Container(
-        color: const Color(0xABCDABCD),
+        color: const Color(0xFFF40125),
       ),
     ));
 
@@ -829,6 +836,199 @@ void main() {
     await tester.pumpWidget(target(ignoring: true));
     expect(logs, <String>['exit3', 'enter2']);
     logs.clear();
+  });
+
+  group('IgnorePointer semantics', () {
+    testWidgets('does not change semantics when not ignoring', (WidgetTester tester) async {
+      final UniqueKey key = UniqueKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: IgnorePointer(
+            ignoring: false,
+            child: ElevatedButton(
+              key: key,
+              onPressed: () { },
+              child: const Text('button'),
+            ),
+          ),
+        ),
+      );
+      expect(
+        tester.getSemantics(find.byKey(key)),
+        matchesSemantics(
+          label: 'button',
+          hasTapAction: true,
+          isButton: true,
+          isFocusable: true,
+          hasEnabledState: true,
+          isEnabled: true,
+        ),
+      );
+    });
+
+    testWidgets('can toggle the ignoring.', (WidgetTester tester) async {
+      final UniqueKey key1 = UniqueKey();
+      final UniqueKey key2 = UniqueKey();
+      final UniqueKey key3 = UniqueKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: TestIgnorePointer(
+            child: Semantics(
+              key: key1,
+              label: '1',
+              onTap: (){ },
+              container: true,
+              child: Semantics(
+                key: key2,
+                label: '2',
+                onTap: (){ },
+                container: true,
+                child: Semantics(
+                  key: key3,
+                  label: '3',
+                  onTap: (){ },
+                  container: true,
+                  child: const SizedBox(width: 10, height: 10),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      expect(
+        tester.getSemantics(find.byKey(key1)),
+        matchesSemantics(
+          label: '1',
+        ),
+      );
+      expect(
+        tester.getSemantics(find.byKey(key2)),
+        matchesSemantics(
+          label: '2',
+        ),
+      );
+      expect(
+        tester.getSemantics(find.byKey(key3)),
+        matchesSemantics(
+          label: '3',
+        ),
+      );
+
+      final TestIgnorePointerState state = tester.state<TestIgnorePointerState>(find.byType(TestIgnorePointer));
+      state.setIgnore(false);
+      await tester.pump();
+      expect(
+        tester.getSemantics(find.byKey(key1)),
+        matchesSemantics(
+          label: '1',
+          hasTapAction: true,
+        ),
+      );
+      expect(
+        tester.getSemantics(find.byKey(key2)),
+        matchesSemantics(
+          label: '2',
+          hasTapAction: true,
+        ),
+      );
+      expect(
+        tester.getSemantics(find.byKey(key3)),
+        matchesSemantics(
+          label: '3',
+          hasTapAction: true,
+        ),
+      );
+
+      state.setIgnore(true);
+      await tester.pump();
+      expect(
+        tester.getSemantics(find.byKey(key1)),
+        matchesSemantics(
+          label: '1',
+        ),
+      );
+      expect(
+        tester.getSemantics(find.byKey(key2)),
+        matchesSemantics(
+          label: '2',
+        ),
+      );
+      expect(
+        tester.getSemantics(find.byKey(key3)),
+        matchesSemantics(
+          label: '3',
+        ),
+      );
+
+      state.setIgnore(false);
+      await tester.pump();
+      expect(
+        tester.getSemantics(find.byKey(key1)),
+        matchesSemantics(
+          label: '1',
+          hasTapAction: true,
+        ),
+      );
+      expect(
+        tester.getSemantics(find.byKey(key2)),
+        matchesSemantics(
+          label: '2',
+          hasTapAction: true,
+        ),
+      );
+      expect(
+        tester.getSemantics(find.byKey(key3)),
+        matchesSemantics(
+          label: '3',
+          hasTapAction: true,
+        ),
+      );
+    });
+
+    testWidgets('drops semantics when its ignoringSemantics is true', (WidgetTester tester) async {
+      final SemanticsTester semantics = SemanticsTester(tester);
+      final UniqueKey key = UniqueKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: IgnorePointer(
+            ignoringSemantics: true,
+            child: ElevatedButton(
+              key: key,
+              onPressed: () { },
+              child: const Text('button'),
+            ),
+          ),
+        ),
+      );
+      expect(semantics, isNot(includesNodeWith(label: 'button')));
+      semantics.dispose();
+    });
+
+    testWidgets('ignores user interactions', (WidgetTester tester) async {
+      final UniqueKey key = UniqueKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: IgnorePointer(
+            child: ElevatedButton(
+              key: key,
+              onPressed: () { },
+              child: const Text('button'),
+            ),
+          ),
+        ),
+      );
+      expect(
+        tester.getSemantics(find.byKey(key)),
+        // Tap action is blocked.
+        matchesSemantics(
+          label: 'button',
+          isButton: true,
+          isFocusable: true,
+          hasEnabledState: true,
+          isEnabled: true,
+        ),
+      );
+    });
   });
 
   testWidgets('AbsorbPointer absorbs pointers', (WidgetTester tester) async {
@@ -938,6 +1138,62 @@ void main() {
       contains('verticalDirection: up'),
     ]));
   });
+
+  testWidgets('Row and IgnoreBaseline (control -- with baseline)', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Row(
+        crossAxisAlignment: CrossAxisAlignment.baseline,
+        textBaseline: TextBaseline.alphabetic,
+        textDirection: TextDirection.ltr,
+        children: <Widget>[
+          Text(
+            'a',
+            textDirection: TextDirection.ltr,
+            style: TextStyle(fontSize: 128.0, fontFamily: 'FlutterTest'), // places baseline at y=96
+          ),
+          Text(
+            'b',
+            textDirection: TextDirection.ltr,
+            style: TextStyle(fontSize: 32.0, fontFamily: 'FlutterTest'), // 24 above baseline, 8 below baseline
+          ),
+        ],
+      ),
+    );
+
+    final Offset aPos = tester.getTopLeft(find.text('a'));
+    final Offset bPos = tester.getTopLeft(find.text('b'));
+    expect(aPos.dy, 0.0);
+    expect(bPos.dy, 96.0 - 24.0);
+  });
+
+  testWidgets('Row and IgnoreBaseline (with ignored baseline)', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Row(
+        crossAxisAlignment: CrossAxisAlignment.baseline,
+        textBaseline: TextBaseline.alphabetic,
+        textDirection: TextDirection.ltr,
+        children: <Widget>[
+          IgnoreBaseline(
+            child: Text(
+              'a',
+              textDirection: TextDirection.ltr,
+              style: TextStyle(fontSize: 128.0, fontFamily: 'FlutterTest'), // places baseline at y=96
+            ),
+          ),
+          Text(
+            'b',
+            textDirection: TextDirection.ltr,
+            style: TextStyle(fontSize: 32.0, fontFamily: 'FlutterTest'), // 24 above baseline, 8 below baseline
+          ),
+        ],
+      ),
+    );
+
+    final Offset aPos = tester.getTopLeft(find.text('a'));
+    final Offset bPos = tester.getTopLeft(find.text('b'));
+    expect(aPos.dy, 0.0);
+    expect(bPos.dy, 0.0);
+  });
 }
 
 HitsRenderBox hits(RenderBox renderBox) => HitsRenderBox(renderBox);
@@ -1003,5 +1259,32 @@ class _MockCanvas extends Fake implements Canvas {
   void drawRect(Rect rect, Paint paint) {
     rects.add(rect);
     paints.add(paint);
+  }
+}
+
+
+class TestIgnorePointer extends StatefulWidget {
+  const TestIgnorePointer({super.key, required this.child});
+
+  final Widget child;
+  @override
+  State<StatefulWidget> createState() => TestIgnorePointerState();
+}
+
+class TestIgnorePointerState extends State<TestIgnorePointer> {
+  bool ignore = true;
+
+  void setIgnore(bool newIgnore) {
+    setState(() {
+      ignore = newIgnore;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return IgnorePointer(
+      ignoring: ignore,
+      child: widget.child,
+    );
   }
 }

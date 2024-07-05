@@ -24,7 +24,7 @@ void main() {
     expect(tester.widget<Container>(find.byType(Container)).color, equals(Colors.red));
 
     await tester.tap(find.text('Green Background'));
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     expect(tester.widget<Container>(find.byType(Container)).color, equals(Colors.green));
   });
@@ -73,5 +73,19 @@ void main() {
 
     expect(tester.widget<Radio<Color>>(find.descendant(of: find.byType(RadioMenuButton<Color>).at(2), matching: find.byType(Radio<Color>))).groupValue, equals(Colors.blue));
     expect(tester.widget<Container>(find.byType(Container)).color, equals(Colors.blue));
+  });
+
+  testWidgets('MenuAnchor is wrapped in a SafeArea', (WidgetTester tester) async {
+    const double safeAreaPadding = 100.0;
+    await tester.pumpWidget(
+      const MediaQuery(
+        data: MediaQueryData(
+          padding: EdgeInsets.symmetric(vertical: safeAreaPadding),
+        ),
+        child: example.MenuApp(),
+      ),
+    );
+
+    expect(tester.getTopLeft(find.byType(MenuAnchor)), const Offset(0.0, safeAreaPadding));
   });
 }

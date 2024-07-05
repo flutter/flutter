@@ -16,13 +16,13 @@ library;
 import 'dart:math' as math;
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
 
@@ -161,39 +161,43 @@ Widget buildFrame({
   double? menuMaxHeight,
   EdgeInsetsGeometry? padding,
   Alignment dropdownAlignment = Alignment.center,
+  bool? useMaterial3,
 }) {
-  return TestApp(
-    textDirection: textDirection,
-    mediaSize: mediaSize,
-    child: Material(
-      child: Align(
-        alignment: dropdownAlignment,
-        child: RepaintBoundary(
-          child: buildDropdown(
-            isFormField: isFormField,
-            buttonKey: buttonKey,
-            value: value,
-            hint: hint,
-            disabledHint: disabledHint,
-            onChanged: onChanged,
-            onTap: onTap,
-            icon: icon,
-            iconSize: iconSize,
-            iconDisabledColor: iconDisabledColor,
-            iconEnabledColor: iconEnabledColor,
-            isDense: isDense,
-            isExpanded: isExpanded,
-            underline: underline,
-            focusNode: focusNode,
-            autofocus: autofocus,
-            focusColor: focusColor,
-            dropdownColor: dropdownColor,
-            items: items,
-            selectedItemBuilder: selectedItemBuilder,
-            itemHeight: itemHeight,
-            alignment: alignment,
-            menuMaxHeight: menuMaxHeight,
-            padding: padding,
+  return Theme(
+    data: ThemeData(useMaterial3: useMaterial3),
+    child: TestApp(
+      textDirection: textDirection,
+      mediaSize: mediaSize,
+      child: Material(
+        child: Align(
+          alignment: dropdownAlignment,
+          child: RepaintBoundary(
+            child: buildDropdown(
+              isFormField: isFormField,
+              buttonKey: buttonKey,
+              value: value,
+              hint: hint,
+              disabledHint: disabledHint,
+              onChanged: onChanged,
+              onTap: onTap,
+              icon: icon,
+              iconSize: iconSize,
+              iconDisabledColor: iconDisabledColor,
+              iconEnabledColor: iconEnabledColor,
+              isDense: isDense,
+              isExpanded: isExpanded,
+              underline: underline,
+              focusNode: focusNode,
+              autofocus: autofocus,
+              focusColor: focusColor,
+              dropdownColor: dropdownColor,
+              items: items,
+              selectedItemBuilder: selectedItemBuilder,
+              itemHeight: itemHeight,
+              alignment: alignment,
+              menuMaxHeight: menuMaxHeight,
+              padding: padding,
+            ),
           ),
         ),
       ),
@@ -207,6 +211,7 @@ Widget buildDropdownWithHint({
   bool enableSelectedItemBuilder = false,
 }){
   return buildFrame(
+    useMaterial3: false,
     mediaSize: const Size(800, 600),
     itemHeight: 100.0,
     alignment: alignment,
@@ -286,6 +291,7 @@ Future<void> checkDropdownColor(WidgetTester tester, {Color? color, bool isFormF
   const String text = 'foo';
   await tester.pumpWidget(
     MaterialApp(
+      theme: ThemeData(useMaterial3: false),
       home: Material(
         child: isFormField
             ? Form(
@@ -335,7 +341,7 @@ Future<void> checkDropdownColor(WidgetTester tester, {Color? color, bool isFormF
 void main() {
   testWidgets('Default dropdown golden', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
-    Widget build() => buildFrame(buttonKey: buttonKey, onChanged: onChanged);
+    Widget build() => buildFrame(buttonKey: buttonKey, onChanged: onChanged, useMaterial3: false);
     await tester.pumpWidget(build());
     final Finder buttonFinder = find.byKey(buttonKey);
     assert(tester.renderObject(buttonFinder).attached);
@@ -347,7 +353,7 @@ void main() {
 
   testWidgets('Expanded dropdown golden', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
-    Widget build() => buildFrame(buttonKey: buttonKey, isExpanded: true, onChanged: onChanged);
+    Widget build() => buildFrame(buttonKey: buttonKey, isExpanded: true, onChanged: onChanged, useMaterial3: false);
     await tester.pumpWidget(build());
     final Finder buttonFinder = find.byKey(buttonKey);
     assert(tester.renderObject(buttonFinder).attached);
@@ -609,6 +615,7 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/66870
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           appBar: AppBar(),
           body: Column(
@@ -697,7 +704,7 @@ void main() {
     testWidgets('Dropdown button aligns selected menu item ($textDirection)', (WidgetTester tester) async {
       final Key buttonKey = UniqueKey();
 
-      Widget build() => buildFrame(buttonKey: buttonKey, textDirection: textDirection, onChanged: onChanged);
+      Widget build() => buildFrame(buttonKey: buttonKey, textDirection: textDirection, onChanged: onChanged, useMaterial3: false);
 
       await tester.pumpWidget(build());
       final RenderBox buttonBox = tester.renderObject<RenderBox>(find.byKey(buttonKey));
@@ -2262,16 +2269,16 @@ void main() {
       'three',
     ];
     String? item = items[0];
-    late MediaQueryData mediaQuery;
+    late double textScale;
 
     await tester.pumpWidget(
       StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
           return MaterialApp(
             builder: (BuildContext context, Widget? child) {
-              mediaQuery = MediaQuery.of(context);
+              textScale = MediaQuery.of(context).textScaler.scale(14) / 14;
               return MediaQuery(
-                data: mediaQuery,
+                data: MediaQueryData(textScaler: TextScaler.linear(textScale)),
                 child: child!,
               );
             },
@@ -2285,9 +2292,7 @@ void main() {
                 onChanged: (String? newItem) {
                   setState(() {
                     item = newItem;
-                    mediaQuery = mediaQuery.copyWith(
-                      textScaleFactor: mediaQuery.textScaleFactor + 0.1,
-                    );
+                    textScale += 0.1;
                   });
                 },
               ),
@@ -2382,12 +2387,14 @@ void main() {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     final UniqueKey buttonKey = UniqueKey();
     final FocusNode focusNode = FocusNode(debugLabel: 'DropdownButton');
-    await tester.pumpWidget(buildFrame(buttonKey: buttonKey, onChanged: onChanged, focusNode: focusNode, autofocus: true));
+    addTearDown(focusNode.dispose);
+
+    await tester.pumpWidget(buildFrame(buttonKey: buttonKey, onChanged: onChanged, focusNode: focusNode, autofocus: true, useMaterial3: false));
     await tester.pumpAndSettle(); // Pump a frame for autofocus to take effect.
     expect(focusNode.hasPrimaryFocus, isTrue);
     expect(find.byType(Material), paints..rect(rect: const Rect.fromLTRB(348.0, 276.0, 452.0, 324.0), color: const Color(0x1f000000)));
 
-    await tester.pumpWidget(buildFrame(buttonKey: buttonKey, onChanged: onChanged, focusNode: focusNode, focusColor: const Color(0xff00ff00)));
+    await tester.pumpWidget(buildFrame(buttonKey: buttonKey, onChanged: onChanged, focusNode: focusNode, focusColor: const Color(0xff00ff00), useMaterial3: false));
     await tester.pumpAndSettle(); // Pump a frame for autofocus to take effect.
     expect(find.byType(Material), paints..rect(rect: const Rect.fromLTRB(348.0, 276.0, 452.0, 324.0), color: const Color(0x1f00ff00)));
   });
@@ -2396,19 +2403,23 @@ void main() {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     final UniqueKey buttonKey = UniqueKey();
     final FocusNode focusNode = FocusNode(debugLabel: 'DropdownButtonFormField');
+    addTearDown(focusNode.dispose);
+
     await tester.pumpWidget(buildFrame(isFormField: true, buttonKey: buttonKey, onChanged: onChanged, focusNode: focusNode, autofocus: true));
     await tester.pumpAndSettle(); // Pump a frame for autofocus to take effect.
     expect(focusNode.hasPrimaryFocus, isTrue);
-    expect(find.byType(Material), paints ..rect(rect: const Rect.fromLTRB(0.0, 264.0, 800.0, 336.0), color: const Color(0x1f000000)));
+    expect(find.byType(Material), paints ..rect(rect: const Rect.fromLTRB(0.0, 268.0, 800.0, 332.0), color: const Color(0x1f000000)));
 
     await tester.pumpWidget(buildFrame(isFormField: true, buttonKey: buttonKey, onChanged: onChanged, focusNode: focusNode, focusColor: const Color(0xff00ff00)));
     await tester.pumpAndSettle(); // Pump a frame for autofocus to take effect.
-    expect(find.byType(Material), paints ..rect(rect: const Rect.fromLTRB(0.0, 264.0, 800.0, 336.0), color: const Color(0x1f00ff00)));
+    expect(find.byType(Material), paints ..rect(rect: const Rect.fromLTRB(0.0, 268.0, 800.0, 332.0), color: const Color(0x1f00ff00)));
   });
 
   testWidgets("DropdownButton won't be focused if not enabled", (WidgetTester tester) async {
     final UniqueKey buttonKey = UniqueKey();
     final FocusNode focusNode = FocusNode(debugLabel: 'DropdownButton');
+    addTearDown(focusNode.dispose);
+
     await tester.pumpWidget(buildFrame(buttonKey: buttonKey, focusNode: focusNode, autofocus: true, focusColor: const Color(0xff00ff00)));
     await tester.pump(); // Pump a frame for autofocus to take effect (although it shouldn't).
     expect(focusNode.hasPrimaryFocus, isFalse);
@@ -2417,6 +2428,7 @@ void main() {
 
   testWidgets('DropdownButton is activated with the enter key', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'DropdownButton');
+    addTearDown(focusNode.dispose);
     String? value = 'one';
 
     Widget buildFrame() {
@@ -2513,6 +2525,7 @@ void main() {
 
   testWidgets('DropdownButton is activated with the space key', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'DropdownButton');
+    addTearDown(focusNode.dispose);
     String? value = 'one';
 
     Widget buildFrame() {
@@ -2568,6 +2581,7 @@ void main() {
 
   testWidgets('Selected element is focused when dropdown is opened', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'DropdownButton');
+    addTearDown(focusNode.dispose);
     String? value = 'one';
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
@@ -2628,6 +2642,7 @@ void main() {
 
   testWidgets('Selected element is correctly focused with dropdown that more items than fit on the screen', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'DropdownButton');
+    addTearDown(focusNode.dispose);
     int? value = 1;
     final List<int> hugeMenuItems = List<int>.generate(50, (int index) => index);
 
@@ -2691,11 +2706,13 @@ void main() {
 
   testWidgets("Having a focused element doesn't interrupt scroll when flung by touch", (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'DropdownButton');
+    addTearDown(focusNode.dispose);
     int? value = 1;
     final List<int> hugeMenuItems = List<int>.generate(100, (int index) => index);
 
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           body: Center(
             child: StatefulBuilder(
@@ -2765,6 +2782,7 @@ void main() {
 
   testWidgets('DropdownButton onTap callback can request focus', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'DropdownButton')..addListener(() { });
+    addTearDown(focusNode.dispose);
     int? value = 1;
     final List<int> hugeMenuItems = List<int>.generate(100, (int index) => index);
 
@@ -2813,6 +2831,7 @@ void main() {
 
   testWidgets('DropdownButton changes selected item with arrow keys', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'DropdownButton');
+    addTearDown(focusNode.dispose);
     String? value = 'one';
 
     Widget buildFrame() {
@@ -3169,6 +3188,7 @@ void main() {
     final UniqueKey itemKey = UniqueKey();
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           body: Center(
             child: DropdownButton<String>(
@@ -3337,7 +3357,7 @@ void main() {
     // Should be center-center aligned, the icon size is 24.0 pixels.
     expect(
       buttonBox.localToGlobal(Offset((buttonBox.size.width -24.0) / 2.0, buttonBox.size.height / 2.0)),
-      selectedItemBox.localToGlobal(Offset(selectedItemBox.size.width / 2.0, selectedItemBox.size.height / 2.0)),
+      offsetMoreOrLessEquals(selectedItemBox.localToGlobal(Offset(selectedItemBox.size.width / 2.0, selectedItemBox.size.height / 2.0))),
     );
 
     // Open dropdown.
@@ -3353,10 +3373,10 @@ void main() {
       Offset(selectedItemBoxInMenu.size.width / 2.0, selectedItemBoxInMenu.size.height / 2.0)
     );
 
-    expect(center.dx, menuRect.topCenter.dx,);
+    expect(center.dx, moreOrLessEquals(menuRect.topCenter.dx));
     expect(
       center.dy,
-      selectedItemBox.localToGlobal(Offset(selectedItemBox.size.width / 2.0, selectedItemBox.size.height / 2.0)).dy,
+      moreOrLessEquals(selectedItemBox.localToGlobal(Offset(selectedItemBox.size.width / 2.0, selectedItemBox.size.height / 2.0)).dy),
     );
   });
 
@@ -3504,8 +3524,9 @@ void main() {
     await tester.pumpAndSettle(); // finish the menu animation
 
     // The inherited ScrollBehavior should not apply Scrollbars since they are
-    // already built in to the widget.
-    expect(find.byType(CupertinoScrollbar), findsNothing);
+    // already built in to the widget. For iOS platform, ScrollBar directly returns
+    // CupertinoScrollbar
+    expect(find.byType(CupertinoScrollbar), debugDefaultTargetPlatformOverride == TargetPlatform.iOS ? findsOneWidget : findsNothing);
     expect(find.byType(Scrollbar), findsOneWidget);
     expect(find.byType(RawScrollbar), findsNothing);
 
@@ -3516,6 +3537,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           body: Center(
             child: DropdownButton<String>(

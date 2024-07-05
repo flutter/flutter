@@ -8,7 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  final MemoryAllocations ma = MemoryAllocations.instance;
+  final FlutterMemoryAllocations ma = FlutterMemoryAllocations.instance;
 
   setUp(() {
     assert(!ma.hasListeners);
@@ -20,7 +20,7 @@ void main() {
   });
 
   testWidgets(
-    '$MemoryAllocations is noop when kFlutterMemoryAllocationsEnabled is false.',
+    '$FlutterMemoryAllocations is noop when kFlutterMemoryAllocationsEnabled is false.',
     (WidgetTester tester) async {
       ObjectEvent? receivedEvent;
       ObjectEvent listener(ObjectEvent event) => receivedEvent = event;
@@ -57,12 +57,8 @@ Future<void> _activateFlutterObjects(WidgetTester tester) async {
   changeNotifier.dispose();
   picture.dispose();
 
-  // TODO(polina-c): Remove the condition after
-  // https://github.com/flutter/flutter/issues/110599 is fixed.
-  if (!kIsWeb) {
-    final Image image = await _createImage();
-    image.dispose();
-  }
+  final Image image = await _createImage();
+  image.dispose();
 }
 
 Future<Image> _createImage() async {

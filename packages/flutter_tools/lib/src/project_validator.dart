@@ -136,7 +136,10 @@ class VariableDumpMachineProjectValidator extends MachineProjectValidator {
     ));
 
     // FlutterVersion
-    final FlutterVersion version = FlutterVersion(workingDirectory: project.directory.absolute.path);
+    final FlutterVersion version = FlutterVersion(
+      flutterRoot: Cache.flutterRoot!,
+      fs: fileSystem,
+    );
     result.add(ProjectValidatorResult(
       name: 'FlutterVersion.frameworkRevision',
       value: _toJsonValue(version.frameworkRevision),
@@ -202,7 +205,7 @@ class VariableDumpMachineProjectValidator extends MachineProjectValidator {
 /// Validator run for all platforms that extract information from the pubspec.yaml.
 ///
 /// Specific info from different platforms should be written in their own ProjectValidator.
-class GeneralInfoProjectValidator extends ProjectValidator{
+class GeneralInfoProjectValidator extends ProjectValidator {
   @override
   Future<List<ProjectValidatorResult>> start(FlutterProject project) async {
     final FlutterManifest flutterManifest = project.manifest;
@@ -224,7 +227,7 @@ class GeneralInfoProjectValidator extends ProjectValidator{
       result.add(_materialDesignResult(flutterManifest));
       result.add(_pluginValidatorResult(flutterManifest));
     }
-    result.add(await project.android.validateJavaGradleAgpVersions());
+    result.add(await project.android.validateJavaAndGradleAgpVersions());
     return result;
   }
 
@@ -313,7 +316,7 @@ class PubDependenciesProjectValidator extends ProjectValidator {
       jsonResult = json.decode(
         processResult.stdout.toString()
       ) as LinkedHashMap<String, dynamic>;
-    } on FormatException{
+    } on FormatException {
       result.add(_createProjectValidatorError(name, processResult.stderr.toString()));
       return result;
     }

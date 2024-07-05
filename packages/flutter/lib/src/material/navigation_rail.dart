@@ -39,7 +39,7 @@ const double _kIndicatorHeight = 32;
 /// Adaptive layouts can build different instances of the [Scaffold] in order to
 /// have a navigation rail for more horizontal layouts and a bottom navigation
 /// bar for more vertical layouts. See
-/// [the adaptive_scaffold.dart sample](https://github.com/flutter/samples/blob/master/experimental/web_dashboard/lib/src/widgets/third_party/adaptive_scaffold.dart)
+/// [the adaptive_scaffold.dart sample](https://github.com/flutter/samples/blob/main/experimental/web_dashboard/lib/src/widgets/third_party/adaptive_scaffold.dart)
 /// for an example.
 ///
 /// {@tool dartpad}
@@ -80,8 +80,8 @@ class NavigationRail extends StatefulWidget {
   /// [minExtendedWidth] is specified, it must be non-negative and greater than
   /// [minWidth].
   ///
-  /// The argument [extended] must not be null. [extended] can only be set to
-  /// true when the [labelType] is null or [NavigationRailLabelType.none].
+  /// The [extended] argument can only be set to true when the [labelType] is
+  /// null or [NavigationRailLabelType.none].
   ///
   /// If [backgroundColor], [elevation], [groupAlignment], [labelType],
   /// [unselectedLabelTextStyle], [selectedLabelTextStyle],
@@ -467,6 +467,7 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
                               tabIndex: i + 1,
                               tabCount: widget.destinations.length,
                             ),
+                            disabled: widget.destinations[i].disabled,
                           ),
                         if (widget.trailing != null)
                           widget.trailing!,
@@ -545,6 +546,7 @@ class _RailDestination extends StatelessWidget {
     required this.useIndicator,
     this.indicatorColor,
     this.indicatorShape,
+    this.disabled = false,
   }) : _positionAnimation = CurvedAnimation(
           parent: ReverseAnimation(destinationAnimation),
           curve: Curves.easeInOut,
@@ -567,6 +569,7 @@ class _RailDestination extends StatelessWidget {
   final bool useIndicator;
   final Color? indicatorColor;
   final ShapeBorder? indicatorShape;
+  final bool disabled;
 
   final Animation<double> _positionAnimation;
 
@@ -577,20 +580,33 @@ class _RailDestination extends StatelessWidget {
       '[NavigationRail.indicatorColor] does not have an effect when [NavigationRail.useIndicator] is false',
     );
 
-    final bool material3 = Theme.of(context).useMaterial3;
-    final EdgeInsets destinationPadding = (padding ?? EdgeInsets.zero).resolve(Directionality.of(context));
+    final ThemeData theme = Theme.of(context);
+    final TextDirection textDirection = Directionality.of(context);
+    final bool material3 = theme.useMaterial3;
+    final EdgeInsets destinationPadding = (padding ?? EdgeInsets.zero).resolve(textDirection);
     Offset indicatorOffset;
+    bool applyXOffset = false;
 
     final Widget themedIcon = IconTheme(
-      data: iconTheme,
+      data: disabled
+        ? iconTheme.copyWith(color: theme.colorScheme.onSurface.withOpacity(0.38))
+        : iconTheme,
       child: icon,
     );
     final Widget styledLabel = DefaultTextStyle(
-      style: labelTextStyle,
+      style: disabled
+        ? labelTextStyle.copyWith(color: theme.colorScheme.onSurface.withOpacity(0.38))
+        : labelTextStyle,
       child: label,
     );
 
     Widget content;
+
+    // The indicator height is fixed and equal to _kIndicatorHeight.
+    // When the icon height is larger than the indicator height the indicator
+    // vertical offset is used to vertically center the indicator.
+    final bool isLargeIconSize = iconTheme.size != null && iconTheme.size! > _kIndicatorHeight;
+    final double indicatorVerticalOffset = isLargeIconSize ? (iconTheme.size! - _kIndicatorHeight) / 2 : 0;
 
     switch (labelType) {
       case NavigationRailLabelType.none:
@@ -598,7 +614,7 @@ class _RailDestination extends StatelessWidget {
         final Widget? spacing = material3 ? const SizedBox(height: _verticalDestinationSpacingM3 / 2) : null;
         indicatorOffset = Offset(
           minWidth / 2 + destinationPadding.left,
-          _verticalDestinationSpacingM3 / 2 + destinationPadding.top,
+          _verticalDestinationSpacingM3 / 2 + destinationPadding.top + indicatorVerticalOffset,
         );
         final Widget iconPart = Column(
           children: <Widget>[
@@ -638,6 +654,7 @@ class _RailDestination extends StatelessWidget {
           );
         } else {
           final Animation<double> labelFadeAnimation = extendedTransitionAnimation.drive(CurveTween(curve: const Interval(0.0, 0.25)));
+          applyXOffset = true;
           content = Padding(
             padding: padding ?? EdgeInsets.zero,
             child: ConstrainedBox(
@@ -676,9 +693,15 @@ class _RailDestination extends StatelessWidget {
         final Widget bottomSpacing = SizedBox(height: material3 ? _verticalDestinationSpacingM3 : verticalPadding);
         final double indicatorHorizontalPadding = (destinationPadding.left / 2) - (destinationPadding.right / 2);
         final double indicatorVerticalPadding = destinationPadding.top;
-        indicatorOffset = Offset(minWidth / 2 + indicatorHorizontalPadding, indicatorVerticalPadding);
+        indicatorOffset = Offset(
+          minWidth / 2 + indicatorHorizontalPadding,
+          indicatorVerticalPadding + indicatorVerticalOffset,
+        );
         if (minWidth < _NavigationRailDefaultsM2(context).minWidth!) {
-          indicatorOffset = Offset(minWidth / 2 + _horizontalDestinationSpacingM3, indicatorVerticalPadding);
+          indicatorOffset = Offset(
+            minWidth / 2 + _horizontalDestinationSpacingM3,
+            indicatorVerticalPadding + indicatorVerticalOffset,
+          );
         }
         content = Container(
           constraints: BoxConstraints(
@@ -723,9 +746,15 @@ class _RailDestination extends StatelessWidget {
         final Widget bottomSpacing = SizedBox(height: material3 ? _verticalDestinationSpacingM3 : _verticalDestinationPaddingWithLabel);
         final double indicatorHorizontalPadding = (destinationPadding.left / 2) - (destinationPadding.right / 2);
         final double indicatorVerticalPadding = destinationPadding.top;
-        indicatorOffset = Offset(minWidth / 2 + indicatorHorizontalPadding, indicatorVerticalPadding);
+        indicatorOffset = Offset(
+          minWidth / 2 + indicatorHorizontalPadding,
+          indicatorVerticalPadding + indicatorVerticalOffset,
+        );
         if (minWidth < _NavigationRailDefaultsM2(context).minWidth!) {
-          indicatorOffset = Offset(minWidth / 2 + _horizontalDestinationSpacingM3, indicatorVerticalPadding);
+          indicatorOffset = Offset(
+            minWidth / 2 + _horizontalDestinationSpacingM3,
+            indicatorVerticalPadding + indicatorVerticalOffset,
+          );
         }
         content = Container(
           constraints: BoxConstraints(
@@ -753,6 +782,13 @@ class _RailDestination extends StatelessWidget {
     }
 
     final ColorScheme colors = Theme.of(context).colorScheme;
+    final bool primaryColorAlphaModified = colors.primary.alpha < 255.0;
+    final Color effectiveSplashColor = primaryColorAlphaModified
+      ? colors.primary
+      : colors.primary.withOpacity(0.12);
+    final Color effectiveHoverColor = primaryColorAlphaModified
+      ? colors.primary
+      : colors.primary.withOpacity(0.04);
     return Semantics(
       container: true,
       selected: selected,
@@ -761,13 +797,15 @@ class _RailDestination extends StatelessWidget {
           Material(
             type: MaterialType.transparency,
             child: _IndicatorInkWell(
-              onTap: onTap,
+              onTap: disabled ? null : onTap,
               borderRadius: BorderRadius.all(Radius.circular(minWidth / 2.0)),
               customBorder: indicatorShape,
-              splashColor: colors.primary.withOpacity(0.12),
-              hoverColor: colors.primary.withOpacity(0.04),
+              splashColor: effectiveSplashColor,
+              hoverColor: effectiveHoverColor,
               useMaterial3: material3,
               indicatorOffset: indicatorOffset,
+              applyXOffset: applyXOffset,
+              textDirection: textDirection,
               child: content,
             ),
           ),
@@ -790,6 +828,8 @@ class _IndicatorInkWell extends InkResponse {
     super.hoverColor,
     required this.useMaterial3,
     required this.indicatorOffset,
+    required this.applyXOffset,
+    required this.textDirection,
   }) : super(
     containedInkWell: true,
     highlightShape: BoxShape.rectangle,
@@ -798,14 +838,28 @@ class _IndicatorInkWell extends InkResponse {
   );
 
   final bool useMaterial3;
+
+  // The offset used to position Ink highlight.
   final Offset indicatorOffset;
+
+  // Whether the horizontal offset from indicatorOffset should be used to position Ink highlight.
+  // If true, Ink highlight uses the indicator horizontal offset. If false, Ink highlight is centered horizontally.
+  final bool applyXOffset;
+
+  // The text direction used to adjust the indicator horizontal offset.
+  final TextDirection textDirection;
 
   @override
   RectCallback? getRectCallback(RenderBox referenceBox) {
     if (useMaterial3) {
+      final double boxWidth = referenceBox.size.width;
+      double indicatorHorizontalCenter = applyXOffset ? indicatorOffset.dx : boxWidth / 2;
+      if (textDirection == TextDirection.rtl) {
+        indicatorHorizontalCenter = boxWidth - indicatorHorizontalCenter;
+      }
       return () {
         return Rect.fromLTWH(
-          indicatorOffset.dx - (_kCircularIndicatorDiameter / 2),
+          indicatorHorizontalCenter - (_kCircularIndicatorDiameter / 2),
           indicatorOffset.dy,
           _kCircularIndicatorDiameter,
           _kIndicatorHeight,
@@ -899,9 +953,9 @@ enum NavigationRailLabelType {
 class NavigationRailDestination {
   /// Creates a destination that is used with [NavigationRail.destinations].
   ///
-  /// [icon] and [label] must be non-null. When the [NavigationRail.labelType]
-  /// is [NavigationRailLabelType.none], the label is still used for semantics,
-  /// and may still be used if [NavigationRail.extended] is true.
+  /// When the [NavigationRail.labelType] is [NavigationRailLabelType.none], the
+  /// label is still used for semantics, and may still be used if
+  /// [NavigationRail.extended] is true.
   const NavigationRailDestination({
     required this.icon,
     Widget? selectedIcon,
@@ -909,6 +963,7 @@ class NavigationRailDestination {
     this.indicatorShape,
     required this.label,
     this.padding,
+    this.disabled = false,
   }) : selectedIcon = selectedIcon ?? icon;
 
   /// The icon of the destination.
@@ -954,6 +1009,9 @@ class NavigationRailDestination {
 
   /// The amount of space to inset the destination item.
   final EdgeInsetsGeometry? padding;
+
+  /// Indicates that this destination is inaccessible.
+  final bool disabled;
 }
 
 class _ExtendedNavigationRailAnimation extends InheritedWidget {
@@ -1028,8 +1086,6 @@ class _NavigationRailDefaultsM2 extends NavigationRailThemeData {
 // "END GENERATED" comments are generated from data in the Material
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
-
-// Token database version: v0_162
 
 class _NavigationRailDefaultsM3 extends NavigationRailThemeData {
   _NavigationRailDefaultsM3(this.context)

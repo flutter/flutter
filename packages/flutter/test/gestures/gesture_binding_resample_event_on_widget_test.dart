@@ -4,75 +4,65 @@
 
 import 'dart:ui' as ui;
 
-import 'package:clock/clock.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class TestResampleEventFlutterBinding extends AutomatedTestWidgetsFlutterBinding {
-  @override
-  SamplingClock? get debugSamplingClock => TestSamplingClock(this.clock);
-}
-
-class TestSamplingClock implements SamplingClock {
-  TestSamplingClock(this._clock);
-
-  @override
-  DateTime now() => _clock.now();
-
-  @override
-  Stopwatch stopwatch() => _clock.stopwatch();
-
-  final Clock _clock;
-}
-
 void main() {
-  final TestWidgetsFlutterBinding binding = TestResampleEventFlutterBinding();
   testWidgets('PointerEvent resampling on a widget', (WidgetTester tester) async {
-    assert(WidgetsBinding.instance == binding);
-    Duration currentTestFrameTime() => Duration(milliseconds: binding.clock.now().millisecondsSinceEpoch);
+    Duration currentTestFrameTime() => Duration(
+      milliseconds: TestWidgetsFlutterBinding.instance.clock.now().millisecondsSinceEpoch,
+    );
     void requestFrame() => SchedulerBinding.instance.scheduleFrameCallback((_) {});
     final Duration epoch = currentTestFrameTime();
     final ui.PointerDataPacket packet = ui.PointerDataPacket(
       data: <ui.PointerData>[
         ui.PointerData(
-            change: ui.PointerChange.add,
-            timeStamp: epoch,
+          viewId: tester.view.viewId,
+          change: ui.PointerChange.add,
+          timeStamp: epoch,
         ),
         ui.PointerData(
-            change: ui.PointerChange.down,
-            timeStamp: epoch,
+          viewId: tester.view.viewId,
+          change: ui.PointerChange.down,
+          timeStamp: epoch,
         ),
         ui.PointerData(
-            change: ui.PointerChange.move,
-            physicalX: 15.0,
-            timeStamp: epoch + const Duration(milliseconds: 10),
+          viewId: tester.view.viewId,
+          change: ui.PointerChange.move,
+          physicalX: 15.0,
+          timeStamp: epoch + const Duration(milliseconds: 10),
         ),
         ui.PointerData(
-            change: ui.PointerChange.move,
-            physicalX: 30.0,
-            timeStamp: epoch + const Duration(milliseconds: 20),
+          viewId: tester.view.viewId,
+          change: ui.PointerChange.move,
+          physicalX: 30.0,
+          timeStamp: epoch + const Duration(milliseconds: 20),
         ),
         ui.PointerData(
-            change: ui.PointerChange.move,
-            physicalX: 45.0,
-            timeStamp: epoch + const Duration(milliseconds: 30),
+          viewId: tester.view.viewId,
+          change: ui.PointerChange.move,
+          physicalX: 45.0,
+          timeStamp: epoch + const Duration(milliseconds: 30),
         ),
         ui.PointerData(
-            change: ui.PointerChange.move,
-            physicalX: 50.0,
-            timeStamp: epoch + const Duration(milliseconds: 40),
+          viewId: tester.view.viewId,
+          change: ui.PointerChange.move,
+          physicalX: 50.0,
+          timeStamp: epoch + const Duration(milliseconds: 40),
         ),
         ui.PointerData(
-            change: ui.PointerChange.up,
-            physicalX: 60.0,
-            timeStamp: epoch + const Duration(milliseconds: 40),
+          viewId: tester.view.viewId,
+          change: ui.PointerChange.up,
+          physicalX: 60.0,
+          timeStamp: epoch + const Duration(milliseconds: 40),
         ),
         ui.PointerData(
-            change: ui.PointerChange.remove,
-            physicalX: 60.0,
-            timeStamp: epoch + const Duration(milliseconds: 40),
+          viewId: tester.view.viewId,
+          change: ui.PointerChange.remove,
+          physicalX: 60.0,
+          timeStamp: epoch + const Duration(milliseconds: 40),
         ),
       ],
     );

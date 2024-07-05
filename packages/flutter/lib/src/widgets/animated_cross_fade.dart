@@ -115,8 +115,6 @@ class AnimatedCrossFade extends StatefulWidget {
   /// The [duration] of the animation is the same for all components (fade in,
   /// fade out, and size), and you can pass [Interval]s instead of [Curve]s in
   /// order to have finer control, e.g., creating an overlap between the fades.
-  ///
-  /// All the arguments other than [key] must be non-null.
   const AnimatedCrossFade({
     super.key,
     required this.firstChild,

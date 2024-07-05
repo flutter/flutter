@@ -25,6 +25,7 @@
   "continueButtonLabel": "ඉදිරියට යන්න",
   "copyButtonLabel": "පිටපත් කරන්න",
   "cutButtonLabel": "කපන්න",
+  "scanTextButtonLabel": "පෙළ ස්කෑන් කරන්න",
   "okButtonLabel": "හරි",
   "pasteButtonLabel": "අලවන්න",
   "selectAllButtonLabel": "සියල්ල තෝරන්න",
@@ -133,5 +134,17 @@
   "scrimLabel": "ස්ක්‍රිම්",
   "bottomSheetLabel": "පහළම පත්‍රය",
   "scrimOnTapHint": "$modalRouteContentName වසන්න",
-  "keyboardKeyShift": "Shift"
+  "keyboardKeyShift": "Shift",
+  "expansionTileExpandedHint": "හැකිළවීමට දෙවරක් තට්ටු කරන්න",
+  "expansionTileCollapsedHint": "විහිදුවීමට දෙවරක් තට්ටු කරන්න",
+  "expansionTileExpandedTapHint": "හකුළන්න",
+  "expansionTileCollapsedTapHint": "වැඩි විස්තර සඳහා පුළුල් කරන්න",
+  "expandedHint": "හකුළන ලදි",
+  "collapsedHint": "දිග හරින ලදි",
+  "menuDismissLabel": "මෙනුව අස් කරන්න",
+  "lookUpButtonLabel": "උඩ බලන්න",
+  "searchWebButtonLabel": "වෙබය සොයන්න",
+  "shareButtonLabel": "බෙදා ගන්න...",
+  "clearButtonTooltip": "Clear text",
+  "selectedDateLabel": "Selected"
 }

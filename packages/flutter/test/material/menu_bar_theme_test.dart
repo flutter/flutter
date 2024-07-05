@@ -10,7 +10,6 @@ void main() {
 
   Finder findMenuPanels(Axis orientation) {
     return find.byWidgetPredicate((Widget widget) {
-      // ignore: avoid_dynamic_calls
       return widget.runtimeType.toString() == '_MenuPanel' && (widget as dynamic).orientation == orientation;
     });
   }
@@ -55,6 +54,7 @@ void main() {
   testWidgets('theme is honored', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Material(
           child: Builder(builder: (BuildContext context) {
             return MenuTheme(
@@ -107,6 +107,7 @@ void main() {
   testWidgets('Constructor parameters override theme parameters', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Material(
           child: Builder(
             builder: (BuildContext context) {

@@ -6,6 +6,7 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class PrintOverrideTestBinding extends AutomatedTestWidgetsFlutterBinding {
   @override
@@ -26,7 +27,10 @@ class PrintOverrideTestBinding extends AutomatedTestWidgetsFlutterBinding {
 }
 
 void main() {
-  final MemoryAllocations ma = MemoryAllocations.instance;
+  // LeakTesting is turned off because it adds subscriptions to
+  // [FlutterMemoryAllocations], that may interfere with the tests.
+  LeakTesting.settings = LeakTesting.settings.withIgnoredAll();
+  final FlutterMemoryAllocations ma = FlutterMemoryAllocations.instance;
 
   PrintOverrideTestBinding();
 
@@ -210,12 +214,8 @@ Future<int> _activateFlutterObjectsAndReturnCountOfEvents() async {
   changeNotifier.dispose(); count++;
   picture.dispose(); count++;
 
-  // TODO(polina-c): Remove the condition after
-  // https://github.com/flutter/flutter/issues/110599 is fixed.
-  if (!kIsWeb) {
-    final Image image = await _createImage(); count++; count++; count++;
-    image.dispose(); count++;
-  }
+  final Image image = await _createImage(); count++; count++; count++;
+  image.dispose(); count++;
 
   return count;
 }

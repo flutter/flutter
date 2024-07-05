@@ -158,13 +158,10 @@ class Version {
     int nextZ = previousVersion.z;
     int? nextM = previousVersion.m;
     int? nextN = previousVersion.n;
-    if (nextVersionType == null) {
-      if (previousVersion.type == VersionType.latest || previousVersion.type == VersionType.gitDescribe) {
-        nextVersionType = VersionType.development;
-      } else {
-        nextVersionType = previousVersion.type;
-      }
-    }
+    nextVersionType ??= switch (previousVersion.type) {
+      VersionType.stable => VersionType.stable,
+      VersionType.latest || VersionType.gitDescribe || VersionType.development => VersionType.development,
+    };
 
     switch (increment) {
       case 'x':
@@ -295,15 +292,11 @@ class Version {
 
   @override
   String toString() {
-    switch (type) {
-      case VersionType.stable:
-        return '$x.$y.$z';
-      case VersionType.development:
-        return '$x.$y.$z-$m.$n.pre';
-      case VersionType.latest:
-        return '$x.$y.$z-$m.$n.pre.$commits';
-      case VersionType.gitDescribe:
-        return '$x.$y.$z-$m.$n.pre.$commits';
-    }
+    return switch (type) {
+      VersionType.stable      => '$x.$y.$z',
+      VersionType.development => '$x.$y.$z-$m.$n.pre',
+      VersionType.latest      => '$x.$y.$z-$m.$n.pre.$commits',
+      VersionType.gitDescribe => '$x.$y.$z-$m.$n.pre.$commits',
+    };
   }
 }

@@ -107,11 +107,11 @@ class Response {
   /// Create a list of Strings from [_failureDetails].
   List<String> _failureDetailsAsString() {
     final List<String> list = <String>[];
-    if (_failureDetails == null || _failureDetails!.isEmpty) {
+    if (_failureDetails == null || _failureDetails.isEmpty) {
       return list;
     }
 
-    for (final Failure failure in _failureDetails!) {
+    for (final Failure failure in _failureDetails) {
       list.add(failure.toJson());
     }
 
@@ -285,9 +285,6 @@ class WebDriverCommand {
 ///
 /// Depending on the platform the communication between `integration_tests` and
 /// the `driver_tests` can be different.
-///
-/// For the web implementation [WebCallbackManager].
-/// For the io implementation [IOCallbackManager].
 abstract class CallbackManager {
   /// The callback function to response the driver side input.
   Future<Map<String, dynamic>> callback(

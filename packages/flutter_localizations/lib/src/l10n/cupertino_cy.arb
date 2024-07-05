@@ -39,8 +39,17 @@
   "cutButtonLabel": "Torri",
   "copyButtonLabel": "Copïo",
   "pasteButtonLabel": "Gludo",
+  "clearButtonLabel": "Clear",
   "selectAllButtonLabel": "Dewis y Cyfan",
   "searchTextFieldPlaceholderLabel": "Chwilio",
   "modalBarrierDismissLabel": "Diystyru",
+<<<<<<< HEAD
   "noSpellCheckReplacementsLabel": "No Replacements Found"
+=======
+  "noSpellCheckReplacementsLabel": "Dim Ailosodiadau wedi'u Canfod",
+  "menuDismissLabel": "Diystyru'r ddewislen",
+  "lookUpButtonLabel": "Chwilio",
+  "searchWebButtonLabel": "Chwilio'r We",
+  "shareButtonLabel": "Rhannu..."
+>>>>>>> 761747bfc538b5af34aa0d3fac380f1bc331ec49
 }

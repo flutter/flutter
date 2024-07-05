@@ -1,0 +1,145 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# See https://github.com/actions/labeler/blob/main/README.md for docs.
+'a: accessibility':
+  - changed-files:
+    - any-glob-to-any-file:
+      - '**/accessibility/*'
+      - '**/*accessibility*'
+      - '**/semantics/*'
+      - '**/*semantics*'
+
+'a: animation':
+  - changed-files:
+    - any-glob-to-any-file:
+      - '**/animation/*'
+      - '**/*animation*'
+
+'a: desktop':
+  - changed-files:
+    - any-glob-to-any-file:
+      - '**/linux/**/*'
+      - '**/macos/**/*'
+      - '**/windows/**/*'
+
+'a: internationalization':
+  - changed-files:
+    - any-glob-to-any-file:
+      - packages/flutter_localizations/**/*
+
+'a: tests':
+  - changed-files:
+    - any-glob-to-any-file:
+      - packages/flutter_driver/**/*
+      - packages/flutter_goldens/**/*
+      - packages/flutter_test/**/*
+      - packages/integration_test/**/*
+
+'a: text input':
+  - changed-files:
+    - any-glob-to-any-file:
+      - '**/text/*'
+      - '**/*text*'
+
+'d: api docs':
+  - changed-files:
+    - any-glob-to-any-file:
+      - examples/api/**/*
+
+'d: examples':
+  - changed-files:
+    - any-glob-to-any-file:
+      - examples/**/*
+
+engine:
+  - changed-files:
+    - any-glob-to-any-file:
+      - bin/internal/engine.version
+
+'f: cupertino':
+  - changed-files:
+    - any-glob-to-any-file:
+      - '**/cupertino/*'
+      - '**/*cupertino*'
+
+'f: focus':
+  - changed-files:
+    - any-glob-to-any-file:
+      - '**/focus/*'
+      - '**/*focus*'
+
+'f: gestures':
+  - changed-files:
+    - any-glob-to-any-file:
+      - '**/gestures/*'
+      - '**/*gestures*'
+
+'f: material design':
+  - changed-files:
+    - any-glob-to-any-file:
+      - '**/material/*'
+      - '**/*material*'
+
+'f: routes':
+  - changed-files:
+    - any-glob-to-any-file:
+      - '**/navigator/*'
+      - '**/*navigator*'
+      - '**/route/*'
+      - '**/*route*'
+
+'f: scrolling':
+  - changed-files:
+    - any-glob-to-any-file:
+      - '**/*scroll*'
+      - '**/scroll/*'
+      - '**/*sliver*'
+      - '**/sliver/*'
+      - '**/*viewport*'
+      - '**/viewport/*'
+
+framework:
+  - changed-files:
+    - any-glob-to-any-file:
+      - packages/flutter/**/*
+      - packages/flutter_driver/**/*
+      - packages/flutter_goldens/**/*
+      - packages/flutter_localizations/**/*
+      - packages/flutter_test/**/*
+      - packages/integration_test/**/*
+      - examples/api/**/*
+
+'f: integration_test':
+  - changed-files:
+    - any-glob-to-any-file:
+      - packages/integration_test/**/*
+
+platform-ios:
+  - changed-files:
+    - any-glob-to-any-file:
+      - packages/flutter_tools/lib/src/ios/**/*
+
+platform-web:
+  - changed-files:
+    - any-glob-to-any-file:
+      - packages/flutter_web_plugins/**/*
+
+'customer: gallery':
+  - changed-files:
+    - any-glob-to-any-file:
+      - examples/flutter_gallery/**/*
+
+'c: tech-debt':
+  - changed-files:
+    - any-glob-to-any-file:
+      - '**/fix_data.yaml'
+      - '**/*.expect'
+      - '**/*test_fixes*'
+
+tool:
+  - changed-files:
+    - any-glob-to-any-file:
+      - packages/flutter_tools/**/*
+      - packages/fuchsia_remote_debug_protocol/**/*

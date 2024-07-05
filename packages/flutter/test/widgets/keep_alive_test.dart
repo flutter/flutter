@@ -46,6 +46,14 @@ List<Widget> generateList(Widget child) {
 }
 
 void main() {
+  test('KeepAlive debugTypicalAncestorWidgetClass', () {
+    final KeepAlive keepAlive = KeepAlive(keepAlive: false, child: Container());
+    expect(
+      keepAlive.debugTypicalAncestorWidgetDescription,
+      'SliverWithKeepAliveWidget or TwoDimensionalViewport',
+    );
+  });
+
   testWidgets('KeepAlive with ListView with itemExtent', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
@@ -205,11 +213,12 @@ void main() {
     );
     // The important lines below are the ones marked with "<----"
     expect(tester.binding.renderView.toStringDeep(minLevel: DiagnosticLevel.info), equalsIgnoringHashCodes(
-      'RenderView#00000\n'
+      '_ReusableRenderView#00000\n'
       ' │ debug mode enabled - ${Platform.operatingSystem}\n'
       ' │ view size: Size(2400.0, 1800.0) (in physical pixels)\n'
       ' │ device pixel ratio: 3.0 (physical pixels per logical pixel)\n'
-      ' │ configuration: Size(800.0, 600.0) at 3.0x (in logical pixels)\n'
+      ' │ configuration: BoxConstraints(w=800.0, h=600.0) at 3.0x (in\n'
+      ' │   logical pixels)\n'
       ' │\n'
       ' └─child: RenderRepaintBoundary#00000\n'
       '   │ needs compositing\n'
@@ -286,7 +295,7 @@ void main() {
       '                   │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
       '                   │ size: Size(800.0, 600.0)\n'
       '                   │ ignoring: false\n'
-      '                   │ ignoringSemantics: false\n'
+      '                   │ ignoringSemantics: null\n'
       '                   │\n'
       '                   └─child: RenderViewport#00000\n'
       '                     │ needs compositing\n'
@@ -307,10 +316,10 @@ void main() {
       '                       │ parentData: paintOffset=Offset(0.0, 0.0) (can use size)\n'
       '                       │ constraints: SliverConstraints(AxisDirection.down,\n'
       '                       │   GrowthDirection.forward, ScrollDirection.idle, scrollOffset:\n'
-      '                       │   0.0, remainingPaintExtent: 600.0, crossAxisExtent: 800.0,\n'
-      '                       │   crossAxisDirection: AxisDirection.right,\n'
-      '                       │   viewportMainAxisExtent: 600.0, remainingCacheExtent: 850.0,\n'
-      '                       │   cacheOrigin: 0.0)\n'
+      '                       │   0.0, precedingScrollExtent: 0.0, remainingPaintExtent: 600.0,\n'
+      '                       │   crossAxisExtent: 800.0, crossAxisDirection:\n'
+      '                       │   AxisDirection.right, viewportMainAxisExtent: 600.0,\n'
+      '                       │   remainingCacheExtent: 850.0, cacheOrigin: 0.0)\n'
       '                       │ geometry: SliverGeometry(scrollExtent: 40000.0, paintExtent:\n'
       '                       │   600.0, maxPaintExtent: 40000.0, hasVisualOverflow: true,\n'
       '                       │   cacheExtent: 850.0)\n'
@@ -321,10 +330,10 @@ void main() {
       '                         │ parentData: paintOffset=Offset(0.0, 0.0) (can use size)\n'
       '                         │ constraints: SliverConstraints(AxisDirection.down,\n'
       '                         │   GrowthDirection.forward, ScrollDirection.idle, scrollOffset:\n'
-      '                         │   0.0, remainingPaintExtent: 600.0, crossAxisExtent: 800.0,\n'
-      '                         │   crossAxisDirection: AxisDirection.right,\n'
-      '                         │   viewportMainAxisExtent: 600.0, remainingCacheExtent: 850.0,\n'
-      '                         │   cacheOrigin: 0.0)\n'
+      '                         │   0.0, precedingScrollExtent: 0.0, remainingPaintExtent: 600.0,\n'
+      '                         │   crossAxisExtent: 800.0, crossAxisDirection:\n'
+      '                         │   AxisDirection.right, viewportMainAxisExtent: 600.0,\n'
+      '                         │   remainingCacheExtent: 850.0, cacheOrigin: 0.0)\n'
       '                         │ geometry: SliverGeometry(scrollExtent: 40000.0, paintExtent:\n'
       '                         │   600.0, maxPaintExtent: 40000.0, hasVisualOverflow: true,\n'
       '                         │   cacheExtent: 850.0)\n'
@@ -379,11 +388,12 @@ void main() {
     await tester.drag(find.byType(ListView), const Offset(0.0, -1000.0));
     await tester.pump();
     expect(tester.binding.renderView.toStringDeep(minLevel: DiagnosticLevel.info), equalsIgnoringHashCodes(
-      'RenderView#00000\n'
+      '_ReusableRenderView#00000\n'
       ' │ debug mode enabled - ${Platform.operatingSystem}\n'
       ' │ view size: Size(2400.0, 1800.0) (in physical pixels)\n'
       ' │ device pixel ratio: 3.0 (physical pixels per logical pixel)\n'
-      ' │ configuration: Size(800.0, 600.0) at 3.0x (in logical pixels)\n'
+      ' │ configuration: BoxConstraints(w=800.0, h=600.0) at 3.0x (in\n'
+      ' │   logical pixels)\n'
       ' │\n'
       ' └─child: RenderRepaintBoundary#00000\n'
       '   │ needs compositing\n'
@@ -460,7 +470,7 @@ void main() {
       '                   │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
       '                   │ size: Size(800.0, 600.0)\n'
       '                   │ ignoring: false\n'
-      '                   │ ignoringSemantics: false\n'
+      '                   │ ignoringSemantics: null\n'
       '                   │\n'
       '                   └─child: RenderViewport#00000\n'
       '                     │ needs compositing\n'
@@ -481,10 +491,10 @@ void main() {
       '                       │ parentData: paintOffset=Offset(0.0, 0.0) (can use size)\n'
       '                       │ constraints: SliverConstraints(AxisDirection.down,\n'
       '                       │   GrowthDirection.forward, ScrollDirection.idle, scrollOffset:\n'
-      '                       │   2000.0, remainingPaintExtent: 600.0, crossAxisExtent: 800.0,\n'
-      '                       │   crossAxisDirection: AxisDirection.right,\n'
-      '                       │   viewportMainAxisExtent: 600.0, remainingCacheExtent: 1100.0,\n'
-      '                       │   cacheOrigin: -250.0)\n'
+      '                       │   2000.0, precedingScrollExtent: 0.0, remainingPaintExtent:\n'
+      '                       │   600.0, crossAxisExtent: 800.0, crossAxisDirection:\n'
+      '                       │   AxisDirection.right, viewportMainAxisExtent: 600.0,\n'
+      '                       │   remainingCacheExtent: 1100.0, cacheOrigin: -250.0)\n'
       '                       │ geometry: SliverGeometry(scrollExtent: 40000.0, paintExtent:\n'
       '                       │   600.0, maxPaintExtent: 40000.0, hasVisualOverflow: true,\n'
       '                       │   cacheExtent: 1100.0)\n'
@@ -495,10 +505,10 @@ void main() {
       '                         │ parentData: paintOffset=Offset(0.0, 0.0) (can use size)\n'
       '                         │ constraints: SliverConstraints(AxisDirection.down,\n'
       '                         │   GrowthDirection.forward, ScrollDirection.idle, scrollOffset:\n'
-      '                         │   2000.0, remainingPaintExtent: 600.0, crossAxisExtent: 800.0,\n'
-      '                         │   crossAxisDirection: AxisDirection.right,\n'
-      '                         │   viewportMainAxisExtent: 600.0, remainingCacheExtent: 1100.0,\n'
-      '                         │   cacheOrigin: -250.0)\n'
+      '                         │   2000.0, precedingScrollExtent: 0.0, remainingPaintExtent:\n'
+      '                         │   600.0, crossAxisExtent: 800.0, crossAxisDirection:\n'
+      '                         │   AxisDirection.right, viewportMainAxisExtent: 600.0,\n'
+      '                         │   remainingCacheExtent: 1100.0, cacheOrigin: -250.0)\n'
       '                         │ geometry: SliverGeometry(scrollExtent: 40000.0, paintExtent:\n'
       '                         │   600.0, maxPaintExtent: 40000.0, hasVisualOverflow: true,\n'
       '                         │   cacheExtent: 1100.0)\n'

@@ -4,12 +4,11 @@
 
 import 'dart:async';
 
+import 'package:unified_analytics/unified_analytics.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../android/android_device.dart';
-import '../artifacts.dart';
 import '../base/common.dart';
-import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -33,6 +32,7 @@ import '../resident_runner.dart';
 import '../run_cold.dart';
 import '../run_hot.dart';
 import '../runner/flutter_command.dart';
+import '../runner/flutter_command_runner.dart';
 import '../vmservice.dart';
 
 /// A Flutter-command that attaches to applications that have been launched
@@ -64,7 +64,6 @@ class AttachCommand extends FlutterCommand {
   AttachCommand({
     bool verboseHelp = false,
     HotRunnerFactory? hotRunnerFactory,
-    required Artifacts? artifacts,
     required Stdio stdio,
     required Logger logger,
     required Terminal terminal,
@@ -72,15 +71,16 @@ class AttachCommand extends FlutterCommand {
     required Platform platform,
     required ProcessInfo processInfo,
     required FileSystem fileSystem,
-  }): _artifacts = artifacts,
-      _hotRunnerFactory = hotRunnerFactory ?? HotRunnerFactory(),
-      _stdio = stdio,
-      _logger = logger,
-      _terminal = terminal,
-      _signals = signals,
-      _platform = platform,
-      _processInfo = processInfo,
-      _fileSystem = fileSystem {
+    HotRunnerNativeAssetsBuilder? nativeAssetsBuilder,
+  }) : _hotRunnerFactory = hotRunnerFactory ?? HotRunnerFactory(),
+       _stdio = stdio,
+       _logger = logger,
+       _terminal = terminal,
+       _signals = signals,
+       _platform = platform,
+       _processInfo = processInfo,
+       _fileSystem = fileSystem,
+       _nativeAssetsBuilder = nativeAssetsBuilder {
     addBuildModeFlags(verboseHelp: verboseHelp, defaultToRelease: false, excludeRelease: true);
     usesTargetOption();
     usesPortOptions(verboseHelp: verboseHelp);
@@ -92,6 +92,7 @@ class AttachCommand extends FlutterCommand {
     addEnableExperimentation(hide: !verboseHelp);
     addNullSafetyModeOptions(hide: !verboseHelp);
     usesInitializeFromDillOption(hide: !verboseHelp);
+    usesNativeAssetsOption(hide: !verboseHelp);
     argParser
       ..addOption(
         'debug-port',
@@ -144,7 +145,6 @@ class AttachCommand extends FlutterCommand {
   }
 
   final HotRunnerFactory _hotRunnerFactory;
-  final Artifacts? _artifacts;
   final Stdio _stdio;
   final Logger _logger;
   final Terminal _terminal;
@@ -152,6 +152,7 @@ class AttachCommand extends FlutterCommand {
   final Platform _platform;
   final ProcessInfo _processInfo;
   final FileSystem _fileSystem;
+  final HotRunnerNativeAssetsBuilder? _nativeAssetsBuilder;
 
   @override
   final String name = 'attach';
@@ -215,9 +216,6 @@ known, it can be explicitly provided to attach via the command-line, e.g.
 
   @override
   Future<void> validateCommand() async {
-    // ARM macOS as an iOS target is hidden, except for attach.
-    MacOSDesignedForIPadDevices.allowDiscovery = true;
-
     await super.validateCommand();
 
     final Device? targetDevice = await findTargetDevice();
@@ -227,7 +225,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
 
     debugPort;
     // Allow --ipv6 for iOS devices even if --debug-port and --debug-url
-    // are unknown
+    // are unknown.
     if (!_isIOSDevice(targetDevice) &&
         debugPort == null &&
         debugUri == null &&
@@ -266,13 +264,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
       throwToolExit('Did not find any valid target devices.');
     }
 
-    final Artifacts? overrideArtifacts = device.artifactOverrides ?? _artifacts;
-    await context.run<void>(
-      body: () => _attachToDevice(device),
-      overrides: <Type, Generator>{
-        Artifacts: () => overrideArtifacts,
-      },
-    );
+    await _attachToDevice(device);
 
     return FlutterCommandResult.success();
   }
@@ -287,7 +279,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
             logger: _logger,
           ),
           notifyingLogger: (_logger is NotifyingLogger)
-            ? _logger as NotifyingLogger
+            ? _logger
             : NotifyingLogger(verbose: _logger.isVerbose, parent: _logger),
           logToStdout: true,
         )
@@ -298,9 +290,9 @@ known, it can be explicitly provided to attach via the command-line, e.g.
     final String ipv6Loopback = InternetAddress.loopbackIPv6.address;
     final String ipv4Loopback = InternetAddress.loopbackIPv4.address;
     final String hostname = usesIpv6 ? ipv6Loopback : ipv4Loopback;
-    final bool isNetworkDevice = (device is IOSDevice) && device.isWirelesslyConnected;
+    final bool isWirelessIOSDevice = (device is IOSDevice) && device.isWirelesslyConnected;
 
-    if ((debugPort == null && debugUri == null) || isNetworkDevice) {
+    if ((debugPort == null && debugUri == null) || isWirelessIOSDevice) {
       if (device is FuchsiaDevice) {
         final String? module = stringArg('module');
         if (module == null) {
@@ -323,10 +315,10 @@ known, it can be explicitly provided to attach via the command-line, e.g.
         // Protocol Discovery relies on logging. On iOS earlier than 13, logging is gathered using syslog.
         // syslog is not available for iOS 13+. For iOS 13+, Protocol Discovery gathers logs from the VMService.
         // Since we don't have access to the VMService yet, Protocol Discovery cannot be used for iOS 13+.
-        // Also, network devices must be found using mDNS and cannot use Protocol Discovery.
+        // Also, wireless devices must be found using mDNS and cannot use Protocol Discovery.
         final bool compatibleWithProtocolDiscovery = (device is IOSDevice) &&
           device.majorSdkVersion < IOSDeviceLogReader.minimumUniversalLoggingSdkVersion &&
-          !isNetworkDevice;
+          !isWirelessIOSDevice;
 
         _logger.printStatus('Waiting for a connection from Flutter on ${device.name}...');
         final Status discoveryStatus = _logger.startSpinner(
@@ -357,7 +349,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
           appId,
           device,
           usesIpv6: usesIpv6,
-          isNetworkDevice: isNetworkDevice,
+          useDeviceIPAsHost: isWirelessIOSDevice,
           deviceVmservicePort: devicePort,
         );
 
@@ -427,6 +419,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
           device: device,
           flutterProject: flutterProject,
           usesIpv6: usesIpv6,
+          nativeAssetsBuilder: _nativeAssetsBuilder,
         );
         late AppInstance app;
         try {
@@ -460,6 +453,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
           device: device,
           flutterProject: flutterProject,
           usesIpv6: usesIpv6,
+          nativeAssetsBuilder: _nativeAssetsBuilder,
         );
         final Completer<void> onAppStart = Completer<void>.sync();
         TerminalHandler? terminalHandler;
@@ -501,6 +495,13 @@ known, it can be explicitly provided to attach via the command-line, e.g.
       for (final ForwardedPort port in ports) {
         await device.portForwarder!.unforward(port);
       }
+      // However we exited from the runner, ensure the terminal has line mode
+      // and echo mode enabled before we return the user to the shell.
+      try {
+        _terminal.singleCharMode = false;
+      } on StdinException {
+        // Do nothing, if the STDIN handle is no longer available, there is nothing actionable for us to do at this point
+      }
     }
   }
 
@@ -509,6 +510,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
     required Device device,
     required FlutterProject flutterProject,
     required bool usesIpv6,
+    required HotRunnerNativeAssetsBuilder? nativeAssetsBuilder,
   }) async {
     final BuildInfo buildInfo = await getBuildInfo();
 
@@ -528,6 +530,8 @@ known, it can be explicitly provided to attach via the command-line, e.g.
       ddsPort: ddsPort,
       devToolsServerAddress: devToolsServerAddress,
       serveObservatory: serveObservatory,
+      usingCISystem: usingCISystem,
+      debugLogsDirectoryPath: debugLogsDirectoryPath,
     );
 
     return buildInfo.isDebug
@@ -535,11 +539,14 @@ known, it can be explicitly provided to attach via the command-line, e.g.
           flutterDevices,
           target: targetFile,
           debuggingOptions: debuggingOptions,
-          packagesFilePath: globalResults!['packages'] as String?,
+          packagesFilePath: globalResults![FlutterGlobalOptions.kPackagesOption] as String?,
           projectRootPath: stringArg('project-root'),
           dillOutputPath: stringArg('output-dill'),
           ipv6: usesIpv6,
           flutterProject: flutterProject,
+          nativeAssetsYamlFile: stringArg(FlutterOptions.kNativeAssetsYamlFile),
+          nativeAssetsBuilder: _nativeAssetsBuilder,
+          analytics: analytics,
         )
       : ColdRunner(
           flutterDevices,
@@ -572,6 +579,9 @@ class HotRunnerFactory {
     bool stayResident = true,
     bool ipv6 = false,
     FlutterProject? flutterProject,
+    String? nativeAssetsYamlFile,
+    required HotRunnerNativeAssetsBuilder? nativeAssetsBuilder,
+    required Analytics analytics,
   }) => HotRunner(
     devices,
     target: target,
@@ -583,5 +593,8 @@ class HotRunnerFactory {
     dillOutputPath: dillOutputPath,
     stayResident: stayResident,
     ipv6: ipv6,
+    nativeAssetsYamlFile: nativeAssetsYamlFile,
+    nativeAssetsBuilder: nativeAssetsBuilder,
+    analytics: analytics,
   );
 }

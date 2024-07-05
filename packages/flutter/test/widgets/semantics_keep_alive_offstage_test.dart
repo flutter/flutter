@@ -18,6 +18,7 @@ void main() {
     const double bottomScrollOffset = 3000.0;
 
     final ScrollController controller = ScrollController(initialScrollOffset: bottomScrollOffset);
+    addTearDown(controller.dispose);
 
     await tester.pumpWidget(_buildTestWidget(
       extraPadding: false,

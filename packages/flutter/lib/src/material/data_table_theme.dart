@@ -137,10 +137,14 @@ class DataTableThemeData with Diagnosticable {
     MaterialStateProperty<MouseCursor?>? headingCellCursor,
     MaterialStateProperty<MouseCursor?>? dataRowCursor,
   }) {
+    assert(dataRowHeight == null || (dataRowMinHeight == null && dataRowMaxHeight == null),
+      'dataRowHeight ($dataRowHeight) must not be set if dataRowMinHeight ($dataRowMinHeight) or dataRowMaxHeight ($dataRowMaxHeight) are set.');
+    dataRowMinHeight = dataRowHeight ?? dataRowMinHeight;
+    dataRowMaxHeight = dataRowHeight ?? dataRowMaxHeight;
+
     return DataTableThemeData(
       decoration: decoration ?? this.decoration,
       dataRowColor: dataRowColor ?? this.dataRowColor,
-      dataRowHeight: dataRowHeight ?? this.dataRowHeight,
       dataRowMinHeight: dataRowMinHeight ?? this.dataRowMinHeight,
       dataRowMaxHeight: dataRowMaxHeight ?? this.dataRowMaxHeight,
       dataTextStyle: dataTextStyle ?? this.dataTextStyle,
@@ -157,8 +161,6 @@ class DataTableThemeData with Diagnosticable {
   }
 
   /// Linearly interpolate between two [DataTableThemeData]s.
-  ///
-  /// The argument `t` must not be null.
   ///
   /// {@macro dart.ui.shadow.lerp}
   static DataTableThemeData lerp(DataTableThemeData a, DataTableThemeData b, double t) {
@@ -262,8 +264,6 @@ class DataTableThemeData with Diagnosticable {
 class DataTableTheme extends InheritedWidget {
   /// Constructs a data table theme that configures all descendant
   /// [DataTable] widgets.
-  ///
-  /// The [data] must not be null.
   const DataTableTheme({
     super.key,
     required this.data,

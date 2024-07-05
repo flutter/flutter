@@ -20,6 +20,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/custom_devices.dart';
 import 'package:flutter_tools/src/custom_devices/custom_device_config.dart';
 import 'package:flutter_tools/src/custom_devices/custom_devices_config.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 
 import '../../src/common.dart';
@@ -237,6 +238,14 @@ class FakeTerminal implements Terminal {
 
   @override
   bool get supportsColor => terminal.supportsColor;
+
+  @override
+  bool get isCliAnimationEnabled => terminal.isCliAnimationEnabled;
+
+  @override
+  void applyFeatureFlags(FeatureFlags flags) {
+    // ignored
+  }
 
   @override
   bool get supportsEmoji => terminal.supportsEmoji;
@@ -541,7 +550,7 @@ void main() {
                 '-w', '1',
                 'testhostname',
               ],
-              postBuildCommand: null, // ignore: avoid_redundant_argument_values
+              postBuildCommand: null,
               installCommand: const <String>[
                 'scp',
                 '-r',
@@ -631,7 +640,7 @@ void main() {
                 '-w', '1',
                 '192.168.178.1',
               ],
-              postBuildCommand: null, // ignore: avoid_redundant_argument_values
+              postBuildCommand: null,
               installCommand: const <String>[
                 'scp',
                 '-r',
@@ -721,7 +730,7 @@ void main() {
                 '-w', '1',
                 '::1',
               ],
-              postBuildCommand: null, // ignore: avoid_redundant_argument_values
+              postBuildCommand: null,
               installCommand: const <String>[
                 'scp',
                 '-r',
@@ -815,7 +824,7 @@ void main() {
                 '-w', '1',
                 'testhostname',
               ],
-              postBuildCommand: null, // ignore: avoid_redundant_argument_values
+              postBuildCommand: null,
               installCommand: <String>[
                 'scp',
                 '-r',
@@ -895,7 +904,7 @@ void main() {
                 '-w', '1',
                 'testhostname',
               ],
-              postBuildCommand: null, // ignore: avoid_redundant_argument_values
+              postBuildCommand: null,
               installCommand: const <String>[
                 'scp',
                 '-r',
@@ -1220,7 +1229,7 @@ void main() {
                 'testhostname',
               ],
               pingSuccessRegex: RegExp(r'[<=]\d+ms'),
-              postBuildCommand: null, // ignore: avoid_redundant_argument_values
+              postBuildCommand: null,
               installCommand: const <String>[
                 'scp',
                 '-r',

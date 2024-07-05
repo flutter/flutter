@@ -38,9 +38,18 @@
   "cutButtonLabel": "قص",
   "copyButtonLabel": "نسخ",
   "pasteButtonLabel": "لصق",
+  "clearButtonLabel": "Clear",
   "selectAllButtonLabel": "اختيار الكل",
   "tabSemanticsLabel": "علامة التبويب $tabIndex من $tabCount",
   "modalBarrierDismissLabel": "رفض",
   "searchTextFieldPlaceholderLabel": "بحث",
+<<<<<<< HEAD
   "noSpellCheckReplacementsLabel": "No Replacements Found"
+=======
+  "noSpellCheckReplacementsLabel": "لم يتم العثور على بدائل",
+  "menuDismissLabel": "إغلاق القائمة",
+  "lookUpButtonLabel": "النظر إلى أعلى",
+  "searchWebButtonLabel": "البحث على الويب",
+  "shareButtonLabel": "مشاركة…"
+>>>>>>> 761747bfc538b5af34aa0d3fac380f1bc331ec49
 }

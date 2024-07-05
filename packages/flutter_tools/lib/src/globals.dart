@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:intl/date_symbol_data_local.dart';
 import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import 'android/android_sdk.dart';
 import 'android/android_studio.dart';
 import 'android/gradle_utils.dart';
+import 'android/java.dart';
 import 'artifacts.dart';
 import 'base/bot_detector.dart';
 import 'base/config.dart';
@@ -27,6 +27,7 @@ import 'base/terminal.dart';
 import 'base/time.dart';
 import 'base/user_messages.dart';
 import 'build_system/build_system.dart';
+import 'build_system/build_targets.dart';
 import 'cache.dart';
 import 'custom_devices/custom_devices_config.dart';
 import 'device.dart';
@@ -49,8 +50,12 @@ import 'runner/flutter_command.dart';
 import 'runner/local_engine.dart';
 import 'version.dart';
 
+// TODO(ianh): We should remove all the global variables and replace them with
+// arguments (to constructors, methods, etc, as appropriate).
+
 Artifacts? get artifacts => context.get<Artifacts>();
 BuildSystem get buildSystem => context.get<BuildSystem>()!;
+BuildTargets get buildTargets => context.get<BuildTargets>()!;
 Cache get cache => context.get<Cache>()!;
 CocoaPodsValidator? get cocoapodsValidator => context.get<CocoaPodsValidator>();
 Config get config => context.get<Config>()!;
@@ -88,21 +93,9 @@ final BotDetector _defaultBotDetector = BotDetector(
 );
 Future<bool> get isRunningOnBot => botDetector.isRunningOnBot;
 
-// Analytics instance for package:unified_analytics for telemetry
+// Analytics instance for package:unified_analytics for analytics
 // reporting for all Flutter and Dart related tooling
-Analytics get analytics => context.get<Analytics>() ?? getDefaultAnalytics();
-Analytics getDefaultAnalytics() {
-
-  initializeDateFormatting();
-  final Analytics defaultAnalytics = Analytics(
-    tool: DashTool.flutterTool,
-    flutterChannel: flutterVersion.channel,
-    flutterVersion: flutterVersion.frameworkVersion,
-    dartVersion: flutterVersion.dartSdkVersion,
-  );
-
-  return defaultAnalytics;
-}
+Analytics get analytics => context.get<Analytics>()!;
 
 /// Currently active implementation of the file system.
 ///
@@ -299,12 +292,15 @@ CustomDevicesConfig get customDevicesConfig => context.get<CustomDevicesConfig>(
 
 PreRunValidator get preRunValidator => context.get<PreRunValidator>() ?? const NoOpPreRunValidator();
 
-// TODO(fujino): Migrate to 'main' https://github.com/flutter/flutter/issues/95041
-const String kDefaultFrameworkChannel = 'master';
-
 // Used to build RegExp instances which can detect the VM service message.
 final RegExp kVMServiceMessageRegExp = RegExp(r'The Dart VM service is listening on ((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+)');
 
 // The official tool no longer allows non-null safe builds. This can be
 // overridden in other clients.
 NonNullSafeBuilds get nonNullSafeBuilds => context.get<NonNullSafeBuilds>() ?? NonNullSafeBuilds.notAllowed;
+
+/// Contains information about the JRE/JDK to use for Java-dependent operations.
+///
+/// A value of [null] indicates that no installation of java could be found on
+/// the host machine.
+Java? get java => context.get<Java>();

@@ -243,36 +243,28 @@ void main() {
 
   testWidgets('Sliver appbars - floating and pinned - second app bar stacks below', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
+
     await tester.pumpWidget(
-      Localizations(
-        locale: const Locale('en', 'us'),
-        delegates: const <LocalizationsDelegate<dynamic>>[
-          DefaultWidgetsLocalizations.delegate,
-          DefaultMaterialLocalizations.delegate,
-        ],
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: MediaQuery(
-            data: const MediaQueryData(),
-            child: CustomScrollView(
-              controller: controller,
-              slivers: <Widget>[
-                const SliverAppBar(floating: true, pinned: true, expandedHeight: 200.0, title: Text('A')),
-                const SliverAppBar(primary: false, pinned: true, title: Text('B')),
-                SliverList(
-                  delegate: SliverChildListDelegate(
-                    const <Widget>[
-                      Text('C'),
-                      Text('D'),
-                      SizedBox(height: 500.0),
-                      Text('E'),
-                      SizedBox(height: 500.0),
-                    ],
-                  ),
-                ),
-              ],
+      MaterialApp(
+        theme: ThemeData(useMaterial3: false),
+        home: CustomScrollView(
+          controller: controller,
+          slivers: <Widget>[
+            const SliverAppBar(floating: true, pinned: true, expandedHeight: 200.0, title: Text('A')),
+            const SliverAppBar(primary: false, pinned: true, title: Text('B')),
+            SliverList(
+              delegate: SliverChildListDelegate(
+                const <Widget>[
+                  Text('C'),
+                  Text('D'),
+                  SizedBox(height: 500.0),
+                  Text('E'),
+                  SizedBox(height: 500.0),
+                ],
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );
@@ -305,7 +297,9 @@ void main() {
   testWidgets('Does not crash when there is less than minExtent remainingPaintExtent', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/21887.
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     const double availableHeight = 50.0;
+
     await tester.pumpWidget(
       MaterialApp(
         home: Center(

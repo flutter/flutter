@@ -39,8 +39,6 @@ class BottomAppBarTheme with Diagnosticable {
   });
 
   /// Overrides the default value for [BottomAppBar.color].
-  ///
-  /// If null, [BottomAppBar] uses [ThemeData.bottomAppBarColor].
   final Color? color;
 
   /// Overrides the default value for [BottomAppBar.elevation].
@@ -93,8 +91,6 @@ class BottomAppBarTheme with Diagnosticable {
   }
 
   /// Linearly interpolate between two BAB themes.
-  ///
-  /// The argument `t` must not be null.
   ///
   /// {@macro dart.ui.shadow.lerp}
   static BottomAppBarTheme lerp(BottomAppBarTheme? a, BottomAppBarTheme? b, double t) {

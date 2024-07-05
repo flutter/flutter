@@ -94,10 +94,7 @@ class CupertinoUserInterfaceLevel extends InheritedWidget {
   ///    [CupertinoUserInterfaceLevel] encloses the given context.
   static CupertinoUserInterfaceLevelData? maybeOf(BuildContext context) {
     final CupertinoUserInterfaceLevel? query = context.dependOnInheritedWidgetOfExactType<CupertinoUserInterfaceLevel>();
-    if (query != null) {
-      return query._data;
-    }
-    return null;
+    return query?._data;
   }
 
   @override

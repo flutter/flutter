@@ -27,5 +27,14 @@
   "tabSemanticsLabel": "$tabIndex. картица од $tabCount",
   "modalBarrierDismissLabel": "Одбаци",
   "searchTextFieldPlaceholderLabel": "Претражите",
+<<<<<<< HEAD
   "noSpellCheckReplacementsLabel": "No Replacements Found"
+=======
+  "noSpellCheckReplacementsLabel": "Нису пронађене замене",
+  "menuDismissLabel": "Одбаците мени",
+  "lookUpButtonLabel": "Поглед нагоре",
+  "searchWebButtonLabel": "Претражи веб",
+  "shareButtonLabel": "Дели…",
+  "clearButtonLabel": "Clear"
+>>>>>>> 761747bfc538b5af34aa0d3fac380f1bc331ec49
 }

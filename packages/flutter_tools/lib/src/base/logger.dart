@@ -36,7 +36,7 @@ abstract class Logger {
   /// If true, silences the logger output.
   bool quiet = false;
 
-  /// If true, this logger supports color output.
+  /// If true, this logger supports ANSI sequences and animations are enabled.
   bool get supportsColor;
 
   /// If true, this logger is connected to a terminal.
@@ -46,7 +46,8 @@ abstract class Logger {
   /// since the last time it was set to false.
   bool hadErrorOutput = false;
 
-  /// If true, then [printWarning] has been called at least once for this logger
+  /// If true, then [printWarning] has been called at least once with its
+  /// "fatal" argument true for this logger
   /// since the last time it was reset to false.
   bool hadWarningOutput = false;
 
@@ -124,6 +125,7 @@ abstract class Logger {
     int? indent,
     int? hangingIndent,
     bool? wrap,
+    bool fatal = true,
   });
 
   /// Display normal output of the command. This should be used for things like
@@ -314,6 +316,7 @@ class DelegatingLogger implements Logger {
     int? indent,
     int? hangingIndent,
     bool? wrap,
+    bool fatal = true,
   }) {
     _delegate.printWarning(
       message,
@@ -322,6 +325,7 @@ class DelegatingLogger implements Logger {
       indent: indent,
       hangingIndent: hangingIndent,
       wrap: wrap,
+      fatal: fatal,
     );
   }
 
@@ -439,7 +443,7 @@ class StdoutLogger extends Logger {
   bool get isVerbose => false;
 
   @override
-  bool get supportsColor => terminal.supportsColor;
+  bool get supportsColor => terminal.supportsColor && terminal.isCliAnimationEnabled;
 
   @override
   bool get hasTerminal => _stdio.stdinHasTerminal;
@@ -481,8 +485,9 @@ class StdoutLogger extends Logger {
     int? indent,
     int? hangingIndent,
     bool? wrap,
+    bool fatal = true,
   }) {
-    hadWarningOutput = true;
+    hadWarningOutput = hadWarningOutput || fatal;
     _status?.pause();
     message = wrapText(message,
       indent: indent,
@@ -767,7 +772,7 @@ class BufferLogger extends Logger {
   bool get isVerbose => _verbose;
 
   @override
-  bool get supportsColor => terminal.supportsColor;
+  bool get supportsColor => terminal.supportsColor && terminal.isCliAnimationEnabled;
 
   final StringBuffer _error = StringBuffer();
   final StringBuffer _warning = StringBuffer();
@@ -820,8 +825,9 @@ class BufferLogger extends Logger {
     int? indent,
     int? hangingIndent,
     bool? wrap,
+    bool fatal = true,
   }) {
-    hadWarningOutput = true;
+    hadWarningOutput = hadWarningOutput || fatal;
     _warning.writeln(terminal.color(
       wrapText(message,
         indent: indent,
@@ -965,6 +971,7 @@ class VerboseLogger extends DelegatingLogger {
         int? indent,
         int? hangingIndent,
         bool? wrap,
+        bool fatal = true,
       }) {
     hadWarningOutput = true;
     _emit(
@@ -1101,7 +1108,7 @@ class PrefixedErrorLogger extends DelegatingLogger {
     bool? wrap,
   }) {
     hadErrorOutput = true;
-    if (message.trim().isNotEmpty == true) {
+    if (message.trim().isNotEmpty) {
       message = 'ERROR: $message';
     }
     super.printError(

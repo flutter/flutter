@@ -24,6 +24,8 @@ import 'scroll_position.dart';
 /// manages [ScrollActivity] instances, which change what content is visible in
 /// the [Scrollable]'s [Viewport].
 ///
+/// {@macro flutter.widgets.scrollPosition.listening}
+///
 /// See also:
 ///
 ///  * [ScrollPosition], which defines the underlying model for a position

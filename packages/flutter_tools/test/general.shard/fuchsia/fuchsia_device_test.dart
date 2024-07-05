@@ -737,7 +737,7 @@ void main() {
             method: kListViewsMethod,
             jsonResponse: <String, Object>{
               'views': <Object>[
-                for (FlutterView view in views) view.toJson(),
+                for (final FlutterView view in views) view.toJson(),
               ],
             },
           ),
@@ -945,9 +945,6 @@ class FuchsiaModulePackage extends ApplicationPackage {
   final String name;
 }
 
-// Unfortunately Device, despite not being immutable, has an `operator ==`.
-// Until we fix that, we have to also ignore related lints here.
-// ignore: avoid_implementing_value_types
 class MockFuchsiaDevice extends Fake implements FuchsiaDevice {
   MockFuchsiaDevice(this.id, this.portForwarder, this._ipv6);
 

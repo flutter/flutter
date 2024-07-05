@@ -25,6 +25,7 @@
   "continueButtonLabel": "Qhubeka",
   "copyButtonLabel": "Kopisha",
   "cutButtonLabel": "Sika",
+  "scanTextButtonLabel": "Skena umbhalo",
   "okButtonLabel": "KULUNGILE",
   "pasteButtonLabel": "Namathisela",
   "selectAllButtonLabel": "Khetha konke",
@@ -133,5 +134,17 @@
   "scrimLabel": "I-Scrim",
   "bottomSheetLabel": "Ishidi Eliphansi",
   "scrimOnTapHint": "Vala i-$modalRouteContentName",
-  "keyboardKeyShift": "U-Shift"
+  "keyboardKeyShift": "U-Shift",
+  "expansionTileExpandedHint": "thepha kabili ukuze ugoqe",
+  "expansionTileCollapsedHint": "Thepha kabili ukuze unwebe",
+  "expansionTileExpandedTapHint": "Goqa",
+  "expansionTileCollapsedTapHint": "Nweba ukuze uthole imininingwane eyengeziwe",
+  "expandedHint": "Kugoqiwe",
+  "collapsedHint": "Kunwetshiwe",
+  "menuDismissLabel": "Chitha imenyu",
+  "lookUpButtonLabel": "Bheka Phezulu",
+  "searchWebButtonLabel": "Sesha Iwebhu",
+  "shareButtonLabel": "Yabelana...",
+  "clearButtonTooltip": "Clear text",
+  "selectedDateLabel": "Selected"
 }

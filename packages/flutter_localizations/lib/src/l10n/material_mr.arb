@@ -26,6 +26,7 @@
   "continueButtonLabel": "पुढे सुरू ठेवा",
   "copyButtonLabel": "कॉपी करा",
   "cutButtonLabel": "कट करा",
+  "scanTextButtonLabel": "मजकूर स्कॅन करा",
   "okButtonLabel": "ओके",
   "pasteButtonLabel": "पेस्ट करा",
   "selectAllButtonLabel": "सर्व निवडा",
@@ -135,5 +136,17 @@
   "scrimLabel": "स्क्रिम",
   "bottomSheetLabel": "तळाशी असलेली शीट",
   "scrimOnTapHint": "$modalRouteContentName बंद करा",
-  "keyboardKeyShift": "शिफ्ट"
+  "keyboardKeyShift": "शिफ्ट",
+  "expansionTileExpandedHint": "कोलॅप्स करण्यासाठी दोनदा टॅप करा",
+  "expansionTileCollapsedHint": "विस्तार करण्‍यासाठी दोनदा टॅप करा",
+  "expansionTileExpandedTapHint": "कोलॅप्स करा",
+  "expansionTileCollapsedTapHint": "आणखी तपशिलांसाठी विस्तार करा",
+  "expandedHint": "कोलॅप्स केले",
+  "collapsedHint": "विस्तार केले",
+  "menuDismissLabel": "मेनू डिसमिस करा",
+  "lookUpButtonLabel": "शोध घ्या",
+  "searchWebButtonLabel": "वेबवर शोधा",
+  "shareButtonLabel": "शेअर करा...",
+  "clearButtonTooltip": "Clear text",
+  "selectedDateLabel": "Selected"
 }

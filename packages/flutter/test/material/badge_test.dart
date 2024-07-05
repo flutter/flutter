@@ -2,11 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../rendering/mock_canvas.dart';
 
 
 void main() {
@@ -47,10 +46,13 @@ void main() {
     expect(tester.getSize(find.byType(Badge)), const Size(24, 24)); // default Icon size
     expect(tester.getTopLeft(find.byType(Badge)), Offset.zero);
 
-    expect(tester.getTopLeft(find.text('0')), const Offset(16, -4));
+    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+      expect(tester.getTopLeft(find.text('0')), const Offset(16, -4));
+    }
 
     final RenderBox box = tester.renderObject(find.byType(Badge));
-    expect(box, paints..rrect(rrect: RRect.fromLTRBR(12, -4, 32, 12, const Radius.circular(8)), color: theme.colorScheme.error));
+    final RRect rrect = RRect.fromLTRBR(12, -4, 31.5, 12, const Radius.circular(8));
+    expect(box, paints..rrect(rrect: rrect, color: theme.colorScheme.error));
   });
 
   testWidgets('Large Badge defaults with RTL', (WidgetTester tester) async {
@@ -86,10 +88,13 @@ void main() {
     expect(tester.getSize(find.byType(Badge)), const Size(24, 24)); // default Icon size
     expect(tester.getTopLeft(find.byType(Badge)), Offset.zero);
 
-    expect(tester.getTopLeft(find.text('0')), const Offset(0, -4));
+    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+      expect(tester.getTopLeft(find.text('0')), const Offset(0, -4));
+    }
 
     final RenderBox box = tester.renderObject(find.byType(Badge));
-    expect(box, paints..rrect(rrect: RRect.fromLTRBR(-4, -4, 16, 12, const Radius.circular(8)), color: theme.colorScheme.error));
+    final RRect rrect = RRect.fromLTRBR(-4, -4, 15.5, 12, const Radius.circular(8));
+    expect(box, paints..rrect(rrect: rrect, color: theme.colorScheme.error));
   });
 
   // Essentially the same as 'Large Badge defaults'
@@ -135,7 +140,9 @@ void main() {
 
     // x = alignment.start + padding.left
     // y = alignment.top
-    expect(tester.getTopLeft(find.text('0')), const Offset(16, -4));
+    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+      expect(tester.getTopLeft(find.text('0')), const Offset(16, -4));
+    }
 
     final RenderBox box = tester.renderObject(find.byType(Badge));
     // '0'.width = 12
@@ -143,7 +150,8 @@ void main() {
     // T = alignment.top
     // R = L + '0'.width + padding.width
     // B = T + largeSize, R = largeSize/2
-    expect(box, paints..rrect(rrect: RRect.fromLTRBR(12, -4, 32, 12, const Radius.circular(8)), color: theme.colorScheme.error));
+    final RRect rrect = RRect.fromLTRBR(12, -4, 31.5, 12, const Radius.circular(8));
+    expect(box, paints..rrect(rrect: rrect, color: theme.colorScheme.error));
 
     await tester.pumpWidget(buildFrame(1000));
     expect(find.text('999+'), findsOneWidget);

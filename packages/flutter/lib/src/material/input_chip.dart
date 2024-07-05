@@ -11,6 +11,7 @@ import 'color_scheme.dart';
 import 'colors.dart';
 import 'debug.dart';
 import 'icons.dart';
+import 'material_state.dart';
 import 'text_theme.dart';
 import 'theme.dart';
 import 'theme_data.dart';
@@ -39,6 +40,16 @@ import 'theme_data.dart';
 /// When the user taps the delete icon, the chip will be deleted.
 ///
 /// ** See code in examples/api/lib/material/input_chip/input_chip.0.dart **
+/// {@end-tool}
+///
+///
+/// {@tool dartpad}
+/// The following example shows how to generate [InputChip]s from
+/// user text input. When the user enters a pizza topping in the text field,
+/// the user is presented with a list of suggestions. When selecting one of the
+/// suggestions, an [InputChip] is generated in the text field.
+///
+/// ** See code in examples/api/lib/material/input_chip/input_chip.1.dart **
 /// {@end-tool}
 ///
 /// ## Material Design 3
@@ -70,12 +81,11 @@ class InputChip extends StatelessWidget
   /// Creates an [InputChip].
   ///
   /// The [onPressed] and [onSelected] callbacks must not both be specified at
-  /// the same time.
+  /// the same time. When both [onPressed] and [onSelected] are null, the chip
+  /// will be disabled.
   ///
-  /// The [label], [isEnabled], [selected], [autofocus], and [clipBehavior]
-  /// arguments must not be null. The [pressElevation] and [elevation] must be
-  /// null or non-negative. Typically, [pressElevation] is greater than
-  /// [elevation].
+  /// The [pressElevation] and [elevation] must be null or non-negative.
+  /// Typically, [pressElevation] is greater than [elevation].
   const InputChip({
     super.key,
     this.avatar,
@@ -99,6 +109,7 @@ class InputChip extends StatelessWidget
     this.clipBehavior = Clip.none,
     this.focusNode,
     this.autofocus = false,
+    this.color,
     this.backgroundColor,
     this.padding,
     this.visualDensity,
@@ -111,11 +122,8 @@ class InputChip extends StatelessWidget
     this.showCheckmark,
     this.checkmarkColor,
     this.avatarBorder = const CircleBorder(),
-    @Deprecated(
-      'Migrate to deleteButtonTooltipMessage. '
-      'This feature was deprecated after v2.10.0-0.3.pre.'
-    )
-    this.useDeleteButtonTooltip = true,
+    this.avatarBoxConstraints,
+    this.deleteIconBoxConstraints,
   }) : assert(pressElevation == null || pressElevation >= 0.0),
        assert(elevation == null || elevation >= 0.0);
 
@@ -162,6 +170,8 @@ class InputChip extends StatelessWidget
   @override
   final bool autofocus;
   @override
+  final MaterialStateProperty<Color?>? color;
+  @override
   final Color? backgroundColor;
   @override
   final EdgeInsetsGeometry? padding;
@@ -186,11 +196,9 @@ class InputChip extends StatelessWidget
   @override
   final IconThemeData? iconTheme;
   @override
-  @Deprecated(
-    'Migrate to deleteButtonTooltipMessage. '
-    'This feature was deprecated after v2.10.0-0.3.pre.'
-  )
-  final bool useDeleteButtonTooltip;
+  final BoxConstraints? avatarBoxConstraints;
+  @override
+  final BoxConstraints? deleteIconBoxConstraints;
 
   @override
   Widget build(BuildContext context) {
@@ -209,7 +217,6 @@ class InputChip extends StatelessWidget
       deleteIcon: resolvedDeleteIcon,
       onDeleted: onDeleted,
       deleteIconColor: deleteIconColor,
-      useDeleteButtonTooltip: useDeleteButtonTooltip,
       deleteButtonTooltipMessage: deleteButtonTooltipMessage,
       onSelected: onSelected,
       onPressed: onPressed,
@@ -223,6 +230,7 @@ class InputChip extends StatelessWidget
       clipBehavior: clipBehavior,
       focusNode: focusNode,
       autofocus: autofocus,
+      color: color,
       backgroundColor: backgroundColor,
       padding: padding,
       visualDensity: visualDensity,
@@ -235,6 +243,9 @@ class InputChip extends StatelessWidget
       checkmarkColor: checkmarkColor,
       isEnabled: isEnabled && (onSelected != null || onDeleted != null || onPressed != null),
       avatarBorder: avatarBorder,
+      iconTheme: iconTheme,
+      avatarBoxConstraints: avatarBoxConstraints,
+      deleteIconBoxConstraints: deleteIconBoxConstraints,
     );
   }
 }
@@ -245,8 +256,6 @@ class InputChip extends StatelessWidget
 // "END GENERATED" comments are generated from data in the Material
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
-
-// Token database version: v0_162
 
 class _InputChipDefaultsM3 extends ChipThemeData {
   _InputChipDefaultsM3(this.context, this.isEnabled, this.isSelected)
@@ -263,10 +272,28 @@ class _InputChipDefaultsM3 extends ChipThemeData {
   late final TextTheme _textTheme = Theme.of(context).textTheme;
 
   @override
-  TextStyle? get labelStyle => _textTheme.labelLarge;
+  TextStyle? get labelStyle => _textTheme.labelLarge?.copyWith(
+    color: isEnabled
+      ? isSelected
+        ? _colors.onSecondaryContainer
+        : _colors.onSurfaceVariant
+      : _colors.onSurface,
+  );
 
   @override
-  Color? get backgroundColor => null;
+  MaterialStateProperty<Color?>? get color =>
+    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.selected) && states.contains(MaterialState.disabled)) {
+        return _colors.onSurface.withOpacity(0.12);
+      }
+      if (states.contains(MaterialState.disabled)) {
+        return null;
+      }
+      if (states.contains(MaterialState.selected)) {
+        return _colors.secondaryContainer;
+      }
+      return null;
+    });
 
   @override
   Color? get shadowColor => Colors.transparent;
@@ -275,18 +302,18 @@ class _InputChipDefaultsM3 extends ChipThemeData {
   Color? get surfaceTintColor => Colors.transparent;
 
   @override
-  Color? get selectedColor => isEnabled
-    ? _colors.secondaryContainer
-    : _colors.onSurface.withOpacity(0.12);
+  Color? get checkmarkColor => isEnabled
+    ? isSelected
+      ? _colors.primary
+      : _colors.onSurfaceVariant
+    : _colors.onSurface;
 
   @override
-  Color? get checkmarkColor => null;
-
-  @override
-  Color? get disabledColor => null;
-
-  @override
-  Color? get deleteIconColor => _colors.onSecondaryContainer;
+  Color? get deleteIconColor => isEnabled
+    ? isSelected
+      ? _colors.onSecondaryContainer
+      : _colors.onSurfaceVariant
+    : _colors.onSurface;
 
   @override
   BorderSide? get side => !isSelected
@@ -298,7 +325,9 @@ class _InputChipDefaultsM3 extends ChipThemeData {
   @override
   IconThemeData? get iconTheme => IconThemeData(
     color: isEnabled
-      ? null
+      ? isSelected
+        ? _colors.primary
+        : _colors.onSurfaceVariant
       : _colors.onSurface,
     size: 18.0,
   );
@@ -306,16 +335,24 @@ class _InputChipDefaultsM3 extends ChipThemeData {
   @override
   EdgeInsetsGeometry? get padding => const EdgeInsets.all(8.0);
 
-  /// The chip at text scale 1 starts with 8px on each side and as text scaling
-  /// gets closer to 2 the label padding is linearly interpolated from 8px to 4px.
-  /// Once the widget has a text scaling of 2 or higher than the label padding
-  /// remains 4px.
+  /// The label padding of the chip scales with the font size specified in the
+  /// [labelStyle], and the system font size settings that scale font sizes
+  /// globally.
+  ///
+  /// The chip at effective font size 14.0 starts with 8px on each side and as
+  /// the font size scales up to closer to 28.0, the label padding is linearly
+  /// interpolated from 8px to 4px. Once the label has a font size of 2 or
+  /// higher, label padding remains 4px.
   @override
-  EdgeInsetsGeometry? get labelPadding => EdgeInsets.lerp(
-    const EdgeInsets.symmetric(horizontal: 8.0),
-    const EdgeInsets.symmetric(horizontal: 4.0),
-    clampDouble(MediaQuery.textScaleFactorOf(context) - 1.0, 0.0, 1.0),
-  )!;
+  EdgeInsetsGeometry? get labelPadding {
+    final double fontSize = labelStyle?.fontSize ?? 14.0;
+    final double fontSizeRatio = MediaQuery.textScalerOf(context).scale(fontSize) / 14.0;
+    return EdgeInsets.lerp(
+      const EdgeInsets.symmetric(horizontal: 8.0),
+      const EdgeInsets.symmetric(horizontal: 4.0),
+      clampDouble(fontSizeRatio - 1.0, 0.0, 1.0),
+    )!;
+  }
 }
 
 // END GENERATED TOKEN PROPERTIES - InputChip

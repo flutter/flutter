@@ -63,6 +63,10 @@ enum BottomNavigationBarLandscapeLayout {
 /// A material widget that's displayed at the bottom of an app for selecting
 /// among a small number of views, typically between three and five.
 ///
+/// There is an updated version of this component, [NavigationBar], that's
+/// preferred for new applications and applications that are configured
+/// for Material 3 (see [ThemeData.useMaterial3]).
+///
 /// The bottom navigation bar consists of multiple items in the form of
 /// text labels, icons, or both, laid out on top of a piece of material. It
 /// provides quick navigation between the top-level views of an app. For larger
@@ -76,8 +80,8 @@ enum BottomNavigationBarLandscapeLayout {
 /// [BottomNavigationBarType.fixed] when there are less than four items, and
 /// [BottomNavigationBarType.shifting] otherwise.
 ///
-/// The length of [items] must be at least two and each item's icon and title/label
-/// must not be null.
+/// The length of [items] must be at least two and each item's icon and
+/// label must not be null.
 ///
 ///  * [BottomNavigationBarType.fixed], the default when there are less than
 ///    four [items]. The selected item is rendered with the
@@ -94,6 +98,39 @@ enum BottomNavigationBarLandscapeLayout {
 ///    case it's assumed that each item will have a different background color
 ///    and that background color will contrast well with white.
 ///
+/// ## Updating to [NavigationBar]
+///
+/// The [NavigationBar] widget's visuals
+/// are a little bit different, see the Material 3 spec at
+/// <https://m3.material.io/components/navigation-bar/overview> for
+/// more details.
+///
+/// The [NavigationBar] widget's API is also slightly different.
+/// To update from [BottomNavigationBar] to [NavigationBar], you will
+/// need to make the following changes.
+///
+/// 1. Instead of using [BottomNavigationBar.items], which
+/// takes a list of [BottomNavigationBarItem]s, use
+/// [NavigationBar.destinations], which takes a list of widgets.
+/// Usually, you use a list of [NavigationDestination] widgets.
+/// Just like [BottomNavigationBarItem]s, [NavigationDestination]s
+/// have a label and icon field.
+///
+/// 2. Instead of using [BottomNavigationBar.onTap],
+/// use [NavigationBar.onDestinationSelected], which is also
+/// a callback that is called when the user taps on a
+/// navigation bar item.
+///
+/// 3. Instead of using [BottomNavigationBar.currentIndex],
+/// use [NavigationBar.selectedIndex], which is also an integer
+/// that represents the index of the selected destination.
+///
+/// 4. You may also need to make changes to the styling of the
+/// [NavigationBar], see the properties in the [NavigationBar]
+/// constructor for more details.
+///
+/// ## Using [BottomNavigationBar]
+///
 /// {@tool dartpad}
 /// This example shows a [BottomNavigationBar] as it is used within a [Scaffold]
 /// widget. The [BottomNavigationBar] has three [BottomNavigationBarItem]
@@ -103,6 +140,13 @@ enum BottomNavigationBarLandscapeLayout {
 /// and displays a corresponding message in the center of the [Scaffold].
 ///
 /// ** See code in examples/api/lib/material/bottom_navigation_bar/bottom_navigation_bar.0.dart **
+/// {@end-tool}
+///
+/// {@tool dartpad}
+/// This example shows how you would migrate the above [BottomNavigationBar]
+/// to the new [NavigationBar].
+///
+/// ** See code in examples/api/lib/material/navigation_bar/navigation_bar.0.dart **
 /// {@end-tool}
 ///
 /// {@tool dartpad}
@@ -144,7 +188,7 @@ class BottomNavigationBar extends StatefulWidget {
   /// are two or three [items], [BottomNavigationBarType.shifting] otherwise.
   ///
   /// The [iconSize], [selectedFontSize], [unselectedFontSize], and [elevation]
-  /// arguments must be non-null and non-negative.
+  /// arguments must be non-negative.
   ///
   /// If [selectedLabelStyle].color and [unselectedLabelStyle].color values
   /// are non-null, they will be used instead of [selectedItemColor] and
@@ -382,7 +426,7 @@ class BottomNavigationBar extends StatefulWidget {
   ///    bottom navigation bar defaults for an entire application.
   ///  * [BottomNavigationBarTheme] - which can be used to specify
   ///    bottom navigation bar defaults for a widget subtree.
-  ///  * [MediaQuery.of] - which can be used to determine the current
+  ///  * [MediaQuery.orientationOf] - which can be used to determine the current
   ///    orientation.
   final BottomNavigationBarLandscapeLayout? landscapeLayout;
 
@@ -405,6 +449,7 @@ class _BottomNavigationTile extends StatelessWidget {
     this.item,
     this.animation,
     this.iconSize, {
+    super.key,
     this.onTap,
     this.labelColorTween,
     this.iconColorTween,
@@ -513,12 +558,10 @@ class _BottomNavigationTile extends StatelessWidget {
       ).evaluate(animation);
     }
 
-    switch (type) {
-      case BottomNavigationBarType.fixed:
-        size = 1;
-      case BottomNavigationBarType.shifting:
-        size = (flex! * 1000.0).round();
-    }
+    size = switch (type) {
+      BottomNavigationBarType.fixed => 1,
+      BottomNavigationBarType.shifting => (flex! * 1000.0).round(),
+    };
 
     Widget result = InkResponse(
       onTap: onTap,
@@ -603,7 +646,14 @@ class _Tile extends StatelessWidget {
         heightFactor: 1,
         child: Row(
           mainAxisSize: MainAxisSize.min,
-          children: <Widget>[icon, const SizedBox(width: 8), label],
+          children: <Widget>[
+            icon,
+            const SizedBox(width: 8),
+            // Flexible lets the overflow property of
+            // label to work and IntrinsicWidth gives label a
+            // reasonable width preventing extra space before it.
+            Flexible(child: IntrinsicWidth(child: label))
+          ],
         ),
       );
     }
@@ -740,11 +790,8 @@ class _Label extends StatelessWidget {
     if (item.label != null) {
       // Do not grow text in bottom navigation bar when we can show a tooltip
       // instead.
-      final MediaQueryData mediaQueryData = MediaQuery.of(context);
-      text = MediaQuery(
-        data: mediaQueryData.copyWith(
-          textScaleFactor: math.min(1.0, mediaQueryData.textScaleFactor),
-        ),
+      text = MediaQuery.withClampedTextScaling(
+        maxScaleFactor: 1.0,
         child: text,
       );
     }
@@ -809,12 +856,10 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
   // Unselected labels are shown by default for [BottomNavigationBarType.fixed],
   // and hidden by default for [BottomNavigationBarType.shifting].
   bool get _defaultShowUnselected {
-    switch (_effectiveType) {
-      case BottomNavigationBarType.shifting:
-        return false;
-      case BottomNavigationBarType.fixed:
-        return true;
-    }
+    return switch (_effectiveType) {
+      BottomNavigationBarType.shifting => false,
+      BottomNavigationBarType.fixed    => true,
+    };
   }
 
   @override
@@ -920,13 +965,10 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
     final ThemeData themeData = Theme.of(context);
     final BottomNavigationBarThemeData bottomTheme = BottomNavigationBarTheme.of(context);
 
-    final Color themeColor;
-    switch (themeData.brightness) {
-      case Brightness.light:
-        themeColor = themeData.colorScheme.primary;
-      case Brightness.dark:
-        themeColor = themeData.colorScheme.secondary;
-    }
+    final Color themeColor = switch (themeData.brightness) {
+      Brightness.light => themeData.colorScheme.primary,
+      Brightness.dark  => themeData.colorScheme.secondary,
+    };
 
     final TextStyle effectiveSelectedLabelStyle =
       _effectiveTextStyle(
@@ -1053,6 +1095,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
         widget.items[i],
         _animations[i],
         widget.iconSize,
+        key: widget.items[i].key,
         selectedIconTheme: widget.useLegacyColorScheme ? widget.selectedIconTheme ?? bottomTheme.selectedIconTheme : effectiveSelectedIconTheme,
         unselectedIconTheme: widget.useLegacyColorScheme ? widget.unselectedIconTheme ?? bottomTheme.unselectedIconTheme : effectiveUnselectedIconTheme,
         selectedLabelStyle: effectiveSelectedLabelStyle,
@@ -1088,13 +1131,10 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
       ?? BottomNavigationBarLandscapeLayout.spread;
     final double additionalBottomPadding = MediaQuery.viewPaddingOf(context).bottom;
 
-    Color? backgroundColor;
-    switch (_effectiveType) {
-      case BottomNavigationBarType.fixed:
-        backgroundColor = widget.backgroundColor ?? bottomTheme.backgroundColor;
-      case BottomNavigationBarType.shifting:
-        backgroundColor = _backgroundColor;
-    }
+    final Color? backgroundColor = switch (_effectiveType) {
+      BottomNavigationBarType.fixed    => widget.backgroundColor ?? bottomTheme.backgroundColor,
+      BottomNavigationBarType.shifting => _backgroundColor,
+    };
 
     return Semantics(
       explicitChildNodes: true,
@@ -1118,7 +1158,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
                   removeBottom: true,
                   child: DefaultTextStyle.merge(
                     overflow: TextOverflow.ellipsis,
-                    child:  Row(
+                    child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: _createTiles(layout),
                     ),
@@ -1248,8 +1288,8 @@ class _RadialPainter extends CustomPainter {
     for (int i = 0; i < circles.length; i += 1) {
       if (circles[i] != oldPainter.circles[i]) {
         return true;
-    }
       }
+    }
     return false;
   }
 
@@ -1259,13 +1299,10 @@ class _RadialPainter extends CustomPainter {
       final Paint paint = Paint()..color = circle.color;
       final Rect rect = Rect.fromLTWH(0.0, 0.0, size.width, size.height);
       canvas.clipRect(rect);
-      final double leftFraction;
-      switch (textDirection) {
-        case TextDirection.rtl:
-          leftFraction = 1.0 - circle.horizontalLeadingOffset;
-        case TextDirection.ltr:
-          leftFraction = circle.horizontalLeadingOffset;
-      }
+      final double leftFraction = switch (textDirection) {
+        TextDirection.rtl => 1.0 - circle.horizontalLeadingOffset,
+        TextDirection.ltr => circle.horizontalLeadingOffset,
+      };
       final Offset center = Offset(leftFraction * size.width, size.height / 2.0);
       final Tween<double> radiusTween = Tween<double>(
         begin: 0.0,

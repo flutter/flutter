@@ -102,7 +102,7 @@ void main() {
     expect(description[8], 'showSelectedLabels: true');
     expect(description[9], 'showUnselectedLabels: true');
     expect(description[10], 'type: BottomNavigationBarType.fixed');
-    expect(description[11], 'mouseCursor: MaterialStateMouseCursor(clickable)');
+    expect(description[11], 'mouseCursor: WidgetStateMouseCursor(clickable)');
   });
 
   testWidgets('BottomNavigationBar is themeable', (WidgetTester tester) async {

@@ -18,6 +18,94 @@
 # * Fixes in this file are from the Painting library. *
 version: 1
 transforms:
+  # Change made in https://github.com/flutter/flutter/pull/128522
+  - title: "Migrate to 'textScaler'"
+    date: 2023-06-09
+    element:
+      uris: [ 'painting.dart' ]
+      method: 'computeMaxIntrinsicWidth'
+      inClass: 'TextPainter'
+    changes:
+      - kind: 'addParameter'
+        index: 4
+        name: 'textScaler'
+        style: optional_named
+        argumentValue:
+          expression: 'TextScaler.linear({% textScaleFactor %})'
+          requiredIf: "textScaleFactor != ''"
+      - kind: 'removeParameter'
+        name: 'textScaleFactor'
+    variables:
+      textScaleFactor:
+        kind: 'fragment'
+        value: 'arguments[textScaleFactor]'
+
+  # Change made in https://github.com/flutter/flutter/pull/128522
+  - title: "Migrate to 'textScaler'"
+    date: 2023-06-09
+    element:
+      uris: [ 'painting.dart' ]
+      method: 'computeWidth'
+      inClass: 'TextPainter'
+    changes:
+      - kind: 'addParameter'
+        index: 4
+        name: 'textScaler'
+        style: optional_named
+        argumentValue:
+          expression: 'TextScaler.linear({% textScaleFactor %})'
+          requiredIf: "textScaleFactor != ''"
+      - kind: 'removeParameter'
+        name: 'textScaleFactor'
+    variables:
+      textScaleFactor:
+        kind: 'fragment'
+        value: 'arguments[textScaleFactor]'
+
+  # Change made in https://github.com/flutter/flutter/pull/128522
+  - title: "Migrate to 'textScaler'"
+    date: 2023-06-09
+    element:
+      uris: [ 'painting.dart' ]
+      constructor: ''
+      inClass: 'TextPainter'
+    changes:
+      - kind: 'addParameter'
+        index: 0
+        name: 'textScaler'
+        style: optional_named
+        argumentValue:
+          expression: 'TextScaler.linear({% textScaleFactor %})'
+          requiredIf: "textScaleFactor != ''"
+      - kind: 'removeParameter'
+        name: 'textScaleFactor'
+    variables:
+      textScaleFactor:
+        kind: 'fragment'
+        value: 'arguments[textScaleFactor]'
+
+  # Change made in https://github.com/flutter/flutter/pull/128522
+  - title: "Migrate to 'textScaler'"
+    date: 2023-06-09
+    element:
+      uris: [ 'painting.dart' ]
+      method: 'getTextStyle'
+      inClass: 'TextStyle'
+    changes:
+      - kind: 'addParameter'
+        index: 0
+        name: 'textScaler'
+        style: optional_named
+        argumentValue:
+          expression: 'TextScaler.linear({% textScaleFactor %})'
+          requiredIf: "textScaleFactor != ''"
+      - kind: 'removeParameter'
+        name: 'textScaleFactor'
+    variables:
+      textScaleFactor:
+        kind: 'fragment'
+        value: 'arguments[textScaleFactor]'
+
   # Changes made in https://github.com/flutter/flutter/pull/121152
   - title: "Rename to 'fromViewPadding'"
     date: 2022-02-21

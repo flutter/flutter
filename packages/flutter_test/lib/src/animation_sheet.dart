@@ -2,13 +2,42 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
+
+// A Future<ui.Image> that stores the resolved result.
+class _AsyncImage {
+  _AsyncImage(Future<ui.Image> task) {
+    _task = task.then((ui.Image image) {
+      _result = image;
+    });
+  }
+
+  // Returns the resolved image.
+  Future<ui.Image> result() async {
+    if (_result != null) {
+      return _result!;
+    }
+    await _task;
+    assert(_result != null);
+    return _result!;
+  }
+
+  late final Future<void> _task;
+  ui.Image? _result;
+
+  // Wait for a list of `_AsyncImage` and returns the list of its resolved
+  // images.
+  static Future<List<ui.Image>> resolveList(List<_AsyncImage> targets) {
+    final Iterable<Future<ui.Image>> images = targets.map<Future<ui.Image>>(
+        (_AsyncImage target) => target.result());
+    return Future.wait<ui.Image>(images);
+  }
+}
 
 /// Records the frames of an animating widget, and later displays the frames as a
 /// grid in an animation sheet.
@@ -21,6 +50,7 @@ import 'package:flutter/widgets.dart';
 /// Using this class includes the following steps:
 ///
 ///  * Create an instance of this class.
+///  * Register [dispose] to the test's tear down callbacks.
 ///  * Pump frames that render the target widget wrapped in [record]. Every frame
 ///    that has `recording` being true will be recorded.
 ///  * Acquire the output image with [collate] and compare against the golden
@@ -34,6 +64,7 @@ import 'package:flutter/widgets.dart';
 /// testWidgets('Inkwell animation sheet', (WidgetTester tester) async {
 ///   // Create instance
 ///   final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(frameSize: const Size(48, 24));
+///   addTearDown(animationSheet.dispose);
 ///
 ///   final Widget target = Material(
 ///     child: Directionality(
@@ -56,14 +87,14 @@ import 'package:flutter/widgets.dart';
 ///   // Start recording (`recording` is true)
 ///   await tester.pumpFrames(animationSheet.record(
 ///     target,
-///     recording: true,
+///     recording: true, // ignore: avoid_redundant_argument_values
 ///   ), const Duration(seconds: 1));
 ///
 ///   await gesture.up();
 ///
 ///   await tester.pumpFrames(animationSheet.record(
 ///     target,
-///     recording: true,
+///     recording: true, // ignore: avoid_redundant_argument_values
 ///   ), const Duration(seconds: 1));
 ///
 ///   // Compare against golden file
@@ -91,6 +122,24 @@ class AnimationSheetBuilder {
     this.allLayers = false,
   }) : assert(!kIsWeb);
 
+  /// Dispose all recorded frames and result images.
+  ///
+  /// This method must be called before the test case ends (usually as a tear
+  /// down callback) to properly deallocate the images.
+  ///
+  /// After this method is called, there will be no frames to [collate].
+  Future<void> dispose() async {
+    final List<_AsyncImage> targets = <_AsyncImage>[
+      ..._recordedFrames,
+      ..._results,
+    ];
+    _recordedFrames.clear();
+    _results.clear();
+    for (final ui.Image image in await _AsyncImage.resolveList(targets)) {
+      image.dispose();
+    }
+  }
+
   /// The size of the child to be recorded.
   ///
   /// This size is applied as a tight layout constraint for the child, and is
@@ -113,20 +162,7 @@ class AnimationSheetBuilder {
   /// Defaults to false.
   final bool allLayers;
 
-  final List<Future<ui.Image>> _recordedFrames = <Future<ui.Image>>[];
-  Future<List<ui.Image>> get _frames async {
-    final List<ui.Image> frames = await Future.wait<ui.Image>(_recordedFrames, eagerError: true);
-    assert(() {
-      for (final ui.Image frame in frames) {
-        assert(frame.width == frameSize.width && frame.height == frameSize.height,
-          'Unexpected size mismatch: frame has (${frame.width}, ${frame.height}) '
-          'while `frameSize` is $frameSize.'
-        );
-      }
-      return true;
-    }());
-    return frames;
-  }
+  final List<_AsyncImage> _recordedFrames = <_AsyncImage>[];
 
   /// Returns a widget that renders a widget in a box that can be recorded.
   ///
@@ -136,10 +172,8 @@ class AnimationSheetBuilder {
   /// The frame is only recorded if the `recording` argument is true, or during
   /// a procedure that is wrapped within [recording]. In either case, the
   /// painted result of each frame will be stored and later available for
-  /// [display]. If neither condition is met, the frames are not recorded, which
+  /// [collate]. If neither condition is met, the frames are not recorded, which
   /// is useful during setup phases.
-  ///
-  /// The `child` must not be null.
   ///
   /// See also:
   ///
@@ -153,163 +187,42 @@ class AnimationSheetBuilder {
       key: key,
       size: frameSize,
       allLayers: allLayers,
-      handleRecorded: recording ? _recordedFrames.add : null,
+      handleRecorded: !recording ? null : (Future<ui.Image> futureImage) {
+        _recordedFrames.add(_AsyncImage(() async {
+          final ui.Image image = await futureImage;
+          assert(image.width == frameSize.width && image.height == frameSize.height,
+            'Unexpected size mismatch: frame has (${image.width}, ${image.height}) '
+            'while `frameSize` is $frameSize.'
+          );
+          return image;
+        }()));
+      },
       child: child,
     );
   }
 
-  /// Constructs a widget that renders the recorded frames in an animation sheet.
-  ///
-  /// The resulting widget takes as much space as its parent allows, which is
-  /// usually the screen size. It is then filled with all recorded frames, each
-  /// having a size specified by [frameSize], chronologically from top-left to
-  /// bottom-right in a row-major order.
-  ///
-  /// This widget does not check whether its size fits all recorded frames.
-  /// Having too many frames can cause overflow errors, while having too few can
-  /// waste the size of golden files. Therefore you should usually adjust the
-  /// viewport size to [sheetSize] before calling this method.
-  ///
-  /// The `key` is applied to the root widget.
-  ///
-  /// This method can only be called if at least one frame has been recorded.
-  ///
-  /// The [display] is the legacy way of acquiring the output for comparison.
-  /// It is not recommended because it requires more boilerplate, and produces
-  /// a much large image than necessary: each pixel is rendered in 3x3 pixels
-  /// without higher definition. Use [collate] instead.
-  ///
-  /// Using this way includes the following steps:
-  ///
-  ///  * Create an instance of this class.
-  ///  * Pump frames that render the target widget wrapped in [record]. Every frame
-  ///    that has `recording` being true will be recorded.
-  ///  * Adjust the size of the test viewport to the [sheetSize] (see the
-  ///    documentation of [sheetSize] for more information).
-  ///  * Pump a frame that renders [display], which shows all recorded frames in an
-  ///    animation sheet, and can be matched against the golden test.
-  ///
-  /// {@tool snippet}
-  /// The following example shows how to record an animation sheet of an [InkWell]
-  /// being pressed then released.
-  ///
-  /// ```dart
-  /// testWidgets('Inkwell animation sheet', (WidgetTester tester) async {
-  ///   // Create instance
-  ///   final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(frameSize: const Size(48, 24));
-  ///
-  ///   final Widget target = Material(
-  ///     child: Directionality(
-  ///       textDirection: TextDirection.ltr,
-  ///       child: InkWell(
-  ///         splashColor: Colors.blue,
-  ///         onTap: () {},
-  ///       ),
-  ///     ),
-  ///   );
-  ///
-  ///   // Optional: setup before recording (`recording` is false)
-  ///   await tester.pumpWidget(animationSheet.record(
-  ///     target,
-  ///     recording: false,
-  ///   ));
-  ///
-  ///   final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(InkWell)));
-  ///
-  ///   // Start recording (`recording` is true)
-  ///   await tester.pumpFrames(animationSheet.record(
-  ///     target,
-  ///     recording: true,
-  ///   ), const Duration(seconds: 1));
-  ///
-  ///   await gesture.up();
-  ///
-  ///   await tester.pumpFrames(animationSheet.record(
-  ///     target,
-  ///     recording: true,
-  ///   ), const Duration(seconds: 1));
-  ///
-  ///   // Adjust view port size
-  ///   tester.binding.setSurfaceSize(animationSheet.sheetSize());
-  ///
-  ///   // Display
-  ///   final Widget display = await animationSheet.display();
-  ///   await tester.pumpWidget(display);
-  ///
-  ///   // Compare against golden file
-  ///   await expectLater(
-  ///     find.byWidget(display),
-  ///     matchesGoldenFile('inkwell.press.animation.png'),
-  ///   );
-  /// }, skip: isBrowser); // Animation sheet does not support browser https://github.com/flutter/flutter/issues/56001
-  /// ```
-  /// {@end-tool}
-  @Deprecated(
-    'Use AnimationSheetBuilder.collate instead. '
-    'This feature was deprecated after v2.3.0-13.0.pre.',
-  )
-  Future<Widget> display({Key? key}) async {
-    assert(_recordedFrames.isNotEmpty);
-    final List<ui.Image> frames = await _frames;
-    return _CellSheet(
-      key: key,
-      cellSize: frameSize,
-      children: frames.map((ui.Image image) => RawImage(
-        image: image.clone(),
-        width: frameSize.width,
-        height: frameSize.height,
-        // Disable quality enhancement because the point of this class is to
-        // precisely record what the widget looks like.
-        filterQuality: ui.FilterQuality.none,
-      )).toList(),
-    );
-  }
+  // The result images generated by `collate`.
+  //
+  // They're stored here to be disposed by [dispose].
+  final List<_AsyncImage> _results = <_AsyncImage>[];
 
   /// Returns an result image by putting all frames together in a table.
   ///
-  /// This method returns a table of captured frames, `cellsPerRow` images
-  /// per row, from left to right, top to bottom.
+  /// This method returns an image that arranges the captured frames in a table,
+  /// which has `cellsPerRow` images per row with the order from left to right,
+  /// top to bottom.
+  ///
+  /// The result image of this method is managed by [AnimationSheetBuilder],
+  /// and should not be disposed by the caller.
   ///
   /// An example of using this method can be found at [AnimationSheetBuilder].
   Future<ui.Image> collate(int cellsPerRow) async {
-    final List<ui.Image> frames = await _frames;
-    assert(frames.isNotEmpty,
+    assert(_recordedFrames.isNotEmpty,
       'No frames are collected. Have you forgot to set `recording` to true?');
-    return _collateFrames(frames, frameSize, cellsPerRow);
+    final _AsyncImage result = _AsyncImage(_collateFrames(_recordedFrames, frameSize, cellsPerRow));
+    _results.add(result);
+    return result.result();
   }
-
-  /// Returns the smallest size that can contain all recorded frames.
-  ///
-  /// This is used to adjust the viewport during unit tests, i.e. the size of
-  /// virtual screen. Having too many frames recorded than the default viewport
-  /// size can contain will lead to overflow errors, while having too few frames
-  /// means the golden file might be larger than necessary.
-  ///
-  /// The [sheetSize] returns the smallest possible size by placing the
-  /// recorded frames, each of which has a size specified by [frameSize], in a
-  /// row-major grid with a maximum width specified by `maxWidth`, and returns
-  /// the size of that grid.
-  ///
-  /// Setting the viewport size during a widget test usually involves
-  /// [TestWidgetsFlutterBinding.setSurfaceSize] and [WidgetTester.binding].
-  ///
-  /// The `maxWidth` defaults to the width of the default viewport, 800.0.
-  ///
-  /// This method can only be called if at least one frame has been recorded.
-  @Deprecated(
-    'The `sheetSize` is only useful for `display`, which should be migrated to `collate`. '
-    'This feature was deprecated after v2.3.0-13.0.pre.',
-  )
-  Size sheetSize({double maxWidth = _kDefaultTestViewportWidth}) {
-    assert(_recordedFrames.isNotEmpty);
-    final int cellsPerRow = (maxWidth / frameSize.width).floor();
-    final int rowNum = (_recordedFrames.length / cellsPerRow).ceil();
-    final double width = math.min(cellsPerRow, _recordedFrames.length) * frameSize.width;
-    return Size(width, frameSize.height * rowNum);
-  }
-
-  // The width of _kDefaultTestViewportSize in [TestViewConfiguration].
-  static const double _kDefaultTestViewportWidth = 800.0;
 }
 
 typedef _RecordedHandler = void Function(Future<ui.Image> image);
@@ -422,7 +335,8 @@ class _RenderPostFrameCallbacker extends RenderProxyBox {
   }
 }
 
-Future<ui.Image> _collateFrames(List<ui.Image> frames, Size frameSize, int cellsPerRow) async {
+Future<ui.Image> _collateFrames(List<_AsyncImage> futureFrames, Size frameSize, int cellsPerRow) async {
+  final List<ui.Image> frames = await _AsyncImage.resolveList(futureFrames);
   final int rowNum = (frames.length / cellsPerRow).ceil();
 
   final ui.PictureRecorder recorder = ui.PictureRecorder();
@@ -437,49 +351,13 @@ Future<ui.Image> _collateFrames(List<ui.Image> frames, Size frameSize, int cells
       Paint(),
     );
   }
-  return recorder.endRecording().toImage(
+  final ui.Picture picture = recorder.endRecording();
+  final ui.Image image = await picture.toImage(
     (frameSize.width * cellsPerRow).toInt(),
     (frameSize.height * rowNum).toInt(),
   );
-}
-
-// Layout children in a grid of fixed-sized cells.
-//
-// The sheet fills up as much space as the parent allows. The cells are
-// positioned from top left to bottom right in a row-major order.
-class _CellSheet extends StatelessWidget {
-  _CellSheet({
-    super.key,
-    required this.cellSize,
-    required this.children,
-  }) : assert(children.isNotEmpty);
-
-  final Size cellSize;
-  final List<Widget> children;
-
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
-      final double rowWidth = constraints.biggest.width;
-      final int cellsPerRow = (rowWidth / cellSize.width).floor();
-      final List<Widget> rows = <Widget>[];
-      for (int rowStart = 0; rowStart < children.length; rowStart += cellsPerRow) {
-        final Iterable<Widget> rowTargets = children.sublist(rowStart, math.min(rowStart + cellsPerRow, children.length));
-        rows.add(Row(
-          textDirection: TextDirection.ltr,
-          children: rowTargets.map((Widget target) => SizedBox.fromSize(
-            size: cellSize,
-            child: target,
-          )).toList(),
-        ));
-      }
-      return Column(
-        textDirection: TextDirection.ltr,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: rows,
-      );
-    });
-  }
+  picture.dispose();
+  return image;
 }
 
 class _RenderRootableRepaintBoundary extends RenderRepaintBoundary {

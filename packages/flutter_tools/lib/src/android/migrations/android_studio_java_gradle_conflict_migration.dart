@@ -5,6 +5,7 @@
 import 'package:meta/meta.dart';
 
 import '../../base/file_system.dart';
+<<<<<<< HEAD
 import '../../base/os.dart';
 import '../../base/platform.dart';
 import '../../base/process.dart';
@@ -14,6 +15,14 @@ import '../../project.dart';
 import '../android_sdk.dart';
 import '../android_studio.dart';
 import '../gradle_utils.dart';
+=======
+import '../../base/project_migrator.dart';
+import '../../base/version.dart';
+import '../../project.dart';
+import '../android_studio.dart';
+import '../gradle_utils.dart';
+import '../java.dart';
+>>>>>>> 761747bfc538b5af34aa0d3fac380f1bc331ec49
 
 // Android Studio 2022.2 "Flamingo" is the first to bundle a Java 17 JDK.
 // Previous versions bundled a Java 11 JDK.
@@ -77,6 +86,7 @@ class AndroidStudioJavaGradleConflictMigration extends ProjectMigrator {
     super.logger,
     {required AndroidProject project,
     AndroidStudio? androidStudio,
+<<<<<<< HEAD
     required FileSystem fileSystem,
     required ProcessUtils processUtils,
     required Platform platform,
@@ -96,6 +106,16 @@ class AndroidStudioJavaGradleConflictMigration extends ProjectMigrator {
   final Platform _platform;
   final OperatingSystemUtils _os;
   final AndroidSdk? _androidSdk;
+=======
+    required Java? java,
+  }) : _gradleWrapperPropertiesFile = getGradleWrapperFile(project.hostAppGradleRoot),
+       _androidStudio = androidStudio,
+       _java = java;
+
+  final File _gradleWrapperPropertiesFile;
+  final AndroidStudio? _androidStudio;
+  final Java? _java;
+>>>>>>> 761747bfc538b5af34aa0d3fac380f1bc331ec49
 
   @override
   void migrate() {
@@ -105,14 +125,22 @@ class AndroidStudioJavaGradleConflictMigration extends ProjectMigrator {
         return;
       }
 
+<<<<<<< HEAD
       if (_androidStudio == null || _androidStudio!.version == null) {
         logger.printTrace(androidStudioNotFound);
         return;
       } else if (_androidStudio!.version!.major < androidStudioFlamingo.major) {
+=======
+      if (_androidStudio == null || _androidStudio.version == null) {
+        logger.printTrace(androidStudioNotFound);
+        return;
+      } else if (_androidStudio.version!.major < androidStudioFlamingo.major) {
+>>>>>>> 761747bfc538b5af34aa0d3fac380f1bc331ec49
         logger.printTrace(androidStudioVersionBelowFlamingo);
         return;
       }
 
+<<<<<<< HEAD
       final String? javaVersionString = _androidSdk?.getJavaVersion(
         androidStudio: _androidStudio,
         fileSystem: _fileSystem,
@@ -122,11 +150,18 @@ class AndroidStudioJavaGradleConflictMigration extends ProjectMigrator {
       );
       final Version? javaVersion = Version.parse(javaVersionString);
       if (javaVersion == null) {
+=======
+      if (_java?.version == null) {
+>>>>>>> 761747bfc538b5af34aa0d3fac380f1bc331ec49
         logger.printTrace(javaVersionNotFound);
         return;
       }
 
+<<<<<<< HEAD
       if (javaVersion.major != flamingoBundledJava.major) {
+=======
+      if (_java!.version!.major != flamingoBundledJava.major) {
+>>>>>>> 761747bfc538b5af34aa0d3fac380f1bc331ec49
         logger.printTrace(javaVersionNot17);
         return;
       }

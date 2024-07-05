@@ -12,8 +12,11 @@ export 'dart:ui' show
   Color,
   ColorFilter,
   FilterQuality,
+  FontFeature,
   FontStyle,
+  FontVariation,
   FontWeight,
+  GlyphInfo,
   ImageShader,
   Locale,
   MaskFilter,
@@ -28,6 +31,7 @@ export 'dart:ui' show
   Radius,
   Rect,
   Shader,
+  Shadow,
   Size,
   StrokeCap,
   StrokeJoin,
@@ -38,13 +42,13 @@ export 'dart:ui' show
   TextDecoration,
   TextDecorationStyle,
   TextDirection,
+  TextHeightBehavior,
+  TextLeadingDistribution,
   TextPosition,
   TileMode,
   VertexMode,
-  // TODO(werainkhatri): remove these after their deprecation period in engine
-  // https://github.com/flutter/flutter/pull/99505
-  hashList, // ignore: deprecated_member_use
-  hashValues; // ignore: deprecated_member_use
+  hashList,
+  hashValues;
 
 export 'package:flutter/foundation.dart' show VoidCallback;
 
@@ -136,12 +140,10 @@ enum Axis {
 ///
 ///  * [flipAxisDirection], which does the same thing for [AxisDirection] values.
 Axis flipAxis(Axis direction) {
-  switch (direction) {
-    case Axis.horizontal:
-      return Axis.vertical;
-    case Axis.vertical:
-      return Axis.horizontal;
-  }
+  return switch (direction) {
+    Axis.horizontal => Axis.vertical,
+    Axis.vertical => Axis.horizontal,
+  };
 }
 
 /// A direction in which boxes flow vertically.
@@ -272,14 +274,10 @@ enum AxisDirection {
 /// [AxisDirection.down] and returns [Axis.horizontal] for [AxisDirection.left]
 /// and [AxisDirection.right].
 Axis axisDirectionToAxis(AxisDirection axisDirection) {
-  switch (axisDirection) {
-    case AxisDirection.up:
-    case AxisDirection.down:
-      return Axis.vertical;
-    case AxisDirection.left:
-    case AxisDirection.right:
-      return Axis.horizontal;
-  }
+  return switch (axisDirection) {
+    AxisDirection.up   || AxisDirection.down  => Axis.vertical,
+    AxisDirection.left || AxisDirection.right => Axis.horizontal,
+  };
 }
 
 /// Returns the [AxisDirection] in which reading occurs in the given [TextDirection].
@@ -287,12 +285,10 @@ Axis axisDirectionToAxis(AxisDirection axisDirection) {
 /// Specifically, returns [AxisDirection.left] for [TextDirection.rtl] and
 /// [AxisDirection.right] for [TextDirection.ltr].
 AxisDirection textDirectionToAxisDirection(TextDirection textDirection) {
-  switch (textDirection) {
-    case TextDirection.rtl:
-      return AxisDirection.left;
-    case TextDirection.ltr:
-      return AxisDirection.right;
-  }
+  return switch (textDirection) {
+    TextDirection.rtl => AxisDirection.left,
+    TextDirection.ltr => AxisDirection.right,
+  };
 }
 
 /// Returns the opposite of the given [AxisDirection].
@@ -305,16 +301,12 @@ AxisDirection textDirectionToAxisDirection(TextDirection textDirection) {
 ///
 ///  * [flipAxis], which does the same thing for [Axis] values.
 AxisDirection flipAxisDirection(AxisDirection axisDirection) {
-  switch (axisDirection) {
-    case AxisDirection.up:
-      return AxisDirection.down;
-    case AxisDirection.right:
-      return AxisDirection.left;
-    case AxisDirection.down:
-      return AxisDirection.up;
-    case AxisDirection.left:
-      return AxisDirection.right;
-  }
+  return switch (axisDirection) {
+    AxisDirection.up    => AxisDirection.down,
+    AxisDirection.right => AxisDirection.left,
+    AxisDirection.down  => AxisDirection.up,
+    AxisDirection.left  => AxisDirection.right,
+  };
 }
 
 /// Returns whether traveling along the given axis direction visits coordinates
@@ -323,12 +315,8 @@ AxisDirection flipAxisDirection(AxisDirection axisDirection) {
 /// Specifically, returns true for [AxisDirection.up] and [AxisDirection.left]
 /// and false for [AxisDirection.down] and [AxisDirection.right].
 bool axisDirectionIsReversed(AxisDirection axisDirection) {
-  switch (axisDirection) {
-    case AxisDirection.up:
-    case AxisDirection.left:
-      return true;
-    case AxisDirection.down:
-    case AxisDirection.right:
-      return false;
-  }
+  return switch (axisDirection) {
+    AxisDirection.up   || AxisDirection.left  => true,
+    AxisDirection.down || AxisDirection.right => false,
+  };
 }

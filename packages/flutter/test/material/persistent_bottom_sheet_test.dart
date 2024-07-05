@@ -106,7 +106,7 @@ void main() {
       ),
     ));
 
-    final PersistentBottomSheetController<void> bottomSheet = scaffoldKey.currentState!.showBottomSheet<void>((_) {
+    final PersistentBottomSheetController bottomSheet = scaffoldKey.currentState!.showBottomSheet((_) {
       return Builder(
         builder: (BuildContext context) {
           buildCount += 1;
@@ -163,7 +163,7 @@ void main() {
       ),
     ));
 
-    scaffoldKey.currentState!.showBottomSheet<void>((BuildContext context) {
+    scaffoldKey.currentState!.showBottomSheet((BuildContext context) {
       return ListView(
         shrinkWrap: true,
         primary: false,
@@ -185,6 +185,44 @@ void main() {
     expect(find.text('Two'), findsNothing);
   });
 
+  testWidgets('Verify DraggableScrollableSheet.shouldCloseOnMinExtent == false prevents dismissal', (WidgetTester tester) async {
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        key: scaffoldKey,
+        body: const Center(child: Text('body')),
+      ),
+    ));
+
+    scaffoldKey.currentState!.showBottomSheet((BuildContext context) {
+      return DraggableScrollableSheet(
+        expand: false,
+        shouldCloseOnMinExtent: false,
+        builder: (_, ScrollController controller) {
+          return ListView(
+            controller: controller,
+            shrinkWrap: true,
+            children: const <Widget>[
+              SizedBox(height: 100.0, child: Text('One')),
+              SizedBox(height: 100.0, child: Text('Two')),
+              SizedBox(height: 100.0, child: Text('Three')),
+            ],
+          );
+        },
+      );
+    });
+
+    await tester.pumpAndSettle();
+
+    expect(find.text('Two'), findsOneWidget);
+
+    await tester.drag(find.text('Two'), const Offset(0.0, 400.0));
+    await tester.pumpAndSettle();
+
+     expect(find.text('Two'), findsOneWidget);
+  });
+
   testWidgets('Verify that a BottomSheet animates non-linearly', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -195,7 +233,7 @@ void main() {
       ),
     ));
 
-    scaffoldKey.currentState!.showBottomSheet<void>((BuildContext context) {
+    scaffoldKey.currentState!.showBottomSheet((BuildContext context) {
       return ListView(
         shrinkWrap: true,
         primary: false,
@@ -230,7 +268,7 @@ void main() {
       ),
     ));
 
-    scaffoldKey.currentState!.showBottomSheet<void>(
+    scaffoldKey.currentState!.showBottomSheet(
       (BuildContext context) {
         return DraggableScrollableSheet(
           expand: false,
@@ -384,7 +422,7 @@ void main() {
       ),
     ));
 
-    scaffoldKey.currentState!.showBottomSheet<void>(
+    scaffoldKey.currentState!.showBottomSheet(
       (BuildContext context) {
         return DraggableScrollableSheet(
           expand: false,
@@ -433,7 +471,7 @@ void main() {
     ));
 
     int buildCount = 0;
-    showBottomSheet<void>(
+    showBottomSheet(
       context: key.currentContext!,
       builder: (BuildContext context) {
         return Builder(
@@ -471,7 +509,7 @@ void main() {
 
     await tester.pump();
 
-    showBottomSheet<void>(
+    showBottomSheet(
       context: scaffoldContext,
       builder: (BuildContext context) {
         bottomSheetContext = context;
@@ -496,6 +534,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           body: const Placeholder(),
           bottomSheet: Container(
@@ -587,7 +626,7 @@ void main() {
       ),
     ));
 
-    scaffoldKey.currentState!.showBottomSheet<void>((BuildContext context) {
+    scaffoldKey.currentState!.showBottomSheet((BuildContext context) {
       return ListView(
         shrinkWrap: true,
         primary: false,
@@ -617,7 +656,7 @@ void main() {
       ),
     ));
 
-    final PersistentBottomSheetController<void> bottomSheet = scaffoldKey.currentState!.showBottomSheet<void>((_) {
+    final PersistentBottomSheetController bottomSheet = scaffoldKey.currentState!.showBottomSheet((_) {
       return Builder(
         builder: (BuildContext context) {
           return Container(height: 200.0);

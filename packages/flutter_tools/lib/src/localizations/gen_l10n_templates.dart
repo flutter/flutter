@@ -142,6 +142,14 @@ const String methodTemplate = '''
 @(tempVars)    return @(message);
   }''';
 
+const String methodWithNamedParameterTemplate = '''
+  @override
+  String @(name)({@(parameters)}) {
+@(dateFormatting)
+@(numberFormatting)
+@(tempVars)    return @(message);
+  }''';
+
 const String pluralVariableTemplate = '''
     String @(varName) = intl.Intl.pluralLogic(
       @(count),
@@ -156,6 +164,9 @@ const String selectVariableTemplate = '''
 @(selectCases)
       },
     );''';
+
+const String dateVariableTemplate = '''
+    String @(varName) = intl.DateFormat.@(formatType)(localeName).format(@(argument));''';
 
 const String classFileTemplate = '''
 @(header)@(requiresIntlImport)import '@(fileName)';
@@ -190,6 +201,13 @@ const String baseClassMethodTemplate = '''
   ///
 @(templateLocaleTranslationComment)
   String @(name)(@(parameters));
+''';
+
+const String baseClassMethodWithNamedParameterTemplate = '''
+@(comment)
+  ///
+@(templateLocaleTranslationComment)
+  String @(name)({@(parameters)});
 ''';
 
 // DELEGATE CLASS TEMPLATES

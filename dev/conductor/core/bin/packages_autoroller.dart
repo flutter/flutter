@@ -15,8 +15,8 @@ import 'package:process/process.dart';
 
 const String kTokenOption = 'token';
 const String kGithubClient = 'github-client';
-const String kMirrorRemote = 'mirror-remote';
 const String kUpstreamRemote = 'upstream-remote';
+const String kGithubAccountName = 'flutter-pub-roller-bot';
 
 Future<void> main(List<String> args) {
   return run(args);
@@ -40,12 +40,6 @@ Future<void> run(
         'present on the PATH.',
   );
   parser.addOption(
-    kMirrorRemote,
-    help: 'The mirror git remote that the feature branch will be pushed to. '
-        'Required',
-    mandatory: true,
-  );
-  parser.addOption(
     kUpstreamRemote,
     help: 'The upstream git remote that the feature branch will be merged to.',
     hide: true,
@@ -64,7 +58,7 @@ ${parser.usage}
     rethrow;
   }
 
-  final String mirrorUrl = results[kMirrorRemote]! as String;
+  const String mirrorUrl = 'https://github.com/flutter-pub-roller-bot/flutter.git';
   final String upstreamUrl = results[kUpstreamRemote]! as String;
   final String tokenPath = results[kTokenOption]! as String;
   final File tokenFile = fs.file(tokenPath);
@@ -81,8 +75,8 @@ ${parser.usage}
   }
 
   final FrameworkRepository framework = FrameworkRepository(
-    _localCheckouts,
-    mirrorRemote: Remote.mirror(mirrorUrl),
+    _localCheckouts(token),
+    mirrorRemote: const Remote.mirror(mirrorUrl),
     upstreamRemote: Remote.upstream(upstreamUrl),
   );
 
@@ -92,6 +86,7 @@ ${parser.usage}
     orgName: _parseOrgName(mirrorUrl),
     token: token,
     processManager: processManager,
+    githubUsername: kGithubAccountName,
   ).roll();
 }
 
@@ -106,7 +101,7 @@ String _parseOrgName(String remoteUrl) {
   return match.group(1)!;
 }
 
-Checkouts get _localCheckouts {
+Checkouts _localCheckouts(String token) {
   const FileSystem fileSystem = LocalFileSystem();
   const ProcessManager processManager = LocalProcessManager();
   const Platform platform = LocalPlatform();
@@ -114,6 +109,7 @@ Checkouts get _localCheckouts {
     stdout: io.stdout,
     stderr: io.stderr,
     stdin: io.stdin,
+    filter: (String message) => message.replaceAll(token, '[GitHub TOKEN]'),
   );
   return Checkouts(
     fileSystem: fileSystem,

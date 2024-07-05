@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/commands/assemble.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -24,6 +25,14 @@ void main() {
   Cache.disableLocking();
   Cache.flutterRoot = '';
   final StackTrace stackTrace = StackTrace.current;
+  late FakeAnalytics fakeAnalytics;
+
+  setUp(() {
+    fakeAnalytics = getInitializedFakeAnalyticsInstance(
+      fs: MemoryFileSystem.test(),
+      fakeFlutterVersion: FakeFlutterVersion(),
+    );
+  });
 
   testUsingContext('flutter assemble can run a build', () async {
     final CommandRunner<void> commandRunner = createTestCommandRunner(AssembleCommand(
@@ -83,6 +92,31 @@ void main() {
     FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+  });
+
+  testUsingContext('flutter assemble sends usage values correctly with platform', () async {
+    final AssembleCommand command = AssembleCommand(
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)));
+    final CommandRunner<void> commandRunner = createTestCommandRunner(command);
+    await commandRunner.run(<String>['assemble', '-o Output', '-dTargetPlatform=darwin', '-dDarwinArchs=x86_64', 'debug_macos_bundle_flutter_assets']);
+
+    expect(
+      fakeAnalytics.sentEvents,
+      contains(
+        Event.commandUsageValues(
+          workflow: 'assemble',
+          commandHasTerminal: false,
+          buildBundleTargetPlatform: 'darwin',
+          buildBundleIsModule: false,
+        ),
+      ),
+    );
+  }, overrides: <Type, Generator>{
+    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.any(),
+    FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+    Analytics: () => fakeAnalytics,
   });
 
   testUsingContext('flutter assemble throws ToolExit if not provided with output', () async {
@@ -192,7 +226,7 @@ void main() {
     ));
     await commandRunner.run(<String>['assemble', '-o Output', 'debug_macos_bundle_flutter_assets']);
   }, overrides: <Type, Generator>{
-    Artifacts: () => Artifacts.test(localEngine: 'out/host_release'),
+    Artifacts: () => Artifacts.testLocalEngine(localEngine: 'out/host_release', localEngineHost: 'out/host_release'),
     Cache: () => Cache.test(processManager: FakeProcessManager.any()),
     FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),
@@ -289,50 +323,5 @@ void main() {
         },
       ],
     });
-  });
-
-  testUsingContext('test --dart-define-from-file option with err file format', () {
-    globals.fs.directory('config').createSync();
-    final CommandRunner<void> commandRunner = createTestCommandRunner(AssembleCommand(
-      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-    ));
-
-    expect(commandRunner.run(<String>['assemble',
-      '-o Output',
-      'debug_macos_bundle_flutter_assets',
-      '--dart-define=k=v',
-      '--dart-define-from-file=config']),
-        throwsToolExit(message: 'Json config define file "--dart-define-from-file=config" is not a file, please fix first!'));
-  }, overrides: <Type, Generator>{
-    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
-    FileSystem: () => MemoryFileSystem.test(),
-    ProcessManager: () => FakeProcessManager.any(),
-  });
-
-  testUsingContext('test --dart-define-from-file option with err json format', () async {
-    await globals.fs.file('config.json').writeAsString(
-        '''
-          {
-            "kInt": 1,
-            "kDouble": 1.1,
-            "name": "err json format,
-            "title": "this is title from config json file"
-          }
-        '''
-    );
-    final CommandRunner<void> commandRunner = createTestCommandRunner(AssembleCommand(
-      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-    ));
-
-    expect(commandRunner.run(<String>['assemble',
-      '-o Output',
-      'debug_macos_bundle_flutter_assets',
-      '--dart-define=k=v',
-      '--dart-define-from-file=config.json']),
-        throwsToolExit(message: 'Json config define file "--dart-define-from-file=config.json" format err, please fix first! format err:'));
-  }, overrides: <Type, Generator>{
-    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
-    FileSystem: () => MemoryFileSystem.test(),
-    ProcessManager: () => FakeProcessManager.any(),
   });
 }

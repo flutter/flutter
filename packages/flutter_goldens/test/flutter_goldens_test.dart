@@ -5,6 +5,7 @@
 // See also dev/automated_tests/flutter_test/flutter_gold_test.dart
 
 import 'dart:convert';
+import 'dart:ffi' show Abi;
 import 'dart:io' hide Directory;
 
 import 'package:file/file.dart';
@@ -57,6 +58,7 @@ void main() {
         process: process,
         platform: platform,
         httpClient: fakeHttpClient,
+        log: (String message) => fail('skia gold client printed unexpected output: "$message"'),
       );
     });
 
@@ -76,6 +78,7 @@ void main() {
         process: process,
         platform: platform,
         httpClient: fakeHttpClient,
+        log: (String message) => fail('skia gold client printed unexpected output: "$message"'),
       );
 
       final File goldenFile = fs.file('/workDirectory/temp/golden_file_test.png')
@@ -119,6 +122,7 @@ void main() {
         process: process,
         platform: platform,
         httpClient: fakeHttpClient,
+        log: (String message) => fail('skia gold client printed unexpected output: "$message"'),
       );
 
       final File goldenFile = fs.file('/workDirectory/temp/golden_file_test.png')
@@ -179,6 +183,7 @@ void main() {
         process: process,
         platform: platform,
         httpClient: fakeHttpClient,
+        log: (String message) => fail('skia gold client printed unexpected output: "$message"'),
       );
 
       process.fallbackProcessResult = ProcessResult(123, 1, 'Fallback failure', 'Fallback failure');
@@ -204,6 +209,7 @@ void main() {
         process: process,
         platform: platform,
         httpClient: fakeHttpClient,
+        log: (String message) => fail('skia gold client printed unexpected output: "$message"'),
       );
 
       const RunInvocation gitInvocation = RunInvocation(
@@ -248,6 +254,7 @@ void main() {
         process: process,
         platform: platform,
         httpClient: fakeHttpClient,
+        log: (String message) => fail('skia gold client printed unexpected output: "$message"'),
       );
 
       const RunInvocation gitInvocation = RunInvocation(
@@ -300,6 +307,7 @@ void main() {
         process: process,
         platform: platform,
         httpClient: fakeHttpClient,
+        log: (String message) => fail('skia gold client printed unexpected output: "$message"'),
       );
 
       const RunInvocation gitInvocation = RunInvocation(
@@ -356,6 +364,7 @@ void main() {
         process: process,
         platform: platform,
         httpClient: fakeHttpClient,
+        log: (String message) => fail('skia gold client printed unexpected output: "$message"'),
       );
 
       const RunInvocation goldctlInvocation = RunInvocation(
@@ -396,6 +405,7 @@ void main() {
         process: process,
         platform: platform,
         httpClient: fakeHttpClient,
+        log: (String message) => fail('skia gold client printed unexpected output: "$message"'),
       );
 
       final List<String> ciArguments = skiaClient.getCIArguments();
@@ -431,12 +441,14 @@ void main() {
         process: process,
         platform: platform,
         httpClient: fakeHttpClient,
+        abi: Abi.linuxX64,
+        log: (String message) => fail('skia gold client printed unexpected output: "$message"'),
       );
 
       traceID = skiaClient.getTraceID('flutter.golden.1');
       expect(
         traceID,
-        equals('ae18c7a6aa48e0685525dfe8fdf79003'),
+        equals('1937c1c93610cc0122a86a83d5bd38a4'),
       );
 
       // Browser
@@ -458,12 +470,14 @@ void main() {
         process: process,
         platform: platform,
         httpClient: fakeHttpClient,
+        abi: Abi.linuxX64,
+        log: (String message) => fail('skia gold client printed unexpected output: "$message"'),
       );
 
       traceID = skiaClient.getTraceID('flutter.golden.1');
       expect(
         traceID,
-        equals('e9d5c296c48e7126808520e9cc191243'),
+        equals('bc44a50c01eb3bbaf72a80d76c1c2305'),
       );
 
       // Locally - should defer to luci traceID
@@ -480,12 +494,14 @@ void main() {
         process: process,
         platform: platform,
         httpClient: fakeHttpClient,
+        abi: Abi.linuxX64,
+        log: (String message) => fail('skia gold client printed unexpected output: "$message"'),
       );
 
       traceID = skiaClient.getTraceID('flutter.golden.1');
       expect(
         traceID,
-        equals('9968695b9ae78cdb77cbb2be621ca2d6'),
+        equals('8821f4896801fcdd7cd6d30f5a8e4284'),
       );
     });
 
@@ -506,6 +522,7 @@ void main() {
         process: process,
         platform: platform,
         httpClient: fakeHttpClient,
+        log: (String message) => fail('skia gold client printed unexpected output: "$message"'),
       );
 
       const RunInvocation goldctlInvocation = RunInvocation(
@@ -550,6 +567,7 @@ void main() {
         process: process,
         platform: platform,
         httpClient: fakeHttpClient,
+        log: (String message) => fail('skia gold client printed unexpected output: "$message"'),
       );
 
       const RunInvocation goldctlInvocation = RunInvocation(
@@ -601,9 +619,11 @@ void main() {
   });
 
   group('FlutterGoldenFileComparator', () {
+    final List<String> log = <String>[];
     late FlutterGoldenFileComparator comparator;
 
     setUp(() {
+      log.clear(); // TODO(ianh): inline the setup into the tests to avoid risk of accidental bleed-through
       final Directory basedir = fs.directory('flutter/test/library/')
         ..createSync(recursive: true);
       comparator = FlutterPostSubmitFileComparator(
@@ -611,6 +631,7 @@ void main() {
         FakeSkiaGoldClient(),
         fs: fs,
         platform: platform,
+        log: log.add,
       );
     });
 
@@ -633,9 +654,11 @@ void main() {
     test('ignores version number', () {
       final Uri key = comparator.getTestUri(Uri.parse('foo.png'), 1);
       expect(key, Uri.parse('foo.png'));
+      expect(log, isEmpty);
     });
 
     test('adds namePrefix', () async {
+      final List<String> log = <String>[];
       const String libraryName = 'sidedishes';
       const String namePrefix = 'tomatosalad';
       const String fileName = 'lettuce.png';
@@ -648,18 +671,22 @@ void main() {
         fs: fs,
         platform: platform,
         namePrefix: namePrefix,
+        log: log.add,
       );
       await comparator.compare(
         Uint8List.fromList(_kTestPngBytes),
         Uri.parse(fileName),
       );
       expect(fakeSkiaClient.testNames.single, '$namePrefix.$libraryName.$fileName');
+      expect(log, isEmpty);
     });
 
     group('Post-Submit', () {
+      final List<String> log = <String>[];
       late FakeSkiaGoldClient fakeSkiaClient;
 
       setUp(() {
+        log.clear(); // TODO(ianh): inline the setup into the tests to avoid risk of accidental bleed-through
         fakeSkiaClient = FakeSkiaGoldClient();
         final Directory basedir = fs.directory('flutter/test/library/')
           ..createSync(recursive: true);
@@ -668,6 +695,7 @@ void main() {
           fakeSkiaClient,
           fs: fs,
           platform: platform,
+          log: log.add,
         );
       });
 
@@ -689,6 +717,7 @@ void main() {
             ),
           ),
         );
+        expect(log, isEmpty);
       });
 
       test('calls init during compare', () {
@@ -698,6 +727,7 @@ void main() {
           Uri.parse('flutter.golden_test.1.png'),
         );
         expect(fakeSkiaClient.initCalls, 1);
+        expect(log, isEmpty);
       });
 
       test('does not call init in during construction', () {
@@ -705,6 +735,7 @@ void main() {
         FlutterPostSubmitFileComparator.fromDefaultComparator(
           platform,
           goldens: fakeSkiaClient,
+          log: (String message) => fail('skia gold client printed unexpected output: "$message"'),
         );
         expect(fakeSkiaClient.initCalls, 0);
       });
@@ -716,11 +747,60 @@ void main() {
               'FLUTTER_ROOT': _kFlutterRoot,
               'SWARMING_TASK_ID' : '12345678990',
               'GOLDCTL' : 'goldctl',
+              'GIT_BRANCH' : 'master',
             },
             operatingSystem: 'macos',
           );
           expect(
-            FlutterPostSubmitFileComparator.isAvailableForEnvironment(platform),
+            FlutterPostSubmitFileComparator.isForEnvironment(platform),
+            isTrue,
+          );
+        });
+
+        test('returns false on release branches in postsubmit', () {
+          platform = FakePlatform(
+            environment: <String, String>{
+              'FLUTTER_ROOT': _kFlutterRoot,
+              'SWARMING_TASK_ID' : 'sweet task ID',
+              'GOLDCTL' : 'some/path',
+              'GIT_BRANCH' : 'flutter-3.16-candidate.0',
+            },
+            operatingSystem: 'macos',
+          );
+          expect(
+            FlutterPostSubmitFileComparator.isForEnvironment(platform),
+            isFalse,
+          );
+        });
+
+        test('returns true on master branch in postsubmit', () {
+          platform = FakePlatform(
+            environment: <String, String>{
+              'FLUTTER_ROOT': _kFlutterRoot,
+              'SWARMING_TASK_ID' : 'sweet task ID',
+              'GOLDCTL' : 'some/path',
+              'GIT_BRANCH' : 'master',
+            },
+            operatingSystem: 'macos',
+          );
+          expect(
+            FlutterPostSubmitFileComparator.isForEnvironment(platform),
+            isTrue,
+          );
+        });
+
+        test('returns true on main branch in postsubmit', () {
+          platform = FakePlatform(
+            environment: <String, String>{
+              'FLUTTER_ROOT': _kFlutterRoot,
+              'SWARMING_TASK_ID' : 'sweet task ID',
+              'GOLDCTL' : 'some/path',
+              'GIT_BRANCH' : 'main',
+            },
+            operatingSystem: 'macos',
+          );
+          expect(
+            FlutterPostSubmitFileComparator.isForEnvironment(platform),
             isTrue,
           );
         });
@@ -734,7 +814,7 @@ void main() {
             operatingSystem: 'macos',
           );
           expect(
-            FlutterPostSubmitFileComparator.isAvailableForEnvironment(platform),
+            FlutterPostSubmitFileComparator.isForEnvironment(platform),
             isFalse,
           );
         });
@@ -750,7 +830,7 @@ void main() {
             operatingSystem: 'macos',
           );
           expect(
-            FlutterPostSubmitFileComparator.isAvailableForEnvironment(platform),
+            FlutterPostSubmitFileComparator.isForEnvironment(platform),
             isFalse,
           );
         });
@@ -767,7 +847,7 @@ void main() {
             operatingSystem: 'macos',
           );
           expect(
-            FlutterPostSubmitFileComparator.isAvailableForEnvironment(platform),
+            FlutterPostSubmitFileComparator.isForEnvironment(platform),
             isFalse,
           );
         });
@@ -775,9 +855,11 @@ void main() {
     });
 
     group('Pre-Submit', () {
+      final List<String> log = <String>[];
       late FakeSkiaGoldClient fakeSkiaClient;
 
       setUp(() {
+        log.clear(); // TODO(ianh): inline the setup into the tests to avoid risk of accidental bleed-through
         fakeSkiaClient = FakeSkiaGoldClient();
         final Directory basedir = fs.directory('flutter/test/library/')
           ..createSync(recursive: true);
@@ -786,6 +868,7 @@ void main() {
           fakeSkiaClient,
           fs: fs,
           platform: platform,
+          log: log.add,
         );
       });
 
@@ -807,6 +890,7 @@ void main() {
             ),
           ),
         );
+        expect(log, isEmpty);
       });
 
       test('calls init during compare', () {
@@ -816,6 +900,7 @@ void main() {
           Uri.parse('flutter.golden_test.1.png'),
         );
         expect(fakeSkiaClient.tryInitCalls, 1);
+        expect(log, isEmpty);
       });
 
       test('does not call init in during construction', () {
@@ -823,11 +908,63 @@ void main() {
         FlutterPostSubmitFileComparator.fromDefaultComparator(
           platform,
           goldens: fakeSkiaClient,
+          log: (String message) => fail('skia gold client printed unexpected output: "$message"'),
         );
         expect(fakeSkiaClient.tryInitCalls, 0);
       });
 
       group('correctly determines testing environment', () {
+        test('returns false on release branches in presubmit', () {
+          platform = FakePlatform(
+            environment: <String, String>{
+              'FLUTTER_ROOT': _kFlutterRoot,
+              'SWARMING_TASK_ID' : 'sweet task ID',
+              'GOLDCTL' : 'some/path',
+              'GOLD_TRYJOB' : 'true',
+              'GIT_BRANCH' : 'flutter-3.16-candidate.0',
+            },
+            operatingSystem: 'macos',
+          );
+          expect(
+            FlutterPreSubmitFileComparator.isForEnvironment(platform),
+            isFalse,
+          );
+        });
+
+        test('returns true on master branch in presubmit', () {
+          platform = FakePlatform(
+            environment: <String, String>{
+              'FLUTTER_ROOT': _kFlutterRoot,
+              'SWARMING_TASK_ID' : 'sweet task ID',
+              'GOLDCTL' : 'some/path',
+              'GOLD_TRYJOB' : 'true',
+              'GIT_BRANCH' : 'master',
+            },
+            operatingSystem: 'macos',
+          );
+          expect(
+            FlutterPreSubmitFileComparator.isForEnvironment(platform),
+            isTrue,
+          );
+        });
+
+        test('returns true on main branch in presubmit', () {
+          platform = FakePlatform(
+            environment: <String, String>{
+              'FLUTTER_ROOT': _kFlutterRoot,
+              'SWARMING_TASK_ID' : 'sweet task ID',
+              'GOLDCTL' : 'some/path',
+              'GOLD_TRYJOB' : 'true',
+              'GIT_BRANCH' : 'main',
+            },
+            operatingSystem: 'macos',
+          );
+          expect(
+            FlutterPreSubmitFileComparator.isForEnvironment(platform),
+            isTrue,
+          );
+        });
+
         test('returns true for Luci', () {
           platform = FakePlatform(
             environment: <String, String>{
@@ -835,11 +972,12 @@ void main() {
               'SWARMING_TASK_ID' : '12345678990',
               'GOLDCTL' : 'goldctl',
               'GOLD_TRYJOB' : 'git/ref/12345/head',
+              'GIT_BRANCH' : 'master',
             },
             operatingSystem: 'macos',
           );
           expect(
-            FlutterPreSubmitFileComparator.isAvailableForEnvironment(platform),
+            FlutterPreSubmitFileComparator.isForEnvironment(platform),
             isTrue,
           );
         });
@@ -852,7 +990,7 @@ void main() {
             operatingSystem: 'macos',
           );
           expect(
-            FlutterPreSubmitFileComparator.isAvailableForEnvironment(platform),
+            FlutterPreSubmitFileComparator.isForEnvironment(platform),
             isFalse,
           );
         });
@@ -867,7 +1005,7 @@ void main() {
             operatingSystem: 'macos',
           );
           expect(
-            FlutterPreSubmitFileComparator.isAvailableForEnvironment(platform),
+            FlutterPreSubmitFileComparator.isForEnvironment(platform),
             isFalse,
           );
         });
@@ -882,7 +1020,7 @@ void main() {
             operatingSystem: 'macos',
           );
           expect(
-            FlutterPreSubmitFileComparator.isAvailableForEnvironment(platform),
+            FlutterPreSubmitFileComparator.isForEnvironment(platform),
             isFalse,
           );
         });
@@ -899,7 +1037,7 @@ void main() {
             operatingSystem: 'macos',
           );
           expect(
-            FlutterPostSubmitFileComparator.isAvailableForEnvironment(platform),
+            FlutterPostSubmitFileComparator.isForEnvironment(platform),
             isFalse,
           );
         });
@@ -908,6 +1046,39 @@ void main() {
 
     group('Skipping', () {
       group('correctly determines testing environment', () {
+        test('returns true on release branches in presubmit', () {
+          platform = FakePlatform(
+            environment: <String, String>{
+              'FLUTTER_ROOT': _kFlutterRoot,
+              'SWARMING_TASK_ID' : 'sweet task ID',
+              'GOLDCTL' : 'some/path',
+              'GOLD_TRYJOB' : 'true',
+              'GIT_BRANCH' : 'flutter-3.16-candidate.0',
+            },
+            operatingSystem: 'macos',
+          );
+          expect(
+            FlutterSkippingFileComparator.isForEnvironment(platform),
+            isTrue,
+          );
+        });
+
+        test('returns true on release branches in postsubmit', () {
+          platform = FakePlatform(
+            environment: <String, String>{
+              'FLUTTER_ROOT': _kFlutterRoot,
+              'SWARMING_TASK_ID' : 'sweet task ID',
+              'GOLDCTL' : 'some/path',
+              'GIT_BRANCH' : 'flutter-3.16-candidate.0',
+            },
+            operatingSystem: 'macos',
+          );
+          expect(
+            FlutterSkippingFileComparator.isForEnvironment(platform),
+            isTrue,
+          );
+        });
+
         test('returns true on Cirrus builds', () {
           platform = FakePlatform(
             environment: <String, String>{
@@ -917,7 +1088,7 @@ void main() {
             operatingSystem: 'macos',
           );
           expect(
-            FlutterSkippingFileComparator.isAvailableForEnvironment(platform),
+            FlutterSkippingFileComparator.isForEnvironment(platform),
             isTrue,
           );
         });
@@ -931,12 +1102,12 @@ void main() {
             operatingSystem: 'macos'
           );
           expect(
-            FlutterSkippingFileComparator.isAvailableForEnvironment(platform),
+            FlutterSkippingFileComparator.isForEnvironment(platform),
             isTrue,
           );
         });
 
-        test('returns false - no CI', () {
+        test('returns false - not in CI', () {
           platform = FakePlatform(
             environment: <String, String>{
               'FLUTTER_ROOT': _kFlutterRoot,
@@ -944,8 +1115,7 @@ void main() {
             operatingSystem: 'macos',
           );
           expect(
-            FlutterSkippingFileComparator.isAvailableForEnvironment(
-              platform),
+            FlutterSkippingFileComparator.isForEnvironment(platform),
             isFalse,
           );
         });
@@ -953,10 +1123,12 @@ void main() {
     });
 
     group('Local', () {
+      final List<String> log = <String>[];
       late FlutterLocalFileComparator comparator;
       final FakeSkiaGoldClient fakeSkiaClient = FakeSkiaGoldClient();
 
       setUp(() async {
+        log.clear(); // TODO(ianh): inline the setup into the tests to avoid risk of accidental bleed-through
         final Directory basedir = fs.directory('flutter/test/library/')
           ..createSync(recursive: true);
         comparator = FlutterLocalFileComparator(
@@ -967,6 +1139,7 @@ void main() {
             environment: <String, String>{'FLUTTER_ROOT': _kFlutterRoot},
             operatingSystem: 'macos',
           ),
+          log: log.add,
         );
 
         const String hash = '55109a4bed52acc780530f7a9aeff6c0';
@@ -993,6 +1166,7 @@ void main() {
             ),
           ),
         );
+        expect(log, isEmpty);
       });
 
       test('passes when bytes match', () async {
@@ -1003,6 +1177,7 @@ void main() {
           ),
           isTrue,
         );
+        expect(log, isEmpty);
       });
 
       test('returns FlutterSkippingGoldenFileComparator when network connection is unavailable', () async {
@@ -1016,6 +1191,7 @@ void main() {
           platform,
           goldens: fakeSkiaClient,
           baseDirectory: fakeDirectory,
+          log: (String message) => fail('skia gold client printed unexpected output: "$message"'),
         );
         expect(comparator.runtimeType, FlutterSkippingFileComparator);
 
@@ -1025,8 +1201,20 @@ void main() {
           platform,
           goldens: fakeSkiaClient,
           baseDirectory: fakeDirectory,
+          log: (String message) => fail('skia gold client printed unexpected output: "$message"'),
         );
         expect(comparator.runtimeType, FlutterSkippingFileComparator);
+
+        fakeSkiaClient.getExpectationForTestThrowable =  const FormatException("Can't reach Gold");
+
+        comparator = await FlutterLocalFileComparator.fromDefaultComparator(
+          platform,
+          goldens: fakeSkiaClient,
+          baseDirectory: fakeDirectory,
+          log: (String message) => fail('skia gold client printed unexpected output: "$message"'),
+        );
+        expect(comparator.runtimeType, FlutterSkippingFileComparator);
+
         // reset property or it will carry on to other tests
         fakeSkiaClient.getExpectationForTestThrowable = null;
       });

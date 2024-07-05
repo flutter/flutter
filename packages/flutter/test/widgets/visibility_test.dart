@@ -6,7 +6,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
 import 'semantics_tester.dart';
 
 class TestState extends StatefulWidget {
@@ -54,6 +53,20 @@ void main() {
             label: 'a true',
             textDirection: TextDirection.rtl,
             actions: <SemanticsAction>[SemanticsAction.tap],
+          ),
+        ],
+      ),
+      ignoreId: true,
+      ignoreRect: true,
+      ignoreTransform: true,
+    );
+
+    final Matcher expectedSemanticsWhenPresentWithIgnorePointer = hasSemantics(
+      TestSemantics.root(
+        children: <TestSemantics>[
+          TestSemantics.rootChild(
+            label: 'a true',
+            textDirection: TextDirection.rtl,
           ),
         ],
       ),
@@ -218,10 +231,10 @@ void main() {
     expect(find.byType(Placeholder), findsNothing);
     expect(find.byType(Visibility), paintsNothing);
     expect(tester.getSize(find.byType(Visibility)), const Size(84.0, 14.0));
-    expect(semantics, expectedSemanticsWhenPresent);
-    expect(log, <String>['created new state']);
+    expect(semantics, expectedSemanticsWhenPresentWithIgnorePointer);
+    expect(log, <String>[]);
     await tester.tap(find.byType(Visibility), warnIfMissed: false);
-    expect(log, <String>['created new state']);
+    expect(log, <String>[]);
     log.clear();
 
     await tester.pumpWidget(Center(

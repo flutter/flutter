@@ -4,20 +4,13 @@
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
-import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
-import 'package:test/fake.dart';
 
-import '../../integration.shard/test_utils.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/fakes.dart' show FakeAndroidStudio, FakeOperatingSystemUtils;
 
 void main() {
   late MemoryFileSystem fileSystem;
@@ -348,6 +341,7 @@ void main() {
       Platform: () => FakePlatform(operatingSystem: 'windows'),
       Config: () => config,
     });
+<<<<<<< HEAD
 
     group('findJavaBinary', () {
       testUsingContext('returns the path of the JDK bundled with Android Studio, if it exists', () {
@@ -429,133 +423,152 @@ void main() {
         AndroidStudio: () => FakeAndroidStudioWithoutJdk(),
       });
     });
+=======
+>>>>>>> 761747bfc538b5af34aa0d3fac380f1bc331ec49
   });
 
-  group('java version', () {
-    const String exampleJdk8Output = '''
-java version "1.8.0_202"
-Java(TM) SE Runtime Environment (build 1.8.0_202-b10)
-Java HotSpot(TM) 64-Bit Server VM (build 25.202-b10, mixed mode)
-''';
-    // Example strings came from actual terminal output.
-    testWithoutContext('parses jdk 8', () {
-      expect(AndroidSdk.parseJavaVersion(exampleJdk8Output), '1.8.0');
-    });
+  const Map<String, String> llvmHostDirectoryName = <String, String>{
+    'macos': 'darwin-x86_64',
+    'linux': 'linux-x86_64',
+    'windows': 'windows-x86_64',
+  };
 
-    testWithoutContext('parses jdk 11 windows', () {
-      const String exampleJdkOutput = '''
-java version "11.0.14"
-Java(TM) SE Runtime Environment (build 11.0.14+10-b13)
-Java HotSpot(TM) 64-Bit Server VM (build 11.0.14+10-b13, mixed mode)
-''';
-      expect(AndroidSdk.parseJavaVersion(exampleJdkOutput), '11.0.14');
-    });
-
-    testWithoutContext('parses jdk 11 mac/linux', () {
-      const String exampleJdkOutput = '''
-openjdk version "11.0.18" 2023-01-17 LTS
-OpenJDK Runtime Environment Zulu11.62+17-CA (build 11.0.18+10-LTS)
-OpenJDK 64-Bit Server VM Zulu11.62+17-CA (build 11.0.18+10-LTS, mixed mode)
-''';
-      expect(AndroidSdk.parseJavaVersion(exampleJdkOutput), '11.0.18');
-    });
-
-    testWithoutContext('parses jdk 17', () {
-      const String exampleJdkOutput = '''
-openjdk 17.0.6 2023-01-17
-OpenJDK Runtime Environment (build 17.0.6+0-17.0.6b802.4-9586694)
-OpenJDK 64-Bit Server VM (build 17.0.6+0-17.0.6b802.4-9586694, mixed mode)
-''';
-      expect(AndroidSdk.parseJavaVersion(exampleJdkOutput), '17.0.6');
-    });
-
-    testWithoutContext('parses jdk 19', () {
-      const String exampleJdkOutput = '''
-openjdk 19.0.2 2023-01-17
-OpenJDK Runtime Environment Homebrew (build 19.0.2)
-OpenJDK 64-Bit Server VM Homebrew (build 19.0.2, mixed mode, sharing)
-''';
-      expect(AndroidSdk.parseJavaVersion(exampleJdkOutput), '19.0.2');
-    });
-
-    // https://chrome-infra-packages.appspot.com/p/flutter/java/openjdk/
-    testWithoutContext('parses jdk output from ci', () {
-      const String exampleJdkOutput = '''
-openjdk 11.0.2 2019-01-15
-OpenJDK Runtime Environment 18.9 (build 11.0.2+9)
-OpenJDK 64-Bit Server VM 18.9 (build 11.0.2+9, mixed mode)
-''';
-      expect(AndroidSdk.parseJavaVersion(exampleJdkOutput), '11.0.2');
-    });
-
-    testWithoutContext('parses jdk two number versions', () {
-      const String exampleJdkOutput = 'openjdk 19.0 2023-01-17';
-      expect(AndroidSdk.parseJavaVersion(exampleJdkOutput), '19.0');
-    });
-
-    testUsingContext('getJavaBinary with AS install', () {
-      final Directory sdkDir = createSdkDirectory(fileSystem: fileSystem);
+  for (final String operatingSystem in <String>['windows', 'linux', 'macos']) {
+    final FileSystem fileSystem;
+    final String extension;
+    if (operatingSystem == 'windows') {
+      fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
+      extension = '.exe';
+    } else {
+      fileSystem = MemoryFileSystem.test();
+      extension = '';
+    }
+    testWithoutContext('ndk executables $operatingSystem', () {
+      final Platform platform = FakePlatform(operatingSystem: operatingSystem);
+      final Directory sdkDir = createSdkDirectory(
+        fileSystem: fileSystem,
+        platform: platform,
+      );
       config.setValue('android-sdk', sdkDir.path);
-      final AndroidStudio androidStudio = FakeAndroidStudio();
 
-      final String javaPath = AndroidSdk.findJavaBinary(
-          androidStudio: androidStudio,
-          fileSystem: fileSystem,
-          operatingSystemUtils: FakeOperatingSystemUtils(),
-          platform: platform)!;
-      // Built from the implementation of findJavaBinary android studio case.
-      final String expectedJavaPath = '${androidStudio.javaPath}/bin/java';
-
-      expect(javaPath, expectedJavaPath);
-    }, overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-      Config: () => config,
-      Platform: () => FakePlatform(environment: <String, String>{}),
+      final AndroidSdk sdk = AndroidSdk(sdkDir, fileSystem: fileSystem);
+      late File clang;
+      late File ar;
+      late File ld;
+      const List<String> versions = <String>['22.1.7171670', '24.0.8215888'];
+      for (final String version in versions) {
+        final Directory binDir = sdk.directory
+            .childDirectory('ndk')
+            .childDirectory(version)
+            .childDirectory('toolchains')
+            .childDirectory('llvm')
+            .childDirectory('prebuilt')
+            .childDirectory(llvmHostDirectoryName[operatingSystem]!)
+            .childDirectory('bin')
+          ..createSync(recursive: true);
+        // Save the last version.
+        clang = binDir.childFile('clang$extension')..createSync();
+        ar = binDir.childFile('llvm-ar$extension')..createSync();
+        ld = binDir.childFile('ld.lld$extension')..createSync();
+      }
+      // Check the last NDK version is used.
+      expect(
+        sdk.getNdkClangPath(platform: platform, config: config),
+        clang.path,
+      );
+      expect(
+        sdk.getNdkArPath(platform: platform, config: config),
+        ar.path,
+      );
+      expect(
+        sdk.getNdkLdPath(platform: platform, config: config),
+        ld.path,
+      );
     });
 
-    group('java', () {
-      late AndroidStudio androidStudio;
-      setUp(() {
-        androidStudio = FakeAndroidStudio();
-      });
-      testUsingContext('getJavaVersion finds AS java and parses version', () {
-        final Directory sdkDir = createSdkDirectory(fileSystem: fileSystem);
+    for (final String envVar in <String>[
+      kAndroidNdkHome,
+      kAndroidNdkPath,
+      kAndroidNdkRoot,
+    ]) {
+      final Directory ndkDir = fileSystem.systemTempDirectory
+          .createTempSync('flutter_mock_android_ndk.');
+      testWithoutContext('ndk executables with $operatingSystem $envVar', () {
+        final Platform platform = FakePlatform(
+          operatingSystem: operatingSystem,
+          environment: <String, String>{
+            envVar: ndkDir.path,
+          },
+        );
+        final Directory sdkDir =
+            createSdkDirectory(fileSystem: fileSystem, platform: platform);
         config.setValue('android-sdk', sdkDir.path);
 
-        final ProcessUtils processUtils = ProcessUtils(
-            processManager: processManager, logger: BufferLogger.test());
-        // Built from the implementation of findJavaBinary android studio case.
-        final String expectedJavaPath = '${androidStudio.javaPath}/bin/java';
+        final Directory binDir = ndkDir
+            .childDirectory('toolchains')
+            .childDirectory('llvm')
+            .childDirectory('prebuilt')
+            .childDirectory(llvmHostDirectoryName[operatingSystem]!)
+            .childDirectory('bin')
+          ..createSync(recursive: true);
+        final File clang = binDir.childFile('clang$extension')..createSync();
+        final File ar = binDir.childFile('llvm-ar$extension')..createSync();
+        final File ld = binDir.childFile('ld.lld$extension')..createSync();
 
-        processManager.addCommand(FakeCommand(
-          command: <String>[
-            expectedJavaPath,
-            '--version',
-          ],
-          stdout: exampleJdk8Output,
-        ));
-
-        final AndroidSdk sdk = AndroidSdk.locateAndroidSdk()!;
-
-        final String? javaVersion = sdk.getJavaVersion(
-          androidStudio: androidStudio,
-          fileSystem: fileSystem,
-          operatingSystemUtils: FakeOperatingSystemUtils(),
-          platform: FakePlatform(),
-          processUtils: processUtils,
+        final AndroidSdk sdk = AndroidSdk(sdkDir, fileSystem: fileSystem);
+        expect(
+          sdk.getNdkClangPath(platform: platform, config: config),
+          clang.path,
         );
-
-        expect(javaVersion, '1.8.0');
-      }, overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => processManager,
-        AndroidStudio: () => androidStudio,
-        Config: () => config,
-        Platform: () => FakePlatform(environment: <String, String>{}),
+        expect(
+          sdk.getNdkArPath(platform: platform, config: config),
+          ar.path,
+        );
+        expect(
+          sdk.getNdkLdPath(platform: platform, config: config),
+          ld.path,
+        );
       });
+    }
+
+    testWithoutContext('ndk executables with config override $operatingSystem',
+        () {
+      final Platform platform = FakePlatform(operatingSystem: operatingSystem);
+      final Directory sdkDir = createSdkDirectory(
+        fileSystem: fileSystem,
+        platform: platform,
+      );
+      final Directory ndkDir = fileSystem.systemTempDirectory
+          .createTempSync('flutter_mock_android_ndk.');
+      config.setValue('android-sdk', sdkDir.path);
+      config.setValue('android-ndk', ndkDir.path);
+
+      final Directory binDir = ndkDir
+          .childDirectory('toolchains')
+          .childDirectory('llvm')
+          .childDirectory('prebuilt')
+          .childDirectory(llvmHostDirectoryName[operatingSystem]!)
+          .childDirectory('bin')
+        ..createSync(recursive: true);
+      final File clang = binDir.childFile('clang$extension')..createSync();
+      final File ar = binDir.childFile('llvm-ar$extension')..createSync();
+      final File ld = binDir.childFile('ld.lld$extension')..createSync();
+
+      final AndroidSdk sdk = AndroidSdk(sdkDir, fileSystem: fileSystem);
+      expect(
+        sdk.getNdkClangPath(platform: platform, config: config),
+        clang.path,
+      );
+      expect(
+        sdk.getNdkArPath(platform: platform, config: config),
+        ar.path,
+      );
+      expect(
+        sdk.getNdkLdPath(platform: platform, config: config),
+        ld.path,
+      );
     });
-  });
+  }
 }
 
 /// A broken SDK installation.
@@ -593,10 +606,12 @@ Directory createSdkDirectory({
   bool withBuildTools = true,
   required FileSystem fileSystem,
   String buildProp = _buildProp,
+  Platform? platform,
 }) {
+  platform ??= globals.platform;
   final Directory dir = fileSystem.systemTempDirectory.createTempSync('flutter_mock_android_sdk.');
-  final String exe = globals.platform.isWindows ? '.exe' : '';
-  final String bat = globals.platform.isWindows ? '.bat' : '';
+  final String exe = platform.isWindows ? '.exe' : '';
+  final String bat = platform.isWindows ? '.bat' : '';
 
   void createDir(Directory dir, String path) {
     final Directory directory = dir.fileSystem.directory(dir.fileSystem.path.join(dir.path, path));
@@ -636,30 +651,3 @@ ro.build.version.incremental=1624448
 ro.build.version.sdk=24
 ro.build.version.codename=REL
 ''';
-
-class FakeAndroidStudioWithJdk extends Fake implements AndroidStudio {
-  @override
-  String? get javaPath => '/fake/android_studio/java/path/';
-}
-
-class FakeAndroidStudioWithoutJdk extends Fake implements AndroidStudio {
-  @override
-  String? get javaPath => null;
-}
-
-class FakeOperatingSystemUtilsWithJava extends Fake implements OperatingSystemUtils {
-  @override
-  File? which(String execName) {
-    if (execName == 'java') {
-      return globals.fs.file('/fake/which/java/path');
-    }
-    return null;
-  }
-}
-
-class FakeOperatingSystemUtilsWithoutJava extends Fake implements OperatingSystemUtils {
-  @override
-  File? which(String execName) {
-    return null;
-  }
-}

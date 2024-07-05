@@ -34,6 +34,10 @@ void main() {
     expect(localizations.modalBarrierDismissLabel, isNotNull);
     expect(localizations.searchTextFieldPlaceholderLabel, isNotNull);
     expect(localizations.noSpellCheckReplacementsLabel, isNotNull);
+<<<<<<< HEAD
+=======
+    expect(localizations.clearButtonLabel, isNotNull);
+>>>>>>> 761747bfc538b5af34aa0d3fac380f1bc331ec49
   });
 
   testWidgets('CupertinoLocalizations.of throws', (WidgetTester tester) async {

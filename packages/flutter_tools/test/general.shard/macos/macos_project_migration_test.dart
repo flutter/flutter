@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/macos/migrations/remove_macos_framework_link_a
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -20,6 +21,7 @@ import '../../src/fakes.dart';
 void main() {
   group('remove link and embed migration', () {
     late TestUsage testUsage;
+    late FakeAnalytics fakeAnalytics;
     late MemoryFileSystem memoryFileSystem;
     late BufferLogger testLogger;
     late FakeMacOSProject macOSProject;
@@ -28,6 +30,10 @@ void main() {
     setUp(() {
       testUsage = TestUsage();
       memoryFileSystem = MemoryFileSystem.test();
+      fakeAnalytics = getInitializedFakeAnalyticsInstance(
+        fs: memoryFileSystem,
+        fakeFlutterVersion: FakeFlutterVersion(),
+      );
       xcodeProjectInfoFile = memoryFileSystem.file('project.pbxproj');
       testLogger = BufferLogger.test();
       macOSProject = FakeMacOSProject();
@@ -40,9 +46,11 @@ void main() {
         macOSProject,
         testLogger,
         testUsage,
+        fakeAnalytics,
       );
       macosProjectMigration.migrate();
       expect(testUsage.events, isEmpty);
+      expect(fakeAnalytics.sentEvents, isEmpty);
 
       expect(xcodeProjectInfoFile.existsSync(), isFalse);
 
@@ -64,9 +72,11 @@ void main() {
         macOSProject,
         testLogger,
         testUsage,
+        fakeAnalytics,
       );
       macosProjectMigration.migrate();
       expect(testUsage.events, isEmpty);
+      expect(fakeAnalytics.sentEvents, isEmpty);
 
       expect(xcodeProjectInfoFile.lastModifiedSync(), projectLastModified);
       expect(xcodeProjectInfoFile.readAsStringSync(), contents);
@@ -85,6 +95,7 @@ shellScript = "echo \"$PRODUCT_NAME.app\" > \"$PROJECT_DIR\"/Flutter/ephemeral/.
         macOSProject,
         testLogger,
         testUsage,
+        fakeAnalytics,
       );
       macosProjectMigration.migrate();
       expect(xcodeProjectInfoFile.readAsStringSync(), contents);
@@ -108,9 +119,11 @@ keep this 2
         macOSProject,
         testLogger,
         testUsage,
+        fakeAnalytics,
       );
       macosProjectMigration.migrate();
       expect(testUsage.events, isEmpty);
+      expect(fakeAnalytics.sentEvents, isEmpty);
 
       expect(xcodeProjectInfoFile.readAsStringSync(), r'''
 keep this 1
@@ -130,12 +143,20 @@ keep this 2
         macOSProject,
         testLogger,
         testUsage,
+        fakeAnalytics,
       );
 
       expect(macosProjectMigration.migrate,
           throwsToolExit(message: 'Your Xcode project requires migration'));
       expect(testUsage.events, contains(
         const TestUsageEvent('macos-migration', 'remove-frameworks', label: 'failure'),
+      ));
+      expect(fakeAnalytics.sentEvents, contains(
+        Event.appleUsageEvent(
+            workflow: 'macos-migration',
+            parameter: 'remove-frameworks',
+            result: 'failure',
+          )
       ));
     });
 
@@ -150,11 +171,19 @@ keep this 2
         macOSProject,
         testLogger,
         testUsage,
+        fakeAnalytics,
       );
       expect(macosProjectMigration.migrate,
           throwsToolExit(message: 'Your Xcode project requires migration'));
       expect(testUsage.events, contains(
         const TestUsageEvent('macos-migration', 'remove-frameworks', label: 'failure'),
+      ));
+      expect(fakeAnalytics.sentEvents, contains(
+        Event.appleUsageEvent(
+            workflow: 'macos-migration',
+            parameter: 'remove-frameworks',
+            result: 'failure',
+          )
       ));
     });
   });
@@ -329,7 +358,7 @@ platform :osx, '10.14'
       );
       infoPlistFile.writeAsStringSync('contents'); // Just so it exists: parser is a fake.
       macOSProjectMigration.migrate();
-      expect(fakePlistParser.getStringValueFromFile(infoPlistFile.path, PlistParser.kNSPrincipalClassKey), isNull);
+      expect(fakePlistParser.getValueFromFile<String>(infoPlistFile.path, PlistParser.kNSPrincipalClassKey), isNull);
       expect(testLogger.statusText, isEmpty);
     });
 
@@ -341,7 +370,7 @@ platform :osx, '10.14'
       );
       infoPlistFile.writeAsStringSync('contents'); // Just so it exists: parser is a fake.
       macOSProjectMigration.migrate();
-      expect(fakePlistParser.getStringValueFromFile(infoPlistFile.path, PlistParser.kNSPrincipalClassKey), 'NSApplication');
+      expect(fakePlistParser.getValueFromFile<String>(infoPlistFile.path, PlistParser.kNSPrincipalClassKey), 'NSApplication');
       expect(testLogger.statusText, isEmpty);
     });
 
@@ -353,7 +382,7 @@ platform :osx, '10.14'
       );
       infoPlistFile.writeAsStringSync('contents'); // Just so it exists: parser is a fake.
       macOSProjectMigration.migrate();
-      expect(fakePlistParser.getStringValueFromFile(infoPlistFile.path, PlistParser.kNSPrincipalClassKey), 'NSApplication');
+      expect(fakePlistParser.getValueFromFile<String>(infoPlistFile.path, PlistParser.kNSPrincipalClassKey), 'NSApplication');
       // Only print once.
       expect('Updating ${infoPlistFile.basename} to use NSApplication instead of FlutterApplication.'.allMatches(testLogger.statusText).length, 1);
     });
@@ -367,7 +396,7 @@ platform :osx, '10.14'
       );
       infoPlistFile.writeAsStringSync('contents'); // Just so it exists: parser is a fake.
       macOSProjectMigration.migrate();
-      expect(fakePlistParser.getStringValueFromFile(infoPlistFile.path, PlistParser.kNSPrincipalClassKey), differentApp);
+      expect(fakePlistParser.getValueFromFile<String>(infoPlistFile.path, PlistParser.kNSPrincipalClassKey), differentApp);
       expect(testLogger.traceText, isEmpty);
     });
   });

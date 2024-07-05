@@ -25,6 +25,7 @@ class LinuxDevice extends DesktopDevice {
     required FileSystem fileSystem,
     required OperatingSystemUtils operatingSystemUtils,
   })  : _operatingSystemUtils = operatingSystemUtils,
+        _logger = logger,
         super(
           'linux',
           platformType: PlatformType.linux,
@@ -36,6 +37,7 @@ class LinuxDevice extends DesktopDevice {
         );
 
   final OperatingSystemUtils _operatingSystemUtils;
+  final Logger _logger;
 
   @override
   bool isSupported() => true;
@@ -66,6 +68,7 @@ class LinuxDevice extends DesktopDevice {
       buildInfo,
       target: mainPath,
       targetPlatform: await targetPlatform,
+      logger: _logger,
     );
   }
 

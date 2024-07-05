@@ -32,10 +32,18 @@ typedef GestureMultiDragStartCallback = Drag? Function(Offset position);
 /// each pointer is a subclass of [MultiDragPointerState].
 abstract class MultiDragPointerState {
   /// Creates per-pointer state for a [MultiDragGestureRecognizer].
-  ///
-  /// The [initialPosition] argument must not be null.
   MultiDragPointerState(this.initialPosition, this.kind, this.gestureSettings)
-    : _velocityTracker = VelocityTracker.withKind(kind);
+    : _velocityTracker = VelocityTracker.withKind(kind) {
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
+        library: 'package:flutter/gestures.dart',
+        className: '$MultiDragPointerState',
+        object: this,
+      );
+    }
+  }
 
   /// Device specific gesture configuration that should be preferred over
   /// framework constants.
@@ -180,6 +188,11 @@ abstract class MultiDragPointerState {
   @protected
   @mustCallSuper
   void dispose() {
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
     _arenaEntry?.resolve(GestureDisposition.rejected);
     _arenaEntry = null;
     assert(() {
@@ -328,7 +341,7 @@ abstract class MultiDragGestureRecognizer extends GestureRecognizer {
 }
 
 class _ImmediatePointerState extends MultiDragPointerState {
-  _ImmediatePointerState(super.initialPosition, super.kind, super.deviceGestureSettings);
+  _ImmediatePointerState(super.initialPosition, super.kind, super.gestureSettings);
 
   @override
   void checkForResolutionAfterMove() {
@@ -381,7 +394,7 @@ class ImmediateMultiDragGestureRecognizer extends MultiDragGestureRecognizer {
 
 
 class _HorizontalPointerState extends MultiDragPointerState {
-  _HorizontalPointerState(super.initialPosition, super.kind, super.deviceGestureSettings);
+  _HorizontalPointerState(super.initialPosition, super.kind, super.gestureSettings);
 
   @override
   void checkForResolutionAfterMove() {
@@ -434,7 +447,7 @@ class HorizontalMultiDragGestureRecognizer extends MultiDragGestureRecognizer {
 
 
 class _VerticalPointerState extends MultiDragPointerState {
-  _VerticalPointerState(super.initialPosition, super.kind, super.deviceGestureSettings);
+  _VerticalPointerState(super.initialPosition, super.kind, super.gestureSettings);
 
   @override
   void checkForResolutionAfterMove() {
@@ -486,7 +499,7 @@ class VerticalMultiDragGestureRecognizer extends MultiDragGestureRecognizer {
 }
 
 class _DelayedPointerState extends MultiDragPointerState {
-  _DelayedPointerState(super.initialPosition, Duration delay, super.kind, super.deviceGestureSettings) {
+  _DelayedPointerState(super.initialPosition, Duration delay, super.kind, super.gestureSettings) {
     _timer = Timer(delay, _delayPassed);
   }
 

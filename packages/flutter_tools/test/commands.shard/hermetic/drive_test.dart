@@ -35,7 +35,7 @@ void main() {
   late BufferLogger logger;
   late Platform platform;
   late FakeDeviceManager fakeDeviceManager;
-  late Signals signals;
+  late FakeSignals signals;
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
@@ -83,6 +83,43 @@ void main() {
 
     expect(logger.errorText, contains('Screenshot not supported for FakeDevice'));
     expect(logger.statusText, isEmpty);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+    Pub: () => FakePub(),
+    DeviceManager: () => fakeDeviceManager,
+  });
+
+  testUsingContext('does not register screenshot signal handler if --screenshot not provided', () async {
+    final DriveCommand command = DriveCommand(
+      fileSystem: fileSystem,
+      logger: logger,
+      platform: platform,
+      signals: signals,
+      flutterDriverFactory: FailingFakeFlutterDriverFactory(),
+    );
+    fileSystem.file('lib/main.dart').createSync(recursive: true);
+    fileSystem.file('test_driver/main_test.dart').createSync(recursive: true);
+    fileSystem.file('pubspec.yaml').createSync();
+    fileSystem.directory('drive_screenshots').createSync();
+
+    final Device screenshotDevice = ScreenshotDevice();
+    fakeDeviceManager.attachedDevices = <Device>[screenshotDevice];
+
+    await expectLater(() => createTestCommandRunner(command).run(
+      <String>[
+        'drive',
+        '--no-pub',
+        '-d',
+        screenshotDevice.id,
+        '--use-existing-app',
+        'http://localhost:8181',
+        '--keep-app-running',
+      ]),
+      throwsToolExit(),
+    );
+    expect(logger.statusText, isNot(contains('Screenshot written to ')));
+    expect(signals.addedHandlers, isEmpty);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
@@ -380,6 +417,7 @@ void main() {
       '--disable-service-auth-codes',
       '--trace-skia',
       '--trace-systrace',
+      '--trace-to-file=path/to/trace.binpb',
       '--verbose-system-logs',
       '--null-assertions',
       '--native-null-assertions',
@@ -388,6 +426,8 @@ void main() {
       '--enable-software-rendering',
       '--skia-deterministic-rendering',
       '--enable-embedder-api',
+      '--ci',
+      '--debug-logs-dir=path/to/logs'
     ]), throwsToolExit());
 
     final DebuggingOptions options = await command.createDebuggingOptions(false);
@@ -396,6 +436,7 @@ void main() {
     expect(options.disableServiceAuthCodes, true);
     expect(options.traceSkia, true);
     expect(options.traceSystrace, true);
+    expect(options.traceToFile, 'path/to/trace.binpb');
     expect(options.verboseSystemLogs, true);
     expect(options.nullAssertions, true);
     expect(options.nativeNullAssertions, true);
@@ -403,13 +444,15 @@ void main() {
     expect(options.traceSystrace, true);
     expect(options.enableSoftwareRendering, true);
     expect(options.skiaDeterministicRendering, true);
+    expect(options.usingCISystem, true);
+    expect(options.debugLogsDirectoryPath, 'path/to/logs');
   }, overrides: <Type, Generator>{
     Cache: () => Cache.test(processManager: FakeProcessManager.any()),
     FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testUsingContext('Port publication not disabled for network device', () async {
+  testUsingContext('Port publication not disabled for wireless device', () async {
     final DriveCommand command = DriveCommand(
       fileSystem: fileSystem,
       logger: logger,
@@ -421,9 +464,9 @@ void main() {
     fileSystem.file('test_driver/main_test.dart').createSync(recursive: true);
     fileSystem.file('pubspec.yaml').createSync();
 
-    final Device networkDevice = FakeIosDevice()
+    final Device wirelessDevice = FakeIosDevice()
       ..connectionInterface = DeviceConnectionInterface.wireless;
-    fakeDeviceManager.wirelessDevices = <Device>[networkDevice];
+    fakeDeviceManager.wirelessDevices = <Device>[wirelessDevice];
 
     await expectLater(() => createTestCommandRunner(command).run(<String>[
       'drive',
@@ -467,7 +510,7 @@ void main() {
     DeviceManager: () => fakeDeviceManager,
   });
 
-  testUsingContext('Port publication does not default to enabled for network device if flag manually added', () async {
+  testUsingContext('Port publication does not default to enabled for wireless device if flag manually added', () async {
     final DriveCommand command = DriveCommand(
       fileSystem: fileSystem,
       logger: logger,
@@ -479,9 +522,9 @@ void main() {
     fileSystem.file('test_driver/main_test.dart').createSync(recursive: true);
     fileSystem.file('pubspec.yaml').createSync();
 
-    final Device networkDevice = FakeIosDevice()
+    final Device wirelessDevice = FakeIosDevice()
       ..connectionInterface = DeviceConnectionInterface.wireless;
-    fakeDeviceManager.wirelessDevices = <Device>[networkDevice];
+    fakeDeviceManager.wirelessDevices = <Device>[wirelessDevice];
 
     await expectLater(() => createTestCommandRunner(command).run(<String>[
       'drive',
@@ -498,8 +541,6 @@ void main() {
   });
 }
 
-// Unfortunately Device, despite not being immutable, has an `operator ==`.
-// Until we fix that, we have to also ignore related lints here.
 class ThrowingScreenshotDevice extends ScreenshotDevice {
   @override
   Future<LaunchResult> startApp(
@@ -517,9 +558,6 @@ class ThrowingScreenshotDevice extends ScreenshotDevice {
   }
 }
 
-// Unfortunately Device, despite not being immutable, has an `operator ==`.
-// Until we fix that, we have to also ignore related lints here.
-// ignore: avoid_implementing_value_types
 class ScreenshotDevice extends Fake implements Device {
   final List<File> screenshots = <File>[];
 
@@ -658,9 +696,6 @@ class FakeProcessSignal extends Fake implements io.ProcessSignal {
   Stream<io.ProcessSignal> watch() => controller.stream;
 }
 
-// Unfortunately Device, despite not being immutable, has an `operator ==`.
-// Until we fix that, we have to also ignore related lints here.
-// ignore: avoid_implementing_value_types
 class FakeIosDevice extends Fake implements IOSDevice {
   @override
   DeviceConnectionInterface connectionInterface = DeviceConnectionInterface.attached;
@@ -671,4 +706,17 @@ class FakeIosDevice extends Fake implements IOSDevice {
 
   @override
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.ios;
+}
+
+class FakeSignals extends Fake implements Signals {
+  List<SignalHandler> addedHandlers = <SignalHandler>[];
+
+  @override
+  Object addHandler(ProcessSignal signal, SignalHandler handler) {
+    addedHandlers.add(handler);
+    return const Object();
+  }
+
+  @override
+  Future<bool> removeHandler(ProcessSignal signal, Object token) async => true;
 }

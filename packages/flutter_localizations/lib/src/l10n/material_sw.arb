@@ -26,6 +26,7 @@
   "continueButtonLabel": "Endelea",
   "copyButtonLabel": "Nakili",
   "cutButtonLabel": "Kata",
+  "scanTextButtonLabel": "Changanua maandishi",
   "okButtonLabel": "Sawa",
   "pasteButtonLabel": "Bandika",
   "selectAllButtonLabel": "Chagua vyote",
@@ -135,5 +136,17 @@
   "scrimLabel": "Scrim",
   "bottomSheetLabel": "Safu ya Chini",
   "scrimOnTapHint": "Funga $modalRouteContentName",
-  "keyboardKeyShift": "Shift"
+  "keyboardKeyShift": "Shift",
+  "expansionTileExpandedHint": "gusa mara mbili ili ukunje",
+  "expansionTileCollapsedHint": "gusa mara mbili ili upanue",
+  "expansionTileExpandedTapHint": "Kunja",
+  "expansionTileCollapsedTapHint": "Panua ili upate maelezo zaidi",
+  "expandedHint": "Imekunjwa",
+  "collapsedHint": "Imepanuliwa",
+  "menuDismissLabel": "Ondoa menyu",
+  "lookUpButtonLabel": "Tafuta",
+  "searchWebButtonLabel": "Tafuta kwenye Wavuti",
+  "shareButtonLabel": "Shiriki...",
+  "clearButtonTooltip": "Clear text",
+  "selectedDateLabel": "Selected"
 }

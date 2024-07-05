@@ -110,6 +110,7 @@ void main() {
     expect(find.byKey(key1), findsNothing);
 
     final ContextMenuController controller = ContextMenuController();
+    addTearDown(controller.remove);
 
     // Instantiating the controller does not shown it.
     await tester.pump();
@@ -183,6 +184,12 @@ void main() {
     final GlobalKey directKey = GlobalKey();
     late final BuildContext context;
 
+    final TextEditingController textEditingController = TextEditingController();
+    addTearDown(textEditingController.dispose);
+
+    final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -190,9 +197,9 @@ void main() {
             builder: (BuildContext localContext) {
               context = localContext;
               return EditableText(
-                controller: TextEditingController(),
+                controller: textEditingController,
                 backgroundCursorColor: Colors.grey,
-                focusNode: FocusNode(),
+                focusNode: focusNode,
                 style: const TextStyle(),
                 cursorColor: Colors.red,
                 selectionControls: materialTextSelectionHandleControls,

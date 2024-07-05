@@ -34,8 +34,8 @@ enum _RadioType { material, adaptive }
 /// those of the same name on [ListTile].
 ///
 /// The [selected] property on this widget is similar to the [ListTile.selected]
-/// property. This tile's [activeColor] is used for the selected item's text color, or
-/// the theme's [ThemeData.toggleableActiveColor] if [activeColor] is null.
+/// property. The [fillColor] in the selected state is used for the selected item's
+/// text color. If it is null, the [activeColor] is used.
 ///
 /// This widget does not coordinate the [selected] state and the
 /// [checked] state; to have the list tile appear selected when the
@@ -189,6 +189,7 @@ class RadioListTile<T> extends StatelessWidget {
     this.onFocusChange,
     this.enableFeedback,
   }) : _radioType = _RadioType.material,
+       useCupertinoCheckmarkStyle = false,
        assert(!isThreeLine || subtitle != null);
 
   /// Creates a combination of a list tile and a platform adaptive radio.
@@ -226,6 +227,7 @@ class RadioListTile<T> extends StatelessWidget {
     this.focusNode,
     this.onFocusChange,
     this.enableFeedback,
+    this.useCupertinoCheckmarkStyle = false,
   }) : _radioType = _RadioType.adaptive,
        assert(!isThreeLine || subtitle != null);
 
@@ -435,52 +437,62 @@ class RadioListTile<T> extends StatelessWidget {
 
   final _RadioType _radioType;
 
+  /// Whether to use the checkbox style for the [CupertinoRadio] control.
+  ///
+  /// Only usable under the [RadioListTile.adaptive] constructor. If set to
+  /// true, on Apple platforms the radio button will appear as an iOS styled
+  /// checkmark. Controls the [CupertinoRadio] through
+  /// [CupertinoRadio.useCheckmarkStyle].
+  ///
+  /// Defaults to false.
+  final bool useCupertinoCheckmarkStyle;
+
   @override
   Widget build(BuildContext context) {
     final Widget control;
     switch (_radioType) {
       case _RadioType.material:
-        control = Radio<T>(
-          value: value,
-          groupValue: groupValue,
-          onChanged: onChanged,
-          toggleable: toggleable,
-          activeColor: activeColor,
-          materialTapTargetSize: materialTapTargetSize ?? MaterialTapTargetSize.shrinkWrap,
-          autofocus: autofocus,
-          fillColor: fillColor,
-          mouseCursor: mouseCursor,
-          hoverColor: hoverColor,
-          overlayColor: overlayColor,
-          splashRadius: splashRadius,
+        control = ExcludeFocus(
+          child: Radio<T>(
+            value: value,
+            groupValue: groupValue,
+            onChanged: onChanged,
+            toggleable: toggleable,
+            activeColor: activeColor,
+            materialTapTargetSize: materialTapTargetSize ?? MaterialTapTargetSize.shrinkWrap,
+            autofocus: autofocus,
+            fillColor: fillColor,
+            mouseCursor: mouseCursor,
+            hoverColor: hoverColor,
+            overlayColor: overlayColor,
+            splashRadius: splashRadius,
+          ),
         );
       case _RadioType.adaptive:
-        control = Radio<T>.adaptive(
-          value: value,
-          groupValue: groupValue,
-          onChanged: onChanged,
-          toggleable: toggleable,
-          activeColor: activeColor,
-          materialTapTargetSize: materialTapTargetSize ?? MaterialTapTargetSize.shrinkWrap,
-          autofocus: autofocus,
-          fillColor: fillColor,
-          mouseCursor: mouseCursor,
-          hoverColor: hoverColor,
-          overlayColor: overlayColor,
-          splashRadius: splashRadius,
+        control = ExcludeFocus(
+          child: Radio<T>.adaptive(
+            value: value,
+            groupValue: groupValue,
+            onChanged: onChanged,
+            toggleable: toggleable,
+            activeColor: activeColor,
+            materialTapTargetSize: materialTapTargetSize ?? MaterialTapTargetSize.shrinkWrap,
+            autofocus: autofocus,
+            fillColor: fillColor,
+            mouseCursor: mouseCursor,
+            hoverColor: hoverColor,
+            overlayColor: overlayColor,
+            splashRadius: splashRadius,
+            useCupertinoCheckmarkStyle: useCupertinoCheckmarkStyle,
+          ),
         );
     }
 
     Widget? leading, trailing;
-    switch (controlAffinity) {
-      case ListTileControlAffinity.leading:
-      case ListTileControlAffinity.platform:
-        leading = control;
-        trailing = secondary;
-      case ListTileControlAffinity.trailing:
-        leading = secondary;
-        trailing = control;
-    }
+    (leading, trailing) = switch (controlAffinity) {
+      ListTileControlAffinity.leading || ListTileControlAffinity.platform => (control, secondary),
+      ListTileControlAffinity.trailing => (secondary, control),
+    };
     final ThemeData theme = Theme.of(context);
     final RadioThemeData radioThemeData = RadioTheme.of(context);
     final Set<MaterialState> states = <MaterialState>{

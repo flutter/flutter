@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -20,6 +21,22 @@ class TestAssetBundle extends CachingAssetBundle {
   Future<ByteData> load(String key) async {
     if (key == 'AssetManifest.smcbin') {
       return const StandardMessageCodec().encodeMessage(_assetBundleMap)!;
+    }
+
+    if (key == 'AssetManifest.bin.json') {
+      // Encode the manifest data that will be used by the app
+      final ByteData data = const StandardMessageCodec().encodeMessage(_assetBundleMap)!;
+      // Simulate the behavior of NetworkAssetBundle.load here, for web tests
+      return ByteData.sublistView(
+        utf8.encode(
+          json.encode(
+            base64.encode(
+              // Encode only the actual bytes of the buffer, and no more...
+              data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes)
+            )
+          )
+        )
+      );
     }
 
     loadCallCount[key] = loadCallCount[key] ?? 0 + 1;
@@ -42,8 +59,6 @@ void main() {
     void buildAndTestWithOneAsset(String mainAssetPath) {
       final Map<String, List<Map<Object?, Object?>>> assetBundleMap =
         <String, List<Map<Object?, Object?>>>{};
-
-      assetBundleMap[mainAssetPath] = <Map<Object?, Object?>>[];
 
       final AssetImage assetImage = AssetImage(
         mainAssetPath,
@@ -160,15 +175,17 @@ void main() {
       double chosenAssetRatio,
       String expectedAssetPath,
     ) {
-      final Map<String, List<Map<Object?, Object?>>> assetBundleMap =
-        <String, List<Map<Object?, Object?>>>{};
-
-      final Map<Object?, Object?> mainAssetVariantManifestEntry = <Object?, Object?>{};
-      mainAssetVariantManifestEntry['asset'] = variantPath;
-      mainAssetVariantManifestEntry['dpr'] = 3.0;
-      assetBundleMap[mainAssetPath] = <Map<Object?, Object?>>[mainAssetVariantManifestEntry];
-
-      final TestAssetBundle testAssetBundle = TestAssetBundle(assetBundleMap);
+      const Map<String, List<Map<Object?, Object?>>> assetManifest =
+          <String, List<Map<Object?, Object?>>>{
+        'assets/normalFolder/normalFile.png': <Map<Object?, Object?>>[
+          <Object?, Object?>{'asset': 'assets/normalFolder/normalFile.png'},
+          <Object?, Object?>{
+            'asset': 'assets/normalFolder/3.0x/normalFile.png',
+            'dpr': 3.0
+          },
+        ]
+      };
+      final TestAssetBundle testAssetBundle = TestAssetBundle(assetManifest);
 
       final AssetImage assetImage = AssetImage(
         mainAssetPath,

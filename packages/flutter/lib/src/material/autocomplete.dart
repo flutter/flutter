@@ -28,6 +28,30 @@ import 'theme.dart';
 /// ** See code in examples/api/lib/material/autocomplete/autocomplete.1.dart **
 /// {@end-tool}
 ///
+/// {@tool dartpad}
+/// This example shows how to create an Autocomplete widget whose options are
+/// fetched over the network.
+///
+/// ** See code in examples/api/lib/material/autocomplete/autocomplete.2.dart **
+/// {@end-tool}
+///
+/// {@tool dartpad}
+/// This example shows how to create an Autocomplete widget whose options are
+/// fetched over the network. It uses debouncing to wait to perform the network
+/// request until after the user finishes typing.
+///
+/// ** See code in examples/api/lib/material/autocomplete/autocomplete.3.dart **
+/// {@end-tool}
+///
+/// {@tool dartpad}
+/// This example shows how to create an Autocomplete widget whose options are
+/// fetched over the network. It includes both debouncing and error handling, so
+/// that failed network requests show an error to the user and can be recovered
+/// from. Try toggling the network Switch widget to simulate going offline.
+///
+/// ** See code in examples/api/lib/material/autocomplete/autocomplete.4.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [RawAutocomplete], which is what Autocomplete is built upon, and which
@@ -42,6 +66,7 @@ class Autocomplete<T extends Object> extends StatelessWidget {
     this.onSelected,
     this.optionsMaxHeight = 200.0,
     this.optionsViewBuilder,
+    this.optionsViewOpenDirection = OptionsViewOpenDirection.down,
     this.initialValue,
   });
 
@@ -65,6 +90,9 @@ class Autocomplete<T extends Object> extends StatelessWidget {
   /// If not provided, will build a standard Material-style list of results by
   /// default.
   final AutocompleteOptionsViewBuilder<T>? optionsViewBuilder;
+
+  /// {@macro flutter.widgets.RawAutocomplete.optionsViewOpenDirection}
+  final OptionsViewOpenDirection optionsViewOpenDirection;
 
   /// The maximum height used for the default Material options list widget.
   ///
@@ -92,11 +120,13 @@ class Autocomplete<T extends Object> extends StatelessWidget {
       fieldViewBuilder: fieldViewBuilder,
       initialValue: initialValue,
       optionsBuilder: optionsBuilder,
+      optionsViewOpenDirection: optionsViewOpenDirection,
       optionsViewBuilder: optionsViewBuilder ?? (BuildContext context, AutocompleteOnSelected<T> onSelected, Iterable<T> options) {
         return _AutocompleteOptions<T>(
           displayStringForOption: displayStringForOption,
           onSelected: onSelected,
           options: options,
+          openDirection: optionsViewOpenDirection,
           maxOptionsHeight: optionsMaxHeight,
         );
       },
@@ -137,6 +167,7 @@ class _AutocompleteOptions<T extends Object> extends StatelessWidget {
     super.key,
     required this.displayStringForOption,
     required this.onSelected,
+    required this.openDirection,
     required this.options,
     required this.maxOptionsHeight,
   });
@@ -144,14 +175,19 @@ class _AutocompleteOptions<T extends Object> extends StatelessWidget {
   final AutocompleteOptionToString<T> displayStringForOption;
 
   final AutocompleteOnSelected<T> onSelected;
+  final OptionsViewOpenDirection openDirection;
 
   final Iterable<T> options;
   final double maxOptionsHeight;
 
   @override
   Widget build(BuildContext context) {
+    final AlignmentDirectional optionsAlignment = switch (openDirection) {
+      OptionsViewOpenDirection.up => AlignmentDirectional.bottomStart,
+      OptionsViewOpenDirection.down => AlignmentDirectional.topStart,
+    };
     return Align(
-      alignment: Alignment.topLeft,
+      alignment: optionsAlignment,
       child: Material(
         elevation: 4.0,
         child: ConstrainedBox(
@@ -172,7 +208,7 @@ class _AutocompleteOptions<T extends Object> extends StatelessWidget {
                     if (highlight) {
                       SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
                         Scrollable.ensureVisible(context, alignment: 0.5);
-                      });
+                      }, debugLabel: 'AutocompleteOptions.ensureVisible');
                     }
                     return Container(
                       color: highlight ? Theme.of(context).focusColor : null,

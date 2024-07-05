@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -20,7 +21,7 @@ class _LeafState extends State<Leaf> {
 
   @override
   void deactivate() {
-    _handle?.release();
+    _handle?.dispose();
     _handle = null;
     super.deactivate();
   }
@@ -33,7 +34,7 @@ class _LeafState extends State<Leaf> {
         KeepAliveNotification(_handle!).dispatch(context);
       }
     } else {
-      _handle?.release();
+      _handle?.dispose();
       _handle = null;
     }
   }
@@ -552,7 +553,9 @@ void main() {
     // RenderSliverWithKeepAliveMixin doesn't get regressed or deleted. As testing
     // the full functionality would be cumbersome.
     final RenderSliverMultiBoxAdaptorAlt alternate = RenderSliverMultiBoxAdaptorAlt();
+    addTearDown(alternate.dispose);
     final RenderBox child = RenderBoxKeepAlive();
+    addTearDown(child.dispose);
     alternate.insert(child);
 
     expect(alternate.children.length, 1);
@@ -560,6 +563,7 @@ void main() {
 
   testWidgets('Keep alive Listenable has its listener removed once called', (WidgetTester tester) async {
     final LeakCheckerHandle handle = LeakCheckerHandle();
+    addTearDown(handle.dispose);
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: ListView.builder(
@@ -600,23 +604,7 @@ class _AlwaysKeepAliveState extends State<_AlwaysKeepAlive> with AutomaticKeepAl
   }
 }
 
-class RenderBoxKeepAlive extends RenderBox {
-  State<StatefulWidget> createState() => AlwaysKeepAliveRenderBoxState();
-}
-
-class AlwaysKeepAliveRenderBoxState extends State<_AlwaysKeepAlive> with AutomaticKeepAliveClientMixin<_AlwaysKeepAlive> {
-  @override
-  bool get wantKeepAlive => true;
-
-  @override
-  Widget build(BuildContext context) {
-    super.build(context);
-    return const SizedBox(
-      height: 48.0,
-      child: Text('keep me alive'),
-    );
-  }
-}
+class RenderBoxKeepAlive extends RenderBox { }
 
 mixin KeepAliveParentDataMixinAlt implements KeepAliveParentDataMixin {
   @override
@@ -630,14 +618,6 @@ class RenderSliverMultiBoxAdaptorAlt extends RenderSliver with
     KeepAliveParentDataMixinAlt,
     RenderSliverHelpers,
     RenderSliverWithKeepAliveMixin {
-
-  RenderSliverMultiBoxAdaptorAlt({
-    RenderSliverBoxChildManager? childManager,
-  }) : _childManager = childManager;
-
-  @protected
-  RenderSliverBoxChildManager? get childManager => _childManager;
-  final RenderSliverBoxChildManager? _childManager;
 
   final List<RenderBox> children = <RenderBox>[];
 
@@ -655,6 +635,12 @@ class RenderSliverMultiBoxAdaptorAlt extends RenderSliver with
 }
 
 class LeakCheckerHandle with ChangeNotifier {
+  LeakCheckerHandle() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      ChangeNotifier.maybeDispatchObjectCreation(this);
+    }
+  }
+
   @override
   bool get hasListeners => super.hasListeners;
 }

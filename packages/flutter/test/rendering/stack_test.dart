@@ -70,7 +70,7 @@ void main() {
       final TestClipPaintingContext context = TestClipPaintingContext();
       final RenderBox child = box200x200;
       final RenderStack stack;
-      switch(clip){
+      switch (clip){
         case Clip.none:
         case Clip.hardEdge:
         case Clip.antiAlias:
@@ -119,6 +119,7 @@ void main() {
         visitedChildren.add(child);
       }
 
+      layout(stack);
       stack.visitChildrenForSemantics(visitor);
 
       expect(visitedChildren, hasLength(1));

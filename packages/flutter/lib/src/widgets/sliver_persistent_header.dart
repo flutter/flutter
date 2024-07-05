@@ -119,8 +119,6 @@ abstract class SliverPersistentHeaderDelegate {
 class SliverPersistentHeader extends StatelessWidget {
   /// Creates a sliver that varies its size when it is scrolled to the start of
   /// a viewport.
-  ///
-  /// The [delegate], [pinned], and [floating] arguments must not be null.
   const SliverPersistentHeader({
     super.key,
     required this.delegate,

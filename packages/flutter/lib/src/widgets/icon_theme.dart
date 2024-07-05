@@ -17,8 +17,6 @@ import 'inherited_theme.dart';
 /// The icon theme is honored by [Icon] and [ImageIcon] widgets.
 class IconTheme extends InheritedTheme {
   /// Creates an icon theme that controls properties of descendant widgets.
-  ///
-  /// Both [data] and [child] arguments must not be null.
   const IconTheme({
     super.key,
     required this.data,
@@ -27,8 +25,6 @@ class IconTheme extends InheritedTheme {
 
   /// Creates an icon theme that controls the properties of
   /// descendant widgets, and merges in the current icon theme, if any.
-  ///
-  /// The [data] and [child] arguments must not be null.
   static Widget merge({
     Key? key,
     required IconThemeData data,
@@ -80,6 +76,7 @@ class IconTheme extends InheritedTheme {
         color: iconThemeData.color ?? const IconThemeData.fallback().color,
         opacity: iconThemeData.opacity ?? const IconThemeData.fallback().opacity,
         shadows: iconThemeData.shadows ?? const IconThemeData.fallback().shadows,
+        applyTextScaling: iconThemeData.applyTextScaling ?? const IconThemeData.fallback().applyTextScaling,
       );
   }
 

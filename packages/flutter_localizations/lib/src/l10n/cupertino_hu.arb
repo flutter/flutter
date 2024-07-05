@@ -22,5 +22,14 @@
   "tabSemanticsLabel": "$tabCount/$tabIndex. lap",
   "modalBarrierDismissLabel": "Elvetés",
   "searchTextFieldPlaceholderLabel": "Keresés",
+<<<<<<< HEAD
   "noSpellCheckReplacementsLabel": "No Replacements Found"
+=======
+  "noSpellCheckReplacementsLabel": "Nem található javítás",
+  "menuDismissLabel": "Menü bezárása",
+  "lookUpButtonLabel": "Felfelé nézés",
+  "searchWebButtonLabel": "Keresés az interneten",
+  "shareButtonLabel": "Megosztás…",
+  "clearButtonLabel": "Clear"
+>>>>>>> 761747bfc538b5af34aa0d3fac380f1bc331ec49
 }

@@ -79,11 +79,14 @@ void main() {
     }
 
     Widget buildWidget() {
+      final ScrollController controller = ScrollController(initialScrollOffset: 300.0);
+      addTearDown(controller.dispose);
+
       return Directionality(
         textDirection: TextDirection.ltr,
         child: FlipWidget(
           left: ListView.builder(
-            controller: ScrollController(initialScrollOffset: 300.0),
+            controller: controller,
             itemExtent: 200.0,
             itemBuilder: itemBuilder,
           ),
@@ -152,11 +155,14 @@ void main() {
     }
 
     Widget buildWidget() {
+      final ScrollController controller = ScrollController(initialScrollOffset: 300.0);
+      addTearDown(controller.dispose);
+
       return Directionality(
         textDirection: TextDirection.ltr,
         child: FlipWidget(
           left: ListView.builder(
-            controller: ScrollController(initialScrollOffset: 300.0),
+            controller: controller,
             itemBuilder: itemBuilder,
             itemExtent: 200.0,
             scrollDirection: Axis.horizontal,

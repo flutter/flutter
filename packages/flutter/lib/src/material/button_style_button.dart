@@ -11,10 +11,45 @@ import 'package:flutter/widgets.dart';
 import 'button_style.dart';
 import 'colors.dart';
 import 'constants.dart';
+import 'elevated_button.dart';
+import 'filled_button.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'material_state.dart';
+import 'outlined_button.dart';
+import 'text_button.dart';
 import 'theme_data.dart';
+
+/// {@template flutter.material.ButtonStyleButton.iconAlignment}
+/// Determines the alignment of the icon within the widgets such as:
+///   - [ElevatedButton.icon],
+///   - [FilledButton.icon],
+///   - [FilledButton.tonalIcon].
+///   - [OutlinedButton.icon],
+///   - [TextButton.icon],
+///
+/// The effect of `iconAlignment` depends on [TextDirection]. If textDirection is
+/// [TextDirection.ltr] then [IconAlignment.start] and [IconAlignment.end] align the
+/// icon on the left or right respectively.  If textDirection is [TextDirection.rtl] the
+/// the alignments are reversed.
+///
+/// Defaults to [IconAlignment.start].
+///
+/// {@tool dartpad}
+/// This sample demonstrates how to use `iconAlignment` to align the button icon to the start
+/// or the end of the button.
+///
+/// ** See code in examples/api/lib/material/button_style_button/button_style_button.icon_alignment.0.dart **
+/// {@end-tool}
+///
+/// {@endtemplate}
+enum IconAlignment {
+  /// The icon is placed at the start of the button.
+  start,
+
+  /// The icon is placed at the end of the button.
+  end,
+}
 
 /// The base [StatefulWidget] class for buttons whose style is defined by a [ButtonStyle] object.
 ///
@@ -42,7 +77,9 @@ abstract class ButtonStyleButton extends StatefulWidget {
     required this.autofocus,
     required this.clipBehavior,
     this.statesController,
+    this.isSemanticButton = true,
     required this.child,
+    this.iconAlignment = IconAlignment.start,
   });
 
   /// Called when the button is tapped or otherwise activated.
@@ -88,8 +125,10 @@ abstract class ButtonStyleButton extends StatefulWidget {
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
-  /// Defaults to [Clip.none], and must not be null.
-  final Clip clipBehavior;
+  /// Defaults to [Clip.none] unless [ButtonStyle.backgroundBuilder] or
+  /// [ButtonStyle.foregroundBuilder] is specified. In those
+  /// cases the default is [Clip.antiAlias].
+  final Clip? clipBehavior;
 
   /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode? focusNode;
@@ -100,10 +139,22 @@ abstract class ButtonStyleButton extends StatefulWidget {
   /// {@macro flutter.material.inkwell.statesController}
   final MaterialStatesController? statesController;
 
+  /// Determine whether this subtree represents a button.
+  ///
+  /// If this is null, the screen reader will not announce "button" when this
+  /// is focused. This is useful for [MenuItemButton] and [SubmenuButton] when we
+  /// traverse the menu system.
+  ///
+  /// Defaults to true.
+  final bool? isSemanticButton;
+
   /// Typically the button's label.
   ///
   /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget? child;
+
+  /// {@macro flutter.material.ButtonStyleButton.iconAlignment}
+  final IconAlignment iconAlignment;
 
   /// Returns a non-null [ButtonStyle] that's based primarily on the [Theme]'s
   /// [ThemeData.textTheme] and [ThemeData.colorScheme].
@@ -160,29 +211,36 @@ abstract class ButtonStyleButton extends StatefulWidget {
   /// A convenience method for subclasses.
   static MaterialStateProperty<T>? allOrNull<T>(T? value) => value == null ? null : MaterialStatePropertyAll<T>(value);
 
-  /// Returns an interpolated value based on the [textScaleFactor] parameter:
+  /// A convenience method used by subclasses in the framework, that returns an
+  /// interpolated value based on the [fontSizeMultiplier] parameter:
   ///
   ///  * 0 - 1 [geometry1x]
-  ///  * 1 - 2 lerp([geometry1x], [geometry2x], [textScaleFactor] - 1)
-  ///  * 2 - 3 lerp([geometry2x], [geometry3x], [textScaleFactor] - 2)
+  ///  * 1 - 2 lerp([geometry1x], [geometry2x], [fontSizeMultiplier] - 1)
+  ///  * 2 - 3 lerp([geometry2x], [geometry3x], [fontSizeMultiplier] - 2)
   ///  * otherwise [geometry3x]
   ///
-  /// A convenience method for subclasses.
+  /// This method is used by the framework for estimating the default paddings to
+  /// use on a button with a text label, when the system text scaling setting
+  /// changes. It's usually supplied with empirical [geometry1x], [geometry2x],
+  /// [geometry3x] values adjusted for different system text scaling values, when
+  /// the unscaled font size is set to 14.0 (the default [TextTheme.labelLarge]
+  /// value).
+  ///
+  /// The `fontSizeMultiplier` argument, for historical reasons, is the default
+  /// font size specified in the [ButtonStyle], scaled by the ambient font
+  /// scaler, then divided by 14.0 (the default font size used in buttons).
   static EdgeInsetsGeometry scaledPadding(
     EdgeInsetsGeometry geometry1x,
     EdgeInsetsGeometry geometry2x,
     EdgeInsetsGeometry geometry3x,
-    double textScaleFactor,
+    double fontSizeMultiplier,
   ) {
-
-    if (textScaleFactor <= 1) {
-      return geometry1x;
-    } else if (textScaleFactor >= 3) {
-      return geometry3x;
-    } else if (textScaleFactor <= 2) {
-      return EdgeInsetsGeometry.lerp(geometry1x, geometry2x, textScaleFactor - 1)!;
-    }
-    return EdgeInsetsGeometry.lerp(geometry2x, geometry3x, textScaleFactor - 2)!;
+    return switch (fontSizeMultiplier) {
+      <= 1 => geometry1x,
+      < 2  => EdgeInsetsGeometry.lerp(geometry1x, geometry2x, fontSizeMultiplier - 1)!,
+      < 3  => EdgeInsetsGeometry.lerp(geometry2x, geometry3x, fontSizeMultiplier - 2)!,
+      _    => geometry3x,
+    };
   }
 }
 
@@ -301,6 +359,11 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
     final AlignmentGeometry? resolvedAlignment = effectiveValue((ButtonStyle? style) => style?.alignment);
     final Offset densityAdjustment = resolvedVisualDensity!.baseSizeAdjustment;
     final InteractiveInkFeatureFactory? resolvedSplashFactory = effectiveValue((ButtonStyle? style) => style?.splashFactory);
+    final ButtonLayerBuilder? resolvedBackgroundBuilder = effectiveValue((ButtonStyle? style) => style?.backgroundBuilder);
+    final ButtonLayerBuilder? resolvedForegroundBuilder = effectiveValue((ButtonStyle? style) => style?.foregroundBuilder);
+
+    final Clip effectiveClipBehavior = widget.clipBehavior
+      ?? ((resolvedBackgroundBuilder ?? resolvedForegroundBuilder) != null ? Clip.antiAlias : Clip.none);
 
     BoxConstraints effectiveConstraints = resolvedVisualDensity.effectiveConstraints(
       BoxConstraints(
@@ -334,7 +397,7 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
     final double dx = math.max(0, densityAdjustment.dx);
     final EdgeInsetsGeometry padding = resolvedPadding!
       .add(EdgeInsets.fromLTRB(dx, dy, dx, dy))
-      .clamp(EdgeInsets.zero, EdgeInsetsGeometry.infinity); // ignore_clamp_double_lint
+      .clamp(EdgeInsets.zero, EdgeInsetsGeometry.infinity);
 
     // If an opaque button's background is becoming translucent while its
     // elevation is changing, change the elevation first. Material implicitly
@@ -367,6 +430,21 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
     elevation = resolvedElevation;
     backgroundColor = resolvedBackgroundColor;
 
+    Widget effectiveChild = Padding(
+      padding: padding,
+      child: Align(
+        alignment: resolvedAlignment!,
+        widthFactor: 1.0,
+        heightFactor: 1.0,
+        child: resolvedForegroundBuilder != null
+          ? resolvedForegroundBuilder(context, statesController.value, widget.child)
+          : widget.child,
+      ),
+    );
+    if (resolvedBackgroundBuilder != null) {
+      effectiveChild = resolvedBackgroundBuilder(context, statesController.value, effectiveChild);
+    }
+
     final Widget result = ConstrainedBox(
       constraints: effectiveConstraints,
       child: Material(
@@ -378,7 +456,7 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
         surfaceTintColor: resolvedSurfaceTintColor,
         type: resolvedBackgroundColor == null ? MaterialType.transparency : MaterialType.button,
         animationDuration: resolvedAnimationDuration,
-        clipBehavior: widget.clipBehavior,
+        clipBehavior: effectiveClipBehavior,
         child: InkWell(
           onTap: widget.onPressed,
           onLongPress: widget.onLongPress,
@@ -396,15 +474,7 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
           statesController: statesController,
           child: IconTheme.merge(
             data: IconThemeData(color: resolvedIconColor ?? resolvedForegroundColor, size: resolvedIconSize),
-            child: Padding(
-              padding: padding,
-              child: Align(
-                alignment: resolvedAlignment!,
-                widthFactor: 1.0,
-                heightFactor: 1.0,
-                child: widget.child,
-              ),
-            ),
+            child: effectiveChild,
           ),
         ),
       ),
@@ -425,7 +495,7 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
 
     return Semantics(
       container: true,
-      button: true,
+      button: widget.isSemanticButton,
       enabled: widget.enabled,
       child: _InputPadding(
         minSize: minSize,

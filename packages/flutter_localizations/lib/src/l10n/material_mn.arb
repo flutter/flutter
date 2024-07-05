@@ -26,6 +26,7 @@
   "continueButtonLabel": "Үргэлжлүүлэх",
   "copyButtonLabel": "Хуулах",
   "cutButtonLabel": "Таслах",
+  "scanTextButtonLabel": "Текстийг скан хийх",
   "okButtonLabel": "OK",
   "pasteButtonLabel": "Буулгах",
   "selectAllButtonLabel": "Бүгдийг сонгох",
@@ -135,5 +136,17 @@
   "scrimLabel": "Скрим",
   "bottomSheetLabel": "Доод хүснэгт",
   "scrimOnTapHint": "$modalRouteContentName-г хаах",
-  "keyboardKeyShift": "Shift"
+  "keyboardKeyShift": "Shift",
+  "expansionTileExpandedHint": "хураахын тулд хоёр товшино уу",
+  "expansionTileCollapsedHint": "дэлгэхийн тулд хоёр товшино уу",
+  "expansionTileExpandedTapHint": "Хураах",
+  "expansionTileCollapsedTapHint": "Илүү дэлгэрэнгүй авах бол дэлгэнэ үү",
+  "expandedHint": "Хураасан",
+  "collapsedHint": "Дэлгэсэн",
+  "menuDismissLabel": "Цэсийг хаах",
+  "lookUpButtonLabel": "Дээшээ харах",
+  "searchWebButtonLabel": "Вебээс хайх",
+  "shareButtonLabel": "Хуваалцах...",
+  "clearButtonTooltip": "Clear text",
+  "selectedDateLabel": "Selected"
 }

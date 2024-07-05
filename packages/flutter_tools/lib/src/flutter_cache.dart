@@ -7,8 +7,12 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 
+<<<<<<< HEAD
 import 'android/android_sdk.dart';
 import 'android/android_studio.dart';
+=======
+import 'android/java.dart';
+>>>>>>> 761747bfc538b5af34aa0d3fac380f1bc331ec49
 import 'base/common.dart';
 import 'base/error_handling_io.dart';
 import 'base/file_system.dart';
@@ -39,6 +43,7 @@ class FlutterCache extends Cache {
     registerArtifact(AndroidInternalBuildArtifacts(this));
     registerArtifact(IOSEngineArtifacts(this, platform: platform));
     registerArtifact(FlutterWebSdk(this));
+    registerArtifact(LegacyCanvasKitRemover(this));
     registerArtifact(FlutterSdk(this, platform: platform));
     registerArtifact(WindowsEngineArtifacts(this, platform: platform));
     registerArtifact(MacOSEngineArtifacts(this, platform: platform));
@@ -185,6 +190,38 @@ class FlutterWebSdk extends CachedArtifact {
   }
 }
 
+// In previous builds, CanvasKit artifacts were stored in a different location
+// than they are now. Leaving those old artifacts in the cache confuses the
+// in-memory filesystem that the web runner uses, so this artifact will evict
+// them from our cache if they are there.
+class LegacyCanvasKitRemover extends ArtifactSet {
+  LegacyCanvasKitRemover(this.cache) : super(DevelopmentArtifact.web);
+
+  final Cache cache;
+
+  @override
+  String get name => 'legacy_canvaskit_remover';
+
+  Directory _getLegacyCanvasKitDirectory(FileSystem fileSystem) =>
+    fileSystem.directory(fileSystem.path.join(
+      cache.getRoot().path,
+      'canvaskit',
+    ));
+
+  @override
+  Future<bool> isUpToDate(FileSystem fileSystem) async =>
+    !(await _getLegacyCanvasKitDirectory(fileSystem).exists());
+
+  @override
+  Future<void> update(
+    ArtifactUpdater artifactUpdater,
+    Logger logger,
+    FileSystem fileSystem,
+    OperatingSystemUtils operatingSystemUtils,
+    {bool offline = false}
+  ) => _getLegacyCanvasKitDirectory(fileSystem).delete(recursive: true);
+}
+
 /// A cached artifact containing the dart:ui source code.
 class FlutterSdk extends EngineCachedArtifact {
   FlutterSdk(Cache cache, {
@@ -203,18 +240,18 @@ class FlutterSdk extends EngineCachedArtifact {
 
   @override
   List<List<String>> getBinaryDirs() {
-    // Currently only Linux supports both arm64 and x64.
+    // Linux and Windows both support arm64 and x64.
     final String arch = cache.getHostPlatformArchName();
     return <List<String>>[
       <String>['common', 'flutter_patched_sdk.zip'],
       <String>['common', 'flutter_patched_sdk_product.zip'],
       if (cache.includeAllPlatforms) ...<List<String>>[
-        <String>['windows-x64', 'windows-x64/artifacts.zip'],
+        <String>['windows-$arch', 'windows-$arch/artifacts.zip'],
         <String>['linux-$arch', 'linux-$arch/artifacts.zip'],
         <String>['darwin-x64', 'darwin-$arch/artifacts.zip'],
       ]
       else if (_platform.isWindows)
-        <String>['windows-x64', 'windows-x64/artifacts.zip']
+        <String>['windows-$arch', 'windows-$arch/artifacts.zip']
       else if (_platform.isMacOS)
         <String>['darwin-x64', 'darwin-$arch/artifacts.zip']
       else if (_platform.isLinux)
@@ -272,7 +309,8 @@ class WindowsEngineArtifacts extends EngineCachedArtifact {
   @override
   List<List<String>> getBinaryDirs() {
     if (_platform.isWindows || ignorePlatformFiltering) {
-      return _windowsDesktopBinaryDirs;
+      final String arch = cache.getHostPlatformArchName();
+      return _getWindowsDesktopBinaryDirs(arch);
     }
     return const <List<String>>[];
   }
@@ -354,12 +392,17 @@ class AndroidGenSnapshotArtifacts extends EngineCachedArtifact {
 /// A cached artifact containing the Maven dependencies used to build Android projects.
 ///
 /// This is a no-op if the android SDK is not available.
+///
+/// Set [Java] to `null` to indicate that no Java/JDK installation could be found.
 class AndroidMavenArtifacts extends ArtifactSet {
   AndroidMavenArtifacts(this.cache, {
+    required Java? java,
     required Platform platform,
-  }) : _platform = platform,
+  }) : _java = java,
+       _platform = platform,
        super(DevelopmentArtifact.androidMaven);
 
+  final Java? _java;
   final Platform _platform;
   final Cache cache;
 
@@ -371,6 +414,8 @@ class AndroidMavenArtifacts extends ArtifactSet {
     OperatingSystemUtils operatingSystemUtils,
     {bool offline = false}
   ) async {
+    // TODO(andrewkolos): Should this really be no-op if the Android SDK
+    // is unavailable? https://github.com/flutter/flutter/issues/127848
     if (globals.androidSdk == null) {
       return;
     }
@@ -391,10 +436,14 @@ class AndroidMavenArtifacts extends ArtifactSet {
           '--project-cache-dir', tempDir.path,
           'resolveDependencies',
         ],
+<<<<<<< HEAD
         environment: <String, String>{
           if (javaPath != null)
             AndroidSdk.javaHomeEnvironmentVariable: javaPath!,
         },
+=======
+        environment: _java?.environment,
+>>>>>>> 761747bfc538b5af34aa0d3fac380f1bc331ec49
       );
       if (processResult.exitCode != 0) {
         logger.printError('Failed to download the Android dependencies');
@@ -703,12 +752,12 @@ class FontSubsetArtifacts extends EngineCachedArtifact {
 
   @override
   List<List<String>> getBinaryDirs() {
-    // Currently only Linux supports both arm64 and x64.
+    // Linux and Windows both support arm64 and x64.
     final String arch = cache.getHostPlatformArchName();
     final Map<String, List<String>> artifacts = <String, List<String>> {
       'macos': <String>['darwin-x64', 'darwin-$arch/$artifactName.zip'],
       'linux': <String>['linux-$arch', 'linux-$arch/$artifactName.zip'],
-      'windows': <String>['windows-x64', 'windows-x64/$artifactName.zip'],
+      'windows': <String>['windows-$arch', 'windows-$arch/$artifactName.zip'],
     };
     if (cache.includeAllPlatforms) {
       return artifacts.values.toList();
@@ -800,26 +849,33 @@ class IosUsbArtifacts extends CachedArtifact {
   }
 
   @visibleForTesting
-  Uri get archiveUri => Uri.parse('${cache.storageBaseUrl}/flutter_infra_release/ios-usb-dependencies${cache.useUnsignedMacBinaries ? '/unsigned' : ''}/$name/$version/$name.zip');
+  Uri get archiveUri => Uri.parse(
+    '${cache.realmlessStorageBaseUrl}/flutter_infra_release/'
+    'ios-usb-dependencies${cache.useUnsignedMacBinaries ? '/unsigned' : ''}'
+    '/$name/$version/$name.zip',
+  );
 }
 
 // TODO(zanderso): upload debug desktop artifacts to host-debug and
 // remove from existing host folder.
 // https://github.com/flutter/flutter/issues/38935
-const List<List<String>> _windowsDesktopBinaryDirs = <List<String>>[
-  <String>['windows-x64', 'windows-x64-debug/windows-x64-flutter.zip'],
-  <String>['windows-x64', 'windows-x64/flutter-cpp-client-wrapper.zip'],
-  <String>['windows-x64-profile', 'windows-x64-profile/windows-x64-flutter.zip'],
-  <String>['windows-x64-release', 'windows-x64-release/windows-x64-flutter.zip'],
-];
+
+List<List<String>> _getWindowsDesktopBinaryDirs(String arch) {
+  return <List<String>>[
+    <String>['windows-$arch', 'windows-$arch-debug/windows-$arch-flutter.zip'],
+    <String>['windows-$arch', 'windows-$arch/flutter-cpp-client-wrapper.zip'],
+    <String>['windows-$arch-profile', 'windows-$arch-profile/windows-$arch-flutter.zip'],
+    <String>['windows-$arch-release', 'windows-$arch-release/windows-$arch-flutter.zip'],
+  ];
+}
 
 const List<List<String>> _macOSDesktopBinaryDirs = <List<String>>[
-  <String>['darwin-x64', 'darwin-x64/FlutterMacOS.framework.zip'],
+  <String>['darwin-x64', 'darwin-x64/framework.zip'],
   <String>['darwin-x64', 'darwin-x64/gen_snapshot.zip'],
-  <String>['darwin-x64-profile', 'darwin-x64-profile/FlutterMacOS.framework.zip'],
+  <String>['darwin-x64-profile', 'darwin-x64-profile/framework.zip'],
   <String>['darwin-x64-profile', 'darwin-x64-profile/artifacts.zip'],
   <String>['darwin-x64-profile', 'darwin-x64-profile/gen_snapshot.zip'],
-  <String>['darwin-x64-release', 'darwin-x64-release/FlutterMacOS.framework.zip'],
+  <String>['darwin-x64-release', 'darwin-x64-release/framework.zip'],
   <String>['darwin-x64-release', 'darwin-x64-release/artifacts.zip'],
   <String>['darwin-x64-release', 'darwin-x64-release/gen_snapshot.zip'],
 ];

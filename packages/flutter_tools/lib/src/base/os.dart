@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ffi' show Abi;
+
 import 'package:archive/archive.dart';
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
@@ -102,6 +104,18 @@ abstract class OperatingSystemUtils {
 
   /// Return the File representing a new pipe.
   File makePipe(String path);
+
+  /// Return a directory's total size in bytes.
+  int? getDirectorySize(Directory directory) {
+    int? size;
+    for (final FileSystemEntity entity in directory.listSync(recursive: true, followLinks: false)) {
+      if (entity is File) {
+        size ??= 0;
+        size += entity.lengthSync();
+      }
+    }
+    return size;
+  }
 
   void unzip(File file, Directory targetDirectory);
 
@@ -340,7 +354,7 @@ class _LinuxUtils extends _PosixUtils {
     for (String entry in osReleaseSplit) {
       entry = entry.trim();
       final List<String> entryKeyValuePair = entry.split('=');
-      if(entryKeyValuePair[0] == key) {
+      if (entryKeyValuePair[0] == key) {
         final String value =  entryKeyValuePair[1];
         // Remove quotes from either end of the value if they exist
         final String quote = value[0];
@@ -472,8 +486,17 @@ class _WindowsUtils extends OperatingSystemUtils {
     required super.processManager,
   }) : super._private();
 
+  HostPlatform? _hostPlatform;
+
   @override
-  HostPlatform hostPlatform = HostPlatform.windows_x64;
+  HostPlatform get hostPlatform {
+    if (_hostPlatform == null) {
+       final Abi abi = Abi.current();
+      _hostPlatform = (abi == Abi.windowsArm64) ? HostPlatform.windows_arm64 :
+                                                  HostPlatform.windows_x64;
+    }
+    return _hostPlatform!;
+  }
 
   @override
   void makeExecutable(File file) {}
@@ -608,19 +631,27 @@ enum HostPlatform {
   linux_x64,
   linux_arm64,
   windows_x64,
+  windows_arm64;
+
+  String get platformName {
+    return switch (this) {
+      HostPlatform.darwin_x64 => 'x64',
+      HostPlatform.darwin_arm64 => 'arm64',
+      HostPlatform.linux_x64 => 'x64',
+      HostPlatform.linux_arm64 => 'arm64',
+      HostPlatform.windows_x64 => 'x64',
+      HostPlatform.windows_arm64 => 'arm64',
+    };
+  }
 }
 
 String getNameForHostPlatform(HostPlatform platform) {
-  switch (platform) {
-    case HostPlatform.darwin_x64:
-      return 'darwin-x64';
-    case HostPlatform.darwin_arm64:
-      return 'darwin-arm64';
-    case HostPlatform.linux_x64:
-      return 'linux-x64';
-    case HostPlatform.linux_arm64:
-      return 'linux-arm64';
-    case HostPlatform.windows_x64:
-      return 'windows-x64';
-  }
+  return switch (platform) {
+    HostPlatform.darwin_x64 => 'darwin-x64',
+    HostPlatform.darwin_arm64 => 'darwin-arm64',
+    HostPlatform.linux_x64 => 'linux-x64',
+    HostPlatform.linux_arm64 => 'linux-arm64',
+    HostPlatform.windows_x64 => 'windows-x64',
+    HostPlatform.windows_arm64 => 'windows-arm64',
+  };
 }

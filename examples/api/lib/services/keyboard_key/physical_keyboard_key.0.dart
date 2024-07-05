@@ -46,7 +46,7 @@ class _MyPhysicalKeyExampleState extends State<MyPhysicalKeyExample> {
 
 // Handles the key events from the RawKeyboardListener and update the
 // _message.
-  KeyEventResult _handleKeyEvent(FocusNode node, RawKeyEvent event) {
+  KeyEventResult _handleKeyEvent(FocusNode node, KeyEvent event) {
     setState(() {
       if (event.physicalKey == PhysicalKeyboardKey.keyA) {
         _message = 'Pressed the key next to CAPS LOCK!';
@@ -73,9 +73,9 @@ class _MyPhysicalKeyExampleState extends State<MyPhysicalKeyExample> {
         style: textTheme.headlineMedium!,
         child: Focus(
           focusNode: _focusNode,
-          onKey: _handleKeyEvent,
-          child: AnimatedBuilder(
-            animation: _focusNode,
+          onKeyEvent: _handleKeyEvent,
+          child: ListenableBuilder(
+            listenable: _focusNode,
             builder: (BuildContext context, Widget? child) {
               if (!_focusNode.hasFocus) {
                 return GestureDetector(

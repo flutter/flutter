@@ -67,7 +67,7 @@ class _ExpansionPanelListExampleState extends State<ExpansionPanelListExample> {
     return ExpansionPanelList(
       expansionCallback: (int index, bool isExpanded) {
         setState(() {
-          _data[index].isExpanded = !isExpanded;
+          _data[index].isExpanded = isExpanded;
         });
       },
       children: _data.map<ExpansionPanel>((Item item) {

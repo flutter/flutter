@@ -204,19 +204,15 @@ class CircleAvatar extends StatelessWidget {
     Color? effectiveBackgroundColor = backgroundColor
       ?? (theme.useMaterial3 ? theme.colorScheme.primaryContainer : null);
     if (effectiveBackgroundColor == null) {
-      switch (ThemeData.estimateBrightnessForColor(textStyle.color!)) {
-        case Brightness.dark:
-          effectiveBackgroundColor = theme.primaryColorLight;
-        case Brightness.light:
-          effectiveBackgroundColor = theme.primaryColorDark;
-      }
+      effectiveBackgroundColor = switch (ThemeData.estimateBrightnessForColor(textStyle.color!)) {
+        Brightness.dark  => theme.primaryColorLight,
+        Brightness.light => theme.primaryColorDark,
+      };
     } else if (effectiveForegroundColor == null) {
-      switch (ThemeData.estimateBrightnessForColor(backgroundColor!)) {
-        case Brightness.dark:
-          textStyle = textStyle.copyWith(color: theme.primaryColorLight);
-        case Brightness.light:
-          textStyle = textStyle.copyWith(color: theme.primaryColorDark);
-      }
+      textStyle = switch (ThemeData.estimateBrightnessForColor(backgroundColor!)) {
+        Brightness.dark  => textStyle.copyWith(color: theme.primaryColorLight),
+        Brightness.light => textStyle.copyWith(color: theme.primaryColorDark),
+      };
     }
     final double minDiameter = _minDiameter;
     final double maxDiameter = _maxDiameter;
@@ -252,10 +248,9 @@ class CircleAvatar extends StatelessWidget {
       child: child == null
           ? null
           : Center(
-              child: MediaQuery(
-                // Need to ignore the ambient textScaleFactor here so that the
-                // text doesn't escape the avatar when the textScaleFactor is large.
-                data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+              // Need to disable text scaling here so that the text doesn't
+              // escape the avatar when the textScaleFactor is large.
+              child: MediaQuery.withNoTextScaling(
                 child: IconTheme(
                   data: theme.iconTheme.copyWith(color: textStyle.color),
                   child: DefaultTextStyle(

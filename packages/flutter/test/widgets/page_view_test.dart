@@ -51,9 +51,8 @@ void main() {
 
   testWidgets('PageView resize from zero-size viewport should not lose state', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/88956
-    final PageController controller = PageController(
-      initialPage: 1,
-    );
+    final PageController controller = PageController(initialPage: 1);
+    addTearDown(controller.dispose);
 
     Widget build(Size size) {
       return Directionality(
@@ -96,9 +95,8 @@ void main() {
 
   testWidgets('Change the page through the controller when zero-size viewport', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/88956
-    final PageController controller = PageController(
-      initialPage: 1,
-    );
+    final PageController controller = PageController(initialPage: 1);
+    addTearDown(controller.dispose);
 
     Widget build(Size size) {
       return Directionality(
@@ -136,9 +134,8 @@ void main() {
 
   testWidgets('_PagePosition.applyViewportDimension should not throw', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/101007
-    final PageController controller = PageController(
-      initialPage: 1,
-    );
+    final PageController controller = PageController(initialPage: 1);
+    addTearDown(controller.dispose);
 
     // Set the starting viewportDimension to 0.0
     await tester.binding.setSurfaceSize(Size.zero);
@@ -176,6 +173,7 @@ void main() {
   testWidgets('PageController cannot return page while unattached',
       (WidgetTester tester) async {
     final PageController controller = PageController();
+    addTearDown(controller.dispose);
     expect(() => controller.page, throwsAssertionError);
   });
 
@@ -286,6 +284,7 @@ void main() {
 
   testWidgets('PageController control test', (WidgetTester tester) async {
     final PageController controller = PageController(initialPage: 4);
+    addTearDown(controller.dispose);
 
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
@@ -384,6 +383,8 @@ void main() {
 
   testWidgets('PageController nextPage and previousPage return Futures that resolve', (WidgetTester tester) async {
     final PageController controller = PageController();
+    addTearDown(controller.dispose);
+
     await tester.pumpWidget(Directionality(
         textDirection: TextDirection.ltr,
         child: PageView(
@@ -497,6 +498,7 @@ void main() {
   testWidgets('Bouncing scroll physics ballistics does not overshoot', (WidgetTester tester) async {
     final List<int> log = <int>[];
     final PageController controller = PageController(viewportFraction: 0.9);
+    addTearDown(controller.dispose);
 
     Widget build(PageController controller, { Size? size }) {
       final Widget pageView = Directionality(
@@ -550,6 +552,7 @@ void main() {
 
   testWidgets('PageView viewportFraction', (WidgetTester tester) async {
     PageController controller = PageController(viewportFraction: 7/8);
+    addTearDown(controller.dispose);
 
     Widget build(PageController controller) {
       return Directionality(
@@ -583,6 +586,7 @@ void main() {
     expect(tester.getTopLeft(find.text('Idaho')), const Offset(750.0, 0.0));
 
     controller = PageController(viewportFraction: 39/40);
+    addTearDown(controller.dispose);
 
     await tester.pumpWidget(build(controller));
 
@@ -656,6 +660,7 @@ void main() {
 
   testWidgets('PageView small viewportFraction', (WidgetTester tester) async {
     final PageController controller = PageController(viewportFraction: 1/8);
+    addTearDown(controller.dispose);
 
     Widget build(PageController controller) {
       return Directionality(
@@ -700,6 +705,7 @@ void main() {
 
   testWidgets('PageView large viewportFraction', (WidgetTester tester) async {
     final PageController controller = PageController(viewportFraction: 5/4);
+    addTearDown(controller.dispose);
 
     Widget build(PageController controller) {
       return Directionality(
@@ -754,12 +760,14 @@ void main() {
       }
 
       final PageController oldController = PageController(viewportFraction: 5/4);
+      addTearDown(oldController.dispose);
       await tester.pumpWidget(build(oldController));
 
       expect(tester.getTopLeft(find.text('Alabama')), const Offset(-100, 0));
       expect(tester.getBottomRight(find.text('Alabama')), const Offset(900.0, 600.0));
 
       final PageController newController = PageController(viewportFraction: 4);
+      addTearDown(newController.dispose);
       await tester.pumpWidget(build(newController));
       newController.jumpToPage(10);
       await tester.pump();
@@ -773,6 +781,7 @@ void main() {
     (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/45096.
       final PageController controller = PageController(viewportFraction: 5/4);
+      addTearDown(controller.dispose);
 
       Widget build(PageController controller) {
         return Directionality(
@@ -810,6 +819,7 @@ void main() {
     (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/23873.
       final PageController controller = PageController(viewportFraction: 1/4);
+      addTearDown(controller.dispose);
       late int tappedIndex;
 
       Widget build() {
@@ -859,6 +869,7 @@ void main() {
       initialPage: kStates.length - 1,
       viewportFraction: 0.5,
     );
+    addTearDown(controller.dispose);
 
     Widget build(Size size) {
       return Directionality(
@@ -899,6 +910,7 @@ void main() {
     final PageController controller = PageController(
       initialPage: kStates.length - 1,
     );
+    addTearDown(controller.dispose);
     int changeIndex = 0;
     Widget build() {
       return Directionality(
@@ -923,6 +935,7 @@ void main() {
 
   testWidgets('PageView can restore page', (WidgetTester tester) async {
     final PageController controller = PageController();
+    addTearDown(controller.dispose);
     expect(
       () => controller.page,
       throwsA(isAssertionError.having(
@@ -983,6 +996,7 @@ void main() {
     expect(controller.page, 2);
 
     final PageController controller2 = PageController(keepPage: false);
+    addTearDown(controller2.dispose);
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: PageStorage(
@@ -1005,6 +1019,7 @@ void main() {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     final PageController controller = PageController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: PageView(
@@ -1059,6 +1074,7 @@ void main() {
 
   testWidgets('Page controller can handle rounding issue', (WidgetTester tester) async {
     final PageController pageController = PageController();
+    addTearDown(pageController.dispose);
 
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
@@ -1081,6 +1097,7 @@ void main() {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     final PageController controller = PageController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: PageView(
@@ -1179,8 +1196,9 @@ void main() {
 
   testWidgets('PageView - precision error inside RenderSliverFixedExtentBoxAdaptor', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/95101
-
     final PageController controller = PageController(initialPage: 152);
+    addTearDown(controller.dispose);
+
     await tester.pumpWidget(
       Center(
         child: SizedBox(
@@ -1202,5 +1220,156 @@ void main() {
     controller.jumpToPage(365);
     await tester.pump();
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('PageView content should not be stretched on precision error', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/126561.
+    final PageController controller = PageController();
+    addTearDown(controller.dispose);
+
+    const double pixel6EmulatorWidth = 411.42857142857144;
+
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(useMaterial3: true),
+      home: Center(
+        child: SizedBox(
+          width: pixel6EmulatorWidth,
+          child: PageView(
+            controller: controller,
+            physics: const PageScrollPhysics().applyTo(const ClampingScrollPhysics()),
+            children: const <Widget>[
+              Center(child: Text('First Page')),
+              Center(child: Text('Second Page')),
+              Center(child: Text('Third Page')),
+            ],
+          ),
+        ),
+      ),
+    ));
+
+    controller.animateToPage(2, duration: const Duration(milliseconds: 300), curve: Curves.ease);
+    await tester.pumpAndSettle();
+
+    final Finder transformFinder = find.descendant(of: find.byType(PageView), matching: find.byType(Transform));
+    expect(transformFinder, findsOneWidget);
+
+    // Get the Transform widget that stretches the PageView.
+    final Transform transform = tester.firstWidget<Transform>(
+      find.descendant(
+        of: find.byType(PageView),
+        matching: find.byType(Transform),
+      ),
+    );
+
+    // Check the stretch factor in the first element of the transform matrix.
+    expect(transform.transform.storage.first, 1.0);
+  });
+
+  testWidgets('PageController onAttach, onDetach', (WidgetTester tester) async {
+    int attach = 0;
+    int detach = 0;
+    final PageController controller = PageController(
+      onAttach: (_) { attach++; },
+      onDetach: (_) { detach++; },
+    );
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(useMaterial3: true),
+      home: Center(
+        child: PageView(
+          controller: controller,
+          physics: const PageScrollPhysics().applyTo(const ClampingScrollPhysics()),
+          children: const <Widget>[
+            Center(child: Text('First Page')),
+            Center(child: Text('Second Page')),
+            Center(child: Text('Third Page')),
+          ],
+        ),
+      ),
+    ));
+    await tester.pumpAndSettle();
+
+    expect(attach, 1);
+    expect(detach, 0);
+
+    await tester.pumpWidget(Container());
+    await tester.pumpAndSettle();
+
+    expect(attach, 1);
+    expect(detach, 1);
+  });
+
+  group('$PageView handles change of controller', () {
+    final GlobalKey key = GlobalKey();
+
+    Widget createPageView(PageController? controller) {
+      return MaterialApp(
+        home: Scaffold(
+          body: PageView(
+            key: key,
+            controller: controller,
+            children: const <Widget>[
+              Center(child: Text('0')),
+              Center(child: Text('1')),
+              Center(child: Text('2')),
+            ],
+          ),
+        ),
+      );
+    }
+
+    Future<void> testPageViewWithController(PageController controller, WidgetTester tester, bool controls) async  {
+      int currentVisiblePage() {
+        return int.parse(tester.widgetList(find.byType(Text)).whereType<Text>().first.data!);
+      }
+
+      final int initialPageInView = currentVisiblePage();
+
+      for (int i = 0; i < 3; i++) {
+        if (controls) {
+          controller.jumpToPage(i);
+          await tester.pumpAndSettle();
+          expect(currentVisiblePage(), i);
+        } else {
+          expect(()=> controller.jumpToPage(i), throwsAssertionError);
+          expect(currentVisiblePage(), initialPageInView);
+        }
+      }
+    }
+
+    testWidgets('null to value', (WidgetTester tester) async {
+      final PageController controller = PageController();
+      addTearDown(controller.dispose);
+      await tester.pumpWidget(createPageView(null));
+      await tester.pumpWidget(createPageView(controller));
+      await testPageViewWithController(controller, tester, true);
+    });
+
+    testWidgets('value to value', (WidgetTester tester) async {
+      final PageController controller1 = PageController();
+      addTearDown(controller1.dispose);
+      final PageController controller2 = PageController();
+      addTearDown(controller2.dispose);
+      await tester.pumpWidget(createPageView(controller1));
+      await testPageViewWithController(controller1, tester, true);
+      await tester.pumpWidget(createPageView(controller2));
+      await testPageViewWithController(controller1, tester, false);
+      await testPageViewWithController(controller2, tester, true);
+    });
+
+    testWidgets('value to null', (WidgetTester tester) async {
+      final PageController controller = PageController();
+      addTearDown(controller.dispose);
+      await tester.pumpWidget(createPageView(controller));
+      await testPageViewWithController(controller, tester, true);
+      await tester.pumpWidget(createPageView(null));
+      await testPageViewWithController(controller, tester, false);
+    });
+
+    testWidgets('null to null', (WidgetTester tester) async {
+      await tester.pumpWidget(createPageView(null));
+      await tester.pumpWidget(createPageView(null));
+    });
   });
 }

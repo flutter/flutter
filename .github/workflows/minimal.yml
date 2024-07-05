@@ -1,0 +1,42 @@
+# Copyright 2023 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+name: Minimal workflow to test github action token
+
+on:
+  workflow_dispatch
+
+permissions: write-all
+
+jobs:
+  minimal_token_test:
+    name: minimal_token_test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout Flutter Repo
+        uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633
+        with:
+          repository: flutter/flutter
+          token: ${{ github.token }}
+          path: flutter
+          ref: master
+          fetch-depth: 0
+      - name: Write a random file
+        run: |
+          cd flutter
+          touch empty.json
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@70a41aba780001da0a30141984ae2a0c95d8704e
+        with:
+          path: flutter
+          commit-message: blah
+          committer: GitHub <noreply@github.com>
+          token: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
+          labels: |
+            cp: review
+          title: '[github actions] testing purposes'
+          reviewers: xilaizhang

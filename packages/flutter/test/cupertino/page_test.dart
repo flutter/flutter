@@ -611,6 +611,12 @@ class _TestRestorableWidgetState extends State<TestRestorableWidget> with Restor
   }
 
   @override
+  void dispose() {
+    super.dispose();
+    counter.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Column(
       children: <Widget>[

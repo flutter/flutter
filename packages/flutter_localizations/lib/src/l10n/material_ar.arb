@@ -35,6 +35,7 @@
   "continueButtonLabel": "المتابعة",
   "copyButtonLabel": "نسخ",
   "cutButtonLabel": "قص",
+  "scanTextButtonLabel": "مسح النص ضوئيًا",
   "okButtonLabel": "حسنًا",
   "pasteButtonLabel": "لصق",
   "selectAllButtonLabel": "اختيار الكل",
@@ -144,5 +145,17 @@
   "scrimLabel": "تمويه",
   "bottomSheetLabel": "بطاقة سفلية",
   "scrimOnTapHint": "إغلاق \"$modalRouteContentName\"",
-  "keyboardKeyShift": "Shift"
+  "keyboardKeyShift": "Shift",
+  "expansionTileExpandedHint": "يُرجى النقر مرّتين للتصغير.",
+  "expansionTileCollapsedHint": "انقر مرّتين للتوسيع",
+  "expansionTileExpandedTapHint": "تصغير",
+  "expansionTileCollapsedTapHint": "وسِّع المربّع لعرض مزيد من التفاصيل.",
+  "expandedHint": "مصغَّر",
+  "collapsedHint": "موسَّع",
+  "menuDismissLabel": "إغلاق القائمة",
+  "lookUpButtonLabel": "النظر إلى أعلى",
+  "searchWebButtonLabel": "البحث على الويب",
+  "shareButtonLabel": "مشاركة…",
+  "clearButtonTooltip": "Clear text",
+  "selectedDateLabel": "Selected"
 }

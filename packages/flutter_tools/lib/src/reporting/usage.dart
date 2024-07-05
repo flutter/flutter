@@ -192,12 +192,12 @@ class _DefaultUsage implements Usage {
     if (!skipAnalyticsSessionSetup) {
       // Report a more detailed OS version string than package:usage does by default.
       analytics.setSessionValue(
-        cdKey(CustomDimensionsEnum.sessionHostOsDetails),
+        CustomDimensionsEnum.sessionHostOsDetails.cdKey,
         globals.os.name,
       );
       // Send the branch name as the "channel".
       analytics.setSessionValue(
-        cdKey(CustomDimensionsEnum.sessionChannelName),
+        CustomDimensionsEnum.sessionChannelName.cdKey,
         flutterVersion.getBranchName(redactUnknownBranches: true),
       );
       // For each flutter experimental feature, record a session value in a comma
@@ -210,7 +210,7 @@ class _DefaultUsage implements Usage {
           .map((Feature feature) => feature.configSetting)
           .join(',');
       analytics.setSessionValue(
-        cdKey(CustomDimensionsEnum.enabledFlutterFeatures),
+        CustomDimensionsEnum.enabledFlutterFeatures.cdKey,
         enabledFeatures,
       );
 
@@ -428,6 +428,7 @@ class TestUsage implements Usage {
   final List<dynamic> exceptions = <dynamic>[];
   final List<TestTimingEvent> timings = <TestTimingEvent>[];
   int ensureAnalyticsSentCalls = 0;
+  bool _printedWelcome = false;
 
   @override
   bool enabled = true;
@@ -438,6 +439,9 @@ class TestUsage implements Usage {
   @override
   String get clientId => 'test-client';
 
+  /// Confirms if the [printWelcome] method was invoked.
+  bool get printedWelcome => _printedWelcome;
+
   @override
   Future<void> ensureAnalyticsSent() async {
     ensureAnalyticsSentCalls++;
@@ -447,7 +451,9 @@ class TestUsage implements Usage {
   Stream<Map<String, dynamic>> get onSend => throw UnimplementedError();
 
   @override
-  void printWelcome() { }
+  void printWelcome() {
+    _printedWelcome = true;
+  }
 
   @override
   void sendCommand(String command, {CustomDimensions? parameters}) {

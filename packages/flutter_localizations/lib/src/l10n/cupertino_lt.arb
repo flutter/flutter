@@ -32,5 +32,14 @@
   "tabSemanticsLabel": "$tabIndex skirtukas iš $tabCount",
   "modalBarrierDismissLabel": "Atsisakyti",
   "searchTextFieldPlaceholderLabel": "Paieška",
+<<<<<<< HEAD
   "noSpellCheckReplacementsLabel": "No Replacements Found"
+=======
+  "noSpellCheckReplacementsLabel": "Nerasta jokių pakeitimų",
+  "menuDismissLabel": "Atsisakyti meniu",
+  "lookUpButtonLabel": "Ieškoti",
+  "searchWebButtonLabel": "Ieškoti žiniatinklyje",
+  "shareButtonLabel": "Bendrinti...",
+  "clearButtonLabel": "Clear"
+>>>>>>> 761747bfc538b5af34aa0d3fac380f1bc331ec49
 }

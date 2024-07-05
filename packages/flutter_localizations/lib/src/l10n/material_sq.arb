@@ -25,6 +25,7 @@
   "continueButtonLabel": "Vazhdo",
   "copyButtonLabel": "Kopjo",
   "cutButtonLabel": "Prit",
+  "scanTextButtonLabel": "Skano tekstin",
   "okButtonLabel": "Në rregull",
   "pasteButtonLabel": "Ngjit",
   "selectAllButtonLabel": "Zgjidh të gjitha",
@@ -133,5 +134,17 @@
   "scrimLabel": "Kanavacë",
   "bottomSheetLabel": "Fleta e poshtme",
   "scrimOnTapHint": "Mbyll $modalRouteContentName",
-  "keyboardKeyShift": "Shift"
+  "keyboardKeyShift": "Shift",
+  "expansionTileExpandedHint": "trokit dy herë për ta palosur",
+  "expansionTileCollapsedHint": "trokit dy herë për ta zgjeruar",
+  "expansionTileExpandedTapHint": "Palos",
+  "expansionTileCollapsedTapHint": "Zgjero për më shumë detaje",
+  "expandedHint": "U palos",
+  "collapsedHint": "U zgjerua",
+  "menuDismissLabel": "Hiqe menynë",
+  "lookUpButtonLabel": "Kërko",
+  "searchWebButtonLabel": "Kërko në ueb",
+  "shareButtonLabel": "Ndaj...",
+  "clearButtonTooltip": "Clear text",
+  "selectedDateLabel": "Selected"
 }

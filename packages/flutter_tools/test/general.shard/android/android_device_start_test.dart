@@ -56,8 +56,7 @@ void main() {
     TargetPlatform.android_x64,
   ]) {
     testWithoutContext('AndroidDevice.startApp allows release builds on $targetPlatform', () async {
-      final String arch = getNameForAndroidArch(
-        getAndroidArchForName(getNameForTargetPlatform(targetPlatform)));
+      final String arch = getAndroidArchForName(getNameForTargetPlatform(targetPlatform)).archName;
       final AndroidDevice device = AndroidDevice('1234', modelID: 'TestModel',
         fileSystem: fileSystem,
         processManager: processManager,
@@ -241,6 +240,7 @@ void main() {
         '--es', 'trace-allowlist', 'bar,baz',
         '--es', 'trace-skia-allowlist', 'skia.a,skia.b',
         '--ez', 'trace-systrace', 'true',
+        '--es', 'trace-to-file', 'path/to/trace.binpb',
         '--ez', 'endless-trace-buffer', 'true',
         '--ez', 'dump-skp-on-shader-compilation', 'true',
         '--ez', 'cache-sksl', 'true',
@@ -272,6 +272,7 @@ void main() {
         traceAllowlist: 'bar,baz',
         traceSkiaAllowlist: 'skia.a,skia.b',
         traceSystrace: true,
+        traceToFile: 'path/to/trace.binpb',
         endlessTraceBuffer: true,
         dumpSkpOnShaderCompilation: true,
         cacheSkSL: true,

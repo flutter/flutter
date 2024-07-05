@@ -57,7 +57,7 @@ import 'theme.dart';
 class BottomAppBar extends StatefulWidget {
   /// Creates a bottom application bar.
   ///
-  /// The [clipBehavior] argument defaults to [Clip.none] and must not be null.
+  /// The [clipBehavior] argument defaults to [Clip.none].
   /// Additionally, [elevation] must be non-negative.
   ///
   /// If [color], [elevation], or [shape] are null, their [BottomAppBarTheme] values will be used.
@@ -94,8 +94,10 @@ class BottomAppBar extends StatefulWidget {
   /// The bottom app bar's background color.
   ///
   /// If this property is null then [BottomAppBarTheme.color] of
-  /// [ThemeData.bottomAppBarTheme] is used. If that's null then
-  /// [ThemeData.bottomAppBarColor] is used.
+  /// [ThemeData.bottomAppBarTheme] is used. If that's null and [ThemeData.useMaterial3]
+  /// is true, the default value is [ColorScheme.surface]; if [ThemeData.useMaterial3]
+  /// is false, then the default value is `Color(0xFF424242)` in dark theme and
+  /// [Colors.white] in light theme.
   final Color? color;
 
   /// The z-coordinate at which to place this bottom app bar relative to its
@@ -118,7 +120,7 @@ class BottomAppBar extends StatefulWidget {
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
-  /// Defaults to [Clip.none], and must not be null.
+  /// Defaults to [Clip.none].
   final Clip clipBehavior;
 
   /// The margin between the [FloatingActionButton] and the [BottomAppBar]'s
@@ -127,13 +129,18 @@ class BottomAppBar extends StatefulWidget {
   /// Not used if [shape] is null.
   final double notchMargin;
 
-  /// The color used as an overlay on [color] to indicate elevation.
+  /// A custom color for the Material 3 surface-tint elevation effect.
   ///
-  /// If this is null, no overlay will be applied. Otherwise the
-  /// color will be composited on top of [color] with an opacity related
-  /// to [elevation] and used to paint the background of the [BottomAppBar].
+  /// This is not recommended for use. [Material 3 spec](https://m3.material.io/styles/color/the-color-system/color-roles)
+  /// introduced a set of tone-based surfaces and surface containers in its [ColorScheme],
+  /// which provide more flexibility. The intention is to eventually remove surface tint color from
+  /// the framework.
   ///
-  /// The default is null.
+  /// If this property is null, then [BottomAppBarTheme.surfaceTintColor]
+  /// of [ThemeData.bottomAppBarTheme] is used. If that is also null, the default
+  /// value is [Colors.transparent].
+  ///
+  /// Ignored if [ThemeData.useMaterial3] is false.
   ///
   /// See [Material.surfaceTintColor] for more details on how this overlay is applied.
   final Color? surfaceTintColor;
@@ -191,7 +198,9 @@ class _BottomAppBarState extends State<BottomAppBar> {
     final double? height = widget.height ?? babTheme.height ?? defaults.height;
     final Color color = widget.color ?? babTheme.color ?? defaults.color!;
     final Color surfaceTintColor = widget.surfaceTintColor ?? babTheme.surfaceTintColor ?? defaults.surfaceTintColor!;
-    final Color effectiveColor = isMaterial3 ? color : ElevationOverlay.applyOverlay(context, color, elevation);
+    final Color effectiveColor = isMaterial3
+      ? ElevationOverlay.applySurfaceTint(color, surfaceTintColor, elevation)
+      : ElevationOverlay.applyOverlay(context, color, elevation);
     final Color shadowColor = widget.shadowColor ?? babTheme.shadowColor ?? defaults.shadowColor!;
 
     final Widget child = SizedBox(
@@ -204,11 +213,7 @@ class _BottomAppBarState extends State<BottomAppBar> {
 
     final Material material = Material(
       key: materialKey,
-      type: isMaterial3 ? MaterialType.canvas : MaterialType.transparency,
-      elevation: elevation,
-      color: isMaterial3 ? effectiveColor : null,
-      surfaceTintColor: surfaceTintColor,
-      shadowColor: shadowColor,
+      type: MaterialType.transparency,
       child: SafeArea(child: child),
     );
 
@@ -276,7 +281,7 @@ class _BottomAppBarDefaultsM2 extends BottomAppBarTheme {
   final BuildContext context;
 
   @override
-  Color? get color => Theme.of(context).bottomAppBarColor;
+  Color? get color => Theme.of(context).brightness == Brightness.dark ? Colors.grey[800]! : Colors.white;
 
   @override
   Color? get surfaceTintColor => Theme.of(context).colorScheme.surfaceTint;
@@ -292,8 +297,6 @@ class _BottomAppBarDefaultsM2 extends BottomAppBarTheme {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_162
-
 class _BottomAppBarDefaultsM3 extends BottomAppBarTheme {
   _BottomAppBarDefaultsM3(this.context)
     : super(
@@ -306,10 +309,10 @@ class _BottomAppBarDefaultsM3 extends BottomAppBarTheme {
   late final ColorScheme _colors = Theme.of(context).colorScheme;
 
   @override
-  Color? get color => _colors.surface;
+  Color? get color => _colors.surfaceContainer;
 
   @override
-  Color? get surfaceTintColor => _colors.surfaceTint;
+  Color? get surfaceTintColor => Colors.transparent;
 
   @override
   Color? get shadowColor => Colors.transparent;

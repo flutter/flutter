@@ -7,9 +7,12 @@ import 'dart:ui' show lerpDouble;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
+import 'button_style.dart';
 import 'color_scheme.dart';
 import 'colors.dart';
+import 'input_decorator.dart';
 import 'material_state.dart';
+import 'text_button.dart';
 import 'text_theme.dart';
 import 'theme.dart';
 
@@ -49,6 +52,7 @@ class DatePickerThemeData with Diagnosticable {
     this.dayForegroundColor,
     this.dayBackgroundColor,
     this.dayOverlayColor,
+    this.dayShape,
     this.todayForegroundColor,
     this.todayBackgroundColor,
     this.todayBorder,
@@ -67,6 +71,10 @@ class DatePickerThemeData with Diagnosticable {
     this.rangePickerHeaderHelpStyle,
     this.rangeSelectionBackgroundColor,
     this.rangeSelectionOverlayColor,
+    this.dividerColor,
+    this.inputDecorationTheme,
+    this.cancelButtonStyle,
+    this.confirmButtonStyle,
   });
 
   /// Overrides the default value of [Dialog.backgroundColor].
@@ -156,12 +164,41 @@ class DatePickerThemeData with Diagnosticable {
   /// indicate that a day in the grid is focused, hovered, or pressed.
   final MaterialStateProperty<Color?>? dayOverlayColor;
 
+  /// Overrides the default shape used to paint the shape decoration of the
+  /// day labels in the grid of the date picker.
+  ///
+  /// If the selected day is the current day, the provided shape with the
+  /// value of [todayBackgroundColor] is used to paint the shape decoration of
+  /// the day label and the value of [todayBorder] and [todayForegroundColor] is
+  /// used to paint the border.
+  ///
+  /// If the selected day is not the current day, the provided shape with the
+  /// value of [dayBackgroundColor] is used to paint the shape decoration of
+  /// the day label.
+  ///
+  /// {@tool dartpad}
+  /// This sample demonstrates how to customize the day selector shape decoration
+  /// using the [dayShape], [todayForegroundColor], [todayBackgroundColor], and
+  /// [todayBorder] properties.
+  ///
+  /// ** See code in examples/api/lib/material/date_picker/date_picker_theme_day_shape.0.dart **
+  /// {@end-tool}
+  final MaterialStateProperty<OutlinedBorder?>? dayShape;
+
   /// Overrides the default color used to paint the
   /// [DatePickerDialog.currentDate] label in the grid of the dialog's
   /// [CalendarDatePicker] and the corresponding year in the dialog's
   /// [YearPicker].
   ///
   /// This will be used instead of the [TextStyle.color] provided in [dayStyle].
+  ///
+  /// {@tool dartpad}
+  /// This sample demonstrates how to customize the day selector shape decoration
+  /// using the [dayShape], [todayForegroundColor], [todayBackgroundColor], and
+  /// [todayBorder] properties.
+  ///
+  /// ** See code in examples/api/lib/material/date_picker/date_picker_theme_day_shape.0.dart **
+  /// {@end-tool}
   final MaterialStateProperty<Color?>? todayForegroundColor;
 
   /// Overrides the default color used to paint the background of the
@@ -174,6 +211,14 @@ class DatePickerThemeData with Diagnosticable {
   ///
   /// The border side's [BorderSide.color] is not used,
   /// [todayForegroundColor] is used instead.
+  ///
+  /// {@tool dartpad}
+  /// This sample demonstrates how to customize the day selector shape decoration
+  /// using the [dayShape], [todayForegroundColor], [todayBackgroundColor], and
+  /// [todayBorder] properties.
+  ///
+  /// ** See code in examples/api/lib/material/date_picker/date_picker_theme_day_shape.0.dart **
+  /// {@end-tool}
   final BorderSide? todayBorder;
 
   /// Overrides the default text style used to paint each of the year
@@ -219,6 +264,11 @@ class DatePickerThemeData with Diagnosticable {
   /// Overrides the default color of the surface tint overlay applied
   /// to the [backgroundColor] of a full screen
   /// [DateRangePickerDialog]'s to indicate elevation.
+  ///
+  /// This is not recommended for use. [Material 3 spec](https://m3.material.io/styles/color/the-color-system/color-roles)
+  /// introduced a set of tone-based surfaces and surface containers in its [ColorScheme],
+  /// which provide more flexibility. The intention is to eventually remove surface tint color from
+  /// the framework.
   ///
   /// See also:
   ///   [Material.surfaceTintColor], which explains how this color is related to
@@ -282,6 +332,21 @@ class DatePickerThemeData with Diagnosticable {
   /// [DateRangePickerDialog] is focused, hovered, or pressed.
   final MaterialStateProperty<Color?>? rangeSelectionOverlayColor;
 
+  /// Overrides the default color used to paint the horizontal divider
+  /// below the header text when dialog is in portrait orientation
+  /// and vertical divider when the dialog is in landscape orientation.
+  final Color? dividerColor;
+
+  /// Overrides the [InputDatePickerFormField]'s input decoration theme.
+  /// If this is null, [ThemeData.inputDecorationTheme] is used instead.
+  final InputDecorationTheme? inputDecorationTheme;
+
+  /// Overrides the default style of the cancel button of a [DatePickerDialog].
+  final ButtonStyle? cancelButtonStyle;
+
+  /// Overrides the default style of the confirm (OK) button of a [DatePickerDialog].
+  final ButtonStyle? confirmButtonStyle;
+
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   DatePickerThemeData copyWith({
@@ -299,6 +364,7 @@ class DatePickerThemeData with Diagnosticable {
     MaterialStateProperty<Color?>? dayForegroundColor,
     MaterialStateProperty<Color?>? dayBackgroundColor,
     MaterialStateProperty<Color?>? dayOverlayColor,
+    MaterialStateProperty<OutlinedBorder?>? dayShape,
     MaterialStateProperty<Color?>? todayForegroundColor,
     MaterialStateProperty<Color?>? todayBackgroundColor,
     BorderSide? todayBorder,
@@ -317,6 +383,10 @@ class DatePickerThemeData with Diagnosticable {
     TextStyle? rangePickerHeaderHelpStyle,
     Color? rangeSelectionBackgroundColor,
     MaterialStateProperty<Color?>? rangeSelectionOverlayColor,
+    Color? dividerColor,
+    InputDecorationTheme? inputDecorationTheme,
+    ButtonStyle? cancelButtonStyle,
+    ButtonStyle? confirmButtonStyle,
   }) {
     return DatePickerThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
@@ -333,6 +403,7 @@ class DatePickerThemeData with Diagnosticable {
       dayForegroundColor: dayForegroundColor ?? this.dayForegroundColor,
       dayBackgroundColor: dayBackgroundColor ?? this.dayBackgroundColor,
       dayOverlayColor: dayOverlayColor ?? this.dayOverlayColor,
+      dayShape: dayShape ?? this.dayShape,
       todayForegroundColor: todayForegroundColor ?? this.todayForegroundColor,
       todayBackgroundColor: todayBackgroundColor ?? this.todayBackgroundColor,
       todayBorder: todayBorder ?? this.todayBorder,
@@ -351,6 +422,10 @@ class DatePickerThemeData with Diagnosticable {
       rangePickerHeaderHelpStyle: rangePickerHeaderHelpStyle ?? this.rangePickerHeaderHelpStyle,
       rangeSelectionBackgroundColor: rangeSelectionBackgroundColor ?? this.rangeSelectionBackgroundColor,
       rangeSelectionOverlayColor: rangeSelectionOverlayColor ?? this.rangeSelectionOverlayColor,
+      dividerColor: dividerColor ?? this.dividerColor,
+      inputDecorationTheme: inputDecorationTheme ?? this.inputDecorationTheme,
+      cancelButtonStyle: cancelButtonStyle ?? this.cancelButtonStyle,
+      confirmButtonStyle: confirmButtonStyle ?? this.confirmButtonStyle,
     );
   }
 
@@ -374,6 +449,7 @@ class DatePickerThemeData with Diagnosticable {
       dayForegroundColor: MaterialStateProperty.lerp<Color?>(a?.dayForegroundColor, b?.dayForegroundColor, t, Color.lerp),
       dayBackgroundColor: MaterialStateProperty.lerp<Color?>(a?.dayBackgroundColor, b?.dayBackgroundColor, t, Color.lerp),
       dayOverlayColor: MaterialStateProperty.lerp<Color?>(a?.dayOverlayColor, b?.dayOverlayColor, t, Color.lerp),
+      dayShape: MaterialStateProperty.lerp<OutlinedBorder?>(a?.dayShape, b?.dayShape, t, OutlinedBorder.lerp),
       todayForegroundColor: MaterialStateProperty.lerp<Color?>(a?.todayForegroundColor, b?.todayForegroundColor, t, Color.lerp),
       todayBackgroundColor: MaterialStateProperty.lerp<Color?>(a?.todayBackgroundColor, b?.todayBackgroundColor, t, Color.lerp),
       todayBorder: _lerpBorderSide(a?.todayBorder, b?.todayBorder, t),
@@ -392,6 +468,10 @@ class DatePickerThemeData with Diagnosticable {
       rangePickerHeaderHelpStyle: TextStyle.lerp(a?.rangePickerHeaderHelpStyle, b?.rangePickerHeaderHelpStyle, t),
       rangeSelectionBackgroundColor: Color.lerp(a?.rangeSelectionBackgroundColor, b?.rangeSelectionBackgroundColor, t),
       rangeSelectionOverlayColor: MaterialStateProperty.lerp<Color?>(a?.rangeSelectionOverlayColor, b?.rangeSelectionOverlayColor, t, Color.lerp),
+      dividerColor: Color.lerp(a?.dividerColor, b?.dividerColor, t),
+      inputDecorationTheme: t < 0.5 ? a?.inputDecorationTheme : b?.inputDecorationTheme,
+      cancelButtonStyle: ButtonStyle.lerp(a?.cancelButtonStyle, b?.cancelButtonStyle, t),
+      confirmButtonStyle: ButtonStyle.lerp(a?.confirmButtonStyle, b?.confirmButtonStyle, t),
     );
   }
 
@@ -421,6 +501,7 @@ class DatePickerThemeData with Diagnosticable {
     dayForegroundColor,
     dayBackgroundColor,
     dayOverlayColor,
+    dayShape,
     todayForegroundColor,
     todayBackgroundColor,
     todayBorder,
@@ -439,6 +520,10 @@ class DatePickerThemeData with Diagnosticable {
     rangePickerHeaderHelpStyle,
     rangeSelectionBackgroundColor,
     rangeSelectionOverlayColor,
+    dividerColor,
+    inputDecorationTheme,
+    cancelButtonStyle,
+    confirmButtonStyle,
   ]);
 
   @override
@@ -461,6 +546,7 @@ class DatePickerThemeData with Diagnosticable {
       && other.dayForegroundColor == dayForegroundColor
       && other.dayBackgroundColor == dayBackgroundColor
       && other.dayOverlayColor == dayOverlayColor
+      && other.dayShape == dayShape
       && other.todayForegroundColor == todayForegroundColor
       && other.todayBackgroundColor == todayBackgroundColor
       && other.todayBorder == todayBorder
@@ -478,7 +564,11 @@ class DatePickerThemeData with Diagnosticable {
       && other.rangePickerHeaderHeadlineStyle == rangePickerHeaderHeadlineStyle
       && other.rangePickerHeaderHelpStyle == rangePickerHeaderHelpStyle
       && other.rangeSelectionBackgroundColor == rangeSelectionBackgroundColor
-      && other.rangeSelectionOverlayColor == rangeSelectionOverlayColor;
+      && other.rangeSelectionOverlayColor == rangeSelectionOverlayColor
+      && other.dividerColor == dividerColor
+      && other.inputDecorationTheme == inputDecorationTheme
+      && other.cancelButtonStyle == cancelButtonStyle
+      && other.confirmButtonStyle == confirmButtonStyle;
   }
 
   @override
@@ -498,6 +588,7 @@ class DatePickerThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('dayForegroundColor', dayForegroundColor, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('dayBackgroundColor', dayBackgroundColor, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('dayOverlayColor', dayOverlayColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<OutlinedBorder?>>('dayShape', dayShape, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('todayForegroundColor', todayForegroundColor, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('todayBackgroundColor', todayBackgroundColor, defaultValue: null));
     properties.add(DiagnosticsProperty<BorderSide?>('todayBorder', todayBorder, defaultValue: null));
@@ -516,6 +607,10 @@ class DatePickerThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<TextStyle>('rangePickerHeaderHelpStyle', rangePickerHeaderHelpStyle, defaultValue: null));
     properties.add(ColorProperty('rangeSelectionBackgroundColor', rangeSelectionBackgroundColor, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('rangeSelectionOverlayColor', rangeSelectionOverlayColor, defaultValue: null));
+    properties.add(ColorProperty('dividerColor', dividerColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<InputDecorationTheme>('inputDecorationTheme', inputDecorationTheme, defaultValue: null));
+    properties.add(DiagnosticsProperty<ButtonStyle>('cancelButtonStyle', cancelButtonStyle, defaultValue: null));
+    properties.add(DiagnosticsProperty<ButtonStyle>('confirmButtonStyle', confirmButtonStyle, defaultValue: null));
   }
 }
 
@@ -621,6 +716,7 @@ class _DatePickerDefaultsM2 extends DatePickerThemeData {
     : super(
         elevation: 24.0,
         shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0))),
+        dayShape: const MaterialStatePropertyAll<OutlinedBorder>(CircleBorder()),
         rangePickerElevation: 0.0,
         rangePickerShape: const RoundedRectangleBorder(),
       );
@@ -633,6 +729,16 @@ class _DatePickerDefaultsM2 extends DatePickerThemeData {
 
   @override
   Color? get headerBackgroundColor => _isDark ? _colors.surface : _colors.primary;
+
+  @override
+  ButtonStyle get cancelButtonStyle {
+    return TextButton.styleFrom();
+  }
+
+  @override
+  ButtonStyle get confirmButtonStyle {
+    return TextButton.styleFrom();
+  }
 
   @override
   Color? get headerForegroundColor => _isDark ? _colors.onSurface : _colors.onPrimary;
@@ -675,23 +781,23 @@ class _DatePickerDefaultsM2 extends DatePickerThemeData {
   MaterialStateProperty<Color?>? get dayOverlayColor =>
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.selected)) {
+        if (states.contains(MaterialState.pressed)) {
+          return _colors.onPrimary.withOpacity(0.38);
+        }
         if (states.contains(MaterialState.hovered)) {
           return _colors.onPrimary.withOpacity(0.08);
         }
         if (states.contains(MaterialState.focused)) {
           return _colors.onPrimary.withOpacity(0.12);
         }
-        if (states.contains(MaterialState.pressed)) {
-          return _colors.onPrimary.withOpacity(0.38);
-        }
       } else {
+        if (states.contains(MaterialState.pressed)) {
+          return _colors.onSurfaceVariant.withOpacity(0.12);
+        }
         if (states.contains(MaterialState.hovered)) {
           return _colors.onSurfaceVariant.withOpacity(0.08);
         }
         if (states.contains(MaterialState.focused)) {
-          return _colors.onSurfaceVariant.withOpacity(0.12);
-        }
-        if (states.contains(MaterialState.pressed)) {
           return _colors.onSurfaceVariant.withOpacity(0.12);
         }
       }
@@ -746,23 +852,23 @@ class _DatePickerDefaultsM2 extends DatePickerThemeData {
   MaterialStateProperty<Color?>? get rangeSelectionOverlayColor =>
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.selected)) {
+        if (states.contains(MaterialState.pressed)) {
+          return _colors.onPrimary.withOpacity(0.38);
+        }
         if (states.contains(MaterialState.hovered)) {
           return _colors.onPrimary.withOpacity(0.08);
         }
         if (states.contains(MaterialState.focused)) {
           return _colors.onPrimary.withOpacity(0.12);
         }
-        if (states.contains(MaterialState.pressed)) {
-          return _colors.onPrimary.withOpacity(0.38);
-        }
       } else {
+        if (states.contains(MaterialState.pressed)) {
+          return _colors.onSurfaceVariant.withOpacity(0.12);
+        }
         if (states.contains(MaterialState.hovered)) {
           return _colors.onSurfaceVariant.withOpacity(0.08);
         }
         if (states.contains(MaterialState.focused)) {
-          return _colors.onSurfaceVariant.withOpacity(0.12);
-        }
-        if (states.contains(MaterialState.pressed)) {
           return _colors.onSurfaceVariant.withOpacity(0.12);
         }
       }
@@ -777,13 +883,14 @@ class _DatePickerDefaultsM2 extends DatePickerThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_162
-
 class _DatePickerDefaultsM3 extends DatePickerThemeData {
   _DatePickerDefaultsM3(this.context)
     : super(
         elevation: 6.0,
         shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(28.0))),
+        // TODO(tahatesser): Update this to use token when gen_defaults
+        // supports `CircleBorder` for fully rounded corners.
+        dayShape: const MaterialStatePropertyAll<OutlinedBorder>(CircleBorder()),
         rangePickerElevation: 0.0,
         rangePickerShape: const RoundedRectangleBorder(),
       );
@@ -794,13 +901,23 @@ class _DatePickerDefaultsM3 extends DatePickerThemeData {
   late final TextTheme _textTheme = _theme.textTheme;
 
   @override
-  Color? get backgroundColor => _colors.surface;
+  Color? get backgroundColor => _colors.surfaceContainerHigh;
+
+  @override
+  ButtonStyle get cancelButtonStyle {
+    return TextButton.styleFrom();
+  }
+
+  @override
+  ButtonStyle get confirmButtonStyle {
+    return TextButton.styleFrom();
+  }
 
   @override
   Color? get shadowColor => Colors.transparent;
 
   @override
-  Color? get surfaceTintColor => _colors.surfaceTint;
+  Color? get surfaceTintColor => Colors.transparent;
 
   @override
   Color? get headerBackgroundColor => Colors.transparent;
@@ -846,24 +963,24 @@ class _DatePickerDefaultsM3 extends DatePickerThemeData {
   MaterialStateProperty<Color?>? get dayOverlayColor =>
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.selected)) {
+        if (states.contains(MaterialState.pressed)) {
+          return _colors.onPrimary.withOpacity(0.1);
+        }
         if (states.contains(MaterialState.hovered)) {
           return _colors.onPrimary.withOpacity(0.08);
         }
         if (states.contains(MaterialState.focused)) {
-          return _colors.onPrimary.withOpacity(0.12);
-        }
-        if (states.contains(MaterialState.pressed)) {
-          return _colors.onPrimary.withOpacity(0.12);
+          return _colors.onPrimary.withOpacity(0.1);
         }
       } else {
+        if (states.contains(MaterialState.pressed)) {
+          return _colors.onSurfaceVariant.withOpacity(0.1);
+        }
         if (states.contains(MaterialState.hovered)) {
           return _colors.onSurfaceVariant.withOpacity(0.08);
         }
         if (states.contains(MaterialState.focused)) {
-          return _colors.onSurfaceVariant.withOpacity(0.12);
-        }
-        if (states.contains(MaterialState.pressed)) {
-          return _colors.onSurfaceVariant.withOpacity(0.12);
+          return _colors.onSurfaceVariant.withOpacity(0.1);
         }
       }
       return null;
@@ -913,24 +1030,24 @@ class _DatePickerDefaultsM3 extends DatePickerThemeData {
   MaterialStateProperty<Color?>? get yearOverlayColor =>
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.selected)) {
+        if (states.contains(MaterialState.pressed)) {
+          return _colors.onPrimary.withOpacity(0.1);
+        }
         if (states.contains(MaterialState.hovered)) {
           return _colors.onPrimary.withOpacity(0.08);
         }
         if (states.contains(MaterialState.focused)) {
-          return _colors.onPrimary.withOpacity(0.12);
-        }
-        if (states.contains(MaterialState.pressed)) {
-          return _colors.onPrimary.withOpacity(0.12);
+          return _colors.onPrimary.withOpacity(0.1);
         }
       } else {
+        if (states.contains(MaterialState.pressed)) {
+          return _colors.onSurfaceVariant.withOpacity(0.1);
+        }
         if (states.contains(MaterialState.hovered)) {
           return _colors.onSurfaceVariant.withOpacity(0.08);
         }
         if (states.contains(MaterialState.focused)) {
-          return _colors.onSurfaceVariant.withOpacity(0.12);
-        }
-        if (states.contains(MaterialState.pressed)) {
-          return _colors.onSurfaceVariant.withOpacity(0.12);
+          return _colors.onSurfaceVariant.withOpacity(0.1);
         }
       }
       return null;
@@ -948,14 +1065,14 @@ class _DatePickerDefaultsM3 extends DatePickerThemeData {
   @override
   MaterialStateProperty<Color?>? get rangeSelectionOverlayColor =>
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.pressed)) {
+        return _colors.onPrimaryContainer.withOpacity(0.1);
+      }
       if (states.contains(MaterialState.hovered)) {
-        return null;
+        return _colors.onPrimaryContainer.withOpacity(0.08);
       }
       if (states.contains(MaterialState.focused)) {
-        return null;
-      }
-      if (states.contains(MaterialState.pressed)) {
-        return null;
+        return _colors.onPrimaryContainer.withOpacity(0.1);
       }
       return null;
     });
@@ -971,8 +1088,6 @@ class _DatePickerDefaultsM3 extends DatePickerThemeData {
 
   @override
   TextStyle? get rangePickerHeaderHelpStyle => _textTheme.titleSmall;
-
-
 }
 
 // END GENERATED TOKEN PROPERTIES - DatePicker

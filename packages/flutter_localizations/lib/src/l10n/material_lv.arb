@@ -26,6 +26,7 @@
   "continueButtonLabel": "Turpināt",
   "copyButtonLabel": "Kopēt",
   "cutButtonLabel": "Izgriezt",
+  "scanTextButtonLabel": "Skenēt tekstu",
   "okButtonLabel": "LABI",
   "pasteButtonLabel": "Ielīmēt",
   "selectAllButtonLabel": "Atlasīt visu",
@@ -135,5 +136,17 @@
   "scrimLabel": "Pārklājums",
   "bottomSheetLabel": "Ekrāna apakšdaļas lapa",
   "scrimOnTapHint": "Aizvērt $modalRouteContentName",
-  "keyboardKeyShift": "Pārslēgšanas taustiņš"
+  "keyboardKeyShift": "Pārslēgšanas taustiņš",
+  "expansionTileExpandedHint": "dubultskāriens, lai sakļautu",
+  "expansionTileCollapsedHint": "dubultskāriens, lai izvērstu",
+  "expansionTileExpandedTapHint": "Sakļaut",
+  "expansionTileCollapsedTapHint": "Izvērst, lai iegūtu plašāku informāciju",
+  "expandedHint": "Sakļauts",
+  "collapsedHint": "Izvērsts",
+  "menuDismissLabel": "Nerādīt izvēlni",
+  "lookUpButtonLabel": "Meklēt",
+  "searchWebButtonLabel": "Meklēt tīmeklī",
+  "shareButtonLabel": "Kopīgot…",
+  "clearButtonTooltip": "Clear text",
+  "selectedDateLabel": "Selected"
 }

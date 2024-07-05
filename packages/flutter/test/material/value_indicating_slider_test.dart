@@ -10,6 +10,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+
 void main() {
   testWidgets('Slider value indicator', (WidgetTester tester) async {
     await _buildValueIndicatorStaticSlider(
@@ -189,8 +190,9 @@ void main() {
   });
 
   group('Material 2', () {
-    // Tests that are only relevant for Material 2. Once ThemeData.useMaterial3
-    // is turned on by default, these tests can be removed.
+    // These tests are only relevant for Material 2. Once Material 2
+    // support is deprecated and the APIs are removed, these tests
+    // can be deleted.
 
     testWidgets('Slider value indicator', (WidgetTester tester) async {
       await _buildValueIndicatorStaticSlider(
@@ -364,8 +366,14 @@ Future<void> _pressStartThumb(WidgetTester tester) async {
   final Offset topLeft = tester.getTopLeft(find.byType(Slider));
   final Offset left = (bottomLeft + topLeft) / 2;
   final Offset start = left + const Offset(24, 0);
-  await tester.startGesture(start);
+  final TestGesture gesture = await tester.startGesture(start);
   await tester.pumpAndSettle();
+
+  addTearDown(()async {
+    // Finish gesture to release resources.
+    await gesture.up();
+    await tester.pumpAndSettle();
+  });
 }
 
 Future<void> _pressMiddleThumb(WidgetTester tester) async {
@@ -378,8 +386,14 @@ Future<void> _pressEndThumb(WidgetTester tester) async {
   final Offset topRight = tester.getTopRight(find.byType(Slider));
   final Offset right = (bottomRight + topRight) / 2;
   final Offset start = right - const Offset(24, 0);
-  await tester.startGesture(start);
+  final TestGesture gesture = await tester.startGesture(start);
   await tester.pumpAndSettle();
+
+  addTearDown(()async {
+    // Finish gesture to release resources.
+    await gesture.up();
+    await tester.pumpAndSettle();
+  });
 }
 
 Future<void> _buildValueIndicatorStaticSlider(
@@ -391,13 +405,15 @@ Future<void> _buildValueIndicatorStaticSlider(
 }) async {
   await tester.pumpWidget(
     MaterialApp(
+      debugShowCheckedModeBanner: false, // https://github.com/flutter/flutter/issues/143616
       theme: ThemeData(useMaterial3: useMaterial3),
       home: Scaffold(
         body: Builder(
           builder: (BuildContext context) {
             return Center(
-              child: MediaQuery(
-                data: MediaQueryData(textScaleFactor: textScale),
+              child: MediaQuery.withClampedTextScaling(
+                minScaleFactor: textScale,
+                maxScaleFactor: textScale,
                 child: SliderTheme(
                   data: Theme.of(context).sliderTheme.copyWith(
                     showValueIndicator: ShowValueIndicator.always,

@@ -55,6 +55,8 @@ class PopupMenuThemeData with Diagnosticable {
     this.enableFeedback,
     this.mouseCursor,
     this.position,
+    this.iconColor,
+    this.iconSize,
   });
 
   /// The background color of the popup menu.
@@ -95,6 +97,12 @@ class PopupMenuThemeData with Diagnosticable {
   /// popup menu appear directly over the button that was used to create it.
   final PopupMenuPosition? position;
 
+  /// The color of the icon in the popup menu button.
+  final Color? iconColor;
+
+  /// The size of the icon in the popup menu button.
+  final double? iconSize;
+
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   PopupMenuThemeData copyWith({
@@ -108,6 +116,8 @@ class PopupMenuThemeData with Diagnosticable {
     bool? enableFeedback,
     MaterialStateProperty<MouseCursor?>? mouseCursor,
     PopupMenuPosition? position,
+    Color? iconColor,
+    double? iconSize,
   }) {
     return PopupMenuThemeData(
       color: color ?? this.color,
@@ -120,6 +130,8 @@ class PopupMenuThemeData with Diagnosticable {
       enableFeedback: enableFeedback ?? this.enableFeedback,
       mouseCursor: mouseCursor ?? this.mouseCursor,
       position: position ?? this.position,
+      iconColor: iconColor ?? this.iconColor,
+      iconSize: iconSize ?? this.iconSize,
     );
   }
 
@@ -143,6 +155,8 @@ class PopupMenuThemeData with Diagnosticable {
       enableFeedback: t < 0.5 ? a?.enableFeedback : b?.enableFeedback,
       mouseCursor: t < 0.5 ? a?.mouseCursor : b?.mouseCursor,
       position: t < 0.5 ? a?.position : b?.position,
+      iconColor: Color.lerp(a?.iconColor, b?.iconColor, t),
+      iconSize: lerpDouble(a?.iconSize, b?.iconSize, t),
     );
   }
 
@@ -158,6 +172,8 @@ class PopupMenuThemeData with Diagnosticable {
     enableFeedback,
     mouseCursor,
     position,
+    iconColor,
+    iconSize,
   );
 
   @override
@@ -178,7 +194,9 @@ class PopupMenuThemeData with Diagnosticable {
         && other.labelTextStyle == labelTextStyle
         && other.enableFeedback == enableFeedback
         && other.mouseCursor == mouseCursor
-        && other.position == position;
+        && other.position == position
+        && other.iconColor == iconColor
+        && other.iconSize == iconSize;
   }
 
   @override
@@ -194,6 +212,8 @@ class PopupMenuThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<bool>('enableFeedback', enableFeedback, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<MouseCursor?>>('mouseCursor', mouseCursor, defaultValue: null));
     properties.add(EnumProperty<PopupMenuPosition?>('position', position, defaultValue: null));
+    properties.add(ColorProperty('iconColor', iconColor, defaultValue: null));
+    properties.add(DoubleProperty('iconSize', iconSize, defaultValue: null));
   }
 }
 
@@ -205,8 +225,6 @@ class PopupMenuThemeData with Diagnosticable {
 class PopupMenuTheme extends InheritedTheme {
   /// Creates a popup menu theme that controls the configurations for
   /// popup menus in its widget subtree.
-  ///
-  /// The data argument must not be null.
   const PopupMenuTheme({
     super.key,
     required this.data,

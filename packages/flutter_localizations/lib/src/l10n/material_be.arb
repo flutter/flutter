@@ -31,6 +31,7 @@
   "continueButtonLabel": "Працягнуць",
   "copyButtonLabel": "Капіраваць",
   "cutButtonLabel": "Выразаць",
+  "scanTextButtonLabel": "Сканіраваць тэкст",
   "okButtonLabel": "ОК",
   "pasteButtonLabel": "Уставіць",
   "selectAllButtonLabel": "Выбраць усе",
@@ -139,5 +140,17 @@
   "scrimLabel": "Палатно",
   "bottomSheetLabel": "Ніжні аркуш",
   "scrimOnTapHint": "Закрыць: $modalRouteContentName",
-  "keyboardKeyShift": "Shift"
+  "keyboardKeyShift": "Shift",
+  "expansionTileExpandedHint": "двойчы націснуць, каб згарнуць",
+  "expansionTileCollapsedHint": "двойчы націснуць, каб разгарнуць",
+  "expansionTileExpandedTapHint": "Згарнуць",
+  "expansionTileCollapsedTapHint": "Разгарніце, каб даведацца больш",
+  "expandedHint": "Згорнута",
+  "collapsedHint": "Разгорнута",
+  "menuDismissLabel": "Закрыць меню",
+  "lookUpButtonLabel": "Знайсці",
+  "searchWebButtonLabel": "Пошук у сетцы",
+  "shareButtonLabel": "Абагуліць...",
+  "clearButtonTooltip": "Clear text",
+  "selectedDateLabel": "Selected"
 }

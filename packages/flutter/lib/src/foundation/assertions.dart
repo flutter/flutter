@@ -48,8 +48,7 @@ typedef StackTraceDemangler = StackTrace Function(StackTrace details);
 ///  * [RepetitiveStackFrameFilter], which uses this class to compare against [StackFrame]s.
 @immutable
 class PartialStackFrame {
-  /// Creates a new [PartialStackFrame] instance. All arguments are required and
-  /// must not be null.
+  /// Creates a new [PartialStackFrame] instance.
   const PartialStackFrame({
     required this.package,
     required this.className,
@@ -397,9 +396,6 @@ class FlutterErrorDetails with Diagnosticable {
   ///
   /// The framework calls this constructor when catching an exception that will
   /// subsequently be reported using [FlutterError.onError].
-  ///
-  /// The [exception] must not be null; other arguments can be left to
-  /// their default values.
   const FlutterErrorDetails({
     required this.exception,
     this.stack,
@@ -724,7 +720,7 @@ class FlutterErrorDetails with Diagnosticable {
             'provide substantially more information in this error message to help you determine '
             'and fix the underlying cause.\n'
             'In either case, please report this assertion by filing a bug on GitHub:\n'
-            '  https://github.com/flutter/flutter/issues/new?template=2_bug.md',
+            '  https://github.com/flutter/flutter/issues/new?template=2_bug.yml',
           ));
         }
       }
@@ -857,7 +853,7 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
           '\nThis error should still help you solve your problem, '
           'however please also report this malformed error in the '
           'framework by filing a bug on GitHub:\n'
-          '  https://github.com/flutter/flutter/issues/new?template=2_bug.md',
+          '  https://github.com/flutter/flutter/issues/new?template=2_bug.yml',
         ),
       ]),
     );
@@ -883,7 +879,7 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
           '\nThis error should still help you solve your problem, '
           'however please also report this malformed error in the '
           'framework by filing a bug on GitHub:\n'
-          '  https://github.com/flutter/flutter/issues/new?template=2_bug.md',
+          '  https://github.com/flutter/flutter/issues/new?template=2_bug.yml',
         ));
         throw FlutterError.fromParts(message);
       }
@@ -1009,7 +1005,7 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
       isInDebugMode = true;
       return true;
     }());
-    final bool reportError = isInDebugMode || details.silent != true; // could be null
+    final bool reportError = isInDebugMode || !details.silent;
     if (!reportError && !forceReport) {
       return;
     }
@@ -1117,7 +1113,7 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
 
     // Only include packages we actually elided from.
     final List<String> where = <String>[
-      for (MapEntry<String, int> entry in removedPackagesAndClasses.entries)
+      for (final MapEntry<String, int> entry in removedPackagesAndClasses.entries)
         if (entry.value > 0)
           entry.key,
     ]..sort();

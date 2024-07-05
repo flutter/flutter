@@ -18,9 +18,18 @@
   "cutButtonLabel": "Couper",
   "copyButtonLabel": "Copier",
   "pasteButtonLabel": "Coller",
-  "selectAllButtonLabel": "Tout sélect.",
+  "selectAllButtonLabel": "Tout sélectionner",
   "tabSemanticsLabel": "Onglet $tabIndex sur $tabCount",
   "modalBarrierDismissLabel": "Ignorer",
   "searchTextFieldPlaceholderLabel": "Rechercher",
+<<<<<<< HEAD
   "noSpellCheckReplacementsLabel": "No Replacements Found"
+=======
+  "noSpellCheckReplacementsLabel": "Aucun remplacement trouvé",
+  "menuDismissLabel": "Fermer le menu",
+  "lookUpButtonLabel": "Recherche visuelle",
+  "searchWebButtonLabel": "Rechercher sur le Web",
+  "shareButtonLabel": "Partager…",
+  "clearButtonLabel": "Clear"
+>>>>>>> 761747bfc538b5af34aa0d3fac380f1bc331ec49
 }

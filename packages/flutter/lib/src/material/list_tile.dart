@@ -296,8 +296,6 @@ enum ListTileTitleAlignment {
 /// Here is an example of a custom list item that resembles a YouTube-related
 /// video list item created with [Expanded] and [Container] widgets.
 ///
-/// ![Custom list item a](https://flutter.github.io/assets-for-api-docs/assets/widgets/custom_list_item_a.png)
-///
 /// ** See code in examples/api/lib/material/list_tile/custom_list_item.0.dart **
 /// {@end-tool}
 ///
@@ -305,8 +303,6 @@ enum ListTileTitleAlignment {
 /// Here is an example of an article list item with multiline titles and
 /// subtitles. It utilizes [Row]s and [Column]s, as well as [Expanded] and
 /// [AspectRatio] widgets to organize its layout.
-///
-/// ![Custom list item b](https://flutter.github.io/assets-for-api-docs/assets/widgets/custom_list_item_b.png)
 ///
 /// ** See code in examples/api/lib/material/list_tile/custom_list_item.1.dart **
 /// {@end-tool}
@@ -368,6 +364,7 @@ class ListTile extends StatelessWidget {
     this.horizontalTitleGap,
     this.minVerticalPadding,
     this.minLeadingWidth,
+    this.minTileHeight,
     this.titleAlignment,
   }) : assert(!isThreeLine || subtitle != null);
 
@@ -428,6 +425,7 @@ class ListTile extends StatelessWidget {
   /// line limits using [Text.maxLines].
   final bool isThreeLine;
 
+  /// {@template flutter.material.ListTile.dense}
   /// Whether this list tile is part of a vertically dense list.
   ///
   /// If this property is null then its value is based on [ListTileTheme.dense].
@@ -435,6 +433,7 @@ class ListTile extends StatelessWidget {
   /// Dense list tiles default to a smaller height.
   ///
   /// It is not recommended to set [dense] to true when [ThemeData.useMaterial3] is true.
+  /// {@endtemplate}
   final bool? dense;
 
   /// Defines how compact the list tile's layout will be.
@@ -513,22 +512,25 @@ class ListTile extends StatelessWidget {
   ///
   /// If this property is null, then [ListTileThemeData.titleTextStyle] is used.
   /// If that is also null and [ThemeData.useMaterial3] is true, [TextTheme.bodyLarge]
-  /// will be used. Otherwise, If ListTile style is [ListTileStyle.list],
-  /// [TextTheme.titleMedium] will be used and if ListTile style is [ListTileStyle.drawer],
-  /// [TextTheme.bodyLarge] will be used.
+  /// with [ColorScheme.onSurface] will be used. Otherwise, If ListTile style is
+  /// [ListTileStyle.list], [TextTheme.titleMedium] will be used and if ListTile style
+  /// is [ListTileStyle.drawer], [TextTheme.bodyLarge] will be used.
   final TextStyle? titleTextStyle;
 
   /// The text style for ListTile's [subtitle].
   ///
   /// If this property is null, then [ListTileThemeData.subtitleTextStyle] is used.
-  /// If that is also null, [TextTheme.bodyMedium] will be used.
+  /// If that is also null and [ThemeData.useMaterial3] is true, [TextTheme.bodyMedium]
+  /// with [ColorScheme.onSurfaceVariant] will be used, otherwise [TextTheme.bodyMedium]
+  /// with [TextTheme.bodySmall] color will be used.
   final TextStyle? subtitleTextStyle;
 
   /// The text style for ListTile's [leading] and [trailing].
   ///
   /// If this property is null, then [ListTileThemeData.leadingAndTrailingTextStyle] is used.
   /// If that is also null and [ThemeData.useMaterial3] is true, [TextTheme.labelSmall]
-  /// will be used, otherwise [TextTheme.bodyMedium] will be used.
+  /// with [ColorScheme.onSurfaceVariant] will be used, otherwise [TextTheme.bodyMedium]
+  /// will be used.
   final TextStyle? leadingAndTrailingTextStyle;
 
   /// Defines the font used for the [title].
@@ -668,6 +670,16 @@ class ListTile extends StatelessWidget {
   /// that is also null, then a default value of 40 is used.
   final double? minLeadingWidth;
 
+  /// {@template flutter.material.ListTile.minTileHeight}
+  /// The minimum height allocated for the [ListTile] widget.
+  ///
+  /// If this is null, default tile heights are 56.0, 72.0, and 88.0 for one,
+  /// two, and three lines of text respectively. If `isDense` is true, these
+  /// defaults are changed to 48.0, 64.0, and 76.0. A visual density value or
+  /// a large title will also adjust the default tile heights.
+  /// {@endtemplate}
+  final double? minTileHeight;
+
   /// Defines how [ListTile.leading] and [ListTile.trailing] are
   /// vertically aligned relative to the [ListTile]'s titles
   /// ([ListTile.title] and [ListTile.subtitle]).
@@ -802,7 +814,7 @@ class ListTile extends StatelessWidget {
       subtitleStyle = subtitleTextStyle
         ?? tileTheme.subtitleTextStyle
         ?? defaults.subtitleTextStyle!;
-      final Color? subtitleColor = effectiveColor ?? theme.textTheme.bodySmall!.color;
+      final Color? subtitleColor = effectiveColor;
       subtitleStyle = subtitleStyle.copyWith(
         color: subtitleColor,
         fontSize: _isDenseLayout(theme, tileTheme) ? 12.0 : null,
@@ -883,6 +895,7 @@ class ListTile extends StatelessWidget {
                   horizontalTitleGap: horizontalTitleGap ?? tileTheme.horizontalTitleGap ?? 16,
                   minVerticalPadding: minVerticalPadding ?? tileTheme.minVerticalPadding ?? defaults.minVerticalPadding!,
                   minLeadingWidth: minLeadingWidth ?? tileTheme.minLeadingWidth ?? defaults.minLeadingWidth!,
+                  minTileHeight: minTileHeight ?? tileTheme.minTileHeight,
                   titleAlignment: effectiveTitleAlignment,
                 ),
               ),
@@ -896,10 +909,6 @@ class ListTile extends StatelessWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<Widget>('leading', leading, defaultValue: null));
-    properties.add(DiagnosticsProperty<Widget>('title', title, defaultValue: null));
-    properties.add(DiagnosticsProperty<Widget>('subtitle', subtitle, defaultValue: null));
-    properties.add(DiagnosticsProperty<Widget>('trailing', trailing, defaultValue: null));
     properties.add(FlagProperty('isThreeLine', value: isThreeLine, ifTrue:'THREE_LINE', ifFalse: 'TWO_LINE', showName: true, defaultValue: false));
     properties.add(FlagProperty('dense', value: dense, ifTrue: 'true', ifFalse: 'false', showName: true));
     properties.add(DiagnosticsProperty<VisualDensity>('visualDensity', visualDensity, defaultValue: null));
@@ -967,7 +976,7 @@ enum _ListTileSlot {
   trailing,
 }
 
-class _ListTile extends RenderObjectWidget with SlottedMultiChildRenderObjectWidgetMixin<_ListTileSlot> {
+class _ListTile extends SlottedMultiChildRenderObjectWidget<_ListTileSlot, RenderBox> {
   const _ListTile({
     this.leading,
     required this.title,
@@ -981,6 +990,7 @@ class _ListTile extends RenderObjectWidget with SlottedMultiChildRenderObjectWid
     required this.horizontalTitleGap,
     required this.minVerticalPadding,
     required this.minLeadingWidth,
+    this.minTileHeight,
     this.subtitleBaselineType,
     required this.titleAlignment,
   });
@@ -998,6 +1008,7 @@ class _ListTile extends RenderObjectWidget with SlottedMultiChildRenderObjectWid
   final double horizontalTitleGap;
   final double minVerticalPadding;
   final double minLeadingWidth;
+  final double? minTileHeight;
   final ListTileTitleAlignment titleAlignment;
 
   @override
@@ -1005,16 +1016,12 @@ class _ListTile extends RenderObjectWidget with SlottedMultiChildRenderObjectWid
 
   @override
   Widget? childForSlot(_ListTileSlot slot) {
-    switch (slot) {
-      case _ListTileSlot.leading:
-        return leading;
-      case _ListTileSlot.title:
-        return title;
-      case _ListTileSlot.subtitle:
-        return subtitle;
-      case _ListTileSlot.trailing:
-        return trailing;
-    }
+    return switch (slot) {
+      _ListTileSlot.leading  => leading,
+      _ListTileSlot.title    => title,
+      _ListTileSlot.subtitle => subtitle,
+      _ListTileSlot.trailing => trailing,
+    };
   }
 
   @override
@@ -1029,6 +1036,7 @@ class _ListTile extends RenderObjectWidget with SlottedMultiChildRenderObjectWid
       horizontalTitleGap: horizontalTitleGap,
       minVerticalPadding: minVerticalPadding,
       minLeadingWidth: minLeadingWidth,
+      minTileHeight: minTileHeight,
       titleAlignment: titleAlignment,
     );
   }
@@ -1044,12 +1052,13 @@ class _ListTile extends RenderObjectWidget with SlottedMultiChildRenderObjectWid
       ..subtitleBaselineType = subtitleBaselineType
       ..horizontalTitleGap = horizontalTitleGap
       ..minLeadingWidth = minLeadingWidth
+      ..minTileHeight = minTileHeight
       ..minVerticalPadding = minVerticalPadding
       ..titleAlignment = titleAlignment;
   }
 }
 
-class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_ListTileSlot> {
+class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_ListTileSlot, RenderBox> {
   _RenderListTile({
     required bool isDense,
     required VisualDensity visualDensity,
@@ -1060,7 +1069,8 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
     required double horizontalTitleGap,
     required double minVerticalPadding,
     required double minLeadingWidth,
-    required ListTileTitleAlignment titleAlignment,
+    double? minTileHeight,
+    required ListTileTitleAlignment titleAlignment
   }) : _isDense = isDense,
        _visualDensity = visualDensity,
        _isThreeLine = isThreeLine,
@@ -1070,6 +1080,7 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
        _horizontalTitleGap = horizontalTitleGap,
        _minVerticalPadding = minVerticalPadding,
        _minLeadingWidth = minLeadingWidth,
+       _minTileHeight = minTileHeight,
        _titleAlignment = titleAlignment;
 
   RenderBox? get leading => childForSlot(_ListTileSlot.leading);
@@ -1186,6 +1197,16 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
     markNeedsLayout();
   }
 
+  double? _minTileHeight;
+  double? get minTileHeight => _minTileHeight;
+  set minTileHeight(double? value) {
+    if (_minTileHeight == value) {
+      return;
+    }
+    _minTileHeight = value;
+    markNeedsLayout();
+  }
+
   ListTileTitleAlignment get titleAlignment => _titleAlignment;
   ListTileTitleAlignment _titleAlignment;
   set titleAlignment(ListTileTitleAlignment value) {
@@ -1245,21 +1266,23 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
   @override
   double computeMinIntrinsicHeight(double width) {
     return math.max(
-      _defaultTileHeight,
+      minTileHeight ?? _defaultTileHeight,
       title!.getMinIntrinsicHeight(width) + (subtitle?.getMinIntrinsicHeight(width) ?? 0.0),
     );
   }
 
   @override
   double computeMaxIntrinsicHeight(double width) {
-    return computeMinIntrinsicHeight(width);
+    return getMinIntrinsicHeight(width);
   }
 
   @override
-  double computeDistanceToActualBaseline(TextBaseline baseline) {
+  double? computeDistanceToActualBaseline(TextBaseline baseline) {
     assert(title != null);
     final BoxParentData parentData = title!.parentData! as BoxParentData;
-    return parentData.offset.dy + title!.getDistanceToActualBaseline(baseline)!;
+    final BaselineOffset offset = BaselineOffset(title!.getDistanceToActualBaseline(baseline))
+                                + parentData.offset.dy;
+    return offset.offset;
   }
 
   static double? _boxBaseline(RenderBox box, TextBaseline baseline) {
@@ -1350,19 +1373,17 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
       assert(isOneLine);
     }
 
-    final double defaultTileHeight = _defaultTileHeight;
-
     double tileHeight;
     double titleY;
     double? subtitleY;
     if (!hasSubtitle) {
-      tileHeight = math.max(defaultTileHeight, titleSize.height + 2.0 * _minVerticalPadding);
+      tileHeight = math.max(minTileHeight ?? _defaultTileHeight, titleSize.height + 2.0 * _minVerticalPadding);
       titleY = (tileHeight - titleSize.height) / 2.0;
     } else {
       assert(subtitleBaselineType != null);
       titleY = titleBaseline! - _boxBaseline(title!, titleBaselineType)!;
       subtitleY = subtitleBaseline! - _boxBaseline(subtitle!, subtitleBaselineType!)! + visualDensity.vertical * 2.0;
-      tileHeight = defaultTileHeight;
+      tileHeight = minTileHeight ?? _defaultTileHeight;
 
       // If the title and subtitle overlap, move the title upwards by half
       // the overlap and the subtitle down by the same amount, and adjust
@@ -1384,55 +1405,27 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
       }
     }
 
-    final double leadingY;
-    final double trailingY;
+    final double leadingDiff = tileHeight - leadingSize.height;
+    final double trailingDiff = tileHeight - trailingSize.height;
 
-    switch (titleAlignment) {
-      case ListTileTitleAlignment.threeLine: {
-        if (isThreeLine) {
-          leadingY = _minVerticalPadding;
-          trailingY = _minVerticalPadding;
-        } else {
-          leadingY = (tileHeight - leadingSize.height) / 2.0;
-          trailingY = (tileHeight - trailingSize.height) / 2.0;
-        }
-        break;
-      }
-      case ListTileTitleAlignment.titleHeight: {
-        // This attempts to implement the redlines for the vertical position of the
-        // leading and trailing icons on the spec page:
-        //   https://m2.material.io/components/lists#specs
-        // The interpretation for these redlines is as follows:
-        //  - For large tiles (> 72dp), both leading and trailing controls should be
-        //    a fixed distance from top. As per guidelines this is set to 16dp.
-        //  - For smaller tiles, trailing should always be centered. Leading can be
-        //    centered or closer to the top. It should never be further than 16dp
-        //    to the top.
-        if (tileHeight > 72.0) {
-          leadingY = 16.0;
-          trailingY = 16.0;
-        } else {
-          leadingY = math.min((tileHeight - leadingSize.height) / 2.0, 16.0);
-          trailingY = (tileHeight - trailingSize.height) / 2.0;
-        }
-        break;
-      }
-      case ListTileTitleAlignment.top: {
-        leadingY = _minVerticalPadding;
-        trailingY = _minVerticalPadding;
-        break;
-      }
-      case ListTileTitleAlignment.center: {
-        leadingY = (tileHeight - leadingSize.height) / 2.0;
-        trailingY = (tileHeight - trailingSize.height) / 2.0;
-        break;
-      }
-      case ListTileTitleAlignment.bottom: {
-        leadingY = tileHeight - leadingSize.height - _minVerticalPadding;
-        trailingY = tileHeight - trailingSize.height - _minVerticalPadding;
-        break;
-      }
-    }
+    final (double leadingY, double trailingY) = switch (titleAlignment) {
+      ListTileTitleAlignment.threeLine when isThreeLine => (_minVerticalPadding, _minVerticalPadding),
+      ListTileTitleAlignment.threeLine => (leadingDiff / 2.0, trailingDiff / 2.0),
+      // This attempts to implement the redlines for the vertical position of the
+      // leading and trailing icons on the spec page:
+      //   https://m2.material.io/components/lists#specs
+      //
+      // For large tiles (> 72dp), both leading and trailing controls should be
+      // a fixed distance from top. As per guidelines this is set to 16dp.
+      ListTileTitleAlignment.titleHeight when tileHeight > 72.0 => (16.0, 16.0),
+      // For smaller tiles, trailing should always be centered. Leading can be
+      // centered or closer to the top. It should never be further than 16dp
+      // to the top.
+      ListTileTitleAlignment.titleHeight => (math.min(leadingDiff / 2.0, 16.0), trailingDiff / 2.0),
+      ListTileTitleAlignment.top => (_minVerticalPadding, _minVerticalPadding),
+      ListTileTitleAlignment.center => (leadingDiff / 2.0, trailingDiff / 2.0),
+      ListTileTitleAlignment.bottom => (leadingDiff - _minVerticalPadding, trailingDiff - _minVerticalPadding),
+    };
 
     switch (textDirection) {
       case TextDirection.rtl: {
@@ -1524,16 +1517,15 @@ class _LisTileDefaultsM2 extends ListTileThemeData {
 
   @override
   TextStyle? get titleTextStyle {
-    switch (style!) {
-      case ListTileStyle.drawer:
-        return _textTheme.bodyLarge;
-      case ListTileStyle.list:
-        return _textTheme.titleMedium;
-    }
+    return switch (style!) {
+      ListTileStyle.drawer => _textTheme.bodyLarge,
+      ListTileStyle.list   => _textTheme.titleMedium,
+    };
   }
 
   @override
-  TextStyle? get subtitleTextStyle => _textTheme.bodyMedium;
+  TextStyle? get subtitleTextStyle => _textTheme.bodyMedium!
+    .copyWith(color: _textTheme.bodySmall!.color);
 
   @override
   TextStyle? get leadingAndTrailingTextStyle => _textTheme.bodyMedium;
@@ -1543,14 +1535,13 @@ class _LisTileDefaultsM2 extends ListTileThemeData {
 
   @override
   Color? get iconColor {
-    switch (_theme.brightness) {
-      case Brightness.light:
-        // For the sake of backwards compatibility, the default for unselected
-        // tiles is Colors.black45 rather than colorScheme.onSurface.withAlpha(0x73).
-        return Colors.black45;
-      case Brightness.dark:
-        return null; // null, Use current icon theme color
-    }
+    return switch (_theme.brightness) {
+      // For the sake of backwards compatibility, the default for unselected
+      // tiles is Colors.black45 rather than colorScheme.onSurface.withAlpha(0x73).
+      Brightness.light => Colors.black45,
+      // null -> use current icon theme color
+      Brightness.dark => null,
+    };
   }
 }
 
@@ -1560,8 +1551,6 @@ class _LisTileDefaultsM2 extends ListTileThemeData {
 // "END GENERATED" comments are generated from data in the Material
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
-
-// Token database version: v0_162
 
 class _LisTileDefaultsM3 extends ListTileThemeData {
   _LisTileDefaultsM3(this.context)
@@ -1581,13 +1570,13 @@ class _LisTileDefaultsM3 extends ListTileThemeData {
   Color? get tileColor =>  Colors.transparent;
 
   @override
-  TextStyle? get titleTextStyle => _textTheme.bodyLarge;
+  TextStyle? get titleTextStyle => _textTheme.bodyLarge!.copyWith(color: _colors.onSurface);
 
   @override
-  TextStyle? get subtitleTextStyle => _textTheme.bodyMedium;
+  TextStyle? get subtitleTextStyle => _textTheme.bodyMedium!.copyWith(color: _colors.onSurfaceVariant);
 
   @override
-  TextStyle? get leadingAndTrailingTextStyle => _textTheme.labelSmall;
+  TextStyle? get leadingAndTrailingTextStyle => _textTheme.labelSmall!.copyWith(color: _colors.onSurfaceVariant);
 
   @override
   Color? get selectedColor => _colors.primary;

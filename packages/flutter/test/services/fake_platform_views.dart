@@ -183,28 +183,21 @@ class FakeAndroidPlatformViewsController {
   void invokeViewFocused(int viewId) {
     final MethodCodec codec = SystemChannels.platform_views.codec;
     final ByteData data = codec.encodeMethodCall(MethodCall('viewFocused', viewId));
-    ServicesBinding.instance.defaultBinaryMessenger
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .handlePlatformMessage(SystemChannels.platform_views.name, data, (ByteData? data) {});
   }
 
   Future<dynamic> _onMethodCall(MethodCall call) {
-    switch(call.method) {
-      case 'create':
-        return _create(call);
-      case 'dispose':
-        return _dispose(call);
-      case 'resize':
-        return _resize(call);
-      case 'touch':
-        return _touch(call);
-      case 'setDirection':
-        return _setDirection(call);
-      case 'clearFocus':
-        return _clearFocus(call);
-      case 'offset':
-        return _offset(call);
-    }
-    return Future<dynamic>.sync(() => null);
+    return switch (call.method) {
+      'create'       => _create(call),
+      'dispose'      => _dispose(call),
+      'resize'       => _resize(call),
+      'touch'        => _touch(call),
+      'setDirection' => _setDirection(call),
+      'clearFocus'   => _clearFocus(call),
+      'offset'       => _offset(call),
+      _ => Future<dynamic>.sync(() => null),
+    };
   }
 
   Future<dynamic> _create(MethodCall call) async {
@@ -395,22 +388,18 @@ class FakeIosPlatformViewsController {
   void invokeViewFocused(int viewId) {
     final MethodCodec codec = SystemChannels.platform_views.codec;
     final ByteData data = codec.encodeMethodCall(MethodCall('viewFocused', viewId));
-    ServicesBinding.instance.defaultBinaryMessenger
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .handlePlatformMessage(SystemChannels.platform_views.name, data, (ByteData? data) {});
   }
 
   Future<dynamic> _onMethodCall(MethodCall call) {
-    switch(call.method) {
-      case 'create':
-        return _create(call);
-      case 'dispose':
-        return _dispose(call);
-      case 'acceptGesture':
-        return _acceptGesture(call);
-      case 'rejectGesture':
-        return _rejectGesture(call);
-    }
-    return Future<dynamic>.sync(() => null);
+    return switch (call.method) {
+      'create'        => _create(call),
+      'dispose'       => _dispose(call),
+      'acceptGesture' => _acceptGesture(call),
+      'rejectGesture' => _rejectGesture(call),
+      _ => Future<dynamic>.sync(() => null),
+    };
   }
 
   Future<dynamic> _create(MethodCall call) async {
@@ -471,38 +460,55 @@ class FakeIosPlatformViewsController {
   }
 }
 
-class FakeHtmlPlatformViewsController {
-  FakeHtmlPlatformViewsController() {
+class FakeMacosPlatformViewsController {
+  FakeMacosPlatformViewsController() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform_views, _onMethodCall);
   }
 
-  Iterable<FakeHtmlPlatformView> get views => _views.values;
-  final Map<int, FakeHtmlPlatformView> _views = <int, FakeHtmlPlatformView>{};
+  Iterable<FakeAppKitView> get views => _views.values;
+  final Map<int, FakeAppKitView> _views = <int, FakeAppKitView>{};
 
   final Set<String> _registeredViewTypes = <String>{};
 
-  late Completer<void> resizeCompleter;
+  // When this completer is non null, the 'create' method channel call will be
+  // delayed until it completes.
+  Completer<void>? creationDelay;
 
-  Completer<void>? createCompleter;
+  // Maps a view id to the number of gestures it accepted so far.
+  final Map<int, int> gesturesAccepted = <int, int>{};
+
+  // Maps a view id to the number of gestures it rejected so far.
+  final Map<int, int> gesturesRejected = <int, int>{};
 
   void registerViewType(String viewType) {
     _registeredViewTypes.add(viewType);
   }
 
+  void invokeViewFocused(int viewId) {
+    final MethodCodec codec = SystemChannels.platform_views.codec;
+    final ByteData data = codec.encodeMethodCall(MethodCall('viewFocused', viewId));
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .handlePlatformMessage(SystemChannels.platform_views.name, data, (ByteData? data) {});
+  }
+
   Future<dynamic> _onMethodCall(MethodCall call) {
-    switch(call.method) {
-      case 'create':
-        return _create(call);
-      case 'dispose':
-        return _dispose(call);
-    }
-    return Future<dynamic>.sync(() => null);
+    return switch (call.method) {
+      'create'        => _create(call),
+      'dispose'       => _dispose(call),
+      'acceptGesture' => _acceptGesture(call),
+      'rejectGesture' => _rejectGesture(call),
+      _ => Future<dynamic>.sync(() => null),
+    };
   }
 
   Future<dynamic> _create(MethodCall call) async {
+    if (creationDelay != null) {
+      await creationDelay!.future;
+    }
     final Map<dynamic, dynamic> args = call.arguments as Map<dynamic, dynamic>;
     final int id = args['id'] as int;
     final String viewType = args['viewType'] as String;
+    final Uint8List? creationParams = args['params'] as Uint8List?;
 
     if (_views.containsKey(id)) {
       throw PlatformException(
@@ -518,11 +524,23 @@ class FakeHtmlPlatformViewsController {
       );
     }
 
-    if (createCompleter != null) {
-      await createCompleter!.future;
-    }
+    _views[id] = FakeAppKitView(id, viewType, creationParams);
+    gesturesAccepted[id] = 0;
+    gesturesRejected[id] = 0;
+    return Future<int?>.sync(() => null);
+  }
 
-    _views[id] = FakeHtmlPlatformView(id, viewType);
+  Future<dynamic> _acceptGesture(MethodCall call) async {
+    final Map<dynamic, dynamic> args = call.arguments as Map<dynamic, dynamic>;
+    final int id = args['id'] as int;
+    gesturesAccepted[id] = gesturesAccepted[id]! + 1;
+    return Future<int?>.sync(() => null);
+  }
+
+  Future<dynamic> _rejectGesture(MethodCall call) async {
+    final Map<dynamic, dynamic> args = call.arguments as Map<dynamic, dynamic>;
+    final int id = args['id'] as int;
+    gesturesRejected[id] = gesturesRejected[id]! + 1;
     return Future<int?>.sync(() => null);
   }
 
@@ -657,20 +675,22 @@ class FakeUiKitView {
 }
 
 @immutable
-class FakeHtmlPlatformView {
-  const FakeHtmlPlatformView(this.id, this.type);
+class FakeAppKitView {
+  const FakeAppKitView(this.id, this.type, [this.creationParams]);
 
   final int id;
   final String type;
+  final Uint8List? creationParams;
 
   @override
   bool operator ==(Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is FakeHtmlPlatformView
+    return other is FakeAppKitView
         && other.id == id
-        && other.type == type;
+        && other.type == type
+        && other.creationParams == creationParams;
   }
 
   @override
@@ -678,6 +698,6 @@ class FakeHtmlPlatformView {
 
   @override
   String toString() {
-    return 'FakeHtmlPlatformView(id: $id, type: $type)';
+    return 'FakeAppKitView(id: $id, type: $type, creationParams: $creationParams)';
   }
 }

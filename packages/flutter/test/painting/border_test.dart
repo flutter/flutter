@@ -273,7 +273,7 @@ void main() {
     expect(error.diagnostics.length, 1);
     expect(
       error.diagnostics[0].toStringDeep(),
-      'A Border can only draw strokeAlign different than\nBorderSide.strokeAlignInside on borders with uniform colors and\nstyles.\n',
+      'A Border can only draw strokeAlign different than\nBorderSide.strokeAlignInside on borders with uniform colors.\n',
     );
   });
 
@@ -341,8 +341,8 @@ void main() {
 
     // This falls into non-uniform border because of strokeAlign.
     await tester.pumpWidget(buildWidget(border: allowedBorderVariations));
-    expect(tester.takeException(), isNull,
-        reason: 'Border with non-uniform strokeAlign should not fail.');
+    expect(tester.takeException(), isAssertionError,
+        reason: 'Border with non-uniform strokeAlign should fail.');
 
     await tester.pumpWidget(buildWidget(
       border: allowedBorderVariations,
@@ -364,8 +364,8 @@ void main() {
         borderRadius: BorderRadius.circular(25),
       ),
     );
-    expect(tester.takeException(), isAssertionError,
-        reason: 'Border with non-uniform styles should fail with borderRadius.');
+    expect(tester.takeException(), isNull,
+        reason: 'Border with non-uniform styles should work with borderRadius.');
 
     await tester.pumpWidget(
       buildWidget(
@@ -381,6 +381,24 @@ void main() {
     expect(tester.takeException(), isAssertionError,
         reason: 'Border with non-uniform colors should fail with borderRadius.');
 
+    await tester.pumpWidget(
+      buildWidget(
+        border: const Border(bottom: BorderSide(width: 0)),
+        borderRadius: BorderRadius.zero,
+      ),
+    );
+    expect(tester.takeException(), isNull,
+        reason: 'Border with a side.width == 0 should work without borderRadius (hairline border).');
+
+    await tester.pumpWidget(
+      buildWidget(
+        border: const Border(bottom: BorderSide(width: 0)),
+        borderRadius: BorderRadius.circular(40),
+      ),
+    );
+    expect(tester.takeException(), isAssertionError,
+        reason: 'Border with width == 0 and borderRadius should fail (hairline border).');
+
     // Tests for BorderDirectional.
     const BorderDirectional allowedBorderDirectionalVariations = BorderDirectional(
       start: BorderSide(width: 5),
@@ -390,7 +408,7 @@ void main() {
     );
 
     await tester.pumpWidget(buildWidget(border: allowedBorderDirectionalVariations));
-    expect(tester.takeException(), isNull);
+    expect(tester.takeException(), isAssertionError);
 
     await tester.pumpWidget(buildWidget(
       border: allowedBorderDirectionalVariations,
@@ -402,4 +420,71 @@ void main() {
     await tester.pumpWidget(buildWidget(border: allowedBorderDirectionalVariations, boxShape: BoxShape.circle));
     expect(tester.takeException(), isNull);
   });
+
+  test('Compound borders with differing preferPaintInteriors', () {
+    expect(ShapeWithInterior().preferPaintInterior, isTrue);
+    expect(ShapeWithoutInterior().preferPaintInterior, isFalse);
+    expect((ShapeWithInterior() + ShapeWithInterior()).preferPaintInterior, isTrue);
+    expect((ShapeWithInterior() + ShapeWithoutInterior()).preferPaintInterior, isFalse);
+    expect((ShapeWithoutInterior() + ShapeWithInterior()).preferPaintInterior, isFalse);
+    expect((ShapeWithoutInterior() + ShapeWithoutInterior()).preferPaintInterior, isFalse);
+  });
+}
+
+class ShapeWithInterior extends ShapeBorder {
+  @override
+  bool get preferPaintInterior => true;
+
+  @override
+  ShapeBorder scale(double t) {
+    return this;
+  }
+
+  @override
+  EdgeInsetsGeometry get dimensions => EdgeInsets.zero;
+
+  @override
+  Path getInnerPath(Rect rect, { TextDirection? textDirection }) {
+    return Path();
+  }
+
+  @override
+  Path getOuterPath(Rect rect, { TextDirection? textDirection }) {
+    return Path();
+  }
+
+  @override
+  void paintInterior(Canvas canvas, Rect rect, Paint paint, { TextDirection? textDirection }) { }
+
+  @override
+  void paint(Canvas canvas, Rect rect, { TextDirection? textDirection }) { }
+}
+
+class ShapeWithoutInterior extends ShapeBorder {
+  @override
+  bool get preferPaintInterior => false;
+
+  @override
+  ShapeBorder scale(double t) {
+    return this;
+  }
+
+  @override
+  EdgeInsetsGeometry get dimensions => EdgeInsets.zero;
+
+  @override
+  Path getInnerPath(Rect rect, { TextDirection? textDirection }) {
+    return Path();
+  }
+
+  @override
+  Path getOuterPath(Rect rect, { TextDirection? textDirection }) {
+    return Path();
+  }
+
+  @override
+  void paintInterior(Canvas canvas, Rect rect, Paint paint, { TextDirection? textDirection }) { }
+
+  @override
+  void paint(Canvas canvas, Rect rect, { TextDirection? textDirection }) { }
 }

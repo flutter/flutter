@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../painting/image_test_utils.dart' show TestImageProvider;
 
@@ -303,9 +304,12 @@ Future<void> main() async {
   testWidgets('Heroes still animate after hero controller is swapped.', (WidgetTester tester) async {
     final GlobalKey<NavigatorState> key = GlobalKey<NavigatorState>();
     final UniqueKey heroKey = UniqueKey();
+    final HeroController controller1 = HeroController();
+    addTearDown(controller1.dispose);
+
     await tester.pumpWidget(
       HeroControllerScope(
-        controller: HeroController(),
+        controller: controller1,
         child: TestDependencies(
           child: Navigator(
             key: key,
@@ -351,15 +355,19 @@ Future<void> main() async {
         );
       },
     ));
+
     expect(find.byKey(heroKey), findsNothing);
     // Begins the navigation
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 30));
     expect(find.byKey(heroKey), isOnstage);
+    final HeroController controller2 = HeroController();
+    addTearDown(controller2.dispose);
+
     // Pumps a new hero controller.
     await tester.pumpWidget(
       HeroControllerScope(
-        controller: HeroController(),
+        controller: controller2,
         child: TestDependencies(
           child: Navigator(
             key: key,
@@ -388,6 +396,7 @@ Future<void> main() async {
         ),
       ),
     );
+
     // The original animation still flies.
     expect(find.byKey(heroKey), isOnstage);
     // Waits for the animation finishes.
@@ -1182,22 +1191,20 @@ Future<void> main() async {
     await tester.pump(const Duration(milliseconds: 100));
     expect(tester.getTopLeft(find.byKey(heroABKey)).dy, 100.0);
 
-    bool isVisible(Element node) {
-      bool visible = true;
-      node.visitAncestorElements((Element ancestor) {
-        final RenderObject r = ancestor.renderObject!;
-        if (r is RenderAnimatedOpacity && r.opacity.value == 0) {
-          visible = false;
+    bool isVisible(RenderObject node) {
+      RenderObject? currentNode = node;
+      while (currentNode != null) {
+        if (currentNode is RenderAnimatedOpacity && currentNode.opacity.value == 0) {
           return false;
         }
-        return true;
-      });
-      return visible;
+        currentNode = currentNode.parent;
+      }
+      return true;
     }
 
     // Of all heroes only one should be visible now.
-    final Iterable<Element> elements = find.text('Hero').evaluate();
-    expect(elements.where(isVisible).length, 1);
+    final Iterable<RenderObject> renderObjects = find.text('Hero').evaluate().map((Element e) => e.renderObject!);
+    expect(renderObjects.where(isVisible).length, 1);
 
     // Hero BC's flight finishes normally.
     await tester.pump(const Duration(milliseconds: 300));
@@ -2919,9 +2926,10 @@ Future<void> main() async {
   testWidgets('toHero becomes unpaintable after the transition begins', (WidgetTester tester) async {
     final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
 
     RenderAnimatedOpacity? findRenderAnimatedOpacity() {
-      AbstractNode? parent = tester.renderObject(find.byType(Placeholder));
+      RenderObject? parent = tester.renderObject(find.byType(Placeholder));
       while (parent is RenderObject && parent is! RenderAnimatedOpacity) {
         parent = parent.parent;
       }
@@ -3134,6 +3142,13 @@ Future<void> main() async {
     expect(tester.getTopLeft(find.byType(Image)).dy, moreOrLessEquals(forwardRest, epsilon: 0.1));
     await tester.pumpAndSettle();
     expect(tester.getTopLeft(find.byType(Image)).dy, moreOrLessEquals(forwardRest, epsilon: 0.1));
+  });
+
+  test('HeroController dispatches memory events', () async {
+    await expectLater(
+      await memoryEvents(() => HeroController().dispose(), HeroController),
+      areCreateAndDispose,
+    );
   });
 }
 

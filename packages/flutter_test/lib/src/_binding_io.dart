@@ -9,11 +9,9 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:path/path.dart' as path;
-// ignore: deprecated_member_use
-import 'package:test_api/test_api.dart' as test_package;
+import 'package:test_api/scaffolding.dart' as test_package;
 
 import 'binding.dart';
-import 'deprecated.dart';
 
 /// Ensure the appropriate test binding is initialized.
 TestWidgetsFlutterBinding ensureInitialized([@visibleForTesting Map<String, String>? environment]) {
@@ -40,9 +38,9 @@ void mockFlutterAssets() {
 
   /// Navigation related actions (pop, push, replace) broadcasts these actions via
   /// platform messages.
-  SystemChannels.navigation.setMockMethodCallHandler((MethodCall methodCall) async {});
+  TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.navigation, (MethodCall methodCall) async { return null; });
 
-  ServicesBinding.instance.defaultBinaryMessenger.setMockMessageHandler('flutter/assets', (ByteData? message) {
+  TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMessageHandler('flutter/assets', (ByteData? message) {
     assert(message != null);
     String key = utf8.decode(message!.buffer.asUint8List());
     File asset = File(path.join(assetFolderPath, key));
@@ -73,17 +71,21 @@ void mockFlutterAssets() {
 class _MockHttpOverrides extends HttpOverrides {
   bool warningPrinted = false;
   @override
-  HttpClient createHttpClient(SecurityContext? _) {
+  HttpClient createHttpClient(SecurityContext? context) {
     if (!warningPrinted) {
       test_package.printOnFailure(
-        'Warning: At least one test in this suite creates an HttpClient. When\n'
-        'running a test suite that uses TestWidgetsFlutterBinding, all HTTP\n'
-        'requests will return status code 400, and no network request will\n'
-        'actually be made. Any test expecting a real network connection and\n'
+        'Warning: At least one test in this suite creates an HttpClient. When '
+        'running a test suite that uses TestWidgetsFlutterBinding, all HTTP '
+        'requests will return status code 400, and no network request will '
+        'actually be made. Any test expecting a real network connection and '
         'status code will fail.\n'
-        'To test code that needs an HttpClient, provide your own HttpClient\n'
-        'implementation to the code under test, so that your test can\n'
-        'consistently provide a testable response to the code under test.');
+        'To test code that needs an HttpClient, provide your own HttpClient '
+        'implementation to the code under test, so that your test can '
+        'consistently provide a testable response to the code under test.'
+          .split('\n')
+          .expand<String>((String line) => debugWordWrap(line, FlutterError.wrapWidth))
+          .join('\n'),
+      );
       warningPrinted = true;
     }
     return _MockHttpClient();
@@ -126,7 +128,7 @@ class _MockHttpClient implements HttpClient {
   bool Function(X509Certificate cert, String host, int port)? badCertificateCallback;
 
   @override
-  Function(String line)? keyLog;
+  void Function(String line)? keyLog;
 
   @override
   void close({ bool force = false }) { }

@@ -7,9 +7,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-
 import '../widgets/clipboard_utils.dart';
 import '../widgets/editable_text_utils.dart';
+import '../widgets/live_text_utils.dart';
+import '../widgets/text_selection_toolbar_utils.dart';
 
 void main() {
   final MockClipboard mockClipboard = MockClipboard();
@@ -105,6 +106,8 @@ void main() {
 
   testWidgets('Can build from EditableTextState', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
+    final TextEditingController controller = TextEditingController();
+    final FocusNode focusNode = FocusNode();
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -112,9 +115,9 @@ void main() {
             child: SizedBox(
               width: 400,
               child: EditableText(
-                controller: TextEditingController(),
+                controller: controller,
                 backgroundCursorColor: const Color(0xff00ffff),
-                focusNode: FocusNode(),
+                focusNode: focusNode,
                 style: const TextStyle(),
                 cursorColor: const Color(0xff00ffff),
                 selectionControls: materialTextSelectionHandleControls,
@@ -162,6 +165,8 @@ void main() {
       case TargetPlatform.macOS:
         expect(find.byType(CupertinoDesktopTextSelectionToolbarButton), findsOneWidget);
     }
+    controller.dispose();
+    focusNode.dispose();
   },
     skip: kIsWeb, // [intended] on web the browser handles the context menu.
     variant: TargetPlatformVariant.all(),
@@ -183,6 +188,10 @@ void main() {
               onCut: () {},
               onPaste: () {},
               onSelectAll: () {},
+              onLiveTextInput: () {},
+              onLookUp: () {},
+              onSearchWeb: () {},
+              onShare: () {},
             ),
           ),
         ),
@@ -190,25 +199,74 @@ void main() {
     );
 
     expect(find.byKey(key), findsOneWidget);
-    expect(find.text('Copy'), findsOneWidget);
-    expect(find.text('Cut'), findsOneWidget);
-    expect(find.text('Paste'), findsOneWidget);
 
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
+        expect(find.byType(TextSelectionToolbarTextButton), findsNWidgets(6));
+        expect(find.text('Cut'), findsOneWidget);
+        expect(find.text('Copy'), findsOneWidget);
+        expect(find.text('Paste'), findsOneWidget);
+        expect(find.text('Share'), findsOneWidget);
         expect(find.text('Select all'), findsOneWidget);
-        expect(find.byType(TextSelectionToolbarTextButton), findsNWidgets(4));
+        expect(find.text('Look Up'), findsOneWidget);
+        expect(findMaterialOverflowNextButton(), findsOneWidget); // Material overflow buttons are not TextSelectionToolbarTextButton.
+
+        await tapMaterialOverflowNextButton(tester);
+
+        expect(find.byType(TextSelectionToolbarTextButton), findsNWidgets(2));
+        expect(find.text('Search Web'), findsOneWidget);
+        expect(findLiveTextButton(), findsOneWidget);
+        expect(findMaterialOverflowBackButton(), findsOneWidget); // Material overflow buttons are not TextSelectionToolbarTextButton.
+
       case TargetPlatform.iOS:
+        expect(find.byType(CupertinoTextSelectionToolbarButton), findsNWidgets(6));
+        expect(find.text('Cut'), findsOneWidget);
+        expect(find.text('Copy'), findsOneWidget);
+        expect(find.text('Paste'), findsOneWidget);
         expect(find.text('Select All'), findsOneWidget);
+        expect(find.text('Look Up'), findsOneWidget);
+        expect(findCupertinoOverflowNextButton(), findsOneWidget);
+
+        await tapCupertinoOverflowNextButton(tester);
+
         expect(find.byType(CupertinoTextSelectionToolbarButton), findsNWidgets(4));
+        expect(findCupertinoOverflowBackButton(), findsOneWidget);
+        expect(find.text('Search Web'), findsOneWidget);
+        expect(find.text('Share...'), findsOneWidget);
+        expect(findLiveTextButton(), findsOneWidget);
+
+      case TargetPlatform.fuchsia:
+        expect(find.byType(TextSelectionToolbarTextButton), findsNWidgets(8));
+        expect(find.text('Cut'), findsOneWidget);
+        expect(find.text('Copy'), findsOneWidget);
+        expect(find.text('Paste'), findsOneWidget);
+        expect(find.text('Select all'), findsOneWidget);
+        expect(find.text('Look Up'), findsOneWidget);
+        expect(find.text('Search Web'), findsOneWidget);
+        expect(find.text('Share'), findsOneWidget);
+
       case TargetPlatform.linux:
       case TargetPlatform.windows:
+        expect(find.byType(DesktopTextSelectionToolbarButton), findsNWidgets(8));
+        expect(find.text('Cut'), findsOneWidget);
+        expect(find.text('Copy'), findsOneWidget);
+        expect(find.text('Paste'), findsOneWidget);
         expect(find.text('Select all'), findsOneWidget);
-        expect(find.byType(DesktopTextSelectionToolbarButton), findsNWidgets(4));
+        expect(find.text('Look Up'), findsOneWidget);
+        expect(find.text('Search Web'), findsOneWidget);
+        expect(find.text('Share'), findsOneWidget);
+        expect(findLiveTextButton(), findsOneWidget);
+
       case TargetPlatform.macOS:
+        expect(find.byType(CupertinoDesktopTextSelectionToolbarButton), findsNWidgets(8));
+        expect(find.text('Cut'), findsOneWidget);
+        expect(find.text('Copy'), findsOneWidget);
+        expect(find.text('Paste'), findsOneWidget);
         expect(find.text('Select All'), findsOneWidget);
-        expect(find.byType(CupertinoDesktopTextSelectionToolbarButton), findsNWidgets(4));
+        expect(find.text('Look Up'), findsOneWidget);
+        expect(find.text('Search Web'), findsOneWidget);
+        expect(find.text('Share...'), findsOneWidget);
+        expect(findLiveTextButton(), findsOneWidget);
     }
   },
     skip: kIsWeb, // [intended] on web the browser handles the context menu.
@@ -223,6 +281,7 @@ void main() {
 
       Set<ContextMenuButtonType> buttonTypes = <ContextMenuButtonType>{};
       final TextEditingController controller = TextEditingController();
+      final FocusNode focusNode = FocusNode();
 
       await tester.pumpWidget(
         MaterialApp(
@@ -231,7 +290,7 @@ void main() {
               child: EditableText(
                 controller: controller,
                 backgroundCursorColor: Colors.grey,
-                focusNode: FocusNode(),
+                focusNode: focusNode,
                 style: const TextStyle(),
                 cursorColor: Colors.red,
                 selectionControls: materialTextSelectionHandleControls,
@@ -306,6 +365,9 @@ void main() {
         case TargetPlatform.macOS:
           expect(buttonTypes, isNot(contains(ContextMenuButtonType.selectAll)));
       }
+
+      focusNode.dispose();
+      controller.dispose();
     },
       variant: TargetPlatformVariant.all(),
       skip: kIsWeb, // [intended]

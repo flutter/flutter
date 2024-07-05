@@ -115,6 +115,9 @@ class _RenderSelectableAdapter extends RenderProxyBox with Selectable, Selection
 
   // Selectable APIs.
 
+  @override
+  List<Rect> get boundingBoxes => <Rect>[paintBounds];
+
   // Adjust this value to enlarge or shrink the selection highlight.
   static const double _padding = 10.0;
   Rect _getSelectionHighlightRect() {
@@ -157,6 +160,7 @@ class _RenderSelectableAdapter extends RenderProxyBox with Selectable, Selection
         hasContent: true,
         startSelectionPoint: isReversed ? secondSelectionPoint : firstSelectionPoint,
         endSelectionPoint: isReversed ? firstSelectionPoint : secondSelectionPoint,
+        selectionRects: <Rect>[selectionRect],
       );
     }
   }

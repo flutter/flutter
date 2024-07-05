@@ -2,14 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:html' as html;
-// platformViewRegistry is exposed in the web version
-import 'dart:ui' as ui show platformViewRegistry; // ignore: undefined_shown_name
+import 'dart:ui_web' as ui_web;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
+import 'package:web/web.dart' as web;
 import 'package:web_e2e_tests/platform_messages_main.dart' as app;
 
 void main() {
@@ -28,7 +27,7 @@ void main() {
     await tester.tap(find.byKey(const Key('input')));
     // Focus in input, otherwise clipboard will fail with
     // 'document is not focused' platform exception.
-    html.document.querySelector('input')?.focus();
+    (web.document.querySelector('input') as web.HTMLElement?)?.focus();
     await Clipboard.setData(const ClipboardData(text: 'sample text'));
   }, skip: true); // https://github.com/flutter/flutter/issues/54296
 
@@ -37,10 +36,9 @@ void main() {
     int viewInstanceCount = 0;
 
     platformViewsRegistry.getNextPlatformViewId();
-    // ignore: undefined_prefixed_name, avoid_dynamic_calls
-    ui.platformViewRegistry.registerViewFactory('MyView', (int viewId) {
+    ui_web.platformViewRegistry.registerViewFactory('MyView', (int viewId) {
       viewInstanceCount += 1;
-      return html.DivElement();
+      return web.HTMLDivElement();
     });
 
     app.main();

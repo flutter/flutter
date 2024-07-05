@@ -12,8 +12,11 @@ import 'package:flutter/scheduler.dart';
 
 import 'asset_bundle.dart';
 import 'binary_messenger.dart';
+import 'debug.dart';
 import 'hardware_keyboard.dart';
 import 'message_codec.dart';
+import 'platform_channel.dart';
+import 'raw_keyboard.dart' show RawKeyboard;
 import 'restoration.dart';
 import 'service_extensions.dart';
 import 'system_channels.dart';
@@ -41,10 +44,12 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     _initKeyboard();
     initLicenses();
     SystemChannels.system.setMessageHandler((dynamic message) => handleSystemMessage(message as Object));
+    SystemChannels.accessibility.setMessageHandler((dynamic message) => _handleAccessibilityMessage(message as Object));
     SystemChannels.lifecycle.setMessageHandler(_handleLifecycleMessage);
     SystemChannels.platform.setMethodCallHandler(_handlePlatformMessage);
     TextInput.ensureInitialized();
     readInitialLifecycleStateFromNativeWindow();
+    initializationComplete();
   }
 
   /// The current [ServicesBinding], if one has been created.
@@ -62,14 +67,23 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
 
   /// The global singleton instance of [KeyEventManager], which is used
   /// internally to dispatch key messages.
+  ///
+  /// This property is deprecated, and will be removed. See
+  /// [HardwareKeyboard.addHandler] instead.
+  @Deprecated(
+    'No longer supported. Add a handler to HardwareKeyboard instead. '
+    'This feature was deprecated after v3.18.0-2.0.pre.',
+  )
   KeyEventManager get keyEventManager => _keyEventManager;
   late final KeyEventManager _keyEventManager;
 
   void _initKeyboard() {
     _keyboard = HardwareKeyboard();
     _keyEventManager = KeyEventManager(_keyboard, RawKeyboard.instance);
-    platformDispatcher.onKeyData = _keyEventManager.handleKeyData;
-    SystemChannels.keyEvent.setMessageHandler(_keyEventManager.handleRawKeyMessage);
+    _keyboard.syncKeyboardState().then((_) {
+      platformDispatcher.onKeyData = _keyEventManager.handleKeyData;
+      SystemChannels.keyEvent.setMessageHandler(_keyEventManager.handleRawKeyMessage);
+    });
   }
 
   /// The default instance of [BinaryMessenger].
@@ -83,8 +97,8 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   BinaryMessenger get defaultBinaryMessenger => _defaultBinaryMessenger;
   late final BinaryMessenger _defaultBinaryMessenger;
 
-  /// A token that represents the root isolate, used for coordinating with background
-  /// isolates.
+  /// A token that represents the root isolate, used for coordinating with
+  /// background isolates.
   ///
   /// This property is primarily intended for use with
   /// [BackgroundIsolateBinaryMessenger.ensureInitialized], which takes a
@@ -221,6 +235,16 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
       );
       return true;
     }());
+
+    if (!kReleaseMode) {
+      registerBoolServiceExtension(
+        name: ServicesServiceExtensions.profilePlatformChannels.name,
+        getter: () async => debugProfilePlatformChannels,
+        setter: (bool value) async {
+          debugProfilePlatformChannels = value;
+        },
+      );
+    }
   }
 
   /// Called in response to the `ext.flutter.evict` service extension.
@@ -240,26 +264,100 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   ///
   /// Once the [lifecycleState] is populated through any means (including this
   /// method), this method will do nothing. This is because the
-  /// [dart:ui.PlatformDispatcher.initialLifecycleState] may already be
-  /// stale and it no longer makes sense to use the initial state at dart vm
-  /// startup as the current state anymore.
+  /// [dart:ui.PlatformDispatcher.initialLifecycleState] may already be stale
+  /// and it no longer makes sense to use the initial state at dart vm startup
+  /// as the current state anymore.
   ///
   /// The latest state should be obtained by subscribing to
   /// [WidgetsBindingObserver.didChangeAppLifecycleState].
   @protected
   void readInitialLifecycleStateFromNativeWindow() {
-    if (lifecycleState != null) {
+    if (lifecycleState != null || platformDispatcher.initialLifecycleState.isEmpty) {
       return;
     }
-    final AppLifecycleState? state = _parseAppLifecycleMessage(platformDispatcher.initialLifecycleState);
-    if (state != null) {
-      handleAppLifecycleStateChanged(state);
-    }
+    _handleLifecycleMessage(platformDispatcher.initialLifecycleState);
   }
 
   Future<String?> _handleLifecycleMessage(String? message) async {
-    handleAppLifecycleStateChanged(_parseAppLifecycleMessage(message!)!);
+    final AppLifecycleState? state = _parseAppLifecycleMessage(message!);
+    final List<AppLifecycleState> generated = _generateStateTransitions(lifecycleState, state!);
+    generated.forEach(handleAppLifecycleStateChanged);
     return null;
+  }
+
+  List<AppLifecycleState> _generateStateTransitions(AppLifecycleState? previousState, AppLifecycleState state) {
+    if (previousState == state) {
+      return const <AppLifecycleState>[];
+    }
+    final List<AppLifecycleState> stateChanges = <AppLifecycleState>[];
+    if (previousState == null) {
+      // If there was no previous state, just jump directly to the new state.
+      stateChanges.add(state);
+    } else {
+      final int previousStateIndex = AppLifecycleState.values.indexOf(previousState);
+      final int stateIndex = AppLifecycleState.values.indexOf(state);
+      assert(previousStateIndex != -1, 'State $previousState missing in stateOrder array');
+      assert(stateIndex != -1, 'State $state missing in stateOrder array');
+      if (state == AppLifecycleState.detached) {
+        for (int i = previousStateIndex + 1; i < AppLifecycleState.values.length; ++i) {
+          stateChanges.add(AppLifecycleState.values[i]);
+        }
+        stateChanges.add(AppLifecycleState.detached);
+      } else if (previousStateIndex > stateIndex) {
+        for (int i = stateIndex; i < previousStateIndex; ++i) {
+          stateChanges.insert(0, AppLifecycleState.values[i]);
+        }
+      } else {
+        for (int i = previousStateIndex + 1; i <= stateIndex; ++i) {
+          stateChanges.add(AppLifecycleState.values[i]);
+        }
+      }
+    }
+    assert((){
+      AppLifecycleState? starting = previousState;
+      for (final AppLifecycleState ending in stateChanges) {
+        if (!_debugVerifyLifecycleChange(starting, ending)) {
+          return false;
+        }
+        starting = ending;
+      }
+      return true;
+    }(), 'Invalid lifecycle state transition generated from $previousState to $state (generated $stateChanges)');
+    return stateChanges;
+  }
+
+  static bool _debugVerifyLifecycleChange(AppLifecycleState? starting, AppLifecycleState ending) {
+    if (starting == null) {
+      // Any transition from null is fine, since it is initializing the state.
+      return true;
+    }
+    if (starting == ending) {
+      // Any transition to itself shouldn't happen.
+      return false;
+    }
+    return switch (starting) {
+      // Can't go from resumed to detached directly (must go through paused).
+      AppLifecycleState.resumed  => ending == AppLifecycleState.inactive,
+      AppLifecycleState.detached => ending == AppLifecycleState.resumed || ending == AppLifecycleState.paused,
+      AppLifecycleState.inactive => ending == AppLifecycleState.resumed || ending == AppLifecycleState.hidden,
+      AppLifecycleState.hidden   => ending == AppLifecycleState.paused  || ending == AppLifecycleState.inactive,
+      AppLifecycleState.paused   => ending == AppLifecycleState.hidden  || ending == AppLifecycleState.detached,
+    };
+  }
+
+
+  /// Listenable that notifies when the accessibility focus on the system have changed.
+  final ValueNotifier<int?> accessibilityFocus = ValueNotifier<int?>(null);
+
+  Future<void> _handleAccessibilityMessage(Object accessibilityMessage) async {
+    final Map<String, dynamic> message =
+        (accessibilityMessage as Map<Object?, Object?>).cast<String, dynamic>();
+    final String type = message['type'] as String;
+    switch (type) {
+      case 'didGainFocus':
+       accessibilityFocus.value = message['nodeId'] as int;
+    }
+    return;
   }
 
   Future<dynamic> _handlePlatformMessage(MethodCall methodCall) async {
@@ -277,17 +375,14 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   }
 
   static AppLifecycleState? _parseAppLifecycleMessage(String message) {
-    switch (message) {
-      case 'AppLifecycleState.resumed':
-        return AppLifecycleState.resumed;
-      case 'AppLifecycleState.inactive':
-        return AppLifecycleState.inactive;
-      case 'AppLifecycleState.paused':
-        return AppLifecycleState.paused;
-      case 'AppLifecycleState.detached':
-        return AppLifecycleState.detached;
-    }
-    return null;
+    return switch (message) {
+      'AppLifecycleState.resumed'  => AppLifecycleState.resumed,
+      'AppLifecycleState.inactive' => AppLifecycleState.inactive,
+      'AppLifecycleState.hidden'   => AppLifecycleState.hidden,
+      'AppLifecycleState.paused'   => AppLifecycleState.paused,
+      'AppLifecycleState.detached' => AppLifecycleState.detached,
+      _ => null,
+    };
   }
 
   /// Handles any requests for application exit that may be received on the
@@ -354,7 +449,6 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   ///
   /// * [WidgetsBindingObserver.didRequestAppExit] for a handler you can
   ///   override on a [WidgetsBindingObserver] to receive exit requests.
-  @mustCallSuper
   Future<ui.AppExitResponse> exitApplication(ui.AppExitType exitType, [int exitCode = 0]) async {
     final Map<String, Object?>? result = await SystemChannels.platform.invokeMethod<Map<String, Object?>>(
       'System.exitApplication',
@@ -412,6 +506,14 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   // ignore: use_setters_to_change_properties, (API predates enforcing the lint)
   void setSystemUiChangeCallback(SystemUiChangeCallback? callback) {
     _systemUiChangeCallback = callback;
+  }
+
+  /// Alert the engine that the binding is registered. This instructs the engine to
+  /// register its top level window handler on Windows. This signals that the app
+  /// is able to process "System.requestAppExit" signals from the engine.
+  @protected
+  Future<void> initializationComplete() async {
+    await SystemChannels.platform.invokeMethod('System.initializationComplete');
   }
 }
 

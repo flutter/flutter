@@ -10,7 +10,6 @@ import 'package:flutter_devicelab/framework/ab.dart';
 import 'package:flutter_devicelab/framework/runner.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
-import 'package:path/path.dart' as path;
 
 /// Runs tasks.
 ///
@@ -37,6 +36,11 @@ Future<void> main(List<String> rawArgs) async {
   ///
   /// Required for A/B test mode.
   final String? localEngine = args['local-engine'] as String?;
+
+  /// The build of the local engine to use as the host platform.
+  ///
+  /// Required if [localEngine] is set.
+  final String? localEngineHost = args['local-engine-host'] as String?;
 
   /// The build of the local Web SDK to use.
   ///
@@ -95,10 +99,16 @@ Future<void> main(List<String> rawArgs) async {
       stderr.writeln(argParser.usage);
       exit(1);
     }
+    if (localEngineHost == null) {
+      stderr.writeln('When running in A/B test mode --local-engine-host is required.\n');
+      stderr.writeln(argParser.usage);
+      exit(1);
+    }
     await _runABTest(
       runsPerTest: runsPerTest,
       silent: silent,
       localEngine: localEngine,
+      localEngineHost: localEngineHost,
       localWebSdk: localWebSdk,
       localEngineSrcPath: localEngineSrcPath,
       deviceId: deviceId,
@@ -109,6 +119,7 @@ Future<void> main(List<String> rawArgs) async {
     await runTasks(taskNames,
       silent: silent,
       localEngine: localEngine,
+      localEngineHost: localEngineHost,
       localEngineSrcPath: localEngineSrcPath,
       deviceId: deviceId,
       exitOnFirstTestFailure: exitOnFirstTestFailure,
@@ -125,6 +136,7 @@ Future<void> _runABTest({
   required int runsPerTest,
   required bool silent,
   required String? localEngine,
+  required String localEngineHost,
   required String? localWebSdk,
   required String? localEngineSrcPath,
   required String? deviceId,
@@ -135,7 +147,11 @@ Future<void> _runABTest({
 
   assert(localEngine != null || localWebSdk != null);
 
-  final ABTest abTest = ABTest((localEngine ?? localWebSdk)!, taskName);
+  final ABTest abTest = ABTest(
+    localEngine: (localEngine ?? localWebSdk)!,
+    localEngineHost: localEngineHost,
+    taskName: taskName,
+  );
   for (int i = 1; i <= runsPerTest; i++) {
     section('Run #$i');
 
@@ -161,6 +177,7 @@ Future<void> _runABTest({
       taskName,
       silent: silent,
       localEngine: localEngine,
+      localEngineHost: localEngineHost,
       localWebSdk: localWebSdk,
       localEngineSrcPath: localEngineSrcPath,
       deviceId: deviceId,
@@ -176,7 +193,7 @@ Future<void> _runABTest({
 
     abTest.addBResult(localEngineResult);
 
-    if (silent != true && i < runsPerTest) {
+    if (!silent && i < runsPerTest) {
       section('A/B results so far');
       print(abTest.printSummary());
     }
@@ -186,7 +203,7 @@ Future<void> _runABTest({
   final File jsonFile = _uniqueFile(resultsFile);
   jsonFile.writeAsStringSync(const JsonEncoder.withIndent('  ').convert(abTest.jsonMap));
 
-  if (silent != true) {
+  if (!silent) {
     section('Raw results');
     print(abTest.rawResults());
   }
@@ -217,29 +234,12 @@ ArgParser createArgParser(List<String> taskNames) {
     ..addMultiOption(
       'task',
       abbr: 't',
-      help: 'Either:\n'
-          ' - the name of a task defined in manifest.yaml.\n'
-          '   Example: complex_layout__start_up.\n'
-          ' - the path to a Dart file corresponding to a task,\n'
-          '   which resides in bin/tasks.\n'
-          '   Example: bin/tasks/complex_layout__start_up.dart.\n'
+      help: 'Name of a Dart file in bin/tasks.\n'
+          '   Example: complex_layout__start_up\n'
           '\n'
           'This option may be repeated to specify multiple tasks.',
-      callback: (List<String> value) {
-        for (final String nameOrPath in value) {
-          final List<String> fragments = path.split(nameOrPath);
-          final bool isDartFile = fragments.last.endsWith('.dart');
-
-          if (fragments.length == 1 && !isDartFile) {
-            // Not a path
-            taskNames.add(nameOrPath);
-          } else if (!isDartFile || !path.equals(path.dirname(nameOrPath), path.join('bin', 'tasks'))) {
-            // Unsupported executable location
-            throw FormatException('Invalid value for option -t (--task): $nameOrPath');
-          } else {
-            taskNames.add(path.withoutExtension(fragments.last));
-          }
-        }
+      callback: (List<String> tasks) {
+        taskNames.addAll(tasks);
       },
     )
     ..addOption(
@@ -275,7 +275,6 @@ ArgParser createArgParser(List<String> taskNames) {
     )
     ..addFlag(
       'exit',
-      defaultsTo: true,
       help: 'Exit on the first test failure. Currently flakes are intentionally (though '
             'incorrectly) not considered to be failures.',
     )
@@ -289,6 +288,15 @@ ArgParser createArgParser(List<String> taskNames) {
       help: 'Name of a build output within the engine out directory, if you\n'
             'are building Flutter locally. Use this to select a specific\n'
             'version of the engine if you have built multiple engine targets.\n'
+            'This path is relative to --local-engine-src-path/out. This option\n'
+            'is required when running an A/B test (see the --ab option).',
+    )
+    ..addOption(
+      'local-engine-host',
+      help: 'Name of a build output within the engine out directory, if you\n'
+            'are building Flutter locally. Use this to select a specific\n'
+            'version of the engine to use as the host platform if you have built '
+            'multiple engine targets.\n'
             'This path is relative to --local-engine-src-path/out. This option\n'
             'is required when running an A/B test (see the --ab option).',
     )
@@ -313,14 +321,6 @@ ArgParser createArgParser(List<String> taskNames) {
             'the location based on the value of the --flutter-root option.',
     )
     ..addOption('luci-builder', help: '[Flutter infrastructure] Name of the LUCI builder being run on.')
-    ..addFlag(
-      'match-host-platform',
-      defaultsTo: true,
-      help: 'Only run tests that match the host platform (e.g. do not run a\n'
-            'test with a `required_agent_capabilities` value of "mac/android"\n'
-            'on a windows host). Each test publishes its '
-            '`required_agent_capabilities`\nin the `manifest.yaml` file.',
-    )
     ..addOption(
       'results-file',
       help: '[Flutter infrastructure] File path for test results. If passed with\n'

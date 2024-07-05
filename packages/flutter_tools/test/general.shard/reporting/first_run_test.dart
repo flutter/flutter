@@ -4,6 +4,7 @@
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/persistent_tool_state.dart';
 import 'package:flutter_tools/src/reporting/first_run.dart';
 
@@ -14,6 +15,12 @@ void main() {
     final FirstRunMessenger messenger = setUpFirstRunMessenger();
 
     expect(messenger.licenseTerms, contains('Welcome to Flutter'));
+  });
+
+  testWithoutContext('FirstRunMessenger informs user how to disable animations', () {
+    final FirstRunMessenger messenger = setUpFirstRunMessenger(redisplayWelcomeMessage: false);
+
+    expect(messenger.licenseTerms, contains('flutter config --no-$kCliAnimationsFeatureName'));
   });
 
   testWithoutContext('FirstRunMessenger requires redisplay if it has never been run before', () {

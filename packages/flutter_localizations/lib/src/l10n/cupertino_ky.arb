@@ -22,5 +22,14 @@
   "tabSemanticsLabel": "$tabCount ичинен $tabIndex-өтмөк",
   "modalBarrierDismissLabel": "Жабуу",
   "searchTextFieldPlaceholderLabel": "Издөө",
+<<<<<<< HEAD
   "noSpellCheckReplacementsLabel": "No Replacements Found"
+=======
+  "noSpellCheckReplacementsLabel": "Алмаштыруу үчүн сөз табылган жок",
+  "menuDismissLabel": "Менюну жабуу",
+  "lookUpButtonLabel": "Издөө",
+  "searchWebButtonLabel": "Интернеттен издөө",
+  "shareButtonLabel": "Бөлүшүү…",
+  "clearButtonLabel": "Clear"
+>>>>>>> 761747bfc538b5af34aa0d3fac380f1bc331ec49
 }

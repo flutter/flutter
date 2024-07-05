@@ -5,6 +5,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   Widget boilerplateWidget(VoidCallback? onButtonPressed, {
@@ -20,7 +21,9 @@ void main() {
     Key? containerKey,
     Key? stackKey,
     NotificationListenerCallback<ScrollNotification>? onScrollNotification,
+    NotificationListenerCallback<DraggableScrollableNotification>? onDraggableScrollableNotification,
     bool ignoreController = false,
+    bool shouldCloseOnMinExtent = true,
   }) {
     return Directionality(
       textDirection: TextDirection.ltr,
@@ -42,19 +45,23 @@ void main() {
                 snap: snap,
                 snapSizes: snapSizes,
                 snapAnimationDuration: snapAnimationDuration,
+                shouldCloseOnMinExtent: shouldCloseOnMinExtent,
                 builder: (BuildContext context, ScrollController scrollController) {
                   return NotificationListener<ScrollNotification>(
                     onNotification: onScrollNotification,
-                    child: ColoredBox(
-                      key: containerKey,
-                      color: const Color(0xFFABCDEF),
-                      child: ListView.builder(
-                        controller: ignoreController ? null : scrollController,
-                        itemExtent: itemExtent,
-                        itemCount: itemCount,
-                        itemBuilder: (BuildContext context, int index) => Text('Item $index'),
+                    child: NotificationListener<DraggableScrollableNotification>(
+                      onNotification: onDraggableScrollableNotification,
+                      child:ColoredBox(
+                        key: containerKey,
+                        color: const Color(0xFFABCDEF),
+                        child: ListView.builder(
+                          controller: ignoreController ? null : scrollController,
+                          itemExtent: itemExtent,
+                          itemCount: itemCount,
+                          itemBuilder: (BuildContext context, int index) => Text('Item $index'),
+                        ),
                       ),
-                    ),
+                    )
                   );
                 },
               ),
@@ -144,7 +151,9 @@ void main() {
     expect(tester.getRect(find.byKey(key)), const Rect.fromLTRB(0.0, 325.0, 800.0, 600.0));
   });
 
-  testWidgets('Invalid snap targets throw assertion errors.', (WidgetTester tester) async {
+  testWidgets('Invalid snap targets throw assertion errors.',
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
+  (WidgetTester tester) async {
     await tester.pumpWidget(boilerplateWidget(
       null,
       maxChildSize: .8,
@@ -465,6 +474,7 @@ void main() {
       const Key containerKey = ValueKey<String>('container');
       const Key stackKey = ValueKey<String>('stack');
       final DraggableScrollableController controller = DraggableScrollableController();
+      addTearDown(controller.dispose);
       await tester.pumpWidget(boilerplateWidget(
         null,
         controller: controller,
@@ -864,6 +874,22 @@ void main() {
     expect(notificationTypes, types);
   });
 
+  testWidgets('Emits DraggableScrollableNotification with shouldCloseOnMinExtent set to non-default value', (WidgetTester tester) async {
+    DraggableScrollableNotification? receivedNotification;
+    await tester.pumpWidget(boilerplateWidget(
+      null,
+      shouldCloseOnMinExtent: false,
+      onDraggableScrollableNotification: (DraggableScrollableNotification notification) {
+        receivedNotification = notification;
+        return false;
+      },
+    ));
+
+    await tester.flingFrom(const Offset(0, 325), const Offset(0, -325), 200);
+    await tester.pumpAndSettle();
+    expect(receivedNotification!.shouldCloseOnMinExtent, isFalse);
+  });
+
   testWidgets('Do not crash when remove the tree during animation.', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/89214
     await tester.pumpWidget(boilerplateWidget(
@@ -887,6 +913,7 @@ void main() {
       const Key stackKey = ValueKey<String>('stack');
       const Key containerKey = ValueKey<String>('container');
       final DraggableScrollableController controller = DraggableScrollableController();
+      addTearDown(controller.dispose);
       await tester.pumpWidget(boilerplateWidget(
         null,
         controller: controller,
@@ -962,6 +989,7 @@ void main() {
     const Key stackKey = ValueKey<String>('stack');
     const Key containerKey = ValueKey<String>('container');
     final DraggableScrollableController controller = DraggableScrollableController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(boilerplateWidget(
       null,
       controller: controller,
@@ -1009,6 +1037,7 @@ void main() {
     const Key stackKey = ValueKey<String>('stack');
     const Key containerKey = ValueKey<String>('container');
     final DraggableScrollableController controller = DraggableScrollableController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(boilerplateWidget(
       null,
       initialChildSize: 0.25,
@@ -1032,6 +1061,7 @@ void main() {
     const Key stackKey = ValueKey<String>('stack');
     const Key containerKey = ValueKey<String>('container');
     final DraggableScrollableController controller = DraggableScrollableController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(boilerplateWidget(
       null,
       controller: controller,
@@ -1062,6 +1092,7 @@ void main() {
     const Key stackKey = ValueKey<String>('stack');
     const Key containerKey = ValueKey<String>('container');
     final DraggableScrollableController controller = DraggableScrollableController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: boilerplateWidget(
@@ -1098,6 +1129,7 @@ void main() {
     const Key stackKey = ValueKey<String>('stack');
     const Key containerKey = ValueKey<String>('container');
     final DraggableScrollableController controller = DraggableScrollableController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: boilerplateWidget(
@@ -1131,6 +1163,7 @@ void main() {
     const Key stackKey = ValueKey<String>('stack');
     const Key containerKey = ValueKey<String>('container');
     final DraggableScrollableController controller = DraggableScrollableController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: boilerplateWidget(
@@ -1173,6 +1206,7 @@ void main() {
     const Key stackKey = ValueKey<String>('stack');
     const Key containerKey = ValueKey<String>('container');
     final DraggableScrollableController controller = DraggableScrollableController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(boilerplateWidget(
       null,
       controller: controller,
@@ -1199,8 +1233,11 @@ void main() {
     expect(controller.pixels, closeTo(.4*screenHeight, precisionErrorTolerance));
   });
 
-  testWidgets('Cannot attach a controller to multiple sheets', (WidgetTester tester) async {
+  testWidgets('Cannot attach a controller to multiple sheets',
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
+  (WidgetTester tester) async {
     final DraggableScrollableController controller = DraggableScrollableController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: Stack(
@@ -1215,7 +1252,7 @@ void main() {
           ),
         ],
       ),
-    ), null, EnginePhase.build);
+    ), phase: EnginePhase.build);
     expect(tester.takeException(), isAssertionError);
   });
 
@@ -1224,6 +1261,7 @@ void main() {
     const Key containerKey = ValueKey<String>('container');
     final List<double> loggedSizes = <double>[];
     final DraggableScrollableController controller = DraggableScrollableController();
+    addTearDown(controller.dispose);
     controller.addListener(() {
       loggedSizes.add(controller.size);
     });
@@ -1272,6 +1310,7 @@ void main() {
     const Key containerKey = ValueKey<String>('container');
     final List<double> loggedSizes = <double>[];
     final DraggableScrollableController controller = DraggableScrollableController();
+    addTearDown(controller.dispose);
     controller.addListener(() {
       loggedSizes.add(controller.size);
     });
@@ -1314,6 +1353,7 @@ void main() {
     const Key containerKey = ValueKey<String>('container');
     final List<double> loggedSizes = <double>[];
     final DraggableScrollableController controller = DraggableScrollableController();
+    addTearDown(controller.dispose);
     controller.addListener(() {
       loggedSizes.add(controller.size);
     });
@@ -1362,6 +1402,7 @@ void main() {
 
   testWidgets('Invalid controller interactions throw assertion errors', (WidgetTester tester) async {
     final DraggableScrollableController controller = DraggableScrollableController();
+    addTearDown(controller.dispose);
     // Can't use a controller before attaching it.
     expect(() => controller.jumpTo(.1), throwsAssertionError);
 
@@ -1394,6 +1435,7 @@ void main() {
 
   testWidgets('DraggableScrollableController must be attached before using any of its parameters', (WidgetTester tester) async {
     final DraggableScrollableController controller = DraggableScrollableController();
+    addTearDown(controller.dispose);
     expect(controller.isAttached, false);
     expect(()=>controller.size, throwsAssertionError);
     final Widget boilerplate = boilerplateWidget(
@@ -1404,28 +1446,29 @@ void main() {
     await tester.pumpWidget(boilerplate);
     expect(controller.isAttached, true);
     expect(controller.size, isNotNull);
-    });
+  });
 
-    testWidgets('DraggableScrollableController.animateTo should not leak Ticker', (WidgetTester tester) async {
-      // Regression test for https://github.com/flutter/flutter/issues/102483
-      final DraggableScrollableController controller = DraggableScrollableController();
-      await tester.pumpWidget(boilerplateWidget(() {}, controller: controller));
+  testWidgets('DraggableScrollableController.animateTo after detach', (WidgetTester tester) async {
+    final DraggableScrollableController controller = DraggableScrollableController();
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(boilerplateWidget(() {}, controller: controller));
 
-      controller.animateTo(0.0, curve: Curves.linear, duration: const Duration(milliseconds: 200));
-      await tester.pump();
+    controller.animateTo(0.0, curve: Curves.linear, duration: const Duration(milliseconds: 200));
+    await tester.pump();
 
-      // Dispose the DraggableScrollableSheet
-      await tester.pumpWidget(const SizedBox.shrink());
-      // Controller should be detached and no exception should be thrown
-      expect(controller.isAttached, false);
-      expect(tester.takeException(), isNull);
-    });
+    // Dispose the DraggableScrollableSheet
+    await tester.pumpWidget(const SizedBox.shrink());
+    // Controller should be detached and no exception should be thrown
+    expect(controller.isAttached, false);
+    expect(tester.takeException(), isNull);
+  });
 
   testWidgets('DraggableScrollableSheet should not reset programmatic drag on rebuild', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/101114
     const Key stackKey = ValueKey<String>('stack');
     const Key containerKey = ValueKey<String>('container');
     final DraggableScrollableController controller = DraggableScrollableController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(boilerplateWidget(
       null,
       controller: controller,
@@ -1487,6 +1530,52 @@ void main() {
     );
   });
 
+  testWidgets('DraggableScrollableSheet should respect NeverScrollableScrollPhysics', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/121021
+    final DraggableScrollableController controller = DraggableScrollableController();
+    addTearDown(controller.dispose);
+    Widget buildFrame(ScrollPhysics? physics) {
+      return MaterialApp(
+        home: Scaffold(
+          body: DraggableScrollableSheet(
+            controller: controller,
+            initialChildSize: 0.25,
+            builder: (BuildContext context, ScrollController scrollController) {
+              return ListView(
+                physics: physics,
+                controller: scrollController,
+                children: <Widget>[
+                  const Text('Drag me!'),
+                  Container(
+                    height: 10000.0,
+                    color: Colors.blue,
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+      );
+    }
+    await tester.pumpWidget(buildFrame(const NeverScrollableScrollPhysics()));
+
+    final double initPixels = controller.pixels;
+
+    await tester.drag(find.text('Drag me!'), const Offset(0, -300));
+    await tester.pumpAndSettle();
+
+    //Should not allow user scrolling.
+    expect(controller.pixels, initPixels);
+
+    await tester.pumpWidget(buildFrame(null));
+
+    await tester.drag(find.text('Drag me!'), const Offset(0, -300.0));
+    await tester.pumpAndSettle();
+
+    //Allow user scrolling.
+    expect(controller.pixels, initPixels + 300.0);
+  });
+
   testWidgets('DraggableScrollableSheet should not rebuild every frame while dragging', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/67219
     int buildCount = 0;
@@ -1536,7 +1625,9 @@ void main() {
 
   testWidgets('DraggableScrollableSheet controller can be changed', (WidgetTester tester) async {
     final DraggableScrollableController controller1 = DraggableScrollableController();
+    addTearDown(controller1.dispose);
     final DraggableScrollableController controller2 = DraggableScrollableController();
+    addTearDown(controller2.dispose);
     final List<double> loggedSizes = <double>[];
 
     DraggableScrollableController controller = controller1;
@@ -1590,5 +1681,69 @@ void main() {
     });
     controller2.jumpTo(1.0);
     expect(loggedSizes, <double>[1.0].map((double v) => closeTo(v, precisionErrorTolerance)));
+  });
+
+  testWidgets('DraggableScrollableSheet controller can be changed while animating', (WidgetTester tester) async {
+    final DraggableScrollableController controller1 = DraggableScrollableController();
+    addTearDown(controller1.dispose);
+    final DraggableScrollableController controller2 = DraggableScrollableController();
+    addTearDown(controller2.dispose);
+
+    DraggableScrollableController controller = controller1;
+    await tester.pumpWidget(MaterialApp(
+      home: StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) => Scaffold(
+          body: DraggableScrollableSheet(
+            initialChildSize: 0.25,
+            snap: true,
+            snapSizes: const <double>[0.25, 0.5, 1.0],
+            controller: controller,
+            builder: (BuildContext context, ScrollController scrollController) {
+              return ListView(
+                controller: scrollController,
+                children: <Widget>[
+                  ElevatedButton(
+                    onPressed: () => setState(() {
+                      controller = controller2;
+                    }),
+                    child: const Text('Switch controller'),
+                  ),
+                  Container(
+                    height: 10000,
+                    color: Colors.blue,
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+      ),
+    ));
+    expect(controller1.isAttached, true);
+    expect(controller2.isAttached, false);
+
+
+    controller1.animateTo(0.5, curve: Curves.linear, duration: const Duration(milliseconds: 200));
+    await tester.pump();
+
+    await tester.tap(find.text('Switch controller'));
+    await tester.pump();
+
+    expect(controller1.isAttached, false);
+    expect(controller2.isAttached, true);
+
+    controller2.animateTo(1.0, curve: Curves.linear, duration: const Duration(milliseconds: 200));
+    await tester.pump();
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    expect(controller1.isAttached, false);
+    expect(controller2.isAttached, false);
+  });
+
+  testWidgets('$DraggableScrollableController dispatches creation in constructor.', (WidgetTester widgetTester) async {
+    await expectLater(
+      await memoryEvents(() async => DraggableScrollableController().dispose(), DraggableScrollableController),
+      areCreateAndDispose,
+    );
   });
 }

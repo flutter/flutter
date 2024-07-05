@@ -18,7 +18,7 @@ import 'theme.dart';
 /// with height [largeSize].
 ///
 /// Badges are typically used to decorate the icon within a
-/// BottomNavigationBarItem] or a [NavigationRailDestination]
+/// [BottomNavigationBarItem] or a [NavigationRailDestination]
 /// or a button's icon, as in [TextButton.icon]. The badge's default
 /// configuration is intended to work well with a default sized (24)
 /// [Icon].
@@ -286,8 +286,6 @@ class _RenderBadge extends RenderAligningShiftedBox {
 // "END GENERATED" comments are generated from data in the Material
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
-
-// Token database version: v0_162
 
 class _BadgeDefaultsM3 extends BadgeThemeData {
   _BadgeDefaultsM3(this.context) : super(

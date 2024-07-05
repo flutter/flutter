@@ -2,9 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:collection/collection.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'semantics_tester.dart';
 
 void main() {
   testWidgets('SliverReorderableList works well when having gestureSettings', (WidgetTester tester) async {
@@ -62,6 +66,104 @@ void main() {
 
     expect(onReorderCallCount, 1);
     expect(items, orderedEquals(<int>[1, 0, 2, 3, 4]));
+  });
+
+  testWidgets('SliverReorderableList item has correct semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    const int itemCount = 5;
+    int onReorderCallCount = 0;
+    final List<int> items = List<int>.generate(itemCount, (int index) => index);
+
+    void handleReorder(int fromIndex, int toIndex) {
+      onReorderCallCount += 1;
+      if (toIndex > fromIndex) {
+        toIndex -= 1;
+      }
+      items.insert(toIndex, items.removeAt(fromIndex));
+    }
+    // The list has five elements of height 100
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(gestureSettings: DeviceGestureSettings(touchSlop: 8.0)),
+          child: CustomScrollView(
+            slivers: <Widget>[
+              SliverReorderableList(
+                itemCount: itemCount,
+                itemBuilder: (BuildContext context, int index) {
+                  return SizedBox(
+                    key: ValueKey<int>(items[index]),
+                    height: 100,
+                    child: ReorderableDragStartListener(
+                      index: index,
+                      child: Text('item ${items[index]}'),
+                    ),
+                  );
+                },
+                onReorder: handleReorder,
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      semantics,
+      includesNodeWith(
+        label: 'item 0',
+        actions: <SemanticsAction>[SemanticsAction.customAction],
+      ),
+    );
+    final SemanticsNode node = tester.getSemantics(find.text('item 0'));
+
+    // perform custom action 'move down'.
+    final int customActionId = CustomSemanticsAction.getIdentifier(const CustomSemanticsAction(label: 'Move down'));
+    tester.binding.pipelineOwner.semanticsOwner!.performAction(node.id, SemanticsAction.customAction, customActionId);
+    await tester.pumpAndSettle();
+
+    expect(onReorderCallCount, 1);
+    expect(items, orderedEquals(<int>[1, 0, 2, 3, 4]));
+
+    semantics.dispose();
+  });
+
+  testWidgets('SliverReorderableList custom semantics action has correct label', (WidgetTester tester) async {
+    const int itemCount = 5;
+    final List<int> items = List<int>.generate(itemCount, (int index) => index);
+    // The list has five elements of height 100
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(gestureSettings: DeviceGestureSettings(touchSlop: 8.0)),
+          child: CustomScrollView(
+            slivers: <Widget>[
+              SliverReorderableList(
+                itemCount: itemCount,
+                itemBuilder: (BuildContext context, int index) {
+                  return SizedBox(
+                    key: ValueKey<int>(items[index]),
+                    height: 100,
+                    child: ReorderableDragStartListener(
+                      index: index,
+                      child: Text('item ${items[index]}'),
+                    ),
+                  );
+                },
+                onReorder: (int _, int __) { },
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+    final SemanticsNode node = tester.getSemantics(find.text('item 0'));
+    final SemanticsData data = node.getSemanticsData();
+    expect(data.customSemanticsActionIds!.length, 2);
+    final CustomSemanticsAction action1 = CustomSemanticsAction.getAction(data.customSemanticsActionIds![0])!;
+    expect(action1.label, 'Move down');
+    final CustomSemanticsAction action2 = CustomSemanticsAction.getAction(data.customSemanticsActionIds![1])!;
+    expect(action2.label, 'Move to the end');
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/100451
@@ -1123,6 +1225,309 @@ void main() {
 
     expect(item0, findsNothing);
   });
+
+  testWidgets('SliverReorderableList auto scrolls speed is configurable', (WidgetTester tester) async {
+    Future<void> pumpFor({
+      required Duration duration,
+      Duration interval = const Duration(milliseconds: 50),
+    }) async {
+      await tester.pump();
+
+      int times = (duration.inMilliseconds / interval.inMilliseconds).ceil();
+      while (times > 0) {
+        await tester.pump(interval + const Duration(milliseconds: 1));
+        await tester.idle();
+        times--;
+      }
+    }
+
+    Future<double> pumpListAndDrag({required double autoScrollerVelocityScalar}) async {
+      final List<int> items = List<int>.generate(10, (int index) => index);
+      final ScrollController scrollController = ScrollController();
+      addTearDown(scrollController.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: CustomScrollView(
+            controller: scrollController,
+            slivers: <Widget>[
+              SliverReorderableList(
+                itemBuilder: (BuildContext context, int index) {
+                  return Container(
+                    key: ValueKey<int>(items[index]),
+                    height: 100,
+                    color: items[index].isOdd ? Colors.red : Colors.green,
+                    child: ReorderableDragStartListener(
+                      index: index,
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Text('item ${items[index]}'),
+                          const Icon(Icons.drag_handle),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+                itemCount: items.length,
+                onReorder: (int fromIndex, int toIndex) {},
+                autoScrollerVelocityScalar: autoScrollerVelocityScalar,
+              ),
+            ],
+          ),
+        ),
+      );
+
+      expect(scrollController.offset, 0);
+
+      final Finder item = find.text('item 0');
+      final TestGesture drag = await tester.startGesture(tester.getCenter(item));
+
+      // Drag just enough to touch the edge but not surpass it, so the
+      // auto scroller is not yet triggered
+      await drag.moveBy(const Offset(0, 500));
+      await pumpFor(duration: const Duration(milliseconds: 200));
+
+      expect(scrollController.offset, 0);
+
+      // Now drag a little bit more so the auto scroller triggers
+      await drag.moveBy(const Offset(0, 50));
+      await pumpFor(
+        duration: const Duration(milliseconds: 600),
+        interval: Duration(milliseconds: (1000 / autoScrollerVelocityScalar).round()),
+      );
+
+      return scrollController.offset;
+    }
+
+    const double fastVelocityScalar = 20;
+    final double offsetForFastScroller = await pumpListAndDrag(autoScrollerVelocityScalar: fastVelocityScalar);
+
+    // Reset widget tree
+    await tester.pumpWidget(const SizedBox());
+
+    const double slowVelocityScalar = 5;
+    final double offsetForSlowScroller = await pumpListAndDrag(autoScrollerVelocityScalar: slowVelocityScalar);
+
+    expect(offsetForFastScroller / offsetForSlowScroller, fastVelocityScalar / slowVelocityScalar);
+  });
+
+  testWidgets('Null check error when dragging and dropping last element into last index with reverse:true', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/132077
+    const int itemCount = 5;
+    final List<String> items = List<String>.generate(itemCount, (int index) => 'Item ${index+1}');
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ReorderableList(
+          onReorder: (int oldIndex, int newIndex) {
+                if (newIndex > oldIndex) {
+                  newIndex -= 1;
+                }
+                final String item = items.removeAt(oldIndex);
+                items.insert(newIndex, item);
+          },
+          itemCount: items.length,
+          reverse: true,
+          itemBuilder: (BuildContext context, int index) {
+            return ReorderableDragStartListener(
+              key: Key('$index'),
+              index: index,
+              child: Material(
+                child: ListTile(
+                  title: Text(items[index]),
+                ),
+              ),
+            );
+          },
+        ),
+      )
+    );
+
+    // Start gesture on last item
+    final TestGesture drag = await tester.startGesture(tester.getCenter(find.text('Item 5')));
+    await tester.pump(kLongPressTimeout);
+
+    // Drag to move up the last item, and drop at the last index
+    await drag.moveBy(const Offset(0, -50));
+    await tester.pump();
+    await drag.up();
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), null);
+  });
+
+  testWidgets(
+    'When creating a new item, be in the correct position',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: LayoutBuilder(
+            builder: (_, BoxConstraints view) {
+              // The third one just appears on the screen
+              final double itemSize = view.maxWidth / 2 - 20;
+              return Scaffold(
+                body: CustomScrollView(
+                  scrollDirection: Axis.horizontal,
+                  cacheExtent: 0, // The fourth one will not be created in the initial state.
+                  slivers: <Widget>[
+                    SliverReorderableList(
+                      itemBuilder: (BuildContext context, int index) {
+                        return ReorderableDragStartListener(
+                          key: ValueKey<int>(index),
+                          index: index,
+                          child: Builder(
+                            builder: (BuildContext context) {
+                              return SizedBox(
+                                width: itemSize,
+                                child: Text('$index'),
+                              );
+                            },
+                          ),
+                        );
+                      },
+                      itemCount: 4,
+                      onReorder: (int fromIndex, int toIndex) {},
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+      );
+      final TestGesture drag = await tester.startGesture(tester.getCenter(find.text('0')));
+      await tester.pump(kLongPressTimeout);
+      await drag.moveBy(const Offset(20, 0));
+      await tester.pump();
+      expect(find.text('3').hitTestable(at: Alignment.topLeft), findsNothing);
+      await drag.up();
+      await tester.pumpAndSettle();
+    },
+  );
+
+  testWidgets('Tests the correctness of the drop animation in various scenarios', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/138994
+    late Size screenSize;
+    final List<double> itemSizes = <double>[20, 50, 30, 80, 100, 30];
+    Future<void> pumpFor(bool reverse, Axis scrollDirection) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Builder(
+            builder: (BuildContext context) {
+              screenSize = MediaQuery.sizeOf(context);
+              return Scaffold(
+                body: CustomScrollView(
+                  reverse: reverse,
+                  scrollDirection: scrollDirection,
+                  slivers: <Widget>[
+                    SliverReorderableList(
+                      itemBuilder: (BuildContext context, int index) {
+                        return ReorderableDragStartListener(
+                          key: ValueKey<int>(index),
+                          index: index,
+                          child: Builder(
+                            builder: (BuildContext context) {
+                              return SizedBox(
+                                height: scrollDirection == Axis.vertical ? itemSizes[index] : double.infinity,
+                                width: scrollDirection == Axis.horizontal ? itemSizes[index] : double.infinity,
+                                child: Text('$index'),
+                              );
+                            },
+                          ),
+                        );
+                      },
+                      itemCount: itemSizes.length,
+                      onReorder: (int fromIndex, int toIndex) {},
+                    ),
+                  ],
+                ),
+              );
+            }
+          ),
+        ),
+      );
+    }
+
+    Future<void> testMove(int from, int to, {bool reverse = false, Axis scrollDirection = Axis.vertical}) async {
+      await pumpFor(reverse, scrollDirection);
+      final double targetOffset = (List<double>.of(itemSizes)..removeAt(from)).sublist(0, to).sum;
+      final Offset targetPosition = reverse
+        ? (scrollDirection == Axis.vertical
+            ? Offset(0, screenSize.height - targetOffset - itemSizes[from])
+            : Offset(screenSize.width - targetOffset - itemSizes[from], 0))
+        : (scrollDirection == Axis.vertical ? Offset(0, targetOffset) : Offset(targetOffset, 0));
+      final Offset moveOffset = targetPosition - tester.getTopLeft(find.text('$from'));
+      await tester.timedDrag(find.text('$from'), moveOffset, const Duration(seconds: 1));
+      // Before the drop animation starts
+      final Offset animationBeginOffset = tester.getTopLeft(find.text('$from'));
+      // Halfway through the animation
+      await tester.pump(const Duration(milliseconds: 125));
+      expect(tester.getTopLeft(find.text('$from')), Offset.lerp(animationBeginOffset, targetPosition, 0.5));
+      // Animation ends
+      await tester.pump(const Duration(milliseconds: 125));
+      expect(tester.getTopLeft(find.text('$from')), targetPosition);
+      await tester.pumpAndSettle();
+    }
+    final List<(int,int)> testCases = <(int,int)>[
+      (3, 1),
+      (3, 3),
+      (3, 5),
+      (0, 5),
+      (5, 0),
+    ];
+    for (final (int, int) element in testCases) {
+      await testMove(element.$1, element.$2);
+      await testMove(element.$1, element.$2, reverse: true);
+      await testMove(element.$1, element.$2, scrollDirection: Axis.horizontal);
+      await testMove(element.$1, element.$2, reverse: true, scrollDirection: Axis.horizontal);
+    }
+  });
+
+  testWidgets('Tests that the item position is correct when prototypeItem or itemExtent are set', (WidgetTester tester) async {
+    Future<void> pumpFor({Widget? prototypeItem, double? itemExtent}) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: CustomScrollView(
+              slivers: <Widget>[
+                SliverReorderableList(
+                  itemBuilder: (BuildContext context, int index) {
+                    return ReorderableDragStartListener(
+                      key: ValueKey<int>(index),
+                      index: index,
+                      child: SizedBox(
+                        height: 100,
+                        child: Text('$index'),
+                      ),
+                    );
+                  },
+                  itemCount: 5,
+                  itemExtent: itemExtent,
+                  prototypeItem: prototypeItem,
+                  onReorder: (int fromIndex, int toIndex) {},
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    Future<void> testFor({Widget? prototypeItem, double? itemExtent}) async {
+      await pumpFor(prototypeItem: prototypeItem, itemExtent: itemExtent);
+      final TestGesture drag = await tester.startGesture(tester.getCenter(find.text('0')));
+      await tester.pump(kLongPressTimeout);
+      await drag.moveBy(const Offset(0, 20));
+      await tester.pump();
+      expect(tester.getTopLeft(find.text('1')), const Offset(0, 100));
+      await drag.up();
+      await tester.pumpAndSettle();
+    }
+    await testFor();
+    await testFor(prototypeItem: const SizedBox(height: 100, width: 100, child: Text('prototype')));
+    await testFor(itemExtent: 100);
+  });
 }
 
 class TestList extends StatelessWidget {
@@ -1135,6 +1540,7 @@ class TestList extends StatelessWidget {
     this.reverse = false,
     this.onReorderStart,
     this.onReorderEnd,
+    this.autoScrollerVelocityScalar,
   });
 
   final List<int> items;
@@ -1143,6 +1549,7 @@ class TestList extends StatelessWidget {
   final ReorderItemProxyDecorator? proxyDecorator;
   final bool reverse;
   final void Function(int)? onReorderStart, onReorderEnd;
+  final double? autoScrollerVelocityScalar;
 
   @override
   Widget build(BuildContext context) {
@@ -1188,6 +1595,7 @@ class TestList extends StatelessWidget {
                       proxyDecorator: proxyDecorator,
                       onReorderStart: onReorderStart,
                       onReorderEnd: onReorderEnd,
+                      autoScrollerVelocityScalar: autoScrollerVelocityScalar,
                     ),
                   ],
                 );

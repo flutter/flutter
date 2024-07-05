@@ -92,7 +92,7 @@ typedef _BucketVisitor = void Function(RestorationBucket bucket);
 /// ## State Restoration on iOS
 ///
 /// To enable state restoration on iOS, a restoration identifier has to be
-/// assigned to the [FlutterViewController](https://api.flutter.dev/objcdoc/Classes/FlutterViewController.html).
+/// assigned to the [FlutterViewController](/ios-embedder/interface_flutter_view_controller.html).
 /// If the standard embedding (produced by `flutter create`) is used, this can
 /// be accomplished with the following steps:
 ///
@@ -154,6 +154,9 @@ class RestorationManager extends ChangeNotifier {
   /// Construct the restoration manager and set up the communications channels
   /// with the engine to get restoration messages (by calling [initChannels]).
   RestorationManager() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      ChangeNotifier.maybeDispatchObjectCreation(this);
+    }
     initChannels();
   }
 
@@ -265,7 +268,7 @@ class RestorationManager extends ChangeNotifier {
     if (_isReplacing) {
       SchedulerBinding.instance.addPostFrameCallback((Duration _) {
         _isReplacing = false;
-      });
+      }, debugLabel: 'RestorationManager.resetIsReplacing');
     }
 
     final RestorationBucket? oldRoot = _rootBucket;
@@ -346,7 +349,10 @@ class RestorationManager extends ChangeNotifier {
     _bucketsNeedingSerialization.add(bucket);
     if (!_serializationScheduled) {
       _serializationScheduled = true;
-      SchedulerBinding.instance.addPostFrameCallback((Duration _) => _doSerialization());
+      SchedulerBinding.instance.addPostFrameCallback(
+        (Duration _) => _doSerialization(),
+        debugLabel: 'RestorationManager.doSerialization'
+      );
     }
   }
 
@@ -413,6 +419,12 @@ class RestorationManager extends ChangeNotifier {
     }
     _doSerialization();
     assert(!_serializationScheduled);
+  }
+
+  @override
+  void dispose() {
+    _rootBucket?.dispose();
+    super.dispose();
   }
 }
 
@@ -492,8 +504,6 @@ class RestorationBucket {
   /// claiming a child from a parent via [claimChild]. If no parent bucket is
   /// available, [RestorationManager.rootBucket] may be used as a parent.
   /// {@endtemplate}
-  ///
-  /// The `restorationId` must not be null.
   RestorationBucket.empty({
     required String restorationId,
     required Object? debugOwner,
@@ -503,6 +513,9 @@ class RestorationBucket {
       _debugOwner = debugOwner;
       return true;
     }());
+    if (kFlutterMemoryAllocationsEnabled) {
+      _maybeDispatchObjectCreation();
+    }
   }
 
   /// Creates the root [RestorationBucket] for the provided restoration
@@ -526,8 +539,6 @@ class RestorationBucket {
   /// ```
   ///
   /// {@macro flutter.services.RestorationBucket.empty.bucketCreation}
-  ///
-  /// The `manager` argument must not be null.
   RestorationBucket.root({
     required RestorationManager manager,
     required Map<Object?, Object?>? rawData,
@@ -538,6 +549,9 @@ class RestorationBucket {
       _debugOwner = manager;
       return true;
     }());
+    if (kFlutterMemoryAllocationsEnabled) {
+      _maybeDispatchObjectCreation();
+    }
   }
 
   /// Creates a child bucket initialized with the data that the provided
@@ -548,8 +562,6 @@ class RestorationBucket {
   /// [RestorationBucket.empty] and have the parent adopt it via [adoptChild].
   ///
   /// {@macro flutter.services.RestorationBucket.empty.bucketCreation}
-  ///
-  /// The `restorationId` and `parent` argument must not be null.
   RestorationBucket.child({
     required String restorationId,
     required RestorationBucket parent,
@@ -563,6 +575,9 @@ class RestorationBucket {
       _debugOwner = debugOwner;
       return true;
     }());
+    if (kFlutterMemoryAllocationsEnabled) {
+      _maybeDispatchObjectCreation();
+    }
   }
 
   static const String _childrenMapKey = 'c';
@@ -934,6 +949,19 @@ class RestorationBucket {
     _parent?._addChildData(this);
   }
 
+  // TODO(polina-c): stop duplicating code across disposables
+  // https://github.com/flutter/flutter/issues/137435
+  /// Dispatches event of object creation to [FlutterMemoryAllocations.instance].
+  void _maybeDispatchObjectCreation() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
+        library: 'package:flutter/services.dart',
+        className: '$RestorationBucket',
+        object: this,
+      );
+    }
+  }
+
   /// Deletes the bucket and all the data stored in it from the bucket
   /// hierarchy.
   ///
@@ -948,6 +976,11 @@ class RestorationBucket {
   /// This method must only be called by the object's owner.
   void dispose() {
     assert(_debugAssertNotDisposed());
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
     _visitChildren(_dropChild, concurrentModification: true);
     _claimedChildren.clear();
     _childrenToAdd.clear();

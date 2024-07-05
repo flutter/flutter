@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -12,8 +13,10 @@ import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:multicast_dns/multicast_dns.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../src/common.dart';
+import '../src/fakes.dart';
 
 void main() {
   group('mDNS Discovery', () {
@@ -57,6 +60,7 @@ void main() {
           preliminaryMDnsClient: client,
           logger: BufferLogger.test(),
           flutterUsage: TestUsage(),
+          analytics: const NoOpAnalytics(),
         );
 
         final MDnsVmServiceDiscoveryResult? result = await portDiscovery.queryForAttach();
@@ -80,6 +84,7 @@ void main() {
           preliminaryMDnsClient: emptyClient,
           logger: BufferLogger.test(),
           flutterUsage: TestUsage(),
+          analytics: const NoOpAnalytics(),
         );
 
         final MDnsVmServiceDiscoveryResult? result = await portDiscovery.queryForAttach();
@@ -107,6 +112,7 @@ void main() {
           preliminaryMDnsClient: client,
           logger: BufferLogger.test(),
           flutterUsage: TestUsage(),
+          analytics: const NoOpAnalytics(),
         );
 
         expect(portDiscovery.queryForAttach, throwsToolExit());
@@ -130,6 +136,7 @@ void main() {
           preliminaryMDnsClient: client,
           logger: BufferLogger.test(),
           flutterUsage: TestUsage(),
+          analytics: const NoOpAnalytics(),
         );
 
         final MDnsVmServiceDiscoveryResult? result = await portDiscovery.queryForAttach();
@@ -157,6 +164,7 @@ void main() {
           preliminaryMDnsClient: client,
           logger: BufferLogger.test(),
           flutterUsage: TestUsage(),
+          analytics: const NoOpAnalytics(),
         );
 
         expect(portDiscovery.queryForAttach, throwsToolExit());
@@ -168,6 +176,7 @@ void main() {
           preliminaryMDnsClient: emptyClient,
           logger: BufferLogger.test(),
           flutterUsage: TestUsage(),
+          analytics: const NoOpAnalytics(),
         );
 
         final int? port = (await portDiscovery.queryForAttach())?.port;
@@ -176,11 +185,17 @@ void main() {
 
       testWithoutContext('Prints helpful message when there is no ipv4 link local address.', () async {
         final BufferLogger logger = BufferLogger.test();
+        final MemoryFileSystem fs = MemoryFileSystem.test();
+        final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
+          fs: fs,
+          fakeFlutterVersion: FakeFlutterVersion(),
+        );
         final MDnsVmServiceDiscovery portDiscovery = MDnsVmServiceDiscovery(
           mdnsClient: emptyClient,
           preliminaryMDnsClient: emptyClient,
           logger: logger,
           flutterUsage: TestUsage(),
+          analytics: fakeAnalytics,
         );
         final Uri? uri = await portDiscovery.getVMServiceUriForAttach(
           '',
@@ -188,6 +203,12 @@ void main() {
         );
         expect(uri, isNull);
         expect(logger.errorText, contains('Personal Hotspot'));
+        expect(fakeAnalytics.sentEvents, contains(
+          Event.appleUsageEvent(
+              workflow: 'ios-mdns',
+              parameter: 'no-ipv4-link-local',
+            )
+        ));
       });
 
       testWithoutContext('One port available, no appId', () async {
@@ -207,6 +228,7 @@ void main() {
           preliminaryMDnsClient: emptyClient,
           logger: BufferLogger.test(),
           flutterUsage: TestUsage(),
+          analytics: const NoOpAnalytics(),
         );
         final int? port = (await portDiscovery.queryForAttach())?.port;
         expect(port, 123);
@@ -234,6 +256,7 @@ void main() {
           preliminaryMDnsClient: emptyClient,
           logger: BufferLogger.test(),
           flutterUsage: TestUsage(),
+          analytics: const NoOpAnalytics(),
         );
         final MDnsVmServiceDiscoveryResult? result = await portDiscovery.queryForAttach();
         expect(result?.port, 123);
@@ -261,6 +284,7 @@ void main() {
           preliminaryMDnsClient: emptyClient,
           logger: BufferLogger.test(),
           flutterUsage: TestUsage(),
+          analytics: const NoOpAnalytics(),
         );
         final int? port = (await portDiscovery.queryForAttach(applicationId: 'fiz'))?.port;
         expect(port, 321);
@@ -289,6 +313,7 @@ void main() {
           preliminaryMDnsClient: emptyClient,
           logger: BufferLogger.test(),
           flutterUsage: TestUsage(),
+          analytics: const NoOpAnalytics(),
         );
         final int? port = (await portDiscovery.queryForAttach(applicationId: 'bar'))?.port;
         expect(port, 1234);
@@ -305,6 +330,7 @@ void main() {
           preliminaryMDnsClient: emptyClient,
           logger: BufferLogger.test(),
           flutterUsage: TestUsage(),
+          analytics: const NoOpAnalytics(),
         );
         expect(
           () async => portDiscovery.queryForAttach(),
@@ -330,12 +356,13 @@ void main() {
           preliminaryMDnsClient: emptyClient,
           logger: BufferLogger.test(),
           flutterUsage: TestUsage(),
+          analytics: const NoOpAnalytics(),
         );
         final Uri? uri = await portDiscovery.getVMServiceUriForAttach('bar', device, hostVmservicePort: 0);
         expect(uri.toString(), 'http://127.0.0.1:123/');
       });
 
-      testWithoutContext('Get network device IP (iPv4)', () async {
+      testWithoutContext('Get wireless device IP (iPv4)', () async {
         final MDnsClient client = FakeMDnsClient(
           <PtrResourceRecord>[
             PtrResourceRecord('foo', future, domainName: 'bar'),
@@ -363,16 +390,17 @@ void main() {
           preliminaryMDnsClient: emptyClient,
           logger: BufferLogger.test(),
           flutterUsage: TestUsage(),
+          analytics: const NoOpAnalytics(),
         );
         final Uri? uri = await portDiscovery.getVMServiceUriForAttach(
           'bar',
           device,
-          isNetworkDevice: true,
+          useDeviceIPAsHost: true,
         );
         expect(uri.toString(), 'http://111.111.111.111:1234/xyz/');
       });
 
-      testWithoutContext('Get network device IP (iPv6)', () async {
+      testWithoutContext('Get wireless device IP (iPv6)', () async {
         final MDnsClient client = FakeMDnsClient(
           <PtrResourceRecord>[
             PtrResourceRecord('foo', future, domainName: 'bar'),
@@ -400,11 +428,12 @@ void main() {
           preliminaryMDnsClient: emptyClient,
           logger: BufferLogger.test(),
           flutterUsage: TestUsage(),
+          analytics: const NoOpAnalytics(),
         );
         final Uri? uri = await portDiscovery.getVMServiceUriForAttach(
           'bar',
           device,
-          isNetworkDevice: true,
+          useDeviceIPAsHost: true,
         );
         expect(uri.toString(), 'http://[1111:1111:1111:1111:1111:1111:1111:1111]:1234/xyz/');
       });
@@ -434,6 +463,7 @@ void main() {
           preliminaryMDnsClient: emptyClient,
           logger: BufferLogger.test(),
           flutterUsage: TestUsage(),
+          analytics: const NoOpAnalytics(),
         );
         expect(
           portDiscovery.getVMServiceUriForAttach(
@@ -464,6 +494,7 @@ void main() {
           preliminaryMDnsClient: emptyClient,
           logger: BufferLogger.test(),
           flutterUsage: TestUsage(),
+          analytics: const NoOpAnalytics(),
         );
         expect(
           portDiscovery.getVMServiceUriForAttach(
@@ -478,6 +509,19 @@ void main() {
     });
 
     group('for launch', () {
+      testWithoutContext('Ensure either port or device name are provided', () async {
+        final MDnsClient client = FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{});
+
+        final MDnsVmServiceDiscovery portDiscovery = MDnsVmServiceDiscovery(
+          mdnsClient: client,
+          logger: BufferLogger.test(),
+          flutterUsage: TestUsage(),
+          analytics: const NoOpAnalytics(),
+        );
+
+        expect(() async => portDiscovery.queryForLaunch(applicationId: 'app-id'), throwsAssertionError);
+      });
+
       testWithoutContext('No ports available', () async {
         final MDnsClient client = FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{});
 
@@ -485,6 +529,7 @@ void main() {
           mdnsClient: client,
           logger: BufferLogger.test(),
           flutterUsage: TestUsage(),
+          analytics: const NoOpAnalytics(),
         );
 
         final MDnsVmServiceDiscoveryResult? result = await portDiscovery.queryForLaunch(
@@ -502,6 +547,7 @@ void main() {
           mdnsClient: client,
           logger: logger,
           flutterUsage: TestUsage(),
+          analytics: const NoOpAnalytics(),
         );
 
         final Uri? uri = await portDiscovery.getVMServiceUriForLaunch(
@@ -523,6 +569,7 @@ void main() {
           mdnsClient: client,
           logger: BufferLogger.test(),
           flutterUsage: TestUsage(),
+          analytics: const NoOpAnalytics(),
         );
         expect(
           () async => portDiscovery.queryForLaunch(applicationId: 'app-id', deviceVmservicePort: 123),
@@ -547,6 +594,7 @@ void main() {
           mdnsClient: client,
           logger: BufferLogger.test(),
           flutterUsage: TestUsage(),
+          analytics: const NoOpAnalytics(),
         );
         final Uri? uri = await portDiscovery.getVMServiceUriForLaunch(
           'bar',
@@ -557,7 +605,7 @@ void main() {
         expect(uri.toString(), 'http://127.0.0.1:123/');
       });
 
-      testWithoutContext('Get network device IP (iPv4)', () async {
+      testWithoutContext('Get wireless device IP (iPv4)', () async {
         final MDnsClient client = FakeMDnsClient(
           <PtrResourceRecord>[
             PtrResourceRecord('foo', future, domainName: 'bar'),
@@ -584,17 +632,18 @@ void main() {
           mdnsClient: client,
           logger: BufferLogger.test(),
           flutterUsage: TestUsage(),
+          analytics: const NoOpAnalytics(),
         );
         final Uri? uri = await portDiscovery.getVMServiceUriForLaunch(
           'bar',
           device,
-          isNetworkDevice: true,
+          useDeviceIPAsHost: true,
           deviceVmservicePort: 1234,
         );
         expect(uri.toString(), 'http://111.111.111.111:1234/xyz/');
       });
 
-      testWithoutContext('Get network device IP (iPv6)', () async {
+      testWithoutContext('Get wireless device IP (iPv6)', () async {
         final MDnsClient client = FakeMDnsClient(
           <PtrResourceRecord>[
             PtrResourceRecord('foo', future, domainName: 'bar'),
@@ -621,11 +670,12 @@ void main() {
           mdnsClient: client,
           logger: BufferLogger.test(),
           flutterUsage: TestUsage(),
+          analytics: const NoOpAnalytics(),
         );
         final Uri? uri = await portDiscovery.getVMServiceUriForLaunch(
           'bar',
           device,
-          isNetworkDevice: true,
+          useDeviceIPAsHost: true,
           deviceVmservicePort: 1234,
         );
         expect(uri.toString(), 'http://[1111:1111:1111:1111:1111:1111:1111:1111]:1234/xyz/');
@@ -655,6 +705,7 @@ void main() {
           mdnsClient: client,
           logger: BufferLogger.test(),
           flutterUsage: TestUsage(),
+          analytics: const NoOpAnalytics(),
         );
         expect(
           portDiscovery.getVMServiceUriForLaunch(
@@ -665,6 +716,97 @@ void main() {
           throwsToolExit(
               message:'Did not find a Dart VM Service advertised for srv-bar on port 321.'),
         );
+      });
+
+      testWithoutContext('Matches on application id and device name', () async {
+        final MDnsClient client = FakeMDnsClient(
+          <PtrResourceRecord>[
+            PtrResourceRecord('foo', future, domainName: 'srv-foo'),
+            PtrResourceRecord('bar', future, domainName: 'srv-bar'),
+            PtrResourceRecord('baz', future, domainName: 'srv-boo'),
+          ],
+          <String, List<SrvResourceRecord>>{
+            'srv-bar': <SrvResourceRecord>[
+              SrvResourceRecord('srv-foo', future, port: 123, weight: 1, priority: 1, target: 'My-Phone.local'),
+            ],
+          },
+        );
+        final FakeIOSDevice device = FakeIOSDevice(
+          name: 'My Phone',
+        );
+        final MDnsVmServiceDiscovery portDiscovery = MDnsVmServiceDiscovery(
+          mdnsClient: client,
+          logger: BufferLogger.test(),
+          flutterUsage: TestUsage(),
+          analytics: const NoOpAnalytics(),
+        );
+
+        final Uri? uri = await portDiscovery.getVMServiceUriForLaunch(
+          'srv-bar',
+          device,
+        );
+        expect(uri.toString(), 'http://127.0.0.1:123/');
+      });
+
+      testWithoutContext('Throw error if unable to find VM Service with app id and device name', () async {
+        final MDnsClient client = FakeMDnsClient(
+          <PtrResourceRecord>[
+            PtrResourceRecord('foo', future, domainName: 'srv-foo'),
+            PtrResourceRecord('bar', future, domainName: 'srv-bar'),
+            PtrResourceRecord('baz', future, domainName: 'srv-boo'),
+          ],
+          <String, List<SrvResourceRecord>>{
+            'srv-foo': <SrvResourceRecord>[
+              SrvResourceRecord('srv-foo', future, port: 123, weight: 1, priority: 1, target: 'target-foo'),
+            ],
+          },
+        );
+        final FakeIOSDevice device = FakeIOSDevice(
+          name: 'My Phone',
+        );
+        final MDnsVmServiceDiscovery portDiscovery = MDnsVmServiceDiscovery(
+          mdnsClient: client,
+          logger: BufferLogger.test(),
+          flutterUsage: TestUsage(),
+          analytics: const NoOpAnalytics(),
+        );
+        expect(
+          portDiscovery.getVMServiceUriForLaunch(
+            'srv-bar',
+            device,
+          ),
+          throwsToolExit(
+              message:'Did not find a Dart VM Service advertised for srv-bar'),
+        );
+      });
+    });
+
+    group('deviceNameMatchesTargetName', () {
+      testWithoutContext('compares case insensitive and without spaces, hyphens, .local', () {
+        final MDnsVmServiceDiscovery portDiscovery = MDnsVmServiceDiscovery(
+          mdnsClient: FakeMDnsClient(
+            <PtrResourceRecord>[],
+            <String, List<SrvResourceRecord>>{},
+          ),
+          logger: BufferLogger.test(),
+          flutterUsage: TestUsage(),
+          analytics: const NoOpAnalytics(),
+        );
+
+        expect(portDiscovery.deviceNameMatchesTargetName('My phone', 'My-Phone.local'), isTrue);
+      });
+
+      testWithoutContext('includes numbers in comparison', () {
+        final MDnsVmServiceDiscovery portDiscovery = MDnsVmServiceDiscovery(
+          mdnsClient: FakeMDnsClient(
+            <PtrResourceRecord>[],
+            <String, List<SrvResourceRecord>>{},
+          ),
+          logger: BufferLogger.test(),
+          flutterUsage: TestUsage(),
+          analytics: const NoOpAnalytics(),
+        );
+        expect(portDiscovery.deviceNameMatchesTargetName('My phone', 'My-Phone-2.local'), isFalse);
       });
     });
 
@@ -692,6 +834,7 @@ void main() {
         mdnsClient: client,
         logger: BufferLogger.test(),
         flutterUsage: TestUsage(),
+        analytics: const NoOpAnalytics(),
       );
       final MDnsVmServiceDiscoveryResult? result = await portDiscovery.firstMatchingVmService(client);
       expect(result?.domainName, 'srv-foo');
@@ -722,6 +865,7 @@ void main() {
         mdnsClient: client,
         logger: BufferLogger.test(),
         flutterUsage: TestUsage(),
+        analytics: const NoOpAnalytics(),
       );
       final MDnsVmServiceDiscoveryResult? result = await portDiscovery.firstMatchingVmService(
         client,
@@ -751,11 +895,12 @@ void main() {
         mdnsClient: client,
         logger: BufferLogger.test(),
         flutterUsage: TestUsage(),
+        analytics: const NoOpAnalytics(),
       );
       final MDnsVmServiceDiscoveryResult? result = await portDiscovery.firstMatchingVmService(
         client,
         applicationId: 'srv-foo',
-        isNetworkDevice: true,
+        useDeviceIPAsHost: true,
       );
       expect(result?.domainName, 'srv-foo');
       expect(result?.port, 111);
@@ -788,11 +933,12 @@ void main() {
         mdnsClient: client,
         logger: BufferLogger.test(),
         flutterUsage: TestUsage(),
+        analytics: const NoOpAnalytics(),
       );
       final MDnsVmServiceDiscoveryResult? result = await portDiscovery.firstMatchingVmService(
         client,
         applicationId: 'srv-foo',
-        isNetworkDevice: true,
+        useDeviceIPAsHost: true,
       );
       expect(result?.domainName, 'srv-foo');
       expect(result?.port, 111);
@@ -825,11 +971,12 @@ void main() {
         mdnsClient: client,
         logger: BufferLogger.test(),
         flutterUsage: TestUsage(),
+        analytics: const NoOpAnalytics(),
       );
       final MDnsVmServiceDiscoveryResult? result = await portDiscovery.firstMatchingVmService(
         client,
         applicationId: 'srv-foo',
-        isNetworkDevice: true,
+        useDeviceIPAsHost: true,
       );
       expect(result?.domainName, 'srv-foo');
       expect(result?.port, 111);
@@ -891,10 +1038,12 @@ class FakeMDnsClient extends Fake implements MDnsClient {
   void stop() {}
 }
 
-// Unfortunately Device, despite not being immutable, has an `operator ==`.
-// Until we fix that, we have to also ignore related lints here.
-// ignore: avoid_implementing_value_types
 class FakeIOSDevice extends Fake implements IOSDevice {
+  FakeIOSDevice({this.name = 'iPhone'});
+
+  @override
+  final String name;
+
   @override
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.ios;
 

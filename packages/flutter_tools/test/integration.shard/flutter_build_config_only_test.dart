@@ -24,14 +24,18 @@ void main() {
     );
     exampleAppDir = tempDir.childDirectory('bbb').childDirectory('example');
 
-    processManager.runSync(<String>[
-      flutterBin,
-      ...getLocalEngineArguments(),
-      'create',
-      '--template=plugin',
-      '--platforms=android',
-      'bbb',
-    ], workingDirectory: tempDir.path);
+    processManager.runSync(
+      <String>[
+        flutterBin,
+        ...getLocalEngineArguments(),
+        'create',
+        '--template=plugin',
+        '--platforms=android',
+        'bbb',
+        '-v',
+      ],
+      workingDirectory: tempDir.path,
+    );
   });
 
   tearDown(() async {
@@ -48,14 +52,17 @@ void main() {
       // Ensure file is gone prior to configOnly running.
       await gradleFile.delete();
 
-      final ProcessResult result = processManager.runSync(<String>[
-        flutterBin,
-        ...getLocalEngineArguments(),
-        'build',
-        'apk',
-        '--target-platform=android-arm',
-        '--config-only',
-      ], workingDirectory: exampleAppDir.path);
+      final ProcessResult result = processManager.runSync(
+        <String>[
+          flutterBin,
+          ...getLocalEngineArguments(),
+          'build',
+          'apk',
+          '--target-platform=android-arm',
+          '--config-only',
+        ],
+        workingDirectory: exampleAppDir.path,
+      );
 
       expect(gradleFile, exists);
       expect(result.stdout, contains(RegExp(r'Config complete')));

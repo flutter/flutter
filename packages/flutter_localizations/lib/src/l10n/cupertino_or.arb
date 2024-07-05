@@ -22,5 +22,14 @@
   "tabSemanticsLabel": "$tabCountର $tabIndex ଟାବ୍",
   "modalBarrierDismissLabel": "ଖାରଜ କରନ୍ତୁ",
   "searchTextFieldPlaceholderLabel": "ସନ୍ଧାନ କରନ୍ତୁ",
+<<<<<<< HEAD
   "noSpellCheckReplacementsLabel": "No Replacements Found"
+=======
+  "noSpellCheckReplacementsLabel": "କୌଣସି ରିପ୍ଲେସମେଣ୍ଟ ମିଳିଲା ନାହିଁ",
+  "menuDismissLabel": "ମେନୁ ଖାରଜ କରନ୍ତୁ",
+  "lookUpButtonLabel": "ଉପରକୁ ଦେଖନ୍ତୁ",
+  "searchWebButtonLabel": "ୱେବ ସର୍ଚ୍ଚ କରନ୍ତୁ",
+  "shareButtonLabel": "ସେୟାର୍ କରନ୍ତୁ...",
+  "clearButtonLabel": "Clear"
+>>>>>>> 761747bfc538b5af34aa0d3fac380f1bc331ec49
 }

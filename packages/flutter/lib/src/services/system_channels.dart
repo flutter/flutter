@@ -58,6 +58,27 @@ abstract final class SystemChannels {
       JSONMethodCodec(),
   );
 
+  /// A [MethodChannel] for handling predictive back gestures.
+  ///
+  /// Currently, this feature is only available on Android U and above.
+  ///
+  /// No outgoing methods are defined for this channel (invoked using
+  /// [OptionalMethodChannel.invokeMethod]).
+  ///
+  /// The following incoming methods are defined for this channel (registered
+  /// using [MethodChannel.setMethodCallHandler]):
+  ///
+  ///  * `startBackGesture`: The user has started a predictive back gesture.
+  ///  * `updateBackGestureProgress`: The user has continued dragging the
+  ///    predictive back gesture.
+  ///  * `commitBackGesture`: The user has finished a predictive back gesture,
+  ///    indicating that the current route should be popped.
+  ///  * `cancelBackGesture`: The user has canceled a predictive back gesture,
+  ///    indicating that no navigation should occur.
+  static const MethodChannel backGesture = OptionalMethodChannel(
+    'flutter/backgesture',
+  );
+
   /// A JSON [MethodChannel] for invoking miscellaneous platform methods.
   ///
   /// The following outgoing methods are defined for this channel (invoked using
@@ -133,11 +154,23 @@ abstract final class SystemChannels {
   ///  * `System.requestAppExit`: The application has requested that it be
   ///    terminated. See [ServicesBinding.exitApplication].
   ///
+  ///  * `System.initializationComplete`: Indicate to the engine the
+  ///    initialization of a binding that may, among other tasks, register a
+  ///    handler for application exit attempts.
+  ///
   /// Calls to methods that are not implemented on the shell side are ignored
   /// (so it is safe to call methods when the relevant plugin might be missing).
   static const MethodChannel platform = OptionalMethodChannel(
       'flutter/platform',
       JSONMethodCodec(),
+  );
+
+  /// A [MethodChannel] for handling text processing actions.
+  ///
+  /// This channel exposes the text processing feature for supported platforms.
+  /// Currently supported on Android only.
+  static const MethodChannel processText = OptionalMethodChannel(
+      'flutter/processtext',
   );
 
   /// A JSON [MethodChannel] for handling text input.
@@ -487,5 +520,27 @@ abstract final class SystemChannels {
   static const MethodChannel contextMenu = OptionalMethodChannel(
     'flutter/contextmenu',
     JSONMethodCodec(),
+  );
+
+  /// A [MethodChannel] for retrieving keyboard pressed keys from the engine.
+  ///
+  /// The following outgoing methods are defined for this channel (invoked using
+  /// [OptionalMethodChannel.invokeMethod]):
+  ///
+  ///  * `getKeyboardState`: Obtains keyboard pressed keys from the engine.
+  ///    The keyboard state is sent as a `Map<int, int>?` where each entry
+  ///    represents a pressed keyboard key. The entry key is the physical
+  ///    key ID and the entry value is the logical key ID.
+  ///
+  ///    Both the framework and the engine maintain a state of the current
+  ///    pressed keys. There are edge cases, related to startup and restart,
+  ///    where the framework needs to resynchronize its keyboard state.
+  ///
+  /// See also:
+  ///
+  ///  * [HardwareKeyboard.syncKeyboardState], which uses this channel to synchronize
+  ///    the `HardwareKeyboard` pressed state.
+  static const MethodChannel keyboard = OptionalMethodChannel(
+    'flutter/keyboard',
   );
 }

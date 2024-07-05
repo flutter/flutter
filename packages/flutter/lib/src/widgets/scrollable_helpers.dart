@@ -10,7 +10,6 @@ import 'package:flutter/rendering.dart';
 
 import 'actions.dart';
 import 'basic.dart';
-import 'focus_manager.dart';
 import 'framework.dart';
 import 'primary_scroll_controller.dart';
 import 'scroll_configuration.dart';
@@ -22,17 +21,14 @@ import 'scrollable.dart';
 export 'package:flutter/physics.dart' show Tolerance;
 
 /// Describes the aspects of a Scrollable widget to inform inherited widgets
-/// like [ScrollBehavior] for decorating.
-// TODO(Piinks): Fix doc with 2DScrollable change.
-// or enumerate the properties of combined
-// Scrollables, such as [TwoDimensionalScrollable].
+/// like [ScrollBehavior] for decorating or enumerate the properties of combined
+/// Scrollables, such as [TwoDimensionalScrollable].
 ///
 /// Decorations like [GlowingOverscrollIndicator]s and [Scrollbar]s require
 /// information about the Scrollable in order to be initialized.
 @immutable
 class ScrollableDetails {
-  /// Creates a set of details describing the [Scrollable]. The [direction]
-  /// cannot be null.
+  /// Creates a set of details describing the [Scrollable].
   const ScrollableDetails({
     required this.direction,
     this.controller,
@@ -160,11 +156,8 @@ class EdgeDraggingAutoScroller {
   EdgeDraggingAutoScroller(
     this.scrollable, {
     this.onScrollViewScrolled,
-    this.velocityScalar = _kDefaultAutoScrollVelocityScalar,
+    required this.velocityScalar,
   });
-
-  // An eyeballed value for a smooth scrolling experience.
-  static const double _kDefaultAutoScrollVelocityScalar = 7;
 
   /// The [Scrollable] this auto scroller is scrolling.
   final ScrollableState scrollable;
@@ -176,10 +169,12 @@ class EdgeDraggingAutoScroller {
   /// in between each scroll.
   final VoidCallback? onScrollViewScrolled;
 
+  /// {@template flutter.widgets.EdgeDraggingAutoScroller.velocityScalar}
   /// The velocity scalar per pixel over scroll.
   ///
   /// It represents how the velocity scale with the over scroll distance. The
   /// auto-scroll velocity = <distance of overscroll> * velocityScalar.
+  /// {@endtemplate}
   final double velocityScalar;
 
   late Rect _dragTargetRelatedToScrollOrigin;
@@ -189,21 +184,17 @@ class EdgeDraggingAutoScroller {
   bool _scrolling = false;
 
   double _offsetExtent(Offset offset, Axis scrollDirection) {
-    switch (scrollDirection) {
-      case Axis.horizontal:
-        return offset.dx;
-      case Axis.vertical:
-        return offset.dy;
-    }
+    return switch (scrollDirection) {
+      Axis.horizontal => offset.dx,
+      Axis.vertical   => offset.dy,
+    };
   }
 
   double _sizeExtent(Size size, Axis scrollDirection) {
-    switch (scrollDirection) {
-      case Axis.horizontal:
-        return size.width;
-      case Axis.vertical:
-        return size.height;
-    }
+    return switch (scrollDirection) {
+      Axis.horizontal => size.width,
+      Axis.vertical   => size.height,
+    };
   }
 
   AxisDirection get _axisDirection => scrollable.axisDirection;
@@ -342,8 +333,6 @@ enum ScrollIncrementType {
 /// for the scrollable.
 class ScrollIncrementDetails {
   /// A const constructor for a [ScrollIncrementDetails].
-  ///
-  /// All of the arguments must not be null, and are required.
   const ScrollIncrementDetails({
     required this.type,
     required this.metrics,
@@ -380,10 +369,10 @@ class ScrollIntent extends Intent {
   final ScrollIncrementType type;
 }
 
-/// An [Action] that scrolls the [Scrollable] that encloses the current
-/// [primaryFocus] by the amount configured in the [ScrollIntent] given to it.
+/// An [Action] that scrolls the relevant [Scrollable] by the amount configured
+/// in the [ScrollIntent] given to it.
 ///
-/// If a Scrollable cannot be found above the current [primaryFocus], the
+/// If a Scrollable cannot be found above the given [BuildContext], the
 /// [PrimaryScrollController] will be considered for default handling of
 /// [ScrollAction]s.
 ///
@@ -391,21 +380,17 @@ class ScrollIntent extends Intent {
 /// for a [ScrollIntent.type] set to [ScrollIncrementType.page] is 80% of the
 /// size of the scroll window, and for [ScrollIncrementType.line], 50 logical
 /// pixels.
-class ScrollAction extends Action<ScrollIntent> {
+class ScrollAction extends ContextAction<ScrollIntent> {
   @override
-  bool isEnabled(ScrollIntent intent) {
-    final FocusNode? focus = primaryFocus;
-    final bool contextIsValid = focus != null && focus.context != null;
-    if (contextIsValid) {
-      // Check for primary scrollable within the current context
-      if (Scrollable.maybeOf(focus.context!) != null) {
-        return true;
-      }
-      // Check for fallback scrollable with context from PrimaryScrollController
-      final ScrollController? primaryScrollController = PrimaryScrollController.maybeOf(focus.context!);
-      return primaryScrollController != null && primaryScrollController.hasClients;
+  bool isEnabled(ScrollIntent intent, [BuildContext? context]) {
+    if (context == null) {
+      return false;
     }
-    return false;
+    if (Scrollable.maybeOf(context) != null) {
+      return true;
+    }
+    final ScrollController? primaryScrollController = PrimaryScrollController.maybeOf(context);
+    return (primaryScrollController != null) && (primaryScrollController.hasClients);
   }
 
   /// Returns the scroll increment for a single scroll request, for use when
@@ -413,8 +398,8 @@ class ScrollAction extends Action<ScrollIntent> {
   ///
   /// Must not be called when the position is null, or when any of the position
   /// metrics (pixels, viewportDimension, maxScrollExtent, minScrollExtent) are
-  /// null. The type and state arguments must not be null, and the widget must
-  /// have already been laid out so that the position fields are valid.
+  /// null. The widget must have already been laid out so that the position
+  /// fields are valid.
   static double _calculateScrollIncrement(ScrollableState state, { ScrollIncrementType type = ScrollIncrementType.line }) {
     assert(state.position.hasPixels);
     assert(state.resolvedPhysics == null || state.resolvedPhysics!.shouldAcceptUserOffset(state.position));
@@ -426,67 +411,28 @@ class ScrollAction extends Action<ScrollIntent> {
         ),
       );
     }
-    switch (type) {
-      case ScrollIncrementType.line:
-        return 50.0;
-      case ScrollIncrementType.page:
-        return 0.8 * state.position.viewportDimension;
-    }
+    return switch (type) {
+      ScrollIncrementType.line => 50.0,
+      ScrollIncrementType.page => 0.8 * state.position.viewportDimension,
+    };
   }
 
   /// Find out how much of an increment to move by, taking the different
   /// directions into account.
   static double getDirectionalIncrement(ScrollableState state, ScrollIntent intent) {
-    final double increment = _calculateScrollIncrement(state, type: intent.type);
-    switch (intent.direction) {
-      case AxisDirection.down:
-        switch (state.axisDirection) {
-          case AxisDirection.up:
-            return -increment;
-          case AxisDirection.down:
-            return increment;
-          case AxisDirection.right:
-          case AxisDirection.left:
-            return 0.0;
-        }
-      case AxisDirection.up:
-        switch (state.axisDirection) {
-          case AxisDirection.up:
-            return increment;
-          case AxisDirection.down:
-            return -increment;
-          case AxisDirection.right:
-          case AxisDirection.left:
-            return 0.0;
-        }
-      case AxisDirection.left:
-        switch (state.axisDirection) {
-          case AxisDirection.right:
-            return -increment;
-          case AxisDirection.left:
-            return increment;
-          case AxisDirection.up:
-          case AxisDirection.down:
-            return 0.0;
-        }
-      case AxisDirection.right:
-        switch (state.axisDirection) {
-          case AxisDirection.right:
-            return increment;
-          case AxisDirection.left:
-            return -increment;
-          case AxisDirection.up:
-          case AxisDirection.down:
-            return 0.0;
-        }
+    if (axisDirectionToAxis(intent.direction) == axisDirectionToAxis(state.axisDirection)) {
+      final double increment = _calculateScrollIncrement(state, type: intent.type);
+      return intent.direction == state.axisDirection ? increment : -increment;
     }
+    return 0.0;
   }
 
   @override
-  void invoke(ScrollIntent intent) {
-    ScrollableState? state = Scrollable.maybeOf(primaryFocus!.context!);
+  void invoke(ScrollIntent intent, [BuildContext? context]) {
+    assert(context != null, 'Cannot scroll without a context.');
+    ScrollableState? state = Scrollable.maybeOf(context!);
     if (state == null) {
-      final ScrollController primaryScrollController = PrimaryScrollController.of(primaryFocus!.context!);
+      final ScrollController primaryScrollController = PrimaryScrollController.of(context);
       assert (() {
         if (primaryScrollController.positions.length != 1) {
           throw FlutterError.fromParts(<DiagnosticsNode>[

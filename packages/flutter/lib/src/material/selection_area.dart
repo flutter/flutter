@@ -33,7 +33,9 @@ import 'theme.dart';
 /// {@end-tool}
 ///
 /// See also:
+///
 ///  * [SelectableRegion], which provides an overview of the selection system.
+///  * [SelectableText], which enables selection on a single run of text.
 class SelectionArea extends StatefulWidget {
   /// Creates a [SelectionArea].
   ///
@@ -48,15 +50,13 @@ class SelectionArea extends StatefulWidget {
     required this.child,
   });
 
-  /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.intro}
-  ///
-  /// {@macro flutter.widgets.magnifier.intro}
-  ///
-  /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.details}
+  /// The configuration for the magnifier in the selection region.
   ///
   /// By default, builds a [CupertinoTextMagnifier] on iOS and [TextMagnifier]
-  /// on Android, and builds nothing on all other platforms. If it is desired to
-  /// suppress the magnifier, consider passing [TextMagnifierConfiguration.disabled].
+  /// on Android, and builds nothing on all other platforms. To suppress the
+  /// magnifier, consider passing [TextMagnifierConfiguration.disabled].
+  ///
+  /// {@macro flutter.widgets.magnifier.intro}
   final TextMagnifierConfiguration? magnifierConfiguration;
 
   /// {@macro flutter.widgets.Focus.focusNode}
@@ -103,13 +103,7 @@ class SelectionArea extends StatefulWidget {
 }
 
 class _SelectionAreaState extends State<SelectionArea> {
-  FocusNode get _effectiveFocusNode {
-    if (widget.focusNode != null) {
-      return widget.focusNode!;
-    }
-    _internalNode ??= FocusNode();
-    return _internalNode!;
-  }
+  FocusNode get _effectiveFocusNode => widget.focusNode ?? (_internalNode ??= FocusNode());
   FocusNode? _internalNode;
 
   @override
@@ -121,20 +115,12 @@ class _SelectionAreaState extends State<SelectionArea> {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
-    TextSelectionControls? controls = widget.selectionControls;
-    switch (Theme.of(context).platform) {
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-        controls ??= materialTextSelectionHandleControls;
-      case TargetPlatform.iOS:
-        controls ??= cupertinoTextSelectionHandleControls;
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        controls ??= desktopTextSelectionHandleControls;
-      case TargetPlatform.macOS:
-        controls ??= cupertinoDesktopTextSelectionHandleControls;
-    }
-
+    final TextSelectionControls controls = widget.selectionControls ?? switch (Theme.of(context).platform) {
+      TargetPlatform.android || TargetPlatform.fuchsia => materialTextSelectionHandleControls,
+      TargetPlatform.linux || TargetPlatform.windows   => desktopTextSelectionHandleControls,
+      TargetPlatform.iOS                               => cupertinoTextSelectionHandleControls,
+      TargetPlatform.macOS                             => cupertinoDesktopTextSelectionHandleControls,
+    };
     return SelectableRegion(
       selectionControls: controls,
       focusNode: _effectiveFocusNode,

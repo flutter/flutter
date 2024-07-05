@@ -42,6 +42,7 @@ class SearchViewThemeData with Diagnosticable {
     this.constraints,
     this.side,
     this.shape,
+    this.headerHeight,
     this.headerTextStyle,
     this.headerHintStyle,
     this.dividerColor,
@@ -61,6 +62,9 @@ class SearchViewThemeData with Diagnosticable {
 
   /// Overrides the default value of the [SearchAnchor.viewShape].
   final OutlinedBorder? shape;
+
+  /// Overrides the default value of the [SearchAnchor.headerHeight].
+  final double? headerHeight;
 
   /// Overrides the default value for [SearchAnchor.headerTextStyle].
   final TextStyle? headerTextStyle;
@@ -82,6 +86,7 @@ class SearchViewThemeData with Diagnosticable {
     Color? surfaceTintColor,
     BorderSide? side,
     OutlinedBorder? shape,
+    double? headerHeight,
     TextStyle? headerTextStyle,
     TextStyle? headerHintStyle,
     BoxConstraints? constraints,
@@ -93,6 +98,7 @@ class SearchViewThemeData with Diagnosticable {
       surfaceTintColor: surfaceTintColor ?? this.surfaceTintColor,
       side: side ?? this.side,
       shape: shape ?? this.shape,
+      headerHeight: headerHeight ?? this.headerHeight,
       headerTextStyle: headerTextStyle ?? this.headerTextStyle,
       headerHintStyle: headerHintStyle ?? this.headerHintStyle,
       constraints: constraints ?? this.constraints,
@@ -111,6 +117,7 @@ class SearchViewThemeData with Diagnosticable {
       surfaceTintColor: Color.lerp(a?.surfaceTintColor, b?.surfaceTintColor, t),
       side: _lerpSides(a?.side, b?.side, t),
       shape: OutlinedBorder.lerp(a?.shape, b?.shape, t),
+      headerHeight: lerpDouble(a?.headerHeight, b?.headerHeight, t),
       headerTextStyle: TextStyle.lerp(a?.headerTextStyle, b?.headerTextStyle, t),
       headerHintStyle: TextStyle.lerp(a?.headerTextStyle, b?.headerTextStyle, t),
       constraints: BoxConstraints.lerp(a?.constraints, b?.constraints, t),
@@ -125,6 +132,7 @@ class SearchViewThemeData with Diagnosticable {
     surfaceTintColor,
     side,
     shape,
+    headerHeight,
     headerTextStyle,
     headerHintStyle,
     constraints,
@@ -145,6 +153,7 @@ class SearchViewThemeData with Diagnosticable {
       && other.surfaceTintColor == surfaceTintColor
       && other.side == side
       && other.shape == shape
+      && other.headerHeight == headerHeight
       && other.headerTextStyle == headerTextStyle
       && other.headerHintStyle == headerHintStyle
       && other.constraints == constraints
@@ -159,6 +168,7 @@ class SearchViewThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<Color?>('surfaceTintColor', surfaceTintColor, defaultValue: null));
     properties.add(DiagnosticsProperty<BorderSide?>('side', side, defaultValue: null));
     properties.add(DiagnosticsProperty<OutlinedBorder?>('shape', shape, defaultValue: null));
+    properties.add(DiagnosticsProperty<double?>('headerHeight', headerHeight, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle?>('headerTextStyle', headerTextStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle?>('headerHintStyle', headerHintStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<BoxConstraints>('constraints', constraints, defaultValue: null));
@@ -187,7 +197,7 @@ class SearchViewThemeData with Diagnosticable {
 ///
 ///  * [SearchViewThemeData], which describes the actual configuration of a search view
 ///    theme.
-class SearchViewTheme extends InheritedWidget {
+class SearchViewTheme extends InheritedTheme {
   /// Creates a const theme that controls the configurations for the search view
   /// created by the [SearchAnchor] widget.
   const SearchViewTheme({
@@ -210,6 +220,11 @@ class SearchViewTheme extends InheritedWidget {
   static SearchViewThemeData of(BuildContext context) {
     final SearchViewTheme? searchViewTheme = context.dependOnInheritedWidgetOfExactType<SearchViewTheme>();
     return searchViewTheme?.data ?? Theme.of(context).searchViewTheme;
+  }
+
+  @override
+  Widget wrap(BuildContext context, Widget child) {
+    return SearchViewTheme(data: data, child: child);
   }
 
   @override

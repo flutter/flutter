@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -112,6 +110,126 @@ void main() {
     expect(renderObject.size, equals(const Size.square(24.0)));
   });
 
+  testWidgets('Icon sizing - no theme, default size, considering text scaler', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MediaQuery(
+        data: MediaQueryData(
+          textScaler: _TextDoubler(),
+        ),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: Icon(
+              null,
+              applyTextScaling: true,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RenderBox renderObject = tester.renderObject(find.byType(Icon));
+    expect(renderObject.size, equals(const Size.square(48.0)));
+  });
+
+  testWidgets('Icon sizing - no theme, explicit size, considering text scaler', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MediaQuery(
+        data: MediaQueryData(
+          textScaler: _TextDoubler(),
+        ),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: Icon(
+              null,
+              size: 96.0,
+              applyTextScaling: true,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RenderBox renderObject = tester.renderObject(find.byType(Icon));
+    expect(renderObject.size, equals(const Size.square(192.0)));
+  });
+
+  testWidgets('Icon sizing - sized theme, considering text scaler', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MediaQuery(
+        data: MediaQueryData(
+          textScaler: _TextDoubler(),
+        ),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: IconTheme(
+              data: IconThemeData(
+                size: 36.0,
+                applyTextScaling: true,
+              ),
+              child: Icon(null),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RenderBox renderObject = tester.renderObject(find.byType(Icon));
+    expect(renderObject.size, equals(const Size.square(72.0)));
+  });
+
+  testWidgets('Icon sizing - sized theme, explicit size, considering text scale', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MediaQuery(
+        data: MediaQueryData(
+          textScaler: _TextDoubler(),
+        ),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: IconTheme(
+              data: IconThemeData(
+                size: 36.0,
+                applyTextScaling: true,
+              ),
+              child: Icon(
+                null,
+                size: 48.0,
+                applyTextScaling: false,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RenderBox renderObject = tester.renderObject(find.byType(Icon));
+    expect(renderObject.size, equals(const Size.square(48.0)));
+  });
+
+  testWidgets('Icon sizing - sizeless theme, default size, default consideration for text scaler', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MediaQuery(
+        data: MediaQueryData(
+          textScaler: _TextDoubler(),
+        ),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: IconTheme(
+              data: IconThemeData(),
+              child: Icon(null),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RenderBox renderObject = tester.renderObject(find.byType(Icon));
+    expect(renderObject.size, equals(const Size.square(24.0)));
+  });
 
   testWidgets('Icon with custom font', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -125,6 +243,36 @@ void main() {
 
     final RichText richText = tester.firstWidget(find.byType(RichText));
     expect(richText.text.style!.fontFamily, equals('Roboto'));
+  });
+
+  testWidgets("Icon's TextStyle makes sure the font body is vertically center-aligned", (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/138592.
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Icon(IconData(0x41)),
+        ),
+      ),
+    );
+
+    final RichText richText = tester.firstWidget(find.byType(RichText));
+    expect(richText.text.style?.height, 1.0);
+    expect(richText.text.style?.leadingDistribution, TextLeadingDistribution.even);
+  });
+
+  testWidgets('Icon with custom fontFamilyFallback', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Icon(IconData(0x41, fontFamilyFallback: <String>['FallbackFont'])),
+        ),
+      ),
+    );
+
+    final RichText richText = tester.firstWidget(find.byType(RichText));
+    expect(richText.text.style!.fontFamilyFallback, equals(<String>['FallbackFont']));
   });
 
   testWidgets('Icon with semantic label', (WidgetTester tester) async {
@@ -303,4 +451,14 @@ void main() {
     expect(() => Icon(Icons.abc, opticalSize: -0.1), throwsAssertionError);
     expect(() => Icon(Icons.abc, opticalSize: 0), throwsAssertionError);
   });
+}
+
+final class _TextDoubler extends TextScaler {
+  const _TextDoubler();
+
+  @override
+  double scale(double fontSize) => fontSize * 2.0;
+
+  @override
+  double get textScaleFactor => 2.0;
 }

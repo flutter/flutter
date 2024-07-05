@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
-
 import 'dart:async';
 import 'dart:io' as io; // flutter_ignore: dart_io_import;
 
@@ -111,8 +109,13 @@ class FlutterTesterTestDevice extends TestDevice {
       if (icudtlPath != null) '--icu-data-file-path=$icudtlPath',
       '--enable-checked-mode',
       '--verify-entry-points',
-      '--enable-software-rendering',
-      '--skia-deterministic-rendering',
+      if (debuggingOptions.enableImpeller == ImpellerStatus.enabled)
+        '--enable-impeller'
+      else
+        ...<String>[
+          '--enable-software-rendering',
+          '--skia-deterministic-rendering',
+        ],
       if (debuggingOptions.enableDartProfiling)
         '--enable-dart-profiling',
       '--non-interactive',
@@ -140,6 +143,8 @@ class FlutterTesterTestDevice extends TestDevice {
       'FONTCONFIG_FILE': fontConfigManager.fontConfigFile.path,
       'SERVER_PORT': _server!.port.toString(),
       'APP_NAME': flutterProject?.manifest.appName ?? '',
+      if (debuggingOptions.enableImpeller == ImpellerStatus.enabled)
+        'FLUTTER_TEST_IMPELLER': 'true',
       if (testAssetDirectory != null)
         'UNIT_TEST_ASSETS': testAssetDirectory!,
     };
@@ -180,21 +185,19 @@ class FlutterTesterTestDevice extends TestDevice {
         }
 
         logger.printTrace('Connecting to service protocol: $forwardingUri');
-        final Future<FlutterVmService> localVmService = connectToVmService(
+        final FlutterVmService vmService = await connectToVmServiceImpl(
           forwardingUri!,
           compileExpression: compileExpression,
           logger: logger,
         );
-        unawaited(localVmService.then((FlutterVmService vmservice) async {
-          logger.printTrace('test $id: Successfully connected to service protocol: $forwardingUri');
-          if (debuggingOptions.serveObservatory) {
-            try {
-              await vmservice.callMethodWrapper('_serveObservatory');
-            } on vm_service.RPCError {
-              logger.printWarning('Unable to enable Observatory');
-            }
+        logger.printTrace('test $id: Successfully connected to service protocol: $forwardingUri');
+        if (debuggingOptions.serveObservatory) {
+          try {
+            await vmService.callMethodWrapper('_serveObservatory');
+          } on vm_service.RPCError {
+            logger.printWarning('Unable to enable Observatory');
           }
-        }));
+        }
 
         if (debuggingOptions.startPaused && !machine!) {
           logger.printStatus('The Dart VM service is listening on $forwardingUri');
@@ -265,6 +268,20 @@ class FlutterTesterTestDevice extends TestDevice {
       enableAuthCodes: !debuggingOptions.disableServiceAuthCodes,
       ipv6: host!.type == InternetAddressType.IPv6,
       uriConverter: uriConverter,
+    );
+  }
+
+  @visibleForTesting
+  @protected
+  Future<FlutterVmService> connectToVmServiceImpl(
+    Uri httpUri, {
+    CompileExpression? compileExpression,
+    required Logger logger,
+  }) {
+    return connectToVmService(
+      httpUri,
+      compileExpression: compileExpression,
+      logger: logger,
     );
   }
 

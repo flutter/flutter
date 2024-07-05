@@ -172,8 +172,8 @@ class BuildableMacOSApp extends MacOSApp {
   }
 
   String bundleDirectory(BuildInfo buildInfo) {
-    return sentenceCase(buildInfo.mode.name) + (buildInfo.flavor != null
-      ? ' ${sentenceCase(buildInfo.flavor!)}'
+    return sentenceCase(buildInfo.mode.cliName) + (buildInfo.flavor != null
+      ? '-${buildInfo.flavor!}'
       : '');
   }
 

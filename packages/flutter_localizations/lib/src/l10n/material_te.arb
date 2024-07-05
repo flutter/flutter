@@ -24,6 +24,7 @@
   "closeButtonLabel": "మూసివేయండి",
   "continueButtonLabel": "కొనసాగించండి",
   "copyButtonLabel": "కాపీ చేయి",
+  "scanTextButtonLabel": "టెక్స్ట్‌ను స్కాన్ చేయండి",
   "cutButtonLabel": "కత్తిరించండి",
   "okButtonLabel": "సరే",
   "pasteButtonLabel": "పేస్ట్ చేయండి",
@@ -133,5 +134,17 @@
   "scrimLabel": "స్క్రిమ్",
   "bottomSheetLabel": "దిగువున ఉన్న షీట్",
   "scrimOnTapHint": "$modalRouteContentName‌ను మూసివేయండి",
-  "keyboardKeyShift": "Shift"
+  "keyboardKeyShift": "Shift",
+  "expansionTileExpandedHint": "కుదించడానికి డబుల్ ట్యాప్ చేయండి",
+  "expansionTileCollapsedHint": "విస్తరించడానికి డబుల్ ట్యాప్ చేయండి",
+  "expansionTileExpandedTapHint": "కుదించండి",
+  "expansionTileCollapsedTapHint": "మరిన్ని వివరాల కోసం విస్తరించండి",
+  "expandedHint": "కుదించబడింది",
+  "collapsedHint": "విస్తరించబడింది",
+  "menuDismissLabel": "మెనూను తీసివేయండి",
+  "lookUpButtonLabel": "వెతకండి",
+  "searchWebButtonLabel": "వెబ్‌లో సెర్చ్ చేయండి",
+  "shareButtonLabel": "షేర్ చేయండి...",
+  "clearButtonTooltip": "Clear text",
+  "selectedDateLabel": "Selected"
 }

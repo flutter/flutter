@@ -22,5 +22,14 @@
   "tabSemanticsLabel": "Қойынды: $tabIndex/$tabCount",
   "modalBarrierDismissLabel": "Жабу",
   "searchTextFieldPlaceholderLabel": "Іздеу",
+<<<<<<< HEAD
   "noSpellCheckReplacementsLabel": "No Replacements Found"
+=======
+  "noSpellCheckReplacementsLabel": "Ауыстыратын ешнәрсе табылмады.",
+  "menuDismissLabel": "Мәзірді жабу",
+  "lookUpButtonLabel": "Іздеу",
+  "searchWebButtonLabel": "Интернеттен іздеу",
+  "shareButtonLabel": "Бөлісу…",
+  "clearButtonLabel": "Clear"
+>>>>>>> 761747bfc538b5af34aa0d3fac380f1bc331ec49
 }

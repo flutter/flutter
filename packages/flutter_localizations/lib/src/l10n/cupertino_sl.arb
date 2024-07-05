@@ -32,5 +32,14 @@
   "tabSemanticsLabel": "Zavihek $tabIndex od $tabCount",
   "modalBarrierDismissLabel": "Opusti",
   "searchTextFieldPlaceholderLabel": "Iskanje",
+<<<<<<< HEAD
   "noSpellCheckReplacementsLabel": "No Replacements Found"
+=======
+  "noSpellCheckReplacementsLabel": "Ni zamenjav",
+  "menuDismissLabel": "Opusti meni",
+  "lookUpButtonLabel": "Pogled gor",
+  "searchWebButtonLabel": "Iskanje v spletu",
+  "shareButtonLabel": "Deli …",
+  "clearButtonLabel": "Clear"
+>>>>>>> 761747bfc538b5af34aa0d3fac380f1bc331ec49
 }

@@ -2,31 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import static groovy.io.FileType.FILES
+// This file exists solely for the compatibility with projects that have
+// not migrated to the declarative apply of the Flutter Gradle Plugin.
 
-import com.android.builder.model.AndroidProject
-import com.android.build.OutputFile
-import groovy.json.JsonSlurper
-import java.nio.file.Path
-import java.nio.file.Paths
-import java.util.regex.Matcher
-import java.util.regex.Pattern
-import org.apache.tools.ant.taskdefs.condition.Os
-import org.gradle.api.DefaultTask
-import org.gradle.api.GradleException
-import org.gradle.api.Project
-import org.gradle.api.Plugin
-import org.gradle.api.Task
-import org.gradle.api.file.CopySpec
-import org.gradle.api.file.FileCollection
-import org.gradle.api.tasks.Copy
-import org.gradle.api.tasks.InputFiles
-import org.gradle.api.tasks.OutputDirectory
-import org.gradle.api.tasks.TaskAction
-import org.gradle.api.tasks.bundling.Jar
-import org.gradle.internal.os.OperatingSystem
-import org.gradle.util.VersionNumber
+logger.error("You are applying Flutter's main Gradle plugin imperatively using \
+the apply script method, which is deprecated and will be removed in a future \
+release. Migrate to applying Gradle plugins with the declarative plugins \
+block: https://flutter.dev/go/flutter-gradle-plugin-apply\n")
 
+<<<<<<< HEAD
 /** For apps only. Provides the flutter extension used in app/build.gradle.
  * The versions specified here should match the values used in
  * ../lib/src/android/gradle_utils.dart, so when bumping, make sure to update
@@ -1326,3 +1310,7 @@ class FlutterTask extends BaseFlutterTask {
         buildBundle()
     }
 }
+=======
+def pathToThisDirectory = buildscript.sourceFile.parentFile
+apply from: "$pathToThisDirectory/src/main/groovy/flutter.groovy"
+>>>>>>> 761747bfc538b5af34aa0d3fac380f1bc331ec49

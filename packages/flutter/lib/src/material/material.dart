@@ -171,9 +171,7 @@ abstract class MaterialInkController {
 class Material extends StatefulWidget {
   /// Creates a piece of material.
   ///
-  /// The [type], [elevation], [borderOnForeground],
-  /// [clipBehavior], and [animationDuration] arguments must not be null.
-  /// Additionally, [elevation] must be non-negative.
+  /// The [elevation] must be non-negative.
   ///
   /// If a [shape] is specified, then the [borderRadius] property must be
   /// null and the [type] property must not be [MaterialType.circle]. If the
@@ -324,7 +322,7 @@ class Material extends StatefulWidget {
   /// use cases.
   /// {@endtemplate}
   ///
-  /// Defaults to [Clip.none], and must not be null.
+  /// Defaults to [Clip.none].
   final Clip clipBehavior;
 
   /// Defines the duration of animated changes for [shape], [elevation],
@@ -711,7 +709,17 @@ abstract class InkFeature {
     required MaterialInkController controller,
     required this.referenceBox,
     this.onRemoved,
-  }) : _controller = controller as _RenderInkFeatures;
+  }) : _controller = controller as _RenderInkFeatures {
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
+        library: 'package:flutter/material.dart',
+        className: '$InkFeature',
+        object: this,
+      );
+    }
+  }
 
   /// The [MaterialInkController] associated with this [InkFeature].
   ///
@@ -736,6 +744,11 @@ abstract class InkFeature {
       _debugDisposed = true;
       return true;
     }());
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
     _controller._removeFeature(this);
     onRemoved?.call();
   }
@@ -762,7 +775,7 @@ abstract class InkFeature {
       final int toDepth = to.depth;
 
       if (fromDepth >= toDepth) {
-        final AbstractNode? fromParent = from.parent;
+        final RenderObject? fromParent = from.parent;
         // Return early if the 2 render objects are not in the same render tree,
         // or either of them is offscreen and thus won't get painted.
         if (fromParent is! RenderObject || !fromParent.paintsChild(from)) {
@@ -773,7 +786,7 @@ abstract class InkFeature {
       }
 
       if (fromDepth <= toDepth) {
-        final AbstractNode? toParent = to.parent;
+        final RenderObject? toParent = to.parent;
         if (toParent is! RenderObject || !toParent.paintsChild(to)) {
           return null;
         }
@@ -841,9 +854,7 @@ class ShapeBorderTween extends Tween<ShapeBorder?> {
 class _MaterialInterior extends ImplicitlyAnimatedWidget {
   /// Creates a const instance of [_MaterialInterior].
   ///
-  /// The [child], [shape], [clipBehavior], [color], and [shadowColor] arguments
-  /// must not be null. The [elevation] must be specified and greater than or
-  /// equal to zero.
+  /// The [elevation] must be specified and greater than or equal to zero.
   const _MaterialInterior({
     required this.child,
     required this.shape,
@@ -876,7 +887,7 @@ class _MaterialInterior extends ImplicitlyAnimatedWidget {
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
-  /// Defaults to [Clip.none], and must not be null.
+  /// Defaults to [Clip.none].
   final Clip clipBehavior;
 
   /// The target z-coordinate at which to place this physical object relative

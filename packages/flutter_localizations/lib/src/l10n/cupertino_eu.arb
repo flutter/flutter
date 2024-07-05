@@ -18,9 +18,18 @@
   "cutButtonLabel": "Ebaki",
   "copyButtonLabel": "Kopiatu",
   "pasteButtonLabel": "Itsatsi",
-  "selectAllButtonLabel": "Hautatu guztiak",
+  "selectAllButtonLabel": "Hautatu dena",
   "tabSemanticsLabel": "$tabIndex/$tabCount fitxa",
   "modalBarrierDismissLabel": "Baztertu",
   "searchTextFieldPlaceholderLabel": "Bilatu",
+<<<<<<< HEAD
   "noSpellCheckReplacementsLabel": "No Replacements Found"
+=======
+  "noSpellCheckReplacementsLabel": "Ez da aurkitu ordezteko hitzik",
+  "menuDismissLabel": "Baztertu menua",
+  "lookUpButtonLabel": "Bilatu",
+  "searchWebButtonLabel": "Bilatu sarean",
+  "shareButtonLabel": "Partekatu...",
+  "clearButtonLabel": "Clear"
+>>>>>>> 761747bfc538b5af34aa0d3fac380f1bc331ec49
 }

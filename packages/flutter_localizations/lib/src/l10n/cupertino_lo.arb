@@ -22,5 +22,14 @@
   "tabSemanticsLabel": "ແຖບທີ $tabIndex ຈາກທັງໝົດ $tabCount",
   "modalBarrierDismissLabel": "ປິດໄວ້",
   "searchTextFieldPlaceholderLabel": "ຊອກຫາ",
+<<<<<<< HEAD
   "noSpellCheckReplacementsLabel": "No Replacements Found"
+=======
+  "noSpellCheckReplacementsLabel": "ບໍ່ພົບການແທນທີ່",
+  "menuDismissLabel": "ປິດເມນູ",
+  "lookUpButtonLabel": "ຊອກຫາຂໍ້ມູນ",
+  "searchWebButtonLabel": "ຊອກຫາຢູ່ອິນເຕີເນັດ",
+  "shareButtonLabel": "ແບ່ງປັນ...",
+  "clearButtonLabel": "Clear"
+>>>>>>> 761747bfc538b5af34aa0d3fac380f1bc331ec49
 }

@@ -20,6 +20,7 @@
   "cutButtonLabel": "Ausschneiden",
   "copyButtonLabel": "Kopieren",
   "pasteButtonLabel": "Einsetzen",
+  "clearButtonLabel": "Clear",
   "selectAllButtonLabel": "Alles auswählen",
   "modalBarrierDismissLabel": "Schliessen"
 }

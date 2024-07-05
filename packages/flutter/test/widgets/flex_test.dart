@@ -109,8 +109,8 @@ void main() {
           Column(),
         ],
       ),
-      Duration.zero,
-      EnginePhase.layout,
+      duration: Duration.zero,
+      phase: EnginePhase.layout,
     );
 
     // Turn off intrinsics checking, which also fails with the same exception.
@@ -125,8 +125,8 @@ void main() {
           ),
         ],
       ),
-      Duration.zero,
-      EnginePhase.layout,
+      duration: Duration.zero,
+      phase: EnginePhase.layout,
     );
     debugCheckIntrinsicSizes = true;
     final String message = tester.takeException().toString();

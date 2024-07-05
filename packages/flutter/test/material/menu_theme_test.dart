@@ -5,12 +5,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+
 void main() {
   void onPressed(TestMenu item) {}
 
   Finder findMenuPanels(Axis orientation) {
     return find.byWidgetPredicate((Widget widget) {
-      // ignore: avoid_dynamic_calls
       return widget.runtimeType.toString() == '_MenuPanel' && (widget as dynamic).orientation == orientation;
     });
   }
@@ -55,6 +55,7 @@ void main() {
   testWidgets('theme is honored', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Material(
           child: Builder(builder: (BuildContext context) {
             return MenuBarTheme(
@@ -104,9 +105,11 @@ void main() {
     expect(subMenuMaterial.color, equals(Colors.red));
   });
 
-  testWidgets('Constructor parameters override theme parameters', (WidgetTester tester) async {
+  testWidgets('Constructor parameters override theme parameters',
+  (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Material(
           child: Builder(
             builder: (BuildContext context) {

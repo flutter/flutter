@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:unified_analytics/unified_analytics.dart';
+
 import '../android/android_builder.dart';
 import '../android/build_validation.dart';
 import '../android/gradle_utils.dart';
@@ -35,7 +37,6 @@ class BuildApkCommand extends BuildSubCommand {
     addNullSafetyModeOptions(hide: !verboseHelp);
     usesAnalyzeSizeFlag();
     addAndroidSpecificBuildOptions(hide: !verboseHelp);
-    addMultidexOption();
     addIgnoreDeprecationOption();
     argParser
       ..addFlag('split-per-abi',
@@ -99,6 +100,30 @@ class BuildApkCommand extends BuildSubCommand {
   }
 
   @override
+  Future<Event> unifiedAnalyticsUsageValues(String commandPath) async {
+    final String buildMode;
+
+    if (boolArg('release')) {
+      buildMode = 'release';
+    } else if (boolArg('debug')) {
+      buildMode = 'debug';
+    } else if (boolArg('profile')) {
+      buildMode = 'profile';
+    } else {
+      // The build defaults to release.
+      buildMode = 'release';
+    }
+
+    return Event.commandUsageValues(
+      workflow: commandPath,
+      commandHasTerminal: hasTerminal,
+      buildApkTargetPlatform: stringsArg('target-platform').join(','),
+      buildApkBuildMode: buildMode,
+      buildApkSplitPerAbi: boolArg('split-per-abi'),
+    );
+  }
+
+  @override
   Future<FlutterCommandResult> runCommand() async {
     if (globals.androidSdk == null) {
       exitWithNoSdkMessage();
@@ -108,7 +133,6 @@ class BuildApkCommand extends BuildSubCommand {
       buildInfo,
       splitPerAbi: boolArg('split-per-abi'),
       targetArchs: stringsArg('target-platform').map<AndroidArch>(getAndroidArchForName),
-      multidexEnabled: boolArg('multidex'),
     );
     validateBuild(androidBuildInfo);
     displayNullSafetyMode(androidBuildInfo.buildInfo);

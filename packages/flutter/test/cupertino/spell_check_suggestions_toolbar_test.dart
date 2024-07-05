@@ -61,10 +61,21 @@ void main() {
     expect(labels, isNot(contains('yeller')));
   });
 
+<<<<<<< HEAD
   testWidgets('buildButtonItems builds a "No Replacements Found" button when no suggestions', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: _FakeEditableText(),
+=======
+  testWidgets('buildButtonItems builds a disabled "No Replacements Found" button when no suggestions', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController();
+    addTearDown(controller.dispose);
+    final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: _FakeEditableText(focusNode, controller),
+>>>>>>> 761747bfc538b5af34aa0d3fac380f1bc331ec49
       ),
     );
     final _FakeEditableTextState editableTextState =
@@ -73,15 +84,29 @@ void main() {
         CupertinoSpellCheckSuggestionsToolbar.buildButtonItems(editableTextState);
 
     expect(buttonItems, isNotNull);
+<<<<<<< HEAD
     expect(buttonItems!.length, 1);
     expect(buttonItems.first.label, 'No Replacements Found');
+=======
+    expect(buttonItems, hasLength(1));
+    expect(buttonItems!.first.label, 'No Replacements Found');
+    expect(buttonItems.first.onPressed, isNull);
+>>>>>>> 761747bfc538b5af34aa0d3fac380f1bc331ec49
   });
 }
 
 class _FakeEditableText extends EditableText {
+<<<<<<< HEAD
   _FakeEditableText() : super(
     controller: TextEditingController(),
     focusNode: FocusNode(),
+=======
+  /// The parameters focusNode and controller are needed here so the can be
+  /// safely disposed after the test is completed.
+  _FakeEditableText(FocusNode focusNode, TextEditingController controller) : super(
+    controller: controller,
+    focusNode: focusNode,
+>>>>>>> 761747bfc538b5af34aa0d3fac380f1bc331ec49
     backgroundCursorColor: CupertinoColors.white,
     cursorColor: CupertinoColors.white,
     style: const TextStyle(),

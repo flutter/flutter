@@ -28,7 +28,7 @@ TaskFunction createGalleryTransitionTest({bool semanticsEnabled = false}) {
 TaskFunction createGalleryTransitionE2EBuildTest(
   List<String> args, {
   bool semanticsEnabled = false,
-  bool enableImpeller = false,
+  bool? enableImpeller,
 }) {
   return GalleryTransitionBuildTest(
     args,
@@ -44,7 +44,7 @@ TaskFunction createGalleryTransitionE2EBuildTest(
 
 TaskFunction createGalleryTransitionE2ETest({
   bool semanticsEnabled = false,
-  bool enableImpeller = false,
+  bool? enableImpeller,
 }) {
   return GalleryTransitionTest(
     testFile: semanticsEnabled
@@ -91,14 +91,14 @@ class GalleryTransitionTest {
     this.driverFile,
     this.measureCpuGpu = true,
     this.measureMemory = true,
-    this.enableImpeller = false,
+    this.enableImpeller,
   });
 
   final bool semanticsEnabled;
   final bool needFullTimeline;
   final bool measureCpuGpu;
   final bool measureMemory;
-  final bool enableImpeller;
+  final bool? enableImpeller;
   final String testFile;
   final String timelineSummaryFile;
   final String? timelineTraceFile;
@@ -136,7 +136,8 @@ class GalleryTransitionTest {
       await flutter('drive', options: <String>[
         '--no-dds',
         '--profile',
-        if (enableImpeller) '--enable-impeller',
+        if (enableImpeller != null && enableImpeller!) '--enable-impeller',
+        if (enableImpeller != null && !enableImpeller!) '--no-enable-impeller',
         if (needFullTimeline)
           '--trace-startup',
         if (applicationBinaryPath != null)
@@ -150,6 +151,8 @@ class GalleryTransitionTest {
         'test_driver/$testDriver.dart',
         '-d',
         deviceId,
+        '-v',
+        '--verbose-system-logs'
       ]);
     });
 
@@ -186,6 +189,7 @@ class GalleryTransitionTest {
         '90th_percentile_frame_build_time_millis',
         '99th_percentile_frame_build_time_millis',
         'average_frame_rasterizer_time_millis',
+        'stddev_frame_rasterizer_time_millis',
         'worst_frame_rasterizer_time_millis',
         '90th_percentile_frame_rasterizer_time_millis',
         '99th_percentile_frame_rasterizer_time_millis',
@@ -233,14 +237,14 @@ class GalleryTransitionBuildTest extends BuildTestTask {
     this.driverFile,
     this.measureCpuGpu = true,
     this.measureMemory = true,
-    this.enableImpeller = false,
+    this.enableImpeller,
   }) : super(workingDirectory: galleryDirectory);
 
   final bool semanticsEnabled;
   final bool needFullTimeline;
   final bool measureCpuGpu;
   final bool measureMemory;
-  final bool enableImpeller;
+  final bool? enableImpeller;
   final String testFile;
   final String timelineSummaryFile;
   final String? timelineTraceFile;
@@ -251,9 +255,17 @@ class GalleryTransitionBuildTest extends BuildTestTask {
 
   @override
   void copyArtifacts() {
-    if(applicationBinaryPath != null) {
+    if (applicationBinaryPath == null) {
+      return;
+    }
+    if (deviceOperatingSystem == DeviceOperatingSystem.android) {
       copy(
         file('${galleryDirectory.path}/build/app/outputs/flutter-apk/app-profile.apk'),
+        Directory(applicationBinaryPath!),
+      );
+    } else if (deviceOperatingSystem == DeviceOperatingSystem.ios) {
+      recursiveCopy(
+        Directory('${galleryDirectory.path}/build/ios/iphoneos'),
         Directory(applicationBinaryPath!),
       );
     }
@@ -261,15 +273,26 @@ class GalleryTransitionBuildTest extends BuildTestTask {
 
   @override
   List<String> getBuildArgs(DeviceOperatingSystem deviceOperatingSystem) {
-    return <String>[
-      'apk',
-      '--no-android-gradle-daemon',
-      '--profile',
-      '-t',
-      'test_driver/$testFile.dart',
-      '--target-platform',
-      'android-arm,android-arm64',
-    ];
+    if (deviceOperatingSystem == DeviceOperatingSystem.android) {
+      return <String>[
+        'apk',
+        '--no-android-gradle-daemon',
+        '--profile',
+        '-t',
+        'test_driver/$testFile.dart',
+        '--target-platform',
+        'android-arm,android-arm64',
+      ];
+    } else if (deviceOperatingSystem == DeviceOperatingSystem.ios) {
+      return <String>[
+        'ios',
+        '--codesign',
+        '--profile',
+        '-t',
+        'test_driver/$testFile.dart',
+      ];
+    }
+    throw Exception('$deviceOperatingSystem has no build configuration');
   }
 
   @override
@@ -278,11 +301,12 @@ class GalleryTransitionBuildTest extends BuildTestTask {
     return <String>[
       '--no-dds',
       '--profile',
-      if (enableImpeller) '--enable-impeller',
+      if (enableImpeller != null && enableImpeller!) '--enable-impeller',
+      if (enableImpeller != null && !enableImpeller!) '--no-enable-impeller',
       if (needFullTimeline) '--trace-startup',
       '-t',
       'test_driver/$testFile.dart',
-      '--use-application-binary=${getApplicationBinaryPath()}',
+      if (applicationBinaryPath != null) '--use-application-binary=${getApplicationBinaryPath()}',
       '--driver',
       'test_driver/$testDriver.dart',
       '-d',
@@ -358,11 +382,13 @@ class GalleryTransitionBuildTest extends BuildTestTask {
 
   @override
   String getApplicationBinaryPath() {
-    if (applicationBinaryPath != null) {
-      return '${applicationBinaryPath!}/app-profile.apk';
+    if (deviceOperatingSystem == DeviceOperatingSystem.android) {
+      return '$applicationBinaryPath/app-profile.apk';
+    } else if (deviceOperatingSystem == DeviceOperatingSystem.ios) {
+      return '$applicationBinaryPath/Flutter Gallery.app';
+    } else {
+      return applicationBinaryPath!;
     }
-
-    return 'build/app/outputs/flutter-apk/app-profile.apk';
   }
 }
 

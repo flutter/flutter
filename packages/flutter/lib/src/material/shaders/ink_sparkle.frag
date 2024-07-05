@@ -11,22 +11,19 @@ precision highp float;
 // TODO(antrob): Put these in a more logical order (e.g. separate consts vs varying, etc)
 
 layout(location = 0) uniform vec4 u_color;
-layout(location = 1) uniform float u_alpha;
-layout(location = 2) uniform vec4 u_sparkle_color;
-layout(location = 3) uniform float u_sparkle_alpha;
-layout(location = 4) uniform float u_blur;
-layout(location = 5) uniform vec2 u_center;
-layout(location = 6) uniform float u_radius_scale;
-layout(location = 7) uniform float u_max_radius;
-layout(location = 8) uniform vec2 u_resolution_scale;
-layout(location = 9) uniform vec2 u_noise_scale;
-layout(location = 10) uniform float u_noise_phase;
-layout(location = 11) uniform vec2 u_circle1;
-layout(location = 12) uniform vec2 u_circle2;
-layout(location = 13) uniform vec2 u_circle3;
-layout(location = 14) uniform vec2 u_rotation1;
-layout(location = 15) uniform vec2 u_rotation2;
-layout(location = 16) uniform vec2 u_rotation3;
+// u_alpha, u_sparkle_alpha, u_blur, u_radius_scale
+layout(location = 1) uniform vec4 u_composite_1;
+layout(location = 2) uniform vec2 u_center;
+layout(location = 3) uniform float u_max_radius;
+layout(location = 4) uniform vec2 u_resolution_scale;
+layout(location = 5) uniform vec2 u_noise_scale;
+layout(location = 6) uniform float u_noise_phase;
+layout(location = 7) uniform vec2 u_circle1;
+layout(location = 8) uniform vec2 u_circle2;
+layout(location = 9) uniform vec2 u_circle3;
+layout(location = 10) uniform vec2 u_rotation1;
+layout(location = 11) uniform vec2 u_rotation2;
+layout(location = 12) uniform vec2 u_rotation3;
 
 layout(location = 0) out vec4 fragColor;
 
@@ -35,6 +32,11 @@ const float PI_ROTATE_RIGHT = PI * 0.0078125;
 const float PI_ROTATE_LEFT = PI * -0.0078125;
 const float ONE_THIRD = 1./3.;
 const vec2 TURBULENCE_SCALE = vec2(0.8);
+
+float u_alpha = u_composite_1.x;
+float u_sparkle_alpha = u_composite_1.y;
+float u_blur = u_composite_1.z;
+float u_radius_scale = u_composite_1.w;
 
 float triangle_noise(highp vec2 n) {
   n = fract(n * vec2(5.3987, 5.4421));
@@ -99,6 +101,5 @@ void main() {
   float sparkle = sparkle(density_uv, u_noise_phase) * ring * turbulence * u_sparkle_alpha;
   float wave_alpha = soft_circle(p, u_center, radius, u_blur) * u_alpha * u_color.a;
   vec4 wave_color = vec4(u_color.rgb * wave_alpha, wave_alpha);
-  vec4 sparkle_color = vec4(u_sparkle_color.rgb * u_sparkle_color.a, u_sparkle_color.a);
-  fragColor = mix(wave_color, sparkle_color, sparkle);
+  fragColor = mix(wave_color, vec4(1.0), sparkle);
 }

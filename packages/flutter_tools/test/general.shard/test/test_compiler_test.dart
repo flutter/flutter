@@ -166,7 +166,7 @@ flutter:
       linux:
         dartPluginClass: APlugin
 environment:
-  sdk: '>=3.0.0-0 <4.0.0'
+  sdk: '>=3.2.0-0 <4.0.0'
   flutter: ">=2.5.0"
 ''');
 
@@ -234,6 +234,7 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
     bool suppressErrors = false,
     bool checkDartPluginRegistry = false,
     File? dartPluginRegistrant,
+    Uri? nativeAssetsYaml,
   }) async {
     if (compilerOutput != null) {
       fileSystem!.file(compilerOutput!.outputFilename).createSync(recursive: true);

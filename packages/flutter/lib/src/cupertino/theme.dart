@@ -47,8 +47,6 @@ const _CupertinoThemeDefaults _kDefaultTheme = _CupertinoThemeDefaults(
 ///    with a [CupertinoThemeData] derived from the Material [ThemeData].
 class CupertinoTheme extends StatelessWidget {
   /// Creates a [CupertinoTheme] to change descendant Cupertino widgets' styling.
-  ///
-  /// The [data] and [child] parameters must not be null.
   const CupertinoTheme({
     super.key,
     required this.data,
@@ -132,13 +130,18 @@ class CupertinoTheme extends StatelessWidget {
   }
 }
 
-class _InheritedCupertinoTheme extends InheritedWidget {
+class _InheritedCupertinoTheme extends InheritedTheme {
   const _InheritedCupertinoTheme({
     required this.theme,
     required super.child,
   });
 
   final CupertinoTheme theme;
+
+  @override
+  Widget wrap(BuildContext context, Widget child) {
+    return CupertinoTheme(data: theme.data, child: child);
+  }
 
   @override
   bool updateShouldNotify(_InheritedCupertinoTheme old) => theme.data != old.theme.data;

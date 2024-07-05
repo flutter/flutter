@@ -27,6 +27,14 @@ import 'package:flutter/rendering.dart';
 /// [extentInside], and [extentAfter], which may be more useful for use cases
 /// such as scroll bars; for example, see [Scrollbar].
 ///
+/// {@tool dartpad}
+/// This sample shows how a [ScrollMetricsNotification] is dispatched when
+/// the [ScrollMetrics] changed as a result of resizing the [Viewport].
+/// Press the floating action button to increase the scrollable window's size.
+///
+/// ** See code in examples/api/lib/widgets/scroll_position/scroll_metrics_notification.0.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [FixedScrollMetrics], which is an immutable object that implements this
@@ -107,11 +115,12 @@ mixin ScrollMetrics {
   /// This is the content above the content described by [extentInside].
   double get extentBefore => math.max(pixels - minScrollExtent, 0.0);
 
-  /// The quantity of content conceptually "inside" the viewport in the scrollable.
+  /// The quantity of content conceptually "inside" the viewport in the
+  /// scrollable (including empty space if the total amount of content is less
+  /// than the [viewportDimension]).
   ///
-  /// The value is typically the height of the viewport when [outOfRange] is false.
-  /// It could be less if there is less content visible than the size of the
-  /// viewport, such as when overscrolling.
+  /// The value is typically the extent of the viewport ([viewportDimension])
+  /// when [outOfRange] is false. It can be less when overscrolling.
   ///
   /// The value is always non-negative, and less than or equal to [viewportDimension].
   double get extentInside {
@@ -127,6 +136,12 @@ mixin ScrollMetrics {
   /// This is the content below the content described by [extentInside].
   double get extentAfter => math.max(maxScrollExtent - pixels, 0.0);
 
+  /// The total quantity of content available.
+  ///
+  /// This is the sum of [extentBefore], [extentInside], and [extentAfter], modulo
+  /// any rounding errors.
+  double get extentTotal => maxScrollExtent - minScrollExtent + viewportDimension;
+
   /// The [FlutterView.devicePixelRatio] of the view that the [Scrollable]
   /// associated with this metrics object is drawn into.
   double get devicePixelRatio;
@@ -135,6 +150,14 @@ mixin ScrollMetrics {
 /// An immutable snapshot of values associated with a [Scrollable] viewport.
 ///
 /// For details, see [ScrollMetrics], which defines this object's interfaces.
+///
+/// {@tool dartpad}
+/// This sample shows how a [ScrollMetricsNotification] is dispatched when
+/// the [ScrollMetrics] changed as a result of resizing the [Viewport].
+/// Press the floating action button to increase the scrollable window's size.
+///
+/// ** See code in examples/api/lib/widgets/scroll_position/scroll_metrics_notification.0.dart **
+/// {@end-tool}
 class FixedScrollMetrics with ScrollMetrics {
   /// Creates an immutable snapshot of values associated with a [Scrollable] viewport.
   FixedScrollMetrics({

@@ -6,6 +6,7 @@ import 'package:package_config/package_config.dart';
 
 import '../../artifacts.dart';
 import '../../base/build.dart';
+import '../../base/common.dart';
 import '../../base/file_system.dart';
 import '../../base/io.dart';
 import '../../build_info.dart';
@@ -15,11 +16,12 @@ import '../../globals.dart' as globals show xcode;
 import '../build_system.dart';
 import '../depfile.dart';
 import '../exceptions.dart';
+import '../tools/shader_compiler.dart';
 import 'assets.dart';
 import 'dart_plugin_registrant.dart';
 import 'icon_tree_shaker.dart';
 import 'localizations.dart';
-import 'shader_compiler.dart';
+import 'native_assets.dart';
 
 /// Copies the pre-built flutter bundle.
 // This is a one-off rule for implementing build bundle in terms of assemble.
@@ -56,7 +58,9 @@ class CopyFlutterBundle extends Target {
     if (buildModeEnvironment == null) {
       throw MissingDefineException(kBuildMode, 'copy_flutter_bundle');
     }
-    final BuildMode buildMode = getBuildModeForName(buildModeEnvironment);
+    final String? flavor = environment.defines[kFlavor];
+
+    final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
     environment.outputDir.createSync(recursive: true);
 
     // Only copy the prebuilt runtimes and kernel blob in debug mode.
@@ -75,13 +79,9 @@ class CopyFlutterBundle extends Target {
       environment.outputDir,
       targetPlatform: TargetPlatform.android,
       buildMode: buildMode,
-      shaderTarget: ShaderTarget.sksl,
+      flavor: flavor,
     );
-    final DepfileService depfileService = DepfileService(
-      fileSystem: environment.fileSystem,
-      logger: environment.logger,
-    );
-    depfileService.writeToFile(
+    environment.depFileService.writeToFile(
       assetDepfile,
       environment.buildDir.childFile('flutter_assets.d'),
     );
@@ -129,10 +129,12 @@ class KernelSnapshot extends Target {
 
   @override
   List<Source> get inputs => const <Source>[
+    Source.pattern('{BUILD_DIR}/native_assets.yaml'),
     Source.pattern('{PROJECT_DIR}/.dart_tool/package_config_subset'),
     Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/common.dart'),
     Source.artifact(Artifact.platformKernelDill),
     Source.artifact(Artifact.engineDartBinary),
+    Source.artifact(Artifact.engineDartAotRuntime),
     Source.artifact(Artifact.frontendServerSnapshotForEngineDartSdk),
   ];
 
@@ -146,6 +148,7 @@ class KernelSnapshot extends Target {
 
   @override
   List<Target> get dependencies => const <Target>[
+    NativeAssets(),
     GenerateLocalizationsTarget(),
     DartPluginRegistrantTarget(),
   ];
@@ -167,7 +170,7 @@ class KernelSnapshot extends Target {
     if (targetPlatformEnvironment == null) {
       throw MissingDefineException(kTargetPlatform, 'kernel_snapshot');
     }
-    final BuildMode buildMode = getBuildModeForName(buildModeEnvironment);
+    final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
     final String targetFile = environment.defines[kTargetFile] ?? environment.fileSystem.path.join('lib', 'main.dart');
     final File packagesFile = environment.projectDir
       .childDirectory('.dart_tool')
@@ -178,9 +181,17 @@ class KernelSnapshot extends Target {
     final TargetPlatform targetPlatform = getTargetPlatformForName(targetPlatformEnvironment);
 
     // This configuration is all optional.
+    final String? frontendServerStarterPath = environment.defines[kFrontendServerStarterPath];
     final List<String> extraFrontEndOptions = decodeCommaSeparated(environment.defines, kExtraFrontEndOptions);
     final List<String>? fileSystemRoots = environment.defines[kFileSystemRoots]?.split(',');
     final String? fileSystemScheme = environment.defines[kFileSystemScheme];
+
+    final File nativeAssetsFile = environment.buildDir.childFile('native_assets.yaml');
+    final String nativeAssets = nativeAssetsFile.path;
+    if (!await nativeAssetsFile.exists()) {
+      throwToolExit("$nativeAssets doesn't exist.");
+    }
+    environment.logger.printTrace('Embedding native assets mapping $nativeAssets in kernel.');
 
     TargetModel targetModel = TargetModel.flutter;
     if (targetPlatform == TargetPlatform.fuchsia_x64 ||
@@ -194,6 +205,7 @@ class KernelSnapshot extends Target {
     switch (targetPlatform) {
       case TargetPlatform.darwin:
       case TargetPlatform.windows_x64:
+      case TargetPlatform.windows_arm64:
       case TargetPlatform.linux_x64:
         forceLinkPlatform = true;
       case TargetPlatform.android:
@@ -209,6 +221,21 @@ class KernelSnapshot extends Target {
       case TargetPlatform.web_javascript:
         forceLinkPlatform = false;
     }
+
+    final String? targetOS = switch (targetPlatform) {
+      TargetPlatform.fuchsia_arm64 || TargetPlatform.fuchsia_x64 => 'fuchsia',
+      TargetPlatform.android ||
+      TargetPlatform.android_arm ||
+      TargetPlatform.android_arm64 ||
+      TargetPlatform.android_x64 ||
+      TargetPlatform.android_x86 =>
+        'android',
+      TargetPlatform.darwin => 'macos',
+      TargetPlatform.ios => 'ios',
+      TargetPlatform.linux_arm64 || TargetPlatform.linux_x64 => 'linux',
+      TargetPlatform.windows_arm64 || TargetPlatform.windows_x64 => 'windows',
+      TargetPlatform.tester || TargetPlatform.web_javascript => null,
+    };
 
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
       packagesFile,
@@ -232,13 +259,16 @@ class KernelSnapshot extends Target {
       linkPlatformKernelIn: forceLinkPlatform || buildMode.isPrecompiled,
       mainPath: targetFileAbsolute,
       depFilePath: environment.buildDir.childFile('kernel_snapshot.d').path,
+      frontendServerStarterPath: frontendServerStarterPath,
       extraFrontEndOptions: extraFrontEndOptions,
       fileSystemRoots: fileSystemRoots,
       fileSystemScheme: fileSystemScheme,
       dartDefines: decodeDartDefines(environment.defines, kDartDefines),
       packageConfig: packageConfig,
       buildDir: environment.buildDir,
+      targetOS: targetOS,
       checkDartPluginRegistry: environment.generateDartPluginRegistry,
+      nativeAssets: nativeAssets,
     );
     if (output == null || output.errorCount != 0) {
       throw Exception();
@@ -272,7 +302,7 @@ abstract class AotElfBase extends Target {
       throw MissingDefineException(kTargetPlatform, 'aot_elf');
     }
     final List<String> extraGenSnapshotOptions = decodeCommaSeparated(environment.defines, kExtraGenSnapshotOptions);
-    final BuildMode buildMode = getBuildModeForName(buildModeEnvironment);
+    final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
     final TargetPlatform targetPlatform = getTargetPlatformForName(targetPlatformEnvironment);
     final String? splitDebugInfo = environment.defines[kSplitDebugInfo];
     final bool dartObfuscation = environment.defines[kDartObfuscation] == 'true';
@@ -411,7 +441,7 @@ abstract final class Lipo {
     environment.fileSystem.directory(resultPath).parent.createSync(recursive: true);
 
     Iterable<String> inputPaths = darwinArchs.map(
-      (DarwinArch iosArch) => environment.fileSystem.path.join(inputDir, getNameForDarwinArch(iosArch), relativePath)
+      (DarwinArch iosArch) => environment.fileSystem.path.join(inputDir, iosArch.name, relativePath)
     );
     if (skipMissingInputs) {
       inputPaths = inputPaths.where(environment.fileSystem.isFileSync);

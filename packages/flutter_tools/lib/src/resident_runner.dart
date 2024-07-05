@@ -24,18 +24,17 @@ import 'base/terminal.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
 import 'build_system/build_system.dart';
-import 'build_system/targets/dart_plugin_registrant.dart';
-import 'build_system/targets/localizations.dart';
-import 'build_system/targets/scene_importer.dart';
-import 'build_system/targets/shader_compiler.dart';
+import 'build_system/tools/scene_importer.dart';
+import 'build_system/tools/shader_compiler.dart';
 import 'bundle.dart';
 import 'cache.dart';
 import 'compile.dart';
 import 'convert.dart';
 import 'devfs.dart';
 import 'device.dart';
-import 'features.dart';
 import 'globals.dart' as globals;
+import 'ios/application_package.dart';
+import 'ios/devices.dart';
 import 'project.dart';
 import 'resident_devtools_handler.dart';
 import 'run_cold.dart';
@@ -66,6 +65,7 @@ class FlutterDevice {
          targetModel: targetModel,
          dartDefines: buildInfo.dartDefines,
          packagesPath: buildInfo.packagesPath,
+         frontendServerStarterPath: buildInfo.frontendServerStarterPath,
          extraFrontEndOptions: buildInfo.extraFrontEndOptions,
          artifacts: globals.artifacts!,
          processManager: globals.processManager,
@@ -120,22 +120,26 @@ class FlutterDevice {
       // TODO(zanderso): consistently provide these flags across platforms.
       final String platformDillName;
       final List<String> extraFrontEndOptions = List<String>.of(buildInfo.extraFrontEndOptions);
-      if (buildInfo.nullSafetyMode == NullSafetyMode.unsound) {
-        platformDillName = 'ddc_outline.dill';
-        if (!extraFrontEndOptions.contains('--no-sound-null-safety')) {
-          extraFrontEndOptions.add('--no-sound-null-safety');
-        }
-      } else if (buildInfo.nullSafetyMode == NullSafetyMode.sound) {
-        platformDillName = 'ddc_outline_sound.dill';
-        if (!extraFrontEndOptions.contains('--sound-null-safety')) {
-          extraFrontEndOptions.add('--sound-null-safety');
-        }
-      } else {
-        throw StateError('Expected buildInfo.nullSafetyMode to be one of unsound or sound, got ${buildInfo.nullSafetyMode}');
+      switch (buildInfo.nullSafetyMode) {
+        case NullSafetyMode.unsound:
+          platformDillName = 'ddc_outline.dill';
+          if (!extraFrontEndOptions.contains('--no-sound-null-safety')) {
+            extraFrontEndOptions.add('--no-sound-null-safety');
+          }
+        case NullSafetyMode.sound:
+          platformDillName = 'ddc_outline_sound.dill';
+          if (!extraFrontEndOptions.contains('--sound-null-safety')) {
+            extraFrontEndOptions.add('--sound-null-safety');
+          }
+        case NullSafetyMode.autodetect:
+          throw StateError(
+            'Expected buildInfo.nullSafetyMode to be one of unsound or sound, '
+            'got NullSafetyMode.autodetect',
+          );
       }
 
       final String platformDillPath = globals.fs.path.join(
-        getWebPlatformBinariesDirectory(globals.artifacts!, buildInfo.webRenderer).path,
+        globals.artifacts!.getHostArtifact(HostArtifact.webPlatformKernelFolder).path,
         platformDillName,
       );
 
@@ -154,6 +158,7 @@ class FlutterDevice {
         ),
         assumeInitializeFromDillUpToDate: buildInfo.assumeInitializeFromDillUpToDate,
         targetModel: TargetModel.dartdevc,
+        frontendServerStarterPath: buildInfo.frontendServerStarterPath,
         extraFrontEndOptions: extraFrontEndOptions,
         platformDill: globals.fs.file(platformDillPath).absolute.uri.toString(),
         dartDefines: buildInfo.dartDefines,
@@ -167,11 +172,8 @@ class FlutterDevice {
         platform: platform,
       );
     } else {
-      // The flutter-widget-cache feature only applies to run mode.
       List<String> extraFrontEndOptions = buildInfo.extraFrontEndOptions;
       extraFrontEndOptions = <String>[
-        if (featureFlags.isSingleWidgetReloadEnabled)
-         '--flutter-widget-cache',
         '--enable-experiment=alternative-invalidation-strategy',
         ...extraFrontEndOptions,
       ];
@@ -187,6 +189,7 @@ class FlutterDevice {
         fileSystemScheme: buildInfo.fileSystemScheme,
         targetModel: targetModel,
         dartDefines: buildInfo.dartDefines,
+        frontendServerStarterPath: buildInfo.frontendServerStarterPath,
         extraFrontEndOptions: extraFrontEndOptions,
         initializeFromDill: buildInfo.initializeFromDill ?? getDefaultCachedKernelPath(
           trackWidgetCreation: buildInfo.trackWidgetCreation,
@@ -228,7 +231,6 @@ class FlutterDevice {
   FlutterVmService? vmService;
   DevFS? devFS;
   ApplicationPackage? package;
-  // ignore: cancel_subscriptions
   StreamSubscription<String>? _loggingSubscription;
   bool? _isListeningForVmServiceUri;
 
@@ -387,15 +389,25 @@ class FlutterDevice {
       osUtils: globals.os,
       fileSystem: globals.fs,
       logger: globals.logger,
+      processManager: globals.processManager,
+      artifacts: globals.artifacts!,
     );
     return devFS!.create();
   }
 
-  Future<void> startEchoingDeviceLog() async {
+  Future<void> startEchoingDeviceLog(DebuggingOptions debuggingOptions) async {
     if (_loggingSubscription != null) {
       return;
     }
-    final Stream<String> logStream = (await device!.getLogReader(app: package)).logLines;
+    final Stream<String> logStream;
+    if (device is IOSDevice) {
+      logStream = (device! as IOSDevice).getLogReader(
+        app: package as IOSApp?,
+        usingCISystem: debuggingOptions.usingCISystem,
+      ).logLines;
+    } else {
+      logStream = (await device!.getLogReader(app: package)).logLines;
+    }
     _loggingSubscription = logStream.listen((String line) {
       if (!line.contains(globals.kVMServiceMessageRegExp)) {
         globals.printStatus(line, wrap: false);
@@ -447,11 +459,9 @@ class FlutterDevice {
     }
     devFSWriter = device!.createDevFSWriter(applicationPackage, userIdentifier);
 
-    final Map<String, dynamic> platformArgs = <String, dynamic>{
-      'multidex': hotRunner.multidexEnabled,
-    };
+    final Map<String, dynamic> platformArgs = <String, dynamic>{};
 
-    await startEchoingDeviceLog();
+    await startEchoingDeviceLog(hotRunner.debuggingOptions);
 
     // Start the application.
     final Future<LaunchResult> futureResult = device!.startApp(
@@ -517,9 +527,8 @@ class FlutterDevice {
 
     final Map<String, dynamic> platformArgs = <String, dynamic>{};
     platformArgs['trace-startup'] = coldRunner.traceStartup;
-    platformArgs['multidex'] = coldRunner.multidexEnabled;
 
-    await startEchoingDeviceLog();
+    await startEchoingDeviceLog(coldRunner.debuggingOptions);
 
     final LaunchResult result = await device!.startApp(
       applicationPackage,
@@ -553,11 +562,9 @@ class FlutterDevice {
     required Uri mainUri,
     String? target,
     AssetBundle? bundle,
-    DateTime? firstBuildTime,
     bool bundleFirstUpload = false,
     bool bundleDirty = false,
     bool fullRestart = false,
-    String? projectRootPath,
     required String pathToReload,
     required String dillOutputPath,
     required List<Uri> invalidatedFiles,
@@ -572,13 +579,11 @@ class FlutterDevice {
         mainUri: mainUri,
         target: target,
         bundle: bundle,
-        firstBuildTime: firstBuildTime,
         bundleFirstUpload: bundleFirstUpload,
         generator: generator!,
         fullRestart: fullRestart,
         dillOutputPath: dillOutputPath,
         trackWidgetCreation: buildInfo.trackWidgetCreation,
-        projectRootPath: projectRootPath,
         pathToReload: pathToReload,
         invalidatedFiles: invalidatedFiles,
         packageConfig: packageConfig,
@@ -592,7 +597,7 @@ class FlutterDevice {
       return UpdateFSReport();
     }
     devFSStatus.stop();
-    globals.printTrace('Synced ${getSizeAsMB(report.syncedBytes)}.');
+    globals.printTrace('Synced ${getSizeAsPlatformMB(report.syncedBytes)}.');
     return report;
   }
 
@@ -713,23 +718,30 @@ abstract class ResidentHandlers {
         continue;
       }
       final List<FlutterView> views = await device!.vmService!.getFlutterViews();
-      for (final FlutterView view in views) {
-        final Map<String, Object?>? rasterData =
-          await device.vmService!.renderFrameWithRasterStats(
-            viewId: view.id,
-            uiIsolateId: view.uiIsolate!.id,
-          );
-        if (rasterData != null) {
-          final File tempFile = globals.fsUtils.getUniqueFile(
-            globals.fs.currentDirectory,
-            'flutter_jank_metrics',
-            'json',
-          );
-          tempFile.writeAsStringSync(jsonEncode(rasterData), flush: true);
-          logger.printStatus('Wrote jank metrics to ${tempFile.absolute.path}');
-        } else {
-          logger.printWarning('Unable to get jank metrics.');
+      try {
+        for (final FlutterView view in views) {
+          final Map<String, Object?>? rasterData =
+            await device.vmService!.renderFrameWithRasterStats(
+              viewId: view.id,
+              uiIsolateId: view.uiIsolate!.id,
+            );
+          if (rasterData != null) {
+            final File tempFile = globals.fsUtils.getUniqueFile(
+              globals.fs.currentDirectory,
+              'flutter_jank_metrics',
+              'json',
+            );
+            tempFile.writeAsStringSync(jsonEncode(rasterData), flush: true);
+            logger.printStatus('Wrote jank metrics to ${tempFile.absolute.path}');
+          } else {
+            logger.printWarning('Unable to get jank metrics.');
+          }
         }
+      } on vm_service.RPCError catch (err) {
+        if (err.code != RPCErrorCodes.kServerError || !err.message.contains('Raster status not supported on Impeller backend')) {
+          rethrow;
+        }
+        logger.printWarning('Unable to get jank metrics for Impeller renderer');
       }
     }
     return true;
@@ -1008,17 +1020,17 @@ abstract class ResidentHandlers {
   }
 
   Future<bool> _takeVmServiceScreenshot(FlutterDevice device, File outputFile) async {
-    final bool isWebDevice = device.targetPlatform == TargetPlatform.web_javascript;
+    if (device.targetPlatform != TargetPlatform.web_javascript) {
+      return false;
+    }
     assert(supportsServiceProtocol);
 
     return _toggleDebugBanner(device, () async {
-      final vm_service.Response? response = isWebDevice
-        ? await device.vmService!.callMethodWrapper('ext.dwds.screenshot')
-        : await device.vmService!.screenshot();
+      final vm_service.Response? response =  await device.vmService!.callMethodWrapper('ext.dwds.screenshot');
       if (response == null) {
        throw Exception('Failed to take screenshot');
       }
-      final String data = response.json![isWebDevice ? 'data' : 'screenshot'] as String;
+      final String data = response.json!['data'] as String;
       outputFile.writeAsBytesSync(base64.decode(data));
     });
   }
@@ -1245,6 +1257,7 @@ abstract class ResidentRunner extends ResidentHandlers {
       processManager: globals.processManager,
       platform: globals.platform,
       usage: globals.flutterUsage,
+      analytics: globals.analytics,
       projectDir: globals.fs.currentDirectory,
       generateDartPluginRegistry: generateDartPluginRegistry,
       defines: <String, String>{
@@ -1254,8 +1267,8 @@ abstract class ResidentRunner extends ResidentHandlers {
     );
 
     final CompositeTarget compositeTarget = CompositeTarget(<Target>[
-      const GenerateLocalizationsTarget(),
-      const DartPluginRegistrantTarget(),
+      globals.buildTargets.generateLocalizationsTarget,
+      globals.buildTargets.dartPluginRegistrantTarget,
     ]);
 
     _lastBuild = await globals.buildSystem.buildIncremental(
@@ -1450,7 +1463,7 @@ abstract class ResidentRunner extends ResidentHandlers {
     }
     try {
       await Future.wait(serveObservatoryRequests);
-    } on vm_service.RPCError catch(e) {
+    } on vm_service.RPCError catch (e) {
       globals.printWarning('Unable to enable Observatory: $e');
     }
   }
@@ -1513,6 +1526,12 @@ abstract class ResidentRunner extends ResidentHandlers {
         );
       }
       if (includeDevtools) {
+        if (_residentDevtoolsHandler!.printDtdUri) {
+          final Uri? dtdUri = residentDevtoolsHandler!.dtdUri;
+          if (dtdUri != null) {
+            globals.printStatus('The Dart Tooling Daemon is available at: $dtdUri\n');
+          }
+        }
         final Uri? uri = devToolsServerAddress!.uri?.replace(
           queryParameters: <String, dynamic>{'uri': '${device.vmService!.httpAddress}'},
         );
@@ -1621,6 +1640,7 @@ Future<String?> getMissingPackageHintForPlatform(TargetPlatform platform) async 
     case TargetPlatform.tester:
     case TargetPlatform.web_javascript:
     case TargetPlatform.windows_x64:
+    case TargetPlatform.windows_arm64:
       return null;
   }
 }
@@ -1684,7 +1704,7 @@ class TerminalHandler {
       _addSignalHandler(io.ProcessSignal.sigusr2, _handleSignal);
       if (_pidFile != null) {
         _logger.printTrace('Writing pid to: $_pidFile');
-        _actualPidFile = _processInfo.writePidFile(_pidFile!);
+        _actualPidFile = _processInfo.writePidFile(_pidFile);
       }
     }
   }
@@ -1871,19 +1891,17 @@ class DebugConnectionInfo {
 /// These values must match what is available in
 /// `packages/flutter/lib/src/foundation/binding.dart`.
 String nextPlatform(String currentPlatform) {
-  switch (currentPlatform) {
-    case 'android':
-      return 'iOS';
-    case 'iOS':
-      return 'fuchsia';
-    case 'fuchsia':
-      return 'macOS';
-    case 'macOS':
-      return 'android';
-    default:
-      assert(false); // Invalid current platform.
-      return 'android';
-  }
+  const List<String> platforms = <String>[
+    'android',
+    'iOS',
+    'windows',
+    'macOS',
+    'linux',
+    'fuchsia',
+  ];
+  final int index = platforms.indexOf(currentPlatform);
+  assert(index >= 0, 'unknown platform "$currentPlatform"');
+  return platforms[(index + 1) % platforms.length];
 }
 
 /// A launcher for the devtools debugger and analysis tool.
@@ -1931,6 +1949,26 @@ abstract class DevtoolsLauncher {
     } else {
       _readyCompleter = Completer<void>();
     }
+  }
+
+  /// The Dart Tooling Daemon (DTD) URI for the DTD instance being hosted by
+  /// DevTools server.
+  ///
+  /// This will be null if the DevTools server is not served through Flutter
+  /// tools (e.g. if it is served from an IDE).
+  Uri? get dtdUri => _dtdUri;
+  Uri? _dtdUri;
+  @protected
+  set dtdUri(Uri? value) => _dtdUri = value;
+
+  /// Whether to print the Dart Tooling Daemon URI.
+  ///
+  /// This will always return false when there is not a DTD instance being
+  /// served from the DevTools server.
+  bool get printDtdUri => _printDtdUri ?? false;
+  bool? _printDtdUri;
+  set printDtdUri(bool value) {
+    _printDtdUri = value;
   }
 
   /// The URL of the current DevTools server.

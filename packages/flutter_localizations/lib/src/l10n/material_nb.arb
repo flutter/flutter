@@ -28,6 +28,7 @@
   "continueButtonLabel": "Fortsett",
   "copyButtonLabel": "Kopiér",
   "cutButtonLabel": "Klipp ut",
+  "scanTextButtonLabel": "Skann tekst",
   "okButtonLabel": "OK",
   "pasteButtonLabel": "Lim inn",
   "selectAllButtonLabel": "Velg alle",
@@ -132,5 +133,17 @@
   "scrimLabel": "Vev",
   "bottomSheetLabel": "Felt nederst",
   "scrimOnTapHint": "Lukk $modalRouteContentName",
-  "keyboardKeyShift": "Shift"
+  "keyboardKeyShift": "Shift",
+  "expansionTileExpandedHint": "dobbelttrykk for å skjule",
+  "expansionTileCollapsedHint": "dobbelttrykk for å vise",
+  "expansionTileExpandedTapHint": "Skjul",
+  "expansionTileCollapsedTapHint": "Vis for å se mer informasjon",
+  "expandedHint": "Skjules",
+  "collapsedHint": "Vises",
+  "menuDismissLabel": "Lukk menyen",
+  "lookUpButtonLabel": "Slå opp",
+  "searchWebButtonLabel": "Søk på nettet",
+  "shareButtonLabel": "Del…",
+  "clearButtonTooltip": "Clear text",
+  "selectedDateLabel": "Selected"
 }

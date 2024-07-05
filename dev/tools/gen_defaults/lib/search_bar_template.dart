@@ -10,6 +10,15 @@ class SearchBarTemplate extends TokenTemplate {
     super.textThemePrefix = '_textTheme.'
   });
 
+  String _surfaceTint() {
+    final String? color = colorOrTransparent('md.comp.search-bar.container.surface-tint-layer.color');
+    final String surfaceTintColor = 'MaterialStatePropertyAll<Color>($color);';
+    if (color == 'Colors.transparent') {
+      return 'const $surfaceTintColor';
+    }
+    return surfaceTintColor;
+  }
+
   @override
   String generate() => '''
 class _SearchBarDefaultsM3 extends SearchBarThemeData {
@@ -33,7 +42,7 @@ class _SearchBarDefaultsM3 extends SearchBarThemeData {
 
   @override
   MaterialStateProperty<Color>? get surfaceTintColor =>
-    MaterialStatePropertyAll<Color>(${colorOrTransparent("md.comp.search-bar.container.surface-tint-layer.color")});
+    ${_surfaceTint()}
 
   @override
   MaterialStateProperty<Color?>? get overlayColor =>
@@ -70,7 +79,10 @@ class _SearchBarDefaultsM3 extends SearchBarThemeData {
 
   @override
   BoxConstraints get constraints =>
-    const BoxConstraints(minWidth: 360.0, maxWidth: 800.0, minHeight: ${tokens['md.comp.search-bar.container.height']});
+    const BoxConstraints(minWidth: 360.0, maxWidth: 800.0, minHeight: ${getToken('md.comp.search-bar.container.height')});
+
+  @override
+  TextCapitalization get textCapitalization => TextCapitalization.none;
 }
 ''';
 }

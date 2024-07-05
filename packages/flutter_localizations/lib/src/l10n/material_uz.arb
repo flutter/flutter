@@ -25,6 +25,7 @@
   "continueButtonLabel": "Davom etish",
   "copyButtonLabel": "Nusxa olish",
   "cutButtonLabel": "Kesib olish",
+  "scanTextButtonLabel": "Matnni skanerlash",
   "okButtonLabel": "OK",
   "pasteButtonLabel": "Joylash",
   "selectAllButtonLabel": "Hammasi",
@@ -133,5 +134,17 @@
   "scrimLabel": "Kanop",
   "bottomSheetLabel": "Quyi ekran",
   "scrimOnTapHint": "Yopish: $modalRouteContentName",
-  "keyboardKeyShift": "Shift"
+  "keyboardKeyShift": "Shift",
+  "expansionTileExpandedHint": "yigʻish uchun ikki marta bosing",
+  "expansionTileCollapsedHint": "yoyish uchun ikki marta bosing",
+  "expansionTileExpandedTapHint": "Yigʻish",
+  "expansionTileCollapsedTapHint": "Batafsil koʻrish uchun yoying",
+  "expandedHint": "Yigʻilgan",
+  "collapsedHint": "Yoyilgan",
+  "menuDismissLabel": "Menyuni yopish",
+  "lookUpButtonLabel": "Tepaga qarang",
+  "searchWebButtonLabel": "Internetdan qidirish",
+  "shareButtonLabel": "Ulashish…",
+  "clearButtonTooltip": "Clear text",
+  "selectedDateLabel": "Selected"
 }

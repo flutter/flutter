@@ -2,7 +2,6 @@ package com.example.abstract_method_smoke_test
 
 import android.content.Context
 import android.graphics.Color
-import android.os.Bundle
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import androidx.annotation.NonNull
@@ -30,25 +29,34 @@ class MainActivity : FlutterActivity() {
         }
     }
 
-    override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
-        GeneratedPluginRegistrant.registerWith(flutterEngine);
+    override fun configureFlutterEngine(
+        @NonNull flutterEngine: FlutterEngine,
+    ) {
+        GeneratedPluginRegistrant.registerWith(flutterEngine)
 
-        val shimPluginRegistry = ShimPluginRegistry(flutterEngine);
+        val shimPluginRegistry = ShimPluginRegistry(flutterEngine)
         shimPluginRegistry.registrarFor("com.example.abstract_method_smoke_test")
-                .platformViewRegistry()
-                .registerViewFactory("simple", object : PlatformViewFactory(StandardMessageCodec.INSTANCE) {
-                    override fun create(context: Context?, viewId: Int, args: Any?): PlatformView {
+            .platformViewRegistry()
+            .registerViewFactory(
+                "simple",
+                object : PlatformViewFactory(StandardMessageCodec.INSTANCE) {
+                    override fun create(
+                        context: Context?,
+                        viewId: Int,
+                        args: Any?,
+                    ): PlatformView {
                         return SimplePlatformView(this@MainActivity)
                     }
-                })
+                },
+            )
 
         // Triggers the Android keyboard, which causes the resize of the Flutter view.
         // We need to wait for the app to complete.
         MethodChannel(flutterEngine.getDartExecutor(), "com.example.abstract_method_smoke_test")
-                .setMethodCallHandler { _, result ->
-                    toggleInput()
-                    result.success(null)
-                }
+            .setMethodCallHandler { _, result ->
+                toggleInput()
+                result.success(null)
+            }
     }
 
     override fun onPause() {

@@ -28,9 +28,18 @@
   "cutButtonLabel": "Vyjmout",
   "copyButtonLabel": "Kopírovat",
   "pasteButtonLabel": "Vložit",
+  "clearButtonLabel": "Clear",
   "selectAllButtonLabel": "Vybrat vše",
   "tabSemanticsLabel": "Karta $tabIndex z $tabCount",
   "modalBarrierDismissLabel": "Zavřít",
   "searchTextFieldPlaceholderLabel": "Hledat",
+<<<<<<< HEAD
   "noSpellCheckReplacementsLabel": "No Replacements Found"
+=======
+  "noSpellCheckReplacementsLabel": "Žádná nahrazení nenalezena",
+  "menuDismissLabel": "Zavřít nabídku",
+  "lookUpButtonLabel": "Vyhledat",
+  "searchWebButtonLabel": "Vyhledávat na webu",
+  "shareButtonLabel": "Sdílet…"
+>>>>>>> 761747bfc538b5af34aa0d3fac380f1bc331ec49
 }

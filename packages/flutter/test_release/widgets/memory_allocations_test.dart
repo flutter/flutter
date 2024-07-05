@@ -7,14 +7,14 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  final MemoryAllocations ma = MemoryAllocations.instance;
+  final FlutterMemoryAllocations ma = FlutterMemoryAllocations.instance;
 
   setUp(() {
     assert(!ma.hasListeners);
   });
 
   testWidgets(
-    '$MemoryAllocations is noop when kFlutterMemoryAllocationsEnabled is false.',
+    '$FlutterMemoryAllocations is noop when kFlutterMemoryAllocationsEnabled is false.',
     (WidgetTester tester) async {
       ObjectEvent? receivedEvent;
       ObjectEvent listener(ObjectEvent event) => receivedEvent = event;
@@ -55,7 +55,7 @@ class _TestRenderObject extends RenderObject {
   Rect get semanticBounds => throw UnimplementedError();
 }
 
-class _TestElement extends RenderObjectElement with RootElementMixin {
+class _TestElement extends RenderTreeRootElement with RootElementMixin {
   _TestElement(): super(_TestLeafRenderObjectWidget());
 
   void makeInactive() {

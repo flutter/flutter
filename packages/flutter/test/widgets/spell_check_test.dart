@@ -353,4 +353,35 @@ void main() {
 
     expect(textSpanTree, equals(expectedTextSpanTree));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.iOS }));
+
+  testWidgets(
+    'buildTextSpanWithSpellCheckSuggestions does not throw when text contains regex reserved characters',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/136032.
+      const String text = 'Hello, *ãresaa';
+      const String resultsText = 'Hello, *ãresa';
+      const TextEditingValue value = TextEditingValue(text: text);
+      const bool composingRegionOutOfRange = false;
+      const SpellCheckResults spellCheckResults = SpellCheckResults(
+        resultsText,
+        <SuggestionSpan>[
+          SuggestionSpan(TextRange(start: 7, end: 12), <String>['*rangesa']),
+        ],
+      );
+
+      const TextSpan expectedTextSpanTree = TextSpan(children: <TextSpan>[
+        TextSpan(text: 'Hello, *ãresaa'),
+      ]);
+      final TextSpan textSpanTree = buildTextSpanWithSpellCheckSuggestions(
+        value,
+        composingRegionOutOfRange,
+        null,
+        misspelledTextStyle,
+        spellCheckResults,
+      );
+
+      expect(tester.takeException(), null);
+      expect(textSpanTree, equals(expectedTextSpanTree));
+    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.iOS }),
+  );
 }

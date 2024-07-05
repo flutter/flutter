@@ -532,6 +532,7 @@ void main() {
         final RenderBox renderBox = tester.binding.renderView.child!;
         final OffsetLayer layer = renderBox.debugLayer! as OffsetLayer;
         final ui.Image imageWithCompositing = await layer.toImage(renderBox.paintBounds);
+        addTearDown(imageWithCompositing.dispose);
 
         await tester.pumpWidget(RepaintBoundary(child: generateTransform(false, angle)));
         await expectLater(find.byType(RepaintBoundary).first, matchesReferenceImage(imageWithCompositing));

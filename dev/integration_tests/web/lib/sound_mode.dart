@@ -4,7 +4,9 @@
 
 // @dart = 2.12
 
-import 'dart:html' as html;
+import 'dart:js_interop';
+
+import 'package:web/web.dart' as web;
 
 // Verify that web applications can be run in sound mode.
 void main() {
@@ -16,9 +18,11 @@ void main() {
     output = '--- TEST SUCCEEDED ---';
   }
   print(output);
-  html.HttpRequest.request(
-    '/test-result',
-    method: 'POST',
-    sendData: output,
+  web.window.fetch(
+    '/test-result'.toJS,
+    web.RequestInit(
+      method: 'POST',
+      body: output.toJS,
+    )
   );
 }

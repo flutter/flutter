@@ -84,6 +84,7 @@ void main() {
       duration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),
     );
+    addTearDown(controller.dispose);
     final List<String> log = <String>[];
 
     void listener1() { log.add('listener1'); }

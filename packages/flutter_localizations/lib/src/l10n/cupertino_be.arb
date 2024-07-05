@@ -28,9 +28,18 @@
   "cutButtonLabel": "Выразаць",
   "copyButtonLabel": "Капіраваць",
   "pasteButtonLabel": "Уставіць",
+  "clearButtonLabel": "Clear",
   "selectAllButtonLabel": "Выбраць усе",
   "tabSemanticsLabel": "Укладка $tabIndex з $tabCount",
   "modalBarrierDismissLabel": "Адхіліць",
   "searchTextFieldPlaceholderLabel": "Пошук",
+<<<<<<< HEAD
   "noSpellCheckReplacementsLabel": "No Replacements Found"
+=======
+  "noSpellCheckReplacementsLabel": "Замен не знойдзена",
+  "menuDismissLabel": "Закрыць меню",
+  "lookUpButtonLabel": "Знайсці",
+  "searchWebButtonLabel": "Пошук у сетцы",
+  "shareButtonLabel": "Абагуліць..."
+>>>>>>> 761747bfc538b5af34aa0d3fac380f1bc331ec49
 }

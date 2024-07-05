@@ -79,11 +79,11 @@ void main() {
     final Finder menuMaterial = find.ancestor(
       of: find.widgetWithText(TextButton, 'Item 0'),
       matching: find.byType(Material),
-    ).last;
+    ).at(1);
     Material material = tester.widget<Material>(menuMaterial);
-    expect(material.color, themeData.colorScheme.surface);
+    expect(material.color, themeData.colorScheme.surfaceContainer);
     expect(material.shadowColor, themeData.colorScheme.shadow);
-    expect(material.surfaceTintColor, themeData.colorScheme.surfaceTint);
+    expect(material.surfaceTintColor, Colors.transparent);
     expect(material.elevation, 3.0);
     expect(material.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0))));
 
@@ -158,7 +158,7 @@ void main() {
     final Finder menuMaterial = find.ancestor(
       of: find.widgetWithText(TextButton, 'Item 0'),
       matching: find.byType(Material),
-    ).last;
+    ).at(1);
     Material material = tester.widget<Material>(menuMaterial);
     expect(material.color, Colors.grey);
     expect(material.shadowColor, Colors.brown);
@@ -261,7 +261,7 @@ void main() {
     final Finder menuMaterial = find.ancestor(
       of: find.widgetWithText(TextButton, 'Item 0'),
       matching: find.byType(Material),
-    ).last;
+    ).at(1);
     Material material = tester.widget<Material>(menuMaterial);
     expect(material.color, Colors.yellow);
     expect(material.shadowColor, Colors.green);
@@ -382,7 +382,7 @@ void main() {
     final Finder menuMaterial = find.ancestor(
       of: find.widgetWithText(TextButton, 'Item 0'),
       matching: find.byType(Material),
-    ).last;
+    ).at(1);
     Material material = tester.widget<Material>(menuMaterial);
     expect(material.color, Colors.limeAccent);
     expect(material.shadowColor, Colors.deepOrangeAccent);

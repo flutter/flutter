@@ -75,16 +75,12 @@ class OperationToken extends ExpressionToken {
   Operation operation;
 
   static String? opString(Operation operation) {
-    switch (operation) {
-      case Operation.Addition:
-        return ' + ';
-      case Operation.Subtraction:
-        return ' - ';
-      case Operation.Multiplication:
-        return '  \u00D7  ';
-      case Operation.Division:
-        return '  \u00F7  ';
-    }
+    return switch (operation) {
+      Operation.Addition       => ' + ',
+      Operation.Subtraction    => ' - ',
+      Operation.Multiplication => '  \u00D7  ',
+      Operation.Division       => '  \u00F7  ',
+    };
   }
 }
 

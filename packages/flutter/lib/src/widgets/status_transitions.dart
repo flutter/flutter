@@ -8,8 +8,6 @@ import 'framework.dart';
 /// A widget that rebuilds when the given animation changes status.
 abstract class StatusTransitionWidget extends StatefulWidget {
   /// Initializes fields for subclasses.
-  ///
-  /// The [animation] argument must not be null.
   const StatusTransitionWidget({
     super.key,
     required this.animation,

@@ -7,8 +7,7 @@ import 'dart:ui' as ui show Image;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../rendering/mock_canvas.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class TestImageProvider extends ImageProvider<TestImageProvider> {
   const TestImageProvider(this.image);
@@ -21,7 +20,7 @@ class TestImageProvider extends ImageProvider<TestImageProvider> {
   }
 
   @override
-  ImageStreamCompleter load(TestImageProvider key, DecoderCallback decode) {
+  ImageStreamCompleter loadImage(TestImageProvider key, ImageDecoderCallback decode) {
     return OneFrameImageStreamCompleter(
       SynchronousFuture<ImageInfo>(ImageInfo(image: image)),
     );
@@ -29,10 +28,19 @@ class TestImageProvider extends ImageProvider<TestImageProvider> {
 }
 
 void main() {
+  // TODO(polina-c): dispose ImageStreamCompleterHandle, https://github.com/flutter/flutter/issues/145599 [leaks-to-clean]
+  LeakTesting.settings = LeakTesting.settings.withIgnoredAll();
+
   late ui.Image testImage;
+
   setUpAll(() async {
     testImage = await createTestImage(width: 16, height: 9);
   });
+
+  tearDownAll(() {
+    testImage.dispose();
+  });
+
   testWidgets('DecorationImage RTL with alignment topEnd and match', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
@@ -52,14 +60,21 @@ void main() {
           ),
         ),
       ),
-      Duration.zero,
-      EnginePhase.layout, // so that we don't try to paint the fake images
+      duration: Duration.zero,
+      phase: EnginePhase.layout, // so that we don't try to paint the fake images
     );
     expect(find.byType(Container), paints
+      ..clipRect(rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 50.0))
       ..translate(x: 50.0, y: 0.0)
       ..scale(x: -1.0, y: 1.0)
       ..translate(x: -50.0, y: 0.0)
-      ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 50.0), shader: isA<ImageShader>())
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(-12.0, 0.0, 4.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(4.0, 0.0, 20.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(20.0, 0.0, 36.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(36.0, 0.0, 52.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(52.0, 0.0, 68.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(68.0, 0.0, 84.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(84.0, 0.0, 100.0, 9.0))
       ..restore(),
     );
     expect(find.byType(Container), isNot(paints..scale()..scale()));
@@ -84,11 +99,18 @@ void main() {
           ),
         ),
       ),
-      Duration.zero,
-      EnginePhase.layout, // so that we don't try to paint the fake images
+      duration: Duration.zero,
+      phase: EnginePhase.layout, // so that we don't try to paint the fake images
     );
     expect(find.byType(Container), paints
-      ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 50.0), shader: isA<ImageShader>())
+      ..clipRect(rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 50.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(-12.0, 0.0, 4.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(4.0, 0.0, 20.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(20.0, 0.0, 36.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(36.0, 0.0, 52.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(52.0, 0.0, 68.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(68.0, 0.0, 84.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(84.0, 0.0, 100.0, 9.0))
       ..restore(),
     );
     expect(find.byType(Container), isNot(paints..scale()));
@@ -112,11 +134,18 @@ void main() {
           ),
         ),
       ),
-      Duration.zero,
-      EnginePhase.layout, // so that we don't try to paint the fake images
+      duration: Duration.zero,
+      phase: EnginePhase.layout, // so that we don't try to paint the fake images
     );
     expect(find.byType(Container), paints
-      ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 50.0), shader: isA<ImageShader>())
+      ..clipRect(rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 50.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(16.0, 0.0, 32.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(32.0, 0.0, 48.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(48.0, 0.0, 64.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(64.0, 0.0, 80.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(80.0, 0.0, 96.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(96.0, 0.0, 112.0, 9.0))
       ..restore(),
     );
     expect(find.byType(Container), isNot(paints..scale()));
@@ -140,11 +169,18 @@ void main() {
           ),
         ),
       ),
-      Duration.zero,
-      EnginePhase.layout, // so that we don't try to paint the fake images
+      duration: Duration.zero,
+      phase: EnginePhase.layout, // so that we don't try to paint the fake images
     );
     expect(find.byType(Container), paints
-      ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 50.0), shader: isA<ImageShader>())
+      ..clipRect(rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 50.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(-12.0, 0.0, 4.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(4.0, 0.0, 20.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(20.0, 0.0, 36.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(36.0, 0.0, 52.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(52.0, 0.0, 68.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(68.0, 0.0, 84.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(84.0, 0.0, 100.0, 9.0))
       ..restore(),
     );
     expect(find.byType(Container), isNot(paints..scale()));
@@ -168,8 +204,8 @@ void main() {
           ),
         ),
       ),
-      Duration.zero,
-      EnginePhase.layout, // so that we don't try to paint the fake images
+      duration: Duration.zero,
+      phase: EnginePhase.layout, // so that we don't try to paint the fake images
     );
     expect(find.byType(Container), paints
       ..translate(x: 50.0, y: 0.0)
@@ -199,8 +235,8 @@ void main() {
           ),
         ),
       ),
-      Duration.zero,
-      EnginePhase.layout, // so that we don't try to paint the fake images
+      duration: Duration.zero,
+      phase: EnginePhase.layout, // so that we don't try to paint the fake images
     );
     expect(find.byType(Container), paints
       ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(84.0, 20.5, 100.0, 29.5)),
@@ -227,8 +263,8 @@ void main() {
           ),
         ),
       ),
-      Duration.zero,
-      EnginePhase.layout, // so that we don't try to paint the fake images
+      duration: Duration.zero,
+      phase: EnginePhase.layout, // so that we don't try to paint the fake images
     );
     expect(find.byType(Container), paints
       ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(84.0, 20.5, 100.0, 29.5)),
@@ -255,8 +291,8 @@ void main() {
           ),
         ),
       ),
-      Duration.zero,
-      EnginePhase.layout, // so that we don't try to paint the fake images
+      duration: Duration.zero,
+      phase: EnginePhase.layout, // so that we don't try to paint the fake images
     );
     expect(find.byType(Container), paints
       ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(84.0, 20.5, 100.0, 29.5)),
@@ -282,14 +318,21 @@ void main() {
           ),
         ),
       ),
-      Duration.zero,
-      EnginePhase.layout, // so that we don't try to paint the fake images
+      duration: Duration.zero,
+      phase: EnginePhase.layout, // so that we don't try to paint the fake images
     );
     expect(find.byType(SizedBox), paints
+      ..clipRect(rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 50.0))
       ..translate(x: 50.0, y: 0.0)
       ..scale(x: -1.0, y: 1.0)
       ..translate(x: -50.0, y: 0.0)
-      ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 50.0), shader: isA<ImageShader>())
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(-12.0, 0.0, 4.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(4.0, 0.0, 20.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(20.0, 0.0, 36.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(36.0, 0.0, 52.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(52.0, 0.0, 68.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(68.0, 0.0, 84.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(84.0, 0.0, 100.0, 9.0))
       ..restore(),
     );
     expect(find.byType(SizedBox), isNot(paints..scale()..scale()));
@@ -312,11 +355,18 @@ void main() {
           ),
         ),
       ),
-      Duration.zero,
-      EnginePhase.layout, // so that we don't try to paint the fake images
+      duration: Duration.zero,
+      phase: EnginePhase.layout, // so that we don't try to paint the fake images
     );
     expect(find.byType(SizedBox), paints
-      ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 50.0), shader: isA<ImageShader>())
+      ..clipRect(rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 50.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(-12.0, 0.0, 4.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(4.0, 0.0, 20.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(20.0, 0.0, 36.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(36.0, 0.0, 52.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(52.0, 0.0, 68.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(68.0, 0.0, 84.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(84.0, 0.0, 100.0, 9.0))
       ..restore(),
     );
     expect(find.byType(SizedBox), isNot(paints..scale()));
@@ -338,11 +388,18 @@ void main() {
           ),
         ),
       ),
-      Duration.zero,
-      EnginePhase.layout, // so that we don't try to paint the fake images
+      duration: Duration.zero,
+      phase: EnginePhase.layout, // so that we don't try to paint the fake images
     );
     expect(find.byType(SizedBox), paints
-      ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 50.0), shader: isA<ImageShader>())
+      ..clipRect(rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 50.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(16.0, 0.0, 32.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(32.0, 0.0, 48.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(48.0, 0.0, 64.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(64.0, 0.0, 80.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(80.0, 0.0, 96.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(96.0, 0.0, 112.0, 9.0))
       ..restore(),
     );
     expect(find.byType(SizedBox), isNot(paints..scale()));
@@ -364,11 +421,18 @@ void main() {
           ),
         ),
       ),
-      Duration.zero,
-      EnginePhase.layout, // so that we don't try to paint the fake images
+      duration: Duration.zero,
+      phase: EnginePhase.layout, // so that we don't try to paint the fake images
     );
     expect(find.byType(SizedBox), paints
-      ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 50.0), shader: isA<ImageShader>())
+      ..clipRect(rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 50.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(-12.0, 0.0, 4.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(4.0, 0.0, 20.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(20.0, 0.0, 36.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(36.0, 0.0, 52.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(52.0, 0.0, 68.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(68.0, 0.0, 84.0, 9.0))
+      ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(84.0, 0.0, 100.0, 9.0))
       ..restore(),
     );
     expect(find.byType(SizedBox), isNot(paints..scale()));
@@ -417,8 +481,8 @@ void main() {
           ),
         ),
       ),
-      Duration.zero,
-      EnginePhase.layout, // so that we don't try to paint the fake images
+      duration: Duration.zero,
+      phase: EnginePhase.layout, // so that we don't try to paint the fake images
     );
     expect(find.byType(SizedBox), paints
       ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(84.0, 20.5, 100.0, 29.5)),
@@ -443,8 +507,8 @@ void main() {
           ),
         ),
       ),
-      Duration.zero,
-      EnginePhase.layout, // so that we don't try to paint the fake images
+      duration: Duration.zero,
+      phase: EnginePhase.layout, // so that we don't try to paint the fake images
     );
     expect(find.byType(SizedBox), paints
       ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(84.0, 20.5, 100.0, 29.5)),
@@ -469,8 +533,8 @@ void main() {
           ),
         ),
       ),
-      Duration.zero,
-      EnginePhase.layout, // so that we don't try to paint the fake images
+      duration: Duration.zero,
+      phase: EnginePhase.layout, // so that we don't try to paint the fake images
     );
     expect(find.byType(SizedBox), paints
       ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(84.0, 20.5, 100.0, 29.5)),
@@ -488,8 +552,8 @@ void main() {
           alignment: Alignment.centerRight,
         ),
       ),
-      Duration.zero,
-      EnginePhase.layout, // so that we don't try to paint the fake images
+      duration: Duration.zero,
+      phase: EnginePhase.layout, // so that we don't try to paint the fake images
     );
     await tester.pumpWidget(
       Directionality(
@@ -500,8 +564,8 @@ void main() {
           matchTextDirection: true,
         ),
       ),
-      Duration.zero,
-      EnginePhase.layout, // so that we don't try to paint the fake images
+      duration: Duration.zero,
+      phase: EnginePhase.layout, // so that we don't try to paint the fake images
     );
     await tester.pumpWidget(
       Directionality(
@@ -511,8 +575,8 @@ void main() {
           alignment: Alignment.centerRight,
         ),
       ),
-      Duration.zero,
-      EnginePhase.layout, // so that we don't try to paint the fake images
+      duration: Duration.zero,
+      phase: EnginePhase.layout, // so that we don't try to paint the fake images
     );
   });
 }

@@ -28,7 +28,7 @@ const FakeCommand kARMCheckCommand = FakeCommand(
 );
 
 const List<String> kDefaultClang = <String>[
-  '-miphoneos-version-min=11.0',
+  '-miphoneos-version-min=12.0',
   '-isysroot',
   'path/to/sdk',
   '-dynamiclib',
@@ -221,7 +221,7 @@ void main() {
           'cc',
           '-arch',
           'arm64',
-          '-miphoneos-version-min=11.0',
+          '-miphoneos-version-min=12.0',
           '-isysroot',
           'path/to/sdk',
           '-c',
@@ -292,7 +292,7 @@ void main() {
           'cc',
           '-arch',
           'arm64',
-          '-miphoneos-version-min=11.0',
+          '-miphoneos-version-min=12.0',
           '-isysroot',
           'path/to/sdk',
           '-c',
@@ -360,7 +360,7 @@ void main() {
           'cc',
           '-arch',
           'arm64',
-          '-miphoneos-version-min=11.0',
+          '-miphoneos-version-min=12.0',
           '-isysroot',
           'path/to/sdk',
           '-c',

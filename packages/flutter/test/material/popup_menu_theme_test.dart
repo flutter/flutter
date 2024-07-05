@@ -41,6 +41,8 @@ PopupMenuThemeData _popupMenuThemeM3() {
       }
       return SystemMouseCursors.alias;
     }),
+    iconColor: const Color(0xfff12099),
+    iconSize: 17.0,
   );
 }
 
@@ -84,19 +86,23 @@ void main() {
   testWidgets('PopupMenuThemeData implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
      PopupMenuThemeData(
-      color: const Color(0xFFFFFFFF),
+      color: const Color(0xfffffff1),
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(2.0))),
       elevation: 2.0,
-      shadowColor: const Color(0xff00ff00),
-      surfaceTintColor: const Color(0xff00ff00),
-      textStyle: const TextStyle(color: Color(0xffffffff)),
+      shadowColor: const Color(0xfffffff2),
+      surfaceTintColor: const Color(0xfffffff3),
+      textStyle: const TextStyle(color: Color(0xfffffff4)),
       labelTextStyle: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
         if (states.contains(MaterialState.disabled)) {
-          return const TextStyle(color: Color(0xfff99ff0), fontSize: 12.0);
+          return const TextStyle(color: Color(0xfffffff5), fontSize: 12.0);
         }
-        return const TextStyle(color: Color(0xfff12099), fontSize: 17.0);
+        return const TextStyle(color: Color(0xfffffff6), fontSize: 17.0);
       }),
+      enableFeedback: false,
       mouseCursor: MaterialStateMouseCursor.clickable,
+      position: PopupMenuPosition.over,
+      iconColor: const Color(0xfffffff8),
+      iconSize: 31.0,
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -105,14 +111,18 @@ void main() {
         .toList();
 
     expect(description, <String>[
-      'color: Color(0xffffffff)',
+      'color: Color(0xfffffff1)',
       'shape: RoundedRectangleBorder(BorderSide(width: 0.0, style: none), BorderRadius.circular(2.0))',
       'elevation: 2.0',
-      'shadowColor: Color(0xff00ff00)',
-      'surfaceTintColor: Color(0xff00ff00)',
-      'text style: TextStyle(inherit: true, color: Color(0xffffffff))',
-      "labelTextStyle: Instance of '_MaterialStatePropertyWith<TextStyle?>'",
-      'mouseCursor: MaterialStateMouseCursor(clickable)',
+      'shadowColor: Color(0xfffffff2)',
+      'surfaceTintColor: Color(0xfffffff3)',
+      'text style: TextStyle(inherit: true, color: Color(0xfffffff4))',
+      "labelTextStyle: Instance of '_WidgetStatePropertyWith<TextStyle?>'",
+      'enableFeedback: false',
+      'mouseCursor: WidgetStateMouseCursor(clickable)',
+      'position: over',
+      'iconColor: Color(0xfffffff8)',
+      'iconSize: 31.0'
     ]);
   });
 
@@ -147,6 +157,13 @@ void main() {
                       enabled: false,
                       child: const Text('Disabled PopupMenuItem'),
                     ),
+                    const CheckedPopupMenuItem<void>(
+                      child: Text('Unchecked item'),
+                    ),
+                    const CheckedPopupMenuItem<void>(
+                      checked: true,
+                      child: Text('Checked item'),
+                    ),
                   ];
                 },
               ),
@@ -155,6 +172,9 @@ void main() {
         ),
       ),
     ));
+
+    // Test default button icon color.
+    expect(_iconStyle(tester, Icons.adaptive.more)?.color, theme.iconTheme.color);
 
     await tester.tap(find.byKey(popupButtonKey));
     await tester.pumpAndSettle();
@@ -169,9 +189,9 @@ void main() {
         matching: find.byType(Material),
       ).last,
     );
-    expect(button.color, theme.colorScheme.surface);
+    expect(button.color, theme.colorScheme.surfaceContainer);
     expect(button.shadowColor, theme.colorScheme.shadow);
-    expect(button.surfaceTintColor, theme.colorScheme.surfaceTint);
+    expect(button.surfaceTintColor, Colors.transparent);
     expect(button.shape, RoundedRectangleBorder(borderRadius: BorderRadius.circular(4.0)));
     expect(button.elevation, 3.0);
 
@@ -179,22 +199,23 @@ void main() {
     /// [PopupMenuItem] specified above, so by finding the last descendent of
     /// popupItemKey that is of type DefaultTextStyle, this code retrieves the
     /// built [PopupMenuItem].
-    final DefaultTextStyle enabledText = tester.widget<DefaultTextStyle>(
+    DefaultTextStyle popupMenuItemLabel = tester.widget<DefaultTextStyle>(
       find.descendant(
         of: find.byKey(enabledPopupItemKey),
         matching: find.byType(DefaultTextStyle),
       ).last,
     );
-    expect(enabledText.style.fontFamily, 'Roboto');
-    expect(enabledText.style.color, theme.colorScheme.onSurface);
+    expect(popupMenuItemLabel.style.fontFamily, 'Roboto');
+    expect(popupMenuItemLabel.style.color, theme.colorScheme.onSurface);
+
     /// Test disabled text color
-    final DefaultTextStyle disabledText = tester.widget<DefaultTextStyle>(
+    popupMenuItemLabel = tester.widget<DefaultTextStyle>(
       find.descendant(
         of: find.byKey(disabledPopupItemKey),
         matching: find.byType(DefaultTextStyle),
       ).last,
     );
-    expect(disabledText.style.color, theme.colorScheme.onSurface.withOpacity(0.38));
+    expect(popupMenuItemLabel.style.color, theme.colorScheme.onSurface.withOpacity(0.38));
 
     final Offset topLeftButton = tester.getTopLeft(find.byType(PopupMenuButton<void>));
     final Offset topLeftMenu = tester.getTopLeft(find.byWidget(button));
@@ -215,6 +236,14 @@ void main() {
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
       SystemMouseCursors.click,
     );
+
+    // Test unchecked CheckedPopupMenuItem label.
+    ListTile listTile = tester.widget<ListTile>(find.byType(ListTile).first);
+    expect(listTile.titleTextStyle?.color, theme.colorScheme.onSurface);
+
+    // Test checked CheckedPopupMenuItem label.
+    listTile = tester.widget<ListTile>(find.byType(ListTile).last);
+    expect(listTile.titleTextStyle?.color, theme.colorScheme.onSurface);
   });
 
   testWidgets('Popup menu uses values from PopupMenuThemeData', (WidgetTester tester) async {
@@ -249,6 +278,13 @@ void main() {
                     onTap: () { },
                     child: const Text('enabled'),
                   ),
+                  const CheckedPopupMenuItem<Object>(
+                    child: Text('Unchecked item'),
+                  ),
+                  const CheckedPopupMenuItem<Object>(
+                    checked: true,
+                    child: Text('Checked item'),
+                  ),
                 ];
               },
             ),
@@ -256,6 +292,9 @@ void main() {
         ),
       ),
     ));
+
+    expect(_iconStyle(tester, Icons.adaptive.more)?.color, popupMenuTheme.iconColor);
+    expect(tester.getSize(find.byIcon(Icons.adaptive.more)), Size(popupMenuTheme.iconSize!, popupMenuTheme.iconSize!));
 
     await tester.tap(find.byKey(popupButtonKey));
     await tester.pumpAndSettle();
@@ -276,25 +315,25 @@ void main() {
     expect(button.shape, const BeveledRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12))));
     expect(button.elevation, 12.0);
 
-    final DefaultTextStyle enabledText = tester.widget<DefaultTextStyle>(
+    DefaultTextStyle popupMenuItemLabel = tester.widget<DefaultTextStyle>(
       find.descendant(
         of: find.byKey(enabledPopupItemKey),
         matching: find.byType(DefaultTextStyle),
       ).last,
     );
     expect(
-      enabledText.style,
+      popupMenuItemLabel.style,
       popupMenuTheme.labelTextStyle?.resolve(enabled),
     );
     /// Test disabled text color
-    final DefaultTextStyle disabledText = tester.widget<DefaultTextStyle>(
+    popupMenuItemLabel = tester.widget<DefaultTextStyle>(
       find.descendant(
         of: find.byKey(disabledPopupItemKey),
         matching: find.byType(DefaultTextStyle),
       ).last,
     );
     expect(
-      disabledText.style,
+      popupMenuItemLabel.style,
       popupMenuTheme.labelTextStyle?.resolve(disabled),
     );
 
@@ -313,6 +352,14 @@ void main() {
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
       popupMenuTheme.mouseCursor?.resolve(enabled),
     );
+
+    // Test unchecked CheckedPopupMenuItem label.
+    ListTile listTile = tester.widget<ListTile>(find.byType(ListTile).first);
+    expect(listTile.titleTextStyle, popupMenuTheme.labelTextStyle?.resolve(enabled));
+
+    // Test checked CheckedPopupMenuItem label.
+    listTile = tester.widget<ListTile>(find.byType(ListTile).last);
+    expect(listTile.titleTextStyle, popupMenuTheme.labelTextStyle?.resolve(enabled));
   });
 
   testWidgets('Popup menu widget properties take priority over theme', (WidgetTester tester) async {
@@ -321,15 +368,17 @@ void main() {
     final Key popupButtonApp = UniqueKey();
     final Key popupItemKey = UniqueKey();
 
-    const Color color = Colors.purple;
-    const Color surfaceTintColor = Colors.amber;
-    const Color shadowColor = Colors.green;
+    const Color color = Color(0xfff11fff);
+    const Color surfaceTintColor = Color(0xfff12fff);
+    const Color shadowColor = Color(0xfff13fff);
     const ShapeBorder shape = RoundedRectangleBorder(
       borderRadius: BorderRadius.all(Radius.circular(9.0)),
     );
     const double elevation = 7.0;
-    const TextStyle textStyle = TextStyle(color: Color(0xffffffef), fontSize: 19.0);
+    const TextStyle textStyle = TextStyle(color: Color(0xfff14fff), fontSize: 19.0);
     const MouseCursor cursor =  SystemMouseCursors.forbidden;
+    const Color iconColor = Color(0xfff15fff);
+    const double iconSize = 21.5;
 
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(useMaterial3: true, popupMenuTheme: popupMenuTheme),
@@ -344,6 +393,8 @@ void main() {
               surfaceTintColor: surfaceTintColor,
               color: color,
               shape: shape,
+              iconColor: iconColor,
+              iconSize: iconSize,
               itemBuilder: (BuildContext context) {
                 return <PopupMenuEntry<void>>[
                   PopupMenuItem<void>(
@@ -352,6 +403,11 @@ void main() {
                     mouseCursor: cursor,
                     child: const Text('Example'),
                   ),
+                  CheckedPopupMenuItem<void>(
+                    checked: true,
+                    labelTextStyle: MaterialStateProperty.all<TextStyle>(textStyle),
+                    child: const Text('Checked item'),
+                  )
                 ];
               },
             ),
@@ -359,6 +415,9 @@ void main() {
         ),
       ),
     ));
+
+    expect(_iconStyle(tester, Icons.adaptive.more)?.color, iconColor);
+    expect(tester.getSize(find.byIcon(Icons.adaptive.more)), const Size(iconSize, iconSize));
 
     await tester.tap(find.byKey(popupButtonKey));
     await tester.pumpAndSettle();
@@ -397,18 +456,23 @@ void main() {
     await gesture.moveTo(tester.getCenter(find.byKey(popupItemKey)));
     await tester.pumpAndSettle();
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), cursor);
+
+    // Test CheckedPopupMenuItem label.
+    final ListTile listTile = tester.widget<ListTile>(find.byType(ListTile).first);
+    expect(listTile.titleTextStyle, textStyle);
   });
 
   group('Material 2', () {
-    // Tests that are only relevant for Material 2. Once ThemeData.useMaterial3
-    // is turned on by default, these tests can be removed.
+    // These tests are only relevant for Material 2. Once Material 2
+    // support is deprecated and the APIs are removed, these tests
+    // can be deleted.
 
     testWidgets('Passing no PopupMenuThemeData returns defaults', (WidgetTester tester) async {
      final Key popupButtonKey = UniqueKey();
       final Key popupButtonApp = UniqueKey();
       final Key enabledPopupItemKey = UniqueKey();
       final Key disabledPopupItemKey = UniqueKey();
-      final ThemeData theme = ThemeData();
+      final ThemeData theme = ThemeData(useMaterial3: false);
 
       await tester.pumpWidget(MaterialApp(
         theme: theme,
@@ -510,7 +574,7 @@ void main() {
       final Key disabledPopupItemKey = UniqueKey();
 
       await tester.pumpWidget(MaterialApp(
-        theme: ThemeData(popupMenuTheme: popupMenuTheme),
+        theme: ThemeData(popupMenuTheme: popupMenuTheme, useMaterial3: false),
         key: popupButtonApp,
         home: Material(
           child: Column(
@@ -676,3 +740,10 @@ void main() {
 
 Set<MaterialState> enabled = <MaterialState>{};
 Set<MaterialState> disabled = <MaterialState>{MaterialState.disabled};
+
+TextStyle? _iconStyle(WidgetTester tester, IconData icon) {
+  return tester.widget<RichText>(find.descendant(
+    of: find.byIcon(icon),
+    matching: find.byType(RichText),
+  )).text.style;
+}

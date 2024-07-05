@@ -23,9 +23,18 @@
   "cutButtonLabel": "Izreži",
   "copyButtonLabel": "Kopiraj",
   "pasteButtonLabel": "Zalijepi",
+  "clearButtonLabel": "Clear",
   "selectAllButtonLabel": "Odaberi sve",
   "tabSemanticsLabel": "Kartica $tabIndex od $tabCount",
   "modalBarrierDismissLabel": "Odbaci",
   "searchTextFieldPlaceholderLabel": "Pretraživanje",
+<<<<<<< HEAD
   "noSpellCheckReplacementsLabel": "No Replacements Found"
+=======
+  "noSpellCheckReplacementsLabel": "Nije pronađena nijedna zamjena",
+  "menuDismissLabel": "Odbacivanje menija",
+  "lookUpButtonLabel": "Pogled nagore",
+  "searchWebButtonLabel": "Pretraži Web",
+  "shareButtonLabel": "Dijeli..."
+>>>>>>> 761747bfc538b5af34aa0d3fac380f1bc331ec49
 }

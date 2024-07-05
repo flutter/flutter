@@ -20,14 +20,14 @@ Future<void> startTransitionBetween(
   String? toTitle,
   TextDirection textDirection = TextDirection.ltr,
   CupertinoThemeData? theme,
-  double textScale = 1.0,
+  TextScaler textScaler = TextScaler.noScaling,
 }) async {
   await tester.pumpWidget(
     CupertinoApp(
       theme: theme,
       builder: (BuildContext context, Widget? navigator) {
         return MediaQuery(
-          data: MediaQuery.of(context).copyWith(textScaleFactor: textScale),
+          data: MediaQuery.of(context).copyWith(textScaler: textScaler),
           child: Directionality(
             textDirection: textDirection,
             child: navigator!,
@@ -59,26 +59,24 @@ Future<void> startTransitionBetween(
 }
 
 CupertinoPageScaffold? scaffoldForNavBar(Widget? navBar) {
-  if (navBar is CupertinoNavigationBar || navBar == null) {
-    return CupertinoPageScaffold(
-      navigationBar: navBar as CupertinoNavigationBar? ?? const CupertinoNavigationBar(),
-      child: const Placeholder(),
-    );
-  } else if (navBar is CupertinoSliverNavigationBar) {
-    return CupertinoPageScaffold(
-      child: CustomScrollView(
-        slivers: <Widget>[
+  switch (navBar) {
+    case CupertinoNavigationBar? _:
+      return CupertinoPageScaffold(
+        navigationBar: navBar ?? const CupertinoNavigationBar(),
+        child: const Placeholder(),
+      );
+    case CupertinoSliverNavigationBar():
+      return CupertinoPageScaffold(
+        child: CustomScrollView(slivers: <Widget>[
           navBar,
           // Add filler so it's scrollable.
-          const SliverToBoxAdapter(
-            child: Placeholder(fallbackHeight: 1000.0),
-          ),
-        ],
-      ),
-    );
+          const SliverToBoxAdapter(child: Placeholder(fallbackHeight: 1000.0)),
+        ]),
+      );
+    default:
+      assert(false, 'Unexpected nav bar type ${navBar.runtimeType}');
+      return null;
   }
-  assert(false, 'Unexpected nav bar type ${navBar.runtimeType}');
-  return null;
 }
 
 Finder flying(WidgetTester tester, Finder finder) {
@@ -145,11 +143,17 @@ void main() {
     // place.
     expect(
       tester.getTopLeft(flying(tester, find.text('Page 1')).first),
-      const Offset(342.33420100808144, 13.5),
+      const Offset(
+        342.547737105096302912,
+        13.5,
+      ),
     );
     expect(
       tester.getTopLeft(flying(tester, find.text('Page 1')).last),
-      const Offset(342.33420100808144, 13.5),
+      const Offset(
+        342.547737105096302912,
+        13.5,
+      ),
     );
   });
 
@@ -166,11 +170,17 @@ void main() {
     // Same as LTR but more to the right now.
     expect(
       tester.getTopLeft(flying(tester, find.text('Page 1')).first),
-      const Offset(357.66579899191856, 13.5),
+      const Offset(
+        357.912261979376353338,
+        13.5,
+      ),
     );
     expect(
       tester.getTopLeft(flying(tester, find.text('Page 1')).last),
-      const Offset(357.66579899191856, 13.5),
+      const Offset(
+        357.912261979376353338,
+        13.5,
+      ),
     );
   });
 
@@ -206,7 +216,7 @@ void main() {
         tester.renderObject(flying(tester, find.text('Page 1')).first);
     expect(bottomMiddle.text.style!.color, const Color(0xff000306));
     expect(bottomMiddle.text.style!.fontWeight, FontWeight.w600);
-    expect(bottomMiddle.text.style!.fontFamily, '.SF Pro Text');
+    expect(bottomMiddle.text.style!.fontFamily, 'CupertinoSystemText');
     expect(bottomMiddle.text.style!.letterSpacing, -0.41);
 
     checkOpacity(tester, flying(tester, find.text('Page 1')).first, 0.9404401779174805);
@@ -217,7 +227,7 @@ void main() {
         tester.renderObject(flying(tester, find.text('Page 1')).last);
     expect(topBackLabel.text.style!.color, const Color(0xff000306));
     expect(topBackLabel.text.style!.fontWeight, FontWeight.w600);
-    expect(topBackLabel.text.style!.fontFamily, '.SF Pro Text');
+    expect(topBackLabel.text.style!.fontFamily, 'CupertinoSystemText');
     expect(topBackLabel.text.style!.letterSpacing, -0.41);
 
     checkOpacity(tester, flying(tester, find.text('Page 1')).last, 0.0);
@@ -226,14 +236,14 @@ void main() {
     await tester.pump(const Duration(milliseconds: 200));
     expect(bottomMiddle.text.style!.color, const Color(0xff005ec5));
     expect(bottomMiddle.text.style!.fontWeight, FontWeight.w400);
-    expect(bottomMiddle.text.style!.fontFamily, '.SF Pro Text');
+    expect(bottomMiddle.text.style!.fontFamily, 'CupertinoSystemText');
     expect(bottomMiddle.text.style!.letterSpacing, -0.41);
 
     checkOpacity(tester, flying(tester, find.text('Page 1')).first, 0.0);
 
     expect(topBackLabel.text.style!.color, const Color(0xff005ec5));
     expect(topBackLabel.text.style!.fontWeight, FontWeight.w400);
-    expect(topBackLabel.text.style!.fontFamily, '.SF Pro Text');
+    expect(topBackLabel.text.style!.fontFamily, 'CupertinoSystemText');
     expect(topBackLabel.text.style!.letterSpacing, -0.41);
 
     checkOpacity(tester, flying(tester, find.text('Page 1')).last, 0.5292819738388062);
@@ -254,7 +264,7 @@ void main() {
         tester.renderObject(flying(tester, find.text('Page 1')).first);
     expect(bottomMiddle.text.style!.color, const Color(0xfff8fbff));
     expect(bottomMiddle.text.style!.fontWeight, FontWeight.w600);
-    expect(bottomMiddle.text.style!.fontFamily, '.SF Pro Text');
+    expect(bottomMiddle.text.style!.fontFamily, 'CupertinoSystemText');
     expect(bottomMiddle.text.style!.letterSpacing, -0.41);
 
     checkOpacity(tester, flying(tester, find.text('Page 1')).first, 0.9404401779174805);
@@ -265,7 +275,7 @@ void main() {
         tester.renderObject(flying(tester, find.text('Page 1')).last);
     expect(topBackLabel.text.style!.color, const Color(0xfff8fbff));
     expect(topBackLabel.text.style!.fontWeight, FontWeight.w600);
-    expect(topBackLabel.text.style!.fontFamily, '.SF Pro Text');
+    expect(topBackLabel.text.style!.fontFamily, 'CupertinoSystemText');
     expect(topBackLabel.text.style!.letterSpacing, -0.41);
 
     checkOpacity(tester, flying(tester, find.text('Page 1')).last, 0.0);
@@ -274,14 +284,14 @@ void main() {
     await tester.pump(const Duration(milliseconds: 200));
     expect(bottomMiddle.text.style!.color, const Color(0xff409fff));
     expect(bottomMiddle.text.style!.fontWeight, FontWeight.w400);
-    expect(bottomMiddle.text.style!.fontFamily, '.SF Pro Text');
+    expect(bottomMiddle.text.style!.fontFamily, 'CupertinoSystemText');
     expect(bottomMiddle.text.style!.letterSpacing, -0.41);
 
     checkOpacity(tester, flying(tester, find.text('Page 1')).first, 0.0);
 
     expect(topBackLabel.text.style!.color, const Color(0xff409fff));
     expect(topBackLabel.text.style!.fontWeight, FontWeight.w400);
-    expect(topBackLabel.text.style!.fontFamily, '.SF Pro Text');
+    expect(topBackLabel.text.style!.fontFamily, 'CupertinoSystemText');
     expect(topBackLabel.text.style!.letterSpacing, -0.41);
 
     checkOpacity(tester, flying(tester, find.text('Page 1')).last, 0.5292819738388062);
@@ -356,9 +366,13 @@ void main() {
       final RenderParagraph bottomMiddle =
           tester.renderObject(flying(tester, find.text('Page 1')).first);
       expect(bottomMiddle.text.style!.color, const Color(0xff000306));
+
       expect(
         tester.getTopLeft(flying(tester, find.text('Page 1')).first),
-        const Offset(342.33420100808144, 13.5),
+        const Offset(
+          342.547737105096302912,
+          13.5,
+        ),
       );
 
       // The top back label is styled exactly the same way. But the opacity tweens
@@ -368,7 +382,10 @@ void main() {
       expect(topBackLabel.text.style!.color, const Color(0xff000306));
       expect(
         tester.getTopLeft(flying(tester, find.text('Page 1')).last),
-        const Offset(342.33420100808144, 13.5),
+        const Offset(
+          342.547737105096302912,
+          13.5,
+        ),
       );
     }
 
@@ -403,7 +420,10 @@ void main() {
       expect(bottomMiddle.text.style!.color, const Color(0xff000306));
       expect(
         tester.getTopLeft(flying(tester, find.text('Page 1')).first),
-        const Offset(357.66579899191856, 13.5),
+        const Offset(
+          357.912261979376353338,
+          13.5,
+        ),
       );
 
       // The top back label is styled exactly the same way. But the opacity tweens
@@ -413,7 +433,10 @@ void main() {
       expect(topBackLabel.text.style!.color, const Color(0xff000306));
       expect(
         tester.getTopLeft(flying(tester, find.text('Page 1')).last),
-        const Offset(357.66579899191856, 13.5),
+        const Offset(
+          357.912261979376353338,
+          13.5,
+        ),
       );
     }
 
@@ -640,6 +663,7 @@ void main() {
   testWidgets('Middle is shown if alwaysShowMiddle is false but the nav bar is collapsed', (WidgetTester tester) async {
     const Widget userMiddle = Placeholder();
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -711,11 +735,17 @@ void main() {
     );
     // Come in from the right and fade in.
     checkOpacity(tester, backChevron, 0.0);
-    expect(tester.getTopLeft(backChevron), const Offset(88.04496401548386, 7.0));
+    expect(tester.getTopLeft(backChevron), const Offset(
+      87.2460581221158690823,
+      7.0,
+    ));
 
     await tester.pump(const Duration(milliseconds: 200));
     checkOpacity(tester, backChevron, 0.09497911669313908);
-    expect(tester.getTopLeft(backChevron), const Offset(31.055883467197418, 7.0));
+    expect(tester.getTopLeft(backChevron), const Offset(
+      30.8718595298545324113,
+      7.0,
+    ));
   });
 
   testWidgets('First appearance of back chevron fades in from the left in RTL', (WidgetTester tester) async {
@@ -753,14 +783,20 @@ void main() {
     checkOpacity(tester, backChevron, 0.0);
     expect(
       tester.getTopRight(backChevron),
-      const Offset(685.9550359845161, 7.0),
+      const Offset(
+        687.163941725296126606,
+        7.0,
+      ),
     );
 
     await tester.pump(const Duration(milliseconds: 200));
     checkOpacity(tester, backChevron, 0.09497911669313908);
     expect(
       tester.getTopRight(backChevron),
-      const Offset(742.9441165328026, 7.0),
+      const Offset(
+        743.538140317557690651,
+        7.0,
+      ),
     );
   });
 
@@ -862,14 +898,20 @@ void main() {
     checkOpacity(tester, flying(tester, find.text('custom')), 0.9280824661254883);
     expect(
       tester.getTopLeft(flying(tester, find.text('custom'))),
-      const Offset(684.0, 13.5),
+      const Offset(
+        684.459999084472656250,
+        13.5,
+      ),
     );
 
     await tester.pump(const Duration(milliseconds: 150));
     checkOpacity(tester, flying(tester, find.text('custom')), 0.0);
     expect(
       tester.getTopLeft(flying(tester, find.text('custom'))),
-      const Offset(684.0, 13.5),
+      const Offset(
+        684.459999084472656250,
+        13.5,
+      ),
     );
   });
 
@@ -898,14 +940,20 @@ void main() {
     checkOpacity(tester, flying(tester, find.text('Page 1')), 0.7952219992876053);
     expect(
       tester.getTopLeft(flying(tester, find.text('Page 1'))),
-      const Offset(41.71033692359924, 13.5),
+      const Offset(
+        41.3003370761871337891,
+        13.5,
+      ),
     );
 
     await tester.pump(const Duration(milliseconds: 200));
     checkOpacity(tester, flying(tester, find.text('Page 1')), 0.0);
     expect(
       tester.getTopLeft(flying(tester, find.text('Page 1'))),
-      const Offset(-258.2321922779083, 13.5),
+      const Offset(
+        -258.642192125320434570,
+        13.5,
+      ),
     );
   });
 
@@ -935,7 +983,10 @@ void main() {
     checkOpacity(tester, flying(tester, find.text('Page 1')), 0.7952219992876053);
     expect(
       tester.getTopRight(flying(tester, find.text('Page 1'))),
-      const Offset(758.2896630764008, 13.5),
+      const Offset(
+        758.699662923812866211,
+        13.5,
+      ),
     );
 
     await tester.pump(const Duration(milliseconds: 200));
@@ -943,7 +994,10 @@ void main() {
     expect(
       tester.getTopRight(flying(tester, find.text('Page 1'))),
       // >1000. It's now off the screen.
-      const Offset(1058.2321922779083, 13.5),
+      const Offset(
+        1058.64219212532043457,
+        13.5,
+      ),
     );
   });
 
@@ -963,25 +1017,39 @@ void main() {
 
     checkOpacity(tester, flying(tester, find.text('Page 1')).first, 0.9280824661254883);
     checkOpacity(tester, flying(tester, find.text('Page 1')).last, 0.0);
+
     expect(
       tester.getTopLeft(flying(tester, find.text('Page 1')).first),
-      const Offset(16.926069676876068, 52.73951627314091),
+      const Offset(
+        16.9155227761479522997,
+        52.73951627314091,
+      ),
     );
     expect(
       tester.getTopLeft(flying(tester, find.text('Page 1')).last),
-      const Offset(16.926069676876068, 52.73951627314091),
+      const Offset(
+        16.9155227761479522997,
+        52.73951627314091,
+      ),
     );
 
     await tester.pump(const Duration(milliseconds: 200));
     checkOpacity(tester, flying(tester, find.text('Page 1')).first, 0.0);
     checkOpacity(tester, flying(tester, find.text('Page 1')).last, 0.4604858811944723);
+
     expect(
       tester.getTopLeft(flying(tester, find.text('Page 1')).first),
-      const Offset(43.92089730501175, 22.49655644595623),
+      const Offset(
+        43.6029094262710827934,
+        22.49655644595623,
+      ),
     );
     expect(
       tester.getTopLeft(flying(tester, find.text('Page 1')).last),
-      const Offset(43.92089730501175, 22.49655644595623),
+      const Offset(
+        43.6029094262710827934,
+        22.49655644595623,
+      ),
     );
   });
 
@@ -1003,11 +1071,17 @@ void main() {
     checkOpacity(tester, flying(tester, find.text('Back')), 0.0);
     expect(
       tester.getTopLeft(flying(tester, find.text('A title too long to fit'))),
-      const Offset(16.926069676876068, 52.73951627314091),
+      const Offset(
+        16.9155227761479522997,
+        52.73951627314091,
+      ),
     );
     expect(
       tester.getTopLeft(flying(tester, find.text('Back'))),
-      const Offset(16.926069676876068, 52.73951627314091),
+      const Offset(
+        16.9155227761479522997,
+        52.73951627314091,
+      ),
     );
 
     await tester.pump(const Duration(milliseconds: 200));
@@ -1015,11 +1089,17 @@ void main() {
     checkOpacity(tester, flying(tester, find.text('Back')), 0.4604858811944723);
     expect(
       tester.getTopLeft(flying(tester, find.text('A title too long to fit'))),
-      const Offset(43.92089730501175, 22.49655644595623),
+      const Offset(
+        43.6029094262710827934,
+        22.49655644595623,
+      ),
     );
     expect(
       tester.getTopLeft(flying(tester, find.text('Back'))),
-      const Offset(43.92089730501175, 22.49655644595623),
+      const Offset(
+        43.6029094262710827934,
+        22.49655644595623,
+      ),
     );
   });
 
@@ -1038,28 +1118,28 @@ void main() {
         tester.renderObject(flying(tester, find.text('Page 1')).first);
     expect(bottomLargeTitle.text.style!.color, const Color(0xff000306));
     expect(bottomLargeTitle.text.style!.fontWeight, FontWeight.w700);
-    expect(bottomLargeTitle.text.style!.fontFamily, '.SF Pro Display');
-    expect(bottomLargeTitle.text.style!.letterSpacing, moreOrLessEquals(0.38890619069337845));
+    expect(bottomLargeTitle.text.style!.fontFamily, 'CupertinoSystemDisplay');
+    expect(bottomLargeTitle.text.style!.letterSpacing, moreOrLessEquals(0.35967791542410854));
 
     // The top back label is styled exactly the same way.
     final RenderParagraph topBackLabel =
         tester.renderObject(flying(tester, find.text('Page 1')).last);
     expect(topBackLabel.text.style!.color, const Color(0xff000306));
     expect(topBackLabel.text.style!.fontWeight, FontWeight.w700);
-    expect(topBackLabel.text.style!.fontFamily, '.SF Pro Display');
-    expect(topBackLabel.text.style!.letterSpacing, moreOrLessEquals(0.38890619069337845));
+    expect(topBackLabel.text.style!.fontFamily, 'CupertinoSystemDisplay');
+    expect(topBackLabel.text.style!.letterSpacing, moreOrLessEquals(0.35967791542410854));
 
     // Move animation further a bit.
     await tester.pump(const Duration(milliseconds: 200));
     expect(bottomLargeTitle.text.style!.color, const Color(0xff005ec5));
     expect(bottomLargeTitle.text.style!.fontWeight, FontWeight.w500);
-    expect(bottomLargeTitle.text.style!.fontFamily, '.SF Pro Text');
-    expect(bottomLargeTitle.text.style!.letterSpacing, moreOrLessEquals(-0.2259759941697121));
+    expect(bottomLargeTitle.text.style!.fontFamily, 'CupertinoSystemText');
+    expect(bottomLargeTitle.text.style!.letterSpacing, moreOrLessEquals(-0.23270857974886894));
 
     expect(topBackLabel.text.style!.color, const Color(0xff005ec5));
     expect(topBackLabel.text.style!.fontWeight, FontWeight.w500);
-    expect(topBackLabel.text.style!.fontFamily, '.SF Pro Text');
-    expect(topBackLabel.text.style!.letterSpacing, moreOrLessEquals(-0.2259759941697121));
+    expect(topBackLabel.text.style!.fontFamily, 'CupertinoSystemText');
+    expect(topBackLabel.text.style!.letterSpacing, moreOrLessEquals(-0.23270857974886894));
   });
 
   testWidgets('Top middle fades in and slides in from the right', (WidgetTester tester) async {
@@ -1075,7 +1155,10 @@ void main() {
     checkOpacity(tester, flying(tester, find.text('Page 2')), 0.0);
     expect(
       tester.getTopLeft(flying(tester, find.text('Page 2'))),
-      const Offset(739.7103369235992, 13.5),
+      const Offset(
+        739.940336465835571289,
+        13.5,
+      ),
     );
 
     await tester.pump(const Duration(milliseconds: 150));
@@ -1083,7 +1166,10 @@ void main() {
     checkOpacity(tester, flying(tester, find.text('Page 2')), 0.29867843724787235);
     expect(
       tester.getTopLeft(flying(tester, find.text('Page 2'))),
-      const Offset(504.65044379234314, 13.5),
+      const Offset(
+        504.880443334579467773,
+        13.5,
+      ),
     );
   });
 
@@ -1125,7 +1211,10 @@ void main() {
     checkOpacity(tester, flying(tester, find.text('Page 2')), 0.0);
     expect(
       tester.getTopRight(flying(tester, find.text('Page 2'))),
-      const Offset(60.28966307640076, 13.5),
+      const Offset(
+        60.0596635341644287109,
+        13.5,
+      ),
     );
 
     await tester.pump(const Duration(milliseconds: 150));
@@ -1133,7 +1222,10 @@ void main() {
     checkOpacity(tester, flying(tester, find.text('Page 2')), 0.29867843724787235);
     expect(
       tester.getTopRight(flying(tester, find.text('Page 2'))),
-      const Offset(295.34955620765686, 13.5),
+      const Offset(
+        295.119556665420532227,
+        13.5,
+      ),
     );
   });
 
@@ -1257,7 +1349,10 @@ void main() {
     // Page 2, which is the middle of the top route, start to fly back to the right.
     expect(
       tester.getTopLeft(flying(tester, find.text('Page 2'))),
-      const Offset(353.5802058875561, 13.5),
+      const Offset(
+        353.810205429792404175,
+        13.5,
+      ),
     );
 
     // Page 1 is in transition in 2 places. Once as the top back label and once
@@ -1272,12 +1367,18 @@ void main() {
     // Transition continues.
     expect(
       tester.getTopLeft(flying(tester, find.text('Page 2'))),
-      const Offset(655.2055835723877, 13.5),
+      const Offset(
+        655.435583114624023438,
+        13.5,
+      ),
     );
     await tester.pump(const Duration(milliseconds: 50));
     expect(
       tester.getTopLeft(flying(tester, find.text('Page 2'))),
-      const Offset(749.6335566043854, 13.5),
+      const Offset(
+        749.863556146621704102,
+        13.5,
+      ),
     );
 
     await tester.pump(const Duration(milliseconds: 500));
@@ -1290,11 +1391,13 @@ void main() {
   });
 
   testWidgets('textScaleFactor is set to 1.0 on transition', (WidgetTester tester) async {
-    await startTransitionBetween(tester, fromTitle: 'Page 1', textScale: 99);
+    await startTransitionBetween(tester, fromTitle: 'Page 1', textScaler: const TextScaler.linear(99));
 
     await tester.pump(const Duration(milliseconds: 50));
 
-    expect(tester.firstWidget<RichText>(flying(tester, find.byType(RichText))).textScaleFactor, 1);
+    final TextScaler scaler = tester.firstWidget<RichText>(flying(tester, find.byType(RichText))).textScaler;
+    final List<double> fontSizes = List<double>.generate(100, (int index) => index / 3 + 1);
+    expect(fontSizes.map(scaler.scale), fontSizes);
   });
 
   testWidgets('Back swipe gesture cancels properly with transition', (WidgetTester tester) async {
@@ -1308,7 +1411,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 600));
 
     // Start the gesture at the edge of the screen.
-    final TestGesture gesture =  await tester.startGesture(const Offset(5.0, 200.0));
+    final TestGesture gesture = await tester.startGesture(const Offset(5.0, 200.0));
     // Trigger the swipe.
     await gesture.moveBy(const Offset(100.0, 0.0));
 
@@ -1319,7 +1422,10 @@ void main() {
     // Page 2, which is the middle of the top route, start to fly back to the right.
     expect(
       tester.getTopLeft(flying(tester, find.text('Page 2'))),
-      const Offset(353.5802058875561, 13.5),
+      const Offset(
+        353.810205429792404175,
+        13.5,
+      ),
     );
 
     await gesture.up();
@@ -1328,12 +1434,18 @@ void main() {
     // Transition continues from the point we let off.
     expect(
       tester.getTopLeft(flying(tester, find.text('Page 2'))),
-      const Offset(353.5802058875561, 13.5),
+      const Offset(
+        353.810205429792404175,
+        13.5,
+      ),
     );
     await tester.pump(const Duration(milliseconds: 50));
     expect(
       tester.getTopLeft(flying(tester, find.text('Page 2'))),
-      const Offset(350.0011436641216, 13.5),
+      const Offset(
+        350.231143206357955933,
+        13.5,
+      ),
     );
 
     // Finish the snap back animation.

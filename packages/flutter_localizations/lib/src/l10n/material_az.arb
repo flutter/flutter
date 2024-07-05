@@ -25,6 +25,7 @@
   "continueButtonLabel": "Davam edin",
   "copyButtonLabel": "Kopyalayın",
   "cutButtonLabel": "Kəsin",
+  "scanTextButtonLabel": "Mətni skan edin",
   "okButtonLabel": "OK",
   "pasteButtonLabel": "Yerləşdirin",
   "selectAllButtonLabel": "Hamısını seçin",
@@ -133,5 +134,17 @@
   "scrimLabel": "Kətan",
   "bottomSheetLabel": "Aşağıdakı Vərəq",
   "scrimOnTapHint": "Bağlayın: $modalRouteContentName",
-  "keyboardKeyShift": "Shift"
+  "keyboardKeyShift": "Shift",
+  "expansionTileExpandedHint": "yığcamlaşdırmaq üçün iki dəfə toxunun",
+  "expansionTileCollapsedHint": "genişləndirmək üçün iki dəfə toxunun",
+  "expansionTileExpandedTapHint": "Yığcamlaşdırın",
+  "expansionTileCollapsedTapHint": "Daha çox detallar üçün genişləndirin",
+  "expandedHint": "Yığcamlaşdırıldı",
+  "collapsedHint": "Genişləndirildi",
+  "menuDismissLabel": "Menyunu qapadın",
+  "lookUpButtonLabel": "Axtarın",
+  "searchWebButtonLabel": "Vebdə axtarın",
+  "shareButtonLabel": "Paylaşın...",
+  "clearButtonTooltip": "Clear text",
+  "selectedDateLabel": "Selected"
 }

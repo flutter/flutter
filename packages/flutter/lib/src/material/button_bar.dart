@@ -12,6 +12,37 @@ import 'dialog.dart';
 /// An end-aligned row of buttons, laying out into a column if there is not
 /// enough horizontal space.
 ///
+/// ## Updating to [OverflowBar]
+///
+/// [ButtonBar] has been replace by a more efficient widget, [OverflowBar].
+///
+/// ```dart
+/// // Before
+/// ButtonBar(
+///   alignment: MainAxisAlignment.spaceEvenly,
+///   children: <Widget>[
+///     TextButton( child: const Text('Button 1'), onPressed: () {}),
+///     TextButton( child: const Text('Button 2'), onPressed: () {}),
+///     TextButton( child: const Text('Button 3'), onPressed: () {}),
+///   ],
+/// );
+/// ```
+/// ```dart
+/// // After
+/// OverflowBar(
+///   alignment: MainAxisAlignment.spaceEvenly,
+///   children: <Widget>[
+///     TextButton( child: const Text('Button 1'), onPressed: () {}),
+///     TextButton( child: const Text('Button 2'), onPressed: () {}),
+///     TextButton( child: const Text('Button 3'), onPressed: () {}),
+///   ],
+/// );
+/// ```
+///
+/// See the [OverflowBar] documentation for more details.
+///
+/// ## Using [ButtonBar]
+///
 /// Places the buttons horizontally according to the [buttonPadding]. The
 /// children are laid out in a [Row] with [MainAxisAlignment.end]. When the
 /// [Directionality] is [TextDirection.ltr], the button bar's children are
@@ -352,14 +383,11 @@ class _RenderButtonBarRow extends RenderFlex {
       super.performLayout();
     } else {
       final BoxConstraints childConstraints = constraints.copyWith(minWidth: 0.0);
-      RenderBox? child;
       double currentHeight = 0.0;
-      switch (verticalDirection) {
-        case VerticalDirection.down:
-          child = firstChild;
-        case VerticalDirection.up:
-          child = lastChild;
-      }
+      RenderBox? child = switch (verticalDirection) {
+        VerticalDirection.down => firstChild,
+        VerticalDirection.up   => lastChild,
+      };
 
       while (child != null) {
         final FlexParentData childParentData = child.parentData! as FlexParentData;
@@ -401,12 +429,10 @@ class _RenderButtonBarRow extends RenderFlex {
             }
         }
         currentHeight += child.size.height;
-        switch (verticalDirection) {
-          case VerticalDirection.down:
-            child = childParentData.nextSibling;
-          case VerticalDirection.up:
-            child = childParentData.previousSibling;
-        }
+        child = switch (verticalDirection) {
+          VerticalDirection.down => childParentData.nextSibling,
+          VerticalDirection.up   => childParentData.previousSibling,
+        };
 
         if (overflowButtonSpacing != null && child != null) {
           currentHeight += overflowButtonSpacing!;

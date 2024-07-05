@@ -236,8 +236,6 @@ class NavigationRailThemeData with Diagnosticable {
 class NavigationRailTheme extends InheritedTheme {
   /// Creates a navigation rail theme that controls the
   /// [NavigationRailThemeData] properties for a [NavigationRail].
-  ///
-  /// The data argument must not be null.
   const NavigationRailTheme({
     super.key,
     required this.data,

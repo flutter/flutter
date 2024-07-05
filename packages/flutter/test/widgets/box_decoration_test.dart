@@ -9,9 +9,9 @@ import 'dart:ui' as ui show Image;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../image_data.dart';
-import '../rendering/mock_canvas.dart';
 
 class TestImageProvider extends ImageProvider<TestImageProvider> {
   TestImageProvider(this.future);
@@ -26,7 +26,7 @@ class TestImageProvider extends ImageProvider<TestImageProvider> {
   }
 
   @override
-  ImageStreamCompleter load(TestImageProvider key, DecoderCallback decode) {
+  ImageStreamCompleter loadImage(TestImageProvider key, ImageDecoderCallback decode) {
     return OneFrameImageStreamCompleter(
       future.then<ImageInfo>((void value) => ImageInfo(image: image)),
     );
@@ -37,7 +37,10 @@ Future<void> main() async {
   AutomatedTestWidgetsFlutterBinding();
   TestImageProvider.image = await decodeImageFromList(Uint8List.fromList(kTransparentImage));
 
-  testWidgets('DecoratedBox handles loading images', (WidgetTester tester) async {
+  testWidgets('DecoratedBox handles loading images',
+  // TODO(polina-c): dispose ImageStreamCompleterHandle, https://github.com/flutter/flutter/issues/145599 [leaks-to-clean]
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+  (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     final Completer<void> completer = Completer<void>();
     await tester.pumpWidget(
@@ -60,7 +63,10 @@ Future<void> main() async {
     expect(tester.binding.hasScheduledFrame, isFalse);
   });
 
-  testWidgets('Moving a DecoratedBox', (WidgetTester tester) async {
+  testWidgets('Moving a DecoratedBox',
+  // TODO(polina-c): dispose ImageStreamCompleterHandle, https://github.com/flutter/flutter/issues/145599 [leaks-to-clean]
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+  (WidgetTester tester) async {
     final Completer<void> completer = Completer<void>();
     final Widget subtree = KeyedSubtree(
       key: GlobalKey(),

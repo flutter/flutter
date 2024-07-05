@@ -15,13 +15,12 @@ import 'vmservice.dart';
 const String kFlutterTestOutputsDirEnvName = 'FLUTTER_TEST_OUTPUTS_DIR';
 class ColdRunner extends ResidentRunner {
   ColdRunner(
-    super.devices, {
+    super.flutterDevices, {
     required super.target,
     required super.debuggingOptions,
     this.traceStartup = false,
     this.awaitFirstFrameWhenTracing = true,
     this.applicationBinary,
-    this.multidexEnabled = false,
     bool super.ipv6 = false,
     super.stayResident,
     super.machine,
@@ -33,7 +32,6 @@ class ColdRunner extends ResidentRunner {
   final bool traceStartup;
   final bool awaitFirstFrameWhenTracing;
   final File? applicationBinary;
-  final bool multidexEnabled;
   bool _didAttach = false;
 
   @override
@@ -86,6 +84,7 @@ class ColdRunner extends ResidentRunner {
         unawaited(residentDevtoolsHandler!.serveAndAnnounceDevTools(
           devToolsServerAddress: debuggingOptions.devToolsServerAddress,
           flutterDevices: flutterDevices,
+          isStartPaused: debuggingOptions.startPaused,
         ));
       }
       if (debuggingOptions.serveObservatory) {
@@ -173,6 +172,7 @@ class ColdRunner extends ResidentRunner {
         unawaited(residentDevtoolsHandler!.serveAndAnnounceDevTools(
           devToolsServerAddress: debuggingOptions.devToolsServerAddress,
           flutterDevices: flutterDevices,
+          isStartPaused: debuggingOptions.startPaused,
         ));
       }
       if (debuggingOptions.serveObservatory) {
