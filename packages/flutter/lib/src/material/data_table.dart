@@ -349,27 +349,28 @@ class DataCell {
       onTapCancel != null;
 }
 
-/// A Material Design data table.
+/// A data table that follows the
+/// [Material 2](https://material.io/go/design-data-tables)
+/// design specification.
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=ktTajqbhIcY}
 ///
-/// Displaying data in a table is expensive, because to lay out the
-/// table all the data must be measured twice, once to negotiate the
-/// dimensions to use for each column, and once to actually lay out
-/// the table given the results of the negotiation.
+/// ## Performance considerations
 ///
-/// For this reason, if you have a lot of data (say, more than a dozen
-/// rows with a dozen columns, though the precise limits depend on the
-/// target device), it is suggested that you use a
-/// [PaginatedDataTable] which automatically splits the data into
-/// multiple pages.
+/// Columns are sized automatically based on the table's contents.
+/// It's expensive to display large amounts of data with this widget,
+/// since it must be measured twice: once to negotiate each column's
+/// dimensions, and again when the table is laid out.
 ///
-/// ## Performance considerations when wrapping [DataTable] with [SingleChildScrollView]
+/// For a table that effectively handles large amounts of data,
+/// here are some other options to consider:
 ///
-/// Wrapping a [DataTable] with [SingleChildScrollView] is expensive as [SingleChildScrollView]
-/// mounts and paints the entire [DataTable] even when only some rows are visible. If scrolling in
-/// one direction is necessary, then consider using a [CustomScrollView], otherwise use [PaginatedDataTable]
-/// to split the data into smaller pages.
+///  * `TableView`, a widget from the
+///    [two_dimensional_scrollables](https://pub.dev/packages/two_dimensional_scrollables)
+///    package.
+///  * [PaginatedDataTable], which automatically splits the data into
+///    multiple pages.
+///  * [CustomScrollView], for greater control over scrolling effects.
 ///
 /// {@tool dartpad}
 /// This sample shows how to display a [DataTable] with three columns: name, age, and
@@ -402,7 +403,10 @@ class DataCell {
 ///  * [DataCell], which contains the data for a single cell in the data table.
 ///  * [PaginatedDataTable], which shows part of the data in a data table and
 ///    provides controls for paging through the remainder of the data.
-///  * <https://material.io/design/components/data-tables.html>
+///  * `TableView` from the
+///    [two_dimensional_scrollables](https://pub.dev/packages/two_dimensional_scrollables)
+///    package, for displaying large amounts of data without pagination.
+///  * <https://material.io/go/design-data-tables>
 class DataTable extends StatelessWidget {
   /// Creates a widget describing a data table.
   ///
