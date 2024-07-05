@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'switch.dart';
+/// @docImport 'slider.dart';
+library;
+
 import 'package:flutter/painting.dart';
 
 import 'colors.dart';
