@@ -3069,6 +3069,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     properties.add(IntProperty('indexInParent', indexInParent, defaultValue: null));
     properties.add(DoubleProperty('elevation', elevation, defaultValue: 0.0));
     properties.add(DoubleProperty('thickness', thickness, defaultValue: 0.0));
+    properties.add(IntProperty('headingLevel', _headingLevel, defaultValue: 0));
   }
 
   /// Returns a string representation of this node and its descendants.
@@ -3539,10 +3540,10 @@ class SemanticsOwner extends ChangeNotifier {
         assert(node.parent == null || !node.parent!.isPartOfNodeMerging || node.isMergedIntoParent);
         if (node.isPartOfNodeMerging) {
           assert(node.mergeAllDescendantsIntoThisNode || node.parent != null);
-          // if we're merged into our parent, make sure our parent is added to the dirty list
+          // If child node is merged into its parent, make sure the parent is marked as dirty
           if (node.parent != null && node.parent!.isPartOfNodeMerging) {
             node.parent!._markDirty(); // this can add the node to the dirty list
-            node._dirty = false; // We don't want to send update for this node.
+            node._dirty = false; // Do not send update for this node, as it's now part of its parent
           }
         }
       }
@@ -5078,6 +5079,20 @@ class SemanticsConfiguration {
     _platformViewId ??= child._platformViewId;
     _maxValueLength ??= child._maxValueLength;
     _currentValueLength ??= child._currentValueLength;
+
+    // Pick the highest heading level when merging.
+    //
+    // Heading levels are lower-is-higher (1 is the highest; 6 is the lowest),
+    // except 0, which means "not a heading", i.e. it's the lowest. Hence the
+    // complicated boolean expression.
+    final bool isChildHeadingLevelHigher =
+      // Check that child is a heading. If not, keep parent heading level.
+      child._headingLevel > 0 &&
+      // Child is a heading => pick the higest heading level
+      (_headingLevel == 0 || child._headingLevel < _headingLevel);
+    if (isChildHeadingLevelHigher) {
+      _headingLevel = child._headingLevel;
+    }
 
     textDirection ??= child.textDirection;
     _sortKey ??= child._sortKey;
