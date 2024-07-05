@@ -87,6 +87,9 @@ void runSemanticsTests() {
   group('header', () {
     _testHeader();
   });
+  group('heading', () {
+    _testHeading();
+  });
   group('live region', () {
     _testLiveRegion();
   });
@@ -790,7 +793,9 @@ void _testHeader() {
 
     semantics().semanticsEnabled = false;
   });
+}
 
+void _testHeading() {
   test('renders aria-level tag for headings with heading level', () {
     semantics()
       ..debugOverrideTimestampFunction(() => _testTime)
@@ -800,14 +805,13 @@ void _testHeader() {
     updateNode(
       builder,
       headingLevel: 2,
+      label: 'This is a heading',
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
     );
 
     owner().updateSemantics(builder.build());
-    expectSemanticsTree(owner(), '''
-<sem aria-level="2" role="heading" style="filter: opacity(0%); color: rgba(0, 0, 0, 0)"></sem>
-''');
+    expectSemanticsTree(owner(), '<h2>This is a heading</h2>');
 
     semantics().semanticsEnabled = false;
   });
