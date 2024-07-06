@@ -9,7 +9,6 @@ import 'color_scheme.dart';
 import 'colors.dart';
 import 'constants.dart';
 import 'material_button.dart';
-import 'material_state.dart';
 import 'theme.dart';
 import 'theme_data.dart' show MaterialTapTargetSize;
 

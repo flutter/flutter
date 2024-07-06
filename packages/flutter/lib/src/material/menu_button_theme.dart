@@ -6,7 +6,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button_style.dart';
-import 'material_state.dart';
 import 'menu_anchor.dart';
 import 'theme.dart';
 
