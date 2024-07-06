@@ -2447,8 +2447,6 @@ void main() {
 
     final BuildContext context = tester.element(find.byType(CupertinoDatePicker));
 
-
-
     for (final String word in words) {
       final double width = CupertinoDatePicker.computeTextWidth(
        text: word,
@@ -2507,7 +2505,7 @@ void main() {
     }
 
     expect(widestWord, 'WWWWW');
-  });
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/39998);
 }
 
 Widget _buildPicker({
