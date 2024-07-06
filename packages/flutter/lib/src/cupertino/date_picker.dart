@@ -483,7 +483,9 @@ class CupertinoDatePicker extends StatefulWidget {
   // This is used to get the longest words from the date picker texts.
   static List<String> _getLongestTexts(List<String> longestTexts) {
     longestTexts.sort((String a, String b) => b.length.compareTo(a.length));
-
+    if (longestTexts.length <= 3) {
+      return longestTexts;
+    }
     return longestTexts..removeRange(3, longestTexts.length);
   }
 
@@ -496,7 +498,7 @@ class CupertinoDatePicker extends StatefulWidget {
     bool standaloneMonth = false,
   }) {
     final List<String> longestTexts = <String>[];
-    String longestText = '';
+    double longestTextWidth = 0.0;
 
     switch (columnType) {
       case _PickerColumnType.date:
@@ -506,44 +508,35 @@ class CupertinoDatePicker extends StatefulWidget {
           // An arbitrary date.
           final String date =
               localizations.datePickerMediumDate(DateTime(2018, i, 25));
-          if (longestText.length < date.length) {
-            longestText = date;
-          }
+          longestTexts.add(date);
         }
       case _PickerColumnType.hour:
         for (int i = 0; i < 24; i++) {
           final String hour = localizations.datePickerHour(i);
-          if (longestText.length < hour.length) {
-            longestText = hour;
-          }
+          longestTexts.add(hour);
         }
       case _PickerColumnType.minute:
         for (int i = 0; i < 60; i++) {
           final String minute = localizations.datePickerMinute(i);
-          if (longestText.length < minute.length) {
-            longestText = minute;
-          }
+          longestTexts.add(minute);
         }
       case _PickerColumnType.dayPeriod:
-        longestText =
+       final String longestText =
           localizations.anteMeridiemAbbreviation.length > localizations.postMeridiemAbbreviation.length
             ? localizations.anteMeridiemAbbreviation
             : localizations.postMeridiemAbbreviation;
+        longestTexts.add(longestText);
       case _PickerColumnType.dayOfMonth:
         int longestDayOfMonth = 1;
         for (int i = 1; i <=31; i++) {
           final String dayOfMonth = localizations.datePickerDayOfMonth(i);
-          if (longestText.length < dayOfMonth.length) {
-            longestText = dayOfMonth;
-            longestDayOfMonth = i;
-          }
+          longestTexts.add(dayOfMonth);
+          longestDayOfMonth = dayOfMonth.length > longestDayOfMonth ? dayOfMonth.length : longestDayOfMonth;
         }
         if (showDayOfWeek) {
           for (int wd = 1; wd < DateTime.daysPerWeek; wd++) {
             final String dayOfMonth = localizations.datePickerDayOfMonth(longestDayOfMonth, wd);
-            if (longestText.length < dayOfMonth.length) {
-              longestText = dayOfMonth;
-            }
+            longestTexts.add(dayOfMonth);
           }
         }
       case _PickerColumnType.month:
@@ -554,24 +547,32 @@ class CupertinoDatePicker extends StatefulWidget {
           longestTexts.add(month);
         }
       case _PickerColumnType.year:
-        longestText = localizations.datePickerYear(2018);
+        final String longestText = localizations.datePickerYear(2018);
+        longestTexts.add(longestText);
     }
 
-    assert(longestText != '' || longestTexts.isNotEmpty, 'longestText or longestTexts should not be empty');
-    if (longestTexts.isNotEmpty) {
-      return TextPainter.computeWidestWordWidth(
-        text: TextSpan(
-          style: _themeTextStyle(context),
-          text: _getLongestTexts(longestTexts).join(' '),
-        ),
-        textDirection: Directionality.of(context),
-      );
+    assert(longestTexts.isNotEmpty, 'longestTexts should not be empty');
+
+    for (final String text in _getLongestTexts(longestTexts)) {
+      final double width = computeTextWidth(text: text, context: context);
+      longestTextWidth = math.max(longestTextWidth, width);
     }
+
+    return longestTextWidth;
+  }
+
+  /// Compute the width of the text.
+  ///
+  /// This method is used to compute the width of the text in the picker.
+  /// It is used to estimate the minimum width that each column needs to layout
+  /// its content.
+  @visibleForTesting
+  static double computeTextWidth({required String text, TextStyle? textStyle, required BuildContext context}) {
 
     return TextPainter.computeMaxIntrinsicWidth(
       text: TextSpan(
-        style: _themeTextStyle(context),
-        text: longestText,
+        text: text,
+        style: textStyle ?? _themeTextStyle(context),
       ),
       textDirection: Directionality.of(context),
     );

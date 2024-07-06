@@ -10,10 +10,14 @@ library;
 
 import 'dart:ui';
 
+import 'package:file/file.dart';
+import 'package:file/local.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:platform/platform.dart';
 
 import '../impeller_test_helpers.dart';
 
@@ -2414,6 +2418,96 @@ void main() {
 
     expect(find.byType(CupertinoPickerDefaultSelectionOverlay), findsExactly(4));
   });
+
+  testWidgets('CupertinoDatePicker computeTextWidth should return the longest width for widest word', (WidgetTester tester) async {
+    final List<String> words = <String>[
+      'IIIIII',
+      'WWWWW',
+    ];
+    String widestWord = '';
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: Builder(
+            builder: (BuildContext context) {
+              return Localizations.override(
+                context: context,
+                child: CupertinoDatePicker(
+                  onDateTimeChanged: (DateTime date) {},
+                  initialDateTime: DateTime(2018, 9, 15),
+                  mode: CupertinoDatePickerMode.monthYear,
+                ),
+              );
+            }
+          ),
+        ),
+      ),
+    );
+
+    final BuildContext context = tester.element(find.byType(CupertinoDatePicker));
+
+
+
+    for (final String word in words) {
+      final double width = CupertinoDatePicker.computeTextWidth(
+       text: word,
+       context: context,
+      );
+      if (width > CupertinoDatePicker.computeTextWidth(text: widestWord, context: context)) {
+        widestWord = word;
+      }
+    }
+
+    expect(widestWord, 'IIIIII');
+  });
+
+  testWidgets('CupertinoDatePicker computeTextWidth should return the longest width for longest word', (WidgetTester tester) async {
+    await _loadFont();
+    // The longest month name is 'IIIIII' which is 6 characters long.
+    // But when the text is rendered, 'WWWWW' is the widest, because of font used. 'W' is wider than 'I'.
+    // This can be different for different fonts and different languages.
+    final List<String> words = <String>[
+      'IIIIII',
+      'WWWWW',
+    ];
+    String widestWord = '';
+    const TextStyle textStyle = TextStyle(fontFamily: 'Roboto', fontSize: 20);
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: Builder(
+            builder: (BuildContext context) {
+              return Localizations.override(
+                context: context,
+                child: CupertinoDatePicker(
+                  onDateTimeChanged: (DateTime date) {},
+                  initialDateTime: DateTime(2018, 9, 15),
+                  mode: CupertinoDatePickerMode.monthYear,
+                ),
+              );
+            }
+          ),
+        ),
+      ),
+    );
+
+    final BuildContext context = tester.element(find.byType(CupertinoDatePicker));
+
+    for (final String word in words) {
+      final double width = CupertinoDatePicker.computeTextWidth(
+        text: word,
+        textStyle: textStyle,
+        context: context,
+      );
+      if (width > CupertinoDatePicker.computeTextWidth(text: widestWord, textStyle: textStyle, context: context)) {
+        widestWord = word;
+      }
+    }
+
+    expect(widestWord, 'WWWWW');
+  });
 }
 
 Widget _buildPicker({
@@ -2437,4 +2531,26 @@ Widget _buildPicker({
       }),
     ),
   );
+}
+
+Future<void> _loadFont() async {
+  const FileSystem fs = LocalFileSystem();
+  const Platform platform = LocalPlatform();
+  final Directory flutterRoot = fs.directory(platform.environment['FLUTTER_ROOT']);
+
+  final File iconFont = flutterRoot.childFile(
+    fs.path.join(
+      'bin',
+      'cache',
+      'artifacts',
+      'material_fonts',
+      'RobotoCondensed-Regular.ttf',
+    ),
+  );
+
+  final Future<ByteData> bytes = Future<ByteData>.value(
+      iconFont.readAsBytesSync().buffer.asByteData(),
+  );
+
+  await (FontLoader('Roboto')..addFont(bytes)).load();
 }

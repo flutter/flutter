@@ -4,14 +4,10 @@
 
 import 'dart:ui' as ui;
 
-import 'package:file/file.dart';
-import 'package:file/local.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
-import 'package:platform/platform.dart';
 
 void _checkCaretOffsetsLtrAt(String text, List<int> boundaries) {
   expect(boundaries.first, 0);
@@ -1730,38 +1726,6 @@ void main() {
       areCreateAndDispose,
     );
   });
-
-  test('TextPainter computeWidestWordWidth with different widths for each character', () async {
-    await _loadFont();
-    // The word 'IIIIII' is longer than 'WWW' but in the font 'Roboto'
-    // 'WWW' is wider than 'IIIIII'.
-    // This can occur when the font has a different width for each character
-    // of the word and/or depending on the language.
-    final List<String> words = <String>[
-      'IIIIII',
-      'WWW',
-    ];
-
-    const TextStyle normalStyle = TextStyle(fontFamily: 'Roboto');
-
-    final TextPainter normalPainter = TextPainter(
-      text: TextSpan(text: words[0], style: normalStyle),
-      textDirection: TextDirection.ltr,
-    )..layout();
-
-    final TextPainter widePainter = TextPainter(
-      text: TextSpan(text: words[1], style: normalStyle),
-      textDirection: TextDirection.ltr,
-    )..layout();
-
-    final double widestWordWidth = TextPainter.computeWidestWordWidth(text: TextSpan(text: words.join(' '), style: normalStyle), textDirection: TextDirection.ltr);
-
-    expect(widePainter.width, widestWordWidth);
-    expect(normalPainter.width, lessThan(widestWordWidth));
-
-    normalPainter.dispose();
-    widePainter.dispose();
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/39998
 }
 
 class MockCanvas extends Fake implements Canvas {
@@ -1775,26 +1739,4 @@ class MockCanvasWithDrawParagraph extends Fake implements Canvas {
     offsetX = offset.dx;
     centerX = offset.dx + paragraph.width / 2;
   }
-}
-
-Future<void> _loadFont() async {
-  const FileSystem fs = LocalFileSystem();
-  const Platform platform = LocalPlatform();
-  final Directory flutterRoot = fs.directory(platform.environment['FLUTTER_ROOT']);
-
-  final File iconFont = flutterRoot.childFile(
-    fs.path.join(
-      'bin',
-      'cache',
-      'artifacts',
-      'material_fonts',
-      'RobotoCondensed-Regular.ttf',
-    ),
-  );
-
-  final Future<ByteData> bytes = Future<ByteData>.value(
-      iconFont.readAsBytesSync().buffer.asByteData(),
-  );
-
-  await (FontLoader('Roboto')..addFont(bytes)).load();
 }
