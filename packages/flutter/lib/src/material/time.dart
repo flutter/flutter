@@ -118,7 +118,7 @@ class TimeOfDay implements Comparable<TimeOfDay> {
   /// Whether this [TimeOfDay] occurs later than [other].
   bool isAfter(TimeOfDay other) => compareTo(other) > 0;
 
-  /// Whether this [TimeOfDay] occurs at the same time [other].
+  /// Whether this [TimeOfDay] occurs at the same time as [other].
   bool isAtSameTimeAs(TimeOfDay other) => compareTo(other) == 0;
 
   /// Compares this [TimeOfDay] object to [other] independent of date.
