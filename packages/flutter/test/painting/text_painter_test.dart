@@ -4,10 +4,14 @@
 
 import 'dart:ui' as ui;
 
+import 'package:file/file.dart';
+import 'package:file/local.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
+import 'package:platform/platform.dart';
 
 void _checkCaretOffsetsLtrAt(String text, List<int> boundaries) {
   expect(boundaries.first, 0);
@@ -114,6 +118,20 @@ List<double> caretOffsetsForTextSpan(TextDirection textDirection, TextSpan text)
   }
   painter.dispose();
   return result;
+}
+
+String getWidestWord(List<String> words, TextStyle style) {
+  return words.reduce((String a, String b) {
+    final double widthA = TextPainter.computeMaxIntrinsicWidth(
+      text: TextSpan(text: a, style: style),
+      textDirection: TextDirection.ltr,
+    );
+    final double widthB = TextPainter.computeMaxIntrinsicWidth(
+      text: TextSpan(text: b, style: style),
+      textDirection: TextDirection.ltr,
+    );
+    return widthA > widthB ? a : b;
+  });
 }
 
 void main() {
@@ -1726,6 +1744,36 @@ void main() {
       areCreateAndDispose,
     );
   });
+
+  testWidgets('TextPainter computeWidth should return the longest width for the longest word with Material font', (WidgetTester tester) async {
+    await _loadFont();
+
+    final List<String> words = <String>[
+      'IIIIII',
+      'WWWWW',
+    ];
+
+    const TextStyle textStyle = TextStyle(fontFamily: 'Material',fontSize: 20);
+    final String widestWord = getWidestWord(words, textStyle);
+
+    expect(widestWord, 'IIIIII');
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/39998
+
+  testWidgets('TextPainter computeWidth should return the longest width for the widest word with Roboto font', (WidgetTester tester) async {
+    await _loadFont();
+    // The longest month name is 'IIIIII' which is 6 characters long.
+    // But when the text is rendered, 'WWWWW' is the widest, because of font used. 'W' is wider than 'I'.
+    // This can be different for different fonts and different languages.
+    final List<String> words = <String>[
+      'IIIIII',
+      'WWWWW',
+    ];
+
+    const TextStyle textStyle = TextStyle(fontFamily: 'Roboto', fontSize: 20);
+    final String widestWord = getWidestWord(words, textStyle);
+
+    expect(widestWord, 'WWWWW');
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/39998
 }
 
 class MockCanvas extends Fake implements Canvas {
@@ -1739,4 +1787,20 @@ class MockCanvasWithDrawParagraph extends Fake implements Canvas {
     offsetX = offset.dx;
     centerX = offset.dx + paragraph.width / 2;
   }
+}
+
+// Load the font used in the test.
+Future<void> _loadFont() async {
+  const FileSystem fs = LocalFileSystem();
+  const Platform platform = LocalPlatform();
+  final Directory flutterRoot = fs.directory(platform.environment['FLUTTER_ROOT']);
+
+  Future<void> loadFont(String fontName, String fontPath) async {
+    final File fontFile = flutterRoot.childFile(fs.path.join('bin', 'cache', 'artifacts', 'material_fonts', fontPath));
+    final ByteData fontData = fontFile.readAsBytesSync().buffer.asByteData();
+    await (FontLoader(fontName)..addFont(Future<ByteData>.value(fontData))).load();
+  }
+
+  await loadFont('Roboto', 'Roboto-Regular.ttf');
+  await loadFont('Material', 'MaterialIcons-Regular.otf');
 }

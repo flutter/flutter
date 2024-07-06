@@ -479,16 +479,6 @@ class CupertinoDatePicker extends StatefulWidget {
     };
   }
 
-  // Get maximum three texts from the date picker texts.
-  // This is used to get the longest words from the date picker texts.
-  static List<String> _getLongestTexts(List<String> longestTexts) {
-    longestTexts.sort((String a, String b) => b.length.compareTo(a.length));
-    if (longestTexts.length <= 3) {
-      return longestTexts;
-    }
-    return longestTexts..removeRange(3, longestTexts.length);
-  }
-
   // Estimate the minimum width that each column needs to layout its content.
   static double _getColumnWidth(
     _PickerColumnType columnType,
@@ -554,7 +544,7 @@ class CupertinoDatePicker extends StatefulWidget {
     assert(longestTexts.isNotEmpty, 'longestTexts should not be empty');
 
     for (final String text in _getLongestTexts(longestTexts)) {
-      final double width = computeTextWidth(text: text, context: context);
+      final double width = _computeTextWidth(text: text, context: context);
       longestTextWidth = math.max(longestTextWidth, width);
     }
 
@@ -566,16 +556,24 @@ class CupertinoDatePicker extends StatefulWidget {
   /// This method is used to compute the width of the text in the picker.
   /// It is used to estimate the minimum width that each column needs to layout
   /// its content.
-  @visibleForTesting
-  static double computeTextWidth({required String text, TextStyle? textStyle, required BuildContext context}) {
-
+  static double _computeTextWidth({required String text, required BuildContext context}) {
     return TextPainter.computeMaxIntrinsicWidth(
       text: TextSpan(
         text: text,
-        style: textStyle ?? _themeTextStyle(context),
+        style: _themeTextStyle(context),
       ),
       textDirection: Directionality.of(context),
     );
+  }
+
+  // Get maximum three texts from the date picker texts.
+  // This is used to get the longest words from the date picker texts.
+  static List<String> _getLongestTexts(List<String> longestTexts) {
+    longestTexts.sort((String a, String b) => b.length.compareTo(a.length));
+    if (longestTexts.length <= 3) {
+      return longestTexts;
+    }
+    return longestTexts..removeRange(3, longestTexts.length);
   }
 }
 
