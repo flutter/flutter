@@ -88,15 +88,15 @@ class DataColumn {
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// heading row.
   ///
-  /// [MaterialStateProperty.resolve] is used for the following [MaterialState]s:
+  /// [WidgetStateProperty.resolve] is used for the following [WidgetState]s:
   ///
-  ///  * [MaterialState.disabled].
+  ///  * [WidgetState.disabled].
   ///
   /// If this is null, then the value of [DataTableThemeData.headingCellCursor]
-  /// is used. If that's null, then [MaterialStateMouseCursor.clickable] is used.
+  /// is used. If that's null, then [WidgetStateMouseCursor.clickable] is used.
   ///
   /// See also:
-  ///  * [MaterialStateMouseCursor], which can be used to create a [MouseCursor].
+  ///  * [WidgetStateMouseCursor], which can be used to create a [MouseCursor].
   final MaterialStateProperty<MouseCursor?>? mouseCursor;
 
   /// Defines the horizontal layout of the [label] and sort indicator in the
@@ -200,7 +200,7 @@ class DataRow {
   /// By default, the color is transparent unless selected. Selected rows has
   /// a grey translucent color.
   ///
-  /// The effective color can depend on the [MaterialState] state, if the
+  /// The effective color can depend on the [WidgetState] state, if the
   /// row is selected, pressed, hovered, focused, disabled or enabled. The
   /// color is painted as an overlay to the row. To make sure that the row's
   /// [InkWell] is visible (when pressed, hovered and focused), it is
@@ -210,8 +210,8 @@ class DataRow {
   ///
   /// ```dart
   /// DataRow(
-  ///   color: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
-  ///     if (states.contains(MaterialState.selected)) {
+  ///   color: MaterialStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+  ///     if (states.contains(WidgetState.selected)) {
   ///       return Theme.of(context).colorScheme.primary.withOpacity(0.08);
   ///     }
   ///     return null;  // Use the default value.
@@ -232,15 +232,15 @@ class DataRow {
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// data row.
   ///
-  /// [MaterialStateProperty.resolve] is used for the following [MaterialState]s:
+  /// [WidgetStateProperty.resolve] is used for the following [WidgetState]s:
   ///
-  ///  * [MaterialState.selected].
+  ///  * [WidgetState.selected].
   ///
   /// If this is null, then the value of [DataTableThemeData.dataRowCursor]
-  /// is used. If that's null, then [MaterialStateMouseCursor.clickable] is used.
+  /// is used. If that's null, then [WidgetStateMouseCursor.clickable] is used.
   ///
   /// See also:
-  ///  * [MaterialStateMouseCursor], which can be used to create a [MouseCursor].
+  ///  * [WidgetStateMouseCursor], which can be used to create a [MouseCursor].
   final MaterialStateProperty<MouseCursor?>? mouseCursor;
 
   bool get _debugInteractive => onSelectChanged != null || cells.any((DataCell cell) => cell._debugInteractive);
@@ -522,7 +522,7 @@ class DataTable extends StatelessWidget {
   /// The background color for the data rows.
   ///
   /// The effective background color can be made to depend on the
-  /// [MaterialState] state, i.e. if the row is selected, pressed, hovered,
+  /// [WidgetState] state, i.e. if the row is selected, pressed, hovered,
   /// focused, disabled or enabled. The color is painted as an overlay to the
   /// row. To make sure that the row's [InkWell] is visible (when pressed,
   /// hovered and focused), it is recommended to use a translucent background
@@ -540,8 +540,8 @@ class DataTable extends StatelessWidget {
   /// {@template flutter.material.DataTable.dataRowColor}
   /// ```dart
   /// DataTable(
-  ///   dataRowColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
-  ///     if (states.contains(MaterialState.selected)) {
+  ///   dataRowColor: MaterialStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+  ///     if (states.contains(WidgetState.selected)) {
   ///       return Theme.of(context).colorScheme.primary.withOpacity(0.08);
   ///     }
   ///     return null;  // Use the default value.
@@ -602,7 +602,7 @@ class DataTable extends StatelessWidget {
   /// The background color for the heading row.
   ///
   /// The effective background color can be made to depend on the
-  /// [MaterialState] state, i.e. if the row is pressed, hovered, focused when
+  /// [WidgetState] state, i.e. if the row is pressed, hovered, focused when
   /// sorted. The color is painted as an overlay to the row. To make sure that
   /// the row's [InkWell] is visible (when pressed, hovered and focused), it is
   /// recommended to use a translucent color.
@@ -615,8 +615,8 @@ class DataTable extends StatelessWidget {
   /// DataTable(
   ///   columns: _columns,
   ///   rows: _rows,
-  ///   headingRowColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
-  ///     if (states.contains(MaterialState.hovered)) {
+  ///   headingRowColor: MaterialStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+  ///     if (states.contains(WidgetState.hovered)) {
   ///       return Theme.of(context).colorScheme.primary.withOpacity(0.08);
   ///     }
   ///     return null;  // Use the default value.
