@@ -1483,6 +1483,7 @@ class _ActionSheetMainSheetState extends State<_ActionSheetMainSheet> {
   );
 }
 
+// Layout an alert dialog, given its content section and list of actions.
 class _CupertinoDialogRenderWidget extends StatefulWidget {
   const _CupertinoDialogRenderWidget({
     required this.contentSection,
@@ -1498,30 +1499,6 @@ class _CupertinoDialogRenderWidget extends StatefulWidget {
   _CupertinoDialogRenderWidgetState createState() => _CupertinoDialogRenderWidgetState();
 }
 
-// iOS style layout policy for sizing an alert dialog's content section and action
-// button section.
-//
-// The policy is as follows:
-//
-// If all content and buttons fit on screen:
-// The content section and action button section are sized intrinsically and centered
-// vertically on screen.
-//
-// If all content and buttons do not fit on screen, and iOS is NOT in accessibility mode:
-// A minimum height for the action button section is calculated. The action
-// button section will not be rendered shorter than this minimum. See
-// [_RenderCupertinoDialogActions] for the minimum height calculation.
-//
-// With the minimum action button section calculated, the content section can
-// take up as much space as is available, up to the point that it hits the
-// minimum button height at the bottom.
-//
-// After the content section is laid out, the action button section is allowed
-// to take up any remaining space that was not consumed by the content section.
-//
-// If all content and buttons do not fit on screen, and iOS IS in accessibility mode:
-// The button section is given up to 50% of the available height. Then the content
-// section is given whatever height remains.
 class _CupertinoDialogRenderWidgetState extends State<_CupertinoDialogRenderWidget> {
 
   double _topOverscroll = 0;
@@ -1599,7 +1576,9 @@ class _CupertinoDialogRenderWidgetState extends State<_CupertinoDialogRenderWidg
           if (!hasContent) {
             return _buildActionsSection();
           }
-          final double actionsMaxHeight = _isInAccessibilityMode(context)
+          // It is observed on the simulator that the minimal height varies
+          // depending on whether the device is in accessibility mode.
+          final double actionsMinHeight = _isInAccessibilityMode(context)
               ? constraints.maxHeight / 2 + _kDividerThickness
               : _kDialogActionsSectionMinHeight + _kDividerThickness;
           return _PriorityColumn(
@@ -1616,7 +1595,7 @@ class _CupertinoDialogRenderWidgetState extends State<_CupertinoDialogRenderWidg
                 ),
               ],
             ),
-            bottomMinHeight: actionsMaxHeight,
+            bottomMinHeight: actionsMinHeight,
           );
         },
       ),
@@ -1732,6 +1711,10 @@ class _CupertinoAlertActionSection extends StatelessWidget {
     required this.scrollController,
   });
 
+  // A list of action buttons.
+  //
+  // This list must not include the dividers between the buttons. If the list
+  // is empty, then this widget returns an empty box.
   final List<Widget> actions;
 
   final _PressedUpdateHandler onPressedUpdate;
@@ -2032,11 +2015,21 @@ class CupertinoDialogAction extends StatelessWidget {
 
 // iOS style dialog action button layout.
 //
-// [_CupertinoDialogActionsRenderWidget] does not provide any scrolling
+// [_AlertDialogActionsLayout] does not provide any scrolling
 // behavior for its buttons. It only handles the sizing and layout of buttons.
 // Scrolling behavior can be composed on top of this widget, if desired.
 //
-// See [_RenderCupertinoDialogActions] for specific layout policy details.
+// The layout operates in two modes:
+//
+// 1. Horizontal Mode: If there are exactly two buttons and they fit in a single
+//    row, the buttons are rendered side by side with a vertical divider between
+//    them.
+// 2. Vertical Mode: In all other cases, the buttons are arranged in a column,
+//    separated by horizontal dividers.
+//
+// The `children` parameter must be a non-empty list containing button widgets
+// and divider widgets in an alternating sequence. Therefore, the list must have
+// an odd length.
 class _AlertDialogActionsLayout extends MultiChildRenderObjectWidget {
   const _AlertDialogActionsLayout({
     required double dividerThickness,
@@ -2047,9 +2040,6 @@ class _AlertDialogActionsLayout extends MultiChildRenderObjectWidget {
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    assert(children.length.isOdd,
-      'The `children` must be a list with an odd number of elements, where '
-      'action buttons alternate with dividers');
     return _RenderAlertDialogActionsLayout(
       dividerThickness: _dividerThickness,
     );
@@ -2062,40 +2052,6 @@ class _AlertDialogActionsLayout extends MultiChildRenderObjectWidget {
   }
 }
 
-// iOS style layout policy for sizing and positioning an alert dialog's action
-// buttons.
-//
-// The policy is as follows:
-//
-// If a single action button is provided, or if 2 action buttons are provided
-// that can fit side-by-side, then action buttons are sized and laid out in a
-// single horizontal row. The row is exactly as wide as the dialog, and the row
-// is as tall as the tallest action button. A horizontal divider is drawn above
-// the button row. If 2 action buttons are provided, a vertical divider is
-// drawn between them. The thickness of the divider is set by [dividerThickness].
-//
-// If 2 action buttons are provided but they cannot fit side-by-side, then the
-// 2 buttons are stacked vertically. A horizontal divider is drawn above each
-// button. The thickness of the divider is set by [dividerThickness]. The minimum
-// height of this [RenderBox] in the case of 2 stacked buttons is as tall as
-// the 2 buttons stacked. This is different than the 3+ button case where the
-// minimum height is only 1.5 buttons tall. See the 3+ button explanation for
-// more info.
-//
-// If 3+ action buttons are provided then they are all stacked vertically. A
-// horizontal divider is drawn above each button. The thickness of the divider
-// is set by [dividerThickness]. The minimum height of this [RenderBox] in the case
-// of 3+ stacked buttons is as tall as the 1st button + 50% the height of the
-// 2nd button. In other words, the minimum height is 1.5 buttons tall. This
-// minimum height of 1.5 buttons is expected to work in tandem with a surrounding
-// [ScrollView] to match the iOS dialog behavior.
-//
-// Each button is expected to have an _ActionButtonParentData which reports
-// whether or not that button is currently pressed. If a button is pressed,
-// then the dividers above and below that pressed button are not drawn - instead
-// they are filled with the standard white dialog background color. The one
-// exception is the very 1st divider which is always rendered. This policy comes
-// from observation of native iOS dialogs.
 class _RenderAlertDialogActionsLayout extends RenderFlex {
   _RenderAlertDialogActionsLayout({
     List<RenderBox>? children,
