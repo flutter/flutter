@@ -3386,6 +3386,7 @@ class _MenuPanelState extends State<_MenuPanel> {
     final EdgeInsetsGeometry resolvedPadding = padding
         .add(EdgeInsets.symmetric(horizontal: dx, vertical: dy))
         .clamp(EdgeInsets.zero, EdgeInsetsGeometry.infinity);
+
     BoxConstraints effectiveConstraints = visualDensity.effectiveConstraints(
       BoxConstraints(
         minWidth: minimumSize?.width ?? 0,
