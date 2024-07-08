@@ -824,6 +824,30 @@ void main() {
     );
   });
 
+  testUsingContext('recreating project uses pubspec name as project name fallback', () async {
+    final Directory outputDirectory = tempDir.childDirectory('invalid-name');
+
+    // Create the new project with a valid project name,
+    // but with a directory name that would be an invalid project name.
+    await _createProject(
+      outputDirectory,
+      <String>['--no-pub', '--template=app', '--project-name', 'valid_name', '--platforms' , 'android'],
+      <String>[]
+    );
+
+    // Now amend a new platform to the project, but omit the project name, so the fallback project name is used.
+    await _createProject(
+      outputDirectory,
+      <String>['--no-pub', '--template=app', '--platforms', 'web'],
+      <String>[]
+    );
+
+    // Verify that the pubspec name was used as project name for the web project.
+    final File webOutputFile = outputDirectory.childDirectory('web').childFile('index.html');
+
+    expect(webOutputFile.readAsStringSync(), contains('<title>valid_name</title>'));
+  });
+
   testUsingContext('module project with pub', () async {
     return _createProject(projectDir, <String>[
       '--template=module',
@@ -3288,7 +3312,7 @@ void main() {
     await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
     expect(logger.errorText, contains(_kNoPlatformsMessage));
     expect(logger.statusText, contains('To add platforms, run `flutter create -t plugin --platforms <platforms> .` under ${globals.fs.path.normalize(globals.fs.path.relative(projectDir.path))}.'));
-    expect(logger.statusText, contains('For more information, see https://flutter.dev/go/plugin-platforms.'));
+    expect(logger.statusText, contains('For more information, see https://flutter.dev/to/pubspec-plugin-platforms.'));
 
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(),
@@ -3304,7 +3328,7 @@ void main() {
     await runner.run(<String>['create', '--no-pub', '--template=plugin_ffi', projectDir.path]);
     expect(logger.errorText, contains(_kNoPlatformsMessage));
     expect(logger.statusText, contains('To add platforms, run `flutter create -t plugin_ffi --platforms <platforms> .` under ${globals.fs.path.normalize(globals.fs.path.relative(projectDir.path))}.'));
-    expect(logger.statusText, contains('For more information, see https://flutter.dev/go/plugin-platforms.'));
+    expect(logger.statusText, contains('For more information, see https://flutter.dev/to/pubspec-plugin-platforms.'));
 
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(),
@@ -3444,6 +3468,27 @@ void main() {
     final String rawPubspec = await projectDir.childFile('pubspec.yaml').readAsString();
     final Pubspec pubspec = Pubspec.parse(rawPubspec);
     expect(pubspec.description, 'a: b');
+  });
+
+  testUsingContext('should use caret syntax in SDK version', () async {
+    await _createProject(
+      projectDir,
+      <String>[
+        '--no-pub',
+      ],
+      <String>[
+        'pubspec.yaml',
+      ],
+    );
+
+    final String rawPubspec = await projectDir.childFile('pubspec.yaml').readAsString();
+    final Pubspec pubspec = Pubspec.parse(rawPubspec);
+
+    expect(
+      pubspec.environment!['sdk'].toString(),
+      startsWith('^'),
+      reason: 'The caret syntax is recommended over the traditional syntax.',
+    );
   });
 
   testUsingContext('create an FFI plugin with ios, then add macos', () async {

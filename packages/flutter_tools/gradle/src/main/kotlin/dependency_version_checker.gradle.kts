@@ -65,7 +65,7 @@ class DependencyVersionChecker {
 
         private fun getPotentialAGPFix(projectDirectory: String): String {
             return "Your project's AGP version is typically " +
-                "defined the plugins block of the `settings.gradle` file " +
+                "defined in the plugins block of the `settings.gradle` file " +
                 "($projectDirectory/settings.gradle), by a plugin with the id of " +
                 "com.android.application. \nIf you don't see a plugins block, your project " +
                 "was likely created with an older template version. In this case it is most " +
@@ -76,7 +76,7 @@ class DependencyVersionChecker {
 
         private fun getPotentialKGPFix(projectDirectory: String): String {
             return "Your project's KGP version is typically " +
-                "defined the plugins block of the `settings.gradle` file " +
+                "defined in the plugins block of the `settings.gradle` file " +
                 "($projectDirectory/settings.gradle), by a plugin with the id of " +
                 "org.jetbrains.kotlin.android. \nIf you don't see a plugins block, your project " +
                 "was likely created with an older template version, in which case it is most " +
@@ -85,23 +85,20 @@ class DependencyVersionChecker {
         }
 
         // The following versions define our support policy for Gradle, Java, AGP, and KGP.
-        // All "error" versions are currently set to 0 as this policy is new. They will be increased
-        // to match the current values of the "warn" versions in the next release.
         // Before updating any "error" version, ensure that you have updated the corresponding
         // "warn" version for a full release to provide advanced warning. See
         // flutter.dev/go/android-dependency-versions for more.
-        // TODO(gmackall): https://github.com/flutter/flutter/issues/142653.
-        val warnGradleVersion: Version = Version(7, 0, 2)
-        val errorGradleVersion: Version = Version(0, 0, 0)
+        val warnGradleVersion: Version = Version(7, 1, 0)
+        val errorGradleVersion: Version = Version(7, 0, 2)
 
         val warnJavaVersion: JavaVersion = JavaVersion.VERSION_11
         val errorJavaVersion: JavaVersion = JavaVersion.VERSION_1_1
 
-        val warnAGPVersion: Version = Version(7, 0, 0)
-        val errorAGPVersion: Version = Version(0, 0, 0)
+        val warnAGPVersion: Version = Version(7, 0, 1)
+        val errorAGPVersion: Version = Version(7, 0, 0)
 
-        val warnKGPVersion: Version = Version(1, 5, 0)
-        val errorKGPVersion: Version = Version(0, 0, 0)
+        val warnKGPVersion: Version = Version(1, 7, 10)
+        val errorKGPVersion: Version = Version(1, 7, 0)
 
         /**
          * Checks if the project's Android build time dependencies are each within the respective
@@ -128,12 +125,8 @@ class DependencyVersionChecker {
             kgpVersion = getKGPVersion(project)
             if (kgpVersion != null) {
                 checkKGPVersion(kgpVersion, project)
-            } else {
-                project.logger.error(
-                    "Warning: unable to detect project KGP version. Skipping " +
-                        "version checking. \nThis may be because you have applied KGP after the Flutter Gradle Plugin."
-                )
             }
+            // KGP is not required, so don't log any warning if we can't find the version.
         }
 
         // https://docs.gradle.org/current/kotlin-dsl/gradle/org.gradle.api.invocation/-gradle/index.html#-837060600%2FFunctions%2F-1793262594
