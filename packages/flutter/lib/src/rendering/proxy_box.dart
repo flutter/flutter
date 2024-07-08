@@ -2711,8 +2711,22 @@ class RenderFittedBox extends RenderProxyBox {
     if (child != null) {
       final Size childSize = child!.getDryLayout(const BoxConstraints());
 
-      if (childSize.isEmpty) {
-        return constraints.smallest;
+      // During [RenderObject.debugCheckingIntrinsics] a child that doesn't
+      // support dry layout may provide us with an invalid size that triggers
+      // assertions if we try to work with it. Instead of throwing, we bail
+      // out early in that case.
+      bool invalidChildSize = false;
+      assert(() {
+        if (RenderObject.debugCheckingIntrinsics && childSize.width * childSize.height == 0.0) {
+          invalidChildSize = true;
+        }
+        return true;
+      }());
+      if (invalidChildSize) {
+        assert(debugCannotComputeDryLayout(
+          reason: 'Child provided invalid size of $childSize.',
+        ));
+        return Size.zero;
       }
 
       switch (fit) {
@@ -2737,23 +2751,18 @@ class RenderFittedBox extends RenderProxyBox {
   void performLayout() {
     if (child != null) {
       child!.layout(const BoxConstraints(), parentUsesSize: true);
-      if (child!.size.isEmpty) {
-        size = constraints.smallest;
-      } else {
-        switch (fit) {
-          case BoxFit.scaleDown:
-            final BoxConstraints sizeConstraints = constraints.loosen();
-            final Size unconstrainedSize =
-                sizeConstraints.constrainSizeAndAttemptToPreserveAspectRatio(child!.size);
-            size = constraints.constrain(unconstrainedSize);
-          case BoxFit.contain:
-          case BoxFit.cover:
-          case BoxFit.fill:
-          case BoxFit.fitHeight:
-          case BoxFit.fitWidth:
-          case BoxFit.none:
-            size = constraints.constrainSizeAndAttemptToPreserveAspectRatio(child!.size);
-        }
+      switch (fit) {
+        case BoxFit.scaleDown:
+          final BoxConstraints sizeConstraints = constraints.loosen();
+          final Size unconstrainedSize = sizeConstraints.constrainSizeAndAttemptToPreserveAspectRatio(child!.size);
+          size = constraints.constrain(unconstrainedSize);
+        case BoxFit.contain:
+        case BoxFit.cover:
+        case BoxFit.fill:
+        case BoxFit.fitHeight:
+        case BoxFit.fitWidth:
+        case BoxFit.none:
+          size = constraints.constrainSizeAndAttemptToPreserveAspectRatio(child!.size);
       }
       _clearPaintData();
     } else {
