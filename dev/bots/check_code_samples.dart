@@ -311,7 +311,6 @@ class SampleChecker {
 final Set<String> _knownMissingTests = <String>{
   'examples/api/test/material/bottom_app_bar/bottom_app_bar.2_test.dart',
   'examples/api/test/material/bottom_app_bar/bottom_app_bar.1_test.dart',
-  'examples/api/test/material/material_state/material_state_border_side.0_test.dart',
   'examples/api/test/material/material_state/material_state_outlined_border.0_test.dart',
   'examples/api/test/material/material_state/material_state_property.0_test.dart',
   'examples/api/test/material/selectable_region/selectable_region.0_test.dart',
@@ -378,9 +377,7 @@ final Set<String> _knownMissingTests = <String>{
   'examples/api/test/widgets/single_child_scroll_view/single_child_scroll_view.1_test.dart',
   'examples/api/test/widgets/single_child_scroll_view/single_child_scroll_view.0_test.dart',
   'examples/api/test/widgets/restoration/restoration_mixin.0_test.dart',
-  'examples/api/test/widgets/actions/action_listener.0_test.dart',
   'examples/api/test/widgets/actions/focusable_action_detector.0_test.dart',
-  'examples/api/test/widgets/color_filter/color_filtered.0_test.dart',
   'examples/api/test/widgets/focus_scope/focus_scope.0_test.dart',
   'examples/api/test/widgets/scroll_view/custom_scroll_view.1_test.dart',
   'examples/api/test/animation/curves/curve2_d.0_test.dart',
