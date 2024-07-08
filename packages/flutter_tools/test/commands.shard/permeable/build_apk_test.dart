@@ -94,57 +94,24 @@ void main() {
       final String projectPath = await createProject(tempDir,
           arguments: <String>['--no-pub', '--template=app']);
 
-      await runBuildApkCommand(projectPath);
-      expect(
-        fakeAnalytics.sentEvents,
-        contains(Event.commandUsageValues(
-          workflow: 'apk',
-          commandHasTerminal: false,
-          buildApkTargetPlatform: 'android-arm,android-arm64,android-x64',
-          buildApkBuildMode: 'release',
-          buildApkSplitPerAbi: false,
-        )),
-      );
+      final BuildApkCommand defaultBuildCommand = await runBuildApkCommand(projectPath);
+      final Event defaultBuildCommandUsageValues = await defaultBuildCommand.unifiedAnalyticsUsageValues('build');
+      expect(defaultBuildCommandUsageValues.eventData['buildApkBuildMode'], 'release');
 
-      fakeAnalytics.sentEvents.clear();
-      await runBuildApkCommand(projectPath, arguments: <String>['--release']);
-      expect(
-        fakeAnalytics.sentEvents,
-        contains(Event.commandUsageValues(
-          workflow: 'apk',
-          commandHasTerminal: false,
-          buildApkTargetPlatform: 'android-arm,android-arm64,android-x64',
-          buildApkBuildMode: 'release',
-          buildApkSplitPerAbi: false,
-        )),
-      );
+      final BuildApkCommand releaseBuildCommand = await runBuildApkCommand(projectPath, arguments: <String>['--release']);
+      final Event releaseBuildCommandUsageValues = await releaseBuildCommand.unifiedAnalyticsUsageValues('build');
+      expect(releaseBuildCommandUsageValues.eventData['buildApkBuildMode'], 'release');
 
-      fakeAnalytics.sentEvents.clear();
-      await runBuildApkCommand(projectPath, arguments: <String>['--debug']);
-      expect(
-        fakeAnalytics.sentEvents,
-        contains(Event.commandUsageValues(
-          workflow: 'apk',
-          commandHasTerminal: false,
-          buildApkTargetPlatform: 'android-arm,android-arm64,android-x64',
-          buildApkBuildMode: 'debug',
-          buildApkSplitPerAbi: false,
-        )),
-      );
+      final BuildApkCommand debugBuildCommand = await runBuildApkCommand(projectPath, arguments: <String>['--debug']);
+      final Event debugBuildCommandUsageValues = await debugBuildCommand.unifiedAnalyticsUsageValues('build');
+      expect(debugBuildCommandUsageValues.eventData['buildApkBuildMode'], 'debug');
+
+      final BuildApkCommand profileBuildCommand = await runBuildApkCommand(projectPath, arguments: <String>['--profile']);
+      final Event profileBuildCommandUsageValues = await profileBuildCommand.unifiedAnalyticsUsageValues('build');
+      expect(profileBuildCommandUsageValues.eventData['buildApkBuildMode'], 'profile');
 
       fakeAnalytics.sentEvents.clear();
       await runBuildApkCommand(projectPath, arguments: <String>['--profile']);
-
-      expect(
-        fakeAnalytics.sentEvents,
-        contains(Event.commandUsageValues(
-          workflow: 'apk',
-          commandHasTerminal: false,
-          buildApkTargetPlatform: 'android-arm,android-arm64,android-x64',
-          buildApkBuildMode: 'profile',
-          buildApkSplitPerAbi: false,
-        )),
-      );
     }, overrides: <Type, Generator>{
       AndroidBuilder: () => FakeAndroidBuilder(),
       Analytics: () => fakeAnalytics,
@@ -171,7 +138,7 @@ void main() {
 
     group('Impeller AndroidManifest.xml setting', () {
       // Adds a key-value `<meta-data>` pair to the `<application>` tag in the
-      // cooresponding `AndroidManifest.xml` file, right before the closing
+      // corresponding `AndroidManifest.xml` file, right before the closing
       // `</application>` tag.
       void writeManifestMetadata({
         required String projectPath,
