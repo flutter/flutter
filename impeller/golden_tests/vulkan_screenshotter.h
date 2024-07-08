@@ -26,6 +26,10 @@ class VulkanScreenshotter : public Screenshotter {
       const ISize& size = {300, 300},
       bool scale_content = true) override;
 
+  std::unique_ptr<Screenshot> MakeScreenshot(
+      AiksContext& aiks_context,
+      const std::shared_ptr<Texture> texture) override;
+
   PlaygroundImpl& GetPlayground() override { return *playground_; }
 
  private:
