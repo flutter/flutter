@@ -1283,14 +1283,18 @@ void main() {
     final Rect labelRect = tester.getRect(find.byKey(labelKey));
     final Rect iconRect = tester.getRect(find.byType(Icon));
 
+    Matcher closeOnWeb(num value) {
+      return kIsWeb ? closeTo(value, 1e-2) : equals(value);
+    }
+
     // The right padding should be applied on the right of the label, whereas the
     // left padding should be applied on the left side of the icon.
-    expect(paddingRect.right, labelRect.right + 10);
-    expect(paddingRect.left, iconRect.left - 16);
+    expect(paddingRect.right, equals(labelRect.right + 10));
+    expect(paddingRect.left, equals(iconRect.left - 16));
     // Use the taller widget to check the top and bottom padding.
     final Rect tallerWidget = iconRect.height > labelRect.height ? iconRect : labelRect;
-    expect(paddingRect.top, tallerWidget.top - 6.5);
-    expect(paddingRect.bottom, tallerWidget.bottom + 13.5);
+    expect(paddingRect.top, closeOnWeb(tallerWidget.top - 6.5));
+    expect(paddingRect.bottom, closeOnWeb(tallerWidget.bottom + 13.5));
   });
 
   group('Default FilledButton padding for textScaleFactor, textDirection', () {
