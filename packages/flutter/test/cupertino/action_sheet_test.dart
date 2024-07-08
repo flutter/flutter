@@ -1822,6 +1822,7 @@ void main() {
         expect(methodCall.arguments, 'HapticFeedbackType.selectionClick');
         vibrationCount += 1;
       }
+      return null;
     });
 
     await tester.pumpWidget(
