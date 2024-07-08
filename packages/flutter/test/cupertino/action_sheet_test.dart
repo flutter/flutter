@@ -20,7 +20,7 @@ import '../widgets/semantics_tester.dart';
 typedef TextScaleInfo = (String name, double scale);
 
 void main() {
-  testWidgets('Overall looks correctly under light theme', (WidgetTester tester) async {
+  testWidgets('Overall appearance is correct for the light theme', (WidgetTester tester) async {
     await tester.pumpWidget(
       TestScaffoldApp(
         theme: const CupertinoThemeData(brightness: Brightness.light),
@@ -51,7 +51,7 @@ void main() {
     await gesture.up();
   });
 
-  testWidgets('Overall looks correctly under dark theme', (WidgetTester tester) async {
+  testWidgets('Overall appearance is correct for the dark theme', (WidgetTester tester) async {
     await tester.pumpWidget(
       TestScaffoldApp(
         theme: const CupertinoThemeData(brightness: Brightness.dark),
@@ -640,6 +640,36 @@ void main() {
       find.byType(CupertinoActionSheet),
       matchesGoldenFile('cupertinoActionSheet.long-overscroll.0.png'),
     );
+  });
+
+  testWidgets('Takes maximum vertical space with one action and long content', (WidgetTester tester) async {
+    // Ensure that if the actions section is shorter than
+    // _kActionSheetActionsSectionMinHeight, the content section can be assigned
+    // with the remaining vertical space to fill up the maximal height.
+
+    late double screenHeight;
+    await tester.pumpWidget(
+      createAppWithButtonThatLaunchesActionSheet(
+        Builder(builder: (BuildContext context) {
+          screenHeight = MediaQuery.sizeOf(context).height;
+          return CupertinoActionSheet(
+            message: Text('content ' * 1000),
+            actions: <Widget>[
+              CupertinoActionSheetAction(
+                onPressed: () {},
+                child: const Text('Button 0'),
+              ),
+            ],
+          );
+        }),
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+    await tester.pump();
+
+    // Expect the action sheet to take all available height.
+    expect(tester.getSize(find.byType(CupertinoActionSheet)).height, screenHeight);
   });
 
   testWidgets('Taps on button calls onPressed', (WidgetTester tester) async {
@@ -1875,9 +1905,10 @@ class TestScaffoldAppState extends State<TestScaffoldApp> {
   @override
   Widget build(BuildContext context) {
     return CupertinoApp(
-      // This CupertinoApp is captured in golden test as a whole. The debug
-      // banner contains tilted text, whose anti-alias might cause false
-      // negative result. https://github.com/flutter/flutter/pull/150442
+      // Hide the debug banner. Because this CupertinoApp is captured in golden
+      // test as a whole. The debug banner contains tilted text, whose
+      // anti-alias might cause false negative result.
+      // https://github.com/flutter/flutter/pull/150442
       debugShowCheckedModeBanner: false,
       theme: widget.theme,
       home: Builder(builder: (BuildContext context) =>
