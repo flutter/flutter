@@ -5,6 +5,7 @@
 #ifndef FLUTTER_SHELL_PLATFORM_FUCHSIA_FLUTTER_SURFACE_PRODUCER_H_
 #define FLUTTER_SHELL_PLATFORM_FUCHSIA_FLUTTER_SURFACE_PRODUCER_H_
 
+#include <fuchsia/sysmem2/cpp/fidl.h>
 #include <fuchsia/ui/composition/cpp/fidl.h>
 #include <lib/zx/event.h>
 

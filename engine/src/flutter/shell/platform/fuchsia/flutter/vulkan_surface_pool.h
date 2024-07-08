@@ -42,7 +42,7 @@ class VulkanSurfacePool final {
  private:
   vulkan::VulkanProvider& vulkan_provider_;
   sk_sp<GrDirectContext> context_;
-  fuchsia::sysmem::AllocatorSyncPtr sysmem_allocator_;
+  fuchsia::sysmem2::AllocatorSyncPtr sysmem_allocator_;
   fuchsia::ui::composition::AllocatorPtr flatland_allocator_;
   std::vector<std::unique_ptr<VulkanSurface>> available_surfaces_;
   std::unordered_map<uintptr_t, std::unique_ptr<VulkanSurface>>

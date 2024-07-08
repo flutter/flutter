@@ -44,7 +44,7 @@ constexpr VkImageUsageFlags kVkImageUsage =
 const VkSysmemColorSpaceFUCHSIA kSrgbColorSpace = {
     .sType = VK_STRUCTURE_TYPE_SYSMEM_COLOR_SPACE_FUCHSIA,
     .pNext = nullptr,
-    .colorSpace = static_cast<uint32_t>(fuchsia::sysmem::ColorSpaceType::SRGB),
+    .colorSpace = static_cast<uint32_t>(fuchsia::images2::ColorSpace::SRGB),
 };
 
 }  // namespace
@@ -147,7 +147,7 @@ bool VulkanSurface::CreateVulkanImage(vulkan::VulkanProvider& vulkan_provider,
 
 VulkanSurface::VulkanSurface(
     vulkan::VulkanProvider& vulkan_provider,
-    fuchsia::sysmem::AllocatorSyncPtr& sysmem_allocator,
+    fuchsia::sysmem2::AllocatorSyncPtr& sysmem_allocator,
     fuchsia::ui::composition::AllocatorPtr& flatland_allocator,
     sk_sp<GrDirectContext> context,
     const SkISize& size)
@@ -263,7 +263,7 @@ bool VulkanSurface::CreateFences() {
 }
 
 bool VulkanSurface::AllocateDeviceMemory(
-    fuchsia::sysmem::AllocatorSyncPtr& sysmem_allocator,
+    fuchsia::sysmem2::AllocatorSyncPtr& sysmem_allocator,
     fuchsia::ui::composition::AllocatorPtr& flatland_allocator,
     sk_sp<GrDirectContext> context,
     const SkISize& size) {
@@ -273,17 +273,21 @@ bool VulkanSurface::AllocateDeviceMemory(
     return false;
   }
 
-  fuchsia::sysmem::BufferCollectionTokenSyncPtr vulkan_token;
-  zx_status_t status =
-      sysmem_allocator->AllocateSharedCollection(vulkan_token.NewRequest());
+  fuchsia::sysmem2::BufferCollectionTokenSyncPtr vulkan_token;
+  zx_status_t status = sysmem_allocator->AllocateSharedCollection(
+      std::move(fuchsia::sysmem2::AllocatorAllocateSharedCollectionRequest{}
+                    .set_token_request(vulkan_token.NewRequest())));
   LOG_AND_RETURN(status != ZX_OK,
                  "VulkanSurface: Failed to allocate collection");
-  fuchsia::sysmem::BufferCollectionTokenSyncPtr scenic_token;
-  status = vulkan_token->Duplicate(std::numeric_limits<uint32_t>::max(),
-                                   scenic_token.NewRequest());
+  fuchsia::sysmem2::BufferCollectionTokenSyncPtr scenic_token;
+  status = vulkan_token->Duplicate(
+      std::move(fuchsia::sysmem2::BufferCollectionTokenDuplicateRequest{}
+                    .set_rights_attenuation_mask(ZX_RIGHT_SAME_RIGHTS)
+                    .set_token_request(scenic_token.NewRequest())));
   LOG_AND_RETURN(status != ZX_OK,
                  "VulkanSurface: Failed to duplicate collection token");
-  status = vulkan_token->Sync();
+  fuchsia::sysmem2::Node_Sync_Result sync_result;
+  status = vulkan_token->Sync(&sync_result);
   LOG_AND_RETURN(status != ZX_OK,
                  "VulkanSurface: Failed to sync collection token");
 
@@ -292,7 +296,8 @@ bool VulkanSurface::AllocateDeviceMemory(
 
   fuchsia::ui::composition::RegisterBufferCollectionArgs args;
   args.set_export_token(std::move(export_token));
-  args.set_buffer_collection_token(std::move(scenic_token));
+  args.set_buffer_collection_token(fuchsia::sysmem::BufferCollectionTokenHandle(
+      scenic_token.Unbind().TakeChannel()));
   args.set_usage(
       fuchsia::ui::composition::RegisterBufferCollectionUsage::DEFAULT);
   flatland_allocator->RegisterBufferCollection(

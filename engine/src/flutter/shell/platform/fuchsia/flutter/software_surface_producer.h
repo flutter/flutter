@@ -5,7 +5,7 @@
 #ifndef FLUTTER_SHELL_PLATFORM_FUCHSIA_FLUTTER_SOFTWARE_SURFACE_PRODUCER_H_
 #define FLUTTER_SHELL_PLATFORM_FUCHSIA_FLUTTER_SOFTWARE_SURFACE_PRODUCER_H_
 
-#include <fuchsia/sysmem/cpp/fidl.h>
+#include <fuchsia/sysmem2/cpp/fidl.h>
 #include <fuchsia/ui/composition/cpp/fidl.h>
 
 #include <unordered_map>
@@ -54,7 +54,7 @@ class SoftwareSurfaceProducer final : public SurfaceProducer {
 
   void TraceStats();
 
-  fuchsia::sysmem::AllocatorSyncPtr sysmem_allocator_;
+  fuchsia::sysmem2::AllocatorSyncPtr sysmem_allocator_;
   fuchsia::ui::composition::AllocatorPtr flatland_allocator_;
 
   // These surfaces are available for re-use.

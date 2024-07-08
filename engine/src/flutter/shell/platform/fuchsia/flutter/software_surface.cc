@@ -28,13 +28,13 @@ namespace {
 
 constexpr SkColorType kSkiaColorType = kRGBA_8888_SkColorType;
 
-uint32_t BytesPerRow(const fuchsia::sysmem::SingleBufferSettings& settings,
+uint32_t BytesPerRow(const fuchsia::sysmem2::SingleBufferSettings& settings,
                      uint32_t bytes_per_pixel,
                      uint32_t image_width) {
   const uint32_t bytes_per_row_divisor =
-      settings.image_format_constraints.bytes_per_row_divisor;
+      settings.image_format_constraints().bytes_per_row_divisor();
   const uint32_t min_bytes_per_row =
-      settings.image_format_constraints.min_bytes_per_row;
+      settings.image_format_constraints().min_bytes_per_row();
   const uint32_t unrounded_bytes_per_row =
       std::max(image_width * bytes_per_pixel, min_bytes_per_row);
   const uint32_t roundup_bytes =
@@ -46,7 +46,7 @@ uint32_t BytesPerRow(const fuchsia::sysmem::SingleBufferSettings& settings,
 }  // namespace
 
 SoftwareSurface::SoftwareSurface(
-    fuchsia::sysmem::AllocatorSyncPtr& sysmem_allocator,
+    fuchsia::sysmem2::AllocatorSyncPtr& sysmem_allocator,
     fuchsia::ui::composition::AllocatorPtr& flatland_allocator,
     const SkISize& size)
     : wait_for_surface_read_finished_(this) {
@@ -102,7 +102,7 @@ bool SoftwareSurface::CreateFences() {
 }
 
 bool SoftwareSurface::SetupSkiaSurface(
-    fuchsia::sysmem::AllocatorSyncPtr& sysmem_allocator,
+    fuchsia::sysmem2::AllocatorSyncPtr& sysmem_allocator,
     fuchsia::ui::composition::AllocatorPtr& flatland_allocator,
     const SkISize& size) {
   if (size.isEmpty()) {
@@ -112,9 +112,10 @@ bool SoftwareSurface::SetupSkiaSurface(
 
   // Allocate a "local" sysmem token to represent flutter's handle to the
   // sysmem buffer.
-  fuchsia::sysmem::BufferCollectionTokenSyncPtr local_token;
-  zx_status_t allocate_status =
-      sysmem_allocator->AllocateSharedCollection(local_token.NewRequest());
+  fuchsia::sysmem2::BufferCollectionTokenSyncPtr local_token;
+  zx_status_t allocate_status = sysmem_allocator->AllocateSharedCollection(
+      std::move(fuchsia::sysmem2::AllocatorAllocateSharedCollectionRequest{}
+                    .set_token_request(local_token.NewRequest())));
   if (allocate_status != ZX_OK) {
     FML_LOG(ERROR) << "Failed to allocate collection: "
                    << zx_status_get_string(allocate_status);
@@ -123,14 +124,19 @@ bool SoftwareSurface::SetupSkiaSurface(
 
   // Create a single Duplicate of the token and Sync it; the single duplicate
   // token represents scenic's handle to the sysmem buffer.
-  std::vector<fuchsia::sysmem::BufferCollectionTokenHandle> duplicate_tokens;
+  fuchsia::sysmem2::BufferCollectionToken_DuplicateSync_Result duplicate_result;
   zx_status_t duplicate_status = local_token->DuplicateSync(
-      std::vector<zx_rights_t>{ZX_RIGHT_SAME_RIGHTS}, &duplicate_tokens);
+      std::move(fuchsia::sysmem2::BufferCollectionTokenDuplicateSyncRequest{}
+                    .set_rights_attenuation_masks(
+                        std::vector<zx_rights_t>{ZX_RIGHT_SAME_RIGHTS})),
+      &duplicate_result);
   if (duplicate_status != ZX_OK) {
     FML_LOG(ERROR) << "Failed to duplicate collection token: "
                    << zx_status_get_string(duplicate_status);
     return false;
   }
+  auto duplicate_tokens =
+      std::move(*duplicate_result.response().mutable_tokens());
   if (duplicate_tokens.size() != 1u) {
     FML_LOG(ERROR) << "Failed to duplicate collection token: Incorrect number "
                       "of tokens returned.";
@@ -153,7 +159,8 @@ bool SoftwareSurface::SetupSkiaSurface(
 
   fuchsia::ui::composition::RegisterBufferCollectionArgs args;
   args.set_export_token(std::move(export_token));
-  args.set_buffer_collection_token(std::move(scenic_token));
+  args.set_buffer_collection_token(
+      fuchsia::sysmem::BufferCollectionTokenHandle(scenic_token.TakeChannel()));
   args.set_usage(
       fuchsia::ui::composition::RegisterBufferCollectionUsage::DEFAULT);
   flatland_allocator->RegisterBufferCollection(
@@ -167,9 +174,11 @@ bool SoftwareSurface::SetupSkiaSurface(
       });
 
   // Acquire flutter's local handle to the sysmem buffer.
-  fuchsia::sysmem::BufferCollectionSyncPtr buffer_collection;
-  zx_status_t bind_status = sysmem_allocator->BindSharedCollection(
-      std::move(local_token), buffer_collection.NewRequest());
+  fuchsia::sysmem2::BufferCollectionSyncPtr buffer_collection;
+  zx_status_t bind_status = sysmem_allocator->BindSharedCollection(std::move(
+      fuchsia::sysmem2::AllocatorBindSharedCollectionRequest{}
+          .set_token(std::move(local_token))
+          .set_buffer_collection_request(buffer_collection.NewRequest())));
   if (bind_status != ZX_OK) {
     FML_LOG(ERROR) << "Failed to bind collection token: "
                    << zx_status_get_string(bind_status);
@@ -178,32 +187,26 @@ bool SoftwareSurface::SetupSkiaSurface(
 
   // Set flutter's constraints on the sysmem buffer.  Software rendering only
   // requires CPU access to the surface and a basic R8G8B8A8 pixel format.
-  fuchsia::sysmem::BufferCollectionConstraints constraints;
-  constraints.min_buffer_count = 1;
-  constraints.usage.cpu =
-      fuchsia::sysmem::cpuUsageWrite | fuchsia::sysmem::cpuUsageWriteOften;
-  constraints.has_buffer_memory_constraints = true;
-  constraints.buffer_memory_constraints.physically_contiguous_required = false;
-  constraints.buffer_memory_constraints.secure_required = false;
-  constraints.buffer_memory_constraints.ram_domain_supported = true;
-  constraints.buffer_memory_constraints.cpu_domain_supported = true;
-  constraints.buffer_memory_constraints.inaccessible_domain_supported = false;
-  constraints.image_format_constraints_count = 1;
-  fuchsia::sysmem::ImageFormatConstraints& image_constraints =
-      constraints.image_format_constraints[0];
-  image_constraints = fuchsia::sysmem::ImageFormatConstraints();
-  image_constraints.min_coded_width = static_cast<uint32_t>(size.fWidth);
-  image_constraints.min_coded_height = static_cast<uint32_t>(size.fHeight);
-  image_constraints.min_bytes_per_row = static_cast<uint32_t>(size.fWidth) * 4;
-  image_constraints.pixel_format.type =
-      fuchsia::sysmem::PixelFormatType::R8G8B8A8;
-  image_constraints.color_spaces_count = 1;
-  image_constraints.color_space[0].type = fuchsia::sysmem::ColorSpaceType::SRGB;
-  image_constraints.pixel_format.has_format_modifier = true;
-  image_constraints.pixel_format.format_modifier.value =
-      fuchsia::sysmem::FORMAT_MODIFIER_LINEAR;
-  zx_status_t set_constraints_status =
-      buffer_collection->SetConstraints(true, constraints);
+  fuchsia::sysmem2::BufferCollectionConstraints constraints;
+  constraints.set_min_buffer_count(1);
+  constraints.mutable_usage()->set_cpu(fuchsia::sysmem2::CPU_USAGE_WRITE |
+                                       fuchsia::sysmem2::CPU_USAGE_WRITE_OFTEN);
+  auto& bmc = *constraints.mutable_buffer_memory_constraints();
+  bmc.set_physically_contiguous_required(false);
+  bmc.set_secure_required(false);
+  bmc.set_ram_domain_supported(true);
+  bmc.set_cpu_domain_supported(true);
+  bmc.set_inaccessible_domain_supported(false);
+  auto& ifc = constraints.mutable_image_format_constraints()->emplace_back();
+  ifc.set_min_size(fuchsia::math::SizeU{static_cast<uint32_t>(size.fWidth),
+                                        static_cast<uint32_t>(size.fHeight)});
+  ifc.set_min_bytes_per_row(static_cast<uint32_t>(size.fWidth) * 4);
+  ifc.set_pixel_format(fuchsia::images2::PixelFormat::R8G8B8A8);
+  ifc.mutable_color_spaces()->emplace_back(fuchsia::images2::ColorSpace::SRGB);
+  ifc.set_pixel_format_modifier(fuchsia::images2::PixelFormatModifier::LINEAR);
+  zx_status_t set_constraints_status = buffer_collection->SetConstraints(
+      std::move(fuchsia::sysmem2::BufferCollectionSetConstraintsRequest{}
+                    .set_constraints(std::move(constraints))));
   if (set_constraints_status != ZX_OK) {
     FML_LOG(ERROR) << "Failed to set constraints: "
                    << zx_status_get_string(set_constraints_status);
@@ -211,30 +214,39 @@ bool SoftwareSurface::SetupSkiaSurface(
   }
 
   // Wait for sysmem to allocate, now that constraints are set.
-  fuchsia::sysmem::BufferCollectionInfo_2 buffer_collection_info;
-  zx_status_t allocation_status = ZX_OK;
+  fuchsia::sysmem2::BufferCollection_WaitForAllBuffersAllocated_Result
+      wait_result;
   zx_status_t wait_for_allocated_status =
-      buffer_collection->WaitForBuffersAllocated(&allocation_status,
-                                                 &buffer_collection_info);
-  if (allocation_status != ZX_OK) {
-    FML_LOG(ERROR) << "Failed to allocate: "
-                   << zx_status_get_string(allocation_status);
-    return false;
-  }
+      buffer_collection->WaitForAllBuffersAllocated(&wait_result);
   if (wait_for_allocated_status != ZX_OK) {
     FML_LOG(ERROR) << "Failed to wait for allocate: "
                    << zx_status_get_string(wait_for_allocated_status);
     return false;
   }
+  if (!wait_result.is_response()) {
+    if (wait_result.is_framework_err()) {
+      FML_LOG(ERROR) << "Failed to allocate (framework_err): "
+                     << fidl::ToUnderlying(wait_result.framework_err());
+    } else {
+      FML_DCHECK(wait_result.is_err());
+      FML_LOG(ERROR) << "Failed to allocate (err): "
+                     << static_cast<uint32_t>(wait_result.err());
+    }
+    return false;
+  }
+  auto buffer_collection_info =
+      std::move(*wait_result.response().mutable_buffer_collection_info());
 
   // Cache the allocated surface VMO and metadata.
-  FML_CHECK(buffer_collection_info.settings.buffer_settings.size_bytes != 0);
-  FML_CHECK(buffer_collection_info.buffers[0].vmo != ZX_HANDLE_INVALID);
-  surface_vmo_ = std::move(buffer_collection_info.buffers[0].vmo);
+  FML_CHECK(buffer_collection_info.settings().buffer_settings().size_bytes() !=
+            0);
+  FML_CHECK(buffer_collection_info.buffers()[0].vmo().is_valid());
+  surface_vmo_ =
+      std::move(*buffer_collection_info.mutable_buffers()->at(0).mutable_vmo());
   surface_size_bytes_ =
-      buffer_collection_info.settings.buffer_settings.size_bytes;
-  if (buffer_collection_info.settings.buffer_settings.coherency_domain ==
-      fuchsia::sysmem::CoherencyDomain::RAM) {
+      buffer_collection_info.settings().buffer_settings().size_bytes();
+  if (buffer_collection_info.settings().buffer_settings().coherency_domain() ==
+      fuchsia::sysmem2::CoherencyDomain::RAM) {
     // RAM coherency domain requires a cache clean when writes are finished.
     needs_cache_clean_ = true;
   }
@@ -252,7 +264,7 @@ bool SoftwareSurface::SetupSkiaSurface(
 
   // Now that the buffer is CPU-readable, it's safe to discard flutter's
   // connection to sysmem.
-  zx_status_t close_status = buffer_collection->Close();
+  zx_status_t close_status = buffer_collection->Release();
   if (close_status != ZX_OK) {
     FML_LOG(ERROR) << "Failed to close buffer: "
                    << zx_status_get_string(close_status);
@@ -261,9 +273,9 @@ bool SoftwareSurface::SetupSkiaSurface(
 
   // Wrap the buffer in a software-rendered Skia surface.
   const uint64_t vmo_offset =
-      buffer_collection_info.buffers[0].vmo_usable_start;
+      buffer_collection_info.buffers()[0].vmo_usable_start();
   const size_t vmo_stride =
-      BytesPerRow(buffer_collection_info.settings, 4u, size.width());
+      BytesPerRow(buffer_collection_info.settings(), 4u, size.width());
   SkSurfaceProps sk_surface_props(0, kUnknown_SkPixelGeometry);
   sk_surface_ = SkSurfaces::WrapPixels(
       SkImageInfo::Make(size, kSkiaColorType, kPremul_SkAlphaType,
