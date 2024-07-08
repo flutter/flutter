@@ -943,6 +943,140 @@ void main() {
     expect(tester.getRect(getItem(9)), const Rect.fromLTRB(240.0, 0.0, 560.0, 600.0));
   });
 
+  testWidgets('The initialItem stays when the flexWeights is updated', (WidgetTester tester) async {
+    final CarouselController controller = CarouselController(initialItem: 3);
+    Widget buildCarousel(List<int> flexWeights) {
+      return MaterialApp(
+        home: Scaffold(
+          body: CarouselView.weighted(
+            controller: controller,
+            flexWeights: flexWeights,
+            itemSnapping: true,
+            children: List<Widget>.generate(20, (int index) {
+              return Center(
+                child: Text('Item $index'),
+              );
+            }),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildCarousel(<int>[1, 1, 6, 1, 1]));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Item 0'), findsNothing);
+    for (int i = 1; i <= 5; i++) {
+      expect(find.text('Item $i'), findsOneWidget);
+    }
+    Rect rect3 = tester.getRect(getItem(3));
+    expect(rect3.center.dx, 400.0);
+    expect(rect3.center.dy, 300.0);
+
+    expect(find.text('Item 6'), findsNothing);
+
+    await tester.pumpWidget(buildCarousel(<int>[7, 1]));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Item 2'), findsNothing);
+    expect(find.text('Item 3'), findsOneWidget);
+    expect(find.text('Item 4'), findsOneWidget);
+    expect(find.text('Item 5'), findsNothing);
+
+    rect3 = tester.getRect(getItem(3));
+    expect(rect3, const Rect.fromLTRB(0.0, 0.0, 700.0, 600.0));
+    final Rect rect4 = tester.getRect(getItem(4));
+    expect(rect4, const Rect.fromLTRB(700.0, 0.0, 800.0, 600.0));
+  });
+
+  testWidgets('The item that currently occupies max weight stays when the flexWeights is updated', (WidgetTester tester) async {
+    final CarouselController controller = CarouselController(initialItem: 3);
+    Widget buildCarousel(List<int> flexWeights) {
+      return MaterialApp(
+        home: Scaffold(
+          body: CarouselView.weighted(
+            controller: controller,
+            flexWeights: flexWeights,
+            itemSnapping: true,
+            children: List<Widget>.generate(20, (int index) {
+              return Center(
+                child: Text('Item $index'),
+              );
+            }),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildCarousel(<int>[1, 1, 6, 1, 1]));
+    await tester.pumpAndSettle();
+    // Item 3 is centered.
+    final Rect rect3 = tester.getRect(getItem(3));
+    expect(rect3.center.dx, 400.0);
+    expect(rect3.center.dy, 300.0);
+
+    // Simulate scroll to right and show item 4 to be the centered max item.
+    await tester.drag(find.byType(CarouselView), const Offset(-80.0, 0.0));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Item 1'), findsNothing);
+    for (int i = 2; i <= 6; i++) {
+      expect(find.text('Item $i'), findsOneWidget);
+    }
+    Rect rect4 = tester.getRect(getItem(4));
+    expect(rect4.center.dx, 400.0);
+    expect(rect4.center.dy, 300.0);
+
+    await tester.pumpWidget(buildCarousel(<int>[7, 1]));
+    await tester.pumpAndSettle();
+
+    rect4 = tester.getRect(getItem(4));
+    expect(rect4, const Rect.fromLTRB(0.0, 0.0, 700.0, 600.0));
+    final Rect rect5 = tester.getRect(getItem(5));
+    expect(rect5, const Rect.fromLTRB(700.0, 0.0, 800.0, 600.0));
+  });
+
+  testWidgets('The initialItem stays when the itemExtent is updated', (WidgetTester tester) async {
+    final CarouselController controller = CarouselController(initialItem: 3);
+    Widget buildCarousel(double itemExtent) {
+      return MaterialApp(
+        home: Scaffold(
+          body: CarouselView(
+            controller: controller,
+            itemExtent: itemExtent,
+            itemSnapping: true,
+            children: List<Widget>.generate(20, (int index) {
+              return Center(
+                child: Text('Item $index'),
+              );
+            }),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildCarousel(234.0));
+    await tester.pumpAndSettle();
+
+    Offset rect3BottomRight = tester.getRect(getItem(3)).bottomRight;
+    expect(rect3BottomRight.dx, 234.0);
+    expect(rect3BottomRight.dy, 600.0);
+
+    await tester.pumpWidget(buildCarousel(400.0));
+    await tester.pumpAndSettle();
+
+    rect3BottomRight = tester.getRect(getItem(3)).bottomRight;
+    expect(rect3BottomRight.dx, 400.0);
+    expect(rect3BottomRight.dy, 600.0);
+
+    await tester.pumpWidget(buildCarousel(100.0));
+    await tester.pumpAndSettle();
+
+    rect3BottomRight = tester.getRect(getItem(3)).bottomRight;
+    expect(rect3BottomRight.dx, 100.0);
+    expect(rect3BottomRight.dy, 600.0);
+  });
+
   testWidgets('While scrolling, one extra item will show at the end of the screen during items transition', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
