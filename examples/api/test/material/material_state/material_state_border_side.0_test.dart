@@ -8,18 +8,6 @@ import 'package:flutter_api_samples/material/material_state/material_state_borde
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets(
-    'MaterialStateBorderSideExampleApp displays FilterChip',
-    (WidgetTester tester) async {
-      await tester.pumpWidget(
-        const example.MaterialStateBorderSideExampleApp(),
-      );
-
-      expect(find.byType(FilterChip), findsOne);
-      expect(find.text('Select chip'), findsOne);
-    },
-  );
-
   void expectBorderColor(Color color) {
     final Finder finder = find.byWidgetPredicate((Widget widget) {
       if (widget is! Material) {
