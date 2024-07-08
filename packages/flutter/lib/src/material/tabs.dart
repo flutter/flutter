@@ -576,12 +576,12 @@ class _IndicatorPainter extends CustomPainter {
   }
 
   // Ease out sine (decelerating).
-  double decelerateIntepolation(double fraction) {
+  double decelerateInterpolation(double fraction) {
     return math.sin((fraction * math.pi) / 2.0);
   }
 
   // Ease in sine (accelerating).
-  double accelerateIntepolation(double fraction) {
+  double accelerateInterpolation(double fraction) {
     return 1.0 - math.cos((fraction * math.pi) / 2.0);
   }
 
@@ -608,11 +608,11 @@ class _IndicatorPainter extends CustomPainter {
     final double rightFraction;
 
     if (isMovingRight) {
-      leftFraction = accelerateIntepolation(tabChangeProgress);
-      rightFraction = accelerateIntepolation(tabChangeProgress);
+      leftFraction = accelerateInterpolation(tabChangeProgress);
+      rightFraction = accelerateInterpolation(tabChangeProgress);
     } else {
-      leftFraction = decelerateIntepolation(tabChangeProgress);
-      rightFraction = decelerateIntepolation(tabChangeProgress);
+      leftFraction = decelerateInterpolation(tabChangeProgress);
+      rightFraction = decelerateInterpolation(tabChangeProgress);
     }
 
     final Rect stretchedRect = _inflateRectHorizontally(rect, targetRect, leftFraction, rightFraction);
