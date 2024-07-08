@@ -904,8 +904,8 @@ class RenderCustomPaint extends RenderProxyBox {
     if (properties.link != null) {
       config.isLink = properties.link!;
     }
-    if (properties.linkUri != null) {
-      config.linkUri = properties.linkUri!;
+    if (properties.linkUrl != null) {
+      config.linkUrl = properties.linkUrl;
     }
     if (properties.textField != null) {
       config.isTextField = properties.textField!;
