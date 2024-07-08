@@ -38,6 +38,8 @@ impeller_shaders("shader_fixtures") {
     "sepia.frag",
     "sepia.vert",
     "simple.vert",
+    "spec_constant.frag",
+    "spec_constant.vert",
     "stage1.comp",
     "stage2.comp",
     "swizzle.frag",

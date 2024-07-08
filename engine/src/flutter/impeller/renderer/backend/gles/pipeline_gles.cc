@@ -8,23 +8,19 @@ namespace impeller {
 
 PipelineGLES::PipelineGLES(ReactorGLES::Ref reactor,
                            std::weak_ptr<PipelineLibrary> library,
-                           const PipelineDescriptor& desc)
+                           const PipelineDescriptor& desc,
+                           std::shared_ptr<UniqueHandleGLES> handle)
     : Pipeline(std::move(library), desc),
       reactor_(std::move(reactor)),
-      handle_(reactor_ ? reactor_->CreateHandle(HandleType::kProgram)
-                       : HandleGLES::DeadHandle()),
-      is_valid_(!handle_.IsDead()) {
+      handle_(std::move(handle)),
+      is_valid_(handle_->IsValid()) {
   if (is_valid_) {
-    reactor_->SetDebugLabel(handle_, GetDescriptor().GetLabel());
+    reactor_->SetDebugLabel(handle_->Get(), GetDescriptor().GetLabel());
   }
 }
 
 // |Pipeline|
-PipelineGLES::~PipelineGLES() {
-  if (!handle_.IsDead()) {
-    reactor_->CollectHandle(handle_);
-  }
-}
+PipelineGLES::~PipelineGLES() = default;
 
 // |Pipeline|
 bool PipelineGLES::IsValid() const {
@@ -32,6 +28,10 @@ bool PipelineGLES::IsValid() const {
 }
 
 const HandleGLES& PipelineGLES::GetProgramHandle() const {
+  return handle_->Get();
+}
+
+const std::shared_ptr<UniqueHandleGLES> PipelineGLES::GetSharedHandle() const {
   return handle_;
 }
 
@@ -58,10 +58,10 @@ bool PipelineGLES::BuildVertexDescriptor(const ProcTableGLES& gl,
 }
 
 [[nodiscard]] bool PipelineGLES::BindProgram() const {
-  if (handle_.IsDead()) {
+  if (!handle_->IsValid()) {
     return false;
   }
-  auto handle = reactor_->GetGLHandle(handle_);
+  auto handle = reactor_->GetGLHandle(handle_->Get());
   if (!handle.has_value()) {
     return false;
   }
