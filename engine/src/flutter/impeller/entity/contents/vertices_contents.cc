@@ -89,6 +89,10 @@ void VerticesSimpleBlendContents::SetLazyTexture(
   lazy_texture_ = lazy_texture;
 }
 
+void VerticesSimpleBlendContents::SetLazyTextureCoverage(Rect rect) {
+  lazy_texture_coverage_ = rect;
+}
+
 bool VerticesSimpleBlendContents::Render(const ContentContext& renderer,
                                          const Entity& entity,
                                          RenderPass& pass) const {
@@ -123,8 +127,8 @@ bool VerticesSimpleBlendContents::Render(const ContentContext& renderer,
           dst_sampler_descriptor);
 
   GeometryResult geometry_result = geometry_->GetPositionUVColorBuffer(
-      (!!texture) ? Rect::MakeSize(texture->GetSize())
-                  : Rect::MakeSize(ISize{1, 1}),
+      lazy_texture_coverage_.has_value() ? lazy_texture_coverage_.value()
+                                         : Rect::MakeSize(texture->GetSize()),
       inverse_matrix_, renderer, entity, pass);
   if (geometry_result.vertex_buffer.vertex_count == 0) {
     return true;
