@@ -589,6 +589,9 @@ abstract class _ActionSheetSlideTarget {
   //  * The point has contacted the screen in this region. In this case, this
   //    method is called as soon as the pointer down event occurs regardless of
   //    whether the gesture wins the arena immediately.
+  //
+  // The `fromPointerDown` should be true if this callback is triggered by a
+  // PointerDownEvent, i.e. the second case from the list above.
   void didEnter({required bool fromPointerDown});
 
   // A pointer has exited this region.
@@ -654,6 +657,9 @@ class _TargetSelectionGestureRecognizer extends GestureRecognizer {
   // Collect the `_ActionSheetSlideTarget`s that are currently hit by the
   // pointer, check whether the current target have changed, and invoke their
   // methods if necessary.
+  //
+  // The `fromPointerDown` should be true if this update is triggered by a
+  // PointerDownEvent.
   void _updateDrag(Offset pointerPosition, {required bool fromPointerDown}) {
     final HitTestResult result = hitTest(pointerPosition);
 
@@ -1202,8 +1208,8 @@ class _ActionSheetButtonBackgroundState extends State<_ActionSheetButtonBackgrou
   void _emitVibration(){
     switch(defaultTargetPlatform) {
       case TargetPlatform.iOS:
-        HapticFeedback.selectionClick();
       case TargetPlatform.android:
+        HapticFeedback.selectionClick();
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
       case TargetPlatform.macOS:
