@@ -714,6 +714,32 @@
     {
       "cas_archive": false,
       "drone_dimensions": [
+        "os=Windows-10",
+        "device_type=none"
+      ],
+      "gclient_variables": {
+        "download_android_deps": false,
+        "use_rbe": true
+      },
+      "gn": [
+        "--runtime-mode",
+        "debug",
+        "--unoptimized",
+        "--no-stripped",
+        "--no-lto",
+        "--rbe",
+        "--no-goma"
+      ],
+      "name": "windows/host_debug_unopt",
+      "description": "Builds an unoptimized debug mode engine for a Windows host.",
+      "ninja": {
+        "config": "host_debug_unopt",
+        "targets": []
+      }
+    },
+    {
+      "cas_archive": false,
+      "drone_dimensions": [
         "os=Mac-13|Mac-14",
         "device_type=none"
       ],
