@@ -1137,32 +1137,46 @@ class _CupertinoActionSheetActionState extends State<CupertinoActionSheetAction>
     widget.onPressed();
   }
 
-  // Calculates the font size for action sheet buttons, which deviate from
-  // standard HIG specifications.
-  //
-  // There is a non-linear relationship between the font size for regular body
-  // text and the font size for the action sheet buttons:
-  //
-  //  Text scale  | xs |  s |  m |  l | xl | xxl | xxxl | ax1 | ax2 | ax3 | ax4 | ax5
-  //  Body font   | 14 | 15 | 16 | 17 | 19 |  21 |  23  |  28 |  33 |  40 |  47 |  53
-  //  Button font | 21 | 21 | 21 | 21 | 23 |  24 |  24  |  28 |  33 |  40 |  47 |  53
+  // Calculates the font size for action sheet buttons.
   //
   // The `contextBodySize` is the body font size specified by context. The
   // return value is the button font size, including the effect of context font
   // scale factor. Divide by context font scale factor before using in a `Text`.
   static double _buttonFontSize(double contextBodySize) {
-    // For very small or very large text, simpler scaling mappings are used.
-    if (contextBodySize <= 17) {
-      return 21;
-    }
-    if (contextBodySize >= 24.5) {
-      return contextBodySize;
-    }
-    // For mid-sized text, an interpolated curve is used. The breakpoint for
-    // switching between these behaviors is 24.5 instead of 28 to allow closer
-    // interpolation over a smaller range.
-    final double resultSize = -18.8 + 3.68 * contextBodySize * (1 - 0.02128 * contextBodySize);
-    return resultSize.roundToDouble();
+    // It is observed that the native action sheet buttons use font sizes that
+    // deviate from standard HIG specifications in a non-linear way. The following
+    // table shows the regular body font size vs the button font size:
+    //
+    //  Text scale  | xs |  s |  m |  l | xl | xxl | xxxl | ax1 | ax2 | ax3 | ax4 | ax5
+    //  Body font   | 14 | 15 | 16 | 17 | 19 |  21 |  23  |  28 |  33 |  40 |  47 |  53
+    //  Button font | 21 | 21 | 21 | 21 | 23 |  24 |  24  |  28 |  33 |  40 |  47 |  53
+
+    // For very small or very large text, simple rules are applied.
+    //
+    // The upper bound is chosen to be closer to 24, instead of 28, because a
+    // shorter range between the bounds allows a closer fit within them (as seen
+    // later).
+    const double lowerBound = 17.0;
+    const double upperBound = 24.5;
+
+    const double minSize = 21.0;
+
+    return switch (contextBodySize) {
+      < lowerBound => minSize,
+
+      > upperBound => contextBodySize,
+
+      // For mid-sized text, the following formula is used.
+      // This formula is derived through quadratic fitting of the following
+      // table, which is part of the overall table above.
+      //
+      //  x | 17 | 19 |  21 |  23  |  24.5
+      //  y | 21 | 23 |  24 |  24  |  24.5
+      _ => (-18.75
+            + 3.675 * contextBodySize
+            - 0.07827 * contextBodySize * contextBodySize
+           ).roundToDouble(),
+    };
   }
 
   @override
