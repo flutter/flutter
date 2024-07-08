@@ -362,8 +362,9 @@ class DataCell {
 /// since it must be measured twice: once to negotiate each column's
 /// dimensions, and again when the table is laid out.
 ///
-/// For a table that effectively handles large amounts of data,
-/// here are some other options to consider:
+/// A [SingleChildScrollView] mounts and paints the entire child, even
+/// when only some of it is visible. For a table that effectively handles
+/// large amounts of data, here are some other options to consider:
 ///
 ///  * `TableView`, a widget from the
 ///    [two_dimensional_scrollables](https://pub.dev/packages/two_dimensional_scrollables)
