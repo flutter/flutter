@@ -20,7 +20,6 @@ import '../cache.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
 import '../macos/cocoapod_utils.dart';
-import '../project.dart';
 import '../runner/flutter_command.dart' show DevelopmentArtifact, FlutterCommandResult;
 import '../version.dart';
 import 'build.dart';
@@ -107,9 +106,6 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
 
   @override
   bool get reportNullSafety => false;
-
-  @protected
-  late final FlutterProject project = FlutterProject.current();
 
   Future<List<BuildInfo>> getBuildInfos() async {
     return <BuildInfo>[
