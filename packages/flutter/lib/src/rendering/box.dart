@@ -321,7 +321,7 @@ class BoxConstraints extends Constraints {
       }());
       return result;
     }
-    
+
     if (size.isEmpty) {
       return constrain(size);
     }
