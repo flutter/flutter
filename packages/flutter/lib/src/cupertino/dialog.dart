@@ -77,7 +77,7 @@ const TextStyle _kActionSheetContentStyle = TextStyle(
 );
 
 // Generic constants shared between Dialog and ActionSheet.
-const double _kBlurAmount = 20.0;
+const double _kBlurAmount = 30.0;
 const double _kCornerRadius = 14.0;
 const double _kDividerThickness = 0.3;
 
@@ -459,6 +459,20 @@ class CupertinoPopupSurface extends StatelessWidget {
   /// The widget below this widget in the tree.
   final Widget? child;
 
+  static const List<double> darkMatrix = <double>[
+     1.39, -0.56, -0.11, 0.00, 0.30,
+    -0.32,  1.14, -0.11, 0.00, 0.30,
+    -0.32, -0.56,  1.59, 0.00, 0.30,
+     0.00,  0.00,  0.00, 1.00, 0.00
+  ];
+
+  static const List<double> lightMatrix = <double>[
+     1.74, -0.40, -0.17, 0.00, 0.00,
+    -0.26,  1.60, -0.17, 0.00, 0.00,
+    -0.26, -0.40,  1.83, 0.00, 0.00,
+     0.00,  0.00,  0.00, 1.00, 0.00
+  ];
+
   @override
   Widget build(BuildContext context) {
     Widget? contents = child;
@@ -468,10 +482,23 @@ class CupertinoPopupSurface extends StatelessWidget {
         child: contents,
       );
     }
+
+    ImageFilter filter = ImageFilter.blur(sigmaX: _kBlurAmount, sigmaY: _kBlurAmount);
+    // ColorFilter is not supported on the web.
+    if (!kIsWeb) {
+      filter = ImageFilter.compose(
+        outer: filter,
+        inner: ColorFilter.matrix(
+          CupertinoTheme.maybeBrightnessOf(context) == Brightness.dark
+              ? darkMatrix
+              : lightMatrix,
+        ),
+      );
+    }
     return ClipRRect(
       borderRadius: const BorderRadius.all(Radius.circular(_kCornerRadius)),
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: _kBlurAmount, sigmaY: _kBlurAmount),
+        filter: filter,
         child: contents,
       ),
     );
