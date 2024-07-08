@@ -685,7 +685,7 @@ void main() {
         currentValueLength: 10,
         maxValueLength: 15,
         headingLevel: 0,
-        linkUrl: 'l',
+        linkUrl: Uri(path: 'l'),
       );
       final _FakeSemanticsNode node = _FakeSemanticsNode(data);
 
@@ -974,7 +974,7 @@ void main() {
         currentValueLength: 10,
         maxValueLength: 15,
         headingLevel: 0,
-        linkUrl: 'l',
+        linkUrl: Uri(path: 'l'),
       );
       final _FakeSemanticsNode node = _FakeSemanticsNode(data);
 
@@ -1069,7 +1069,7 @@ void main() {
         currentValueLength: 10,
         maxValueLength: 15,
         headingLevel: 0,
-        linkUrl: 'l',
+        linkUrl: Uri(path: 'l'),
       );
       final _FakeSemanticsNode node = _FakeSemanticsNode(data);
 
@@ -1171,7 +1171,7 @@ void main() {
         currentValueLength: 10,
         maxValueLength: 15,
         headingLevel: 0,
-        linkUrl: 'l',
+        linkUrl: Uri(path: 'l'),
       );
       final _FakeSemanticsNode emptyNode = _FakeSemanticsNode(emptyData);
 
@@ -1201,7 +1201,7 @@ void main() {
         maxValueLength: 15,
         customSemanticsActionIds: <int>[CustomSemanticsAction.getIdentifier(action)],
         headingLevel: 0,
-        linkUrl: 'l',
+        linkUrl: Uri(path: 'l'),
       );
       final _FakeSemanticsNode fullNode = _FakeSemanticsNode(fullData);
 
@@ -1293,7 +1293,7 @@ void main() {
         maxValueLength: 15,
         customSemanticsActionIds: <int>[CustomSemanticsAction.getIdentifier(action)],
         headingLevel: 0,
-        linkUrl: 'l',
+        linkUrl: Uri(path: 'l'),
       );
       final _FakeSemanticsNode node = _FakeSemanticsNode(data);
 
