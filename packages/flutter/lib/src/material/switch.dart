@@ -289,7 +289,7 @@ class Switch extends StatelessWidget {
   /// Switch(
   ///   value: true,
   ///   onChanged: (bool value) { },
-  ///   thumbColor: MaterialStateProperty.resolveWith<Color>((Set<WidgetState> states) {
+  ///   thumbColor: WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {
   ///     if (states.contains(WidgetState.disabled)) {
   ///       return Colors.orange.withOpacity(.48);
   ///     }
@@ -330,7 +330,7 @@ class Switch extends StatelessWidget {
   /// Switch(
   ///   value: true,
   ///   onChanged: (bool value) { },
-  ///   thumbColor: MaterialStateProperty.resolveWith<Color>((Set<WidgetState> states) {
+  ///   thumbColor: WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {
   ///     if (states.contains(WidgetState.disabled)) {
   ///       return Colors.orange.withOpacity(.48);
   ///     }
@@ -371,7 +371,7 @@ class Switch extends StatelessWidget {
   /// Switch(
   ///   value: true,
   ///   onChanged: (bool value) { },
-  ///   trackOutlineColor: MaterialStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+  ///   trackOutlineColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
   ///     if (states.contains(WidgetState.disabled)) {
   ///       return Colors.orange.withOpacity(.48);
   ///     }
@@ -405,7 +405,7 @@ class Switch extends StatelessWidget {
   /// Switch(
   ///   value: true,
   ///   onChanged: (bool value) { },
-  ///   trackOutlineWidth: MaterialStateProperty.resolveWith<double?>((Set<WidgetState> states) {
+  ///   trackOutlineWidth: WidgetStateProperty.resolveWith<double?>((Set<WidgetState> states) {
   ///     if (states.contains(WidgetState.disabled)) {
   ///       return 5.0;
   ///     }
@@ -437,7 +437,7 @@ class Switch extends StatelessWidget {
   /// Switch(
   ///   value: true,
   ///   onChanged: (bool value) { },
-  ///   thumbIcon: MaterialStateProperty.resolveWith<Icon?>((Set<WidgetState> states) {
+  ///   thumbIcon: WidgetStateProperty.resolveWith<Icon?>((Set<WidgetState> states) {
   ///     if (states.contains(WidgetState.disabled)) {
   ///       return const Icon(Icons.close);
   ///     }

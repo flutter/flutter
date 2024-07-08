@@ -246,7 +246,7 @@ class Radio<T> extends StatefulWidget {
   ///   value: 1,
   ///   groupValue: 1,
   ///   onChanged: (_){},
-  ///   fillColor: MaterialStateProperty.resolveWith<Color>((Set<WidgetState> states) {
+  ///   fillColor: WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {
   ///     if (states.contains(WidgetState.disabled)) {
   ///       return Colors.orange.withOpacity(.32);
   ///     }

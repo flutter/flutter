@@ -210,7 +210,7 @@ class DataRow {
   ///
   /// ```dart
   /// DataRow(
-  ///   color: MaterialStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+  ///   color: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
   ///     if (states.contains(WidgetState.selected)) {
   ///       return Theme.of(context).colorScheme.primary.withOpacity(0.08);
   ///     }
@@ -540,7 +540,7 @@ class DataTable extends StatelessWidget {
   /// {@template flutter.material.DataTable.dataRowColor}
   /// ```dart
   /// DataTable(
-  ///   dataRowColor: MaterialStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+  ///   dataRowColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
   ///     if (states.contains(WidgetState.selected)) {
   ///       return Theme.of(context).colorScheme.primary.withOpacity(0.08);
   ///     }
@@ -615,7 +615,7 @@ class DataTable extends StatelessWidget {
   /// DataTable(
   ///   columns: _columns,
   ///   rows: _rows,
-  ///   headingRowColor: MaterialStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+  ///   headingRowColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
   ///     if (states.contains(WidgetState.hovered)) {
   ///       return Theme.of(context).colorScheme.primary.withOpacity(0.08);
   ///     }
