@@ -128,7 +128,7 @@ Future<(Uri? nativeAssetsYaml, List<Uri> dependencies)> buildNativeAssetsMacOS({
       workingDirectory: projectUri,
       includeParentEnvironment: true,
       cCompilerConfig: await buildRunner.cCompilerConfig,
-      // TODO: Fetch minimum MacOS version from somewhere. https://github.com/flutter/flutter/issues/145104
+      // TODO(dcharkes): Fetch minimum MacOS version from somewhere. https://github.com/flutter/flutter/issues/145104
       targetMacOSVersion: 13,
     );
     ensureNativeAssetsBuildSucceed(buildResult);
