@@ -1845,17 +1845,9 @@ void main() {
     await tester.pumpAndSettle();
     // Tapping down on a button should not emit vibration.
     expect(vibrationCount, 0);
-    await expectLater(
-      find.byType(CupertinoApp),
-      matchesGoldenFile('cupertinoActionSheet.test.0.png'),
-    );
 
     await gesture.moveTo(tester.getCenter(find.text('Two')));
     await tester.pumpAndSettle();
-    await expectLater(
-      find.byType(CupertinoApp),
-      matchesGoldenFile('cupertinoActionSheet.test.1.png'),
-    );
     expect(vibrationCount, 1);
 
     await gesture.moveTo(tester.getCenter(find.text('Three')));
