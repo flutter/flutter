@@ -106,8 +106,8 @@ Future<List<Plugin>> findPlugins(FlutterProject project, { bool throwOnError = t
   return plugins;
 }
 
-/// Plugin type to determine the injection mechanism.
-enum _PluginType {
+/// Plugin resolution type to determine the injection mechanism.
+enum _PluginResolutionType {
   dart,
   nativeOrDart,
 }
@@ -189,7 +189,7 @@ bool _writeFlutterPluginsList(
 
   final Map<String, List<Plugin>> resolvedPlatformPlugins = _resolvePluginImplementations(
     plugins,
-    pluginType: _PluginType.nativeOrDart,
+    pluginResolutionType: _PluginResolutionType.nativeOrDart,
   );
 
   final Map<String, Object> pluginsMap = <String, Object>{};
@@ -1059,7 +1059,7 @@ Future<void> injectBuildTimePluginFiles(
   bool webPlatform = false,
 }) async {
   final List<Plugin> plugins = await findPlugins(project);
-  final Map<String, List<Plugin>> pluginsByPlatform = _resolvePluginImplementations(plugins, pluginType: _PluginType.nativeOrDart);
+  final Map<String, List<Plugin>> pluginsByPlatform = _resolvePluginImplementations(plugins, pluginResolutionType: _PluginResolutionType.nativeOrDart);
   if (webPlatform) {
     await _writeWebPluginRegistrant(project, pluginsByPlatform[WebPlugin.kConfigKey]!, destination);
   }
@@ -1088,7 +1088,7 @@ Future<void> injectPlugins(
   DarwinDependencyManagement? darwinDependencyManagement,
 }) async {
   final List<Plugin> plugins = await findPlugins(project);
-  final Map<String, List<Plugin>> pluginsByPlatform = _resolvePluginImplementations(plugins, pluginType: _PluginType.nativeOrDart);
+  final Map<String, List<Plugin>> pluginsByPlatform = _resolvePluginImplementations(plugins, pluginResolutionType: _PluginResolutionType.nativeOrDart);
 
   if (androidPlatform) {
     await _writeAndroidPluginRegistrant(project, pluginsByPlatform[AndroidPlugin.kConfigKey]!);
@@ -1158,7 +1158,7 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
 }) {
   final Map<String, List<Plugin>> resolution = _resolvePluginImplementations(
     plugins,
-    pluginType: selectDartPluginsOnly ? _PluginType.dart : _PluginType.nativeOrDart,
+    pluginResolutionType: selectDartPluginsOnly ? _PluginResolutionType.dart : _PluginResolutionType.nativeOrDart,
   );
   return resolution.entries.expand((MapEntry<String, List<Plugin>> entry) {
     return entry.value.map((Plugin plugin) {
@@ -1173,7 +1173,7 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
 /// Only plugins which provide the according platform implementation are returned.
 Map<String, List<Plugin>> _resolvePluginImplementations(
   List<Plugin> plugins, {
-  required _PluginType pluginType,
+  required _PluginResolutionType pluginResolutionType,
 }) {
   final Map<String, List<Plugin>> pluginsByPlatform = <String, List<Plugin>>{
     AndroidPlugin.kConfigKey: <Plugin>[],
@@ -1195,7 +1195,7 @@ Map<String, List<Plugin>> _resolvePluginImplementations(
     ) = _resolvePluginImplementationsByPlatform(
       plugins,
       platformKey,
-      pluginType: pluginType,
+      pluginResolutionType: pluginResolutionType,
     );
 
     if (hasPlatformPluginPubspecError) {
@@ -1220,7 +1220,7 @@ Map<String, List<Plugin>> _resolvePluginImplementations(
 (List<Plugin> pluginImplementations, bool hasPluginPubspecError, bool hasResolutionError) _resolvePluginImplementationsByPlatform(
   Iterable<Plugin> plugins,
   String platformKey, {
-  _PluginType pluginType = _PluginType.nativeOrDart,
+  _PluginResolutionType pluginResolutionType = _PluginResolutionType.nativeOrDart,
 }) {
   bool hasPluginPubspecError = false;
   bool hasResolutionError = false;
@@ -1232,21 +1232,21 @@ Map<String, List<Plugin>> _resolvePluginImplementations(
   final Map<String, Plugin> defaultImplementations = <String, Plugin>{};
 
   for (final Plugin plugin in plugins) {
-    final String? error = _validatePlugin(plugin, platformKey, pluginType: pluginType);
+    final String? error = _validatePlugin(plugin, platformKey, pluginResolutionType: pluginResolutionType);
     if (error != null) {
       globals.printError(error);
       hasPluginPubspecError = true;
       continue;
     }
-    final String? implementsPluginName = _getImplementedPlugin(plugin, platformKey, pluginType: pluginType);
-    final String? defaultImplPluginName = _getDefaultImplPlugin(plugin, platformKey, pluginType: pluginType);
+    final String? implementsPluginName = _getImplementedPlugin(plugin, platformKey, pluginResolutionType: pluginResolutionType);
+    final String? defaultImplPluginName = _getDefaultImplPlugin(plugin, platformKey, pluginResolutionType: pluginResolutionType);
 
     if (defaultImplPluginName != null) {
       final Plugin? defaultPackage = plugins.where((Plugin plugin) => plugin.name == defaultImplPluginName).firstOrNull;
       if (defaultPackage != null) {
-        if (_hasPluginInlineImpl(defaultPackage, platformKey, pluginType: _PluginType.nativeOrDart)) {
-          if (pluginType == _PluginType.nativeOrDart ||
-              _hasPluginInlineImpl(defaultPackage, platformKey, pluginType: pluginType)) {
+        if (_hasPluginInlineImpl(defaultPackage, platformKey, pluginResolutionType: _PluginResolutionType.nativeOrDart)) {
+          if (pluginResolutionType == _PluginResolutionType.nativeOrDart ||
+              _hasPluginInlineImpl(defaultPackage, platformKey, pluginResolutionType: pluginResolutionType)) {
             // Each plugin can only have one default implementation for this [platformKey].
             defaultImplementations[plugin.name] = defaultPackage;
             // No need to add the default plugin to `pluginImplCandidates`,
@@ -1258,7 +1258,7 @@ Map<String, List<Plugin>> _resolvePluginImplementations(
           globals.printWarning(
             'Package ${plugin.name}:$platformKey references $defaultImplPluginName:$platformKey as the default plugin, but it does not provide an inline implementation.\n'
             'Ask the maintainers of ${plugin.name} to either avoid referencing a default implementation via `platforms: $platformKey: default_package: $defaultImplPluginName` '
-            'or add an inline implementation to $defaultImplPluginName via `platforms: $platformKey: [dart]PluginClass`.\n',
+            'or add an inline implementation to $defaultImplPluginName via `platforms: $platformKey:` `pluginClass` or `dartPluginClass`.\n',
           );
         }
       } else {
@@ -1283,7 +1283,7 @@ Map<String, List<Plugin>> _resolvePluginImplementations(
   for (final MapEntry<String, List<Plugin>> implCandidatesEntry in pluginImplCandidates.entries) {
     final (Plugin? resolution, String? error) = _resolveImplementationOfPlugin(
       platformKey: platformKey,
-      pluginType: pluginType,
+      pluginResolutionType: pluginResolutionType,
       pluginName: implCandidatesEntry.key,
       candidates: implCandidatesEntry.value,
       defaultPackage: defaultImplementations[implCandidatesEntry.key],
@@ -1307,7 +1307,7 @@ Map<String, List<Plugin>> _resolvePluginImplementations(
 ///
 /// Returns an error, if failing.
 String? _validatePlugin(Plugin plugin, String platformKey, {
-  required _PluginType pluginType,
+  required _PluginResolutionType pluginResolutionType,
 }) {
   final String? implementsPackage = plugin.implementsPackage;
   final String? defaultImplPluginName = plugin.defaultPackagePlatforms[platformKey];
@@ -1326,10 +1326,10 @@ String? _validatePlugin(Plugin plugin, String platformKey, {
           'or avoid referencing a default implementation via `platforms: $platformKey: default_package: $defaultImplPluginName`.\n';
     }
 
-    if (_hasPluginInlineImpl(plugin, platformKey, pluginType: pluginType)) {
+    if (_hasPluginInlineImpl(plugin, platformKey, pluginResolutionType: pluginResolutionType)) {
       return 'Plugin ${plugin.name}:$platformKey which provides an inline implementation '
           'cannot also reference a default implementation for $defaultImplPluginName. '
-          'Ask the maintainers of ${plugin.name} to either remove the implementation via `platforms: $platformKey: ${pluginType == _PluginType.dart ? 'dartPluginClass' : '[dart]pluginClass'}` '
+          'Ask the maintainers of ${plugin.name} to either remove the implementation via `platforms: $platformKey:${pluginResolutionType == _PluginResolutionType.dart ? ' dartPluginClass' : '` `pluginClass` or `dartPLuginClass'}` '
           'or avoid referencing a default implementation via `platforms: $platformKey: default_package: $defaultImplPluginName`.\n';
     }
   }
@@ -1350,9 +1350,9 @@ String? _validatePlugin(Plugin plugin, String platformKey, {
 String? _getImplementedPlugin(
   Plugin plugin,
   String platformKey, {
-  _PluginType pluginType = _PluginType.nativeOrDart,
+  _PluginResolutionType pluginResolutionType = _PluginResolutionType.nativeOrDart,
 }) {
-  if (_hasPluginInlineImpl(plugin, platformKey, pluginType: pluginType)) {
+  if (_hasPluginInlineImpl(plugin, platformKey, pluginResolutionType: pluginResolutionType)) {
     // Only can serve, if the plugin has an inline implementation.
 
     final String? implementsPackage = plugin.implementsPackage;
@@ -1361,7 +1361,7 @@ String? _getImplementedPlugin(
       return implementsPackage;
     }
 
-    if (pluginType == _PluginType.nativeOrDart || _isEligibleDartSelfImpl(plugin, platformKey)) {
+    if (pluginResolutionType == _PluginResolutionType.nativeOrDart || _isEligibleDartSelfImpl(plugin, platformKey)) {
       // The inline plugin implements itself.
       return plugin.name;
     }
@@ -1384,7 +1384,7 @@ String? _getImplementedPlugin(
 String? _getDefaultImplPlugin(
   Plugin plugin,
   String platformKey, {
-  _PluginType pluginType = _PluginType.nativeOrDart,
+  _PluginResolutionType pluginResolutionType = _PluginResolutionType.nativeOrDart,
 }) {
   final String? defaultImplPluginName =
       plugin.defaultPackagePlatforms[platformKey];
@@ -1392,8 +1392,8 @@ String? _getDefaultImplPlugin(
     return defaultImplPluginName;
   }
 
-  if (_hasPluginInlineImpl(plugin, platformKey, pluginType: pluginType) &&
-      (pluginType == _PluginType.nativeOrDart || _isEligibleDartSelfImpl(plugin, platformKey))) {
+  if (_hasPluginInlineImpl(plugin, platformKey, pluginResolutionType: pluginResolutionType) &&
+      (pluginResolutionType == _PluginResolutionType.nativeOrDart || _isEligibleDartSelfImpl(plugin, platformKey))) {
     // The inline plugin serves as its own default implementation.
     return plugin.name;
   }
@@ -1427,10 +1427,10 @@ bool _isEligibleDartSelfImpl(Plugin plugin, String platformKey) {
 bool _hasPluginInlineImpl(
   Plugin plugin,
   String platformKey, {
-  required _PluginType pluginType,
+  required _PluginResolutionType pluginResolutionType,
 }) {
-  return pluginType == _PluginType.nativeOrDart && plugin.platforms[platformKey] != null ||
-      pluginType == _PluginType.dart && _hasPluginInlineDartImpl(plugin, platformKey);
+  return pluginResolutionType == _PluginResolutionType.nativeOrDart && plugin.platforms[platformKey] != null ||
+      pluginResolutionType == _PluginResolutionType.dart && _hasPluginInlineDartImpl(plugin, platformKey);
 }
 
 /// Determine if the plugin provides an inline Dart implementation.
@@ -1445,7 +1445,7 @@ bool _hasPluginInlineDartImpl(Plugin plugin, String platformKey) {
 /// Returns an [error] string, if failing.
 (Plugin? resolution, String? error) _resolveImplementationOfPlugin({
   required String platformKey,
-  required _PluginType pluginType,
+  required _PluginResolutionType pluginResolutionType,
   required String pluginName,
   required List<Plugin> candidates,
   Plugin? defaultPackage,
@@ -1482,7 +1482,7 @@ bool _hasPluginInlineDartImpl(Plugin plugin, String platformKey) {
   // Next, defer to the default implementation if there is one.
   if (defaultPackage != null && candidates.contains(defaultPackage)) {
     // By definition every candidate has an inline implementation
-    assert(_hasPluginInlineImpl(defaultPackage, platformKey, pluginType: pluginType));
+    assert(_hasPluginInlineImpl(defaultPackage, platformKey, pluginResolutionType: pluginResolutionType));
     return (defaultPackage, null);
   }
   // Otherwise, require an explicit choice.

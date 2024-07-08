@@ -814,7 +814,7 @@ void main() {
             'Package url_launcher:linux references url_launcher_linux:linux as the default plugin, '
             'but it does not provide an inline implementation.\n'
             'Ask the maintainers of url_launcher to either avoid referencing a default implementation via `platforms: linux: default_package: url_launcher_linux` '
-            'or add an inline implementation to url_launcher_linux via `platforms: linux: [dart]PluginClass`.\n'
+            'or add an inline implementation to url_launcher_linux via `platforms: linux:` `pluginClass` or `dartPluginClass`.\n'
             '\n');
       });
 
