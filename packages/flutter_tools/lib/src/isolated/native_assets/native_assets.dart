@@ -85,6 +85,8 @@ abstract class NativeAssetsBuildRunner {
     required BuildResult buildResult,
     CCompilerConfigImpl? cCompilerConfig,
     int? targetAndroidNdkApi,
+    int? targetIOSVersion,
+    int? targetMacOSVersion,
     IOSSdkImpl? targetIOSSdkImpl,
   });
 
@@ -235,6 +237,8 @@ class NativeAssetsBuildRunnerImpl implements NativeAssetsBuildRunner {
     required BuildResult buildResult,
     CCompilerConfigImpl? cCompilerConfig,
     int? targetAndroidNdkApi,
+    int? targetIOSVersion,
+    int? targetMacOSVersion,
     IOSSdkImpl? targetIOSSdkImpl,
   }) {
     final PackageLayout packageLayout = PackageLayout.fromPackageConfig(
@@ -252,6 +256,8 @@ class NativeAssetsBuildRunnerImpl implements NativeAssetsBuildRunner {
       workingDirectory: workingDirectory,
       packageLayout: packageLayout,
       buildResult: buildResult,
+      targetIOSVersion: targetIOSVersion,
+      targetMacOSVersion: targetMacOSVersion,
     );
   }
 
