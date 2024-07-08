@@ -322,10 +322,12 @@ class BoxConstraints extends Constraints {
       return result;
     }
 
+    if (size.isEmpty) {
+      return constrain(size);
+    }
+
     double width = size.width;
     double height = size.height;
-    assert(width > 0.0);
-    assert(height > 0.0);
     final double aspectRatio = width / height;
 
     if (width > maxWidth) {

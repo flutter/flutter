@@ -2711,24 +2711,6 @@ class RenderFittedBox extends RenderProxyBox {
     if (child != null) {
       final Size childSize = child!.getDryLayout(const BoxConstraints());
 
-      // During [RenderObject.debugCheckingIntrinsics] a child that doesn't
-      // support dry layout may provide us with an invalid size that triggers
-      // assertions if we try to work with it. Instead of throwing, we bail
-      // out early in that case.
-      bool invalidChildSize = false;
-      assert(() {
-        if (RenderObject.debugCheckingIntrinsics && childSize.width * childSize.height == 0.0) {
-          invalidChildSize = true;
-        }
-        return true;
-      }());
-      if (invalidChildSize) {
-        assert(debugCannotComputeDryLayout(
-          reason: 'Child provided invalid size of $childSize.',
-        ));
-        return Size.zero;
-      }
-
       switch (fit) {
         case BoxFit.scaleDown:
           final BoxConstraints sizeConstraints = constraints.loosen();
