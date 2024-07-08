@@ -16,10 +16,10 @@ class DatePickerApp extends StatelessWidget {
     return MaterialApp(
       theme: ThemeData(
         datePickerTheme: DatePickerThemeData(
-          todayBackgroundColor: const WidgetStatePropertyAll<Color>(Colors.amber),
-          todayForegroundColor: const WidgetStatePropertyAll<Color>(Colors.black),
+          todayBackgroundColor: const MaterialStatePropertyAll<Color>(Colors.amber),
+          todayForegroundColor: const MaterialStatePropertyAll<Color>(Colors.black),
           todayBorder: const BorderSide(width: 2),
-          dayShape: WidgetStatePropertyAll<OutlinedBorder>(
+          dayShape: MaterialStatePropertyAll<OutlinedBorder>(
             RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8.0),
             ),

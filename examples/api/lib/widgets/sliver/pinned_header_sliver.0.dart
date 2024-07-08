@@ -50,7 +50,7 @@ class _PinnedHeaderSliverExampleState extends State<PinnedHeaderSliverExample> {
     final ColorScheme colorScheme = theme.colorScheme;
 
     final Widget header = Container(
-      color: colorScheme.surface,
+      color: colorScheme.background,
       padding: const EdgeInsets.all(4),
       child: Material(
         color: colorScheme.primaryContainer,

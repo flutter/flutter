@@ -3,9 +3,6 @@
 // found in the LICENSE file.
 
 /// @docImport 'dart:developer';
-///
-/// @docImport 'package:flutter/rendering.dart';
-/// @docImport 'package:flutter/widgets.dart';
 library;
 
 import 'dart:math' as math;

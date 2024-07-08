@@ -1591,15 +1591,22 @@ mixin WidgetInspectorService {
   /// API surface of methods called from the Flutter IntelliJ Plugin.
   @protected
   bool setSelection(Object? object, [ String? groupName ]) {
-    switch (object) {
-      case Element() when object != selection.currentElement:
+    if (object is Element || object is RenderObject) {
+      if (object is Element) {
+        if (object == selection.currentElement) {
+          return false;
+        }
         selection.currentElement = object;
         _sendInspectEvent(selection.currentElement);
-        return true;
-      case RenderObject() when object != selection.current:
-        selection.current = object;
+      } else {
+        if (object == selection.current) {
+          return false;
+        }
+        selection.current = object! as RenderObject;
         _sendInspectEvent(selection.current);
-        return true;
+      }
+
+      return true;
     }
     return false;
   }

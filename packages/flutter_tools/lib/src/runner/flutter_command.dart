@@ -1163,18 +1163,13 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
-  /// Returns a [FlutterProject] view of the current directory or a ToolExit error,
-  /// if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
-  FlutterProject get project => FlutterProject.current();
-
   /// Compute the [BuildInfo] for the current flutter command.
-  ///
   /// Commands that build multiple build modes can pass in a [forcedBuildMode]
   /// to be used instead of parsing flags.
   ///
   /// Throws a [ToolExit] if the current set of options is not compatible with
   /// each other.
-  Future<BuildInfo> getBuildInfo({BuildMode? forcedBuildMode, File? forcedTargetFile}) async {
+  Future<BuildInfo> getBuildInfo({ BuildMode? forcedBuildMode, File? forcedTargetFile }) async {
     final bool trackWidgetCreation = argParser.options.containsKey('track-widget-creation') &&
       boolArg('track-widget-creation');
 
@@ -1182,12 +1177,10 @@ abstract class FlutterCommand extends Command<void> {
       ? stringArg('build-number')
       : null;
 
-    final File packageConfigFile = globals.fs.file(packagesPath ?? project.packageConfigFile.path);
+    final File packagesFile = globals.fs.file(
+      packagesPath ?? globals.fs.path.absolute('.dart_tool', 'package_config.json'));
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-      packageConfigFile,
-      logger: globals.logger,
-      throwOnError: false,
-    );
+        packagesFile, logger: globals.logger, throwOnError: false);
 
     final List<String> experiments =
       argParser.options.containsKey(FlutterOptions.kEnableExperiment)
@@ -1289,13 +1282,16 @@ abstract class FlutterCommand extends Command<void> {
     final Map<String, Object?> defineConfigJsonMap = extractDartDefineConfigJsonMap();
     final List<String> dartDefines = extractDartDefines(defineConfigJsonMap: defineConfigJsonMap);
 
-    final bool useCdn = !argParser.options.containsKey(FlutterOptions.kWebResourcesCdnFlag)
-      || boolArg(FlutterOptions.kWebResourcesCdnFlag);
-    final bool useLocalWebSdk = argParser.options.containsKey(FlutterGlobalOptions.kLocalWebSDKOption)
-      && stringArg(FlutterGlobalOptions.kLocalWebSDKOption, global: true) != null;
-    final bool useLocalCanvasKit = !useCdn || useLocalWebSdk;
+    if (argParser.options.containsKey(FlutterOptions.kWebResourcesCdnFlag)) {
+      final bool hasLocalWebSdk = argParser.options.containsKey('local-web-sdk') && stringArg('local-web-sdk') != null;
+      if (boolArg(FlutterOptions.kWebResourcesCdnFlag) && !hasLocalWebSdk) {
+        if (!dartDefines.any((String define) => define.startsWith('FLUTTER_WEB_CANVASKIT_URL='))) {
+          dartDefines.add('FLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/${globals.flutterVersion.engineRevision}/');
+        }
+      }
+    }
 
-    final String? defaultFlavor = project.manifest.defaultFlavor;
+    final String? defaultFlavor = FlutterProject.current().manifest.defaultFlavor;
     final String? cliFlavor = argParser.options.containsKey('flavor') ? stringArg('flavor') : null;
     final String? flavor = cliFlavor ?? defaultFlavor;
     if (flavor != null) {
@@ -1335,7 +1331,7 @@ abstract class FlutterCommand extends Command<void> {
       bundleSkSLPath: bundleSkSLPath,
       dartExperiments: experiments,
       performanceMeasurementFile: performanceMeasurementFile,
-      packageConfigPath: packagesPath ?? packageConfigFile.path,
+      packagesPath: packagesPath ?? globals.fs.path.absolute('.dart_tool', 'package_config.json'),
       nullSafetyMode: nullSafetyMode,
       codeSizeDirectory: codeSizeDirectory,
       androidGradleDaemon: androidGradleDaemon,
@@ -1347,7 +1343,6 @@ abstract class FlutterCommand extends Command<void> {
           : null,
       assumeInitializeFromDillUpToDate: argParser.options.containsKey(FlutterOptions.kAssumeInitializeFromDillUpToDate)
           && boolArg(FlutterOptions.kAssumeInitializeFromDillUpToDate),
-      useLocalCanvasKit: useLocalCanvasKit,
     );
   }
 

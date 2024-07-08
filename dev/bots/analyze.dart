@@ -184,8 +184,8 @@ Future<void> run(List<String> arguments) async {
     final String ruleNames = rules.map((AnalyzeRule rule) => '\n * $rule').join();
     printProgress('Analyzing code in the framework with the following rules:$ruleNames');
     await analyzeWithRules(flutterRoot, rules,
-      includePaths: const <String>['packages/flutter/lib'],
-      excludePaths: const <String>['packages/flutter/lib/fix_data'],
+      includePaths: <String>['packages/flutter/lib'],
+      excludePaths: <String>['packages/flutter/lib/fix_data'],
     );
     final List<AnalyzeRule> testRules = <AnalyzeRule>[noStopwatches];
     final String testRuleNames = testRules.map((AnalyzeRule rule) => '\n * $rule').join();
@@ -196,14 +196,7 @@ Future<void> run(List<String> arguments) async {
     final List<AnalyzeRule> toolRules = <AnalyzeRule>[AvoidFutureCatchError()];
     final String toolRuleNames = toolRules.map((AnalyzeRule rule) => '\n * $rule').join();
     printProgress('Analyzing code in the tool with the following rules:$toolRuleNames');
-    await analyzeWithRules(
-      flutterRoot,
-      toolRules,
-      includePaths: const <String>[
-        'packages/flutter_tools/lib',
-        'packages/flutter_tools/test',
-      ],
-    );
+    await analyzeToolWithRules(flutterRoot, toolRules);
   } else {
     printProgress('Skipped performing further analysis in the framework because "flutter analyze" finished with a non-zero exit code.');
   }
@@ -1891,9 +1884,14 @@ Stream<File> _allFiles(String workingDirectory, String? extension, { required in
       if (_isGeneratedPluginRegistrant(entity)) {
         continue;
       }
-      switch (path.basename(entity.path)) {
-        case 'flutter_export_environment.sh' || 'gradlew.bat' || '.DS_Store':
-          continue;
+      if (path.basename(entity.path) == 'flutter_export_environment.sh') {
+        continue;
+      }
+      if (path.basename(entity.path) == 'gradlew.bat') {
+        continue;
+      }
+      if (path.basename(entity.path) == '.DS_Store') {
+        continue;
       }
       if (extension == null || path.extension(entity.path) == '.$extension') {
         matches += 1;
@@ -1903,9 +1901,23 @@ Stream<File> _allFiles(String workingDirectory, String? extension, { required in
       if (File(path.join(entity.path, '.dartignore')).existsSync()) {
         continue;
       }
-      switch (path.basename(entity.path)) {
-        case '.git' || '.idea' || '.gradle' || '.dart_tool' || 'build':
-          continue;
+      if (path.basename(entity.path) == '.git') {
+        continue;
+      }
+      if (path.basename(entity.path) == '.idea') {
+        continue;
+      }
+      if (path.basename(entity.path) == '.gradle') {
+        continue;
+      }
+      if (path.basename(entity.path) == '.dart_tool') {
+        continue;
+      }
+      if (path.basename(entity.path) == '.idea') {
+        continue;
+      }
+      if (path.basename(entity.path) == 'build') {
+        continue;
       }
       pending.addAll(entity.listSync());
     }

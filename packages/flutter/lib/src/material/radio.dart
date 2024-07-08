@@ -175,23 +175,23 @@ class Radio<T> extends StatefulWidget {
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// widget.
   ///
-  /// If [mouseCursor] is a [WidgetStateProperty<MouseCursor>],
-  /// [WidgetStateProperty.resolve] is used for the following [WidgetState]s:
+  /// If [mouseCursor] is a [MaterialStateProperty<MouseCursor>],
+  /// [MaterialStateProperty.resolve] is used for the following [MaterialState]s:
   ///
-  ///  * [WidgetState.selected].
-  ///  * [WidgetState.hovered].
-  ///  * [WidgetState.focused].
-  ///  * [WidgetState.disabled].
+  ///  * [MaterialState.selected].
+  ///  * [MaterialState.hovered].
+  ///  * [MaterialState.focused].
+  ///  * [MaterialState.disabled].
   /// {@endtemplate}
   ///
   /// If null, then the value of [RadioThemeData.mouseCursor] is used.
-  /// If that is also null, then [WidgetStateMouseCursor.clickable] is used.
+  /// If that is also null, then [MaterialStateMouseCursor.clickable] is used.
   ///
   /// See also:
   ///
-  ///  * [WidgetStateMouseCursor], a [MouseCursor] that implements
-  ///    `WidgetStateProperty` which is used in APIs that need to accept
-  ///    either a [MouseCursor] or a [WidgetStateProperty<MouseCursor>].
+  ///  * [MaterialStateMouseCursor], a [MouseCursor] that implements
+  ///    `MaterialStateProperty` which is used in APIs that need to accept
+  ///    either a [MouseCursor] or a [MaterialStateProperty<MouseCursor>].
   final MouseCursor? mouseCursor;
 
   /// Set to true if this radio button is allowed to be returned to an
@@ -223,31 +223,31 @@ class Radio<T> extends StatefulWidget {
   ///
   /// Defaults to [ColorScheme.secondary].
   ///
-  /// If [fillColor] returns a non-null color in the [WidgetState.selected]
+  /// If [fillColor] returns a non-null color in the [MaterialState.selected]
   /// state, it will be used instead of this color.
   final Color? activeColor;
 
   /// {@template flutter.material.radio.fillColor}
-  /// The color that fills the radio button, in all [WidgetState]s.
+  /// The color that fills the radio button, in all [MaterialState]s.
   ///
   /// Resolves in the following states:
-  ///  * [WidgetState.selected].
-  ///  * [WidgetState.hovered].
-  ///  * [WidgetState.focused].
-  ///  * [WidgetState.disabled].
+  ///  * [MaterialState.selected].
+  ///  * [MaterialState.hovered].
+  ///  * [MaterialState.focused].
+  ///  * [MaterialState.disabled].
   ///
   /// {@tool snippet}
-  /// This example resolves the [fillColor] based on the current [WidgetState]
+  /// This example resolves the [fillColor] based on the current [MaterialState]
   /// of the [Radio], providing a different [Color] when it is
-  /// [WidgetState.disabled].
+  /// [MaterialState.disabled].
   ///
   /// ```dart
   /// Radio<int>(
   ///   value: 1,
   ///   groupValue: 1,
   ///   onChanged: (_){},
-  ///   fillColor: WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {
-  ///     if (states.contains(WidgetState.disabled)) {
+  ///   fillColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
+  ///     if (states.contains(MaterialState.disabled)) {
   ///       return Colors.orange.withOpacity(.32);
   ///     }
   ///     return Colors.orange;
@@ -297,7 +297,7 @@ class Radio<T> extends StatefulWidget {
 
   /// The color for the radio's [Material] when it has the input focus.
   ///
-  /// If [overlayColor] returns a non-null color in the [WidgetState.focused]
+  /// If [overlayColor] returns a non-null color in the [MaterialState.focused]
   /// state, it will be used instead.
   ///
   /// If null, then the value of [RadioThemeData.overlayColor] is used in the
@@ -308,7 +308,7 @@ class Radio<T> extends StatefulWidget {
   /// {@template flutter.material.radio.hoverColor}
   /// The color for the radio's [Material] when a pointer is hovering over it.
   ///
-  /// If [overlayColor] returns a non-null color in the [WidgetState.hovered]
+  /// If [overlayColor] returns a non-null color in the [MaterialState.hovered]
   /// state, it will be used instead.
   /// {@endtemplate}
   ///
@@ -321,10 +321,10 @@ class Radio<T> extends StatefulWidget {
   /// The color for the radio's [Material].
   ///
   /// Resolves in the following states:
-  ///  * [WidgetState.pressed].
-  ///  * [WidgetState.selected].
-  ///  * [WidgetState.hovered].
-  ///  * [WidgetState.focused].
+  ///  * [MaterialState.pressed].
+  ///  * [MaterialState.selected].
+  ///  * [MaterialState.hovered].
+  ///  * [MaterialState.focused].
   /// {@endtemplate}
   ///
   /// If null, then the value of [activeColor] with alpha

@@ -9,6 +9,7 @@ import 'color_scheme.dart';
 import 'colors.dart';
 import 'constants.dart';
 import 'material_button.dart';
+import 'material_state.dart';
 import 'theme.dart';
 import 'theme_data.dart' show MaterialTapTargetSize;
 
@@ -390,8 +391,8 @@ class ButtonThemeData with Diagnosticable {
   /// Otherwise the color scheme's [ColorScheme.onSurface] color is returned
   /// with its opacity set to 0.38.
   ///
-  /// If [MaterialButton.textColor] is a [WidgetStateProperty<Color>], it will be
-  /// used as the `disabledTextColor`. It will be resolved in the [WidgetState.disabled] state.
+  /// If [MaterialButton.textColor] is a [MaterialStateProperty<Color>], it will be
+  /// used as the `disabledTextColor`. It will be resolved in the [MaterialState.disabled] state.
   Color getDisabledTextColor(MaterialButton button) {
     return button.textColor ?? button.disabledTextColor ?? colorScheme!.onSurface.withOpacity(0.38);
   }

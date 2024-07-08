@@ -20,15 +20,15 @@ import 'theme.dart';
 ///
 /// The [style]'s properties override [IconButton]'s default style. Only
 /// the style's non-null property values or resolved non-null
-/// [WidgetStateProperty] values are used.
+/// [MaterialStateProperty] values are used.
 ///
 /// See also:
 ///
 ///  * [IconButtonTheme], the theme which is configured with this class.
 ///  * [IconButton.styleFrom], which converts simple values into a
 ///    [ButtonStyle] that's consistent with [IconButton]'s defaults.
-///  * [WidgetStateProperty.resolve], "resolve" a material state property
-///    to a simple value based on a set of [WidgetState]s.
+///  * [MaterialStateProperty.resolve], "resolve" a material state property
+///    to a simple value based on a set of [MaterialState]s.
 ///  * [ThemeData.iconButtonTheme], which can be used to override the default
 ///    [ButtonStyle] for [IconButton]s below the overall [Theme].
 @immutable
@@ -41,7 +41,7 @@ class IconButtonThemeData with Diagnosticable {
   /// Overrides for [IconButton]'s default style if [ThemeData.useMaterial3]
   /// is set to true.
   ///
-  /// Non-null properties or non-null resolved [WidgetStateProperty]
+  /// Non-null properties or non-null resolved [MaterialStateProperty]
   /// values override the default [ButtonStyle] in [IconButton].
   ///
   /// If [style] is null, then this theme doesn't override anything.

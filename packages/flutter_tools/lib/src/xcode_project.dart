@@ -585,7 +585,7 @@ class IosProject extends XcodeBasedProject {
     if (globals.cache.isOlderThanToolsStamp(generatedXcodePropertiesFile)) {
       await xcode.updateGeneratedXcodeProperties(
         project: parent,
-        buildInfo: BuildInfo.dummy,
+        buildInfo: BuildInfo.debug,
         targetOverride: bundle.defaultMainPath,
       );
     }
@@ -757,7 +757,7 @@ class MacOSProject extends XcodeBasedProject {
     if (globals.cache.isOlderThanToolsStamp(generatedXcodePropertiesFile)) {
       await xcode.updateGeneratedXcodeProperties(
         project: parent,
-        buildInfo: BuildInfo.dummy,
+        buildInfo: BuildInfo.debug,
         useMacOSConfig: true,
       );
     }

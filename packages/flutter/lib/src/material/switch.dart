@@ -45,7 +45,7 @@ enum _SwitchType { material, adaptive }
 ///
 /// Material Design 3 provides the option to add icons on the thumb of the [Switch].
 /// If [ThemeData.useMaterial3] is set to true, users can use [Switch.thumbIcon]
-/// to add optional Icons based on the different [WidgetState]s of the [Switch].
+/// to add optional Icons based on the different [MaterialState]s of the [Switch].
 ///
 /// {@tool dartpad}
 /// This example shows a toggleable [Switch]. When the thumb slides to the other
@@ -55,7 +55,7 @@ enum _SwitchType { material, adaptive }
 /// {@end-tool}
 ///
 /// {@tool dartpad}
-/// This example shows how to customize [Switch] using [WidgetStateProperty]
+/// This example shows how to customize [Switch] using [MaterialStateProperty]
 /// switch properties.
 ///
 /// ** See code in examples/api/lib/material/switch/switch.1.dart **
@@ -82,7 +82,7 @@ enum _SwitchType { material, adaptive }
 ///  * [Checkbox], another widget with similar semantics.
 ///  * [Radio], for selecting among a set of explicit values.
 ///  * [Slider], for selecting a value in a range.
-///  * [WidgetStateProperty], an interface for objects that "resolve" to
+///  * [MaterialStateProperty], an interface for objects that "resolve" to
 ///    different values depending on a widget's material state.
 ///  * <https://material.io/design/components/selection-controls.html#switches>
 class Switch extends StatelessWidget {
@@ -215,7 +215,7 @@ class Switch extends StatelessWidget {
   ///
   /// Defaults to [ColorScheme.secondary].
   ///
-  /// If [thumbColor] returns a non-null color in the [WidgetState.selected]
+  /// If [thumbColor] returns a non-null color in the [MaterialState.selected]
   /// state, it will be used instead of this color.
   final Color? activeColor;
 
@@ -225,7 +225,7 @@ class Switch extends StatelessWidget {
   ///
   /// Defaults to [ColorScheme.secondary] with the opacity set at 50%.
   ///
-  /// If [trackColor] returns a non-null color in the [WidgetState.selected]
+  /// If [trackColor] returns a non-null color in the [MaterialState.selected]
   /// state, it will be used instead of this color.
   final Color? activeTrackColor;
 
@@ -275,22 +275,22 @@ class Switch extends StatelessWidget {
   /// The color of this [Switch]'s thumb.
   ///
   /// Resolved in the following states:
-  ///  * [WidgetState.selected].
-  ///  * [WidgetState.hovered].
-  ///  * [WidgetState.focused].
-  ///  * [WidgetState.disabled].
+  ///  * [MaterialState.selected].
+  ///  * [MaterialState.hovered].
+  ///  * [MaterialState.focused].
+  ///  * [MaterialState.disabled].
   ///
   /// {@tool snippet}
   /// This example resolves the [thumbColor] based on the current
-  /// [WidgetState] of the [Switch], providing a different [Color] when it is
-  /// [WidgetState.disabled].
+  /// [MaterialState] of the [Switch], providing a different [Color] when it is
+  /// [MaterialState.disabled].
   ///
   /// ```dart
   /// Switch(
   ///   value: true,
   ///   onChanged: (bool value) { },
-  ///   thumbColor: WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {
-  ///     if (states.contains(WidgetState.disabled)) {
+  ///   thumbColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
+  ///     if (states.contains(MaterialState.disabled)) {
   ///       return Colors.orange.withOpacity(.48);
   ///     }
   ///     return Colors.orange;
@@ -316,22 +316,22 @@ class Switch extends StatelessWidget {
   /// The color of this [Switch]'s track.
   ///
   /// Resolved in the following states:
-  ///  * [WidgetState.selected].
-  ///  * [WidgetState.hovered].
-  ///  * [WidgetState.focused].
-  ///  * [WidgetState.disabled].
+  ///  * [MaterialState.selected].
+  ///  * [MaterialState.hovered].
+  ///  * [MaterialState.focused].
+  ///  * [MaterialState.disabled].
   ///
   /// {@tool snippet}
   /// This example resolves the [trackColor] based on the current
-  /// [WidgetState] of the [Switch], providing a different [Color] when it is
-  /// [WidgetState.disabled].
+  /// [MaterialState] of the [Switch], providing a different [Color] when it is
+  /// [MaterialState.disabled].
   ///
   /// ```dart
   /// Switch(
   ///   value: true,
   ///   onChanged: (bool value) { },
-  ///   thumbColor: WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {
-  ///     if (states.contains(WidgetState.disabled)) {
+  ///   thumbColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
+  ///     if (states.contains(MaterialState.disabled)) {
   ///       return Colors.orange.withOpacity(.48);
   ///     }
   ///     return Colors.orange;
@@ -357,22 +357,22 @@ class Switch extends StatelessWidget {
   /// The outline color of this [Switch]'s track.
   ///
   /// Resolved in the following states:
-  ///  * [WidgetState.selected].
-  ///  * [WidgetState.hovered].
-  ///  * [WidgetState.focused].
-  ///  * [WidgetState.disabled].
+  ///  * [MaterialState.selected].
+  ///  * [MaterialState.hovered].
+  ///  * [MaterialState.focused].
+  ///  * [MaterialState.disabled].
   ///
   /// {@tool snippet}
   /// This example resolves the [trackOutlineColor] based on the current
-  /// [WidgetState] of the [Switch], providing a different [Color] when it is
-  /// [WidgetState.disabled].
+  /// [MaterialState] of the [Switch], providing a different [Color] when it is
+  /// [MaterialState.disabled].
   ///
   /// ```dart
   /// Switch(
   ///   value: true,
   ///   onChanged: (bool value) { },
-  ///   trackOutlineColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
-  ///     if (states.contains(WidgetState.disabled)) {
+  ///   trackOutlineColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+  ///     if (states.contains(MaterialState.disabled)) {
   ///       return Colors.orange.withOpacity(.48);
   ///     }
   ///     return null; // Use the default color.
@@ -391,22 +391,22 @@ class Switch extends StatelessWidget {
   /// The outline width of this [Switch]'s track.
   ///
   /// Resolved in the following states:
-  ///  * [WidgetState.selected].
-  ///  * [WidgetState.hovered].
-  ///  * [WidgetState.focused].
-  ///  * [WidgetState.disabled].
+  ///  * [MaterialState.selected].
+  ///  * [MaterialState.hovered].
+  ///  * [MaterialState.focused].
+  ///  * [MaterialState.disabled].
   ///
   /// {@tool snippet}
   /// This example resolves the [trackOutlineWidth] based on the current
-  /// [WidgetState] of the [Switch], providing a different outline width when it is
-  /// [WidgetState.disabled].
+  /// [MaterialState] of the [Switch], providing a different outline width when it is
+  /// [MaterialState.disabled].
   ///
   /// ```dart
   /// Switch(
   ///   value: true,
   ///   onChanged: (bool value) { },
-  ///   trackOutlineWidth: WidgetStateProperty.resolveWith<double?>((Set<WidgetState> states) {
-  ///     if (states.contains(WidgetState.disabled)) {
+  ///   trackOutlineWidth: MaterialStateProperty.resolveWith<double?>((Set<MaterialState> states) {
+  ///     if (states.contains(MaterialState.disabled)) {
   ///       return 5.0;
   ///     }
   ///     return null; // Use the default width.
@@ -423,22 +423,22 @@ class Switch extends StatelessWidget {
   /// The icon to use on the thumb of this switch
   ///
   /// Resolved in the following states:
-  ///  * [WidgetState.selected].
-  ///  * [WidgetState.hovered].
-  ///  * [WidgetState.focused].
-  ///  * [WidgetState.disabled].
+  ///  * [MaterialState.selected].
+  ///  * [MaterialState.hovered].
+  ///  * [MaterialState.focused].
+  ///  * [MaterialState.disabled].
   ///
   /// {@tool snippet}
   /// This example resolves the [thumbIcon] based on the current
-  /// [WidgetState] of the [Switch], providing a different [Icon] when it is
-  /// [WidgetState.disabled].
+  /// [MaterialState] of the [Switch], providing a different [Icon] when it is
+  /// [MaterialState.disabled].
   ///
   /// ```dart
   /// Switch(
   ///   value: true,
   ///   onChanged: (bool value) { },
-  ///   thumbIcon: WidgetStateProperty.resolveWith<Icon?>((Set<WidgetState> states) {
-  ///     if (states.contains(WidgetState.disabled)) {
+  ///   thumbIcon: MaterialStateProperty.resolveWith<Icon?>((Set<MaterialState> states) {
+  ///     if (states.contains(MaterialState.disabled)) {
   ///       return const Icon(Icons.close);
   ///     }
   ///     return null; // All other states will use the default thumbIcon.
@@ -477,28 +477,28 @@ class Switch extends StatelessWidget {
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// widget.
   ///
-  /// If [mouseCursor] is a [WidgetStateProperty<MouseCursor>],
-  /// [WidgetStateProperty.resolve] is used for the following [WidgetState]s:
+  /// If [mouseCursor] is a [MaterialStateProperty<MouseCursor>],
+  /// [MaterialStateProperty.resolve] is used for the following [MaterialState]s:
   ///
-  ///  * [WidgetState.selected].
-  ///  * [WidgetState.hovered].
-  ///  * [WidgetState.focused].
-  ///  * [WidgetState.disabled].
+  ///  * [MaterialState.selected].
+  ///  * [MaterialState.hovered].
+  ///  * [MaterialState.focused].
+  ///  * [MaterialState.disabled].
   /// {@endtemplate}
   ///
   /// If null, then the value of [SwitchThemeData.mouseCursor] is used. If that
-  /// is also null, then [WidgetStateMouseCursor.clickable] is used.
+  /// is also null, then [MaterialStateMouseCursor.clickable] is used.
   ///
   /// See also:
   ///
-  ///  * [WidgetStateMouseCursor], a [MouseCursor] that implements
-  ///    `WidgetStateProperty` which is used in APIs that need to accept
-  ///    either a [MouseCursor] or a [WidgetStateProperty<MouseCursor>].
+  ///  * [MaterialStateMouseCursor], a [MouseCursor] that implements
+  ///    `MaterialStateProperty` which is used in APIs that need to accept
+  ///    either a [MouseCursor] or a [MaterialStateProperty<MouseCursor>].
   final MouseCursor? mouseCursor;
 
   /// The color for the button's [Material] when it has the input focus.
   ///
-  /// If [overlayColor] returns a non-null color in the [WidgetState.focused]
+  /// If [overlayColor] returns a non-null color in the [MaterialState.focused]
   /// state, it will be used instead.
   ///
   /// If null, then the value of [SwitchThemeData.overlayColor] is used in the
@@ -508,7 +508,7 @@ class Switch extends StatelessWidget {
 
   /// The color for the button's [Material] when a pointer is hovering over it.
   ///
-  /// If [overlayColor] returns a non-null color in the [WidgetState.hovered]
+  /// If [overlayColor] returns a non-null color in the [MaterialState.hovered]
   /// state, it will be used instead.
   ///
   /// If null, then the value of [SwitchThemeData.overlayColor] is used in the
@@ -520,10 +520,10 @@ class Switch extends StatelessWidget {
   /// The color for the switch's [Material].
   ///
   /// Resolves in the following states:
-  ///  * [WidgetState.pressed].
-  ///  * [WidgetState.selected].
-  ///  * [WidgetState.hovered].
-  ///  * [WidgetState.focused].
+  ///  * [MaterialState.pressed].
+  ///  * [MaterialState.selected].
+  ///  * [MaterialState.hovered].
+  ///  * [MaterialState.focused].
   /// {@endtemplate}
   ///
   /// If null, then the value of [activeColor] with alpha

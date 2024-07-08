@@ -412,7 +412,6 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       debugLogsDirectoryPath: debugLogsDirectoryPath,
       webRenderer: webRenderer,
       webUseWasm: useWasm,
-      webUseLocalCanvaskit: true,
     );
 
     String? testAssetDirectory;
@@ -505,8 +504,8 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       collector = CoverageCollector(
         verbose: !machine,
         libraryNames: packagesToInclude,
-        packagesPath: buildInfo.packageConfigPath,
-        resolver: await CoverageCollector.getResolver(buildInfo.packageConfigPath),
+        packagesPath: buildInfo.packagesPath,
+        resolver: await CoverageCollector.getResolver(buildInfo.packagesPath),
         testTimeRecorder: testTimeRecorder,
         branchCoverage: boolArg('branch-coverage'),
       );

@@ -88,21 +88,11 @@ void main() {
   group('gradle tasks', () {
     testWithoutContext('assemble release', () {
       expect(
-        getAssembleTaskFor(const BuildInfo(
-          BuildMode.release,
-          null,
-          treeShakeIcons: false,
-          packageConfigPath: '.dart_tool/package_config.json',
-        )),
+        getAssembleTaskFor(const BuildInfo(BuildMode.release, null, treeShakeIcons: false)),
         equals('assembleRelease'),
       );
       expect(
-        getAssembleTaskFor(const BuildInfo(
-          BuildMode.release,
-          'flavorFoo',
-          treeShakeIcons: false,
-          packageConfigPath: '.dart_tool/package_config.json',
-        )),
+        getAssembleTaskFor(const BuildInfo(BuildMode.release, 'flavorFoo', treeShakeIcons: false)),
         equals('assembleFlavorFooRelease'),
       );
     });
@@ -113,33 +103,18 @@ void main() {
         equals('assembleDebug'),
       );
       expect(
-        getAssembleTaskFor(const BuildInfo(
-          BuildMode.debug,
-          'flavorFoo',
-          treeShakeIcons: false,
-          packageConfigPath: '.dart_tool/package_config.json',
-        )),
+        getAssembleTaskFor(const BuildInfo(BuildMode.debug, 'flavorFoo', treeShakeIcons: false)),
         equals('assembleFlavorFooDebug'),
       );
     });
 
     testWithoutContext('assemble profile', () {
       expect(
-        getAssembleTaskFor(const BuildInfo(
-          BuildMode.profile,
-          null,
-          treeShakeIcons: false,
-          packageConfigPath: '.dart_tool/package_config.json',
-        )),
+        getAssembleTaskFor(const BuildInfo(BuildMode.profile, null, treeShakeIcons: false)),
         equals('assembleProfile'),
       );
       expect(
-        getAssembleTaskFor(const BuildInfo(
-          BuildMode.profile,
-          'flavorFoo',
-          treeShakeIcons: false,
-          packageConfigPath: '.dart_tool/package_config.json',
-        )),
+        getAssembleTaskFor(const BuildInfo(BuildMode.profile, 'flavorFoo', treeShakeIcons: false)),
         equals('assembleFlavorFooProfile'),
       );
     });
@@ -148,36 +123,21 @@ void main() {
   group('listApkPaths', () {
     testWithoutContext('Finds APK without flavor in debug', () {
       final Iterable<String> apks = listApkPaths(
-        const AndroidBuildInfo(BuildInfo(
-          BuildMode.debug,
-          '',
-          treeShakeIcons: false,
-          packageConfigPath: '.dart_tool/package_config.json',
-        )),
+        const AndroidBuildInfo(BuildInfo(BuildMode.debug, '', treeShakeIcons: false)),
       );
       expect(apks, <String>['app-debug.apk']);
     });
 
     testWithoutContext('Finds APK with flavor in debug', () {
       final Iterable<String> apks = listApkPaths(
-        const AndroidBuildInfo(BuildInfo(
-          BuildMode.debug,
-          'flavor1',
-          treeShakeIcons: false,
-          packageConfigPath: '.dart_tool/package_config.json',
-        )),
+        const AndroidBuildInfo(BuildInfo(BuildMode.debug, 'flavor1', treeShakeIcons: false)),
       );
       expect(apks, <String>['app-flavor1-debug.apk']);
     });
 
     testWithoutContext('Finds APK without flavor in release', () {
       final Iterable<String> apks = listApkPaths(
-        const AndroidBuildInfo(BuildInfo(
-          BuildMode.release,
-          '',
-          treeShakeIcons: false,
-          packageConfigPath: '.dart_tool/package_config.json',
-        )),
+        const AndroidBuildInfo(BuildInfo(BuildMode.release, '', treeShakeIcons: false)),
       );
 
       expect(apks, <String>['app-release.apk']);
@@ -185,12 +145,7 @@ void main() {
 
     testWithoutContext('Finds APK with flavor in release mode', () {
       final Iterable<String> apks = listApkPaths(
-        const AndroidBuildInfo(BuildInfo(
-          BuildMode.release,
-          'flavor1',
-          treeShakeIcons: false,
-          packageConfigPath: '.dart_tool/package_config.json',
-        )),
+        const AndroidBuildInfo(BuildInfo(BuildMode.release, 'flavor1', treeShakeIcons: false)),
       );
 
       expect(apks, <String>['app-flavor1-release.apk']);
@@ -198,8 +153,7 @@ void main() {
 
     testWithoutContext('Finds APK with flavor in release mode', () {
       final Iterable<String> apks = listApkPaths(
-        const AndroidBuildInfo(BuildInfo(BuildMode.release, 'flavorA', treeShakeIcons: false,
-        packageConfigPath: '.dart_tool/package_config.json',)),
+        const AndroidBuildInfo(BuildInfo(BuildMode.release, 'flavorA', treeShakeIcons: false)),
       );
 
       expect(apks, <String>['app-flavora-release.apk']);
@@ -207,26 +161,15 @@ void main() {
 
     testWithoutContext('Finds APK with flavor in release mode - AGP v3', () {
       final Iterable<String> apks = listApkPaths(
-        const AndroidBuildInfo(BuildInfo(
-          BuildMode.release,
-          'flavor1',
-          treeShakeIcons: false,
-          packageConfigPath: '.dart_tool/package_config.json',
-        )),
+        const AndroidBuildInfo(BuildInfo(BuildMode.release, 'flavor1', treeShakeIcons: false)),
       );
+
       expect(apks, <String>['app-flavor1-release.apk']);
     });
 
     testWithoutContext('Finds APK with split-per-abi', () {
       final Iterable<String> apks = listApkPaths(
-        const AndroidBuildInfo(
-            BuildInfo(
-              BuildMode.release,
-              'flavor1',
-              treeShakeIcons: false,
-              packageConfigPath: '.dart_tool/package_config.json',
-            ),
-            splitPerAbi: true),
+        const AndroidBuildInfo(BuildInfo(BuildMode.release, 'flavor1', treeShakeIcons: false), splitPerAbi: true),
       );
 
       expect(apks, unorderedEquals(<String>[
@@ -238,14 +181,7 @@ void main() {
 
     testWithoutContext('Finds APK with split-per-abi when flavor contains uppercase letters', () {
       final Iterable<String> apks = listApkPaths(
-        const AndroidBuildInfo(
-            BuildInfo(
-              BuildMode.release,
-              'flavorA',
-              treeShakeIcons: false,
-              packageConfigPath: '.dart_tool/package_config.json',
-            ),
-            splitPerAbi: true),
+        const AndroidBuildInfo(BuildInfo(BuildMode.release, 'flavorA', treeShakeIcons: false), splitPerAbi: true),
       );
 
       expect(apks, unorderedEquals(<String>[
@@ -326,12 +262,7 @@ dependencies:
 flutter:
 ''';
 
-      const BuildInfo buildInfo = BuildInfo(
-        BuildMode.release,
-        null,
-        treeShakeIcons: false,
-        packageConfigPath: '.dart_tool/package_config.json',
-      );
+      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, treeShakeIcons: false);
       await checkBuildVersion(
         manifest: manifest,
         buildInfo: buildInfo,
@@ -349,12 +280,7 @@ dependencies:
     sdk: flutter
 flutter:
 ''';
-      const BuildInfo buildInfo = BuildInfo(
-        BuildMode.release,
-        null,
-        treeShakeIcons: false,
-        packageConfigPath: '.dart_tool/package_config.json',
-      );
+      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, treeShakeIcons: false);
       await checkBuildVersion(
         manifest: manifest,
         buildInfo: buildInfo,
@@ -371,13 +297,7 @@ dependencies:
     sdk: flutter
 flutter:
 ''';
-      const BuildInfo buildInfo = BuildInfo(
-        BuildMode.release,
-        null,
-        buildName: '1.0.2',
-        treeShakeIcons: false,
-        packageConfigPath: '.dart_tool/package_config.json',
-      );
+      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, buildName: '1.0.2', treeShakeIcons: false);
       await checkBuildVersion(
         manifest: manifest,
         buildInfo: buildInfo,
@@ -395,13 +315,7 @@ dependencies:
     sdk: flutter
 flutter:
 ''';
-      const BuildInfo buildInfo = BuildInfo(
-        BuildMode.release,
-        null,
-        buildNumber: '3',
-        treeShakeIcons: false,
-        packageConfigPath: '.dart_tool/package_config.json',
-      );
+      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, buildNumber: '3', treeShakeIcons: false);
       await checkBuildVersion(
         manifest: manifest,
         buildInfo: buildInfo,
@@ -419,14 +333,7 @@ dependencies:
     sdk: flutter
 flutter:
 ''';
-      const BuildInfo buildInfo = BuildInfo(
-        BuildMode.release,
-        null,
-        buildName: '1.0.2',
-        buildNumber: '3',
-        treeShakeIcons: false,
-        packageConfigPath: '.dart_tool/package_config.json',
-      );
+      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, buildName: '1.0.2', buildNumber: '3', treeShakeIcons: false);
       await checkBuildVersion(
         manifest: manifest,
         buildInfo: buildInfo,
@@ -444,14 +351,7 @@ dependencies:
     sdk: flutter
 flutter:
 ''';
-      const BuildInfo buildInfo = BuildInfo(
-        BuildMode.release,
-        null,
-        buildName: '1.0.2',
-        buildNumber: '3',
-        treeShakeIcons: false,
-        packageConfigPath: '.dart_tool/package_config.json',
-      );
+      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, buildName: '1.0.2', buildNumber: '3', treeShakeIcons: false);
       await checkBuildVersion(
         manifest: manifest,
         buildInfo: buildInfo,
@@ -468,14 +368,7 @@ dependencies:
     sdk: flutter
 flutter:
 ''';
-      const BuildInfo buildInfo = BuildInfo(
-        BuildMode.release,
-        null,
-        buildName: '1.0.2',
-        buildNumber: '3',
-        treeShakeIcons: false,
-        packageConfigPath: '.dart_tool/package_config.json',
-      );
+      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, buildName: '1.0.2', buildNumber: '3', treeShakeIcons: false);
       await checkBuildVersion(
         manifest: manifest,
         buildInfo: buildInfo,
@@ -494,36 +387,17 @@ flutter:
 ''';
       await checkBuildVersion(
         manifest: manifest,
-        buildInfo: const BuildInfo(
-          BuildMode.release,
-          null,
-          treeShakeIcons: false,
-          packageConfigPath: '.dart_tool/package_config.json',
-        ),
+        buildInfo: const BuildInfo(BuildMode.release, null, treeShakeIcons: false),
       );
       await checkBuildVersion(
         manifest: manifest,
-        buildInfo: const BuildInfo(
-          BuildMode.release,
-          null,
-          buildName: '1.0.2',
-          buildNumber: '3',
-          treeShakeIcons: false,
-          packageConfigPath: '.dart_tool/package_config.json',
-        ),
+        buildInfo: const BuildInfo(BuildMode.release, null, buildName: '1.0.2', buildNumber: '3', treeShakeIcons: false),
         expectedBuildName: '1.0.2',
         expectedBuildNumber: '3',
       );
       await checkBuildVersion(
         manifest: manifest,
-        buildInfo: const BuildInfo(
-          BuildMode.release,
-          null,
-          buildName: '1.0.3',
-          buildNumber: '4',
-          treeShakeIcons: false,
-          packageConfigPath: '.dart_tool/package_config.json',
-        ),
+        buildInfo: const BuildInfo(BuildMode.release, null, buildName: '1.0.3', buildNumber: '4', treeShakeIcons: false),
         expectedBuildName: '1.0.3',
         expectedBuildNumber: '4',
       );
@@ -536,12 +410,7 @@ flutter:
       // Values get unset.
       await checkBuildVersion(
         manifest: manifest,
-        buildInfo: const BuildInfo(
-          BuildMode.release,
-          null,
-          treeShakeIcons: false,
-          packageConfigPath: '.dart_tool/package_config.json',
-        ),
+        buildInfo: const BuildInfo(BuildMode.release, null, treeShakeIcons: false),
       );
     });
   });

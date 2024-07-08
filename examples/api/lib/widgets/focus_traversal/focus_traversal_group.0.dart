@@ -78,18 +78,18 @@ class _OrderedButtonState<T> extends State<OrderedButton<T>> {
       order = LexicalFocusOrder(widget.order.toString());
     }
 
-    Color? overlayColor(Set<WidgetState> states) {
-      if (states.contains(WidgetState.focused)) {
+    Color? overlayColor(Set<MaterialState> states) {
+      if (states.contains(MaterialState.focused)) {
         return Colors.red;
       }
-      if (states.contains(WidgetState.hovered)) {
+      if (states.contains(MaterialState.hovered)) {
         return Colors.blue;
       }
       return null; // defer to the default overlayColor
     }
 
-    Color? foregroundColor(Set<WidgetState> states) {
-      if (states.contains(WidgetState.focused) || states.contains(WidgetState.hovered)) {
+    Color? foregroundColor(Set<MaterialState> states) {
+      if (states.contains(MaterialState.focused) || states.contains(MaterialState.hovered)) {
         return Colors.white;
       }
       return null; // defer to the default foregroundColor
@@ -103,8 +103,8 @@ class _OrderedButtonState<T> extends State<OrderedButton<T>> {
           focusNode: focusNode,
           autofocus: widget.autofocus,
           style: ButtonStyle(
-            overlayColor: WidgetStateProperty.resolveWith<Color?>(overlayColor),
-            foregroundColor: WidgetStateProperty.resolveWith<Color?>(foregroundColor),
+            overlayColor: MaterialStateProperty.resolveWith<Color?>(overlayColor),
+            foregroundColor: MaterialStateProperty.resolveWith<Color?>(foregroundColor),
           ),
           onPressed: () => _handleOnPressed(),
           child: Text(widget.name),

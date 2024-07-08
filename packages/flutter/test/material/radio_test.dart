@@ -205,7 +205,7 @@ void main() {
         ),
       ),
     ));
-    final bool isCupertino = defaultTargetPlatform == TargetPlatform.iOS ||
+    final bool isApple = defaultTargetPlatform == TargetPlatform.iOS ||
                          defaultTargetPlatform == TargetPlatform.macOS;
     expect(
       semantics,
@@ -217,11 +217,11 @@ void main() {
           SemanticsFlag.isEnabled,
           SemanticsFlag.isFocusable,
           SemanticsFlag.isChecked,
-          if (isCupertino) SemanticsFlag.isSelected,
+          if (isApple) SemanticsFlag.isSelected,
         ],
         actions: <SemanticsAction>[
           SemanticsAction.tap,
-          if (defaultTargetPlatform != TargetPlatform.iOS) SemanticsAction.focus,
+          SemanticsAction.focus,
         ],
       ),
     );

@@ -4,7 +4,6 @@
 
 import 'package:meta/meta.dart';
 import 'package:uuid/uuid.dart';
-import 'package:yaml/yaml.dart';
 
 import '../android/android.dart' as android_common;
 import '../android/android_workflow.dart';
@@ -320,45 +319,13 @@ abstract class CreateBase extends FlutterCommand {
     }
   }
 
-  /// Gets the project name.
+  /// Gets the project name based.
   ///
-  /// If the `--project-name` is not specified explicitly,
-  /// the `name` field from the pubspec.yaml file is used.
-  ///
-  /// If the pubspec.yaml file does not exist,
-  /// the current directory path name is used.
+  /// Use the current directory path name if the `--project-name` is not specified explicitly.
   @protected
   String get projectName {
-    String? projectName = stringArg('project-name');
-
-    if (projectName == null) {
-      final File pubspec = globals.fs
-        .directory(projectDirPath)
-        .childFile('pubspec.yaml');
-
-      if (pubspec.existsSync()) {
-        final String pubspecContents = pubspec.readAsStringSync();
-
-        try {
-          final Object? pubspecYaml = loadYaml(pubspecContents);
-
-          if (pubspecYaml is YamlMap) {
-            final Object? pubspecName = pubspecYaml['name'];
-
-            if (pubspecName is String) {
-              projectName = pubspecName;
-            }
-          }
-        } on YamlException {
-          // If the pubspec is malformed, fallback to using the directory name.
-        }
-      }
-
-      final String projectDirName = globals.fs.path.basename(projectDirPath);
-
-      projectName ??= projectDirName;
-    }
-
+    final String projectName =
+        stringArg('project-name') ?? globals.fs.path.basename(projectDirPath);
     if (!boolArg('skip-name-checks')) {
       final String? error = _validateProjectName(projectName);
       if (error != null) {

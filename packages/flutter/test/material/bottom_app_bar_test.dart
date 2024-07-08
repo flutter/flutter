@@ -64,11 +64,14 @@ void main() {
         return widget is PhysicalShape || widget is PhysicalModel;
       }),
     );
-    switch (tester.widgetList(finder).single) {
-      case PhysicalShape(:final Color color) || PhysicalModel(:final Color color):
-        expect(color, bottomAppBarColor);
-      default:
-        assert(false); // Should be unreachable: compare with the finder.
+    final Widget widget = tester.widgetList(finder).single;
+    if (widget is PhysicalShape) {
+      expect(widget.color, bottomAppBarColor);
+    } else if (widget is PhysicalModel) {
+      expect(widget.color, bottomAppBarColor);
+    } else {
+      // Should be unreachable: compare with the finder.
+      assert(false);
     }
   });
 

@@ -340,11 +340,11 @@ class RangeSlider extends StatefulWidget {
   /// widget.
   ///
   /// If null, then the value of [SliderThemeData.mouseCursor] is used. If that
-  /// is also null, then [WidgetStateMouseCursor.clickable] is used.
+  /// is also null, then [MaterialStateMouseCursor.clickable] is used.
   ///
   /// See also:
   ///
-  ///  * [WidgetStateMouseCursor], which can be used to create a [MouseCursor].
+  ///  * [MaterialStateMouseCursor], which can be used to create a [MouseCursor].
   final MaterialStateProperty<MouseCursor?>? mouseCursor;
 
   /// The callback used to create a semantic value from the slider's values.

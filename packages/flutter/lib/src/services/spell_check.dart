@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// @docImport 'package:flutter/widgets.dart';
-library;
-
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';

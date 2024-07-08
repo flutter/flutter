@@ -11,6 +11,7 @@ import '../build_info.dart';
 import '../cache.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
+import '../project.dart';
 import '../runner/flutter_command.dart' show FlutterCommandResult;
 import '../windows/build_windows.dart';
 import '../windows/visual_studio.dart';
@@ -48,6 +49,7 @@ class BuildWindowsCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    final FlutterProject flutterProject = FlutterProject.current();
     final BuildInfo buildInfo = await getBuildInfo();
     if (!featureFlags.isWindowsEnabled) {
       throwToolExit('"build windows" is not currently supported. To enable, run "flutter config --enable-windows-desktop".');
@@ -62,7 +64,7 @@ class BuildWindowsCommand extends BuildSubCommand {
 
     displayNullSafetyMode(buildInfo);
     await buildWindows(
-      project.windows,
+      flutterProject.windows,
       buildInfo,
       targetPlatform,
       target: targetFile,

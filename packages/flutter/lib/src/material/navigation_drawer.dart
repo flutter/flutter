@@ -218,7 +218,7 @@ class NavigationDrawerDestination extends StatelessWidget {
   /// selected.
   ///
   /// The icon will use [NavigationDrawerThemeData.iconTheme] with
-  /// [WidgetState.selected]. If this is null, the default [IconThemeData]
+  /// [MaterialState.selected]. If this is null, the default [IconThemeData]
   /// would use a size of 24.0 and [ColorScheme.onSecondaryContainer].
   final Widget? selectedIcon;
 

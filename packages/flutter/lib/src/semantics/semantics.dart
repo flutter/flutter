@@ -2,12 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// @docImport 'dart:ui';
-///
-/// @docImport 'package:flutter/material.dart';
-/// @docImport 'package:flutter/rendering.dart';
-library;
-
 import 'dart:math' as math;
 import 'dart:ui' show Offset, Rect, SemanticsAction, SemanticsFlag, SemanticsUpdate, SemanticsUpdateBuilder, StringAttribute, TextDirection;
 
@@ -3723,7 +3717,7 @@ class SemanticsConfiguration {
   ///
   /// See also:
   ///
-  ///  * [_addAction] to add an action.
+  ///  * [addAction] to add an action.
   final Map<SemanticsAction, SemanticsActionHandler> _actions = <SemanticsAction, SemanticsActionHandler>{};
 
   int get _effectiveActionsAsBits => isBlockingUserActions ? _actionsAsBits & _kUnblockedUserActions : _actionsAsBits;

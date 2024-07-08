@@ -856,7 +856,6 @@ class MenuItemButton extends StatefulWidget {
     this.requestFocusOnHover = true,
     this.onFocusChange,
     this.focusNode,
-    this.autofocus = false,
     this.shortcut,
     this.semanticsLabel,
     this.style,
@@ -898,9 +897,6 @@ class MenuItemButton extends StatefulWidget {
   /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode? focusNode;
 
-  /// {@macro flutter.widgets.Focus.autofocus}
-  final bool autofocus;
-
   /// The optional shortcut that selects this [MenuItemButton].
   ///
   /// {@macro flutter.material.MenuBar.shortcuts_note}
@@ -924,9 +920,9 @@ class MenuItemButton extends StatefulWidget {
   /// Customizes this button's appearance.
   ///
   /// Non-null properties of this style override the corresponding properties in
-  /// [themeStyleOf] and [defaultStyleOf]. [WidgetStateProperty]s that resolve
+  /// [themeStyleOf] and [defaultStyleOf]. [MaterialStateProperty]s that resolve
   /// to non-null values will similarly override the corresponding
-  /// [WidgetStateProperty]s in [themeStyleOf] and [defaultStyleOf].
+  /// [MaterialStateProperty]s in [themeStyleOf] and [defaultStyleOf].
   ///
   /// Null by default.
   final ButtonStyle? style;
@@ -998,7 +994,7 @@ class MenuItemButton extends StatefulWidget {
   /// A static convenience method that constructs a [MenuItemButton]'s
   /// [ButtonStyle] given simple values.
   ///
-  /// The [foregroundColor] color is used to create a [WidgetStateProperty]
+  /// The [foregroundColor] color is used to create a [MaterialStateProperty]
   /// [ButtonStyle.foregroundColor] value. Specify a value for [foregroundColor]
   /// to specify the color of the button's icons. Use [backgroundColor] for the
   /// button's background fill color. Use [disabledForegroundColor] and
@@ -1006,7 +1002,7 @@ class MenuItemButton extends StatefulWidget {
   /// color.
   ///
   /// All of the other parameters are either used directly or used to create a
-  /// [WidgetStateProperty] with a single value for all states.
+  /// [MaterialStateProperty] with a single value for all states.
   ///
   /// All parameters default to null, by default this method returns a
   /// [ButtonStyle] that doesn't override anything.
@@ -1144,7 +1140,6 @@ class _MenuItemButtonState extends State<MenuItemButton> {
       onFocusChange: widget.enabled ? widget.onFocusChange : null,
       focusNode: _focusNode,
       style: mergedStyle,
-      autofocus: widget.enabled && widget.autofocus,
       statesController: widget.statesController,
       clipBehavior: widget.clipBehavior,
       isSemanticButton: null,
@@ -1331,8 +1326,8 @@ class CheckboxMenuButton extends StatelessWidget {
   ///
   /// Non-null properties of this style override the corresponding properties in
   /// [MenuItemButton.themeStyleOf] and [MenuItemButton.defaultStyleOf].
-  /// [WidgetStateProperty]s that resolve to non-null values will similarly
-  /// override the corresponding [WidgetStateProperty]s in
+  /// [MaterialStateProperty]s that resolve to non-null values will similarly
+  /// override the corresponding [MaterialStateProperty]s in
   /// [MenuItemButton.themeStyleOf] and [MenuItemButton.defaultStyleOf].
   ///
   /// Null by default.
@@ -1530,8 +1525,8 @@ class RadioMenuButton<T> extends StatelessWidget {
   ///
   /// Non-null properties of this style override the corresponding properties in
   /// [MenuItemButton.themeStyleOf] and [MenuItemButton.defaultStyleOf].
-  /// [WidgetStateProperty]s that resolve to non-null values will similarly
-  /// override the corresponding [WidgetStateProperty]s in
+  /// [MaterialStateProperty]s that resolve to non-null values will similarly
+  /// override the corresponding [MaterialStateProperty]s in
   /// [MenuItemButton.themeStyleOf] and [MenuItemButton.defaultStyleOf].
   ///
   /// Null by default.
@@ -1680,9 +1675,9 @@ class SubmenuButton extends StatefulWidget {
   /// Customizes this button's appearance.
   ///
   /// Non-null properties of this style override the corresponding properties in
-  /// [themeStyleOf] and [defaultStyleOf]. [WidgetStateProperty]s that resolve
+  /// [themeStyleOf] and [defaultStyleOf]. [MaterialStateProperty]s that resolve
   /// to non-null values will similarly override the corresponding
-  /// [WidgetStateProperty]s in [themeStyleOf] and [defaultStyleOf].
+  /// [MaterialStateProperty]s in [themeStyleOf] and [defaultStyleOf].
   ///
   /// Null by default.
   final ButtonStyle? style;
@@ -1756,7 +1751,7 @@ class SubmenuButton extends StatefulWidget {
   /// A static convenience method that constructs a [SubmenuButton]'s
   /// [ButtonStyle] given simple values.
   ///
-  /// The [foregroundColor] color is used to create a [WidgetStateProperty]
+  /// The [foregroundColor] color is used to create a [MaterialStateProperty]
   /// [ButtonStyle.foregroundColor] value. Specify a value for [foregroundColor]
   /// to specify the color of the button's icons. Use [backgroundColor] for the
   /// button's background fill color. Use [disabledForegroundColor] and
@@ -1764,7 +1759,7 @@ class SubmenuButton extends StatefulWidget {
   /// color.
   ///
   /// All of the other parameters are either used directly or used to create a
-  /// [WidgetStateProperty] with a single value for all states.
+  /// [MaterialStateProperty] with a single value for all states.
   ///
   /// All parameters default to null, by default this method returns a
   /// [ButtonStyle] that doesn't override anything.
@@ -3603,7 +3598,7 @@ class _Submenu extends StatelessWidget {
   }
 }
 
-/// Wraps the [WidgetStateMouseCursor] so that it can default to
+/// Wraps the [MaterialStateMouseCursor] so that it can default to
 /// [MouseCursor.uncontrolled] if none is set.
 class _MouseCursor extends MaterialStateMouseCursor {
   const _MouseCursor(this.resolveCallback);

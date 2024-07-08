@@ -2,14 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// @docImport 'dart:ui';
-///
-/// @docImport 'package:flutter/widgets.dart';
-///
-/// @docImport 'image_cache.dart';
-/// @docImport 'image_provider.dart';
-library;
-
 import 'dart:async';
 import 'dart:ui' as ui show Codec, FrameInfo, Image;
 

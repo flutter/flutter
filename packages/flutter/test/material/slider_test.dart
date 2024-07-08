@@ -1454,10 +1454,7 @@ void main() {
                         TestSemantics(
                           id: 4,
                           flags: <SemanticsFlag>[SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled, SemanticsFlag.isFocusable, SemanticsFlag.isSlider],
-                          actions: <SemanticsAction>[
-                            if (defaultTargetPlatform != TargetPlatform.iOS) SemanticsAction.focus,
-                            SemanticsAction.increase, SemanticsAction.decrease,
-                          ],
+                          actions: <SemanticsAction>[SemanticsAction.focus, SemanticsAction.increase, SemanticsAction.decrease],
                           value: '50%',
                           increasedValue: '60%',
                           decreasedValue: '40%',

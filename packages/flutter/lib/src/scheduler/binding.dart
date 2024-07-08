@@ -2,14 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// @docImport 'package:flutter/material.dart';
-/// @docImport 'package:flutter/rendering.dart';
-/// @docImport 'package:flutter/services.dart';
-/// @docImport 'package:flutter/widgets.dart';
-///
-/// @docImport 'ticker.dart';
-library;
-
 import 'dart:async';
 import 'dart:collection';
 import 'dart:developer' show Flow, Timeline, TimelineTask;
@@ -517,11 +509,14 @@ mixin SchedulerBinding on BindingBase {
 
   /// Execute the highest-priority task, if it is of a high enough priority.
   ///
-  /// Returns false if the scheduler is [locked], or if there are no tasks
-  /// remaining.
+  /// Returns true if a task was executed and there are other tasks remaining
+  /// (even if they are not high-enough priority).
   ///
-  /// Returns true otherwise, including when no task is executed due to priority
-  /// being too low.
+  /// Returns false if no task was executed, which can occur if there are no
+  /// tasks scheduled, if the scheduler is [locked], or if the highest-priority
+  /// task is of too low a priority given the current [schedulingStrategy].
+  ///
+  /// Also returns false if there are no tasks remaining.
   @visibleForTesting
   @pragma('vm:notify-debugger-on-exception')
   bool handleEventLoopCallback() {
@@ -558,7 +553,7 @@ mixin SchedulerBinding on BindingBase {
       }
       return _taskQueue.isNotEmpty;
     }
-    return true;
+    return false;
   }
 
   int _nextFrameCallbackId = 0; // positive

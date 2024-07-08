@@ -119,7 +119,6 @@ void main() {
               BuildMode.release,
               null,
               treeShakeIcons: false,
-              packageConfigPath: '.dart_tool/package_config.json',
             ),
           ),
           target: 'lib/main.dart',
@@ -242,7 +241,6 @@ void main() {
             BuildMode.release,
             null,
             treeShakeIcons: false,
-            packageConfigPath: '.dart_tool/package_config.json',
           ),
         ),
         target: 'lib/main.dart',
@@ -321,7 +319,6 @@ void main() {
               BuildMode.release,
               null,
               treeShakeIcons: false,
-              packageConfigPath: '.dart_tool/package_config.json',
             ),
           ),
           target: 'lib/main.dart',
@@ -433,7 +430,6 @@ void main() {
               BuildMode.release,
               null,
               treeShakeIcons: false,
-              packageConfigPath: '.dart_tool/package_config.json',
             ),
           ),
           target: 'lib/main.dart',
@@ -543,7 +539,6 @@ void main() {
               BuildMode.release,
               null,
               treeShakeIcons: false,
-              packageConfigPath: '.dart_tool/package_config.json',
             ),
           ),
           target: 'lib/main.dart',
@@ -632,7 +627,6 @@ void main() {
             BuildMode.release,
             null,
             treeShakeIcons: false,
-            packageConfigPath: '.dart_tool/package_config.json',
           ),
         ),
         target: 'lib/main.dart',
@@ -756,7 +750,6 @@ void main() {
             null,
             treeShakeIcons: false,
             codeSizeDirectory: 'foo',
-            packageConfigPath: '.dart_tool/package_config.json',
           ),
           targetArchs: <AndroidArch>[AndroidArch.arm64_v8a],
         ),
@@ -835,7 +828,6 @@ void main() {
             BuildMode.release,
             null,
             treeShakeIcons: false,
-            packageConfigPath: '.dart_tool/package_config.json',
           ),
         ),
         target: 'lib/main.dart',
@@ -905,11 +897,7 @@ android {
         processManager: processManager,
         processUtils: ProcessUtils(processManager: processManager, logger: logger),
         userMessages: UserMessages(),
-        buildInfo: const BuildInfo(
-          BuildMode.debug, null,
-          treeShakeIcons: false,
-          packageConfigPath: '.dart_tool/package_config.json',
-        ),
+        buildInfo: const BuildInfo(BuildMode.debug, null, treeShakeIcons: false),
       );
 
       expect(androidApk?.id, 'com.example.foo');
@@ -1083,14 +1071,7 @@ Gradle Crashed
       fileSystem.directory('build/outputs/repo').createSync(recursive: true);
 
       await builder.buildGradleAar(
-        androidBuildInfo: const AndroidBuildInfo(
-          BuildInfo(
-            BuildMode.release,
-            null,
-            treeShakeIcons: false,
-            packageConfigPath: '.dart_tool/package_config.json',
-          )
-        ),
+        androidBuildInfo: const AndroidBuildInfo(BuildInfo(BuildMode.release, null, treeShakeIcons: false)),
         project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         outputDirectory: fileSystem.directory('build/'),
         target: '',
@@ -1169,14 +1150,7 @@ Gradle Crashed
       fileSystem.directory('build/outputs/repo').createSync(recursive: true);
 
       await builder.buildGradleAar(
-        androidBuildInfo: const AndroidBuildInfo(
-          BuildInfo(
-            BuildMode.release,
-            null,
-            treeShakeIcons: false,
-            packageConfigPath: '.dart_tool/package_config.json',
-          )
-        ),
+        androidBuildInfo: const AndroidBuildInfo(BuildInfo(BuildMode.release, null, treeShakeIcons: false)),
         project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         outputDirectory: fileSystem.directory('build/'),
         target: '',
@@ -1237,14 +1211,7 @@ Gradle Crashed
 
       await expectLater(() async =>
         builder.buildGradleAar(
-          androidBuildInfo: const AndroidBuildInfo(
-            BuildInfo(
-              BuildMode.release,
-              null,
-              treeShakeIcons: false,
-              packageConfigPath: '.dart_tool/package_config.json',
-            )
-          ),
+          androidBuildInfo: const AndroidBuildInfo(BuildInfo(BuildMode.release, null, treeShakeIcons: false)),
           project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
           outputDirectory: fileSystem.directory('build/'),
           target: '',
@@ -1327,7 +1294,6 @@ Gradle Crashed
               BuildMode.release,
               null,
               treeShakeIcons: false,
-              packageConfigPath: '.dart_tool/package_config.json',
             ),
           ),
           target: 'lib/main.dart',
@@ -1413,7 +1379,6 @@ Gradle Crashed
               BuildMode.release,
               null,
               treeShakeIcons: false,
-              packageConfigPath: '.dart_tool/package_config.json',
             ),
           ),
           target: 'lib/main.dart',
@@ -1499,7 +1464,6 @@ Gradle Crashed
               BuildMode.release,
               null,
               treeShakeIcons: false,
-              packageConfigPath: '.dart_tool/package_config.json',
             ),
           ),
           target: 'lib/main.dart',
@@ -1586,7 +1550,6 @@ Gradle Crashed
               BuildMode.release,
               null,
               treeShakeIcons: false,
-              packageConfigPath: '.dart_tool/package_config.json',
             ),
           ),
           target: 'lib/main.dart',
@@ -1653,7 +1616,6 @@ Gradle Crashed
               null,
               treeShakeIcons: false,
               androidGradleDaemon: false,
-              packageConfigPath: '.dart_tool/package_config.json',
             ),
           ),
           target: 'lib/main.dart',
@@ -1740,14 +1702,7 @@ Gradle Crashed
       fileSystem.directory('build/outputs/repo').createSync(recursive: true);
 
       await builder.buildGradleAar(
-        androidBuildInfo: const AndroidBuildInfo(
-          BuildInfo(
-            BuildMode.release,
-            null,
-            treeShakeIcons: false,
-            packageConfigPath: '.dart_tool/package_config.json',
-          )
-        ),
+        androidBuildInfo: const AndroidBuildInfo(BuildInfo(BuildMode.release, null, treeShakeIcons: false)),
         project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         outputDirectory: fileSystem.directory('build/'),
         target: '',
@@ -1837,13 +1792,7 @@ Gradle Crashed
 
       await builder.buildGradleAar(
         androidBuildInfo: const AndroidBuildInfo(
-            BuildInfo(
-              BuildMode.release,
-              null,
-              treeShakeIcons: false,
-              packageConfigPath: '.dart_tool/package_config.json',
-            )
-          ),
+            BuildInfo(BuildMode.release, null, treeShakeIcons: false)),
         project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         outputDirectory: fileSystem.directory('build/'),
         target: '',
@@ -1933,13 +1882,7 @@ Gradle Crashed
 
       await builder.buildGradleAar(
         androidBuildInfo: const AndroidBuildInfo(
-            BuildInfo(
-              BuildMode.release,
-              null,
-              treeShakeIcons: false,
-              packageConfigPath: '.dart_tool/package_config.json',
-            )
-          ),
+            BuildInfo(BuildMode.release, null, treeShakeIcons: false)),
         project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         outputDirectory: fileSystem.directory('build/'),
         target: '',
@@ -2029,13 +1972,7 @@ Gradle Crashed
 
       await builder.buildGradleAar(
         androidBuildInfo: const AndroidBuildInfo(
-            BuildInfo(
-              BuildMode.release,
-              null,
-              treeShakeIcons: false,
-              packageConfigPath: '.dart_tool/package_config.json',
-            )
-          ),
+            BuildInfo(BuildMode.release, null, treeShakeIcons: false)),
         project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         outputDirectory: fileSystem.directory('build/'),
         target: '',

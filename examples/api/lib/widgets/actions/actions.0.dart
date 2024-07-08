@@ -103,7 +103,7 @@ class _SaveButtonState extends State<SaveButton> {
           icon: const Icon(Icons.save),
           label: Text('$_savedValue'),
           style: ButtonStyle(
-            foregroundColor: WidgetStatePropertyAll<Color>(
+            foregroundColor: MaterialStatePropertyAll<Color>(
               widget.valueNotifier.value ? Colors.red : Colors.green,
             ),
           ),

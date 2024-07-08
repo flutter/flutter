@@ -83,7 +83,6 @@ void main() {
       BuildMode.debug,
       '',
       treeShakeIcons: false,
-      packageConfigPath: '.dart_tool/package_config.json',
     );
 
     await compiler.initialize(

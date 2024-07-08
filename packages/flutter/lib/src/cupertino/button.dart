@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// @docImport 'nav_bar.dart';
-library;
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
@@ -34,10 +31,6 @@ const double _kCupertinoFocusColorSaturation = 0.835;
 /// a fixed height parent, like a [CupertinoNavigationBar], a smaller, or even
 /// [EdgeInsets.zero], should be used to prevent clipping larger [child]
 /// widgets.
-///
-/// Preserves any parent [IconThemeData] but overwrites its [IconThemeData.color]
-/// with the [CupertinoThemeData.primaryColor] (or
-/// [CupertinoThemeData.primaryContrastingColor] if the button is disabled).
 ///
 /// {@tool dartpad}
 /// This sample shows produces an enabled and disabled [CupertinoButton] and
@@ -298,7 +291,6 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
         .toColor();
 
     final TextStyle textStyle = themeData.textTheme.textStyle.copyWith(color: foregroundColor);
-    final IconThemeData iconTheme = IconTheme.of(context).copyWith(color: foregroundColor);
 
     return MouseRegion(
       cursor: enabled && kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
@@ -352,7 +344,7 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
                       child: DefaultTextStyle(
                         style: textStyle,
                         child: IconTheme(
-                          data: iconTheme,
+                          data: IconThemeData(color: foregroundColor),
                           child: widget.child,
                         ),
                       ),

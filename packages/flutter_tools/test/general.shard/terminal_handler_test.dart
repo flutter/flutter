@@ -1361,15 +1361,12 @@ TerminalHandler setUpTerminalHandler(List<FakeVmServiceRequest> requests, {
   final ProcessInfo processInfo = ProcessInfo.test(MemoryFileSystem.test());
   final FlutterDevice device = FlutterDevice(
     FakeDevice()..supportsScreenshot = supportsScreenshot,
-    buildInfo: BuildInfo(
-      buildMode,
-      '',
-      treeShakeIcons: false,
-      packageConfigPath: '.dart_tool/package_config.json',
-    ),
+    buildInfo: BuildInfo(buildMode, '', treeShakeIcons: false),
     generator: FakeResidentCompiler(),
     developmentShaderCompiler: const FakeShaderCompiler(),
-    targetPlatform: web ? TargetPlatform.web_javascript : TargetPlatform.android_arm,
+    targetPlatform: web
+      ? TargetPlatform.web_javascript
+      : TargetPlatform.android_arm,
   );
   device.vmService = FakeVmServiceHost(requests: requests).vmService;
   final FakeResidentRunner residentRunner = FakeResidentRunner(device, testLogger, localFileSystem)

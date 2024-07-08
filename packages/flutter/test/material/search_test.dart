@@ -630,8 +630,6 @@ void main() {
       final bool isDesktop = debugDefaultTargetPlatformOverride == TargetPlatform.macOS ||
           debugDefaultTargetPlatformOverride == TargetPlatform.windows ||
           debugDefaultTargetPlatformOverride == TargetPlatform.linux;
-      final bool isCupertino = debugDefaultTargetPlatformOverride == TargetPlatform.iOS ||
-          debugDefaultTargetPlatformOverride == TargetPlatform.macOS;
       return TestSemantics.root(
         children: <TestSemantics>[
           TestSemantics(
@@ -664,10 +662,7 @@ void main() {
                                   SemanticsFlag.isEnabled,
                                   SemanticsFlag.isFocusable,
                                 ],
-                                actions: <SemanticsAction>[
-                                  SemanticsAction.tap,
-                                  if (defaultTargetPlatform != TargetPlatform.iOS) SemanticsAction.focus,
-                                ],
+                                actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                                 tooltip: 'Back',
                                 textDirection: TextDirection.ltr,
                               ),
@@ -679,7 +674,8 @@ void main() {
                                   SemanticsFlag.isEnabled,
                                   SemanticsFlag.isFocused,
                                   SemanticsFlag.isHeader,
-                                  if (!isCupertino) SemanticsFlag.namesRoute,
+                                  if (debugDefaultTargetPlatformOverride != TargetPlatform.iOS &&
+                                    debugDefaultTargetPlatformOverride != TargetPlatform.macOS) SemanticsFlag.namesRoute,
                                 ],
                                 actions: <SemanticsAction>[
                                   if (isDesktop)
@@ -687,7 +683,6 @@ void main() {
                                   if (isDesktop)
                                     SemanticsAction.didLoseAccessibilityFocus,
                                   SemanticsAction.tap,
-                                  SemanticsAction.focus,
                                   SemanticsAction.setSelection,
                                   SemanticsAction.setText,
                                   SemanticsAction.paste,
@@ -723,10 +718,7 @@ void main() {
                           SemanticsFlag.isEnabled,
                           SemanticsFlag.isFocusable,
                         ],
-                        actions: <SemanticsAction>[
-                          SemanticsAction.tap,
-                          if (defaultTargetPlatform != TargetPlatform.iOS) SemanticsAction.focus,
-                        ],
+                        actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                         label: 'Suggestions',
                         textDirection: TextDirection.ltr,
                       ),
@@ -791,8 +783,6 @@ void main() {
       final bool isDesktop = debugDefaultTargetPlatformOverride == TargetPlatform.macOS ||
                              debugDefaultTargetPlatformOverride == TargetPlatform.windows ||
                              debugDefaultTargetPlatformOverride == TargetPlatform.linux;
-      final bool isCupertino = debugDefaultTargetPlatformOverride == TargetPlatform.iOS ||
-          debugDefaultTargetPlatformOverride == TargetPlatform.macOS;
       return TestSemantics.root(
         children: <TestSemantics>[
           TestSemantics(
@@ -822,10 +812,7 @@ void main() {
                               SemanticsFlag.isEnabled,
                               SemanticsFlag.isFocusable,
                             ],
-                                actions: <SemanticsAction>[
-                                  SemanticsAction.tap,
-                                  if (defaultTargetPlatform != TargetPlatform.iOS) SemanticsAction.focus,
-                                ],
+                            actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                             tooltip: 'Back',
                             textDirection: TextDirection.ltr,
                           ),
@@ -837,7 +824,8 @@ void main() {
                               SemanticsFlag.isEnabled,
                               SemanticsFlag.isFocused,
                               SemanticsFlag.isHeader,
-                              if (!isCupertino) SemanticsFlag.namesRoute,
+                              if (debugDefaultTargetPlatformOverride != TargetPlatform.iOS &&
+                                debugDefaultTargetPlatformOverride != TargetPlatform.macOS) SemanticsFlag.namesRoute,
                             ],
                             actions: <SemanticsAction>[
                               if (isDesktop)
@@ -845,7 +833,6 @@ void main() {
                               if (isDesktop)
                                 SemanticsAction.didLoseAccessibilityFocus,
                               SemanticsAction.tap,
-                              SemanticsAction.focus,
                               SemanticsAction.setSelection,
                               SemanticsAction.setText,
                               SemanticsAction.paste,
@@ -869,10 +856,7 @@ void main() {
                           SemanticsFlag.isEnabled,
                           SemanticsFlag.isFocusable,
                         ],
-                        actions: <SemanticsAction>[
-                          SemanticsAction.tap,
-                          if (defaultTargetPlatform != TargetPlatform.iOS) SemanticsAction.focus,
-                        ],
+                        actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                         label: 'Suggestions',
                         textDirection: TextDirection.ltr,
                       ),

@@ -21,17 +21,15 @@ class FuchsiaKernelCompiler {
   Future<void> build({
     required FuchsiaProject fuchsiaProject,
     required String target, // E.g., lib/main.dart
-    BuildInfo buildInfo = BuildInfo.dummy,
+    BuildInfo buildInfo = BuildInfo.debug,
   }) async {
     // TODO(zanderso): Use filesystem root and scheme information from buildInfo.
     const String multiRootScheme = 'main-root';
+    final String packagesFile = fuchsiaProject.project.packagesFile.path;
     final String outDir = getFuchsiaBuildDirectory();
     final String appName = fuchsiaProject.project.manifest.appName;
     final String fsRoot = fuchsiaProject.project.directory.path;
-    final String relativePackageConfigPath = globals.fs.path.relative(
-      buildInfo.packageConfigPath,
-      from: fsRoot,
-    );
+    final String relativePackagesFile = globals.fs.path.relative(packagesFile, from: fsRoot);
     final String manifestPath = globals.fs.path.join(outDir, '$appName.dilpmanifest');
     final String? kernelCompiler = globals.artifacts?.getArtifactPath(
       Artifact.fuchsiaKernelCompiler,
@@ -60,7 +58,7 @@ class FuchsiaKernelCompiler {
       '--filesystem-root',
       fsRoot,
       '--packages',
-      '$multiRootScheme:///$relativePackageConfigPath',
+      '$multiRootScheme:///$relativePackagesFile',
       '--output',
       globals.fs.path.join(outDir, '$appName.dil'),
       '--component-name',

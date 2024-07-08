@@ -47,22 +47,22 @@ class _ListTileExampleState extends State<ListTileExample> {
           },
           // This sets text color and icon color to red when list tile is disabled and
           // green when list tile is selected, otherwise sets it to black.
-          iconColor: WidgetStateColor.resolveWith((Set<WidgetState> states) {
-            if (states.contains(WidgetState.disabled)) {
+          iconColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
+            if (states.contains(MaterialState.disabled)) {
               return Colors.red;
             }
-            if (states.contains(WidgetState.selected)) {
+            if (states.contains(MaterialState.selected)) {
               return Colors.green;
             }
             return Colors.black;
           }),
           // This sets text color and icon color to red when list tile is disabled and
           // green when list tile is selected, otherwise sets it to black.
-          textColor: WidgetStateColor.resolveWith((Set<WidgetState> states) {
-            if (states.contains(WidgetState.disabled)) {
+          textColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
+            if (states.contains(MaterialState.disabled)) {
               return Colors.red;
             }
-            if (states.contains(WidgetState.selected)) {
+            if (states.contains(MaterialState.selected)) {
               return Colors.green;
             }
             return Colors.black;

@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button_style.dart';
+import 'material_state.dart';
 import 'menu_anchor.dart';
 import 'theme.dart';
 
@@ -20,7 +21,7 @@ import 'theme.dart';
 /// default style, i.e. the [ButtonStyle] returned by
 /// [MenuItemButton.defaultStyleOf] and [SubmenuButton.defaultStyleOf]. Only the
 /// style's non-null property values or resolved non-null
-/// [WidgetStateProperty] values are used.
+/// [MaterialStateProperty] values are used.
 ///
 /// See also:
 ///
@@ -32,8 +33,8 @@ import 'theme.dart';
 /// * [MenuItemButton.styleFrom] and [SubmenuButton.styleFrom], which converts
 ///   simple values into a [ButtonStyle] that's consistent with their respective
 ///   defaults.
-/// * [WidgetStateProperty.resolve], "resolve" a material state property to a
-///   simple value based on a set of [WidgetState]s.
+/// * [MaterialStateProperty.resolve], "resolve" a material state property to a
+///   simple value based on a set of [MaterialState]s.
 /// * [ThemeData.menuButtonTheme], which can be used to override the default
 ///   [ButtonStyle] for [MenuItemButton]s and [SubmenuButton]s below the overall
 ///   [Theme].
@@ -49,7 +50,7 @@ class MenuButtonThemeData with Diagnosticable {
 
   /// Overrides for [SubmenuButton] and [MenuItemButton]'s default style.
   ///
-  /// Non-null properties or non-null resolved [WidgetStateProperty] values
+  /// Non-null properties or non-null resolved [MaterialStateProperty] values
   /// override the [ButtonStyle] returned by [SubmenuButton.defaultStyleOf] or
   /// [MenuItemButton.defaultStyleOf].
   ///

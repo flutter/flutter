@@ -339,7 +339,7 @@ class CreateCommand extends CreateBase {
       linux: includeLinux,
       macos: includeMacos,
       windows: includeWindows,
-      dartSdkVersionBounds: '^$dartSdk',
+      dartSdkVersionBounds: "'>=$dartSdk <4.0.0'",
       implementationTests: boolArg('implementation-tests'),
       agpVersion: gradle.templateAndroidGradlePluginVersion,
       kotlinVersion: gradle.templateKotlinGradlePluginVersion,

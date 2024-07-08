@@ -113,16 +113,11 @@ void main() {
         project.android,
         androidSdk: sdk,
         processManager: fakeProcessManager,
-        userMessages: UserMessages(),
+        userMessages:  UserMessages(),
         processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
         logger: logger,
         fileSystem: fs,
-        buildInfo: const BuildInfo(
-          BuildMode.debug,
-          null,
-          treeShakeIcons: false,
-          packageConfigPath: '.dart_tool/package_config.json',
-        ),
+        buildInfo: const BuildInfo(BuildMode.debug, null, treeShakeIcons: false),
       );
       expect(androidApk, isNotNull);
     }, overrides: overrides);

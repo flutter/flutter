@@ -235,19 +235,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
 
   bool get useWasm => boolArg(FlutterOptions.kWebWasmFlag);
 
-  bool get useLocalCanvasKit {
-    // If we have specified not to use CDN, use local CanvasKit
-    if (!boolArg(FlutterOptions.kWebResourcesCdnFlag)) {
-      return true;
-    }
-
-    // If we are using a locally built web sdk, we should use local CanvasKit
-    if (stringArg(FlutterGlobalOptions.kLocalWebSDKOption, global: true) != null) {
-      return true;
-    }
-    return false;
-  }
-
   WebRendererMode get webRenderer => WebRendererMode.fromCliOption(
     stringArg(FlutterOptions.kWebRendererFlag),
     useWasm: useWasm
@@ -287,7 +274,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         webHeaders: webHeaders,
         webRenderer: webRenderer,
         webUseWasm: useWasm,
-        webUseLocalCanvaskit: useLocalCanvasKit,
         enableImpeller: enableImpeller,
         enableVulkanValidation: enableVulkanValidation,
         uninstallFirst: uninstallFirst,
@@ -339,7 +325,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         webHeaders: webHeaders,
         webRenderer: webRenderer,
         webUseWasm: useWasm,
-        webUseLocalCanvaskit: useLocalCanvasKit,
         vmserviceOutFile: stringArg('vmservice-out-file'),
         fastStart: argParser.options.containsKey('fast-start')
           && boolArg('fast-start')
@@ -593,7 +578,7 @@ class RunCommand extends RunCommandBase {
       runTargetName: deviceType,
       runTargetOsVersion: deviceOsVersion,
       runModeName: modeName,
-      runProjectModule: project.isModule,
+      runProjectModule: FlutterProject.current().isModule,
       runProjectHostLanguage: hostLanguage.join(','),
       runAndroidEmbeddingVersion: androidEmbeddingVersion,
       runEnableImpeller: enableImpeller.asBool,
@@ -753,9 +738,9 @@ class RunCommand extends RunCommandBase {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final BuildInfo buildInfo = await getBuildInfo();
     // Enable hot mode by default if `--no-hot` was not passed and we are in
     // debug mode.
+    final BuildInfo buildInfo = await getBuildInfo();
     final bool hotMode = shouldUseHotMode(buildInfo);
     final String? applicationBinaryPath = stringArg(FlutterOptions.kUseApplicationBinary);
 
@@ -817,6 +802,7 @@ class RunCommand extends RunCommandBase {
         stringsArg(FlutterOptions.kEnableExperiment).isNotEmpty) {
       expFlags = stringsArg(FlutterOptions.kEnableExperiment);
     }
+    final FlutterProject flutterProject = FlutterProject.current();
     final List<FlutterDevice> flutterDevices = <FlutterDevice>[
       for (final Device device in devices!)
         await FlutterDevice.create(
@@ -832,7 +818,7 @@ class RunCommand extends RunCommandBase {
     final ResidentRunner runner = await createRunner(
       applicationBinaryPath: applicationBinaryPath,
       flutterDevices: flutterDevices,
-      flutterProject: project,
+      flutterProject: flutterProject,
       hotMode: hotMode,
     );
 

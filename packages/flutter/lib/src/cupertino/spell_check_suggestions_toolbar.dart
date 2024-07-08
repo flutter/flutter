@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// @docImport 'package:flutter/material.dart';
-library;
-
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart' show SelectionChangedCause, SuggestionSpan;
 import 'package:flutter/widgets.dart';

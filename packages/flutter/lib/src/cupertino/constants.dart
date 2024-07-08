@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// @docImport 'package:flutter/material.dart';
-library;
-
 /// The minimum dimension of any interactive region according to the iOS Human
 /// Interface Guidelines.
 ///

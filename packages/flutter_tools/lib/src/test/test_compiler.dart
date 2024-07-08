@@ -122,7 +122,7 @@ class TestCompiler {
       trackWidgetCreation: buildInfo.trackWidgetCreation,
       initializeFromDill: testFilePath,
       dartDefines: buildInfo.dartDefines,
-      packagesPath: buildInfo.packageConfigPath,
+      packagesPath: buildInfo.packagesPath,
       frontendServerStarterPath: buildInfo.frontendServerStarterPath,
       extraFrontEndOptions: buildInfo.extraFrontEndOptions,
       platform: globals.platform,

@@ -2,12 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// @docImport 'package:flutter/material.dart';
-///
-/// @docImport 'goldens.dart';
-/// @docImport 'widget_tester.dart';
-library;
-
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';

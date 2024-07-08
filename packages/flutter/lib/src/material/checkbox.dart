@@ -35,7 +35,7 @@ enum _CheckboxType { material, adaptive }
 ///
 /// {@tool dartpad}
 /// This example shows how you can override the default theme of
-/// a [Checkbox] with a [WidgetStateProperty].
+/// a [Checkbox] with a [MaterialStateProperty].
 /// In this example, the checkbox's color will be `Colors.blue` when the [Checkbox]
 /// is being pressed, hovered, or focused. Otherwise, the checkbox's color will
 /// be `Colors.red`.
@@ -106,11 +106,10 @@ class Checkbox extends StatefulWidget {
   /// graphics expected on iOS. On other platforms, this creates a Material
   /// design [Checkbox].
   ///
-  /// If a [CupertinoCheckbox] is created, the following parameters are ignored:
-  /// [mouseCursor], [fillColor], [hoverColor], [overlayColor], [splashRadius],
-  /// [materialTapTargetSize], [visualDensity], [isError]. However, [shape] and
-  /// [side] will still affect the [CupertinoCheckbox] and should be handled if
-  /// native fidelity is important.
+  /// If a [CupertinoCheckbox] is created, [hoverColor], [overlayColor], and
+  /// [splashRadius] are ignored because a Cupertino-design checkbox does not
+  /// have a radial reaction overlay. [materialTapTargetSize] and [visualDensity]
+  /// are also ignored because both are Material-design-specific configurations.
   ///
   /// The target platform is based on the current [Theme]: [ThemeData.platform].
   const Checkbox.adaptive({
@@ -176,56 +175,56 @@ class Checkbox extends StatefulWidget {
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// widget.
   ///
-  /// If [mouseCursor] is a [WidgetStateProperty<MouseCursor>],
-  /// [WidgetStateProperty.resolve] is used for the following [WidgetState]s:
+  /// If [mouseCursor] is a [MaterialStateProperty<MouseCursor>],
+  /// [MaterialStateProperty.resolve] is used for the following [MaterialState]s:
   ///
-  ///  * [WidgetState.selected].
-  ///  * [WidgetState.hovered].
-  ///  * [WidgetState.focused].
-  ///  * [WidgetState.disabled].
+  ///  * [MaterialState.selected].
+  ///  * [MaterialState.hovered].
+  ///  * [MaterialState.focused].
+  ///  * [MaterialState.disabled].
   /// {@endtemplate}
   ///
-  /// When [value] is null and [tristate] is true, [WidgetState.selected] is
+  /// When [value] is null and [tristate] is true, [MaterialState.selected] is
   /// included as a state.
   ///
   /// If null, then the value of [CheckboxThemeData.mouseCursor] is used. If
-  /// that is also null, then [WidgetStateMouseCursor.clickable] is used.
+  /// that is also null, then [MaterialStateMouseCursor.clickable] is used.
   ///
   /// See also:
   ///
-  ///  * [WidgetStateMouseCursor], a [MouseCursor] that implements
-  ///    `WidgetStateProperty` which is used in APIs that need to accept
-  ///    either a [MouseCursor] or a [WidgetStateProperty<MouseCursor>].
+  ///  * [MaterialStateMouseCursor], a [MouseCursor] that implements
+  ///    `MaterialStateProperty` which is used in APIs that need to accept
+  ///    either a [MouseCursor] or a [MaterialStateProperty<MouseCursor>].
   final MouseCursor? mouseCursor;
 
   /// The color to use when this checkbox is checked.
   ///
   /// Defaults to [ColorScheme.secondary].
   ///
-  /// If [fillColor] returns a non-null color in the [WidgetState.selected]
+  /// If [fillColor] returns a non-null color in the [MaterialState.selected]
   /// state, it will be used instead of this color.
   final Color? activeColor;
 
   /// {@template flutter.material.checkbox.fillColor}
-  /// The color that fills the checkbox, in all [WidgetState]s.
+  /// The color that fills the checkbox, in all [MaterialState]s.
   ///
   /// Resolves in the following states:
-  ///  * [WidgetState.selected].
-  ///  * [WidgetState.hovered].
-  ///  * [WidgetState.focused].
-  ///  * [WidgetState.disabled].
+  ///  * [MaterialState.selected].
+  ///  * [MaterialState.hovered].
+  ///  * [MaterialState.focused].
+  ///  * [MaterialState.disabled].
   ///
   /// {@tool snippet}
-  /// This example resolves the [fillColor] based on the current [WidgetState]
+  /// This example resolves the [fillColor] based on the current [MaterialState]
   /// of the [Checkbox], providing a different [Color] when it is
-  /// [WidgetState.disabled].
+  /// [MaterialState.disabled].
   ///
   /// ```dart
   /// Checkbox(
   ///   value: true,
   ///   onChanged: (_){},
-  ///   fillColor: MaterialStateProperty.resolveWith<Color>((Set<WidgetState> states) {
-  ///     if (states.contains(WidgetState.disabled)) {
+  ///   fillColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
+  ///     if (states.contains(MaterialState.disabled)) {
   ///       return Colors.orange.withOpacity(.32);
   ///     }
   ///     return Colors.orange;
@@ -293,7 +292,7 @@ class Checkbox extends StatefulWidget {
 
   /// The color for the checkbox's [Material] when it has the input focus.
   ///
-  /// If [overlayColor] returns a non-null color in the [WidgetState.focused]
+  /// If [overlayColor] returns a non-null color in the [MaterialState.focused]
   /// state, it will be used instead.
   ///
   /// If null, then the value of [CheckboxThemeData.overlayColor] is used in the
@@ -304,7 +303,7 @@ class Checkbox extends StatefulWidget {
   /// {@template flutter.material.checkbox.hoverColor}
   /// The color for the checkbox's [Material] when a pointer is hovering over it.
   ///
-  /// If [overlayColor] returns a non-null color in the [WidgetState.hovered]
+  /// If [overlayColor] returns a non-null color in the [MaterialState.hovered]
   /// state, it will be used instead.
   /// {@endtemplate}
   ///
@@ -317,10 +316,10 @@ class Checkbox extends StatefulWidget {
   /// The color for the checkbox's [Material].
   ///
   /// Resolves in the following states:
-  ///  * [WidgetState.pressed].
-  ///  * [WidgetState.selected].
-  ///  * [WidgetState.hovered].
-  ///  * [WidgetState.focused].
+  ///  * [MaterialState.pressed].
+  ///  * [MaterialState.selected].
+  ///  * [MaterialState.hovered].
+  ///  * [MaterialState.focused].
   /// {@endtemplate}
   ///
   /// If null, then the value of [activeColor] with alpha
@@ -358,19 +357,19 @@ class Checkbox extends StatefulWidget {
   /// {@template flutter.material.checkbox.side}
   /// The color and width of the checkbox's border.
   ///
-  /// This property can be a [WidgetStateBorderSide] that can
+  /// This property can be a [MaterialStateBorderSide] that can
   /// specify different border color and widths depending on the
   /// checkbox's state.
   ///
   /// Resolves in the following states:
-  ///  * [WidgetState.pressed].
-  ///  * [WidgetState.selected].
-  ///  * [WidgetState.hovered].
-  ///  * [WidgetState.focused].
-  ///  * [WidgetState.disabled].
-  ///  * [WidgetState.error].
+  ///  * [MaterialState.pressed].
+  ///  * [MaterialState.selected].
+  ///  * [MaterialState.hovered].
+  ///  * [MaterialState.focused].
+  ///  * [MaterialState.disabled].
+  ///  * [MaterialState.error].
   ///
-  /// If this property is not a [WidgetStateBorderSide] and it is
+  /// If this property is not a [MaterialStateBorderSide] and it is
   /// non-null, then it is only rendered when the checkbox's value is
   /// false. The difference in interpretation is for backwards
   /// compatibility.
@@ -470,6 +469,17 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
 
   @override
   Widget build(BuildContext context) {
+    final CheckboxThemeData checkboxTheme = CheckboxTheme.of(context);
+
+    // Colors need to be resolved in selected and non selected states separately
+    final Set<MaterialState> activeStates = states..add(MaterialState.selected);
+    final Set<MaterialState> inactiveStates = states..remove(MaterialState.selected);
+    if (widget.isError) {
+      activeStates.add(MaterialState.error);
+      inactiveStates.add(MaterialState.error);
+    }
+    final Set<MaterialState> checkStates = widget.isError ? (states..add(MaterialState.error)) : states;
+
     switch (widget._checkboxType) {
       case _CheckboxType.material:
         break;
@@ -488,19 +498,22 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
               value: value,
               tristate: tristate,
               onChanged: onChanged,
+              mouseCursor: widget.mouseCursor ?? checkboxTheme.mouseCursor?.resolve(states),
               activeColor: widget.activeColor,
-              checkColor: widget.checkColor,
+              fillColor: widget.fillColor ?? checkboxTheme.fillColor,
+              checkColor: widget.checkColor ?? checkboxTheme.checkColor?.resolve(checkStates),
               focusColor: widget.focusColor,
               focusNode: widget.focusNode,
               autofocus: widget.autofocus,
-              side: widget.side,
-              shape: widget.shape,
+              side: widget.side ?? checkboxTheme.side,
+              shape: widget.shape ?? checkboxTheme.shape,
+              isError: widget.isError,
+              semanticLabel: widget.semanticLabel,
             );
         }
     }
 
     assert(debugCheckHasMaterial(context));
-    final CheckboxThemeData checkboxTheme = CheckboxTheme.of(context);
     final CheckboxThemeData defaults = Theme.of(context).useMaterial3
       ? _CheckboxDefaultsM3(context)
       : _CheckboxDefaultsM2(context);
@@ -522,13 +535,6 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
         ?? MaterialStateMouseCursor.clickable.resolve(states);
     });
 
-    // Colors need to be resolved in selected and non selected states separately
-    final Set<MaterialState> activeStates = states..add(MaterialState.selected);
-    final Set<MaterialState> inactiveStates = states..remove(MaterialState.selected);
-    if (widget.isError) {
-      activeStates.add(MaterialState.error);
-      inactiveStates.add(MaterialState.error);
-    }
     final Color? activeColor = widget.fillColor?.resolve(activeStates)
       ?? _widgetFillColor.resolve(activeStates)
       ?? checkboxTheme.fillColor?.resolve(activeStates);
@@ -586,7 +592,6 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
         : effectiveInactivePressedOverlayColor;
     }
 
-    final Set<MaterialState> checkStates = widget.isError ? (states..add(MaterialState.error)) : states;
     final Color effectiveCheckColor = widget.checkColor
       ?? checkboxTheme.checkColor?.resolve(checkStates)
       ?? defaults.checkColor!.resolve(checkStates)!;

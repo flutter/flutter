@@ -5,9 +5,6 @@
 // Examples can assume:
 // bool _giveVerse = false;
 
-/// @docImport 'package:flutter/material.dart';
-library;
-
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';

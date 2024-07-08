@@ -503,8 +503,8 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// In Material v3 (i.e., when [ThemeData.useMaterial3] is true),
   /// then [AppBar] uses the overall theme's [ColorScheme.surface]
   ///
-  /// If this color is a [WidgetStateColor] it will be resolved against
-  /// [WidgetState.scrolledUnder] when the content of the app's
+  /// If this color is a [MaterialStateColor] it will be resolved against
+  /// [MaterialState.scrolledUnder] when the content of the app's
   /// primary scrollable overlaps the app bar.
   /// {@endtemplate}
   ///

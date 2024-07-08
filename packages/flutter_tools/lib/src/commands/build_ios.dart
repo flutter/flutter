@@ -16,7 +16,6 @@ import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
-import '../base/version.dart';
 import '../build_info.dart';
 import '../convert.dart';
 import '../doctor_validator.dart';
@@ -468,14 +467,14 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     String? exportOptions = exportOptionsPlist;
     String? exportMethod = exportOptions != null ?
         globals.plistParser.getValueFromFile<String?>(exportOptions, 'method') : null;
-    exportMethod ??= _getVersionAppropriateExportMethod(stringArg('export-method')!);
-    final bool isAppStoreUpload = exportMethod == 'app-store' || exportMethod == 'app-store-connect';
+    exportMethod ??= stringArg('export-method')!;
+    final bool isAppStoreUpload = exportMethod == 'app-store';
     File? generatedExportPlist;
     try {
       final String exportMethodDisplayName = isAppStoreUpload ? 'App Store' : exportMethod;
       status = globals.logger.startProgress('Building $exportMethodDisplayName IPA...');
       if (exportOptions == null) {
-        generatedExportPlist = _createExportPlist(exportMethod);
+        generatedExportPlist = _createExportPlist();
         exportOptions = generatedExportPlist.path;
       }
 
@@ -556,7 +555,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     return FlutterCommandResult.success();
   }
 
-  File _createExportPlist(String exportMethod) {
+  File _createExportPlist() {
     // Create the plist to be passed into xcodebuild -exportOptionsPlist.
     final StringBuffer plistContents = StringBuffer('''
 <?xml version="1.0" encoding="UTF-8"?>
@@ -564,7 +563,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
 <plist version="1.0">
     <dict>
         <key>method</key>
-        <string>$exportMethod</string>
+        <string>${stringArg('export-method')}</string>
         <key>uploadBitcode</key>
         <false/>
     </dict>
@@ -576,29 +575,6 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     tempPlist.writeAsStringSync(plistContents.toString());
 
     return tempPlist;
-  }
-
-  // As of Xcode 15.4, the old export methods 'app-store', 'ad-hoc', and 'development'
-  // are now deprecated. The new equivalents are 'app-store-connect', 'release-testing',
-  // and 'debugging'.
-  String _getVersionAppropriateExportMethod(String method) {
-    final Version? currVersion = globals.xcode!.currentVersion;
-    if (currVersion != null) {
-      if (currVersion >= Version(15, 4, 0)) {
-        switch (method) {
-          case 'app-store':
-            return 'app-store-connect';
-          case 'ad-hoc':
-            return 'release-testing';
-          case 'development':
-            return 'debugging';
-          default:
-            throwToolExit('Encountered invalid export-method input.');
-        }
-      }
-      return method;
-    }
-    throwToolExit('Xcode version could not be found.');
   }
 }
 

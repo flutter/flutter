@@ -275,15 +275,15 @@ class CheckboxListTile extends StatelessWidget {
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// widget.
   ///
-  /// If [mouseCursor] is a [WidgetStateProperty<MouseCursor>],
-  /// [WidgetStateProperty.resolve] is used for the following [WidgetState]s:
+  /// If [mouseCursor] is a [MaterialStateProperty<MouseCursor>],
+  /// [MaterialStateProperty.resolve] is used for the following [MaterialState]s:
   ///
-  ///  * [WidgetState.selected].
-  ///  * [WidgetState.hovered].
-  ///  * [WidgetState.disabled].
+  ///  * [MaterialState.selected].
+  ///  * [MaterialState.hovered].
+  ///  * [MaterialState.disabled].
   ///
   /// If null, then the value of [CheckboxThemeData.mouseCursor] is used. If
-  /// that is also null, then [WidgetStateMouseCursor.clickable] is used.
+  /// that is also null, then [MaterialStateMouseCursor.clickable] is used.
   final MouseCursor? mouseCursor;
 
   /// The color to use when this checkbox is checked.
@@ -294,9 +294,9 @@ class CheckboxListTile extends StatelessWidget {
   /// The color that fills the checkbox.
   ///
   /// Resolves in the following states:
-  ///  * [WidgetState.selected].
-  ///  * [WidgetState.hovered].
-  ///  * [WidgetState.disabled].
+  ///  * [MaterialState.selected].
+  ///  * [MaterialState.hovered].
+  ///  * [MaterialState.disabled].
   ///
   /// If null, then the value of [activeColor] is used in the selected
   /// state. If that is also null, the value of [CheckboxThemeData.fillColor]
@@ -314,9 +314,9 @@ class CheckboxListTile extends StatelessWidget {
   /// The color for the checkbox's [Material].
   ///
   /// Resolves in the following states:
-  ///  * [WidgetState.pressed].
-  ///  * [WidgetState.selected].
-  ///  * [WidgetState.hovered].
+  ///  * [MaterialState.pressed].
+  ///  * [MaterialState.selected].
+  ///  * [MaterialState.hovered].
   ///
   /// If null, then the value of [activeColor] with alpha [kRadialReactionAlpha]
   /// and [hoverColor] is used in the pressed and hovered state. If that is also null,

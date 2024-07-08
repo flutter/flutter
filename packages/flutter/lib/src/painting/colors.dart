@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// @docImport 'package:flutter/material.dart';
-library;
-
 import 'dart:math' as math;
 import 'dart:ui' show Color, lerpDouble;
 
@@ -404,7 +401,7 @@ class HSLColor {
 ///
 ///  * [MaterialColor] and [MaterialAccentColor], which define Material Design
 ///    primary and accent color swatches.
-///  * [Colors], which defines all of the standard Material Design
+///  * [material.Colors], which defines all of the standard Material Design
 ///    colors.
 @immutable
 class ColorSwatch<T> extends Color {

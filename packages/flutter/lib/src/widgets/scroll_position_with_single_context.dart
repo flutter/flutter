@@ -147,7 +147,7 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
         this,
         simulation,
         context.vsync,
-        shouldIgnorePointer,
+        activity?.shouldIgnorePointer ?? true,
       ));
     } else {
       goIdle();

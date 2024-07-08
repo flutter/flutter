@@ -1722,12 +1722,7 @@ void main() {
         theme: ThemeData(platform: TargetPlatform.iOS),
         home: const AlertDialog(
           title: Text('title'),
-          content: Column(
-            children: <Widget>[
-              Text('some content'),
-              Text('more content'),
-            ],
-          ),
+          content: Text('content'),
           actions: <Widget>[ TextButton(onPressed: null, child: Text('action')) ],
         ),
       ),
@@ -1758,21 +1753,11 @@ void main() {
                         // node 4.
                         TestSemantics(
                           id: 6,
-                          children: <TestSemantics>[
-                            TestSemantics(
-                              id: 7,
-                              label: 'some content',
-                              textDirection: TextDirection.ltr,
-                            ),
-                            TestSemantics(
-                              id: 8,
-                              label: 'more content',
-                              textDirection: TextDirection.ltr,
-                            ),
-                          ],
+                          label: 'content',
+                          textDirection: TextDirection.ltr,
                         ),
                         TestSemantics(
-                          id: 9,
+                          id: 7,
                           flags: <SemanticsFlag>[
                             SemanticsFlag.isButton,
                             SemanticsFlag.hasEnabledState,

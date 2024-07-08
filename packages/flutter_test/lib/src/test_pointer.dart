@@ -2,12 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// @docImport 'dart:ui';
-///
-/// @docImport 'controller.dart';
-/// @docImport 'widget_tester.dart';
-library;
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 

@@ -50,7 +50,7 @@ class RadioThemeData with Diagnosticable {
   /// {@macro flutter.material.radio.mouseCursor}
   ///
   /// If specified, overrides the default value of [Radio.mouseCursor]. The
-  /// default value is [WidgetStateMouseCursor.clickable].
+  /// default value is [MaterialStateMouseCursor.clickable].
   final MaterialStateProperty<MouseCursor?>? mouseCursor;
 
   /// {@macro flutter.material.radio.fillColor}

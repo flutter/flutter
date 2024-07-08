@@ -339,8 +339,8 @@ class Stepper extends StatefulWidget {
   /// Customize connected lines colors.
   ///
   /// Resolves in the following states:
-  ///  * [WidgetState.selected].
-  ///  * [WidgetState.disabled].
+  ///  * [MaterialState.selected].
+  ///  * [MaterialState.disabled].
   ///
   /// If not set then the widget will use default colors, primary for selected state
   /// and grey.shade400 for disabled state.

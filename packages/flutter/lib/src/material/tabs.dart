@@ -1049,8 +1049,8 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// [TextTheme.bodyLarge] text color is used.
   ///
   /// If [labelColor] (or, if null, [TabBarTheme.labelColor]) is a
-  /// [WidgetStateColor], then the effective tab color will depend on the
-  /// [WidgetState.selected] state, i.e. if the [Tab] is selected or not,
+  /// [MaterialStateColor], then the effective tab color will depend on the
+  /// [MaterialState.selected] state, i.e. if the [Tab] is selected or not,
   /// ignoring [unselectedLabelColor] even if it's non-null.
   ///
   /// When this color or the [TabBarTheme.labelColor] is specified, it overrides
@@ -1065,8 +1065,8 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// The color of unselected tab labels.
   ///
   /// If [labelColor] (or, if null, [TabBarTheme.labelColor]) is a
-  /// [WidgetStateColor], then the unselected tabs are rendered with
-  /// that [WidgetStateColor]'s resolved color for unselected state, even if
+  /// [MaterialStateColor], then the unselected tabs are rendered with
+  /// that [MaterialStateColor]'s resolved color for unselected state, even if
   /// [unselectedLabelColor] is non-null.
   ///
   /// If null, then [TabBarTheme.unselectedLabelColor] is used. If that is also
@@ -1124,10 +1124,10 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
 
   /// Defines the ink response focus, hover, and splash colors.
   ///
-  /// If non-null, it is resolved against one of [WidgetState.focused],
-  /// [WidgetState.hovered], and [WidgetState.pressed].
+  /// If non-null, it is resolved against one of [MaterialState.focused],
+  /// [MaterialState.hovered], and [MaterialState.pressed].
   ///
-  /// [WidgetState.pressed] triggers a ripple (an ink splash), per
+  /// [MaterialState.pressed] triggers a ripple (an ink splash), per
   /// the current Material Design spec.
   ///
   /// If the overlay color is null or resolves to null, then if [ThemeData.useMaterial3] is
@@ -1150,19 +1150,19 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// individual tab widgets.
   ///
-  /// If [mouseCursor] is a [WidgetStateProperty<MouseCursor>],
-  /// [WidgetStateProperty.resolve] is used for the following [WidgetState]s:
+  /// If [mouseCursor] is a [MaterialStateProperty<MouseCursor>],
+  /// [MaterialStateProperty.resolve] is used for the following [MaterialState]s:
   ///
-  ///  * [WidgetState.selected].
+  ///  * [MaterialState.selected].
   /// {@endtemplate}
   ///
   /// If null, then the value of [TabBarTheme.mouseCursor] is used. If
-  /// that is also null, then [WidgetStateMouseCursor.clickable] is used.
+  /// that is also null, then [MaterialStateMouseCursor.clickable] is used.
   ///
   /// See also:
   ///
-  ///  * [WidgetStateMouseCursor], which can be used to create a [MouseCursor]
-  ///    that is also a [WidgetStateProperty<MouseCursor>].
+  ///  * [MaterialStateMouseCursor], which can be used to create a [MouseCursor]
+  ///    that is also a [MaterialStateProperty<MouseCursor>].
   final MouseCursor? mouseCursor;
 
   /// Whether detected gestures should provide acoustic and/or haptic feedback.
@@ -1202,9 +1202,9 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// ```dart
   /// TabBar(
   ///   splashFactory: NoSplash.splashFactory,
-  ///   overlayColor: WidgetStateProperty.resolveWith<Color?>(
-  ///     (Set<WidgetState> states) {
-  ///       return states.contains(WidgetState.focused) ? null : Colors.transparent;
+  ///   overlayColor: MaterialStateProperty.resolveWith<Color?>(
+  ///     (Set<MaterialState> states) {
+  ///       return states.contains(MaterialState.focused) ? null : Colors.transparent;
   ///     },
   ///   ),
   ///   tabs: const <Widget>[

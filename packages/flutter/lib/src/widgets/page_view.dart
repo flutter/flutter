@@ -383,16 +383,13 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
 
   @override
   double? get page {
-    if (!hasPixels) {
-      return null;
-    }
     assert(
-      hasContentDimensions || !haveDimensions,
+      !hasPixels || hasContentDimensions,
       'Page value is only available after content dimensions are established.',
     );
-    return hasContentDimensions || haveDimensions
-        ? _cachedPage ?? getPageFromPixels(clampDouble(pixels, minScrollExtent, maxScrollExtent), viewportDimension)
-        : null;
+    return !hasPixels || !hasContentDimensions
+      ? null
+      : _cachedPage ?? getPageFromPixels(clampDouble(pixels, minScrollExtent, maxScrollExtent), viewportDimension);
   }
 
   @override

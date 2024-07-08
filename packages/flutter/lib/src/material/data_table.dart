@@ -88,15 +88,15 @@ class DataColumn {
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// heading row.
   ///
-  /// [WidgetStateProperty.resolve] is used for the following [WidgetState]s:
+  /// [MaterialStateProperty.resolve] is used for the following [MaterialState]s:
   ///
-  ///  * [WidgetState.disabled].
+  ///  * [MaterialState.disabled].
   ///
   /// If this is null, then the value of [DataTableThemeData.headingCellCursor]
-  /// is used. If that's null, then [WidgetStateMouseCursor.clickable] is used.
+  /// is used. If that's null, then [MaterialStateMouseCursor.clickable] is used.
   ///
   /// See also:
-  ///  * [WidgetStateMouseCursor], which can be used to create a [MouseCursor].
+  ///  * [MaterialStateMouseCursor], which can be used to create a [MouseCursor].
   final MaterialStateProperty<MouseCursor?>? mouseCursor;
 
   /// Defines the horizontal layout of the [label] and sort indicator in the
@@ -200,7 +200,7 @@ class DataRow {
   /// By default, the color is transparent unless selected. Selected rows has
   /// a grey translucent color.
   ///
-  /// The effective color can depend on the [WidgetState] state, if the
+  /// The effective color can depend on the [MaterialState] state, if the
   /// row is selected, pressed, hovered, focused, disabled or enabled. The
   /// color is painted as an overlay to the row. To make sure that the row's
   /// [InkWell] is visible (when pressed, hovered and focused), it is
@@ -210,8 +210,8 @@ class DataRow {
   ///
   /// ```dart
   /// DataRow(
-  ///   color: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
-  ///     if (states.contains(WidgetState.selected)) {
+  ///   color: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+  ///     if (states.contains(MaterialState.selected)) {
   ///       return Theme.of(context).colorScheme.primary.withOpacity(0.08);
   ///     }
   ///     return null;  // Use the default value.
@@ -232,15 +232,15 @@ class DataRow {
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// data row.
   ///
-  /// [WidgetStateProperty.resolve] is used for the following [WidgetState]s:
+  /// [MaterialStateProperty.resolve] is used for the following [MaterialState]s:
   ///
-  ///  * [WidgetState.selected].
+  ///  * [MaterialState.selected].
   ///
   /// If this is null, then the value of [DataTableThemeData.dataRowCursor]
-  /// is used. If that's null, then [WidgetStateMouseCursor.clickable] is used.
+  /// is used. If that's null, then [MaterialStateMouseCursor.clickable] is used.
   ///
   /// See also:
-  ///  * [WidgetStateMouseCursor], which can be used to create a [MouseCursor].
+  ///  * [MaterialStateMouseCursor], which can be used to create a [MouseCursor].
   final MaterialStateProperty<MouseCursor?>? mouseCursor;
 
   bool get _debugInteractive => onSelectChanged != null || cells.any((DataCell cell) => cell._debugInteractive);
@@ -349,29 +349,27 @@ class DataCell {
       onTapCancel != null;
 }
 
-/// A data table that follows the
-/// [Material 2](https://material.io/go/design-data-tables)
-/// design specification.
+/// A Material Design data table.
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=ktTajqbhIcY}
 ///
-/// ## Performance considerations
+/// Displaying data in a table is expensive, because to lay out the
+/// table all the data must be measured twice, once to negotiate the
+/// dimensions to use for each column, and once to actually lay out
+/// the table given the results of the negotiation.
 ///
-/// Columns are sized automatically based on the table's contents.
-/// It's expensive to display large amounts of data with this widget,
-/// since it must be measured twice: once to negotiate each column's
-/// dimensions, and again when the table is laid out.
+/// For this reason, if you have a lot of data (say, more than a dozen
+/// rows with a dozen columns, though the precise limits depend on the
+/// target device), it is suggested that you use a
+/// [PaginatedDataTable] which automatically splits the data into
+/// multiple pages.
 ///
-/// A [SingleChildScrollView] mounts and paints the entire child, even
-/// when only some of it is visible. For a table that effectively handles
-/// large amounts of data, here are some other options to consider:
+/// ## Performance considerations when wrapping [DataTable] with [SingleChildScrollView]
 ///
-///  * `TableView`, a widget from the
-///    [two_dimensional_scrollables](https://pub.dev/packages/two_dimensional_scrollables)
-///    package.
-///  * [PaginatedDataTable], which automatically splits the data into
-///    multiple pages.
-///  * [CustomScrollView], for greater control over scrolling effects.
+/// Wrapping a [DataTable] with [SingleChildScrollView] is expensive as [SingleChildScrollView]
+/// mounts and paints the entire [DataTable] even when only some rows are visible. If scrolling in
+/// one direction is necessary, then consider using a [CustomScrollView], otherwise use [PaginatedDataTable]
+/// to split the data into smaller pages.
 ///
 /// {@tool dartpad}
 /// This sample shows how to display a [DataTable] with three columns: name, age, and
@@ -404,10 +402,7 @@ class DataCell {
 ///  * [DataCell], which contains the data for a single cell in the data table.
 ///  * [PaginatedDataTable], which shows part of the data in a data table and
 ///    provides controls for paging through the remainder of the data.
-///  * `TableView` from the
-///    [two_dimensional_scrollables](https://pub.dev/packages/two_dimensional_scrollables)
-///    package, for displaying large amounts of data without pagination.
-///  * <https://material.io/go/design-data-tables>
+///  * <https://material.io/design/components/data-tables.html>
 class DataTable extends StatelessWidget {
   /// Creates a widget describing a data table.
   ///
@@ -527,7 +522,7 @@ class DataTable extends StatelessWidget {
   /// The background color for the data rows.
   ///
   /// The effective background color can be made to depend on the
-  /// [WidgetState] state, i.e. if the row is selected, pressed, hovered,
+  /// [MaterialState] state, i.e. if the row is selected, pressed, hovered,
   /// focused, disabled or enabled. The color is painted as an overlay to the
   /// row. To make sure that the row's [InkWell] is visible (when pressed,
   /// hovered and focused), it is recommended to use a translucent background
@@ -545,8 +540,8 @@ class DataTable extends StatelessWidget {
   /// {@template flutter.material.DataTable.dataRowColor}
   /// ```dart
   /// DataTable(
-  ///   dataRowColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
-  ///     if (states.contains(WidgetState.selected)) {
+  ///   dataRowColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+  ///     if (states.contains(MaterialState.selected)) {
   ///       return Theme.of(context).colorScheme.primary.withOpacity(0.08);
   ///     }
   ///     return null;  // Use the default value.
@@ -607,7 +602,7 @@ class DataTable extends StatelessWidget {
   /// The background color for the heading row.
   ///
   /// The effective background color can be made to depend on the
-  /// [WidgetState] state, i.e. if the row is pressed, hovered, focused when
+  /// [MaterialState] state, i.e. if the row is pressed, hovered, focused when
   /// sorted. The color is painted as an overlay to the row. To make sure that
   /// the row's [InkWell] is visible (when pressed, hovered and focused), it is
   /// recommended to use a translucent color.
@@ -620,8 +615,8 @@ class DataTable extends StatelessWidget {
   /// DataTable(
   ///   columns: _columns,
   ///   rows: _rows,
-  ///   headingRowColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
-  ///     if (states.contains(WidgetState.hovered)) {
+  ///   headingRowColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+  ///     if (states.contains(MaterialState.hovered)) {
   ///       return Theme.of(context).colorScheme.primary.withOpacity(0.08);
   ///     }
   ///     return null;  // Use the default value.

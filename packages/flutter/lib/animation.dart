@@ -158,8 +158,6 @@
 ///    implicitly animate changes to their properties.
 ///  * [AnimatedWidget] and its subclasses, which are [Widget]s that take an
 ///    explicit [Animation] to animate their properties.
-///
-/// @docImport 'package:flutter/material.dart';
 library animation;
 
 // AnimationController can throw TickerCanceled

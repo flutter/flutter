@@ -61,10 +61,10 @@ class CheckboxThemeData with Diagnosticable {
   /// {@macro flutter.material.checkbox.checkColor}
   ///
   /// Resolves in the following states:
-  ///  * [WidgetState.selected].
-  ///  * [WidgetState.hovered].
-  ///  * [WidgetState.focused].
-  ///  * [WidgetState.disabled].
+  ///  * [MaterialState.selected].
+  ///  * [MaterialState.hovered].
+  ///  * [MaterialState.focused].
+  ///  * [MaterialState.disabled].
   ///
   /// If specified, overrides the default value of [Checkbox.checkColor].
   final MaterialStateProperty<Color?>? checkColor;

@@ -104,7 +104,6 @@ void main() {
       '',
       nullSafetyMode: NullSafetyMode.unsound,
       treeShakeIcons: false,
-      packageConfigPath: '.dart_tool/package_config.json',
     );
 
     final BufferLogger logger = BufferLogger.test();

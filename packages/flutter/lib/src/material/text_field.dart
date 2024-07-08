@@ -468,23 +468,23 @@ class TextField extends StatefulWidget {
   final bool autofocus;
 
   /// Represents the interactive "state" of this widget in terms of a set of
-  /// [WidgetState]s, including [WidgetState.disabled], [WidgetState.hovered],
-  /// [WidgetState.error], and [WidgetState.focused].
+  /// [MaterialState]s, including [MaterialState.disabled], [MaterialState.hovered],
+  /// [MaterialState.error], and [MaterialState.focused].
   ///
   /// Classes based on this one can provide their own
-  /// [WidgetStatesController] to which they've added listeners.
-  /// They can also update the controller's [WidgetStatesController.value]
+  /// [MaterialStatesController] to which they've added listeners.
+  /// They can also update the controller's [MaterialStatesController.value]
   /// however, this may only be done when it's safe to call
   /// [State.setState], like in an event handler.
   ///
-  /// The controller's [WidgetStatesController.value] represents the set of
-  /// states that a widget's visual properties, typically [WidgetStateProperty]
+  /// The controller's [MaterialStatesController.value] represents the set of
+  /// states that a widget's visual properties, typically [MaterialStateProperty]
   /// values, are resolved against. It is _not_ the intrinsic state of the widget.
   /// The widget is responsible for ensuring that the controller's
-  /// [WidgetStatesController.value] tracks its intrinsic state. For example
-  /// one cannot request the keyboard focus for a widget by adding [WidgetState.focused]
+  /// [MaterialStatesController.value] tracks its intrinsic state. For example
+  /// one cannot request the keyboard focus for a widget by adding [MaterialState.focused]
   /// to its controller. When the widget gains the or loses the focus it will
-  /// [WidgetStatesController.update] its controller's [WidgetStatesController.value]
+  /// [MaterialStatesController.update] its controller's [MaterialStatesController.value]
   /// and notify listeners of the change.
   final MaterialStatesController? statesController;
 
@@ -733,15 +733,15 @@ class TextField extends StatefulWidget {
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// widget.
   ///
-  /// If [mouseCursor] is a [WidgetStateProperty<MouseCursor>],
-  /// [WidgetStateProperty.resolve] is used for the following [WidgetState]s:
+  /// If [mouseCursor] is a [MaterialStateProperty<MouseCursor>],
+  /// [MaterialStateProperty.resolve] is used for the following [MaterialState]s:
   ///
-  ///  * [WidgetState.error].
-  ///  * [WidgetState.hovered].
-  ///  * [WidgetState.focused].
-  ///  * [WidgetState.disabled].
+  ///  * [MaterialState.error].
+  ///  * [MaterialState.hovered].
+  ///  * [MaterialState.focused].
+  ///  * [MaterialState.disabled].
   ///
-  /// If this property is null, [WidgetStateMouseCursor.textable] will be used.
+  /// If this property is null, [MaterialStateMouseCursor.textable] will be used.
   ///
   /// The [mouseCursor] is the only property of [TextField] that controls the
   /// appearance of the mouse pointer. All other properties related to "cursor"
@@ -1594,35 +1594,6 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
                 },
                 onDidGainAccessibilityFocus: handleDidGainAccessibilityFocus,
                 onDidLoseAccessibilityFocus: handleDidLoseAccessibilityFocus,
-                onFocus: _isEnabled
-                  ? () {
-                      assert(
-                        _effectiveFocusNode.canRequestFocus,
-                        'Received SemanticsAction.focus from the engine. However, the FocusNode '
-                        'of this text field cannot gain focus. This likely indicates a bug. '
-                        'If this text field cannot be focused (e.g. because it is not '
-                        'enabled), then its corresponding semantics node must be configured '
-                        'such that the assistive technology cannot request focus on it.'
-                      );
-
-                      if (_effectiveFocusNode.canRequestFocus && !_effectiveFocusNode.hasFocus) {
-                        _effectiveFocusNode.requestFocus();
-                      } else if (!widget.readOnly) {
-                        // If the platform requested focus, that means that previously the
-                        // platform believed that the text field did not have focus (even
-                        // though Flutter's widget system believed otherwise). This likely
-                        // means that the on-screen keyboard is hidden, or more generally,
-                        // there is no current editing session in this field. To correct
-                        // that, keyboard must be requested.
-                        //
-                        // A concrete scenario where this can happen is when the user
-                        // dismisses the keyboard on the web. The editing session is
-                        // closed by the engine, but the text field widget stays focused
-                        // in the framework.
-                        _requestKeyboard();
-                      }
-                    }
-                  : null,
                 child: child,
               );
             },

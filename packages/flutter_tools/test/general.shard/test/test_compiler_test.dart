@@ -29,8 +29,7 @@ final BuildInfo debugBuild = BuildInfo(
   treeShakeIcons: false,
   packageConfig: PackageConfig(<Package>[
     Package('test_api', Uri.parse('file:///test_api/')),
-  ]),
-  packageConfigPath: '.dart_tool/package_config.json',
+  ])
 );
 
 void main() {
