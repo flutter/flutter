@@ -224,7 +224,7 @@ As a reviewer, you are the last line of defense.
 5. Is it testable? Is it tested? **All code must be tested.** Are there asserts? Encourage liberal use of assertions.
 6. Look for mistakes in indenting the code and other trivial formatting problems.
 7. Is new code licensed correctly?
-8. Is the documentation thorough and useful? Look for useless documentation, empty prose, and breadcrumbs. See the [documentation section](hStyle-guide-for-Flutter-repo.md#documentation-dartdocs-javadocs-etc) of our style guide for what that means.
+8. Is the documentation thorough and useful? Look for useless documentation, empty prose, and breadcrumbs. See the [documentation section](Style-guide-for-Flutter-repo.md#documentation-dartdocs-javadocs-etc) of our style guide for what that means.
 9. Check for good grammar in API docs and comments. Check that identifiers are named according to our conventions.
 
 Once you are satisfied with the contribution, and _only_ once you are satisfied,
@@ -458,9 +458,10 @@ When adding a deprecation notice to the framework, a flutter fix should be inclu
 
 When deprecating features, be aware that *you* will not by default be informed when the Flutter code itself uses the deprecated feature (there is a `deprecated_member_use_from_same_package: ignore` line in the root `analysis_options.yaml` file). To find places where the old feature is used, rename its declaration and see where the compiler complains. (You can't just comment out the "ignore" in the `analysis_options.yaml` file because it's hiding hundreds of other warnings...)
 
-Deprecations are removed in a consistent "first-in-first-out" fashion. The lifetime for a Flutter deprecation is 1 year after reaching the stable channel, or after 4 stable releases, whichever is longer. Deprecations are still subject to the policy described on the [breaking changes page](https://flutter.dev/docs/release/breaking-changes) of the website. Where possible, prepare the dart fix tools and write appropriate migrations guides.
-
-This policy is currently enforced for `package:flutter`, `package:flutter_driver`, and `package:flutter_test`.
+Removing deprecated APIs from the framework are not currently planned. In the past, deprecations were removed after a set
+amount of time. This is not currently in practice. If and when we do resume removing deprecated APIs, it will be announced
+across several channels like the [flutter-announce group](https://groups.google.com/g/flutter-announce), and the
+[Discord](../contributing/Chat.md).
 
 ## Skipped Tests
 
