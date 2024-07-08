@@ -18,7 +18,7 @@ import 'theme.dart';
 /// The [style]'s properties override [FilledButton]'s default style,
 /// i.e. the [ButtonStyle] returned by [FilledButton.defaultStyleOf]. Only
 /// the style's non-null property values or resolved non-null
-/// [MaterialStateProperty] values are used.
+/// [WidgetStateProperty] values are used.
 ///
 /// See also:
 ///
@@ -27,8 +27,8 @@ import 'theme.dart';
 ///    for text buttons.
 ///  * [FilledButton.styleFrom], which converts simple values into a
 ///    [ButtonStyle] that's consistent with [FilledButton]'s defaults.
-///  * [MaterialStateProperty.resolve], "resolve" a material state property
-///    to a simple value based on a set of [MaterialState]s.
+///  * [WidgetStateProperty.resolve], "resolve" a material state property
+///    to a simple value based on a set of [WidgetState]s.
 ///  * [ThemeData.filledButtonTheme], which can be used to override the default
 ///    [ButtonStyle] for [FilledButton]s below the overall [Theme].
 @immutable
@@ -40,7 +40,7 @@ class FilledButtonThemeData with Diagnosticable {
 
   /// Overrides for [FilledButton]'s default style.
   ///
-  /// Non-null properties or non-null resolved [MaterialStateProperty]
+  /// Non-null properties or non-null resolved [WidgetStateProperty]
   /// values override the [ButtonStyle] returned by
   /// [FilledButton.defaultStyleOf].
   ///

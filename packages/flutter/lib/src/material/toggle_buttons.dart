@@ -266,7 +266,7 @@ class ToggleButtons extends StatelessWidget {
 
   /// {@macro flutter.material.RawMaterialButton.mouseCursor}
   ///
-  /// If this property is null, [MaterialStateMouseCursor.clickable] will be used.
+  /// If this property is null, [WidgetStateMouseCursor.clickable] will be used.
   final MouseCursor? mouseCursor;
 
   /// Configures the minimum size of the area within which the buttons may
@@ -334,11 +334,11 @@ class ToggleButtons extends StatelessWidget {
   /// [ToggleButtonsThemeData.fillColor] is also null, then
   /// the fill color is null.
   ///
-  /// If fillColor is a [MaterialStateProperty<Color>], then [MaterialStateProperty.resolve]
-  /// is used for the following [MaterialState]s:
+  /// If fillColor is a [WidgetStateProperty<Color>], then [WidgetStateProperty.resolve]
+  /// is used for the following [WidgetState]s:
   ///
-  ///  * [MaterialState.disabled]
-  ///  * [MaterialState.selected]
+  ///  * [WidgetState.disabled]
+  ///  * [WidgetState.selected]
   ///
   final Color? fillColor;
 
