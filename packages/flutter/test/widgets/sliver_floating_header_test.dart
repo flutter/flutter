@@ -273,13 +273,18 @@ void main() {
       expect(getHeaderRect(), const Rect.fromLTRB(0, 0, 800, 200));
       expect(getItem0Y(), 200);
 
+      // Scrolling in this direction will move more than 200 because
+      // timedDrag() concludes with a fling and there's room for a
+      // 200+ scroll.
       await scroll(const Offset(0, -200));
       await tester.pumpAndSettle();
       expect(find.text('header'), findsNothing);
       final double item0StartY = getItem0Y();
       expect(item0StartY, lessThan(0));
 
-      // Trigger the appearance of the floating header.
+      // Trigger the appearance of the floating header. There's no
+      // fling component to the scroll in this case because the scroll
+      // offset is small.
       await scroll(const Offset(0, 25));
       await tester.pumpAndSettle();
 
@@ -287,7 +292,7 @@ void main() {
       // the snapMode is overlay.
       expect(getItem0Y(), item0StartY + 25);
 
-      // Return the header and item0 to their initial layout
+      // Return the header and item0 to their initial layout.
       await scroll(const Offset(0, 200));
       await tester.pumpAndSettle();
       expect(getHeaderRect(), const Rect.fromLTRB(0, 0, 800, 200));
@@ -311,7 +316,7 @@ void main() {
       await scroll(const Offset(0, 25));
       await tester.pumpAndSettle();
 
-      // Item0 has moved as far as the scroll (25) plus the heaight of
+      // Item0 has moved as far as the scroll (25) plus the height of
       // the header (200) because the snapMode is scroll and the
       // entire header had to snap in.
       expect(getItem0Y(), item0StartY + 200 + 25);

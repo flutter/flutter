@@ -20,11 +20,11 @@ import 'ticker_provider.dart';
 /// content move in sync. If the header is partially visible when the
 /// scroll gesture ends, [SliverFloatingHeader.snapMode] specifies if
 /// the header should [FloatingHeaderSnapMode.overlay] the scrollable's
-/// content as it expands untill it's completely visible, or if the
+/// content as it expands until it's completely visible, or if the
 /// content should scroll out of the way as the header expands.
 enum FloatingHeaderSnapMode {
   /// At the end of a user scroll gesture, the [SliverFloatingHeader] will
-  /// expand over the scrollable's content
+  /// expand over the scrollable's content.
   overlay,
 
   /// At the end of a user scroll gesture, the [SliverFloatingHeader] will
@@ -301,7 +301,7 @@ class _RenderSliverFloatingHeader extends RenderSliverSingleBoxAdapter {
 
     child?.layout(constraints.asBoxConstraints(), parentUsesSize: true);
     final double paintExtent = childExtent - effectiveScrollOffset;
-    final double layoutExtent = switch(snapMode ?? FloatingHeaderSnapMode.overlay) {
+    final double layoutExtent = switch (snapMode ?? FloatingHeaderSnapMode.overlay) {
       FloatingHeaderSnapMode.overlay => childExtent - constraints.scrollOffset,
       FloatingHeaderSnapMode.scroll => paintExtent,
     };
