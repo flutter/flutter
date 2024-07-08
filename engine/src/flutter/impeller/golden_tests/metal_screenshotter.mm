@@ -31,6 +31,12 @@ std::unique_ptr<Screenshot> MetalScreenshotter::MakeScreenshot(
       aiks_context,
       ISize(size.width * content_scale.x, size.height * content_scale.y));
   std::shared_ptr<Texture> texture = image->GetTexture();
+  return MakeScreenshot(aiks_context, texture);
+}
+
+std::unique_ptr<Screenshot> MetalScreenshotter::MakeScreenshot(
+    AiksContext& aiks_context,
+    const std::shared_ptr<Texture> texture) {
   id<MTLTexture> metal_texture =
       std::static_pointer_cast<TextureMTL>(texture)->GetMTLTexture();
 
