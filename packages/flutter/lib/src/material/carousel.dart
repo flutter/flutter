@@ -1386,8 +1386,6 @@ class _CarouselPosition extends ScrollPositionWithSingleContext implements _Caro
       assert(flexWeights != null);
       fraction = flexWeights!.first / flexWeights!.sum;
     }
-    print(flexWeights);
-    print('fraction: $fraction, pixels: $pixels, viewportDimension: $viewportDimension');
 
     final double actual = math.max(0.0, pixels) / (viewportDimension * fraction);
     final double round = actual.roundToDouble();
