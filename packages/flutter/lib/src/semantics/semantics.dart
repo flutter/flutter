@@ -453,7 +453,7 @@ class SemanticsData with Diagnosticable {
     required this.maxValueLength,
     required this.currentValueLength,
     required this.headingLevel,
-    this.linkUrl,
+    required this.linkUrl,
     this.tags,
     this.transform,
     this.customSemanticsActionIds,

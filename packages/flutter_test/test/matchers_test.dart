@@ -1171,7 +1171,7 @@ void main() {
         currentValueLength: 10,
         maxValueLength: 15,
         headingLevel: 0,
-        linkUrl: Uri(path: 'l'),
+        linkUrl: null,
       );
       final _FakeSemanticsNode emptyNode = _FakeSemanticsNode(emptyData);
 
