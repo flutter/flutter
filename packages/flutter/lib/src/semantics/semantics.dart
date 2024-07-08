@@ -649,7 +649,7 @@ class SemanticsData with Diagnosticable {
   /// See also:
   ///
   /// * [SemanticsFlag.isLink], which indicates that this node is a link.
-  final String? linkUrl;
+  final Uri? linkUrl;
 
   /// The bounding box for this node in its coordinate system.
   final Rect rect;
@@ -742,7 +742,7 @@ class SemanticsData with Diagnosticable {
     properties.add(DoubleProperty('scrollPosition', scrollPosition, defaultValue: null));
     properties.add(DoubleProperty('scrollExtentMax', scrollExtentMax, defaultValue: null));
     properties.add(IntProperty('headingLevel', headingLevel, defaultValue: 0));
-    properties.add(StringProperty('linkUrl', linkUrl, defaultValue: null));
+    properties.add(DiagnosticsProperty<Uri>('linkUrl', linkUrl, defaultValue: null));
   }
 
   @override
@@ -1451,7 +1451,7 @@ class SemanticsProperties extends DiagnosticableTree {
   /// See also:
   ///
   /// * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/a#href
-  final String? linkUrl;
+  final Uri? linkUrl;
 
   /// The handler for [SemanticsAction.tap].
   ///
@@ -2600,8 +2600,8 @@ class SemanticsNode with DiagnosticableTreeMixin {
   int _headingLevel = _kEmptyConfig._headingLevel;
 
   /// The URL that this node links to.
-  String? get linkUrl => _linkUrl;
-  String? _linkUrl = _kEmptyConfig._linkUrl;
+  Uri? get linkUrl => _linkUrl;
+  Uri? _linkUrl = _kEmptyConfig._linkUrl;
 
   bool _canPerformAction(SemanticsAction action) =>
       _actions.containsKey(action);
@@ -2712,7 +2712,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     int headingLevel = _headingLevel;
     final double elevation = _elevation;
     double thickness = _thickness;
-    String? linkUrl = _linkUrl;
+    Uri? linkUrl = _linkUrl;
     final Set<int> customSemanticsActionIds = <int>{};
     for (final CustomSemanticsAction action in _customSemanticsActions.keys) {
       customSemanticsActionIds.add(CustomSemanticsAction.getIdentifier(action));
@@ -2914,7 +2914,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
       childrenInHitTestOrder: childrenInHitTestOrder,
       additionalActions: customSemanticsActionIds ?? _kEmptyCustomSemanticsActionsList,
       headingLevel: data.headingLevel,
-      linkUrl: data.linkUrl ?? '',
+      linkUrl: data.linkUrl?.toString() ?? '',
     );
     _dirty = false;
   }
@@ -4779,10 +4779,10 @@ class SemanticsConfiguration {
   }
 
   /// The URL that the owning [RenderObject] links to.
-  String? get linkUrl => _linkUrl;
-  String? _linkUrl;
+  Uri? get linkUrl => _linkUrl;
+  Uri? _linkUrl;
 
-  set linkUrl(String? value) {
+  set linkUrl(Uri? value) {
     if (value == _linkUrl) {
       return;
     }

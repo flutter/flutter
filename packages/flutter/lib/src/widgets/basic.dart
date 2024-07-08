@@ -7109,7 +7109,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     bool? slider,
     bool? keyboardKey,
     bool? link,
-    String? linkUrl,
+    Uri? linkUrl,
     bool? header,
     int? headingLevel,
     bool? textField,
