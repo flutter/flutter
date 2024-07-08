@@ -1304,7 +1304,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     _stopSelectionStartEdgeUpdate();
   }
 
-  /// Removes the ongoing selection.
+  /// Removes the ongoing selection for this [SelectableRegion].
   void clearSelection() {
     _finalizeSelection();
     _directionalHorizontalBaseline = null;
