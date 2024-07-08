@@ -983,7 +983,7 @@ class SemanticsProperties extends DiagnosticableTree {
        assert(decreasedValue == null || attributedDecreasedValue == null, 'Only one of decreasedValue or attributedDecreasedValue should be provided'),
        assert(hint == null || attributedHint == null, 'Only one of hint or attributedHint should be provided'),
        assert(headingLevel == null || (headingLevel > 0 && headingLevel <= 6), 'Heading level must be between 1 and 6'),
-       assert(linkUrl == null || link == true, 'If linkUrl is set then link must be true');
+       assert(linkUrl == null || (link ?? false), 'If linkUrl is set then link must be true');
 
   /// If non-null, indicates that this subtree represents something that can be
   /// in an enabled or disabled state.
