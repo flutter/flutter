@@ -3181,7 +3181,7 @@ void main() {
         equals(const <Rect>[
           Rect.fromLTRB(161.0, 0.0, 639.0, 40.0),
           Rect.fromLTRB(265.0, 40.0, 467.0, 160.0),
-          Rect.fromLTRB(467.0, 80.0, 707.0, 240.0)
+          Rect.fromLTRB(467.0, 80.0, 707.0, 240.0),
         ]),
       );
     });
