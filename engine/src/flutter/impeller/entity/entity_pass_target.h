@@ -26,7 +26,7 @@ class EntityPassTarget {
   ///         method).
   std::shared_ptr<Texture> Flip(Allocator& allocator);
 
-  const RenderTarget& GetRenderTarget() const;
+  RenderTarget& GetRenderTarget();
 
   bool IsValid() const;
 

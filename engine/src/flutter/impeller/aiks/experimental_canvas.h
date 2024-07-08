@@ -22,6 +22,9 @@ struct LazyRenderingConfig {
   std::unique_ptr<EntityPassTarget> entity_pass_target;
   std::unique_ptr<InlinePassContext> inline_pass_context;
 
+  /// Whether or not the clear color texture can still be updated.
+  bool IsApplyingClearColor() const { return !inline_pass_context->IsActive(); }
+
   LazyRenderingConfig(ContentContext& renderer,
                       std::unique_ptr<EntityPassTarget> p_entity_pass_target)
       : entity_pass_target(std::move(p_entity_pass_target)) {
