@@ -322,7 +322,10 @@ void main() {
         SemanticsFlag.isFocusable,
         SemanticsFlag.isCheckStateMixed,
       ],
-      actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+      actions: <SemanticsAction>[
+        SemanticsAction.tap,
+        SemanticsAction.focus,
+      ],
     ), hasLength(1));
 
     await tester.pumpWidget(
@@ -346,7 +349,10 @@ void main() {
         SemanticsFlag.isChecked,
         SemanticsFlag.isFocusable,
       ],
-      actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+      actions: <SemanticsAction>[
+        SemanticsAction.tap,
+        SemanticsAction.focus,
+      ],
     ), hasLength(1));
 
     await tester.pumpWidget(
@@ -369,7 +375,10 @@ void main() {
         SemanticsFlag.isEnabled,
         SemanticsFlag.isFocusable,
       ],
-      actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+      actions: <SemanticsAction>[
+        SemanticsAction.tap,
+        SemanticsAction.focus,
+      ],
     ), hasLength(1));
 
     semantics.dispose();
