@@ -294,7 +294,12 @@ void main() {
     final FlutterProject project = generateFakeAppBundle('fooProfile', 'app.aab', fileSystem);
     final File bundle = findBundleFile(
       project,
-      const BuildInfo(BuildMode.profile, 'foo', treeShakeIcons: false,      packageConfigPath: '.dart_tool/package_config.json',),
+      const BuildInfo(
+        BuildMode.profile,
+        'foo',
+        treeShakeIcons: false,
+        packageConfigPath: '.dart_tool/package_config.json',
+      ),
       BufferLogger.test(),
       fakeAnalytics,
     );
