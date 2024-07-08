@@ -114,14 +114,13 @@ abstract class SelectionHandler implements ValueListenable<SelectionGeometry> {
 ///
 /// [SelectionArea] and [SelectableRegion] provide access to the
 /// [SelectedContentRange]s that represent their active selection
-/// through the [SelectionListener] passed to their
-/// [SelectionListener.onSelectionChanged] callback.
+/// through the [SelectionListener.onSelectionChanged] callback.
 ///
 /// See also:
 ///
-///   * [SelectionListener], which provides the [SelectedContentRange]s representing
-///     the active selection for a given subtree contained under a [SelectionArea]
-///     or [SelectableRegion].
+///   * [SelectionListener], which provides selection updates in
+///   the form of [SelectedContentRange]s for the subtree it wraps,
+///   contained under a [SelectionArea] or [SelectableRegion].
 @immutable
 class SelectedContentRange<T extends Object> {
   /// Creates a [SelectedContentRange] with the given values.
