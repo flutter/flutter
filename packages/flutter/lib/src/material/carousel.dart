@@ -315,17 +315,15 @@ class CarouselView extends StatefulWidget {
 
 class _CarouselViewState extends State<CarouselView> {
   double? _itemExtent;
-  List<int>? _weights;
+  List<int>? get _flexWeights => widget.flexWeights;
+  bool get _consumeMaxWeight => widget.consumeMaxWeight;
   CarouselController? _internalController;
   CarouselController get _controller => widget.controller ?? _internalController!;
-  late bool _consumeMaxWeight;
 
   @override
   void initState() {
     super.initState();
-    _consumeMaxWeight = widget.consumeMaxWeight;
     _itemExtent = widget.itemExtent;
-    _weights = widget.flexWeights;
     if (widget.controller == null) {
       _internalController = CarouselController();
     }
@@ -348,15 +346,13 @@ class _CarouselViewState extends State<CarouselView> {
       }
     }
     if (widget.flexWeights != oldWidget.flexWeights) {
-      _weights = widget.flexWeights;
-      (_controller.position as _CarouselPosition).flexWeights = _weights;
+      (_controller.position as _CarouselPosition).flexWeights = _flexWeights;
     }
     if (widget.itemExtent != oldWidget.itemExtent) {
       _itemExtent = widget.itemExtent;
       (_controller.position as _CarouselPosition).itemExtent = _itemExtent;
     }
     if (widget.consumeMaxWeight != oldWidget.consumeMaxWeight) {
-      _consumeMaxWeight = widget.consumeMaxWeight;
       (_controller.position as _CarouselPosition).consumeMaxWeight = _consumeMaxWeight;
     }
   }
@@ -442,11 +438,11 @@ class _CarouselViewState extends State<CarouselView> {
       );
     }
 
-    assert(_weights != null && _weights!.every((int weight) => weight > 0), '_weights is null or it contains non-positive integers');
+    assert(_flexWeights != null && _flexWeights!.every((int weight) => weight > 0), 'flexWeights is null or it contains non-positive integers');
     return _SliverWeightedCarousel(
       consumeMaxWeight: _consumeMaxWeight,
       shrinkExtent: widget.shrinkExtent,
-      weights: _weights!,
+      weights: _flexWeights!,
       delegate: SliverChildBuilderDelegate(
         (BuildContext context, int index) {
           return _buildCarouselItem(theme, index);
@@ -1504,7 +1500,7 @@ class CarouselController extends ScrollController {
       initialItem: initialItem,
       itemExtent: _carouselState!._itemExtent,
       consumeMaxWeight: _carouselState!._consumeMaxWeight,
-      flexWeights: _carouselState!._weights,
+      flexWeights: _carouselState!._flexWeights,
       oldPosition: oldPosition,
     );
   }
@@ -1513,7 +1509,7 @@ class CarouselController extends ScrollController {
   void attach(ScrollPosition position) {
     super.attach(position);
     final _CarouselPosition carouselPosition = position as _CarouselPosition;
-    carouselPosition.flexWeights = _carouselState!._weights;
+    carouselPosition.flexWeights = _carouselState!._flexWeights;
     carouselPosition.itemExtent = _carouselState!._itemExtent;
     carouselPosition.consumeMaxWeight = _carouselState!._consumeMaxWeight;
   }
