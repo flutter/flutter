@@ -1293,7 +1293,7 @@ void main() {
         maxValueLength: 15,
         customSemanticsActionIds: <int>[CustomSemanticsAction.getIdentifier(action)],
         headingLevel: 0,
-        linkUrl: Uri(path: 'l'),
+        linkUrl: null,
       );
       final _FakeSemanticsNode node = _FakeSemanticsNode(data);
 
