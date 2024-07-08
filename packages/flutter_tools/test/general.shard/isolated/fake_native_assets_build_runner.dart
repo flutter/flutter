@@ -56,6 +56,8 @@ class FakeNativeAssetsBuildRunner implements NativeAssetsBuildRunner {
     required Uri workingDirectory,
     CCompilerConfigImpl? cCompilerConfig,
     int? targetAndroidNdkApi,
+    int? targetIOSVersion,
+    int? targetMacOSVersion,
     IOSSdkImpl? targetIOSSdkImpl,
   }) async {
     buildInvocations++;

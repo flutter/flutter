@@ -61,6 +61,8 @@ abstract class NativeAssetsBuildRunner {
     required Uri workingDirectory,
     CCompilerConfigImpl? cCompilerConfig,
     int? targetAndroidNdkApi,
+    int? targetIOSVersion,
+    int? targetMacOSVersion,
     IOSSdkImpl? targetIOSSdkImpl,
   });
 
@@ -176,6 +178,8 @@ class NativeAssetsBuildRunnerImpl implements NativeAssetsBuildRunner {
     required Target target,
     required Uri workingDirectory,
     CCompilerConfigImpl? cCompilerConfig,
+    int? targetIOSVersion,
+    int? targetMacOSVersion,
     int? targetAndroidNdkApi,
     IOSSdkImpl? targetIOSSdkImpl,
   }) {
@@ -193,6 +197,8 @@ class NativeAssetsBuildRunnerImpl implements NativeAssetsBuildRunner {
       targetIOSSdk: targetIOSSdkImpl,
       workingDirectory: workingDirectory,
       packageLayout: packageLayout,
+      targetIOSVersion: targetIOSVersion,
+      targetMacOSVersion: targetMacOSVersion,
     );
   }
 
