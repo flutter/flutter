@@ -332,18 +332,6 @@ class _CarouselViewState extends State<CarouselView> {
     _controller._attach(this);
   }
 
-  void updateController() {
-    if (widget.controller != null) {
-      _internalController?._detach(this);
-      _internalController = null;
-      widget.controller?._attach(this);
-    } else { // widget.controller == null && oldWidget.controller != null
-      assert(_internalController == null);
-      _internalController = CarouselController();
-      _controller._attach(this);
-    }
-  }
-
   @override
   void didUpdateWidget(covariant CarouselView oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -361,8 +349,6 @@ class _CarouselViewState extends State<CarouselView> {
     }
     if (widget.flexWeights != oldWidget.flexWeights) {
       _weights = widget.flexWeights;
-      updateController();
-      // (_controller.position as _CarouselPosition)._cachedItem = _controller.initialItem.toDouble();
       (_controller.position as _CarouselPosition).flexWeights = _weights;
     }
     if (widget.itemExtent != oldWidget.itemExtent) {
