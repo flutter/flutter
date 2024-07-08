@@ -5,7 +5,7 @@
 #ifndef FLUTTER_SHELL_PLATFORM_FUCHSIA_FLUTTER_SOFTWARE_SURFACE_H_
 #define FLUTTER_SHELL_PLATFORM_FUCHSIA_FLUTTER_SOFTWARE_SURFACE_H_
 
-#include <fuchsia/sysmem/cpp/fidl.h>
+#include <fuchsia/sysmem2/cpp/fidl.h>
 #include <fuchsia/ui/composition/cpp/fidl.h>
 #include <lib/async/cpp/wait.h>
 #include <lib/zx/event.h>
@@ -25,7 +25,7 @@ namespace flutter_runner {
 
 class SoftwareSurface final : public SurfaceProducerSurface {
  public:
-  SoftwareSurface(fuchsia::sysmem::AllocatorSyncPtr& sysmem_allocator,
+  SoftwareSurface(fuchsia::sysmem2::AllocatorSyncPtr& sysmem_allocator,
                   fuchsia::ui::composition::AllocatorPtr& flatland_allocator,
                   const SkISize& size);
 
@@ -79,7 +79,7 @@ class SoftwareSurface final : public SurfaceProducerSurface {
                              const zx_packet_signal_t* signal);
 
   bool SetupSkiaSurface(
-      fuchsia::sysmem::AllocatorSyncPtr& sysmem_allocator,
+      fuchsia::sysmem2::AllocatorSyncPtr& sysmem_allocator,
       fuchsia::ui::composition::AllocatorPtr& flatland_allocator,
       const SkISize& size);
 

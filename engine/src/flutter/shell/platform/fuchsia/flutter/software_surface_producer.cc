@@ -49,10 +49,12 @@ zx_koid_t GetCurrentProcessId() {
 
 SoftwareSurfaceProducer::SoftwareSurfaceProducer() {
   zx_status_t status = fdio_service_connect(
-      "/svc/fuchsia.sysmem.Allocator",
+      "/svc/fuchsia.sysmem2.Allocator",
       sysmem_allocator_.NewRequest().TakeChannel().release());
-  sysmem_allocator_->SetDebugClientInfo(GetCurrentProcessName(),
-                                        GetCurrentProcessId());
+  sysmem_allocator_->SetDebugClientInfo(
+      std::move(fuchsia::sysmem2::AllocatorSetDebugClientInfoRequest{}
+                    .set_name(GetCurrentProcessName())
+                    .set_id(GetCurrentProcessId())));
   FML_DCHECK(status == ZX_OK);
 
   status = fdio_service_connect(

@@ -237,11 +237,7 @@ void FlutterEmbedderTest::SetUpRealmBase() {
                     Protocol{fuchsia::logger::LogSink::Name_},
                     Protocol{fuchsia::inspect::InspectSink::Name_},
                     Protocol{fuchsia::sysmem::Allocator::Name_},
-
-                    // Replace "fuchsia.sysmem2.Allocator" with
-                    // fuchsia::sysmem2::Allocator::Name_
-                    // when available (fuchsia SDK >= 19).
-                    Protocol{"fuchsia.sysmem2.Allocator"},
+                    Protocol{fuchsia::sysmem2::Allocator::Name_},
                     Protocol{fuchsia::tracing::provider::Registry::Name_},
                     Protocol{kVulkanLoaderServiceName},
                 },
@@ -254,11 +250,7 @@ void FlutterEmbedderTest::SetUpRealmBase() {
       .capabilities = {Protocol{fuchsia::logger::LogSink::Name_},
                        Protocol{fuchsia::inspect::InspectSink::Name_},
                        Protocol{fuchsia::sysmem::Allocator::Name_},
-
-                       // Replace "fuchsia.sysmem2.Allocator" with
-                       // fuchsia::sysmem2::Allocator::Name_
-                       // when available (fuchsia SDK >= 19).
-                       Protocol{"fuchsia.sysmem2.Allocator"},
+                       Protocol{fuchsia::sysmem2::Allocator::Name_},
                        Protocol{fuchsia::tracing::provider::Registry::Name_},
                        Protocol{kVulkanLoaderServiceName}},
       .source = ParentRef{},
