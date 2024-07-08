@@ -1339,7 +1339,6 @@ class _CarouselPosition extends ScrollPositionWithSingleContext implements _Caro
     }
     if (hasPixels) {
       final double leadingItem = getItemFromPixels(pixels, viewportDimension);
-      print(leadingItem);
       final double newPixel = getPixelsFromItem(leadingItem, flexWeights, value);
       forcePixels(newPixel);
     }
