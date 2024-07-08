@@ -266,7 +266,7 @@ class MaterialAccentColor extends ColorSwatch<int> {
 ///
 /// See also:
 ///
-///  * Cookbook: [Use themes to share colors and font styles](https://flutter.dev/docs/cookbook/design/themes)
+///  * Cookbook: [Use themes to share colors and font styles](https://docs.flutter.dev/cookbook/design/themes)
 abstract final class Colors {
   /// Completely invisible.
   static const Color transparent = Color(0x00000000);

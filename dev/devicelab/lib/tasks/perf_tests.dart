@@ -1324,6 +1324,10 @@ class PerfTest {
       final String? localEngineSrcPath = localEngineSrcPathFromEnv;
 
       if (createPlatforms.isNotEmpty) {
+        // Ensure that the platform-specific manifests are freshly created and
+        // do not contain any settings from previous runs.
+        await exec('git', <String>['clean', '-f', testDirectory]);
+
         await flutter('create', options: <String>[
           '--platforms',
           createPlatforms.join(','),
@@ -1968,11 +1972,12 @@ class CompileTest {
 
 /// Measure application memory usage.
 class MemoryTest {
-  MemoryTest(this.project, this.test, this.package);
+  MemoryTest(this.project, this.test, this.package, {this.requiresTapToStart = false});
 
   final String project;
   final String test;
   final String package;
+  final bool requiresTapToStart;
 
   /// Completes when the log line specified in the last call to
   /// [prepareForNextMessage] is seen by `adb logcat`.
@@ -2061,6 +2066,38 @@ class MemoryTest {
     await receivedNextMessage;
   }
 
+  /// Taps the application and looks for acknowldgement.
+  ///
+  /// This is used by several tests to ensure scrolling gestures are installed.
+  Future<void> tapNotification() async {
+    // Keep "tapping" the device till it responds with the string we expect,
+    // or throw an error instead of tying up the infrastructure for 30 minutes.
+    prepareForNextMessage('TAPPED');
+    bool tapped = false;
+    int tapCount = 0;
+    await Future.any(<Future<void>>[
+      () async {
+        while (true) {
+          if (tapped) {
+            break;
+          }
+          tapCount += 1;
+          print('tapping device... [$tapCount]');
+          await device!.tap(100, 100);
+          await Future<void>.delayed(const Duration(milliseconds: 100));
+        }
+      }(),
+      () async {
+        print('awaiting "tapped" message... (timeout: 10 seconds)');
+        try {
+          await receivedNextMessage?.timeout(const Duration(seconds: 10));
+        } finally {
+          tapped = true;
+        }
+      }(),
+    ]);
+  }
+
   /// To change the behavior of the test, override this.
   ///
   /// Make sure to call recordStart() and recordEnd() once each in that order.
@@ -2070,10 +2107,11 @@ class MemoryTest {
   Future<void> useMemory() async {
     await launchApp();
     await recordStart();
+    if (requiresTapToStart) {
+      await tapNotification();
+    }
 
     prepareForNextMessage('DONE');
-    print('tapping device...');
-    await device!.tap(100, 100);
     print('awaiting "done" message...');
     await receivedNextMessage;
 

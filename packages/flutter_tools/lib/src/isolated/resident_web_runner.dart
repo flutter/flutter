@@ -172,7 +172,11 @@ class ResidentWebRunner extends ResidentRunner {
     final vmservice.VmService? service = _connectionResult?.vmService;
     final Uri websocketUri = Uri.parse(_connectionResult!.debugConnection!.uri);
     final Uri httpUri = _httpUriFromWebsocketUri(websocketUri);
-    return _instance ??= FlutterVmService(service!, wsAddress: websocketUri, httpAddress: httpUri, logger: _logger);
+    return _instance ??= FlutterVmService(
+      service!,
+      wsAddress: websocketUri,
+      httpAddress: httpUri,
+    );
   }
 
   FlutterVmService? _instance;
@@ -318,6 +322,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
           ddcModuleSystem: debuggingOptions.buildInfo.ddcModuleFormat == DdcModuleFormat.ddc,
           webRenderer: debuggingOptions.webRenderer,
           isWasm: debuggingOptions.webUseWasm,
+          useLocalCanvasKit: debuggingOptions.webUseLocalCanvaskit,
           rootDirectory: fileSystem.directory(projectRootPath),
         );
         Uri url = await device!.devFS!.create();
@@ -554,7 +559,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
     if (rebuildBundle) {
       _logger.printTrace('Updating assets');
       final int result = await assetBundle.build(
-        packagesPath: debuggingOptions.buildInfo.packagesPath,
+        packagesPath: debuggingOptions.buildInfo.packageConfigPath,
         targetPlatform: TargetPlatform.web_javascript,
       );
       if (result != 0) {

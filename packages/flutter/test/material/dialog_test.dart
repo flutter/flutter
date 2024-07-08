@@ -111,6 +111,28 @@ void main() {
     expect(materialWidget.color, customColor);
   });
 
+  testWidgets('Dialog background defaults to ColorScheme.surface', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(
+      colorScheme: ThemeData().colorScheme.copyWith(
+        surface: Colors.orange,
+        background: Colors.green,
+      )
+    );
+    const Dialog dialog = Dialog(
+      child: SizedBox(
+        width: 200,
+        height: 200
+      ),
+    );
+    await tester.pumpWidget(_buildAppWithDialog(dialog, theme: theme));
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    final Material materialWidget = _getMaterialFromDialog(tester);
+    expect(materialWidget.color, theme.colorScheme.surface);
+  });
+
   testWidgets('Material2 - Dialog Defaults', (WidgetTester tester) async {
     const AlertDialog dialog = AlertDialog(
       title: Text('Title'),
@@ -1700,7 +1722,12 @@ void main() {
         theme: ThemeData(platform: TargetPlatform.iOS),
         home: const AlertDialog(
           title: Text('title'),
-          content: Text('content'),
+          content: Column(
+            children: <Widget>[
+              Text('some content'),
+              Text('more content'),
+            ],
+          ),
           actions: <Widget>[ TextButton(onPressed: null, child: Text('action')) ],
         ),
       ),
@@ -1731,11 +1758,21 @@ void main() {
                         // node 4.
                         TestSemantics(
                           id: 6,
-                          label: 'content',
-                          textDirection: TextDirection.ltr,
+                          children: <TestSemantics>[
+                            TestSemantics(
+                              id: 7,
+                              label: 'some content',
+                              textDirection: TextDirection.ltr,
+                            ),
+                            TestSemantics(
+                              id: 8,
+                              label: 'more content',
+                              textDirection: TextDirection.ltr,
+                            ),
+                          ],
                         ),
                         TestSemantics(
-                          id: 7,
+                          id: 9,
                           flags: <SemanticsFlag>[
                             SemanticsFlag.isButton,
                             SemanticsFlag.hasEnabledState,

@@ -3,10 +3,12 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
+import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/time.dart';
@@ -1751,6 +1753,73 @@ The Flutter Preview device does not support the following plugins from your pubs
         returnsNormally,
       );
     });
+  });
+
+  testUsingContext('exits tool when deleting .plugin_symlinks fails', () async {
+    final FakeFlutterProject flutterProject = FakeFlutterProject()
+      ..directory = globals.fs.currentDirectory.childDirectory('app');
+    final FakeFlutterManifest flutterManifest = FakeFlutterManifest();
+    final Directory windowsManagedDirectory = flutterProject.directory
+        .childDirectory('windows')
+        .childDirectory('flutter');
+    final FakeWindowsProject windowsProject = FakeWindowsProject()
+      ..managedDirectory = windowsManagedDirectory
+      ..cmakeFile = windowsManagedDirectory.parent.childFile('CMakeLists.txt')
+      ..generatedPluginCmakeFile =
+          windowsManagedDirectory.childFile('generated_plugins.mk')
+      ..pluginSymlinkDirectory = windowsManagedDirectory
+          .childDirectory('ephemeral')
+          .childDirectory('.plugin_symlinks')
+      ..exists = true;
+
+    flutterProject
+      ..manifest = flutterManifest
+      ..flutterPluginsFile =
+          flutterProject.directory.childFile('.flutter-plugins')
+      ..flutterPluginsDependenciesFile =
+          flutterProject.directory.childFile('.flutter-plugins-dependencies')
+      ..windows = windowsProject;
+
+    flutterProject.directory.childFile('.packages').createSync(recursive: true);
+
+    createPluginSymlinks(
+      flutterProject,
+      force: true,
+      featureFlagsOverride: TestFeatureFlags(isWindowsEnabled: true),
+    );
+
+    expect(
+      () => createPluginSymlinks(
+        flutterProject,
+        force: true,
+        featureFlagsOverride: TestFeatureFlags(isWindowsEnabled: true),
+      ),
+      throwsToolExit(
+          message: RegExp('Unable to delete file or directory at '
+              r'"C:\\app\\windows\\flutter\\ephemeral\\\.plugin_symlinks"')),
+    );
+  }, overrides: <Type, Generator>{
+    FileSystem: () {
+      final FileExceptionHandler handle = FileExceptionHandler();
+      final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
+        platform: FakePlatform(),
+        delegate: MemoryFileSystem.test(
+          style: FileSystemStyle.windows,
+          opHandle: handle.opHandle,
+        ),
+      );
+      const String symlinkDirectoryPath = r'C:\app\windows\flutter\ephemeral\.plugin_symlinks';
+      handle.addError(
+        fileSystem.directory(symlinkDirectoryPath),
+        FileSystemOp.delete,
+        const PathNotFoundException(
+          symlinkDirectoryPath,
+          OSError('The system cannot find the path specified.', 3),
+        ),
+      );
+      return fileSystem;
+    },
+    ProcessManager: () => FakeProcessManager.empty(),
   });
 }
 

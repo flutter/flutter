@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
+
 import 'package:package_config/package_config_types.dart';
 
 import 'artifacts.dart';
@@ -37,7 +39,7 @@ class BuildInfo {
     List<String>? dartExperiments,
     required this.treeShakeIcons,
     this.performanceMeasurementFile,
-    this.packagesPath = '.dart_tool/package_config.json', // TODO(zanderso): make this required and remove the default.
+    required this.packageConfigPath,
     this.nullSafetyMode = NullSafetyMode.sound,
     this.codeSizeDirectory,
     this.androidGradleDaemon = true,
@@ -46,6 +48,7 @@ class BuildInfo {
     this.initializeFromDill,
     this.assumeInitializeFromDillUpToDate = false,
     this.buildNativeAssets = true,
+    this.useLocalCanvasKit = false,
   }) : extraFrontEndOptions = extraFrontEndOptions ?? const <String>[],
        extraGenSnapshotOptions = extraGenSnapshotOptions ?? const <String>[],
        fileSystemRoots = fileSystemRoots ?? const <String>[],
@@ -74,7 +77,7 @@ class BuildInfo {
   ///
   /// This is used by package:package_config to locate the actual package_config.json
   /// file. If not provided, defaults to `.dart_tool/package_config.json`.
-  final String packagesPath;
+  final String packageConfigPath;
 
   final List<String> fileSystemRoots;
   final String? fileSystemScheme;
@@ -180,10 +183,50 @@ class BuildInfo {
   /// If set, builds native assets with `build.dart` from all packages.
   final bool buildNativeAssets;
 
-  static const BuildInfo debug = BuildInfo(BuildMode.debug, null, trackWidgetCreation: true, treeShakeIcons: false);
-  static const BuildInfo profile = BuildInfo(BuildMode.profile, null, treeShakeIcons: kIconTreeShakerEnabledDefault);
-  static const BuildInfo jitRelease = BuildInfo(BuildMode.jitRelease, null, treeShakeIcons: kIconTreeShakerEnabledDefault);
-  static const BuildInfo release = BuildInfo(BuildMode.release, null, treeShakeIcons: kIconTreeShakerEnabledDefault);
+  /// If set, web builds will use the locally built CanvasKit instead of using the CDN
+  final bool useLocalCanvasKit;
+
+  /// Can be used when the actual information is not needed.
+  static const BuildInfo dummy = BuildInfo(
+    BuildMode.debug,
+    null,
+    trackWidgetCreation: true,
+    treeShakeIcons: false,
+    packageConfigPath: '.dart_tool/package_config.json',
+  );
+
+  @visibleForTesting
+  static const BuildInfo debug = BuildInfo(
+    BuildMode.debug,
+    null,
+    trackWidgetCreation: true,
+    treeShakeIcons: false,
+    packageConfigPath: '.dart_tool/package_config.json',
+  );
+
+  @visibleForTesting
+  static const BuildInfo profile = BuildInfo(
+    BuildMode.profile,
+    null,
+    treeShakeIcons: kIconTreeShakerEnabledDefault,
+    packageConfigPath: '.dart_tool/package_config.json',
+  );
+
+  @visibleForTesting
+  static const BuildInfo jitRelease = BuildInfo(
+    BuildMode.jitRelease,
+    null,
+    treeShakeIcons: kIconTreeShakerEnabledDefault,
+    packageConfigPath: '.dart_tool/package_config.json',
+  );
+
+  @visibleForTesting
+  static const BuildInfo release = BuildInfo(
+    BuildMode.release,
+    null,
+    treeShakeIcons: kIconTreeShakerEnabledDefault,
+    packageConfigPath: '.dart_tool/package_config.json',
+  );
 
   /// Returns whether a debug build is requested.
   ///
@@ -260,6 +303,8 @@ class BuildInfo {
         kBuildName: buildName!,
       if (buildNumber != null)
         kBuildNumber: buildNumber!,
+      if (useLocalCanvasKit)
+        kUseLocalCanvasKitFlag: useLocalCanvasKit.toString(),
     };
   }
 
@@ -287,7 +332,7 @@ class BuildInfo {
         'PERFORMANCE_MEASUREMENT_FILE': performanceMeasurementFile!,
       if (bundleSkSLPath != null)
         'BUNDLE_SKSL_PATH': bundleSkSLPath!,
-      'PACKAGE_CONFIG': packagesPath,
+      'PACKAGE_CONFIG': packageConfigPath,
       if (codeSizeDirectory != null)
         'CODE_SIZE_DIRECTORY': codeSizeDirectory!,
       if (flavor != null)
@@ -941,6 +986,9 @@ const String kCodesignIdentity = 'CodesignIdentity';
 /// only the glyphs used by the application.
 const String kIconTreeShakerFlag = 'TreeShakeIcons';
 
+/// Controls whether a web build should use local canvaskit or the CDN
+const String kUseLocalCanvasKitFlag = 'UseLocalCanvasKit';
+
 /// The input key for an SkSL bundle path.
 const String kBundleSkSLPath = 'BundleSkSLPath';
 
@@ -957,6 +1005,12 @@ const String kBuildNumber = 'BuildNumber';
 ///
 /// Will be "build" when building and "install" when archiving.
 const String kXcodeAction = 'Action';
+
+/// The define of the Xcode build Pre-action.
+///
+/// Will be "PrepareFramework" when copying the Flutter/FlutterMacOS framework
+/// to the BUILT_PRODUCTS_DIR prior to the build.
+const String kXcodePreAction = 'PreBuildAction';
 
 final Converter<String, String> _defineEncoder = utf8.encoder.fuse(base64.encoder);
 final Converter<String, String> _defineDecoder = base64.decoder.fuse(utf8.decoder);

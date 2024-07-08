@@ -3592,7 +3592,7 @@ void main() {
                     children: <TestSemantics>[
                       TestSemantics(
                         id: 4,
-                        actions: <SemanticsAction>[SemanticsAction.tap],
+                        actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                         flags: <SemanticsFlag>[
                           SemanticsFlag.isSelected,
                           SemanticsFlag.isFocusable,
@@ -3604,7 +3604,7 @@ void main() {
                       TestSemantics(
                         id: 5,
                         flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
-                        actions: <SemanticsAction>[SemanticsAction.tap],
+                        actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                         label: 'TAB #1\nTab 2 of 2',
                         rect: const Rect.fromLTRB(0.0, 0.0, 116.0, kTextTabBarHeight),
                         transform: Matrix4.translationValues(116.0, 276.0, 0.0),
@@ -3863,7 +3863,7 @@ void main() {
                           SemanticsFlag.isSelected,
                           SemanticsFlag.isFocusable,
                         ],
-                        actions: <SemanticsAction>[SemanticsAction.tap],
+                        actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                         label: 'Semantics override 0\nTab 1 of 2',
                         rect: const Rect.fromLTRB(0.0, 0.0, 116.0, kTextTabBarHeight),
                         transform: Matrix4.translationValues(0.0, 276.0, 0.0),
@@ -3871,7 +3871,7 @@ void main() {
                       TestSemantics(
                         id: 5,
                         flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
-                        actions: <SemanticsAction>[SemanticsAction.tap],
+                        actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                         label: 'Semantics override 1\nTab 2 of 2',
                         rect: const Rect.fromLTRB(0.0, 0.0, 116.0, kTextTabBarHeight),
                         transform: Matrix4.translationValues(116.0, 276.0, 0.0),
@@ -5652,14 +5652,14 @@ void main() {
               flags: <SemanticsFlag>[SemanticsFlag.isFocusable, SemanticsFlag.isSelected],
               id: 2,
               rect: TestSemantics.fullScreen,
-              actions: 1,
+              actions: 1 | SemanticsAction.focus.index,
             ),
             TestSemantics(
               label: 'TAB2\nTab 2 of 2',
               flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
               id: 3,
               rect: TestSemantics.fullScreen,
-              actions: <SemanticsAction>[SemanticsAction.tap],
+              actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
             ),
             TestSemantics(
               id: 4,
@@ -6722,30 +6722,6 @@ void main() {
       tabAlignment: TabAlignment.center,
     ));
     expect(tester.getSize(find.byType(TabBar)).width, 307.5);
-
-    // Test default tab bar width when the divider color is set to transparent
-    // and tabAlignment is set to startOffset.
-    await tester.pumpWidget(buildTabBar(
-      dividerColor: Colors.transparent,
-      tabAlignment: TabAlignment.startOffset,
-    ));
-    expect(tester.getSize(find.byType(TabBar)).width, 359.5);
-
-    // Test default tab bar width when the divider color is set to transparent
-    // and tabAlignment is set to start.
-    await tester.pumpWidget(buildTabBar(
-      dividerColor: Colors.transparent,
-      tabAlignment: TabAlignment.start,
-    ));
-    expect(tester.getSize(find.byType(TabBar)).width, 307.5);
-
-    // Test default tab bar width when the divider color is set to transparent
-    // and tabAlignment is set to center.
-    await tester.pumpWidget(buildTabBar(
-      dividerColor: Colors.transparent,
-      tabAlignment: TabAlignment.center,
-    ));
-    expect(tester.getSize(find.byType(TabBar)).width, 307.5);
   });
 
   group('Material 2', () {
@@ -7158,4 +7134,143 @@ void main() {
     labelSize = tester.getSize(find.text('Tab 1'));
     expect(labelSize, equals(const Size(140.5, 40.0)));
   }, skip: isBrowser && !isSkiaWeb); // https://github.com/flutter/flutter/issues/87543
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/150000.
+  testWidgets('Scrollable TabBar does not jitter in the middle position', (WidgetTester tester) async {
+    final List<String> tabs = List<String>.generate(20, (int index) => 'Tab $index');
+
+    await tester.pumpWidget(MaterialApp(
+      home: DefaultTabController(
+        length: tabs.length,
+        initialIndex: 10,
+        child: Scaffold(
+          appBar: AppBar(
+            bottom: TabBar(
+              isScrollable: true,
+              tabs: tabs.map((String tab) => Tab(text: tab)).toList(),
+            ),
+          ),
+          body: TabBarView(
+            children: <Widget>[
+              for (int i = 0; i < tabs.length; i++)
+                Center(
+                  child: Text('Page $i'),
+                ),
+            ],
+          ),
+        ),
+      ),
+    ));
+
+    final SingleChildScrollView scrollable = tester.widget(find.byType(SingleChildScrollView));
+    expect(find.text('Page 10'), findsOneWidget);
+    expect(find.text('Page 11'), findsNothing);
+    expect(scrollable.controller!.position.pixels, closeTo(683.2, 0.1));
+
+    // Drag the TabBarView to the left.
+    await tester.drag(find.byType(TabBarView), const Offset(-800, 0));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
+
+    expect(find.text('Page 10'), findsNothing);
+    expect(find.text('Page 11'), findsOneWidget);
+    expect(scrollable.controller!.position.pixels, closeTo(799.8, 0.1));
+  });
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/150000.
+  testWidgets('Scrollable TabBar does not jitter when the tab bar reaches the start', (WidgetTester tester) async {
+    final List<String> tabs = List<String>.generate(20, (int index) => 'Tab $index');
+
+    await tester.pumpWidget(MaterialApp(
+      home: DefaultTabController(
+        length: tabs.length,
+        initialIndex: 4,
+        child: Scaffold(
+          appBar: AppBar(
+            bottom: TabBar(
+              isScrollable: true,
+              tabs: tabs.map((String tab) => Tab(text: tab)).toList(),
+            ),
+          ),
+          body: TabBarView(
+            children: <Widget>[
+              for (int i = 0; i < tabs.length; i++)
+                Center(
+                  child: Text('Page $i'),
+                ),
+            ],
+          ),
+        ),
+      ),
+    ));
+
+    final SingleChildScrollView scrollable = tester.widget(find.byType(SingleChildScrollView));
+
+    expect(find.text('Page 4'), findsOneWidget);
+    expect(find.text('Page 3'), findsNothing);
+    expect(scrollable.controller!.position.pixels, closeTo(61.25, 0.1));
+
+    // Drag the TabBarView to the right.
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('Page 4')));
+    await gesture.moveBy(const Offset(600.0, 0.0));
+    await gesture.up();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(find.text('Page 4'), findsOneWidget);
+    expect(find.text('Page 3'), findsOneWidget);
+    expect(scrollable.controller!.position.pixels, closeTo(0.2, 0.1));
+
+    await tester.pumpAndSettle();
+    expect(find.text('Page 4'), findsNothing);
+    expect(find.text('Page 3'), findsOneWidget);
+    expect(scrollable.controller!.position.pixels, equals(0.0));
+  });
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/150316.
+  testWidgets('Scrollable TabBar wuth transparent divider expands to full width', (WidgetTester tester) async {
+    Widget buildTabBar({ Color? dividerColor, TabAlignment? tabAlignment }) {
+      return boilerplate(
+        child: Center(
+          child: DefaultTabController(
+            length: 3,
+            child: TabBar(
+              dividerColor: dividerColor,
+              tabAlignment: tabAlignment,
+              isScrollable: true,
+              tabs: const <Widget>[
+                Tab(text: 'Tab 1'),
+                Tab(text: 'Tab 2'),
+                Tab(text: 'Tab 3'),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Test default tab bar width when the divider color is set to transparent
+    // and tabAlignment is set to startOffset.
+    await tester.pumpWidget(buildTabBar(
+      dividerColor: Colors.transparent,
+      tabAlignment: TabAlignment.startOffset,
+    ));
+    expect(tester.getSize(find.byType(TabBar)).width, 800.0);
+
+    // Test default tab bar width when the divider color is set to transparent
+    // and tabAlignment is set to start.
+    await tester.pumpWidget(buildTabBar(
+      dividerColor: Colors.transparent,
+      tabAlignment: TabAlignment.start,
+    ));
+    expect(tester.getSize(find.byType(TabBar)).width, 800.0);
+
+    // Test default tab bar width when the divider color is set to transparent
+    // and tabAlignment is set to center.
+    await tester.pumpWidget(buildTabBar(
+      dividerColor: Colors.transparent,
+      tabAlignment: TabAlignment.center,
+    ));
+    expect(tester.getSize(find.byType(TabBar)).width, 800.0);
+  });
 }

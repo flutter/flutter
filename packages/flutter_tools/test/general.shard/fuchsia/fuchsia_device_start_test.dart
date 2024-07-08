@@ -137,8 +137,12 @@ void main() {
                     .fuchsia);
       }
 
-      final DebuggingOptions debuggingOptions = DebuggingOptions.disabled(
-          BuildInfo(mode, null, treeShakeIcons: false));
+      final DebuggingOptions debuggingOptions = DebuggingOptions.disabled(BuildInfo(
+        mode,
+        null,
+        treeShakeIcons: false,
+        packageConfigPath: '.dart_tool/package_config.json',
+      ));
       return device.startApp(
         app!,
         prebuiltApplication: prebuilt,
@@ -189,8 +193,12 @@ void main() {
       final File far = globals.fs.file('app_name-0.far')..createSync();
 
       final FuchsiaApp app = FuchsiaApp.fromPrebuiltApp(far)!;
-      final DebuggingOptions debuggingOptions = DebuggingOptions.disabled(
-          const BuildInfo(BuildMode.release, null, treeShakeIcons: false));
+      final DebuggingOptions debuggingOptions = DebuggingOptions.disabled(const BuildInfo(
+        BuildMode.release,
+        null,
+        treeShakeIcons: false,
+        packageConfigPath: '.dart_tool/package_config.json',
+      ));
       final LaunchResult launchResult = await device.startApp(app,
           prebuiltApplication: true, debuggingOptions: debuggingOptions);
       expect(launchResult.started, isFalse);
@@ -215,8 +223,12 @@ void main() {
       final File far = globals.fs.file('app_name-0.far')..createSync();
 
       final FuchsiaApp app = FuchsiaApp.fromPrebuiltApp(far)!;
-      final DebuggingOptions debuggingOptions = DebuggingOptions.disabled(
-          const BuildInfo(BuildMode.release, null, treeShakeIcons: false));
+      final DebuggingOptions debuggingOptions = DebuggingOptions.disabled(const BuildInfo(
+        BuildMode.release,
+        null,
+        treeShakeIcons: false,
+        packageConfigPath: '.dart_tool/package_config.json',
+      ));
       final LaunchResult launchResult = await device.startApp(app,
           prebuiltApplication: true, debuggingOptions: debuggingOptions);
       expect(launchResult.started, isTrue);

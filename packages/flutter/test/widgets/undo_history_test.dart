@@ -30,6 +30,123 @@ void main() {
     Future<void> sendUndo(WidgetTester tester) => sendUndoRedo(tester);
     Future<void> sendRedo(WidgetTester tester) => sendUndoRedo(tester, true);
 
+    testWidgets('UndoHistory widget registers as global undo/redo client', (WidgetTester tester) async {
+      final FocusNode focusNode = FocusNode(debugLabel: 'UndoHistory Node');
+      addTearDown(focusNode.dispose);
+      final GlobalKey undoHistoryGlobalKey = GlobalKey();
+      final ValueNotifier<int> value = ValueNotifier<int>(0);
+      addTearDown(value.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: UndoHistory<int>(
+            key: undoHistoryGlobalKey,
+            value: value,
+            onTriggered: (_) {},
+            focusNode: focusNode,
+            child: Focus(
+              focusNode: focusNode,
+              child: Container(),
+            ),
+          ),
+        ),
+      );
+
+      // Initially the UndoHistory doesn't have focus, therefore it should
+      // not be the global undo/redo client. Ensure that's the case.
+      expect(UndoManager.client, isNull);
+
+      // Give focus to the UndoHistory widget.
+      focusNode.requestFocus();
+      await tester.pump();
+
+      // Now that the UndoHistory widget has focus, it should have registered
+      // itself as the global undo/redo client.
+      final State? undoHistoryState = undoHistoryGlobalKey.currentState;
+      expect(UndoManager.client, undoHistoryState);
+    });
+
+    testWidgets('UndoHistory widget deregisters as global undo/redo client when it loses focus',
+            (WidgetTester tester) async {
+          final FocusNode focusNode = FocusNode(debugLabel: 'UndoHistory Node');
+          addTearDown(focusNode.dispose);
+          final GlobalKey undoHistoryGlobalKey = GlobalKey();
+          final ValueNotifier<int> value = ValueNotifier<int>(0);
+          addTearDown(value.dispose);
+
+          await tester.pumpWidget(
+            MaterialApp(
+              home: UndoHistory<int>(
+                key: undoHistoryGlobalKey,
+                value: value,
+                onTriggered: (_) {},
+                focusNode: focusNode,
+                child: Focus(
+                  focusNode: focusNode,
+                  child: Container(),
+                ),
+              ),
+            ),
+          );
+
+          // Give focus to the UndoHistory widget.
+          focusNode.requestFocus();
+          await tester.pump();
+
+          // Ensure that UndoHistory is the global undo/redo client.
+          final State? undoHistoryState = undoHistoryGlobalKey.currentState;
+          expect(UndoManager.client, undoHistoryState);
+
+          // Remove focus from UndoHistory widget.
+          focusNode.unfocus();
+          await tester.pump();
+
+          // Ensure the UndoHistory widget is no longer the global client
+          expect(UndoManager.client, null);
+        });
+
+    testWidgets('UndoHistory widget deregisters as global undo/redo client when disposed', (WidgetTester tester) async {
+      final FocusNode focusNode = FocusNode(debugLabel: 'UndoHistory Node');
+      addTearDown(focusNode.dispose);
+      final GlobalKey undoHistoryGlobalKey = GlobalKey();
+      final ValueNotifier<int> value = ValueNotifier<int>(0);
+      addTearDown(value.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: UndoHistory<int>(
+            key: undoHistoryGlobalKey,
+            value: value,
+            onTriggered: (_) {},
+            focusNode: focusNode,
+            child: Focus(
+              focusNode: focusNode,
+              child: Container(),
+            ),
+          ),
+        ),
+      );
+
+      // Give focus to the UndoHistory widget.
+      focusNode.requestFocus();
+      await tester.pump();
+
+      // Ensure that UndoHistory is the global undo/redo client.
+      final State? undoHistoryState = undoHistoryGlobalKey.currentState;
+      expect(UndoManager.client, undoHistoryState);
+
+      // Cause the UndoHistory widget to dispose its state.
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: SizedBox(),
+        ),
+      );
+
+      // Ensure that the disposed UndoHistory state is not still the global
+      // undo/redo history client.
+      expect(UndoManager.client, isNull);
+    });
+
     testWidgets('allows undo and redo to be called programmatically from the UndoHistoryController', (WidgetTester tester) async {
       final ValueNotifier<int> value = ValueNotifier<int>(0);
       addTearDown(value.dispose);

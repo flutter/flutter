@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'box_decoration.dart';
+library;
+
 import 'dart:collection';
 import 'dart:math' as math;
 import 'dart:ui' as ui show Gradient, lerpDouble;
@@ -234,6 +239,9 @@ abstract class Gradient {
   ///
   /// Typically this is the same as interpolating from null (with [lerp]).
   Gradient scale(double factor);
+
+  /// Returns a new [Gradient] with each color set to the given opacity.
+  Gradient withOpacity(double opacity);
 
   /// Linearly interpolates from another [Gradient] to `this`.
   ///
@@ -507,6 +515,7 @@ class LinearGradient extends Gradient {
       colors: interpolated.colors,
       stops: interpolated.stops,
       tileMode: t < 0.5 ? a.tileMode : b.tileMode, // TODO(ianh): interpolate tile mode
+      transform: t < 0.5 ? a.transform : b.transform,
     );
   }
 
@@ -549,6 +558,19 @@ class LinearGradient extends Gradient {
     ];
 
     return '${objectRuntimeType(this, 'LinearGradient')}(${description.join(', ')})';
+  }
+
+  @override
+  LinearGradient withOpacity(double opacity) {
+    return LinearGradient(
+      begin: begin,
+      end: end,
+      colors: <Color>[
+        for (final Color color in colors) color.withOpacity(opacity)
+      ],
+      stops: stops,
+      tileMode: tileMode,
+    );
   }
 }
 
@@ -787,6 +809,7 @@ class RadialGradient extends Gradient {
       tileMode: t < 0.5 ? a.tileMode : b.tileMode, // TODO(ianh): interpolate tile mode
       focal: AlignmentGeometry.lerp(a.focal, b.focal, t),
       focalRadius: math.max(0.0, ui.lerpDouble(a.focalRadius, b.focalRadius, t)!),
+      transform: t < 0.5 ? a.transform : b.transform,
     );
   }
 
@@ -835,6 +858,21 @@ class RadialGradient extends Gradient {
     ];
 
     return '${objectRuntimeType(this, 'RadialGradient')}(${description.join(', ')})';
+  }
+
+  @override
+  RadialGradient withOpacity(double opacity) {
+    return RadialGradient(
+      center: center,
+      radius: radius,
+      colors: <Color>[
+        for (final Color color in colors) color.withOpacity(opacity)
+      ],
+      stops: stops,
+      tileMode: tileMode,
+      focal: focal,
+      focalRadius: focalRadius,
+    );
   }
 }
 
@@ -1052,6 +1090,7 @@ class SweepGradient extends Gradient {
       colors: interpolated.colors,
       stops: interpolated.stops,
       tileMode: t < 0.5 ? a.tileMode : b.tileMode, // TODO(ianh): interpolate tile mode
+      transform: t < 0.5 ? a.transform : b.transform,
     );
   }
 
@@ -1097,5 +1136,19 @@ class SweepGradient extends Gradient {
     ];
 
     return '${objectRuntimeType(this, 'SweepGradient')}(${description.join(', ')})';
+  }
+
+  @override
+  SweepGradient withOpacity(double opacity) {
+    return SweepGradient(
+      center: center,
+      startAngle: startAngle,
+      endAngle: endAngle,
+      colors: <Color>[
+        for (final Color color in colors) color.withOpacity(opacity)
+      ],
+      stops: stops,
+      tileMode: tileMode,
+    );
   }
 }
