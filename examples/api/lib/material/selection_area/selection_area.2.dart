@@ -65,9 +65,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
   final List<SelectedContentRange<Object>> _activeSelections = <SelectedContentRange<Object>>[];
   final ContextMenuController _menuController = ContextMenuController();
-  final SelectionController _selectionController = SelectionController();
   late final List<Widget> _textWidgets;
   final Map<Key, TextSpan> dataSourceMap = <Key, TextSpan>{};
+  final GlobalKey<SelectionAreaState> selectionAreaKey = GlobalKey<SelectionAreaState>();
 
   @override
   void initState() {
@@ -77,7 +77,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   void dispose() {
-    _selectionController.dispose();
     _activeSelections.clear();
     super.dispose();
   }
@@ -249,7 +248,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       backgroundColor: Colors.blueAccent,
       body: SelectionArea(
-        controller: _selectionController,
+        key: selectionAreaKey,
         onSelectionChanged: (SelectedContent? selectedContent) {
             if (selectedContent == null
                || selectedContent.plainText.isEmpty
@@ -273,7 +272,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       onPressed: () {
                         ContextMenuController.removeAny();
                         _insertContent(_activeSelections, selectedContent.plainText);
-                        _selectionController.clear();
+                        selectionAreaKey.currentState?.selectableRegion.clearSelection();
                       },
                       label: 'Insert Content',
                     ),

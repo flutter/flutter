@@ -38,7 +38,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   final List<SelectedContentRange<Object>> _activeSelections = <SelectedContentRange<Object>>[];
   final ContextMenuController _menuController = ContextMenuController();
-  final SelectionController _selectionController = SelectionController();
+  final GlobalKey<SelectionAreaState> selectionAreaKey = GlobalKey<SelectionAreaState>();
   final Key _text1Id = UniqueKey();
   final Key _text2Id = UniqueKey();
   final Key _text3Id = UniqueKey();
@@ -56,7 +56,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   void dispose() {
-    _selectionController.dispose();
     _activeSelections.clear();
     super.dispose();
   }
@@ -225,7 +224,6 @@ class _MyHomePageState extends State<MyHomePage> {
     // Avoid clearing the selection and setting the state
     // before we have colored all parts of the selection.
     if (!coloringChildSpan) {
-      _selectionController.clear();
       setState(() {});
     }
   }
@@ -238,7 +236,7 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text(widget.title),
       ),
       body: SelectionArea(
-        controller: _selectionController,
+        key: selectionAreaKey,
         onSelectionChanged: (SelectedContent? selectedContent) {
           if (selectedContent == null
              || selectedContent.plainText.isEmpty
@@ -266,7 +264,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           dataMap: dataSourceMap,
                           coloringChildSpan: false,
                         );
-                        _selectionController.clear();
+                        selectionAreaKey.currentState?.selectableRegion.clearSelection();
                       },
                       label: 'Color Text Red',
                     ),
