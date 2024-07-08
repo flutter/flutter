@@ -1206,7 +1206,7 @@ class _ActionSheetButtonBackgroundState extends State<_ActionSheetButtonBackgrou
   bool isBeingPressed = false;
 
   void _emitVibration(){
-    switch(defaultTargetPlatform) {
+    switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
       case TargetPlatform.android:
         HapticFeedback.selectionClick();
