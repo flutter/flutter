@@ -7,6 +7,7 @@
 #include "impeller/aiks/canvas.h"
 #include "impeller/aiks/paint_pass_delegate.h"
 #include "impeller/base/validation.h"
+#include "impeller/core/formats.h"
 #include "impeller/entity/contents/framebuffer_blend_contents.h"
 #include "impeller/entity/contents/text_contents.h"
 #include "impeller/entity/entity.h"
@@ -594,11 +595,36 @@ void ExperimentalCanvas::DrawTextFrame(
 
 void ExperimentalCanvas::AddRenderEntityToCurrentPass(Entity entity,
                                                       bool reuse_depth) {
-  entity.SetInheritedOpacity(transform_stack_.back().distributed_opacity);
-
-  auto transform = entity.GetTransform();
   entity.SetTransform(
-      Matrix::MakeTranslation(Vector3(-GetGlobalPassPosition())) * transform);
+      Matrix::MakeTranslation(Vector3(-GetGlobalPassPosition())) *
+      entity.GetTransform());
+  entity.SetInheritedOpacity(transform_stack_.back().distributed_opacity);
+  if (entity.GetBlendMode() == BlendMode::kSourceOver &&
+      entity.GetContents()->IsOpaque()) {
+    entity.SetBlendMode(BlendMode::kSource);
+  }
+
+  // If the entity covers the current render target and is a solid color, then
+  // conditionally update the backdrop color to its solid color value blended
+  // with the current backdrop.
+  if (render_passes_.back().IsApplyingClearColor()) {
+    std::optional<Color> maybe_color =
+        entity.AsBackgroundColor(render_passes_.back()
+                                     .entity_pass_target->GetRenderTarget()
+                                     .GetRenderTargetSize());
+    if (maybe_color.has_value()) {
+      Color color = maybe_color.value();
+      RenderTarget& render_target =
+          render_passes_.back().entity_pass_target->GetRenderTarget();
+      ColorAttachment attachment =
+          render_target.GetColorAttachments().find(0u)->second;
+      attachment.clear_color = attachment.clear_color.Unpremultiply()
+                                   .Blend(color, entity.GetBlendMode())
+                                   .Premultiply();
+      render_target.SetColorAttachment(attachment, 0u);
+    }
+  }
+
   if (!reuse_depth) {
     ++current_depth_;
   }

@@ -65,7 +65,7 @@ std::shared_ptr<Texture> EntityPassTarget::Flip(Allocator& allocator) {
   return secondary_color_texture_;
 }
 
-const RenderTarget& EntityPassTarget::GetRenderTarget() const {
+RenderTarget& EntityPassTarget::GetRenderTarget() {
   return target_;
 }
 
