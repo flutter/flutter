@@ -251,7 +251,7 @@ void main() {
         SemanticsFlag.isFocusable,
         SemanticsFlag.isCheckStateMixed,
       ],
-      actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+      actions: <SemanticsAction>[SemanticsAction.focus, SemanticsAction.tap],
     ), hasLength(1));
 
     await tester.pumpWidget(
