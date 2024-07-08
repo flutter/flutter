@@ -24,6 +24,10 @@ class Screenshotter {
       const ISize& size = {300, 300},
       bool scale_content = true) = 0;
 
+  virtual std::unique_ptr<Screenshot> MakeScreenshot(
+      AiksContext& aiks_context,
+      const std::shared_ptr<Texture> texture) = 0;
+
   virtual PlaygroundImpl& GetPlayground() = 0;
 };
 

@@ -120,5 +120,11 @@ std::unique_ptr<Screenshot> VulkanScreenshotter::MakeScreenshot(
   return ReadTexture(aiks_context.GetContext(), texture);
 }
 
+std::unique_ptr<Screenshot> VulkanScreenshotter::MakeScreenshot(
+    AiksContext& aiks_context,
+    const std::shared_ptr<Texture> texture) {
+  return ReadTexture(aiks_context.GetContext(), texture);
+}
+
 }  // namespace testing
 }  // namespace impeller
