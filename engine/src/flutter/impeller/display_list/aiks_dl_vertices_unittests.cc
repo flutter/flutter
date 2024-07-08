@@ -354,5 +354,95 @@ TEST_P(AiksTest, DrawVerticesPremultipliesColors) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+// All four vertices should form a solid red rectangle with no gaps.
+// The blur rectangle drawn under them should not be visible.
+TEST_P(AiksTest, DrawVerticesTextureCoordinatesWithFragmentShader) {
+  std::vector<SkPoint> positions_lt = {
+      SkPoint::Make(0, 0),    //
+      SkPoint::Make(50, 0),   //
+      SkPoint::Make(0, 50),   //
+      SkPoint::Make(50, 50),  //
+  };
+
+  auto vertices_lt = flutter::DlVertices::Make(
+      flutter::DlVertexMode::kTriangleStrip, positions_lt.size(),
+      positions_lt.data(),
+      /*texture_coordinates=*/positions_lt.data(), /*colors=*/nullptr,
+      /*index_count=*/0,
+      /*indices=*/nullptr);
+
+  std::vector<SkPoint> positions_rt = {
+      SkPoint::Make(50, 0),    //
+      SkPoint::Make(100, 0),   //
+      SkPoint::Make(50, 50),   //
+      SkPoint::Make(100, 50),  //
+  };
+
+  auto vertices_rt = flutter::DlVertices::Make(
+      flutter::DlVertexMode::kTriangleStrip, positions_rt.size(),
+      positions_rt.data(),
+      /*texture_coordinates=*/positions_rt.data(), /*colors=*/nullptr,
+      /*index_count=*/0,
+      /*indices=*/nullptr);
+
+  std::vector<SkPoint> positions_lb = {
+      SkPoint::Make(0, 50),    //
+      SkPoint::Make(50, 50),   //
+      SkPoint::Make(0, 100),   //
+      SkPoint::Make(50, 100),  //
+  };
+
+  auto vertices_lb = flutter::DlVertices::Make(
+      flutter::DlVertexMode::kTriangleStrip, positions_lb.size(),
+      positions_lb.data(),
+      /*texture_coordinates=*/positions_lb.data(), /*colors=*/nullptr,
+      /*index_count=*/0,
+      /*indices=*/nullptr);
+
+  std::vector<SkPoint> positions_rb = {
+      SkPoint::Make(50, 50),    //
+      SkPoint::Make(100, 50),   //
+      SkPoint::Make(50, 100),   //
+      SkPoint::Make(100, 100),  //
+  };
+
+  auto vertices_rb = flutter::DlVertices::Make(
+      flutter::DlVertexMode::kTriangleStrip, positions_rb.size(),
+      positions_rb.data(),
+      /*texture_coordinates=*/positions_rb.data(), /*colors=*/nullptr,
+      /*index_count=*/0,
+      /*indices=*/nullptr);
+
+  flutter::DisplayListBuilder builder;
+  flutter::DlPaint paint;
+  flutter::DlPaint rect_paint;
+  rect_paint.setColor(DlColor::kBlue());
+
+  auto runtime_stages =
+      OpenAssetAsRuntimeStage("runtime_stage_simple.frag.iplr");
+
+  auto runtime_stage =
+      runtime_stages[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+  ASSERT_TRUE(runtime_stage);
+
+  auto runtime_effect = DlRuntimeEffect::MakeImpeller(runtime_stage);
+  auto uniform_data = std::make_shared<std::vector<uint8_t>>();
+  auto color_source = flutter::DlColorSource::MakeRuntimeEffect(
+      runtime_effect, {}, uniform_data);
+
+  paint.setColorSource(color_source);
+
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+  builder.Save();
+  builder.DrawRect(SkRect::MakeLTRB(0, 0, 100, 100), rect_paint);
+  builder.DrawVertices(vertices_lt, flutter::DlBlendMode::kSrcOver, paint);
+  builder.DrawVertices(vertices_rt, flutter::DlBlendMode::kSrcOver, paint);
+  builder.DrawVertices(vertices_lb, flutter::DlBlendMode::kSrcOver, paint);
+  builder.DrawVertices(vertices_rb, flutter::DlBlendMode::kSrcOver, paint);
+  builder.Restore();
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 }  // namespace testing
 }  // namespace impeller

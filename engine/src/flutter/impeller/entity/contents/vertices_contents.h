@@ -42,6 +42,8 @@ class VerticesSimpleBlendContents final : public Contents {
 
   void SetEffectTransform(Matrix transform);
 
+  void SetLazyTextureCoverage(Rect rect);
+
   // |Contents|
   std::optional<Rect> GetCoverage(const Entity& entity) const override;
 
@@ -59,6 +61,7 @@ class VerticesSimpleBlendContents final : public Contents {
   Entity::TileMode tile_mode_x_ = Entity::TileMode::kClamp;
   Entity::TileMode tile_mode_y_ = Entity::TileMode::kClamp;
   Matrix inverse_matrix_ = {};
+  std::optional<Rect> lazy_texture_coverage_;
   LazyTexture lazy_texture_;
 
   VerticesSimpleBlendContents(const VerticesSimpleBlendContents&) = delete;

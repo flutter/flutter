@@ -69,6 +69,7 @@ impellerc("runtime_stages") {
   shaders = [
     "ink_sparkle.frag",
     "runtime_stage_example.frag",
+    "runtime_stage_simple.frag",
     "gradient.frag",
     "uniforms_and_sampler_1.frag",
     "uniforms_and_sampler_2.frag",
