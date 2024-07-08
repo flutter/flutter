@@ -1898,7 +1898,8 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
     _dirtyNodes.clear();
     if (previousFocus != _primaryFocus) {
       if (_primaryFocus != null && (_primaryFocus!.context?.mounted ?? false)) {
-        final int? viewId = View.maybeOf(_primaryFocus!.context!)?.viewId;
+        final FlutterView? view = View.maybeOf(_primaryFocus!.context!);
+        final int? viewId = view?.viewId;
         if (viewId != null && viewId != _lastFocusedViewId) {
           WidgetsBinding.instance.platformDispatcher.requestViewFocusChange(
             direction: ViewFocusDirection.forward,
