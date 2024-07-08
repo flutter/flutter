@@ -1261,7 +1261,7 @@ class _CarouselMetrics extends FixedScrollMetrics {
   /// Used to compute [item] from the current [pixels].
   final List<int>? flexWeights;
 
-  /// Determin whether each child can be expanded to occupy the maximum weight while scrolling.
+  /// Determine whether each child can be expanded to occupy the maximum weight while scrolling.
   final bool? consumeMaxWeight;
 
   @override
@@ -1273,6 +1273,7 @@ class _CarouselMetrics extends FixedScrollMetrics {
     AxisDirection? axisDirection,
     double? itemExtent,
     List<int>? flexWeights,
+    bool? consumeMaxWeight,
     double? devicePixelRatio,
   }) {
     return _CarouselMetrics(
@@ -1283,6 +1284,7 @@ class _CarouselMetrics extends FixedScrollMetrics {
       axisDirection: axisDirection ?? this.axisDirection,
       itemExtent: itemExtent ?? this.itemExtent,
       flexWeights: flexWeights ?? this.flexWeights,
+      consumeMaxWeight: consumeMaxWeight ?? this.consumeMaxWeight,
       devicePixelRatio: devicePixelRatio ?? this.devicePixelRatio,
     );
   }
@@ -1300,6 +1302,7 @@ class _CarouselPosition extends ScrollPositionWithSingleContext implements _Caro
   }) : assert(flexWeights != null && itemExtent == null
        || flexWeights == null && itemExtent != null),
        _itemToShowOnStartup = initialItem.toDouble(),
+       _consumeMaxWeight = consumeMaxWeight,
        super(
          initialPixels: null,
        );
@@ -1313,7 +1316,7 @@ class _CarouselPosition extends ScrollPositionWithSingleContext implements _Caro
 
   @override
   bool get consumeMaxWeight => _consumeMaxWeight;
-  bool _consumeMaxWeight = true;
+  bool _consumeMaxWeight;
   set consumeMaxWeight(bool value) {
     if (_consumeMaxWeight == value) {
       return;
