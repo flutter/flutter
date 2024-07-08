@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:collection' show LinkedHashMap;
 import 'dart:math';
 import 'dart:ui' as ui show TextHeightBehavior;
 
@@ -1268,18 +1267,6 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
     if (currentSelectionStartIndex == -1 || currentSelectionEndIndex == -1) {
       return null;
     }
-    final int selectionStart = min(currentSelectionStartIndex, currentSelectionEndIndex);
-    final int selectionEnd = max(currentSelectionStartIndex, currentSelectionEndIndex);
-    final LinkedHashMap<int, List<SelectedContentRange<Object>>> selections = LinkedHashMap<int, List<SelectedContentRange<Object>>>();
-    for (int index = selectionStart; index <= selectionEnd; index += 1) {
-      final List<SelectedContentRange<Object>>? selectedContentRanges = selectables[index].getSelections();
-      if (selectedContentRanges != null) {
-        selections[index] = selectedContentRanges;
-      }
-    }
-    if (selections.isEmpty) {
-      return null;
-    }
     // Accurately find the selection endpoints, selections.first.startOffset and
     // selections.last.endOffset are only accurate when the selections.first and
     // selections.last are root selectables with regards to the text. When the
@@ -1292,11 +1279,14 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
     final int endOffset;
     final List<SelectedContentRange<Object>>? startingSelectableSelections = selectables[currentSelectionStartIndex].getSelections();
     final List<SelectedContentRange<Object>>? endingSelectableSelections = selectables[currentSelectionEndIndex].getSelections();
+    if (startingSelectableSelections == null || endingSelectableSelections == null) {
+      return null;
+    }
     if (paragraph.selectableBelongsToParagraph(selectables[currentSelectionStartIndex])) {
       // A [_SelectableFragment] will only have one [SelectedContentRange].
-      startOffset = startingSelectableSelections!.first.startOffset;
+      startOffset = startingSelectableSelections.first.startOffset;
     } else {
-      final bool localSelectionForward = startingSelectableSelections!.first.endOffset >= startingSelectableSelections!.first.startOffset;
+      final bool localSelectionForward = startingSelectableSelections.first.endOffset >= startingSelectableSelections.first.startOffset;
       final TextPosition positionBeforeStart = localSelectionForward
                                              ? paragraph.getPositionForOffset(selectables[currentSelectionStartIndex].boundingBoxes.first.bottomLeft)
                                              : paragraph.getPositionForOffset(selectables[currentSelectionStartIndex].boundingBoxes.last.bottomRight);
@@ -1304,15 +1294,17 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
     }
     if (paragraph.selectableBelongsToParagraph(selectables[currentSelectionEndIndex])) {
       // A [_SelectableFragment] will only have one [SelectedContentRange].
-      endOffset = endingSelectableSelections!.first.endOffset;
+      endOffset = endingSelectableSelections.first.endOffset;
     } else {
-      final bool localSelectionForward = endingSelectableSelections!.first.endOffset >= endingSelectableSelections!.first.startOffset;
+      final bool localSelectionForward = endingSelectableSelections.first.endOffset >= endingSelectableSelections.first.startOffset;
       final TextPosition positionAfterEnd = localSelectionForward
                                           ? paragraph.getPositionForOffset(selectables[currentSelectionEndIndex].boundingBoxes.last.bottomRight)
                                           : paragraph.getPositionForOffset(selectables[currentSelectionEndIndex].boundingBoxes.first.bottomLeft);
       endOffset = positionAfterEnd.offset;
     }
     // Collect any child ranges.
+    final int selectionStart = min(currentSelectionStartIndex, currentSelectionEndIndex);
+    final int selectionEnd = max(currentSelectionStartIndex, currentSelectionEndIndex);
     final List<SelectedContentRange<Object>> childSelections = <SelectedContentRange<Object>>[];
     for (int index = selectionStart; index <= selectionEnd; index += 1) {
       if (paragraph.selectableBelongsToParagraph(selectables[index])) {
