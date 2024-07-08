@@ -8,8 +8,8 @@ import 'package:flutter_api_samples/material/material_state/material_state_borde
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  void expectBorderColor(Color color) {
-    final Finder finder = find.byWidgetPredicate((Widget widget) {
+  Finder findBorderColor(Color color) {
+    return find.byWidgetPredicate((Widget widget) {
       if (widget is! Material) {
         return false;
       }
@@ -19,7 +19,6 @@ void main() {
       }
       return shape.side.color == color;
     });
-    expect(finder, findsOne);
   }
 
   testWidgets(
@@ -33,7 +32,7 @@ void main() {
         ),
       );
 
-      expectBorderColor(Colors.red);
+      expect(findBorderColor(Colors.red), findsOne);
     },
   );
 
@@ -51,7 +50,7 @@ void main() {
       await tester.tap(find.byType(FilterChip));
       await tester.pumpAndSettle();
 
-      expectBorderColor(const Color(0xff79747e));
+      expect(findBorderColor(const Color(0xff79747e)), findsOne);
     },
   );
 }
