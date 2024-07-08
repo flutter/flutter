@@ -184,8 +184,8 @@ Future<void> run(List<String> arguments) async {
     final String ruleNames = rules.map((AnalyzeRule rule) => '\n * $rule').join();
     printProgress('Analyzing code in the framework with the following rules:$ruleNames');
     await analyzeWithRules(flutterRoot, rules,
-      includePaths: <String>['packages/flutter/lib'],
-      excludePaths: <String>['packages/flutter/lib/fix_data'],
+      includePaths: const <String>['packages/flutter/lib'],
+      excludePaths: const <String>['packages/flutter/lib/fix_data'],
     );
     final List<AnalyzeRule> testRules = <AnalyzeRule>[noStopwatches];
     final String testRuleNames = testRules.map((AnalyzeRule rule) => '\n * $rule').join();
@@ -196,7 +196,14 @@ Future<void> run(List<String> arguments) async {
     final List<AnalyzeRule> toolRules = <AnalyzeRule>[AvoidFutureCatchError()];
     final String toolRuleNames = toolRules.map((AnalyzeRule rule) => '\n * $rule').join();
     printProgress('Analyzing code in the tool with the following rules:$toolRuleNames');
-    await analyzeToolWithRules(flutterRoot, toolRules);
+    await analyzeWithRules(
+      flutterRoot,
+      toolRules,
+      includePaths: const <String>[
+        'packages/flutter_tools/lib',
+        'packages/flutter_tools/test',
+      ],
+    );
   } else {
     printProgress('Skipped performing further analysis in the framework because "flutter analyze" finished with a non-zero exit code.');
   }
