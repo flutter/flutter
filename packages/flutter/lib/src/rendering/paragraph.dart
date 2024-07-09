@@ -458,6 +458,9 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
 
   /// Determines whether the given [Selectable] was created by this
   /// [RenderParagraph].
+  ///
+  /// The [RenderParagraph] splits its text into multiple [Selectable]s,
+  /// delimited by [PlaceholderSpan.placeholderCodeUnit].
   bool selectableBelongsToParagraph(Selectable selectable) {
     if (_lastSelectableFragments == null) {
       return false;
