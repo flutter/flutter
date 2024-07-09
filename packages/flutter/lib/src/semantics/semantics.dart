@@ -1219,6 +1219,9 @@ class SemanticsProperties extends DiagnosticableTree {
   /// It'll be appear in accessibility hierarchy as `resource-id`.
   ///
   /// On iOS, this will set `UIAccessibilityElement.accessibilityIdentifier`.
+  ///
+  /// On web, this will set a `flt-semantics-identifier` attribute on the DOM element
+  /// that corresponds to the semantics node.
   /// {@endtemplate}
   final String? identifier;
 
