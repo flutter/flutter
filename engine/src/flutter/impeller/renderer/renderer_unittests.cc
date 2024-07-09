@@ -440,7 +440,7 @@ TEST_P(RendererTest, CanRenderToTexture) {
 
 TEST_P(RendererTest, CanRenderInstanced) {
   if (GetParam() == PlaygroundBackend::kOpenGLES) {
-    GTEST_SKIP_("Instancing is not supported on OpenGL.");
+    GTEST_SKIP() << "Instancing is not supported on OpenGL.";
   }
   using VS = InstancedDrawVertexShader;
   using FS = InstancedDrawFragmentShader;
@@ -1403,8 +1403,8 @@ TEST_P(RendererTest, CanSepiaToneWithSubpasses) {
   ASSERT_TRUE(context);
 
   if (!context->GetCapabilities()->SupportsFramebufferFetch()) {
-    GTEST_SKIP_(
-        "This test uses framebuffer fetch and the backend doesn't support it.");
+    GTEST_SKIP() << "This test uses framebuffer fetch and the backend doesn't "
+                    "support it.";
     return;
   }
 
@@ -1494,8 +1494,8 @@ TEST_P(RendererTest, CanSepiaToneThenSwizzleWithSubpasses) {
   ASSERT_TRUE(context);
 
   if (!context->GetCapabilities()->SupportsFramebufferFetch()) {
-    GTEST_SKIP_(
-        "This test uses framebuffer fetch and the backend doesn't support it.");
+    GTEST_SKIP() << "This test uses framebuffer fetch and the backend doesn't "
+                    "support it.";
     return;
   }
 

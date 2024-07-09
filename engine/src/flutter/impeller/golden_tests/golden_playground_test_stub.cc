@@ -20,7 +20,7 @@ void GoldenPlaygroundTest::SetTypographerContext(
 void GoldenPlaygroundTest::TearDown() {}
 
 void GoldenPlaygroundTest::SetUp() {
-  GTEST_SKIP_("GoldenPlaygroundTest doesn't support this backend type.");
+  GTEST_SKIP() << "GoldenPlaygroundTest doesn't support this backend type.";
 }
 
 PlaygroundBackend GoldenPlaygroundTest::GetBackend() const {
