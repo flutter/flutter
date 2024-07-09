@@ -339,7 +339,7 @@ class CreateCommand extends CreateBase {
       linux: includeLinux,
       macos: includeMacos,
       windows: includeWindows,
-      dartSdkVersionBounds: "'>=$dartSdk <4.0.0'",
+      dartSdkVersionBounds: '^$dartSdk',
       implementationTests: boolArg('implementation-tests'),
       agpVersion: gradle.templateAndroidGradlePluginVersion,
       kotlinVersion: gradle.templateKotlinGradlePluginVersion,
@@ -820,7 +820,7 @@ Your example app code is in $relativeExampleMain.
   if (platformsString.isNotEmpty) {
     globals.printStatus('''
 Host platform code is in the $platformsString directories under $pluginPath.
-To edit platform code in an IDE see https://flutter.dev/developing-packages/#edit-plugin-package.
+To edit platform code in an IDE see https://flutter.dev/to/edit-plugins.
 
     ''');
   }
@@ -841,7 +841,7 @@ You've created a plugin project that doesn't yet support any platforms.
 void _printPluginAddPlatformMessage(String pluginPath, String template) {
   globals.printStatus('''
 To add platforms, run `flutter create -t $template --platforms <platforms> .` under $pluginPath.
-For more information, see https://flutter.dev/go/plugin-platforms.
+For more information, see https://flutter.dev/to/pubspec-plugin-platforms.
 
 ''');
 }
@@ -881,13 +881,13 @@ void _printWarningDisabledPlatform(List<String> platforms) {
 
     globals.printStatus('''
 The desktop $platforms: ${desktop.join(', ')} $verb currently not supported on your local environment.
-For more details, see: https://flutter.dev/desktop
+For more details, see: https://flutter.dev/to/add-desktop-support
 ''');
   }
   if (web.isNotEmpty) {
     globals.printStatus('''
 The web is currently not supported on your local environment.
-For more details, see: https://flutter.dev/docs/get-started/web
+For more details, see: https://flutter.dev/to/add-web-support
 ''');
   }
 }

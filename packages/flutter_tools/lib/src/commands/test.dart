@@ -46,8 +46,8 @@ const String _kIntegrationTestDirectory = 'integration_test';
 /// the `*_test.dart` suffix, and run them in a single invocation.
 ///
 /// See:
-/// - https://flutter.dev/docs/cookbook/testing/unit/introduction
-/// - https://flutter.dev/docs/cookbook/testing/widget/introduction
+/// - https://flutter.dev/to/unit-testing
+/// - https://flutter.dev/to/widget-testing
 ///
 /// ## Integration Tests
 ///
@@ -59,7 +59,7 @@ const String _kIntegrationTestDirectory = 'integration_test';
 /// your package. To run these tests, use `flutter test integration_test`.
 ///
 /// See:
-/// - https://flutter.dev/docs/testing/integration-tests
+/// - https://flutter.dev/to/integration-testing
 class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
   TestCommand({
     bool verboseHelp = false,
@@ -412,6 +412,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       debugLogsDirectoryPath: debugLogsDirectoryPath,
       webRenderer: webRenderer,
       webUseWasm: useWasm,
+      webUseLocalCanvaskit: true,
     );
 
     String? testAssetDirectory;
@@ -504,8 +505,8 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       collector = CoverageCollector(
         verbose: !machine,
         libraryNames: packagesToInclude,
-        packagesPath: buildInfo.packagesPath,
-        resolver: await CoverageCollector.getResolver(buildInfo.packagesPath),
+        packagesPath: buildInfo.packageConfigPath,
+        resolver: await CoverageCollector.getResolver(buildInfo.packageConfigPath),
         testTimeRecorder: testTimeRecorder,
         branchCoverage: boolArg('branch-coverage'),
       );
@@ -695,7 +696,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     if (build != 0) {
       throwToolExit('Error: Failed to build asset bundle');
     }
-    if (_needRebuild(assetBundle.entries)) {
+    if (_needsRebuild(assetBundle.entries, flavor)) {
       await writeBundle(
         globals.fs.directory(globals.fs.path.join('build', 'unit_test_assets')),
         assetBundle.entries,
@@ -708,14 +709,25 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         projectDir: globals.fs.currentDirectory,
         buildMode: buildMode,
       );
+
+      final File cachedFlavorFile = globals.fs.file(
+        globals.fs.path.join('build', 'test_cache', 'flavor.txt'),
+      );
+      if (cachedFlavorFile.existsSync()) {
+        await cachedFlavorFile.delete();
+      }
+      if (flavor != null) {
+        cachedFlavorFile.createSync(recursive: true);
+        cachedFlavorFile.writeAsStringSync(flavor);
+      }
     }
   }
 
-  bool _needRebuild(Map<String, AssetBundleEntry> entries) {
+  bool _needsRebuild(Map<String, AssetBundleEntry> entries, String? flavor) {
     // TODO(andrewkolos): This logic might fail in the future if we change the
-    // schema of the contents of the asset manifest file and the user does not
-    // perform a `flutter clean` after upgrading.
-    // See https://github.com/flutter/flutter/issues/128563.
+    //  schema of the contents of the asset manifest file and the user does not
+    //  perform a `flutter clean` after upgrading.
+    //  See https://github.com/flutter/flutter/issues/128563.
     final File manifest = globals.fs.file(globals.fs.path.join('build', 'unit_test_assets', 'AssetManifest.bin'));
     if (!manifest.existsSync()) {
       return true;
@@ -736,6 +748,17 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         return true;
       }
     }
+
+    final File cachedFlavorFile = globals.fs.file(
+      globals.fs.path.join('build', 'test_cache', 'flavor.txt'),
+    );
+    final String? cachedFlavor = cachedFlavorFile.existsSync()
+        ? cachedFlavorFile.readAsStringSync()
+        : null;
+    if (cachedFlavor != flavor) {
+      return true;
+    }
+
     return false;
   }
 }

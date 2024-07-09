@@ -1202,13 +1202,30 @@ class RenderBackdropFilter extends RenderProxyBox {
   /// Creates a backdrop filter.
   //
   /// The [blendMode] argument defaults to [BlendMode.srcOver].
-  RenderBackdropFilter({ RenderBox? child, required ui.ImageFilter filter, BlendMode blendMode = BlendMode.srcOver })
+  RenderBackdropFilter({
+    RenderBox? child,
+    required ui.ImageFilter filter,
+    BlendMode blendMode = BlendMode.srcOver,
+    bool enabled = true,
+  })
     : _filter = filter,
+      _enabled = enabled,
       _blendMode = blendMode,
       super(child);
 
   @override
   BackdropFilterLayer? get layer => super.layer as BackdropFilterLayer?;
+
+  /// Whether or not the backdrop filter operation will be applied to the child.
+  bool get enabled => _enabled;
+  bool _enabled;
+  set enabled(bool value) {
+    if (enabled == value) {
+      return;
+    }
+    _enabled = value;
+    markNeedsPaint();
+  }
 
   /// The image filter to apply to the existing painted content before painting
   /// the child.
@@ -1244,6 +1261,11 @@ class RenderBackdropFilter extends RenderProxyBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
+    if (!_enabled) {
+      super.paint(context, offset);
+      return;
+    }
+
     if (child != null) {
       assert(needsCompositing);
       layer ??= BackdropFilterLayer();
@@ -2688,24 +2710,6 @@ class RenderFittedBox extends RenderProxyBox {
   Size computeDryLayout(covariant BoxConstraints constraints) {
     if (child != null) {
       final Size childSize = child!.getDryLayout(const BoxConstraints());
-
-      // During [RenderObject.debugCheckingIntrinsics] a child that doesn't
-      // support dry layout may provide us with an invalid size that triggers
-      // assertions if we try to work with it. Instead of throwing, we bail
-      // out early in that case.
-      bool invalidChildSize = false;
-      assert(() {
-        if (RenderObject.debugCheckingIntrinsics && childSize.width * childSize.height == 0.0) {
-          invalidChildSize = true;
-        }
-        return true;
-      }());
-      if (invalidChildSize) {
-        assert(debugCannotComputeDryLayout(
-          reason: 'Child provided invalid size of $childSize.',
-        ));
-        return Size.zero;
-      }
 
       switch (fit) {
         case BoxFit.scaleDown:
