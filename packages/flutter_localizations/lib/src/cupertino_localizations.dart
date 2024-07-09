@@ -119,7 +119,7 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
   String datePickerDayOfMonth(int dayIndex, [int? weekDay]) {
     // Year and month doesn't matter since we just want to day formatted.
     return weekDay != null
-      ? '${_weekdayFormat.format(DateTime.utc(0, 0, dayIndex))} ${_dayFormat.format(DateTime.utc(0, 0, dayIndex))}'
+      ? ' ${_weekdayFormat.format(DateTime.utc(0, 0, dayIndex))} $dayIndex '
       : _dayFormat.format(DateTime.utc(0, 0, dayIndex));
   }
 
