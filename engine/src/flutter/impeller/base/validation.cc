@@ -33,11 +33,12 @@ ScopedValidationFatal::~ScopedValidationFatal() {
   sValidationLogsAreFatal--;
 }
 
-ValidationLog::ValidationLog() = default;
+ValidationLog::ValidationLog(const char* file, int line)
+    : file_(file), line_(line) {}
 
 ValidationLog::~ValidationLog() {
   if (sValidationLogsDisabledCount <= 0) {
-    ImpellerValidationBreak(stream_.str().c_str());
+    ImpellerValidationBreak(stream_.str().c_str(), file_, line_);
   }
 }
 
@@ -45,19 +46,17 @@ std::ostream& ValidationLog::GetStream() {
   return stream_;
 }
 
-void ImpellerValidationBreak(const char* message) {
-  std::stringstream stream;
+void ImpellerValidationBreak(const char* message, const char* file, int line) {
+  const auto severity =
+      ImpellerValidationErrorsAreFatal() ? fml::LOG_FATAL : fml::LOG_ERROR;
+  auto fml_log = fml::LogMessage{severity, file, line, nullptr};
+  fml_log.stream() <<
 #if FLUTTER_RELEASE
-  stream << "Impeller validation: " << message;
-#else
-  stream << "Break on '" << __FUNCTION__
-         << "' to inspect point of failure: " << message;
-#endif
-  if (sValidationLogsAreFatal > 0) {
-    FML_LOG(FATAL) << stream.str();
-  } else {
-    FML_LOG(ERROR) << stream.str();
-  }
+      "Impeller validation: " << message;
+#else   // FLUTTER_RELEASE
+      "Break on '" << __FUNCTION__
+                   << "' to inspect point of failure: " << message;
+#endif  // FLUTTER_RELEASE
 }
 
 bool ImpellerValidationErrorsAreFatal() {
