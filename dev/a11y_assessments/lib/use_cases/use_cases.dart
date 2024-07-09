@@ -9,7 +9,6 @@ import 'badge.dart';
 import 'check_box_list_tile.dart';
 import 'date_picker.dart';
 import 'dialog.dart';
-import 'headings.dart';
 import 'material_banner.dart';
 import 'navigation_bar.dart';
 import 'radio_list_tile.dart';
@@ -37,5 +36,4 @@ final List<UseCase> useCases = <UseCase>[
   NavigationBarUseCase(),
   TextButtonUseCase(),
   RadioListTileUseCase(),
-  HeadingsUseCase(),
 ];

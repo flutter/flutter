@@ -2755,8 +2755,11 @@ class SemanticsNode with DiagnosticableTreeMixin {
         platformViewId ??= node._platformViewId;
         maxValueLength ??= node._maxValueLength;
         currentValueLength ??= node._currentValueLength;
-        headingLevel = node._headingLevel;
         linkUrl ??= node._linkUrl;
+        headingLevel = _mergeHeadingLevels(
+          sourceLevel: node._headingLevel,
+          targetLevel: headingLevel,
+        );
 
         if (identifier == '') {
           identifier = node._identifier;
@@ -5080,19 +5083,10 @@ class SemanticsConfiguration {
     _maxValueLength ??= child._maxValueLength;
     _currentValueLength ??= child._currentValueLength;
 
-    // Pick the highest heading level when merging.
-    //
-    // Heading levels are lower-is-higher (1 is the highest; 6 is the lowest),
-    // except 0, which means "not a heading", i.e. it's the lowest. Hence the
-    // complicated boolean expression.
-    final bool isChildHeadingLevelHigher =
-      // Check that child is a heading. If not, keep parent heading level.
-      child._headingLevel > 0 &&
-      // Child is a heading => pick the higest heading level
-      (_headingLevel == 0 || child._headingLevel < _headingLevel);
-    if (isChildHeadingLevelHigher) {
-      _headingLevel = child._headingLevel;
-    }
+    _headingLevel = _mergeHeadingLevels(
+      sourceLevel: child._headingLevel,
+      targetLevel: _headingLevel,
+    );
 
     textDirection ??= child.textDirection;
     _sortKey ??= child._sortKey;
@@ -5330,4 +5324,17 @@ class OrdinalSortKey extends SemanticsSortKey {
     super.debugFillProperties(properties);
     properties.add(DoubleProperty('order', order, defaultValue: null));
   }
+}
+
+/// Picks the most accurate heading level when two nodes, with potentially
+/// different heading levels, are merged.
+///
+/// Argument [sourceLevel] is the heading level of the source node that is being
+/// merged into a target node, which has heading level [targetLevel].
+///
+/// If the target node is not a heading, the the source heading level is used.
+/// Otherwise, the target heading level is used irrespective of the source
+/// heading level.
+int _mergeHeadingLevels({required int sourceLevel, required int targetLevel}) {
+  return targetLevel == 0 ? sourceLevel : targetLevel;
 }
