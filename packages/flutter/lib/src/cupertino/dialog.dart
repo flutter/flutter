@@ -77,6 +77,7 @@ const TextStyle _kActionSheetContentStyle = TextStyle(
 );
 
 // Generic constants shared between Dialog and ActionSheet.
+// Blur kernel eyeballed from iOS simulator
 const double _kBlurAmount = 30.0;
 const double _kCornerRadius = 14.0;
 const double _kDividerThickness = 0.3;
@@ -459,20 +460,69 @@ class CupertinoPopupSurface extends StatelessWidget {
   /// The widget below this widget in the tree.
   final Widget? child;
 
-  static const List<double> darkMatrix = <double>[
+  /// The [ColorFilter.matrix] used by [CupertinoPopupSurface] to create a
+  /// dark-mode backdrop for Cupertino widgets.
+  ///
+  /// To derive this matrix, the saturation matrix was taken from
+  /// https://docs.rainmeter.net/tips/colormatrix-guide/ and was tweaked to
+  /// resemble the iOS 17 simulator.
+  /// ```dart
+  ///  // The matrix can be derived from the following function:
+  ///  static List<double> buildDarkColorFilterMatrix() {
+  ///     const double additive = 0.3;
+  ///     const double darkLumR = 0.45;
+  ///     const double darkLumG = 0.8;
+  ///     const double darkLumB = 0.16;
+  ///     const double saturation = 1.7;
+  ///     const double sr = (1 - saturation) * darkLumR;
+  ///     const double sg = (1 - saturation) * darkLumG;
+  ///     const double sb = (1 - saturation) * darkLumB;
+  ///     return <double>[
+  ///       sr + saturation, sg, sb, 0.0, additive,
+  ///       sr, sg + saturation, sb, 0.0, additive,
+  ///       sr, sg, sb + saturation, 0.0, additive,
+  ///       0.0, 0.0, 0.0, 1.0, 0.0,
+  ///     ];
+  ///   }
+  /// ```
+  static const List<double> _darkMatrix = <double>[
      1.39, -0.56, -0.11, 0.00, 0.30,
     -0.32,  1.14, -0.11, 0.00, 0.30,
     -0.32, -0.56,  1.59, 0.00, 0.30,
      0.00,  0.00,  0.00, 1.00, 0.00
   ];
 
-  static const List<double> lightMatrix = <double>[
+  /// The [ColorFilter.matrix] used by [CupertinoPopupSurface] to create a
+  /// dark-mode backdrop for Cupertino widgets.
+  ///
+  /// To derive this matrix, the saturation matrix was taken from
+  /// https://docs.rainmeter.net/tips/colormatrix-guide/ and was tweaked to
+  /// resemble the iOS 17 simulator.
+  ///
+  /// ```dart
+  /// // The matrix can be derived from the following function:
+  /// static List<double> buildLightColorFilterMatrix() {
+  ///     const double lightLumR = 0.26;
+  ///     const double lightLumG = 0.4;
+  ///     const double lightLumB = 0.17;
+  ///     const double saturation = 2.0;
+  ///     const double sr = (1 - saturation) * lightLumR;
+  ///     const double sg = (1 - saturation) * lightLumG;
+  ///     const double sb = (1 - saturation) * lightLumB;
+  ///     return <double>[
+  ///       sr + saturation, sg, sb, 0.0, 0.0,
+  ///       sr, sg + saturation, sb, 0.0, 0.0,
+  ///       sr, sg, sb + saturation, 0.0, 0.0,
+  ///       0.0, 0.0, 0.0, 1.0, 0.0,
+  ///     ];
+  ///   }
+  /// ```
+  static const List<double> _lightMatrix = <double>[
      1.74, -0.40, -0.17, 0.00, 0.00,
     -0.26,  1.60, -0.17, 0.00, 0.00,
     -0.26, -0.40,  1.83, 0.00, 0.00,
      0.00,  0.00,  0.00, 1.00, 0.00
   ];
-
   @override
   Widget build(BuildContext context) {
     Widget? contents = child;
