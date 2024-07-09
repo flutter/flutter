@@ -2398,21 +2398,25 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
 
   /// Copies the selections of all [Selectable]s.
   @override
-  List<SelectedContentRange<Object>>? getSelections() {
+  List<SelectedContentRange<Object>> getSelections() {
     if (currentSelectionStartIndex == -1 || currentSelectionEndIndex == -1) {
-      return null;
+      return <SelectedContentRange<Object>>[];
     }
     final int selectionStart = min(currentSelectionStartIndex, currentSelectionEndIndex);
     final int selectionEnd = max(currentSelectionStartIndex, currentSelectionEndIndex);
     final List<SelectedContentRange<Object>> selections = <SelectedContentRange<Object>>[];
     for (int index = selectionStart; index <= selectionEnd; index += 1) {
-      final List<SelectedContentRange<Object>>? selectedContentRanges = selectables[index].getSelections();
-      if (selectedContentRanges != null) {
+      final List<SelectedContentRange<Object>> selectedContentRanges = selectables[index].getSelections();
+      if (selectedContentRanges.isNotEmpty) {
         selections.addAll(selectedContentRanges);
       }
     }
     if (selections.isEmpty) {
-      return null;
+      assert(
+        true,
+        'This selection container delegate has an active selection, indicated by its currentSelectionStartIndex and currentSelectionEndIndex, but it provides no SelectedContentRanges to represent this selection.',
+      );
+      return <SelectedContentRange<Object>>[];
     }
     return selections;
   }
@@ -2863,7 +2867,9 @@ typedef SelectableRegionContextMenuBuilder = Widget Function(
 /// The [selections] list is ordered according to the order of the
 /// [Selectable]s contained under the [SelectionListener] this callback
 /// is provided to.
-typedef SelectionListenerSelectionChangedCallback = void Function(List<SelectedContentRange<Object>>? selections);
+///
+/// [selections] will be an empty list if nothing is selected.
+typedef SelectionListenerSelectionChangedCallback = void Function(List<SelectedContentRange<Object>> selections);
 
 /// A [SelectionContainer] that allows the user to listen to selection changes
 /// for the child subtree it wraps under a [SelectionArea] or [SelectableRegion].

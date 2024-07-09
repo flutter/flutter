@@ -286,9 +286,9 @@ class _MyHomePageState extends State<MyHomePage> {
           );
         },
         child: SelectionListener(
-          onSelectionChanged: (List<SelectedContentRange<Object>>? selections) {
+          onSelectionChanged: (List<SelectedContentRange<Object>> selections) {
             _activeSelections.clear();
-            if (selections == null) {
+            if (selections.isEmpty) {
               return;
             }
             _activeSelections.addAll(selections);

@@ -1263,9 +1263,9 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
 
   /// Copies the selections of all [Selectable]s.
   @override
-  List<SelectedContentRange<Object>>? getSelections() {
+  List<SelectedContentRange<Object>> getSelections() {
     if (currentSelectionStartIndex == -1 || currentSelectionEndIndex == -1) {
-      return null;
+      return <SelectedContentRange<Object>>[];
     }
     // Accurately find the selection endpoints, selections.first.startOffset and
     // selections.last.endOffset are only accurate when the selections.first and
@@ -1277,10 +1277,14 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
     // to the root text.
     final int startOffset;
     final int endOffset;
-    final List<SelectedContentRange<Object>>? startingSelectableSelections = selectables[currentSelectionStartIndex].getSelections();
-    final List<SelectedContentRange<Object>>? endingSelectableSelections = selectables[currentSelectionEndIndex].getSelections();
-    if (startingSelectableSelections == null || endingSelectableSelections == null) {
-      return null;
+    final List<SelectedContentRange<Object>> startingSelectableSelections = selectables[currentSelectionStartIndex].getSelections();
+    final List<SelectedContentRange<Object>> endingSelectableSelections = selectables[currentSelectionEndIndex].getSelections();
+    if (startingSelectableSelections.isEmpty || endingSelectableSelections.isEmpty) {
+      assert(
+        true,
+        'This selection container delegate has an active selection, indicated by its currentSelectionStartIndex and currentSelectionEndIndex, but it provides no SelectedContentRanges to represent this selection.',
+      );
+      return <SelectedContentRange<Object>>[];
     }
     if (paragraph.selectableBelongsToParagraph(selectables[currentSelectionStartIndex])) {
       // A [_SelectableFragment] will only have one [SelectedContentRange].
@@ -1310,8 +1314,8 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
       if (paragraph.selectableBelongsToParagraph(selectables[index])) {
         continue;
       }
-      final List<SelectedContentRange<Object>>? selectedContentRanges = selectables[index].getSelections();
-      if (selectedContentRanges != null) {
+      final List<SelectedContentRange<Object>> selectedContentRanges = selectables[index].getSelections();
+      if (selectedContentRanges.isNotEmpty) {
         childSelections.addAll(selectedContentRanges);
       }
     }

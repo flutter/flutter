@@ -101,13 +101,11 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _colorSelectionRed(
-    List<SelectedContentRange<Object>>? ranges,
-    {
-      required Map<Key, TextSpan> dataMap,
-      required bool coloringChildSpan,
-    }
-  ) {
-    if (ranges == null || ranges.isEmpty) {
+    List<SelectedContentRange<Object>> ranges, {
+    required Map<Key, TextSpan> dataMap,
+    required bool coloringChildSpan,
+  }) {
+    if (ranges.isEmpty) {
       return;
     }
     for (int index = 0; index < ranges.length; index += 1) {
@@ -278,9 +276,9 @@ class _MyHomePageState extends State<MyHomePage> {
           );
         },
         child: SelectionListener(
-          onSelectionChanged: (List<SelectedContentRange<Object>>? selections) {
+          onSelectionChanged: (List<SelectedContentRange<Object>> selections) {
             _activeSelections.clear();
-            if (selections == null) {
+            if (selections.isEmpty) {
               return;
             }
             _activeSelections.addAll(selections);
