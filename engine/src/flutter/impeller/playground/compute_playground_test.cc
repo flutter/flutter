@@ -16,12 +16,12 @@ ComputePlaygroundTest::~ComputePlaygroundTest() = default;
 
 void ComputePlaygroundTest::SetUp() {
   if (!Playground::SupportsBackend(GetParam())) {
-    GTEST_SKIP_("Playground doesn't support this backend type.");
+    GTEST_SKIP() << "Playground doesn't support this backend type.";
     return;
   }
 
   if (!Playground::ShouldOpenNewPlaygrounds()) {
-    GTEST_SKIP_("Skipping due to user action.");
+    GTEST_SKIP() << "Skipping due to user action.";
     return;
   }
 

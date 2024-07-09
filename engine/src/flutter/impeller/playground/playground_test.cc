@@ -27,12 +27,12 @@ bool DoesSupportWideGamutTests() {
 
 void PlaygroundTest::SetUp() {
   if (!Playground::SupportsBackend(GetParam())) {
-    GTEST_SKIP_("Playground doesn't support this backend type.");
+    GTEST_SKIP() << "Playground doesn't support this backend type.";
     return;
   }
 
   if (!Playground::ShouldOpenNewPlaygrounds()) {
-    GTEST_SKIP_("Skipping due to user action.");
+    GTEST_SKIP() << "Skipping due to user action.";
     return;
   }
 
@@ -46,7 +46,7 @@ void PlaygroundTest::SetUp() {
 
   if (switches.enable_wide_gamut && (GetParam() != PlaygroundBackend::kMetal ||
                                      !DoesSupportWideGamutTests())) {
-    GTEST_SKIP_("This backend doesn't yet support wide gamut.");
+    GTEST_SKIP() << "This backend doesn't yet support wide gamut.";
     return;
   }
 

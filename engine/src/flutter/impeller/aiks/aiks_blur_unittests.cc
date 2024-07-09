@@ -502,14 +502,14 @@ TEST_P(AiksTest, GaussianBlurAtPeripheryHorizontal) {
 
 TEST_P(AiksTest, GaussianBlurWithoutDecalSupport) {
   if (GetParam() != PlaygroundBackend::kMetal) {
-    GTEST_SKIP_(
-        "This backend doesn't yet support setting device capabilities.");
+    GTEST_SKIP()
+        << "This backend doesn't yet support setting device capabilities.";
   }
   if (!WillRenderSomething()) {
     // Sometimes these tests are run without playgrounds enabled which is
     // pointless for this test since we are asserting that
     // `SupportsDecalSamplerAddressMode` is called.
-    GTEST_SKIP_("This test requires playgrounds.");
+    GTEST_SKIP() << "This test requires playgrounds.";
   }
 
   std::shared_ptr<const Capabilities> old_capabilities =

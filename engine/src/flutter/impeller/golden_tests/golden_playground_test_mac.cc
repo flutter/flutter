@@ -210,15 +210,15 @@ void GoldenPlaygroundTest::SetUp() {
   switch (GetParam()) {
     case PlaygroundBackend::kMetal:
       if (!DoesSupportWideGamutTests()) {
-        GTEST_SKIP_(
-            "This metal device doesn't support wide gamut golden tests.");
+        GTEST_SKIP()
+            << "This metal device doesn't support wide gamut golden tests.";
       }
       pimpl_->screenshotter =
           std::make_unique<testing::MetalScreenshotter>(enable_wide_gamut);
       break;
     case PlaygroundBackend::kVulkan: {
       if (enable_wide_gamut) {
-        GTEST_SKIP_("Vulkan doesn't support wide gamut golden tests.");
+        GTEST_SKIP() << "Vulkan doesn't support wide gamut golden tests.";
       }
       const std::unique_ptr<PlaygroundImpl>& playground =
           GetSharedVulkanPlayground(/*enable_validations=*/true);
@@ -228,7 +228,7 @@ void GoldenPlaygroundTest::SetUp() {
     }
     case PlaygroundBackend::kOpenGLES: {
       if (enable_wide_gamut) {
-        GTEST_SKIP_("OpenGLES doesn't support wide gamut golden tests.");
+        GTEST_SKIP() << "OpenGLES doesn't support wide gamut golden tests.";
       }
       FML_CHECK(::glfwInit() == GLFW_TRUE);
       PlaygroundSwitches playground_switches;
@@ -243,9 +243,9 @@ void GoldenPlaygroundTest::SetUp() {
 
   if (std::find(kSkipTests.begin(), kSkipTests.end(), test_name) !=
       kSkipTests.end()) {
-    GTEST_SKIP_(
-        "GoldenPlaygroundTest doesn't support interactive playground tests "
-        "yet.");
+    GTEST_SKIP()
+        << "GoldenPlaygroundTest doesn't support interactive playground tests "
+           "yet.";
   }
 
   testing::GoldenDigest::Instance()->AddDimension(

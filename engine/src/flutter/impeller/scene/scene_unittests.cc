@@ -112,7 +112,7 @@ TEST_P(SceneTest, FlutterLogo) {
 
 TEST_P(SceneTest, TwoTriangles) {
   if (GetBackend() == PlaygroundBackend::kVulkan) {
-    GTEST_SKIP_("Temporarily disabled.");
+    GTEST_SKIP() << "Temporarily disabled.";
   }
   auto allocator = GetContext()->GetResourceAllocator();
 

@@ -55,7 +55,8 @@ TEST_P(CompilerTest, CanCompileHLSLWithMultipleStages) {
 
 TEST_P(CompilerTest, CanCompileComputeShader) {
   if (!TargetPlatformIsMetal(GetParam())) {
-    GTEST_SKIP_("Only enabled on Metal backends till ES 3.2 support is added.");
+    GTEST_SKIP()
+        << "Only enabled on Metal backends till ES 3.2 support is added.";
   }
   ASSERT_TRUE(CanCompileAndReflect("sample.comp"));
   ASSERT_TRUE(CanCompileAndReflect("sample.comp", SourceType::kComputeShader));

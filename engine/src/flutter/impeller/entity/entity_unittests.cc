@@ -1916,7 +1916,8 @@ static std::vector<std::shared_ptr<Texture>> CreateTestYUVTextures(
 TEST_P(EntityTest, YUVToRGBFilter) {
   if (GetParam() == PlaygroundBackend::kOpenGLES) {
     // TODO(114588) : Support YUV to RGB filter on OpenGLES backend.
-    GTEST_SKIP_("YUV to RGB filter is not supported on OpenGLES backend yet.");
+    GTEST_SKIP()
+        << "YUV to RGB filter is not supported on OpenGLES backend yet.";
   }
 
   auto callback = [&](ContentContext& context, RenderPass& pass) -> bool {
