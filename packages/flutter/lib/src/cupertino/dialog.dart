@@ -1149,32 +1149,41 @@ class _CupertinoActionSheetActionState extends State<CupertinoActionSheetAction>
     //  Body font   | 14 | 15 | 16 | 17 | 19 |  21 |  23  |  28 |  33 |  40 |  47 |  53
     //  Button font | 21 | 21 | 21 | 21 | 23 |  24 |  24  |  28 |  33 |  40 |  47 |  53
 
-    // For very small or very large text, simple rules are applied.
-    //
-    // The upper bound is chosen to be closer to 24, instead of 28, because a
-    // shorter range between the bounds allows a closer fit within them (as seen
-    // later).
+    // For very small or very large text, simple rules can be observed.
     const double lowerBound = 17.0;
-    const double upperBound = 24.5;
+    const double upperBound = 25.0;
 
     const double minSize = 21.0;
 
-    return switch (contextBodySize) {
-      < lowerBound => minSize,
+    if (contextBodySize <= lowerBound) {
+      return minSize;
+    }
+    if (contextBodySize >= upperBound) {
+      return contextBodySize;
+    }
 
-      > upperBound => contextBodySize,
+    // For mid-sized text, piecewise linear interpolation is used.
 
-      // For mid-sized text, the following formula is used.
-      // This formula is derived through quadratic fitting of the following
-      // table, which is part of the overall table above.
-      //
-      //  x | 17 | 19 |  21 |  23  |  24.5
-      //  y | 21 | 23 |  24 |  24  |  24.5
-      _ => (-18.75
-            + 3.675 * contextBodySize
-            - 0.07827 * contextBodySize * contextBodySize
-           ).roundToDouble(),
-    };
+    // Data points:       contextBodySizes [17, 19, 21, 23, 25], corresponding to...
+    final List<int> buttonFontSizes = <int>[21, 23, 24, 24, 25];
+    // The (17, 21) and (25, 25) points ensure the curve connects smoothly
+    // to the lower and upper segments, respectively.
+
+    // The contextBodySize increments by 2.0 for each entry in the table,
+    // so a linear search can be avoided, improving lookup time to O(1).
+    const double slotWidth = 2.0;
+
+    // Calculate the slot index for the given contextBodySize.
+    // This determines which two points to interpolate between.
+    final double slotIndexDouble = (contextBodySize - lowerBound) / slotWidth;
+    final int slotIndex = slotIndexDouble.floor();
+    assert(slotIndex >= 0 && slotIndex < buttonFontSizes.length - 1);
+
+    // The interpolation ratio within the slot.
+    final double ratio = slotIndexDouble - slotIndex;
+
+    return buttonFontSizes[slotIndex] * ratio
+         + buttonFontSizes[slotIndex + 1] * (1 - ratio);
   }
 
   @override
