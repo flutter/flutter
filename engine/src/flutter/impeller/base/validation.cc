@@ -12,9 +12,14 @@ namespace impeller {
 
 static std::atomic_int32_t sValidationLogsDisabledCount = 0;
 static std::atomic_int32_t sValidationLogsAreFatal = 0;
+static ValidationFailureCallback sValidationFailureCallback;
 
 void ImpellerValidationErrorsSetFatal(bool fatal) {
   sValidationLogsAreFatal = fatal;
+}
+
+void ImpellerValidationErrorsSetCallback(ValidationFailureCallback callback) {
+  sValidationFailureCallback = std::move(callback);
 }
 
 ScopedValidationDisable::ScopedValidationDisable() {
@@ -47,6 +52,10 @@ std::ostream& ValidationLog::GetStream() {
 }
 
 void ImpellerValidationBreak(const char* message, const char* file, int line) {
+  if (sValidationFailureCallback &&
+      sValidationFailureCallback(message, file, line)) {
+    return;
+  }
   const auto severity =
       ImpellerValidationErrorsAreFatal() ? fml::LOG_FATAL : fml::LOG_ERROR;
   auto fml_log = fml::LogMessage{severity, file, line, nullptr};
