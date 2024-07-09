@@ -636,19 +636,18 @@ class DragTarget<T extends Object> extends StatefulWidget {
   /// into this drag target.
   ///
   /// [onWillAccept] or [onWillAcceptWithDetails] is called when a draggable
-  /// enters the target. If either return true, the data will appear in
-  /// `candidateData`, if they return false, the data will appear in
-  /// `rejectedData`.
+  /// enters the target. If true, then the data will appear in `candidateData`,
+  /// else in `rejectedData`.
   ///
   /// Typically the builder will check `candidateData` and `rejectedData` and
-  /// and build a widget that indicates the result of dropping the
-  /// `candidateData` onto this target.
+  /// build a widget that indicates the result of dropping the `candidateData`
+  /// onto this target.
   ///
-  /// The `candidateData` and `rejectedData` are List types to support multiple
+  /// The `candidateData` and `rejectedData` are [List] types to support multiple
   /// simultaneous drags.
   ///
-  /// If you see unexpected `null` values in `candidateData` or `rejectedData`,
-  /// ensure that the `data` argument of the [Draggable] is not `null`.
+  /// If unexpected `null` values in `candidateData` or `rejectedData`, ensure
+  /// that the `data` argument of the [Draggable] is not `null`.
   final DragTargetBuilder<T> builder;
 
   /// Called to determine whether this widget is interested in receiving a given
@@ -746,7 +745,7 @@ class _DragTargetState<T extends Object> extends State<DragTarget<T>> {
                                     widget.onWillAccept!(avatar.data as T?)) ||
                                     (widget.onWillAcceptWithDetails != null &&
                                     avatar.data != null &&
-                                    widget.onWillAcceptWithDetails!(DragTargetDetails<T>(data: avatar.data! as T, offset: avatar._lastOffset!)));
+                                    widget.onWillAcceptWithDetails!(DragTargetDetails<T>(data: avatar.data! as T, offset: avatar._lastOffset)));
     if (resolvedWillAccept) {
       setState(() {
         _candidateAvatars.add(avatar);
@@ -782,7 +781,7 @@ class _DragTargetState<T extends Object> extends State<DragTarget<T>> {
     });
     if (avatar.data != null)  {
       widget.onAccept?.call(avatar.data! as T);
-      widget.onAcceptWithDetails?.call(DragTargetDetails<T>(data: avatar.data! as T, offset: avatar._lastOffset!));
+      widget.onAcceptWithDetails?.call(DragTargetDetails<T>(data: avatar.data! as T, offset: avatar._lastOffset));
     }
   }
 
@@ -790,7 +789,7 @@ class _DragTargetState<T extends Object> extends State<DragTarget<T>> {
     if (!mounted || avatar.data == null) {
       return;
     }
-    widget.onMove?.call(DragTargetDetails<T>(data: avatar.data! as T, offset: avatar._lastOffset!));
+    widget.onMove?.call(DragTargetDetails<T>(data: avatar.data! as T, offset: avatar._lastOffset));
   }
 
   @override
@@ -960,7 +959,7 @@ class _DragAvatar<T extends Object> extends Drag {
     _entry!.dispose();
     _entry = null;
     // TODO(ianh): consider passing _entry as well so the client can perform an animation.
-    onDragEnd?.call(velocity ?? Velocity.zero, _lastOffset!, wasAccepted);
+    onDragEnd?.call(velocity ?? Velocity.zero, _lastOffset, wasAccepted);
   }
 
   Widget _build(BuildContext context) {
