@@ -91,11 +91,11 @@ void main() {
     // Verifies layout of action button in various text scaling by drawing it in
     // all 12 iOS text scale in one golden image.
 
-    // The following function returns a CupertinoActionSheetAction that has:
-    // * A fixed width
-    // * Unconstrained height
-    // * Aligned center in a grid of fixed height
-    // * Surrounded by a black border
+    // The following function returns a CupertinoActionSheetAction that:
+    // * Has a fixed width
+    // * Is unconstrained in height
+    // * Is aligned center in a grid of fixed height
+    // * Is surrounded by a black border
     const double buttonWidth = 400;
     const double rowHeight = 100;
     Widget testButton(double contextBodySize) {
