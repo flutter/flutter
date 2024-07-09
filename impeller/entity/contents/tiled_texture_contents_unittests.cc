@@ -56,8 +56,8 @@ TEST_P(EntityTest, TiledTextureContentsRendersWithCorrectPipeline) {
 #if !defined(FML_OS_MACOSX)
 TEST_P(EntityTest, TiledTextureContentsRendersWithCorrectPipelineExternalOES) {
   if (GetParam() != PlaygroundBackend::kOpenGLES) {
-    GTEST_SKIP_(
-        "External OES textures are only valid for the OpenGLES backend.");
+    GTEST_SKIP()
+        << "External OES textures are only valid for the OpenGLES backend.";
   }
 
   TextureDescriptor texture_desc;
