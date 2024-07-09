@@ -5,6 +5,27 @@
 import("//flutter/impeller/tools/impeller.gni")
 import("//flutter/testing/testing.gni")
 
+impeller_shaders("modern_shader_fixtures") {
+  name = "modern_fixtures"
+
+  # 2.3 adds support for framebuffer fetch in Metal.
+  metal_version = "2.3"
+
+  # Specify that framebuffer fetch is required for all backends. Compilation of
+  # shaders will be gated on capability checks.
+  require_framebuffer_fetch = true
+
+  # These shaders are not performance critical and malioc analysis of shaders
+  # that use framebuffer fetch is unsupported anyway.
+  analyze = false
+
+  shaders = [
+    "sepia.frag",
+    "sepia.vert",
+    "swizzle.frag",
+  ]
+}
+
 impeller_shaders("shader_fixtures") {
   name = "fixtures"
 
@@ -14,6 +35,7 @@ impeller_shaders("shader_fixtures") {
   # Not analyzing because they are not performance critical, and mipmap uses
   # textureLod, which uses an extension that malioc does not support.
   analyze = false
+
   shaders = [
     "array.frag",
     "array.vert",
@@ -35,14 +57,11 @@ impeller_shaders("shader_fixtures") {
     "planet.frag",
     "planet.vert",
     "sample.comp",
-    "sepia.frag",
-    "sepia.vert",
     "simple.vert",
     "spec_constant.frag",
     "spec_constant.vert",
     "stage1.comp",
     "stage2.comp",
-    "swizzle.frag",
     "test_texture.frag",
     "test_texture.vert",
     "texture.frag",
@@ -174,6 +193,7 @@ group("fixtures") {
 
   public_deps = [
     ":file_fixtures",
+    ":modern_shader_fixtures",
     ":scene_fixtures",
     ":shader_fixtures",
   ]
