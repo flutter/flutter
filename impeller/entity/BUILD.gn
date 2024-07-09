@@ -50,6 +50,7 @@ impeller_shaders("entity_shaders") {
     "shaders/blending/vertices_uber.frag",
     "shaders/gradients/fast_gradient.vert",
     "shaders/gradients/fast_gradient.frag",
+    "shaders/texture_downsample.frag",
   ]
 }
 
