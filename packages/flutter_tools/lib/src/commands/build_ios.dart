@@ -713,7 +713,6 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
         result,
         analytics: globals.analytics,
         fileSystem: globals.fs,
-        flutterUsage: globals.flutterUsage,
         logger: globals.logger,
         platform: SupportedPlatform.ios,
         project: app.project.parent,
@@ -726,7 +725,6 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
       final SizeAnalyzer sizeAnalyzer = SizeAnalyzer(
         fileSystem: globals.fs,
         logger: globals.logger,
-        flutterUsage: globals.flutterUsage,
         analytics: analytics,
         appFilenamePattern: 'App'
       );
