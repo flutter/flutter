@@ -88,6 +88,10 @@ abstract class SelectionHandler implements ValueListenable<SelectionGeometry> {
 
   /// Gets the list of selections in this object.
   ///
+  /// The order of this list, follows the same
+  /// order as the [Selectable]s contained under
+  /// this [SelectionHandler].
+  ///
   /// Return `null` if nothing is selected.
   List<SelectedContentRange<Object>>? getSelections();
 

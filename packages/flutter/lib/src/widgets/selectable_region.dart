@@ -2859,6 +2859,10 @@ typedef SelectableRegionContextMenuBuilder = Widget Function(
 
 /// Signature for the callback that reports when the user changes the selection
 /// under a [SelectionListener].
+///
+/// The [selections] list is ordered according to the order of the
+/// [Selectable]s contained under the [SelectionListener] this callback
+/// is provided to.
 typedef SelectionListenerSelectionChangedCallback = void Function(List<SelectedContentRange<Object>>? selections);
 
 /// A [SelectionContainer] that allows the user to listen to selection changes
