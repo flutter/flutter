@@ -1464,8 +1464,9 @@ enum FocusHighlightStrategy {
   alwaysTraditional,
 }
 
-// By extending the WidgetsBindingObserver class,
-// we can add a listener object to FocusManager as a private member.
+// Instead of making the FocusManager a WidgetsBindingObserver, we use a
+// separate class so that its API surface doesn't become part of the
+// FocusManager's public API.
 class _WidgetsBindingObserver extends WidgetsBindingObserver {
   _WidgetsBindingObserver({
     required this.onLifecycleStateChanged,
@@ -1548,7 +1549,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
       onLifecycleStateChanged: _appLifecycleChanged,
       onViewFocusChanged: _viewFocusChanged,
     );
-    WidgetsBinding.instance.addObserver(_widgetsBindingObserver!);
+    WidgetsBinding.instance.addObserver(_widgetsBindingObserver);
     rootScope._manager = this;
   }
 
@@ -1581,9 +1582,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
 
   @override
   void dispose() {
-    if (_widgetsBindingObserver != null) {
-      WidgetsBinding.instance.removeObserver(_widgetsBindingObserver!);
-    }
+    WidgetsBinding.instance.removeObserver(_widgetsBindingObserver);
     _highlightManager.dispose();
     rootScope.dispose();
     super.dispose();
@@ -1743,8 +1742,9 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
   final Set<FocusNode> _dirtyNodes = <FocusNode>{};
 
   // Allows FocusManager to respond to app lifecycle state changes,
-  // temporarily suspending the primaryFocus when the app is inactive.
-  _WidgetsBindingObserver? _widgetsBindingObserver;
+  // temporarily suspending the primaryFocus when the app is inactive,
+  // and keeping track of the currently focused view.
+  late final _WidgetsBindingObserver _widgetsBindingObserver;
 
   // Stores the node that was focused before the app lifecycle changed.
   // Will be restored as the primary focus once app is resumed.
@@ -1917,30 +1917,6 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
     }());
   }
 
-  /// Enables this [FocusManager] to listen to changes of the application
-  /// lifecycle if it does not already have an application lifecycle listener
-  /// active, and the app isn't running on a native mobile platform.
-  ///
-  /// Typically, the application lifecycle listener for this [FocusManager] is
-  /// setup at construction, but sometimes it is necessary to manually initialize
-  /// it when the [FocusManager] does not have the relevant platform context in
-  /// [defaultTargetPlatform] at the time of construction. This can happen in
-  /// a test environment where the [BuildOwner] which initializes its own
-  /// [FocusManager], may not have the accurate platform context during its
-  /// initialization. In this case it is necessary for the test framework to call
-  /// this method after it has set up the test variant for a given test, so the
-  /// [FocusManager] can accurately listen to application lifecycle changes, if
-  /// supported.
-  @visibleForTesting
-  void listenToApplicationLifecycleChangesIfSupported() {
-    if (_widgetsBindingObserver == null) {
-      _widgetsBindingObserver = _WidgetsBindingObserver(
-        onLifecycleStateChanged: _appLifecycleChanged,
-        onViewFocusChanged: _viewFocusChanged,
-      );
-      WidgetsBinding.instance.addObserver(_widgetsBindingObserver!);
-    }
-  }
 
   @override
   List<DiagnosticsNode> debugDescribeChildren() {
