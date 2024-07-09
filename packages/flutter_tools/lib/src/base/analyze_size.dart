@@ -9,7 +9,6 @@ import 'package:unified_analytics/unified_analytics.dart';
 import 'package:vm_snapshot_analysis/treemap.dart';
 
 import '../convert.dart';
-import '../reporting/reporting.dart';
 import 'common.dart';
 import 'file_system.dart';
 import 'logger.dart';
@@ -20,19 +19,16 @@ class SizeAnalyzer {
   SizeAnalyzer({
     required FileSystem fileSystem,
     required Logger logger,
-    required Usage flutterUsage,
     required Analytics analytics,
     Pattern appFilenamePattern = 'libapp.so',
-  }) : _flutterUsage = flutterUsage,
-       _analytics = analytics,
-       _fileSystem = fileSystem,
-       _logger = logger,
-       _appFilenamePattern = appFilenamePattern;
+  })  : _analytics = analytics,
+        _fileSystem = fileSystem,
+        _logger = logger,
+        _appFilenamePattern = appFilenamePattern;
 
   final FileSystem _fileSystem;
   final Logger _logger;
   final Pattern _appFilenamePattern;
-  final Usage _flutterUsage;
   final Analytics _analytics;
   String? _appFilename;
 
@@ -91,7 +87,6 @@ class SizeAnalyzer {
     );
 
     assert(_appFilename != null);
-    CodeSizeEvent(type, flutterUsage: _flutterUsage).send();
     _analytics.send(Event.codeSizeAnalysis(platform: type));
     return apkAnalysisJson;
   }
@@ -145,7 +140,6 @@ class SizeAnalyzer {
       aotSnapshotJson: processedAotSnapshotJson,
       precompilerTrace: json.decode(precompilerTrace.readAsStringSync()) as Map<String, Object?>? ?? <String, Object?>{},
     );
-    CodeSizeEvent(kind, flutterUsage: _flutterUsage).send();
     _analytics.send(Event.codeSizeAnalysis(platform: kind));
     return apkAnalysisJson;
   }

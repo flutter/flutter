@@ -18,7 +18,6 @@ import '../build_info.dart';
 import '../cache.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
-import '../reporting/reporting.dart';
 import 'android_sdk.dart';
 
 // These are the versions used in the project templates.
@@ -809,11 +808,6 @@ void writeLocalProperties(File properties) {
 }
 
 void exitWithNoSdkMessage() {
-  BuildEvent('unsupported-project',
-          type: 'gradle',
-          eventError: 'android-sdk-not-found',
-          flutterUsage: globals.flutterUsage)
-      .send();
   globals.analytics.send(Event.flutterBuildInfo(
     label: 'unsupported-project',
     buildType: 'gradle',
