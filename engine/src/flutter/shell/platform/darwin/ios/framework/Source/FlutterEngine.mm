@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "common/settings.h"
 #define FML_USED_ON_EMBEDDER
 
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Internal.h"
@@ -786,7 +787,8 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
   return [NSString stringWithFormat:@"%@.%zu", labelPrefix, ++s_shellCount];
 }
 
-+ (flutter::ThreadHost)makeThreadHost:(NSString*)threadLabel {
+static flutter::ThreadHost MakeThreadHost(NSString* thread_label,
+                                          const flutter::Settings& settings) {
   // The current thread will be used as the platform thread. Ensure that the message loop is
   // initialized.
   fml::MessageLoop::EnsureInitializedForCurrentThread();
@@ -798,22 +800,24 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
     threadHostType = threadHostType | flutter::ThreadHost::Type::kProfiler;
   }
 
-  flutter::ThreadHost::ThreadHostConfig host_config(threadLabel.UTF8String, threadHostType,
+  flutter::ThreadHost::ThreadHostConfig host_config(thread_label.UTF8String, threadHostType,
                                                     IOSPlatformThreadConfigSetter);
 
-  host_config.ui_config =
-      fml::Thread::ThreadConfig(flutter::ThreadHost::ThreadHostConfig::MakeThreadName(
-                                    flutter::ThreadHost::Type::kUi, threadLabel.UTF8String),
-                                fml::Thread::ThreadPriority::kDisplay);
+  if (!settings.merged_platform_ui_thread) {
+    host_config.ui_config =
+        fml::Thread::ThreadConfig(flutter::ThreadHost::ThreadHostConfig::MakeThreadName(
+                                      flutter::ThreadHost::Type::kUi, thread_label.UTF8String),
+                                  fml::Thread::ThreadPriority::kDisplay);
+  }
 
   host_config.raster_config =
       fml::Thread::ThreadConfig(flutter::ThreadHost::ThreadHostConfig::MakeThreadName(
-                                    flutter::ThreadHost::Type::kRaster, threadLabel.UTF8String),
+                                    flutter::ThreadHost::Type::kRaster, thread_label.UTF8String),
                                 fml::Thread::ThreadPriority::kRaster);
 
   host_config.io_config =
       fml::Thread::ThreadConfig(flutter::ThreadHost::ThreadHostConfig::MakeThreadName(
-                                    flutter::ThreadHost::Type::kIo, threadLabel.UTF8String),
+                                    flutter::ThreadHost::Type::kIo, thread_label.UTF8String),
                                 fml::Thread::ThreadPriority::kNormal);
 
   return (flutter::ThreadHost){host_config};
@@ -858,7 +862,7 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 
   NSString* threadLabel = [FlutterEngine generateThreadLabel:_labelPrefix];
   _threadHost = std::make_shared<flutter::ThreadHost>();
-  *_threadHost = [FlutterEngine makeThreadHost:threadLabel];
+  *_threadHost = MakeThreadHost(threadLabel, settings);
 
   // Lambda captures by pointers to ObjC objects are fine here because the
   // create call is synchronous.
@@ -873,10 +877,17 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
   flutter::Shell::CreateCallback<flutter::Rasterizer> on_create_rasterizer =
       [](flutter::Shell& shell) { return std::make_unique<flutter::Rasterizer>(shell); };
 
+  fml::RefPtr<fml::TaskRunner> ui_runner;
+  if (settings.merged_platform_ui_thread) {
+    FML_LOG(IMPORTANT) << "Warning: Using highly experimental merged thread mode.";
+    ui_runner = fml::MessageLoop::GetCurrent().GetTaskRunner();
+  } else {
+    ui_runner = _threadHost->ui_thread->GetTaskRunner();
+  }
   flutter::TaskRunners task_runners(threadLabel.UTF8String,                          // label
                                     fml::MessageLoop::GetCurrent().GetTaskRunner(),  // platform
                                     _threadHost->raster_thread->GetTaskRunner(),     // raster
-                                    _threadHost->ui_thread->GetTaskRunner(),         // ui
+                                    ui_runner,                                       // ui
                                     _threadHost->io_thread->GetTaskRunner()          // io
   );
 

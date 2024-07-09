@@ -944,11 +944,12 @@ void Shell::OnPlatformViewDestroyed() {
 
   // Notify the Dart VM that the PlatformView has been destroyed and some
   // cleanup activity can be done (e.g: garbage collect the Dart heap).
-  task_runners_.GetUITaskRunner()->PostTask([engine = engine_->GetWeakPtr()]() {
-    if (engine) {
-      engine->NotifyDestroyed();
-    }
-  });
+  fml::TaskRunner::RunNowOrPostTask(task_runners_.GetUITaskRunner(),
+                                    [engine = engine_->GetWeakPtr()]() {
+                                      if (engine) {
+                                        engine->NotifyDestroyed();
+                                      }
+                                    });
 
   // Note:
   // This is a synchronous operation because certain platforms depend on
@@ -1006,11 +1007,12 @@ void Shell::OnPlatformViewScheduleFrame() {
   FML_DCHECK(is_set_up_);
   FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
 
-  task_runners_.GetUITaskRunner()->PostTask([engine = engine_->GetWeakPtr()]() {
-    if (engine) {
-      engine->ScheduleFrame();
-    }
-  });
+  fml::TaskRunner::RunNowOrPostTask(task_runners_.GetUITaskRunner(),
+                                    [engine = engine_->GetWeakPtr()]() {
+                                      if (engine) {
+                                        engine->ScheduleFrame();
+                                      }
+                                    });
 }
 
 // |PlatformView::Delegate|
@@ -1038,7 +1040,8 @@ void Shell::OnPlatformViewSetViewportMetrics(int64_t view_id,
         }
       });
 
-  task_runners_.GetUITaskRunner()->PostTask(
+  fml::TaskRunner::RunNowOrPostTask(
+      task_runners_.GetUITaskRunner(),
       [engine = engine_->GetWeakPtr(), view_id, metrics]() {
         if (engine) {
           engine->SetViewportMetrics(view_id, metrics);
@@ -1078,8 +1081,10 @@ void Shell::OnPlatformViewDispatchPlatformMessage(
 
   // The static leak checker gets confused by the use of fml::MakeCopyable.
   // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
-  task_runners_.GetUITaskRunner()->PostTask(fml::MakeCopyable(
-      [engine = engine_->GetWeakPtr(), message = std::move(message)]() mutable {
+  fml::TaskRunner::RunNowOrPostTask(
+      task_runners_.GetUITaskRunner(),
+      fml::MakeCopyable([engine = engine_->GetWeakPtr(),
+                         message = std::move(message)]() mutable {
         if (engine) {
           engine->DispatchPlatformMessage(std::move(message));
         }
@@ -1095,7 +1100,8 @@ void Shell::OnPlatformViewDispatchPointerDataPacket(
   TRACE_FLOW_BEGIN("flutter", "PointerEvent", next_pointer_flow_id_);
   FML_DCHECK(is_set_up_);
   FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
-  task_runners_.GetUITaskRunner()->PostTask(
+  fml::TaskRunner::RunNowOrPostTask(
+      task_runners_.GetUITaskRunner(),
       fml::MakeCopyable([engine = weak_engine_, packet = std::move(packet),
                          flow_id = next_pointer_flow_id_]() mutable {
         if (engine) {
@@ -1112,7 +1118,8 @@ void Shell::OnPlatformViewDispatchSemanticsAction(int32_t node_id,
   FML_DCHECK(is_set_up_);
   FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
 
-  task_runners_.GetUITaskRunner()->PostTask(
+  fml::TaskRunner::RunNowOrPostTask(
+      task_runners_.GetUITaskRunner(),
       fml::MakeCopyable([engine = engine_->GetWeakPtr(), node_id, action,
                          args = std::move(args)]() mutable {
         if (engine) {
@@ -1126,12 +1133,12 @@ void Shell::OnPlatformViewSetSemanticsEnabled(bool enabled) {
   FML_DCHECK(is_set_up_);
   FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
 
-  task_runners_.GetUITaskRunner()->PostTask(
-      [engine = engine_->GetWeakPtr(), enabled] {
-        if (engine) {
-          engine->SetSemanticsEnabled(enabled);
-        }
-      });
+  fml::TaskRunner::RunNowOrPostTask(task_runners_.GetUITaskRunner(),
+                                    [engine = engine_->GetWeakPtr(), enabled] {
+                                      if (engine) {
+                                        engine->SetSemanticsEnabled(enabled);
+                                      }
+                                    });
 }
 
 // |PlatformView::Delegate|
@@ -1139,12 +1146,12 @@ void Shell::OnPlatformViewSetAccessibilityFeatures(int32_t flags) {
   FML_DCHECK(is_set_up_);
   FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
 
-  task_runners_.GetUITaskRunner()->PostTask(
-      [engine = engine_->GetWeakPtr(), flags] {
-        if (engine) {
-          engine->SetAccessibilityFeatures(flags);
-        }
-      });
+  fml::TaskRunner::RunNowOrPostTask(task_runners_.GetUITaskRunner(),
+                                    [engine = engine_->GetWeakPtr(), flags] {
+                                      if (engine) {
+                                        engine->SetAccessibilityFeatures(flags);
+                                      }
+                                    });
 }
 
 // |PlatformView::Delegate|
@@ -1205,11 +1212,12 @@ void Shell::OnPlatformViewMarkTextureFrameAvailable(int64_t texture_id) {
       });
 
   // Schedule a new frame without having to rebuild the layer tree.
-  task_runners_.GetUITaskRunner()->PostTask([engine = engine_->GetWeakPtr()]() {
-    if (engine) {
-      engine->ScheduleFrame(false);
-    }
-  });
+  fml::TaskRunner::RunNowOrPostTask(task_runners_.GetUITaskRunner(),
+                                    [engine = engine_->GetWeakPtr()]() {
+                                      if (engine) {
+                                        engine->ScheduleFrame(false);
+                                      }
+                                    });
 }
 
 // |PlatformView::Delegate|
@@ -1317,7 +1325,8 @@ void Shell::OnEngineUpdateSemantics(SemanticsNodeUpdates update,
   FML_DCHECK(is_set_up_);
   FML_DCHECK(task_runners_.GetUITaskRunner()->RunsTasksOnCurrentThread());
 
-  task_runners_.GetPlatformTaskRunner()->PostTask(
+  task_runners_.GetPlatformTaskRunner()->RunNowOrPostTask(
+      task_runners_.GetPlatformTaskRunner(),
       [view = platform_view_->GetWeakPtr(), update = std::move(update),
        actions = std::move(actions)] {
         if (view) {
@@ -2142,15 +2151,16 @@ void Shell::OnPlatformViewAddView(int64_t view_id,
       << "Unexpected request to add the implicit view #"
       << kFlutterImplicitViewId << ". This view should never be added.";
 
-  task_runners_.GetUITaskRunner()->PostTask([engine = engine_->GetWeakPtr(),  //
-                                             viewport_metrics,                //
-                                             view_id,                         //
-                                             callback = std::move(callback)   //
+  task_runners_.GetUITaskRunner()->RunNowOrPostTask(
+      task_runners_.GetUITaskRunner(), [engine = engine_->GetWeakPtr(),  //
+                                        viewport_metrics,                //
+                                        view_id,                         //
+                                        callback = std::move(callback)   //
   ] {
-    if (engine) {
-      engine->AddView(view_id, viewport_metrics, callback);
-    }
-  });
+        if (engine) {
+          engine->AddView(view_id, viewport_metrics, callback);
+        }
+      });
 }
 
 void Shell::OnPlatformViewRemoveView(int64_t view_id,
@@ -2163,7 +2173,8 @@ void Shell::OnPlatformViewRemoveView(int64_t view_id,
       << kFlutterImplicitViewId << ". This view should never be removed.";
 
   expected_frame_sizes_.erase(view_id);
-  task_runners_.GetUITaskRunner()->PostTask(
+  task_runners_.GetUITaskRunner()->RunNowOrPostTask(
+      task_runners_.GetUITaskRunner(),
       [&task_runners = task_runners_,           //
        engine = engine_->GetWeakPtr(),          //
        rasterizer = rasterizer_->GetWeakPtr(),  //
@@ -2303,13 +2314,13 @@ void Shell::OnDisplayUpdates(std::vector<std::unique_ptr<Display>> displays) {
   for (const auto& display : displays) {
     display_data.push_back(display->GetDisplayData());
   }
-  task_runners_.GetUITaskRunner()->PostTask(
-      [engine = engine_->GetWeakPtr(),
-       display_data = std::move(display_data)]() {
-        if (engine) {
-          engine->SetDisplays(display_data);
-        }
-      });
+  fml::TaskRunner::RunNowOrPostTask(task_runners_.GetUITaskRunner(),
+                                    [engine = engine_->GetWeakPtr(),
+                                     display_data = std::move(display_data)]() {
+                                      if (engine) {
+                                        engine->SetDisplays(display_data);
+                                      }
+                                    });
 
   display_manager_->HandleDisplayUpdates(std::move(displays));
 }
