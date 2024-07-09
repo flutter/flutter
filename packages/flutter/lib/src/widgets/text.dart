@@ -1290,6 +1290,7 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
       // A [_SelectableFragment] will only have one [SelectedContentRange].
       startOffset = startingSelectableSelections.first.startOffset;
     } else {
+      // TODO(Renzo-Olivares): Fix for rtl.
       final bool localSelectionForward = startingSelectableSelections.first.endOffset >= startingSelectableSelections.first.startOffset;
       final TextPosition positionBeforeStart = localSelectionForward
                                              ? paragraph.getPositionForOffset(selectables[currentSelectionStartIndex].boundingBoxes.first.bottomLeft)
@@ -1300,6 +1301,7 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
       // A [_SelectableFragment] will only have one [SelectedContentRange].
       endOffset = endingSelectableSelections.first.endOffset;
     } else {
+      // TODO(Renzo-Olivares): Fix for rtl.
       final bool localSelectionForward = endingSelectableSelections.first.endOffset >= endingSelectableSelections.first.startOffset;
       final TextPosition positionAfterEnd = localSelectionForward
                                           ? paragraph.getPositionForOffset(selectables[currentSelectionEndIndex].boundingBoxes.last.bottomRight)
