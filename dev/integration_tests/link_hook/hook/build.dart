@@ -20,8 +20,8 @@ void main(List<String> args) async {
     );
     final BuildOutput outputCatcher = BuildOutput();
     await cbuilder.run(
-      buildConfig: config,
-      buildOutput: outputCatcher,
+      config: config,
+      output: outputCatcher,
       logger: Logger('')
         ..level = Level.ALL
         ..onRecord.listen((LogRecord record) => print(record.message)),
