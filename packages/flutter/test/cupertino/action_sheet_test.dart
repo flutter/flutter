@@ -159,6 +159,16 @@ void main() {
       ),
     );
 
+    final Iterable<RichText> buttons = tester.widgetList<RichText>(
+      find.text('Button', findRichText: true));
+    final Iterable<double?> sizes = buttons.map((RichText text) {
+      return text.textScaler.scale(text.text.style!.fontSize!);
+    });
+    expect(sizes,
+      <double>[21, 21, 21, 21, 23, 24, 24, 28, 33, 40, 47, 53].map(
+        (double size) => moreOrLessEquals(size, epsilon: 0.001)),
+    );
+
     await expectLater(
       find.byType(Column),
       matchesGoldenFile('cupertinoActionSheet.textScaling.png'),

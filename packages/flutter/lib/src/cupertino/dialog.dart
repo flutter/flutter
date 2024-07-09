@@ -9,7 +9,7 @@
 library;
 
 import 'dart:math' as math;
-import 'dart:ui' show ImageFilter;
+import 'dart:ui' show ImageFilter, lerpDouble;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -944,9 +944,7 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
     } else if (x >= x2) {
       return y2;
     } else {
-      return Tween<double>(begin: y1, end: y2).transform(
-        (x - x1) / (x2 - x1)
-      );
+      return lerpDouble(y1, y2, (x - x1) / (x2 - x1))!;
     }
   }
 
@@ -1150,40 +1148,15 @@ class _CupertinoActionSheetActionState extends State<CupertinoActionSheetAction>
     //  Button font | 21 | 21 | 21 | 21 | 23 |  24 |  24  |  28 |  33 |  40 |  47 |  53
 
     // For very small or very large text, simple rules can be observed.
-    const double lowerBound = 17.0;
-    const double upperBound = 25.0;
-
-    const double minSize = 21.0;
-
-    if (contextBodySize <= lowerBound) {
-      return minSize;
-    }
-    if (contextBodySize >= upperBound) {
-      return contextBodySize;
-    }
-
     // For mid-sized text, piecewise linear interpolation is used.
-
-    // Data points:       contextBodySizes [17, 19, 21, 23, 25], corresponding to...
-    final List<int> buttonFontSizes = <int>[21, 23, 24, 24, 25];
-    // The (17, 21) and (25, 25) points ensure the curve connects smoothly
-    // to the lower and upper segments, respectively.
-
-    // The contextBodySize increments by 2.0 for each entry in the table,
-    // so a linear search can be avoided, improving lookup time to O(1).
-    const double slotWidth = 2.0;
-
-    // Calculate the slot index for the given contextBodySize.
-    // This determines which two points to interpolate between.
-    final double slotIndexDouble = (contextBodySize - lowerBound) / slotWidth;
-    final int slotIndex = slotIndexDouble.floor();
-    assert(slotIndex >= 0 && slotIndex < buttonFontSizes.length - 1);
-
-    // The interpolation ratio within the slot.
-    final double ratio = slotIndexDouble - slotIndex;
-
-    return buttonFontSizes[slotIndex] * ratio
-         + buttonFontSizes[slotIndex + 1] * (1 - ratio);
+    return switch (contextBodySize) {
+      <= 17 => 21.0,
+      <= 19 => lerpDouble(21.0, 23.0, (contextBodySize - 17.0)/(19.0 - 17.0))!,
+      <= 21 => lerpDouble(23.0, 24.0, (contextBodySize - 19.0)/(21.0 - 19.0))!,
+      <= 24 => 24.0,
+      <= 28 => lerpDouble(24.0, 28.0, (contextBodySize - 23.0)/(28.0 - 23.0))!,
+      _ => contextBodySize,
+    };
   }
 
   @override
