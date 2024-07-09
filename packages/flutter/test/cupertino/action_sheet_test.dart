@@ -84,8 +84,8 @@ void main() {
   });
 
   testWidgets('Button appearance is correct with text scaling', (WidgetTester tester) async {
-    // Verifies layout of action button in various text scaling by drawing it in
-    // all 12 iOS text scale in one golden image.
+    // Verifies layout of action button in various text scaling by drawing
+    // buttons in all 12 iOS text scales in one golden image.
 
     // The following function returns a CupertinoActionSheetAction that:
     // * Has a fixed width
