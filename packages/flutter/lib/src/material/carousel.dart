@@ -52,7 +52,7 @@ import 'theme.dart';
 /// Scaffold(
 ///   body: CarouselView(
 ///     scrollDirection: Axis.vertical,
-///     itemExtent: MediaQuery.sizeOf(context).height,
+///     itemExtent: double.infinity,
 ///     children: List<Widget>.generate(10, (int index) {
 ///       return Center(child: Text('Item $index'));
 ///     }),
