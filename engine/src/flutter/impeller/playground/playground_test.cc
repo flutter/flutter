@@ -11,9 +11,26 @@
 namespace impeller {
 
 PlaygroundTest::PlaygroundTest()
-    : Playground(PlaygroundSwitches{flutter::testing::GetArgsForProcess()}) {}
+    : Playground(PlaygroundSwitches{flutter::testing::GetArgsForProcess()}) {
+  ImpellerValidationErrorsSetCallback(
+      [](const char* message, const char* file, int line) -> bool {
+        // GTEST_MESSAGE_AT_ can only be used in a function that returns void.
+        // Hence the goofy lambda. The failure message and location will still
+        // be correct however.
+        //
+        // https://google.github.io/googletest/advanced.html#assertion-placement
+        [message, file, line]() -> void {
+          GTEST_MESSAGE_AT_(file, line, "Impeller Validation Error",
+                            ::testing::TestPartResult::kFatalFailure)
+              << message;
+        }();
+        return true;
+      });
+}
 
-PlaygroundTest::~PlaygroundTest() = default;
+PlaygroundTest::~PlaygroundTest() {
+  ImpellerValidationErrorsSetCallback(nullptr);
+}
 
 namespace {
 bool DoesSupportWideGamutTests() {
@@ -35,8 +52,6 @@ void PlaygroundTest::SetUp() {
     GTEST_SKIP() << "Skipping due to user action.";
     return;
   }
-
-  ImpellerValidationErrorsSetFatal(true);
 
   // Test names that end with "WideGamut" will render with wide gamut support.
   std::string test_name = flutter::testing::GetCurrentTestName();

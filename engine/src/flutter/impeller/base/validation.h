@@ -5,6 +5,7 @@
 #ifndef FLUTTER_IMPELLER_BASE_VALIDATION_H_
 #define FLUTTER_IMPELLER_BASE_VALIDATION_H_
 
+#include <functional>
 #include <sstream>
 
 namespace impeller {
@@ -36,6 +37,21 @@ void ImpellerValidationBreak(const char* message, const char* file, int line);
 void ImpellerValidationErrorsSetFatal(bool fatal);
 
 bool ImpellerValidationErrorsAreFatal();
+
+using ValidationFailureCallback =
+    std::function<bool(const char* message, const char* file, int line)>;
+
+//------------------------------------------------------------------------------
+/// @brief      Sets a callback that callers (usually tests) can set to
+///             intercept validation failures.
+///
+///             Returning true from the callback indicates that Impeller can
+///             continue and avoid any default behavior on tripping validation
+///             (which could include process termination).
+///
+/// @param[in]  callback  The callback
+///
+void ImpellerValidationErrorsSetCallback(ValidationFailureCallback callback);
 
 struct ScopedValidationDisable {
   ScopedValidationDisable();
