@@ -223,7 +223,7 @@ enum ListTileTitleAlignment {
 ///
 /// {@tool dartpad}
 /// This sample shows [ListTile]'s [textColor] and [iconColor] can use
-/// [MaterialStateColor] color to change the color of the text and icon
+/// [WidgetStateColor] color to change the color of the text and icon
 /// when the [ListTile] is enabled, selected, or disabled.
 ///
 /// ** See code in examples/api/lib/material/list_tile/list_tile.3.dart **
@@ -510,8 +510,8 @@ class ListTile extends StatelessWidget {
   /// If this property is null and [selected] is true then [ListTileThemeData.selectedColor]
   /// is used. If that is also null then [ColorScheme.primary] is used.
   ///
-  /// If this color is a [MaterialStateColor] it will be resolved against
-  /// [MaterialState.selected] and [MaterialState.disabled] states.
+  /// If this color is a [WidgetStateColor] it will be resolved against
+  /// [WidgetState.selected] and [WidgetState.disabled] states.
   ///
   /// See also:
   ///
@@ -529,8 +529,8 @@ class ListTile extends StatelessWidget {
   /// If this property is null and [selected] is true then [ListTileThemeData.selectedColor]
   /// is used. If that is also null then [ColorScheme.primary] is used.
   ///
-  /// If this color is a [MaterialStateColor] it will be resolved against
-  /// [MaterialState.selected] and [MaterialState.disabled] states.
+  /// If this color is a [WidgetStateColor] it will be resolved against
+  /// [WidgetState.selected] and [WidgetState.disabled] states.
   ///
   /// See also:
   ///
@@ -606,20 +606,20 @@ class ListTile extends StatelessWidget {
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// widget.
   ///
-  /// If [mouseCursor] is a [MaterialStateProperty<MouseCursor>],
-  /// [MaterialStateProperty.resolve] is used for the following [MaterialState]s:
+  /// If [mouseCursor] is a [WidgetStateProperty<MouseCursor>],
+  /// [WidgetStateProperty.resolve] is used for the following [WidgetState]s:
   ///
-  ///  * [MaterialState.selected].
-  ///  * [MaterialState.disabled].
+  ///  * [WidgetState.selected].
+  ///  * [WidgetState.disabled].
   /// {@endtemplate}
   ///
   /// If null, then the value of [ListTileThemeData.mouseCursor] is used. If
-  /// that is also null, then [MaterialStateMouseCursor.clickable] is used.
+  /// that is also null, then [WidgetStateMouseCursor.clickable] is used.
   ///
   /// See also:
   ///
-  ///  * [MaterialStateMouseCursor], which can be used to create a [MouseCursor]
-  ///    that is also a [MaterialStateProperty<MouseCursor>].
+  ///  * [WidgetStateMouseCursor], which can be used to create a [MouseCursor]
+  ///    that is also a [WidgetStateProperty<MouseCursor>].
   final MouseCursor? mouseCursor;
 
   /// If this tile is also [enabled] then icons and text are rendered with the same color.
