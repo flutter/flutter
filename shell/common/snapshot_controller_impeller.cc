@@ -12,6 +12,7 @@
 #include "flutter/impeller/display_list/dl_image_impeller.h"
 #include "flutter/impeller/geometry/size.h"
 #include "flutter/shell/common/snapshot_controller.h"
+#include "impeller/renderer/render_target.h"
 
 namespace flutter {
 
@@ -21,37 +22,84 @@ sk_sp<DlImage> DoMakeRasterSnapshot(
     SkISize size,
     const std::shared_ptr<impeller::AiksContext>& context) {
   TRACE_EVENT0("flutter", __FUNCTION__);
+  if (!context) {
+    return nullptr;
+  }
+  // Determine render target size.
+  auto max_size = context->GetContext()
+                      ->GetResourceAllocator()
+                      ->GetMaxTextureSizeSupported();
+  double scale_factor_x =
+      static_cast<double>(max_size.width) / static_cast<double>(size.width());
+  double scale_factor_y =
+      static_cast<double>(max_size.height) / static_cast<double>(size.height());
+  double scale_factor = std::min({1.0, scale_factor_x, scale_factor_y});
+
+  auto render_target_size = impeller::ISize(size.width(), size.height());
+
+  // Scale down the render target size to the max supported by the
+  // GPU if necessary. Exceeding the max would otherwise cause a
+  // null result.
+  if (scale_factor < 1.0) {
+    render_target_size.width *= scale_factor;
+    render_target_size.height *= scale_factor;
+  }
+
+#if EXPERIMENTAL_CANVAS
+  // Do not use the render target cache as the lifecycle of this texture
+  // will outlive a particular frame.
+  impeller::ISize impeller_size = impeller::ISize(size.width(), size.height());
+  impeller::RenderTargetAllocator render_target_allocator =
+      impeller::RenderTargetAllocator(
+          context->GetContext()->GetResourceAllocator());
+  impeller::RenderTarget target;
+  if (context->GetContext()->GetCapabilities()->SupportsOffscreenMSAA()) {
+    target = render_target_allocator.CreateOffscreenMSAA(
+        *context->GetContext(),  // context
+        impeller_size,           // size
+        /*mip_count=*/1,
+        "Picture Snapshot MSAA",  // label
+        impeller::RenderTarget::
+            kDefaultColorAttachmentConfigMSAA  // color_attachment_config
+    );
+  } else {
+    target = render_target_allocator.CreateOffscreen(
+        *context->GetContext(),  // context
+        impeller_size,           // size
+        /*mip_count=*/1,
+        "Picture Snapshot",  // label
+        impeller::RenderTarget::
+            kDefaultColorAttachmentConfig  // color_attachment_config
+    );
+  }
+
+  impeller::TextFrameDispatcher collector(context->GetContentContext(),
+                                          impeller::Matrix());
+  display_list->Dispatch(collector, SkIRect::MakeSize(size));
+  impeller::ExperimentalDlDispatcher impeller_dispatcher(
+      context->GetContentContext(), target,
+      display_list->root_has_backdrop_filter(),
+      display_list->max_root_blend_mode(),
+      impeller::IRect::MakeSize(impeller_size));
+  display_list->Dispatch(impeller_dispatcher, SkIRect::MakeSize(size));
+  impeller_dispatcher.FinishRecording();
+
+  context->GetContentContext().GetLazyGlyphAtlas()->ResetTextFrames();
+
+  return impeller::DlImageImpeller::Make(target.GetRenderTargetTexture(),
+                                         DlImage::OwningContext::kRaster);
+#else
   impeller::DlDispatcher dispatcher;
   display_list->Dispatch(dispatcher);
   impeller::Picture picture = dispatcher.EndRecordingAsPicture();
-  if (context) {
-    auto max_size = context->GetContext()
-                        ->GetResourceAllocator()
-                        ->GetMaxTextureSizeSupported();
-    double scale_factor_x =
-        static_cast<double>(max_size.width) / static_cast<double>(size.width());
-    double scale_factor_y = static_cast<double>(max_size.height) /
-                            static_cast<double>(size.height());
-    double scale_factor =
-        std::min(1.0, std::min(scale_factor_x, scale_factor_y));
 
-    auto render_target_size = impeller::ISize(size.width(), size.height());
-
-    // Scale down the render target size to the max supported by the
-    // GPU if necessary. Exceeding the max would otherwise cause a
-    // null result.
-    if (scale_factor < 1.0) {
-      render_target_size.width *= scale_factor;
-      render_target_size.height *= scale_factor;
-    }
-
-    std::shared_ptr<impeller::Image> image =
-        picture.ToImage(*context, render_target_size);
-    if (image) {
-      return impeller::DlImageImpeller::Make(image->GetTexture(),
-                                             DlImage::OwningContext::kRaster);
-    }
+  std::shared_ptr<impeller::Image> image =
+      picture.ToImage(*context, render_target_size);
+  if (image) {
+    return impeller::DlImageImpeller::Make(image->GetTexture(),
+                                           DlImage::OwningContext::kRaster);
   }
+#endif  // EXPERIMENTAL_CANVAS
 
   return nullptr;
 }
