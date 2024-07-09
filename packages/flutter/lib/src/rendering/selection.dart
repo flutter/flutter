@@ -137,7 +137,13 @@ class SelectedContentRange<T extends Object> {
     this.children,
   });
 
-  /// The unique id for the [Selectable] that created the range.
+  /// An optional identifier for the [Selectable] that created the range.
+  ///
+  /// This ID can be used to map a given [SelectedContentRange] to
+  /// the widget that created it. For example, when a [Text] widget
+  /// is given a [Key], that [Key] will be the [selectableId] used
+  /// in the [SelectedContentRange] that is provides to represent
+  /// its active selection.
   final Object? selectableId;
 
   /// The content that contains the selection.
