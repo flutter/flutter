@@ -17,8 +17,6 @@
 
 static_assert(!__has_feature(objc_arc), "ARC must be disabled.");
 
-#define ENABLE_EXPERIMENTAL_CANVAS false
-
 namespace flutter {
 
 static std::shared_ptr<impeller::Renderer> CreateImpellerRenderer(
@@ -165,7 +163,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrameFromCAMetalLa
         impeller::IRect cull_rect = surface->coverage();
         SkIRect sk_cull_rect = SkIRect::MakeWH(cull_rect.GetWidth(), cull_rect.GetHeight());
 
-#if ENABLE_EXPERIMENTAL_CANVAS
+#if EXPERIMENTAL_CANVAS
         impeller::TextFrameDispatcher collector(aiks_context->GetContentContext(),
                                                 impeller::Matrix());
         display_list->Dispatch(collector, sk_cull_rect);
@@ -285,7 +283,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrameFromMTLTextur
 
         impeller::IRect cull_rect = surface->coverage();
         SkIRect sk_cull_rect = SkIRect::MakeWH(cull_rect.GetWidth(), cull_rect.GetHeight());
-#if ENABLE_EXPERIMENTAL_CANVAS
+#if EXPERIMENTAL_CANVAS
         impeller::TextFrameDispatcher collector(aiks_context->GetContentContext(),
                                                 impeller::Matrix());
         display_list->Dispatch(collector, sk_cull_rect);

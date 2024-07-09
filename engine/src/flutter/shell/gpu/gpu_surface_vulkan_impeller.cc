@@ -13,8 +13,6 @@
 
 namespace flutter {
 
-#define ENABLE_EXPERIMENTAL_CANVAS false
-
 GPUSurfaceVulkanImpeller::GPUSurfaceVulkanImpeller(
     std::shared_ptr<impeller::Context> context) {
   if (!context || !context->IsValid()) {
@@ -89,7 +87,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceVulkanImpeller::AcquireFrame(
             std::move(surface),
             fml::MakeCopyable([&](impeller::RenderTarget& render_target)
                                   -> bool {
-#if ENABLE_EXPERIMENTAL_CANVAS
+#if EXPERIMENTAL_CANVAS
               impeller::TextFrameDispatcher collector(
                   aiks_context->GetContentContext(), impeller::Matrix());
               display_list->Dispatch(

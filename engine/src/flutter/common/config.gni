@@ -35,6 +35,9 @@ declare_args() {
   # See [go/slimpeller-dashboard](https://github.com/orgs/flutter/projects/21)
   # for details.
   slimpeller = false
+
+  # Opt into new DL dispatcher that skips AIKS layer
+  experimental_canvas = false
 }
 
 # feature_defines_list ---------------------------------------------------------
@@ -71,6 +74,10 @@ if (flutter_runtime_mode == "debug") {
 
 if (slimpeller) {
   feature_defines_list += [ "SLIMPELLER=1" ]
+}
+
+if (experimental_canvas) {
+  feature_defines_list += [ "EXPERIMENTAL_CANVAS=1" ]
 }
 
 if (is_ios || is_mac) {
