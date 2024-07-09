@@ -47,6 +47,7 @@ impeller_component("playground") {
   }
 
   public_deps = [
+    "../fixtures:modern_shader_fixtures",
     "../fixtures:shader_fixtures",
     "../renderer",
     "../scene/shaders",

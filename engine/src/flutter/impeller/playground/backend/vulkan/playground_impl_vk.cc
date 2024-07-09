@@ -16,6 +16,7 @@
 #include "impeller/entity/vk/framebuffer_blend_shaders_vk.h"
 #include "impeller/entity/vk/modern_shaders_vk.h"
 #include "impeller/fixtures/vk/fixtures_shaders_vk.h"
+#include "impeller/fixtures/vk/modern_fixtures_shaders_vk.h"
 #include "impeller/playground/imgui/vk/imgui_shaders_vk.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
 #include "impeller/renderer/backend/vulkan/formats_vk.h"
@@ -40,6 +41,9 @@ ShaderLibraryMappingsForPlayground() {
       std::make_shared<fml::NonOwnedMapping>(
           impeller_fixtures_shaders_vk_data,
           impeller_fixtures_shaders_vk_length),
+      std::make_shared<fml::NonOwnedMapping>(
+          impeller_modern_fixtures_shaders_vk_data,
+          impeller_modern_fixtures_shaders_vk_length),
       std::make_shared<fml::NonOwnedMapping>(impeller_imgui_shaders_vk_data,
                                              impeller_imgui_shaders_vk_length),
       std::make_shared<fml::NonOwnedMapping>(impeller_scene_shaders_vk_data,
