@@ -15,8 +15,6 @@
 #include "third_party/skia/include/core/SkTypeface.h"
 #include "txt/platform.h"
 
-#define ENABLE_EXPERIMENTAL_CANVAS false
-
 namespace impeller {
 
 DlPlayground::DlPlayground() = default;
@@ -50,7 +48,7 @@ bool DlPlayground::OpenPlaygroundHere(DisplayListPlaygroundCallback callback) {
 
         auto list = callback();
 
-#if ENABLE_EXPERIMENTAL_CANVAS
+#if EXPERIMENTAL_CANVAS
         TextFrameDispatcher collector(context.GetContentContext(), Matrix());
         list->Dispatch(collector);
 
