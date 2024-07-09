@@ -453,6 +453,7 @@ class SemanticsData with Diagnosticable {
     required this.maxValueLength,
     required this.currentValueLength,
     required this.headingLevel,
+    required this.linkUrl,
     this.tags,
     this.transform,
     this.customSemanticsActionIds,
@@ -462,7 +463,8 @@ class SemanticsData with Diagnosticable {
        assert(attributedDecreasedValue.string == '' || textDirection != null, 'A SemanticsData object with decreasedValue "${attributedDecreasedValue.string}" had a null textDirection.'),
        assert(attributedIncreasedValue.string == '' || textDirection != null, 'A SemanticsData object with increasedValue "${attributedIncreasedValue.string}" had a null textDirection.'),
        assert(attributedHint.string == '' || textDirection != null, 'A SemanticsData object with hint "${attributedHint.string}" had a null textDirection.'),
-       assert(headingLevel >= 0 && headingLevel <= 6, 'Heading level must be between 0 and 6');
+       assert(headingLevel >= 0 && headingLevel <= 6, 'Heading level must be between 0 and 6'),
+       assert(linkUrl == null || (flags & SemanticsFlag.isLink.index) != 0, 'A SemanticsData object with a linkUrl must have the isLink flag set to true');
 
   /// A bit field of [SemanticsFlag]s that apply to this node.
   final int flags;
@@ -643,6 +645,13 @@ class SemanticsData with Diagnosticable {
   /// be set when [maxValueLength] is set.
   final int? currentValueLength;
 
+  /// The URL that this node links to.
+  ///
+  /// See also:
+  ///
+  /// * [SemanticsFlag.isLink], which indicates that this node is a link.
+  final Uri? linkUrl;
+
   /// The bounding box for this node in its coordinate system.
   final Rect rect;
 
@@ -734,6 +743,7 @@ class SemanticsData with Diagnosticable {
     properties.add(DoubleProperty('scrollPosition', scrollPosition, defaultValue: null));
     properties.add(DoubleProperty('scrollExtentMax', scrollExtentMax, defaultValue: null));
     properties.add(IntProperty('headingLevel', headingLevel, defaultValue: 0));
+    properties.add(DiagnosticsProperty<Uri>('linkUrl', linkUrl, defaultValue: null));
   }
 
   @override
@@ -764,6 +774,7 @@ class SemanticsData with Diagnosticable {
         && other.elevation == elevation
         && other.thickness == thickness
         && other.headingLevel == headingLevel
+        && other.linkUrl == linkUrl
         && _sortedListsEqual(other.customSemanticsActionIds, customSemanticsActionIds);
   }
 
@@ -795,6 +806,7 @@ class SemanticsData with Diagnosticable {
       elevation,
       thickness,
       headingLevel,
+      linkUrl,
       customSemanticsActionIds == null ? null : Object.hashAll(customSemanticsActionIds!),
     ),
   );
@@ -908,6 +920,7 @@ class SemanticsProperties extends DiagnosticableTree {
     this.toggled,
     this.button,
     this.link,
+    this.linkUrl,
     this.header,
     this.headingLevel,
     this.textField,
@@ -969,7 +982,8 @@ class SemanticsProperties extends DiagnosticableTree {
        assert(increasedValue == null || attributedIncreasedValue == null, 'Only one of increasedValue or attributedIncreasedValue should be provided'),
        assert(decreasedValue == null || attributedDecreasedValue == null, 'Only one of decreasedValue or attributedDecreasedValue should be provided'),
        assert(hint == null || attributedHint == null, 'Only one of hint or attributedHint should be provided'),
-       assert(headingLevel == null || (headingLevel > 0 && headingLevel <= 6), 'Heading level must be between 1 and 6');
+       assert(headingLevel == null || (headingLevel > 0 && headingLevel <= 6), 'Heading level must be between 1 and 6'),
+       assert(linkUrl == null || (link ?? false), 'If linkUrl is set then link must be true');
 
   /// If non-null, indicates that this subtree represents something that can be
   /// in an enabled or disabled state.
@@ -1205,6 +1219,9 @@ class SemanticsProperties extends DiagnosticableTree {
   /// It'll be appear in accessibility hierarchy as `resource-id`.
   ///
   /// On iOS, this will set `UIAccessibilityElement.accessibilityIdentifier`.
+  ///
+  /// On web, this will set a `flt-semantics-identifier` attribute on the DOM element
+  /// that corresponds to the semantics node.
   /// {@endtemplate}
   final String? identifier;
 
@@ -1431,6 +1448,15 @@ class SemanticsProperties extends DiagnosticableTree {
   ///  * [SemanticsConfiguration.addTagForChildren], to which the tags provided
   ///    here will be passed.
   final SemanticsTag? tagForChildren;
+
+  /// The URL that this node links to.
+  ///
+  /// On the web, this is used to set the `href` attribute of the DOM element.
+  ///
+  /// See also:
+  ///
+  /// * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/a#href
+  final Uri? linkUrl;
 
   /// The handler for [SemanticsAction.tap].
   ///
@@ -2267,7 +2293,8 @@ class SemanticsNode with DiagnosticableTreeMixin {
         || _currentValueLength != config._currentValueLength
         || _mergeAllDescendantsIntoThisNode != config.isMergingSemanticsOfDescendants
         || _areUserActionsBlocked != config.isBlockingUserActions
-        || _headingLevel != config._headingLevel;
+        || _headingLevel != config._headingLevel
+        || _linkUrl != config._linkUrl;
   }
 
   // TAGS, LABELS, ACTIONS
@@ -2577,6 +2604,10 @@ class SemanticsNode with DiagnosticableTreeMixin {
   int get headingLevel => _headingLevel;
   int _headingLevel = _kEmptyConfig._headingLevel;
 
+  /// The URL that this node links to.
+  Uri? get linkUrl => _linkUrl;
+  Uri? _linkUrl = _kEmptyConfig._linkUrl;
+
   bool _canPerformAction(SemanticsAction action) =>
       _actions.containsKey(action);
 
@@ -2637,6 +2668,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     _currentValueLength = config._currentValueLength;
     _areUserActionsBlocked = config.isBlockingUserActions;
     _headingLevel = config._headingLevel;
+    _linkUrl = config._linkUrl;
     _replaceChildren(childrenInInversePaintOrder ?? const <SemanticsNode>[]);
 
     if (mergeAllDescendantsIntoThisNodeValueChanged) {
@@ -2685,6 +2717,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     int headingLevel = _headingLevel;
     final double elevation = _elevation;
     double thickness = _thickness;
+    Uri? linkUrl = _linkUrl;
     final Set<int> customSemanticsActionIds = <int>{};
     for (final CustomSemanticsAction action in _customSemanticsActions.keys) {
       customSemanticsActionIds.add(CustomSemanticsAction.getIdentifier(action));
@@ -2723,6 +2756,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
         maxValueLength ??= node._maxValueLength;
         currentValueLength ??= node._currentValueLength;
         headingLevel = node._headingLevel;
+        linkUrl ??= node._linkUrl;
 
         if (identifier == '') {
           identifier = node._identifier;
@@ -2808,6 +2842,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
       currentValueLength: currentValueLength,
       customSemanticsActionIds: customSemanticsActionIds.toList()..sort(),
       headingLevel: headingLevel,
+      linkUrl: linkUrl,
     );
   }
 
@@ -2884,6 +2919,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
       childrenInHitTestOrder: childrenInHitTestOrder,
       additionalActions: customSemanticsActionIds ?? _kEmptyCustomSemanticsActionsList,
       headingLevel: data.headingLevel,
+      linkUrl: data.linkUrl?.toString() ?? '',
     );
     _dirty = false;
   }
@@ -4747,6 +4783,18 @@ class SemanticsConfiguration {
     _setFlag(SemanticsFlag.isLink, value);
   }
 
+  /// The URL that the owning [RenderObject] links to.
+  Uri? get linkUrl => _linkUrl;
+  Uri? _linkUrl;
+
+  set linkUrl(Uri? value) {
+    if (value == _linkUrl) {
+      return;
+    }
+    _linkUrl = value;
+    _hasBeenAnnotated = true;
+  }
+
   /// Whether the owning [RenderObject] is a header (true) or not (false).
   bool get isHeader => _hasFlag(SemanticsFlag.isHeader);
   set isHeader(bool value) {
@@ -5102,7 +5150,8 @@ class SemanticsConfiguration {
       .._actions.addAll(_actions)
       .._customSemanticsActions.addAll(_customSemanticsActions)
       ..isBlockingUserActions = isBlockingUserActions
-      .._headingLevel = _headingLevel;
+      .._headingLevel = _headingLevel
+      .._linkUrl = _linkUrl;
   }
 }
 
