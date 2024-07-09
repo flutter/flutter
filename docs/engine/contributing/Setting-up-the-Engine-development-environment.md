@@ -171,9 +171,9 @@ To set up:
 
 ### Using Android Studio as an IDE for the Android Embedding [Java]
 
-Alternatively, Android Studio can be used as an IDE for the Android Embedding Java code. See docs 
-at https://github.com/flutter/engine/blob/main/shell/platform/android/README.md#editing-java-code for
-instructions. 
+Alternatively, Android Studio can be used as an IDE for the Android Embedding Java code. See docs
+ at https://github.com/flutter/engine/blob/main/shell/platform/android/README.md#editing-java-code for
+instructions.
 
 ## VSCode Additional Useful Configuration
 
