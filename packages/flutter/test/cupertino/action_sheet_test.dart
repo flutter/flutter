@@ -7,8 +7,6 @@
 @Tags(<String>['reduced-test-set'])
 library;
 
-import 'dart:ui' as ui;
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -18,8 +16,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/semantics_tester.dart';
-
-typedef TextScaleInfo = (String name, double scale);
 
 void main() {
   testWidgets('Overall appearance is correct for the light theme', (WidgetTester tester) async {
