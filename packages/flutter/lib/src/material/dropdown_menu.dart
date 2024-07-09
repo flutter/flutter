@@ -267,7 +267,9 @@ class DropdownMenu<T> extends StatefulWidget {
   /// Defaults to true as the search function could be commonly used.
   final bool enableSearch;
 
-  /// {@macro flutter.widgets.editableText.keyboardType}
+  /// The type of keyboard to use for editing the text.
+  ///
+  /// Defaults to [TextInputType.text].
   final TextInputType? keyboardType;
 
   /// The text style for the [TextField] of the [DropdownMenu];
