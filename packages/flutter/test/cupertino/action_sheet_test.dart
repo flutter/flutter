@@ -7,6 +7,8 @@
 @Tags(<String>['reduced-test-set'])
 library;
 
+import 'dart:ui' as ui;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -85,49 +87,87 @@ void main() {
     await gesture.up();
   });
 
-  for (final (String name, double textScaleFactor) in const <TextScaleInfo>[
-    // The font size scale factor reported by the iOS embedding is the current
-    // body font size over body font size in "large" font scale setting.
-    ('xs',   14.0/17),
-    ('xxxl', 23.0/17),
-    ('ax1',  28.0/17),
-    ('ax5',  53.0/17),
-  ]) {
-    testWidgets('Looks correctly with text scaling: $name', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        OverrideMediaQuery(
-          transformer: (MediaQueryData data) {
-            return data.copyWith(
-              textScaler: TextScaler.linear(textScaleFactor),
-            );
-          },
-          child: createAppWithButtonThatLaunchesActionSheet(
-            CupertinoActionSheet(
-              actions: List<Widget>.generate(20, (int i) =>
-                CupertinoActionSheetAction(
-                  onPressed: () {},
-                  child: Text('Button $i'),
+  testWidgets('Button appearance is correct with text scaling', (WidgetTester tester) async {
+    // Verifies layout of action button in various text scaling by drawing it in
+    // all 12 iOS text scale in one golden image.
+
+    // The following function returns a CupertinoActionSheetAction that has:
+    // * A fixed width
+    // * Unconstrained height
+    // * Aligned center in a grid of fixed height
+    // * Surrounded by a black border
+    const double buttonWidth = 400;
+    const double rowHeight = 100;
+    Widget testButton(double contextBodySize) {
+      const double standardHigBody = 17.0;
+      final double contextScaleFactor = contextBodySize / standardHigBody;
+      return OverrideMediaQuery(
+        transformer: (MediaQueryData data) {
+          return data.copyWith(
+            textScaler: TextScaler.linear(contextScaleFactor),
+          );
+        },
+        child: SizedBox(
+          height: rowHeight,
+          child: Center(
+            child: UnconstrainedBox(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints.tightFor(width: buttonWidth),
+                child: DecoratedBox(
+                  decoration: BoxDecoration(border: Border.all()),
+                  child: CupertinoActionSheetAction(
+                    onPressed: () {},
+                    child: const Text('Button'),
+                  ),
                 ),
               ),
-              cancelButton: CupertinoActionSheetAction(child: const Text('Cancel'), onPressed: () {}),
             ),
           ),
         ),
       );
+    }
 
-      await tester.tap(find.text('Go'));
-      await tester.pumpAndSettle();
+    await tester.pumpWidget(CupertinoApp(
+      home: CupertinoPageScaffold(
+          child: Center(
+            child: Column(
+              children: <Widget>[
+                Row(children: <Widget>[
+                  /*xs*/ testButton(14),
+                  /*s*/  testButton(15),
+                ]),
+                Row(children: <Widget>[
+                  /*m*/  testButton(16),
+                  /*l*/  testButton(17),
+                ]),
+                Row(children: <Widget>[
+                  /*xl*/ testButton(19),
+                  /*xxl*/testButton(21),
+                ]),
+                Row(children: <Widget>[
+                  /*xxxl*/testButton(23),
+                  /*ax1*/ testButton(28),
+                ]),
+                Row(children: <Widget>[
+                  /*ax2*/ testButton(33),
+                  /*ax3*/ testButton(40),
+                ]),
+                Row(children: <Widget>[
+                  /*ax4*/ testButton(47),
+                  /*ax5*/ testButton(53),
+                ]),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
 
-      final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('Button 1')));
-      await tester.pumpAndSettle();
-      await expectLater(
-        find.byType(CupertinoActionSheet),
-        matchesGoldenFile('cupertinoActionSheet.textScaling.$name.png'),
-      );
-
-      await gesture.up();
-    });
-  }
+    await expectLater(
+      find.byType(Column),
+      matchesGoldenFile('cupertinoActionSheet.textScaling.png'),
+    );
+  });
 
   testWidgets('Verify that a tap on modal barrier dismisses an action sheet', (WidgetTester tester) async {
     await tester.pumpWidget(
