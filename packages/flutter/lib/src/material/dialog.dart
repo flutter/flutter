@@ -87,6 +87,8 @@ class Dialog extends StatelessWidget {
   ///
   /// If `null`, [ColorScheme.surfaceContainerHigh] is used in Material 3.
   /// Otherwise, defaults to [ThemeData.dialogBackgroundColor].
+  ///
+  /// If [Dialog.fullscreen] is used, defaults to [ColorScheme.surface].
   /// {@endtemplate}
   final Color? backgroundColor;
 

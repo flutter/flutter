@@ -111,11 +111,12 @@ void main() {
     expect(materialWidget.color, customColor);
   });
 
-  testWidgets('Dialog background defaults to ColorScheme.surface', (WidgetTester tester) async {
+  testWidgets('Dialog background defaults to ColorScheme.surfaceContainerHigh', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(
       colorScheme: ThemeData().colorScheme.copyWith(
         surface: Colors.orange,
         background: Colors.green,
+        surfaceContainerHigh: Colors.red,
       )
     );
     const Dialog dialog = Dialog(
