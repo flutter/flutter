@@ -32,7 +32,6 @@ part '../annotations.dart';
 part '../channel_buffers.dart';
 part '../compositing.dart';
 part '../geometry.dart';
-part '../hash_codes.dart';
 part '../hooks.dart';
 part '../isolate_name_server.dart';
 part '../key.dart';
@@ -45,8 +44,7 @@ part '../platform_isolate.dart';
 part '../plugins.dart';
 part '../pointer.dart';
 part '../semantics.dart';
-part 'setup_hooks.dart';
 part '../text.dart';
 part '../window.dart';
-
 part 'scene.dart';
+part 'setup_hooks.dart';

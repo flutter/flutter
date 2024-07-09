@@ -32,7 +32,6 @@ part 'annotations.dart';
 part 'channel_buffers.dart';
 part 'compositing.dart';
 part 'geometry.dart';
-part 'hash_codes.dart';
 part 'hooks.dart';
 part 'isolate_name_server.dart';
 part 'key.dart';
