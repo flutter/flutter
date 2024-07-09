@@ -105,6 +105,9 @@ class AndroidShellHolder {
 
   void UpdateDisplayMetrics();
 
+  // Visible for testing.
+  const std::unique_ptr<Shell>& GetShellForTesting() const { return shell_; }
+
  private:
   const flutter::Settings settings_;
   const std::shared_ptr<PlatformViewAndroidJNI> jni_facade_;

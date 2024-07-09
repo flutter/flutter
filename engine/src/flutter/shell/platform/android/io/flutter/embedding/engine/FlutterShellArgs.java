@@ -71,8 +71,6 @@ public class FlutterShellArgs {
     // Before adding more entries to this list, consider that arbitrary
     // Android applications can generate intents with extra data and that
     // there are many security-sensitive args in the binary.
-    // TODO(mattcarroll): I left this warning as-is, but we should clarify what exactly this warning
-    // is warning against.
     ArrayList<String> args = new ArrayList<>();
 
     if (intent.getBooleanExtra(ARG_KEY_TRACE_STARTUP, false)) {
