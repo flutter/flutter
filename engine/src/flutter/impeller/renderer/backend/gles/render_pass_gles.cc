@@ -241,6 +241,7 @@ struct RenderPassData {
   gl.Disable(GL_STENCIL_TEST);
   gl.Disable(GL_CULL_FACE);
   gl.Disable(GL_BLEND);
+  gl.Disable(GL_DITHER);
   gl.ColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
   gl.DepthMask(GL_TRUE);
   gl.StencilMaskSeparate(GL_FRONT, 0xFFFFFFFF);
