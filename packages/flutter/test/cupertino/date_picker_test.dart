@@ -10,10 +10,14 @@ library;
 
 import 'dart:ui';
 
+import 'package:file/file.dart';
+import 'package:file/local.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:platform/platform.dart';
 
 import '../impeller_test_helpers.dart';
 
@@ -2414,6 +2418,86 @@ void main() {
 
     expect(find.byType(CupertinoPickerDefaultSelectionOverlay), findsExactly(4));
   });
+
+  testWidgets('CupertinoDatePicker month column width validation',
+      (WidgetTester tester) async {
+    // Using Brazilian locale for months and Roboto Font for month picker
+    // to make sure month column width is same as largest month width
+    // not longest month in characters
+
+    await _loadRobotoRegularFont();
+
+    // Apply Roboto font to `dateTimePickerTextStyle`
+    CupertinoThemeData theme = const CupertinoThemeData();
+    theme = theme.copyWith(
+        textTheme: theme.textTheme.copyWith(
+            dateTimePickerTextStyle: theme.textTheme.dateTimePickerTextStyle
+                .copyWith(fontFamily: 'Roboto')));
+
+    await tester.pumpWidget(CupertinoApp(
+      theme: theme,
+      locale: const Locale('pt'),
+      supportedLocales: const <Locale>[Locale('pt')],
+      localizationsDelegates: const <LocalizationsDelegate<
+          CupertinoLocalizations>>[_MockDefaultCupertinoLocalizations.delegate],
+      home: Builder(builder: (BuildContext context) {
+        return Center(
+          child: CupertinoDatePicker(
+              mode: CupertinoDatePickerMode.monthYear,
+              onDateTimeChanged: (DateTime date) {},
+              initialDateTime: DateTime(2018, 11, 15)),
+        );
+      }),
+    ));
+
+    // pump twice required for loading localization
+    await tester.pump();
+    await tester.pump();
+
+    // get date picker context
+    final BuildContext datePickerContext =
+        tester.element(find.byType(CupertinoDatePicker));
+
+    const String largestMonthText = 'novembro';
+
+    // largest month text width
+    final double largestMonthWidth = TextPainter.computeMaxIntrinsicWidth(
+        text: TextSpan(
+            text: largestMonthText,
+            style: CupertinoTheme.of(datePickerContext)
+                .textTheme
+                .dateTimePickerTextStyle),
+        textDirection: Directionality.of(datePickerContext));
+
+    /// same as _kDatePickerPadSize for CupertinoDatePicker
+    const double kDatePickerPadSize = 12.0;
+
+    final double targetAlignWidgetWidth =
+        largestMonthWidth + kDatePickerPadSize;
+
+    // find parent of largest month
+    final Finder foundAlignWidgets =
+        find.widgetWithText(Align, largestMonthText);
+
+    foundAlignWidgets.tryEvaluate();
+
+    // closest Element to the text widget
+    Element deepestElement = foundAlignWidgets.found.first;
+
+    // Find closest Align element to the text widget
+    for (final Element element in foundAlignWidgets.found) {
+      if (element.depth < deepestElement.depth) {
+        continue;
+      }
+      deepestElement = element;
+    }
+    final double? alignWidgetWidth = deepestElement.size?.width;
+
+    // make sure widget has size
+    assert(alignWidgetWidth != null);
+
+    expect(alignWidgetWidth, equals(targetAlignWidgetWidth));
+  });
 }
 
 Widget _buildPicker({
@@ -2437,4 +2521,74 @@ Widget _buildPicker({
       }),
     ),
   );
+}
+
+class _MockDefaultCupertinoLocalizations extends DefaultCupertinoLocalizations {
+  const _MockDefaultCupertinoLocalizations();
+  static const List<String> _testMonths = <String>[
+    'janeiro',
+    'fevereiro',
+    'março',
+    'abril',
+    'maio',
+    'junho',
+    'julho',
+    'agosto',
+    'setembro',
+    'outubro',
+    'novembro',
+    'dezembro',
+  ];
+
+  @override
+  String datePickerMonth(int monthIndex) => _testMonths[monthIndex - 1];
+
+  @override
+  String datePickerStandaloneMonth(int monthIndex) =>
+      _testMonths[monthIndex - 1];
+
+  static Future<CupertinoLocalizations> load(Locale locale) async {
+    return const _MockDefaultCupertinoLocalizations();
+  }
+
+  static const LocalizationsDelegate<CupertinoLocalizations> delegate =
+      _MockCupertinoLocalizationsDelegate();
+}
+
+class _MockCupertinoLocalizationsDelegate
+    extends LocalizationsDelegate<CupertinoLocalizations> {
+  const _MockCupertinoLocalizationsDelegate();
+
+  @override
+  bool isSupported(Locale locale) => locale.languageCode == 'pt';
+
+  @override
+  Future<CupertinoLocalizations> load(Locale locale) =>
+      _MockDefaultCupertinoLocalizations.load(locale);
+
+  @override
+  bool shouldReload(_MockCupertinoLocalizationsDelegate old) => false;
+}
+
+/// Loads the cached Roboto-Regular font.
+Future<void> _loadRobotoRegularFont() async {
+  const FileSystem fs = LocalFileSystem();
+  const Platform platform = LocalPlatform();
+  final Directory flutterRoot =
+      fs.directory(platform.environment['FLUTTER_ROOT']);
+
+  final File iconFont = flutterRoot.childFile(
+    fs.path.join(
+      'bin',
+      'cache',
+      'artifacts',
+      'material_fonts',
+      'Roboto-Regular.ttf',
+    ),
+  );
+
+  final Future<ByteData> bytes =
+      Future<ByteData>.value(iconFont.readAsBytesSync().buffer.asByteData());
+
+  await (FontLoader('Roboto')..addFont(bytes)).load();
 }
