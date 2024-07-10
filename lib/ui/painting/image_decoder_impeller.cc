@@ -205,6 +205,25 @@ DecompressResult ImageDecoderImpeller::DecompressTexture(
     bitmap->setImmutable();
   }
 
+  // If the image is unpremultiplied, fix it.
+  if (alpha_type == SkAlphaType::kUnpremul_SkAlphaType) {
+    // Single copy of ImpellerAllocator crashes.
+    auto premul_allocator = std::make_shared<ImpellerAllocator>(allocator);
+    auto premul_bitmap = std::make_shared<SkBitmap>();
+    premul_bitmap->setInfo(bitmap->info().makeAlphaType(kPremul_SkAlphaType));
+    if (!premul_bitmap->tryAllocPixels(premul_allocator.get())) {
+      std::string decode_error(
+          "Could not allocate intermediate for premultiplication conversion.");
+      FML_DLOG(ERROR) << decode_error;
+      return DecompressResult{.decode_error = decode_error};
+    }
+    // readPixels() handles converting pixels to premultiplied form.
+    bitmap->readPixels(premul_bitmap->pixmap());
+    premul_bitmap->setImmutable();
+    bitmap_allocator = premul_allocator;
+    bitmap = premul_bitmap;
+  }
+
   if (bitmap->dimensions() == target_size) {
     std::shared_ptr<impeller::DeviceBuffer> buffer =
         bitmap_allocator->GetDeviceBuffer();
