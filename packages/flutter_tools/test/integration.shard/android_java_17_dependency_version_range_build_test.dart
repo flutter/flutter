@@ -25,7 +25,6 @@ List<VersionTuple> versionTuples = <VersionTuple>[
   VersionTuple(agpVersion: '8.4.0', gradleVersion: '8.6', kotlinVersion: '1.8.22'),
 ];
 
-// This test requires Java 11 due to the intentionally low version of Gradle.
 void main() {
   late Directory tempDir;
 
