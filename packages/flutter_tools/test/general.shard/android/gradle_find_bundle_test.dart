@@ -4,7 +4,7 @@
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/gradle.dart';
-import 'package:flutter_tools/src/android/gradle_utils.dart';
+import 'package:flutter_tools/src/android/gradle_utils.dart' as gradleUtils;
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -531,7 +531,7 @@ void main() {
         Event.flutterBuildInfo(
           label: 'gradle-expected-file-not-found',
           buildType: 'gradle',
-          settings: 'androidGradlePluginVersion: $templateDefaultGradleVersion, fileExtension: .aab',
+          settings: 'androidGradlePluginVersion: ${gradleUtils.templateDefaultGradleVersion}, fileExtension: .aab',
         ),
       ),
     );
