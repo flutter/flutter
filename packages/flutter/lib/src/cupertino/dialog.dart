@@ -541,8 +541,8 @@ class CupertinoPopupSurface extends StatelessWidget {
         outer: filter,
         inner: ColorFilter.matrix(
           CupertinoTheme.maybeBrightnessOf(context) == Brightness.dark
-              ? darkMatrix
-              : lightMatrix,
+              ? _darkMatrix
+              : _lightMatrix,
         ),
       );
     }
