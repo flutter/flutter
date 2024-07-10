@@ -2415,6 +2415,23 @@ void main() {
     final TextField textField = tester.widget(find.byType(TextField));
     expect(textField.keyboardType, TextInputType.number);
   });
+
+  testWidgets('DropdownMenu keyboardType defaults to TextInputType.text', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SafeArea(
+            child: DropdownMenu<TestMenu>(
+              dropdownMenuEntries: menuChildren,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TextField textField = tester.widget(find.byType(TextField));
+    expect(textField.keyboardType, TextInputType.text);
+  });
 }
 
 enum TestMenu {
