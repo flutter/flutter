@@ -2192,7 +2192,11 @@ class _RenderAlertDialogActionsLayout extends RenderFlex {
     final double slotWidth = horizontalSlotWidthFor(overallWidth: overallWidth);
     RenderBox child = firstChild!;
     while (true) {
-      if (child.getMinIntrinsicWidth(double.infinity) > slotWidth) {
+      // If both children fit into a half-row slot, use the horizontal layout.
+      // Max intrinsic widths are used here, which, according to
+      // [TextPainter.maxIntrinsicWidth], allows text to be displayed at their
+      // full height.
+      if (child.getMaxIntrinsicWidth(double.infinity) > slotWidth) {
         return false;
       }
       final RenderBox? divider = childAfter(child);
