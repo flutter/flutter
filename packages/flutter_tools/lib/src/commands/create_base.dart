@@ -568,7 +568,6 @@ abstract class CreateBase extends FlutterCommand {
         outputDir: globals.fs.directory(getBuildDirectory()),
         processManager: globals.processManager,
         platform: globals.platform,
-        usage: globals.flutterUsage,
         analytics: globals.analytics,
         projectDir: project.directory,
         generateDartPluginRegistry: true,

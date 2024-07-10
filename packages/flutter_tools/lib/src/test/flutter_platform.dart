@@ -15,7 +15,6 @@ import 'package:test_core/src/platform.dart'; // ignore: implementation_imports
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
-import '../build_info.dart';
 import '../cache.dart';
 import '../compile.dart';
 import '../convert.dart';
@@ -72,7 +71,6 @@ FlutterPlatform installHook({
   TestTimeRecorder? testTimeRecorder,
   UriConverter? uriConverter,
   TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
-  BuildInfo? buildInfo,
 }) {
   assert(enableVmService || enableObservatory || (!debuggingOptions.startPaused && debuggingOptions.hostVmServicePort == null));
 
@@ -104,7 +102,6 @@ FlutterPlatform installHook({
     testTimeRecorder: testTimeRecorder,
     uriConverter: uriConverter,
     nativeAssetsBuilder: nativeAssetsBuilder,
-    buildInfo: buildInfo,
   );
   platformPluginRegistration(platform);
   return platform;
@@ -123,9 +120,6 @@ FlutterPlatform installHook({
 /// configuration files as outlined in the [flutter_test] library. By default,
 /// the test file will be launched directly.
 ///
-/// The [packageConfigUri] argument specifies the package config location for
-/// the test file being launched. This is expected to be a file URI.
-///
 /// The [updateGoldens] argument will set the [autoUpdateGoldens] global
 /// variable in the [flutter_test] package before invoking the test.
 ///
@@ -138,7 +132,6 @@ String generateTestBootstrap({
   required Uri testUrl,
   required InternetAddress host,
   File? testConfigFile,
-  Uri? packageConfigUri,
   bool updateGoldens = false,
   String languageVersionHeader = '',
   bool nullSafety = false,
@@ -181,15 +174,6 @@ import '$testUrl' as test;
 import '${Uri.file(testConfigFile.path)}' as test_config;
 ''');
   }
-
-  // IMPORTANT: DO NOT RENAME, REMOVE, OR MODIFY THE
-  // 'const packageConfigLocation' VARIABLE.
-  // Dash tooling like Dart DevTools performs an evaluation on this variable at
-  // runtime to get the package config location for Flutter test targets.
-  buffer.write('''
-
-const packageConfigLocation = '$packageConfigUri';
-''');
   buffer.write('''
 
 /// Returns a serialized test suite.
@@ -311,7 +295,6 @@ class FlutterPlatform extends PlatformPlugin {
     this.testTimeRecorder,
     this.uriConverter,
     this.nativeAssetsBuilder,
-    this.buildInfo,
   });
 
   final String shellPath;
@@ -329,7 +312,6 @@ class FlutterPlatform extends PlatformPlugin {
   final String? icudtlPath;
   final TestTimeRecorder? testTimeRecorder;
   final TestCompilerNativeAssetsBuilder? nativeAssetsBuilder;
-  final BuildInfo? buildInfo;
 
   // This can be used by internal projects that require custom logic for converting package: URIs to local paths.
   final UriConverter? uriConverter;
@@ -659,8 +641,6 @@ class FlutterPlatform extends PlatformPlugin {
     return generateTestBootstrap(
       testUrl: testUrl,
       testConfigFile: findTestConfigFile(globals.fs.file(testUrl), globals.logger),
-      // This MUST be a file URI.
-      packageConfigUri: buildInfo != null ? globals.fs.path.toUri(buildInfo!.packageConfigPath) : null,
       host: host!,
       updateGoldens: updateGoldens!,
       flutterTestDep: packageConfig['flutter_test'] != null,

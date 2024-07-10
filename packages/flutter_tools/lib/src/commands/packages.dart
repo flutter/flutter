@@ -18,7 +18,6 @@ import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
 import '../plugins.dart';
 import '../project.dart';
-import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
 
 /// The function signature of the [print] function.
@@ -298,7 +297,6 @@ class PackagesGetCommand extends FlutterCommand {
           outputDir: globals.fs.directory(getBuildDirectory()),
           processManager: globals.processManager,
           platform: globals.platform,
-          usage: globals.flutterUsage,
           analytics: analytics,
           projectDir: rootProject.directory,
           generateDartPluginRegistry: true,
@@ -320,7 +318,6 @@ class PackagesGetCommand extends FlutterCommand {
           outputDir: globals.fs.directory(getBuildDirectory()),
           processManager: globals.processManager,
           platform: globals.platform,
-          usage: globals.flutterUsage,
           analytics: analytics,
           projectDir: rootProject.directory,
           generateDartPluginRegistry: true,
@@ -357,7 +354,6 @@ class PackagesGetCommand extends FlutterCommand {
         touchesPackageConfig: !(isHelp || dryRun),
       );
       final Duration elapsedDuration = timer.elapsed;
-      globals.flutterUsage.sendTiming('pub', 'get', elapsedDuration, label: 'success');
       analytics.send(Event.timing(
         workflow: 'pub',
         variableName: 'get',
@@ -367,7 +363,6 @@ class PackagesGetCommand extends FlutterCommand {
     // Not limiting to catching Exception because the exception is rethrown.
     } catch (_) { // ignore: avoid_catches_without_on_clauses
       final Duration elapsedDuration = timer.elapsed;
-      globals.flutterUsage.sendTiming('pub', 'get', elapsedDuration, label: 'failure');
       analytics.send(Event.timing(
         workflow: 'pub',
         variableName: 'get',
@@ -400,35 +395,6 @@ class PackagesGetCommand extends FlutterCommand {
   })();
 
   late final String? _androidEmbeddingVersion = _rootProject?.android.getEmbeddingVersion().toString().split('.').last;
-
-  /// The pub packages usage values are incorrect since these are calculated/sent
-  /// before pub get completes. This needs to be performed after dependency resolution.
-  @override
-  Future<CustomDimensions> get usageValues async {
-    final FlutterProject? rootProject = _rootProject;
-    if (rootProject == null) {
-      return const CustomDimensions();
-    }
-
-    int numberPlugins;
-    // Do not send plugin analytics if pub has not run before.
-    final bool hasPlugins = rootProject.flutterPluginsDependenciesFile.existsSync()
-      && rootProject.packageConfigFile.existsSync();
-    if (hasPlugins) {
-      // Do not fail pub get if package config files are invalid before pub has
-      // had a chance to run.
-      final List<Plugin> plugins = await _pluginsFound;
-      numberPlugins = plugins.length;
-    } else {
-      numberPlugins = 0;
-    }
-
-    return CustomDimensions(
-      commandPackagesNumberPlugins: numberPlugins,
-      commandPackagesProjectModule: rootProject.isModule,
-      commandPackagesAndroidEmbeddingVersion: _androidEmbeddingVersion,
-    );
-  }
 
   /// The pub packages usage values are incorrect since these are calculated/sent
   /// before pub get completes. This needs to be performed after dependency resolution.

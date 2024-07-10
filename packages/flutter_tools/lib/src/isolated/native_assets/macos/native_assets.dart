@@ -128,8 +128,6 @@ Future<(Uri? nativeAssetsYaml, List<Uri> dependencies)> buildNativeAssetsMacOS({
       workingDirectory: projectUri,
       includeParentEnvironment: true,
       cCompilerConfig: await buildRunner.cCompilerConfig,
-      // TODO(dcharkes): Fetch minimum MacOS version from somewhere. https://github.com/flutter/flutter/issues/145104
-      targetMacOSVersion: 13,
     );
     ensureNativeAssetsBuildSucceed(buildResult);
     nativeAssets.addAll(buildResult.assets);
@@ -142,8 +140,6 @@ Future<(Uri? nativeAssetsYaml, List<Uri> dependencies)> buildNativeAssetsMacOS({
       includeParentEnvironment: true,
       cCompilerConfig: await buildRunner.cCompilerConfig,
       buildResult: buildResult,
-      // TODO(dcharkes): Fetch minimum MacOS version from somewhere. https://github.com/flutter/flutter/issues/145104
-      targetMacOSVersion: 13,
     );
     ensureNativeAssetsLinkSucceed(linkResult);
     nativeAssets.addAll(linkResult.assets);

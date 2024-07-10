@@ -618,7 +618,6 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         integrationTestUserIdentifier: stringArg(FlutterOptions.kDeviceUser),
         testTimeRecorder: testTimeRecorder,
         nativeAssetsBuilder: nativeAssetsBuilder,
-        buildInfo: buildInfo,
       );
     }
     testTimeRecorder?.stop(TestTimePhases.TestRunner, testRunnerTimeRecorderStopwatch!);

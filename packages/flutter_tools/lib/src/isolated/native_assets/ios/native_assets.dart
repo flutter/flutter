@@ -107,8 +107,6 @@ Future<List<Uri>> buildNativeAssetsIOS({
       workingDirectory: projectUri,
       includeParentEnvironment: true,
       cCompilerConfig: await buildRunner.cCompilerConfig,
-      // TODO(dcharkes): Fetch minimum iOS version from somewhere. https://github.com/flutter/flutter/issues/145104
-      targetIOSVersion: 12,
     );
     ensureNativeAssetsBuildSucceed(buildResult);
     nativeAssets.addAll(buildResult.assets);
@@ -122,8 +120,6 @@ Future<List<Uri>> buildNativeAssetsIOS({
       includeParentEnvironment: true,
       cCompilerConfig: await buildRunner.cCompilerConfig,
       buildResult: buildResult,
-      // TODO(dcharkes): Fetch minimum iOS version from somewhere. https://github.com/flutter/flutter/issues/145104
-      targetIOSVersion: 12,
     );
     ensureNativeAssetsLinkSucceed(linkResult);
     nativeAssets.addAll(linkResult.assets);

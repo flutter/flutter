@@ -23,7 +23,6 @@ import 'devfs.dart';
 import 'device.dart';
 import 'globals.dart' as globals;
 import 'project.dart';
-import 'reporting/reporting.dart';
 import 'resident_runner.dart';
 import 'vmservice.dart';
 
@@ -431,17 +430,6 @@ class HotRunner extends ResidentRunner {
     }
 
     unawaited(appStartedCompleter?.future.then((_) {
-      HotEvent(
-        'reload-ready',
-        targetPlatform: _targetPlatform!,
-        sdkName: _sdkName!,
-        emulator: _emulator!,
-        fullRestart: false,
-        overallTimeInMs: appStartedTimer.elapsed.inMilliseconds,
-        compileTimeInMs: totalCompileTime.inMilliseconds,
-        transferTimeInMs: totalLaunchAppTime.inMilliseconds,
-      ).send();
-
       _analytics.send(Event.hotRunnerInfo(
         label: 'reload-ready',
         targetPlatform: _targetPlatform!,
@@ -721,7 +709,6 @@ class HotRunner extends ResidentRunner {
 
     // Send timing analytics.
     final Duration elapsedDuration = restartTimer.elapsed;
-    globals.flutterUsage.sendTiming('hot', 'restart', elapsedDuration);
     _analytics.send(Event.timing(
       workflow: 'hot',
       variableName: 'restart',
@@ -845,25 +832,11 @@ class HotRunner extends ResidentRunner {
       if (!result.isOk) {
         restartEvent = 'restart-failed';
       } else {
-        HotEvent('restart',
+        _analytics.send(Event.hotRunnerInfo(
+          label: 'restart',
           targetPlatform: targetPlatform!,
           sdkName: sdkName!,
           emulator: emulator!,
-          fullRestart: true,
-          reason: reason,
-          overallTimeInMs: restartTimer.elapsed.inMilliseconds,
-          syncedBytes: result.updateFSReport?.syncedBytes,
-          invalidatedSourcesCount: result.updateFSReport?.invalidatedSourcesCount,
-          transferTimeInMs: result.updateFSReport?.transferDuration.inMilliseconds,
-          compileTimeInMs: result.updateFSReport?.compileDuration.inMilliseconds,
-          findInvalidatedTimeInMs: result.updateFSReport?.findInvalidatedDuration.inMilliseconds,
-          scannedSourcesCount: result.updateFSReport?.scannedSourcesCount,
-        ).send();
-        _analytics.send(Event.hotRunnerInfo(
-          label: 'restart',
-          targetPlatform: targetPlatform,
-          sdkName: sdkName,
-          emulator: emulator,
           fullRestart: true,
           reason: reason,
           overallTimeInMs: restartTimer.elapsed.inMilliseconds,
@@ -885,18 +858,11 @@ class HotRunner extends ResidentRunner {
       // The `restartEvent` variable will be null if restart succeeded. We will
       // only handle the case when it failed here.
       if (restartEvent != null) {
-        HotEvent(restartEvent,
+        _analytics.send(Event.hotRunnerInfo(
+          label: restartEvent,
           targetPlatform: targetPlatform!,
           sdkName: sdkName!,
           emulator: emulator!,
-          fullRestart: true,
-          reason: reason,
-        ).send();
-        _analytics.send(Event.hotRunnerInfo(
-          label: restartEvent,
-          targetPlatform: targetPlatform,
-          sdkName: sdkName,
-          emulator: emulator,
           fullRestart: true,
           reason: reason,
         ));
@@ -942,34 +908,20 @@ class HotRunner extends ResidentRunner {
                       'the source code. Please address the error and then use "R" to '
                       'restart the app.\n'
                       '${error.message} (error code: ${error.code})';
-        HotEvent('reload-barred',
+        _analytics.send(Event.hotRunnerInfo(
+          label: 'reload-barred',
           targetPlatform: targetPlatform!,
           sdkName: sdkName!,
           emulator: emulator!,
-          fullRestart: false,
-          reason: reason,
-        ).send();
-        _analytics.send(Event.hotRunnerInfo(
-          label: 'reload-barred',
-          targetPlatform: targetPlatform,
-          sdkName: sdkName,
-          emulator: emulator,
           fullRestart: false,
           reason: reason,
         ));
       } else {
-        HotEvent('exception',
+        _analytics.send(Event.hotRunnerInfo(
+          label: 'exception',
           targetPlatform: targetPlatform!,
           sdkName: sdkName!,
           emulator: emulator!,
-          fullRestart: false,
-          reason: reason,
-        ).send();
-        _analytics.send(Event.hotRunnerInfo(
-          label: 'exception',
-          targetPlatform: targetPlatform,
-          sdkName: sdkName,
-          emulator: emulator,
           fullRestart: false,
           reason: reason,
         ));
@@ -1034,7 +986,6 @@ class HotRunner extends ResidentRunner {
         sdkName,
         emulator,
         reason,
-        globals.flutterUsage,
         globals.analytics,
       );
       if (result.code != 0) {
@@ -1075,31 +1026,11 @@ class HotRunner extends ResidentRunner {
     // many libraries were affected by the hot reload request.
     // Relation of [invalidatedSourcesCount] to [syncedLibraryCount] should help
     // understand sync/transfer "overhead" of updating this number of source files.
-    HotEvent('reload',
+    _analytics.send(Event.hotRunnerInfo(
+      label: 'reload',
       targetPlatform: targetPlatform!,
       sdkName: sdkName!,
       emulator: emulator!,
-      fullRestart: false,
-      reason: reason,
-      overallTimeInMs: reloadInMs,
-      finalLibraryCount: firstReloadDetails['finalLibraryCount'] as int? ?? 0,
-      syncedLibraryCount: firstReloadDetails['receivedLibraryCount'] as int? ?? 0,
-      syncedClassesCount: firstReloadDetails['receivedClassesCount'] as int? ?? 0,
-      syncedProceduresCount: firstReloadDetails['receivedProceduresCount'] as int? ?? 0,
-      syncedBytes: updatedDevFS.syncedBytes,
-      invalidatedSourcesCount: updatedDevFS.invalidatedSourcesCount,
-      transferTimeInMs: updatedDevFS.transferDuration.inMilliseconds,
-      compileTimeInMs: updatedDevFS.compileDuration.inMilliseconds,
-      findInvalidatedTimeInMs: updatedDevFS.findInvalidatedDuration.inMilliseconds,
-      scannedSourcesCount: updatedDevFS.scannedSourcesCount,
-      reassembleTimeInMs: reassembleTimer.elapsed.inMilliseconds,
-      reloadVMTimeInMs: reloadVMTimer.elapsed.inMilliseconds,
-    ).send();
-    _analytics.send(Event.hotRunnerInfo(
-      label: 'reload',
-      targetPlatform: targetPlatform,
-      sdkName: sdkName,
-      emulator: emulator,
       fullRestart: false,
       reason: reason,
       overallTimeInMs: reloadInMs,
@@ -1124,7 +1055,6 @@ class HotRunner extends ResidentRunner {
     }
     // Only report timings if we reloaded a single view without any errors.
     if ((reassembleResult.reassembleViews.length == 1) && !reassembleResult.failedReassemble && shouldReportReloadTime) {
-      globals.flutterUsage.sendTiming('hot', 'reload', reloadDuration);
       _analytics.send(Event.timing(
         workflow: 'hot',
         variableName: 'reload',
@@ -1282,7 +1212,6 @@ typedef ReloadSourcesHelper = Future<OperationResult> Function(
   String? sdkName,
   bool? emulator,
   String? reason,
-  Usage usage,
   Analytics analytics,
 );
 
@@ -1296,7 +1225,6 @@ Future<OperationResult> defaultReloadSourcesHelper(
   String? sdkName,
   bool? emulator,
   String? reason,
-  Usage usage,
   Analytics analytics,
 ) async {
   final Stopwatch vmReloadTimer = Stopwatch()..start();
@@ -1330,19 +1258,11 @@ Future<OperationResult> defaultReloadSourcesHelper(
   final vm_service.ReloadReport? reloadReport = reports.isEmpty ? null : reports.first.reports[0];
   if (reloadReport == null || !HotRunner.validateReloadReport(reloadReport)) {
     // Reload failed.
-    HotEvent('reload-reject',
+    analytics.send(Event.hotRunnerInfo(
+      label: 'reload-reject',
       targetPlatform: targetPlatform!,
       sdkName: sdkName!,
       emulator: emulator!,
-      fullRestart: false,
-      reason: reason,
-      usage: usage,
-    ).send();
-    analytics.send(Event.hotRunnerInfo(
-      label: 'reload-reject',
-      targetPlatform: targetPlatform,
-      sdkName: sdkName,
-      emulator: emulator,
       fullRestart: false,
       reason: reason,
     ));
