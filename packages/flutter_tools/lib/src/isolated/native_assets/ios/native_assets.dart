@@ -55,18 +55,8 @@ Future<Iterable<KernelAsset>> dryRunNativeAssetsIOSInternal(
     includeParentEnvironment: true,
   );
   ensureNativeAssetsBuildDryRunSucceed(buildDryRunResult);
-  final LinkDryRunResult linkDryRunResult = await buildRunner.linkDryRun(
-    linkModePreference: LinkModePreferenceImpl.dynamic,
-    targetOS: targetOS,
-    workingDirectory: projectUri,
-    includeParentEnvironment: true,
-    buildDryRunResult: buildDryRunResult,
-  );
-  ensureNativeAssetsLinkDryRunSucceed(linkDryRunResult);
-  final List<AssetImpl> nativeAssets = <AssetImpl>[
-    ...buildDryRunResult.assets,
-    ...linkDryRunResult.assets,
-  ];
+  // No link hooks in JIT.
+  final List<AssetImpl> nativeAssets = buildDryRunResult.assets;
   ensureNoLinkModeStatic(nativeAssets);
   globals.logger.printTrace('Dry running native assets for $targetOS done.');
   return _assetTargetLocations(nativeAssets).values;
