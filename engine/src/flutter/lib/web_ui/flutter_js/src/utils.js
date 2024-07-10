@@ -2,14 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-export const baseUri = getBaseURI();
-
-function getBaseURI() {
-  const base = document.querySelector("base");
-  return (base && base.getAttribute("href")) || "";
+export function resolveUrlWithSegments(...segments) {
+  return new URL(joinPathSegments(...segments), document.baseURI).toString()
 }
 
-export function joinPathSegments(...segments) {
+function joinPathSegments(...segments) {
   return segments.filter((segment) => !!segment).map((segment, i) => {
     if (i === 0) {
       return stripRightSlashes(segment);
@@ -54,5 +51,5 @@ export function getCanvaskitBaseUrl(config, buildConfig) {
   if (buildConfig.engineRevision && !buildConfig.useLocalCanvasKit) {
     return joinPathSegments("https://www.gstatic.com/flutter-canvaskit", buildConfig.engineRevision);
   }
-  return "/canvaskit";
+  return "canvaskit";
 }

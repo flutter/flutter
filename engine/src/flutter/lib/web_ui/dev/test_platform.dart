@@ -575,6 +575,7 @@ class BrowserPlatform extends PlatformPlugin {
       // Some of our tests rely on color emoji
       useColorEmoji: true,
       canvasKitVariant: "${getCanvasKitVariant()}",
+      canvasKitBaseUrl: "/canvaskit",
     },
   });
 </script>
