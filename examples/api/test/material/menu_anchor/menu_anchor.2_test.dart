@@ -25,5 +25,4 @@ void main() {
       expect(find.widgetWithText(MenuItemButton, 'Item $i'), findsOne);
     }
   });
-
 }
