@@ -115,27 +115,19 @@ void main() {
           body: SingleChildScrollView(
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                ...List<Widget>.generate(
-                  10,
-                  (int index) => Text(index.toString()),
-                ),
                 Autocomplete<String>(
                   optionsBuilder: (TextEditingValue textEditingValue) {
-                    return <String>[
-                      'flutter',
-                      'dart',
-                      'pub',
-                    ].where((String option) {
-                      return option
-                          .contains(textEditingValue.text.toLowerCase());
+                    return <String>['One', 'Two', 'Three'].where((String option) {
+                      return option.contains(textEditingValue.text.toLowerCase());
                     }).toList();
                   },
-                ),
-                ...List<Widget>.generate(
-                  50,
-                  (int index) => Text(index.toString()),
+                  fieldViewBuilder: (BuildContext context, TextEditingController textEditingController, FocusNode focusNode, VoidCallback onFieldSubmitted) {
+                    return TextField(
+                      controller: textEditingController,
+                      focusNode: focusNode,
+                    );
+                  },
                 ),
               ],
             ),
@@ -143,9 +135,19 @@ void main() {
         ),
       ),
     );
-    for (int i = 10; i < 20; i++) {
-      expect(find.text(i.toString()), findsOneWidget);
-    }
+    final Finder textFieldFinder = find.byType(TextField);
+    expect(textFieldFinder, findsOneWidget);
+
+    await tester.tap(textFieldFinder);
+    await tester.pump();
+
+    final TextField textField = tester.widget(textFieldFinder);
+    expect(textField.focusNode!.hasFocus, isTrue);
+
+    await tester.drag(textFieldFinder, const Offset(0, 500));
+    await tester.pumpAndSettle();
+
+    expect(textField.focusNode!.nextFocus(), isTrue);
   });
 
   testWidgets('SingleChildScrollView respects clipBehavior', (WidgetTester tester) async {
