@@ -940,6 +940,31 @@ TEST_F(FlutterEngineTest, ManageControllersIfInitiatedByEngine) {
   EXPECT_EQ(viewController1.viewIdentifier, 0ll);
 }
 
+TEST_F(FlutterEngineTest, RemovingViewDisposesCompositorResources) {
+  NSString* fixtures = @(flutter::testing::GetFixturesPath());
+  FlutterDartProject* project = [[FlutterDartProject alloc]
+      initWithAssetsPath:fixtures
+             ICUDataPath:[fixtures stringByAppendingString:@"/icudtl.dat"]];
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"test" project:project];
+
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
+                                                                                nibName:nil
+                                                                                 bundle:nil];
+  [viewController loadView];
+  [viewController viewDidLoad];
+  viewController.flutterView.frame = CGRectMake(0, 0, 800, 600);
+
+  EXPECT_TRUE([engine runWithEntrypoint:@"drawIntoAllViews"]);
+  [engine.testThreadSynchronizer blockUntilFrameAvailable];
+  EXPECT_EQ(engine.macOSCompositor->DebugNumViews(), 1u);
+
+  engine.viewController = nil;
+  EXPECT_EQ(engine.macOSCompositor->DebugNumViews(), 0u);
+
+  [engine shutDownEngine];
+  engine = nil;
+}
+
 TEST_F(FlutterEngineTest, HandlesTerminationRequest) {
   id engineMock = CreateMockFlutterEngine(nil);
   __block NSString* nextResponse = @"exit";
