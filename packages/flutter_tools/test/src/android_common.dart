@@ -126,6 +126,11 @@ class VersionTuple {
   String agpVersion;
   String gradleVersion;
   String kotlinVersion;
+
+  @override
+  String toString() {
+    return '(AGP version: $agpVersion, Gradle version: $gradleVersion, Kotlin version: $kotlinVersion)';
+  }
 }
 
 Future<ProcessResult> buildFlutterApkWithSpecifiedDependencyVersions({
