@@ -453,6 +453,9 @@ end
             'COMPILER_INDEX_STORE_ENABLE=NO',
             'archive',
           ],
+          environment: <String, String>{
+            'FLUTTER_SUPPRESS_ANALYTICS': '1',
+          }
         );
 
         final String archivedAppPath = path.join(
@@ -547,6 +550,9 @@ end
             'test',
             'COMPILER_INDEX_STORE_ENABLE=NO',
           ],
+          environment: <String, String>{
+            'FLUTTER_SUPPRESS_ANALYTICS': '1',
+          },
           workingDirectory: objectiveCHostApp.path,
           canFail: true,
         );
@@ -595,6 +601,9 @@ end
             'BUILD_DIR=${objectiveCBuildDirectory.path}',
             'COMPILER_INDEX_STORE_ENABLE=NO',
           ],
+          environment: <String, String>{
+            'FLUTTER_SUPPRESS_ANALYTICS': '1',
+          },
           canFail: true,
         )
       );

@@ -272,6 +272,7 @@ Future<void> main() async {
           <String>['SampleApp:assembleRelease'],
           environment: <String, String>{
             'JAVA_HOME': javaHome,
+            'FLUTTER_SUPPRESS_ANALYTICS': '1',
           },
         );
       });

@@ -265,6 +265,7 @@ class ModuleTest {
           <String>['app:assembleDebug'],
           environment: <String, String>{
             'JAVA_HOME': javaHome,
+            'FLUTTER_SUPPRESS_ANALYTICS': '1',
           },
         );
       });
@@ -336,6 +337,7 @@ class ModuleTest {
           <String>['app:assembleRelease'],
           environment: <String, String>{
             'JAVA_HOME': javaHome,
+            'FLUTTER_SUPPRESS_ANALYTICS': '1',
           },
         );
       });
