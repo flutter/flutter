@@ -7,6 +7,7 @@ dart_ui_files = [
   "//flutter/lib/ui/channel_buffers.dart",
   "//flutter/lib/ui/compositing.dart",
   "//flutter/lib/ui/geometry.dart",
+  "//flutter/lib/ui/hash_codes.dart",
   "//flutter/lib/ui/hooks.dart",
   "//flutter/lib/ui/isolate_name_server.dart",
   "//flutter/lib/ui/key.dart",
