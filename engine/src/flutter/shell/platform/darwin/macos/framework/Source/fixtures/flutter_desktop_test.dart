@@ -49,6 +49,18 @@ void canCompositePlatformViews() {
   PlatformDispatcher.instance.scheduleFrame();
 }
 
+@pragma('vm:entry-point')
+void drawIntoAllViews() {
+  PlatformDispatcher.instance.onBeginFrame = (Duration duration) {
+    SceneBuilder builder = SceneBuilder();
+    builder.addPicture(Offset(1.0, 1.0), _createSimplePicture());
+    for (final FlutterView view in PlatformDispatcher.instance.views) {
+      view.render(builder.build());
+    }
+  };
+  PlatformDispatcher.instance.scheduleFrame();
+}
+
 /// Returns a [Picture] of a simple black square.
 Picture _createSimplePicture() {
   Paint blackPaint = Paint();
