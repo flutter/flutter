@@ -2368,9 +2368,15 @@ extension DomPopStateEventExtension on DomPopStateEvent {
   dynamic get state => _state?.toObjectDeep;
 }
 
-@JS()
+@JS('URL')
 @staticInterop
-class DomURL {}
+class DomURL {
+  external factory DomURL.arg1(JSString url);
+  external factory DomURL.arg2(JSString url, JSString? base);
+}
+
+DomURL createDomURL(String url, [String? base]) =>
+    base == null ? DomURL.arg1(url.toJS) : DomURL.arg2(url.toJS, base.toJS);
 
 extension DomURLExtension on DomURL {
   @JS('createObjectURL')
@@ -2381,6 +2387,9 @@ extension DomURLExtension on DomURL {
   @JS('revokeObjectURL')
   external JSVoid _revokeObjectURL(JSString url);
   void revokeObjectURL(String url) => _revokeObjectURL(url.toJS);
+
+  @JS('toString')
+  external JSString toJSString();
 }
 
 @JS('Blob')
@@ -3383,16 +3392,16 @@ final DomTrustedTypePolicy _ttPolicy = domWindow.trustedTypes!.createPolicy(
 
 /// Converts a String `url` into a [DomTrustedScriptURL] object when the
 /// Trusted Types API is available, else returns the unmodified `url`.
-Object createTrustedScriptUrl(String url) {
+JSAny createTrustedScriptUrl(String url) {
   if (domWindow.trustedTypes != null) {
     // Pass `url` through Flutter Engine's TrustedType policy.
     final DomTrustedScriptURL trustedUrl = _ttPolicy.createScriptURL(url);
 
     assert(trustedUrl.url != '', 'URL: $url rejected by TrustedTypePolicy');
 
-    return trustedUrl;
+    return trustedUrl as JSAny;
   }
-  return url;
+  return url.toJS;
 }
 
 DomMessageChannel createDomMessageChannel() => DomMessageChannel();
