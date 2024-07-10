@@ -2072,7 +2072,7 @@ class TestAction extends CallbackAction<Intent> {
 /// An activator that accepts down events that has [key] as the logical key.
 ///
 /// This class is used only to tests. It is intentionally designed poorly by
-/// returning null in [triggers], and checks [key] in [acceptsEvent].
+/// returning null in [triggers], and checks [key] in [accepts].
 class DumbLogicalActivator extends ShortcutActivator {
   const DumbLogicalActivator(this.key);
 

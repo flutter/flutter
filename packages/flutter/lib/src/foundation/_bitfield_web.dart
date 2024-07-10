@@ -20,7 +20,7 @@ class BitField<T extends dynamic> implements bitfield.BitField<T> {
   // ignore: avoid_unused_constructor_parameters
   BitField(int length);
 
-  /// The web implementation of [bitfield.Bitfield.filled].
+  /// The web implementation of [bitfield.BitField.filled].
   // Can remove when we have metaclasses.
   // ignore: avoid_unused_constructor_parameters
   BitField.filled(int length, bool value);
