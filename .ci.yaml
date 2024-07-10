@@ -2079,6 +2079,7 @@ targets:
 
   # Uses Impeller.
   - name: Linux_pixel_7pro hello_world_impeller
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/151528
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
