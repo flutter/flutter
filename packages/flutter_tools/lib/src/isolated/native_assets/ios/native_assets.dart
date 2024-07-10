@@ -90,6 +90,7 @@ Future<List<Uri>> buildNativeAssetsIOS({
 
   final List<Target> targets = darwinArchs.map(_getNativeTarget).toList();
   final BuildModeImpl buildModeCli = nativeAssetsBuildMode(buildMode);
+  final bool linkingEnabled = buildModeCli == BuildModeImpl.release;
 
   const OSImpl targetOS = OSImpl.iOS;
   final Uri buildUri = nativeAssetsBuildUri(projectUri, targetOS);
@@ -109,25 +110,28 @@ Future<List<Uri>> buildNativeAssetsIOS({
       cCompilerConfig: await buildRunner.cCompilerConfig,
       // TODO(dcharkes): Fetch minimum iOS version from somewhere. https://github.com/flutter/flutter/issues/145104
       targetIOSVersion: 12,
+      linkingEnabled: linkingEnabled,
     );
     ensureNativeAssetsBuildSucceed(buildResult);
     nativeAssets.addAll(buildResult.assets);
     dependencies.addAll(buildResult.dependencies);
-    final LinkResult linkResult = await buildRunner.link(
-      linkModePreference: LinkModePreferenceImpl.dynamic,
-      target: target,
-      targetIOSSdkImpl: iosSdk,
-      buildMode: buildModeCli,
-      workingDirectory: projectUri,
-      includeParentEnvironment: true,
-      cCompilerConfig: await buildRunner.cCompilerConfig,
-      buildResult: buildResult,
-      // TODO(dcharkes): Fetch minimum iOS version from somewhere. https://github.com/flutter/flutter/issues/145104
-      targetIOSVersion: 12,
-    );
-    ensureNativeAssetsLinkSucceed(linkResult);
-    nativeAssets.addAll(linkResult.assets);
-    dependencies.addAll(linkResult.dependencies);
+    if (linkingEnabled) {
+      final LinkResult linkResult = await buildRunner.link(
+        linkModePreference: LinkModePreferenceImpl.dynamic,
+        target: target,
+        targetIOSSdkImpl: iosSdk,
+        buildMode: buildModeCli,
+        workingDirectory: projectUri,
+        includeParentEnvironment: true,
+        cCompilerConfig: await buildRunner.cCompilerConfig,
+        buildResult: buildResult,
+        // TODO(dcharkes): Fetch minimum iOS version from somewhere. https://github.com/flutter/flutter/issues/145104
+        targetIOSVersion: 12,
+      );
+      ensureNativeAssetsLinkSucceed(linkResult);
+      nativeAssets.addAll(linkResult.assets);
+      dependencies.addAll(linkResult.dependencies);
+    }
   }
   ensureNoLinkModeStatic(nativeAssets);
   globals.logger.printTrace('Building native assets for $targets done.');
