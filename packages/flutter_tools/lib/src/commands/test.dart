@@ -412,6 +412,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       debugLogsDirectoryPath: debugLogsDirectoryPath,
       webRenderer: webRenderer,
       webUseWasm: useWasm,
+      webUseLocalCanvaskit: true,
     );
 
     String? testAssetDirectory;
@@ -504,8 +505,8 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       collector = CoverageCollector(
         verbose: !machine,
         libraryNames: packagesToInclude,
-        packagesPath: buildInfo.packagesPath,
-        resolver: await CoverageCollector.getResolver(buildInfo.packagesPath),
+        packagesPath: buildInfo.packageConfigPath,
+        resolver: await CoverageCollector.getResolver(buildInfo.packageConfigPath),
         testTimeRecorder: testTimeRecorder,
         branchCoverage: boolArg('branch-coverage'),
       );
@@ -617,6 +618,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         integrationTestUserIdentifier: stringArg(FlutterOptions.kDeviceUser),
         testTimeRecorder: testTimeRecorder,
         nativeAssetsBuilder: nativeAssetsBuilder,
+        buildInfo: buildInfo,
       );
     }
     testTimeRecorder?.stop(TestTimePhases.TestRunner, testRunnerTimeRecorderStopwatch!);
