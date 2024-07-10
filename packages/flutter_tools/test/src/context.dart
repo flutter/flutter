@@ -126,6 +126,7 @@ void testUsingContext(
           TemplateRenderer: () => const MustacheTemplateRenderer(),
           BuildTargets: () => const BuildTargetsImpl(),
           Analytics: () => const NoOpAnalytics(),
+          Stdio: () => FakeStdio(),
         },
         body: () {
           // To catch all errors thrown by the test, even uncaught async errors, we use a zone.
