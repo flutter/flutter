@@ -34,7 +34,7 @@ If you are visually verifying a subset of tests quickly, you can specify how lon
 --playground_timeout_ms=1000
 ```
 
-> ![TIP]
+> [!TIP]
 > To render one and only frame of each playground, specify the a timeout of 0 milliseconds.
 
 ### Selecting a Subset of Tests to Run
@@ -68,7 +68,7 @@ Setup Xcode for frame captures with Playgrounds [using the documented instructio
 
 We are going to use Angle to translate OpenGL ES calls into Metal calls and then debug/profile the results. You can switch backends by tinkering with the filters as command line arguments in Xcode run scheme.
 
-> ![TIP]
+> [!TIP]
 > You'll be editing the Xcode run scheme a lot as you switch backends and tests. The shortcut to edit the scheme is `⌘ + ⇧ + r`.
 
 An alternative on non-macOS platforms is RenderDoc. Instructions to [setup RenderDoc are here](./renderdoc_frame_capture.md). RenderDoc is **not** available on macOS.
