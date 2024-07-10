@@ -1,4 +1,4 @@
-Signature: ae3fa0ac39a435ca0c2c1f6317d93564
+Signature: b45ed5020c7ec33466cb700a0c21051d
 
 ====================================================================================================
 LIBRARY: dart
@@ -4091,6 +4091,7 @@ ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/js_dev_runtime/priva
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/js_dev_runtime/private/identity_hash_set.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/js_dev_runtime/private/linked_hash_set.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/js_runtime/lib/dart2js_only.dart + ../../../flutter/third_party/dart/LICENSE
+ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/js_runtime/lib/synced/array_flags.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/js_runtime/lib/synced/invocation_mirror_constants.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/js_shared/lib/date_time_patch.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/compact_hash.dart + ../../../flutter/third_party/dart/LICENSE
@@ -4114,6 +4115,7 @@ FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/js_dev_runtime/private
 FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/js_dev_runtime/private/identity_hash_set.dart
 FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/js_dev_runtime/private/linked_hash_set.dart
 FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/js_runtime/lib/dart2js_only.dart
+FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/js_runtime/lib/synced/array_flags.dart
 FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/js_runtime/lib/synced/invocation_mirror_constants.dart
 FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/js_shared/lib/date_time_patch.dart
 FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/compact_hash.dart
@@ -4757,7 +4759,7 @@ Exhibit B - "Incompatible With Secondary Licenses" Notice
   This Source Code Form is "Incompatible With Secondary Licenses", as
   defined by the Mozilla Public License, v. 2.0.
 
-You may obtain a copy of this library's Source Code Form from: https://dart.googlesource.com/sdk/+/dba0dfbd06ebafe9af634c4a61c4338ac2fa6855
+You may obtain a copy of this library's Source Code Form from: https://dart.googlesource.com/sdk/+/c6053ad84f2bc2182834421e0f81f1295677ba06
 /third_party/fallback_root_certificates/
 
 ====================================================================================================
