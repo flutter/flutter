@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/material/menu_anchor/menu_anchor.2.dart' as 
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('The menu should display 3 items', (WidgetTester tester) async {
+  testWidgets('The menu should display three items', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.MenuAnchorApp(),
     );
