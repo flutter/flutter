@@ -1154,7 +1154,6 @@ class _CupertinoActionSheetActionState extends State<CupertinoActionSheetAction>
       <= 19 => lerpDouble(21.0, 23.0, (contextBodySize - 17.0)/(19.0 - 17.0))!,
       <= 21 => lerpDouble(23.0, 24.0, (contextBodySize - 19.0)/(21.0 - 19.0))!,
       <= 24 => 24.0,
-      <= 28 => lerpDouble(24.0, 28.0, (contextBodySize - 23.0)/(28.0 - 23.0))!,
       _ => contextBodySize,
     };
   }
