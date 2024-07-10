@@ -1022,7 +1022,7 @@ class _ViewContentState extends State<_ViewContent> {
                           ),
                         ),
                       ),
-                      if (widget.showFullScreenView || result.isNotEmpty) ...<Widget>[
+                      if (!effectiveShrinkWrap || widget.showFullScreenView || result.isNotEmpty) ...<Widget>[
                         FadeTransition(
                           opacity: viewDividerFadeCurve,
                           child: viewDivider,
