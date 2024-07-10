@@ -248,7 +248,6 @@ void main() {
     expect(localizations.datePickerDayOfMonth(1), '1日');
     expect(localizations.datePickerDayOfMonth(1, 2), '周三 1日');
   });
-
 }
 
 class _FakeEditableText extends EditableText {
