@@ -246,7 +246,7 @@ void main() {
     final CupertinoLocalizations localizations = await GlobalCupertinoLocalizations.delegate.load(locale);
     expect(localizations, isA<CupertinoLocalizationZh>());
     expect(localizations.datePickerDayOfMonth(1), '1日');
-    expect(localizations.datePickerDayOfMonth(1, 2), '周三 1日');
+    expect(localizations.datePickerDayOfMonth(1, 2), '周二 1日');
   });
 }
 
