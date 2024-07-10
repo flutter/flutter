@@ -130,7 +130,9 @@ Because `git pull` will often miss tags that are used to define the release of t
 Use `git fetch upstream; git rebase upstream/main; git push origin your_branch_name` to update your PRs, rather than using merge, because that way our tooling will recognize your PR as being up to date. (Otherwise it'll try testing against the tests at the time you originally branched.) Also, **be wary of force pushing to your PR branch** if you are dealing with golden image tests; see [gold troubleshooting instructions](./testing/Writing-a-golden-file-test-for-package-flutter.md#troubleshooting).
 
 Please make sure all your patches have detailed commit messages explaining what the problem was and
-what the solution is.
+what the solution is. (Avoid GitHub @-mentions in commit messages. GitHub turns this into a notification
+for the person any time someone rebases your commit on their own fork. On a project of this size, that's
+rather disruptive. If you need to @-mention someone, do it as a separate comment on the PR.)
 
 You must complete the
 [Contributor License Agreement](https://cla.developers.google.com/clas).
