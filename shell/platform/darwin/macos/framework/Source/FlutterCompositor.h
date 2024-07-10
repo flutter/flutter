@@ -46,6 +46,18 @@ class FlutterCompositor {
 
   ~FlutterCompositor() = default;
 
+  // Allocate the resources for displaying a view.
+  //
+  // This method must be called when a view is added to FlutterEngine, and must be
+  // called on the main dispatch queue, or an assertion will be thrown.
+  void AddView(FlutterViewId view_id);
+
+  // Deallocate the resources for displaying a view.
+  //
+  // This method must be called when a view is removed from FlutterEngine, and
+  // must be called on the main dispatch queue, or an assertion will be thrown.
+  void RemoveView(FlutterViewId view_id);
+
   // Creates a backing store and saves updates the backing_store_out data with
   // the new FlutterBackingStore data.
   //
@@ -64,6 +76,11 @@ class FlutterCompositor {
   // Presents the FlutterLayers by updating the FlutterView specified by
   // `view_id` using the layer content.
   bool Present(FlutterViewIdentifier view_id, const FlutterLayer** layers, size_t layers_count);
+
+  // The number of views that the FlutterCompositor is keeping track of.
+  //
+  // This method must only be used in unit tests.
+  size_t DebugNumViews();
 
  private:
   // A class that contains the information for a view to be presented.
@@ -103,7 +120,8 @@ class FlutterCompositor {
   // The controller used to manage creation and deletion of platform views.
   const FlutterPlatformViewController* platform_view_controller_;
 
-  std::unordered_map<int64_t, ViewPresenter> presenters_;
+  // The view presenters for views. Each key is a view ID.
+  std::unordered_map<FlutterViewId, ViewPresenter> presenters_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(FlutterCompositor);
 };
