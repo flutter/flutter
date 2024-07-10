@@ -29,8 +29,8 @@ const Color _kDisabledCheckColor = Color.fromARGB(255, 172, 172, 172);
 
 // Eyeballed from a checkbox on a physical Macbook Pro running macOS version 14.5.
 const CupertinoDynamicColor _kDefaultFillColor = CupertinoDynamicColor.withBrightness(
-    color: CupertinoColors.white,
-    darkColor: Color.fromARGB(255, 87, 87, 87),
+  color: CupertinoColors.white,
+  darkColor: Color.fromARGB(255, 87, 87, 87),
 );
 
 /// A macOS style checkbox.
@@ -97,7 +97,6 @@ class CupertinoCheckbox extends StatefulWidget {
     this.autofocus = false,
     this.side,
     this.shape,
-    this.isError = false,
     this.semanticLabel,
   }) : assert(tristate || value != null);
 
@@ -145,14 +144,13 @@ class CupertinoCheckbox extends StatefulWidget {
   /// [WidgetStateMouseCursor.resolve] is used for the following [WidgetState]s:
   ///
   ///  * [WidgetState.selected].
-  ///  * [WidgetState.hovered].
   ///  * [WidgetState.focused].
   ///  * [WidgetState.disabled].
   ///
   /// When [value] is null and [tristate] is true, [WidgetState.selected] is
   /// included as a state.
   ///
-  /// If null, then [SystemMouseCursors.basic] is used.
+  /// Defaults to [SystemMouseCursors.basic].
   final MouseCursor? mouseCursor;
 
   /// The color to use when this checkbox is checked.
@@ -248,8 +246,8 @@ class CupertinoCheckbox extends StatefulWidget {
   /// false. The difference in interpretation is for backwards
   /// compatibility.
   ///
-  /// If this property is null, then the side defaults to a one pixel wide
-  /// black, solid border.
+  /// If this property is null and the checkbox's value is false, then the side
+  /// defaults to a one pixel wide grey-black border.
   final BorderSide? side;
 
   /// The shape of the checkbox.
@@ -257,14 +255,6 @@ class CupertinoCheckbox extends StatefulWidget {
   /// If this property is null then the shape defaults to a
   /// [RoundedRectangleBorder] with a circular corner radius of 4.0.
   final OutlinedBorder? shape;
-
-  /// True if this checkbox wants to show an error state.
-  ///
-  /// The checkbox will have different default container color and check color
-  /// when this is true.
-  ///
-  /// Defaults to false.
-  final bool isError;
 
   /// The semantic label for the checkbox that will be announced by screen readers.
   ///
@@ -315,7 +305,7 @@ class _CupertinoCheckboxState extends State<CupertinoCheckbox> with TickerProvid
   @override
   bool? get value => widget.value;
 
-  WidgetStateProperty<Color> get _widgetFillColor {
+  WidgetStateProperty<Color> get _defaultFillColor {
     return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
       if (states.contains(WidgetState.disabled)) {
         return CupertinoColors.white.withOpacity(0.5);
@@ -328,7 +318,7 @@ class _CupertinoCheckboxState extends State<CupertinoCheckbox> with TickerProvid
     });
   }
 
-  WidgetStateProperty<Color> get _widgetCheckColor {
+  WidgetStateProperty<Color> get _defaultCheckColor {
     return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
       if (states.contains(WidgetState.disabled) && states.contains(WidgetState.selected)) {
         return widget.checkColor ?? _kDisabledCheckColor;
@@ -340,7 +330,7 @@ class _CupertinoCheckboxState extends State<CupertinoCheckbox> with TickerProvid
     });
   }
 
-  WidgetStateProperty<BorderSide> get _widgetSide {
+  WidgetStateProperty<BorderSide> get _defaultSide {
     final Color borderColor = CupertinoDynamicColor.resolve(
       CupertinoColors.systemGrey4,
       context,
@@ -372,19 +362,14 @@ class _CupertinoCheckboxState extends State<CupertinoCheckbox> with TickerProvid
     final Set<WidgetState> activeStates = states..add(WidgetState.selected);
     final Set<WidgetState> inactiveStates = states..remove(WidgetState.selected);
 
-    if (widget.isError) {
-      activeStates.add(WidgetState.error);
-      inactiveStates.add(WidgetState.error);
-    }
-
     final Color effectiveActiveColor = widget.fillColor?.resolve(activeStates)
-      ?? _widgetFillColor.resolve(activeStates);
+      ?? _defaultFillColor.resolve(activeStates);
 
     final Color effectiveInactiveColor = widget.fillColor?.resolve(inactiveStates)
-      ?? _widgetFillColor.resolve(inactiveStates);
+      ?? _defaultFillColor.resolve(inactiveStates);
 
     final BorderSide effectiveBorderSide = _resolveSide(widget.side, states)
-      ?? _widgetSide.resolve(states);
+      ?? _defaultSide.resolve(states);
 
     final Color effectiveFocusOverlayColor = widget.focusColor
       ?? HSLColor
@@ -392,9 +377,6 @@ class _CupertinoCheckboxState extends State<CupertinoCheckbox> with TickerProvid
           .withLightness(_kCupertinoFocusColorBrightness)
           .withSaturation(_kCupertinoFocusColorSaturation)
           .toColor();
-
-    final Set<WidgetState> checkStates = widget.isError
-      ? (states..add(WidgetState.error)) : states;
 
     final WidgetStateProperty<MouseCursor> effectiveMouseCursor =
       WidgetStateProperty.resolveWith<MouseCursor>((Set<WidgetState> states) {
@@ -420,7 +402,7 @@ class _CupertinoCheckboxState extends State<CupertinoCheckbox> with TickerProvid
           ..isHovered = states.contains(WidgetState.hovered)
           ..activeColor = effectiveActiveColor
           ..inactiveColor = effectiveInactiveColor
-          ..checkColor = _widgetCheckColor.resolve(checkStates)
+          ..checkColor = _defaultCheckColor.resolve(states)
           ..value = value
           ..previousValue = _previousValue
           ..isActive = widget.onChanged != null
