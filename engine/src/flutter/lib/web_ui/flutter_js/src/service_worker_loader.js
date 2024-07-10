@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import { baseUri, joinPathSegments } from "./utils.js";
+import { resolveUrlWithSegments } from "./utils.js";
 
 /**
  * Wraps `promise` in a timeout of the given `duration` in ms.
@@ -78,7 +78,7 @@ export class FlutterServiceWorkerLoader {
     }
     const {
       serviceWorkerVersion,
-      serviceWorkerUrl = joinPathSegments(baseUri, `flutter_service_worker.js?v=${serviceWorkerVersion}`),
+      serviceWorkerUrl = resolveUrlWithSegments(`flutter_service_worker.js?v=${serviceWorkerVersion}`),
       timeoutMillis = 4000,
     } = settings;
     // Apply the TrustedTypes policy, if present.

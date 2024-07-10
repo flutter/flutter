@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import { baseUri, joinPathSegments } from "./utils.js";
+import { resolveUrlWithSegments } from "./utils.js";
 
 /**
  * Handles injecting the main Flutter web entrypoint (main.dart.js), and notifying
@@ -37,7 +37,7 @@ export class FlutterEntrypointLoader {
    * Returns undefined when an `onEntrypointLoaded` callback is supplied in `options`.
    */
   async loadEntrypoint(options) {
-    const { entrypointUrl = joinPathSegments(baseUri, "main.dart.js"), onEntrypointLoaded, nonce } =
+    const { entrypointUrl = resolveUrlWithSegments("main.dart.js"), onEntrypointLoaded, nonce } =
       options || {};
     return this._loadJSEntrypoint(entrypointUrl, onEntrypointLoaded, nonce);
   }
@@ -68,7 +68,7 @@ export class FlutterEntrypointLoader {
       return this._loadWasmEntrypoint(build, deps, entryPointBaseUrl, onEntrypointLoaded);
     } else {
       const mainPath = build.mainJsPath ?? "main.dart.js";
-      const entrypointUrl = joinPathSegments(baseUri, entryPointBaseUrl, mainPath);
+      const entrypointUrl = resolveUrlWithSegments(entryPointBaseUrl, mainPath);
       return this._loadJSEntrypoint(entrypointUrl, onEntrypointLoaded, nonce);
     }
   }
@@ -148,8 +148,8 @@ export class FlutterEntrypointLoader {
 
       this._onEntrypointLoaded = onEntrypointLoaded;
       const { mainWasmPath, jsSupportRuntimePath } = build;
-      const moduleUri = joinPathSegments(baseUri, entrypointBaseUrl, mainWasmPath);
-      let jsSupportRuntimeUri = joinPathSegments(baseUri, entrypointBaseUrl, jsSupportRuntimePath);
+      const moduleUri = resolveUrlWithSegments(entrypointBaseUrl, mainWasmPath);
+      let jsSupportRuntimeUri = resolveUrlWithSegments(entrypointBaseUrl, jsSupportRuntimePath);
       if (this._ttPolicy != null) {
         jsSupportRuntimeUri = this._ttPolicy.createScriptURL(jsSupportRuntimeUri);
       }  
