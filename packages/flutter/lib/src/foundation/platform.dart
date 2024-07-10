@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 /// @docImport 'package:flutter/material.dart';
+/// @docImport 'package:flutter_test/flutter_test.dart';
 library;
 
 import '_platform_io.dart'
