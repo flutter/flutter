@@ -12,7 +12,6 @@ import '../cache.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
 import '../linux/build_linux.dart';
-import '../project.dart';
 import '../runner/flutter_command.dart' show FlutterCommandResult;
 import 'build.dart';
 
@@ -60,7 +59,6 @@ class BuildLinuxCommand extends BuildSubCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     final BuildInfo buildInfo = await getBuildInfo();
-    final FlutterProject flutterProject = FlutterProject.current();
     final TargetPlatform targetPlatform =
         getTargetPlatformForName(stringArg('target-platform')!);
     final bool needCrossBuild =
@@ -87,13 +85,12 @@ class BuildLinuxCommand extends BuildSubCommand {
     displayNullSafetyMode(buildInfo);
     final Logger logger = globals.logger;
     await buildLinux(
-      flutterProject.linux,
+      project.linux,
       buildInfo,
       target: targetFile,
       sizeAnalyzer: SizeAnalyzer(
         fileSystem: globals.fs,
         logger: logger,
-        flutterUsage: globals.flutterUsage,
         analytics: analytics,
       ),
       needCrossBuild: needCrossBuild,

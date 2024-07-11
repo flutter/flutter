@@ -120,7 +120,7 @@ class FlutterTesterTestDevice extends TestDevice {
       '--non-interactive',
       '--use-test-fonts',
       '--disable-asset-fonts',
-      '--packages=${debuggingOptions.buildInfo.packagesPath}',
+      '--packages=${debuggingOptions.buildInfo.packageConfigPath}',
       if (testAssetDirectory != null)
         '--flutter-assets-dir=$testAssetDirectory',
       if (debuggingOptions.nullAssertions)

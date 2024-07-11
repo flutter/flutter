@@ -77,7 +77,8 @@ class WebDriverService extends DriverService {
           port: debuggingOptions.port,
           hostname: debuggingOptions.hostname,
           webRenderer: debuggingOptions.webRenderer,
-          webUseWasm: debuggingOptions.webUseWasm
+          webUseWasm: debuggingOptions.webUseWasm,
+          webUseLocalCanvaskit: debuggingOptions.webUseLocalCanvaskit,
         )
         : DebuggingOptions.enabled(
           buildInfo,
@@ -86,6 +87,7 @@ class WebDriverService extends DriverService {
           disablePortPublication: debuggingOptions.disablePortPublication,
           webRenderer: debuggingOptions.webRenderer,
           webUseWasm: debuggingOptions.webUseWasm,
+          webUseLocalCanvaskit: debuggingOptions.webUseLocalCanvaskit,
         ),
       stayResident: true,
       flutterProject: FlutterProject.current(),
@@ -169,7 +171,7 @@ class WebDriverService extends DriverService {
         'Unable to start a WebDriver session for web testing.\n'
         'Make sure you have the correct WebDriver server (e.g. chromedriver) running at $driverPort.\n'
         'For instructions on how to obtain and run a WebDriver server, see:\n'
-        'https://flutter.dev/docs/testing/integration-tests#running-in-a-browser\n'
+        'https://flutter.dev/to/integration-test-on-web\n'
       );
     }
 
