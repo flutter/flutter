@@ -57,9 +57,25 @@ class SecureRestorableStateMigration extends ProjectMigrator {
       );
       return;
     }
+    final String original = _appDelegateSwift.readAsStringSync();
+
+    // If we have an AppDelegate.swift, but can't migrate, log a warning.
+    if (!original.contains(_appDelegateFileBefore)) {
+      if (original.contains('applicationSupportsSecureRestorableState')) {
+        // User has already overridden this method. Exit quietly.
+        return;
+      }
+
+      logger.printWarning(
+        'macos/Runner/AppDelegate.swift has been modified and cannot be automatically migrated.'
+        'We recommend developers override applicationSupportsSecureRestorableState in AppDelegate.swift as follows:\n'
+        'override func applicationSupportsSecureRestorableState(_ app: NSApplication) -> Bool {\n'
+        '  return true\n'
+        '}'
+      );
+    }
 
     // Migrate the macos/Runner/AppDelegate.swift file.
-    final String original = _appDelegateSwift.readAsStringSync();
     final String migrated = original.replaceFirst(_appDelegateFileBefore, _appDelegateFileAfter);
     if (original == migrated) {
       return;

@@ -545,7 +545,7 @@ class AppDelegate: FlutterAppDelegate {
       expect(testLogger.statusText, isEmpty);
     });
 
-    testWithoutContext('skipped if override present, but false', () async {
+    testWithoutContext('skipped if override already present, but different', () async {
       const String appDelegateContents = '''
 import Cocoa
 import FlutterMacOS
@@ -575,6 +575,36 @@ class AppDelegate: FlutterAppDelegate {
 
       expect(testLogger.statusText, isEmpty);
     });
+
+    testWithoutContext('warns if override not present and cannot be applied cleanly', () async {
+      const String appDelegateContents = '''
+import Cocoa
+import FlutterMacOS
+
+@main
+class AppDelegate: FlutterAppDelegate {
+  let ninetiesSong = "島人ぬ宝"
+
+  override func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
+    return true
+  }
+}
+''';
+      appDelegateFile.writeAsStringSync(appDelegateContents);
+      final DateTime lastModified = appDelegateFile.lastModifiedSync();
+
+      final SecureRestorableStateMigration migration = SecureRestorableStateMigration(
+        project,
+        testLogger,
+      );
+      await migration.migrate();
+
+      expect(appDelegateFile.lastModifiedSync(), lastModified);
+      expect(appDelegateFile.readAsStringSync(), appDelegateContents);
+
+      expect(testLogger.warningText, contains('has been modified and cannot be automatically migrated.'));
+    });
+
     testWithoutContext('updates AppDelegate.swift', () async {
       appDelegateFile.writeAsStringSync('''
 import Cocoa
