@@ -169,6 +169,12 @@ To set up:
 
 1. If you previously had a `shell/platform/android/.classpath`, delete it.
 
+### Using Android Studio as an IDE for the Android Embedding [Java]
+
+Alternatively, Android Studio can be used as an IDE for the Android Embedding Java code. See docs
+at https://github.com/flutter/engine/blob/main/shell/platform/android/README.md#editing-java-code for
+instructions.
+
 ## VSCode Additional Useful Configuration
 
 1. Create [snippets](https://code.visualstudio.com/docs/editor/userdefinedsnippets) for header files with [this configuration](https://github.com/chromium/chromium/blob/master/tools/vscode/settings.json5). This will let you use `hdr` keyboard macro to create the boiler plate header code. Also consider some of [these settings](https://github.com/chromium/chromium/blob/master/tools/vscode/settings.json5) and [more tips](https://chromium.googlesource.com/chromium/src/+show/lkgr/docs/vscode.md).
