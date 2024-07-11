@@ -18,6 +18,7 @@ import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/commands/config.dart';
 import 'package:flutter_tools/src/commands/run.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
@@ -43,7 +44,7 @@ void main() {
     late MemoryFileSystem fileSystem;
     late Platform platform;
     late FileSystemUtils fileSystemUtils;
-    late Logger logger;
+    late BufferLogger logger;
     late FakeProcessManager processManager;
     late PreRunValidator preRunValidator;
 
@@ -1130,6 +1131,48 @@ flutter:
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.empty(),
       });
+    });
+  });
+
+  group('a flutter command', () {
+    Cache.flutterRoot = '/path/to/sdk/flutter';
+    Cache.disableLocking();
+    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+    final BufferLogger logger = BufferLogger.test();
+    final FakeProcessManager processManager = FakeProcessManager.empty();
+    final FakeAnalytics analytics = Analytics.fake(
+      tool: DashTool.flutterTool,
+      homeDirectory: fileSystem.currentDirectory,
+      dartVersion: 'dartVersion',
+      fs: fileSystem,
+    );
+
+    tearDown(() {
+      Cache.enableLocking();
+    });
+
+    testUsingContext('will print the analytics welcome message on first run of the tool', () async {
+      final DummyFlutterCommand flutterCommand = DummyFlutterCommand();
+      final CommandRunner<void> runner = createTestCommandRunner(flutterCommand);
+      await runner.run(<String>['dummy']);
+      expect(
+        logger.statusText,
+        contains('The Flutter CLI developer tool uses Google Analytics to'),
+      );
+
+      logger.clear();
+
+      await runner.run(<String>['dummy']);
+      expect(
+        logger.statusText,
+        isNot(contains('The Flutter CLI developer tool uses')),
+        reason: 'Analytics welcome message should not be shown on second run.',
+      );
+    }, overrides: <Type, Generator>{
+      Logger: () => logger,
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      Analytics: () => analytics,
     });
   });
 }

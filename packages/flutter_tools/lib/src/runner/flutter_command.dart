@@ -1432,6 +1432,10 @@ abstract class FlutterCommand extends Command<void> {
           globals.logger.fatalWarnings = boolArg(FlutterOptions.kFatalWarnings);
         }
         if (globals.analytics.shouldShowMessage) {
+          globals.logger.printBox(
+            globals.analytics.getConsentMessage,
+            title: 'Welcome to Flutter! — https://flutter.dev',
+          );
           globals.analytics.clientShowedMessage();
         }
         _printDeprecationWarning();
