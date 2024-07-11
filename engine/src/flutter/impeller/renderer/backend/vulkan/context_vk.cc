@@ -338,7 +338,8 @@ void ContextVK::Setup(Settings settings) {
     device_holder->device = std::move(device_result.value);
   }
 
-  if (!caps->SetPhysicalDevice(device_holder->physical_device)) {
+  if (!caps->SetPhysicalDevice(device_holder->physical_device,
+                               *enabled_features)) {
     VALIDATION_LOG << "Capabilities could not be updated.";
     return;
   }
