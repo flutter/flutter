@@ -114,25 +114,25 @@ class TimeOfDay implements Comparable<TimeOfDay> {
 
   /// Whether this [TimeOfDay] occurs earlier than [other].
   ///
-  /// Does not account for day or sub-minute differences. This means 
+  /// Does not account for day or sub-minute differences. This means
   /// that "00:00" of the next day is still before "23:00" of this day.
   bool isBefore(TimeOfDay other) => compareTo(other) < 0;
 
   /// Whether this [TimeOfDay] occurs later than [other].
   ///
-  /// Does not account for day or sub-minute differences. This means 
+  /// Does not account for day or sub-minute differences. This means
   /// that "00:00" of the next day is still before "23:00" of this day.
   bool isAfter(TimeOfDay other) => compareTo(other) > 0;
 
   /// Whether this [TimeOfDay] occurs at the same time as [other].
   ///
-  /// Does not account for day or sub-minute differences. This means 
+  /// Does not account for day or sub-minute differences. This means
   /// that "00:00" of the next day is still before "23:00" of this day.
   bool isAtSameTimeAs(TimeOfDay other) => compareTo(other) == 0;
 
   /// Compares this [TimeOfDay] object to [other] independent of date.
   ///
-  /// Does not account for day or sub-minute differences. This means 
+  /// Does not account for day or sub-minute differences. This means
   /// that "00:00" of the next day is still before "23:00" of this day.
   ///
   /// A [compareTo] function returns:
