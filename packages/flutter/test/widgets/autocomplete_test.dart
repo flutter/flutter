@@ -1328,23 +1328,31 @@ void main() {
       )
     );
 
-    const Duration longReqDelay = Duration(milliseconds: 500);
-    const Duration shortReqDelay = Duration(milliseconds: 100);
+    const Duration longRequestDelay = Duration(milliseconds: 5000);
+    const Duration shortRequestDelay = Duration(milliseconds: 1000);
     focusNode.requestFocus();
 
-    // Enter first letter
-    delay = longReqDelay;
+    // Enter first letter.
+    delay = longRequestDelay;
     await tester.enterText(find.byKey(fieldKey), 'c');
+    await tester.pump();
+    expect(lastOptions, null);
 
-    // Enter the second letter which resolves faster
-    delay = shortReqDelay;
+    // Enter the second letter which resolves faster.
+    delay = shortRequestDelay;
     await tester.enterText(find.byKey(fieldKey), 'ch');
+    await tester.pump();
+    expect(lastOptions, null);
 
-    // wait for the first optionsBuilder call to resolve
-    await tester.pumpAndSettle(longReqDelay);
+    // Wait for the short request to resolve.
+    await tester.pump(shortRequestDelay);
 
-    // lastOptions must contain the result from the last request
+    // lastOptions must contain results from the last request.
     expect(find.byKey(optionsKey), findsOneWidget);
+    expect(lastOptions, <String>['chameleon']);
+
+    // Wait for the last timer to finish.
+    await tester.pump(longRequestDelay - shortRequestDelay);
     expect(lastOptions, <String>['chameleon']);
   });
 }
