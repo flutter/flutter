@@ -795,7 +795,7 @@ class _AppBarState extends State<AppBar> {
 
       // Check if any scroll positions on the vertical axis have been updated.
       // If so, update the scroll position for the associated ScrollableState.
-      if (notificationScrollableState is ScrollableState && notification.metrics.axis == Axis.vertical) {
+      if (notificationScrollableState != null && notification.metrics.axis == Axis.vertical) {
         final double newPixels = notification.metrics.pixels;
         _notificationListenerStates[notificationScrollableState] = newPixels;
 
