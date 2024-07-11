@@ -72,6 +72,7 @@ void main() {
           id: 1,
           rect: const Rect.fromLTWH(0.0, 0.0, 800.0, 56.0),
           flags: <SemanticsFlag>[
+            SemanticsFlag.isButton,
             SemanticsFlag.hasEnabledState,
             SemanticsFlag.hasToggledState,
             SemanticsFlag.isEnabled,
@@ -86,6 +87,7 @@ void main() {
           rect: const Rect.fromLTWH(0.0, 0.0, 800.0, 56.0),
           transform: Matrix4.translationValues(0.0, 56.0, 0.0),
           flags: <SemanticsFlag>[
+            SemanticsFlag.isButton,
             SemanticsFlag.hasCheckedState,
             SemanticsFlag.hasEnabledState,
             SemanticsFlag.isChecked,
@@ -100,6 +102,7 @@ void main() {
           rect: const Rect.fromLTWH(0.0, 0.0, 800.0, 56.0),
           transform: Matrix4.translationValues(0.0, 112.0, 0.0),
           flags: <SemanticsFlag>[
+            SemanticsFlag.isButton,
             SemanticsFlag.hasCheckedState,
             SemanticsFlag.hasEnabledState,
             SemanticsFlag.isEnabled,
