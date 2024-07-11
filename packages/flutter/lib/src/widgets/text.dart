@@ -1234,33 +1234,6 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
     return a.right > b.right ? 1 : -1;
   }
 
-  @override
-  SelectedContent? getSelectedContent() {
-    if (currentSelectionStartIndex == -1 || currentSelectionEndIndex == -1) {
-      return null;
-    }
-    final int selectionStart = min(currentSelectionStartIndex, currentSelectionEndIndex);
-    final int selectionEnd = max(currentSelectionStartIndex, currentSelectionEndIndex);
-    final List<SelectedContent> selections = <SelectedContent>[];
-    for (int index = selectionStart; index <= selectionEnd; index += 1) {
-      final SelectedContent? selectedContent = selectables[index].getSelectedContent();
-      if (selectedContent != null) {
-        selections.add(selectedContent);
-      }
-    }
-    if (selections.isEmpty) {
-      return null;
-    }
-    final StringBuffer buffer = StringBuffer();
-    for (final SelectedContent selection in selections) {
-      buffer.write(selection.plainText);
-    }
-    return SelectedContent(
-      plainText: buffer.toString(),
-      geometry: value,
-    );
-  }
-
   /// Copies the selections of all [Selectable]s.
   @override
   List<SelectedContentRange<Object>> getSelections() {

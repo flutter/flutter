@@ -1471,7 +1471,6 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
     final int end = math.max(_textSelectionStart!.offset, _textSelectionEnd!.offset);
     return SelectedContent(
       plainText: fullText.substring(start, end),
-      geometry: value,
     );
   }
 

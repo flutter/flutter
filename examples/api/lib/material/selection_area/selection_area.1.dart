@@ -238,9 +238,12 @@ class _MyHomePageState extends State<MyHomePage> {
         onSelectionChanged: (SelectedContent? selectedContent) {
           if (selectedContent == null
              || selectedContent.plainText.isEmpty
-             || selectedContent.geometry.startSelectionPoint == null
-             || selectedContent.geometry.endSelectionPoint == null
              || _activeSelections.isEmpty) {
+            return;
+          }
+          if (selectionAreaKey.currentState == null
+              || !selectionAreaKey.currentState!.mounted
+              || selectionAreaKey.currentState!.selectableRegion.contextMenuAnchors.secondaryAnchor == null) {
             return;
           }
           _menuController.show(
@@ -262,14 +265,12 @@ class _MyHomePageState extends State<MyHomePage> {
                           dataMap: dataSourceMap,
                           coloringChildSpan: false,
                         );
-                        selectionAreaKey.currentState?.selectableRegion.clearSelection();
+                        selectionAreaKey.currentState!.selectableRegion.clearSelection();
                       },
                       label: 'Color Text Red',
                     ),
                   ],
-                  anchors: TextSelectionToolbarAnchors(
-                    primaryAnchor: selectedContent.geometry.endSelectionPoint!.localPosition,
-                  ),
+                  anchors: TextSelectionToolbarAnchors(primaryAnchor: selectionAreaKey.currentState!.selectableRegion.contextMenuAnchors.secondaryAnchor!),
                 ),
               );
             },

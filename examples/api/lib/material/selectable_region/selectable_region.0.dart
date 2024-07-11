@@ -281,10 +281,7 @@ class _RenderSelectableAdapter extends RenderProxyBox with Selectable, Selection
   // widget into clipboard.
   @override
   SelectedContent? getSelectedContent() {
-    return value.hasSelection ? SelectedContent(
-      plainText: 'Custom Text',
-      geometry: value,
-    ) : null;
+    return value.hasSelection ? const SelectedContent(plainText: 'Custom Text') : null;
   }
 
   @override

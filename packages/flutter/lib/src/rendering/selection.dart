@@ -227,21 +227,15 @@ class SelectedContent {
   /// Only supports plain text.
   const SelectedContent({
     required this.plainText,
-    required this.geometry,
   });
 
   /// The selected content in plain text format.
   final String plainText;
 
-  /// The [SelectionGeometry] of the [Selectable] or [SelectionHandler] containing
-  /// the selection.
-  final SelectionGeometry geometry;
-
   @override
   String toString() {
     return 'SelectedContent(\n'
            '  plainText: $plainText,\n'
-           '  geometry: $geometry,\n'
            ')';
   }
 }
