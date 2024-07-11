@@ -374,6 +374,8 @@ targets:
       subshard: "1_3"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+    runIfNot:
+      docs/**
 
   - name: Linux build_tests_2_3
     recipe: flutter/flutter_drone
