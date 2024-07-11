@@ -23,8 +23,6 @@ import 'theme_data.dart';
 // bool _giveVerse = true;
 // late StateSetter setState;
 
-const double _kSwitchMinSize = kMinInteractiveDimension - 8.0;
-
 enum _SwitchType { material, adaptive }
 
 /// A Material Design switch.
@@ -124,6 +122,7 @@ class Switch extends StatelessWidget {
     this.focusNode,
     this.onFocusChange,
     this.autofocus = false,
+    this.padding,
   })  : _switchType = _SwitchType.material,
         applyCupertinoTheme = false,
         assert(activeThumbImage != null || onActiveThumbImageError == null),
@@ -177,6 +176,7 @@ class Switch extends StatelessWidget {
     this.focusNode,
     this.onFocusChange,
     this.autofocus = false,
+    this.padding,
     this.applyCupertinoTheme,
   })  : assert(activeThumbImage != null || onActiveThumbImageError == null),
         assert(inactiveThumbImage != null || onInactiveThumbImageError == null),
@@ -552,6 +552,12 @@ class Switch extends StatelessWidget {
   /// {@macro flutter.widgets.Focus.autofocus}
   final bool autofocus;
 
+  /// The amount of space to surround the child inside the bounds of the switch.
+  ///
+  /// Defaults to horizontal padding of 4 pixels. If [ThemeData.useMaterial3] is false,
+  /// then there is no padding by default.
+  final EdgeInsetsGeometry? padding;
+
   Size _getSwitchSize(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     SwitchThemeData switchTheme = SwitchTheme.of(context);
@@ -565,9 +571,20 @@ class Switch extends StatelessWidget {
     final MaterialTapTargetSize effectiveMaterialTapTargetSize = materialTapTargetSize
       ?? switchTheme.materialTapTargetSize
       ?? theme.materialTapTargetSize;
+    final EdgeInsetsGeometry effectivePadding = padding
+      ?? switchTheme.padding
+      ?? (theme.useMaterial3
+          ? const EdgeInsets.symmetric(horizontal: 4)
+          : EdgeInsets.zero);
     return switch (effectiveMaterialTapTargetSize) {
-      MaterialTapTargetSize.padded     => Size(switchConfig.switchWidth, switchConfig.switchHeight),
-      MaterialTapTargetSize.shrinkWrap => Size(switchConfig.switchWidth, switchConfig.switchHeightCollapsed),
+      MaterialTapTargetSize.padded     => Size(
+        switchConfig.switchWidth + effectivePadding.horizontal,
+        switchConfig.switchHeight + effectivePadding.vertical,
+      ),
+      MaterialTapTargetSize.shrinkWrap => Size(
+        switchConfig.switchWidth + effectivePadding.horizontal,
+        switchConfig.switchHeightCollapsed + effectivePadding.vertical,
+      ),
     };
   }
 
@@ -789,7 +806,11 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
           case TargetPlatform.fuchsia:
           case TargetPlatform.linux:
           case TargetPlatform.windows:
-            return widget.size.width - _kSwitchMinSize;
+            final _SwitchConfig config = Theme.of(context).useMaterial3 ? _SwitchConfigM3(context) : _SwitchConfigM2();
+            final double trackInnerStart = config.trackHeight / 2.0;
+            final double trackInnerEnd = config.trackWidth - trackInnerStart;
+            final double trackInnerLength = trackInnerEnd - trackInnerStart;
+            return trackInnerLength;
           case TargetPlatform.iOS:
           case TargetPlatform.macOS:
             final _SwitchConfig config = _SwitchConfigCupertino(context);
@@ -799,7 +820,11 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
             return trackInnerLength;
         }
       case _SwitchType.material:
-        return widget.size.width - _kSwitchMinSize;
+        final _SwitchConfig config = Theme.of(context).useMaterial3 ? _SwitchConfigM3(context) : _SwitchConfigM2();
+        final double trackInnerStart = config.trackHeight / 2.0;
+        final double trackInnerEnd = config.trackWidth - trackInnerStart;
+        final double trackInnerLength = trackInnerEnd - trackInnerStart;
+        return trackInnerLength;
     }
   }
 
@@ -1782,6 +1807,7 @@ mixin _SwitchConfig {
   double? get thumbOffset;
   Size get transitionalThumbSize;
   int get toggleDuration;
+  Size get switchMinSize;
 }
 
 // Hand coded defaults for iOS/macOS Switch
@@ -1862,10 +1888,10 @@ class _SwitchConfigCupertino with _SwitchConfig {
   double get pressedThumbRadius => 14.0;
 
   @override
-  double get switchHeight => _kSwitchMinSize + 8.0;
+  double get switchHeight => switchMinSize.height + 8.0;
 
   @override
-  double get switchHeightCollapsed => _kSwitchMinSize;
+  double get switchHeightCollapsed => switchMinSize.height;
 
   @override
   double get switchWidth => 60.0;
@@ -1904,6 +1930,9 @@ class _SwitchConfigCupertino with _SwitchConfig {
   // Hand coded default based on the animation specs.
   @override
   double? get thumbOffset => null;
+
+  @override
+  Size get switchMinSize => const Size.square(kMinInteractiveDimension - 8.0);
 }
 
 // Hand coded defaults based on Material Design 2.
@@ -1923,13 +1952,13 @@ class _SwitchConfigM2 with _SwitchConfig {
   double get pressedThumbRadius => 10.0;
 
   @override
-  double get switchHeight => _kSwitchMinSize + 8.0;
+  double get switchHeight => switchMinSize.height + 8.0;
 
   @override
-  double get switchHeightCollapsed => _kSwitchMinSize;
+  double get switchHeightCollapsed => switchMinSize.height;
 
   @override
-  double get switchWidth => trackWidth - 2 * (trackHeight / 2.0) + _kSwitchMinSize;
+  double get switchWidth => trackWidth - 2 * (trackHeight / 2.0) + switchMinSize.width;
 
   @override
   double get thumbRadiusWithIcon => 10.0;
@@ -1951,6 +1980,9 @@ class _SwitchConfigM2 with _SwitchConfig {
 
   @override
   int get toggleDuration => 200;
+
+  @override
+  Size get switchMinSize => const Size.square(kMinInteractiveDimension - 8.0);
 }
 
 class _SwitchDefaultsM2 extends SwitchThemeData {
@@ -2211,13 +2243,13 @@ class _SwitchConfigM3 with _SwitchConfig {
   double get pressedThumbRadius => 28.0 / 2;
 
   @override
-  double get switchHeight => _kSwitchMinSize + 8.0;
+  double get switchHeight => switchMinSize.height + 8.0;
 
   @override
-  double get switchHeightCollapsed => _kSwitchMinSize;
+  double get switchHeightCollapsed => switchMinSize.height;
 
   @override
-  double get switchWidth => trackWidth - 2 * (trackHeight / 2.0) + _kSwitchMinSize;
+  double get switchWidth => 52.0;
 
   @override
   double get thumbRadiusWithIcon => 24.0 / 2;
@@ -2242,6 +2274,9 @@ class _SwitchConfigM3 with _SwitchConfig {
   // Hand coded default based on the animation specs.
   @override
   double? get thumbOffset => null;
+
+  @override
+  Size get switchMinSize => const Size(kMinInteractiveDimension, kMinInteractiveDimension - 8.0);
 }
 
 // END GENERATED TOKEN PROPERTIES - Switch
