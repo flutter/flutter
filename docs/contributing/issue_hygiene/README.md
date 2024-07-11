@@ -20,7 +20,7 @@ Within the bug database we try to make sure each issue is actionable and discove
 
 ## Comments
 
-### Do not add "me too" or "same" or "is there an update" comments to bugs
+### Do not add "me too" or "same" or "is there an update" comments to issues or PRs
 
 The Flutter team prioritizes issues in part based on the number of +1 (thumbs
 up) reactions on the top level comment of the bug. Adding comments like "me
@@ -154,7 +154,7 @@ Flutter is an open source project and many people contribute their time (or thei
 
 To determine when a bug will be fixed, look at the issue.
 
-If there's a recent status update on the issue, that is the best information we have about the bug. If there's a lot of comments on the issue, we try to link to the latest status from the top comment, so look there. (Please [don't _ask_](#do-not-add-me-too-or-same-or-is-there-an-update-comments-to-bugs) for updates, though.)
+If there's a recent status update on the issue, that is the best information we have about the bug. If there's a lot of comments on the issue, we try to link to the latest status from the top comment, so look there. (Please [don't _ask_](#do-not-add-me-too-or-same-or-is-there-an-update-comments-to-issues-or-prs) for updates, though.)
 
 If the issue is labeled with priorities `P0` or `P1`, or if the issue is assigned, we are likely to address it in the near term; we just need to find time.
 

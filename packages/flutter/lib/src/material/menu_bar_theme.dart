@@ -93,7 +93,7 @@ class MenuBarTheme extends InheritedTheme {
   ///   return MenuTheme(
   ///     data: const MenuThemeData(
   ///       style: MenuStyle(
-  ///         backgroundColor: MaterialStatePropertyAll<Color?>(Colors.red),
+  ///         backgroundColor: WidgetStatePropertyAll<Color?>(Colors.red),
   ///       ),
   ///     ),
   ///     child: child,

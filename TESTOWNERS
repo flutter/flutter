@@ -211,6 +211,7 @@
 /dev/devicelab/bin/tasks/platform_interaction_test_ios.dart @hellohuanlin @flutter/engine
 /dev/devicelab/bin/tasks/platform_view_ios__start_up.dart @stuartmorgan @flutter/plugin
 /dev/devicelab/bin/tasks/platform_views_scroll_perf_ad_banners__timeline_summary.dart @hellohuanlin @flutter/engine
+/dev/devicelab/bin/tasks/platform_views_scroll_perf_bottom_ad_banner__timeline_summary.dart @hellohuanlin @flutter/engine
 /dev/devicelab/bin/tasks/platform_views_scroll_perf_ios__timeline_summary.dart @hellohuanlin @flutter/engine
 /dev/devicelab/bin/tasks/platform_views_scroll_perf_non_intersecting_impeller_ios__timeline_summary.dart @jonahwilliams @flutter/engine
 /dev/devicelab/bin/tasks/post_backdrop_filter_perf_ios__timeline_summary.dart @hellohuanlin @flutter/engine
@@ -332,6 +333,8 @@
 # test_ownership @keyonghan
 # tool_host_cross_arch_tests @andrewkolos @flutter/tool
 # tool_integration_tests @christopherfujino @flutter/tool
+# android_preview_tool_integration_tests @gmackall @flutter/android
+# android_java11_tool_integration_tests @gmackall @flutter/android
 # tool_tests @andrewkolos @flutter/tool
 # verify_binaries_codesigned @cbracken @flutter/releases
 # web_canvaskit_tests @yjbanov @flutter/web

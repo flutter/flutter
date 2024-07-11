@@ -3586,6 +3586,7 @@ void main() {
 
   testWidgets('Drag and drop - unmounting overlay ends drag gracefully', (WidgetTester tester) async {
     final ValueNotifier<bool> mountedNotifier = ValueNotifier<bool>(true);
+    addTearDown(mountedNotifier.dispose);
 
     await tester.pumpWidget(ValueListenableBuilder<bool>(
       valueListenable: mountedNotifier,

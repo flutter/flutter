@@ -82,14 +82,14 @@ abstract interface class ChipAttributes {
   /// This only has an effect on widgets that respect the [DefaultTextStyle],
   /// such as [Text].
   ///
-  /// If [TextStyle.color] is a [MaterialStateProperty<Color>], [MaterialStateProperty.resolve]
-  /// is used for the following [MaterialState]s:
+  /// If [TextStyle.color] is a [WidgetStateProperty<Color>], [WidgetStateProperty.resolve]
+  /// is used for the following [WidgetState]s:
   ///
-  ///  * [MaterialState.disabled].
-  ///  * [MaterialState.selected].
-  ///  * [MaterialState.hovered].
-  ///  * [MaterialState.focused].
-  ///  * [MaterialState.pressed].
+  ///  * [WidgetState.disabled].
+  ///  * [WidgetState.selected].
+  ///  * [WidgetState.hovered].
+  ///  * [WidgetState.focused].
+  ///  * [WidgetState.pressed].
   TextStyle? get labelStyle;
 
   /// The color and weight of the chip's outline.
@@ -104,14 +104,14 @@ abstract interface class ChipAttributes {
   /// This value is combined with [shape] to create a shape decorated with an
   /// outline. To omit the outline entirely, pass [BorderSide.none] to [side].
   ///
-  /// If it is a [MaterialStateBorderSide], [MaterialStateProperty.resolve] is
-  /// used for the following [MaterialState]s:
+  /// If it is a [WidgetStateBorderSide], [WidgetStateProperty.resolve] is
+  /// used for the following [WidgetState]s:
   ///
-  ///  * [MaterialState.disabled].
-  ///  * [MaterialState.selected].
-  ///  * [MaterialState.hovered].
-  ///  * [MaterialState.focused].
-  ///  * [MaterialState.pressed].
+  ///  * [WidgetState.disabled].
+  ///  * [WidgetState.selected].
+  ///  * [WidgetState.hovered].
+  ///  * [WidgetState.focused].
+  ///  * [WidgetState.pressed].
   BorderSide? get side;
 
   /// The [OutlinedBorder] to draw around the chip.
@@ -126,14 +126,14 @@ abstract interface class ChipAttributes {
   /// side of [shape] is ignored. To omit the outline entirely,
   /// pass [BorderSide.none] to [side].
   ///
-  /// If it is a [MaterialStateOutlinedBorder], [MaterialStateProperty.resolve]
-  /// is used for the following [MaterialState]s:
+  /// If it is a [WidgetStateOutlinedBorder], [WidgetStateProperty.resolve]
+  /// is used for the following [WidgetState]s:
   ///
-  ///  * [MaterialState.disabled].
-  ///  * [MaterialState.selected].
-  ///  * [MaterialState.hovered].
-  ///  * [MaterialState.focused].
-  ///  * [MaterialState.pressed].
+  ///  * [WidgetState.disabled].
+  ///  * [WidgetState.selected].
+  ///  * [WidgetState.hovered].
+  ///  * [WidgetState.focused].
+  ///  * [WidgetState.pressed].
   OutlinedBorder? get shape;
 
   /// {@macro flutter.material.Material.clipBehavior}
@@ -147,13 +147,13 @@ abstract interface class ChipAttributes {
   /// {@macro flutter.widgets.Focus.autofocus}
   bool get autofocus;
 
-  /// The color that fills the chip, in all [MaterialState]s.
+  /// The color that fills the chip, in all [WidgetState]s.
   ///
   /// Defaults to null.
   ///
   /// Resolves in the following states:
-  ///  * [MaterialState.selected].
-  ///  * [MaterialState.disabled].
+  ///  * [WidgetState.selected].
+  ///  * [WidgetState.disabled].
   MaterialStateProperty<Color?>? get color;
 
   /// Color to be used for the unselected, enabled chip's background.

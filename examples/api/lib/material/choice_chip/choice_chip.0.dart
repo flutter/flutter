@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-/// Flutter code sample for [ActionChoice].
+/// Flutter code sample for [ChoiceChip].
 
 void main() => runApp(const ChipApp());
 

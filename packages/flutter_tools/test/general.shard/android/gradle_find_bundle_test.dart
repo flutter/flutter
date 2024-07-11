@@ -4,11 +4,11 @@
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/gradle.dart';
+import 'package:flutter_tools/src/android/gradle_utils.dart' as gradle_utils;
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
@@ -37,7 +37,6 @@ void main() {
         packageConfigPath: '.dart_tool/package_config.json',
       ),
       BufferLogger.test(),
-      TestUsage(),
       fakeAnalytics,
     );
 
@@ -56,7 +55,6 @@ void main() {
         packageConfigPath: '.dart_tool/package_config.json',
       ),
       BufferLogger.test(),
-      TestUsage(),
       fakeAnalytics,
     );
 
@@ -75,7 +73,6 @@ void main() {
         packageConfigPath: '.dart_tool/package_config.json',
       ),
       BufferLogger.test(),
-      TestUsage(),
       fakeAnalytics,
     );
 
@@ -94,7 +91,6 @@ void main() {
         packageConfigPath: '.dart_tool/package_config.json',
       ),
       BufferLogger.test(),
-      TestUsage(),
       fakeAnalytics,
     );
 
@@ -113,7 +109,6 @@ void main() {
         packageConfigPath: '.dart_tool/package_config.json',
       ),
       BufferLogger.test(),
-      TestUsage(),
       fakeAnalytics,
     );
 
@@ -132,7 +127,6 @@ void main() {
         packageConfigPath: '.dart_tool/package_config.json',
       ),
       BufferLogger.test(),
-      TestUsage(),
       fakeAnalytics,
     );
 
@@ -151,7 +145,6 @@ void main() {
         packageConfigPath: '.dart_tool/package_config.json',
       ),
       BufferLogger.test(),
-      TestUsage(),
       fakeAnalytics,
     );
 
@@ -170,7 +163,6 @@ void main() {
         packageConfigPath: '.dart_tool/package_config.json',
       ),
       BufferLogger.test(),
-      TestUsage(),
       fakeAnalytics,
     );
 
@@ -189,7 +181,6 @@ void main() {
         packageConfigPath: '.dart_tool/package_config.json',
       ),
       BufferLogger.test(),
-      TestUsage(),
       fakeAnalytics,
     );
 
@@ -208,7 +199,6 @@ void main() {
         packageConfigPath: '.dart_tool/package_config.json',
       ),
       BufferLogger.test(),
-      TestUsage(),
       fakeAnalytics,
     );
 
@@ -227,7 +217,6 @@ void main() {
         packageConfigPath: '.dart_tool/package_config.json',
       ),
       BufferLogger.test(),
-      TestUsage(),
       fakeAnalytics,
     );
 
@@ -241,7 +230,6 @@ void main() {
       project,
       BuildInfo.debug,
       BufferLogger.test(),
-      TestUsage(),
       fakeAnalytics,
     );
 
@@ -260,7 +248,6 @@ void main() {
         packageConfigPath: '.dart_tool/package_config.json',
       ),
       BufferLogger.test(),
-      TestUsage(),
       fakeAnalytics,
     );
 
@@ -279,7 +266,6 @@ void main() {
         packageConfigPath: '.dart_tool/package_config.json',
       ),
       BufferLogger.test(),
-      TestUsage(),
       fakeAnalytics,
     );
 
@@ -298,7 +284,6 @@ void main() {
         packageConfigPath: '.dart_tool/package_config.json',
       ),
       BufferLogger.test(),
-      TestUsage(),
       fakeAnalytics,
     );
 
@@ -309,17 +294,16 @@ void main() {
   testWithoutContext("Finds app bundle when flavor doesn't contain underscores in profile mode", () {
     final FlutterProject project = generateFakeAppBundle('fooProfile', 'app.aab', fileSystem);
     final File bundle = findBundleFile(
-   project,
-   const BuildInfo(
-     BuildMode.profile,
-     'foo',
-     treeShakeIcons: false,
-     packageConfigPath: '.dart_tool/package_config.json',
-   ),
-   BufferLogger.test(),
-   TestUsage(),
-   fakeAnalytics,
- );
+      project,
+      const BuildInfo(
+        BuildMode.profile,
+        'foo',
+        treeShakeIcons: false,
+        packageConfigPath: '.dart_tool/package_config.json',
+      ),
+      BufferLogger.test(),
+      fakeAnalytics,
+    );
 
     expect(bundle, isNotNull);
     expect(bundle.path, '/build/app/outputs/bundle/fooProfile/app.aab');
@@ -336,7 +320,6 @@ void main() {
         packageConfigPath: '.dart_tool/package_config.json',
       ),
       BufferLogger.test(),
-      TestUsage(),
       fakeAnalytics,
     );
 
@@ -355,7 +338,6 @@ void main() {
         packageConfigPath: '.dart_tool/package_config.json',
       ),
       BufferLogger.test(),
-      TestUsage(),
       fakeAnalytics,
     );
 
@@ -374,7 +356,6 @@ void main() {
         packageConfigPath: '.dart_tool/package_config.json',
       ),
       BufferLogger.test(),
-      TestUsage(),
       fakeAnalytics,
     );
 
@@ -393,7 +374,6 @@ void main() {
         packageConfigPath: '.dart_tool/package_config.json',
       ),
       BufferLogger.test(),
-      TestUsage(),
       fakeAnalytics,
     );
 
@@ -407,7 +387,6 @@ void main() {
       project,
       BuildInfo.debug,
       BufferLogger.test(),
-      TestUsage(),
       fakeAnalytics,
     );
 
@@ -426,7 +405,6 @@ void main() {
         packageConfigPath: '.dart_tool/package_config.json',
       ),
       BufferLogger.test(),
-      TestUsage(),
       fakeAnalytics,
     );
 
@@ -445,7 +423,6 @@ void main() {
         packageConfigPath: '.dart_tool/package_config.json',
       ),
       BufferLogger.test(),
-      TestUsage(),
       fakeAnalytics,
     );
 
@@ -464,7 +441,6 @@ void main() {
         packageConfigPath: '.dart_tool/package_config.json',
       ),
       BufferLogger.test(),
-      TestUsage(),
       fakeAnalytics,
     );
 
@@ -483,7 +459,6 @@ void main() {
         packageConfigPath: '.dart_tool/package_config.json',
       ),
       BufferLogger.test(),
-      TestUsage(),
       fakeAnalytics,
     );
 
@@ -503,7 +478,6 @@ void main() {
         packageConfigPath: '.dart_tool/package_config.json',
       ),
       BufferLogger.test(),
-      TestUsage(),
       fakeAnalytics,
     );
 
@@ -523,7 +497,6 @@ void main() {
         packageConfigPath: '.dart_tool/package_config.json',
       ),
       BufferLogger.test(),
-      TestUsage(),
       fakeAnalytics,
     );
 
@@ -533,7 +506,6 @@ void main() {
 
   testWithoutContext('AAB not found', () {
     final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
-    final TestUsage testUsage = TestUsage();
     expect(
       () {
         findBundleFile(
@@ -545,7 +517,6 @@ void main() {
             packageConfigPath: '.dart_tool/package_config.json',
           ),
           BufferLogger.test(),
-          testUsage,
           fakeAnalytics,
         );
       },
@@ -553,16 +524,6 @@ void main() {
         message:
           "Gradle build failed to produce an .aab file. It's likely that this file "
           "was generated under ${project.android.buildDirectory.path}, but the tool couldn't find it."));
-    expect(testUsage.events, contains(
-      TestUsageEvent(
-        'build',
-        'gradle',
-        label: 'gradle-expected-file-not-found',
-        parameters: CustomDimensions.fromMap(<String, String> {
-          'cd37': 'androidGradlePluginVersion: 7.6.3, fileExtension: .aab',
-        }),
-      ),
-    ));
     expect(fakeAnalytics.sentEvents, hasLength(1));
     expect(
       fakeAnalytics.sentEvents,
@@ -570,7 +531,7 @@ void main() {
         Event.flutterBuildInfo(
           label: 'gradle-expected-file-not-found',
           buildType: 'gradle',
-          settings: 'androidGradlePluginVersion: 7.6.3, fileExtension: .aab',
+          settings: 'androidGradlePluginVersion: ${gradle_utils.templateDefaultGradleVersion}, fileExtension: .aab',
         ),
       ),
     );

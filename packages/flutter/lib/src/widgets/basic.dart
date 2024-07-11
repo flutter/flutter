@@ -559,6 +559,7 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
     required this.filter,
     super.child,
     this.blendMode = BlendMode.srcOver,
+    this.enabled = true,
   });
 
   /// The image filter to apply to the existing painted content before painting the child.
@@ -573,15 +574,23 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
   /// {@macro flutter.widgets.BackdropFilter.blendMode}
   final BlendMode blendMode;
 
+  /// Whether or not to apply the backdrop filter operation to the child of this
+  /// widget.
+  ///
+  /// Prefer setting enabled to `false` instead of creating a "no-op" filter
+  /// type for performance reasons.
+  final bool enabled;
+
   @override
   RenderBackdropFilter createRenderObject(BuildContext context) {
-    return RenderBackdropFilter(filter: filter, blendMode: blendMode);
+    return RenderBackdropFilter(filter: filter, blendMode: blendMode, enabled: enabled);
   }
 
   @override
   void updateRenderObject(BuildContext context, RenderBackdropFilter renderObject) {
     renderObject
       ..filter = filter
+      ..enabled = enabled
       ..blendMode = blendMode;
   }
 }
@@ -7100,6 +7109,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     bool? slider,
     bool? keyboardKey,
     bool? link,
+    Uri? linkUrl,
     bool? header,
     int? headingLevel,
     bool? textField,
@@ -7172,6 +7182,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       slider: slider,
       keyboardKey: keyboardKey,
       link: link,
+      linkUrl: linkUrl,
       header: header,
       headingLevel: headingLevel,
       textField: textField,

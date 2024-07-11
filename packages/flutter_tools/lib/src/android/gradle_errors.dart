@@ -10,7 +10,6 @@ import '../base/process.dart';
 import '../base/terminal.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
-import '../reporting/reporting.dart';
 import 'gradle_utils.dart';
 
 typedef GradleErrorTest = bool Function(String);
@@ -592,7 +591,7 @@ final GradleHandledError incompatibleJavaAndGradleVersionsHandler = GradleHandle
       "${globals.logger.terminal.warningMark} Your project's Gradle version "
           'is incompatible with the Java version that Flutter is using for Gradle.\n\n'
           'If you recently upgraded Android Studio, consult the migration guide '
-          'at https://flutter.dev/to/to/java-gradle-incompatibility.\n\n'
+          'at https://flutter.dev/to/java-gradle-incompatibility.\n\n'
           'Otherwise, to fix this issue, first, check the Java version used by Flutter by '
           'running `flutter doctor --verbose`.\n\n'
           'Then, update the Gradle version specified in ${gradlePropertiesFile.path} '
