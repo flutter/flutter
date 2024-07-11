@@ -27,7 +27,7 @@ class AppDelegate: FlutterAppDelegate {
 /// Add `applicationSupportsSecureRestorableState` if not already present.
 ///
 /// In all new AppKit apps since Xcode 13.2, the AppDelegate template includes
-/// this method, which opts in to requiring safe deserialization via the 
+/// this method, which opts in to requiring safe deserialization via the
 /// `NSSecureCoding` protocol. Because this required new API, existing apps
 /// need to opt in to this behavior.
 ///
@@ -87,4 +87,3 @@ class SecureRestorableStateMigration extends ProjectMigrator {
     _appDelegateSwift.writeAsStringSync(migrated);
   }
 }
-
