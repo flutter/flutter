@@ -311,7 +311,6 @@ class SampleChecker {
 final Set<String> _knownMissingTests = <String>{
   'examples/api/test/material/bottom_app_bar/bottom_app_bar.2_test.dart',
   'examples/api/test/material/bottom_app_bar/bottom_app_bar.1_test.dart',
-  'examples/api/test/material/material_state/material_state_border_side.0_test.dart',
   'examples/api/test/material/material_state/material_state_outlined_border.0_test.dart',
   'examples/api/test/material/material_state/material_state_property.0_test.dart',
   'examples/api/test/material/selectable_region/selectable_region.0_test.dart',
@@ -321,7 +320,6 @@ final Set<String> _knownMissingTests = <String>{
   'examples/api/test/material/color_scheme/dynamic_content_color.0_test.dart',
   'examples/api/test/material/platform_menu_bar/platform_menu_bar.0_test.dart',
   'examples/api/test/material/menu_anchor/menu_anchor.2_test.dart',
-  'examples/api/test/material/stepper/stepper.controls_builder.0_test.dart',
   'examples/api/test/material/flexible_space_bar/flexible_space_bar.0_test.dart',
   'examples/api/test/material/chip/deletable_chip_attributes.on_deleted.0_test.dart',
   'examples/api/test/material/expansion_panel/expansion_panel_list.expansion_panel_list_radio.0_test.dart',
