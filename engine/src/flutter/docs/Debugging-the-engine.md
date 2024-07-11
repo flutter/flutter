@@ -75,6 +75,14 @@ Add an engine symbol breakpoint via **Debug > Breakpoints > Create Symbolic Brea
 
 You can also set a breakpoint directly with [lldb](https://lldb.llvm.org/tutorial.html) by expanding **Flutter > Runner** in the Runner Project Navigator. Put a breakpoint in `AppDelegate.swift`'s `application(didFinishLaunchingWithOptions:)` (Swift project) or `main.m`'s `main()` (Objective-C project) and start the application by clicking the Run button (CMD + R). Then, set your desired breakpoint in the engine in `lldb` via `breakpoint set -...`.
 
+### Googlers using RBE
+
+You need to tell Xcode where your Flutter Engine sources are located. You can do this using an LLDB Init file. Place one in your home directory named `~/.lldbinit`. The contents of the file should be (fixup the path as necessary):
+
+```
+settings set target.source-map "flutter/" "/path/to/engine/src/flutter/"
+```
+
 ## Debugging Android builds with gdb
 
 See https://github.com/flutter/engine/blob/main/sky/tools/flutter_gdb#L13
