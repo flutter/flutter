@@ -62,6 +62,7 @@ class LinuxDevice extends DesktopDevice {
   Future<void> buildForDevice({
     String? mainPath,
     required BuildInfo buildInfo,
+    bool usingCISystem = false,
   }) async {
     await buildLinux(
       FlutterProject.current().linux,

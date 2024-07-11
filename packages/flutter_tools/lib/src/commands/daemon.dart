@@ -1190,7 +1190,7 @@ class DeviceDomain extends Domain {
       debuggingOptions: DebuggingOptions.fromJson(
         castStringKeyedMap(args['debuggingOptions'])!,
         // We are using prebuilts, build info does not matter here.
-        BuildInfo.debug,
+        BuildInfo.dummy,
       ),
       mainPath: _getStringArg(args, 'mainPath'),
       route: _getStringArg(args, 'route'),
@@ -1429,16 +1429,12 @@ Map<String, Object?> _operationResultToMap(OperationResult result) {
 }
 
 Object? _toJsonable(Object? obj) {
-  if (obj is String || obj is int || obj is bool || obj is Map<Object?, Object?> || obj is List<Object?> || obj == null) {
-    return obj;
-  }
-  if (obj is OperationResult) {
-    return _operationResultToMap(obj);
-  }
-  if (obj is ToolExit) {
-    return obj.message;
-  }
-  return '$obj';
+  return switch (obj) {
+    String() || int() || bool() || Map<Object?, Object?>() || List<Object?>() || null => obj,
+    OperationResult() => _operationResultToMap(obj),
+    ToolExit() => obj.message,
+    _ => obj.toString(),
+  };
 }
 
 class NotifyingLogger extends DelegatingLogger {

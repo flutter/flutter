@@ -373,14 +373,13 @@ void main() {
           '   in its parent data.\n'
           '   The following child has no ID: RenderConstrainedBox#00000 NEEDS-LAYOUT NEEDS-PAINT:\n'
           '     creator: ConstrainedBox ← Container ← LayoutWithMissingId ←\n'
-          '       CustomMultiChildLayout ← Center ← MediaQuery ←\n'
-          '       _MediaQueryFromView ← _PipelineOwnerScope ← _ViewScope ←\n'
-          '       _RawView-[_DeprecatedRawViewKey TestFlutterView#00000] ← View ←\n'
-          '       [root]\n'
+          '       CustomMultiChildLayout ← Center ← _FocusInheritedScope ←\n'
+          '       _FocusScopeWithExternalFocusNode ← _FocusInheritedScope ← Focus\n'
+          '       ← FocusTraversalGroup ← MediaQuery ← _MediaQueryFromView ← ⋯\n'
           '     parentData: offset=Offset(0.0, 0.0); id=null\n'
           '     constraints: MISSING\n'
           '     size: MISSING\n'
-          '     additionalConstraints: BoxConstraints(w=100.0, 0.0<=h<=Infinity)\n',
+          '     additionalConstraints: BoxConstraints(w=100.0, 0.0<=h<=Infinity)\n'
       );
     });
 

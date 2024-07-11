@@ -372,18 +372,18 @@ class BottomNavigationBar extends StatefulWidget {
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// items.
   ///
-  /// If [mouseCursor] is a [MaterialStateProperty<MouseCursor>],
-  /// [MaterialStateProperty.resolve] is used for the following [MaterialState]s:
+  /// If [mouseCursor] is a [WidgetStateProperty<MouseCursor>],
+  /// [WidgetStateProperty.resolve] is used for the following [WidgetState]s:
   ///
-  ///  * [MaterialState.selected].
+  ///  * [WidgetState.selected].
   ///
   /// If null, then the value of [BottomNavigationBarThemeData.mouseCursor] is used. If
-  /// that is also null, then [MaterialStateMouseCursor.clickable] is used.
+  /// that is also null, then [WidgetStateMouseCursor.clickable] is used.
   ///
   /// See also:
   ///
-  ///  * [MaterialStateMouseCursor], which can be used to create a [MouseCursor]
-  ///    that is also a [MaterialStateProperty<MouseCursor>].
+  ///  * [WidgetStateMouseCursor], which can be used to create a [MouseCursor]
+  ///    that is also a [WidgetStateProperty<MouseCursor>].
   final MouseCursor? mouseCursor;
 
   /// Whether detected gestures should provide acoustic and/or haptic feedback.
@@ -605,6 +605,7 @@ class _BottomNavigationTile extends StatelessWidget {
 
     result = Semantics(
       selected: selected,
+      button: true,
       container: true,
       child: Stack(
         children: <Widget>[
@@ -784,7 +785,7 @@ class _Label extends StatelessWidget {
     text = Align(
       alignment: Alignment.bottomCenter,
       heightFactor: 1.0,
-      child: Container(child: text),
+      child: text,
     );
 
     if (item.label != null) {
@@ -802,7 +803,7 @@ class _Label extends StatelessWidget {
 
 class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerProviderStateMixin {
   List<AnimationController> _controllers = <AnimationController>[];
-  late List<CurvedAnimation> _animations;
+  List<CurvedAnimation> _animations = <CurvedAnimation>[];
 
   // A queue of color splashes currently being animated.
   final Queue<_Circle> _circles = Queue<_Circle>();
@@ -819,6 +820,9 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
     }
     for (final _Circle circle in _circles) {
       circle.dispose();
+    }
+    for (final CurvedAnimation animation in _animations) {
+      animation.dispose();
     }
     _circles.clear();
 
@@ -899,22 +903,15 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
           index: index,
           color: widget.items[index].backgroundColor!,
           vsync: this,
-        )..controller.addStatusListener(
-          (AnimationStatus status) {
-            switch (status) {
-              case AnimationStatus.completed:
-                setState(() {
-                  final _Circle circle = _circles.removeFirst();
-                  _backgroundColor = circle.color;
-                  circle.dispose();
-                });
-              case AnimationStatus.dismissed:
-              case AnimationStatus.forward:
-              case AnimationStatus.reverse:
-                break;
-            }
-          },
-        ),
+        )..controller.addStatusListener((AnimationStatus status) {
+          if (status.isCompleted) {
+            setState(() {
+              final _Circle circle = _circles.removeFirst();
+              _backgroundColor = circle.color;
+              circle.dispose();
+            });
+          }
+        }),
       );
     }
   }
@@ -1254,6 +1251,7 @@ class _Circle {
 
   void dispose() {
     controller.dispose();
+    animation.dispose();
   }
 }
 

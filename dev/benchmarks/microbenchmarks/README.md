@@ -4,7 +4,7 @@ To run these benchmarks on a device, first run `flutter logs' in one
 window to see the device logs, then, in a different window, run any of
 these:
 
-```
+```sh
 flutter run --release lib/gestures/velocity_tracker_bench.dart
 flutter run --release lib/gestures/gesture_detector_bench.dart
 flutter run --release lib/stocks/animation_bench.dart

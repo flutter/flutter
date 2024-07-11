@@ -880,7 +880,7 @@ void main() {
     ));
     expect(
       exception, endsWith(
-      '← [root]"\n' // End of ownership chain.
+      '_ViewScope ← ⋯"\n' // End of ownership chain.
       'Typically, the Directionality widget is introduced by the MaterialApp or WidgetsApp widget at the '
       'top of your application widget tree. It determines the ambient reading direction and is used, for '
       'example, to determine how to lay out text, how to interpret "start" and "end" values, and to resolve '

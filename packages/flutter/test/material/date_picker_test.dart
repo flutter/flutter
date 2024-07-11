@@ -871,9 +871,13 @@ void main() {
       // Test switch button position.
       final Finder switchButtonM3 = find.widgetWithIcon(IconButton, Icons.edit_outlined);
       final Offset switchButtonTopLeft = tester.getTopLeft(switchButtonM3);
+      final Offset switchButtonBottomLeft = tester.getBottomLeft(switchButtonM3);
       final Offset headerTextBottomLeft = tester.getBottomLeft(headerText);
-      expect(switchButtonTopLeft.dx, dialogTopLeft.dx + 4.0);
+      final Offset dialogBottomLeft = tester.getBottomLeft(find.byType(AnimatedContainer));
+      expect(switchButtonTopLeft.dx, dialogTopLeft.dx + 8.0);
       expect(switchButtonTopLeft.dy, headerTextBottomLeft.dy);
+      expect(switchButtonBottomLeft.dx, dialogTopLeft.dx + 8.0);
+      expect(switchButtonBottomLeft.dy, dialogBottomLeft.dy - 6.0);
 
       // Test vertical divider position.
       final Finder divider = find.byType(VerticalDivider);
@@ -1541,6 +1545,7 @@ void main() {
           label: '3, Sunday, January 3, 2016, Today',
           isButton: true,
           hasTapAction: true,
+          hasFocusAction: true,
           isFocusable: true,
         ));
 
@@ -1549,6 +1554,7 @@ void main() {
           tooltip: 'Switch to input',
           isButton: true,
           hasTapAction: true,
+          hasFocusAction: true,
           isEnabled: true,
           hasEnabledState: true,
           isFocusable: true,
@@ -1561,6 +1567,7 @@ void main() {
           label: 'OK',
           isButton: true,
           hasTapAction: true,
+          hasFocusAction: true,
           isEnabled: true,
           hasEnabledState: true,
           isFocusable: true,
@@ -1569,6 +1576,7 @@ void main() {
           label: 'CANCEL',
           isButton: true,
           hasTapAction: true,
+          hasFocusAction: true,
           isEnabled: true,
           hasEnabledState: true,
           isFocusable: true,
@@ -1599,6 +1607,7 @@ void main() {
           tooltip: 'Switch to calendar',
           isButton: true,
           hasTapAction: true,
+          hasFocusAction: true,
           isEnabled: true,
           hasEnabledState: true,
           isFocusable: true,
@@ -1612,6 +1621,7 @@ void main() {
           isFocused: true,
           value: '01/15/2016',
           hasTapAction: true,
+          hasFocusAction: true,
           hasSetTextAction: true,
           hasSetSelectionAction: true,
           hasCopyAction: true,
@@ -1626,6 +1636,7 @@ void main() {
           label: 'OK',
           isButton: true,
           hasTapAction: true,
+          hasFocusAction: true,
           isEnabled: true,
           hasEnabledState: true,
           isFocusable: true,
@@ -1634,6 +1645,7 @@ void main() {
           label: 'CANCEL',
           isButton: true,
           hasTapAction: true,
+          hasFocusAction: true,
           isEnabled: true,
           hasEnabledState: true,
           isFocusable: true,

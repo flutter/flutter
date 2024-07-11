@@ -66,7 +66,8 @@ class _AnimatedListSampleState extends State<AnimatedListSample> {
   // Insert the "next item" into the list model.
   void _insert() {
     final int index = _selectedItem == null ? _list.length : _list.indexOf(_selectedItem!);
-    _list.insert(index, _nextItem++);
+    _list.insert(index, _nextItem);
+    _nextItem++;
   }
 
   // Remove the selected item from the list model.
@@ -121,7 +122,7 @@ typedef RemovedItemBuilder<T> = Widget Function(T item, BuildContext context, An
 /// This class only exposes as much of the Dart List API as is needed by the
 /// sample app. More list methods are easily added, however methods that
 /// mutate the list must make the same changes to the animated list in terms
-/// of [AnimatedListState.insertItem] and [AnimatedList.removeItem].
+/// of [AnimatedListState.insertItem] and [AnimatedListState.removeItem].
 class ListModel<E> {
   ListModel({
     required this.listKey,

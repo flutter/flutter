@@ -24,14 +24,14 @@ output files can be generated without the Internet.
 
 The tool can be run based on the existing database. To do this, run:
 
-```bash
+```sh
 /PATH/TO/ROOT/bin/gen_keycodes
 ```
 
 The tool can also be run by rebuilding the database by drawing online information
 anew before generating the files. To do this, run:
 
-```bash
+```sh
 /PATH/TO/ROOT/bin/gen_keycodes --collect
 ```
 

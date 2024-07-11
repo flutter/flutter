@@ -30,12 +30,12 @@ class SwiftPackageManager {
 
   static const String _defaultFlutterPluginsSwiftPackageName = 'FlutterGeneratedPluginSwiftPackage';
 
-  static final SwiftPackageSupportedPlatform _iosSwiftPackageSupportedPlatform = SwiftPackageSupportedPlatform(
+  static final SwiftPackageSupportedPlatform iosSwiftPackageSupportedPlatform = SwiftPackageSupportedPlatform(
     platform: SwiftPackagePlatform.ios,
     version: Version(12, 0, null),
   );
 
-  static final SwiftPackageSupportedPlatform _macosSwiftPackageSupportedPlatform = SwiftPackageSupportedPlatform(
+  static final SwiftPackageSupportedPlatform macosSwiftPackageSupportedPlatform = SwiftPackageSupportedPlatform(
     platform: SwiftPackagePlatform.macos,
     version: Version(10, 14, null),
   );
@@ -66,9 +66,9 @@ class SwiftPackageManager {
 
     final SwiftPackageSupportedPlatform swiftSupportedPlatform;
     if (platform == SupportedPlatform.ios) {
-      swiftSupportedPlatform = _iosSwiftPackageSupportedPlatform;
+      swiftSupportedPlatform = iosSwiftPackageSupportedPlatform;
     } else {
-      swiftSupportedPlatform = _macosSwiftPackageSupportedPlatform;
+      swiftSupportedPlatform = macosSwiftPackageSupportedPlatform;
     }
 
     // FlutterGeneratedPluginSwiftPackage must be statically linked to ensure
@@ -169,10 +169,10 @@ class SwiftPackageManager {
     final SwiftPackageSupportedPlatform defaultPlatform;
     final SwiftPackagePlatform packagePlatform;
     if (platform == SupportedPlatform.ios) {
-      defaultPlatform = _iosSwiftPackageSupportedPlatform;
+      defaultPlatform = iosSwiftPackageSupportedPlatform;
       packagePlatform = SwiftPackagePlatform.ios;
     } else {
-      defaultPlatform = _macosSwiftPackageSupportedPlatform;
+      defaultPlatform = macosSwiftPackageSupportedPlatform;
       packagePlatform = SwiftPackagePlatform.macos;
     }
 

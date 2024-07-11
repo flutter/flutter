@@ -27,7 +27,7 @@ import 'fake_native_assets_build_runner.dart';
 void main() {
   group('native assets', () {
     late TestHotRunnerConfig testingConfig;
-    late FileSystem fileSystem;
+    late MemoryFileSystem fileSystem;
     late FakeAnalytics fakeAnalytics;
 
     setUp(() {
@@ -62,7 +62,7 @@ void main() {
         packagesWithNativeAssetsResult: <Package>[
           Package('bar', fileSystem.currentDirectory.uri),
         ],
-        dryRunResult: FakeNativeAssetsBuilderResult(
+        buildDryRunResult: FakeNativeAssetsBuilderResult(
           assets: <AssetImpl>[
             NativeCodeAssetImpl(
               id: 'package:bar/bar.dart',
@@ -95,7 +95,9 @@ void main() {
       // Hot restart does not require rerunning anything for native assets.
       // The previous native assets mapping should be used.
       expect(buildRunner.buildInvocations, 0);
-      expect(buildRunner.dryRunInvocations, 0);
+      expect(buildRunner.buildDryRunInvocations, 0);
+      expect(buildRunner.linkInvocations, 0);
+      expect(buildRunner.linkDryRunInvocations, 0);
       expect(buildRunner.hasPackageConfigInvocations, 0);
       expect(buildRunner.packagesWithNativeAssetsInvocations, 0);
     }, overrides: <Type, Generator>{
@@ -129,7 +131,7 @@ void main() {
         packagesWithNativeAssetsResult: <Package>[
           Package('bar', fileSystem.currentDirectory.uri),
         ],
-        dryRunResult: FakeNativeAssetsBuilderResult(
+        buildDryRunResult: FakeNativeAssetsBuilderResult(
           assets: <AssetImpl>[
             NativeCodeAssetImpl(
               id: 'package:bar/bar.dart',

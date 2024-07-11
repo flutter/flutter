@@ -429,9 +429,6 @@ void main() {
     final PerformanceOverlayLayer layer = PerformanceOverlayLayer(
       overlayRect: Rect.zero,
       optionsMask: 0,
-      rasterizerThreshold: 0,
-      checkerboardRasterCacheImages: false,
-      checkerboardOffscreenLayers: false,
     );
     checkNeedsAddToScene(layer, () {
       layer.overlayRect = unitRect;

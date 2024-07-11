@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'context_menu_action.dart';
+library;
+
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
@@ -502,7 +505,7 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
   // Watch for when _ContextMenuRoute is closed and return to the state where
   // the CupertinoContextMenu just behaves as a Container.
   void _routeAnimationStatusListener(AnimationStatus status) {
-    if (status != AnimationStatus.dismissed) {
+    if (!status.isDismissed) {
       return;
     }
     if (mounted) {
@@ -626,6 +629,7 @@ class _DecoyChild extends StatefulWidget {
 class _DecoyChildState extends State<_DecoyChild> with TickerProviderStateMixin {
   late Animation<Rect?> _rect;
   late Animation<Decoration> _boxDecoration;
+  late final CurvedAnimation _boxDecorationCurvedAnimation;
 
   @override
   void initState() {
@@ -670,6 +674,10 @@ class _DecoyChildState extends State<_DecoyChild> with TickerProviderStateMixin 
       ),
     ]).animate(widget.controller);
 
+    _boxDecorationCurvedAnimation = CurvedAnimation(
+        parent: widget.controller,
+        curve: Interval(0.0, CupertinoContextMenu.animationOpensAt),
+    );
     _boxDecoration = DecorationTween(
       begin: const BoxDecoration(
         boxShadow: <BoxShadow>[],
@@ -677,11 +685,7 @@ class _DecoyChildState extends State<_DecoyChild> with TickerProviderStateMixin 
       end: const BoxDecoration(
         boxShadow: _endBoxShadow,
       ),
-    ).animate(CurvedAnimation(
-        parent: widget.controller,
-        curve: Interval(0.0, CupertinoContextMenu.animationOpensAt),
-      ),
-    );
+    ).animate(_boxDecorationCurvedAnimation);
   }
 
   Widget _buildAnimation(BuildContext context, Widget? child) {
@@ -699,6 +703,12 @@ class _DecoyChildState extends State<_DecoyChild> with TickerProviderStateMixin 
       rect: _rect.value!,
       child: widget.builder!(context, widget.controller),
     );
+  }
+
+  @override
+  void dispose() {
+    _boxDecorationCurvedAnimation.dispose();
+    super.dispose();
   }
 
   @override
@@ -793,6 +803,10 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
   @override
   Duration get transitionDuration => _kModalPopupTransitionDuration;
 
+  CurvedAnimation? _curvedAnimation;
+
+  CurvedAnimation? _sheetOpacityCurvedAnimation;
+
   // Getting the RenderBox doesn't include the scale from the Transform.scale,
   // so it's manually accounted for here.
   static Rect _getScaledRect(GlobalKey globalKey, double scale) {
@@ -840,10 +854,11 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
   void _onDismiss(BuildContext context, double scale, double opacity) {
     _scale = scale;
     _opacityTween.end = opacity;
-    _sheetOpacity = _opacityTween.animate(CurvedAnimation(
+    _sheetOpacityCurvedAnimation = CurvedAnimation(
       parent: animation!,
       curve: const Interval(0.9, 1.0),
-    ));
+    );
+    _sheetOpacity = _opacityTween.animate(_sheetOpacityCurvedAnimation!);
     Navigator.of(context).pop();
   }
 
@@ -918,10 +933,14 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
   @override
   Animation<double> createAnimation() {
     final Animation<double> animation = super.createAnimation();
-    _sheetOpacity = _opacityTween.animate(CurvedAnimation(
-      parent: animation,
-      curve: Curves.linear,
-    ));
+    if (_curvedAnimation?.parent != animation) {
+      _curvedAnimation?.dispose();
+      _curvedAnimation = CurvedAnimation(
+        parent: animation,
+        curve: Curves.linear,
+      );
+    }
+    _sheetOpacity = _opacityTween.animate(_curvedAnimation!);
     return animation;
   }
 
@@ -995,6 +1014,13 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
       },
     );
   }
+
+  @override
+  void dispose() {
+    _curvedAnimation?.dispose();
+    _sheetOpacityCurvedAnimation?.dispose();
+    super.dispose();
+  }
 }
 
 // The final state of the _ContextMenuRoute after animating in and before
@@ -1034,8 +1060,10 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
 
   late Offset _dragOffset;
   double _lastScale = 1.0;
-  late AnimationController _moveController;
-  late AnimationController _sheetController;
+  late final AnimationController _moveController;
+  late final CurvedAnimation _moveCurvedAnimation;
+  late final AnimationController _sheetController;
+  late final CurvedAnimation _sheetCurvedAnimation;
   late Animation<Offset> _moveAnimation;
   late Animation<double> _sheetScaleAnimation;
   late Animation<double> _sheetOpacityAnimation;
@@ -1100,14 +1128,14 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
     // When the scale passes the threshold, animate the sheet back in.
     if (_lastScale > _kSheetScaleThreshold) {
       _moveController.removeListener(_moveListener);
-      if (_sheetController.status != AnimationStatus.dismissed) {
+      if (!_sheetController.isDismissed) {
         _sheetController.reverse();
       }
     }
   }
 
   void _flingStatusListener(AnimationStatus status) {
-    if (status != AnimationStatus.completed) {
+    if (!status.isCompleted) {
       return;
     }
 
@@ -1148,12 +1176,7 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
           clampDouble(endX, -_kPadding, _kPadding),
           endY,
         ),
-      ).animate(
-        CurvedAnimation(
-          parent: _moveController,
-          curve: Curves.elasticIn,
-        ),
-      );
+      ).animate(_moveCurvedAnimation);
 
       // Fade the _ContextMenuSheet out or in, if needed.
       if (_lastScale <= _kSheetScaleThreshold
@@ -1252,21 +1275,24 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
       value: 1.0,
       vsync: this,
     );
+    _moveCurvedAnimation = CurvedAnimation(
+      parent: _moveController,
+     curve: Curves.elasticIn,
+    );
     _sheetController = AnimationController(
       duration: const Duration(milliseconds: 100),
       reverseDuration: const Duration(milliseconds: 300),
       vsync: this,
     );
+    _sheetCurvedAnimation = CurvedAnimation(
+      parent: _sheetController,
+        curve: Curves.linear,
+        reverseCurve: Curves.easeInBack,
+    );
     _sheetScaleAnimation = Tween<double>(
       begin: 1.0,
       end: 0.0,
-    ).animate(
-      CurvedAnimation(
-        parent: _sheetController,
-        curve: Curves.linear,
-        reverseCurve: Curves.easeInBack,
-      ),
-    );
+    ).animate(_sheetCurvedAnimation);
     _sheetOpacityAnimation = Tween<double>(
       begin: 1.0,
       end: 0.0,
@@ -1277,7 +1303,9 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
   @override
   void dispose() {
     _moveController.dispose();
+    _moveCurvedAnimation.dispose();
     _sheetController.dispose();
+    _sheetCurvedAnimation.dispose();
     super.dispose();
   }
 
@@ -1298,15 +1326,14 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
           child: AnimatedBuilder(
             animation: _moveController,
             builder: _buildAnimation,
-            child: widget.orientation == Orientation.portrait
-              ? Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: children,
-              )
-              : Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: children,
-              ),
+            child: Flex(
+              direction: switch (widget.orientation) {
+                Orientation.portrait  => Axis.vertical,
+                Orientation.landscape => Axis.horizontal,
+              },
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: children,
+            ),
           ),
         ),
       ),

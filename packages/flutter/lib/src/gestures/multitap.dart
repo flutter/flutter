@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/widgets.dart';
+library;
+
 import 'dart:async';
 
 import 'arena.dart';
@@ -119,8 +122,8 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
   DoubleTapGestureRecognizer({
     super.debugOwner,
     super.supportedDevices,
-    AllowedButtonsFilter? allowedButtonsFilter,
-  }) : super(allowedButtonsFilter: allowedButtonsFilter ?? _defaultButtonAcceptBehavior);
+    super.allowedButtonsFilter = _defaultButtonAcceptBehavior,
+  });
 
   // The default value for [allowedButtonsFilter].
   // Accept the input if, and only if, [kPrimaryButton] is pressed.

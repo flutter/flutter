@@ -4,6 +4,7 @@
 
 import 'package:meta/meta.dart';
 import 'package:uuid/uuid.dart';
+import 'package:yaml/yaml.dart';
 
 import '../android/android.dart' as android_common;
 import '../android/android_workflow.dart';
@@ -319,13 +320,45 @@ abstract class CreateBase extends FlutterCommand {
     }
   }
 
-  /// Gets the project name based.
+  /// Gets the project name.
   ///
-  /// Use the current directory path name if the `--project-name` is not specified explicitly.
+  /// If the `--project-name` is not specified explicitly,
+  /// the `name` field from the pubspec.yaml file is used.
+  ///
+  /// If the pubspec.yaml file does not exist,
+  /// the current directory path name is used.
   @protected
   String get projectName {
-    final String projectName =
-        stringArg('project-name') ?? globals.fs.path.basename(projectDirPath);
+    String? projectName = stringArg('project-name');
+
+    if (projectName == null) {
+      final File pubspec = globals.fs
+        .directory(projectDirPath)
+        .childFile('pubspec.yaml');
+
+      if (pubspec.existsSync()) {
+        final String pubspecContents = pubspec.readAsStringSync();
+
+        try {
+          final Object? pubspecYaml = loadYaml(pubspecContents);
+
+          if (pubspecYaml is YamlMap) {
+            final Object? pubspecName = pubspecYaml['name'];
+
+            if (pubspecName is String) {
+              projectName = pubspecName;
+            }
+          }
+        } on YamlException {
+          // If the pubspec is malformed, fallback to using the directory name.
+        }
+      }
+
+      final String projectDirName = globals.fs.path.basename(projectDirPath);
+
+      projectName ??= projectDirName;
+    }
+
     if (!boolArg('skip-name-checks')) {
       final String? error = _validateProjectName(projectName);
       if (error != null) {
@@ -351,6 +384,7 @@ abstract class CreateBase extends FlutterCommand {
     String? kotlinVersion,
     String? gradleVersion,
     bool withPlatformChannelPluginHook = false,
+    bool withSwiftPackageManager = false,
     bool withFfiPluginHook = false,
     bool withFfiPackage = false,
     bool withEmptyMain = false,
@@ -404,6 +438,7 @@ abstract class CreateBase extends FlutterCommand {
       'withFfiPackage': withFfiPackage,
       'withFfiPluginHook': withFfiPluginHook,
       'withPlatformChannelPluginHook': withPlatformChannelPluginHook,
+      'withSwiftPackageManager': withSwiftPackageManager,
       'withPluginHook': withFfiPluginHook || withFfiPackage || withPlatformChannelPluginHook,
       'withEmptyMain': withEmptyMain,
       'androidLanguage': androidLanguage,
@@ -667,8 +702,18 @@ abstract class CreateBase extends FlutterCommand {
       'templates',
       'template_manifest.json',
     );
+    final String manifestFileContents;
+    try {
+      manifestFileContents = globals.fs.file(manifestPath).readAsStringSync();
+    } on FileSystemException catch (e) {
+      throwToolExit(
+        'Unable to read the template manifest at path "$manifestPath".\n'
+        'Make sure that your user account has sufficient permissions to read this file.\n'
+        'Exception details: $e',
+      );
+    }
     final Map<String, Object?> manifest = json.decode(
-      globals.fs.file(manifestPath).readAsStringSync(),
+      manifestFileContents,
     ) as Map<String, Object?>;
     return Set<Uri>.from(
       (manifest['files']! as List<Object?>).cast<String>().map<Uri>(
@@ -696,11 +741,11 @@ abstract class CreateBase extends FlutterCommand {
 
 // A valid Dart identifier that can be used for a package, i.e. no
 // capital letters.
-// https://dart.dev/guides/language/language-tour#important-concepts
+// https://dart.dev/language#important-concepts
 final RegExp _identifierRegExp = RegExp('[a-z_][a-z0-9_]*');
 
 // non-contextual dart keywords.
-//' https://dart.dev/guides/language/language-tour#keywords
+// https://dart.dev/language/keywords
 const Set<String> _keywords = <String>{
   'abstract',
   'as',

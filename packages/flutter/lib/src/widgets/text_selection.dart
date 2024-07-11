@@ -1898,6 +1898,11 @@ class _SelectionHandleOverlayState extends State<_SelectionHandleOverlay> with S
       math.max((interactiveRect.height - handleRect.height) / 2, 0),
     );
 
+    // Make sure a drag is eagerly accepted. This is used on iOS to match the
+    // behavior where a drag directly on a collapse handle will always win against
+    // other drag gestures.
+    final bool eagerlyAcceptDragWhenCollapsed = widget.type == TextSelectionHandleType.collapsed && defaultTargetPlatform == TargetPlatform.iOS;
+
     return CompositedTransformFollower(
       link: widget.handleLayerLink,
       offset: interactiveRect.topLeft,
@@ -1924,6 +1929,7 @@ class _SelectionHandleOverlayState extends State<_SelectionHandleOverlay> with S
                 (PanGestureRecognizer instance) {
                   instance
                     ..dragStartBehavior = widget.dragStartBehavior
+                    ..gestureSettings = eagerlyAcceptDragWhenCollapsed ? const DeviceGestureSettings(touchSlop: 1.0) : null
                     ..onStart = widget.onSelectionHandleDragStart
                     ..onUpdate = widget.onSelectionHandleDragUpdate
                     ..onEnd = widget.onSelectionHandleDragEnd;
@@ -2081,18 +2087,6 @@ class TextSelectionGestureDetectorBuilder {
         && selection.end >= textPosition.offset;
   }
 
-  /// Returns true if position was on selection.
-  bool _positionOnSelection(Offset position, TextSelection? targetSelection) {
-    if (targetSelection == null) {
-      return false;
-    }
-
-    final TextPosition textPosition = renderEditable.getPositionForPoint(position);
-
-    return targetSelection.start <= textPosition.offset
-        && targetSelection.end >= textPosition.offset;
-  }
-
   // Expand the selection to the given global position.
   //
   // Either base or extent will be moved to the last tapped position, whichever
@@ -2202,15 +2196,6 @@ class TextSelectionGestureDetectorBuilder {
   // tap. Mac uses this value to reset to the original selection when an
   // inversion of the base and offset happens.
   TextSelection? _dragStartSelection;
-
-  // For tap + drag gesture on iOS, whether the position where the drag started
-  // was on the previous TextSelection. iOS uses this value to determine if
-  // the cursor should move on drag update.
-  //
-  // If the drag started on the previous selection then the cursor will move on
-  // drag update. If the drag did not start on the previous selection then the
-  // cursor will not move on drag update.
-  bool? _dragBeganOnPreviousSelection;
 
   // For iOS long press behavior when the field is not focused. iOS uses this value
   // to determine if a long press began on a field that was not focused.
@@ -2807,7 +2792,6 @@ class TextSelectionGestureDetectorBuilder {
     _dragStartSelection = renderEditable.selection;
     _dragStartScrollOffset = _scrollPosition;
     _dragStartViewportOffset = renderEditable.offset.pixels;
-    _dragBeganOnPreviousSelection = _positionOnSelection(details.globalPosition, _dragStartSelection);
 
     if (_TextSelectionGestureDetectorState._getEffectiveConsecutiveTapCount(details.consecutiveTapCount) > 1) {
       // Do not set the selection on a consecutive tap and drag.
@@ -2839,16 +2823,6 @@ class TextSelectionGestureDetectorBuilder {
             case PointerDeviceKind.invertedStylus:
             case PointerDeviceKind.touch:
             case PointerDeviceKind.unknown:
-              // For iOS platforms, a touch drag does not initiate unless the
-              // editable has focus and the drag began on the previous selection.
-              assert(_dragBeganOnPreviousSelection != null);
-              if (renderEditable.hasFocus && _dragBeganOnPreviousSelection!) {
-                renderEditable.selectPositionAt(
-                  from: details.globalPosition,
-                  cause: SelectionChangedCause.drag,
-                );
-                _showMagnifierIfSupportedByPlatform(details.globalPosition);
-              }
             case null:
           }
         case TargetPlatform.android:
@@ -2906,12 +2880,10 @@ class TextSelectionGestureDetectorBuilder {
       final Offset editableOffset = renderEditable.maxLines == 1
           ? Offset(renderEditable.offset.pixels - _dragStartViewportOffset, 0.0)
           : Offset(0.0, renderEditable.offset.pixels - _dragStartViewportOffset);
-      final double effectiveScrollPosition = _scrollPosition - _dragStartScrollOffset;
-      final bool scrollingOnVerticalAxis = _scrollDirection == AxisDirection.up || _scrollDirection == AxisDirection.down;
-      final Offset scrollableOffset = Offset(
-        !scrollingOnVerticalAxis ? effectiveScrollPosition : 0.0,
-        scrollingOnVerticalAxis ? effectiveScrollPosition : 0.0,
-      );
+      final Offset scrollableOffset = switch (axisDirectionToAxis(_scrollDirection ?? AxisDirection.left)) {
+        Axis.horizontal => Offset(_scrollPosition - _dragStartScrollOffset, 0.0),
+        Axis.vertical   => Offset(0.0, _scrollPosition - _dragStartScrollOffset),
+      };
       final Offset dragStartGlobalPosition = details.globalPosition - details.offsetFromOrigin;
 
       // Select word by word.
@@ -2977,12 +2949,10 @@ class TextSelectionGestureDetectorBuilder {
 
       switch (defaultTargetPlatform) {
         case TargetPlatform.iOS:
-          // With a touch device, nothing should happen, unless there was a double tap, or
-          // there was a collapsed selection, and the tap/drag position is at the collapsed selection.
-          // In that case the caret should move with the drag position.
-          //
           // With a mouse device, a drag should select the range from the origin of the drag
           // to the current position of the drag.
+          //
+          // With a touch device, nothing should happen.
           switch (details.kind) {
             case PointerDeviceKind.mouse:
             case PointerDeviceKind.trackpad:
@@ -2995,17 +2965,6 @@ class TextSelectionGestureDetectorBuilder {
             case PointerDeviceKind.invertedStylus:
             case PointerDeviceKind.touch:
             case PointerDeviceKind.unknown:
-              assert(_dragBeganOnPreviousSelection != null);
-              if (renderEditable.hasFocus
-                  && _dragStartSelection!.isCollapsed
-                  && _dragBeganOnPreviousSelection!
-              ) {
-                renderEditable.selectPositionAt(
-                  from: details.globalPosition,
-                  cause: SelectionChangedCause.drag,
-                );
-                return _showMagnifierIfSupportedByPlatform(details.globalPosition);
-              }
             case null:
               break;
           }
@@ -3102,8 +3061,6 @@ class TextSelectionGestureDetectorBuilder {
   ///    callback.
   @protected
   void onDragSelectionEnd(TapDragEndDetails details) {
-    _dragBeganOnPreviousSelection = null;
-
     if (_shouldShowSelectionToolbar && _TextSelectionGestureDetectorState._getEffectiveConsecutiveTapCount(details.consecutiveTapCount) == 2) {
       editableText.showToolbar();
     }
@@ -3439,6 +3396,7 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
                 // Text selection should start from the position of the first pointer
                 // down event.
                 ..dragStartBehavior = DragStartBehavior.down
+                ..eagerVictoryOnDrag = defaultTargetPlatform != TargetPlatform.iOS
                 ..onTapTrackStart = _handleTapTrackStart
                 ..onTapTrackReset = _handleTapTrackReset
                 ..onTapDown = _handleTapDown

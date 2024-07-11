@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
+import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -19,7 +20,6 @@ import 'package:flutter_tools/src/commands/build_macos.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
@@ -64,8 +64,7 @@ final Platform notMacosPlatform = FakePlatform(
 );
 
 void main() {
-  late FileSystem fileSystem;
-  late TestUsage usage;
+  late MemoryFileSystem fileSystem;
   late FakeProcessManager fakeProcessManager;
   late ProcessUtils processUtils;
   late BufferLogger logger;
@@ -81,7 +80,6 @@ void main() {
     fileSystem = MemoryFileSystem.test();
     artifacts = Artifacts.test(fileSystem: fileSystem);
     logger = BufferLogger.test();
-    usage = TestUsage();
     fakeProcessManager = FakeProcessManager.empty();
     processUtils = ProcessUtils(
       logger: logger,
@@ -109,7 +107,12 @@ void main() {
 
   // Creates a FakeCommand for the xcodebuild call to build the app
   // in the given configuration.
-  FakeCommand setUpFakeXcodeBuildHandler(String configuration, { bool verbose = false, void Function(List<String> command)? onRun }) {
+  FakeCommand setUpFakeXcodeBuildHandler(
+    String configuration, {
+    bool verbose = false,
+    void Function(List<String> command)? onRun,
+    List<String>? additionalCommandArguements,
+  }) {
     final FlutterProject flutterProject = FlutterProject.fromDirectory(fileSystem.currentDirectory);
     final Directory flutterBuildDir = fileSystem.directory(getMacOSBuildDirectory());
     return FakeCommand(
@@ -129,6 +132,8 @@ void main() {
         else
           '-quiet',
         'COMPILER_INDEX_STORE_ENABLE=NO',
+        if (additionalCommandArguements != null)
+          ...additionalCommandArguements,
       ],
       stdout: '''
 STDOUT STUFF
@@ -173,7 +178,7 @@ STDERR STUFF
     expect(createTestCommandRunner(command).run(
       const <String>['build', 'macos', '--no-pub']
     ), throwsToolExit(message: 'No macOS desktop project configured. See '
-      'https://docs.flutter.dev/desktop#add-desktop-support-to-an-existing-flutter-app '
+      'https://flutter.dev/to/add-desktop-support '
       'to learn about adding macOS support to a project.'));
   }, overrides: <Type, Generator>{
     Platform: () => macosPlatform,
@@ -649,7 +654,6 @@ STDERR STUFF
     Platform: () => macosPlatform,
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
     FileSystemUtils: () => FileSystemUtils(fileSystem: fileSystem, platform: macosPlatform),
-    Usage: () => usage,
     Analytics: () => fakeAnalytics,
   });
   testUsingContext('Performs code size analysis and sends analytics from arm64 host', () async {
@@ -674,9 +678,6 @@ STDERR STUFF
 
     expect(testLogger.statusText, contains('A summary of your macOS bundle analysis can be found at'));
     expect(testLogger.statusText, contains('dart devtools --appSizeBase='));
-    expect(usage.events, contains(
-      const TestUsageEvent('code-size-analysis', 'macos'),
-    ));
     expect(fakeAnalytics.sentEvents, contains(Event.codeSizeAnalysis(platform: 'macos')));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -703,7 +704,138 @@ STDERR STUFF
     Platform: () => macosPlatform,
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
     FileSystemUtils: () => FileSystemUtils(fileSystem: fileSystem, platform: macosPlatform),
-    Usage: () => usage,
     Analytics: () => fakeAnalytics,
+  });
+
+  testUsingContext('macOS build overrides CODE_SIGN_ENTITLEMENTS when in CI if entitlement file exists (debug)', () async {
+    final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: fileSystem,
+      logger: logger,
+      processUtils: processUtils,
+      osUtils: FakeOperatingSystemUtils(),
+    );
+    createMinimalMockProjectFiles();
+
+    final File entitlementFile = fileSystem.file(fileSystem.path.join('macos', 'Runner', 'DebugProfile.entitlements'));
+    entitlementFile.createSync(recursive: true);
+    entitlementFile.writeAsStringSync('''
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>com.apple.security.app-sandbox</key>
+	<true/>
+</dict>
+</plist>
+
+''');
+
+    await createTestCommandRunner(command).run(
+      const <String>['build', 'macos', '--debug', '--no-pub']
+    );
+
+    final File tempEntitlementFile = fileSystem.systemTempDirectory.childFile('flutter_disable_sandbox_entitlement.rand0/DebugProfileWithDisabledSandboxing.entitlements');
+    expect(tempEntitlementFile, exists);
+    expect(tempEntitlementFile.readAsStringSync(), '''
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>com.apple.security.app-sandbox</key>
+	<false/>
+</dict>
+</plist>
+
+''');
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+      setUpFakeXcodeBuildHandler(
+        'Debug',
+        additionalCommandArguements: <String>[
+          'CODE_SIGN_ENTITLEMENTS=/.tmp_rand0/flutter_disable_sandbox_entitlement.rand0/DebugProfileWithDisabledSandboxing.entitlements',
+        ],
+      ),
+    ]),
+    Platform: () => FakePlatform(
+      operatingSystem: 'macos',
+      environment: <String, String>{
+        'FLUTTER_ROOT': '/',
+        'HOME': '/',
+        'LUCI_CI': 'True'
+      }
+    ),
+    FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+  });
+
+  testUsingContext('macOS build overrides CODE_SIGN_ENTITLEMENTS when in CI if entitlement file exists (release)', () async {
+    final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: fileSystem,
+      logger: logger,
+      processUtils: processUtils,
+      osUtils: FakeOperatingSystemUtils(),
+    );
+    createMinimalMockProjectFiles();
+
+    final File entitlementFile = fileSystem.file(
+      fileSystem.path.join('macos', 'Runner', 'Release.entitlements'),
+    );
+    entitlementFile.createSync(recursive: true);
+    entitlementFile.writeAsStringSync('''
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>com.apple.security.app-sandbox</key>
+	<true/>
+</dict>
+</plist>
+
+''');
+
+    await createTestCommandRunner(command).run(
+      const <String>['build', 'macos', '--release', '--no-pub']
+    );
+
+    final File tempEntitlementFile = fileSystem.systemTempDirectory.childFile(
+      'flutter_disable_sandbox_entitlement.rand0/ReleaseWithDisabledSandboxing.entitlements',
+    );
+    expect(tempEntitlementFile, exists);
+    expect(tempEntitlementFile.readAsStringSync(), '''
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>com.apple.security.app-sandbox</key>
+	<false/>
+</dict>
+</plist>
+
+''');
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+      setUpFakeXcodeBuildHandler(
+        'Release',
+        additionalCommandArguements: <String>[
+          'CODE_SIGN_ENTITLEMENTS=/.tmp_rand0/flutter_disable_sandbox_entitlement.rand0/ReleaseWithDisabledSandboxing.entitlements',
+        ],
+      ),
+    ]),
+    Platform: () => FakePlatform(
+      operatingSystem: 'macos',
+      environment: <String, String>{
+        'FLUTTER_ROOT': '/',
+        'HOME': '/',
+        'LUCI_CI': 'True'
+      }
+    ),
+    FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
   });
 }

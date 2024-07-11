@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -468,7 +469,7 @@ void main() {
         Usage: () => usage,
       });
 
-      testUsingContext('passes device target platform to usage', () async {
+      testUsingContext('passes device target platform to analytics', () async {
         final RunCommand command = RunCommand();
         final FakeDevice mockDevice = FakeDevice(sdkNameAndVersion: 'iOS 13')
           ..startAppSuccess = false;
@@ -484,14 +485,6 @@ void main() {
           '--no-hot',
         ]), isNull);
 
-        expect(usage.commands, contains(
-          TestUsageCommand('run', parameters: CustomDimensions.fromMap(<String, String>{
-            'cd3': 'false', 'cd4': 'ios', 'cd22': 'iOS 13',
-            'cd23': 'debug', 'cd18': 'false', 'cd15': 'swift', 'cd31': 'true',
-            'cd57': 'usb',
-            'cd58': 'false',
-          })
-        )));
         expect(
           fakeAnalytics.sentEvents,
           contains(
@@ -521,7 +514,7 @@ void main() {
         analytics.Analytics: () => fakeAnalytics,
       });
 
-      testUsingContext('correctly reports tests to usage', () async {
+      testUsingContext('correctly reports tests to analytics', () async {
         fs.currentDirectory.childDirectory('test').childFile('widget_test.dart').createSync(recursive: true);
         fs.currentDirectory.childDirectory('ios').childFile('AppDelegate.swift').createSync(recursive: true);
         final RunCommand command = RunCommand();
@@ -537,14 +530,6 @@ void main() {
           'test/widget_test.dart',
         ]), isNull);
 
-        expect(usage.commands, contains(
-          TestUsageCommand('run', parameters: CustomDimensions.fromMap(<String, String>{
-            'cd3': 'false', 'cd4': 'ios', 'cd22': 'iOS 13',
-            'cd23': 'debug', 'cd18': 'false', 'cd15': 'swift', 'cd31': 'true',
-            'cd57': 'usb',
-            'cd58': 'true',
-          })),
-        ));
         expect(
           fakeAnalytics.sentEvents,
           contains(
@@ -1201,6 +1186,26 @@ void main() {
     ProcessManager: () => FakeProcessManager.any(),
   });
 
+  testUsingContext('usingCISystem can also be set by environment LUCI_CI', () async {
+    final RunCommand command = RunCommand();
+    await expectLater(() => createTestCommandRunner(command).run(<String>[
+      'run',
+    ]), throwsToolExit());
+
+    final DebuggingOptions options = await command.createDebuggingOptions(false);
+
+    expect(options.usingCISystem, true);
+  }, overrides: <Type, Generator>{
+    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.any(),
+    Platform: () => FakePlatform(
+      environment: <String, String>{
+        'LUCI_CI': 'True'
+      }
+    ),
+  });
+
   testUsingContext('wasm mode selects skwasm renderer by default', () async {
     final RunCommand command = RunCommand();
     await expectLater(() => createTestCommandRunner(command).run(<String>[
@@ -1454,8 +1459,8 @@ class TestRunCommandForUsageValues extends RunCommand {
   }
 
   @override
-  Future<BuildInfo> getBuildInfo({ BuildMode? forcedBuildMode, File? forcedTargetFile }) async {
-    return const BuildInfo(BuildMode.debug, null, treeShakeIcons: false);
+  Future<BuildInfo> getBuildInfo({FlutterProject? project, BuildMode? forcedBuildMode, File? forcedTargetFile}) async {
+    return const BuildInfo(BuildMode.debug, null, treeShakeIcons: false, packageConfigPath: '.dart_tool/package_config.json');
   }
 }
 

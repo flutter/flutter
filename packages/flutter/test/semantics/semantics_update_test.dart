@@ -212,6 +212,8 @@ class SemanticsUpdateBuilderSpy extends Fake implements ui.SemanticsUpdateBuilde
     required Int32List childrenInTraversalOrder,
     required Int32List childrenInHitTestOrder,
     required Int32List additionalActions,
+    int headingLevel = 0,
+    String? linkUrl,
   }) {
     // Makes sure we don't send the same id twice.
     assert(!observations.containsKey(id));

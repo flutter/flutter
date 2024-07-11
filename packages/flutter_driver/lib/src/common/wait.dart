@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/widgets.dart';
+library;
+
 import 'dart:convert';
 
 import 'message.dart';
@@ -195,19 +198,14 @@ class CombinedCondition extends SerializableWaitCondition {
 
 /// Parses a [SerializableWaitCondition] or its subclass from the given [json] map.
 SerializableWaitCondition _deserialize(Map<String, String> json) {
-  final String conditionName = json['conditionName']!;
-  switch (conditionName) {
-    case 'NoTransientCallbacksCondition':
-      return NoTransientCallbacks.deserialize(json);
-    case 'NoPendingFrameCondition':
-      return NoPendingFrame.deserialize(json);
-    case 'FirstFrameRasterizedCondition':
-      return FirstFrameRasterized.deserialize(json);
-    case 'NoPendingPlatformMessagesCondition':
-      return NoPendingPlatformMessages.deserialize(json);
-    case 'CombinedCondition':
-      return CombinedCondition.deserialize(json);
-  }
-  throw SerializationException(
-      'Unsupported wait condition $conditionName in the JSON string $json');
+  return switch (json['conditionName']!) {
+    'NoTransientCallbacksCondition'      => NoTransientCallbacks.deserialize(json),
+    'NoPendingFrameCondition'            => NoPendingFrame.deserialize(json),
+    'FirstFrameRasterizedCondition'      => FirstFrameRasterized.deserialize(json),
+    'NoPendingPlatformMessagesCondition' => NoPendingPlatformMessages.deserialize(json),
+    'CombinedCondition'                  => CombinedCondition.deserialize(json),
+    final String condition => throw SerializationException(
+      'Unsupported wait condition $condition in the JSON string $json',
+    ),
+  };
 }

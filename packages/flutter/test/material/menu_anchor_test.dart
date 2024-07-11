@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker/leak_tracker.dart';
 
 import '../widgets/semantics_tester.dart';
 
@@ -166,6 +167,10 @@ void main() {
     );
   }
 
+  RenderObject getOverlayColor(WidgetTester tester) {
+    return tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+  }
+
   testWidgets('Menu responds to density changes', (WidgetTester tester) async {
     Widget buildMenu({VisualDensity? visualDensity = VisualDensity.standard}) {
       return MaterialApp(
@@ -251,13 +256,13 @@ void main() {
     expect(tester.getRect(find.byType(MenuBar)), equals(const Rect.fromLTRB(105.0, 0.0, 695.0, 72.0)));
     expect(
       tester.getRect(find.widgetWithText(MenuItemButton, TestMenu.subMenu10.label)),
-      equals(const Rect.fromLTRB(249.0, 80.0, 483.0, 136.0)),
+      equals(const Rect.fromLTRB(257.0, 80.0, 491.0, 136.0)),
     );
     expect(
       tester.getRect(
         find.ancestor(of: find.text(TestMenu.subMenu10.label), matching: find.byType(Material)).at(1),
       ),
-      equals(const Rect.fromLTRB(241.0, 64.0, 491.0, 264.0)),
+      equals(const Rect.fromLTRB(249.0, 64.0, 499.0, 264.0)),
     );
   });
 
@@ -2224,6 +2229,45 @@ void main() {
       expect(find.text('leadingIcon'), findsOneWidget);
     });
 
+    testWidgets('autofocus is used when set and widget is enabled',
+        (WidgetTester tester) async {
+
+      listenForFocusChanges();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Column(
+              children: <Widget>[
+                MenuAnchor(
+                  controller: controller,
+                  menuChildren: <Widget>[
+                    MenuItemButton(
+                      autofocus: true,
+                      // Required for clickability.
+                      onPressed: () {},
+                      child: Text(TestMenu.mainMenu0.label),
+                    ),
+                    MenuItemButton(
+                      onPressed: () {},
+                      child: Text(TestMenu.mainMenu1.label),
+                    ),
+                  ],
+                ),
+                const Expanded(child: Placeholder()),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      controller.open();
+      await tester.pump();
+
+      expect(controller.isOpen, equals(true));
+      expect(focusedMenu, equals('MenuItemButton(Text("${TestMenu.mainMenu0.label}"))'));
+    });
+
     testWidgets('trailingIcon is used when set', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
@@ -2494,6 +2538,56 @@ void main() {
       final AssertionError exception = tester.takeException() as AssertionError;
       expect(exception, isAssertionError);
     }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
+
+    testWidgets('MenuItemButton.styleFrom overlayColor overrides default overlay color', (WidgetTester tester) async {
+      const Color overlayColor = Color(0xffff0000);
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          body: MenuItemButton(
+            style: MenuItemButton.styleFrom(overlayColor: overlayColor),
+            onPressed: () {},
+            child: const Text('MenuItem'),
+          ),
+        ),
+      ));
+
+      // Hovered.
+      final Offset center = tester.getCenter(find.byType(MenuItemButton));
+      final TestGesture gesture = await tester.createGesture(
+        kind: PointerDeviceKind.mouse,
+      );
+      await gesture.addPointer();
+      await gesture.moveTo(center);
+      await tester.pumpAndSettle();
+      expect(getOverlayColor(tester), paints..rect(color: overlayColor.withOpacity(0.08)));
+
+      // Highlighted (pressed).
+      await gesture.down(center);
+      await tester.pumpAndSettle();
+      expect(
+        getOverlayColor(tester),
+        paints
+          ..rect(color: overlayColor.withOpacity(0.08))
+          ..rect(color: overlayColor.withOpacity(0.08))
+          ..rect(color: overlayColor.withOpacity(0.1)),
+      );
+    });
+
+    testWidgets('MenuItemButton can build when its child is null', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: SizedBox(
+              width: 200,
+              child: MenuItemButton(),
+            ),
+          ),
+        ),
+      );
+
+      // exception `Null check operator used on a null value` would be thrown.
+      expect(tester.takeException(), isNull);
+    });
   });
 
   group('Layout', () {
@@ -3087,7 +3181,7 @@ void main() {
         equals(const <Rect>[
           Rect.fromLTRB(161.0, 0.0, 639.0, 40.0),
           Rect.fromLTRB(265.0, 40.0, 467.0, 160.0),
-          Rect.fromLTRB(467.0, 72.0, 707.0, 232.0),
+          Rect.fromLTRB(467.0, 80.0, 707.0, 240.0),
         ]),
       );
     });
@@ -3103,7 +3197,7 @@ void main() {
         equals(const <Rect>[
           Rect.fromLTRB(161.0, 0.0, 639.0, 40.0),
           Rect.fromLTRB(333.0, 40.0, 535.0, 160.0),
-          Rect.fromLTRB(93.0, 72.0, 333.0, 232.0),
+          Rect.fromLTRB(93.0, 80.0, 333.0, 240.0),
         ]),
       );
     });
@@ -3367,6 +3461,7 @@ void main() {
               TestSemantics.rootChild(
                 actions: <SemanticsAction>[
                   SemanticsAction.tap,
+                  SemanticsAction.focus,
                 ],
                 label: 'ABC',
                 rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
@@ -3497,7 +3592,7 @@ void main() {
                               SemanticsFlag.hasExpandedState,
                               SemanticsFlag.isExpanded,
                             ],
-                            actions: <SemanticsAction>[SemanticsAction.tap],
+                            actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                             label: 'ABC',
                             rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
                           ),
@@ -3519,7 +3614,7 @@ void main() {
                                       SemanticsFlag.isEnabled,
                                       SemanticsFlag.isFocusable,
                                     ],
-                                    actions: <SemanticsAction>[SemanticsAction.tap],
+                                    actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                                   ),
                                 ],
                               ),
@@ -3567,7 +3662,7 @@ void main() {
                               SemanticsFlag.isEnabled,
                               SemanticsFlag.isFocusable,
                             ],
-                            actions: <SemanticsAction>[SemanticsAction.tap],
+                            actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                             label: 'ABC',
                             rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
                           ),
@@ -3709,6 +3804,90 @@ void main() {
     );
     expect(intrinsicWidthFinder, findsOneWidget);
   });
+
+  testWidgets('SubmenuButton.styleFrom overlayColor overrides default overlay color', (WidgetTester tester) async {
+    const Color overlayColor = Color(0xffff00ff);
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: SubmenuButton(
+          style: SubmenuButton.styleFrom(overlayColor: overlayColor),
+          menuChildren: <Widget>[
+            MenuItemButton(
+              onPressed: () {},
+              child: const Text('MenuItemButton'),
+            ),
+          ],
+          child: const Text('Submenu'),
+        ),
+      ),
+    ));
+
+    // Hovered.
+    final Offset center = tester.getCenter(find.byType(SubmenuButton));
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
+    await gesture.addPointer();
+    await gesture.moveTo(center);
+    await tester.pumpAndSettle();
+    expect(getOverlayColor(tester), paints..rect(color: overlayColor.withOpacity(0.08)));
+
+    // Highlighted (pressed).
+    await gesture.down(center);
+    await tester.pumpAndSettle();
+    expect(
+      getOverlayColor(tester),
+      paints
+        ..rect(color: overlayColor.withOpacity(0.08))
+        ..rect(color: overlayColor.withOpacity(0.08))
+        ..rect(color: overlayColor.withOpacity(0.1)),
+    );
+  });
+
+  testWidgets('Garbage collector destroys child _MenuAnchorState after parent is closed', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/149584
+      await tester.pumpWidget(
+        MaterialApp(
+          home: MenuAnchor(
+            controller: controller,
+            menuChildren: const <Widget>[
+              SubmenuButton(
+                menuChildren: <Widget>[],
+                child: Text(''),
+              )
+            ],
+          ),
+        ),
+      );
+
+      controller.open();
+      await tester.pump();
+
+      final WeakReference<State> state =
+        WeakReference<State>(
+          tester.firstState<State<SubmenuButton>>(
+            find.byType(SubmenuButton),
+          ),
+        );
+      expect(state.target, isNotNull);
+
+      controller.close();
+      await tester.pump();
+
+      controller.open();
+      await tester.pump();
+
+      controller.close();
+      await tester.pump();
+
+      // Garbage collect. 1 should be enough, but 3 prevents flaky tests.
+      await tester.runAsync<void>(() async {
+        await forceGC(fullGcCycles: 3);
+      });
+
+      expect(state.target, isNull);
+    }, skip: kIsWeb // [intended] ForceGC does not work in web and in release mode. See https://api.flutter.dev/flutter/package-leak_tracker_leak_tracker/forceGC.html
+  );
 }
 
 List<Widget> createTestMenus({

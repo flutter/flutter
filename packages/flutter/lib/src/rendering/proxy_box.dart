@@ -1202,13 +1202,30 @@ class RenderBackdropFilter extends RenderProxyBox {
   /// Creates a backdrop filter.
   //
   /// The [blendMode] argument defaults to [BlendMode.srcOver].
-  RenderBackdropFilter({ RenderBox? child, required ui.ImageFilter filter, BlendMode blendMode = BlendMode.srcOver })
+  RenderBackdropFilter({
+    RenderBox? child,
+    required ui.ImageFilter filter,
+    BlendMode blendMode = BlendMode.srcOver,
+    bool enabled = true,
+  })
     : _filter = filter,
+      _enabled = enabled,
       _blendMode = blendMode,
       super(child);
 
   @override
   BackdropFilterLayer? get layer => super.layer as BackdropFilterLayer?;
+
+  /// Whether or not the backdrop filter operation will be applied to the child.
+  bool get enabled => _enabled;
+  bool _enabled;
+  set enabled(bool value) {
+    if (enabled == value) {
+      return;
+    }
+    _enabled = value;
+    markNeedsPaint();
+  }
 
   /// The image filter to apply to the existing painted content before painting
   /// the child.
@@ -1244,6 +1261,11 @@ class RenderBackdropFilter extends RenderProxyBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
+    if (!_enabled) {
+      super.paint(context, offset);
+      return;
+    }
+
     if (child != null) {
       assert(needsCompositing);
       layer ??= BackdropFilterLayer();
@@ -2689,24 +2711,6 @@ class RenderFittedBox extends RenderProxyBox {
     if (child != null) {
       final Size childSize = child!.getDryLayout(const BoxConstraints());
 
-      // During [RenderObject.debugCheckingIntrinsics] a child that doesn't
-      // support dry layout may provide us with an invalid size that triggers
-      // assertions if we try to work with it. Instead of throwing, we bail
-      // out early in that case.
-      bool invalidChildSize = false;
-      assert(() {
-        if (RenderObject.debugCheckingIntrinsics && childSize.width * childSize.height == 0.0) {
-          invalidChildSize = true;
-        }
-        return true;
-      }());
-      if (invalidChildSize) {
-        assert(debugCannotComputeDryLayout(
-          reason: 'Child provided invalid size of $childSize.',
-        ));
-        return Size.zero;
-      }
-
       switch (fit) {
         case BoxFit.scaleDown:
           final BoxConstraints sizeConstraints = constraints.loosen();
@@ -3497,26 +3501,21 @@ class RenderRepaintBoundary extends RenderProxyBox {
     bool inReleaseMode = true;
     assert(() {
       inReleaseMode = false;
-      if (debugSymmetricPaintCount + debugAsymmetricPaintCount == 0) {
+      final int totalPaints = debugSymmetricPaintCount + debugAsymmetricPaintCount;
+      if (totalPaints == 0) {
         properties.add(MessageProperty('usefulness ratio', 'no metrics collected yet (never painted)'));
       } else {
-        final double fraction = debugAsymmetricPaintCount / (debugSymmetricPaintCount + debugAsymmetricPaintCount);
-        final String diagnosis;
-        if (debugSymmetricPaintCount + debugAsymmetricPaintCount < 5) {
-          diagnosis = 'insufficient data to draw conclusion (less than five repaints)';
-        } else if (fraction > 0.9) {
-          diagnosis = 'this is an outstandingly useful repaint boundary and should definitely be kept';
-        } else if (fraction > 0.5) {
-          diagnosis = 'this is a useful repaint boundary and should be kept';
-        } else if (fraction > 0.30) {
-          diagnosis = 'this repaint boundary is probably useful, but maybe it would be more useful in tandem with adding more repaint boundaries elsewhere';
-        } else if (fraction > 0.1) {
-          diagnosis = 'this repaint boundary does sometimes show value, though currently not that often';
-        } else if (debugAsymmetricPaintCount == 0) {
-          diagnosis = 'this repaint boundary is astoundingly ineffectual and should be removed';
-        } else {
-          diagnosis = 'this repaint boundary is not very effective and should probably be removed';
-        }
+        final double fraction = debugAsymmetricPaintCount / totalPaints;
+        final String diagnosis = switch (fraction) {
+          _ when totalPaints < 5 => 'insufficient data to draw conclusion (less than five repaints)',
+          > 0.9 => 'this is an outstandingly useful repaint boundary and should definitely be kept',
+          > 0.5 => 'this is a useful repaint boundary and should be kept',
+          > 0.3 => 'this repaint boundary is probably useful, but maybe it would be more useful in tandem with adding more repaint boundaries elsewhere',
+          > 0.1 => 'this repaint boundary does sometimes show value, though currently not that often',
+          _ when debugAsymmetricPaintCount > 0 => 'this repaint boundary is not very effective and should probably be removed',
+          _ => 'this repaint boundary is astoundingly ineffectual and should be removed',
+        };
+
         properties.add(PercentProperty('metrics', fraction, unit: 'useful', tooltip: '$debugSymmetricPaintCount bad vs $debugAsymmetricPaintCount good'));
         properties.add(MessageProperty('diagnosis', diagnosis));
       }
@@ -4325,6 +4324,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     if (_properties.link != null) {
       config.isLink = _properties.link!;
     }
+    if (_properties.linkUrl != null) {
+      config.linkUrl = _properties.linkUrl;
+    }
     if (_properties.slider != null) {
       config.isSlider = _properties.slider!;
     }
@@ -4333,6 +4335,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     }
     if (_properties.header != null) {
       config.isHeader = _properties.header!;
+    }
+    if (_properties.headingLevel != null) {
+      config.headingLevel = _properties.headingLevel!;
     }
     if (_properties.textField != null) {
       config.isTextField = _properties.textField!;
@@ -4472,6 +4477,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     if (_properties.onDidLoseAccessibilityFocus != null) {
       config.onDidLoseAccessibilityFocus = _performDidLoseAccessibilityFocus;
     }
+    if (_properties.onFocus != null) {
+      config.onFocus = _performFocus;
+    }
     if (_properties.customSemanticsActions != null) {
       config.customSemanticsActions = _properties.customSemanticsActions!;
     }
@@ -4555,6 +4563,10 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
 
   void _performDidLoseAccessibilityFocus() {
     _properties.onDidLoseAccessibilityFocus?.call();
+  }
+
+  void _performFocus() {
+    _properties.onFocus?.call();
   }
 }
 

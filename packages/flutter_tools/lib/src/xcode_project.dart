@@ -385,14 +385,11 @@ class IosProject extends XcodeBasedProject {
           )?.cast<String>();
 
           if (domains != null) {
-            final List<String> result = <String>[];
-            for (final String domain in domains) {
-              final RegExpMatch? match = _associatedDomainPattern.firstMatch(domain);
-              if (match != null) {
-                result.add(match.group(1)!);
-              }
-            }
-            return result;
+            return <String>[
+              for (final String domain in domains)
+                if (_associatedDomainPattern.firstMatch(domain) case final RegExpMatch match)
+                  match.group(1)!,
+            ];
           }
         }
       }
@@ -412,7 +409,7 @@ class IosProject extends XcodeBasedProject {
   Future<String> _parseHostAppBundleName(BuildInfo? buildInfo) async {
     // The product name and bundle name are derived from the display name, which the user
     // is instructed to change in Xcode as part of deploying to the App Store.
-    // https://flutter.dev/docs/deployment/ios#review-xcode-project-settings
+    // https://flutter.dev/to/xcode-name-config
     // The only source of truth for the name is Xcode's interpretation of the build settings.
     String? productName;
     if (globals.xcodeProjectInterpreter?.isInstalled ?? false) {
@@ -588,7 +585,7 @@ class IosProject extends XcodeBasedProject {
     if (globals.cache.isOlderThanToolsStamp(generatedXcodePropertiesFile)) {
       await xcode.updateGeneratedXcodeProperties(
         project: parent,
-        buildInfo: BuildInfo.debug,
+        buildInfo: BuildInfo.dummy,
         targetOverride: bundle.defaultMainPath,
       );
     }
@@ -760,7 +757,7 @@ class MacOSProject extends XcodeBasedProject {
     if (globals.cache.isOlderThanToolsStamp(generatedXcodePropertiesFile)) {
       await xcode.updateGeneratedXcodeProperties(
         project: parent,
-        buildInfo: BuildInfo.debug,
+        buildInfo: BuildInfo.dummy,
         useMacOSConfig: true,
       );
     }
