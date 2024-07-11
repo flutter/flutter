@@ -376,6 +376,7 @@ targets:
         ["framework", "hostonly", "shard", "linux"]
     runIfNot:
       - docs/**
+      - .ci.yaml
 
   - name: Linux build_tests_2_3
     recipe: flutter/flutter_drone
