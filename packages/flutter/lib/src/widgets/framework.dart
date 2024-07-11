@@ -2521,8 +2521,8 @@ abstract class BuildContext {
   /// In general, [dependOnInheritedWidgetOfExactType] is more appropriate for such
   /// cases. This method is useful only in esoteric cases where a widget needs
   /// to cause an ancestor to change its layout or paint behavior. For example,
-  /// it is used by [SplashBox] so that [Splash] effects are triggered on the
-  /// [SplashController] render object.
+  /// it is used by [Material] so that [InkWell] widgets can trigger the ink
+  /// splash on the [Material]'s actual render object.
   ///
   /// Calling this method is relatively expensive (O(N) in the depth of the
   /// tree). Only call this method if the distance from this widget to the

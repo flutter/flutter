@@ -139,11 +139,11 @@ typedef _CheckContext = bool Function(BuildContext context);
 /// matches the Material Design premise wherein the [Material] is what is
 /// actually reacting to touches by spreading ink.
 ///
-/// If a Widget uses this class directly, it should call [debugCheckSplash]
-/// at the top of its build method:
+/// If a Widget uses this class directly, it should include the following line
+/// at the top of its build function to call [debugCheckHasMaterial]:
 ///
 /// ```dart
-/// assert(debugCheckSplash(context));
+/// assert(debugCheckHasMaterial(context));
 /// ```
 ///
 /// ## Troubleshooting
@@ -1242,11 +1242,11 @@ class _InkResponseState extends State<_InkResponseStateWidget>
 /// matches the Material Design premise wherein the [Material] is what is
 /// actually reacting to touches by spreading ink.
 ///
-/// If a Widget uses this class directly, it should call [debugCheckSplash]
-/// at the top of its build method:
+/// If a Widget uses this class directly, it should include the following line
+/// at the top of its build function to call [debugCheckHasMaterial]:
 ///
 /// ```dart
-/// assert(debugCheckSplash(context));
+/// assert(debugCheckHasMaterial(context));
 /// ```
 ///
 /// ## Troubleshooting
@@ -1259,21 +1259,27 @@ class _InkResponseState extends State<_InkResponseStateWidget>
 /// This is because ink splashes draw on the underlying [Material] itself, as
 /// if the ink was spreading inside the material.
 ///
-/// Replacing the opaque widget with a [Material] allows the ink splash to be shown.
+/// The [Ink] widget can be used as a replacement for [Image], [Container], or
+/// [DecoratedBox] to ensure that the image or decoration also paints in the
+/// [Material] itself, below the ink.
 ///
-/// Alternatively, an [SplashBox] can be set as the opaque widget's child, and
-/// [Splash] effects will be visible on top of it.
+/// If this is not possible for some reason, e.g. because you are using an
+/// opaque [CustomPaint] widget, alternatively consider using a second
+/// [Material] above the opaque widget but below the [InkWell] (as an
+/// ancestor to the ink well). The [MaterialType.transparency] material
+/// kind can be used for this purpose.
 ///
 /// ### InkWell isn't clipping properly
 ///
-/// In order to clip an InkWell (or any other [Splash] widgets), clipping should
-/// be applied to the widget providing the [SplashController], which could be a
-/// [Material] or a [SplashBox].
+/// If you want to clip an InkWell or any [Ink] widgets you need to keep in mind
+/// that the [Material] that the Ink will be printed on is responsible for clipping.
+/// This means you can't wrap the [Ink] widget in a clipping widget directly,
+/// since this will leave the [Material] not clipped (and by extension the printed
+/// [Ink] widgets as well).
 ///
-/// If, for example, the ancestor [SplashController] is supplied by a [Scaffold],
-/// clipping the ancestor might be undesirable. In this case, the InkWell can
-/// be wrapped in a [SplashBox], so that clipping, resizing, and [Splash] effects
-/// are no longer directly tied to the [Scaffold].
+/// An easy solution is to deliberately wrap the [Ink] widgets you want to clip
+/// in a [Material], and wrap that in a clipping widget instead. See [Ink] for
+/// an example.
 ///
 /// ### The ink splashes don't track the size of an animated container
 /// If the size of an InkWell's [Material] ancestor changes while the InkWell's

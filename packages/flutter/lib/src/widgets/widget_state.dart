@@ -761,9 +761,10 @@ class _WidgetTextStyleMapper extends WidgetStateTextStyle {
 /// Widget state properties represent values that depend on a widget's "state".
 /// The state is encoded as a set of [WidgetState] values, like
 /// [WidgetState.focused], [WidgetState.hovered], [WidgetState.pressed]. For
-/// example, the [InkWell.overlayColor] defines an ink well's [Splash] color.
-/// The [InkWell] uses the overlay color's [resolve] method to compute the
-/// color for the ink well's current state.
+/// example the [InkWell.overlayColor] defines the color that fills the ink well
+/// when it's pressed (the "splash color"), focused, or hovered. The [InkWell]
+/// uses the overlay color's [resolve] method to compute the color for the
+/// ink well's current state.
 ///
 /// [ButtonStyle], which is used to configure the appearance of
 /// buttons like [TextButton], [ElevatedButton], and [OutlinedButton],

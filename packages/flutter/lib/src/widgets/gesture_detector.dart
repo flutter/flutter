@@ -129,8 +129,9 @@ class GestureRecognizerFactoryWithHandlers<T extends GestureRecognizer> extends 
 ///
 /// See <http://flutter.dev/to/gestures> for additional information.
 ///
-/// Some widgets react to touches with [Splash] effects. [InkWell] implements
-/// this effect and can be used in place of a [GestureDetector] for handling taps.
+/// Material design applications typically react to touches with ink splash
+/// effects. The [InkWell] class implements this effect and can be used in place
+/// of a [GestureDetector] for handling taps.
 ///
 /// {@tool dartpad}
 /// This example contains a black light bulb wrapped in a [GestureDetector]. It
