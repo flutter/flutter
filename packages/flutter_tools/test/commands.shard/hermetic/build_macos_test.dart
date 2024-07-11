@@ -838,3 +838,4 @@ STDERR STUFF
     ),
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
   });
+}
