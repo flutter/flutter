@@ -185,7 +185,7 @@ class Dismissible extends StatefulWidget {
   /// Flinging is treated as being equivalent to dragging almost to 1.0, so
   /// flinging can dismiss an item past any threshold less than 1.0.
   ///
-  /// This defaults to `true`
+  /// Defaults to `true`.
   final bool allowFlinging;
 
   /// Defines the duration for card to dismiss or to come back to original position if not dismissed.
