@@ -34,6 +34,12 @@ void main() {
   });
 
   test('Vertices.raw checks', () {
+    bool assertsEnabled = false;
+    assert(() {
+      assertsEnabled = true;
+      return true;
+    }());
+
     try {
       Vertices.raw(
         VertexMode.triangles,
@@ -43,6 +49,8 @@ void main() {
     } on ArgumentError catch (e) {
       expect('$e', 'Invalid argument(s): "positions" must have an even number of entries (each coordinate is an x,y pair).');
     }
+
+    Object? indicesError;
     try {
       Vertices.raw(
         VertexMode.triangles,
@@ -51,8 +59,14 @@ void main() {
       );
       throw 'Vertices.raw did not throw the expected error.';
     } on ArgumentError catch (e) {
-      expect('$e', 'Invalid argument(s): "indices" values must be valid indices in the positions list (i.e. numbers in the range 0..2), but indices[2] is 5, which is too big.');
+      indicesError = e;
     }
+    if (assertsEnabled) {
+      expect('$indicesError', 'Invalid argument(s): "indices" values must be valid indices in the positions list (i.e. numbers in the range 0..2), but indices[2] is 5, which is too big.');
+    } else {
+      expect(indicesError, null);
+    }
+
     Vertices.raw( // This one does not throw.
       VertexMode.triangles,
       Float32List.fromList(const <double>[0.0, 0.0]),
