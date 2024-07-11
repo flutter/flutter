@@ -1169,7 +1169,6 @@ targets:
 
   - name: Linux android_java11_tool_integration_tests
     recipe: flutter/flutter_drone
-    bringup: true
     timeout: 60
     properties:
       add_recipes_cq: "true"
