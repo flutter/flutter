@@ -167,6 +167,36 @@ void main() {
       expect(notifyLog, isEmpty);
     });
   });
+
+  testWidgets('correctly compares to other TimeOfDays', (WidgetTester tester) async {
+    expect(const TimeOfDay(hour: 0, minute: 0).compareTo(const TimeOfDay(hour: 1, minute: 0)), lessThan(0));
+    expect(const TimeOfDay(hour: 20, minute: 0).compareTo(const TimeOfDay(hour: 20, minute: 1)), lessThan(0));
+    expect(const TimeOfDay(hour: 0, minute: 0).compareTo(const TimeOfDay(hour: 0, minute: 0)), 0);
+    expect(const TimeOfDay(hour: 1, minute: 0).compareTo(const TimeOfDay(hour: 0, minute: 0)), greaterThan(0));
+    expect(const TimeOfDay(hour: 20, minute: 1).compareTo(const TimeOfDay(hour: 20, minute: 0)), greaterThan(0));
+
+    expect(const TimeOfDay(hour: 0, minute: 0).isBefore(const TimeOfDay(hour: 1, minute: 0)), isTrue);
+    expect(const TimeOfDay(hour: 0, minute: 0).isBefore(const TimeOfDay(hour: 23, minute: 0)), isTrue);
+    expect(const TimeOfDay(hour: 0, minute: 0).isBefore(const TimeOfDay(hour: 0, minute: 10)), isTrue);
+    expect(const TimeOfDay(hour: 0, minute: 0).isBefore(const TimeOfDay(hour: 0, minute: 0)), isFalse);
+    expect(const TimeOfDay(hour: 1, minute: 0).isBefore(const TimeOfDay(hour: 0, minute: 0)), isFalse);
+    expect(const TimeOfDay(hour: 23, minute: 0).isBefore(const TimeOfDay(hour: 0, minute: 0)), isFalse);
+    expect(const TimeOfDay(hour: 0, minute: 10).isBefore(const TimeOfDay(hour: 0, minute: 0)), isFalse);
+
+    expect(const TimeOfDay(hour: 0, minute: 0).isAfter(const TimeOfDay(hour: 1, minute: 0)), isFalse);
+    expect(const TimeOfDay(hour: 0, minute: 0).isAfter(const TimeOfDay(hour: 23, minute: 0)), isFalse);
+    expect(const TimeOfDay(hour: 0, minute: 0).isAfter(const TimeOfDay(hour: 0, minute: 10)), isFalse);
+    expect(const TimeOfDay(hour: 0, minute: 0).isAfter(const TimeOfDay(hour: 0, minute: 0)), isFalse);
+    expect(const TimeOfDay(hour: 1, minute: 0).isAfter(const TimeOfDay(hour: 0, minute: 0)), isTrue);
+    expect(const TimeOfDay(hour: 23, minute: 0).isAfter(const TimeOfDay(hour: 0, minute: 0)), isTrue);
+    expect(const TimeOfDay(hour: 0, minute: 10).isAfter(const TimeOfDay(hour: 0, minute: 0)), isTrue);
+
+    expect(const TimeOfDay(hour: 0, minute: 0).isAtSameTimeAs(const TimeOfDay(hour: 1, minute: 0)), isFalse);
+    expect(const TimeOfDay(hour: 0, minute: 0).isAtSameTimeAs(const TimeOfDay(hour: 0, minute: 10)), isFalse);
+    expect(const TimeOfDay(hour: 0, minute: 0).isAtSameTimeAs(const TimeOfDay(hour: 0, minute: 0)), isTrue);
+    expect(const TimeOfDay(hour: 1, minute: 0).isAtSameTimeAs(const TimeOfDay(hour: 0, minute: 0)), isFalse);
+    expect(const TimeOfDay(hour: 0, minute: 10).isAtSameTimeAs(const TimeOfDay(hour: 0, minute: 0)), isFalse);
+  });
 }
 
 class _RestorableWidget extends StatefulWidget {
