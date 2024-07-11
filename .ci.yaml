@@ -376,7 +376,7 @@ targets:
         ["framework", "hostonly", "shard", "linux"]
     runIfNot:
       - docs/**
-      - .ci.yaml
+      - **.md
 
   - name: Linux build_tests_2_3
     recipe: flutter/flutter_drone
@@ -396,6 +396,8 @@ targets:
       subshard: "2_3"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+    runIfNot:
+      - docs/**
 
   - name: Linux build_tests_3_3
     recipe: flutter/flutter_drone
