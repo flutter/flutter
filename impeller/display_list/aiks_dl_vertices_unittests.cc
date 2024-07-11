@@ -354,6 +354,30 @@ TEST_P(AiksTest, DrawVerticesPremultipliesColors) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+TEST_P(AiksTest, DrawVerticesWithInvalidIndices) {
+  std::vector<SkPoint> positions = {
+      SkPoint::Make(100, 300), SkPoint::Make(200, 100), SkPoint::Make(300, 300),
+      SkPoint::Make(200, 500)};
+  std::vector<uint16_t> indices = {0, 1, 2, 0, 2, 3, 99, 100, 101};
+
+  auto vertices = flutter::DlVertices::Make(
+      flutter::DlVertexMode::kTriangles, positions.size(), positions.data(),
+      /*texture_coordinates=*/nullptr, /*colors=*/nullptr, indices.size(),
+      indices.data());
+
+  EXPECT_EQ(vertices->bounds(), SkRect::MakeLTRB(100, 100, 300, 500));
+
+  flutter::DisplayListBuilder builder;
+  flutter::DlPaint paint;
+  paint.setBlendMode(flutter::DlBlendMode::kSrcOver);
+  paint.setColor(flutter::DlColor::kRed());
+
+  builder.DrawRect(SkRect::MakeLTRB(0, 0, 400, 400), paint);
+  builder.DrawVertices(vertices, flutter::DlBlendMode::kSrc, paint);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 // All four vertices should form a solid red rectangle with no gaps.
 // The blur rectangle drawn under them should not be visible.
 TEST_P(AiksTest, DrawVerticesTextureCoordinatesWithFragmentShader) {
