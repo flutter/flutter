@@ -4,7 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 
-/// Flutter code sample for [FontFeature.FontFeature.superscripts].
+/// Flutter code sample for [FontFeature.superscripts].
 
 void main() => runApp(const ExampleApp());
 

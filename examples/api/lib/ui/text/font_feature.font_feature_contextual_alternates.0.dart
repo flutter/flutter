@@ -4,7 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 
-/// Flutter code sample for [FontFeature.FontFeature.contextualAlternates].
+/// Flutter code sample for [FontFeature.contextualAlternates].
 
 void main() => runApp(const ExampleApp());
 

@@ -4,7 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 
-/// Flutter code sample for [FontFeature.FontFeature.stylisticSet].
+/// Flutter code sample for [FontFeature.stylisticSet].
 
 void main() => runApp(const ExampleApp());
 
