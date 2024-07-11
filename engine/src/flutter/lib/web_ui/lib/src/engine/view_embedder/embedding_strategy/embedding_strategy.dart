@@ -26,7 +26,8 @@ abstract class EmbeddingStrategy {
     }
   }
 
-  /// The host element in which the Flutter view is embedded.
+  /// The DOM element in which the Flutter view is embedded.
+  /// This element is the direct parent element of the <flutter-view> element.
   DomElement get hostElement;
 
   /// The global event target for the Flutter view.

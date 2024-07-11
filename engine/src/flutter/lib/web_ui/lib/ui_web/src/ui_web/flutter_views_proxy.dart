@@ -17,13 +17,19 @@ class FlutterViewManagerProxy {
   // The proxied viewManager instance.
   final FlutterViewManager _viewManager;
 
-  /// Returns the `hostElement` configuration value passed from JS when `viewId` was added.
+  /// Returns the host element for [viewId].
+  ///
+  /// In the full-page mode, the host element is the `<body>` element of the page
+  /// and the view is the one and only [PlatformDispatcher.implicitView].
+  ///
+  /// In the add-to-app mode, the host element is the value of `hostElement`
+  /// provided when creating the view.
   ///
   /// This is useful for plugins and apps to have a safe DOM Element where they
   /// can add their own custom HTML elements (for example: file inputs for the
   /// file_selector plugin).
   JSAny? getHostElement(int viewId) {
-    return _viewManager.getOptions(viewId)?.hostElement as JSAny?;
+    return _viewManager.getHostElement(viewId) as JSAny?;
   }
 
   /// Returns the `initialData` configuration value passed from JS when `viewId` was added.
