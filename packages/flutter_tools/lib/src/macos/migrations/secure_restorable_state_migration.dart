@@ -52,8 +52,7 @@ class SecureRestorableStateMigration extends ProjectMigrator {
     // Skip this migration if the project uses Objective-C.
     if (!_appDelegateSwift.existsSync()) {
       logger.printTrace(
-        'macos/Runner/AppDelegate.swift not found.'
-        'Skipping applicationSupportsSecureRestorableState migration.',
+        'macos/Runner/AppDelegate.swift not found. Skipping applicationSupportsSecureRestorableState migration.'
       );
       return;
     }
@@ -66,13 +65,13 @@ class SecureRestorableStateMigration extends ProjectMigrator {
         return;
       }
 
-      logger.printWarning(
-        'macos/Runner/AppDelegate.swift has been modified and cannot be automatically migrated.'
-        'We recommend developers override applicationSupportsSecureRestorableState in AppDelegate.swift as follows:\n'
-        'override func applicationSupportsSecureRestorableState(_ app: NSApplication) -> Bool {\n'
-        '  return true\n'
-        '}'
-      );
+      logger.printWarning('''
+macos/Runner/AppDelegate.swift has been modified and cannot be automatically migrated.
+We recommend developers override applicationSupportsSecureRestorableState in AppDelegate.swift as follows:
+override func applicationSupportsSecureRestorableState(_ app: NSApplication) -> Bool {
+  return true
+}
+''');
     }
 
     // Migrate the macos/Runner/AppDelegate.swift file.
