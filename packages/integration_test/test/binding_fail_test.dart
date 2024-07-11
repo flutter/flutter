@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:integration_test/integration_test.dart';
+library;
+
 import 'dart:convert';
 import 'dart:io';
 
@@ -52,7 +55,7 @@ Future<void> main() async {
   });
 }
 
-/// Runs a test script and returns the [IntegrationTestWidgetsFlutterBinding.result].
+/// Runs a test script and returns the [IntegrationTestWidgetsFlutterBinding.results].
 ///
 /// [scriptPath] is relative to the package root.
 Future<Map<String, dynamic>?> _runTest(String scriptPath) async {
