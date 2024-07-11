@@ -343,7 +343,7 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
   const DefaultCupertinoLocalizations();
 
   /// Short version of days of week.
-  static const List<String> shortWeekdays = <String>[
+  static const List<String> _shortWeekdays = <String>[
     'Mon',
     'Tue',
     'Wed',
@@ -397,7 +397,7 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
   @override
   String datePickerDayOfMonth(int dayIndex, [int? weekDay]) {
     if (weekDay != null) {
-      return ' ${shortWeekdays[weekDay - DateTime.monday]} $dayIndex ';
+      return ' ${_shortWeekdays[weekDay - DateTime.monday]} $dayIndex ';
     }
 
     return dayIndex.toString();
@@ -422,7 +422,7 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
 
   @override
   String datePickerMediumDate(DateTime date) {
-    return '${shortWeekdays[date.weekday - DateTime.monday]} '
+    return '${_shortWeekdays[date.weekday - DateTime.monday]} '
       '${_shortMonths[date.month - DateTime.january]} '
       '${date.day.toString().padRight(2)}';
   }
