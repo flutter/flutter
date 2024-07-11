@@ -1528,7 +1528,7 @@ class _ActionSheetMainSheetState extends State<_ActionSheetMainSheet> {
   );
 }
 
-// Layout an alert dialog, given its content section and list of actions.
+// Layout an alert dialog given its content section and actions section.
 class _CupertinoDialogRenderWidget extends StatefulWidget {
   const _CupertinoDialogRenderWidget({
     required this.contentSection,
