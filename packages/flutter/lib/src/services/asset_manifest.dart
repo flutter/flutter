@@ -19,7 +19,7 @@ const String _kAssetManifestFilename = 'AssetManifest.bin';
 const String _kAssetManifestWebFilename = 'AssetManifest.bin.json';
 
 /// Contains details about available assets and their variants.
-/// See [Resolution-aware image assets](https://docs.flutter.dev/ui/assets-and-images#resolution-aware)
+/// See [Resolution-aware image assets](https://flutter.dev/to/resolution-aware-images)
 /// to learn about asset variants and how to declare them.
 abstract class AssetManifest {
   /// Loads asset manifest data from an [AssetBundle] object and creates an
@@ -50,8 +50,8 @@ abstract class AssetManifest {
   /// The logical key maps to the path of an asset specified in the pubspec.yaml
   /// file at build time.
   ///
-  /// See [Specifying assets](https://docs.flutter.dev/development/ui/assets-and-images#specifying-assets)
-  /// and [Loading assets](https://docs.flutter.dev/development/ui/assets-and-images#loading-assets)
+  /// See [Specifying assets](https://docs.flutter.dev/ui/assets/assets-and-images#specifying-assets)
+  /// and [Loading assets](https://docs.flutter.dev/ui/assets/assets-and-images#loading-assets)
   /// for more information.
   List<String> listAssets();
 
@@ -139,7 +139,7 @@ class AssetMetadata {
   /// This will be null if the parent folder name is not a ratio value followed
   /// by an "x".
   ///
-  /// See [Resolution-aware image assets](https://docs.flutter.dev/development/ui/assets-and-images#resolution-aware)
+  /// See [Resolution-aware image assets](https://flutter.dev/to/resolution-aware-images)
   /// for more information.
   final double? targetDevicePixelRatio;
 

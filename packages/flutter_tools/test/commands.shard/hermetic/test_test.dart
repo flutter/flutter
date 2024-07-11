@@ -7,11 +7,13 @@ import 'dart:convert';
 
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
+import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/async_guard.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/test.dart';
 import 'package:flutter_tools/src/device.dart';
@@ -1178,6 +1180,59 @@ dev_dependencies:
     DeviceManager: () => _FakeDeviceManager(<Device>[]),
   });
 
+  testUsingContext('correctly considers --flavor when validating the cached asset bundle', () async {
+    final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
+    fs.file('vanilla.txt').writeAsStringSync('vanilla');
+    fs.file('flavorless.txt').writeAsStringSync('flavorless');
+    fs.file('pubspec.yaml').writeAsStringSync('''
+flutter:
+  assets:
+    - path: vanilla.txt
+      flavors:
+        - vanilla
+    - flavorless.txt
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  integration_test:
+    sdk: flutter''');
+    final TestCommand testCommand = TestCommand(testRunner: testRunner);
+    final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+    const List<String> buildArgsFlavorless = <String>[
+      'test',
+      '--no-pub',
+    ];
+
+    const List<String> buildArgsVanilla = <String>[
+      'test',
+      '--no-pub',
+      '--flavor',
+      'vanilla',
+    ];
+
+    final File builtVanillaAssetFile = fs.file(
+      fs.path.join('build', 'unit_test_assets', 'vanilla.txt'),
+    );
+    final File builtFlavorlessAssetFile = fs.file(
+      fs.path.join('build', 'unit_test_assets', 'flavorless.txt'),
+    );
+
+    await commandRunner.run(buildArgsVanilla);
+    await commandRunner.run(buildArgsFlavorless);
+
+    expect(builtVanillaAssetFile, isNot(exists));
+    expect(builtFlavorlessAssetFile, exists);
+
+    await commandRunner.run(buildArgsVanilla);
+
+    expect(builtVanillaAssetFile, exists);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fs,
+    ProcessManager: () => FakeProcessManager.empty(),
+    DeviceManager: () => _FakeDeviceManager(<Device>[]),
+  });
+
   testUsingContext("Don't build the asset manifest if --no-test-assets if informed", () async {
     final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
 
@@ -1425,6 +1480,7 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
     String? integrationTestUserIdentifier,
     TestTimeRecorder? testTimeRecorder,
     TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
+    BuildInfo? buildInfo,
   }) async {
     lastEnableVmServiceValue = enableVmService;
     lastDebuggingOptionsValue = debuggingOptions;

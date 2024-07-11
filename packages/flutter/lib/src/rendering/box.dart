@@ -322,10 +322,12 @@ class BoxConstraints extends Constraints {
       return result;
     }
 
+    if (size.isEmpty) {
+      return constrain(size);
+    }
+
     double width = size.width;
     double height = size.height;
-    assert(width > 0.0);
-    assert(height > 0.0);
     final double aspectRatio = width / height;
 
     if (width > maxWidth) {
@@ -2467,7 +2469,7 @@ abstract class RenderBox extends RenderObject {
           ...information,
           DiagnosticsProperty<BoxConstraints>('The constraints that applied to the $runtimeType were', constraints, style: DiagnosticsTreeStyle.errorProperty),
           DiagnosticsProperty<Size>('The exact size it was given was', _size, style: DiagnosticsTreeStyle.errorProperty),
-          ErrorHint('See https://docs.flutter.dev/ui/layout/box-constraints for more information.'),
+          ErrorHint('See https://flutter.dev/to/unbounded-constraints for more information.'),
         ]);
       }
       // verify that the size is within the constraints
