@@ -54,8 +54,8 @@ class CircularNotchedRectangle extends NotchedShape {
   /// The notch is curve that smoothly connects the host's top edge and
   /// the guest circle.
   ///
-  /// Parameter [inverted] allows for the inversion of the circular notch
-  /// so that it may be applied to the bottom of a path when set to true.
+  /// If [inverted] is true, the notch is placed at the bottom of the
+  /// rectangle.
   // TODO(amirh): add an example diagram here.
   @override
   Path getOuterPath(Rect host, Rect? guest, {bool inverted = false}) {
