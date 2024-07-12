@@ -3586,7 +3586,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
 
   /// Whether the semantics of this render object is dirty and await the update.
   ///
-  /// Always return false in release mode.
+  /// Always returns false in release mode.
   bool get debugNeedsSemanticsUpdate {
     if (kReleaseMode) {
       return false;
