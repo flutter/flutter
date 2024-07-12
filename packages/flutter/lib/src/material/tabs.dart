@@ -603,7 +603,7 @@ class _IndicatorPainter extends CustomPainter {
       return rect;
     }
 
-    final double fraction = switch(rect.left < targetRect.left) {
+    final double fraction = switch (rect.left < targetRect.left) {
       true  => accelerateInterpolation(tabChangeProgress),
       false => decelerateInterpolation(tabChangeProgress),
     };
