@@ -27,6 +27,7 @@ import 'migrations/flutter_application_migration.dart';
 import 'migrations/macos_deployment_target_migration.dart';
 import 'migrations/nsapplicationmain_deprecation_migration.dart';
 import 'migrations/remove_macos_framework_link_and_embedding_migration.dart';
+import 'migrations/secure_restorable_state_migration.dart';
 
 /// When run in -quiet mode, Xcode should only print from the underlying tasks to stdout.
 /// Passing this regexp to trace moves the stdout output to stderr.
@@ -87,6 +88,7 @@ Future<void> buildMacOS({
     XcodeThinBinaryBuildPhaseInputPathsMigration(flutterProject.macos, globals.logger),
     FlutterApplicationMigration(flutterProject.macos, globals.logger),
     NSApplicationMainDeprecationMigration(flutterProject.macos, globals.logger),
+    SecureRestorableStateMigration(flutterProject.macos, globals.logger),
     if (flutterProject.usesSwiftPackageManager && flutterProject.macos.flutterPluginSwiftPackageManifest.existsSync())
       SwiftPackageManagerIntegrationMigration(
         flutterProject.macos,
