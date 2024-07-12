@@ -285,13 +285,18 @@ class Icon extends StatelessWidget {
     }
 
     final double iconOpacity = iconTheme.opacity ?? 1.0;
-    Color iconColor = color ?? iconTheme.color!;
+    Color? iconColor = color ?? iconTheme.color!;
     if (iconOpacity != 1.0) {
       iconColor = iconColor.withOpacity(iconColor.opacity * iconOpacity);
     }
 
-    final Paint paint = foreground ?? Paint();
-    paint.color = iconColor;
+    // Cannot provide both a color and a foreground. The color argument is just
+    // a shorthand for "foreground: Paint()..color = color".
+    if (foreground != null) {
+      foreground!.color = iconColor;
+      iconColor = null;
+    }
+
     final TextStyle fontStyle = TextStyle(
       fontVariations: <FontVariation>[
         if (iconFill != null) FontVariation('FILL', iconFill),
@@ -300,6 +305,7 @@ class Icon extends StatelessWidget {
         if (iconOpticalSize != null) FontVariation('opsz', iconOpticalSize),
       ],
       inherit: false,
+      color: iconColor,
       fontSize: iconSize,
       fontFamily: icon.fontFamily,
       package: icon.fontPackage,
@@ -307,7 +313,7 @@ class Icon extends StatelessWidget {
       shadows: iconShadows,
       height: 1.0,  // Makes sure the font's body is vertically centered within the iconSize x iconSize square.
       leadingDistribution: TextLeadingDistribution.even,
-      foreground: paint,
+      foreground: foreground,
     );
 
     Widget iconWidget = RichText(
