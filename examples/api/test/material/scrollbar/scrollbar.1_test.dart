@@ -7,15 +7,26 @@ import 'package:flutter_api_samples/material/scrollbar/scrollbar.1.dart' as exam
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('The scrollbar thumb should be visible', (WidgetTester tester) async {
+  testWidgets('The scrollbar thumb should be visible at all time', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.ScrollbarExampleApp(),
     );
+    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump();
+    await tester.pump();
+    await tester.pump();
 
     expect(find.widgetWithText(AppBar, 'Scrollbar Sample'), findsOne);
-    expect(find.text('item 0'), findsOne);
-    expect(find.text('item 1'), findsOne);
-    expect(find.text('item 2'), findsOne);
 
+    expect(find.text('item 0'), findsOne);
+    expect(find.text('item 9'), findsNothing);
+    expect(find.byType(Scrollbar), paints..rect());
+
+    await tester.fling(find.byType(Scrollbar).last, const Offset(0, -300), 10.0);
+
+    expect(find.text('item 0'), findsNothing);
+    expect(find.text('item 9'), findsOne);
+    expect(find.byType(Scrollbar), paints..rect());
   });
 }
