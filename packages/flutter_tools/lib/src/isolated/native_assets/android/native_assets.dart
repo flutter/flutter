@@ -57,18 +57,8 @@ Future<Iterable<KernelAsset>> dryRunNativeAssetsAndroidInternal(
     includeParentEnvironment: true,
   );
   ensureNativeAssetsBuildDryRunSucceed(buildDryRunResult);
-  final LinkDryRunResult linkDryRunResult = await buildRunner.linkDryRun(
-    linkModePreference: LinkModePreferenceImpl.dynamic,
-    targetOS: targetOS,
-    workingDirectory: projectUri,
-    includeParentEnvironment: true,
-    buildDryRunResult: buildDryRunResult,
-  );
-  ensureNativeAssetsLinkDryRunSucceed(linkDryRunResult);
-  final List<AssetImpl> nativeAssets = <AssetImpl>[
-    ...buildDryRunResult.assets,
-    ...linkDryRunResult.assets,
-  ];
+  // No link hooks in JIT mode.
+  final List<AssetImpl> nativeAssets = buildDryRunResult.assets;
   ensureNoLinkModeStatic(nativeAssets);
   globals.logger.printTrace('Dry running native assets for $targetOS done.');
   final Map<AssetImpl, KernelAsset> assetTargetLocations =
@@ -102,6 +92,7 @@ Future<(Uri? nativeAssetsYaml, List<Uri> dependencies)>
   final List<Target> targets = androidArchs.map(_getNativeTarget).toList();
   final BuildModeImpl buildModeCli =
       nativeAssetsBuildMode(buildMode);
+  final bool linkingEnabled = buildModeCli == BuildModeImpl.release;
 
   globals.logger
       .printTrace('Building native assets for $targets $buildModeCli.');
@@ -116,23 +107,26 @@ Future<(Uri? nativeAssetsYaml, List<Uri> dependencies)>
       includeParentEnvironment: true,
       cCompilerConfig: await buildRunner.ndkCCompilerConfigImpl,
       targetAndroidNdkApi: targetAndroidNdkApi,
+      linkingEnabled: linkingEnabled,
     );
     ensureNativeAssetsBuildSucceed(buildResult);
     nativeAssets.addAll(buildResult.assets);
     dependencies.addAll(buildResult.dependencies);
-    final LinkResult linkResult = await buildRunner.link(
-      linkModePreference: LinkModePreferenceImpl.dynamic,
-      target: target,
-      buildMode: buildModeCli,
-      workingDirectory: projectUri,
-      includeParentEnvironment: true,
-      cCompilerConfig: await buildRunner.ndkCCompilerConfigImpl,
-      targetAndroidNdkApi: targetAndroidNdkApi,
-      buildResult: buildResult,
-    );
-    ensureNativeAssetsLinkSucceed(linkResult);
-    nativeAssets.addAll(linkResult.assets);
-    dependencies.addAll(linkResult.dependencies);
+    if (linkingEnabled) {
+      final LinkResult linkResult = await buildRunner.link(
+        linkModePreference: LinkModePreferenceImpl.dynamic,
+        target: target,
+        buildMode: buildModeCli,
+        workingDirectory: projectUri,
+        includeParentEnvironment: true,
+        cCompilerConfig: await buildRunner.ndkCCompilerConfigImpl,
+        targetAndroidNdkApi: targetAndroidNdkApi,
+        buildResult: buildResult,
+      );
+      ensureNativeAssetsLinkSucceed(linkResult);
+      nativeAssets.addAll(linkResult.assets);
+      dependencies.addAll(linkResult.dependencies);
+    }
   }
   ensureNoLinkModeStatic(nativeAssets);
   globals.logger.printTrace('Building native assets for $targets done.');

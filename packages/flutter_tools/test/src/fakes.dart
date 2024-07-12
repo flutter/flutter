@@ -254,7 +254,7 @@ class FakeStdio extends Stdio {
   }
 
   @override
-  bool hasTerminal = true;
+  bool hasTerminal = false;
 
   List<String> get writtenToStdout => _stdout.writes.map<String>(_stdout.encoding.decode).toList();
   List<String> get writtenToStderr => _stderr.writes.map<String>(_stderr.encoding.decode).toList();
@@ -280,6 +280,9 @@ class FakeStdin extends Fake implements Stdin {
 
   @override
   bool lineMode = true;
+
+  @override
+  bool hasTerminal = false;
 
   @override
   Stream<S> transform<S>(StreamTransformer<List<int>, S> transformer) {
@@ -735,5 +738,15 @@ class FakeDevtoolsLauncher extends Fake implements DevtoolsLauncher {
   @override
   Future<void> close() async {
     closed = true;
+  }
+}
+
+class ClosedStdinController extends Fake implements StreamSink<List<int>> {
+  @override
+  Future<Object?> addStream(Stream<List<int>> stream) async => throw const SocketException('Bad pipe');
+
+  @override
+  Future<Object?> close() async {
+    return null;
   }
 }

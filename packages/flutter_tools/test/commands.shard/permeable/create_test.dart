@@ -824,6 +824,30 @@ void main() {
     );
   });
 
+  testUsingContext('recreating project uses pubspec name as project name fallback', () async {
+    final Directory outputDirectory = tempDir.childDirectory('invalid-name');
+
+    // Create the new project with a valid project name,
+    // but with a directory name that would be an invalid project name.
+    await _createProject(
+      outputDirectory,
+      <String>['--no-pub', '--template=app', '--project-name', 'valid_name', '--platforms' , 'android'],
+      <String>[]
+    );
+
+    // Now amend a new platform to the project, but omit the project name, so the fallback project name is used.
+    await _createProject(
+      outputDirectory,
+      <String>['--no-pub', '--template=app', '--platforms', 'web'],
+      <String>[]
+    );
+
+    // Verify that the pubspec name was used as project name for the web project.
+    final File webOutputFile = outputDirectory.childDirectory('web').childFile('index.html');
+
+    expect(webOutputFile.readAsStringSync(), contains('<title>valid_name</title>'));
+  });
+
   testUsingContext('module project with pub', () async {
     return _createProject(projectDir, <String>[
       '--template=module',
@@ -3446,6 +3470,27 @@ void main() {
     expect(pubspec.description, 'a: b');
   });
 
+  testUsingContext('should use caret syntax in SDK version', () async {
+    await _createProject(
+      projectDir,
+      <String>[
+        '--no-pub',
+      ],
+      <String>[
+        'pubspec.yaml',
+      ],
+    );
+
+    final String rawPubspec = await projectDir.childFile('pubspec.yaml').readAsString();
+    final Pubspec pubspec = Pubspec.parse(rawPubspec);
+
+    expect(
+      pubspec.environment!['sdk'].toString(),
+      startsWith('^'),
+      reason: 'The caret syntax is recommended over the traditional syntax.',
+    );
+  });
+
   testUsingContext('create an FFI plugin with ios, then add macos', () async {
     Cache.flutterRoot = '../..';
 
@@ -3714,7 +3759,7 @@ void main() {
       logger.clear();
     }
   }, overrides: <Type, Generator>{
-    Java: () => FakeJava(version: const software.Version.withText(14, 0, 0, '14.0.0')), // Middle compatible Java version with current template AGP/Gradle versions.
+    Java: () => FakeJava(version: const software.Version.withText(20, 0, 0, '20.0.0')), // Middle compatible Java version with current template AGP/Gradle versions.
     Logger: () => logger,
   });
 
@@ -3741,7 +3786,7 @@ void main() {
       logger.clear();
     }
   }, overrides: <Type, Generator>{
-    Java: () => FakeJava(version: const software.Version.withText(17, 0, 0, '18.0.0')), // Maximum compatible Java version with current template AGP/Gradle versions.
+    Java: () => FakeJava(version: const software.Version.withText(17, 0, 0, '22.0.0')), // Maximum compatible Java version with current template AGP/Gradle versions.
     Logger: () => logger,
   });
 
@@ -3768,7 +3813,7 @@ void main() {
       logger.clear();
     }
   }, overrides: <Type, Generator>{
-    Java: () => FakeJava(version: const software.Version.withText(11, 0, 0, '11.0.0')), // Minimum compatible Java version with current template AGP/Gradle versions.
+    Java: () => FakeJava(version: const software.Version.withText(17, 0, 0, '17.0.0')), // Minimum compatible Java version with current template AGP/Gradle versions.
     Logger: () => logger,
   });
 
