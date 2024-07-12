@@ -846,29 +846,33 @@ class ProxiedDartDevelopmentService with DartDevelopmentServiceLocalOperationsMi
               // Ignore if we did not receive any event from the server.
             },
           ));
-       final Map<String, Object?> response = _cast<Map<String, Object?>>(
-        await connection.sendRequest(method, <String, Object?>{
+      final Object? response = await connection.sendRequest(method, <String, Object?>{
           'deviceId': deviceId,
           'vmServiceUri': remoteVMServiceUri.toString(),
           'disableServiceAuthCodes': disableServiceAuthCodes,
           // TODO(bkonyi): uncomment when ready to serve DevTools from DDS.
           // 'enableDevTools': enableDevTools,
           // if (devToolsServerAddress != null) 'devToolsServerAddress': devToolsServerAddress.toString(),
-        }
-      ));
+      });
 
-      remoteUriStr = response['ddsUri'] as String?;
-      // TODO(bkonyi): uncomment when ready to serve DevTools from DDS.
-      /*
-      final String? devToolsUriStr = response['devToolsUri'] as String?;
-      if (devToolsUriStr != null) {
-        _remoteDevToolsUri = Uri.parse(devToolsUriStr);
+      if (response is Map<String, Object?>) {
+        remoteUriStr = response['ddsUri'] as String?;
+        // TODO(bkonyi): uncomment when ready to serve DevTools from DDS.
+        /*
+        final String? devToolsUriStr = response['devToolsUri'] as String?;
+        if (devToolsUriStr != null) {
+          _remoteDevToolsUri = Uri.parse(devToolsUriStr);
+        }
+        final String? dtdUriStr = response['dtdUri'] as String?;
+        if (dtdUriStr != null) {
+          _remoteDtdUri = Uri.parse(dtdUriStr);
+        }
+        */
+      } else {
+        // For backwards compatibility in google3.
+        // TODO(bkonyi): remove once a newer version of the flutter_tool is rolled out.
+        remoteUriStr = _cast<String?>(response);
       }
-      final String? dtdUriStr = response['dtdUri'] as String?;
-      if (dtdUriStr != null) {
-        _remoteDtdUri = Uri.parse(dtdUriStr);
-      }
-      */
     } on String catch (e) {
       if (!e.contains(method)) {
         rethrow;
