@@ -1641,6 +1641,30 @@ void main() {
     expect(inputText.style?.color, Colors.orange);
   });
 
+  testWidgets('SearchAnchor respects viewPadding property', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: SearchAnchor(
+          viewPadding: const EdgeInsets.all(16.0),
+          builder: (BuildContext context, SearchController controller) {
+            return IconButton(icon: const Icon(Icons.search), onPressed: () {
+              controller.openView();
+            },);
+          },
+          suggestionsBuilder: (BuildContext context, SearchController controller) {
+            return <Widget>[];
+          },
+        ),
+      ),
+    ));
+
+    await tester.tap(find.widgetWithIcon(IconButton, Icons.search));
+    await tester.pumpAndSettle();
+
+    final Padding padding = tester.widget<Padding>(find.descendant(of: findViewContent(), matching: find.byType(Padding)).first);
+    expect(padding.padding, const EdgeInsets.all(16.0));
+  });
+
   testWidgets('SearchAnchor respects dividerColor property', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Material(
