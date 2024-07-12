@@ -100,6 +100,7 @@ template("embedder_source_set") {
     public_deps = [ ":embedder_headers" ]
     deps = [
       ":embedder_gpu_configuration",
+      "$dart_src/runtime/bin:concurrent_api",
       "$dart_src/runtime/bin:dart_io_api",
       "$dart_src/runtime/bin:elf_loader",
       "//flutter/assets",

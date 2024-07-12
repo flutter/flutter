@@ -11,6 +11,7 @@ import("$dart_src/sdk/lib/_internal/js_shared/js_types_sources.gni")
 import("$dart_src/sdk/lib/_internal/vm/lib/vm_internal.gni")
 import("$dart_src/sdk/lib/async/async_sources.gni")
 import("$dart_src/sdk/lib/collection/collection_sources.gni")
+import("$dart_src/sdk/lib/concurrent/concurrent_sources.gni")
 import("$dart_src/sdk/lib/convert/convert_sources.gni")
 import("$dart_src/sdk/lib/core/core_sources.gni")
 import("$dart_src/sdk/lib/developer/developer_sources.gni")
@@ -51,6 +52,14 @@ copy("collection") {
   sources = rebase_path(collection_sdk_sources, "", lib_path)
   outputs = [
     "$root_gen_dir/dart-pkg/sky_engine/lib/collection/{{source_file_part}}",
+  ]
+}
+
+copy("concurrent") {
+  lib_path = rebase_path("concurrent", "", dart_sdk_lib_path)
+  sources = rebase_path(concurrent_sdk_sources, "", lib_path)
+  outputs = [
+    "$root_gen_dir/dart-pkg/sky_engine/lib/concurrent/{{source_file_part}}",
   ]
 }
 
@@ -210,6 +219,7 @@ group("copy_dart_sdk") {
     ":_js_types",
     ":async",
     ":collection",
+    ":concurrent",
     ":convert",
     ":copy_allowed_experiments",
     ":core",
@@ -238,6 +248,7 @@ generated_file("_embedder_yaml") {
     "embedded_libs:",
     "  \"dart:async\": \"async/async.dart\"",
     "  \"dart:collection\": \"collection/collection.dart\"",
+    "  \"dart:concurrent\": \"concurrent/concurrent.dart\"",
     "  \"dart:convert\": \"convert/convert.dart\"",
     "  \"dart:core\": \"core/core.dart\"",
     "  \"dart:developer\": \"developer/developer.dart\"",
