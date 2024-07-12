@@ -23,7 +23,7 @@
 #include "flutter/runtime/dart_vm.h"
 #include "flutter/shell/common/shell.h"
 #include "flutter/shell/common/switches.h"
-#include "flutter/shell/platform/android/android_context_vulkan_impeller.h"
+#include "flutter/shell/platform/android/android_context_vk_impeller.h"
 #include "flutter/shell/platform/android/flutter_main.h"
 #include "impeller/base/validation.h"
 #include "impeller/toolkit/android/proc_table.h"
@@ -269,7 +269,7 @@ AndroidRenderingAPI FlutterMain::SelectedRenderingAPI(
     // Determine if Vulkan is supported by creating a Vulkan context and
     // checking if it is valid.
     impeller::ScopedValidationDisable disable_validation;
-    auto vulkan_backend = std::make_unique<AndroidContextVulkanImpeller>(
+    auto vulkan_backend = std::make_unique<AndroidContextVKImpeller>(
         /*enable_vulkan_validation=*/false,
         /*enable_vulkan_gpu_tracing=*/false,
         /*quiet=*/true);
