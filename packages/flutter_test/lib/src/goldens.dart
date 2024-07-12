@@ -4,7 +4,7 @@
 
 /// @docImport 'package:flutter/widgets.dart';
 ///
-/// @docImport '_goldens_web.dart';
+/// @docImport '_goldens_io.dart';
 /// @docImport 'binding.dart';
 /// @docImport 'matchers.dart';
 /// @docImport 'widget_tester.dart';
