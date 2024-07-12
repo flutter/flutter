@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:async_helper/async_minitest.dart';
 import 'package:expect/expect.dart';
+import 'async_minitest.dart';
 
 /// The epsilon of tolerable double precision error.
 ///
