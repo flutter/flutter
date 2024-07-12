@@ -32,11 +32,13 @@ template("runner_sources") {
     dart_public_deps = []
     if (!invoker.product) {
       dart_public_deps += [
+        "$dart_src/runtime/bin:concurrent_api",
         "$dart_src/runtime/bin:dart_io_api",
         "//flutter/shell/platform/fuchsia/runtime/dart/utils:utils",
       ]
     } else {
       dart_public_deps += [
+        "$dart_src/runtime/bin:concurrent_api_product",
         "$dart_src/runtime/bin:dart_io_api_product",
         "//flutter/shell/platform/fuchsia/runtime/dart/utils:utils_product",
       ]
