@@ -31,6 +31,8 @@ void main() {
     expect(themeData.headerHeight, null);
     expect(themeData.headerTextStyle, null);
     expect(themeData.headerHintStyle, null);
+    expect(themeData.padding, null);
+    expect(themeData.shrinkWrap, null);
     expect(themeData.dividerColor, null);
 
     const SearchViewTheme theme = SearchViewTheme(data: SearchViewThemeData(), child: SizedBox());
@@ -43,6 +45,8 @@ void main() {
     expect(theme.data.headerHeight, null);
     expect(theme.data.headerTextStyle, null);
     expect(theme.data.headerHintStyle, null);
+    expect(themeData.padding, null);
+    expect(themeData.shrinkWrap, null);
     expect(theme.data.dividerColor, null);
   });
 
