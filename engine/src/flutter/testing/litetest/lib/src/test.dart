@@ -6,8 +6,8 @@ import 'dart:async';
 import 'dart:io' show stdout;
 import 'dart:isolate';
 
-import 'package:async_helper/async_minitest.dart' as m;
 import 'package:expect/expect.dart' as e;
+import 'async_minitest.dart' as m;
 
 /// The state that each [Test] may be in.
 enum TestState {

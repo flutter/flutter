@@ -114,6 +114,7 @@ dart_library("litetest") {
 
   sources = [
     "litetest.dart",
+    "src/async_minitest.dart",
     "src/matchers.dart",
     "src/test.dart",
     "src/test_suite.dart",
