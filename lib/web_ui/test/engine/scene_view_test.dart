@@ -152,10 +152,8 @@ void testMain() {
 
     final PlatformView platformView = PlatformView(
         1,
-        const ui.Size(100, 120),
-        const PlatformViewStyling(
-          position: PlatformViewPosition.offset(ui.Offset(50, 80)),
-        ));
+        const ui.Rect.fromLTWH(50, 80, 100, 120),
+        const PlatformViewStyling());
     final EngineRootLayer rootLayer = EngineRootLayer();
     rootLayer.slices.add(PlatformViewSlice(<PlatformView>[platformView], null));
     final EngineScene scene = EngineScene(rootLayer);
