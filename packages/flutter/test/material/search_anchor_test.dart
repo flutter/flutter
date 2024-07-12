@@ -1725,7 +1725,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final Rect searchViewRect = tester.getRect(find.descendant(of: findViewContent(), matching: find.byType(ConstrainedBox)).first);
-    expect(searchViewRect, equals(const Rect.fromLTRB(388.0, 0.0, 748.0, 56.0)));
+    expect(searchViewRect, equals(const Rect.fromLTRB(388.0, 0.0, 748.0, 400.0)));
 
     // Search view top left should be the same as the anchor top left
     expect(searchViewRect.topLeft, anchorRect.topLeft);
@@ -1762,7 +1762,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final Rect searchViewRect = tester.getRect(find.descendant(of: findViewContent(), matching: find.byType(ConstrainedBox)).first);
-    expect(searchViewRect, equals(const Rect.fromLTRB(52.0, 0.0, 412.0, 56.0)));
+    expect(searchViewRect, equals(const Rect.fromLTRB(52.0, 0.0, 412.0, 400.0)));
 
     // Search view top right should be the same as the anchor top right
     expect(searchViewRect.topRight, anchorRect.topRight);
@@ -1965,8 +1965,8 @@ void main() {
 
     expect(find.byType(SearchBar), findsOneWidget);
     final Rect anchorRect = tester.getRect(find.byType(SearchBar));
-    expect(anchorRect.size, const Size(800.0, 56.0));
-    expect(anchorRect, equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 56.0)));
+    expect(anchorRect.size, const Size(800.0, 400.0));
+    expect(anchorRect, equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 400.0)));
 
     await tester.tap(find.byIcon(Icons.search));
     await tester.pumpAndSettle();
@@ -2051,7 +2051,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final Rect searchViewRect = tester.getRect(find.descendant(of: findViewContent(), matching: find.byType(ConstrainedBox)).first);
-    expect(searchViewRect, equals(const Rect.fromLTRB(440.0, 200.0, 800.0, 256.0)));
+    expect(searchViewRect, equals(const Rect.fromLTRB(440.0, 200.0, 800.0, 600.0)));
   });
 
   testWidgets('Search view does not go off the screen - RTL', (WidgetTester tester) async {
@@ -2092,7 +2092,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final Rect searchViewRect = tester.getRect(find.descendant(of: findViewContent(), matching: find.byType(ConstrainedBox)).first);
-    expect(searchViewRect, equals(const Rect.fromLTRB(0.0, 200.0, 360.0, 256.0)));
+    expect(searchViewRect, equals(const Rect.fromLTRB(0.0, 200.0, 360.0, 600.0)));
   });
 
   testWidgets('Search view becomes smaller if the window size is smaller than the view size', (WidgetTester tester) async {
@@ -2139,7 +2139,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final Rect searchViewRect = tester.getRect(find.descendant(of: findViewContent(), matching: find.byType(ConstrainedBox)).first);
-    expect(searchViewRect, equals(const Rect.fromLTRB(0.0, 0.0, 200.0, 56.0)));
+    expect(searchViewRect, equals(const Rect.fromLTRB(0.0, 0.0, 200.0, 200.0)));
 
     // Test RTL text direction.
     await tester.pumpWidget(Container());
@@ -2154,7 +2154,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final Rect searchViewRectRTL = tester.getRect(find.descendant(of: findViewContent(), matching: find.byType(ConstrainedBox)).first);
-    expect(searchViewRectRTL, equals(const Rect.fromLTRB(0.0, 0.0, 200.0, 56.0)));
+    expect(searchViewRectRTL, equals(const Rect.fromLTRB(0.0, 0.0, 200.0, 200.0)));
   });
 
   testWidgets('Docked search view route is popped if the window size changes', (WidgetTester tester) async {
@@ -2363,7 +2363,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final Rect searchViewRect = tester.getRect(find.descendant(of: findViewContent(), matching: find.byType(ConstrainedBox)).first);
-    expect(searchViewRect.bottomRight, equals(const Offset(300.0, 156.0)));
+    expect(searchViewRect.bottomRight, equals(const Offset(300.0, 300.0)));
   });
 
   // Regression tests for https://github.com/flutter/flutter/issues/128332
