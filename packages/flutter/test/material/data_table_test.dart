@@ -46,6 +46,9 @@ void main() {
             onSelectChanged: (bool? selected) {
               log.add('row-selected: ${dessert.name}');
             },
+            onHover: (bool? selected) {
+              log.add('row-hover: ${dessert.name}');
+            },
             onLongPress: () {
               log.add('onLongPress: ${dessert.name}');
             },
