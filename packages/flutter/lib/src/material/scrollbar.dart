@@ -296,15 +296,14 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
 
   MaterialStateProperty<double> get _thickness {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (widget.thickness ?? _scrollbarTheme.thickness?.resolve(states) case final double thickness) {
+        return thickness;
+      }
       if (states.contains(MaterialState.hovered) && _trackVisibility.resolve(states)) {
-        return widget.thickness
-          ?? _scrollbarTheme.thickness?.resolve(states)
-          ?? _kScrollbarThicknessWithTrack;
+        return _kScrollbarThicknessWithTrack;
       }
       // The default scrollbar thickness is smaller on mobile.
-      return widget.thickness
-        ?? _scrollbarTheme.thickness?.resolve(states)
-        ?? (_kScrollbarThickness / (_useAndroidScrollbar ? 2 : 1));
+      return _kScrollbarThickness / (_useAndroidScrollbar ? 2 : 1);
     });
   }
 

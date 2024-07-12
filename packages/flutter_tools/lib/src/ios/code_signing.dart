@@ -186,17 +186,12 @@ Future<String?> _getCodeSigningIdentityDevelopmentTeam({
     return null;
   }
 
-  final List<String> validCodeSigningIdentities = findIdentityStdout
-      .split('\n')
-      .map<String?>((String outputLine) {
-        return _securityFindIdentityDeveloperIdentityExtractionPattern
-            .firstMatch(outputLine)
-            ?.group(1);
-      })
-      .where(_isNotEmpty)
-      .whereType<String>()
-      .toSet() // Unique.
-      .toList();
+  final List<String> validCodeSigningIdentities = <String>{
+    for (final String outputLine in findIdentityStdout.split('\n'))
+      if (_securityFindIdentityDeveloperIdentityExtractionPattern.firstMatch(outputLine)?.group(1)
+      case final String match when match.isNotEmpty)
+        match,
+  }.toList();
 
   final String? signingIdentity =
       await _chooseSigningIdentity(validCodeSigningIdentities, logger, config, terminal, shouldExitOnNoCerts);

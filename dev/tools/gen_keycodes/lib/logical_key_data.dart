@@ -368,22 +368,18 @@ class LogicalKeyData {
       final String value = match.namedGroup('value')!;
       replaced[name] = int.tryParse(value) ?? value.replaceAll('GLFW_KEY_', '');
     }
-    final Map<String, int> glfwNameToKeyCode = <String, int>{};
-    replaced.forEach((String key, dynamic value) {
-      // Some definition values point to other definitions (e.g #define GLFW_KEY_LAST GLFW_KEY_MENU).
-      if (value is String) {
-        glfwNameToKeyCode[key] = replaced[value] as int;
-      } else {
-        glfwNameToKeyCode[key] = value as int;
-      }
-    });
+    final Map<String, int> glfwNameToKeyCode = <String, int>{
+      for (final MapEntry<String, dynamic>(:String key, :dynamic value) in replaced.entries)
+        // Some definition values point to other definitions (e.g #define GLFW_KEY_LAST GLFW_KEY_MENU).
+        key: (value is int) ? value : replaced[value] as int,
+    };
 
     glfwNameToKeyCode.forEach((String glfwName, int value) {
       final String? name = nameToFlutterName[glfwName];
       if (name == null) {
         return;
       }
-      final LogicalKeyEntry? entry = data[nameToFlutterName[glfwName]];
+      final LogicalKeyEntry? entry = data[name];
       if (entry == null) {
         print('Invalid logical entry by name $name (from GLFW $glfwName)');
         return;

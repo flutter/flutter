@@ -132,26 +132,24 @@ class SectionDetailView extends StatelessWidget {
     );
 
     Widget item;
-    if (detail.title == null && detail.subtitle == null) {
-      item = Container(
-        height: 240.0,
-        padding: const EdgeInsets.all(16.0),
-        child: SafeArea(
-          top: false,
-          bottom: false,
-          child: image,
-        ),
+    if (detail case SectionDetail(:final String title, :final String subtitle)) {
+      item = ListTile(
+        title: Text(title),
+        subtitle: Text(subtitle),
+        leading: SizedBox.square(dimension: 32.0, child: image),
       );
     } else {
-      item = ListTile(
-        title: Text(detail.title!),
-        subtitle: Text(detail.subtitle!),
-        leading: SizedBox(width: 32.0, height: 32.0, child: image),
+      item = SizedBox(
+        height: 240.0,
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: SafeArea(top: false, bottom: false, child: image),
+        ),
       );
     }
 
-    return DecoratedBox(
-      decoration: BoxDecoration(color: Colors.grey.shade200),
+    return ColoredBox(
+      color: Colors.grey.shade200,
       child: item,
     );
   }

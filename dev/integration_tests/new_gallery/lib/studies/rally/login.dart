@@ -291,12 +291,12 @@ class _ThumbButtonState extends State<_ThumbButton> {
           onTap: widget.onTap,
           child: Focus(
             onKeyEvent: (FocusNode node, KeyEvent event) {
-              if (event is KeyDownEvent || event is KeyRepeatEvent) {
-                if (event.logicalKey == LogicalKeyboardKey.enter ||
-                    event.logicalKey == LogicalKeyboardKey.space) {
-                  widget.onTap();
-                  return KeyEventResult.handled;
-                }
+              if ((event, event.logicalKey) case (
+                KeyDownEvent() || KeyRepeatEvent(),
+                LogicalKeyboardKey.enter || LogicalKeyboardKey.space,
+              )) {
+                widget.onTap();
+                return KeyEventResult.handled;
               }
               return KeyEventResult.ignored;
             },

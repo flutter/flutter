@@ -157,25 +157,19 @@ class EmailStore with ChangeNotifier {
         ..._drafts,
       ];
 
-  List<Email> get inboxEmails {
-    return _inbox.where((Email email) {
-      if (email is InboxEmail) {
-        return email.inboxType == InboxType.normal &&
-            !trashEmailIds.contains(email.id);
-      }
-      return false;
-    }).toList();
-  }
+  List<Email> get inboxEmails => <Email>[
+    for (final Email email in _inbox)
+      if (email case InboxEmail(:final int id, :final InboxType inboxType))
+        if (inboxType == InboxType.normal && !trashEmailIds.contains(id))
+          email,
+  ];
 
-  List<Email> get spamEmails {
-    return _inbox.where((Email email) {
-      if (email is InboxEmail) {
-        return email.inboxType == InboxType.spam &&
-            !trashEmailIds.contains(email.id);
-      }
-      return false;
-    }).toList();
-  }
+  List<Email> get spamEmails => <Email>[
+    for (final Email email in _inbox)
+      if (email case InboxEmail(:final int id, :final InboxType inboxType))
+        if (inboxType == InboxType.spam && !trashEmailIds.contains(id))
+          email,
+  ];
 
   Email get currentEmail =>
       _allEmails.firstWhere((Email email) => email.id == _selectedEmailId);

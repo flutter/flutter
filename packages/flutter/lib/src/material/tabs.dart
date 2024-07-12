@@ -1252,9 +1252,8 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   Size get preferredSize {
     double maxHeight = _kTabHeight;
     for (final Widget item in tabs) {
-      if (item is PreferredSizeWidget) {
-        final double itemHeight = item.preferredSize.height;
-        maxHeight = math.max(itemHeight, maxHeight);
+      if (item case PreferredSizeWidget(preferredSize: Size(:final double height))) {
+        maxHeight = math.max(height, maxHeight);
       }
     }
     return Size.fromHeight(maxHeight + indicatorWeight);
@@ -1267,10 +1266,8 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// text or icon.
   bool get tabHasTextAndIcon {
     for (final Widget item in tabs) {
-      if (item is PreferredSizeWidget) {
-        if (item.preferredSize.height == _kTextAndIconTabHeight) {
-          return true;
-        }
+      if (item case PreferredSizeWidget(preferredSize: Size(height: _kTextAndIconTabHeight))) {
+        return true;
       }
     }
     return false;
@@ -1456,11 +1453,8 @@ class _TabBarState extends State<TabBar> {
       _updateTabController();
       _initIndicatorPainter();
       // Adjust scroll position.
-      if (_scrollController != null && _scrollController!.hasClients) {
-        final ScrollPosition position = _scrollController!.position;
-        if (position is _TabBarScrollPosition) {
-          position.markNeedsPixelsCorrection();
-        }
+      if (_scrollController case ScrollController(hasClients: true, :final _TabBarScrollPosition position)) {
+        position.markNeedsPixelsCorrection();
       }
     } else if (widget.indicatorColor != oldWidget.indicatorColor ||
         widget.indicatorWeight != oldWidget.indicatorWeight ||
@@ -1653,22 +1647,16 @@ class _TabBarState extends State<TabBar> {
     }
 
     final List<Widget> wrappedTabs = List<Widget>.generate(widget.tabs.length, (int index) {
-      const double verticalAdjustment = (_kTextAndIconTabHeight - _kTabHeight)/2.0;
-      EdgeInsetsGeometry? adjustedPadding;
+      EdgeInsetsGeometry padding = widget.labelPadding ?? tabBarTheme.labelPadding ?? kTabLabelPadding;
+      const double verticalAdjustment = (_kTextAndIconTabHeight - _kTabHeight) / 2.0;
 
-      if (widget.tabs[index] is PreferredSizeWidget) {
-        final PreferredSizeWidget tab = widget.tabs[index] as PreferredSizeWidget;
-        if (widget.tabHasTextAndIcon && tab.preferredSize.height == _kTabHeight) {
-          if (widget.labelPadding != null || tabBarTheme.labelPadding != null) {
-            adjustedPadding = (widget.labelPadding ?? tabBarTheme.labelPadding!).add(const EdgeInsets.symmetric(vertical: verticalAdjustment));
-          }
-          else {
-            adjustedPadding = const EdgeInsets.symmetric(vertical: verticalAdjustment, horizontal: 16.0);
-          }
-        }
+      if (
+        widget.tabs[index] case PreferredSizeWidget(preferredSize: Size(height: _kTabHeight))
+        when widget.tabHasTextAndIcon
+      ) {
+        padding = padding.add(const EdgeInsets.symmetric(vertical: verticalAdjustment));
       }
-
-      _labelPaddings[index] = adjustedPadding ?? widget.labelPadding ?? tabBarTheme.labelPadding ?? kTabLabelPadding;
+      _labelPaddings[index] = padding;
 
       return Center(
         heightFactor: 1.0,

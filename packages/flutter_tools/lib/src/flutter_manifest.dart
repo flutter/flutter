@@ -165,13 +165,10 @@ class FlutterManifest {
   ///   licenses:
   ///     - assets/foo_license.txt
   /// ```
-  List<String> get additionalLicenses {
-    final Object? licenses = _flutterDescriptor['licenses'];
-    if (licenses is YamlList) {
-      return licenses.map((Object? element) => element.toString()).toList();
-    }
-    return <String>[];
-  }
+  List<String> get additionalLicenses => <String>[
+    if (_flutterDescriptor case {'licenses': final YamlList list})
+      for (final dynamic item in list) '$item',
+  ];
 
   /// True if this manifest declares a Flutter module project.
   ///
@@ -211,11 +208,8 @@ class FlutterManifest {
       }
       return null;
     }
-    if (platforms.containsKey('android')) {
-      final Object? android = platforms['android'];
-      if (android is YamlMap) {
-        return android['package'] as String?;
-      }
+    if (platforms case {'android': final YamlMap map}) {
+      return map['package'] as String?;
     }
     return null;
   }

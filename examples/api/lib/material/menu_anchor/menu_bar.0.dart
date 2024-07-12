@@ -41,17 +41,13 @@ class MenuEntry {
   }
 
   static Map<MenuSerializableShortcut, Intent> shortcuts(List<MenuEntry> selections) {
-    final Map<MenuSerializableShortcut, Intent> result = <MenuSerializableShortcut, Intent>{};
-    for (final MenuEntry selection in selections) {
-      if (selection.menuChildren != null) {
-        result.addAll(MenuEntry.shortcuts(selection.menuChildren!));
-      } else {
-        if (selection.shortcut != null && selection.onPressed != null) {
-          result[selection.shortcut!] = VoidCallbackIntent(selection.onPressed!);
-        }
-      }
-    }
-    return result;
+    return <MenuSerializableShortcut, Intent>{
+      for (final MenuEntry selection in selections)
+        if (selection.menuChildren != null)
+          ...MenuEntry.shortcuts(selection.menuChildren!)
+        else if (selection case MenuEntry(:final MenuSerializableShortcut shortcut, :final VoidCallback onPressed))
+          shortcut: VoidCallbackIntent(onPressed),
+    };
   }
 }
 

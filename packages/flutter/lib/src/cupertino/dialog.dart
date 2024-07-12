@@ -665,14 +665,11 @@ class _TargetSelectionGestureRecognizer extends GestureRecognizer {
 
     // A slide target might nest other targets, therefore multiple targets might
     // be found.
-    final List<_ActionSheetSlideTarget> foundTargets = <_ActionSheetSlideTarget>[];
-    for (final HitTestEntry entry in result.path) {
-      if (entry.target case final RenderMetaData target) {
-        if (target.metaData is _ActionSheetSlideTarget) {
-          foundTargets.add(target.metaData as _ActionSheetSlideTarget);
-        }
-      }
-    }
+    final List<_ActionSheetSlideTarget> foundTargets = <_ActionSheetSlideTarget>[
+      for (final HitTestEntry(:HitTestTarget target) in result.path)
+        if (target case RenderMetaData(:final _ActionSheetSlideTarget metaData))
+          metaData,
+    ];
 
     // Compare whether the active target has changed by simply comparing the
     // first (inner-most) avatar of the nest, ignoring the cases where

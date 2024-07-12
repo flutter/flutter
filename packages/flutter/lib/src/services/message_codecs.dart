@@ -147,10 +147,8 @@ class JSONMethodCodec implements MethodCodec {
     if (decoded is! Map) {
       throw FormatException('Expected method call Map, got $decoded');
     }
-    final Object? method = decoded['method'];
-    final Object? arguments = decoded['args'];
-    if (method is String) {
-      return MethodCall(method, arguments);
+    if (decoded case {'method': final String method}) {
+      return MethodCall(method, decoded['args']);
     }
     throw FormatException('Invalid method call: $decoded');
   }
