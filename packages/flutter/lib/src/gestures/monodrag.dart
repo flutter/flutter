@@ -338,21 +338,21 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   DragEndDetails? considerFling(VelocityEstimate estimate, PointerDeviceKind kind);
 
   /// Returns the effective delta that should be considered for the incoming [delta].
-  /// 
-  /// The delta received by an event might contain both the x and y components 
+  ///
+  /// The delta received by an event might contain both the x and y components
   /// greater than zero, and an one-axis drag recognizer only cares about one
   /// of them.
-  /// 
-  /// For example, a [VerticalDragGestureRecognizer], would return an [Offset] 
+  ///
+  /// For example, a [VerticalDragGestureRecognizer], would return an [Offset]
   /// with the x component set to 0.0, because it only cares about the y component.
   Offset getDeltaForDetails(Offset delta);
 
   /// Returns the value for the primary axis from the given [value].
-  /// 
+  ///
   /// For example, a [VerticalDragGestureRecognizer] would return the y
-  /// component, while a [HorizontalDragGestureRecognizer] would return 
+  /// component, while a [HorizontalDragGestureRecognizer] would return
   /// the x component.
-  /// 
+  ///
   /// Returns `null` if the recognizer does not have a primary axis.
   double? getPrimaryValueFromOffset(Offset value);
 
@@ -360,12 +360,12 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   ///
   /// The [PanGestureRecognizer] returns null.
   DragDirection? getPrimaryDragAxis() => null;
-  
+
   /// Whether the [globalDistanceMoved] is big enough to accept the gesture.
-  /// 
+  ///
   /// If this method returns `true`, it means this recognizer should declare win in the gesture arena.
   bool hasSufficientGlobalDistanceToAccept(PointerDeviceKind pointerDeviceKind, double? deviceTouchSlop);
-  
+
   bool _hasDragThresholdBeenMet = false;
 
   final Map<int, VelocityTracker> _velocityTrackers = <int, VelocityTracker>{};
