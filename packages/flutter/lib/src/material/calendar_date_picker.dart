@@ -425,6 +425,8 @@ class _DatePickerModeToggleButtonState extends State<_DatePickerModeToggleButton
                             child: Text(
                               widget.title,
                               overflow: TextOverflow.ellipsis,
+                              // textScaleFactor: 1.6, portrait
+                              textScaleFactor: 2.0, // landscape
                               style: textTheme.titleSmall?.copyWith(
                                 color: controlColor,
                               ),
@@ -1135,7 +1137,10 @@ class _DayPickerGridDelegate extends SliverGridDelegate {
   SliverGridLayout getLayout(SliverConstraints constraints) {
     const double fontSizeToScale = 14.0;
     final double textScaleFactor = MediaQuery.textScalerOf(context).clamp(maxScaleFactor: 3.0).scale(fontSizeToScale) / fontSizeToScale;
-    final double scaledRowHeight =
+    final Orientation orientation = MediaQuery.orientationOf(context);
+    final bool isLandscapeOrientation = orientation == Orientation.landscape;
+    final double scaledRowHeight = isLandscapeOrientation ?
+      textScaleFactor > 1.3 ? ((textScaleFactor - 1) * 40) + _dayPickerRowHeight : _dayPickerRowHeight :
       textScaleFactor > 1.3 ? ((textScaleFactor - 1) * 30) + _dayPickerRowHeight : _dayPickerRowHeight;
     const int columnCount = DateTime.daysPerWeek;
     final double tileWidth = constraints.crossAxisExtent / columnCount;

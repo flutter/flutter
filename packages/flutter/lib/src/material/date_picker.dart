@@ -53,7 +53,7 @@ const Duration _dialogSizeAnimationDuration = Duration(milliseconds: 200);
 const double _inputFormPortraitHeight = 98.0;
 const double _inputFormLandscapeHeight = 108.0;
 const double _kMaxTextScaleFactor = 3.0;
-const double _kMaxHeaderTextScaleFactor = 2.0;
+const double _kMaxHeaderTextScaleFactor = 1.8;
 
 /// Shows a dialog containing a Material Design date picker.
 ///
@@ -525,6 +525,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
     final bool useMaterial3 = theme.useMaterial3;
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final Orientation orientation = MediaQuery.orientationOf(context);
+    final bool isLandscapeOrientation = orientation == Orientation.landscape;
     final DatePickerThemeData datePickerTheme = DatePickerTheme.of(context);
     final DatePickerThemeData defaults = DatePickerTheme.defaults(context);
     final TextTheme textTheme = theme.textTheme;
@@ -547,35 +548,38 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
           // M3 default is OK.
       }
     } else {
-      headlineStyle = orientation == Orientation.landscape ? textTheme.headlineSmall : textTheme.headlineMedium;
+      headlineStyle = isLandscapeOrientation ? textTheme.headlineSmall : textTheme.headlineMedium;
     }
     final Color? headerForegroundColor = datePickerTheme.headerForegroundColor ?? defaults.headerForegroundColor;
     headlineStyle = headlineStyle?.copyWith(color: headerForegroundColor);
 
     final Widget actions = ConstrainedBox(
       constraints: const BoxConstraints(minHeight: 52.0),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8),
-        child: Align(
-          alignment: AlignmentDirectional.centerEnd,
-          child: OverflowBar(
-            spacing: 8,
-            children: <Widget>[
-              TextButton(
-                style: datePickerTheme.cancelButtonStyle ?? defaults.cancelButtonStyle,
-                onPressed: _handleCancel,
-                child: Text(widget.cancelText ?? (
-                  useMaterial3
-                    ? localizations.cancelButtonLabel
-                    : localizations.cancelButtonLabel.toUpperCase()
-                )),
-              ),
-              TextButton(
-                style: datePickerTheme.confirmButtonStyle ?? defaults.confirmButtonStyle,
-                onPressed: _handleOk,
-                child: Text(widget.confirmText ?? localizations.okButtonLabel),
-              ),
-            ],
+      child: MediaQuery.withClampedTextScaling(
+        maxScaleFactor: isLandscapeOrientation ? 2.0 : _kMaxTextScaleFactor,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          child: Align(
+            alignment: AlignmentDirectional.centerEnd,
+            child: OverflowBar(
+              spacing: 8,
+              children: <Widget>[
+                TextButton(
+                  style: datePickerTheme.cancelButtonStyle ?? defaults.cancelButtonStyle,
+                  onPressed: _handleCancel,
+                  child: Text(widget.cancelText ?? (
+                    useMaterial3
+                      ? localizations.cancelButtonLabel
+                      : localizations.cancelButtonLabel.toUpperCase()
+                  )),
+                ),
+                TextButton(
+                  style: datePickerTheme.confirmButtonStyle ?? defaults.confirmButtonStyle,
+                  onPressed: _handleOk,
+                  child: Text(widget.confirmText ?? localizations.okButtonLabel),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -886,7 +890,7 @@ class _DatePickerHeader extends StatelessWidget {
     );
 
     final double fontScaleAdjustedHeaderHeight =
-      orientation == Orientation.portrait ? headerScaleFactor > 1.5 ? headerScaleFactor - 0.1 : headerScaleFactor : headerScaleFactor;
+      orientation == Orientation.portrait ? headerScaleFactor > 1.5 ? headerScaleFactor - 0.2 : headerScaleFactor : headerScaleFactor;
 
     switch (orientation) {
       case Orientation.portrait:
