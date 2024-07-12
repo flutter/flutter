@@ -1983,14 +1983,15 @@ targets:
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: android_semantics_integration_test
 
-  # linux motog4 test
-  - name: Linux_android android_stack_size_test
+  # linux mokey test
+  - name: Linux_mokey android_stack_size_test
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true # https://github.com/flutter/flutter/issues/148085
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "linux"]
+        ["devicelab", "android", "linux", "mokey"]
       task_name: android_stack_size_test
 
   # linux mokey benchmark
@@ -2580,67 +2581,73 @@ targets:
         ["devicelab", "android", "linux", "mokey"]
       task_name: very_long_picture_scrolling_perf__e2e_summary
 
-  # linux motog4 benchmark
-  - name: Linux_android hello_world__memory
+  # linux mokey benchmark
+  - name: Linux_mokey hello_world__memory
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true # https://github.com/flutter/flutter/issues/148085
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "linux"]
+        ["devicelab", "android", "linux", "mokey"]
       task_name: hello_world__memory
 
-  # linux motog4 benchmark
-  - name: Linux_android home_scroll_perf__timeline_summary
+  # linux mokey benchmark
+  - name: Linux_mokey home_scroll_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true # https://github.com/flutter/flutter/issues/148085
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "linux"]
+        ["devicelab", "android", "linux", "mokey"]
       task_name: home_scroll_perf__timeline_summary
 
-  # linux motog4 benchmark
-  - name: Linux_android hot_mode_dev_cycle_linux__benchmark
+  # linux mokey benchmark
+  - name: Linux_mokey hot_mode_dev_cycle_linux__benchmark
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true # https://github.com/flutter/flutter/issues/148085
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "linux"]
+        ["devicelab", "android", "linux", "mokey"]
       task_name: hot_mode_dev_cycle_linux__benchmark
     runIf:
       - .ci.yaml
       - dev/**
 
-  # linux motog4 test
-  - name: Linux_android hybrid_android_views_integration_test
+  # linux mokey test
+  - name: Linux_mokey hybrid_android_views_integration_test
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true # https://github.com/flutter/flutter/issues/148085
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "linux"]
+        ["devicelab", "android", "linux", "mokey"]
       task_name: hybrid_android_views_integration_test
 
-  # linux motog4 benchmark
-  - name: Linux_android image_list_jit_reported_duration
+  # linux mokey benchmark
+  - name: Linux_mokey image_list_jit_reported_duration
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true # https://github.com/flutter/flutter/issues/148085
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "linux"]
+        ["devicelab", "android", "linux", "mokey"]
       task_name: image_list_jit_reported_duration
 
-  # linux motog4 benchmark
-  - name: Linux_android imagefiltered_transform_animation_perf__timeline_summary
+  # linux mokey benchmark
+  - name: Linux_mokey imagefiltered_transform_animation_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true # https://github.com/flutter/flutter/issues/148085
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "linux"]
+        ["devicelab", "android", "linux", "mokey"]
       task_name: imagefiltered_transform_animation_perf__timeline_summary
 
   - name: Linux_pixel_7pro imagefiltered_transform_animation_perf__timeline_summary
@@ -2652,14 +2659,15 @@ targets:
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: imagefiltered_transform_animation_perf__timeline_summary
 
-  # linux motog4 benchmark
-  - name: Linux_android image_list_reported_duration
+  # linux mokey benchmark
+  - name: Linux_mokey image_list_reported_duration
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true # https://github.com/flutter/flutter/issues/148085
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "linux"]
+        ["devicelab", "android", "linux", "mokey"]
       task_name: image_list_reported_duration
 
   - name: Linux_pixel_7pro integration_ui_driver
@@ -2689,14 +2697,15 @@ targets:
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: integration_ui_textfield
 
-  # linux motog4 benchmark
-  - name: Linux_android large_image_changer_perf_android
+  # linux mokey benchmark
+  - name: Linux_mokey large_image_changer_perf_android
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true # https://github.com/flutter/flutter/issues/148085
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "linux"]
+        ["devicelab", "android", "linux", "mokey"]
       task_name: large_image_changer_perf_android
 
   - name: Linux_pixel_7pro linux_chrome_dev_mode
@@ -2708,24 +2717,26 @@ targets:
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: linux_chrome_dev_mode
 
-  # linux motog4 benchmark
-  - name: Linux_android multi_widget_construction_perf__e2e_summary
+  # linux mokey benchmark
+  - name: Linux_mokey multi_widget_construction_perf__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true # https://github.com/flutter/flutter/issues/148085
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "linux"]
+        ["devicelab", "android", "linux", "mokey"]
       task_name: multi_widget_construction_perf__e2e_summary
 
-  # linux motog4 benchmark
-  - name: Linux_android list_text_layout_perf__e2e_summary
+  # linux mokey benchmark
+  - name: Linux_mokey list_text_layout_perf__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true # https://github.com/flutter/flutter/issues/148085
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "linux"]
+        ["devicelab", "android", "linux", "mokey"]
       task_name: list_text_layout_perf__e2e_summary
 
   # linux mokey benchmark
@@ -2748,24 +2759,26 @@ targets:
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: native_assets_android
 
-  # linux motog4 benchmark
-  - name: Linux_android new_gallery__crane_perf
+  # linux mokey benchmark
+  - name: Linux_mokey new_gallery__crane_perf
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true # https://github.com/flutter/flutter/issues/148085
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "linux"]
+        ["devicelab", "android", "linux", "mokey"]
       task_name: new_gallery__crane_perf
 
-  # linux motog4 benchmark
-  - name: Linux_android old_gallery__transition_perf
+  # linux mokey benchmark
+  - name: Linux_mokey old_gallery__transition_perf
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true # https://github.com/flutter/flutter/issues/148085
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "linux"]
+        ["devicelab", "android", "linux", "mokey"]
       task_name: old_gallery__transition_perf
 
   - name: Linux_build_test flutter_gallery__transition_perf
@@ -2804,26 +2817,16 @@ targets:
       drone_dimensions: >
         ["device_os=N","os=Linux", "device_type=msm8952"]
 
-  # linux motog4 benchmark
-  - name: Linux_android flutter_gallery__transition_perf_with_semantics
+  # linux mokey benchmark
+  - name: Linux_mokey flutter_gallery__transition_perf_with_semantics
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true # https://github.com/flutter/flutter/issues/148085
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "linux"]
+        ["devicelab", "android", "linux", "mokey"]
       task_name: flutter_gallery__transition_perf_with_semantics
-
-  # linux motog4 benchmark
-  # MotoG4, Skia
-  - name: Linux_android new_gallery__transition_perf
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "android", "linux"]
-      task_name: new_gallery__transition_perf
 
   # Mokey, Impeller
   - name: Linux_mokey new_gallery_impeller__transition_perf
@@ -2865,18 +2868,6 @@ targets:
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: new_gallery__transition_perf
 
-  # linux motog4 benchmark
-  # Moto G4, Impeller (OpenGL)
-  - name: Linux_android new_gallery_opengles_impeller__transition_perf
-    recipe: devicelab/devicelab_drone
-    bringup: true
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "android", "linux"]
-      task_name: new_gallery_opengles_impeller__transition_perf
-
   # Pixel 7 Pro, Impeller (Vulkan)
   - name: Linux_pixel_7pro new_gallery_impeller_old_zoom__transition_perf
     recipe: devicelab/devicelab_drone
@@ -2908,14 +2899,15 @@ targets:
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: new_gallery_opengles_impeller__transition_perf
 
-  # linux motog4 benchmark
-  - name: Linux_android picture_cache_perf__e2e_summary
+  # linux mokey benchmark
+  - name: Linux_mokey picture_cache_perf__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true # https://github.com/flutter/flutter/issues/148085
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "linux"]
+        ["devicelab", "android", "linux", "mokey"]
       task_name: picture_cache_perf__e2e_summary
 
   - name: Linux_pixel_7pro picture_cache_perf__timeline_summary
@@ -2927,34 +2919,37 @@ targets:
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: picture_cache_perf__timeline_summary
 
-  # linux motog4 benchmark
-  - name: Linux_android android_picture_cache_complexity_scoring_perf__timeline_summary
+  # linux mokey benchmark
+  - name: Linux_mokey android_picture_cache_complexity_scoring_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true # https://github.com/flutter/flutter/issues/148085
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "linux"]
+        ["devicelab", "android", "linux", "mokey"]
       task_name: android_picture_cache_complexity_scoring_perf__timeline_summary
 
-  # linux motog4 benchmark
-  - name: Linux_android slider_perf_android
+  # linux mokey benchmark
+  - name: Linux_mokey slider_perf_android
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true # https://github.com/flutter/flutter/issues/148085
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "linux"]
+        ["devicelab", "android", "linux", "mokey"]
       task_name: slider_perf_android
 
-  # linux motog4 benchmark
-  - name: Linux_android platform_channels_benchmarks
+  # linux mokey benchmark
+  - name: Linux_mokey platform_channels_benchmarks
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true # https://github.com/flutter/flutter/issues/148085
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "linux"]
+        ["devicelab", "android", "linux", "mokey"]
       task_name: platform_channels_benchmarks
 
   - name: Linux_pixel_7pro platform_channels_benchmarks
@@ -2984,14 +2979,15 @@ targets:
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: platform_interaction_test
 
-  # linux motog4 benchmark
-  - name: Linux_android platform_views_scroll_perf__timeline_summary
+  # linux mokey benchmark
+  - name: Linux_mokey platform_views_scroll_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true # https://github.com/flutter/flutter/issues/148085
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "linux"]
+        ["devicelab", "android", "linux", "mokey"]
       task_name: platform_views_scroll_perf__timeline_summary
 
   - name: Linux_pixel_7pro platform_views_scroll_perf__timeline_summary
@@ -3023,14 +3019,15 @@ targets:
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: platform_views_scroll_perf_impeller__timeline_summary
 
-  # linux motog4 benchmark
-  - name: Linux_android platform_view__start_up
+  # linux mokey benchmark
+  - name: Linux_mokey platform_view__start_up
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true # https://github.com/flutter/flutter/issues/148085
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "linux"]
+        ["devicelab", "android", "linux", "mokey"]
       task_name: platform_view__start_up
 
   - name: Linux_pixel_7pro routing_test
@@ -3051,14 +3048,15 @@ targets:
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: service_extensions_test
 
-  # linux motog4 benchmark
-  - name: Linux_android textfield_perf__e2e_summary
+  # linux mokey benchmark
+  - name: Linux_mokey textfield_perf__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true # https://github.com/flutter/flutter/issues/148085
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "linux"]
+        ["devicelab", "android", "linux", "mokey"]
       task_name: textfield_perf__e2e_summary
 
   - name: Linux_pixel_7pro textfield_perf__timeline_summary
@@ -3070,14 +3068,15 @@ targets:
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: textfield_perf__timeline_summary
 
-  # linux motog4 benchmark
-  - name: Linux_android tiles_scroll_perf__timeline_summary
+  # linux mokey benchmark
+  - name: Linux_mokey tiles_scroll_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true # https://github.com/flutter/flutter/issues/148085
     timeout: 60
     properties:
       tags: >
-        ["devicelab","android","linux"]
+        ["devicelab","android","linux", "mokey"]
       task_name: tiles_scroll_perf__timeline_summary
       dependencies: >-
         [
@@ -3093,104 +3092,114 @@ targets:
         ["devicelab", "hostonly", "linux"]
       task_name: web_size__compile_test
 
-  # linux motog4 benchmark
-  - name: Linux_android opacity_peephole_one_rect_perf__e2e_summary
+  # linux mokey benchmark
+  - name: Linux_mokey opacity_peephole_one_rect_perf__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true # https://github.com/flutter/flutter/issues/148085
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "linux"]
+        ["devicelab", "android", "linux", "mokey"]
       task_name: opacity_peephole_one_rect_perf__e2e_summary
 
-  # linux motog4 benchmark
-  - name: Linux_android opacity_peephole_col_of_rows_perf__e2e_summary
+  # linux mokey benchmark
+  - name: Linux_mokey opacity_peephole_col_of_rows_perf__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true # https://github.com/flutter/flutter/issues/148085
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "linux"]
+        ["devicelab", "android", "linux", "mokey"]
       task_name: opacity_peephole_col_of_rows_perf__e2e_summary
 
-  # linux motog4 benchmark
-  - name: Linux_android opacity_peephole_opacity_of_grid_perf__e2e_summary
+  # linux mokey benchmark
+  - name: Linux_mokey opacity_peephole_opacity_of_grid_perf__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true # https://github.com/flutter/flutter/issues/148085
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "linux"]
+        ["devicelab", "android", "linux", "mokey"]
       task_name: opacity_peephole_opacity_of_grid_perf__e2e_summary
 
-  # linux motog4 benchmark
-  - name: Linux_android opacity_peephole_grid_of_opacity_perf__e2e_summary
+  # linux mokey benchmark
+  - name: Linux_mokey opacity_peephole_grid_of_opacity_perf__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true # https://github.com/flutter/flutter/issues/148085
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "linux"]
+        ["devicelab", "android", "linux", "mokey"]
       task_name: opacity_peephole_grid_of_opacity_perf__e2e_summary
 
-  # linux motog4 benchmark
-  - name: Linux_android opacity_peephole_fade_transition_text_perf__e2e_summary
+  # linux mokey benchmark
+  - name: Linux_mokey opacity_peephole_fade_transition_text_perf__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true # https://github.com/flutter/flutter/issues/148085
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "linux"]
+        ["devicelab", "android", "linux", "mokey"]
       task_name: opacity_peephole_fade_transition_text_perf__e2e_summary
 
-  # linux motog4 benchmark
-  - name: Linux_android opacity_peephole_grid_of_alpha_savelayers_perf__e2e_summary
+  # linux mokey benchmark
+  - name: Linux_mokey opacity_peephole_grid_of_alpha_savelayers_perf__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true # https://github.com/flutter/flutter/issues/148085
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "linux"]
+        ["devicelab", "android", "linux", "mokey"]
       task_name: opacity_peephole_grid_of_alpha_savelayers_perf__e2e_summary
 
-  # linux motog4 benchmark
-  - name: Linux_android opacity_peephole_col_of_alpha_savelayer_rows_perf__e2e_summary
+  # linux mokey benchmark
+  - name: Linux_mokey opacity_peephole_col_of_alpha_savelayer_rows_perf__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true # https://github.com/flutter/flutter/issues/148085
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "linux"]
+        ["devicelab", "android", "linux", "mokey"]
       task_name: opacity_peephole_col_of_alpha_savelayer_rows_perf__e2e_summary
 
-  # linux motog4 benchmark
-  - name: Linux_android gradient_dynamic_perf__e2e_summary
+  # linux mokey benchmark
+  - name: Linux_mokey gradient_dynamic_perf__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true # https://github.com/flutter/flutter/issues/148085
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "linux"]
+        ["devicelab", "android", "linux", "mokey"]
       task_name: gradient_dynamic_perf__e2e_summary
 
-  # linux motog4 benchmark
-  - name: Linux_android gradient_consistent_perf__e2e_summary
+  # linux mokey benchmark
+  - name: Linux_mokey gradient_consistent_perf__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true # https://github.com/flutter/flutter/issues/148085
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "linux"]
+        ["devicelab", "android", "linux", "mokey"]
       task_name: gradient_consistent_perf__e2e_summary
 
-  # linux motog4 benchmark
-  - name: Linux_android gradient_static_perf__e2e_summary
+  # linux mokey benchmark
+  - name: Linux_mokey gradient_static_perf__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true # https://github.com/flutter/flutter/issues/148085
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "linux"]
+        ["devicelab", "android", "linux", "mokey"]
       task_name: gradient_static_perf__e2e_summary
 
   - name: Linux_pixel_7pro android_choreographer_do_frame_test
