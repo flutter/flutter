@@ -21,6 +21,8 @@ ImageExternalTexture::ImageExternalTexture(
       image_texture_entry_(image_texture_entry),
       jni_facade_(jni_facade) {}
 
+ImageExternalTexture::~ImageExternalTexture() = default;
+
 // Implementing flutter::Texture.
 void ImageExternalTexture::Paint(PaintContext& context,
                                  const SkRect& bounds,

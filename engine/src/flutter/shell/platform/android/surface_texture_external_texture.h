@@ -12,7 +12,23 @@
 
 namespace flutter {
 
-// External texture peered to an android.graphics.SurfaceTexture.
+//------------------------------------------------------------------------------
+/// @brief      Instances of external textures peered to
+///             `android.graphics.SurfaceTexture`.
+///
+///             SurfaceTextures are used on older versions of Android (API <
+///             29). On newer versions, the Android Hardware Buffer backend
+///             `flutter::ImageExternalTexture` instances are used instead.
+///
+///             Due to the way surface textures are designed, it is not possible
+///             to have a Vulkan renderer interoperate with such textures.
+///             Consequently, both Skia and Impeller only have OpenGL
+///             implementations for these kinds of textures.
+///
+///             This is an abstract base class. Minimally, subclasses override
+///             the pure virtual `ProcessFrame` method to bind the package
+///             specific texture implementation to the surface texture.
+///
 class SurfaceTextureExternalTexture : public flutter::Texture {
  public:
   SurfaceTextureExternalTexture(
@@ -20,29 +36,45 @@ class SurfaceTextureExternalTexture : public flutter::Texture {
       const fml::jni::ScopedJavaGlobalRef<jobject>& surface_texture,
       const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade);
 
+  // |Texture|
   ~SurfaceTextureExternalTexture() override;
 
-  void Paint(PaintContext& context,
-             const SkRect& bounds,
-             bool freeze,
-             const DlImageSampling sampling) override;
-
-  void OnGrContextCreated() override;
-
-  void OnGrContextDestroyed() override;
-
-  void MarkNewFrameAvailable() override;
-
-  void OnTextureUnregistered() override;
-
  protected:
+  //----------------------------------------------------------------------------
+  /// @brief      Subclasses override this method to bind the OpenGL texture
+  ///             resource represented by this surface texture to the package
+  ///             specific texture (SkImage, impeller::Texture, etc...).
+  ///
+  /// @important  The state of texture should be AttachmentState::kAttached
+  ///             after a call to this method. That is the responsibility of the
+  ///             subclass.
+  ///
+  /// @param      context  The context.
+  /// @param[in]  bounds   The bounds of the texture.
+  ///
   virtual void ProcessFrame(PaintContext& context, const SkRect& bounds) = 0;
+
+  //----------------------------------------------------------------------------
+  /// @brief      Provides an opportunity for the subclasses to sever the
+  ///             connection between the OpenGL texture resource represented by
+  ///             this surface texture and the underlying package handle
+  ///             (SkImage, impeller::Texture, etc...).
+  ///
   virtual void Detach();
 
   void Attach(int gl_tex_id);
+
   bool ShouldUpdate();
+
+  //----------------------------------------------------------------------------
+  /// @brief      Update the surface texture contents and transformation matrix.
+  ///
   void Update();
 
+  //----------------------------------------------------------------------------
+  /// @brief      Specifies how this instance is bound to the underlying surface
+  ///             texture.
+  ///
   enum class AttachmentState { kUninitialized, kAttached, kDetached };
 
   std::shared_ptr<PlatformViewAndroidJNI> jni_facade_;
@@ -50,6 +82,25 @@ class SurfaceTextureExternalTexture : public flutter::Texture {
   AttachmentState state_ = AttachmentState::kUninitialized;
   SkMatrix transform_;
   sk_sp<flutter::DlImage> dl_image_;
+
+ private:
+  // |Texture|
+  void Paint(PaintContext& context,
+             const SkRect& bounds,
+             bool freeze,
+             const DlImageSampling sampling) override;
+
+  // |ContextListener|
+  void OnGrContextCreated() override;
+
+  // |ContextListener|
+  void OnGrContextDestroyed() override;
+
+  // |Texture|
+  void MarkNewFrameAvailable() override;
+
+  // |Texture|
+  void OnTextureUnregistered() override;
 
   FML_DISALLOW_COPY_AND_ASSIGN(SurfaceTextureExternalTexture);
 };
