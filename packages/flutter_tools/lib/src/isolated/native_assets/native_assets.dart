@@ -64,6 +64,7 @@ abstract class NativeAssetsBuildRunner {
     int? targetIOSVersion,
     int? targetMacOSVersion,
     IOSSdkImpl? targetIOSSdkImpl,
+    required bool linkingEnabled,
   });
 
   /// Runs all [packagesWithNativeAssets] `link.dart` in dry run.
@@ -169,6 +170,7 @@ class NativeAssetsBuildRunnerImpl implements NativeAssetsBuildRunner {
       targetOS: targetOS,
       workingDirectory: workingDirectory,
       packageLayout: packageLayout,
+      linkingEnabled: false, // Dry run is only used in JIT mode.
     );
   }
 
@@ -184,6 +186,7 @@ class NativeAssetsBuildRunnerImpl implements NativeAssetsBuildRunner {
     int? targetMacOSVersion,
     int? targetAndroidNdkApi,
     IOSSdkImpl? targetIOSSdkImpl,
+    required bool linkingEnabled,
   }) {
     final PackageLayout packageLayout = PackageLayout.fromPackageConfig(
       packageConfig,
@@ -201,6 +204,7 @@ class NativeAssetsBuildRunnerImpl implements NativeAssetsBuildRunner {
       packageLayout: packageLayout,
       targetIOSVersion: targetIOSVersion,
       targetMacOSVersion: targetMacOSVersion,
+      linkingEnabled: linkingEnabled,
     );
   }
 
@@ -657,18 +661,8 @@ Future<Iterable<KernelAsset>> dryRunNativeAssetsSingleArchitectureInternal(
     includeParentEnvironment: true,
   );
   ensureNativeAssetsBuildDryRunSucceed(buildDryRunResult);
-  final LinkDryRunResult linkDryRunResult = await buildRunner.linkDryRun(
-    linkModePreference: LinkModePreferenceImpl.dynamic,
-    targetOS: targetOS,
-    workingDirectory: projectUri,
-    includeParentEnvironment: true,
-    buildDryRunResult: buildDryRunResult,
-  );
-  ensureNativeAssetsLinkDryRunSucceed(linkDryRunResult);
-  final List<AssetImpl> nativeAssets = <AssetImpl>[
-    ...buildDryRunResult.assets,
-    ...linkDryRunResult.assets,
-  ];
+  // No link hooks in JIT mode.
+  final List<AssetImpl> nativeAssets = buildDryRunResult.assets;
   ensureNoLinkModeStatic(nativeAssets);
   globals.logger.printTrace('Dry running native assets for $targetOS done.');
   final Uri? absolutePath = flutterTester ? buildUri : null;
@@ -714,6 +708,7 @@ Future<(Uri? nativeAssetsYaml, List<Uri> dependencies)> buildNativeAssetsSingleA
   }
 
   final BuildModeImpl buildModeCli = nativeAssetsBuildMode(buildMode);
+  final bool linkingEnabled = buildModeCli == BuildModeImpl.release;
 
   globals.logger.printTrace('Building native assets for $target $buildModeCli.');
   final BuildResult buildResult = await buildRunner.build(
@@ -723,25 +718,29 @@ Future<(Uri? nativeAssetsYaml, List<Uri> dependencies)> buildNativeAssetsSingleA
     workingDirectory: projectUri,
     includeParentEnvironment: true,
     cCompilerConfig: await buildRunner.cCompilerConfig,
+    linkingEnabled: linkingEnabled,
   );
   ensureNativeAssetsBuildSucceed(buildResult);
-  final LinkResult linkResult = await buildRunner.link(
-    linkModePreference: LinkModePreferenceImpl.dynamic,
-    target: target,
-    buildMode: buildModeCli,
-    workingDirectory: projectUri,
-    includeParentEnvironment: true,
-    cCompilerConfig: await buildRunner.cCompilerConfig,
-    buildResult: buildResult,
-  );
-  ensureNativeAssetsLinkSucceed(linkResult);
+  late final LinkResult linkResult;
+  if (linkingEnabled) {
+    linkResult = await buildRunner.link(
+      linkModePreference: LinkModePreferenceImpl.dynamic,
+      target: target,
+      buildMode: buildModeCli,
+      workingDirectory: projectUri,
+      includeParentEnvironment: true,
+      cCompilerConfig: await buildRunner.cCompilerConfig,
+      buildResult: buildResult,
+    );
+    ensureNativeAssetsLinkSucceed(linkResult);
+  }
   final List<AssetImpl> nativeAssets = <AssetImpl>[
     ...buildResult.assets,
-    ...linkResult.assets,
+    if (linkingEnabled) ...linkResult.assets,
   ];
   final Set<Uri> dependencies = <Uri>{
     ...buildResult.dependencies,
-    ...linkResult.dependencies,
+    if (linkingEnabled) ...linkResult.dependencies,
   };
   ensureNoLinkModeStatic(nativeAssets);
   globals.logger.printTrace('Building native assets for $target done.');
