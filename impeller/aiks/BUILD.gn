@@ -78,7 +78,6 @@ template("aiks_unittests_component") {
     "aiks_blend_unittests.cc",
     "aiks_blur_unittests.cc",
     "aiks_gradient_unittests.cc",
-    "aiks_path_unittests.cc",
     "aiks_unittests.cc",
     "aiks_unittests.h",
   ]
