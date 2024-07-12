@@ -20,11 +20,11 @@ void main() {
   }, variant: TargetPlatformVariant.all());
 
   testWidgets('The scrollbar should be painted when the user scrolls', (WidgetTester tester) async {
-
     await tester.pumpWidget(
       const example.ScrollbarExampleApp(),
     );
-    await tester.pumpAndSettle(); // Waits for all the paints to be done.
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 10)); // Wait for the thumb to start appearing.
 
     final Finder scrollbarFinder = find.byType(Scrollbar).last;
 

@@ -11,7 +11,8 @@ void main() {
     await tester.pumpWidget(
       const example.ScrollbarExampleApp(),
     );
-    await tester.pumpAndSettle(); // Waits for all the paints to be done.
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 10)); // Wait for the thumb to start appearing.
 
     expect(find.widgetWithText(AppBar, 'Scrollbar Sample'), findsOne);
 
