@@ -441,15 +441,16 @@ action("flutter_shell_java") {
       ] + rebase_path(embedding_dependencies_jars, root_build_dir)
 
   if (host_os == "mac") {
-    _javacbin =
-        rebase_path("//third_party/java/openjdk/Contents/Home/bin/javac")
-    _jarbin = rebase_path("//third_party/java/openjdk/Contents/Home/bin/jar")
+    _javacbin = rebase_path(
+            "//flutter/third_party/java/openjdk/Contents/Home/bin/javac")
+    _jarbin =
+        rebase_path("//flutter/third_party/java/openjdk/Contents/Home/bin/jar")
   } else if (host_os == "win") {
-    _javacbin = rebase_path("//third_party/java/openjdk/bin/javac.exe")
-    _jarbin = rebase_path("//third_party/java/openjdk/bin/jar.exe")
+    _javacbin = rebase_path("//flutter/third_party/java/openjdk/bin/javac.exe")
+    _jarbin = rebase_path("//flutter/third_party/java/openjdk/bin/jar.exe")
   } else {
-    _javacbin = rebase_path("//third_party/java/openjdk/bin/javac")
-    _jarbin = rebase_path("//third_party/java/openjdk/bin/jar")
+    _javacbin = rebase_path("//flutter/third_party/java/openjdk/bin/javac")
+    _jarbin = rebase_path("//flutter/third_party/java/openjdk/bin/jar")
   }
 
   args = [

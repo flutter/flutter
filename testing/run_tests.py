@@ -691,10 +691,8 @@ def assert_expected_xcode_version():
 def java_home():
   script_path = os.path.dirname(os.path.realpath(__file__))
   if is_mac():
-    return os.path.join(
-        script_path, '..', '..', 'third_party', 'java', 'openjdk', 'Contents', 'Home'
-    )
-  return os.path.join(script_path, '..', '..', 'third_party', 'java', 'openjdk')
+    return os.path.join(script_path, '..', 'third_party', 'java', 'openjdk', 'Contents', 'Home')
+  return os.path.join(script_path, '..', 'third_party', 'java', 'openjdk')
 
 
 def java_bin():
