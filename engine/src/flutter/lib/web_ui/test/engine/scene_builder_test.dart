@@ -72,9 +72,7 @@ void testMain() {
       expect(slices.length, 2);
       expect(slices[0], pictureSliceWithRect(pictureRect));
       expect(slices[1], platformViewSliceWithViews(<PlatformView>[
-        PlatformView(1, platformViewRect.size, PlatformViewStyling(
-          position: PlatformViewPosition.offset(platformViewRect.topLeft)
-        ))
+        PlatformView(1, platformViewRect, const PlatformViewStyling())
       ]));
     });
 
@@ -95,9 +93,7 @@ void testMain() {
       final List<LayerSlice> slices = scene.rootLayer.slices;
       expect(slices.length, 2);
       expect(slices[0], platformViewSliceWithViews(<PlatformView>[
-        PlatformView(1, platformViewRect.size, PlatformViewStyling(
-          position: PlatformViewPosition.offset(platformViewRect.topLeft)
-        ))
+        PlatformView(1, platformViewRect, const PlatformViewStyling())
       ]));
       expect(slices[1], pictureSliceWithRect(pictureRect));
     });
@@ -122,9 +118,7 @@ void testMain() {
       expect(slices.length, 3);
       expect(slices[0], pictureSliceWithRect(pictureRect1));
       expect(slices[1], platformViewSliceWithViews(<PlatformView>[
-        PlatformView(1, platformViewRect.size, PlatformViewStyling(
-          position: PlatformViewPosition.offset(platformViewRect.topLeft)
-        ))
+        PlatformView(1, platformViewRect, const PlatformViewStyling())
       ]));
       expect(slices[2], pictureSliceWithRect(pictureRect2));
     });
@@ -153,9 +147,7 @@ void testMain() {
       expect(slices.length, 2);
       expect(slices[0], pictureSliceWithRect(const ui.Rect.fromLTRB(50, 50, 200, 200)));
       expect(slices[1], platformViewSliceWithViews(<PlatformView>[
-        PlatformView(1, platformViewRect.size, PlatformViewStyling(
-          position: PlatformViewPosition.offset(platformViewRect.topLeft)
-        ))
+        PlatformView(1, platformViewRect, const PlatformViewStyling())
       ]));
     });
   });
@@ -219,7 +211,7 @@ class PlatformViewSliceMatcher extends Matcher {
       if (expectedView.viewId != actualView.viewId) {
         return false;
       }
-      if (expectedView.size != actualView.size) {
+      if (expectedView.bounds != actualView.bounds) {
         return false;
       }
       if (expectedView.styling != actualView.styling) {
