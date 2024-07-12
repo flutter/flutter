@@ -251,6 +251,9 @@ class Icon extends StatelessWidget {
   /// The paint object to use for the icon's foreground.
   ///
   /// This is useful for applying effects like blur or color filters to the icon.
+  ///
+  /// Paint's color property is ignored, as the color is determined by the
+  /// [color] property.
   final Paint? foreground;
 
   @override
