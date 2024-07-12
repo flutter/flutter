@@ -17,17 +17,15 @@ SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 def JavadocBin():
   if sys.platform == 'darwin':
     return os.path.join(
-        SCRIPT_DIR, '..', '..', '..', 'third_party', 'java', 'openjdk', 'Contents', 'Home', 'bin',
+        SCRIPT_DIR, '..', '..', 'third_party', 'java', 'openjdk', 'Contents', 'Home', 'bin',
         'javadoc'
     )
   elif sys.platform.startswith(('cygwin', 'win')):
     return os.path.join(
-        SCRIPT_DIR, '..', '..', '..', 'third_party', 'java', 'openjdk', 'bin', 'javadoc.exe'
+        SCRIPT_DIR, '..', '..', 'third_party', 'java', 'openjdk', 'bin', 'javadoc.exe'
     )
   else:
-    return os.path.join(
-        SCRIPT_DIR, '..', '..', '..', 'third_party', 'java', 'openjdk', 'bin', 'javadoc'
-    )
+    return os.path.join(SCRIPT_DIR, '..', '..', 'third_party', 'java', 'openjdk', 'bin', 'javadoc')
 
 
 def main():

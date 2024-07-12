@@ -105,6 +105,7 @@ final Set<String> skippedPaths = <String>{
   r'flutter/third_party/inja/doc', // documentation
   r'flutter/third_party/inja/third_party/amalgamate', // only used at build time
   r'flutter/third_party/inja/third_party/include/doctest', // seems to be a unit test library
+  r'flutter/third_party/java', // only used for Android builds
   r'flutter/third_party/json/docs',
   r'flutter/third_party/libcxx/benchmarks',
   r'flutter/third_party/libcxx/docs',
@@ -222,7 +223,6 @@ final Set<String> skippedPaths = <String>{
   r'fuchsia/sdk/mac/tools',
   r'out', // output of build
   r'third_party/android_tools', // excluded on advice
-  r'third_party/java', // only used for Android builds
   r'third_party/libxml', // dependency of the testing system that we don't actually use
   r'tools', // not distributed in binary
 };
