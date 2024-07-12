@@ -332,7 +332,7 @@ class NavigationDestination extends StatelessWidget {
   /// selected.
   ///
   /// The icon will use [NavigationBarThemeData.iconTheme] with
-  /// [MaterialState.selected]. If this is null, the default [IconThemeData]
+  /// [WidgetState.selected]. If this is null, the default [IconThemeData]
   /// would use a size of 24.0 and [ColorScheme.onSurface].
   final Widget? selectedIcon;
 
