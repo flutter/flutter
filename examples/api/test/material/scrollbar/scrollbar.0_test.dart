@@ -18,4 +18,24 @@ void main() {
 
     expect(tester.takeException(), isNull);
   }, variant: TargetPlatformVariant.all());
+
+  testWidgets('The scrollbar should be painted when the user scrolls', (WidgetTester tester) async {
+
+    await tester.pumpWidget(
+      const example.ScrollbarExampleApp(),
+    );
+    await tester.pumpAndSettle(); // Waits for all the paints to be done.
+
+    final Finder scrollbarFinder = find.byType(Scrollbar).last;
+
+    expect(find.text('item 0'), findsOne);
+    expect(find.text('item 9'), findsNothing);
+    expect(scrollbarFinder, isNot(paints..rect()));
+
+    await tester.fling(find.byType(Scrollbar).last, const Offset(0, -300), 10.0);
+
+    expect(find.text('item 0'), findsNothing);
+    expect(find.text('item 9'), findsOne);
+    expect(scrollbarFinder.last, paints..rect());
+  });
 }
