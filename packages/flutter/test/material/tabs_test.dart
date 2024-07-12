@@ -2457,7 +2457,7 @@ void main() {
     expect(tester.getTopRight(find.widgetWithText(Tab, 'TAB #19')).dx, moreOrLessEquals(tabRight));
   });
 
-  testWidgets('Indicator stretch animation', (WidgetTester tester) async {
+  testWidgets('Indicator elastic animation', (WidgetTester tester) async {
     const double indicatorWidth = 50.0;
     final List<Widget> tabs = List<Widget>.generate(4, (int index) {
       return Tab(

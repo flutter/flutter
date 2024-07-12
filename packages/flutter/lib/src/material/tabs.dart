@@ -603,28 +603,21 @@ class _IndicatorPainter extends CustomPainter {
       return rect;
     }
 
-    final bool isMovingRight = rect.left < targetRect.left;
-    final double leftFraction;
-    final double rightFraction;
+    final double fraction = switch(rect.left < targetRect.left) {
+      true  => accelerateInterpolation(tabChangeProgress),
+      false => decelerateInterpolation(tabChangeProgress),
+    };
 
-    if (isMovingRight) {
-      leftFraction = accelerateInterpolation(tabChangeProgress);
-      rightFraction = accelerateInterpolation(tabChangeProgress);
-    } else {
-      leftFraction = decelerateInterpolation(tabChangeProgress);
-      rightFraction = decelerateInterpolation(tabChangeProgress);
-    }
-
-    final Rect stretchedRect = _inflateRectHorizontally(rect, targetRect, leftFraction, rightFraction);
+    final Rect stretchedRect = _inflateRectHorizontally(rect, targetRect, fraction);
     return stretchedRect;
   }
 
   /// Same as [Rect.inflate], but only inflates in the horizontal direction.
-  Rect _inflateRectHorizontally(Rect rect, Rect targetRect, double leftFraction, double rightFraction) {
+  Rect _inflateRectHorizontally(Rect rect, Rect targetRect, double fraction) {
     return Rect.fromLTRB(
-      lerpDouble(rect.left, targetRect.left, leftFraction)!,
+      lerpDouble(rect.left, targetRect.left, fraction)!,
       rect.top,
-      lerpDouble(rect.right, targetRect.right, rightFraction)!,
+      lerpDouble(rect.right, targetRect.right, fraction)!,
       rect.bottom,
     );
   }
