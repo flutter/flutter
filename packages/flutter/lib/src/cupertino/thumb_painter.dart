@@ -45,7 +45,7 @@ const List<BoxShadow> _kSliderBoxShadows = <BoxShadow> [
 
 /// Paints an iOS-style slider thumb or switch thumb.
 ///
-/// Used by [CupertinoSwitch] and [CupertinoSlider].
+/// Used by [CupertinoSlider].
 class CupertinoThumbPainter {
   /// Creates an object that paints an iOS-style slider thumb.
   const CupertinoThumbPainter({

@@ -22,7 +22,7 @@ import 'theme.dart';
 /// [CupertinoTabController] controls, as well as the currently selected tab item of
 /// its [CupertinoTabBar].
 ///
-/// {@tool snippet}
+/// {@tool dartpad}
 /// This samples shows how [CupertinoTabController] can be used to switch tabs in
 /// [CupertinoTabScaffold].
 ///
