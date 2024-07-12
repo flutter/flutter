@@ -2570,5 +2570,4 @@ TEST_P(AiksTest, SetContentsWithRegion) {
 // █ - aiks_blend_unittests.cc
 // █ - aiks_blur_unittests.cc
 // █ - aiks_gradient_unittests.cc
-// █ - aiks_path_unittests.cc
 // █████████████████████████████████████████████████████████████████████████████
