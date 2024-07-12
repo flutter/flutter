@@ -69,8 +69,10 @@ final class ViewFocusBinding {
   });
 
   late final DomEventListener _handleKeyDown = createDomEventListener((DomEvent event) {
-    event as DomKeyboardEvent;
-    if (event.shiftKey ?? false) {
+    // The right event type needs to be checked because Chrome seems to be firing
+    // `Event` events instead of `KeyboardEvent` events when autofilling is used.
+    // See https://github.com/flutter/flutter/issues/149968 for more info.
+    if (event is DomKeyboardEvent && (event.shiftKey ?? false)) {
       _viewFocusDirection = ui.ViewFocusDirection.backward;
     }
   });
