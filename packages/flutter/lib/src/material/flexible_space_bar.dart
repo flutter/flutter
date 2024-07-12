@@ -402,7 +402,7 @@ class FlexibleSpaceBarSettings extends InheritedWidget {
   /// True if the FlexibleSpaceBar overlaps the primary scrollable's contents.
   ///
   /// This value is used by the [AppBar] to resolve
-  /// [AppBar.backgroundColor] against [MaterialState.scrolledUnder],
+  /// [AppBar.backgroundColor] against [WidgetState.scrolledUnder],
   /// i.e. to enable apps to specify different colors when content
   /// has been scrolled up and behind the app bar.
   ///
