@@ -9,6 +9,7 @@ import 'package:flutter_tools/runner.dart' as runner;
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart' as io;
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/net.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
@@ -23,6 +24,7 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_http_client.dart';
 import '../../src/fakes.dart';
+import 'utils.dart';
 
 const String kCustomBugInstructions = 'These are instructions to report with a custom bug tracker.';
 
@@ -44,8 +46,8 @@ void main() {
         firstExitCode ??= exitCode;
 
         // TODO(jamesderlin): Ideally only the first call to exit() would be
-        // honored and subsequent calls would be no-ops, but existing tests
-        // rely on all calls to throw.
+        //  honored and subsequent calls would be no-ops, but existing tests
+        //  rely on all calls to throw.
         throw Exception('test exit');
       });
 
@@ -314,6 +316,55 @@ void main() {
         CrashReporter: () => WaitingCrashReporter(Future<void>.value()),
         HttpClientFactory: () => () => FakeHttpClient.any(),
       });
+    });
+  });
+
+  group('unified_analytics', () {
+    late final MemoryFileSystem fileSystem;
+    late final FakeAnalytics analytics;
+    late final BufferLogger logger;
+
+    setUp(() {
+      fileSystem = MemoryFileSystem.test();
+      analytics = Analytics.fake(
+        tool: DashTool.flutterTool,
+        homeDirectory: fileSystem.currentDirectory,
+        dartVersion: 'dartVersion',
+        fs: fileSystem,
+      );
+      logger = BufferLogger.test();
+    });
+
+    setUp(() {
+      io.setExitFunctionForTests((int exitCode) {});
+      Cache.disableLocking();
+    });
+
+    tearDown(() {
+      io.restoreExitFunction();
+      Cache.enableLocking();
+    });
+
+    testUsingContext('unified_analytics welcome message is shown on first tool run when exiting the tool', () async {
+      await runner.run(
+        <String>['dummy'],
+        () => <FlutterCommand>[
+          DummyFlutterCommand(
+            commandFunction: () async {
+              globals.logger.printStatus('This is the command output.');
+              return FlutterCommandResult.success();
+            },
+          )
+        ],
+        shutdownHooks: ShutdownHooks(),
+      );
+
+      expect(logger.statusText, 'This is the command output.\n\n${analytics.getConsentMessage}\n');
+    }, overrides: <Type, Generator>{
+      Logger: () => logger,
+      FileSystem: () => fileSystem,
+      Analytics: () => analytics,
+      ProcessManager: () => FakeProcessManager.empty(),
     });
   });
 

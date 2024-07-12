@@ -1132,48 +1132,6 @@ flutter:
       });
     });
   });
-
-  group('a flutter command', () {
-    Cache.flutterRoot = '/path/to/sdk/flutter';
-    Cache.disableLocking();
-    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
-    final BufferLogger logger = BufferLogger.test();
-    final FakeProcessManager processManager = FakeProcessManager.empty();
-    final FakeAnalytics analytics = Analytics.fake(
-      tool: DashTool.flutterTool,
-      homeDirectory: fileSystem.currentDirectory,
-      dartVersion: 'dartVersion',
-      fs: fileSystem,
-    );
-
-    tearDown(() {
-      Cache.enableLocking();
-    });
-
-    testUsingContext('will print the analytics welcome message on first run of the tool', () async {
-      final DummyFlutterCommand flutterCommand = DummyFlutterCommand();
-      final CommandRunner<void> runner = createTestCommandRunner(flutterCommand);
-      await runner.run(<String>['dummy']);
-      expect(
-        logger.statusText,
-        contains('The Flutter CLI developer tool uses Google Analytics to'),
-      );
-
-      logger.clear();
-
-      await runner.run(<String>['dummy']);
-      expect(
-        logger.statusText,
-        isNot(contains('The Flutter CLI developer tool uses')),
-        reason: 'Analytics welcome message should not be shown on second run.',
-      );
-    }, overrides: <Type, Generator>{
-      Logger: () => logger,
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-      Analytics: () => analytics,
-    });
-  });
 }
 
 class FakeDeprecatedCommand extends FlutterCommand {
