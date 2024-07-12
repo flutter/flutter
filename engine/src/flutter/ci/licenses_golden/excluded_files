@@ -127,7 +127,6 @@
 ../../../flutter/impeller/aiks/aiks_blend_unittests.cc
 ../../../flutter/impeller/aiks/aiks_blur_unittests.cc
 ../../../flutter/impeller/aiks/aiks_gradient_unittests.cc
-../../../flutter/impeller/aiks/aiks_path_unittests.cc
 ../../../flutter/impeller/aiks/aiks_unittests.cc
 ../../../flutter/impeller/aiks/aiks_unittests.h
 ../../../flutter/impeller/aiks/canvas_unittests.cc

@@ -14,6 +14,15 @@ struct DlColor {
   constexpr DlColor() : argb_(0xFF000000) {}
   constexpr explicit DlColor(uint32_t argb) : argb_(argb) {}
 
+  /// @brief Construct a 32 bit color from a floating point A, R, G, and B color
+  /// channel.
+  constexpr explicit DlColor(SkScalar a, SkScalar r, SkScalar g, SkScalar b)
+      : argb_(static_cast<uint8_t>(std::round(a * 255)) << 24 |  //
+              static_cast<uint8_t>(std::round(r * 255)) << 16 |  //
+              static_cast<uint8_t>(std::round(g * 255)) << 8 |   //
+              static_cast<uint8_t>(std::round(b * 255)) << 0     //
+        ) {}
+
   static constexpr uint8_t toAlpha(SkScalar opacity) { return toC(opacity); }
   static constexpr SkScalar toOpacity(uint8_t alpha) { return toF(alpha); }
 
