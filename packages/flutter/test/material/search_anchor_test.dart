@@ -1971,7 +1971,7 @@ void main() {
     await tester.tap(find.byIcon(Icons.search));
     await tester.pumpAndSettle();
 
-    final Rect searchViewRect = tester.getRect(find.descendant(of: findViewContent(), matching: find.byType(SizedBox)).first);
+    final Rect searchViewRect = tester.getRect(find.descendant(of: findViewContent(), matching: find.byType(ConstrainedBox)).first);
     expect(searchViewRect, equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 400.0)));
 
     // Search view has same width with the default anchor(search bar).
