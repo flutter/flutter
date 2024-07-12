@@ -11,11 +11,7 @@ void main() {
     await tester.pumpWidget(
       const example.ScrollbarExampleApp(),
     );
-    await tester.pumpAndSettle();
-    await tester.pump();
-    await tester.pump();
-    await tester.pump();
-    await tester.pump();
+    await tester.pumpAndSettle(); // Waits for all the paints to be done.
 
     expect(find.widgetWithText(AppBar, 'Scrollbar Sample'), findsOne);
 
