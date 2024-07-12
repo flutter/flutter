@@ -792,7 +792,7 @@ deps = {
      'dep_type': 'cipd',
    },
 
-  'src/third_party/java/openjdk': {
+  'src/flutter/third_party/java/openjdk': {
      'packages': [
        {
         'package': 'flutter/java/openjdk/${{platform}}',

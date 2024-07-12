@@ -166,9 +166,9 @@ ArgParser setupOptions() {
 
 String getJavaHome(String src) {
   if (Platform.isMacOS) {
-    return path.normalize('$src/third_party/java/openjdk/Contents/Home/');
+    return path.normalize('$src/flutter/third_party/java/openjdk/Contents/Home/');
   }
-  return path.normalize('$src/third_party/java/openjdk/');
+  return path.normalize('$src/flutter/third_party/java/openjdk/');
 }
 
 /// The root directory of this project.
