@@ -1116,7 +1116,7 @@ void main() {
                   return const Icon(Icons.search);
                 },
                 suggestionsBuilder: (BuildContext context, SearchController controller) {
-                  return const <Widget>[ListTile(title: Text('test'))];
+                  return <Widget>[];
                 },
               ),
             ),
@@ -1362,7 +1362,7 @@ void main() {
               },);
             },
             suggestionsBuilder: (BuildContext context, SearchController controller) {
-              return const <Widget>[ListTile(title: Text('test'))];
+              return <Widget>[];
             },
           ),
         ),
@@ -1377,7 +1377,7 @@ void main() {
 
     await tester.pumpWidget(Container());
     await tester.pumpWidget(buildAnchor(viewBuilder: (Iterable<Widget> suggestions)
-      => GridView.count(crossAxisCount: 5, shrinkWrap: true, children: suggestions.toList())
+      => GridView.count(crossAxisCount: 5, children: suggestions.toList(),)
     ));
     await tester.tap(find.widgetWithIcon(IconButton, Icons.search));
     await tester.pumpAndSettle();
@@ -1965,14 +1965,14 @@ void main() {
 
     expect(find.byType(SearchBar), findsOneWidget);
     final Rect anchorRect = tester.getRect(find.byType(SearchBar));
-    expect(anchorRect.size, const Size(800.0, 400.0));
-    expect(anchorRect, equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 400.0)));
+    expect(anchorRect.size, const Size(800.0, 56.0));
+    expect(anchorRect, equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 56.0)));
 
     await tester.tap(find.byIcon(Icons.search));
     await tester.pumpAndSettle();
 
-    final Rect searchViewRect = tester.getRect(find.descendant(of: findViewContent(), matching: find.byType(ConstrainedBox)).first);
-    expect(searchViewRect, equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 56.0)));
+    final Rect searchViewRect = tester.getRect(find.descendant(of: findViewContent(), matching: find.byType(SizedBox)).first);
+    expect(searchViewRect, equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 400.0)));
 
     // Search view has same width with the default anchor(search bar).
     expect(searchViewRect.width, anchorRect.width);
