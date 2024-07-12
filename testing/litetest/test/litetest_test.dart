@@ -7,7 +7,7 @@ import 'dart:collection';
 import 'dart:isolate';
 
 import 'package:async_helper/async_helper.dart';
-import 'package:async_helper/async_minitest.dart';
+import 'package:litetest/src/async_minitest.dart';
 import 'package:litetest/src/test.dart';
 import 'package:litetest/src/test_suite.dart';
 
