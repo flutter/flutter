@@ -38,7 +38,7 @@ class TestFileReporterResults {
     required this.errors,
   });
 
-  /// Intended to parse the output file of `dart test --file-reporter json:file_name
+  /// Intended to parse the output file of `dart test --file-reporter json:file_name`
   factory TestFileReporterResults.fromFile(File metrics) {
     if (!metrics.existsSync()) {
       throw Exception('${metrics.path} does not exist');
@@ -49,14 +49,21 @@ class TestFileReporterResults {
     final List<String> errors = <String>[];
 
     for (final String metric in metrics.readAsLinesSync()) {
-      /// Using print within a test adds the printed content to the json file report
-      /// as \u0000 making the file parsing step fail. The content of the json file
-      /// is expected to be a json dictionary per line and the following line removes
-      /// all the additional content at the beginning of the line until it finds the
-      /// first opening curly bracket.
-      // TODO(godofredoc): remove when https://github.com/flutter/flutter/issues/145553 is fixed.
-      final String sanitizedMetric = metric.replaceAll(RegExp(r'$.*{'), '{');
-      final Map<String, Object?> entry = json.decode(sanitizedMetric) as Map<String, Object?>;
+      // Using print within a test adds the printed content to the json file report
+      // as \u0000 making the file parsing step fail. The content of the json file
+      // is expected to be a json dictionary per line and the following line removes
+      // all the additional content at the beginning of the line until it finds the
+      // first opening curly bracket.
+      // TODO: remove when https://github.com/flutter/flutter/issues/145553 is fixed.
+      final String sanitizedMetric = metric.replaceFirst(RegExp(r'^.*?{'), '{');
+      final Map<String, Object?> entry;
+      try {
+        entry = json.decode(sanitizedMetric) as Map<String, Object?>;
+      } catch (e) {
+        errors.add('Failed to decode JSON: $e');
+        continue;
+      }
+
       if (entry.containsKey('suite')) {
         final Map<String, Object?> suite = entry['suite']! as Map<String, Object?>;
         addTestSpec(suite, entry['time']! as int, testSpecs);
@@ -72,13 +79,16 @@ class TestFileReporterResults {
       }
     }
 
-    return TestFileReporterResults._(allTestSpecs: testSpecs, hasFailedTests: hasFailedTests, errors: errors);
+    return TestFileReporterResults._(
+      allTestSpecs: testSpecs,
+      hasFailedTests: hasFailedTests,
+      errors: errors,
+    );
   }
 
   final Map<int, TestSpecs> allTestSpecs;
   final bool hasFailedTests;
   final List<String> errors;
-
 
   static void addTestSpec(Map<String, Object?> suite, int time, Map<int, TestSpecs> allTestSpecs) {
     allTestSpecs[suite['id']! as int] = TestSpecs(
