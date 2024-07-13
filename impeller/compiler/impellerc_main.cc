@@ -263,9 +263,6 @@ bool Main(const fml::CommandLine& command_line) {
 
   // Create at least one compiler to output the SL file, reflection data, and a
   // depfile.
-  // TODO(dnfield): This seems off. We should more explicitly handle how we
-  // generate reflection and depfile data for the runtime stage case.
-  // https://github.com/flutter/flutter/issues/140841
 
   SourceOptions options = switches.CreateSourceOptions();
 

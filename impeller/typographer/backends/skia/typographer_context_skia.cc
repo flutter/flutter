@@ -44,9 +44,6 @@
 
 namespace impeller {
 
-// TODO(bdero): We might be able to remove this per-glyph padding if we fix
-//              the underlying causes of the overlap.
-//              https://github.com/flutter/flutter/issues/114563
 constexpr auto kPadding = 2;
 
 namespace {

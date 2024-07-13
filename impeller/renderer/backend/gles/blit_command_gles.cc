@@ -72,7 +72,7 @@ bool BlitCopyTextureToTextureCommandGLES::Encode(
   // glBlitFramebuffer is a GLES3 proc. Since we target GLES2, we need to
   // emulate the blit when it's not available in the driver.
   if (!gl.BlitFramebuffer.IsAvailable()) {
-    // TODO(bdero): Emulate the blit using a raster draw call here.
+    // TODO(135818): Emulate the blit using a raster draw call here.
     FML_LOG(ERROR) << "Texture blit fallback not implemented yet for GLES2.";
     return false;
   }
