@@ -174,6 +174,75 @@ void main() {
     expect(inkFeatures, paints..rect(rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0), color: const Color(0xff00ff00)));
   });
 
+  testWidgets('InkWell waitDuration test', (WidgetTester tester) async {
+    final List<String> log = <String>[];
+
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: Material(
+        child: Center(
+          child: InkWell(
+            waitDuration: const Duration(milliseconds: 500),
+            onTap: () {
+              log.add('tap');
+            },
+            onDoubleTap: () {
+              log.add('double-tap');
+            },
+            onLongPress: () {
+              log.add('long-press');
+            },
+            onTapDown: (TapDownDetails details) {
+              log.add('tap-down');
+            },
+            onTapUp: (TapUpDetails details) {
+              log.add('tap-up');
+            },
+            onTapCancel: () {
+              log.add('tap-cancel');
+            },
+          ),
+        ),
+      ),
+    ));
+
+    await tester.tap(find.byType(InkWell), pointer: 1);
+
+    expect(log, isEmpty);
+
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(log, equals(<String>['tap-down', 'tap-up', 'tap']));
+    log.clear();
+
+    await tester.tap(find.byType(InkWell), pointer: 2);
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.tap(find.byType(InkWell), pointer: 3);
+
+    expect(log, equals(<String>['double-tap']));
+    log.clear();
+
+    await tester.longPress(find.byType(InkWell), pointer: 4);
+
+    expect(log, equals(<String>['tap-down', 'tap-cancel', 'long-press']));
+
+    log.clear();
+    TestGesture gesture = await tester.startGesture(tester.getRect(find.byType(InkWell)).center);
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(log, equals(<String>['tap-down']));
+    await gesture.up();
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(log, equals(<String>['tap-down', 'tap-up', 'tap']));
+
+    log.clear();
+    gesture = await tester.startGesture(tester.getRect(find.byType(InkWell)).center);
+    await tester.pump(const Duration(milliseconds: 100));
+    await gesture.moveBy(const Offset(0.0, 200.0));
+    await gesture.cancel();
+    expect(log, equals(<String>['tap-down', 'tap-cancel']));
+});
+
+
   testWidgets('ink well changes color on hover with overlayColor', (WidgetTester tester) async {
     // Same test as 'ink well changes color on hover' except that the
     // hover color is specified with the overlayColor parameter.

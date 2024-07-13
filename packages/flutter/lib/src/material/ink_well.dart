@@ -328,6 +328,7 @@ class InkResponse extends StatelessWidget {
     this.autofocus = false,
     this.statesController,
     this.hoverDuration,
+    this.waitDuration,
   });
 
   /// The widget below this widget in the tree.
@@ -622,6 +623,10 @@ class InkResponse extends StatelessWidget {
   /// The default is 50ms.
   final Duration? hoverDuration;
 
+  /// The duration to wait before starting the hover animation.
+  /// The default is 0ms.
+  final Duration? waitDuration;
+
   @override
   Widget build(BuildContext context) {
     final _ParentInkResponseState? parentState = _ParentInkResponseProvider.maybeOf(context);
@@ -661,6 +666,7 @@ class InkResponse extends StatelessWidget {
       debugCheckContext: debugCheckContext,
       statesController: statesController,
       hoverDuration: hoverDuration,
+      waitDuration: waitDuration,
       child: child,
     );
   }
@@ -718,6 +724,7 @@ class _InkResponseStateWidget extends StatefulWidget {
     required this.debugCheckContext,
     this.statesController,
     this.hoverDuration,
+    this.waitDuration,
   });
 
   final Widget? child;
@@ -756,6 +763,7 @@ class _InkResponseStateWidget extends StatefulWidget {
   final _CheckContext debugCheckContext;
   final MaterialStatesController? statesController;
   final Duration? hoverDuration;
+  final Duration? waitDuration;
 
   @override
   _InkResponseState createState() => _InkResponseState();
@@ -815,6 +823,8 @@ class _InkResponseState extends State<_InkResponseStateWidget>
 
   static const Duration _activationDuration = Duration(milliseconds: 100);
   Timer? _activationTimer;
+
+  Timer? _hoverTimer;
 
   @override
   void markChildInkResponsePressed(_ParentInkResponseState childState, bool value) {
@@ -1254,12 +1264,20 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   void handleMouseEnter(PointerEnterEvent event) {
     _hovering = true;
     if (enabled) {
-      handleHoverChange();
+      if (widget.waitDuration != null && widget.waitDuration! > Duration.zero) {
+        _hoverTimer?.cancel();
+        _hoverTimer = Timer(widget.waitDuration!, () {
+          handleHoverChange();
+        });
+      } else {
+        handleHoverChange();
+      }
     }
   }
 
   void handleMouseExit(PointerExitEvent event) {
     _hovering = false;
+    _hoverTimer?.cancel();
     // If the exit occurs after we've been disabled, we still
     // want to take down the highlights and run widget.onHover.
     handleHoverChange();
@@ -1464,6 +1482,7 @@ class InkWell extends InkResponse {
     super.autofocus,
     super.statesController,
     super.hoverDuration,
+    super.waitDuration,
   }) : super(
     containedInkWell: true,
     highlightShape: BoxShape.rectangle,
