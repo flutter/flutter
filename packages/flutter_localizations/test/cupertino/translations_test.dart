@@ -240,6 +240,16 @@ void main() {
     expect(localizations.lookUpButtonLabel, '查询');
   });
 
+  testWidgets('ko-KR translation for cut, copy, paste label in ButtonLabel', (WidgetTester tester) async {
+    const Locale locale = Locale('ko');
+    expect(GlobalCupertinoLocalizations.delegate.isSupported(locale), isTrue);
+    final CupertinoLocalizations localizations = await GlobalCupertinoLocalizations.delegate.load(locale);
+    expect(localizations, isA<CupertinoLocalizationKo>());
+    expect(localizations.cutButtonLabel, '잘라내기');
+    expect(localizations.copyButtonLabel, '복사');
+    expect(localizations.pasteButtonLabel, '붙여넣기');
+  });
+
   testWidgets('localizations.datePickerDayOfMonth uses the current locale for weekdays', (WidgetTester tester) async {
     const Locale locale = Locale('zh');
     expect(GlobalCupertinoLocalizations.delegate.isSupported(locale), isTrue);
