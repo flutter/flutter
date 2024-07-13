@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'gesture_tester.dart';
@@ -145,6 +146,58 @@ void main() {
     dragCallbacks.clear();
   });
 
+  testWidgets('can beat customscrollview', (WidgetTester tester) async {
+    final GlobalKey tapTargetKey = GlobalKey();
+    bool wasPanStartCalled = false;
+
+    // Pump a tree with panable widget inside a CustomScrollView. The CustomScrollView
+    // has a more aggresive drag recognizer that will typically beat other drag
+    // recognizers in the arena. This pan recognizer uses a smaller threshold to
+    // accept the gesture, that should make it win the arena.
+    await tester.pumpWidget(
+      MaterialApp(home:
+        Scaffold(
+          body: CustomScrollView(
+            slivers: <Widget>[
+              SliverToBoxAdapter(
+                child: RawGestureDetector(
+                  behavior: HitTestBehavior.translucent,
+                  gestures: <Type, GestureRecognizerFactory>{
+                    _EagerPanGestureRecognizer: GestureRecognizerFactoryWithHandlers<_EagerPanGestureRecognizer>(
+                      () => _EagerPanGestureRecognizer(),
+                      (_EagerPanGestureRecognizer recognizer) {
+                        recognizer
+                          .onStart = (DragStartDetails details) => wasPanStartCalled = true;
+                      },
+                    ),
+                  },
+                  child: SizedBox(
+                    key: tapTargetKey,
+                    width: 100,
+                    height: 100,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    // Tap down on the tap target inside the gesture recognizer.
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byKey(tapTargetKey)));
+    await tester.pump();
+
+    // Move the pointer predominantly on the x-axis, with a y-axis movement that
+    // is sufficient bigger so that both the CustomScrollScrollView and the
+    // pan gesture recognizer want to accept the gesture.
+    await gesture.moveBy(const Offset(30, kTouchSlop + 1));
+    await tester.pump();
+
+    // Ensure our gesture recognizer won the arena.
+    expect(wasPanStartCalled, isTrue);
+  });
+
   group('Recognizers on different button filters:', () {
     final List<String> recognized = <String>[];
     late HorizontalDragGestureRecognizer primaryRecognizer;
@@ -200,4 +253,16 @@ void main() {
 class MockHitTestTarget implements HitTestTarget {
   @override
   void handleEvent(PointerEvent event, HitTestEntry entry) { }
+}
+
+/// A [PanGestureRecognizer] that tries to beat [VerticalDragGestureRecognizer] in the arena.
+///
+/// Typically, [VerticalDragGestureRecognizer] wins because it has a smaller threshold to
+/// accept the gesture. This recognizer uses the same threshold that [VerticalDragGestureRecognizer]
+/// uses.
+class _EagerPanGestureRecognizer extends PanGestureRecognizer {
+  @override
+  bool hasSufficientGlobalDistanceToAccept(PointerDeviceKind pointerDeviceKind, double? deviceTouchSlop) {
+    return globalDistanceMoved.abs() > computeHitSlop(pointerDeviceKind, gestureSettings);
+  }
 }
