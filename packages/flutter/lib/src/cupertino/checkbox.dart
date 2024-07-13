@@ -8,10 +8,12 @@
 /// @docImport 'switch.dart';
 library;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
 import 'constants.dart';
+import 'theme.dart';
 
 // Examples can assume:
 // bool _throwShotAway = false;
@@ -28,9 +30,9 @@ const double _kCupertinoFocusColorSaturation = 0.835;
 const Color _kDisabledCheckColor = Color.fromARGB(255, 172, 172, 172);
 
 // Eyeballed from a checkbox on a physical Macbook Pro running macOS version 14.5.
-const CupertinoDynamicColor _kDefaultFillColor = CupertinoDynamicColor.withBrightness(
-  color: CupertinoColors.white,
-  darkColor: Color.fromARGB(255, 87, 87, 87),
+const CupertinoDynamicColor _kDefaultBorderColor = CupertinoDynamicColor.withBrightness(
+  color: Color.fromARGB(255, 209, 209, 214),
+  darkColor: Color.fromARGB(128, 128, 128, 128),
 );
 
 /// A macOS style checkbox.
@@ -314,7 +316,7 @@ class _CupertinoCheckboxState extends State<CupertinoCheckbox> with TickerProvid
         return widget.activeColor
           ?? CupertinoDynamicColor.resolve(CupertinoColors.activeBlue, context);
       }
-      return CupertinoDynamicColor.resolve(_kDefaultFillColor, context);
+      return CupertinoColors.white;
     });
   }
 
@@ -331,18 +333,12 @@ class _CupertinoCheckboxState extends State<CupertinoCheckbox> with TickerProvid
   }
 
   WidgetStateProperty<BorderSide> get _defaultSide {
-    final Color borderColor = CupertinoDynamicColor.resolve(
-      CupertinoColors.systemGrey4,
-      context,
-    );
     return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
-      if (states.contains(WidgetState.disabled)){
-        return BorderSide(color: borderColor);
-      }
-      if (states.contains(WidgetState.selected) || states.contains(WidgetState.focused)) {
+      if ((states.contains(WidgetState.selected) || states.contains(WidgetState.focused))
+        && !states.contains(WidgetState.disabled)) {
         return const BorderSide(width: 0.0, color: CupertinoColors.transparent);
       }
-      return BorderSide(color: borderColor);
+      return BorderSide(color: CupertinoDynamicColor.resolve(_kDefaultBorderColor, context));
     });
   }
 
@@ -410,6 +406,7 @@ class _CupertinoCheckboxState extends State<CupertinoCheckbox> with TickerProvid
             borderRadius: BorderRadius.circular(4.0),
           )
           ..side = effectiveBorderSide
+          ..brightness = CupertinoTheme.of(context).brightness
       ),
     );
   }
@@ -466,6 +463,16 @@ class _CheckboxPainter extends ToggleablePainter {
     notifyListeners();
   }
 
+  Brightness? get brightness => _brightness;
+  Brightness? _brightness;
+  set brightness(Brightness? value) {
+    if (_brightness == value) {
+      return;
+    }
+    _brightness = value;
+    notifyListeners();
+  }
+
   Rect _outerRectAt(Offset origin) {
     const double size = CupertinoCheckbox.width;
     final Rect rect = Rect.fromLTWH(origin.dx, origin.dy, size, size);
@@ -488,7 +495,24 @@ class _CheckboxPainter extends ToggleablePainter {
   }
 
   void _drawBox(Canvas canvas, Rect outer, Paint paint, BorderSide? side) {
-    canvas.drawPath(shape.getOuterPath(outer), paint);
+    // Fill the unchecked checkbox with a gradient in dark mode.
+    if (value == false && brightness == Brightness.dark){
+      final LinearGradient fillGradient = LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        // Eyeballed from a checkbox on a physical Macbook Pro running macOS version 14.5.
+        colors: <Color>[
+          paint.color.withOpacity(0.29),
+          paint.color.withOpacity(0.41),
+        ],
+      );
+      final Paint gradientPaint = Paint()
+        ..shader = fillGradient.createShader(outer);
+      canvas.drawPath(shape.getOuterPath(outer), gradientPaint);
+    }
+    else{
+      canvas.drawPath(shape.getOuterPath(outer), paint);
+    }
     if (side != null) {
       shape.copyWith(side: side).paint(canvas, outer);
     }

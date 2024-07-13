@@ -535,11 +535,10 @@ void main() {
   testWidgets('Checkbox default colors, and size in dark mode', (WidgetTester tester) async {
     const Color enabledCheckColor = Color(0xffffffff);
     const Color disabledCheckColor = Color(0xffacacac);
-    const Color inactiveFillColor = Color(0xff575757);
     const Color activeFillColor = Color(0xff0a84ff);
     const Color disabledFillColor = Color(0x80ffffff);
     const Color activeBorderColor = Color(0x00000000);
-    const Color inactiveBorderColor = Color(0xff3a3a3c);
+    const Color inactiveBorderColor = Color(0x80808080);
 
     Widget buildApp({bool value = true, bool enabled = true}) {
       return CupertinoApp(
@@ -556,7 +555,7 @@ void main() {
     expect(
       find.byType(CupertinoCheckbox),
       paints
-        ..path(color: inactiveFillColor)
+        ..path()
         ..drrect(color: inactiveBorderColor),
       reason: 'Inactive enabled checkbox should have default colors',
     );
@@ -579,7 +578,7 @@ void main() {
     expect(
       find.byType(CupertinoCheckbox),
       paints
-        ..path(color: disabledFillColor)
+        ..path()
         ..drrect(color: inactiveBorderColor),
       reason: 'Inactive disabled checkbox should have default colors',
     );
