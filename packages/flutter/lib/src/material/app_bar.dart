@@ -760,7 +760,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
 }
 
 class _AppBarState extends State<AppBar> {
-  final Map<ScrollableState?, double> _notificationListenerStates = <ScrollableState?, double>{};
+  final Map<String?, double> _scrollPositions = <String?, double>{};
   ScrollNotificationObserverState? _scrollNotificationObserver;
   bool _scrolledUnder = false;
 
@@ -782,24 +782,22 @@ class _AppBarState extends State<AppBar> {
       _scrollNotificationObserver!.removeListener(_handleScrollNotification);
       _scrollNotificationObserver = null;
     }
-    _notificationListenerStates.clear();
+    _scrollPositions.clear();
     super.dispose();
   }
 
   void _handleScrollNotification(ScrollNotification notification) {
+    // Store the scroll position of the widget that sent the notification.
+    // The key is the widget's string representation to avoid storing the widget itself.
+    if (notification.context?.widget != null) {
+      _scrollPositions[notification.context?.widget.toString()] = notification.metrics.pixels;
+    }
+
     if (notification is ScrollUpdateNotification && widget.notificationPredicate(notification)) {
-      // The notification context of a ScrollNotification points to the RawGestureDetector
-      // of the Scrollable. We get the ScrollableState associated with this notification
-      // by looking up the tree.
-      final ScrollableState? notificationScrollableState = notification.context?.findAncestorStateOfType<ScrollableState>();
-
       // Check if any scroll positions on the vertical axis have been updated.
-      // If so, update the scroll position for the associated ScrollableState.
-      if (notificationScrollableState != null && notification.metrics.axis == Axis.vertical) {
-        final double newPixels = notification.metrics.pixels;
-        _notificationListenerStates[notificationScrollableState] = newPixels;
-
-        if (_notificationListenerStates.values.toList().any((double element) => element > 0) && _scrolledUnder) {
+      // If any have, then the app bar should not be scrolled under.
+      if (_scrollPositions.isNotEmpty && notification.metrics.axis == Axis.vertical) {
+        if (_scrollPositions.values.toList().any((double element) => element > 0) && _scrolledUnder) {
           return;
         }
       }
