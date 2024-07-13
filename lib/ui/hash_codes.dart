@@ -32,21 +32,6 @@ class _Jenkins {
   }
 }
 
-/// Combine up to twenty objects' hash codes into one value.
-///
-/// If you only need to handle one object's hash code, then just refer to its
-/// [Object.hashCode] getter directly.
-///
-/// If you need to combine an arbitrary number of objects from a [List] or other
-/// [Iterable], use [hashList]. The output of [hashList] can be used as one of
-/// the arguments to this function.
-///
-/// For example:
-///
-/// ```dart
-/// int get hashCode => hashValues(foo, bar, hashList(quux), baz);
-/// ```
-///
 /// ## Deprecation
 ///
 /// This function has been replaced by [Object.hash], so that it can be used
