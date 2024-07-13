@@ -364,8 +364,7 @@ struct TRect {
 
   /// @brief  Get the area of the rectangle, equivalent to |GetSize().Area()|
   [[nodiscard]] constexpr T Area() const {
-    // TODO(flutter/flutter#141710) - Use saturated math to avoid overflow
-    // https://github.com/flutter/flutter/issues/141710
+    // TODO(141710): Use saturated math to avoid overflow.
     return IsEmpty() ? 0 : (right_ - left_) * (bottom_ - top_);
   }
 

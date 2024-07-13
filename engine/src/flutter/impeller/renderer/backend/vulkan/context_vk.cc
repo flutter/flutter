@@ -42,7 +42,6 @@ VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE
 
 namespace impeller {
 
-// TODO(csg): Fix this after caps are reworked.
 static bool gHasValidationLayers = false;
 
 bool HasValidationLayers() {

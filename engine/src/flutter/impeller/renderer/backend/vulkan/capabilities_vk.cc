@@ -507,8 +507,7 @@ bool CapabilitiesVK::SetPhysicalDevice(
 
   {
     // Query texture support.
-    // TODO(jonahwilliams):
-    // https://github.com/flutter/flutter/issues/129784
+    // TODO(129784): Add a capability check for expected memory types.
     vk::PhysicalDeviceMemoryProperties memory_properties;
     device.getMemoryProperties(&memory_properties);
 

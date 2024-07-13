@@ -127,9 +127,8 @@ fml::Status ComputePassMTL::Compute(const ISize& grid_size) {
     return fml::Status(fml::StatusCode::kUnknown,
                        "Invalid grid size for compute command.");
   }
-  // TODO(dnfield): use feature detection to support non-uniform threadgroup
-  // sizes.
-  // https://github.com/flutter/flutter/issues/110619
+
+  // Threadgroup sizes must be uniform.
   auto width = grid_size.width;
   auto height = grid_size.height;
 

@@ -476,9 +476,9 @@ struct RenderPassData {
   if (gl.DiscardFramebufferEXT.IsAvailable()) {
     std::vector<GLenum> attachments;
 
-    // TODO(jonahwilliams): discarding stencil or depth on the default fbo
-    // causes Angle to discard the entire render target. Until we know the
-    // reason, default to storing.
+    // TODO(130048): discarding stencil or depth on the default fbo causes Angle
+    // to discard the entire render target. Until we know the reason, default to
+    // storing.
     bool angle_safe = gl.GetCapabilities()->IsANGLE() ? !is_default_fbo : true;
 
     if (pass_data.discard_color_attachment) {
