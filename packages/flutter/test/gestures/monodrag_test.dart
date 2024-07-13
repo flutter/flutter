@@ -146,7 +146,7 @@ void main() {
     dragCallbacks.clear();
   });
 
-  testWidgets('can beat customscrollview', (WidgetTester tester) async {
+  testWidgets('DragGestureRecognizer can be subclassed to beat a CustomScrollView in the arena', (WidgetTester tester) async {
     final GlobalKey tapTargetKey = GlobalKey();
     bool wasPanStartCalled = false;
 
