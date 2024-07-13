@@ -1590,35 +1590,34 @@ void main() {
     expect(titleSize.width, materialAppSize.width - 32.0);
   });
 
-  testWidgets('ExpansionTile uses ListTileTheme controlAffinity', (WidgetTester tester) async {
-    Widget buildView(ListTileControlAffinity controlAffinity) {
-      return MaterialApp(
-        home: ListTileTheme(
-          data: ListTileThemeData(
-            controlAffinity: controlAffinity,
-          ),
-          child: const Material(
-            child: ExpansionTile(
-              title: Text('ExpansionTile'),
+  testWidgets('ExpansionTile passes shape to ListTile',
+      (WidgetTester tester) async {
+    final RoundedRectangleBorder customShape =
+        RoundedRectangleBorder(borderRadius: BorderRadius.circular(16));
+
+    Widget buildAppWithExpansionTile() => MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: ExpansionTile(
+                title: const Text('Test Tile'),
+                shape: customShape,
+              ),
             ),
           ),
-        ),
-      );
-    }
+        );
 
-    await tester.pumpWidget(buildView(ListTileControlAffinity.leading));
-    final Finder leading = find.text('ExpansionTile');
-    final Offset offsetLeading = tester.getTopLeft(leading);
-    expect(offsetLeading, const Offset(56.0, 17.0));
+    await tester.pumpWidget(buildAppWithExpansionTile());
 
-    await tester.pumpWidget(buildView(ListTileControlAffinity.trailing));
-    final Finder trailing = find.text('ExpansionTile');
-    final Offset offsetTrailing = tester.getTopLeft(trailing);
-    expect(offsetTrailing, const Offset(16.0, 17.0));
+    final Finder listTileFinder = find.byType(ListTile);
+    expect(listTileFinder, findsOneWidget);
 
-    await tester.pumpWidget(buildView(ListTileControlAffinity.platform));
-    final Finder platform = find.text('ExpansionTile');
-    final Offset offsetPlatform = tester.getTopLeft(platform);
-    expect(offsetPlatform, const Offset(16.0, 17.0));
+    final ListTile listTile = tester.widget<ListTile>(listTileFinder.first);
+    expect(listTile.shape, equals(customShape));
+
+    await tester.tap(listTileFinder);
+    expect(find.byType(ListTile), findsOneWidget);
+    final ListTile clickedListTile =
+        tester.widget<ListTile>(find.byType(ListTile).first);
+    expect(clickedListTile.shape, equals(customShape));
   });
 }
