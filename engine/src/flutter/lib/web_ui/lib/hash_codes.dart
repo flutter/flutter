@@ -26,19 +26,23 @@ class _Jenkins {
   }
 }
 
-/// Combine up to twenty objects' hash codes into one value.
+/// ## Deprecation
 ///
-/// If you only need to handle one object's hash code, then just refer to its
-/// [Object.hashCode] getter directly.
+/// This function has been replaced by [Object.hash], so that it can be used
+/// outside of Flutter as well. The new function is a drop-in replacement.
 ///
-/// If you need to combine an arbitrary number of objects from a [List] or other
-/// [Iterable], use [hashList]. The output of [hashList] can be used as one of
-/// the arguments to this function.
-///
-/// For example:
+/// The [hashList] function has also been replaced, [Object.hashAll] is the new
+/// function. The example above therefore is better written as:
 ///
 /// ```dart
-/// int hashCode => hashValues(foo, bar, hashList(quux), baz);
+/// int get hashCode => Object.hash(foo, bar, Object.hashAll(quux), baz);
+/// ```
+///
+/// If a parameter is nullable, then it needs special handling,
+/// because [Object.hashAll]'s argument is not nullable:
+///
+/// ```dart
+/// int get hashCode => Object.hash(foo, bar, thud == null ? null : Object.hashAll(thud!), baz);
 /// ```
 @Deprecated(
   'Use Object.hash() instead. '
