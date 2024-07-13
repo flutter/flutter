@@ -1,4 +1,4 @@
-Signature: d035f7647d7dd3c7a9d0993ae067e571
+Signature: b5bddd8d0d731da11e49e7d763a3537a
 
 ====================================================================================================
 LIBRARY: etc1
@@ -9499,6 +9499,7 @@ LIBRARY: skia
 ORIGIN: ../../../flutter/third_party/skia/fuzz/oss_fuzz/FuzzParsePath.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/gm/emptyshader.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/gm/imagedither.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/gm/pathopsblend.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/gm/rendertomipmappedyuvimageplanes.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/core/SkArc.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/gpu/ganesh/gl/GrGLMakeWebGLInterface.h + ../../../flutter/third_party/skia/LICENSE
@@ -9592,6 +9593,7 @@ TYPE: LicenseType.bsd
 FILE: ../../../flutter/third_party/skia/fuzz/oss_fuzz/FuzzParsePath.cpp
 FILE: ../../../flutter/third_party/skia/gm/emptyshader.cpp
 FILE: ../../../flutter/third_party/skia/gm/imagedither.cpp
+FILE: ../../../flutter/third_party/skia/gm/pathopsblend.cpp
 FILE: ../../../flutter/third_party/skia/gm/rendertomipmappedyuvimageplanes.cpp
 FILE: ../../../flutter/third_party/skia/include/core/SkArc.h
 FILE: ../../../flutter/third_party/skia/include/gpu/ganesh/gl/GrGLMakeWebGLInterface.h
