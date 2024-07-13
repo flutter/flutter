@@ -303,7 +303,6 @@ PipelineFuture<ComputePipelineDescriptor> PipelineLibraryGLES::GetPipeline(
     bool async) {
   auto promise = std::make_shared<
       std::promise<std::shared_ptr<Pipeline<ComputePipelineDescriptor>>>>();
-  // TODO(dnfield): implement compute for GLES.
   promise->set_value(nullptr);
   return {descriptor, promise->get_future()};
 }

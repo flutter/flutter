@@ -44,16 +44,16 @@ const std::unique_ptr<PlaygroundImpl>& GetSharedVulkanPlayground(
     static absl::NoDestructor<std::unique_ptr<PlaygroundImpl>>
         vulkan_validation_playground(
             MakeVulkanPlayground(/*enable_validations=*/true));
-    // TODO(https://github.com/flutter/flutter/issues/142237): This can be
-    // removed when the thread local storage is removed.
+    // TODO(142237): This can be removed when the thread local storage is
+    // removed.
     static fml::ScopedCleanupClosure context_cleanup(
         [&] { (*vulkan_validation_playground)->GetContext()->Shutdown(); });
     return *vulkan_validation_playground;
   } else {
     static absl::NoDestructor<std::unique_ptr<PlaygroundImpl>>
         vulkan_playground(MakeVulkanPlayground(/*enable_validations=*/false));
-    // TODO(https://github.com/flutter/flutter/issues/142237): This can be
-    // removed when the thread local storage is removed.
+    // TODO(142237): This can be removed when the thread local storage is
+    // removed.
     static fml::ScopedCleanupClosure context_cleanup(
         [&] { (*vulkan_playground)->GetContext()->Shutdown(); });
     return *vulkan_playground;

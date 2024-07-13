@@ -100,7 +100,6 @@ static bool ConfigureStencilAttachment(
   return true;
 }
 
-// TODO(csg): Move this to formats_mtl.h
 static MTLRenderPassDescriptor* ToMTLRenderPassDescriptor(
     const RenderTarget& desc) {
   auto result = [MTLRenderPassDescriptor renderPassDescriptor];

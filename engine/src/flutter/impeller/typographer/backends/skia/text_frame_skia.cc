@@ -63,8 +63,8 @@ std::shared_ptr<TextFrame> MakeTextFrameFromTextBlobSkia(
   bool has_color = false;
   std::vector<TextRun> runs;
   for (SkTextBlobRunIterator run(blob.get()); !run.done(); run.next()) {
-    // TODO(jonahwilliams): ask Skia for a public API to look this up.
-    // https://github.com/flutter/flutter/issues/112005
+    // TODO(112005): Ask Skia for a public API to look this up. This is using a
+    // private API today.
     SkStrikeSpec strikeSpec = SkStrikeSpec::MakeWithNoDevice(run.font());
     SkBulkGlyphMetricsAndPaths paths{strikeSpec};
     AxisAlignment alignment = AxisAlignment::kNone;

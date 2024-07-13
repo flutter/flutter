@@ -90,7 +90,6 @@ static MTLComputePipelineDescriptor* GetMTLComputePipelineDescriptor(
   return descriptor;
 }
 
-// TODO(csg): Make PipelineDescriptor a struct and move this to formats_mtl.
 static id<MTLDepthStencilState> CreateDepthStencilDescriptor(
     const PipelineDescriptor& desc,
     id<MTLDevice> device) {

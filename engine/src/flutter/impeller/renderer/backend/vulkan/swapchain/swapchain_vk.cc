@@ -55,8 +55,7 @@ std::shared_ptr<SwapchainVK> SwapchainVK::Create(
     return nullptr;
   }
 
-  // TODO(148139): https://github.com/flutter/flutter/issues/148139 sync issues
-  // on present.
+  // TODO(148139): Fix synchronization issues on present.
   if constexpr (false) {
     // TODO(147533): AHB swapchains on emulators are not functional.
     const auto emulator =
