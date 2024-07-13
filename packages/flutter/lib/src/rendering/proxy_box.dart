@@ -4324,6 +4324,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     if (_properties.link != null) {
       config.isLink = _properties.link!;
     }
+    if (_properties.linkUrl != null) {
+      config.linkUrl = _properties.linkUrl;
+    }
     if (_properties.slider != null) {
       config.isSlider = _properties.slider!;
     }
