@@ -43,11 +43,10 @@ class CircularNotchedRectangle extends NotchedShape {
   /// Creates a [CircularNotchedRectangle].
   ///
   /// The same object can be used to create multiple shapes.
-  ///
-  /// If [inverted] is true, the notch is placed at the bottom of the
-  /// rectangle.
   const CircularNotchedRectangle({this.inverted = false});
 
+  /// If [inverted] is true, the notch is placed at the bottom of the
+  /// rectangle.
   final bool inverted;
 
   /// Creates a [Path] that describes a rectangle with a smooth circular notch.
