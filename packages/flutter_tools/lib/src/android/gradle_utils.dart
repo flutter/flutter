@@ -18,7 +18,6 @@ import '../build_info.dart';
 import '../cache.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
-import '../reporting/reporting.dart';
 import 'android_sdk.dart';
 
 // These are the versions used in the project templates.
@@ -29,7 +28,7 @@ import 'android_sdk.dart';
 // Please see the README before changing any of these values.
 const String templateDefaultGradleVersion = '8.3';
 const String templateAndroidGradlePluginVersion = '8.1.0';
-const String templateAndroidGradlePluginVersionForModule = '8.1.0';
+const String templateAndroidGradlePluginVersionForModule = '7.3.0';
 const String templateKotlinGradlePluginVersion = '1.8.22';
 
 // The Flutter Gradle Plugin is only applied to app projects, and modules that
@@ -809,11 +808,6 @@ void writeLocalProperties(File properties) {
 }
 
 void exitWithNoSdkMessage() {
-  BuildEvent('unsupported-project',
-          type: 'gradle',
-          eventError: 'android-sdk-not-found',
-          flutterUsage: globals.flutterUsage)
-      .send();
   globals.analytics.send(Event.flutterBuildInfo(
     label: 'unsupported-project',
     buildType: 'gradle',

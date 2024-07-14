@@ -4,7 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 
-/// Flutter code sample for [FontFeature.FontFeature.fractions].
+/// Flutter code sample for [FontFeature.fractions].
 
 void main() => runApp(const ExampleApp());
 

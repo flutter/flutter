@@ -779,7 +779,7 @@ dependencies {
                 gradleV: data.gradleVersion,
                 agpV: data.agpVersion,
               ),
-              data.validPair,
+              data.validPair ? isTrue : isFalse,
               reason: 'G: ${data.gradleVersion}, AGP: ${data.agpVersion}');
         });
       }
@@ -982,6 +982,7 @@ allprojects {
       JavaAgpTestData(false, javaVersion: '17.0.3', agpVersion: '8.5'),
       JavaAgpTestData(true, javaVersion: '17.0.3', agpVersion: maxKnownAndSupportedAgpVersion),
       JavaAgpTestData(true, javaVersion: '17.0.3', agpVersion: '8.3'),
+      JavaAgpTestData(true, javaVersion: '17.0.3', agpVersion: '8.2'),
       JavaAgpTestData(true, javaVersion: '17.0.3', agpVersion: '8.1'),
       JavaAgpTestData(true, javaVersion: '17.0.3', agpVersion: '8.0'),
       JavaAgpTestData(true, javaVersion: '17.0.3', agpVersion: '7.4'),

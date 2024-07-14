@@ -182,7 +182,7 @@ void main() {
       hasEnabledState: true,
       isEnabled: true,
       hasTapAction: true,
-      hasFocusAction: true,
+      hasFocusAction: defaultTargetPlatform != TargetPlatform.iOS,
       isFocusable: true,
     ));
     handle.dispose();
@@ -240,7 +240,7 @@ void main() {
       hasEnabledState: true,
       isEnabled: true,
       hasTapAction: true,
-      hasFocusAction: true,
+      hasFocusAction: defaultTargetPlatform != TargetPlatform.iOS,
       isFocusable: true,
     ));
     handle.dispose();
