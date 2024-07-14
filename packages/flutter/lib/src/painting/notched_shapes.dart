@@ -40,7 +40,12 @@ class CircularNotchedRectangle extends NotchedShape {
   /// Creates a [CircularNotchedRectangle].
   ///
   /// The same object can be used to create multiple shapes.
-  const CircularNotchedRectangle();
+  ///
+  /// If [inverted] is true, the notch is placed at the bottom of the
+  /// rectangle.
+  const CircularNotchedRectangle({this.inverted = false});
+
+  final bool inverted;
 
   /// Creates a [Path] that describes a rectangle with a smooth circular notch.
   ///
@@ -53,12 +58,9 @@ class CircularNotchedRectangle extends NotchedShape {
   ///
   /// The notch is curve that smoothly connects the host's top edge and
   /// the guest circle.
-  ///
-  /// If [inverted] is true, the notch is placed at the bottom of the
-  /// rectangle.
   // TODO(amirh): add an example diagram here.
   @override
-  Path getOuterPath(Rect host, Rect? guest, {bool inverted = false}) {
+  Path getOuterPath(Rect host, Rect? guest) {
     if (guest == null || !host.overlaps(guest)) {
       return Path()..addRect(host);
     }
