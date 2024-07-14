@@ -10,9 +10,9 @@ library;
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/painting.dart' show Axis;
 import 'package:flutter/scheduler.dart';
 
-import '../painting/basic_types.dart';
 import 'constants.dart';
 import 'drag_details.dart';
 import 'events.dart';
