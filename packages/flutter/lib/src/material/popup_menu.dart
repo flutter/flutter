@@ -859,6 +859,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
     this.constraints,
     required this.clipBehavior,
     super.settings,
+    super.requestFocus,
     this.popUpAnimationStyle,
   }) : itemSizes = List<Size?>.filled(items.length, null),
        // Menus always cycle focus through their items irrespective of the
@@ -1049,6 +1050,7 @@ Future<T?> showMenu<T>({
   Clip clipBehavior = Clip.none,
   RouteSettings? routeSettings,
   AnimationStyle? popUpAnimationStyle,
+  bool? requestFocus,
 }) {
   assert(items.isNotEmpty);
   assert(debugCheckHasMaterialLocalizations(context));
@@ -1084,6 +1086,7 @@ Future<T?> showMenu<T>({
     clipBehavior: clipBehavior,
     settings: routeSettings,
     popUpAnimationStyle: popUpAnimationStyle,
+    requestFocus: requestFocus,
   ));
 }
 
@@ -1217,6 +1220,7 @@ class PopupMenuButton<T> extends StatefulWidget {
     this.popUpAnimationStyle,
     this.routeSettings,
     this.style,
+    this.requestFocus,
   }) : assert(
          !(child != null && icon != null),
          'You can only pass [child] or [icon], not both.',
@@ -1438,6 +1442,11 @@ class PopupMenuButton<T> extends StatefulWidget {
   /// Null by default.
   final ButtonStyle? style;
 
+  /// Whether to request focus when the menu appears.
+  ///
+  /// If null, [Navigator.requestFocus] will be used instead.
+  final bool? requestFocus;
+
   @override
   PopupMenuButtonState<T> createState() => PopupMenuButtonState<T>();
 }
@@ -1501,6 +1510,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
         useRootNavigator: widget.useRootNavigator,
         popUpAnimationStyle: widget.popUpAnimationStyle,
         routeSettings: widget.routeSettings,
+        requestFocus: widget.requestFocus,
       )
       .then<void>((T? newValue) {
         if (!mounted) {
