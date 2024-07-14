@@ -6,7 +6,6 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/painting.dart' show AxisDirection;
 import 'package:flutter/physics.dart';
 
 import 'binding.dart' show WidgetsBinding;
