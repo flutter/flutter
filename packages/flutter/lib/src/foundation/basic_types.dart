@@ -93,7 +93,20 @@ enum Axis {
   horizontal,
 
   /// Up and down.
-  vertical,
+  vertical;
+
+  /// Returns the opposite of the given [Axis].
+  ///
+  /// Specifically, returns [Axis.horizontal] for [Axis.vertical], and
+  /// vice versa.
+  ///
+  /// See also:
+  ///
+  ///  * [AxisDirection.flipped], which does the same thing for [AxisDirection] values.
+  Axis get flipped => switch (this) {
+    horizontal => vertical,
+    vertical => horizontal,
+  };
 }
 
 /// A direction in which boxes flow vertically.
@@ -145,7 +158,7 @@ enum VerticalDirection {
 ///   * [CustomScrollView.anchor], the relative position of the zero scroll
 ///     offset in a viewport and inflection point for [AxisDirection]s of the
 ///     same cardinal [Axis].
-///   * [axisDirectionIsReversed], which returns whether traveling along the
+///   * [AxisDirection.isReversed], which returns whether traveling along the
 ///     given axis direction visits coordinates along that axis in numerically
 ///     decreasing order.
 enum AxisDirection {
@@ -160,7 +173,7 @@ enum AxisDirection {
   ///
   /// See also:
   ///
-  ///   * [axisDirectionIsReversed], which returns whether traveling along the
+  ///   * [AxisDirection.isReversed], which returns whether traveling along the
   ///     given axis direction visits coordinates along that axis in numerically
   ///     decreasing order.
   up,
@@ -177,7 +190,7 @@ enum AxisDirection {
   ///
   /// See also:
   ///
-  ///   * [axisDirectionIsReversed], which returns whether traveling along the
+  ///   * [AxisDirection.isReversed], which returns whether traveling along the
   ///     given axis direction visits coordinates along that axis in numerically
   ///     decreasing order.
   right,
@@ -194,7 +207,7 @@ enum AxisDirection {
   ///
   /// See also:
   ///
-  ///   * [axisDirectionIsReversed], which returns whether traveling along the
+  ///   * [AxisDirection.isReversed], which returns whether traveling along the
   ///     given axis direction visits coordinates along that axis in numerically
   ///     decreasing order.
   down,
@@ -212,10 +225,46 @@ enum AxisDirection {
   ///
   /// See also:
   ///
-  ///   * [axisDirectionIsReversed], which returns whether traveling along the
+  ///   * [AxisDirection.isReversed], which returns whether traveling along the
   ///     given axis direction visits coordinates along that axis in numerically
   ///     decreasing order.
-  left,
+  left;
+
+  /// Returns the [Axis] that contains the given [AxisDirection].
+  ///
+  /// Specifically, returns [Axis.vertical] for [AxisDirection.up] and
+  /// [AxisDirection.down] and returns [Axis.horizontal] for [AxisDirection.left]
+  /// and [AxisDirection.right].
+  Axis get axis => switch (this) {
+    left || right => Axis.horizontal,
+    up   || down  => Axis.vertical,
+  };
+
+  /// Returns the opposite of the given [AxisDirection].
+  ///
+  /// Specifically, returns [AxisDirection.up] for [AxisDirection.down] (and
+  /// vice versa), as well as [AxisDirection.left] for [AxisDirection.right] (and
+  /// vice versa).
+  ///
+  /// See also:
+  ///
+  ///  * [Axis.flipped], which does the same thing for [Axis] values.
+  AxisDirection get flipped => switch (this) {
+    up    => AxisDirection.down,
+    right => AxisDirection.left,
+    down  => AxisDirection.up,
+    left  => AxisDirection.right,
+  };
+
+  /// Returns whether traveling along the given axis direction visits coordinates
+  /// along that axis in numerically decreasing order.
+  ///
+  /// Specifically, returns true for [AxisDirection.up] and [AxisDirection.left]
+  /// and false for [AxisDirection.down] and [AxisDirection.right].
+  bool get isReversed => switch (this) {
+    up   || left  => true,
+    down || right => false,
+  };
 }
 
 // LAZY CACHING ITERATOR
