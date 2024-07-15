@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/macos/migrations/flutter_application_migration
 import 'package:flutter_tools/src/macos/migrations/macos_deployment_target_migration.dart';
 import 'package:flutter_tools/src/macos/migrations/nsapplicationmain_deprecation_migration.dart';
 import 'package:flutter_tools/src/macos/migrations/remove_macos_framework_link_and_embedding_migration.dart';
+import 'package:flutter_tools/src/macos/migrations/secure_restorable_state_migration.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:test/fake.dart';
@@ -485,6 +486,160 @@ class AppDelegate: FlutterAppDelegate {
 }
 ''');
       expect(testLogger.warningText, contains('uses the deprecated @NSApplicationMain attribute, updating'));
+    });
+  });
+
+  group('migrate AppDelegate to override applicationSupportsSecureRestorableState', () {
+    late MemoryFileSystem memoryFileSystem;
+    late BufferLogger testLogger;
+    late FakeMacOSProject project;
+    late File appDelegateFile;
+
+    setUp(() {
+      memoryFileSystem = MemoryFileSystem();
+      testLogger = BufferLogger.test();
+      project = FakeMacOSProject();
+      appDelegateFile = memoryFileSystem.file('AppDelegate.swift');
+      project.appDelegateSwift = appDelegateFile;
+    });
+
+    testWithoutContext('skipped if files are missing', () async {
+      final SecureRestorableStateMigration migration = SecureRestorableStateMigration(
+        project,
+        testLogger,
+      );
+      await migration.migrate();
+      expect(appDelegateFile.existsSync(), isFalse);
+
+      expect(testLogger.statusText, isEmpty);
+    });
+
+    testWithoutContext('skipped if nothing to upgrade', () async {
+      const String appDelegateContents = '''
+import Cocoa
+import FlutterMacOS
+
+@main
+class AppDelegate: FlutterAppDelegate {
+  override func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
+    return true
+  }
+
+  override func applicationSupportsSecureRestorableState(_ app: NSApplication) -> Bool {
+    return true
+  }
+}
+''';
+      appDelegateFile.writeAsStringSync(appDelegateContents);
+      final DateTime lastModified = appDelegateFile.lastModifiedSync();
+
+      final SecureRestorableStateMigration migration = SecureRestorableStateMigration(
+        project,
+        testLogger,
+      );
+      await migration.migrate();
+
+      expect(appDelegateFile.lastModifiedSync(), lastModified);
+      expect(appDelegateFile.readAsStringSync(), appDelegateContents);
+
+      expect(testLogger.statusText, isEmpty);
+    });
+
+    testWithoutContext('skipped if override already present, but different', () async {
+      const String appDelegateContents = '''
+import Cocoa
+import FlutterMacOS
+
+@main
+class AppDelegate: FlutterAppDelegate {
+  override func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
+    return true
+  }
+
+  override func applicationSupportsSecureRestorableState(_ app: NSApplication) -> Bool {
+    return false
+  }
+}
+''';
+      appDelegateFile.writeAsStringSync(appDelegateContents);
+      final DateTime lastModified = appDelegateFile.lastModifiedSync();
+
+      final SecureRestorableStateMigration migration = SecureRestorableStateMigration(
+        project,
+        testLogger,
+      );
+      await migration.migrate();
+
+      expect(appDelegateFile.lastModifiedSync(), lastModified);
+      expect(appDelegateFile.readAsStringSync(), appDelegateContents);
+
+      expect(testLogger.statusText, isEmpty);
+    });
+
+    testWithoutContext('warns if override not present and cannot be applied cleanly', () async {
+      const String appDelegateContents = '''
+import Cocoa
+import FlutterMacOS
+
+@main
+class AppDelegate: FlutterAppDelegate {
+  let ninetiesSong = "島人ぬ宝"
+
+  override func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
+    return true
+  }
+}
+''';
+      appDelegateFile.writeAsStringSync(appDelegateContents);
+      final DateTime lastModified = appDelegateFile.lastModifiedSync();
+
+      final SecureRestorableStateMigration migration = SecureRestorableStateMigration(
+        project,
+        testLogger,
+      );
+      await migration.migrate();
+
+      expect(appDelegateFile.lastModifiedSync(), lastModified);
+      expect(appDelegateFile.readAsStringSync(), appDelegateContents);
+
+      expect(testLogger.warningText, contains('has been modified and cannot be automatically migrated.'));
+    });
+
+    testWithoutContext('updates AppDelegate.swift', () async {
+      appDelegateFile.writeAsStringSync('''
+import Cocoa
+import FlutterMacOS
+
+@main
+class AppDelegate: FlutterAppDelegate {
+  override func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
+    return true
+  }
+}
+''');
+
+      final SecureRestorableStateMigration migration = SecureRestorableStateMigration(
+        project,
+        testLogger,
+      );
+      await migration.migrate();
+
+      expect(appDelegateFile.readAsStringSync(), '''
+import Cocoa
+import FlutterMacOS
+
+@main
+class AppDelegate: FlutterAppDelegate {
+  override func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
+    return true
+  }
+
+  override func applicationSupportsSecureRestorableState(_ app: NSApplication) -> Bool {
+    return true
+  }
+}
+''');
+      expect(testLogger.warningText, contains('does not override applicationSupportsSecureRestorableState. Updating.'));
     });
   });
 }

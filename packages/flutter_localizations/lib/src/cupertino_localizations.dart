@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:intl/intl.dart';
+library;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart' as intl;
@@ -61,6 +64,7 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
     required String localeName,
     required intl.DateFormat fullYearFormat,
     required intl.DateFormat dayFormat,
+    required intl.DateFormat weekdayFormat,
     required intl.DateFormat mediumDateFormat,
     required intl.DateFormat singleDigitHourFormat,
     required intl.DateFormat singleDigitMinuteFormat,
@@ -70,6 +74,7 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
   }) : _localeName = localeName,
        _fullYearFormat = fullYearFormat,
        _dayFormat = dayFormat,
+       _weekdayFormat = weekdayFormat,
        _mediumDateFormat = mediumDateFormat,
        _singleDigitHourFormat = singleDigitHourFormat,
        _singleDigitMinuteFormat = singleDigitMinuteFormat,
@@ -80,6 +85,7 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
   final String _localeName;
   final intl.DateFormat _fullYearFormat;
   final intl.DateFormat _dayFormat;
+  final intl.DateFormat _weekdayFormat;
   final intl.DateFormat _mediumDateFormat;
   final intl.DateFormat _singleDigitHourFormat;
   final intl.DateFormat _singleDigitMinuteFormat;
@@ -114,11 +120,10 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
 
   @override
   String datePickerDayOfMonth(int dayIndex, [int? weekDay]) {
-     if (weekDay != null) {
-      return ' ${DefaultCupertinoLocalizations.shortWeekdays[weekDay - DateTime.monday]} $dayIndex ';
-    }
-    // Year and month doesn't matter since we just want to day formatted.
-    return _dayFormat.format(DateTime.utc(0, 0, dayIndex));
+    return weekDay != null
+      ? '${_weekdayFormat.format(DateTime.utc(1, 1, weekDay))} ${_dayFormat.format(DateTime.utc(1, 1, dayIndex))}'
+      // Year and month doesn't matter since we just want to day formatted.
+      : _dayFormat.format(DateTime.utc(0, 0, dayIndex));
   }
 
   @override
@@ -486,6 +491,7 @@ class _GlobalCupertinoLocalizationsDelegate extends LocalizationsDelegate<Cupert
 
       late intl.DateFormat fullYearFormat;
       late intl.DateFormat dayFormat;
+      late intl.DateFormat weekdayFormat;
       late intl.DateFormat mediumDateFormat;
       // We don't want any additional decoration here. The am/pm is handled in
       // the date picker. We just want an hour number localized.
@@ -498,6 +504,7 @@ class _GlobalCupertinoLocalizationsDelegate extends LocalizationsDelegate<Cupert
       void loadFormats(String? locale) {
         fullYearFormat = intl.DateFormat.y(locale);
         dayFormat = intl.DateFormat.d(locale);
+        weekdayFormat = intl.DateFormat.E(locale);
         mediumDateFormat = intl.DateFormat.MMMEd(locale);
         // TODO(xster): fix when https://github.com/dart-lang/intl/issues/207 is resolved.
         singleDigitHourFormat = intl.DateFormat('HH', locale);
@@ -519,6 +526,7 @@ class _GlobalCupertinoLocalizationsDelegate extends LocalizationsDelegate<Cupert
         locale,
         fullYearFormat,
         dayFormat,
+        weekdayFormat,
         mediumDateFormat,
         singleDigitHourFormat,
         singleDigitMinuteFormat,
