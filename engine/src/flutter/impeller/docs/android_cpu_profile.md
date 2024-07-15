@@ -52,19 +52,19 @@ Open Android Studio. You can create a new blank project if you don't have one al
 > [!IMPORTANT]
 > This may be in a different location or missing depending on the exact version of Android Studio that you have installed. Start a new Android Studio project if you can't find this link.
 
-![Open the Profiler](assets/android_profiling/image.png)
+![Open the Profiler](https://raw.githubusercontent.com/flutter/assets-for-api-docs//5da33067f5cfc7f177d9c460d618397aad9082ca/assets/engine/impeller/android_profiling/image.avif)
 
 ### Start a New Profiling Session
 
 Click the plus button to start a new session, then look for the attached devices, then finally the name of the application to profile. It usually takes a few seconds for the drop downs to populate. The IDE will warn about the build not being a release build, but this doesn't impact the C++ engine so ignore it.
 
-![Start a new Profiling Session](assets/android_profiling/dropdown.png)
+![Start a new Profiling Session](https://raw.githubusercontent.com/flutter/assets-for-api-docs//5da33067f5cfc7f177d9c460d618397aad9082ca/assets/engine/impeller/android_profiling/dropdown.avif)
 
 ### Capture a CPU Profile
 
 Click on the CPU section of the chart highlighted below. This will open a side panel that allows you to select the type of profile. Choose "Callstack Sample Recording" and then hit "Record" to start the profile and "Stop" to end the profile
 
-![Capture a CPU Profile](assets/android_profiling/where_do_i_click.png)
+![Capture a CPU Profile](https://raw.githubusercontent.com/flutter/assets-for-api-docs//5da33067f5cfc7f177d9c460d618397aad9082ca/assets/engine/impeller/android_profiling/where_do_i_click.avif)
 
 ### Analyze Raster performance
 
@@ -72,4 +72,4 @@ Samples will be collected from all threads, but for analyzing the engine perform
 
 Select the raster thread by clicking on that area and then choose flame graph (or any of the other options). The flame graph can be navigated using `WASD` and the chart area expanded to make inspection easier.
 
-![Analyze Performance](assets/android_profiling/so_many_options.png)
+![Analyze Performance](https://raw.githubusercontent.com/flutter/assets-for-api-docs//5da33067f5cfc7f177d9c460d618397aad9082ca/assets/engine/impeller/android_profiling/so_many_options.avif)

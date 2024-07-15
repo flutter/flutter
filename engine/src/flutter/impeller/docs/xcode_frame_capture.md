@@ -15,12 +15,12 @@ follow along.
 
 In Xcode, `File -> New -> Project…`, select an empty project.
 
-![alt_text](assets/xcode_frame_capture/image1.png "image_tooltip")
+![alt_text](https://raw.githubusercontent.com/flutter/assets-for-api-docs//5da33067f5cfc7f177d9c460d618397aad9082ca/assets/engine/impeller/xcode_frame_capture/image1.avif "image_tooltip")
 
 Call it whatever you want, you are not going to check this into version control
 and the targets are going to be specific to your workflow.
 
-![alt_text](assets/xcode_frame_capture/image2.png "image_tooltip")
+![alt_text](https://raw.githubusercontent.com/flutter/assets-for-api-docs//5da33067f5cfc7f177d9c460d618397aad9082ca/assets/engine/impeller/xcode_frame_capture/image2.avif "image_tooltip")
 
 Save it outside the source tree. Since you are not going to check this in, you
 don’t want to accidentally delete it via a `git clean -fdx` when regenerating
@@ -29,18 +29,18 @@ the licenses (ask me how I know).
 Create a new `External Build System` target in the empty project by clicking on
 the `+` icon at the bottom.
 
-![alt_text](assets/xcode_frame_capture/image3.png "image_tooltip")
+![alt_text](https://raw.githubusercontent.com/flutter/assets-for-api-docs//5da33067f5cfc7f177d9c460d618397aad9082ca/assets/engine/impeller/xcode_frame_capture/image3.avif "image_tooltip")
 
 Click through the defaults (it wants you to use `make`) to create the target, we
 are going to be modifying it later.
 
-![alt_text](assets/xcode_frame_capture/image4.png "image_tooltip")
+![alt_text](https://raw.githubusercontent.com/flutter/assets-for-api-docs//5da33067f5cfc7f177d9c460d618397aad9082ca/assets/engine/impeller/xcode_frame_capture/image4.avif "image_tooltip")
 
 Select the target you just created from the sidebar and in the `Info` tab, fill
 in the command you would use to bring the target up-to-date. In the example, I
 am building the Impeller unit-tests.
 
-![alt_text](assets/xcode_frame_capture/image5.png "image_tooltip")
+![alt_text](https://raw.githubusercontent.com/flutter/assets-for-api-docs//5da33067f5cfc7f177d9c460d618397aad9082ca/assets/engine/impeller/xcode_frame_capture/image5.avif "image_tooltip")
 
 If you wanted to instrument multiple targets and switch between them, you would
 add them here.
@@ -50,20 +50,20 @@ however. You need to specify a Run Scheme for that. We’ll do that next.
 
 Click the default scheme for the target.
 
-![alt_text](assets/xcode_frame_capture/image6.png "image_tooltip")
+![alt_text](https://raw.githubusercontent.com/flutter/assets-for-api-docs//5da33067f5cfc7f177d9c460d618397aad9082ca/assets/engine/impeller/xcode_frame_capture/image6.avif "image_tooltip")
 
 In the Pop-Up, click `Edit Scheme`.
 
-![alt_text](assets/xcode_frame_capture/image7.png "image_tooltip")
+![alt_text](https://raw.githubusercontent.com/flutter/assets-for-api-docs//5da33067f5cfc7f177d9c460d618397aad9082ca/assets/engine/impeller/xcode_frame_capture/image7.avif "image_tooltip")
 
 In the Info tab, select the executable you want to launch after the target has
 been updated by clicking on `Other…`.
 
-![alt_text](assets/xcode_frame_capture/image8.png "image_tooltip")
+![alt_text](https://raw.githubusercontent.com/flutter/assets-for-api-docs//5da33067f5cfc7f177d9c460d618397aad9082ca/assets/engine/impeller/xcode_frame_capture/image8.avif "image_tooltip")
 
 I want to launch the unit-tests harness. Select it in the `out` directory.
 
-![alt_text](assets/xcode_frame_capture/image9.png "image_tooltip")
+![alt_text](https://raw.githubusercontent.com/flutter/assets-for-api-docs//5da33067f5cfc7f177d9c460d618397aad9082ca/assets/engine/impeller/xcode_frame_capture/image9.avif "image_tooltip")
 
 Now, when you click `Product -> Run` in Xcode, the unit-tests target will be
 brought up to data and run.
@@ -77,12 +77,12 @@ In the `Options` tab on the `Edit Scheme…` pop-up, in the `GPU Frame Capture`
 section, set API detection to `Metal` and check `Profile GPU trace after
 capture`.
 
-![alt_text](assets/xcode_frame_capture/image10.png "image_tooltip")
+![alt_text](https://raw.githubusercontent.com/flutter/assets-for-api-docs//5da33067f5cfc7f177d9c460d618397aad9082ca/assets/engine/impeller/xcode_frame_capture/image10.avif "image_tooltip")
 
 Then, in the `Diagnostics` tab on the `Edit Scheme…` pop-up, in the `Metal`
 section, enable `API Validation` and `Shader Validation`.
 
-![alt_text](assets/xcode_frame_capture/image11.png "image_tooltip")
+![alt_text](https://raw.githubusercontent.com/flutter/assets-for-api-docs//5da33067f5cfc7f177d9c460d618397aad9082ca/assets/engine/impeller/xcode_frame_capture/image11.avif "image_tooltip")
 
 On a side note, you may be tempted to enable all the other diagnostics. Be aware
 that some of those diagnostics need Xcode to be able to re-compile the
@@ -105,7 +105,7 @@ instrument just the one test you want.
 
 You also need to set the `--enable_playground` flag in order to do frame capturing.
 
-![alt_text](assets/xcode_frame_capture/image12.png "image_tooltip")
+![alt_text](https://raw.githubusercontent.com/flutter/assets-for-api-docs//5da33067f5cfc7f177d9c460d618397aad9082ca/assets/engine/impeller/xcode_frame_capture/image12.avif "image_tooltip")
 
 This is also the spot where you will add other command line arguments that will
 aid in your debugging. In that example, `–timeout=-1` will disable the Flutter

@@ -129,7 +129,7 @@ pass.Draw();
 
 And, in ~10 lines of C++ code and some simple GLSL, you should see a glorious red triangle. The compiler has done the heavy lifting of converting the GLSL to Metal Shading Language and figuring out the metadata to put together the pipeline for us.
 
-![Red Triangle](assets/babys_first_triangle/baby_triangle_red.png "Our First Triangle!")
+![Red Triangle](https://raw.githubusercontent.com/flutter/assets-for-api-docs//5da33067f5cfc7f177d9c460d618397aad9082ca/assets/engine/impeller/babys_first_triangle/baby_triangle_red.avif "Our First Triangle!")
 
 ## Extra Credit
 
@@ -176,7 +176,7 @@ vertex_buffer_builder.AddVertices({
 
 We should now see a triangle with each pixel shaded differently.
 
-![Varying Triangle](assets/babys_first_triangle/baby_triangle_varying.png "Varying Triangle")
+![Varying Triangle](https://raw.githubusercontent.com/flutter/assets-for-api-docs//5da33067f5cfc7f177d9c460d618397aad9082ca/assets/engine/impeller/babys_first_triangle/baby_triangle_varying.avif "Varying Triangle")
 
 ### Uniforms
 
@@ -268,7 +268,7 @@ void main() {
 
 And with that, you should see animated triangle shading.
 
-![Animating Triangle](assets/babys_first_triangle/baby_triangle_anim.gif "Animating Triangle")
+![Animating Triangle](https://raw.githubusercontent.com/flutter/assets-for-api-docs//5da33067f5cfc7f177d9c460d618397aad9082ca/assets/engine/impeller/babys_first_triangle/baby_triangle_anim.webp "Animating Triangle")
 
 ## Conclusion
 
