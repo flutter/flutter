@@ -17,6 +17,7 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/device_vm_service_discovery_for_attach.dart';
 import 'package:flutter_tools/src/proxied_devices/devices.dart';
 import 'package:flutter_tools/src/proxied_devices/file_transfer.dart';
+import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
@@ -644,9 +645,8 @@ void main() {
       final Future<void> startFuture = dds.startDartDevelopmentService(
         Uri.parse('http://127.0.0.1:100/fake'),
         disableServiceAuthCodes: true,
-        hostPort: 150,
+        ddsPort: 150,
         ipv6: false,
-        logger: bufferLogger,
       );
 
       final DaemonMessage startMessage = await broadcastOutput.first;
@@ -656,9 +656,13 @@ void main() {
         'deviceId': 'test_id',
         'vmServiceUri': 'http://127.0.0.1:200/fake',
         'disableServiceAuthCodes': true,
+        // TODO(bkonyi): uncomment when ready to serve DevTools from DDS.
+        // 'enableDevTools': false,
       });
 
-      serverDaemonConnection.sendResponse(startMessage.data['id']!, 'http://127.0.0.1:300/remote');
+      serverDaemonConnection.sendResponse( startMessage.data['id']!, const <String, Object?>{
+        'ddsUri': 'http://127.0.0.1:300/remote',
+      });
 
       await startFuture;
       expect(portForwarder.receivedLocalForwardedPort, 100);
@@ -701,9 +705,8 @@ void main() {
       final Future<void> startFuture = dds.startDartDevelopmentService(
         Uri.parse('http://127.0.0.1:100/fake'),
         disableServiceAuthCodes: true,
-        hostPort: 150,
+        ddsPort: 150,
         ipv6: false,
-        logger: bufferLogger,
       );
 
       final DaemonMessage startMessage = await broadcastOutput.first;
@@ -713,9 +716,13 @@ void main() {
         'deviceId': 'test_id',
         'vmServiceUri': 'http://127.0.0.1:200/fake',
         'disableServiceAuthCodes': true,
+        // TODO(bkonyi): uncomment when ready to serve DevTools from DDS.
+        // 'enableDevTools': false,
       });
 
-      serverDaemonConnection.sendResponse(startMessage.data['id']!, 'http://127.0.0.1:300/remote');
+      serverDaemonConnection.sendResponse(startMessage.data['id']!, <String, Object?>{
+        'ddsUri': 'http://127.0.0.1:300/remote',
+      });
 
       await startFuture;
       expect(portForwarder.receivedLocalForwardedPort, 100);
@@ -758,9 +765,8 @@ void main() {
       await dds.startDartDevelopmentService(
         Uri.parse('http://127.0.0.1:100/fake'),
         disableServiceAuthCodes: true,
-        hostPort: 150,
+        ddsPort: 150,
         ipv6: false,
-        logger: bufferLogger,
       );
 
       expect(localDds.startCalled, true);
@@ -797,9 +803,8 @@ void main() {
       final Future<void> startFuture = dds.startDartDevelopmentService(
         Uri.parse('http://127.0.0.1:100/fake'),
         disableServiceAuthCodes: true,
-        hostPort: 150,
+        ddsPort: 150,
         ipv6: false,
-        logger: bufferLogger,
       );
 
       expect(localDds.startCalled, false);
@@ -810,6 +815,8 @@ void main() {
         'deviceId': 'test_id',
         'vmServiceUri': 'http://127.0.0.1:200/fake',
         'disableServiceAuthCodes': true,
+        // TODO(bkonyi): uncomment when ready to serve DevTools from DDS.
+        // 'enableDevTools': false,
       });
 
       serverDaemonConnection.sendErrorResponse(startMessage.data['id']!, 'command not understood: device.startDartDevelopmentService', StackTrace.current);
@@ -1178,11 +1185,14 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
   @override
   Future<void> startDartDevelopmentService(
     Uri vmServiceUri, {
-    required Logger logger,
-    int? hostPort,
+    FlutterDevice? device,
+    int? ddsPort,
     bool? ipv6,
     bool? disableServiceAuthCodes,
+    bool enableDevTools = false,
     bool cacheStartupProfile = false,
+    String? google3WorkspaceRoot,
+    Uri? devToolsServerAddress,
   }) async {
     startCalled = true;
     startUri = vmServiceUri;
@@ -1190,6 +1200,10 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
 
   @override
   Future<void> shutdown() async => shutdownCalled = true;
+
+  // TODO(bkonyi): uncomment when ready to serve DevTools from DDS.
+  // @override
+  // Future<void> invokeServiceExtensions(FlutterDevice? device) async {}
 }
 
 class FakePrebuiltApplicationPackage extends Fake implements PrebuiltApplicationPackage {

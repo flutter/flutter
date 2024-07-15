@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
+import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/signals.dart';
@@ -25,6 +26,7 @@ import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../src/common.dart';
 import '../src/fake_vm_services.dart';
+import '../src/fakes.dart';
 
 final vm_service.Isolate fakeUnpausedIsolate = vm_service.Isolate(
   id: '1',
@@ -832,8 +834,20 @@ void main() {
       final FakeResidentDevtoolsHandler devtoolsHandler = runner.residentDevtoolsHandler as FakeResidentDevtoolsHandler;
 
       expect(devtoolsHandler.calledLaunchDevToolsInBrowser, isFalse);
+      // TODO(bkonyi): uncomment these checks and remove existing checks when ready to
+      // serve DevTools from DDS.
+      /*
+      for (final FlutterDevice? device in runner.flutterDevices) {
+        expect(device!.device!.dds.calledLaunchDevToolsInBrowser, isFalse);
+      }
+      */
       await terminalHandler.processTerminalInput('v');
       expect(devtoolsHandler.calledLaunchDevToolsInBrowser, isTrue);
+      /*
+      for (final FlutterDevice? device in runner.flutterDevices) {
+        expect(device!.device!.dds.calledLaunchDevToolsInBrowser, isTrue);
+      }
+      */
     });
 
     testWithoutContext('w,W - debugDumpApp without service protocol is skipped', () async {
@@ -1308,11 +1322,13 @@ class FakeResidentRunner extends ResidentHandlers {
     return OperationResult(reloadExitCode, '', fatal: fatalReloadError);
   }
 
+  // TODO(bkonyi): remove when ready to serve DevTools from DDS.
   @override
   ResidentDevtoolsHandler get residentDevtoolsHandler => _residentDevtoolsHandler;
   final ResidentDevtoolsHandler _residentDevtoolsHandler = FakeResidentDevtoolsHandler();
 }
 
+// TODO(bkonyi): remove when ready to serve DevTools from DDS.
 class FakeResidentDevtoolsHandler extends Fake implements ResidentDevtoolsHandler {
   bool calledLaunchDevToolsInBrowser = false;
 
@@ -1333,13 +1349,15 @@ class FakeDevice extends Fake implements Device {
   String get name => 'Fake Device';
 
   @override
+  DartDevelopmentService dds = DartDevelopmentService(logger: FakeLogger());
+
+  @override
   Future<void> takeScreenshot(File file) async {
     if (!supportsScreenshot) {
       throw StateError('illegal screenshot attempt');
     }
     file.writeAsBytesSync(<int>[1, 2, 3, 4]);
   }
-
 }
 
 TerminalHandler setUpTerminalHandler(List<FakeVmServiceRequest> requests, {

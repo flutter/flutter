@@ -95,7 +95,7 @@ class PreviewDeviceDiscovery extends PollingDeviceDiscovery {
 class PreviewDevice extends Device {
   PreviewDevice({
     required ProcessManager processManager,
-    required Logger logger,
+    required super.logger,
     required FileSystem fileSystem,
     required Artifacts artifacts,
     required File previewBinary,
@@ -170,7 +170,6 @@ class PreviewDevice extends Device {
     required DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs = const <String, dynamic>{},
     bool prebuiltApplication = false,
-    bool ipv6 = false,
     String? userIdentifier,
   }) async {
     final Directory assetDirectory = _fileSystem.systemTempDirectory
@@ -214,7 +213,7 @@ class PreviewDevice extends Device {
     final ProtocolDiscovery vmServiceDiscovery = ProtocolDiscovery.vmService(_logReader,
       devicePort: debuggingOptions.deviceVmServicePort,
       hostPort: debuggingOptions.hostVmServicePort,
-      ipv6: ipv6,
+      ipv6: debuggingOptions.ipv6,
       logger: _logger,
     );
     try {
