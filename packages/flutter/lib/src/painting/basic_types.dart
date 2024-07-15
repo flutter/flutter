@@ -122,6 +122,11 @@ enum RenderComparison {
 /// See also:
 ///
 ///  * [flipAxisDirection], which does the same thing for [AxisDirection] values.
+@Deprecated(
+  'Use the ".flipped" getter instead. '
+  "The getter's behavior is identical to this function and is less verbose. "
+  'This feature was deprecated after v3.23.0-0.1.pre.',
+)
 Axis flipAxis(Axis direction) {
   return switch (direction) {
     Axis.horizontal => Axis.vertical,
@@ -134,6 +139,11 @@ Axis flipAxis(Axis direction) {
 /// Specifically, returns [Axis.vertical] for [AxisDirection.up] and
 /// [AxisDirection.down] and returns [Axis.horizontal] for [AxisDirection.left]
 /// and [AxisDirection.right].
+@Deprecated(
+  'Use the ".axis" getter instead. '
+  "The getter's behavior is identical to this function and is less verbose. "
+  'This feature was deprecated after v3.23.0-0.1.pre.',
+)
 Axis axisDirectionToAxis(AxisDirection axisDirection) {
   return switch (axisDirection) {
     AxisDirection.up   || AxisDirection.down  => Axis.vertical,
@@ -161,6 +171,11 @@ AxisDirection textDirectionToAxisDirection(TextDirection textDirection) {
 /// See also:
 ///
 ///  * [flipAxis], which does the same thing for [Axis] values.
+@Deprecated(
+  'Use the ".flipped" getter instead. '
+  "The getter's behavior is identical to this function and is less verbose. "
+  'This feature was deprecated after v3.23.0-0.1.pre.',
+)
 AxisDirection flipAxisDirection(AxisDirection axisDirection) {
   return switch (axisDirection) {
     AxisDirection.up    => AxisDirection.down,
@@ -175,6 +190,11 @@ AxisDirection flipAxisDirection(AxisDirection axisDirection) {
 ///
 /// Specifically, returns true for [AxisDirection.up] and [AxisDirection.left]
 /// and false for [AxisDirection.down] and [AxisDirection.right].
+@Deprecated(
+  'Use the ".isReversed" getter instead. '
+  "The getter's behavior is identical to this function and is less verbose. "
+  'This feature was deprecated after v3.23.0-0.1.pre.',
+)
 bool axisDirectionIsReversed(AxisDirection axisDirection) {
   return switch (axisDirection) {
     AxisDirection.up   || AxisDirection.left  => true,
