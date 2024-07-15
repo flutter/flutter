@@ -483,7 +483,7 @@ class ListTileTheme extends InheritedTheme {
   /// Overrides the default value of [CheckboxListTile.controlAffinity]
   /// or [ExpansionTile.controlAffinity] or [SwitchListTile.controlAffinity] or [RadioListTile.controlAffinity]
   ///
-  /// This property is obsolete: please use the [data]
+  /// This property is obsolete: please use the
   /// [ListTileThemeData.controlAffinity] property instead.
   ListTileControlAffinity? get controlAffinity => _data != null ? _data.controlAffinity : _controlAffinity;
 
