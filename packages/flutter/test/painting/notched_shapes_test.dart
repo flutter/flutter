@@ -47,6 +47,26 @@ void main() {
       expect(pathDoesNotContainCircle(actualPath, guest), isTrue);
     });
 
+    test('inverted guest center above host', () {
+      const CircularNotchedRectangle shape = CircularNotchedRectangle(inverted: true);
+      const Rect host = Rect.fromLTRB(0.0, 100.0, 300.0, 300.0);
+      const Rect guest = Rect.fromLTRB(190.0, 285.0, 210.0, 305.0);
+
+      final Path actualPath = shape.getOuterPath(host, guest);
+
+      expect(pathDoesNotContainCircle(actualPath, guest), isTrue);
+    });
+
+    test('inverted guest center below host', () {
+      const CircularNotchedRectangle shape = CircularNotchedRectangle(inverted: true);
+      const Rect host = Rect.fromLTRB(0.0, 100.0, 300.0, 300.0);
+      const Rect guest = Rect.fromLTRB(190.0, 295.0, 210.0, 315.0);
+
+      final Path actualPath = shape.getOuterPath(host, guest);
+
+      expect(pathDoesNotContainCircle(actualPath, guest), isTrue);
+    });
+
     test('no guest is ok', () {
       const Rect host = Rect.fromLTRB(0.0, 100.0, 300.0, 300.0);
       expect(
