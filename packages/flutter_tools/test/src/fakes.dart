@@ -741,6 +741,12 @@ class FakeDevtoolsLauncher extends Fake implements DevtoolsLauncher {
   }
 }
 
+/// A fake [Logger] that throws the [Invocation] for any method call.
+class FakeLogger implements Logger {
+  @override
+  dynamic noSuchMethod(Invocation invocation) => throw invocation; // ignore: only_throw_errors
+}
+
 class ClosedStdinController extends Fake implements StreamSink<List<int>> {
   @override
   Future<Object?> addStream(Stream<List<int>> stream) async => throw const SocketException('Bad pipe');
