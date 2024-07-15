@@ -361,7 +361,6 @@ known, it can be explicitly provided to attach via the command-line, e.g.
                 connectionInfoCompleter: connectionInfoCompleter,
                 appStartedCompleter: appStartedCompleter,
                 allowExistingDdsInstance: true,
-                enableDevTools: boolArg(FlutterCommand.kEnableDevTools),
               );
             },
             device,
@@ -403,7 +402,6 @@ known, it can be explicitly provided to attach via the command-line, e.g.
         result = await runner.attach(
           appStartedCompleter: onAppStart,
           allowExistingDdsInstance: true,
-          enableDevTools: boolArg(FlutterCommand.kEnableDevTools),
         );
         if (result != 0) {
           throwToolExit(null, exitCode: result);
@@ -462,6 +460,9 @@ known, it can be explicitly provided to attach via the command-line, e.g.
       serveObservatory: serveObservatory,
       usingCISystem: usingCISystem,
       debugLogsDirectoryPath: debugLogsDirectoryPath,
+      enableDevTools: boolArg(FlutterCommand.kEnableDevTools),
+      ipv6: usesIpv6,
+      printDtd: boolArg(FlutterGlobalOptions.kPrintDtd, global: true),
     );
 
     return buildInfo.isDebug
@@ -472,7 +473,6 @@ known, it can be explicitly provided to attach via the command-line, e.g.
           packagesFilePath: globalResults![FlutterGlobalOptions.kPackagesOption] as String?,
           projectRootPath: stringArg('project-root'),
           dillOutputPath: stringArg('output-dill'),
-          ipv6: usesIpv6,
           flutterProject: flutterProject,
           nativeAssetsYamlFile: stringArg(FlutterOptions.kNativeAssetsYamlFile),
           nativeAssetsBuilder: _nativeAssetsBuilder,
@@ -482,7 +482,6 @@ known, it can be explicitly provided to attach via the command-line, e.g.
           flutterDevices,
           target: targetFile,
           debuggingOptions: debuggingOptions,
-          ipv6: usesIpv6,
         );
   }
 
@@ -506,7 +505,6 @@ class HotRunnerFactory {
     String? packagesFilePath,
     String? dillOutputPath,
     bool stayResident = true,
-    bool ipv6 = false,
     FlutterProject? flutterProject,
     String? nativeAssetsYamlFile,
     required HotRunnerNativeAssetsBuilder? nativeAssetsBuilder,
@@ -521,7 +519,6 @@ class HotRunnerFactory {
     projectRootPath: projectRootPath,
     dillOutputPath: dillOutputPath,
     stayResident: stayResident,
-    ipv6: ipv6,
     nativeAssetsYamlFile: nativeAssetsYamlFile,
     nativeAssetsBuilder: nativeAssetsBuilder,
     analytics: analytics,

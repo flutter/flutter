@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:dds/dds.dart' as dds;
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/dds.dart';
@@ -151,33 +150,44 @@ const FakeVmServiceRequest evictShader = FakeVmServiceRequest(
   }
 );
 
+const DartDevelopmentServiceInstance fakeDartDevelopmentServiceInstance = (
+  process: null,
+  serviceUri: null,
+  devToolsUri: null,
+  dtdUri: null,
+);
+
 final Uri testUri = Uri.parse('foo://bar');
 
-// This implements [dds.DartDevelopmentService], not the [DartDevelopmentService]
-// interface from package:flutter_tools.
-class FakeDartDevelopmentService extends Fake implements dds.DartDevelopmentService {
+class FakeDartDevelopmentService extends Fake with DartDevelopmentServiceLocalOperationsMixin implements DartDevelopmentService {
   @override
   Future<void> get done => Future<void>.value();
 
   @override
   Uri? get uri => null;
+
+  // TODO(bkonyi): uncomment when ready to serve DevTools from DDS>
+  /*
+  @override
+  Uri? get devToolsUri => null;
+
+  @override
+  Uri? get dtdUri => null;
+
+  @override
+  Future<void> handleHotRestart(FlutterDevice? device) async {}
+  */
 }
 
-class FakeDartDevelopmentServiceException implements dds.DartDevelopmentServiceException {
+class FakeDartDevelopmentServiceException implements DartDevelopmentServiceException {
   FakeDartDevelopmentServiceException({this.message = defaultMessage});
 
   @override
-  final int errorCode = dds.DartDevelopmentServiceException.existingDdsInstanceError;
+  final int errorCode = DartDevelopmentServiceException.existingDdsInstanceError;
 
   @override
   final String message;
   static const String defaultMessage = 'A DDS instance is already connected at http://localhost:8181';
-
-  @override
-  Map<String, Object?> toJson() => <String, Object?>{
-        'error_code': errorCode,
-        'message': message,
-      };
 }
 
 class TestFlutterDevice extends FlutterDevice {
@@ -272,13 +282,10 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
     GetSkSLMethod? getSkSLMethod,
     FlutterProject? flutterProject,
     PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
+    required DebuggingOptions debuggingOptions,
     int? hostVmServicePort,
-    int? ddsPort,
-    bool disableServiceAuthCodes = false,
-    bool enableDds = true,
-    bool cacheStartupProfile = false,
-    required bool allowExistingDdsInstance,
-    bool ipv6 = false,
+    bool? ipv6 = false,
+    bool allowExistingDdsInstance = false,
   }) async { }
 
   @override
@@ -303,6 +310,10 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
 
   @override
   Future<void> updateReloadStatus(bool wasReloadSuccessful) async { }
+
+  // TODO(bkonyi): uncomment when ready to serve DevTools from DDS.
+  // @override
+  // Future<void> handleHotRestart() async {}
 }
 
 class FakeDelegateFlutterDevice extends FlutterDevice {
@@ -317,16 +328,13 @@ class FakeDelegateFlutterDevice extends FlutterDevice {
   Future<void> connect({
     ReloadSources? reloadSources,
     Restart? restart,
-    bool enableDds = true,
-    bool cacheStartupProfile = false,
-    bool disableServiceAuthCodes = false,
-    bool ipv6 = false,
     CompileExpression? compileExpression,
     GetSkSLMethod? getSkSLMethod,
     FlutterProject? flutterProject,
-    int? hostVmServicePort,
-    int? ddsPort,
     PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
+    required DebuggingOptions debuggingOptions,
+    int? hostVmServicePort,
+    bool? ipv6 = false,
     bool allowExistingDdsInstance = false,
   }) async { }
 
@@ -435,7 +443,7 @@ class FakeDevice extends Fake implements Device {
   String get name => 'FakeDevice';
 
   @override
-  late DartDevelopmentService dds;
+  late DartDevelopmentService dds = FakeDartDevelopmentService();
 
   @override
   Future<void> dispose() async {
