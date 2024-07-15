@@ -16,7 +16,6 @@ import '../globals.dart' as globals;
 import '../native_assets.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
-import '../runner/flutter_command_runner.dart';
 import '../test/coverage_collector.dart';
 import '../test/event_printer.dart';
 import '../test/runner.dart';
@@ -412,7 +411,6 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       enableImpeller: ImpellerStatus.fromBool(argResults!['enable-impeller'] as bool?),
       debugLogsDirectoryPath: debugLogsDirectoryPath,
       webRenderer: webRenderer,
-      printDtd: boolArg(FlutterGlobalOptions.kPrintDtd, global: true),
       webUseWasm: useWasm,
       webUseLocalCanvaskit: true,
     );
@@ -601,6 +599,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         excludeTags: excludeTags,
         watcher: watcher,
         enableVmService: collector != null || startPaused || enableVmService,
+        ipv6: ipv6,
         machine: machine,
         updateGoldens: boolArg('update-goldens'),
         concurrency: jobs,

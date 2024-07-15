@@ -26,7 +26,7 @@ abstract class DesktopDevice extends Device {
   DesktopDevice(super.id, {
       required PlatformType super.platformType,
       required super.ephemeral,
-      required super.logger,
+      required Logger logger,
       required ProcessManager processManager,
       required FileSystem fileSystem,
       required OperatingSystemUtils operatingSystemUtils,
@@ -114,6 +114,7 @@ abstract class DesktopDevice extends Device {
     required DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs = const <String, dynamic>{},
     bool prebuiltApplication = false,
+    bool ipv6 = false,
     String? userIdentifier,
   }) async {
     if (!prebuiltApplication) {
@@ -157,7 +158,7 @@ abstract class DesktopDevice extends Device {
     final ProtocolDiscovery vmServiceDiscovery = ProtocolDiscovery.vmService(_deviceLogReader,
       devicePort: debuggingOptions.deviceVmServicePort,
       hostPort: debuggingOptions.hostVmServicePort,
-      ipv6: debuggingOptions.ipv6,
+      ipv6: ipv6,
       logger: _logger,
     );
     try {

@@ -128,10 +128,6 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
     required PackageConfig packageConfig,
   }) => updateDevFSReportCallback();
 
-  // TODO(bkonyi): uncomment when ready to serve DevTools from DDS.
-  // @override
-  // Future<void> handleHotRestart() async {}
-
   @override
   TargetPlatform? get targetPlatform => device._targetPlatform;
 }
@@ -154,10 +150,12 @@ class TestFlutterDevice extends FlutterDevice {
     GetSkSLMethod? getSkSLMethod,
     FlutterProject? flutterProject,
     PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
-    required DebuggingOptions debuggingOptions,
-    int? hostVmServicePort,
+    bool disableServiceAuthCodes = false,
+    bool enableDds = true,
+    bool cacheStartupProfile = false,
     bool? ipv6 = false,
-    bool enableDevTools = false,
+    int? hostVmServicePort,
+    int? ddsPort,
     bool allowExistingDdsInstance = false,
   }) async {
     throw exception;

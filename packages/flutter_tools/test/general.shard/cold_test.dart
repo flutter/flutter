@@ -213,9 +213,13 @@ class TestFlutterDevice extends FlutterDevice {
     GetSkSLMethod? getSkSLMethod,
     FlutterProject? flutterProject,
     PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
-    required DebuggingOptions debuggingOptions,
+    bool enableDds = true,
+    bool cacheStartupProfile = false,
+    bool disableServiceAuthCodes = false,
     int? hostVmServicePort,
-    required bool allowExistingDdsInstance,
+    int? ddsPort,
+    bool? ipv6 = false,
+    bool allowExistingDdsInstance = false,
   }) async {
     throw exception;
   }

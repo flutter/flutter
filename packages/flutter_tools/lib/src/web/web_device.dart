@@ -38,7 +38,7 @@ abstract class ChromiumDevice extends Device {
     required String name,
     required this.chromeLauncher,
     required FileSystem fileSystem,
-    required super.logger,
+    required Logger logger,
   }) : _fileSystem = fileSystem,
        _logger = logger,
        super(
@@ -124,6 +124,7 @@ abstract class ChromiumDevice extends Device {
     required DebuggingOptions debuggingOptions,
     Map<String, Object?> platformArgs = const <String, Object?>{},
     bool prebuiltApplication = false,
+    bool ipv6 = false,
     String? userIdentifier,
   }) async {
     // See [ResidentWebRunner.run] in flutter_tools/lib/src/resident_web_runner.dart
@@ -381,7 +382,7 @@ String parseVersionForWindows(String input) {
 /// A special device type to allow serving for arbitrary browsers.
 class WebServerDevice extends Device {
   WebServerDevice({
-    required super.logger,
+    required Logger logger,
   }) : _logger = logger,
        super(
          'web-server',
@@ -459,6 +460,7 @@ class WebServerDevice extends Device {
     required DebuggingOptions debuggingOptions,
     Map<String, Object?> platformArgs = const <String, Object?>{},
     bool prebuiltApplication = false,
+    bool ipv6 = false,
     String? userIdentifier,
   }) async {
     final String? url = platformArgs['uri'] as String?;

@@ -40,6 +40,7 @@ abstract class FlutterTestRunner {
     String? tags,
     String? excludeTags,
     bool enableVmService = false,
+    bool ipv6 = false,
     bool machine = false,
     String? precompiledDillPath,
     Map<String, String>? precompiledDillFiles,
@@ -107,6 +108,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
     String? tags,
     String? excludeTags,
     bool enableVmService = false,
+    bool ipv6 = false,
     bool machine = false,
     String? precompiledDillPath,
     Map<String, String>? precompiledDillFiles,
@@ -237,7 +239,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
       ..addAll(testFiles.map((Uri uri) => uri.toString()));
 
     final InternetAddressType serverType =
-        debuggingOptions.ipv6 ? InternetAddressType.IPv6 : InternetAddressType.IPv4;
+        ipv6 ? InternetAddressType.IPv6 : InternetAddressType.IPv4;
 
     final loader.FlutterPlatform platform = loader.installHook(
       testWrapper: testWrapper,

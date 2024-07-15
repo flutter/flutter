@@ -6,6 +6,7 @@
 
 import 'dart:async';
 
+import 'package:dds/dds.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:stream_channel/stream_channel.dart';
@@ -69,6 +70,7 @@ FlutterPlatform installHook({
   Device? integrationTestDevice,
   String? integrationTestUserIdentifier,
   TestTimeRecorder? testTimeRecorder,
+  UriConverter? uriConverter,
   TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
   BuildInfo? buildInfo,
 }) {
@@ -100,6 +102,7 @@ FlutterPlatform installHook({
     integrationTestDevice: integrationTestDevice,
     integrationTestUserIdentifier: integrationTestUserIdentifier,
     testTimeRecorder: testTimeRecorder,
+    uriConverter: uriConverter,
     nativeAssetsBuilder: nativeAssetsBuilder,
     buildInfo: buildInfo,
   );
@@ -306,6 +309,7 @@ class FlutterPlatform extends PlatformPlugin {
     this.integrationTestDevice,
     this.integrationTestUserIdentifier,
     this.testTimeRecorder,
+    this.uriConverter,
     this.nativeAssetsBuilder,
     this.buildInfo,
   });
@@ -326,6 +330,9 @@ class FlutterPlatform extends PlatformPlugin {
   final TestTimeRecorder? testTimeRecorder;
   final TestCompilerNativeAssetsBuilder? nativeAssetsBuilder;
   final BuildInfo? buildInfo;
+
+  // This can be used by internal projects that require custom logic for converting package: URIs to local paths.
+  final UriConverter? uriConverter;
 
   /// The device to run the test on for Integration Tests.
   ///
@@ -455,6 +462,7 @@ class FlutterPlatform extends PlatformPlugin {
       icudtlPath: icudtlPath,
       compileExpression: _compileExpressionService,
       fontConfigManager: _fontConfigManager,
+      uriConverter: uriConverter,
     );
   }
 
