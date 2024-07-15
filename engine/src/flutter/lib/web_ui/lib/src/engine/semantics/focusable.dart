@@ -48,6 +48,7 @@ class Focusable extends RoleManager {
   /// this role manager did not take the focus. The return value can be used to
   /// decide whether to stop searching for a node that should take focus.
   bool focusAsRouteDefault() {
+    _focusManager._lastEvent = AccessibilityFocusManagerEvent.requestedFocus;
     owner.element.focus();
     return true;
   }
@@ -86,6 +87,21 @@ typedef _FocusTarget = ({
   DomEventListener domBlurListener,
 });
 
+enum AccessibilityFocusManagerEvent {
+  /// No event has happend for the target element.
+  nothing,
+
+  /// The engine requested focus on the DOM element, possibly because the
+  /// framework requested it.
+  requestedFocus,
+
+  /// Received the DOM "focus" event.
+  receivedDomFocus,
+
+  /// Received the DOM "blur" event.
+  receivedDomBlur,
+}
+
 /// Implements accessibility focus management for arbitrary elements.
 ///
 /// Unlike [Focusable], which implements focus features on [SemanticsObject]s
@@ -101,6 +117,8 @@ class AccessibilityFocusManager {
   final EngineSemanticsOwner _owner;
 
   _FocusTarget? _target;
+
+  AccessibilityFocusManagerEvent _lastEvent = AccessibilityFocusManagerEvent.nothing;
 
   // The last focus value set by this focus manager, used to prevent requesting
   // focus on the same element repeatedly. Requesting focus on DOM elements is
@@ -148,10 +166,11 @@ class AccessibilityFocusManager {
     final _FocusTarget newTarget = (
       semanticsNodeId: semanticsNodeId,
       element: element,
-      domFocusListener: createDomEventListener((_) => _setFocusFromDom(true)),
-      domBlurListener: createDomEventListener((_) => _setFocusFromDom(false)),
+      domFocusListener: createDomEventListener((_) => _didReceiveDomFocus()),
+      domBlurListener: createDomEventListener((_) => _didReceiveDomBlur()),
     );
     _target = newTarget;
+    _lastEvent = AccessibilityFocusManagerEvent.nothing;
 
     element.tabIndex = 0;
     element.addEventListener('focus', newTarget.domFocusListener);
@@ -173,7 +192,7 @@ class AccessibilityFocusManager {
     target.element.removeEventListener('blur', target.domBlurListener);
   }
 
-  void _setFocusFromDom(bool acquireFocus) {
+  void _didReceiveDomFocus() {
     final _FocusTarget? target = _target;
 
     if (target == null) {
@@ -182,13 +201,23 @@ class AccessibilityFocusManager {
       return;
     }
 
-    EnginePlatformDispatcher.instance.invokeOnSemanticsAction(
-      target.semanticsNodeId,
-      acquireFocus
-        ? ui.SemanticsAction.didGainAccessibilityFocus
-        : ui.SemanticsAction.didLoseAccessibilityFocus,
-      null,
-    );
+    // Do not notify the framework if DOM focus was acquired as a result of
+    // requesting it programmatically. Only notify the framework if the DOM
+    // focus was initiated by the browser, e.g. as a result of the screen reader
+    // shifting focus.
+    if (_lastEvent != AccessibilityFocusManagerEvent.requestedFocus) {
+      EnginePlatformDispatcher.instance.invokeOnSemanticsAction(
+        target.semanticsNodeId,
+        ui.SemanticsAction.focus,
+        null,
+      );
+    }
+
+    _lastEvent = AccessibilityFocusManagerEvent.receivedDomFocus;
+  }
+
+  void _didReceiveDomBlur() {
+    _lastEvent = AccessibilityFocusManagerEvent.receivedDomBlur;
   }
 
   /// Requests focus or blur on the DOM element.
@@ -229,7 +258,7 @@ class AccessibilityFocusManager {
       // a dialog, and nothing else in the dialog is focused. The Flutter
       // framework expects that the screen reader will focus on the first (in
       // traversal order) focusable element inside the dialog and send a
-      // didGainAccessibilityFocus action. Screen readers on the web do not do
+      // SemanticsAction.focus action. Screen readers on the web do not do
       // that, and so the web engine has to implement this behavior directly. So
       // the dialog will look for a focusable element and request focus on it,
       // but now there may be a race between this method unsetting the focus and
@@ -249,6 +278,7 @@ class AccessibilityFocusManager {
         return;
       }
 
+      _lastEvent = AccessibilityFocusManagerEvent.requestedFocus;
       target.element.focus();
     });
   }

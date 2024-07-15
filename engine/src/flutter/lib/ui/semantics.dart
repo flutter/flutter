@@ -220,6 +220,9 @@ class SemanticsAction {
   /// must immediately become editable, opening a virtual keyboard, if needed.
   /// Buttons must respond to tap/click events from the keyboard.
   ///
+  /// Widget reaction to this action must be idempotent. It is possible to
+  /// receive this action more than once, or when the widget is already focused.
+  ///
   /// Focus behavior is specific to the platform and to the assistive technology
   /// used. Typically on desktop operating systems, such as Windows, macOS, and
   /// Linux, moving accessibility focus will also move the input focus. On
