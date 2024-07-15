@@ -41,6 +41,8 @@ class _CupertinoCheckboxExampleState extends State<CupertinoCheckboxExample> {
   Widget build(BuildContext context) {
     return CupertinoCheckbox(
       checkColor: CupertinoColors.white,
+      // Set tristate to true to make the checkbox display a null value
+      // in addition to the default true and false values.
       tristate: true,
       value: isChecked,
       onChanged: (bool? value) {
