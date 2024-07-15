@@ -107,7 +107,7 @@ class Checkbox extends StatefulWidget {
   /// design [Checkbox].
   ///
   /// If a [CupertinoCheckbox] is created, the following parameters are ignored:
-  /// [mouseCursor], [fillColor], [hoverColor], [overlayColor], [splashRadius],
+  /// [fillColor], [hoverColor], [overlayColor], [splashRadius],
   /// [materialTapTargetSize], [visualDensity], [isError]. However, [shape] and
   /// [side] will still affect the [CupertinoCheckbox] and should be handled if
   /// native fidelity is important.
@@ -488,6 +488,7 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
               value: value,
               tristate: tristate,
               onChanged: onChanged,
+              mouseCursor: widget.mouseCursor,
               activeColor: widget.activeColor,
               checkColor: widget.checkColor,
               focusColor: widget.focusColor,
