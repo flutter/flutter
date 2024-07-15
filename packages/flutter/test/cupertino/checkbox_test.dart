@@ -26,7 +26,7 @@ void main() {
             value: false,
             onChanged: (bool? b) { },
           ),
-        ),
+        )
       ),
     );
 
@@ -46,7 +46,7 @@ void main() {
             value: true,
             onChanged: (bool? b) { },
           ),
-        ),
+        )
       ),
     );
 
@@ -67,7 +67,7 @@ void main() {
             value: false,
             onChanged: null,
           ),
-        ),
+        )
       ),
     );
 
@@ -93,7 +93,7 @@ void main() {
             value: true,
             onChanged: null,
           ),
-        ),
+        )
       ),
     );
 
@@ -111,7 +111,7 @@ void main() {
             tristate: true,
             onChanged: null,
           ),
-        ),
+        )
       ),
     );
 
@@ -129,7 +129,7 @@ void main() {
             tristate: true,
             onChanged: null,
           ),
-        ),
+        )
       ),
     );
 
@@ -147,7 +147,7 @@ void main() {
             tristate: true,
             onChanged: null,
           ),
-        ),
+        )
       ),
     );
 
@@ -339,58 +339,6 @@ void main() {
     semanticsTester.dispose();
   });
 
-  testWidgets('Checkbox can configure a semantic label', (WidgetTester tester) async {
-    final SemanticsHandle handle = tester.ensureSemantics();
-
-    await tester.pumpWidget(
-      CupertinoApp (
-        home: Center(
-          child: CupertinoCheckbox(
-            value: false,
-            onChanged: (bool? b) { },
-            semanticLabel: 'checkbox',
-          ),
-        ),
-      ),
-    );
-    expect(tester.getSemantics(find.byType(Focus).last), matchesSemantics(
-      hasCheckedState: true,
-      hasEnabledState: true,
-      isEnabled: true,
-      hasTapAction: true,
-      hasFocusAction: true,
-      isFocusable: true,
-      label: 'checkbox'
-    ));
-
-    // If wrapped with semantics, both the parent semantic label and the
-    // checkbox's semantic label are used in annotation.
-    await tester.pumpWidget(
-      CupertinoApp(
-        home: Semantics(
-          label: 'foo',
-          textDirection: TextDirection.ltr,
-          child: CupertinoCheckbox(
-            value: false,
-            onChanged: (bool? b) { },
-            semanticLabel: 'checkbox',
-          ),
-        ),
-      ),
-    );
-    expect(tester.getSemantics(find.byType(Focus).last), matchesSemantics(
-      label: 'foo\ncheckbox',
-      textDirection: TextDirection.ltr,
-      hasCheckedState: true,
-      hasEnabledState: true,
-      isEnabled: true,
-      hasTapAction: true,
-      hasFocusAction: true,
-      isFocusable: true,
-    ));
-    handle.dispose();
-  });
-
   testWidgets('Checkbox can be toggled by keyboard shortcuts', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     bool? value = true;
@@ -465,190 +413,6 @@ void main() {
           outer: RRect.fromLTRBR(13.0, 13.0, 31.0, 31.0, const Radius.circular(5)),
           inner: RRect.fromLTRBR(17.0, 17.0, 27.0, 27.0, const Radius.circular(1)),
         ),
-    );
-  });
-
-  testWidgets('Checkbox default colors, and size in light mode', (WidgetTester tester) async {
-    const Color enabledCheckColor = Color(0xffffffff);
-    const Color disabledCheckColor = Color(0xffacacac);
-    const Color inactiveFillColor = Color(0xffffffff);
-    const Color activeFillColor = Color(0xff007aff);
-    const Color disabledFillColor = Color(0x80ffffff);
-    const Color activeBorderColor = Color(0x00000000);
-    const Color inactiveBorderColor = Color(0xffd1d1d6);
-
-    Widget buildApp({bool value = true, bool enabled = true}) {
-      return CupertinoApp(
-        home: Center(
-          child: CupertinoCheckbox(
-            value: value,
-            onChanged: enabled ? (_) {} : null,
-          ),
-        ),
-      );
-    }
-    await tester.pumpWidget(buildApp(value: false));
-    expect(
-      find.byType(CupertinoCheckbox),
-      paints
-        ..path(color: inactiveFillColor)
-        ..drrect(color: inactiveBorderColor),
-      reason: 'Inactive enabled checkbox should have default colors',
-    );
-
-    await tester.pumpWidget(buildApp());
-    await tester.pump();
-    expect(
-      find.byType(CupertinoCheckbox),
-      paints
-        ..path(color: activeFillColor)
-        ..rrect(color: activeBorderColor)
-        ..path(color: enabledCheckColor)
-        ..path(color: enabledCheckColor),
-      reason: 'Active enabled checkbox should have default colors',
-    );
-
-    // Test disabled checkbox.
-    await tester.pumpWidget(buildApp(enabled: false, value: false));
-    await tester.pump();
-    expect(
-      find.byType(CupertinoCheckbox),
-      paints
-        ..path(color: disabledFillColor)
-        ..drrect(color: inactiveBorderColor),
-      reason: 'Inactive disabled checkbox should have default colors',
-    );
-
-    await tester.pumpWidget(buildApp(enabled: false));
-    await tester.pump();
-    expect(
-      find.byType(CupertinoCheckbox),
-      paints
-        ..path(color: disabledFillColor)
-        ..drrect(color: inactiveBorderColor)
-        ..path(color: disabledCheckColor)
-        ..path(color: disabledCheckColor),
-      reason: 'Active disabled checkbox should have default colors',
-    );
-  });
-
-  testWidgets('Checkbox default colors, and size in dark mode', (WidgetTester tester) async {
-    const Color enabledCheckColor = Color(0xffffffff);
-    const Color disabledCheckColor = Color(0xffacacac);
-    const Color activeFillColor = Color(0xff0a84ff);
-    const Color disabledFillColor = Color(0x80ffffff);
-    const Color activeBorderColor = Color(0x00000000);
-    const Color inactiveBorderColor = Color(0x80808080);
-
-    Widget buildApp({bool value = true, bool enabled = true}) {
-      return CupertinoApp(
-        theme: const CupertinoThemeData(brightness: Brightness.dark),
-        home: Center(
-          child: CupertinoCheckbox(
-            value: value,
-            onChanged: enabled ? (_) {} : null,
-          ),
-        ),
-      );
-    }
-    await tester.pumpWidget(buildApp(value: false));
-    expect(
-      find.byType(CupertinoCheckbox),
-      paints
-        ..path()
-        ..drrect(color: inactiveBorderColor),
-      reason: 'Inactive enabled checkbox should have default colors',
-    );
-
-    await tester.pumpWidget(buildApp());
-    await tester.pump();
-    expect(
-      find.byType(CupertinoCheckbox),
-      paints
-        ..path(color: activeFillColor)
-        ..rrect(color: activeBorderColor)
-        ..path(color: enabledCheckColor)
-        ..path(color: enabledCheckColor),
-      reason: 'Active enabled checkbox should have default colors',
-    );
-
-    // Test disabled checkbox.
-    await tester.pumpWidget(buildApp(enabled: false, value: false));
-    await tester.pump();
-    expect(
-      find.byType(CupertinoCheckbox),
-      paints
-        ..path()
-        ..drrect(color: inactiveBorderColor),
-      reason: 'Inactive disabled checkbox should have default colors',
-    );
-
-    await tester.pumpWidget(buildApp(enabled: false));
-    await tester.pump();
-    expect(
-      find.byType(CupertinoCheckbox),
-      paints
-        ..path(color: disabledFillColor)
-        ..drrect(color: inactiveBorderColor)
-        ..path(color: disabledCheckColor)
-        ..path(color: disabledCheckColor),
-      reason: 'Active disabled checkbox should have default colors',
-    );
-  });
-
-  testWidgets('Checkbox configures focus color', (WidgetTester tester) async {
-    const Color defaultCheckColor = Color(0xffffffff);
-    const Color defaultActiveFillColor = Color(0xff007aff);
-    const Color defaultFocusColor = Color(0xcc6eadf2);
-    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
-    final FocusNode node = FocusNode();
-    addTearDown(node.dispose);
-
-    Widget buildApp({Color? focusColor, bool autofocus = false, FocusNode? focusNode}) {
-      return CupertinoApp(
-        home: Center(
-          child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
-            return CupertinoCheckbox(
-              value: true,
-              onChanged: (bool? newValue) {},
-              autofocus: autofocus,
-              focusNode: focusNode,
-              focusColor: focusColor,
-            );
-          }),
-        ),
-      );
-    }
-    await tester.pumpWidget(buildApp(focusNode: node, autofocus: true));
-    await tester.pump();
-    expect(node.hasPrimaryFocus, isTrue);
-    expect(
-      find.byType(CupertinoCheckbox),
-      paints
-        ..path(color: defaultActiveFillColor)
-        ..rrect()
-        ..path(color: defaultCheckColor)
-        ..path(color: defaultCheckColor)
-        ..path(color: defaultFocusColor, strokeWidth: 3.5, style: PaintingStyle.stroke),
-      reason: 'Checkbox shows the correct focus color',
-    );
-
-    await tester.pumpWidget(buildApp(
-      focusColor: const Color(0xffaabbcc),
-      focusNode: node,
-      autofocus: true,
-    ));
-    await tester.pump();
-    expect(node.hasPrimaryFocus, isTrue);
-    expect(
-      find.byType(CupertinoCheckbox),
-      paints
-        ..path(color: defaultActiveFillColor)
-        ..rrect()
-        ..path(color: defaultCheckColor)
-        ..path(color: defaultCheckColor)
-        ..path(color: const Color(0xffaabbcc), strokeWidth: 3.5, style: PaintingStyle.stroke),
-        reason: 'Checkbox can configure a focus color',
     );
   });
 
@@ -729,146 +493,6 @@ void main() {
     );
     await tester.pump();
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.forbidden);
-  });
-
-  testWidgets('Checkbox fill color resolves in disabled/hovered/focused states', (WidgetTester tester) async {
-    final FocusNode focusNode = FocusNode(debugLabel: 'Checkbox');
-    addTearDown(focusNode.dispose);
-    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
-
-    const Color hoverColor = Color(0xFF000005);
-    const Color focusColor = Color(0xFF000006);
-    const Color disabledColor = Color(0xFF000007);
-    const Color defaultColor = Color(0x00000000);
-
-    Color getFillColor(Set<WidgetState> states) {
-      if (states.contains(WidgetState.disabled)) {
-        return disabledColor;
-      }
-      if (states.contains(WidgetState.hovered)) {
-        return hoverColor;
-      }
-      if (states.contains(WidgetState.focused)) {
-        return focusColor;
-      }
-      return defaultColor;
-    }
-
-    await tester.pumpWidget(
-      CupertinoApp(
-        home: Center(
-          child: CupertinoCheckbox(
-            value: true,
-            onChanged: (_) {},
-            fillColor: WidgetStateProperty.resolveWith(getFillColor),
-            autofocus: true,
-            focusNode: focusNode,
-          ),
-        ),
-      ),
-    );
-
-    // Test focused case.
-    await tester.pump();
-    expect(focusNode.hasPrimaryFocus, isTrue);
-    expect(
-      find.byType(CupertinoCheckbox),
-      paints
-        ..path(color: focusColor),
-      reason: 'Focused Checkbox should use $focusColor',
-    );
-
-    // Test hovered case.
-    final TestGesture gesture5 = await tester.createGesture(kind: PointerDeviceKind.mouse);
-    await gesture5.addPointer();
-    addTearDown(gesture5.removePointer);
-    await gesture5.moveTo(tester.getCenter(find.byType(CupertinoCheckbox)));
-    await tester.pump();
-    expect(
-      find.byType(CupertinoCheckbox),
-      paints
-        ..path(color: hoverColor),
-      reason: 'Hovered Checkbox should use $hoverColor',
-    );
-
-    // Test disabled case.
-    await tester.pumpWidget(
-      CupertinoApp(
-        home: Center(
-          child: CupertinoCheckbox(
-            value: true,
-            onChanged: null,
-            fillColor: WidgetStateProperty.resolveWith(getFillColor)
-          ),
-        ),
-      ),
-    );
-    expect(
-      find.byType(CupertinoCheckbox),
-      paints
-        ..path(color: disabledColor),
-      reason: 'Disabled Checkbox should use $disabledColor',
-    );
-  });
-
-  testWidgets('Checkbox is slightly darkened when pressed', (WidgetTester tester) async {
-    const Color checkColor = Color(0xffffffff);
-    const Color defaultActiveFillColor = Color(0xff007aff);
-    const Color defaultInactiveFillColor = Color(0xffffffff);
-    const Color pressedDarkShadow = Color(0x0d000000);
-
-    await tester.pumpWidget(
-      CupertinoApp(
-        home: Center(
-          child: CupertinoCheckbox(
-            value: false,
-            onChanged: (_) {},
-          ),
-        ),
-      ),
-    );
-
-    final TestGesture gesture1 = await tester.startGesture(tester.getCenter(find.byType(CupertinoCheckbox)));
-    await tester.pump();
-
-    expect(
-      find.byType(CupertinoCheckbox),
-      paints
-        ..path(color: defaultInactiveFillColor)
-        ..drrect()
-        ..path(color: pressedDarkShadow),
-      reason: 'Inactive pressed Checkbox is slightly darkened',
-    );
-
-    await tester.pumpWidget(
-      CupertinoApp(
-        home: Center(
-          child: CupertinoCheckbox(
-            value: true,
-            onChanged: (_) {},
-          ),
-        ),
-      ),
-    );
-
-    final TestGesture gesture2 = await tester.startGesture(tester.getCenter(find.byType(CupertinoCheckbox)));
-    await tester.pump();
-
-    expect(
-      find.byType(CupertinoCheckbox),
-      paints
-        ..path(color: defaultActiveFillColor)
-        ..rrect()
-        ..path(color: checkColor)
-        ..path(color: checkColor)
-        ..path(color: pressedDarkShadow),
-      reason: 'Active pressed Checkbox is slightly darkened',
-    );
-
-    // Finish gestures to release resources.
-    await gesture1.up();
-    await gesture2.up();
-    await tester.pump();
   });
 }
 
