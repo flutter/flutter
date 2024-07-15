@@ -93,7 +93,7 @@ void main() {
     final Device device = FakeDevice(LaunchResult.failed());
 
     expect(
-      () => driverService.start(BuildInfo.profile, device, DebuggingOptions.enabled(BuildInfo.profile, ipv6: true)),
+      () => driverService.start(BuildInfo.profile, device, DebuggingOptions.enabled(BuildInfo.profile), true),
       throwsToolExit(message: 'Application failed to start. Will not run test. Quitting.'),
     );
   });
@@ -118,7 +118,7 @@ void main() {
     ))..failOnce = true;
 
     await expectLater(
-      () async => driverService.start(BuildInfo.profile, device, DebuggingOptions.enabled(BuildInfo.profile, ipv6: true)),
+      () async => driverService.start(BuildInfo.profile, device, DebuggingOptions.enabled(BuildInfo.profile), true),
       returnsNormally,
     );
   });
@@ -142,7 +142,7 @@ void main() {
       vmServiceUri: Uri.parse('http://127.0.0.1:63426/1UasC_ihpXY=/'),
     ));
 
-    await driverService.start(BuildInfo.profile, device, DebuggingOptions.enabled(BuildInfo.profile, ipv6: true));
+    await driverService.start(BuildInfo.profile, device, DebuggingOptions.enabled(BuildInfo.profile), true);
     final int testResult = await driverService.startTest(
       'foo.test',
       <String>['--enable-experiment=non-nullable'],
@@ -173,7 +173,7 @@ void main() {
       vmServiceUri: Uri.parse('http://127.0.0.1:63426/1UasC_ihpXY=/'),
     ));
 
-    await driverService.start(BuildInfo.profile, device, DebuggingOptions.enabled(BuildInfo.profile, ipv6: true));
+    await driverService.start(BuildInfo.profile, device, DebuggingOptions.enabled(BuildInfo.profile), true);
     final int testResult = await driverService.startTest(
       'foo.test',
       <String>['--enable-experiment=non-nullable'],
@@ -205,7 +205,7 @@ void main() {
       vmServiceUri: Uri.parse('http://127.0.0.1:63426/1UasC_ihpXY=/'),
     ));
 
-    await driverService.start(BuildInfo.profile, device, DebuggingOptions.enabled(BuildInfo.profile, ipv6: true));
+    await driverService.start(BuildInfo.profile, device, DebuggingOptions.enabled(BuildInfo.profile), true);
     final int testResult = await driverService.startTest(
       'foo.test',
       <String>['--enable-experiment=non-nullable'],
@@ -237,7 +237,7 @@ void main() {
     final FakeDartDevelopmentService dds = device.dds as FakeDartDevelopmentService;
 
     expect(dds.started, false);
-    await driverService.start(BuildInfo.profile, device, DebuggingOptions.enabled(BuildInfo.profile, enableDds: false, ipv6: true));
+    await driverService.start(BuildInfo.profile, device, DebuggingOptions.enabled(BuildInfo.profile, enableDds: false), true);
     expect(dds.started, false);
 
     final int testResult = await driverService.startTest(
@@ -261,7 +261,7 @@ void main() {
       vmServiceUri: Uri.parse('http://127.0.0.1:63426/1UasC_ihpXY=/'),
     ));
 
-    await driverService.start(BuildInfo.profile, device, DebuggingOptions.enabled(BuildInfo.profile, ipv6: true));
+    await driverService.start(BuildInfo.profile, device, DebuggingOptions.enabled(BuildInfo.profile), true);
     await driverService.stop();
 
     expect(device.didStopApp, true);
@@ -293,7 +293,7 @@ void main() {
       vmServiceUri: Uri.parse('http://127.0.0.1:63426/1UasC_ihpXY=/'),
     ));
 
-    await driverService.start(BuildInfo.profile, device, DebuggingOptions.enabled(BuildInfo.profile, ipv6: true));
+    await driverService.start(BuildInfo.profile, device, DebuggingOptions.enabled(BuildInfo.profile), true);
     await driverService.stop(writeSkslOnExit: fileSystem.file('out.json'));
 
     expect(device.didStopApp, true);
@@ -327,6 +327,7 @@ void main() {
       Uri.parse('http://127.0.0.1:63426/1UasC_ihpXY=/'),
       device,
       DebuggingOptions.enabled(BuildInfo.debug),
+      false,
     );
     await driverService.stop();
   });
@@ -350,6 +351,7 @@ void main() {
       Uri.parse('ws://127.0.0.1:63426/1UasC_ihpXY=/ws/'),
       device,
       DebuggingOptions.enabled(BuildInfo.debug),
+      false,
     );
     await driverService.stop();
   });
@@ -373,6 +375,7 @@ void main() {
       Uri.parse('ws://127.0.0.1:63426/1UasC_ihpXY=/ws'),
       device,
       DebuggingOptions.enabled(BuildInfo.debug),
+      false,
     );
     await driverService.stop();
   });
@@ -396,6 +399,7 @@ void main() {
       Uri.parse('ws://127.0.0.1:63426/wsasC_ihpXY=/ws'),
       device,
       DebuggingOptions.enabled(BuildInfo.debug),
+      false,
     );
     await driverService.stop();
   });
@@ -412,6 +416,7 @@ void main() {
       Uri.parse('http://127.0.0.1:63426/1UasC_ihpXY=/'),
       device,
       DebuggingOptions.enabled(BuildInfo.debug),
+      false,
     );
     await driverService.stop();
   });
@@ -535,9 +540,7 @@ class FakeDevice extends Fake implements Device {
   }
 }
 
-class FakeDartDevelopmentService extends Fake
-    with DartDevelopmentServiceLocalOperationsMixin
-    implements DartDevelopmentService {
+class FakeDartDevelopmentService extends Fake implements DartDevelopmentService {
   bool started = false;
   bool disposed = false;
 
@@ -547,14 +550,11 @@ class FakeDartDevelopmentService extends Fake
   @override
   Future<void> startDartDevelopmentService(
     Uri vmServiceUri, {
-    FlutterDevice? device,
-    int? ddsPort,
+    required Logger logger,
+    int? hostPort,
     bool? ipv6,
     bool? disableServiceAuthCodes,
-    bool enableDevTools = false,
     bool cacheStartupProfile = false,
-    String? google3WorkspaceRoot,
-    Uri? devToolsServerAddress,
   }) async {
     started = true;
   }

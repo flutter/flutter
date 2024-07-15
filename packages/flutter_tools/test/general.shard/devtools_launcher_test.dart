@@ -33,8 +33,6 @@ void main() {
             'Artifact.engineDartBinary',
             'devtools',
             '--no-launch-browser',
-            // TODO(bkonyi): does this need to be removed?
-            // '--print-dtd',
           ],
           stdout: 'Serving DevTools at http://127.0.0.1:9100.\n',
           completer: completer,
@@ -51,7 +49,6 @@ void main() {
     expect(launcher.printDtdUri, false);
   });
 
-  // TODO(bkonyi): this test can be removed when DevTools is served from DDS.
   testWithoutContext('DevtoolsLauncher saves the Dart Tooling Daemon uri', () async {
     final (BufferLogger logger, Artifacts artifacts) = getTestState();
     final Completer<void> completer = Completer<void>();
@@ -98,7 +95,6 @@ Serving DevTools at http://127.0.0.1:9100.
             'Artifact.engineDartBinary',
             'devtools',
             '--no-launch-browser',
-            // '--print-dtd',
           ],
           stdout: 'Serving DevTools at http://127.0.0.1:9100.\n',
           completer: completer,
@@ -124,7 +120,6 @@ Serving DevTools at http://127.0.0.1:9100.
           'Artifact.engineDartBinary',
           'devtools',
           '--no-launch-browser',
-          // '--print-dtd',
           '--vm-uri=localhost:8181/abcdefg',
           '--profile-memory=foo',
         ],
@@ -156,7 +151,6 @@ Serving DevTools at http://127.0.0.1:9100.
             'Artifact.engineDartBinary',
             'devtools',
             '--no-launch-browser',
-            // '--print-dtd',
             '--vm-uri=http://127.0.0.1:1234/abcdefg',
           ],
           exception: ProcessException('pub', <String>[]),
@@ -182,7 +176,6 @@ Serving DevTools at http://127.0.0.1:9100.
             'Artifact.engineDartBinary',
             'devtools',
             '--no-launch-browser',
-            // '--print-dtd',
           ],
           stdout: 'Serving DevTools at http://127.0.0.1:9100.\n',
           completer: completer,

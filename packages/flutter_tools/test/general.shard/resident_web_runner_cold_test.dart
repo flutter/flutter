@@ -50,6 +50,7 @@ void main() {
       mockFlutterDevice,
       flutterProject: project,
       debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
+      ipv6: true,
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       systemClock: SystemClock.fixed(DateTime(0, 0, 0)),
@@ -80,6 +81,7 @@ void main() {
       mockFlutterDevice,
       flutterProject: project,
       debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
+      ipv6: true,
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       systemClock: SystemClock.fixed(DateTime(0, 0, 0)),
@@ -105,6 +107,7 @@ void main() {
       mockFlutterDevice,
       flutterProject: project,
       debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
+      ipv6: true,
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       systemClock: SystemClock.fixed(DateTime(0, 0, 0)),
@@ -129,6 +132,7 @@ void main() {
       mockFlutterDevice,
       flutterProject: project,
       debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
+      ipv6: true,
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       systemClock: SystemClock.fixed(DateTime(0, 0, 0)),
@@ -158,6 +162,7 @@ void main() {
       mockFlutterDevice,
       flutterProject: project,
       debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
+      ipv6: true,
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       systemClock: SystemClock.fixed(DateTime(0, 0, 0)),
@@ -240,8 +245,4 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
 
   @override
   FlutterVmService? vmService;
-
-  // TODO(bkonyi): uncomment when ready to serve DevTools from DDS.
-  // @override
-  // Future<void> handleHotRestart() async {}
 }

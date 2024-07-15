@@ -26,6 +26,7 @@ abstract class WebRunnerFactory {
     String? target,
     required bool stayResident,
     required FlutterProject flutterProject,
+    required bool? ipv6,
     required DebuggingOptions debuggingOptions,
     UrlTunneller? urlTunneller,
     required Logger logger,

@@ -137,7 +137,8 @@ void main() {
           ..writeAsStringSync('\n');
         final FakeDevice device = FakeDevice();
         final List<FlutterDevice> devices = <FlutterDevice>[
-          FakeFlutterDevice(device),
+          FlutterDevice(device, generator: residentCompiler, buildInfo: BuildInfo.debug, developmentShaderCompiler: const FakeShaderCompiler())
+            ..devFS = FakeDevFs(),
         ];
         final OperationResult result = await HotRunner(
           devices,
@@ -145,6 +146,7 @@ void main() {
           target: 'main.dart',
           devtoolsHandler: createNoOpHandler,
           analytics: fakeAnalytics,
+
         ).restart(fullRestart: true);
         expect(result.isOk, false);
         expect(result.message, 'setupHotRestart failed');

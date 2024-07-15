@@ -5,12 +5,12 @@
 import 'dart:async';
 import 'dart:io' as io; // flutter_ignore: dart_io_import;
 
+import 'package:dds/dds.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 import 'package:stream_channel/stream_channel.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
-import '../base/dds.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -43,6 +43,7 @@ class FlutterTesterTestDevice extends TestDevice {
     required this.icudtlPath,
     required this.compileExpression,
     required this.fontConfigManager,
+    required this.uriConverter,
   })  : assert(!debuggingOptions.startPaused || enableVmService),
         _gotProcessVmServiceUri = enableVmService
             ? Completer<Uri?>() : (Completer<Uri?>()..complete());
@@ -63,8 +64,8 @@ class FlutterTesterTestDevice extends TestDevice {
   final String? icudtlPath;
   final CompileExpression? compileExpression;
   final FontConfigManager fontConfigManager;
+  final UriConverter? uriConverter;
 
-  late final DartDevelopmentService _ddsLauncher = DartDevelopmentService(logger: logger);
   final Completer<Uri?> _gotProcessVmServiceUri;
   final Completer<int> _exitCode = Completer<int>();
 
@@ -169,20 +170,16 @@ class FlutterTesterTestDevice extends TestDevice {
             debuggingOptions.hostVmServicePort == detectedUri.port);
 
         Uri? forwardingUri;
-        // TODO(bkonyi): uncomment when ready to serve DevTools from DDS.
-        // Uri? devToolsUri;
+        DartDevelopmentService? dds;
 
         if (debuggingOptions.enableDds) {
           logger.printTrace('test $id: Starting Dart Development Service');
-
-          await _ddsLauncher.startDartDevelopmentServiceFromDebuggingOptions(
+          dds = await startDds(
             detectedUri,
-            debuggingOptions: debuggingOptions,
+            uriConverter: uriConverter,
           );
-          forwardingUri = _ddsLauncher.uri;
-          // TODO(bkonyi): uncomment when ready to serve DevTools from DDS.
-          // devToolsUri = _ddsLauncher.devToolsUri;
-          logger.printTrace('test $id: Dart Development Service started at $forwardingUri, forwarding to VM service at $detectedUri.');
+          forwardingUri = dds.uri;
+          logger.printTrace('test $id: Dart Development Service started at ${dds.uri}, forwarding to VM service at ${dds.remoteVmServiceUri}.');
         } else {
           forwardingUri = detectedUri;
         }
@@ -204,11 +201,7 @@ class FlutterTesterTestDevice extends TestDevice {
 
         if (debuggingOptions.startPaused && !machine!) {
           logger.printStatus('The Dart VM service is listening on $forwardingUri');
-          await _startDevTools(forwardingUri, _ddsLauncher);
-          // TODO(bkonyi): uncomment when ready to serve DevTools from DDS.
-          // if (devToolsUri != null) {
-          //  logger.printStatus('The Flutter DevTools debugger and profiler is available at: $devToolsUri');
-          // }
+          await _startDevTools(forwardingUri, dds);
           logger.printStatus('');
           logger.printStatus('The test process has been started. Set any relevant breakpoints and then resume the test in the debugger.');
         }
@@ -255,6 +248,28 @@ class FlutterTesterTestDevice extends TestDevice {
     throw TestDeviceException(_getExitCodeMessage(exitCode), StackTrace.current);
   }
 
+  Uri get _ddsServiceUri {
+    return Uri(
+      scheme: 'http',
+      host: (host!.type == InternetAddressType.IPv6 ?
+        InternetAddress.loopbackIPv6 :
+        InternetAddress.loopbackIPv4
+      ).host,
+      port: debuggingOptions.hostVmServicePort ?? 0,
+    );
+  }
+
+  @visibleForTesting
+  @protected
+  Future<DartDevelopmentService> startDds(Uri uri, {UriConverter? uriConverter}) {
+    return DartDevelopmentService.startDartDevelopmentService(
+      uri,
+      serviceUri: _ddsServiceUri,
+      enableAuthCodes: !debuggingOptions.disableServiceAuthCodes,
+      ipv6: host!.type == InternetAddressType.IPv6,
+      uriConverter: uriConverter,
+    );
+  }
 
   @visibleForTesting
   @protected
@@ -270,7 +285,6 @@ class FlutterTesterTestDevice extends TestDevice {
     );
   }
 
-  // TODO(bkonyi): remove when ready to serve DevTools from DDS.
   Future<void> _startDevTools(Uri forwardingUri, DartDevelopmentService? dds) async {
     _devToolsLauncher = DevtoolsLauncher.instance;
     logger.printTrace('test $id: Serving DevTools...');
@@ -282,6 +296,10 @@ class FlutterTesterTestDevice extends TestDevice {
     }
     await _devToolsLauncher?.ready;
     logger.printTrace('test $id: DevTools is being served at ${devToolsServerAddress.uri}');
+
+    // Notify the DDS instance that there's a DevTools instance available so it can correctly
+    // redirect DevTools related requests.
+    dds?.setExternalDevToolsUri(devToolsServerAddress.uri!);
 
     final Uri devToolsUri = devToolsServerAddress.uri!.replace(
       // Use query instead of queryParameters to avoid unnecessary encoding.
