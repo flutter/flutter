@@ -2468,8 +2468,8 @@ void main() {
     Size buttonSize = tester.getSize(find.widgetWithText(MenuItemButton, 'I0').hitTestable());
     expect(buttonSize.width, 136.0);
 
-    // The width of the text field should be adjusted based on the EdgeInsetsDirectional.start and
-    // EdgeInsetsDirectional.right. The top and bottom values will be ignored.
+    // The width of the text field should be adjusted based on the EdgeInsetsDirectional.start
+    // and EdgeInsetsDirectional.end. The top and bottom values will be ignored.
     await tester.pumpWidget(Container());
     await tester.pumpWidget(buildMenuAnchor());
     box = tester.firstRenderObject(find.byType(TextField));
