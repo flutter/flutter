@@ -53,16 +53,6 @@ const CupertinoDynamicColor _kDefaultBorderColor = CupertinoDynamicColor.withBri
 /// ([CupertinoSwitch] in Flutter) instead, or to find a creative custom
 /// solution.
 ///
-/// {@tool dartpad}
-/// This example shows how you can override the default color palette of
-/// a [CupertinoCheckbox] with a [WidgetStateProperty].
-/// In this example, the checkbox's color will be `CupertinoColors.activeGreen`
-/// when the [CupertinoCheckbox] is being pressed, hovered, or focused.
-/// Otherwise, the checkbox's color will be `CupertinoColors.systemRed`.
-///
-/// ** See code in examples/api/lib/cupertino/checkbox/cupertino_checkbox.0.dart **
-/// {@end-tool}
-///
 /// See also:
 ///
 ///  * [Checkbox], the Material Design equivalent.
