@@ -368,7 +368,7 @@ class _CheckboxPainter extends ToggleablePainter {
     const Offset end = Offset(CupertinoCheckbox.width * 0.75, CupertinoCheckbox.width * 0.5);
     canvas.drawLine(origin + start, origin + end, paint);
   }
-
+  
   @override
   void paint(Canvas canvas, Size size) {
     final Paint strokePaint = _createStrokePaint();
@@ -388,21 +388,7 @@ class _CheckboxPainter extends ToggleablePainter {
         _drawCheck(canvas, origin, strokePaint);
       } else {
         _drawDash(canvas, origin, strokePaint);
-    }
-    }
-    // Apply effect to darken checkbox when pressed.
-    if (downPosition != null) {
-      final Paint paint = Paint()
-        ..color = CupertinoColors.black.withOpacity(0.05);
-      final Rect outer = _outerRectAt(origin);
-      canvas.drawPath(shape.getOuterPath(outer), paint);
       }
-    // Apply effect to darken checkbox when pressed.
-    if (downPosition != null) {
-      final Paint paint = Paint()
-        ..color = CupertinoColors.black.withOpacity(0.05);
-      final Rect outer = _outerRectAt(origin);
-      canvas.drawPath(shape.getOuterPath(outer), paint);
     }
 
     if (isFocused) {
