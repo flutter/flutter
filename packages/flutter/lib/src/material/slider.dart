@@ -1650,7 +1650,22 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       sliderTheme: _sliderTheme,
       isDiscrete: isDiscrete,
     );
-    final Offset thumbCenter = Offset(trackRect.left + visualPosition * trackRect.width, trackRect.center.dy);
+    final double padding = isDiscrete || _sliderTheme.trackShape!.isRounded ? trackRect.height : 0.0;
+    final double thumbPosition = isDiscrete
+      ? trackRect.left + visualPosition * (trackRect.width - padding) + padding / 2
+      : trackRect.left + visualPosition * trackRect.width;
+    // Apply padding to trackRect.left and trackRect.right if the track height is
+    // greater than the thumb radius to ensure the thumb is drawn within the track.
+    final Size thumbSize = _sliderTheme.thumbShape!.getPreferredSize(isInteractive, isDiscrete);
+    final double thumbPadding = (padding > thumbSize.width / 2 ? padding / 2 : 0);
+    final Offset thumbCenter = Offset(
+      clampDouble(
+        thumbPosition,
+        trackRect.left + thumbPadding,
+        trackRect.right - thumbPadding,
+      ),
+      trackRect.center.dy,
+    );
     if (isInteractive) {
       final Size overlaySize = sliderTheme.overlayShape!.getPreferredSize(isInteractive, false);
       overlayRect = Rect.fromCircle(center: thumbCenter, radius: overlaySize.width / 2.0);
@@ -1692,7 +1707,6 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
         isEnabled: isInteractive,
         sliderTheme: _sliderTheme,
       ).width;
-      final double padding = trackRect.height;
       final double adjustedTrackWidth = trackRect.width - padding;
       // If the tick marks would be too dense, don't bother painting them.
       if (adjustedTrackWidth / divisions! >= 3.0 * tickMarkWidth) {
