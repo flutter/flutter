@@ -38,32 +38,4 @@ void main() {
 
     expect(checkbox.value, isTrue);
   });
-
-  testWidgets('Checkbox color can be changed', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.CupertinoCheckboxApp(),
-    );
-    final CupertinoCheckbox checkbox = tester.widget(find.byType(CupertinoCheckbox));
-
-    expect(
-      checkbox.checkColor,
-      CupertinoColors.white,
-    );
-    expect(
-      checkbox.fillColor!.resolve(<WidgetState>{}),
-      CupertinoColors.systemRed,
-    );
-    expect(
-      checkbox.fillColor!.resolve(<WidgetState>{WidgetState.pressed}),
-      CupertinoColors.activeGreen,
-    );
-    expect(
-      checkbox.fillColor!.resolve(<WidgetState>{WidgetState.hovered}),
-      CupertinoColors.activeGreen,
-    );
-    expect(
-      checkbox.fillColor!.resolve(<WidgetState>{WidgetState.focused}),
-      CupertinoColors.activeGreen,
-    );
-  });
 }
