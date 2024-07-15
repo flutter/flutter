@@ -42,11 +42,11 @@ Make sure you have already set up an Xcode session by following the instructions
 in the wiki. Setup a test that opens a blank playground. With the playground
 running, click on the stylized `M` to capture a Metal frame.
 
-![alt_text](assets/read_frame_captures/image1.png "image_tooltip")
+![alt_text](https://raw.githubusercontent.com/flutter/assets-for-api-docs//5da33067f5cfc7f177d9c460d618397aad9082ca/assets/engine/impeller/read_frame_captures/image1.avif "image_tooltip")
 
 Give Xcode a few seconds to capture the frame and show the frame overview.
 
-![alt_text](assets/read_frame_captures/image2.png "image_tooltip")
+![alt_text](https://raw.githubusercontent.com/flutter/assets-for-api-docs//5da33067f5cfc7f177d9c460d618397aad9082ca/assets/engine/impeller/read_frame_captures/image2.avif "image_tooltip")
 
 Let’s figure out what the gauges of this car mean.
 
@@ -120,7 +120,7 @@ still not rendering anything in the playground.
 
 An overview of all graphics memory usage is shown.
 
-![alt_text](assets/read_frame_captures/image3.png "image_tooltip")
+![alt_text](https://raw.githubusercontent.com/flutter/assets-for-api-docs//5da33067f5cfc7f177d9c460d618397aad9082ca/assets/engine/impeller/read_frame_captures/image3.avif "image_tooltip")
 
 Along with all the objects that occupy memory, their locations in different
 memory categorizations are also shown. Notice how the totals all add up to the
@@ -130,7 +130,7 @@ memory storage mode for textures or buffers (private, managed, or memory-less).
 You can double click an object to inspect it and highlighting a texture should
 give you a preview of its contents.
 
-![alt_text](assets/read_frame_captures/image4.png "image_tooltip")
+![alt_text](https://raw.githubusercontent.com/flutter/assets-for-api-docs//5da33067f5cfc7f177d9c460d618397aad9082ca/assets/engine/impeller/read_frame_captures/image4.avif "image_tooltip")
 
 Do not underestimate the usefulness of filtering the results either by category
 name or resource name. You can filter by category by selecting the small
@@ -138,7 +138,7 @@ circular callstack button next to the category. When you apply filters, the
 memory totals will update to reflect just filtered items. Here, there is 3 MB of
 device memory for managed textures.
 
-![alt_text](assets/read_frame_captures/image5.png "image_tooltip")
+![alt_text](https://raw.githubusercontent.com/flutter/assets-for-api-docs//5da33067f5cfc7f177d9c460d618397aad9082ca/assets/engine/impeller/read_frame_captures/image5.avif "image_tooltip")
 
 You can also apply freeform text filters to the resources using the text field
 highlighted by the second box. This is used by multiple Impeller subsystems. For
@@ -167,7 +167,7 @@ gauges and pedals do. Let’s drive this car onto a quiet street.
 Let’s render a scene that actually renders something. But, let’s just render a
 solid red triangle in the playground.
 
-![alt_text](assets/read_frame_captures/image6.png "image_tooltip")
+![alt_text](https://raw.githubusercontent.com/flutter/assets-for-api-docs//5da33067f5cfc7f177d9c460d618397aad9082ca/assets/engine/impeller/read_frame_captures/image6.avif "image_tooltip")
 
 We notice two changes in the overview.
 
@@ -209,7 +209,7 @@ Let’s click on the `SolidFill Pipeline` in the example to analyze that pipelin
 All draw calls listed below that pipeline use the same programmable and fixed
 function pipeline configuration.
 
-![alt_text](assets/read_frame_captures/image7.png "image_tooltip")
+![alt_text](https://raw.githubusercontent.com/flutter/assets-for-api-docs//5da33067f5cfc7f177d9c460d618397aad9082ca/assets/engine/impeller/read_frame_captures/image7.avif "image_tooltip")
 
 You will get intimately familiar with this view when you set up a new pipeline
 state object in Impeller or try to reason about the correctness of one of the
@@ -242,7 +242,7 @@ topology).
 
 To inspect how each draw call is configured, select the call in the sidebar.
 
-![alt_text](assets/read_frame_captures/image8.png "image_tooltip")
+![alt_text](https://raw.githubusercontent.com/flutter/assets-for-api-docs//5da33067f5cfc7f177d9c460d618397aad9082ca/assets/engine/impeller/read_frame_captures/image8.avif "image_tooltip")
 
 To get an overview of the draw call, the Bound Resources section is the most
 useful view. Let’s ensure we understand each item.
@@ -253,7 +253,7 @@ detail](#inspecting-the-pipeline-state-object).
 In the `Vertex` section, the `Geometry` lists how each vertex is transformed by
 the vertex shader.
 
-![alt_text](assets/read_frame_captures/image9.png "image_tooltip")
+![alt_text](https://raw.githubusercontent.com/flutter/assets-for-api-docs//5da33067f5cfc7f177d9c460d618397aad9082ca/assets/engine/impeller/read_frame_captures/image9.avif "image_tooltip")
 
 Here, you see how each vertex (three here since we are rendering a triangle) is
 transformed by the shader such that it ends up in the correct spot in normalized
@@ -268,7 +268,7 @@ information about that buffer presented in a view appropriate for that stage.
 When I double click the buffer containing the uniform data, the following view
 is shown.
 
-![alt_text](assets/read_frame_captures/image10.png "image_tooltip")
+![alt_text](https://raw.githubusercontent.com/flutter/assets-for-api-docs//5da33067f5cfc7f177d9c460d618397aad9082ca/assets/engine/impeller/read_frame_captures/image10.avif "image_tooltip")
 
 Pay specific attention to the `Row` index. Impeller architecture doesn’t create
 small individual buffers for uniform data. All uniform data for a single render
@@ -297,7 +297,7 @@ changes in the buffer indiscernible to you. Xcode helpfully selected the “Min 
 Max” view for us. You can do the same for any attachment.
 
 
-![alt_text](assets/read_frame_captures/image11.png "image_tooltip")
+![alt_text](https://raw.githubusercontent.com/flutter/assets-for-api-docs//5da33067f5cfc7f177d9c460d618397aad9082ca/assets/engine/impeller/read_frame_captures/image11.avif "image_tooltip")
 
 ## Debugging a Shader
 
@@ -331,7 +331,7 @@ for shader along with a button to show it where to find the relevant
 `.metallibsym` files. Click that button and a dialog will pop up showing the
 Metal libraries whose `.metallibsym` files could not be resolved.
 
-![No Sources](assets/read_frame_captures/no_sources.png)
+![No Sources](https://raw.githubusercontent.com/flutter/assets-for-api-docs//5da33067f5cfc7f177d9c460d618397aad9082ca/assets/engine/impeller/read_frame_captures/no_sources.avif)
 
 In the "External Source Search Paths" section, click the tiny `+` button at the
 bottom. In the file chooser dialog box that appears next, select all the
@@ -345,7 +345,7 @@ sources in an outdated `.metallibsym` file.
 You may however also run into Xcode complaining about "Invalid UUID" errors.
 This is instead of the "No Source" errors as shown in the dialog above.
 
-![Invalid UUID](assets/read_frame_captures/invalid_uuid.png)
+![Invalid UUID](https://raw.githubusercontent.com/flutter/assets-for-api-docs//5da33067f5cfc7f177d9c460d618397aad9082ca/assets/engine/impeller/read_frame_captures/invalid_uuid.avif)
 
 The team has been unable to to find documentation for this type of error. But
 through trial-and-error, we have determined that the way to fix this is to set
@@ -364,7 +364,7 @@ section as described in the section on [inspecting a single draw
 call](#inspecting-a-single-draw-call).
 
 
-![alt_text](assets/read_frame_captures/image12.png "image_tooltip")
+![alt_text](https://raw.githubusercontent.com/flutter/assets-for-api-docs//5da33067f5cfc7f177d9c460d618397aad9082ca/assets/engine/impeller/read_frame_captures/image12.avif "image_tooltip")
 
 
 At the bottom right corner of the attachment preview, you will see a disabled
@@ -377,7 +377,7 @@ Once a valid texture element is highlighted, the `Debug` button should be
 enabled. Click it to debug that one invocation of the fragment shader used by
 that draw call.
 
-![alt_text](assets/read_frame_captures/image13.png "image_tooltip")
+![alt_text](https://raw.githubusercontent.com/flutter/assets-for-api-docs//5da33067f5cfc7f177d9c460d618397aad9082ca/assets/engine/impeller/read_frame_captures/image13.avif "image_tooltip")
 
 
 In the sidebar on the left, each step of execution of the fragment shader is
@@ -407,7 +407,7 @@ described in the section on [inspecting a single draw
 call](#inspecting-a-single-draw-call).
 
 
-![alt_text](assets/read_frame_captures/image14.png "image_tooltip")
+![alt_text](https://raw.githubusercontent.com/flutter/assets-for-api-docs//5da33067f5cfc7f177d9c460d618397aad9082ca/assets/engine/impeller/read_frame_captures/image14.avif "image_tooltip")
 
 
 In this view, the `Debug` button on the bottom right will be disabled unless a
@@ -415,7 +415,7 @@ specific vertex in the geometry has been selected. Once you select the vertex
 whose vertex shader invocation you want to debug, the button should be enabled.
 Click it.
 
-![alt_text](assets/read_frame_captures/image15.png "image_tooltip")
+![alt_text](https://raw.githubusercontent.com/flutter/assets-for-api-docs//5da33067f5cfc7f177d9c460d618397aad9082ca/assets/engine/impeller/read_frame_captures/image15.avif "image_tooltip")
 
 
 In the sidebar on the left, each step of execution of the vertex shader is
@@ -447,7 +447,7 @@ button at the bottom of the shader viewer that is typically disabled becomes
 enabled.
 
 
-![alt_text](assets/read_frame_captures/image16.png "image_tooltip")
+![alt_text](https://raw.githubusercontent.com/flutter/assets-for-api-docs//5da33067f5cfc7f177d9c460d618397aad9082ca/assets/engine/impeller/read_frame_captures/image16.avif "image_tooltip")
 
 
 Click on that button to see what that invocation would look like had it used the
@@ -469,12 +469,12 @@ updates.
 From either the frame insights or by selecting an API call on the object, open
 the call-stack to navigate to the code that made that call. Then add your label.
 
-![alt_text](assets/read_frame_captures/image17.png "image_tooltip")
+![alt_text](https://raw.githubusercontent.com/flutter/assets-for-api-docs//5da33067f5cfc7f177d9c460d618397aad9082ca/assets/engine/impeller/read_frame_captures/image17.avif "image_tooltip")
 
 When inspecting an API call, reveal the call-stack. This resource has already
 been labelled and you’ll find the call in `AllocatorMTL::CreateTexture`.
 
-![alt_text](assets/read_frame_captures/image18.png "image_tooltip")
+![alt_text](https://raw.githubusercontent.com/flutter/assets-for-api-docs//5da33067f5cfc7f177d9c460d618397aad9082ca/assets/engine/impeller/read_frame_captures/image18.avif "image_tooltip")
 
 
 This trace-first approach of navigating an unfamiliar codebase is unreasonably

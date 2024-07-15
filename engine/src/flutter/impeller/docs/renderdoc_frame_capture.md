@@ -22,7 +22,7 @@
 
 3. Start RenderDoc and (if necessary) select "Launch Application" button from the menu:
 
-   ![Launch App](assets/renderdoc_frame_capture/launch-app.png)
+   ![Launch App](https://raw.githubusercontent.com/flutter/assets-for-api-docs//5da33067f5cfc7f177d9c460d618397aad9082ca/assets/engine/impeller/renderdoc_frame_capture/launch-app.avif)
 
    On Linux, the executable is `qrenderdoc`.
 
@@ -45,7 +45,7 @@
 
 5. For the frame you wish to capture, press `F12`, you will now be able to see the frame capture and inspect the state:
 
-   ![Renderdoc Capture](assets/renderdoc_frame_capture/render-doc-capture.png)
+   ![Renderdoc Capture](https://raw.githubusercontent.com/flutter/assets-for-api-docs//5da33067f5cfc7f177d9c460d618397aad9082ca/assets/engine/impeller/renderdoc_frame_capture/render-doc-capture.avif)
 
 _See also:_
 
