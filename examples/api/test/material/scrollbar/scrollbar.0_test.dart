@@ -26,16 +26,14 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 10)); // Wait for the thumb to start appearing.
 
-    final Finder scrollbarFinder = find.byType(Scrollbar).last;
-
     expect(find.text('item 0'), findsOne);
     expect(find.text('item 9'), findsNothing);
-    expect(scrollbarFinder, isNot(paints..rect()));
+    expect(find.byType(Scrollbar), isNot(paints..rect()));
 
     await tester.fling(find.byType(Scrollbar).last, const Offset(0, -300), 10.0);
 
     expect(find.text('item 0'), findsNothing);
     expect(find.text('item 9'), findsOne);
-    expect(scrollbarFinder.last, paints..rect());
+    expect(find.byType(Scrollbar).last, paints..rect());
   });
 }
