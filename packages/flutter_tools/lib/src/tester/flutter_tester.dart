@@ -46,7 +46,7 @@ class FlutterTesterDevice extends Device {
   FlutterTesterDevice(super.id, {
     required ProcessManager processManager,
     required FlutterVersion flutterVersion,
-    required super.logger,
+    required Logger logger,
     required FileSystem fileSystem,
     required Artifacts artifacts,
   }) : _processManager = processManager,
@@ -135,6 +135,7 @@ class FlutterTesterDevice extends Device {
     required DebuggingOptions debuggingOptions,
     Map<String, Object?> platformArgs = const <String, Object>{},
     bool prebuiltApplication = false,
+    bool ipv6 = false,
     String? userIdentifier,
   }) async {
     final BuildInfo buildInfo = debuggingOptions.buildInfo;
@@ -192,7 +193,7 @@ class FlutterTesterDevice extends Device {
         getLogReader(),
         hostPort: debuggingOptions.hostVmServicePort,
         devicePort: debuggingOptions.deviceVmServicePort,
-        ipv6: debuggingOptions.ipv6,
+        ipv6: ipv6,
         logger: _logger,
       );
       _logReader.initializeProcess(_process!);
