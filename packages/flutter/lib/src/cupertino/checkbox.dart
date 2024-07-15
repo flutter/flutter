@@ -406,21 +406,7 @@ class _CheckboxPainter extends ToggleablePainter {
         _drawCheck(canvas, origin, strokePaint);
       } else {
         _drawDash(canvas, origin, strokePaint);
-    }
-    }
-    // Apply effect to darken checkbox when pressed.
-    if (downPosition != null) {
-      final Paint paint = Paint()
-        ..color = CupertinoColors.black.withOpacity(0.05);
-      final Rect outer = _outerRectAt(origin);
-      canvas.drawPath(shape.getOuterPath(outer), paint);
       }
-    // Apply effect to darken checkbox when pressed.
-    if (downPosition != null) {
-      final Paint paint = Paint()
-        ..color = CupertinoColors.black.withOpacity(0.05);
-      final Rect outer = _outerRectAt(origin);
-      canvas.drawPath(shape.getOuterPath(outer), paint);
     }
 
     if (isFocused) {
