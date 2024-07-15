@@ -2449,7 +2449,7 @@ void main() {
             height: parentWidth,
             child: DropdownMenu<ShortMenu>(
               // The DropdownMenu should accept any EdgeInsetsGeometry, not just EdgeInsets.
-              expandedInsets: const EdgeInsetsDirectional.only(left: 35.0, top: 50.0, right: 20.0),
+              expandedInsets: const EdgeInsetsDirectional.only(start: 35.0, top: 50.0, end: 20.0),
               dropdownMenuEntries: shortMenuItems,
             ),
           ),
