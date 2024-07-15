@@ -161,7 +161,7 @@ void main() {
       contains('package:bar/bar.dart'),
     );
     expect(buildRunner.buildDryRunInvocations, 1);
-    expect(buildRunner.linkDryRunInvocations, 1);
+    expect(buildRunner.linkDryRunInvocations, 0);
   });
 
   testUsingContext('build with assets but not enabled', () async {
@@ -215,57 +215,67 @@ void main() {
     );
   });
 
-  testUsingContext('build with assets',
-      skip: const LocalPlatform().isWindows, // [intended] Backslashes in commands, but we will never run these commands on Windows.
-      overrides: <Type, Generator>{
-    FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
-    ProcessManager: () => FakeProcessManager.empty(),
-  }, () async {
-    final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
-    await packageConfig.parent.create();
-    await packageConfig.create();
-    final File dylibAfterCompiling = fileSystem.file('libbar.so');
-    // The mock doesn't create the file, so create it here.
-    await dylibAfterCompiling.create();
-    final FakeNativeAssetsBuildRunner buildRunner = FakeNativeAssetsBuildRunner(
-      packagesWithNativeAssetsResult: <Package>[
-        Package('bar', projectUri),
-      ],
-      buildResult: FakeNativeAssetsBuilderResult(
-        assets: <AssetImpl>[
-          NativeCodeAssetImpl(
-            id: 'package:bar/bar.dart',
-            linkMode: DynamicLoadingBundledImpl(),
-            os: OSImpl.android,
-            architecture: ArchitectureImpl.arm64,
-            file: Uri.file('libbar.so'),
-          ),
+  for (final BuildMode buildMode in <BuildMode>[
+    BuildMode.debug,
+    BuildMode.release,
+  ]) {
+    testUsingContext('build with assets $buildMode',
+        skip: const LocalPlatform().isWindows, // [intended] Backslashes in commands, but we will never run these commands on Windows.
+        overrides: <Type, Generator>{
+          FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
+          ProcessManager: () => FakeProcessManager.empty(),
+        }, () async {
+      final File packageConfig =
+          environment.projectDir.childFile('.dart_tool/package_config.json');
+      await packageConfig.parent.create();
+      await packageConfig.create();
+      final File dylibAfterCompiling = fileSystem.file('libbar.so');
+      // The mock doesn't create the file, so create it here.
+      await dylibAfterCompiling.create();
+      final FakeNativeAssetsBuildRunner buildRunner =
+          FakeNativeAssetsBuildRunner(
+        packagesWithNativeAssetsResult: <Package>[
+          Package('bar', projectUri),
         ],
-      ),
-    );
-    await buildNativeAssetsAndroid(
-      androidArchs: <AndroidArch>[AndroidArch.arm64_v8a],
-      targetAndroidNdkApi: 21,
-      projectUri: projectUri,
-      buildMode: BuildMode.debug,
-      fileSystem: fileSystem,
-      yamlParentDirectory: environment.buildDir.uri,
-      buildRunner: buildRunner,
-    );
-    expect(
-      (globals.logger as BufferLogger).traceText,
-      stringContainsInOrder(<String>[
-        'Building native assets for [android_arm64] debug.',
-        'Building native assets for [android_arm64] done.',
-      ]),
-    );
-    expect(
-      environment.buildDir.childFile('native_assets.yaml'),
-      exists,
-    );
-    expect(buildRunner.buildInvocations, 1);
-    expect(buildRunner.linkInvocations, 1);
-  });
+        buildResult: FakeNativeAssetsBuilderResult(
+          assets: <AssetImpl>[
+            NativeCodeAssetImpl(
+              id: 'package:bar/bar.dart',
+              linkMode: DynamicLoadingBundledImpl(),
+              os: OSImpl.android,
+              architecture: ArchitectureImpl.arm64,
+              file: Uri.file('libbar.so'),
+            ),
+          ],
+        ),
+      );
+      await buildNativeAssetsAndroid(
+        androidArchs: <AndroidArch>[AndroidArch.arm64_v8a],
+        targetAndroidNdkApi: 21,
+        projectUri: projectUri,
+        buildMode: buildMode,
+        fileSystem: fileSystem,
+        yamlParentDirectory: environment.buildDir.uri,
+        buildRunner: buildRunner,
+      );
+      expect(
+        (globals.logger as BufferLogger).traceText,
+        stringContainsInOrder(<String>[
+          'Building native assets for [android_arm64] $buildMode.',
+          'Building native assets for [android_arm64] done.',
+        ]),
+      );
+      expect(
+        environment.buildDir.childFile('native_assets.yaml'),
+        exists,
+      );
+      expect(buildRunner.buildInvocations, 1);
+      expect(
+        buildRunner.linkInvocations,
+        buildMode == BuildMode.release ? 1 : 0,
+      );
+    });
+  }
 
   // Ensure no exceptions for a non installed NDK are thrown if no native
   // assets have to be build.
@@ -328,29 +338,24 @@ void main() {
         environment.projectDir.childFile('.dart_tool/package_config.json');
     await packageConfig.parent.create();
     await packageConfig.create();
-    for (final String hook in <String>['Building', 'Linking']) {
-      expect(
-        () => dryRunNativeAssetsAndroid(
-          projectUri: projectUri,
-          fileSystem: fileSystem,
-          buildRunner: FakeNativeAssetsBuildRunner(
-            packagesWithNativeAssetsResult: <Package>[
-              Package('bar', projectUri),
-            ],
-            buildDryRunResult: FakeNativeAssetsBuilderResult(
-              success: hook != 'Building',
-            ),
-            linkDryRunResult: FakeNativeAssetsBuilderResult(
-              success: hook != 'Linking',
-            ),
+    expect(
+      () => dryRunNativeAssetsAndroid(
+        projectUri: projectUri,
+        fileSystem: fileSystem,
+        buildRunner: FakeNativeAssetsBuildRunner(
+          packagesWithNativeAssetsResult: <Package>[
+            Package('bar', projectUri),
+          ],
+          buildDryRunResult: const FakeNativeAssetsBuilderResult(
+            success: false,
           ),
         ),
-        throwsToolExit(
-          message:
-              '$hook (dry run) native assets failed. See the logs for more details.',
-        ),
-      );
-    }
+      ),
+      throwsToolExit(
+        message:
+            'Building (dry run) native assets failed. See the logs for more details.',
+      ),
+    );
   });
 
   testUsingContext('Native assets build error', overrides: <Type, Generator>{
@@ -367,7 +372,7 @@ void main() {
           androidArchs: <AndroidArch>[AndroidArch.arm64_v8a],
           targetAndroidNdkApi: 21,
           projectUri: projectUri,
-          buildMode: BuildMode.debug,
+          buildMode: BuildMode.release,
           fileSystem: fileSystem,
           yamlParentDirectory: environment.buildDir.uri,
           buildRunner: FakeNativeAssetsBuildRunner(

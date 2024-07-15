@@ -8,7 +8,6 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
-import '../project.dart';
 import '../runner/flutter_command.dart'
     show DevelopmentArtifact, FlutterCommandResult, FlutterOptions;
 import '../web/compile.dart';
@@ -147,6 +146,8 @@ class BuildWebCommand extends BuildSubCommand {
         ? null
         : WebRendererMode.values.byName(webRendererString);
 
+    final bool sourceMaps = boolArg('source-maps');
+
     final List<WebCompilerConfig> compilerConfigs;
     if (boolArg(FlutterOptions.kWebWasmFlag)) {
       if (webRenderer != null) {
@@ -163,6 +164,7 @@ class BuildWebCommand extends BuildSubCommand {
         WasmCompilerConfig(
           optimizationLevel: optimizationLevel,
           stripWasm: boolArg('strip-wasm'),
+          sourceMaps: sourceMaps,
         ),
         JsCompilerConfig(
           csp: boolArg('csp'),
@@ -170,7 +172,7 @@ class BuildWebCommand extends BuildSubCommand {
           dumpInfo: boolArg('dump-info'),
           nativeNullAssertions: boolArg('native-null-assertions'),
           noFrequencyBasedMinification: boolArg('no-frequency-based-minification'),
-          sourceMaps: boolArg('source-maps'),
+          sourceMaps: sourceMaps,
         )];
     } else {
       compilerConfigs = <WebCompilerConfig>[JsCompilerConfig(
@@ -179,12 +181,11 @@ class BuildWebCommand extends BuildSubCommand {
         dumpInfo: boolArg('dump-info'),
         nativeNullAssertions: boolArg('native-null-assertions'),
         noFrequencyBasedMinification: boolArg('no-frequency-based-minification'),
-        sourceMaps: boolArg('source-maps'),
+        sourceMaps: sourceMaps,
         renderer: webRenderer ?? WebRendererMode.defaultForJs,
       )];
     }
 
-    final FlutterProject flutterProject = FlutterProject.current();
     final String target = stringArg('target')!;
     final BuildInfo buildInfo = await getBuildInfo();
     if (buildInfo.isDebug) {
@@ -197,7 +198,7 @@ class BuildWebCommand extends BuildSubCommand {
         '--base-href should start and end with /',
       );
     }
-    if (!flutterProject.web.existsSync()) {
+    if (!project.web.existsSync()) {
       throwToolExit('Missing index.html.');
     }
     if (!_fileSystem.currentDirectory
@@ -227,7 +228,7 @@ class BuildWebCommand extends BuildSubCommand {
       analytics: globals.analytics,
     );
     await webBuilder.buildWeb(
-      flutterProject,
+      project,
       target,
       buildInfo,
       ServiceWorkerStrategy.fromCliName(stringArg('pwa-strategy')),
