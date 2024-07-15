@@ -55,7 +55,7 @@ void main() {
       residentCompiler,
     );
 
-    expect(await testCompiler.compile(Uri.parse('test/foo.dart')), 'test/foo.dart.dill');
+    expect(await testCompiler.compile(Uri.parse('test/foo.dart')), 'test/foo.dart_01.dill');
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     Platform: () => linuxPlatform,
@@ -107,7 +107,7 @@ void main() {
       residentCompiler,
       testTimeRecorder: testTimeRecorder,
     );
-    expect(await testCompiler.compile(Uri.parse('test/foo.dart')), 'test/foo.dart.dill');
+    expect(await testCompiler.compile(Uri.parse('test/foo.dart')), 'test/foo.dart_01.dill');
     testTimeRecorder.print();
 
     // Expect one message for each phase.
