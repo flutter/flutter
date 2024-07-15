@@ -660,7 +660,7 @@ void main() {
       const <String>['build', 'ipa', '--no-pub']
     );
 
-    expect(logger.statusText, contains('Built /build/ios/archive/Runner.xcarchive'));
+    expect(logger.statusText, contains('Built build/ios/archive/Runner.xcarchive'));
     expect(logger.statusText, contains('Building App Store IPA'));
     expect(logger.errorText, contains('Encountered error while creating the IPA:'));
     expect(logger.errorText, contains('error: exportArchive: "Runner.app" requires a provisioning profile.'));
