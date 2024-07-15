@@ -4016,6 +4016,8 @@ targets:
       tags: >
         ["devicelab", "hostonly", "mac"]
       task_name: plugin_test_ios
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/151772
+      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/flutter_tools/**
