@@ -878,7 +878,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
 
     if (widget.expandedInsets case final EdgeInsetsGeometry padding) {
       menuAnchor = Padding(
-        // padding: padding.copyWith(top: 0.0, bottom: 0.0),
+        // Clamp the top and bottom padding to 0.
         padding: padding.clamp(
           EdgeInsets.zero,
           const EdgeInsets.only(
