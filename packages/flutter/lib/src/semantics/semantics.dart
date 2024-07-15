@@ -2755,8 +2755,11 @@ class SemanticsNode with DiagnosticableTreeMixin {
         platformViewId ??= node._platformViewId;
         maxValueLength ??= node._maxValueLength;
         currentValueLength ??= node._currentValueLength;
-        headingLevel = node._headingLevel;
         linkUrl ??= node._linkUrl;
+        headingLevel = _mergeHeadingLevels(
+          sourceLevel: node._headingLevel,
+          targetLevel: headingLevel,
+        );
 
         if (identifier == '') {
           identifier = node._identifier;
@@ -3069,6 +3072,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     properties.add(IntProperty('indexInParent', indexInParent, defaultValue: null));
     properties.add(DoubleProperty('elevation', elevation, defaultValue: 0.0));
     properties.add(DoubleProperty('thickness', thickness, defaultValue: 0.0));
+    properties.add(IntProperty('headingLevel', _headingLevel, defaultValue: 0));
   }
 
   /// Returns a string representation of this node and its descendants.
@@ -3539,10 +3543,10 @@ class SemanticsOwner extends ChangeNotifier {
         assert(node.parent == null || !node.parent!.isPartOfNodeMerging || node.isMergedIntoParent);
         if (node.isPartOfNodeMerging) {
           assert(node.mergeAllDescendantsIntoThisNode || node.parent != null);
-          // if we're merged into our parent, make sure our parent is added to the dirty list
+          // If child node is merged into its parent, make sure the parent is marked as dirty
           if (node.parent != null && node.parent!.isPartOfNodeMerging) {
             node.parent!._markDirty(); // this can add the node to the dirty list
-            node._dirty = false; // We don't want to send update for this node.
+            node._dirty = false; // Do not send update for this node, as it's now part of its parent
           }
         }
       }
@@ -5079,6 +5083,11 @@ class SemanticsConfiguration {
     _maxValueLength ??= child._maxValueLength;
     _currentValueLength ??= child._currentValueLength;
 
+    _headingLevel = _mergeHeadingLevels(
+      sourceLevel: child._headingLevel,
+      targetLevel: _headingLevel,
+    );
+
     textDirection ??= child.textDirection;
     _sortKey ??= child._sortKey;
     if (_identifier == '') {
@@ -5315,4 +5324,17 @@ class OrdinalSortKey extends SemanticsSortKey {
     super.debugFillProperties(properties);
     properties.add(DoubleProperty('order', order, defaultValue: null));
   }
+}
+
+/// Picks the most accurate heading level when two nodes, with potentially
+/// different heading levels, are merged.
+///
+/// Argument [sourceLevel] is the heading level of the source node that is being
+/// merged into a target node, which has heading level [targetLevel].
+///
+/// If the target node is not a heading, the the source heading level is used.
+/// Otherwise, the target heading level is used irrespective of the source
+/// heading level.
+int _mergeHeadingLevels({required int sourceLevel, required int targetLevel}) {
+  return targetLevel == 0 ? sourceLevel : targetLevel;
 }
