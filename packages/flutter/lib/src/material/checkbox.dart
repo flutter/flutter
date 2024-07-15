@@ -495,6 +495,7 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
               autofocus: widget.autofocus,
               side: widget.side,
               shape: widget.shape,
+              semanticLabel: widget.semanticLabel,
             );
         }
     }
