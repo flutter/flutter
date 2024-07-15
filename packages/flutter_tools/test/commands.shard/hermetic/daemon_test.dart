@@ -695,22 +695,17 @@ void main() {
           'deviceId': 'device',
           'disableServiceAuthCodes': false,
           'vmServiceUri': 'http://fake_uri/auth_code',
-          // TODO(bkonyi): uncomment when ready to serve DevTools from DDS.
-          // 'enableDevTools': true,
         },
       }));
       final Stream<DaemonMessage> broadcastOutput = daemonStreams.outputs.stream.asBroadcastStream();
       final DaemonMessage startResponse = await broadcastOutput.firstWhere(_notEvent);
       expect(startResponse.data['id'], 0);
       expect(startResponse.data['error'], isNull);
-      final Map<String, Object?>? result = startResponse.data['result'] as Map<String, Object?>?;
-      final String? ddsUri = result!['ddsUri'] as String?;
+      final String? ddsUri = startResponse.data['result'] as String?;
       expect(ddsUri, fakeDdsUri.toString());
       expect(device.dds.startCalled, true);
       expect(device.dds.startDisableServiceAuthCodes, false);
       expect(device.dds.startVMServiceUri, Uri.parse('http://fake_uri/auth_code'));
-      // TODO(bkonyi): uncomment when ready to serve DevTools from DDS.
-      // expect(device.dds.enableDevTools, true);
 
       // dds.done event should be sent to the client.
       ddsDoneCompleter.complete();
@@ -1241,8 +1236,6 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
   bool? startDisableServiceAuthCodes;
 
   bool shutdownCalled = false;
-  // TODO(bkonyi): uncomment when ready to serve DevTools from DDS.
-  // bool enableDevTools = false;
 
   @override
   late Future<void> done;
@@ -1250,32 +1243,18 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
   @override
   Uri? uri;
 
-  // TODO(bkonyi): uncomment when ready to serve DevTools from DDS.
-  /*
-  @override
-  Uri? devToolsUri;
-
-  @override
-  Uri? dtdUri;
-  */
-
   @override
   Future<void> startDartDevelopmentService(
     Uri vmServiceUri, {
-    int? ddsPort,
-    FlutterDevice? device,
+    required Logger logger,
+    int? hostPort,
     bool? ipv6,
     bool? disableServiceAuthCodes,
-    bool enableDevTools = false,
     bool cacheStartupProfile = false,
-    String? google3WorkspaceRoot,
-    Uri? devToolsServerAddress,
   }) async {
     startCalled = true;
     startVMServiceUri = vmServiceUri;
     startDisableServiceAuthCodes = disableServiceAuthCodes;
-    // TODO(bkonyi): uncomment when ready to serve DevTools from DDS.
-    // this.enableDevTools = enableDevTools;
   }
 
   @override
