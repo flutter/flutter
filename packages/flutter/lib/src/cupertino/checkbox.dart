@@ -89,17 +89,14 @@ class CupertinoCheckbox extends StatefulWidget {
     required this.value,
     this.tristate = false,
     required this.onChanged,
-    this.mouseCursor,
     this.activeColor,
     this.inactiveColor,
-    this.fillColor,
     this.checkColor,
     this.focusColor,
     this.focusNode,
     this.autofocus = false,
     this.side,
     this.shape,
-    this.semanticLabel,
   }) : assert(tristate || value != null);
 
   /// Whether this checkbox is checked.
@@ -139,65 +136,15 @@ class CupertinoCheckbox extends StatefulWidget {
   /// ```
   final ValueChanged<bool?>? onChanged;
 
-  /// The cursor for a mouse pointer when it enters or is hovering over the
-  /// widget.
-  ///
-  /// If [mouseCursor] is a [WidgetStateMouseCursor],
-  /// [WidgetStateMouseCursor.resolve] is used for the following [WidgetState]s:
-  ///
-  ///  * [WidgetState.selected].
-  ///  * [WidgetState.focused].
-  ///  * [WidgetState.disabled].
-  ///
-  /// When [value] is null and [tristate] is true, [WidgetState.selected] is
-  /// included as a state.
-  ///
-  /// Defaults to [SystemMouseCursors.basic].
-  final MouseCursor? mouseCursor;
-
   /// The color to use when this checkbox is checked.
   ///
   /// Defaults to [CupertinoColors.activeBlue].
-  ///
-  /// If [fillColor] returns a non-null color in the [WidgetState.selected]
-  /// state, it will be used instead of this color.
   final Color? activeColor;
 
   /// The color used if the checkbox is inactive.
   ///
   /// By default, [CupertinoColors.inactiveGray] is used.
   final Color? inactiveColor;
-
-  /// The color that fills the checkbox, in all [WidgetState]s.
-  ///
-  /// Resolves in the following states:
-  ///  * [WidgetState.selected].
-  ///  * [WidgetState.hovered].
-  ///  * [WidgetState.focused].
-  ///  * [WidgetState.disabled].
-  ///
-  /// {@tool snippet}
-  /// This example resolves the [fillColor] based on the current [WidgetState]
-  /// of the [CupertinoCheckbox], providing a different [Color] when it is
-  /// [WidgetState.disabled].
-  ///
-  /// ```dart
-  /// CupertinoCheckbox(
-  ///   value: true,
-  ///   onChanged: (_){},
-  ///   fillColor: WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {
-  ///     if (states.contains(WidgetState.disabled)) {
-  ///       return Colors.orange.withOpacity(.32);
-  ///     }
-  ///     return Colors.orange;
-  ///   })
-  /// )
-  /// ```
-  /// {@end-tool}
-  ///
-  /// If null, then the value of [activeColor] is used in the selected
-  /// state, and [CupertinoColors.white] is used in the unselected state.
-  final WidgetStateProperty<Color?>? fillColor;
 
   /// The color to use for the check icon when this checkbox is checked.
   ///
@@ -257,13 +204,6 @@ class CupertinoCheckbox extends StatefulWidget {
   /// If this property is null then the shape defaults to a
   /// [RoundedRectangleBorder] with a circular corner radius of 4.0.
   final OutlinedBorder? shape;
-
-  /// The semantic label for the checkbox that will be announced by screen readers.
-  ///
-  /// This is announced in accessibility modes (e.g TalkBack/VoiceOver).
-  ///
-  /// This label does not show in the UI.
-  final String? semanticLabel;
 
   /// The width of a checkbox widget.
   static const double width = 18.0;
@@ -358,11 +298,7 @@ class _CupertinoCheckboxState extends State<CupertinoCheckbox> with TickerProvid
     final Set<WidgetState> activeStates = states..add(WidgetState.selected);
     final Set<WidgetState> inactiveStates = states..remove(WidgetState.selected);
 
-    final Color effectiveActiveColor = widget.fillColor?.resolve(activeStates)
-      ?? _defaultFillColor.resolve(activeStates);
-
-    final Color effectiveInactiveColor = widget.fillColor?.resolve(inactiveStates)
-      ?? _defaultFillColor.resolve(inactiveStates);
+    final Color effectiveActiveColor = _defaultFillColor.resolve(activeStates);
 
     final BorderSide effectiveBorderSide = _resolveSide(widget.side, states)
       ?? _defaultSide.resolve(states);
@@ -374,18 +310,10 @@ class _CupertinoCheckboxState extends State<CupertinoCheckbox> with TickerProvid
           .withSaturation(_kCupertinoFocusColorSaturation)
           .toColor();
 
-    final WidgetStateProperty<MouseCursor> effectiveMouseCursor =
-      WidgetStateProperty.resolveWith<MouseCursor>((Set<WidgetState> states) {
-        return WidgetStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states)
-          ?? SystemMouseCursors.basic;
-      });
-
     return Semantics(
-      label: widget.semanticLabel,
       checked: widget.value ?? false,
       mixed: widget.tristate ? widget.value == null : null,
       child: buildToggleable(
-        mouseCursor: effectiveMouseCursor,
         focusNode: widget.focusNode,
         autofocus: widget.autofocus,
         size: const Size.square(kMinInteractiveDimensionCupertino),
@@ -397,7 +325,7 @@ class _CupertinoCheckboxState extends State<CupertinoCheckbox> with TickerProvid
           ..isFocused = states.contains(WidgetState.focused)
           ..isHovered = states.contains(WidgetState.hovered)
           ..activeColor = effectiveActiveColor
-          ..inactiveColor = effectiveInactiveColor
+          ..inactiveColor = _defaultFillColor.resolve(inactiveStates)
           ..checkColor = _defaultCheckColor.resolve(states)
           ..value = value
           ..previousValue = _previousValue
