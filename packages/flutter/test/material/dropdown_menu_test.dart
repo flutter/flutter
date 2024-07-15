@@ -337,7 +337,7 @@ void main() {
     // based on the EdgeInsets.left and EdgeInsets.right. The top and bottom values
     // will be ignored.
     await tester.pumpWidget(Container());
-    await tester.pumpWidget(buildMenuAnchor(expandedInsets: const EdgeInsetsDirectional.only(left: 35.0, top: 50.0, right: 20.0)));
+    await tester.pumpWidget(buildMenuAnchor(expandedInsets: const EdgeInsets.only(left: 35.0, top: 50.0, right: 20.0)));
     box = tester.firstRenderObject(find.byType(TextField));
     expect(box.size.width, parentWidth - 35.0 - 20.0);
     final Rect containerRect = tester.getRect(find.byType(SizedBox).first);
