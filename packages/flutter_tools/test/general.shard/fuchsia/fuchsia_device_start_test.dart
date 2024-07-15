@@ -9,7 +9,6 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -39,7 +38,6 @@ void main() {
     late FakeProcessManager fakeSuccessfulProcessManager;
     late FakeProcessManager fakeFailedProcessManagerForHostAddress;
     late File sshConfig;
-    final Logger logger = FakeLogger();
 
     setUp(() {
       memoryFileSystem = MemoryFileSystem.test();
@@ -116,7 +114,7 @@ void main() {
       required BuildMode mode,
     }) async {
       const String appName = 'app_name';
-      final FuchsiaDevice device = FuchsiaDeviceWithFakeDiscovery('123', logger: logger);
+      final FuchsiaDevice device = FuchsiaDeviceWithFakeDiscovery('123');
       globals.fs.directory('fuchsia').createSync(recursive: true);
       final File pubspecFile = globals.fs.file('pubspec.yaml')..createSync();
       pubspecFile.writeAsStringSync('name: $appName');
@@ -188,7 +186,7 @@ void main() {
         'start and stop prebuilt in release mode fails without session',
         () async {
       const String appName = 'app_name';
-      final FuchsiaDevice device = FuchsiaDeviceWithFakeDiscovery('123', logger: logger);
+      final FuchsiaDevice device = FuchsiaDeviceWithFakeDiscovery('123');
       globals.fs.directory('fuchsia').createSync(recursive: true);
       final File pubspecFile = globals.fs.file('pubspec.yaml')..createSync();
       pubspecFile.writeAsStringSync('name: $appName');
@@ -218,7 +216,7 @@ void main() {
     testUsingContext('start and stop prebuilt in release mode with session',
         () async {
       const String appName = 'app_name';
-      final FuchsiaDevice device = FuchsiaDeviceWithFakeDiscovery('123', logger: logger);
+      final FuchsiaDevice device = FuchsiaDeviceWithFakeDiscovery('123');
       globals.fs.directory('fuchsia').createSync(recursive: true);
       final File pubspecFile = globals.fs.file('pubspec.yaml')..createSync();
       pubspecFile.writeAsStringSync('name: $appName');
@@ -411,7 +409,7 @@ void main() {
     });
 
     testUsingContext('fail when cant get host address', () async {
-      expect(() async => FuchsiaDeviceWithFakeDiscovery('123', logger: logger).hostAddress,
+      expect(() async => FuchsiaDeviceWithFakeDiscovery('123').hostAddress,
           throwsToolExit(message: 'Failed to get local address, aborting.'));
     }, overrides: <Type, Generator>{
       Artifacts: () => artifacts,
@@ -481,7 +479,7 @@ Process _createFakeProcess({
 }
 
 class FuchsiaDeviceWithFakeDiscovery extends FuchsiaDevice {
-  FuchsiaDeviceWithFakeDiscovery(super.id, {super.name = '', required super.logger});
+  FuchsiaDeviceWithFakeDiscovery(super.id, {super.name = ''});
 
   @override
   FuchsiaIsolateDiscoveryProtocol getIsolateDiscoveryProtocol(

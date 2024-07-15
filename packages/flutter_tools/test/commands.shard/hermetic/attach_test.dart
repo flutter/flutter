@@ -73,7 +73,7 @@ void main() {
       artifacts = Artifacts.test(fileSystem: testFileSystem);
       stdio = FakeStdio();
       terminal = FakeTerminal();
-      signals = FakeSignals();
+      signals = Signals.test();
       processInfo = FakeProcessInfo();
       testDeviceManager = TestDeviceManager(logger: logger);
     });
@@ -802,13 +802,6 @@ void main() {
         ProcessManager: () => FakeProcessManager.any(),
         Logger: () => logger,
         DeviceManager: () => testDeviceManager,
-        MDnsVmServiceDiscovery: () => MDnsVmServiceDiscovery(
-          mdnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
-          preliminaryMDnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
-          logger: logger,
-          flutterUsage: TestUsage(),
-          analytics: const NoOpAnalytics(),
-        ),
       });
 
       testUsingContext('exits when vm-service-port is specified and debug-port is not', () async {
@@ -1401,14 +1394,11 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
   @override
   Future<void> startDartDevelopmentService(
     Uri vmServiceUri, {
-    int? ddsPort,
-    FlutterDevice? device,
+    required Logger logger,
+    int? hostPort,
     bool? ipv6,
     bool? disableServiceAuthCodes,
-    bool enableDevTools = false,
     bool cacheStartupProfile = false,
-    String? google3WorkspaceRoot,
-    Uri? devToolsServerAddress,
   }) async {}
 
   @override
