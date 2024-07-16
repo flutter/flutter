@@ -1826,3 +1826,15 @@ class FlutterTask extends BaseFlutterTask {
     }
 
 }
+
+apply plugin: FlutterPluginPlugin
+
+class FlutterPluginPlugin implements Plugin<Project> {
+    private Project project
+
+    @Override
+    void apply(Project project) {
+        this.project = project
+        project.extensions.create("flutter", FlutterExtension)
+    }
+}
