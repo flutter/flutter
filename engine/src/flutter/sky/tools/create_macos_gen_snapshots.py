@@ -21,7 +21,6 @@ def main():
   parser.add_argument('--clang-dir', type=str, default='clang_x64')
   parser.add_argument('--x64-out-dir', type=str)
   parser.add_argument('--arm64-out-dir', type=str)
-  parser.add_argument('--armv7-out-dir', type=str)
   parser.add_argument('--zip', action='store_true', default=False)
 
   args = parser.parse_args()
@@ -48,14 +47,6 @@ def main():
         os.path.join(arm64_out_dir, args.clang_dir), os.path.join(dst, 'gen_snapshot_arm64')
     )
 
-  if args.armv7_out_dir:
-    armv7_out_dir = (
-        args.armv7_out_dir
-        if os.path.isabs(args.armv7_out_dir) else os.path.join(buildroot_dir, args.armv7_out_dir)
-    )
-    generate_gen_snapshot(
-        os.path.join(armv7_out_dir, args.clang_dir), os.path.join(dst, 'gen_snapshot_armv7')
-    )
   if args.zip:
     zip_archive(dst)
 
