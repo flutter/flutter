@@ -160,8 +160,13 @@ class FakeProcess implements io.Process {
          }
          return exitCode;
        }),
-      _stderr = stderr,
-      stdin = stdin ?? IOSink(StreamController<List<int>>().sink),
+        _stderr = stderr,
+        stdin = stdin ??
+            IOSink(
+              StreamController<List<int>>()
+                ..stream.listen((_) {})
+                ..sink,
+            ),
       _stdout = stdout,
       _completer = completer
   {
