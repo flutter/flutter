@@ -2467,7 +2467,6 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey flutter_gallery__memory_nav
     recipe: devicelab/devicelab_drone
-    bringup: true # https://github.com/flutter/flutter/issues/149901
     presubmit: false
     timeout: 60
     properties:
@@ -2585,7 +2584,6 @@ targets:
   - name: Linux_mokey hello_world__memory
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true # https://github.com/flutter/flutter/issues/148085
     timeout: 60
     properties:
       tags: >
@@ -2596,7 +2594,6 @@ targets:
   - name: Linux_mokey home_scroll_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true # https://github.com/flutter/flutter/issues/148085
     timeout: 60
     properties:
       tags: >
@@ -2607,7 +2604,6 @@ targets:
   - name: Linux_mokey hot_mode_dev_cycle_linux__benchmark
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true # https://github.com/flutter/flutter/issues/148085
     timeout: 60
     properties:
       tags: >
@@ -2632,7 +2628,6 @@ targets:
   - name: Linux_mokey image_list_jit_reported_duration
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true # https://github.com/flutter/flutter/issues/148085
     timeout: 60
     properties:
       tags: >
@@ -2643,7 +2638,6 @@ targets:
   - name: Linux_mokey imagefiltered_transform_animation_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true # https://github.com/flutter/flutter/issues/148085
     timeout: 60
     properties:
       tags: >
@@ -2663,7 +2657,6 @@ targets:
   - name: Linux_mokey image_list_reported_duration
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true # https://github.com/flutter/flutter/issues/148085
     timeout: 60
     properties:
       tags: >
@@ -2701,7 +2694,6 @@ targets:
   - name: Linux_mokey large_image_changer_perf_android
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true # https://github.com/flutter/flutter/issues/148085
     timeout: 60
     properties:
       tags: >
@@ -2721,7 +2713,6 @@ targets:
   - name: Linux_mokey multi_widget_construction_perf__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true # https://github.com/flutter/flutter/issues/148085
     timeout: 60
     properties:
       tags: >
@@ -2732,7 +2723,6 @@ targets:
   - name: Linux_mokey list_text_layout_perf__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true # https://github.com/flutter/flutter/issues/148085
     timeout: 60
     properties:
       tags: >
@@ -2763,7 +2753,6 @@ targets:
   - name: Linux_mokey new_gallery__crane_perf
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true # https://github.com/flutter/flutter/issues/148085
     timeout: 60
     properties:
       tags: >
@@ -2774,7 +2763,6 @@ targets:
   - name: Linux_mokey old_gallery__transition_perf
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true # https://github.com/flutter/flutter/issues/148085
     timeout: 60
     properties:
       tags: >
@@ -2821,7 +2809,6 @@ targets:
   - name: Linux_mokey flutter_gallery__transition_perf_with_semantics
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true # https://github.com/flutter/flutter/issues/148085
     timeout: 60
     properties:
       tags: >
@@ -2880,7 +2867,6 @@ targets:
 
   # Pixel 7 Pro, Impeller (Vulkan)
   - name: Linux_pixel_7pro new_gallery_impeller__transition_perf
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/139643
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -2903,7 +2889,6 @@ targets:
   - name: Linux_mokey picture_cache_perf__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true # https://github.com/flutter/flutter/issues/148085
     timeout: 60
     properties:
       tags: >
@@ -2923,7 +2908,6 @@ targets:
   - name: Linux_mokey android_picture_cache_complexity_scoring_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true # https://github.com/flutter/flutter/issues/148085
     timeout: 60
     properties:
       tags: >
@@ -2934,7 +2918,6 @@ targets:
   - name: Linux_mokey slider_perf_android
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true # https://github.com/flutter/flutter/issues/148085
     timeout: 60
     properties:
       tags: >
@@ -2945,7 +2928,6 @@ targets:
   - name: Linux_mokey platform_channels_benchmarks
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true # https://github.com/flutter/flutter/issues/148085
     timeout: 60
     properties:
       tags: >
@@ -2983,7 +2965,6 @@ targets:
   - name: Linux_mokey platform_views_scroll_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true # https://github.com/flutter/flutter/issues/148085
     timeout: 60
     properties:
       tags: >
@@ -3023,7 +3004,6 @@ targets:
   - name: Linux_mokey platform_view__start_up
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true # https://github.com/flutter/flutter/issues/148085
     timeout: 60
     properties:
       tags: >
@@ -3052,7 +3032,6 @@ targets:
   - name: Linux_mokey textfield_perf__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true # https://github.com/flutter/flutter/issues/148085
     timeout: 60
     properties:
       tags: >
@@ -3072,7 +3051,6 @@ targets:
   - name: Linux_mokey tiles_scroll_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true # https://github.com/flutter/flutter/issues/148085
     timeout: 60
     properties:
       tags: >
@@ -3096,7 +3074,6 @@ targets:
   - name: Linux_mokey opacity_peephole_one_rect_perf__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true # https://github.com/flutter/flutter/issues/148085
     timeout: 60
     properties:
       tags: >
@@ -3107,7 +3084,6 @@ targets:
   - name: Linux_mokey opacity_peephole_col_of_rows_perf__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true # https://github.com/flutter/flutter/issues/148085
     timeout: 60
     properties:
       tags: >
@@ -3118,7 +3094,6 @@ targets:
   - name: Linux_mokey opacity_peephole_opacity_of_grid_perf__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true # https://github.com/flutter/flutter/issues/148085
     timeout: 60
     properties:
       tags: >
@@ -3129,7 +3104,6 @@ targets:
   - name: Linux_mokey opacity_peephole_grid_of_opacity_perf__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true # https://github.com/flutter/flutter/issues/148085
     timeout: 60
     properties:
       tags: >
@@ -3140,7 +3114,6 @@ targets:
   - name: Linux_mokey opacity_peephole_fade_transition_text_perf__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true # https://github.com/flutter/flutter/issues/148085
     timeout: 60
     properties:
       tags: >
@@ -3151,7 +3124,6 @@ targets:
   - name: Linux_mokey opacity_peephole_grid_of_alpha_savelayers_perf__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true # https://github.com/flutter/flutter/issues/148085
     timeout: 60
     properties:
       tags: >
@@ -3162,7 +3134,6 @@ targets:
   - name: Linux_mokey opacity_peephole_col_of_alpha_savelayer_rows_perf__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true # https://github.com/flutter/flutter/issues/148085
     timeout: 60
     properties:
       tags: >
@@ -3173,7 +3144,6 @@ targets:
   - name: Linux_mokey gradient_dynamic_perf__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true # https://github.com/flutter/flutter/issues/148085
     timeout: 60
     properties:
       tags: >
@@ -3184,7 +3154,6 @@ targets:
   - name: Linux_mokey gradient_consistent_perf__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true # https://github.com/flutter/flutter/issues/148085
     timeout: 60
     properties:
       tags: >
@@ -3195,7 +3164,6 @@ targets:
   - name: Linux_mokey gradient_static_perf__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true # https://github.com/flutter/flutter/issues/148085
     timeout: 60
     properties:
       tags: >
@@ -3217,7 +3185,6 @@ targets:
     presubmit: false
     timeout: 60
     properties:
-      ignore_flakiness: "true"
       tags: >
         ["devicelab", "android", "linux", "mokey"]
       task_name: animated_blur_backdrop_filter_perf__timeline_summary
@@ -3246,10 +3213,8 @@ targets:
   - name: Linux_pixel_7pro animated_advanced_blend_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true # https://github.com/flutter/flutter/issues/138385
     timeout: 60
     properties:
-      ignore_flakiness: "true"
       tags: >
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: animated_advanced_blend_perf__timeline_summary
@@ -3267,10 +3232,8 @@ targets:
   - name: Linux_pixel_7pro rrect_blur_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
-      ignore_flakiness: "true"
       tags: >
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: rrect_blur_perf__timeline_summary
@@ -4016,6 +3979,9 @@ targets:
       tags: >
         ["devicelab", "hostonly", "mac"]
       task_name: plugin_test_ios
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/151772
+      presubmit_max_attempts: "2"
+      test_timeout_secs: "3600"
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -4346,7 +4312,6 @@ targets:
       task_name: microbenchmarks
 
   - name: Mac_pixel_7pro native_assets_android
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/148402
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -4845,7 +4810,6 @@ targets:
   - name: Mac_ios platform_views_scroll_perf_bottom_ad_banner__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -4900,7 +4864,6 @@ targets:
   - name: Mac_arm64_ios hot_mode_dev_cycle_ios__benchmark
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
