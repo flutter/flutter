@@ -21,6 +21,11 @@ import 'localizations.dart';
 // This value was eyeballed from a physical device running iOS 13.1.2.
 const double _kOpenScale = 1.15;
 
+// The smallest possible scale of the child, used if opening the
+// CupertinoContextMenu would cause it to go offscreen. This value was eyeballed
+// from the XCode iPhone simulator running iOS 16.1.
+const double _kMinScaleFactor = 1.02;
+
 // The ratio for the borderRadius of the context menu preview image. This value
 // was eyeballed by overlapping the CupertinoContextMenu with a context menu
 // from iOS 16.0 in the XCode iPhone simulator.
@@ -431,17 +436,16 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
 
   // Constrain the size of the expanded child so that it does not go offscreen.
   // See https://github.com/flutter/flutter/issues/122951
-  static double _computeMinScaleFactor(BuildContext context, Rect childRect){
+  static double _computeScaleFactor(BuildContext context, Rect childRect){
     final MediaQueryData mediaQuery = MediaQuery.of(context);
     final double leftMaxScale = 2 * (childRect.center.dx - mediaQuery.padding.left) / childRect.width;
-    final double rightMaxScale = 2 * childRect.width * (mediaQuery.size.width - mediaQuery.padding.right - childRect.center.dx);
     final double topMaxScale = 2 * (childRect.center.dy - mediaQuery.padding.top) / childRect.height;
+    final double rightMaxScale = 2 * childRect.width * (mediaQuery.size.width - mediaQuery.padding.right - childRect.center.dx);
     final double bottomMaxScale = 2 * childRect.height * (mediaQuery.size.height - mediaQuery.padding.bottom - childRect.center.dy);
-    final double minHeight = math.min(topMaxScale, bottomMaxScale);
     final double minWidth = math.min(leftMaxScale, rightMaxScale);
-    // Return the smallest possible factor that keeps the entire child onscreen
-    // without reducing its size in the animation (scale factor >= 1.0).
-    return math.max(1.0, math.min(math.min(minHeight, minWidth), _kOpenScale));
+    final double minHeight = math.min(topMaxScale, bottomMaxScale);
+    // Return the smallest scale factor that keeps the child entirely onscreen.
+    return math.max(_kMinScaleFactor, math.min(math.min(minWidth, minHeight), _kOpenScale));
   }
 
   /// The default preview builder if none is provided. It makes a rectangle
@@ -562,7 +566,7 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
     });
 
     final Rect childRect = _getRect(_childGlobalKey);
-    _scaleFactor = _computeMinScaleFactor(context, childRect);
+    _scaleFactor = _computeScaleFactor(context, childRect);
     _decoyChildEndRect = Rect.fromCenter(
       center: childRect.center,
       width: childRect.width * _scaleFactor,
