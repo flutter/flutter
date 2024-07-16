@@ -2557,7 +2557,7 @@ mixin FlexibleTransitionRouteMixin<T> on ModalRoute<T> {
 
   @override
   void didChangeNext(Route<dynamic>? nextRoute) {
-    if (nextRoute is FlexibleTransitionRouteMixin<T> && canTransitionTo(nextRoute)) {
+    if (nextRoute is FlexibleTransitionRouteMixin<T> && canTransitionTo(nextRoute) && nextRoute.delegatedTransition != this.delegatedTransition) {
       receivedTransition = nextRoute.delegatedTransition;
     } else {
       receivedTransition = null;
@@ -2567,7 +2567,7 @@ mixin FlexibleTransitionRouteMixin<T> on ModalRoute<T> {
 
   @override
   void didPopNext(Route<dynamic> nextRoute) {
-    if (nextRoute is FlexibleTransitionRouteMixin<T> && canTransitionTo(nextRoute)) {
+    if (nextRoute is FlexibleTransitionRouteMixin<T> && canTransitionTo(nextRoute) && nextRoute.delegatedTransition != this.delegatedTransition) {
       receivedTransition = nextRoute.delegatedTransition;
     } else {
       receivedTransition = null;
