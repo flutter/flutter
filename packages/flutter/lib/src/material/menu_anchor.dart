@@ -1832,7 +1832,7 @@ class SubmenuButton extends StatefulWidget {
 }
 
 class _SubmenuButtonState extends State<SubmenuButton> {
-  late final Map<Type, Action<Intent>> actions = <Type, Action<Intent>>{
+  final Map<Type, Action<Intent>> actions = <Type, Action<Intent>>{
     DirectionalFocusIntent: _SubmenuDirectionalFocusAction(submenu: this)
   };
   bool _waitingToFocusMenu = false;
