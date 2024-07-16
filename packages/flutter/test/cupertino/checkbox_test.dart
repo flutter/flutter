@@ -602,7 +602,7 @@ void main() {
     );
   });
 
-  testWidgets('Checkbox is slightly darkened when pressed', (WidgetTester tester) async {
+  testWidgets('Checkbox changes opacity when pressed in light mode', (WidgetTester tester) async {
     const Color checkColor = Color(0xffffffff);
     const Color defaultActiveFillColor = Color(0xff007aff);
     const Color defaultInactiveFillColor = Color(0xffffffff);
@@ -654,6 +654,70 @@ void main() {
         ..path(color: checkColor)
         ..path(color: pressedDarkShadow),
       reason: 'Active pressed Checkbox is slightly darkened',
+    );
+
+    // Finish gestures to release resources.
+    await gesture1.up();
+    await gesture2.up();
+    await tester.pump();
+  });
+
+  testWidgets('Checkbox changes opacity when pressed in dark mode', (WidgetTester tester) async {
+    const Color checkColor = Color(0xffffffff);
+    const Color defaultActiveFillColor = Color(0xff0a84ff);
+    const Color defaultInactiveFillColor = Color(0xff000000);
+    const Color pressedLightShadow = Color(0x26ffffff);
+    const Color defaultPressedOverlayColor = Color(0x26000000);
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        theme: const CupertinoThemeData(brightness: Brightness.dark),
+        home: Center(
+          child: CupertinoCheckbox(
+            value: false,
+            onChanged: (_) {},
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture1 = await tester.startGesture(tester.getCenter(find.byType(CupertinoCheckbox)));
+    await tester.pump();
+
+    expect(
+      find.byType(CupertinoCheckbox),
+      paints
+        ..path(color: defaultInactiveFillColor)
+        ..drrect()
+        ..path(color: pressedLightShadow),
+      reason: 'Inactive pressed Checkbox is slightly lightened',
+    );
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        theme: const CupertinoThemeData(brightness: Brightness.dark),
+        home: Center(
+          child: CupertinoCheckbox(
+            value: true,
+            onChanged: (_) {},
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture2 = await tester.startGesture(tester.getCenter(find.byType(CupertinoCheckbox)));
+    await tester.pump();
+
+    expect(
+      find.byType(CupertinoCheckbox),
+      paints
+        ..path(color: defaultActiveFillColor)
+        ..rrect()
+        ..path(color: defaultPressedOverlayColor)
+        ..path(color: checkColor)
+        ..path(color: checkColor)
+        ..path(color: pressedLightShadow),
+      reason: 'Active pressed Checkbox is slightly lightened',
     );
 
     // Finish gestures to release resources.
