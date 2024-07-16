@@ -661,15 +661,26 @@ extension DomElementExtension on DomElement {
   external JSNumber? get _tabIndex;
   double? get tabIndex => _tabIndex?.toDartDouble;
 
+  /// Consider not exposing this method publicly. It defaults `preventScroll` to
+  /// false, which is almost always wrong in Flutter. If you need to expose a
+  /// method that focuses and scrolls to the element, give it a more specific
+  /// and lengthy name, e.g. `focusAndScrollToElement`. See more details in
+  /// [focusWithoutScroll].
   @JS('focus')
   external JSVoid _focus(JSAny options);
 
-  void focus({bool? preventScroll, bool? focusVisible}) {
-    final Map<String, bool> options = <String, bool>{
-      if (preventScroll != null) 'preventScroll': preventScroll,
-      if (focusVisible != null) 'focusVisible': focusVisible,
-    };
-    _focus(options.toJSAnyDeep);
+  static final JSAny _preventScrollOptions = <String, bool>{ 'preventScroll': true }.toJSAnyDeep;
+
+  /// Calls DOM `Element.focus` with `preventScroll` set to true.
+  ///
+  /// This method exists because DOM `Element.focus` defaults to `preventScroll`
+  /// set to false. This default browser behavior is almost always wrong in the
+  /// Flutter context because the Flutter framework is in charge of scrolling
+  /// all of the widget content. See, for example, this issue:
+  ///
+  /// https://github.com/flutter/flutter/issues/130950
+  void focusWithoutScroll() {
+    _focus(_preventScrollOptions);
   }
 
   @JS('scrollTop')
