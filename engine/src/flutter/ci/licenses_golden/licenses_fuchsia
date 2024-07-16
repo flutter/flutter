@@ -1,4 +1,4 @@
-Signature: a85c17eb3e8fd3c65cbce3367e92bc83
+Signature: ba16164bca7aa48149f3a6eff0df63ae
 
 ====================================================================================================
 LIBRARY: fuchsia_sdk
@@ -4748,11 +4748,9 @@ limitations under the License.
 
 ====================================================================================================
 LIBRARY: fuchsia_sdk
-ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys/service_provider.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input/input_event_constants.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input/input_events.fidl + ../../../fuchsia/sdk/linux/LICENSE
 TYPE: LicenseType.bsd
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys/service_provider.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input/input_event_constants.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input/input_events.fidl
 ----------------------------------------------------------------------------------------------------
@@ -4838,17 +4836,6 @@ ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.math/math.fidl + ../../../fuchsi
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.playback/problem.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.playback/seeking_reader.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.media/audio.fidl + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/module_context.fidl + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/session_shell.fidl + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/story_controller.fidl + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/story_info.fidl + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/story_provider.fidl + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys/component_controller.fidl + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys/environment.fidl + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys/environment_controller.fidl + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys/launcher.fidl + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys/loader.fidl + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys/runner.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.tracing.provider/provider.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.policy/presenter.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-15/sysroot/include/zircon/assert.h + ../../../fuchsia/sdk/linux/LICENSE
@@ -5278,17 +5265,6 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.math/math.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.playback/problem.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.playback/seeking_reader.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media/audio.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/module_context.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/session_shell.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/story_controller.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/story_info.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/story_provider.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys/component_controller.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys/environment.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys/environment_controller.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys/launcher.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys/loader.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys/runner.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.tracing.provider/provider.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.policy/presenter.fidl
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-15/sysroot/include/zircon/assert.h
@@ -5734,18 +5710,7 @@ ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.le/types_deprecated.fi
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.images/presentation_info.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.media/audio_capturer.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.mem/buffer.fidl + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/agent.fidl + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/agent_controller.fidl + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/component_context.fidl + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/intent.fidl + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/lifecycle.fidl + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/module_data.fidl + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/module_state.fidl + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/story_shell.fidl + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/story_state.fidl + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/surface.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.mdns/mdns.fidl + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys/flat_namespace.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.gfx/commands.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.gfx/display_info.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.gfx/events.fidl + ../../../fuchsia/sdk/linux/LICENSE
@@ -6102,18 +6067,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.le/types_deprecated.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.images/presentation_info.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media/audio_capturer.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.mem/buffer.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/agent.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/agent_controller.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/component_context.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/intent.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/lifecycle.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/module_data.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/module_state.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/story_shell.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/story_state.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/surface.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.mdns/mdns.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys/flat_namespace.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.gfx/commands.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.gfx/display_info.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.gfx/events.fidl
@@ -6508,15 +6462,10 @@ ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.media/stream_processor.fidl + ..
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.media/stream_type.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.media/timeline_function.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.mediacodec/codec_factory.fidl + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/module_manifest.fidl + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/puppet_master.fidl + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/story_command.fidl + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/story_options.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.http/client.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.net/net.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.process/launcher.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.process/resolver.fidl + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys/job_provider.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysinfo/sysinfo.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysmem/allocator.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysmem/collection.fidl + ../../../fuchsia/sdk/linux/LICENSE
@@ -6878,15 +6827,10 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media/stream_processor.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media/stream_type.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media/timeline_function.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.mediacodec/codec_factory.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/module_manifest.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/puppet_master.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/story_command.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/story_options.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.http/client.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net/net.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.process/launcher.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.process/resolver.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys/job_provider.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysinfo/sysinfo.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysmem/allocator.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysmem/collection.fidl
@@ -11895,6 +11839,7 @@ ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.fonts/styles.fidl + ../../../fuc
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/ring_buffer.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/stream_config.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/stream_config_connector.fidl + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.clock/clock.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.light/light.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.power.statecontrol/admin.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.power/power.fidl + ../../../fuchsia/sdk/linux/LICENSE
@@ -11939,8 +11884,6 @@ ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.media/audio_core.fidl + ../../..
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.media/usage_reporter.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.mem/range.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.migration/migration.fidl + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/annotation.fidl + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/story_shell_factory.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.recovery.ui/countdown.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.recovery.ui/overview.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.recovery/factory_reset.fidl + ../../../fuchsia/sdk/linux/LICENSE
@@ -11954,8 +11897,6 @@ ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/intl.fidl + ../../../fu
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/privacy.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/settings.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/setup.fidl + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys.test/cache.fidl + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys/types.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysmem/secure_mem.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.test/suite.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.thermal/thermal.fidl + ../../../fuchsia/sdk/linux/LICENSE
@@ -12319,6 +12260,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.fonts/styles.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/ring_buffer.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/stream_config.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/stream_config_connector.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.clock/clock.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.light/light.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.power.statecontrol/admin.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.power/power.fidl
@@ -12363,8 +12305,6 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media/audio_core.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media/usage_reporter.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.mem/range.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.migration/migration.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/annotation.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/story_shell_factory.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.recovery.ui/countdown.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.recovery.ui/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.recovery/factory_reset.fidl
@@ -12378,8 +12318,6 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/intl.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/privacy.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/settings.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/setup.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys.test/cache.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys/types.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysmem/secure_mem.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.test/suite.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.thermal/thermal.fidl
@@ -12782,7 +12720,6 @@ ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.media/activity_reporter.fidl + .
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.media/profile_provider.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.memorypressure/memorypressure.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.metrics/metric_event_logger.fidl + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/session_restart_controller.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.interfaces/interfaces.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.routes/routes.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.net/socket.fidl + ../../../fuchsia/sdk/linux/LICENSE
@@ -13084,7 +13021,6 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media/activity_reporter.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media/profile_provider.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.memorypressure/memorypressure.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.metrics/metric_event_logger.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/session_restart_controller.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.interfaces/interfaces.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.routes/routes.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net/socket.fidl
@@ -13772,7 +13708,6 @@ ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.sessions2/overview.fidl + 
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.media/overview.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.mediastreams/overview.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.mem/overview.fidl + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/overview.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.mdns/common.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.mdns/host_name_resolver.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.mdns/host_name_subscriber.fidl + ../../../fuchsia/sdk/linux/LICENSE
@@ -13789,7 +13724,6 @@ ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.process/overview.fidl + ../../..
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.recovery.ui/progress.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings.policy/overview.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/overview.fidl + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys/overview.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysmem/overview.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysmem2/allocator.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysmem2/collection.fidl + ../../../fuchsia/sdk/linux/LICENSE
@@ -14123,7 +14057,6 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.sessions2/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.mediastreams/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.mem/overview.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.mdns/common.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.mdns/host_name_resolver.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.mdns/host_name_subscriber.fidl
@@ -14140,7 +14073,6 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.process/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.recovery.ui/progress.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings.policy/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/overview.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysmem/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysmem2/allocator.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysmem2/collection.fidl
@@ -14447,6 +14379,8 @@ ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/composite_connect
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/device_type.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/plug.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/ring_buffer_format.fidl + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.clockimpl/clock-impl.fidl + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.clockimpl/init.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.gpioimpl/gpio-impl.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.i2cimpl/i2cimpl.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.power/config.fidl + ../../../fuchsia/sdk/linux/LICENSE
@@ -14552,6 +14486,8 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/composite_connector
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/device_type.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/plug.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/ring_buffer_format.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.clockimpl/clock-impl.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.clockimpl/init.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.gpioimpl/gpio-impl.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.i2cimpl/i2cimpl.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.power/config.fidl
