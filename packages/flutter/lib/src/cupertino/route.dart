@@ -105,9 +105,6 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
   /// {@endtemplate}
   String? get title;
 
-  /// The delegated transition received from an incoming route.
-  DelegatedTransitionBuilder? receivedTransition;
-
   ValueNotifier<String?>? _previousTitle;
 
   /// The title string of the previous [CupertinoPageRoute].
@@ -215,7 +212,6 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
     BuildContext context,
     Animation<double> animation,
     Animation<double> secondaryAnimation,
-    DelegatedTransitionBuilder? receivedTransition,
     Widget child,
   ) {
     // Check if the route has an animation that's currently participating
@@ -236,7 +232,6 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
         primaryRouteAnimation: animation,
         secondaryRouteAnimation: secondaryAnimation,
         linearTransition: linearTransition,
-        receivedTransitionBuilder: receivedTransition,
         child: _CupertinoBackGestureDetector<T>(
           enabledCallback: () => route.popGestureEnabled,
           onStartPopGesture: () => _startPopGesture<T>(route),
@@ -248,7 +243,7 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
 
   @override
   Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
-    return buildPageTransitions<T>(this, context, animation, secondaryAnimation, receivedTransition, child);
+    return buildPageTransitions<T>(this, context, animation, secondaryAnimation, child);
   }
 }
 
@@ -414,7 +409,6 @@ class CupertinoPageTransition extends StatefulWidget {
     required this.secondaryRouteAnimation,
     required this.child,
     required this.linearTransition,
-    this.receivedTransitionBuilder,
   });
 
   /// The widget below this widget in the tree.
@@ -431,9 +425,6 @@ class CupertinoPageTransition extends StatefulWidget {
   ///  * `linearTransition` is whether to perform the transitions linearly.
   ///    Used to precisely track back gesture drags.
   final bool linearTransition;
-
-  /// Delegated transition builder
-  final DelegatedTransitionBuilder? receivedTransitionBuilder;
 
   /// The delegated transition.
   static Widget delegateTransition(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget? child) {
@@ -534,17 +525,17 @@ class _CupertinoPageTransitionState extends State<CupertinoPageTransition> {
   Widget build(BuildContext context) {
     assert(debugCheckHasDirectionality(context));
     final TextDirection textDirection = Directionality.of(context);
-      return SlideTransition(
-        position: _secondaryPositionAnimation,
+    return SlideTransition(
+      position: _secondaryPositionAnimation,
+      textDirection: textDirection,
+      transformHitTests: false,
+      child: SlideTransition(
+        position: _primaryPositionAnimation,
         textDirection: textDirection,
-        transformHitTests: false,
-        child: SlideTransition(
-          position: _primaryPositionAnimation,
-          textDirection: textDirection,
-          child: DecoratedBoxTransition(
-            decoration: _primaryShadowAnimation,
-            child: widget.child,
-          ),
+        child: DecoratedBoxTransition(
+          decoration: _primaryShadowAnimation,
+          child: widget.child,
+        ),
       ),
     );
   }

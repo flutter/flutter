@@ -337,33 +337,11 @@ class _ZoomPageTransition extends StatelessWidget {
           child: child,
         );
       },
-      child: DualTransitionBuilder(
-        animation: ReverseAnimation(secondaryAnimation),
-        forwardBuilder: (
-          BuildContext context,
-          Animation<double> animation,
-          Widget? child,
-        ) {
-          return _ZoomEnterTransition(
-            animation: animation,
-            allowSnapshotting: allowSnapshotting && allowEnterRouteSnapshotting ,
-            reverse: true,
-            backgroundColor: enterTransitionBackgroundColor,
-            child: child,
-          );
-        },
-        reverseBuilder: (
-          BuildContext context,
-          Animation<double> animation,
-          Widget? child,
-        ) {
-          return _ZoomExitTransition(
-            animation: animation,
-            allowSnapshotting: allowSnapshotting,
-            child: child,
-          );
-        },
-        child: child,
+      child: ZoomPageTransitionsBuilder.delegateTransition(
+        context,
+        animation,
+        secondaryAnimation,
+        child
       ),
     );
   }

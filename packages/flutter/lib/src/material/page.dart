@@ -134,7 +134,7 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> implements FlexibleTransit
   Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
     final PageTransitionsTheme theme = Theme.of(context).pageTransitionsTheme;
     delegatedTransition = theme.delegatedTransition(context);
-    return theme.buildTransitions<T>(this, context, animation, secondaryAnimation, receivedTransition, child);
+    return theme.buildTransitions<T>(this, context, animation, secondaryAnimation, child);
   }
 }
 
