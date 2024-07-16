@@ -88,7 +88,7 @@ abstract class SelectionHandler implements ValueListenable<SelectionGeometry> {
 
   /// Gets the list of selections in this object.
   ///
-  /// The order of this list, follows the same
+  /// The order of this list follows the same
   /// order as the [Selectable]s contained under
   /// this [SelectionHandler].
   ///
@@ -142,8 +142,14 @@ class SelectedContentRange<T extends Object> {
   /// This ID can be used to map a given [SelectedContentRange] to
   /// the widget that created it. For example, when a [Text] widget
   /// is given a [Key], that [Key] will be the [selectableId] used
-  /// in the [SelectedContentRange] that is provides to represent
+  /// in the [SelectedContentRange] that it provides to represent
   /// its active selection.
+  ///
+  /// See also:
+  ///
+  ///   * [SelectionListener], which provides a concrete example
+  ///   of using [selectableId] to map [SelectedContentRange]s
+  ///   to your widget tree.
   final Object? selectableId;
 
   /// The content that contains the selection.
@@ -156,10 +162,10 @@ class SelectedContentRange<T extends Object> {
   /// must not exceed the content length.
   final int contentLength;
 
-  /// The start of the selection relative to the [content].
+  /// The start of the selection relative to the start of the [content].
   ///
   /// {@template flutter.rendering.selection.SelectedContentRange.selectionOffsets}
-  /// For example a [Text] widgets content is in the format
+  /// For example a [Text] widget's content is in the format
   /// of an [InlineSpan] tree.
   ///
   /// Take the [Text] widget and [TextSpan] tree below:
@@ -194,7 +200,7 @@ class SelectedContentRange<T extends Object> {
   /// {@endtemplate}
   final int startOffset;
 
-  /// The end of the selection relative to the [content].
+  /// The end of the selection relative to the end of the [content].
   ///
   /// {@macro flutter.rendering.selection.SelectedContentRange.selectionOffsets}
   final int endOffset;

@@ -2881,7 +2881,7 @@ typedef SelectionListenerSelectionChangedCallback = void Function(List<SelectedC
 /// [SelectionRegistrar]s that do not register to any ancestor registrar.
 ///
 /// {@tool dartpad}
-/// This example shows how to color red the active selection
+/// This example shows how to color the active selection red
 /// under a [SelectionArea] or [SelectableRegion].
 ///
 /// ** See code in examples/api/lib/material/selection_area/selection_area.1.dart **
