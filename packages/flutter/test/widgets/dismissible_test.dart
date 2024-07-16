@@ -869,7 +869,7 @@ void main() {
     expect(tester.getTopLeft(find.text('0')), position);
   });
 
-  testWidgets('`shouldDismiss` returning `null` results in default behavior', (WidgetTester tester) async {
+  testWidgets('Default behavior expected when `shouldDismiss` returns `null`', (WidgetTester tester) async {
     await tester.pumpWidget(
       buildTest(
         shouldDismiss: (AcceptDismissDetails details) => null,
