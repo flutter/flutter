@@ -184,7 +184,7 @@ class ExecCommandCopyStrategy implements CopyToClipboardStrategy {
     // See: https://developers.google.com/web/updates/2015/04/cut-and-copy-commands
     final DomHTMLTextAreaElement tempTextArea = _appendTemporaryTextArea();
     tempTextArea.value = text;
-    tempTextArea.focus();
+    tempTextArea.focusWithoutScroll();
     tempTextArea.select();
     bool result = false;
     try {

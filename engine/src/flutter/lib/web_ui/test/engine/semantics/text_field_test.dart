@@ -133,7 +133,7 @@ void testMain() {
       expect(
           owner().semanticsHost.ownerDocument?.activeElement, isNot(textField));
 
-      textField.focus();
+      textField.focusWithoutScroll();
 
       expect(owner().semanticsHost.ownerDocument?.activeElement, textField);
       expect(await logger.idLog.first, 0);

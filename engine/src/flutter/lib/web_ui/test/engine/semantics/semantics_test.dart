@@ -1401,7 +1401,7 @@ void _testVerticalScrolling() {
 
     owner().updateSemantics(builder.build());
     expectSemanticsTree(owner(), '''
-<sem style="touch-action: none; overflow-y: scroll">
+<sem role="group" style="touch-action: none; overflow-y: scroll">
 <flt-semantics-scroll-overflow></flt-semantics-scroll-overflow>
 </sem>''');
 
@@ -1554,7 +1554,7 @@ void _testHorizontalScrolling() {
 
     owner().updateSemantics(builder.build());
     expectSemanticsTree(owner(), '''
-<sem style="touch-action: none; overflow-x: scroll">
+<sem role="group" style="touch-action: none; overflow-x: scroll">
 <flt-semantics-scroll-overflow></flt-semantics-scroll-overflow>
 </sem>''');
 
@@ -1852,7 +1852,7 @@ void _testIncrementables() {
     capturedActions.clear();
 
     element.blur();
-    element.focus();
+    element.focusWithoutScroll();
     expect(
       reason: 'Browser-initiated focus even should be communicated to the framework.',
       capturedActions,
@@ -2216,7 +2216,7 @@ void _testCheckables() {
     element.blur();
     expect(capturedActions, isEmpty);
 
-    element.focus();
+    element.focusWithoutScroll();
     expect(
       reason: 'Browser-initiated focus even should be communicated to the framework.',
       capturedActions,
@@ -2404,7 +2404,7 @@ void _testTappable() {
     element.blur();
     expect(capturedActions, isEmpty);
 
-    element.focus();
+    element.focusWithoutScroll();
     expect(
       reason: 'Browser-initiated focus even should be communicated to the framework.',
       capturedActions,
@@ -3483,7 +3483,7 @@ void _testFocusable() {
     // Blur and emulate browser requesting focus
     element.blur();
     expect(domDocument.activeElement, isNot(element));
-    element.focus();
+    element.focusWithoutScroll();
     expect(domDocument.activeElement, element);
     expect(capturedActions, <CapturedAction>[
       (1, ui.SemanticsAction.focus, null),

@@ -99,7 +99,7 @@ abstract final class LabelRepresentationBehavior {
   /// https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/tabindex
   void focusAsRouteDefault() {
     focusTarget.tabIndex = -1;
-    focusTarget.focus();
+    focusTarget.focusWithoutScroll();
   }
 }
 
