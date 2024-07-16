@@ -6,7 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-   testWidgets('light painted appearance', (WidgetTester tester) async {
+  testWidgets('light painted appearance', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         theme: const CupertinoThemeData(brightness: Brightness.light),
@@ -21,7 +21,7 @@ void main() {
       matchesGoldenFile('cupertinoPopupSurface.light.filter-effects.png'),
     );
   });
-   testWidgets('dark painted appearance', (WidgetTester tester) async {
+  testWidgets('dark painted appearance', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         theme: const CupertinoThemeData(brightness: Brightness.dark),
@@ -36,7 +36,7 @@ void main() {
       matchesGoldenFile('cupertinoPopupSurface.dark.filter-effects.png'),
     );
   });
-   testWidgets('unpainted appearance', (WidgetTester tester) async {
+  testWidgets('unpainted appearance', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         theme: const CupertinoThemeData(brightness: Brightness.light),
@@ -47,7 +47,7 @@ void main() {
     // Golden matches the backdrop filter effect of the CupertinoPopupSurface in
     // dark mode and light mode when the popup surface is unpainted. The
     // brightness should not affect the appearance of the popup surface.
-     await expectLater(
+    await expectLater(
       find.byType(CupertinoApp),
       matchesGoldenFile('cupertinoPopupSurface.unpainted.filter-effects.png'),
     );
@@ -59,13 +59,12 @@ void main() {
       ),
     );
 
-     await expectLater(
+    await expectLater(
       find.byType(CupertinoApp),
       matchesGoldenFile('cupertinoPopupSurface.unpainted.filter-effects.png'),
     );
   });
 }
-
 
 Widget buildRainbowPopupSurface({required bool isSurfacePainted}) {
   return ColoredBox(
