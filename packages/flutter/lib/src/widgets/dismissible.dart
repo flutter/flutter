@@ -36,10 +36,6 @@ typedef ConfirmDismissCallback = Future<bool?> Function(DismissDirection directi
 /// Signature used by [Dismissible] to give the application an opportunity to
 /// accept or deny a dismiss gesture.
 ///
-/// This callback can be used to deny a dismiss gesture based the [AcceptDismissDetails.progress] value.
-///
-/// Returning `null` will use de default behavior.
-///
 /// Used by [Dismissible.shouldDismiss].
 typedef AcceptDismissCallback = bool? Function(AcceptDismissDetails details);
 
@@ -154,7 +150,20 @@ class Dismissible extends StatefulWidget {
   /// and [onDismissed] callbacks will not run.
   final ConfirmDismissCallback? confirmDismiss;
 
-  /// Gives the app an
+  /// Gives the app the ability to accept or reject a dismiss gesture, overriding
+  /// the default behavior.
+  ///
+  /// Returning `null` will use de default behavior.
+  ///
+  /// {@tool snippet}
+  /// The default flinging effect can be disabled by using:
+  /// ```dart
+  /// Dismissible(
+  ///   ...
+  ///   shouldDismiss: (AcceptDismissDetails details) => details.reached ? null : false,
+  /// )
+  /// ```
+  /// {@end-tool}
   final AcceptDismissCallback? shouldDismiss;
 
   /// Called when the widget changes size (i.e., when contracting before being dismissed).
