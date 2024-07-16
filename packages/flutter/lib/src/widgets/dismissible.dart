@@ -584,11 +584,8 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
       _handleMoveCompleted();
       return;
     }
-
     final double flingVelocity = _directionIsXAxis ? details.velocity.pixelsPerSecond.dx : details.velocity.pixelsPerSecond.dy;
-    final _FlingGestureKind flingGesture = _describeFlingGesture(details.velocity);
-
-    switch (flingGesture) {
+    switch (_describeFlingGesture(details.velocity)) {
       case _FlingGestureKind.forward:
         assert(_dragExtent != 0.0);
         assert(!_moveController.isDismissed);
