@@ -4,7 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 
-/// Flutter code sample for [FontFeature.FontFeature.slashedZero].
+/// Flutter code sample for [FontFeature.slashedZero].
 
 void main() => runApp(const ExampleApp());
 

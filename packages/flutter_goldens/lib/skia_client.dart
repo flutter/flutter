@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'flutter_goldens.dart';
+library;
+
 import 'dart:convert';
 import 'dart:io' as io;
 
@@ -24,7 +27,7 @@ const String _kImpellerKey = 'FLUTTER_TEST_IMPELLER';
 /// Signature of callbacks used to inject [print] replacements.
 typedef LogCallback = void Function(String);
 
-/// Exception thrown when an error is returned from the [SkiaClient].
+/// Exception thrown when an error is returned from the [SkiaGoldClient].
 class SkiaException implements Exception {
   /// Creates a new `SkiaException` with a required error [message].
   const SkiaException(this.message);
@@ -75,12 +78,12 @@ class SkiaGoldClient {
   /// A client for making Http requests to the Flutter Gold dashboard.
   final io.HttpClient httpClient;
 
-  /// The local [Directory] within the [comparisonRoot] for the current test
+  /// The local [Directory] within the comparison root for the current test
   /// context. In this directory, the client will create image and JSON files
   /// for the goldctl tool to use.
   ///
-  /// This is informed by the [FlutterGoldenFileComparator] [basedir]. It cannot
-  /// be null.
+  /// This is informed by [FlutterGoldenFileComparator.basedir]. It cannot be
+  /// null.
   final Directory workDirectory;
 
   /// The logging function to use when reporting messages to the console.

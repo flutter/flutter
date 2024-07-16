@@ -8,7 +8,7 @@ import 'timeline.dart';
 /// Event name for frame request pending timeline events.
 const String kFrameRequestPendingEvent = 'Frame Request Pending';
 
-/// Summarizes [TimelineEvents]s corresponding to [kFrameRequestPendingEvent] events.
+/// Summarizes [TimelineEvent]s corresponding to [kFrameRequestPendingEvent] events.
 ///
 /// `FrameRequestPendingLatency` is the time between `Animator::RequestFrame`
 /// and `Animator::BeginFrame` for each frame built by the Flutter engine.
@@ -16,7 +16,7 @@ class FrameRequestPendingLatencySummarizer {
   /// Creates a FrameRequestPendingLatencySummarizer given the timeline events.
   FrameRequestPendingLatencySummarizer(this.frameRequestPendingEvents);
 
-  /// Timeline events with names in [kFrameRequestPendingTimelineEventNames].
+  /// Timeline events with names in [kFrameRequestPendingEvent].
   final List<TimelineEvent> frameRequestPendingEvents;
 
   /// Computes the average `FrameRequestPendingLatency` over the period of the timeline.

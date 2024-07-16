@@ -2397,6 +2397,41 @@ void main() {
     expect(fields[0].textAlign, TextAlign.start);
     expect(fields[1].textAlign, TextAlign.center);
   });
+
+  testWidgets('DropdownMenu correctly sets keyboardType on TextField', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SafeArea(
+            child: DropdownMenu<TestMenu>(
+              dropdownMenuEntries: menuChildren,
+              keyboardType: TextInputType.number,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TextField textField = tester.widget(find.byType(TextField));
+    expect(textField.keyboardType, TextInputType.number);
+  });
+
+  testWidgets('DropdownMenu keyboardType defaults to TextInputType.text', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SafeArea(
+            child: DropdownMenu<TestMenu>(
+              dropdownMenuEntries: menuChildren,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TextField textField = tester.widget(find.byType(TextField));
+    expect(textField.keyboardType, TextInputType.text);
+  });
 }
 
 enum TestMenu {

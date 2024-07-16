@@ -159,6 +159,7 @@ class DropdownMenu<T> extends StatefulWidget {
     this.selectedTrailingIcon,
     this.enableFilter = false,
     this.enableSearch = true,
+    this.keyboardType,
     this.textStyle,
     this.textAlign = TextAlign.start,
     this.inputDecorationTheme,
@@ -265,6 +266,11 @@ class DropdownMenu<T> extends StatefulWidget {
   ///
   /// Defaults to true as the search function could be commonly used.
   final bool enableSearch;
+
+  /// The type of keyboard to use for editing the text.
+  ///
+  /// Defaults to [TextInputType.text].
+  final TextInputType? keyboardType;
 
   /// The text style for the [TextField] of the [DropdownMenu];
   ///
@@ -804,6 +810,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
           focusNode: widget.focusNode,
           canRequestFocus: canRequestFocus(),
           enableInteractiveSelection: canRequestFocus(),
+          keyboardType: widget.keyboardType,
           textAlign: widget.textAlign,
           textAlignVertical: TextAlignVertical.center,
           style: effectiveTextStyle,

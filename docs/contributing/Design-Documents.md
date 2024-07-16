@@ -10,7 +10,14 @@ Googlers: Design docs must be created by non-corp accounts! See [Contributor Acc
 
 When you implement a design, document it in the source code in detail. The API documentation is the usual place where we document our designs. It's perfectly reasonable for API docs to be multiple pages long with subheadings (e.g. see the docs for [RenderBox](https://master-api.flutter.dev/flutter/rendering/RenderBox-class.html)!). Do not assume that anyone will ever read your design doc after the discussion has finished. Similarly, do not assume that anyone will look at closed GitHub issues or PR discussions.
 
-_See also: [list of current design docs](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3A%22design+doc%22)_
+See also:
+
+1. [`design doc`][] GitHub issue label: list of all design documents.
+2. [Archive of design documents][] from before the [`design doc`][]
+   GitHub issue label was introduced.
+
+[`design doc`]: https://github.com/flutter/flutter/issues/151486
+[Archive of design documents]: https://github.com/flutter/flutter/issues/151486
 
 ## Purpose of design docs
 
