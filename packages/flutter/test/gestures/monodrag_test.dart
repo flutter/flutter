@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui';
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -260,9 +262,45 @@ class MockHitTestTarget implements HitTestTarget {
 /// Typically, [VerticalDragGestureRecognizer] wins because it has a smaller threshold to
 /// accept the gesture. This recognizer uses the same threshold that [VerticalDragGestureRecognizer]
 /// uses.
-class _EagerPanGestureRecognizer extends PanGestureRecognizer {
+class _EagerPanGestureRecognizer extends DragGestureRecognizer {
+
   @override
   bool hasSufficientGlobalDistanceToAccept(PointerDeviceKind pointerDeviceKind, double? deviceTouchSlop) {
     return globalDistanceMoved.abs() > computeHitSlop(pointerDeviceKind, gestureSettings);
   }
+
+  @override
+  bool isFlingGesture(VelocityEstimate estimate, PointerDeviceKind kind) {
+    final double minVelocity = minFlingVelocity ?? kMinFlingVelocity;
+    final double minDistance = minFlingDistance ?? computeHitSlop(kind, gestureSettings);
+    return estimate.pixelsPerSecond.distanceSquared > minVelocity * minVelocity &&
+        estimate.offset.distanceSquared > minDistance * minDistance;
+  }
+
+  @override
+  DragEndDetails? considerFling(VelocityEstimate estimate, PointerDeviceKind kind) {
+    if (!isFlingGesture(estimate, kind)) {
+      return null;
+    }
+    final double maxVelocity = maxFlingVelocity ?? kMaxFlingVelocity;
+    final double dy = clampDouble(estimate.pixelsPerSecond.dy, -maxVelocity, maxVelocity);
+    return DragEndDetails(
+      velocity: Velocity(pixelsPerSecond: Offset(0, dy)),
+      primaryVelocity: dy,
+      globalPosition: lastPosition.global,
+      localPosition: lastPosition.local,
+    );
+  }
+
+  @override
+  Offset getDeltaForDetails(Offset delta) => delta;
+
+  @override
+  double? getPrimaryValueFromOffset(Offset value) => null;
+
+  @override
+  Axis? get primaryDragAxis => null;
+
+  @override
+  String get debugDescription => 'pan';
 }
