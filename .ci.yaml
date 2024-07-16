@@ -297,6 +297,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       shard: analyze
       dependencies: >-
         [
@@ -310,7 +311,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
-      test_timeout_secs: "3600" # 1 hour
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
@@ -330,6 +331,7 @@ targets:
       # Don't run this on release branches
       - master
     properties:
+      test_timeout_secs: "3600"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
 
@@ -351,6 +353,7 @@ targets:
   - name: Linux_android_emu android views
     recipe: devicelab/devicelab_drone
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["framework","hostonly","linux"]
       task_name: android_views
@@ -360,6 +363,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
@@ -379,6 +383,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
@@ -398,6 +403,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
@@ -432,6 +438,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       shard: customer_testing
       tags: >
         ["framework", "hostonly", "shard", "linux"]
@@ -443,6 +450,7 @@ targets:
     dimensions:
       os: "Linux"
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       cores: "32"
       dependencies: >-
         [
@@ -464,6 +472,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 90 # https://github.com/flutter/flutter/issues/120901
     properties:
+      test_timeout_secs: "3600"  # 58 minutes
       cores: "32"
       dependencies: >-
         [
@@ -490,6 +499,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
@@ -510,6 +520,7 @@ targets:
     recipe: firebaselab/firebaselab
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
@@ -542,6 +553,7 @@ targets:
     bringup: true # https://github.com/flutter/flutter/issues/147335
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
@@ -574,6 +586,7 @@ targets:
     bringup: true # https://github.com/flutter/flutter/issues/147335
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
@@ -620,6 +633,7 @@ targets:
       - master
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       shard: flutter_plugins
       subshard: analyze
       tags: >
@@ -629,6 +643,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
@@ -654,6 +669,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
@@ -680,6 +696,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"},
@@ -711,6 +728,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
@@ -736,6 +754,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       shard: fuchsia_precache
       tags: >
         ["framework", "hostonly", "shard", "linux"]
@@ -747,6 +766,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
@@ -765,6 +785,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
@@ -783,6 +804,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
@@ -801,6 +823,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
@@ -820,6 +843,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
@@ -839,6 +863,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
@@ -858,6 +883,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
@@ -877,6 +903,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
@@ -896,6 +923,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
@@ -915,6 +943,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
@@ -934,6 +963,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
@@ -954,6 +984,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       xvfb: "1"
       dependencies: >-
         [
@@ -974,6 +1005,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       xvfb: "1"
       dependencies: >-
         [
@@ -997,6 +1029,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       shard: skp_generator
       subshard: "0"
       tags: >
@@ -1013,6 +1046,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
@@ -1053,7 +1087,7 @@ targets:
       subshard: "1_4"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
-      test_timeout_secs: "2700"
+      test_timeout_secs: "3480"  # 58 minutes
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -1079,7 +1113,7 @@ targets:
       subshard: "2_4"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
-      test_timeout_secs: "2700"
+      test_timeout_secs: "3480"  # 58 minutes
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -1105,7 +1139,7 @@ targets:
       subshard: "3_4"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
-      test_timeout_secs: "2700"
+      test_timeout_secs: "3480"  # 58 minutes
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -1131,7 +1165,7 @@ targets:
       subshard: "4_4"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
-      test_timeout_secs: "2700"
+      test_timeout_secs: "3480"  # 58 minutes
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -1160,7 +1194,7 @@ targets:
       shard: android_preview_tool_integration_tests
       tags: >
         ["framework", "hostonly", "shard", "linux"]
-      test_timeout_secs: "2700"
+      test_timeout_secs: "3480"  # 58 minutes
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -1185,7 +1219,7 @@ targets:
       shard: android_java11_tool_integration_tests
       tags: >
         ["framework", "hostonly", "shard", "linux"]
-      test_timeout_secs: "2700"
+      test_timeout_secs: "3480"  # 58 minutes
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -1196,6 +1230,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       add_recipes_cq: "true"
       dependencies: >-
         [
@@ -1216,6 +1251,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       add_recipes_cq: "true"
       dependencies: >-
         [
@@ -1236,6 +1272,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       add_recipes_cq: "true"
       shard: realm_checker
       tags: >
@@ -1251,6 +1288,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
@@ -1264,6 +1302,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
@@ -1282,6 +1321,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
@@ -1299,6 +1339,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
@@ -1321,6 +1362,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
@@ -1343,6 +1385,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
@@ -1365,6 +1408,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
@@ -1387,6 +1431,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
@@ -1409,6 +1454,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
@@ -1431,6 +1477,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
@@ -1453,6 +1500,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
@@ -1475,6 +1523,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
@@ -1497,6 +1546,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
@@ -1519,6 +1569,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
@@ -1541,6 +1592,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
@@ -1563,6 +1615,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
@@ -1585,6 +1638,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
@@ -1607,6 +1661,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
@@ -1629,6 +1684,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
@@ -1651,6 +1707,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
@@ -1673,6 +1730,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
@@ -1695,6 +1753,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
@@ -1717,6 +1776,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
@@ -1739,6 +1799,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
@@ -1761,6 +1822,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
@@ -1783,6 +1845,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
@@ -1805,6 +1868,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
@@ -1827,6 +1891,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
@@ -1849,6 +1914,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
@@ -1871,6 +1937,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
@@ -1893,6 +1960,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
@@ -1915,6 +1983,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
@@ -1937,6 +2006,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
@@ -1960,6 +2030,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "linux"]
       task_name: android_defines_test
@@ -1969,6 +2040,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: android_obfuscate_test
@@ -1979,6 +2051,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: android_semantics_integration_test
@@ -1990,6 +2063,7 @@ targets:
     bringup: true # https://github.com/flutter/flutter/issues/148085
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "mokey"]
       task_name: android_stack_size_test
@@ -2000,6 +2074,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "mokey"]
       task_name: android_view_scroll_perf__timeline_summary
@@ -2010,6 +2085,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "mokey"]
       task_name: animated_image_gc_perf
@@ -2020,6 +2096,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "mokey"]
       task_name: animated_complex_opacity_perf__e2e_summary
@@ -2030,6 +2107,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "mokey"]
       task_name: animated_complex_image_filtered_perf__e2e_summary
@@ -2040,6 +2118,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "mokey"]
       task_name: animated_placeholder_perf__e2e_summary
@@ -2050,6 +2129,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "mokey"]
       task_name: backdrop_filter_perf__e2e_summary
@@ -2059,6 +2139,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: backdrop_filter_perf__timeline_summary
@@ -2069,6 +2150,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: draw_atlas_perf_opengles__timeline_summary
@@ -2079,6 +2161,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: draw_atlas_perf__timeline_summary
@@ -2089,6 +2172,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: dynamic_path_tessellation_perf__timeline_summary
@@ -2099,6 +2183,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: static_path_tessellation_perf__timeline_summary
@@ -2109,6 +2194,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: hello_world_impeller
@@ -2118,6 +2204,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: basic_material_app_android__compile
@@ -2127,6 +2214,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: channels_integration_test
@@ -2137,6 +2225,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab","android","linux","mokey"]
       task_name: clipper_cache_perf__e2e_summary
@@ -2147,6 +2236,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "mokey"]
       task_name: color_filter_and_fade_perf__e2e_summary
@@ -2157,6 +2247,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "mokey"]
       task_name: color_filter_cache_perf__e2e_summary
@@ -2167,6 +2258,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab","android","linux","mokey"]
       task_name: color_filter_with_unstable_child_perf__e2e_summary
@@ -2177,6 +2269,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab","android","linux","mokey"]
       task_name: raster_cache_use_memory_perf__e2e_summary
@@ -2187,6 +2280,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "mokey"]
       task_name: shader_mask_cache_perf__e2e_summary
@@ -2197,6 +2291,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "mokey"]
       task_name: complex_layout_android__scroll_smoothness
@@ -2211,6 +2306,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab","android","linux","mokey"]
       task_name: complex_layout_scroll_perf__devtools_memory
@@ -2225,6 +2321,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab","android","linux","mokey"]
       task_name: complex_layout_scroll_perf__memory
@@ -2239,6 +2336,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab","android","linux","mokey"]
       task_name: complex_layout_scroll_perf__timeline_summary
@@ -2252,6 +2350,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: complex_layout_scroll_perf__timeline_summary
@@ -2265,6 +2364,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: complex_layout_scroll_perf_impeller__timeline_summary
@@ -2278,6 +2378,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: complex_layout_scroll_perf_impeller_gles__timeline_summary
@@ -2292,6 +2393,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "mokey"]
       task_name: complex_layout_semantics_perf
@@ -2306,6 +2408,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "mokey"]
       task_name: complex_layout__start_up
@@ -2320,6 +2423,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "mokey"]
       task_name: cubic_bezier_perf__e2e_summary
@@ -2329,6 +2433,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: cubic_bezier_perf__timeline_summary
@@ -2339,6 +2444,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "mokey"]
       task_name: cull_opacity_perf__e2e_summary
@@ -2348,6 +2454,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: cull_opacity_perf__timeline_summary
@@ -2358,6 +2465,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "mokey"]
       task_name: devtools_profile_start_test
@@ -2367,6 +2475,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: drive_perf_debug_warning
@@ -2376,6 +2485,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: embedded_android_views_integration_test
@@ -2390,6 +2500,7 @@ targets:
       - bin/internal/engine.version
       - .ci.yaml
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "linux"]
       task_name: external_textures_integration_test
@@ -2400,6 +2511,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux"]
       task_name: fading_child_animation_perf__timeline_summary
@@ -2410,6 +2522,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "mokey"]
       task_name: fast_scroll_heavy_gridview__memory
@@ -2420,6 +2533,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "mokey"]
       task_name: fast_scroll_large_images__memory
@@ -2429,6 +2543,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: flavors_test
@@ -2440,6 +2555,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "mokey"]
       task_name: flutter_engine_group_performance
@@ -2450,6 +2566,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "mokey"]
       task_name: flutter_gallery__back_button_memory
@@ -2460,6 +2577,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "mokey"]
       task_name: flutter_gallery__image_cache_memory
@@ -2470,6 +2588,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab" ,"android", "linux", "mokey"]
       task_name: flutter_gallery__memory_nav
@@ -2480,6 +2599,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux"]
       task_name: flutter_gallery__start_up
@@ -2490,6 +2610,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "mokey"]
       task_name: flutter_gallery__start_up_delayed
@@ -2499,6 +2620,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: flutter_gallery_android__compile
@@ -2508,6 +2630,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: flutter_gallery_v2_chrome_run_test
@@ -2517,6 +2640,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "hostonly", "linux"]
       task_name: flutter_gallery_v2_web_compile_test
@@ -2527,6 +2651,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux"]
       task_name: flutter_test_performance
@@ -2537,6 +2662,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "mokey"]
       task_name: flutter_view__start_up
@@ -2546,6 +2672,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: frame_policy_delay_test_android
@@ -2556,6 +2683,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "mokey"]
       task_name: fullscreen_textfield_perf
@@ -2566,6 +2694,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "mokey"]
       task_name: fullscreen_textfield_perf__e2e_summary
@@ -2576,6 +2705,7 @@ targets:
     presubmit: false
     timeout: 120
     properties:
+      test_timeout_secs: "3600"
       tags: >
         ["devicelab", "android", "linux", "mokey"]
       task_name: very_long_picture_scrolling_perf__e2e_summary
@@ -2586,6 +2716,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "mokey"]
       task_name: hello_world__memory
@@ -2596,6 +2727,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "mokey"]
       task_name: home_scroll_perf__timeline_summary
@@ -2606,6 +2738,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "mokey"]
       task_name: hot_mode_dev_cycle_linux__benchmark
@@ -2620,6 +2753,7 @@ targets:
     bringup: true # https://github.com/flutter/flutter/issues/148085
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "mokey"]
       task_name: hybrid_android_views_integration_test
@@ -2630,6 +2764,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "mokey"]
       task_name: image_list_jit_reported_duration
@@ -2640,6 +2775,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "mokey"]
       task_name: imagefiltered_transform_animation_perf__timeline_summary
@@ -2649,6 +2785,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: imagefiltered_transform_animation_perf__timeline_summary
@@ -2659,6 +2796,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "mokey"]
       task_name: image_list_reported_duration
@@ -2668,6 +2806,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: integration_ui_driver
@@ -2677,6 +2816,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: integration_ui_keyboard_resize
@@ -2686,6 +2826,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: integration_ui_textfield
@@ -2696,6 +2837,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "mokey"]
       task_name: large_image_changer_perf_android
@@ -2705,6 +2847,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: linux_chrome_dev_mode
@@ -2715,6 +2858,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "mokey"]
       task_name: multi_widget_construction_perf__e2e_summary
@@ -2725,6 +2869,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "mokey"]
       task_name: list_text_layout_perf__e2e_summary
@@ -2735,6 +2880,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       ignore_flakiness: "true"
       tags: >
         ["devicelab", "android", "linux", "mokey"]
@@ -2745,6 +2891,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: native_assets_android
@@ -2755,6 +2902,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "mokey"]
       task_name: new_gallery__crane_perf
@@ -2765,6 +2913,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "mokey"]
       task_name: old_gallery__transition_perf
@@ -2774,6 +2923,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux"]
       task_name: flutter_gallery__transition_perf
@@ -2786,6 +2936,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux"]
       task_name: flutter_gallery__transition_perf_e2e
@@ -2798,6 +2949,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux"]
       task_name: flutter_gallery__transition_perf_hybrid
@@ -2811,6 +2963,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "mokey"]
       task_name: flutter_gallery__transition_perf_with_semantics
@@ -2821,6 +2974,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "mokey"]
       task_name: new_gallery_impeller__transition_perf
@@ -2831,6 +2985,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "mokey"]
       task_name: new_gallery_opengles_impeller__transition_perf
@@ -2841,6 +2996,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "mokey"]
       task_name: new_gallery__transition_perf
@@ -2851,6 +3007,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: new_gallery__transition_perf
@@ -2861,6 +3018,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: new_gallery_impeller_old_zoom__transition_perf
@@ -2871,6 +3029,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: new_gallery_impeller__transition_perf
@@ -2881,6 +3040,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: new_gallery_opengles_impeller__transition_perf
@@ -2891,6 +3051,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "mokey"]
       task_name: picture_cache_perf__e2e_summary
@@ -2900,6 +3061,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: picture_cache_perf__timeline_summary
@@ -2910,6 +3072,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "mokey"]
       task_name: android_picture_cache_complexity_scoring_perf__timeline_summary
@@ -2920,6 +3083,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "mokey"]
       task_name: slider_perf_android
@@ -2930,6 +3094,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "mokey"]
       task_name: platform_channels_benchmarks
@@ -2939,6 +3104,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: platform_channels_benchmarks
@@ -2948,6 +3114,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: platform_channel_sample_test
@@ -2957,6 +3124,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: platform_interaction_test
@@ -2967,6 +3135,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "mokey"]
       task_name: platform_views_scroll_perf__timeline_summary
@@ -2976,6 +3145,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: platform_views_scroll_perf__timeline_summary
@@ -2986,6 +3156,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       ignore_flakiness: "true"
       tags: >
         ["devicelab", "android", "linux", "mokey"]
@@ -2996,6 +3167,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: platform_views_scroll_perf_impeller__timeline_summary
@@ -3006,6 +3178,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "mokey"]
       task_name: platform_view__start_up
@@ -3015,6 +3188,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: routing_test
@@ -3024,6 +3198,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: service_extensions_test
@@ -3034,6 +3209,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "mokey"]
       task_name: textfield_perf__e2e_summary
@@ -3043,6 +3219,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: textfield_perf__timeline_summary
@@ -3053,6 +3230,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab","android","linux", "mokey"]
       task_name: tiles_scroll_perf__timeline_summary
@@ -3066,6 +3244,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "hostonly", "linux"]
       task_name: web_size__compile_test
@@ -3076,6 +3255,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "mokey"]
       task_name: opacity_peephole_one_rect_perf__e2e_summary
@@ -3086,6 +3266,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "mokey"]
       task_name: opacity_peephole_col_of_rows_perf__e2e_summary
@@ -3096,6 +3277,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "mokey"]
       task_name: opacity_peephole_opacity_of_grid_perf__e2e_summary
@@ -3106,6 +3288,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "mokey"]
       task_name: opacity_peephole_grid_of_opacity_perf__e2e_summary
@@ -3116,6 +3299,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "mokey"]
       task_name: opacity_peephole_fade_transition_text_perf__e2e_summary
@@ -3126,6 +3310,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "mokey"]
       task_name: opacity_peephole_grid_of_alpha_savelayers_perf__e2e_summary
@@ -3136,6 +3321,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "mokey"]
       task_name: opacity_peephole_col_of_alpha_savelayer_rows_perf__e2e_summary
@@ -3146,6 +3332,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "mokey"]
       task_name: gradient_dynamic_perf__e2e_summary
@@ -3156,6 +3343,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "mokey"]
       task_name: gradient_consistent_perf__e2e_summary
@@ -3166,6 +3354,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "mokey"]
       task_name: gradient_static_perf__e2e_summary
@@ -3175,6 +3364,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: android_choreographer_do_frame_test
@@ -3185,6 +3375,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "mokey"]
       task_name: animated_blur_backdrop_filter_perf__timeline_summary
@@ -3195,6 +3386,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: animated_blur_backdrop_filter_perf__timeline_summary
@@ -3205,6 +3397,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: animated_advanced_blend_perf_opengles__timeline_summary
@@ -3215,6 +3408,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: animated_advanced_blend_perf__timeline_summary
@@ -3224,6 +3418,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: animated_advanced_blend_perf_ios__timeline_summary
@@ -3234,6 +3429,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: rrect_blur_perf__timeline_summary
@@ -3243,6 +3439,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: rrect_blur_perf_ios__timeline_summary
@@ -3253,6 +3450,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: animated_blur_backdrop_filter_perf_opengles__timeline_summary
@@ -3263,6 +3461,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: draw_vertices_perf_opengles__timeline_summary
@@ -3273,6 +3472,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: draw_vertices_perf__timeline_summary
@@ -3282,6 +3482,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: draw_vertices_perf_ios__timeline_summary
@@ -3291,6 +3492,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: draw_atlas_perf_ios__timeline_summary
@@ -3300,6 +3502,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: static_path_tessellation_perf_ios__timeline_summary
@@ -3309,6 +3512,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: dynamic_path_tessellation_perf_ios__timeline_summary
@@ -3319,6 +3523,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       shard: analyze
       ignore_flakiness: "true"
       tags: >
@@ -3329,6 +3534,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
@@ -3340,6 +3546,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       task_name: basic_material_app_macos__compile
 
   - name: Mac build_ios_framework_module_test
@@ -3354,6 +3561,7 @@ targets:
       tags: >
         ["devicelab", "hostonly", "mac"]
       task_name: build_ios_framework_module_test
+      test_timeout_secs: "3480"  # 58 minutes
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -3372,6 +3580,7 @@ targets:
       tags: >
         ["devicelab", "hostonly", "mac", "arm64"]
       task_name: build_ios_framework_module_test
+      test_timeout_secs: "3480"  # 58 minutes
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -3383,6 +3592,7 @@ targets:
     presubmit: false # Rely on Mac_arm build_tests in presubmit.
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       add_recipes_cq: "true"
       dependencies: >-
         [
@@ -3402,6 +3612,7 @@ targets:
     presubmit: false # Rely on Mac_arm build_tests in presubmit.
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       add_recipes_cq: "true"
       dependencies: >-
         [
@@ -3421,6 +3632,7 @@ targets:
     presubmit: false # Rely on Mac_arm build_tests in presubmit.
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       add_recipes_cq: "true"
       dependencies: >-
         [
@@ -3440,6 +3652,7 @@ targets:
     presubmit: false # Rely on Mac_arm build_tests in presubmit.
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       add_recipes_cq: "true"
       dependencies: >-
         [
@@ -3458,6 +3671,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       add_recipes_cq: "true"
       dependencies: >-
         [
@@ -3476,6 +3690,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       add_recipes_cq: "true"
       dependencies: >-
         [
@@ -3494,6 +3709,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       add_recipes_cq: "true"
       dependencies: >-
         [
@@ -3512,6 +3728,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       add_recipes_cq: "true"
       dependencies: >-
         [
@@ -3531,6 +3748,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
@@ -3542,6 +3760,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
@@ -3554,6 +3773,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       shard: customer_testing
       tags: >
         ["framework", "hostonly", "shard", "mac"]
@@ -3562,6 +3782,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
@@ -3580,6 +3801,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
@@ -3593,6 +3815,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
@@ -3630,12 +3853,14 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       task_name: flutter_view_macos__start_up
 
   - name: Mac framework_tests_libraries
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       cpu: x86 # https://github.com/flutter/flutter/issues/119880
       dependencies: >-
         [
@@ -3662,6 +3887,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       cpu: x86 # https://github.com/flutter/flutter/issues/119880
       dependencies: >-
         [
@@ -3688,6 +3914,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"},
@@ -3717,6 +3944,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       os: Mac-13
       dependencies: >-
         [
@@ -3747,6 +3975,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       cpu: x86 # https://github.com/flutter/flutter/issues/119880
       dependencies: >-
         [
@@ -3773,6 +4002,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
@@ -3791,6 +4021,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       task_name: hello_world_macos__compile
 
   - name: Mac integration_ui_test_test_macos
@@ -3798,6 +4029,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
@@ -3810,6 +4042,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
@@ -3828,6 +4061,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
@@ -3846,6 +4080,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
@@ -3864,6 +4099,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
@@ -3882,6 +4118,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       task_name: platform_view_macos__start_up
 
   - name: Mac platform_channel_sample_test_macos
@@ -3889,6 +4126,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "hostonly", "mac"]
       task_name: platform_channel_sample_test_macos
@@ -3897,6 +4135,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
@@ -3917,6 +4156,7 @@ targets:
     bringup: true
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
@@ -3936,6 +4176,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
@@ -3954,6 +4195,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
@@ -3981,7 +4223,7 @@ targets:
       task_name: plugin_test_ios
       # Retry for flakes caused by https://github.com/flutter/flutter/issues/151772
       presubmit_max_attempts: "2"
-      test_timeout_secs: "3600"
+      test_timeout_secs: "3480"  # 58 minutes
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -4016,7 +4258,7 @@ targets:
       shard: tool_host_cross_arch_tests
       tags: >
         ["framework", "hostonly", "shard", "mac"]
-      test_timeout_secs: "2700"
+      test_timeout_secs: "3480"  # 58 minutes
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -4034,7 +4276,7 @@ targets:
       shard: tool_host_cross_arch_tests
       tags: >
         ["framework", "hostonly", "shard", "mac"]
-      test_timeout_secs: "2700"
+      test_timeout_secs: "3480"  # 58 minutes
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -4058,7 +4300,7 @@ targets:
       subshard: "1_4"
       tags: >
         ["framework", "hostonly", "shard", "mac"]
-      test_timeout_secs: "2700"
+      test_timeout_secs: "3480"  # 58 minutes
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -4082,7 +4324,7 @@ targets:
       subshard: "2_4"
       tags: >
         ["framework", "hostonly", "shard", "mac"]
-      test_timeout_secs: "2700"
+      test_timeout_secs: "3480"  # 58 minutes
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -4106,7 +4348,7 @@ targets:
       subshard: "3_4"
       tags: >
         ["framework", "hostonly", "shard", "mac"]
-      test_timeout_secs: "2700"
+      test_timeout_secs: "3480"  # 58 minutes
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -4130,7 +4372,7 @@ targets:
       subshard: "4_4"
       tags: >
         ["framework", "hostonly", "shard", "mac"]
-      test_timeout_secs: "2700"
+      test_timeout_secs: "3480"  # 58 minutes
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -4141,6 +4383,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       add_recipes_cq: "true"
       dependencies: >-
         [
@@ -4156,6 +4399,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       add_recipes_cq: "true"
       dependencies: >-
         [
@@ -4171,6 +4415,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       add_recipes_cq: "true"
       dependencies: >-
         [
@@ -4194,6 +4439,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["framework", "hostonly", "shard", "mac"]
       shard: verify_binaries_codesigned
@@ -4205,6 +4451,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["framework", "hostonly", "shard", "mac"]
       shard: verify_binaries_codesigned
@@ -4213,6 +4460,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
@@ -4235,6 +4483,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "mac", "pixel", "7pro"]
       task_name: entrypoint_dart_registrant
@@ -4249,6 +4498,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "mac", "pixel", "7pro"]
       task_name: hello_world_android__compile
@@ -4259,6 +4509,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "mac", "arm64"]
       task_name: hello_world_android__compile
@@ -4269,6 +4520,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "mac"]
       task_name: hot_mode_dev_cycle__benchmark
@@ -4278,6 +4530,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "mac", "pixel", "7pro"]
       task_name: integration_test_test
@@ -4288,6 +4541,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "mac", "arm64"]
       task_name: integration_test_test
@@ -4297,6 +4551,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "mac", "pixel", "7pro"]
       task_name: integration_ui_frame_number
@@ -4307,6 +4562,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "mac"]
       task_name: microbenchmarks
@@ -4316,6 +4572,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "mac", "pixel", "7pro"]
       task_name: native_assets_android
@@ -4328,6 +4585,7 @@ targets:
       - dev/**
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "mac", "pixel", "7pro"]
       task_name: run_debug_test_android
@@ -4341,6 +4599,7 @@ targets:
       - dev/**
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "mac", "arm64"]
       task_name: run_debug_test_android
@@ -4353,6 +4612,7 @@ targets:
       - dev/**
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "mac", "pixel", "7pro"]
       task_name: run_release_test
@@ -4366,6 +4626,7 @@ targets:
       - dev/**
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "mac", "arm64"]
       task_name: run_release_test
@@ -4375,6 +4636,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: animation_with_microtasks_perf_ios__timeline_summary
@@ -4384,6 +4646,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: backdrop_filter_perf_ios__timeline_summary
@@ -4393,6 +4656,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: basic_material_app_ios__compile
@@ -4402,6 +4666,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: channels_integration_test_ios
@@ -4411,6 +4676,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: complex_layout_ios__start_up
@@ -4420,6 +4686,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: complex_layout_scroll_perf_ios__timeline_summary
@@ -4429,6 +4696,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: complex_layout_scroll_perf_bad_ios__timeline_summary
@@ -4438,6 +4706,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: color_filter_and_fade_perf_ios__e2e_summary
@@ -4447,6 +4716,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: imagefiltered_transform_animation_perf_ios__timeline_summary
@@ -4463,6 +4733,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: external_textures_integration_test_ios
@@ -4473,6 +4744,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: route_test_ios
@@ -4482,6 +4754,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: flavors_test_ios
@@ -4491,6 +4764,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "ios", "mac", "arm64"]
       task_name: flutter_gallery_ios__compile
@@ -4500,6 +4774,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: flutter_gallery_ios__start_up
@@ -4509,6 +4784,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: flutter_view_ios__start_up
@@ -4518,6 +4794,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "ios", "mac", "arm64"]
       task_name: hello_world_ios__compile
@@ -4526,6 +4803,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
@@ -4542,6 +4820,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
@@ -4558,6 +4837,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: integration_test_test_ios
@@ -4567,6 +4847,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: integration_test_test_ios
@@ -4576,6 +4857,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: integration_ui_ios_driver
@@ -4585,6 +4867,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: integration_ui_ios_frame_number
@@ -4594,6 +4877,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: integration_ui_ios_keyboard_resize
@@ -4603,6 +4887,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: integration_ui_ios_textfield
@@ -4612,6 +4897,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
@@ -4625,6 +4911,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
@@ -4638,6 +4925,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: ios_defines_test
@@ -4647,6 +4935,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: ios_platform_view_tests
@@ -4656,6 +4945,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: large_image_changer_perf_ios
@@ -4665,6 +4955,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
@@ -4678,6 +4969,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
@@ -4691,6 +4983,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: microbenchmarks_ios
@@ -4700,6 +4993,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
@@ -4713,6 +5007,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: native_assets_ios
@@ -4722,6 +5017,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: native_platform_view_ui_tests_ios
@@ -4731,6 +5027,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: new_gallery_ios__transition_perf
@@ -4740,6 +5037,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: new_gallery_skia_ios__transition_perf
@@ -4749,6 +5047,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: platform_channel_sample_test_ios
@@ -4758,6 +5057,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: platform_channel_sample_test_swift
@@ -4767,6 +5067,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: platform_channels_benchmarks_ios
@@ -4776,6 +5077,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: platform_interaction_test_ios
@@ -4785,6 +5087,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: platform_view_ios__start_up
@@ -4794,6 +5097,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: platform_views_scroll_perf_ios__timeline_summary
@@ -4803,6 +5107,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: platform_views_scroll_perf_ad_banners__timeline_summary
@@ -4812,6 +5117,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: platform_views_scroll_perf_bottom_ad_banner__timeline_summary
@@ -4821,6 +5127,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: platform_views_scroll_perf_non_intersecting_impeller_ios__timeline_summary
@@ -4830,6 +5137,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: post_backdrop_filter_perf_ios__timeline_summary
@@ -4839,6 +5147,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: simple_animation_perf_ios
@@ -4848,6 +5157,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: wide_gamut_ios
@@ -4857,6 +5167,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: hot_mode_dev_cycle_ios__benchmark
@@ -4866,6 +5177,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "ios", "mac"]
       # TODO(vashworth): Use "hot_mode_dev_cycle_ios__benchmark" once https://github.com/flutter/flutter/issues/142305 is fixed.
@@ -4876,6 +5188,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
@@ -4889,6 +5202,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: fullscreen_textfield_perf_ios__e2e_summary
@@ -4898,6 +5212,7 @@ targets:
     presubmit: false
     timeout: 120
     properties:
+      test_timeout_secs: "3600"
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: very_long_picture_scrolling_perf_ios__e2e_summary
@@ -4907,6 +5222,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: tiles_scroll_perf_ios__timeline_summary
@@ -4916,6 +5232,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: flutter_gallery__transition_perf_e2e_ios
@@ -4927,6 +5244,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: animated_blur_backdrop_filter_perf_ios__timeline_summary
@@ -4936,6 +5254,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: draw_points_perf_ios__timeline_summary
@@ -4945,6 +5264,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: spell_check_test_ios
@@ -4953,6 +5273,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
@@ -4970,6 +5291,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
@@ -4987,6 +5309,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
@@ -5004,6 +5327,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
@@ -5021,6 +5345,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
@@ -5039,6 +5364,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
@@ -5056,6 +5382,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       add_recipes_cq: "true"
       dependencies: >-
         [
@@ -5074,6 +5401,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       add_recipes_cq: "true"
       dependencies: >-
         [
@@ -5092,6 +5420,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       add_recipes_cq: "true"
       dependencies: >-
         [
@@ -5110,6 +5439,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       add_recipes_cq: "true"
       dependencies: >-
         [
@@ -5128,6 +5458,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       add_recipes_cq: "true"
       dependencies: >-
         [
@@ -5146,6 +5477,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       add_recipes_cq: "true"
       dependencies: >-
         [
@@ -5164,6 +5496,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       add_recipes_cq: "true"
       dependencies: >-
         [
@@ -5184,6 +5517,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       shard: customer_testing
       tags: >
         ["framework", "hostonly", "shard", "windows"]
@@ -5192,6 +5526,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
@@ -5250,6 +5585,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"},
@@ -5279,6 +5615,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
@@ -5337,6 +5674,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
@@ -5356,6 +5694,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "vs_build", "version": "version:vs2019"}
@@ -5369,6 +5708,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "vs_build", "version": "version:vs2019"}
@@ -5381,6 +5721,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
@@ -5400,6 +5741,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
@@ -5419,6 +5761,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
@@ -5439,6 +5782,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "vs_build", "version": "version:vs2019"}
@@ -5452,6 +5796,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "vs_build", "version": "version:vs2019"}
@@ -5464,6 +5809,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
@@ -5484,6 +5830,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
@@ -5503,6 +5850,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "vs_build", "version": "version:vs2019"}
@@ -5521,6 +5869,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "vs_build", "version": "version:vs2019"}
@@ -5540,6 +5889,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "vs_build", "version": "version:vs2019"}
@@ -5558,6 +5908,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "vs_build", "version": "version:vs2019"}
@@ -5576,6 +5927,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "vs_build", "version": "version:vs2019"}
@@ -5594,6 +5946,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "vs_build", "version": "version:vs2019"}
@@ -5624,7 +5977,7 @@ targets:
       subshard: "1_6"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
-      test_timeout_secs: "2700"
+      test_timeout_secs: "3480"  # 58 minutes
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -5648,7 +6001,7 @@ targets:
       subshard: "2_6"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
-      test_timeout_secs: "2700"
+      test_timeout_secs: "3480"  # 58 minutes
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -5672,7 +6025,7 @@ targets:
       subshard: "3_6"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
-      test_timeout_secs: "2700"
+      test_timeout_secs: "3480"  # 58 minutes
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -5696,7 +6049,7 @@ targets:
       subshard: "4_6"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
-      test_timeout_secs: "2700"
+      test_timeout_secs: "3480"  # 58 minutes
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -5720,7 +6073,7 @@ targets:
       subshard: "5_6"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
-      test_timeout_secs: "2700"
+      test_timeout_secs: "3480"  # 58 minutes
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -5744,7 +6097,7 @@ targets:
       subshard: "6_6"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
-      test_timeout_secs: "2700"
+      test_timeout_secs: "3480"  # 58 minutes
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -5755,6 +6108,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       add_recipes_cq: "true"
       dependencies: >-
         [
@@ -5775,6 +6129,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       add_recipes_cq: "true"
       dependencies: >-
         [
@@ -5806,7 +6161,7 @@ targets:
       subshard: "1_2"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
-      test_timeout_secs: "2700"
+      test_timeout_secs: "3480"  # 58 minutes
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -5817,6 +6172,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:34v3"},
@@ -5839,6 +6195,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "hostonly", "windows"]
       dependencies: >-
@@ -5852,6 +6209,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "hostonly", "windows", "arm64"]
       dependencies: >-
@@ -5866,6 +6224,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "hostonly", "windows"]
       dependencies: >-
@@ -5879,6 +6238,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "hostonly", "windows", "arm64"]
       dependencies: >-
@@ -5892,6 +6252,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "hostonly", "windows"]
       dependencies: >-
@@ -5905,6 +6266,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "hostonly", "windows", "arm64"]
       dependencies: >-
@@ -5918,6 +6280,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "hostonly", "windows"]
       dependencies: >-
@@ -5931,6 +6294,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "hostonly", "windows", "arm64"]
       dependencies: >-
@@ -5944,6 +6308,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "hostonly", "windows"]
       dependencies: >-
@@ -5957,6 +6322,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "hostonly", "windows", "arm64"]
       dependencies: >-
@@ -5970,6 +6336,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "hostonly", "windows"]
       dependencies: >-
@@ -5983,6 +6350,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "hostonly", "windows", "arm64"]
       dependencies: >-
@@ -5996,6 +6364,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "hostonly", "windows"]
       dependencies: >-
@@ -6009,6 +6378,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "hostonly", "windows", "arm64"]
       dependencies: >-
@@ -6023,6 +6393,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "windows"]
       task_name: basic_material_app_win__compile
@@ -6033,6 +6404,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "windows"]
       task_name: channels_integration_test_win
@@ -6043,6 +6415,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "windows"]
       task_name: flavors_test
@@ -6053,6 +6426,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "windows"]
       task_name: flutter_gallery_win__compile
@@ -6063,6 +6437,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "windows"]
       task_name: hot_mode_dev_cycle_win__benchmark
@@ -6073,6 +6448,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "windows"]
       task_name: native_assets_android
@@ -6083,6 +6459,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "android", "windows"]
       task_name: windows_chrome_dev_mode
@@ -6093,6 +6470,7 @@ targets:
     enabled_branches:
       - master
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       task_name: flutter_packaging
       tags: >
         ["framework", "hostonly", "shard", "windows"]
@@ -6105,6 +6483,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "vs_build", "version": "version:vs2019"}
@@ -6118,6 +6497,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       dependencies: >-
         [
           {"dependency": "vs_build", "version": "version:vs2019"}
@@ -6131,6 +6511,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "hostonly", "windows"]
       task_name: flutter_tool_startup
@@ -6140,6 +6521,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "hostonly", "windows", "arm64"]
       task_name: flutter_tool_startup
@@ -6149,6 +6531,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       tags: >
         ["devicelab", "hostonly", "linux"]
       task_name: flutter_tool_startup
@@ -6158,6 +6541,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       task_name: flutter_tool_startup
 
   - name: Linux flutter_packaging
@@ -6169,6 +6553,7 @@ targets:
       - beta
       - stable
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       task_name: flutter_packaging
       tags: >
         ["framework", "hostonly", "shard", "linux"]
@@ -6183,6 +6568,7 @@ targets:
       - beta
       - stable
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       task_name: flutter_packaging
       tags: >
         ["framework", "hostonly", "shard", "mac"]
@@ -6199,6 +6585,7 @@ targets:
       - beta
       - stable
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       task_name: flutter_packaging
       tags: >
         ["framework", "hostonly", "shard", "mac"]
@@ -6215,6 +6602,7 @@ targets:
       - beta
       - stable
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       task_name: flutter_packaging
       tags: >
         ["framework", "hostonly", "shard", "windows"]
@@ -6231,6 +6619,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       cores: "32"
       dependencies: >-
         [
@@ -6254,6 +6643,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3480"  # 58 minutes
       cores: "32"
       dependencies: >-
         [
