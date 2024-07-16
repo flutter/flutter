@@ -1420,9 +1420,6 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// Transition that matches with the next route. Will be null if there is no
   /// next route or a next route is not provided. If a non-null value exists,
   /// then it will be used in place of [buildTransitions].
-  ///
-  /// TODO: clean this up if viable
-  /// TODO: put in explaination how to never allow this behavior?
   DelegatedTransitionBuilder? get nextRouteTransition => null;
 
   /// docs

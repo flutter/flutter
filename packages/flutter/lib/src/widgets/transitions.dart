@@ -13,7 +13,6 @@ import 'package:flutter/rendering.dart';
 import 'basic.dart';
 import 'container.dart';
 import 'framework.dart';
-import 'navigator.dart';
 import 'text.dart';
 
 export 'package:flutter/rendering.dart' show RelativeRect;
