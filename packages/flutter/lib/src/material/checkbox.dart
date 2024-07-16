@@ -394,7 +394,7 @@ class Checkbox extends StatefulWidget {
   /// {@template flutter.material.checkbox.semanticLabel}
   /// The semantic label for the checkbox that will be announced by screen readers.
   ///
-  /// This is announced in accessibility modes (e.g TalkBack/VoiceOver).
+  /// This is announced by assistive technologies (e.g TalkBack/VoiceOver).
   ///
   /// This label does not show in the UI.
   /// {@endtemplate}
@@ -495,6 +495,7 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
               autofocus: widget.autofocus,
               side: widget.side,
               shape: widget.shape,
+              semanticLabel: widget.semanticLabel,
             );
         }
     }
