@@ -2,6 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/services.dart';
+/// @docImport 'package:flutter/widgets.dart';
+/// @docImport 'package:flutter_driver/driver_extension.dart';
+
+/// @docImport 'package:flutter_test/flutter_test.dart';
+library;
+
 import 'dart:io';
 
 import 'package:meta/meta.dart';
@@ -762,7 +769,7 @@ abstract class FlutterDriver {
 class CommonFinders {
   const CommonFinders._();
 
-  /// Finds [widgets.Text] and [widgets.EditableText] widgets containing string
+  /// Finds [Text] and [EditableText] widgets containing string
   /// equal to [text].
   SerializableFinder text(String text) => ByText(text);
 
