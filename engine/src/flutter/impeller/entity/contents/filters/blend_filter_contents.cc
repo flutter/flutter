@@ -365,7 +365,8 @@ std::optional<Entity> BlendFilterContents::CreateForegroundAdvancedBlend(
     FS::BindTextureSamplerDst(pass, dst_snapshot->texture, dst_sampler);
     frame_info.dst_y_coord_scale = dst_snapshot->texture->GetYCoordScale();
 
-    frame_info.mvp = pass.GetOrthographicTransform() * dst_snapshot->transform;
+    frame_info.mvp = Entity::GetShaderTransform(entity.GetShaderClipDepth(),
+                                                pass, dst_snapshot->transform);
 
     blend_info.dst_input_alpha =
         absorb_opacity == ColorFilterContents::AbsorbOpacity::kYes
@@ -454,7 +455,8 @@ std::optional<Entity> BlendFilterContents::CreateForegroundPorterDuffBlend(
     FS::FragInfo frag_info;
     VS::FrameInfo frame_info;
 
-    frame_info.mvp = pass.GetOrthographicTransform() * dst_snapshot->transform;
+    frame_info.mvp = Entity::GetShaderTransform(entity.GetShaderClipDepth(),
+                                                pass, dst_snapshot->transform);
 
     auto dst_sampler_descriptor = dst_snapshot->sampler_descriptor;
     if (renderer.GetDeviceCapabilities().SupportsDecalSamplerAddressMode()) {
