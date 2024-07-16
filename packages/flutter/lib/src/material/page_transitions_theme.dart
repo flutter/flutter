@@ -539,6 +539,9 @@ abstract class PageTransitionsBuilder {
   /// const constructors so that they can be used in const expressions.
   const PageTransitionsBuilder();
 
+  /// Provideds a secondary transition to the previous route.
+  DelegatedTransitionBuilder? get delegatedTransitionBuilder => null;
+
   /// Wraps the child with one or more transition widgets which define how [route]
   /// arrives on and leaves the screen.
   ///
@@ -686,6 +689,9 @@ class ZoomPageTransitionsBuilder extends PageTransitionsBuilder {
   // for the Impeller backend.
   static const bool _kProfileForceDisableSnapshotting = bool.fromEnvironment('flutter.benchmarks.force_disable_snapshot');
 
+  @override
+  DelegatedTransitionBuilder? get delegatedTransitionBuilder => delegateTransition;
+
   /// The delegated transition.
   static Widget delegateTransition(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget? child) {
     return DualTransitionBuilder(
@@ -758,6 +764,9 @@ class ZoomPageTransitionsBuilder extends PageTransitionsBuilder {
 class CupertinoPageTransitionsBuilder extends PageTransitionsBuilder {
   /// Constructs a page transition animation that matches the iOS transition.
   const CupertinoPageTransitionsBuilder();
+
+  @override
+  DelegatedTransitionBuilder? get delegatedTransitionBuilder => CupertinoPageTransition.delegateTransition;
 
   @override
   Widget buildTransitions<T>(
@@ -848,10 +857,7 @@ class PageTransitionsTheme with Diagnosticable {
     final PageTransitionsBuilder matchingBuilder =
       builders[platform] ?? const ZoomPageTransitionsBuilder();
 
-    if (matchingBuilder == const ZoomPageTransitionsBuilder()) {
-      return ZoomPageTransitionsBuilder.delegateTransition;
-    }
-    return null;
+    return matchingBuilder.delegatedTransitionBuilder;
   }
 
   // Map the builders to a list with one PageTransitionsBuilder per platform for
