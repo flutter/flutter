@@ -117,5 +117,30 @@ TEST_P(AiksTest, ClipsUseCurrentTransform) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+/// If correct, this test should draw a green circle. If any red is visible,
+/// there is a depth bug.
+TEST_P(AiksTest, FramebufferBlendsRespectClips) {
+  DisplayListBuilder builder;
+
+  // Clear the whole canvas with white.
+  DlPaint paint;
+  paint.setColor(DlColor::kWhite());
+  builder.DrawPaint(paint);
+
+  builder.ClipPath(SkPath::Circle(150, 150, 50), DlCanvas::ClipOp::kIntersect);
+
+  // Draw a red rectangle that should not show through the circle clip.
+  paint.setColor(DlColor::kRed());
+  paint.setBlendMode(DlBlendMode::kMultiply);
+  builder.DrawRect(SkRect::MakeXYWH(100, 100, 100, 100), paint);
+
+  // Draw a green circle that shows through the clip.
+  paint.setColor(DlColor::kGreen());
+  paint.setBlendMode(DlBlendMode::kSrcOver);
+  builder.DrawCircle(SkPoint::Make(150, 150), 50, paint);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 }  // namespace testing
 }  // namespace impeller
