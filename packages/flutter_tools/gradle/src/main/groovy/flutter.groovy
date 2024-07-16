@@ -1835,7 +1835,7 @@ class FlutterPluginPlugin implements Plugin<Project> {
     @Override
     void apply(Project project) {
         this.project = project
-        if (project.extensions.findByType(FlutterExtension) != null) {
+        if (project.extensions.findByType(FlutterExtension) == null) {
             project.extensions.create("flutter", FlutterExtension)
         }
     }
