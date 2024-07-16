@@ -290,8 +290,8 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   late OffsetPair _pendingDragOffset;
 
   /// The position of the last pointer event received.
-  OffsetPair get finalPosition => _finalPosition;
-  late OffsetPair _finalPosition;
+  OffsetPair get lastPosition => _lastPosition;
+  late OffsetPair _lastPosition;
 
   Duration? _lastPendingEventTimestamp;
 
@@ -407,7 +407,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
       case _DragState.ready:
         _state = _DragState.possible;
         _initialPosition = OffsetPair(global: event.position, local: event.localPosition);
-        _finalPosition = _initialPosition;
+        _lastPosition = _initialPosition;
         _pendingDragOffset = OffsetPair.zero;
         _globalDistanceMoved = 0.0;
         _lastPendingEventTimestamp = event.timeStamp;
@@ -656,7 +656,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
       final Offset localDelta = (event is PointerMoveEvent) ? event.localDelta : (event as PointerPanZoomUpdateEvent).localPanDelta;
       final Offset position = (event is PointerMoveEvent) ? event.position : (event.position + (event as PointerPanZoomUpdateEvent).pan);
       final Offset localPosition = (event is PointerMoveEvent) ? event.localPosition : (event.localPosition + (event as PointerPanZoomUpdateEvent).localPan);
-      _finalPosition = OffsetPair(local: localPosition, global: position);
+      _lastPosition = OffsetPair(local: localPosition, global: position);
       final Offset resolvedDelta = _resolveLocalDeltaForMultitouch(event.pointer, localDelta);
       switch (_state) {
         case _DragState.ready || _DragState.possible:
@@ -857,8 +857,8 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     }
     details ??= DragEndDetails(
       primaryVelocity: 0.0,
-      globalPosition: _finalPosition.global,
-      localPosition: _finalPosition.local,
+      globalPosition: _lastPosition.global,
+      localPosition: _lastPosition.local,
     );
 
     invokeCallback<void>('onEnd', () => onEnd!(details!), debugReport: debugReport);
@@ -919,8 +919,8 @@ class VerticalDragGestureRecognizer extends DragGestureRecognizer {
     return DragEndDetails(
       velocity: Velocity(pixelsPerSecond: Offset(0, dy)),
       primaryVelocity: dy,
-      globalPosition: finalPosition.global,
-      localPosition: finalPosition.local,
+      globalPosition: lastPosition.global,
+      localPosition: lastPosition.local,
     );
   }
 
@@ -979,8 +979,8 @@ class HorizontalDragGestureRecognizer extends DragGestureRecognizer {
     return DragEndDetails(
       velocity: Velocity(pixelsPerSecond: Offset(dx, 0)),
       primaryVelocity: dx,
-      globalPosition: _finalPosition.global,
-      localPosition: _finalPosition.local,
+      globalPosition: _lastPosition.global,
+      localPosition: _lastPosition.local,
     );
   }
 
@@ -1036,8 +1036,8 @@ class PanGestureRecognizer extends DragGestureRecognizer {
         .clampMagnitude(minFlingVelocity ?? kMinFlingVelocity, maxFlingVelocity ?? kMaxFlingVelocity);
     return DragEndDetails(
       velocity: velocity,
-      globalPosition: finalPosition.global,
-      localPosition: finalPosition.local,
+      globalPosition: lastPosition.global,
+      localPosition: lastPosition.local,
     );
   }
 
