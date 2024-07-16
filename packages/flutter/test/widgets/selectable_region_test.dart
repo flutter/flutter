@@ -2221,7 +2221,7 @@ void main() {
     );
 
     testWidgets(
-      'right-click mouse on an active selection does not clear the selection in other selectables on apple platforms',
+      'right-click mouse on an active selection does not clear the selection in other selectables on Apple platforms',
       (WidgetTester tester) async {
         // Regression test for https://github.com/flutter/flutter/issues/150268.
         Set<ContextMenuButtonType> buttonTypes = <ContextMenuButtonType>{};
