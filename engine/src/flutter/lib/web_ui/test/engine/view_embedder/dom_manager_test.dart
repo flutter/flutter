@@ -52,7 +52,7 @@ void doTests() {
       regularTextField.placeholder = 'Now you see me';
       domManager.rootElement.appendChild(regularTextField);
 
-      regularTextField.focus();
+      regularTextField.focusWithoutScroll();
       DomCSSStyleDeclaration? style = domWindow.getComputedStyle(
           domManager.rootElement.querySelector('input')!,
           '::placeholder');
@@ -64,7 +64,7 @@ void doTests() {
       textField.classList.add('flt-text-editing');
       domManager.rootElement.appendChild(textField);
 
-      textField.focus();
+      textField.focusWithoutScroll();
       style = domWindow.getComputedStyle(
           domManager.rootElement.querySelector('input.flt-text-editing')!,
           '::placeholder');

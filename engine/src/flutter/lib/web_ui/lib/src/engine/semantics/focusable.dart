@@ -49,7 +49,7 @@ class Focusable extends RoleManager {
   /// decide whether to stop searching for a node that should take focus.
   bool focusAsRouteDefault() {
     _focusManager._lastEvent = AccessibilityFocusManagerEvent.requestedFocus;
-    owner.element.focus();
+    owner.element.focusWithoutScroll();
     return true;
   }
 
@@ -279,7 +279,7 @@ class AccessibilityFocusManager {
       }
 
       _lastEvent = AccessibilityFocusManagerEvent.requestedFocus;
-      target.element.focus();
+      target.element.focusWithoutScroll();
     });
   }
 }

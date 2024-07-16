@@ -51,7 +51,7 @@ final class ViewFocusBinding {
     if (state == ui.ViewFocusState.focused) {
       // Only move the focus to the flutter view if nothing inside it is focused already.
       if (viewId != _viewId(domDocument.activeElement)) {
-        viewElement?.focus(preventScroll: true);
+        viewElement?.focusWithoutScroll();
       }
     } else {
       viewElement?.blur();

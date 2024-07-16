@@ -62,7 +62,7 @@ class Incrementable extends PrimaryRoleManager {
 
   @override
   bool focusAsRouteDefault() {
-    _element.focus();
+    _element.focusWithoutScroll();
     return true;
   }
 
