@@ -64,7 +64,7 @@ class DismissibleExample extends StatelessWidget {
         ),
         _Dismissible(
           title: 'Only accept if threshold is reached (Disable flinging)',
-          shouldDismiss: (AcceptDismissDetails details) => details.reached,
+          shouldDismiss: (AcceptDismissDetails details) => details.reached ? null : false,
         ),
         _Dismissible(
           title: 'Accept dismiss before threshold',
