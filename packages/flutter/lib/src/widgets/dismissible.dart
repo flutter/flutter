@@ -33,6 +33,16 @@ typedef DismissDirectionCallback = void Function(DismissDirection direction);
 /// Used by [Dismissible.confirmDismiss].
 typedef ConfirmDismissCallback = Future<bool?> Function(DismissDirection direction);
 
+/// Signature used by [Dismissible] to give the application an opportunity to
+/// accept or deny a dismiss gesture.
+///
+/// This callback can be used to deny a dismiss gesture based on the distance and the velocity of the gesture.
+///
+/// Returning `null` will use de default behavior.
+///
+/// Used by [Dismissible.shouldDismiss].
+typedef AcceptDismissCallback = bool? Function(AcceptDismissDetails details);
+
 /// Signature used by [Dismissible] to indicate that the dismissible has been dragged.
 ///
 /// Used by [Dismissible.onUpdate].
@@ -105,13 +115,13 @@ class Dismissible extends StatefulWidget {
     this.background,
     this.secondaryBackground,
     this.confirmDismiss,
+    this.shouldDismiss,
     this.onResize,
     this.onUpdate,
     this.onDismissed,
     this.direction = DismissDirection.horizontal,
     this.resizeDuration = const Duration(milliseconds: 300),
     this.dismissThresholds = const <DismissDirection, double>{},
-    this.allowFlinging = true,
     this.movementDuration = const Duration(milliseconds: 200),
     this.crossAxisEndOffset = 0.0,
     this.dragStartBehavior = DragStartBehavior.start,
@@ -143,6 +153,9 @@ class Dismissible extends StatefulWidget {
   /// If the returned `Future<bool?>` completes to false or null the [onResize]
   /// and [onDismissed] callbacks will not run.
   final ConfirmDismissCallback? confirmDismiss;
+
+  /// Gives the app an
+  final AcceptDismissCallback? shouldDismiss;
 
   /// Called when the widget changes size (i.e., when contracting before being dismissed).
   final VoidCallback? onResize;
@@ -179,14 +192,6 @@ class Dismissible extends StatefulWidget {
   ///  * [direction], which controls the directions in which the items can
   ///    be dismissed.
   final Map<DismissDirection, double> dismissThresholds;
-
-  /// Controls whether the widget can be dismissed by flinging in the indicated [direction].
-  ///
-  /// Flinging is treated as being equivalent to dragging almost to 1.0, so
-  /// flinging can dismiss an item past any threshold less than 1.0.
-  ///
-  /// Defaults to `true`.
-  final bool allowFlinging;
 
   /// Defines the duration for card to dismiss or to come back to original position if not dismissed.
   final Duration movementDuration;
@@ -239,7 +244,7 @@ class Dismissible extends StatefulWidget {
 ///   * [Dismissible.onUpdate], which receives this information.
 class DismissUpdateDetails {
   /// Create a new instance of [DismissUpdateDetails].
-  DismissUpdateDetails({
+  const DismissUpdateDetails({
     this.direction = DismissDirection.horizontal,
     this.reached = false,
     this.previousReached = false,
@@ -257,6 +262,35 @@ class DismissUpdateDetails {
   /// This can be used in conjunction with [DismissUpdateDetails.reached] to catch the moment
   /// that the [Dismissible] is dragged across the threshold.
   final bool previousReached;
+
+  /// The offset ratio of the dismissible in its parent container.
+  ///
+  /// A value of 0.0 represents the normal position and 1.0 means the child is
+  /// completely outside its parent.
+  ///
+  /// This can be used to synchronize other elements to what the dismissible is doing on screen,
+  /// e.g. using this value to set the opacity thereby fading dismissible as it's dragged offscreen.
+  final double progress;
+}
+
+/// Details for [DismissUpdateCallback].
+///
+/// See also:
+///
+///   * [Dismissible.onUpdate], which receives this information.
+class AcceptDismissDetails {
+  /// Create a new instance of [AcceptDismissDetails].
+  const AcceptDismissDetails({
+    this.direction = DismissDirection.horizontal,
+    this.reached = false,
+    this.progress = 0.0,
+  });
+
+  /// The direction that the dismissible is being dragged.
+  final DismissDirection direction;
+
+  /// Whether the dismiss threshold is currently reached.
+  final bool reached;
 
   /// The offset ratio of the dismissible in its parent container.
   ///
@@ -450,7 +484,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
   }
 
   void _handleDismissUpdateValueChanged() {
-    if (widget.onUpdate != null) {
+    if (widget.onUpdate case final DismissUpdateCallback onUpdate) {
       final bool oldDismissThresholdReached = _dismissThresholdReached;
       _dismissThresholdReached = _moveController.value > _dismissThreshold;
       final DismissUpdateDetails details = DismissUpdateDetails(
@@ -459,7 +493,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
           previousReached: oldDismissThresholdReached,
           progress: _moveController.value,
       );
-      widget.onUpdate!(details);
+      onUpdate(details);
     }
   }
 
@@ -517,8 +551,33 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
       return;
     }
 
+    // Use value returned by `widget.shouldDismiss` if a callback is provided
+    // If the callback returns null, use the default behavior
+    if (widget.shouldDismiss case final AcceptDismissCallback shouldDismissCallback) {
+      final AcceptDismissDetails details = AcceptDismissDetails(
+        direction: _dismissDirection,
+        reached: _moveController.value > _dismissThreshold,
+        progress: _moveController.value,
+      );
+      final bool? shouldDismiss = shouldDismissCallback(details);
+
+      if (shouldDismiss != null) {
+        if (_moveController.isDismissed) {
+          return;
+        }
+
+        if (shouldDismiss) {
+          _moveController.forward();
+        } else {
+          _moveController.reverse();
+        }
+        return;
+      }
+    }
+
     final double flingVelocity = _directionIsXAxis ? details.velocity.pixelsPerSecond.dx : details.velocity.pixelsPerSecond.dy;
-    final _FlingGestureKind flingGesture = widget.allowFlinging ? _describeFlingGesture(details.velocity) : _FlingGestureKind.none;
+    final _FlingGestureKind flingGesture = _describeFlingGesture(details.velocity);
+
     switch (flingGesture) {
       case _FlingGestureKind.forward:
         assert(_dragExtent != 0.0);
