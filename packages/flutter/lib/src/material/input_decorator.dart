@@ -2786,6 +2786,10 @@ class InputDecoration {
   /// of [InputDecoration] that changes the color of the label to the
   /// [InputDecoration.errorStyle] color or [ColorScheme.error].
   ///
+  /// When [InputDecoration.label] is shown above the input field, it is scaled down
+  /// to 0.75. So, any given font size needs to be changed
+  /// accordingly that it will be scaling down at the end.
+  ///
   /// {@tool dartpad}
   /// It's possible to override the label style for just the error state, or
   /// just the default state, or both.
