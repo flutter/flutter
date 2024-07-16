@@ -34,6 +34,7 @@ import java.util.concurrent.ExecutorService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
 import org.robolectric.annotation.Config;
 
 @Config(manifest = Config.NONE)
@@ -59,6 +60,25 @@ public class FlutterLoaderTest {
     assertTrue(flutterLoader.initialized());
     verify(mockFlutterJNI, times(1)).loadLibrary();
     verify(mockFlutterJNI, times(1)).updateRefreshRate();
+  }
+
+  @Test
+  public void unsatisfiedLinkErrorPathDoesNotExist() {
+    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
+    ctx.getApplicationInfo().nativeLibraryDir = "/path/that/doesnt/exist";
+    FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
+
+    Mockito.doThrow(new UnsatisfiedLinkError("couldn't find \"libflutter.so\""))
+        .when(mockFlutterJNI)
+        .loadLibrary();
+    try {
+      flutterLoader.startInitialization(ctx);
+    } catch (UnsupportedOperationException e) {
+      assertTrue(
+          e.getMessage()
+              .contains(
+                  "and the native libraries directory (with path /path/that/doesnt/exist) does not exist."));
+    }
   }
 
   @Test
