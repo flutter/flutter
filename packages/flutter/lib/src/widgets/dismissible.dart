@@ -546,10 +546,6 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
       return;
     }
     _dragUnderway = false;
-    if (_moveController.isCompleted) {
-      _handleMoveCompleted();
-      return;
-    }
 
     // Use value returned by `widget.shouldDismiss` if a callback is provided
     // If the callback returns null, use the default behavior
@@ -573,6 +569,11 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
         }
         return;
       }
+    }
+
+    if (_moveController.isCompleted) {
+      _handleMoveCompleted();
+      return;
     }
 
     final double flingVelocity = _directionIsXAxis ? details.velocity.pixelsPerSecond.dx : details.velocity.pixelsPerSecond.dy;
