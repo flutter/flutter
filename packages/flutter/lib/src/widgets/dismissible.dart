@@ -282,11 +282,11 @@ class DismissUpdateDetails {
   final double progress;
 }
 
-/// Details for [DismissUpdateCallback].
+/// Details for [AcceptDismissCallback].
 ///
 /// See also:
 ///
-///   * [Dismissible.onUpdate], which receives this information.
+///   * [Dismissible.shouldDismiss], which receives this information.
 class AcceptDismissDetails {
   /// Create a new instance of [AcceptDismissDetails].
   const AcceptDismissDetails({
