@@ -368,7 +368,9 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
   bool _childHidden = false;
   // Animates the child while it's opening.
   late AnimationController _openController;
-  Rect? _decoyChildEndRect;
+  late Rect? _decoyChildEndRect;
+  late double _widthScaleFactor;
+  late double _heightScaleFactor;
   OverlayEntry? _lastOverlayEntry;
   _ContextMenuRoute<void>? _route;
   final double _midpoint = CupertinoContextMenu.animationOpensAt / 2;
@@ -428,6 +430,24 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
     return _ContextMenuLocation.left;
   }
 
+  // Constrain the size of the expanded child so that it does not go offscreen on the left or right sides.
+  // See https://github.com/flutter/flutter/issues/122951
+  static double _computeMinWidthScale(BuildContext context, Rect childRect){
+    final MediaQueryData mediaQuery = MediaQuery.of(context);
+    final double leftMaxScale = 2 * (childRect.center.dx - mediaQuery.padding.left) / childRect.width;
+    final double rightMaxScale = 2 * childRect.width * (mediaQuery.size.width - mediaQuery.padding.right - childRect.center.dx);
+    return math.min(math.min(leftMaxScale, rightMaxScale), _kOpenScale);
+  }
+
+  // Constrain the size of the expanded child so that it does not go offscreen on the top or bottom sides.
+  // See https://github.com/flutter/flutter/issues/122951
+  static double _computeMinHeightScale(BuildContext context, Rect childRect){
+    final MediaQueryData mediaQuery = MediaQuery.of(context);
+    final double topMaxScale = 2 * (childRect.center.dy - mediaQuery.padding.top) / childRect.height;
+    final double bottomMaxScale = 2 * childRect.height * (mediaQuery.size.height - mediaQuery.padding.bottom - childRect.center.dy);
+    return math.min(math.min(topMaxScale, bottomMaxScale), _kOpenScale);
+  }
+
   /// The default preview builder if none is provided. It makes a rectangle
   /// around the child widget with rounded borders, matching the iOS 16 opened
   /// context menu eyeballed on the XCode iOS simulator.
@@ -456,6 +476,8 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
       ),
       contextMenuLocation: _contextMenuLocation,
       previousChildRect: _decoyChildEndRect!,
+      widthScaleFactor: _widthScaleFactor,
+      heightScaleFactor: _heightScaleFactor,
       builder: (BuildContext context, Animation<double> animation) {
         if (widget.child == null) {
           final Animation<double> localAnimation = Tween<double>(begin: CupertinoContextMenu.animationOpensAt, end: 1).animate(animation);
@@ -545,10 +567,12 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
     });
 
     final Rect childRect = _getRect(_childGlobalKey);
+    _widthScaleFactor = _computeMinWidthScale(context, childRect);
+    _heightScaleFactor = _computeMinHeightScale(context, childRect);
     _decoyChildEndRect = Rect.fromCenter(
       center: childRect.center,
-      width: childRect.width * _kOpenScale,
-      height: childRect.height * _kOpenScale,
+      width: childRect.width * _widthScaleFactor,
+      height: childRect.height * _heightScaleFactor,
     );
 
     // Create a decoy child in an overlay directly on top of the original child.
@@ -734,12 +758,16 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
     CupertinoContextMenuBuilder? builder,
     super.filter,
     required Rect previousChildRect,
+    double widthScaleFactor = _kOpenScale,
+    double heightScaleFactor = _kOpenScale,
     super.settings,
   }) : assert(actions.isNotEmpty),
        _actions = actions,
        _builder = builder,
        _contextMenuLocation = contextMenuLocation,
-       _previousChildRect = previousChildRect;
+       _previousChildRect = previousChildRect,
+       _widthScaleFactor = widthScaleFactor,
+       _heightScaleFactor = heightScaleFactor;
 
   // Barrier color for a Cupertino modal barrier.
   static const Color _kModalBarrierColor = Color(0x6604040F);
@@ -750,6 +778,8 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
   final _ContextMenuLocation _contextMenuLocation;
   bool _externalOffstage = false;
   bool _internalOffstage = false;
+  final double _widthScaleFactor;
+  final double _heightScaleFactor;
   Orientation? _lastOrientation;
   // The Rect of the child at the moment that the CupertinoContextMenu opens.
   final Rect _previousChildRect;
@@ -876,8 +906,8 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
     // to the original position before the bounce.
     final Rect childRectOriginal = Rect.fromCenter(
       center: _previousChildRect.center,
-      width: _previousChildRect.width / _kOpenScale,
-      height: _previousChildRect.height / _kOpenScale,
+      width: _previousChildRect.width / _widthScaleFactor,
+      height: _previousChildRect.height / _heightScaleFactor,
     );
 
     final Rect sheetRect = _getRect(_sheetGlobalKey);
