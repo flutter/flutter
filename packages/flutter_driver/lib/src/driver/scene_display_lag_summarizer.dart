@@ -10,7 +10,7 @@ const String kSceneDisplayLagEvent = 'SceneDisplayLag';
 
 const String _kVsyncTransitionsMissed = 'vsync_transitions_missed';
 
-/// Summarizes [TimelineEvents]s corresponding to [kSceneDisplayLagEvent] events.
+/// Summarizes [TimelineEvent]s corresponding to [kSceneDisplayLagEvent] events.
 ///
 /// A sample event (some fields have been omitted for brevity):
 /// ```json

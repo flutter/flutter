@@ -41,6 +41,12 @@ const double _kCupertinoFocusColorSaturation = 0.835;
 /// ([CupertinoSwitch] in Flutter) instead, or to find a creative custom
 /// solution.
 ///
+/// {@tool dartpad}
+/// This example shows a toggleable [CupertinoCheckbox].
+///
+/// ** See code in examples/api/lib/cupertino/checkbox/cupertino_checkbox.0.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [Checkbox], the Material Design equivalent.
