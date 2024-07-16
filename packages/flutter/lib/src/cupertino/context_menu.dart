@@ -440,8 +440,8 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
     final MediaQueryData mediaQuery = MediaQuery.of(context);
     final double leftMaxScale = 2 * (childRect.center.dx - mediaQuery.padding.left) / childRect.width;
     final double topMaxScale = 2 * (childRect.center.dy - mediaQuery.padding.top) / childRect.height;
-    final double rightMaxScale = 2 * childRect.width * (mediaQuery.size.width - mediaQuery.padding.right - childRect.center.dx);
-    final double bottomMaxScale = 2 * childRect.height * (mediaQuery.size.height - mediaQuery.padding.bottom - childRect.center.dy);
+    final double rightMaxScale = 2 * (mediaQuery.size.width - mediaQuery.padding.right - childRect.center.dx) / childRect.width;
+    final double bottomMaxScale = 2 * (mediaQuery.size.height - mediaQuery.padding.bottom - childRect.center.dy) / childRect.height;
     final double minWidth = math.min(leftMaxScale, rightMaxScale);
     final double minHeight = math.min(topMaxScale, bottomMaxScale);
     // Return the smallest scale factor that keeps the child entirely onscreen.
