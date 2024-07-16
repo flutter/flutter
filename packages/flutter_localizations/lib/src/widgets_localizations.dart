@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'material_localizations.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
@@ -17,7 +22,7 @@ import 'l10n/generated_widgets_localizations.dart';
 ///
 /// This list is available programmatically via [kWidgetsSupportedLanguages].
 ///
-/// Besides localized strings, this class also maps [locale] to [textDirection].
+/// Besides localized strings, this class also maps [Locale] to [textDirection].
 /// All locales are [TextDirection.ltr] except for locales with the following
 /// [Locale.languageCode] values, which are [TextDirection.rtl]:
 ///
