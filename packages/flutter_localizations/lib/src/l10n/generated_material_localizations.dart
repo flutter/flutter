@@ -24330,7 +24330,7 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
   String get currentDateLabel => '오늘';
 
   @override
-  String get cutButtonLabel => '잘라냄';
+  String get cutButtonLabel => '잘라내기';
 
   @override
   String get dateHelpText => 'yyyy.mm.dd';
