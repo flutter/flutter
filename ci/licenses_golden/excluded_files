@@ -3293,6 +3293,8 @@
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.adc/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio.signalprocessing/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/meta.json
+../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.clock/meta.json
+../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.clockimpl/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.gpio/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.gpioimpl/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.i2c.businfo/meta.json
@@ -3349,7 +3351,6 @@
 ../../../fuchsia/sdk/linux/fidl/fuchsia.memorypressure/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.metrics/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.migration/meta.json
-../../../fuchsia/sdk/linux/fidl/fuchsia.modular/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.net.http/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.net.interfaces/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.net.mdns/meta.json
@@ -3369,8 +3370,6 @@
 ../../../fuchsia/sdk/linux/fidl/fuchsia.session/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.settings.policy/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/meta.json
-../../../fuchsia/sdk/linux/fidl/fuchsia.sys.test/meta.json
-../../../fuchsia/sdk/linux/fidl/fuchsia.sys/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.sysinfo/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.sysmem/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.sysmem2/meta.json
