@@ -539,22 +539,21 @@ class CupertinoPopupSurface extends StatelessWidget {
         child: contents,
       );
     }
-
-    ImageFilter filter = ImageFilter.blur(sigmaX: _kBlurAmount, sigmaY: _kBlurAmount);
-    // ColorFilter is not supported on the web.
-    if (!kIsWeb) {
-      filter = ImageFilter.compose(
-        outer: filter,
-        inner: ColorFilter.matrix(
-          CupertinoTheme.maybeBrightnessOf(context) == Brightness.dark
-              ? _darkMatrix
-              : _lightMatrix,
-        ),
-      );
-    }
+    final ImageFilter filter = ImageFilter.compose(
+      outer: ImageFilter.blur(
+        sigmaX: _kBlurAmount,
+        sigmaY: _kBlurAmount,
+      ),
+      inner: ColorFilter.matrix(
+        CupertinoTheme.maybeBrightnessOf(context) == Brightness.dark
+            ? _darkMatrix
+            : _lightMatrix,
+      ),
+    );
     return ClipRRect(
       borderRadius: const BorderRadius.all(Radius.circular(_kCornerRadius)),
       child: BackdropFilter(
+        blendMode: BlendMode.src,
         filter: filter,
         child: contents,
       ),
