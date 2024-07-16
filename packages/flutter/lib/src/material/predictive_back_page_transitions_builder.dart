@@ -43,7 +43,6 @@ class PredictiveBackPageTransitionsBuilder extends PageTransitionsBuilder {
     BuildContext context,
     Animation<double> animation,
     Animation<double> secondaryAnimation,
-    DelegatedTransitionBuilder? receivedTransition,
     Widget child,
   ) {
     return _PredictiveBackGestureDetector(
@@ -66,7 +65,6 @@ class PredictiveBackPageTransitionsBuilder extends PageTransitionsBuilder {
           context,
           animation,
           secondaryAnimation,
-          receivedTransition,
           child,
         );
       },
