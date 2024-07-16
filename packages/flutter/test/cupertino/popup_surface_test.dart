@@ -21,6 +21,7 @@ void main() {
       matchesGoldenFile('cupertinoPopupSurface.light.filter-effects.png'),
     );
   });
+
   testWidgets('dark painted appearance', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
@@ -36,6 +37,7 @@ void main() {
       matchesGoldenFile('cupertinoPopupSurface.dark.filter-effects.png'),
     );
   });
+
   testWidgets('unpainted appearance', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
