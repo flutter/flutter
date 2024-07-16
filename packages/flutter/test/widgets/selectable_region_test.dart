@@ -2221,6 +2221,82 @@ void main() {
     );
 
     testWidgets(
+      'right-click mouse on an active selection does not clear the selection in other selectables on apple platforms',
+      (WidgetTester tester) async {
+        // Regression test for https://github.com/flutter/flutter/issues/150268.
+        Set<ContextMenuButtonType> buttonTypes = <ContextMenuButtonType>{};
+        final UniqueKey toolbarKey = UniqueKey();
+        final FocusNode focusNode = FocusNode();
+        addTearDown(focusNode.dispose);
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: SelectableRegion(
+              focusNode: focusNode,
+              selectionControls: materialTextSelectionHandleControls,
+              contextMenuBuilder: (
+                BuildContext context,
+                SelectableRegionState selectableRegionState,
+              ) {
+                buttonTypes = selectableRegionState.contextMenuButtonItems
+                  .map((ContextMenuButtonItem buttonItem) => buttonItem.type)
+                  .toSet();
+                return SizedBox.shrink(key: toolbarKey);
+              },
+              child: const Column(
+                children: <Widget>[
+                  Text('How are you?'),
+                  Text('Good, and you?'),
+                  Text('Fine, thank you.'),
+                ],
+              ),
+            ),
+          ),
+        );
+
+        expect(buttonTypes.isEmpty, true);
+        expect(find.byKey(toolbarKey), findsNothing);
+
+        final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you?'), matching: find.byType(RichText)));
+        final RenderParagraph paragraph2 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Good, and you?'), matching: find.byType(RichText)));
+        final RenderParagraph paragraph3 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Fine, thank you.'), matching: find.byType(RichText)));
+        final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph, 2), kind: PointerDeviceKind.mouse);
+        final TestGesture secondaryMouseButtonGesture = await tester.createGesture(kind: PointerDeviceKind.mouse, buttons: kSecondaryMouseButton);
+        addTearDown(secondaryMouseButtonGesture.removePointer);
+        addTearDown(gesture.removePointer);
+        await tester.pump();
+        await gesture.moveTo(textOffsetToPosition(paragraph3, 5));
+        await tester.pump();
+        await gesture.up();
+        await tester.pumpAndSettle();
+        expect(paragraph.selections, isNotEmpty);
+        expect(paragraph2.selections, isNotEmpty);
+        expect(paragraph3.selections, isNotEmpty);
+        expect(paragraph.selections[0], const TextSelection(baseOffset: 2, extentOffset: 12));
+        expect(paragraph2.selections[0], const TextSelection(baseOffset: 0, extentOffset: 14));
+        expect(paragraph3.selections[0], const TextSelection(baseOffset: 0, extentOffset: 5));
+
+        // Right-clicking on the active selection should retain the selection.
+        await secondaryMouseButtonGesture.down(textOffsetToPosition(paragraph2, 7));
+        await tester.pump();
+        await secondaryMouseButtonGesture.up();
+        await tester.pumpAndSettle();
+        expect(paragraph.selections, isNotEmpty);
+        expect(paragraph2.selections, isNotEmpty);
+        expect(paragraph3.selections, isNotEmpty);
+        expect(paragraph.selections[0], const TextSelection(baseOffset: 2, extentOffset: 12));
+        expect(paragraph2.selections[0], const TextSelection(baseOffset: 0, extentOffset: 14));
+        expect(paragraph3.selections[0], const TextSelection(baseOffset: 0, extentOffset: 5));
+
+        expect(buttonTypes, contains(ContextMenuButtonType.copy));
+        expect(buttonTypes, contains(ContextMenuButtonType.selectAll));
+        expect(find.byKey(toolbarKey), findsOneWidget);
+      },
+      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }),
+      skip: kIsWeb, // [intended] Web uses its native context menu.
+    );
+
+    testWidgets(
       'right-click mouse at the same position as previous right-click toggles the context menu on macOS',
       (WidgetTester tester) async {
         Set<ContextMenuButtonType> buttonTypes = <ContextMenuButtonType>{};
