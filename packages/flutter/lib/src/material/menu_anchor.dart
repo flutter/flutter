@@ -2066,7 +2066,7 @@ class _SubmenuDirectionalFocusAction extends DirectionalFocusAction {
     assert(_debugMenuInfo('${intent.direction}: Invoking directional focus intent.'));
     final TextDirection directionality = Directionality.of(submenu.context);
     switch ((_orientation, directionality, intent.direction)) {
-      case (Axis.horizontal, TextDirection.ltr, TraversalDirection.left): // Fallthrough
+      case (Axis.horizontal, TextDirection.ltr, TraversalDirection.left):
       case (Axis.horizontal, TextDirection.rtl, TraversalDirection.right):
         assert(_debugMenuInfo('Moving to previous $MenuBar item'));
         // Focus this MenuBar SubmenuButton, then move focus to the previous focusable
