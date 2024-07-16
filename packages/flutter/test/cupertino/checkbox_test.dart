@@ -409,8 +409,8 @@ void main() {
       paints
         ..drrect(
           color: const Color(0xfff44336),
-          outer: RRect.fromLTRBR(13.0, 13.0, 31.0, 31.0, const Radius.circular(5)),
-          inner: RRect.fromLTRBR(17.0, 17.0, 27.0, 27.0, const Radius.circular(1)),
+          outer: RRect.fromLTRBR(15.0, 15.0, 29.0, 29.0, const Radius.circular(5)),
+          inner: RRect.fromLTRBR(19.0, 19.0, 25.0, 25.0, const Radius.circular(1)),
         ),
     );
   });
@@ -483,9 +483,10 @@ void main() {
     const Color enabledCheckColor = Color(0xffffffff);
     const Color disabledCheckColor = Color(0xffacacac);
     const Color activeFillColor = Color(0xff0a84ff);
+    const Color activeFillColorOverlay = Color(0x26000000);
     const Color disabledFillColor = Color(0x80ffffff);
     const Color activeBorderColor = Color(0x00000000);
-    const Color inactiveBorderColor = Color(0x80808080);
+    const Color inactiveBorderColor = Color(0x32808080);
 
     Widget buildApp({bool value = true, bool enabled = true}) {
       return CupertinoApp(
@@ -514,6 +515,7 @@ void main() {
       paints
         ..path(color: activeFillColor)
         ..rrect(color: activeBorderColor)
+        ..path(color: activeFillColorOverlay)
         ..path(color: enabledCheckColor)
         ..path(color: enabledCheckColor),
       reason: 'Active enabled checkbox should have default colors',
@@ -547,6 +549,7 @@ void main() {
     const Color defaultCheckColor = Color(0xffffffff);
     const Color defaultActiveFillColor = Color(0xff007aff);
     const Color defaultFocusColor = Color(0xcc6eadf2);
+    const Color testFocusColor = Color(0xffaabbcc);
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     final FocusNode node = FocusNode();
     addTearDown(node.dispose);
@@ -581,7 +584,7 @@ void main() {
     );
 
     await tester.pumpWidget(buildApp(
-      focusColor: const Color(0xffaabbcc),
+      focusColor: testFocusColor,
       focusNode: node,
       autofocus: true,
     ));
@@ -594,7 +597,7 @@ void main() {
         ..rrect()
         ..path(color: defaultCheckColor)
         ..path(color: defaultCheckColor)
-        ..path(color: const Color(0xffaabbcc), strokeWidth: 3.5, style: PaintingStyle.stroke),
+        ..path(color: testFocusColor, strokeWidth: 3.5, style: PaintingStyle.stroke),
         reason: 'Checkbox can configure a focus color',
     );
   });
@@ -603,7 +606,7 @@ void main() {
     const Color checkColor = Color(0xffffffff);
     const Color defaultActiveFillColor = Color(0xff007aff);
     const Color defaultInactiveFillColor = Color(0xffffffff);
-    const Color pressedDarkShadow = Color(0x0d000000);
+    const Color pressedDarkShadow = Color(0x26ffffff);
 
     await tester.pumpWidget(
       CupertinoApp(

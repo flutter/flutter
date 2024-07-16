@@ -32,8 +32,10 @@ const Color _kDisabledCheckColor = Color.fromARGB(255, 172, 172, 172);
 // Eyeballed from a checkbox on a physical Macbook Pro running macOS version 14.5.
 const CupertinoDynamicColor _kDefaultBorderColor = CupertinoDynamicColor.withBrightness(
   color: Color.fromARGB(255, 209, 209, 214),
-  darkColor: Color.fromARGB(128, 128, 128, 128),
+  darkColor: Color.fromARGB(50, 128, 128, 128),
 );
+const double _kPressedOverlayOpacity = 0.15;
+const double _kBrightnessModeOverlayOpacity = 0.15;
 
 /// A macOS style checkbox.
 ///
@@ -196,7 +198,7 @@ class CupertinoCheckbox extends StatefulWidget {
   final OutlinedBorder? shape;
 
   /// The width of a checkbox widget.
-  static const double width = 18.0;
+  static const double width = 14.0;
 
   @override
   State<CupertinoCheckbox> createState() => _CupertinoCheckboxState();
@@ -420,8 +422,8 @@ class _CheckboxPainter extends ToggleablePainter {
         end: Alignment.bottomCenter,
         // Eyeballed from a checkbox on a physical Macbook Pro running macOS version 14.5.
         colors: <Color>[
+          paint.color.withOpacity(0.14),
           paint.color.withOpacity(0.29),
-          paint.color.withOpacity(0.41),
         ],
       );
       final Paint gradientPaint = Paint()
@@ -472,17 +474,24 @@ class _CheckboxPainter extends ToggleablePainter {
         _drawBox(canvas, outer, paint, side);
       case true:
         _drawBox(canvas, outer, paint, side);
+        // The fill color of an active checkbox is slightly darker in dark mode.
+        if (brightness == Brightness.dark && isActive){
+          final Paint overlayPaint = Paint()
+            ..color =  CupertinoColors.black.withOpacity(_kBrightnessModeOverlayOpacity);
+          canvas.drawPath(shape.getOuterPath(outer), overlayPaint);
+        }
         _drawCheck(canvas, origin, strokePaint);
       case null:
         _drawBox(canvas, outer, paint, side);
         _drawDash(canvas, origin, strokePaint);
     }
-    // Apply effect to darken checkbox when pressed.
+    // The checkbox's opacity changes when pressed.
     if (downPosition != null) {
-      final Paint paint = Paint()
-        ..color = CupertinoColors.black.withOpacity(0.05);
-      final Rect outer = _outerRectAt(origin);
-      canvas.drawPath(shape.getOuterPath(outer), paint);
+      final Paint pressedPaint = Paint()
+        ..color = brightness == Brightness.light
+          ? CupertinoColors.black.withOpacity(_kPressedOverlayOpacity)
+          : CupertinoColors.white.withOpacity(_kPressedOverlayOpacity);
+      canvas.drawPath(shape.getOuterPath(outer), pressedPaint);
     }
     if (isFocused) {
       final Rect focusOuter = outer.inflate(1);
