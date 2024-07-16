@@ -3054,8 +3054,6 @@ void main() {
     final String buildGradleContent = await buildGradleFile.readAsString();
 
     expect(buildGradleContent.contains('namespace = "com.bar.foo.flutter_project"'), true);
-    // The namespace should be conditionalized for AGP <4.2.
-    expect(buildGradleContent.contains('if (project.android.hasProperty("namespace")) {'), true);
   });
 
   testUsingContext('Android FFI plugin contains namespace', () async {
@@ -3077,8 +3075,6 @@ void main() {
     final String buildGradleContent = await buildGradleFile.readAsString();
 
     expect(buildGradleContent.contains('namespace = "com.bar.foo.flutter_project"'), true);
-    // The namespace should be conditionalized for AGP <4.2.
-    expect(buildGradleContent.contains('if (project.android.hasProperty("namespace")) {'), true);
   });
 
   testUsingContext('Android Kotlin plugin contains namespace', () async {
@@ -3101,8 +3097,6 @@ void main() {
     final String buildGradleContent = await buildGradleFile.readAsString();
 
     expect(buildGradleContent.contains('namespace = "com.bar.foo.flutter_project"'), true);
-    // The namespace should be conditionalized for AGP <4.2.
-    expect(buildGradleContent.contains('if (project.android.hasProperty("namespace")) {'), true);
   });
 
   testUsingContext('Flutter module Android project contains namespace', () async {
@@ -3128,13 +3122,6 @@ void main() {
     expect(moduleFlutterBuildGradleFileContent.contains(expectedNameSpace), true);
     const String expectedHostNameSpace = 'namespace = "com.bar.foo.flutter_project.host"';
     expect(moduleAppBuildGradleFileContent.contains(expectedHostNameSpace), true);
-
-    // The namespaces should be conditionalized for AGP <4.2.
-    const String expectedConditional = 'if (project.android.hasProperty("namespace")) {';
-    expect(moduleBuildGradleFileContent.contains(expectedConditional), true);
-    expect(moduleAppBuildGradleFileContent.contains(expectedConditional), true);
-    expect(moduleFlutterBuildGradleFileContent.contains(expectedConditional), true);
-
   }, overrides: <Type, Generator>{
     Pub: () => Pub.test(
       fileSystem: globals.fs,

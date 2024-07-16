@@ -30,11 +30,7 @@ group = "{{androidIdentifier}}"
 version = "1.0"
 
 android {
-    // Conditional for compatibility with AGP <4.2.
-    if (project.android.hasProperty("namespace")) {
-        namespace = "{{androidIdentifier}}"
-    }
-
+    namespace = "{{androidIdentifier}}"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
