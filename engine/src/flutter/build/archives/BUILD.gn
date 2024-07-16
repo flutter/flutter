@@ -272,23 +272,7 @@ if (host_os == "win") {
   }
 }
 
-# Archives Flutter Mac Artifacts
 if (is_mac) {
-  zip_bundle("archive_gen_snapshot") {
-    deps = [ "//flutter/lib/snapshot:create_macos_gen_snapshots" ]
-    suffix = "-$flutter_runtime_mode"
-    if (flutter_runtime_mode == "debug") {
-      suffix = ""
-    }
-    output = "$full_platform_name$suffix/gen_snapshot.zip"
-    files = [
-      {
-        source = "${root_out_dir}/gen_snapshot_${target_cpu}"
-        destination = "gen_snapshot_${target_cpu}"
-      },
-    ]
-  }
-
   group("flutter_embedder_framework") {
     deps = [
       "//flutter/shell/platform/embedder:flutter_embedder_framework_archive",
