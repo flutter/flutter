@@ -36,7 +36,7 @@ typedef ConfirmDismissCallback = Future<bool?> Function(DismissDirection directi
 /// Signature used by [Dismissible] to give the application an opportunity to
 /// accept or deny a dismiss gesture.
 ///
-/// This callback can be used to deny a dismiss gesture based on the distance and the velocity of the gesture.
+/// This callback can be used to deny a dismiss gesture based the [AcceptDismissDetails.progress] value.
 ///
 /// Returning `null` will use de default behavior.
 ///
