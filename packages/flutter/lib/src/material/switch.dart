@@ -552,7 +552,7 @@ class Switch extends StatelessWidget {
   /// {@macro flutter.widgets.Focus.autofocus}
   final bool autofocus;
 
-  /// The amount of space to surround the child inside the bounds of the switch.
+  /// The amount of space to surround the child inside the bounds of the [Switch].
   ///
   /// Defaults to horizontal padding of 4 pixels. If [ThemeData.useMaterial3] is false,
   /// then there is no padding by default.
@@ -561,6 +561,7 @@ class Switch extends StatelessWidget {
   Size _getSwitchSize(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     SwitchThemeData switchTheme = SwitchTheme.of(context);
+    final SwitchThemeData defaults = theme.useMaterial3 ? _SwitchDefaultsM3(context) : _SwitchDefaultsM2(context);
     if (_switchType == _SwitchType.adaptive) {
       final Adaptation<SwitchThemeData> switchAdaptation = theme.getAdaptation<SwitchThemeData>()
         ?? const _SwitchThemeAdaptation();
@@ -573,9 +574,7 @@ class Switch extends StatelessWidget {
       ?? theme.materialTapTargetSize;
     final EdgeInsetsGeometry effectivePadding = padding
       ?? switchTheme.padding
-      ?? (theme.useMaterial3
-          ? const EdgeInsets.symmetric(horizontal: 4)
-          : EdgeInsets.zero);
+      ?? defaults.padding!;
     return switch (effectiveMaterialTapTargetSize) {
       MaterialTapTargetSize.padded     => Size(
         switchConfig.switchWidth + effectivePadding.horizontal,
@@ -2053,6 +2052,9 @@ class _SwitchDefaultsM2 extends SwitchThemeData {
 
   @override
   double get splashRadius => kRadialReactionRadius;
+
+  @override
+  EdgeInsetsGeometry? get padding => EdgeInsets.zero;
 }
 
 // BEGIN GENERATED TOKEN PROPERTIES - Switch
@@ -2188,6 +2190,9 @@ class _SwitchDefaultsM3 extends SwitchThemeData {
 
   @override
   double get splashRadius => 40.0 / 2;
+
+  @override
+  EdgeInsetsGeometry? get padding => const EdgeInsets.symmetric(horizontal: 4);
 }
 
 class _SwitchConfigM3 with _SwitchConfig {

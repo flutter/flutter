@@ -137,6 +137,9 @@ class _${blockName}DefaultsM3 extends SwitchThemeData {
 
   @override
   double get splashRadius => ${getToken('md.comp.switch.state-layer.size')} / 2;
+
+  @override
+  EdgeInsetsGeometry? get padding => const EdgeInsets.symmetric(horizontal: 4);
 }
 
 class _SwitchConfigM3 with _SwitchConfig {
