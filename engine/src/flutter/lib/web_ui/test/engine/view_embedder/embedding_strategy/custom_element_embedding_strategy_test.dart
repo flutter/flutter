@@ -76,6 +76,8 @@ void doTests() {
           reason: 'Should take 100% of the available height');
       expect(styleAfter.overflow, 'hidden',
           reason: 'Should hide the occasional oversized canvas elements.');
+      expect(styleAfter.touchAction, 'none',
+          reason: 'Should disable browser handling of touch events.');
     });
   });
 }
