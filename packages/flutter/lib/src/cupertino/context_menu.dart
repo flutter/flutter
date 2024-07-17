@@ -23,12 +23,12 @@ const double _kOpenScale = 1.15;
 
 // The smallest possible scale of the child, used if opening the
 // CupertinoContextMenu would cause it to go outside the safe area. This value
-// was eyeballed from the XCode iPhone simulator running iOS 16.1.
+// was eyeballed from the Xcode iPhone simulator running iOS 16.1.
 const double _kMinScaleFactor = 1.02;
 
 // The ratio for the borderRadius of the context menu preview image. This value
 // was eyeballed by overlapping the CupertinoContextMenu with a context menu
-// from iOS 16.0 in the XCode iPhone simulator.
+// from iOS 16.0 in the Xcode iPhone simulator.
 const double _previewBorderRadiusRatio = 12.0;
 
 // The duration of the transition used when a modal popup is shown. Eyeballed
@@ -36,7 +36,7 @@ const double _previewBorderRadiusRatio = 12.0;
 const Duration _kModalPopupTransitionDuration = Duration(milliseconds: 335);
 
 // The duration it takes for the CupertinoContextMenu to open.
-// This value was eyeballed from the XCode simulator running iOS 16.0.
+// This value was eyeballed from the Xcode simulator running iOS 16.0.
 const Duration _previewLongPressTimeout = Duration(milliseconds: 800);
 
 // The total length of the combined animations until the menu is fully open.
@@ -44,7 +44,7 @@ final int _animationDuration =
   _previewLongPressTimeout.inMilliseconds + _kModalPopupTransitionDuration.inMilliseconds;
 
 // The final box shadow for the opening child widget.
-// This value was eyeballed from the XCode simulator running iOS 16.0.
+// This value was eyeballed from the Xcode simulator running iOS 16.0.
 const List<BoxShadow> _endBoxShadow = <BoxShadow>[
   BoxShadow(
     color: Color(0x40000000),
@@ -449,7 +449,7 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
 
   /// The default preview builder if none is provided. It makes a rectangle
   /// around the child widget with rounded borders, matching the iOS 16 opened
-  /// context menu eyeballed on the XCode iOS simulator.
+  /// context menu eyeballed on the Xcode iOS simulator.
   static Widget _defaultPreviewBuilder(BuildContext context, Animation<double> animation, Widget child) {
     return FittedBox(
       fit: BoxFit.cover,
@@ -664,7 +664,7 @@ class _DecoyChildState extends State<_DecoyChild> with TickerProviderStateMixin 
     final double endPause =
       ((totalOpenAnimationLength * _animationDuration) / _previewLongPressTimeout.inMilliseconds) - totalOpenAnimationLength;
 
-    // The timing on the animation was eyeballed from the XCode iOS simulator
+    // The timing on the animation was eyeballed from the Xcode iOS simulator
     // running iOS 16.0.
     // Because the animation no longer goes from 0.0 to 1.0, but to a number
     // depending on the ratio between the press animation time and the opening
