@@ -132,24 +132,22 @@ class CupertinoRadio<T> extends StatefulWidget {
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// widget.
   ///
-  /// If [mouseCursor] is a [WidgetStateMouseCursor],
-  /// [WidgetStateMouseCursor.resolve] is used for the following [WidgetState]s:
+  /// Resolves in the following states:
   ///
   ///  * [WidgetState.selected].
-  ///  * [WidgetState.hovered].
   ///  * [WidgetState.focused].
   ///  * [WidgetState.disabled].
   ///
-  /// If null, then [SystemMouseCursors.basic] is used when this radio button is disabled.
-  /// When this radio button is enabled, [SystemMouseCursors.click] is used on Web, and
-  /// [SystemMouseCursors.basic] is used on other platforms.
+  /// If null, then [SystemMouseCursors.basic] is used when this radio button is
+  /// disabled. When this radio button is enabled, [SystemMouseCursors.click] is
+  /// used on Web, and [SystemMouseCursors.basic] is used on other platforms.
   ///
   /// See also:
   ///
   ///  * [WidgetStateMouseCursor], a [MouseCursor] that implements
   ///    `WidgetStateProperty` which is used in APIs that need to accept
-  ///    either a [MouseCursor] or a [WidgetStateProperty<MouseCursor>].
-  final MouseCursor? mouseCursor;
+  ///    either a [MouseCursor] or a [WidgetStateProperty].
+  final WidgetStateProperty<MouseCursor>? mouseCursor;
 
   /// Set to true if this radio button is allowed to be returned to an
   /// indeterminate state by selecting it again when selected.
@@ -244,6 +242,14 @@ class _CupertinoRadioState<T> extends State<CupertinoRadio<T>> with TickerProvid
   @override
   bool? get value => widget._selected;
 
+  WidgetStateProperty<MouseCursor> get _defaultMouseCursor {
+    return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      return (!states.contains(WidgetState.disabled) && kIsWeb)
+        ? SystemMouseCursors.click
+        : SystemMouseCursors.basic;
+    });
+  }
+
   void onFocusChange(bool value) {
     if (focused != value) {
       focused = value;
@@ -269,15 +275,6 @@ class _CupertinoRadioState<T> extends State<CupertinoRadio<T>> with TickerProvid
 
     final Color effectiveFillColor = widget.fillColor ?? CupertinoColors.white;
 
-    final WidgetStateProperty<MouseCursor> effectiveMouseCursor =
-      WidgetStateProperty.resolveWith<MouseCursor>((Set<WidgetState> states) {
-        return WidgetStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states)
-          ?? (states.contains(WidgetState.disabled)
-              ? SystemMouseCursors.basic
-              : kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic
-            );
-      });
-
     final bool? accessibilitySelected;
     // Apple devices also use `selected` to annotate radio button's semantics
     // state.
@@ -297,7 +294,7 @@ class _CupertinoRadioState<T> extends State<CupertinoRadio<T>> with TickerProvid
       checked: widget._selected,
       selected: accessibilitySelected,
       child: buildToggleable(
-        mouseCursor: effectiveMouseCursor,
+        mouseCursor: widget.mouseCursor ?? _defaultMouseCursor,
         focusNode: widget.focusNode,
         autofocus: widget.autofocus,
         onFocusChange: onFocusChange,
