@@ -321,11 +321,9 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
     assert(debugCheckHasDirectionality(context));
     const double fontSizeToScale = 14.0;
     final double textScaleFactor = MediaQuery.textScalerOf(context).clamp(maxScaleFactor: 3.0).scale(fontSizeToScale) / fontSizeToScale;
-    final Orientation orientation = MediaQuery.orientationOf(context);
-    final bool isLandscapeOrientation = orientation == Orientation.landscape;
-    final double rowHeightScaling = isLandscapeOrientation ? 30 : 8;
+    // Scale the height of the picker area up with larger text.
     final double scaledMaxDayPickerHeight =
-      textScaleFactor > 1.3 ? _maxDayPickerHeight + ((_maxDayPickerRowCount + 1) * ((textScaleFactor - 1) * rowHeightScaling)) : _maxDayPickerHeight;
+      textScaleFactor > 1.3 ? _maxDayPickerHeight + ((_maxDayPickerRowCount + 1) * ((textScaleFactor - 1) * 8)) : _maxDayPickerHeight;
     return Stack(
       children: <Widget>[
         SizedBox(
@@ -428,8 +426,7 @@ class _DatePickerModeToggleButtonState extends State<_DatePickerModeToggleButton
                             child: Text(
                               widget.title,
                               overflow: TextOverflow.ellipsis,
-                              // textScaleFactor: 1.6, portrait
-                              textScaleFactor: 2.0, // landscape
+                              textScaleFactor: 2.0,
                               style: textTheme.titleSmall?.copyWith(
                                 color: controlColor,
                               ),
@@ -1142,8 +1139,6 @@ class _DayPickerGridDelegate extends SliverGridDelegate {
   @override
   SliverGridLayout getLayout(SliverConstraints constraints) {
     const double fontSizeToScale = 14.0;
-    final Orientation orientation = MediaQuery.orientationOf(context);
-    final bool isLandscapeOrientation = orientation == Orientation.landscape;
     final double textScaleFactor = MediaQuery.textScalerOf(context).clamp(maxScaleFactor: 3.0).scale(fontSizeToScale) / fontSizeToScale;
     final double scaledRowHeight =
       textScaleFactor > 1.3 ? ((textScaleFactor - 1) * 30) + _dayPickerRowHeight : _dayPickerRowHeight;

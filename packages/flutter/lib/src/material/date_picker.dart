@@ -884,7 +884,9 @@ class _DatePickerHeader extends StatelessWidget {
       titleText,
       semanticsLabel: titleSemanticsLabel ?? titleText,
       style: titleStyle,
-      maxLines: orientation == Orientation.portrait ? scaledFontSize > 70 ? 2 : 1 : scaledFontSize > 40 ? 3 : 2,
+      maxLines: orientation == Orientation.portrait ?
+        (scaledFontSize > 70 ? 2 : 1) :
+        scaledFontSize > 40 ? 3 : 2,
       overflow: TextOverflow.ellipsis,
       textScaler: MediaQuery.textScalerOf(context).clamp(maxScaleFactor: _kMaxHeaderTextScaleFactor),
     );
