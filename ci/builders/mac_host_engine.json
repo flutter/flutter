@@ -557,10 +557,10 @@
                 "parameters": [
                     "--dst",
                     "out/debug/snapshot",
-                    "--arm64-out-dir",
-                    "out/ci/mac_debug_arm64",
-                    "--x64-out-dir",
-                    "out/ci/host_debug",
+                    "--arm64-path",
+                    "out/ci/mac_debug_arm64/clang_x64/gen_snapshot",
+                    "--x64-path",
+                    "out/ci/host_debug/gen_snapshot",
                     "--zip"
                 ],
                 "script": "flutter/sky/tools/create_macos_gen_snapshots.py"
@@ -570,10 +570,10 @@
                 "parameters": [
                     "--dst",
                     "out/profile/snapshot",
-                    "--arm64-out-dir",
-                    "out/ci/mac_profile_arm64",
-                    "--x64-out-dir",
-                    "out/ci/host_profile",
+                    "--arm64-path",
+                    "out/ci/mac_profile_arm64/clang_x64/gen_snapshot",
+                    "--x64-path",
+                    "out/ci/host_profile/gen_snapshot",
                     "--zip"
                 ],
                 "script": "flutter/sky/tools/create_macos_gen_snapshots.py"
@@ -583,10 +583,10 @@
                 "parameters": [
                     "--dst",
                     "out/release/snapshot",
-                    "--arm64-out-dir",
-                    "out/ci/mac_release_arm64",
-                    "--x64-out-dir",
-                    "out/ci/host_release",
+                    "--arm64-path",
+                    "out/ci/mac_release_arm64/clang_x64/gen_snapshot",
+                    "--x64-path",
+                    "out/ci/host_release/gen_snapshot",
                     "--zip"
                 ],
                 "script": "flutter/sky/tools/create_macos_gen_snapshots.py"

@@ -519,8 +519,8 @@
                 "parameters": [
                     "--dst",
                     "out/release",
-                    "--arm64-out-dir",
-                    "out/ci/ios_release"
+                    "--arm64-path",
+                    "out/ci/ios_release/clang_x64/gen_snapshot"
                 ],
                 "script": "flutter/sky/tools/create_macos_gen_snapshots.py",
                 "language": "python3"
