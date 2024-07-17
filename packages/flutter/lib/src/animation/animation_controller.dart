@@ -707,10 +707,10 @@ class AnimationController extends Animation<double>
   /// provided, [duration] will be used instead, which has to be set before [repeat] is
   /// called either in the constructor or later by using the [duration] setter.
   ///
-  /// If a value is passed to [repeatCount], the animation will perform that many
+  /// If a value is passed to [count], the animation will perform that many
   /// iterations before stopping. Otherwise, the animation repeats indefinitely.
   ///
-  /// Returns a [TickerFuture] that never completes, unless a [repeatCount] is specified.
+  /// Returns a [TickerFuture] that never completes, unless a [count] is specified.
   /// The [TickerFuture.orCancel] future completes with an error when the animation is
   /// stopped (e.g. with [stop]).
   ///
@@ -722,7 +722,7 @@ class AnimationController extends Animation<double>
     double? max,
     bool reverse = false,
     Duration? period,
-    int? repeatCount,
+    int? count,
   }) {
     min ??= lowerBound;
     max ??= upperBound;
@@ -740,9 +740,9 @@ class AnimationController extends Animation<double>
     }());
     assert(max >= min);
     assert(max <= upperBound && min >= lowerBound);
-    assert(repeatCount == null || repeatCount > 0, 'Repeat times shall be greater than zero if not null');
+    assert(count == null || count > 0, 'Count shall be greater than zero if not null');
     stop();
-    return _startSimulation(_RepeatingSimulation(_value, min, max, reverse, period!, _directionSetter, repeatCount));
+    return _startSimulation(_RepeatingSimulation(_value, min, max, reverse, period!, _directionSetter, count));
   }
 
   void _directionSetter(_AnimationDirection direction) {
@@ -977,10 +977,10 @@ class _RepeatingSimulation extends Simulation {
     this.reverse,
     Duration period,
     this.directionSetter,
-    this.repeatCount,
+    this.count,
   )  : assert(
-          repeatCount == null || repeatCount > 0,
-          'Repeat count shall be greater than zero if not null',
+          count == null || count > 0,
+          'Count shall be greater than zero if not null',
         ),
         _periodInSeconds = period.inMicroseconds / Duration.microsecondsPerSecond,
         _initialT = (max == min) ? 0.0 : ((clampDouble(initialValue, min, max) - min) / (max - min)) * (period.inMicroseconds / Duration.microsecondsPerSecond) {
@@ -991,16 +991,13 @@ class _RepeatingSimulation extends Simulation {
   final double min;
   final double max;
   final bool reverse;
-  final int? repeatCount;
+  final int? count;
   final _DirectionSetter directionSetter;
 
   final double _periodInSeconds;
   final double _initialT;
 
-  /// If [reverse] is true, the duration of a full cycle is doubled.
-  late final int _effectiveRepeatCount = repeatCount! * (reverse ? 2 : 1);
-
-  late final double _exitTimeInSeconds = (_effectiveRepeatCount * _periodInSeconds) - _initialT;
+  late final double _exitTimeInSeconds = (count! * _periodInSeconds) - _initialT;
 
   @override
   double x(double timeInSeconds) {
@@ -1024,8 +1021,8 @@ class _RepeatingSimulation extends Simulation {
 
   @override
   bool isDone(double timeInSeconds) {
-    // if [timeInSeconds] elapsed the [_exitTimeInSeconds] && repeatCount is not null,
+    // if [timeInSeconds] elapsed the [_exitTimeInSeconds] && [count] is not null,
     // consider marking the simulation as "DONE"
-    return repeatCount != null && (timeInSeconds >= _exitTimeInSeconds);
+    return count != null && (timeInSeconds >= _exitTimeInSeconds);
   }
 }
