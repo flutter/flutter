@@ -15,7 +15,7 @@ import 'package:flutter/services.dart';
 ///
 /// A [Map] with [WidgetStateMapKey] objects as keys can be used
 /// in the [WidgetStateProperty.fromMap] constructor to resolve to
-/// one of its values, based on the first key that [matchesSet]
+/// one of its values, based on the first key that [isSatisfiedBy]
 /// the current set of states.
 ///
 /// {@macro flutter.widgets.WidgetStateProperty.WidgetStateMap}
@@ -38,7 +38,7 @@ abstract interface class WidgetStateMapKey {
   /// states.contains(WidgetState.focused) || states.contains(WidgetState.hovered);
   /// ```
   /// {@endtemplate}
-  bool matchesSet(Set<WidgetState> states);
+  bool isSatisfiedBy(Set<WidgetState> states);
 }
 
 // A private class, used in [WidgetStateOperators].
@@ -48,7 +48,7 @@ class _WidgetStateOperation implements WidgetStateMapKey {
   final bool Function(Set<WidgetState> states) _isSatisfiedBy;
 
   @override
-  bool matchesSet(Set<WidgetState> states) => _isSatisfiedBy(states);
+  bool isSatisfiedBy(Set<WidgetState> states) => _isSatisfiedBy(states);
 }
 
 /// These operators can be used inside a [WidgetStateMap] to combine states
@@ -65,21 +65,21 @@ extension WidgetStateOperators on WidgetStateMapKey {
   /// Combines two [WidgetStateMapKey] values using logical "and".
   WidgetStateMapKey operator &(WidgetStateMapKey other) {
     return _WidgetStateOperation(
-      (Set<WidgetState> states) => matchesSet(states) && other.matchesSet(states),
+      (Set<WidgetState> states) => isSatisfiedBy(states) && other.isSatisfiedBy(states),
     );
   }
 
   /// Combines two [WidgetStateMapKey] values using logical "or".
   WidgetStateMapKey operator |(WidgetStateMapKey other) {
     return _WidgetStateOperation(
-      (Set<WidgetState> states) => matchesSet(states) || other.matchesSet(states),
+      (Set<WidgetState> states) => isSatisfiedBy(states) || other.isSatisfiedBy(states),
     );
   }
 
   /// Takes a [WidgetStateMapKey] and applies the logical "not".
   WidgetStateMapKey operator ~() {
     return _WidgetStateOperation(
-      (Set<WidgetState> states) => !matchesSet(states),
+      (Set<WidgetState> states) => !isSatisfiedBy(states),
     );
   }
 }
@@ -89,7 +89,7 @@ class _AlwaysMatch implements WidgetStateMapKey {
   const _AlwaysMatch();
 
   @override
-  bool matchesSet(Set<WidgetState> states) => true;
+  bool isSatisfiedBy(Set<WidgetState> states) => true;
 }
 
 /// Interactive states that some of the widgets can take on when receiving input
@@ -181,7 +181,7 @@ enum WidgetState implements WidgetStateMapKey {
   static const WidgetStateMapKey any = _AlwaysMatch();
 
   @override
-  bool matchesSet(Set<WidgetState> states) => states.contains(this);
+  bool isSatisfiedBy(Set<WidgetState> states) => states.contains(this);
 }
 
 /// Signature for the function that returns a value of type `T` based on a given
@@ -263,7 +263,7 @@ abstract class WidgetStateColor extends Color implements WidgetStateProperty<Col
   /// [Set] of [WidgetState]s will be selected.
   ///
   /// {@macro flutter.widgets.WidgetState.any}
-  factory WidgetStateColor.map(WidgetStateMap<Color> map) = _WidgetStateColorMapper;
+  factory WidgetStateColor.fromMap(WidgetStateMap<Color> map) = _WidgetStateColorMapper;
 
   /// Returns a [Color] that's to be used when a component is in the specified
   /// state.
@@ -475,7 +475,7 @@ abstract class WidgetStateBorderSide extends BorderSide implements WidgetStatePr
   /// ```dart
   /// const Chip(
   ///   label: Text('Transceiver'),
-  ///   side: WidgetStateBorderSide.map(<WidgetStateMapKey, BorderSide?>{
+  ///   side: WidgetStateBorderSide.fromMap(<WidgetStateMapKey, BorderSide?>{
   ///     WidgetState.selected: BorderSide(color: Colors.red),
   ///     // returns null if not selected, deferring to default theme/widget value.
   ///   }),
@@ -483,7 +483,7 @@ abstract class WidgetStateBorderSide extends BorderSide implements WidgetStatePr
   /// ```
   ///
   /// {@macro flutter.widgets.WidgetState.any}
-  const factory WidgetStateBorderSide.map(WidgetStateMap<BorderSide?> map) = _WidgetBorderSideMapper;
+  const factory WidgetStateBorderSide.fromMap(WidgetStateMap<BorderSide?> map) = _WidgetBorderSideMapper;
 
   /// Returns a [BorderSide] that's to be used when a Widget is in the
   /// specified state. Return null to defer to the default value of the
@@ -598,7 +598,7 @@ abstract class WidgetStateOutlinedBorder extends OutlinedBorder implements Widge
 ///   1. Create a subclass of [WidgetStateTextStyle] and implement the abstract `resolve` method.
 ///   2. Use [WidgetStateTextStyle.resolveWith] and pass in a callback that
 ///      will be used to resolve the color in the given states.
-///   3. Use [WidgetStateTextStyle.map] to assign a style using a [WidgetStateMap].
+///   3. Use [WidgetStateTextStyle.fromMap] to assign a style using a [WidgetStateMap].
 ///
 /// If a [WidgetStateTextStyle] is used for a property or a parameter that doesn't
 /// support resolving [WidgetStateProperty<TextStyle>]s, then its default color
@@ -635,7 +635,7 @@ abstract class WidgetStateTextStyle extends TextStyle implements WidgetStateProp
   /// [Set] of [WidgetState]s will be selected.
   ///
   /// {@macro flutter.widgets.WidgetState.any}
-  const factory WidgetStateTextStyle.map(WidgetStateMap<TextStyle> map) = _WidgetTextStyleMapper;
+  const factory WidgetStateTextStyle.fromMap(WidgetStateMap<TextStyle> map) = _WidgetTextStyleMapper;
 
   /// Returns a [TextStyle] that's to be used when a component is in the
   /// specified state.
@@ -702,7 +702,7 @@ abstract class WidgetStateProperty<T> {
   /// the method throws an [ArgumentError].
   ///
   /// {@macro flutter.widgets.WidgetState.any}
-  const factory WidgetStateProperty.map(WidgetStateMap<T> map) = _WidgetStateMapper<T>;
+  const factory WidgetStateProperty.fromMap(WidgetStateMap<T> map) = _WidgetStateMapper<T>;
 
   /// Resolves the value for the given set of states if `value` is a
   /// [WidgetStateProperty], otherwise returns the value itself.
@@ -786,7 +786,7 @@ class _WidgetStatePropertyWith<T> implements WidgetStateProperty<T> {
 /// Example:
 ///
 /// ```dart
-/// WidgetStateProperty<Color?>.map(<WidgetStateMapKey, Color?>{
+/// WidgetStateProperty<Color?>.fromMap(<WidgetStateMapKey, Color?>{
 ///   WidgetState.error: Colors.red,
 ///   WidgetState.hovered & WidgetState.focused: Colors.blueAccent,
 ///   WidgetState.focused: Colors.blue,
@@ -816,7 +816,7 @@ class _WidgetStatePropertyWith<T> implements WidgetStateProperty<T> {
 /// ```dart
 /// final WidgetStateMapKey selectedError = WidgetState.selected & WidgetState.error;
 ///
-/// final WidgetStateProperty<Color> color = WidgetStateProperty<Color>.map(
+/// final WidgetStateProperty<Color> color = WidgetStateProperty<Color>.fromMap(
 ///   <WidgetStateMapKey, Color>{
 ///     selectedError & WidgetState.hovered: Colors.redAccent,
 ///     selectedError: Colors.red,
@@ -849,7 +849,7 @@ class _WidgetStateMapper<T> implements WidgetStateProperty<T> {
   @override
   T resolve(Set<WidgetState> states) {
     for (final MapEntry<WidgetStateMapKey, T> entry in map.entries) {
-      if (entry.key.matchesSet(states)) {
+      if (entry.key.isSatisfiedBy(states)) {
         return entry.value;
       }
     }
@@ -861,7 +861,7 @@ class _WidgetStateMapper<T> implements WidgetStateProperty<T> {
         'The current set of material states is $states.\n'
         'None of the provided map keys matched this set, '
         'and the type "$T" is non-nullable.\n'
-        'Consider using "WidgetStateProperty<$T?>.map()", '
+        'Consider using "WidgetStateProperty<$T?>.fromMap()", '
         'or adding the "WidgetState.any" key to this map.',
       );
     }
