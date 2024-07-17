@@ -243,20 +243,11 @@ class _CupertinoCheckboxState extends State<CupertinoCheckbox> with TickerProvid
           .withSaturation(_kCupertinoFocusColorSaturation)
           .toColor();
 
-    final Color effectiveCheckColor = widget.checkColor
-      ?? CupertinoColors.white;
-
-    final WidgetStateProperty<MouseCursor> effectiveMouseCursor =
-      WidgetStateProperty.resolveWith<MouseCursor>((Set<WidgetState> states) {
-        return WidgetStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states)
-          ?? SystemMouseCursors.basic;
-      });
-
     return Semantics(
       checked: widget.value ?? false,
       mixed: widget.tristate ? widget.value == null : null,
       child: buildToggleable(
-        mouseCursor: effectiveMouseCursor,
+        mouseCursor: widget.mouseCursor,
         focusNode: widget.focusNode,
         autofocus: widget.autofocus,
         onFocusChange: onFocusChange,
@@ -267,7 +258,7 @@ class _CupertinoCheckboxState extends State<CupertinoCheckbox> with TickerProvid
           ..downPosition = downPosition
           ..activeColor = effectiveActiveColor
           ..inactiveColor = effectiveInactiveColor
-          ..checkColor = effectiveCheckColor
+          ..checkColor = widget.checkColor ?? CupertinoColors.white
           ..value = value
           ..previousValue = _previousValue
           ..isActive = widget.onChanged != null

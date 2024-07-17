@@ -488,7 +488,7 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
               value: value,
               tristate: tristate,
               onChanged: onChanged,
-              mouseCursor: widget.mouseCursor,
+              mouseCursor: WidgetStateProperty.all(widget.mouseCursor ?? SystemMouseCursors.basic),
               activeColor: widget.activeColor,
               checkColor: widget.checkColor,
               focusColor: widget.focusColor,
