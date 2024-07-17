@@ -454,7 +454,16 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
       if (kIsWeb) {
         PlatformSelectableRegionContextMenu.detach(_selectionDelegate);
       }
-      _clearSelection();
+      if (SchedulerBinding.instance.lifecycleState == AppLifecycleState.resumed) {
+        // We should only clear the selection when this SelectableRegion loses
+        // focus while the application is currently running. It is possible
+        // that the application is not currently running, for example on desktop
+        // platforms, clicking on a different window switches the focus to
+        // the new window causing the Flutter application to go inactive. In this
+        // case we want to retain the selection so it remains when we return to
+        // the Flutter application.
+        _clearSelection();
+      }
     }
     if (kIsWeb) {
       PlatformSelectableRegionContextMenu.attach(_selectionDelegate);

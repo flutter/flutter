@@ -416,7 +416,7 @@ void main() {
 
       await setAppLifecycleState(AppLifecycleState.resumed);
       expect(focusNode.hasPrimaryFocus, isTrue);
-    });
+    }, variant: TargetPlatformVariant.desktop());
 
     testWidgets('Node is removed completely even if app is paused.', (WidgetTester tester) async {
       Future<void> setAppLifecycleState(AppLifecycleState state) async {
