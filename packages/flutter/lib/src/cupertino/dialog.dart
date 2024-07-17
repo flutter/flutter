@@ -475,7 +475,7 @@ class CupertinoPopupSurface extends StatelessWidget {
   /// resemble the iOS 17 simulator.
   /// ```dart
   ///  // The matrix can be derived from the following function:
-  ///  static List<double> buildDarkColorFilterMatrix() {
+  ///  static List<double> buildDarkModeMatrix() {
   ///     const double additive = 0.3;
   ///     const double darkLumR = 0.45;
   ///     const double darkLumG = 0.8;
@@ -492,7 +492,7 @@ class CupertinoPopupSurface extends StatelessWidget {
   ///     ];
   ///   }
   /// ```
-  static const List<double> _darkMatrix = <double>[
+  static const List<double> _darkColorMatrix = <double>[
      1.39, -0.56, -0.11, 0.00, 0.30,
     -0.32,  1.14, -0.11, 0.00, 0.30,
     -0.32, -0.56,  1.59, 0.00, 0.30,
@@ -508,7 +508,7 @@ class CupertinoPopupSurface extends StatelessWidget {
   ///
   /// ```dart
   /// // The matrix can be derived from the following function:
-  /// static List<double> buildLightColorFilterMatrix() {
+  /// static List<double> buildLightModeMatrix() {
   ///     const double lightLumR = 0.26;
   ///     const double lightLumG = 0.4;
   ///     const double lightLumB = 0.17;
@@ -524,12 +524,18 @@ class CupertinoPopupSurface extends StatelessWidget {
   ///     ];
   ///   }
   /// ```
-  static const List<double> _lightMatrix = <double>[
+  static const List<double> _lightColorMatrix = <double>[
      1.74, -0.40, -0.17, 0.00, 0.00,
     -0.26,  1.60, -0.17, 0.00, 0.00,
     -0.26, -0.40,  1.83, 0.00, 0.00,
      0.00,  0.00,  0.00, 1.00, 0.00
   ];
+
+  static final ImageFilter _blurFilter = ImageFilter.blur(
+    sigmaX: _kBlurAmount,
+    sigmaY: _kBlurAmount,
+  );
+
   @override
   Widget build(BuildContext context) {
     Widget? contents = child;
@@ -539,17 +545,19 @@ class CupertinoPopupSurface extends StatelessWidget {
         child: contents,
       );
     }
-    final ImageFilter filter = ImageFilter.compose(
-      outer: ImageFilter.blur(
-        sigmaX: _kBlurAmount,
-        sigmaY: _kBlurAmount,
-      ),
-      inner: ColorFilter.matrix(
-        CupertinoTheme.maybeBrightnessOf(context) == Brightness.dark
-            ? _darkMatrix
-            : _lightMatrix,
-      ),
-    );
+
+    // ColorFilter is not supported on the web.
+    final ImageFilter filter = kIsWeb
+        ? _blurFilter
+        : ImageFilter.compose(
+            outer: _blurFilter,
+            inner: ColorFilter.matrix(
+              CupertinoTheme.maybeBrightnessOf(context) == Brightness.dark
+                  ? _darkColorMatrix
+                  : _lightColorMatrix,
+            ),
+          );
+
     return ClipRRect(
       borderRadius: const BorderRadius.all(Radius.circular(_kCornerRadius)),
       child: BackdropFilter(
