@@ -48,14 +48,15 @@ Future<Iterable<KernelAsset>> dryRunNativeAssetsIOSInternal(
 ) async {
   const OSImpl targetOS = OSImpl.iOS;
   globals.logger.printTrace('Dry running native assets for $targetOS.');
-  final DryRunResult dryRunResult = await buildRunner.dryRun(
+  final BuildDryRunResult buildDryRunResult = await buildRunner.buildDryRun(
     linkModePreference: LinkModePreferenceImpl.dynamic,
     targetOS: targetOS,
     workingDirectory: projectUri,
     includeParentEnvironment: true,
   );
-  ensureNativeAssetsBuildSucceed(dryRunResult);
-  final List<AssetImpl> nativeAssets = dryRunResult.assets;
+  ensureNativeAssetsBuildDryRunSucceed(buildDryRunResult);
+  // No link hooks in JIT.
+  final List<AssetImpl> nativeAssets = buildDryRunResult.assets;
   ensureNoLinkModeStatic(nativeAssets);
   globals.logger.printTrace('Dry running native assets for $targetOS done.');
   return _assetTargetLocations(nativeAssets).values;
@@ -79,6 +80,7 @@ Future<List<Uri>> buildNativeAssetsIOS({
 
   final List<Target> targets = darwinArchs.map(_getNativeTarget).toList();
   final BuildModeImpl buildModeCli = nativeAssetsBuildMode(buildMode);
+  final bool linkingEnabled = buildModeCli == BuildModeImpl.release;
 
   const OSImpl targetOS = OSImpl.iOS;
   final Uri buildUri = nativeAssetsBuildUri(projectUri, targetOS);
@@ -88,7 +90,7 @@ Future<List<Uri>> buildNativeAssetsIOS({
   final List<AssetImpl> nativeAssets = <AssetImpl>[];
   final Set<Uri> dependencies = <Uri>{};
   for (final Target target in targets) {
-    final BuildResult result = await buildRunner.build(
+    final BuildResult buildResult = await buildRunner.build(
       linkModePreference: LinkModePreferenceImpl.dynamic,
       target: target,
       targetIOSSdkImpl: iosSdk,
@@ -96,10 +98,30 @@ Future<List<Uri>> buildNativeAssetsIOS({
       workingDirectory: projectUri,
       includeParentEnvironment: true,
       cCompilerConfig: await buildRunner.cCompilerConfig,
+      // TODO(dcharkes): Fetch minimum iOS version from somewhere. https://github.com/flutter/flutter/issues/145104
+      targetIOSVersion: 12,
+      linkingEnabled: linkingEnabled,
     );
-    ensureNativeAssetsBuildSucceed(result);
-    nativeAssets.addAll(result.assets);
-    dependencies.addAll(result.dependencies);
+    ensureNativeAssetsBuildSucceed(buildResult);
+    nativeAssets.addAll(buildResult.assets);
+    dependencies.addAll(buildResult.dependencies);
+    if (linkingEnabled) {
+      final LinkResult linkResult = await buildRunner.link(
+        linkModePreference: LinkModePreferenceImpl.dynamic,
+        target: target,
+        targetIOSSdkImpl: iosSdk,
+        buildMode: buildModeCli,
+        workingDirectory: projectUri,
+        includeParentEnvironment: true,
+        cCompilerConfig: await buildRunner.cCompilerConfig,
+        buildResult: buildResult,
+        // TODO(dcharkes): Fetch minimum iOS version from somewhere. https://github.com/flutter/flutter/issues/145104
+        targetIOSVersion: 12,
+      );
+      ensureNativeAssetsLinkSucceed(linkResult);
+      nativeAssets.addAll(linkResult.assets);
+      dependencies.addAll(linkResult.dependencies);
+    }
   }
   ensureNoLinkModeStatic(nativeAssets);
   globals.logger.printTrace('Building native assets for $targets done.');
@@ -162,14 +184,23 @@ Map<KernelAssetPath, List<AssetImpl>> _fatAssetTargetLocations(
 Map<AssetImpl, KernelAsset> _assetTargetLocations(
     List<AssetImpl> nativeAssets) {
   final Set<String> alreadyTakenNames = <String>{};
-  return <AssetImpl, KernelAsset>{
-    for (final AssetImpl asset in nativeAssets)
-      asset: _targetLocationIOS(asset, alreadyTakenNames),
-  };
+  final Map<String, KernelAssetPath> idToPath = <String, KernelAssetPath>{};
+  final Map<AssetImpl, KernelAsset> result = <AssetImpl, KernelAsset>{};
+  for (final AssetImpl asset in nativeAssets) {
+    final KernelAssetPath path = idToPath[asset.id] ??
+        _targetLocationIOS(asset, alreadyTakenNames).path;
+    idToPath[asset.id] = path;
+    result[asset] = KernelAsset(
+      id: (asset as NativeCodeAssetImpl).id,
+      target: Target.fromArchitectureAndOS(asset.architecture!, asset.os),
+      path: path,
+    );
+  }
+  return result;
 }
 
 KernelAsset _targetLocationIOS(AssetImpl asset, Set<String> alreadyTakenNames) {
-  final LinkModeImpl linkMode = (asset as NativeCodeAssetImpl).linkMode;
+final LinkModeImpl linkMode = (asset as NativeCodeAssetImpl).linkMode;
 final KernelAssetPath kernelAssetPath;
   switch (linkMode) {
     case DynamicLoadingSystemImpl _:

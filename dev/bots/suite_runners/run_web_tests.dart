@@ -292,11 +292,6 @@ class WebTestsSuite {
     bool expectWriteResponseFile = false,
     String expectResponseFileContent = '',
   }) async {
-    // TODO(yjbanov): this is temporarily disabled due to https://github.com/flutter/flutter/issues/147731
-    if (buildMode == 'debug' && renderer == 'canvaskit') {
-      print('SKIPPED: $target in debug CanvasKit mode due to https://github.com/flutter/flutter/issues/147731');
-      return;
-    }
     printProgress('${green}Running integration tests $target in $buildMode mode.$reset');
     await runCommand(
       flutter,
@@ -521,6 +516,7 @@ class WebTestsSuite {
       flutter,
       <String>[
         'run',
+        '--verbose',
         '--debug',
         '-d',
         'chrome',
@@ -533,10 +529,15 @@ class WebTestsSuite {
       ],
       outputMode: OutputMode.capture,
       outputListener: (String line, Process process) {
+        bool shutdownFlutterTool = false;
         if (line.contains('--- TEST SUCCEEDED ---')) {
           success = true;
+          shutdownFlutterTool = true;
         }
-        if (success || line.contains('--- TEST FAILED ---')) {
+        if (line.contains('--- TEST FAILED ---')) {
+          shutdownFlutterTool = true;
+        }
+        if (shutdownFlutterTool) {
           process.stdin.add('q'.codeUnits);
         }
       },

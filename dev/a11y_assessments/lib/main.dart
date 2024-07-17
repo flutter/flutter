@@ -20,16 +20,25 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ThemeData lightTheme = ThemeData(
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: const Color(0xff6750a4),
+        contrastLevel: MediaQuery.highContrastOf(context) ? 1.0 : 0.0,
+    ));
+    final ThemeData darkTheme = ThemeData(
+      colorScheme: ColorScheme.fromSeed(
+        brightness: Brightness.dark,
+        seedColor: const Color(0xff6750a4),
+        contrastLevel: MediaQuery.highContrastOf(context) ? 1.0 : 0.0,
+    ));
 
     final Map<String, WidgetBuilder> routes = Map<String, WidgetBuilder>.fromEntries(
       useCases.map((UseCase useCase) => MapEntry<String, WidgetBuilder>(useCase.route, useCase.build)),
     );
     return MaterialApp(
       title: 'Accessibility Assessments',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
+      theme: lightTheme,
+      darkTheme: darkTheme,
       routes: <String, WidgetBuilder>{
         '/': (_) => const HomePage(),
         ...routes

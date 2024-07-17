@@ -5,7 +5,7 @@ Flutter has the following channels, in increasing order of stability.
 ### `master` (aka `main`)
 
 The current tip-of-tree, absolute latest cutting edge build. Usually functional, though sometimes we accidentally break things. We do not run the entirety of our testing before allowing patches to land on this branch. We do not
-recommend using this branch unless [you are contributing to Flutter](https://github.com/flutter/flutter/blob/main/CONTRIBUTING.md).
+recommend using this branch unless [you are contributing to Flutter](../../CONTRIBUTING.md).
 
 The API documentation for the most recent commit on `master` is staged at: <https://master-api.flutter.dev>
 
@@ -17,7 +17,7 @@ _We are planning to rename this channel to `main` soon; this work is tracked in 
 
 The latest stable release. If you want to be using the latest and greatest, the `beta` branch is the right choice. That's the most recent version of Flutter that we have heavily tested. The beta branch has passed all our public testing, has been verified against test suites for Google products that use Flutter, and has been vetted against [contributed private test suites](https://github.com/flutter/tests).
 
-We branch from `master` for a new beta release at the beginning of the month, usually the first Wednesday. This includes a branch for Dart, the engine and the framework. These branches are then "stabilized" for the next couple of weeks, meaning we accept [cherrypick](https://github.com/flutter/flutter/wiki/Flutter-Cherrypick-Process) requests for high impact issues. Once a quarter, the beta branch lives on to become the next stable branch, as detailed below.
+We branch from `master` for a new beta release at the beginning of the month, usually the first Wednesday. This includes a branch for Dart, the engine and the framework. These branches are then "stabilized" for the next couple of weeks, meaning we accept [cherrypick](Flutter-Cherrypick-Process.md) requests for high impact issues. Once a quarter, the beta branch lives on to become the next stable branch, as detailed below.
 
 On average it takes about two weeks for a fix to end up in the beta branch after it lands in our repository (in the `master` channel).
 
@@ -29,7 +29,7 @@ Roughly speaking, every third `beta` is promoted to `stable`. This is essentiall
 
 We recommend using this channel for new users and for production app releases.
 
-In case of high severity, high impact or security issues, we may do a hotfix release for the `stable` channel just like we do for `beta`. This will follow the same [cherrypick](https://github.com/flutter/flutter/wiki/Flutter-Cherrypick-Process) process.
+In case of high severity, high impact or security issues, we may do a hotfix release for the `stable` channel just like we do for `beta`. This will follow the same [cherrypick](Flutter-Cherrypick-Process.md) process.
 
 The `stable` version of Flutter is the one documented by our API documentation at: <https://api.flutter.dev>
 
@@ -52,12 +52,12 @@ To switch channels, run `flutter channel [<channel-name>]`, and then run `flutte
 
 ## Will a particular bug fix be provided in a hotfix release?
 
-Depending on the severity of the issue, it is possible.  Refer to the [cherrypick process](https://github.com/flutter/flutter/wiki/Flutter-Cherrypick-Process) for details.
+Depending on the severity of the issue, it is possible.  Refer to the [cherrypick process](Flutter-Cherrypick-Process.md) for details.
 
 If you really need a particular patch and it's a fix to the flutter/flutter repository, you should feel free to create a Flutter branch yourself on your development machine and cherry-pick the fix you want onto that branch. Flutter is distributed as a `git` repository and all of `git`'s tools are available to you. If you need a particular patch that's from the flutter/engine repository or one of our dependencies (e.g. Dart or Skia), you could build your own engine but it's probably easier to just wait until the next release. On average, the next `beta` release is about two weeks away.
 
 ## See also
 
 * [Release process](Release-process.md), which describes the details for how we push builds from channel to channel.
-* [Cherrypick process](https://github.com/flutter/flutter/wiki/Flutter-Cherrypick-Process), where we cover how to request an issue for cherrypicking.
+* [Cherrypick process](Flutter-Cherrypick-Process.md), where we cover how to request an issue for cherrypicking.
 * [Release notes](https://flutter.dev/docs/development/tools/sdk/release-notes), where we document changes to each version of the stable channel.

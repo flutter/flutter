@@ -32,7 +32,7 @@ Anyone can request a cherry-pick.
 ### When do I request a cherry pick?
 
 - Whenever you have identified a commit on the main/master that fixes an issue that is present on the beta or stable branch.
-- Whenever you need to update a pub dependency that fixes an issue that is present on the beta or stable branch (see [Updating dependencies](https://github.com/flutter/flutter/wiki/Updating-dependencies-in-Flutter#to-update-a-single-dependency-for-cherrypicks))
+- Whenever you need to update a pub dependency that fixes an issue that is present on the beta or stable branch (see [Updating dependencies](../infra/Updating-dependencies-in-Flutter.md#to-update-a-single-dependency-for-cherrypicks)
 
 ### Who reviews and approves cherry-pick requests?
 

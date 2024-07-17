@@ -150,7 +150,7 @@ In order to install the App you will need to:
 ### Adding the Configuration
 After the app is installed you will need to place a configuration file into your ORGs .github repository. If you do not have one then you will need to create onc in your ORG level .github repository.
 
-Once the repository is created then you will need to add the Autosubmit configuration file at .github/autosubmit/autosubmit.yml. This is the primary location that Autosubmit will check first for the configuration. Repositories in your ORG can override the ORG level configs by placing a configuration file at repo/.github/autosubmit/autosubmit.yml. See the section on [configuration](https://github.com/flutter/flutter/wiki/Autosubmit-bot#configuration) above on the fields you may want to include in your configuration.
+Once the repository is created then you will need to add the Autosubmit configuration file at .github/autosubmit/autosubmit.yml. This is the primary location that Autosubmit will check first for the configuration. Repositories in your ORG can override the ORG level configs by placing a configuration file at repo/.github/autosubmit/autosubmit.yml. See the section on [configuration](Autosubmit-bot.md#configuration) above on the fields you may want to include in your configuration.
 
 Make sure that the App has read write access to the ORG level .github repository.
 

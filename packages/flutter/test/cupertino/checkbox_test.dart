@@ -34,6 +34,7 @@ void main() {
       hasEnabledState: true,
       isEnabled: true,
       hasTapAction: true,
+      hasFocusAction: true,
       isFocusable: true,
     ));
 
@@ -54,6 +55,7 @@ void main() {
       isChecked: true,
       isEnabled: true,
       hasTapAction: true,
+      hasFocusAction: true,
       isFocusable: true,
     ));
 
@@ -73,6 +75,7 @@ void main() {
       hasEnabledState: true,
       // isFocusable is delayed by 1 frame.
       isFocusable: true,
+      hasFocusAction: true,
     ));
 
     await tester.pump();
@@ -178,6 +181,7 @@ void main() {
       hasEnabledState: true,
       isEnabled: true,
       hasTapAction: true,
+      hasFocusAction: true,
       isFocusable: true,
     ));
     handle.dispose();
@@ -247,7 +251,7 @@ void main() {
         SemanticsFlag.isFocusable,
         SemanticsFlag.isCheckStateMixed,
       ],
-      actions: <SemanticsAction>[SemanticsAction.tap],
+      actions: <SemanticsAction>[SemanticsAction.focus, SemanticsAction.tap],
     ), hasLength(1));
 
     await tester.pumpWidget(
@@ -268,7 +272,7 @@ void main() {
         SemanticsFlag.isChecked,
         SemanticsFlag.isFocusable,
       ],
-      actions: <SemanticsAction>[SemanticsAction.tap],
+      actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
     ), hasLength(1));
 
     await tester.pumpWidget(
@@ -288,7 +292,7 @@ void main() {
         SemanticsFlag.isEnabled,
         SemanticsFlag.isFocusable,
       ],
-      actions: <SemanticsAction>[SemanticsAction.tap],
+      actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
     ), hasLength(1));
 
     semantics.dispose();
@@ -332,6 +336,58 @@ void main() {
 
     tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, null);
     semanticsTester.dispose();
+  });
+
+  testWidgets('Checkbox can configure a semantic label', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+
+    await tester.pumpWidget(
+      CupertinoApp (
+        home: Center(
+          child: CupertinoCheckbox(
+            value: false,
+            onChanged: (bool? b) { },
+            semanticLabel: 'checkbox',
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSemantics(find.byType(Focus).last), matchesSemantics(
+      hasCheckedState: true,
+      hasEnabledState: true,
+      isEnabled: true,
+      hasTapAction: true,
+      hasFocusAction: true,
+      isFocusable: true,
+      label: 'checkbox'
+    ));
+
+    // If wrapped with semantics, both the parent semantic label and the
+    // checkbox's semantic label are used in annotation.
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Semantics(
+          label: 'foo',
+          textDirection: TextDirection.ltr,
+          child: CupertinoCheckbox(
+            value: false,
+            onChanged: (bool? b) { },
+            semanticLabel: 'checkbox',
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSemantics(find.byType(Focus).last), matchesSemantics(
+      label: 'foo\ncheckbox',
+      textDirection: TextDirection.ltr,
+      hasCheckedState: true,
+      hasEnabledState: true,
+      isEnabled: true,
+      hasTapAction: true,
+      hasFocusAction: true,
+      isFocusable: true,
+    ));
+    handle.dispose();
   });
 
   testWidgets('Checkbox can be toggled by keyboard shortcuts', (WidgetTester tester) async {

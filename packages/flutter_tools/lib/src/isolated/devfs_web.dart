@@ -120,6 +120,7 @@ class WebAssetServer implements AssetReader {
     this._nullSafetyMode,
     this._ddcModuleSystem, {
     required this.webRenderer,
+    required this.useLocalCanvasKit,
   }) : basePath = _getWebTemplate('index.html', _kDefaultIndex).getBaseHref();
 
   // Fallback to "application/octet-stream" on null which
@@ -181,6 +182,7 @@ class WebAssetServer implements AssetReader {
     NullSafetyMode nullSafetyMode, {
     required WebRendererMode webRenderer,
     required bool isWasm,
+    required bool useLocalCanvasKit,
     bool testMode = false,
     DwdsLauncher dwdsLauncher = Dwds.start,
     // TODO(markzipan): Make sure this default value aligns with that in the debugger options.
@@ -233,6 +235,7 @@ class WebAssetServer implements AssetReader {
       nullSafetyMode,
       ddcModuleSystem,
       webRenderer: webRenderer,
+      useLocalCanvasKit: useLocalCanvasKit,
     );
     if (testMode) {
       return server;
@@ -530,6 +533,8 @@ class WebAssetServer implements AssetReader {
   /// Determines what rendering backed to use.
   final WebRendererMode webRenderer;
 
+  final bool useLocalCanvasKit;
+
   String get _buildConfigString {
     final Map<String, dynamic> buildConfig = <String, dynamic>{
       'engineRevision': globals.flutterVersion.engineRevision,
@@ -540,6 +545,7 @@ class WebAssetServer implements AssetReader {
           'mainJsPath': 'main.dart.js',
         },
       ],
+      if (useLocalCanvasKit) 'useLocalCanvasKit' : true,
     };
     return '''
 if (!window._flutter) {
@@ -740,6 +746,7 @@ class WebDevFS implements DevFS {
     required this.ddcModuleSystem,
     required this.webRenderer,
     required this.isWasm,
+    required this.useLocalCanvasKit,
     required this.rootDirectory,
     this.testMode = false,
   }) : _port = port;
@@ -767,6 +774,7 @@ class WebDevFS implements DevFS {
   final String? tlsCertKeyPath;
   final WebRendererMode webRenderer;
   final bool isWasm;
+  final bool useLocalCanvasKit;
 
   late WebAssetServer webAssetServer;
 
@@ -868,6 +876,7 @@ class WebDevFS implements DevFS {
       nullSafetyMode,
       webRenderer: webRenderer,
       isWasm: isWasm,
+      useLocalCanvasKit: useLocalCanvasKit,
       testMode: testMode,
       ddcModuleSystem: ddcModuleSystem,
     );
@@ -1222,14 +1231,7 @@ void log(logging.LogRecord event) {
 
 Future<Directory> _loadDwdsDirectory(
     FileSystem fileSystem, Logger logger) async {
-  final String toolPackagePath =
-      fileSystem.path.join(Cache.flutterRoot!, 'packages', 'flutter_tools');
-  final String packageFilePath =
-      fileSystem.path.join(toolPackagePath, '.dart_tool', 'package_config.json');
-  final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-    fileSystem.file(packageFilePath),
-    logger: logger,
-  );
+  final PackageConfig packageConfig = await currentPackageConfig();
   return fileSystem.directory(packageConfig['dwds']!.packageUriRoot);
 }
 

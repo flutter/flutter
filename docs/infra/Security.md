@@ -7,7 +7,7 @@ Unopt builds are not published or consumed by the flutter/flutter CI to run inte
 
 ### Sanitizers
 
-[flutter/engine](https://github.com/flutter/engine) supports thread, address, memory, undefined behavior and leak sanitizers. Sanitizers are not enabled by default but they can be enabled on local builds following the [sanitizers with the flutter engine](https://github.com/flutter/flutter/wiki/Using-Sanitizers-with-the-Flutter-Engine) instructions.
+[flutter/engine](https://github.com/flutter/engine) supports thread, address, memory, undefined behavior and leak sanitizers. Sanitizers are not enabled by default but they can be enabled on local builds following the [sanitizers with the flutter engine](../engine/Using-Sanitizers-with-the-Flutter-Engine.md) instructions.
 
 ### Builds with sanitizers, and tests with assertions enabled
 

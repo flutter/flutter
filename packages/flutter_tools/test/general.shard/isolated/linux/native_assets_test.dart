@@ -155,32 +155,33 @@ void main() {
     final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
     await packageConfig.parent.create();
     await packageConfig.create();
+    final FakeNativeAssetsBuildRunner buildRunner = FakeNativeAssetsBuildRunner(
+      packagesWithNativeAssetsResult: <Package>[
+        Package('bar', projectUri),
+      ],
+      buildDryRunResult: FakeNativeAssetsBuilderResult(
+        assets: <AssetImpl>[
+          NativeCodeAssetImpl(
+            id: 'package:bar/bar.dart',
+            linkMode: DynamicLoadingBundledImpl(),
+            os: OSImpl.linux,
+            architecture: ArchitectureImpl.x64,
+            file: Uri.file('libbar.so'),
+          ),
+          NativeCodeAssetImpl(
+            id: 'package:bar/bar.dart',
+            linkMode: DynamicLoadingBundledImpl(),
+            os: OSImpl.linux,
+            architecture: ArchitectureImpl.arm64,
+            file: Uri.file('libbar.so'),
+          ),
+        ],
+      ),
+    );
     final Uri? nativeAssetsYaml = await dryRunNativeAssetsLinux(
       projectUri: projectUri,
       fileSystem: fileSystem,
-      buildRunner: FakeNativeAssetsBuildRunner(
-        packagesWithNativeAssetsResult: <Package>[
-          Package('bar', projectUri),
-        ],
-        dryRunResult: FakeNativeAssetsBuilderResult(
-          assets: <AssetImpl>[
-            NativeCodeAssetImpl(
-              id: 'package:bar/bar.dart',
-              linkMode: DynamicLoadingBundledImpl(),
-              os: OSImpl.linux,
-              architecture: ArchitectureImpl.x64,
-              file: Uri.file('libbar.so'),
-            ),
-            NativeCodeAssetImpl(
-              id: 'package:bar/bar.dart',
-              linkMode: DynamicLoadingBundledImpl(),
-              os: OSImpl.linux,
-              architecture: ArchitectureImpl.arm64,
-              file: Uri.file('libbar.so'),
-            ),
-          ],
-        ),
-      ),
+      buildRunner: buildRunner,
     );
     expect(
       (globals.logger as BufferLogger).traceText,
@@ -197,6 +198,8 @@ void main() {
       await fileSystem.file(nativeAssetsYaml).readAsString(),
       contains('package:bar/bar.dart'),
     );
+    expect(buildRunner.buildDryRunInvocations, 1);
+    expect(buildRunner.linkDryRunInvocations, 0);
   });
 
   testUsingContext('build with assets but not enabled', overrides: <Type, Generator>{
@@ -263,23 +266,25 @@ void main() {
     if (flutterTester) {
       testName += ' flutter tester';
     }
-    testUsingContext('build with assets$testName', overrides: <Type, Generator>{
-      FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
-      ProcessManager: () => FakeProcessManager.empty(),
-    }, () async {
-      final File packageConfig = environment.projectDir.childDirectory('.dart_tool').childFile('package_config.json');
-      await packageConfig.parent.create();
-      await packageConfig.create();
-      final File dylibAfterCompiling = fileSystem.file('libbar.so');
-      // The mock doesn't create the file, so create it here.
-      await dylibAfterCompiling.create();
-      final (Uri? nativeAssetsYaml, _) = await buildNativeAssetsLinux(
-        targetPlatform: TargetPlatform.linux_x64,
-        projectUri: projectUri,
-        buildMode: BuildMode.debug,
-        fileSystem: fileSystem,
-        flutterTester: flutterTester,
-        buildRunner: FakeNativeAssetsBuildRunner(
+    for (final BuildMode buildMode in <BuildMode>[
+      BuildMode.debug,
+      BuildMode.release,
+    ]) {
+      testUsingContext('build with assets $buildMode$testName',
+          overrides: <Type, Generator>{
+            FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
+            ProcessManager: () => FakeProcessManager.empty(),
+          }, () async {
+        final File packageConfig = environment.projectDir
+            .childDirectory('.dart_tool')
+            .childFile('package_config.json');
+        await packageConfig.parent.create();
+        await packageConfig.create();
+        final File dylibAfterCompiling = fileSystem.file('libbar.so');
+        // The mock doesn't create the file, so create it here.
+        await dylibAfterCompiling.create();
+        final FakeNativeAssetsBuildRunner buildRunner =
+            FakeNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <Package>[
             Package('bar', projectUri),
           ],
@@ -294,32 +299,45 @@ void main() {
               ),
             ],
           ),
-        ),
-      );
-      expect(
-        (globals.logger as BufferLogger).traceText,
-        stringContainsInOrder(<String>[
-          'Building native assets for linux_x64 debug.',
-          'Building native assets for linux_x64 done.',
-        ]),
-      );
-      expect(
-        nativeAssetsYaml,
-        projectUri.resolve('build/native_assets/linux/native_assets.yaml'),
-      );
-      expect(
-        await fileSystem.file(nativeAssetsYaml).readAsString(),
-        stringContainsInOrder(<String>[
-          'package:bar/bar.dart',
-          if (flutterTester)
-            // Tests run on host system, so the have the full path on the system.
-            '- ${projectUri.resolve('build/native_assets/linux/libbar.so').toFilePath()}'
-          else
-            // Apps are a bundle with the dylibs on their dlopen path.
-            '- libbar.so',
-        ]),
-      );
-    });
+        );
+        final (Uri? nativeAssetsYaml, _) = await buildNativeAssetsLinux(
+          targetPlatform: TargetPlatform.linux_x64,
+          projectUri: projectUri,
+          buildMode: buildMode,
+          fileSystem: fileSystem,
+          flutterTester: flutterTester,
+          buildRunner: buildRunner,
+        );
+        expect(
+          (globals.logger as BufferLogger).traceText,
+          stringContainsInOrder(<String>[
+            'Building native assets for linux_x64 $buildMode.',
+            'Building native assets for linux_x64 done.',
+          ]),
+        );
+        expect(
+          nativeAssetsYaml,
+          projectUri.resolve('build/native_assets/linux/native_assets.yaml'),
+        );
+        expect(
+          await fileSystem.file(nativeAssetsYaml).readAsString(),
+          stringContainsInOrder(<String>[
+            'package:bar/bar.dart',
+            if (flutterTester)
+              // Tests run on host system, so the have the full path on the system.
+              '- ${projectUri.resolve('build/native_assets/linux/libbar.so').toFilePath()}'
+            else
+              // Apps are a bundle with the dylibs on their dlopen path.
+              '- libbar.so',
+          ]),
+        );
+        expect(buildRunner.buildInvocations, 1);
+        expect(
+          buildRunner.linkInvocations,
+          buildMode == BuildMode.release ? 1 : 0,
+        );
+      });
+    }
   }
 
   testUsingContext('static libs not supported', overrides: <Type, Generator>{
@@ -337,7 +355,7 @@ void main() {
           packagesWithNativeAssetsResult: <Package>[
             Package('bar', projectUri),
           ],
-          dryRunResult: FakeNativeAssetsBuilderResult(
+          buildDryRunResult: FakeNativeAssetsBuilderResult(
             assets: <AssetImpl>[
               NativeCodeAssetImpl(
                 id: 'package:bar/bar.dart',
@@ -381,14 +399,14 @@ void main() {
           packagesWithNativeAssetsResult: <Package>[
             Package('bar', projectUri),
           ],
-          dryRunResult: const FakeNativeAssetsBuilderResult(
+          buildDryRunResult: const FakeNativeAssetsBuilderResult(
             success: false,
           ),
         ),
       ),
       throwsToolExit(
         message:
-            'Building native assets failed. See the logs for more details.',
+            'Building (dry run) native assets failed. See the logs for more details.',
       ),
     );
   });

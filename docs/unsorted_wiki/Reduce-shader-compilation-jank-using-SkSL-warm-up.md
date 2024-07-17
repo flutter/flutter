@@ -1,1 +1,0 @@
-This page has moved to [Reduce shader compilation jank](https://flutter.dev/docs/perf/rendering/shader) on flutter.dev.

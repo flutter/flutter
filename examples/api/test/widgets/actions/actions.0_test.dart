@@ -21,7 +21,7 @@ void main() {
     return button.style?.foregroundColor?.resolve(<WidgetState>{});
   }
 
-  testWidgets('increments and decrements value', (WidgetTester tester) async {
+  testWidgets('Increments and decrements value', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.ActionsExampleApp(),
     );

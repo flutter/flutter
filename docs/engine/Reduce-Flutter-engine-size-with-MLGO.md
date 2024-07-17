@@ -228,6 +228,6 @@ condition.
 
 
 [MLGO]: https://github.com/google/ml-compiler-opt
-[engine setup]: https://github.com/flutter/flutter/wiki/Setting-up-the-Engine-development-environment
-[compile android]: https://github.com/flutter/flutter/wiki/Compiling-the-engine#compiling-for-android-from-macos-or-linux
+[engine setup]: ./contributing/Setting-up-the-Engine-development-environment
+[compile android]: ./contributing/Compiling-the-engine#compiling-for-android-from-macos-or-linux
 [MLGO demo]: https://github.com/google/ml-compiler-opt/blob/main/docs/demo/demo.md

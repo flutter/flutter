@@ -341,7 +341,7 @@ void main() {
         opacity: 0.99,
         scale: 2.01,
       ).toString(),
-      'DecorationImage(SynchronousTestImageProvider(), Alignment.center, scale 2.0, opacity 1.0, FilterQuality.low)',
+      'DecorationImage(SynchronousTestImageProvider(), Alignment.center, scale 2.0, opacity 1.0, FilterQuality.medium)',
     );
   });
 
@@ -389,7 +389,7 @@ void main() {
       '     BoxFit.contain, Alignment.center, centerSlice:\n'
       '     Rect.fromLTRB(10.0, 20.0, 40.0, 60.0), ImageRepeat.repeatY,\n'
       '     match text direction, scale 0.5, opacity 0.5,\n'
-      '     FilterQuality.low, invert colors, use anti-aliasing)\n'
+      '     FilterQuality.medium, invert colors, use anti-aliasing)\n'
       '   The ImageConfiguration was:\n'
       '     ImageConfiguration(size: Size(100.0, 100.0))\n',
     );

@@ -1,3 +1,5 @@
+# Writing a golden file test for package:flutter
+
 _(This page is referenced by comments in the Flutter codebase.)_
 
 **If you want to learn how to write a golden test for your package, see [the `matchesGoldenFile` API docs](https://api.flutter.dev/flutter/flutter_test/matchesGoldenFile.html).** This wiki page describes the special process specifically for the Flutter team itself.
@@ -5,16 +7,15 @@ _(This page is referenced by comments in the Flutter codebase.)_
 Golden file tests for `package:flutter` use [Flutter Gold](https://flutter-gold.skia.org/?query=source_type%3Dflutter) for baseline and version management of golden files. This allows for golden file testing on Linux, Windows, MacOS and Web, which accounts for the occasional subtle rendering differences between these platforms.
 
 ## Index
-- [Known Issues](https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package:flutter#known-issues)
-- [Build Breakage](https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package:flutter#build-breakage)
-- [Creating a New Golden File Test](https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package%3Aflutter#creating-a-new-golden-file-test)
-- [Updating a Golden File Test](https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package%3Aflutter#updating-a-golden-file-test
-)
-- [Flutter Gold Login](https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package%3Aflutter#flutter-gold-login
-)
-- [`flutter-gold` Check](https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package:flutter#flutter-gold-check)
-- [`reduced-test-set` tag](https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package:flutter#reduced-test-set-tag)
-- [Troubleshooting](https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package:flutter#troubleshooting)
+- [Known Issues](#known-issues)
+- [Build Breakage](#build-breakage)
+- [Creating a New Golden File Test](#creating-a-new-golden-file-test)
+- [Adding a new key in the Skia Client](#Adding-a-new-key-in-the-Skia-Client)
+- [Updating a Golden File Test](#updating-a-golden-file-test)
+- [Flutter Gold Login](#flutter-gold-login)
+- [`flutter-gold` Check](#flutter-gold-check)
+- [`reduced-test-set` tag](#reduced-test-set-tag)
+- [Troubleshooting](#troubleshooting)
 
 
 ## Known Issues
@@ -30,6 +31,8 @@ If you would like to instantly invalidate all prior renderings, changing the nam
 
 If the Flutter build is broken due to a golden file test failure, this typically means an image change has landed without being triaged. Golden file images should be triaged in pre-submit before a change lands (as described in the steps below). If this process is not followed, a test with an unapproved golden file image will fail in post-submit testing. This will present in the following error message:
 
+<!-- TODO(Piinks): Update this error message in the framework. -->
+
 ```
   Skia Gold received an unapproved image in post-submit
   testing. Golden file images in flutter/flutter are triaged
@@ -38,7 +41,7 @@ If the Flutter build is broken due to a golden file test failure, this typically
   Visit https://flutter-gold.skia.org/ to view and approve
   the image(s), or revert the associated change. For more
   information, visit the wiki:
-  https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package:flutter
+  https://github.com/flutter/flutter/blob/main/docs/contributing/testing/Writing-a-golden-file-test-for-package-flutter.md
 ```
 
 To resolve, visit the [Flutter Gold dashboard](https://flutter-gold.skia.org/) to view the batch of images in question. If they are intended changes, approve them by clicking the checkmark, and re-run the failing test to resolve. If the image changes are not intended, revert the associated change.
@@ -76,6 +79,23 @@ New tests can be triaged from these tryjobs, which will cause the pending `flutt
 
 And that’s it! Your new golden file(s) will be checked in as the baseline(s) for your new test(s), and your PR will be ready to merge. :tada:
 
+## Adding a new key in the Skia Client
+
+Approved golden file images on the [Flutter Gold Dashboard] [Flutter Gold](https://flutter-gold.skia.org/?query=source_type%3Dflutter)
+are keyed with parameters like platform, CI environment, test name, browser, and image extension.
+
+When adding new keys, consider all possible values, and whether or not they are covered by the CI environments that are used
+to test changes in presubmit and postsubmit testing. If not all possible values are accounted for, false negatives can occur
+in local testing.
+
+For example, we once included an abi key, which in our CI environments at the time could be linux_x64, windows_x64, or mac_x64.
+These keys are used to look up approved images for local testing, so when a mac_arm64 machine would run local tests,
+no image could be found and the tests would fail.
+Omitting the key in the lookup did most often find the right image, but it was not consistently reliable, so we removed it.
+
+If the CI environments available for testing changes do not cover all value of a particular key, it is not a good key to
+include as part of testing.
+
 ## Updating a Golden File Test
 
 If renderings change, then the golden baseline in [Flutter Gold](https://flutter-gold.skia.org/?query=source_type%3Dflutter) will need to be updated.
@@ -91,7 +111,7 @@ And that’s it! Your new golden file(s) will be checked in as the baseline(s) f
 
 ## Flutter Gold Login
 
-Triage permission is currently restricted to members of *flutter-hackers*. For more information, see [Contributor Access](https://github.com/flutter/flutter/wiki/Contributor-access).
+Triage permission is currently restricted to members of *flutter-hackers*. For more information, see [Contributor Access](../Contributor-access.md).
 Once you have been added as an authorized user for Flutter Gold, you can log in through the [homepage of the Flutter Gold dashboard](https://flutter-gold.skia.org/) and proceed to triage your image results under [Changelists](https://flutter-gold.skia.org/changelists).
 
 ## `flutter gold` Check

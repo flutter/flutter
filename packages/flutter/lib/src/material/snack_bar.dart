@@ -5,7 +5,6 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-import 'button_style.dart';
 import 'color_scheme.dart';
 import 'colors.dart';
 import 'icon_button.dart';
@@ -99,8 +98,8 @@ class SnackBarAction extends StatefulWidget {
   /// The button label color. If not provided, defaults to
   /// [SnackBarThemeData.actionTextColor].
   ///
-  /// If [textColor] is a [MaterialStateColor], then the text color will be
-  /// resolved against the set of [MaterialState]s that the action text
+  /// If [textColor] is a [WidgetStateColor], then the text color will be
+  /// resolved against the set of [WidgetState]s that the action text
   /// is in, thus allowing for different colors for states such as pressed,
   /// hovered and others.
   final Color? textColor;
@@ -108,8 +107,8 @@ class SnackBarAction extends StatefulWidget {
   /// The button background fill color. If not provided, defaults to
   /// [SnackBarThemeData.actionBackgroundColor].
   ///
-  /// If [backgroundColor] is a [MaterialStateColor], then the text color will
-  /// be resolved against the set of [MaterialState]s that the action text is
+  /// If [backgroundColor] is a [WidgetStateColor], then the text color will
+  /// be resolved against the set of [WidgetState]s that the action text is
   /// in, thus allowing for different colors for the states.
   final Color? backgroundColor;
 
@@ -204,10 +203,11 @@ class _SnackBarActionState extends State<SnackBarAction> {
     }
 
     return TextButton(
-      style: ButtonStyle(
-        foregroundColor: resolveForegroundColor(),
-        backgroundColor: resolveBackgroundColor(),
-      ),
+      style: TextButton.styleFrom(overlayColor: resolveForegroundColor())
+        .copyWith(
+          foregroundColor: resolveForegroundColor(),
+          backgroundColor: resolveBackgroundColor(),
+        ),
       onPressed: _haveTriggeredAction ? null : _handlePressed,
       child: Text(widget.label),
     );
@@ -387,7 +387,8 @@ class SnackBar extends StatefulWidget {
 
   /// Defines how the snack bar area, including margin, will behave during hit testing.
   ///
-  /// If this property is null and [margin] is not null, then [HitTestBehavior.deferToChild] is used by default.
+  /// If this property is null, and [margin] is not null or [SnackBarThemeData.insetPadding] of
+  /// [ThemeData.snackBarTheme] is not null, then [HitTestBehavior.deferToChild] is used by default.
   ///
   /// Please refer to [HitTestBehavior] for a detailed explanation of every behavior.
   final HitTestBehavior? hitTestBehavior;
@@ -438,8 +439,8 @@ class SnackBar extends StatefulWidget {
   /// [ThemeData.snackBarTheme] is used. If that is null, then the default is
   /// inverse surface.
   ///
-  /// If [closeIconColor] is a [MaterialStateColor], then the icon color will be
-  /// resolved against the set of [MaterialState]s that the action text
+  /// If [closeIconColor] is a [WidgetStateColor], then the icon color will be
+  /// resolved against the set of [WidgetState]s that the action text
   /// is in, thus allowing for different colors for states such as pressed,
   /// hovered and others.
   final Color? closeIconColor;
@@ -671,9 +672,6 @@ class _SnackBarState extends State<SnackBar> {
     final double actionHorizontalMargin = (widget.padding?.resolve(TextDirection.ltr).right ?? horizontalPadding) / 2;
     final double iconHorizontalMargin = (widget.padding?.resolve(TextDirection.ltr).right ?? horizontalPadding) / 12.0;
 
-
-
-
     final IconButton? iconButton = showCloseIcon
         ? IconButton(
             icon: const Icon(Icons.close),
@@ -818,7 +816,7 @@ class _SnackBarState extends State<SnackBar> {
         key: const Key('dismissible'),
         direction: dismissDirection,
         resizeDuration: null,
-        behavior: widget.hitTestBehavior ?? (widget.margin != null ? HitTestBehavior.deferToChild : HitTestBehavior.opaque),
+        behavior: widget.hitTestBehavior ?? (widget.margin != null || snackBarTheme.insetPadding != null ? HitTestBehavior.deferToChild : HitTestBehavior.opaque),
         onDismissed: (DismissDirection direction) {
           ScaffoldMessenger.of(context).removeCurrentSnackBar(reason: SnackBarClosedReason.swipe);
         },

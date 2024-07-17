@@ -83,11 +83,9 @@ void main() {
     expect(material.textStyle?.height, 1.43);
   });
 
-  testWidgets('DropdownMenu can be disabled', (WidgetTester tester) async {
-    final ThemeData themeData = ThemeData();
+  testWidgets('Inner TextField is disabled when DropdownMenu is disabled', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
-        theme: themeData,
         home: Scaffold(
           body: SafeArea(
             child: DropdownMenu<TestMenu>(
@@ -100,7 +98,7 @@ void main() {
     );
 
     final TextField textField = tester.widget(find.byType(TextField));
-    expect(textField.decoration?.enabled, false);
+    expect(textField.enabled, false);
     final Finder menuMaterial = find.ancestor(
       of: find.byType(SingleChildScrollView),
       matching: find.byType(Material),
@@ -114,6 +112,25 @@ void main() {
       matching: find.byType(Material),
     );
     expect(updatedMenuMaterial, findsNothing);
+  });
+
+  testWidgets('Inner IconButton is disabled when DropdownMenu is disabled', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/149598.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SafeArea(
+            child: DropdownMenu<TestMenu>(
+              enabled: false,
+              dropdownMenuEntries: menuChildren,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final IconButton trailingButton = tester.widget(find.widgetWithIcon(IconButton, Icons.arrow_drop_down).first);
+    expect(trailingButton.onPressed, null);
   });
 
   testWidgets('Material2 - The width of the text field should always be the same as the menu view',
@@ -1128,6 +1145,70 @@ void main() {
         expect(find.widgetWithText(MenuItemButton, menu.label), findsOneWidget);
       }
     }
+  });
+
+  testWidgets('Enable filtering with custom filter callback that filter text case sensitive', (WidgetTester tester) async {
+    final ThemeData themeData = ThemeData();
+    final TextEditingController controller = TextEditingController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(MaterialApp(
+      theme: themeData,
+      home: Scaffold(
+        body: DropdownMenu<TestMenu>(
+          requestFocusOnTap: true,
+          enableFilter: true,
+          filterCallback: (List<DropdownMenuEntry<TestMenu>> entries, String filter) {
+            return entries.where((DropdownMenuEntry<TestMenu> element) => element.label.contains(filter)).toList();
+          },
+          dropdownMenuEntries: menuChildren,
+          controller: controller,
+        ),
+      ),
+    ));
+
+    // Open the menu.
+    await tester.tap(find.byType(DropdownMenu<TestMenu>));
+    await tester.pump();
+
+    await tester.enterText(find.byType(TextField).first, 'item');
+    expect(controller.text, 'item');
+    await tester.pumpAndSettle();
+    for (final TestMenu menu in TestMenu.values) {
+      expect(find.widgetWithText(MenuItemButton, menu.label).hitTestable(), findsNothing);
+    }
+
+    await tester.enterText(find.byType(TextField).first, 'Item');
+    expect(controller.text, 'Item');
+    await tester.pumpAndSettle();
+    expect(find.widgetWithText(MenuItemButton, 'Item 0').hitTestable(), findsOneWidget);
+    expect(find.widgetWithText(MenuItemButton, 'Menu 1').hitTestable(), findsNothing);
+    expect(find.widgetWithText(MenuItemButton, 'Item 2').hitTestable(), findsOneWidget);
+    expect(find.widgetWithText(MenuItemButton, 'Item 3').hitTestable(), findsOneWidget);
+    expect(find.widgetWithText(MenuItemButton, 'Item 4').hitTestable(), findsOneWidget);
+    expect(find.widgetWithText(MenuItemButton, 'Item 5').hitTestable(), findsOneWidget);
+  });
+
+  testWidgets('Throw assertion error when enable filtering with custom filter callback and enableFilter set on False', (WidgetTester tester) async {
+    final ThemeData themeData = ThemeData();
+    final TextEditingController controller = TextEditingController();
+    addTearDown(controller.dispose);
+
+    expect((){
+      MaterialApp(
+        theme: themeData,
+        home: Scaffold(
+          body: DropdownMenu<TestMenu>(
+            requestFocusOnTap: true,
+            filterCallback: (List<DropdownMenuEntry<TestMenu>> entries, String filter) {
+              return entries.where((DropdownMenuEntry<TestMenu> element) => element.label.contains(filter)).toList();
+            },
+            dropdownMenuEntries: menuChildren,
+            controller: controller,
+          ),
+        ),
+      );
+    }, throwsAssertionError);
   });
 
   testWidgets('The controller can access the value in the input field', (WidgetTester tester) async {
@@ -2292,6 +2373,64 @@ void main() {
     await tester.pumpAndSettle();
     // One is layout for the _DropdownMenuBody, the other one is the real button item in the menu.
     expect(find.widgetWithText(MenuItemButton, labelText), findsNWidgets(2));
+  });
+
+  testWidgets('DropdownMenu allows customizing text field text align', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(
+      home: Scaffold(
+        body: Column(
+          children: <DropdownMenu<int>>[
+            DropdownMenu<int>(
+              dropdownMenuEntries: <DropdownMenuEntry<int>>[],
+            ),
+             DropdownMenu<int>(
+              textAlign: TextAlign.center,
+              dropdownMenuEntries: <DropdownMenuEntry<int>>[],
+            ),
+          ],
+        ),
+      ),
+    ));
+
+    final List<TextField> fields = tester.widgetList<TextField>(find.byType(TextField)).toList();
+
+    expect(fields[0].textAlign, TextAlign.start);
+    expect(fields[1].textAlign, TextAlign.center);
+  });
+
+  testWidgets('DropdownMenu correctly sets keyboardType on TextField', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SafeArea(
+            child: DropdownMenu<TestMenu>(
+              dropdownMenuEntries: menuChildren,
+              keyboardType: TextInputType.number,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TextField textField = tester.widget(find.byType(TextField));
+    expect(textField.keyboardType, TextInputType.number);
+  });
+
+  testWidgets('DropdownMenu keyboardType defaults to TextInputType.text', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SafeArea(
+            child: DropdownMenu<TestMenu>(
+              dropdownMenuEntries: menuChildren,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TextField textField = tester.widget(find.byType(TextField));
+    expect(textField.keyboardType, TextInputType.text);
   });
 }
 

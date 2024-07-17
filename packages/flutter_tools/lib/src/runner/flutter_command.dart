@@ -376,7 +376,16 @@ abstract class FlutterCommand extends Command<void> {
   String? get packagesPath => stringArg(FlutterGlobalOptions.kPackagesOption, global: true);
 
   /// Whether flutter is being run from our CI.
-  bool get usingCISystem => boolArg(FlutterGlobalOptions.kContinuousIntegrationFlag, global: true);
+  ///
+  /// This is true if `--ci` is passed to the command or if environment
+  /// variable `LUCI_CI` is `True`.
+  bool get usingCISystem {
+    return boolArg(
+          FlutterGlobalOptions.kContinuousIntegrationFlag,
+          global: true,
+        ) ||
+        globals.platform.environment['LUCI_CI'] == 'True';
+  }
 
   String? get debugLogsDirectoryPath => stringArg(FlutterGlobalOptions.kDebugLogsDirectoryFlag, global: true);
 
@@ -499,7 +508,6 @@ abstract class FlutterCommand extends Command<void> {
     );
     argParser.addFlag(
       'dds',
-      hide: !verboseHelp,
       defaultsTo: true,
       help: 'Enable the Dart Developer Service (DDS).\n'
             'It may be necessary to disable this when attaching to an application with '
@@ -702,7 +710,6 @@ abstract class FlutterCommand extends Command<void> {
   void usesWebRendererOption() {
     argParser.addOption(
       FlutterOptions.kWebRendererFlag,
-      defaultsTo: WebRendererMode.auto.name,
       allowed: WebRendererMode.values.map((WebRendererMode e) => e.name),
       help: 'The renderer implementation to use when building for the web.',
       allowedHelp: CliEnum.allowedHelp(WebRendererMode.values)
@@ -1156,13 +1163,18 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
+  /// Returns a [FlutterProject] view of the current directory or a ToolExit error,
+  /// if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
+  FlutterProject get project => FlutterProject.current();
+
   /// Compute the [BuildInfo] for the current flutter command.
+  ///
   /// Commands that build multiple build modes can pass in a [forcedBuildMode]
   /// to be used instead of parsing flags.
   ///
   /// Throws a [ToolExit] if the current set of options is not compatible with
   /// each other.
-  Future<BuildInfo> getBuildInfo({ BuildMode? forcedBuildMode, File? forcedTargetFile }) async {
+  Future<BuildInfo> getBuildInfo({BuildMode? forcedBuildMode, File? forcedTargetFile}) async {
     final bool trackWidgetCreation = argParser.options.containsKey('track-widget-creation') &&
       boolArg('track-widget-creation');
 
@@ -1170,10 +1182,12 @@ abstract class FlutterCommand extends Command<void> {
       ? stringArg('build-number')
       : null;
 
-    final File packagesFile = globals.fs.file(
-      packagesPath ?? globals.fs.path.absolute('.dart_tool', 'package_config.json'));
+    final File packageConfigFile = globals.fs.file(packagesPath ?? project.packageConfigFile.path);
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-        packagesFile, logger: globals.logger, throwOnError: false);
+      packageConfigFile,
+      logger: globals.logger,
+      throwOnError: false,
+    );
 
     final List<String> experiments =
       argParser.options.containsKey(FlutterOptions.kEnableExperiment)
@@ -1275,16 +1289,13 @@ abstract class FlutterCommand extends Command<void> {
     final Map<String, Object?> defineConfigJsonMap = extractDartDefineConfigJsonMap();
     final List<String> dartDefines = extractDartDefines(defineConfigJsonMap: defineConfigJsonMap);
 
-    if (argParser.options.containsKey(FlutterOptions.kWebResourcesCdnFlag)) {
-      final bool hasLocalWebSdk = argParser.options.containsKey('local-web-sdk') && stringArg('local-web-sdk') != null;
-      if (boolArg(FlutterOptions.kWebResourcesCdnFlag) && !hasLocalWebSdk) {
-        if (!dartDefines.any((String define) => define.startsWith('FLUTTER_WEB_CANVASKIT_URL='))) {
-          dartDefines.add('FLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/${globals.flutterVersion.engineRevision}/');
-        }
-      }
-    }
+    final bool useCdn = !argParser.options.containsKey(FlutterOptions.kWebResourcesCdnFlag)
+      || boolArg(FlutterOptions.kWebResourcesCdnFlag);
+    final bool useLocalWebSdk = argParser.options.containsKey(FlutterGlobalOptions.kLocalWebSDKOption)
+      && stringArg(FlutterGlobalOptions.kLocalWebSDKOption, global: true) != null;
+    final bool useLocalCanvasKit = !useCdn || useLocalWebSdk;
 
-    final String? defaultFlavor = FlutterProject.current().manifest.defaultFlavor;
+    final String? defaultFlavor = project.manifest.defaultFlavor;
     final String? cliFlavor = argParser.options.containsKey('flavor') ? stringArg('flavor') : null;
     final String? flavor = cliFlavor ?? defaultFlavor;
     if (flavor != null) {
@@ -1324,7 +1335,7 @@ abstract class FlutterCommand extends Command<void> {
       bundleSkSLPath: bundleSkSLPath,
       dartExperiments: experiments,
       performanceMeasurementFile: performanceMeasurementFile,
-      packagesPath: packagesPath ?? globals.fs.path.absolute('.dart_tool', 'package_config.json'),
+      packageConfigPath: packagesPath ?? packageConfigFile.path,
       nullSafetyMode: nullSafetyMode,
       codeSizeDirectory: codeSizeDirectory,
       androidGradleDaemon: androidGradleDaemon,
@@ -1336,6 +1347,7 @@ abstract class FlutterCommand extends Command<void> {
           : null,
       assumeInitializeFromDillUpToDate: argParser.options.containsKey(FlutterOptions.kAssumeInitializeFromDillUpToDate)
           && boolArg(FlutterOptions.kAssumeInitializeFromDillUpToDate),
+      useLocalCanvasKit: useLocalCanvasKit,
     );
   }
 
@@ -1417,7 +1429,7 @@ abstract class FlutterCommand extends Command<void> {
   String get deprecationWarning {
     return '${globals.logger.terminal.warningMark} The "$name" command is '
            'deprecated and will be removed in a future version of Flutter. '
-           'See https://flutter.dev/docs/development/tools/sdk/releases '
+           'See https://flutter.dev/to/previous-releases '
            'for previous releases of Flutter.\n';
   }
 
@@ -1872,10 +1884,7 @@ Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and 
   /// If no flag named [name] was added to the [ArgParser], an [ArgumentError]
   /// will be thrown.
   bool boolArg(String name, {bool global = false}) {
-    if (global) {
-      return globalResults![name] as bool;
-    }
-    return argResults![name] as bool;
+    return (global ? globalResults : argResults)!.flag(name);
   }
 
   /// Gets the parsed command-line option named [name] as a `String`.
@@ -1883,18 +1892,12 @@ Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and 
   /// If no option named [name] was added to the [ArgParser], an [ArgumentError]
   /// will be thrown.
   String? stringArg(String name, {bool global = false}) {
-    if (global) {
-      return globalResults![name] as String?;
-    }
-    return argResults![name] as String?;
+    return (global ? globalResults : argResults)!.option(name);
   }
 
   /// Gets the parsed command-line option named [name] as `List<String>`.
   List<String> stringsArg(String name, {bool global = false}) {
-    if (global) {
-      return globalResults![name] as List<String>;
-    }
-    return argResults![name] as List<String>;
+    return (global ? globalResults : argResults)!.multiOption(name);
   }
 }
 

@@ -30,7 +30,7 @@ within their Flutter UI.
 
 There are currently three different implementations of Android platform views:
 - [Virtual Display](Virtual_Display.md) (VD)
-- [Hybrid Composition](https://github.com/flutter/flutter/wiki/Hybrid-Composition) (HC)
+- [Hybrid Composition](../Hybrid-Composition.md) (HC)
 - [Texture Layer Hybrid Composition](Texture-Layer-Hybrid-Composition.md) (TLHC)
 
 Each has a different set of limitations and tradeoffs, as discussed below. The pages linked above give details about each implementation.

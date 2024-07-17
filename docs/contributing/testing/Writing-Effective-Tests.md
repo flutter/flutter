@@ -227,4 +227,4 @@ When writing tests, think about the developer who will read this test 6 months f
 
 # See also
 
-- [Flutter Test Fonts](https://github.com/flutter/flutter/wiki/Flutter-Test-Fonts)
+- [Flutter Test Fonts](Flutter-Test-Fonts.md)

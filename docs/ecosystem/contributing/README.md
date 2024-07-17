@@ -1,4 +1,4 @@
-This page covers additional information that is specific to contributing to flutter/packages. If you aren't already familiar with the general guidance on Flutter contribution, start with [Tree hygiene](https://github.com/flutter/flutter/wiki/Tree-hygiene).
+This page covers additional information that is specific to contributing to flutter/packages. If you aren't already familiar with the general guidance on Flutter contribution, start with [Tree hygiene](../../contributing/Tree-hygiene.md).
 
 ## Version and CHANGELOG updates
 
@@ -178,12 +178,12 @@ On some platforms, there are multiple native languages that can be used to write
     - Currently our policy is to have a limited number of plugins in Kotlin, to ensure that we are finding Kotlin-specific plugin issues in our own development.
   - Java if the plugin is already in Java (which is almost all of them).
     - Allowing Kotlin more broadly is [under consideration](https://docs.google.com/document/d/1Ok_mUPgmw8_l-ynLueEKtXm2Fs48lEVB0JqZd7M7uyA/edit?usp=sharing), but currently most plugin development is limited to Java to avoid adding another language to the set of languages Flutter team members need to interact with regularly.
-    - If you are interested in taking on a **long-term ownership role in a plugin**, and would like to migrate it to Kotlin, please reach out in the `hackers-ecosystem` channel [on Discord](https://github.com/flutter/flutter/wiki/Chat).
+    - If you are interested in taking on a **long-term ownership role in a plugin**, and would like to migrate it to Kotlin, please reach out in the `hackers-ecosystem` channel [on Discord](../../contributing/Chat.md).
 - iOS: Depends on the plugin. The goal is to eventually migrate all plugins to Swift; see [the migration section below](#swift-migration-for-1p-plugins) for details. For non-migration PRs, use:
   - Swift if the plugin is entirely Swift.
   - Swift or Objective-C if the plugin is partially migrated.
   - Objective-C if the plugin is still entirely Objective-C.
-- Linux: C. Use of C++ constructs is strongly discouraged; see [repo style notes](https://github.com/flutter/packages/blob/main/CONTRIBUTING.md#style) for details
+- Linux: C. Use of C++ constructs is strongly discouraged; see [repo style notes](../../../CONTRIBUTING.md#style) for details
 - macOS: Swift only\*.
   - \* In some cases an existing iOS implementation has been updated to support macOS, so is Objective-C (e.g., `in_app_purchase`). This is the only case where Objective-C is allowed for macOS plugins.
 - Windows: C++.

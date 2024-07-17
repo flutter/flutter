@@ -559,6 +559,7 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
     required this.filter,
     super.child,
     this.blendMode = BlendMode.srcOver,
+    this.enabled = true,
   });
 
   /// The image filter to apply to the existing painted content before painting the child.
@@ -573,15 +574,23 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
   /// {@macro flutter.widgets.BackdropFilter.blendMode}
   final BlendMode blendMode;
 
+  /// Whether or not to apply the backdrop filter operation to the child of this
+  /// widget.
+  ///
+  /// Prefer setting enabled to `false` instead of creating a "no-op" filter
+  /// type for performance reasons.
+  final bool enabled;
+
   @override
   RenderBackdropFilter createRenderObject(BuildContext context) {
-    return RenderBackdropFilter(filter: filter, blendMode: blendMode);
+    return RenderBackdropFilter(filter: filter, blendMode: blendMode, enabled: enabled);
   }
 
   @override
   void updateRenderObject(BuildContext context, RenderBackdropFilter renderObject) {
     renderObject
       ..filter = filter
+      ..enabled = enabled
       ..blendMode = blendMode;
   }
 }
@@ -2381,7 +2390,7 @@ class CustomMultiChildLayout extends MultiChildRenderObjectWidget {
 ///  * [FittedBox], which sizes and positions its child widget to fit the parent
 ///    according to a given [BoxFit] discipline.
 ///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
-///  * [Understanding constraints](https://flutter.dev/docs/development/ui/layout/constraints),
+///  * [Understanding constraints](https://docs.flutter.dev/ui/layout/constraints),
 ///    an in-depth article about layout in Flutter.
 class SizedBox extends SingleChildRenderObjectWidget {
   /// Creates a fixed size box. The [width] and [height] parameters can be null
@@ -5934,8 +5943,8 @@ class RichText extends MultiChildRenderObjectWidget {
 /// various fields on this class in more detail.
 ///
 /// The [image] is not disposed of by this widget. Creators of the widget are
-/// expected to call [Image.dispose] on the [image] once the [RawImage] is no
-/// longer buildable.
+/// expected to call [dart:ui.Image.dispose] on the [image] once the [RawImage]
+/// is no longer buildable.
 ///
 /// This widget is rarely used directly. Instead, consider using [Image].
 class RawImage extends LeafRenderObjectWidget {
@@ -5959,15 +5968,15 @@ class RawImage extends LeafRenderObjectWidget {
     this.centerSlice,
     this.matchTextDirection = false,
     this.invertColors = false,
-    this.filterQuality = FilterQuality.low,
+    this.filterQuality = FilterQuality.medium,
     this.isAntiAlias = false,
   });
 
   /// The image to display.
   ///
   /// Since a [RawImage] is stateless, it does not ever dispose this image.
-  /// Creators of a [RawImage] are expected to call [Image.dispose] on this
-  /// image handle when the [RawImage] will no longer be needed.
+  /// Creators of a [RawImage] are expected to call [dart:ui.Image.dispose] on
+  /// this image handle when the [RawImage] will no longer be needed.
   final ui.Image? image;
 
   /// A string identifying the source of the image.
@@ -6002,8 +6011,7 @@ class RawImage extends LeafRenderObjectWidget {
 
   /// Used to set the filterQuality of the image.
   ///
-  /// Defaults to [FilterQuality.low] to scale the image, which corresponds to
-  /// bilinear interpolation.
+  /// Defaults to [FilterQuality.medium].
   final FilterQuality filterQuality;
 
   /// Used to combine [color] with this image.
@@ -7101,7 +7109,9 @@ class Semantics extends SingleChildRenderObjectWidget {
     bool? slider,
     bool? keyboardKey,
     bool? link,
+    Uri? linkUrl,
     bool? header,
+    int? headingLevel,
     bool? textField,
     bool? readOnly,
     bool? focusable,
@@ -7152,6 +7162,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     SetTextHandler? onSetText,
     VoidCallback? onDidGainAccessibilityFocus,
     VoidCallback? onDidLoseAccessibilityFocus,
+    VoidCallback? onFocus,
     Map<CustomSemanticsAction, VoidCallback>? customSemanticsActions,
   }) : this.fromProperties(
     key: key,
@@ -7171,7 +7182,9 @@ class Semantics extends SingleChildRenderObjectWidget {
       slider: slider,
       keyboardKey: keyboardKey,
       link: link,
+      linkUrl: linkUrl,
       header: header,
+      headingLevel: headingLevel,
       textField: textField,
       readOnly: readOnly,
       focusable: focusable,
@@ -7216,6 +7229,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       onMoveCursorBackwardByCharacter: onMoveCursorBackwardByCharacter,
       onDidGainAccessibilityFocus: onDidGainAccessibilityFocus,
       onDidLoseAccessibilityFocus: onDidLoseAccessibilityFocus,
+      onFocus: onFocus,
       onDismiss: onDismiss,
       onSetSelection: onSetSelection,
       onSetText: onSetText,
