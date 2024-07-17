@@ -12,6 +12,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 
 import 'package:flutter_test/flutter_test.dart';
 
@@ -1900,6 +1901,50 @@ void main() {
       kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
     );
   });
+
+  testWidgets('Action sheets emits haptic vibration on sliding into a button', (WidgetTester tester) async {
+    int vibrationCount = 0;
+
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
+      if (methodCall.method == 'HapticFeedback.vibrate') {
+        expect(methodCall.arguments, 'HapticFeedbackType.selectionClick');
+        vibrationCount += 1;
+      }
+      return null;
+    });
+
+    await tester.pumpWidget(
+      createAppWithButtonThatLaunchesActionSheet(
+        CupertinoActionSheet(
+            title: const Text('The title'),
+            actions: <Widget>[
+              CupertinoActionSheetAction(child: const Text('One'), onPressed: () {}),
+              CupertinoActionSheetAction(child: const Text('Two'), onPressed: () {}),
+              CupertinoActionSheetAction(child: const Text('Three'), onPressed: () {}),
+            ],
+          )
+        ),
+    );
+
+    await tester.tap(find.text('Go'));
+    await tester.pumpAndSettle();
+
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('One')));
+    await tester.pumpAndSettle();
+    // Tapping down on a button should not emit vibration.
+    expect(vibrationCount, 0);
+
+    await gesture.moveTo(tester.getCenter(find.text('Two')));
+    await tester.pumpAndSettle();
+    expect(vibrationCount, 1);
+
+    await gesture.moveTo(tester.getCenter(find.text('Three')));
+    await tester.pumpAndSettle();
+    expect(vibrationCount, 2);
+
+    await gesture.up();
+    expect(vibrationCount, 2);
+  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 }
 
 RenderBox findScrollableActionsSectionRenderBox(WidgetTester tester) {
