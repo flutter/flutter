@@ -368,6 +368,7 @@
                 "config": "ci/mac_profile_arm64",
                 "targets": [
                     "flutter/build/archives:artifacts",
+                    "flutter/lib/snapshot:create_macos_gen_snapshots",
                     "flutter/shell/platform/darwin/macos:zip_macos_flutter_framework"
                 ]
             },
@@ -558,9 +559,9 @@
                     "--dst",
                     "out/debug/snapshot",
                     "--arm64-path",
-                    "out/ci/mac_debug_arm64/clang_x64/gen_snapshot",
+                    "out/ci/mac_debug_arm64/gen_snapshot_arm64",
                     "--x64-path",
-                    "out/ci/host_debug/gen_snapshot",
+                    "out/ci/host_debug/gen_snapshot_x64",
                     "--zip"
                 ],
                 "script": "flutter/sky/tools/create_macos_gen_snapshots.py"
@@ -571,9 +572,9 @@
                     "--dst",
                     "out/profile/snapshot",
                     "--arm64-path",
-                    "out/ci/mac_profile_arm64/clang_x64/gen_snapshot",
+                    "out/ci/mac_profile_arm64/gen_snapshot_arm64",
                     "--x64-path",
-                    "out/ci/host_profile/gen_snapshot",
+                    "out/ci/host_profile/gen_snapshot_x64",
                     "--zip"
                 ],
                 "script": "flutter/sky/tools/create_macos_gen_snapshots.py"
@@ -584,9 +585,9 @@
                     "--dst",
                     "out/release/snapshot",
                     "--arm64-path",
-                    "out/ci/mac_release_arm64/clang_x64/gen_snapshot",
+                    "out/ci/mac_release_arm64/gen_snapshot_arm64",
                     "--x64-path",
-                    "out/ci/host_release/gen_snapshot",
+                    "out/ci/host_release/gen_snapshot_x64",
                     "--zip"
                 ],
                 "script": "flutter/sky/tools/create_macos_gen_snapshots.py"
