@@ -53,13 +53,16 @@ if (build_engine_artifacts && !is_android) {
       exe = ".exe"
     }
 
-    # Only include gen_snapshot for all runtime modes.
+    # gen_snapshot is bundled for all runtime modes.
     files = [
       {
         source = "$root_out_dir/gen_snapshot$exe"
         destination = "gen_snapshot$exe"
       },
     ]
+
+    # Host tooling/libraries that are used only in debug builds, or which are
+    # identical across all runtime modes.
     if (flutter_runtime_mode == "debug") {
       dll = ".so"
       lib_prefix = "lib"
@@ -109,6 +112,9 @@ if (build_engine_artifacts && !is_android) {
         },
       ]
     }
+
+    # On macOS, add entitlements.txt, which contains filenames of binaries that
+    # need to be code-signed by a later CI stage.
     if (host_os == "mac") {
       deps += [ ":artifacts_entitlement_config" ]
       files += [
