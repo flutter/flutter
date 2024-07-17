@@ -546,21 +546,35 @@ class _SlidingTapGestureRecognizer extends VerticalDragGestureRecognizer {
       if (event is PointerMoveEvent) {
         onResponsiveUpdate?.call(event.position);
       }
-      // If this gesture has a competing gesture (such as scrolling), and the
-      // pointer has not moved far enough to get this panning accepted, a
-      // pointer up event should still be considered as an accepted tap up.
-      // Manually accept this gesture here, which triggers onDragEnd.
+      // Sliding tap needs to handle 'up' events differently compared to typical
+      // drag gestures. If there's another gesture recognizer (like scrolling)
+      // competing and the pointer hasn't moved beyond the tolerance limit
+      // (slop), this gesture must still be accepted.
+      //
+      // Simply calling `accept()` here to handle this won't work because it
+      // would break backward compatibility with legacy buttons (see
+      // https://github.com/flutter/flutter/issues/150980 for more details).
+      // Legacy buttons recognize taps using `GestureDetector.onTap`, which
+      // neither accepts nor rejects for short taps. Instead, they wait for the
+      // default resolution as the last contender in the gesture arena.
+      //
+      // Therefore, this gesture should also follow the same strategy of not
+      // immediately accepting or rejecting. This allows tap gestures to take
+      // precedence for being inner, while sliding taps can take precedence over
+      // scroll gestures when the latter give up.
       if (event is PointerUpEvent) {
-        resolve(GestureDisposition.accepted);
         stopTrackingPointer(_primaryPointer!);
         onResponsiveEnd?.call(event.position);
-      } else {
-        super.handleEvent(event);
+        _primaryPointer = null;
+        // Do not call `super.handleEvent`, which gives up the pointer and thus
+        // rejects the gesture.
+        return;
       }
-      if (event is PointerUpEvent || event is PointerCancelEvent) {
+      if (event is PointerCancelEvent) {
         _primaryPointer = null;
       }
     }
+    super.handleEvent(event);
   }
 
   @override
