@@ -521,9 +521,9 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
       final FileSystemEntityType type = globals.fs.typeSync(absoluteArchivePath);
       globals.printError('Try distributing the app in Xcode:');
       if (type == FileSystemEntityType.notFound) {
-        globals.printError('  open ios/Runner.xcworkspace');
+        globals.printError('open ios/Runner.xcworkspace', indent: 2);
       } else {
-        globals.printError('  open $absoluteArchivePath');
+        globals.printError('open $absoluteArchivePath', indent: 2);
       }
 
       // Even though the IPA step didn't succeed, the xcarchive did.
