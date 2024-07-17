@@ -149,6 +149,10 @@ class DisplayListMatrixClipState {
   void clipRect(const SkRect& rect, ClipOp op, bool is_aa) {
     clipRect(ToDlRect(rect), op, is_aa);
   }
+  void clipOval(const DlRect& bounds, ClipOp op, bool is_aa);
+  void clipOval(const SkRect& bounds, ClipOp op, bool is_aa) {
+    clipRect(ToDlRect(bounds), op, is_aa);
+  }
   void clipRRect(const SkRRect& rrect, ClipOp op, bool is_aa);
   void clipPath(const SkPath& path, ClipOp op, bool is_aa);
 

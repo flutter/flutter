@@ -4332,36 +4332,66 @@ TEST_F(DisplayListTest, DrawDisplayListForwardsBackdropFlag) {
 
 #define CLIP_EXPECTOR(name) ClipExpector name(__FILE__, __LINE__)
 
+struct ClipExpectation {
+  std::variant<SkRect, SkRRect, SkPath> shape;
+  bool is_oval;
+  ClipOp clip_op;
+  bool is_aa;
+
+  std::string shape_name() {
+    switch (shape.index()) {
+      case 0:
+        return is_oval ? "SkOval" : "SkRect";
+      case 1:
+        return "SkRRect";
+      case 2:
+        return "SkPath";
+      default:
+        return "Unknown";
+    }
+  }
+};
+
+::std::ostream& operator<<(::std::ostream& os, const ClipExpectation& expect) {
+  os << "Expectation(";
+  switch (expect.shape.index()) {
+    case 0:
+      os << std::get<SkRect>(expect.shape);
+      if (expect.is_oval) {
+        os << " (oval)";
+      }
+      break;
+    case 1:
+      os << std::get<SkRRect>(expect.shape);
+      break;
+    case 2:
+      os << std::get<SkPath>(expect.shape);
+      break;
+    case 3:
+      os << "Unknown";
+  }
+  os << ", " << expect.clip_op;
+  os << ", " << expect.is_aa;
+  os << ")";
+  return os;
+}
+
 class ClipExpector : public virtual DlOpReceiver,
                      virtual IgnoreAttributeDispatchHelper,
                      virtual IgnoreTransformDispatchHelper,
                      virtual IgnoreDrawDispatchHelper {
  public:
-  struct Expectation {
-    std::variant<SkRect, SkRRect, SkPath> shape;
-    ClipOp clip_op;
-    bool is_aa;
-
-    std::string shape_name() {
-      switch (shape.index()) {
-        case 0:
-          return "SkRect";
-        case 1:
-          return "SkRRect";
-        case 2:
-          return "SkPath";
-        default:
-          return "Unknown";
-      }
-    }
-  };
-
   // file and line supplied automatically from CLIP_EXPECTOR macro
   explicit ClipExpector(const std::string& file, int line)
       : file_(file), line_(line) {}
 
   ~ClipExpector() {  //
     EXPECT_EQ(index_, clip_expectations_.size()) << label();
+    while (index_ < clip_expectations_.size()) {
+      auto expect = clip_expectations_[index_];
+      FML_LOG(ERROR) << "leftover clip shape[" << index_ << "] = " << expect;
+      index_++;
+    }
   }
 
   ClipExpector& addExpectation(const SkRect& rect,
@@ -4369,6 +4399,19 @@ class ClipExpector : public virtual DlOpReceiver,
                                bool is_aa = false) {
     clip_expectations_.push_back({
         .shape = rect,
+        .is_oval = false,
+        .clip_op = clip_op,
+        .is_aa = is_aa,
+    });
+    return *this;
+  }
+
+  ClipExpector& addOvalExpectation(const SkRect& rect,
+                                   ClipOp clip_op = ClipOp::kIntersect,
+                                   bool is_aa = false) {
+    clip_expectations_.push_back({
+        .shape = rect,
+        .is_oval = true,
         .clip_op = clip_op,
         .is_aa = is_aa,
     });
@@ -4380,6 +4423,7 @@ class ClipExpector : public virtual DlOpReceiver,
                                bool is_aa = false) {
     clip_expectations_.push_back({
         .shape = rrect,
+        .is_oval = false,
         .clip_op = clip_op,
         .is_aa = is_aa,
     });
@@ -4391,6 +4435,7 @@ class ClipExpector : public virtual DlOpReceiver,
                                bool is_aa = false) {
     clip_expectations_.push_back({
         .shape = path,
+        .is_oval = false,
         .clip_op = clip_op,
         .is_aa = is_aa,
     });
@@ -4401,6 +4446,11 @@ class ClipExpector : public virtual DlOpReceiver,
                 DlCanvas::ClipOp clip_op,
                 bool is_aa) override {
     check(rect, clip_op, is_aa);
+  }
+  void clipOval(const SkRect& bounds,
+                DlCanvas::ClipOp clip_op,
+                bool is_aa) override {
+    check(bounds, clip_op, is_aa, true);
   }
   void clipRRect(const SkRRect& rrect,
                  DlCanvas::ClipOp clip_op,
@@ -4415,22 +4465,23 @@ class ClipExpector : public virtual DlOpReceiver,
 
  private:
   size_t index_ = 0;
-  std::vector<Expectation> clip_expectations_;
+  std::vector<ClipExpectation> clip_expectations_;
 
   template <typename T>
-  void check(T shape, ClipOp clip_op, bool is_aa) {
+  void check(T shape, ClipOp clip_op, bool is_aa, bool is_oval = false) {
     ASSERT_LT(index_, clip_expectations_.size())
         << label() << std::endl
-        << "extra clip shape = " << shape;
+        << "extra clip shape = " << shape << (is_oval ? " (oval)" : "");
     auto expected = clip_expectations_[index_];
-    EXPECT_EQ(expected.clip_op, clip_op) << label();
-    EXPECT_EQ(expected.is_aa, is_aa) << label();
     if (!std::holds_alternative<T>(expected.shape)) {
       EXPECT_TRUE(std::holds_alternative<T>(expected.shape))
           << label() << ", expected type: " << expected.shape_name();
     } else {
       EXPECT_EQ(std::get<T>(expected.shape), shape) << label();
     }
+    EXPECT_EQ(expected.is_oval, is_oval) << label();
+    EXPECT_EQ(expected.clip_op, clip_op) << label();
+    EXPECT_EQ(expected.is_aa, is_aa) << label();
     index_++;
   }
 
@@ -4570,9 +4621,47 @@ TEST_F(DisplayListTest, ClipRectNestedNonCullingComplex) {
   cull_dl->Dispatch(expector);
 }
 
+TEST_F(DisplayListTest, ClipOvalCulling) {
+  auto clip = SkRect::MakeLTRB(10.0f, 10.0f, 20.0f, 20.0f);
+  // A 10x10 rectangle extends 5x5 from the center to each corner. To have
+  // an oval that encompasses that rectangle, the radius must be at least
+  // length(5, 5), or 7.071+ so we expand the radius 5 square clip by 2.072
+  // on each side to barely contain the corners of the square.
+  auto encompassing_oval = clip.makeOutset(2.072f, 2.072f);
+
+  DisplayListBuilder cull_builder;
+  cull_builder.ClipRect(clip, ClipOp::kIntersect, false);
+  cull_builder.ClipOval(encompassing_oval, ClipOp::kIntersect, false);
+  auto cull_dl = cull_builder.Build();
+
+  CLIP_EXPECTOR(expector);
+  expector.addExpectation(clip, ClipOp::kIntersect, false);
+  cull_dl->Dispatch(expector);
+}
+
+TEST_F(DisplayListTest, ClipOvalNonCulling) {
+  auto clip = SkRect::MakeLTRB(10.0f, 10.0f, 20.0f, 20.0f);
+  // A 10x10 rectangle extends 5x5 from the center to each corner. To have
+  // an oval that encompasses that rectangle, the radius must be at least
+  // length(5, 5), or 7.071+ so we expand the radius 5 square clip by 2.072
+  // on each side to barely exclude the corners of the square.
+  auto non_encompassing_oval = clip.makeOutset(2.071f, 2.071f);
+
+  DisplayListBuilder cull_builder;
+  cull_builder.ClipRect(clip, ClipOp::kIntersect, false);
+  cull_builder.ClipOval(non_encompassing_oval, ClipOp::kIntersect, false);
+  auto cull_dl = cull_builder.Build();
+
+  CLIP_EXPECTOR(expector);
+  expector.addExpectation(clip, ClipOp::kIntersect, false);
+  expector.addOvalExpectation(non_encompassing_oval, ClipOp::kIntersect, false);
+  cull_dl->Dispatch(expector);
+}
+
 TEST_F(DisplayListTest, ClipRRectCulling) {
   auto clip = SkRect::MakeLTRB(10.0f, 10.0f, 20.0f, 20.0f);
   auto rrect = SkRRect::MakeRectXY(clip.makeOutset(2.0f, 2.0f), 2.0f, 2.0f);
+  ASSERT_FALSE(rrect.isOval());
 
   DisplayListBuilder cull_builder;
   cull_builder.ClipRect(clip, ClipOp::kIntersect, false);
@@ -4586,7 +4675,8 @@ TEST_F(DisplayListTest, ClipRRectCulling) {
 
 TEST_F(DisplayListTest, ClipRRectNonCulling) {
   auto clip = SkRect::MakeLTRB(10.0f, 10.0f, 20.0f, 20.0f);
-  auto rrect = SkRRect::MakeRectXY(clip.makeOutset(2.0f, 2.0f), 12.0f, 12.0f);
+  auto rrect = SkRRect::MakeRectXY(clip.makeOutset(1.0f, 1.0f), 4.0f, 4.0f);
+  ASSERT_FALSE(rrect.isOval());
 
   DisplayListBuilder cull_builder;
   cull_builder.ClipRect(clip, ClipOp::kIntersect, false);
@@ -4661,9 +4751,55 @@ TEST_F(DisplayListTest, ClipPathRectNonCulling) {
   cull_dl->Dispatch(expector);
 }
 
+TEST_F(DisplayListTest, ClipPathOvalCulling) {
+  auto clip = SkRect::MakeLTRB(10.0f, 10.0f, 20.0f, 20.0f);
+  // A 10x10 rectangle extends 5x5 from the center to each corner. To have
+  // an oval that encompasses that rectangle, the radius must be at least
+  // length(5, 5), or 7.071+ so we expand the radius 5 square clip by 2.072
+  // on each side to barely contain the corners of the square.
+  auto encompassing_oval = clip.makeOutset(2.072f, 2.072f);
+  SkPath path;
+  path.addOval(encompassing_oval);
+
+  DisplayListBuilder cull_builder;
+  cull_builder.ClipRect(clip, ClipOp::kIntersect, false);
+  cull_builder.ClipPath(path, ClipOp::kIntersect, false);
+  auto cull_dl = cull_builder.Build();
+
+  CLIP_EXPECTOR(expector);
+  expector.addExpectation(clip, ClipOp::kIntersect, false);
+  cull_dl->Dispatch(expector);
+}
+
+TEST_F(DisplayListTest, ClipPathOvalNonCulling) {
+  auto clip = SkRect::MakeLTRB(10.0f, 10.0f, 20.0f, 20.0f);
+  // A 10x10 rectangle extends 5x5 from the center to each corner. To have
+  // an oval that encompasses that rectangle, the radius must be at least
+  // length(5, 5), or 7.071+ so we expand the radius 5 square clip by 2.072
+  // on each side to barely exclude the corners of the square.
+  auto non_encompassing_oval = clip.makeOutset(2.071f, 2.071f);
+  SkPath path;
+  path.addOval(non_encompassing_oval);
+  SkRRect rrect;
+  rrect.setOval(non_encompassing_oval);
+
+  DisplayListBuilder cull_builder;
+  cull_builder.ClipRect(clip, ClipOp::kIntersect, false);
+  cull_builder.ClipPath(path, ClipOp::kIntersect, false);
+  auto cull_dl = cull_builder.Build();
+
+  CLIP_EXPECTOR(expector);
+  expector.addExpectation(clip, ClipOp::kIntersect, false);
+  // Builder will not cull this clip, but it will turn it into a ClipRRect
+  // Eventually it should turn it into a ClipOval
+  expector.addExpectation(rrect, ClipOp::kIntersect, false);
+  cull_dl->Dispatch(expector);
+}
+
 TEST_F(DisplayListTest, ClipPathRRectCulling) {
   auto clip = SkRect::MakeLTRB(10.0f, 10.0f, 20.0f, 20.0f);
   auto rrect = SkRRect::MakeRectXY(clip.makeOutset(2.0f, 2.0f), 2.0f, 2.0f);
+  ASSERT_FALSE(rrect.isOval());
   SkPath path;
   path.addRRect(rrect);
 
@@ -4679,7 +4815,8 @@ TEST_F(DisplayListTest, ClipPathRRectCulling) {
 
 TEST_F(DisplayListTest, ClipPathRRectNonCulling) {
   auto clip = SkRect::MakeLTRB(10.0f, 10.0f, 20.0f, 20.0f);
-  auto rrect = SkRRect::MakeRectXY(clip.makeOutset(2.0f, 2.0f), 12.0f, 12.0f);
+  auto rrect = SkRRect::MakeRectXY(clip.makeOutset(1.0f, 1.0f), 4.0f, 4.0f);
+  ASSERT_FALSE(rrect.isOval());
   SkPath path;
   path.addRRect(rrect);
 
@@ -4722,6 +4859,324 @@ TEST_F(DisplayListTest, RecordLargeVertices) {
     }
     auto dl = builder.Build();
   }
+}
+
+TEST_F(DisplayListTest, DrawRectRRectPromoteToDrawRect) {
+  SkRect rect = SkRect::MakeLTRB(10.0f, 10.0f, 20.0f, 20.0f);
+
+  DisplayListBuilder builder;
+  builder.DrawRRect(SkRRect::MakeRect(rect), DlPaint());
+  auto dl = builder.Build();
+
+  DisplayListBuilder expected;
+  expected.DrawRect(rect, DlPaint());
+  auto expect_dl = expected.Build();
+
+  DisplayListsEQ_Verbose(dl, expect_dl);
+}
+
+TEST_F(DisplayListTest, DrawOvalRRectPromoteToDrawOval) {
+  SkRect rect = SkRect::MakeLTRB(10.0f, 10.0f, 20.0f, 20.0f);
+
+  DisplayListBuilder builder;
+  builder.DrawRRect(SkRRect::MakeOval(rect), DlPaint());
+  auto dl = builder.Build();
+
+  DisplayListBuilder expected;
+  expected.DrawOval(rect, DlPaint());
+  auto expect_dl = expected.Build();
+
+  DisplayListsEQ_Verbose(dl, expect_dl);
+}
+
+TEST_F(DisplayListTest, DrawRectPathPromoteToDrawRect) {
+  SkRect rect = SkRect::MakeLTRB(10.0f, 10.0f, 20.0f, 20.0f);
+
+  DisplayListBuilder builder;
+  builder.DrawPath(SkPath::Rect(rect), DlPaint());
+  auto dl = builder.Build();
+
+  DisplayListBuilder expected;
+  expected.DrawRect(rect, DlPaint());
+  auto expect_dl = expected.Build();
+
+  DisplayListsEQ_Verbose(dl, expect_dl);
+}
+
+TEST_F(DisplayListTest, DrawOvalPathPromoteToDrawOval) {
+  SkRect rect = SkRect::MakeLTRB(10.0f, 10.0f, 20.0f, 20.0f);
+
+  DisplayListBuilder builder;
+  builder.DrawPath(SkPath::Oval(rect), DlPaint());
+  auto dl = builder.Build();
+
+  DisplayListBuilder expected;
+  expected.DrawOval(rect, DlPaint());
+  auto expect_dl = expected.Build();
+
+  DisplayListsEQ_Verbose(dl, expect_dl);
+}
+
+TEST_F(DisplayListTest, DrawRRectPathPromoteToDrawRRect) {
+  SkRect rect = SkRect::MakeLTRB(10.0f, 10.0f, 20.0f, 20.0f);
+  SkRRect rrect = SkRRect::MakeRectXY(rect, 2.0f, 2.0f);
+
+  DisplayListBuilder builder;
+  builder.DrawPath(SkPath::RRect(rrect), DlPaint());
+  auto dl = builder.Build();
+
+  DisplayListBuilder expected;
+  expected.DrawRRect(rrect, DlPaint());
+  auto expect_dl = expected.Build();
+
+  DisplayListsEQ_Verbose(dl, expect_dl);
+}
+
+TEST_F(DisplayListTest, DrawRectRRectPathPromoteToDrawRect) {
+  SkRect rect = SkRect::MakeLTRB(10.0f, 10.0f, 20.0f, 20.0f);
+  SkRRect rrect = SkRRect::MakeRect(rect);
+
+  DisplayListBuilder builder;
+  builder.DrawPath(SkPath::RRect(rrect), DlPaint());
+  auto dl = builder.Build();
+
+  DisplayListBuilder expected;
+  expected.DrawRect(rect, DlPaint());
+  auto expect_dl = expected.Build();
+
+  DisplayListsEQ_Verbose(dl, expect_dl);
+}
+
+TEST_F(DisplayListTest, DrawOvalRRectPathPromoteToDrawOval) {
+  SkRect rect = SkRect::MakeLTRB(10.0f, 10.0f, 20.0f, 20.0f);
+  SkRRect rrect = SkRRect::MakeOval(rect);
+
+  DisplayListBuilder builder;
+  builder.DrawPath(SkPath::RRect(rrect), DlPaint());
+  auto dl = builder.Build();
+
+  DisplayListBuilder expected;
+  expected.DrawOval(rect, DlPaint());
+  auto expect_dl = expected.Build();
+
+  DisplayListsEQ_Verbose(dl, expect_dl);
+}
+
+TEST_F(DisplayListTest, ClipRectRRectPromoteToClipRect) {
+  SkRect clip_rect = SkRect::MakeLTRB(10.0f, 10.0f, 20.0f, 20.0f);
+  SkRect draw_rect = clip_rect.makeOutset(2.0f, 2.0f);
+
+  DisplayListBuilder builder;
+  builder.ClipRRect(SkRRect::MakeRect(clip_rect), ClipOp::kIntersect, false);
+  // Include a rendering op in case DlBuilder ever removes unneeded clips
+  builder.DrawRect(draw_rect, DlPaint());
+  auto dl = builder.Build();
+
+  DisplayListBuilder expected;
+  expected.ClipRect(clip_rect, ClipOp::kIntersect, false);
+  expected.DrawRect(draw_rect, DlPaint());
+  auto expect_dl = expected.Build();
+
+  DisplayListsEQ_Verbose(dl, expect_dl);
+}
+
+TEST_F(DisplayListTest, ClipOvalRRectPromoteToClipOval) {
+  SkRect clip_rect = SkRect::MakeLTRB(10.0f, 10.0f, 20.0f, 20.0f);
+  SkRect draw_rect = clip_rect.makeOutset(2.0f, 2.0f);
+
+  DisplayListBuilder builder;
+  builder.ClipRRect(SkRRect::MakeOval(clip_rect), ClipOp::kIntersect, false);
+  // Include a rendering op in case DlBuilder ever removes unneeded clips
+  builder.DrawRect(draw_rect, DlPaint());
+  auto dl = builder.Build();
+
+  DisplayListBuilder expected;
+  expected.ClipOval(clip_rect, ClipOp::kIntersect, false);
+  expected.DrawRect(draw_rect, DlPaint());
+  auto expect_dl = expected.Build();
+
+  DisplayListsEQ_Verbose(dl, expect_dl);
+}
+
+TEST_F(DisplayListTest, ClipRectPathPromoteToClipRect) {
+  SkRect clip_rect = SkRect::MakeLTRB(10.0f, 10.0f, 20.0f, 20.0f);
+  SkRect draw_rect = clip_rect.makeOutset(2.0f, 2.0f);
+  SkPath clip_path = SkPath::Rect(clip_rect);
+  ASSERT_TRUE(clip_path.isRect(nullptr));
+  ASSERT_FALSE(clip_path.isInverseFillType());
+
+  DisplayListBuilder builder;
+  builder.ClipPath(clip_path, ClipOp::kIntersect, false);
+  // Include a rendering op in case DlBuilder ever removes unneeded clips
+  builder.DrawRect(draw_rect, DlPaint());
+  auto dl = builder.Build();
+
+  DisplayListBuilder expected;
+  expected.ClipRect(clip_rect, ClipOp::kIntersect, false);
+  expected.DrawRect(draw_rect, DlPaint());
+  auto expect_dl = expected.Build();
+
+  DisplayListsEQ_Verbose(dl, expect_dl);
+}
+
+TEST_F(DisplayListTest, ClipOvalPathPromoteToClipOval) {
+  SkRect clip_rect = SkRect::MakeLTRB(10.0f, 10.0f, 20.0f, 20.0f);
+  SkRect draw_rect = clip_rect.makeOutset(2.0f, 2.0f);
+  SkPath clip_path = SkPath::Oval(clip_rect);
+  ASSERT_TRUE(clip_path.isOval(nullptr));
+  ASSERT_FALSE(clip_path.isInverseFillType());
+
+  DisplayListBuilder builder;
+  builder.ClipPath(clip_path, ClipOp::kIntersect, false);
+  // Include a rendering op in case DlBuilder ever removes unneeded clips
+  builder.DrawRect(draw_rect, DlPaint());
+  auto dl = builder.Build();
+
+  DisplayListBuilder expected;
+  expected.ClipOval(clip_rect, ClipOp::kIntersect, false);
+  expected.DrawRect(draw_rect, DlPaint());
+  auto expect_dl = expected.Build();
+
+  DisplayListsEQ_Verbose(dl, expect_dl);
+}
+
+TEST_F(DisplayListTest, ClipRRectPathPromoteToClipRRect) {
+  SkRect clip_rect = SkRect::MakeLTRB(10.0f, 10.0f, 20.0f, 20.0f);
+  SkRRect clip_rrect = SkRRect::MakeRectXY(clip_rect, 2.0f, 2.0f);
+  SkRect draw_rect = clip_rect.makeOutset(2.0f, 2.0f);
+  SkPath clip_path = SkPath::RRect(clip_rrect);
+  ASSERT_TRUE(clip_path.isRRect(nullptr));
+  ASSERT_FALSE(clip_path.isInverseFillType());
+
+  DisplayListBuilder builder;
+  builder.ClipPath(clip_path, ClipOp::kIntersect, false);
+  // Include a rendering op in case DlBuilder ever removes unneeded clips
+  builder.DrawRect(draw_rect, DlPaint());
+  auto dl = builder.Build();
+
+  DisplayListBuilder expected;
+  expected.ClipRRect(clip_rrect, ClipOp::kIntersect, false);
+  expected.DrawRect(draw_rect, DlPaint());
+  auto expect_dl = expected.Build();
+
+  DisplayListsEQ_Verbose(dl, expect_dl);
+}
+
+TEST_F(DisplayListTest, ClipRectInversePathNoPromoteToClipRect) {
+  SkRect clip_rect = SkRect::MakeLTRB(10.0f, 10.0f, 20.0f, 20.0f);
+  SkRect draw_rect = clip_rect.makeOutset(2.0f, 2.0f);
+  SkPath clip_path = SkPath::Rect(clip_rect);
+  clip_path.toggleInverseFillType();
+  ASSERT_TRUE(clip_path.isRect(nullptr));
+  ASSERT_TRUE(clip_path.isInverseFillType());
+
+  DisplayListBuilder builder;
+  builder.ClipPath(clip_path, ClipOp::kIntersect, false);
+  // Include a rendering op in case DlBuilder ever removes unneeded clips
+  builder.DrawRect(draw_rect, DlPaint());
+  auto dl = builder.Build();
+
+  // Non-promoting tests can't use DL comparisons to verify that the
+  // promotion isn't happening because the test and expectation builders
+  // would both apply or not apply the same optimization. For this case
+  // we use the CLIP_EXPECTOR instead to see exactly which type of
+  // clip operation was recorded.
+  CLIP_EXPECTOR(expector);
+  expector.addExpectation(clip_path, ClipOp::kIntersect, false);
+  dl->Dispatch(expector);
+}
+
+TEST_F(DisplayListTest, ClipOvalInversePathNoPromoteToClipOval) {
+  SkRect clip_rect = SkRect::MakeLTRB(10.0f, 10.0f, 20.0f, 20.0f);
+  SkRect draw_rect = clip_rect.makeOutset(2.0f, 2.0f);
+  SkPath clip_path = SkPath::Oval(clip_rect);
+  clip_path.toggleInverseFillType();
+  ASSERT_TRUE(clip_path.isOval(nullptr));
+  ASSERT_TRUE(clip_path.isInverseFillType());
+
+  DisplayListBuilder builder;
+  builder.ClipPath(clip_path, ClipOp::kIntersect, false);
+  // Include a rendering op in case DlBuilder ever removes unneeded clips
+  builder.DrawRect(draw_rect, DlPaint());
+  auto dl = builder.Build();
+
+  // Non-promoting tests can't use DL comparisons to verify that the
+  // promotion isn't happening because the test and expectation builders
+  // would both apply or not apply the same optimization. For this case
+  // we use the CLIP_EXPECTOR instead to see exactly which type of
+  // clip operation was recorded.
+  CLIP_EXPECTOR(expector);
+  expector.addExpectation(clip_path, ClipOp::kIntersect, false);
+  dl->Dispatch(expector);
+}
+
+TEST_F(DisplayListTest, ClipRRectInversePathNoPromoteToClipRRect) {
+  SkRect clip_rect = SkRect::MakeLTRB(10.0f, 10.0f, 20.0f, 20.0f);
+  SkRRect clip_rrect = SkRRect::MakeRectXY(clip_rect, 2.0f, 2.0f);
+  SkRect draw_rect = clip_rect.makeOutset(2.0f, 2.0f);
+  SkPath clip_path = SkPath::RRect(clip_rrect);
+  clip_path.toggleInverseFillType();
+  ASSERT_TRUE(clip_path.isRRect(nullptr));
+  ASSERT_TRUE(clip_path.isInverseFillType());
+
+  DisplayListBuilder builder;
+  builder.ClipPath(clip_path, ClipOp::kIntersect, false);
+  // Include a rendering op in case DlBuilder ever removes unneeded clips
+  builder.DrawRect(draw_rect, DlPaint());
+  auto dl = builder.Build();
+
+  // Non-promoting tests can't use DL comparisons to verify that the
+  // promotion isn't happening because the test and expectation builders
+  // would both apply or not apply the same optimization. For this case
+  // we use the CLIP_EXPECTOR instead to see exactly which type of
+  // clip operation was recorded.
+  CLIP_EXPECTOR(expector);
+  expector.addExpectation(clip_path, ClipOp::kIntersect, false);
+  dl->Dispatch(expector);
+}
+
+TEST_F(DisplayListTest, ClipRectRRectPathPromoteToClipRect) {
+  SkRect clip_rect = SkRect::MakeLTRB(10.0f, 10.0f, 20.0f, 20.0f);
+  SkRRect clip_rrect = SkRRect::MakeRect(clip_rect);
+  SkRect draw_rect = clip_rect.makeOutset(2.0f, 2.0f);
+  SkPath clip_path = SkPath::RRect(clip_rrect);
+  ASSERT_TRUE(clip_path.isRRect(nullptr));
+  ASSERT_FALSE(clip_path.isInverseFillType());
+
+  DisplayListBuilder builder;
+  builder.ClipPath(clip_path, ClipOp::kIntersect, false);
+  // Include a rendering op in case DlBuilder ever removes unneeded clips
+  builder.DrawRect(draw_rect, DlPaint());
+  auto dl = builder.Build();
+
+  DisplayListBuilder expected;
+  expected.ClipRect(clip_rect, ClipOp::kIntersect, false);
+  expected.DrawRect(draw_rect, DlPaint());
+  auto expect_dl = expected.Build();
+
+  DisplayListsEQ_Verbose(dl, expect_dl);
+}
+
+TEST_F(DisplayListTest, ClipOvalRRectPathPromoteToClipOval) {
+  SkRect clip_rect = SkRect::MakeLTRB(10.0f, 10.0f, 20.0f, 20.0f);
+  SkRRect clip_rrect = SkRRect::MakeOval(clip_rect);
+  SkRect draw_rect = clip_rect.makeOutset(2.0f, 2.0f);
+  SkPath clip_path = SkPath::RRect(clip_rrect);
+  ASSERT_TRUE(clip_path.isRRect(nullptr));
+  ASSERT_FALSE(clip_path.isInverseFillType());
+
+  DisplayListBuilder builder;
+  builder.ClipPath(clip_path, ClipOp::kIntersect, false);
+  // Include a rendering op in case DlBuilder ever removes unneeded clips
+  builder.DrawRect(draw_rect, DlPaint());
+  auto dl = builder.Build();
+
+  DisplayListBuilder expected;
+  expected.ClipOval(clip_rect, ClipOp::kIntersect, false);
+  expected.DrawRect(draw_rect, DlPaint());
+  auto expect_dl = expected.Build();
+
+  DisplayListsEQ_Verbose(dl, expect_dl);
 }
 
 }  // namespace testing

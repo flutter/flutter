@@ -5,7 +5,7 @@
 #ifndef FLUTTER_DISPLAY_LIST_DL_COLOR_H_
 #define FLUTTER_DISPLAY_LIST_DL_COLOR_H_
 
-#include "third_party/skia/include/core/SkScalar.h"
+#include "flutter/display_list/geometry/dl_geometry_types.h"
 
 namespace flutter {
 
@@ -14,17 +14,29 @@ struct DlColor {
   constexpr DlColor() : argb_(0xFF000000) {}
   constexpr explicit DlColor(uint32_t argb) : argb_(argb) {}
 
-  /// @brief Construct a 32 bit color from a floating point A, R, G, and B color
-  /// channel.
-  constexpr explicit DlColor(SkScalar a, SkScalar r, SkScalar g, SkScalar b)
-      : argb_(static_cast<uint8_t>(std::round(a * 255)) << 24 |  //
-              static_cast<uint8_t>(std::round(r * 255)) << 16 |  //
-              static_cast<uint8_t>(std::round(g * 255)) << 8 |   //
-              static_cast<uint8_t>(std::round(b * 255)) << 0     //
-        ) {}
+  /// @brief Construct a 32 bit color from floating point R, G, B, and A color
+  /// channels.
+  static constexpr DlColor RGBA(DlScalar r,
+                                DlScalar g,
+                                DlScalar b,
+                                DlScalar a) {
+    return ARGB(a, r, g, b);
+  }
 
-  static constexpr uint8_t toAlpha(SkScalar opacity) { return toC(opacity); }
-  static constexpr SkScalar toOpacity(uint8_t alpha) { return toF(alpha); }
+  /// @brief Construct a 32 bit color from floating point A, R, G, and B color
+  /// channels.
+  static constexpr DlColor ARGB(DlScalar a,
+                                DlScalar r,
+                                DlScalar g,
+                                DlScalar b) {
+    return DlColor(toC(a) << 24 |  //
+                   toC(r) << 16 |  //
+                   toC(g) << 8 |   //
+                   toC(b));
+  }
+
+  static constexpr uint8_t toAlpha(DlScalar opacity) { return toC(opacity); }
+  static constexpr DlScalar toOpacity(uint8_t alpha) { return toF(alpha); }
 
   // clang-format off
   static constexpr DlColor kTransparent()        {return DlColor(0x00000000);};
@@ -54,16 +66,16 @@ struct DlColor {
   constexpr int getGreen() const { return (argb_ >> 8) & 0xFF; }
   constexpr int getBlue() const { return argb_ & 0xFF; }
 
-  constexpr float getAlphaF() const { return toF(getAlpha()); }
-  constexpr float getRedF() const { return toF(getRed()); }
-  constexpr float getGreenF() const { return toF(getGreen()); }
-  constexpr float getBlueF() const { return toF(getBlue()); }
+  constexpr DlScalar getAlphaF() const { return toF(getAlpha()); }
+  constexpr DlScalar getRedF() const { return toF(getRed()); }
+  constexpr DlScalar getGreenF() const { return toF(getGreen()); }
+  constexpr DlScalar getBlueF() const { return toF(getBlue()); }
 
   constexpr uint32_t premultipliedArgb() const {
     if (isOpaque()) {
       return argb_;
     }
-    float f = getAlphaF();
+    DlScalar f = getAlphaF();
     return (argb_ & 0xFF000000) |       //
            toC(getRedF() * f) << 16 |   //
            toC(getGreenF() * f) << 8 |  //
@@ -83,7 +95,7 @@ struct DlColor {
     return DlColor((argb_ & 0xFFFFFF00) | (blue << 0));
   }
 
-  constexpr DlColor modulateOpacity(float opacity) const {
+  constexpr DlColor modulateOpacity(DlScalar opacity) const {
     return opacity <= 0   ? withAlpha(0)
            : opacity >= 1 ? *this
                           : withAlpha(round(getAlpha() * opacity));
@@ -99,8 +111,8 @@ struct DlColor {
  private:
   uint32_t argb_;
 
-  static float toF(uint8_t comp) { return comp * (1.0f / 255); }
-  static uint8_t toC(float fComp) { return round(fComp * 255); }
+  static constexpr DlScalar toF(uint8_t comp) { return comp * (1.0f / 255); }
+  static constexpr uint8_t toC(DlScalar fComp) { return round(fComp * 255); }
 };
 
 }  // namespace flutter
