@@ -183,6 +183,7 @@ static const SkRRect kTestInnerRRect =
     SkRRect::MakeRectXY(kTestBounds.makeInset(5, 5), 2, 2);
 static const SkPath kTestPathRect = SkPath::Rect(kTestBounds);
 static const SkPath kTestPathOval = SkPath::Oval(kTestBounds);
+static const SkPath kTestPathRRect = SkPath::RRect(kTestRRect);
 static const SkPath kTestPath1 =
     SkPath::Polygon({{0, 0}, {10, 10}, {10, 0}, {0, 10}}, true);
 static const SkPath kTestPath2 =

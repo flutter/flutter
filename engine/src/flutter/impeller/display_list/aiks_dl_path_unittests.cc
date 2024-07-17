@@ -246,7 +246,8 @@ TEST_P(AiksTest, SolidStrokesRenderCorrectly) {
     paint.setColor(DlColor::kWhite());
     builder.DrawPaint(paint);
 
-    paint.setColor(DlColor(color.alpha, color.red, color.green, color.blue));
+    paint.setColor(
+        DlColor::ARGB(color.alpha, color.red, color.green, color.blue));
     paint.setDrawStyle(DlDrawStyle::kStroke);
     paint.setStrokeWidth(10);
 
@@ -339,13 +340,13 @@ TEST_P(AiksTest, DrawLinesRenderCorrectly) {
   };
 
   std::vector<DlColor> colors = {
-      DlColor{1, 0x1f / 255.0, 0.0, 0x5c / 255.0},
-      DlColor{1, 0x5b / 255.0, 0.0, 0x60 / 255.0},
-      DlColor{1, 0x87 / 255.0, 0x01 / 255.0, 0x60 / 255.0},
-      DlColor{1, 0xac / 255.0, 0x25 / 255.0, 0x53 / 255.0},
-      DlColor{1, 0xe1 / 255.0, 0x6b / 255.0, 0x5c / 255.0},
-      DlColor{1, 0xf3 / 255.0, 0x90 / 255.0, 0x60 / 255.0},
-      DlColor{1, 0xff / 255.0, 0xb5 / 255.0, 0x6b / 250.0}};
+      DlColor::ARGB(1, 0x1f / 255.0, 0.0, 0x5c / 255.0),
+      DlColor::ARGB(1, 0x5b / 255.0, 0.0, 0x60 / 255.0),
+      DlColor::ARGB(1, 0x87 / 255.0, 0x01 / 255.0, 0x60 / 255.0),
+      DlColor::ARGB(1, 0xac / 255.0, 0x25 / 255.0, 0x53 / 255.0),
+      DlColor::ARGB(1, 0xe1 / 255.0, 0x6b / 255.0, 0x5c / 255.0),
+      DlColor::ARGB(1, 0xf3 / 255.0, 0x90 / 255.0, 0x60 / 255.0),
+      DlColor::ARGB(1, 0xff / 255.0, 0xb5 / 255.0, 0x6b / 250.0)};
   std::vector<Scalar> stops = {
       0.0,
       (1.0 / 6.0) * 1,
@@ -432,8 +433,8 @@ TEST_P(AiksTest, ArcWithZeroSweepAndBlur) {
   DlPaint paint;
   paint.setColor(DlColor::kRed());
 
-  std::vector<DlColor> colors = {DlColor{1.0, 0.0, 0.0, 1.0},
-                                 DlColor{0.0, 0.0, 0.0, 1.0}};
+  std::vector<DlColor> colors = {DlColor::RGBA(1.0, 0.0, 0.0, 1.0),
+                                 DlColor::RGBA(0.0, 0.0, 0.0, 1.0)};
   std::vector<Scalar> stops = {0.0, 1.0};
 
   paint.setColorSource(

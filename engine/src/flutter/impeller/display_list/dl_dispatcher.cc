@@ -724,6 +724,14 @@ void DlDispatcherBase::clipRect(const SkRect& rect,
 }
 
 // |flutter::DlOpReceiver|
+void DlDispatcherBase::clipOval(const SkRect& bounds,
+                                ClipOp clip_op,
+                                bool is_aa) {
+  GetCanvas().ClipOval(skia_conversions::ToRect(bounds),
+                       ToClipOperation(clip_op));
+}
+
+// |flutter::DlOpReceiver|
 void DlDispatcherBase::clipRRect(const SkRRect& rrect,
                                  ClipOp sk_op,
                                  bool is_aa) {

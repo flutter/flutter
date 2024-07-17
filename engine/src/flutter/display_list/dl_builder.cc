@@ -963,6 +963,38 @@ void DisplayListBuilder::ClipRect(const SkRect& rect,
       break;
   }
 }
+void DisplayListBuilder::ClipOval(const SkRect& bounds,
+                                  ClipOp clip_op,
+                                  bool is_aa) {
+  if (!bounds.isFinite()) {
+    return;
+  }
+  if (current_info().is_nop) {
+    return;
+  }
+  if (current_info().has_valid_clip &&
+      clip_op == DlCanvas::ClipOp::kIntersect &&
+      layer_local_state().oval_covers_cull(bounds)) {
+    return;
+  }
+  global_state().clipOval(bounds, clip_op, is_aa);
+  layer_local_state().clipOval(bounds, clip_op, is_aa);
+  if (global_state().is_cull_rect_empty() ||
+      layer_local_state().is_cull_rect_empty()) {
+    current_info().is_nop = true;
+    return;
+  }
+  current_info().has_valid_clip = true;
+  checkForDeferredSave();
+  switch (clip_op) {
+    case ClipOp::kIntersect:
+      Push<ClipIntersectOvalOp>(0, bounds, is_aa);
+      break;
+    case ClipOp::kDifference:
+      Push<ClipDifferenceOvalOp>(0, bounds, is_aa);
+      break;
+  }
+}
 void DisplayListBuilder::ClipRRect(const SkRRect& rrect,
                                    ClipOp clip_op,
                                    bool is_aa) {

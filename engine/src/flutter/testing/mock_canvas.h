@@ -114,6 +114,12 @@ class MockCanvas final : public DlCanvas {
     ClipEdgeStyle style;
   };
 
+  struct ClipOvalData {
+    SkRect bounds;
+    ClipOp clip_op;
+    ClipEdgeStyle style;
+  };
+
   struct ClipRRectData {
     SkRRect rrect;
     ClipOp clip_op;
@@ -145,6 +151,7 @@ class MockCanvas final : public DlCanvas {
                                     DrawDisplayListData,
                                     DrawShadowData,
                                     ClipRectData,
+                                    ClipOvalData,
                                     ClipRRectData,
                                     ClipPathData,
                                     DrawPaintData>;
@@ -206,6 +213,7 @@ class MockCanvas final : public DlCanvas {
   SkMatrix GetTransform() const override;
 
   void ClipRect(const SkRect& rect, ClipOp clip_op, bool is_aa) override;
+  void ClipOval(const SkRect& bounds, ClipOp clip_op, bool is_aa) override;
   void ClipRRect(const SkRRect& rrect, ClipOp clip_op, bool is_aa) override;
   void ClipPath(const SkPath& path, ClipOp clip_op, bool is_aa) override;
 
