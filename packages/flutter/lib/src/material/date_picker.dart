@@ -556,7 +556,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
     final Widget actions = ConstrainedBox(
       constraints: const BoxConstraints(minHeight: 52.0),
       child: MediaQuery.withClampedTextScaling(
-        maxScaleFactor: isLandscapeOrientation ? 2.0 : _kMaxTextScaleFactor,
+        maxScaleFactor: isLandscapeOrientation ? 1.6 : _kMaxTextScaleFactor,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8),
           child: Align(
@@ -878,7 +878,7 @@ class _DatePickerHeader extends StatelessWidget {
       style: helpStyle,
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
-      textScaler: MediaQuery.textScalerOf(context).clamp(maxScaleFactor: 1.6),
+      textScaler: MediaQuery.textScalerOf(context).clamp(maxScaleFactor: orientation ==  Orientation.portrait ? 1.6 : 1.4),
     );
     final Text title = Text(
       titleText,

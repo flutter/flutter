@@ -321,8 +321,11 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
     assert(debugCheckHasDirectionality(context));
     const double fontSizeToScale = 14.0;
     final double textScaleFactor = MediaQuery.textScalerOf(context).clamp(maxScaleFactor: 3.0).scale(fontSizeToScale) / fontSizeToScale;
+    final Orientation orientation = MediaQuery.orientationOf(context);
+    final bool isLandscapeOrientation = orientation == Orientation.landscape;
+    final double rowHeightScaling = isLandscapeOrientation ? 30 : 8;
     final double scaledMaxDayPickerHeight =
-      textScaleFactor > 1.3 ? _maxDayPickerHeight + ((_maxDayPickerRowCount + 1) * ((textScaleFactor - 1) * 8)) : _maxDayPickerHeight;
+      textScaleFactor > 1.3 ? _maxDayPickerHeight + ((_maxDayPickerRowCount + 1) * ((textScaleFactor - 1) * rowHeightScaling)) : _maxDayPickerHeight;
     return Stack(
       children: <Widget>[
         SizedBox(
@@ -955,6 +958,9 @@ class _DayPickerState extends State<_DayPicker> {
     final DatePickerThemeData defaults = DatePickerTheme.defaults(context);
     final TextStyle? weekdayStyle = datePickerTheme.weekdayStyle ?? defaults.weekdayStyle;
 
+    final Orientation orientation = MediaQuery.orientationOf(context);
+    final bool isLandscapeOrientation = orientation == Orientation.landscape;
+
     final int year = widget.displayedMonth.year;
     final int month = widget.displayedMonth.month;
 
@@ -997,7 +1003,7 @@ class _DayPickerState extends State<_DayPicker> {
         horizontal: _monthPickerHorizontalPadding,
       ),
       child: MediaQuery.withClampedTextScaling(
-        maxScaleFactor: 2.0,
+        maxScaleFactor: isLandscapeOrientation ? 1.5 : 2.0,
         child: GridView.custom(
         physics: const ClampingScrollPhysics(),
         gridDelegate: _DayPickerGridDelegate(context),
@@ -1136,11 +1142,10 @@ class _DayPickerGridDelegate extends SliverGridDelegate {
   @override
   SliverGridLayout getLayout(SliverConstraints constraints) {
     const double fontSizeToScale = 14.0;
-    final double textScaleFactor = MediaQuery.textScalerOf(context).clamp(maxScaleFactor: 3.0).scale(fontSizeToScale) / fontSizeToScale;
     final Orientation orientation = MediaQuery.orientationOf(context);
     final bool isLandscapeOrientation = orientation == Orientation.landscape;
-    final double scaledRowHeight = isLandscapeOrientation ?
-      textScaleFactor > 1.3 ? ((textScaleFactor - 1) * 40) + _dayPickerRowHeight : _dayPickerRowHeight :
+    final double textScaleFactor = MediaQuery.textScalerOf(context).clamp(maxScaleFactor: 3.0).scale(fontSizeToScale) / fontSizeToScale;
+    final double scaledRowHeight =
       textScaleFactor > 1.3 ? ((textScaleFactor - 1) * 30) + _dayPickerRowHeight : _dayPickerRowHeight;
     const int columnCount = DateTime.daysPerWeek;
     final double tileWidth = constraints.crossAxisExtent / columnCount;
