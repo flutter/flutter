@@ -474,7 +474,7 @@ void main() {
         home: Center(
           child: CupertinoCheckbox(
             value: value,
-            onChanged: enabled ? (_) {} : null,
+            onChanged: enabled ? (bool? value) {} : null,
             mouseCursor: mouseCursor,
           ),
         ),
@@ -522,7 +522,7 @@ void main() {
         home: Center(
           child: CupertinoCheckbox(
             value: false,
-            onChanged: (_) => true,
+            onChanged: (bool? value) => true,
             mouseCursor: mouseCursor,
             focusNode: focusNode
           ),
