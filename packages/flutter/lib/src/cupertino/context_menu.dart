@@ -444,8 +444,8 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
     final double bottomMaxScale = 2 * (mediaQuery.size.height - mediaQuery.padding.bottom - childRect.center.dy) / childRect.height;
     final double minWidth = math.min(leftMaxScale, rightMaxScale);
     final double minHeight = math.min(topMaxScale, bottomMaxScale);
-    // Return the smallest scale factor that keeps the child entirely onscreen.
-    return math.max(_kMinScaleFactor, math.min(math.min(minWidth, minHeight), _kOpenScale));
+    // Return the smallest scale factor that keeps the child mostly onscreen.
+    return math.min(minWidth, minHeight).clamp(_kMinScaleFactor, _kOpenScale);
   }
 
   /// The default preview builder if none is provided. It makes a rectangle
