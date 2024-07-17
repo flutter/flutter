@@ -305,15 +305,15 @@ void testMain() {
     },
   );
 
-  test('prevents default on touchstart events', () async {
+  test('allows default on touchstart events', () async {
     final event = createDomEvent('Event', 'touchstart');
 
     rootElement.dispatchEvent(event);
 
     expect(
       event.defaultPrevented,
-      isTrue,
-      reason: 'touchstart events should be prevented so pointer events are not cancelled later.',
+      isFalse,
+      reason: 'touchstart events should NOT be prevented. That breaks semantic taps!',
     );
   });
 

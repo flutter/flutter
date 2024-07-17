@@ -968,20 +968,6 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
 
   @override
   void setup() {
-    // Prevents the browser auto-canceling pointer events.
-    // Register into `_listener` directly so the event isn't forwarded to semantics.
-    _listeners.add(Listener.register(
-      event: 'touchstart',
-      target: _viewTarget,
-      handler: (DomEvent event) {
-        // This is one of the ways I've seen this done. PixiJS does a similar thing.
-        // ThreeJS seems to subscribe move/leave in the pointerdown handler instead?
-        if (event.cancelable) {
-          event.preventDefault();
-        }
-      },
-    ));
-
     _addPointerEventListener(_viewTarget, 'pointerdown', (DomPointerEvent event) {
       final int device = _getPointerId(event);
       final List<ui.PointerData> pointerData = <ui.PointerData>[];
