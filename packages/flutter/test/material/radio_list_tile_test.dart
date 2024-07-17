@@ -1547,4 +1547,39 @@ void main() {
       );
     });
   });
+
+  testWidgets('RadioListTile uses ListTileTheme controlAffinity', (WidgetTester tester) async {
+    Widget buildListTile(ListTileControlAffinity controlAffinity) {
+      return MaterialApp(
+        home: Material(
+          child: ListTileTheme(
+            data: ListTileThemeData(
+              controlAffinity: controlAffinity,
+            ),
+            child: RadioListTile<double>(
+              value: 0.5,
+              groupValue: 1.0,
+              title: const Text('RadioListTile'),
+              onChanged: (double? value) {},
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildListTile(ListTileControlAffinity.leading));
+    final Finder leading = find.text('RadioListTile');
+    final Offset offsetLeading = tester.getTopLeft(leading);
+    expect(offsetLeading, const Offset(72.0, 16.0));
+
+    await tester.pumpWidget(buildListTile(ListTileControlAffinity.trailing));
+    final Finder trailing = find.text('RadioListTile');
+    final Offset offsetTrailing = tester.getTopLeft(trailing);
+    expect(offsetTrailing, const Offset(16.0, 16.0));
+
+    await tester.pumpWidget(buildListTile(ListTileControlAffinity.platform));
+    final Finder platform = find.text('RadioListTile');
+    final Offset offsetPlatform = tester.getTopLeft(platform);
+    expect(offsetPlatform, const Offset(72.0, 16.0));
+  });
 }
