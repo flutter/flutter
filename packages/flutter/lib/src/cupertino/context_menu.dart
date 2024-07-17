@@ -22,8 +22,8 @@ import 'localizations.dart';
 const double _kOpenScale = 1.15;
 
 // The smallest possible scale of the child, used if opening the
-// CupertinoContextMenu would cause it to go offscreen. This value was eyeballed
-// from the XCode iPhone simulator running iOS 16.1.
+// CupertinoContextMenu would cause it to go outside the safe area. This value
+// was eyeballed from the XCode iPhone simulator running iOS 16.1.
 const double _kMinScaleFactor = 1.02;
 
 // The ratio for the borderRadius of the context menu preview image. This value
@@ -373,7 +373,7 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
   bool _childHidden = false;
   // Animates the child while it's opening.
   late AnimationController _openController;
-  late Rect? _decoyChildEndRect;
+  Rect? _decoyChildEndRect;
   late double _scaleFactor;
   OverlayEntry? _lastOverlayEntry;
   _ContextMenuRoute<void>? _route;
@@ -434,14 +434,13 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
     return _ContextMenuLocation.left;
   }
 
-  // Constrain the size of the expanded child so that it does not go offscreen.
-  // See https://github.com/flutter/flutter/issues/122951
-  static double _computeScaleFactor(BuildContext context, Rect childRect){
-    final MediaQueryData mediaQuery = MediaQuery.of(context);
-    final double leftMaxScale = 2 * (childRect.center.dx - mediaQuery.padding.left) / childRect.width;
-    final double topMaxScale = 2 * (childRect.center.dy - mediaQuery.padding.top) / childRect.height;
-    final double rightMaxScale = 2 * (mediaQuery.size.width - mediaQuery.padding.right - childRect.center.dx) / childRect.width;
-    final double bottomMaxScale = 2 * (mediaQuery.size.height - mediaQuery.padding.bottom - childRect.center.dy) / childRect.height;
+  // Constrain the size of the expanded child so that it does not go outside the
+  // safe area. See https://github.com/flutter/flutter/issues/122951.
+  static double _computeScaleFactor(Rect childRect, EdgeInsets padding, Size size) {
+    final double leftMaxScale = 2 * (childRect.center.dx - padding.left) / childRect.width;
+    final double topMaxScale = 2 * (childRect.center.dy - padding.top) / childRect.height;
+    final double rightMaxScale = 2 * (size.width - padding.right - childRect.center.dx) / childRect.width;
+    final double bottomMaxScale = 2 * (size.height - padding.bottom - childRect.center.dy) / childRect.height;
     final double minWidth = math.min(leftMaxScale, rightMaxScale);
     final double minHeight = math.min(topMaxScale, bottomMaxScale);
     // Return the smallest scale factor that keeps the child mostly onscreen.
@@ -566,7 +565,9 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
     });
 
     final Rect childRect = _getRect(_childGlobalKey);
-    _scaleFactor = _computeScaleFactor(context, childRect);
+    final EdgeInsets safeAreaPadding = MediaQuery.paddingOf(context);
+    final Size screenSize = MediaQuery.sizeOf(context);
+    _scaleFactor = _computeScaleFactor(childRect, safeAreaPadding, screenSize);
     _decoyChildEndRect = Rect.fromCenter(
       center: childRect.center,
       width: childRect.width * _scaleFactor,
@@ -756,7 +757,7 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
     CupertinoContextMenuBuilder? builder,
     super.filter,
     required Rect previousChildRect,
-    double scaleFactor = _kOpenScale,
+    required double scaleFactor,
     super.settings,
   }) : assert(actions.isNotEmpty),
        _actions = actions,
