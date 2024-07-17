@@ -299,8 +299,5 @@ class _EagerPanGestureRecognizer extends DragGestureRecognizer {
   double? getPrimaryValueFromOffset(Offset value) => null;
 
   @override
-  Axis? get primaryDragAxis => null;
-
-  @override
   String get debugDescription => 'pan';
 }

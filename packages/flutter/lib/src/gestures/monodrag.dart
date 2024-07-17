@@ -10,7 +10,6 @@ library;
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/painting.dart' show Axis;
 import 'package:flutter/scheduler.dart';
 
 import 'constants.dart';
@@ -360,13 +359,12 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   /// The axis (horizontal or vertical) corresponding to the primary drag direction.
   ///
   /// The [PanGestureRecognizer] returns null.
-  Axis? get primaryDragAxis => null;
+  _DragDirection? _getPrimaryDragAxis() => null;
 
   /// Whether the [globalDistanceMoved] is big enough to accept the gesture.
   ///
   /// If this method returns `true`, it means this recognizer should declare win in the gesture arena.
   bool hasSufficientGlobalDistanceToAccept(PointerDeviceKind pointerDeviceKind, double? deviceTouchSlop);
-
   bool _hasDragThresholdBeenMet = false;
 
   final Map<int, VelocityTracker> _velocityTrackers = <int, VelocityTracker>{};
@@ -475,7 +473,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   double _getSumDelta({
     required int pointer,
     required bool positive,
-    required Axis axis,
+    required _DragDirection axis,
   }) {
     double sum = 0.0;
 
@@ -485,13 +483,13 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
 
     final Offset offset = _moveDeltaBeforeFrame[pointer]!;
     if (positive) {
-      if (axis == Axis.vertical) {
+      if (axis == _DragDirection.vertical) {
         sum = max(offset.dy, 0.0);
       } else {
         sum = max(offset.dx, 0.0);
       }
     } else {
-      if (axis == Axis.vertical) {
+      if (axis == _DragDirection.vertical) {
         sum = min(offset.dy, 0.0);
       } else {
         sum = min(offset.dx, 0.0);
@@ -503,7 +501,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
 
   int? _getMaxSumDeltaPointer({
     required bool positive,
-    required Axis axis,
+    required _DragDirection axis,
   }) {
     if (_moveDeltaBeforeFrame.isEmpty) {
       return null;
@@ -554,24 +552,24 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
 
     assert(_frameTimeStamp == SchedulerBinding.instance.currentSystemFrameTimeStamp);
 
-    final Axis? axis = primaryDragAxis;
+    final _DragDirection? axis = _getPrimaryDragAxis();
 
     if (_state != _DragState.accepted || localDelta == Offset.zero || (_moveDeltaBeforeFrame.isEmpty && axis != null)) {
       return localDelta;
     }
 
     final double dx,dy;
-    if (axis == Axis.horizontal) {
-      dx = _resolveDelta(pointer: pointer, axis: Axis.horizontal, localDelta: localDelta);
+    if (axis == _DragDirection.horizontal) {
+      dx = _resolveDelta(pointer: pointer, axis: _DragDirection.horizontal, localDelta: localDelta);
       assert(dx.abs() <= localDelta.dx.abs());
       dy = 0.0;
-    } else if (axis == Axis.vertical) {
+    } else if (axis == _DragDirection.vertical) {
       dx = 0.0;
-      dy = _resolveDelta(pointer: pointer, axis: Axis.vertical, localDelta: localDelta);
+      dy = _resolveDelta(pointer: pointer, axis: _DragDirection.vertical, localDelta: localDelta);
       assert(dy.abs() <= localDelta.dy.abs());
     } else {
-      final double averageX = _resolveDeltaForPanGesture(axis: Axis.horizontal, localDelta: localDelta);
-      final double averageY = _resolveDeltaForPanGesture(axis: Axis.vertical, localDelta: localDelta);
+      final double averageX = _resolveDeltaForPanGesture(axis: _DragDirection.horizontal, localDelta: localDelta);
+      final double averageY = _resolveDeltaForPanGesture(axis: _DragDirection.vertical, localDelta: localDelta);
       final Offset updatedDelta = Offset(averageX, averageY) - _lastUpdatedDeltaForPan;
       _lastUpdatedDeltaForPan = Offset(averageX, averageY);
       dx = updatedDelta.dx;
@@ -583,11 +581,11 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
 
   double _resolveDelta({
     required int pointer,
-    required Axis axis,
+    required _DragDirection axis,
     required Offset localDelta,
   }) {
-    final bool positive = axis == Axis.horizontal ? localDelta.dx > 0 : localDelta.dy > 0;
-    final double delta = axis == Axis.horizontal ? localDelta.dx : localDelta.dy;
+    final bool positive = axis == _DragDirection.horizontal ? localDelta.dx > 0 : localDelta.dy > 0;
+    final double delta = axis == _DragDirection.horizontal ? localDelta.dx : localDelta.dy;
     final int? maxSumDeltaPointer = _getMaxSumDeltaPointer(positive: positive, axis: axis);
     assert(maxSumDeltaPointer != null);
 
@@ -613,16 +611,16 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 
   double _resolveDeltaForPanGesture({
-    required Axis axis,
+    required _DragDirection axis,
     required Offset localDelta,
   }) {
-    final double delta = axis == Axis.horizontal ? localDelta.dx : localDelta.dy;
+    final double delta = axis == _DragDirection.horizontal ? localDelta.dx : localDelta.dy;
     final int pointerCount = _acceptedActivePointers.length;
     assert(pointerCount >= 1);
 
     double sum = delta;
     for (final Offset offset in _moveDeltaBeforeFrame.values) {
-      if (axis == Axis.horizontal) {
+      if (axis == _DragDirection.horizontal) {
         sum += offset.dx;
       } else {
         sum += offset.dy;
@@ -936,7 +934,7 @@ class VerticalDragGestureRecognizer extends DragGestureRecognizer {
   double getPrimaryValueFromOffset(Offset value) => value.dy;
 
   @override
-  Axis? get primaryDragAxis => Axis.vertical;
+  _DragDirection? _getPrimaryDragAxis() => _DragDirection.vertical;
 
   @override
   String get debugDescription => 'vertical drag';
@@ -996,7 +994,7 @@ class HorizontalDragGestureRecognizer extends DragGestureRecognizer {
   double getPrimaryValueFromOffset(Offset value) => value.dx;
 
   @override
-  Axis? get primaryDragAxis => Axis.horizontal;
+  _DragDirection? _getPrimaryDragAxis() => _DragDirection.horizontal;
 
   @override
   String get debugDescription => 'horizontal drag';
@@ -1054,4 +1052,9 @@ class PanGestureRecognizer extends DragGestureRecognizer {
 
   @override
   String get debugDescription => 'pan';
+}
+
+enum _DragDirection {
+  horizontal,
+  vertical,
 }
