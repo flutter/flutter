@@ -445,7 +445,7 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
     final double minWidth = math.min(leftMaxScale, rightMaxScale);
     final double minHeight = math.min(topMaxScale, bottomMaxScale);
     // Return the smallest scale factor that keeps the child mostly onscreen.
-    return math.min(minWidth, minHeight).clamp(_kMinScaleFactor, _kOpenScale);
+    return clampDouble(math.min(minWidth, minHeight), _kMinScaleFactor, _kOpenScale);
   }
 
   /// The default preview builder if none is provided. It makes a rectangle
