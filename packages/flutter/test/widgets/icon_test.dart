@@ -442,8 +442,8 @@ void main() {
     ]);
   });
 
-  testWidgets("TextStyle's foreground is exposed", (WidgetTester tester) async {
-    final Paint foreground = Paint()..invertColors = true;
+  testWidgets("TextStyle's foreground is exposed and its color will be used", (WidgetTester tester) async {
+    final Paint foreground = Paint()..color = Color(0xFF666666);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -452,7 +452,8 @@ void main() {
     );
 
     final RichText richText = tester.firstWidget(find.byType(RichText));
-    expect(richText.text.style?.foreground?.invertColors, isTrue);
+    expect(richText.text.style?.color, isNull);
+    expect(richText.text.style?.foreground?.color, equals(const Color(0xFF666666)));
   });
 
   test('Throws if given invalid values', () {
