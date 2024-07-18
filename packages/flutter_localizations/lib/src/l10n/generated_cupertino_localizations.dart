@@ -7758,7 +7758,7 @@ class CupertinoLocalizationKo extends GlobalCupertinoLocalizations {
   String get copyButtonLabel => '복사';
 
   @override
-  String get cutButtonLabel => '잘라냄';
+  String get cutButtonLabel => '잘라내기';
 
   @override
   String get datePickerDateOrderString => 'ymd';
