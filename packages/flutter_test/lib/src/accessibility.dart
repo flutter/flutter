@@ -730,6 +730,44 @@ Map<Color, int> _colorsWithinRect(
   });
 }
 
+/// A guideline which enforces that all pages have a h1 tag present.
+///
+/// See also:
+///  * [AccessibilityGuideline], which provides a general overview of
+///    accessibility guidelines and how to use them.
+@visibleForTesting
+class PageHasHeadingOneGuideline extends AccessibilityGuideline {
+  const PageHasHeadingOneGuideline._();
+
+  @override
+  String get description => 'Pages should have a semantic header with headingLevel: 1.';
+
+  @override
+  FutureOr<Evaluation> evaluate(WidgetTester tester) {
+    Evaluation result = const Evaluation.pass();
+
+    for (final RenderView view in tester.binding.renderViews) {
+      result += _traverse(view.owner!.semanticsOwner!.rootSemanticsNode!);
+    }
+
+    return result;
+  }
+
+  Evaluation _traverse(SemanticsNode node) {
+    Evaluation result = const Evaluation.pass();
+    node.visitChildren((SemanticsNode child) {
+      result += _traverse(child);
+      return true;
+    });
+    final SemanticsData data = node.getSemanticsData();
+    if (!!data.hasFlag(ui.SemanticsFlag.isHeader)) {
+      expect(data.headingLevel, 1);
+    }
+    
+    return result;
+  }
+}
+
 /// A guideline which requires tappable semantic nodes a minimum size of
 /// 48 by 48.
 ///
@@ -780,3 +818,10 @@ const AccessibilityGuideline textContrastGuideline = MinimumTextContrastGuidelin
 ///  * [AccessibilityGuideline], which provides a general overview of
 ///    accessibility guidelines and how to use them.
 const AccessibilityGuideline labeledTapTargetGuideline = LabeledTapTargetGuideline._();
+
+/// A guideline which enforces that all nodes with a tap or long press action
+/// also have a label.
+///
+///  * [AccessibilityGuideline], which provides a general overview of
+///    accessibility guidelines and how to use them.
+const AccessibilityGuideline pageHasHeadingOneGuideline = PageHasHeadingOneGuideline._();
