@@ -92,13 +92,6 @@ class _PreferredAppBarSize extends Size {
 /// appears in the toolbar when the writing language is left-to-right (e.g.
 /// English):
 ///
-/// The [AppBar] insets its content based on the ambient [MediaQuery]'s padding,
-/// to avoid system UI intrusions. It's taken care of by [Scaffold] when used in
-/// the [Scaffold.appBar] property. When animating an [AppBar], unexpected
-/// [MediaQuery] changes (as is common in [Hero] animations) may cause the content
-/// to suddenly jump. Wrap the [AppBar] in a [MediaQuery] widget, and adjust its
-/// padding such that the animation is smooth.
-///
 /// ![The leading widget is in the top left, the actions are in the top right,
 /// the title is between them. The bottom is, naturally, at the bottom, and the
 /// flexibleSpace is behind all of them.](https://flutter.github.io/assets-for-api-docs/assets/material/app_bar.png)
@@ -109,6 +102,13 @@ class _PreferredAppBarSize extends Size {
 /// instead. This behavior can be turned off by setting the [automaticallyImplyLeading]
 /// to false. In that case a null leading widget will result in the middle/title widget
 /// stretching to start.
+///
+/// The [AppBar] insets its content based on the ambient [MediaQuery]'s padding,
+/// to avoid system UI intrusions. It's taken care of by [Scaffold] when used in
+/// the [Scaffold.appBar] property. When animating an [AppBar], unexpected
+/// [MediaQuery] changes (as is common in [Hero] animations) may cause the content
+/// to suddenly jump. Wrap the [AppBar] in a [MediaQuery] widget, and adjust its
+/// padding such that the animation is smooth.
 ///
 /// {@tool dartpad}
 /// This sample shows an [AppBar] with two simple actions. The first action
