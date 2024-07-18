@@ -1693,6 +1693,11 @@ typedef struct {
   // The set of semantics flags associated with this node. Prefer to use this
   // over `flags__deprecated__`.
   FlutterSemanticsFlags* flags2;
+  /// An identifier for the semantics node in native accessibility hierarchy.
+  /// This value should not be exposed to the users of the app.
+  /// This is usually used for UI testing with tools that work by querying the
+  /// native accessibility, like UIAutomator, XCUITest, or Appium.
+  const char* identifier;
 } FlutterSemanticsNode2;
 
 /// `FlutterSemanticsCustomAction` ID used as a sentinel to signal the end of a
