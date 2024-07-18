@@ -4,25 +4,18 @@
 
 name: engine_tool
 publish_to: none
+
+# Required for workspace support.
 environment:
-  # Required for extension types.
-  sdk: ^3.3.0
+  sdk: ^3.5.0-294.0.dev
 
-# Do not add any dependencies that require more than what is provided in
-# //third_party/pkg, //third_party/dart/pkg, or
-# //third_party/dart/third_party/pkg. In particular, package:test is not usable
-# here.
-
-# If you do add packages here, make sure you can run `pub get --offline`, and
-# check the .packages and .package_config to make sure all the paths are
-# relative to this directory into //third_party/dart
+# This package is managed as part of the engine workspace.
+resolution: workspace
 
 dependencies:
   args: any
-  engine_build_configs:
-    path: ../pkg/engine_build_configs
-  engine_repo_tools:
-    path: ../pkg/engine_repo_tools
+  engine_build_configs: any
+  engine_repo_tools: any
   file: any
   logging: any
   meta: any
@@ -31,47 +24,5 @@ dependencies:
   process_runner: any
 
 dev_dependencies:
-  async_helper: any
-  expect: any
   litetest: any
-  process_fakes:
-    path: ../pkg/process_fakes
-  smith: any
-
-dependency_overrides:
-  args:
-    path: ../../third_party/dart/third_party/pkg/args
-  async:
-    path: ../../third_party/dart/third_party/pkg/async
-  async_helper:
-    path: ../../third_party/dart/pkg/async_helper
-  collection:
-    path: ../../third_party/dart/third_party/pkg/collection
-  expect:
-    path: ../../third_party/dart/pkg/expect
-  file:
-    path: ../../third_party/dart/third_party/pkg/file/packages/file
-  litetest:
-    path: ../../testing/litetest
-  logging:
-    path: ../../third_party/dart/third_party/pkg/logging
-  meta:
-    path: ../../third_party/dart/pkg/meta
-  path:
-    path: ../../third_party/dart/third_party/pkg/path
-  platform:
-    path: ../../third_party/pkg/platform
-  process:
-    path: ../../third_party/pkg/process
-  process_runner:
-    path: ../../third_party/pkg/process_runner
-  smith:
-    path: ../../third_party/dart/pkg/smith
-  source_span:
-    path: ../../third_party/dart/third_party/pkg/source_span
-  string_scanner:
-    path: ../../third_party/dart/third_party/pkg/string_scanner
-  term_glyph:
-    path: ../../third_party/dart/third_party/pkg/term_glyph
-  yaml:
-    path: ../../third_party/dart/third_party/pkg/yaml
+  process_fakes: any

@@ -14,10 +14,15 @@ import os
 import subprocess
 import sys
 
+THIS_DIR = os.path.abspath(os.path.dirname(__file__))
+sys.path += [os.path.join(THIS_DIR, '..', 'third_party', 'pyyaml', 'lib3')]
+import yaml  # pylint: disable=import-error, wrong-import-position
+
 SRC_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 ENGINE_DIR = os.path.join(SRC_ROOT, 'flutter')
 
 ALL_PACKAGES = [
+    os.path.join(ENGINE_DIR),
     os.path.join(ENGINE_DIR, 'ci'),
     os.path.join(ENGINE_DIR, 'flutter_frontend_server'),
     os.path.join(ENGINE_DIR, 'impeller', 'tessellator', 'dart'),
@@ -64,7 +69,14 @@ def fetch_package(pub, package):
   return 0
 
 
-def check_package(package):
+def package_uses_workspace_resolution(package):
+  pubspec = os.path.join(package, 'pubspec.yaml')
+
+  with open(pubspec) as pubspec_file:
+    return yaml.safe_load(pubspec_file).get('resolution') == 'workspace'
+
+
+def check_package_config(package):
   package_config = os.path.join(package, '.dart_tool', 'package_config.json')
   pub_count = 0
   with open(package_config) as config_file:
@@ -119,6 +131,9 @@ def find_unlisted_packages():
 
 
 def main():
+  # Intentionally use the Dart SDK prebuilt instead of the Flutter prebuilt
+  # (i.e. prebuilts/{platform}/dart-sdk/bin/dart) because the script has to run
+  # in a monorepo build *before* the newer Dart SDK has been built from source.
   dart_sdk_bin = os.path.join(
       SRC_ROOT, 'flutter', 'third_party', 'dart', 'tools', 'sdks', 'dart-sdk', 'bin'
   )
@@ -139,7 +154,8 @@ def main():
   for package in ALL_PACKAGES:
     if fetch_package(pubcmd, package) != 0:
       return 1
-    pub_count = pub_count + check_package(package)
+    if not package_uses_workspace_resolution(package):
+      pub_count = pub_count + check_package_config(package)
 
   if pub_count > 0:
     return 1

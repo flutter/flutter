@@ -400,6 +400,8 @@ class ChannelBuffers {
   @Native<Void Function(Handle, Bool)>(symbol: 'PlatformConfigurationNativeApi::SendChannelUpdate')
   external static void _sendChannelUpdate(String name, bool listening);
 
+  // TODO(matanlurey): have original authors document; see https://github.com/flutter/flutter/issues/151917.
+  // ignore: public_member_api_docs
   void sendChannelUpdate(String name, {required bool listening}) => _sendChannelUpdate(name, listening);
 
   /// Deprecated. Migrate to [setListener] instead.

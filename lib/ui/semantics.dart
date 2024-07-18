@@ -284,8 +284,12 @@ class SemanticsAction {
     _kFocusIndex: focus,
   };
 
+  // TODO(matanlurey): have original authors document; see https://github.com/flutter/flutter/issues/151917.
+  // ignore: public_member_api_docs
   static List<SemanticsAction> get values => _kActionById.values.toList(growable: false);
 
+  // TODO(matanlurey): have original authors document; see https://github.com/flutter/flutter/issues/151917.
+  // ignore: public_member_api_docs
   static SemanticsAction? fromIndex(int index) => _kActionById[index];
 
   @override
@@ -638,8 +642,12 @@ class SemanticsFlag {
     _kIsExpandedIndex: isExpanded,
   };
 
+  // TODO(matanlurey): have original authors document; see https://github.com/flutter/flutter/issues/151917.
+  // ignore: public_member_api_docs
   static List<SemanticsFlag> get values => _kFlagById.values.toList(growable: false);
 
+  // TODO(matanlurey): have original authors document; see https://github.com/flutter/flutter/issues/151917.
+  // ignore: public_member_api_docs
   static SemanticsFlag? fromIndex(int index) => _kFlagById[index];
 
   @override

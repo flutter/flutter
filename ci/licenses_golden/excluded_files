@@ -12,6 +12,7 @@
 ../../../flutter/.ci.yaml
 ../../../flutter/.clang-format
 ../../../flutter/.clang-tidy
+../../../flutter/.dart_tool
 ../../../flutter/.git
 ../../../flutter/.gitattributes
 ../../../flutter/.github
@@ -254,6 +255,8 @@
 ../../../flutter/lib/web_ui/pubspec.yaml
 ../../../flutter/lib/web_ui/test
 ../../../flutter/prebuilts
+../../../flutter/pubspec.lock
+../../../flutter/pubspec.yaml
 ../../../flutter/runtime/dart_isolate_unittests.cc
 ../../../flutter/runtime/dart_lifecycle_unittests.cc
 ../../../flutter/runtime/dart_plugin_registrant_unittests.cc
