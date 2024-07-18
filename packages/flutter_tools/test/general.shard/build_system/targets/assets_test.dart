@@ -347,6 +347,7 @@ flutter:
             ..writeAsStringSync('foo');
         },
       );
+
       testUsingContext('uses unique paths for temporary files', () async {
         Cache.flutterRoot = Cache.defaultFlutterRoot(
           platform: globals.platform,

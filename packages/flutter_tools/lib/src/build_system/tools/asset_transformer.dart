@@ -58,12 +58,16 @@ final class AssetTransformer {
     String getTempFilePath(int transformStep) {
       final String basename = _fileSystem.path.basename(asset.path);
       final String ext = _fileSystem.path.extension(asset.path);
+
+      // Resolution-aware asset variants can share the same basename/extension,
+      // so we need to insert a unique identifier into the path.
       return '$basename-transformOutput$transformStep$ext';
     }
 
-    File tempInputFile = _fileSystem.systemTempDirectory.childFile(getTempFilePath(0));
+    final Directory tempDirectory = _fileSystem.systemTempDirectory.createTempSync();
+    File tempInputFile = tempDirectory.childFile(getTempFilePath(0));
     await asset.copy(tempInputFile.path);
-    File tempOutputFile = _fileSystem.systemTempDirectory.childFile(getTempFilePath(1));
+    File tempOutputFile = tempDirectory.childFile(getTempFilePath(1));
     ErrorHandlingFileSystem.deleteIfExists(tempOutputFile);
 
     final Stopwatch stopwatch = Stopwatch()..start();
