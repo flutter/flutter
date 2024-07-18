@@ -25,7 +25,11 @@ class _MainWidget extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Text('Dialog'),
+        title: Semantics(
+          header: true,
+          headingLevel: 1,
+          child: const Text('Dialog'),
+        ),
       ),
       body: Center(
         child: TextButton(

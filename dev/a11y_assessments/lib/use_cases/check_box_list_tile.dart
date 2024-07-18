@@ -29,7 +29,13 @@ class _MainWidgetState extends State<_MainWidget> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('CheckBoxListTile')),
+      appBar: AppBar(
+        title: Semantics(
+          header: true,
+          headingLevel: 1,
+          child: const Text('CheckBoxListTile'),
+        ),
+      ),
       body: ListView(
         children: <Widget>[
           CheckboxListTile(

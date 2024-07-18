@@ -47,7 +47,11 @@ class _MainWidgetState extends State<_MainWidget> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Text('AutoComplete'),
+        title: Semantics(
+          header: true,
+          headingLevel: 1,
+          child: const Text('AutoComplete')
+        ),
       ),
       body: Center(
         child: Column(

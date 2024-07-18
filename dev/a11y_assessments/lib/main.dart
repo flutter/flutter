@@ -85,8 +85,8 @@ class HomePageState extends State<HomePage> {
         title: Semantics(
           header: true,
           headingLevel: 1,
-          child:const Text('Accessibility Assessments'),
-          )
+          child: const Text('Accessibility Assessments'),
+          ),
         ),
       body: Center(
         child: ListView(
