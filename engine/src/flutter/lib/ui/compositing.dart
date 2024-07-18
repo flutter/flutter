@@ -246,6 +246,8 @@ class ShaderMaskEngineLayer extends _EngineLayerWrapper {
 /// This does not apply when using the `dart:ui` API directly, without using the
 /// Flutter framework bindings, `flutter_test` framework, et al.
 abstract class SceneBuilder {
+  // TODO(matanlurey): have original authors document; see https://github.com/flutter/flutter/issues/151917.
+  // ignore: public_member_api_docs
   factory SceneBuilder() = _NativeSceneBuilder;
 
   /// Pushes a transform operation onto the operation stack.

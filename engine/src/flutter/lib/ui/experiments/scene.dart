@@ -50,24 +50,34 @@ base class SceneNode extends NativeFieldWrapperClass1 {
     return result;
   }
 
+  // TODO(matanlurey): have original authors document; see https://github.com/flutter/flutter/issues/151917.
+  // ignore: public_member_api_docs
   static SceneNodeValue fromTransform(Float64List matrix4) {
     final SceneNode sceneNode = SceneNode._create();
     sceneNode._initFromTransform(matrix4);
     return SceneNodeValue.fromValue(sceneNode);
   }
 
+  // TODO(matanlurey): have original authors document; see https://github.com/flutter/flutter/issues/151917.
+  // ignore: public_member_api_docs
   void addChild(SceneNode sceneNode) {
     _addChild(sceneNode);
   }
 
+  // TODO(matanlurey): have original authors document; see https://github.com/flutter/flutter/issues/151917.
+  // ignore: public_member_api_docs
   void setTransform(Float64List matrix4) {
     _setTransform(matrix4);
   }
 
+  // TODO(matanlurey): have original authors document; see https://github.com/flutter/flutter/issues/151917.
+  // ignore: public_member_api_docs
   void setAnimationState(String animationName, bool playing, bool loop, double weight, double timeScale) {
     _setAnimationState(animationName, playing, loop, weight, timeScale);
   }
 
+  // TODO(matanlurey): have original authors document; see https://github.com/flutter/flutter/issues/151917.
+  // ignore: public_member_api_docs
   void seekAnimation(String animationName, double time) {
     _seekAnimation(animationName, time);
   }
@@ -126,17 +136,24 @@ base class SceneNode extends NativeFieldWrapperClass1 {
 
   /// Returns a fresh instance of [SceneShader].
   SceneShader sceneShader() => SceneShader._(this, debugName: _debugName);
+
 }
 
+// TODO(matanlurey): have original authors document; see https://github.com/flutter/flutter/issues/151917.
+// ignore: public_member_api_docs
 class SceneNodeValue {
   SceneNodeValue._(this._future, this._value) {
     _future?.then((SceneNode result) => _value = result);
   }
 
+  // TODO(matanlurey): have original authors document; see https://github.com/flutter/flutter/issues/151917.
+  // ignore: public_member_api_docs
   static SceneNodeValue fromFuture(Future<SceneNode> future) {
     return SceneNodeValue._(future, null);
   }
 
+  // TODO(matanlurey): have original authors document; see https://github.com/flutter/flutter/issues/151917.
+  // ignore: public_member_api_docs
   static SceneNodeValue fromValue(SceneNode value) {
     return SceneNodeValue._(null, value);
   }
@@ -144,14 +161,20 @@ class SceneNodeValue {
   final Future<SceneNode>? _future;
   SceneNode? _value;
 
+  // TODO(matanlurey): have original authors document; see https://github.com/flutter/flutter/issues/151917.
+  // ignore: public_member_api_docs
   bool get isComplete {
     return _value != null;
   }
 
+  // TODO(matanlurey): have original authors document; see https://github.com/flutter/flutter/issues/151917.
+  // ignore: public_member_api_docs
   Future<SceneNode>? get future {
     return _future;
   }
 
+  // TODO(matanlurey): have original authors document; see https://github.com/flutter/flutter/issues/151917.
+  // ignore: public_member_api_docs
   SceneNode? get value {
     return _value;
   }
@@ -186,6 +209,8 @@ base class SceneShader extends Shader {
   // ignore: unused_field
   final String? _debugName;
 
+  // TODO(matanlurey): have original authors document; see https://github.com/flutter/flutter/issues/151917.
+  // ignore: public_member_api_docs
   void setCameraTransform(Float64List matrix4) {
     _setCameraTransform(matrix4);
   }

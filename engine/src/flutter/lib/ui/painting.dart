@@ -2598,6 +2598,8 @@ base class _NativeEngineLayer extends NativeFieldWrapperClass1 implements Engine
 /// Paths can be drawn on canvases using [Canvas.drawPath], and can
 /// used to create clip regions using [Canvas.clipPath].
 abstract class Path {
+  // TODO(matanlurey): have original authors document; see https://github.com/flutter/flutter/issues/151917.
+  // ignore: public_member_api_docs
   factory Path() = _NativePath;
 
   /// Creates a copy of another [Path].
