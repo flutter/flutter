@@ -43,7 +43,7 @@ const List<double> halvesBrightnessColorMatrix = <double>[
   0,   0,   0,   1, 0,
 ];
 
-void main() {
+void main() async {
   Future<Uint32List> getBytesForPaint(Paint paint, {int width = 3, int height = 3}) async {
     final PictureRecorder recorder = PictureRecorder();
     final Canvas recorderCanvas = Canvas(recorder);
@@ -302,8 +302,6 @@ void main() {
 
   // Tests that FilterQuality.<value> produces the expected golden file.
   group('ImageFilter|FilterQuality', () async {
-    final ImageComparer comparer = await ImageComparer.create();
-
     /// Draw a red-green checkerboard pattern with 1x1 squares (pixels).
     Future<Image> drawCheckerboard({
       int width = 100,
@@ -354,6 +352,7 @@ void main() {
     }
 
     test('Scaling a checkerboard of 1x1 red-green pixels with FilterQuality.none', () async {
+      final ImageComparer comparer = await ImageComparer.create();
       final Image base = await redGreenCheckerboard;
       final Image scaled = await shrinkAndScaleImage(base, FilterQuality.none);
       await comparer.addGoldenImage(scaled, 'dart_ui_filter_quality_none_scale_1x1_red_green_checkerboard.png');
