@@ -55,6 +55,26 @@ interface class Gn {
       failOk: true,
     );
     if (process.exitCode != 0) {
+      // If the error was in the format:
+      // "The input testing/scenario_app:scenario_app matches no targets, configs or files."
+      //
+      // Then report a nicer error, versus a fatal error.
+      final stdout = process.stdout;
+      if (stdout.contains('matches no targets, configs or files')) {
+        final gnPattern = pattern.toGnPattern();
+        if (!gnPattern.startsWith('//flutter')) {
+          _environment.logger.warning(
+            'No targets matched the pattern `$gnPattern`.'
+            'Did you mean `//flutter/$gnPattern`?',
+          );
+        } else {
+          _environment.logger.warning(
+            'No targets matched the pattern `${pattern.toGnPattern()}`',
+          );
+        }
+        return <BuildTarget>[];
+      }
+
       _environment.logger.fatal(
         'Failed to run `${command.join(' ')}` (exit code ${process.exitCode})'
         '\n\n'

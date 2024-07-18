@@ -424,6 +424,36 @@ void main() {
     }
   });
 
+  test('build command gracefully handles no matched targets', () async {
+    final List<CannedProcess> cannedProcesses = <CannedProcess>[
+      CannedProcess((List<String> command) =>
+          command.contains('desc'),
+          stdout: fixtures.gnDescOutputEmpty(gnPattern: 'testing/scenario_app:sceario_app'),
+          exitCode: 1),
+    ];
+    final TestEnvironment testEnv = TestEnvironment.withTestEngine(
+      cannedProcesses: cannedProcesses,
+    );
+    try {
+      final ToolCommandRunner runner = ToolCommandRunner(
+        environment: testEnv.environment,
+        configs: configs,
+      );
+      final int result = await runner.run(<String>[
+        'build',
+        '--config',
+        'host_debug',
+        // Intentionally omit the prefix '//flutter/' to trigger the warning.
+        '//testing/scenario_app',
+      ]);
+      expect(result, equals(0));
+      expect(testEnv.testLogs.map((LogRecord r) => r.message).join(),
+          contains('No targets matched the pattern `testing/scenario_app'));
+    } finally {
+      testEnv.cleanup();
+    }
+  });
+
   test('et help build line length is not too big', () async {
     final List<String> prints = <String>[];
     await runZoned(

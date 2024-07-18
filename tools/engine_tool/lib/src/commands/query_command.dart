@@ -221,7 +221,8 @@ et query targets //flutter/fml/...  # List all targets under `//flutter/fml`
     }
 
     if (allTargets.isEmpty) {
-      environment.logger.fatal('Query unexpectedly returned an empty list');
+      environment.logger.error('No targets found, nothing to query.');
+      return 1;
     }
 
     for (final BuildTarget target in allTargets) {
