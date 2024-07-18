@@ -3,8 +3,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include <epoxy/egl.h>
-#include <epoxy/gl.h>
+#include "flutter/shell/platform/linux/testing/mock_epoxy.h"
+
+using namespace flutter::testing;
 
 typedef struct {
   EGLint config_id;
@@ -45,6 +46,7 @@ typedef struct {
 typedef struct {
 } MockSurface;
 
+static MockEpoxy* mock = nullptr;
 static bool display_initialized = false;
 static MockDisplay mock_display;
 static MockConfig mock_config;
@@ -52,6 +54,10 @@ static MockContext mock_context;
 static MockSurface mock_surface;
 
 static EGLint mock_error = EGL_SUCCESS;
+
+MockEpoxy::MockEpoxy() {
+  mock = this;
+}
 
 static bool check_display(EGLDisplay dpy) {
   if (dpy == nullptr) {
@@ -346,6 +352,8 @@ EGLBoolean _eglSwapBuffers(EGLDisplay dpy, EGLSurface surface) {
 
 static GLuint bound_texture_2d;
 
+void _glAttachShader(GLuint program, GLuint shader) {}
+
 static void _glBindFramebuffer(GLenum target, GLuint framebuffer) {}
 
 static void _glBindTexture(GLenum target, GLuint texture) {
@@ -354,7 +362,33 @@ static void _glBindTexture(GLenum target, GLuint texture) {
   }
 }
 
+static void _glBlitFramebuffer(GLint srcX0,
+                               GLint srcY0,
+                               GLint srcX1,
+                               GLint srcY1,
+                               GLint dstX0,
+                               GLint dstY0,
+                               GLint dstX1,
+                               GLint dstY1,
+                               GLbitfield mask,
+                               GLenum filter) {
+  mock->glBlitFramebuffer(srcX0, srcY0, srcX1, srcY1, dstX0, dstY0, dstX1,
+                          dstY1, mask, filter);
+}
+
+GLuint _glCreateProgram() {
+  return 0;
+}
+
+void _glCompileShader(GLuint shader) {}
+
+GLuint _glCreateShader(GLenum shaderType) {
+  return 0;
+}
+
 void _glDeleteFramebuffers(GLsizei n, const GLuint* framebuffers) {}
+
+void _glDeleteShader(GLuint shader) {}
 
 void _glDeleteTextures(GLsizei n, const GLuint* textures) {}
 
@@ -382,6 +416,28 @@ static void _glGetIntegerv(GLenum pname, GLint* data) {
   }
 }
 
+static void _glGetProgramiv(GLuint program, GLenum pname, GLint* params) {
+  if (pname == GL_LINK_STATUS) {
+    *params = GL_TRUE;
+  }
+}
+
+static void _glGetProgramInfoLog(GLuint program,
+                                 GLsizei maxLength,
+                                 GLsizei* length,
+                                 GLchar* infoLog) {}
+
+static void _glGetShaderiv(GLuint shader, GLenum pname, GLint* params) {
+  if (pname == GL_COMPILE_STATUS) {
+    *params = GL_TRUE;
+  }
+}
+
+static void _glGetShaderInfoLog(GLuint shader,
+                                GLsizei maxLength,
+                                GLsizei* length,
+                                GLchar* infoLog) {}
+
 static void _glTexParameterf(GLenum target, GLenum pname, GLfloat param) {}
 
 static void _glTexParameteri(GLenum target, GLenum pname, GLint param) {}
@@ -400,16 +456,23 @@ static GLenum _glGetError() {
   return GL_NO_ERROR;
 }
 
+void _glLinkProgram(GLuint program) {}
+
+void _glShaderSource(GLuint shader,
+                     GLsizei count,
+                     const GLchar* const* string,
+                     const GLint* length) {}
+
 bool epoxy_has_gl_extension(const char* extension) {
-  return false;
+  return mock->epoxy_has_gl_extension(extension);
 }
 
 bool epoxy_is_desktop_gl(void) {
-  return false;
+  return mock->epoxy_is_desktop_gl();
 }
 
 int epoxy_gl_version(void) {
-  return 0;
+  return mock->epoxy_gl_version();
 }
 
 #ifdef __GNUC__
@@ -463,9 +526,24 @@ EGLBoolean (*epoxy_eglMakeCurrent)(EGLDisplay dpy,
                                    EGLContext ctx);
 EGLBoolean (*epoxy_eglSwapBuffers)(EGLDisplay dpy, EGLSurface surface);
 
+void (*epoxy_glAttachShader)(GLuint program, GLuint shader);
 void (*epoxy_glBindFramebuffer)(GLenum target, GLuint framebuffer);
 void (*epoxy_glBindTexture)(GLenum target, GLuint texture);
+void (*epoxy_glBlitFramebuffer)(GLint srcX0,
+                                GLint srcY0,
+                                GLint srcX1,
+                                GLint srcY1,
+                                GLint dstX0,
+                                GLint dstY0,
+                                GLint dstX1,
+                                GLint dstY1,
+                                GLbitfield mask,
+                                GLenum filter);
+void (*epoxy_glCompileShader)(GLuint shader);
+GLuint (*epoxy_glCreateProgram)();
+GLuint (*epoxy_glCreateShader)(GLenum shaderType);
 void (*epoxy_glDeleteFramebuffers)(GLsizei n, const GLuint* framebuffers);
+void (*expoxy_glDeleteShader)(GLuint shader);
 void (*epoxy_glDeleteTextures)(GLsizei n, const GLuint* textures);
 void (*epoxy_glFramebufferTexture2D)(GLenum target,
                                      GLenum attachment,
@@ -474,6 +552,11 @@ void (*epoxy_glFramebufferTexture2D)(GLenum target,
                                      GLint level);
 void (*epoxy_glGenFramebuffers)(GLsizei n, GLuint* framebuffers);
 void (*epoxy_glGenTextures)(GLsizei n, GLuint* textures);
+void (*epoxy_glLinkProgram)(GLuint program);
+void (*epoxy_glShaderSource)(GLuint shader,
+                             GLsizei count,
+                             const GLchar* const* string,
+                             const GLint* length);
 void (*epoxy_glTexParameterf)(GLenum target, GLenum pname, GLfloat param);
 void (*epoxy_glTexParameteri)(GLenum target, GLenum pname, GLint param);
 void (*epoxy_glTexImage2D)(GLenum target,
@@ -502,14 +585,26 @@ static void library_init() {
   epoxy_eglQueryContext = _eglQueryContext;
   epoxy_eglSwapBuffers = _eglSwapBuffers;
 
+  epoxy_glAttachShader = _glAttachShader;
   epoxy_glBindFramebuffer = _glBindFramebuffer;
   epoxy_glBindTexture = _glBindTexture;
+  epoxy_glBlitFramebuffer = _glBlitFramebuffer;
+  epoxy_glCompileShader = _glCompileShader;
+  epoxy_glCreateProgram = _glCreateProgram;
+  epoxy_glCreateShader = _glCreateShader;
   epoxy_glDeleteFramebuffers = _glDeleteFramebuffers;
+  epoxy_glDeleteShader = _glDeleteShader;
   epoxy_glDeleteTextures = _glDeleteTextures;
   epoxy_glFramebufferTexture2D = _glFramebufferTexture2D;
   epoxy_glGenFramebuffers = _glGenFramebuffers;
   epoxy_glGenTextures = _glGenTextures;
   epoxy_glGetIntegerv = _glGetIntegerv;
+  epoxy_glGetProgramiv = _glGetProgramiv;
+  epoxy_glGetProgramInfoLog = _glGetProgramInfoLog;
+  epoxy_glGetShaderiv = _glGetShaderiv;
+  epoxy_glGetShaderInfoLog = _glGetShaderInfoLog;
+  epoxy_glLinkProgram = _glLinkProgram;
+  epoxy_glShaderSource = _glShaderSource;
   epoxy_glTexParameterf = _glTexParameterf;
   epoxy_glTexParameteri = _glTexParameteri;
   epoxy_glTexImage2D = _glTexImage2D;
