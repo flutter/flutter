@@ -1427,6 +1427,7 @@
 ../../../flutter/third_party/dart/runtime/tools/dartfuzz/update_spreadsheet.py
 ../../../flutter/third_party/dart/runtime/tools/embedder_layering_check.py
 ../../../flutter/third_party/dart/runtime/tools/entitlements/README.md
+../../../flutter/third_party/dart/runtime/tools/exists.py
 ../../../flutter/third_party/dart/runtime/tools/gen_library_src_paths.py
 ../../../flutter/third_party/dart/runtime/tools/graphexplorer/graphexplorer.css
 ../../../flutter/third_party/dart/runtime/tools/heapsnapshot/CHANGELOG.md
