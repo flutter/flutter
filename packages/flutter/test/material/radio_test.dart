@@ -1884,7 +1884,7 @@ void main() {
       await gesture.moveTo(tester.getCenter(find.byType(CupertinoRadio<int>)));
       expect(
         RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-        SystemMouseCursors.basic,
+        kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
       );
       await tester.pumpWidget(buildApp(platform: platform, mouseCursor: SystemMouseCursors.forbidden));
       expect(
