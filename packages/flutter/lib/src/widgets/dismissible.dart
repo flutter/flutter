@@ -87,6 +87,13 @@ enum DismissDirection {
 /// ** See code in examples/api/lib/widgets/dismissible/dismissible.0.dart **
 /// {@end-tool}
 ///
+/// {@tool dartpad}
+/// In this sample, the [shouldDismiss] callback is used to customize the behavior
+/// of the [Dismissible] widget.
+///
+/// ** See code in examples/api/lib/widgets/dismissible/dismissible.1.dart **
+/// {@end-tool}
+///
 /// Backgrounds can be used to implement the "leave-behind" idiom. If a background
 /// is specified it is stacked behind the Dismissible's child and is exposed when
 /// the child moves.
