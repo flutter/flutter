@@ -262,7 +262,7 @@ class MockHitTestTarget implements HitTestTarget {
 /// Typically, [VerticalDragGestureRecognizer] wins because it has a smaller threshold to
 /// accept the gesture. This recognizer uses the same threshold that [VerticalDragGestureRecognizer]
 /// uses.
-class _EagerPanGestureRecognizer extends DragGestureRecognizer {
+class _EagerPanGestureRecognizer extends PanGestureRecognizer {
 
   @override
   bool hasSufficientGlobalDistanceToAccept(PointerDeviceKind pointerDeviceKind, double? deviceTouchSlop) {
@@ -291,13 +291,4 @@ class _EagerPanGestureRecognizer extends DragGestureRecognizer {
       localPosition: lastPosition.local,
     );
   }
-
-  @override
-  Offset getDeltaForDetails(Offset delta) => delta;
-
-  @override
-  double? getPrimaryValueFromOffset(Offset value) => null;
-
-  @override
-  String get debugDescription => 'pan';
 }
