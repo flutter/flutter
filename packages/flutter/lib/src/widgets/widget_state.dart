@@ -18,9 +18,9 @@ import 'package:flutter/services.dart';
 /// one of its values, based on the first key that [isSatisfiedBy]
 /// the current set of states.
 ///
-/// {@macro flutter.widgets.WidgetStateProperty.WidgetStateMap}
+/// {@macro flutter.widgets.WidgetStateMap}
 abstract interface class WidgetStatesConstraint {
-  /// Whether the current [states] satisfy this object's criteria.
+  /// Whether the provided [states] satisfy this object's criteria.
   ///
   /// If the constraint is a single [WidgetState] object,
   /// it's satisfied by the set if the set contains the object.
@@ -703,6 +703,8 @@ abstract class WidgetStateProperty<T> {
   /// the method throws an [ArgumentError].
   ///
   /// {@macro flutter.widgets.WidgetState.any}
+  ///
+  /// {@macro flutter.widgets.WidgetStateMap}
   const factory WidgetStateProperty.fromMap(WidgetStateMap<T> map) = _WidgetStateMapper<T>;
 
   /// Resolves the value for the given set of states if `value` is a
@@ -783,10 +785,11 @@ class _WidgetStatePropertyWith<T> implements WidgetStateProperty<T> {
 /// A [Map] used to resolve to a single value of type `T` based on
 /// the current set of Widget states.
 ///
-/// {@template flutter.widgets.WidgetStateProperty.WidgetStateMap}
+/// {@template flutter.widgets.WidgetStateMap}
 /// Example:
 ///
 /// ```dart
+/// // This WidgetStateMap<Color?> resolves to null if no keys match.
 /// WidgetStateProperty<Color?>.fromMap(<WidgetStatesConstraint, Color?>{
 ///   WidgetState.error: Colors.red,
 ///   WidgetState.hovered & WidgetState.focused: Colors.blueAccent,
