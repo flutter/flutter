@@ -55,19 +55,20 @@ final class AssetTransformer {
     required Logger logger,
   }) async {
 
-    String getTempFilePath(int transformStep) {
+    final Directory tempDirectory = _fileSystem.systemTempDirectory.createTempSync();
+
+    File newTempFile(int transformStep) {
       final String basename = _fileSystem.path.basename(asset.path);
       final String ext = _fileSystem.path.extension(asset.path);
 
       // Resolution-aware asset variants can share the same basename/extension,
       // so we need to insert a unique identifier into the path.
-      return '$basename-transformOutput$transformStep$ext';
+      return tempDirectory.childFile('$basename-transformOutput$transformStep$ext');
     }
 
-    final Directory tempDirectory = _fileSystem.systemTempDirectory.createTempSync();
-    File tempInputFile = tempDirectory.childFile(getTempFilePath(0));
+    File tempInputFile = newTempFile(0);
     await asset.copy(tempInputFile.path);
-    File tempOutputFile = tempDirectory.childFile(getTempFilePath(1));
+    File tempOutputFile = newTempFile(1);
     ErrorHandlingFileSystem.deleteIfExists(tempOutputFile);
 
     final Stopwatch stopwatch = Stopwatch()..start();
@@ -82,10 +83,7 @@ final class AssetTransformer {
         );
 
         if (transformerFailure != null) {
-          return AssetTransformationFailure(
-            'User-defined transformation of asset "${asset.path}" failed.\n'
-            '${transformerFailure.message}',
-          );
+          return AssetTransformationFailure(transformerFailure.message);
         }
 
         ErrorHandlingFileSystem.deleteIfExists(tempInputFile);
@@ -94,15 +92,14 @@ final class AssetTransformer {
           await tempOutputFile.copy(outputPath);
         } else {
           tempInputFile = tempOutputFile;
-          tempOutputFile = _fileSystem.systemTempDirectory.childFile(getTempFilePath(i+2));
+          tempOutputFile = newTempFile(i+2);
           ErrorHandlingFileSystem.deleteIfExists(tempOutputFile);
         }
       }
 
       logger.printTrace("Finished transforming asset at path '${asset.path}' (${stopwatch.elapsedMilliseconds}ms)");
     } finally {
-      ErrorHandlingFileSystem.deleteIfExists(tempInputFile);
-      ErrorHandlingFileSystem.deleteIfExists(tempOutputFile);
+      ErrorHandlingFileSystem.deleteIfExists(tempDirectory, recursive: true);
     }
 
     return null;

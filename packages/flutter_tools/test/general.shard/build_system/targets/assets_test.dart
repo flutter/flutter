@@ -291,7 +291,7 @@ flutter:
 
       await expectToolExitLater(
         const CopyAssets().build(environment),
-        startsWith('User-defined transformation of asset "/input.txt" failed.\n'),
+        startsWith('User-defined transformation of asset "input.txt" failed.\n'),
       );
       expect(globals.processManager, hasNoRemainingExpectations);
     }, overrides: <Type, Generator> {
