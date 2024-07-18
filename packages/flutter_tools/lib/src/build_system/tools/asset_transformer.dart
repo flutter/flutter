@@ -57,16 +57,19 @@ final class AssetTransformer {
 
     final Directory tempDirectory = _fileSystem.systemTempDirectory.createTempSync();
 
-    File newTempFile(int transformStep) {
+    int transformStep = 0;
+    File nextTempFile() {
       final String basename = _fileSystem.path.basename(asset.path);
       final String ext = _fileSystem.path.extension(asset.path);
 
-      return tempDirectory.childFile('$basename-transformOutput$transformStep$ext');
+      final File result = tempDirectory.childFile('$basename-transformOutput$transformStep$ext');
+      transformStep++;
+      return result;
     }
 
-    File tempInputFile = newTempFile(0);
+    File tempInputFile = nextTempFile();
     await asset.copy(tempInputFile.path);
-    File tempOutputFile = newTempFile(1);
+    File tempOutputFile = nextTempFile();
 
     final Stopwatch stopwatch = Stopwatch()..start();
     try {
@@ -89,7 +92,7 @@ final class AssetTransformer {
           await tempOutputFile.copy(outputPath);
         } else {
           tempInputFile = tempOutputFile;
-          tempOutputFile = newTempFile(i+2);
+          tempOutputFile = nextTempFile();
         }
       }
 
