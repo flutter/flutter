@@ -166,7 +166,7 @@ class CupertinoApp extends StatefulWidget {
     this.onNavigationNotification,
     List<NavigatorObserver> this.navigatorObservers = const <NavigatorObserver>[],
     this.builder,
-    this.title = '',
+    this.title,
     this.onGenerateTitle,
     this.color,
     this.locale,
@@ -207,7 +207,7 @@ class CupertinoApp extends StatefulWidget {
     this.routerConfig,
     this.theme,
     this.builder,
-    this.title = '',
+    this.title,
     this.onGenerateTitle,
     this.onNavigationNotification,
     this.color,
@@ -303,7 +303,7 @@ class CupertinoApp extends StatefulWidget {
   /// {@macro flutter.widgets.widgetsApp.title}
   ///
   /// This value is passed unmodified to [WidgetsApp.title].
-  final String title;
+  final String? title;
 
   /// {@macro flutter.widgets.widgetsApp.onGenerateTitle}
   ///

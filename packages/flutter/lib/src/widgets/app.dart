@@ -828,7 +828,7 @@ class WidgetsApp extends StatefulWidget {
   ///
   /// To provide a localized title instead, use [onGenerateTitle].
   /// {@endtemplate}
-  final String title;
+  final String? title;
 
   /// {@template flutter.widgets.widgetsApp.onGenerateTitle}
   /// If non-null this callback function is called to produce the app's
