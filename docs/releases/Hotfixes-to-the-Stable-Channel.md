@@ -26,7 +26,7 @@ INTERNAL NOTE
 -->
 ## Flutter 3.22 Changes
 
-### [3.22.3](https://github.com/flutter/flutter/releases/tag/3.22.2) (July 17, 2024)
+### [3.22.3](https://github.com/flutter/flutter/releases/tag/3.22.3) (July 17, 2024)
 
 - [dart/55979](https://github.com/dart-lang/sdk/issues/55979) - Fixes an issue where `const bool.fromEnvironment('dart.library.ffi')` is true and conditional import condition `dart.library.ffi` is true in dart2wasm.
 - [dart/55943](https://github.com/dart-lang/sdk/issues/55943) - Fixes an issue where FFI calls with variadic arguments on MacOS Arm64 would mangle the arguments.
