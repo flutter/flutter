@@ -13,26 +13,26 @@ import 'package:flutter/services.dart';
 /// This class allows [WidgetState] enum values to be combined
 /// using [WidgetStateOperators].
 ///
-/// A [Map] with [WidgetStateMapKey] objects as keys can be used
+/// A [Map] with [WidgetStatesConstraint] objects as keys can be used
 /// in the [WidgetStateProperty.fromMap] constructor to resolve to
 /// one of its values, based on the first key that [isSatisfiedBy]
 /// the current set of states.
 ///
 /// {@macro flutter.widgets.WidgetStateProperty.WidgetStateMap}
-abstract interface class WidgetStateMapKey {
-  /// Whether this key should apply, given the current [states].
+abstract interface class WidgetStatesConstraint {
+  /// Whether the current [states] satisfy this object's criteria.
   ///
-  /// If the key is a single [WidgetState] object, it's satisfied by the set
-  /// if the set contains the object.
+  /// If the constraint is a single [WidgetState] object,
+  /// it's satisfied by the set if the set contains the object.
   ///
-  /// The key could also be created using one or more operators, for example:
+  /// The constraint can also be created using one or more operators, for example:
   ///
-  /// {@template flutter.widgets.WidgetStateMapKey.isSatisfiedBy}
+  /// {@template flutter.widgets.WidgetStatesConstraint.isSatisfiedBy}
   /// ```dart
-  /// final WidgetStateMapKey mapKey = WidgetState.focused | WidgetState.hovered;
+  /// final WidgetStatesConstraint constraint = WidgetState.focused | WidgetState.hovered;
   /// ```
   ///
-  /// In the above case, `mapKey.isSatisfiedBy(states)` is equivalent to:
+  /// In the above case, `constraint.isSatisfiedBy(states)` is equivalent to:
   ///
   /// ```dart
   /// states.contains(WidgetState.focused) || states.contains(WidgetState.hovered);
@@ -42,7 +42,7 @@ abstract interface class WidgetStateMapKey {
 }
 
 // A private class, used in [WidgetStateOperators].
-class _WidgetStateOperation implements WidgetStateMapKey {
+class _WidgetStateOperation implements WidgetStatesConstraint {
   const _WidgetStateOperation(this._isSatisfiedBy);
 
   final bool Function(Set<WidgetState> states) _isSatisfiedBy;
@@ -56,28 +56,28 @@ class _WidgetStateOperation implements WidgetStateMapKey {
 ///
 /// Example:
 ///
-/// {@macro flutter.widgets.WidgetStateMapKey.isSatisfiedBy}
+/// {@macro flutter.widgets.WidgetStatesConstraint.isSatisfiedBy}
 ///
-/// Since enums can't extend other classes, [WidgetState] instead
-/// `implements` the [WidgetStateMapKey] interface. This `extension` ensures
-/// that the operators can be used without being directly inherited.
-extension WidgetStateOperators on WidgetStateMapKey {
-  /// Combines two [WidgetStateMapKey] values using logical "and".
-  WidgetStateMapKey operator &(WidgetStateMapKey other) {
+/// Since enums can't extend other classes, [WidgetState] instead `implements`
+/// the [WidgetStatesConstraint] interface. This `extension` ensures that
+/// the operators can be used without being directly inherited.
+extension WidgetStateOperators on WidgetStatesConstraint {
+  /// Combines two [WidgetStatesConstraint] values using logical "and".
+  WidgetStatesConstraint operator &(WidgetStatesConstraint other) {
     return _WidgetStateOperation(
       (Set<WidgetState> states) => isSatisfiedBy(states) && other.isSatisfiedBy(states),
     );
   }
 
-  /// Combines two [WidgetStateMapKey] values using logical "or".
-  WidgetStateMapKey operator |(WidgetStateMapKey other) {
+  /// Combines two [WidgetStatesConstraint] values using logical "or".
+  WidgetStatesConstraint operator |(WidgetStatesConstraint other) {
     return _WidgetStateOperation(
       (Set<WidgetState> states) => isSatisfiedBy(states) || other.isSatisfiedBy(states),
     );
   }
 
-  /// Takes a [WidgetStateMapKey] and applies the logical "not".
-  WidgetStateMapKey operator ~() {
+  /// Takes a [WidgetStatesConstraint] and applies the logical "not".
+  WidgetStatesConstraint operator ~() {
     return _WidgetStateOperation(
       (Set<WidgetState> states) => !isSatisfiedBy(states),
     );
@@ -85,7 +85,7 @@ extension WidgetStateOperators on WidgetStateMapKey {
 }
 
 // A private class, used to create [WidgetState.any].
-class _AlwaysMatch implements WidgetStateMapKey {
+class _AlwaysMatch implements WidgetStatesConstraint {
   const _AlwaysMatch();
 
   @override
@@ -122,7 +122,7 @@ class _AlwaysMatch implements WidgetStateMapKey {
 ///    `WidgetStateProperty` which is used in APIs that need to accept either
 ///    a [TextStyle] or a [WidgetStateProperty<TextStyle>].
 /// {@endtemplate}
-enum WidgetState implements WidgetStateMapKey {
+enum WidgetState implements WidgetStatesConstraint {
   /// The state when the user drags their mouse cursor over the given widget.
   ///
   /// See: https://material.io/design/interaction/states.html#hover.
@@ -175,10 +175,11 @@ enum WidgetState implements WidgetStateMapKey {
   error;
 
   /// {@template flutter.widgets.WidgetState.any}
-  /// To prevent a situation where no [WidgetStateMapKey]s are satisfied by
-  /// a given set of states, consier adding [WidgetState.any] as the final key.
+  /// To prevent a situation where each [WidgetStatesConstraint]
+  /// isn't satisfied by the given set of states, consier adding
+  /// [WidgetState.any] as the final [WidgetStateMap] key.
   /// {@endtemplate}
-  static const WidgetStateMapKey any = _AlwaysMatch();
+  static const WidgetStatesConstraint any = _AlwaysMatch();
 
   @override
   bool isSatisfiedBy(Set<WidgetState> states) => states.contains(this);
@@ -475,7 +476,7 @@ abstract class WidgetStateBorderSide extends BorderSide implements WidgetStatePr
   /// ```dart
   /// const Chip(
   ///   label: Text('Transceiver'),
-  ///   side: WidgetStateBorderSide.fromMap(<WidgetStateMapKey, BorderSide?>{
+  ///   side: WidgetStateBorderSide.fromMap(<WidgetStatesConstraint, BorderSide?>{
   ///     WidgetState.selected: BorderSide(color: Colors.red),
   ///     // returns null if not selected, deferring to default theme/widget value.
   ///   }),
@@ -786,7 +787,7 @@ class _WidgetStatePropertyWith<T> implements WidgetStateProperty<T> {
 /// Example:
 ///
 /// ```dart
-/// WidgetStateProperty<Color?>.fromMap(<WidgetStateMapKey, Color?>{
+/// WidgetStateProperty<Color?>.fromMap(<WidgetStatesConstraint, Color?>{
 ///   WidgetState.error: Colors.red,
 ///   WidgetState.hovered & WidgetState.focused: Colors.blueAccent,
 ///   WidgetState.focused: Colors.blue,
@@ -814,10 +815,10 @@ class _WidgetStatePropertyWith<T> implements WidgetStateProperty<T> {
 /// that there's a match:
 ///
 /// ```dart
-/// final WidgetStateMapKey selectedError = WidgetState.selected & WidgetState.error;
+/// final WidgetStatesConstraint selectedError = WidgetState.selected & WidgetState.error;
 ///
 /// final WidgetStateProperty<Color> color = WidgetStateProperty<Color>.fromMap(
-///   <WidgetStateMapKey, Color>{
+///   <WidgetStatesConstraint, Color>{
 ///     selectedError & WidgetState.hovered: Colors.redAccent,
 ///     selectedError: Colors.red,
 ///     WidgetState.any: Colors.black,
@@ -838,7 +839,7 @@ class _WidgetStatePropertyWith<T> implements WidgetStateProperty<T> {
 /// );
 /// ```
 /// {@endtemplate}
-typedef WidgetStateMap<T> = Map<WidgetStateMapKey, T>;
+typedef WidgetStateMap<T> = Map<WidgetStatesConstraint, T>;
 
 // A private class, used to create the [WidgetStateProperty.fromMap] constructor.
 class _WidgetStateMapper<T> implements WidgetStateProperty<T> {
@@ -848,7 +849,7 @@ class _WidgetStateMapper<T> implements WidgetStateProperty<T> {
 
   @override
   T resolve(Set<WidgetState> states) {
-    for (final MapEntry<WidgetStateMapKey, T> entry in map.entries) {
+    for (final MapEntry<WidgetStatesConstraint, T> entry in map.entries) {
       if (entry.key.isSatisfiedBy(states)) {
         return entry.value;
       }

@@ -21,9 +21,9 @@ void main() {
   });
 
   test('WidgetStateProperty.map()', () {
-    final WidgetStateMapKey active = WidgetState.hovered | WidgetState.focused | WidgetState.pressed;
+    final WidgetStatesConstraint active = WidgetState.hovered | WidgetState.focused | WidgetState.pressed;
     final WidgetStateProperty<String?> value = WidgetStateProperty<String?>.fromMap(
-      <WidgetStateMapKey, String?>{
+      <WidgetStatesConstraint, String?>{
         active & WidgetState.error: 'active error',
         WidgetState.disabled | WidgetState.error: 'kinda sus',
         ~(WidgetState.dragged | WidgetState.selected) & ~active: 'this is boring',
