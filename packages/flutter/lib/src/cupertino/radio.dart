@@ -208,6 +208,13 @@ class CupertinoRadio<T> extends StatefulWidget {
 
   bool get _selected => value == groupValue;
 
+  /// The default mouse cursor of a [CupertinoRadio].
+  static MouseCursor defaultMouseCursor(Function? onChanged) {
+    return (onChanged != null && kIsWeb)
+      ? SystemMouseCursors.click
+      : SystemMouseCursors.basic;
+  }
+
   @override
   State<CupertinoRadio<T>> createState() => _CupertinoRadioState<T>();
 }
@@ -241,14 +248,6 @@ class _CupertinoRadioState<T> extends State<CupertinoRadio<T>> with TickerProvid
 
   @override
   bool? get value => widget._selected;
-
-  WidgetStateProperty<MouseCursor> get _defaultMouseCursor {
-    return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
-      return (!states.contains(WidgetState.disabled) && kIsWeb)
-        ? SystemMouseCursors.click
-        : SystemMouseCursors.basic;
-    });
-  }
 
   void onFocusChange(bool value) {
     if (focused != value) {
@@ -294,7 +293,7 @@ class _CupertinoRadioState<T> extends State<CupertinoRadio<T>> with TickerProvid
       checked: widget._selected,
       selected: accessibilitySelected,
       child: buildToggleable(
-        mouseCursor: widget.mouseCursor ?? _defaultMouseCursor,
+        mouseCursor: widget.mouseCursor ?? WidgetStateProperty.all(CupertinoRadio.defaultMouseCursor(widget.onChanged)),
         focusNode: widget.focusNode,
         autofocus: widget.autofocus,
         onFocusChange: onFocusChange,

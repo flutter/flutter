@@ -467,7 +467,7 @@ void main() {
       if (states.contains(WidgetState.disabled)) {
         return SystemMouseCursors.forbidden;
       }
-      if (states.contains(WidgetState.focused)){
+      if (states.contains(WidgetState.focused)) {
         return SystemMouseCursors.basic;
       }
       return SystemMouseCursors.click;
