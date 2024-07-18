@@ -125,6 +125,7 @@ class SearchAnchor extends StatefulWidget {
     this.viewSurfaceTintColor,
     this.viewSide,
     this.viewShape,
+    this.viewBarPadding,
     this.headerHeight,
     this.headerTextStyle,
     this.headerHintStyle,
@@ -165,6 +166,7 @@ class SearchAnchor extends StatefulWidget {
     MaterialStateProperty<BorderSide?>? barSide,
     MaterialStateProperty<OutlinedBorder?>? barShape,
     MaterialStateProperty<EdgeInsetsGeometry?>? barPadding,
+    MaterialStateProperty<EdgeInsetsGeometry?>? viewBarPadding,
     MaterialStateProperty<TextStyle?>? barTextStyle,
     MaterialStateProperty<TextStyle?>? barHintStyle,
     ViewBuilder? viewBuilder,
@@ -272,6 +274,11 @@ class SearchAnchor extends StatefulWidget {
   /// If this is also null, then the default value is a rectangle shape for full-screen
   /// mode and a [RoundedRectangleBorder] shape with a 28.0 radius otherwise.
   final OutlinedBorder? viewShape;
+
+  /// The padding to use for the search view's search bar.
+  ///
+  /// If null, then the default value is 8.0 horizontally.
+  final MaterialStateProperty<EdgeInsetsGeometry?>? viewBarPadding;
 
   /// The height of the search field on the search view.
   ///
@@ -429,6 +436,7 @@ class _SearchAnchorState extends State<SearchAnchor> {
       viewSurfaceTintColor: widget.viewSurfaceTintColor,
       viewSide: widget.viewSide,
       viewShape: widget.viewShape,
+      viewBarPadding: widget.viewBarPadding,
       viewHeaderHeight: widget.headerHeight,
       viewHeaderTextStyle: widget.headerTextStyle,
       viewHeaderHintStyle: widget.headerHintStyle,
@@ -500,6 +508,7 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
     this.viewSurfaceTintColor,
     this.viewSide,
     this.viewShape,
+    this.viewBarPadding,
     this.viewHeaderHeight,
     this.viewHeaderTextStyle,
     this.viewHeaderHintStyle,
@@ -530,6 +539,7 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
   final Color? viewSurfaceTintColor;
   final BorderSide? viewSide;
   final OutlinedBorder? viewShape;
+  final MaterialStateProperty<EdgeInsetsGeometry?>? viewBarPadding;
   final double? viewHeaderHeight;
   final TextStyle? viewHeaderTextStyle;
   final TextStyle? viewHeaderHintStyle;
@@ -686,6 +696,7 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
                 viewSurfaceTintColor: viewSurfaceTintColor,
                 viewSide: viewSide,
                 viewShape: viewShape,
+                viewBarPadding: viewBarPadding,
                 viewHeaderHeight: viewHeaderHeight,
                 viewHeaderTextStyle: viewHeaderTextStyle,
                 viewHeaderHintStyle: viewHeaderHintStyle,
@@ -728,6 +739,7 @@ class _ViewContent extends StatefulWidget {
     this.viewSurfaceTintColor,
     this.viewSide,
     this.viewShape,
+    this.viewBarPadding,
     this.viewHeaderHeight,
     this.viewHeaderTextStyle,
     this.viewHeaderHintStyle,
@@ -757,6 +769,7 @@ class _ViewContent extends StatefulWidget {
   final Color? viewSurfaceTintColor;
   final BorderSide? viewSide;
   final OutlinedBorder? viewShape;
+  final MaterialStateProperty<EdgeInsetsGeometry?>? viewBarPadding;
   final double? viewHeaderHeight;
   final TextStyle? viewHeaderTextStyle;
   final TextStyle? viewHeaderHintStyle;
@@ -1002,6 +1015,7 @@ class _ViewContentState extends State<_ViewContent> {
                           child: SearchBar(
                             autoFocus: true,
                             constraints: headerConstraints ?? (widget.showFullScreenView ? BoxConstraints(minHeight: _SearchViewDefaultsM3.fullScreenBarHeight) : null),
+                            padding: widget.viewBarPadding ?? const MaterialStatePropertyAll<EdgeInsets>(EdgeInsets.symmetric(horizontal: 8.0)),
                             leading: widget.viewLeading ?? defaultLeading,
                             trailing: widget.viewTrailing ?? defaultTrailing,
                             hintText: widget.viewHintText,
@@ -1059,6 +1073,7 @@ class _SearchAnchorWithSearchBar extends SearchAnchor {
     MaterialStateProperty<BorderSide?>? barSide,
     MaterialStateProperty<OutlinedBorder?>? barShape,
     MaterialStateProperty<EdgeInsetsGeometry?>? barPadding,
+    super.viewBarPadding,
     MaterialStateProperty<TextStyle?>? barTextStyle,
     MaterialStateProperty<TextStyle?>? barHintStyle,
     super.viewBuilder,
