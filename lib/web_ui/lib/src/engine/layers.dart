@@ -499,18 +499,19 @@ class PlatformViewPosition {
     }
 
     // Otherwise, at least one of the positions involves a matrix transform.
-    final Matrix4 newTransform;
-    if (outerOffset != null) {
-      newTransform = Matrix4.translationValues(outerOffset.dx, outerOffset.dy, 0);
-    } else {
-      newTransform = outer.transform!.clone();
-    }
+    final Matrix4 innerTransform;
+    final Matrix4 outerTransform;
     if (innerOffset != null) {
-      newTransform.translate(innerOffset.dx, innerOffset.dy);
+      innerTransform = Matrix4.translationValues(innerOffset.dx, innerOffset.dy, 0);
     } else {
-      newTransform.multiply(inner.transform!);
+      innerTransform = inner.transform!;
     }
-    return PlatformViewPosition.transform(newTransform);
+    if (outerOffset != null) {
+      outerTransform = Matrix4.translationValues(outerOffset.dx, outerOffset.dy, 0);
+    } else {
+      outerTransform = outer.transform!;
+    }
+    return PlatformViewPosition.transform(outerTransform.multiplied(innerTransform));
   }
 
   @override

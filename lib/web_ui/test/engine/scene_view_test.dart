@@ -167,10 +167,13 @@ void testMain() {
         containerElement.tagName, equalsIgnoringCase('flt-platform-view-slot'));
 
     final DomCSSStyleDeclaration style = containerElement.style;
-    expect(style.left, '25px');
-    expect(style.top, '40px');
-    expect(style.width, '50px');
-    expect(style.height, '60px');
+    expect(style.left, '');
+    expect(style.top, '');
+    expect(style.width, '100px');
+    expect(style.height, '120px');
+
+    // The heavy lifting of offsetting and sizing is done by the transform
+    expect(style.transform, 'matrix(0.5, 0, 0, 0.5, 25, 40)');
 
     debugOverrideDevicePixelRatio(null);
   });
