@@ -677,7 +677,7 @@ class DevFS {
                 return entry.content;
               }
               return _assetTransformer.retransformAsset(
-                assetKey: archivePath,
+                inputAssetKey: archivePath,
                 inputAssetContent: entry.content,
                 transformerEntries: entry.transformers,
                 workingDirectory: rootDirectory.path,

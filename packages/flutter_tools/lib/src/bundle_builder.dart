@@ -206,7 +206,6 @@ Future<void> writeBundle(
             }
             final AssetTransformationFailure? failure = await assetTransformer.transformAsset(
               asset: input,
-              assetKey: entry.key,
               outputPath: file.path,
               workingDirectory: projectDir.path,
               transformerEntries: entry.value.transformers,

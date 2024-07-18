@@ -58,7 +58,6 @@ void main() {
     );
 
     final AssetTransformationFailure? transformationFailure = await transformer.transformAsset(
-      assetKey: 'asset.txt',
       asset: asset,
       outputPath: outputPath,
       workingDirectory: fileSystem.currentDirectory.path,
@@ -121,7 +120,6 @@ void main() {
 
     final AssetTransformationFailure? failure = await transformer.transformAsset(
       asset: asset,
-      assetKey: 'asset.txt',
       outputPath: outputPath,
       workingDirectory: fileSystem.currentDirectory.path,
       transformerEntries: <AssetTransformerEntry>[
@@ -183,7 +181,6 @@ Something went wrong''');
 
     final AssetTransformationFailure? failure = await transformer.transformAsset(
       asset: asset,
-      assetKey: 'asset.txt',
       outputPath: outputPath,
       workingDirectory: fileSystem.currentDirectory.path,
       transformerEntries: <AssetTransformerEntry>[
@@ -280,7 +277,6 @@ Transformation failed, but I forgot to exit with a non-zero code.'''
 
     final AssetTransformationFailure? failure = await transformer.transformAsset(
       asset: asset,
-      assetKey: 'asset.txt',
       outputPath: outputPath,
       workingDirectory: fileSystem.currentDirectory.path,
       transformerEntries: <AssetTransformerEntry>[
@@ -360,7 +356,6 @@ Transformation failed, but I forgot to exit with a non-zero code.'''
 
     final AssetTransformationFailure? failure = await transformer.transformAsset(
       asset: asset,
-      assetKey: 'asset.txt',
       outputPath: outputPath,
       workingDirectory: fileSystem.currentDirectory.path,
       transformerEntries: <AssetTransformerEntry>[
