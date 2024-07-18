@@ -67,7 +67,6 @@ final class AssetTransformer {
     File tempInputFile = newTempFile(0);
     await asset.copy(tempInputFile.path);
     File tempOutputFile = newTempFile(1);
-    ErrorHandlingFileSystem.deleteIfExists(tempOutputFile);
 
     final Stopwatch stopwatch = Stopwatch()..start();
     try {
@@ -91,7 +90,6 @@ final class AssetTransformer {
         } else {
           tempInputFile = tempOutputFile;
           tempOutputFile = newTempFile(i+2);
-          ErrorHandlingFileSystem.deleteIfExists(tempOutputFile);
         }
       }
 
@@ -122,6 +120,11 @@ final class AssetTransformer {
       transformer.package,
       ...transformerArguments,
     ];
+
+    // Delete the output file if it already exists for whatever reason.
+    // With this, we can check for the existence of the file after transformation
+    // to make sure the transformer produced an output file.
+    ErrorHandlingFileSystem.deleteIfExists(output);
 
     logger.printTrace("Transforming asset using command '${command.join(' ')}'");
     final ProcessResult result = await _processManager.run(
