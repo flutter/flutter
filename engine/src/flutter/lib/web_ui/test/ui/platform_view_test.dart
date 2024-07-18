@@ -132,6 +132,39 @@ Future<void> testMain() async {
     await matchGoldenFile('platformview_transformed.png', region: region);
   });
 
+  test('transformed and offset platformview', () async {
+    await _createPlatformView(1, platformViewType);
+
+    final ui.PictureRecorder recorder = ui.PictureRecorder();
+    final ui.Canvas canvas = ui.Canvas(recorder);
+    canvas.drawCircle(
+      const ui.Offset(50, 50),
+      50,
+      ui.Paint()
+        ..style = ui.PaintingStyle.fill
+        ..color = const ui.Color(0xFFFF0000)
+    );
+
+    final ui.SceneBuilder sb = ui.SceneBuilder();
+    sb.pushOffset(0, 0);
+    sb.addPicture(const ui.Offset(100, 100), recorder.endRecording());
+
+    // Nest offsets both before and after the transform to make sure that they
+    // are applied properly.
+    sb.pushOffset(50, 50);
+    sb.pushTransform(Matrix4.rotationZ(0.1).toFloat64());
+    sb.pushOffset(25, 25);
+    sb.addPlatformView(
+      1,
+      offset: const ui.Offset(50, 50),
+      width: 50,
+      height: 50,
+    );
+    await renderScene(sb.build());
+
+    await matchGoldenFile('platformview_transformed_offset.png', region: region);
+  });
+
   test('offset platformview', () async {
     await _createPlatformView(1, platformViewType);
 
