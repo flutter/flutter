@@ -288,7 +288,10 @@ sealed class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   late OffsetPair _initialPosition;
   late OffsetPair _pendingDragOffset;
 
-  /// The position of the last pointer event received.
+  /// The local and global offsets of the last pointer event received.
+  ///
+  /// It is used to create the [DragEndDetails], which provides information about
+  /// the end of a drag gesture.
   OffsetPair get lastPosition => _lastPosition;
   late OffsetPair _lastPosition;
 
