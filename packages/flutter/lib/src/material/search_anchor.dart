@@ -1112,7 +1112,7 @@ class _SearchAnchorWithSearchBar extends SearchAnchor {
         overlayColor: barOverlayColor,
         side: barSide,
         shape: barShape,
-        padding: barPadding,
+        padding: barPadding ?? const MaterialStatePropertyAll<EdgeInsets>(EdgeInsets.symmetric(horizontal: 16.0)),
         leading: barLeading ?? const Icon(Icons.search),
         trailing: barTrailing,
         textCapitalization: textCapitalization,
@@ -1587,7 +1587,7 @@ class _SearchBarDefaultsM3 extends SearchBarThemeData {
 
   @override
   MaterialStateProperty<EdgeInsetsGeometry>? get padding =>
-    const MaterialStatePropertyAll<EdgeInsetsGeometry>(EdgeInsets.symmetric(horizontal: 16.0));
+    const MaterialStatePropertyAll<EdgeInsetsGeometry>(EdgeInsets.symmetric(horizontal: 8.0));
 
   @override
   MaterialStateProperty<TextStyle?> get textStyle =>
