@@ -55,7 +55,7 @@ dependencies:
   unified_analytics: 6.1.2
 
   cli_config: 0.2.0
-  graphs: 2.3.1
+  graphs: 2.3.2
   native_assets_builder: 0.8.1
   native_assets_cli: 0.7.1
 
@@ -120,4 +120,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: 20b3
+# PUBSPEC CHECKSUM: 97b4
