@@ -451,16 +451,14 @@ abstract class WidgetStateOutlinedBorder extends OutlinedBorder implements Widge
 /// To use a [WidgetStateTextStyle], you can either:
 ///   1. Create a subclass of [WidgetStateTextStyle] and implement the abstract `resolve` method.
 ///   2. Use [WidgetStateTextStyle.resolveWith] and pass in a callback that
-///      will be used to resolve the color in the given states.
+///      will be used to resolve the text style in the given states.
 ///
 /// If a [WidgetStateTextStyle] is used for a property or a parameter that doesn't
-/// support resolving [WidgetStateProperty<TextStyle>]s, then its default color
+/// support resolving [WidgetStateProperty<TextStyle>]s, then its default text style
 /// value will be used for all states.
 ///
 /// To define a `const` [WidgetStateTextStyle], you'll need to extend
-/// [WidgetStateTextStyle] and override its [resolve] method. You'll also need
-/// to provide a `defaultValue` to the super constructor, so that we can know
-/// at compile-time what its default color is.
+/// [WidgetStateTextStyle] and override its [resolve] method.
 /// See also:
 ///
 ///  * [MaterialStateTextStyle], the Material specific version of
