@@ -838,6 +838,23 @@ void main() {
     chromeConnection.throwSocketExceptions = true;
     await chrome.close();
   });
+
+  test('Chromium close handles a WebSocketException when closing the WipConnection', () async {
+    final BufferLogger logger = BufferLogger.test();
+    final FakeChromeConnectionWithTab chromeConnection = FakeChromeConnectionWithTab(throwWebSocketException: true);
+    final ChromiumLauncher chromiumLauncher = ChromiumLauncher(
+      fileSystem: fileSystem,
+      platform: platform,
+      processManager: processManager,
+      operatingSystemUtils: operatingSystemUtils,
+      browserFinder: findChromeExecutable,
+      logger: logger,
+    );
+    final FakeProcess process = FakeProcess();
+    final Chromium chrome = Chromium(0, chromeConnection, chromiumLauncher: chromiumLauncher, process: process, logger: logger);
+    expect(await chromiumLauncher.connect(chrome, false), equals(chrome));
+    await chrome.close();
+  });
 }
 
 /// Fake chrome connection that fails to get tabs a few times.
@@ -877,8 +894,8 @@ typedef OnSendCommand = void Function(String);
 
 /// Fake chrome connection that returns a tab.
 class FakeChromeConnectionWithTab extends Fake implements ChromeConnection {
-  FakeChromeConnectionWithTab({OnSendCommand? onSendCommand})
-      : _tab = FakeChromeTab(onSendCommand);
+  FakeChromeConnectionWithTab({OnSendCommand? onSendCommand, bool throwWebSocketException = false})
+      : _tab = FakeChromeTab(onSendCommand, throwWebSocketException);
 
   final FakeChromeTab _tab;
   bool throwSocketExceptions = false;
@@ -904,20 +921,22 @@ class FakeChromeConnectionWithTab extends Fake implements ChromeConnection {
 }
 
 class FakeChromeTab extends Fake implements ChromeTab {
-  FakeChromeTab(this.onSendCommand);
+  FakeChromeTab(this.onSendCommand, this.throwWebSocketException);
 
-  OnSendCommand? onSendCommand;
+  final OnSendCommand? onSendCommand;
+  final bool throwWebSocketException;
 
   @override
   Future<WipConnection> connect({Function? onError}) async {
-    return FakeWipConnection(onSendCommand);
+    return FakeWipConnection(onSendCommand, throwWebSocketException);
   }
 }
 
 class FakeWipConnection extends Fake implements WipConnection {
-  FakeWipConnection(this.onSendCommand);
+  FakeWipConnection(this.onSendCommand, this.throwWebSocketException);
 
-  OnSendCommand? onSendCommand;
+  final OnSendCommand? onSendCommand;
+  final bool throwWebSocketException;
 
   @override
   Future<WipResponse> sendCommand(String method, [Map<String, dynamic>? params]) async {
@@ -926,5 +945,9 @@ class FakeWipConnection extends Fake implements WipConnection {
   }
 
   @override
-  Future<void> close() async {}
+  Future<void> close() async {
+    if (throwWebSocketException) {
+      throw const io.WebSocketException('test');
+    }
+  }
 }
