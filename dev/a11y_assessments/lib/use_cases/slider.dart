@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 
 import 'use_cases.dart';
 
@@ -36,16 +37,19 @@ class MainWidgetState extends State<MainWidget> {
         title: const Text('Slider'),
       ),
       body: Center(
-        child: Slider(
-          value: currentSliderValue,
-          max: 100,
-          divisions: 5,
-          label: currentSliderValue.round().toString(),
-          onChanged: (double value) {
-            setState(() {
-              currentSliderValue = value;
-            });
-          },
+        child: Semantics(
+          label: 'Accessibility Test Slider',
+          child: Slider(
+            value: currentSliderValue,
+            max: 100,
+            divisions: 5,
+            label: currentSliderValue.round().toString(),
+            onChanged: (double value) {
+              setState(() {
+                currentSliderValue = value;
+              });
+            },
+          ),
         ),
       ),
     );
