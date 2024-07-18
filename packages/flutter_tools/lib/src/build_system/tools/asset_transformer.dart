@@ -61,8 +61,6 @@ final class AssetTransformer {
       final String basename = _fileSystem.path.basename(asset.path);
       final String ext = _fileSystem.path.extension(asset.path);
 
-      // Resolution-aware asset variants can share the same basename/extension,
-      // so we need to insert a unique identifier into the path.
       return tempDirectory.childFile('$basename-transformOutput$transformStep$ext');
     }
 
