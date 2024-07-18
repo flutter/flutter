@@ -308,26 +308,26 @@ final class PlatformViewContainer extends SliceContainer {
     assert(_bounds != null);
     if (_dirty) {
       final DomCSSStyleDeclaration style = container.style;
-      final double devicePixelRatio = EngineFlutterDisplay.instance.devicePixelRatio;
-      final double logicalWidth = _bounds!.width / devicePixelRatio;
-      final double logicalHeight = _bounds!.height / devicePixelRatio;
-      style.width = '${logicalWidth}px';
-      style.height = '${logicalHeight}px';
       style.position = 'absolute';
+      style.width = '${_bounds!.width}px';
+      style.height = '${_bounds!.height}px';
 
-      final PlatformViewPosition position = PlatformViewPosition.combine(
-        _styling!.position,
-        PlatformViewPosition.offset(_bounds!.topLeft),
-      );
+      final double devicePixelRatio = EngineFlutterDisplay.instance.devicePixelRatio;
+      final PlatformViewPosition position = _styling!.position;
 
-      final ui.Offset offset = position.offset ?? ui.Offset.zero;
-      final double logicalLeft = offset.dx / devicePixelRatio;
-      final double logicalTop = offset.dy / devicePixelRatio;
-      style.left = '${logicalLeft}px';
-      style.top = '${logicalTop}px';
-
-      final Matrix4? transform = position.transform;
-      style.transform = transform != null ? float64ListToCssTransform3d(transform.storage) : '';
+      final Matrix4 transform;
+      if (position.transform != null) {
+        transform = position.transform!.clone()..translate(_bounds!.left, _bounds!.top);
+      } else {
+        final ui.Offset offset = position.offset ?? ui.Offset.zero;
+        transform = Matrix4.translationValues(_bounds!.left + offset.dx, _bounds!.top + offset.dy, 0);
+      }
+      final double inverseScale = 1.0 / devicePixelRatio;
+      final Matrix4 scaleMatrix =
+        Matrix4.diagonal3Values(inverseScale, inverseScale, 1);
+      scaleMatrix.multiply(transform);
+      style.transform = float64ListToCssTransform(scaleMatrix.storage);
+      style.transformOrigin = '0 0 0';
       style.opacity = _styling!.opacity != 1.0 ? '${_styling!.opacity}' : '';
       // TODO(jacksongardner): Implement clip styling for platform views
 
