@@ -319,3 +319,7 @@ String gnDescOutput() => '''
    }
 }
 ''';
+
+String gnDescOutputEmpty({required String gnPattern}) => '''
+The input $gnPattern matches no targets, configs or files.
+''';
