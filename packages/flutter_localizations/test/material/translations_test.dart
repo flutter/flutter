@@ -560,7 +560,8 @@ void main() {
     expect(localizations.lookUpButtonLabel, '查询');
   });
 
-  testWidgets('zh-CN translation for look up label', (WidgetTester tester) async {
+  // Regression test for https://github.com/flutter/flutter/pull/151364
+  testWidgets('ko-KR translation for cut, copy, paste label in ButtonLabel', (WidgetTester tester) async {
     const Locale locale = Locale('ko');
     expect(GlobalCupertinoLocalizations.delegate.isSupported(locale), isTrue);
     final MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(locale);
