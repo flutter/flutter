@@ -47,11 +47,15 @@ final class AssetTransformer {
 
   /// Applies, in sequence, a list of transformers to an [asset] and then copies
   /// the output to [outputPath].
+  ///
+  /// The [assetKey] is the the name of the asset as it would be referred to
+  /// by code in the Flutter application.
   Future<AssetTransformationFailure?> transformAsset({
     required File asset,
     required String outputPath,
     required String workingDirectory,
     required List<AssetTransformerEntry> transformerEntries,
+    required String assetKey,
     required Logger logger,
   }) async {
 
@@ -70,7 +74,8 @@ final class AssetTransformer {
     try {
       for (final (int i, AssetTransformerEntry transformer) in transformerEntries.indexed) {
         final AssetTransformationFailure? transformerFailure = await _applyTransformer(
-          asset: tempInputFile,
+          input: tempInputFile,
+          assetKey: assetKey,
           output: tempOutputFile,
           transformer: transformer,
           workingDirectory: workingDirectory,
@@ -79,7 +84,7 @@ final class AssetTransformer {
 
         if (transformerFailure != null) {
           return AssetTransformationFailure(
-            'User-defined transformation of asset "${asset.path}" failed.\n'
+            "Asset '$assetKey': user-defined transformation failed.\n"
             '${transformerFailure.message}',
           );
         }
@@ -95,7 +100,7 @@ final class AssetTransformer {
         }
       }
 
-      logger.printTrace("Finished transforming asset at path '${asset.path}' (${stopwatch.elapsedMilliseconds}ms)");
+      logger.printTrace("Asset '$assetKey': transformation finished after (${stopwatch.elapsedMilliseconds}ms)");
     } finally {
       ErrorHandlingFileSystem.deleteIfExists(tempInputFile);
       ErrorHandlingFileSystem.deleteIfExists(tempOutputFile);
@@ -105,14 +110,15 @@ final class AssetTransformer {
   }
 
   Future<AssetTransformationFailure?> _applyTransformer({
-    required File asset,
+    required File input,
+    required String assetKey,
     required File output,
     required AssetTransformerEntry transformer,
     required String workingDirectory,
     required Logger logger,
   }) async {
     final List<String> transformerArguments = <String>[
-      '--input=${asset.absolute.path}',
+      '--input=${input.absolute.path}',
       '--output=${output.absolute.path}',
       ...?transformer.args,
     ];
@@ -124,7 +130,7 @@ final class AssetTransformer {
       ...transformerArguments,
     ];
 
-    logger.printTrace("Transforming asset using command '${command.join(' ')}'");
+    logger.printTrace("Asset '$assetKey': transforming using command '${command.join(' ')}'");
     final ProcessResult result = await _processManager.run(
       command,
       workingDirectory: workingDirectory,
@@ -138,6 +144,7 @@ final class AssetTransformer {
     if (result.exitCode != 0) {
       return AssetTransformationFailure(
         'Transformer process terminated with non-zero exit code: ${result.exitCode}\n'
+        'Original asset: "$assetKey"\n'
         'Transformer package: ${transformer.package}\n'
         'Full command: ${command.join(' ')}\n'
         'stdout:\n$stdout\n'
@@ -148,7 +155,8 @@ final class AssetTransformer {
     if (!_fileSystem.file(output).existsSync()) {
       return AssetTransformationFailure(
         'Asset transformer ${transformer.package} did not produce an output file.\n'
-        'Input file provided to transformer: "${asset.path}"\n'
+        'Original asset: "$assetKey"\n'
+        'Input file provided to transformer: "${input.path}"\n'
         'Expected output file at: "${output.absolute.path}"\n'
         'Full command: ${command.join(' ')}\n'
         'stdout:\n$stdout\n'
@@ -181,12 +189,12 @@ final class DevelopmentAssetTransformer {
   ///
   /// Returns `null` if any of the transformation subprocesses failed.
   Future<DevFSContent?> retransformAsset({
-    required String inputAssetKey,
+    required String assetKey,
     required DevFSContent inputAssetContent,
     required List<AssetTransformerEntry> transformerEntries,
     required String workingDirectory,
   }) async {
-    final File output = _fileSystem.systemTempDirectory.childFile('retransformerInput-$inputAssetKey');
+    final File output = _fileSystem.systemTempDirectory.childFile('retransformerInput-$assetKey');
     ErrorHandlingFileSystem.deleteIfExists(output);
     File? inputFile;
     bool cleanupInput = false;
@@ -197,12 +205,13 @@ final class DevelopmentAssetTransformer {
       if (inputAssetContent is DevFSFileContent) {
         inputFile = inputAssetContent.file as File;
       } else {
-        inputFile = _fileSystem.systemTempDirectory.childFile('retransformerInput-$inputAssetKey');
+        inputFile = _fileSystem.systemTempDirectory.childFile('retransformerInput-$assetKey');
         inputFile.writeAsBytesSync(await inputAssetContent.contentsAsBytes());
         cleanupInput = true;
       }
       final AssetTransformationFailure? failure = await _transformer.transformAsset(
         asset: inputFile,
+        assetKey: assetKey,
         outputPath: output.path,
         transformerEntries: transformerEntries,
         workingDirectory: workingDirectory,
