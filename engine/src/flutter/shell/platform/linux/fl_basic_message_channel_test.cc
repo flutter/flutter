@@ -51,7 +51,7 @@ TEST(FlBasicMessageChannelTest, SendMessageWithoutResponse) {
         return kSuccess;
       }));
 
-  FlBinaryMessenger* messenger = fl_binary_messenger_new(engine);
+  g_autoptr(FlBinaryMessenger) messenger = fl_binary_messenger_new(engine);
   g_autoptr(FlStandardMessageCodec) codec = fl_standard_message_codec_new();
   g_autoptr(FlBasicMessageChannel) channel =
       fl_basic_message_channel_new(messenger, "test", FL_MESSAGE_CODEC(codec));
@@ -84,7 +84,7 @@ TEST(FlBasicMessageChannelTest, SendMessageWithResponse) {
   g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
 
   g_autoptr(FlEngine) engine = make_mock_engine();
-  FlBinaryMessenger* messenger = fl_binary_messenger_new(engine);
+  g_autoptr(FlBinaryMessenger) messenger = fl_binary_messenger_new(engine);
   g_autoptr(FlStandardMessageCodec) codec = fl_standard_message_codec_new();
   g_autoptr(FlBasicMessageChannel) channel = fl_basic_message_channel_new(
       messenger, "test/echo", FL_MESSAGE_CODEC(codec));
@@ -114,7 +114,7 @@ TEST(FlBasicMessageChannelTest, SendFailure) {
   g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
 
   g_autoptr(FlEngine) engine = make_mock_engine();
-  FlBinaryMessenger* messenger = fl_binary_messenger_new(engine);
+  g_autoptr(FlBinaryMessenger) messenger = fl_binary_messenger_new(engine);
   g_autoptr(FlStandardMessageCodec) codec = fl_standard_message_codec_new();
   g_autoptr(FlBasicMessageChannel) channel = fl_basic_message_channel_new(
       messenger, "test/failure", FL_MESSAGE_CODEC(codec));
@@ -162,7 +162,7 @@ TEST(FlBasicMessageChannelTest, ReceiveMessage) {
   g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
 
   g_autoptr(FlEngine) engine = make_mock_engine();
-  FlBinaryMessenger* messenger = fl_binary_messenger_new(engine);
+  g_autoptr(FlBinaryMessenger) messenger = fl_binary_messenger_new(engine);
 
   // Listen for messages from the engine.
   g_autoptr(FlStandardMessageCodec) codec = fl_standard_message_codec_new();
@@ -212,7 +212,7 @@ TEST(FlBasicMessageChannelTest, SendNullMessageWithResponse) {
   g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
 
   g_autoptr(FlEngine) engine = make_mock_engine();
-  FlBinaryMessenger* messenger = fl_binary_messenger_new(engine);
+  g_autoptr(FlBinaryMessenger) messenger = fl_binary_messenger_new(engine);
   g_autoptr(FlStandardMessageCodec) codec = fl_standard_message_codec_new();
   g_autoptr(FlBasicMessageChannel) channel = fl_basic_message_channel_new(
       messenger, "test/echo", FL_MESSAGE_CODEC(codec));
