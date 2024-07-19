@@ -2,6 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/widgets.dart';
+///
+/// @docImport 'image.dart';
+/// @docImport 'paragraph.dart';
+/// @docImport 'proxy_box.dart';
+/// @docImport 'shifted_box.dart';
+/// @docImport 'sliver.dart';
+/// @docImport 'viewport.dart';
+library;
+
 import 'dart:math' as math;
 import 'dart:ui' as ui show ViewConstraints, lerpDouble;
 

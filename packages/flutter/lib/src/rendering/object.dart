@@ -2,6 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:ui';
+///
+/// @docImport 'package:flutter/widgets.dart';
+///
+/// @docImport 'box.dart';
+/// @docImport 'proxy_box.dart';
+/// @docImport 'view.dart';
+/// @docImport 'viewport.dart';
+library;
+
 import 'dart:ui' as ui show PictureRecorder;
 
 import 'package:flutter/animation.dart';
@@ -4685,7 +4695,7 @@ abstract class _InterestingSemanticsFragment extends _SemanticsFragment {
   /// Adds the geometric information of `ancestor` to this object.
   ///
   /// Those information are required to properly compute the value for
-  /// [SemanticsNode.transform], [SemanticsNode.clipRect], and
+  /// [SemanticsNode.transform], [SemanticsNode.parentSemanticsClipRect], and
   /// [SemanticsNode.rect].
   ///
   /// Ancestors have to be added in order from [owner] up until the next
@@ -4699,7 +4709,7 @@ abstract class _InterestingSemanticsFragment extends _SemanticsFragment {
 /// the semantics tree.
 ///
 /// The root node is available as the only element in the Iterable returned by
-/// [children].
+/// [_children].
 class _RootSemanticsFragment extends _InterestingSemanticsFragment {
   _RootSemanticsFragment({
     required super.owner,
@@ -4818,7 +4828,7 @@ class _IncompleteSemanticsFragment extends _InterestingSemanticsFragment {
 ///
 /// If [markAsExplicit] was not called before this fragment is added to
 /// another fragment it will merge [config] into the parent's [SemanticsNode]
-/// and add its [children] to it.
+/// and add its [_children] to it.
 ///
 /// If [markAsExplicit] was called before adding this fragment to another
 /// fragment it will create a new [SemanticsNode]. The newly created node will
@@ -4827,7 +4837,7 @@ class _IncompleteSemanticsFragment extends _InterestingSemanticsFragment {
 /// Similarly, the new node will also take over the children that otherwise
 /// would have been added to the parent's [SemanticsNode].
 ///
-/// After a call to [markAsExplicit] the only element returned by [children]
+/// After a call to [markAsExplicit] the only element returned by [_children]
 /// is the newly created node and [config] will return null as the fragment
 /// no longer wants to merge any semantic information into the parent's
 /// [SemanticsNode].
