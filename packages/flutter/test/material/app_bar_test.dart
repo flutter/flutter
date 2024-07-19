@@ -2649,9 +2649,7 @@ void main() {
             appBar: AppBar(
               elevation: 0,
               backgroundColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
-                return states.contains(MaterialState.scrolledUnder)
-                  ? scrolledColor
-                  : defaultColor;
+                return states.contains(MaterialState.scrolledUnder) ? scrolledColor : defaultColor;
               }),
               title: const Text('AppBar'),
             ),
@@ -2720,9 +2718,7 @@ void main() {
             appBar: AppBar(
               elevation: 0,
               backgroundColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
-                return states.contains(MaterialState.scrolledUnder)
-                  ? scrolledColor
-                  : defaultColor;
+                 return states.contains(MaterialState.scrolledUnder) ? scrolledColor : defaultColor;
               }),
               title: const Text('AppBar'),
             ),
