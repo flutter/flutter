@@ -82,7 +82,7 @@ TEST(FlEventChannelTest, Listen) {
   g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
 
   g_autoptr(FlEngine) engine = make_mock_engine();
-  FlBinaryMessenger* messenger = fl_binary_messenger_new(engine);
+  g_autoptr(FlBinaryMessenger) messenger = fl_binary_messenger_new(engine);
   g_autoptr(FlStandardMethodCodec) codec = fl_standard_method_codec_new();
   FlEventChannel* channel = fl_event_channel_new(
       messenger, "test/standard-event", FL_METHOD_CODEC(codec));
@@ -141,7 +141,7 @@ TEST(FlEventChannelTest, ListenException) {
   g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
 
   g_autoptr(FlEngine) engine = make_mock_engine();
-  FlBinaryMessenger* messenger = fl_binary_messenger_new(engine);
+  g_autoptr(FlBinaryMessenger) messenger = fl_binary_messenger_new(engine);
   g_autoptr(FlStandardMethodCodec) codec = fl_standard_method_codec_new();
   FlEventChannel* channel = fl_event_channel_new(
       messenger, "test/standard-event", FL_METHOD_CODEC(codec));
@@ -177,7 +177,7 @@ TEST(FlEventChannelTest, Cancel) {
   g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
 
   g_autoptr(FlEngine) engine = make_mock_engine();
-  FlBinaryMessenger* messenger = fl_binary_messenger_new(engine);
+  g_autoptr(FlBinaryMessenger) messenger = fl_binary_messenger_new(engine);
   g_autoptr(FlStandardMethodCodec) codec = fl_standard_method_codec_new();
   FlEventChannel* channel = fl_event_channel_new(
       messenger, "test/standard-event", FL_METHOD_CODEC(codec));
@@ -245,7 +245,7 @@ TEST(FlEventChannelTest, CancelException) {
   data.count = 0;
 
   g_autoptr(FlEngine) engine = make_mock_engine();
-  FlBinaryMessenger* messenger = fl_binary_messenger_new(engine);
+  g_autoptr(FlBinaryMessenger) messenger = fl_binary_messenger_new(engine);
   g_autoptr(FlStandardMethodCodec) codec = fl_standard_method_codec_new();
   FlEventChannel* channel = fl_event_channel_new(
       messenger, "test/standard-event", FL_METHOD_CODEC(codec));
@@ -294,7 +294,7 @@ TEST(FlEventChannelTest, Args) {
   g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
 
   g_autoptr(FlEngine) engine = make_mock_engine();
-  FlBinaryMessenger* messenger = fl_binary_messenger_new(engine);
+  g_autoptr(FlBinaryMessenger) messenger = fl_binary_messenger_new(engine);
   g_autoptr(FlStandardMethodCodec) codec = fl_standard_method_codec_new();
   FlEventChannel* channel = fl_event_channel_new(
       messenger, "test/standard-event", FL_METHOD_CODEC(codec));
@@ -370,7 +370,7 @@ TEST(FlEventChannelTest, Test) {
   data.count = 0;
 
   g_autoptr(FlEngine) engine = make_mock_engine();
-  FlBinaryMessenger* messenger = fl_binary_messenger_new(engine);
+  g_autoptr(FlBinaryMessenger) messenger = fl_binary_messenger_new(engine);
   g_autoptr(FlStandardMethodCodec) codec = fl_standard_method_codec_new();
   FlEventChannel* channel = fl_event_channel_new(
       messenger, "test/standard-event", FL_METHOD_CODEC(codec));
@@ -401,7 +401,7 @@ TEST(FlEventChannelTest, ReuseChannel) {
 
   // Register an event channel.
   g_autoptr(FlEngine) engine = make_mock_engine();
-  FlBinaryMessenger* messenger = fl_binary_messenger_new(engine);
+  g_autoptr(FlBinaryMessenger) messenger = fl_binary_messenger_new(engine);
   g_autoptr(FlStandardMethodCodec) codec = fl_standard_method_codec_new();
   FlEventChannel* channel1 = fl_event_channel_new(
       messenger, "test/standard-event", FL_METHOD_CODEC(codec));
@@ -437,7 +437,7 @@ TEST(FlEventChannelTest, ReplaceChannel) {
 
   // Register an event channel.
   g_autoptr(FlEngine) engine = make_mock_engine();
-  FlBinaryMessenger* messenger = fl_binary_messenger_new(engine);
+  g_autoptr(FlBinaryMessenger) messenger = fl_binary_messenger_new(engine);
   g_autoptr(FlStandardMethodCodec) codec = fl_standard_method_codec_new();
   FlEventChannel* channel1 = fl_event_channel_new(
       messenger, "test/standard-event", FL_METHOD_CODEC(codec));
