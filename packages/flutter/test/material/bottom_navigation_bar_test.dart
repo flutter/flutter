@@ -16,8 +16,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vector_math/vector_math_64.dart' show Vector3;
 
+import '../widgets/feedback_tester.dart';
 import '../widgets/semantics_tester.dart';
-import 'feedback_tester.dart';
 
 void main() {
   testWidgets('BottomNavigationBar callback test', (WidgetTester tester) async {
@@ -1882,7 +1882,7 @@ void main() {
     expect(find.text(label), findsOneWidget);
     await tester.longPress(find.text(label));
     expect(tester.getSize(find.text(label).last).height, equals(80.0));
-  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
+  }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
 
   testWidgets('Different behaviour of tool tip in BottomNavigationBarItem', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -2108,9 +2108,11 @@ void main() {
       matchesSemantics(
         label: 'AC\nTab 1 of 3',
         textDirection: TextDirection.ltr,
+        isButton: true,
         isFocusable: true,
         isSelected: true,
         hasTapAction: true,
+        hasFocusAction: true,
       ),
     );
     expect(
@@ -2118,8 +2120,10 @@ void main() {
       matchesSemantics(
         label: 'Alarm\nTab 2 of 3',
         textDirection: TextDirection.ltr,
+        isButton: true,
         isFocusable: true,
         hasTapAction: true,
+        hasFocusAction: true,
       ),
     );
     expect(
@@ -2127,8 +2131,10 @@ void main() {
       matchesSemantics(
         label: 'Hot Tub\nTab 3 of 3',
         textDirection: TextDirection.ltr,
+        isButton: true,
         isFocusable: true,
         hasTapAction: true,
+        hasFocusAction: true,
       ),
     );
   });
@@ -2162,9 +2168,11 @@ void main() {
       matchesSemantics(
         label: 'AC\nTab 1 of 3',
         textDirection: TextDirection.ltr,
+        isButton: true,
         isFocusable: true,
         isSelected: true,
         hasTapAction: true,
+        hasFocusAction: true,
       ),
     );
     expect(
@@ -2172,8 +2180,10 @@ void main() {
       matchesSemantics(
         label: 'Alarm\nTab 2 of 3',
         textDirection: TextDirection.ltr,
+        isButton: true,
         isFocusable: true,
         hasTapAction: true,
+        hasFocusAction: true,
       ),
     );
     expect(
@@ -2181,8 +2191,10 @@ void main() {
       matchesSemantics(
         label: 'Hot Tub\nTab 3 of 3',
         textDirection: TextDirection.ltr,
+        isButton: true,
         isFocusable: true,
         hasTapAction: true,
+        hasFocusAction: true,
       ),
     );
   });
@@ -2512,9 +2524,11 @@ void main() {
       matchesSemantics(
         label: 'Red\nTab 1 of 2',
         textDirection: TextDirection.ltr,
+        isButton: true,
         isFocusable: true,
         isSelected: true,
         hasTapAction: true,
+        hasFocusAction: true,
       ),
     );
     expect(
@@ -2522,8 +2536,10 @@ void main() {
       matchesSemantics(
         label: 'Green\nTab 2 of 2',
         textDirection: TextDirection.ltr,
+        isButton: true,
         isFocusable: true,
         hasTapAction: true,
+        hasFocusAction: true,
       ),
     );
   });
@@ -2555,9 +2571,11 @@ void main() {
       matchesSemantics(
         label: 'Red\nTab 1 of 2',
         textDirection: TextDirection.ltr,
+        isButton: true,
         isFocusable: true,
         isSelected: true,
         hasTapAction: true,
+        hasFocusAction: true,
       ),
     );
     expect(
@@ -2565,8 +2583,10 @@ void main() {
       matchesSemantics(
         label: 'Green\nTab 2 of 2',
         textDirection: TextDirection.ltr,
+        isButton: true,
         isFocusable: true,
         hasTapAction: true,
+        hasFocusAction: true,
       ),
     );
   });
@@ -2744,16 +2764,20 @@ void main() {
                           children: <TestSemantics>[
                             TestSemantics(
                               flags: <SemanticsFlag>[
+                                SemanticsFlag.isButton,
                                 SemanticsFlag.isSelected,
                                 SemanticsFlag.isFocusable,
                               ],
-                              actions: <SemanticsAction>[SemanticsAction.tap],
+                              actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                               label: 'A\nTab 1 of 2',
                               textDirection: TextDirection.ltr,
                             ),
                             TestSemantics(
-                              flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
-                              actions: <SemanticsAction>[SemanticsAction.tap],
+                              flags: <SemanticsFlag>[
+                                SemanticsFlag.isButton,
+                                SemanticsFlag.isFocusable,
+                              ],
+                              actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                               label: 'B\nTab 2 of 2',
                               textDirection: TextDirection.ltr,
                             ),
@@ -2889,7 +2913,7 @@ void main() {
     );
     expect(tester.getRect(find.byKey(icon0)), Rect.fromLTRB(100.0, iconTop, 300.0, iconTop + iconHeight));
     expect(tester.getRect(find.byKey(icon1)), Rect.fromLTRB(500.0, iconTop, 700.0, iconTop + iconHeight));
-  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
+  }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
 
   testWidgets('Material2 - BottomNavigationBar centered landscape layout', (WidgetTester tester) async {
     final Key icon0 = UniqueKey();
@@ -3008,7 +3032,7 @@ void main() {
     );
     expect(tester.getRect(find.byKey(icon0)), Rect.fromLTRB(150.0, iconTop, 350.0, iconTop + iconHeight));
     expect(tester.getRect(find.byKey(icon1)), Rect.fromLTRB(450.0, iconTop, 650.0, iconTop + iconHeight));
-  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
+  }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
 
   testWidgets('Material2 - BottomNavigationBar linear landscape layout', (WidgetTester tester) async {
     final Key icon0 = UniqueKey();
@@ -3123,7 +3147,7 @@ void main() {
     );
     expect(tester.getRect(find.byKey(icon0)), Rect.fromLTRB(firstItemLeft, iconTop, firstItemLeft + iconWidth, iconTop + iconHeight));
     expect(tester.getRect(find.byKey(icon1)), Rect.fromLTRB(secondItemLeft, iconTop, secondItemLeft + iconWidth, iconTop + iconHeight));
-  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
+  }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
 
   testWidgets('BottomNavigationBar linear landscape layout label RenderFlex overflow',(WidgetTester tester) async {
     //Regression test for https://github.com/flutter/flutter/issues/112163

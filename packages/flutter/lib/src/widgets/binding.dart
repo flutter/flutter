@@ -4,7 +4,8 @@
 
 import 'dart:async';
 import 'dart:developer' as developer;
-import 'dart:ui' show AccessibilityFeatures, AppExitResponse, AppLifecycleState, FrameTiming, Locale, PlatformDispatcher, TimingsCallback;
+import 'dart:ui' show AccessibilityFeatures, AppExitResponse, AppLifecycleState,
+  FrameTiming, Locale, PlatformDispatcher, TimingsCallback, ViewFocusEvent;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -75,6 +76,57 @@ abstract mixin class WidgetsBindingObserver {
   ///
   /// {@macro flutter.widgets.AndroidPredictiveBack}
   Future<bool> didPopRoute() => Future<bool>.value(false);
+
+  /// Called at the start of a predictive back gesture.
+  ///
+  /// Observers are notified in registration order until one returns true or all
+  /// observers have been notified. If an observer returns true then that
+  /// observer, and only that observer, will be notified of subsequent events in
+  /// this same gesture (for example [handleUpdateBackGestureProgress], etc.).
+  ///
+  /// Observers are expected to return true if they were able to handle the
+  /// notification, for example by starting a predictive back animation, and
+  /// false otherwise. [PredictiveBackPageTransitionsBuilder] uses this
+  /// mechanism to listen for predictive back gestures.
+  ///
+  /// If all observers indicate they are not handling this back gesture by
+  /// returning false, then a navigation pop will result when
+  /// [handleCommitBackGesture] is called, as in a non-predictive system back
+  /// gesture.
+  ///
+  /// Currently, this is only used on Android devices that support the
+  /// predictive back feature.
+  bool handleStartBackGesture(PredictiveBackEvent backEvent) => false;
+
+  /// Called when a predictive back gesture moves.
+  ///
+  /// The observer which was notified of this gesture's [handleStartBackGesture]
+  /// is the same observer notified for this.
+  ///
+  /// Currently, this is only used on Android devices that support the
+  /// predictive back feature.
+  void handleUpdateBackGestureProgress(PredictiveBackEvent backEvent) {}
+
+  /// Called when a predictive back gesture is finished successfully, indicating
+  /// that the current route should be popped.
+  ///
+  /// The observer which was notified of this gesture's [handleStartBackGesture]
+  /// is the same observer notified for this. If there is none, then a
+  /// navigation pop will result, as in a non-predictive system back gesture.
+  ///
+  /// Currently, this is only used on Android devices that support the
+  /// predictive back feature.
+  void handleCommitBackGesture() {}
+
+  /// Called when a predictive back gesture is canceled, indicating that no
+  /// navigation should occur.
+  ///
+  /// The observer which was notified of this gesture's [handleStartBackGesture]
+  /// is the same observer notified for this.
+  ///
+  /// Currently, this is only used on Android devices that support the
+  /// predictive back feature.
+  void handleCancelBackGesture() {}
 
   /// Called when the host tells the application to push a new route onto the
   /// navigator.
@@ -270,6 +322,18 @@ abstract mixin class WidgetsBindingObserver {
   ///    application lifecycle changes.
   void didChangeAppLifecycleState(AppLifecycleState state) { }
 
+  /// Called whenever the [PlatformDispatcher] receives a notification that the
+  /// focus state on a view has changed.
+  ///
+  /// The [event] contains the view ID for the view that changed its focus
+  /// state.
+  ///
+  /// The view ID of the [FlutterView] in which a particular [BuildContext]
+  /// resides can be retrieved with `View.of(context).viewId`, so that it may be
+  /// compared with the view ID in the `event` to see if the event pertains to
+  /// the given context.
+  void didChangeViewFocus(ViewFocusEvent event) { }
+
   /// Called when a request is received from the system to exit the application.
   ///
   /// If any observer responds with [AppExitResponse.cancel], it will cancel the
@@ -360,6 +424,9 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
     buildOwner!.onBuildScheduled = _handleBuildScheduled;
     platformDispatcher.onLocaleChanged = handleLocaleChanged;
     SystemChannels.navigation.setMethodCallHandler(_handleNavigationInvocation);
+    SystemChannels.backGesture.setMethodCallHandler(
+      _handleBackGestureInvocation,
+    );
     assert(() {
       FlutterErrorDetails.propertiesTransformers.add(debugTransformDebugCreator);
       return true;
@@ -646,7 +713,12 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   ///
   ///  * [addObserver], for the method that adds observers in the first place.
   ///  * [WidgetsBindingObserver], which has an example of using this method.
-  bool removeObserver(WidgetsBindingObserver observer) => _observers.remove(observer);
+  bool removeObserver(WidgetsBindingObserver observer) {
+    if (observer == _backGestureObserver) {
+      _backGestureObserver = null;
+    }
+    return _observers.remove(observer);
+  }
 
   @override
   Future<AppExitResponse> handleRequestAppExit() async {
@@ -771,13 +843,59 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   /// {@endtemplate}
   @protected
   @visibleForTesting
-  Future<void> handlePopRoute() async {
+  Future<bool> handlePopRoute() async {
     for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
       if (await observer.didPopRoute()) {
-        return;
+        return true;
       }
     }
     SystemNavigator.pop();
+    return false;
+  }
+
+  // The observer that is currently handling an active predictive back gesture.
+  WidgetsBindingObserver? _backGestureObserver;
+
+  Future<bool> _handleStartBackGesture(Map<String?, Object?> arguments) {
+    _backGestureObserver = null;
+    final PredictiveBackEvent backEvent = PredictiveBackEvent.fromMap(arguments);
+    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
+      if (observer.handleStartBackGesture(backEvent)) {
+        _backGestureObserver = observer;
+        return Future<bool>.value(true);
+      }
+    }
+    return Future<bool>.value(false);
+  }
+
+  Future<void> _handleUpdateBackGestureProgress(Map<String?, Object?> arguments) async {
+    if (_backGestureObserver == null) {
+      return;
+    }
+
+    final PredictiveBackEvent backEvent = PredictiveBackEvent.fromMap(arguments);
+    _backGestureObserver!.handleUpdateBackGestureProgress(backEvent);
+  }
+
+  Future<void> _handleCommitBackGesture() async {
+    if (_backGestureObserver == null) {
+      // If the predictive back was not handled, then the route should be popped
+      // like a normal, non-predictive back. For example, this will happen if a
+      // back gesture occurs but no predictive back route transition exists to
+      // handle it. The back gesture should still cause normal pop even if it
+      // doesn't cause a predictive transition.
+      await handlePopRoute();
+      return;
+    }
+    _backGestureObserver?.handleCommitBackGesture();
+  }
+
+  Future<void> _handleCancelBackGesture() async {
+    if (_backGestureObserver == null) {
+      return;
+    }
+
+    _backGestureObserver!.handleCancelBackGesture();
   }
 
   /// Called when the host tells the app to push a new route onto the
@@ -793,33 +911,48 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   @protected
   @mustCallSuper
   @visibleForTesting
-  Future<void> handlePushRoute(String route) async {
+  Future<bool> handlePushRoute(String route) async {
     final RouteInformation routeInformation = RouteInformation(uri: Uri.parse(route));
     for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
       if (await observer.didPushRouteInformation(routeInformation)) {
-        return;
+        return true;
       }
     }
+    return false;
   }
 
-  Future<void> _handlePushRouteInformation(Map<dynamic, dynamic> routeArguments) async {
+  Future<bool> _handlePushRouteInformation(Map<dynamic, dynamic> routeArguments) async {
     final RouteInformation routeInformation = RouteInformation(
       uri: Uri.parse(routeArguments['location'] as String),
       state: routeArguments['state'] as Object?,
     );
     for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
       if (await observer.didPushRouteInformation(routeInformation)) {
-        return;
+        return true;
       }
     }
+    return false;
   }
 
-  Future<dynamic> _handleNavigationInvocation(MethodCall methodCall) {
+  Future<bool> _handleNavigationInvocation(MethodCall methodCall) {
     return switch (methodCall.method) {
       'popRoute' => handlePopRoute(),
       'pushRoute' => handlePushRoute(methodCall.arguments as String),
       'pushRouteInformation' => _handlePushRouteInformation(methodCall.arguments as Map<dynamic, dynamic>),
-      _ => Future<dynamic>.value(),
+      // Return false for unhandled method.
+      _ => Future<bool>.value(false),
+    };
+  }
+
+  Future<dynamic> _handleBackGestureInvocation(MethodCall methodCall) {
+    final Map<String?, Object?>? arguments =
+        (methodCall.arguments as Map<Object?, Object?>?)?.cast<String?, Object?>();
+    return switch (methodCall.method) {
+      'startBackGesture' => _handleStartBackGesture(arguments!),
+      'updateBackGestureProgress' => _handleUpdateBackGestureProgress(arguments!),
+      'commitBackGesture' => _handleCommitBackGesture(),
+      'cancelBackGesture' => _handleCancelBackGesture(),
+      _ => throw MissingPluginException(),
     };
   }
 
@@ -828,6 +961,14 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
     super.handleAppLifecycleStateChanged(state);
     for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
       observer.didChangeAppLifecycleState(state);
+    }
+  }
+
+  @override
+  void handleViewFocusChanged(ViewFocusEvent event) {
+    super.handleViewFocusChanged(event);
+    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
+      observer.didChangeViewFocus(event);
     }
   }
 
@@ -1239,7 +1380,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
 /// as soon as it is displayed again.
 /// {@endtemplate}
 ///
-/// To release resources more eagerly, establish a [platform channel](https://flutter.dev/platform-channels/)
+/// To release resources more eagerly, establish a [platform channel](https://flutter.dev/to/platform-channels)
 /// and use it to call [runApp] with a widget such as [SizedBox.shrink] when
 /// the framework should dispose of the active widget tree.
 ///
@@ -1297,11 +1438,9 @@ void runApp(Widget app) {
 /// calling [runWidget] with a [ViewCollection] that does not specify any
 /// [ViewCollection.views].
 ///
-/// ## Dismissing Flutter UI via platform native methods
-///
 /// {@macro flutter.widgets.runApp.dismissal}
 ///
-/// To release resources more eagerly, establish a [platform channel](https://flutter.dev/platform-channels/)
+/// To release resources more eagerly, establish a [platform channel](https://flutter.dev/to/platform-channels)
 /// and use it to remove the [View] whose widget resources should be released
 /// from the `app` widget tree provided to [runWidget].
 ///

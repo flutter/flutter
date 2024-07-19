@@ -30,7 +30,7 @@ class MainActivity : FlutterActivity() {
     }
 
     override fun configureFlutterEngine(
-        @NonNull flutterEngine: FlutterEngine,
+        @NonNull flutterEngine: FlutterEngine
     ) {
         GeneratedPluginRegistrant.registerWith(flutterEngine)
 
@@ -43,11 +43,11 @@ class MainActivity : FlutterActivity() {
                     override fun create(
                         context: Context?,
                         viewId: Int,
-                        args: Any?,
+                        args: Any?
                     ): PlatformView {
                         return SimplePlatformView(this@MainActivity)
                     }
-                },
+                }
             )
 
         // Triggers the Android keyboard, which causes the resize of the Flutter view.

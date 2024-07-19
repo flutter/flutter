@@ -5,6 +5,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   testWidgets('Use home', (WidgetTester tester) async {
@@ -81,7 +82,9 @@ void main() {
     expect(find.text('generated home'), findsOneWidget);
   });
 
-  testWidgets('Use onUnknownRoute', (WidgetTester tester) async {
+  testWidgets('Use onUnknownRoute',
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
+  (WidgetTester tester) async {
     late String unknownForRouteCalled;
     await tester.pumpWidget(
       CupertinoApp(
@@ -302,7 +305,7 @@ void main() {
               BottomNavigationBarItem(label: '', icon: Text('2'))
             ],
           ),
-          tabBuilder: (_, int i) => PopScope(
+          tabBuilder: (_, int i) => PopScope<Object?>(
             canPop: false,
             child: CupertinoTabView(
               navigatorKey: key,

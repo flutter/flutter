@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'matchers.dart';
+library;
+
 import 'dart:async';
 import 'dart:io';
 import 'dart:math' as math;
@@ -292,6 +295,11 @@ ByteData _invert(ByteData imageBytes) {
 
 /// An unsupported [WebGoldenComparator] that exists for API compatibility.
 class DefaultWebGoldenComparator extends WebGoldenComparator {
+  /// This is provided to prevent warnings from the analyzer.
+  DefaultWebGoldenComparator(Uri _) {
+    throw UnsupportedError('DefaultWebGoldenComparator is only supported on the web.');
+  }
+
   @override
   Future<bool> compare(double width, double height, Uri golden) {
     throw UnsupportedError('DefaultWebGoldenComparator is only supported on the web.');

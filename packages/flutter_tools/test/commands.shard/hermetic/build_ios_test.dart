@@ -70,7 +70,7 @@ final Platform notMacosPlatform = FakePlatform(
 );
 
 void main() {
-  late FileSystem fileSystem;
+  late MemoryFileSystem fileSystem;
   late TestUsage usage;
   late FakeAnalytics fakeAnalytics;
   late BufferLogger logger;
@@ -279,6 +279,36 @@ void main() {
     Platform: () => notMacosPlatform,
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
+    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+  });
+
+
+  testUsingContext('ios build outputs path and size when successful', () async {
+    final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      processUtils: processUtils,
+      osUtils: FakeOperatingSystemUtils(),
+    );
+    createMinimalMockProjectFiles();
+
+    await createTestCommandRunner(command).run(
+      const <String>['build', 'ios', '--no-pub']
+    );
+    expect(testLogger.statusText, contains(RegExp(r'✓ Built build/ios/iphoneos/Runner\.app \(\d+\.\d+MB\)')));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+      xattrCommand,
+      setUpFakeXcodeBuildHandler(onRun: (_) {
+        fileSystem.directory('build/ios/Release-iphoneos/Runner.app').createSync(recursive: true);
+      }),
+      setUpRsyncCommand(),
+    ]),
+    Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
@@ -591,14 +621,6 @@ void main() {
         const <String>['build', 'ios', '--no-pub']
       );
 
-      expect(usage.events, contains(
-        const TestUsageEvent(
-          'build', 'ios',
-          label:'plist-impeller-enabled',
-          parameters:CustomDimensions(),
-        ),
-      ));
-
       expect(fakeAnalytics.sentEvents, contains(
         Event.flutterBuildInfo(
           label: 'plist-impeller-enabled',
@@ -653,14 +675,6 @@ void main() {
       await createTestCommandRunner(command).run(
         const <String>['build', 'ios', '--no-pub']
       );
-
-      expect(usage.events, contains(
-        const TestUsageEvent(
-          'build', 'ios',
-          label:'plist-impeller-disabled',
-          parameters:CustomDimensions(),
-        ),
-      ));
 
       expect(fakeAnalytics.sentEvents, contains(
         Event.flutterBuildInfo(

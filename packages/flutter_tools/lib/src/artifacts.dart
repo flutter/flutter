@@ -323,7 +323,7 @@ class EngineBuildPaths {
 
 /// Information about a local engine build (i.e. `--local-engine[-host]=...`).
 ///
-/// See https://github.com/flutter/flutter/wiki/The-flutter-tool#using-a-locally-built-engine-with-the-flutter-tool
+/// See https://github.com/flutter/flutter/blob/main/docs/tool/README.md#using-a-locally-built-engine-with-the-flutter-tool
 /// for more information about local engine builds.
 class LocalEngineInfo {
   /// Creates a reference to a local engine build.
@@ -578,7 +578,7 @@ class CachedArtifacts implements Artifacts {
       case TargetPlatform.linux_arm64:
       case TargetPlatform.windows_x64:
       case TargetPlatform.windows_arm64:
-        return _getDesktopArtifactPath(artifact, platform, mode);
+        return _getDesktopArtifactPath(artifact, platform!, mode);
       case TargetPlatform.fuchsia_arm64:
       case TargetPlatform.fuchsia_x64:
         return _getFuchsiaArtifactPath(artifact, platform!, mode!);
@@ -594,18 +594,18 @@ class CachedArtifacts implements Artifacts {
     return _fileSystem.path.basename(_getEngineArtifactsPath(platform, mode)!);
   }
 
-  String _getDesktopArtifactPath(Artifact artifact, TargetPlatform? platform, BuildMode? mode) {
+  String _getDesktopArtifactPath(Artifact artifact, TargetPlatform platform, BuildMode? mode) {
     // When platform is null, a generic host platform artifact is being requested
     // and not the gen_snapshot for darwin as a target platform.
-    if (platform != null && artifact == Artifact.genSnapshot) {
+    if (artifact == Artifact.genSnapshot) {
       final String engineDir = _getEngineArtifactsPath(platform, mode)!;
       return _fileSystem.path.join(engineDir, _artifactToFileName(artifact, _platform));
     }
-    if (platform != null && artifact == Artifact.flutterMacOSFramework) {
+    if (artifact == Artifact.flutterMacOSFramework) {
       final String engineDir = _getEngineArtifactsPath(platform, mode)!;
       return _getMacOSEngineArtifactPath(engineDir, _fileSystem, _platform);
     }
-    return _getHostArtifactPath(artifact, platform ?? _currentHostPlatform(_platform, _operatingSystemUtils), mode);
+    return _getHostArtifactPath(artifact, platform, mode);
   }
 
   String _getAndroidArtifactPath(Artifact artifact, TargetPlatform platform, BuildMode mode) {
@@ -841,7 +841,7 @@ class CachedArtifacts implements Artifacts {
         if (mode == BuildMode.debug || mode == null) {
           return _fileSystem.path.join(engineDir, platformName);
         }
-        final String suffix = mode != BuildMode.debug ? '-${snakeCase(mode.cliName, '-')}' : '';
+        final String suffix = mode != BuildMode.debug ? '-${kebabCase(mode.cliName)}' : '';
         return _fileSystem.path.join(engineDir, platformName + suffix);
       case TargetPlatform.fuchsia_arm64:
       case TargetPlatform.fuchsia_x64:
@@ -855,7 +855,7 @@ class CachedArtifacts implements Artifacts {
       case TargetPlatform.android_x64:
       case TargetPlatform.android_x86:
         assert(mode != null, 'Need to specify a build mode for platform $platform.');
-        final String suffix = mode != BuildMode.debug ? '-${snakeCase(mode!.cliName, '-')}' : '';
+        final String suffix = mode != BuildMode.debug ? '-${kebabCase(mode!.cliName)}' : '';
         return _fileSystem.path.join(engineDir, platformName + suffix);
       case TargetPlatform.android:
         assert(false, 'cannot use TargetPlatform.android to look up artifacts');

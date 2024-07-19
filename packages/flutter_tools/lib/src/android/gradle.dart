@@ -37,6 +37,7 @@ import 'gradle_utils.dart';
 import 'java.dart';
 import 'migrations/android_studio_java_gradle_conflict_migration.dart';
 import 'migrations/min_sdk_version_migration.dart';
+import 'migrations/multidex_removal_migration.dart';
 import 'migrations/top_level_gradle_build_file_migration.dart';
 
 /// The regex to grab variant names from printBuildVariants gradle task
@@ -313,10 +314,11 @@ class AndroidGradleBuilder implements AndroidBuilder {
           androidStudio: _androidStudio,
           java: globals.java),
       MinSdkVersionMigration(project.android, _logger),
+      MultidexRemovalMigration(project.android, _logger),
     ];
 
     final ProjectMigration migration = ProjectMigration(migrators);
-    migration.run();
+    await migration.run();
 
     final bool usesAndroidX = isAppUsingAndroidX(project.android.hostAppGradleRoot);
     if (usesAndroidX) {
@@ -549,14 +551,15 @@ class AndroidGradleBuilder implements AndroidBuilder {
       final File bundleFile = findBundleFile(project, buildInfo, _logger, _usage, _analytics);
       final String appSize = (buildInfo.mode == BuildMode.debug)
           ? '' // Don't display the size when building a debug variant.
-          : ' (${getSizeAsMB(bundleFile.lengthSync())})';
+          : ' (${getSizeAsPlatformMB(bundleFile.lengthSync())})';
 
       if (buildInfo.codeSizeDirectory != null) {
         await _performCodeSizeAnalysis('aab', bundleFile, androidBuildInfo);
       }
 
       _logger.printStatus(
-        '${_logger.terminal.successMark} Built ${_fileSystem.path.relative(bundleFile.path)}$appSize.',
+        '${_logger.terminal.successMark} '
+        'Built ${_fileSystem.path.relative(bundleFile.path)}$appSize',
         color: TerminalColor.green,
       );
       return;
@@ -586,9 +589,10 @@ class AndroidGradleBuilder implements AndroidBuilder {
 
       final String appSize = (buildInfo.mode == BuildMode.debug)
           ? '' // Don't display the size when building a debug variant.
-          : ' (${getSizeAsMB(apkFile.lengthSync())})';
+          : ' (${getSizeAsPlatformMB(apkFile.lengthSync())})';
       _logger.printStatus(
-        '${_logger.terminal.successMark}  Built ${_fileSystem.path.relative(apkFile.path)}$appSize.',
+        '${_logger.terminal.successMark} '
+        'Built ${_fileSystem.path.relative(apkFile.path)}$appSize',
         color: TerminalColor.green,
       );
 
@@ -780,7 +784,8 @@ class AndroidGradleBuilder implements AndroidBuilder {
       );
     }
     _logger.printStatus(
-      '${_logger.terminal.successMark} Built ${_fileSystem.path.relative(repoDirectory.path)}.',
+      '${_logger.terminal.successMark} '
+      'Built ${_fileSystem.path.relative(repoDirectory.path)}',
       color: TerminalColor.green,
     );
   }
@@ -808,14 +813,11 @@ class AndroidGradleBuilder implements AndroidBuilder {
       _logger.printError(result.stderr, wrap: false);
       return const <String>[];
     }
-    final List<String> options = <String>[];
-    for (final String line in LineSplitter.split(result.stdout)) {
-      final RegExpMatch? match = _kBuildVariantRegex.firstMatch(line);
-      if (match != null) {
-        options.add(match.namedGroup(_kBuildVariantRegexGroupName)!);
-      }
-    }
-    return options;
+    return <String>[
+      for (final String line in LineSplitter.split(result.stdout))
+        if (_kBuildVariantRegex.firstMatch(line) case final RegExpMatch match)
+          match.namedGroup(_kBuildVariantRegexGroupName)!,
+    ];
   }
 
   @override
@@ -909,7 +911,7 @@ void printHowToConsumeAar({
 ''');
   }
 
-  logger.printStatus('To learn more, visit https://flutter.dev/go/build-aar');
+  logger.printStatus('To learn more, visit https://flutter.dev/to/integrate-android-archive');
 }
 
 String _hex(List<int> bytes) {

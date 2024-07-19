@@ -14,15 +14,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:web/web.dart' as web;
 
 extension on web.HTMLCollection {
-  Iterable<web.Element> get iterable => _genIterable(this);
+  Iterable<web.Element?> get iterable => Iterable<web.Element?>.generate(length, (int index) => item(index));
 }
 extension on web.CSSRuleList {
-  Iterable<web.CSSRule> get iterable => _genIterable(this);
-}
-
-Iterable<T> _genIterable<T>(dynamic jsCollection) {
-  // ignore: avoid_dynamic_calls
-  return Iterable<T>.generate(jsCollection.length as int, (int index) => jsCollection.item(index) as T,);
+  Iterable<web.CSSRule?> get iterable => Iterable<web.CSSRule?>.generate(length, (int index) => item(index));
 }
 
 void main() {
@@ -46,13 +41,14 @@ void main() {
 
     expect(web.document.head!.children.iterable, isNotEmpty);
     bool foundStyle = false;
-    for (final web.Element element in web.document.head!.children.iterable) {
-      if (element.tagName != 'STYLE') {
+    for (final web.Element? element in web.document.head!.children.iterable) {
+      expect(element, isNotNull);
+      if (element!.tagName != 'STYLE') {
         continue;
       }
       final web.CSSRuleList? rules = (element as web.HTMLStyleElement).sheet?.rules;
       if (rules != null) {
-        foundStyle = rules.iterable.any((web.CSSRule rule) => rule.cssText.contains(className));
+        foundStyle = rules.iterable.any((web.CSSRule? rule) => rule!.cssText.contains(className));
       }
       if (foundStyle) {
         break;

@@ -106,16 +106,10 @@ class Response {
 
   /// Create a list of Strings from [_failureDetails].
   List<String> _failureDetailsAsString() {
-    final List<String> list = <String>[];
-    if (_failureDetails == null || _failureDetails.isEmpty) {
-      return list;
-    }
-
-    for (final Failure failure in _failureDetails) {
-      list.add(failure.toJson());
-    }
-
-    return list;
+    return <String>[
+      if (_failureDetails != null)
+        for (final Failure failure in _failureDetails) failure.toJson(),
+    ];
   }
 
   /// Creates a [Failure] list using a json response.
@@ -212,16 +206,12 @@ class DriverTestMessage {
 
   /// Return a DriverTestMessage depending on `status`.
   static DriverTestMessage fromString(String status) {
-    switch (status) {
-      case 'error':
-        return DriverTestMessage.error();
-      case 'pending':
-        return DriverTestMessage.pending();
-      case 'complete':
-        return DriverTestMessage.complete();
-      default:
-        throw StateError('This type of status does not exist: $status');
-    }
+    return switch (status) {
+      'error'    => DriverTestMessage.error(),
+      'pending'  => DriverTestMessage.pending(),
+      'complete' => DriverTestMessage.complete(),
+      _ => throw StateError('This type of status does not exist: $status'),
+    };
   }
 }
 

@@ -1094,6 +1094,7 @@ IOSDevice setUpIOSDevice({
     cpuArchitecture: DarwinArch.arm64,
     connectionInterface: interfaceType,
     isConnected: true,
+    isPaired: true,
     devModeEnabled: true,
     isCoreDevice: isCoreDevice,
   );

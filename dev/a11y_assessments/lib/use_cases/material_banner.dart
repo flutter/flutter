@@ -64,7 +64,6 @@ class MainWidgetState extends State<MainWidget> {
       ),
       body: Center(
         child: ElevatedButton(
-          autofocus: true,
           onPressed: onPress,
           child: const Text('Show a MaterialBanner'),
         ),

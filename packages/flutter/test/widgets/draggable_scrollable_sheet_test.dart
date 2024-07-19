@@ -151,7 +151,9 @@ void main() {
     expect(tester.getRect(find.byKey(key)), const Rect.fromLTRB(0.0, 325.0, 800.0, 600.0));
   });
 
-  testWidgets('Invalid snap targets throw assertion errors.', (WidgetTester tester) async {
+  testWidgets('Invalid snap targets throw assertion errors.',
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
+  (WidgetTester tester) async {
     await tester.pumpWidget(boilerplateWidget(
       null,
       maxChildSize: .8,
@@ -1231,7 +1233,9 @@ void main() {
     expect(controller.pixels, closeTo(.4*screenHeight, precisionErrorTolerance));
   });
 
-  testWidgets('Cannot attach a controller to multiple sheets', (WidgetTester tester) async {
+  testWidgets('Cannot attach a controller to multiple sheets',
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
+  (WidgetTester tester) async {
     final DraggableScrollableController controller = DraggableScrollableController();
     addTearDown(controller.dispose);
     await tester.pumpWidget(Directionality(

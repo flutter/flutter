@@ -190,7 +190,7 @@ void main() {
       'for normal use as it more likely to contain serious regressions.\n'
       '\n'
       'For information on contributing to Flutter, see our contributing guide:\n'
-      '    https://github.com/flutter/flutter/blob/master/CONTRIBUTING.md\n'
+      '    https://github.com/flutter/flutter/blob/main/CONTRIBUTING.md\n'
       '\n'
       'For the most up to date stable version of flutter, consider using the "beta" channel '
       'instead. The Flutter "beta" channel enjoys all the same automated testing as the '

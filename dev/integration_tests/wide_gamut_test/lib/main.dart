@@ -259,18 +259,13 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   void initState() {
-    if (widget.setup == Setup.canvasSaveLayer) {
-      _loadImage().then((ui.Image? value) {
-        setState(() {
-          _image = value;
-        });
-      });
-    } else if (widget.setup == Setup.drawnImage) {
-      _drawImage().then((ui.Image? value) {
-        setState(() {
-          _image = value;
-        });
-      });
+    switch (widget.setup) {
+      case Setup.canvasSaveLayer:
+        _loadImage().then((ui.Image? value) => setState(() { _image = value; }));
+      case Setup.drawnImage:
+        _drawImage().then((ui.Image? value) => setState(() { _image = value; }));
+      case Setup.image || Setup.blur || Setup.none:
+        break;
     }
     super.initState();
   }

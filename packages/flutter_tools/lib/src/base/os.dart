@@ -105,6 +105,18 @@ abstract class OperatingSystemUtils {
   /// Return the File representing a new pipe.
   File makePipe(String path);
 
+  /// Return a directory's total size in bytes.
+  int? getDirectorySize(Directory directory) {
+    int? size;
+    for (final FileSystemEntity entity in directory.listSync(recursive: true, followLinks: false)) {
+      if (entity is File) {
+        size ??= 0;
+        size += entity.lengthSync();
+      }
+    }
+    return size;
+  }
+
   void unzip(File file, Directory targetDirectory);
 
   void unpack(File gzippedTarFile, Directory targetDirectory);

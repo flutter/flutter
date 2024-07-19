@@ -15,7 +15,7 @@ import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/native_assets/ios/native_assets.dart';
 import 'package:native_assets_cli/native_assets_cli_internal.dart'
-    hide BuildMode, Target;
+    hide Target;
 import 'package:native_assets_cli/native_assets_cli_internal.dart'
     as native_assets_cli;
 import 'package:package_config/package_config_types.dart';
@@ -119,30 +119,33 @@ void main() {
     final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
     await packageConfig.parent.create();
     await packageConfig.create();
+    final FakeNativeAssetsBuildRunner buildRunner = FakeNativeAssetsBuildRunner(
+      packagesWithNativeAssetsResult: <Package>[
+        Package('bar', projectUri),
+      ],
+      buildDryRunResult: FakeNativeAssetsBuilderResult(
+        assets: <AssetImpl>[
+          NativeCodeAssetImpl(
+            id: 'package:bar/bar.dart',
+            linkMode: DynamicLoadingBundledImpl(),
+            os: OSImpl.macOS,
+            architecture: ArchitectureImpl.arm64,
+            file: Uri.file('libbar.dylib'),
+          ),
+          NativeCodeAssetImpl(
+            id: 'package:bar/bar.dart',
+            linkMode: DynamicLoadingBundledImpl(),
+            os: OSImpl.macOS,
+            architecture: ArchitectureImpl.x64,
+            file: Uri.file('libbar.dylib'),
+          ),
+        ],
+      ),
+    );
     final Uri? nativeAssetsYaml = await dryRunNativeAssetsIOS(
       projectUri: projectUri,
       fileSystem: fileSystem,
-      buildRunner: FakeNativeAssetsBuildRunner(
-        packagesWithNativeAssetsResult: <Package>[
-          Package('bar', projectUri),
-        ],
-        dryRunResult: FakeNativeAssetsBuilderResult(
-          assets: <Asset>[
-            Asset(
-              id: 'package:bar/bar.dart',
-              linkMode: LinkMode.dynamic,
-              target: native_assets_cli.Target.macOSArm64,
-              path: AssetAbsolutePath(Uri.file('libbar.dylib')),
-            ),
-            Asset(
-              id: 'package:bar/bar.dart',
-              linkMode: LinkMode.dynamic,
-              target: native_assets_cli.Target.macOSX64,
-              path: AssetAbsolutePath(Uri.file('libbar.dylib')),
-            ),
-          ],
-        ),
-      ),
+      buildRunner: buildRunner,
     );
     expect(
       (globals.logger as BufferLogger).traceText,
@@ -159,6 +162,8 @@ void main() {
       await fileSystem.file(nativeAssetsYaml).readAsString(),
       contains('package:bar/bar.dart'),
     );
+    expect(buildRunner.buildDryRunInvocations, 1);
+    expect(buildRunner.linkDryRunInvocations, 1);
   });
 
   testUsingContext('build with assets but not enabled', () async {
@@ -222,7 +227,8 @@ void main() {
             '-create',
             '-output',
             '/build/native_assets/ios/bar.framework/bar',
-            'libbar.dylib',
+            'arm64/libbar.dylib',
+            'x64/libbar.dylib',
           ],
         ),
         const FakeCommand(
@@ -252,40 +258,46 @@ void main() {
     final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
     await packageConfig.parent.create();
     await packageConfig.create();
+    final FakeNativeAssetsBuildRunner buildRunner = FakeNativeAssetsBuildRunner(
+      packagesWithNativeAssetsResult: <Package>[
+        Package('bar', projectUri),
+      ],
+      onBuild: (native_assets_cli.Target target) =>
+          FakeNativeAssetsBuilderResult(
+        assets: <AssetImpl>[
+          NativeCodeAssetImpl(
+            id: 'package:bar/bar.dart',
+            linkMode: DynamicLoadingBundledImpl(),
+            os: target.os,
+            architecture: target.architecture,
+            file: Uri.file('${target.architecture}/libbar.dylib'),
+          ),
+        ],
+      ),
+    );
     await buildNativeAssetsIOS(
-      darwinArchs: <DarwinArch>[DarwinArch.arm64],
+      darwinArchs: <DarwinArch>[DarwinArch.arm64, DarwinArch.x86_64],
       environmentType: EnvironmentType.simulator,
       projectUri: projectUri,
       buildMode: BuildMode.debug,
       fileSystem: fileSystem,
       yamlParentDirectory: environment.buildDir.uri,
-      buildRunner: FakeNativeAssetsBuildRunner(
-        packagesWithNativeAssetsResult: <Package>[
-          Package('bar', projectUri),
-        ],
-        buildResult: FakeNativeAssetsBuilderResult(
-          assets: <Asset>[
-            Asset(
-              id: 'package:bar/bar.dart',
-              linkMode: LinkMode.dynamic,
-              target: native_assets_cli.Target.iOSArm64,
-              path: AssetAbsolutePath(Uri.file('libbar.dylib')),
-            ),
-          ],
-        ),
-      ),
+      buildRunner: buildRunner,
     );
     expect(
       (globals.logger as BufferLogger).traceText,
       stringContainsInOrder(<String>[
-        'Building native assets for [ios_arm64] debug.',
-        'Building native assets for [ios_arm64] done.',
+        'Building native assets for [ios_arm64, ios_x64] debug.',
+        'Building native assets for [ios_arm64, ios_x64] done.',
       ]),
     );
     expect(
       environment.buildDir.childFile('native_assets.yaml'),
       exists,
     );
+    // Two archs.
+    expect(buildRunner.buildInvocations, 2);
+    expect(buildRunner.linkInvocations, 2);
   });
 
   testUsingContext('Native assets dry run error', overrides: <Type, Generator>{
@@ -296,24 +308,29 @@ void main() {
         environment.projectDir.childFile('.dart_tool/package_config.json');
     await packageConfig.parent.create();
     await packageConfig.create();
-    expect(
-      () => dryRunNativeAssetsIOS(
-        projectUri: projectUri,
-        fileSystem: fileSystem,
-        buildRunner: FakeNativeAssetsBuildRunner(
-          packagesWithNativeAssetsResult: <Package>[
-            Package('bar', projectUri),
-          ],
-          dryRunResult: const FakeNativeAssetsBuilderResult(
-            success: false,
+    for (final String hook in <String>['Building', 'Linking']) {
+      expect(
+        () => dryRunNativeAssetsIOS(
+          projectUri: projectUri,
+          fileSystem: fileSystem,
+          buildRunner: FakeNativeAssetsBuildRunner(
+            packagesWithNativeAssetsResult: <Package>[
+              Package('bar', projectUri),
+            ],
+            buildDryRunResult: FakeNativeAssetsBuilderResult(
+              success: hook != 'Building',
+            ),
+            linkDryRunResult: FakeNativeAssetsBuilderResult(
+              success: hook != 'Linking',
+            ),
           ),
         ),
-      ),
-      throwsToolExit(
-        message:
-            'Building native assets failed. See the logs for more details.',
-      ),
-    );
+        throwsToolExit(
+          message:
+              '$hook (dry run) native assets failed. See the logs for more details.',
+        ),
+      );
+    }
   });
 
   testUsingContext('Native assets build error', overrides: <Type, Generator>{
@@ -324,27 +341,32 @@ void main() {
         environment.projectDir.childFile('.dart_tool/package_config.json');
     await packageConfig.parent.create();
     await packageConfig.create();
-    expect(
-      () => buildNativeAssetsIOS(
-        darwinArchs: <DarwinArch>[DarwinArch.arm64],
-        environmentType: EnvironmentType.simulator,
-        projectUri: projectUri,
-        buildMode: BuildMode.debug,
-        fileSystem: fileSystem,
-        yamlParentDirectory: environment.buildDir.uri,
-        buildRunner: FakeNativeAssetsBuildRunner(
-          packagesWithNativeAssetsResult: <Package>[
-            Package('bar', projectUri),
-          ],
-          buildResult: const FakeNativeAssetsBuilderResult(
-            success: false,
+    for (final String hook in <String>['Building', 'Linking']) {
+      expect(
+        () => buildNativeAssetsIOS(
+          darwinArchs: <DarwinArch>[DarwinArch.arm64],
+          environmentType: EnvironmentType.simulator,
+          projectUri: projectUri,
+          buildMode: BuildMode.debug,
+          fileSystem: fileSystem,
+          yamlParentDirectory: environment.buildDir.uri,
+          buildRunner: FakeNativeAssetsBuildRunner(
+            packagesWithNativeAssetsResult: <Package>[
+              Package('bar', projectUri),
+            ],
+            buildResult: FakeNativeAssetsBuilderResult(
+              success: hook != 'Building',
+            ),
+            linkResult: FakeNativeAssetsBuilderResult(
+              success: hook != 'Linking',
+            ),
           ),
         ),
-      ),
-      throwsToolExit(
-        message:
-            'Building native assets failed. See the logs for more details.',
-      ),
-    );
+        throwsToolExit(
+          message:
+              '$hook native assets failed. See the logs for more details.',
+        ),
+      );
+    }
   });
 }

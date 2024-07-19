@@ -76,7 +76,7 @@ ${parser.usage}
 
   final FrameworkRepository framework = FrameworkRepository(
     _localCheckouts(token),
-    mirrorRemote: Remote.mirror(mirrorUrl),
+    mirrorRemote: const Remote.mirror(mirrorUrl),
     upstreamRemote: Remote.upstream(upstreamUrl),
   );
 

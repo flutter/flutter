@@ -3,11 +3,17 @@
 // found in the LICENSE file.
 
 
+import 'dart:typed_data';
+
+import 'package:pool/pool.dart';
 import 'package:process/process.dart';
 
 import '../../base/error_handling_io.dart';
 import '../../base/file_system.dart';
 import '../../base/io.dart';
+import '../../base/logger.dart';
+import '../../build_info.dart';
+import '../../devfs.dart';
 import '../../flutter_manifest.dart';
 import '../build_system.dart';
 
@@ -17,13 +23,18 @@ final class AssetTransformer {
     required ProcessManager processManager,
     required FileSystem fileSystem,
     required String dartBinaryPath,
+    required BuildMode buildMode,
   })  : _processManager = processManager,
         _fileSystem = fileSystem,
-        _dartBinaryPath = dartBinaryPath;
+        _dartBinaryPath = dartBinaryPath,
+        _buildMode = buildMode;
+
+  static const String buildModeEnvVar = 'FLUTTER_BUILD_MODE';
 
   final ProcessManager _processManager;
   final FileSystem _fileSystem;
   final String _dartBinaryPath;
+  final BuildMode _buildMode;
 
   /// The [Source] inputs that targets using this should depend on.
   ///
@@ -41,6 +52,7 @@ final class AssetTransformer {
     required String outputPath,
     required String workingDirectory,
     required List<AssetTransformerEntry> transformerEntries,
+    required Logger logger,
   }) async {
 
     String getTempFilePath(int transformStep) {
@@ -52,7 +64,9 @@ final class AssetTransformer {
     File tempInputFile = _fileSystem.systemTempDirectory.childFile(getTempFilePath(0));
     await asset.copy(tempInputFile.path);
     File tempOutputFile = _fileSystem.systemTempDirectory.childFile(getTempFilePath(1));
+    ErrorHandlingFileSystem.deleteIfExists(tempOutputFile);
 
+    final Stopwatch stopwatch = Stopwatch()..start();
     try {
       for (final (int i, AssetTransformerEntry transformer) in transformerEntries.indexed) {
         final AssetTransformationFailure? transformerFailure = await _applyTransformer(
@@ -60,6 +74,7 @@ final class AssetTransformer {
           output: tempOutputFile,
           transformer: transformer,
           workingDirectory: workingDirectory,
+          logger: logger,
         );
 
         if (transformerFailure != null) {
@@ -71,12 +86,16 @@ final class AssetTransformer {
 
         ErrorHandlingFileSystem.deleteIfExists(tempInputFile);
         if (i == transformerEntries.length - 1) {
+          await _fileSystem.file(outputPath).create(recursive: true);
           await tempOutputFile.copy(outputPath);
         } else {
           tempInputFile = tempOutputFile;
           tempOutputFile = _fileSystem.systemTempDirectory.childFile(getTempFilePath(i+2));
+          ErrorHandlingFileSystem.deleteIfExists(tempOutputFile);
         }
       }
+
+      logger.printTrace("Finished transforming asset at path '${asset.path}' (${stopwatch.elapsedMilliseconds}ms)");
     } finally {
       ErrorHandlingFileSystem.deleteIfExists(tempInputFile);
       ErrorHandlingFileSystem.deleteIfExists(tempOutputFile);
@@ -90,6 +109,7 @@ final class AssetTransformer {
     required File output,
     required AssetTransformerEntry transformer,
     required String workingDirectory,
+    required Logger logger,
   }) async {
     final List<String> transformerArguments = <String>[
       '--input=${asset.absolute.path}',
@@ -104,9 +124,13 @@ final class AssetTransformer {
       ...transformerArguments,
     ];
 
+    logger.printTrace("Transforming asset using command '${command.join(' ')}'");
     final ProcessResult result = await _processManager.run(
       command,
       workingDirectory: workingDirectory,
+      environment: <String, String>{
+        AssetTransformer.buildModeEnvVar: _buildMode.cliName,
+      }
     );
     final String stdout = result.stdout as String;
     final String stderr = result.stderr as String;
@@ -133,6 +157,70 @@ final class AssetTransformer {
     }
 
     return null;
+  }
+}
+
+
+// A wrapper around [AssetTransformer] to support hot reload of transformed assets.
+final class DevelopmentAssetTransformer {
+  DevelopmentAssetTransformer({
+    required FileSystem fileSystem,
+    required AssetTransformer transformer,
+    required Logger logger,
+  })  : _fileSystem = fileSystem,
+        _transformer = transformer,
+        _logger = logger;
+
+  final AssetTransformer _transformer;
+  final FileSystem _fileSystem;
+  final Pool _transformationPool = Pool(4);
+  final Logger _logger;
+
+  /// Re-transforms an asset and returns a [DevFSContent] that should be synced
+  /// to the attached device in its place.
+  ///
+  /// Returns `null` if any of the transformation subprocesses failed.
+  Future<DevFSContent?> retransformAsset({
+    required String inputAssetKey,
+    required DevFSContent inputAssetContent,
+    required List<AssetTransformerEntry> transformerEntries,
+    required String workingDirectory,
+  }) async {
+    final File output = _fileSystem.systemTempDirectory.childFile('retransformerInput-$inputAssetKey');
+    ErrorHandlingFileSystem.deleteIfExists(output);
+    File? inputFile;
+    bool cleanupInput = false;
+    Uint8List result;
+    PoolResource? resource;
+    try {
+      resource = await _transformationPool.request();
+      if (inputAssetContent is DevFSFileContent) {
+        inputFile = inputAssetContent.file as File;
+      } else {
+        inputFile = _fileSystem.systemTempDirectory.childFile('retransformerInput-$inputAssetKey');
+        inputFile.writeAsBytesSync(await inputAssetContent.contentsAsBytes());
+        cleanupInput = true;
+      }
+      final AssetTransformationFailure? failure = await _transformer.transformAsset(
+        asset: inputFile,
+        outputPath: output.path,
+        transformerEntries: transformerEntries,
+        workingDirectory: workingDirectory,
+        logger: _logger,
+      );
+      if (failure != null) {
+        _logger.printError(failure.message);
+        return null;
+      }
+      result = output.readAsBytesSync();
+    } finally {
+      resource?.release();
+      ErrorHandlingFileSystem.deleteIfExists(output);
+      if (cleanupInput && inputFile != null) {
+        ErrorHandlingFileSystem.deleteIfExists(inputFile);
+      }
+    }
+    return DevFSByteContent(result);
   }
 }
 

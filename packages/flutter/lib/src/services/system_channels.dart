@@ -2,6 +2,24 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:typed_data';
+///
+/// @docImport 'package:flutter/semantics.dart';
+/// @docImport 'package:flutter/widgets.dart';
+///
+/// @docImport 'binding.dart';
+/// @docImport 'clipboard.dart';
+/// @docImport 'haptic_feedback.dart';
+/// @docImport 'platform_views.dart';
+/// @docImport 'raw_keyboard.dart';
+/// @docImport 'raw_keyboard_android.dart';
+/// @docImport 'raw_keyboard_fuchsia.dart';
+/// @docImport 'system_chrome.dart';
+/// @docImport 'system_navigator.dart';
+/// @docImport 'system_sound.dart';
+/// @docImport 'text_input.dart';
+library;
+
 import 'dart:ui';
 
 import 'message_codecs.dart';
@@ -56,6 +74,27 @@ abstract final class SystemChannels {
   static const MethodChannel navigation = OptionalMethodChannel(
       'flutter/navigation',
       JSONMethodCodec(),
+  );
+
+  /// A [MethodChannel] for handling predictive back gestures.
+  ///
+  /// Currently, this feature is only available on Android U and above.
+  ///
+  /// No outgoing methods are defined for this channel (invoked using
+  /// [OptionalMethodChannel.invokeMethod]).
+  ///
+  /// The following incoming methods are defined for this channel (registered
+  /// using [MethodChannel.setMethodCallHandler]):
+  ///
+  ///  * `startBackGesture`: The user has started a predictive back gesture.
+  ///  * `updateBackGestureProgress`: The user has continued dragging the
+  ///    predictive back gesture.
+  ///  * `commitBackGesture`: The user has finished a predictive back gesture,
+  ///    indicating that the current route should be popped.
+  ///  * `cancelBackGesture`: The user has canceled a predictive back gesture,
+  ///    indicating that no navigation should occur.
+  static const MethodChannel backGesture = OptionalMethodChannel(
+    'flutter/backgesture',
   );
 
   /// A JSON [MethodChannel] for invoking miscellaneous platform methods.

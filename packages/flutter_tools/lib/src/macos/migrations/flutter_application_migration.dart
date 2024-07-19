@@ -24,7 +24,7 @@ class FlutterApplicationMigration extends ProjectMigrator {
   final File _infoPlistFile;
 
   @override
-  void migrate() {
+  Future<void> migrate() async {
     if (_infoPlistFile.existsSync()) {
       final String? principalClass =
           globals.plistParser.getValueFromFile<String>(_infoPlistFile.path, PlistParser.kNSPrincipalClassKey);

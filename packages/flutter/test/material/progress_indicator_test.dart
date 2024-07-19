@@ -228,6 +228,27 @@ void main() {
   });
 
   testWidgets('LinearProgressIndicator with colors', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox(
+            width: 200.0,
+            child: LinearProgressIndicator(
+              value: 0.25,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Defaults.
+    expect(
+      find.byType(LinearProgressIndicator),
+      paints
+        ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 200.0, 4.0), color: theme.colorScheme.secondaryContainer)
+        ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 50.0, 4.0), color: theme.colorScheme.primary),
+    );
+
     // With valueColor & color provided
     await tester.pumpWidget(
       Theme(
@@ -1298,7 +1319,7 @@ class _RefreshProgressIndicatorGoldenState extends State<_RefreshProgressIndicat
         setState(() {});
       })
     ..addStatusListener((AnimationStatus status) {
-        if (status == AnimationStatus.completed) {
+        if (status.isCompleted) {
           indeterminate = true;
         }
       });

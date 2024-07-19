@@ -16,6 +16,7 @@ import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/utils.dart';
+import '../build_info.dart';
 import '../cache.dart';
 import '../convert.dart';
 import '../reporting/reporting.dart';
@@ -182,21 +183,13 @@ abstract class Target {
     List<File> outputs,
     Environment environment,
   ) {
-    final File stamp = _findStampFile(environment);
-    final List<String> inputPaths = <String>[];
-    for (final File input in inputs) {
-      inputPaths.add(input.path);
-    }
-    final List<String> outputPaths = <String>[];
-    for (final File output in outputs) {
-      outputPaths.add(output.path);
-    }
-    final String? key = buildKey;
+    String getPath(File file) => file.path;
     final Map<String, Object> result = <String, Object>{
-      'inputs': inputPaths,
-      'outputs': outputPaths,
-      if (key != null) 'buildKey': key,
+      'inputs': inputs.map(getPath).toList(),
+      'outputs': outputs.map(getPath).toList(),
+      if (buildKey case final String key) 'buildKey': key,
     };
+    final File stamp = _findStampFile(environment);
     if (!stamp.existsSync()) {
       stamp.createSync();
     }
@@ -743,6 +736,13 @@ class FlutterBuildSystem extends BuildSystem {
     FileSystem fileSystem,
     Map<String, File> currentOutputs,
   ) {
+    if (environment.defines[kXcodePreAction] == 'PrepareFramework') {
+      // If the current build is the PrepareFramework Xcode pre-action, skip
+      // updating the last build identifier and cleaning up the previous build
+      // since this build is not a complete build.
+      return;
+    }
+
     final String currentBuildId = fileSystem.path.basename(environment.buildDir.path);
     final File lastBuildIdFile = environment.outputDir.childFile('.last_build_id');
     if (!lastBuildIdFile.existsSync()) {

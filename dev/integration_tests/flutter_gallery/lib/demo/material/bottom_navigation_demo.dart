@@ -40,14 +40,15 @@ class NavigationIconView {
 
   FadeTransition transition(BottomNavigationBarType type, BuildContext context) {
     Color? iconColor;
-    if (type == BottomNavigationBarType.shifting) {
-      iconColor = _color;
-    } else {
-      final ThemeData theme = Theme.of(context);
-      final ColorScheme colorScheme = theme.colorScheme;
-      iconColor = theme.brightness == Brightness.light
-          ? colorScheme.primary
-          : colorScheme.secondary;
+    switch (type) {
+      case BottomNavigationBarType.shifting:
+        iconColor = _color;
+      case BottomNavigationBarType.fixed:
+        final ThemeData theme = Theme.of(context);
+        iconColor = switch (theme.brightness) {
+          Brightness.light => theme.colorScheme.primary,
+          Brightness.dark  => theme.colorScheme.secondary,
+        };
     }
 
     return FadeTransition(

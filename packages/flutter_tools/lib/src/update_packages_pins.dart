@@ -2,9 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// This constant is in its own library so that the test exemption bot knows
+// The constant below is in its own library so that the test exemption bot knows
 // that changing a pin does not require a new test. These pins are already
 // tested as part of the analysis shard.
+
+// Pub packages are rolled automatically by the flutter-pub-roller-bot.
+// For the latest status, see:
+//   https://github.com/pulls?q=author%3Aflutter-pub-roller-bot
 
 /// Map from package name to package version, used to artificially pin a pub
 /// package version in cases when upgrading to the latest breaks Flutter.
@@ -18,11 +22,19 @@ const Map<String, String> kManuallyPinnedDependencies = <String, String>{
   // Add pinned packages here. Please leave a comment explaining why.
   'flutter_gallery_assets': '1.0.2', // Tests depend on the exact version.
   'flutter_template_images': '4.2.0', // Must always exactly match flutter_tools template.
-  'material_color_utilities': '0.8.0', // Keep pinned to latest until 1.0.0.
-  'archive': '3.3.2', // https://github.com/flutter/flutter/issues/115660
-  'leak_tracker': '10.0.4', // https://github.com/flutter/devtools/issues/3951
+  'material_color_utilities': '0.11.1', // Keep pinned to latest until 1.0.0.
+  'leak_tracker': '10.0.5', // https://github.com/flutter/devtools/issues/3951
   'leak_tracker_testing': '3.0.1', // https://github.com/flutter/devtools/issues/3951
-  'leak_tracker_flutter_testing': '3.0.3', // https://github.com/flutter/devtools/issues/3951
+  'leak_tracker_flutter_testing': '3.0.5', // https://github.com/flutter/devtools/issues/3951
   'path_provider_android':
       '2.2.1', // https://github.com/flutter/flutter/issues/140796
 };
+
+/// These are packages that are explicitly excluded from appearing in the list
+/// of pinned packages added to each pubspec.yaml.
+const List<String> kExplicitlyExcludedPackages = <String>[
+  '_macros', // Synthetic dependency for macros package, which isn't published.
+  // This is effectively pinned via the Dart SDK pin, see
+  // https://github.com/flutter/flutter/issues/148004 for more context.
+  'macros',
+];

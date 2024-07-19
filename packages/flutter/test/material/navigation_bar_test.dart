@@ -410,7 +410,7 @@ void main() {
     await tester.longPress(find.text(label));
     expect(find.text(label), findsNWidgets(2));
 
-    if (!kIsWeb || isCanvasKit) {
+    if (!kIsWeb || isSkiaWeb) {
       expect(tester.getSize(find.text(label).last), const Size(14.25, 20.0));
     }
     // The duration is needed to ensure the tooltip disappears.
@@ -420,7 +420,7 @@ void main() {
     expect(find.text(label), findsOneWidget);
     await tester.longPress(find.text(label));
 
-    if (!kIsWeb || isCanvasKit) {
+    if (!kIsWeb || isSkiaWeb) {
       expect(tester.getSize(find.text(label).last), const Size(56.25, 80.0));
     }
   });
@@ -467,25 +467,25 @@ void main() {
 
     await tester.pumpWidget(buildApp(textScaler: TextScaler.noScaling));
     expect(find.text(label), findsOneWidget);
-    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+    if (!kIsWeb || isSkiaWeb) { // https://github.com/flutter/flutter/issues/99933
       expect( _sizeAlmostEqual(tester.getSize(find.text(label)), const Size(12.5, 16.0)), true);
     }
 
     await tester.pumpWidget(buildApp(textScaler: const TextScaler.linear(1.1)));
     await tester.pumpAndSettle();
 
-    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+    if (!kIsWeb || isSkiaWeb) { // https://github.com/flutter/flutter/issues/99933
       expect( _sizeAlmostEqual(tester.getSize(find.text(label)), const Size(13.7, 18.0)), true);
     }
 
     await tester.pumpWidget(buildApp(textScaler: const TextScaler.linear(1.3)));
 
-    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+    if (!kIsWeb || isSkiaWeb) { // https://github.com/flutter/flutter/issues/99933
       expect( _sizeAlmostEqual(tester.getSize(find.text(label)), const Size(16.1, 21.0)), true);
     }
 
     await tester.pumpWidget(buildApp(textScaler: const TextScaler.linear(4)));
-    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+    if (!kIsWeb || isSkiaWeb) { // https://github.com/flutter/flutter/issues/99933
       expect( _sizeAlmostEqual(tester.getSize(find.text(label)), const Size(16.1, 21.0)), true);
     }
   });
@@ -559,6 +559,7 @@ void main() {
         isFocusable: true,
         isSelected: true,
         hasTapAction: true,
+        hasFocusAction: true,
       ),
     );
     expect(
@@ -568,6 +569,7 @@ void main() {
         textDirection: TextDirection.ltr,
         isFocusable: true,
         hasTapAction: true,
+        hasFocusAction: true,
       ),
     );
 
@@ -580,6 +582,7 @@ void main() {
         textDirection: TextDirection.ltr,
         isFocusable: true,
         hasTapAction: true,
+        hasFocusAction: true,
       ),
     );
     expect(
@@ -590,6 +593,7 @@ void main() {
         isFocusable: true,
         isSelected: true,
         hasTapAction: true,
+        hasFocusAction: true,
       ),
     );
   });
@@ -624,6 +628,7 @@ void main() {
         isFocusable: true,
         isSelected: true,
         hasTapAction: true,
+        hasFocusAction: true,
       ),
     );
     expect(
@@ -633,6 +638,7 @@ void main() {
         textDirection: TextDirection.ltr,
         isFocusable: true,
         hasTapAction: true,
+        hasFocusAction: true,
       ),
     );
 
@@ -645,6 +651,7 @@ void main() {
         textDirection: TextDirection.ltr,
         isFocusable: true,
         hasTapAction: true,
+        hasFocusAction: true,
       ),
     );
     expect(
@@ -655,6 +662,7 @@ void main() {
         isFocusable: true,
         isSelected: true,
         hasTapAction: true,
+        hasFocusAction: true,
       ),
     );
   });
@@ -891,7 +899,7 @@ void main() {
           color: const Color(0x0a000000),
         )
     );
-  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
+  }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
 
   testWidgets('Material3 - Navigation indicator ripple golden test', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/117420.

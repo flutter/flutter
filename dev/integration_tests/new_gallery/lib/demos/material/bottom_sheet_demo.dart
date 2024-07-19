@@ -17,21 +17,17 @@ class BottomSheetDemo extends StatelessWidget {
 
   String _title(BuildContext context) {
     final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
-    switch (type) {
-      case BottomSheetDemoType.persistent:
-        return localizations.demoBottomSheetPersistentTitle;
-      case BottomSheetDemoType.modal:
-        return localizations.demoBottomSheetModalTitle;
-    }
+    return switch (type) {
+      BottomSheetDemoType.persistent => localizations.demoBottomSheetPersistentTitle,
+      BottomSheetDemoType.modal      => localizations.demoBottomSheetModalTitle,
+    };
   }
 
   Widget _bottomSheetDemo(BuildContext context) {
-    switch (type) {
-      case BottomSheetDemoType.persistent:
-        return _PersistentBottomSheetDemo();
-      case BottomSheetDemoType.modal:
-        return _ModalBottomSheetDemo();
-    }
+    return switch (type) {
+      BottomSheetDemoType.persistent => _PersistentBottomSheetDemo(),
+      BottomSheetDemoType.modal      => _ModalBottomSheetDemo(),
+    };
   }
 
   @override

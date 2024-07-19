@@ -27,22 +27,16 @@ class SelectionControlsDemo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget? controls;
-    switch (type) {
-      case SelectionControlsDemoType.checkbox:
-        controls = _CheckboxDemo();
-      case SelectionControlsDemoType.radio:
-        controls = _RadioDemo();
-      case SelectionControlsDemoType.switches:
-        controls = _SwitchDemo();
-    }
-
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: Text(_title(context)),
       ),
-      body: controls,
+      body: switch (type) {
+        SelectionControlsDemoType.checkbox => _CheckboxDemo(),
+        SelectionControlsDemoType.radio    => _RadioDemo(),
+        SelectionControlsDemoType.switches => _SwitchDemo(),
+      },
     );
   }
 }

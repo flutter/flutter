@@ -5,13 +5,13 @@ dartdoc:
   # The dev/bots/docs.sh script does this automatically.
   tools:
     snippet:
-      command: ["bin/cache/dart-sdk/bin/dart", "pub", "global", "run", "snippets", "--output-directory=doc/snippets", "--type=snippet"]
+      command: ["bin/cache/artifacts/snippets/snippets", "--output-directory=doc/snippets", "--type=snippet"]
       description: "Creates sample code documentation output from embedded documentation samples."
     sample:
-      command: ["bin/cache/dart-sdk/bin/dart", "pub", "global", "run", "snippets", "--output-directory=doc/snippets", "--type=sample"]
+      command: ["bin/cache/artifacts/snippets/snippets", "--output-directory=doc/snippets", "--type=sample"]
       description: "Creates full application sample code documentation output from embedded documentation samples."
     dartpad:
-      command: ["bin/cache/dart-sdk/bin/dart", "pub", "global", "run", "snippets", "--output-directory=doc/snippets", "--type=dartpad"]
+      command: ["bin/cache/artifacts/snippets/snippets", "--output-directory=doc/snippets", "--type=dartpad"]
       description: "Creates full application sample code documentation output from embedded documentation samples and displays it in an embedded DartPad."
   errors:
     ## Default errors of dartdoc:
@@ -40,4 +40,3 @@ dartdoc:
     ## Ignores that are elevated to errors:
     # - type-as-html # broken, https://github.com/dart-lang/dartdoc/issues/3545
     - missing-constant-constructor
-    # - missing-code-block-language # blocked on https://github.com/dart-lang/matcher/pull/230

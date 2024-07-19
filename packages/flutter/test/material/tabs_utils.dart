@@ -228,3 +228,24 @@ class _TabAlwaysKeepAliveWidgetState extends State<TabAlwaysKeepAliveWidget> wit
     return Text(TabAlwaysKeepAliveWidget.text);
   }
 }
+
+// This decoration is used to test the indicator decoration image configuration.
+class TestIndicatorDecoration extends Decoration {
+  final List<TestIndicatorBoxPainter> painters = <TestIndicatorBoxPainter>[];
+
+  @override
+  BoxPainter createBoxPainter([VoidCallback? onChanged]) {
+    final TestIndicatorBoxPainter painter = TestIndicatorBoxPainter();
+    painters.add(painter);
+    return painter;
+  }
+}
+
+class TestIndicatorBoxPainter extends BoxPainter {
+  ImageConfiguration? lastConfiguration;
+
+  @override
+  void paint(Canvas canvas, Offset offset, ImageConfiguration configuration) {
+    lastConfiguration = configuration;
+  }
+}

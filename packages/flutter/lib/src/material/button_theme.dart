@@ -238,7 +238,7 @@ class ButtonThemeData with Diagnosticable {
   ///
   /// See also:
   ///
-  ///  * [getPadding], which is used to calculate padding for the [button]'s
+  ///  * [getPadding], which is used to calculate padding for the button's
   ///    child (typically the button's label).
   EdgeInsetsGeometry get padding {
     return _padding ?? switch (textTheme) {
@@ -261,7 +261,7 @@ class ButtonThemeData with Diagnosticable {
   ///
   /// See also:
   ///
-  ///  * [getShape], which is used to calculate the shape of the [button]'s
+  ///  * [getShape], which is used to calculate the shape of the button's
   ///    [Material].
   ShapeBorder get shape {
     return _shape ?? switch (textTheme) {
@@ -381,7 +381,7 @@ class ButtonThemeData with Diagnosticable {
   /// minimum size, internal padding, and shape.
   ///
   /// Despite the name, this property is not the [TextTheme] whose
-  /// [TextTheme.button] is used as the button text's [TextStyle].
+  /// [TextTheme.labelLarge] is used as the button text's [TextStyle].
   ButtonTextTheme getTextTheme(MaterialButton button) => button.textTheme ?? textTheme;
 
   /// The foreground color of the [button]'s text and icon when

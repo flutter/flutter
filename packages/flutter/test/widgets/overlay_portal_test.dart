@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'semantics_tester.dart';
 
@@ -28,7 +29,7 @@ class _ManyRelayoutBoundaries extends StatelessWidget {
   }
 }
 
-void rebuildLayoutBuilderSubtree(RenderBox descendant) {
+void rebuildLayoutBuilderSubtree(RenderBox descendant, WidgetTester tester) {
   assert(descendant is! RenderConstrainedLayoutBuilder<BoxConstraints, RenderBox>);
 
   RenderObject? node = descendant.parent;
@@ -36,7 +37,10 @@ void rebuildLayoutBuilderSubtree(RenderBox descendant) {
     if (node is! RenderConstrainedLayoutBuilder<BoxConstraints, RenderBox>) {
       node = node.parent;
     } else {
-      node.markNeedsBuild();
+      final Element layoutBuilderElement = tester.element(find.byElementPredicate(
+        (Element element) => element.widget is LayoutBuilder && element.renderObject == node,
+      ));
+      layoutBuilderElement.markNeedsBuild();
       return;
     }
   }
@@ -311,7 +315,9 @@ void main() {
       verifyTreeIsClean();
   });
 
-  testWidgets('Throws when the same controller is attached to multiple OverlayPortal', (WidgetTester tester) async {
+  testWidgets('Throws when the same controller is attached to multiple OverlayPortal',
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
+  (WidgetTester tester) async {
     final OverlayPortalController controller = OverlayPortalController(debugLabel: 'local controller');
     late final OverlayEntry entry;
     addTearDown(() { entry.remove(); entry.dispose(); });
@@ -708,7 +714,7 @@ void main() {
     renderChild1.markNeedsLayout();
     // Dirty both render subtree branches.
     childBox.markNeedsLayout();
-    rebuildLayoutBuilderSubtree(overlayChildBox);
+    rebuildLayoutBuilderSubtree(overlayChildBox, tester);
 
     // Make sure childBox's depth is greater than that of the overlay
     // child, and childBox's parent isn't dirty (childBox is a dirty relayout
@@ -1107,7 +1113,7 @@ void main() {
 
       widgetKey.currentContext!.findRenderObject()!.markNeedsLayout();
       childBox.markNeedsLayout();
-      rebuildLayoutBuilderSubtree(overlayChildBox);
+      rebuildLayoutBuilderSubtree(overlayChildBox, tester);
       // Make sure childBox's depth is greater than that of the overlay child.
       expect(
         widgetKey.currentContext!.findRenderObject()!.depth,
@@ -1187,7 +1193,7 @@ void main() {
 
       targetGlobalKey.currentContext!.findRenderObject()!.markNeedsLayout();
       childBox.markNeedsLayout();
-      rebuildLayoutBuilderSubtree(overlayChildBox);
+      rebuildLayoutBuilderSubtree(overlayChildBox, tester);
       setState1(() {});
       setState2(() {});
       targetMovedToOverlayEntry3 = true;

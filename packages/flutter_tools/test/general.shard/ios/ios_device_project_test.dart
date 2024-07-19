@@ -106,6 +106,7 @@ IOSDevice setUpIOSDevice(FileSystem fileSystem) {
     iProxy: IProxy.test(logger: logger, processManager: processManager),
     connectionInterface: DeviceConnectionInterface.attached,
     isConnected: true,
+    isPaired: true,
     devModeEnabled: true,
     isCoreDevice: false,
   );

@@ -27,21 +27,16 @@ class SlidersDemo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget sliders;
-    switch (type) {
-      case SlidersDemoType.sliders:
-        sliders = _Sliders();
-      case SlidersDemoType.rangeSliders:
-        sliders = _RangeSliders();
-      case SlidersDemoType.customSliders:
-        sliders = _CustomSliders();
-    }
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: Text(_title(context)),
       ),
-      body: sliders,
+      body: switch (type) {
+        SlidersDemoType.sliders       => _Sliders(),
+        SlidersDemoType.rangeSliders  => _RangeSliders(),
+        SlidersDemoType.customSliders => _CustomSliders(),
+      },
     );
   }
 }
@@ -345,25 +340,13 @@ class _CustomRangeThumbShape extends RangeSliderThumbShape {
     );
 
     final double size = _thumbSize * sizeTween.evaluate(enableAnimation);
-    Path thumbPath;
-    switch (textDirection!) {
-      case TextDirection.rtl:
-        switch (thumb!) {
-          case Thumb.start:
-            thumbPath = _rightTriangle(size, center);
-          case Thumb.end:
-            thumbPath = _leftTriangle(size, center);
-        }
-      case TextDirection.ltr:
-        switch (thumb!) {
-          case Thumb.start:
-            thumbPath = _leftTriangle(size, center);
-          case Thumb.end:
-            thumbPath = _rightTriangle(size, center);
-        }
-    }
     canvas.drawPath(
-      thumbPath,
+      switch ((textDirection!, thumb!)) {
+        (TextDirection.rtl, Thumb.start) => _rightTriangle(size, center),
+        (TextDirection.rtl, Thumb.end)   => _leftTriangle(size, center),
+        (TextDirection.ltr, Thumb.start) => _leftTriangle(size, center),
+        (TextDirection.ltr, Thumb.end)   => _rightTriangle(size, center),
+      },
       Paint()..color = colorTween.evaluate(enableAnimation)!,
     );
   }

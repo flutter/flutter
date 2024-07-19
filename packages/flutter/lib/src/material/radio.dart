@@ -13,7 +13,6 @@ import 'material_state.dart';
 import 'radio_theme.dart';
 import 'theme.dart';
 import 'theme_data.dart';
-import 'toggleable.dart';
 
 // Examples can assume:
 // late BuildContext context;
@@ -260,10 +259,12 @@ class Radio<T> extends StatefulWidget {
   ///
   /// If null, then the value of [activeColor] is used in the selected state. If
   /// that is also null, then the value of [RadioThemeData.fillColor] is used.
-  /// If that is also null, then [ThemeData.disabledColor] is used in
-  /// the disabled state, [ColorScheme.secondary] is used in the
-  /// selected state, and [ThemeData.unselectedWidgetColor] is used in the
-  /// default state.
+  /// If that is also null and [ThemeData.useMaterial3] is false, then
+  /// [ThemeData.disabledColor] is used in the disabled state, [ColorScheme.secondary]
+  /// is used in the selected state, and [ThemeData.unselectedWidgetColor] is used in the
+  /// default state; if [ThemeData.useMaterial3] is true, then [ColorScheme.onSurface]
+  /// is used in the disabled state, [ColorScheme.primary] is used in the
+  /// selected state and [ColorScheme.onSurfaceVariant] is used in the default state.
   final MaterialStateProperty<Color?>? fillColor;
 
   /// {@template flutter.material.radio.materialTapTargetSize}
@@ -410,6 +411,9 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin, Togg
   @override
   bool? get value => widget._selected;
 
+  @override
+  Duration? get reactionAnimationDuration => kRadialReactionDuration;
+
   MaterialStateProperty<Color?> get _widgetFillColor {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
@@ -443,6 +447,7 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin, Togg
               value: widget.value,
               groupValue: widget.groupValue,
               onChanged: widget.onChanged,
+              mouseCursor: widget.mouseCursor,
               toggleable: widget.toggleable,
               activeColor: widget.activeColor,
               focusColor: widget.focusColor,

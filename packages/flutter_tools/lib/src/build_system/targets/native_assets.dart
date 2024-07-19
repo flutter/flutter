@@ -314,8 +314,13 @@ class NativeAssets extends Target {
     );
     final int targetAndroidNdkApi =
         int.parse(environment.defines[kMinSdkVersion] ?? minSdkVersion);
+    final String? environmentBuildMode = environment.defines[kBuildMode];
+    if (environmentBuildMode == null) {
+      throw MissingDefineException(kBuildMode, name);
+    }
+    final BuildMode buildMode = BuildMode.fromCliName(environmentBuildMode);
     return buildNativeAssetsAndroid(
-      buildMode: BuildMode.debug,
+      buildMode: buildMode,
       projectUri: projectUri,
       yamlParentDirectory: environment.buildDir.uri,
       fileSystem: fileSystem,
@@ -366,13 +371,17 @@ class NativeAssets extends Target {
   ];
 
   @override
-  List<Target> get dependencies => <Target>[];
+  List<Target> get dependencies => const <Target>[
+    // In AOT, depends on tree-shaking information (resources.json) from compiling dart.
+    KernelSnapshotProgram(),
+  ];
 
   @override
   List<Source> get inputs => const <Source>[
     Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/native_assets.dart'),
     // If different packages are resolved, different native assets might need to be built.
     Source.pattern('{PROJECT_DIR}/.dart_tool/package_config_subset'),
+    // TODO(mosuem): Should consume resources.json. https://github.com/flutter/flutter/issues/146263
   ];
 
   @override

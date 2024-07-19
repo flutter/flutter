@@ -330,8 +330,6 @@ class WidgetsApp extends StatefulWidget {
     this.localeResolutionCallback,
     this.supportedLocales = const <Locale>[Locale('en', 'US')],
     this.showPerformanceOverlay = false,
-    this.checkerboardRasterCacheImages = false,
-    this.checkerboardOffscreenLayers = false,
     this.showSemanticsDebugger = false,
     this.debugShowWidgetInspector = false,
     this.debugShowCheckedModeBanner = true,
@@ -430,8 +428,6 @@ class WidgetsApp extends StatefulWidget {
     this.localeResolutionCallback,
     this.supportedLocales = const <Locale>[Locale('en', 'US')],
     this.showPerformanceOverlay = false,
-    this.checkerboardRasterCacheImages = false,
-    this.checkerboardOffscreenLayers = false,
     this.showSemanticsDebugger = false,
     this.debugShowWidgetInspector = false,
     this.debugShowCheckedModeBanner = true,
@@ -1008,18 +1004,8 @@ class WidgetsApp extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  * <https://flutter.dev/debugging/#performance-overlay>
+  ///  * <https://flutter.dev/to/performance-overlay>
   final bool showPerformanceOverlay;
-
-  /// Checkerboards raster cache images.
-  ///
-  /// See [PerformanceOverlay.checkerboardRasterCacheImages].
-  final bool checkerboardRasterCacheImages;
-
-  /// Checkerboards layers rendered to offscreen bitmaps.
-  ///
-  /// See [PerformanceOverlay.checkerboardOffscreenLayers].
-  final bool checkerboardOffscreenLayers;
 
   /// Turns on an overlay that shows the accessibility information
   /// reported by the framework.
@@ -1192,6 +1178,36 @@ class WidgetsApp extends StatefulWidget {
   ///
   /// Used by the `showPerformanceOverlay` VM service extension.
   static bool showPerformanceOverlayOverride = false;
+
+  /// If true, forces the widget inspector to be visible.
+  ///
+  /// Deprecated.
+  /// Use WidgetsBinding.instance.debugShowWidgetInspectorOverrideNotifier.value
+  /// instead.
+  ///
+  /// Overrides the `debugShowWidgetInspector` value set in [WidgetsApp].
+  ///
+  /// Used by the `debugShowWidgetInspector` debugging extension.
+  ///
+  /// The inspector allows the selection of a location on your device or emulator
+  /// and view what widgets and render objects associated with it. An outline of
+  /// the selected widget and some summary information is shown on device and
+  /// more detailed information is shown in the IDE or DevTools.
+  @Deprecated(
+    'Use WidgetsBinding.instance.debugShowWidgetInspectorOverrideNotifier.value instead. '
+    'This feature was deprecated after v3.20.0-14.0.pre.',
+  )
+  static bool get debugShowWidgetInspectorOverride {
+    return WidgetsBinding.instance.debugShowWidgetInspectorOverrideNotifier.value;
+  }
+
+  @Deprecated(
+    'Use WidgetsBinding.instance.debugShowWidgetInspectorOverrideNotifier.value instead. '
+    'This feature was deprecated after v3.20.0-14.0.pre.',
+  )
+  static set debugShowWidgetInspectorOverride(bool value) {
+    WidgetsBinding.instance.debugShowWidgetInspectorOverrideNotifier.value = value;
+  }
 
   /// If false, prevents the debug banner from being visible.
   ///
@@ -1640,7 +1656,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
           ),
           ErrorSpacer(),
           ErrorDescription(
-            'See https://flutter.dev/tutorials/internationalization/ for more '
+            'See https://flutter.dev/to/internationalization/ for more '
             "information about configuring an app's locale, supportedLocales, "
             'and localizationsDelegates parameters.',
           ),
@@ -1710,25 +1726,11 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
       );
     }
 
-    PerformanceOverlay? performanceOverlay;
-    // We need to push a performance overlay if any of the display or checkerboarding
-    // options are set.
     if (widget.showPerformanceOverlay || WidgetsApp.showPerformanceOverlayOverride) {
-      performanceOverlay = PerformanceOverlay.allEnabled(
-        checkerboardRasterCacheImages: widget.checkerboardRasterCacheImages,
-        checkerboardOffscreenLayers: widget.checkerboardOffscreenLayers,
-      );
-    } else if (widget.checkerboardRasterCacheImages || widget.checkerboardOffscreenLayers) {
-      performanceOverlay = PerformanceOverlay(
-        checkerboardRasterCacheImages: widget.checkerboardRasterCacheImages,
-        checkerboardOffscreenLayers: widget.checkerboardOffscreenLayers,
-      );
-    }
-    if (performanceOverlay != null) {
       result = Stack(
         children: <Widget>[
           result,
-          Positioned(top: 0.0, left: 0.0, right: 0.0, child: performanceOverlay),
+          Positioned(top: 0.0, left: 0.0, right: 0.0, child: PerformanceOverlay.allEnabled()),
         ],
       );
     }

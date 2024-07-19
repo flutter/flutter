@@ -8,6 +8,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/src/foundation/diagnostics.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -110,7 +111,9 @@ void main() {
         );
       });
     });
-    testWidgets('asserts when more than one has locked the delegate', (WidgetTester tester) async {
+    testWidgets('asserts when more than one has locked the delegate',
+    experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
+    (WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Material(

@@ -10,7 +10,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 Future<void> verifyMarkedNeedsLayoutDuringTransientCallbacksPhase(WidgetTester tester, RenderObject renderObject) async {
   assert(!renderObject.debugNeedsLayout);
@@ -37,9 +36,6 @@ Future<void> verifyMarkedNeedsLayoutDuringTransientCallbacksPhase(WidgetTester t
 }
 
 void main() {
-  // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787 [leaks-to-clean]
-  LeakTesting.settings = LeakTesting.settings.withIgnored(classes: <String>['CurvedAnimation']);
-
   testWidgets('RenderParagraph relayout upon system fonts changes', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
@@ -193,7 +189,7 @@ void main() {
     expect(element.dirty, isTrue);
   }, skip: isBrowser);  // TODO(yjbanov): cupertino does not work on the Web yet: https://github.com/flutter/flutter/issues/41920
 
-  testWidgets('RangeSlider relayout upon system fonts changes', (WidgetTester tester) async {
+  testWidgets('RangeSlider relayout upon system fonts changes more than once', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(

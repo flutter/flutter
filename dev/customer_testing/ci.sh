@@ -6,7 +6,7 @@
 # This should match the ci.bat file in this directory.
 
 # This is called from .cirrus.yml and the LUCI recipes:
-# https://flutter.googlesource.com/recipes/+/refs/heads/master/recipe_modules/adhoc_validation/resources/customer_testing.sh
+# https://github.com/flutter/flutter/blob/main/dev/bots/suite_runners/run_customer_testing_tests.dart
 
 set -ex
 

@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/widgets.dart';
+library;
+
 import 'dart:math' show max;
 import 'dart:ui' as ui show
   BoxHeightStyle,
@@ -276,10 +279,14 @@ class _UntilTextBoundary extends TextBoundary {
 }
 
 class _TextLayout {
-  _TextLayout._(this._paragraph, this.writingDirection, this.rawString);
+  _TextLayout._(this._paragraph, this.writingDirection, this._painter);
 
   final TextDirection writingDirection;
-  final String rawString;
+
+  // Computing plainText is a bit expensive and is currently not needed for
+  // simple static text. Pass in the entire text painter so `TextPainter.plainText`
+  // is only called when needed.
+  final TextPainter _painter;
 
   // This field is not final because the owner TextPainter could create a new
   // ui.Paragraph with the exact same text layout (for example, when only the
@@ -340,17 +347,18 @@ class _TextLayout {
   /// line ended with a line feed.
   late final _LineCaretMetrics _endOfTextCaretMetrics = _computeEndOfTextCaretAnchorOffset();
   _LineCaretMetrics _computeEndOfTextCaretAnchorOffset() {
+    final String rawString = _painter.plainText;
     final int lastLineIndex = _paragraph.numberOfLines - 1;
     assert(lastLineIndex >= 0);
     final ui.LineMetrics lineMetrics = _paragraph.getLineMetricsAt(lastLineIndex)!;
-    // SkParagraph currently treats " " and "\t" as white spaces. Trailing white
-    // spaces don't contribute to the line width and thus require special handling
+    // Trailing white spaces don't contribute to the line width and thus require special handling
     // when they're present.
     // Luckily they have the same bidi embedding level as the paragraph as per
     // https://unicode.org/reports/tr9/#L1, so we can anchor the caret to the
     // last logical trailing space.
     final bool hasTrailingSpaces = switch (rawString.codeUnitAt(rawString.length - 1)) {
       0x9 ||        // horizontal tab
+      0x3000 ||     // ideographic space
       0x20 => true, // space
       _ => false,
     };
@@ -1189,7 +1197,7 @@ class TextPainter {
     //    called.
     final ui.Paragraph paragraph = (cachedLayout?.paragraph ?? _createParagraph(text))
       ..layout(ui.ParagraphConstraints(width: layoutMaxWidth));
-    final _TextLayout layout = _TextLayout._(paragraph, textDirection, plainText);
+    final _TextLayout layout = _TextLayout._(paragraph, textDirection, this);
     final double contentWidth = layout._contentWidthFor(minWidth, maxWidth, textWidthBasis);
 
     final _TextPainterLayoutCacheWithOffset newLayoutCache;
@@ -1352,7 +1360,7 @@ class TextPainter {
   /// {@endtemplate}
   ///
   /// Valid only after [layout] has been called.
-  double? getFullHeightForCaret(TextPosition position, Rect caretPrototype) {
+  double getFullHeightForCaret(TextPosition position, Rect caretPrototype) {
     final TextBox textBox = _getOrCreateLayoutTemplate().getBoxesForRange(0, 1, boxHeightStyle: ui.BoxHeightStyle.strut).single;
     return textBox.toRect().height;
   }
@@ -1463,15 +1471,20 @@ class TextPainter {
     final _LineCaretMetrics metrics;
     final List<TextBox> boxes = cachedLayout.paragraph
       .getBoxesForRange(graphemeRange.start, graphemeRange.end, boxHeightStyle: ui.BoxHeightStyle.strut);
+
     if (boxes.isNotEmpty) {
-      final TextBox box = boxes.single;
+      final bool anchorToLeft = switch (glyphInfo.writingDirection) {
+        TextDirection.ltr => anchorToLeadingEdge,
+        TextDirection.rtl => !anchorToLeadingEdge,
+      };
+      final TextBox box = anchorToLeft ? boxes.first : boxes.last;
       metrics = _LineCaretMetrics(
-        offset: Offset(anchorToLeadingEdge ? box.start : box.end, box.top),
+        offset: Offset(anchorToLeft ? box.left : box.right, box.top),
         writingDirection: box.direction,
       );
     } else {
       // Fall back to glyphInfo. This should only happen when using the HTML renderer.
-      assert(kIsWeb && !isCanvasKit);
+      assert(kIsWeb && !isSkiaWeb);
       final Rect graphemeBounds = glyphInfo.graphemeClusterLayoutBounds;
       final double dx = switch (glyphInfo.writingDirection) {
         TextDirection.ltr => anchorToLeadingEdge ? graphemeBounds.left : graphemeBounds.right,
@@ -1659,6 +1672,7 @@ class TextPainter {
   ///
   /// After disposal this painter is unusable.
   void dispose() {
+    assert(!debugDisposed);
     assert(() {
       _disposed = true;
       return true;

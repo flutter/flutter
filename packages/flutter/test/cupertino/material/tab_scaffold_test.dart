@@ -324,6 +324,7 @@ void main() {
 
     expect(contents.length, greaterThan(0));
     expect(contents, isNot(contains(predicate((RichText t) => t.textScaler != const TextScaler.linear(99.0)))));
+    imageCache.clear();
   });
 }
 

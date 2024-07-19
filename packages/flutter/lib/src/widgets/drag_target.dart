@@ -370,14 +370,11 @@ class Draggable<T extends Object> extends StatefulWidget {
   /// recognizing a drag.
   @protected
   MultiDragGestureRecognizer createRecognizer(GestureMultiDragStartCallback onStart) {
-    switch (affinity) {
-      case Axis.horizontal:
-        return HorizontalMultiDragGestureRecognizer(allowedButtonsFilter: allowedButtonsFilter)..onStart = onStart;
-      case Axis.vertical:
-        return VerticalMultiDragGestureRecognizer(allowedButtonsFilter: allowedButtonsFilter)..onStart = onStart;
-      case null:
-        return ImmediateMultiDragGestureRecognizer(allowedButtonsFilter: allowedButtonsFilter)..onStart = onStart;
-    }
+    return switch (affinity) {
+      Axis.horizontal => HorizontalMultiDragGestureRecognizer(allowedButtonsFilter: allowedButtonsFilter),
+      Axis.vertical   => VerticalMultiDragGestureRecognizer(allowedButtonsFilter: allowedButtonsFilter),
+      null            => ImmediateMultiDragGestureRecognizer(allowedButtonsFilter: allowedButtonsFilter),
+    }..onStart = onStart;
   }
 
   @override
@@ -414,6 +411,8 @@ class LongPressDraggable<T extends Object> extends Draggable<T> {
     super.ignoringFeedbackPointer,
     this.delay = kLongPressTimeout,
     super.allowedButtonsFilter,
+    super.hitTestBehavior,
+    super.rootOverlay,
   });
 
   /// Whether haptic feedback should be triggered on drag start.
@@ -831,6 +830,7 @@ class _DragAvatar<T extends Object> extends Drag {
   final List<_DragTargetState<Object>> _enteredTargets = <_DragTargetState<Object>>[];
   Offset _position;
   Offset? _lastOffset;
+  late Offset _overlayOffset;
   OverlayEntry? _entry;
 
   @override
@@ -856,7 +856,14 @@ class _DragAvatar<T extends Object> extends Drag {
 
   void updateDrag(Offset globalPosition) {
     _lastOffset = globalPosition - dragStartPoint;
-    _entry!.markNeedsBuild();
+    if (overlayState.mounted) {
+      final RenderBox box = overlayState.context.findRenderObject()! as RenderBox;
+      final Offset overlaySpaceOffset = box.globalToLocal(globalPosition);
+      _overlayOffset = overlaySpaceOffset - dragStartPoint;
+
+      _entry!.markNeedsBuild();
+    }
+
     final HitTestResult result = HitTestResult();
     WidgetsBinding.instance.hitTestInView(result, globalPosition + feedbackOffset, viewId);
 
@@ -909,17 +916,12 @@ class _DragAvatar<T extends Object> extends Drag {
   Iterable<_DragTargetState<Object>> _getDragTargets(Iterable<HitTestEntry> path) {
     // Look for the RenderBoxes that corresponds to the hit target (the hit target
     // widgets build RenderMetaData boxes for us for this purpose).
-    final List<_DragTargetState<Object>> targets = <_DragTargetState<Object>>[];
-    for (final HitTestEntry entry in path) {
-      final HitTestTarget target = entry.target;
-      if (target is RenderMetaData) {
-        final dynamic metaData = target.metaData;
-        if (metaData is _DragTargetState && metaData.isExpectedDataType(data, T)) {
-          targets.add(metaData);
-        }
-      }
-    }
-    return targets;
+    return <_DragTargetState<Object>>[
+      for (final HitTestEntry entry in path)
+        if (entry.target case final RenderMetaData target)
+          if (target.metaData case final _DragTargetState<Object> metaData)
+            if (metaData.isExpectedDataType(data, T)) metaData,
+    ];
   }
 
   void _leaveAllEntered() {
@@ -946,11 +948,9 @@ class _DragAvatar<T extends Object> extends Drag {
   }
 
   Widget _build(BuildContext context) {
-    final RenderBox box = overlayState.context.findRenderObject()! as RenderBox;
-    final Offset overlayTopLeft = box.localToGlobal(Offset.zero);
     return Positioned(
-      left: _lastOffset!.dx - overlayTopLeft.dx,
-      top: _lastOffset!.dy - overlayTopLeft.dy,
+      left: _overlayOffset.dx,
+      top: _overlayOffset.dy,
       child: ExcludeSemantics(
         excluding: ignoringFeedbackSemantics,
         child: IgnorePointer(
@@ -971,12 +971,10 @@ class _DragAvatar<T extends Object> extends Drag {
   }
 
   Offset _restrictAxis(Offset offset) {
-    if (axis == null) {
-      return offset;
-    }
-    if (axis == Axis.horizontal) {
-      return Offset(offset.dx, 0.0);
-    }
-    return Offset(0.0, offset.dy);
+    return switch (axis) {
+      Axis.horizontal => Offset(offset.dx, 0.0),
+      Axis.vertical   => Offset(0.0, offset.dy),
+      null => offset,
+    };
   }
 }

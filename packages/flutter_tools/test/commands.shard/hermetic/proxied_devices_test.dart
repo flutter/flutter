@@ -275,6 +275,9 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
   bool get isConnected => true;
 
   @override
+  final DeviceConnectionInterface connectionInterface = DeviceConnectionInterface.attached;
+
+  @override
   Future<String> get sdkNameAndVersion async => 'Android 12';
 
   @override

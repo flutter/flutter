@@ -4,6 +4,8 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -352,6 +354,24 @@ void main() {
     expect(ScrollConfiguration.of(capturedContext).runtimeType, CupertinoScrollBehavior);
   });
 
+  testWidgets('CupertinoApp has correct default multitouchDragStrategy', (WidgetTester tester) async {
+    late BuildContext capturedContext;
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            capturedContext = context;
+            return const Placeholder();
+          },
+        ),
+      ),
+    );
+
+    final ScrollBehavior scrollBehavior = ScrollConfiguration.of(capturedContext);
+    expect(scrollBehavior.runtimeType, CupertinoScrollBehavior);
+    expect(scrollBehavior.getMultitouchDragStrategy(capturedContext), MultitouchDragStrategy.averageBoundaryPointers);
+  });
+
   testWidgets('A ScrollBehavior can be set for CupertinoApp', (WidgetTester tester) async {
     late BuildContext capturedContext;
     await tester.pumpWidget(
@@ -427,6 +447,23 @@ void main() {
     expect(textColor.toString(), CupertinoColors.label.resolveFrom(capturedContext).toString());
 
     debugBrightnessOverride = null;
+  });
+
+  testWidgets('CupertinoApp creates a Material theme with colors based off of Cupertino theme', (WidgetTester tester) async {
+    late ThemeData appliedTheme;
+    await tester.pumpWidget(
+      CupertinoApp(
+        theme: const CupertinoThemeData(primaryColor: CupertinoColors.activeGreen),
+        home: Builder(
+          builder: (BuildContext context) {
+            appliedTheme = Theme.of(context);
+            return const SizedBox();
+          },
+        ),
+      ),
+    );
+
+    expect(appliedTheme.colorScheme.primary, CupertinoColors.activeGreen);
   });
 
   testWidgets('Cursor color is resolved when CupertinoThemeData.brightness is null', (WidgetTester tester) async {

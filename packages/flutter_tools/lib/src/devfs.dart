@@ -5,8 +5,10 @@
 import 'dart:async';
 
 import 'package:package_config/package_config.dart';
+import 'package:process/process.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
+import 'artifacts.dart';
 import 'asset.dart';
 import 'base/config.dart';
 import 'base/context.dart';
@@ -16,6 +18,7 @@ import 'base/logger.dart';
 import 'base/net.dart';
 import 'base/os.dart';
 import 'build_info.dart';
+import 'build_system/tools/asset_transformer.dart';
 import 'build_system/tools/scene_importer.dart';
 import 'build_system/tools/shader_compiler.dart';
 import 'compile.dart';
@@ -150,18 +153,11 @@ class DevFSFileContent extends DevFSContent {
 class DevFSByteContent extends DevFSContent {
   DevFSByteContent(this._bytes);
 
-  List<int> _bytes;
-
+  final List<int> _bytes;
+  final DateTime _creationTime = DateTime.now();
   bool _isModified = true;
-  DateTime _modificationTime = DateTime.now();
 
   List<int> get bytes => _bytes;
-
-  set bytes(List<int> value) {
-    _bytes = value;
-    _isModified = true;
-    _modificationTime = DateTime.now();
-  }
 
   /// Return true only once so that the content is written to the device only once.
   @override
@@ -173,7 +169,7 @@ class DevFSByteContent extends DevFSContent {
 
   @override
   bool isModifiedAfter(DateTime time) {
-    return _modificationTime.isAfter(time);
+    return _creationTime.isAfter(time);
   }
 
   @override
@@ -193,19 +189,9 @@ class DevFSStringContent extends DevFSByteContent {
     : _string = string,
       super(utf8.encode(string));
 
-  String _string;
+  final String _string;
 
   String get string => _string;
-
-  set string(String value) {
-    _string = value;
-    super.bytes = utf8.encode(_string);
-  }
-
-  @override
-  set bytes(List<int> value) {
-    string = utf8.decode(value);
-  }
 }
 
 /// A string compressing DevFSContent.
@@ -230,7 +216,7 @@ class DevFSStringCompressingBytesContent extends DevFSContent {
 
   final String _string;
   final ZLibEncoder _compressor;
-  final DateTime _modificationTime = DateTime.now();
+  final DateTime _creationTime = DateTime.now();
 
   bool _isModified = true;
 
@@ -246,7 +232,7 @@ class DevFSStringCompressingBytesContent extends DevFSContent {
 
   @override
   bool isModifiedAfter(DateTime time) {
-    return _modificationTime.isAfter(time);
+    return _creationTime.isAfter(time);
   }
 
   @override
@@ -454,6 +440,9 @@ class DevFS {
     required OperatingSystemUtils osUtils,
     required Logger logger,
     required FileSystem fileSystem,
+    required ProcessManager processManager,
+    required Artifacts artifacts,
+    required BuildMode buildMode,
     HttpClient? httpClient,
     Duration? uploadRetryThrottle,
     StopwatchFactory stopwatchFactory = const StopwatchFactory(),
@@ -471,7 +460,17 @@ class DevFS {
           ? HttpClient()
           : context.get<HttpClientFactory>()!())),
        _stopwatchFactory = stopwatchFactory,
-       _config = config;
+       _config = config,
+       _assetTransformer = DevelopmentAssetTransformer(
+          transformer: AssetTransformer(
+            processManager: processManager,
+            fileSystem: fileSystem,
+            dartBinaryPath: artifacts.getArtifactPath(Artifact.engineDartBinary),
+            buildMode: buildMode,
+          ),
+          fileSystem: fileSystem,
+          logger: logger,
+        );
 
   final FlutterVmService _vmService;
   final _DevFSHttpWriter _httpWriter;
@@ -479,9 +478,10 @@ class DevFS {
   final FileSystem _fileSystem;
   final StopwatchFactory _stopwatchFactory;
   final Config? _config;
+  final DevelopmentAssetTransformer _assetTransformer;
 
   final String fsName;
-  final Directory? rootDirectory;
+  final Directory rootDirectory;
   final Set<String> assetPathsToEvict = <String>{};
   final Set<String> shaderPathsToEvict = <String>{};
   final Set<String> scenePathsToEvict = <String>{};
@@ -505,7 +505,7 @@ class DevFS {
     final String baseUriString = baseUri.toString();
     if (deviceUriString.startsWith(baseUriString)) {
       final String deviceUriSuffix = deviceUriString.substring(baseUriString.length);
-      return rootDirectory!.uri.resolve(deviceUriSuffix);
+      return rootDirectory.uri.resolve(deviceUriSuffix);
     }
     return deviceUri;
   }
@@ -571,7 +571,6 @@ class DevFS {
     DevFSWriter? devFSWriter,
     String? target,
     AssetBundle? bundle,
-    DateTime? firstBuildTime,
     bool bundleFirstUpload = false,
     bool fullRestart = false,
     File? dartPluginRegistrant,
@@ -601,7 +600,7 @@ class DevFS {
       invalidatedFiles,
       outputPath: dillOutputPath,
       fs: _fileSystem,
-      projectRootPath: rootDirectory?.path,
+      projectRootPath: rootDirectory.path,
       packageConfig: packageConfig,
       checkDartPluginRegistry: true, // The entry point is assumed not to have changed.
       dartPluginRegistrant: dartPluginRegistrant,
@@ -637,8 +636,8 @@ class DevFS {
         if (archivePath == _kFontManifest) {
           didUpdateFontManifest = true;
         }
-
-        switch (bundle.entries[archivePath]?.kind) {
+        final AssetKind? kind = bundle.entries[archivePath]?.kind;
+        switch (kind) {
           case AssetKind.shader:
             final Future<DevFSContent?> pending = shaderCompiler.recompileShader(entry.content);
             pendingAssetBuilds.add(pending);
@@ -673,11 +672,30 @@ class DevFS {
           case AssetKind.regular:
           case AssetKind.font:
           case null:
-            dirtyEntries[deviceUri] = entry.content;
-            syncedBytes += entry.content.size;
-            if (!bundleFirstUpload) {
-              assetPathsToEvict.add(archivePath);
-            }
+            final Future<DevFSContent?> pending = (() async {
+              if (entry.transformers.isEmpty || kind != AssetKind.regular) {
+                return entry.content;
+              }
+              return _assetTransformer.retransformAsset(
+                inputAssetKey: archivePath,
+                inputAssetContent: entry.content,
+                transformerEntries: entry.transformers,
+                workingDirectory: rootDirectory.path,
+              );
+            })();
+
+            pendingAssetBuilds.add(pending);
+            pending.then((DevFSContent? content) {
+              if (content == null) {
+                assetBuildFailed = true;
+                return;
+              }
+              dirtyEntries[deviceUri] = content;
+              syncedBytes += content.size;
+              if (!bundleFirstUpload) {
+                assetPathsToEvict.add(archivePath);
+              }
+            });
         }
       });
 
@@ -714,6 +732,7 @@ class DevFS {
       return UpdateFSReport();
     }
 
+    _logger.printTrace('Pending asset builds completed. Writing dirty entries.');
     if (dirtyEntries.isNotEmpty) {
       await (devFSWriter ?? _httpWriter).write(dirtyEntries, _baseUri!, _httpWriter);
     }

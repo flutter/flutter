@@ -422,7 +422,7 @@ void main() {
       'extendedIconLabelSpacing: 12.0',
       'extendedPadding: EdgeInsetsDirectional(7.0, 0.0, 8.0, 0.0)',
       'extendedTextStyle: TextStyle(inherit: true, letterSpacing: 2.0)',
-      'mouseCursor: MaterialStateMouseCursor(clickable)',
+      'mouseCursor: WidgetStateMouseCursor(clickable)',
     ]);
   });
 

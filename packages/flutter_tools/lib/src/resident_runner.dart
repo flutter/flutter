@@ -64,7 +64,7 @@ class FlutterDevice {
          fileSystemScheme: buildInfo.fileSystemScheme,
          targetModel: targetModel,
          dartDefines: buildInfo.dartDefines,
-         packagesPath: buildInfo.packagesPath,
+         packagesPath: buildInfo.packageConfigPath,
          frontendServerStarterPath: buildInfo.frontendServerStarterPath,
          extraFrontEndOptions: buildInfo.extraFrontEndOptions,
          artifacts: globals.artifacts!,
@@ -120,18 +120,22 @@ class FlutterDevice {
       // TODO(zanderso): consistently provide these flags across platforms.
       final String platformDillName;
       final List<String> extraFrontEndOptions = List<String>.of(buildInfo.extraFrontEndOptions);
-      if (buildInfo.nullSafetyMode == NullSafetyMode.unsound) {
-        platformDillName = 'ddc_outline.dill';
-        if (!extraFrontEndOptions.contains('--no-sound-null-safety')) {
-          extraFrontEndOptions.add('--no-sound-null-safety');
-        }
-      } else if (buildInfo.nullSafetyMode == NullSafetyMode.sound) {
-        platformDillName = 'ddc_outline_sound.dill';
-        if (!extraFrontEndOptions.contains('--sound-null-safety')) {
-          extraFrontEndOptions.add('--sound-null-safety');
-        }
-      } else {
-        throw StateError('Expected buildInfo.nullSafetyMode to be one of unsound or sound, got ${buildInfo.nullSafetyMode}');
+      switch (buildInfo.nullSafetyMode) {
+        case NullSafetyMode.unsound:
+          platformDillName = 'ddc_outline.dill';
+          if (!extraFrontEndOptions.contains('--no-sound-null-safety')) {
+            extraFrontEndOptions.add('--no-sound-null-safety');
+          }
+        case NullSafetyMode.sound:
+          platformDillName = 'ddc_outline_sound.dill';
+          if (!extraFrontEndOptions.contains('--sound-null-safety')) {
+            extraFrontEndOptions.add('--sound-null-safety');
+          }
+        case NullSafetyMode.autodetect:
+          throw StateError(
+            'Expected buildInfo.nullSafetyMode to be one of unsound or sound, '
+            'got NullSafetyMode.autodetect',
+          );
       }
 
       final String platformDillPath = globals.fs.path.join(
@@ -160,7 +164,7 @@ class FlutterDevice {
         dartDefines: buildInfo.dartDefines,
         librariesSpec: globals.fs.file(globals.artifacts!
           .getHostArtifact(HostArtifact.flutterWebLibrariesJson)).uri.toString(),
-        packagesPath: buildInfo.packagesPath,
+        packagesPath: buildInfo.packageConfigPath,
         artifacts: globals.artifacts!,
         processManager: globals.processManager,
         logger: globals.logger,
@@ -193,7 +197,7 @@ class FlutterDevice {
           extraFrontEndOptions: extraFrontEndOptions,
         ),
         assumeInitializeFromDillUpToDate: buildInfo.assumeInitializeFromDillUpToDate,
-        packagesPath: buildInfo.packagesPath,
+        packagesPath: buildInfo.packageConfigPath,
         artifacts: globals.artifacts!,
         processManager: globals.processManager,
         logger: globals.logger,
@@ -385,6 +389,9 @@ class FlutterDevice {
       osUtils: globals.os,
       fileSystem: globals.fs,
       logger: globals.logger,
+      processManager: globals.processManager,
+      artifacts: globals.artifacts!,
+      buildMode: buildInfo.mode,
     );
     return devFS!.create();
   }
@@ -556,7 +563,6 @@ class FlutterDevice {
     required Uri mainUri,
     String? target,
     AssetBundle? bundle,
-    DateTime? firstBuildTime,
     bool bundleFirstUpload = false,
     bool bundleDirty = false,
     bool fullRestart = false,
@@ -567,6 +573,7 @@ class FlutterDevice {
   }) async {
     final Status devFSStatus = globals.logger.startProgress(
       'Syncing files to device ${device!.name}...',
+      progressId: 'devFS.update',
     );
     UpdateFSReport report;
     try {
@@ -574,7 +581,6 @@ class FlutterDevice {
         mainUri: mainUri,
         target: target,
         bundle: bundle,
-        firstBuildTime: firstBuildTime,
         bundleFirstUpload: bundleFirstUpload,
         generator: generator!,
         fullRestart: fullRestart,
@@ -593,7 +599,7 @@ class FlutterDevice {
       return UpdateFSReport();
     }
     devFSStatus.stop();
-    globals.printTrace('Synced ${getSizeAsMB(report.syncedBytes)}.');
+    globals.printTrace('Synced ${getSizeAsPlatformMB(report.syncedBytes)}.');
     return report;
   }
 
@@ -908,12 +914,10 @@ abstract class ResidentHandlers {
     final Brightness? current = await flutterDevices.first!.vmService!.flutterBrightnessOverride(
       isolateId: views.first.uiIsolate!.id!,
     );
-    Brightness next;
-    if (current == Brightness.light) {
-      next = Brightness.dark;
-    } else {
-      next = Brightness.light;
-    }
+    final Brightness next = switch (current) {
+      Brightness.light => Brightness.dark,
+      Brightness.dark || null => Brightness.light,
+    };
     for (final FlutterDevice? device in flutterDevices) {
       final List<FlutterView> views = await device!.vmService!.getFlutterViews();
       for (final FlutterView view in views) {
@@ -1099,7 +1103,7 @@ abstract class ResidentRunner extends ResidentHandlers {
     this.machine = false,
     ResidentDevtoolsHandlerFactory devtoolsHandler = createDefaultHandler,
   }) : mainPath = globals.fs.file(target).absolute.path,
-       packagesFilePath = debuggingOptions.buildInfo.packagesPath,
+       packagesFilePath = debuggingOptions.buildInfo.packageConfigPath,
        projectRootPath = projectRootPath ?? globals.fs.currentDirectory.path,
        _dillOutputPath = dillOutputPath,
        artifactDirectory = dillOutputPath == null
@@ -1177,10 +1181,10 @@ abstract class ResidentRunner extends ResidentHandlers {
   bool get debuggingEnabled => debuggingOptions.debuggingEnabled;
 
   @override
-  bool get isRunningDebug => debuggingOptions.buildInfo.isDebug;
+  bool get isRunningDebug => !debuggingOptions.webUseWasm && debuggingOptions.buildInfo.isDebug;
 
   @override
-  bool get isRunningProfile => debuggingOptions.buildInfo.isProfile;
+  bool get isRunningProfile => !debuggingOptions.webUseWasm && debuggingOptions.buildInfo.isProfile;
 
   @override
   bool get isRunningRelease => debuggingOptions.buildInfo.isRelease;
@@ -1446,17 +1450,12 @@ abstract class ResidentRunner extends ResidentHandlers {
 
   Future<void> enableObservatory() async {
     assert(debuggingOptions.serveObservatory);
-    final List<Future<vm_service.Response?>> serveObservatoryRequests = <Future<vm_service.Response?>>[];
-    for (final FlutterDevice? device in flutterDevices) {
-      if (device == null) {
-        continue;
-      }
-      // Notify the VM service if the user wants Observatory to be served.
-      serveObservatoryRequests.add(
-        device.vmService?.callMethodWrapper('_serveObservatory') ??
-          Future<vm_service.Response?>.value(),
-      );
-    }
+    final List<Future<vm_service.Response?>> serveObservatoryRequests = <Future<vm_service.Response?>>[
+      for (final FlutterDevice? device in flutterDevices)
+        if (device != null)
+          // Notify the VM service if the user wants Observatory to be served.
+          device.vmService?.callMethodWrapper('_serveObservatory') ?? Future<vm_service.Response?>.value(),
+    ];
     try {
       await Future.wait(serveObservatoryRequests);
     } on vm_service.RPCError catch (e) {
@@ -1522,6 +1521,12 @@ abstract class ResidentRunner extends ResidentHandlers {
         );
       }
       if (includeDevtools) {
+        if (_residentDevtoolsHandler!.printDtdUri) {
+          final Uri? dtdUri = residentDevtoolsHandler!.dtdUri;
+          if (dtdUri != null) {
+            globals.printStatus('The Dart Tooling Daemon is available at: $dtdUri\n');
+          }
+        }
         final Uri? uri = devToolsServerAddress!.uri?.replace(
           queryParameters: <String, dynamic>{'uri': '${device.vmService!.httpAddress}'},
         );
@@ -1939,6 +1944,26 @@ abstract class DevtoolsLauncher {
     } else {
       _readyCompleter = Completer<void>();
     }
+  }
+
+  /// The Dart Tooling Daemon (DTD) URI for the DTD instance being hosted by
+  /// DevTools server.
+  ///
+  /// This will be null if the DevTools server is not served through Flutter
+  /// tools (e.g. if it is served from an IDE).
+  Uri? get dtdUri => _dtdUri;
+  Uri? _dtdUri;
+  @protected
+  set dtdUri(Uri? value) => _dtdUri = value;
+
+  /// Whether to print the Dart Tooling Daemon URI.
+  ///
+  /// This will always return false when there is not a DTD instance being
+  /// served from the DevTools server.
+  bool get printDtdUri => _printDtdUri ?? false;
+  bool? _printDtdUri;
+  set printDtdUri(bool value) {
+    _printDtdUri = value;
   }
 
   /// The URL of the current DevTools server.

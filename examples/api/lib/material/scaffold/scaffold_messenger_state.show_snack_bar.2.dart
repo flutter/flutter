@@ -34,7 +34,7 @@ class SnackBarExample extends StatefulWidget {
 }
 
 class _SnackBarExampleState extends State<SnackBarExample> {
-  final Set<AnimationStyles> _animationStyleSelection = <AnimationStyles>{AnimationStyles.defaultStyle};
+  Set<AnimationStyles> _animationStyleSelection = <AnimationStyles>{AnimationStyles.defaultStyle};
   AnimationStyle? _animationStyle;
 
   @override
@@ -57,6 +57,7 @@ class _SnackBarExampleState extends State<SnackBarExample> {
                     ),
                     AnimationStyles.none => AnimationStyle.noAnimation,
                   };
+                  _animationStyleSelection = styles;
                 });
               },
               segments: animationStyleSegments

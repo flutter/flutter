@@ -10,6 +10,7 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/project_migrator.dart';
+import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
@@ -83,7 +84,7 @@ class WebBuilder {
     ];
 
     final ProjectMigration migration = ProjectMigration(migrators);
-    migration.run();
+    await migration.run();
 
     final Status status = _logger.startProgress('Compiling $target for the Web...');
     final Stopwatch sw = Stopwatch()..start();
@@ -130,6 +131,14 @@ class WebBuilder {
       status.stop();
     }
 
+    // We don't print a size because the output directory can contain
+    // optional files not needed by the user.
+    globals.printStatus(
+      '${globals.terminal.successMark} '
+      'Built ${globals.fs.path.relative(outputDirectory.path)}',
+      color: TerminalColor.green,
+    );
+
     final String buildSettingsString = _buildEventAnalyticsSettings(
       configs: compilerConfigs,
     );
@@ -175,8 +184,22 @@ enum WebRendererMode implements CliEnum {
   /// Always use skwasm.
   skwasm;
 
+  factory WebRendererMode.fromCliOption(String? webRendererString, {required bool useWasm}) {
+    if (webRendererString == null) {
+      return getDefault(useWasm: useWasm);
+    }
+    return WebRendererMode.values.byName(webRendererString);
+  }
+
+  static WebRendererMode getDefault({required bool useWasm}) {
+    return useWasm ? defaultForWasm : defaultForJs;
+  }
+
+  static const WebRendererMode defaultForJs = WebRendererMode.canvaskit;
+  static const WebRendererMode defaultForWasm = WebRendererMode.skwasm;
+
   @override
-  String get cliName => snakeCase(name, '-');
+  String get cliName => kebabCase(name);
 
   @override
   String get helpText => switch (this) {
@@ -190,22 +213,22 @@ enum WebRendererMode implements CliEnum {
       };
 
   Iterable<String> get dartDefines => switch (this) {
-        WebRendererMode.auto => <String>[
+        auto => <String>[
             'FLUTTER_WEB_AUTO_DETECT=true',
           ],
-        WebRendererMode.canvaskit => <String>[
+        canvaskit => <String>[
             'FLUTTER_WEB_AUTO_DETECT=false',
             'FLUTTER_WEB_USE_SKIA=true',
           ],
-        WebRendererMode.html => <String>[
+        html => <String>[
             'FLUTTER_WEB_AUTO_DETECT=false',
             'FLUTTER_WEB_USE_SKIA=false',
           ],
-        WebRendererMode.skwasm => <String>[
+        skwasm => <String>[
             'FLUTTER_WEB_AUTO_DETECT=false',
             'FLUTTER_WEB_USE_SKIA=false',
             'FLUTTER_WEB_USE_SKWASM=true',
-          ]
+          ],
       };
 
   List<String> updateDartDefines(List<String> inputDefines) {

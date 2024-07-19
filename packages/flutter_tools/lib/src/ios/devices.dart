@@ -22,6 +22,7 @@ import '../build_info.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
+import '../device_vm_service_discovery_for_attach.dart';
 import '../globals.dart' as globals;
 import '../macos/xcdevice.dart';
 import '../mdns_discovery.dart';
@@ -102,8 +103,6 @@ class IOSDevices extends PollingDeviceDiscovery {
       return;
     }
 
-    deviceNotifier ??= ItemListNotifier<Device>();
-
     // Start by populating all currently attached devices.
     _updateCachedDevices(await pollingGetDevices());
     _updateNotifierFromCache();
@@ -127,10 +126,8 @@ class IOSDevices extends PollingDeviceDiscovery {
 
   @visibleForTesting
   Future<void> onDeviceEvent(XCDeviceEventNotification event) async {
-    final ItemListNotifier<Device>? notifier = deviceNotifier;
-    if (notifier == null) {
-      return;
-    }
+    final ItemListNotifier<Device> notifier = deviceNotifier;
+
     Device? knownDevice;
     for (final Device device in notifier.items) {
       if (device.id == event.deviceIdentifier) {
@@ -186,10 +183,8 @@ class IOSDevices extends PollingDeviceDiscovery {
   /// Updates notifier with devices found in the cache that are determined
   /// to be connected.
   void _updateNotifierFromCache() {
-    final ItemListNotifier<Device>? notifier = deviceNotifier;
-    if (notifier == null) {
-      return;
-    }
+    final ItemListNotifier<Device> notifier = deviceNotifier;
+
     // Device is connected if it has either an observed usb or wifi connection
     // or it has not been observed but was found as connected in the cache.
     final List<Device> connectedDevices = _cachedPolledDevices.values.where((Device device) {
@@ -267,6 +262,7 @@ class IOSDevice extends Device {
     required this.cpuArchitecture,
     required this.connectionInterface,
     required this.isConnected,
+    required this.isPaired,
     required this.devModeEnabled,
     required this.isCoreDevice,
     String? sdkVersion,
@@ -336,6 +332,11 @@ class IOSDevice extends Device {
   @override
   bool isConnected;
 
+  bool devModeEnabled = false;
+
+  /// Device has trusted this computer and paired.
+  bool isPaired = false;
+
   /// CoreDevice is a device connectivity stack introduced in Xcode 15. Devices
   /// with iOS 17 or greater are CoreDevices.
   final bool isCoreDevice;
@@ -343,8 +344,6 @@ class IOSDevice extends Device {
   final Map<IOSApp?, DeviceLogReader> _logReaders = <IOSApp?, DeviceLogReader>{};
 
   DevicePortForwarder? _portForwarder;
-
-  bool devModeEnabled = false;
 
   @visibleForTesting
   IOSDeployDebugger? iosDeployDebugger;
@@ -497,7 +496,15 @@ class IOSDevice extends Device {
       );
       if (!buildResult.success) {
         _logger.printError('Could not build the precompiled application for the device.');
-        await diagnoseXcodeBuildFailure(buildResult, globals.flutterUsage, _logger, globals.analytics);
+        await diagnoseXcodeBuildFailure(
+          buildResult,
+          analytics: globals.analytics,
+          fileSystem: globals.fs,
+          flutterUsage: globals.flutterUsage,
+          logger: globals.logger,
+          platform: SupportedPlatform.ios,
+          project: package.project.parent,
+        );
         _logger.printError('');
         return LaunchResult.failed();
       }
@@ -775,14 +782,11 @@ class IOSDevice extends Device {
 
     final List<Future<Uri?>> discoveryOptions = <Future<Uri?>>[
       vmUrlFromMDns,
+      // vmServiceDiscovery uses device logs (`idevicesyslog`), which doesn't work
+      // on wireless devices.
+      if (vmServiceDiscovery != null && !isWirelesslyConnected)
+        vmServiceDiscovery.uri,
     ];
-
-    // vmServiceDiscovery uses device logs (`idevicesyslog`), which doesn't work
-    // on wireless devices.
-    if (vmServiceDiscovery != null && !isWirelesslyConnected) {
-      final Future<Uri?> vmUrlFromLogs = vmServiceDiscovery.uri;
-      discoveryOptions.add(vmUrlFromLogs);
-    }
 
     Uri? localUri = await Future.any(
       <Future<Uri?>>[...discoveryOptions, cancelCompleter.future],
@@ -1027,6 +1031,43 @@ class IOSDevice extends Device {
 
   @override
   void clearLogs() { }
+
+  @override
+  VMServiceDiscoveryForAttach getVMServiceDiscoveryForAttach({
+    String? appId,
+    String? fuchsiaModule,
+    int? filterDevicePort,
+    int? expectedHostPort,
+    required bool ipv6,
+    required Logger logger,
+  }) {
+    final bool compatibleWithProtocolDiscovery = majorSdkVersion < IOSDeviceLogReader.minimumUniversalLoggingSdkVersion &&
+          !isWirelesslyConnected;
+    final MdnsVMServiceDiscoveryForAttach mdnsVMServiceDiscoveryForAttach = MdnsVMServiceDiscoveryForAttach(
+      device: this,
+      appId: appId,
+      deviceVmservicePort: filterDevicePort,
+      hostVmservicePort: expectedHostPort,
+      usesIpv6: ipv6,
+      useDeviceIPAsHost: isWirelesslyConnected,
+    );
+
+    if (compatibleWithProtocolDiscovery) {
+      return DelegateVMServiceDiscoveryForAttach(<VMServiceDiscoveryForAttach>[
+        mdnsVMServiceDiscoveryForAttach,
+        super.getVMServiceDiscoveryForAttach(
+          appId: appId,
+          fuchsiaModule: fuchsiaModule,
+          filterDevicePort: filterDevicePort,
+          expectedHostPort: expectedHostPort,
+          ipv6: ipv6,
+          logger: logger,
+        ),
+      ]);
+    } else {
+      return mdnsVMServiceDiscoveryForAttach;
+    }
+  }
 
   @override
   bool get supportsScreenshot {

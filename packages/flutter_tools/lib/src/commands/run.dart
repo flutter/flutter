@@ -30,6 +30,7 @@ import '../runner/flutter_command_runner.dart';
 import '../tracing.dart';
 import '../vmservice.dart';
 import '../web/compile.dart';
+import '../web/web_constants.dart';
 import '../web/web_runner.dart';
 import 'daemon.dart';
 
@@ -179,7 +180,12 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         hide: !verboseHelp,
         help: 'Uninstall previous versions of the app on the device '
               'before reinstalling. Currently only supported on iOS.',
-    );
+      )
+      ..addFlag(
+        FlutterOptions.kWebWasmFlag,
+        help: 'Compile to WebAssembly rather than JavaScript.\n$kWasmMoreInfo',
+        negatable: false,
+      );
     usesWebOptions(verboseHelp: verboseHelp);
     usesTargetOption();
     usesPortOptions(verboseHelp: verboseHelp);
@@ -227,6 +233,26 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
 
   String? get traceAllowlist => stringArg('trace-allowlist');
 
+  bool get useWasm => boolArg(FlutterOptions.kWebWasmFlag);
+
+  bool get useLocalCanvasKit {
+    // If we have specified not to use CDN, use local CanvasKit
+    if (!boolArg(FlutterOptions.kWebResourcesCdnFlag)) {
+      return true;
+    }
+
+    // If we are using a locally built web sdk, we should use local CanvasKit
+    if (stringArg(FlutterGlobalOptions.kLocalWebSDKOption, global: true) != null) {
+      return true;
+    }
+    return false;
+  }
+
+  WebRendererMode get webRenderer => WebRendererMode.fromCliOption(
+    stringArg(FlutterOptions.kWebRendererFlag),
+    useWasm: useWasm
+  );
+
   /// Create a debugging options instance for the current `run` or `drive` invocation.
   @visibleForTesting
   @protected
@@ -242,10 +268,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     final Map<String, String> webHeaders = featureFlags.isWebEnabled
         ? extractWebHeaders()
         : const <String, String>{};
-    final String? webRendererString = stringArg('web-renderer');
-    final WebRendererMode webRenderer = (webRendererString != null)
-        ? WebRendererMode.values.byName(webRendererString)
-        : WebRendererMode.auto;
 
     if (buildInfo.mode.isRelease) {
       return DebuggingOptions.disabled(
@@ -264,6 +286,8 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         webBrowserFlags: webBrowserFlags,
         webHeaders: webHeaders,
         webRenderer: webRenderer,
+        webUseWasm: useWasm,
+        webUseLocalCanvaskit: useLocalCanvasKit,
         enableImpeller: enableImpeller,
         enableVulkanValidation: enableVulkanValidation,
         uninstallFirst: uninstallFirst,
@@ -314,6 +338,8 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         webLaunchUrl: featureFlags.isWebEnabled ? stringArg('web-launch-url') : null,
         webHeaders: webHeaders,
         webRenderer: webRenderer,
+        webUseWasm: useWasm,
+        webUseLocalCanvaskit: useLocalCanvasKit,
         vmserviceOutFile: stringArg('vmservice-out-file'),
         fastStart: argParser.options.containsKey('fast-start')
           && boolArg('fast-start')
@@ -567,7 +593,7 @@ class RunCommand extends RunCommandBase {
       runTargetName: deviceType,
       runTargetOsVersion: deviceOsVersion,
       runModeName: modeName,
-      runProjectModule: FlutterProject.current().isModule,
+      runProjectModule: project.isModule,
       runProjectHostLanguage: hostLanguage.join(','),
       runAndroidEmbeddingVersion: androidEmbeddingVersion,
       runEnableImpeller: enableImpeller.asBool,
@@ -630,11 +656,20 @@ class RunCommand extends RunCommandBase {
     if (devices!.any((Device device) => device is AndroidDevice)) {
       _deviceDeprecationBehavior = DeprecationBehavior.exit;
     }
+
     // Only support "web mode" with a single web device due to resident runner
     // refactoring required otherwise.
     webMode = featureFlags.isWebEnabled &&
       devices!.length == 1  &&
       await devices!.single.targetPlatform == TargetPlatform.web_javascript;
+
+    if (useWasm && !webMode) {
+      throwToolExit('--wasm is only supported on the web platform');
+    }
+
+    if (webRenderer == WebRendererMode.skwasm && !useWasm) {
+      throwToolExit('Skwasm renderer requires --wasm');
+    }
 
     final String? flavor = stringArg('flavor');
     final bool flavorsSupportedOnEveryDevice = devices!
@@ -718,9 +753,9 @@ class RunCommand extends RunCommandBase {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    final BuildInfo buildInfo = await getBuildInfo();
     // Enable hot mode by default if `--no-hot` was not passed and we are in
     // debug mode.
-    final BuildInfo buildInfo = await getBuildInfo();
     final bool hotMode = shouldUseHotMode(buildInfo);
     final String? applicationBinaryPath = stringArg(FlutterOptions.kUseApplicationBinary);
 
@@ -782,7 +817,6 @@ class RunCommand extends RunCommandBase {
         stringsArg(FlutterOptions.kEnableExperiment).isNotEmpty) {
       expFlags = stringsArg(FlutterOptions.kEnableExperiment);
     }
-    final FlutterProject flutterProject = FlutterProject.current();
     final List<FlutterDevice> flutterDevices = <FlutterDevice>[
       for (final Device device in devices!)
         await FlutterDevice.create(
@@ -798,7 +832,7 @@ class RunCommand extends RunCommandBase {
     final ResidentRunner runner = await createRunner(
       applicationBinaryPath: applicationBinaryPath,
       flutterDevices: flutterDevices,
-      flutterProject: flutterProject,
+      flutterProject: project,
       hotMode: hotMode,
     );
 

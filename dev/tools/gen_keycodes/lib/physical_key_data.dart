@@ -80,7 +80,7 @@ class PhysicalKeyData {
   ///
   /// Lines in this file look like this (without the ///):
   ///
-  /// ```
+  /// ```none
   /// key 100   ALT_RIGHT
   /// # key 101 "KEY_LINEFEED"
   /// key 477   F12               FUNCTION

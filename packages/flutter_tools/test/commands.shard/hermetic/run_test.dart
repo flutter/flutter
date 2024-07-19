@@ -7,8 +7,6 @@ import 'dart:async';
 import 'package:args/command_runner.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/android/android_device.dart';
-import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
@@ -32,6 +30,7 @@ import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_hot.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/vmservice.dart';
+import 'package:flutter_tools/src/web/compile.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart' as analytics;
 import 'package:vm_service/vm_service.dart';
@@ -361,84 +360,6 @@ void main() {
           '10',
         ]);
         // Finishes normally without error.
-      }, overrides: <Type, Generator>{
-        FileSystem: () => fs,
-        ProcessManager: () => FakeProcessManager.any(),
-        DeviceManager: () => testDeviceManager,
-        Stdio: () => FakeStdio(),
-        Cache: () => Cache.test(processManager: FakeProcessManager.any()),
-      });
-
-      testUsingContext('fails when v1 FlutterApplication is detected', () async {
-        fs.file('pubspec.yaml').createSync();
-        fs.file('android/AndroidManifest.xml')
-          ..createSync(recursive: true)
-          ..writeAsStringSync('''
-          <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-              package="com.example.v1">
-             <application
-                  android:name="io.flutter.app.FlutterApplication">
-              </application>
-          </manifest>
-        ''', flush: true);
-        fs.file('.packages').writeAsStringSync('\n');
-        fs.file('lib/main.dart').createSync(recursive: true);
-        final AndroidDevice device = AndroidDevice('1234',
-          modelID: 'TestModel',
-          logger: testLogger,
-          platform: FakePlatform(),
-          androidSdk: FakeAndroidSdk(),
-          fileSystem: fs,
-          processManager: FakeProcessManager.any(),
-        );
-
-        testDeviceManager.devices = <Device>[device];
-
-        final RunCommand command = RunCommand();
-        await expectLater(createTestCommandRunner(command).run(<String>[
-          'run',
-          '--pub',
-        ]), throwsToolExit(message: 'Build failed due to use of deprecated Android v1 embedding.'));
-      }, overrides: <Type, Generator>{
-        FileSystem: () => fs,
-        ProcessManager: () => FakeProcessManager.any(),
-        DeviceManager: () => testDeviceManager,
-        Stdio: () => FakeStdio(),
-        Cache: () => Cache.test(processManager: FakeProcessManager.any()),
-      });
-
-      testUsingContext('fails when v1 metadata is detected', () async {
-        fs.file('pubspec.yaml').createSync();
-        fs.file('android/AndroidManifest.xml')
-          ..createSync(recursive: true)
-          ..writeAsStringSync('''
-          <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-              package="com.example.v1">
-              <application >
-                <meta-data
-                    android:name="flutterEmbedding"
-                    android:value="1" />
-              </application>
-          </manifest>
-        ''', flush: true);
-        fs.file('.packages').writeAsStringSync('\n');
-        fs.file('lib/main.dart').createSync(recursive: true);
-        final AndroidDevice device = AndroidDevice('1234',
-          modelID: 'TestModel',
-          logger: testLogger,
-          platform: FakePlatform(),
-          androidSdk: FakeAndroidSdk(),
-          fileSystem: fs,
-          processManager: FakeProcessManager.any(),
-        );
-
-        testDeviceManager.devices = <Device>[device];
-
-        final RunCommand command = RunCommand();
-        await expectLater(createTestCommandRunner(command).run(<String>[
-          'run',
-          '--pub',
-        ]), throwsToolExit(message: 'Build failed due to use of deprecated Android v1 embedding.'));
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -1067,6 +988,36 @@ void main() {
         DeviceManager: () => testDeviceManager,
       });
 
+      testUsingContext('throws a ToolExit when using --wasm on a non-web platform', () async {
+        final RunCommand command = RunCommand();
+        await expectLater(
+          () => createTestCommandRunner(command).run(<String>[
+            'run',
+            '--no-pub',
+            '--wasm',
+          ]), throwsToolExit(message: '--wasm is only supported on the web platform'));
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Logger: () => logger,
+        DeviceManager: () => testDeviceManager,
+      });
+
+      testUsingContext('throws a ToolExit when using the skwasm renderer without --wasm', () async {
+        final RunCommand command = RunCommand();
+        await expectLater(
+          () => createTestCommandRunner(command).run(<String>[
+            'run',
+            '--no-pub',
+            '--web-renderer=skwasm',
+          ]), throwsToolExit(message: 'Skwasm renderer requires --wasm'));
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Logger: () => logger,
+        DeviceManager: () => testDeviceManager,
+      });
+
       testUsingContext('accepts headers with commas in them', () async {
         final RunCommand command = RunCommand();
         await expectLater(
@@ -1251,6 +1202,44 @@ void main() {
     ProcessManager: () => FakeProcessManager.any(),
   });
 
+  testUsingContext('usingCISystem can also be set by environment LUCI_CI', () async {
+    final RunCommand command = RunCommand();
+    await expectLater(() => createTestCommandRunner(command).run(<String>[
+      'run',
+    ]), throwsToolExit());
+
+    final DebuggingOptions options = await command.createDebuggingOptions(false);
+
+    expect(options.usingCISystem, true);
+  }, overrides: <Type, Generator>{
+    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.any(),
+    Platform: () => FakePlatform(
+      environment: <String, String>{
+        'LUCI_CI': 'True'
+      }
+    ),
+  });
+
+  testUsingContext('wasm mode selects skwasm renderer by default', () async {
+    final RunCommand command = RunCommand();
+    await expectLater(() => createTestCommandRunner(command).run(<String>[
+      'run',
+      '-d chrome',
+      '--wasm',
+    ]), throwsToolExit());
+
+    final DebuggingOptions options = await command.createDebuggingOptions(false);
+
+    expect(options.webUseWasm, true);
+    expect(options.webRenderer, WebRendererMode.skwasm);
+  }, overrides: <Type, Generator>{
+    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.any(),
+  });
+
   testUsingContext('fails when "--web-launch-url" is not supported', () async {
     final RunCommand command = RunCommand();
     await expectLater(
@@ -1286,11 +1275,6 @@ class TestDeviceManager extends DeviceManager {
     devices.forEach(discoverer.addDevice);
     return <DeviceDiscovery>[discoverer];
   }
-}
-
-class FakeAndroidSdk extends Fake implements AndroidSdk {
-  @override
-  String get adbPath => 'adb';
 }
 
 class FakeDevice extends Fake implements Device {
@@ -1491,8 +1475,8 @@ class TestRunCommandForUsageValues extends RunCommand {
   }
 
   @override
-  Future<BuildInfo> getBuildInfo({ BuildMode? forcedBuildMode, File? forcedTargetFile }) async {
-    return const BuildInfo(BuildMode.debug, null, treeShakeIcons: false);
+  Future<BuildInfo> getBuildInfo({FlutterProject? project, BuildMode? forcedBuildMode, File? forcedTargetFile}) async {
+    return const BuildInfo(BuildMode.debug, null, treeShakeIcons: false, packageConfigPath: '.dart_tool/package_config.json');
   }
 }
 

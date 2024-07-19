@@ -39,8 +39,8 @@ TaskFunction createMicrobenchmarkTask({
             if (enableImpeller != null && !enableImpeller) '--no-enable-impeller',
             '-d',
             device.deviceId,
+            benchmarkPath,
           ];
-          options.add(benchmarkPath);
           return startFlutter(
             'run',
             options: options,
@@ -74,6 +74,7 @@ TaskFunction createMicrobenchmarkTask({
       ...await runMicrobench('lib/stocks/build_bench.dart'),
       ...await runMicrobench('lib/stocks/layout_bench.dart'),
       ...await runMicrobench('lib/ui/image_bench.dart'),
+      ...await runMicrobench('lib/layout/text_intrinsic_bench.dart'),
     };
 
     return TaskResult.success(allResults,

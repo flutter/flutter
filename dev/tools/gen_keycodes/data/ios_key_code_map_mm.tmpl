@@ -49,8 +49,8 @@ const std::set<uint32_t> functionKeyCodes = {
 };
 
 API_AVAILABLE(ios(13.4))
-NSDictionary<NSString*, NSNumber*>* specialKeyMapping = [[NSDictionary alloc] initWithDictionary:@{
+NSDictionary<NSString*, NSNumber*>* specialKeyMapping = @{
 @@@SPECIAL_KEY_MAPPING@@@
-}];
+};
 
 @@@SPECIAL_KEY_CONSTANTS@@@

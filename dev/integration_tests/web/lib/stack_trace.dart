@@ -2,11 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:html' as html;
+import 'dart:js_interop';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:meta/dart2js.dart';
+import 'package:web/web.dart' as web;
 
 /// Expected sequence of method calls.
 const List<String> callChain = <String>['baz', 'bar', 'foo'];
@@ -32,7 +33,7 @@ const List<StackFrame> expectedDebugStackFrames = <StackFrame>[
     packageScheme: 'package',
     package: 'packages',
     packagePath: 'web_integration/stack_trace.dart',
-    line: 119,
+    line: 122,
     column: 3,
     className: '<unknown>',
     method: 'baz',
@@ -43,7 +44,7 @@ const List<StackFrame> expectedDebugStackFrames = <StackFrame>[
     packageScheme: 'package',
     package: 'packages',
     packagePath: 'web_integration/stack_trace.dart',
-    line: 114,
+    line: 117,
     column: 3,
     className: '<unknown>',
     method: 'bar',
@@ -54,7 +55,7 @@ const List<StackFrame> expectedDebugStackFrames = <StackFrame>[
     packageScheme: 'package',
     package: 'packages',
     packagePath: 'web_integration/stack_trace.dart',
-    line: 109,
+    line: 112,
     column: 3,
     className: '<unknown>',
     method: 'foo',
@@ -65,7 +66,7 @@ const List<StackFrame> expectedDebugStackFrames = <StackFrame>[
 /// Tests that we do not crash while parsing Web stack traces.
 ///
 /// This test is run in debug, profile, and release modes.
-void main() {
+void main() async {
   final StringBuffer output = StringBuffer();
   try {
     try {
@@ -96,12 +97,14 @@ void main() {
     output.writeln(unexpectedStackTrace);
     output.writeln('--- TEST FAILED ---');
   }
+  await web.window.fetch(
+    '/test-result'.toJS,
+    web.RequestInit(
+      method: 'POST',
+      body: '$output'.toJS,
+    )
+  ).toDart;
   print(output);
-  html.HttpRequest.request(
-    '/test-result',
-    method: 'POST',
-    sendData: '$output',
-  );
 }
 
 @noInline

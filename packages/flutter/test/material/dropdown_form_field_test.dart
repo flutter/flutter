@@ -10,11 +10,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 const List<String> menuItems = <String>['one', 'two', 'three', 'four'];
 void onChanged<T>(T _) { }
-final Type dropdownButtonType = DropdownButton<String>(
-  onChanged: (_) { },
-  items: const <DropdownMenuItem<String>>[],
-).runtimeType;
-
 Finder _iconRichText(Key iconKey) {
   return find.descendant(
     of: find.byKey(iconKey),
@@ -566,8 +561,7 @@ void main() {
     }
   });
 
-  testWidgets('DropdownButtonFormField with isDense:true does not clip large scale text',
-      (WidgetTester tester) async {
+  testWidgets('DropdownButtonFormField with isDense:true does not clip large scale text', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
     const String value = 'two';
 
@@ -588,9 +582,11 @@ void main() {
                     return DropdownMenuItem<String>(
                       key: ValueKey<String>(item),
                       value: item,
-                      child: Text(item,
-                          key: ValueKey<String>('${item}Text'),
-                          style: const TextStyle(fontSize: 20.0)),
+                      child: Text(
+                        item,
+                        key: ValueKey<String>('${item}Text'),
+                        style: const TextStyle(fontSize: 20.0),
+                      ),
                     );
                   }).toList(),
                 ),
@@ -601,8 +597,7 @@ void main() {
       ),
     );
 
-    final RenderBox box =
-    tester.renderObject<RenderBox>(find.byType(dropdownButtonType));
+    final RenderBox box = tester.renderObject<RenderBox>(find.byType(DropdownButton<String>));
     expect(box.size.height, 64.0);
   });
 
@@ -633,7 +628,7 @@ void main() {
       ),
     );
 
-    final RenderBox box = tester.renderObject<RenderBox>(find.byType(dropdownButtonType));
+    final RenderBox box = tester.renderObject<RenderBox>(find.byType(DropdownButton<String>));
     expect(box.size.height, 48.0);
   });
 
@@ -1077,7 +1072,7 @@ void main() {
     expect(find.text(currentValue), findsOneWidget);
 
     // Tap the DropdownButtonFormField widget
-    await tester.tap(find.byType(dropdownButtonType));
+    await tester.tap(find.byType(DropdownButton<String>));
     await tester.pumpAndSettle();
 
     // Tap the first dropdown menu item.
@@ -1278,5 +1273,38 @@ void main() {
     formKey.currentState!.reset();
     expect(value, equals('One'));
     expect(stateKey.currentState!.value, equals('One'));
+  });
+
+  testWidgets('DropdownButtonFormField with onChanged set to null does not throw on form reset', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/146335.
+    final GlobalKey<FormFieldState<String>> stateKey = GlobalKey<FormFieldState<String>>();
+    final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Form(
+            key: formKey,
+            child: DropdownButtonFormField<String>(
+              key: stateKey,
+              value: 'One',
+              items: <String>['One', 'Two', 'Free', 'Four']
+                .map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+              }).toList(),
+              onChanged: null,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Reset the form.
+    formKey.currentState!.reset();
+
+    expect(tester.takeException(), isNull);
   });
 }

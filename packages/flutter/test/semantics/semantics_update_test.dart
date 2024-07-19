@@ -82,7 +82,7 @@ void main() {
 
     SemanticsUpdateBuilderSpy.observations.clear();
     handle.dispose();
-  });
+  }, skip: true); // https://github.com/flutter/flutter/issues/97894
 
   testWidgets('Semantics update receives attributed text', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
@@ -162,7 +162,7 @@ void main() {
 
     SemanticsUpdateBuilderSpy.observations.clear();
     handle.dispose();
-  });
+  }, skip: true); // https://github.com/flutter/flutter/issues/97894
 }
 
 class SemanticsUpdateTestBinding extends AutomatedTestWidgetsFlutterBinding {
@@ -212,6 +212,7 @@ class SemanticsUpdateBuilderSpy extends Fake implements ui.SemanticsUpdateBuilde
     required Int32List childrenInTraversalOrder,
     required Int32List childrenInHitTestOrder,
     required Int32List additionalActions,
+    int headingLevel = 0,
   }) {
     // Makes sure we don't send the same id twice.
     assert(!observations.containsKey(id));

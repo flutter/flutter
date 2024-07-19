@@ -45,7 +45,7 @@ final Platform notWindowsPlatform = FakePlatform(
 );
 
 void main() {
-  late FileSystem fileSystem;
+  late MemoryFileSystem fileSystem;
   late ProcessManager processManager;
   late TestUsage usage;
   late FakeAnalytics fakeAnalytics;
@@ -152,7 +152,7 @@ void main() {
     expect(createTestCommandRunner(command).run(
       const <String>['windows', '--no-pub']
     ), throwsToolExit(message: 'No Windows desktop project configured. See '
-      'https://docs.flutter.dev/desktop#add-desktop-support-to-an-existing-flutter-app '
+      'https://flutter.dev/to/add-desktop-support '
       'to learn about adding Windows support to a project.'));
   }, overrides: <Type, Generator>{
     Platform: () => windowsPlatform,
@@ -563,6 +563,28 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     await createTestCommandRunner(command).run(
       const <String>['windows', '--profile', '--no-pub']
     );
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+    Platform: () => windowsPlatform,
+    FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
+  });
+
+  testUsingContext('Windows build outputs path when successful', () async {
+    final FakeVisualStudio fakeVisualStudio = FakeVisualStudio();
+    final BuildWindowsCommand command = BuildWindowsCommand(logger: BufferLogger.test(), operatingSystemUtils: FakeOperatingSystemUtils())
+      ..visualStudioOverride = fakeVisualStudio;
+    setUpMockProjectFilesForBuild();
+
+    processManager = FakeProcessManager.list(<FakeCommand>[
+      cmakeGenerationCommand(),
+      buildCommand('Release'),
+    ]);
+
+    await createTestCommandRunner(command).run(
+      const <String>['windows', '--release', '--no-pub']
+    );
+    expect(testLogger.statusText, contains(r'✓ Built build\windows\x64\runner\Release'));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,

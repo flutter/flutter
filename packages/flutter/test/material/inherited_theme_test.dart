@@ -91,7 +91,7 @@ void main() {
     expect(containerColor(), isNot(primaryColor));
   });
 
-  testWidgets('PopupMenuTheme.wrap()', (WidgetTester tester) async {
+  testWidgets('Material2 - PopupMenuTheme.wrap()', (WidgetTester tester) async {
     const double menuFontSize = 24;
     const Color menuTextColor = Color(0xFF0000FF);
 
@@ -139,6 +139,58 @@ void main() {
     expect(itemTextStyle('One').color, menuTextColor);
     expect(itemTextStyle('Two').fontSize, menuFontSize);
     expect(itemTextStyle('Two').color, menuTextColor);
+
+    // Dismiss the menu
+    await tester.tap(find.text('One'));
+    await tester.pumpAndSettle(); // menu route animation
+  });
+
+  testWidgets('Material3 - PopupMenuTheme.wrap()', (WidgetTester tester) async {
+    const TextStyle textStyle = TextStyle(fontSize: 24.0, color: Color(0xFF0000FF));
+
+    Widget buildFrame() {
+      return MaterialApp(
+        home: Scaffold(
+          body: PopupMenuTheme(
+            data: const PopupMenuThemeData(
+              // The menu route's elevation, shape, and color are defined by the
+              // current context, so they're not affected by ThemeData.captureAll().
+              labelTextStyle: MaterialStatePropertyAll<TextStyle>(textStyle),
+            ),
+            child: Center(
+              child: PopupMenuButton<int>(
+                // The appearance of the menu items' text is defined by the
+                // PopupMenuTheme defined above. Popup menus use
+                // InheritedTheme.captureAll() by default.
+                child: const Text('show popupmenu'),
+                onSelected: (int result) { },
+                itemBuilder: (BuildContext context) {
+                  return const <PopupMenuEntry<int>>[
+                    PopupMenuItem<int>(value: 1, child: Text('One')),
+                    PopupMenuItem<int>(value: 2, child: Text('Two')),
+                  ];
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    TextStyle itemTextStyle(String text) {
+      return tester.widget<RichText>(
+        find.descendant(of: find.text(text), matching: find.byType(RichText)),
+      ).text.style!;
+    }
+
+    await tester.pumpWidget(buildFrame());
+
+    await tester.tap(find.text('show popupmenu'));
+    await tester.pumpAndSettle(); // menu route animation
+    expect(itemTextStyle('One').fontSize, textStyle.fontSize);
+    expect(itemTextStyle('One').color, textStyle.color);
+    expect(itemTextStyle('Two').fontSize, textStyle.fontSize);
+    expect(itemTextStyle('Two').color, textStyle.color);
 
     // Dismiss the menu
     await tester.tap(find.text('One'));

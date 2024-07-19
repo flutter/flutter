@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 
 import 'curves.dart';
@@ -13,6 +16,9 @@ import 'tween.dart';
 /// - [ExpansionTile]
 /// - [MaterialApp]
 /// - [PopupMenuButton]
+/// - [ScaffoldMessengerState.showSnackBar]
+/// - [showBottomSheet]
+/// - [showModalBottomSheet]
 ///
 /// If [duration] and [reverseDuration] are set to [Duration.zero], the
 /// corresponding animation will be disabled.

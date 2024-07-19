@@ -251,7 +251,7 @@ void main() {
         'A RenderFlex overflowed by 69200 pixels on the right.',
         '',
         'The relevant error-causing widget was:',
-        matches(RegExp(r'^  Row .+flutter/dev/integration_tests/ui/lib/overflow\.dart:32:18$')),
+        matches(RegExp(r'^  Row.+/dev/integration_tests/ui/lib/overflow\.dart:32:18$')),
         '',
         'To inspect this widget in Flutter DevTools, visit:',
         startsWith('http'),

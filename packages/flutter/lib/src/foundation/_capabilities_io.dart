@@ -8,3 +8,10 @@
 bool get isCanvasKit {
   throw UnimplementedError('isCanvasKit is not implemented for dart:io.');
 }
+
+/// The dart:io implementation of [isSkwasm].
+///
+/// This bool shouldn't be used outside of web.
+bool get isSkwasm {
+  throw UnimplementedError('isSkwasm is not implemented for dart:io.');
+}

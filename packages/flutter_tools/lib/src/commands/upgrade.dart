@@ -18,7 +18,7 @@ import '../version.dart';
 import 'channel.dart';
 
 // The official docs to install Flutter.
-const String _flutterInstallDocs = 'https://flutter.dev/docs/get-started/install';
+const String _flutterInstallDocs = 'https://flutter.dev/setup';
 
 class UpgradeCommand extends FlutterCommand {
   UpgradeCommand({
@@ -135,7 +135,7 @@ class UpgradeCommandRunner {
       globals.printStatus('To upgrade now, run "flutter upgrade".');
       if (flutterVersion.channel == 'stable') {
         globals.printStatus('\nSee the announcement and release notes:');
-        globals.printStatus('https://flutter.dev/docs/development/tools/sdk/release-notes');
+        globals.printStatus('https://docs.flutter.dev/release/release-notes');
       }
       return;
     }
@@ -221,7 +221,7 @@ class UpgradeCommandRunner {
         'We do not recommend using this channel for normal use as it more likely to contain serious regressions.\n'
         '\n'
         'For information on contributing to Flutter, see our contributing guide:\n'
-        '    https://github.com/flutter/flutter/blob/master/CONTRIBUTING.md\n'
+        '    https://github.com/flutter/flutter/blob/main/CONTRIBUTING.md\n'
         '\n'
         'For the most up to date stable version of flutter, consider using the "beta" channel instead. '
         'The Flutter "beta" channel enjoys all the same automated testing as the "stable" channel, '

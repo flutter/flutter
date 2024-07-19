@@ -257,7 +257,7 @@ class Plugin {
       const String errorMessage =
           'The flutter.plugin.platforms key cannot be used in combination with the old '
           'flutter.plugin.{androidPackage,iosPrefix,pluginClass} keys. '
-          'See: https://flutter.dev/docs/development/packages-and-plugins/developing-packages#plugin';
+          'See: https://flutter.dev/to/pubspec-plugin-platforms';
       return <String>[errorMessage];
     }
 
@@ -265,7 +265,7 @@ class Plugin {
       const String errorMessage =
           'Cannot find the `flutter.plugin.platforms` key in the `pubspec.yaml` file. '
           'An instruction to format the `pubspec.yaml` can be found here: '
-          'https://flutter.dev/docs/development/packages-and-plugins/developing-packages#plugin-platforms';
+          'https://flutter.dev/to/pubspec-plugin-platforms';
       return <String>[errorMessage];
     }
 
@@ -298,38 +298,29 @@ class Plugin {
     if (yaml == null) {
       return <String>['Invalid "platforms" specification.'];
     }
-    final List<String> errors = <String>[];
-    if (isInvalid(AndroidPlugin.kConfigKey, AndroidPlugin.validate)) {
-      errors.add('Invalid "android" plugin specification.');
-    }
-    if (isInvalid(IOSPlugin.kConfigKey, IOSPlugin.validate)) {
-      errors.add('Invalid "ios" plugin specification.');
-    }
-    if (isInvalid(LinuxPlugin.kConfigKey, LinuxPlugin.validate)) {
-      errors.add('Invalid "linux" plugin specification.');
-    }
-    if (isInvalid(MacOSPlugin.kConfigKey, MacOSPlugin.validate)) {
-      errors.add('Invalid "macos" plugin specification.');
-    }
-    if (isInvalid(WindowsPlugin.kConfigKey, WindowsPlugin.validate)) {
-      errors.add('Invalid "windows" plugin specification.');
-    }
-    return errors;
+    return <String>[
+      if (isInvalid(AndroidPlugin.kConfigKey, AndroidPlugin.validate))
+        'Invalid "android" plugin specification.',
+      if (isInvalid(IOSPlugin.kConfigKey, IOSPlugin.validate))
+        'Invalid "ios" plugin specification.',
+      if (isInvalid(LinuxPlugin.kConfigKey, LinuxPlugin.validate))
+        'Invalid "linux" plugin specification.',
+      if (isInvalid(MacOSPlugin.kConfigKey, MacOSPlugin.validate))
+        'Invalid "macos" plugin specification.',
+      if (isInvalid(WindowsPlugin.kConfigKey, WindowsPlugin.validate))
+        'Invalid "windows" plugin specification.',
+    ];
   }
 
   static List<String> _validateLegacyYaml(YamlMap yaml) {
-    final List<String> errors = <String>[];
-
-    if (yaml['androidPackage'] != null && yaml['androidPackage'] is! String) {
-      errors.add('The "androidPackage" must either be null or a string.');
-    }
-    if (yaml['iosPrefix'] != null && yaml['iosPrefix'] is! String) {
-      errors.add('The "iosPrefix" must either be null or a string.');
-    }
-    if (yaml['pluginClass'] != null && yaml['pluginClass'] is! String) {
-      errors.add('The "pluginClass" must either be null or a string..');
-    }
-    return errors;
+    return <String>[
+      if (yaml['androidPackage'] is! String?)
+        'The "androidPackage" must either be null or a string.',
+      if (yaml['iosPrefix'] is! String?)
+        'The "iosPrefix" must either be null or a string.',
+      if (yaml['pluginClass'] is! String?)
+        'The "pluginClass" must either be null or a string.',
+    ];
   }
 
   static bool _supportsPlatform(YamlMap platformsYaml, String platformKey) {
@@ -397,6 +388,51 @@ class Plugin {
   /// Whether this plugin is a direct dependency of the app.
   /// If [false], the plugin is a dependency of another plugin.
   final bool isDirectDependency;
+
+  /// Expected path to the plugin's Package.swift. Returns null if the plugin
+  /// does not support the [platform] or the [platform] is not iOS or macOS.
+  String? pluginSwiftPackageManifestPath(
+    FileSystem fileSystem,
+    String platform,
+  ) {
+    final String? platformDirectoryName = _darwinPluginDirectoryName(platform);
+    if (platformDirectoryName == null) {
+      return null;
+    }
+    return fileSystem.path.join(
+      path,
+      platformDirectoryName,
+      name,
+      'Package.swift',
+    );
+  }
+
+  /// Expected path to the plugin's podspec. Returns null if the plugin does
+  /// not support the [platform] or the [platform] is not iOS or macOS.
+  String? pluginPodspecPath(FileSystem fileSystem, String platform) {
+    final String? platformDirectoryName = _darwinPluginDirectoryName(platform);
+    if (platformDirectoryName == null) {
+      return null;
+    }
+    return fileSystem.path.join(path, platformDirectoryName, '$name.podspec');
+  }
+
+  String? _darwinPluginDirectoryName(String platform) {
+    final PluginPlatform? platformPlugin = platforms[platform];
+    if (platformPlugin == null ||
+        (platform != IOSPlugin.kConfigKey &&
+            platform != MacOSPlugin.kConfigKey)) {
+      return null;
+    }
+
+    // iOS and macOS code can be shared in "darwin" directory, otherwise
+    // respectively in "ios" or "macos" directories.
+    if (platformPlugin is DarwinPlugin &&
+        (platformPlugin as DarwinPlugin).sharedDarwinSource) {
+      return 'darwin';
+    }
+    return platform;
+  }
 }
 
 /// Metadata associated with the resolution of a platform interface of a plugin.

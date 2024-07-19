@@ -207,7 +207,7 @@ class _MockHttpClient implements HttpClient {
   }
 }
 
-/// A mocked [HttpClientRequest] which always returns a [_MockHttpClientResponse].
+/// A mocked [HttpClientRequest] which always returns a [_MockHttpResponse].
 class _MockHttpRequest implements HttpClientRequest {
   @override
   bool bufferOutput = true;

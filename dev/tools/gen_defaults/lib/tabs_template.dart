@@ -78,7 +78,12 @@ class _${blockName}PrimaryDefaultsM3 extends TabBarTheme {
   @override
   TabAlignment? get tabAlignment => isScrollable ? TabAlignment.startOffset : TabAlignment.fill;
 
-  static double indicatorWeight = ${getToken('md.comp.primary-navigation-tab.active-indicator.height')};
+  static double indicatorWeight(TabBarIndicatorSize indicatorSize) {
+    return switch (indicatorSize) {
+      TabBarIndicatorSize.label => ${getToken('md.comp.primary-navigation-tab.active-indicator.height')},
+      TabBarIndicatorSize.tab   => ${getToken('md.comp.secondary-navigation-tab.active-indicator.height')},
+    };
+  }
 
   // TODO(davidmartos96): This value doesn't currently exist in
   // https://m3.material.io/components/tabs/specs
@@ -104,7 +109,7 @@ class _${blockName}SecondaryDefaultsM3 extends TabBarTheme {
   double? get dividerHeight => ${getToken("md.comp.divider.thickness")};
 
   @override
-  Color? get indicatorColor => ${componentColor("md.comp.primary-navigation-tab.active-indicator")};
+  Color? get indicatorColor => ${componentColor("md.comp.secondary-navigation-tab.active-indicator")};
 
   @override
   Color? get labelColor => ${componentColor("md.comp.secondary-navigation-tab.active.label-text")};
@@ -151,6 +156,8 @@ class _${blockName}SecondaryDefaultsM3 extends TabBarTheme {
 
   @override
   TabAlignment? get tabAlignment => isScrollable ? TabAlignment.startOffset : TabAlignment.fill;
+
+  static double indicatorWeight = ${getToken('md.comp.secondary-navigation-tab.active-indicator.height')};
 }
 ''';
 

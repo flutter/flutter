@@ -43,6 +43,10 @@ void main() {
     selectedTabs = <int>[];
   });
 
+  tearDown(() {
+    imageCache.clear();
+  });
+
   BottomNavigationBarItem tabGenerator(int index) {
     return BottomNavigationBarItem(
       icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
@@ -1363,6 +1367,8 @@ void main() {
       expect(find.text('Page 1 of tab 2'), findsOneWidget);
       expect(find.text('Page 2 of tab 2'), findsNothing);
       expect(lastFrameworkHandlesBack, isFalse);
+
+      imageCache.clear();
     },
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
       skip: kIsWeb, // [intended] frameworkHandlesBack not used on web.

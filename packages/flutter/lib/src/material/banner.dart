@@ -267,11 +267,15 @@ class MaterialBanner extends StatefulWidget {
 
 class _MaterialBannerState extends State<MaterialBanner> {
   bool _wasVisible = false;
+  CurvedAnimation? _heightAnimation;
+  CurvedAnimation? _slideOutCurvedAnimation;
 
   @override
   void initState() {
     super.initState();
     widget.animation?.addStatusListener(_onAnimationStatusChanged);
+    _setCurvedAnimations();
+
   }
 
   @override
@@ -280,26 +284,40 @@ class _MaterialBannerState extends State<MaterialBanner> {
     if (widget.animation != oldWidget.animation) {
       oldWidget.animation?.removeStatusListener(_onAnimationStatusChanged);
       widget.animation?.addStatusListener(_onAnimationStatusChanged);
+      _setCurvedAnimations();
     }
+  }
+
+  void _setCurvedAnimations() {
+    _heightAnimation?.dispose();
+    _slideOutCurvedAnimation?.dispose();
+    if (widget.animation != null) {
+      _heightAnimation = CurvedAnimation(parent: widget.animation!, curve: _materialBannerHeightCurve);
+      _slideOutCurvedAnimation = CurvedAnimation(
+        parent: widget.animation!,
+        curve: const Threshold(0.0),
+      );
+    } else {
+      _heightAnimation = null;
+      _slideOutCurvedAnimation = null;
+    }
+
   }
 
   @override
   void dispose() {
     widget.animation?.removeStatusListener(_onAnimationStatusChanged);
+    _heightAnimation?.dispose();
+    _slideOutCurvedAnimation?.dispose();
     super.dispose();
   }
 
-  void _onAnimationStatusChanged(AnimationStatus animationStatus) {
-    switch (animationStatus) {
-      case AnimationStatus.dismissed:
-      case AnimationStatus.forward:
-      case AnimationStatus.reverse:
-        break;
-      case AnimationStatus.completed:
-        if (widget.onVisible != null && !_wasVisible) {
-          widget.onVisible!();
-        }
-        _wasVisible = true;
+  void _onAnimationStatusChanged(AnimationStatus status) {
+    if (status.isCompleted) {
+      if (widget.onVisible != null && !_wasVisible) {
+        widget.onVisible!();
+      }
+      _wasVisible = true;
     }
   }
 
@@ -322,14 +340,18 @@ class _MaterialBannerState extends State<MaterialBanner> {
         ?? bannerTheme.leadingPadding
         ?? const EdgeInsetsDirectional.only(end: 16.0);
 
-    final Widget actionsBar = Container(
-      alignment: AlignmentDirectional.centerEnd,
+    final Widget actionsBar = ConstrainedBox(
       constraints: const BoxConstraints(minHeight: 52.0),
-      padding: const EdgeInsets.symmetric(horizontal: 8),
-      child: OverflowBar(
-        overflowAlignment: widget.overflowAlignment,
-        spacing: 8,
-        children: widget.actions,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        child: Align(
+          alignment: AlignmentDirectional.centerEnd,
+          child: OverflowBar(
+            overflowAlignment: widget.overflowAlignment,
+            spacing: 8,
+            children: widget.actions,
+          ),
+        ),
       ),
     );
 
@@ -350,8 +372,8 @@ class _MaterialBannerState extends State<MaterialBanner> {
         ?? bannerTheme.contentTextStyle
         ?? defaults.contentTextStyle;
 
-    Widget materialBanner = Container(
-      margin: margin,
+    Widget materialBanner = Padding(
+      padding: margin,
       child: Material(
         elevation: elevation,
         color: backgroundColor,
@@ -408,14 +430,10 @@ class _MaterialBannerState extends State<MaterialBanner> {
       child: materialBanner,
     );
 
-    final CurvedAnimation heightAnimation = CurvedAnimation(parent: widget.animation!, curve: _materialBannerHeightCurve);
     final Animation<Offset> slideOutAnimation = Tween<Offset>(
       begin: const Offset(0.0, -1.0),
       end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: widget.animation!,
-      curve: const Threshold(0.0),
-    ));
+    ).animate(_slideOutCurvedAnimation!);
 
     materialBanner = Semantics(
       container: true,
@@ -436,11 +454,11 @@ class _MaterialBannerState extends State<MaterialBanner> {
       materialBannerTransition = materialBanner;
     } else {
       materialBannerTransition = AnimatedBuilder(
-        animation: heightAnimation,
+        animation: _heightAnimation!,
         builder: (BuildContext context, Widget? child) {
           return Align(
             alignment: AlignmentDirectional.bottomStart,
-            heightFactor: heightAnimation.value,
+            heightFactor: _heightAnimation!.value,
             child: child,
           );
         },

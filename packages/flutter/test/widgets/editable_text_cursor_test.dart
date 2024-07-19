@@ -1236,7 +1236,7 @@ void main() {
       backgroundCursorColor: Colors.grey,
       controller: controller,
       focusNode: focusNode,
-      style: const TextStyle(),
+      style: const TextStyle(fontSize: 17),
       textAlign: TextAlign.center,
       keyboardType: TextInputType.text,
       cursorColor: cursorColor,
@@ -1264,7 +1264,97 @@ void main() {
       paints..rect(color: cursorColor, rect: caretRect),
     );
   },
-  skip: isBrowser && !isCanvasKit, // https://github.com/flutter/flutter/issues/56308
+  skip: isBrowser && !isSkiaWeb, // https://github.com/flutter/flutter/issues/56308
+  );
+
+  testWidgets(
+    'Caret with a cursorHeight smaller than font size is vertically centered on non-Apple platforms',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/143480.
+      final TextEditingController controller = TextEditingController.fromValue(
+        const TextEditingValue(selection: TextSelection.collapsed(offset: 0)),
+      );
+      addTearDown(controller.dispose);
+
+      const double cursorHeight = 12.0;
+      const double cursorWidth = 4.0;
+      const double fontSize = 16.0;
+
+      final Widget widget = EditableText(
+        autofocus: true,
+        backgroundCursorColor: Colors.grey,
+        controller: controller,
+        focusNode: focusNode,
+        style: const TextStyle(fontSize: fontSize),
+        keyboardType: TextInputType.text,
+        cursorColor: cursorColor,
+        cursorHeight: cursorHeight,
+        cursorWidth: cursorWidth,
+      );
+      await tester.pumpWidget(MaterialApp(home: widget));
+
+      final EditableTextState editableTextState = tester.firstState(find.byWidget(widget));
+      final RenderEditable renderEditable = editableTextState.renderEditable;
+
+      // The caretRect is vertically centered.
+      const Rect caretRect = Rect.fromLTWH(
+        0.0,
+        (fontSize - cursorHeight) / 2,
+        cursorWidth,
+        cursorHeight,
+      );
+      expect(
+        renderEditable,
+        paints..rect(color: cursorColor, rect: caretRect),
+      );
+    },
+    variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{TargetPlatform.macOS, TargetPlatform.iOS}),
+    skip: isBrowser && !isCanvasKit, // https://github.com/flutter/flutter/issues/56308
+  );
+
+  testWidgets(
+    'Caret with a cursorHeight bigger than font size is vertically centered on non-Apple platforms',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/143480.
+      final TextEditingController controller = TextEditingController.fromValue(
+        const TextEditingValue(selection: TextSelection.collapsed(offset: 0)),
+      );
+      addTearDown(controller.dispose);
+
+      const double cursorHeight = 24.0;
+      const double cursorWidth = 4.0;
+      const double fontSize = 16.0;
+
+      final Widget widget = EditableText(
+        autofocus: true,
+        backgroundCursorColor: Colors.grey,
+        controller: controller,
+        focusNode: focusNode,
+        style: const TextStyle(fontSize: fontSize),
+        keyboardType: TextInputType.text,
+        cursorColor: cursorColor,
+        cursorHeight: cursorHeight,
+        cursorWidth: cursorWidth,
+      );
+      await tester.pumpWidget(MaterialApp(home: widget));
+
+      final EditableTextState editableTextState = tester.firstState(find.byWidget(widget));
+      final RenderEditable renderEditable = editableTextState.renderEditable;
+
+      // The caretRect is vertically centered.
+      const Rect caretRect = Rect.fromLTWH(
+        0.0,
+        (fontSize - cursorHeight) / 2,
+        cursorWidth,
+        cursorHeight,
+      );
+      expect(
+        renderEditable,
+        paints..rect(color: cursorColor, rect: caretRect),
+      );
+    },
+    variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{TargetPlatform.macOS, TargetPlatform.iOS}),
+    skip: isBrowser && !isCanvasKit, // https://github.com/flutter/flutter/issues/56308
   );
 
   testWidgets('getLocalRectForCaret reports the real caret Rect', (WidgetTester tester) async {

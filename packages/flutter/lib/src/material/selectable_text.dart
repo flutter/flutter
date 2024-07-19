@@ -11,7 +11,6 @@ import 'package:flutter/rendering.dart';
 
 import 'adaptive_text_selection_toolbar.dart';
 import 'desktop_text_selection.dart';
-import 'feedback.dart';
 import 'magnifier.dart';
 import 'text_selection.dart';
 import 'theme.dart';
@@ -117,12 +116,10 @@ class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestur
     final Offset editableOffset = renderEditable.maxLines == 1
         ? Offset(renderEditable.offset.pixels - _dragStartViewportOffset, 0.0)
         : Offset(0.0, renderEditable.offset.pixels - _dragStartViewportOffset);
-    final double effectiveScrollPosition = _scrollPosition - _dragStartScrollOffset;
-    final bool scrollingOnVerticalAxis = _scrollDirection == AxisDirection.up || _scrollDirection == AxisDirection.down;
-    final Offset scrollableOffset = Offset(
-      !scrollingOnVerticalAxis ? effectiveScrollPosition : 0.0,
-      scrollingOnVerticalAxis ? effectiveScrollPosition : 0.0,
-    );
+    final Offset scrollableOffset = switch (axisDirectionToAxis(_scrollDirection ?? AxisDirection.left)) {
+      Axis.horizontal => Offset(_scrollPosition - _dragStartScrollOffset, 0),
+      Axis.vertical   => Offset(0, _scrollPosition - _dragStartScrollOffset),
+    };
     renderEditable.selectWordsInRange(
       from: details.globalPosition - details.offsetFromOrigin - editableOffset - scrollableOffset,
       to: details.globalPosition,
