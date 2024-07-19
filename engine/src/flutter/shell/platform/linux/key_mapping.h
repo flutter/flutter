@@ -44,7 +44,7 @@ typedef struct {
   // The logical key for this key.
   uint64_t logical_key;
 
-  // If the goal is mandatory, the keyboard manager will make sure to find a
+  // If the goal is mandatory, the keyboard handler will make sure to find a
   // logical key for this character, falling back to the US keyboard layout.
   bool mandatory;
 } LayoutGoal;
