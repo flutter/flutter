@@ -64,7 +64,9 @@ void main() {
         platform: FakePlatform(
             operatingSystem: Platform.linux,
             resolvedExecutable: io.Platform.resolvedExecutable,
-            pathSeparator: '/'),
+            pathSeparator: '/',
+            numberOfProcessors: 32,
+        ),
         processRunner: ProcessRunner(
           processManager: FakeProcessManager(onStart: (List<String> command) {
             runHistory.add(command);

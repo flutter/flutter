@@ -29,6 +29,7 @@ final class BuildCommand extends CommandBase {
       argParser,
       builds,
     );
+    addConcurrencyOption(argParser);
     argParser.addFlag(
       rbeFlag,
       defaultsTo: environment.hasRbeConfigInTree(),
@@ -71,13 +72,21 @@ et build //flutter/fml:fml_benchmarks  # Build a specific target in `//flutter/f
       return 1;
     }
 
+    final String dashJ = argResults![concurrencyFlag] as String;
+    final int? concurrency = int.tryParse(dashJ);
+    if (concurrency == null || concurrency < 0) {
+      environment.logger.error('-j must specify a positive integer.');
+      return 1;
+    }
+
     final List<String> extraGnArgs = <String>[
       if (!useRbe) '--no-rbe',
       if (useLto) '--lto' else '--no-lto',
     ];
 
     final List<String> commandLineTargets = argResults!.rest;
-    if (commandLineTargets.isNotEmpty && !await ensureBuildDir(environment, build, enableRbe: useRbe)) {
+    if (commandLineTargets.isNotEmpty &&
+        !await ensureBuildDir(environment, build, enableRbe: useRbe)) {
       return 1;
     }
 
@@ -97,6 +106,7 @@ et build //flutter/fml:fml_benchmarks  # Build a specific target in `//flutter/f
     return runBuild(
       environment,
       build,
+      concurrency: concurrency,
       extraGnArgs: extraGnArgs,
       targets: allTargets.toList(),
       enableRbe: useRbe,

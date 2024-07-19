@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:ffi' as ffi;
 import 'dart:io' as io show Directory, File, Process;
+import 'dart:math';
 
 import 'package:path/path.dart' as p;
 import 'package:platform/platform.dart';
@@ -189,6 +190,7 @@ final class BuildRunner extends Runner {
     ffi.Abi? abi,
     required io.Directory engineSrcDir,
     required this.build,
+    this.concurrency = 0,
     this.extraGnArgs = const <String>[],
     this.extraNinjaArgs = const <String>[],
     this.extraTestArgs = const <String>[],
@@ -207,6 +209,13 @@ final class BuildRunner extends Runner {
 
   /// The [Build] to run.
   final Build build;
+
+  /// The maximum number of concurrent jobs.
+  ///
+  /// This currently only applies to the ninja build, passed as the -j
+  /// argument. If this field is left as the default value `0`, then the
+  /// concurrency level is determined automatically.
+  final int concurrency;
 
   /// Extra arguments to append to the `gn` command.
   final List<String> extraGnArgs;
@@ -465,6 +474,17 @@ final class BuildRunner extends Runner {
     return bootstrapResult.exitCode == 0;
   }
 
+  late final _computedRbeJValue = (){
+    // 80 here matches the value used in CI:
+    // https://flutter.googlesource.com/recipes/+/refs/heads/main/recipe_modules/build_util/api.py#56
+    const int multiplier = 80;
+    final int processors = platform.numberOfProcessors;
+    // Assume simultaneous multithreading on intel and therefore half as many
+    // cores as logical processors.
+    final int cores = _hostCpu == 'x64' ? processors >> 1 : processors;
+    return min(multiplier * cores, 1000);
+  }();
+
   Future<bool> _runNinja(RunnerEventHandler eventHandler) async {
     if (_isRbe) {
       if (!await _bootstrapRbe(eventHandler)) {
@@ -485,11 +505,13 @@ final class BuildRunner extends Runner {
         'out',
         build.ninja.config,
       );
+      final int rbej = concurrency == 0 ? _computedRbeJValue : concurrency;
       final List<String> command = <String>[
         ninjaPath,
         '-C',
         outDir,
-        if (_isRbe) ...<String>['-j', '200'],
+        if (_isRbe) ...<String>['-j', '$rbej']
+        else if (concurrency != 0) ...<String>['-j', '$concurrency'],
         ...extraNinjaArgs,
         ...build.ninja.targets,
       ];

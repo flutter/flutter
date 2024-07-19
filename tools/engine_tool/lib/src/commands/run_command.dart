@@ -35,6 +35,7 @@ final class RunCommand extends CommandBase {
       builds,
       defaultsTo: '',
     );
+    addConcurrencyOption(argParser);
     argParser.addFlag(
       rbeFlag,
       defaultsTo: environment.hasRbeConfigInTree(),
@@ -164,10 +165,18 @@ See `flutter run --help` for a listing
     final List<Label> buildTargetsForShell =
         target?.buildTargetsForShell() ?? <Label>[];
 
+    final String dashJ = argResults![concurrencyFlag] as String;
+    final int? concurrency = int.tryParse(dashJ);
+    if (concurrency == null || concurrency < 0) {
+      environment.logger.error('-j must specify a positive integer.');
+      return 1;
+    }
+
     // First build the host.
     int r = await runBuild(
       environment,
       hostBuild,
+      concurrency: concurrency,
       extraGnArgs: extraGnArgs,
       enableRbe: useRbe,
     );
@@ -177,10 +186,14 @@ See `flutter run --help` for a listing
 
     // Now build the target if it isn't the same.
     if (hostBuild.name != build.name) {
-      r = await runBuild(environment, build,
-          extraGnArgs: extraGnArgs,
-          enableRbe: useRbe,
-          targets: buildTargetsForShell);
+      r = await runBuild(
+        environment,
+        build,
+        concurrency: concurrency,
+        extraGnArgs: extraGnArgs,
+        enableRbe: useRbe,
+        targets: buildTargetsForShell,
+      );
       if (r != 0) {
         return r;
       }

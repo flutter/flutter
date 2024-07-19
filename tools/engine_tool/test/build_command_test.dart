@@ -177,6 +177,33 @@ void main() {
     }
   });
 
+  test('build command plumbs -j to ninja', () async {
+    final TestEnvironment testEnv = TestEnvironment.withTestEngine(
+      withRbe: true,
+      cannedProcesses: cannedProcesses,
+    );
+    try {
+      final ToolCommandRunner runner = ToolCommandRunner(
+        environment: testEnv.environment,
+        configs: configs,
+      );
+      final int result = await runner.run(<String>[
+        'build',
+        '--config',
+        'ci/android_debug_rbe_arm64',
+        '-j',
+        '500',
+      ]);
+      expect(result, equals(0));
+      expect(testEnv.processHistory[0].command[0],
+          contains(path.join('tools', 'gn')));
+      expect(testEnv.processHistory[0].command[2], equals('--rbe'));
+      expect(testEnv.processHistory[2].command.contains('500'), isTrue);
+    } finally {
+      testEnv.cleanup();
+    }
+  });
+
   test('build command fails when rbe is enabled but not supported', () async {
     final TestEnvironment testEnv = TestEnvironment.withTestEngine(
       cannedProcesses: cannedProcesses,
