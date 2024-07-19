@@ -1184,10 +1184,10 @@ extension SkImageExtension on SkImage {
                           matrix?.toJS);
 
   @JS('readPixels')
-  external JSUint8Array _readPixels(
+  external JSUint8Array? _readPixels(
       JSNumber srcX, JSNumber srcY, SkImageInfo imageInfo);
-  Uint8List readPixels(double srcX, double srcY, SkImageInfo imageInfo) =>
-      _readPixels(srcX.toJS, srcY.toJS, imageInfo).toDart;
+  Uint8List? readPixels(double srcX, double srcY, SkImageInfo imageInfo) =>
+      _readPixels(srcX.toJS, srcY.toJS, imageInfo)?.toDart;
 
   @JS('encodeToBytes')
   external JSUint8Array? _encodeToBytes();

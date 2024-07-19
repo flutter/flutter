@@ -98,6 +98,10 @@ class HtmlImage implements ui.Image {
         final DomCanvasRenderingContext2D ctx = canvas.context2D;
         ctx.drawImage(imgElement, 0, 0);
         final DomImageData imageData = ctx.getImageData(0, 0, width, height);
+        // Resize the canvas to 0x0 to cause the browser to reclaim its memory
+        // eagerly.
+        canvas.width = 0;
+        canvas.height = 0;
         return Future<ByteData?>.value(imageData.data.buffer.asByteData());
       default:
         if (imgElement.src?.startsWith('data:') ?? false) {

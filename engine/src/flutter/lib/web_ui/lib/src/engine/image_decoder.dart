@@ -381,18 +381,33 @@ class ResizingCodec implements ui.Codec {
     final ui.FrameInfo frameInfo = await delegate.getNextFrame();
     return AnimatedImageFrameInfo(
       frameInfo.duration,
-      scaleImageIfNeeded(frameInfo.image,
-          targetWidth: targetWidth,
-          targetHeight: targetHeight,
-          allowUpscaling: allowUpscaling),
+      scaleImage(
+        frameInfo.image,
+        targetWidth: targetWidth,
+        targetHeight: targetHeight,
+        allowUpscaling: allowUpscaling,
+      ),
     );
   }
+
+  ui.Image scaleImage(
+    ui.Image image, {
+    int? targetWidth,
+    int? targetHeight,
+    bool allowUpscaling = true,
+  }) =>
+      scaleImageIfNeeded(
+        image,
+        targetWidth: targetWidth,
+        targetHeight: targetHeight,
+        allowUpscaling: allowUpscaling,
+      );
 
   @override
   int get repetitionCount => delegate.frameCount;
 }
 
-ui.Size? _scaledSize(
+BitmapSize? scaledImageSize(
   int width,
   int height,
   int? targetWidth,
@@ -415,7 +430,7 @@ ui.Size? _scaledSize(
     }
     targetHeight = (height * targetWidth / width).round();
   }
-  return ui.Size(targetWidth.toDouble(), targetHeight.toDouble());
+  return BitmapSize(targetWidth, targetHeight);
 }
 
 ui.Image scaleImageIfNeeded(
@@ -426,8 +441,8 @@ ui.Image scaleImageIfNeeded(
 }) {
   final int width = image.width;
   final int height = image.height;
-  final ui.Size? scaledSize =
-      _scaledSize(width, height, targetWidth, targetHeight);
+  final BitmapSize? scaledSize =
+      scaledImageSize(width, height, targetWidth, targetHeight);
   if (scaledSize == null) {
     return image;
   }
@@ -436,8 +451,8 @@ ui.Image scaleImageIfNeeded(
     return image;
   }
 
-  final ui.Rect outputRect =
-      ui.Rect.fromLTWH(0, 0, scaledSize.width, scaledSize.height);
+  final ui.Rect outputRect = ui.Rect.fromLTWH(
+      0, 0, scaledSize.width.toDouble(), scaledSize.height.toDouble());
   final ui.PictureRecorder recorder = ui.PictureRecorder();
   final ui.Canvas canvas = ui.Canvas(recorder, outputRect);
 
@@ -449,7 +464,7 @@ ui.Image scaleImageIfNeeded(
   );
   final ui.Picture picture = recorder.endRecording();
   final ui.Image finalImage =
-      picture.toImageSync(scaledSize.width.round(), scaledSize.height.round());
+      picture.toImageSync(scaledSize.width, scaledSize.height);
   picture.dispose();
   image.dispose();
   return finalImage;

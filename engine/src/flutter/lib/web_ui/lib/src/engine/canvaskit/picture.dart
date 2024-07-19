@@ -101,8 +101,8 @@ class CkPicture implements ScenePicture {
     assert(debugCheckNotDisposed('Cannot convert picture to image.'));
 
     final Surface surface = CanvasKitRenderer.instance.pictureToImageSurface;
-    final CkSurface ckSurface = surface
-        .createOrUpdateSurface(BitmapSize(width, height));
+    final CkSurface ckSurface =
+        surface.createOrUpdateSurface(BitmapSize(width, height));
     final CkCanvas ckCanvas = ckSurface.getCanvas();
     ckCanvas.clear(const ui.Color(0x00000000));
     ckCanvas.drawPicture(this);
@@ -114,7 +114,10 @@ class CkPicture implements ScenePicture {
       width: width.toDouble(),
       height: height.toDouble(),
     );
-    final Uint8List pixels = skImage.readPixels(0, 0, imageInfo);
+    final Uint8List? pixels = skImage.readPixels(0, 0, imageInfo);
+    if (pixels == null) {
+      throw StateError('Unable to read pixels from SkImage.');
+    }
     final SkImage? rasterImage =
         canvasKit.MakeImage(imageInfo, pixels, (4 * width).toDouble());
     if (rasterImage == null) {

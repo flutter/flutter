@@ -1551,7 +1551,7 @@ extension DomImageDataExtension on DomImageData {
 
 @JS('ImageBitmap')
 @staticInterop
-class DomImageBitmap {}
+class DomImageBitmap implements DomCanvasImageSource {}
 
 extension DomImageBitmapExtension on DomImageBitmap {
   external JSNumber get width;
