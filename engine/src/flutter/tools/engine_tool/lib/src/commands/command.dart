@@ -53,3 +53,13 @@ void addConfigOption(
     },
   );
 }
+
+/// Adds the -j option to the parser.
+void addConcurrencyOption(ArgParser parser) {
+  parser.addOption(
+    concurrencyFlag,
+    abbr: 'j',
+    defaultsTo: '0',
+    help: 'Specify the concurrency level to use for the ninja build.',
+  );
+}
