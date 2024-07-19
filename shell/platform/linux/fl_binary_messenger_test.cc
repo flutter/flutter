@@ -235,7 +235,7 @@ TEST(FlBinaryMessengerTest, FakeMessengerReceive) {
 // Checks sending nullptr for a message works.
 TEST(FlBinaryMessengerTest, SendNullptrMessage) {
   g_autoptr(FlEngine) engine = make_mock_engine();
-  FlBinaryMessenger* messenger = fl_binary_messenger_new(engine);
+  g_autoptr(FlBinaryMessenger) messenger = fl_binary_messenger_new(engine);
   fl_binary_messenger_send_on_channel(messenger, "test/echo", nullptr, nullptr,
                                       nullptr, nullptr);
 }
@@ -243,7 +243,7 @@ TEST(FlBinaryMessengerTest, SendNullptrMessage) {
 // Checks sending a zero length message works.
 TEST(FlBinaryMessengerTest, SendEmptyMessage) {
   g_autoptr(FlEngine) engine = make_mock_engine();
-  FlBinaryMessenger* messenger = fl_binary_messenger_new(engine);
+  g_autoptr(FlBinaryMessenger) messenger = fl_binary_messenger_new(engine);
   g_autoptr(GBytes) message = g_bytes_new(nullptr, 0);
   fl_binary_messenger_send_on_channel(messenger, "test/echo", message, nullptr,
                                       nullptr, nullptr);
@@ -272,7 +272,7 @@ TEST(FlBinaryMessengerTest, SendMessage) {
   g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
 
   g_autoptr(FlEngine) engine = make_mock_engine();
-  FlBinaryMessenger* messenger = fl_binary_messenger_new(engine);
+  g_autoptr(FlBinaryMessenger) messenger = fl_binary_messenger_new(engine);
   const char* text = "Hello World!";
   g_autoptr(GBytes) message = g_bytes_new(text, strlen(text));
   fl_binary_messenger_send_on_channel(messenger, "test/echo", message, nullptr,
@@ -302,7 +302,7 @@ TEST(FlBinaryMessengerTest, NullptrResponse) {
   g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
 
   g_autoptr(FlEngine) engine = make_mock_engine();
-  FlBinaryMessenger* messenger = fl_binary_messenger_new(engine);
+  g_autoptr(FlBinaryMessenger) messenger = fl_binary_messenger_new(engine);
   const char* text = "Hello World!";
   g_autoptr(GBytes) message = g_bytes_new(text, strlen(text));
   fl_binary_messenger_send_on_channel(messenger, "test/nullptr-response",
@@ -331,7 +331,7 @@ TEST(FlBinaryMessengerTest, SendFailure) {
   g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
 
   g_autoptr(FlEngine) engine = make_mock_engine();
-  FlBinaryMessenger* messenger = fl_binary_messenger_new(engine);
+  g_autoptr(FlBinaryMessenger) messenger = fl_binary_messenger_new(engine);
   fl_binary_messenger_send_on_channel(messenger, "test/failure", nullptr,
                                       nullptr, failure_response_cb, loop);
 
@@ -384,7 +384,7 @@ TEST(FlBinaryMessengerTest, ReceiveMessage) {
   g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
 
   g_autoptr(FlEngine) engine = make_mock_engine();
-  FlBinaryMessenger* messenger = fl_binary_messenger_new(engine);
+  g_autoptr(FlBinaryMessenger) messenger = fl_binary_messenger_new(engine);
 
   // Listen for messages from the engine.
   fl_binary_messenger_set_message_handler_on_channel(
@@ -448,7 +448,7 @@ TEST(FlBinaryMessengerTest, ResizeChannel) {
   EXPECT_TRUE(fl_engine_start(engine, &error));
   EXPECT_EQ(error, nullptr);
 
-  FlBinaryMessenger* messenger = fl_binary_messenger_new(engine);
+  g_autoptr(FlBinaryMessenger) messenger = fl_binary_messenger_new(engine);
   fl_binary_messenger_resize_channel(messenger, "flutter/test", 3);
 
   EXPECT_TRUE(called);
@@ -494,7 +494,7 @@ TEST(FlBinaryMessengerTest, WarnsOnOverflowChannel) {
   EXPECT_TRUE(fl_engine_start(engine, &error));
   EXPECT_EQ(error, nullptr);
 
-  FlBinaryMessenger* messenger = fl_binary_messenger_new(engine);
+  g_autoptr(FlBinaryMessenger) messenger = fl_binary_messenger_new(engine);
   fl_binary_messenger_set_warns_on_channel_overflow(messenger, "flutter/test",
                                                     false);
 
@@ -511,7 +511,7 @@ static gboolean quit_main_loop_cb(gpointer user_data) {
 TEST(FlBinaryMessengerTest, ControlChannelErrorResponse) {
   g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
   g_autoptr(FlEngine) engine = make_mock_engine();
-  FlBinaryMessenger* messenger = fl_binary_messenger_new(engine);
+  g_autoptr(FlBinaryMessenger) messenger = fl_binary_messenger_new(engine);
 
   g_autoptr(GError) error = nullptr;
   EXPECT_TRUE(fl_engine_start(engine, &error));
@@ -608,7 +608,7 @@ TEST(FlBinaryMessengerTest, RespondOnBackgroundThread) {
   g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
 
   g_autoptr(FlEngine) engine = make_mock_engine();
-  FlBinaryMessenger* messenger = fl_binary_messenger_new(engine);
+  g_autoptr(FlBinaryMessenger) messenger = fl_binary_messenger_new(engine);
 
   // Listen for messages from the engine.
   fl_binary_messenger_set_message_handler_on_channel(
