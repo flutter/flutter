@@ -211,10 +211,11 @@ class CupertinoRadio<T> extends StatefulWidget {
   /// If [onChanged] is null, indicating the radio button is disabled,
   /// [SystemMouseCursors.basic] is used. Otherwise, [SystemMouseCursors.click]
   /// is used on Web, and [SystemMouseCursors.basic] is used on other platforms.
-  static MouseCursor defaultMouseCursor(Function? onChanged) {
-    return (onChanged != null && kIsWeb)
+  static WidgetStateProperty<MouseCursor> defaultMouseCursor(Function? onChanged) {
+    final MouseCursor mouseCursor = (onChanged != null && kIsWeb)
       ? SystemMouseCursors.click
       : SystemMouseCursors.basic;
+    return WidgetStateProperty.all<MouseCursor>(mouseCursor);
   }
 
   @override
@@ -295,7 +296,7 @@ class _CupertinoRadioState<T> extends State<CupertinoRadio<T>> with TickerProvid
       checked: widget._selected,
       selected: accessibilitySelected,
       child: buildToggleable(
-        mouseCursor: widget.mouseCursor ?? WidgetStateProperty.all(CupertinoRadio.defaultMouseCursor(widget.onChanged)),
+        mouseCursor: widget.mouseCursor ?? CupertinoRadio.defaultMouseCursor(widget.onChanged),
         focusNode: widget.focusNode,
         autofocus: widget.autofocus,
         onFocusChange: onFocusChange,

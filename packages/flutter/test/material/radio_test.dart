@@ -2034,12 +2034,12 @@ void main() {
   });
 }
 
-class _SelectedGrabMouseCursor extends MaterialStateMouseCursor {
+class _SelectedGrabMouseCursor extends WidgetStateMouseCursor {
   const _SelectedGrabMouseCursor();
 
   @override
-  MouseCursor resolve(Set<MaterialState> states) {
-    if (states.contains(MaterialState.selected)) {
+  MouseCursor resolve(Set<WidgetState> states) {
+    if (states.contains(WidgetState.selected)) {
       return SystemMouseCursors.grab;
     }
     return SystemMouseCursors.basic;
