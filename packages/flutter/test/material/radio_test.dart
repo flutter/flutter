@@ -1864,13 +1864,11 @@ void main() {
       return MaterialApp(
         theme: ThemeData(platform: platform),
         home: Material(
-          child: Center(
-            child: Radio<int>.adaptive(
-              value: 1,
-              groupValue: 2,
-              onChanged: (int? i) {},
-              mouseCursor: mouseCursor,
-            ),
+          child: Radio<int>.adaptive(
+            value: 1,
+            groupValue: 1,
+            onChanged: (int? i) {},
+            mouseCursor: mouseCursor,
           ),
         ),
       );
@@ -1879,6 +1877,8 @@ void main() {
     for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.iOS, TargetPlatform.macOS ]) {
       await tester.pumpWidget(buildApp(platform: platform));
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+
+      // Test default mouse cursor.
       await gesture.addPointer(location: tester.getCenter(find.byType(CupertinoRadio<int>)));
       await tester.pump();
       await gesture.moveTo(tester.getCenter(find.byType(CupertinoRadio<int>)));
@@ -1886,11 +1886,15 @@ void main() {
         RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
         kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
       );
+
+      // Test mouse cursor can be configured.
       await tester.pumpWidget(buildApp(platform: platform, mouseCursor: SystemMouseCursors.forbidden));
-      expect(
-        RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-        SystemMouseCursors.forbidden,
-      );
+      expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.forbidden);
+
+      // Test Radio.adaptive can resolve a WidgetStateMouseCursor.
+      await tester.pumpWidget(buildApp(platform: platform, mouseCursor: const _SelectedGrabMouseCursor()));
+      expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.grab);
+
       await gesture.removePointer();
     }
   });
@@ -2028,4 +2032,19 @@ void main() {
     );
     focusNode.dispose();
   });
+}
+
+class _SelectedGrabMouseCursor extends MaterialStateMouseCursor {
+  const _SelectedGrabMouseCursor();
+
+  @override
+  MouseCursor resolve(Set<MaterialState> states) {
+    if (states.contains(MaterialState.selected)) {
+      return SystemMouseCursors.grab;
+    }
+    return SystemMouseCursors.basic;
+  }
+
+  @override
+  String get debugDescription => '_SelectedGrabMouseCursor()';
 }

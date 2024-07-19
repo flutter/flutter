@@ -447,8 +447,10 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin, Togg
               value: widget.value,
               groupValue: widget.groupValue,
               onChanged: widget.onChanged,
-              mouseCursor: WidgetStateProperty.all(widget.mouseCursor
-                ?? CupertinoRadio.defaultMouseCursor(widget.onChanged)),
+              mouseCursor: WidgetStateProperty.resolveWith((Set<MaterialState> states) {
+                return MaterialStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states)
+                  ?? CupertinoRadio.defaultMouseCursor(widget.onChanged);
+              }),
               toggleable: widget.toggleable,
               activeColor: widget.activeColor,
               focusColor: widget.focusColor,
