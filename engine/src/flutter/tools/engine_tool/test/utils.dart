@@ -67,7 +67,9 @@ class TestEnvironment {
       platform: FakePlatform(
           operatingSystem: _operatingSystemForAbi(abi),
           resolvedExecutable: io.Platform.resolvedExecutable,
-          pathSeparator: _pathSeparatorForAbi(abi)),
+          pathSeparator: _pathSeparatorForAbi(abi),
+          numberOfProcessors: 32,
+      ),
       processRunner: ProcessRunner(
           processManager: FakeProcessManager(onStart: (List<String> command) {
         final FakeProcess processResult =

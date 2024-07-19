@@ -126,6 +126,7 @@ Future<int> runBuild(
   required bool enableRbe,
   List<String> extraGnArgs = const <String>[],
   List<Label> targets = const <Label>[],
+  int concurrency = 0,
 }) async {
   final List<String> gnArgs = <String>[
     if (!enableRbe) '--no-rbe',
@@ -139,6 +140,7 @@ Future<int> runBuild(
     abi: environment.abi,
     engineSrcDir: environment.engine.srcDir,
     build: build,
+    concurrency: concurrency,
     extraGnArgs: gnArgs,
     runTests: false,
     extraNinjaArgs: <String>[
