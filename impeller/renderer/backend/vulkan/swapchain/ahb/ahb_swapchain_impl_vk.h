@@ -114,7 +114,7 @@ class AHBSwapchainImplVK final
   bool Present(const AutoSemaSignaler& signaler,
                const std::shared_ptr<AHBTextureSourceVK>& texture);
 
-  vk::UniqueSemaphore CreateRenderReadySemaphore(
+  vk::UniqueFence CreateRenderReadyFence(
       const std::shared_ptr<fml::UniqueFD>& fd) const;
 
   bool SubmitWaitForRenderReady(
