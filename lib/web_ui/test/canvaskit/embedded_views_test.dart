@@ -597,6 +597,7 @@ void testMain() {
       await createPlatformView(0, 'test-platform-view');
 
       final CkBrowserImageDecoder image = await CkBrowserImageDecoder.create(
+        contentType: 'image/gif',
         data: kAnimatedGif,
         debugSource: 'test',
       );

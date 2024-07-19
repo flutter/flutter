@@ -222,7 +222,8 @@ class CanvasKitRenderer implements Renderer {
           {int? targetWidth,
           int? targetHeight,
           bool allowUpscaling = true}) async =>
-      skiaInstantiateImageCodec(list, targetWidth, targetHeight);
+      skiaInstantiateImageCodec(
+          list, targetWidth, targetHeight, allowUpscaling);
 
   @override
   Future<ui.Codec> instantiateImageCodecFromUrl(Uri uri,
@@ -236,7 +237,7 @@ class CanvasKitRenderer implements Renderer {
     if (skImage == null) {
       throw Exception('Failed to convert image bitmap to an SkImage.');
     }
-    return CkImage(skImage);
+    return CkImage(skImage, imageSource: ImageBitmapImageSource(imageBitmap));
   }
 
   @override
