@@ -2236,25 +2236,21 @@ void main() {
   });
 
   testWidgets('Checkbox.adaptive respects Checkbox.mouseCursor', (WidgetTester tester) async {
-    Widget buildApp({required TargetPlatform platform, MouseCursor? mouseCursor, bool enabled = true, bool value = true}) {
+    Widget buildApp({required TargetPlatform platform, MouseCursor? mouseCursor}) {
       return MaterialApp(
         theme: ThemeData(platform: platform),
         home: Material(
-          child: Center(
-            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
-              return Checkbox.adaptive(
-                value: false,
-                onChanged: (bool? newValue) {},
-                mouseCursor: mouseCursor,
-              );
-            }),
+          child: Checkbox.adaptive(
+            value: true,
+            onChanged: (bool? newValue) { },
+            mouseCursor: mouseCursor,
           ),
         ),
       );
     }
 
     for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.iOS, TargetPlatform.macOS ]) {
-      await tester.pumpWidget(buildApp(platform: platform, value: false));
+      await tester.pumpWidget(buildApp(platform: platform));
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
 
       await gesture.addPointer(location: tester.getCenter(find.byType(CupertinoCheckbox)));
@@ -2265,6 +2261,10 @@ void main() {
       // Test mouse cursor can be configured.
       await tester.pumpWidget(buildApp(platform: platform, mouseCursor: SystemMouseCursors.click));
       expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+
+      // Test Checkbox.adaptive can resolve a WidgetStateMouseCursor.
+      await tester.pumpWidget(buildApp(platform: platform, mouseCursor: const _SelectedGrabMouseCursor()));
+      expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.grab);
 
       await gesture.removePointer();
     }
