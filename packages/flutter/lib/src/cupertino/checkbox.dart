@@ -36,6 +36,7 @@ const CupertinoDynamicColor _kDefaultBorderColor = CupertinoDynamicColor.withBri
 );
 const double _kPressedOverlayOpacity = 0.15;
 const double _kBrightnessModeOverlayOpacity = 0.15;
+const Color _kDarkModeCheckColor = Color.fromARGB(255, 222, 232, 248);
 
 /// A macOS style checkbox.
 ///
@@ -407,8 +408,11 @@ class _CheckboxPainter extends ToggleablePainter {
 
   // White stroke used to paint the check and dash.
   Paint _createStrokePaint() {
+    final bool isDefault = checkColor == CupertinoColors.white && activeColor == CupertinoColors.systemBlue;
     return Paint()
-      ..color = checkColor
+      // In dark mode, macOS checkboxes have a blue-white check/dash color.
+      ..color = brightness == Brightness.dark && isDefault
+        ? _kDarkModeCheckColor : checkColor
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.0
       ..strokeCap = StrokeCap.round;
