@@ -507,19 +507,18 @@ class Chromium {
     // Send a command to shut down the browser cleanly.
     Duration sigtermDelay = Duration.zero;
     if (_hasValidChromeConnection) {
-      ChromeTab? tab;
       try {
-        tab = await chromeConnection.getTab(
+        final ChromeTab? tab = await chromeConnection.getTab(
             (_) => true, retryFor: const Duration(seconds: 1));
-      } on SocketException {
+        if (tab != null) {
+          final WipConnection wipConnection = await tab.connect();
+          await wipConnection.sendCommand('Browser.close');
+          await wipConnection.close();
+          sigtermDelay = const Duration(seconds: 1);
+        }
+      } on IOException {
         // Chrome is not responding to the debug protocol and probably has
         // already been closed.
-      }
-      if (tab != null) {
-        final WipConnection wipConnection = await tab.connect();
-        await wipConnection.sendCommand('Browser.close');
-        await wipConnection.close();
-        sigtermDelay = const Duration(seconds: 1);
       }
     }
     chromeConnection.close();
