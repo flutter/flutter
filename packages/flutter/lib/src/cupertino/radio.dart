@@ -138,9 +138,7 @@ class CupertinoRadio<T> extends StatefulWidget {
   ///  * [WidgetState.focused].
   ///  * [WidgetState.disabled].
   ///
-  /// If null, then [SystemMouseCursors.basic] is used when this radio button is
-  /// disabled. When this radio button is enabled, [SystemMouseCursors.click] is
-  /// used on Web, and [SystemMouseCursors.basic] is used on other platforms.
+  /// Defaults to [defaultMouseCursor].
   ///
   /// See also:
   ///
@@ -208,7 +206,11 @@ class CupertinoRadio<T> extends StatefulWidget {
 
   bool get _selected => value == groupValue;
 
-  /// The default mouse cursor of a [CupertinoRadio].
+  /// The default [mouseCursor] of a [CupertinoRadio].
+  ///
+  /// If [onChanged] is null, indicating the radio button is disabled,
+  /// [SystemMouseCursors.basic] is used. Otherwise, [SystemMouseCursors.click]
+  /// is used on Web, and [SystemMouseCursors.basic] is used on other platforms.
   static MouseCursor defaultMouseCursor(Function? onChanged) {
     return (onChanged != null && kIsWeb)
       ? SystemMouseCursors.click
