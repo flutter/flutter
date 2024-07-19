@@ -7,16 +7,6 @@ import 'package:flutter_api_samples/material/expansion_panel/expansion_panel_lis
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  void expectExpandedItem(WidgetTester tester, int index) {
-    for (int i = 0; i < 8; i++) {
-      expect(
-        tester.widget<ExpandIcon>(find.byType(ExpandIcon).at(i)).isExpanded,
-        index == i,
-        reason: 'Only the panel $index should be expanded',
-      );
-    }
-  }
-
   testWidgets('ExpansionPanelList.radio can expand on item at the time', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.ExpansionPanelListRadioExampleApp(),
@@ -28,14 +18,27 @@ void main() {
       expect(find.widgetWithText(ListTile, 'Panel $i'), findsOne);
     }
 
-    expectExpandedItem(tester, 2); // The default expanded item is 2.
+    // The default expanded item is 2.
+    for (int i = 0; i < 8; i++) {
+      expect(
+        tester.widget<ExpandIcon>(find.byType(ExpandIcon).at(i)).isExpanded,
+        i == 2,
+        reason: 'Only the panel 2 should be expanded',
+      );
+    }
 
     // Open all the panels one by one.
-    for (int i = 0; i < 8; i++) {
-      await tester.ensureVisible(find.byType(ExpandIcon).at(i));
-      await tester.tap(find.byType(ExpandIcon).at(i));
+    for (int index = 0; index < 8; index++) {
+      await tester.ensureVisible(find.byType(ExpandIcon).at(index));
+      await tester.tap(find.byType(ExpandIcon).at(index));
       await tester.pumpAndSettle();
-      expectExpandedItem(tester, i);
+      for (int i = 0; i < 8; i++) {
+        expect(
+          tester.widget<ExpandIcon>(find.byType(ExpandIcon).at(i)).isExpanded,
+          i == index,
+          reason: 'Only the panel $index should be expanded',
+        );
+      }
     }
   });
 }
