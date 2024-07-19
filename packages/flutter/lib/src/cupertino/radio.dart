@@ -71,6 +71,7 @@ class CupertinoRadio<T> extends StatefulWidget {
     required this.value,
     required this.groupValue,
     required this.onChanged,
+    this.mouseCursor,
     this.toggleable = false,
     this.activeColor,
     this.inactiveColor,
