@@ -55,28 +55,24 @@ std::shared_ptr<SwapchainVK> SwapchainVK::Create(
     return nullptr;
   }
 
-  // TODO(148139): Fix synchronization issues on present.
-  if constexpr (false) {
-    // TODO(147533): AHB swapchains on emulators are not functional.
-    const auto emulator =
-        ContextVK::Cast(*context).GetDriverInfo()->IsEmulator();
+  // TODO(147533): AHB swapchains on emulators are not functional.
+  const auto emulator = ContextVK::Cast(*context).GetDriverInfo()->IsEmulator();
 
-    // Try AHB swapchains first.
-    if (!emulator && AHBSwapchainVK::IsAvailableOnPlatform()) {
-      auto ahb_swapchain = std::shared_ptr<AHBSwapchainVK>(new AHBSwapchainVK(
-          context,             //
-          window.GetHandle(),  //
-          surface,             //
-          window.GetSize(),    //
-          enable_msaa          //
-          ));
+  // Try AHB swapchains first.
+  if (!emulator && AHBSwapchainVK::IsAvailableOnPlatform()) {
+    auto ahb_swapchain = std::shared_ptr<AHBSwapchainVK>(new AHBSwapchainVK(
+        context,             //
+        window.GetHandle(),  //
+        surface,             //
+        window.GetSize(),    //
+        enable_msaa          //
+        ));
 
-      if (ahb_swapchain->IsValid()) {
-        return ahb_swapchain;
-      } else {
-        VALIDATION_LOG
-            << "Could not create AHB swapchain. Falling back to KHR variant.";
-      }
+    if (ahb_swapchain->IsValid()) {
+      return ahb_swapchain;
+    } else {
+      VALIDATION_LOG
+          << "Could not create AHB swapchain. Falling back to KHR variant.";
     }
   }
 
