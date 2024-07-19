@@ -2564,7 +2564,7 @@ void main() {
       expect(tester.getSize(findAppBarMaterial()).height, kToolbarHeight);
     });
 
-    testWidgets('Material3 - scrolledUnderElevation should be maintained when drawer is opened', (WidgetTester tester) async {
+    testWidgets('scrolledUnderElevation should be maintained when drawer is opened', (WidgetTester tester) async {
       final GlobalKey drawerListKey  = GlobalKey();
       final GlobalKey bodyListKey = GlobalKey();
        await tester.pumpWidget(MaterialApp(
@@ -2639,7 +2639,7 @@ void main() {
       expect(getAppBarBackgroundColor(tester), defaultColor);
     });
 
-    testWidgets('Material3 - scrolledUnderElevation should be applied when scrolled under with multiple list views', (WidgetTester tester) async {
+    testWidgets('scrolledUnderElevation should be applied when scrolled under with multiple list views', (WidgetTester tester) async {
       final GlobalKey list1Key = GlobalKey();
       final GlobalKey list2Key = GlobalKey();
 
@@ -2710,7 +2710,7 @@ void main() {
       expect(getAppBarBackgroundColor(tester), defaultColor);
     });
 
-    testWidgets('Material3 - scrolledUnderElevation should be applied when scrolled under with multiple list views with list scrolled', (WidgetTester tester) async {
+    testWidgets('scrolledUnderElevation should be applied when scrolled under with multiple list views with list scrolled', (WidgetTester tester) async {
       final GlobalKey list1Key = GlobalKey();
       final GlobalKey list2Key = GlobalKey();
 
