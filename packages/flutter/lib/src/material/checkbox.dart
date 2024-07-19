@@ -488,8 +488,8 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
               value: value,
               tristate: tristate,
               onChanged: onChanged,
-              mouseCursor: WidgetStateProperty.resolveWith((Set<MaterialState> states) {
-                return MaterialStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states)
+              mouseCursor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+                return WidgetStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states)
                   ?? SystemMouseCursors.basic;
               }),
               activeColor: widget.activeColor,
