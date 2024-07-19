@@ -2,6 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'sliver.dart';
+/// @docImport 'sliver_persistent_header.dart';
+/// @docImport 'viewport.dart';
+library;
+
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 
