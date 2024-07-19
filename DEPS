@@ -666,7 +666,7 @@ deps = {
    Var('flutter_git') + '/third_party/sqlite' + '@' + '0f61bd2023ba94423b4e4c8cfb1a23de1fe6a21c',
 
   'src/flutter/third_party/pyyaml':
-   Var('flutter_git') + '/third_party/pyyaml.git' + '@' + '25e97546488eee166b1abb229a27856cecd8b7ac',
+   Var('flutter_git') + '/third_party/pyyaml.git' + '@' + '03c67afd452cdff45b41bfe65e19a2fb5b80a0e8',
 
    'src/flutter/third_party/swiftshader':
    Var('swiftshader_git') + '/SwiftShader.git' + '@' + '2fa7e9b99ae4e70ea5ae2cc9c8d3afb43391384f',
