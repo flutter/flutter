@@ -14,8 +14,6 @@
 
 G_BEGIN_DECLS
 
-typedef struct _FlKeyboardManager FlKeyboardManager;
-
 /**
  * FlKeyResponderAsyncCallback:
  * @event: whether the event has been handled.
@@ -40,7 +38,7 @@ G_DECLARE_INTERFACE(FlKeyResponder,
  * An interface for a responder that can process a key event and decides
  * asynchronously whether to handle an event.
  *
- * To use this class, add it with #fl_keyboard_manager_add_responder.
+ * To use this class, add it with #fl_keyboard_handler_add_responder.
  */
 
 struct _FlKeyResponderInterface {

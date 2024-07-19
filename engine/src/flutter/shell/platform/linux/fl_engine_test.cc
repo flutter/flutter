@@ -220,8 +220,8 @@ TEST(FlEngineTest, PlatformMessageResponse) {
   EXPECT_TRUE(called);
 }
 
-// Checks settings plugin sends settings on startup.
-TEST(FlEngineTest, SettingsPlugin) {
+// Checks settings handler sends settings on startup.
+TEST(FlEngineTest, SettingsHandler) {
   g_autoptr(FlEngine) engine = make_mock_engine();
   FlutterEngineProcTable* embedder_api = fl_engine_get_embedder_api(engine);
 

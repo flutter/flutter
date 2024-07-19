@@ -8,7 +8,7 @@
 #include <gdk/gdk.h>
 
 #include "flutter/shell/platform/linux/fl_key_responder.h"
-#include "flutter/shell/platform/linux/fl_keyboard_manager.h"
+#include "flutter/shell/platform/linux/fl_keyboard_handler.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_binary_messenger.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_value.h"
 

@@ -20,7 +20,7 @@ G_DECLARE_INTERFACE(FlTextInputViewDelegate,
 /**
  * FlTextInputViewDelegate:
  *
- * An interface for a class that provides `FlTextInputPlugin` with
+ * An interface for a class that provides `FlTextInputHandler` with
  * view-related features.
  *
  * This interface is typically implemented by `FlView`.

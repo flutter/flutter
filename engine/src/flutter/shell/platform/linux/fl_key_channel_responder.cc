@@ -43,9 +43,9 @@ struct _FlKeyChannelUserData {
 
   // The current responder.
   FlKeyChannelResponder* responder;
-  // The callback provided by the caller #FlKeyboardManager.
+  // The callback provided by the caller #FlKeyboardHandler.
   FlKeyResponderAsyncCallback callback;
-  // The user_data provided by the caller #FlKeyboardManager.
+  // The user_data provided by the caller #FlKeyboardHandler.
   gpointer user_data;
 };
 
@@ -179,7 +179,7 @@ static void fl_key_channel_responder_class_init(
 static void fl_key_channel_responder_init(FlKeyChannelResponder* self) {}
 
 // Creates a new FlKeyChannelResponder instance, with a messenger used to send
-// messages to the framework, and an FlTextInputPlugin that is used to handle
+// messages to the framework, and an FlTextInputHandler that is used to handle
 // key events that the framework doesn't handle. Mainly for testing purposes, it
 // also takes an optional callback to call when a response is received, and an
 // optional channel name to use when sending messages.

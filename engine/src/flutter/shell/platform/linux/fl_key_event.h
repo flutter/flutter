@@ -12,7 +12,7 @@
  * A struct that stores information from GdkEvent.
  *
  * This is a class only used within the GTK embedding, created by
- * FlView and consumed by FlKeyboardManager. It is not sent to
+ * FlView and consumed by FlKeyboardHandler. It is not sent to
  * the embedder.
  *
  * This object contains information from GdkEvent as well as an origin event
