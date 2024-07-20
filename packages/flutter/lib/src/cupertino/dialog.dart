@@ -423,20 +423,30 @@ class _CupertinoAlertDialogState extends State<CupertinoAlertDialog> {
   }
 }
 
-/// Rounded rectangle surface that looks like an iOS popup surface, e.g., alert dialog
-/// and action sheet.
+/// An iOS-style rounded rectangle surface useful for showing modal overlays,
+/// such as dialogs and action sheets.
 ///
-/// A [CupertinoPopupSurface] can be configured to paint or not paint a white
-/// color on top of its blurred area. Typical usage should paint white on top
-/// of the blur. However, the white paint can be disabled for the purpose of
-/// rendering divider gaps for a more complicated layout, e.g., [CupertinoAlertDialog].
-/// Additionally, the white paint can be disabled to render a blurred rounded
-/// rectangle without any color (similar to iOS's volume control popup).
+/// By default, this surface is composed of a transparent surface color painted
+/// atop a [BackdropFilter]. The surface color is light gray when the ambient
+/// [CupertinoTheme] brightness is [Brightness.light], and dark gray when the
+/// ambient brightness is [Brightness.dark]. The [BackdropFilter] applied
+/// beneath the surface saturates and blurs underlying content.
+///
+/// The blur strength can be changed by setting [blurSigma] to a positive value,
+/// or removed by setting the [BlurSigma] to 0.
+///
+/// The saturation effect can be removed by setting [isVibrancePainted] to
+/// false. Removing the vibrance can prevent oversaturating areas where multiple
+/// [CupertinoPopupSurface]s are stacked upon eachother.
+///
+/// For more complicated layouts, the surface color can be disabled by setting
+/// [isSurfacePainted] to false. This can be used to render divider gaps, such
+/// as with [CupertinoAlertDialog], or for rendering custom surface colors.
 ///
 /// {@tool dartpad}
 /// This sample shows how to use a [CupertinoPopupSurface]. The [CupertinoPopupSurface]
-/// shows a model popup from the bottom of the screen.
-/// Toggling the switch to configure its surface color.
+/// shows a modal popup from the bottom of the screen.
+/// Togge the switch to configure its surface color.
 ///
 /// ** See code in examples/api/lib/cupertino/dialog/cupertino_popup_surface.0.dart **
 /// {@end-tool}
@@ -451,8 +461,28 @@ class CupertinoPopupSurface extends StatelessWidget {
   const CupertinoPopupSurface({
     super.key,
     this.isSurfacePainted = true,
-    this.child,
+    this.blurSigma = defaultBlurSigma,
+    this.isVibrancePainted = true,
+    required this.child,
   });
+
+  /// The strength of the gaussian blur applied to the area beneath this
+  /// surface.
+  ///
+  /// Defaults to 30.0.
+  final double blurSigma;
+
+  /// Whether or not a [ColorFilter] should be applied beneath this surface.
+  ///
+  /// The appearance of the [ColorFilter] is determined by the [Brightness]
+  /// value obtained from the ambient [CupertinoTheme].
+  ///
+  /// When stacking multiple [CupertinoPopupSurface]s, setting
+  /// [isVibrancePainted] to false can prevent the backdrop from becoming too
+  /// saturated.
+  ///
+  /// Defaults to true.
+  final bool isVibrancePainted;
 
   /// Whether or not to paint a translucent white on top of this surface's
   /// blurred background. [isSurfacePainted] should be true for a typical popup
@@ -465,17 +495,29 @@ class CupertinoPopupSurface extends StatelessWidget {
   final bool isSurfacePainted;
 
   /// The widget below this widget in the tree.
-  final Widget? child;
+  final Widget child;
+
+  /// The default strength of the blur applied to widgets underlying a
+  /// [CupertinoPopupSurface].
+  ///
+  /// Setting this to 0 will remove the blur filter.
+  static const double defaultBlurSigma = 30.0;
+
+  /// The default corner radius of a [CupertinoPopupSurface].
+  static const BorderRadius _clipper = BorderRadius.all(Radius.circular(_kCornerRadius));
 
   /// The [ColorFilter.matrix] used by [CupertinoPopupSurface] to create a
   /// dark-mode backdrop for Cupertino widgets.
+  ///
+  /// If the ambient [Brightness] obtained from [CupertinoTheme] is null, the
+  /// [_lightSaturationMatrix] will be used to create the backdrop.
   ///
   /// To derive this matrix, the saturation matrix was taken from
   /// https://docs.rainmeter.net/tips/colormatrix-guide/ and was tweaked to
   /// resemble the iOS 17 simulator.
   /// ```dart
   ///  // The matrix can be derived from the following function:
-  ///  static List<double> buildDarkModeMatrix() {
+  ///  static List<double> get _darkSaturationMatrix {
   ///     const double additive = 0.3;
   ///     const double darkLumR = 0.45;
   ///     const double darkLumG = 0.8;
@@ -492,7 +534,7 @@ class CupertinoPopupSurface extends StatelessWidget {
   ///     ];
   ///   }
   /// ```
-  static const List<double> _darkColorMatrix = <double>[
+  static const List<double> _darkSaturationMatrix = <double>[
      1.39, -0.56, -0.11, 0.00, 0.30,
     -0.32,  1.14, -0.11, 0.00, 0.30,
     -0.32, -0.56,  1.59, 0.00, 0.30,
@@ -500,7 +542,10 @@ class CupertinoPopupSurface extends StatelessWidget {
   ];
 
   /// The [ColorFilter.matrix] used by [CupertinoPopupSurface] to create a
-  /// dark-mode backdrop for Cupertino widgets.
+  /// light-mode backdrop for Cupertino widgets.
+  ///
+  /// If the ambient [Brightness] obtained from [CupertinoTheme] is null, this
+  /// matrix will be used to create the backdrop.
   ///
   /// To derive this matrix, the saturation matrix was taken from
   /// https://docs.rainmeter.net/tips/colormatrix-guide/ and was tweaked to
@@ -508,7 +553,7 @@ class CupertinoPopupSurface extends StatelessWidget {
   ///
   /// ```dart
   /// // The matrix can be derived from the following function:
-  /// static List<double> buildLightModeMatrix() {
+  /// static List<double> get _lightSaturationMatrix() {
   ///     const double lightLumR = 0.26;
   ///     const double lightLumG = 0.4;
   ///     const double lightLumB = 0.17;
@@ -524,21 +569,48 @@ class CupertinoPopupSurface extends StatelessWidget {
   ///     ];
   ///   }
   /// ```
-  static const List<double> _lightColorMatrix = <double>[
+  static const List<double> _lightSaturationMatrix = <double>[
      1.74, -0.40, -0.17, 0.00, 0.00,
     -0.26,  1.60, -0.17, 0.00, 0.00,
     -0.26, -0.40,  1.83, 0.00, 0.00,
      0.00,  0.00,  0.00, 1.00, 0.00
   ];
 
-  static final ImageFilter _blurFilter = ImageFilter.blur(
-    sigmaX: _kBlurAmount,
-    sigmaY: _kBlurAmount,
-  );
+  ImageFilter? _buildFilter(Brightness? brightness) {
+    if (kIsWeb || !isVibrancePainted) {
+      if (blurSigma <= 0) {
+        return null;
+      }
+      return ImageFilter.blur(
+        sigmaX: blurSigma,
+        sigmaY: blurSigma,
+      );
+    }
+
+    final ColorFilter colorFilter = switch (brightness) {
+      Brightness.dark          => const ColorFilter.matrix(_darkSaturationMatrix),
+      Brightness.light || null => const ColorFilter.matrix(_lightSaturationMatrix)
+    };
+
+    if (blurSigma <= 0) {
+      return colorFilter;
+    }
+
+    return ImageFilter.compose(
+      inner: colorFilter,
+      outer: ImageFilter.blur(
+        sigmaX: blurSigma,
+        sigmaY: blurSigma,
+      ),
+    );
+
+  }
 
   @override
   Widget build(BuildContext context) {
-    Widget? contents = child;
+    final ImageFilter? filter = _buildFilter(CupertinoTheme.maybeBrightnessOf(context));
+    Widget contents = child;
+
     if (isSurfacePainted) {
       contents = ColoredBox(
         color: CupertinoDynamicColor.resolve(_kDialogColor, context),
@@ -546,25 +618,20 @@ class CupertinoPopupSurface extends StatelessWidget {
       );
     }
 
-    // ColorFilter is not supported on the web.
-    final ImageFilter filter = kIsWeb
-        ? _blurFilter
-        : ImageFilter.compose(
-            outer: _blurFilter,
-            inner: ColorFilter.matrix(
-              CupertinoTheme.maybeBrightnessOf(context) == Brightness.dark
-                  ? _darkColorMatrix
-                  : _lightColorMatrix,
-            ),
-          );
+    if (filter != null) {
+      return ClipRRect(
+        borderRadius: _clipper,
+        child: BackdropFilter(
+          blendMode: BlendMode.src,
+          filter: filter,
+          child: contents,
+        ),
+      );
+    }
 
     return ClipRRect(
-      borderRadius: const BorderRadius.all(Radius.circular(_kCornerRadius)),
-      child: BackdropFilter(
-        blendMode: BlendMode.src,
-        filter: filter,
-        child: contents,
-      ),
+      borderRadius: _clipper,
+      child: contents,
     );
   }
 }
