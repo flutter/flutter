@@ -126,6 +126,7 @@ void main() {
                     return TextField(
                       controller: textEditingController,
                       focusNode: focusNode,
+                      onTapOutside:(void v) => FocusScope.of(context).requestFocus(FocusNode()),
                     );
                   },
                 ),
@@ -147,7 +148,11 @@ void main() {
     await tester.drag(textFieldFinder, const Offset(0, 500));
     await tester.pumpAndSettle();
 
-    expect(textField.focusNode!.nextFocus(), isTrue);
+    expect(textField.focusNode!.hasFocus, isTrue);
+
+    final Finder widgetFinder = find.byType(TextField);
+    expect(widgetFinder, findsExactly(1));
+
   });
 
   testWidgets('SingleChildScrollView respects clipBehavior', (WidgetTester tester) async {
