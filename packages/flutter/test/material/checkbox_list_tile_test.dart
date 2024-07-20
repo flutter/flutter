@@ -1231,6 +1231,39 @@ void main() {
     expect(Focus.of(firstChildKey.currentContext!).hasPrimaryFocus, isFalse);
     expect(Focus.of(secondChildKey.currentContext!).hasPrimaryFocus, isTrue);
   });
+
+  testWidgets('CheckboxListTile uses ListTileTheme controlAffinity', (WidgetTester tester) async {
+    Widget buildListTile(ListTileControlAffinity controlAffinity) {
+      return MaterialApp(
+        home: Material(
+          child: ListTileTheme(
+            data: ListTileThemeData(
+              controlAffinity: controlAffinity,
+            ),
+            child: CheckboxListTile(
+              value: false,
+              onChanged: (bool? value) {},
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildListTile(ListTileControlAffinity.trailing));
+    final Finder trailing = find.byType(Checkbox);
+    final Offset offsetTrailing = tester.getTopLeft(trailing);
+    expect(offsetTrailing, const Offset(736.0, 8.0));
+
+    await tester.pumpWidget(buildListTile(ListTileControlAffinity.leading));
+    final Finder leading = find.byType(Checkbox);
+    final Offset offsetLeading = tester.getTopLeft(leading);
+    expect(offsetLeading, const Offset(16.0, 8.0));
+
+    await tester.pumpWidget(buildListTile(ListTileControlAffinity.platform));
+    final Finder platform = find.byType(Checkbox);
+    final Offset offsetPlatform = tester.getTopLeft(platform);
+    expect(offsetPlatform, const Offset(736.0, 8.0));
+  });
 }
 
 class _SelectedGrabMouseCursor extends MaterialStateMouseCursor {
