@@ -740,6 +740,8 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
   // TODO(bleroux): consider defining this value as a Material token and making it
   // configurable by InputDecorationTheme.
   double get subtextGap => material3 ? 4.0 : 8.0;
+  double get prefixToInputGap => material3 ? 4.0 : 0.0;
+  double get inputToSuffixGap => material3 ? 4.0 : 0.0;
 
   RenderBox? get icon => childForSlot(_DecorationSlot.icon);
   RenderBox? get input => childForSlot(_DecorationSlot.input);
@@ -1003,8 +1005,8 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
     final Size suffixSize = suffix == null ? Size.zero : layoutChild(suffix, contentConstraints);
 
     final EdgeInsetsDirectional accessoryHorizontalInsets = EdgeInsetsDirectional.only(
-      start: iconWidth + prefixSize.width + (prefixIcon == null ? contentPadding.start : prefixIconSize.width),
-      end: suffixSize.width + (suffixIcon == null ? contentPadding.end : suffixIconSize.width),
+      start: iconWidth + prefixSize.width + (prefixIcon == null ? contentPadding.start : prefixIconSize.width + prefixToInputGap),
+      end: suffixSize.width + (suffixIcon == null ? contentPadding.end : suffixIconSize.width + inputToSuffixGap),
     );
 
     final double inputWidth = math.max(0.0, constraints.maxWidth - accessoryHorizontalInsets.horizontal);
@@ -1377,6 +1379,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
         if (prefixIcon != null) {
           start += contentPadding.start;
           start -= centerLayout(prefixIcon!, start - prefixIcon!.size.width);
+          start -= prefixToInputGap;
         }
         if (label != null) {
           if (decoration.alignLabelWithHint) {
@@ -1397,6 +1400,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
         if (suffixIcon != null) {
           end -= contentPadding.end;
           end += centerLayout(suffixIcon!, end);
+          end += inputToSuffixGap;
         }
         if (suffix != null) {
           end += baselineLayout(suffix!, end);
@@ -1407,6 +1411,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
         if (prefixIcon != null) {
           start -= contentPadding.start;
           start += centerLayout(prefixIcon!, start);
+          start += prefixToInputGap;
         }
         if (label != null) {
           if (decoration.alignLabelWithHint) {
@@ -1427,6 +1432,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
         if (suffixIcon != null) {
           end += contentPadding.end;
           end -= centerLayout(suffixIcon!, end - suffixIcon!.size.width);
+          end -= inputToSuffixGap;
         }
         if (suffix != null) {
           end -= baselineLayout(suffix!, end - suffix!.size.width);
