@@ -36,10 +36,10 @@ class _FilterTest extends StatelessWidget {
                   width: tileWidth,
                   child: ColoredBox(
                     color: HSVColor.fromAHSV(
-                      0.25 + a / 4,
+                      0.5 + a / 8,
                       h * 45,
-                      s / 4,
-                      b / 4,
+                      0.5 + s / 8,
+                      0.5 + b / 8,
                     ).toColor(),
                   ),
                 ),
@@ -320,13 +320,12 @@ void main() {
   });
 
   // Because ImageFilter.compose is used to apply multiple filters, the order
-  // of the filters matters. As such, we need to test that the color filter is
-  // applied before the blur filter.
-  testWidgets('Color filter is applied before blur', (WidgetTester tester) async {
+  // of the filters matters. As such, test that the surface effects are stacked
+  // in the correct order.
+  testWidgets('Composition', (WidgetTester tester) async {
     await tester.pumpWidget(
       const _FilterTest(
         CupertinoPopupSurface(
-          isSurfacePainted: false,
           child: SizedBox(),
         ),
       ),
@@ -334,7 +333,7 @@ void main() {
 
     await expectLater(
       find.byType(CupertinoApp),
-      matchesGoldenFile('cupertinoPopupSurface.backdrop-filter.composition.png'),
+      matchesGoldenFile('cupertinoPopupSurface.composition.png'),
     );
   });
 }
