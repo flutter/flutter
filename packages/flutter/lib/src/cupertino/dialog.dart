@@ -553,7 +553,7 @@ class CupertinoPopupSurface extends StatelessWidget {
   ///
   /// ```dart
   /// // The matrix can be derived from the following function:
-  /// static List<double> get _lightSaturationMatrix() {
+  /// static List<double> get _lightSaturationMatrix {
   ///     const double lightLumR = 0.26;
   ///     const double lightLumG = 0.4;
   ///     const double lightLumB = 0.17;
