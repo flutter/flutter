@@ -460,8 +460,8 @@ class CupertinoPopupSurface extends StatelessWidget {
   /// Creates an iOS-style rounded rectangle popup surface.
   const CupertinoPopupSurface({
     super.key,
-    this.isSurfacePainted = true,
     this.blurSigma = defaultBlurSigma,
+    this.isSurfacePainted = true,
     this.isVibrancePainted = true,
     required this.child,
   });
@@ -492,6 +492,8 @@ class CupertinoPopupSurface extends StatelessWidget {
   /// Some popups, like iOS's volume control popup, choose to render a blurred
   /// area without any white paint covering it. To achieve this effect,
   /// [isSurfacePainted] should be set to false.
+  ///
+  /// Defaults to true.
   final bool isSurfacePainted;
 
   /// The widget below this widget in the tree.
@@ -506,46 +508,9 @@ class CupertinoPopupSurface extends StatelessWidget {
   /// The default corner radius of a [CupertinoPopupSurface].
   static const BorderRadius _clipper = BorderRadius.all(Radius.circular(_kCornerRadius));
 
-  /// The [ColorFilter.matrix] used by [CupertinoPopupSurface] to create a
-  /// dark-mode backdrop for Cupertino widgets.
-  ///
-  /// If the ambient [Brightness] obtained from [CupertinoTheme] is null, the
-  /// [_lightSaturationMatrix] will be used to create the backdrop.
-  ///
-  /// To derive this matrix, the saturation matrix was taken from
-  /// https://docs.rainmeter.net/tips/colormatrix-guide/ and was tweaked to
-  /// resemble the iOS 17 simulator.
-  /// ```dart
-  ///  // The matrix can be derived from the following function:
-  ///  static List<double> get _darkSaturationMatrix {
-  ///     const double additive = 0.3;
-  ///     const double darkLumR = 0.45;
-  ///     const double darkLumG = 0.8;
-  ///     const double darkLumB = 0.16;
-  ///     const double saturation = 1.7;
-  ///     const double sr = (1 - saturation) * darkLumR;
-  ///     const double sg = (1 - saturation) * darkLumG;
-  ///     const double sb = (1 - saturation) * darkLumB;
-  ///     return <double>[
-  ///       sr + saturation, sg, sb, 0.0, additive,
-  ///       sr, sg + saturation, sb, 0.0, additive,
-  ///       sr, sg, sb + saturation, 0.0, additive,
-  ///       0.0, 0.0, 0.0, 1.0, 0.0,
-  ///     ];
-  ///   }
-  /// ```
-  static const List<double> _darkSaturationMatrix = <double>[
-     1.39, -0.56, -0.11, 0.00, 0.30,
-    -0.32,  1.14, -0.11, 0.00, 0.30,
-    -0.32, -0.56,  1.59, 0.00, 0.30,
-     0.00,  0.00,  0.00, 1.00, 0.00
-  ];
-
-  /// The [ColorFilter.matrix] used by [CupertinoPopupSurface] to create a
-  /// light-mode backdrop for Cupertino widgets.
-  ///
-  /// If the ambient [Brightness] obtained from [CupertinoTheme] is null, this
-  /// matrix will be used to create the backdrop.
+  /// The [ColorFilter.matrix] used to saturate widgets underlying a
+  /// [CupertinoPopupSurface] when the ambient [CupertinoThemeData.brightness] is
+  /// [Brightness.light].
   ///
   /// To derive this matrix, the saturation matrix was taken from
   /// https://docs.rainmeter.net/tips/colormatrix-guide/ and was tweaked to
@@ -573,6 +538,39 @@ class CupertinoPopupSurface extends StatelessWidget {
      1.74, -0.40, -0.17, 0.00, 0.00,
     -0.26,  1.60, -0.17, 0.00, 0.00,
     -0.26, -0.40,  1.83, 0.00, 0.00,
+     0.00,  0.00,  0.00, 1.00, 0.00
+  ];
+
+  /// The [ColorFilter.matrix] used to saturate widgets underlying a
+  /// [CupertinoPopupSurface] when the ambient [CupertinoThemeData.brightness] is
+  /// [Brightness.dark].
+  ///
+  /// To derive this matrix, the saturation matrix was taken from
+  /// https://docs.rainmeter.net/tips/colormatrix-guide/ and was tweaked to
+  /// resemble the iOS 17 simulator.
+  /// ```dart
+  ///  // The matrix can be derived from the following function:
+  ///  static List<double> get _darkSaturationMatrix {
+  ///     const double additive = 0.3;
+  ///     const double darkLumR = 0.45;
+  ///     const double darkLumG = 0.8;
+  ///     const double darkLumB = 0.16;
+  ///     const double saturation = 1.7;
+  ///     const double sr = (1 - saturation) * darkLumR;
+  ///     const double sg = (1 - saturation) * darkLumG;
+  ///     const double sb = (1 - saturation) * darkLumB;
+  ///     return <double>[
+  ///       sr + saturation, sg, sb, 0.0, additive,
+  ///       sr, sg + saturation, sb, 0.0, additive,
+  ///       sr, sg, sb + saturation, 0.0, additive,
+  ///       0.0, 0.0, 0.0, 1.0, 0.0,
+  ///     ];
+  ///   }
+  /// ```
+  static const List<double> _darkSaturationMatrix = <double>[
+     1.39, -0.56, -0.11, 0.00, 0.30,
+    -0.32,  1.14, -0.11, 0.00, 0.30,
+    -0.32, -0.56,  1.59, 0.00, 0.30,
      0.00,  0.00,  0.00, 1.00, 0.00
   ];
 
