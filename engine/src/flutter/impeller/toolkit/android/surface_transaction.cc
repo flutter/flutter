@@ -61,9 +61,6 @@ bool SurfaceTransaction::SetContents(const SurfaceControl* control,
 
   const auto& proc_table = GetProcTable();
 
-  proc_table.ASurfaceTransaction_setEnableBackPressure(
-      transaction_.get(), control->GetHandle(), true);
-
   proc_table.ASurfaceTransaction_setBuffer(
       transaction_.get(),                                      //
       control->GetHandle(),                                    //
