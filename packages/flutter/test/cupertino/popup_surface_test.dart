@@ -69,7 +69,7 @@ void main() {
       );
 
       // Golden displays the color filter effect of the CupertinoPopupSurface
-      // in light mode.
+      // when the ambient brightness is light.
       await expectLater(
         find.byType(CupertinoApp),
         matchesGoldenFile('cupertinoPopupSurface.color-filter.light.png'),
@@ -88,7 +88,7 @@ void main() {
       );
 
       // Golden displays the color filter effect of the CupertinoPopupSurface
-      // in dark mode.
+      // when the ambient brightness is dark.
       await expectLater(
         find.byType(CupertinoApp),
         matchesGoldenFile('cupertinoPopupSurface.color-filter.dark.png'),
@@ -114,6 +114,13 @@ void main() {
           matching: find.byType(BackdropFilter),
         ),
         findsNothing,
+      );
+
+      // Golden should display color tiles without CupertinoPopupSurface being
+      // displayed.
+      await expectLater(
+        find.byType(CupertinoApp),
+        matchesGoldenFile('cupertinoPopupSurface.color-filter.removed.png'),
       );
     });
   });
@@ -222,24 +229,6 @@ void main() {
       await expectLater(
         find.byType(CupertinoApp),
         matchesGoldenFile('cupertinoPopupSurface.blur.5.png'),
-      );
-
-      await tester.pumpWidget(
-        const _FilterTest(
-          CupertinoPopupSurface(
-            isSurfacePainted: false,
-            isVibrancePainted: false,
-            blurSigma: 15,
-            child: SizedBox(),
-          ),
-        ),
-      );
-
-      // Golden displays a CupertinoPopupSurface with no vibrance or surface
-      // color, and a blur sigma of 30.
-      await expectLater(
-        find.byType(CupertinoApp),
-        matchesGoldenFile('cupertinoPopupSurface.blur.30.png'),
       );
 
       await tester.pumpWidget(
