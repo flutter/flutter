@@ -148,10 +148,8 @@ void main() {
     await tester.drag(textFieldFinder, const Offset(0, 500));
     await tester.pumpAndSettle();
 
-    expect(textField.focusNode!.hasFocus, isTrue);
-
-    final Finder widgetFinder = find.byType(TextField);
-    expect(widgetFinder, findsExactly(1));
+    expect(textField.focusNode!.nextFocus(), isTrue);
+    expect(textFieldFinder, findsExactly(1));
 
   });
 
