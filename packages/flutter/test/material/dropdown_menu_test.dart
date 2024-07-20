@@ -2720,7 +2720,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Check text location in text field.
-    expect(tester.getTopLeft(find.text('Hint')).dx, 48.0);
+    expect(tester.getTopLeft(find.text('Hint')).dx, 52.0);
 
     // By default, the text of item 0 should be aligned with the text of the text field.
     expect(tester.getTopLeft(find.text('Item 0').last).dx, 48.0);
