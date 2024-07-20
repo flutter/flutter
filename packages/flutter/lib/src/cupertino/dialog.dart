@@ -433,7 +433,7 @@ class _CupertinoAlertDialogState extends State<CupertinoAlertDialog> {
 /// beneath the surface saturates and blurs underlying content.
 ///
 /// The blur strength can be changed by setting [blurSigma] to a positive value,
-/// or removed by setting the [BlurSigma] to 0.
+/// or removed by setting the [blurSigma] to 0.
 ///
 /// The saturation effect can be removed by setting [isVibrancePainted] to
 /// false. Removing the vibrance can prevent oversaturating areas where multiple
