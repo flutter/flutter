@@ -437,7 +437,7 @@ void main() {
   testWidgets('Radio has correct default active/inactive/fill/border colors in light mode', (WidgetTester tester) async {
     const Color activeInnerColor = Color(0xffffffff);
     const Color activeOuterColor = Color(0xff007aff);
-    const Color inactiveBorderColor = Color(0xff999999);
+    const Color inactiveBorderColor = Color(0xffd1d1d6);
     const Color inactiveOuterColor = Color(0xffffffff);
     const double innerRadius = 2.975;
     const double outerRadius = 7.0;
@@ -480,10 +480,9 @@ void main() {
   });
 
   testWidgets('Radio has correct default active/inactive/fill/border colors in dark mode', (WidgetTester tester) async {
-    const Color activeInnerColor = Color(0xffffffff);
-    const Color activeOuterColor = Color(0xff007aff);
-    const Color inactiveBorderColor = Color(0xff999999);
-    const Color inactiveOuterColor = Color(0xff575757);
+    const Color activeInnerColor = Color(0xffdee8f8);
+    const Color activeOuterColor = Color(0xff3062d4);
+    const Color inactiveBorderColor = Color(0x80808080);
     const double innerRadius = 2.975;
     const double outerRadius = 7.0;
 
@@ -501,7 +500,7 @@ void main() {
     expect(
       find.byType(CupertinoRadio<int>),
       paints
-        ..circle(radius: outerRadius, style: PaintingStyle.fill, color: inactiveOuterColor)
+        ..path()
         ..circle(radius: outerRadius, style: PaintingStyle.stroke, color: inactiveBorderColor),
       reason: 'Unselected radio button should have default fill and border colors',
     );
@@ -529,7 +528,7 @@ void main() {
   testWidgets('Disabled radio has correct default active/inactive/fill/border colors', (WidgetTester tester) async {
     const Color activeDisabledInnerColor = Color(0x40000000);
     const Color activeDisabledOuterColor = Color(0x80ffffff);
-    const Color inactiveBorderColor = Color(0xff999999);
+    const Color inactiveBorderColor = Color(0xffd1d1d6);
     const Color inactiveDisabledOuterColor = Color(0x80ffffff);
     const double innerRadius = 2.975;
     const double outerRadius = 7.0;
@@ -572,7 +571,7 @@ void main() {
   });
 
   testWidgets('Radio can set inactive/active/fill colors', (WidgetTester tester) async {
-    const Color inactiveBorderColor = Color(0xff999999);
+    const Color inactiveBorderColor = Color(0xffd1d1d6);
     const Color activeColor = Color(0x0000000A);
     const Color fillColor = Color(0x0000000B);
     const Color inactiveColor = Color(0x0000000C);
@@ -625,11 +624,11 @@ void main() {
   testWidgets('Radio is slightly darkened when pressed', (WidgetTester tester) async {
     const Color activeInnerColor = Color(0xffffffff);
     const Color activeOuterColor = Color(0xff007aff);
-    const Color inactiveBorderColor = Color(0xff999999);
+    const Color inactiveBorderColor = Color(0xffd1d1d6);
     const Color inactiveOuterColor = Color(0xffffffff);
     const double innerRadius = 2.975;
     const double outerRadius = 7.0;
-    const Color pressedDarkShadow = Color(0x0d000000);
+    const Color pressedDarkShadow = Color(0x26ffffff);
 
     await tester.pumpWidget(CupertinoApp(
       home: Center(
@@ -648,8 +647,8 @@ void main() {
       find.byType(CupertinoRadio<int>),
       paints
         ..circle(radius: outerRadius, style: PaintingStyle.fill, color: inactiveOuterColor)
-        ..circle(radius: outerRadius, style: PaintingStyle.stroke, color: inactiveBorderColor)
-        ..circle(radius: outerRadius, style: PaintingStyle.fill, color: pressedDarkShadow),
+        ..circle(radius: outerRadius, style: PaintingStyle.fill, color: pressedDarkShadow)
+        ..circle(radius: outerRadius, style: PaintingStyle.stroke, color: inactiveBorderColor),
       reason: 'Unselected pressed radio button is slightly darkened',
     );
 
@@ -670,8 +669,8 @@ void main() {
       find.byType(CupertinoRadio<int>),
       paints
         ..circle(radius: outerRadius, style: PaintingStyle.fill, color: activeOuterColor)
-        ..circle(radius: innerRadius, style: PaintingStyle.fill, color: activeInnerColor)
-        ..circle(radius: outerRadius, style: PaintingStyle.fill, color: pressedDarkShadow),
+        ..circle(radius: outerRadius, style: PaintingStyle.fill, color: pressedDarkShadow)
+        ..circle(radius: innerRadius, style: PaintingStyle.fill, color: activeInnerColor),
       reason: 'Selected pressed radio button is slightly darkened',
     );
 
