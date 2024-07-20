@@ -35,7 +35,7 @@ SkRect GetCullRect(ISize window_size) {
 }  // namespace
 
 TEST_P(AiksTest, CollapsedDrawPaintInSubpass) {
-  DisplayListBuilder builder(GetCullRect(GetWindowSize()));
+  DisplayListBuilder builder;
 
   DlPaint paint;
   paint.setColor(DlColor::kYellow());
@@ -55,7 +55,7 @@ TEST_P(AiksTest, CollapsedDrawPaintInSubpass) {
 
 TEST_P(AiksTest, CollapsedDrawPaintInSubpassBackdropFilter) {
   // Bug: https://github.com/flutter/flutter/issues/131576
-  DisplayListBuilder builder(GetCullRect(GetWindowSize()));
+  DisplayListBuilder builder;
 
   DlPaint paint;
   paint.setColor(DlColor::kYellow());
