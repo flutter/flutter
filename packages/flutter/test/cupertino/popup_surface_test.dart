@@ -151,7 +151,7 @@ void main() {
       await tester.pumpWidget(
         const CupertinoApp(
           home: ColoredBox(
-            color: Color(0xff000000),
+            color: Color(0xffffffff),
             child: Padding(
                 padding: EdgeInsets.all(32),
                 child: Stack(
