@@ -15,6 +15,10 @@
 ///  * Use the [TextPainter] class for painting text.
 ///  * Use [Decoration] (and more concretely [BoxDecoration]) for
 ///    painting boxes.
+///
+/// @docImport 'src/painting/box_decoration.dart';
+/// @docImport 'src/painting/decoration.dart';
+/// @docImport 'src/painting/text_painter.dart';
 library painting;
 
 export 'dart:ui' show PlaceholderAlignment, Shadow, TextHeightBehavior, TextLeadingDistribution, kTextHeightNone;

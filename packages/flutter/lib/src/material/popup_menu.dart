@@ -285,16 +285,16 @@ class PopupMenuItem<T> extends PopupMenuEntry<T> {
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// widget.
   ///
-  /// If [mouseCursor] is a [MaterialStateProperty<MouseCursor>],
-  /// [MaterialStateProperty.resolve] is used for the following [MaterialState]s:
+  /// If [mouseCursor] is a [WidgetStateProperty<MouseCursor>],
+  /// [WidgetStateProperty.resolve] is used for the following [WidgetState]s:
   ///
-  ///  * [MaterialState.hovered].
-  ///  * [MaterialState.focused].
-  ///  * [MaterialState.disabled].
+  ///  * [WidgetState.hovered].
+  ///  * [WidgetState.focused].
+  ///  * [WidgetState.disabled].
   /// {@endtemplate}
   ///
   /// If null, then the value of [PopupMenuThemeData.mouseCursor] is used. If
-  /// that is also null, then [MaterialStateMouseCursor.clickable] is used.
+  /// that is also null, then [WidgetStateMouseCursor.clickable] is used.
   final MouseCursor? mouseCursor;
 
   /// The widget below this widget in the tree.
@@ -1196,6 +1196,7 @@ class PopupMenuButton<T> extends StatefulWidget {
     this.padding = const EdgeInsets.all(8.0),
     this.menuPadding,
     this.child,
+    this.borderRadius,
     this.splashRadius,
     this.icon,
     this.iconSize,
@@ -1291,6 +1292,11 @@ class PopupMenuButton<T> extends StatefulWidget {
   /// If provided, [child] is the widget used for this button
   /// and the button will utilize an [InkWell] for taps.
   final Widget? child;
+
+  /// The border radius for the [InkWell] that wraps the [child].
+  ///
+  /// Defaults to null, which indicates no border radius should be applied.
+  final BorderRadius? borderRadius;
 
   /// If provided, the [icon] is used for this button
   /// and the button will behave like an [IconButton].
@@ -1527,6 +1533,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
       return Tooltip(
         message: widget.tooltip ?? MaterialLocalizations.of(context).showMenuTooltip,
         child: InkWell(
+          borderRadius: widget.borderRadius,
           onTap: widget.enabled ? showButtonMenu : null,
           canRequestFocus: _canRequestFocus,
           radius: widget.splashRadius,

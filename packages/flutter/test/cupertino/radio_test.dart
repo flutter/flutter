@@ -148,7 +148,7 @@ void main() {
         ],
         actions: <SemanticsAction>[
           SemanticsAction.tap,
-          SemanticsAction.focus,
+          if (defaultTargetPlatform != TargetPlatform.iOS) SemanticsAction.focus,
         ],
       ),
     );
@@ -756,7 +756,7 @@ void main() {
           value: 1,
           groupValue: 1,
           onChanged: (int? i) { },
-          mouseCursor: SystemMouseCursors.forbidden,
+          mouseCursor: WidgetStateProperty.all(SystemMouseCursors.forbidden),
         ),
       ),
     ));
@@ -778,13 +778,25 @@ void main() {
     final FocusNode focusNode = FocusNode(debugLabel: 'Radio');
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
+    MouseCursor getMouseCursor(Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
+        return SystemMouseCursors.forbidden;
+      }
+      if (states.contains(WidgetState.focused)) {
+        return SystemMouseCursors.basic;
+      }
+      return SystemMouseCursors.click;
+    }
+
+    final WidgetStateProperty<MouseCursor> mouseCursor = WidgetStateProperty.resolveWith(getMouseCursor);
+
     await tester.pumpWidget(CupertinoApp(
       home: Center(
         child: CupertinoRadio<int>(
           value: 1,
           groupValue: 1,
           onChanged: (int? i) { },
-          mouseCursor: const RadioMouseCursor(),
+          mouseCursor: mouseCursor,
           focusNode: focusNode
         ),
       ),
@@ -813,13 +825,13 @@ void main() {
     );
 
     // Test disabled case.
-    await tester.pumpWidget(const CupertinoApp(
+    await tester.pumpWidget(CupertinoApp(
       home: Center(
         child: CupertinoRadio<int>(
           value: 1,
           groupValue: 1,
           onChanged: null,
-          mouseCursor: RadioMouseCursor(),
+          mouseCursor: mouseCursor,
         ),
       ),
     ));
@@ -855,22 +867,4 @@ void main() {
       kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic
     );
   });
-}
-
-class RadioMouseCursor extends WidgetStateMouseCursor {
-  const RadioMouseCursor();
-
-  @override
-  MouseCursor resolve(Set<WidgetState> states) {
-    if (states.contains(WidgetState.disabled)) {
-      return SystemMouseCursors.forbidden;
-    }
-    if (states.contains(WidgetState.focused)){
-      return SystemMouseCursors.basic;
-    }
-    return SystemMouseCursors.click;
-  }
-
-  @override
-  String get debugDescription => 'RadioMouseCursor()';
 }
