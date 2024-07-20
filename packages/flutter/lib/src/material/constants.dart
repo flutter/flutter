@@ -2,6 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:ui';
+/// @docImport 'package:flutter/cupertino.dart';
+///
+/// @docImport 'app_bar.dart';
+/// @docImport 'icon_button.dart';
+/// @docImport 'tabs.dart';
+/// @docImport 'theme_data.dart';
+library;
+
 import 'package:flutter/painting.dart';
 
 /// The minimum dimension of any interactive region according to Material
