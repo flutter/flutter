@@ -2432,6 +2432,32 @@ void main() {
     final TextField textField = tester.widget(find.byType(TextField));
     expect(textField.keyboardType, TextInputType.text);
   });
+
+  testWidgets('When filteredEntries isEmpty, no RangeError exception is thrown', (WidgetTester tester) async {
+    final ThemeData themeData = ThemeData();
+    await tester.pumpWidget(MaterialApp(
+      theme: themeData,
+      home: Scaffold(
+        body: DropdownMenu<TestMenu>(
+          requestFocusOnTap: true,
+          enableFilter: true,
+          initialSelection: TestMenu.mainMenu1,
+          dropdownMenuEntries: menuChildren,
+        ),
+      ),
+    ));
+
+    await tester.tap(find.byType(DropdownMenu<TestMenu>));
+    await tester.pump();
+
+    await tester.enterText(find
+        .byType(TextField)
+        .first, 'Menu 11');
+    await tester.pumpAndSettle();
+
+    // No exception should be thrown.
+    expect(tester.takeException(), isNull);
+  });
 }
 
 enum TestMenu {

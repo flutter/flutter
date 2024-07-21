@@ -604,6 +604,9 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
     if (searchText.isEmpty) {
       return null;
     }
+    if (entries.isEmpty) {
+      return null;
+    }
     if (currentHighlight != null && entries[currentHighlight!].label.toLowerCase().contains(searchText)) {
       return currentHighlight;
     }
