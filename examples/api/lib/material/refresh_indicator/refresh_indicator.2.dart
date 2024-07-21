@@ -42,7 +42,7 @@ class _RefreshIndicatorExampleState extends State<RefreshIndicatorExample> {
             // Callback function used by the app to listen to the
             // status of the RefreshIndicator pull-down action.
             onStatusChange: (RefreshIndicatorStatus? status) {
-              if(status == RefreshIndicatorStatus.done) {
+              if (status == RefreshIndicatorStatus.done) {
                 setState(() {
                   _isRefreshing = false;
                 });
@@ -78,7 +78,7 @@ class _RefreshIndicatorExampleState extends State<RefreshIndicatorExample> {
           ),
 
           // Shows an overlay with a CircularProgressIndicator when refreshing
-          if(_isRefreshing)
+          if (_isRefreshing)
             ColoredBox(
               color: Colors.black45,
               child: Align(
