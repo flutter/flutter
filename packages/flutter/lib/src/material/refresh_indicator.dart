@@ -187,9 +187,13 @@ class RefreshIndicator extends StatefulWidget {
   })  : _indicatorType = _IndicatorType.adaptive,
         onStatusChange = null;
 
+  /// {@tool dartpad}
   /// Creates [RefreshIndicator] with no spinner and calls `onRefresh` when
   /// successfully armed by drag event. Events can be optionally listened
-  /// by using `onStatusChange` callback
+  /// by using `onStatusChange` callback.
+  ///
+  /// ** See code in examples/api/lib/material/refresh_indicator/refresh_indicator.2.dart **
+  /// {@end-tool}
   const RefreshIndicator.noSpinner({
     super.key,
     required this.child,
