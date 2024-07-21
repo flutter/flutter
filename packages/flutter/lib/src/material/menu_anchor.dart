@@ -2075,7 +2075,7 @@ class _SubmenuDirectionalFocusAction extends DirectionalFocusAction {
           ..requestFocus()
           ..previousFocus();
         return;
-      case (Axis.horizontal, TextDirection.ltr, TraversalDirection.right): // Fallthrough
+      case (Axis.horizontal, TextDirection.ltr, TraversalDirection.right):
       case (Axis.horizontal, TextDirection.rtl, TraversalDirection.left):
         assert(_debugMenuInfo('Moving to next $MenuBar item'));
         // Focus this MenuBar SubmenuButton, then move focus to the next focusable
@@ -2105,7 +2105,7 @@ class _SubmenuDirectionalFocusAction extends DirectionalFocusAction {
           }
           return;
         }
-      case (Axis.vertical, TextDirection.ltr, TraversalDirection.left): // Fallthrough
+      case (Axis.vertical, TextDirection.ltr, TraversalDirection.left):
       case (Axis.vertical, TextDirection.rtl, TraversalDirection.right):
         if (_parent?._parent?._orientation == Axis.horizontal) {
           if (isSubmenu) {
@@ -2139,7 +2139,7 @@ class _SubmenuDirectionalFocusAction extends DirectionalFocusAction {
           assert(_debugMenuInfo('Exiting submenu'));
         }
         return;
-      case (Axis.vertical, TextDirection.ltr, TraversalDirection.right) when isSubmenu: // Fallthrough
+      case (Axis.vertical, TextDirection.ltr, TraversalDirection.right) when isSubmenu:
       case (Axis.vertical, TextDirection.rtl, TraversalDirection.left) when isSubmenu:
         assert(_debugMenuInfo('Entering submenu'));
         if (_anchor._isOpen) {
