@@ -33,7 +33,7 @@ class _RefreshIndicatorExampleState extends State<RefreshIndicatorExample> {
         title: const Text('RefreshIndicator.noSpinner Sample'),
       ),
       body: Stack(
-        children: [
+        children: <Widget>[
           RefreshIndicator.noSpinner(
             // Callback function used by the app to listen to the
             // status of the RefreshIndicator pull-down action.
