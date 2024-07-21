@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/widgets.dart';
+library;
+
 import 'package:meta/meta.dart';
 
 /// An object sent from the Flutter Driver to a Flutter application to instruct

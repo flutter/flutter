@@ -9,11 +9,12 @@
 library;
 
 import 'dart:math' as math;
-import 'dart:ui' show ImageFilter;
+import 'dart:ui' show ImageFilter, lerpDouble;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
@@ -59,7 +60,8 @@ const TextStyle _kCupertinoDialogActionStyle = TextStyle(
 
 // CupertinoActionSheet-specific text styles.
 const TextStyle _kActionSheetActionStyle = TextStyle(
-  fontFamily: 'CupertinoSystemText',
+  // The fontSize and fontWeight may be adjusted when the text is rendered.
+  fontFamily: 'CupertinoSystemDisplay',
   inherit: false,
   fontSize: 17.0,
   fontWeight: FontWeight.w400,
@@ -96,8 +98,14 @@ const double _kActionSheetEdgePadding = 8.0;
 const double _kActionSheetCancelButtonPadding = 8.0;
 const double _kActionSheetContentHorizontalPadding = 16.0;
 const double _kActionSheetContentVerticalPadding = 13.5;
-const double _kActionSheetButtonHeight = 57.0;
 const double _kActionSheetActionsSectionMinHeight = 84.0;
+const double _kActionSheetButtonHorizontalPadding = 10.0;
+
+// According to experimenting on the simulator, the height of action sheet
+// buttons is proportional to the font size down to a minimal height.
+const double _kActionSheetButtonMinHeight = 57.17;
+const double _kActionSheetButtonVerticalPaddingFactor = 0.4;
+const double _kActionSheetButtonVerticalPaddingBase = 1.8;
 
 // A translucent color that is painted on top of the blurred backdrop as the
 // dialog's background color
@@ -538,21 +546,35 @@ class _SlidingTapGestureRecognizer extends VerticalDragGestureRecognizer {
       if (event is PointerMoveEvent) {
         onResponsiveUpdate?.call(event.position);
       }
-      // If this gesture has a competing gesture (such as scrolling), and the
-      // pointer has not moved far enough to get this panning accepted, a
-      // pointer up event should still be considered as an accepted tap up.
-      // Manually accept this gesture here, which triggers onDragEnd.
+      // Sliding tap needs to handle 'up' events differently compared to typical
+      // drag gestures. If there's another gesture recognizer (like scrolling)
+      // competing and the pointer hasn't moved beyond the tolerance limit
+      // (slop), this gesture must still be accepted.
+      //
+      // Simply calling `accept()` here to handle this won't work because it
+      // would break backward compatibility with legacy buttons (see
+      // https://github.com/flutter/flutter/issues/150980 for more details).
+      // Legacy buttons recognize taps using `GestureDetector.onTap`, which
+      // neither accepts nor rejects for short taps. Instead, they wait for the
+      // default resolution as the last contender in the gesture arena.
+      //
+      // Therefore, this gesture should also follow the same strategy of not
+      // immediately accepting or rejecting. This allows tap gestures to take
+      // precedence for being inner, while sliding taps can take precedence over
+      // scroll gestures when the latter give up.
       if (event is PointerUpEvent) {
-        resolve(GestureDisposition.accepted);
         stopTrackingPointer(_primaryPointer!);
         onResponsiveEnd?.call(event.position);
-      } else {
-        super.handleEvent(event);
+        _primaryPointer = null;
+        // Do not call `super.handleEvent`, which gives up the pointer and thus
+        // rejects the gesture.
+        return;
       }
-      if (event is PointerUpEvent || event is PointerCancelEvent) {
+      if (event is PointerCancelEvent) {
         _primaryPointer = null;
       }
     }
+    super.handleEvent(event);
   }
 
   @override
@@ -588,7 +610,10 @@ abstract class _ActionSheetSlideTarget {
   //  * The point has contacted the screen in this region. In this case, this
   //    method is called as soon as the pointer down event occurs regardless of
   //    whether the gesture wins the arena immediately.
-  void didEnter();
+  //
+  // The `fromPointerDown` should be true if this callback is triggered by a
+  // PointerDownEvent, i.e. the second case from the list above.
+  void didEnter({required bool fromPointerDown});
 
   // A pointer has exited this region.
   //
@@ -653,7 +678,10 @@ class _TargetSelectionGestureRecognizer extends GestureRecognizer {
   // Collect the `_ActionSheetSlideTarget`s that are currently hit by the
   // pointer, check whether the current target have changed, and invoke their
   // methods if necessary.
-  void _updateDrag(Offset pointerPosition) {
+  //
+  // The `fromPointerDown` should be true if this update is triggered by a
+  // PointerDownEvent.
+  void _updateDrag(Offset pointerPosition, {required bool fromPointerDown}) {
     final HitTestResult result = hitTest(pointerPosition);
 
     // A slide target might nest other targets, therefore multiple targets might
@@ -679,21 +707,21 @@ class _TargetSelectionGestureRecognizer extends GestureRecognizer {
         ..clear()
         ..addAll(foundTargets);
       for (final _ActionSheetSlideTarget target in _currentTargets) {
-        target.didEnter();
+        target.didEnter(fromPointerDown: fromPointerDown);
       }
     }
   }
 
   void _onDown(DragDownDetails details) {
-    _updateDrag(details.globalPosition);
+    _updateDrag(details.globalPosition, fromPointerDown: true);
   }
 
   void _onUpdate(Offset globalPosition) {
-    _updateDrag(globalPosition);
+    _updateDrag(globalPosition, fromPointerDown: false);
   }
 
   void _onEnd(Offset globalPosition) {
-    _updateDrag(globalPosition);
+    _updateDrag(globalPosition, fromPointerDown: false);
     for (final _ActionSheetSlideTarget target in _currentTargets) {
       target.didConfirm();
     }
@@ -937,9 +965,7 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
     } else if (x >= x2) {
       return y2;
     } else {
-      return Tween<double>(begin: y1, end: y2).transform(
-        (x - x1) / (x2 - x1)
-      );
+      return lerpDouble(y1, y2, (x - x1) / (x2 - x1))!;
     }
   }
 
@@ -1116,7 +1142,7 @@ class _CupertinoActionSheetActionState extends State<CupertinoActionSheetAction>
     implements _ActionSheetSlideTarget {
   // |_ActionSheetSlideTarget|
   @override
-  void didEnter() {}
+  void didEnter({required bool fromPointerDown}) {}
 
   // |_ActionSheetSlideTarget|
   @override
@@ -1128,9 +1154,44 @@ class _CupertinoActionSheetActionState extends State<CupertinoActionSheetAction>
     widget.onPressed();
   }
 
+  // Calculates the font size for action sheet buttons.
+  //
+  // The `contextBodySize` is the body font size specified by context. The
+  // return value is the button font size, including the effect of context font
+  // scale factor. Divide by context font scale factor before using in a `Text`.
+  static double _buttonFontSize(double contextBodySize) {
+    // It is observed that the native action sheet buttons use font sizes that
+    // deviate from standard HIG specifications in a non-linear way. The following
+    // table shows the regular body font size vs the button font size:
+    //
+    //  Text scale  | xs |  s |  m |  l | xl | xxl | xxxl | ax1 | ax2 | ax3 | ax4 | ax5
+    //  Body font   | 14 | 15 | 16 | 17 | 19 |  21 |  23  |  28 |  33 |  40 |  47 |  53
+    //  Button font | 21 | 21 | 21 | 21 | 23 |  24 |  24  |  28 |  33 |  40 |  47 |  53
+
+    // For very small or very large text, simple rules can be observed.
+    // For mid-sized text, piecewise linear interpolation is used.
+    return switch (contextBodySize) {
+      <= 17 => 21.0,
+      <= 19 => lerpDouble(21.0, 23.0, (contextBodySize - 17.0)/(19.0 - 17.0))!,
+      <= 21 => lerpDouble(23.0, 24.0, (contextBodySize - 19.0)/(21.0 - 19.0))!,
+      <= 24 => 24.0,
+      _ => contextBodySize,
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
+    // The context scale factor is derived from the current body size and the
+    // standard body size in "large".
+    const double higLargeBodySize = 17.0;
+    final double contextBodySize = MediaQuery.textScalerOf(context).scale(higLargeBodySize);
+    final double contextScaleFactor = contextBodySize / higLargeBodySize;
+    final double fontSize = _buttonFontSize(contextBodySize);
+
     TextStyle style = _kActionSheetActionStyle.copyWith(
+      // `Text` will scale the provided font size inside, so its parameter is
+      // unscaled first.
+      fontSize: fontSize / contextScaleFactor,
       color: widget.isDestructiveAction
           ? CupertinoDynamicColor.resolve(CupertinoColors.systemRed, context)
           : CupertinoTheme.of(context).primaryColor,
@@ -1140,6 +1201,9 @@ class _CupertinoActionSheetActionState extends State<CupertinoActionSheetAction>
       style = style.copyWith(fontWeight: FontWeight.w600);
     }
 
+    final double verticalPadding = _kActionSheetButtonVerticalPaddingBase
+        + fontSize * _kActionSheetButtonVerticalPaddingFactor;
+
     return MouseRegion(
       cursor: kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
       child: MetaData(
@@ -1147,15 +1211,17 @@ class _CupertinoActionSheetActionState extends State<CupertinoActionSheetAction>
         behavior: HitTestBehavior.opaque,
         child: ConstrainedBox(
           constraints: const BoxConstraints(
-            minHeight: _kActionSheetButtonHeight,
+            minHeight: _kActionSheetButtonMinHeight,
           ),
           child: Semantics(
             button: true,
             onTap: widget.onPressed,
             child: Padding(
-              padding: const EdgeInsets.symmetric(
-                vertical: 16.0,
-                horizontal: 10.0,
+              padding: EdgeInsets.fromLTRB(
+                _kActionSheetButtonHorizontalPadding,
+                verticalPadding,
+                _kActionSheetButtonHorizontalPadding,
+                verticalPadding,
               ),
               child: DefaultTextStyle(
                 style: style,
@@ -1198,11 +1264,27 @@ class _ActionSheetButtonBackground extends StatefulWidget {
 class _ActionSheetButtonBackgroundState extends State<_ActionSheetButtonBackground> implements _ActionSheetSlideTarget {
   bool isBeingPressed = false;
 
+  void _emitVibration(){
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.android:
+        HapticFeedback.selectionClick();
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        break;
+    }
+  }
+
   // |_ActionSheetSlideTarget|
   @override
-  void didEnter() {
+  void didEnter({required bool fromPointerDown}) {
     setState(() { isBeingPressed = true; });
     widget.onPressStateChange?.call(true);
+    if (!fromPointerDown) {
+      _emitVibration();
+    }
   }
 
   // |_ActionSheetSlideTarget|
