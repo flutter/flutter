@@ -2109,11 +2109,9 @@ class _SubmenuDirectionalFocusAction extends DirectionalFocusAction {
       case (Axis.vertical, TextDirection.rtl, TraversalDirection.right):
         if (_parent?._parent?._orientation == Axis.horizontal) {
           if (isSubmenu) {
-            if (!_parent!._isRoot) {
-              _parent!.widget.childFocusNode
-                ?..requestFocus()
-                ..previousFocus();
-            }
+            _parent!.widget.childFocusNode
+              ?..requestFocus()
+              ..previousFocus();
           } else {
             assert(_debugMenuInfo('Exiting submenu'));
             // MenuBar SubmenuButton => SubmenuButton => child
