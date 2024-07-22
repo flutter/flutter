@@ -3613,7 +3613,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
 
   void _handleHistoryChanged() {
     final bool navigatorCanPop = canPop();
-    late final bool routeBlocksPop;
+    final bool routeBlocksPop;
     if (!navigatorCanPop) {
       final _RouteEntry? lastEntry = _lastRouteEntryWhereOrNull(_RouteEntry.isPresentPredicate);
       routeBlocksPop = lastEntry != null
