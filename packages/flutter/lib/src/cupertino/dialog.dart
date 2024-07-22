@@ -91,6 +91,8 @@ const double _kAccessibilityCupertinoDialogWidth = 310.0;
 const double _kDialogEdgePadding = 20.0;
 const double _kDialogMinButtonHeight = 45.0;
 const double _kDialogMinButtonFontSize = 10.0;
+// The min height for a button excluding dividers. Derived by comparing on iOS
+// 17 simulators.
 const double _kDialogActionsSectionMinHeight = 67.8;
 
 // ActionSheet specific constants.
@@ -298,9 +300,9 @@ class _CupertinoAlertDialogState extends State<CupertinoAlertDialog> {
   ScrollController get _effectiveActionScrollController =>
     widget.actionScrollController ?? (_backupActionScrollController ??= ScrollController());
 
-  bool get hasContent => widget.title != null || widget.content != null;
 
   Widget? _buildContent(BuildContext context) {
+    final bool hasContent = widget.title != null || widget.content != null;
     if (!hasContent) {
       return null;
     }
@@ -406,7 +408,7 @@ class _CupertinoAlertDialogState extends State<CupertinoAlertDialog> {
                             scopesRoute: true,
                             explicitChildNodes: true,
                             label: localizations.alertDialogLabel,
-                            child: _CupertinoDialogRenderWidget(
+                            child: _CupertinoDialogLayoutWidget(
                               contentSection: _buildContent(context),
                               actionsSection: _buildActions(),
                               dividerColor: CupertinoColors.separator,
@@ -1302,11 +1304,17 @@ class _ActionSheetButtonBackgroundState extends State<_ActionSheetButtonBackgrou
   }
 }
 
-// The divider of an action sheet.
+// The divider of an action sheet or an alert dialog.
+//
+// The divider can be used as a horizontal divider (in a column) or a vertical
+// divider (in a row) without widget-layer configuration, but instead depending
+// on the provided layout constraints. The constraints should be the column
+// width or row height for one dimension, and unlimited for the other, which
+// will result as divider thickness. This is useful when whether the container
+// is a row or a column must be decided in the layout phase.
 //
 // If the divider is not `hidden`, then it displays the `dividerColor`.
-// Otherwise it displays the background color. A divider is hidden when either
-// of its neighbor button is pressed.
+// Otherwise it displays the background color.
 class _ActionSheetDivider extends StatelessWidget {
   const _ActionSheetDivider({
     required this.dividerColor,
@@ -1323,6 +1331,7 @@ class _ActionSheetDivider extends StatelessWidget {
     final Color backgroundColor = CupertinoDynamicColor.resolve(hiddenColor, context);
     return LimitedBox(
       maxHeight: _kDividerThickness,
+      maxWidth: _kDividerThickness,
       child: Container(
         height: _kDividerThickness,
         decoration: BoxDecoration(
@@ -1529,8 +1538,8 @@ class _ActionSheetMainSheetState extends State<_ActionSheetMainSheet> {
 }
 
 // Layout an alert dialog given its content section and actions section.
-class _CupertinoDialogRenderWidget extends StatefulWidget {
-  const _CupertinoDialogRenderWidget({
+class _CupertinoDialogLayoutWidget extends StatefulWidget {
+  const _CupertinoDialogLayoutWidget({
     required this.contentSection,
     required this.actionsSection,
     required this.dividerColor,
@@ -1541,10 +1550,10 @@ class _CupertinoDialogRenderWidget extends StatefulWidget {
   final Color dividerColor;
 
   @override
-  _CupertinoDialogRenderWidgetState createState() => _CupertinoDialogRenderWidgetState();
+  _CupertinoDialogLayoutWidgetState createState() => _CupertinoDialogLayoutWidgetState();
 }
 
-class _CupertinoDialogRenderWidgetState extends State<_CupertinoDialogRenderWidget> {
+class _CupertinoDialogLayoutWidgetState extends State<_CupertinoDialogLayoutWidget> {
 
   double _topOverscroll = 0;
   double _bottomOverscroll = 0;
@@ -1748,13 +1757,15 @@ class _CupertinoAlertContentSection extends StatelessWidget {
 }
 
 // The "actions section" of a [CupertinoAlertDialog].
+//
+// The `actions` must not be empty.
 class _CupertinoAlertActionSection extends StatelessWidget {
   const _CupertinoAlertActionSection({
     required this.actions,
     required this.onPressedUpdate,
     required this.pressedIndex,
     required this.scrollController,
-  });
+  }) : assert(actions.length != 0);
 
   // A list of action buttons.
   //
@@ -1774,13 +1785,6 @@ class _CupertinoAlertActionSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (actions.isEmpty) {
-      return const LimitedBox(
-        maxWidth: 0,
-        child: SizedBox(width: double.infinity, height: 0),
-      );
-    }
-
     final Color dialogColor = CupertinoDynamicColor.resolve(_kDialogColor, context);
     final Color dialogPressedColor = CupertinoDynamicColor.resolve(_kDialogPressedColor, context);
     final Color dividerColor = CupertinoDynamicColor.resolve(CupertinoColors.separator, context);
@@ -2240,7 +2244,7 @@ class _RenderAlertDialogActionsLayout extends RenderFlex {
       // If both children fit into a half-row slot, use the horizontal layout.
       // Max intrinsic widths are used here, which, according to
       // [TextPainter.maxIntrinsicWidth], allows text to be displayed at their
-      // full height.
+      // full font size.
       if (child.getMaxIntrinsicWidth(double.infinity) > slotWidth) {
         return false;
       }
