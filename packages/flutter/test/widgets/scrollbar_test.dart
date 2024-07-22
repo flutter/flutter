@@ -3495,23 +3495,23 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
     final ScrollController scrollController = ScrollController();
     addTearDown(scrollController.dispose);
     await tester.pumpWidget(
-        Directionality(
-            textDirection: TextDirection.ltr,
-            child: MediaQuery(
-              data: const MediaQueryData(
-              ),
-              child: RawScrollbar(
-                controller: scrollController,
-                minThumbLength: 21,
-                minOverscrollLength: 8,
-                thumbVisibility: true,
-                child: SingleChildScrollView(
-                  controller: scrollController,
-                  child: const SizedBox(width: 1000.0, height: 50000.0),
-                ),
-              ),
-            )
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(
+          ),
+          child: RawScrollbar(
+            controller: scrollController,
+            minThumbLength: 21,
+            minOverscrollLength: 8,
+            thumbVisibility: true,
+            child: SingleChildScrollView(
+              controller: scrollController,
+              child: const SizedBox(width: 1000.0, height: 50000.0),
+            ),
+          ),
         )
+      )
     );
     await tester.pumpAndSettle();
     expect(
