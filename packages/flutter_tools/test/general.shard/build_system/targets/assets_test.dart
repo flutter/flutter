@@ -317,7 +317,7 @@ flutter:
     ),
   });
 
-  {
+  testUsingContext('asset transformation, per each asset, uses unique paths for temporary files', () async {
     final List<String> inputFilePaths = <String>[];
     final List<String> outputFilePaths = <String>[];
 
@@ -347,30 +347,34 @@ flutter:
       },
     );
 
-    testUsingContext('uses unique paths for temporary files', () async {
-      Cache.flutterRoot = Cache.defaultFlutterRoot(
-        platform: globals.platform,
-        fileSystem: fileSystem,
-        userMessages: UserMessages(),
-      );
+    Cache.flutterRoot = Cache.defaultFlutterRoot(
+      platform: globals.platform,
+      fileSystem: fileSystem,
+      userMessages: UserMessages(),
+    );
 
-      final Environment environment = Environment.test(
-        fileSystem.currentDirectory,
-        processManager: globals.processManager,
-        artifacts: Artifacts.test(),
-        fileSystem: fileSystem,
-        logger: logger,
-        platform: globals.platform,
-        defines: <String, String>{
-          kBuildMode: BuildMode.debug.cliName,
-        },
-      );
+    final Environment environment = Environment.test(
+      fileSystem.currentDirectory,
+      processManager: FakeProcessManager.list(
+        <FakeCommand>[
+          transformerCommand,
+          transformerCommand,
+        ],
+      ),
+      artifacts: Artifacts.test(),
+      fileSystem: fileSystem,
+      logger: logger,
+      platform: globals.platform,
+      defines: <String, String>{
+        kBuildMode: BuildMode.debug.cliName,
+      },
+    );
 
-      await fileSystem.file('.packages').create();
+    await fileSystem.file('.packages').create();
 
-      fileSystem.file('pubspec.yaml')
-        ..createSync()
-        ..writeAsStringSync('''
+    fileSystem.file('pubspec.yaml')
+      ..createSync()
+      ..writeAsStringSync('''
   name: example
   flutter:
     assets:
@@ -379,30 +383,24 @@ flutter:
           - package: my_capitalizer_transformer
   ''');
 
-      fileSystem.file('input.txt')
-        ..createSync(recursive: true)
-        ..writeAsStringSync('abc');
+    fileSystem.file('input.txt')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('abc');
 
-      fileSystem.directory('2x').childFile('input.txt')
-        ..createSync(recursive: true)
-        ..writeAsStringSync('def');
+    fileSystem.directory('2x').childFile('input.txt')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('def');
 
-      await const CopyAssets().build(environment);
+    await const CopyAssets().build(environment);
 
-      expect(inputFilePaths.toSet(), hasLength(inputFilePaths.length));
-      expect(outputFilePaths.toSet(), hasLength(outputFilePaths.length));
-    }, overrides: <Type, Generator> {
-      Logger: () => logger,
-      FileSystem: () => fileSystem,
-      Platform: () => FakePlatform(),
-      ProcessManager: () => FakeProcessManager.list(
-        <FakeCommand>[
-          transformerCommand,
-          transformerCommand,
-        ]
-      ),
-    });
-  }
+    expect(inputFilePaths.toSet(), hasLength(inputFilePaths.length));
+    expect(outputFilePaths.toSet(), hasLength(outputFilePaths.length));
+  }, overrides: <Type, Generator>{
+    Logger: () => logger,
+    FileSystem: () => fileSystem,
+    Platform: () => FakePlatform(),
+    ProcessManager: () => FakeProcessManager.empty(),
+  });
 
   testUsingContext('Throws exception if pubspec contains missing files', () async {
     fileSystem.file('pubspec.yaml')
