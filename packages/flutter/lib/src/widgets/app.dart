@@ -328,7 +328,7 @@ class WidgetsApp extends StatefulWidget {
     this.home,
     Map<String, WidgetBuilder> this.routes = const <String, WidgetBuilder>{},
     this.builder,
-    this.title = '',
+    this.title,
     this.onGenerateTitle,
     this.textStyle,
     required this.color,
@@ -425,7 +425,7 @@ class WidgetsApp extends StatefulWidget {
     this.routerConfig,
     this.backButtonDispatcher,
     this.builder,
-    this.title = '',
+    this.title,
     this.onGenerateTitle,
     this.onNavigationNotification,
     this.textStyle,
@@ -1771,7 +1771,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
       return true;
     }());
 
-    final Widget title;
+    final Widget? title;
     if (widget.onGenerateTitle != null) {
       title = Builder(
         // This Builder exists to provide a context below the Localizations widget.
@@ -1786,12 +1786,14 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
           );
         },
       );
-    } else {
+    } else if (widget.title != null) {
       title = Title(
-        title: widget.title,
+        title: widget.title!,
         color: widget.color.withOpacity(1.0),
         child: result,
       );
+    } else {
+      title = null;
     }
 
     final Locale appLocale = widget.locale != null

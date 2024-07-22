@@ -22,7 +22,7 @@ void main() {
       child: Container(),
     );
     expect(widget.toString, isNot(throwsException));
-    expect(widget.title, isNull);
+    expect(widget.title, equals(''));
     expect(widget.color, equals(const Color(0xFF00FF00)));
   });
 
@@ -46,6 +46,10 @@ void main() {
       child: Container(),
     ));
 
-    expect(log, isEmpty);
+    expect(log, hasLength(1));
+    expect(log.single, isMethodCall(
+      'SystemChrome.setApplicationSwitcherDescription',
+      arguments: <String, dynamic>{'label': '', 'primaryColor': 4278255360},
+    ));
   });
 }
