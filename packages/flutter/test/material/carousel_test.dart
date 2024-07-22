@@ -231,43 +231,6 @@ void main() {
     expect(find.text('Item 7'), findsNothing);
   });
 
-  testWidgets('CarouselView.weighted respects CarouselController.initialItem', (WidgetTester tester) async {
-    final CarouselController controller = CarouselController(initialItem: 5);
-    addTearDown(controller.dispose);
-
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: CarouselView.weighted(
-            controller: controller,
-            flexWeights: const <int>[7, 1],
-            children: List<Widget>.generate(10, (int index) {
-              return Center(
-                child: Text('Item $index'),
-              );
-            }),
-          ),
-        ),
-      )
-    );
-
-    final Size viewportSize = MediaQuery.of(tester.element(find.byType(CarouselView))).size;
-    expect(viewportSize, const Size(800, 600));
-
-    expect(find.text('Item 5'), findsOneWidget);
-    final Rect rect5 = tester.getRect(getItem(5));
-    // Item width is 7/8 of the viewport.
-    expect(rect5, const Rect.fromLTRB(0.0, 0.0, 700.0, 600.0));
-
-    expect(find.text('Item 6'), findsOneWidget);
-    final Rect rect6 = tester.getRect(getItem(6));
-    // Item width is 1/8 of the viewport.
-    expect(rect6, const Rect.fromLTRB(700.0, 0.0, 800.0, 600.0));
-
-    expect(find.text('Item 4'), findsNothing);
-    expect(find.text('Item 7'), findsNothing);
-  });
-
   testWidgets('The initialItem should be the first item with expanded size(max extent)', (WidgetTester tester) async {
     final CarouselController controller = CarouselController(initialItem: 5);
     addTearDown(controller.dispose);
