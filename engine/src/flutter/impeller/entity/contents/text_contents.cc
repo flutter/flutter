@@ -254,8 +254,9 @@ bool TextContents::Render(const ContentContext& renderer,
             for (const Point& point : unit_points) {
               Point position;
               if (is_translation_scale) {
-                position = screen_glyph_position +
-                           (basis_transform * point * scaled_bounds.GetSize());
+                position = (screen_glyph_position +
+                            (basis_transform * point * scaled_bounds.GetSize()))
+                               .Round();
               } else {
                 position = entity_transform * (glyph_position.position +
                                                scaled_bounds.GetLeftTop() +
