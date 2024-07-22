@@ -74,14 +74,14 @@ struct GLProc {
   ///
   template <class... Args>
   auto operator()(Args&&... args) const {
-#ifdef IMPELLER_DEBUG
+#if defined(IMPELLER_DEBUG) && !defined(NDEBUG)
     AutoErrorCheck error(error_fn, name);
     // We check for the existence of extensions, and reset the function pointer
     // but it's still called unconditionally below, and will segfault. This
     // validation log will at least give us a hint as to what's going on.
     FML_CHECK(IsAvailable()) << "GL function " << name << " is not available. "
                              << "This is likely due to a missing extension.";
-#endif  // IMPELLER_DEBUG
+#endif  // defined(IMPELLER_DEBUG) && !defined(NDEBUG)
     return function(std::forward<Args>(args)...);
   }
 
