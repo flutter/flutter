@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'color_scheme.dart';
+/// @docImport 'navigation_bar.dart';
+/// @docImport 'scaffold.dart';
+library;
+
 import 'dart:collection' show Queue;
 import 'dart:math' as math;
 
