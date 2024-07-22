@@ -1839,7 +1839,7 @@ class ColorScheme with Diagnosticable {
       height: maxDimension
     );
     final ImageStreamListener listener = ImageStreamListener(
-          (ImageInfo info, _) => completer.complete(info.image),
+          (ImageInfo info, bool sync) => completer.complete(info.image),
       onError: completer.completeError,
     );
 
