@@ -131,7 +131,8 @@ class _MyHomePageState extends State<MyHomePage> {
     final List<Widget> newText = <Widget>[];
     for (final SelectedContentRange contentRange in ranges) {
       if (contentRange.selectableId == null || !dataSourceMap.containsKey(contentRange.selectableId)) {
-        // Cannot replace content at range if not text or if a selectable id has not been provided.
+        // Cannot replace content at range if a selectable id has not been provided or if the selectableId
+        // is not in the data model.
         return;
       }
       final TextSpan rawSpan = dataSourceMap[contentRange.selectableId]!;
