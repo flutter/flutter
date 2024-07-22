@@ -15,7 +15,7 @@ import re
 import sys
 
 THIS_DIR = os.path.abspath(os.path.dirname(__file__))
-sys.path += [os.path.join(THIS_DIR, '..', '..', '..', 'third_party', 'pyyaml', 'lib')]
+sys.path.insert(0, os.path.join(THIS_DIR, '..', '..', '..', 'third_party', 'pyyaml', 'lib'))
 import yaml
 
 DEFAULT_LANGUAGE_VERSION = '2.8'
