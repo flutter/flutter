@@ -3515,10 +3515,10 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
     );
     await tester.pumpAndSettle();
     expect(
-        find.byType(RawScrollbar),
-        paints
-          ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0)) // track
-          ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 21.0)) // thumb
+      find.byType(RawScrollbar),
+      paints
+        ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0)) // track
+        ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 21.0)) // thumb
     ); // thumb
   });
 }
