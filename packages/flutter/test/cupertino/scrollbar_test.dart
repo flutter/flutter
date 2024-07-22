@@ -1017,6 +1017,7 @@ void main() {
     await tester.pump(kScrollbarFadeDuration);
   });
 
+// This test should be changed to 'does not page the scroll view'.
   testWidgets('Tapping the track area pages the Scroll View', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     addTearDown(scrollController.dispose);

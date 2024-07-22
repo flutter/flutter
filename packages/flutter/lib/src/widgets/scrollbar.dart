@@ -1788,7 +1788,11 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     _cachedController = null;
   }
 
-  void _handleTrackTapDown(TapDownDetails details) {
+  /// Handler called when the track is tapped in order to scroll to the tapped
+  /// position.
+  ///
+  @protected
+  void handleTrackTapDown(TapDownDetails details) {
     // The Scrollbar should page towards the position of the tap on the track.
     assert(_debugCheckHasValidScrollPosition());
     _cachedController = _effectiveScrollController;
@@ -2007,7 +2011,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
           customPaintKey: _scrollbarPainterKey,
         ),
         (_TrackTapGestureRecognizer instance) {
-          instance.onTapDown = _handleTrackTapDown;
+          instance.onTapDown = handleTrackTapDown;
         },
       );
 
