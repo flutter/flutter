@@ -312,6 +312,144 @@ void main() {
       semantics.dispose();
     });
 
+    testWidgets('Horizontal PageView beats SelectionArea child touch drag gestures on iOS', (WidgetTester tester) async {
+      final PageController pageController = PageController();
+      const String testValue = 'abc def ghi jkl mno pqr stu vwx yz';
+      final FocusNode focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+      addTearDown(pageController.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: PageView(
+            controller: pageController,
+            children: <Widget>[
+              Center(
+                child: SelectableRegion(
+                  focusNode: focusNode,
+                  selectionControls: materialTextSelectionControls,
+                  child: const Text(testValue),
+                ),
+              ),
+              const SizedBox(
+                height: 200.0,
+                child: Center(
+                  child: Text('Page 2'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.descendant(of: find.text(testValue), matching: find.byType(RichText)));
+      final Offset gPos = textOffsetToPosition(paragraph, testValue.indexOf('g'));
+      final Offset pPos = textOffsetToPosition(paragraph, testValue.indexOf('p'));
+
+      // A double tap + drag should take precendence over parent drags.
+      final TestGesture gesture = await tester.startGesture(gPos);
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+      await gesture.down(gPos);
+      await tester.pumpAndSettle();
+      await gesture.moveTo(pPos);
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(paragraph.selections, isNotEmpty);
+      expect(paragraph.selections[0], TextSelection(baseOffset: testValue.indexOf('g'), extentOffset: testValue.indexOf('p') + 3));
+
+      expect(pageController.page, isNotNull);
+      expect(pageController.page, 0.0);
+      // A horizontal drag directly on the SelectableRegion should move the page
+      // view to the next page.
+      final Rect selectableTextRect = tester.getRect(find.byType(SelectableRegion));
+      await tester.dragFrom(selectableTextRect.centerRight - const Offset(0.1, 0.0), const Offset(-500.0, 0.0));
+      await tester.pumpAndSettle();
+      expect(pageController.page, isNotNull);
+      expect(pageController.page, 1.0);
+    },
+      variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+      skip: kIsWeb, // https://github.com/flutter/flutter/issues/125582.
+    );
+
+    testWidgets('Vertical PageView beats SelectionArea child touch drag gestures', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/150897.
+      final PageController pageController = PageController();
+      const String testValue = 'abc def ghi jkl mno pqr stu vwx yz';
+      final FocusNode focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+      addTearDown(pageController.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: PageView(
+            scrollDirection: Axis.vertical,
+            controller: pageController,
+            children: <Widget>[
+              Center(
+                child: SelectableRegion(
+                  focusNode: focusNode,
+                  selectionControls: materialTextSelectionControls,
+                  child: const Text(testValue),
+                ),
+              ),
+              const SizedBox(
+                height: 200.0,
+                child: Center(
+                  child: Text('Page 2'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.descendant(of: find.text(testValue), matching: find.byType(RichText)));
+      final Offset gPos = textOffsetToPosition(paragraph, testValue.indexOf('g'));
+      final Offset pPos = textOffsetToPosition(paragraph, testValue.indexOf('p'));
+
+      // A double tap + drag should take precendence over parent drags.
+      final TestGesture gesture = await tester.startGesture(gPos);
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+      await gesture.down(gPos);
+      await tester.pumpAndSettle();
+      await gesture.moveTo(pPos);
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(paragraph.selections, isNotEmpty);
+      expect(paragraph.selections[0], TextSelection(baseOffset: testValue.indexOf('g'), extentOffset: testValue.indexOf('p') + 3));
+
+      expect(pageController.page, isNotNull);
+      expect(pageController.page, 0.0);
+      // A vertical drag directly on the SelectableRegion should move the page
+      // view to the next page.
+      final Rect selectableTextRect = tester.getRect(find.byType(SelectableRegion));
+      // Simulate a pan by drag vertically first.
+      await gesture.down(selectableTextRect.center);
+      await tester.pump();
+      await gesture.moveTo(selectableTextRect.center + const Offset(0.0, -200.0));
+      // Introduce horizontal movement.
+      await gesture.moveTo(selectableTextRect.center + const Offset(5.0, -300.0));
+      await gesture.moveTo(selectableTextRect.center + const Offset(-10.0, -400.0));
+      // Continue dragging vertically.
+      await gesture.moveTo(selectableTextRect.center + const Offset(0.0, -500.0));
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(pageController.page, isNotNull);
+      expect(pageController.page, 1.0);
+    },
+      variant: TargetPlatformVariant.mobile(),
+      skip: kIsWeb, // https://github.com/flutter/flutter/issues/125582.
+    );
+
     testWidgets('mouse single-click selection collapses the selection', (WidgetTester tester) async {
       final UniqueKey spy = UniqueKey();
       final FocusNode focusNode = FocusNode();
