@@ -93,7 +93,7 @@ abstract class SelectionHandler implements ValueListenable<SelectionGeometry> {
   /// this [SelectionHandler].
   ///
   /// Return an empty list if nothing is selected.
-  List<SelectedContentRange<Object>> getSelections();
+  List<SelectedContentRange> getSelections();
 
   /// Handles the [SelectionEvent] sent to this object.
   ///
@@ -126,11 +126,10 @@ abstract class SelectionHandler implements ValueListenable<SelectionGeometry> {
 ///   the form of [SelectedContentRange]s for the subtree it wraps,
 ///   contained under a [SelectionArea] or [SelectableRegion].
 @immutable
-class SelectedContentRange<T extends Object> {
+class SelectedContentRange {
   /// Creates a [SelectedContentRange] with the given values.
   const SelectedContentRange({
     this.selectableId,
-    required this.content,
     required this.contentLength,
     required this.startOffset,
     required this.endOffset,
@@ -152,9 +151,6 @@ class SelectedContentRange<T extends Object> {
   ///   to your widget tree.
   final Object? selectableId;
 
-  /// The content that contains the selection.
-  final T content;
-
   /// The length of the content.
   ///
   /// The absolute value of the difference between the start
@@ -162,7 +158,7 @@ class SelectedContentRange<T extends Object> {
   /// must not exceed the content length.
   final int contentLength;
 
-  /// The start of the selection relative to the start of the [content].
+  /// The start of the selection relative to the start of the content.
   ///
   /// {@template flutter.rendering.selection.SelectedContentRange.selectionOffsets}
   /// For example a [Text] widget's content is in the format
@@ -200,7 +196,7 @@ class SelectedContentRange<T extends Object> {
   /// {@endtemplate}
   final int startOffset;
 
-  /// The end of the selection relative to the end of the [content].
+  /// The end of the selection relative to the end of the content.
   ///
   /// {@macro flutter.rendering.selection.SelectedContentRange.selectionOffsets}
   final int endOffset;
@@ -209,13 +205,12 @@ class SelectedContentRange<T extends Object> {
   ///
   /// Children of a given range enable more granular modification of the
   /// selection.
-  final List<SelectedContentRange<Object>>? children;
+  final List<SelectedContentRange>? children;
 
   @override
   String toString() {
     return 'SelectedContentRange(\n'
            '  selectableId: $selectableId,\n'
-           '  content: $content,\n'
            '  startOffset: $startOffset,\n'
            '  endOffset: $endOffset,\n'
            '  children: $children,\n'

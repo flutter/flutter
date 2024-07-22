@@ -36,7 +36,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final List<SelectedContentRange<Object>> _activeSelections = <SelectedContentRange<Object>>[];
+  final List<SelectedContentRange> _activeSelections = <SelectedContentRange>[];
   final ContextMenuController _menuController = ContextMenuController();
   final GlobalKey<SelectionAreaState> selectionAreaKey = GlobalKey<SelectionAreaState>();
   final Key _text1Id = UniqueKey();
@@ -101,7 +101,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _colorSelectionRed(
-    List<SelectedContentRange<Object>> ranges, {
+    List<SelectedContentRange> ranges, {
     required Map<Key, TextSpan> dataMap,
     required bool coloringChildSpan,
   }) {
@@ -109,12 +109,13 @@ class _MyHomePageState extends State<MyHomePage> {
       return;
     }
     for (int index = 0; index < ranges.length; index += 1) {
-      final SelectedContentRange<Object> contentRange = ranges[index];
-      if (contentRange.content is! TextSpan || contentRange.selectableId == null) {
-        // Cannot color range red if it is not text or if a selectable id has not been provided.
+      final SelectedContentRange contentRange = ranges[index];
+      if (contentRange.selectableId == null || !dataMap.containsKey(contentRange.selectableId)) {
+        // Cannot color range red if a selectable id has not been provided or if the selectableId
+        // is not in the data model.
         return;
       }
-      final TextSpan rawSpan = contentRange.content as TextSpan;
+      final TextSpan rawSpan = dataMap[contentRange.selectableId]!;
       final int startOffset = min(contentRange.startOffset, contentRange.endOffset);
       final int endOffset = max(contentRange.startOffset, contentRange.endOffset);
       final List<InlineSpan> beforeSelection = <InlineSpan>[];
@@ -181,9 +182,9 @@ class _MyHomePageState extends State<MyHomePage> {
               return true;
             }
             // Update bulleted list data.
-            for (final SelectedContentRange<Object> range in contentRange.children!) {
+            for (final SelectedContentRange range in contentRange.children!) {
               _colorSelectionRed(
-                <SelectedContentRange<Object>>[range],
+                <SelectedContentRange>[range],
                 dataMap: bulletSourceMap,
                 coloringChildSpan: true,
               );
@@ -211,7 +212,7 @@ class _MyHomePageState extends State<MyHomePage> {
         return true;
       });
       dataMap[contentRange.selectableId! as Key] = TextSpan(
-        style: (contentRange.content as TextSpan).style,
+        style: dataMap[contentRange.selectableId]!.style,
         children: <InlineSpan>[
           ...beforeSelection,
           ...insideSelection,
@@ -277,7 +278,7 @@ class _MyHomePageState extends State<MyHomePage> {
           );
         },
         child: SelectionListener(
-          onSelectionChanged: (List<SelectedContentRange<Object>> selections) {
+          onSelectionChanged: (List<SelectedContentRange> selections) {
             _activeSelections.clear();
             if (selections.isEmpty) {
               return;

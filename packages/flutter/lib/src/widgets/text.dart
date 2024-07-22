@@ -1236,9 +1236,9 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
 
   /// Copies the selections of all [Selectable]s.
   @override
-  List<SelectedContentRange<Object>> getSelections() {
+  List<SelectedContentRange> getSelections() {
     if (currentSelectionStartIndex == -1 || currentSelectionEndIndex == -1) {
-      return <SelectedContentRange<Object>>[];
+      return <SelectedContentRange>[];
     }
     // Accurately find the selection endpoints, selections.first.startOffset and
     // selections.last.endOffset are only accurate when the selections.first and
@@ -1250,14 +1250,14 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
     // to the root text.
     final int startOffset;
     final int endOffset;
-    final List<SelectedContentRange<Object>> startingSelectableSelections = selectables[currentSelectionStartIndex].getSelections();
-    final List<SelectedContentRange<Object>> endingSelectableSelections = selectables[currentSelectionEndIndex].getSelections();
+    final List<SelectedContentRange> startingSelectableSelections = selectables[currentSelectionStartIndex].getSelections();
+    final List<SelectedContentRange> endingSelectableSelections = selectables[currentSelectionEndIndex].getSelections();
     if (startingSelectableSelections.isEmpty || endingSelectableSelections.isEmpty) {
       assert(
         true,
         'This selection container delegate has an active selection, indicated by its currentSelectionStartIndex and currentSelectionEndIndex, but it provides no SelectedContentRanges to represent this selection.',
       );
-      return <SelectedContentRange<Object>>[];
+      return <SelectedContentRange>[];
     }
     if (paragraph.selectableBelongsToParagraph(selectables[currentSelectionStartIndex])) {
       // A [_SelectableFragment] will only have one [SelectedContentRange].
@@ -1284,25 +1284,24 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
     // Collect any child ranges.
     final int selectionStart = min(currentSelectionStartIndex, currentSelectionEndIndex);
     final int selectionEnd = max(currentSelectionStartIndex, currentSelectionEndIndex);
-    final List<SelectedContentRange<Object>> childSelections = <SelectedContentRange<Object>>[];
+    final List<SelectedContentRange> childSelections = <SelectedContentRange>[];
     for (int index = selectionStart; index <= selectionEnd; index += 1) {
       if (paragraph.selectableBelongsToParagraph(selectables[index])) {
         continue;
       }
-      final List<SelectedContentRange<Object>> selectedContentRanges = selectables[index].getSelections();
+      final List<SelectedContentRange> selectedContentRanges = selectables[index].getSelections();
       if (selectedContentRanges.isNotEmpty) {
         childSelections.addAll(selectedContentRanges);
       }
     }
-    final SelectedContentRange<TextSpan> range = SelectedContentRange<TextSpan>(
-      content: textState,
+    final SelectedContentRange range = SelectedContentRange(
       contentLength: paragraph.text.toPlainText(includeSemanticsLabels: false).length,
       selectableId: selectableId,
       startOffset: startOffset,
       endOffset: endOffset,
       children: childSelections,
     );
-    return <SelectedContentRange<Object>>[range];
+    return <SelectedContentRange>[range];
   }
 
   // From [SelectableRegion].

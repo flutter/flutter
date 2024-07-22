@@ -67,7 +67,6 @@ class _SelectableAdapter extends SingleChildRenderObjectWidget {
   _RenderSelectableAdapter createRenderObject(BuildContext context) {
     return _RenderSelectableAdapter(
       DefaultSelectionStyle.of(context).selectionColor!,
-      child!,
       registrar,
     );
   }
@@ -76,7 +75,6 @@ class _SelectableAdapter extends SingleChildRenderObjectWidget {
   void updateRenderObject(BuildContext context, _RenderSelectableAdapter renderObject) {
     renderObject
       ..selectionColor = DefaultSelectionStyle.of(context).selectionColor!
-      ..content = child!
       ..registrar = registrar;
   }
 }
@@ -84,10 +82,8 @@ class _SelectableAdapter extends SingleChildRenderObjectWidget {
 class _RenderSelectableAdapter extends RenderProxyBox with Selectable, SelectionRegistrant {
   _RenderSelectableAdapter(
     Color selectionColor,
-    Widget content,
     SelectionRegistrar registrar,
   )   : _selectionColor = selectionColor,
-        _content = content,
         _geometry = ValueNotifier<SelectionGeometry>(_noSelection) {
     this.registrar = registrar;
     _geometry.addListener(markNeedsPaint);
@@ -104,15 +100,6 @@ class _RenderSelectableAdapter extends RenderProxyBox with Selectable, Selection
     }
     _selectionColor = value;
     markNeedsPaint();
-  }
-
-  Widget get content => _content;
-  Widget _content;
-  set content(Widget value) {
-    if (_content == value) {
-      return;
-    }
-    _content = value;
   }
 
   // ValueListenable APIs
@@ -285,13 +272,12 @@ class _RenderSelectableAdapter extends RenderProxyBox with Selectable, Selection
   }
 
   @override
-  List<SelectedContentRange<Object>> getSelections() {
+  List<SelectedContentRange> getSelections() {
     if (!value.hasSelection) {
-      return <SelectedContentRange<Object>>[];
+      return <SelectedContentRange>[];
     }
-    return <SelectedContentRange<Object>>[
-      SelectedContentRange<Widget>(
-        content: content,
+    return const <SelectedContentRange>[
+      SelectedContentRange(
         startOffset: 0,
         endOffset: 1,
         contentLength: 1,

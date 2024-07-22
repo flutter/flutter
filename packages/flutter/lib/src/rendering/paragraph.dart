@@ -1475,17 +1475,16 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
   }
 
   @override
-  List<SelectedContentRange<Object>> getSelections() {
+  List<SelectedContentRange> getSelections() {
     if (_textSelectionStart == null || _textSelectionEnd == null) {
-      return <SelectedContentRange<Object>>[];
+      return <SelectedContentRange>[];
     }
-    final SelectedContentRange<String> localSelectedContentRange = SelectedContentRange<String>(
-      content: fullText,
+    final SelectedContentRange localSelectedContentRange = SelectedContentRange(
       contentLength: fullText.length,
       startOffset: _textSelectionStart!.offset,
       endOffset: _textSelectionEnd!.offset,
     );
-    return <SelectedContentRange<Object>>[localSelectedContentRange];
+    return <SelectedContentRange>[localSelectedContentRange];
   }
 
   void _didChangeSelection() {

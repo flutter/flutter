@@ -63,7 +63,7 @@ class _MyHomePageState extends State<MyHomePage> {
     'eleifend orci justo id lectus. Integer sagittis, lorem nec molestie condimentum, tortor nisl '
     'aliquam velit, eget efficitur justo mauris a ante.';
 
-  final List<SelectedContentRange<Object>> _activeSelections = <SelectedContentRange<Object>>[];
+  final List<SelectedContentRange> _activeSelections = <SelectedContentRange>[];
   final ContextMenuController _menuController = ContextMenuController();
   late final List<Widget> _textWidgets;
   final Map<Key, TextSpan> dataSourceMap = <Key, TextSpan>{};
@@ -126,15 +126,15 @@ class _MyHomePageState extends State<MyHomePage> {
     return paragraphSpans;
   }
 
-  void _insertContent(List<SelectedContentRange<Object>> ranges, String plainText) {
+  void _insertContent(List<SelectedContentRange> ranges, String plainText) {
     int rangeIndex = 0;
     final List<Widget> newText = <Widget>[];
-    for (final SelectedContentRange<Object> contentRange in ranges) {
-      if (contentRange.content is! TextSpan || contentRange.selectableId == null) {
+    for (final SelectedContentRange contentRange in ranges) {
+      if (contentRange.selectableId == null || !dataSourceMap.containsKey(contentRange.selectableId)) {
         // Cannot replace content at range if not text or if a selectable id has not been provided.
         return;
       }
-      final TextSpan rawSpan = contentRange.content as TextSpan;
+      final TextSpan rawSpan = dataSourceMap[contentRange.selectableId]!;
       final int startOffset = min(contentRange.startOffset, contentRange.endOffset);
       final int endOffset = max(contentRange.startOffset, contentRange.endOffset);
       final List<InlineSpan> beforeSelection = <InlineSpan>[];
@@ -220,7 +220,7 @@ class _MyHomePageState extends State<MyHomePage> {
         return true;
       });
       dataSourceMap[contentRange.selectableId! as Key] = TextSpan(
-        style: (contentRange.content as TextSpan).style,
+        style: dataSourceMap[contentRange.selectableId]!.style,
         children: <InlineSpan>[
           ...beforeSelection,
           ...insideSelection,
@@ -287,7 +287,7 @@ class _MyHomePageState extends State<MyHomePage> {
           );
         },
         child: SelectionListener(
-          onSelectionChanged: (List<SelectedContentRange<Object>> selections) {
+          onSelectionChanged: (List<SelectedContentRange> selections) {
             _activeSelections.clear();
             if (selections.isEmpty) {
               return;
