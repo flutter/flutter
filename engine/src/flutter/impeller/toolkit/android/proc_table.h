@@ -60,7 +60,6 @@ namespace impeller::android {
   INVOKE(ASurfaceTransaction_setBuffer, 29)                      \
   INVOKE(ASurfaceTransaction_setColor, 29)                       \
   INVOKE(ASurfaceTransaction_setOnComplete, 29)                  \
-  INVOKE(ASurfaceTransaction_setEnableBackPressure, 31)          \
   INVOKE(ASurfaceTransactionStats_getPreviousReleaseFenceFd, 29) \
   INVOKE(ATrace_isEnabled, 23)                                   \
   INVOKE(eglGetNativeClientBufferANDROID, 0)
