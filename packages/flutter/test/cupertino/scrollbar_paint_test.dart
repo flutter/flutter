@@ -79,8 +79,8 @@ void main() {
     await gesture.moveBy(Offset(-_kGestureOffset.dx, -_kGestureOffset.dy));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
-    final Matcher r= rectMoreOrLessEquals(const Rect.fromLTWH(0,0,800,600),epsilon: 1); //800 is Width and 600 is viewport size(i.e screen inner height)
-    expect(tester.getRect(find.byType(CupertinoScrollbar)), r);
+    expect(tester.getRect(find.byType(CupertinoScrollbar)),
+        rectMoreOrLessEquals(const Rect.fromLTWH(0, 0, 800, 600), epsilon: 1); // (800, 600) is viewport size
   });
   testWidgets("should not paint when there isn't enough space", (WidgetTester tester) async {
     await tester.pumpWidget(
