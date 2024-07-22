@@ -1955,5 +1955,4 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
     expect(scrollController.offset, equals(0));
     scrollController.dispose();
   });
-
 }
