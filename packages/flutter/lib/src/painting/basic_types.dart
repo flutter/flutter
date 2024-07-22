@@ -53,9 +53,7 @@ export 'dart:ui' show
   TextLeadingDistribution,
   TextPosition,
   TileMode,
-  VertexMode,
-  hashList,
-  hashValues;
+  VertexMode;
 
 export 'package:flutter/foundation.dart' show VoidCallback;
 
