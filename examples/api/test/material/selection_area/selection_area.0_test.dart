@@ -16,23 +16,29 @@ void main() {
       const example.SelectionAreaExampleApp(),
     );
 
-    expect(find.byType(SelectionArea), findsExactly(1));
-
-    Finder finder = find.descendant(
-      of: find.byType(SelectionArea),
-      matching: find.descendant(
-        of: find.byType(AppBar),
-        matching: find.text('SelectionArea Sample'),
+    expect(
+      find.descendant(
+        of: find.byType(SelectionArea),
+        matching: find.byType(Text),
       ),
+      findsExactly(4),
     );
 
-    expect(finder, findsExactly(1));
+    final List<String> selectableTexts = <String>[
+      'SelectionArea Sample',
+      'Row 1',
+      'Row 2',
+      'Row 3',
+    ];
 
-    finder = find.descendant(
-      of: find.byType(Column),
-      matching: find.byType(Text),
-    );
-
-    expect(finder, findsExactly(3));
+    for (final String text in selectableTexts) {
+      expect(
+        find.descendant(
+          of: find.byType(SelectionArea),
+          matching: find.text(text),
+        ),
+        findsExactly(1),
+      );
+    }
   });
 }
