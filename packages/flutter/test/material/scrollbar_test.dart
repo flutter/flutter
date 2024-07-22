@@ -244,7 +244,7 @@ void main() {
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
-                return  const Scrollbar(
+                return const Scrollbar(
                   thumbVisibility: true,
                   child: SingleChildScrollView(
                     primary: true,
