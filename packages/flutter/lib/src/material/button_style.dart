@@ -2,6 +2,21 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'button_style_button.dart';
+/// @docImport 'constants.dart';
+/// @docImport 'elevated_button.dart';
+/// @docImport 'elevated_button_theme.dart';
+/// @docImport 'filled_button.dart';
+/// @docImport 'filled_button_theme.dart';
+/// @docImport 'material.dart';
+/// @docImport 'no_splash.dart';
+/// @docImport 'outlined_button.dart';
+/// @docImport 'outlined_button_theme.dart';
+/// @docImport 'text_button.dart';
+/// @docImport 'text_button_theme.dart';
+/// @docImport 'theme.dart';
+library;
+
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';

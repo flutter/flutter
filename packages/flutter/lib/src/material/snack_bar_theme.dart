@@ -2,6 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'bottom_navigation_bar.dart';
+/// @docImport 'color_scheme.dart';
+/// @docImport 'colors.dart';
+/// @docImport 'floating_action_button.dart';
+/// @docImport 'navigation_bar.dart';
+/// @docImport 'scaffold.dart';
+/// @docImport 'snack_bar.dart';
+library;
+
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';

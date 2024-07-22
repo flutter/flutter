@@ -2,6 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'floating_action_button.dart';
+/// @docImport 'ink_well.dart';
+/// @docImport 'material.dart';
+/// @docImport 'theme.dart';
+/// @docImport 'theme_data.dart';
+library;
+
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
