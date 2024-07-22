@@ -27,6 +27,7 @@ class MainWidget extends StatefulWidget {
 
 class MainWidgetState extends State<MainWidget> {
   double currentSliderValue = 20;
+  String accessibilityLabel = 'Accessibility Test Slider';
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +38,7 @@ class MainWidgetState extends State<MainWidget> {
       ),
       body: Center(
         child: Semantics(
-          label: 'Accessibility Test Slider',
+          label: accessibilityLabel,
           child: Slider(
             value: currentSliderValue,
             max: 100,
