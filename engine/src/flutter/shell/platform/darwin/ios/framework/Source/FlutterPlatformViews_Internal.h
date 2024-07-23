@@ -234,7 +234,7 @@ class FlutterPlatformViewsController {
   void PrerollCompositeEmbeddedView(int64_t view_id,
                                     std::unique_ptr<flutter::EmbeddedViewParams> params);
 
-  size_t EmbeddedViewCount();
+  size_t EmbeddedViewCount() const;
 
   // Returns the `FlutterPlatformView`'s `view` object associated with the view_id.
   //
