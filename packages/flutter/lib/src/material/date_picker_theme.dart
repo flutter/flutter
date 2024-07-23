@@ -2,6 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'calendar_date_picker.dart';
+/// @docImport 'date_picker.dart';
+/// @docImport 'dialog.dart';
+/// @docImport 'input_date_picker_form_field.dart';
+/// @docImport 'material.dart';
+/// @docImport 'scaffold.dart';
+library;
+
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';

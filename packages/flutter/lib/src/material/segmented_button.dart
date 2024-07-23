@@ -2,6 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'checkbox.dart';
+/// @docImport 'choice_chip.dart';
+/// @docImport 'filter_chip.dart';
+/// @docImport 'radio.dart';
+/// @docImport 'toggle_buttons.dart';
+library;
+
 import 'dart:math' as math;
 import 'dart:math';
 
