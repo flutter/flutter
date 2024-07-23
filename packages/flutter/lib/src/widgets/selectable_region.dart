@@ -1375,9 +1375,11 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   ///    for the default context menu buttons.
   TextSelectionToolbarAnchors get contextMenuAnchors {
     if (_lastSecondaryTapDownPosition != null) {
-      return TextSelectionToolbarAnchors(
+      final TextSelectionToolbarAnchors anchors = TextSelectionToolbarAnchors(
         primaryAnchor: _lastSecondaryTapDownPosition!,
       );
+      _lastSecondaryTapDownPosition = null;
+      return anchors;
     }
     final RenderBox renderBox = context.findRenderObject()! as RenderBox;
     return TextSelectionToolbarAnchors.fromSelection(
