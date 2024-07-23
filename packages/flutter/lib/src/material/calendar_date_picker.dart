@@ -331,13 +331,16 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
           child: _buildPicker(),
         ),
         // Put the mode toggle button on top so that it won't be covered up by the _MonthPicker
-        _DatePickerModeToggleButton(
-          mode: _mode,
-          title: _localizations.formatMonthYear(_currentDisplayedMonthDate),
-          onTitlePressed: () => _handleModeChanged(switch (_mode) {
-            DatePickerMode.day => DatePickerMode.year,
-            DatePickerMode.year => DatePickerMode.day,
-          }),
+        MediaQuery.withClampedTextScaling(
+          maxScaleFactor: 2.0,
+          child: _DatePickerModeToggleButton(
+            mode: _mode,
+            title: _localizations.formatMonthYear(_currentDisplayedMonthDate),
+            onTitlePressed: () => _handleModeChanged(switch (_mode) {
+              DatePickerMode.day => DatePickerMode.year,
+              DatePickerMode.year => DatePickerMode.day,
+            }),
+          ),
         ),
       ],
     );
@@ -426,7 +429,6 @@ class _DatePickerModeToggleButtonState extends State<_DatePickerModeToggleButton
                             child: Text(
                               widget.title,
                               overflow: TextOverflow.ellipsis,
-                              textScaleFactor: 2.0,
                               style: textTheme.titleSmall?.copyWith(
                                 color: controlColor,
                               ),
@@ -1002,11 +1004,11 @@ class _DayPickerState extends State<_DayPicker> {
       child: MediaQuery.withClampedTextScaling(
         maxScaleFactor: isLandscapeOrientation ? 1.5 : 2.0,
         child: GridView.custom(
-        physics: const ClampingScrollPhysics(),
-        gridDelegate: _DayPickerGridDelegate(context),
-        childrenDelegate: SliverChildListDelegate(
-          dayItems,
-          addRepaintBoundaries: false,
+          physics: const ClampingScrollPhysics(),
+          gridDelegate: _DayPickerGridDelegate(context),
+          childrenDelegate: SliverChildListDelegate(
+            dayItems,
+            addRepaintBoundaries: false,
           ),
         ),
       ),
@@ -1407,5 +1409,3 @@ class _YearPickerGridDelegate extends SliverGridDelegate {
   @override
   bool shouldRelayout(_YearPickerGridDelegate oldDelegate) => false;
 }
-
-// const _YearPickerGridDelegate _yearPickerGridDelegate = _YearPickerGridDelegate();

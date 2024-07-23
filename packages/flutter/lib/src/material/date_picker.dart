@@ -892,7 +892,7 @@ class _DatePickerHeader extends StatelessWidget {
     );
 
     final double fontScaleAdjustedHeaderHeight =
-      orientation == Orientation.portrait ? headerScaleFactor > 1.5 ? headerScaleFactor - 0.2 : headerScaleFactor : headerScaleFactor;
+      headerScaleFactor > 1.5 ? headerScaleFactor - 0.2 : headerScaleFactor;
 
     switch (orientation) {
       case Orientation.portrait:
