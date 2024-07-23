@@ -107,50 +107,46 @@ void main() {
     expect(context.clipBehavior, equals(Clip.hardEdge));
   });
 
-  testWidgets('SingleChildScrollView ScrollViewKeyboardDismissBehavior.onDrag test',
-      (WidgetTester tester) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: SingleChildScrollView(
-            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-            child: Column(
-              children: <Widget>[
-                Autocomplete<String>(
-                  optionsBuilder: (TextEditingValue textEditingValue) {
-                    return <String>['One', 'Two', 'Three'].where((String option) {
-                      return option.contains(textEditingValue.text.toLowerCase());
-                    }).toList();
-                  },
-                  fieldViewBuilder: (BuildContext context, TextEditingController textEditingController, FocusNode focusNode, VoidCallback onFieldSubmitted) {
-                    return TextField(
-                      controller: textEditingController,
-                      focusNode: focusNode,
-                      onTapOutside:(void v) => FocusScope.of(context).requestFocus(FocusNode()),
-                    );
-                  },
-                ),
-              ],
-            ),
+testWidgets('SingleChildScrollView ScrollViewKeyboardDismissBehavior.onDrag test', (WidgetTester tester) async {
+    final Widget testWidget = MaterialApp(
+      home: Scaffold(
+        body: SingleChildScrollView(
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+          child: Column(
+            children: <Widget>[
+              Autocomplete<String>(
+                optionsBuilder: (TextEditingValue textEditingValue) {
+                  if (textEditingValue.text.isEmpty) {
+                    return const Iterable<String>.empty();
+                  }
+                  return<String>['apple', 'banana', 'cherry']
+                      .where((String option) {
+                    return option.contains(textEditingValue.text.toLowerCase());
+                  });
+                },
+              ),
+              Container(height: 5000.0),
+            ],
           ),
         ),
       ),
     );
-    final Finder textFieldFinder = find.byType(TextField);
-    expect(textFieldFinder, findsOneWidget);
 
-    await tester.tap(textFieldFinder);
+    await tester.pumpWidget(testWidget);
+    await tester.tap(find.byType(Autocomplete<String>));
     await tester.pump();
 
-    final TextField textField = tester.widget(textFieldFinder);
-    expect(textField.focusNode!.hasFocus, isTrue);
+    await tester.enterText(find.byType(RawAutocomplete<String>),'a');
+    await tester.pump();
 
-    await tester.drag(textFieldFinder, const Offset(0, 500));
-    await tester.pumpAndSettle();
+    expect(find.text('apple'), findsOneWidget);
+    expect(find.text('banana'), findsOneWidget);
 
-    expect(textField.focusNode!.nextFocus(), isTrue);
-    expect(textFieldFinder, findsExactly(1));
+    await tester.drag(find.byType(SingleChildScrollView), const Offset(0, -1000));
+    await tester.pump();
 
+    expect(find.text('apple'), findsNothing);
+    expect(find.text('banana'), findsNothing);
   });
 
   testWidgets('SingleChildScrollView respects clipBehavior', (WidgetTester tester) async {
