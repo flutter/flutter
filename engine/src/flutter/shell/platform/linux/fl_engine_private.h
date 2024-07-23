@@ -82,6 +82,18 @@ typedef void (*FlEngineOnPreEngineRestartHandler)(FlEngine* engine,
 FlEngine* fl_engine_new(FlDartProject* project, FlRenderer* renderer);
 
 /**
+ * fl_engine_start:
+ * @engine: an #FlEngine.
+ * @error: (allow-none): #GError location to store the error occurring, or %NULL
+ * to ignore.
+ *
+ * Starts the Flutter engine.
+ *
+ * Returns: %TRUE on success.
+ */
+gboolean fl_engine_start(FlEngine* engine, GError** error);
+
+/**
  * fl_engine_get_embedder_api:
  * @engine: an #FlEngine.
  *
@@ -90,6 +102,74 @@ FlEngine* fl_engine_new(FlDartProject* project, FlRenderer* renderer);
  * Returns: a mutable pointer to the embedder API proc table.
  */
 FlutterEngineProcTable* fl_engine_get_embedder_api(FlEngine* engine);
+
+/**
+ * fl_engine_add_view:
+ * @engine: an #FlEngine.
+ * @width: width of view in pixels.
+ * @height: height of view in pixels.
+ * @pixel_ratio: scale factor for view.
+ * @cancellable: (allow-none): a #GCancellable or %NULL.
+ * @callback: (scope async): a #GAsyncReadyCallback to call when the view is
+ * added.
+ * @user_data: (closure): user data to pass to @callback.
+ *
+ * Asynchronously add a new view.
+ */
+void fl_engine_add_view(FlEngine* engine,
+                        size_t width,
+                        size_t height,
+                        double pixel_ratio,
+                        GCancellable* cancellable,
+                        GAsyncReadyCallback callback,
+                        gpointer user_data);
+
+/**
+ * fl_engine_add_view_finish:
+ * @engine: an #FlEngine.
+ * @result: a #GAsyncResult.
+ * @error: (allow-none): #GError location to store the error occurring, or %NULL
+ * to ignore.
+ *
+ * Completes request started with fl_engine_add_view().
+ *
+ * Returns: the newly added view ID or 0 on error.
+ */
+FlutterViewId fl_engine_add_view_finish(FlEngine* engine,
+                                        GAsyncResult* result,
+                                        GError** error);
+
+/**
+ * fl_engine_remove_view:
+ * @engine: an #FlEngine.
+ * @view_id: ID to remove.
+ * @cancellable: (allow-none): a #GCancellable or %NULL.
+ * @callback: (scope async): a #GAsyncReadyCallback to call when the view is
+ * added.
+ * @user_data: (closure): user data to pass to @callback.
+ *
+ * Removes a view previously added with fl_engine_add_view().
+ */
+void fl_engine_remove_view(FlEngine* engine,
+                           FlutterViewId view_id,
+                           GCancellable* cancellable,
+                           GAsyncReadyCallback callback,
+                           gpointer user_data);
+
+/**
+ * fl_engine_remove_view_finish:
+ * @engine: an #FlEngine.
+ * @result: a #GAsyncResult.
+ * @error: (allow-none): #GError location to store the error occurring, or %NULL
+ * to ignore.
+ *
+ * Completes request started with fl_engine_remove_view().
+ *
+ * Returns: TRUE on succcess.
+ */
+gboolean fl_engine_remove_view_finish(FlEngine* engine,
+                                      GAsyncResult* result,
+                                      GError** error);
 
 /**
  * fl_engine_set_platform_message_handler:
@@ -142,18 +222,6 @@ void fl_engine_set_on_pre_engine_restart_handler(
     FlEngineOnPreEngineRestartHandler handler,
     gpointer user_data,
     GDestroyNotify destroy_notify);
-
-/**
- * fl_engine_start:
- * @engine: an #FlEngine.
- * @error: (allow-none): #GError location to store the error occurring, or %NULL
- * to ignore.
- *
- * Starts the Flutter engine.
- *
- * Returns: %TRUE on success.
- */
-gboolean fl_engine_start(FlEngine* engine, GError** error);
 
 /**
  * fl_engine_send_window_metrics_event:
