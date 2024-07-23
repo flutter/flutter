@@ -1831,6 +1831,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   ///
   /// [OverlayPortal] overrides this field to change how it forms its
   /// semantics sub-tree.
+  @visibleForOverriding
   RenderObject? get semanticsParent => _parent;
 
   /// Called by subclasses when they decide a render object is a child.
