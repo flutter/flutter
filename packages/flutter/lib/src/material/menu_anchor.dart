@@ -2,6 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/cupertino.dart';
+///
+/// @docImport 'app.dart';
+/// @docImport 'checkbox_theme.dart';
+/// @docImport 'dropdown_menu.dart';
+/// @docImport 'radio_theme.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';

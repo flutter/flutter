@@ -174,7 +174,7 @@ class IosProject extends XcodeBasedProject {
   static const String kProductBundleIdKey = 'PRODUCT_BUNDLE_IDENTIFIER';
   static const String kTeamIdKey = 'DEVELOPMENT_TEAM';
   static const String kEntitlementFilePathKey = 'CODE_SIGN_ENTITLEMENTS';
-  static const String kHostAppBundleNameKey = 'FULL_PRODUCT_NAME';
+  static const String kProductNameKey = 'PRODUCT_NAME';
 
   static final RegExp _productBundleIdPattern = RegExp('^\\s*$kProductBundleIdKey\\s*=\\s*(["\']?)(.*?)\\1;\\s*\$');
   static const String _kProductBundleIdVariable = '\$($kProductBundleIdKey)';
@@ -397,16 +397,16 @@ class IosProject extends XcodeBasedProject {
     return const <String>[];
   }
 
-  /// The bundle name of the host app, `My App.app`.
-  Future<String?> hostAppBundleName(BuildInfo? buildInfo) async {
+  /// The product name of the app, `My App`.
+  Future<String?> productName(BuildInfo? buildInfo) async {
     if (!existsSync()) {
       return null;
     }
-    return _hostAppBundleName ??= await _parseHostAppBundleName(buildInfo);
+    return _productName ??= await _parseProductName(buildInfo);
   }
-  String? _hostAppBundleName;
+  String? _productName;
 
-  Future<String> _parseHostAppBundleName(BuildInfo? buildInfo) async {
+  Future<String> _parseProductName(BuildInfo? buildInfo) async {
     // The product name and bundle name are derived from the display name, which the user
     // is instructed to change in Xcode as part of deploying to the App Store.
     // https://flutter.dev/to/xcode-name-config
@@ -415,13 +415,13 @@ class IosProject extends XcodeBasedProject {
     if (globals.xcodeProjectInterpreter?.isInstalled ?? false) {
       final Map<String, String>? xcodeBuildSettings = await buildSettingsForBuildInfo(buildInfo);
       if (xcodeBuildSettings != null) {
-        productName = xcodeBuildSettings[kHostAppBundleNameKey];
+        productName = xcodeBuildSettings[kProductNameKey];
       }
     }
     if (productName == null) {
-      globals.printTrace('$kHostAppBundleNameKey not present, defaulting to $hostAppProjectName');
+      globals.printTrace('$kProductNameKey not present, defaulting to $hostAppProjectName');
     }
-    return productName ?? '${XcodeBasedProject._defaultHostAppName}.app';
+    return productName ?? XcodeBasedProject._defaultHostAppName;
   }
 
   /// The build settings for the host app of this project, as a detached map.
