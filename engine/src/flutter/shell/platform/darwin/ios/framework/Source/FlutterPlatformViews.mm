@@ -398,7 +398,7 @@ void FlutterPlatformViewsController::PrerollCompositeEmbeddedView(
   views_to_recomposite_.insert(view_id);
 }
 
-size_t FlutterPlatformViewsController::EmbeddedViewCount() {
+size_t FlutterPlatformViewsController::EmbeddedViewCount() const {
   return composition_order_.size();
 }
 
