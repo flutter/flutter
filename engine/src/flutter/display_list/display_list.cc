@@ -26,6 +26,7 @@ DisplayList::DisplayList()
       is_ui_thread_safe_(true),
       modifies_transparent_black_(false),
       root_has_backdrop_filter_(false),
+      root_is_unbounded_(false),
       max_root_blend_mode_(DlBlendMode::kClear) {}
 
 DisplayList::DisplayList(DisplayListStorage&& storage,
@@ -40,6 +41,7 @@ DisplayList::DisplayList(DisplayListStorage&& storage,
                          bool modifies_transparent_black,
                          DlBlendMode max_root_blend_mode,
                          bool root_has_backdrop_filter,
+                         bool root_is_unbounded,
                          sk_sp<const DlRTree> rtree)
     : storage_(std::move(storage)),
       byte_count_(byte_count),
@@ -53,6 +55,7 @@ DisplayList::DisplayList(DisplayListStorage&& storage,
       is_ui_thread_safe_(is_ui_thread_safe),
       modifies_transparent_black_(modifies_transparent_black),
       root_has_backdrop_filter_(root_has_backdrop_filter),
+      root_is_unbounded_(root_is_unbounded),
       max_root_blend_mode_(max_root_blend_mode),
       rtree_(std::move(rtree)) {}
 

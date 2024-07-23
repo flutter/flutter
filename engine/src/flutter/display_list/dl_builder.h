@@ -554,6 +554,7 @@ class DisplayListBuilder final : public virtual DlCanvas,
     bool opacity_incompatible_op_detected = false;
     bool affects_transparent_layer = false;
     bool contains_backdrop_filter = false;
+    bool is_unbounded = false;
 
     bool is_group_opacity_compatible() const {
       return !opacity_incompatible_op_detected &&

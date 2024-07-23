@@ -18,6 +18,7 @@
 #include "flutter/display_list/utils/dl_receiver_utils.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/math.h"
+#include "flutter/impeller/typographer/backends/skia/text_frame_skia.h"
 #include "flutter/testing/assertions_skia.h"
 #include "flutter/testing/display_list_testing.h"
 #include "flutter/testing/testing.h"
@@ -1309,28 +1310,80 @@ TEST_F(DisplayListTest, SaveLayerBoundsSnapshotsImageFilter) {
   EXPECT_EQ(bounds, SkRect::MakeLTRB(50, 50, 100, 100));
 }
 
+#define SAVE_LAYER_EXPECTOR(name) SaveLayerExpector name(__FILE__, __LINE__)
+
+using SaveLayerOptionsTester =
+    std::function<bool(const SaveLayerOptions& options)>;
+
+struct SaveLayerExpectations {
+  SaveLayerExpectations() {}
+
+  // NOLINTNEXTLINE(google-explicit-constructor)
+  SaveLayerExpectations(const SaveLayerOptions& o) : options(o) {}
+  // NOLINTNEXTLINE(google-explicit-constructor)
+  SaveLayerExpectations(const SaveLayerOptionsTester& t) : tester(t) {}
+  // NOLINTNEXTLINE(google-explicit-constructor)
+  SaveLayerExpectations(DlBlendMode mode) : max_blend_mode(mode) {}
+
+  std::optional<SaveLayerOptions> options;
+  std::optional<SaveLayerOptionsTester> tester;
+  std::optional<DlBlendMode> max_blend_mode;
+};
+
+::std::ostream& operator<<(::std::ostream& os,
+                           const SaveLayerExpectations& expect) {
+  os << "SaveLayerExpectation(";
+  if (expect.options.has_value()) {
+    os << "options: " << expect.options.value();
+  }
+  if (expect.tester.has_value()) {
+    os << "option tester: " << &expect.tester.value();
+  }
+  if (expect.max_blend_mode.has_value()) {
+    os << "max_blend: " << expect.max_blend_mode.value();
+  }
+  os << ")";
+  return os;
+}
+
 class SaveLayerExpector : public virtual DlOpReceiver,
                           public IgnoreAttributeDispatchHelper,
                           public IgnoreClipDispatchHelper,
                           public IgnoreTransformDispatchHelper,
                           public IgnoreDrawDispatchHelper {
  public:
-  struct Expectations {
-    // NOLINTNEXTLINE(google-explicit-constructor)
-    Expectations(SaveLayerOptions o) : options(o) {}
-    // NOLINTNEXTLINE(google-explicit-constructor)
-    Expectations(DlBlendMode mode) : max_blend_mode(mode) {}
+  SaveLayerExpector(const std::string& file, int line)
+      : file_(file), line_(line), detail_("") {}
 
-    std::optional<SaveLayerOptions> options;
-    std::optional<DlBlendMode> max_blend_mode;
-  };
-
-  explicit SaveLayerExpector(const Expectations& expected) {
-    expected_.push_back(expected);
+  ~SaveLayerExpector() {  //
+    EXPECT_EQ(save_layer_count_, expected_.size()) << label();
+    while (save_layer_count_ < expected_.size()) {
+      auto expect = expected_[save_layer_count_];
+      FML_LOG(ERROR) << "leftover expectation[" << save_layer_count_
+                     << "] = " << expect;
+      save_layer_count_++;
+    }
   }
 
-  explicit SaveLayerExpector(std::vector<Expectations> expected)
-      : expected_(std::move(expected)) {}
+  SaveLayerExpector& addDetail(const std::string& detail) {
+    detail_ = detail;
+    return *this;
+  }
+
+  SaveLayerExpector& addExpectation(const SaveLayerExpectations& expected) {
+    expected_.push_back(expected);
+    return *this;
+  }
+
+  SaveLayerExpector& addExpectation(const SaveLayerOptionsTester& tester) {
+    expected_.push_back(SaveLayerExpectations(tester));
+    return *this;
+  }
+
+  SaveLayerExpector& addOpenExpectation() {
+    expected_.push_back(SaveLayerExpectations());
+    return *this;
+  }
 
   void saveLayer(const SkRect& bounds,
                  const SaveLayerOptions options,
@@ -1343,15 +1396,19 @@ class SaveLayerExpector : public virtual DlOpReceiver,
                          uint32_t total_content_depth,
                          DlBlendMode max_content_blend_mode,
                          const DlImageFilter* backdrop = nullptr) {
-    auto label = "index " + std::to_string(save_layer_count_);
-    ASSERT_LT(save_layer_count_, expected_.size());
-    auto expect = expected_[save_layer_count_++];
+    ASSERT_LT(save_layer_count_, expected_.size()) << label();
+    auto expect = expected_[save_layer_count_];
     if (expect.options.has_value()) {
-      EXPECT_EQ(options, expect.options.value()) << label;
+      EXPECT_EQ(options, expect.options.value()) << label();
+    }
+    if (expect.tester.has_value()) {
+      EXPECT_TRUE(expect.tester.value()(options)) << label();
     }
     if (expect.max_blend_mode.has_value()) {
-      EXPECT_EQ(max_content_blend_mode, expect.max_blend_mode.value()) << label;
+      EXPECT_EQ(max_content_blend_mode, expect.max_blend_mode.value())
+          << label();
     }
+    save_layer_count_++;
   }
 
   bool all_expectations_checked() const {
@@ -1359,14 +1416,29 @@ class SaveLayerExpector : public virtual DlOpReceiver,
   }
 
  private:
-  std::vector<Expectations> expected_;
+  // mutable allows the copy constructor to leave no expectations behind
+  mutable std::vector<SaveLayerExpectations> expected_;
   size_t save_layer_count_ = 0;
+
+  const std::string file_;
+  const int line_;
+  std::string detail_;
+
+  std::string label() {
+    std::string label = "at index " + std::to_string(save_layer_count_) +  //
+                        ", from " + file_ +                                //
+                        ":" + std::to_string(line_);
+    if (detail_.length() > 0) {
+      label = label + " (" + detail_ + ")";
+    }
+    return label;
+  }
 };
 
 TEST_F(DisplayListTest, SaveLayerOneSimpleOpInheritsOpacity) {
-  SaveLayerOptions expected =
-      SaveLayerOptions::kWithAttributes.with_can_distribute_opacity();
-  SaveLayerExpector expector(expected);
+  SAVE_LAYER_EXPECTOR(expector);
+  expector.addExpectation(
+      SaveLayerOptions::kWithAttributes.with_can_distribute_opacity());
 
   DisplayListBuilder builder;
   DlOpReceiver& receiver = ToReceiver(builder);
@@ -1380,9 +1452,9 @@ TEST_F(DisplayListTest, SaveLayerOneSimpleOpInheritsOpacity) {
 }
 
 TEST_F(DisplayListTest, SaveLayerNoAttributesInheritsOpacity) {
-  SaveLayerOptions expected =
-      SaveLayerOptions::kNoAttributes.with_can_distribute_opacity();
-  SaveLayerExpector expector(expected);
+  SAVE_LAYER_EXPECTOR(expector);
+  expector.addExpectation(
+      SaveLayerOptions::kNoAttributes.with_can_distribute_opacity());
 
   DisplayListBuilder builder;
   DlOpReceiver& receiver = ToReceiver(builder);
@@ -1395,8 +1467,8 @@ TEST_F(DisplayListTest, SaveLayerNoAttributesInheritsOpacity) {
 }
 
 TEST_F(DisplayListTest, SaveLayerTwoOverlappingOpsDoesNotInheritOpacity) {
-  SaveLayerOptions expected = SaveLayerOptions::kWithAttributes;
-  SaveLayerExpector expector(expected);
+  SAVE_LAYER_EXPECTOR(expector);
+  expector.addExpectation(SaveLayerOptions::kWithAttributes);
 
   DisplayListBuilder builder;
   DlOpReceiver& receiver = ToReceiver(builder);
@@ -1411,12 +1483,13 @@ TEST_F(DisplayListTest, SaveLayerTwoOverlappingOpsDoesNotInheritOpacity) {
 }
 
 TEST_F(DisplayListTest, NestedSaveLayersMightInheritOpacity) {
-  SaveLayerOptions expected1 =
-      SaveLayerOptions::kWithAttributes.with_can_distribute_opacity();
-  SaveLayerOptions expected2 = SaveLayerOptions::kWithAttributes;
-  SaveLayerOptions expected3 =
-      SaveLayerOptions::kWithAttributes.with_can_distribute_opacity();
-  SaveLayerExpector expector({expected1, expected2, expected3});
+  SAVE_LAYER_EXPECTOR(expector);
+  expector  //
+      .addExpectation(
+          SaveLayerOptions::kWithAttributes.with_can_distribute_opacity())
+      .addExpectation(SaveLayerOptions::kWithAttributes)
+      .addExpectation(
+          SaveLayerOptions::kWithAttributes.with_can_distribute_opacity());
 
   DisplayListBuilder builder;
   DlOpReceiver& receiver = ToReceiver(builder);
@@ -1435,11 +1508,12 @@ TEST_F(DisplayListTest, NestedSaveLayersMightInheritOpacity) {
 }
 
 TEST_F(DisplayListTest, NestedSaveLayersCanBothSupportOpacityOptimization) {
-  SaveLayerOptions expected1 =
-      SaveLayerOptions::kWithAttributes.with_can_distribute_opacity();
-  SaveLayerOptions expected2 =
-      SaveLayerOptions::kNoAttributes.with_can_distribute_opacity();
-  SaveLayerExpector expector({expected1, expected2});
+  SAVE_LAYER_EXPECTOR(expector);
+  expector  //
+      .addExpectation(
+          SaveLayerOptions::kWithAttributes.with_can_distribute_opacity())
+      .addExpectation(
+          SaveLayerOptions::kNoAttributes.with_can_distribute_opacity());
 
   DisplayListBuilder builder;
   DlOpReceiver& receiver = ToReceiver(builder);
@@ -1455,8 +1529,8 @@ TEST_F(DisplayListTest, NestedSaveLayersCanBothSupportOpacityOptimization) {
 }
 
 TEST_F(DisplayListTest, SaveLayerImageFilterDoesNotInheritOpacity) {
-  SaveLayerOptions expected = SaveLayerOptions::kWithAttributes;
-  SaveLayerExpector expector(expected);
+  SAVE_LAYER_EXPECTOR(expector);
+  expector.addExpectation(SaveLayerOptions::kWithAttributes);
 
   DisplayListBuilder builder;
   DlOpReceiver& receiver = ToReceiver(builder);
@@ -1472,8 +1546,8 @@ TEST_F(DisplayListTest, SaveLayerImageFilterDoesNotInheritOpacity) {
 }
 
 TEST_F(DisplayListTest, SaveLayerColorFilterDoesNotInheritOpacity) {
-  SaveLayerOptions expected = SaveLayerOptions::kWithAttributes;
-  SaveLayerExpector expector(expected);
+  SAVE_LAYER_EXPECTOR(expector);
+  expector.addExpectation(SaveLayerOptions::kWithAttributes);
 
   DisplayListBuilder builder;
   DlOpReceiver& receiver = ToReceiver(builder);
@@ -1489,8 +1563,8 @@ TEST_F(DisplayListTest, SaveLayerColorFilterDoesNotInheritOpacity) {
 }
 
 TEST_F(DisplayListTest, SaveLayerSrcBlendDoesNotInheritOpacity) {
-  SaveLayerOptions expected = SaveLayerOptions::kWithAttributes;
-  SaveLayerExpector expector(expected);
+  SAVE_LAYER_EXPECTOR(expector);
+  expector.addExpectation(SaveLayerOptions::kWithAttributes);
 
   DisplayListBuilder builder;
   DlOpReceiver& receiver = ToReceiver(builder);
@@ -1506,9 +1580,9 @@ TEST_F(DisplayListTest, SaveLayerSrcBlendDoesNotInheritOpacity) {
 }
 
 TEST_F(DisplayListTest, SaveLayerImageFilterOnChildInheritsOpacity) {
-  SaveLayerOptions expected =
-      SaveLayerOptions::kWithAttributes.with_can_distribute_opacity();
-  SaveLayerExpector expector(expected);
+  SAVE_LAYER_EXPECTOR(expector);
+  expector.addExpectation(
+      SaveLayerOptions::kWithAttributes.with_can_distribute_opacity());
 
   DisplayListBuilder builder;
   DlOpReceiver& receiver = ToReceiver(builder);
@@ -1523,8 +1597,8 @@ TEST_F(DisplayListTest, SaveLayerImageFilterOnChildInheritsOpacity) {
 }
 
 TEST_F(DisplayListTest, SaveLayerColorFilterOnChildDoesNotInheritOpacity) {
-  SaveLayerOptions expected = SaveLayerOptions::kWithAttributes;
-  SaveLayerExpector expector(expected);
+  SAVE_LAYER_EXPECTOR(expector);
+  expector.addExpectation(SaveLayerOptions::kWithAttributes);
 
   DisplayListBuilder builder;
   DlOpReceiver& receiver = ToReceiver(builder);
@@ -1539,8 +1613,8 @@ TEST_F(DisplayListTest, SaveLayerColorFilterOnChildDoesNotInheritOpacity) {
 }
 
 TEST_F(DisplayListTest, SaveLayerSrcBlendOnChildDoesNotInheritOpacity) {
-  SaveLayerOptions expected = SaveLayerOptions::kWithAttributes;
-  SaveLayerExpector expector(expected);
+  SAVE_LAYER_EXPECTOR(expector);
+  expector.addExpectation(SaveLayerOptions::kWithAttributes);
 
   DisplayListBuilder builder;
   DlOpReceiver& receiver = ToReceiver(builder);
@@ -4156,7 +4230,8 @@ TEST_F(DisplayListTest, MaxBlendModeInsideSaveLayer) {
   builder.Restore();
   auto dl = builder.Build();
   EXPECT_EQ(dl->max_root_blend_mode(), DlBlendMode::kSrcOver);
-  SaveLayerExpector expector(DlBlendMode::kModulate);
+  SAVE_LAYER_EXPECTOR(expector);
+  expector.addExpectation(DlBlendMode::kModulate);
   dl->Dispatch(expector);
   EXPECT_TRUE(expector.all_expectations_checked());
 }
@@ -4173,7 +4248,8 @@ TEST_F(DisplayListTest, MaxBlendModeInsideNonDefaultBlendedSaveLayer) {
   builder.Restore();
   auto dl = builder.Build();
   EXPECT_EQ(dl->max_root_blend_mode(), DlBlendMode::kScreen);
-  SaveLayerExpector expector(DlBlendMode::kModulate);
+  SAVE_LAYER_EXPECTOR(expector);
+  expector.addExpectation(DlBlendMode::kModulate);
   dl->Dispatch(expector);
   EXPECT_TRUE(expector.all_expectations_checked());
 }
@@ -4237,7 +4313,10 @@ TEST_F(DisplayListTest, MaxBlendModeInsideComplexSaveLayers) {
 
   auto dl = builder.Build();
   EXPECT_EQ(dl->max_root_blend_mode(), DlBlendMode::kSrcOver);
-  SaveLayerExpector expector({DlBlendMode::kModulate, DlBlendMode::kScreen});
+  SAVE_LAYER_EXPECTOR(expector);
+  expector  //
+      .addExpectation(DlBlendMode::kModulate)
+      .addExpectation(DlBlendMode::kScreen);
   dl->Dispatch(expector);
   EXPECT_TRUE(expector.all_expectations_checked());
 }
@@ -4266,7 +4345,8 @@ TEST_F(DisplayListTest, BackdropDetectionSimpleSaveLayer) {
   EXPECT_TRUE(dl->root_has_backdrop_filter());
   // The saveLayer itself, though, does not have the contains backdrop
   // flag set because its content does not contain a saveLayer with backdrop
-  SaveLayerExpector expector(
+  SAVE_LAYER_EXPECTOR(expector);
+  expector.addExpectation(
       SaveLayerOptions::kNoAttributes.with_can_distribute_opacity());
   dl->Dispatch(expector);
   EXPECT_TRUE(expector.all_expectations_checked());
@@ -4289,10 +4369,13 @@ TEST_F(DisplayListTest, BackdropDetectionNestedSaveLayer) {
   auto dl = builder.Build();
 
   EXPECT_FALSE(dl->root_has_backdrop_filter());
-  SaveLayerExpector expector({
-      SaveLayerOptions::kNoAttributes.with_contains_backdrop_filter(),
-      SaveLayerOptions::kNoAttributes.with_can_distribute_opacity(),
-  });
+  SAVE_LAYER_EXPECTOR(expector);
+  expector                                             //
+      .addExpectation(SaveLayerOptions::kNoAttributes  //
+                          .with_contains_backdrop_filter()
+                          .with_content_is_unbounded())
+      .addExpectation(
+          SaveLayerOptions::kNoAttributes.with_can_distribute_opacity());
   dl->Dispatch(expector);
   EXPECT_TRUE(expector.all_expectations_checked());
 }
@@ -5177,6 +5260,424 @@ TEST_F(DisplayListTest, ClipOvalRRectPathPromoteToClipOval) {
   auto expect_dl = expected.Build();
 
   DisplayListsEQ_Verbose(dl, expect_dl);
+}
+
+TEST_F(DisplayListTest, BoundedRenderOpsDoNotReportUnbounded) {
+  static const SkRect root_cull = SkRect::MakeLTRB(100, 100, 200, 200);
+  static const SkRect draw_rect = SkRect::MakeLTRB(110, 110, 190, 190);
+
+  using Renderer = const std::function<void(DlCanvas&)>;
+  auto test_bounded = [](const std::string& label, const Renderer& renderer) {
+    {
+      DisplayListBuilder builder(root_cull);
+      renderer(builder);
+      auto display_list = builder.Build();
+
+      EXPECT_EQ(display_list->bounds(), draw_rect) << label;
+      EXPECT_FALSE(display_list->root_is_unbounded()) << label;
+    }
+
+    {
+      DisplayListBuilder builder(root_cull);
+      builder.SaveLayer(nullptr, nullptr);
+      renderer(builder);
+      builder.Restore();
+      auto display_list = builder.Build();
+
+      EXPECT_EQ(display_list->bounds(), draw_rect) << label;
+      EXPECT_FALSE(display_list->root_is_unbounded()) << label;
+
+      SAVE_LAYER_EXPECTOR(expector);
+      expector  //
+          .addDetail(label)
+          .addExpectation([](const SaveLayerOptions& options) {
+            return !options.content_is_unbounded();
+          });
+      display_list->Dispatch(expector);
+    }
+  };
+
+  test_bounded("DrawLine", [](DlCanvas& builder) {
+    builder.DrawLine(
+        {draw_rect.left() + 1.0f, draw_rect.top() + 1.0f},
+        {draw_rect.right() - 1.0f, draw_rect.top() + 1.0f},
+        DlPaint().setStrokeWidth(2.0f).setStrokeCap(DlStrokeCap::kSquare));
+    builder.DrawLine(
+        {draw_rect.left() + 1.0f, draw_rect.bottom() - 1.0f},
+        {draw_rect.right() - 1.0f, draw_rect.bottom() - 1.0f},
+        DlPaint().setStrokeWidth(2.0f).setStrokeCap(DlStrokeCap::kSquare));
+  });
+
+  test_bounded("DrawDashedLine", [](DlCanvas& builder) {
+    builder.DrawDashedLine(
+        {draw_rect.left() + 1.0f, draw_rect.top() + 1.0f},
+        {draw_rect.right() - 1.0f, draw_rect.top() + 1.0f},
+        // must fill 80 x 80 square with on dashes at both
+        // ends - 40 + 25 + 40 == 105 so it will be on
+        // at both ends
+        40.0f, 25.0f,
+        DlPaint().setStrokeWidth(2.0f).setStrokeCap(DlStrokeCap::kSquare));
+    builder.DrawDashedLine(
+        {draw_rect.left() + 1.0f, draw_rect.bottom() - 1.0f},
+        {draw_rect.right() - 1.0f, draw_rect.bottom() - 1.0f},
+        // must fill 80 x 80 square with on dashes at both
+        // ends - 40 + 25 + 40 == 105 so it will be on
+        // at both ends
+        40.0f, 25.0f,
+        DlPaint().setStrokeWidth(2.0f).setStrokeCap(DlStrokeCap::kSquare));
+  });
+
+  test_bounded("DrawRect", [](DlCanvas& builder) {
+    builder.DrawRect(draw_rect, DlPaint());
+  });
+
+  test_bounded("DrawOval", [](DlCanvas& builder) {
+    builder.DrawOval(draw_rect, DlPaint());
+  });
+
+  test_bounded("DrawCircle", [](DlCanvas& builder) {
+    builder.DrawCircle(draw_rect.center(), draw_rect.width() * 0.5f, DlPaint());
+  });
+
+  test_bounded("DrawRRect", [](DlCanvas& builder) {
+    builder.DrawRRect(SkRRect::MakeRectXY(draw_rect, 5.0f, 5.0f), DlPaint());
+  });
+
+  test_bounded("DrawDRRect", [](DlCanvas& builder) {
+    builder.DrawDRRect(
+        SkRRect::MakeRectXY(draw_rect, 5.0f, 5.0f),
+        SkRRect::MakeRectXY(draw_rect.makeInset(10.0f, 10.0f), 5.0f, 5.0f),
+        DlPaint());
+  });
+
+  test_bounded("DrawArc", [](DlCanvas& builder) {
+    builder.DrawArc(draw_rect, 45.0f, 355.0f, false, DlPaint());
+  });
+
+  test_bounded("DrawPathEvenOdd", [](DlCanvas& builder) {
+    SkPath path = SkPath::Rect(draw_rect);
+    path.setFillType(SkPathFillType::kEvenOdd);
+    builder.DrawPath(path, DlPaint());
+  });
+
+  test_bounded("DrawPathWinding", [](DlCanvas& builder) {
+    SkPath path = SkPath::Rect(draw_rect);
+    path.setFillType(SkPathFillType::kWinding);
+    builder.DrawPath(path, DlPaint());
+  });
+
+  auto test_draw_points = [&test_bounded](PointMode mode) {
+    std::stringstream ss;
+    ss << "DrawPoints(" << mode << ")";
+    test_bounded(ss.str(), [mode](DlCanvas& builder) {
+      SkPoint points[4] = {
+          {draw_rect.left() + 1.0f, draw_rect.top() + 1.0f},
+          {draw_rect.right() - 1.0f, draw_rect.top() + 1.0f},
+          {draw_rect.right() - 1.0f, draw_rect.bottom() - 1.0f},
+          {draw_rect.left() + 1.0f, draw_rect.bottom() - 1.0f},
+      };
+      DlPaint paint;
+      paint.setStrokeWidth(2.0f);
+      paint.setDrawStyle(DlDrawStyle::kStroke);
+      // bounds accumulation doesn't examine the points to see if they
+      // have diagonals so Square caps may have their corners accumulated
+      // but Round caps will always pad by only half the stroke width.
+      paint.setStrokeCap(DlStrokeCap::kRound);
+
+      builder.DrawPoints(mode, 4, points, paint);
+    });
+  };
+
+  test_draw_points(PointMode::kPoints);
+  test_draw_points(PointMode::kLines);
+  test_draw_points(PointMode::kPolygon);
+
+  test_bounded("DrawVerticesTriangles", [](DlCanvas& builder) {
+    SkPoint points[6] = {
+        {draw_rect.left(), draw_rect.top()},
+        {draw_rect.right(), draw_rect.top()},
+        {draw_rect.right(), draw_rect.bottom()},
+        {draw_rect.right(), draw_rect.bottom()},
+        {draw_rect.left(), draw_rect.bottom()},
+        {draw_rect.left(), draw_rect.top()},
+    };
+    DlVertices::Builder vertices(DlVertexMode::kTriangles, 6,
+                                 DlVertices::Builder::kNone, 0);
+    vertices.store_vertices(points);
+    builder.DrawVertices(vertices.build(), DlBlendMode::kSrcOver, DlPaint());
+  });
+
+  test_bounded("DrawVerticesTriangleStrip", [](DlCanvas& builder) {
+    SkPoint points[6] = {
+        {draw_rect.left(), draw_rect.top()},
+        {draw_rect.right(), draw_rect.top()},
+        {draw_rect.right(), draw_rect.bottom()},
+        {draw_rect.left(), draw_rect.bottom()},
+        {draw_rect.left(), draw_rect.top()},
+        {draw_rect.right(), draw_rect.top()},
+    };
+    DlVertices::Builder vertices(DlVertexMode::kTriangleStrip, 6,
+                                 DlVertices::Builder::kNone, 0);
+    vertices.store_vertices(points);
+    builder.DrawVertices(vertices.build(), DlBlendMode::kSrcOver, DlPaint());
+  });
+
+  test_bounded("DrawVerticesTriangleFan", [](DlCanvas& builder) {
+    SkPoint points[6] = {
+        draw_rect.center(),
+        {draw_rect.left(), draw_rect.top()},
+        {draw_rect.right(), draw_rect.top()},
+        {draw_rect.right(), draw_rect.bottom()},
+        {draw_rect.left(), draw_rect.bottom()},
+    };
+    DlVertices::Builder vertices(DlVertexMode::kTriangleFan, 5,
+                                 DlVertices::Builder::kNone, 0);
+    vertices.store_vertices(points);
+    builder.DrawVertices(vertices.build(), DlBlendMode::kSrcOver, DlPaint());
+  });
+
+  test_bounded("DrawImage", [](DlCanvas& builder) {
+    auto image = MakeTestImage(draw_rect.width(), draw_rect.height(), 5);
+    builder.DrawImage(image, {draw_rect.left(), draw_rect.top()},
+                      DlImageSampling::kLinear);
+  });
+
+  test_bounded("DrawImageRect", [](DlCanvas& builder) {
+    auto image = MakeTestImage(root_cull.width(), root_cull.height(), 5);
+    builder.DrawImageRect(image, draw_rect, DlImageSampling::kLinear);
+  });
+
+  test_bounded("DrawImageNine", [](DlCanvas& builder) {
+    auto image = MakeTestImage(root_cull.width(), root_cull.height(), 5);
+    SkIRect center = image->bounds().makeInset(10, 10);
+    builder.DrawImageNine(image, center, draw_rect, DlFilterMode::kLinear);
+  });
+
+  test_bounded("DrawTextBlob", [](DlCanvas& builder) {
+    SkFont font = CreateTestFontOfSize(20.0f);
+    sk_sp<SkTypeface> face = font.refTypeface();
+    ASSERT_TRUE(face);
+    ASSERT_TRUE(face->countGlyphs() > 0) << "No glyphs in font";
+    auto blob = SkTextBlob::MakeFromText("Hello", 5, font);
+
+    // Make sure the blob fits within the draw_rect bounds.
+    ASSERT_LT(blob->bounds().width(), draw_rect.width());
+    ASSERT_LT(blob->bounds().height(), draw_rect.height());
+
+    // Draw once at upper left and again at lower right to fill the bounds.
+    builder.DrawTextBlob(blob, draw_rect.left() - blob->bounds().left(),
+                         draw_rect.top() - blob->bounds().top(), DlPaint());
+    builder.DrawTextBlob(blob, draw_rect.right() - blob->bounds().right(),
+                         draw_rect.bottom() - blob->bounds().bottom(),
+                         DlPaint());
+  });
+
+  test_bounded("DrawTextFrame", [](DlCanvas& builder) {
+    SkFont font = CreateTestFontOfSize(20.0f);
+    sk_sp<SkTypeface> face = font.refTypeface();
+    ASSERT_TRUE(face);
+    ASSERT_TRUE(face->countGlyphs() > 0) << "No glyphs in font";
+    auto blob = SkTextBlob::MakeFromText("Hello", 5, font);
+    auto frame = impeller::MakeTextFrameFromTextBlobSkia(blob);
+
+    // Make sure the blob fits within the draw_rect bounds.
+    ASSERT_LT(blob->bounds().width(), draw_rect.width());
+    ASSERT_LT(blob->bounds().height(), draw_rect.height());
+
+    // Draw once at upper left and again at lower right to fill the bounds.
+    builder.DrawTextFrame(frame, draw_rect.left() - blob->bounds().left(),
+                          draw_rect.top() - blob->bounds().top(), DlPaint());
+    builder.DrawTextFrame(frame, draw_rect.right() - blob->bounds().right(),
+                          draw_rect.bottom() - blob->bounds().bottom(),
+                          DlPaint());
+  });
+
+  test_bounded("DrawBoundedDisplayList", [](DlCanvas& builder) {
+    DisplayListBuilder nested_builder(root_cull);
+    nested_builder.DrawRect(draw_rect, DlPaint());
+    auto nested_display_list = nested_builder.Build();
+
+    EXPECT_EQ(nested_display_list->bounds(), draw_rect);
+    ASSERT_FALSE(nested_display_list->root_is_unbounded());
+
+    builder.DrawDisplayList(nested_display_list);
+  });
+
+  test_bounded("DrawShadow", [](DlCanvas& builder) {
+    SkPath path = SkPath::Rect(draw_rect.makeInset(20, 20));
+    DlScalar elevation = 2.0f;
+    DlScalar dpr = 1.0f;
+    auto shadow_bounds =
+        DlCanvas::ComputeShadowBounds(path, elevation, dpr, SkMatrix::I());
+
+    // Make sure the shadow fits within the draw_rect bounds.
+    ASSERT_LT(shadow_bounds.width(), draw_rect.width());
+    ASSERT_LT(shadow_bounds.height(), draw_rect.height());
+
+    // Draw once at upper left and again at lower right to fill the bounds.
+    SkPath pathUL =  //
+        SkPath(path).offset(draw_rect.left() - shadow_bounds.left(),
+                            draw_rect.top() - shadow_bounds.top());
+    builder.DrawShadow(pathUL, DlColor::kMagenta(), elevation, true, dpr);
+    SkPath pathLR =
+        SkPath(path).offset(draw_rect.right() - shadow_bounds.right(),
+                            draw_rect.bottom() - shadow_bounds.bottom());
+    builder.DrawShadow(pathLR, DlColor::kMagenta(), elevation, true, dpr);
+  });
+
+  for (int i = 0; i <= static_cast<int>(DlBlendMode::kLastMode); i++) {
+    DlBlendMode mode = static_cast<DlBlendMode>(i);
+    if (mode == DlBlendMode::kDst) {
+      // No way to make kDst a non-nop
+      continue;
+    }
+    std::stringstream ss;
+    ss << "DrawRectWith" << mode;
+    test_bounded(ss.str(), [mode](DlCanvas& builder) {
+      // alpha of 0x7f prevents kDstIn from being a nop
+      builder.DrawRect(draw_rect, DlPaint().setBlendMode(mode).setAlpha(0x7f));
+    });
+  }
+}
+
+TEST_F(DisplayListTest, UnboundedRenderOpsAreReportedUnlessClipped) {
+  static const SkRect root_cull = SkRect::MakeLTRB(100, 100, 200, 200);
+  static const SkRect clip_rect = SkRect::MakeLTRB(120, 120, 180, 180);
+  static const SkRect draw_rect = SkRect::MakeLTRB(110, 110, 190, 190);
+
+  using Renderer = const std::function<void(DlCanvas&)>;
+  auto test_unbounded = [](const std::string& label,  //
+                           const Renderer& renderer,
+                           int extra_save_layers = 0) {
+    {
+      DisplayListBuilder builder(root_cull);
+      renderer(builder);
+      auto display_list = builder.Build();
+
+      EXPECT_EQ(display_list->bounds(), root_cull) << label;
+      EXPECT_TRUE(display_list->root_is_unbounded()) << label;
+    }
+
+    {
+      DisplayListBuilder builder(root_cull);
+      builder.ClipRect(clip_rect);
+      renderer(builder);
+      auto display_list = builder.Build();
+
+      EXPECT_EQ(display_list->bounds(), clip_rect) << label;
+      EXPECT_FALSE(display_list->root_is_unbounded()) << label;
+    }
+
+    {
+      DisplayListBuilder builder(root_cull);
+      builder.SaveLayer(nullptr, nullptr);
+      renderer(builder);
+      builder.Restore();
+      auto display_list = builder.Build();
+
+      EXPECT_EQ(display_list->bounds(), root_cull) << label;
+      EXPECT_FALSE(display_list->root_is_unbounded()) << label;
+
+      SAVE_LAYER_EXPECTOR(expector);
+      expector  //
+          .addDetail(label)
+          .addExpectation([](const SaveLayerOptions& options) {
+            return options.content_is_unbounded();
+          });
+      for (int i = 0; i < extra_save_layers; i++) {
+        expector.addOpenExpectation();
+      }
+      display_list->Dispatch(expector);
+    }
+
+    {
+      DisplayListBuilder builder(root_cull);
+      builder.SaveLayer(nullptr, nullptr);
+      builder.ClipRect(clip_rect);
+      renderer(builder);
+      builder.Restore();
+      auto display_list = builder.Build();
+
+      EXPECT_EQ(display_list->bounds(), clip_rect) << label;
+      EXPECT_FALSE(display_list->root_is_unbounded()) << label;
+
+      SAVE_LAYER_EXPECTOR(expector);
+      expector  //
+          .addDetail(label)
+          .addExpectation([](const SaveLayerOptions& options) {
+            return !options.content_is_unbounded();
+          });
+      for (int i = 0; i < extra_save_layers; i++) {
+        expector.addOpenExpectation();
+      }
+      display_list->Dispatch(expector);
+    }
+  };
+
+  test_unbounded("DrawPaint", [](DlCanvas& builder) {  //
+    builder.DrawPaint(DlPaint());
+  });
+
+  test_unbounded("DrawColor", [](DlCanvas& builder) {
+    builder.DrawColor(DlColor::kMagenta(), DlBlendMode::kSrc);
+  });
+
+  test_unbounded("Clear", [](DlCanvas& builder) {  //
+    builder.Clear(DlColor::kMagenta());
+  });
+
+  test_unbounded("DrawPathEvenOddInverted", [](DlCanvas& builder) {
+    SkPath path = SkPath::Rect(draw_rect);
+    path.setFillType(SkPathFillType::kInverseEvenOdd);
+    builder.DrawPath(path, DlPaint());
+  });
+
+  test_unbounded("DrawPathWindingInverted", [](DlCanvas& builder) {
+    SkPath path = SkPath::Rect(draw_rect);
+    path.setFillType(SkPathFillType::kInverseWinding);
+    builder.DrawPath(path, DlPaint());
+  });
+
+  test_unbounded("DrawUnboundedDisplayList", [](DlCanvas& builder) {
+    DisplayListBuilder nested_builder(root_cull);
+    nested_builder.DrawPaint(DlPaint());
+    auto nested_display_list = nested_builder.Build();
+
+    EXPECT_EQ(nested_display_list->bounds(), root_cull);
+    ASSERT_TRUE(nested_display_list->root_is_unbounded());
+
+    builder.DrawDisplayList(nested_display_list);
+  });
+
+  test_unbounded("DrawRectWithUnboundedImageFilter", [](DlCanvas& builder) {
+    // clang-format off
+    const DlScalar matrix[20] = {
+      0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+      0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+      0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+      0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+    };
+    // clang-format on
+    auto unbounded_cf = DlMatrixColorFilter::Make(matrix);
+    // ColorFilter must modify transparent black to be "unbounded"
+    ASSERT_TRUE(unbounded_cf->modifies_transparent_black());
+    auto unbounded_if = DlColorFilterImageFilter::Make(unbounded_cf);
+    SkRect output_bounds;
+    // ImageFilter returns null from bounds queries if it is "unbounded"
+    ASSERT_EQ(unbounded_if->map_local_bounds(draw_rect, output_bounds),
+              nullptr);
+
+    builder.DrawRect(draw_rect, DlPaint().setImageFilter(unbounded_if));
+  });
+
+  test_unbounded(
+      "SaveLayerWithBackdropFilter",
+      [](DlCanvas& builder) {
+        auto filter = DlBlurImageFilter::Make(3.0f, 3.0f, DlTileMode::kMirror);
+        builder.SaveLayer(nullptr, nullptr, filter.get());
+        builder.Restore();
+      },
+      1);
 }
 
 }  // namespace testing

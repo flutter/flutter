@@ -216,6 +216,13 @@ class SaveLayerOptions {
     return options;
   }
 
+  bool content_is_unbounded() const { return fContentIsUnbounded; }
+  SaveLayerOptions with_content_is_unbounded() const {
+    SaveLayerOptions options(this);
+    options.fContentIsUnbounded = true;
+    return options;
+  }
+
   SaveLayerOptions& operator=(const SaveLayerOptions& other) {
     flags_ = other.flags_;
     return *this;
@@ -235,6 +242,7 @@ class SaveLayerOptions {
       unsigned fBoundsFromCaller : 1;
       unsigned fContentIsClipped : 1;
       unsigned fHasBackdropFilter : 1;
+      unsigned fContentIsUnbounded : 1;
     };
     uint32_t flags_;
   };
@@ -331,6 +339,18 @@ class DisplayList : public SkRefCnt {
   /// be required for the backdrop filter to do its work.
   bool root_has_backdrop_filter() const { return root_has_backdrop_filter_; }
 
+  /// @brief    Indicates if a rendering operation at the root level of the
+  ///           DisplayList had an unbounded result, not otherwise limited by
+  ///           a clip operation.
+  ///
+  /// This condition can occur in a number of situations. The most common
+  /// situation is when there is a drawPaint or drawColor rendering
+  /// operation which fills out the entire drawable surface unless it is
+  /// bounded by a clip. Other situations include an operation rendered
+  /// through an ImageFilter that cannot compute the resulting bounds or
+  /// when an unclipped backdrop filter is applied by a save layer.
+  bool root_is_unbounded() const { return root_is_unbounded_; }
+
   /// @brief    Indicates the maximum DlBlendMode used on any rendering op
   ///           in the root surface of the DisplayList.
   ///
@@ -353,6 +373,7 @@ class DisplayList : public SkRefCnt {
               bool modifies_transparent_black,
               DlBlendMode max_root_blend_mode,
               bool root_has_backdrop_filter,
+              bool root_is_unbounded,
               sk_sp<const DlRTree> rtree);
 
   static uint32_t next_unique_id();
@@ -375,6 +396,7 @@ class DisplayList : public SkRefCnt {
   const bool is_ui_thread_safe_;
   const bool modifies_transparent_black_;
   const bool root_has_backdrop_filter_;
+  const bool root_is_unbounded_;
   const DlBlendMode max_root_blend_mode_;
 
   const sk_sp<const DlRTree> rtree_;
