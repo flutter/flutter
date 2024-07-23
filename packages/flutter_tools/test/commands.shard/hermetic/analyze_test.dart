@@ -144,8 +144,9 @@ void main() {
           ),
         ],
       );
-      await runner.run(<String>['analyze', '--flutter-repo']);
+      final Future<void> commandProcess = runner.run(<String>['analyze', '--flutter-repo']);
       final Map<String, Object?> setAnalysisRootsCommand = jsonDecode(await streamController.stream.transform(utf8.decoder).elementAt(2)) as Map<String, Object?>;
+      await commandProcess;
       expect(setAnalysisRootsCommand['method'], 'analysis.setAnalysisRoots');
       final Map<String, Object?> params = setAnalysisRootsCommand['params']! as Map<String, Object?>;
       expect(params['included'], <String?>[Cache.flutterRoot]);
