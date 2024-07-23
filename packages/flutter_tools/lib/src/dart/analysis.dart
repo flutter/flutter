@@ -11,7 +11,6 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
-import '../base/process.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../convert.dart';
@@ -89,17 +88,12 @@ class AnalysisServer {
         .transform<String>(const LineSplitter());
     inStream.listen(_handleServerResponse);
 
-    await _sendCommand(
-      'server.setSubscriptions',
-      <String, dynamic>{
-        'subscriptions': <String>['STATUS'],
-      },
-    );
+    _sendCommand('server.setSubscriptions', <String, dynamic>{
+      'subscriptions': <String>['STATUS'],
+    });
 
-    await _sendCommand(
-      'analysis.setAnalysisRoots',
-      <String, dynamic>{'included': directories, 'excluded': <String>[]},
-    );
+    _sendCommand('analysis.setAnalysisRoots',
+        <String, dynamic>{'included': directories, 'excluded': <String>[]});
   }
 
   final List<String> _logs = <String>[];
@@ -132,18 +126,13 @@ class AnalysisServer {
 
   Future<int?> get onExit async => _process?.exitCode;
 
-  Future<void> _sendCommand(String method, Map<String, dynamic> params) async {
+  void _sendCommand(String method, Map<String, dynamic> params) {
     final String message = json.encode(<String, dynamic>{
       'id': (++_id).toString(),
       'method': method,
       'params': params,
     });
-    if (_process != null) {
-      await ProcessUtils.writelnToStdinUnsafe(
-        stdin: _process!.stdin,
-        line: message,
-      );
-    }
+    _process?.stdin.writeln(message);
     _logger.printTrace('==> $message');
   }
 
