@@ -90,6 +90,7 @@ source_set("flutter_linux_sources") {
              "fl_method_channel_private.h",
              "fl_method_codec_private.h",
              "fl_plugin_registrar_private.h",
+             "fl_window_state_monitor.h",
              "key_mapping.h",
            ]
 
@@ -146,6 +147,7 @@ source_set("flutter_linux_sources") {
     "fl_value.cc",
     "fl_view.cc",
     "fl_view_accessible.cc",
+    "fl_window_state_monitor.cc",
     "key_mapping.g.cc",
   ]
 
@@ -227,6 +229,7 @@ executable("flutter_linux_unittests") {
     "fl_value_test.cc",
     "fl_view_accessible_test.cc",
     "fl_view_test.cc",
+    "fl_window_state_monitor_test.cc",
     "key_mapping_test.cc",
     "testing/fl_test.cc",
     "testing/fl_test_gtk_logs.cc",
@@ -243,6 +246,7 @@ executable("flutter_linux_unittests") {
     "testing/mock_text_input_handler.cc",
     "testing/mock_text_input_view_delegate.cc",
     "testing/mock_texture_registrar.cc",
+    "testing/mock_window.cc",
   ]
 
   public_configs = [ "//flutter:config" ]
