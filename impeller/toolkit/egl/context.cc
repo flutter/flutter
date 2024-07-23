@@ -99,5 +99,9 @@ void Context::DispatchLifecyleEvent(LifecycleEvent event) const {
   }
 }
 
+bool Context::IsCurrent() const {
+  return ::eglGetCurrentContext() == context_;
+}
+
 }  // namespace egl
 }  // namespace impeller

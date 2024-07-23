@@ -99,6 +99,12 @@ class Context {
   ///
   bool RemoveLifecycleListener(UniqueID id);
 
+  //----------------------------------------------------------------------------
+  /// @return     True if the context is current and attached to any surface,
+  ///             False otherwise.
+  ///
+  bool IsCurrent() const;
+
  private:
   friend class Display;
 

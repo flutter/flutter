@@ -54,14 +54,42 @@ class SurfaceTextureExternalTexture : public flutter::Texture {
   ///
   virtual void ProcessFrame(PaintContext& context, const SkRect& bounds) = 0;
 
+  virtual void DrawFrame(PaintContext& context,
+                         const SkRect& bounds,
+                         const DlImageSampling sampling) const;
+
+  //----------------------------------------------------------------------------
+  /// @brief      Get the transformation that should be applied to the UV
+  ///             texture coordinates when sampling from this texture.
+  ///
+  /// @return     The current uv transformation.
+  ///
+  const SkMatrix& GetCurrentUVTransformation() const;
+
   //----------------------------------------------------------------------------
   /// @brief      Provides an opportunity for the subclasses to sever the
   ///             connection between the OpenGL texture resource represented by
   ///             this surface texture and the underlying package handle
   ///             (SkImage, impeller::Texture, etc...).
   ///
+  /// @important  It is the responsibility of the subclass to ensure that a
+  ///             context is current when this call is made. Subclass can do
+  ///             this by overriding this method, making the context current in
+  ///             the implementation and calling the base class method.
+  ///
   virtual void Detach();
 
+  //----------------------------------------------------------------------------
+  /// @brief      Attaches the given OpenGL texture handle to the surface
+  ///             texture via a bind operation.
+  ///
+  /// @important  It is the responsibility of the subclass to ensure that a
+  ///             context is current when this call is made. Subclass can do
+  ///             this by overriding this method, making the context current in
+  ///             the implementation and calling the base class method.
+  ///
+  /// @param[in]  gl_tex_id  The gl tex identifier
+  ///
   void Attach(int gl_tex_id);
 
   bool ShouldUpdate();
@@ -80,10 +108,11 @@ class SurfaceTextureExternalTexture : public flutter::Texture {
   std::shared_ptr<PlatformViewAndroidJNI> jni_facade_;
   fml::jni::ScopedJavaGlobalRef<jobject> surface_texture_;
   AttachmentState state_ = AttachmentState::kUninitialized;
-  SkMatrix transform_;
   sk_sp<flutter::DlImage> dl_image_;
 
  private:
+  SkMatrix transform_;
+
   // |Texture|
   void Paint(PaintContext& context,
              const SkRect& bounds,

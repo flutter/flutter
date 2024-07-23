@@ -22,6 +22,7 @@
 #include "flutter/shell/platform/android/image_external_texture_gl_skia.h"
 #include "flutter/shell/platform/android/surface_texture_external_texture_gl_impeller.h"
 #include "flutter/shell/platform/android/surface_texture_external_texture_gl_skia.h"
+#include "flutter/shell/platform/android/surface_texture_external_texture_vk_impeller.h"
 #include "fml/logging.h"
 #if IMPELLER_ENABLE_VULKAN  // b/258506856 for why this is behind an if
 #include "flutter/shell/platform/android/android_surface_vk_impeller.h"
@@ -279,23 +280,36 @@ void PlatformViewAndroid::RegisterExternalTexture(
       // Impeller GLES.
       RegisterTexture(std::make_shared<SurfaceTextureExternalTextureGLImpeller>(
           std::static_pointer_cast<impeller::ContextGLES>(
-              android_context_->GetImpellerContext()),
-          texture_id, surface_texture, jni_facade_));
+              android_context_->GetImpellerContext()),  //
+          texture_id,                                   //
+          surface_texture,                              //
+          jni_facade_                                   //
+          ));
       break;
     case AndroidRenderingAPI::kSkiaOpenGLES:
       // Legacy GL.
       RegisterTexture(std::make_shared<SurfaceTextureExternalTextureGLSkia>(
-          texture_id, surface_texture, jni_facade_));
+          texture_id,       //
+          surface_texture,  //
+          jni_facade_       //
+          ));
       break;
     case AndroidRenderingAPI::kSoftware:
       FML_LOG(INFO) << "Software rendering does not support external textures.";
       break;
     case AndroidRenderingAPI::kImpellerVulkan:
-      FML_LOG(ERROR) << "Impeller requires migrating plugins that create and "
-                        "register surface textures to the new surface producer "
-                        "API. See "
-                        "https://docs.flutter.dev/release/breaking-changes/"
-                        "android-surface-plugins";
+      FML_LOG(IMPORTANT)
+          << "Flutter recommends migrating plugins that create and "
+             "register surface textures to the new surface producer "
+             "API. See https://docs.flutter.dev/release/breaking-changes/"
+             "android-surface-plugins";
+      RegisterTexture(std::make_shared<SurfaceTextureExternalTextureVKImpeller>(
+          std::static_pointer_cast<impeller::ContextVK>(
+              android_context_->GetImpellerContext()),  //
+          texture_id,                                   //
+          surface_texture,                              //
+          jni_facade_                                   //
+          ));
   }
 }
 
