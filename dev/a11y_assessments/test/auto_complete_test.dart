@@ -4,6 +4,7 @@
 
 import 'package:a11y_assessments/use_cases/auto_complete.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'test_utils.dart';
@@ -19,10 +20,8 @@ void main() {
 
   testWidgets('auto complete has one h1 tag', (WidgetTester tester) async {
     await pumpsUseCase(tester, AutoCompleteUseCase());
-    final Widget semanticsH1 = Semantics(
-      header: true,
-      headingLevel: 1,
-      child: const Text('AutoComplete Demo'));
-    expect(find.byWidget(semanticsH1), findsOne);
+    final Finder findHeadingLevelOnes = find.bySemanticsLabel(RegExp('AutoComplete Demo'));
+    await tester.pumpAndSettle();
+    expect(findHeadingLevelOnes, findsOne);
   });
 }

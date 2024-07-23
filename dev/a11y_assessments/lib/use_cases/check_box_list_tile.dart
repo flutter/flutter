@@ -32,7 +32,7 @@ class _MainWidgetState extends State<_MainWidget> {
         title: Semantics(
           header: true,
           headingLevel: 1,
-          child: const Text('CheckBoxListTile')
+          child: const Text('CheckBoxListTile Demo')
         ),
       ),
       body: ListView(
