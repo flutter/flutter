@@ -425,6 +425,215 @@ TEST(FlEngineTest, SwitchesEmpty) {
   EXPECT_EQ(switches->len, 0U);
 }
 
+static void add_view_cb(GObject* object,
+                        GAsyncResult* result,
+                        gpointer user_data) {
+  g_autoptr(GError) error = nullptr;
+  FlutterViewId view_id =
+      fl_engine_add_view_finish(FL_ENGINE(object), result, &error);
+  EXPECT_GT(view_id, 0);
+  EXPECT_EQ(error, nullptr);
+
+  g_main_loop_quit(static_cast<GMainLoop*>(user_data));
+}
+
+TEST(FlEngineTest, AddView) {
+  g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
+
+  g_autoptr(FlEngine) engine = make_mock_engine();
+  FlutterEngineProcTable* embedder_api = fl_engine_get_embedder_api(engine);
+
+  bool called = false;
+  embedder_api->AddView = MOCK_ENGINE_PROC(
+      AddView, ([&called](auto engine, const FlutterAddViewInfo* info) {
+        called = true;
+        EXPECT_EQ(info->view_metrics->width, 123u);
+        EXPECT_EQ(info->view_metrics->height, 456u);
+        EXPECT_EQ(info->view_metrics->pixel_ratio, 2.0);
+
+        FlutterAddViewResult result;
+        result.struct_size = sizeof(FlutterAddViewResult);
+        result.added = true;
+        result.user_data = info->user_data;
+        info->add_view_callback(&result);
+
+        return kSuccess;
+      }));
+
+  fl_engine_add_view(engine, 123, 456, 2.0, nullptr, add_view_cb, loop);
+  EXPECT_TRUE(called);
+
+  // Blocks here until add_view_cb is called.
+  g_main_loop_run(loop);
+}
+
+static void add_view_error_cb(GObject* object,
+                              GAsyncResult* result,
+                              gpointer user_data) {
+  g_autoptr(GError) error = nullptr;
+  FlutterViewId view_id =
+      fl_engine_add_view_finish(FL_ENGINE(object), result, &error);
+  EXPECT_EQ(view_id, 0);
+  EXPECT_NE(error, nullptr);
+
+  g_main_loop_quit(static_cast<GMainLoop*>(user_data));
+}
+
+TEST(FlEngineTest, AddViewError) {
+  g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
+
+  g_autoptr(FlEngine) engine = make_mock_engine();
+  FlutterEngineProcTable* embedder_api = fl_engine_get_embedder_api(engine);
+
+  embedder_api->AddView = MOCK_ENGINE_PROC(
+      AddView, ([](auto engine, const FlutterAddViewInfo* info) {
+        FlutterAddViewResult result;
+        result.struct_size = sizeof(FlutterAddViewResult);
+        result.added = false;
+        result.user_data = info->user_data;
+        info->add_view_callback(&result);
+
+        return kSuccess;
+      }));
+
+  fl_engine_add_view(engine, 123, 456, 2.0, nullptr, add_view_error_cb, loop);
+
+  // Blocks here until add_view_error_cb is called.
+  g_main_loop_run(loop);
+}
+
+static void add_view_engine_error_cb(GObject* object,
+                                     GAsyncResult* result,
+                                     gpointer user_data) {
+  g_autoptr(GError) error = nullptr;
+  FlutterViewId view_id =
+      fl_engine_add_view_finish(FL_ENGINE(object), result, &error);
+  EXPECT_EQ(view_id, 0);
+  EXPECT_NE(error, nullptr);
+
+  g_main_loop_quit(static_cast<GMainLoop*>(user_data));
+}
+
+TEST(FlEngineTest, AddViewEngineError) {
+  g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
+
+  g_autoptr(FlEngine) engine = make_mock_engine();
+  FlutterEngineProcTable* embedder_api = fl_engine_get_embedder_api(engine);
+
+  embedder_api->AddView = MOCK_ENGINE_PROC(
+      AddView, ([](auto engine, const FlutterAddViewInfo* info) {
+        return kInvalidArguments;
+      }));
+
+  fl_engine_add_view(engine, 123, 456, 2.0, nullptr, add_view_engine_error_cb,
+                     loop);
+
+  // Blocks here until remove_view_engine_error_cb is called.
+  g_main_loop_run(loop);
+}
+
+static void remove_view_cb(GObject* object,
+                           GAsyncResult* result,
+                           gpointer user_data) {
+  g_autoptr(GError) error = nullptr;
+  gboolean r = fl_engine_remove_view_finish(FL_ENGINE(object), result, &error);
+  EXPECT_TRUE(r);
+  EXPECT_EQ(error, nullptr);
+
+  g_main_loop_quit(static_cast<GMainLoop*>(user_data));
+}
+
+TEST(FlEngineTest, RemoveView) {
+  g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
+
+  g_autoptr(FlEngine) engine = make_mock_engine();
+  FlutterEngineProcTable* embedder_api = fl_engine_get_embedder_api(engine);
+
+  bool called = false;
+  embedder_api->RemoveView = MOCK_ENGINE_PROC(
+      RemoveView, ([&called](auto engine, const FlutterRemoveViewInfo* info) {
+        called = true;
+        EXPECT_EQ(info->view_id, 123);
+
+        FlutterRemoveViewResult result;
+        result.struct_size = sizeof(FlutterRemoveViewResult);
+        result.removed = true;
+        result.user_data = info->user_data;
+        info->remove_view_callback(&result);
+
+        return kSuccess;
+      }));
+
+  fl_engine_remove_view(engine, 123, nullptr, remove_view_cb, loop);
+  EXPECT_TRUE(called);
+
+  // Blocks here until remove_view_cb is called.
+  g_main_loop_run(loop);
+}
+
+static void remove_view_error_cb(GObject* object,
+                                 GAsyncResult* result,
+                                 gpointer user_data) {
+  g_autoptr(GError) error = nullptr;
+  gboolean r = fl_engine_remove_view_finish(FL_ENGINE(object), result, &error);
+  EXPECT_FALSE(r);
+  EXPECT_NE(error, nullptr);
+
+  g_main_loop_quit(static_cast<GMainLoop*>(user_data));
+}
+
+TEST(FlEngineTest, RemoveViewError) {
+  g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
+
+  g_autoptr(FlEngine) engine = make_mock_engine();
+  FlutterEngineProcTable* embedder_api = fl_engine_get_embedder_api(engine);
+
+  embedder_api->RemoveView = MOCK_ENGINE_PROC(
+      RemoveView, ([](auto engine, const FlutterRemoveViewInfo* info) {
+        FlutterRemoveViewResult result;
+        result.struct_size = sizeof(FlutterRemoveViewResult);
+        result.removed = false;
+        result.user_data = info->user_data;
+        info->remove_view_callback(&result);
+
+        return kSuccess;
+      }));
+
+  fl_engine_remove_view(engine, 123, nullptr, remove_view_error_cb, loop);
+
+  // Blocks here until remove_view_error_cb is called.
+  g_main_loop_run(loop);
+}
+
+static void remove_view_engine_error_cb(GObject* object,
+                                        GAsyncResult* result,
+                                        gpointer user_data) {
+  g_autoptr(GError) error = nullptr;
+  gboolean r = fl_engine_remove_view_finish(FL_ENGINE(object), result, &error);
+  EXPECT_FALSE(r);
+  EXPECT_NE(error, nullptr);
+
+  g_main_loop_quit(static_cast<GMainLoop*>(user_data));
+}
+
+TEST(FlEngineTest, RemoveViewEngineError) {
+  g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
+
+  g_autoptr(FlEngine) engine = make_mock_engine();
+  FlutterEngineProcTable* embedder_api = fl_engine_get_embedder_api(engine);
+
+  embedder_api->RemoveView = MOCK_ENGINE_PROC(
+      RemoveView, ([](auto engine, const FlutterRemoveViewInfo* info) {
+        return kInvalidArguments;
+      }));
+
+  fl_engine_remove_view(engine, 123, nullptr, remove_view_engine_error_cb,
+                        loop);
+
+  // Blocks here until remove_view_engine_error_cb is called.
+  g_main_loop_run(loop);
+}
+
 #ifndef FLUTTER_RELEASE
 TEST(FlEngineTest, Switches) {
   g_autoptr(FlEngine) engine = make_mock_engine();
