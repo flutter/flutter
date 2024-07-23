@@ -1080,15 +1080,18 @@ class DefaultResidentCompiler implements ResidentCompiler {
     return compilation.futures;
   }
 
-  Future<CompilerOutput?> _reject(_RejectRequest request) async {
+  Future<void> _reject(_RejectRequest request) async {
     if (!_compileRequestNeedsConfirmation) {
-      return Future<CompilerOutput?>.value();
+      request.startedCompleter.complete();
+      request.resultCompleter.complete();
+      return;
     }
     _stdoutHandler.reset(expectSources: false);
     await _writelnToServerStdin('reject', printTrace: true);
     request.startedCompleter.complete();
     _compileRequestNeedsConfirmation = false;
-    return _stdoutHandler.compilerOutput?.future;
+
+    request.resultCompleter.complete(_stdoutHandler.compilerOutput?.future);
   }
 
   @override
