@@ -206,5 +206,9 @@ std::unique_ptr<Surface> Display::CreatePixelBufferSurface(const Config& config,
   return std::unique_ptr<Surface>(new Surface(display_, surface));
 }
 
+const EGLDisplay& Display::GetHandle() const {
+  return display_;
+}
+
 }  // namespace egl
 }  // namespace impeller

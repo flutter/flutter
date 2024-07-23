@@ -133,6 +133,8 @@ source_set("flutter_shell_native_src") {
     "surface_texture_external_texture_gl_impeller.h",
     "surface_texture_external_texture_gl_skia.cc",
     "surface_texture_external_texture_gl_skia.h",
+    "surface_texture_external_texture_vk_impeller.cc",
+    "surface_texture_external_texture_vk_impeller.h",
     "vsync_waiter_android.cc",
     "vsync_waiter_android.h",
   ]
@@ -152,6 +154,7 @@ source_set("flutter_shell_native_src") {
     "//flutter/impeller/toolkit/android",
     "//flutter/impeller/toolkit/egl",
     "//flutter/impeller/toolkit/gles",
+    "//flutter/impeller/toolkit/glvk",
     "//flutter/lib/ui",
     "//flutter/runtime",
     "//flutter/runtime:libdart",
