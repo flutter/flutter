@@ -336,7 +336,7 @@ class MaterialApp extends StatefulWidget {
   ///
   /// When a named route is pushed with [Navigator.pushNamed], the route name is
   /// looked up in this map. If the name is present, the associated
-  /// [widgets.WidgetBuilder] is used to construct a [MaterialPageRoute] that
+  /// [WidgetBuilder] is used to construct a [MaterialPageRoute] that
   /// performs an appropriate transition, including [Hero] animations, to the
   /// new route.
   ///
