@@ -27,7 +27,7 @@ class MainWidget extends StatefulWidget {
 
 class MainWidgetState extends State<MainWidget> {
   double currentSliderValue = 20;
-  const String accessibilityLabel = 'Accessibility Test Slider';
+  static const String accessibilityLabel = 'Accessibility Test Slider';
 
   @override
   Widget build(BuildContext context) {
