@@ -33,7 +33,7 @@ class _MainWidgetState extends State<_MainWidget> {
         title: Semantics(
           header: true,
           headingLevel: 1,
-          child: const Text('DatePicker'),
+          child: const Text('DatePicker Demo'),
         ),
       ),
       body: Center(

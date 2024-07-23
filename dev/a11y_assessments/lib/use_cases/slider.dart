@@ -36,7 +36,7 @@ class MainWidgetState extends State<MainWidget> {
         title: Semantics(
           header: true,
           headingLevel: 1,
-          child: const Text('Slider'),
+          child: const Text('Slider demo'),
         ),
       ),
       body: Center(

@@ -63,7 +63,7 @@ class MainWidgetState extends State<MainWidget> {
         title: Semantics(
           header: true,
           headingLevel: 1,
-          child: const Text('MaterialBanner'),
+          child: const Text('MaterialBanner Demo'),
         ),
       ),
       body: Center(

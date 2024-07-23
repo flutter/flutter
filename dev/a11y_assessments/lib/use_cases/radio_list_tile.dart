@@ -40,7 +40,7 @@ class _MainWidgetState extends State<_MainWidget> {
         title: Semantics(
           header: true,
           headingLevel: 1,
-          child: const Text('Radio button')
+          child: const Text('Radio button demo')
         ),
       ),
       body: ListView(

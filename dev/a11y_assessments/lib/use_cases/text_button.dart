@@ -35,7 +35,7 @@ class MainWidgetState extends State<MainWidget> {
         title: Semantics(
           header: true,
           headingLevel: 1,
-          child: const Text('TextButton'),
+          child: const Text('TextButton Demo'),
         ),
       ),
       body: Center(
