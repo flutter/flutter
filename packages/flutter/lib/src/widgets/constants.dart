@@ -1,9 +1,9 @@
-/// @docImport 'package:flutter/cupertino.dart';
-library;
-
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
+/// @docImport 'package:flutter/cupertino.dart';
+library;
 
 /// The minimum dimension of any interactive region according to the Material
 /// guidelines.

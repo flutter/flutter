@@ -4,28 +4,7 @@
 
 /// @docImport 'package:flutter/cupertino.dart';
 /// @docImport 'package:flutter/material.dart';
-///
-/// @docImport 'animated_scroll_view.dart';
-/// @docImport 'automatic_keep_alive.dart';
-/// @docImport 'container.dart';
-/// @docImport 'implicit_animations.dart';
-/// @docImport 'layout_builder.dart';
-/// @docImport 'page_storage.dart';
-/// @docImport 'page_view.dart';
-/// @docImport 'reorderable_list.dart';
-/// @docImport 'routes.dart';
-/// @docImport 'safe_area.dart';
-/// @docImport 'scroll_metrics.dart';
-/// @docImport 'scroll_position.dart';
-/// @docImport 'shortcuts.dart';
-/// @docImport 'single_child_scroll_view.dart';
-/// @docImport 'sliver_fill.dart';
-/// @docImport 'sliver_layout_builder.dart';
-/// @docImport 'sliver_persistent_header.dart';
-/// @docImport 'text.dart';
-/// @docImport 'transitions.dart';
-/// @docImport 'two_dimensional_scroll_view.dart';
-/// @docImport 'visibility.dart';
+/// @docImport 'package:flutter/widgets.dart';
 library;
 
 import 'dart:math' as math;

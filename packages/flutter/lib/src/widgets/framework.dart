@@ -5,25 +5,7 @@
 /// @docImport 'dart:ui';
 /// @docImport 'package:flutter/animation.dart';
 /// @docImport 'package:flutter/material.dart';
-///
-/// @docImport 'app.dart';
-/// @docImport 'app_lifecycle_listener.dart';
-/// @docImport 'automatic_keep_alive.dart';
-/// @docImport 'basic.dart';
-/// @docImport 'container.dart';
-/// @docImport 'focus_scope.dart';
-/// @docImport 'gesture_detector.dart';
-/// @docImport 'inherited_notifier.dart';
-/// @docImport 'layout_builder.dart';
-/// @docImport 'overlay.dart';
-/// @docImport 'page_storage.dart';
-/// @docImport 'scroll_delegate.dart';
-/// @docImport 'scroll_view.dart';
-/// @docImport 'sliver.dart';
-/// @docImport 'slotted_render_object_widget.dart';
-/// @docImport 'transitions.dart';
-/// @docImport 'value_listenable_builder.dart';
-/// @docImport 'view.dart';
+/// @docImport 'package:flutter/widgets.dart';
 library;
 
 import 'dart:async';

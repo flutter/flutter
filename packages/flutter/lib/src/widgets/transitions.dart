@@ -3,16 +3,7 @@
 // found in the LICENSE file.
 
 /// @docImport 'package:flutter/material.dart';
-///
-/// @docImport 'animated_cross_fade.dart';
-/// @docImport 'focus_manager.dart';
-/// @docImport 'focus_scope.dart';
-/// @docImport 'implicit_animations.dart';
-/// @docImport 'modal_barrier.dart';
-/// @docImport 'scroll_view.dart';
-/// @docImport 'sliver.dart';
-/// @docImport 'tween_animation_builder.dart';
-/// @docImport 'value_listenable_builder.dart';
+/// @docImport 'package:flutter/widgets.dart';
 library;
 
 import 'dart:math' as math;
