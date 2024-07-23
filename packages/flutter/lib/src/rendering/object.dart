@@ -1825,7 +1825,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   RenderObject? get parent => _parent;
   RenderObject? _parent;
 
-  /// The semantics parent of this render object in the render tree.
+  /// The semantics parent of this render object in the semantics tree.
   ///
   /// This is typically the same as [parent].
   ///
