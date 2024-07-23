@@ -1017,8 +1017,7 @@ void main() {
     await tester.pump(kScrollbarFadeDuration);
   });
 
-// This test should be changed to 'does not page the scroll view'.
-  testWidgets('Tapping the track area pages the Scroll View', (WidgetTester tester) async {
+  testWidgets('Tapping the track area does not page the Scroll View', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     addTearDown(scrollController.dispose);
     await tester.pumpWidget(
@@ -1052,15 +1051,12 @@ void main() {
     await tester.tapAt(const Offset(796.0, 550.0));
     await tester.pumpAndSettle();
 
-    expect(scrollController.offset, 400.0);
+    expect(scrollController.offset, 0.0);
     expect(
       find.byType(CupertinoScrollbar),
       paints..rrect(
         color: _kScrollbarColor.color,
-        rrect: RRect.fromRectAndRadius(
-          const Rect.fromLTRB(794.0, 240.6, 797.0, 597.0),
-          const Radius.circular(1.5),
-        ),
+        rrect: RRect.fromLTRBR(794.0, 3.0, 797.0, 359.4, const Radius.circular(1.5)),
       ),
     );
 

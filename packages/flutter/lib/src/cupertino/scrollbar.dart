@@ -212,11 +212,8 @@ class _CupertinoScrollbarState extends RawScrollbarState<CupertinoScrollbar> {
   }
 
   @override
-  void handleTrackTapDown(TapDownDetails details){
+  void handleTrackTapDown(TapDownDetails details) {
     // On iOS, tapping the track does not page towards the position of the tap.
-    // The track should act like a regular scrolling surface.
-    // TODO: Ask Kate how to make track scroll like regular scrollview.
-    return;
   }
 
   @override
