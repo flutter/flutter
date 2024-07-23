@@ -49,6 +49,9 @@ struct _FlEngine {
   FLUTTER_API_SYMBOL(FlutterEngine) engine;
   FlutterEngineProcTable embedder_api;
 
+  // Next ID to use for a view.
+  FlutterViewId next_view_id;
+
   // Function to call when a platform message is received.
   FlEnginePlatformMessageHandler platform_message_handler;
   gpointer platform_message_handler_data;
@@ -123,6 +126,29 @@ static void parse_locale(const gchar* locale,
   }
 }
 
+static void view_added_cb(const FlutterAddViewResult* result) {
+  g_autoptr(GTask) task = G_TASK(result->user_data);
+
+  FlutterViewId view_id = GPOINTER_TO_INT(g_task_get_task_data(task));
+  if (result->added) {
+    g_task_return_pointer(task, GINT_TO_POINTER(view_id), nullptr);
+  } else {
+    g_task_return_new_error(task, fl_engine_error_quark(),
+                            FL_ENGINE_ERROR_FAILED, "Failed to add view");
+  }
+}
+
+static void view_removed_cb(const FlutterRemoveViewResult* result) {
+  g_autoptr(GTask) task = G_TASK(result->user_data);
+
+  if (result->removed) {
+    g_task_return_boolean(task, TRUE);
+  } else {
+    g_task_return_new_error(task, fl_engine_error_quark(),
+                            FL_ENGINE_ERROR_FAILED, "Failed to remove view");
+  }
+}
+
 // Passes locale information to the Flutter engine.
 static void setup_locales(FlEngine* self) {
   const gchar* const* languages = g_get_language_names();
@@ -177,12 +203,11 @@ static bool compositor_collect_backing_store_callback(
 }
 
 // Called when embedder should composite contents of each layer onto the screen.
-static bool compositor_present_layers_callback(const FlutterLayer** layers,
-                                               size_t layers_count,
-                                               void* user_data) {
-  g_return_val_if_fail(FL_IS_RENDERER(user_data), false);
-  return fl_renderer_present_layers(FL_RENDERER(user_data), layers,
-                                    layers_count);
+static bool compositor_present_view_callback(
+    const FlutterPresentViewInfo* info) {
+  g_return_val_if_fail(FL_IS_RENDERER(info->user_data), false);
+  return fl_renderer_present_layers(FL_RENDERER(info->user_data), info->layers,
+                                    info->layers_count);
 }
 
 // Flutter engine rendering callbacks.
@@ -211,7 +236,7 @@ static uint32_t fl_engine_gl_get_fbo(void* user_data) {
 
 static bool fl_engine_gl_present(void* user_data) {
   // No action required, as this is handled in
-  // compositor_present_layers_callback.
+  // compositor_present_view_callback.
   return true;
 }
 
@@ -429,6 +454,9 @@ static void fl_engine_init(FlEngine* self) {
   self->embedder_api.struct_size = sizeof(FlutterEngineProcTable);
   FlutterEngineGetProcAddresses(&self->embedder_api);
 
+  // Implicit view is 0, so start at 1.
+  self->next_view_id = 1;
+
   self->texture_registrar = fl_texture_registrar_new(self);
 }
 
@@ -511,7 +539,7 @@ gboolean fl_engine_start(FlEngine* self, GError** error) {
       compositor_create_backing_store_callback;
   compositor.collect_backing_store_callback =
       compositor_collect_backing_store_callback;
-  compositor.present_layers_callback = compositor_present_layers_callback;
+  compositor.present_view_callback = compositor_present_view_callback;
   args.compositor = &compositor;
 
   if (self->embedder_api.RunsAOTCompiledDartCode()) {
@@ -578,6 +606,82 @@ gboolean fl_engine_start(FlEngine* self, GError** error) {
 
 FlutterEngineProcTable* fl_engine_get_embedder_api(FlEngine* self) {
   return &(self->embedder_api);
+}
+
+void fl_engine_add_view(FlEngine* self,
+                        size_t width,
+                        size_t height,
+                        double pixel_ratio,
+                        GCancellable* cancellable,
+                        GAsyncReadyCallback callback,
+                        gpointer user_data) {
+  g_return_if_fail(FL_IS_ENGINE(self));
+
+  g_autoptr(GTask) task = g_task_new(self, cancellable, callback, user_data);
+
+  FlutterViewId view_id = self->next_view_id;
+  self->next_view_id++;
+  g_task_set_task_data(task, GINT_TO_POINTER(view_id), nullptr);
+
+  FlutterWindowMetricsEvent metrics;
+  metrics.struct_size = sizeof(FlutterWindowMetricsEvent);
+  metrics.width = width;
+  metrics.height = height;
+  metrics.pixel_ratio = pixel_ratio;
+  metrics.view_id = view_id;
+  FlutterAddViewInfo info;
+  info.struct_size = sizeof(FlutterAddViewInfo);
+  info.view_id = view_id;
+  info.view_metrics = &metrics;
+  info.user_data = g_object_ref(task);
+  info.add_view_callback = view_added_cb;
+  FlutterEngineResult result = self->embedder_api.AddView(self->engine, &info);
+  if (result != kSuccess) {
+    g_task_return_new_error(task, fl_engine_error_quark(),
+                            FL_ENGINE_ERROR_FAILED, "AddView returned %d",
+                            result);
+    // This would have been done in the callback, but that won't occur now.
+    g_object_unref(task);
+  }
+}
+
+FlutterViewId fl_engine_add_view_finish(FlEngine* self,
+                                        GAsyncResult* result,
+                                        GError** error) {
+  g_return_val_if_fail(FL_IS_ENGINE(self), FALSE);
+  return GPOINTER_TO_INT(g_task_propagate_pointer(G_TASK(result), error));
+}
+
+void fl_engine_remove_view(FlEngine* self,
+                           FlutterViewId view_id,
+                           GCancellable* cancellable,
+                           GAsyncReadyCallback callback,
+                           gpointer user_data) {
+  g_return_if_fail(FL_IS_ENGINE(self));
+
+  g_autoptr(GTask) task = g_task_new(self, cancellable, callback, user_data);
+
+  FlutterRemoveViewInfo info;
+  info.struct_size = sizeof(FlutterRemoveViewInfo);
+  info.view_id = view_id;
+  info.user_data = g_object_ref(task);
+  info.remove_view_callback = view_removed_cb;
+  FlutterEngineResult result =
+      self->embedder_api.RemoveView(self->engine, &info);
+  if (result != kSuccess) {
+    g_task_return_new_error(task, fl_engine_error_quark(),
+                            FL_ENGINE_ERROR_FAILED, "RemoveView returned %d",
+                            result);
+    // This would have been done in the callback, but that won't occur now.
+    g_object_unref(task);
+  }
+}
+
+gboolean fl_engine_remove_view_finish(FlEngine* self,
+                                      GAsyncResult* result,
+                                      GError** error) {
+  g_return_val_if_fail(FL_IS_ENGINE(self), FALSE);
+  return g_task_propagate_boolean(G_TASK(result), error);
 }
 
 void fl_engine_set_platform_message_handler(
