@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'card_theme.dart';
+/// @docImport 'data_table_theme.dart';
+/// @docImport 'text_button.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/gestures.dart' show DragStartBehavior;
