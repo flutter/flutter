@@ -182,14 +182,14 @@ class WebTestCompiler {
       fileSystem: _fileSystem,
     );
 
-    final CompilerOutput? output = await (await residentCompiler.recompile(
+    final CompilerOutput? output = await residentCompiler.recompile(
       Uri.parse('org-dartlang-app:///${testFile.basename}'),
       <Uri>[],
       outputPath: outputDirectory.childFile('out').path,
       packageConfig: buildInfo.packageConfig,
       fs: _fileSystem,
       projectRootPath: projectDirectory.absolute.path,
-    )).result;
+    );
     if (output == null || output.errorCount > 0) {
       throwToolExit('Failed to compile');
     }

@@ -225,7 +225,7 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
   bool didShutdown = false;
 
   @override
-  CompilerOp recompile(
+  Future<CompilerOutput?> recompile(
     Uri mainUri,
     List<Uri>? invalidatedFiles, {
     String? outputPath,
@@ -236,11 +236,11 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
     bool checkDartPluginRegistry = false,
     File? dartPluginRegistrant,
     Uri? nativeAssetsYaml,
-  }) {
+  }) async {
     if (compilerOutput != null) {
       fileSystem!.file(compilerOutput!.outputFilename).createSync(recursive: true);
     }
-    return CompilerOp.value(compilerOutput);
+    return compilerOutput;
   }
 
   @override

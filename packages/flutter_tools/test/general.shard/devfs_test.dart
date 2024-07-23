@@ -495,6 +495,7 @@ void main() {
     expect(report.transferDuration, const Duration(seconds: 5));
   });
 
+
   testUsingContext('DevFS actually starts compile before processing bundle', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
@@ -524,7 +525,7 @@ void main() {
       int processed = 0;
       while (true) {
         while (frontendServerStdIn.writes.length == processed) {
-          await Future<dynamic>.delayed(const Duration(milliseconds: 500));
+          await Future<dynamic>.delayed(const Duration(milliseconds: 5));
         }
 
         String? boundaryKey;
@@ -912,7 +913,7 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
   Future<CompilerOutput> Function(Uri mainUri, List<Uri>? invalidatedFiles)? onRecompile;
 
   @override
-  CompilerOp recompile(
+  Future<CompilerOutput> recompile(
     Uri mainUri,
     List<Uri>? invalidatedFiles, {
     String? outputPath,
@@ -924,10 +925,8 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
     File? dartPluginRegistrant,
     Uri? nativeAssetsYaml,
   }) {
-    final Future<CompilerOutput> result =
-        onRecompile?.call(mainUri, invalidatedFiles) ??
-            Future<CompilerOutput>.value(const CompilerOutput('', 1, <Uri>[]));
-    return CompilerOp.future(result);
+    return onRecompile?.call(mainUri, invalidatedFiles)
+      ?? Future<CompilerOutput>.value(const CompilerOutput('', 1, <Uri>[]));
   }
 }
 

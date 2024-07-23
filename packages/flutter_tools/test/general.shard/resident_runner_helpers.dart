@@ -347,7 +347,7 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
   bool recompileCalled = false;
 
   @override
-  CompilerOp recompile(
+  Future<CompilerOutput?> recompile(
     Uri mainUri,
     List<Uri>? invalidatedFiles, {
     required String outputPath,
@@ -358,11 +358,11 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
     bool checkDartPluginRegistry = false,
     File? dartPluginRegistrant,
     Uri? nativeAssetsYaml,
-  }) {
+  }) async {
     recompileCalled = true;
     receivedNativeAssetsYaml = nativeAssetsYaml;
     didSuppressErrors = suppressErrors;
-    return CompilerOp.value(nextOutput ?? (const CompilerOutput('foo.dill', 0, <Uri>[])));
+    return nextOutput ?? const CompilerOutput('foo.dill', 0, <Uri>[]);
   }
 
   @override

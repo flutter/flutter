@@ -211,9 +211,9 @@ class HotRunner extends ResidentRunner {
     for (final FlutterDevice? device in flutterDevices) {
       if (device!.generator != null) {
         final CompilerOutput? compilerOutput =
-            await (await device.generator!.compileExpression(expression, definitions,
+            await device.generator!.compileExpression(expression, definitions,
                 definitionTypes, typeDefinitions, typeBounds, typeDefaults,
-                libraryUri, klass, method, isStatic)).result;
+                libraryUri, klass, method, isStatic);
         if (compilerOutput != null && compilerOutput.expressionData != null) {
           return base64.encode(compilerOutput.expressionData!);
         }
@@ -412,7 +412,7 @@ class HotRunner extends ResidentRunner {
             projectRootPath: FlutterProject.current().directory.absolute.path,
             fs: globals.fs,
             nativeAssetsYaml: nativeAssetsYaml,
-          ).result.then((CompilerOutput? output) {
+          ).then((CompilerOutput? output) {
             compileTimer.stop();
             totalCompileTime += compileTimer.elapsed;
             return output?.errorCount == 0;

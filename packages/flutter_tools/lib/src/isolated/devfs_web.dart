@@ -84,8 +84,8 @@ class WebExpressionCompiler implements ExpressionCompiler {
     String expression,
   ) async {
     final CompilerOutput? compilerOutput =
-        await (await _generator.compileExpressionToJs(libraryUri, line, column,
-            jsModules, jsFrameValues, moduleName, expression)).result;
+        await _generator.compileExpressionToJs(libraryUri, line, column,
+            jsModules, jsFrameValues, moduleName, expression);
 
     if (compilerOutput != null) {
       final String content = utf8.decode(
@@ -1027,7 +1027,7 @@ class WebDevFS implements DevFS {
     // the web specific bootstrap logic. To make it easier for DWDS to handle
     // mapping the file name, this is done via an additional file root and
     // special hard-coded scheme.
-    final CompilerOutput? compilerOutput = await (await generator.recompile(
+    final CompilerOutput? compilerOutput = await generator.recompile(
       Uri(
         scheme: 'org-dartlang-app',
         path: '/${mainUri.pathSegments.last}',
@@ -1038,7 +1038,7 @@ class WebDevFS implements DevFS {
       projectRootPath: projectRootPath,
       fs: globals.fs,
       dartPluginRegistrant: dartPluginRegistrant,
-    )).result;
+    );
     if (compilerOutput == null || compilerOutput.errorCount > 0) {
       return UpdateFSReport();
     }

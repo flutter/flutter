@@ -16,7 +16,6 @@ import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
 import 'base/platform.dart';
-import 'base/process.dart';
 import 'build_info.dart';
 import 'convert.dart';
 
@@ -59,39 +58,6 @@ class TargetModel {
 
   @override
   String toString() => _value;
-}
-
-final class _Compilation {
-  final Completer<void> started = Completer<void>();
-  final Completer<CompilerOutput?> result = Completer<CompilerOutput?>();
-
-  CompilerOp get futures {
-    return CompilerOp(
-      started: started.future,
-      result: result.future,
-    );
-  }
-}
-
-final class CompilerOp {
-  CompilerOp({required this.started, required this.result});
-
-  static CompilerOp value([CompilerOutput? value]) {
-    return CompilerOp(
-      started: Future<void>.value(),
-      result: Future<CompilerOutput?>.value(value),
-    );
-  }
-
-  static CompilerOp future([Future<CompilerOutput?>? future]) {
-    return CompilerOp(
-      started: Future<void>.value(),
-      result: future ?? Future<CompilerOutput?>.value(),
-    );
-  }
-
-  final Future<void> started;
-  final Future<CompilerOutput?> result;
 }
 
 class CompilerOutput {
@@ -419,18 +385,20 @@ class KernelCompiler {
 
 /// Class that allows to serialize compilation requests to the compiler.
 abstract class _CompilationRequest {
-  _CompilationRequest(this.startedCompleter, this.resultCompleter);
+  _CompilationRequest(this.completer);
 
-  Completer<void> startedCompleter;
-  Completer<CompilerOutput?> resultCompleter;
+  Completer<CompilerOutput?> completer;
 
-  Future<void> run(DefaultResidentCompiler compiler);
+  Future<CompilerOutput?> _run(DefaultResidentCompiler compiler);
+
+  Future<void> run(DefaultResidentCompiler compiler) async {
+    completer.complete(await _run(compiler));
+  }
 }
 
 class _RecompileRequest extends _CompilationRequest {
   _RecompileRequest(
-    super.startedCompleter,
-    super.resultCompleter,
+    super.completer,
     this.mainUri,
     this.invalidatedFiles,
     this.outputPath,
@@ -449,14 +417,13 @@ class _RecompileRequest extends _CompilationRequest {
   final Uri? nativeAssetsYamlUri;
 
   @override
-  Future<void> run(DefaultResidentCompiler compiler) async =>
+  Future<CompilerOutput?> _run(DefaultResidentCompiler compiler) async =>
       compiler._recompile(this);
 }
 
 class _CompileExpressionRequest extends _CompilationRequest {
   _CompileExpressionRequest(
-    super.startedCompleter,
-    super.resultCompleter,
+    super.completer,
     this.expression,
     this.definitions,
     this.definitionTypes,
@@ -481,14 +448,13 @@ class _CompileExpressionRequest extends _CompilationRequest {
   bool isStatic;
 
   @override
-  Future<void> run(DefaultResidentCompiler compiler) async =>
+  Future<CompilerOutput?> _run(DefaultResidentCompiler compiler) async =>
       compiler._compileExpression(this);
 }
 
 class _CompileExpressionToJsRequest extends _CompilationRequest {
   _CompileExpressionToJsRequest(
-    super.startedCompleter,
-    super.resultCompleter,
+    super.completer,
     this.libraryUri,
     this.line,
     this.column,
@@ -507,16 +473,16 @@ class _CompileExpressionToJsRequest extends _CompilationRequest {
   final String? expression;
 
   @override
-  Future<void> run(DefaultResidentCompiler compiler) async =>
+  Future<CompilerOutput?> _run(DefaultResidentCompiler compiler) async =>
       compiler._compileExpressionToJs(this);
 }
 
 class _RejectRequest extends _CompilationRequest {
-  _RejectRequest(super.startedCompleter, super.resultCompleter);
+  _RejectRequest(super.completer);
 
   @override
-  Future<void> run(DefaultResidentCompiler compiler) =>
-    compiler._reject(this);
+  Future<CompilerOutput?> _run(DefaultResidentCompiler compiler) async =>
+      compiler._reject();
 }
 
 /// Wrapper around incremental frontend server compiler, that communicates with
@@ -549,8 +515,8 @@ abstract class ResidentCompiler {
   }) = DefaultResidentCompiler;
 
   // TODO(zanderso): find a better way to configure additional file system
-  //  roots from the runner.
-  //  See: https://github.com/flutter/flutter/issues/50494
+  // roots from the runner.
+  // See: https://github.com/flutter/flutter/issues/50494
   void addFileSystemRoot(String root);
 
   /// If invoked for the first time, it compiles Dart script identified by
@@ -564,7 +530,7 @@ abstract class ResidentCompiler {
   /// If [checkDartPluginRegistry] is true, it is the caller's responsibility
   /// to ensure that the generated registrant file has been updated such that
   /// it is wrapping [mainUri].
-  CompilerOp recompile(
+  Future<CompilerOutput?> recompile(
     Uri mainUri,
     List<Uri>? invalidatedFiles, {
     required String outputPath,
@@ -577,7 +543,7 @@ abstract class ResidentCompiler {
     Uri? nativeAssetsYaml,
   });
 
-  CompilerOp compileExpression(
+  Future<CompilerOutput?> compileExpression(
     String expression,
     List<String>? definitions,
     List<String>? definitionTypes,
@@ -608,7 +574,9 @@ abstract class ResidentCompiler {
   /// variable name is the name originally used in JavaScript to contain the
   /// module object, for example:
   /// { 'dart':'dart_sdk', 'main': '/packages/hello_world_main.dart' }
-  CompilerOp compileExpressionToJs(
+  /// Returns a [CompilerOutput] including the name of the file containing the
+  /// compilation result and a number of errors.
+  Future<CompilerOutput?> compileExpressionToJs(
     String libraryUri,
     int line,
     int column,
@@ -626,7 +594,7 @@ abstract class ResidentCompiler {
   /// Should be invoked when results of compilation are rejected by the client.
   ///
   /// Either [accept] or [reject] should be called after every [recompile] call.
- CompilerOp reject();
+  Future<CompilerOutput?> reject();
 
   /// Should be invoked when frontend server compiler should forget what was
   /// accepted previously so that next call to [recompile] produces complete
@@ -713,7 +681,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
   final StreamController<_CompilationRequest> _controller = StreamController<_CompilationRequest>();
 
   @override
-  CompilerOp recompile(
+  Future<CompilerOutput?> recompile(
     Uri mainUri,
     List<Uri>? invalidatedFiles, {
     required String outputPath,
@@ -724,7 +692,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
     String? projectRootPath,
     FileSystem? fs,
     Uri? nativeAssetsYaml,
-  }) {
+  }) async {
     if (!_controller.hasListener) {
       _controller.stream.listen(_handleCompilationRequest);
     }
@@ -733,11 +701,9 @@ class DefaultResidentCompiler implements ResidentCompiler {
     if (checkDartPluginRegistry && dartPluginRegistrant != null && dartPluginRegistrant.existsSync()) {
       additionalSourceUri = dartPluginRegistrant.uri;
     }
-
-    final _Compilation result = _Compilation();
+    final Completer<CompilerOutput?> completer = Completer<CompilerOutput?>();
     _controller.add(_RecompileRequest(
-      result.started,
-      result.result,
+      completer,
       mainUri,
       invalidatedFiles,
       outputPath,
@@ -746,10 +712,10 @@ class DefaultResidentCompiler implements ResidentCompiler {
       additionalSourceUri: additionalSourceUri,
       nativeAssetsYamlUri: nativeAssetsYaml,
     ));
-    return result.futures;
+    return completer.future;
   }
 
-  Future<void> _recompile(_RecompileRequest request) async {
+  Future<CompilerOutput?> _recompile(_RecompileRequest request) async {
     _stdoutHandler.reset();
     _compileRequestNeedsConfirmation = true;
     _stdoutHandler._suppressCompilerMessages = request.suppressErrors;
@@ -766,21 +732,21 @@ class DefaultResidentCompiler implements ResidentCompiler {
     final String? nativeAssets = request.nativeAssetsYamlUri?.toString();
     final Process? server = _server;
     if (server == null) {
-      request.startedCompleter.complete();
-      request.resultCompleter.complete(_compile(
+      return _compile(
         mainUri,
         request.outputPath,
         additionalSourceUri: additionalSourceUri,
         nativeAssetsUri: nativeAssets,
-      ));
-      return;
+      );
     }
     final String inputKey = Uuid().generateV4();
 
     if (nativeAssets != null && nativeAssets.isNotEmpty) {
-      await _writelnToServerStdin('native-assets $nativeAssets', printTrace: true);
+      server.stdin.writeln('native-assets $nativeAssets');
+      _logger.printTrace('<- native-assets $nativeAssets');
     }
-    await _writelnToServerStdin('recompile $mainUri $inputKey', printTrace: true);
+    server.stdin.writeln('recompile $mainUri $inputKey');
+    _logger.printTrace('<- recompile $mainUri $inputKey');
     final List<Uri>? invalidatedFiles = request.invalidatedFiles;
     if (invalidatedFiles != null) {
       for (final Uri fileUri in invalidatedFiles) {
@@ -791,15 +757,14 @@ class DefaultResidentCompiler implements ResidentCompiler {
           message = request.packageConfig.toPackageUri(fileUri)?.toString() ??
               toMultiRootPath(fileUri, fileSystemScheme, fileSystemRoots, _platform.isWindows);
         }
-        await _writelnToServerStdin(message, printTrace: true);
+        server.stdin.writeln(message);
+        _logger.printTrace(message);
       }
     }
-    await _writelnToServerStdin(inputKey, printTrace: true);
-    request.startedCompleter.complete();
+    server.stdin.writeln(inputKey);
+    _logger.printTrace('<- $inputKey');
 
-    return _stdoutHandler.compilerOutput?.future.then(
-      (CompilerOutput? value) => request.resultCompleter.complete(value),
-    );
+    return _stdoutHandler.compilerOutput?.future;
   }
 
   final List<_CompilationRequest> _compilationQueue = <_CompilationRequest>[];
@@ -852,8 +817,8 @@ class DefaultResidentCompiler implements ResidentCompiler {
         '--no-print-incremental-dependencies',
       '--target=$targetModel',
       // TODO(annagrin): remove once this becomes the default behavior
-      //  in the frontend_server.
-      //  https://github.com/flutter/flutter/issues/59902
+      // in the frontend_server.
+      // https://github.com/flutter/flutter/issues/59902
       '--experimental-emit-debug-metadata',
       for (final Object dartDefine in dartDefines)
         '-D$dartDefine',
@@ -934,16 +899,18 @@ class DefaultResidentCompiler implements ResidentCompiler {
     }));
 
     if (nativeAssetsUri != null && nativeAssetsUri.isNotEmpty) {
-      await _writelnToServerStdin('native assets $nativeAssetsUri', printTrace: true);
+      _server?.stdin.writeln('native-assets $nativeAssetsUri');
+      _logger.printTrace('<- native-assets $nativeAssetsUri');
     }
 
-    await _writelnToServerStdin('compile $scriptUri', printTrace: true);
+    _server?.stdin.writeln('compile $scriptUri');
+    _logger.printTrace('<- compile $scriptUri');
 
     return _stdoutHandler.compilerOutput?.future;
   }
 
   @override
-  CompilerOp compileExpression(
+  Future<CompilerOutput?> compileExpression(
     String expression,
     List<String>? definitions,
     List<String>? definitionTypes,
@@ -954,17 +921,17 @@ class DefaultResidentCompiler implements ResidentCompiler {
     String? klass,
     String? method,
     bool isStatic,
-  ) {
+  ) async {
     if (!_controller.hasListener) {
       _controller.stream.listen(_handleCompilationRequest);
     }
 
-    final _Compilation result = _Compilation();
+    final Completer<CompilerOutput?> completer = Completer<CompilerOutput?>();
     final _CompileExpressionRequest request =  _CompileExpressionRequest(
-        result.started, result.result, expression, definitions, definitionTypes, typeDefinitions,
+        completer, expression, definitions, definitionTypes, typeDefinitions,
         typeBounds, typeDefaults, libraryUri, klass, method, isStatic);
     _controller.add(request);
-    return result.futures;
+    return completer.future;
   }
 
   Future<CompilerOutput?> _compileExpression(_CompileExpressionRequest request) async {
@@ -978,31 +945,30 @@ class DefaultResidentCompiler implements ResidentCompiler {
     }
 
     final String inputKey = Uuid().generateV4();
-    await _writelnAllToServerStdin(<String>[
-      'compile-expression $inputKey',
-      request.expression,
-      ...?request.definitions,
-      inputKey,
-      ...?request.definitionTypes,
-      inputKey,
-      ...?request.typeDefinitions,
-      inputKey,
-      ...?request.typeBounds,
-      inputKey,
-      ...?request.typeDefaults,
-      inputKey,
-      request.libraryUri ?? '',
-      request.klass ?? '',
-      request.method ?? '',
-      request.isStatic.toString(),
-    ]);
-    request.startedCompleter.complete();
+    server.stdin
+      ..writeln('compile-expression $inputKey')
+      ..writeln(request.expression);
+    request.definitions?.forEach(server.stdin.writeln);
+    server.stdin.writeln(inputKey);
+    request.definitionTypes?.forEach(server.stdin.writeln);
+    server.stdin.writeln(inputKey);
+    request.typeDefinitions?.forEach(server.stdin.writeln);
+    server.stdin.writeln(inputKey);
+    request.typeBounds?.forEach(server.stdin.writeln);
+    server.stdin.writeln(inputKey);
+    request.typeDefaults?.forEach(server.stdin.writeln);
+    server.stdin
+      ..writeln(inputKey)
+      ..writeln(request.libraryUri ?? '')
+      ..writeln(request.klass ?? '')
+      ..writeln(request.method ?? '')
+      ..writeln(request.isStatic);
 
     return _stdoutHandler.compilerOutput?.future;
   }
 
   @override
-  CompilerOp compileExpressionToJs(
+  Future<CompilerOutput?> compileExpressionToJs(
     String libraryUri,
     int line,
     int column,
@@ -1015,21 +981,12 @@ class DefaultResidentCompiler implements ResidentCompiler {
       _controller.stream.listen(_handleCompilationRequest);
     }
 
-    final _Compilation result = _Compilation();
+    final Completer<CompilerOutput?> completer = Completer<CompilerOutput?>();
     _controller.add(
-      _CompileExpressionToJsRequest(
-        result.started,
-        result.result,
-        libraryUri,
-        line,
-        column,
-        jsModules,
-        jsFrameValues,
-        moduleName,
-        expression,
-      ),
+        _CompileExpressionToJsRequest(
+            completer, libraryUri, line, column, jsModules, jsFrameValues, moduleName, expression)
     );
-    return result.futures;
+    return completer.future;
   }
 
   Future<CompilerOutput?> _compileExpressionToJs(_CompileExpressionToJsRequest request) async {
@@ -1043,57 +1000,57 @@ class DefaultResidentCompiler implements ResidentCompiler {
     }
 
     final String inputKey = Uuid().generateV4();
-    await _writelnAllToServerStdin(<String>[
-      'compile-expression-to-js $inputKey',
-      request.libraryUri ?? '',
-      request.line.toString(),
-      request.column.toString(),
-      for (final MapEntry<String, String> entry in request.jsModules?.entries ?? <MapEntry<String, String>>[])
-        '${entry.key}:${entry.value}',
-      inputKey,
-      for (final MapEntry<String, String> entry in request.jsFrameValues?.entries ?? <MapEntry<String, String>>[])
-        '${entry.key}:${entry.value}',
-      inputKey,
-      request.moduleName ?? '',
-      request.expression ?? ''
-    ]);
-    request.startedCompleter.complete();
+    server.stdin
+      ..writeln('compile-expression-to-js $inputKey')
+      ..writeln(request.libraryUri ?? '')
+      ..writeln(request.line)
+      ..writeln(request.column);
+    request.jsModules?.forEach((String k, String v) { server.stdin.writeln('$k:$v'); });
+    server.stdin.writeln(inputKey);
+    request.jsFrameValues?.forEach((String k, String v) { server.stdin.writeln('$k:$v'); });
+    server.stdin
+      ..writeln(inputKey)
+      ..writeln(request.moduleName ?? '')
+      ..writeln(request.expression ?? '');
+
     return _stdoutHandler.compilerOutput?.future;
   }
 
   @override
-  Future<void> accept() async {
+  void accept() {
     if (_compileRequestNeedsConfirmation) {
-      await _writelnToServerStdin('accept', printTrace: true);
+      _server?.stdin.writeln('accept');
+      _logger.printTrace('<- accept');
     }
     _compileRequestNeedsConfirmation = false;
   }
 
   @override
-  CompilerOp reject() {
+  Future<CompilerOutput?> reject() {
     if (!_controller.hasListener) {
       _controller.stream.listen(_handleCompilationRequest);
     }
 
-    final _Compilation compilation = _Compilation();
-    _controller.add(_RejectRequest(compilation.started, compilation.result));
-    return compilation.futures;
+    final Completer<CompilerOutput?> completer = Completer<CompilerOutput?>();
+    _controller.add(_RejectRequest(completer));
+    return completer.future;
   }
 
-  Future<CompilerOutput?> _reject(_RejectRequest request) async {
+  Future<CompilerOutput?> _reject() async {
     if (!_compileRequestNeedsConfirmation) {
       return Future<CompilerOutput?>.value();
     }
     _stdoutHandler.reset(expectSources: false);
-    await _writelnToServerStdin('reject', printTrace: true);
-    request.startedCompleter.complete();
+    _server?.stdin.writeln('reject');
+    _logger.printTrace('<- reject');
     _compileRequestNeedsConfirmation = false;
     return _stdoutHandler.compilerOutput?.future;
   }
 
   @override
-  Future<void> reset() async {
-    await _writelnToServerStdin('reset', printTrace: true);
+  void reset() {
+    _server?.stdin.writeln('reset');
+    _logger.printTrace('<- reset');
   }
 
   @override
@@ -1106,29 +1063,6 @@ class DefaultResidentCompiler implements ResidentCompiler {
     _logger.printTrace('killing pid ${server.pid}');
     server.kill();
     return server.exitCode;
-  }
-
-  Future<void> _writelnToServerStdin(String line, {
-    bool printTrace = false,
-  }) async {
-    final Process? server = _server;
-    if (server == null) {
-      return;
-    }
-    await ProcessUtils.writelnToStdinUnsafe(stdin: server.stdin, line: line);
-    if (printTrace) {
-      _logger.printTrace('<- $line');
-    }
-  }
-
-  Future<void> _writelnAllToServerStdin(List<String>? lines) async {
-    final Process? server = _server;
-    if (server == null) {
-      return;
-    }
-    for (final String line in lines ?? <String>[]) {
-      await ProcessUtils.writelnToStdinUnsafe(stdin: server.stdin, line: line);
-    }
   }
 }
 

@@ -1420,7 +1420,7 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
   void addFileSystemRoot(String root) { }
 
   @override
-  CompilerOp recompile(Uri mainUri, List<Uri>? invalidatedFiles, {
+  Future<CompilerOutput?> recompile(Uri mainUri, List<Uri>? invalidatedFiles, {
     String? outputPath,
     PackageConfig? packageConfig,
     String? projectRootPath,
@@ -1429,8 +1429,8 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
     bool checkDartPluginRegistry = false,
     File? dartPluginRegistrant,
     Uri? nativeAssetsYaml,
-  }) {
-    return CompilerOp.value(output);
+  }) async {
+    return output;
   }
 }
 

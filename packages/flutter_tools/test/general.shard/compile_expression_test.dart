@@ -49,8 +49,8 @@ void main() {
   });
 
   testWithoutContext('compile expression fails if not previously compiled', () async {
-    final CompilerOutput? result = await (await generator.compileExpression(
-        '2+2', null, null, null, null, null, null, null, null, false)).result;
+    final CompilerOutput? result = await generator.compileExpression(
+        '2+2', null, null, null, null, null, null, null, null, false);
 
     expect(result, isNull);
   });
@@ -74,34 +74,31 @@ void main() {
       'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0\n'
     )));
 
-    await generator
-        .recompile(
-          Uri.file('/path/to/main.dart'),
-          null,
-          outputPath: '/build/',
-          packageConfig: PackageConfig.empty,
-          projectRootPath: '',
-          fs: fileSystem,
-        )
-        .result
-        .then((CompilerOutput? output) {
+    await generator.recompile(
+      Uri.file('/path/to/main.dart'),
+      null, /* invalidatedFiles */
+      outputPath: '/build/',
+      packageConfig: PackageConfig.empty,
+      projectRootPath: '',
+      fs: fileSystem,
+    ).then((CompilerOutput? output) {
       expect(frontendServerStdIn.getAndClear(),
           'compile file:///path/to/main.dart\n');
-      expect(testLogger.errorText, equals('line1\nline2\n'));
+      expect(testLogger.errorText,
+          equals('line1\nline2\n'));
       expect(output!.outputFilename, equals('/path/to/main.dart.dill'));
 
       compileExpressionResponseCompleter.complete(
-        Future<List<int>>.value(utf8.encode(
-            'result def\nline1\nline2\ndef\ndef /path/to/main.dart.dill.incremental 0\n')),
+          Future<List<int>>.value(utf8.encode(
+              'result def\nline1\nline2\ndef\ndef /path/to/main.dart.dill.incremental 0\n'
+          )));
+      generator.compileExpression(
+          '2+2', null, null, null, null, null, null, null, null, false).then(
+              (CompilerOutput? outputExpression) {
+                expect(outputExpression, isNotNull);
+                expect(outputExpression!.expressionData, <int>[1, 2, 3, 4]);
+              }
       );
-      generator
-          .compileExpression(
-              '2+2', null, null, null, null, null, null, null, null, false)
-          .result
-          .then((CompilerOutput? outputExpression) {
-        expect(outputExpression, isNotNull);
-        expect(outputExpression!.expressionData, <int>[1, 2, 3, 4]);
-      });
     });
   });
 
@@ -119,39 +116,34 @@ void main() {
             compileExpressionResponseCompleter2.future,
           ]);
 
+    // The test manages timing via completers.
     unawaited(
-      generator
-          .recompile(
-            Uri.parse('/path/to/main.dart'),
-            null,
-            outputPath: '/build/',
-            packageConfig: PackageConfig.empty,
-            projectRootPath: '',
-            fs: MemoryFileSystem(),
-          )
-          .result
-          .then((CompilerOutput? outputCompile) {
-        expect(testLogger.errorText, equals('line1\nline2\n'));
-        expect(
-            outputCompile!.outputFilename, equals('/path/to/main.dart.dill'));
+      generator.recompile(
+        Uri.parse('/path/to/main.dart'),
+        null, /* invalidatedFiles */
+        outputPath: '/build/',
+        packageConfig: PackageConfig.empty,
+        projectRootPath: '',
+        fs: MemoryFileSystem(),
+      ).then((CompilerOutput? outputCompile) {
+        expect(testLogger.errorText,
+            equals('line1\nline2\n'));
+        expect(outputCompile!.outputFilename, equals('/path/to/main.dart.dill'));
 
         fileSystem.file('/path/to/main.dart.dill.incremental')
           ..createSync(recursive: true)
           ..writeAsBytesSync(<int>[0, 1, 2, 3]);
-        compileExpressionResponseCompleter1.complete(Future<
-            List<
-                int>>.value(utf8.encode(
-            'result def\nline1\nline2\ndef /path/to/main.dart.dill.incremental 0\n')));
+        compileExpressionResponseCompleter1.complete(Future<List<int>>.value(utf8.encode(
+            'result def\nline1\nline2\ndef /path/to/main.dart.dill.incremental 0\n'
+        )));
       }),
     );
 
+    // The test manages timing via completers.
     final Completer<bool> lastExpressionCompleted = Completer<bool>();
     unawaited(
-      generator
-          .compileExpression(
-              '0+1', null, null, null, null, null, null, null, null, false)
-          .result
-          .then(
+      generator.compileExpression('0+1', null, null, null, null, null, null,
+          null, null, false).then(
         (CompilerOutput? outputExpression) {
           expect(outputExpression, isNotNull);
           expect(outputExpression!.expressionData, <int>[0, 1, 2, 3]);
@@ -159,20 +151,17 @@ void main() {
           fileSystem.file('/path/to/main.dart.dill.incremental')
             ..createSync(recursive: true)
             ..writeAsBytesSync(<int>[4, 5, 6, 7]);
-          compileExpressionResponseCompleter2.complete(
-            Future<List<int>>.value(utf8.encode(
-                'result def\nline1\nline2\ndef /path/to/main.dart.dill.incremental 0\n')),
-          );
+          compileExpressionResponseCompleter2.complete(Future<List<int>>.value(utf8.encode(
+              'result def\nline1\nline2\ndef /path/to/main.dart.dill.incremental 0\n'
+          )));
         },
       ),
     );
 
+    // The test manages timing via completers.
     unawaited(
-      generator
-          .compileExpression(
-              '1+1', null, null, null, null, null, null, null, null, false)
-          .result
-          .then(
+      generator.compileExpression('1+1', null, null, null, null, null, null,
+          null, null, false).then(
         (CompilerOutput? outputExpression) {
           expect(outputExpression, isNotNull);
           expect(outputExpression!.expressionData, <int>[4, 5, 6, 7]);
