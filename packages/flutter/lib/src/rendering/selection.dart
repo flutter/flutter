@@ -415,6 +415,11 @@ enum SelectionEventType {
   /// Used by [SelectionEdgeUpdateEvent].
   endEdgeUpdate,
 
+  /// An event to indicate the selection is finalized.
+  ///
+  /// Used by [SelectionFinalizedSelectionEvent].
+  selectionFinalized,
+
   /// An event to clear the current selection.
   ///
   /// Used by [ClearSelectionEvent].
@@ -482,6 +487,13 @@ abstract class SelectionEvent {
 
   /// The type of this selection event.
   final SelectionEventType type;
+}
+
+
+/// Indicates that the selection is finalized.
+class SelectionFinalizedSelectionEvent extends SelectionEvent {
+  /// Creates a selection finalized selection event.
+  const SelectionFinalizedSelectionEvent(): super._(SelectionEventType.selectionFinalized);
 }
 
 /// Selects all selectable contents.
@@ -745,6 +757,71 @@ enum SelectionStatus {
 
   /// No selection.
   none,
+}
+
+/// The details of a selection.
+///
+/// This object is created by users of the [SelectionListenerSelectionChangedCallback] callback.
+///
+/// This includes information such as the status of the selection
+/// indicating if it is collapsed or uncollapsed, the [SelectedContentRange]s
+/// that represent the selection, and whether the selection is ongoing.
+///
+/// See also:
+///
+///   * [SelectionListener], which provides a [SelectionDetails] object
+///   for the selection under its subtree in its [SelectionListener.onSelectionChanged]
+///   callback.
+@immutable
+class SelectionDetails {
+  /// Creates a selection details object.
+  const SelectionDetails({
+    required this.status,
+    required this.selectionFinalized,
+    required this.ranges,
+  });
+
+  /// The status of ongoing selection under the [Selectable]
+  /// or [SelectionHandler] that created this object.
+  final SelectionStatus status;
+
+  /// Whether the selection is ongoing.
+  ///
+  /// Returns false if the selection is ongoing and
+  /// true if the selection is finalized.
+  final bool selectionFinalized;
+
+  /// The [SelectedContentRange]s that represent the selection.
+  ///
+  /// The [ranges] list is ordered according to the order of the
+  /// [Selectable]s contained under the [Selectable] or [SelectionHandler]
+  /// that created this object.
+  ///
+  /// [ranges] will be an empty list if nothing is selected.
+  final List<SelectedContentRange> ranges;
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is SelectionDetails
+        && other.status == status
+        && other.selectionFinalized == selectionFinalized
+        && listEquals(other.ranges, ranges);
+  }
+
+  @override
+  int get hashCode {
+    return Object.hash(
+      status,
+      selectionFinalized,
+      ranges,
+    );
+  }
 }
 
 /// The geometry of the current selection.

@@ -36,7 +36,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final List<SelectedContentRange> _activeSelections = <SelectedContentRange>[];
   final ContextMenuController _menuController = ContextMenuController();
   final GlobalKey<SelectionAreaState> selectionAreaKey = GlobalKey<SelectionAreaState>();
   final Key _text1Id = UniqueKey();
@@ -52,12 +51,6 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
     _initData();
-  }
-
-  @override
-  void dispose() {
-    _activeSelections.clear();
-    super.dispose();
   }
 
   void _initData() {
@@ -236,54 +229,47 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: SelectionArea(
         key: selectionAreaKey,
-        onSelectionChanged: (SelectedContent? selectedContent) {
-          if (selectedContent == null
-             || selectedContent.plainText.isEmpty
-             || _activeSelections.isEmpty) {
-            return;
-          }
-          if (selectionAreaKey.currentState == null
-              || !selectionAreaKey.currentState!.mounted
-              || selectionAreaKey.currentState!.selectableRegion.contextMenuAnchors.secondaryAnchor == null) {
-            return;
-          }
-          _menuController.show(
-            context: context,
-            contextMenuBuilder: (BuildContext context) {
-              return TapRegion(
-                onTapOutside: (PointerDownEvent event) {
-                  if (_menuController.isShown) {
-                    ContextMenuController.removeAny();
-                  }
-                },
-                child: AdaptiveTextSelectionToolbar.buttonItems(
-                  buttonItems: <ContextMenuButtonItem>[
-                    ContextMenuButtonItem(
-                      onPressed: () {
-                        ContextMenuController.removeAny();
-                        _colorSelectionRed(
-                          _activeSelections,
-                          dataMap: dataSourceMap,
-                          coloringChildSpan: false,
-                        );
-                        selectionAreaKey.currentState!.selectableRegion.clearSelection();
-                      },
-                      label: 'Color Text Red',
-                    ),
-                  ],
-                  anchors: TextSelectionToolbarAnchors(primaryAnchor: selectionAreaKey.currentState!.selectableRegion.contextMenuAnchors.secondaryAnchor!),
-                ),
-              );
-            },
-          );
-        },
         child: SelectionListener(
-          onSelectionChanged: (List<SelectedContentRange> selections) {
-            _activeSelections.clear();
-            if (selections.isEmpty) {
+          onSelectionChanged: (SelectionDetails selectionDetails) {
+            if (selectionDetails.status == SelectionStatus.none
+               || selectionDetails.status == SelectionStatus.collapsed
+               || !selectionDetails.selectionFinalized) {
               return;
             }
-            _activeSelections.addAll(selections);
+            if (selectionAreaKey.currentState == null
+                || !selectionAreaKey.currentState!.mounted
+                || selectionAreaKey.currentState!.selectableRegion.contextMenuAnchors.secondaryAnchor == null) {
+              return;
+            }
+            _menuController.show(
+              context: context,
+              contextMenuBuilder: (BuildContext context) {
+                return TapRegion(
+                  onTapOutside: (PointerDownEvent event) {
+                    if (_menuController.isShown) {
+                      ContextMenuController.removeAny();
+                    }
+                  },
+                  child: AdaptiveTextSelectionToolbar.buttonItems(
+                    buttonItems: <ContextMenuButtonItem>[
+                      ContextMenuButtonItem(
+                        onPressed: () {
+                          ContextMenuController.removeAny();
+                          _colorSelectionRed(
+                            selectionDetails.ranges,
+                            dataMap: dataSourceMap,
+                            coloringChildSpan: false,
+                          );
+                          selectionAreaKey.currentState!.selectableRegion.clearSelection();
+                        },
+                        label: 'Color Text Red',
+                      ),
+                    ],
+                    anchors: TextSelectionToolbarAnchors(primaryAnchor: selectionAreaKey.currentState!.selectableRegion.contextMenuAnchors.secondaryAnchor!),
+                  ),
+                );
+              },
+            );
           },
           child: Center(
             child: Column(

@@ -63,7 +63,6 @@ class _MyHomePageState extends State<MyHomePage> {
     'eleifend orci justo id lectus. Integer sagittis, lorem nec molestie condimentum, tortor nisl '
     'aliquam velit, eget efficitur justo mauris a ante.';
 
-  final List<SelectedContentRange> _activeSelections = <SelectedContentRange>[];
   final ContextMenuController _menuController = ContextMenuController();
   late final List<Widget> _textWidgets;
   final Map<Key, TextSpan> dataSourceMap = <Key, TextSpan>{};
@@ -73,12 +72,6 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
     _textWidgets = _initWidgets(_aboutLorem);
-  }
-
-  @override
-  void dispose() {
-    _activeSelections.clear();
-    super.dispose();
   }
 
   List<Widget> _initWidgets(String text) {
@@ -250,50 +243,43 @@ class _MyHomePageState extends State<MyHomePage> {
       backgroundColor: Colors.blueAccent,
       body: SelectionArea(
         key: selectionAreaKey,
-        onSelectionChanged: (SelectedContent? selectedContent) {
-            if (selectedContent == null
-               || selectedContent.plainText.isEmpty
-               || _activeSelections.isEmpty) {
-            return;
-          }
-          if (selectionAreaKey.currentState == null
-              || !selectionAreaKey.currentState!.mounted
-              || selectionAreaKey.currentState!.selectableRegion.contextMenuAnchors.secondaryAnchor == null) {
-            return;
-          }
-          _menuController.show(
-            context: context,
-            contextMenuBuilder: (BuildContext context) {
-              return TapRegion(
-                onTapOutside: (PointerDownEvent event) {
-                  if (_menuController.isShown) {
-                    ContextMenuController.removeAny();
-                  }
-                },
-                child: AdaptiveTextSelectionToolbar.buttonItems(
-                  buttonItems: <ContextMenuButtonItem>[
-                    ContextMenuButtonItem(
-                      onPressed: () {
-                        ContextMenuController.removeAny();
-                        _insertContent(_activeSelections, selectedContent.plainText);
-                        selectionAreaKey.currentState!.selectableRegion.clearSelection();
-                      },
-                      label: 'Insert Content',
-                    ),
-                  ],
-                  anchors: TextSelectionToolbarAnchors(primaryAnchor: selectionAreaKey.currentState!.selectableRegion.contextMenuAnchors.secondaryAnchor!),
-                ),
-              );
-            },
-          );
-        },
         child: SelectionListener(
-          onSelectionChanged: (List<SelectedContentRange> selections) {
-            _activeSelections.clear();
-            if (selections.isEmpty) {
+          onSelectionChanged: (SelectionDetails selectionDetails) {
+            if (selectionDetails.status == SelectionStatus.none
+               || selectionDetails.status == SelectionStatus.collapsed
+               || !selectionDetails.selectionFinalized) {
               return;
             }
-            _activeSelections.addAll(selections);
+            if (selectionAreaKey.currentState == null
+                || !selectionAreaKey.currentState!.mounted
+                || selectionAreaKey.currentState!.selectableRegion.contextMenuAnchors.secondaryAnchor == null) {
+              return;
+            }
+            _menuController.show(
+              context: context,
+              contextMenuBuilder: (BuildContext context) {
+                return TapRegion(
+                  onTapOutside: (PointerDownEvent event) {
+                    if (_menuController.isShown) {
+                      ContextMenuController.removeAny();
+                    }
+                  },
+                  child: AdaptiveTextSelectionToolbar.buttonItems(
+                    buttonItems: <ContextMenuButtonItem>[
+                      ContextMenuButtonItem(
+                        onPressed: () {
+                          ContextMenuController.removeAny();
+                          _insertContent(selectionDetails.ranges, 'Inserted Content');
+                          selectionAreaKey.currentState!.selectableRegion.clearSelection();
+                        },
+                        label: 'Insert Content',
+                      ),
+                    ],
+                    anchors: TextSelectionToolbarAnchors(primaryAnchor: selectionAreaKey.currentState!.selectableRegion.contextMenuAnchors.secondaryAnchor!),
+                  ),
+                );
+              },
+            );
           },
           child: Center(
             child: Container(
