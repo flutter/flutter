@@ -7,6 +7,7 @@
 #include "impeller/aiks/canvas.h"
 #include "impeller/aiks/paint_pass_delegate.h"
 #include "impeller/base/validation.h"
+#include "impeller/core/allocator.h"
 #include "impeller/core/formats.h"
 #include "impeller/entity/contents/framebuffer_blend_contents.h"
 #include "impeller/entity/contents/text_contents.h"
@@ -42,6 +43,106 @@ static void ApplyFramebufferBlend(Entity& entity) {
   contents->SetBlendMode(entity.GetBlendMode());
   entity.SetContents(std::move(contents));
   entity.SetBlendMode(BlendMode::kSource);
+}
+
+/// End the current render pass, saving the result as a texture, and then
+/// restart it with the backdrop cleared to the previous contents.
+///
+/// This method is used to set up the input for emulated advanced blends and
+/// backdrop filters.
+///
+/// Returns the previous render pass stored as a texture, or nullptr if there
+/// was a validation failure.
+static std::shared_ptr<Texture> FlipBackdrop(
+    std::vector<LazyRenderingConfig>& render_passes,
+    Point global_pass_position,
+    EntityPassClipStack& clip_coverage_stack,
+    ContentContext& renderer) {
+  auto rendering_config = std::move(render_passes.back());
+  render_passes.pop_back();
+
+  // If the very first thing we render in this EntityPass is a subpass that
+  // happens to have a backdrop filter or advanced blend, than that backdrop
+  // filter/blend will sample from an uninitialized texture.
+  //
+  // By calling `pass_context.GetRenderPass` here, we force the texture to pass
+  // through at least one RenderPass with the correct clear configuration before
+  // any sampling occurs.
+  //
+  // In cases where there are no contents, we
+  // could instead check the clear color and initialize a 1x2 CPU texture
+  // instead of ending the pass.
+  rendering_config.inline_pass_context->GetRenderPass(0);
+  if (!rendering_config.inline_pass_context->EndPass()) {
+    VALIDATION_LOG
+        << "Failed to end the current render pass in order to read from "
+           "the backdrop texture and apply an advanced blend or backdrop "
+           "filter.";
+    // Note: adding this render pass ensures there are no later crashes from
+    // unbalanced save layers. Ideally, this method would return false and the
+    // renderer could handle that by terminating dispatch.
+    render_passes.push_back(LazyRenderingConfig(
+        renderer, std::move(rendering_config.entity_pass_target)));
+    return nullptr;
+  }
+
+  std::shared_ptr<Texture> input_texture =
+      rendering_config.entity_pass_target->Flip(
+          *renderer.GetContext()->GetResourceAllocator());
+
+  if (!input_texture) {
+    VALIDATION_LOG << "Failed to fetch the color texture in order to "
+                      "apply an advanced blend or backdrop filter.";
+
+    // Note: see above.
+    render_passes.push_back(LazyRenderingConfig(
+        renderer, std::move(rendering_config.entity_pass_target)));
+    return nullptr;
+  }
+
+  render_passes.push_back(LazyRenderingConfig(
+      renderer, std::move(rendering_config.entity_pass_target)));
+  // Eagerly restore the BDF contents.
+
+  // If the pass context returns a backdrop texture, we need to draw it to the
+  // current pass. We do this because it's faster and takes significantly less
+  // memory than storing/loading large MSAA textures. Also, it's not possible
+  // to blit the non-MSAA resolve texture of the previous pass to MSAA
+  // textures (let alone a transient one).
+  Rect size_rect = Rect::MakeSize(input_texture->GetSize());
+  auto msaa_backdrop_contents = TextureContents::MakeRect(size_rect);
+  msaa_backdrop_contents->SetStencilEnabled(false);
+  msaa_backdrop_contents->SetLabel("MSAA backdrop");
+  msaa_backdrop_contents->SetSourceRect(size_rect);
+  msaa_backdrop_contents->SetTexture(input_texture);
+
+  Entity msaa_backdrop_entity;
+  msaa_backdrop_entity.SetContents(std::move(msaa_backdrop_contents));
+  msaa_backdrop_entity.SetBlendMode(BlendMode::kSource);
+  msaa_backdrop_entity.SetClipDepth(std::numeric_limits<uint32_t>::max());
+  if (!msaa_backdrop_entity.Render(
+          renderer,
+          *render_passes.back().inline_pass_context->GetRenderPass(0).pass)) {
+    VALIDATION_LOG << "Failed to render MSAA backdrop entity.";
+    return nullptr;
+  }
+
+  // Restore any clips that were recorded before the backdrop filter was
+  // applied.
+  auto& replay_entities = clip_coverage_stack.GetReplayEntities();
+  for (const auto& replay : replay_entities) {
+    SetClipScissor(
+        clip_coverage_stack.CurrentClipCoverage(),
+        *render_passes.back().inline_pass_context->GetRenderPass(0).pass,
+        global_pass_position);
+    if (!replay.entity.Render(
+            renderer,
+            *render_passes.back().inline_pass_context->GetRenderPass(0).pass)) {
+      VALIDATION_LOG << "Failed to render entity for clip restore.";
+    }
+  }
+
+  return input_texture;
 }
 
 }  // namespace
@@ -276,23 +377,12 @@ void ExperimentalCanvas::SaveLayer(
           return filter;
         };
 
-    auto rendering_config = std::move(render_passes_.back());
-    render_passes_.pop_back();
-
-    // If the very first thing we render in this EntityPass is a subpass that
-    // happens to have a backdrop filter, than that backdrop filter will end
-    // may wind up sampling from the raw, uncleared texture that came straight
-    // out of the texture cache. By calling `pass_context.GetRenderPass` here,
-    // we force the texture to pass through at least one RenderPass with the
-    // correct clear configuration before any sampling occurs.
-    rendering_config.inline_pass_context->GetRenderPass(0);
-
-    ISize restore_size =
-        rendering_config.inline_pass_context->GetTexture()->GetSize();
-
-    std::shared_ptr<Texture> input_texture =
-        rendering_config.entity_pass_target->Flip(
-            *renderer_.GetContext()->GetResourceAllocator());
+    auto input_texture = FlipBackdrop(render_passes_, GetGlobalPassPosition(),
+                                      clip_coverage_stack_, renderer_);
+    if (!input_texture) {
+      // Validation failures are logged in FlipBackdrop.
+      return;
+    }
 
     backdrop_filter_contents = backdrop_filter_proc(
         FilterInput::Make(std::move(input_texture)),
@@ -302,58 +392,6 @@ void ExperimentalCanvas::SaveLayer(
         transform_stack_.back().transform.HasTranslation()
             ? Entity::RenderingMode::kSubpassPrependSnapshotTransform
             : Entity::RenderingMode::kSubpassAppendSnapshotTransform);
-
-    // The subpass will need to read from the current pass texture when
-    // rendering the backdrop, so if there's an active pass, end it prior to
-    // rendering the subpass.
-    rendering_config.inline_pass_context->EndPass();
-
-    // Create a new render pass that the backdrop filter contents will be
-    // restored to in order to continue rendering.
-    render_passes_.push_back(LazyRenderingConfig(
-        renderer_, std::move(rendering_config.entity_pass_target)));
-    // Eagerly restore the BDF contents.
-
-    // If the pass context returns a backdrop texture, we need to draw it to the
-    // current pass. We do this because it's faster and takes significantly less
-    // memory than storing/loading large MSAA textures. Also, it's not possible
-    // to blit the non-MSAA resolve texture of the previous pass to MSAA
-    // textures (let alone a transient one).
-    Rect size_rect = Rect::MakeSize(restore_size);
-    auto msaa_backdrop_contents = TextureContents::MakeRect(size_rect);
-    msaa_backdrop_contents->SetStencilEnabled(false);
-    msaa_backdrop_contents->SetLabel("MSAA backdrop");
-    msaa_backdrop_contents->SetSourceRect(size_rect);
-    msaa_backdrop_contents->SetTexture(
-        rendering_config.inline_pass_context->GetTexture());
-
-    Entity msaa_backdrop_entity;
-    msaa_backdrop_entity.SetContents(std::move(msaa_backdrop_contents));
-    msaa_backdrop_entity.SetBlendMode(BlendMode::kSource);
-    msaa_backdrop_entity.SetClipDepth(std::numeric_limits<uint32_t>::max());
-    if (!msaa_backdrop_entity.Render(renderer_,
-                                     *render_passes_.back()
-                                          .inline_pass_context->GetRenderPass(0)
-                                          .pass)) {
-      VALIDATION_LOG << "Failed to render MSAA backdrop filter entity.";
-      return;
-    }
-
-    // Restore any clips that were recorded before the backdrop filter was
-    // applied.
-    auto& replay_entities = clip_coverage_stack_.GetReplayEntities();
-    for (const auto& replay : replay_entities) {
-      SetClipScissor(
-          clip_coverage_stack_.CurrentClipCoverage(),
-          *render_passes_.back().inline_pass_context->GetRenderPass(0).pass,
-          GetGlobalPassPosition());
-      if (!replay.entity.Render(renderer_,
-                                *render_passes_.back()
-                                     .inline_pass_context->GetRenderPass(0)
-                                     .pass)) {
-        VALIDATION_LOG << "Failed to render entity for clip restore.";
-      }
-    }
   }
 
   // When applying a save layer, absorb any pending distributed opacity.
@@ -484,8 +522,31 @@ bool ExperimentalCanvas::Restore() {
       if (renderer_.GetDeviceCapabilities().SupportsFramebufferFetch()) {
         ApplyFramebufferBlend(element_entity);
       } else {
-        VALIDATION_LOG << "Emulated advanced blends are currently unsupported.";
-        element_entity.SetBlendMode(BlendMode::kSourceOver);
+        // End the active pass and flush the buffer before rendering "advanced"
+        // blends. Advanced blends work by binding the current render target
+        // texture as an input ("destination"), blending with a second texture
+        // input ("source"), writing the result to an intermediate texture, and
+        // finally copying the data from the intermediate texture back to the
+        // render target texture. And so all of the commands that have written
+        // to the render target texture so far need to execute before it's bound
+        // for blending (otherwise the blend pass will end up executing before
+        // all the previous commands in the active pass).
+        auto input_texture =
+            FlipBackdrop(render_passes_, GetGlobalPassPosition(),
+                         clip_coverage_stack_, renderer_);
+        if (!input_texture) {
+          return false;
+        }
+
+        FilterInput::Vector inputs = {
+            FilterInput::Make(input_texture,
+                              element_entity.GetTransform().Invert()),
+            FilterInput::Make(element_entity.GetContents())};
+        auto contents = ColorFilterContents::MakeBlend(
+            element_entity.GetBlendMode(), inputs);
+        contents->SetCoverageHint(element_entity.GetCoverage());
+        element_entity.SetContents(std::move(contents));
+        element_entity.SetBlendMode(BlendMode::kSource);
       }
     }
 
