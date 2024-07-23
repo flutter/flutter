@@ -1233,13 +1233,13 @@ targets:
       - .ci.yaml
 
   - name: Linux_android_emu flutter_driver_android_test
-    recipe: devicelab/devicelab_drone
+    recipe: flutter/flutter_drone
     bringup: true
     timeout: 60
     properties:
+      shard: flutter_driver_android
       tags: >
          ["devicelab", "linux"]
-      task_name: flutter_driver_android
 
   - name: Linux realm_checker
     recipe: flutter/flutter_drone
