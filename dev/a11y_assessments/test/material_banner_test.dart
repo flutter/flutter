@@ -20,4 +20,11 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Hello, I am a Material Banner'), findsNothing);
   });
+
+  testWidgets('material banner has one h1 tag', (WidgetTester tester) async {
+    await pumpsUseCase(tester, MaterialBannerUseCase());
+    final Finder findHeadingLevelOnes = find.bySemanticsLabel('MaterialBanner Demo');
+    await tester.pumpAndSettle();
+    expect(findHeadingLevelOnes, findsOne);
+  });
 }

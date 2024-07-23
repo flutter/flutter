@@ -27,7 +27,7 @@ class _MainWidget extends StatelessWidget {
         title: Semantics(
           header: true,
           headingLevel: 1,
-          child: const Text('Dialog'),
+          child: const Text('Dialog Demo'),
         ),
       ),
       body: Center(
