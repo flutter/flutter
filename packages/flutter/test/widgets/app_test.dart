@@ -153,7 +153,7 @@ void main() {
     expect(checked, isTrue);
   }, variant: KeySimulatorTransitModeVariant.all());
 
-  testWidgets('Title is generated if the platform is web', (WidgetTester tester) async {
+  testWidgets('Title is generated if the platform is not web', (WidgetTester tester) async {
     await tester.pumpWidget(
       WidgetsApp(
         color: const Color(0xFF123456),
