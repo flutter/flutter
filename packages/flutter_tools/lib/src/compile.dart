@@ -967,14 +967,16 @@ class DefaultResidentCompiler implements ResidentCompiler {
     return result.futures;
   }
 
-  Future<CompilerOutput?> _compileExpression(_CompileExpressionRequest request) async {
+  Future<void> _compileExpression(_CompileExpressionRequest request) async {
     _stdoutHandler.reset(suppressCompilerMessages: true, expectSources: false, readFile: true);
 
     // 'compile-expression' should be invoked after compiler has been started,
     // program was compiled.
     final Process? server = _server;
     if (server == null) {
-      return null;
+      request.startedCompleter.complete();
+      request.resultCompleter.complete();
+      return;
     }
 
     final String inputKey = Uuid().generateV4();
@@ -997,8 +999,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
       request.isStatic.toString(),
     ]);
     request.startedCompleter.complete();
-
-    return _stdoutHandler.compilerOutput?.future;
+    request.resultCompleter.complete(_stdoutHandler.compilerOutput?.future);
   }
 
   @override
