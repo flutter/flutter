@@ -96,6 +96,8 @@ class Display {
   virtual std::unique_ptr<Surface>
   CreatePixelBufferSurface(const Config& config, size_t width, size_t height);
 
+  const EGLDisplay& GetHandle() const;
+
  private:
   EGLDisplay display_ = EGL_NO_DISPLAY;
 

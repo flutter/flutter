@@ -46,17 +46,6 @@ extension type const Options._(ArgResults _args) {
       );
     }
 
-    // Cannot use forceSurfaceProducerSurfaceTexture with Impeller+Vulkan.
-    if (options.forceSurfaceProducerSurfaceTexture &&
-        options.enableImpeller &&
-        options.impellerBackend != 'opengles') {
-      throw const FormatException(
-        'Cannot use --force-surface-producer-surface-texture with '
-        '--enable-impeller unless --impeller-backend="opengles" is used. See '
-        'https://github.com/flutter/flutter/issues/143539 for details.',
-      );
-    }
-
     return options;
   }
 
@@ -152,11 +141,7 @@ extension type const Options._(ArgResults _args) {
             'rendering strategy. This is used to emulate the behavior of older '
             'devices that do not support ImageReader, or to explicitly test '
             'SurfaceTexture path for rendering plugins still using the older '
-            'createSurfaceTexture() API.'
-            '\n'
-            'Cannot be used with --enable-impeller unless --impeller-backend='
-            '"opengles" is used. See '
-            'https://github.com/flutter/flutter/issues/143539 for details.',
+            'createSurfaceTexture() API.',
         negatable: false
       )
       ..addFlag(
@@ -322,13 +307,7 @@ extension type const Options._(ArgResults _args) {
   String? get outputContentsGolden => _args['output-contents-golden'] as String;
 
   /// Whether to force the use of `SurfaceTexture` for `SurfaceProducer`.
-  ///
-  /// Always returns `false` if `--enable-impeller` is `true` and
-  /// `--impeller-backend` is not `opengles`.
   bool get forceSurfaceProducerSurfaceTexture {
-    if (enableImpeller && impellerBackend != 'opengles') {
-      return false;
-    }
     return _args['force-surface-producer-surface-texture'] as bool;
   }
 
