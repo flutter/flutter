@@ -80,7 +80,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
     expect(tester.getRect(find.byType(CupertinoScrollbar)),
-        rectMoreOrLessEquals(const Rect.fromLTWH(0, 0, 800, 600), epsilon: 1); // (800, 600) is viewport size
+        rectMoreOrLessEquals(const Rect.fromLTWH(0, 0, 800, 600), epsilon: 1)); // (800, 600) is viewport size
   });
   testWidgets("should not paint when there isn't enough space", (WidgetTester tester) async {
     await tester.pumpWidget(
