@@ -16,4 +16,13 @@ void main() {
 
     expect(find.text('apple'), findsOneWidget);
   });
+
+  testWidgets('auto complete has one h1 tag', (WidgetTester tester) async {
+    await pumpsUseCase(tester, AutoCompleteUseCase());
+    final Widget semanticsH1 = Semantics(
+      header: true,
+      headingLevel: 1,
+      child: const Text('AutoComplete Demo'));
+    expect(find.byWidget(semanticsH1), findsOne);
+  });
 }

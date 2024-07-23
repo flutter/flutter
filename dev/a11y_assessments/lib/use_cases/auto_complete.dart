@@ -45,12 +45,17 @@ class _MainWidgetState extends State<_MainWidget> {
     );
   }
 
+  Widget semanticsH1 = Semantics(
+    header: true,
+    headingLevel: 1,
+    child: const Text('AutoComplete Demo'));
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Text('AutoComplete'),
+        title: semanticsH1,
       ),
       body: Center(
         child: Column(
