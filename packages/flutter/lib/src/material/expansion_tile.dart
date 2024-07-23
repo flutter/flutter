@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'circle_avatar.dart';
+/// @docImport 'text_theme.dart';
+library;
+
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
