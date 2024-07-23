@@ -10,6 +10,7 @@
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterPlatformViews.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViews_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTouchInterceptingView_Test.h"
 #import "flutter/shell/platform/darwin/ios/platform_view_ios.h"
@@ -3312,6 +3313,32 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
   NSObject* container = [[NSObject alloc] init];
   [touchInteceptorView setFlutterAccessibilityContainer:container];
   XCTAssertEqualObjects([touchInteceptorView accessibilityContainer], container);
+}
+
+- (void)testLayerPool {
+  // Create an IOSContext and GrDirectContext.
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar"];
+  [engine run];
+  XCTAssertTrue([engine iosPlatformView] != nullptr);
+  auto ios_context = [engine iosPlatformView]->GetIosContext();
+  auto gr_context = ios_context->GetMainContext();
+
+  auto pool = flutter::FlutterPlatformViewLayerPool{};
+
+  // Add layers to the pool.
+  auto layer1 = pool.GetLayer(gr_context.get(), ios_context, MTLPixelFormatBGRA8Unorm);
+  XCTAssertEqual(pool.size(), 1u);
+  auto layer2 = pool.GetLayer(gr_context.get(), ios_context, MTLPixelFormatBGRA8Unorm);
+  XCTAssertEqual(pool.size(), 2u);
+
+  // Mark all layers as unused.
+  pool.RecycleLayers();
+  XCTAssertEqual(pool.size(), 2u);
+
+  // Free the unused layers.
+  auto unused_layers = pool.RemoveUnusedLayers();
+  XCTAssertEqual(unused_layers.size(), 2u);
+  XCTAssertEqual(pool.size(), 0u);
 }
 
 @end
