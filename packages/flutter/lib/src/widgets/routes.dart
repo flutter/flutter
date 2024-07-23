@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:ui';
 /// @docImport 'package:flutter/cupertino.dart';
 /// @docImport 'package:flutter/material.dart';
 ///
@@ -128,7 +129,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> implements PredictiveB
   /// Handle to the performance mode request.
   ///
   /// When the route is animating, the performance mode is requested. It is then
-  /// disposed when the animation ends. Requesting [ui.DartPerformanceMode.latency]
+  /// disposed when the animation ends. Requesting [DartPerformanceMode.latency]
   /// indicates to the engine that the transition is latency sensitive and to delay
   /// non-essential work while this handle is active.
   PerformanceModeRequestHandle? _performanceModeRequestHandle;
@@ -2264,7 +2265,7 @@ abstract mixin class RouteAware {
 /// [RouteSettings] for details.
 ///
 /// {@template flutter.widgets.RawDialogRoute}
-/// A [ui.DisplayFeature] can split the screen into sub-screens. The closest one to
+/// A [DisplayFeature] can split the screen into sub-screens. The closest one to
 /// [anchorPoint] is used to render the content.
 ///
 /// If no [anchorPoint] is provided, then [Directionality] is used:
@@ -2281,7 +2282,7 @@ abstract mixin class RouteAware {
 /// See also:
 ///
 ///  * [DisplayFeatureSubScreen], which documents the specifics of how
-///    [ui.DisplayFeature]s can split the screen into sub-screens.
+///    [DisplayFeature]s can split the screen into sub-screens.
 ///  * [showGeneralDialog], which is a way to display a RawDialogRoute.
 ///  * [showDialog], which is a way to display a DialogRoute.
 ///  * [showCupertinoDialog], which displays an iOS-style dialog.
@@ -2425,7 +2426,7 @@ class RawDialogRoute<T> extends PopupRoute<T> {
 /// See also:
 ///
 ///  * [DisplayFeatureSubScreen], which documents the specifics of how
-///    [ui.DisplayFeature]s can split the screen into sub-screens.
+///    [DisplayFeature]s can split the screen into sub-screens.
 ///  * [showDialog], which displays a Material-style dialog.
 ///  * [showCupertinoDialog], which displays an iOS-style dialog.
 Future<T?> showGeneralDialog<T extends Object?>({
