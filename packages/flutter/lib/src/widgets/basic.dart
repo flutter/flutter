@@ -2,6 +2,34 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:ui';
+/// @docImport 'package:flutter/cupertino.dart';
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'app.dart';
+/// @docImport 'container.dart';
+/// @docImport 'gesture_detector.dart';
+/// @docImport 'icon.dart';
+/// @docImport 'icon_theme.dart';
+/// @docImport 'image_filter.dart';
+/// @docImport 'implicit_animations.dart';
+/// @docImport 'navigator.dart';
+/// @docImport 'overlay.dart';
+/// @docImport 'page_view.dart';
+/// @docImport 'placeholder.dart';
+/// @docImport 'scroll_view.dart';
+/// @docImport 'selectable_region.dart';
+/// @docImport 'selection_container.dart';
+/// @docImport 'semantics_debugger.dart';
+/// @docImport 'single_child_scroll_view.dart';
+/// @docImport 'sliver.dart';
+/// @docImport 'sliver_prototype_extent_list.dart';
+/// @docImport 'spacer.dart';
+/// @docImport 'text.dart';
+/// @docImport 'ticker_provider.dart';
+/// @docImport 'transitions.dart';
+library;
+
 import 'dart:math' as math;
 import 'dart:ui' as ui show Image, ImageFilter, TextHeightBehavior;
 

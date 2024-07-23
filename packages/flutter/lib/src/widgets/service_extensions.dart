@@ -1,3 +1,13 @@
+/// @docImport 'package:flutter/foundation.dart';
+/// @docImport 'package:flutter/rendering.dart';
+///
+/// @docImport 'app.dart';
+/// @docImport 'binding.dart';
+/// @docImport 'debug.dart';
+/// @docImport 'framework.dart';
+/// @docImport 'widget_inspector.dart';
+library;
+
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
