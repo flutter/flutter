@@ -75,6 +75,9 @@ TEST(FlRendererTest, BlitFramebuffer) {
   ::testing::NiceMock<flutter::testing::MockEpoxy> epoxy;
 
   // OpenGL 3.0
+  ON_CALL(epoxy, glGetString(GL_VENDOR))
+      .WillByDefault(
+          ::testing::Return(reinterpret_cast<const GLubyte*>("Intel")));
   ON_CALL(epoxy, epoxy_is_desktop_gl).WillByDefault(::testing::Return(true));
   EXPECT_CALL(epoxy, epoxy_gl_version).WillRepeatedly(::testing::Return(30));
 
@@ -103,6 +106,9 @@ TEST(FlRendererTest, BlitFramebufferExtension) {
   ::testing::NiceMock<flutter::testing::MockEpoxy> epoxy;
 
   // OpenGL 2.0 with GL_EXT_framebuffer_blit extension
+  ON_CALL(epoxy, glGetString(GL_VENDOR))
+      .WillByDefault(
+          ::testing::Return(reinterpret_cast<const GLubyte*>("Intel")));
   ON_CALL(epoxy, epoxy_is_desktop_gl).WillByDefault(::testing::Return(true));
   EXPECT_CALL(epoxy, epoxy_gl_version).WillRepeatedly(::testing::Return(20));
   EXPECT_CALL(epoxy, epoxy_has_gl_extension(
@@ -134,8 +140,41 @@ TEST(FlRendererTest, NoBlitFramebuffer) {
   ::testing::NiceMock<flutter::testing::MockEpoxy> epoxy;
 
   // OpenGL 2.0
+  ON_CALL(epoxy, glGetString(GL_VENDOR))
+      .WillByDefault(
+          ::testing::Return(reinterpret_cast<const GLubyte*>("Intel")));
   ON_CALL(epoxy, epoxy_is_desktop_gl).WillByDefault(::testing::Return(true));
   EXPECT_CALL(epoxy, epoxy_gl_version).WillRepeatedly(::testing::Return(20));
+
+  g_autoptr(FlMockRenderer) renderer =
+      fl_mock_renderer_new(&renderer_get_refresh_rate);
+  fl_renderer_setup(FL_RENDERER(renderer));
+  fl_renderer_wait_for_frame(FL_RENDERER(renderer), 1024, 1024);
+  FlutterBackingStoreConfig config = {
+      .struct_size = sizeof(FlutterBackingStoreConfig),
+      .size = {.width = 1024, .height = 1024}};
+  FlutterBackingStore backing_store;
+  fl_renderer_create_backing_store(FL_RENDERER(renderer), &config,
+                                   &backing_store);
+  const FlutterLayer layer0 = {.struct_size = sizeof(FlutterLayer),
+                               .type = kFlutterLayerContentTypeBackingStore,
+                               .backing_store = &backing_store,
+                               .size = {.width = 1024, .height = 1024}};
+  const FlutterLayer* layers[] = {&layer0};
+  fl_renderer_present_layers(FL_RENDERER(renderer), layers, 1);
+  fl_renderer_render(FL_RENDERER(renderer), 1024, 1024);
+}
+
+TEST(FlRendererTest, BlitFramebufferNvidia) {
+  ::testing::NiceMock<flutter::testing::MockEpoxy> epoxy;
+
+  // OpenGL 3.0, but on NVIDIA driver so temporarily disabled due to
+  // https://github.com/flutter/flutter/issues/152099
+  ON_CALL(epoxy, glGetString(GL_VENDOR))
+      .WillByDefault(
+          ::testing::Return(reinterpret_cast<const GLubyte*>("NVIDIA")));
+  ON_CALL(epoxy, epoxy_is_desktop_gl).WillByDefault(::testing::Return(true));
+  EXPECT_CALL(epoxy, epoxy_gl_version).WillRepeatedly(::testing::Return(30));
 
   g_autoptr(FlMockRenderer) renderer =
       fl_mock_renderer_new(&renderer_get_refresh_rate);

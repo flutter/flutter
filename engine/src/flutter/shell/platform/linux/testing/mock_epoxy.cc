@@ -438,6 +438,10 @@ static void _glGetShaderInfoLog(GLuint shader,
                                 GLsizei* length,
                                 GLchar* infoLog) {}
 
+static const GLubyte* _glGetString(GLenum pname) {
+  return mock->glGetString(pname);
+}
+
 static void _glTexParameterf(GLenum target, GLenum pname, GLfloat param) {}
 
 static void _glTexParameteri(GLenum target, GLenum pname, GLint param) {}
@@ -603,6 +607,7 @@ static void library_init() {
   epoxy_glGetProgramInfoLog = _glGetProgramInfoLog;
   epoxy_glGetShaderiv = _glGetShaderiv;
   epoxy_glGetShaderInfoLog = _glGetShaderInfoLog;
+  epoxy_glGetString = _glGetString;
   epoxy_glLinkProgram = _glLinkProgram;
   epoxy_glShaderSource = _glShaderSource;
   epoxy_glTexParameterf = _glTexParameterf;

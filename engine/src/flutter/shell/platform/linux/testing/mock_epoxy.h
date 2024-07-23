@@ -32,6 +32,7 @@ class MockEpoxy {
                GLint dstY1,
                GLbitfield mask,
                GLenum filter));
+  MOCK_METHOD(const GLubyte*, glGetString, (GLenum pname));
 };
 
 }  // namespace testing
