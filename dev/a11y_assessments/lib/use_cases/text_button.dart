@@ -44,7 +44,10 @@ class MainWidgetState extends State<MainWidget> {
               children: <Widget>[
                 const Text('This is a TextButton:'),
                 TextButton(
-                  onPressed: () {  },
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Text button is pressed')));
+                  },
                   child: const Text('Action'),
                 ),
               ],
@@ -55,7 +58,7 @@ class MainWidgetState extends State<MainWidget> {
                 Text('This is a disabled TextButton:'),
                 TextButton(
                   onPressed: null,
-                  child: Text('Action'),
+                  child: Text('Action Disabled'),
                 ),
               ],
             ),
