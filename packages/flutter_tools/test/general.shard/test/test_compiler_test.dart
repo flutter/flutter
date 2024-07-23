@@ -225,7 +225,7 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
   bool didShutdown = false;
 
   @override
-  CompilerOp recompile(
+  PendingCompilerOp recompile(
     Uri mainUri,
     List<Uri>? invalidatedFiles, {
     String? outputPath,
@@ -240,7 +240,7 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
     if (compilerOutput != null) {
       fileSystem!.file(compilerOutput!.outputFilename).createSync(recursive: true);
     }
-    return CompilerOp.value(compilerOutput);
+    return PendingCompilerOp.value(compilerOutput);
   }
 
   @override

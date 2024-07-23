@@ -98,14 +98,14 @@ void main() {
       stdin: frontendServerStdIn,
     ));
 
-    final CompilerOutput? output = await (await generator.recompile(
+    final CompilerOutput? output = await generator.recompile(
       Uri.parse('/path/to/main.dart'),
       null,
       outputPath: '/build/',
       packageConfig: PackageConfig.empty,
       fs: MemoryFileSystem(),
       projectRootPath: '',
-    )).result;
+    ).result;
     expect(frontendServerStdIn.getAndClear(), 'compile /path/to/main.dart\n');
     expect(testLogger.errorText, equals('line1\nline2\n'));
     expect(output?.outputFilename, equals('/path/to/main.dart.dill'));
@@ -126,14 +126,14 @@ void main() {
       stdin: frontendServerStdIn,
     ));
 
-    final CompilerOutput? output = await (await generatorWithScheme.recompile(
+    final CompilerOutput? output = await generatorWithScheme.recompile(
       Uri.parse('file:///foo/bar/fizz/main.dart'),
       null,
       outputPath: '/build/',
       packageConfig: PackageConfig.empty,
       fs: MemoryFileSystem(),
       projectRootPath: '',
-    )).result;
+    ).result;
     expect(frontendServerStdIn.getAndClear(), 'compile scheme:///main.dart\n');
     expect(testLogger.errorText, equals('line1\nline2\n'));
     expect(output?.outputFilename, equals('/path/to/main.dart.dill'));
@@ -429,7 +429,7 @@ void main() {
 
     final MemoryFileSystem fs = MemoryFileSystem();
     final File dartPluginRegistrant = fs.file('some/dir/plugin_registrant.dart')..createSync(recursive: true);
-    final CompilerOutput? output = await (await generatorWithScheme.recompile(
+    final CompilerOutput? output = await generatorWithScheme.recompile(
       Uri.parse('file:///foo/bar/fizz/main.dart'),
       null,
       outputPath: '/build/',
@@ -438,7 +438,7 @@ void main() {
       projectRootPath: '',
       checkDartPluginRegistry: true,
       dartPluginRegistrant: dartPluginRegistrant,
-    )).result;
+    ).result;
     expect(frontendServerStdIn.getAndClear(), 'compile scheme:///main.dart\n');
     expect(testLogger.errorText, equals('line1\nline2\n'));
     expect(output?.outputFilename, equals('/path/to/main.dart.dill'));
@@ -457,14 +457,14 @@ void main() {
       stdin: frontendServerStdIn,
     ));
 
-    final CompilerOutput? output = await (await generatorWithPlatformDillAndLibrariesSpec.recompile(
+    final CompilerOutput? output = await generatorWithPlatformDillAndLibrariesSpec.recompile(
       Uri.parse('/path/to/main.dart'),
       null,
       outputPath: '/build/',
       packageConfig: PackageConfig.empty,
       fs: MemoryFileSystem(),
       projectRootPath: '',
-    )).result;
+    ).result;
     expect(frontendServerStdIn.getAndClear(), 'compile /path/to/main.dart\n');
     expect(testLogger.errorText, equals('line1\nline2\n'));
     expect(output?.outputFilename, equals('/path/to/main.dart.dill'));
@@ -536,11 +536,11 @@ Future<void> _reject(
 ) async {
   // Put content into the output stream after generator.recompile gets
   // going few lines below, resets completer.
-  final Future<CompilerOutput?> rejectFuture = generator.reject();
+  final PendingCompilerOp rejectOp = generator.reject();
   scheduleMicrotask(() {
     LineSplitter.split(mockCompilerOutput).forEach(stdoutHandler.handler);
   });
-  final CompilerOutput? output = await rejectFuture;
+  final CompilerOutput? output = await rejectOp.result;
   expect(output, isNull);
 
   final String commands = frontendServerStdIn.getAndClear();

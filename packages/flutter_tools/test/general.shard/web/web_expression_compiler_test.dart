@@ -67,7 +67,7 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
   final CompilerOutput? output;
 
   @override
-  CompilerOp compileExpressionToJs(
+  PendingCompilerOp compileExpressionToJs(
     String libraryUri,
     int line,
     int column,
@@ -76,6 +76,6 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
     String moduleName,
     String expression,
   ) {
-    return CompilerOp.value(output);
+    return PendingCompilerOp.value(output);
   }
 }

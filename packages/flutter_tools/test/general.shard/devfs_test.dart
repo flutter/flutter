@@ -912,7 +912,7 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
   Future<CompilerOutput> Function(Uri mainUri, List<Uri>? invalidatedFiles)? onRecompile;
 
   @override
-  CompilerOp recompile(
+  PendingCompilerOp recompile(
     Uri mainUri,
     List<Uri>? invalidatedFiles, {
     String? outputPath,
@@ -927,7 +927,7 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
     final Future<CompilerOutput> result =
         onRecompile?.call(mainUri, invalidatedFiles) ??
             Future<CompilerOutput>.value(const CompilerOutput('', 1, <Uri>[]));
-    return CompilerOp.future(result);
+    return PendingCompilerOp.future(result);
   }
 }
 

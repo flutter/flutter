@@ -1497,7 +1497,7 @@ class FakeWipDebugger extends Fake implements WipDebugger {}
 
 class FakeResidentCompiler extends Fake implements ResidentCompiler {
   @override
-  CompilerOp recompile(
+  PendingCompilerOp recompile(
     Uri mainUri,
     List<Uri>? invalidatedFiles, {
     required String outputPath,
@@ -1509,7 +1509,7 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
     File? dartPluginRegistrant,
     Uri? nativeAssetsYaml,
   }) {
-    return CompilerOp.value(const CompilerOutput('foo.dill', 0, <Uri>[]));
+    return PendingCompilerOp.value(const CompilerOutput('foo.dill', 0, <Uri>[]));
   }
 
   @override
@@ -1519,8 +1519,8 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
   void reset() {}
 
   @override
-  Future<CompilerOutput> reject() async {
-    return const CompilerOutput('foo.dill', 0, <Uri>[]);
+  PendingCompilerOp reject() {
+    return PendingCompilerOp.value(const CompilerOutput('foo.dill', 0, <Uri>[]));
   }
 
   @override

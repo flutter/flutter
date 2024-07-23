@@ -595,7 +595,7 @@ class DevFS {
     // Await the compiler response after checking if the bundle is updated. This allows the file
     // stating to be done while waiting for the frontend_server response.
     final Stopwatch compileTimer = _stopwatchFactory.createStopwatch('compile')..start();
-    final CompilerOp compilation = generator.recompile(
+    final PendingCompilerOp compilation = generator.recompile(
       mainUri,
       invalidatedFiles,
       outputPath: dillOutputPath,

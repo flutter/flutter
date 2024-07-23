@@ -65,26 +65,26 @@ final class _Compilation {
   final Completer<void> started = Completer<void>();
   final Completer<CompilerOutput?> result = Completer<CompilerOutput?>();
 
-  CompilerOp get futures {
-    return CompilerOp(
+  PendingCompilerOp get futures {
+    return PendingCompilerOp(
       started: started.future,
       result: result.future,
     );
   }
 }
 
-final class CompilerOp {
-  CompilerOp({required this.started, required this.result});
+final class PendingCompilerOp {
+  PendingCompilerOp({required this.started, required this.result});
 
-  static CompilerOp value([CompilerOutput? value]) {
-    return CompilerOp(
+  static PendingCompilerOp value([CompilerOutput? value]) {
+    return PendingCompilerOp(
       started: Future<void>.value(),
       result: Future<CompilerOutput?>.value(value),
     );
   }
 
-  static CompilerOp future([Future<CompilerOutput?>? future]) {
-    return CompilerOp(
+  static PendingCompilerOp future([Future<CompilerOutput?>? future]) {
+    return PendingCompilerOp(
       started: Future<void>.value(),
       result: future ?? Future<CompilerOutput?>.value(),
     );
@@ -564,7 +564,7 @@ abstract class ResidentCompiler {
   /// If [checkDartPluginRegistry] is true, it is the caller's responsibility
   /// to ensure that the generated registrant file has been updated such that
   /// it is wrapping [mainUri].
-  CompilerOp recompile(
+  PendingCompilerOp recompile(
     Uri mainUri,
     List<Uri>? invalidatedFiles, {
     required String outputPath,
@@ -577,7 +577,7 @@ abstract class ResidentCompiler {
     Uri? nativeAssetsYaml,
   });
 
-  CompilerOp compileExpression(
+  PendingCompilerOp compileExpression(
     String expression,
     List<String>? definitions,
     List<String>? definitionTypes,
@@ -608,7 +608,7 @@ abstract class ResidentCompiler {
   /// variable name is the name originally used in JavaScript to contain the
   /// module object, for example:
   /// { 'dart':'dart_sdk', 'main': '/packages/hello_world_main.dart' }
-  CompilerOp compileExpressionToJs(
+  PendingCompilerOp compileExpressionToJs(
     String libraryUri,
     int line,
     int column,
@@ -626,7 +626,7 @@ abstract class ResidentCompiler {
   /// Should be invoked when results of compilation are rejected by the client.
   ///
   /// Either [accept] or [reject] should be called after every [recompile] call.
- CompilerOp reject();
+ PendingCompilerOp reject();
 
   /// Should be invoked when frontend server compiler should forget what was
   /// accepted previously so that next call to [recompile] produces complete
@@ -713,7 +713,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
   final StreamController<_CompilationRequest> _controller = StreamController<_CompilationRequest>();
 
   @override
-  CompilerOp recompile(
+  PendingCompilerOp recompile(
     Uri mainUri,
     List<Uri>? invalidatedFiles, {
     required String outputPath,
@@ -943,7 +943,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
   }
 
   @override
-  CompilerOp compileExpression(
+  PendingCompilerOp compileExpression(
     String expression,
     List<String>? definitions,
     List<String>? definitionTypes,
@@ -1002,7 +1002,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
   }
 
   @override
-  CompilerOp compileExpressionToJs(
+  PendingCompilerOp compileExpressionToJs(
     String libraryUri,
     int line,
     int column,
@@ -1070,7 +1070,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
   }
 
   @override
-  CompilerOp reject() {
+  PendingCompilerOp reject() {
     if (!_controller.hasListener) {
       _controller.stream.listen(_handleCompilationRequest);
     }
