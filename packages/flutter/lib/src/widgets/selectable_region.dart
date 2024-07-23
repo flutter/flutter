@@ -2921,15 +2921,6 @@ typedef SelectableRegionContextMenuBuilder = Widget Function(
 ///
 /// The [selectionDetails] object provides information about the active
 /// selection contained under the [SelectionListener] this callback is provided to.
-///
-/// The [selections] list is ordered according to the order of the
-/// [Selectable]s contained under the [SelectionListener] this callback
-/// is provided to.
-///
-/// [selections] will be an empty list if nothing is selected.
-///
-/// [selectionIsFinalized] will return false if the selection is ongoing
-/// and true if the selection is finalized.
 typedef SelectionListenerSelectionChangedCallback = void Function(SelectionDetails selectionDetails);
 
 /// A [SelectionContainer] that allows the user to listen to selection changes
