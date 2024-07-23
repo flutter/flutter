@@ -256,11 +256,14 @@ void main() {
   });
 
   testWidgets('CarouselController initialItem', (WidgetTester tester) async {
+    final CarouselController controller = CarouselController(initialItem: 5);
+    addTearDown(controller.dispose);
+
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: CarouselView(
-            controller: CarouselController(initialItem: 5),
+            controller: controller,
             itemExtent: 400,
             children: List<Widget>.generate(10, (int index) {
               return Center(
@@ -290,11 +293,14 @@ void main() {
   });
 
   testWidgets('CarouselView.weighted respects CarouselController.initialItem', (WidgetTester tester) async {
+    final CarouselController controller = CarouselController(initialItem: 5);
+    addTearDown(controller.dispose);
+
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: CarouselView.weighted(
-            controller: CarouselController(initialItem: 5),
+            controller: controller,
             flexWeights: const <int>[7, 1],
             children: List<Widget>.generate(10, (int index) {
               return Center(
@@ -324,11 +330,14 @@ void main() {
   });
 
   testWidgets('The initialItem should be the first item with expanded size(max extent)', (WidgetTester tester) async {
+    final CarouselController controller = CarouselController(initialItem: 5);
+    addTearDown(controller.dispose);
+
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: CarouselView.weighted(
-            controller: CarouselController(initialItem: 5),
+            controller: controller,
             flexWeights: const <int>[1, 8, 1],
             children: List<Widget>.generate(10, (int index) {
               return Center(
@@ -945,6 +954,8 @@ void main() {
 
   testWidgets('The initialItem stays when the flexWeights is updated', (WidgetTester tester) async {
     final CarouselController controller = CarouselController(initialItem: 3);
+    addTearDown(controller.dispose);
+
     Widget buildCarousel(List<int> flexWeights) {
       return MaterialApp(
         home: Scaffold(
@@ -991,6 +1002,8 @@ void main() {
 
   testWidgets('The item that currently occupies max weight stays when the flexWeights is updated', (WidgetTester tester) async {
     final CarouselController controller = CarouselController(initialItem: 3);
+    addTearDown(controller.dispose);
+
     Widget buildCarousel(List<int> flexWeights) {
       return MaterialApp(
         home: Scaffold(
@@ -1038,6 +1051,8 @@ void main() {
 
   testWidgets('The initialItem stays when the itemExtent is updated', (WidgetTester tester) async {
     final CarouselController controller = CarouselController(initialItem: 3);
+    addTearDown(controller.dispose);
+
     Widget buildCarousel(double itemExtent) {
       return MaterialApp(
         home: Scaffold(
