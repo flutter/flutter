@@ -1786,14 +1786,14 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
           );
         },
       );
-    } else if (widget.title != null) {
+    } else if (widget.title == null && kIsWeb) {
+      title = null;
+    } else {
       title = Title(
-        title: widget.title!,
+        title: widget.title ?? '',
         color: widget.color.withOpacity(1.0),
         child: result,
       );
-    } else {
-      title = null;
     }
 
     final Locale appLocale = widget.locale != null

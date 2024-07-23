@@ -153,6 +153,28 @@ void main() {
     expect(checked, isTrue);
   }, variant: KeySimulatorTransitModeVariant.all());
 
+  testWidgets('Title is generated if the platform is web', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      WidgetsApp(
+        color: const Color(0xFF123456),
+        builder: (BuildContext context, Widget? child) => Container(),
+      ),
+    );
+
+    expect(find.byType(Title), findsOneWidget);
+  }, skip: kIsWeb);
+
+  testWidgets('Title is not generated if the platform is web', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      WidgetsApp(
+        color: const Color(0xFF123456),
+        builder: (BuildContext context, Widget? child) => Container(),
+      ),
+    );
+
+    expect(find.byType(Title), findsNothing);
+  }, skip: !kIsWeb);
+
   group('error control test', () {
     Future<void> expectFlutterError({
       required GlobalKey<NavigatorState> key,
