@@ -1258,9 +1258,10 @@ void main() {
       invoked = 0;
     });
 
-     testWidgets('Shortcuts does not insert a semantics node when includeSemantics is false', (WidgetTester tester) async {
+    testWidgets('Shortcuts does not insert a semantics node when includeSemantics is false', (WidgetTester tester) async {
       final SemanticsTester semanticsTester = SemanticsTester(tester);
       addTearDown(semanticsTester.dispose);
+
       // By default, includeSemantics is true.
       await tester.pumpWidget(
         const Shortcuts(
