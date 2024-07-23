@@ -100,10 +100,25 @@ void main() {
     // Trigger fade in animation.
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
-    // Verify the Scrollbar is painted on the screen
-    final RenderBox renderBox = tester.renderObject(find.byType(Scrollbar));
-    expect(renderBox.size.width, greaterThan(0));
-    expect(renderBox.size.height, greaterThan(0));
+
+    expect(
+      find.byType(Scrollbar),
+      paints
+        ..rect(
+          rect: const Rect.fromLTRB(796.0, 0.0, 800.0, 524.0),
+          color: const Color(0x00000000),
+        )
+        ..line(
+          p1: const Offset(796.0, 0.0),
+          p2: const Offset(796.0, 524.0),
+          strokeWidth: 1.0,
+          color: const Color(0x00000000),
+        )
+        ..rect(
+          rect: const Rect.fromLTWH(796.0, 0.0, 4.0, (524/4034) * 524),
+          color: _kAndroidThumbIdleColor,
+        ),
+    );
   });
 
   testWidgets("should not paint when there isn't enough space", (WidgetTester tester) async {
