@@ -838,6 +838,7 @@ GBytes* fl_engine_send_platform_message_finish(FlEngine* self,
 }
 
 void fl_engine_send_window_metrics_event(FlEngine* self,
+                                         FlutterViewId view_id,
                                          size_t width,
                                          size_t height,
                                          double pixel_ratio) {
@@ -852,14 +853,12 @@ void fl_engine_send_window_metrics_event(FlEngine* self,
   event.width = width;
   event.height = height;
   event.pixel_ratio = pixel_ratio;
-  // TODO(dkwingsmt): Assign the correct view ID once the Linux embedder
-  // supports multiple views.
-  // https://github.com/flutter/flutter/issues/138178
-  event.view_id = flutter::kFlutterImplicitViewId;
+  event.view_id = view_id;
   self->embedder_api.SendWindowMetricsEvent(self->engine, &event);
 }
 
 void fl_engine_send_mouse_pointer_event(FlEngine* self,
+                                        FlutterViewId view_id,
                                         FlutterPointerPhase phase,
                                         size_t timestamp,
                                         double x,
@@ -888,14 +887,12 @@ void fl_engine_send_mouse_pointer_event(FlEngine* self,
   fl_event.device_kind = device_kind;
   fl_event.buttons = buttons;
   fl_event.device = kMousePointerDeviceId;
-  // TODO(dkwingsmt): Assign the correct view ID once the Linux embedder
-  // supports multiple views.
-  // https://github.com/flutter/flutter/issues/138178
-  fl_event.view_id = flutter::kFlutterImplicitViewId;
+  fl_event.view_id = view_id;
   self->embedder_api.SendPointerEvent(self->engine, &fl_event, 1);
 }
 
 void fl_engine_send_pointer_pan_zoom_event(FlEngine* self,
+                                           FlutterViewId view_id,
                                            size_t timestamp,
                                            double x,
                                            double y,
@@ -922,10 +919,7 @@ void fl_engine_send_pointer_pan_zoom_event(FlEngine* self,
   fl_event.rotation = rotation;
   fl_event.device = kPointerPanZoomDeviceId;
   fl_event.device_kind = kFlutterPointerDeviceKindTrackpad;
-  // TODO(dkwingsmt): Assign the correct view ID once the Linux embedder
-  // supports multiple views.
-  // https://github.com/flutter/flutter/issues/138178
-  fl_event.view_id = flutter::kFlutterImplicitViewId;
+  fl_event.view_id = view_id;
   self->embedder_api.SendPointerEvent(self->engine, &fl_event, 1);
 }
 

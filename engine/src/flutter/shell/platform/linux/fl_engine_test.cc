@@ -25,6 +25,7 @@ TEST(FlEngineTest, WindowMetrics) {
       SendWindowMetricsEvent,
       ([&called](auto engine, const FlutterWindowMetricsEvent* event) {
         called = true;
+        EXPECT_EQ(event->view_id, 1);
         EXPECT_EQ(event->width, static_cast<size_t>(3840));
         EXPECT_EQ(event->height, static_cast<size_t>(2160));
         EXPECT_EQ(event->pixel_ratio, 2.0);
@@ -35,7 +36,7 @@ TEST(FlEngineTest, WindowMetrics) {
   g_autoptr(GError) error = nullptr;
   EXPECT_TRUE(fl_engine_start(engine, &error));
   EXPECT_EQ(error, nullptr);
-  fl_engine_send_window_metrics_event(engine, 3840, 2160, 2.0);
+  fl_engine_send_window_metrics_event(engine, 1, 3840, 2160, 2.0);
 
   EXPECT_TRUE(called);
 }
@@ -52,6 +53,7 @@ TEST(FlEngineTest, MousePointer) {
                  size_t events_count) {
         called = true;
         EXPECT_EQ(events_count, static_cast<size_t>(1));
+        EXPECT_EQ(events[0].view_id, 1);
         EXPECT_EQ(events[0].phase, kDown);
         EXPECT_EQ(events[0].timestamp, static_cast<size_t>(1234567890));
         EXPECT_EQ(events[0].x, 800);
@@ -69,7 +71,7 @@ TEST(FlEngineTest, MousePointer) {
   g_autoptr(GError) error = nullptr;
   EXPECT_TRUE(fl_engine_start(engine, &error));
   EXPECT_EQ(error, nullptr);
-  fl_engine_send_mouse_pointer_event(engine, kDown, 1234567890, 800, 600,
+  fl_engine_send_mouse_pointer_event(engine, 1, kDown, 1234567890, 800, 600,
                                      kFlutterPointerDeviceKindMouse, 1.2, -3.4,
                                      kFlutterPointerButtonMouseSecondary);
 
@@ -88,6 +90,7 @@ TEST(FlEngineTest, PointerPanZoom) {
                  size_t events_count) {
         called = true;
         EXPECT_EQ(events_count, static_cast<size_t>(1));
+        EXPECT_EQ(events[0].view_id, 1);
         EXPECT_EQ(events[0].phase, kPanZoomUpdate);
         EXPECT_EQ(events[0].timestamp, static_cast<size_t>(1234567890));
         EXPECT_EQ(events[0].x, 800);
@@ -107,7 +110,7 @@ TEST(FlEngineTest, PointerPanZoom) {
   g_autoptr(GError) error = nullptr;
   EXPECT_TRUE(fl_engine_start(engine, &error));
   EXPECT_EQ(error, nullptr);
-  fl_engine_send_pointer_pan_zoom_event(engine, 1234567890, 800, 600,
+  fl_engine_send_pointer_pan_zoom_event(engine, 1, 1234567890, 800, 600,
                                         kPanZoomUpdate, 1.5, 2.5, 3.5, 4.5);
 
   EXPECT_TRUE(called);

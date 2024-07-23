@@ -11,6 +11,7 @@
 
 #include <cstring>
 
+#include "flutter/common/constants.h"
 #include "flutter/shell/platform/linux/fl_accessible_node.h"
 #include "flutter/shell/platform/linux/fl_backing_store_provider.h"
 #include "flutter/shell/platform/linux/fl_engine_private.h"
@@ -38,6 +39,9 @@ struct _FlView {
 
   // Project being run.
   FlDartProject* project;
+
+  // ID for this view.
+  FlutterViewId view_id;
 
   // Rendering output.
   FlRendererGdk* renderer;
@@ -207,9 +211,10 @@ static gboolean send_pointer_button_event(FlView* self, GdkEvent* event) {
   fl_keyboard_handler_sync_modifier_if_needed(self->keyboard_handler,
                                               event_state, event_time);
   fl_engine_send_mouse_pointer_event(
-      self->engine, phase, event_time * kMicrosecondsPerMillisecond,
-      event_x * scale_factor, event_y * scale_factor,
-      get_device_kind((GdkEvent*)event), 0, 0, self->button_state);
+      self->engine, self->view_id, phase,
+      event_time * kMicrosecondsPerMillisecond, event_x * scale_factor,
+      event_y * scale_factor, get_device_kind((GdkEvent*)event), 0, 0,
+      self->button_state);
 
   return TRUE;
 }
@@ -224,7 +229,7 @@ static void check_pointer_inside(FlView* self, GdkEvent* event) {
       gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
 
       fl_engine_send_mouse_pointer_event(
-          self->engine, kAdd,
+          self->engine, self->view_id, kAdd,
           gdk_event_get_time(event) * kMicrosecondsPerMillisecond,
           x * scale_factor, y * scale_factor, get_device_kind(event), 0, 0,
           self->button_state);
@@ -238,7 +243,7 @@ static void handle_geometry_changed(FlView* self) {
   gtk_widget_get_allocation(GTK_WIDGET(self), &allocation);
   gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
   fl_engine_send_window_metrics_event(
-      self->engine, allocation.width * scale_factor,
+      self->engine, self->view_id, allocation.width * scale_factor,
       allocation.height * scale_factor, scale_factor);
 
   // Make sure the view has been realized and its size has been allocated before
@@ -354,9 +359,9 @@ static void fl_view_scrolling_delegate_iface_init(
          double scroll_delta_y, int64_t buttons) {
         FlView* self = FL_VIEW(view_delegate);
         if (self->engine != nullptr) {
-          fl_engine_send_mouse_pointer_event(self->engine, phase, timestamp, x,
-                                             y, device_kind, scroll_delta_x,
-                                             scroll_delta_y, buttons);
+          fl_engine_send_mouse_pointer_event(
+              self->engine, self->view_id, phase, timestamp, x, y, device_kind,
+              scroll_delta_x, scroll_delta_y, buttons);
         }
       };
   iface->send_pointer_pan_zoom_event =
@@ -365,9 +370,9 @@ static void fl_view_scrolling_delegate_iface_init(
          double scale, double rotation) {
         FlView* self = FL_VIEW(view_delegate);
         if (self->engine != nullptr) {
-          fl_engine_send_pointer_pan_zoom_event(self->engine, timestamp, x, y,
-                                                phase, pan_x, pan_y, scale,
-                                                rotation);
+          fl_engine_send_pointer_pan_zoom_event(self->engine, self->view_id,
+                                                timestamp, x, y, phase, pan_x,
+                                                pan_y, scale, rotation);
         };
       };
 }
@@ -441,7 +446,7 @@ static gboolean motion_notify_event_cb(FlView* self,
   fl_keyboard_handler_sync_modifier_if_needed(self->keyboard_handler,
                                               event_state, event_time);
   fl_engine_send_mouse_pointer_event(
-      self->engine, self->button_state != 0 ? kMove : kHover,
+      self->engine, self->view_id, self->button_state != 0 ? kMove : kHover,
       event_time * kMicrosecondsPerMillisecond, event_x * scale_factor,
       event_y * scale_factor, get_device_kind((GdkEvent*)event), 0, 0,
       self->button_state);
@@ -486,9 +491,10 @@ static gboolean leave_notify_event_cb(FlView* self,
   if (self->pointer_inside && self->button_state == 0) {
     gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
     fl_engine_send_mouse_pointer_event(
-        self->engine, kRemove, event_time * kMicrosecondsPerMillisecond,
-        event_x * scale_factor, event_y * scale_factor,
-        get_device_kind((GdkEvent*)event), 0, 0, self->button_state);
+        self->engine, self->view_id, kRemove,
+        event_time * kMicrosecondsPerMillisecond, event_x * scale_factor,
+        event_y * scale_factor, get_device_kind((GdkEvent*)event), 0, 0,
+        self->button_state);
     self->pointer_inside = FALSE;
   }
 
@@ -754,6 +760,10 @@ static void fl_view_class_init(FlViewClass* klass) {
 
 static void fl_view_init(FlView* self) {
   gtk_widget_set_can_focus(GTK_WIDGET(self), TRUE);
+
+  // When we support multiple views this will become variable.
+  // https://github.com/flutter/flutter/issues/138178
+  self->view_id = flutter::kFlutterImplicitViewId;
 
   self->event_box = gtk_event_box_new();
   gtk_widget_set_hexpand(self->event_box, TRUE);
