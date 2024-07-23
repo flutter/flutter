@@ -144,6 +144,8 @@ std::ostream& operator<<(std::ostream& os, const SaveLayerOptions& options) {
             << "can_distribute_opacity: " << options.can_distribute_opacity()
             << ", "
             << "contains_backdrop: " << options.contains_backdrop_filter()
+            << ", "
+            << "is_unbounded: " << options.content_is_unbounded()
             << ")";
 }
 
