@@ -1942,8 +1942,6 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
 
     // The left edge of the scrollbar should be at the very left of the viewport
     expect(topLeft.dx, 0.0);
-
-
     await tester.pumpWidget(buildScrollWithOrientation(ScrollbarOrientation.right));
     await tester.pumpAndSettle();
 
