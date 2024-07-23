@@ -29,7 +29,7 @@ const String flutterReleaseHotline =
     'https://mail.google.com/chat/u/0/#chat/space/AAAA6RKcK2k';
 
 const String hotfixToStableWiki =
-    'https://github.com/flutter/flutter/blob/main/docs/releases/Hotfixes-to-the-Stable-Channel.md';
+    'https://github.com/flutter/flutter/blob/main/CHANGELOG.md';
 
 const String flutterAnnounceGroup =
     'https://groups.google.com/g/flutter-announce';
