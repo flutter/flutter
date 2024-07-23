@@ -997,6 +997,7 @@ class Shortcuts extends StatefulWidget {
     required Map<ShortcutActivator, Intent> shortcuts,
     required this.child,
     this.debugLabel,
+    this.includeSemantics = true,
   }) : _shortcuts = shortcuts,
        manager = null;
 
@@ -1012,6 +1013,7 @@ class Shortcuts extends StatefulWidget {
     required ShortcutManager this.manager,
     required this.child,
     this.debugLabel,
+    this.includeSemantics = true,
   }) : _shortcuts = const <ShortcutActivator, Intent>{};
 
   /// The [ShortcutManager] that will manage the mapping between key
@@ -1046,6 +1048,9 @@ class Shortcuts extends StatefulWidget {
   /// This allows simplifying the diagnostic output to avoid cluttering it
   /// unnecessarily with large default shortcut maps.
   final String? debugLabel;
+
+  /// {@macro flutter.widgets.Focus.includeSemantics}
+  final bool includeSemantics;
 
   @override
   State<Shortcuts> createState() => _ShortcutsState();
@@ -1104,6 +1109,7 @@ class _ShortcutsState extends State<Shortcuts> {
       debugLabel: '$Shortcuts',
       canRequestFocus: false,
       onKeyEvent: _handleOnKeyEvent,
+      includeSemantics: widget.includeSemantics,
       child: widget.child,
     );
   }
