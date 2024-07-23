@@ -49,8 +49,8 @@ void main() {
   });
 
   testWithoutContext('compile expression fails if not previously compiled', () async {
-    final CompilerOutput? result = await (await generator.compileExpression(
-        '2+2', null, null, null, null, null, null, null, null, false)).result;
+    final CompilerOutput? result = await generator.compileExpression(
+        '2+2', null, null, null, null, null, null, null, null, false).result;
 
     expect(result, isNull);
   });

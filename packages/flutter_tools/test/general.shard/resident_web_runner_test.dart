@@ -1513,10 +1513,10 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
   }
 
   @override
-  void accept() {}
+  Future<void> accept() async {}
 
   @override
-  void reset() {}
+  Future<void> reset() async {}
 
   @override
   PendingCompilerOp reject() {

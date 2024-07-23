@@ -171,7 +171,7 @@ class TestCompiler {
 
       final Uri? nativeAssetsYaml = await _nativeAssetsBuilder?.build(buildInfo);
 
-      final CompilerOutput? compilerOutput = await (await compiler!.recompile(
+      final CompilerOutput? compilerOutput = await compiler!.recompile(
         request.mainUri,
         <Uri>[request.mainUri, ...invalidatedRegistrantFiles],
         outputPath: outputDill.path,
@@ -180,7 +180,9 @@ class TestCompiler {
         checkDartPluginRegistry: true,
         fs: globals.fs,
         nativeAssetsYaml: nativeAssetsYaml,
-      )).result;
+      ).result;
+      await compiler!.accept();
+      await compiler!.reset();
       final String? outputPath = compilerOutput?.outputFilename;
 
       // In case compiler didn't produce output or reported compilation
@@ -209,8 +211,6 @@ class TestCompiler {
         } else {
           request.result.complete(outputPath);
         }
-        compiler!.accept();
-        compiler!.reset();
       }
       globals.printTrace('Compiling ${request.mainUri} took ${compilerTime.elapsedMilliseconds}ms');
       testTimeRecorder?.stop(TestTimePhases.Compile, testTimeRecorderStopwatch!);

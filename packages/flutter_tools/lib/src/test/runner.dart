@@ -648,8 +648,8 @@ class SpawnPlugin extends PlatformPlugin {
       packageConfig: packageConfig,
       fs: globals.fs,
       nativeAssetsYaml: nativeAssetsYaml,
-    );
-    residentCompiler.accept();
+    ).result;
+    await residentCompiler.accept();
 
     globals.printTrace('Compiling ${sourceFile.absolute.uri} took ${compilerTime.elapsedMilliseconds}ms');
     testTimeRecorder?.stop(TestTimePhases.Compile, testTimeRecorderStopwatch!);
