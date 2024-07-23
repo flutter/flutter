@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// @docImport 'dart:ui';
 /// @docImport 'package:flutter/cupertino.dart';
 /// @docImport 'package:flutter/material.dart';
 ///
@@ -527,7 +526,7 @@ class ShaderMask extends SingleChildRenderObjectWidget {
 /// This effect is relatively expensive, especially if the filter is non-local,
 /// such as a blur.
 ///
-/// If all you want to do is apply an [ImageFilter] to a single widget
+/// If all you want to do is apply an [ui.ImageFilter] to a single widget
 /// (as opposed to applying the filter to everything _beneath_ a widget), use
 /// [ImageFiltered] instead. For that scenario, [ImageFiltered] is both
 /// easier to use and less expensive than [BackdropFilter].
@@ -573,7 +572,7 @@ class ShaderMask extends SingleChildRenderObjectWidget {
 ///
 /// See also:
 ///
-///  * [ImageFiltered], which applies an [ImageFilter] to its child.
+///  * [ImageFiltered], which applies an [ui.ImageFilter] to its child.
 ///  * [DecoratedBox], which draws a background under (or over) a widget.
 ///  * [Opacity], which changes the opacity of the widget itself.
 ///  * https://flutter.dev/go/ios-platformview-backdrop-filter-blur for details and restrictions when an iOS PlatformView needs to be blurred.
@@ -592,7 +591,7 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
 
   /// The image filter to apply to the existing painted content before painting the child.
   ///
-  /// For example, consider using [ImageFilter.blur] to create a backdrop
+  /// For example, consider using [ui.ImageFilter.blur] to create a backdrop
   /// blur effect.
   final ui.ImageFilter filter;
 
@@ -1553,7 +1552,7 @@ class Transform extends SingleChildRenderObjectWidget {
   ///
   /// {@template flutter.widgets.Transform.optional.FilterQuality}
   /// The transform will be applied by re-rendering the child if [filterQuality] is null,
-  /// otherwise it controls the quality of an [ImageFilter.matrix] applied to a bitmap
+  /// otherwise it controls the quality of an [ui.ImageFilter.matrix] applied to a bitmap
   /// rendering of the child.
   /// {@endtemplate}
   final FilterQuality? filterQuality;
