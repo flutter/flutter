@@ -45,9 +45,12 @@ void main() {
     addTearDown(tapAndDrag.dispose);
   }
 
-  void setUpTapAndHorizontalDragGestureRecognizer() {
+  void setUpTapAndHorizontalDragGestureRecognizer({
+    bool eagerVictoryOnDrag = true, // This is the default for [BaseTapAndDragGestureRecognizer].
+  }) {
     tapAndDrag = TapAndHorizontalDragGestureRecognizer()
       ..dragStartBehavior = DragStartBehavior.down
+      ..eagerVictoryOnDrag = eagerVictoryOnDrag
       ..maxConsecutiveTap = 3
       ..onTapDown = (TapDragDownDetails details) {
         events.add('down#${details.consecutiveTapCount}');
@@ -690,6 +693,74 @@ void main() {
         'panend',
       ],
     );
+  });
+
+  testGesture('Drag state is properly reset after losing GestureArena', (GestureTester tester) {
+    setUpTapAndHorizontalDragGestureRecognizer(eagerVictoryOnDrag: false);
+    final HorizontalDragGestureRecognizer horizontalDrag = HorizontalDragGestureRecognizer()
+      ..onStart = (DragStartDetails details) {
+        events.add('basichorizontalstart');
+      }
+      ..onUpdate =  (DragUpdateDetails details) {
+        events.add('basichorizontalupdate');
+      }
+      ..onEnd = (DragEndDetails details) {
+        events.add('basichorizontalend');
+      }
+      ..onCancel = () {
+        events.add('basichorizontalcancel');
+      };
+    addTearDown(horizontalDrag.dispose);
+
+    final LongPressGestureRecognizer longpress = LongPressGestureRecognizer()
+      ..onLongPressStart = (LongPressStartDetails details) {
+        events.add('longpressstart');
+      }
+      ..onLongPressMoveUpdate =  (LongPressMoveUpdateDetails details) {
+        events.add('longpressmoveupdate');
+      }
+      ..onLongPressEnd = (LongPressEndDetails details) {
+        events.add('longpressend');
+      }
+      ..onLongPressCancel = () {
+        events.add('longpresscancel');
+      };
+    addTearDown(longpress.dispose);
+
+    FlutterErrorDetails? errorDetails;
+    final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+    FlutterError.onError = (FlutterErrorDetails details) {
+      errorDetails = details;
+    };
+
+    final TestPointer pointer = TestPointer(5);
+    final PointerDownEvent downB = pointer.down(const Offset(10.0, 10.0));
+    // When competing against another [DragGestureRecognizer], the [TapAndPanGestureRecognizer]
+    // will only win when it is the last recognizer in the arena.
+    tapAndDrag.addPointer(downB);
+    horizontalDrag.addPointer(downB);
+    longpress.addPointer(downB);
+    tester.closeArena(5);
+    tester.route(downB);
+    tester.route(pointer.move(const Offset(28.1, 10.0)));
+    tester.route(pointer.up());
+    expect(
+      events,
+      <String>[
+        'basichorizontalstart',
+        'basichorizontalend',
+      ],
+    );
+
+    final PointerDownEvent downC = pointer.down(const Offset(10.0, 10.0));
+    tapAndDrag.addPointer(downC);
+    horizontalDrag.addPointer(downC);
+    longpress.addPointer(downC);
+    tester.closeArena(5);
+    tester.route(downC);
+    tester.route(pointer.up());
+    FlutterError.onError = oldHandler;
+    expect(errorDetails, isNull);
   });
 
   testGesture('Beats LongPressGestureRecognizer on a consecutive tap greater than one', (GestureTester tester) {
