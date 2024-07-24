@@ -1583,6 +1583,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(_widgetsBindingObserver);
+    _primaryFocus = null;
     _highlightManager.dispose();
     rootScope.dispose();
     super.dispose();

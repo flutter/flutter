@@ -1028,6 +1028,8 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       // We only try to clean up and verify invariants if we didn't already
       // fail. If we got an exception already, then we instead leave everything
       // alone so that we don't cause more spurious errors.
+      buildOwner!.focusManager.dispose();
+      buildOwner!.focusManager = FocusManager()..registerGlobalHandlers();
       runApp(Container(key: UniqueKey(), child: _postTestMessage)); // Unmount any remaining widgets.
       await pump();
       if (registerTestTextInput) {
