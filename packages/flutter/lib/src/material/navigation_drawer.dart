@@ -435,6 +435,7 @@ class _NavigationDestinationSemantics extends StatelessWidget {
             label: localizations.tabLabel(
               tabIndex: destinationInfo.index + 1,
               tabCount: destinationInfo.totalNumberOfDestinations,
+              selected: destinationInfo.selectedAnimation.isForwardOrCompleted,
             ),
           ),
         ],
