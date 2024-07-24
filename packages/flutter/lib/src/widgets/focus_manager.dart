@@ -1828,7 +1828,10 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
       return;
     }
     _haveScheduledUpdate = true;
-    scheduleMicrotask(applyFocusChangesIfNeeded);
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      applyFocusChangesIfNeeded();
+    });
+    SchedulerBinding.instance.scheduleFrame();
   }
 
   /// Applies any pending focus changes and notifies listeners that the focus
@@ -1906,6 +1909,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
             state: ViewFocusState.focused,
             viewId: viewId,
           );
+          _lastFocusedViewId = viewId;
         }
       }
       notifyListeners();
