@@ -181,6 +181,7 @@ class MenuAnchor extends StatefulWidget {
   /// Defaults to the ambient [MenuThemeData.style].
   final MenuStyle? style;
 
+  /// {@template flutter.material.MenuAnchor.alignmentOffset}
   /// The offset of the menu relative to the alignment origin determined by
   /// [MenuStyle.alignment] on the [style] attribute and the ambient
   /// [Directionality].
@@ -201,6 +202,7 @@ class MenuAnchor extends StatefulWidget {
   /// [alignmentOffset] move the menu position to the left.
   ///
   /// Defaults to [Offset.zero].
+  /// {@endtemplate}
   final Offset? alignmentOffset;
 
   /// {@macro flutter.material.Material.clipBehavior}

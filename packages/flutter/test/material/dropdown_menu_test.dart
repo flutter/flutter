@@ -2432,6 +2432,28 @@ void main() {
     final TextField textField = tester.widget(find.byType(TextField));
     expect(textField.keyboardType, TextInputType.text);
   });
+
+  testWidgets('DropdownMenu passes an alignmentOffset to MenuAnchor', (WidgetTester tester) async {
+    const Offset alignmentOffset = Offset(0, 16);
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: DropdownMenu<String>(
+            alignmentOffset: alignmentOffset,
+            dropdownMenuEntries: <DropdownMenuEntry<String>>[
+              DropdownMenuEntry<String>(value: '1', label: 'One'),
+              DropdownMenuEntry<String>(value: '2', label: 'Two'),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final MenuAnchor menuAnchor = tester.widget<MenuAnchor>(find.byType(MenuAnchor));
+
+    expect(menuAnchor.alignmentOffset, alignmentOffset);
+  });
 }
 
 enum TestMenu {
