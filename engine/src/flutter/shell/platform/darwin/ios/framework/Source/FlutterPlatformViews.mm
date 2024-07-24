@@ -6,6 +6,7 @@
 
 #include <Metal/Metal.h>
 
+#include "flutter/flow/view_slicer.h"
 #include "flutter/fml/platform/darwin/scoped_nsobject.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterOverlayView.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterView.h"
@@ -681,101 +682,36 @@ bool FlutterPlatformViewsController::SubmitFrame(GrDirectContext* gr_context,
 
   DlCanvas* background_canvas = frame->Canvas();
 
-  // Resolve all pending GPU operations before allocating a new surface.
-  background_canvas->Flush();
-
-  // Clipping the background canvas before drawing the picture recorders requires
-  // saving and restoring the clip context.
-  DlAutoCanvasRestore save(background_canvas, /*do_save=*/true);
-
-  // Maps a platform view id to a vector of `FlutterPlatformViewLayer`.
-  LayersMap platform_view_layers;
-
-  auto did_submit = true;
-  auto num_platform_views = composition_order_.size();
-
-  // TODO(hellohuanlin) this double for-loop is expensive with wasted computations.
-  // See: https://github.com/flutter/flutter/issues/145802
-  for (size_t i = 0; i < num_platform_views; i++) {
-    int64_t platform_view_id = composition_order_[i];
-    EmbedderViewSlice* slice = slices_[platform_view_id].get();
-    slice->end_recording();
-
-    // Check if the current picture contains overlays that intersect with the
-    // current platform view or any of the previous platform views.
-    for (size_t j = i + 1; j > 0; j--) {
-      int64_t current_platform_view_id = composition_order_[j - 1];
-      SkRect platform_view_rect = GetPlatformViewRect(current_platform_view_id);
-      std::vector<SkIRect> intersection_rects = slice->region(platform_view_rect).getRects();
-      const SkIRect rounded_in_platform_view_rect = platform_view_rect.roundIn();
-      // Ignore intersections of single width/height on the edge of the platform view.
-      // This is to address the following performance issue when interleaving adjacent
-      // platform views and layers:
-      // Since we `roundOut` both platform view rects and the layer rects, as long as
-      // the coordinate is fractional, there will be an intersection of a single pixel width
-      // (or height) after rounding out, even if they do not intersect before rounding out.
-      // We have to round out both platform view rect and the layer rect.
-      // Rounding in platform view rect will result in missing pixel on the intersection edge.
-      // Rounding in layer rect will result in missing pixel on the edge of the layer on top
-      // of the platform view.
-      for (auto it = intersection_rects.begin(); it != intersection_rects.end(); /*no-op*/) {
-        // If intersection_rect does not intersect with the *rounded in* platform
-        // view rect, then the intersection must be a single pixel width (or height) on edge.
-        if (!SkIRect::Intersects(*it, rounded_in_platform_view_rect)) {
-          it = intersection_rects.erase(it);
-        } else {
-          ++it;
-        }
-      }
-
-      auto allocation_size = intersection_rects.size();
-
-      // For testing purposes, the overlay id is used to find the overlay view.
-      // This is the index of the layer for the current platform view.
-      auto overlay_id = platform_view_layers[current_platform_view_id].size();
-
-      // If the max number of allocations per platform view is exceeded,
-      // then join all the rects into a single one.
-      //
-      // TODO(egarciad): Consider making this configurable.
-      // https://github.com/flutter/flutter/issues/52510
-      if (allocation_size > kMaxLayerAllocations) {
-        SkIRect joined_rect = SkIRect::MakeEmpty();
-        for (const SkIRect& rect : intersection_rects) {
-          joined_rect.join(rect);
-        }
-        // Replace the rects in the intersection rects list for a single rect that is
-        // the union of all the rects in the list.
-        intersection_rects.clear();
-        intersection_rects.push_back(joined_rect);
-      }
-      for (SkIRect& joined_rect : intersection_rects) {
-        // Get the intersection rect between the current rect
-        // and the platform view rect.
-        joined_rect.intersect(platform_view_rect.roundOut());
-        // Clip the background canvas, so it doesn't contain any of the pixels drawn
-        // on the overlay layer.
-        background_canvas->ClipRect(SkRect::Make(joined_rect), DlCanvas::ClipOp::kDifference);
-        // Get a new host layer.
-        std::shared_ptr<FlutterPlatformViewLayer> layer =
-            GetLayer(gr_context,                                      //
-                     ios_context,                                     //
-                     slice,                                           //
-                     joined_rect,                                     //
-                     current_platform_view_id,                        //
-                     overlay_id,                                      //
-                     ((FlutterView*)flutter_view_.get()).pixelFormat  //
-            );
-        did_submit &= layer->did_submit_last_frame;
-        platform_view_layers[current_platform_view_id].push_back(layer);
-        overlay_id++;
-      }
-    }
-    slice->render_into(background_canvas);
+  std::unordered_map<int64_t, SkRect> view_rects;
+  for (auto view_id : composition_order_) {
+    view_rects[view_id] = GetPlatformViewRect(view_id);
   }
 
-  // Manually trigger the SkAutoCanvasRestore before we submit the frame
-  save.Restore();
+  std::unordered_map<int64_t, SkRect> overlay_layers =
+      SliceViews(background_canvas, composition_order_, slices_, view_rects);
+
+  LayersMap platform_view_layers;
+  auto did_submit = true;
+
+  int overlay_id = 0;
+  for (int64_t view_id : composition_order_) {
+    std::unordered_map<int64_t, SkRect>::const_iterator overlay = overlay_layers.find(view_id);
+    if (overlay == overlay_layers.end()) {
+      continue;
+    }
+    std::shared_ptr<FlutterPlatformViewLayer> layer =
+        GetLayer(gr_context,                                      //
+                 ios_context,                                     //
+                 slices_[view_id].get(),                          //
+                 overlay->second,                                 //
+                 view_id,                                         //
+                 overlay_id,                                      //
+                 ((FlutterView*)flutter_view_.get()).pixelFormat  //
+        );
+    did_submit &= layer->did_submit_last_frame;
+    platform_view_layers[view_id].push_back(layer);
+    overlay_id++;
+  }
 
   // If a layer was allocated in the previous frame, but it's not used in the current frame,
   // then it can be removed from the scene.
@@ -833,7 +769,7 @@ std::shared_ptr<FlutterPlatformViewLayer> FlutterPlatformViewsController::GetLay
     GrDirectContext* gr_context,
     const std::shared_ptr<IOSContext>& ios_context,
     EmbedderViewSlice* slice,
-    SkIRect rect,
+    SkRect rect,
     int64_t view_id,
     int64_t overlay_id,
     MTLPixelFormat pixel_format) {
@@ -868,7 +804,7 @@ std::shared_ptr<FlutterPlatformViewLayer> FlutterPlatformViewsController::GetLay
   DlCanvas* overlay_canvas = frame->Canvas();
   int restore_count = overlay_canvas->GetSaveCount();
   overlay_canvas->Save();
-  overlay_canvas->ClipRect(SkRect::Make(rect));
+  overlay_canvas->ClipRect(rect);
   overlay_canvas->Clear(DlColor::kTransparent());
   slice->render_into(overlay_canvas);
   overlay_canvas->RestoreToCount(restore_count);

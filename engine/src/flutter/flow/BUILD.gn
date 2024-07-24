@@ -88,6 +88,8 @@ source_set("flow") {
     "surface.h",
     "surface_frame.cc",
     "surface_frame.h",
+    "view_slicer.cc",
+    "view_slicer.h",
   ]
 
   public_configs = [ "//flutter:config" ]
@@ -183,6 +185,7 @@ if (enable_unittests) {
       "testing/mock_layer_unittests.cc",
       "testing/mock_texture_unittests.cc",
       "texture_unittests.cc",
+      "view_slicer_unittests.cc",
     ]
 
     deps = [
