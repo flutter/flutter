@@ -5000,6 +5000,7 @@ targets:
       - .ci.yaml
 
   - name: Mac channels_integration_test
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/151881
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
