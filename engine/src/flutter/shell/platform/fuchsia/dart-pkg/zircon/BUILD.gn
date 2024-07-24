@@ -61,7 +61,6 @@ dart_library("zircon_lib") {
 dart_library("zircon_tests_lib") {
   testonly = true
   package_name = "zircon_tests"
-  language_version = "2.12"
   source_dir = "."
   package_root = "test"
 

@@ -49,10 +49,15 @@ def language_version_from_pubspec(pubspec):
     if not parsed:
       return DEFAULT_LANGUAGE_VERSION
 
-    # If a format like sdk: '>=a.b' or sdk: 'a.b' is found, we'll use a.b.
+    # If any format like:
+    #   sdk: '>=a.b'
+    #   sdk: '^a.b'
+    #   sdk: 'a.b'
+    # ... is found, we 'a.b' as the language version.
+    #
     # In all other cases we default to "2.8"
     env_sdk = parsed.get('environment', {}).get('sdk', 'any')
-    match = re.search(r'^(>=)?((0|[1-9]\d*)\.(0|[1-9]\d*))', env_sdk)
+    match = re.search(r'^(>=|\^)?((0|[1-9]\d*)\.(0|[1-9]\d*))', env_sdk)
     if match:
       min_sdk_version = match.group(2)
     else:
