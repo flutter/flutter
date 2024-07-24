@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "flutter/shell/platform/android/external_view_embedder/external_view_embedder.h"
+#include "flow/view_slicer.h"
 #include "flutter/common/constants.h"
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/fml/trace_event.h"
@@ -78,72 +79,17 @@ void AndroidExternalViewEmbedder::SubmitFlutterView(
     return;
   }
 
-  std::unordered_map<int64_t, SkRect> overlay_layers;
-  DlCanvas* background_canvas = frame->Canvas();
-  auto current_frame_view_count = composition_order_.size();
-
-  // Restore the clip context after exiting this method since it's changed
-  // below.
-  DlAutoCanvasRestore save(background_canvas, /*do_save=*/true);
-
-  for (size_t i = 0; i < current_frame_view_count; i++) {
-    int64_t view_id = composition_order_[i];
-    EmbedderViewSlice* slice = slices_.at(view_id).get();
-    if (slice->canvas() == nullptr) {
-      continue;
-    }
-
-    slice->end_recording();
-
-    SkRect full_joined_rect = SkRect::MakeEmpty();
-
-    // Determinate if Flutter UI intersects with any of the previous
-    // platform views stacked by z position.
-    //
-    // This is done by querying the r-tree that holds the records for the
-    // picture recorder corresponding to the flow layers added after a platform
-    // view layer.
-    for (ssize_t j = i; j >= 0; j--) {
-      int64_t current_view_id = composition_order_[j];
-      SkRect current_view_rect = GetViewRect(current_view_id);
-      // The rect above the `current_view_rect`
-      SkRect partial_joined_rect = SkRect::MakeEmpty();
-      // Each rect corresponds to a native view that renders Flutter UI.
-      std::vector<SkIRect> intersection_rects =
-          slice->region(current_view_rect).getRects();
-
-      // Limit the number of native views, so it doesn't grow forever.
-      //
-      // In this case, the rects are merged into a single one that is the union
-      // of all the rects.
-      for (const SkIRect& rect : intersection_rects) {
-        partial_joined_rect.join(SkRect::Make(rect));
-      }
-      // Get the intersection rect with the `current_view_rect`,
-      partial_joined_rect.intersect(current_view_rect);
-      // Join the `partial_joined_rect` into `full_joined_rect` to get the rect
-      // above the current `slice`
-      full_joined_rect.join(partial_joined_rect);
-    }
-    if (!full_joined_rect.isEmpty()) {
-      // Subpixels in the platform may not align with the canvas subpixels.
-      //
-      // To workaround it, round the floating point bounds and make the rect
-      // slightly larger.
-      //
-      // For example, {0.3, 0.5, 3.1, 4.7} becomes {0, 0, 4, 5}.
-      full_joined_rect.set(full_joined_rect.roundOut());
-      overlay_layers.insert({view_id, full_joined_rect});
-      // Clip the background canvas, so it doesn't contain any of the pixels
-      // drawn on the overlay layer.
-      background_canvas->ClipRect(full_joined_rect,
-                                  DlCanvas::ClipOp::kDifference);
-    }
-    slice->render_into(background_canvas);
+  std::unordered_map<int64_t, SkRect> view_rects;
+  for (auto platform_id : composition_order_) {
+    view_rects[platform_id] = GetViewRect(platform_id);
   }
 
-  // Manually trigger the DlAutoCanvasRestore before we submit the frame
-  save.Restore();
+  std::unordered_map<int64_t, SkRect> overlay_layers =
+      SliceViews(frame->Canvas(),     //
+                 composition_order_,  //
+                 slices_,             //
+                 view_rects           //
+      );
 
   // Submit the background canvas frame before switching the GL context to
   // the overlay surfaces.

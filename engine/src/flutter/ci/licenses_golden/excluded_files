@@ -80,6 +80,7 @@
 ../../../flutter/flow/surface_frame_unittests.cc
 ../../../flutter/flow/testing
 ../../../flutter/flow/texture_unittests.cc
+../../../flutter/flow/view_slicer_unittests.cc
 ../../../flutter/flutter_frontend_server
 ../../../flutter/fml/ascii_trie_unittests.cc
 ../../../flutter/fml/backtrace_unittests.cc
