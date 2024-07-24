@@ -1509,7 +1509,6 @@ void main() {
         final List<double> scales = <double>[0.88, 1.0, 2.0];
 
         for (final double scale in scales) {
-          print(scale);
           await tester.pumpWidget(
             MaterialApp(
               home: MediaQuery(
