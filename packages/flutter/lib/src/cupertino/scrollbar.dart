@@ -214,6 +214,9 @@ class _CupertinoScrollbarState extends RawScrollbarState<CupertinoScrollbar> {
   @override
   void handleTrackTapDown(TapDownDetails details) {
     // On iOS, tapping the track does not page towards the position of the tap.
+    if (ScrollConfiguration.of(context).getPlatform(context) != TargetPlatform.iOS) {
+      super.handleTrackTapDown(details);
+    }
   }
 
   @override
