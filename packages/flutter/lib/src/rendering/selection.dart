@@ -827,6 +827,15 @@ class SelectionDetails {
       ranges,
     );
   }
+
+  @override
+  String toString() {
+    return 'SelectionDetails(\n'
+           '  status: $status,\n'
+           '  selectionFinalized: $selectionFinalized,\n'
+           '  ranges: $ranges,\n'
+           ')';
+  }
 }
 
 /// The geometry of the current selection.
