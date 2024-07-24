@@ -30,24 +30,20 @@ class _MainWidget extends StatelessWidget {
       ),
       body: ListView(
         children: <Widget>[
-          Semantics(
-            child: const TextField(
-              key: Key('enabled password'),
-              decoration: InputDecoration(
-                labelText: 'Password',
-              ),
-              obscureText: true,
+          TextField(
+            key: Key('enabled password'),
+            decoration: InputDecoration(
+              labelText: 'Password',
             ),
+            obscureText: true,
           ),
-          Semantics(
-            child: const TextField(
-              key: Key('disabled password'),
-              decoration: InputDecoration(
-                labelText: 'Password',
-              ),
-              enabled: false,
-              obscureText: true,
+          TextField(
+            key: Key('disabled password'),
+            decoration: InputDecoration(
+              labelText: 'Password',
             ),
+            enabled: false,
+            obscureText: true,
           ),
         ],
       ),
