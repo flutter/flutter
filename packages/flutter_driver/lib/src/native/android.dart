@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// Examples can assume:
+// import 'package:flutter_driver/src/native/android.dart';
+
 import 'dart:io' as io;
 import 'dart:typed_data';
 
@@ -129,7 +132,7 @@ sealed class AndroidDeviceTarget {
   /// In this example, the serial number is `emulator-5554`:
   ///
   /// ```dart
-  /// final target = AndroidDeviceTarget.bySerial('emulator-5554');
+  /// const AndroidDeviceTarget target = AndroidDeviceTarget.bySerial('emulator-5554');
   /// ```
   const factory AndroidDeviceTarget.bySerial(String serialNumber) = _SerialDeviceTarget;
 
