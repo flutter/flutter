@@ -1306,17 +1306,20 @@ class _ActionSheetButtonBackgroundState extends State<_ActionSheetButtonBackgrou
 
 // The divider of an action sheet or an alert dialog.
 //
-// The divider can be used as a horizontal divider (in a column) or a vertical
-// divider (in a row) without widget-layer configuration, but instead depending
-// on the provided layout constraints. The constraints should be the column
-// width or row height for one dimension, and unlimited for the other, which
-// will result as divider thickness. This is useful when whether the container
-// is a row or a column must be decided in the layout phase.
+// The divider can function as either a horizontal divider (in a column) or a
+// vertical divider (in a row) without widget-layer configuration. Instead, this
+// is determined during the layout phase based on the constraints. This approach
+// is necessary to allow the alert dialog to provide a list of widgets to the
+// layout widget, which doesn't know its layout mode until the layout phase.
+//
+// The constraints provided to this widget should match the column container's
+// width or the row container's height, while being unlimited in the other
+// dimension. This unlimited dimension will result in the divider's thickness.
 //
 // If the divider is not `hidden`, then it displays the `dividerColor`.
 // Otherwise it displays the background color.
-class _ActionSheetDivider extends StatelessWidget {
-  const _ActionSheetDivider({
+class _Divider extends StatelessWidget {
+  const _Divider({
     required this.dividerColor,
     required this.hiddenColor,
     required this.hidden,
@@ -1328,14 +1331,13 @@ class _ActionSheetDivider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color backgroundColor = CupertinoDynamicColor.resolve(hiddenColor, context);
     return LimitedBox(
       maxHeight: _kDividerThickness,
       maxWidth: _kDividerThickness,
       child: Container(
         height: _kDividerThickness,
         decoration: BoxDecoration(
-          color: hidden ? backgroundColor : dividerColor,
+          color: hidden ? CupertinoDynamicColor.resolve(hiddenColor, context) : dividerColor,
         ),
       ),
     );
@@ -1375,7 +1377,7 @@ class _ActionSheetActionSection extends StatelessWidget {
     final List<Widget> column = <Widget>[];
     for (int actionIndex = 0; actionIndex < actions!.length; actionIndex += 1) {
       if (actionIndex != 0) {
-        column.add(_ActionSheetDivider(
+        column.add(_Divider(
           dividerColor: dividerColor,
           hiddenColor: _kActionSheetBackgroundColor,
           hidden: pressedIndex == actionIndex - 1 || pressedIndex == actionIndex,
@@ -1489,7 +1491,7 @@ class _ActionSheetMainSheetState extends State<_ActionSheetMainSheet> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
         if (_hasContent)
-          _ActionSheetDivider(
+          _Divider(
             dividerColor: widget.dividerColor,
             hiddenColor: backgroundColor,
             hidden: false,
@@ -1639,7 +1641,7 @@ class _CupertinoDialogLayoutWidgetState extends State<_CupertinoDialogLayoutWidg
             top: widget.contentSection!,
             bottom: Column(
               children: <Widget>[
-                _ActionSheetDivider(
+                _Divider(
                   dividerColor: widget.dividerColor,
                   hiddenColor: _kDialogColor,
                   hidden: false,
@@ -1792,7 +1794,7 @@ class _CupertinoAlertActionSection extends StatelessWidget {
     final List<Widget> column = <Widget>[];
     for (int actionIndex = 0; actionIndex < actions.length; actionIndex += 1) {
       if (actionIndex != 0) {
-        column.add(_ActionSheetDivider(
+        column.add(_Divider(
           dividerColor: dividerColor,
           hiddenColor: dialogColor,
           hidden: pressedIndex == actionIndex - 1 || pressedIndex == actionIndex,
