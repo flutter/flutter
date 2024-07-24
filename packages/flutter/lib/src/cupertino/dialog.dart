@@ -1803,6 +1803,7 @@ class _CupertinoAlertActionSection extends StatelessWidget {
       column.add(_AlertDialogButtonBackground(
         idleColor: dialogColor,
         pressedColor: dialogPressedColor,
+        pressed: pressedIndex == actionIndex,
         onPressStateChange: (bool state) {
           onPressedUpdate(actionIndex, state);
         },
@@ -1825,13 +1826,17 @@ class _CupertinoAlertActionSection extends StatelessWidget {
 
 // Renders the background of a button (both the pressed background and the idle
 // background) and reports its state to the parent with `onPressStateChange`.
-class _AlertDialogButtonBackground extends StatefulWidget {
+class _AlertDialogButtonBackground extends StatelessWidget {
   const _AlertDialogButtonBackground({
     required this.idleColor,
     required this.pressedColor,
+    required this.pressed,
     required this.onPressStateChange,
     required this.child,
   });
+
+  /// Called whether the user is holding on this button.
+  final bool pressed;
 
   /// Called when the user taps down or lifts up on the button.
   ///
@@ -1846,31 +1851,21 @@ class _AlertDialogButtonBackground extends StatefulWidget {
   /// Typically a [Text] widget.
   final Widget child;
 
-  @override
-  _AlertDialogButtonBackgroundState createState() => _AlertDialogButtonBackgroundState();
-}
-
-class _AlertDialogButtonBackgroundState extends State<_AlertDialogButtonBackground> {
-  bool _isPressed = false;
-
   void onTapDown(TapDownDetails details) {
-    setState(() { _isPressed = true; });
-    widget.onPressStateChange?.call(true);
+    onPressStateChange?.call(true);
   }
 
   void onTapUp(TapUpDetails details) {
-    setState(() { _isPressed = false; });
-    widget.onPressStateChange?.call(false);
+    onPressStateChange?.call(false);
   }
 
   void onTapCancel() {
-    setState(() { _isPressed = false; });
-    widget.onPressStateChange?.call(false);
+    onPressStateChange?.call(false);
   }
 
   @override
   Widget build(BuildContext context) {
-    final Color backgroundColor = _isPressed ? widget.pressedColor : widget.idleColor;
+    final Color backgroundColor = pressed ? pressedColor : idleColor;
     return MergeSemantics(
       // TODO(mattcarroll): Button press dynamics need overhaul for iOS:
       // https://github.com/flutter/flutter/issues/19786
@@ -1886,7 +1881,7 @@ class _AlertDialogButtonBackgroundState extends State<_AlertDialogButtonBackgrou
           decoration: BoxDecoration(
             color: CupertinoDynamicColor.resolve(backgroundColor, context),
           ),
-          child: widget.child,
+          child: child,
         ),
       ),
     );
