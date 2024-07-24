@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/material/expansion_panel/expansion_panel_lis
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('ExpansionPanelList.radio can expand on item at the time', (WidgetTester tester) async {
+  testWidgets('ExpansionPanelList.radio can expand one item at the time', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.ExpansionPanelListRadioExampleApp(),
     );
