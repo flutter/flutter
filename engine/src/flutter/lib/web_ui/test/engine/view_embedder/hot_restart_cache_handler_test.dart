@@ -50,8 +50,7 @@ void doTests() {
       HotRestartCacheHandler();
 
       expect(_jsHotRestartStore, isNotNull);
-      // For dart2wasm, we have to check the length this way.
-      expect(_jsHotRestartStore!.length, 0.toJS);
+      expect(_jsHotRestartStore!.length, 0);
     });
   });
 
@@ -94,7 +93,7 @@ void doTests() {
       cache = HotRestartCacheHandler();
 
       // For dart2wasm, we have to check the length this way.
-      expect(_jsHotRestartStore!.length, 0.toJS);
+      expect(_jsHotRestartStore!.length, 0);
       expect(element.isConnected, isFalse); // Removed
       expect(element2.isConnected, isTrue);
     });
