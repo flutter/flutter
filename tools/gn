@@ -226,6 +226,15 @@ def setup_rbe(args):
   # care of starting and stopping the compiler proxy.
   running_on_luci = os.environ.get('LUCI_CONTEXT') is not None
 
+  # The default is 'racing', which eagerly attempts to use the local machine
+  # to run build actions. This is not a performance improvement in CI where the
+  # 'local machine' is nearly always a VM anyway, and is not any more powerful
+  # than the 'remote' RBE workers. Only  attempt a 'local' build if the remote
+  # worker times-out or otherwise fails. See also docs on RbeExecStrategy in the
+  # engine_build_config package under tools/pkg.
+  if running_on_luci:
+    rbe_gn_args['rbe_exec_strategy'] = 'remote_local_fallback'
+
   if args.rbe_server_address:
     rbe_gn_args['rbe_server_address'] = args.rbe_server_address
   if args.rbe_exec_strategy:
