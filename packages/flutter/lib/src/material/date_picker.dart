@@ -874,7 +874,8 @@ class _DatePickerHeader extends StatelessWidget {
       color: foregroundColor,
     );
     const double fontSizeToScale = 14.0;
-    final double maxHeaderTextScaleFactor = entryModeButton != null ? 1.4 : _kMaxHeaderTextScaleFactor;
+    final double currentScale = MediaQuery.textScalerOf(context).scale(fontSizeToScale) / fontSizeToScale;
+    final double maxHeaderTextScaleFactor = math.min(currentScale, entryModeButton != null ? 1.4 : _kMaxHeaderTextScaleFactor);
     final double textScaleFactor = MediaQuery.textScalerOf(context).clamp(maxScaleFactor: maxHeaderTextScaleFactor).scale(fontSizeToScale) / fontSizeToScale;
     final double scaledFontSize = MediaQuery.textScalerOf(context).scale(titleStyle?.fontSize ?? 32);
     final double headerScaleFactor = textScaleFactor > 1 ? textScaleFactor  : 1.0;
@@ -884,7 +885,7 @@ class _DatePickerHeader extends StatelessWidget {
       style: helpStyle,
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
-      textScaler: MediaQuery.textScalerOf(context).clamp(maxScaleFactor: orientation ==  Orientation.portrait ? 1.6 : 1.4),
+      textScaler: MediaQuery.textScalerOf(context).clamp(maxScaleFactor: math.min(textScaleFactor, orientation ==  Orientation.portrait ? 1.6 : 1.4)),
     );
     final Text title = Text(
       titleText,
@@ -894,11 +895,11 @@ class _DatePickerHeader extends StatelessWidget {
         (scaledFontSize > 70 ? 2 : 1) :
         scaledFontSize > 40 ? 3 : 2,
       overflow: TextOverflow.ellipsis,
-      textScaler: MediaQuery.textScalerOf(context).clamp(maxScaleFactor: maxHeaderTextScaleFactor),
+      textScaler: MediaQuery.textScalerOf(context).clamp(maxScaleFactor: textScaleFactor),
     );
 
     final double fontScaleAdjustedHeaderHeight =
-      headerScaleFactor > 1.5 ? headerScaleFactor - 0.2 : headerScaleFactor;
+      headerScaleFactor > 1.3 ? headerScaleFactor - 0.2 : 1.0;
 
     switch (orientation) {
       case Orientation.portrait:
