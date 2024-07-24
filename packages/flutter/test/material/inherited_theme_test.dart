@@ -558,8 +558,8 @@ void main() {
     await tester.tap(find.text('push wrapped'));
     await tester.pumpAndSettle(); // route animation
     RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
-    expect(sliderBox, paints..rrect(color: inactiveTrackColor)..rrect(color: activeTrackColor));
-    expect(sliderBox, paints..circle(color: thumbColor));
+    expect(sliderBox, paints..rrect(color: activeTrackColor)..rrect(color: inactiveTrackColor));
+    expect(sliderBox, paints..circle()..rrect(color: thumbColor));
 
     Navigator.of(navigatorContext).pop();
     await tester.pumpAndSettle(); // route animation
@@ -567,8 +567,8 @@ void main() {
     await tester.tap(find.text('push unwrapped'));
     await tester.pumpAndSettle(); // route animation
     sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
-    expect(sliderBox, isNot(paints..rrect(color: inactiveTrackColor)..rrect(color: activeTrackColor)));
-    expect(sliderBox, isNot(paints..circle(color: thumbColor)));
+    expect(sliderBox, isNot(paints..rrect(color: activeTrackColor)..rrect(color: inactiveTrackColor)));
+    expect(sliderBox, isNot(paints..circle()..rrect(color: thumbColor)));
   });
 
   testWidgets('ToggleButtonsTheme.wrap()', (WidgetTester tester) async {
