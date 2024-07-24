@@ -2166,6 +2166,7 @@ class _OverlayPortalElement extends RenderObjectElement {
     if (slot != null) {
       renderObject._deferredLayoutChild = child as _RenderDeferredLayoutBox;
       slot._addChild(child);
+      renderObject.markNeedsSemanticsUpdate();
     } else {
       renderObject.child = child;
     }
@@ -2177,6 +2178,7 @@ class _OverlayPortalElement extends RenderObjectElement {
   void moveRenderObjectChild(_RenderDeferredLayoutBox child, _OverlayEntryLocation oldSlot, _OverlayEntryLocation newSlot) {
     assert(newSlot._debugIsLocationValid());
     newSlot._moveChild(child, oldSlot);
+    renderObject.markNeedsSemanticsUpdate();
   }
 
   @override
@@ -2283,6 +2285,9 @@ final class _RenderDeferredLayoutBox extends RenderProxyBox with _RenderTheaterM
     _needsLayout = true;
     super.markNeedsLayout();
   }
+
+  @override
+  RenderObject? get semanticsParent => _layoutSurrogate;
 
   @override
   double? computeDryBaseline(BoxConstraints constraints, TextBaseline baseline) {
