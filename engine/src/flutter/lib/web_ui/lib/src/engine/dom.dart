@@ -3763,9 +3763,8 @@ bool get browserSupportsCreateImageBitmap =>
     !isChrome110OrOlder &&
     !debugDisableCreateImageBitmapSupport;
 
-@JS()
-@staticInterop
 extension JSArrayExtension on JSArray<JSAny?> {
   external void push(JSAny value);
-  external JSNumber get length;
+  // TODO(srujzs): Delete this when we add `JSArray.length` in the SDK.
+  external int get length;
 }
