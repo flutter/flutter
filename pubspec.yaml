@@ -80,6 +80,7 @@ environment:
 
 # Declare all packages that are part of the workspace.
 workspace:
+  - testing/litetest
   - tools/engine_tool
 
 # Declare all dependencies that are used by one or more packages.
@@ -145,8 +146,6 @@ dependency_overrides:
     path: ./third_party/dart/pkg/expect
   file:
     path: ./third_party/dart/third_party/pkg/file/packages/file
-  litetest:
-    path: ./testing/litetest
   logging:
     path: ./third_party/dart/third_party/pkg/logging
   meta:
