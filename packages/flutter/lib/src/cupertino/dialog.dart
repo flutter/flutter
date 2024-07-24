@@ -1424,13 +1424,21 @@ class _Divider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // The LimitedBox turns unconstrained dimension (typically the main axis of
+    // a flex container) to the divider thickness.
     return LimitedBox(
       maxHeight: _kDividerThickness,
       maxWidth: _kDividerThickness,
-      child: Container(
-        height: _kDividerThickness,
-        decoration: BoxDecoration(
-          color: hidden ? CupertinoDynamicColor.resolve(hiddenColor, context) : dividerColor,
+      // The constrained box prevents the divider from collapsing to nothing.
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(
+          minHeight: _kDividerThickness,
+          minWidth: _kDividerThickness,
+        ),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: hidden ? CupertinoDynamicColor.resolve(hiddenColor, context) : dividerColor,
+          ),
         ),
       ),
     );
@@ -1489,13 +1497,17 @@ class _OverscrollBackgroundState extends State<_OverscrollBackground> {
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: <Widget>[
-        Container(
-          color: widget.color,
-          height: _topOverscroll,
+        DecoratedBox(
+          decoration: BoxDecoration(color: widget.color),
+          child: SizedBox(
+            height: _topOverscroll,
+          ),
         ),
-        Container(
-          color: widget.color,
-          height: _bottomOverscroll,
+        DecoratedBox(
+          decoration: BoxDecoration(color: widget.color),
+          child: SizedBox(
+            height: _bottomOverscroll,
+          ),
         ),
       ],
     );
@@ -1564,6 +1576,7 @@ class _ActionSheetActionSection extends StatelessWidget {
       child: SingleChildScrollView(
         controller: scrollController,
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: column,
         ),
       ),
