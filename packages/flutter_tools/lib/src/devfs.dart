@@ -585,7 +585,7 @@ class DevFS {
     bool assetBuildFailed = false;
     int syncedBytes = 0;
     if (fullRestart) {
-      generator.reset();
+      await generator.reset();
     }
     // On a full restart, or on an initial compile for the attach based workflow,
     // this will produce a full dill. Subsequent invocations will produce incremental
@@ -614,6 +614,9 @@ class DevFS {
       // before processing bundle.
       _logger.printTrace('Processing bundle.');
       // await null to give time for telling the compiler to compile.
+      await null;
+      await null;
+      await null;
       await null;
 
       // The tool writes the assets into the AssetBundle working dir so that they

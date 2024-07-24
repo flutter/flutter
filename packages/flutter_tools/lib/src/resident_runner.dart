@@ -605,7 +605,7 @@ class FlutterDevice {
 
   Future<void> updateReloadStatus(bool wasReloadSuccessful) async {
     if (wasReloadSuccessful) {
-      generator?.accept();
+      await generator?.accept();
     } else {
       await generator?.reject();
     }

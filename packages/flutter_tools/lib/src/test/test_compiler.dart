@@ -181,6 +181,8 @@ class TestCompiler {
         fs: globals.fs,
         nativeAssetsYaml: nativeAssetsYaml,
       );
+      await compiler!.accept();
+      await compiler!.reset();
       final String? outputPath = compilerOutput?.outputFilename;
 
       // In case compiler didn't produce output or reported compilation
@@ -209,8 +211,6 @@ class TestCompiler {
         } else {
           request.result.complete(outputPath);
         }
-        compiler!.accept();
-        compiler!.reset();
       }
       globals.printTrace('Compiling ${request.mainUri} took ${compilerTime.elapsedMilliseconds}ms');
       testTimeRecorder?.stop(TestTimePhases.Compile, testTimeRecorderStopwatch!);
