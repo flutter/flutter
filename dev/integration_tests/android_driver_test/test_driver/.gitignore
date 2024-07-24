@@ -1,0 +1,4 @@
+# In flutter/flutter, all screenshot tests are run on Skia Gold.
+#
+# However, local development might require running screenshot tests locally.
+*.png

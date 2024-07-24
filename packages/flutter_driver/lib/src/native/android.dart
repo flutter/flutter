@@ -5,6 +5,7 @@
 // Examples can assume:
 // import 'package:flutter_driver/src/native/android.dart';
 
+import 'dart:convert';
 import 'dart:io' as io;
 import 'dart:typed_data';
 
@@ -20,44 +21,57 @@ final class AndroidNativeDriver implements NativeDriver {
   /// The [tempDirectory] argument can be used to specify a custom directory
   /// where the driver will store temporary files. If not provided, a temporary
   /// directory will be created in the system's temporary directory.
+  ///
+  /// @nodoc
   @visibleForTesting
   AndroidNativeDriver({
     required AndroidDeviceTarget target,
     String? adbPath,
     io.Directory? tempDirectory,
-  }) : _adbPath = adbPath ?? 'adb',
-       _target = target,
-       _tmpDir = tempDirectory ?? io.Directory.systemTemp.createTempSync('flutter_driver.');
+  })  : _adbPath = adbPath ?? 'adb',
+        _target = target,
+        _tmpDir = tempDirectory ??
+            io.Directory.systemTemp.createTempSync('flutter_driver.');
 
   /// Connects to a device or emulator identified by [target].
   static Future<AndroidNativeDriver> connect({
-    AndroidDeviceTarget target = const AndroidDeviceTarget.onlyEmulatorOrDevice(),
+    AndroidDeviceTarget? target,
   }) async {
+    target ??= const AndroidDeviceTarget.onlyEmulatorOrDevice();
     final AndroidNativeDriver driver = AndroidNativeDriver(target: target);
     await driver._smokeTest();
     return driver;
   }
 
-  Future<void> _smokeTest() async {
-    final io.ProcessResult version = await io.Process.run(
+  Future<io.ProcessResult> _adb(
+    List<String> args, {
+    Encoding? stdoutEncoding = io.systemEncoding,
+  }) {
+    return io.Process.run(
       _adbPath,
-      const <String>['version'],
+      <String>[
+        ..._target._toAdbArgs(),
+        ...args,
+      ],
+      stdoutEncoding: stdoutEncoding,
     );
+  }
+
+  Future<void> _smokeTest() async {
+    final io.ProcessResult version = await _adb(<String>['version']);
     if (version.exitCode != 0) {
       throw StateError('Failed to run `$_adbPath version`: ${version.stderr}');
     }
 
-    final io.ProcessResult devices = await io.Process.run(
-      _adbPath,
+    final io.ProcessResult echo = await _adb(
       <String>[
-        ..._target._toAdbArgs(),
         'shell',
         'echo',
         'connected',
       ],
     );
-    if (devices.exitCode != 0) {
-      throw StateError('Failed to connect to target: ${devices.stderr}');
+    if (echo.exitCode != 0) {
+      throw StateError('Failed to connect to target: ${echo.stderr}');
     }
   }
 
@@ -71,9 +85,35 @@ final class AndroidNativeDriver implements NativeDriver {
   }
 
   @override
+  Future<void> configureForScreenshotTesting() async {
+    const Map<String, String> settings = <String, String>{
+      'show_surface_updates': '1',
+      'transition_animation_scale': '0',
+      'window_animation_scale': '0',
+      'animator_duration_scale': '0',
+    };
+
+    for (final MapEntry<String, String> entry in settings.entries) {
+      final io.ProcessResult result = await _adb(
+        <String>[
+          'shell',
+          'settings',
+          'put',
+          'global',
+          entry.key,
+          entry.value,
+        ],
+      );
+
+      if (result.exitCode != 0) {
+        throw StateError('Failed to configure device: ${result.stderr}');
+      }
+    }
+  }
+
+  @override
   Future<NativeScreenshot> screenshot() async {
-    final io.ProcessResult result = await io.Process.run(
-      _adbPath,
+    final io.ProcessResult result = await _adb(
       <String>[
         ..._target._toAdbArgs(),
         'exec-out',
@@ -134,7 +174,8 @@ sealed class AndroidDeviceTarget {
   /// ```dart
   /// const AndroidDeviceTarget target = AndroidDeviceTarget.bySerial('emulator-5554');
   /// ```
-  const factory AndroidDeviceTarget.bySerial(String serialNumber) = _SerialDeviceTarget;
+  const factory AndroidDeviceTarget.bySerial(String serialNumber) =
+      _SerialDeviceTarget;
 
   /// Represents the only running emulator _or_ connected device.
   ///
@@ -144,7 +185,8 @@ sealed class AndroidDeviceTarget {
   /// Represents the only running emulator on the host machine.
   ///
   /// This is equivalent to using `adb -e`, a _single_ emulator must be running.
-  const factory AndroidDeviceTarget.onlyRunningEmulator() = _SingleEmulatorTarget;
+  const factory AndroidDeviceTarget.onlyRunningEmulator() =
+      _SingleEmulatorTarget;
 
   /// Represents the only connected device on the host machine.
   ///
