@@ -880,6 +880,9 @@ class CupertinoActionSheet extends StatefulWidget {
 }
 
 class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
+  int? _pressedIndex;
+  static const int _kCancelButtonIndex = -1;
+
   ScrollController? _backupMessageScrollController;
 
   ScrollController? _backupActionScrollController;
@@ -935,7 +938,19 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
     );
   }
 
-  bool _cancelButtonPressed = false;
+  void _onPressedUpdate(int actionIndex, bool state) {
+    if (!state) {
+      if (_pressedIndex == actionIndex) {
+        setState(() {
+          _pressedIndex = null;
+        });
+      }
+    } else {
+      setState(() {
+        _pressedIndex = actionIndex;
+      });
+    }
+  }
 
   Widget _buildCancelButton() {
     assert(widget.cancelButton != null);
@@ -945,11 +960,9 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
       padding: EdgeInsets.only(top: cancelPadding),
       child: _ActionSheetButtonBackground(
         isCancel: true,
-        pressed: _cancelButtonPressed,
+        pressed: _pressedIndex == _kCancelButtonIndex,
         onPressStateChange: (bool state) {
-          setState(() {
-            _cancelButtonPressed = state;
-          });
+          _onPressedUpdate(_kCancelButtonIndex, state);
         },
         child: widget.cancelButton!,
       ),
@@ -1044,6 +1057,8 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: _kBlurAmount, sigmaY: _kBlurAmount),
             child: _ActionSheetMainSheet(
+              pressedIndex: _pressedIndex,
+              onPressedUpdate: _onPressedUpdate,
               scrollController: _effectiveActionScrollController,
               contentSection: _buildContent(context),
               actions: widget.actions ?? List<Widget>.empty(),
@@ -1446,12 +1461,16 @@ class _ActionSheetActionSection extends StatelessWidget {
 // The part of an action sheet without the cancel button.
 class _ActionSheetMainSheet extends StatefulWidget {
   const _ActionSheetMainSheet({
+    required this.pressedIndex,
+    required this.onPressedUpdate,
     required this.scrollController,
     required this.actions,
     required this.contentSection,
     required this.dividerColor,
   });
 
+  final int? pressedIndex;
+  final _PressedUpdateHandler onPressedUpdate;
   final ScrollController? scrollController;
   final List<Widget> actions;
   final Widget? contentSection;
@@ -1462,7 +1481,6 @@ class _ActionSheetMainSheet extends StatefulWidget {
 }
 
 class _ActionSheetMainSheetState extends State<_ActionSheetMainSheet> {
-  int? _pressedIndex;
   double _topOverscroll = 0;
   double _bottomOverscroll = 0;
 
@@ -1508,20 +1526,6 @@ class _ActionSheetMainSheetState extends State<_ActionSheetMainSheet> {
   bool get _hasContent => widget.contentSection != null;
   bool get _hasActions => widget.actions.isNotEmpty;
 
-  void _onPressedUpdate(int actionIndex, bool state) {
-    if (!state) {
-      if (_pressedIndex == actionIndex) {
-        setState(() {
-          _pressedIndex = null;
-        });
-      }
-    } else {
-      setState(() {
-        _pressedIndex = actionIndex;
-      });
-    }
-  }
-
   Widget _dividerAndActionsSection(BuildContext context) {
     if (!_hasActions) {
       return _empty;
@@ -1547,10 +1551,10 @@ class _ActionSheetMainSheetState extends State<_ActionSheetMainSheet> {
                 child: _ActionSheetActionSection(
                   actions: widget.actions,
                   scrollController: widget.scrollController,
-                  pressedIndex: _pressedIndex,
+                  pressedIndex: widget.pressedIndex,
                   dividerColor: widget.dividerColor,
                   backgroundColor: backgroundColor,
-                  onPressedUpdate: _onPressedUpdate,
+                  onPressedUpdate: widget.onPressedUpdate,
                 ),
               )
             ],
