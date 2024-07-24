@@ -291,6 +291,11 @@ class CupertinoAlertDialog extends StatefulWidget {
 }
 
 class _CupertinoAlertDialogState extends State<CupertinoAlertDialog> {
+  // The index of the action button that the user is holding on.
+  //
+  // Null if the user is not holding on any buttons.
+  int? _pressedIndex;
+
   ScrollController? _backupScrollController;
 
   ScrollController? _backupActionScrollController;
@@ -340,8 +345,6 @@ class _CupertinoAlertDialogState extends State<CupertinoAlertDialog> {
       child: child,
     );
   }
-
-  int? _pressedIndex;
 
   void _onPressedUpdate(int actionIndex, bool isPressed) {
     if (isPressed) {
