@@ -224,6 +224,8 @@ class WebTestsSuite {
           '--dart-define=test.valueB=Value',
         ]
       ),
+      () => _runWebDebugTest('lib/assertion_test.dart'),
+      () => _runWebReleaseTest('lib/assertion_test.dart'),
       () => _runWebDebugTest('lib/sound_mode.dart'),
       () => _runWebReleaseTest('lib/sound_mode.dart'),
       () => _runFlutterWebTest(
