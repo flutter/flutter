@@ -24,7 +24,6 @@ tags
 Thumbs.db
 .idea
 pubspec.lock
-.vscode/
 docs/doxygen/
 xcuserdata
 
@@ -49,7 +48,6 @@ xcuserdata
 .classpath
 .project
 .settings/
-.vscode/
 
 # packages file containing multi-root paths
 .packages.generated

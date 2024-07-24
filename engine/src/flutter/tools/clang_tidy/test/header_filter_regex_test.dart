@@ -39,6 +39,7 @@ void main() {
       '.dart_tool',
       '.git',
       '.github',
+      '.vscode',
       'build_overrides',
       'buildtools',
       'prebuilts',
