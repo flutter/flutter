@@ -20,8 +20,10 @@ import 'focus_scope.dart';
 import 'focus_traversal.dart';
 import 'framework.dart';
 import 'heroes.dart';
+import 'navigator_pop_handler.dart';
 import 'notification_listener.dart';
 import 'overlay.dart';
+import 'pop_scope.dart';
 import 'restoration.dart';
 import 'restoration_properties.dart';
 import 'routes.dart';
@@ -3625,6 +3627,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       canHandlePop: navigatorCanPop || routeBlocksPop,
     );
     // Avoid dispatching a notification in the middle of a build.
+    final bool isNested = Navigator.maybeOf(context, rootNavigator: true) != this;
+    print('justin handlehistorychanged dispatching. ${notification.canHandlePop} with history ${_history.length}. isNested? $isNested');
     switch (SchedulerBinding.instance.schedulerPhase) {
       case SchedulerPhase.postFrameCallbacks:
         notification.dispatch(context);
@@ -5610,8 +5614,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
 
     // Hides the HeroControllerScope for the widget subtree so that the other
     // nested navigator underneath will not pick up the hero controller above
-    // this level.
-    return HeroControllerScope.none(
+    final Widget child = HeroControllerScope.none(
       child: NotificationListener<NavigationNotification>(
         onNotification: (NavigationNotification notification) {
           // If the state of this Navigator does not change whether or not the
@@ -5654,6 +5657,27 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
         ),
       ),
     );
+
+    if (Navigator.maybeOf(context, rootNavigator: true) != this) {
+      print('justin adding a PopScope. canPop? ${canPop()} with history ${_history.length}');
+      // TODO(justinmc): This seems to do the right thing, but it doesn't solve the problem.
+      // 1. Stash the changes and confirm on master that NavigatorPopHandler works in the non-go-router case.
+      // 2. If so, check why the nested navigator is receiving the back and not the root navigator.
+      //    Is it because of the janky registration ordering of willHandlePop??
+      return PopScope(
+        canPop: !canPop(),
+        child: child,
+      );
+      print('justin adding a NavigatorPopHandler to Navigator. With history ${_history.length}');
+      return NavigatorPopHandler(
+        onPop: () {
+          print('justin NPH onPop.');
+          maybePop();
+        },
+        child: child,
+      );
+    }
+    return child;
   }
 }
 
@@ -6122,27 +6146,4 @@ class RestorableRouteFuture<T> extends RestorableProperty<String?> {
   }
 
   static NavigatorState _defaultNavigatorFinder(BuildContext context) => Navigator.of(context);
-}
-
-/// A notification that a change in navigation has taken place.
-///
-/// Specifically, this notification indicates that at least one of the following
-/// has occurred:
-///
-///  * That route stack of a [Navigator] has changed in any way.
-///  * The ability to pop has changed, such as controlled by [PopScope].
-class NavigationNotification extends Notification {
-  /// Creates a notification that some change in navigation has happened.
-  const NavigationNotification({
-    required this.canHandlePop,
-  });
-
-  /// Indicates that the originator of this [Notification] is capable of
-  /// handling a navigation pop.
-  final bool canHandlePop;
-
-  @override
-  String toString() {
-    return 'NavigationNotification canHandlePop: $canHandlePop';
-  }
 }

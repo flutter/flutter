@@ -21,6 +21,7 @@ import 'framework.dart';
 import 'inherited_model.dart';
 import 'modal_barrier.dart';
 import 'navigator.dart';
+import 'navigator_pop_handler.dart';
 import 'overlay.dart';
 import 'page_storage.dart';
 import 'primary_scroll_controller.dart';

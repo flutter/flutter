@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'framework.dart';
-import 'navigator.dart';
 import 'notification_listener.dart';
 import 'pop_scope.dart';
 
@@ -81,9 +80,11 @@ class _NavigatorPopHandlerState extends State<NavigatorPopHandler> {
   Widget build(BuildContext context) {
     // When the widget subtree indicates it can handle a pop, disable popping
     // here, so that it can be manually handled in canPop.
+    print('justin building NavigatorPopHandler with canPop = ${!widget.enabled || _canPop}');
     return PopScope<Object?>(
       canPop: !widget.enabled || _canPop,
       onPopInvokedWithResult: (bool didPop, Object? result) {
+        print('justin PopScope onPopInvokedWithResult.');
         if (didPop) {
           return;
         }
@@ -92,6 +93,8 @@ class _NavigatorPopHandlerState extends State<NavigatorPopHandler> {
       // Listen to changes in the navigation stack in the widget subtree.
       child: NotificationListener<NavigationNotification>(
         onNotification: (NavigationNotification notification) {
+          // TODO(justinmc): Is this receiving stuff as expected?
+          print('justin NavigatorPopHandler received navnotification. ${notification.canHandlePop}');
           // If this subtree cannot handle pop, then set canPop to true so
           // that our PopScope will allow the Navigator higher in the tree to
           // handle the pop instead.
@@ -106,5 +109,29 @@ class _NavigatorPopHandlerState extends State<NavigatorPopHandler> {
         child: widget.child,
       ),
     );
+  }
+}
+
+// TODO(justinmc): Move.
+/// A notification that a change in navigation has taken place.
+///
+/// Specifically, this notification indicates that at least one of the following
+/// has occurred:
+///
+///  * That route stack of a [Navigator] has changed in any way.
+///  * The ability to pop has changed, such as controlled by [PopScope].
+class NavigationNotification extends Notification {
+  /// Creates a notification that some change in navigation has happened.
+  const NavigationNotification({
+    required this.canHandlePop,
+  });
+
+  /// Indicates that the originator of this [Notification] is capable of
+  /// handling a navigation pop.
+  final bool canHandlePop;
+
+  @override
+  String toString() {
+    return 'NavigationNotification canHandlePop: $canHandlePop';
   }
 }

@@ -19,6 +19,7 @@ import 'framework.dart';
 import 'localizations.dart';
 import 'media_query.dart';
 import 'navigator.dart';
+import 'navigator_pop_handler.dart';
 import 'notification_listener.dart';
 import 'pages.dart';
 import 'performance_overlay.dart';
