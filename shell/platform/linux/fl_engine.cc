@@ -469,6 +469,9 @@ FlEngine* fl_engine_new(FlDartProject* project, FlRenderer* renderer) {
   self->project = FL_DART_PROJECT(g_object_ref(project));
   self->renderer = FL_RENDERER(g_object_ref(renderer));
   self->binary_messenger = fl_binary_messenger_new(self);
+
+  fl_renderer_set_engine(self->renderer, self);
+
   return self;
 }
 
