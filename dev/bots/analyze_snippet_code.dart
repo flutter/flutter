@@ -677,7 +677,8 @@ class _SnippetChecker {
                        line.contains('```swift') ||
                        line.contains('```glsl') ||
                        line.contains('```json') ||
-                       line.contains('```csv')) {
+                       line.contains('```csv') ||
+                       line.contains('```sh')) {
               inOtherBlock = true;
             } else if (line.startsWith(_uncheckedCodeBlockStartRegex)) {
               // this is an intentionally-unchecked block that doesn't appear in the API docs.
