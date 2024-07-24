@@ -1583,7 +1583,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(_widgetsBindingObserver);
-    _primaryFocus = null;
+    resetState();
     _highlightManager.dispose();
     rootScope.dispose();
     super.dispose();
@@ -1920,6 +1920,21 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
     }());
   }
 
+  /// Clears out stored state in the FocusManager for testing purposes.
+  ///
+  /// This is to allow tests which throw exceptions to clean out focus
+  /// information so that if a microtask is already scheduled to resolve focus,
+  /// the focus resolution never occurs, since that can cause invalid accesses.
+  @visibleForTesting
+  void resetState() {
+    _primaryFocus = null;
+    _pendingAutofocuses.clear();
+    _markedForFocus = null;
+    _dirtyNodes.clear();
+    _suspendedNode = null;
+    _lastFocusedViewId = null;
+    _haveScheduledUpdate = false;
+  }
 
   @override
   List<DiagnosticsNode> debugDescribeChildren() {
