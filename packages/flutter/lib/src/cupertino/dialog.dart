@@ -375,7 +375,7 @@ class _CupertinoAlertDialogState extends State<CupertinoAlertDialog> {
 
   Widget _buildBody(BuildContext context) {
     final Color backgroundColor = CupertinoDynamicColor.resolve(_kDialogColor, context);
-    final Color dividerColor = CupertinoColors.separator;
+    const Color dividerColor = CupertinoColors.separator;
     // Remove view padding here because the `Scrollbar` widget uses the view
     // padding as padding, which is unwanted.
     // https://github.com/flutter/flutter/issues/150544
@@ -390,7 +390,11 @@ class _CupertinoAlertDialogState extends State<CupertinoAlertDialog> {
           final Widget? contentSection = _buildContent(context);
           final Widget? actionsSection = _buildActions();
           if (actionsSection == null) {
-            return contentSection ?? Container();
+            return contentSection ??
+                const LimitedBox(
+                  maxWidth: 0,
+                  child: SizedBox(width: double.infinity, height: 0),
+                );
           }
           final Widget scrolledActionsSection = _OverscrollBackground(
             scrollController: _effectiveActionScrollController,
@@ -1440,7 +1444,7 @@ class _Divider extends StatelessWidget {
 // section's background is rendered by the buttons, so that a button's
 // background can be _replaced_ by a different color when the button is pressed.
 class _OverscrollBackground extends StatefulWidget {
-  _OverscrollBackground({
+  const _OverscrollBackground({
     required this.color,
     required this.scrollController,
     required this.child,
