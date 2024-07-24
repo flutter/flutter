@@ -83,21 +83,44 @@ final Animatable<Offset> _kBottomUpTween = Tween<Offset>(
   end: Offset.zero,
 );
 
-class _SpringCurve extends Curve {
-  final SpringSimulation _simulation = _createSimulation();
+class _CupertinoSpringCurve extends Curve {
+  _CupertinoSpringCurve({
+    double mass = defaultMass,
+    double stiffness = defaultStiffness,
+  }) : _simulation = _createSimulation(mass, stiffness),
+       _endPosition = _createSimulation(mass, stiffness).x(_kEndTime * _kTimeFactor);
+
+  final SpringSimulation _simulation;
+  // The spring's position when time reaches the end, used to normalizes the
+  // output.
+  final double _endPosition;
 
   @override
   double transformInternal(double t) {
-    return _simulation.x(t * timeFactor) / _destinationFactor;
+    return _simulation.x(t * _kTimeFactor) / _endPosition;
   }
 
-  static SpringSimulation _createSimulation() => SpringSimulation(
-    SpringDescription.withDampingRatio(mass: 1, stiffness: 522.35),
-    /*start*/ 0, /* end */1, /* velocity */0
-  );
-  static const timeFactor = 0.41;
-  static late final double _destinationFactor =
-      _createSimulation().x(1.0 * timeFactor);
+  static SpringSimulation _createSimulation(double mass, double stiffness) {
+    return SpringSimulation(
+      SpringDescription.withDampingRatio(mass: mass, stiffness: stiffness),
+      /*start*/ 0,
+      /* end */1,
+      /* velocity */0,
+    );
+  }
+
+  static const double _kEndTime = 1.0;
+
+  // The factor between the time unit used by Flutter's animations (0.0~1.0)
+  // and that by iOS's animations.
+  //
+  // Derived by manually comparing Flutter's curve versus iOS's curve.
+  static const double _kTimeFactor = 0.41;
+
+  // Default values of iOS's .spring animation. Extracted from simulator
+  // runtime arguments.
+  static const double defaultMass = 1;
+  static const double defaultStiffness = 522.35;
 }
 
 /// A mixin that replaces the entire screen with an iOS transition for a
@@ -1141,8 +1164,8 @@ class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
     assert(_animation == null);
     _animation = CurvedAnimation(
       parent: super.createAnimation(),
-      curve: _SpringCurve(),
-      reverseCurve: _SpringCurve().flipped,
+      curve: _CupertinoSpringCurve(),
+      reverseCurve: _CupertinoSpringCurve().flipped,
     );
     _offsetTween = Tween<Offset>(
       begin: const Offset(0.0, 1.0),
