@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'switch.dart';
+library;
+
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -46,6 +49,7 @@ class SwitchThemeData with Diagnosticable {
     this.overlayColor,
     this.splashRadius,
     this.thumbIcon,
+    this.padding,
   });
 
   /// {@macro flutter.material.switch.thumbColor}
@@ -94,6 +98,9 @@ class SwitchThemeData with Diagnosticable {
   /// It is overridden by [Switch.thumbIcon].
   final MaterialStateProperty<Icon?>? thumbIcon;
 
+  /// If specified, overrides the default value of [Switch.padding].
+  final EdgeInsetsGeometry? padding;
+
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   SwitchThemeData copyWith({
@@ -106,6 +113,7 @@ class SwitchThemeData with Diagnosticable {
     MaterialStateProperty<Color?>? overlayColor,
     double? splashRadius,
     MaterialStateProperty<Icon?>? thumbIcon,
+    EdgeInsetsGeometry? padding,
   }) {
     return SwitchThemeData(
       thumbColor: thumbColor ?? this.thumbColor,
@@ -117,6 +125,7 @@ class SwitchThemeData with Diagnosticable {
       overlayColor: overlayColor ?? this.overlayColor,
       splashRadius: splashRadius ?? this.splashRadius,
       thumbIcon: thumbIcon ?? this.thumbIcon,
+      padding: padding ?? this.padding,
     );
   }
 
@@ -137,6 +146,7 @@ class SwitchThemeData with Diagnosticable {
       overlayColor: MaterialStateProperty.lerp<Color?>(a?.overlayColor, b?.overlayColor, t, Color.lerp),
       splashRadius: lerpDouble(a?.splashRadius, b?.splashRadius, t),
       thumbIcon: t < 0.5 ? a?.thumbIcon : b?.thumbIcon,
+      padding: EdgeInsetsGeometry.lerp(a?.padding, b?.padding, t),
     );
   }
 
@@ -151,6 +161,7 @@ class SwitchThemeData with Diagnosticable {
     overlayColor,
     splashRadius,
     thumbIcon,
+    padding,
   );
 
   @override
@@ -170,7 +181,8 @@ class SwitchThemeData with Diagnosticable {
       && other.mouseCursor == mouseCursor
       && other.overlayColor == overlayColor
       && other.splashRadius == splashRadius
-      && other.thumbIcon == thumbIcon;
+      && other.thumbIcon == thumbIcon
+      && other.padding == padding;
   }
 
   @override
@@ -185,6 +197,7 @@ class SwitchThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('overlayColor', overlayColor, defaultValue: null));
     properties.add(DoubleProperty('splashRadius', splashRadius, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<Icon?>>('thumbIcon', thumbIcon, defaultValue: null));
+    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
   }
 }
 

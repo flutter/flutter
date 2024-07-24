@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:ui';
+///
+/// @docImport 'app.dart';
+/// @docImport 'time_picker.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/rendering.dart';
@@ -801,9 +807,6 @@ class _RestorableAutovalidateMode extends RestorableValue<AutovalidateMode> {
 /// * Single Date picker with calendar mode.
 /// * Single Date picker with text input mode.
 /// * Date Range picker with text input mode.
-///
-/// [helpText], [orientation], [icon], [onIconPressed] are required and must be
-/// non-null.
 class _DatePickerHeader extends StatelessWidget {
 
   /// Creates a header for use in a date picker dialog.
@@ -2112,9 +2115,7 @@ class _CalendarKeyboardNavigatorState extends State<_CalendarKeyboardNavigator> 
 }
 
 /// InheritedWidget indicating what the current focused date is for its children.
-///
-/// This is used by the [_MonthPicker] to let its children [_DayPicker]s know
-/// what the currently focused date (if any) should be.
+// See also: _FocusedDate in calendar_date_picker.dart
 class _FocusedDate extends InheritedWidget {
   const _FocusedDate({
     required super.child,

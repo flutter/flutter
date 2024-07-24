@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'bottom_navigation_bar.dart';
+/// @docImport 'navigation_rail.dart';
+/// @docImport 'scaffold.dart';
+library;
+
 import 'package:flutter/widgets.dart';
 
 import 'color_scheme.dart';
@@ -1224,8 +1229,8 @@ class _SelectableAnimatedBuilderState extends State<_SelectableAnimatedBuilder>
 /// Watches [animation] and calls [builder] with the appropriate [Curve]
 /// depending on the direction of the [animation] status.
 ///
-/// If [animation.status] is forward or complete, [curve] is used. If
-/// [animation.status] is reverse or dismissed, [reverseCurve] is used.
+/// If [Animation.status] is forward or complete, [curve] is used. If
+/// [Animation.status] is reverse or dismissed, [reverseCurve] is used.
 ///
 /// If the [animation] changes direction while it is already running, the curve
 /// used will not change, this will keep the animations smooth until it

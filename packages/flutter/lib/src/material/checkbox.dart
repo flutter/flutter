@@ -2,6 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'checkbox_list_tile.dart';
+/// @docImport 'list_tile.dart';
+/// @docImport 'material.dart';
+/// @docImport 'radio.dart';
+/// @docImport 'slider.dart';
+/// @docImport 'switch.dart';
+library;
+
 import 'package:flutter/cupertino.dart';
 
 import 'checkbox_theme.dart';
@@ -394,7 +402,7 @@ class Checkbox extends StatefulWidget {
   /// {@template flutter.material.checkbox.semanticLabel}
   /// The semantic label for the checkbox that will be announced by screen readers.
   ///
-  /// This is announced in accessibility modes (e.g TalkBack/VoiceOver).
+  /// This is announced by assistive technologies (e.g TalkBack/VoiceOver).
   ///
   /// This label does not show in the UI.
   /// {@endtemplate}
@@ -495,6 +503,7 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
               autofocus: widget.autofocus,
               side: widget.side,
               shape: widget.shape,
+              semanticLabel: widget.semanticLabel,
             );
         }
     }
