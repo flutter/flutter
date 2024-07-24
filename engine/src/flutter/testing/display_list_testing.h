@@ -13,20 +13,26 @@
 namespace flutter {
 namespace testing {
 
-bool DisplayListsEQ_Verbose(const DisplayList* a, const DisplayList* b);
-bool inline DisplayListsEQ_Verbose(const DisplayList& a, const DisplayList& b) {
+[[nodiscard]] bool DisplayListsEQ_Verbose(const DisplayList* a,
+                                          const DisplayList* b);
+[[nodiscard]] bool inline DisplayListsEQ_Verbose(const DisplayList& a,
+                                                 const DisplayList& b) {
   return DisplayListsEQ_Verbose(&a, &b);
 }
-bool inline DisplayListsEQ_Verbose(const sk_sp<const DisplayList>& a,
-                                   const sk_sp<const DisplayList>& b) {
+[[nodiscard]] bool inline DisplayListsEQ_Verbose(
+    const sk_sp<const DisplayList>& a,
+    const sk_sp<const DisplayList>& b) {
   return DisplayListsEQ_Verbose(a.get(), b.get());
 }
-bool DisplayListsNE_Verbose(const DisplayList* a, const DisplayList* b);
-bool inline DisplayListsNE_Verbose(const DisplayList& a, const DisplayList& b) {
+[[nodiscard]] bool DisplayListsNE_Verbose(const DisplayList* a,
+                                          const DisplayList* b);
+[[nodiscard]] bool inline DisplayListsNE_Verbose(const DisplayList& a,
+                                                 const DisplayList& b) {
   return DisplayListsNE_Verbose(&a, &b);
 }
-bool inline DisplayListsNE_Verbose(const sk_sp<const DisplayList>& a,
-                                   const sk_sp<const DisplayList>& b) {
+[[nodiscard]] bool inline DisplayListsNE_Verbose(
+    const sk_sp<const DisplayList>& a,
+    const sk_sp<const DisplayList>& b) {
   return DisplayListsNE_Verbose(a.get(), b.get());
 }
 
