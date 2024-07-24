@@ -1633,6 +1633,9 @@ class _ActionSheetActionSection extends StatelessWidget {
 }
 
 // The part of an action sheet without the cancel button.
+//
+// The reason that this class is not merged into `_CupertinoActionSheetState` is
+// because a few old unit tests query this class to verify layout behavior.
 class _ActionSheetMainSheet extends StatelessWidget {
   const _ActionSheetMainSheet({
     required this.pressedIndex,
