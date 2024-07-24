@@ -20,7 +20,7 @@ repositories {
 apply plugin: "com.android.library"
 
 android {
-    compileSdkVersion 34
+    compileSdk 35
 
     defaultConfig {
         minSdkVersion 21

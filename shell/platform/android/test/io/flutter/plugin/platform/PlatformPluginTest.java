@@ -263,6 +263,9 @@ public class PlatformPluginTest {
   }
 
   @Config(sdk = API_LEVELS.API_29)
+  @SuppressWarnings("deprecation")
+  // setStatusBarColor, setNavigationBarColor, setNavigationBarDividerColor,
+  // setStatusBarContrastEnforced, setNavigationBarContrastEnforced
   @Test
   public void setNavigationBarDividerColor() {
     View fakeDecorView = mock(View.class);

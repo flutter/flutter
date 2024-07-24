@@ -1048,6 +1048,9 @@ public class FlutterActivityAndFragmentDelegateTest {
   }
 
   @Test
+  @SuppressWarnings("deprecation")
+  // TRIM_MEMORY_COMPLETE, TRIM_MEMORY_MODERATE, TRIM_MEMORY_RUNNING_LOW,
+  // TRIM_MEMORY_RUNNING_MODERATE, TRIM_MEMORY_RUNNING_CRITICAL
   public void itNotifiesDartExecutorAndSendsMessageOverSystemChannelWhenToldToTrimMemory() {
     // Create the real object that we're testing.
     FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);

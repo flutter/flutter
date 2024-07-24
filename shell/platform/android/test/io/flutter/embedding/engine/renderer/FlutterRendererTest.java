@@ -381,6 +381,8 @@ public class FlutterRendererTest {
   }
 
   @Test
+  @SuppressWarnings("deprecation")
+  // TRIM_MEMORY_COMPLETE
   public void itNotifySurfaceTextureEntryWhenMemoryPressureWarning() {
     // Setup the test.
     FlutterRenderer flutterRenderer = engineRule.getFlutterEngine().getRenderer();
