@@ -762,7 +762,9 @@ class FlutterPlugin implements Plugin<Project> {
     private void configurePluginProject(Map<String, Object> pluginObject) {
         assert(pluginObject.name instanceof String)
         Project pluginProject = project.rootProject.findProject(":${pluginObject.name}")
-        pluginProject.pluginManager.apply(FlutterPluginPlugin.class)
+        if (pluginProject.extensions.findByType(FlutterExtension) == null) {
+            pluginProject.extensions.create("flutter", FlutterExtension)
+        }
         if (pluginProject == null) {
             return
         }
@@ -1826,18 +1828,4 @@ class FlutterTask extends BaseFlutterTask {
         buildBundle()
     }
 
-}
-
-apply plugin: FlutterPluginPlugin
-
-class FlutterPluginPlugin implements Plugin<Project> {
-    private Project project
-
-    @Override
-    void apply(Project project) {
-        this.project = project
-        if (project.extensions.findByType(FlutterExtension) == null) {
-            project.extensions.create("flutter", FlutterExtension)
-        }
-    }
 }
