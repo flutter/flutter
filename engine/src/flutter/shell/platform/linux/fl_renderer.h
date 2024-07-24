@@ -93,6 +93,15 @@ struct _FlRendererClass {
 };
 
 /**
+ * fl_renderer_set_engine:
+ * @renderer: an #FlRenderer.
+ * @engine: an #FlEngine.
+ *
+ * Called when the renderer is connected to an engine.
+ */
+void fl_renderer_set_engine(FlRenderer* renderer, FlEngine* engine);
+
+/**
  * fl_renderer_start:
  * @renderer: an #FlRenderer.
  * @view: the view Flutter is renderering to.
