@@ -60,9 +60,21 @@ class StubPictureRecorder implements ui.PictureRecorder {
 class StubSceneCanvas implements SceneCanvas {
   List<StubPicture> pictures = <StubPicture>[];
 
+  // We actually use offsets in some of the tests, so we need to track the
+  // translate calls as they are made.
+  List<ui.Offset> offsetStack = <ui.Offset>[ui.Offset.zero];
+
+  ui.Offset get currentOffset {
+    return offsetStack.last;
+  }
+
+  set currentOffset(ui.Offset offset) {
+    offsetStack[offsetStack.length - 1] = offset;
+  }
+
   @override
   void drawPicture(ui.Picture picture) {
-    pictures.add(picture as StubPicture);
+    pictures.add(StubPicture((picture as StubPicture).cullRect.shift(currentOffset)));
   }
 
   @override
@@ -155,7 +167,9 @@ class StubSceneCanvas implements SceneCanvas {
   }
 
   @override
-  void restore() {}
+  void restore() {
+    offsetStack.removeLast();
+  }
 
   @override
   void restoreToCount(int count) {}
@@ -164,7 +178,9 @@ class StubSceneCanvas implements SceneCanvas {
   void rotate(double radians) {}
 
   @override
-  void save() {}
+  void save() {
+    offsetStack.add(currentOffset);
+  }
 
   @override
   void saveLayer(ui.Rect? bounds, ui.Paint paint) {}
@@ -182,5 +198,7 @@ class StubSceneCanvas implements SceneCanvas {
   void transform(Float64List matrix4) {}
 
   @override
-  void translate(double dx, double dy) {}
+  void translate(double dx, double dy) {
+    currentOffset += ui.Offset(dx, dy);
+  }
 }

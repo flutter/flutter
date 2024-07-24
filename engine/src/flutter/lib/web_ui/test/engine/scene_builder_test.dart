@@ -150,6 +150,33 @@ void testMain() {
         PlatformView(1, platformViewRect, const PlatformViewStyling())
       ]));
     });
+
+    test('platform view sandwich (overlapping) with offset layers', () {
+      final EngineSceneBuilder sceneBuilder = EngineSceneBuilder();
+
+      const ui.Rect pictureRect1 = ui.Rect.fromLTRB(100, 100, 200, 200);
+      sceneBuilder.addPicture(ui.Offset.zero, StubPicture(pictureRect1));
+
+      sceneBuilder.pushOffset(150, 150);
+      const ui.Rect platformViewRect = ui.Rect.fromLTRB(0, 0, 100, 100);
+      sceneBuilder.addPlatformView(
+        1,
+        offset: platformViewRect.topLeft,
+        width: platformViewRect.width,
+        height: platformViewRect.height
+      );
+      sceneBuilder.pushOffset(50, 50);
+      sceneBuilder.addPicture(ui.Offset.zero, StubPicture(const ui.Rect.fromLTRB(0, 0, 100, 100)));
+
+      final EngineScene scene = sceneBuilder.build() as EngineScene;
+      final List<LayerSlice> slices = scene.rootLayer.slices;
+      expect(slices.length, 3);
+      expect(slices[0], pictureSliceWithRect(pictureRect1));
+      expect(slices[1], platformViewSliceWithViews(<PlatformView>[
+        PlatformView(1, platformViewRect, const PlatformViewStyling(position: PlatformViewPosition.offset(ui.Offset(150, 150))))
+      ]));
+      expect(slices[2], pictureSliceWithRect(const ui.Rect.fromLTRB(200, 200, 300, 300)));
+    });
   });
 }
 
@@ -209,12 +236,15 @@ class PlatformViewSliceMatcher extends Matcher {
       final PlatformView expectedView = expectedPlatformViews[i];
       final PlatformView actualView = item.views[i];
       if (expectedView.viewId != actualView.viewId) {
+        print('viewID mismatch');
         return false;
       }
       if (expectedView.bounds != actualView.bounds) {
+        print('bounds mismatch');
         return false;
       }
       if (expectedView.styling != actualView.styling) {
+        print('styling mismatch');
         return false;
       }
     }
