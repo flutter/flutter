@@ -991,6 +991,7 @@ class _AppBarState extends State<AppBar> {
             TargetPlatform.iOS || TargetPlatform.macOS => null,
           },
           header: true,
+          headingLevel: 1,
           child: title,
         );
       }
