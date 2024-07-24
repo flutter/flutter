@@ -177,7 +177,7 @@ class Dart2JSTarget extends Dart2WebTarget {
       ...decodeCommaSeparated(environment.defines, kExtraFrontEndOptions),
       if (buildMode == BuildMode.profile)
         '-Ddart.vm.profile=true'
-      else
+      else if (buildMode == BuildMode.release)
         '-Ddart.vm.product=true',
       for (final String dartDefine in computeDartDefines(environment))
         '-D$dartDefine',
@@ -313,7 +313,7 @@ class Dart2WasmTarget extends Dart2WebTarget {
       ],
       if (buildMode == BuildMode.profile)
         '-Ddart.vm.profile=true'
-      else
+      else if (buildMode == BuildMode.release)
         '-Ddart.vm.product=true',
       ...decodeCommaSeparated(environment.defines, kExtraFrontEndOptions),
       for (final String dartDefine in computeDartDefines(environment))
