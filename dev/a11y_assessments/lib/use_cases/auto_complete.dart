@@ -3,8 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-
+import '../utils.dart';
 import 'use_cases.dart';
 
 class AutoCompleteUseCase extends UseCase {
@@ -48,11 +47,7 @@ class _MainWidgetState extends State<_MainWidget> {
 
   @override
   Widget build(BuildContext context) {
-    SystemChrome.setApplicationSwitcherDescription(
-      const ApplicationSwitcherDescription(
-        label: 'AutoComplete',
-      )
-    );
+    setWebTitle('Autocomplete', Theme.of(context).colorScheme.primary.value);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
