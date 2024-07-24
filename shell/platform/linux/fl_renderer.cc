@@ -8,8 +8,8 @@
 #include <epoxy/gl.h>
 
 #include "flutter/shell/platform/embedder/embedder.h"
-#include "flutter/shell/platform/linux/fl_backing_store_provider.h"
 #include "flutter/shell/platform/linux/fl_engine_private.h"
+#include "flutter/shell/platform/linux/fl_framebuffer.h"
 #include "flutter/shell/platform/linux/fl_view_private.h"
 
 // Vertex shader to draw Flutter window contents.
@@ -54,8 +54,8 @@ typedef struct {
   // Shader program.
   GLuint program;
 
-  // Textures to render.
-  GPtrArray* textures;
+  // Framebuffers to render.
+  GPtrArray* framebuffers;
 } FlRendererPrivate;
 
 G_DEFINE_TYPE_WITH_PRIVATE(FlRenderer, fl_renderer, G_TYPE_OBJECT)
@@ -158,18 +158,16 @@ static void render_with_blit(FlRenderer* self) {
   // See OpenGL specification version 4.6, section 18.3.1.
   glDisable(GL_SCISSOR_TEST);
 
-  for (guint i = 0; i < priv->textures->len; i++) {
-    FlBackingStoreProvider* texture =
-        FL_BACKING_STORE_PROVIDER(g_ptr_array_index(priv->textures, i));
+  for (guint i = 0; i < priv->framebuffers->len; i++) {
+    FlFramebuffer* framebuffer =
+        FL_FRAMEBUFFER(g_ptr_array_index(priv->framebuffers, i));
 
-    uint32_t framebuffer_id =
-        fl_backing_store_provider_get_gl_framebuffer_id(texture);
+    GLuint framebuffer_id = fl_framebuffer_get_id(framebuffer);
     glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffer_id);
-    GdkRectangle geometry = fl_backing_store_provider_get_geometry(texture);
-    glBlitFramebuffer(0, 0, geometry.width, geometry.height, geometry.x,
-                      geometry.y, geometry.x + geometry.width,
-                      geometry.y + geometry.height, GL_COLOR_BUFFER_BIT,
-                      GL_NEAREST);
+    size_t width = fl_framebuffer_get_width(framebuffer);
+    size_t height = fl_framebuffer_get_height(framebuffer);
+    glBlitFramebuffer(0, 0, width, height, 0, 0, width, height,
+                      GL_COLOR_BUFFER_BIT, GL_NEAREST);
   }
   glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 }
@@ -190,25 +188,20 @@ static void render_with_textures(FlRenderer* self, int width, int height) {
 
   glUseProgram(priv->program);
 
-  for (guint i = 0; i < priv->textures->len; i++) {
-    FlBackingStoreProvider* texture =
-        FL_BACKING_STORE_PROVIDER(g_ptr_array_index(priv->textures, i));
+  for (guint i = 0; i < priv->framebuffers->len; i++) {
+    FlFramebuffer* framebuffer =
+        FL_FRAMEBUFFER(g_ptr_array_index(priv->framebuffers, i));
 
-    uint32_t texture_id = fl_backing_store_provider_get_gl_texture_id(texture);
+    GLuint texture_id = fl_framebuffer_get_texture_id(framebuffer);
     glBindTexture(GL_TEXTURE_2D, texture_id);
 
     // Translate into OpenGL co-ordinates
-    GdkRectangle texture_geometry =
-        fl_backing_store_provider_get_geometry(texture);
-    GLfloat texture_x = texture_geometry.x;
-    GLfloat texture_y = texture_geometry.y;
-    GLfloat texture_width = texture_geometry.width;
-    GLfloat texture_height = texture_geometry.height;
-    GLfloat x0 = pixels_to_gl_coords(texture_x, width);
-    GLfloat y0 =
-        pixels_to_gl_coords(height - (texture_y + texture_height), height);
-    GLfloat x1 = pixels_to_gl_coords(texture_x + texture_width, width);
-    GLfloat y1 = pixels_to_gl_coords(height - texture_y, height);
+    size_t texture_width = fl_framebuffer_get_width(framebuffer);
+    size_t texture_height = fl_framebuffer_get_height(framebuffer);
+    GLfloat x0 = pixels_to_gl_coords(0, width);
+    GLfloat y0 = pixels_to_gl_coords(height - texture_height, height);
+    GLfloat x1 = pixels_to_gl_coords(texture_width, width);
+    GLfloat y1 = pixels_to_gl_coords(height, height);
     GLfloat vertex_data[] = {x0, y0, 0, 0, x1, y1, 1, 1, x0, y1, 0, 1,
                              x0, y0, 0, 0, x1, y0, 1, 0, x1, y1, 1, 1};
 
@@ -246,7 +239,7 @@ static void fl_renderer_dispose(GObject* object) {
 
   fl_renderer_unblock_main_thread(self);
 
-  g_clear_pointer(&priv->textures, g_ptr_array_unref);
+  g_clear_pointer(&priv->framebuffers, g_ptr_array_unref);
 
   G_OBJECT_CLASS(fl_renderer_parent_class)->dispose(object);
 }
@@ -258,7 +251,7 @@ static void fl_renderer_class_init(FlRendererClass* klass) {
 static void fl_renderer_init(FlRenderer* self) {
   FlRendererPrivate* priv = reinterpret_cast<FlRendererPrivate*>(
       fl_renderer_get_instance_private(self));
-  priv->textures = g_ptr_array_new_with_free_func(g_object_unref);
+  priv->framebuffers = g_ptr_array_new_with_free_func(g_object_unref);
 }
 
 gboolean fl_renderer_start(FlRenderer* self, FlView* view) {
@@ -310,21 +303,20 @@ gboolean fl_renderer_create_backing_store(
     FlutterBackingStore* backing_store_out) {
   fl_renderer_make_current(renderer);
 
-  FlBackingStoreProvider* provider =
-      fl_backing_store_provider_new(config->size.width, config->size.height);
-  if (!provider) {
+  FlFramebuffer* framebuffer =
+      fl_framebuffer_new(config->size.width, config->size.height);
+  if (!framebuffer) {
     g_warning("Failed to create backing store");
     return FALSE;
   }
 
-  uint32_t name = fl_backing_store_provider_get_gl_framebuffer_id(provider);
-  uint32_t format = fl_backing_store_provider_get_gl_format(provider);
-
   backing_store_out->type = kFlutterBackingStoreTypeOpenGL;
   backing_store_out->open_gl.type = kFlutterOpenGLTargetTypeFramebuffer;
-  backing_store_out->open_gl.framebuffer.user_data = provider;
-  backing_store_out->open_gl.framebuffer.name = name;
-  backing_store_out->open_gl.framebuffer.target = format;
+  backing_store_out->open_gl.framebuffer.user_data = framebuffer;
+  backing_store_out->open_gl.framebuffer.name =
+      fl_framebuffer_get_id(framebuffer);
+  backing_store_out->open_gl.framebuffer.target =
+      fl_framebuffer_get_format(framebuffer);
   backing_store_out->open_gl.framebuffer.destruction_callback = [](void* p) {
     // Backing store destroyed in fl_renderer_collect_backing_store(), set
     // on FlutterCompositor.collect_backing_store_callback during engine start.
@@ -338,7 +330,7 @@ gboolean fl_renderer_collect_backing_store(
     const FlutterBackingStore* backing_store) {
   fl_renderer_make_current(self);
 
-  // OpenGL context is required when destroying #FlBackingStoreProvider.
+  // OpenGL context is required when destroying #FlFramebuffer.
   g_object_unref(backing_store->open_gl.framebuffer.user_data);
   return TRUE;
 }
@@ -383,16 +375,15 @@ gboolean fl_renderer_present_layers(FlRenderer* self,
 
   fl_renderer_unblock_main_thread(self);
 
-  g_ptr_array_set_size(priv->textures, 0);
+  g_ptr_array_set_size(priv->framebuffers, 0);
   for (size_t i = 0; i < layers_count; ++i) {
     const FlutterLayer* layer = layers[i];
     switch (layer->type) {
       case kFlutterLayerContentTypeBackingStore: {
         const FlutterBackingStore* backing_store = layer->backing_store;
-        auto framebuffer = &backing_store->open_gl.framebuffer;
-        FlBackingStoreProvider* provider =
-            FL_BACKING_STORE_PROVIDER(framebuffer->user_data);
-        g_ptr_array_add(priv->textures, g_object_ref(provider));
+        FlFramebuffer* framebuffer =
+            FL_FRAMEBUFFER(backing_store->open_gl.framebuffer.user_data);
+        g_ptr_array_add(priv->framebuffers, g_object_ref(framebuffer));
       } break;
       case kFlutterLayerContentTypePlatformView: {
         // TODO(robert-ancell) Not implemented -
