@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "impeller/renderer/backend/metal/context_mtl.h"
+#include <Metal/Metal.h>
 
 #include <memory>
 
@@ -134,6 +135,7 @@ ContextMTL::ContextMTL(
   command_queue_ip_ = std::make_shared<CommandQueue>();
 #ifdef IMPELLER_DEBUG
   gpu_tracer_ = std::make_shared<GPUTracerMTL>();
+  capture_manager_ = std::make_shared<ImpellerMetalCaptureManager>(device_);
 #endif  // IMPELLER_DEBUG
   is_valid_ = true;
 }
@@ -402,6 +404,37 @@ void ContextMTL::SyncSwitchObserver::OnSyncSwitchUpdate(bool new_is_disabled) {
 // |Context|
 std::shared_ptr<CommandQueue> ContextMTL::GetCommandQueue() const {
   return command_queue_ip_;
+}
+
+#ifdef IMPELLER_DEBUG
+const std::shared_ptr<ImpellerMetalCaptureManager>
+ContextMTL::GetCaptureManager() const {
+  return capture_manager_;
+}
+#endif  // IMPELLER_DEBUG
+
+ImpellerMetalCaptureManager::ImpellerMetalCaptureManager(id<MTLDevice> device) {
+  current_capture_scope_ = [[MTLCaptureManager sharedCaptureManager]
+      newCaptureScopeWithDevice:device];
+  [current_capture_scope_ setLabel:@"Impeller Frame"];
+}
+
+bool ImpellerMetalCaptureManager::CaptureScopeActive() const {
+  return scope_active_;
+}
+
+void ImpellerMetalCaptureManager::StartCapture() {
+  if (scope_active_) {
+    return;
+  }
+  scope_active_ = true;
+  [current_capture_scope_ beginScope];
+}
+
+void ImpellerMetalCaptureManager::FinishCapture() {
+  FML_DCHECK(scope_active_);
+  [current_capture_scope_ endScope];
+  scope_active_ = false;
 }
 
 }  // namespace impeller

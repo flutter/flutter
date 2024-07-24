@@ -103,7 +103,7 @@ TEST(GPUSurfaceMetalImpeller, ResetHostBufferBasedOnFrameBoundary) {
 
   auto context = CreateImpellerContext();
   std::unique_ptr<Surface> surface =
-      std::make_unique<GPUSurfaceMetalImpeller>(delegate.get(), CreateImpellerContext());
+      std::make_unique<GPUSurfaceMetalImpeller>(delegate.get(), context);
 
   ASSERT_TRUE(surface->IsValid());
 
@@ -123,6 +123,36 @@ TEST(GPUSurfaceMetalImpeller, ResetHostBufferBasedOnFrameBoundary) {
   ASSERT_TRUE(frame->Submit());
   EXPECT_EQ(host_buffer.GetStateForTest().current_frame, 1u);
 }
+
+#ifdef IMPELLER_DEBUG
+TEST(GPUSurfaceMetalImpeller, CreatesImpellerCaptureScope) {
+  auto delegate = std::make_shared<TestGPUSurfaceMetalDelegate>();
+  delegate->SetDevice();
+
+  auto context = CreateImpellerContext();
+
+  EXPECT_FALSE(context->GetCaptureManager()->CaptureScopeActive());
+
+  std::unique_ptr<Surface> surface =
+      std::make_unique<GPUSurfaceMetalImpeller>(delegate.get(), context);
+  auto frame_1 = surface->AcquireFrame(SkISize::Make(100, 100));
+  frame_1->set_submit_info({.frame_boundary = false});
+
+  EXPECT_TRUE(context->GetCaptureManager()->CaptureScopeActive());
+
+  std::unique_ptr<Surface> surface_2 =
+      std::make_unique<GPUSurfaceMetalImpeller>(delegate.get(), context);
+  auto frame_2 = surface->AcquireFrame(SkISize::Make(100, 100));
+  frame_2->set_submit_info({.frame_boundary = true});
+
+  EXPECT_TRUE(context->GetCaptureManager()->CaptureScopeActive());
+
+  ASSERT_TRUE(frame_1->Submit());
+  EXPECT_TRUE(context->GetCaptureManager()->CaptureScopeActive());
+  ASSERT_TRUE(frame_2->Submit());
+  EXPECT_FALSE(context->GetCaptureManager()->CaptureScopeActive());
+}
+#endif  // IMPELLER_DEBUG
 
 }  // namespace testing
 }  // namespace flutter

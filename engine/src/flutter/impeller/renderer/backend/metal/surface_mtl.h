@@ -61,6 +61,10 @@ class SurfaceMTL final : public Surface {
   // |Surface|
   bool Present() const override;
 
+  void SetFrameBoundary(bool frame_boundary) {
+    frame_boundary_ = frame_boundary;
+  }
+
  private:
   std::weak_ptr<Context> context_;
   std::shared_ptr<Texture> resolve_texture_;
@@ -69,6 +73,7 @@ class SurfaceMTL final : public Surface {
   std::shared_ptr<Texture> destination_texture_;
   bool requires_blit_ = false;
   std::optional<IRect> clip_rect_;
+  bool frame_boundary_ = false;
 
   static bool ShouldPerformPartialRepaint(std::optional<IRect> damage_rect);
 
