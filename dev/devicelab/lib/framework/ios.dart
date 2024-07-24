@@ -308,17 +308,3 @@ File? _createDisabledSandboxEntitlementFile(
 
   return disabledSandboxEntitlementFile;
 }
-
-/// Returns global (external) symbol table entries, delimited by new lines.
-Future<String> dumpSymbolTable(String filePath) {
-  return eval(
-    'nm',
-    <String>[
-      '--extern-only',
-      '--just-symbol-name',
-      filePath,
-      '-arch',
-      'arm64',
-    ],
-  );
-}

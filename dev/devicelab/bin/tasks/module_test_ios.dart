@@ -703,7 +703,13 @@ Future<bool> _isAppAotBuild(Directory app) async {
     'App',
   );
 
-  final String symbolTable = await dumpSymbolTable(binary);
+  final String symbolTable = await eval(
+    'nm',
+    <String> [
+      '-gU',
+      binary,
+    ],
+  );
 
   return symbolTable.contains('kDartIsolateSnapshotInstructions');
 }
