@@ -441,7 +441,7 @@ void main() {
           value: 1,
           groupValue: 1,
           onChanged: (int? i) { },
-          mouseCursor: WidgetStateProperty.all(SystemMouseCursors.forbidden),
+          mouseCursor: SystemMouseCursors.forbidden,
         ),
       ),
     ));
@@ -463,25 +463,13 @@ void main() {
     final FocusNode focusNode = FocusNode(debugLabel: 'Radio');
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
-    MouseCursor getMouseCursor(Set<WidgetState> states) {
-      if (states.contains(WidgetState.disabled)) {
-        return SystemMouseCursors.forbidden;
-      }
-      if (states.contains(WidgetState.focused)) {
-        return SystemMouseCursors.basic;
-      }
-      return SystemMouseCursors.click;
-    }
-
-    final WidgetStateProperty<MouseCursor> mouseCursor = WidgetStateProperty.resolveWith(getMouseCursor);
-
     await tester.pumpWidget(CupertinoApp(
       home: Center(
         child: CupertinoRadio<int>(
           value: 1,
           groupValue: 1,
           onChanged: (int? i) { },
-          mouseCursor: mouseCursor,
+          mouseCursor: const RadioMouseCursor(),
           focusNode: focusNode
         ),
       ),
@@ -510,13 +498,13 @@ void main() {
     );
 
     // Test disabled case.
-    await tester.pumpWidget(CupertinoApp(
+    await tester.pumpWidget(const CupertinoApp(
       home: Center(
         child: CupertinoRadio<int>(
           value: 1,
           groupValue: 1,
           onChanged: null,
-          mouseCursor: mouseCursor,
+          mouseCursor: RadioMouseCursor(),
         ),
       ),
     ));
@@ -552,4 +540,22 @@ void main() {
       kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic
     );
   });
+}
+
+class RadioMouseCursor extends WidgetStateMouseCursor {
+  const RadioMouseCursor();
+
+  @override
+  MouseCursor resolve(Set<WidgetState> states) {
+    if (states.contains(WidgetState.disabled)) {
+      return SystemMouseCursors.forbidden;
+    }
+    if (states.contains(WidgetState.focused)){
+      return SystemMouseCursors.basic;
+    }
+    return SystemMouseCursors.click;
+  }
+
+  @override
+  String get debugDescription => 'RadioMouseCursor()';
 }
