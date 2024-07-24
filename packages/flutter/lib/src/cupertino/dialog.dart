@@ -1633,7 +1633,7 @@ class _ActionSheetActionSection extends StatelessWidget {
 }
 
 // The part of an action sheet without the cancel button.
-class _ActionSheetMainSheet extends StatefulWidget {
+class _ActionSheetMainSheet extends StatelessWidget {
   const _ActionSheetMainSheet({
     required this.pressedIndex,
     required this.onPressedUpdate,
@@ -1650,42 +1650,35 @@ class _ActionSheetMainSheet extends StatefulWidget {
   final Widget? contentSection;
   final Color dividerColor;
 
-  @override
-  _ActionSheetMainSheetState createState() => _ActionSheetMainSheetState();
-}
-
-class _ActionSheetMainSheetState extends State<_ActionSheetMainSheet> {
-  bool get _hasContent => widget.contentSection != null;
-  bool get _hasActions => widget.actions.isNotEmpty;
+  Widget _scrolledActionsSection(BuildContext context) {
+    final Color backgroundColor = CupertinoDynamicColor.resolve(_kActionSheetBackgroundColor, context);
+    return _OverscrollBackground(
+      scrollController: scrollController,
+      color: backgroundColor,
+      child: _ActionSheetActionSection(
+        actions: actions,
+        scrollController: scrollController,
+        dividerColor: dividerColor,
+        backgroundColor: backgroundColor,
+        pressedIndex: pressedIndex,
+        onPressedUpdate: onPressedUpdate,
+      ),
+    );
+  }
 
   Widget _dividerAndActionsSection(BuildContext context) {
-    if (!_hasActions) {
-      return _empty;
-    }
     final Color backgroundColor = CupertinoDynamicColor.resolve(_kActionSheetBackgroundColor, context);
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        if (_hasContent)
-          _Divider(
-            dividerColor: widget.dividerColor,
-            hiddenColor: backgroundColor,
-            hidden: false,
-          ),
+        _Divider(
+          dividerColor: dividerColor,
+          hiddenColor: backgroundColor,
+          hidden: false,
+        ),
         Flexible(
-          child: _OverscrollBackground(
-            scrollController: widget.scrollController,
-            color: backgroundColor,
-            child: _ActionSheetActionSection(
-              actions: widget.actions,
-              scrollController: widget.scrollController,
-              dividerColor: widget.dividerColor,
-              backgroundColor: backgroundColor,
-              pressedIndex: widget.pressedIndex,
-              onPressedUpdate: widget.onPressedUpdate,
-            ),
-          ),
+          child: _scrolledActionsSection(context),
         ),
       ],
     );
@@ -1693,14 +1686,16 @@ class _ActionSheetMainSheetState extends State<_ActionSheetMainSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (BuildContext context, BoxConstraints constraints) {
-        return _PriorityColumn(
-          top: widget.contentSection ?? _empty,
-          bottom: _dividerAndActionsSection(context),
-          bottomMinHeight: _kActionSheetActionsSectionMinHeight + _kDividerThickness,
-        );
-      },
+    if (actions.isEmpty) {
+      return contentSection ?? _empty;
+    }
+    if (contentSection == null) {
+      return _scrolledActionsSection(context);
+    }
+    return _PriorityColumn(
+      top: contentSection!,
+      bottom: _dividerAndActionsSection(context),
+      bottomMinHeight: _kActionSheetActionsSectionMinHeight + _kDividerThickness,
     );
   }
 
