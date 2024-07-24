@@ -612,9 +612,6 @@ void DlDispatcherBase::save(uint32_t total_content_depth) {
   GetCanvas().Save(total_content_depth);
 }
 
-static constexpr SkRect kMaxCullRect =
-    SkRect::MakeLTRB(-1E9F, -1E9F, 1E9F, 1E9F);
-
 // |flutter::DlOpReceiver|
 void DlDispatcherBase::saveLayer(const SkRect& bounds,
                                  const flutter::SaveLayerOptions& options,
@@ -626,9 +623,7 @@ void DlDispatcherBase::saveLayer(const SkRect& bounds,
                      ? ContentBoundsPromise::kMayClipContents
                      : ContentBoundsPromise::kContainsContents;
   std::optional<Rect> impeller_bounds;
-  if (bounds == kMaxCullRect) {
-    impeller_bounds = std::nullopt;
-  } else {
+  if (!options.content_is_unbounded()) {
     impeller_bounds = skia_conversions::ToRect(bounds);
   }
 
