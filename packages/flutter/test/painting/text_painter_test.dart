@@ -145,17 +145,73 @@ void main() {
       caretOffset = painter.getOffsetForCaret(ui.TextPosition(offset: text.length), ui.Rect.zero);
       expect(caretOffset.dx, painter.width);
 
-      // Test with trailing full-width space
-      const String textWithFullWidthSpace = 'A\u{3000}';
-      checkCaretOffsetsLtr(textWithFullWidthSpace);
-      painter.text = const TextSpan(text: textWithFullWidthSpace);
+      text = 'A';
+      painter.text = TextSpan(text: text);
       painter.layout();
-      caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 0), ui.Rect.zero);
-      expect(caretOffset.dx, 0);
-      caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 1), ui.Rect.zero);
-      expect(caretOffset.dx, painter.width / 2);
-      caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: textWithFullWidthSpace.length), ui.Rect.zero);
-      expect(caretOffset.dx, painter.width);
+      final double textAWidth = painter.width;
+      void checkUnicodeZsCategory(String charset) {
+        text = 'A$charset';
+        checkCaretOffsetsLtr(text);
+        painter.text = TextSpan(text: text);
+        painter.layout();
+        caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 0), ui.Rect.zero);
+        expect(caretOffset.dx, 0);
+        caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 1), ui.Rect.zero);
+        expect(caretOffset.dx, textAWidth);
+        caretOffset = painter.getOffsetForCaret(ui.TextPosition(offset: text.length), ui.Rect.zero);
+        expect(caretOffset.dx, painter.width);
+      }
+
+      // Test with trailing space
+      checkUnicodeZsCategory('\u{0020}');
+
+      // Test with trailing no-break space
+      checkUnicodeZsCategory('\u{00A0}');
+
+      // Test with trailing full-width space
+      checkUnicodeZsCategory('\u{3000}');
+
+      // Test with trailing ogham space mark
+      checkUnicodeZsCategory('\u{1680}');
+
+      // Test with trailing en quad
+      checkUnicodeZsCategory('\u{2000}');
+
+      // Test with trailing em quad
+      checkUnicodeZsCategory('\u{2001}');
+
+      // Test with trailing en space
+      checkUnicodeZsCategory('\u{2002}');
+
+      // Test with trailing em space
+      checkUnicodeZsCategory('\u{2003}');
+
+      // Test with trailing three-per-em space
+      checkUnicodeZsCategory('\u{2004}');
+
+      // Test with trailing four-per-em space
+      checkUnicodeZsCategory('\u{2005}');
+
+      // Test with trailing six-per-em space
+      checkUnicodeZsCategory('\u{2006}');
+
+      // Test with trailing figure space
+      checkUnicodeZsCategory('\u{2007}');
+
+      // Test with trailing punctuation space
+      checkUnicodeZsCategory('\u{2008}');
+
+      // Test with trailing thin space
+      checkUnicodeZsCategory('\u{2009}');
+
+      // Test with trailing hair space
+      checkUnicodeZsCategory('\u{200A}');
+
+      // Test with trailing narrow no-break space(NNBSP)
+      checkUnicodeZsCategory('\u{202F}');
+
+      // Test with trailing medium mathematical space(MMSP)
+      checkUnicodeZsCategory('\u{205F}');
 
       painter.dispose();
     });
