@@ -6,12 +6,12 @@ import("//build/config/android/config.gni")
 import("//flutter/tools/templater/templater.gni")
 
 android_buildtools =
-    "//flutter/third_party/android_tools/sdk/build-tools/34.0.0"
+    "//flutter/third_party/android_tools/sdk/build-tools/35.0.0-rc4"
 aapt2 = "$android_buildtools/aapt2"
 zipalign = "$android_buildtools/zipalign"
 apksigner = "$android_buildtools/apksigner"
 android_jar =
-    "//flutter/third_party/android_tools/sdk/platforms/android-34/android.jar"
+    "//flutter/third_party/android_tools/sdk/platforms/android-35/android.jar"
 src_root = "//flutter/testing/android/native_activity"
 
 # A drop in replacement for an executable or shared library target. Providing a

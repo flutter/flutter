@@ -48,7 +48,7 @@ def main():
     os.makedirs(args.out_dir)
 
   android_jar_path = os.path.join(
-      args.src_dir, 'flutter', 'third_party', 'android_tools', 'sdk', 'platforms', 'android-34',
+      args.src_dir, 'flutter', 'third_party', 'android_tools', 'sdk', 'platforms', 'android-35',
       'android.jar'
   )
   if not os.path.exists(android_jar_path):

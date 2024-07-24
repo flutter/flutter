@@ -290,7 +290,7 @@ public class PlatformViewsChannel {
      * The ID returned by {@code createForTextureLayer} to indicate that the requested texture mode
      * was not available and the view creation fell back to {@code PlatformViewLayer} mode.
      *
-     * This can only be returned if the {@link PlatformViewCreationRequest} sets
+     * This can only be returned if the {@code PlatformViewCreationRequest} sets
      * {@code TEXTURE_WITH_HYBRID_FALLBACK} as the requested display mode.
      */
     static final long NON_TEXTURE_FALLBACK = -2;

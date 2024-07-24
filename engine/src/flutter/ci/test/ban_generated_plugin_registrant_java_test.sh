@@ -59,8 +59,8 @@ trap cleanup EXIT
 echo "PASS: ban_generated_plugin_registrant_java failed as expected"
 
 # Create a file in SRC_DIR/third_party, that should be OK.
-echo "Creating file ./src/third_party/GeneratedPluginRegistrant.java"
-touch "$SRC_DIR/third_party/GeneratedPluginRegistrant.java"
+echo "Creating file ./src/flutter/third_party/GeneratedPluginRegistrant.java"
+touch "$SRC_DIR/flutter/third_party/GeneratedPluginRegistrant.java"
 
 # Run the ban script, expecting it to succeed.
 "$FLUTTER_DIR/ci/ban_generated_plugin_registrant_java.sh" > /dev/null 2>&1 || {

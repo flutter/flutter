@@ -277,7 +277,7 @@ allowed_hosts = [
 ]
 
 deps = {
-  'src': 'https://github.com/flutter/buildroot.git' + '@' + '327906297b49980748ea1956019829e7c434a03e',
+  'src': 'https://github.com/flutter/buildroot.git' + '@' + '91c259d5ee56c24fb870cf7be7d041bb9b8e139f',
 
   'src/flutter/third_party/depot_tools':
   Var('chromium_git') + '/chromium/tools/depot_tools.git' + '@' + '580b4ff3f5cd0dcaa2eacda28cefe0f45320e8f7',
@@ -734,7 +734,7 @@ deps = {
       {
         # See tools/gradle/README.md for update instructions.
         # Version here means the CIPD tag.
-        'version': 'version:8.3',
+        'version': 'version:8.9',
         'package': 'flutter/gradle'
       }
     ],
@@ -774,7 +774,7 @@ deps = {
      'packages': [
        {
         'package': 'flutter/android/sdk/all/${{platform}}',
-        'version': 'version:34v7'
+        'version': 'version:35v1'
        }
      ],
      'condition': 'download_android_deps',
