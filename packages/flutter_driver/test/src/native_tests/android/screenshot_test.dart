@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io' as io;
 import 'dart:typed_data';
 
 import 'package:flutter_driver/src/native/android.dart';
@@ -17,7 +18,7 @@ void main() async {
     expect(bytes.length, greaterThan(0));
 
     final String path = await screenshot.saveAs();
-    expect(path, isNotEmpty);
+    expect(io.File(path).readAsBytesSync(), bytes);
 
     await driver.close();
   });
