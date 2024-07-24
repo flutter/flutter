@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'drawer.dart';
+/// @docImport 'list_tile_theme.dart';
+library;
+
 import 'dart:developer' show Flow, Timeline;
 import 'dart:io' show Platform;
 
@@ -1012,7 +1016,7 @@ typedef _MasterViewBuilder = Widget Function(BuildContext context, bool isLatera
 /// sheet in the lateral UI. Otherwise, it is null.
 typedef _DetailPageBuilder = Widget Function(BuildContext context, Object? arguments, ScrollController? scrollController);
 
-/// Signature for the builder callback used by [_MasterDetailFlow.actionBuilder].
+/// Signature for the builder callback used by [_MasterDetailScaffold.actionBuilder].
 ///
 /// Builds the actions that go in the app bars constructed for the master and
 /// lateral UI pages. actionLevel indicates the intended destination of the
@@ -1043,7 +1047,6 @@ enum _Focus { master, detail }
 
 /// A Master Detail Flow widget. Depending on screen width it builds either a
 /// lateral or nested navigation flow between a master view and a detail page.
-/// bloc pattern.
 ///
 /// If focus is on detail view, then switching to nested navigation will
 /// populate the navigation history with the master page and the detail page on
@@ -1061,7 +1064,7 @@ class _MasterDetailFlow extends StatefulWidget {
 
   /// Builder for the master view for lateral navigation.
   ///
-  /// If [masterPageBuilder] is not supplied the master page required for nested navigation, also
+  /// This builder builds the master page required for nested navigation, also
   /// builds the master view inside a [Scaffold] with an [AppBar].
   final _MasterViewBuilder masterViewBuilder;
 

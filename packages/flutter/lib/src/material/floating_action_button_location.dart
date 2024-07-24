@@ -2,6 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'app_bar.dart';
+/// @docImport 'bottom_app_bar.dart';
+/// @docImport 'bottom_navigation_bar.dart';
+/// @docImport 'circle_avatar.dart';
+/// @docImport 'floating_action_button.dart';
+/// @docImport 'list_tile.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -1026,7 +1034,7 @@ class _NoAnimationFabMotionAnimator extends FloatingActionButtonAnimator {
 
 /// An animation that swaps from one animation to the next when the [parent] passes [swapThreshold].
 ///
-/// The [value] of this animation is the value of [first] when [parent.value] < [swapThreshold]
+/// The [value] of this animation is the value of [first] when `parent.value` < [swapThreshold]
 /// and the value of [next] otherwise.
 class _AnimationSwap<T> extends CompoundAnimation<T> {
   /// Creates an [_AnimationSwap].
