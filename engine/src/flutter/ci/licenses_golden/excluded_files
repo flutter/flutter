@@ -3309,6 +3309,8 @@
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.light/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.network/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.pci/meta.json
+../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.pin/meta.json
+../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.pinimpl/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.platform.bus/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.platform.device/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.power.sensor/meta.json
