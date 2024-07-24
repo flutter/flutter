@@ -2711,7 +2711,6 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
         _extendSelectionInProgress = false;
         result = handleSelectionEdgeUpdate(event as SelectionEdgeUpdateEvent);
       case SelectionEventType.selectionFinalized:
-        _extendSelectionInProgress = false;
         result = handleSelectionFinalized(event as SelectionFinalizedSelectionEvent);
       case SelectionEventType.clear:
         _extendSelectionInProgress = false;
