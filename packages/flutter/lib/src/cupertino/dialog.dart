@@ -342,17 +342,17 @@ class _CupertinoAlertDialogState extends State<CupertinoAlertDialog> {
 
   int? _pressedIndex;
 
-  void _onPressedUpdate(int actionIndex, bool state) {
-    if (!state) {
+  void _onPressedUpdate(int actionIndex, bool isPressed) {
+    if (isPressed) {
+      setState(() {
+        _pressedIndex = actionIndex;
+      });
+    } else {
       if (_pressedIndex == actionIndex) {
         setState(() {
           _pressedIndex = null;
         });
       }
-    } else {
-      setState(() {
-        _pressedIndex = actionIndex;
-      });
     }
   }
 
@@ -367,6 +367,58 @@ class _CupertinoAlertDialogState extends State<CupertinoAlertDialog> {
         onPressedUpdate: _onPressedUpdate,
       );
     }
+  }
+
+  Widget _buildBody(BuildContext context) {
+    final Color backgroundColor = CupertinoDynamicColor.resolve(_kDialogColor, context);
+    final Color dividerColor = CupertinoColors.separator;
+    // Removing padding because the scrollbars currently uses the view padding
+    // as padding. https://github.com/flutter/flutter/issues/150544
+    return MediaQuery.removePadding(
+      removeLeft: true,
+      removeTop: true,
+      removeRight: true,
+      removeBottom: true,
+      context: context,
+      child: LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
+          final Widget? contentSection = _buildContent(context);
+          final Widget? actionsSection = _buildActions();
+          if (actionsSection == null) {
+            return contentSection ?? Container();
+          }
+          final Widget scrolledActionsSection = _OverscrollBackground(
+            scrollController: _effectiveActionScrollController,
+            color: backgroundColor,
+            child: actionsSection,
+          );
+          if (contentSection == null) {
+            return scrolledActionsSection;
+          }
+          // It is observed on the simulator that the minimal height varies
+          // depending on whether the device is in accessibility mode.
+          final double actionsMinHeight = _isInAccessibilityMode(context)
+              ? constraints.maxHeight / 2 + _kDividerThickness
+              : _kDialogActionsSectionMinHeight + _kDividerThickness;
+          return _PriorityColumn(
+            top: contentSection,
+            bottom: Column(
+              children: <Widget>[
+                _Divider(
+                  dividerColor: dividerColor,
+                  hiddenColor: backgroundColor,
+                  hidden: false,
+                ),
+                Flexible(
+                  child: scrolledActionsSection,
+                ),
+              ],
+            ),
+            bottomMinHeight: actionsMinHeight,
+          );
+        },
+      ),
+    );
   }
 
   @override
@@ -408,11 +460,7 @@ class _CupertinoAlertDialogState extends State<CupertinoAlertDialog> {
                             scopesRoute: true,
                             explicitChildNodes: true,
                             label: localizations.alertDialogLabel,
-                            child: _CupertinoDialogLayoutWidget(
-                              contentSection: _buildContent(context),
-                              actionsSection: _buildActions(),
-                              dividerColor: CupertinoColors.separator,
-                            ),
+                            child: _buildBody(context),
                           ),
                         ),
                       ),
@@ -1344,6 +1392,82 @@ class _Divider extends StatelessWidget {
   }
 }
 
+// Fills the overscroll area at the top or bottom of a scrollable widget with a
+// solid color.
+//
+// This is necessary for action sheets and alert dialogs, because their actions
+// section's background is rendered by the buttons, so that a button's
+// background can be _replaced_ by a different color when the button is pressed.
+class _OverscrollBackground extends StatefulWidget {
+  _OverscrollBackground({
+    required this.color,
+    required this.scrollController,
+    required this.child,
+  });
+
+  // The color for the overscroll part.
+  //
+  // This value must be a resolved color instead of, for example, a
+  // CupertinoDynamicColor.
+  final Color color;
+  final ScrollController? scrollController;
+  final Widget child;
+
+  @override
+  _OverscrollBackgroundState createState() => _OverscrollBackgroundState();
+}
+
+class _OverscrollBackgroundState extends State<_OverscrollBackground> {
+  double _topOverscroll = 0;
+  double _bottomOverscroll = 0;
+
+  bool _onScrollUpdate(ScrollUpdateNotification notification) {
+    final ScrollMetrics metrics = notification.metrics;
+    setState(() {
+      // The sizes of the overscroll should not be longer than the height of the
+      // actions section.
+      _topOverscroll = math.min(
+        math.max(metrics.minScrollExtent - metrics.pixels, 0),
+        metrics.viewportDimension,
+      );
+      _bottomOverscroll = math.min(
+        math.max(metrics.pixels - metrics.maxScrollExtent, 0),
+        metrics.viewportDimension,
+      );
+    });
+    return false;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final Widget overscroll = Column(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: <Widget>[
+        Container(
+          color: widget.color,
+          height: _topOverscroll,
+        ),
+        Container(
+          color: widget.color,
+          height: _bottomOverscroll,
+        ),
+      ],
+    );
+    return Stack(
+      children: <Widget>[
+        Positioned.fill(
+          child: overscroll,
+        ),
+        NotificationListener<ScrollUpdateNotification>(
+          onNotification: _onScrollUpdate,
+          child: widget.child,
+        )
+      ],
+    );
+  }
+}
+
 typedef _PressedUpdateHandler = void Function(int actionIndex, bool state);
 
 // The list of actions in an action sheet.
@@ -1422,47 +1546,6 @@ class _ActionSheetMainSheet extends StatefulWidget {
 
 class _ActionSheetMainSheetState extends State<_ActionSheetMainSheet> {
   int? _pressedIndex;
-  double _topOverscroll = 0;
-  double _bottomOverscroll = 0;
-
-  // Fills the overscroll area at the top and bottom of the sheet. This is
-  // necessary because the action section's background is rendered by the
-  // buttons, so that a button's background can be _replaced_ by a different
-  // color when the button is pressed.
-  Widget _buildOverscroll() {
-    final Color backgroundColor = CupertinoDynamicColor.resolve(_kActionSheetBackgroundColor, context);
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: <Widget>[
-        Container(
-          color: backgroundColor,
-          height: _topOverscroll,
-        ),
-        Container(
-          color: backgroundColor,
-          height: _bottomOverscroll,
-        ),
-      ],
-    );
-  }
-
-  bool _onScrollUpdate(ScrollUpdateNotification notification) {
-    final ScrollMetrics metrics = notification.metrics;
-    setState(() {
-      // The sizes of the overscroll should not be longer than the height of the
-      // actions section.
-      _topOverscroll = math.min(
-        math.max(metrics.minScrollExtent - metrics.pixels, 0),
-        metrics.viewportDimension,
-      );
-      _bottomOverscroll = math.min(
-        math.max(metrics.pixels - metrics.maxScrollExtent, 0),
-        metrics.viewportDimension,
-      );
-    });
-    return false;
-  }
 
   bool get _hasContent => widget.contentSection != null;
   bool get _hasActions => widget.actions.isNotEmpty;
@@ -1497,23 +1580,17 @@ class _ActionSheetMainSheetState extends State<_ActionSheetMainSheet> {
             hidden: false,
           ),
         Flexible(
-          child: Stack(
-            children: <Widget>[
-              Positioned.fill(
-                child: _buildOverscroll(),
-              ),
-              NotificationListener<ScrollUpdateNotification>(
-                onNotification: _onScrollUpdate,
-                child: _ActionSheetActionSection(
-                  actions: widget.actions,
-                  scrollController: widget.scrollController,
-                  pressedIndex: _pressedIndex,
-                  dividerColor: widget.dividerColor,
-                  backgroundColor: backgroundColor,
-                  onPressedUpdate: _onPressedUpdate,
-                ),
-              )
-            ],
+          child: _OverscrollBackground(
+            scrollController: widget.scrollController,
+            color: backgroundColor,
+            child: _ActionSheetActionSection(
+              actions: widget.actions,
+              scrollController: widget.scrollController,
+              pressedIndex: _pressedIndex,
+              dividerColor: widget.dividerColor,
+              backgroundColor: backgroundColor,
+              onPressedUpdate: _onPressedUpdate,
+            ),
           ),
         ),
       ],
@@ -1537,126 +1614,6 @@ class _ActionSheetMainSheetState extends State<_ActionSheetMainSheet> {
     maxWidth: 0,
     child: SizedBox(width: double.infinity, height: 0),
   );
-}
-
-// Layout an alert dialog given its content section and actions section.
-class _CupertinoDialogLayoutWidget extends StatefulWidget {
-  const _CupertinoDialogLayoutWidget({
-    required this.contentSection,
-    required this.actionsSection,
-    required this.dividerColor,
-  });
-
-  final Widget? contentSection;
-  final Widget? actionsSection;
-  final Color dividerColor;
-
-  @override
-  _CupertinoDialogLayoutWidgetState createState() => _CupertinoDialogLayoutWidgetState();
-}
-
-class _CupertinoDialogLayoutWidgetState extends State<_CupertinoDialogLayoutWidget> {
-
-  double _topOverscroll = 0;
-  double _bottomOverscroll = 0;
-
-  // Fills the overscroll area at the top and bottom of the sheet. This is
-  // necessary because the action section's background is rendered by the
-  // buttons, so that a button's background can be _replaced_ by a different
-  // color when the button is pressed.
-  Widget _buildOverscroll(Color backgroundColor) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: <Widget>[
-        Container(
-          color: backgroundColor,
-          height: _topOverscroll,
-        ),
-        Container(
-          color: backgroundColor,
-          height: _bottomOverscroll,
-        ),
-      ],
-    );
-  }
-
-  bool _onScrollUpdate(ScrollUpdateNotification notification) {
-    final ScrollMetrics metrics = notification.metrics;
-    setState(() {
-      // The sizes of the overscroll should not be longer than the height of the
-      // actions section.
-      _topOverscroll = math.min(
-        math.max(metrics.minScrollExtent - metrics.pixels, 0),
-        metrics.viewportDimension,
-      );
-      _bottomOverscroll = math.min(
-        math.max(metrics.pixels - metrics.maxScrollExtent, 0),
-        metrics.viewportDimension,
-      );
-    });
-    return false;
-  }
-
-  Widget _buildActionsSection() {
-    return Stack(
-      children: <Widget>[
-        Positioned.fill(
-          child: _buildOverscroll(_kDialogColor),
-        ),
-        NotificationListener<ScrollUpdateNotification>(
-          onNotification: _onScrollUpdate,
-          child: widget.actionsSection!,
-        ),
-      ],
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final bool hasActions = widget.actionsSection != null;
-    final bool hasContent = widget.contentSection != null;
-    // Removing padding because the scrollbars currently uses the view padding
-    // as padding. https://github.com/flutter/flutter/issues/150544
-    return MediaQuery.removePadding(
-      removeLeft: true,
-      removeTop: true,
-      removeRight: true,
-      removeBottom: true,
-      context: context,
-      child: LayoutBuilder(
-        builder: (BuildContext context, BoxConstraints constraints) {
-          if (!hasActions) {
-            return widget.contentSection ?? Container();
-          }
-          if (!hasContent) {
-            return _buildActionsSection();
-          }
-          // It is observed on the simulator that the minimal height varies
-          // depending on whether the device is in accessibility mode.
-          final double actionsMinHeight = _isInAccessibilityMode(context)
-              ? constraints.maxHeight / 2 + _kDividerThickness
-              : _kDialogActionsSectionMinHeight + _kDividerThickness;
-          return _PriorityColumn(
-            top: widget.contentSection!,
-            bottom: Column(
-              children: <Widget>[
-                _Divider(
-                  dividerColor: widget.dividerColor,
-                  hiddenColor: _kDialogColor,
-                  hidden: false,
-                ),
-                Flexible(
-                  child: _buildActionsSection(),
-                ),
-              ],
-            ),
-            bottomMinHeight: actionsMinHeight,
-          );
-        },
-      ),
-    );
-  }
 }
 
 // The "content section" of a CupertinoAlertDialog.
