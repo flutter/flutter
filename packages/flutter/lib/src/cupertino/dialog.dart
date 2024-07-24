@@ -594,14 +594,14 @@ class _SlidingTapGestureRecognizer extends VerticalDragGestureRecognizer {
 // enters, leaves, or ends this `MetaData` widget, corresponding methods of this
 // class will be called.
 //
-// Multiple `_ActionSheetSlideTarget`s might be nested.
+// Multiple `_SlideTarget`s might be nested.
 // `_TargetSelectionGestureRecognizer` uses a simple algorithm that only
 // compares if the inner-most slide target has changed (which suffices our use
 // case).  Semantically, this means that all outer targets will be treated as
 // identical to the inner-most one, i.e. when the pointer enters or leaves a
 // slide target, the corresponding method will be called on all targets that
 // nest it.
-abstract class _ActionSheetSlideTarget {
+abstract class _SlideTarget {
   // A pointer has entered this region.
   //
   // This includes:
@@ -633,7 +633,7 @@ abstract class _ActionSheetSlideTarget {
 }
 
 // Recognizes sliding taps and thereupon interacts with
-// `_ActionSheetSlideTarget`s.
+// `_SlideTarget`s.
 class _TargetSelectionGestureRecognizer extends GestureRecognizer {
   _TargetSelectionGestureRecognizer({super.debugOwner, required this.hitTest})
     : _slidingTap = _SlidingTapGestureRecognizer(debugOwner: debugOwner) {
@@ -646,7 +646,7 @@ class _TargetSelectionGestureRecognizer extends GestureRecognizer {
 
   final _HitTester hitTest;
 
-  final List<_ActionSheetSlideTarget> _currentTargets = <_ActionSheetSlideTarget>[];
+  final List<_SlideTarget> _currentTargets = <_SlideTarget>[];
   final _SlidingTapGestureRecognizer _slidingTap;
 
   @override
@@ -675,7 +675,7 @@ class _TargetSelectionGestureRecognizer extends GestureRecognizer {
     super.dispose();
   }
 
-  // Collect the `_ActionSheetSlideTarget`s that are currently hit by the
+  // Collect the `_SlideTarget`s that are currently hit by the
   // pointer, check whether the current target have changed, and invoke their
   // methods if necessary.
   //
@@ -686,27 +686,27 @@ class _TargetSelectionGestureRecognizer extends GestureRecognizer {
 
     // A slide target might nest other targets, therefore multiple targets might
     // be found.
-    final List<_ActionSheetSlideTarget> foundTargets = <_ActionSheetSlideTarget>[];
+    final List<_SlideTarget> foundTargets = <_SlideTarget>[];
     for (final HitTestEntry entry in result.path) {
       if (entry.target case final RenderMetaData target) {
-        if (target.metaData is _ActionSheetSlideTarget) {
-          foundTargets.add(target.metaData as _ActionSheetSlideTarget);
+        if (target.metaData is _SlideTarget) {
+          foundTargets.add(target.metaData as _SlideTarget);
         }
       }
     }
 
     // Compare whether the active target has changed by simply comparing the
     // first (inner-most) avatar of the nest, ignoring the cases where
-    // _currentTargets intersect with foundTargets (see _ActionSheetSlideTarget's
+    // _currentTargets intersect with foundTargets (see _SlideTarget's
     // document for more explanation).
     if (_currentTargets.firstOrNull != foundTargets.firstOrNull) {
-      for (final _ActionSheetSlideTarget target in _currentTargets) {
+      for (final _SlideTarget target in _currentTargets) {
         target.didLeave();
       }
       _currentTargets
         ..clear()
         ..addAll(foundTargets);
-      for (final _ActionSheetSlideTarget target in _currentTargets) {
+      for (final _SlideTarget target in _currentTargets) {
         target.didEnter(fromPointerDown: fromPointerDown);
       }
     }
@@ -722,14 +722,14 @@ class _TargetSelectionGestureRecognizer extends GestureRecognizer {
 
   void _onEnd(Offset globalPosition) {
     _updateDrag(globalPosition, fromPointerDown: false);
-    for (final _ActionSheetSlideTarget target in _currentTargets) {
+    for (final _SlideTarget target in _currentTargets) {
       target.didConfirm();
     }
     _currentTargets.clear();
   }
 
   void _onCancel() {
-    for (final _ActionSheetSlideTarget target in _currentTargets) {
+    for (final _SlideTarget target in _currentTargets) {
       target.didLeave();
     }
     _currentTargets.clear();
@@ -935,6 +935,8 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
     );
   }
 
+  bool _cancelButtonPressed = false;
+
   Widget _buildCancelButton() {
     assert(widget.cancelButton != null);
     final double cancelPadding = (widget.actions != null || widget.message != null || widget.title != null)
@@ -943,7 +945,12 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
       padding: EdgeInsets.only(top: cancelPadding),
       child: _ActionSheetButtonBackground(
         isCancel: true,
-        onPressStateChange: (_) {},
+        pressed: _cancelButtonPressed,
+        onPressStateChange: (bool state) {
+          setState(() {
+            _cancelButtonPressed = state;
+          });
+        },
         child: widget.cancelButton!,
       ),
     );
@@ -1139,16 +1146,16 @@ class CupertinoActionSheetAction extends StatefulWidget {
 }
 
 class _CupertinoActionSheetActionState extends State<CupertinoActionSheetAction>
-    implements _ActionSheetSlideTarget {
-  // |_ActionSheetSlideTarget|
+    implements _SlideTarget {
+  // |_SlideTarget|
   @override
   void didEnter({required bool fromPointerDown}) {}
 
-  // |_ActionSheetSlideTarget|
+  // |_SlideTarget|
   @override
   void didLeave() {}
 
-  // |_ActionSheetSlideTarget|
+  // |_SlideTarget|
   @override
   void didConfirm() {
     widget.onPressed();
@@ -1236,20 +1243,73 @@ class _CupertinoActionSheetActionState extends State<CupertinoActionSheetAction>
   }
 }
 
+// Base class for stateless widget classes that mark their [Element] as
+// [_SlideTarget].
+//
+// Using [_SlideTarget] requires injecting [_SlideTarget] objects as
+// [MetaData.data], which should be an object that is persistent across
+// rebuilds. Stateless widgets can use their elements as a persistent object.
+mixin _SlideTargetWidgetMixin on StatelessWidget {
+  // Called by the element when a pointer that is in touch with the screen moves
+  // from out of the widget to within.
+  void handleSlideIn();
+
+  // Called by the element when the user taps down or lifts up on the button.
+  //
+  // The boolean value is true if the user is tapping down on the button.
+  ValueSetter<bool>? get onPressStateChange;
+
+  @override
+  StatelessElement createElement() => _SlideTargetElement(this);
+}
+
+// A [Element] class that marks itself as `_SlideTarget`.
+class _SlideTargetElement extends StatelessElement implements _SlideTarget {
+  _SlideTargetElement(_SlideTargetWidgetMixin super.widget);
+
+  _SlideTargetWidgetMixin get widgetTarget => widget as _SlideTargetWidgetMixin;
+
+  // |_SlideTarget|
+  @override
+  void didEnter({required bool fromPointerDown}) {
+    widgetTarget.onPressStateChange?.call(true);
+    if (!fromPointerDown) {
+      widgetTarget.handleSlideIn();
+    }
+  }
+
+  // |_SlideTarget|
+  @override
+  void didLeave() {
+    widgetTarget.onPressStateChange?.call(false);
+  }
+
+  // |_SlideTarget|
+  @override
+  void didConfirm() {
+    widgetTarget.onPressStateChange?.call(false);
+  }
+}
+
 // Renders the background of a button (both the pressed background and the idle
 // background) and reports its state to the parent with `onPressStateChange`.
-class _ActionSheetButtonBackground extends StatefulWidget {
+class _ActionSheetButtonBackground extends StatelessWidget with _SlideTargetWidgetMixin {
   const _ActionSheetButtonBackground({
     this.isCancel = false,
+    required this.pressed,
     this.onPressStateChange,
     required this.child,
   });
 
   final bool isCancel;
 
+  /// Whether the user is holding on this button.
+  final bool pressed;
+
   /// Called when the user taps down or lifts up on the button.
   ///
   /// The boolean value is true if the user is tapping down on the button.
+  @override
   final ValueSetter<bool>? onPressStateChange;
 
   /// The widget below this widget in the tree.
@@ -1257,14 +1317,9 @@ class _ActionSheetButtonBackground extends StatefulWidget {
   /// Typically a [Text] widget.
   final Widget child;
 
+  // |_SlideTargetWidgetMixin|
   @override
-  _ActionSheetButtonBackgroundState createState() => _ActionSheetButtonBackgroundState();
-}
-
-class _ActionSheetButtonBackgroundState extends State<_ActionSheetButtonBackground> implements _ActionSheetSlideTarget {
-  bool isBeingPressed = false;
-
-  void _emitVibration(){
+  void handleSlideIn(){
     switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
       case TargetPlatform.android:
@@ -1277,52 +1332,28 @@ class _ActionSheetButtonBackgroundState extends State<_ActionSheetButtonBackgrou
     }
   }
 
-  // |_ActionSheetSlideTarget|
-  @override
-  void didEnter({required bool fromPointerDown}) {
-    setState(() { isBeingPressed = true; });
-    widget.onPressStateChange?.call(true);
-    if (!fromPointerDown) {
-      _emitVibration();
-    }
-  }
-
-  // |_ActionSheetSlideTarget|
-  @override
-  void didLeave() {
-    setState(() { isBeingPressed = false; });
-    widget.onPressStateChange?.call(false);
-  }
-
-  // |_ActionSheetSlideTarget|
-  @override
-  void didConfirm() {
-    setState(() { isBeingPressed = false; });
-    widget.onPressStateChange?.call(false);
-  }
-
   @override
   Widget build(BuildContext context) {
     late final Color backgroundColor;
     BorderRadius? borderRadius;
-    if (!widget.isCancel) {
-      backgroundColor = isBeingPressed
+    if (!isCancel) {
+      backgroundColor = pressed
         ? _kActionSheetPressedColor
         : _kActionSheetBackgroundColor;
     } else {
-      backgroundColor = isBeingPressed
+      backgroundColor = pressed
         ? _kActionSheetCancelPressedColor
         : _kActionSheetCancelColor;
       borderRadius = const BorderRadius.all(Radius.circular(_kCornerRadius));
     }
     return MetaData(
-      metaData: this,
+      metaData: context,
       child: Container(
         decoration: BoxDecoration(
           color: CupertinoDynamicColor.resolve(backgroundColor, context),
           borderRadius: borderRadius,
         ),
-        child: widget.child,
+        child: child,
       )
     );
   }
@@ -1393,6 +1424,7 @@ class _ActionSheetActionSection extends StatelessWidget {
         ));
       }
       column.add(_ActionSheetButtonBackground(
+        pressed: pressedIndex == actionIndex,
         onPressStateChange: (bool state) {
           onPressedUpdate(actionIndex, state);
         },
