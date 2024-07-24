@@ -1828,10 +1828,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
       return;
     }
     _haveScheduledUpdate = true;
-    SchedulerBinding.instance.addPostFrameCallback((_) {
-      applyFocusChangesIfNeeded();
-    });
-    SchedulerBinding.instance.scheduleFrame();
+    scheduleMicrotask(applyFocusChangesIfNeeded);
   }
 
   /// Applies any pending focus changes and notifies listeners that the focus
