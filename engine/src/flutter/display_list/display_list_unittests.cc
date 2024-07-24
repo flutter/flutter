@@ -676,12 +676,12 @@ TEST_F(DisplayListTest, SingleOpDisplayListsRecapturedAreEqual) {
       sk_sp<DisplayList> copy = copy_builder.Build();
       auto desc =
           group.op_name + "(variant " + std::to_string(i + 1) + " == copy)";
-      DisplayListsEQ_Verbose(dl, copy);
+      ASSERT_TRUE(DisplayListsEQ_Verbose(dl, copy));
       ASSERT_EQ(copy->op_count(false), dl->op_count(false)) << desc;
       ASSERT_EQ(copy->bytes(false), dl->bytes(false)) << desc;
       ASSERT_EQ(copy->op_count(true), dl->op_count(true)) << desc;
       ASSERT_EQ(copy->bytes(true), dl->bytes(true)) << desc;
-      EXPECT_EQ(copy->total_depth(), dl->total_depth()) << desc;
+      ASSERT_EQ(copy->total_depth(), dl->total_depth()) << desc;
       ASSERT_EQ(copy->bounds(), dl->bounds()) << desc;
       ASSERT_TRUE(copy->Equals(*dl)) << desc;
       ASSERT_TRUE(dl->Equals(*copy)) << desc;
@@ -4955,7 +4955,7 @@ TEST_F(DisplayListTest, DrawRectRRectPromoteToDrawRect) {
   expected.DrawRect(rect, DlPaint());
   auto expect_dl = expected.Build();
 
-  DisplayListsEQ_Verbose(dl, expect_dl);
+  ASSERT_TRUE(DisplayListsEQ_Verbose(dl, expect_dl));
 }
 
 TEST_F(DisplayListTest, DrawOvalRRectPromoteToDrawOval) {
@@ -4969,7 +4969,7 @@ TEST_F(DisplayListTest, DrawOvalRRectPromoteToDrawOval) {
   expected.DrawOval(rect, DlPaint());
   auto expect_dl = expected.Build();
 
-  DisplayListsEQ_Verbose(dl, expect_dl);
+  ASSERT_TRUE(DisplayListsEQ_Verbose(dl, expect_dl));
 }
 
 TEST_F(DisplayListTest, DrawRectPathPromoteToDrawRect) {
@@ -4983,7 +4983,9 @@ TEST_F(DisplayListTest, DrawRectPathPromoteToDrawRect) {
   expected.DrawRect(rect, DlPaint());
   auto expect_dl = expected.Build();
 
-  DisplayListsEQ_Verbose(dl, expect_dl);
+  // Support for this will be re-added soon, until then verify that we
+  // do not promote.
+  ASSERT_TRUE(DisplayListsNE_Verbose(dl, expect_dl));
 }
 
 TEST_F(DisplayListTest, DrawOvalPathPromoteToDrawOval) {
@@ -4997,7 +4999,9 @@ TEST_F(DisplayListTest, DrawOvalPathPromoteToDrawOval) {
   expected.DrawOval(rect, DlPaint());
   auto expect_dl = expected.Build();
 
-  DisplayListsEQ_Verbose(dl, expect_dl);
+  // Support for this will be re-added soon, until then verify that we
+  // do not promote.
+  ASSERT_TRUE(DisplayListsNE_Verbose(dl, expect_dl));
 }
 
 TEST_F(DisplayListTest, DrawRRectPathPromoteToDrawRRect) {
@@ -5012,7 +5016,9 @@ TEST_F(DisplayListTest, DrawRRectPathPromoteToDrawRRect) {
   expected.DrawRRect(rrect, DlPaint());
   auto expect_dl = expected.Build();
 
-  DisplayListsEQ_Verbose(dl, expect_dl);
+  // Support for this will be re-added soon, until then verify that we
+  // do not promote.
+  ASSERT_TRUE(DisplayListsNE_Verbose(dl, expect_dl));
 }
 
 TEST_F(DisplayListTest, DrawRectRRectPathPromoteToDrawRect) {
@@ -5027,7 +5033,9 @@ TEST_F(DisplayListTest, DrawRectRRectPathPromoteToDrawRect) {
   expected.DrawRect(rect, DlPaint());
   auto expect_dl = expected.Build();
 
-  DisplayListsEQ_Verbose(dl, expect_dl);
+  // Support for this will be re-added soon, until then verify that we
+  // do not promote.
+  ASSERT_TRUE(DisplayListsNE_Verbose(dl, expect_dl));
 }
 
 TEST_F(DisplayListTest, DrawOvalRRectPathPromoteToDrawOval) {
@@ -5042,7 +5050,9 @@ TEST_F(DisplayListTest, DrawOvalRRectPathPromoteToDrawOval) {
   expected.DrawOval(rect, DlPaint());
   auto expect_dl = expected.Build();
 
-  DisplayListsEQ_Verbose(dl, expect_dl);
+  // Support for this will be re-added soon, until then verify that we
+  // do not promote.
+  ASSERT_TRUE(DisplayListsNE_Verbose(dl, expect_dl));
 }
 
 TEST_F(DisplayListTest, ClipRectRRectPromoteToClipRect) {
@@ -5060,7 +5070,7 @@ TEST_F(DisplayListTest, ClipRectRRectPromoteToClipRect) {
   expected.DrawRect(draw_rect, DlPaint());
   auto expect_dl = expected.Build();
 
-  DisplayListsEQ_Verbose(dl, expect_dl);
+  ASSERT_TRUE(DisplayListsEQ_Verbose(dl, expect_dl));
 }
 
 TEST_F(DisplayListTest, ClipOvalRRectPromoteToClipOval) {
@@ -5078,7 +5088,9 @@ TEST_F(DisplayListTest, ClipOvalRRectPromoteToClipOval) {
   expected.DrawRect(draw_rect, DlPaint());
   auto expect_dl = expected.Build();
 
-  DisplayListsEQ_Verbose(dl, expect_dl);
+  // Support for this will be re-added soon, until then verify that we
+  // do not promote.
+  ASSERT_TRUE(DisplayListsNE_Verbose(dl, expect_dl));
 }
 
 TEST_F(DisplayListTest, ClipRectPathPromoteToClipRect) {
@@ -5099,7 +5111,7 @@ TEST_F(DisplayListTest, ClipRectPathPromoteToClipRect) {
   expected.DrawRect(draw_rect, DlPaint());
   auto expect_dl = expected.Build();
 
-  DisplayListsEQ_Verbose(dl, expect_dl);
+  ASSERT_TRUE(DisplayListsEQ_Verbose(dl, expect_dl));
 }
 
 TEST_F(DisplayListTest, ClipOvalPathPromoteToClipOval) {
@@ -5120,7 +5132,9 @@ TEST_F(DisplayListTest, ClipOvalPathPromoteToClipOval) {
   expected.DrawRect(draw_rect, DlPaint());
   auto expect_dl = expected.Build();
 
-  DisplayListsEQ_Verbose(dl, expect_dl);
+  // Support for this will be re-added soon, until then verify that we
+  // do not promote.
+  ASSERT_TRUE(DisplayListsNE_Verbose(dl, expect_dl));
 }
 
 TEST_F(DisplayListTest, ClipRRectPathPromoteToClipRRect) {
@@ -5142,7 +5156,7 @@ TEST_F(DisplayListTest, ClipRRectPathPromoteToClipRRect) {
   expected.DrawRect(draw_rect, DlPaint());
   auto expect_dl = expected.Build();
 
-  DisplayListsEQ_Verbose(dl, expect_dl);
+  ASSERT_TRUE(DisplayListsEQ_Verbose(dl, expect_dl));
 }
 
 TEST_F(DisplayListTest, ClipRectInversePathNoPromoteToClipRect) {
@@ -5237,7 +5251,7 @@ TEST_F(DisplayListTest, ClipRectRRectPathPromoteToClipRect) {
   expected.DrawRect(draw_rect, DlPaint());
   auto expect_dl = expected.Build();
 
-  DisplayListsEQ_Verbose(dl, expect_dl);
+  ASSERT_TRUE(DisplayListsEQ_Verbose(dl, expect_dl));
 }
 
 TEST_F(DisplayListTest, ClipOvalRRectPathPromoteToClipOval) {
@@ -5259,7 +5273,9 @@ TEST_F(DisplayListTest, ClipOvalRRectPathPromoteToClipOval) {
   expected.DrawRect(draw_rect, DlPaint());
   auto expect_dl = expected.Build();
 
-  DisplayListsEQ_Verbose(dl, expect_dl);
+  // Support for this will be re-added soon, until then verify that we
+  // do not promote.
+  ASSERT_TRUE(DisplayListsNE_Verbose(dl, expect_dl));
 }
 
 TEST_F(DisplayListTest, BoundedRenderOpsDoNotReportUnbounded) {
