@@ -196,10 +196,11 @@ static bool compositor_create_backing_store_callback(
 
 // Called when the backing store is to be released.
 static bool compositor_collect_backing_store_callback(
-    const FlutterBackingStore* renderer,
+    const FlutterBackingStore* backing_store,
     void* user_data) {
   g_return_val_if_fail(FL_IS_RENDERER(user_data), false);
-  return fl_renderer_collect_backing_store(FL_RENDERER(user_data), renderer);
+  return fl_renderer_collect_backing_store(FL_RENDERER(user_data),
+                                           backing_store);
 }
 
 // Called when embedder should composite contents of each layer onto the screen.
