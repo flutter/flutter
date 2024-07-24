@@ -87,6 +87,7 @@ void main() {
         late File outputFlutterFrameworkBinary;
         late Directory outputAppFramework;
         late File outputAppFrameworkBinary;
+        late File outputRunnerBinary;
         late File outputPluginFrameworkBinary;
         late Directory buildPath;
         late Directory buildAppFrameworkDsym;
@@ -122,6 +123,10 @@ void main() {
           outputAppFramework = frameworkDirectory.childDirectory('App.framework');
           outputAppFrameworkBinary = outputAppFramework.childFile('App');
 
+          outputRunnerBinary = outputApp.childFile('Runner');
+
+          // Exists only if the plugin is built as a dynamic framework.
+          // This is is the default for CocoaPods but not Swift Package Manager.
           outputPluginFrameworkBinary = frameworkDirectory.childDirectory('hello.framework').childFile('hello');
 
           buildPath = fileSystem.directory(fileSystem.path.join(
@@ -141,7 +146,18 @@ void main() {
           printOnFailure(buildResult.stderr.toString());
           expect(buildResult.exitCode, 0);
 
-          expect(outputPluginFrameworkBinary, exists);
+          // Plugins are built either as a static library (SwiftPM's default)
+          // or as a dynamic library (CocoaPods's default).
+          // If built as a dynamic library, the plugin will have a .framework.
+          // If built as static library, the plugin's symbols will be in the
+          // Runner binary.
+          final bool helloDynamic = outputPluginFrameworkBinary.existsSync();
+          final bool helloStatic = AppleTestUtils
+            .getExportedSymbols(outputRunnerBinary.path)
+            .any((String symbol) => symbol.contains('HelloPlugin') && symbol.contains('handle'));
+
+          // Plugin is a dynamic xor static framework.
+          expect(helloDynamic != helloStatic, isTrue);
 
           expect(outputAppFrameworkBinary, exists);
           expect(outputAppFramework.childFile('Info.plist'), exists);
@@ -300,6 +316,19 @@ void main() {
       );
       expect(buildSimulator.exitCode, 0);
 
+      // Plugins are built either as a static library (SwiftPM's default)
+      // or as a dynamic library (CocoaPods's default).
+      // If built as a dynamic library, the plugin will have a .framework.
+      // If built as static library, the plugin's symbols will be in the
+      // Runner binary.
+      final File runnerBinary = fileSystem.file(fileSystem.path.join(
+        projectRoot,
+        'build',
+        'ios',
+        'iphonesimulator',
+        'Runner.app',
+        'Runner',
+      ));
       final File pluginFrameworkBinary = fileSystem.file(fileSystem.path.join(
         projectRoot,
         'build',
@@ -310,12 +339,21 @@ void main() {
         'hello.framework',
         'hello',
       ));
-      expect(pluginFrameworkBinary, exists);
-      final ProcessResult archs = processManager.runSync(
-        <String>['file', pluginFrameworkBinary.path],
-      );
-      expect(archs.stdout, contains('Mach-O 64-bit dynamically linked shared library x86_64'));
-      expect(archs.stdout, contains('Mach-O 64-bit dynamically linked shared library arm64'));
+      final bool helloDynamic = pluginFrameworkBinary.existsSync();
+      final bool helloStatic = AppleTestUtils
+        .getExportedSymbols(runnerBinary.path)
+        .any((String symbol) => symbol.contains('HelloPlugin') && symbol.contains('handle'));
+
+      // Plugin is a dynamic xor static framework.
+      expect(helloDynamic != helloStatic, isTrue);
+
+      if (helloDynamic) {
+        final ProcessResult archs = processManager.runSync(
+          <String>['file', pluginFrameworkBinary.path],
+        );
+        expect(archs.stdout, contains('Mach-O 64-bit dynamically linked shared library x86_64'));
+        expect(archs.stdout, contains('Mach-O 64-bit dynamically linked shared library arm64'));
+      }
     });
 
     testWithoutContext('build for simulator with all available architectures', () {
