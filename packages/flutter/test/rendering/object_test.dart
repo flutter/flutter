@@ -33,7 +33,7 @@ void main() {
       onSemanticsUpdate: (ui.SemanticsUpdate update) {}
     );
     owner.ensureSemantics();
-    renderObject.attach(owner);
+    owner.rootNode = renderObject;
     renderObject.layout(const BoxConstraints.tightForFinite());  // semantics are only calculated if layout information is up to date.
     owner.flushSemantics();
 
@@ -54,7 +54,7 @@ void main() {
     expect(onSemanticsUpdateCallCount, 0);
 
     final TestRenderObject renderObject = TestRenderObject();
-    renderObject.attach(owner);
+    owner.rootNode = renderObject;
     renderObject.layout(const BoxConstraints.tightForFinite());
     owner.flushSemantics();
 

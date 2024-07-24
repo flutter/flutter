@@ -1856,6 +1856,15 @@ class SemanticsNode with DiagnosticableTreeMixin {
     }
   }
 
+  /// Whether is this node is hidden off-screen from parent's bounding box.
+  bool get isHidden => hasFlag(SemanticsFlag.isHidden);
+  set isHidden(bool value) {
+    if (hasFlag(SemanticsFlag.isHidden) != value) {
+      _flags = _flags ^ SemanticsFlag.isHidden.index;
+      _markDirty();
+    }
+  }
+
   /// The semantic clip from an ancestor that was applied to this node.
   ///
   /// Expressed in the coordinate system of the node. May be null if no clip has
@@ -1905,6 +1914,10 @@ class SemanticsNode with DiagnosticableTreeMixin {
   /// See also:
   ///
   ///  * [elevation], the actual elevation of this [SemanticsNode].
+  @Deprecated(
+    'This was caches for internal calculation and is no longer needed. '
+    'This feature was deprecated after v3.26.0.'
+  )
   double? elevationAdjustment;
 
   /// The index of this node within the parent's list of semantic children.
@@ -1925,7 +1938,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
   /// An invisible node can be safely dropped from the semantic tree without
   /// losing semantic information that is relevant for describing the content
   /// currently shown on screen.
-  bool get isInvisible => !isMergedIntoParent && rect.isEmpty;
+  bool get isInvisible => !isMergedIntoParent && (rect.isEmpty || (transform?.isZero() ?? false));
 
   // MERGING
 
@@ -1933,8 +1946,15 @@ class SemanticsNode with DiagnosticableTreeMixin {
   ///
   /// This value indicates whether this node has any ancestors with
   /// [mergeAllDescendantsIntoThisNode] set to true.
-  bool get isMergedIntoParent => parent != null && _isMergedIntoParent;
+  bool get isMergedIntoParent => _isMergedIntoParent;
   bool _isMergedIntoParent = false;
+  set isMergedIntoParent(bool value) {
+    if (_isMergedIntoParent == value) {
+      return;
+    }
+    _isMergedIntoParent = value;
+    parent?._markDirty();
+  }
 
   /// Whether the user can interact with this node in assistive technologies.
   ///
@@ -1971,6 +1991,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
   // CHILDREN
 
   /// Contains the children in inverse hit test order (i.e. paint order).
+  List<SemanticsNode>? get children => _children;
   List<SemanticsNode>? _children;
 
   /// A snapshot of `newChildren` passed to [_replaceChildren] that we keep in
@@ -1978,6 +1999,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
   /// of children.
   late List<SemanticsNode> _debugPreviousSnapshot;
 
+  /// Replace current children.
   void _replaceChildren(List<SemanticsNode> newChildren) {
     assert(!newChildren.any((SemanticsNode child) => child == this));
     assert(() {
@@ -2164,12 +2186,11 @@ class SemanticsNode with DiagnosticableTreeMixin {
     assert(child.owner == owner);
     final bool childShouldMergeToParent = isPartOfNodeMerging;
 
-    if (childShouldMergeToParent == child._isMergedIntoParent) {
+    if (childShouldMergeToParent == child.isMergedIntoParent) {
       return;
     }
 
-    child._isMergedIntoParent = childShouldMergeToParent;
-    _markDirty();
+    child.isMergedIntoParent = childShouldMergeToParent;
 
     if (child.mergeAllDescendantsIntoThisNode) {
       // No need to update the descendants since `child` has the merge flag set.
@@ -2181,6 +2202,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
   void _updateChildrenMergeFlags() {
     _children?.forEach(_updateChildMergeFlagRecursively);
   }
+
 
   void _adoptChild(SemanticsNode child) {
     assert(child._parent == null);
@@ -2197,6 +2219,11 @@ class SemanticsNode with DiagnosticableTreeMixin {
       child.attach(_owner!);
     }
     _redepthChild(child);
+    // In most cases, child should have up to date `isMergedIntoParent` since
+    // it was set during _SwitchableSemanticsFragment.compileSemanticsNodes.
+    // However, it is still possible that this child was an extra node
+    // introduced in RenderObject.assembleSemanticsNode. We have to make sure
+    // their `isMergedIntoParent` is updated correctly.
     _updateChildMergeFlagRecursively(child);
   }
 
@@ -3542,7 +3569,7 @@ class SemanticsOwner extends ChangeNotifier {
       visitedNodes.addAll(localDirtyNodes);
       for (final SemanticsNode node in localDirtyNodes) {
         assert(node._dirty);
-        assert(node.parent == null || !node.parent!.isPartOfNodeMerging || node.isMergedIntoParent);
+        assert(node.parent == null || !node.parent!.isPartOfNodeMerging || node.isMergedIntoParent, 'node ${node.id}, node.parent?.isPartOfNodeMerging ${node.parent?.isPartOfNodeMerging}, node.isMergedIntoParent ${node.isMergedIntoParent}');
         if (node.isPartOfNodeMerging) {
           assert(node.mergeAllDescendantsIntoThisNode || node.parent != null);
           // If child node is merged into its parent, make sure the parent is marked as dirty
@@ -3757,8 +3784,7 @@ class SemanticsConfiguration {
   ///
   /// An empty configuration doesn't contain any semantic information that it
   /// wants to contribute to the semantics tree.
-  bool get hasBeenAnnotated => _hasBeenAnnotated;
-  bool _hasBeenAnnotated = false;
+  bool hasBeenAnnotated = false;
 
   /// The actions (with associated action handlers) that this configuration
   /// would like to contribute to the semantics tree.
@@ -3778,7 +3804,7 @@ class SemanticsConfiguration {
   void _addAction(SemanticsAction action, SemanticsActionHandler handler) {
     _actions[action] = handler;
     _actionsAsBits |= action.index;
-    _hasBeenAnnotated = true;
+    hasBeenAnnotated = true;
   }
 
   /// Adds an `action` to the semantics tree, whose `handler` does not expect
@@ -4199,8 +4225,7 @@ class SemanticsConfiguration {
   set childConfigurationsDelegate(ChildSemanticsConfigurationsDelegate? value) {
     assert(value != null);
     _childConfigurationsDelegate = value;
-    // Setting the childConfigsDelegate does not annotate any meaningful
-    // semantics information of the config.
+    // hasBeenAnnotated = true;
   }
 
   /// Returns the action handler registered for [action] or null if none was
@@ -4223,7 +4248,7 @@ class SemanticsConfiguration {
   set sortKey(SemanticsSortKey? value) {
     assert(value != null);
     _sortKey = value;
-    _hasBeenAnnotated = true;
+    hasBeenAnnotated = true;
   }
 
   /// The index of this node within the parent's list of semantic children.
@@ -4236,7 +4261,7 @@ class SemanticsConfiguration {
   int? _indexInParent;
   set indexInParent(int? value) {
     _indexInParent = value;
-    _hasBeenAnnotated = true;
+    hasBeenAnnotated = true;
   }
 
   /// The total number of scrollable children that contribute to semantics.
@@ -4250,7 +4275,7 @@ class SemanticsConfiguration {
       return;
     }
     _scrollChildCount = value;
-    _hasBeenAnnotated = true;
+    hasBeenAnnotated = true;
   }
 
   /// The index of the first visible scrollable child that contributes to
@@ -4262,7 +4287,7 @@ class SemanticsConfiguration {
       return;
     }
     _scrollIndex = value;
-    _hasBeenAnnotated = true;
+    hasBeenAnnotated = true;
   }
 
   /// The id of the platform view, whose semantics nodes will be added as
@@ -4274,7 +4299,7 @@ class SemanticsConfiguration {
       return;
     }
     _platformViewId = value;
-    _hasBeenAnnotated = true;
+    hasBeenAnnotated = true;
   }
 
   /// The maximum number of characters that can be entered into an editable
@@ -4292,7 +4317,7 @@ class SemanticsConfiguration {
       return;
     }
     _maxValueLength = value;
-    _hasBeenAnnotated = true;
+    hasBeenAnnotated = true;
   }
 
   /// The current number of characters that have been entered into an editable
@@ -4310,7 +4335,7 @@ class SemanticsConfiguration {
       return;
     }
     _currentValueLength = value;
-    _hasBeenAnnotated = true;
+    hasBeenAnnotated = true;
   }
 
   /// Whether the semantic information provided by the owning [RenderObject] and
@@ -4326,7 +4351,7 @@ class SemanticsConfiguration {
   set isMergingSemanticsOfDescendants(bool value) {
     assert(isSemanticBoundary);
     _isMergingSemanticsOfDescendants = value;
-    _hasBeenAnnotated = true;
+    hasBeenAnnotated = true;
   }
 
   /// The handlers for each supported [CustomSemanticsAction].
@@ -4338,7 +4363,7 @@ class SemanticsConfiguration {
   Map<CustomSemanticsAction, VoidCallback> get customSemanticsActions => _customSemanticsActions;
   Map<CustomSemanticsAction, VoidCallback> _customSemanticsActions = <CustomSemanticsAction, VoidCallback>{};
   set customSemanticsActions(Map<CustomSemanticsAction, VoidCallback> value) {
-    _hasBeenAnnotated = true;
+    hasBeenAnnotated = true;
     _actionsAsBits |= SemanticsAction.customAction.index;
     _customSemanticsActions = value;
     _actions[SemanticsAction.customAction] = _onCustomSemanticsAction;
@@ -4360,7 +4385,7 @@ class SemanticsConfiguration {
   String _identifier = '';
   set identifier(String identifier) {
     _identifier = identifier;
-    _hasBeenAnnotated = true;
+    hasBeenAnnotated = true;
   }
 
   /// A textual description of the owning [RenderObject].
@@ -4375,7 +4400,7 @@ class SemanticsConfiguration {
   String get label => _attributedLabel.string;
   set label(String label) {
     _attributedLabel = AttributedString(label);
-    _hasBeenAnnotated = true;
+    hasBeenAnnotated = true;
   }
 
   /// A textual description of the owning [RenderObject] in [AttributedString]
@@ -4396,7 +4421,7 @@ class SemanticsConfiguration {
   AttributedString _attributedLabel = AttributedString('');
   set attributedLabel(AttributedString attributedLabel) {
     _attributedLabel = attributedLabel;
-    _hasBeenAnnotated = true;
+    hasBeenAnnotated = true;
   }
 
   /// A textual description for the current value of the owning [RenderObject].
@@ -4415,7 +4440,7 @@ class SemanticsConfiguration {
   String get value => _attributedValue.string;
   set value(String value) {
     _attributedValue = AttributedString(value);
-    _hasBeenAnnotated = true;
+    hasBeenAnnotated = true;
   }
 
   /// A textual description for the current value of the owning [RenderObject]
@@ -4440,7 +4465,7 @@ class SemanticsConfiguration {
   AttributedString _attributedValue = AttributedString('');
   set attributedValue(AttributedString attributedValue) {
     _attributedValue = attributedValue;
-    _hasBeenAnnotated = true;
+    hasBeenAnnotated = true;
   }
 
   /// The value that [value] will have after performing a
@@ -4460,7 +4485,7 @@ class SemanticsConfiguration {
   String get increasedValue => _attributedIncreasedValue.string;
   set increasedValue(String increasedValue) {
     _attributedIncreasedValue = AttributedString(increasedValue);
-    _hasBeenAnnotated = true;
+    hasBeenAnnotated = true;
   }
 
   /// The value that [value] will have after performing a
@@ -4479,7 +4504,7 @@ class SemanticsConfiguration {
   AttributedString _attributedIncreasedValue = AttributedString('');
   set attributedIncreasedValue(AttributedString attributedIncreasedValue) {
     _attributedIncreasedValue = attributedIncreasedValue;
-    _hasBeenAnnotated = true;
+    hasBeenAnnotated = true;
   }
 
   /// The value that [value] will have after performing a
@@ -4497,7 +4522,7 @@ class SemanticsConfiguration {
   String get decreasedValue => _attributedDecreasedValue.string;
   set decreasedValue(String decreasedValue) {
     _attributedDecreasedValue = AttributedString(decreasedValue);
-    _hasBeenAnnotated = true;
+    hasBeenAnnotated = true;
   }
 
   /// The value that [value] will have after performing a
@@ -4516,7 +4541,7 @@ class SemanticsConfiguration {
   AttributedString _attributedDecreasedValue = AttributedString('');
   set attributedDecreasedValue(AttributedString attributedDecreasedValue) {
     _attributedDecreasedValue = attributedDecreasedValue;
-    _hasBeenAnnotated = true;
+    hasBeenAnnotated = true;
   }
 
   /// A brief description of the result of performing an action on this node.
@@ -4531,7 +4556,7 @@ class SemanticsConfiguration {
   String get hint => _attributedHint.string;
   set hint(String hint) {
     _attributedHint = AttributedString(hint);
-    _hasBeenAnnotated = true;
+    hasBeenAnnotated = true;
   }
 
   /// A brief description of the result of performing an action on this node in
@@ -4552,7 +4577,7 @@ class SemanticsConfiguration {
   AttributedString _attributedHint = AttributedString('');
   set attributedHint(AttributedString attributedHint) {
     _attributedHint = attributedHint;
-    _hasBeenAnnotated = true;
+    hasBeenAnnotated = true;
   }
 
   /// A textual description of the widget's tooltip.
@@ -4562,7 +4587,7 @@ class SemanticsConfiguration {
   String _tooltip = '';
   set tooltip(String tooltip) {
     _tooltip = tooltip;
-    _hasBeenAnnotated = true;
+    hasBeenAnnotated = true;
   }
 
   /// Provides hint values which override the default hints on supported
@@ -4574,7 +4599,7 @@ class SemanticsConfiguration {
       return;
     }
     _hintOverrides = value;
-    _hasBeenAnnotated = true;
+    hasBeenAnnotated = true;
   }
 
   /// The elevation in z-direction at which the owning [RenderObject] is
@@ -4587,7 +4612,7 @@ class SemanticsConfiguration {
       return;
     }
     _elevation = value;
-    _hasBeenAnnotated = true;
+    hasBeenAnnotated = true;
   }
 
   /// The extend that the owning [RenderObject] occupies in z-direction starting
@@ -4604,7 +4629,7 @@ class SemanticsConfiguration {
       return;
     }
     _thickness = value;
-    _hasBeenAnnotated = true;
+    hasBeenAnnotated = true;
   }
 
   /// Whether the semantics node is the root of a subtree for which values
@@ -4661,7 +4686,7 @@ class SemanticsConfiguration {
   TextDirection? _textDirection;
   set textDirection(TextDirection? textDirection) {
     _textDirection = textDirection;
-    _hasBeenAnnotated = true;
+    hasBeenAnnotated = true;
   }
 
   /// Whether the owning [RenderObject] is selected (true) or not (false).
@@ -4799,7 +4824,7 @@ class SemanticsConfiguration {
       return;
     }
     _linkUrl = value;
-    _hasBeenAnnotated = true;
+    hasBeenAnnotated = true;
   }
 
   /// Whether the owning [RenderObject] is a header (true) or not (false).
@@ -4820,7 +4845,7 @@ class SemanticsConfiguration {
       return;
     }
     _headingLevel = value;
-    _hasBeenAnnotated = true;
+    hasBeenAnnotated = true;
   }
 
   /// Whether the owning [RenderObject] is a slider (true) or not (false).
@@ -4909,7 +4934,7 @@ class SemanticsConfiguration {
   set textSelection(TextSelection? value) {
     assert(value != null);
     _textSelection = value;
-    _hasBeenAnnotated = true;
+    hasBeenAnnotated = true;
   }
 
   /// Indicates the current scrolling position in logical pixels if the node is
@@ -4927,7 +4952,7 @@ class SemanticsConfiguration {
   set scrollPosition(double? value) {
     assert(value != null);
     _scrollPosition = value;
-    _hasBeenAnnotated = true;
+    hasBeenAnnotated = true;
   }
 
   /// Indicates the maximum in-range value for [scrollPosition] if the node is
@@ -4943,7 +4968,7 @@ class SemanticsConfiguration {
   set scrollExtentMax(double? value) {
     assert(value != null);
     _scrollExtentMax = value;
-    _hasBeenAnnotated = true;
+    hasBeenAnnotated = true;
   }
 
   /// Indicates the minimum in-range value for [scrollPosition] if the node is
@@ -4959,7 +4984,7 @@ class SemanticsConfiguration {
   set scrollExtentMin(double? value) {
     assert(value != null);
     _scrollExtentMin = value;
-    _hasBeenAnnotated = true;
+    hasBeenAnnotated = true;
   }
 
   // TAGS
@@ -5008,7 +5033,7 @@ class SemanticsConfiguration {
     } else {
       _flags &= ~flag.index;
     }
-    _hasBeenAnnotated = true;
+    hasBeenAnnotated = true;
   }
 
   bool _hasFlag(SemanticsFlag flag) => (_flags & flag.index) != 0;
@@ -5123,7 +5148,7 @@ class SemanticsConfiguration {
 
     _thickness = math.max(_thickness, child._thickness + child._elevation);
 
-    _hasBeenAnnotated = _hasBeenAnnotated || child._hasBeenAnnotated;
+    hasBeenAnnotated = hasBeenAnnotated || child.hasBeenAnnotated;
   }
 
   /// Returns an exact copy of this configuration.
@@ -5132,7 +5157,7 @@ class SemanticsConfiguration {
       .._isSemanticBoundary = _isSemanticBoundary
       ..explicitChildNodes = explicitChildNodes
       ..isBlockingSemanticsOfPreviouslyPaintedNodes = isBlockingSemanticsOfPreviouslyPaintedNodes
-      .._hasBeenAnnotated = _hasBeenAnnotated
+      ..hasBeenAnnotated = hasBeenAnnotated
       .._isMergingSemanticsOfDescendants = _isMergingSemanticsOfDescendants
       .._textDirection = _textDirection
       .._sortKey = _sortKey
