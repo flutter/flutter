@@ -6,6 +6,7 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import '../widgets/semantics_tester.dart';
 
@@ -985,7 +986,6 @@ void main() {
         body: const Center(child: Text('body')),
       ),
     ));
-
     showModalBottomSheet<void>(
       context: scaffoldKey.currentContext!,
       builder: (BuildContext context) {

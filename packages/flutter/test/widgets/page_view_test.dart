@@ -1121,6 +1121,7 @@ void main() {
 
     controller.nextPage(duration: const Duration(milliseconds: 150), curve: Curves.ease);
     await tester.pumpAndSettle();
+
     expect(semantics, includesNodeWith(label: 'Page #0', flags: <SemanticsFlag>[SemanticsFlag.isHidden]));
     expect(semantics, includesNodeWith(label: 'Page #1'));
     expect(semantics, includesNodeWith(label: 'Page #2', flags: <SemanticsFlag>[SemanticsFlag.isHidden]));
