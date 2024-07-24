@@ -373,8 +373,9 @@ class _CupertinoAlertDialogState extends State<CupertinoAlertDialog> {
   Widget _buildBody(BuildContext context) {
     final Color backgroundColor = CupertinoDynamicColor.resolve(_kDialogColor, context);
     final Color dividerColor = CupertinoColors.separator;
-    // Removing padding because the scrollbars currently uses the view padding
-    // as padding. https://github.com/flutter/flutter/issues/150544
+    // Remove view padding here because the `Scrollbar` widget uses the view
+    // padding as padding, which is unwanted.
+    // https://github.com/flutter/flutter/issues/150544
     return MediaQuery.removePadding(
       removeLeft: true,
       removeTop: true,
