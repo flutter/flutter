@@ -8,6 +8,8 @@ import 'package:flutter/rendering.dart';
 
 import 'use_cases/use_cases.dart';
 
+import 'utils.dart';
+
 void main() {
   runApp(const App());
   if (kIsWeb) {
@@ -75,7 +77,10 @@ class HomePageState extends State<HomePage> {
   }
 
   @override
+  @override
   Widget build(BuildContext context) {
+    setWebTitle('Home Page', Theme.of(context).colorScheme.primary.value);
+
     return Scaffold(
       appBar: AppBar(
         title: Semantics(headingLevel: 1, child: const Text('Accessibility Assessments')),
