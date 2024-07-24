@@ -1,6 +1,6 @@
-platforms;android-34:platforms
+platforms;android-35:platforms
 cmdline-tools;latest:cmdline-tools
-build-tools;34.0.0:build-tools
+build-tools;35.0.0-rc4:build-tools
 platform-tools:platform-tools
 tools:tools
-ndk;26.1.10909125:ndk
+ndk;26.3.11579264:ndk
