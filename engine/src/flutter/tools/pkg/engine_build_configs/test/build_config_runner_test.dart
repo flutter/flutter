@@ -283,6 +283,135 @@ void main() {
     expect(events[5].name, equals('$buildName: ninja'));
   });
 
+  test('GlobalBuildRunner sets default RBE env vars in an RBE build', () async {
+    final Build targetBuild = buildConfig.builds[0];
+    final BuildRunner buildRunner = BuildRunner(
+      platform: FakePlatform(
+        operatingSystem: Platform.linux,
+        numberOfProcessors: 32,
+      ),
+      processRunner: ProcessRunner(
+        processManager: _fakeProcessManager(),
+      ),
+      abi: ffi.Abi.linuxX64,
+      engineSrcDir: engine.srcDir,
+      build: targetBuild,
+      concurrency: 500,
+      extraGnArgs: <String>['--rbe'],
+      dryRun: true,
+    );
+    final List<RunnerEvent> events = <RunnerEvent>[];
+    void handler(RunnerEvent event) => events.add(event);
+    final bool runResult = await buildRunner.run(handler);
+
+    final String buildName = targetBuild.name;
+
+    expect(runResult, isTrue);
+
+    // Check that the events for the Ninja command are correct.
+    expect(events[4] is RunnerStart, isTrue);
+    expect(events[4].name, equals('$buildName: ninja'));
+    expect(events[4].environment, isNotNull);
+    expect(events[4].environment!.containsKey('RBE_exec_strategy'), isTrue);
+    expect(
+      events[4].environment!['RBE_exec_strategy'],
+      equals(RbeExecStrategy.racing.toString()),
+    );
+    expect(events[4].environment!.containsKey('RBE_racing_bias'), isTrue);
+    expect(events[4].environment!['RBE_racing_bias'], equals('0.95'));
+    expect(
+      events[4].environment!.containsKey('RBE_local_resource_fraction'),
+      isTrue,
+    );
+    expect(
+      events[4].environment!['RBE_local_resource_fraction'],
+      equals('0.2'),
+    );
+  });
+
+  test('GlobalBuildRunner sets RBE_disable_remote when remote builds are disabled', () async {
+    final Build targetBuild = buildConfig.builds[0];
+    final BuildRunner buildRunner = BuildRunner(
+      platform: FakePlatform(
+        operatingSystem: Platform.linux,
+        numberOfProcessors: 32,
+      ),
+      processRunner: ProcessRunner(
+        processManager: _fakeProcessManager(),
+      ),
+      abi: ffi.Abi.linuxX64,
+      engineSrcDir: engine.srcDir,
+      build: targetBuild,
+      concurrency: 500,
+      rbeConfig: const RbeConfig(remoteDisabled: true),
+      extraGnArgs: <String>['--rbe'],
+      dryRun: true,
+    );
+    final List<RunnerEvent> events = <RunnerEvent>[];
+    void handler(RunnerEvent event) => events.add(event);
+    final bool runResult = await buildRunner.run(handler);
+
+    final String buildName = targetBuild.name;
+
+    expect(runResult, isTrue);
+
+    // Check that the events for the Ninja command are correct.
+    expect(events[4] is RunnerStart, isTrue);
+    expect(events[4].name, equals('$buildName: ninja'));
+    expect(events[4].environment, isNotNull);
+    expect(events[4].environment!.containsKey('RBE_remote_disabled'), isTrue);
+    expect(events[4].environment!['RBE_remote_disabled'], equals('1'));
+    expect(events[4].environment!.containsKey('RBE_exec_strategy'), isFalse);
+    expect(events[4].environment!.containsKey('RBE_racing_bias'), isFalse);
+    expect(
+      events[4].environment!.containsKey('RBE_local_resource_fraction'),
+      isFalse,
+    );
+  });
+
+  test('GlobalBuildRunner sets RBE_exec_strategy when a non-default value is passed in the RbeConfig', () async {
+    final Build targetBuild = buildConfig.builds[0];
+    final BuildRunner buildRunner = BuildRunner(
+      platform: FakePlatform(
+        operatingSystem: Platform.linux,
+        numberOfProcessors: 32,
+      ),
+      processRunner: ProcessRunner(
+        processManager: _fakeProcessManager(),
+      ),
+      abi: ffi.Abi.linuxX64,
+      engineSrcDir: engine.srcDir,
+      build: targetBuild,
+      concurrency: 500,
+      rbeConfig: const RbeConfig(execStrategy: RbeExecStrategy.local),
+      extraGnArgs: <String>['--rbe'],
+      dryRun: true,
+    );
+    final List<RunnerEvent> events = <RunnerEvent>[];
+    void handler(RunnerEvent event) => events.add(event);
+    final bool runResult = await buildRunner.run(handler);
+
+    final String buildName = targetBuild.name;
+
+    expect(runResult, isTrue);
+
+    // Check that the events for the Ninja command are correct.
+    expect(events[4] is RunnerStart, isTrue);
+    expect(events[4].name, equals('$buildName: ninja'));
+    expect(events[4].environment, isNotNull);
+    expect(events[4].environment!.containsKey('RBE_remote_disabled'), isFalse);
+    expect(events[4].environment!.containsKey('RBE_exec_strategy'), isTrue);
+    expect(
+      events[4].environment!['RBE_exec_strategy'],
+      equals(RbeExecStrategy.local.toString()),
+    );
+    expect(events[4].environment!.containsKey('RBE_racing_bias'), isFalse);
+    expect(
+      events[4].environment!.containsKey('RBE_local_resource_fraction'),
+      isFalse,
+    );
+  });
+
   test('GlobalBuildRunner passes the specified -j when explicitly provided in a non-RBE build', () async {
     final Build targetBuild = buildConfig.builds[0];
     final BuildRunner buildRunner = BuildRunner(
