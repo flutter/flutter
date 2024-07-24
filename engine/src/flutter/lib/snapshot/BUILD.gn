@@ -33,7 +33,7 @@ group("generate_snapshot_bins") {
   #
   # For macOS target builds: needed for both target CPUs (arm64, x64).
   # For iOS, Android target builds: all AOT target CPUs are arm/arm64.
-  if (host_os == "mac" && target_os == "mac") {
+  if (host_os == "mac" && (target_os == "mac" || target_os == "ios")) {
     deps += [ ":create_macos_gen_snapshots" ]
   } else if (host_os == "mac" &&
              (target_cpu == "arm" || target_cpu == "arm64")) {
@@ -184,17 +184,16 @@ if (host_os == "mac" && target_os != "mac" &&
 # to `gen_snapshot_arm64` or `gen_snapshot_x64` depending on the target
 # platform.
 #
-# This target is used for builds targeting macOS.
-if (host_os == "mac" && target_os == "mac") {
+# This target is used for builds targeting iOS and macOS.
+if (host_os == "mac" && (target_os == "mac" || target_os == "ios")) {
   template("build_mac_gen_snapshot") {
     assert(defined(invoker.host_arch))
     host_cpu = invoker.host_arch
 
     build_toolchain = "//build/toolchain/mac:clang_$host_cpu"
-    if (host_cpu == target_cpu) {
+    gen_snapshot_target_name = "gen_snapshot"
+    if (target_os == "mac" && host_cpu == target_cpu) {
       gen_snapshot_target_name = "gen_snapshot_host_targeting_host"
-    } else {
-      gen_snapshot_target_name = "gen_snapshot"
     }
     gen_snapshot_target =
         "$dart_src/runtime/bin:$gen_snapshot_target_name($build_toolchain)"

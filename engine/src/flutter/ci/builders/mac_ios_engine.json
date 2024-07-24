@@ -117,6 +117,7 @@
             "ninja": {
                 "config": "ci/ios_debug",
                 "targets": [
+                    "flutter/lib/snapshot:generate_snapshot_bins",
                     "flutter/shell/platform/darwin/ios:flutter_framework"
                 ]
             },
@@ -161,8 +162,8 @@
             "ninja": {
                 "config": "ci/ios_profile",
                 "targets": [
-                    "flutter/shell/platform/darwin/ios:flutter_framework",
-                    "flutter/lib/snapshot:generate_snapshot_bin"
+                    "flutter/lib/snapshot:generate_snapshot_bins",
+                    "flutter/shell/platform/darwin/ios:flutter_framework"
                 ]
             },
             "postsubmit_overrides": {
@@ -206,8 +207,8 @@
             "ninja": {
                 "config": "ci/ios_release",
                 "targets": [
-                    "flutter/shell/platform/darwin/ios:flutter_framework",
-                    "flutter/lib/snapshot:generate_snapshot_bin"
+                    "flutter/lib/snapshot:generate_snapshot_bins",
+                    "flutter/shell/platform/darwin/ios:flutter_framework"
                 ]
             },
             "postsubmit_overrides": {
@@ -349,6 +350,7 @@
             "ninja": {
                 "config": "ci/ios_debug_extension_safe",
                 "targets": [
+                    "flutter/lib/snapshot:generate_snapshot_bins",
                     "flutter/shell/platform/darwin/ios:flutter_framework"
                 ]
             },
@@ -395,8 +397,8 @@
             "ninja": {
                 "config": "ci/ios_profile_extension_safe",
                 "targets": [
-                    "flutter/shell/platform/darwin/ios:flutter_framework",
-                    "flutter/lib/snapshot:generate_snapshot_bin"
+                    "flutter/lib/snapshot:generate_snapshot_bins",
+                    "flutter/shell/platform/darwin/ios:flutter_framework"
                 ]
             },
             "postsubmit_overrides": {
@@ -442,8 +444,8 @@
             "ninja": {
                 "config": "ci/ios_release_extension_safe",
                 "targets": [
-                    "flutter/shell/platform/darwin/ios:flutter_framework",
-                    "flutter/lib/snapshot:generate_snapshot_bin"
+                    "flutter/lib/snapshot:generate_snapshot_bins",
+                    "flutter/shell/platform/darwin/ios:flutter_framework"
                 ]
             },
             "postsubmit_overrides": {

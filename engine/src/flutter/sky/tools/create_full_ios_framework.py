@@ -230,21 +230,20 @@ def process_framework(args, dst, framework, framework_binary):
 
 def generate_gen_snapshot(dst, x64_out_dir, arm64_out_dir):
   if x64_out_dir:
-    _generate_gen_snapshot(x64_out_dir, os.path.join(dst, 'gen_snapshot_x64'))
+    x64_path = os.path.join(x64_out_dir, 'gen_snapshot_x64')
+    _generate_gen_snapshot(x64_path, os.path.join(dst, 'gen_snapshot_x64'))
 
   if arm64_out_dir:
-    _generate_gen_snapshot(
-        os.path.join(arm64_out_dir, 'clang_x64'), os.path.join(dst, 'gen_snapshot_arm64')
-    )
+    arm64_path = os.path.join(arm64_out_dir, 'gen_snapshot_arm64')
+    _generate_gen_snapshot(arm64_path, os.path.join(dst, 'gen_snapshot_arm64'))
 
 
-def _generate_gen_snapshot(directory, destination):
-  gen_snapshot_dir = os.path.join(directory, 'gen_snapshot')
-  if not os.path.isfile(gen_snapshot_dir):
-    print('Cannot find gen_snapshot at %s' % gen_snapshot_dir)
+def _generate_gen_snapshot(gen_snapshot_path, destination):
+  if not os.path.isfile(gen_snapshot_path):
+    print('Cannot find gen_snapshot at %s' % gen_snapshot_path)
     sys.exit(1)
 
-  subprocess.check_call(['xcrun', 'bitcode_strip', '-r', gen_snapshot_dir, '-o', destination])
+  subprocess.check_call(['xcrun', 'bitcode_strip', '-r', gen_snapshot_path, '-o', destination])
 
 
 if __name__ == '__main__':
