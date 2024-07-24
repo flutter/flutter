@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:ui';
+/// @docImport 'package:flutter/cupertino.dart';
+/// @docImport 'package:flutter/material.dart';
+/// @docImport 'package:flutter/widgets.dart';
+library;
+
 import 'dart:math' as math;
 import 'dart:ui' as ui show Image, ImageFilter, TextHeightBehavior;
 

@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'editable_text.dart';
+/// @docImport 'form.dart';
+/// @docImport 'scrollable.dart';
+library;
+
 import 'package:flutter/services.dart';
 import 'framework.dart';
 

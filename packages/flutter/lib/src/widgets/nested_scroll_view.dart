@@ -2,6 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'page_storage.dart';
+/// @docImport 'safe_area.dart';
+/// @docImport 'scrollable.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';

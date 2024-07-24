@@ -2,6 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/cupertino.dart';
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'heroes.dart';
+/// @docImport 'overlay.dart';
+/// @docImport 'view.dart';
+library;
+
 import 'dart:collection' show HashMap;
 
 import 'package:flutter/foundation.dart';

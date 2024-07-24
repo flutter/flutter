@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/cupertino.dart';
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'text_selection_toolbar_layout_delegate.dart';
+library;
+
 import 'package:flutter/rendering.dart';
 
 /// Positions the toolbar at [anchor] if it fits, otherwise moves it so that it

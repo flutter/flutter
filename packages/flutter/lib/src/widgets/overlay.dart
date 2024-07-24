@@ -2,6 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/cupertino.dart';
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'app.dart';
+/// @docImport 'drag_target.dart';
+/// @docImport 'implicit_animations.dart';
+/// @docImport 'media_query.dart';
+/// @docImport 'navigator.dart';
+/// @docImport 'routes.dart';
+/// @docImport 'scroll_view.dart';
+/// @docImport 'sliver.dart';
+/// @docImport 'text.dart';
+library;
+
 import 'dart:collection';
 
 import 'package:flutter/foundation.dart';

@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/cupertino.dart';
+///
+/// @docImport 'form.dart';
+/// @docImport 'navigator_pop_handler.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 
 import 'framework.dart';
