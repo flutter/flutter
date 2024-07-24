@@ -231,6 +231,9 @@ bool SurfaceMTL::Present() const {
 
 #ifdef IMPELLER_DEBUG
   context->GetResourceAllocator()->DebugTraceMemoryStatistics();
+  if (frame_boundary_) {
+    ContextMTL::Cast(context.get())->GetCaptureManager()->FinishCapture();
+  }
 #endif  // IMPELLER_DEBUG
 
   if (requires_blit_) {

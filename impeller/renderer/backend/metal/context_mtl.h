@@ -31,6 +31,36 @@
 
 namespace impeller {
 
+/// @brief Creates and manages a Metal capture scope that supports frame capture
+///        when using the FlutterMetalLayer backed drawable.
+class ImpellerMetalCaptureManager {
+ public:
+  /// @brief Construct a new capture manager from the provided Metal device.
+  explicit ImpellerMetalCaptureManager(id<MTLDevice> device);
+
+  ~ImpellerMetalCaptureManager() = default;
+
+  /// Whether or not the Impeller capture scope is active.
+  ///
+  /// This is distinct from whether or not there is a session recording the
+  /// capture. That can be checked with `[[MTLCaptureManager
+  /// sharedCaptureManager] isCapturing].`
+  bool CaptureScopeActive() const;
+
+  /// @brief Begin a new capture scope, no-op if the scope has already started.
+  void StartCapture();
+
+  /// @brief End the current capture scope.
+  void FinishCapture();
+
+ private:
+  id<MTLCaptureScope> current_capture_scope_;
+  bool scope_active_ = false;
+
+  ImpellerMetalCaptureManager(const ImpellerMetalCaptureManager&) = default;
+  ImpellerMetalCaptureManager(ImpellerMetalCaptureManager&&) = delete;
+};
+
 class ContextMTL final : public Context,
                          public BackendCast<ContextMTL, Context>,
                          public std::enable_shared_from_this<ContextMTL> {
@@ -101,6 +131,8 @@ class ContextMTL final : public Context,
 
 #ifdef IMPELLER_DEBUG
   std::shared_ptr<GPUTracerMTL> GetGPUTracer() const;
+
+  const std::shared_ptr<ImpellerMetalCaptureManager> GetCaptureManager() const;
 #endif  // IMPELLER_DEBUG
 
   // |Context|
@@ -125,12 +157,13 @@ class ContextMTL final : public Context,
   std::shared_ptr<AllocatorMTL> resource_allocator_;
   std::shared_ptr<const Capabilities> device_capabilities_;
   std::shared_ptr<const fml::SyncSwitch> is_gpu_disabled_sync_switch_;
-#ifdef IMPELLER_DEBUG
-  std::shared_ptr<GPUTracerMTL> gpu_tracer_;
-#endif  // IMPELLER_DEBUG
   std::deque<std::function<void()>> tasks_awaiting_gpu_;
   std::unique_ptr<SyncSwitchObserver> sync_switch_observer_;
   std::shared_ptr<CommandQueue> command_queue_ip_;
+#ifdef IMPELLER_DEBUG
+  std::shared_ptr<GPUTracerMTL> gpu_tracer_;
+  std::shared_ptr<ImpellerMetalCaptureManager> capture_manager_;
+#endif  // IMPELLER_DEBUG
   bool is_valid_ = false;
 
   ContextMTL(id<MTLDevice> device,
