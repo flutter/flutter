@@ -35,6 +35,9 @@ static const char* fragment_shader_src =
 G_DEFINE_QUARK(fl_renderer_error_quark, fl_renderer_error)
 
 typedef struct {
+  // Engine we are rendering.
+  GWeakRef engine;
+
   FlView* view;
 
   // target dimension for resizing
@@ -103,9 +106,10 @@ static void fl_renderer_unblock_main_thread(FlRenderer* self) {
   if (priv->blocking_main_thread) {
     priv->blocking_main_thread = false;
 
-    FlTaskRunner* runner =
-        fl_engine_get_task_runner(fl_view_get_engine(priv->view));
-    fl_task_runner_release_main_thread(runner);
+    g_autoptr(FlEngine) engine = FL_ENGINE(g_weak_ref_get(&priv->engine));
+    if (engine != nullptr) {
+      fl_task_runner_release_main_thread(fl_engine_get_task_runner(engine));
+    }
   }
 }
 
@@ -239,6 +243,7 @@ static void fl_renderer_dispose(GObject* object) {
 
   fl_renderer_unblock_main_thread(self);
 
+  g_weak_ref_clear(&priv->engine);
   g_clear_pointer(&priv->framebuffers, g_ptr_array_unref);
 
   G_OBJECT_CLASS(fl_renderer_parent_class)->dispose(object);
@@ -252,6 +257,15 @@ static void fl_renderer_init(FlRenderer* self) {
   FlRendererPrivate* priv = reinterpret_cast<FlRendererPrivate*>(
       fl_renderer_get_instance_private(self));
   priv->framebuffers = g_ptr_array_new_with_free_func(g_object_unref);
+}
+
+void fl_renderer_set_engine(FlRenderer* self, FlEngine* engine) {
+  FlRendererPrivate* priv = reinterpret_cast<FlRendererPrivate*>(
+      fl_renderer_get_instance_private(self));
+
+  g_return_if_fail(FL_IS_RENDERER(self));
+
+  g_weak_ref_init(&priv->engine, engine);
 }
 
 gboolean fl_renderer_start(FlRenderer* self, FlView* view) {
@@ -348,9 +362,10 @@ void fl_renderer_wait_for_frame(FlRenderer* self,
 
   if (priv->had_first_frame && !priv->blocking_main_thread) {
     priv->blocking_main_thread = true;
-    FlTaskRunner* runner =
-        fl_engine_get_task_runner(fl_view_get_engine(priv->view));
-    fl_task_runner_block_main_thread(runner);
+    g_autoptr(FlEngine) engine = FL_ENGINE(g_weak_ref_get(&priv->engine));
+    if (engine != nullptr) {
+      fl_task_runner_block_main_thread(fl_engine_get_task_runner(engine));
+    }
   }
 }
 
