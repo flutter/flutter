@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'chip.dart';
+/// @docImport 'color_scheme.dart';
+/// @docImport 'list_tile.dart';
+library;
+
 import 'package:flutter/widgets.dart';
 
 import 'constants.dart';
@@ -84,7 +89,8 @@ class CircleAvatar extends StatelessWidget {
   /// The color with which to fill the circle. Changing the background
   /// color will cause the avatar to animate to the new color.
   ///
-  /// If a [backgroundColor] is not specified, the theme's
+  /// If a [backgroundColor] is not specified and [ThemeData.useMaterial3] is true,
+  /// [ColorScheme.primaryContainer] will be used, otherwise the theme's
   /// [ThemeData.primaryColorLight] is used with dark foreground colors, and
   /// [ThemeData.primaryColorDark] with light foreground colors.
   final Color? backgroundColor;
@@ -94,7 +100,9 @@ class CircleAvatar extends StatelessWidget {
   /// Defaults to the primary text theme color if no [backgroundColor] is
   /// specified.
   ///
-  /// Defaults to [ThemeData.primaryColorLight] for dark background colors, and
+  /// If a [foregroundColor] is not specified and [ThemeData.useMaterial3] is true,
+  /// [ColorScheme.onPrimaryContainer] will be used, otherwise the theme's
+  /// [ThemeData.primaryColorLight] for dark background colors, and
   /// [ThemeData.primaryColorDark] for light background colors.
   final Color? foregroundColor;
 
@@ -192,26 +200,24 @@ class CircleAvatar extends StatelessWidget {
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
     final ThemeData theme = Theme.of(context);
-    TextStyle textStyle = theme.primaryTextTheme.titleMedium!.copyWith(color: foregroundColor);
-    Color? effectiveBackgroundColor = backgroundColor;
+    final Color? effectiveForegroundColor = foregroundColor
+      ?? (theme.useMaterial3 ? theme.colorScheme.onPrimaryContainer : null);
+    final TextStyle effectiveTextStyle = theme.useMaterial3
+      ? theme.textTheme.titleMedium!
+      : theme.primaryTextTheme.titleMedium!;
+    TextStyle textStyle = effectiveTextStyle.copyWith(color: effectiveForegroundColor);
+    Color? effectiveBackgroundColor = backgroundColor
+      ?? (theme.useMaterial3 ? theme.colorScheme.primaryContainer : null);
     if (effectiveBackgroundColor == null) {
-      switch (ThemeData.estimateBrightnessForColor(textStyle.color!)) {
-        case Brightness.dark:
-          effectiveBackgroundColor = theme.primaryColorLight;
-          break;
-        case Brightness.light:
-          effectiveBackgroundColor = theme.primaryColorDark;
-          break;
-      }
-    } else if (foregroundColor == null) {
-      switch (ThemeData.estimateBrightnessForColor(backgroundColor!)) {
-        case Brightness.dark:
-          textStyle = textStyle.copyWith(color: theme.primaryColorLight);
-          break;
-        case Brightness.light:
-          textStyle = textStyle.copyWith(color: theme.primaryColorDark);
-          break;
-      }
+      effectiveBackgroundColor = switch (ThemeData.estimateBrightnessForColor(textStyle.color!)) {
+        Brightness.dark  => theme.primaryColorLight,
+        Brightness.light => theme.primaryColorDark,
+      };
+    } else if (effectiveForegroundColor == null) {
+      textStyle = switch (ThemeData.estimateBrightnessForColor(backgroundColor!)) {
+        Brightness.dark  => textStyle.copyWith(color: theme.primaryColorLight),
+        Brightness.light => textStyle.copyWith(color: theme.primaryColorDark),
+      };
     }
     final double minDiameter = _minDiameter;
     final double maxDiameter = _maxDiameter;
@@ -247,10 +253,9 @@ class CircleAvatar extends StatelessWidget {
       child: child == null
           ? null
           : Center(
-              child: MediaQuery(
-                // Need to ignore the ambient textScaleFactor here so that the
-                // text doesn't escape the avatar when the textScaleFactor is large.
-                data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+              // Need to disable text scaling here so that the text doesn't
+              // escape the avatar when the textScaleFactor is large.
+              child: MediaQuery.withNoTextScaling(
                 child: IconTheme(
                   data: theme.iconTheme.copyWith(color: textStyle.color),
                   child: DefaultTextStyle(

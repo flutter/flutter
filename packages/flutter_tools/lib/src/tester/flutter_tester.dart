@@ -11,7 +11,6 @@ import '../artifacts.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/os.dart';
 import '../build_info.dart';
 import '../bundle.dart';
 import '../bundle_builder.dart';
@@ -44,19 +43,17 @@ class FlutterTesterApp extends ApplicationPackage {
 /// also be used as a regular device when `--show-test-device` is provided
 /// to the flutter command.
 class FlutterTesterDevice extends Device {
-  FlutterTesterDevice(super.deviceId, {
+  FlutterTesterDevice(super.id, {
     required ProcessManager processManager,
     required FlutterVersion flutterVersion,
     required Logger logger,
     required FileSystem fileSystem,
     required Artifacts artifacts,
-    required OperatingSystemUtils operatingSystemUtils,
   }) : _processManager = processManager,
        _flutterVersion = flutterVersion,
        _logger = logger,
        _fileSystem = fileSystem,
-       _artifacts = artifacts,
-       _operatingSystemUtils = operatingSystemUtils,
+        _artifacts = artifacts,
        super(
         platformType: null,
         category: null,
@@ -68,7 +65,6 @@ class FlutterTesterDevice extends Device {
   final Logger _logger;
   final FileSystem _fileSystem;
   final Artifacts _artifacts;
-  final OperatingSystemUtils _operatingSystemUtils;
 
   Process? _process;
   final DevicePortForwarder _portForwarder = const NoOpDevicePortForwarder();
@@ -93,6 +89,9 @@ class FlutterTesterDevice extends Device {
 
   @override
   bool supportsRuntimeMode(BuildMode buildMode) => buildMode == BuildMode.debug;
+
+  @override
+  bool get supportsFlavors => true;
 
   @override
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.tester;
@@ -130,7 +129,7 @@ class FlutterTesterDevice extends Device {
 
   @override
   Future<LaunchResult> startApp(
-    ApplicationPackage package, {
+    ApplicationPackage? package, {
     String? mainPath,
     String? route,
     required DebuggingOptions debuggingOptions,
@@ -157,7 +156,7 @@ class FlutterTesterDevice extends Device {
       buildInfo: buildInfo,
       mainPath: mainPath,
       applicationKernelFilePath: applicationKernelFilePath,
-      platform: getTargetPlatformForName(getNameForHostPlatform(_operatingSystemUtils.hostPlatform)),
+      platform: TargetPlatform.tester,
       assetDirPath: assetDirectory.path,
     );
 
@@ -165,19 +164,20 @@ class FlutterTesterDevice extends Device {
       _artifacts.getArtifactPath(Artifact.flutterTester),
       '--run-forever',
       '--non-interactive',
-      '--enable-dart-profiling',
-      '--packages=${debuggingOptions.buildInfo.packagesPath}',
+      if (debuggingOptions.enableDartProfiling)
+        '--enable-dart-profiling',
+      '--packages=${debuggingOptions.buildInfo.packageConfigPath}',
       '--flutter-assets-dir=${assetDirectory.path}',
       if (debuggingOptions.startPaused)
         '--start-paused',
       if (debuggingOptions.disableServiceAuthCodes)
         '--disable-service-auth-codes',
-      if (debuggingOptions.hasObservatoryPort)
-        '--observatory-port=${debuggingOptions.hostVmServicePort}',
+      if (debuggingOptions.hostVmServicePort != null)
+        '--vm-service-port=${debuggingOptions.hostVmServicePort}',
       applicationKernelFilePath,
     ];
 
-    ProtocolDiscovery? observatoryDiscovery;
+    ProtocolDiscovery? vmServiceDiscovery;
     try {
       _logger.printTrace(command.join(' '));
       _process = await _processManager.start(command,
@@ -189,7 +189,7 @@ class FlutterTesterDevice extends Device {
         return LaunchResult.succeeded();
       }
 
-      observatoryDiscovery = ProtocolDiscovery.observatory(
+      vmServiceDiscovery = ProtocolDiscovery.vmService(
         getLogReader(),
         hostPort: debuggingOptions.hostVmServicePort,
         devicePort: debuggingOptions.deviceVmServicePort,
@@ -198,9 +198,9 @@ class FlutterTesterDevice extends Device {
       );
       _logReader.initializeProcess(_process!);
 
-      final Uri? observatoryUri = await observatoryDiscovery.uri;
-      if (observatoryUri != null) {
-        return LaunchResult.succeeded(observatoryUri: observatoryUri);
+      final Uri? vmServiceUri = await vmServiceDiscovery.uri;
+      if (vmServiceUri != null) {
+        return LaunchResult.succeeded(vmServiceUri: vmServiceUri);
       }
       _logger.printError(
         'Failed to launch $package: '
@@ -209,14 +209,14 @@ class FlutterTesterDevice extends Device {
     } on Exception catch (error) {
       _logger.printError('Failed to launch $package: $error');
     } finally {
-      await observatoryDiscovery?.cancel();
+      await vmServiceDiscovery?.cancel();
     }
     return LaunchResult.failed();
   }
 
   @override
   Future<bool> stopApp(
-    ApplicationPackage app, {
+    ApplicationPackage? app, {
     String? userIdentifier,
   }) async {
     _process?.kill();
@@ -235,7 +235,7 @@ class FlutterTesterDevice extends Device {
 
   @override
   DevFSWriter createDevFSWriter(
-    covariant ApplicationPackage app,
+    ApplicationPackage? app,
     String? userIdentifier,
   ) {
     return LocalDevFSWriter(
@@ -257,15 +257,13 @@ class FlutterTesterDevices extends PollingDeviceDiscovery {
     required ProcessManager processManager,
     required Logger logger,
     required FlutterVersion flutterVersion,
-    required OperatingSystemUtils operatingSystemUtils,
   }) : _testerDevice = FlutterTesterDevice(
         kTesterDeviceId,
         fileSystem: fileSystem,
         artifacts: artifacts,
         processManager: processManager,
         logger: logger,
-        flutterVersion: flutterVersion,
-        operatingSystemUtils: operatingSystemUtils,
+          flutterVersion: flutterVersion,
       ),
        super('Flutter tester');
 

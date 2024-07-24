@@ -68,6 +68,40 @@ void main() {
       equals(<KeyboardLockMode>{}));
   }, variant: KeySimulatorTransitModeVariant.keyDataThenRawKeyData());
 
+  testWidgets('KeyEvent can tell which keys are pressed', (WidgetTester tester) async {
+    await tester.pumpWidget(const Focus(autofocus: true, child: SizedBox()));
+    await tester.pump();
+
+    await simulateKeyDownEvent(LogicalKeyboardKey.numLock, platform: 'windows');
+
+    expect(HardwareKeyboard.instance.isPhysicalKeyPressed(PhysicalKeyboardKey.numLock), isTrue);
+    expect(HardwareKeyboard.instance.isLogicalKeyPressed(LogicalKeyboardKey.numLock), isTrue);
+
+    await simulateKeyDownEvent(LogicalKeyboardKey.numpad1, platform: 'windows');
+    expect(HardwareKeyboard.instance.isPhysicalKeyPressed(PhysicalKeyboardKey.numpad1), isTrue);
+    expect(HardwareKeyboard.instance.isLogicalKeyPressed(LogicalKeyboardKey.numpad1), isTrue);
+
+    await simulateKeyRepeatEvent(LogicalKeyboardKey.numpad1, platform: 'windows');
+    expect(HardwareKeyboard.instance.isPhysicalKeyPressed(PhysicalKeyboardKey.numpad1), isTrue);
+    expect(HardwareKeyboard.instance.isLogicalKeyPressed(LogicalKeyboardKey.numpad1), isTrue);
+
+    await simulateKeyUpEvent(LogicalKeyboardKey.numLock);
+    expect(HardwareKeyboard.instance.isPhysicalKeyPressed(PhysicalKeyboardKey.numpad1), isTrue);
+    expect(HardwareKeyboard.instance.isLogicalKeyPressed(LogicalKeyboardKey.numpad1), isTrue);
+
+    await simulateKeyDownEvent(LogicalKeyboardKey.numLock, platform: 'windows');
+    expect(HardwareKeyboard.instance.isPhysicalKeyPressed(PhysicalKeyboardKey.numLock), isTrue);
+    expect(HardwareKeyboard.instance.isLogicalKeyPressed(LogicalKeyboardKey.numLock), isTrue);
+
+    await simulateKeyUpEvent(LogicalKeyboardKey.numpad1, platform: 'windows');
+    expect(HardwareKeyboard.instance.isPhysicalKeyPressed(PhysicalKeyboardKey.numpad1), isFalse);
+    expect(HardwareKeyboard.instance.isLogicalKeyPressed(LogicalKeyboardKey.numpad1), isFalse);
+
+    await simulateKeyUpEvent(LogicalKeyboardKey.numLock, platform: 'windows');
+    expect(HardwareKeyboard.instance.isPhysicalKeyPressed(PhysicalKeyboardKey.numLock), isFalse);
+    expect(HardwareKeyboard.instance.isLogicalKeyPressed(LogicalKeyboardKey.numLock), isFalse);
+  }, variant: KeySimulatorTransitModeVariant.keyDataThenRawKeyData());
+
   testWidgets('KeyboardManager synthesizes modifier keys in rawKeyData mode', (WidgetTester tester) async {
     final List<KeyEvent> events = <KeyEvent>[];
     HardwareKeyboard.instance.addHandler((KeyEvent event) {
@@ -98,6 +132,7 @@ void main() {
 
   testWidgets('Dispatch events to all handlers', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
     final List<int> logs = <int>[];
 
     await tester.pumpWidget(
@@ -203,6 +238,7 @@ void main() {
   // where a ShiftLeft key down is dispatched but the modifier bit is not set.
   testWidgets('Correctly convert down events that are synthesized released', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
     final List<KeyEvent> events = <KeyEvent>[];
 
     await tester.pumpWidget(
@@ -224,7 +260,7 @@ void main() {
       LogicalKeyboardKey.shiftLeft,
       platform: 'web',
     )..['metaState'] = 0;
-    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+    await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
       SystemChannels.keyEvent.name,
       SystemChannels.keyEvent.codec.encodeMessage(data2),
       (ByteData? data) {},
@@ -246,6 +282,7 @@ void main() {
 
   testWidgets('Instantly dispatch synthesized key events when the queue is empty', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
     final List<int> logs = <int>[];
 
     await tester.pumpWidget(
@@ -277,18 +314,21 @@ void main() {
   }, variant: KeySimulatorTransitModeVariant.keyDataThenRawKeyData());
 
   testWidgets('Postpone synthesized key events when the queue is not empty', (WidgetTester tester) async {
-    final FocusNode focusNode = FocusNode();
+    final FocusNode keyboardListenerFocusNode = FocusNode();
+    addTearDown(keyboardListenerFocusNode.dispose);
+    final FocusNode rawKeyboardListenerFocusNode = FocusNode();
+    addTearDown(rawKeyboardListenerFocusNode.dispose);
     final List<String> logs = <String>[];
 
     await tester.pumpWidget(
       RawKeyboardListener(
-        focusNode: FocusNode(),
+        focusNode: rawKeyboardListenerFocusNode,
         onKey: (RawKeyEvent event) {
           logs.add('${event.runtimeType}');
         },
         child: KeyboardListener(
           autofocus: true,
-          focusNode: focusNode,
+          focusNode: keyboardListenerFocusNode,
           child: Container(),
           onKeyEvent: (KeyEvent event) {
             logs.add('${event.runtimeType}');
@@ -465,9 +505,27 @@ void main() {
     // trigger assertions.
     expect(record, isNull);
   }, variant: KeySimulatorTransitModeVariant.all());
+
+  testWidgets('debugPrintKeyboardEvents causes logging of key events', (WidgetTester tester) async {
+    final bool oldDebugPrintKeyboardEvents = debugPrintKeyboardEvents;
+    final DebugPrintCallback oldDebugPrint = debugPrint;
+    final StringBuffer messages = StringBuffer();
+    debugPrint = (String? message, {int? wrapWidth}) {
+      messages.writeln(message ?? '');
+    };
+    debugPrintKeyboardEvents = true;
+    try {
+      await simulateKeyDownEvent(LogicalKeyboardKey.keyA);
+    } finally {
+      debugPrintKeyboardEvents = oldDebugPrintKeyboardEvents;
+      debugPrint = oldDebugPrint;
+    }
+    final String messagesStr = messages.toString();
+    expect(messagesStr, contains('KEYBOARD: Key event received: '));
+    expect(messagesStr, contains('KEYBOARD: Pressed state before processing the event:'));
+    expect(messagesStr, contains('KEYBOARD: Pressed state after processing the event:'));
+  });
 }
-
-
 
 Future<void> _runWhileOverridingOnError(AsyncCallback body, {required FlutterExceptionHandler onError}) async {
   final FlutterExceptionHandler? oldFlutterErrorOnError = FlutterError.onError;

@@ -52,18 +52,17 @@ import 'image.dart';
 ///  * [Decoration], which you can extend to provide other effects with
 ///    [DecoratedBox].
 ///  * [CustomPaint], another way to draw custom effects from the widget layer.
+///  * [DecoratedSliver], which applies a [Decoration] to a sliver.
 class DecoratedBox extends SingleChildRenderObjectWidget {
   /// Creates a widget that paints a [Decoration].
   ///
-  /// The [decoration] and [position] arguments must not be null. By default the
-  /// decoration paints behind the child.
+  /// By default the decoration paints behind the child.
   const DecoratedBox({
     super.key,
     required this.decoration,
     this.position = DecorationPosition.background,
     super.child,
-  }) : assert(decoration != null),
-       assert(position != null);
+  });
 
   /// What decoration to paint.
   ///
@@ -93,15 +92,10 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    final String label;
-    switch (position) {
-      case DecorationPosition.background:
-        label = 'bg';
-        break;
-      case DecorationPosition.foreground:
-        label = 'fg';
-        break;
-    }
+    final String label = switch (position) {
+      DecorationPosition.background => 'bg',
+      DecorationPosition.foreground => 'fg',
+    };
     properties.add(EnumProperty<DecorationPosition>('position', position, level: DiagnosticLevel.hidden));
     properties.add(DiagnosticsProperty<Decoration>(label, decoration));
   }
@@ -238,8 +232,8 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
 ///  * [Border], which has a sample which uses [Container] heavily.
 ///  * [Ink], which paints a [Decoration] on a [Material], allowing
 ///    [InkResponse] and [InkWell] splashes to paint over them.
-///  * Cookbook: [Animate the properties of a container](https://flutter.dev/docs/cookbook/animation/animated-container)
-///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
+///  * Cookbook: [Animate the properties of a container](https://docs.flutter.dev/cookbook/animation/animated-container)
+///  * The [catalog of layout widgets](https://docs.flutter.dev/ui/widgets/layout).
 class Container extends StatelessWidget {
   /// Creates a widget that combines common painting, positioning, and sizing widgets.
   ///
@@ -268,7 +262,6 @@ class Container extends StatelessWidget {
        assert(padding == null || padding.isNonNegative),
        assert(decoration == null || decoration.debugAssertIsValid()),
        assert(constraints == null || constraints.debugAssertIsValid()),
-       assert(clipBehavior != null),
        assert(decoration != null || clipBehavior == Clip.none),
        assert(color == null || decoration == null,
          'Cannot provide both a color and a decoration\n'
@@ -369,14 +362,11 @@ class Container extends StatelessWidget {
   final Clip clipBehavior;
 
   EdgeInsetsGeometry? get _paddingIncludingDecoration {
-    if (decoration == null || decoration!.padding == null) {
-      return padding;
-    }
-    final EdgeInsetsGeometry? decorationPadding = decoration!.padding;
-    if (padding == null) {
-      return decorationPadding;
-    }
-    return padding!.add(decorationPadding!);
+    return switch ((padding, decoration?.padding)) {
+      (null, final EdgeInsetsGeometry? padding) => padding,
+      (final EdgeInsetsGeometry? padding, null) => padding,
+      (_) => padding!.add(decoration!.padding),
+    };
   }
 
   @override
@@ -464,8 +454,7 @@ class _DecorationClipper extends CustomClipper<Path> {
   _DecorationClipper({
     TextDirection? textDirection,
     required this.decoration,
-  }) : assert(decoration != null),
-       textDirection = textDirection ?? TextDirection.ltr;
+  }) : textDirection = textDirection ?? TextDirection.ltr;
 
   final TextDirection textDirection;
   final Decoration decoration;

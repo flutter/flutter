@@ -2,36 +2,43 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:args/command_runner.dart';
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_builder.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
+import 'package:flutter_tools/src/android/java.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_apk.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/testing.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/android_common.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
+import '../../src/fakes.dart' show FakeFlutterVersion;
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
   Cache.disableLocking();
 
   group('Usage', () {
-    Directory tempDir;
-    TestUsage testUsage;
+    late Directory tempDir;
+    late FakeAnalytics fakeAnalytics;
 
     setUp(() {
-      testUsage = TestUsage();
       tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
+      fakeAnalytics = getInitializedFakeAnalyticsInstance(
+        fs: MemoryFileSystem.test(),
+        fakeFlutterVersion: FakeFlutterVersion(),
+      );
     });
 
     tearDown(() {
@@ -41,12 +48,23 @@ void main() {
     testUsingContext('indicate the default target platforms', () async {
       final String projectPath = await createProject(tempDir,
           arguments: <String>['--no-pub', '--template=app']);
-      final BuildApkCommand command = await runBuildApkCommand(projectPath);
+      await runBuildApkCommand(projectPath);
 
-      expect((await command.usageValues).commandBuildApkTargetPlatform, 'android-arm,android-arm64,android-x64');
-
+      expect(
+        fakeAnalytics.sentEvents,
+        contains(
+          Event.commandUsageValues(
+            workflow: 'apk',
+            commandHasTerminal: false,
+            buildApkTargetPlatform: 'android-arm,android-arm64,android-x64',
+            buildApkBuildMode: 'release',
+            buildApkSplitPerAbi: false,
+          ),
+        ),
+      );
     }, overrides: <Type, Generator>{
       AndroidBuilder: () => FakeAndroidBuilder(),
+      Analytics: () => fakeAnalytics,
     });
 
     testUsingContext('split per abi', () async {
@@ -55,11 +73,19 @@ void main() {
 
       final BuildApkCommand commandWithFlag = await runBuildApkCommand(projectPath,
           arguments: <String>['--split-per-abi']);
-      expect((await commandWithFlag.usageValues).commandBuildApkSplitPerAbi, true);
+
+      expect(
+        (await commandWithFlag.unifiedAnalyticsUsageValues('run'))
+            .eventData['buildApkSplitPerAbi'],
+        isTrue,
+      );
 
       final BuildApkCommand commandWithoutFlag = await runBuildApkCommand(projectPath);
-      expect((await commandWithoutFlag.usageValues).commandBuildApkSplitPerAbi, false);
-
+      expect(
+        (await commandWithoutFlag.unifiedAnalyticsUsageValues('run'))
+            .eventData['buildApkSplitPerAbi'],
+        isFalse
+      );
     }, overrides: <Type, Generator>{
       AndroidBuilder: () => FakeAndroidBuilder(),
     });
@@ -68,23 +94,27 @@ void main() {
       final String projectPath = await createProject(tempDir,
           arguments: <String>['--no-pub', '--template=app']);
 
-      final BuildApkCommand commandDefault = await runBuildApkCommand(projectPath);
-      expect((await commandDefault.usageValues).commandBuildApkBuildMode, 'release');
+      final BuildApkCommand defaultBuildCommand = await runBuildApkCommand(projectPath);
+      final Event defaultBuildCommandUsageValues = await defaultBuildCommand.unifiedAnalyticsUsageValues('build');
+      expect(defaultBuildCommandUsageValues.eventData['buildApkBuildMode'], 'release');
 
-      final BuildApkCommand commandInRelease = await runBuildApkCommand(projectPath,
-          arguments: <String>['--release']);
-      expect((await commandInRelease.usageValues).commandBuildApkBuildMode, 'release');
+      final BuildApkCommand releaseBuildCommand = await runBuildApkCommand(projectPath, arguments: <String>['--release']);
+      final Event releaseBuildCommandUsageValues = await releaseBuildCommand.unifiedAnalyticsUsageValues('build');
+      expect(releaseBuildCommandUsageValues.eventData['buildApkBuildMode'], 'release');
 
-      final BuildApkCommand commandInDebug = await runBuildApkCommand(projectPath,
-          arguments: <String>['--debug']);
-      expect((await commandInDebug.usageValues).commandBuildApkBuildMode, 'debug');
+      final BuildApkCommand debugBuildCommand = await runBuildApkCommand(projectPath, arguments: <String>['--debug']);
+      final Event debugBuildCommandUsageValues = await debugBuildCommand.unifiedAnalyticsUsageValues('build');
+      expect(debugBuildCommandUsageValues.eventData['buildApkBuildMode'], 'debug');
 
-      final BuildApkCommand commandInProfile = await runBuildApkCommand(projectPath,
-          arguments: <String>['--profile']);
-      expect((await commandInProfile.usageValues).commandBuildApkBuildMode, 'profile');
+      final BuildApkCommand profileBuildCommand = await runBuildApkCommand(projectPath, arguments: <String>['--profile']);
+      final Event profileBuildCommandUsageValues = await profileBuildCommand.unifiedAnalyticsUsageValues('build');
+      expect(profileBuildCommandUsageValues.eventData['buildApkBuildMode'], 'profile');
 
+      fakeAnalytics.sentEvents.clear();
+      await runBuildApkCommand(projectPath, arguments: <String>['--profile']);
     }, overrides: <Type, Generator>{
       AndroidBuilder: () => FakeAndroidBuilder(),
+      Analytics: () => fakeAnalytics,
     });
 
     testUsingContext('logs success', () async {
@@ -93,34 +123,151 @@ void main() {
 
       await runBuildApkCommand(projectPath);
 
-      expect(testUsage.events, contains(
-        const TestUsageEvent(
-          'tool-command-result',
-          'apk',
-          label: 'success',
-        ),
-      ));
+      final Iterable<Event> successEvent = fakeAnalytics.sentEvents.where(
+        (Event e) =>
+            e.eventName == DashEvent.flutterCommandResult &&
+            e.eventData['commandPath'] == 'create' &&
+            e.eventData['result'] == 'success',
+      );
+      expect(successEvent, isNotEmpty, reason: 'Tool should send create success event');
     },
     overrides: <Type, Generator>{
       AndroidBuilder: () => FakeAndroidBuilder(),
-      Usage: () => testUsage,
+      Analytics: () => fakeAnalytics,
+    });
+
+    group('Impeller AndroidManifest.xml setting', () {
+      // Adds a key-value `<meta-data>` pair to the `<application>` tag in the
+      // corresponding `AndroidManifest.xml` file, right before the closing
+      // `</application>` tag.
+      void writeManifestMetadata({
+        required String projectPath,
+        required String name,
+        required String value,
+      }) {
+        final String manifestPath = globals.fs.path.join(
+          projectPath,
+          'android',
+          'app',
+          'src',
+          'main',
+          'AndroidManifest.xml',
+        );
+
+        // It would be unnecessarily complicated to parse this XML file and
+        // insert the key-value pair, so we just insert it right before the
+        // closing </application> tag.
+        final String oldManifest = globals.fs.file(manifestPath).readAsStringSync();
+        final String newManifest = oldManifest.replaceFirst(
+          '</application>',
+          '    <meta-data\n'
+          '        android:name="$name"\n'
+          '        android:value="$value" />\n'
+          '    </application>',
+        );
+        globals.fs.file(manifestPath).writeAsStringSync(newManifest);
+      }
+
+      testUsingContext('a default APK build reports Impeller as disabled', () async {
+        final String projectPath = await createProject(
+          tempDir,
+          arguments: <String>['--no-pub', '--template=app', '--platform=android']
+        );
+
+        await runBuildApkCommand(projectPath);
+
+        expect(
+          fakeAnalytics.sentEvents,
+          contains(
+            Event.flutterBuildInfo(
+              label: 'manifest-impeller-disabled',
+              buildType: 'android',
+            ),
+          ),
+        );
+      }, overrides: <Type, Generator>{
+        Analytics: () => fakeAnalytics,
+        AndroidBuilder: () => FakeAndroidBuilder(),
+        FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
+      });
+
+      testUsingContext('EnableImpeller="true" reports an enabled event', () async {
+        final String projectPath = await createProject(
+          tempDir,
+          arguments: <String>['--no-pub', '--template=app', '--platform=android']
+        );
+
+        writeManifestMetadata(
+          projectPath: projectPath,
+          name: 'io.flutter.embedding.android.EnableImpeller',
+          value: 'true',
+        );
+
+        await runBuildApkCommand(projectPath);
+
+        expect(
+          fakeAnalytics.sentEvents,
+          contains(
+            Event.flutterBuildInfo(
+              label: 'manifest-impeller-enabled',
+              buildType: 'android',
+            ),
+          ),
+        );
+      }, overrides: <Type, Generator>{
+        Analytics: () => fakeAnalytics,
+        AndroidBuilder: () => FakeAndroidBuilder(),
+        FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
+      });
+
+      testUsingContext('EnableImpeller="false" reports an disabled event', () async {
+        final String projectPath = await createProject(
+          tempDir,
+          arguments: <String>['--no-pub', '--template=app', '--platform=android']
+        );
+
+        writeManifestMetadata(
+          projectPath: projectPath,
+          name: 'io.flutter.embedding.android.EnableImpeller',
+          value: 'false',
+        );
+
+        await runBuildApkCommand(projectPath);
+
+        expect(
+          fakeAnalytics.sentEvents,
+          contains(
+            Event.flutterBuildInfo(
+              label: 'manifest-impeller-disabled',
+              buildType: 'android',
+            ),
+          ),
+        );
+      }, overrides: <Type, Generator>{
+        Analytics: () => fakeAnalytics,
+        AndroidBuilder: () => FakeAndroidBuilder(),
+        FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
+      });
     });
   });
 
   group('Gradle', () {
-    Directory tempDir;
-    FakeProcessManager processManager;
-    String gradlew;
-    AndroidSdk mockAndroidSdk;
-    TestUsage testUsage;
+    late Directory tempDir;
+    late FakeProcessManager processManager;
+    late String gradlew;
+    late AndroidSdk mockAndroidSdk;
+    late FakeAnalytics analytics;
 
     setUp(() {
-      testUsage = TestUsage();
       tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
       gradlew = globals.fs.path.join(tempDir.path, 'flutter_project', 'android',
           globals.platform.isWindows ? 'gradlew.bat' : 'gradlew');
       processManager = FakeProcessManager.empty();
       mockAndroidSdk = FakeAndroidSdk(globals.fs.directory('irrelevant'));
+      analytics = getInitializedFakeAnalyticsInstance(
+        fs: MemoryFileSystem.test(),
+        fakeFlutterVersion: FakeFlutterVersion(),
+      );
     });
 
     tearDown(() {
@@ -137,12 +284,13 @@ void main() {
             arguments: <String>['--no-pub'],
           ),
           throwsToolExit(
-            message: 'No Android SDK found. Try setting the ANDROID_SDK_ROOT environment variable',
+            message: 'No Android SDK found. Try setting the ANDROID_HOME environment variable',
           ),
         );
       },
       overrides: <Type, Generator>{
         AndroidSdk: () => null,
+        Java: () => null,
         FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
         ProcessManager: () => processManager,
         AndroidStudio: () => FakeAndroidStudio(),
@@ -174,6 +322,7 @@ void main() {
     },
     overrides: <Type, Generator>{
       AndroidSdk: () => mockAndroidSdk,
+      Java: () => null,
       FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
       ProcessManager: () => processManager,
       AndroidStudio: () => FakeAndroidStudio(),
@@ -205,6 +354,7 @@ void main() {
     },
     overrides: <Type, Generator>{
       AndroidSdk: () => mockAndroidSdk,
+      Java: () => null,
       FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
       ProcessManager: () => processManager,
       AndroidStudio: () => FakeAndroidStudio(),
@@ -236,6 +386,7 @@ void main() {
     },
     overrides: <Type, Generator>{
       AndroidSdk: () => mockAndroidSdk,
+      Java: () => null,
       FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
       ProcessManager: () => processManager,
       AndroidStudio: () => FakeAndroidStudio(),
@@ -269,6 +420,7 @@ void main() {
     },
     overrides: <Type, Generator>{
       AndroidSdk: () => mockAndroidSdk,
+      Java: () => null,
       FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
       ProcessManager: () => processManager,
       AndroidStudio: () => FakeAndroidStudio(),
@@ -308,21 +460,24 @@ void main() {
           containsIgnoringWhitespace('To learn more, see: https://developer.android.com/studio/build/shrink-code'),
         )
       );
-      expect(testUsage.events, contains(
-        const TestUsageEvent(
-          'build',
-          'gradle',
-          label: 'gradle-r8-failure',
-          parameters: CustomDimensions(),
+
+      expect(
+        analytics.sentEvents,
+        contains(
+          Event.flutterBuildInfo(
+            label: 'gradle-r8-failure',
+            buildType: 'gradle',
+          ),
         ),
-      ));
+      );
       expect(processManager, hasNoRemainingExpectations);
     },
     overrides: <Type, Generator>{
       AndroidSdk: () => mockAndroidSdk,
+      Java: () => null,
       FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
       ProcessManager: () => processManager,
-      Usage: () => testUsage,
+      Analytics: () => analytics,
       AndroidStudio: () => FakeAndroidStudio(),
     });
 
@@ -361,21 +516,22 @@ void main() {
           ),
         ),
       );
-      expect(testUsage.events, contains(
-        const TestUsageEvent(
-          'build',
-          'gradle',
-          label: 'app-not-using-android-x',
-          parameters: CustomDimensions(),
+
+      expect(
+        analytics.sentEvents,
+        contains(
+          Event.flutterBuildInfo(
+              label: 'app-not-using-android-x', buildType: 'gradle'),
         ),
-      ));
+      );
       expect(processManager, hasNoRemainingExpectations);
     },
     overrides: <Type, Generator>{
       AndroidSdk: () => mockAndroidSdk,
       FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
+      Java: () => null,
       ProcessManager: () => processManager,
-      Usage: () => testUsage,
+      Analytics: () => analytics,
       AndroidStudio: () => FakeAndroidStudio(),
     });
 
@@ -407,21 +563,22 @@ void main() {
           ))
         ),
       );
-      expect(testUsage.events, contains(
-        const TestUsageEvent(
-          'build',
-          'gradle',
+
+      expect(
+        analytics.sentEvents,
+        contains(Event.flutterBuildInfo(
           label: 'app-using-android-x',
-          parameters: CustomDimensions(),
-        ),
-      ));
+          buildType: 'gradle',
+        )),
+      );
       expect(processManager, hasNoRemainingExpectations);
     },
     overrides: <Type, Generator>{
       AndroidSdk: () => mockAndroidSdk,
       FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
+      Java: () => null,
       ProcessManager: () => processManager,
-      Usage: () => testUsage,
+      Analytics: () => analytics,
       AndroidStudio: () => FakeAndroidStudio(),
     });
   });
@@ -429,9 +586,9 @@ void main() {
 
 Future<BuildApkCommand> runBuildApkCommand(
   String target, {
-  List<String> arguments,
+  List<String>? arguments,
 }) async {
-  final BuildApkCommand command = BuildApkCommand();
+  final BuildApkCommand command = BuildApkCommand(logger: BufferLogger.test());
   final CommandRunner<void> runner = createTestCommandRunner(command);
   await runner.run(<String>[
     'apk',
@@ -452,4 +609,7 @@ class FakeAndroidSdk extends Fake implements AndroidSdk {
 class FakeAndroidStudio extends Fake implements AndroidStudio {
   @override
   String get javaPath => 'java';
+
+  @override
+  Version get version => Version(2021, 3, 1);
 }

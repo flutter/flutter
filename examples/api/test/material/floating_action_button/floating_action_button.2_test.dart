@@ -8,20 +8,30 @@ import 'package:flutter_api_samples/material/floating_action_button/floating_act
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('FloatingActionButton - Material 3', (WidgetTester tester) async {
-    RawMaterialButton getRawMaterialButtonWidget(Finder finder) {
-      return tester.widget<RawMaterialButton>(finder);
-    }
+  testWidgets('FloatingActionButton variants', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const example.MyApp(),
+      const example.FloatingActionButtonExampleApp(),
     );
 
-    expect(find.byType(FloatingActionButton), findsOneWidget);
-    expect(find.byIcon(Icons.add), findsOneWidget);
+    FloatingActionButton getFAB(Finder finder) {
+      return tester.widget<FloatingActionButton>(finder);
+    }
 
-    final ThemeData theme = ThemeData(colorSchemeSeed: const Color(0xff6750a4), useMaterial3: true);
-    final Finder materialButtonFinder = find.byType(RawMaterialButton);
-    expect(getRawMaterialButtonWidget(materialButtonFinder).fillColor, theme.colorScheme.primaryContainer);
-    expect(getRawMaterialButtonWidget(materialButtonFinder).shape, RoundedRectangleBorder(borderRadius:  BorderRadius.circular(16.0)));
+    final ColorScheme colorScheme = ThemeData(useMaterial3: true).colorScheme;
+
+    // Test the FAB with surface color mapping.
+    FloatingActionButton fab = getFAB(find.byType(FloatingActionButton).at(0));
+    expect(fab.foregroundColor, colorScheme.primary);
+    expect(fab.backgroundColor, colorScheme.surface);
+
+    // Test the FAB with secondary color mapping.
+    fab = getFAB(find.byType(FloatingActionButton).at(1));
+    expect(fab.foregroundColor, colorScheme.onSecondaryContainer);
+    expect(fab.backgroundColor, colorScheme.secondaryContainer);
+
+    // Test the FAB with tertiary color mapping.
+    fab = getFAB(find.byType(FloatingActionButton).at(2));
+    expect(fab.foregroundColor, colorScheme.onTertiaryContainer);
+    expect(fab.backgroundColor, colorScheme.tertiaryContainer);
   });
 }

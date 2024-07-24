@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'route.dart';
+/// @docImport 'text_theme.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -49,12 +53,11 @@ const double _kOverAndUnderCenterOpacity = 0.447;
 ///
 ///  * [ListWheelScrollView], the generic widget backing this picker without
 ///    the iOS design specific chrome.
-///  * <https://developer.apple.com/ios/human-interface-guidelines/controls/pickers/>
+///  * <https://developer.apple.com/design/human-interface-guidelines/pickers/>
 class CupertinoPicker extends StatefulWidget {
   /// Creates a picker from a concrete list of children.
   ///
-  /// The [diameterRatio] and [itemExtent] arguments must not be null. The
-  /// [itemExtent] must be greater than zero.
+  /// The [itemExtent] must be greater than zero.
   ///
   /// The [backgroundColor] defaults to null, which disables background painting entirely.
   /// (i.e. the picker is going to have a completely transparent background), to match
@@ -83,13 +86,9 @@ class CupertinoPicker extends StatefulWidget {
     required List<Widget> children,
     this.selectionOverlay = const CupertinoPickerDefaultSelectionOverlay(),
     bool looping = false,
-  }) : assert(children != null),
-       assert(diameterRatio != null),
-       assert(diameterRatio > 0.0, RenderListWheelViewport.diameterRatioZeroMessage),
+  }) : assert(diameterRatio > 0.0, RenderListWheelViewport.diameterRatioZeroMessage),
        assert(magnification > 0),
-       assert(itemExtent != null),
        assert(itemExtent > 0),
-       assert(squeeze != null),
        assert(squeeze > 0),
        childDelegate = looping
                        ? ListWheelChildLoopingListDelegate(children: children)
@@ -103,11 +102,11 @@ class CupertinoPicker extends StatefulWidget {
   /// normally the builder is only called once for each index (except when
   /// rebuilding - the cache is cleared).
   ///
-  /// The [itemBuilder] argument must not be null. The [childCount] argument
-  /// reflects the number of children that will be provided by the [itemBuilder].
+  /// The [childCount] argument reflects the number of children that will be
+  /// provided by the [itemBuilder].
   /// {@macro flutter.widgets.ListWheelChildBuilderDelegate.childCount}
   ///
-  /// The [itemExtent] argument must be non-null and positive.
+  /// The [itemExtent] argument must be positive.
   ///
   /// The [backgroundColor] defaults to null, which disables background painting entirely.
   /// (i.e. the picker is going to have a completely transparent background), to match
@@ -126,13 +125,9 @@ class CupertinoPicker extends StatefulWidget {
     required NullableIndexedWidgetBuilder itemBuilder,
     int? childCount,
     this.selectionOverlay = const CupertinoPickerDefaultSelectionOverlay(),
-  }) : assert(itemBuilder != null),
-       assert(diameterRatio != null),
-       assert(diameterRatio > 0.0, RenderListWheelViewport.diameterRatioZeroMessage),
+  }) : assert(diameterRatio > 0.0, RenderListWheelViewport.diameterRatioZeroMessage),
        assert(magnification > 0),
-       assert(itemExtent != null),
        assert(itemExtent > 0),
-       assert(squeeze != null),
        assert(squeeze > 0),
        childDelegate = ListWheelChildBuilderDelegate(builder: itemBuilder, childCount: childCount);
 
@@ -142,7 +137,7 @@ class CupertinoPicker extends StatefulWidget {
   ///
   /// For more details, see [ListWheelScrollView.diameterRatio].
   ///
-  /// Must not be null and defaults to `1.1` to visually mimic iOS.
+  /// Defaults to 1.1 to visually mimic iOS.
   final double diameterRatio;
 
   /// Background color behind the children.
@@ -170,10 +165,12 @@ class CupertinoPicker extends StatefulWidget {
   /// If null, an implicit one will be created internally.
   final FixedExtentScrollController? scrollController;
 
+  /// {@template flutter.cupertino.picker.itemExtent}
   /// The uniform height of all children.
   ///
   /// All children will be given the [BoxConstraints] to match this exact
-  /// height. Must not be null and must be positive.
+  /// height. Must be a positive value.
+  /// {@endtemplate}
   final double itemExtent;
 
   /// {@macro flutter.rendering.RenderListWheelViewport.squeeze}
@@ -225,6 +222,7 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
   void didUpdateWidget(CupertinoPicker oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.scrollController != null && oldWidget.scrollController == null) {
+      _controller?.dispose();
       _controller = null;
     } else if (widget.scrollController == null && oldWidget.scrollController != null) {
       assert(_controller == null);
@@ -245,16 +243,13 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
     switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
         hasSuitableHapticHardware = true;
-        break;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
         hasSuitableHapticHardware = false;
-        break;
     }
-    assert(hasSuitableHapticHardware != null);
     if (hasSuitableHapticHardware && index != _lastHapticIndex) {
       _lastHapticIndex = index;
       HapticFeedback.selectionClick();
@@ -343,21 +338,18 @@ class CupertinoPickerDefaultSelectionOverlay extends StatelessWidget {
   /// area (or the currently selected item, depending on how you described it
   /// elsewhere) of a [CupertinoPicker].
   ///
-  /// The [background] argument default value is [CupertinoColors.tertiarySystemFill].
-  /// It must be non-null.
+  /// The [background] argument default value is
+  /// [CupertinoColors.tertiarySystemFill].
   ///
   /// The [capStartEdge] and [capEndEdge] arguments decide whether to add a
   /// default margin and use rounded corners on the left and right side of the
-  /// rectangular overlay.
-  /// Default to true and must not be null.
+  /// rectangular overlay, and they both default to true.
   const CupertinoPickerDefaultSelectionOverlay({
     super.key,
     this.background = CupertinoColors.tertiarySystemFill,
     this.capStartEdge = true,
     this.capEndEdge = true,
-  }) : assert(background != null),
-       assert(capStartEdge != null),
-       assert(capEndEdge != null);
+  });
 
   /// Whether to use the default use rounded corners and margin on the start side.
   final bool capStartEdge;
@@ -512,5 +504,11 @@ class _RenderCupertinoPickerSemantics extends RenderProxyBox {
       config.onDecrease = _handleDecrease;
     }
     node.updateWith(config: config);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    controller.removeListener(_handleScrollUpdate);
   }
 }

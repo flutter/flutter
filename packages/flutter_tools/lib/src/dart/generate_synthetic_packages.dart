@@ -8,14 +8,13 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/utils.dart';
 import '../build_system/build_system.dart';
-import '../build_system/targets/localizations.dart';
+import '../build_system/build_targets.dart';
 
 Future<void> generateLocalizationsSyntheticPackage({
   required Environment environment,
   required BuildSystem buildSystem,
+  required BuildTargets buildTargets,
 }) async {
-  assert(environment != null);
-  assert(buildSystem != null);
 
   final FileSystem fileSystem = environment.fileSystem;
   final File l10nYamlFile = fileSystem.file(
@@ -56,13 +55,10 @@ Future<void> generateLocalizationsSyntheticPackage({
   }
 
   final BuildResult result = await buildSystem.build(
-    const GenerateLocalizationsTarget(),
+    buildTargets.generateLocalizationsTarget,
     environment,
   );
 
-  if (result == null) {
-    throwToolExit('Generating synthetic localizations package failed: result is null.');
-  }
   if (result.hasException) {
     throwToolExit(
       'Generating synthetic localizations package failed with ${result.exceptions.length} ${pluralize('error', result.exceptions.length)}:'

@@ -34,13 +34,10 @@ class _BannerDemoState extends State<BannerDemo> {
           _displayBanner = true;
           _showMultipleActions = true;
           _showLeading = true;
-          break;
         case BannerDemoAction.showMultipleActions:
           _showMultipleActions = !_showMultipleActions;
-          break;
         case BannerDemoAction.showLeading:
           _showLeading = !_showLeading;
-          break;
       }
     });
   }

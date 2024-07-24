@@ -148,16 +148,18 @@
 ///
 /// See also:
 ///
-///  * [Introduction to animations](https://flutter.dev/docs/development/ui/animations)
+///  * [Introduction to animations](https://docs.flutter.dev/ui/animations)
 ///    on flutter.dev.
-///  * [Animations tutorial](https://flutter.dev/docs/development/ui/animations/tutorial)
+///  * [Animations tutorial](https://docs.flutter.dev/ui/animations/tutorial)
 ///    on flutter.dev.
-///  * [Sample app](https://github.com/flutter/samples/tree/master/animations),
+///  * [Sample app](https://github.com/flutter/samples/tree/main/animations),
 ///    which showcases Flutter's animation features.
 ///  * [ImplicitlyAnimatedWidget] and its subclasses, which are [Widget]s that
 ///    implicitly animate changes to their properties.
 ///  * [AnimatedWidget] and its subclasses, which are [Widget]s that take an
 ///    explicit [Animation] to animate their properties.
+///
+/// @docImport 'package:flutter/material.dart';
 library animation;
 
 // AnimationController can throw TickerCanceled
@@ -165,6 +167,7 @@ export 'package:flutter/scheduler.dart' show TickerCanceled;
 
 export 'src/animation/animation.dart';
 export 'src/animation/animation_controller.dart';
+export 'src/animation/animation_style.dart';
 export 'src/animation/animations.dart';
 export 'src/animation/curves.dart';
 export 'src/animation/listener_helpers.dart';

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:unified_analytics/unified_analytics.dart';
+
 import '../base/common.dart';
 import '../build_info.dart';
 import '../bundle.dart';
@@ -15,6 +17,7 @@ import 'build.dart';
 
 class BuildBundleCommand extends BuildSubCommand {
   BuildBundleCommand({
+    required super.logger,
     bool verboseHelp = false,
     BundleBuilder? bundleBuilder,
   }) :  _bundleBuilder = bundleBuilder ?? BundleBuilder(), super(verboseHelp: verboseHelp) {
@@ -42,6 +45,7 @@ class BuildBundleCommand extends BuildSubCommand {
           'linux-x64',
           'linux-arm64',
           'windows-x64',
+          'windows-arm64',
         ],
         help: 'The architecture for which to build the application.',
       )
@@ -76,18 +80,27 @@ class BuildBundleCommand extends BuildSubCommand {
   Future<CustomDimensions> get usageValues async {
     final String projectDir = globals.fs.file(targetFile).parent.parent.path;
     final FlutterProject flutterProject = FlutterProject.fromDirectory(globals.fs.directory(projectDir));
-    if (flutterProject == null) {
-      return const CustomDimensions();
-    }
     return CustomDimensions(
-      commandBuildBundleTargetPlatform: stringArgDeprecated('target-platform'),
+      commandBuildBundleTargetPlatform: stringArg('target-platform'),
       commandBuildBundleIsModule: flutterProject.isModule,
     );
   }
 
   @override
+  Future<Event> unifiedAnalyticsUsageValues(String commandPath) async {
+    final String projectDir = globals.fs.file(targetFile).parent.parent.path;
+    final FlutterProject flutterProject = FlutterProject.fromDirectory(globals.fs.directory(projectDir));
+    return Event.commandUsageValues(
+      workflow: commandPath,
+      commandHasTerminal: hasTerminal,
+      buildBundleTargetPlatform: stringArg('target-platform'),
+      buildBundleIsModule: flutterProject.isModule,
+    );
+  }
+
+  @override
   Future<void> validateCommand() async {
-    if (boolArgDeprecated('tree-shake-icons')) {
+    if (boolArg('tree-shake-icons')) {
       throwToolExit('The "--tree-shake-icons" flag is deprecated for "build bundle" and will be removed in a future version of Flutter.');
     }
     return super.validateCommand();
@@ -95,29 +108,24 @@ class BuildBundleCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final String targetPlatform = stringArgDeprecated('target-platform')!;
+    final String targetPlatform = stringArg('target-platform')!;
     final TargetPlatform platform = getTargetPlatformForName(targetPlatform);
-    if (platform == null) {
-      throwToolExit('Unknown platform: $targetPlatform');
-    }
     // Check for target platforms that are only allowed via feature flags.
     switch (platform) {
       case TargetPlatform.darwin:
         if (!featureFlags.isMacOSEnabled) {
           throwToolExit('macOS is not a supported target platform.');
         }
-        break;
       case TargetPlatform.windows_x64:
+      case TargetPlatform.windows_arm64:
         if (!featureFlags.isWindowsEnabled) {
           throwToolExit('Windows is not a supported target platform.');
         }
-        break;
       case TargetPlatform.linux_x64:
       case TargetPlatform.linux_arm64:
         if (!featureFlags.isLinuxEnabled) {
           throwToolExit('Linux is not a supported target platform.');
         }
-        break;
       case TargetPlatform.android:
       case TargetPlatform.android_arm:
       case TargetPlatform.android_arm64:
@@ -138,8 +146,9 @@ class BuildBundleCommand extends BuildSubCommand {
       platform: platform,
       buildInfo: buildInfo,
       mainPath: targetFile,
-      depfilePath: stringArgDeprecated('depfile'),
-      assetDirPath: stringArgDeprecated('asset-dir'),
+      depfilePath: stringArg('depfile'),
+      assetDirPath: stringArg('asset-dir'),
+      buildNativeAssets: false,
     );
     return FlutterCommandResult.success();
   }

@@ -341,9 +341,9 @@ void main() {
 
     testWidgets('ButtonBar has a min height of 52 when using ButtonBarLayoutBehavior.constrained', (WidgetTester tester) async {
       await tester.pumpWidget(
-        SingleChildScrollView(
+        const SingleChildScrollView(
           child: ListBody(
-            children: const <Widget>[
+            children: <Widget>[
               Directionality(
                 textDirection: TextDirection.ltr,
                 child: ButtonBar(
@@ -364,9 +364,9 @@ void main() {
 
     testWidgets('ButtonBar has padding applied when using ButtonBarLayoutBehavior.padded', (WidgetTester tester) async {
       await tester.pumpWidget(
-        SingleChildScrollView(
+        const SingleChildScrollView(
           child: ListBody(
-            children: const <Widget>[
+            children: <Widget>[
               Directionality(
                 textDirection: TextDirection.ltr,
                 child: ButtonBar(
@@ -631,8 +631,8 @@ void main() {
   testWidgets('_RenderButtonBarRow.constraints does not work before layout', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(home: ButtonBar()),
-      Duration.zero,
-      EnginePhase.build,
+      duration: Duration.zero,
+      phase: EnginePhase.build,
     );
 
     final Finder buttonBar = find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_ButtonBarRow');

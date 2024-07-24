@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-library stocks;
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show
   debugPaintBaselinesEnabled,
@@ -49,18 +47,14 @@ class StocksAppState extends State<StocksApp> {
   }
 
   ThemeData get theme {
-    switch (_configuration.stockMode) {
-      case StockMode.optimistic:
-        return ThemeData(
-          brightness: Brightness.light,
-          primarySwatch: Colors.purple,
-        );
-      case StockMode.pessimistic:
-        return ThemeData(
-          brightness: Brightness.dark,
-          primarySwatch: Colors.purple,
-        );
-    }
+    return ThemeData(
+      useMaterial3: false,
+      brightness: switch (_configuration.stockMode) {
+        StockMode.optimistic => Brightness.light,
+        StockMode.pessimistic => Brightness.dark,
+      },
+      primarySwatch: Colors.purple,
+    );
   }
 
   Route<dynamic>? _getRoute(RouteSettings settings) {

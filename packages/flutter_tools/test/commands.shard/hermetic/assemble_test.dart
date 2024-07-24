@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
@@ -15,6 +13,7 @@ import 'package:flutter_tools/src/commands/assemble.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -26,6 +25,14 @@ void main() {
   Cache.disableLocking();
   Cache.flutterRoot = '';
   final StackTrace stackTrace = StackTrace.current;
+  late FakeAnalytics fakeAnalytics;
+
+  setUp(() {
+    fakeAnalytics = getInitializedFakeAnalyticsInstance(
+      fs: MemoryFileSystem.test(),
+      fakeFlutterVersion: FakeFlutterVersion(),
+    );
+  });
 
   testUsingContext('flutter assemble can run a build', () async {
     final CommandRunner<void> commandRunner = createTestCommandRunner(AssembleCommand(
@@ -87,6 +94,31 @@ void main() {
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
   });
 
+  testUsingContext('flutter assemble sends usage values correctly with platform', () async {
+    final AssembleCommand command = AssembleCommand(
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)));
+    final CommandRunner<void> commandRunner = createTestCommandRunner(command);
+    await commandRunner.run(<String>['assemble', '-o Output', '-dTargetPlatform=darwin', '-dDarwinArchs=x86_64', 'debug_macos_bundle_flutter_assets']);
+
+    expect(
+      fakeAnalytics.sentEvents,
+      contains(
+        Event.commandUsageValues(
+          workflow: 'assemble',
+          commandHasTerminal: false,
+          buildBundleTargetPlatform: 'darwin',
+          buildBundleIsModule: false,
+        ),
+      ),
+    );
+  }, overrides: <Type, Generator>{
+    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.any(),
+    FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+    Analytics: () => fakeAnalytics,
+  });
+
   testUsingContext('flutter assemble throws ToolExit if not provided with output', () async {
     final CommandRunner<void> commandRunner = createTestCommandRunner(AssembleCommand(
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
@@ -137,13 +169,13 @@ void main() {
   testUsingContext('flutter assemble does not log stack traces during build failure', () async {
     final CommandRunner<void> commandRunner = createTestCommandRunner(AssembleCommand(
       buildSystem: TestBuildSystem.all(BuildResult(success: false, exceptions: <String, ExceptionMeasurement>{
-        'hello': ExceptionMeasurement('hello', 'bar', stackTrace),
+        'hello': ExceptionMeasurement('hello', 'bar', stackTrace, fatal: true),
       }))
     ));
 
     await expectLater(commandRunner.run(<String>['assemble', '-o Output', 'debug_macos_bundle_flutter_assets']),
       throwsToolExit());
-    expect(testLogger.errorText, isNot(contains('bar')));
+    expect(testLogger.errorText, contains('Target hello failed: bar'));
     expect(testLogger.errorText, isNot(contains(stackTrace.toString())));
   }, overrides: <Type, Generator>{
     Cache: () => Cache.test(processManager: FakeProcessManager.any()),
@@ -194,7 +226,7 @@ void main() {
     ));
     await commandRunner.run(<String>['assemble', '-o Output', 'debug_macos_bundle_flutter_assets']);
   }, overrides: <Type, Generator>{
-    Artifacts: () => Artifacts.test(localEngine: 'out/host_release'),
+    Artifacts: () => Artifacts.testLocalEngine(localEngine: 'out/host_release', localEngineHost: 'out/host_release'),
     Cache: () => Cache.test(processManager: FakeProcessManager.any()),
     FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),

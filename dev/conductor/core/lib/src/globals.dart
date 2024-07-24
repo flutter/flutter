@@ -16,9 +16,9 @@ const List<String> kBaseReleaseChannels = <String>['stable', 'beta'];
 
 const List<String> kReleaseChannels = <String>[...kBaseReleaseChannels, FrameworkRepository.defaultBranch];
 
-const String kReleaseDocumentationUrl = 'https://github.com/flutter/flutter/wiki/Flutter-Cherrypick-Process';
+const String kReleaseDocumentationUrl = 'https://github.com/flutter/flutter/blob/main/docs/releases/Flutter-Cherrypick-Process.md';
 
-const String kLuciPackagingConsoleLink = 'https://ci.chromium.org/p/flutter/g/packaging/console';
+const String kLuciPackagingConsoleLink = 'https://ci.chromium.org/p/dart-internal/g/flutter_packaging/console';
 
 const String kWebsiteReleasesUrl = 'https://docs.flutter.dev/development/tools/sdk/releases';
 
@@ -29,21 +29,17 @@ const String flutterReleaseHotline =
     'https://mail.google.com/chat/u/0/#chat/space/AAAA6RKcK2k';
 
 const String hotfixToStableWiki =
-    'https://github.com/flutter/flutter/wiki/Hotfixes-to-the-Stable-Channel';
+    'https://github.com/flutter/flutter/blob/main/CHANGELOG.md';
 
 const String flutterAnnounceGroup =
     'https://groups.google.com/g/flutter-announce';
 
 const String hotfixDocumentationBestPractices =
-    'https://github.com/flutter/flutter/wiki/Hotfix-Documentation-Best-Practices';
+    'https://github.com/flutter/flutter/blob/main/docs/releases/Hotfix-Documentation-Best-Practices.md';
 
 final RegExp releaseCandidateBranchRegex = RegExp(
   r'flutter-(\d+)\.(\d+)-candidate\.(\d+)',
 );
-
-/// Whether all releases published to the beta channel should be mirrored to
-/// dev.
-const bool kSynchronizeDevWithBeta = true;
 
 /// Cast a dynamic to String and trim.
 String stdoutToString(dynamic input) {
@@ -107,7 +103,7 @@ bool getBoolFromEnvOrArgs(
 ) {
   final String envName = fromArgToEnvName(name);
   if (env[envName] != null) {
-    return (env[envName]?.toUpperCase()) == 'TRUE';
+    return env[envName]?.toUpperCase() == 'TRUE';
   }
   return argResults[name] as bool;
 }
@@ -130,7 +126,7 @@ List<String> getValuesFromEnvOrArgs(
   if (env[envName] != null && env[envName] != '') {
     return env[envName]!.split(',');
   }
-  final List<String> argValues = argResults[name] as List<String>;
+  final List<String>? argValues = argResults[name] as List<String>?;
   if (argValues != null) {
     return argValues;
   }
@@ -156,23 +152,13 @@ String getNewPrLink({
 }) {
   assert(state.releaseChannel.isNotEmpty);
   assert(state.releaseVersion.isNotEmpty);
-  late final String candidateBranch;
-  late final String workingBranch;
-  late final String repoLabel;
-  switch (repoName) {
-    case 'flutter':
-      candidateBranch = state.framework.candidateBranch;
-      workingBranch = state.framework.workingBranch;
-      repoLabel = 'Framework';
-      break;
-    case 'engine':
-      candidateBranch = state.engine.candidateBranch;
-      workingBranch = state.engine.workingBranch;
-      repoLabel = 'Engine';
-      break;
-    default:
-      throw ConductorException('Expected repoName to be one of flutter or engine but got $repoName.');
-  }
+  final (pb.Repository repository, String repoLabel) = switch (repoName) {
+    'flutter' => (state.framework, 'Framework'),
+    'engine'  => (state.engine, 'Engine'),
+    _ => throw ConductorException('Expected repoName to be one of flutter or engine but got $repoName.'),
+  };
+  final String candidateBranch = repository.candidateBranch;
+  final String workingBranch = repository.workingBranch;
   assert(candidateBranch.isNotEmpty);
   assert(workingBranch.isNotEmpty);
   final String title = '[flutter_releases] Flutter ${state.releaseChannel} '

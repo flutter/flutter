@@ -17,11 +17,7 @@ typedef OnResultListener = void Function(String result);
 // in real-world applications.
 class Calculator {
   Calculator({ required this.onProgressListener, required this.onResultListener, String? data })
-    : assert(onProgressListener != null),
-      assert(onResultListener != null),
-      // In order to keep the example files smaller, we "cheat" a little and
-      // replicate our small json string into a 10,000-element array.
-      _data = _replicateJson(data, 10000);
+    : _data = _replicateJson(data, 10000);
 
   final OnProgressListener onProgressListener;
   final OnResultListener onResultListener;
@@ -87,9 +83,7 @@ class CalculationMessage {
 // progress of the background computation.
 class CalculationManager {
   CalculationManager({ required this.onProgressListener, required this.onResultListener })
-    : assert(onProgressListener != null),
-      assert(onResultListener != null),
-      _receivePort = ReceivePort() {
+    : _receivePort = ReceivePort() {
     _receivePort.listen(_handleMessage);
   }
 
@@ -278,14 +272,11 @@ class IsolateExampleState extends State<StatefulWidget> with SingleTickerProvide
   }
 
   String _getStatus(CalculationState state) {
-    switch (state) {
-      case CalculationState.loading:
-        return 'Loading...';
-      case CalculationState.calculating:
-        return 'In Progress';
-      case CalculationState.idle:
-        return 'Idle';
-    }
+    return switch (state) {
+      CalculationState.loading     => 'Loading...',
+      CalculationState.calculating => 'In Progress',
+      CalculationState.idle        => 'Idle',
+    };
   }
 
   void _updateState(String result, double progress) {

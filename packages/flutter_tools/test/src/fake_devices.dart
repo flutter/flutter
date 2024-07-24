@@ -54,6 +54,58 @@ List<FakeDeviceJsonData> fakeDevices = <FakeDeviceJsonData>[
       },
     },
   ),
+  FakeDeviceJsonData(
+    FakeDevice(
+      'wireless android',
+      'wireless-android',
+      type: PlatformType.android,
+      connectionInterface: DeviceConnectionInterface.wireless,
+    ),
+    <String, Object>{
+      'name': 'wireless android',
+      'id': 'wireless-android',
+      'isSupported': true,
+      'targetPlatform': 'android-arm',
+      'emulator': true,
+      'sdk': 'Test SDK (1.2.3)',
+      'capabilities': <String, Object>{
+        'hotReload': true,
+        'hotRestart': true,
+        'screenshot': false,
+        'fastStart': false,
+        'flutterExit': true,
+        'hardwareRendering': true,
+        'startPaused': true,
+      },
+    }
+  ),
+  FakeDeviceJsonData(
+    FakeDevice(
+      'wireless ios',
+      'wireless-ios',
+      type:PlatformType.ios,
+      connectionInterface: DeviceConnectionInterface.wireless,
+    )
+      ..targetPlatform = Future<TargetPlatform>.value(TargetPlatform.ios)
+      ..sdkNameAndVersion = Future<String>.value('iOS 16'),
+    <String,Object>{
+      'name': 'wireless ios',
+      'id': 'wireless-ios',
+      'isSupported': true,
+      'targetPlatform': 'ios',
+      'emulator': true,
+      'sdk': 'iOS 16',
+      'capabilities': <String, Object>{
+        'hotReload': true,
+        'hotRestart': true,
+        'screenshot': false,
+        'fastStart': false,
+        'flutterExit': true,
+        'hardwareRendering': true,
+        'startPaused': true,
+      },
+    },
+  ),
 ];
 
 /// Fake device to test `devices` command.
@@ -62,11 +114,16 @@ class FakeDevice extends Device {
     bool ephemeral = true,
     bool isSupported = true,
     bool isSupportedForProject = true,
+    this.isConnected = true,
+    this.connectionInterface = DeviceConnectionInterface.attached,
     PlatformType type = PlatformType.web,
     LaunchResult? launchResult,
+    this.deviceLogReader,
+    bool supportsFlavors = false,
   }) : _isSupported = isSupported,
       _isSupportedForProject = isSupportedForProject,
       _launchResult = launchResult ?? LaunchResult.succeeded(),
+      _supportsFlavors = supportsFlavors,
       super(
         id,
         platformType: type,
@@ -76,13 +133,15 @@ class FakeDevice extends Device {
 
   final bool _isSupported;
   final bool _isSupportedForProject;
+  final bool _supportsFlavors;
   final LaunchResult _launchResult;
+  DeviceLogReader? deviceLogReader;
 
   @override
   final String name;
 
   @override
-  Future<LaunchResult> startApp(covariant ApplicationPackage package, {
+  Future<LaunchResult> startApp(ApplicationPackage? package, {
     String? mainPath,
     String? route,
     DebuggingOptions? debuggingOptions,
@@ -93,13 +152,13 @@ class FakeDevice extends Device {
   }) async => _launchResult;
 
   @override
-  Future<bool> stopApp(covariant ApplicationPackage app, {
+  Future<bool> stopApp(ApplicationPackage? app, {
     String? userIdentifier,
   }) async => true;
 
   @override
   Future<bool> uninstallApp(
-  covariant ApplicationPackage app, {
+    ApplicationPackage app, {
     String? userIdentifier,
   }) async => true;
 
@@ -119,10 +178,25 @@ class FakeDevice extends Device {
   bool isSupported() => _isSupported;
 
   @override
+  bool get supportsFlavors => _supportsFlavors;
+
+  @override
+  bool isConnected;
+
+  @override
+  DeviceConnectionInterface connectionInterface;
+
+  @override
   Future<bool> isLocalEmulator = Future<bool>.value(true);
 
   @override
   Future<String> sdkNameAndVersion = Future<String>.value('Test SDK (1.2.3)');
+
+  @override
+  FutureOr<DeviceLogReader> getLogReader({
+    ApplicationPackage? app,
+    bool includePastLogs = false,
+  }) => deviceLogReader ?? FakeDeviceLogReader();
 }
 
 /// Combines fake device with its canonical JSON representation.
@@ -134,7 +208,9 @@ class FakeDeviceJsonData {
 }
 
 class FakePollingDeviceDiscovery extends PollingDeviceDiscovery {
-  FakePollingDeviceDiscovery() : super('mock');
+  FakePollingDeviceDiscovery({
+    this.requiresExtendedWirelessDeviceDiscovery = false,
+  })  : super('mock');
 
   final List<Device> _devices = <Device>[];
   final StreamController<Device> _onAddedController = StreamController<Device>.broadcast();
@@ -154,6 +230,9 @@ class FakePollingDeviceDiscovery extends PollingDeviceDiscovery {
   @override
   bool get canListAnything => true;
 
+  @override
+  bool requiresExtendedWirelessDeviceDiscovery;
+
   void addDevice(Device device) {
     _devices.add(device);
     _onAddedController.add(device);
@@ -165,7 +244,7 @@ class FakePollingDeviceDiscovery extends PollingDeviceDiscovery {
   }
 
   void setDevices(List<Device> devices) {
-    while(_devices.isNotEmpty) {
+    while (_devices.isNotEmpty) {
       _removeDevice(_devices.first);
     }
     devices.forEach(addDevice);
@@ -174,7 +253,10 @@ class FakePollingDeviceDiscovery extends PollingDeviceDiscovery {
   bool discoverDevicesCalled = false;
 
   @override
-  Future<List<Device>> discoverDevices({Duration? timeout}) {
+  Future<List<Device>> discoverDevices({
+    Duration? timeout,
+    DeviceDiscoveryFilter? filter,
+  }) {
     discoverDevicesCalled = true;
     return super.discoverDevices(timeout: timeout);
   }
@@ -187,6 +269,11 @@ class FakePollingDeviceDiscovery extends PollingDeviceDiscovery {
 
   @override
   List<String> wellKnownIds = <String>[];
+
+  List<String> diagnostics = <String>[];
+
+  @override
+  Future<List<String>> getDiagnostics() => Future<List<String>>.value(diagnostics);
 }
 
 /// A fake implementation of the [DeviceLogReader].

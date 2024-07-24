@@ -24,7 +24,8 @@ class WindowsDevice extends DesktopDevice {
     required Logger logger,
     required FileSystem fileSystem,
     required OperatingSystemUtils operatingSystemUtils,
-  }) : super(
+  }) : _operatingSystemUtils = operatingSystemUtils,
+      super(
       'windows',
       platformType: PlatformType.windows,
       ephemeral: false,
@@ -34,6 +35,8 @@ class WindowsDevice extends DesktopDevice {
       operatingSystemUtils: operatingSystemUtils,
   );
 
+  final OperatingSystemUtils _operatingSystemUtils;
+
   @override
   bool isSupported() => true;
 
@@ -41,7 +44,12 @@ class WindowsDevice extends DesktopDevice {
   String get name => 'Windows';
 
   @override
-  Future<TargetPlatform> get targetPlatform async => TargetPlatform.windows_x64;
+  Future<TargetPlatform> get targetPlatform async => _targetPlatform;
+
+  TargetPlatform get _targetPlatform => switch (_operatingSystemUtils.hostPlatform) {
+    HostPlatform.windows_arm64 => TargetPlatform.windows_arm64,
+    _ => TargetPlatform.windows_x64,
+  };
 
   @override
   bool isSupportedForProject(FlutterProject flutterProject) {
@@ -49,21 +57,22 @@ class WindowsDevice extends DesktopDevice {
   }
 
   @override
-  Future<void> buildForDevice(
-    covariant WindowsApp package, {
+  Future<void> buildForDevice({
     String? mainPath,
     required BuildInfo buildInfo,
+    bool usingCISystem = false,
   }) async {
     await buildWindows(
       FlutterProject.current().windows,
       buildInfo,
+      _targetPlatform,
       target: mainPath,
     );
   }
 
   @override
-  String executablePathForDevice(covariant WindowsApp package, BuildMode buildMode) {
-    return package.executable(buildMode);
+  String executablePathForDevice(covariant WindowsApp package, BuildInfo buildInfo) {
+    return package.executable(buildInfo.mode, _targetPlatform);
   }
 }
 

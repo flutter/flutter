@@ -66,12 +66,17 @@ void main() {
     ]);
   });
 
-  testWidgets('Passing no MaterialBannerThemeData returns defaults', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData();
+  testWidgets('Material3 - Passing no MaterialBannerThemeData returns defaults', (WidgetTester tester) async {
     const String contentText = 'Content';
+    final ThemeData theme = ThemeData(useMaterial3: true);
+    late final ThemeData localizedTheme;
 
     await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(useMaterial3: true),
+      theme: theme,
+      builder:(BuildContext context, Widget? child) {
+        localizedTheme = Theme.of(context);
+        return child!;
+      },
       home: Scaffold(
         body: MaterialBanner(
           content: const Text(contentText),
@@ -87,18 +92,15 @@ void main() {
     ));
 
     final Material material = _getMaterialFromText(tester, contentText);
-    expect(material.color, const Color(0xffffffff));
-    expect(material.surfaceTintColor, theme.colorScheme.surfaceTint);
+    expect(material.color, theme.colorScheme.surfaceContainerLow);
+    expect(material.surfaceTintColor, Colors.transparent);
     expect(material.shadowColor, null);
     expect(material.elevation, 0.0);
 
     final RenderParagraph content = _getTextRenderObjectFromDialog(tester, contentText);
-    // Default value for ThemeData.typography is Typography.material2021()
     expect(
       content.text.style,
-      Typography.material2021().englishLike.bodyMedium!.merge(
-        Typography.material2021().black.bodyMedium,
-      ),
+      localizedTheme.textTheme.bodyMedium,
     );
 
     final Offset rowTopLeft = tester.getTopLeft(find.byType(Row));
@@ -110,19 +112,21 @@ void main() {
     expect(leadingTopLeft.dx - materialTopLeft.dx, 16); // Default leading padding.
 
     final Divider divider = tester.widget<Divider>(find.byType(Divider));
-    expect(divider.color, theme.colorScheme.surfaceVariant);
+    expect(divider.color, theme.colorScheme.outlineVariant);
   });
 
-  testWidgets('Passing no MaterialBannerThemeData returns defaults when presented by ScaffoldMessenger', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData();
+  testWidgets('Material3 - Passing no MaterialBannerThemeData returns defaults when presented by ScaffoldMessenger', (WidgetTester tester) async {
     const String contentText = 'Content';
     const Key tapTarget = Key('tap-target');
+    final ThemeData theme = ThemeData(useMaterial3: true);
+    late final ThemeData localizedTheme;
 
     await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(useMaterial3: true),
+      theme: theme,
       home: Scaffold(
         body: Builder(
           builder: (BuildContext context) {
+            localizedTheme = Theme.of(context);
             return GestureDetector(
               key: tapTarget,
               onTap: () {
@@ -151,18 +155,15 @@ void main() {
     await tester.pumpAndSettle();
 
     final Material material = _getMaterialFromText(tester, contentText);
-    expect(material.color, const Color(0xffffffff));
-    expect(material.surfaceTintColor, theme.colorScheme.surfaceTint);
+    expect(material.color, theme.colorScheme.surfaceContainerLow);
+    expect(material.surfaceTintColor, Colors.transparent);
     expect(material.shadowColor, null);
     expect(material.elevation, 0.0);
 
     final RenderParagraph content = _getTextRenderObjectFromDialog(tester, contentText);
-    // Default value for ThemeData.typography is Typography.material2021()
     expect(
       content.text.style,
-      Typography.material2021().englishLike.bodyMedium!.merge(
-        Typography.material2021().black.bodyMedium,
-      ),
+      localizedTheme.textTheme.bodyMedium,
     );
 
     final Offset rowTopLeft = tester.getTopLeft(find.byType(Row));
@@ -174,7 +175,7 @@ void main() {
     expect(leadingTopLeft.dx - materialTopLeft.dx, 16); // Default leading padding.
 
     final Divider divider = tester.widget<Divider>(find.byType(Divider));
-    expect(divider.color, theme.colorScheme.surfaceVariant);
+    expect(divider.color, theme.colorScheme.outlineVariant);
   });
 
   testWidgets('MaterialBanner uses values from MaterialBannerThemeData', (WidgetTester tester) async {
@@ -405,7 +406,7 @@ void main() {
     ));
 
     final Material material = _getMaterialFromText(tester, contentText);
-    expect(material.color, colorScheme.surface);
+    expect(material.color, colorScheme.surfaceContainerLow);
   });
 
   testWidgets('MaterialBanner uses color scheme when necessary when presented by ScaffoldMessenger', (WidgetTester tester) async {
@@ -444,18 +445,19 @@ void main() {
     await tester.pumpAndSettle();
 
     final Material material = _getMaterialFromText(tester, contentText);
-    expect(material.color, colorScheme.surface);
+    expect(material.color, colorScheme.surfaceContainerLow);
   });
 
   group('Material 2', () {
-    // Tests that are only relevant for Material 2. Once ThemeData.useMaterial3
-    // is turned on by default, these tests can be removed.
+    // These tests are only relevant for Material 2. Once Material 2
+    // support is deprecated and the APIs are removed, these tests
+    // can be deleted.
 
-    testWidgets('Passing no MaterialBannerThemeData returns defaults', (WidgetTester tester) async {
-      final ThemeData theme = ThemeData();
+    testWidgets('Material2 - Passing no MaterialBannerThemeData returns defaults', (WidgetTester tester) async {
       const String contentText = 'Content';
 
       await tester.pumpWidget(MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           body: MaterialBanner(
             content: const Text(contentText),
@@ -480,8 +482,8 @@ void main() {
       // Default value for ThemeData.typography is Typography.material2014()
       expect(
         content.text.style,
-        Typography.material2014().englishLike.bodyText2!.merge(
-          Typography.material2014().black.bodyText2,
+        Typography.material2014().englishLike.bodyMedium!.merge(
+          Typography.material2014().black.bodyMedium,
         ),
       );
 
@@ -494,15 +496,15 @@ void main() {
       expect(leadingTopLeft.dx - materialTopLeft.dx, 16); // Default leading padding.
 
       final Divider divider = tester.widget<Divider>(find.byType(Divider));
-      expect(divider.color, theme.colorScheme.surfaceVariant);
+      expect(divider.color, null);
     });
 
-    testWidgets('Passing no MaterialBannerThemeData returns defaults when presented by ScaffoldMessenger', (WidgetTester tester) async {
-      final ThemeData theme = ThemeData();
+    testWidgets('Material2 - Passing no MaterialBannerThemeData returns defaults when presented by ScaffoldMessenger', (WidgetTester tester) async {
       const String contentText = 'Content';
       const Key tapTarget = Key('tap-target');
 
       await tester.pumpWidget(MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           body: Builder(
             builder: (BuildContext context) {
@@ -543,8 +545,8 @@ void main() {
       // Default value for ThemeData.typography is Typography.material2014()
       expect(
         content.text.style,
-        Typography.material2014().englishLike.bodyText2!.merge(
-          Typography.material2014().black.bodyText2,
+        Typography.material2014().englishLike.bodyMedium!.merge(
+          Typography.material2014().black.bodyMedium,
         ),
       );
 
@@ -557,7 +559,7 @@ void main() {
       expect(leadingTopLeft.dx - materialTopLeft.dx, 16); // Default leading padding.
 
       final Divider divider = tester.widget<Divider>(find.byType(Divider));
-      expect(divider.color, theme.colorScheme.surfaceVariant);
+      expect(divider.color, null);
     });
   });
 }

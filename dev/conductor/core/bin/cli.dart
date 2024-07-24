@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// See: https://github.com/flutter/flutter/wiki/Release-process
+// See: https://github.com/flutter/flutter/blob/main/docs/releases/Release-process.md
 
 import 'dart:io' as io;
 
@@ -13,7 +13,7 @@ import 'package:file/local.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
-const String readmeUrl = 'https://github.com/flutter/flutter/tree/master/dev/conductor/README.md';
+const String readmeUrl = 'https://github.com/flutter/flutter/tree/main/dev/conductor/README.md';
 
 Future<void> main(List<String> args) async {
   const FileSystem fileSystem = LocalFileSystem();
@@ -46,10 +46,6 @@ Future<void> main(List<String> args) async {
   )).trim();
 
   <Command<void>>[
-    CodesignCommand(
-      checkouts: checkouts,
-      flutterRoot: _localFlutterRoot,
-    ),
     StatusCommand(
       checkouts: checkouts,
     ),

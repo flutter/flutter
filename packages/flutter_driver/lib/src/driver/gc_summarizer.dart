@@ -14,10 +14,10 @@ const Set<String> kGCRootEvents = <String>{
   'StartConcurrentMark',
 };
 
-/// Summarizes [TimelineEvents]s corresponding to [kGCRootEvents] category.
+/// Summarizes [TimelineEvent]s corresponding to [kGCRootEvents] category.
 ///
 /// A sample event (some fields have been omitted for brevity):
-/// ```
+/// ```json
 /// {
 ///   "name": "StartConcurrentMarking",
 ///   "cat": "GC",

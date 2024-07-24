@@ -33,7 +33,7 @@ void main() {
       final String? oldRoot = Cache.flutterRoot;
       final Directory tempDir = fileSystem.systemTempDirectory.createTempSync('cache_test.');
       final BufferLogger logger = BufferLogger(
-        terminal: Terminal.test(supportsColor: false, supportsEmoji: false),
+        terminal: Terminal.test(),
         outputPreferences: OutputPreferences(),
       );
       logger.fatalWarnings = true;
@@ -114,7 +114,7 @@ Future<void> main(List<String> args) async {
       final String? oldRoot = Cache.flutterRoot;
       final Directory tempDir = fileSystem.systemTempDirectory.createTempSync('cache_test.');
       final BufferLogger logger = BufferLogger(
-        terminal: Terminal.test(supportsColor: false, supportsEmoji: false),
+        terminal: Terminal.test(),
         outputPreferences: OutputPreferences(),
       );
       logger.fatalWarnings = true;

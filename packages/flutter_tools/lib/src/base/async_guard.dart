@@ -31,7 +31,7 @@ import 'dart:async';
 /// Rationale:
 ///
 /// Consider the following snippet:
-/// ```
+/// ```dart
 /// try {
 ///   await foo();
 ///   ...
@@ -55,7 +55,7 @@ import 'dart:async';
 /// [asyncGuard] is intended to wrap awaited expressions occurring in a `try`
 /// block. The behavior described above gives the behavior that users
 /// intuitively expect from `await`. Consider the snippet:
-/// ```
+/// ```dart
 /// try {
 ///   await asyncGuard(() async {
 ///     var c = Completer();
@@ -117,7 +117,7 @@ Future<T> asyncGuard<T>(
     } catch (e, s) { // ignore: avoid_catches_without_on_clauses, forwards to Future
       handleError(e, s);
     }
-  }, onError: (Object e, StackTrace s) { // ignore: deprecated_member_use
+  }, onError: (Object e, StackTrace s) {
     handleError(e, s);
   });
 

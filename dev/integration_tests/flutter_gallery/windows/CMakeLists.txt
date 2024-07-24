@@ -3,7 +3,7 @@ project(flutter_gallery LANGUAGES CXX)
 
 set(BINARY_NAME "flutter_gallery")
 
-cmake_policy(SET CMP0063 NEW)
+cmake_policy(VERSION 3.14...3.25)
 
 set(CMAKE_INSTALL_RPATH "$ORIGIN/lib")
 

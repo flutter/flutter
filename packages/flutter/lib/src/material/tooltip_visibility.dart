@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'tooltip.dart';
+library;
+
 import 'package:flutter/widgets.dart';
 
 class _TooltipVisibilityScope extends InheritedWidget {
@@ -26,8 +29,6 @@ class _TooltipVisibilityScope extends InheritedWidget {
 /// continues to provide any semantic information that is provided.
 class TooltipVisibility extends StatelessWidget {
   /// Creates a widget that configures the visibility of [Tooltip].
-  ///
-  /// Both arguments must not be null.
   const TooltipVisibility({
     super.key,
     required this.visible,

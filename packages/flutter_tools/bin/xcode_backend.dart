@@ -49,26 +49,20 @@ class Context {
     switch (subCommand) {
       case 'build':
         buildApp();
-        break;
+      case 'prepare':
+        prepare();
       case 'thin':
         // No-op, thinning is handled during the bundle asset assemble build target.
         break;
       case 'embed':
         embedFlutterFrameworks();
-        break;
       case 'embed_and_thin':
         // Thinning is handled during the bundle asset assemble build target, so just embed.
         embedFlutterFrameworks();
-        break;
-      case 'test_observatory_bonjour_service':
+      case 'test_vm_service_bonjour_service':
         // Exposed for integration testing only.
-        addObservatoryBonjourService();
+        addVmServiceBonjourService();
     }
-  }
-
-  bool existsDir(String path) {
-    final Directory dir = Directory(path);
-    return dir.existsSync();
   }
 
   bool existsFile(String path) {
@@ -97,11 +91,17 @@ class Context {
     if (verbose) {
       print((result.stdout as String).trim());
     }
-    if ((result.stderr as String).isNotEmpty) {
-      echoError((result.stderr as String).trim());
+    final String resultStderr = result.stderr.toString().trim();
+    if (resultStderr.isNotEmpty) {
+      final StringBuffer errorOutput = StringBuffer();
+      if (result.exitCode != 0) {
+        // "error:" prefix makes this show up as an Xcode compilation error.
+        errorOutput.write('error: ');
+      }
+      errorOutput.write(resultStderr);
+      echoError(errorOutput.toString());
     }
     if (!allowFail && result.exitCode != 0) {
-      stderr.write('${result.stderr}\n');
       throw Exception(
         'Command "$bin ${args.join(' ')}" exited with code ${result.exitCode}',
       );
@@ -173,6 +173,32 @@ class Context {
     exitApp(-1);
   }
 
+  /// Copies all files from [source] to [destination].
+  ///
+  /// Does not copy `.DS_Store`.
+  ///
+  /// If [delete], delete extraneous files from [destination].
+  void runRsync(
+    String source,
+    String destination, {
+    List<String> extraArgs = const <String>[],
+    bool delete = false,
+  }) {
+    runSync(
+      'rsync',
+      <String>[
+        '-8', // Avoid mangling filenames with encodings that do not match the current locale.
+        '-av',
+        if (delete) '--delete',
+        '--filter',
+        '- .DS_Store',
+        ...extraArgs,
+        source,
+        destination,
+      ],
+    );
+  }
+
   // Adds the App.framework as an embedded binary and the flutter_assets as
   // resources.
   void embedFlutterFrameworks() {
@@ -187,38 +213,57 @@ class Context {
         xcodeFrameworksDir,
       ]
     );
-    runSync(
-      'rsync',
-      <String>[
-        '-8', // Avoid mangling filenames with encodings that do not match the current locale.
-        '-av',
-        '--delete',
-        '--filter',
-        '- .DS_Store',
-        '${environment['BUILT_PRODUCTS_DIR']}/App.framework',
-        xcodeFrameworksDir,
-      ],
+    runRsync(
+      delete: true,
+      '${environment['BUILT_PRODUCTS_DIR']}/App.framework',
+      xcodeFrameworksDir,
     );
 
     // Embed the actual Flutter.framework that the Flutter app expects to run against,
     // which could be a local build or an arch/type specific build.
-    runSync(
-      'rsync',
-      <String>[
-        '-av',
-        '--delete',
-        '--filter',
-        '- .DS_Store',
-        '${environment['BUILT_PRODUCTS_DIR']}/Flutter.framework',
-        '$xcodeFrameworksDir/',
-      ],
+    runRsync(
+      delete: true,
+      '${environment['BUILT_PRODUCTS_DIR']}/Flutter.framework',
+      '$xcodeFrameworksDir/',
     );
 
-    addObservatoryBonjourService();
+    // Copy the native assets. These do not have to be codesigned here because,
+    // they are already codesigned in buildNativeAssetsMacOS.
+    final String sourceRoot = environment['SOURCE_ROOT'] ?? '';
+    String projectPath = '$sourceRoot/..';
+    if (environment['FLUTTER_APPLICATION_PATH'] != null) {
+      projectPath = environment['FLUTTER_APPLICATION_PATH']!;
+    }
+    final String flutterBuildDir = environment['FLUTTER_BUILD_DIR']!;
+    final String nativeAssetsPath = '$projectPath/$flutterBuildDir/native_assets/ios/';
+    final bool verbose = (environment['VERBOSE_SCRIPT_LOGGING'] ?? '').isNotEmpty;
+    if (Directory(nativeAssetsPath).existsSync()) {
+      if (verbose) {
+        print('♦ Copying native assets from $nativeAssetsPath.');
+      }
+      runRsync(
+        extraArgs: <String>[
+          '--filter',
+          '- native_assets.yaml',
+        ],
+        nativeAssetsPath,
+        xcodeFrameworksDir,
+      );
+    } else if (verbose) {
+      print("♦ No native assets to bundle. $nativeAssetsPath doesn't exist.");
+    }
+
+    addVmServiceBonjourService();
   }
 
-  // Add the observatory publisher Bonjour service to the produced app bundle Info.plist.
-  void addObservatoryBonjourService() {
+  // Add the vmService publisher Bonjour service to the produced app bundle Info.plist.
+  void addVmServiceBonjourService() {
+    // Skip adding Bonjour service settings when DISABLE_PORT_PUBLICATION is YES.
+    // These settings are not needed if port publication is disabled.
+    if (environment['DISABLE_PORT_PUBLICATION'] == 'YES') {
+      return;
+    }
+
     final String buildMode = parseFlutterBuildMode();
 
     // Debug and profile only.
@@ -233,13 +278,13 @@ class Context {
       // The file will be present on re-run.
       echo(
         '${environment['INFOPLIST_PATH'] ?? ''} does not exist. Skipping '
-        '_dartobservatory._tcp NSBonjourServices insertion. Try re-building to '
+        '_dartVmService._tcp NSBonjourServices insertion. Try re-building to '
         'enable "flutter attach".');
       return;
     }
 
     // If there are already NSBonjourServices specified by the app (uncommon),
-    // insert the observatory service name to the existing list.
+    // insert the vmService service name to the existing list.
     ProcessResult result = runSync(
       'plutil',
       <String>[
@@ -259,19 +304,19 @@ class Context {
           '-insert',
           'NSBonjourServices.0',
           '-string',
-          '_dartobservatory._tcp',
+          '_dartVmService._tcp',
           builtProductsPlist,
         ],
       );
     } else {
-      // Otherwise, add the NSBonjourServices key and observatory service name.
+      // Otherwise, add the NSBonjourServices key and vmService service name.
       runSync(
         'plutil',
         <String>[
           '-insert',
           'NSBonjourServices',
           '-json',
-          '["_dartobservatory._tcp"]',
+          '["_dartVmService._tcp"]',
           builtProductsPlist,
         ],
       );
@@ -308,86 +353,54 @@ class Context {
     }
   }
 
-  void buildApp() {
-    final bool verbose = environment['VERBOSE_SCRIPT_LOGGING'] != null && environment['VERBOSE_SCRIPT_LOGGING'] != '';
+  void prepare() {
+    // The "prepare" command runs in a pre-action script, which also runs when
+    // using the Xcode/xcodebuild clean command. Skip if cleaning.
+    if (environment['ACTION'] == 'clean') {
+      return;
+    }
+    final bool verbose = (environment['VERBOSE_SCRIPT_LOGGING'] ?? '').isNotEmpty;
     final String sourceRoot = environment['SOURCE_ROOT'] ?? '';
-    String projectPath = '$sourceRoot/..';
-    if (environment['FLUTTER_APPLICATION_PATH'] != null) {
-      projectPath = environment['FLUTTER_APPLICATION_PATH']!;
-    }
-
-    String targetPath = 'lib/main.dart';
-    if (environment['FLUTTER_TARGET'] != null) {
-      targetPath = environment['FLUTTER_TARGET']!;
-    }
+    final String projectPath = environment['FLUTTER_APPLICATION_PATH'] ?? '$sourceRoot/..';
 
     final String buildMode = parseFlutterBuildMode();
 
-    // Warn the user if not archiving (ACTION=install) in release mode.
-    final String? action = environment['ACTION'];
-    if (action == 'install' && buildMode != 'release') {
-      echo(
-        'warning: Flutter archive not built in Release mode. Ensure '
-        'FLUTTER_BUILD_MODE is set to release or run "flutter build ios '
-        '--release", then re-run Archive from Xcode.',
-      );
+    final List<String> flutterArgs = _generateFlutterArgsForAssemble(
+      'prepare',
+      buildMode,
+      verbose,
+    );
+
+    // The "prepare" command only targets the UnpackIOS target, which copies the
+    // Flutter framework to the BUILT_PRODUCTS_DIR.
+    flutterArgs.add('${buildMode}_unpack_ios');
+
+    final ProcessResult result = runSync(
+      '${environmentEnsure('FLUTTER_ROOT')}/bin/flutter',
+      flutterArgs,
+      verbose: verbose,
+      allowFail: true,
+      workingDirectory: projectPath, // equivalent of RunCommand pushd "${project_path}"
+    );
+
+    if (result.exitCode != 0) {
+      echoError('Failed to copy Flutter framework.');
+      exitApp(-1);
     }
+  }
 
-    String bitcodeFlag = '';
-    if (environment['ENABLE_BITCODE'] == 'YES' && environment['ACTION'] == 'install') {
-      bitcodeFlag = 'true';
-    }
+  void buildApp() {
+    final bool verbose = (environment['VERBOSE_SCRIPT_LOGGING'] ?? '').isNotEmpty;
+    final String sourceRoot = environment['SOURCE_ROOT'] ?? '';
+    final String projectPath = environment['FLUTTER_APPLICATION_PATH'] ?? '$sourceRoot/..';
 
-    final List<String> flutterArgs = <String>[];
+    final String buildMode = parseFlutterBuildMode();
 
-    if (verbose) {
-      flutterArgs.add('--verbose');
-    }
-
-    if (environment['FLUTTER_ENGINE'] != null && environment['FLUTTER_ENGINE']!.isNotEmpty) {
-      flutterArgs.add('--local-engine-src-path=${environment['FLUTTER_ENGINE']}');
-    }
-
-    if (environment['LOCAL_ENGINE'] != null && environment['LOCAL_ENGINE']!.isNotEmpty) {
-      flutterArgs.add('--local-engine=${environment['LOCAL_ENGINE']}');
-    }
-
-    flutterArgs.addAll(<String>[
-      'assemble',
-      '--no-version-check',
-      '--output=${environment['BUILT_PRODUCTS_DIR'] ?? ''}/',
-      '-dTargetPlatform=ios',
-      '-dTargetFile=$targetPath',
-      '-dBuildMode=$buildMode',
-      '-dIosArchs=${environment['ARCHS'] ?? ''}',
-      '-dSdkRoot=${environment['SDKROOT'] ?? ''}',
-      '-dSplitDebugInfo=${environment['SPLIT_DEBUG_INFO'] ?? ''}',
-      '-dTreeShakeIcons=${environment['TREE_SHAKE_ICONS'] ?? ''}',
-      '-dTrackWidgetCreation=${environment['TRACK_WIDGET_CREATION'] ?? ''}',
-      '-dDartObfuscation=${environment['DART_OBFUSCATION'] ?? ''}',
-      '-dEnableBitcode=$bitcodeFlag',
-      '-dAction=${environment['ACTION'] ?? ''}',
-      '--ExtraGenSnapshotOptions=${environment['EXTRA_GEN_SNAPSHOT_OPTIONS'] ?? ''}',
-      '--DartDefines=${environment['DART_DEFINES'] ?? ''}',
-      '--ExtraFrontEndOptions=${environment['EXTRA_FRONT_END_OPTIONS'] ?? ''}',
-    ]);
-
-    if (environment['PERFORMANCE_MEASUREMENT_FILE'] != null && environment['PERFORMANCE_MEASUREMENT_FILE']!.isNotEmpty) {
-      flutterArgs.add('--performance-measurement-file=${environment['PERFORMANCE_MEASUREMENT_FILE']}');
-    }
-
-    final String? expandedCodeSignIdentity = environment['EXPANDED_CODE_SIGN_IDENTITY'];
-    if (expandedCodeSignIdentity != null && expandedCodeSignIdentity.isNotEmpty && environment['CODE_SIGNING_REQUIRED'] != 'NO') {
-      flutterArgs.add('-dCodesignIdentity=$expandedCodeSignIdentity');
-    }
-
-    if (environment['BUNDLE_SKSL_PATH'] != null && environment['BUNDLE_SKSL_PATH']!.isNotEmpty) {
-      flutterArgs.add('-dBundleSkSLPath=${environment['BUNDLE_SKSL_PATH']}');
-    }
-
-    if (environment['CODE_SIZE_DIRECTORY'] != null && environment['CODE_SIZE_DIRECTORY']!.isNotEmpty) {
-      flutterArgs.add('-dCodeSizeDirectory=${environment['CODE_SIZE_DIRECTORY']}');
-    }
+    final List<String> flutterArgs = _generateFlutterArgsForAssemble(
+      'build',
+      buildMode,
+      verbose,
+    );
 
     flutterArgs.add('${buildMode}_ios_bundle_flutter_assets');
 
@@ -408,5 +421,108 @@ class Context {
     streamOutput(' └─Compiling, linking and signing...');
 
     echo('Project $projectPath built and packaged successfully.');
+  }
+
+  List<String> _generateFlutterArgsForAssemble(
+    String command,
+    String buildMode,
+    bool verbose,
+  ) {
+    String targetPath = 'lib/main.dart';
+    if (environment['FLUTTER_TARGET'] != null) {
+      targetPath = environment['FLUTTER_TARGET']!;
+    }
+
+    // Warn the user if not archiving (ACTION=install) in release mode.
+    final String? action = environment['ACTION'];
+    if (action == 'install' && buildMode != 'release') {
+      echo(
+        'warning: Flutter archive not built in Release mode. Ensure '
+        'FLUTTER_BUILD_MODE is set to release or run "flutter build ios '
+        '--release", then re-run Archive from Xcode.',
+      );
+    }
+
+    final List<String> flutterArgs = <String>[];
+
+    if (verbose) {
+      flutterArgs.add('--verbose');
+    }
+
+    if (environment['FLUTTER_ENGINE'] != null && environment['FLUTTER_ENGINE']!.isNotEmpty) {
+      flutterArgs.add('--local-engine-src-path=${environment['FLUTTER_ENGINE']}');
+    }
+
+    if (environment['LOCAL_ENGINE'] != null && environment['LOCAL_ENGINE']!.isNotEmpty) {
+      flutterArgs.add('--local-engine=${environment['LOCAL_ENGINE']}');
+    }
+
+    if (environment['LOCAL_ENGINE_HOST'] != null && environment['LOCAL_ENGINE_HOST']!.isNotEmpty) {
+      flutterArgs.add('--local-engine-host=${environment['LOCAL_ENGINE_HOST']}');
+    }
+
+    String architectures = environment['ARCHS'] ?? '';
+    if (command == 'prepare') {
+      // The "prepare" command runs in a pre-action script, which doesn't always
+      // filter the "ARCHS" build setting to only the active arch. To workaround,
+      // if "ONLY_ACTIVE_ARCH" is true and the "NATIVE_ARCH" is arm, assume the
+      // active arch is also arm to improve caching. If this assumption is
+      // incorrect, it will later be corrected by the "build" command.
+      if (environment['ONLY_ACTIVE_ARCH'] == 'YES' && environment['NATIVE_ARCH'] != null) {
+        if (environment['NATIVE_ARCH']!.contains('arm')) {
+          architectures = 'arm64';
+        } else {
+          architectures = 'x86_64';
+        }
+      }
+    }
+
+    flutterArgs.addAll(<String>[
+      'assemble',
+      '--no-version-check',
+      '--output=${environment['BUILT_PRODUCTS_DIR'] ?? ''}/',
+      '-dTargetPlatform=ios',
+      '-dTargetFile=$targetPath',
+      '-dBuildMode=$buildMode',
+      if (environment['FLAVOR'] != null) '-dFlavor=${environment['FLAVOR']}',
+      '-dIosArchs=$architectures',
+      '-dSdkRoot=${environment['SDKROOT'] ?? ''}',
+      '-dSplitDebugInfo=${environment['SPLIT_DEBUG_INFO'] ?? ''}',
+      '-dTreeShakeIcons=${environment['TREE_SHAKE_ICONS'] ?? ''}',
+      '-dTrackWidgetCreation=${environment['TRACK_WIDGET_CREATION'] ?? ''}',
+      '-dDartObfuscation=${environment['DART_OBFUSCATION'] ?? ''}',
+      '-dAction=${environment['ACTION'] ?? ''}',
+      '-dFrontendServerStarterPath=${environment['FRONTEND_SERVER_STARTER_PATH'] ?? ''}',
+      '--ExtraGenSnapshotOptions=${environment['EXTRA_GEN_SNAPSHOT_OPTIONS'] ?? ''}',
+      '--DartDefines=${environment['DART_DEFINES'] ?? ''}',
+      '--ExtraFrontEndOptions=${environment['EXTRA_FRONT_END_OPTIONS'] ?? ''}',
+    ]);
+
+    if (command == 'prepare') {
+      // Use the PreBuildAction define flag to force the tool to use a different
+      // filecache file for the "prepare" command. This will make the environment
+      // buildPrefix for the "prepare" command unique from the "build" command.
+      // This will improve caching since the "build" command has more target dependencies.
+      flutterArgs.add('-dPreBuildAction=PrepareFramework');
+    }
+
+    if (environment['PERFORMANCE_MEASUREMENT_FILE'] != null && environment['PERFORMANCE_MEASUREMENT_FILE']!.isNotEmpty) {
+      flutterArgs.add('--performance-measurement-file=${environment['PERFORMANCE_MEASUREMENT_FILE']}');
+    }
+
+    final String? expandedCodeSignIdentity = environment['EXPANDED_CODE_SIGN_IDENTITY'];
+    if (expandedCodeSignIdentity != null && expandedCodeSignIdentity.isNotEmpty && environment['CODE_SIGNING_REQUIRED'] != 'NO') {
+      flutterArgs.add('-dCodesignIdentity=$expandedCodeSignIdentity');
+    }
+
+    if (environment['BUNDLE_SKSL_PATH'] != null && environment['BUNDLE_SKSL_PATH']!.isNotEmpty) {
+      flutterArgs.add('-dBundleSkSLPath=${environment['BUNDLE_SKSL_PATH']}');
+    }
+
+    if (environment['CODE_SIZE_DIRECTORY'] != null && environment['CODE_SIZE_DIRECTORY']!.isNotEmpty) {
+      flutterArgs.add('-dCodeSizeDirectory=${environment['CODE_SIZE_DIRECTORY']}');
+    }
+
+    return flutterArgs;
   }
 }

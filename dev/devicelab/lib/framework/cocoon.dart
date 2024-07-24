@@ -246,7 +246,7 @@ class AuthenticatedCocoonClient extends BaseClient {
 }
 
 class CocoonException implements Exception {
-  CocoonException(this.message) : assert(message != null);
+  CocoonException(this.message);
 
   /// The message to show to the issuer to explain the error.
   final String message;

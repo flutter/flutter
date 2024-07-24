@@ -99,7 +99,7 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
           final ParentDataElement<KeepAliveParentDataMixin>? childElement = _getChildElement();
           assert(childElement != null);
           _updateParentDataOfChild(childElement!);
-        });
+        }, debugLabel: 'AutomaticKeepAlive.updateParentData');
       }
     }
     return false;
@@ -144,7 +144,8 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
   }
 
   VoidCallback _createCallback(Listenable handle) {
-    return () {
+    late final VoidCallback callback;
+    return callback = () {
       assert(() {
         if (!mounted) {
           throw FlutterError(
@@ -157,6 +158,7 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
         return true;
       }());
       _handles!.remove(handle);
+      handle.removeListener(callback);
       if (_handles!.isEmpty) {
         if (SchedulerBinding.instance.schedulerPhase.index < SchedulerPhase.persistentCallbacks.index) {
           // Build/layout haven't started yet so let's just schedule this for
@@ -292,9 +294,7 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
 /// [KeepAliveNotification] internally.
 class KeepAliveNotification extends Notification {
   /// Creates a notification to indicate that a subtree must be kept alive.
-  ///
-  /// The [handle] must not be null.
-  const KeepAliveNotification(this.handle) : assert(handle != null);
+  const KeepAliveNotification(this.handle);
 
   /// A [Listenable] that will inform its clients when the widget that fired the
   /// notification no longer needs to be kept alive.
@@ -319,19 +319,6 @@ class KeepAliveNotification extends Notification {
 /// consider using [AutomaticKeepAliveClientMixin], which uses a
 /// [KeepAliveHandle] internally.
 class KeepAliveHandle extends ChangeNotifier {
-  /// Trigger the listeners to indicate that the widget
-  /// no longer needs to be kept alive.
-  ///
-  /// This method does not call [dispose]. When the handle is not needed
-  /// anymore, it must be [dispose]d regardless of whether notifying listeners.
-  @Deprecated(
-    'Use dispose instead. '
-    'This feature was deprecated after v3.3.0-0.0.pre.',
-  )
-  void release() {
-    notifyListeners();
-  }
-
   @override
   void dispose() {
     notifyListeners();
@@ -366,7 +353,6 @@ mixin AutomaticKeepAliveClientMixin<T extends StatefulWidget> on State<T> {
   }
 
   void _releaseKeepAlive() {
-    // Dispose and release do not imply each other.
     _keepAliveHandle!.dispose();
     _keepAliveHandle = null;
   }
@@ -414,6 +400,10 @@ mixin AutomaticKeepAliveClientMixin<T extends StatefulWidget> on State<T> {
   Widget build(BuildContext context) {
     if (wantKeepAlive && _keepAliveHandle == null) {
       _ensureKeepAlive();
+      // Whenever wantKeepAlive's value changes (or might change), the
+      // subclass should call [updateKeepAlive].
+      // That will ensure that the keepalive is disabled (or enabled)
+      // without requiring a rebuild.
     }
     return const _NullWidget();
   }

@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'text_button.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
@@ -18,7 +21,7 @@ import 'theme.dart';
 /// The [style]'s properties override [TextButton]'s default style,
 /// i.e. the [ButtonStyle] returned by [TextButton.defaultStyleOf]. Only
 /// the style's non-null property values or resolved non-null
-/// [MaterialStateProperty] values are used.
+/// [WidgetStateProperty] values are used.
 ///
 /// See also:
 ///
@@ -27,8 +30,8 @@ import 'theme.dart';
 ///    for text buttons.
 ///  * [TextButton.styleFrom], which converts simple values into a
 ///    [ButtonStyle] that's consistent with [TextButton]'s defaults.
-///  * [MaterialStateProperty.resolve], "resolve" a material state property
-///    to a simple value based on a set of [MaterialState]s.
+///  * [WidgetStateProperty.resolve], "resolve" a material state property
+///    to a simple value based on a set of [WidgetState]s.
 ///  * [ThemeData.textButtonTheme], which can be used to override the default
 ///    [ButtonStyle] for [TextButton]s below the overall [Theme].
 @immutable
@@ -40,7 +43,7 @@ class TextButtonThemeData with Diagnosticable {
 
   /// Overrides for [TextButton]'s default style.
   ///
-  /// Non-null properties or non-null resolved [MaterialStateProperty]
+  /// Non-null properties or non-null resolved [WidgetStateProperty]
   /// values override the [ButtonStyle] returned by
   /// [TextButton.defaultStyleOf].
   ///
@@ -49,9 +52,8 @@ class TextButtonThemeData with Diagnosticable {
 
   /// Linearly interpolate between two text button themes.
   static TextButtonThemeData? lerp(TextButtonThemeData? a, TextButtonThemeData? b, double t) {
-    assert (t != null);
-    if (a == null && b == null) {
-      return null;
+    if (identical(a, b)) {
+      return a;
     }
     return TextButtonThemeData(
       style: ButtonStyle.lerp(a?.style, b?.style, t),
@@ -92,13 +94,11 @@ class TextButtonThemeData with Diagnosticable {
 ///    [ButtonStyle] for [TextButton]s below the overall [Theme].
 class TextButtonTheme extends InheritedTheme {
   /// Create a [TextButtonTheme].
-  ///
-  /// The [data] parameter must not be null.
   const TextButtonTheme({
     super.key,
     required this.data,
     required super.child,
-  }) : assert(data != null);
+  });
 
   /// The configuration of this theme.
   final TextButtonThemeData data;

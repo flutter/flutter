@@ -75,7 +75,7 @@ const String _kSamplePluginPubspec = '''
 name: path_provider_linux
 description: linux implementation of the path_provider plugin
 // version: 2.0.1
-// homepage: https://github.com/flutter/plugins/tree/master/packages/path_provider/path_provider_linux
+// homepage: https://github.com/flutter/plugins/tree/main/packages/path_provider/path_provider_linux
 
 flutter:
   plugin:
@@ -86,7 +86,7 @@ flutter:
         pluginClass: none
 
 environment:
-  sdk: ">=2.12.0-259.9.beta <3.0.0"
+  sdk: '>=3.2.0-0 <4.0.0'
   flutter: ">=1.20.0"
 ''';
 
@@ -257,7 +257,6 @@ void main() {
           "          '`path_provider_linux` threw an error: \$err. '\n"
           "          'The app may not function as expected until you remove this plugin from pubspec.yaml'\n"
           '        );\n'
-          '        rethrow;\n'
           '      }\n'
           '\n'
           '    } else if (Platform.isMacOS) {\n'
@@ -385,7 +384,6 @@ void main() {
           "          '`path_provider_linux` threw an error: \$err. '\n"
           "          'The app may not function as expected until you remove this plugin from pubspec.yaml'\n"
           '        );\n'
-          '        rethrow;\n'
           '      }\n'
           '\n'
           '    } else if (Platform.isMacOS) {\n'

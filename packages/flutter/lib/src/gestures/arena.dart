@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'events.dart';
+library;
 
 import 'dart:async';
 
@@ -97,9 +99,13 @@ class _GestureArena {
   }
 }
 
+/// Used for disambiguating the meaning of sequences of pointer events.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=Q85LBtBdi0U}
+///
 /// The first member to accept or the last member to not reject wins.
 ///
-/// See <https://flutter.dev/gestures/#gesture-disambiguation> for more
+/// See <https://flutter.dev/to/gesture-disambiguation> for more
 /// information about the role this class plays in the gesture system.
 ///
 /// To debug problems with gestures, consider using
@@ -218,22 +224,23 @@ class GestureArenaManager {
     if (state == null) {
       return; // This arena has already resolved.
     }
-    assert(_debugLogDiagnostic(pointer, '${ disposition == GestureDisposition.accepted ? "Accepting" : "Rejecting" }: $member'));
     assert(state.members.contains(member));
-    if (disposition == GestureDisposition.rejected) {
-      state.members.remove(member);
-      member.rejectGesture(pointer);
-      if (!state.isOpen) {
-        _tryToResolveArena(pointer, state);
-      }
-    } else {
-      assert(disposition == GestureDisposition.accepted);
-      if (state.isOpen) {
-        state.eagerWinner ??= member;
-      } else {
-        assert(_debugLogDiagnostic(pointer, 'Self-declared winner: $member'));
-        _resolveInFavorOf(pointer, state, member);
-      }
+    switch (disposition) {
+      case GestureDisposition.accepted:
+        assert(_debugLogDiagnostic(pointer, 'Accepting: $member'));
+        if (state.isOpen) {
+          state.eagerWinner ??= member;
+        } else {
+          assert(_debugLogDiagnostic(pointer, 'Self-declared winner: $member'));
+          _resolveInFavorOf(pointer, state, member);
+        }
+      case GestureDisposition.rejected:
+        assert(_debugLogDiagnostic(pointer, 'Rejecting: $member'));
+        state.members.remove(member);
+        member.rejectGesture(pointer);
+        if (!state.isOpen) {
+          _tryToResolveArena(pointer, state);
+        }
     }
   }
 
@@ -266,7 +273,6 @@ class GestureArenaManager {
 
   void _resolveInFavorOf(int pointer, _GestureArena state, GestureArenaMember member) {
     assert(state == _arenas[pointer]);
-    assert(state != null);
     assert(state.eagerWinner == null || state.eagerWinner == member);
     assert(!state.isOpen);
     _arenas.remove(pointer);

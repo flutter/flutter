@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:collection';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -296,12 +299,12 @@ class _SegmentSeparatorState extends State<_SegmentSeparator> with TickerProvide
 /// See also:
 ///
 ///  * <https://developer.apple.com/design/human-interface-guidelines/ios/controls/segmented-controls/>
-class CupertinoSlidingSegmentedControl<T> extends StatefulWidget {
+class CupertinoSlidingSegmentedControl<T extends Object> extends StatefulWidget {
   /// Creates an iOS-style segmented control bar.
   ///
-  /// The [children] and [onValueChanged] arguments must not be null. The
-  /// [children] argument must be an ordered [Map] such as a [LinkedHashMap].
-  /// Further, the length of the [children] list must be greater than one.
+  /// The [children] argument must be an ordered [Map] such as a
+  /// [LinkedHashMap]. Further, the length of the [children] list must be
+  /// greater than one.
   ///
   /// Each widget value in the map of [children] must have an associated key
   /// that uniquely identifies this widget. This key is what will be returned
@@ -320,10 +323,7 @@ class CupertinoSlidingSegmentedControl<T> extends StatefulWidget {
     this.thumbColor = _kThumbColor,
     this.padding = _kHorizontalItemPadding,
     this.backgroundColor = CupertinoColors.tertiarySystemFill,
-  }) : assert(children != null),
-       assert(children.length >= 2),
-       assert(padding != null),
-       assert(onValueChanged != null),
+  }) : assert(children.length >= 2),
        assert(
          groupValue == null || children.keys.contains(groupValue),
          'The groupValue must be either null or one of the keys in the children map.',
@@ -345,8 +345,6 @@ class CupertinoSlidingSegmentedControl<T> extends StatefulWidget {
   final T? groupValue;
 
   /// The callback that is called when a new option is tapped.
-  ///
-  /// This attribute must not be null.
   ///
   /// The segmented control passes the newly selected widget's associated key
   /// to the callback but does not actually change state until the parent
@@ -406,14 +404,14 @@ class CupertinoSlidingSegmentedControl<T> extends StatefulWidget {
 
   /// The amount of space by which to inset the [children].
   ///
-  /// Must not be null. Defaults to EdgeInsets.symmetric(vertical: 2, horizontal: 3).
+  /// Defaults to `EdgeInsets.symmetric(vertical: 2, horizontal: 3)`.
   final EdgeInsetsGeometry padding;
 
   @override
   State<CupertinoSlidingSegmentedControl<T>> createState() => _SegmentedControlState<T>();
 }
 
-class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T>>
+class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSegmentedControl<T>>
     with TickerProviderStateMixin<CupertinoSlidingSegmentedControl<T>> {
   late final AnimationController thumbController = AnimationController(duration: _kSpringAnimationDuration, value: 0, vsync: this);
   Animatable<Rect?>? thumbAnimatable;
@@ -494,14 +492,13 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
     final int numOfChildren = widget.children.length;
     assert(renderBox.hasSize);
     assert(numOfChildren >= 2);
-    int index = (dx ~/ (renderBox.size.width / numOfChildren)).clamp(0, numOfChildren - 1); // ignore_clamp_double_lint
+    int index = (dx ~/ (renderBox.size.width / numOfChildren)).clamp(0, numOfChildren - 1);
 
     switch (Directionality.of(context)) {
       case TextDirection.ltr:
         break;
       case TextDirection.rtl:
         index = numOfChildren - 1 - index;
-        break;
     }
 
     return widget.children.keys.elementAt(index);
@@ -523,7 +520,6 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
   // _Segment widget) to make the overall animation look natural when the thumb
   // is not sliding.
   void _playThumbScaleAnimation({ required bool isExpanding }) {
-    assert(isExpanding != null);
     thumbScaleAnimation = thumbScaleController.drive(
       Tween<double>(
         begin: thumbScaleAnimation.value,
@@ -686,7 +682,6 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
         if (highlightedIndex != null) {
           highlightedIndex = index - 1 - highlightedIndex;
         }
-        break;
     }
 
     return UnconstrainedBox(
@@ -714,8 +709,8 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
   }
 }
 
-class _SegmentedControlRenderWidget<T> extends MultiChildRenderObjectWidget {
-  _SegmentedControlRenderWidget({
+class _SegmentedControlRenderWidget<T extends Object> extends MultiChildRenderObjectWidget {
+  const _SegmentedControlRenderWidget({
     super.key,
     super.children,
     required this.highlightedIndex,
@@ -783,7 +778,7 @@ class _SegmentedControlContainerBoxParentData extends ContainerBoxParentData<Ren
 //    region (either outside of the segmented control's vicinity or to a
 //    different segment). The reverse animation has the same duration and timing
 //    function.
-class _RenderSegmentedControl<T> extends RenderBox
+class _RenderSegmentedControl<T extends Object> extends RenderBox
     with ContainerRenderObjectMixin<RenderBox, ContainerBoxParentData<RenderBox>>,
         RenderBoxContainerDefaultsMixin<RenderBox, ContainerBoxParentData<RenderBox>> {
   _RenderSegmentedControl({
@@ -793,8 +788,7 @@ class _RenderSegmentedControl<T> extends RenderBox
     required this.state,
   }) : _highlightedIndex = highlightedIndex,
        _thumbColor = thumbColor,
-       _thumbScale = thumbScale,
-       assert(state != null);
+       _thumbScale = thumbScale;
 
   final _SegmentedControlState<T> state;
 
@@ -957,6 +951,18 @@ class _RenderSegmentedControl<T> extends RenderBox
   }
 
   @override
+  double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
+    final Size childSize = _calculateChildSize(constraints);
+    final BoxConstraints childConstraints = BoxConstraints.tight(childSize);
+
+    BaselineOffset baselineOffset = BaselineOffset.noBaseline;
+    for (RenderBox? child = firstChild; child != null; child = childAfter(child)) {
+      baselineOffset = baselineOffset.minOf(BaselineOffset(child.getDryBaseline(childConstraints, baseline)));
+    }
+    return baselineOffset.offset;
+  }
+
+  @override
   Size computeDryLayout(BoxConstraints constraints) {
     final Size childSize = _calculateChildSize(constraints);
     return _computeOverallSizeFromChildSize(childSize, constraints);
@@ -1074,13 +1080,11 @@ class _RenderSegmentedControl<T> extends RenderBox
   // Paint the separator to the right of the given child.
   final Paint separatorPaint = Paint();
   void _paintSeparator(PaintingContext context, Offset offset, RenderBox child) {
-    assert(child != null);
     final _SegmentedControlContainerBoxParentData childParentData = child.parentData! as _SegmentedControlContainerBoxParentData;
     context.paintChild(child, offset + childParentData.offset);
   }
 
   void _paintChild(PaintingContext context, Offset offset, RenderBox child) {
-    assert(child != null);
     final _SegmentedControlContainerBoxParentData childParentData = child.parentData! as _SegmentedControlContainerBoxParentData;
     context.paintChild(child, childParentData.offset + offset);
   }
@@ -1119,7 +1123,6 @@ class _RenderSegmentedControl<T> extends RenderBox
 
   @override
   bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
-    assert(position != null);
     RenderBox? child = lastChild;
     while (child != null) {
       final _SegmentedControlContainerBoxParentData childParentData =

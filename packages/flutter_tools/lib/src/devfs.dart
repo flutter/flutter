@@ -5,9 +5,12 @@
 import 'dart:async';
 
 import 'package:package_config/package_config.dart';
+import 'package:process/process.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
+import 'artifacts.dart';
 import 'asset.dart';
+import 'base/config.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
@@ -15,7 +18,9 @@ import 'base/logger.dart';
 import 'base/net.dart';
 import 'base/os.dart';
 import 'build_info.dart';
-import 'build_system/targets/shader_compiler.dart';
+import 'build_system/tools/asset_transformer.dart';
+import 'build_system/tools/scene_importer.dart';
+import 'build_system/tools/shader_compiler.dart';
 import 'compile.dart';
 import 'convert.dart' show base64, utf8;
 import 'vmservice.dart';
@@ -123,8 +128,7 @@ class DevFSFileContent extends DevFSContent {
     if (oldFileStat == null && newFileStat == null) {
       return false;
     }
-    return time == null
-        || oldFileStat == null
+    return oldFileStat == null
         || newFileStat == null
         || newFileStat.modified.isAfter(time);
   }
@@ -149,18 +153,11 @@ class DevFSFileContent extends DevFSContent {
 class DevFSByteContent extends DevFSContent {
   DevFSByteContent(this._bytes);
 
-  List<int> _bytes;
-
+  final List<int> _bytes;
+  final DateTime _creationTime = DateTime.now();
   bool _isModified = true;
-  DateTime _modificationTime = DateTime.now();
 
   List<int> get bytes => _bytes;
-
-  set bytes(List<int> value) {
-    _bytes = value;
-    _isModified = true;
-    _modificationTime = DateTime.now();
-  }
 
   /// Return true only once so that the content is written to the device only once.
   @override
@@ -172,7 +169,7 @@ class DevFSByteContent extends DevFSContent {
 
   @override
   bool isModifiedAfter(DateTime time) {
-    return time == null || _modificationTime.isAfter(time);
+    return _creationTime.isAfter(time);
   }
 
   @override
@@ -192,19 +189,9 @@ class DevFSStringContent extends DevFSByteContent {
     : _string = string,
       super(utf8.encode(string));
 
-  String _string;
+  final String _string;
 
   String get string => _string;
-
-  set string(String value) {
-    _string = value;
-    super.bytes = utf8.encode(_string);
-  }
-
-  @override
-  set bytes(List<int> value) {
-    string = utf8.decode(value);
-  }
 }
 
 /// A string compressing DevFSContent.
@@ -229,7 +216,7 @@ class DevFSStringCompressingBytesContent extends DevFSContent {
 
   final String _string;
   final ZLibEncoder _compressor;
-  final DateTime _modificationTime = DateTime.now();
+  final DateTime _creationTime = DateTime.now();
 
   bool _isModified = true;
 
@@ -245,7 +232,7 @@ class DevFSStringCompressingBytesContent extends DevFSContent {
 
   @override
   bool isModifiedAfter(DateTime time) {
-    return time == null || _modificationTime.isAfter(time);
+    return _creationTime.isAfter(time);
   }
 
   @override
@@ -348,7 +335,7 @@ class _DevFSHttpWriter implements DevFSWriter {
     DevFSContent content, {
     int retry = 0,
   }) async {
-    while(true) {
+    while (true) {
       try {
         final HttpClientRequest request = await _client.putUrl(httpAddress!);
         request.headers.removeAll(HttpHeaders.acceptEncodingHeader);
@@ -401,7 +388,6 @@ class UpdateFSReport {
     bool success = false,
     int invalidatedSourcesCount = 0,
     int syncedBytes = 0,
-    this.fastReassembleClassName,
     int scannedSourcesCount = 0,
     Duration compileDuration = Duration.zero,
     Duration transferDuration = Duration.zero,
@@ -423,7 +409,6 @@ class UpdateFSReport {
   Duration get findInvalidatedDuration => _findInvalidatedDuration;
 
   bool _success;
-  String? fastReassembleClassName;
   int _invalidatedSourcesCount;
   int _syncedBytes;
   int _scannedSourcesCount;
@@ -435,7 +420,6 @@ class UpdateFSReport {
     if (!report._success) {
       _success = false;
     }
-    fastReassembleClassName ??= report.fastReassembleClassName;
     _invalidatedSourcesCount += report._invalidatedSourcesCount;
     _syncedBytes += report._syncedBytes;
     _scannedSourcesCount += report._scannedSourcesCount;
@@ -456,9 +440,13 @@ class DevFS {
     required OperatingSystemUtils osUtils,
     required Logger logger,
     required FileSystem fileSystem,
+    required ProcessManager processManager,
+    required Artifacts artifacts,
+    required BuildMode buildMode,
     HttpClient? httpClient,
     Duration? uploadRetryThrottle,
     StopwatchFactory stopwatchFactory = const StopwatchFactory(),
+    Config? config,
   }) : _vmService = serviceProtocol,
        _logger = logger,
        _fileSystem = fileSystem,
@@ -471,18 +459,32 @@ class DevFS {
         httpClient: httpClient ?? ((context.get<HttpClientFactory>() == null)
           ? HttpClient()
           : context.get<HttpClientFactory>()!())),
-       _stopwatchFactory = stopwatchFactory;
+       _stopwatchFactory = stopwatchFactory,
+       _config = config,
+       _assetTransformer = DevelopmentAssetTransformer(
+          transformer: AssetTransformer(
+            processManager: processManager,
+            fileSystem: fileSystem,
+            dartBinaryPath: artifacts.getArtifactPath(Artifact.engineDartBinary),
+            buildMode: buildMode,
+          ),
+          fileSystem: fileSystem,
+          logger: logger,
+        );
 
   final FlutterVmService _vmService;
   final _DevFSHttpWriter _httpWriter;
   final Logger _logger;
   final FileSystem _fileSystem;
   final StopwatchFactory _stopwatchFactory;
+  final Config? _config;
+  final DevelopmentAssetTransformer _assetTransformer;
 
   final String fsName;
-  final Directory? rootDirectory;
+  final Directory rootDirectory;
   final Set<String> assetPathsToEvict = <String>{};
   final Set<String> shaderPathsToEvict = <String>{};
+  final Set<String> scenePathsToEvict = <String>{};
 
   // A flag to indicate whether we have called `setAssetDirectory` on the target device.
   bool hasSetAssetDirectory = false;
@@ -494,7 +496,6 @@ class DevFS {
   DateTime? lastCompiled;
   DateTime? _previousCompiled;
   PackageConfig? lastPackageConfig;
-  File? _widgetCacheOutputFile;
 
   Uri? _baseUri;
   Uri? get baseUri => _baseUri;
@@ -504,7 +505,7 @@ class DevFS {
     final String baseUriString = baseUri.toString();
     if (deviceUriString.startsWith(baseUriString)) {
       final String deviceUriSuffix = deviceUriString.substring(baseUriString.length);
-      return rootDirectory!.uri.resolve(deviceUriSuffix);
+      return rootDirectory.uri.resolve(deviceUriSuffix);
     }
     return deviceUri;
   }
@@ -554,22 +555,6 @@ class DevFS {
     lastCompiled = _previousCompiled;
   }
 
-
-  /// If the build method of a single widget was modified, return the widget name.
-  ///
-  /// If any other changes were made, or there is an error scanning the file,
-  /// return `null`.
-  String? _checkIfSingleWidgetReloadApplied() {
-    final File? widgetCacheOutputFile = _widgetCacheOutputFile;
-    if (widgetCacheOutputFile != null && widgetCacheOutputFile.existsSync()) {
-      final String widget = widgetCacheOutputFile.readAsStringSync().trim();
-      if (widget.isNotEmpty) {
-        return widget;
-      }
-    }
-    return null;
-  }
-
   /// Updates files on the device.
   ///
   /// Returns the number of bytes synced.
@@ -582,26 +567,22 @@ class DevFS {
     required PackageConfig packageConfig,
     required String dillOutputPath,
     required DevelopmentShaderCompiler shaderCompiler,
+    DevelopmentSceneImporter? sceneImporter,
     DevFSWriter? devFSWriter,
     String? target,
     AssetBundle? bundle,
-    DateTime? firstBuildTime,
     bool bundleFirstUpload = false,
     bool fullRestart = false,
-    String? projectRootPath,
     File? dartPluginRegistrant,
   }) async {
-    assert(trackWidgetCreation != null);
-    assert(generator != null);
     final DateTime candidateCompileTime = DateTime.now();
     didUpdateFontManifest = false;
     lastPackageConfig = packageConfig;
-    _widgetCacheOutputFile = _fileSystem.file('$dillOutputPath.incremental.dill.widget_cache');
 
     // Update modified files
     final Map<Uri, DevFSContent> dirtyEntries = <Uri, DevFSContent>{};
-    final List<Future<void>> pendingShaderCompiles = <Future<void>>[];
-    bool shaderCompilationFailed = false;
+    final List<Future<void>> pendingAssetBuilds = <Future<void>>[];
+    bool assetBuildFailed = false;
     int syncedBytes = 0;
     if (fullRestart) {
       generator.reset();
@@ -619,7 +600,7 @@ class DevFS {
       invalidatedFiles,
       outputPath: dillOutputPath,
       fs: _fileSystem,
-      projectRootPath: projectRootPath,
+      projectRootPath: rootDirectory.path,
       packageConfig: packageConfig,
       checkDartPluginRegistry: true, // The entry point is assumed not to have changed.
       dartPluginRegistrant: dartPluginRegistrant,
@@ -637,12 +618,12 @@ class DevFS {
 
       // The tool writes the assets into the AssetBundle working dir so that they
       // are in the same location in DevFS and the iOS simulator.
-      final String assetBuildDirPrefix = _asUriPath(getAssetBuildDirectory());
-      final String assetDirectory = getAssetBuildDirectory();
-      bundle.entries.forEach((String archivePath, DevFSContent content) {
+      final String assetDirectory = getAssetBuildDirectory(_config, _fileSystem);
+      final String assetBuildDirPrefix = _asUriPath(assetDirectory);
+      bundle.entries.forEach((String archivePath, AssetBundleEntry entry) {
         // If the content is backed by a real file, isModified will file stat and return true if
         // it was modified since the last time this was called.
-        if (!content.isModified || bundleFirstUpload) {
+        if (!entry.content.isModified || bundleFirstUpload) {
           return;
         }
         // Modified shaders must be recompiled per-target platform.
@@ -655,27 +636,66 @@ class DevFS {
         if (archivePath == _kFontManifest) {
           didUpdateFontManifest = true;
         }
+        final AssetKind? kind = bundle.entries[archivePath]?.kind;
+        switch (kind) {
+          case AssetKind.shader:
+            final Future<DevFSContent?> pending = shaderCompiler.recompileShader(entry.content);
+            pendingAssetBuilds.add(pending);
+            pending.then((DevFSContent? content) {
+              if (content == null) {
+                assetBuildFailed = true;
+                return;
+              }
+              dirtyEntries[deviceUri] = content;
+              syncedBytes += content.size;
+              if (!bundleFirstUpload) {
+                shaderPathsToEvict.add(archivePath);
+              }
+            });
+          case AssetKind.model:
+            if (sceneImporter == null) {
+              break;
+            }
+            final Future<DevFSContent?> pending = sceneImporter.reimportScene(entry.content);
+            pendingAssetBuilds.add(pending);
+            pending.then((DevFSContent? content) {
+              if (content == null) {
+                assetBuildFailed = true;
+                return;
+              }
+              dirtyEntries[deviceUri] = content;
+              syncedBytes += content.size;
+              if (!bundleFirstUpload) {
+                scenePathsToEvict.add(archivePath);
+              }
+            });
+          case AssetKind.regular:
+          case AssetKind.font:
+          case null:
+            final Future<DevFSContent?> pending = (() async {
+              if (entry.transformers.isEmpty || kind != AssetKind.regular) {
+                return entry.content;
+              }
+              return _assetTransformer.retransformAsset(
+                inputAssetKey: archivePath,
+                inputAssetContent: entry.content,
+                transformerEntries: entry.transformers,
+                workingDirectory: rootDirectory.path,
+              );
+            })();
 
-        if (bundle.entryKinds[archivePath] == AssetKind.shader) {
-          final Future<DevFSContent?> pending = shaderCompiler.recompileShader(content);
-          pendingShaderCompiles.add(pending);
-          pending.then((DevFSContent? content) {
-            if (content == null) {
-              shaderCompilationFailed = true;
-              return;
-            }
-            dirtyEntries[deviceUri] = content;
-            syncedBytes += content.size;
-            if (archivePath != null && !bundleFirstUpload) {
-              shaderPathsToEvict.add(archivePath);
-            }
-          });
-        } else {
-          dirtyEntries[deviceUri] = content;
-          syncedBytes += content.size;
-          if (archivePath != null && !bundleFirstUpload) {
-            assetPathsToEvict.add(archivePath);
-          }
+            pendingAssetBuilds.add(pending);
+            pending.then((DevFSContent? content) {
+              if (content == null) {
+                assetBuildFailed = true;
+                return;
+              }
+              dirtyEntries[deviceUri] = content;
+              syncedBytes += content.size;
+              if (!bundleFirstUpload) {
+                assetPathsToEvict.add(archivePath);
+              }
+            });
         }
       });
 
@@ -707,11 +727,12 @@ class DevFS {
     _logger.printTrace('Updating files.');
     final Stopwatch transferTimer = _stopwatchFactory.createStopwatch('transfer')..start();
 
-    await Future.wait(pendingShaderCompiles);
-    if (shaderCompilationFailed) {
+    await Future.wait(pendingAssetBuilds);
+    if (assetBuildFailed) {
       return UpdateFSReport();
     }
 
+    _logger.printTrace('Pending asset builds completed. Writing dirty entries.');
     if (dirtyEntries.isNotEmpty) {
       await (devFSWriter ?? _httpWriter).write(dirtyEntries, _baseUri!, _httpWriter);
     }
@@ -721,7 +742,6 @@ class DevFS {
       success: true,
       syncedBytes: syncedBytes,
       invalidatedSourcesCount: invalidatedFiles.length,
-      fastReassembleClassName: _checkIfSingleWidgetReloadApplied(),
       compileDuration: compileTimer.elapsed,
       transferDuration: transferTimer.elapsed,
     );

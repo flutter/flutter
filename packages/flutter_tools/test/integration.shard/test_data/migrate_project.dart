@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 @Timeout(Duration(seconds: 600))
+library;
 
 import 'dart:io';
 import 'package:file/file.dart';
@@ -21,9 +22,7 @@ class MigrateProject extends Project {
   }) async {
     this.dir = dir;
     _appPath = dir.path;
-    if (androidLocalProperties != null) {
-      writeFile(fileSystem.path.join(dir.path, 'android', 'local.properties'), androidLocalProperties);
-    }
+    writeFile(fileSystem.path.join(dir.path, 'android', 'local.properties'), androidLocalProperties);
     final Directory tempDir = createResolvedTempDirectorySync('cipd_dest.');
     final Directory depotToolsDir = createResolvedTempDirectorySync('depot_tools.');
 
@@ -176,7 +175,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: ">=2.6.0 <3.0.0"
+  sdk: '>=3.2.0-0 <4.0.0'
 
 dependencies:
   flutter:
@@ -208,10 +207,10 @@ flutter:
     - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
-  # https://flutter.dev/assets-and-images/#resolution-aware.
+  # https://flutter.dev/to/resolution-aware-images
 
   # For details regarding adding assets from package dependencies, see
-  # https://flutter.dev/assets-and-images/#from-packages
+  # https://flutter.dev/to/asset-from-package
 
   # To add custom fonts to your application, add a fonts section here,
   # in this "flutter" section. Each entry in this list should have a
@@ -231,7 +230,7 @@ flutter:
   #         weight: 700
   #
   # For details regarding fonts from package dependencies,
-  # see https://flutter.dev/custom-fonts/#from-packages
+  # see https://flutter.dev/to/font-from-package
 
 ''';
 }

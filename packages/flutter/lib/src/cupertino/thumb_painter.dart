@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'slider.dart';
+/// @docImport 'switch.dart';
+library;
+
 import 'package:flutter/painting.dart';
 
 import 'colors.dart';
@@ -41,13 +45,13 @@ const List<BoxShadow> _kSliderBoxShadows = <BoxShadow> [
 
 /// Paints an iOS-style slider thumb or switch thumb.
 ///
-/// Used by [CupertinoSwitch] and [CupertinoSlider].
+/// Used by [CupertinoSlider].
 class CupertinoThumbPainter {
   /// Creates an object that paints an iOS-style slider thumb.
   const CupertinoThumbPainter({
     this.color = CupertinoColors.white,
     this.shadows = _kSliderBoxShadows,
-  }) : assert(shadows != null);
+  });
 
   /// Creates an object that paints an iOS-style switch thumb.
   const CupertinoThumbPainter.switchThumb({
@@ -59,8 +63,6 @@ class CupertinoThumbPainter {
   final Color color;
 
   /// The list of [BoxShadow] to paint below the thumb.
-  ///
-  /// Must not be null.
   final List<BoxShadow> shadows;
 
   /// Half the default diameter of the thumb.

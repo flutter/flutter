@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'platform.dart';
+library;
+
 /// A constant that is true if the application was compiled in release mode.
 ///
 /// More specifically, this is a constant that is true if the application was
@@ -69,9 +72,24 @@ const double precisionErrorTolerance = 1e-10;
 
 /// A constant that is true if the application was compiled to run on the web.
 ///
-/// This implementation takes advantage of the fact that JavaScript does not
-/// support integers. In this environment, Dart's doubles and ints are
-/// backed by the same kind of object. Thus a double `0.0` is identical
-/// to an integer `0`. This is not true for Dart code running in AOT or on the
-/// VM.
-const bool kIsWeb = identical(0, 0.0);
+/// See also:
+///
+/// * [defaultTargetPlatform], which is used by themes to find out which
+///   platform the application is running on (or, in the case of a web app,
+///   which platform the application's browser is running in). Can be overridden
+///   in tests with [debugDefaultTargetPlatformOverride].
+/// * [dart:io.Platform], a way to find out the browser's platform that is not
+///   overridable in tests.
+const bool kIsWeb = bool.fromEnvironment('dart.library.js_util');
+
+/// A constant that is true if the application was compiled to WebAssembly.
+///
+/// See also:
+///
+/// * [defaultTargetPlatform], which is used by themes to find out which
+///   platform the application is running on (or, in the case of a web app,
+///   which platform the application's browser is running in). Can be overridden
+///   in tests with [debugDefaultTargetPlatformOverride].
+/// * [dart:io.Platform], a way to find out the browser's platform that is not
+///   overridable in tests.
+const bool kIsWasm = bool.fromEnvironment('dart.tool.dart2wasm');

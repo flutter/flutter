@@ -25,18 +25,10 @@ typedef SliverLayoutWidgetBuilder = Widget Function(BuildContext context, Sliver
 ///  * [LayoutBuilder], the non-sliver version of this widget.
 class SliverLayoutBuilder extends ConstrainedLayoutBuilder<SliverConstraints> {
   /// Creates a sliver widget that defers its building until layout.
-  ///
-  /// The [builder] argument must not be null.
   const SliverLayoutBuilder({
     super.key,
     required super.builder,
   });
-
-  /// Called at layout time to construct the widget tree.
-  ///
-  /// The builder must return a non-null sliver widget.
-  @override
-  SliverLayoutWidgetBuilder get builder => super.builder;
 
   @override
   RenderObject createRenderObject(BuildContext context) => _RenderSliverLayoutBuilder();
@@ -45,7 +37,6 @@ class SliverLayoutBuilder extends ConstrainedLayoutBuilder<SliverConstraints> {
 class _RenderSliverLayoutBuilder extends RenderSliver with RenderObjectWithChildMixin<RenderSliver>, RenderConstrainedLayoutBuilder<SliverConstraints, RenderSliver> {
   @override
   double childMainAxisPosition(RenderObject child) {
-    assert(child != null);
     assert(child == this.child);
     return 0;
   }
@@ -59,7 +50,6 @@ class _RenderSliverLayoutBuilder extends RenderSliver with RenderObjectWithChild
 
   @override
   void applyPaintTransform(RenderObject child, Matrix4 transform) {
-    assert(child != null);
     assert(child == this.child);
     // child's offset is always (0, 0), transform.translate(0, 0) does not mutate the transform.
   }

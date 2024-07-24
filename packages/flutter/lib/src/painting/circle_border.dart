@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'box_border.dart';
+/// @docImport 'box_decoration.dart';
+/// @docImport 'oval_border.dart';
+/// @docImport 'shape_decoration.dart';
+library;
+
 import 'dart:ui' as ui show lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -30,12 +36,8 @@ import 'borders.dart';
 ///  * [Border], which, when used with [BoxDecoration], can also describe a circle.
 class CircleBorder extends OutlinedBorder {
   /// Create a circle border.
-  ///
-  /// The [side] argument must not be null.
   const CircleBorder({ super.side, this.eccentricity = 0.0 })
-      : assert(side != null),
-        assert(eccentricity != null),
-        assert(eccentricity >= 0.0, 'The eccentricity argument $eccentricity is not greater than or equal to zero.'),
+      : assert(eccentricity >= 0.0, 'The eccentricity argument $eccentricity is not greater than or equal to zero.'),
         assert(eccentricity <= 1.0, 'The eccentricity argument $eccentricity is not less than or equal to one.');
 
   /// Defines the ratio (0.0-1.0) from which the border will deform

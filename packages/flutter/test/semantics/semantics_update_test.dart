@@ -18,8 +18,7 @@ void main() {
     await tester.pumpWidget(
       const Placeholder(),
       // Stops right after the warm up frame.
-      null,
-      EnginePhase.build,
+      phase: EnginePhase.build,
     );
     // The warm up frame will send update for an empty semantics tree. We
     // ignore this one time update.
@@ -83,7 +82,7 @@ void main() {
 
     SemanticsUpdateBuilderSpy.observations.clear();
     handle.dispose();
-  });
+  }, skip: true); // https://github.com/flutter/flutter/issues/97894
 
   testWidgets('Semantics update receives attributed text', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
@@ -91,8 +90,7 @@ void main() {
     await tester.pumpWidget(
       const Placeholder(),
       // Stops right after the warm up frame.
-      null,
-      EnginePhase.build,
+      phase: EnginePhase.build,
     );
     // The warm up frame will send update for an empty semantics tree. We
     // ignore this one time update.
@@ -158,14 +156,13 @@ void main() {
         'properties: SemanticsProperties, '
         'attributedLabel: "label" [SpellOutStringAttribute(TextRange(start: 0, end: 5))], '
         'attributedValue: "value" [LocaleStringAttribute(TextRange(start: 0, end: 5), en-MX)], '
-        'attributedHint: "hint" [SpellOutStringAttribute(TextRange(start: 1, end: 2))], '
-        'tooltip: null'// ignore: missing_whitespace_between_adjacent_strings
+        'attributedHint: "hint" [SpellOutStringAttribute(TextRange(start: 1, end: 2))]' // ignore: missing_whitespace_between_adjacent_strings
       ')',
     );
 
     SemanticsUpdateBuilderSpy.observations.clear();
     handle.dispose();
-  });
+  }, skip: true); // https://github.com/flutter/flutter/issues/97894
 }
 
 class SemanticsUpdateTestBinding extends AutomatedTestWidgetsFlutterBinding {
@@ -175,7 +172,9 @@ class SemanticsUpdateTestBinding extends AutomatedTestWidgetsFlutterBinding {
   }
 }
 
-class SemanticsUpdateBuilderSpy extends ui.SemanticsUpdateBuilder {
+class SemanticsUpdateBuilderSpy extends Fake implements ui.SemanticsUpdateBuilder {
+  final SemanticsUpdateBuilder _builder = ui.SemanticsUpdateBuilder();
+
   static Map<int, SemanticsNodeUpdateObservation> observations = <int, SemanticsNodeUpdateObservation>{};
 
   @override
@@ -196,6 +195,7 @@ class SemanticsUpdateBuilderSpy extends ui.SemanticsUpdateBuilder {
     required double elevation,
     required double thickness,
     required Rect rect,
+    required String identifier,
     required String label,
     List<StringAttribute>? labelAttributes,
     required String value,
@@ -212,109 +212,46 @@ class SemanticsUpdateBuilderSpy extends ui.SemanticsUpdateBuilder {
     required Int32List childrenInTraversalOrder,
     required Int32List childrenInHitTestOrder,
     required Int32List additionalActions,
+    int headingLevel = 0,
+    String? linkUrl,
   }) {
     // Makes sure we don't send the same id twice.
     assert(!observations.containsKey(id));
     observations[id] = SemanticsNodeUpdateObservation(
-      id: id,
-      flags: flags,
-      actions: actions,
-      maxValueLength: maxValueLength,
-      currentValueLength: currentValueLength,
-      textSelectionBase: textSelectionBase,
-      textSelectionExtent: textSelectionExtent,
-      platformViewId: platformViewId,
-      scrollChildren: scrollChildren,
-      scrollIndex: scrollIndex,
-      scrollPosition: scrollPosition,
-      scrollExtentMax: scrollExtentMax,
-      scrollExtentMin: scrollExtentMin,
-      elevation: elevation,
-      thickness: thickness,
-      rect: rect,
       label: label,
       labelAttributes: labelAttributes,
       hint: hint,
       hintAttributes: hintAttributes,
       value: value,
       valueAttributes: valueAttributes,
-      increasedValue: increasedValue,
-      increasedValueAttributes: increasedValueAttributes,
-      decreasedValue: decreasedValue,
-      decreasedValueAttributes: decreasedValueAttributes,
-      textDirection: textDirection,
-      transform: transform,
       childrenInTraversalOrder: childrenInTraversalOrder,
-      childrenInHitTestOrder: childrenInHitTestOrder,
-      additionalActions: additionalActions,
     );
   }
+
+  @override
+  void updateCustomAction({required int id, String? label, String? hint, int overrideId = -1}) =>
+    _builder.updateCustomAction(id: id, label: label, hint: hint, overrideId: overrideId);
+
+  @override
+  ui.SemanticsUpdate build() => _builder.build();
 }
 
 class SemanticsNodeUpdateObservation {
   const SemanticsNodeUpdateObservation({
-    required this.id,
-    required this.flags,
-    required this.actions,
-    required this.maxValueLength,
-    required this.currentValueLength,
-    required this.textSelectionBase,
-    required this.textSelectionExtent,
-    required this.platformViewId,
-    required this.scrollChildren,
-    required this.scrollIndex,
-    required this.scrollPosition,
-    required this.scrollExtentMax,
-    required this.scrollExtentMin,
-    required this.elevation,
-    required this.thickness,
-    required this.rect,
     required this.label,
     this.labelAttributes,
     required this.value,
     this.valueAttributes,
-    required this.increasedValue,
-    this.increasedValueAttributes,
-    required this.decreasedValue,
-    this.decreasedValueAttributes,
     required this.hint,
     this.hintAttributes,
-    this.textDirection,
-    required this.transform,
     required this.childrenInTraversalOrder,
-    required this.childrenInHitTestOrder,
-    required this.additionalActions,
   });
 
-  final int id;
-  final int flags;
-  final int actions;
-  final int maxValueLength;
-  final int currentValueLength;
-  final int textSelectionBase;
-  final int textSelectionExtent;
-  final int platformViewId;
-  final int scrollChildren;
-  final int scrollIndex;
-  final double scrollPosition;
-  final double scrollExtentMax;
-  final double scrollExtentMin;
-  final double elevation;
-  final double thickness;
-  final Rect rect;
   final String label;
   final List<StringAttribute>? labelAttributes;
   final String value;
   final List<StringAttribute>? valueAttributes;
-  final String increasedValue;
-  final List<StringAttribute>? increasedValueAttributes;
-  final String decreasedValue;
-  final List<StringAttribute>? decreasedValueAttributes;
   final String hint;
   final List<StringAttribute>? hintAttributes;
-  final TextDirection? textDirection;
-  final Float64List transform;
   final Int32List childrenInTraversalOrder;
-  final Int32List childrenInHitTestOrder;
-  final Int32List additionalActions;
 }

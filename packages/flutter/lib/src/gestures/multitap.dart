@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/widgets.dart';
+library;
+
 import 'dart:async';
 
 import 'arena.dart';
@@ -43,8 +46,7 @@ typedef GestureMultiTapCancelCallback = void Function(int pointer);
 /// CountdownZoned tracks whether the specified duration has elapsed since
 /// creation, honoring [Zone].
 class _CountdownZoned {
-  _CountdownZoned({ required Duration duration })
-       : assert(duration != null) {
+  _CountdownZoned({ required Duration duration }) {
     Timer(duration, _onTimeout);
   }
 
@@ -65,10 +67,7 @@ class _TapTracker {
     required this.entry,
     required Duration doubleTapMinTime,
     required this.gestureSettings,
-  }) : assert(doubleTapMinTime != null),
-       assert(event != null),
-       assert(event.buttons != null),
-       pointer = event.pointer,
+  }) : pointer = event.pointer,
        _initialGlobalPosition = event.position,
        initialButtons = event.buttons,
        _doubleTapMinTimeCountdown = _CountdownZoned(duration: doubleTapMinTime);
@@ -113,8 +112,8 @@ class _TapTracker {
 /// Recognizes when the user has tapped the screen at the same location twice in
 /// quick succession.
 ///
-/// [DoubleTapGestureRecognizer] competes on pointer events of [kPrimaryButton]
-/// only when it has a non-null callback. If it has no callbacks, it is a no-op.
+/// [DoubleTapGestureRecognizer] competes on pointer events when it
+/// has a non-null callback. If it has no callbacks, it is a no-op.
 ///
 class DoubleTapGestureRecognizer extends GestureRecognizer {
   /// Create a gesture recognizer for double taps.
@@ -122,13 +121,13 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
   /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
   DoubleTapGestureRecognizer({
     super.debugOwner,
-    @Deprecated(
-      'Migrate to supportedDevices. '
-      'This feature was deprecated after v2.3.0-1.0.pre.',
-    )
-    super.kind,
     super.supportedDevices,
+    super.allowedButtonsFilter = _defaultButtonAcceptBehavior,
   });
+
+  // The default value for [allowedButtonsFilter].
+  // Accept the input if, and only if, [kPrimaryButton] is pressed.
+  static bool _defaultButtonAcceptBehavior(int buttons) => buttons == kPrimaryButton;
 
   // Implementation notes:
   //
@@ -165,7 +164,7 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
   ///
   /// See also:
   ///
-  ///  * [kPrimaryButton], the button this callback responds to.
+  ///  * [allowedButtonsFilter], which decides which button will be allowed.
   ///  * [TapDownDetails], which is passed as an argument to this callback.
   ///  * [GestureDetector.onDoubleTapDown], which exposes this callback.
   GestureTapDownCallback? onDoubleTapDown;
@@ -178,7 +177,7 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
   ///
   /// See also:
   ///
-  ///  * [kPrimaryButton], the button this callback responds to.
+  ///  * [allowedButtonsFilter], which decides which button will be allowed.
   ///  * [GestureDetector.onDoubleTap], which exposes this callback.
   GestureDoubleTapCallback? onDoubleTap;
 
@@ -192,7 +191,7 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
   ///
   /// See also:
   ///
-  ///  * [kPrimaryButton], the button this callback responds to.
+  ///  * [allowedButtonsFilter], which decides which button will be allowed.
   ///  * [GestureDetector.onDoubleTapCancel], which exposes this callback.
   GestureTapCancelCallback? onDoubleTapCancel;
 
@@ -203,19 +202,19 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
   @override
   bool isPointerAllowed(PointerDownEvent event) {
     if (_firstTap == null) {
-      switch (event.buttons) {
-        case kPrimaryButton:
-          if (onDoubleTapDown == null &&
-              onDoubleTap == null &&
-              onDoubleTapCancel == null) {
-            return false;
-          }
-          break;
-        default:
-          return false;
+      if (onDoubleTapDown == null &&
+          onDoubleTap == null &&
+          onDoubleTapCancel == null) {
+        return false;
       }
     }
-    return super.isPointerAllowed(event);
+
+    // If second tap is not allowed, reset the state.
+    final bool isPointerAllowed = super.isPointerAllowed(event);
+    if (!isPointerAllowed) {
+      _reset();
+    }
+    return isPointerAllowed;
   }
 
   @override
@@ -367,7 +366,6 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
   }
 
   void _checkUp(int buttons) {
-    assert(buttons == kPrimaryButton);
     if (onDoubleTap != null) {
       invokeCallback<void>('onDoubleTap', onDoubleTap!);
     }
@@ -486,12 +484,8 @@ class MultiTapGestureRecognizer extends GestureRecognizer {
   MultiTapGestureRecognizer({
     this.longTapDelay = Duration.zero,
     super.debugOwner,
-    @Deprecated(
-      'Migrate to supportedDevices. '
-      'This feature was deprecated after v2.3.0-1.0.pre.',
-    )
-    super.kind,
     super.supportedDevices,
+    super.allowedButtonsFilter,
   });
 
   /// A pointer that might cause a tap has contacted the screen at a particular
@@ -679,8 +673,7 @@ class SerialTapCancelDetails {
   /// The `count` argument must be greater than zero.
   SerialTapCancelDetails({
     this.count = 1,
-  }) : assert(count != null),
-       assert(count > 0);
+  }) : assert(count > 0);
 
   /// The number of consecutive taps that were in progress when the gesture was
   /// interrupted.
@@ -813,6 +806,7 @@ class SerialTapGestureRecognizer extends GestureRecognizer {
   SerialTapGestureRecognizer({
     super.debugOwner,
     super.supportedDevices,
+    super.allowedButtonsFilter,
   });
 
   /// A pointer has contacted the screen at a particular location, which might

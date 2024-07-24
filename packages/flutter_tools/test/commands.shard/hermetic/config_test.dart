@@ -5,45 +5,88 @@
 import 'dart:convert';
 
 import 'package:args/command_runner.dart';
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
+import 'package:flutter_tools/src/android/java.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/config.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fakes.dart' as fakes;
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
+  late Java fakeJava;
   late FakeAndroidStudio fakeAndroidStudio;
   late FakeAndroidSdk fakeAndroidSdk;
   late FakeFlutterVersion fakeFlutterVersion;
   late TestUsage testUsage;
+  late FakeAnalytics fakeAnalytics;
 
   setUpAll(() {
     Cache.disableLocking();
   });
 
   setUp(() {
+    fakeJava = fakes.FakeJava();
     fakeAndroidStudio = FakeAndroidStudio();
     fakeAndroidSdk = FakeAndroidSdk();
     fakeFlutterVersion = FakeFlutterVersion();
     testUsage = TestUsage();
+    fakeAnalytics = getInitializedFakeAnalyticsInstance(
+      fs: MemoryFileSystem.test(),
+      fakeFlutterVersion: fakes.FakeFlutterVersion(),
+    );
   });
 
   void verifyNoAnalytics() {
     expect(testUsage.commands, isEmpty);
     expect(testUsage.events, isEmpty);
     expect(testUsage.timings, isEmpty);
+    expect(fakeAnalytics.sentEvents, isEmpty);
   }
 
   group('config', () {
+    testUsingContext('prints all settings with --list', () async {
+      final ConfigCommand configCommand = ConfigCommand();
+      final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
+      await commandRunner.run(<String>['config', '--list']);
+      expect(
+        testLogger.statusText,
+        'All Settings:\n'
+        '${allFeatures
+            .where((Feature e) => e.configSetting != null)
+            .map((Feature e) => '  ${e.configSetting}: (Not set)')
+            .join('\n')}'
+        '\n\n',
+      );
+    }, overrides: <Type, Generator>{
+      Usage: () => testUsage,
+    });
+
+    testUsingContext('throws error on excess arguments', () {
+      final ConfigCommand configCommand = ConfigCommand();
+      final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
+
+      expect(() => commandRunner.run(<String>[
+        'config',
+        '--android-studio-dir=/opt/My', 'Android', 'Studio',
+      ]), throwsToolExit());
+      verifyNoAnalytics();
+    }, overrides: <Type, Generator>{
+      Usage: () => testUsage,
+    });
+
     testUsingContext('machine flag', () async {
       final ConfigCommand command = ConfigCommand();
       await command.handleMachine();
@@ -52,16 +95,15 @@ void main() {
       final dynamic jsonObject = json.decode(testLogger.statusText);
       expect(jsonObject, const TypeMatcher<Map<String, dynamic>>());
       if (jsonObject is Map<String, dynamic>) {
-        expect(jsonObject.containsKey('android-studio-dir'), true);
-        expect(jsonObject['android-studio-dir'], isNotNull);
-
-        expect(jsonObject.containsKey('android-sdk'), true);
-        expect(jsonObject['android-sdk'], isNotNull);
+        expect(jsonObject['android-studio-dir'], fakeAndroidStudio.directory);
+        expect(jsonObject['android-sdk'], fakeAndroidSdk.directory.path);
+        expect(jsonObject['jdk-dir'], fakeJava.javaHome);
       }
       verifyNoAnalytics();
     }, overrides: <Type, Generator>{
       AndroidStudio: () => fakeAndroidStudio,
       AndroidSdk: () => fakeAndroidSdk,
+      Java: () => fakeJava,
       Usage: () => testUsage,
     });
 
@@ -180,6 +222,7 @@ void main() {
 
       await commandRunner.run(<String>[
         'config',
+        '--list'
       ]);
 
       expect(
@@ -228,6 +271,7 @@ void main() {
       ]));
       expect(testUsage.commands, isEmpty);
       expect(testUsage.timings, isEmpty);
+      expect(fakeAnalytics.sentEvents, isEmpty);
     }, overrides: <Type, Generator>{
       Usage: () => testUsage,
     });
@@ -250,23 +294,25 @@ void main() {
       ]));
       expect(testUsage.commands, isEmpty);
       expect(testUsage.timings, isEmpty);
+      expect(fakeAnalytics.sentEvents, isEmpty);
     }, overrides: <Type, Generator>{
       Usage: () => testUsage,
     });
 
-    testUsingContext('analytics reported disabled when suppressed', () async {
+    testUsingContext('analytics reported with help usages', () async {
       final ConfigCommand configCommand = ConfigCommand();
-      final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
+      createTestCommandRunner(configCommand);
 
       testUsage.suppressAnalytics = true;
-
-      await commandRunner.run(<String>[
-        'config',
-      ]);
-
       expect(
-        testLogger.statusText,
+        configCommand.usage,
         containsIgnoringWhitespace('Analytics reporting is currently disabled'),
+      );
+
+      testUsage.suppressAnalytics = false;
+      expect(
+        configCommand.usage,
+        containsIgnoringWhitespace('Analytics reporting is currently enabled'),
       );
     }, overrides: <Type, Generator>{
       Usage: () => testUsage,
@@ -276,7 +322,10 @@ void main() {
 
 class FakeAndroidStudio extends Fake implements AndroidStudio, Comparable<AndroidStudio> {
   @override
-  String get directory => 'path/to/android/stdio';
+  String get directory => 'path/to/android/studio';
+
+  @override
+  String? get javaPath => 'path/to/android/studio/jbr';
 }
 
 class FakeAndroidSdk extends Fake implements AndroidSdk {

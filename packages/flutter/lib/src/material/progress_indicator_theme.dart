@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'color_scheme.dart';
+/// @docImport 'progress_indicator.dart';
+library;
+
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -84,10 +88,9 @@ class ProgressIndicatorThemeData with Diagnosticable {
   ///
   /// If both arguments are null, then null is returned.
   static ProgressIndicatorThemeData? lerp(ProgressIndicatorThemeData? a, ProgressIndicatorThemeData? b, double t) {
-    if (a == null && b == null) {
-      return null;
+    if (identical(a, b)) {
+      return a;
     }
-    assert(t != null);
     return ProgressIndicatorThemeData(
       color: Color.lerp(a?.color, b?.color, t),
       linearTrackColor : Color.lerp(a?.linearTrackColor, b?.linearTrackColor, t),
@@ -160,7 +163,7 @@ class ProgressIndicatorTheme extends InheritedTheme {
     super.key,
     required this.data,
     required super.child,
-  }) : assert(data != null);
+  });
 
   /// The properties for descendant [ProgressIndicator] widgets.
   final ProgressIndicatorThemeData data;

@@ -2,45 +2,46 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for TweenAnimationBuilder
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [TweenAnimationBuilder].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const TweenAnimationBuilderExampleApp());
 
-  static const String _title = 'Flutter Code Sample';
+class TweenAnimationBuilderExampleApp extends StatelessWidget {
+  const TweenAnimationBuilderExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
+        appBar: AppBar(
+          title: const Text('TweenAnimationBuilder Sample'),
+        ),
         body: const Center(
-          child: MyStatefulWidget(),
+          child: TweenAnimationBuilderExample(),
         ),
       ),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class TweenAnimationBuilderExample extends StatefulWidget {
+  const TweenAnimationBuilderExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<TweenAnimationBuilderExample> createState() =>
+      _TweenAnimationBuilderExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
-  double targetValue = 24.0;
+class _TweenAnimationBuilderExampleState
+    extends State<TweenAnimationBuilderExample> {
+  double _targetValue = 24.0;
 
   @override
   Widget build(BuildContext context) {
     return TweenAnimationBuilder<double>(
-      tween: Tween<double>(begin: 0, end: targetValue),
+      tween: Tween<double>(begin: 0, end: _targetValue),
       duration: const Duration(seconds: 1),
       builder: (BuildContext context, double size, Widget? child) {
         return IconButton(
@@ -49,7 +50,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
           icon: child!,
           onPressed: () {
             setState(() {
-              targetValue = targetValue == 24.0 ? 48.0 : 24.0;
+              _targetValue = _targetValue == 24.0 ? 48.0 : 24.0;
             });
           },
         );

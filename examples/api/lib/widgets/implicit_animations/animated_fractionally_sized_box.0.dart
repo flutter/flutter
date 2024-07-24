@@ -2,37 +2,52 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for AnimatedFractionallySizedBox
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [AnimatedFractionallySizedBox].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const AnimatedFractionallySizedBoxExampleApp());
 
-  static const String _title = 'Flutter Code Sample';
+class AnimatedFractionallySizedBoxExampleApp extends StatelessWidget {
+  const AnimatedFractionallySizedBoxExampleApp({super.key});
+
+  static const Duration duration = Duration(seconds: 1);
+  static const Curve curve = Curves.fastOutSlowIn;
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
-        body: const MyStatefulWidget(),
+        appBar: AppBar(
+          title: const Text('AnimatedFractionallySizedBox Sample'),
+        ),
+        body: const AnimatedFractionallySizedBoxExample(
+          duration: duration,
+          curve: curve,
+        ),
       ),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class AnimatedFractionallySizedBoxExample extends StatefulWidget {
+  const AnimatedFractionallySizedBoxExample({
+    required this.duration,
+    required this.curve,
+    super.key,
+  });
+
+  final Duration duration;
+
+  final Curve curve;
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<AnimatedFractionallySizedBoxExample> createState() =>
+      _AnimatedFractionallySizedBoxExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _AnimatedFractionallySizedBoxExampleState
+    extends State<AnimatedFractionallySizedBoxExample> {
   bool selected = false;
 
   @override
@@ -47,17 +62,17 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
         child: SizedBox(
           width: 200,
           height: 200,
-          child: Container(
+          child: ColoredBox(
             color: Colors.red,
             child: AnimatedFractionallySizedBox(
               widthFactor: selected ? 0.25 : 0.75,
               heightFactor: selected ? 0.75 : 0.25,
               alignment: selected ? Alignment.topLeft : Alignment.bottomRight,
-              duration: const Duration(seconds: 1),
-              curve: Curves.fastOutSlowIn,
-              child: Container(
+              duration: widget.duration,
+              curve: widget.curve,
+              child: const ColoredBox(
                 color: Colors.blue,
-                child: const FlutterLogo(size: 75),
+                child: FlutterLogo(size: 75),
               ),
             ),
           ),

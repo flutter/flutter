@@ -4,7 +4,7 @@
 // To add platforms, run `flutter create -t plugin_ffi --platforms <platforms> .`
 // in this directory. You can also find a detailed instruction on how to
 // add platforms in the `pubspec.yaml` at
-// https://flutter.dev/docs/development/packages-and-plugins/developing-packages#plugin-platforms.
+// https://flutter.dev/to/pubspec-plugin-platforms.
 {{/no_platforms}}
 
 import 'dart:async';
@@ -129,7 +129,7 @@ Future<SendPort> _helperIsolateSendPort = () async {
         throw UnsupportedError('Unsupported message type: ${data.runtimeType}');
       });
 
-    // Send the the port to the main isolate on which we can receive requests.
+    // Send the port to the main isolate on which we can receive requests.
     sendPort.send(helperReceivePort.sendPort);
   }, receivePort.sendPort);
 

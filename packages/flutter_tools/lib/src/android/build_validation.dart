@@ -6,7 +6,7 @@ import '../base/common.dart';
 import '../build_info.dart';
 
 const String kGooglePlayVersioning = 'https://developer.android.com/studio/publish/versioning.html';
-const String kSupportedAbis = 'https://flutter.dev/docs/deployment/android#what-are-the-supported-target-architectures';
+const String kSupportedAbis = 'https://flutter.dev/to/android-supported-architectures';
 
 /// Validates that the build mode and build number are valid for a given build.
 void validateBuild(AndroidBuildInfo androidBuildInfo) {
@@ -20,7 +20,7 @@ void validateBuild(AndroidBuildInfo androidBuildInfo) {
   }
   if (buildInfo.mode.isPrecompiled && androidBuildInfo.targetArchs.contains(AndroidArch.x86)) {
     throwToolExit(
-      'Cannot build ${androidBuildInfo.buildInfo.mode.name} mode for x86 ABI.\n'
+      'Cannot build ${androidBuildInfo.buildInfo.mode.cliName} mode for x86 ABI.\n'
       'For more information see $kSupportedAbis .'
     );
   }

@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter_driver/flutter_driver.dart';
+library;
+
 import 'enum_util.dart';
 import 'message.dart';
 
@@ -36,8 +39,7 @@ final EnumIndex<HealthStatus> _healthStatusIndex =
 /// [FlutterDriver.checkHealth] test.
 class Health extends Result {
   /// Creates a [Health] object with the given [status].
-  const Health(this.status)
-    : assert(status != null);
+  const Health(this.status);
 
   /// The status represented by this object.
   ///

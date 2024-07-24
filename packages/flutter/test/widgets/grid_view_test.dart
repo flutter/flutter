@@ -7,7 +7,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
 import '../rendering/rendering_tester.dart' show TestClipPaintingContext;
 import 'states.dart';
 
@@ -78,7 +77,7 @@ void main() {
               onTap: () {
                 log.add(state);
               },
-              child: Container(
+              child: ColoredBox(
                 color: const Color(0xFF0000FF),
                 child: Text(state),
               ),
@@ -151,7 +150,7 @@ void main() {
               onTap: () {
                 log.add(state);
               },
-              child: Container(
+              child: ColoredBox(
                 color: const Color(0xFF0000FF),
                 child: Text(state),
               ),
@@ -475,9 +474,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: SizedBox(
-            width: 0.0,
-            height: 0.0,
+          child: SizedBox.shrink(
             child: GridView.count(
               crossAxisCount: 4,
               children: List<Widget>.generate(20, (int i) {
@@ -666,6 +663,7 @@ void main() {
     final TestClipPaintingContext context = TestClipPaintingContext();
     renderObject.paint(context, Offset.zero);
     expect(context.clipBehavior, equals(Clip.none));
+    context.dispose();
   });
 
   testWidgets('GridView respects clipBehavior', (WidgetTester tester) async {
@@ -732,6 +730,7 @@ void main() {
     // 4th, check that a non-default clip behavior can be sent to the painting context.
     renderObject.paint(context, Offset.zero);
     expect(context.clipBehavior, equals(Clip.antiAlias));
+    context.dispose();
   });
 
   testWidgets('GridView.builder respects clipBehavior', (WidgetTester tester) async {
@@ -859,6 +858,101 @@ void main() {
         maxCrossAxisExtent: maxCrossAxisExtent,
       ),
     ), throwsAssertionError);
+  });
 
+  testWidgets('SliverGrid sets correct extent for null returning builder delegate', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/130685
+    final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: GridView.builder(
+        controller: controller,
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 3,
+          crossAxisSpacing: 16,
+          mainAxisSpacing: 16,
+        ),
+        itemBuilder: (BuildContext context, int index) {
+          if (index == 12) {
+            return null;
+          }
+          return Container(
+            height: 100,
+            width: 100,
+            color: const Color(0xFFFF8A80),
+            alignment: Alignment.center,
+            child: Text('item ${index+1}'),
+          );
+        },
+      ),
+    ));
+    await tester.pumpAndSettle();
+
+    expect(controller.position.maxScrollExtent, double.infinity);
+    expect(controller.position.pixels, 0.0);
+    await tester.fling(find.byType(GridView), const Offset(0.0, -1300.0), 100.0);
+    await tester.pumpAndSettle();
+    // The actual extent of the children is 472.0. This should be reflected when
+    // the builder returns null (meaning we have reached the end).
+    expect(controller.position.maxScrollExtent, 472.0);
+    expect(controller.position.pixels, 472.0);
+  });
+
+  testWidgets('SliverGridDelegate mainAxisExtent add assert', (WidgetTester tester) async {
+    Widget buildGridView(SliverGridDelegate delegate) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: GridView.builder(
+          gridDelegate: delegate,
+          itemBuilder: (BuildContext context, int index) {
+            return Container(
+              height: 50,
+              alignment: Alignment.center,
+              child: Text('$index'),
+            );
+          },
+          itemCount: 50,
+        ),
+      );
+    }
+
+    await expectLater(
+      () => tester.pumpWidget(buildGridView(
+        SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 3,
+          mainAxisSpacing: 8,
+          crossAxisSpacing: 8,
+          mainAxisExtent: -100,
+        ),
+      )),
+      throwsA(
+        isAssertionError.having(
+          (AssertionError e) => e.toString(),
+          '.toString()',
+          contains('mainAxisExtent == null || mainAxisExtent >= 0'),
+        ),
+      ),
+    );
+
+    await expectLater(
+      () => tester.pumpWidget(
+        buildGridView(
+          SliverGridDelegateWithMaxCrossAxisExtent(
+            maxCrossAxisExtent: 100,
+            mainAxisSpacing: 8,
+            crossAxisSpacing: 8,
+            mainAxisExtent: -100,
+          ),
+        ),
+      ),
+      throwsA(
+        isAssertionError.having(
+          (AssertionError e) => e.toString(),
+          '.toString()',
+          contains('mainAxisExtent == null || mainAxisExtent >= 0'),
+        ),
+      ),
+    );
   });
 }

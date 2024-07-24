@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart' show clampDouble;
@@ -35,8 +38,6 @@ import 'basic_types.dart';
 /// container.
 ///
 /// Used by [Tooltip] to position a tooltip relative to its parent.
-///
-/// The arguments must not be null.
 Offset positionDependentBox({
   required Size size,
   required Size childSize,
@@ -45,36 +46,22 @@ Offset positionDependentBox({
   double verticalOffset = 0.0,
   double margin = 10.0,
 }) {
-  assert(size != null);
-  assert(childSize != null);
-  assert(target != null);
-  assert(verticalOffset != null);
-  assert(preferBelow != null);
-  assert(margin != null);
   // VERTICAL DIRECTION
   final bool fitsBelow = target.dy + verticalOffset + childSize.height <= size.height - margin;
   final bool fitsAbove = target.dy - verticalOffset - childSize.height >= margin;
-  final bool tooltipBelow = preferBelow ? fitsBelow || !fitsAbove : !(fitsAbove || !fitsBelow);
-  double y;
+  final bool tooltipBelow = fitsAbove == fitsBelow ? preferBelow : fitsBelow;
+  final double y;
   if (tooltipBelow) {
     y = math.min(target.dy + verticalOffset, size.height - margin);
   } else {
     y = math.max(target.dy - verticalOffset - childSize.height, margin);
   }
   // HORIZONTAL DIRECTION
-  double x;
-  if (size.width - margin * 2.0 < childSize.width) {
-    x = (size.width - childSize.width) / 2.0;
-  } else {
-    final double normalizedTargetX = clampDouble(target.dx, margin, size.width - margin);
-    final double edge = margin + childSize.width / 2.0;
-    if (normalizedTargetX < edge) {
-      x = margin;
-    } else if (normalizedTargetX > size.width - edge) {
-      x = size.width - margin - childSize.width;
-    } else {
-      x = normalizedTargetX - childSize.width / 2.0;
-    }
-  }
+  final double flexibleSpace = size.width - childSize.width;
+  final double x = flexibleSpace <= 2 * margin
+    // If there's not enough horizontal space for margin + child, center the
+    // child.
+    ? flexibleSpace / 2.0
+    : clampDouble(target.dx - childSize.width / 2, margin, flexibleSpace - margin);
   return Offset(x, y);
 }

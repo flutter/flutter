@@ -5,6 +5,7 @@
 // This file is run as part of a reduced test set in CI on Mac and Windows
 // machines.
 @Tags(<String>['reduced-test-set'])
+library;
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -26,6 +27,12 @@ void main() {
   test('FlutterLogoDecoration lerp from null to null is null', () {
     final FlutterLogoDecoration? logo = FlutterLogoDecoration.lerp(null, null, 0.5);
     expect(logo, isNull);
+  });
+
+  test('FlutterLogoDecoration.lerp identical a,b', () {
+    expect(FlutterLogoDecoration.lerp(null, null, 0), null);
+    const FlutterLogoDecoration logo = FlutterLogoDecoration();
+    expect(identical(FlutterLogoDecoration.lerp(logo, logo, 0.5), logo), true);
   });
 
   test('FlutterLogoDecoration lerp from non-null to null lerps margin', () {

@@ -1,7 +1,7 @@
 # Flutter Conductor
 
 Command-line tool for managing a release of the Flutter SDK. Also see
-https://github.com/flutter/flutter/wiki/Release-process for more information on
+[Release Process](../../docs/releases/Release-process.md) for more information on
 the release process.
 
 ## Requirements
@@ -35,7 +35,7 @@ All available commands can be seen via:
 
 Releases are initialized with the `start` sub-command, like:
 
-```
+```sh
 conductor start \
   --candidate-branch=flutter-2.2-candidate.10 \
   --release-channel=beta \
@@ -89,13 +89,6 @@ Once a PR is opened, the user must validate CI builds. If there are regressions
 `//engine/ci/licenses_golden/licenses_third_party` must be updated to match the
 output of the failing test), then the user must fix these tests in their local
 checkout and push their changes again.
-
-### Codesign Engine Binaries
-
-The user must validate post-submit CI builds for their merged engine PR have
-passed. A link to the web dashboard is available via `conductor status`. Once
-the post-submit CI builds have all passed, the user must codesign engine
-binaries for the **merged** engine commit.
 
 ### Apply Framework Cherrypicks
 

@@ -2,25 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for Actions
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [Actions].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const ActionsExampleApp());
 
-  static const String _title = 'Flutter Code Sample';
+class ActionsExampleApp extends StatelessWidget {
+  const ActionsExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
+        appBar: AppBar(title: const Text('Actions Sample')),
         body: const Center(
-          child: MyStatefulWidget(),
+          child: ActionsExample(),
         ),
       ),
     );
@@ -29,8 +26,8 @@ class MyApp extends StatelessWidget {
 
 // A simple model class that notifies listeners when it changes.
 class Model {
-  ValueNotifier<bool> isDirty = ValueNotifier<bool>(false);
-  ValueNotifier<int> data = ValueNotifier<int>(0);
+  final ValueNotifier<bool> isDirty = ValueNotifier<bool>(false);
+  final ValueNotifier<int> data = ValueNotifier<int>(0);
 
   int save() {
     if (isDirty.value) {
@@ -43,6 +40,11 @@ class Model {
   void setValue(int newValue) {
     isDirty.value = data.value != newValue;
     data.value = newValue;
+  }
+
+  void dispose() {
+    isDirty.dispose();
+    data.dispose();
   }
 }
 
@@ -90,24 +92,24 @@ class SaveButton extends StatefulWidget {
 }
 
 class _SaveButtonState extends State<SaveButton> {
-  int savedValue = 0;
+  int _savedValue = 0;
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: widget.valueNotifier,
+    return ListenableBuilder(
+      listenable: widget.valueNotifier,
       builder: (BuildContext context, Widget? child) {
         return TextButton.icon(
           icon: const Icon(Icons.save),
-          label: Text('$savedValue'),
+          label: Text('$_savedValue'),
           style: ButtonStyle(
-            foregroundColor: MaterialStatePropertyAll<Color>(
+            foregroundColor: WidgetStatePropertyAll<Color>(
               widget.valueNotifier.value ? Colors.red : Colors.green,
             ),
           ),
           onPressed: () {
             setState(() {
-              savedValue = Actions.invoke(context, const SaveIntent())! as int;
+              _savedValue = Actions.invoke(context, const SaveIntent())! as int;
             });
           },
         );
@@ -116,23 +118,29 @@ class _SaveButtonState extends State<SaveButton> {
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class ActionsExample extends StatefulWidget {
+  const ActionsExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<ActionsExample> createState() => _ActionsExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
-  Model model = Model();
-  int count = 0;
+class _ActionsExampleState extends State<ActionsExample> {
+  final Model _model = Model();
+  int _count = 0;
+
+  @override
+  void dispose() {
+    _model.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Actions(
       actions: <Type, Action<Intent>>{
-        ModifyIntent: ModifyAction(model),
-        SaveIntent: SaveAction(model),
+        ModifyIntent: ModifyAction(_model),
+        SaveIntent: SaveAction(_model),
       },
       child: Builder(
         builder: (BuildContext context) {
@@ -146,27 +154,30 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                   IconButton(
                     icon: const Icon(Icons.exposure_plus_1),
                     onPressed: () {
-                      Actions.invoke(context, ModifyIntent(++count));
+                      Actions.invoke(context, ModifyIntent(++_count));
                     },
                   ),
-                  AnimatedBuilder(
-                      animation: model.data,
-                      builder: (BuildContext context, Widget? child) {
-                        return Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text('${model.data.value}',
-                              style: Theme.of(context).textTheme.headlineMedium),
-                        );
-                      }),
+                  ListenableBuilder(
+                    listenable: _model.data,
+                    builder: (BuildContext context, Widget? child) {
+                      return Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(
+                          'Value: ${_model.data.value}',
+                          style: Theme.of(context).textTheme.headlineMedium,
+                        ),
+                      );
+                    },
+                  ),
                   IconButton(
                     icon: const Icon(Icons.exposure_minus_1),
                     onPressed: () {
-                      Actions.invoke(context, ModifyIntent(--count));
+                      Actions.invoke(context, ModifyIntent(--_count));
                     },
                   ),
                 ],
               ),
-              SaveButton(model.isDirty),
+              SaveButton(_model.isDirty),
               const Spacer(),
             ],
           );

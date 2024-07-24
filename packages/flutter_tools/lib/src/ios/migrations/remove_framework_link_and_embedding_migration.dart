@@ -2,10 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:unified_analytics/unified_analytics.dart';
+
 import '../../base/common.dart';
 import '../../base/file_system.dart';
 import '../../base/project_migrator.dart';
-import '../../reporting/reporting.dart';
 import '../../xcode_project.dart';
 
 // Xcode 11.4 requires linked and embedded frameworks to contain all targeted architectures before build phases are run.
@@ -15,23 +16,21 @@ class RemoveFrameworkLinkAndEmbeddingMigration extends ProjectMigrator {
   RemoveFrameworkLinkAndEmbeddingMigration(
     IosProject project,
     super.logger,
-    Usage usage,
+    Analytics analytics,
   ) : _xcodeProjectInfoFile = project.xcodeProjectInfoFile,
-        _usage = usage;
+        _analytics = analytics;
 
   final File _xcodeProjectInfoFile;
-  final Usage _usage;
+  final Analytics _analytics;
 
   @override
-  bool migrate() {
+  Future<void> migrate() async {
     if (!_xcodeProjectInfoFile.existsSync()) {
       logger.printTrace('Xcode project not found, skipping framework link and embedding migration');
-      return true;
+      return;
     }
 
     processFileLines(_xcodeProjectInfoFile);
-
-    return true;
   }
 
   @override
@@ -92,8 +91,12 @@ class RemoveFrameworkLinkAndEmbeddingMigration extends ProjectMigrator {
 
     if (line.contains('/* App.framework ') || line.contains('/* Flutter.framework ')) {
       // Print scary message.
-      UsageEvent('ios-migration', 'remove-frameworks', label: 'failure', flutterUsage: _usage).send();
-      throwToolExit('Your Xcode project requires migration. See https://flutter.dev/docs/development/ios-project-migration for details.');
+      _analytics.send(Event.appleUsageEvent(
+        workflow: 'ios-migration',
+        parameter: 'remove-frameworks',
+        result: 'failure',
+      ));
+      throwToolExit('Your Xcode project requires migration. See https://docs.flutter.dev/ios-project-migration for details.');
     }
 
     return line;

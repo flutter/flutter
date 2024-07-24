@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for CupertinoAlertDialog
-
 import 'package:flutter/cupertino.dart';
+
+/// Flutter code sample for [CupertinoAlertDialog].
 
 void main() => runApp(const AlertDialogApp());
 
@@ -23,9 +23,8 @@ class AlertDialogApp extends StatelessWidget {
 class AlertDialogExample extends StatelessWidget {
   const AlertDialogExample({super.key});
 
-  // This shows a CupertinoModalPopup which hosts a CupertinoAlertDialog.
   void _showAlertDialog(BuildContext context) {
-    showCupertinoModalPopup<void>(
+    showCupertinoDialog<void>(
       context: context,
       builder: (BuildContext context) => CupertinoAlertDialog(
         title: const Text('Alert'),

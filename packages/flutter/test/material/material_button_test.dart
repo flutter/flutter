@@ -6,8 +6,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
@@ -23,11 +21,14 @@ void main() {
 
     // Enabled MaterialButton
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: MaterialButton(
-          onPressed: () { },
-          child: const Text('button'),
+      Theme(
+        data: ThemeData(useMaterial3: false),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: MaterialButton(
+            onPressed: () { },
+            child: const Text('button'),
+          ),
         ),
       ),
     );
@@ -47,7 +48,7 @@ void main() {
     expect(material.type, MaterialType.transparency);
 
     final Offset center = tester.getCenter(find.byType(MaterialButton));
-    await tester.startGesture(center);
+    final TestGesture gesture = await tester.startGesture(center);
     await tester.pumpAndSettle();
 
     // Only elevation changes when enabled and pressed.
@@ -68,11 +69,14 @@ void main() {
 
     // Disabled MaterialButton
     await tester.pumpWidget(
-      const Directionality(
-        textDirection: TextDirection.ltr,
-        child: MaterialButton(
-          onPressed: null,
-          child: Text('button'),
+      Theme(
+        data: ThemeData(useMaterial3: false),
+        child: const Directionality(
+          textDirection: TextDirection.ltr,
+          child: MaterialButton(
+            onPressed: null,
+            child: Text('button'),
+          ),
         ),
       ),
     );
@@ -90,6 +94,10 @@ void main() {
     expect(material.textStyle!.fontSize, 14);
     expect(material.textStyle!.fontWeight, FontWeight.w500);
     expect(material.type, MaterialType.transparency);
+
+    // Finish gesture to release resources.
+    await gesture.up();
+    await tester.pumpAndSettle();
   });
 
   testWidgets('Does MaterialButton work with hover', (WidgetTester tester) async {
@@ -137,6 +145,8 @@ void main() {
 
     final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
     expect(inkFeatures, paints..rect(color: focusColor));
+
+    focusNode.dispose();
   });
 
   testWidgets('MaterialButton elevation and colors have proper precedence', (WidgetTester tester) async {
@@ -209,6 +219,8 @@ void main() {
     expect(inkFeatures, paints..rect(color: focusColor)..rect(color: highlightColor));
     expect(material.elevation, equals(highlightElevation));
     await gesture2.up();
+
+    focusNode.dispose();
   });
 
   testWidgets("MaterialButton's disabledColor takes precedence over its default disabled color.", (WidgetTester tester) async {
@@ -253,10 +265,14 @@ void main() {
 
     // Highlighted (pressed).
     final Offset center = tester.getCenter(find.byType(MaterialButton));
-    await tester.startGesture(center);
+    final TestGesture gesture = await tester.startGesture(center);
     await tester.pump(); // Start the splash and highlight animations.
     await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
     await expectLater(tester, meetsGuideline(textContrastGuideline));
+
+    // Finish gesture to release resources.
+    await gesture.up();
+    await tester.pumpAndSettle();
   },
     skip: isBrowser, // https://github.com/flutter/flutter/issues/44115
   );
@@ -293,6 +309,8 @@ void main() {
 
     await tester.pump();
     expect(focusNode.hasPrimaryFocus, isTrue);
+
+    focusNode.dispose();
   });
 
   testWidgets('MaterialButton onPressed and onLongPress callbacks are correctly called when non-null', (WidgetTester tester) async {
@@ -442,6 +460,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Theme(
           data: ThemeData(
+            useMaterial3: false,
             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
           ),
           child: buttonWidget,
@@ -488,6 +507,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Theme(
           data: ThemeData(
+            useMaterial3: false,
             highlightColor: themeHighlightColor1,
             splashColor: themeSplashColor1,
             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -516,6 +536,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Theme(
           data: ThemeData(
+            useMaterial3: false,
             highlightColor: themeHighlightColor2,
             splashColor: themeSplashColor2,
             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -574,15 +595,20 @@ void main() {
       );
 
     // enabled button
-    await tester.pumpWidget(Directionality(
-      textDirection: TextDirection.ltr,
-      child: Center(
-        child: MaterialButton(
-          child: const Text('Button'),
-          onPressed: () { /* to make sure the button is enabled */ },
+    await tester.pumpWidget(
+      Theme(
+        data: ThemeData(useMaterial3: false),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: MaterialButton(
+              child: const Text('Button'),
+              onPressed: () { /* to make sure the button is enabled */ },
+            ),
+          ),
         ),
       ),
-    ));
+    );
 
     expect(semantics, hasSemantics(
       TestSemantics.root(
@@ -594,6 +620,7 @@ void main() {
             label: 'Button',
             actions: <SemanticsAction>[
               SemanticsAction.tap,
+              SemanticsAction.focus,
             ],
             flags: <SemanticsFlag>[
               SemanticsFlag.hasEnabledState,
@@ -607,15 +634,20 @@ void main() {
     ));
 
     // disabled button
-    await tester.pumpWidget(const Directionality(
-      textDirection: TextDirection.ltr,
-      child: Center(
-        child: MaterialButton(
-          onPressed: null, // button is disabled
-          child: Text('Button'),
+    await tester.pumpWidget(
+      Theme(
+        data: ThemeData(useMaterial3: false),
+        child: const Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: MaterialButton(
+              onPressed: null, // button is disabled
+              child: Text('Button'),
+            ),
+          ),
         ),
       ),
-    ));
+    );
 
     expect(semantics, hasSemantics(
       TestSemantics.root(
@@ -630,6 +662,7 @@ void main() {
               SemanticsFlag.isButton,
               SemanticsFlag.isFocusable,
             ],
+            actions: <SemanticsAction>[SemanticsAction.focus],
           ),
         ],
       ),
@@ -773,6 +806,7 @@ void main() {
     Future<void> buildTest(VisualDensity visualDensity, {bool useText = false}) async {
       return tester.pumpWidget(
         MaterialApp(
+          theme: ThemeData(useMaterial3: false),
           home: Directionality(
             textDirection: TextDirection.rtl,
             child: Center(

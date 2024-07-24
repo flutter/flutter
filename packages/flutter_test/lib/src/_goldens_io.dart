@@ -2,14 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'matchers.dart';
+library;
+
 import 'dart:async';
 import 'dart:io';
 import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
+import 'package:matcher/expect.dart' show fail;
 import 'package:path/path.dart' as path;
-import 'package:test_api/expect.dart' show fail;
 
 import 'goldens.dart';
 import 'test_async_utils.dart';
@@ -96,11 +99,14 @@ class LocalFileComparator extends GoldenFileComparator with LocalComparisonOutpu
       await getGoldenBytes(golden),
     );
 
-    if (!result.passed) {
-      final String error = await generateFailureOutput(result, golden, basedir);
-      throw FlutterError(error);
+    if (result.passed) {
+      result.dispose();
+      return true;
     }
-    return result.passed;
+
+    final String error = await generateFailureOutput(result, golden, basedir);
+    result.dispose();
+    throw FlutterError(error);
   }
 
   @override
@@ -172,18 +178,18 @@ mixin LocalComparisonOutput {
 /// Returns a [ComparisonResult] to describe the pixel differential of the
 /// [test] and [master] image bytes provided.
 Future<ComparisonResult> compareLists(List<int>? test, List<int>? master) async {
-  if (identical(test, master)) {
-    return ComparisonResult(
-      passed: true,
-      diffPercent: 0.0,
-    );
-  }
-
   if (test == null || master == null || test.isEmpty || master.isEmpty) {
     return ComparisonResult(
       passed: false,
       diffPercent: 1.0,
       error: 'Pixel test failed, null image provided.',
+    );
+  }
+
+  if (listEquals(test, master)) {
+    return ComparisonResult(
+      passed: true,
+      diffPercent: 0.0,
     );
   }
 
@@ -201,13 +207,18 @@ Future<ComparisonResult> compareLists(List<int>? test, List<int>? master) async 
   final int height = testImage.height;
 
   if (width != masterImage.width || height != masterImage.height) {
-    return ComparisonResult(
+    final ComparisonResult result =  ComparisonResult(
       passed: false,
       diffPercent: 1.0,
       error: 'Pixel test failed, image sizes do not match.\n'
         'Master Image: ${masterImage.width} X ${masterImage.height}\n'
         'Test Image: ${testImage.width} X ${testImage.height}',
+        diffs: <String, Image>{
+          'masterImage': masterImage,
+          'testImage': testImage,
+        },
     );
+    return result;
   }
 
   int pixelDiffCount = 0;
@@ -254,7 +265,7 @@ Future<ComparisonResult> compareLists(List<int>? test, List<int>? master) async 
       passed: false,
       diffPercent: diffPercent,
       error: 'Pixel test failed, '
-        '${(diffPercent * 100).toStringAsFixed(2)}% '
+        '${(diffPercent * 100).toStringAsFixed(2)}%, ${pixelDiffCount}px '
         'diff detected.',
       diffs:  <String, Image>{
         'masterImage' : masterImage,
@@ -264,6 +275,8 @@ Future<ComparisonResult> compareLists(List<int>? test, List<int>? master) async 
       },
     );
   }
+  masterImage.dispose();
+  testImage.dispose();
   return ComparisonResult(passed: true, diffPercent: 0.0);
 }
 
@@ -282,6 +295,11 @@ ByteData _invert(ByteData imageBytes) {
 
 /// An unsupported [WebGoldenComparator] that exists for API compatibility.
 class DefaultWebGoldenComparator extends WebGoldenComparator {
+  /// This is provided to prevent warnings from the analyzer.
+  DefaultWebGoldenComparator(Uri _) {
+    throw UnsupportedError('DefaultWebGoldenComparator is only supported on the web.');
+  }
+
   @override
   Future<bool> compare(double width, double height, Uri golden) {
     throw UnsupportedError('DefaultWebGoldenComparator is only supported on the web.');
@@ -289,6 +307,16 @@ class DefaultWebGoldenComparator extends WebGoldenComparator {
 
   @override
   Future<void> update(double width, double height, Uri golden) {
+    throw UnsupportedError('DefaultWebGoldenComparator is only supported on the web.');
+  }
+
+  @override
+  Future<bool> compareBytes(Uint8List bytes, Uri golden) {
+    throw UnsupportedError('DefaultWebGoldenComparator is only supported on the web.');
+  }
+
+  @override
+  Future<void> updateBytes(Uint8List bytes, Uri golden) {
     throw UnsupportedError('DefaultWebGoldenComparator is only supported on the web.');
   }
 }

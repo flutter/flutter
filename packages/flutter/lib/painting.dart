@@ -15,9 +15,13 @@
 ///  * Use the [TextPainter] class for painting text.
 ///  * Use [Decoration] (and more concretely [BoxDecoration]) for
 ///    painting boxes.
+///
+/// @docImport 'src/painting/box_decoration.dart';
+/// @docImport 'src/painting/decoration.dart';
+/// @docImport 'src/painting/text_painter.dart';
 library painting;
 
-export 'dart:ui' show PlaceholderAlignment, Shadow, TextHeightBehavior, TextLeadingDistribution;
+export 'dart:ui' show PlaceholderAlignment, Shadow, TextHeightBehavior, TextLeadingDistribution, kTextHeightNone;
 
 export 'src/painting/alignment.dart';
 export 'src/painting/basic_types.dart';
@@ -47,6 +51,7 @@ export 'src/painting/image_provider.dart';
 export 'src/painting/image_resolution.dart';
 export 'src/painting/image_stream.dart';
 export 'src/painting/inline_span.dart';
+export 'src/painting/linear_border.dart';
 export 'src/painting/matrix_utils.dart';
 export 'src/painting/notched_shapes.dart';
 export 'src/painting/oval_border.dart';
@@ -59,5 +64,6 @@ export 'src/painting/stadium_border.dart';
 export 'src/painting/star_border.dart';
 export 'src/painting/strut_style.dart';
 export 'src/painting/text_painter.dart';
+export 'src/painting/text_scaler.dart';
 export 'src/painting/text_span.dart';
 export 'src/painting/text_style.dart';

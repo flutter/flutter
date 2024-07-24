@@ -5,6 +5,7 @@
 // This file is run as part of a reduced test set in CI on Mac and Windows
 // machines.
 @Tags(<String>['reduced-test-set'])
+library;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -265,6 +266,10 @@ void main() {
           ],
           onReorder: (int oldIndex, int newIndex) { },
         );
+
+        late final OverlayEntry entry;
+        addTearDown(() => entry..remove()..dispose());
+
         await tester.pumpWidget(MaterialApp(
           home: Container(
             color: Colors.white,
@@ -272,7 +277,7 @@ void main() {
             // Wrap in an overlay so that the golden image includes the dragged item.
             child: Overlay(
               initialEntries: <OverlayEntry>[
-                OverlayEntry(builder: (BuildContext context) {
+                entry = OverlayEntry(builder: (BuildContext context) {
                   // Wrap the list in padding to test that the positioning
                   // is correct when the origin of the overlay is different
                   // from the list.
@@ -374,6 +379,7 @@ void main() {
 
       testWidgets('Uses the PrimaryScrollController when available', (WidgetTester tester) async {
         final ScrollController primary = ScrollController();
+        addTearDown(primary.dispose);
         final Widget reorderableList = ReorderableListView(
           children: const <Widget>[
             SizedBox(width: 100.0, height: 100.0, key: Key('C'), child: Text('C')),
@@ -404,6 +410,8 @@ void main() {
 
         // Now try changing the primary scroll controller and checking that the scroll view gets updated.
         final ScrollController primary2 = ScrollController();
+        addTearDown(primary2.dispose);
+
         await tester.pumpWidget(buildWithScrollController(primary2));
         scrollView = tester.widget(
           find.byType(Scrollable),
@@ -416,6 +424,8 @@ void main() {
         const Key secondBox = Key('B');
         const Key thirdBox = Key('A');
         final ScrollController customController = ScrollController();
+        addTearDown(customController.dispose);
+
         await tester.pumpWidget(
           MaterialApp(
             home: Scaffold(
@@ -473,6 +483,47 @@ void main() {
         expect(customController.offset, 120.0);
       });
 
+      testWidgets('ReorderableList auto scrolling is fast enough', (WidgetTester tester) async {
+        // Regression test for https://github.com/flutter/flutter/issues/121603.
+        final ScrollController controller = ScrollController();
+        addTearDown(controller.dispose);
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: ReorderableListView.builder(
+                scrollController: controller,
+                itemCount: 100,
+                itemBuilder: (BuildContext context, int index) {
+                  return Text('data', key: ValueKey<int>(index));
+                },
+                onReorder: (int oldIndex, int newIndex) {},
+              ),
+            ),
+          ),
+        );
+
+        // Start gesture on first item.
+        final TestGesture drag = await tester.startGesture(tester.getCenter(find.byKey(const ValueKey<int>(0))));
+        await tester.pump(kLongPressTimeout + kPressTimeout);
+        final Offset bottomRight = tester.getBottomRight(find.byType(ReorderableListView));
+        // Drag enough for move to start.
+        await drag.moveTo(Offset(bottomRight.dx / 2, bottomRight.dy));
+        await tester.pump();
+        // Use a fixed value to make sure the default velocity scalar is bigger
+        // than a certain amount.
+        const double kMinimumAllowedAutoScrollDistancePer5ms = 1.7;
+
+        await tester.pump(const Duration(milliseconds: 5));
+        expect(controller.offset, greaterThan(kMinimumAllowedAutoScrollDistancePer5ms));
+        await tester.pump(const Duration(milliseconds: 5));
+        expect(controller.offset, greaterThan(kMinimumAllowedAutoScrollDistancePer5ms * 2));
+        await tester.pump(const Duration(milliseconds: 5));
+        expect(controller.offset, greaterThan(kMinimumAllowedAutoScrollDistancePer5ms * 3));
+        await tester.pump(const Duration(milliseconds: 5));
+        expect(controller.offset, greaterThan(kMinimumAllowedAutoScrollDistancePer5ms * 4));
+      });
+
       testWidgets('Still builds when no PrimaryScrollController is available', (WidgetTester tester) async {
         final Widget reorderableList = ReorderableListView(
           children: const <Widget>[
@@ -482,9 +533,13 @@ void main() {
           ],
           onReorder: (int oldIndex, int newIndex) { },
         );
+
+        late final OverlayEntry entry;
+        addTearDown(() => entry..remove()..dispose());
+
         final Widget overlay = Overlay(
           initialEntries: <OverlayEntry>[
-            OverlayEntry(builder: (BuildContext context) => reorderableList),
+            entry = OverlayEntry(builder: (BuildContext context) => reorderableList),
           ],
         );
         final Widget boilerplate = Localizations(
@@ -672,8 +727,23 @@ void main() {
           // Get the switch tile's semantics:
           final SemanticsNode semanticsNode = tester.getSemantics(find.byKey(const Key('Switch tile')));
 
-          // Check for properties of both SwitchTile semantics and the ReorderableListView custom semantics actions.
+          // Check for ReorderableListView custom semantics actions.
           expect(semanticsNode, matchesSemantics(
+            customActions: const <CustomSemanticsAction>[
+              CustomSemanticsAction(label: 'Move up'),
+              CustomSemanticsAction(label: 'Move down'),
+              CustomSemanticsAction(label: 'Move to the end'),
+              CustomSemanticsAction(label: 'Move to the start'),
+            ],
+          ));
+
+          // Check for properties of SwitchTile semantics.
+          late SemanticsNode child;
+          semanticsNode.visitChildren((SemanticsNode node) {
+            child = node;
+            return false;
+          });
+          expect(child, matchesSemantics(
             hasToggledState: true,
             isToggled: true,
             isEnabled: true,
@@ -681,12 +751,7 @@ void main() {
             hasEnabledState: true,
             label: 'Switch tile',
             hasTapAction: true,
-            customActions: const <CustomSemanticsAction>[
-              CustomSemanticsAction(label: 'Move up'),
-              CustomSemanticsAction(label: 'Move down'),
-              CustomSemanticsAction(label: 'Move to the end'),
-              CustomSemanticsAction(label: 'Move to the start'),
-            ],
+            hasFocusAction: true,
           ));
           handle.dispose();
         });
@@ -897,6 +962,10 @@ void main() {
             ),
           ],
         );
+
+        late final OverlayEntry entry;
+        addTearDown(() => entry..remove()..dispose());
+
         await tester.pumpWidget(MaterialApp(
           home: Container(
             color: Colors.white,
@@ -904,7 +973,7 @@ void main() {
             // Wrap in an overlay so that the golden image includes the dragged item.
             child: Overlay(
               initialEntries: <OverlayEntry>[
-                OverlayEntry(builder: (BuildContext context) {
+                entry = OverlayEntry(builder: (BuildContext context) {
                   // Wrap the list in padding to test that the positioning
                   // is correct when the origin of the overlay is different
                   // from the list.
@@ -1499,6 +1568,7 @@ void main() {
             ),
           );
         },
+        buildDefaultDragHandles: false,
         itemCount: items.length,
         onReorder: handleReorder,
       ),
@@ -1565,6 +1635,7 @@ void main() {
             ),
           );
         },
+        buildDefaultDragHandles: false,
         itemCount: items.length,
         onReorder: handleReorder,
         onReorderStart: (int index) {
@@ -1643,7 +1714,7 @@ void main() {
         DefaultMaterialLocalizations.delegate,
         DefaultWidgetsLocalizations.delegate,
       ],
-      child:SizedBox(
+      child: SizedBox(
         width: 100.0,
         height: 100.0,
         child: Directionality(
@@ -1769,6 +1840,89 @@ void main() {
     expect(item1Height, 30.0);
     expect(item2Height, 30.0);
   });
+
+  testWidgets('ReorderableListView auto scrolls speed is configurable', (WidgetTester tester) async {
+    Future<void> pumpFor({
+      required Duration duration,
+      Duration interval = const Duration(milliseconds: 50),
+    }) async {
+      await tester.pump();
+
+      int times = (duration.inMilliseconds / interval.inMilliseconds).ceil();
+      while (times > 0) {
+        await tester.pump(interval + const Duration(milliseconds: 1));
+        await tester.idle();
+        times--;
+      }
+    }
+
+    Future<double> pumpListAndDrag({required double autoScrollerVelocityScalar}) async {
+      final List<int> items = List<int>.generate(10, (int index) => index);
+      final ScrollController scrollController = ScrollController();
+      addTearDown(scrollController.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: ReorderableListView.builder(
+            itemBuilder: (BuildContext context, int index) {
+              return Container(
+                key: ValueKey<int>(items[index]),
+                height: 100,
+                color: items[index].isOdd ? Colors.red : Colors.green,
+                child: ReorderableDragStartListener(
+                  index: index,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text('item ${items[index]}'),
+                      const Icon(Icons.drag_handle),
+                    ],
+                  ),
+                ),
+              );
+            },
+            itemCount: items.length,
+            onReorder: (int fromIndex, int toIndex) {},
+            scrollController: scrollController,
+            autoScrollerVelocityScalar: autoScrollerVelocityScalar,
+          ),
+        ),
+      );
+
+      expect(scrollController.offset, 0);
+
+      final Finder item = find.text('item 0');
+      final TestGesture drag = await tester.startGesture(tester.getCenter(item));
+
+      // Drag just enough to touch the edge but not surpass it, so the
+      // auto scroller is not yet triggered
+      await drag.moveBy(const Offset(0, 500));
+      await pumpFor(duration: const Duration(milliseconds: 200));
+
+      expect(scrollController.offset, 0);
+
+      // Now drag a little bit more so the auto scroller triggers
+      await drag.moveBy(const Offset(0, 50));
+      await pumpFor(
+        duration: const Duration(milliseconds: 600),
+        interval: Duration(milliseconds: (1000 / autoScrollerVelocityScalar).round()),
+      );
+
+      return scrollController.offset;
+    }
+
+    const double fastVelocityScalar = 20;
+    final double offsetForFastScroller = await pumpListAndDrag(autoScrollerVelocityScalar: fastVelocityScalar);
+
+    // Reset widget tree
+    await tester.pumpWidget(const SizedBox());
+
+    const double slowVelocityScalar = 5;
+    final double offsetForSlowScroller = await pumpListAndDrag(autoScrollerVelocityScalar: slowVelocityScalar);
+
+    expect(offsetForFastScroller / offsetForSlowScroller, fastVelocityScalar / slowVelocityScalar);
+  });
+
 }
 
 Future<void> longPressDrag(WidgetTester tester, Offset start, Offset end) async {

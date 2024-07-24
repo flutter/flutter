@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/widgets.dart';
+library;
+
 import 'recognizer.dart';
 
 export 'dart:ui' show PointerDeviceKind;
@@ -18,12 +21,8 @@ class EagerGestureRecognizer extends OneSequenceGestureRecognizer {
   ///
   /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
   EagerGestureRecognizer({
-    @Deprecated(
-      'Migrate to supportedDevices. '
-      'This feature was deprecated after v2.3.0-1.0.pre.',
-    )
-    super.kind,
     super.supportedDevices,
+    super.allowedButtonsFilter,
   });
 
   @override

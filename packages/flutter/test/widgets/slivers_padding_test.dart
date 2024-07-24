@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -15,15 +16,16 @@ class _MockRenderSliver extends RenderSliver {
       maxPaintExtent: 10,
     );
   }
-
 }
 
 Future<void> test(WidgetTester tester, double offset, EdgeInsetsGeometry padding, AxisDirection axisDirection, TextDirection textDirection) {
+  final ViewportOffset viewportOffset = ViewportOffset.fixed(offset);
+  addTearDown(viewportOffset.dispose);
   return tester.pumpWidget(
     Directionality(
       textDirection: textDirection,
       child: Viewport(
-        offset: ViewportOffset.fixed(offset),
+        offset: viewportOffset,
         axisDirection: axisDirection,
         slivers: <Widget>[
           const SliverToBoxAdapter(child: SizedBox(width: 400.0, height: 400.0, child: Text('before'))),
@@ -178,15 +180,16 @@ void main() {
     ]);
     HitTestResult result;
     result = tester.hitTestOnBinding(const Offset(10.0, 10.0));
-    expectIsTextSpan(result.path.first.target, 'before');
+    hitsText(result, 'before');
     result = tester.hitTestOnBinding(const Offset(10.0, 60.0));
     expect(result.path.first.target, isA<RenderView>());
     result = tester.hitTestOnBinding(const Offset(100.0, 100.0));
-    expectIsTextSpan(result.path.first.target, 'padded');
+    hitsText(result, 'padded');
+    expect(result.path.any((HitTestEntry entry) => entry.target is RenderSliverPadding), isTrue);
     result = tester.hitTestOnBinding(const Offset(100.0, 490.0));
     expect(result.path.first.target, isA<RenderView>());
     result = tester.hitTestOnBinding(const Offset(10.0, 520.0));
-    expectIsTextSpan(result.path.first.target, 'after');
+    hitsText(result, 'after');
   });
 
   testWidgets('Viewport+SliverPadding hit testing up', (WidgetTester tester) async {
@@ -200,15 +203,15 @@ void main() {
     ]);
     HitTestResult result;
     result = tester.hitTestOnBinding(const Offset(10.0, 600.0-10.0));
-    expectIsTextSpan(result.path.first.target, 'before');
+    hitsText(result, 'before');
     result = tester.hitTestOnBinding(const Offset(10.0, 600.0-60.0));
     expect(result.path.first.target, isA<RenderView>());
     result = tester.hitTestOnBinding(const Offset(100.0, 600.0-100.0));
-    expectIsTextSpan(result.path.first.target, 'padded');
+    hitsText(result, 'padded');
     result = tester.hitTestOnBinding(const Offset(100.0, 600.0-490.0));
     expect(result.path.first.target, isA<RenderView>());
     result = tester.hitTestOnBinding(const Offset(10.0, 600.0-520.0));
-    expectIsTextSpan(result.path.first.target, 'after');
+    hitsText(result, 'after');
   });
 
   testWidgets('Viewport+SliverPadding hit testing left', (WidgetTester tester) async {
@@ -222,15 +225,15 @@ void main() {
     ]);
     HitTestResult result;
     result = tester.hitTestOnBinding(const Offset(800.0-10.0, 10.0));
-    expectIsTextSpan(result.path.first.target, 'before');
+    hitsText(result, 'before');
     result = tester.hitTestOnBinding(const Offset(800.0-60.0, 10.0));
     expect(result.path.first.target, isA<RenderView>());
     result = tester.hitTestOnBinding(const Offset(800.0-100.0, 100.0));
-    expectIsTextSpan(result.path.first.target, 'padded');
+    hitsText(result, 'padded');
     result = tester.hitTestOnBinding(const Offset(800.0-490.0, 100.0));
     expect(result.path.first.target, isA<RenderView>());
     result = tester.hitTestOnBinding(const Offset(800.0-520.0, 10.0));
-    expectIsTextSpan(result.path.first.target, 'after');
+    hitsText(result, 'after');
   });
 
   testWidgets('Viewport+SliverPadding hit testing right', (WidgetTester tester) async {
@@ -244,23 +247,26 @@ void main() {
     ]);
     HitTestResult result;
     result = tester.hitTestOnBinding(const Offset(10.0, 10.0));
-    expectIsTextSpan(result.path.first.target, 'before');
+    hitsText(result, 'before');
     result = tester.hitTestOnBinding(const Offset(60.0, 10.0));
     expect(result.path.first.target, isA<RenderView>());
     result = tester.hitTestOnBinding(const Offset(100.0, 100.0));
-    expectIsTextSpan(result.path.first.target, 'padded');
+    hitsText(result, 'padded');
     result = tester.hitTestOnBinding(const Offset(490.0, 100.0));
     expect(result.path.first.target, isA<RenderView>());
     result = tester.hitTestOnBinding(const Offset(520.0, 10.0));
-    expectIsTextSpan(result.path.first.target, 'after');
+    hitsText(result, 'after');
   });
 
   testWidgets('Viewport+SliverPadding no child', (WidgetTester tester) async {
+    final ViewportOffset offset = ViewportOffset.fixed(0.0);
+    addTearDown(offset.dispose);
+
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: Viewport(
-          offset: ViewportOffset.fixed(0.0),
+          offset: offset,
           slivers: const <Widget>[
             SliverPadding(padding: EdgeInsets.all(100.0)),
             SliverToBoxAdapter(child: SizedBox(width: 400.0, height: 400.0, child: Text('x'))),
@@ -274,6 +280,7 @@ void main() {
   testWidgets('SliverPadding with no child reports correct geometry as scroll offset changes', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/64506
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -300,12 +307,15 @@ void main() {
   });
 
   testWidgets('Viewport+SliverPadding changing padding', (WidgetTester tester) async {
+    final ViewportOffset offset1 = ViewportOffset.fixed(0.0);
+    addTearDown(offset1.dispose);
+
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: Viewport(
           axisDirection: AxisDirection.left,
-          offset: ViewportOffset.fixed(0.0),
+          offset: offset1,
           slivers: const <Widget>[
             SliverPadding(padding: EdgeInsets.fromLTRB(90.0, 1.0, 110.0, 2.0)),
             SliverToBoxAdapter(child: SizedBox(width: 201.0, child: Text('x'))),
@@ -313,13 +323,18 @@ void main() {
         ),
       ),
     );
+
     expect(tester.renderObject<RenderBox>(find.text('x')).localToGlobal(Offset.zero), const Offset(399.0, 0.0));
+
+    final ViewportOffset offset2 = ViewportOffset.fixed(0.0);
+    addTearDown(offset2.dispose);
+
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: Viewport(
           axisDirection: AxisDirection.left,
-          offset: ViewportOffset.fixed(0.0),
+          offset: offset2,
           slivers: const <Widget>[
             SliverPadding(padding: EdgeInsets.fromLTRB(110.0, 1.0, 80.0, 2.0)),
             SliverToBoxAdapter(child: SizedBox(width: 201.0, child: Text('x'))),
@@ -327,73 +342,98 @@ void main() {
         ),
       ),
     );
+
     expect(tester.renderObject<RenderBox>(find.text('x')).localToGlobal(Offset.zero), const Offset(409.0, 0.0));
   });
 
   testWidgets('Viewport+SliverPadding changing direction', (WidgetTester tester) async {
+    final ViewportOffset offset1 = ViewportOffset.fixed(0.0);
+    addTearDown(offset1.dispose);
+
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: Viewport(
           axisDirection: AxisDirection.up,
-          offset: ViewportOffset.fixed(0.0),
+          offset: offset1,
           slivers: const <Widget>[
             SliverPadding(padding: EdgeInsets.fromLTRB(1.0, 2.0, 4.0, 8.0)),
           ],
         ),
       ),
     );
+
     expect(tester.renderObject<RenderSliverPadding>(find.byType(SliverPadding)).afterPadding, 2.0);
+
+    final ViewportOffset offset2 = ViewportOffset.fixed(0.0);
+    addTearDown(offset2.dispose);
+
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: Viewport(
-          offset: ViewportOffset.fixed(0.0),
+          offset: offset2,
           slivers: const <Widget>[
             SliverPadding(padding: EdgeInsets.fromLTRB(1.0, 2.0, 4.0, 8.0)),
           ],
         ),
       ),
     );
+
     expect(tester.renderObject<RenderSliverPadding>(find.byType(SliverPadding)).afterPadding, 8.0);
+
+    final ViewportOffset offset3 = ViewportOffset.fixed(0.0);
+    addTearDown(offset3.dispose);
+
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: Viewport(
           axisDirection: AxisDirection.right,
-          offset: ViewportOffset.fixed(0.0),
+          offset: offset3,
           slivers: const <Widget>[
             SliverPadding(padding: EdgeInsets.fromLTRB(1.0, 2.0, 4.0, 8.0)),
           ],
         ),
       ),
     );
+
     expect(tester.renderObject<RenderSliverPadding>(find.byType(SliverPadding)).afterPadding, 4.0);
+
+    final ViewportOffset offset4 = ViewportOffset.fixed(0.0);
+    addTearDown(offset4.dispose);
+
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: Viewport(
           axisDirection: AxisDirection.left,
-          offset: ViewportOffset.fixed(0.0),
+          offset: offset4,
           slivers: const <Widget>[
             SliverPadding(padding: EdgeInsets.fromLTRB(1.0, 2.0, 4.0, 8.0)),
           ],
         ),
       ),
     );
+
     expect(tester.renderObject<RenderSliverPadding>(find.byType(SliverPadding)).afterPadding, 1.0);
+
+    final ViewportOffset offset5 = ViewportOffset.fixed(99999.9);
+    addTearDown(offset5.dispose);
+
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: Viewport(
           axisDirection: AxisDirection.left,
-          offset: ViewportOffset.fixed(99999.9),
+          offset: offset5,
           slivers: const <Widget>[
             SliverPadding(padding: EdgeInsets.fromLTRB(1.0, 2.0, 4.0, 8.0)),
           ],
         ),
       ),
     );
+
     expect(tester.renderObject<RenderSliverPadding>(find.byType(SliverPadding, skipOffstage: false)).afterPadding, 1.0);
   });
 
@@ -498,9 +538,11 @@ void main() {
 
   testWidgets("SliverPadding consumes only its padding from the overlap of its parent's constraints", (WidgetTester tester) async {
     final _MockRenderSliver mock = _MockRenderSliver();
+    addTearDown(mock.dispose);
     final RenderSliverPadding renderObject = RenderSliverPadding(
       padding: const EdgeInsets.only(top: 20),
     );
+    addTearDown(renderObject.dispose);
     renderObject.child = mock;
     renderObject.layout(const SliverConstraints(
         viewportMainAxisExtent: 100.0,
@@ -523,9 +565,11 @@ void main() {
 
   testWidgets("SliverPadding passes the overlap to the child if it's negative", (WidgetTester tester) async {
     final _MockRenderSliver mock = _MockRenderSliver();
+    addTearDown(mock.dispose);
     final RenderSliverPadding renderObject = RenderSliverPadding(
       padding: const EdgeInsets.only(top: 20),
     );
+    addTearDown(renderObject.dispose);
     renderObject.child = mock;
     renderObject.layout(const SliverConstraints(
         viewportMainAxisExtent: 100.0,
@@ -548,9 +592,11 @@ void main() {
 
   testWidgets('SliverPadding passes the paintOrigin of the child on', (WidgetTester tester) async {
     final _MockRenderSliver mock = _MockRenderSliver();
+    addTearDown(mock.dispose);
     final RenderSliverPadding renderObject = RenderSliverPadding(
       padding: const EdgeInsets.only(top: 20),
     );
+    addTearDown(renderObject.dispose);
     renderObject.child = mock;
     renderObject.layout(const SliverConstraints(
         viewportMainAxisExtent: 100.0,
@@ -572,7 +618,15 @@ void main() {
   });
 }
 
-void expectIsTextSpan(Object target, String text) {
-  expect(target, isA<TextSpan>());
-  expect((target as TextSpan).text, text);
+void hitsText(HitTestResult hitTestResult, String text) {
+  switch (hitTestResult.path.first.target) {
+    case final TextSpan span:
+      expect(span.text, text);
+    case final RenderParagraph paragraph:
+      final InlineSpan span = paragraph.text;
+      expect(span, isA<TextSpan>());
+      expect((span as TextSpan).text, text);
+    case final HitTestTarget target:
+      fail('$target is not a TextSpan or a RenderParagraph.');
+  }
 }

@@ -1,8 +1,8 @@
 # Debug Adapter Protocol (DAP)
 
-This document is Flutter-specific. For information on the standard Dart DAP implementation, [see this document](https://github.com/dart-lang/sdk/blob/main/pkg/dds/tool/dap/README.md).
+This document is Flutter-specific. For information on the standard Dart DAP implementation, [see this document](https://github.com/dart-lang/sdk/blob/main/third_party/pkg/dap/tool/README.md).
 
-Flutter includes support for debugging using [the Debug Adapter Protocol](https://microsoft.github.io/debug-adapter-protocol/) as an alternative to using the [VM Service](https://github.com/dart-lang/sdk/blob/master/runtime/vm/service/service.md) directly, simplying the integration for new editors.
+Flutter includes support for debugging using [the Debug Adapter Protocol](https://microsoft.github.io/debug-adapter-protocol/) as an alternative to using the [VM Service](https://github.com/dart-lang/sdk/blob/main/runtime/vm/service/service.md) directly, simplifying the integration for new editors.
 
 The debug adapters are started with the `flutter debug-adapter` command and are intended to be consumed by DAP-compliant tools such as Flutter-specific extensions for editors, or configured by users whose editors include generic configurable DAP clients.
 
@@ -40,7 +40,10 @@ Arguments specific to `launchRequest` are:
 
 Arguments specific to `attachRequest` are:
 
-- `String? vmServiceUri` - the VM Service URI to attach to (if not supplied, Flutter will try to discover it from the device)
+- `String? vmServiceInfoFile` - the file to read the VM Service info from \*
+- `String? vmServiceUri` - the VM Service URI to attach to \*
+
+\* Only one of `vmServiceInfoFile` or `vmServiceUri` may be supplied. If neither are supplied, Flutter will try to discover it from the device.
 
 ## Custom Requests
 
@@ -50,7 +53,7 @@ Some custom requests are available for clients to call. Below are the Flutter-sp
 
 `hotReload` injects updated source code files into the running VM and then rebuilds the widget tree. An optional `reason` can be provided and should usually be `"manual"` or `"save"` to indicate what how the reload was triggered (for example by the user clicking a button, versus a hot-reload-on-save feature).
 
-```
+```json
 {
 	"reason": "manual"
 }
@@ -60,7 +63,7 @@ Some custom requests are available for clients to call. Below are the Flutter-sp
 
 `hotRestart` updates the code on the device and performs a full restart (which does not preserve state). An optional `reason` can be provided and should usually be `"manual"` or `"save"` to indicate what how the reload was triggered (for example by the user clicking a button, versus a hot-reload-on-save feature).
 
-```
+```json
 {
 	"reason": "manual"
 }
@@ -78,7 +81,7 @@ This event is emitted when the application has started up. Unlike `dart.debugger
 
 When the value of a Flutter service extension changes, this event is emitted and includes the new value. Values are always encoded as strings, even if numeric/boolean.
 
-```
+```json
 {
 	"type": "event",
 	"event": "flutter.serviceExtensionStateChanged",

@@ -35,22 +35,25 @@ Future<void> runTasks(
   String? deviceId,
   String? gitBranch,
   String? localEngine,
+  String? localEngineHost,
   String? localEngineSrcPath,
   String? luciBuilder,
   String? resultsPath,
   List<String>? taskArgs,
+  bool useEmulator = false,
   @visibleForTesting Map<String, String>? isolateParams,
-  @visibleForTesting Function(String) print = print,
+  @visibleForTesting void Function(String) print = print,
   @visibleForTesting List<String>? logs,
 }) async {
   for (final String taskName in taskNames) {
     TaskResult result = TaskResult.success(null);
-    int retry = 0;
-    while (retry <= Cocoon.retryNumber) {
+    int failureCount = 0;
+    while (failureCount <= Cocoon.retryNumber) {
       result = await rerunTask(
         taskName,
         deviceId: deviceId,
         localEngine: localEngine,
+        localEngineHost: localEngineHost,
         localEngineSrcPath: localEngineSrcPath,
         terminateStrayDartProcesses: terminateStrayDartProcesses,
         silent: silent,
@@ -59,14 +62,18 @@ Future<void> runTasks(
         gitBranch: gitBranch,
         luciBuilder: luciBuilder,
         isolateParams: isolateParams,
+        useEmulator: useEmulator,
       );
 
       if (!result.succeeded) {
-        retry += 1;
+        failureCount += 1;
+        if (exitOnFirstTestFailure) {
+          break;
+        }
       } else {
         section('Flaky status for "$taskName"');
-        if (retry > 0) {
-          print('Total ${retry+1} executions: $retry failures and 1 false positive.');
+        if (failureCount > 0) {
+          print('Total ${failureCount+1} executions: $failureCount failures and 1 false positive.');
           print('flaky: true');
           // TODO(ianh): stop ignoring this failure. We should set exitCode=1, and quit
           // if exitOnFirstTestFailure is true.
@@ -80,7 +87,7 @@ Future<void> runTasks(
 
     if (!result.succeeded) {
       section('Flaky status for "$taskName"');
-      print('Consistently failed across all $retry executions.');
+      print('Consistently failed across all $failureCount executions.');
       print('flaky: false');
       exitCode = 1;
       if (exitOnFirstTestFailure) {
@@ -97,6 +104,7 @@ Future<TaskResult> rerunTask(
   String taskName, {
   String? deviceId,
   String? localEngine,
+  String? localEngineHost,
   String? localEngineSrcPath,
   bool terminateStrayDartProcesses = false,
   bool silent = false,
@@ -104,6 +112,7 @@ Future<TaskResult> rerunTask(
   String? resultsPath,
   String? gitBranch,
   String? luciBuilder,
+  bool useEmulator = false,
   @visibleForTesting Map<String, String>? isolateParams,
 }) async {
   section('Running task "$taskName"');
@@ -111,11 +120,13 @@ Future<TaskResult> rerunTask(
     taskName,
     deviceId: deviceId,
     localEngine: localEngine,
+    localEngineHost: localEngineHost,
     localEngineSrcPath: localEngineSrcPath,
     terminateStrayDartProcesses: terminateStrayDartProcesses,
     silent: silent,
     taskArgs: taskArgs,
     isolateParams: isolateParams,
+    useEmulator: useEmulator,
   );
 
   print('Task result:');
@@ -149,16 +160,29 @@ Future<TaskResult> runTask(
   bool terminateStrayDartProcesses = false,
   bool silent = false,
   String? localEngine,
+  String? localEngineHost,
+  String? localWebSdk,
   String? localEngineSrcPath,
   String? deviceId,
   List<String>? taskArgs,
+  bool useEmulator = false,
   @visibleForTesting Map<String, String>? isolateParams,
 }) async {
   final String taskExecutable = 'bin/tasks/$taskName.dart';
 
   if (!file(taskExecutable).existsSync()) {
-    throw 'Executable Dart file not found: $taskExecutable';
+    print('Executable Dart file not found: $taskExecutable');
+    exit(1);
   }
+
+  if (useEmulator) {
+    taskArgs ??= <String>[];
+    taskArgs
+      ..add('--android-emulator')
+      ..add('--browser-name=android-chrome');
+  }
+
+  stdout.writeln('Starting process for task: [$taskName]');
 
   final Process runner = await startProcess(
     dartBin,
@@ -167,6 +191,8 @@ Future<TaskResult> runTask(
       '--enable-vm-service=0', // zero causes the system to choose a free port
       '--no-pause-isolates-on-exit',
       if (localEngine != null) '-DlocalEngine=$localEngine',
+      if (localEngineHost != null) '-DlocalEngineHost=$localEngineHost',
+      if (localWebSdk != null) '-DlocalWebSdk=$localWebSdk',
       if (localEngineSrcPath != null) '-DlocalEngineSrcPath=$localEngineSrcPath',
       taskExecutable,
       ...?taskArgs,
@@ -190,13 +216,13 @@ Future<TaskResult> runTask(
       .transform<String>(const LineSplitter())
       .listen((String line) {
     if (!uri.isCompleted) {
-      final Uri? serviceUri = parseServiceUri(line, prefix: RegExp('(Observatory|The Dart VM service is) listening on '));
+      final Uri? serviceUri = parseServiceUri(line, prefix: RegExp('The Dart VM service is listening on '));
       if (serviceUri != null) {
         uri.complete(serviceUri);
       }
     }
     if (!silent) {
-      stdout.writeln('[$taskName] [STDOUT] $line');
+      stdout.writeln('[${DateTime.now()}] [STDOUT] $line');
     }
   });
 
@@ -204,7 +230,7 @@ Future<TaskResult> runTask(
       .transform<String>(const Utf8Decoder())
       .transform<String>(const LineSplitter())
       .listen((String line) {
-    stderr.writeln('[$taskName] [STDERR] $line');
+    stderr.writeln('[${DateTime.now()}] [STDERR] $line');
   });
 
   try {
@@ -263,7 +289,13 @@ Future<ConnectionResult> _connectToRunnerIsolate(Uri vmServiceUri) async {
       return ConnectionResult(client, isolate);
     } catch (error) {
       if (stopwatch.elapsed > const Duration(seconds: 10)) {
-        print('VM service still not ready after ${stopwatch.elapsed}: $error\nContinuing to retry...');
+        print(
+          'VM service still not ready. It is possible the target has failed.\n'
+          'Latest connection error:\n'
+          '  $error\n'
+          'Continuing to retry...\n',
+        );
+        stopwatch.reset();
       }
       await Future<void>.delayed(const Duration(milliseconds: 50));
     }

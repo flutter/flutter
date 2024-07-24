@@ -3,7 +3,7 @@ project(dartpad_curve2_d_0 LANGUAGES CXX)
 
 set(BINARY_NAME "dartpad_curve2_d_0")
 
-cmake_policy(SET CMP0063 NEW)
+cmake_policy(VERSION 3.14...3.25)
 
 set(CMAKE_INSTALL_RPATH "$ORIGIN/lib")
 

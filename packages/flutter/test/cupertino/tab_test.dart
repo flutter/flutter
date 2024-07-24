@@ -3,7 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   testWidgets('Use home', (WidgetTester tester) async {
@@ -80,7 +82,9 @@ void main() {
     expect(find.text('generated home'), findsOneWidget);
   });
 
-  testWidgets('Use onUnknownRoute', (WidgetTester tester) async {
+  testWidgets('Use onUnknownRoute',
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
+  (WidgetTester tester) async {
     late String unknownForRouteCalled;
     await tester.pumpWidget(
       CupertinoApp(
@@ -288,5 +292,38 @@ void main() {
 
     expect(find.text('home'), findsOneWidget);
     expect(find.text('second route'), findsNothing);
+  });
+
+  testWidgets('Handles Android back button', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> key = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoTabScaffold(
+          tabBar: CupertinoTabBar(
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(label: '', icon: Text('1')),
+              BottomNavigationBarItem(label: '', icon: Text('2'))
+            ],
+          ),
+          tabBuilder: (_, int i) => PopScope<Object?>(
+            canPop: false,
+            child: CupertinoTabView(
+              navigatorKey: key,
+              builder: (BuildContext context) => const Text('first route'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('first route'), findsOneWidget);
+
+    // Simulate android back button intent.
+    final ByteData message = const JSONMethodCodec().encodeMethodCall(const MethodCall('popRoute'));
+    await tester.binding.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) {});
+    await tester.pumpAndSettle();
+
+    // Navigator didn't pop, so first route is still visible
+    expect(find.text('first route'), findsOneWidget);
   });
 }

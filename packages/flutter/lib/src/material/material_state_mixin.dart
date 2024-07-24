@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'ink_well.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
@@ -38,7 +41,7 @@ import 'material_state.dart';
 ///   Widget build(BuildContext context) {
 ///     return InkWell(
 ///       onFocusChange: updateMaterialState(MaterialState.focused),
-///       child: Container(
+///       child: ColoredBox(
 ///         color: widget.color.resolve(materialStates),
 ///         child: widget.child,
 ///       ),
@@ -88,7 +91,7 @@ mixin MaterialStateMixin<T extends StatefulWidget> on State<T> {
   /// class MyWidgetState extends State<MyWidget> with MaterialStateMixin<MyWidget> {
   ///   @override
   ///   Widget build(BuildContext context) {
-  ///     return Container(
+  ///     return ColoredBox(
   ///       color: isPressed ? Colors.black : Colors.white,
   ///       child: InkWell(
   ///         onHighlightChanged: updateMaterialState(

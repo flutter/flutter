@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show PointerDeviceKind, kSecondaryButton;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -399,6 +400,29 @@ void main() {
       expect(dismissCallbackCalled, true);
     });
 
+    testWidgets('when onDismiss throws, should have correct context', (WidgetTester tester) async {
+      final FlutterExceptionHandler? handler = FlutterError.onError;
+      FlutterErrorDetails? error;
+      FlutterError.onError = (FlutterErrorDetails details) {
+        error = details;
+      };
+
+      final UniqueKey barrierKey = UniqueKey();
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          body: ModalBarrier(
+            key: barrierKey,
+            onDismiss: () => throw Exception('deliberate'),
+          ),
+        ),
+      ));
+      await tester.tap(find.byKey(barrierKey));
+      await tester.pump();
+
+      expect(error?.context.toString(), contains('handling a gesture'));
+      FlutterError.onError = handler;
+    });
+
     testWidgets('will not pop when given an onDismiss callback', (WidgetTester tester) async {
       final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
         '/': (BuildContext context) => const FirstWidget(),
@@ -436,7 +460,7 @@ void main() {
       semantics.dispose();
     });
 
-    testWidgets('Dismissible ModalBarrier includes button in semantic tree on iOS', (WidgetTester tester) async {
+    testWidgets('Dismissible ModalBarrier includes button in semantic tree on iOS, macOS and android', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
       await tester.pumpWidget(const Directionality(
         textDirection: TextDirection.ltr,
@@ -448,6 +472,7 @@ void main() {
       final TestSemantics expectedSemantics = TestSemantics.root(
         children: <TestSemantics>[
           TestSemantics.rootChild(
+            id: 1,
             rect: TestSemantics.fullScreen,
             actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.dismiss],
             label: 'Dismiss',
@@ -458,18 +483,7 @@ void main() {
       expect(semantics, hasSemantics(expectedSemantics, ignoreId: true));
 
       semantics.dispose();
-    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS}));
-
-    testWidgets(
-        'Dismissible ModalBarrier is hidden on Android (back button is used to dismiss)', (WidgetTester tester) async {
-      final SemanticsTester semantics = SemanticsTester(tester);
-      await tester.pumpWidget(const ModalBarrier());
-
-      final TestSemantics expectedSemantics = TestSemantics.root();
-      expect(semantics, hasSemantics(expectedSemantics));
-
-      semantics.dispose();
-    });
+    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS, TargetPlatform.android}));
   });
   group('AnimatedModalBarrier', () {
     testWidgets('prevents interactions with widgets behind it', (WidgetTester tester) async {
@@ -863,7 +877,7 @@ void main() {
       semantics.dispose();
     });
 
-    testWidgets('Dismissible AnimatedModalBarrier includes button in semantic tree on iOS', (WidgetTester tester) async {
+    testWidgets('Dismissible AnimatedModalBarrier includes button in semantic tree on iOS, macOS and android', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
       await tester.pumpWidget(Directionality(
         textDirection: TextDirection.ltr,
@@ -886,24 +900,44 @@ void main() {
       expect(semantics, hasSemantics(expectedSemantics, ignoreId: true));
 
       semantics.dispose();
-    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS}));
+    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS, TargetPlatform.android}));
+  });
 
-    testWidgets(
-        'Dismissible AnimatedModalBarrier is hidden on Android (back button is used to dismiss)', (WidgetTester tester) async {
+  group('SemanticsClipper', () {
+    testWidgets('SemanticsClipper correctly clips Semantics.rect in four directions', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
-      await tester.pumpWidget(AnimatedModalBarrier(color: colorAnimation));
+      final ValueNotifier<EdgeInsets> notifier = ValueNotifier<EdgeInsets>(const EdgeInsets.fromLTRB(10, 20, 30, 40));
+      addTearDown(notifier.dispose);
+      const Rect fullScreen = TestSemantics.fullScreen;
+      await tester.pumpWidget(Directionality(
+        textDirection: TextDirection.ltr,
+        child: ModalBarrier(
+          semanticsLabel: 'Dismiss',
+          clipDetailsNotifier: notifier,
+        ),
+      ));
 
-      final TestSemantics expectedSemantics = TestSemantics.root();
-      expect(semantics, hasSemantics(expectedSemantics));
+      final TestSemantics expectedSemantics = TestSemantics.root(
+        children: <TestSemantics>[
+          TestSemantics.rootChild(
+            rect: Rect.fromLTRB(fullScreen.left + 10, fullScreen.top + 20.0, fullScreen.right - 30, fullScreen.bottom - 40),
+            actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.dismiss],
+            label: 'Dismiss',
+            textDirection: TextDirection.ltr,
+          ),
+        ],
+
+      );
+      expect(semantics, hasSemantics(expectedSemantics, ignoreId: true));
 
       semantics.dispose();
-    });
+    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS, TargetPlatform.android}));
   });
 
   testWidgets('uses default mouse cursor', (WidgetTester tester) async {
-    await tester.pumpWidget(Stack(
+    await tester.pumpWidget(const Stack(
       textDirection: TextDirection.ltr,
-      children: const <Widget>[
+      children: <Widget>[
         MouseRegion(cursor: SystemMouseCursors.click),
         ModalBarrier(dismissible: false),
       ],

@@ -14,10 +14,9 @@ import 'process.dart';
 
 /// A snapshot build configuration.
 class SnapshotType {
-  SnapshotType(this.platform, this.mode)
-    : assert(mode != null);
+  SnapshotType(this.platform, this.mode);
 
-  final TargetPlatform? platform;
+  final TargetPlatform platform;
   final BuildMode mode;
 
   @override
@@ -70,7 +69,7 @@ class GenSnapshot {
     // one for the target architecture in question.
     if (snapshotType.platform == TargetPlatform.ios ||
         snapshotType.platform == TargetPlatform.darwin) {
-      snapshotterPath += '_${getDartNameForDarwinArch(darwinArch!)}';
+      snapshotterPath += '_${darwinArch!.dartName}';
     }
 
     return _processUtils.stream(
@@ -116,16 +115,11 @@ class AOTSnapshotter {
     DarwinArch? darwinArch,
     String? sdkRoot,
     List<String> extraGenSnapshotOptions = const <String>[],
-    required bool bitcode,
     String? splitDebugInfo,
     required bool dartObfuscation,
     bool quiet = false,
   }) async {
     assert(platform != TargetPlatform.ios || darwinArch != null);
-    if (bitcode && platform != TargetPlatform.ios) {
-      _logger.printError('Bitcode is only supported for iOS.');
-      return 1;
-    }
 
     if (!_isValidAotPlatform(platform, buildMode)) {
       _logger.printError('${getNameForTargetPlatform(platform)} does not support AOT compilation.');
@@ -150,7 +144,7 @@ class AOTSnapshotter {
     // We strip snapshot by default, but allow to suppress this behavior
     // by supplying --no-strip in extraGenSnapshotOptions.
     bool shouldStrip = true;
-    if (extraGenSnapshotOptions != null && extraGenSnapshotOptions.isNotEmpty) {
+    if (extraGenSnapshotOptions.isNotEmpty) {
       _logger.printTrace('Extra gen_snapshot options: $extraGenSnapshotOptions');
       for (final String option in extraGenSnapshotOptions) {
         if (option == '--no-strip') {
@@ -162,7 +156,7 @@ class AOTSnapshotter {
     }
 
     final String assembly = _fileSystem.path.join(outputDir.path, 'snapshot_assembly.S');
-    if (platform == TargetPlatform.ios || platform == TargetPlatform.darwin) {
+    if (targetingApplePlatform) {
       genSnapshotArgs.addAll(<String>[
         '--snapshot_kind=app-aot-assembly',
         '--assembly=$assembly',
@@ -175,13 +169,13 @@ class AOTSnapshotter {
       ]);
     }
 
-    // When buiding for iOS and splitting out debug info, we want to strip
+    // When building for iOS and splitting out debug info, we want to strip
     // manually after the dSYM export, instead of in the `gen_snapshot`.
     final bool stripAfterBuild;
     if (targetingApplePlatform) {
       stripAfterBuild = shouldStrip;
       if (stripAfterBuild) {
-        _logger.printTrace('Will strip AOT snapshot manual after build and dSYM generation.');
+        _logger.printTrace('Will strip AOT snapshot manually after build and dSYM generation.');
       }
     } else {
       stripAfterBuild = false;
@@ -211,11 +205,11 @@ class AOTSnapshotter {
         .createSync(recursive: true);
     }
 
-    // Optimization arguments.
+    // Debugging information.
     genSnapshotArgs.addAll(<String>[
-      // Faster async/await
       if (shouldSplitDebugInfo) ...<String>[
         '--dwarf-stack-traces',
+        '--resolve-dwarf-paths',
         '--save-debugging-info=${_fileSystem.path.join(splitDebugInfo!, debugFilename)}',
       ],
       if (dartObfuscation)
@@ -244,7 +238,6 @@ class AOTSnapshotter {
         sdkRoot: sdkRoot,
         assemblyPath: assembly,
         outputPath: outputDir.path,
-        bitcode: bitcode,
         quiet: quiet,
         stripAfterBuild: stripAfterBuild,
         extractAppleDebugSymbols: extractAppleDebugSymbols
@@ -262,12 +255,11 @@ class AOTSnapshotter {
     String? sdkRoot,
     required String assemblyPath,
     required String outputPath,
-    required bool bitcode,
     required bool quiet,
     required bool stripAfterBuild,
     required bool extractAppleDebugSymbols
   }) async {
-    final String targetArch = getNameForDarwinArch(appleArch);
+    final String targetArch = appleArch.name;
     if (!quiet) {
       _logger.printStatus('Building App.framework for $targetArch...');
     }
@@ -279,19 +271,17 @@ class AOTSnapshotter {
         // When the minimum version is updated, remember to update
         // template MinimumOSVersion.
         // https://github.com/flutter/flutter/pull/62902
-        '-miphoneos-version-min=11.0',
+        '-miphoneos-version-min=12.0',
       if (sdkRoot != null) ...<String>[
         '-isysroot',
         sdkRoot,
       ],
     ];
 
-    const String embedBitcodeArg = '-fembed-bitcode';
     final String assemblyO = _fileSystem.path.join(outputPath, 'snapshot_assembly.o');
 
     final RunResult compileResult = await _xcode.cc(<String>[
       ...commonBuildOptions,
-      if (bitcode) embedBitcodeArg,
       '-c',
       assemblyPath,
       '-o',
@@ -310,8 +300,8 @@ class AOTSnapshotter {
       '-dynamiclib',
       '-Xlinker', '-rpath', '-Xlinker', '@executable_path/Frameworks',
       '-Xlinker', '-rpath', '-Xlinker', '@loader_path/Frameworks',
+      '-fapplication-extension',
       '-install_name', '@rpath/App.framework/App',
-      if (bitcode) embedBitcodeArg,
       '-o', appLib,
       assemblyO,
     ];
@@ -331,14 +321,14 @@ class AOTSnapshotter {
 
       if (stripAfterBuild) {
         // See https://www.unix.com/man-page/osx/1/strip/ for arguments
-        final RunResult stripResult = await _xcode.strip(<String>['-S', appLib, '-o', appLib]);
+        final RunResult stripResult = await _xcode.strip(<String>['-x', appLib, '-o', appLib]);
         if (stripResult.exitCode != 0) {
           _logger.printError('Failed to strip debugging symbols from the generated AOT snapshot - strip terminated with exit code ${stripResult.exitCode}');
           return stripResult.exitCode;
         }
       }
     } else {
-      assert(stripAfterBuild == false);
+      assert(!stripAfterBuild);
     }
 
     return 0;
@@ -357,6 +347,7 @@ class AOTSnapshotter {
       TargetPlatform.linux_x64,
       TargetPlatform.linux_arm64,
       TargetPlatform.windows_x64,
+      TargetPlatform.windows_arm64,
     ].contains(platform);
   }
 }

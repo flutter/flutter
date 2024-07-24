@@ -113,6 +113,7 @@ void main() {
 
   testWidgets('ListView controller', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
 
     Widget buildBlock() {
       return Directionality(
@@ -167,6 +168,7 @@ void main() {
       vsync: const TestVSync(),
       duration: const Duration(milliseconds: 200),
     );
+    addTearDown(controller.dispose);
 
     // The overall height of the frame is (as ever) 600
     Widget buildFrame() {
@@ -215,7 +217,7 @@ void main() {
     await tester.pumpWidget(buildFrame());
     expect(find.text('top'), findsOneWidget);
 
-    final ScrollPosition position = Scrollable.of(tester.element(find.text('middle')))!.position;
+    final ScrollPosition position = Scrollable.of(tester.element(find.text('middle'))).position;
     expect(position.viewportDimension, 600.0);
     expect(position.pixels, 0.0);
 

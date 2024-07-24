@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:args/args.dart';
 import 'package:flutter_tools/src/asset.dart' hide defaultManifestPath;
 import 'package:flutter_tools/src/base/common.dart';
@@ -16,7 +14,6 @@ import 'package:flutter_tools/src/bundle.dart';
 import 'package:flutter_tools/src/bundle_builder.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/context_runner.dart';
-import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/reporting/reporting.dart';
 
@@ -39,9 +36,9 @@ Future<void> main(List<String> args) {
   });
 }
 
-Future<void> writeFile(libfs.File outputFile, DevFSContent content) async {
+Future<void> writeAssetFile(libfs.File outputFile, AssetBundleEntry asset) async {
   outputFile.createSync(recursive: true);
-  final List<int> data = await content.contentsAsBytes();
+  final List<int> data = await asset.contentsAsBytes();
   outputFile.writeAsBytesSync(data);
 }
 
@@ -63,10 +60,10 @@ Future<void> run(List<String> args) async {
   Cache.flutterRoot = globals.platform.environment['FLUTTER_ROOT'];
 
   final String assetDir = argResults[_kOptionAsset] as String;
-  final AssetBundle assets = await buildAssets(
-    manifestPath: argResults[_kOptionManifest] as String ?? defaultManifestPath,
+  final AssetBundle? assets = await buildAssets(
+    manifestPath: argResults[_kOptionManifest] as String? ?? defaultManifestPath,
     assetDirPath: assetDir,
-    packagesPath: argResults[_kOptionPackages] as String,
+    packagesPath: argResults[_kOptionPackages] as String?,
     targetPlatform: TargetPlatform.fuchsia_arm64 // This is not arch specific.
   );
 
@@ -75,17 +72,18 @@ Future<void> run(List<String> args) async {
   }
 
   final List<Future<void>> calls = <Future<void>>[];
-  assets.entries.forEach((String fileName, DevFSContent content) {
+  assets.entries.forEach((String fileName, AssetBundleEntry entry) {
     final libfs.File outputFile = globals.fs.file(globals.fs.path.join(assetDir, fileName));
-    calls.add(writeFile(outputFile, content));
+    calls.add(writeAssetFile(outputFile, entry));
   });
   await Future.wait<void>(calls);
 
   final String outputMan = argResults[_kOptionAssetManifestOut] as String;
   await writeFuchsiaManifest(assets, argResults[_kOptionAsset] as String, outputMan, argResults[_kOptionComponentName] as String);
 
-  if (argResults.options.contains(_kOptionDepfile)) {
-    await writeDepfile(assets, outputMan, argResults[_kOptionDepfile] as String);
+  final String? depfilePath = argResults[_kOptionDepfile] as String?;
+  if (depfilePath != null) {
+    await writeDepfile(assets, outputMan, depfilePath);
   }
 }
 

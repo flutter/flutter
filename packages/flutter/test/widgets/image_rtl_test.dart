@@ -7,8 +7,7 @@ import 'dart:ui' as ui show Image;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../rendering/mock_canvas.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class TestImageProvider extends ImageProvider<TestImageProvider> {
   const TestImageProvider(this.image);
@@ -21,7 +20,7 @@ class TestImageProvider extends ImageProvider<TestImageProvider> {
   }
 
   @override
-  ImageStreamCompleter load(TestImageProvider key, DecoderCallback decode) {
+  ImageStreamCompleter loadImage(TestImageProvider key, ImageDecoderCallback decode) {
     return OneFrameImageStreamCompleter(
       SynchronousFuture<ImageInfo>(ImageInfo(image: image)),
     );
@@ -29,10 +28,19 @@ class TestImageProvider extends ImageProvider<TestImageProvider> {
 }
 
 void main() {
+  // TODO(polina-c): dispose ImageStreamCompleterHandle, https://github.com/flutter/flutter/issues/145599 [leaks-to-clean]
+  LeakTesting.settings = LeakTesting.settings.withIgnoredAll();
+
   late ui.Image testImage;
+
   setUpAll(() async {
     testImage = await createTestImage(width: 16, height: 9);
   });
+
+  tearDownAll(() {
+    testImage.dispose();
+  });
+
   testWidgets('DecorationImage RTL with alignment topEnd and match', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
@@ -52,8 +60,8 @@ void main() {
           ),
         ),
       ),
-      Duration.zero,
-      EnginePhase.layout, // so that we don't try to paint the fake images
+      duration: Duration.zero,
+      phase: EnginePhase.layout, // so that we don't try to paint the fake images
     );
     expect(find.byType(Container), paints
       ..clipRect(rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 50.0))
@@ -91,8 +99,8 @@ void main() {
           ),
         ),
       ),
-      Duration.zero,
-      EnginePhase.layout, // so that we don't try to paint the fake images
+      duration: Duration.zero,
+      phase: EnginePhase.layout, // so that we don't try to paint the fake images
     );
     expect(find.byType(Container), paints
       ..clipRect(rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 50.0))
@@ -126,8 +134,8 @@ void main() {
           ),
         ),
       ),
-      Duration.zero,
-      EnginePhase.layout, // so that we don't try to paint the fake images
+      duration: Duration.zero,
+      phase: EnginePhase.layout, // so that we don't try to paint the fake images
     );
     expect(find.byType(Container), paints
       ..clipRect(rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 50.0))
@@ -161,8 +169,8 @@ void main() {
           ),
         ),
       ),
-      Duration.zero,
-      EnginePhase.layout, // so that we don't try to paint the fake images
+      duration: Duration.zero,
+      phase: EnginePhase.layout, // so that we don't try to paint the fake images
     );
     expect(find.byType(Container), paints
       ..clipRect(rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 50.0))
@@ -196,8 +204,8 @@ void main() {
           ),
         ),
       ),
-      Duration.zero,
-      EnginePhase.layout, // so that we don't try to paint the fake images
+      duration: Duration.zero,
+      phase: EnginePhase.layout, // so that we don't try to paint the fake images
     );
     expect(find.byType(Container), paints
       ..translate(x: 50.0, y: 0.0)
@@ -227,8 +235,8 @@ void main() {
           ),
         ),
       ),
-      Duration.zero,
-      EnginePhase.layout, // so that we don't try to paint the fake images
+      duration: Duration.zero,
+      phase: EnginePhase.layout, // so that we don't try to paint the fake images
     );
     expect(find.byType(Container), paints
       ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(84.0, 20.5, 100.0, 29.5)),
@@ -255,8 +263,8 @@ void main() {
           ),
         ),
       ),
-      Duration.zero,
-      EnginePhase.layout, // so that we don't try to paint the fake images
+      duration: Duration.zero,
+      phase: EnginePhase.layout, // so that we don't try to paint the fake images
     );
     expect(find.byType(Container), paints
       ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(84.0, 20.5, 100.0, 29.5)),
@@ -283,8 +291,8 @@ void main() {
           ),
         ),
       ),
-      Duration.zero,
-      EnginePhase.layout, // so that we don't try to paint the fake images
+      duration: Duration.zero,
+      phase: EnginePhase.layout, // so that we don't try to paint the fake images
     );
     expect(find.byType(Container), paints
       ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(84.0, 20.5, 100.0, 29.5)),
@@ -310,8 +318,8 @@ void main() {
           ),
         ),
       ),
-      Duration.zero,
-      EnginePhase.layout, // so that we don't try to paint the fake images
+      duration: Duration.zero,
+      phase: EnginePhase.layout, // so that we don't try to paint the fake images
     );
     expect(find.byType(SizedBox), paints
       ..clipRect(rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 50.0))
@@ -347,8 +355,8 @@ void main() {
           ),
         ),
       ),
-      Duration.zero,
-      EnginePhase.layout, // so that we don't try to paint the fake images
+      duration: Duration.zero,
+      phase: EnginePhase.layout, // so that we don't try to paint the fake images
     );
     expect(find.byType(SizedBox), paints
       ..clipRect(rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 50.0))
@@ -380,8 +388,8 @@ void main() {
           ),
         ),
       ),
-      Duration.zero,
-      EnginePhase.layout, // so that we don't try to paint the fake images
+      duration: Duration.zero,
+      phase: EnginePhase.layout, // so that we don't try to paint the fake images
     );
     expect(find.byType(SizedBox), paints
       ..clipRect(rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 50.0))
@@ -413,8 +421,8 @@ void main() {
           ),
         ),
       ),
-      Duration.zero,
-      EnginePhase.layout, // so that we don't try to paint the fake images
+      duration: Duration.zero,
+      phase: EnginePhase.layout, // so that we don't try to paint the fake images
     );
     expect(find.byType(SizedBox), paints
       ..clipRect(rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 50.0))
@@ -473,8 +481,8 @@ void main() {
           ),
         ),
       ),
-      Duration.zero,
-      EnginePhase.layout, // so that we don't try to paint the fake images
+      duration: Duration.zero,
+      phase: EnginePhase.layout, // so that we don't try to paint the fake images
     );
     expect(find.byType(SizedBox), paints
       ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(84.0, 20.5, 100.0, 29.5)),
@@ -499,8 +507,8 @@ void main() {
           ),
         ),
       ),
-      Duration.zero,
-      EnginePhase.layout, // so that we don't try to paint the fake images
+      duration: Duration.zero,
+      phase: EnginePhase.layout, // so that we don't try to paint the fake images
     );
     expect(find.byType(SizedBox), paints
       ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(84.0, 20.5, 100.0, 29.5)),
@@ -525,8 +533,8 @@ void main() {
           ),
         ),
       ),
-      Duration.zero,
-      EnginePhase.layout, // so that we don't try to paint the fake images
+      duration: Duration.zero,
+      phase: EnginePhase.layout, // so that we don't try to paint the fake images
     );
     expect(find.byType(SizedBox), paints
       ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(84.0, 20.5, 100.0, 29.5)),
@@ -544,8 +552,8 @@ void main() {
           alignment: Alignment.centerRight,
         ),
       ),
-      Duration.zero,
-      EnginePhase.layout, // so that we don't try to paint the fake images
+      duration: Duration.zero,
+      phase: EnginePhase.layout, // so that we don't try to paint the fake images
     );
     await tester.pumpWidget(
       Directionality(
@@ -556,8 +564,8 @@ void main() {
           matchTextDirection: true,
         ),
       ),
-      Duration.zero,
-      EnginePhase.layout, // so that we don't try to paint the fake images
+      duration: Duration.zero,
+      phase: EnginePhase.layout, // so that we don't try to paint the fake images
     );
     await tester.pumpWidget(
       Directionality(
@@ -567,8 +575,8 @@ void main() {
           alignment: Alignment.centerRight,
         ),
       ),
-      Duration.zero,
-      EnginePhase.layout, // so that we don't try to paint the fake images
+      duration: Duration.zero,
+      phase: EnginePhase.layout, // so that we don't try to paint the fake images
     );
   });
 }

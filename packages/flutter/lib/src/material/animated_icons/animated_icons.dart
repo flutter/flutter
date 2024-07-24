@@ -2,15 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of material_animated_icons;
+// TODO(goderbauer): Clean up the part-of hack currently used for testing the private implementation.
+part of material_animated_icons; // ignore: use_string_in_part_of_directives
 
 // The code for drawing animated icons is kept in a private API, as we are not
 // yet ready for exposing a public API for (partial) vector graphics support.
 // See: https://github.com/flutter/flutter/issues/1831 for details regarding
 // generic vector graphics support in Flutter.
-
-// Examples can assume:
-// late AnimationController controller;
 
 /// Shows an animated icon at a given animation [progress].
 ///
@@ -18,22 +16,21 @@ part of material_animated_icons;
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=pJcbh8pbvJs}
 ///
-/// {@tool snippet}
+/// {@tool dartpad}
+/// This example shows how to create an animated icon. The icon is animated
+/// forward and reverse in a loop.
 ///
-/// ```dart
-/// AnimatedIcon(
-///   icon: AnimatedIcons.menu_arrow,
-///   progress: controller,
-///   semanticLabel: 'Show menu',
-/// )
-/// ```
+/// ** See code in examples/api/lib/material/animated_icon/animated_icon.0.dart **
 /// {@end-tool}
 ///
+/// See also:
+///
+///  * [Icons], for the list of available static Material Icons.
 class AnimatedIcon extends StatelessWidget {
   /// Creates an AnimatedIcon.
   ///
-  /// The [progress] and [icon] arguments must not be null.
-  /// The [size] and [color] default to the value given by the current [IconTheme].
+  /// The [size] and [color] default to the value given by the current
+  /// [IconTheme].
   const AnimatedIcon({
     super.key,
     required this.icon,
@@ -42,8 +39,7 @@ class AnimatedIcon extends StatelessWidget {
     this.size,
     this.semanticLabel,
     this.textDirection,
-  }) : assert(progress != null),
-       assert(icon != null);
+  });
 
   /// The animation progress for the animated icon.
   ///
@@ -81,7 +77,7 @@ class AnimatedIcon extends StatelessWidget {
 
   /// Semantic label for the icon.
   ///
-  /// Announced in accessibility modes (e.g TalkBack/VoiceOver).
+  /// Announced by assistive technologies (e.g TalkBack/VoiceOver).
   /// This label does not show in the UI.
   ///
   /// See also:
@@ -200,7 +196,7 @@ class _PathFrames {
   final List<double> opacities;
 
   void paint(ui.Canvas canvas, Color color, _UiPathFactory uiPathFactory, double progress) {
-    final double opacity = _interpolate<double?>(opacities, progress, lerpDouble)!;
+    final double opacity = _interpolate<double?>(opacities, progress, ui.lerpDouble)!;
     final ui.Paint paint = ui.Paint()
       ..style = PaintingStyle.fill
       ..color = color.withOpacity(color.opacity * opacity);
@@ -297,7 +293,7 @@ T _interpolate<T>(List<T> values, double progress, _Interpolator<T> interpolator
   if (values.length == 1) {
     return values[0];
   }
-  final double targetIdx = lerpDouble(0, values.length -1, progress)!;
+  final double targetIdx = ui.lerpDouble(0, values.length -1, progress)!;
   final int lowIdx = targetIdx.floor();
   final int highIdx = targetIdx.ceil();
   final double t = targetIdx - lowIdx;

@@ -12,14 +12,17 @@ void main() {
       duration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),
     );
+    addTearDown(controller1.dispose);
     final AnimationController controller2 = AnimationController(
       duration: const Duration(milliseconds: 600),
       vsync: const TestVSync(),
     );
+    addTearDown(controller2.dispose);
     final AnimationController controller3 = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: const TestVSync(),
     );
+    addTearDown(controller3.dispose);
     final List<String> log = <String>[];
     Future<void> runTest() async {
       log.add('a'); // t=0
@@ -61,14 +64,17 @@ void main() {
       duration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),
     );
+    addTearDown(controller1.dispose);
     final AnimationController controller2 = AnimationController(
       duration: const Duration(milliseconds: 600),
       vsync: const TestVSync(),
     );
+    addTearDown(controller2.dispose);
     final AnimationController controller3 = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: const TestVSync(),
     );
+    addTearDown(controller3.dispose);
     final List<String> log = <String>[];
     Future<void> runTest() async {
       log.add('a'); // t=0
@@ -138,6 +144,7 @@ void main() {
       duration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),
     );
+    addTearDown(controller1.dispose);
     final TickerFuture f = controller1.forward();
     await tester.pump(); // start ticker
     await tester.pump(const Duration(milliseconds: 200)); // end ticker
@@ -151,6 +158,7 @@ void main() {
       duration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),
     );
+    addTearDown(controller1.dispose);
     final TickerFuture f = controller1.forward();
     await tester.pump(); // start ticker
     controller1.stop(); // cancel ticker
@@ -168,6 +176,7 @@ void main() {
       duration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),
     );
+    addTearDown(controller1.dispose);
     final TickerFuture f = controller1.forward();
     await tester.pump(); // start ticker
     await tester.pump(const Duration(milliseconds: 200)); // end ticker

@@ -173,7 +173,18 @@ void main() {
 
       final String id = message.data['id']! as String;
       daemonStreams.inputs.add(DaemonMessage(<String, dynamic>{'id': id, 'error': 'some_error', 'trace': 'stack trace'}));
-      expect(requestFuture, throwsA('some_error'));
+
+      Object? gotError;
+      StackTrace? gotStackTrace;
+      try {
+        await requestFuture;
+      } on Object catch (error, stackTrace) {
+        gotError = error;
+        gotStackTrace = stackTrace;
+      }
+
+      expect(gotError, 'some_error');
+      expect(gotStackTrace.toString(), 'stack trace');
     });
   });
 

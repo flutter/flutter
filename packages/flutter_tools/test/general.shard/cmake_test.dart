@@ -11,23 +11,20 @@ import 'package:flutter_tools/src/cmake.dart';
 import 'package:flutter_tools/src/project.dart';
 
 import '../src/common.dart';
-import '../src/context.dart';
 
 const String _kTestFlutterRoot = '/flutter';
 const String _kTestWindowsFlutterRoot = r'C:\flutter';
 
 void main() {
   late FileSystem fileSystem;
-  late ProcessManager processManager;
   late BufferLogger logger;
 
   setUp(() {
-    processManager = FakeProcessManager.any();
     fileSystem = MemoryFileSystem.test();
     logger = BufferLogger.test();
   });
 
-  testUsingContext('parses executable name from cmake file', () async {
+  testWithoutContext('parses executable name from cmake file', () async {
     final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
     final CmakeBasedProject cmakeProject = _FakeProject.fromFlutter(project);
 
@@ -38,27 +35,26 @@ void main() {
     final String? name = getCmakeExecutableName(cmakeProject);
 
     expect(name, 'hello');
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    ProcessManager: () => processManager,
   });
 
-  testUsingContext('defaults executable name to null if cmake config does not exist', () async {
+  testWithoutContext('defaults executable name to null if cmake config does not exist', () async {
     final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
     final CmakeBasedProject cmakeProject = _FakeProject.fromFlutter(project);
 
     final String? name = getCmakeExecutableName(cmakeProject);
 
     expect(name, isNull);
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    ProcessManager: () => processManager,
   });
 
-  testUsingContext('generates config', () async {
+  testWithoutContext('generates config', () async {
     final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
     final CmakeBasedProject cmakeProject = _FakeProject.fromFlutter(project);
-    const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, treeShakeIcons: false);
+    const BuildInfo buildInfo = BuildInfo(
+      BuildMode.release,
+      null,
+      treeShakeIcons: false,
+      packageConfigPath: '.dart_tool/package_config.json',
+    );
     final Map<String, String> environment = <String, String>{};
 
     writeGeneratedCmakeConfig(
@@ -66,6 +62,7 @@ void main() {
       cmakeProject,
       buildInfo,
       environment,
+      logger,
     );
 
     final File cmakeConfig = cmakeProject.generatedCmakeConfigFile;
@@ -91,17 +88,19 @@ void main() {
       r'  "PROJECT_DIR=/"',
       r')',
     ]));
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    ProcessManager: () => processManager,
   });
 
-  testUsingContext('config escapes backslashes', () async {
+  testWithoutContext('config escapes backslashes', () async {
     fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
 
     final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
     final CmakeBasedProject cmakeProject = _FakeProject.fromFlutter(project);
-    const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, treeShakeIcons: false);
+    const BuildInfo buildInfo = BuildInfo(
+      BuildMode.release,
+      null,
+      treeShakeIcons: false,
+      packageConfigPath: '.dart_tool/package_config.json',
+    );
 
     final Map<String, String> environment = <String, String>{
       'TEST': r'hello\world',
@@ -112,6 +111,7 @@ void main() {
       cmakeProject,
       buildInfo,
       environment,
+      logger,
     );
 
     final File cmakeConfig = cmakeProject.generatedCmakeConfigFile;
@@ -138,19 +138,21 @@ void main() {
       r'  "TEST=hello\\world"',
       r')',
     ]));
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    ProcessManager: () => processManager,
   });
 
-  testUsingContext('generated config uses pubspec version', () async {
+  testWithoutContext('generated config uses pubspec version', () async {
     fileSystem.file('pubspec.yaml')
       ..createSync()
       ..writeAsStringSync('version: 1.2.3+4');
 
     final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
     final CmakeBasedProject cmakeProject = _FakeProject.fromFlutter(project);
-    const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, treeShakeIcons: false);
+    const BuildInfo buildInfo = BuildInfo(
+      BuildMode.release,
+      null,
+      treeShakeIcons: false,
+      packageConfigPath: '.dart_tool/package_config.json',
+    );
     final Map<String, String> environment = <String, String>{};
 
     writeGeneratedCmakeConfig(
@@ -158,6 +160,7 @@ void main() {
       cmakeProject,
       buildInfo,
       environment,
+      logger,
     );
 
     final File cmakeConfig = cmakeProject.generatedCmakeConfigFile;
@@ -173,12 +176,9 @@ void main() {
       'set(FLUTTER_VERSION_PATCH 3 PARENT_SCOPE)',
       'set(FLUTTER_VERSION_BUILD 4 PARENT_SCOPE)',
     ]));
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    ProcessManager: () => processManager,
   });
 
-  testUsingContext('generated config uses build name', () async {
+  testWithoutContext('generated config uses build name', () async {
     final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
     final CmakeBasedProject cmakeProject = _FakeProject.fromFlutter(project);
     const BuildInfo buildInfo = BuildInfo(
@@ -186,6 +186,7 @@ void main() {
       null,
       buildName: '1.2.3',
       treeShakeIcons: false,
+      packageConfigPath: '.dart_tool/package_config.json',
     );
     final Map<String, String> environment = <String, String>{};
 
@@ -194,6 +195,7 @@ void main() {
       cmakeProject,
       buildInfo,
       environment,
+      logger,
     );
 
     final File cmakeConfig = cmakeProject.generatedCmakeConfigFile;
@@ -209,12 +211,9 @@ void main() {
       'set(FLUTTER_VERSION_PATCH 3 PARENT_SCOPE)',
       'set(FLUTTER_VERSION_BUILD 0 PARENT_SCOPE)',
     ]));
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    ProcessManager: () => processManager,
   });
 
-  testUsingContext('generated config uses build number', () async {
+  testWithoutContext('generated config uses build number', () async {
     final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
     final CmakeBasedProject cmakeProject = _FakeProject.fromFlutter(project);
     const BuildInfo buildInfo = BuildInfo(
@@ -222,6 +221,7 @@ void main() {
       null,
       buildNumber: '4',
       treeShakeIcons: false,
+      packageConfigPath: '.dart_tool/package_config.json',
     );
     final Map<String, String> environment = <String, String>{};
 
@@ -230,6 +230,7 @@ void main() {
       cmakeProject,
       buildInfo,
       environment,
+      logger,
     );
 
     final File cmakeConfig = cmakeProject.generatedCmakeConfigFile;
@@ -245,12 +246,9 @@ void main() {
       'set(FLUTTER_VERSION_PATCH 0 PARENT_SCOPE)',
       'set(FLUTTER_VERSION_BUILD 4 PARENT_SCOPE)',
     ]));
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    ProcessManager: () => processManager,
   });
 
-  testUsingContext('generated config uses build name and build number', () async {
+  testWithoutContext('generated config uses build name and build number', () async {
     final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
     final CmakeBasedProject cmakeProject = _FakeProject.fromFlutter(project);
     const BuildInfo buildInfo = BuildInfo(
@@ -259,6 +257,7 @@ void main() {
       buildName: '1.2.3',
       buildNumber: '4',
       treeShakeIcons: false,
+      packageConfigPath: '.dart_tool/package_config.json',
     );
     final Map<String, String> environment = <String, String>{};
 
@@ -267,6 +266,7 @@ void main() {
       cmakeProject,
       buildInfo,
       environment,
+      logger,
     );
 
     final File cmakeConfig = cmakeProject.generatedCmakeConfigFile;
@@ -282,12 +282,9 @@ void main() {
       'set(FLUTTER_VERSION_PATCH 3 PARENT_SCOPE)',
       'set(FLUTTER_VERSION_BUILD 4 PARENT_SCOPE)',
     ]));
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    ProcessManager: () => processManager,
   });
 
-  testUsingContext('generated config uses build name over pubspec version', () async {
+  testWithoutContext('generated config uses build name over pubspec version', () async {
     fileSystem.file('pubspec.yaml')
       ..createSync()
       ..writeAsStringSync('version: 9.9.9+9');
@@ -299,6 +296,7 @@ void main() {
       null,
       buildName: '1.2.3',
       treeShakeIcons: false,
+      packageConfigPath: '.dart_tool/package_config.json',
     );
     final Map<String, String> environment = <String, String>{};
 
@@ -307,6 +305,7 @@ void main() {
       cmakeProject,
       buildInfo,
       environment,
+      logger,
     );
 
     final File cmakeConfig = cmakeProject.generatedCmakeConfigFile;
@@ -322,12 +321,9 @@ void main() {
       'set(FLUTTER_VERSION_PATCH 3 PARENT_SCOPE)',
       'set(FLUTTER_VERSION_BUILD 0 PARENT_SCOPE)',
     ]));
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    ProcessManager: () => processManager,
   });
 
-  testUsingContext('generated config uses build number over pubspec version', () async {
+  testWithoutContext('generated config uses build number over pubspec version', () async {
     fileSystem.file('pubspec.yaml')
       ..createSync()
       ..writeAsStringSync('version: 1.2.3+4');
@@ -339,6 +335,7 @@ void main() {
       null,
       buildNumber: '5',
       treeShakeIcons: false,
+      packageConfigPath: '.dart_tool/package_config.json',
     );
     final Map<String, String> environment = <String, String>{};
 
@@ -347,6 +344,7 @@ void main() {
       cmakeProject,
       buildInfo,
       environment,
+      logger,
     );
 
     final File cmakeConfig = cmakeProject.generatedCmakeConfigFile;
@@ -362,12 +360,9 @@ void main() {
       'set(FLUTTER_VERSION_PATCH 3 PARENT_SCOPE)',
       'set(FLUTTER_VERSION_BUILD 5 PARENT_SCOPE)',
     ]));
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    ProcessManager: () => processManager,
   });
 
-  testUsingContext('generated config uses build name and build number over pubspec version', () async {
+  testWithoutContext('generated config uses build name and build number over pubspec version', () async {
     fileSystem.file('pubspec.yaml')
       ..createSync()
       ..writeAsStringSync('version: 9.9.9+9');
@@ -380,6 +375,7 @@ void main() {
       buildName: '1.2.3',
       buildNumber: '4',
       treeShakeIcons: false,
+      packageConfigPath: '.dart_tool/package_config.json',
     );
     final Map<String, String> environment = <String, String>{};
 
@@ -388,6 +384,7 @@ void main() {
       cmakeProject,
       buildInfo,
       environment,
+      logger,
     );
 
     final File cmakeConfig = cmakeProject.generatedCmakeConfigFile;
@@ -403,12 +400,9 @@ void main() {
       'set(FLUTTER_VERSION_PATCH 3 PARENT_SCOPE)',
       'set(FLUTTER_VERSION_BUILD 4 PARENT_SCOPE)',
     ]));
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    ProcessManager: () => processManager,
   });
 
-  testUsingContext('generated config ignores invalid build name', () async {
+  testWithoutContext('generated config ignores invalid build name', () async {
     final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
     final CmakeBasedProject cmakeProject = _FakeProject.fromFlutter(project);
     const BuildInfo buildInfo = BuildInfo(
@@ -416,6 +410,7 @@ void main() {
       null,
       buildName: 'hello.world',
       treeShakeIcons: false,
+      packageConfigPath: '.dart_tool/package_config.json',
     );
     final Map<String, String> environment = <String, String>{};
 
@@ -424,6 +419,7 @@ void main() {
       cmakeProject,
       buildInfo,
       environment,
+      logger,
     );
 
     final File cmakeConfig = cmakeProject.generatedCmakeConfigFile;
@@ -441,13 +437,9 @@ void main() {
     ]));
 
     expect(logger.warningText, contains('Warning: could not parse version hello.world, defaulting to 1.0.0.'));
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    ProcessManager: () => processManager,
-    Logger: () => logger,
   });
 
-  testUsingContext('generated config ignores invalid build number', () async {
+  testWithoutContext('generated config ignores invalid build number', () async {
     final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
     final CmakeBasedProject cmakeProject = _FakeProject.fromFlutter(project);
     const BuildInfo buildInfo = BuildInfo(
@@ -456,6 +448,7 @@ void main() {
       buildName: '1.2.3',
       buildNumber: 'foo_bar',
       treeShakeIcons: false,
+      packageConfigPath: '.dart_tool/package_config.json',
     );
     final Map<String, String> environment = <String, String>{};
 
@@ -464,6 +457,7 @@ void main() {
       cmakeProject,
       buildInfo,
       environment,
+      logger,
     );
 
     final File cmakeConfig = cmakeProject.generatedCmakeConfigFile;
@@ -481,13 +475,9 @@ void main() {
     ]));
 
     expect(logger.warningText, contains('Warning: could not parse version 1.2.3+foo_bar, defaulting to 1.0.0.'));
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    ProcessManager: () => processManager,
-    Logger: () => logger,
   });
 
-  testUsingContext('generated config handles non-numeric build number', () async {
+  testWithoutContext('generated config handles non-numeric build number', () async {
     final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
     final CmakeBasedProject cmakeProject = _FakeProject.fromFlutter(project);
     const BuildInfo buildInfo = BuildInfo(
@@ -496,6 +486,7 @@ void main() {
       buildName: '1.2.3',
       buildNumber: 'hello',
       treeShakeIcons: false,
+      packageConfigPath: '.dart_tool/package_config.json',
     );
     final Map<String, String> environment = <String, String>{};
 
@@ -504,6 +495,7 @@ void main() {
       cmakeProject,
       buildInfo,
       environment,
+      logger,
     );
 
     expect(logger.warningText, isEmpty);
@@ -521,13 +513,9 @@ void main() {
       'set(FLUTTER_VERSION_PATCH 3 PARENT_SCOPE)',
       'set(FLUTTER_VERSION_BUILD 0 PARENT_SCOPE)',
     ]));
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    ProcessManager: () => processManager,
-    Logger: () => logger,
   });
 
-  testUsingContext('generated config handles complex build number', () async {
+  testWithoutContext('generated config handles complex build number', () async {
     final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
     final CmakeBasedProject cmakeProject = _FakeProject.fromFlutter(project);
     const BuildInfo buildInfo = BuildInfo(
@@ -536,6 +524,7 @@ void main() {
       buildName: '1.2.3',
       buildNumber: '4.5',
       treeShakeIcons: false,
+      packageConfigPath: '.dart_tool/package_config.json',
     );
     final Map<String, String> environment = <String, String>{};
 
@@ -544,6 +533,7 @@ void main() {
       cmakeProject,
       buildInfo,
       environment,
+      logger,
     );
 
     expect(logger.warningText, isEmpty);
@@ -561,13 +551,9 @@ void main() {
       'set(FLUTTER_VERSION_PATCH 3 PARENT_SCOPE)',
       'set(FLUTTER_VERSION_BUILD 0 PARENT_SCOPE)',
     ]));
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    ProcessManager: () => processManager,
-    Logger: () => logger,
   });
 
-  testUsingContext('generated config warns on Windows project with non-numeric build number', () async {
+  testWithoutContext('generated config warns on Windows project with non-numeric build number', () async {
     final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
     final CmakeBasedProject cmakeProject = WindowsProject.fromFlutter(project);
     const BuildInfo buildInfo = BuildInfo(
@@ -576,6 +562,7 @@ void main() {
       buildName: '1.2.3',
       buildNumber: 'hello',
       treeShakeIcons: false,
+      packageConfigPath: '.dart_tool/package_config.json',
     );
     final Map<String, String> environment = <String, String>{};
 
@@ -584,6 +571,7 @@ void main() {
       cmakeProject,
       buildInfo,
       environment,
+      logger,
     );
 
     expect(logger.warningText, contains(
@@ -605,13 +593,9 @@ void main() {
       'set(FLUTTER_VERSION_PATCH 3 PARENT_SCOPE)',
       'set(FLUTTER_VERSION_BUILD 0 PARENT_SCOPE)',
     ]));
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    ProcessManager: () => processManager,
-    Logger: () => logger,
   });
 
-  testUsingContext('generated config warns on Windows project with complex build number', () async {
+  testWithoutContext('generated config warns on Windows project with complex build number', () async {
     final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
     final CmakeBasedProject cmakeProject = WindowsProject.fromFlutter(project);
     const BuildInfo buildInfo = BuildInfo(
@@ -620,6 +604,7 @@ void main() {
       buildName: '1.2.3',
       buildNumber: '4.5',
       treeShakeIcons: false,
+      packageConfigPath: '.dart_tool/package_config.json',
     );
     final Map<String, String> environment = <String, String>{};
 
@@ -628,6 +613,7 @@ void main() {
       cmakeProject,
       buildInfo,
       environment,
+      logger,
     );
 
     expect(logger.warningText, contains(
@@ -649,10 +635,6 @@ void main() {
       'set(FLUTTER_VERSION_PATCH 3 PARENT_SCOPE)',
       'set(FLUTTER_VERSION_BUILD 0 PARENT_SCOPE)',
     ]));
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    ProcessManager: () => processManager,
-    Logger: () => logger,
   });
 }
 

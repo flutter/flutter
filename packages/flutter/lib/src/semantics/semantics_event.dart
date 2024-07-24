@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/services.dart';
+/// @docImport 'package:flutter/widgets.dart';
+library;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
@@ -87,18 +90,12 @@ class AnnounceSemanticsEvent extends SemanticsEvent {
 
   /// Constructs an event that triggers an announcement by the platform.
   const AnnounceSemanticsEvent(this.message, this.textDirection, {this.assertiveness = Assertiveness.polite})
-    : assert(message != null),
-      assert(textDirection != null),
-      super('announce');
+    : super('announce');
 
   /// The message to announce.
-  ///
-  /// This property must not be null.
   final String message;
 
   /// Text direction for [message].
-  ///
-  /// This property must not be null.
   final TextDirection textDirection;
 
   /// Determines whether the announcement should interrupt any existing announcement,
@@ -157,6 +154,73 @@ class LongPressSemanticsEvent extends SemanticsEvent {
 class TapSemanticEvent extends SemanticsEvent {
   /// Constructs an event that triggers a long-press semantic feedback by the platform.
   const TapSemanticEvent() : super('tap');
+
+  @override
+  Map<String, dynamic> getDataMap() => const <String, dynamic>{};
+}
+
+/// An event to move the accessibility focus.
+///
+/// Using this API is generally not recommended, as it may break a users' expectation of
+/// how a11y focus works and therefore should be used very carefully.
+///
+/// One possible use case:
+/// For example, the currently focused rendering object is replaced by another rendering
+/// object. In general, such design should be avoided if possible. If not, one may want
+/// to refocus the newly added rendering object.
+///
+/// One example that is not recommended:
+/// When a new popup or dropdown opens, moving the focus in these cases may confuse users
+/// and make it less accessible.
+///
+/// {@tool snippet}
+///
+/// The following code snippet shows how one can request focus on a
+/// certain widget.
+///
+/// ```dart
+/// class MyWidget extends StatefulWidget {
+///   const MyWidget({super.key});
+///
+///   @override
+///   State<MyWidget> createState() => _MyWidgetState();
+/// }
+///
+/// class _MyWidgetState extends State<MyWidget> {
+///   final GlobalKey mykey = GlobalKey();
+///
+///   @override
+///   void initState() {
+///     super.initState();
+///     // Using addPostFrameCallback because changing focus need to wait for the widget to finish rendering.
+///     WidgetsBinding.instance.addPostFrameCallback((_) {
+///       mykey.currentContext?.findRenderObject()?.sendSemanticsEvent(const FocusSemanticEvent());
+///     });
+///   }
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return Scaffold(
+///       appBar: AppBar(
+///         title: const Text('example'),
+///       ),
+///       body: Column(
+///         children: <Widget>[
+///           const Text('Hello World'),
+///           const SizedBox(height: 50),
+///           Text('set focus here', key: mykey),
+///         ],
+///       ),
+///     );
+///   }
+/// }
+/// ```
+/// {@end-tool}
+///
+/// This currently only supports Android and iOS.
+class FocusSemanticEvent extends SemanticsEvent {
+  /// Constructs an event that triggers a focus change by the platform.
+  const FocusSemanticEvent() : super('focus');
 
   @override
   Map<String, dynamic> getDataMap() => const <String, dynamic>{};

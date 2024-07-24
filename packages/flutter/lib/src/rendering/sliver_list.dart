@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'sliver_fixed_extent_list.dart';
+/// @docImport 'sliver_grid.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 
 import 'box.dart';
@@ -36,8 +40,6 @@ import 'sliver_multi_box_adaptor.dart';
 class RenderSliverList extends RenderSliverMultiBoxAdaptor {
   /// Creates a sliver that places multiple box children in a linear array along
   /// the main axis.
-  ///
-  /// The [childManager] argument must not be null.
   RenderSliverList({
     required super.childManager,
   });

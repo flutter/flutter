@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:developer';
+import 'package:flutter/foundation.dart';
 
 import '../common.dart';
 
@@ -16,8 +16,8 @@ void main() {
   final Stopwatch watch = Stopwatch();
   watch.start();
   for (int i = 0; i < _kNumIterations; i += 1) {
-    Timeline.startSync('foo');
-    Timeline.finishSync();
+    FlutterTimeline.startSync('foo');
+    FlutterTimeline.finishSync();
   }
   watch.stop();
 
@@ -31,14 +31,14 @@ void main() {
   watch.reset();
   watch.start();
   for (int i = 0; i < _kNumIterations; i += 1) {
-    Timeline.startSync('foo', arguments: <String, dynamic>{
+    FlutterTimeline.startSync('foo', arguments: <String, dynamic>{
       'int': 1234,
       'double': 0.3,
       'list': <int>[1, 2, 3, 4],
       'map': <String, dynamic>{'map': true},
       'bool': false,
     });
-    Timeline.finishSync();
+    FlutterTimeline.finishSync();
   }
   watch.stop();
 

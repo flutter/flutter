@@ -37,15 +37,11 @@ class DeferredComponentsGenSnapshotValidatorTarget extends Target {
 
   /// The abis to validate.
   List<String> get _abis {
-    final List<String> abis = <String>[];
-    for (final AndroidAotDeferredComponentsBundle target in deferredComponentsDependencies) {
-      if (deferredComponentsTargets.contains(target.name)) {
-        abis.add(
-          getNameForAndroidArch(getAndroidArchForName(getNameForTargetPlatform(target.dependency.targetPlatform)))
-        );
-      }
-    }
-    return abis;
+    return <String>[
+      for (final AndroidAotDeferredComponentsBundle target in deferredComponentsDependencies)
+        if (deferredComponentsTargets.contains(target.name))
+          getAndroidArchForName(getNameForTargetPlatform(target.dependency.targetPlatform)).archName,
+    ];
   }
 
   @override
@@ -74,10 +70,6 @@ class DeferredComponentsGenSnapshotValidatorTarget extends Target {
 
   @override
   Future<void> build(Environment environment) async {
-    final DepfileService depfileService = DepfileService(
-      fileSystem: environment.fileSystem,
-      logger: environment.logger,
-    );
     validator = DeferredComponentsGenSnapshotValidator(
       environment,
       title: title,
@@ -100,7 +92,7 @@ class DeferredComponentsGenSnapshotValidatorTarget extends Target {
 
     validator!.handleResults();
 
-    depfileService.writeToFile(
+    environment.depFileService.writeToFile(
       Depfile(validator!.inputs, validator!.outputs),
       environment.buildDir.childFile('flutter_$name.d'),
     );

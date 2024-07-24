@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -28,7 +26,7 @@ final Platform platform = FakePlatform(
 );
 
 void main() {
-  FileSystem fileSystem;
+  late FileSystem fileSystem;
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
@@ -51,6 +49,7 @@ void main() {
       platform: platform,
       flutterRoot: '/flutter',
       webBuildDirectory: 'build/web',
+      needsCoopCoep: false,
     );
     fileSystem.file('build/web/assets/foo.png')
       ..createSync(recursive: true)
@@ -70,6 +69,7 @@ void main() {
       platform: platform,
       flutterRoot: '/flutter',
       webBuildDirectory: 'build/web',
+      needsCoopCoep: false,
     );
     fileSystem.file('build/web/assets/foo.js')
       ..createSync(recursive: true)
@@ -78,7 +78,7 @@ void main() {
       .handle(Request('GET', Uri.parse('http://localhost:8080/assets/foo.js')));
 
     expect(response.headers, <String, String>{
-      'Content-Type': 'application/javascript',
+      'Content-Type': 'text/javascript',
       'content-length': '18',
     });
   });
@@ -89,6 +89,7 @@ void main() {
       platform: platform,
       flutterRoot: '/flutter',
       webBuildDirectory: 'build/web',
+      needsCoopCoep: false,
     );
     fileSystem.file('build/web/assets/foo.html')
       ..createSync(recursive: true)
@@ -108,6 +109,7 @@ void main() {
       platform: platform,
       flutterRoot: '/flutter',
       webBuildDirectory: 'build/web',
+      needsCoopCoep: false,
     );
     fileSystem.file('flutter/bar.dart')
       ..createSync(recursive: true)
@@ -124,6 +126,7 @@ void main() {
       platform: platform,
       flutterRoot: '/flutter',
       webBuildDirectory: 'build/web',
+      needsCoopCoep: false,
     );
     fileSystem.file('bar.dart')
       ..createSync(recursive: true)
@@ -132,5 +135,45 @@ void main() {
       .handle(Request('GET', Uri.parse('http://localhost:8080/bar.dart')));
 
     expect(response.statusCode, HttpStatus.ok);
+  });
+
+  testWithoutContext('release asset server serves html content with COOP/COEP headers when specified', () async {
+    final ReleaseAssetServer assetServer = ReleaseAssetServer(Uri.base,
+      fileSystem: fileSystem,
+      platform: platform,
+      flutterRoot: '/flutter',
+      webBuildDirectory: 'build/web',
+      needsCoopCoep: true,
+    );
+    fileSystem.file('build/web/index.html')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('<html></html>');
+    final Response response = await assetServer
+      .handle(Request('GET', Uri.parse('http://localhost:8080/index.html')));
+
+    expect(response.statusCode, HttpStatus.ok);
+    final Map<String, String> headers = response.headers;
+    expect(headers['Cross-Origin-Opener-Policy'], 'same-origin');
+    expect(headers['Cross-Origin-Embedder-Policy'], 'require-corp');
+  });
+
+  testWithoutContext('release asset server serves html content without COOP/COEP headers when specified', () async {
+    final ReleaseAssetServer assetServer = ReleaseAssetServer(Uri.base,
+      fileSystem: fileSystem,
+      platform: platform,
+      flutterRoot: '/flutter',
+      webBuildDirectory: 'build/web',
+      needsCoopCoep: false,
+    );
+    fileSystem.file('build/web/index.html')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('<html></html>');
+    final Response response = await assetServer
+      .handle(Request('GET', Uri.parse('http://localhost:8080/index.html')));
+
+    expect(response.statusCode, HttpStatus.ok);
+    final Map<String, String> headers = response.headers;
+    expect(headers.containsKey('Cross-Origin-Opener-Policy'), false);
+    expect(headers.containsKey('Cross-Origin-Embedder-Policy'), false);
   });
 }

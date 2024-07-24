@@ -115,8 +115,6 @@ class AnimatedCrossFade extends StatefulWidget {
   /// The [duration] of the animation is the same for all components (fade in,
   /// fade out, and size), and you can pass [Interval]s instead of [Curve]s in
   /// order to have finer control, e.g., creating an overlap between the fades.
-  ///
-  /// All the arguments other than [key] must be non-null.
   const AnimatedCrossFade({
     super.key,
     required this.firstChild,
@@ -130,16 +128,7 @@ class AnimatedCrossFade extends StatefulWidget {
     this.reverseDuration,
     this.layoutBuilder = defaultLayoutBuilder,
     this.excludeBottomFocus = true,
-  }) : assert(firstChild != null),
-       assert(secondChild != null),
-       assert(firstCurve != null),
-       assert(secondCurve != null),
-       assert(sizeCurve != null),
-       assert(alignment != null),
-       assert(crossFadeState != null),
-       assert(duration != null),
-       assert(layoutBuilder != null),
-       assert(excludeBottomFocus != null);
+  });
 
   /// The child that is visible when [crossFadeState] is
   /// [CrossFadeState.showFirst]. It fades out when transitioning
@@ -315,30 +304,23 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProvid
       switch (widget.crossFadeState) {
         case CrossFadeState.showFirst:
           _controller.reverse();
-          break;
         case CrossFadeState.showSecond:
           _controller.forward();
-          break;
       }
     }
   }
-
-  /// Whether we're in the middle of cross-fading this frame.
-  bool get _isTransitioning => _controller.status == AnimationStatus.forward || _controller.status == AnimationStatus.reverse;
 
   @override
   Widget build(BuildContext context) {
     const Key kFirstChildKey = ValueKey<CrossFadeState>(CrossFadeState.showFirst);
     const Key kSecondChildKey = ValueKey<CrossFadeState>(CrossFadeState.showSecond);
-    final bool transitioningForwards = _controller.status == AnimationStatus.completed ||
-                                       _controller.status == AnimationStatus.forward;
     final Key topKey;
     Widget topChild;
     final Animation<double> topAnimation;
     final Key bottomKey;
     Widget bottomChild;
     final Animation<double> bottomAnimation;
-    if (transitioningForwards) {
+    if (_controller.isForwardOrCompleted) {
       topKey = kSecondChildKey;
       topChild = widget.secondChild;
       topAnimation = _secondAnimation;
@@ -356,7 +338,7 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProvid
 
     bottomChild = TickerMode(
       key: bottomKey,
-      enabled: _isTransitioning,
+      enabled: _controller.isAnimating,
       child: IgnorePointer(
         child: ExcludeSemantics( // Always exclude the semantics of the widget that's fading out.
           child: ExcludeFocus(

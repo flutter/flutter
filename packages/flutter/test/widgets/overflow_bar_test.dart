@@ -7,13 +7,12 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('OverflowBar documented defaults', (WidgetTester tester) async {
-    final OverflowBar bar = OverflowBar();
+    const OverflowBar bar = OverflowBar();
     expect(bar.spacing, 0);
     expect(bar.alignment, null);
     expect(bar.overflowSpacing, 0);
     expect(bar.overflowDirection, VerticalDirection.down);
     expect(bar.textDirection, null);
-    expect(bar.clipBehavior, Clip.none);
     expect(bar.children, const <Widget>[]);
   });
 
@@ -26,7 +25,7 @@ void main() {
         child: Center(
           child: ConstrainedBox(
             constraints: BoxConstraints.tight(size),
-            child: OverflowBar(),
+            child: const OverflowBar(),
           ),
         ),
       ),
@@ -35,7 +34,7 @@ void main() {
     expect(tester.getSize(find.byType(OverflowBar)), size);
 
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
           child: OverflowBar(),
@@ -182,11 +181,11 @@ void main() {
           child: Container(
             width: width,
             alignment: Alignment.topLeft,
-            child: IntrinsicWidth(
+            child: const IntrinsicWidth(
               child: OverflowBar(
                 spacing: 4,
                 overflowSpacing: 8,
-                children: const <Widget>[
+                children: <Widget>[
                   SizedBox(width: 48, height: 50),
                   SizedBox(width: 64, height: 25),
                   SizedBox(width: 32, height: 75),
@@ -213,11 +212,11 @@ void main() {
           child: Container(
             width: maxWidth,
             alignment: Alignment.topLeft,
-            child: IntrinsicHeight(
+            child: const IntrinsicHeight(
               child: OverflowBar(
                 spacing: 4,
                 overflowSpacing: 8,
-                children: const <Widget>[
+                children: <Widget>[
                   SizedBox(width: 48, height: 50),
                   SizedBox(width: 64, height: 25),
                   SizedBox(width: 32, height: 75),

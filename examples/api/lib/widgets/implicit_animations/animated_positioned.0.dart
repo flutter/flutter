@@ -2,39 +2,51 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for AnimatedPositioned
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [AnimatedPositioned].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const AnimatedPositionedExampleApp());
 
-  static const String _title = 'Flutter Code Sample';
+class AnimatedPositionedExampleApp extends StatelessWidget {
+  const AnimatedPositionedExampleApp({super.key});
+
+  static const Duration duration = Duration(seconds: 2);
+  static const Curve curve = Curves.fastOutSlowIn;
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
+        appBar: AppBar(title: const Text('AnimatedPositioned Sample')),
         body: const Center(
-          child: MyStatefulWidget(),
+          child: AnimatedPositionedExample(
+            duration: duration,
+            curve: curve,
+          ),
         ),
       ),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class AnimatedPositionedExample extends StatefulWidget {
+  const AnimatedPositionedExample({
+    required this.duration,
+    required this.curve,
+    super.key,
+  });
+
+  final Duration duration;
+
+  final Curve curve;
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<AnimatedPositionedExample> createState() =>
+      _AnimatedPositionedExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _AnimatedPositionedExampleState extends State<AnimatedPositionedExample> {
   bool selected = false;
 
   @override
@@ -48,17 +60,17 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
             width: selected ? 200.0 : 50.0,
             height: selected ? 50.0 : 200.0,
             top: selected ? 50.0 : 150.0,
-            duration: const Duration(seconds: 2),
-            curve: Curves.fastOutSlowIn,
+            duration: widget.duration,
+            curve: widget.curve,
             child: GestureDetector(
               onTap: () {
                 setState(() {
                   selected = !selected;
                 });
               },
-              child: Container(
+              child: const ColoredBox(
                 color: Colors.blue,
-                child: const Center(child: Text('Tap me')),
+                child: Center(child: Text('Tap me')),
               ),
             ),
           ),

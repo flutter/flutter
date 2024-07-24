@@ -29,6 +29,7 @@ void main() {
       ..onSerialTapUp = (SerialTapUpDetails details) {
         events.add('up#${details.count}');
       };
+    addTearDown(serial.dispose);
   });
 
   // Down/up pair 1: normal tap sequence
@@ -145,6 +146,7 @@ void main() {
       ..onTapCancel = () {
         canceledSingleTap = true;
       };
+    addTearDown(singleTap.dispose);
 
     singleTap.addPointer(down1);
     serial.addPointer(down1);
@@ -168,6 +170,7 @@ void main() {
       ..onTapCancel = () {
         canceledSingleTap = true;
       };
+    addTearDown(singleTap.dispose);
 
     serial.addPointer(down1);
     singleTap.addPointer(down1);
@@ -187,6 +190,7 @@ void main() {
       ..onRelease = () {
         recognizedRelease = true;
       };
+      addTearDown(release.dispose);
 
     release.addPointer(down1);
     serial.addPointer(down1);
@@ -204,6 +208,7 @@ void main() {
       ..onRelease = () {
         recognizedRelease = true;
       };
+      addTearDown(release.dispose);
 
     serial.addPointer(down1);
     release.addPointer(down1);
@@ -217,6 +222,7 @@ void main() {
 
   testGesture('Fires cancel if competing recognizer declares victory', (GestureTester tester) {
     final WinningGestureRecognizer winner = WinningGestureRecognizer();
+    addTearDown(winner.dispose);
     winner.addPointer(down1);
     serial.addPointer(down1);
     tester.closeArena(1);
@@ -232,6 +238,7 @@ void main() {
       ..onDoubleTap = () {
         recognizedDoubleTap = true;
       };
+    addTearDown(doubleTap.dispose);
 
     doubleTap.addPointer(down1);
     serial.addPointer(down1);
@@ -269,6 +276,7 @@ void main() {
       ..onDoubleTap = () {
         recognizedDoubleTap = true;
       };
+    addTearDown(doubleTap.dispose);
 
     serial.addPointer(down1);
     doubleTap.addPointer(down1);
@@ -410,6 +418,8 @@ void main() {
 
   testGesture('Is no-op if no callbacks are specified', (GestureTester tester) {
     serial = SerialTapGestureRecognizer();
+    addTearDown(serial.dispose);
+
     serial.addPointer(down1);
     tester.closeArena(1);
     tester.route(down1);

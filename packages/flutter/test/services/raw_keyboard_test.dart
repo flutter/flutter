@@ -18,7 +18,7 @@ class _ModifierCheck {
 void main() {
   group('RawKeyboard', () {
     testWidgets('The correct character is produced', (WidgetTester tester) async {
-      for (final String platform in <String>['linux', 'android', 'macos', 'fuchsia', 'windows']) {
+      for (final String platform in <String>['linux', 'android', 'macos', 'fuchsia', 'windows', 'ios']) {
         String character = '';
         void handleKey(RawKeyEvent event) {
           expect(event.character, equals(character), reason: 'on $platform');
@@ -30,10 +30,10 @@ void main() {
         await simulateKeyDownEvent(LogicalKeyboardKey.backquote, platform: platform);
         RawKeyboard.instance.removeListener(handleKey);
       }
-    });
+    }, variant: KeySimulatorTransitModeVariant.rawKeyData());
 
     testWidgets('No character is produced for non-printables', (WidgetTester tester) async {
-      for (final String platform in <String>['linux', 'android', 'macos', 'fuchsia', 'windows', 'web']) {
+      for (final String platform in <String>['linux', 'android', 'macos', 'fuchsia', 'windows', 'web', 'ios']) {
         void handleKey(RawKeyEvent event) {
           expect(event.character, isNull, reason: 'on $platform');
         }
@@ -41,7 +41,7 @@ void main() {
         await simulateKeyDownEvent(LogicalKeyboardKey.shiftLeft, platform: platform);
         RawKeyboard.instance.removeListener(handleKey);
       }
-    });
+    }, variant: KeySimulatorTransitModeVariant.rawKeyData());
 
     testWidgets('keysPressed is maintained', (WidgetTester tester) async {
       for (final String platform in <String>['linux', 'android', 'macos', 'fuchsia', 'windows', 'ios']) {
@@ -147,7 +147,10 @@ void main() {
           expect(RawKeyboard.instance.keysPressed, isEmpty, reason: 'on $platform');
         }
       }
-    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
+    },
+      variant: KeySimulatorTransitModeVariant.rawKeyData(),
+      skip: isBrowser, // https://github.com/flutter/flutter/issues/61021
+    );
 
     testWidgets('keysPressed is correct when modifier is released before key', (WidgetTester tester) async {
       for (final String platform in <String>['linux', 'android', 'macos', 'fuchsia', 'windows', 'ios']) {
@@ -198,7 +201,10 @@ void main() {
         await simulateKeyUpEvent(LogicalKeyboardKey.keyA, platform: platform, physicalKey: PhysicalKeyboardKey.keyA);
         expect(RawKeyboard.instance.keysPressed, isEmpty, reason: 'on $platform');
       }
-    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/76741
+    },
+      variant: KeySimulatorTransitModeVariant.rawKeyData(),
+      skip: isBrowser, // https://github.com/flutter/flutter/issues/76741
+    );
 
     testWidgets('keysPressed modifiers are synchronized with key events on macOS', (WidgetTester tester) async {
       expect(RawKeyboard.instance.keysPressed, isEmpty);
@@ -211,7 +217,7 @@ void main() {
       // when this event is received, but it's not in keysPressed yet.
       data['modifiers'] = (data['modifiers'] as int) | RawKeyEventDataMacOs.modifierLeftShift | RawKeyEventDataMacOs.modifierShift;
       // dispatch the modified data.
-      await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+      await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(data),
         (ByteData? data) {},
@@ -222,7 +228,10 @@ void main() {
           <LogicalKeyboardKey>{LogicalKeyboardKey.shiftLeft, LogicalKeyboardKey.keyA},
         ),
       );
-    }, skip: isBrowser); // [intended] This is a macOS-specific test.
+    },
+      variant: KeySimulatorTransitModeVariant.rawKeyData(),
+      skip: isBrowser, // [intended] This is a macOS-specific test.
+    );
 
     testWidgets('keysPressed modifiers are synchronized with key events on iOS', (WidgetTester tester) async {
       expect(RawKeyboard.instance.keysPressed, isEmpty);
@@ -235,7 +244,7 @@ void main() {
       // when this event is received, but it's not in keysPressed yet.
       data['modifiers'] = (data['modifiers'] as int) | RawKeyEventDataMacOs.modifierLeftShift | RawKeyEventDataMacOs.modifierShift;
       // dispatch the modified data.
-      await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+      await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(data),
         (ByteData? data) {},
@@ -246,7 +255,10 @@ void main() {
           <LogicalKeyboardKey>{LogicalKeyboardKey.shiftLeft, LogicalKeyboardKey.keyA},
         ),
       );
-    }, skip: isBrowser); // [intended] This is an iOS-specific test.
+    },
+      variant: KeySimulatorTransitModeVariant.rawKeyData(),
+      skip: isBrowser, // [intended] This is a iOS-specific test.
+    );
 
     testWidgets('keysPressed modifiers are synchronized with key events on Windows', (WidgetTester tester) async {
       expect(RawKeyboard.instance.keysPressed, isEmpty);
@@ -259,7 +271,7 @@ void main() {
       // when this event is received, but it's not in keysPressed yet.
       data['modifiers'] = (data['modifiers'] as int) | RawKeyEventDataWindows.modifierLeftShift | RawKeyEventDataWindows.modifierShift;
       // dispatch the modified data.
-      await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+      await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(data),
         (ByteData? data) {},
@@ -270,7 +282,10 @@ void main() {
           <LogicalKeyboardKey>{LogicalKeyboardKey.shiftLeft, LogicalKeyboardKey.keyA},
         ),
       );
-    }, skip: isBrowser); // [intended] This is a Windows-specific test.
+    },
+      variant: KeySimulatorTransitModeVariant.rawKeyData(),
+      skip: isBrowser, // [intended] This is a Windows-specific test.
+    );
 
     testWidgets('keysPressed modifiers are synchronized with key events on android', (WidgetTester tester) async {
       expect(RawKeyboard.instance.keysPressed, isEmpty);
@@ -283,7 +298,7 @@ void main() {
       // when this event is received, but it's not in keysPressed yet.
       data['metaState'] = (data['metaState'] as int) | RawKeyEventDataAndroid.modifierLeftShift | RawKeyEventDataAndroid.modifierShift;
       // dispatch the modified data.
-      await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+      await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(data),
         (ByteData? data) {},
@@ -294,7 +309,10 @@ void main() {
           <LogicalKeyboardKey>{LogicalKeyboardKey.shiftLeft, LogicalKeyboardKey.keyA},
         ),
       );
-    }, skip: isBrowser); // [intended] This is an Android-specific test.
+    },
+      variant: KeySimulatorTransitModeVariant.rawKeyData(),
+      skip: isBrowser, // [intended] This is an Android-specific test.
+    );
 
     testWidgets('keysPressed modifiers are synchronized with key events on fuchsia', (WidgetTester tester) async {
       expect(RawKeyboard.instance.keysPressed, isEmpty);
@@ -307,7 +325,7 @@ void main() {
       // when this event is received, but it's not in keysPressed yet.
       data['modifiers'] = (data['modifiers'] as int) | RawKeyEventDataFuchsia.modifierLeftShift;
       // dispatch the modified data.
-      await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+      await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(data),
         (ByteData? data) {},
@@ -318,7 +336,10 @@ void main() {
           <LogicalKeyboardKey>{LogicalKeyboardKey.shiftLeft, LogicalKeyboardKey.keyA},
         ),
       );
-    }, skip: isBrowser); // [intended] This is a Fuchsia-specific test.
+    },
+      variant: KeySimulatorTransitModeVariant.rawKeyData(),
+      skip: isBrowser, // [intended] This is a Fuchsia-specific test.
+    );
 
     testWidgets('keysPressed modifiers are synchronized with key events on Linux GLFW', (WidgetTester tester) async {
       expect(RawKeyboard.instance.keysPressed, isEmpty);
@@ -331,7 +352,7 @@ void main() {
       // when this event is received, but it's not in keysPressed yet.
       data['modifiers'] = (data['modifiers'] as int) | GLFWKeyHelper.modifierShift;
       // dispatch the modified data.
-      await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+      await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(data),
         (ByteData? data) {},
@@ -348,8 +369,38 @@ void main() {
           },
         ),
       );
-    }, skip: isBrowser); // [intended] This is a GLFW-specific test.
+    },
+      variant: KeySimulatorTransitModeVariant.rawKeyData(),
+      skip: isBrowser, // [intended] This is a GLFW-specific test.
+    );
 
+    Future<void> simulateGTKKeyEvent(bool keyDown, int scancode, int keycode, int modifiers) async {
+      final Map<String, dynamic> data = <String, dynamic>{
+          'type': keyDown ? 'keydown' : 'keyup',
+          'keymap': 'linux',
+          'toolkit': 'gtk',
+          'scanCode': scancode,
+          'keyCode': keycode,
+          'modifiers': modifiers,
+        };
+      // Dispatch an empty key data to disable HardwareKeyboard sanity check,
+      // since we're only testing if the raw keyboard can handle the message.
+      // In a real application, the embedder responder will send the correct key data
+      // (which is tested in the engine).
+      TestDefaultBinaryMessengerBinding.instance.keyEventManager.handleKeyData(const ui.KeyData(
+        type: ui.KeyEventType.down,
+        timeStamp: Duration.zero,
+        logical: 0,
+        physical: 0,
+        character: null,
+        synthesized: false,
+      ));
+      await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+        SystemChannels.keyEvent.name,
+        SystemChannels.keyEvent.codec.encodeMessage(data),
+        (ByteData? data) {},
+      );
+    }
 
     // Regression test for https://github.com/flutter/flutter/issues/93278 .
     //
@@ -357,38 +408,11 @@ void main() {
     // result in a AltRight down event without Alt bitmask.
     testWidgets('keysPressed modifiers are synchronized with key events on Linux GTK (down events)', (WidgetTester tester) async {
       expect(RawKeyboard.instance.keysPressed, isEmpty);
-      Future<void> simulate(bool keyDown, int scancode, int keycode, int modifiers) async {
-        final Map<String, dynamic> data = <String, dynamic>{
-            'type': keyDown ? 'keydown' : 'keyup',
-            'keymap': 'linux',
-            'toolkit': 'gtk',
-            'scanCode': scancode,
-            'keyCode': keycode,
-            'modifiers': modifiers,
-          };
-        // Dispatch an empty key data to disable HardwareKeyboard sanity check,
-        // since we're only testing if the raw keyboard can handle the message.
-        // In real application the embedder responder will send correct key data
-        // (which is tested in the engine.)
-        TestDefaultBinaryMessengerBinding.instance!.keyEventManager.handleKeyData(const ui.KeyData(
-          type: ui.KeyEventType.down,
-          timeStamp: Duration.zero,
-          logical: 0,
-          physical: 0,
-          character: null,
-          synthesized: false,
-        ));
-        await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
-          SystemChannels.keyEvent.name,
-          SystemChannels.keyEvent.codec.encodeMessage(data),
-          (ByteData? data) {},
-        );
-      }
 
-      await simulate(true,  0x6c/*AltRight*/,  0xffea/*AltRight*/,  0x2000000);
-      await simulate(true,  0x32/*ShiftLeft*/, 0xfe08/*NextGroup*/, 0x2000008/*MOD3*/);
-      await simulate(false, 0x6c/*AltRight*/,  0xfe03/*AltRight*/,  0x2002008/*MOD3|Reserve14*/);
-      await simulate(true,  0x6c/*AltRight*/,  0xfe03/*AltRight*/,  0x2002000/*Reserve14*/);
+      await simulateGTKKeyEvent(true,  0x6c/*AltRight*/,  0xffea/*AltRight*/,  0x2000000);
+      await simulateGTKKeyEvent(true,  0x32/*ShiftLeft*/, 0xfe08/*NextGroup*/, 0x2000008/*MOD3*/);
+      await simulateGTKKeyEvent(false, 0x6c/*AltRight*/,  0xfe03/*AltRight*/,  0x2002008/*MOD3|Reserve14*/);
+      await simulateGTKKeyEvent(true,  0x6c/*AltRight*/,  0xfe03/*AltRight*/,  0x2002000/*Reserve14*/);
       expect(
         RawKeyboard.instance.keysPressed,
         equals(
@@ -397,7 +421,66 @@ void main() {
           },
         ),
       );
-    }, skip: isBrowser); // [intended] This is a GTK-specific test.
+    },
+      variant: KeySimulatorTransitModeVariant.rawKeyData(),
+      skip: isBrowser, // [intended] This is a GTK-specific test.
+    );
+
+    // Regression test for https://github.com/flutter/flutter/issues/114591 .
+    //
+    // On Linux, CapsLock can be remapped to a non-modifier key.
+    testWidgets('CapsLock should not be release when remapped on Linux', (WidgetTester tester) async {
+      expect(RawKeyboard.instance.keysPressed, isEmpty);
+
+      await simulateGTKKeyEvent(true,  0x42/*CapsLock*/,  0xff08/*Backspace*/,  0x2000000);
+      expect(
+        RawKeyboard.instance.keysPressed,
+        equals(
+          <LogicalKeyboardKey>{
+            LogicalKeyboardKey.backspace,
+          },
+        ),
+      );
+    },
+      variant: KeySimulatorTransitModeVariant.rawKeyData(),
+      skip: isBrowser, // [intended] This is a GTK-specific test.
+    );
+
+    // Regression test for https://github.com/flutter/flutter/issues/114591 .
+    //
+    // On Web, CapsLock can be remapped to a non-modifier key.
+    testWidgets('CapsLock should not be release when remapped on Web', (WidgetTester _) async {
+      final List<RawKeyEvent> events = <RawKeyEvent>[];
+      RawKeyboard.instance.addListener(events.add);
+      addTearDown(() {
+        RawKeyboard.instance.removeListener(events.add);
+      });
+      await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+        SystemChannels.keyEvent.name,
+        SystemChannels.keyEvent.codec.encodeMessage(const <String, dynamic>{
+          'type': 'keydown',
+          'keymap': 'web',
+          'code': 'CapsLock',
+          'key': 'Backspace',
+          'location': 0,
+          'metaState': 0,
+          'keyCode': 8,
+        }),
+        (ByteData? data) { },
+      );
+
+      expect(
+        RawKeyboard.instance.keysPressed,
+        equals(
+          <LogicalKeyboardKey>{
+            LogicalKeyboardKey.backspace,
+          },
+        ),
+      );
+    },
+      variant: KeySimulatorTransitModeVariant.rawKeyData(),
+      skip: !isBrowser, // [intended] This is a Browser-specific test.
+    );
 
     testWidgets('keysPressed modifiers are synchronized with key events on web', (WidgetTester tester) async {
       expect(RawKeyboard.instance.keysPressed, isEmpty);
@@ -410,7 +493,7 @@ void main() {
       );
       data['metaState'] = (data['metaState'] as int) | RawKeyEventDataWeb.modifierShift;
       // Dispatch the modified data.
-      await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+      await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(data),
         (ByteData? data) {},
@@ -434,7 +517,7 @@ void main() {
         isDown: false,
       )..['metaState'] = 0;
       // Dispatch the modified data.
-      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+      await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(data2),
         (ByteData? data) {},
@@ -453,7 +536,7 @@ void main() {
       );
       data['metaState'] = (data['metaState'] as int) | RawKeyEventDataWeb.modifierShift;
       // Dispatch the modified data.
-      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+      await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(data3),
         (ByteData? data) {},
@@ -474,7 +557,7 @@ void main() {
         isDown: false,
       )..['metaState'] = 0;
       // Dispatch the modified data.
-      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+      await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(data4),
         (ByteData? data) {},
@@ -501,7 +584,7 @@ void main() {
         RawKeyEventDataAndroid.modifierControl |
         RawKeyEventDataAndroid.modifierMeta;
       // dispatch the modified data.
-      await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+      await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(data),
             (ByteData? data) {},
@@ -522,7 +605,10 @@ void main() {
           },
         ),
       );
-    }, skip: isBrowser); // [intended] This is an Android-specific test.
+    },
+      variant: KeySimulatorTransitModeVariant.rawKeyData(),
+      skip: isBrowser, // [intended] This is a Android-specific test.
+    );
 
     testWidgets('sided modifiers without a side set return all sides on macOS', (WidgetTester tester) async {
       expect(RawKeyboard.instance.keysPressed, isEmpty);
@@ -538,7 +624,7 @@ void main() {
           RawKeyEventDataMacOs.modifierCommand |
           RawKeyEventDataMacOs.modifierControl;
       // dispatch the modified data.
-      await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+      await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(data),
             (ByteData? data) {},
@@ -575,7 +661,7 @@ void main() {
           RawKeyEventDataIos.modifierCommand |
           RawKeyEventDataIos.modifierControl;
       // dispatch the modified data.
-      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+      await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(data),
             (ByteData? data) {},
@@ -611,7 +697,7 @@ void main() {
         LogicalKeyboardKey.keyA,
         platform: 'windows',
       );
-      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+      await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(downData),
         (ByteData? data) {},
@@ -619,7 +705,7 @@ void main() {
       expect(receivedEvent.repeat, false);
 
       // Dispatch another down event, which should be recognized as a repeat.
-      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+      await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(downData),
         (ByteData? data) {},
@@ -627,7 +713,7 @@ void main() {
       expect(receivedEvent.repeat, true);
 
       // Dispatch an up event.
-      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+      await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(KeyEventSimulator.getKeyData(
           LogicalKeyboardKey.keyA,
@@ -655,7 +741,7 @@ void main() {
           RawKeyEventDataWindows.modifierAlt |
           RawKeyEventDataWindows.modifierControl;
       // dispatch the modified data.
-      await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+      await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(data),
             (ByteData? data) {},
@@ -691,7 +777,7 @@ void main() {
         GLFWKeyHelper.modifierControl |
         GLFWKeyHelper.modifierMeta;
       // dispatch the modified data.
-      await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+      await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(data),
             (ByteData? data) {},
@@ -728,7 +814,7 @@ void main() {
         RawKeyEventDataWeb.modifierControl |
         RawKeyEventDataWeb.modifierMeta;
       // dispatch the modified data.
-      await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+      await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(data),
             (ByteData? data) {},
@@ -759,18 +845,17 @@ void main() {
       } else {
         keyEventMessage = const <String, dynamic>{
           'type': 'keydown',
-          'keymap': 'android',
-          'keyCode': 0x3b, // Left shift key keyCode
-          'scanCode': 0x2a,
-          'metaState': 0x0, // No shift key metaState set!
-          'source': 0x101,
-          'deviceId': 1,
+          'keymap': 'windows',
+          'keyCode': 16, // Left shift key keyCode
+          'characterCodePoint': 0,
+          'scanCode': 42,
+          'modifiers': 0x0, // No shift key metaState set!
         };
       }
 
       expect(
         () async {
-          await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+          await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
             SystemChannels.keyEvent.name,
             SystemChannels.keyEvent.codec.encodeMessage(keyEventMessage),
             (ByteData? data) { },
@@ -784,8 +869,126 @@ void main() {
       );
     });
 
+    testWidgets('Allows inconsistent modifier for iOS', (WidgetTester _) async {
+      // Use `testWidgets` for clean-ups.
+      final List<RawKeyEvent> events = <RawKeyEvent>[];
+      RawKeyboard.instance.addListener(events.add);
+      addTearDown(() {
+        RawKeyboard.instance.removeListener(events.add);
+      });
+      await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+        SystemChannels.keyEvent.name,
+        SystemChannels.keyEvent.codec.encodeMessage(const <String, dynamic>{
+          'type': 'keydown',
+          'keymap': 'ios',
+          'keyCode': 0x00000039,
+          'characters': '',
+          'charactersIgnoringModifiers': '',
+          'modifiers': 0,
+        }),
+        (ByteData? data) { },
+      );
+
+      expect(events, hasLength(1));
+      final RawKeyEvent capsLockKey = events[0];
+      final RawKeyEventDataIos data = capsLockKey.data as RawKeyEventDataIos;
+      expect(data.physicalKey, equals(PhysicalKeyboardKey.capsLock));
+      expect(data.logicalKey, equals(LogicalKeyboardKey.capsLock));
+      expect(RawKeyboard.instance.keysPressed, contains(LogicalKeyboardKey.capsLock));
+    }, skip: isBrowser); // [intended] This is an iOS-specific group.
+
+    testWidgets('Allows inconsistent modifier for Android', (WidgetTester _) async {
+      // Use `testWidgets` for clean-ups.
+      final List<RawKeyEvent> events = <RawKeyEvent>[];
+      RawKeyboard.instance.addListener(events.add);
+      addTearDown(() {
+        RawKeyboard.instance.removeListener(events.add);
+      });
+      await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+        SystemChannels.keyEvent.name,
+        SystemChannels.keyEvent.codec.encodeMessage(const <String, dynamic>{
+          'type': 'keydown',
+          'keymap': 'android',
+          'keyCode': 115,
+          'plainCodePoint': 0,
+          'codePoint': 0,
+          'scanCode': 58,
+          'metaState': 0,
+          'source': 0x101,
+          'deviceId': 1,
+        }),
+        (ByteData? data) { },
+      );
+
+      expect(events, hasLength(1));
+      final RawKeyEvent capsLockKey = events[0];
+      final RawKeyEventDataAndroid data = capsLockKey.data as RawKeyEventDataAndroid;
+      expect(data.physicalKey, equals(PhysicalKeyboardKey.capsLock));
+      expect(data.logicalKey, equals(LogicalKeyboardKey.capsLock));
+      expect(RawKeyboard.instance.keysPressed, contains(LogicalKeyboardKey.capsLock));
+    }, skip: isBrowser); // [intended] This is an Android-specific group.
+
+    testWidgets('Allows inconsistent modifier for Web - Alt graph', (WidgetTester _) async {
+      // Regression test for https://github.com/flutter/flutter/issues/113836
+      final List<RawKeyEvent> events = <RawKeyEvent>[];
+      RawKeyboard.instance.addListener(events.add);
+      addTearDown(() {
+        RawKeyboard.instance.removeListener(events.add);
+      });
+      await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+        SystemChannels.keyEvent.name,
+        SystemChannels.keyEvent.codec.encodeMessage(const <String, dynamic>{
+          'type': 'keydown',
+          'keymap': 'web',
+          'code': 'AltRight',
+          'key': 'AltGraph',
+          'location': 2,
+          'metaState': 0,
+          'keyCode': 225,
+        }),
+        (ByteData? data) { },
+      );
+
+      expect(events, hasLength(1));
+      final RawKeyEvent altRightKey = events[0];
+      final RawKeyEventDataWeb data = altRightKey.data as RawKeyEventDataWeb;
+      expect(data.physicalKey, equals(PhysicalKeyboardKey.altRight));
+      expect(data.logicalKey, equals(LogicalKeyboardKey.altGraph));
+      expect(RawKeyboard.instance.keysPressed, contains(LogicalKeyboardKey.altGraph));
+    }, skip: !isBrowser); // [intended] This is a Browser-specific test.
+
+    testWidgets('Allows inconsistent modifier for Web - Alt right', (WidgetTester _) async {
+      // Regression test for https://github.com/flutter/flutter/issues/113836
+      final List<RawKeyEvent> events = <RawKeyEvent>[];
+      RawKeyboard.instance.addListener(events.add);
+      addTearDown(() {
+        RawKeyboard.instance.removeListener(events.add);
+      });
+      await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+        SystemChannels.keyEvent.name,
+        SystemChannels.keyEvent.codec.encodeMessage(const <String, dynamic>{
+          'type': 'keydown',
+          'keymap': 'web',
+          'code': 'AltRight',
+          'key': 'Alt',
+          'location': 2,
+          'metaState': 0,
+          'keyCode': 225,
+        }),
+        (ByteData? data) { },
+      );
+
+      expect(events, hasLength(1));
+      final RawKeyEvent altRightKey = events[0];
+      final RawKeyEventDataWeb data = altRightKey.data as RawKeyEventDataWeb;
+      expect(data.physicalKey, equals(PhysicalKeyboardKey.altRight));
+      expect(data.logicalKey, equals(LogicalKeyboardKey.altRight));
+      expect(RawKeyboard.instance.keysPressed, contains(LogicalKeyboardKey.altRight));
+    }, skip: !isBrowser); // [intended] This is a Browser-specific test.
+
     testWidgets('Dispatch events to all handlers', (WidgetTester tester) async {
       final FocusNode focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
       final List<int> logs = <int>[];
 
       await tester.pumpWidget(
@@ -1130,7 +1333,7 @@ void main() {
         platform: 'android',
       );
       Map<String, Object?>? message;
-      await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+      await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(data),
         (ByteData? data) {
@@ -1142,6 +1345,7 @@ void main() {
 
       // Set up a widget that will receive focused text events.
       final FocusNode focusNode = FocusNode(debugLabel: 'Test Node');
+      addTearDown(focusNode.dispose);
       await tester.pumpWidget(
         Focus(
           focusNode: focusNode,
@@ -1154,7 +1358,7 @@ void main() {
       focusNode.requestFocus();
       await tester.pump();
 
-      await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+      await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(data),
         (ByteData? data) {
@@ -1945,6 +2149,7 @@ void main() {
           return KeyEventResult.ignored;
         },
       );
+      addTearDown(node.dispose);
       await tester.pumpWidget(RawKeyboardListener(
         focusNode: node,
         child: Container(),
@@ -1960,7 +2165,7 @@ void main() {
 
       // Simulate raw events because VK_PROCESSKEY does not exist in the key mapping.
       Future<void> simulateKeyEventMessage(String type, int keyCode, int scanCode) {
-        return ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+        return tester.binding.defaultBinaryMessenger.handlePlatformMessage(
           SystemChannels.keyEvent.name,
           SystemChannels.keyEvent.codec.encodeMessage(<String, Object?>{
             'type': type,
@@ -2036,22 +2241,15 @@ void main() {
 
     // How modifiers are interpreted depends upon the keyCode for GLFW.
     int keyCodeForModifier(int modifier, {required bool isLeft}) {
-      switch (modifier) {
-        case GLFWKeyHelper.modifierAlt:
-          return isLeft ? 342 : 346;
-        case GLFWKeyHelper.modifierShift:
-          return isLeft ? 340 : 344;
-        case GLFWKeyHelper.modifierControl:
-          return isLeft ? 341 : 345;
-        case GLFWKeyHelper.modifierMeta:
-          return isLeft ? 343 : 347;
-        case GLFWKeyHelper.modifierNumericPad:
-          return 282;
-        case GLFWKeyHelper.modifierCapsLock:
-          return 280;
-        default:
-          return 65; // keyA
-      }
+      return switch (modifier) {
+        GLFWKeyHelper.modifierAlt     => isLeft ? 342 : 346,
+        GLFWKeyHelper.modifierShift   => isLeft ? 340 : 344,
+        GLFWKeyHelper.modifierControl => isLeft ? 341 : 345,
+        GLFWKeyHelper.modifierMeta    => isLeft ? 343 : 347,
+        GLFWKeyHelper.modifierNumericPad => 282,
+        GLFWKeyHelper.modifierCapsLock   => 280,
+        _ => 65, // keyA
+      };
     }
 
     test('modifier keys are recognized individually', () {
@@ -2268,22 +2466,15 @@ void main() {
 
     // How modifiers are interpreted depends upon the keyCode for GTK.
     int keyCodeForModifier(int modifier, {required bool isLeft}) {
-      switch (modifier) {
-        case GtkKeyHelper.modifierMod1:
-          return 65513;
-        case GtkKeyHelper.modifierShift:
-          return isLeft ? 65505 : 65506;
-        case GtkKeyHelper.modifierControl:
-          return isLeft ? 65507 : 65508;
-        case GtkKeyHelper.modifierMeta:
-          return isLeft ? 65515 : 65516;
-        case GtkKeyHelper.modifierMod2:
-          return 65407;
-        case GtkKeyHelper.modifierCapsLock:
-          return 65509;
-        default:
-          return 65; // keyA
-      }
+      return switch (modifier) {
+        GtkKeyHelper.modifierShift    => isLeft ? 65505 : 65506,
+        GtkKeyHelper.modifierControl  => isLeft ? 65507 : 65508,
+        GtkKeyHelper.modifierMeta     => isLeft ? 65515 : 65516,
+        GtkKeyHelper.modifierMod1     => 65513,
+        GtkKeyHelper.modifierMod2     => 65407,
+        GtkKeyHelper.modifierCapsLock => 65509,
+        _ => 65, // keyA
+      };
     }
 
     test('modifier keys are recognized individually', () {

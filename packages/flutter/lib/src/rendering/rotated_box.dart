@@ -2,8 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'proxy_box.dart';
+library;
+
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'box.dart';
@@ -19,13 +23,10 @@ const double _kQuarterTurnsInRadians = math.pi / 2.0;
 /// rotated box consumes only as much space as required by the rotated child.
 class RenderRotatedBox extends RenderBox with RenderObjectWithChildMixin<RenderBox> {
   /// Creates a rotated render box.
-  ///
-  /// The [quarterTurns] argument must not be null.
   RenderRotatedBox({
     required int quarterTurns,
     RenderBox? child,
-  }) : assert(quarterTurns != null),
-       _quarterTurns = quarterTurns {
+  }) : _quarterTurns = quarterTurns {
     this.child = child;
   }
 
@@ -33,7 +34,6 @@ class RenderRotatedBox extends RenderBox with RenderObjectWithChildMixin<RenderB
   int get quarterTurns => _quarterTurns;
   int _quarterTurns;
   set quarterTurns(int value) {
-    assert(value != null);
     if (_quarterTurns == value) {
       return;
     }
@@ -78,7 +78,8 @@ class RenderRotatedBox extends RenderBox with RenderObjectWithChildMixin<RenderB
   Matrix4? _paintTransform;
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  @protected
+  Size computeDryLayout(covariant BoxConstraints constraints) {
     if (child == null) {
       return constraints.smallest;
     }

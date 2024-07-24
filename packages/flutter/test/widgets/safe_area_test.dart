@@ -113,10 +113,10 @@ void main() {
       }
 
       testWidgets('SafeArea alone.', (WidgetTester tester) async {
-        final Widget child = boilerplate(SafeArea(
+        final Widget child = boilerplate(const SafeArea(
           maintainBottomViewPadding: true,
           child: Column(
-            children: const <Widget>[
+            children: <Widget>[
               Expanded(child: Placeholder()),
             ],
           ),
@@ -148,10 +148,10 @@ void main() {
       });
 
       testWidgets('SafeArea alone - partial ViewInsets consume Padding', (WidgetTester tester) async {
-        final Widget child = boilerplate(SafeArea(
+        final Widget child = boilerplate(const SafeArea(
           maintainBottomViewPadding: true,
           child: Column(
-            children: const <Widget>[
+            children: <Widget>[
               Expanded(child: Placeholder()),
             ],
           ),
@@ -181,12 +181,12 @@ void main() {
       });
 
       testWidgets('SafeArea with nested Scaffold', (WidgetTester tester) async {
-        final Widget child = boilerplate(SafeArea(
+        final Widget child = boilerplate(const SafeArea(
           maintainBottomViewPadding: true,
           child: Scaffold(
             resizeToAvoidBottomInset: false,
             body: Column(
-              children: const <Widget>[
+              children: <Widget>[
                 Expanded(child: Placeholder()),
               ],
             ),
@@ -219,12 +219,12 @@ void main() {
       });
 
       testWidgets('SafeArea with nested Scaffold  - partial ViewInsets consume Padding', (WidgetTester tester) async {
-        final Widget child = boilerplate(SafeArea(
+        final Widget child = boilerplate(const SafeArea(
           maintainBottomViewPadding: true,
           child: Scaffold(
             resizeToAvoidBottomInset: false,
             body: Column(
-              children: const <Widget>[
+              children: <Widget>[
                 Expanded(child: Placeholder()),
               ],
             ),
@@ -258,12 +258,15 @@ void main() {
 
   group('SliverSafeArea', () {
     Widget buildWidget(EdgeInsets mediaPadding, Widget sliver) {
+      late final ViewportOffset offset;
+      addTearDown(() => offset.dispose());
+
       return MediaQuery(
         data: MediaQueryData(padding: mediaPadding),
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: Viewport(
-            offset: ViewportOffset.fixed(0.0),
+            offset: offset = ViewportOffset.fixed(0.0),
             slivers: <Widget>[
               const SliverToBoxAdapter(child: SizedBox(width: 800.0, height: 100.0, child: Text('before'))),
               sliver,

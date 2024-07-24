@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/widgets.dart';
+library;
+
 import 'dart:ui' show TextDirection;
 
 import 'package:flutter/services.dart' show SystemChannels;
@@ -17,11 +20,7 @@ export 'dart:ui' show TextDirection;
 ///
 /// When possible, prefer using mechanisms like [Semantics] to implicitly
 /// trigger announcements over using this event.
-class SemanticsService {
-  // This class is not meant to be instantiated or extended; this constructor
-  // prevents instantiation and extension.
-  SemanticsService._();
-
+abstract final class SemanticsService {
   /// Sends a semantic announcement.
   ///
   /// This should be used for announcement that are not seamlessly announced by

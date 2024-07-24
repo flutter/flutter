@@ -49,6 +49,8 @@ void main() {
     Key? formKey,
     ThemeData? theme,
     Iterable<LocalizationsDelegate<dynamic>>? localizationsDelegates,
+    bool acceptEmptyDate = false,
+    FocusNode? focusNode,
   }) {
     return MaterialApp(
       theme: theme ?? ThemeData.from(colorScheme: const ColorScheme.light()),
@@ -69,6 +71,8 @@ void main() {
             fieldHintText: fieldHintText,
             fieldLabelText: fieldLabelText,
             autofocus: autofocus,
+            acceptEmptyDate: acceptEmptyDate,
+            focusNode: focusNode,
           ),
         ),
       ),
@@ -262,7 +266,6 @@ void main() {
 
     testWidgets('Semantics', (WidgetTester tester) async {
       final SemanticsHandle semantics = tester.ensureSemantics();
-      addTearDown(semantics.dispose);
 
       // Fill the clipboard so that the Paste option is available in the text
       // selection menu.
@@ -274,11 +277,14 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(tester.getSemantics(find.byType(EditableText)), matchesSemantics(
-        label: 'Enter Date\nmm/dd/yyyy',
+        label: 'Enter Date',
         isTextField: true,
+        hasEnabledState: true,
+        isEnabled: true,
         isFocused: true,
         value: '01/15/2016',
         hasTapAction: true,
+        hasFocusAction: true,
         hasSetTextAction: true,
         hasSetSelectionAction: true,
         hasCopyAction: true,
@@ -287,6 +293,7 @@ void main() {
         hasMoveCursorBackwardByCharacterAction: true,
         hasMoveCursorBackwardByWordAction: true,
       ));
+      semantics.dispose();
     });
 
     testWidgets('InputDecorationTheme is honored', (WidgetTester tester) async {
@@ -345,5 +352,50 @@ void main() {
         )
       );
     });
+
+    testWidgets('when an empty date is entered and acceptEmptyDate is true, then errorFormatText is not shown', (WidgetTester tester) async {
+      final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+      const String errorFormatText = 'That is not a date.';
+      await tester.pumpWidget(inputDatePickerField(
+        errorFormatText: errorFormatText,
+        formKey: formKey,
+        acceptEmptyDate: true,
+      ));
+      await tester.enterText(find.byType(TextField), '');
+      await tester.pumpAndSettle();
+      formKey.currentState!.validate();
+      await tester.pumpAndSettle();
+      expect(find.text(errorFormatText), findsNothing);
+    });
+
+    testWidgets('when an empty date is entered and acceptEmptyDate is false, then errorFormatText is shown', (WidgetTester tester) async {
+      final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+      const String errorFormatText = 'That is not a date.';
+      await tester.pumpWidget(inputDatePickerField(
+        errorFormatText: errorFormatText,
+        formKey: formKey,
+      ));
+      await tester.enterText(find.byType(TextField), '');
+      await tester.pumpAndSettle();
+      formKey.currentState!.validate();
+      await tester.pumpAndSettle();
+      expect(find.text(errorFormatText), findsOneWidget);
+    });
+  });
+
+  testWidgets('FocusNode can request focus', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+    await tester.pumpWidget(inputDatePickerField(
+      focusNode: focusNode,
+    ));
+    expect((tester.widget(find.byType(TextField)) as TextField).focusNode, focusNode);
+    expect(focusNode.hasFocus, isFalse);
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+    expect(focusNode.hasFocus, isTrue);
+    focusNode.unfocus();
+    await tester.pumpAndSettle();
+    expect(focusNode.hasFocus, isFalse);
   });
 }

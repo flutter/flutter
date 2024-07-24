@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter_driver/flutter_driver.dart';
+///
+/// @docImport 'integration_test_driver_extended.dart';
+library;
+
 import 'dart:async';
 import 'dart:developer' as developer;
 import 'dart:io' show HttpClient, SocketException, WebSocket;
@@ -14,10 +19,10 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_service/vm_service.dart' as vm;
 
-import '_callback_io.dart' if (dart.library.html) '_callback_web.dart' as driver_actions;
-import '_extension_io.dart' if (dart.library.html) '_extension_web.dart';
 import 'common.dart';
+import 'src/callback.dart' as driver_actions;
 import 'src/channel.dart';
+import 'src/extension.dart';
 
 const String _success = 'success';
 
@@ -75,7 +80,7 @@ If you're running the tests with Android instrumentation or XCTest, this means
 that you are not capturing test results properly! See the following link for
 how to set up the integration_test plugin:
 
-https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
+https://docs.flutter.dev/testing/integration-tests
 ''');
       }
     });
@@ -100,10 +105,6 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
   // under debug mode.
   static bool _firstRun = false;
 
-  /// Artificially changes the surface size to `size` on the Widget binding,
-  /// then flushes microtasks.
-  ///
-  /// Set to null to use the default surface size.
   @override
   Future<void> setSurfaceSize(Size? size) {
     return TestAsyncUtils.guard<void>(() async {
@@ -117,12 +118,12 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
   }
 
   @override
-  ViewConfiguration createViewConfiguration() {
-    final double devicePixelRatio = window.devicePixelRatio;
-    final Size size = _surfaceSize ?? window.physicalSize / devicePixelRatio;
-    return TestViewConfiguration(
-      size: size,
-      window: window,
+  ViewConfiguration createViewConfigurationFor(RenderView renderView) {
+    final FlutterView view = renderView.flutterView;
+    final Size? surfaceSize = view == platformDispatcher.implicitView ? _surfaceSize : null;
+    return TestViewConfiguration.fromView(
+      size: surfaceSize ?? view.physicalSize / view.devicePixelRatio,
+      view: view,
     );
   }
 
@@ -184,10 +185,10 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
   ///
   /// On Android, you need to call `convertFlutterSurfaceToImage()`, and
   /// pump a frame before taking a screenshot.
-  Future<List<int>> takeScreenshot(String screenshotName) async {
+  Future<List<int>> takeScreenshot(String screenshotName, [Map<String, Object?>? args]) async {
     reportData ??= <String, dynamic>{};
     reportData!['screenshots'] ??= <dynamic>[];
-    final Map<String, dynamic> data = await callbackManager.takeScreenshot(screenshotName);
+    final Map<String, dynamic> data = await callbackManager.takeScreenshot(screenshotName, args);
     assert(data.containsKey('bytes'));
 
     (reportData!['screenshots']! as List<dynamic>).add(data);
@@ -252,7 +253,6 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
     @visibleForTesting vm.VmService? vmService,
     @visibleForTesting HttpClient? httpClient,
   }) async {
-    assert(streams != null);
     assert(streams.isNotEmpty);
     if (vmService != null) {
       _vmService = vmService;
@@ -263,7 +263,7 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
       final String address = 'ws://localhost:${info.serverUri!.port}${info.serverUri!.path}ws';
       try {
         _vmService = await _vmServiceConnectUri(address, httpClient: httpClient);
-      } on SocketException catch(e, s) {
+      } on SocketException catch (e, s) {
         throw StateError(
           'Failed to connect to VM Service at $address.\n'
           'This may happen if DDS is enabled. If this test was launched via '
@@ -317,8 +317,8 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
   /// [reportData] with `reportKey`. The [reportData] contains extra information
   /// from the test other than test success/fail. It will be passed back to the
   /// host and be processed by the [ResponseDataCallback] defined in
-  /// [integration_test_driver.integrationDriver]. By default it will be written
-  /// to `build/integration_response_data.json` with the key `timeline`.
+  /// [integrationDriver]. By default it will be written to
+  /// `build/integration_response_data.json` with the key `timeline`.
   ///
   /// For tests with multiple calls of this method, `reportKey` needs to be a
   /// unique key, otherwise the later result will override earlier one. Tests
@@ -331,9 +331,9 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
   ///
   /// Future<void> main() {
   ///   return integrationDriver(
-  ///     responseDataCallback: (data) async {
+  ///     responseDataCallback: (Map<String, dynamic>? data) async {
   ///       if (data != null) {
-  ///         for (var entry in data.entries) {
+  ///         for (final MapEntry<String, dynamic> entry in data.entries) {
   ///           print('Writing ${entry.key} to the disk.');
   ///           await writeResponseData(
   ///             entry.value as Map<String, dynamic>,
@@ -406,7 +406,7 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
     // The engine could batch FrameTimings and send them only once per second.
     // Delay for a sufficient time so either old FrameTimings are flushed and not
     // interfering our measurements here, or new FrameTimings are all reported.
-    // TODO(CareF): remove this when flush FrameTiming is readly in engine.
+    // TODO(CareF): remove this when flush FrameTiming is readily in engine.
     //              See https://github.com/flutter/flutter/issues/64808
     //              and https://github.com/flutter/flutter/issues/67593
     final List<FrameTiming> frameTimings = <FrameTiming>[];
@@ -442,11 +442,11 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
   Timeout defaultTestTimeout = Timeout.none;
 
   @override
-  void attachRootWidget(Widget rootWidget) {
+  Widget wrapWithDefaultView(Widget rootWidget) {
     // This is a workaround where screenshots of root widgets have incorrect
     // bounds.
     // TODO(jiahaog): Remove when https://github.com/flutter/flutter/issues/66006 is fixed.
-    super.attachRootWidget(RepaintBoundary(child: rootWidget));
+    return super.wrapWithDefaultView(RepaintBoundary(child: rootWidget));
   }
 
   @override

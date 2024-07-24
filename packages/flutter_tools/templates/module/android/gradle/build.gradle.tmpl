@@ -13,12 +13,14 @@ allprojects {
 }
 
 android {
-    compileSdkVersion {{compileSdkVersion}}
+    namespace = "{{androidIdentifier}}"
+    compileSdk = {{compileSdkVersion}}
     defaultConfig {
-        minSdkVersion {{minSdkVersion}}
+        minSdk = {{minSdkVersion}}
+        targetSdk = {{targetSdkVersion}}
     }
 }
 
 dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version")
 }

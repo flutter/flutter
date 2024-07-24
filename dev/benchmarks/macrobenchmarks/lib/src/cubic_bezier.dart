@@ -12,10 +12,10 @@ class CubicBezierPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
+    return const Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: const <Widget>[
+        children: <Widget>[
           Bezier(Colors.amber, 1.0),
         ],
       ),
@@ -318,10 +318,10 @@ class AnimatedBezierState extends State<AnimatedBezier>
       ..addListener(() {
         setState(() {});
       })
-      ..addStatusListener((AnimationStatus state) {
-        if (state == AnimationStatus.completed) {
+      ..addStatusListener((AnimationStatus status) {
+        if (status.isCompleted) {
           reverseAnimation();
-        } else if (state == AnimationStatus.dismissed) {
+        } else if (status.isDismissed) {
           playAnimation();
         }
       });

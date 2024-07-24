@@ -91,17 +91,14 @@ class LinkedScrollController extends ScrollController {
   @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
-    if (before != null && after != null) {
-      description.add('links: ⬌');
-    } else if (before != null) {
-      description.add('links: ⬅');
-    } else if (after != null) {
-      description.add('links: ➡');
-    } else {
-      description.add('links: none');
-    }
+    final String linkSymbol = switch ((before, after)) {
+      (null, null) => 'none',
+      (null, _)    => '➡',
+      (_, null)    => '⬅',
+      (_, _)       => '⬌',
+    };
+    description.add('links: $linkSymbol');
   }
-
 }
 
 class LinkedScrollPosition extends ScrollPositionWithSingleContext {
@@ -111,7 +108,7 @@ class LinkedScrollPosition extends ScrollPositionWithSingleContext {
     required super.context,
     required double super.initialPixels,
     super.oldPosition,
-  }) : assert(owner != null);
+  });
 
   final LinkedScrollController owner;
 
@@ -286,8 +283,8 @@ class _TestState extends State<Test> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _beforeController.setParent(PrimaryScrollController.of(context));
-    _afterController.setParent(PrimaryScrollController.of(context));
+    _beforeController.setParent(PrimaryScrollController.maybeOf(context));
+    _afterController.setParent(PrimaryScrollController.maybeOf(context));
   }
 
   @override

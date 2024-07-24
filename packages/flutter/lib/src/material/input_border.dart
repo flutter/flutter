@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'input_decorator.dart';
+library;
+
 import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
@@ -31,13 +34,12 @@ import 'package:flutter/widgets.dart';
 abstract class InputBorder extends ShapeBorder {
   /// Creates a border for an [InputDecorator].
   ///
-  /// The [borderSide] parameter must not be null. Applications typically do
-  /// not specify a [borderSide] parameter because the input decorator
-  /// substitutes its own, using [copyWith], based on the current theme and
-  /// [InputDecorator.isFocused].
+  /// Applications typically do not specify a [borderSide] parameter because the
+  /// [InputDecorator] substitutes its own, using [copyWith], based on the
+  /// current theme and [InputDecorator.isFocused].
   const InputBorder({
     this.borderSide = BorderSide.none,
-  }) : assert(borderSide != null);
+  });
 
   /// No input border.
   ///
@@ -149,15 +151,14 @@ class UnderlineInputBorder extends InputBorder {
   /// on the current theme and [InputDecorator.isFocused].
   ///
   /// The [borderRadius] parameter defaults to a value where the top left
-  /// and right corners have a circular radius of 4.0. The [borderRadius]
-  /// parameter must not be null.
+  /// and right corners have a circular radius of 4.0.
   const UnderlineInputBorder({
     super.borderSide = const BorderSide(),
     this.borderRadius = const BorderRadius.only(
       topLeft: Radius.circular(4.0),
       topRight: Radius.circular(4.0),
     ),
-  }) : assert(borderRadius != null);
+  });
 
   /// The radii of the border's rounded rectangle corners.
   ///
@@ -245,10 +246,27 @@ class UnderlineInputBorder extends InputBorder {
     double gapPercentage = 0.0,
     TextDirection? textDirection,
   }) {
-    if (borderRadius.bottomLeft != Radius.zero || borderRadius.bottomRight != Radius.zero) {
-      canvas.clipPath(getOuterPath(rect, textDirection: textDirection));
+    if (borderSide.style == BorderStyle.none) {
+      return;
     }
-    canvas.drawLine(rect.bottomLeft, rect.bottomRight, borderSide.toPaint());
+
+    if (borderRadius.bottomLeft != Radius.zero || borderRadius.bottomRight != Radius.zero) {
+      // This prevents the border from leaking the color due to anti-aliasing rounding errors.
+      final BorderRadius updatedBorderRadius = BorderRadius.only(
+        bottomLeft: borderRadius.bottomLeft.clamp(maximum: Radius.circular(rect.height / 2)),
+        bottomRight: borderRadius.bottomRight.clamp(maximum: Radius.circular(rect.height / 2)),
+      );
+
+      BoxBorder.paintNonUniformBorder(canvas, rect,
+        textDirection: textDirection,
+        borderRadius: updatedBorderRadius,
+        bottom: borderSide.copyWith(strokeAlign: BorderSide.strokeAlignInside),
+        color: borderSide.color,
+      );
+    } else {
+      final Offset alignInsideOffset = Offset(0, borderSide.width / 2);
+      canvas.drawLine(rect.bottomLeft - alignInsideOffset, rect.bottomRight - alignInsideOffset, borderSide.toPaint());
+    }
   }
 
   @override
@@ -259,12 +277,13 @@ class UnderlineInputBorder extends InputBorder {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is InputBorder
-        && other.borderSide == borderSide;
+    return other is UnderlineInputBorder
+        && other.borderSide == borderSide
+        && other.borderRadius == borderRadius;
   }
 
   @override
-  int get hashCode => borderSide.hashCode;
+  int get hashCode => Object.hash(borderSide, borderRadius);
 }
 
 /// Draws a rounded rectangle around an [InputDecorator]'s container.
@@ -291,10 +310,9 @@ class OutlineInputBorder extends InputBorder {
   /// value [BorderSide.none], the input decorator substitutes its own, using
   /// [copyWith], based on the current theme and [InputDecorator.isFocused].
   ///
-  /// The [borderRadius] parameter defaults to a value where all four
-  /// corners have a circular radius of 4.0. The [borderRadius] parameter
-  /// must not be null and the corner radii must be circular, i.e. their
-  /// [Radius.x] and [Radius.y] values must be the same.
+  /// The [borderRadius] parameter defaults to a value where all four corners
+  /// have a circular radius of 4.0. The corner radii must be circular, i.e.
+  /// their [Radius.x] and [Radius.y] values must be the same.
   ///
   /// See also:
   ///
@@ -307,8 +325,7 @@ class OutlineInputBorder extends InputBorder {
     super.borderSide = const BorderSide(),
     this.borderRadius = const BorderRadius.all(Radius.circular(4.0)),
     this.gapPadding = 4.0,
-  }) : assert(borderRadius != null),
-       assert(gapPadding != null && gapPadding >= 0.0);
+  }) : assert(gapPadding >= 0.0);
 
   // The label text's gap can extend into the corners (even both the top left
   // and the top right corner). To avoid the more complicated problem of finding
@@ -439,44 +456,63 @@ class OutlineInputBorder extends InputBorder {
       scaledRRect.left,
       scaledRRect.bottom - scaledRRect.blRadiusY * 2.0,
       scaledRRect.blRadiusX * 2.0,
-      scaledRRect.blRadiusX * 2.0,
+      scaledRRect.blRadiusY * 2.0,
     );
 
     // This assumes that the radius is circular (x and y radius are equal).
     // Currently, BorderRadius only supports circular radii.
     const double cornerArcSweep = math.pi / 2.0;
-    final double tlCornerArcSweep = math.acos(
-      clampDouble(1 - start / scaledRRect.tlRadiusX, 0.0, 1.0),
-    );
+    final Path path = Path();
 
-    final Path path = Path()
-      ..addArc(tlCorner, math.pi, tlCornerArcSweep);
+    // Top left corner
+    if (scaledRRect.tlRadius != Radius.zero) {
+      final double tlCornerArcSweep = math.acos(clampDouble(1 - start / scaledRRect.tlRadiusX, 0.0, 1.0));
+      path.addArc(tlCorner, math.pi, tlCornerArcSweep);
+    } else {
+      // Because the path is painted with Paint.strokeCap = StrokeCap.butt, horizontal coordinate is moved
+      // to the left using borderSide.width / 2.
+      path.moveTo(scaledRRect.left - borderSide.width / 2, scaledRRect.top);
+    }
 
+    // Draw top border from top left corner to gap start.
     if (start > scaledRRect.tlRadiusX) {
       path.lineTo(scaledRRect.left + start, scaledRRect.top);
     }
 
+    // Draw top border from gap end to top right corner and draw top right corner.
     const double trCornerArcStart = (3 * math.pi) / 2.0;
     const double trCornerArcSweep = cornerArcSweep;
     if (start + extent < scaledRRect.width - scaledRRect.trRadiusX) {
       path.moveTo(scaledRRect.left + start + extent, scaledRRect.top);
       path.lineTo(scaledRRect.right - scaledRRect.trRadiusX, scaledRRect.top);
-      path.addArc(trCorner, trCornerArcStart, trCornerArcSweep);
+      if (scaledRRect.trRadius != Radius.zero) {
+        path.addArc(trCorner, trCornerArcStart, trCornerArcSweep);
+      }
     } else if (start + extent < scaledRRect.width) {
       final double dx = scaledRRect.width - (start + extent);
-      final double sweep = math.asin(
-        clampDouble(1 - dx / scaledRRect.trRadiusX, 0.0, 1.0),
-      );
+      final double sweep = math.asin(clampDouble(1 - dx / scaledRRect.trRadiusX, 0.0, 1.0));
       path.addArc(trCorner, trCornerArcStart + sweep, trCornerArcSweep - sweep);
     }
 
-    return path
-      ..moveTo(scaledRRect.right, scaledRRect.top + scaledRRect.trRadiusY)
-      ..lineTo(scaledRRect.right, scaledRRect.bottom - scaledRRect.brRadiusY)
-      ..addArc(brCorner, 0.0, cornerArcSweep)
-      ..lineTo(scaledRRect.left + scaledRRect.blRadiusX, scaledRRect.bottom)
-      ..addArc(blCorner, math.pi / 2.0, cornerArcSweep)
-      ..lineTo(scaledRRect.left, scaledRRect.top + scaledRRect.tlRadiusY);
+    // Draw right border and bottom right corner.
+    if (scaledRRect.brRadius != Radius.zero) {
+      path.moveTo(scaledRRect.right, scaledRRect.top + scaledRRect.trRadiusY);
+    }
+    path.lineTo(scaledRRect.right, scaledRRect.bottom - scaledRRect.brRadiusY);
+    if (scaledRRect.brRadius != Radius.zero) {
+      path.addArc(brCorner, 0.0, cornerArcSweep);
+    }
+
+    // Draw bottom border and bottom left corner.
+    path.lineTo(scaledRRect.left + scaledRRect.blRadiusX, scaledRRect.bottom);
+    if (scaledRRect.blRadius != Radius.zero) {
+      path.addArc(blCorner, math.pi / 2.0, cornerArcSweep);
+    }
+
+    // Draw left border
+    path.lineTo(scaledRRect.left, scaledRRect.top + scaledRRect.tlRadiusY);
+
+    return path;
   }
 
   /// Draw a rounded rectangle around [rect] using [borderRadius].
@@ -496,7 +532,6 @@ class OutlineInputBorder extends InputBorder {
     double gapPercentage = 0.0,
     TextDirection? textDirection,
   }) {
-    assert(gapExtent != null);
     assert(gapPercentage >= 0.0 && gapPercentage <= 1.0);
     assert(_cornersAreCircular(borderRadius));
 
@@ -507,17 +542,12 @@ class OutlineInputBorder extends InputBorder {
       canvas.drawRRect(center, paint);
     } else {
       final double extent = lerpDouble(0.0, gapExtent + gapPadding * 2.0, gapPercentage)!;
-      switch (textDirection!) {
-        case TextDirection.rtl:
-          final Path path = _gapBorderPath(canvas, center, math.max(0.0, gapStart + gapPadding - extent), extent);
-          canvas.drawPath(path, paint);
-          break;
-
-        case TextDirection.ltr:
-          final Path path = _gapBorderPath(canvas, center, math.max(0.0, gapStart - gapPadding), extent);
-          canvas.drawPath(path, paint);
-          break;
-      }
+      final double start = switch (textDirection!) {
+        TextDirection.rtl => gapStart + gapPadding - extent,
+        TextDirection.ltr => gapStart - gapPadding,
+      };
+      final Path path = _gapBorderPath(canvas, center, math.max(0.0, start), extent);
+      canvas.drawPath(path, paint);
     }
   }
 

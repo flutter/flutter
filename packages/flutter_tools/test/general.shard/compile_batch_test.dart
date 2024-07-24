@@ -53,7 +53,7 @@ void main() {
       logger: logger,
       processManager: FakeProcessManager.list(<FakeCommand>[
         FakeCommand(command: const <String>[
-         'HostArtifact.engineDartBinary',
+          'Artifact.engineDartAotRuntime',
           '--disable-dart-dev',
           'Artifact.frontendServerSnapshotForEngineDartSdk',
           '--sdk-root',
@@ -99,7 +99,7 @@ void main() {
       logger: logger,
       processManager: FakeProcessManager.list(<FakeCommand>[
         FakeCommand(command: const <String>[
-         'HostArtifact.engineDartBinary',
+          'Artifact.engineDartAotRuntime',
           '--disable-dart-dev',
           'Artifact.frontendServerSnapshotForEngineDartSdk',
           '--sdk-root',
@@ -126,7 +126,7 @@ void main() {
       packageConfig: PackageConfig.empty,
       packagesPath: '.packages',
     );
-    stdoutHandler.compilerOutput?.complete(null);
+    stdoutHandler.compilerOutput?.complete();
     completer.complete();
 
     expect(await output, null);
@@ -145,7 +145,7 @@ void main() {
       logger: logger,
       processManager: FakeProcessManager.list(<FakeCommand>[
         FakeCommand(command: const <String>[
-         'HostArtifact.engineDartBinary',
+          'Artifact.engineDartAotRuntime',
           '--disable-dart-dev',
           'Artifact.frontendServerSnapshotForEngineDartSdk',
           '--sdk-root',
@@ -191,7 +191,7 @@ void main() {
       logger: logger,
       processManager: FakeProcessManager.list(<FakeCommand>[
         FakeCommand(command: const <String>[
-          'HostArtifact.engineDartBinary',
+          'Artifact.engineDartAotRuntime',
           '--disable-dart-dev',
           'Artifact.frontendServerSnapshotForEngineDartSdk',
           '--sdk-root',
@@ -200,7 +200,8 @@ void main() {
           '--no-print-incremental-dependencies',
           '-Ddart.vm.profile=true',
           '-Ddart.vm.product=false',
-          '--compact-async',
+          '--delete-tostring-package-uri=dart:ui',
+          '--delete-tostring-package-uri=package:flutter',
           '--no-link-platform',
           '--aot',
           '--tfa',
@@ -240,7 +241,7 @@ void main() {
       logger: logger,
       processManager: FakeProcessManager.list(<FakeCommand>[
         FakeCommand(command: const <String>[
-          'HostArtifact.engineDartBinary',
+          'Artifact.engineDartAotRuntime',
           '--disable-dart-dev',
           'Artifact.frontendServerSnapshotForEngineDartSdk',
           '--sdk-root',
@@ -249,7 +250,8 @@ void main() {
           '--no-print-incremental-dependencies',
           '-Ddart.vm.profile=false',
           '-Ddart.vm.product=true',
-          '--compact-async',
+          '--delete-tostring-package-uri=dart:ui',
+          '--delete-tostring-package-uri=package:flutter',
           '--no-link-platform',
           '--aot',
           '--tfa',
@@ -289,7 +291,7 @@ void main() {
       logger: logger,
       processManager: FakeProcessManager.list(<FakeCommand>[
         FakeCommand(command: const <String>[
-          'HostArtifact.engineDartBinary',
+          'Artifact.engineDartAotRuntime',
           '--disable-dart-dev',
           'Artifact.frontendServerSnapshotForEngineDartSdk',
           '--sdk-root',
@@ -341,7 +343,7 @@ void main() {
       logger: logger,
       processManager: FakeProcessManager.list(<FakeCommand>[
         FakeCommand(command: const <String>[
-          'HostArtifact.engineDartBinary',
+          'Artifact.engineDartAotRuntime',
           '--disable-dart-dev',
           'Artifact.frontendServerSnapshotForEngineDartSdk',
           '--sdk-root',
@@ -391,7 +393,7 @@ void main() {
       logger: logger,
       processManager: FakeProcessManager.list(<FakeCommand>[
         FakeCommand(command: const <String>[
-          'HostArtifact.engineDartBinary',
+          'Artifact.engineDartAotRuntime',
           '--disable-dart-dev',
           'Artifact.frontendServerSnapshotForEngineDartSdk',
           '--sdk-root',
@@ -436,5 +438,56 @@ void main() {
     stdoutHandler.compilerOutput?.complete(const CompilerOutput('', 0, <Uri>[]));
     completer.complete();
     await output;
+  });
+
+  testWithoutContext('KernelCompiler passes native assets', () async {
+    final BufferLogger logger = BufferLogger.test();
+    final StdoutHandler stdoutHandler = StdoutHandler(logger: logger, fileSystem: MemoryFileSystem.test());
+    final Completer<void> completer = Completer<void>();
+
+    final KernelCompiler kernelCompiler = KernelCompiler(
+      artifacts: Artifacts.test(),
+      fileSystem: MemoryFileSystem.test(),
+      fileSystemRoots: <String>[],
+      fileSystemScheme: '',
+      logger: logger,
+      processManager: FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(command: const <String>[
+          'Artifact.engineDartAotRuntime',
+          '--disable-dart-dev',
+          'Artifact.frontendServerSnapshotForEngineDartSdk',
+          '--sdk-root',
+          '/path/to/sdkroot/',
+          '--target=flutter',
+          '--no-print-incremental-dependencies',
+          '-Ddart.vm.profile=false',
+          '-Ddart.vm.product=false',
+          '--enable-asserts',
+          '--no-link-platform',
+          '--packages',
+          '.packages',
+          '--native-assets',
+          'path/to/native_assets.yaml',
+          '--verbosity=error',
+          'file:///path/to/main.dart',
+        ], completer: completer),
+      ]),
+      stdoutHandler: stdoutHandler,
+    );
+    final Future<CompilerOutput?> output = kernelCompiler.compile(
+      sdkRoot: '/path/to/sdkroot',
+      mainPath: '/path/to/main.dart',
+      buildMode: BuildMode.debug,
+      trackWidgetCreation: false,
+      dartDefines: const <String>[],
+      packageConfig: PackageConfig.empty,
+      packagesPath: '.packages',
+      nativeAssets: 'path/to/native_assets.yaml',
+    );
+    stdoutHandler.compilerOutput
+        ?.complete(const CompilerOutput('', 0, <Uri>[]));
+    completer.complete();
+
+    expect((await output)?.outputFilename, '');
   });
 }

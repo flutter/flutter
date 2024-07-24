@@ -12,7 +12,6 @@ import 'package:flutter_test/flutter_test.dart';
 import '../widgets/semantics_tester.dart';
 
 const TextStyle testStyle = TextStyle(
-  fontFamily: 'Ahem',
   fontSize: 10.0,
   letterSpacing: 0.0,
 );
@@ -240,7 +239,7 @@ void main() {
 
     // Keep a "down" gesture on the button
     final Offset center = tester.getCenter(find.byType(CupertinoButton));
-    await tester.startGesture(center);
+    final TestGesture gesture = await tester.startGesture(center);
     await tester.pumpAndSettle();
 
     // Check opacity
@@ -249,6 +248,10 @@ void main() {
       matching: find.byType(FadeTransition),
     ));
     expect(opacity.opacity.value, 0.4);
+
+    // Finish gesture to release resources.
+    await gesture.up();
+    await tester.pumpAndSettle();
   });
 
   testWidgets('pressedOpacity parameter', (WidgetTester tester) async {
@@ -261,7 +264,7 @@ void main() {
 
     // Keep a "down" gesture on the button
     final Offset center = tester.getCenter(find.byType(CupertinoButton));
-    await tester.startGesture(center);
+    final TestGesture gesture = await tester.startGesture(center);
     await tester.pumpAndSettle();
 
     // Check opacity
@@ -270,6 +273,10 @@ void main() {
       matching: find.byType(FadeTransition),
     ));
     expect(opacity.opacity.value, pressedOpacity);
+
+    // Finish gesture to release resources.
+    await gesture.up();
+    await tester.pumpAndSettle();
   });
 
   testWidgets('Cupertino button is semantically a button', (WidgetTester tester) async {
@@ -289,9 +296,12 @@ void main() {
       TestSemantics.root(
         children: <TestSemantics>[
           TestSemantics.rootChild(
-            actions: SemanticsAction.tap.index,
+            actions: SemanticsAction.tap.index | SemanticsAction.focus.index,
             label: 'ABC',
-            flags: SemanticsFlag.isButton.index,
+            flags: <SemanticsFlag>[
+              SemanticsFlag.isButton,
+              SemanticsFlag.isFocusable,
+            ]
           ),
         ],
       ),
@@ -478,6 +488,153 @@ void main() {
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
       kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
     );
+  });
+
+  testWidgets('Button can be focused and has default colors', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode(debugLabel: 'Button');
+    addTearDown(focusNode.dispose);
+
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    const Border defaultFocusBorder = Border.fromBorderSide(
+      BorderSide(
+        color: Color(0xcc6eadf2),
+        width: 3.5,
+        strokeAlign: BorderSide.strokeAlignOutside,
+      ),
+    );
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoButton(
+            onPressed: () { },
+            focusNode: focusNode,
+            autofocus: true,
+            child: const Text('Tap me'),
+          ),
+        ),
+      ),
+    );
+
+    expect(focusNode.hasPrimaryFocus, isTrue);
+
+    // The button has no border.
+    final BoxDecoration unfocusedDecoration = tester.widget<DecoratedBox>(
+      find.descendant(
+        of: find.byType(CupertinoButton),
+        matching: find.byType(DecoratedBox),
+      ),
+    ).decoration as BoxDecoration;
+    await tester.pump();
+    expect(unfocusedDecoration.border, null);
+
+    // When focused, the button has a light blue border outline by default.
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+    final BoxDecoration decoration = tester.widget<DecoratedBox>(
+      find.descendant(
+        of: find.byType(CupertinoButton),
+        matching: find.byType(DecoratedBox),
+      ),
+    ).decoration as BoxDecoration;
+    expect(decoration.border, defaultFocusBorder);
+  });
+
+  testWidgets('Button configures focus color', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode(debugLabel: 'Button');
+    addTearDown(focusNode.dispose);
+
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    const Color focusColor = CupertinoColors.systemGreen;
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoButton(
+            onPressed: () { },
+            focusNode: focusNode,
+            autofocus: true,
+            focusColor: focusColor,
+            child: const Text('Tap me'),
+          ),
+        ),
+      ),
+    );
+
+    expect(focusNode.hasPrimaryFocus, isTrue);
+    focusNode.requestFocus();
+    await tester.pump();
+    final BoxDecoration decoration = tester.widget<DecoratedBox>(
+      find.descendant(
+        of: find.byType(CupertinoButton),
+        matching: find.byType(DecoratedBox),
+      ),
+    ).decoration as BoxDecoration;
+    final Border border = decoration.border! as Border;
+    await tester.pumpAndSettle();
+    expect(border.top.color, focusColor);
+    expect(border.left.color, focusColor);
+    expect(border.right.color, focusColor);
+    expect(border.bottom.color, focusColor);
+  });
+
+  testWidgets('CupertinoButton.onFocusChange callback', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode(debugLabel: 'CupertinoButton');
+    addTearDown(focusNode.dispose);
+
+    bool focused = false;
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoButton(
+            onPressed: () { },
+            focusNode: focusNode,
+            onFocusChange: (bool value) {
+              focused = value;
+            },
+            child: const Text('Tap me'),
+          ),
+        ),
+      ),
+    );
+
+    focusNode.requestFocus();
+    await tester.pump();
+    expect(focused, isTrue);
+    expect(focusNode.hasFocus, isTrue);
+
+    focusNode.unfocus();
+    await tester.pump();
+    expect(focused, isFalse);
+    expect(focusNode.hasFocus, isFalse);
+  });
+
+  testWidgets('IconThemeData is not replaced by CupertinoButton', (WidgetTester tester) async {
+    const IconThemeData givenIconTheme = IconThemeData(size: 12.0);
+
+    IconThemeData? actualIconTheme;
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: IconTheme(
+            data: givenIconTheme,
+            child: CupertinoButton(
+              onPressed: () {},
+              child: Builder(
+                  builder: (BuildContext context) {
+                    actualIconTheme = IconTheme.of(context);
+
+                    return const Placeholder();
+                  }
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(actualIconTheme?.size, givenIconTheme.size);
   });
 }
 

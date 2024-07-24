@@ -2,9 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/painting.dart';
+/// @docImport 'package:flutter/cupertino.dart';
+///
+/// @docImport 'app_bar.dart';
+/// @docImport 'icon_button.dart';
+/// @docImport 'tabs.dart';
+/// @docImport 'theme_data.dart';
+library;
 
-import 'colors.dart';
+import 'package:flutter/painting.dart';
 
 /// The minimum dimension of any interactive region according to Material
 /// guidelines.
@@ -51,11 +57,13 @@ const EdgeInsets kTabLabelPadding = EdgeInsets.symmetric(horizontal: 16.0);
 const EdgeInsets kMaterialListPadding = EdgeInsets.symmetric(vertical: 8.0);
 
 /// The default color for [ThemeData.iconTheme] when [ThemeData.brightness] is
-/// [Brightness.light]. This color is used in [IconButton] to detect whether
-/// [IconTheme.of(context).color] is the same as the default color of [ThemeData.iconTheme].
-const Color kDefaultIconLightColor = Colors.white;
-
-/// The default color for [ThemeData.iconTheme] when [ThemeData.brightness] is
 /// [Brightness.dark]. This color is used in [IconButton] to detect whether
 /// [IconTheme.of(context).color] is the same as the default color of [ThemeData.iconTheme].
-const Color kDefaultIconDarkColor = Colors.black87;
+// ignore: prefer_const_constructors
+final Color kDefaultIconLightColor = Color(0xFFFFFFFF);
+
+/// The default color for [ThemeData.iconTheme] when [ThemeData.brightness] is
+/// [Brightness.light]. This color is used in [IconButton] to detect whether
+/// [IconTheme.of(context).color] is the same as the default color of [ThemeData.iconTheme].
+// ignore: prefer_const_constructors
+final Color kDefaultIconDarkColor = Color(0xDD000000);

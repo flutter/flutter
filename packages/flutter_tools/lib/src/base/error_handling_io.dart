@@ -21,9 +21,13 @@ import 'platform.dart';
 // ToolExit and a message that is more clear than the FileSystemException by
 // itself.
 
-/// On windows this is error code 2: ERROR_FILE_NOT_FOUND, and on
+/// On Windows this is error code 2: ERROR_FILE_NOT_FOUND, and on
 /// macOS/Linux it is error code 2/ENOENT: No such file or directory.
-const int kSystemCannotFindFile = 2;
+const int kSystemCodeCannotFindFile = 2;
+
+/// On Windows this error is 3: ERROR_PATH_NOT_FOUND, and on
+/// macOS/Linux, it is error code 3/ESRCH: No such process.
+const int kSystemCodePathNotFound = 3;
 
 /// A [FileSystem] that throws a [ToolExit] on certain errors.
 ///
@@ -40,8 +44,6 @@ class ErrorHandlingFileSystem extends ForwardingFileSystem {
     required FileSystem delegate,
     required Platform platform,
   }) :
-      assert(delegate != null),
-      assert(platform != null),
       _platform = platform,
       super(delegate);
 
@@ -74,24 +76,28 @@ class ErrorHandlingFileSystem extends ForwardingFileSystem {
   /// This method should be preferred to checking if it exists and
   /// then deleting, because it handles the edge case where the file or directory
   /// is deleted by a different program between the two calls.
-  static bool deleteIfExists(FileSystemEntity file, {bool recursive = false}) {
-    if (!file.existsSync()) {
+  static bool deleteIfExists(FileSystemEntity entity, {bool recursive = false}) {
+    if (!entity.existsSync()) {
       return false;
     }
     try {
-      file.deleteSync(recursive: recursive);
+      entity.deleteSync(recursive: recursive);
     } on FileSystemException catch (err) {
       // Certain error codes indicate the file could not be found. It could have
       // been deleted by a different program while the tool was running.
       // if it still exists, the file likely exists on a read-only volume.
-      if (err.osError?.errorCode != kSystemCannotFindFile || _noExitOnFailure) {
+      // This check will falsely match "3/ESRCH: No such process" on Linux/macOS,
+      // but this should be fine since this code should never come up here.
+      final bool codeCorrespondsToPathOrFileNotFound = err.osError?.errorCode == kSystemCodeCannotFindFile ||
+          err.osError?.errorCode == kSystemCodePathNotFound;
+      if (!codeCorrespondsToPathOrFileNotFound || _noExitOnFailure) {
         rethrow;
       }
-      if (file.existsSync()) {
+      if (entity.existsSync()) {
         throwToolExit(
-          'The Flutter tool tried to delete the file or directory ${file.path} but was '
-          "unable to. This may be due to the file and/or project's location on a read-only "
-          'volume. Consider relocating the project and trying again',
+          'Unable to delete file or directory at "${entity.path}". '
+          'This may be due to the project being in a read-only '
+          'volume. Consider relocating the project and trying again.',
         );
       }
     }
@@ -106,7 +112,7 @@ class ErrorHandlingFileSystem extends ForwardingFileSystem {
       return _runSync(() =>  directory(delegate.currentDirectory), platform: _platform);
     } on FileSystemException catch (err) {
       // Special handling for OS error 2 for current directory only.
-      if (err.osError?.errorCode == kSystemCannotFindFile) {
+      if (err.osError?.errorCode == kSystemCodeCannotFindFile) {
         throwToolExit(
           'Unable to read current working directory. This can happen if the directory the '
           'Flutter tool was run from was moved or deleted.'
@@ -117,23 +123,28 @@ class ErrorHandlingFileSystem extends ForwardingFileSystem {
   }
 
   @override
+  Directory get systemTempDirectory {
+    return directory(delegate.systemTempDirectory);
+  }
+
+  @override
   File file(dynamic path) => ErrorHandlingFile(
     platform: _platform,
-    fileSystem: delegate,
+    fileSystem: this,
     delegate: delegate.file(path),
   );
 
   @override
   Directory directory(dynamic path) => ErrorHandlingDirectory(
     platform: _platform,
-    fileSystem: delegate,
+    fileSystem: this,
     delegate: delegate.directory(path),
   );
 
   @override
   Link link(dynamic path) => ErrorHandlingLink(
     platform: _platform,
-    fileSystem: delegate,
+    fileSystem: this,
     delegate: delegate.link(path),
   );
 
@@ -164,16 +175,13 @@ class ErrorHandlingFile
     required this.fileSystem,
     required this.delegate,
   }) :
-    assert(platform != null),
-    assert(fileSystem != null),
-    assert(delegate != null),
     _platform = platform;
 
   @override
   final io.File delegate;
 
   @override
-  final FileSystem fileSystem;
+  final ErrorHandlingFileSystem fileSystem;
 
   final Platform _platform;
 
@@ -379,16 +387,13 @@ class ErrorHandlingDirectory
     required this.fileSystem,
     required this.delegate,
   }) :
-    assert(platform != null),
-    assert(fileSystem != null),
-    assert(delegate != null),
     _platform = platform;
 
   @override
   final io.Directory delegate;
 
   @override
-  final FileSystem fileSystem;
+  final ErrorHandlingFileSystem fileSystem;
 
   final Platform _platform;
 
@@ -413,20 +418,20 @@ class ErrorHandlingDirectory
     delegate: delegate,
   );
 
-  // For the childEntity methods, we first obtain an instance of the entity
-  // from the underlying file system, then invoke childEntity() on it, then
-  // wrap in the ErrorHandling version.
   @override
-  Directory childDirectory(String basename) =>
-    wrapDirectory(fileSystem.directory(delegate).childDirectory(basename));
+  Directory childDirectory(String basename) {
+    return fileSystem.directory(fileSystem.path.join(path, basename));
+  }
 
   @override
-  File childFile(String basename) =>
-    wrapFile(fileSystem.directory(delegate).childFile(basename));
+  File childFile(String basename) {
+    return fileSystem.file(fileSystem.path.join(path, basename));
+  }
 
   @override
-  Link childLink(String basename) =>
-    wrapLink(fileSystem.directory(delegate).childLink(basename));
+  Link childLink(String basename) {
+    return fileSystem.link(fileSystem.path.join(path, basename));
+  }
 
   @override
   void createSync({bool recursive = false}) {
@@ -518,16 +523,13 @@ class ErrorHandlingLink
     required this.fileSystem,
     required this.delegate,
   }) :
-    assert(platform != null),
-    assert(fileSystem != null),
-    assert(delegate != null),
     _platform = platform;
 
   @override
   final io.Link delegate;
 
   @override
-  final FileSystem fileSystem;
+  final ErrorHandlingFileSystem fileSystem;
 
   final Platform _platform;
 
@@ -563,7 +565,6 @@ Future<T> _run<T>(Future<T> Function() op, {
   String? failureMessage,
   String? posixPermissionSuggestion,
 }) async {
-  assert(platform != null);
   try {
     return await op();
   } on ProcessPackageExecutableNotFoundException catch (e) {
@@ -581,8 +582,10 @@ Future<T> _run<T>(Future<T> Function() op, {
   } on io.ProcessException catch (e) {
     if (platform.isWindows) {
       _handleWindowsException(e, failureMessage, e.errorCode);
-    } else if (platform.isLinux || platform.isMacOS) {
+    } else if (platform.isLinux) {
       _handlePosixException(e, failureMessage, e.errorCode, posixPermissionSuggestion);
+    } if (platform.isMacOS) {
+      _handleMacOSException(e, failureMessage, e.errorCode, posixPermissionSuggestion);
     }
     rethrow;
   }
@@ -593,7 +596,6 @@ T _runSync<T>(T Function() op, {
   String? failureMessage,
   String? posixPermissionSuggestion,
 }) {
-  assert(platform != null);
   try {
     return op();
   } on ProcessPackageExecutableNotFoundException catch (e) {
@@ -611,8 +613,10 @@ T _runSync<T>(T Function() op, {
   } on io.ProcessException catch (e) {
     if (platform.isWindows) {
       _handleWindowsException(e, failureMessage, e.errorCode);
-    } else if (platform.isLinux || platform.isMacOS) {
+    } else if (platform.isLinux) {
       _handlePosixException(e, failureMessage, e.errorCode, posixPermissionSuggestion);
+    } if (platform.isMacOS) {
+      _handleMacOSException(e, failureMessage, e.errorCode, posixPermissionSuggestion);
     }
     rethrow;
   }
@@ -676,7 +680,10 @@ class ErrorHandlingProcessManager extends ProcessManager {
         stdoutEncoding: stdoutEncoding,
         stderrEncoding: stderrEncoding,
       );
-    }, platform: _platform);
+    },
+      platform: _platform,
+      failureMessage: 'Flutter failed to run "${command.join(' ')}"',
+    );
   }
 
   @override
@@ -695,8 +702,12 @@ class ErrorHandlingProcessManager extends ProcessManager {
         environment: environment,
         includeParentEnvironment: includeParentEnvironment,
         runInShell: runInShell,
+        mode: mode,
       );
-    }, platform: _platform);
+    },
+      platform: _platform,
+      failureMessage: 'Flutter failed to run "${command.join(' ')}"',
+    );
   }
 
   @override
@@ -719,7 +730,10 @@ class ErrorHandlingProcessManager extends ProcessManager {
         stdoutEncoding: stdoutEncoding,
         stderrEncoding: stderrEncoding,
       );
-    }, platform: _platform);
+    },
+      platform: _platform,
+      failureMessage: 'Flutter failed to run "${command.join(' ')}"',
+    );
   }
 }
 
@@ -727,7 +741,7 @@ void _handlePosixException(Exception e, String? message, int errorCode, String? 
   // From:
   // https://github.com/torvalds/linux/blob/master/include/uapi/asm-generic/errno.h
   // https://github.com/torvalds/linux/blob/master/include/uapi/asm-generic/errno-base.h
-  // https://github.com/apple/darwin-xnu/blob/master/bsd/dev/dtrace/scripts/errno.d
+  // https://github.com/apple/darwin-xnu/blob/main/bsd/dev/dtrace/scripts/errno.d
   const int eperm = 1;
   const int enospc = 28;
   const int eacces = 13;
@@ -739,7 +753,6 @@ void _handlePosixException(Exception e, String? message, int errorCode, String? 
         '$message. The target device is full.'
         '\n$e\n'
         'Free up space and try again.';
-      break;
     case eperm:
     case eacces:
       final StringBuffer errorBuffer = StringBuffer();
@@ -754,12 +767,27 @@ void _handlePosixException(Exception e, String? message, int errorCode, String? 
         errorBuffer.writeln(posixPermissionSuggestion);
       }
       errorMessage = errorBuffer.toString();
-      break;
     default:
       // Caller must rethrow the exception.
       break;
   }
   _throwFileSystemException(errorMessage);
+}
+
+void _handleMacOSException(Exception e, String? message, int errorCode, String? posixPermissionSuggestion) {
+  // https://github.com/apple/darwin-xnu/blob/main/bsd/dev/dtrace/scripts/errno.d
+  const int ebadarch = 86;
+  if (errorCode == ebadarch) {
+    final StringBuffer errorBuffer = StringBuffer();
+    if (message != null) {
+      errorBuffer.writeln('$message.');
+    }
+    errorBuffer.writeln('The binary was built with the incorrect architecture to run on this machine.');
+    errorBuffer.writeln('If you are on an ARM Apple Silicon Mac, Flutter requires the Rosetta translation environment. Try running:');
+    errorBuffer.writeln('  sudo softwareupdate --install-rosetta --agree-to-license');
+    _throwFileSystemException(errorBuffer.toString());
+  }
+  _handlePosixException(e, message, errorCode, posixPermissionSuggestion);
 }
 
 void _handleWindowsException(Exception e, String? message, int errorCode) {
@@ -779,31 +807,26 @@ void _handleWindowsException(Exception e, String? message, int errorCode) {
         '$message. The flutter tool cannot access the file or directory.\n'
         'Please ensure that the SDK and/or project is installed in a location '
         'that has read/write permissions for the current user.';
-      break;
     case kDeviceFull:
       errorMessage =
         '$message. The target device is full.'
         '\n$e\n'
         'Free up space and try again.';
-      break;
     case kUserMappedSectionOpened:
       errorMessage =
         '$message. The file is being used by another program.'
         '\n$e\n'
         'Do you have an antivirus program running? '
         'Try disabling your antivirus program and try again.';
-      break;
     case kFatalDeviceHardwareError:
       errorMessage =
         '$message. There is a problem with the device driver '
         'that this file or directory is stored on.';
-      break;
     case kDeviceDoesNotExist:
       errorMessage =
         '$message. The device was not found.'
         '\n$e\n'
         'Verify the device is mounted and try again.';
-      break;
     default:
       // Caller must rethrow the exception.
       break;
@@ -816,7 +839,7 @@ void _throwFileSystemException(String? errorMessage) {
     return;
   }
   if (ErrorHandlingFileSystem._noExitOnFailure) {
-    throw Exception(errorMessage);
+    throw FileSystemException(errorMessage);
   }
   throwToolExit(errorMessage);
 }

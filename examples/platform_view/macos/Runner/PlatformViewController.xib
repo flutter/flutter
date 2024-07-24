@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="21208.1" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
+    <dependencies>
+        <deployment identifier="macosx"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="21208.1"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <customObject id="-2" userLabel="File's Owner" customClass="PlatformViewController" customModule="platform_view" customModuleProvider="target">
+            <connections>
+                <outlet property="label" destination="Eug-C1-PRv" id="wbw-1a-uP2"/>
+                <outlet property="view" destination="Hz6-mo-xeY" id="0bl-1N-x8E"/>
+            </connections>
+        </customObject>
+        <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
+        <customObject id="-3" userLabel="Application" customClass="NSObject"/>
+        <customView wantsLayer="YES" id="Hz6-mo-xeY" userLabel="Platform View">
+            <rect key="frame" x="0.0" y="0.0" width="587" height="356"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+            <subviews>
+                <stackView distribution="fill" orientation="vertical" alignment="leading" spacing="0.0" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="asX-Cr-4ZL">
+                    <rect key="frame" x="0.0" y="0.0" width="587" height="356"/>
+                    <subviews>
+                        <customView translatesAutoresizingMaskIntoConstraints="NO" id="LRL-SV-BW7" userLabel="Top">
+                            <rect key="frame" x="0.0" y="70" width="587" height="286"/>
+                            <subviews>
+                                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Eug-C1-PRv">
+                                    <rect key="frame" x="193" y="133" width="202" height="21"/>
+                                    <textFieldCell key="cell" lineBreakMode="clipping" title="Button tapped X time(s)." id="e4z-H9-rSi">
+                                        <font key="font" metaFont="system" size="18"/>
+                                        <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                        <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                    </textFieldCell>
+                                </textField>
+                                <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Jn3-XC-Bej">
+                                    <rect key="frame" x="204" y="90" width="179" height="32"/>
+                                    <buttonCell key="cell" type="push" title="Continue in Flutter View" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="1Sq-bc-nHD">
+                                        <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                        <font key="font" metaFont="system"/>
+                                    </buttonCell>
+                                    <connections>
+                                        <action selector="pop:" target="-2" id="KiK-HY-d8D"/>
+                                    </connections>
+                                </button>
+                            </subviews>
+                            <constraints>
+                                <constraint firstItem="Jn3-XC-Bej" firstAttribute="centerX" secondItem="Eug-C1-PRv" secondAttribute="centerX" id="0Wb-kD-KeP"/>
+                                <constraint firstItem="Jn3-XC-Bej" firstAttribute="top" secondItem="Eug-C1-PRv" secondAttribute="bottom" constant="16" id="55w-Yj-iSV"/>
+                                <constraint firstItem="Eug-C1-PRv" firstAttribute="centerX" secondItem="LRL-SV-BW7" secondAttribute="centerX" id="E6g-Q5-V9j"/>
+                                <constraint firstItem="Eug-C1-PRv" firstAttribute="centerY" secondItem="LRL-SV-BW7" secondAttribute="centerY" id="FPs-Lq-4vX"/>
+                            </constraints>
+                        </customView>
+                        <customView translatesAutoresizingMaskIntoConstraints="NO" id="ocC-s8-csF" userLabel="Bottom">
+                            <rect key="frame" x="0.0" y="0.0" width="587" height="70"/>
+                            <subviews>
+                                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="ibp-9J-zlZ">
+                                    <rect key="frame" x="18" y="12" width="100" height="35"/>
+                                    <textFieldCell key="cell" lineBreakMode="clipping" title="macOS" id="gQ0-QK-wuE">
+                                        <font key="font" metaFont="system" size="30"/>
+                                        <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                        <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                    </textFieldCell>
+                                </textField>
+                                <button verticalHuggingPriority="750" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="p1C-yr-atP">
+                                    <rect key="frame" x="540" y="13" width="34" height="32"/>
+                                    <buttonCell key="cell" type="push" title="+" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="Zhj-im-lGH">
+                                        <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                        <font key="font" metaFont="system"/>
+                                    </buttonCell>
+                                    <connections>
+                                        <action selector="increment:" target="-2" id="t7P-hc-bBq"/>
+                                    </connections>
+                                </button>
+                            </subviews>
+                            <constraints>
+                                <constraint firstAttribute="bottom" secondItem="p1C-yr-atP" secondAttribute="bottom" constant="20" symbolic="YES" id="O6I-0q-C2q"/>
+                                <constraint firstItem="ibp-9J-zlZ" firstAttribute="leading" secondItem="ocC-s8-csF" secondAttribute="leading" constant="20" symbolic="YES" id="RaJ-kB-iMn"/>
+                                <constraint firstAttribute="bottom" secondItem="ibp-9J-zlZ" secondAttribute="bottom" constant="12" id="bHW-eU-Qry"/>
+                                <constraint firstAttribute="height" constant="70" id="ipW-qa-zLH"/>
+                                <constraint firstAttribute="trailing" secondItem="p1C-yr-atP" secondAttribute="trailing" constant="20" symbolic="YES" id="rQt-7N-1IH"/>
+                            </constraints>
+                        </customView>
+                    </subviews>
+                    <visibilityPriorities>
+                        <integer value="1000"/>
+                        <integer value="1000"/>
+                    </visibilityPriorities>
+                    <customSpacing>
+                        <real value="3.4028234663852886e+38"/>
+                        <real value="3.4028234663852886e+38"/>
+                    </customSpacing>
+                </stackView>
+            </subviews>
+            <constraints>
+                <constraint firstAttribute="trailing" secondItem="asX-Cr-4ZL" secondAttribute="trailing" id="2mi-qA-Xg7"/>
+                <constraint firstAttribute="bottom" secondItem="asX-Cr-4ZL" secondAttribute="bottom" id="4yQ-Dc-p85"/>
+                <constraint firstItem="asX-Cr-4ZL" firstAttribute="top" secondItem="Hz6-mo-xeY" secondAttribute="top" id="QUl-ar-P9E"/>
+                <constraint firstItem="asX-Cr-4ZL" firstAttribute="leading" secondItem="Hz6-mo-xeY" secondAttribute="leading" id="o34-Uf-9SV"/>
+            </constraints>
+            <point key="canvasLocation" x="138.5" y="96"/>
+        </customView>
+    </objects>
+</document>

@@ -144,10 +144,8 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
   String get _androidScanCodeMap {
     final OutputLines<int> lines = OutputLines<int>('Android scancode map');
     for (final PhysicalKeyEntry entry in keyData.entries) {
-      if (entry.androidScanCodes != null) {
-        for (final int code in entry.androidScanCodes) {
-          lines.add(code, '  $code: PhysicalKeyboardKey.${entry.constantName},');
-        }
+      for (final int code in entry.androidScanCodes) {
+        lines.add(code, '  $code: PhysicalKeyboardKey.${entry.constantName},');
       }
     }
     return lines.sortedJoin().trimRight();
@@ -296,9 +294,7 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
   String get _fuchsiaHidCodeMap {
     final StringBuffer fuchsiaScanCodeMap = StringBuffer();
     for (final PhysicalKeyEntry entry in keyData.entries) {
-      if (entry.usbHidCode != null) {
-        fuchsiaScanCodeMap.writeln('  ${toHex(entry.usbHidCode)}: PhysicalKeyboardKey.${entry.constantName},');
-      }
+      fuchsiaScanCodeMap.writeln('  ${toHex(entry.usbHidCode)}: PhysicalKeyboardKey.${entry.constantName},');
     }
     return fuchsiaScanCodeMap.toString().trimRight();
   }
@@ -328,9 +324,7 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
   String get _webNumpadMap {
     final OutputLines<String> lines = OutputLines<String>('Web numpad map');
     for (final LogicalKeyEntry entry in _numpadLogicalKeyData) {
-      if (entry.name != null) {
-        lines.add(entry.name, "  '${entry.name}': LogicalKeyboardKey.${entry.constantName},");
-      }
+      lines.add(entry.name, "  '${entry.name}': LogicalKeyboardKey.${entry.constantName},");
     }
     return lines.sortedJoin().trimRight();
   }

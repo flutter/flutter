@@ -6,8 +6,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
-
 /// Unit tests error.dart's usage via ErrorWidget.
 void main() {
   const String errorMessage = 'Some error message';

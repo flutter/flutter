@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:intl/intl.dart';
+library;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart' as intl;
@@ -9,6 +12,10 @@ import 'package:intl/intl.dart' as intl;
 import 'l10n/generated_cupertino_localizations.dart';
 import 'utils/date_localizations.dart' as util;
 import 'widgets_localizations.dart';
+
+// Examples can assume:
+// import 'package:flutter_localizations/flutter_localizations.dart';
+// import 'package:flutter/cupertino.dart';
 
 /// Implementation of localized strings for Cupertino widgets using the `intl`
 /// package for date and time formatting.
@@ -32,11 +39,11 @@ import 'widgets_localizations.dart';
 /// app supports with [CupertinoApp.supportedLocales]:
 ///
 /// ```dart
-/// CupertinoApp(
+/// const CupertinoApp(
 ///   localizationsDelegates: GlobalCupertinoLocalizations.delegates,
-///   supportedLocales: [
-///     const Locale('en', 'US'), // American English
-///     const Locale('he', 'IL'), // Israeli Hebrew
+///   supportedLocales: <Locale>[
+///     Locale('en', 'US'), // American English
+///     Locale('he', 'IL'), // Israeli Hebrew
 ///     // ...
 ///   ],
 ///   // ...
@@ -57,34 +64,28 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
     required String localeName,
     required intl.DateFormat fullYearFormat,
     required intl.DateFormat dayFormat,
+    required intl.DateFormat weekdayFormat,
     required intl.DateFormat mediumDateFormat,
     required intl.DateFormat singleDigitHourFormat,
     required intl.DateFormat singleDigitMinuteFormat,
     required intl.DateFormat doubleDigitMinuteFormat,
     required intl.DateFormat singleDigitSecondFormat,
     required intl.NumberFormat decimalFormat,
-  }) : assert(localeName != null),
-       _localeName = localeName,
-       assert(fullYearFormat != null),
+  }) : _localeName = localeName,
        _fullYearFormat = fullYearFormat,
-       assert(dayFormat != null),
        _dayFormat = dayFormat,
-       assert(mediumDateFormat != null),
+       _weekdayFormat = weekdayFormat,
        _mediumDateFormat = mediumDateFormat,
-       assert(singleDigitHourFormat != null),
        _singleDigitHourFormat = singleDigitHourFormat,
-       assert(singleDigitMinuteFormat != null),
        _singleDigitMinuteFormat = singleDigitMinuteFormat,
-       assert(doubleDigitMinuteFormat != null),
        _doubleDigitMinuteFormat = doubleDigitMinuteFormat,
-       assert(singleDigitSecondFormat != null),
        _singleDigitSecondFormat = singleDigitSecondFormat,
-       assert(decimalFormat != null),
        _decimalFormat =decimalFormat;
 
   final String _localeName;
   final intl.DateFormat _fullYearFormat;
   final intl.DateFormat _dayFormat;
+  final intl.DateFormat _weekdayFormat;
   final intl.DateFormat _mediumDateFormat;
   final intl.DateFormat _singleDigitHourFormat;
   final intl.DateFormat _singleDigitMinuteFormat;
@@ -106,9 +107,23 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
   }
 
   @override
-  String datePickerDayOfMonth(int dayIndex) {
-    // Year and month doesn't matter since we just want to day formatted.
-    return _dayFormat.format(DateTime.utc(0, 0, dayIndex));
+  String datePickerStandaloneMonth(int monthIndex) {
+    // It doesn't actually have anything to do with _fullYearFormat. It's just
+    // taking advantage of the fact that _fullYearFormat loaded the needed
+    // locale's symbols.
+    //
+    // Because this will be used without specifying any day of month,
+    // in most cases it should be capitalized (according to rules in specific language).
+    return intl.toBeginningOfSentenceCase(_fullYearFormat.dateSymbols.STANDALONEMONTHS[monthIndex - 1]) ??
+        _fullYearFormat.dateSymbols.STANDALONEMONTHS[monthIndex - 1];
+  }
+
+  @override
+  String datePickerDayOfMonth(int dayIndex, [int? weekDay]) {
+    return weekDay != null
+      ? '${_weekdayFormat.format(DateTime.utc(1, 1, weekDay))} ${_dayFormat.format(DateTime.utc(1, 1, dayIndex))}'
+      // Year and month doesn't matter since we just want to day formatted.
+      : _dayFormat.format(DateTime.utc(0, 0, dayIndex));
   }
 
   @override
@@ -438,11 +453,11 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
   /// app supports with [CupertinoApp.supportedLocales]:
   ///
   /// ```dart
-  /// CupertinoApp(
+  /// const CupertinoApp(
   ///   localizationsDelegates: GlobalCupertinoLocalizations.delegates,
-  ///   supportedLocales: [
-  ///     const Locale('en', 'US'), // English
-  ///     const Locale('he', 'IL'), // Hebrew
+  ///   supportedLocales: <Locale>[
+  ///     Locale('en', 'US'), // English
+  ///     Locale('he', 'IL'), // Hebrew
   ///   ],
   ///   // ...
   /// )
@@ -476,6 +491,7 @@ class _GlobalCupertinoLocalizationsDelegate extends LocalizationsDelegate<Cupert
 
       late intl.DateFormat fullYearFormat;
       late intl.DateFormat dayFormat;
+      late intl.DateFormat weekdayFormat;
       late intl.DateFormat mediumDateFormat;
       // We don't want any additional decoration here. The am/pm is handled in
       // the date picker. We just want an hour number localized.
@@ -488,6 +504,7 @@ class _GlobalCupertinoLocalizationsDelegate extends LocalizationsDelegate<Cupert
       void loadFormats(String? locale) {
         fullYearFormat = intl.DateFormat.y(locale);
         dayFormat = intl.DateFormat.d(locale);
+        weekdayFormat = intl.DateFormat.E(locale);
         mediumDateFormat = intl.DateFormat.MMMEd(locale);
         // TODO(xster): fix when https://github.com/dart-lang/intl/issues/207 is resolved.
         singleDigitHourFormat = intl.DateFormat('HH', locale);
@@ -509,6 +526,7 @@ class _GlobalCupertinoLocalizationsDelegate extends LocalizationsDelegate<Cupert
         locale,
         fullYearFormat,
         dayFormat,
+        weekdayFormat,
         mediumDateFormat,
         singleDigitHourFormat,
         singleDigitMinuteFormat,

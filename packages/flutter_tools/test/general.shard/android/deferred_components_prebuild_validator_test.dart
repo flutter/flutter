@@ -65,7 +65,7 @@ void main() {
     buildGradleTemplate.createSync(recursive: true);
     androidManifestTemplate.createSync(recursive: true);
     buildGradleTemplate.writeAsStringSync('fake build.gradle template {{componentName}}', flush: true, mode: FileMode.append);
-    androidManifestTemplate.writeAsStringSync('fake AndroidManigest.xml template {{componentName}}', flush: true, mode: FileMode.append);
+    androidManifestTemplate.writeAsStringSync('fake AndroidManifest.xml template {{componentName}}', flush: true, mode: FileMode.append);
 
     final DeferredComponentsPrebuildValidator validator = DeferredComponentsPrebuildValidator(
       projectDir,
@@ -107,7 +107,7 @@ void main() {
     buildGradleTemplate.createSync(recursive: true);
     androidManifestTemplate.createSync(recursive: true);
     buildGradleTemplate.writeAsStringSync('fake build.gradle template {{componentName}}', flush: true, mode: FileMode.append);
-    androidManifestTemplate.writeAsStringSync('fake AndroidManigest.xml template {{componentName}}', flush: true, mode: FileMode.append);
+    androidManifestTemplate.writeAsStringSync('fake AndroidManifest.xml template {{componentName}}', flush: true, mode: FileMode.append);
 
     final DeferredComponentsPrebuildValidator validator = DeferredComponentsPrebuildValidator(
       projectDir,
@@ -149,7 +149,7 @@ void main() {
     buildGradleTemplate.createSync(recursive: true);
     androidManifestTemplate.createSync(recursive: true);
     buildGradleTemplate.writeAsStringSync('fake build.gradle template {{componentName}}', flush: true, mode: FileMode.append);
-    androidManifestTemplate.writeAsStringSync('fake AndroidManigest.xml template {{componentName}}', flush: true, mode: FileMode.append);
+    androidManifestTemplate.writeAsStringSync('fake AndroidManifest.xml template {{componentName}}', flush: true, mode: FileMode.append);
 
     final DeferredComponentsPrebuildValidator validator = DeferredComponentsPrebuildValidator(
       projectDir,

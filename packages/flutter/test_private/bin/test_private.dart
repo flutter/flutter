@@ -195,7 +195,13 @@ class TestCase {
 
     // Use Flutter's analysis_options.yaml file from packages/flutter.
     File(path.join(tmpdir.absolute.path, 'analysis_options.yaml'))
-        .writeAsStringSync('include: ${path.toUri(path.join(flutterRoot.path, 'packages', 'flutter', 'analysis_options.yaml'))}');
+        .writeAsStringSync(
+          'include: ${path.toUri(path.join(flutterRoot.path, 'packages', 'flutter', 'analysis_options.yaml'))}\n'
+          'linter:\n'
+          '  rules:\n'
+          // The code does wonky things with the part-of directive that cause false positives.
+          '    unreachable_from_main: false'
+    );
 
     return true;
   }
@@ -225,7 +231,7 @@ class TestCase {
     for (final File test in tests) {
       final String testPath = path.join(path.dirname(test.path), 'lib', path.basenameWithoutExtension(test.path));
       final ProcessRunnerResult result = await runner.runProcess(
-        <String>[flutter, 'test', '--enable-experiment=non-nullable', '--no-sound-null-safety', '--null-assertions', testPath],
+        <String>[flutter, 'test', testPath],
         failOk: true,
       );
       if (result.exitCode != 0) {

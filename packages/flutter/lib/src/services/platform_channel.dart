@@ -7,18 +7,48 @@ import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
 
+import '_background_isolate_binary_messenger_io.dart'
+  if (dart.library.js_util) '_background_isolate_binary_messenger_web.dart';
+
 import 'binary_messenger.dart';
 import 'binding.dart';
-import 'debug.dart' show debugProfilePlatformChannels;
+import 'debug.dart';
 import 'message_codec.dart';
 import 'message_codecs.dart';
 
+export '_background_isolate_binary_messenger_io.dart'
+  if (dart.library.js_util) '_background_isolate_binary_messenger_web.dart';
+
 export 'binary_messenger.dart' show BinaryMessenger;
+export 'binding.dart' show RootIsolateToken;
 export 'message_codec.dart' show MessageCodec, MethodCall, MethodCodec;
 
-bool _debugProfilePlatformChannelsIsRunning = false;
-const Duration _debugProfilePlatformChannelsRate = Duration(seconds: 1);
-final Expando<BinaryMessenger> _debugBinaryMessengers = Expando<BinaryMessenger>();
+/// Profile and print statistics on Platform Channel usage.
+///
+/// When this is true statistics about the usage of Platform Channels will be
+/// printed out periodically to the console and Timeline events will show the
+/// time between sending and receiving a message (encoding and decoding time
+/// excluded).
+///
+/// The statistics include the total bytes transmitted and the average number of
+/// bytes per invocation in the last quantum. "Up" means in the direction of
+/// Flutter to the host platform, "down" is the host platform to flutter.
+bool get shouldProfilePlatformChannels => kProfilePlatformChannels || (!kReleaseMode && debugProfilePlatformChannels);
+
+/// Controls whether platform channel usage can be debugged in release mode.
+///
+/// See also:
+///
+/// * [shouldProfilePlatformChannels], which checks both
+///   [kProfilePlatformChannels] and [debugProfilePlatformChannels] for the
+///   current run mode.
+/// * [debugProfilePlatformChannels], which determines whether platform
+///   channel usage can be debugged in non-release mode.
+const bool kProfilePlatformChannels = false;
+
+bool _profilePlatformChannelsIsRunning = false;
+const Duration _profilePlatformChannelsRate = Duration(seconds: 1);
+final Expando<BinaryMessenger> _profiledBinaryMessengers = Expando<BinaryMessenger>();
 
 class _ProfiledBinaryMessenger implements BinaryMessenger {
   const _ProfiledBinaryMessenger(this.proxy, this.channelTypeName, this.codecTypeName);
@@ -32,14 +62,13 @@ class _ProfiledBinaryMessenger implements BinaryMessenger {
   }
 
   Future<ByteData?>? sendWithPostfix(String channel, String postfix, ByteData? message) async {
-    final TimelineTask task = TimelineTask();
     _debugRecordUpStream(channelTypeName, '$channel$postfix', codecTypeName, message);
-    task.start('Platform Channel send $channel$postfix');
+    final TimelineTask timelineTask = TimelineTask()..start('Platform Channel send $channel$postfix');
     final ByteData? result;
     try {
       result = await proxy.send(channel, message);
     } finally {
-      task.finish();
+      timelineTask.finish();
     }
     _debugRecordDownStream(channelTypeName, '$channel$postfix', codecTypeName, result);
     return result;
@@ -82,17 +111,17 @@ class _PlatformChannelStats {
   double get averageDownPayload => _downBytes / _downCount;
 }
 
-final Map<String, _PlatformChannelStats> _debugProfilePlatformChannelsStats = <String, _PlatformChannelStats>{};
+final Map<String, _PlatformChannelStats> _profilePlatformChannelsStats = <String, _PlatformChannelStats>{};
 
 Future<void> _debugLaunchProfilePlatformChannels() async {
-  if (!_debugProfilePlatformChannelsIsRunning) {
-    _debugProfilePlatformChannelsIsRunning = true;
-    await Future<dynamic>.delayed(_debugProfilePlatformChannelsRate);
-    _debugProfilePlatformChannelsIsRunning = false;
+  if (!_profilePlatformChannelsIsRunning) {
+    _profilePlatformChannelsIsRunning = true;
+    await Future<dynamic>.delayed(_profilePlatformChannelsRate);
+    _profilePlatformChannelsIsRunning = false;
     final StringBuffer log = StringBuffer();
     log.writeln('Platform Channel Stats:');
     final List<_PlatformChannelStats> allStats =
-        _debugProfilePlatformChannelsStats.values.toList();
+        _profilePlatformChannelsStats.values.toList();
     // Sort highest combined bandwidth first.
     allStats.sort((_PlatformChannelStats x, _PlatformChannelStats y) =>
         (y.upBytes + y.downBytes) - (x.upBytes + x.downBytes));
@@ -101,14 +130,14 @@ Future<void> _debugLaunchProfilePlatformChannels() async {
           '  (name:"${stats.channel}" type:"${stats.type}" codec:"${stats.codec}" upBytes:${stats.upBytes} upBytes_avg:${stats.averageUpPayload.toStringAsFixed(1)} downBytes:${stats.downBytes} downBytes_avg:${stats.averageDownPayload.toStringAsFixed(1)})');
     }
     debugPrint(log.toString());
-    _debugProfilePlatformChannelsStats.clear();
+    _profilePlatformChannelsStats.clear();
   }
 }
 
 void _debugRecordUpStream(String channelTypeName, String name,
     String codecTypeName, ByteData? bytes) {
   final _PlatformChannelStats stats =
-      _debugProfilePlatformChannelsStats[name] ??=
+      _profilePlatformChannelsStats[name] ??=
           _PlatformChannelStats(name, codecTypeName, channelTypeName);
   stats.addUpStream(bytes?.lengthInBytes ?? 0);
   _debugLaunchProfilePlatformChannels();
@@ -117,10 +146,16 @@ void _debugRecordUpStream(String channelTypeName, String name,
 void _debugRecordDownStream(String channelTypeName, String name,
     String codecTypeName, ByteData? bytes) {
   final _PlatformChannelStats stats =
-      _debugProfilePlatformChannelsStats[name] ??=
+      _profilePlatformChannelsStats[name] ??=
           _PlatformChannelStats(name, codecTypeName, channelTypeName);
   stats.addDownStream(bytes?.lengthInBytes ?? 0);
   _debugLaunchProfilePlatformChannels();
+}
+
+BinaryMessenger _findBinaryMessenger() {
+  return !kIsWeb && ServicesBinding.rootIsolateToken == null
+      ? BackgroundIsolateBinaryMessenger.instance
+      : ServicesBinding.instance.defaultBinaryMessenger;
 }
 
 /// A named channel for communicating with platform plugins using asynchronous
@@ -143,16 +178,15 @@ void _debugRecordDownStream(String channelTypeName, String name,
 /// ordering. Applications can assume messages sent via a built-in
 /// [BasicMessageChannel] are delivered in the same order as they're sent.
 ///
-/// See: <https://flutter.dev/platform-channels/>
+/// See: <https://flutter.dev/to/platform-channels/>
 class BasicMessageChannel<T> {
-  /// Creates a [BasicMessageChannel] with the specified [name], [codec] and [binaryMessenger].
+  /// Creates a [BasicMessageChannel] with the specified [name], [codec] and
+  /// [binaryMessenger].
   ///
-  /// The [name] and [codec] arguments cannot be null. The default [ServicesBinding.defaultBinaryMessenger]
-  /// instance is used if [binaryMessenger] is null.
+  /// The default [ServicesBinding.defaultBinaryMessenger] instance is used if
+  /// [binaryMessenger] is null.
   const BasicMessageChannel(this.name, this.codec, { BinaryMessenger? binaryMessenger })
-      : assert(name != null),
-        assert(codec != null),
-        _binaryMessenger = binaryMessenger;
+      : _binaryMessenger = binaryMessenger;
 
   /// The logical channel on which communication happens, not null.
   final String name;
@@ -160,12 +194,16 @@ class BasicMessageChannel<T> {
   /// The message codec used by this channel, not null.
   final MessageCodec<T> codec;
 
-  /// The messenger which sends the bytes for this channel, not null.
+  /// The messenger which sends the bytes for this channel.
+  ///
+  /// On the root isolate or web, this defaults to the
+  /// [ServicesBinding.defaultBinaryMessenger]. In other contexts the default
+  /// value is a [BackgroundIsolateBinaryMessenger] from
+  /// [BackgroundIsolateBinaryMessenger.ensureInitialized].
   BinaryMessenger get binaryMessenger {
-    final BinaryMessenger result =
-        _binaryMessenger ?? ServicesBinding.instance.defaultBinaryMessenger;
-    return !kReleaseMode && debugProfilePlatformChannels
-        ? _debugBinaryMessengers[this] ??= _ProfiledBinaryMessenger(
+    final BinaryMessenger result = _binaryMessenger ?? _findBinaryMessenger();
+    return shouldProfilePlatformChannels
+        ? _profiledBinaryMessengers[this] ??= _ProfiledBinaryMessenger(
             // ignore: no_runtimetype_tostring
             result, runtimeType.toString(), codec.runtimeType.toString())
         : result;
@@ -226,19 +264,18 @@ class BasicMessageChannel<T> {
 /// they're sent.
 /// {@endtemplate}
 ///
-/// See: <https://flutter.dev/platform-channels/>
+/// See: <https://flutter.dev/to/platform-channels/>
+@pragma('vm:keep-name')
 class MethodChannel {
   /// Creates a [MethodChannel] with the specified [name].
   ///
   /// The [codec] used will be [StandardMethodCodec], unless otherwise
   /// specified.
   ///
-  /// The [name] and [codec] arguments cannot be null. The default [ServicesBinding.defaultBinaryMessenger]
-  /// instance is used if [binaryMessenger] is null.
+  /// The default [ServicesBinding.defaultBinaryMessenger] instance is used if
+  /// [binaryMessenger] is null.
   const MethodChannel(this.name, [this.codec = const StandardMethodCodec(), BinaryMessenger? binaryMessenger ])
-      : assert(name != null),
-        assert(codec != null),
-        _binaryMessenger = binaryMessenger;
+      : _binaryMessenger = binaryMessenger;
 
   /// The logical channel on which communication happens, not null.
   final String name;
@@ -246,14 +283,16 @@ class MethodChannel {
   /// The message codec used by this channel, not null.
   final MethodCodec codec;
 
-  /// The messenger used by this channel to send platform messages.
+  /// The messenger which sends the bytes for this channel.
   ///
-  /// The messenger may not be null.
+  /// On the root isolate or web, this defaults to the
+  /// [ServicesBinding.defaultBinaryMessenger]. In other contexts the default
+  /// value is a [BackgroundIsolateBinaryMessenger] from
+  /// [BackgroundIsolateBinaryMessenger.ensureInitialized].
   BinaryMessenger get binaryMessenger {
-    final BinaryMessenger result =
-        _binaryMessenger ?? ServicesBinding.instance.defaultBinaryMessenger;
-    return !kReleaseMode && debugProfilePlatformChannels
-        ? _debugBinaryMessengers[this] ??= _ProfiledBinaryMessenger(
+    final BinaryMessenger result = _binaryMessenger ?? _findBinaryMessenger();
+    return shouldProfilePlatformChannels
+        ? _profiledBinaryMessengers[this] ??= _ProfiledBinaryMessenger(
             // ignore: no_runtimetype_tostring
             result, runtimeType.toString(), codec.runtimeType.toString())
         : result;
@@ -268,10 +307,10 @@ class MethodChannel {
   /// [binaryMessenger]'s [BinaryMessenger.send] method.
   ///
   /// If the result is null and `missingOk` is true, this returns null. (This is
-  /// the behaviour of [OptionalMethodChannel.invokeMethod].)
+  /// the behavior of [OptionalMethodChannel.invokeMethod].)
   ///
   /// If the result is null and `missingOk` is false, this throws a
-  /// [MissingPluginException]. (This is the behaviour of
+  /// [MissingPluginException]. (This is the behavior of
   /// [MethodChannel.invokeMethod].)
   ///
   /// Otherwise, the result is decoded using the [codec]'s
@@ -281,10 +320,9 @@ class MethodChannel {
   /// nullable.
   @optionalTypeArgs
   Future<T?> _invokeMethod<T>(String method, { required bool missingOk, dynamic arguments }) async {
-    assert(method != null);
     final ByteData input = codec.encodeMethodCall(MethodCall(method, arguments));
     final ByteData? result =
-      !kReleaseMode && debugProfilePlatformChannels ?
+      shouldProfilePlatformChannels ?
         await (binaryMessenger as _ProfiledBinaryMessenger).sendWithPostfix(name, '#$method', input) :
         await binaryMessenger.send(name, input);
     if (result == null) {
@@ -323,13 +361,10 @@ class MethodChannel {
   /// {@tool snippet}
   ///
   /// The code might be packaged up as a musical plugin, see
-  /// <https://flutter.dev/developing-packages/>:
+  /// <https://flutter.dev/to/develop-packages>:
   ///
   /// ```dart
-  /// class Music {
-  ///   // Class cannot be instantiated.
-  ///   const Music._();
-  ///
+  /// abstract final class Music {
   ///   static const MethodChannel _channel = MethodChannel('music');
   ///
   ///   static Future<bool> isLicensed() async {
@@ -476,7 +511,7 @@ class MethodChannel {
   ///
   /// Dart generics are reified, meaning that an untyped `List<dynamic>` cannot
   /// masquerade as a `List<T>`. Since [invokeMethod] can only return dynamic
-  /// maps, we instead create a new typed list using [List.cast].
+  /// lists, we instead create a new typed list using [List.cast].
   ///
   /// See also:
   ///
@@ -516,7 +551,7 @@ class MethodChannel {
   /// Any other exception results in an error envelope being sent.
   void setMethodCallHandler(Future<dynamic> Function(MethodCall call)? handler) {
     assert(
-      _binaryMessenger != null || ServicesBinding.instance != null,
+      _binaryMessenger != null || BindingBase.debugBindingType() != null,
       'Cannot set the method call handler before the binary messenger has been initialized. '
       'This happens when you call setMethodCallHandler() before the WidgetsFlutterBinding '
       'has been initialized. You can fix this by either calling WidgetsFlutterBinding.ensureInitialized() '
@@ -572,7 +607,7 @@ class OptionalMethodChannel extends MethodChannel {
 /// Stream setup requests are encoded into binary before being sent,
 /// and binary events and errors received are decoded into Dart values.
 /// The [MethodCodec] used must be compatible with the one used by the platform
-/// plugin. This can be achieved by creating an `EventChannel` counterpart of
+/// plugin. This can be achieved by creating an [EventChannel] counterpart of
 /// this channel on the platform side. The Dart type of events sent and received
 /// is `dynamic`, but only values supported by the specified [MethodCodec] can
 /// be used.
@@ -580,7 +615,7 @@ class OptionalMethodChannel extends MethodChannel {
 /// The logical identity of the channel is given by its name. Identically named
 /// channels will interfere with each other's communication.
 ///
-/// See: <https://flutter.dev/platform-channels/>
+/// See: <https://flutter.dev/to/platform-channels/>
 class EventChannel {
   /// Creates an [EventChannel] with the specified [name].
   ///
@@ -590,9 +625,7 @@ class EventChannel {
   /// Neither [name] nor [codec] may be null. The default [ServicesBinding.defaultBinaryMessenger]
   /// instance is used if [binaryMessenger] is null.
   const EventChannel(this.name, [this.codec = const StandardMethodCodec(), BinaryMessenger? binaryMessenger])
-      : assert(name != null),
-        assert(codec != null),
-        _binaryMessenger = binaryMessenger;
+      : _binaryMessenger = binaryMessenger;
 
   /// The logical channel on which communication happens, not null.
   final String name;
@@ -600,8 +633,14 @@ class EventChannel {
   /// The message codec used by this channel, not null.
   final MethodCodec codec;
 
-  /// The messenger used by this channel to send platform messages, not null.
-  BinaryMessenger get binaryMessenger => _binaryMessenger ?? ServicesBinding.instance.defaultBinaryMessenger;
+  /// The messenger which sends the bytes for this channel.
+  ///
+  /// On the root isolate or web, this defaults to the
+  /// [ServicesBinding.defaultBinaryMessenger]. In other contexts the default
+  /// value is a [BackgroundIsolateBinaryMessenger] from
+  /// [BackgroundIsolateBinaryMessenger.ensureInitialized].
+  BinaryMessenger get binaryMessenger =>
+      _binaryMessenger ?? _findBinaryMessenger();
   final BinaryMessenger? _binaryMessenger;
 
   /// Sets up a broadcast stream for receiving events on this channel.

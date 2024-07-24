@@ -3,6 +3,9 @@
 // found in the LICENSE file.
 
 @TestOn('!chrome')
+library;
+
+import 'dart:convert';
 import 'dart:ui' as ui show Image;
 
 import 'package:flutter/foundation.dart';
@@ -16,55 +19,36 @@ import '../image_data.dart';
 ByteData testByteData(double scale) => ByteData(8)..setFloat64(0, scale);
 double scaleOf(ByteData data) => data.getFloat64(0);
 
-const String testManifest = '''
-{
-  "assets/image.png" : [
-    "assets/image.png",
-    "assets/1.5x/image.png",
-    "assets/2.0x/image.png",
-    "assets/3.0x/image.png",
-    "assets/4.0x/image.png"
-  ]
-}
-''';
+final Map<Object?, Object?> testManifest = <Object?, Object?>{
+  'assets/image.png' : <Map<String, Object>>[
+    <String, String>{'asset': 'assets/image.png'},
+    <String, Object>{'asset': 'assets/1.5x/image.png', 'dpr': 1.5},
+    <String, Object>{'asset': 'assets/2.0x/image.png', 'dpr': 2.0},
+    <String, Object>{'asset': 'assets/3.0x/image.png', 'dpr': 3.0},
+    <String, Object>{'asset': 'assets/4.0x/image.png', 'dpr': 4.0}
+  ],
+};
 
 class TestAssetBundle extends CachingAssetBundle {
-  TestAssetBundle({ this.manifest = testManifest });
+  TestAssetBundle({ required Map<Object?, Object?> manifest }) {
+    this.manifest = const StandardMessageCodec().encodeMessage(manifest)!;
+  }
 
-  final String manifest;
+  late final ByteData manifest;
 
   @override
   Future<ByteData> load(String key) {
-    late ByteData data;
-    switch (key) {
-      case 'assets/image.png':
-        data = testByteData(1.0);
-        break;
-      case 'assets/1.0x/image.png':
-        data = testByteData(10.0); // see "...with a main asset and a 1.0x asset"
-        break;
-      case 'assets/1.5x/image.png':
-        data = testByteData(1.5);
-        break;
-      case 'assets/2.0x/image.png':
-        data = testByteData(2.0);
-        break;
-      case 'assets/3.0x/image.png':
-        data = testByteData(3.0);
-        break;
-      case 'assets/4.0x/image.png':
-        data = testByteData(4.0);
-        break;
-    }
+    final ByteData data = switch (key) {
+      'AssetManifest.bin'     => manifest,
+      'assets/image.png'      => testByteData(1.0),
+      'assets/1.0x/image.png' => testByteData(10.0), // see "...with a main asset and a 1.0x asset"
+      'assets/1.5x/image.png' => testByteData(1.5),
+      'assets/2.0x/image.png' => testByteData(2.0),
+      'assets/3.0x/image.png' => testByteData(3.0),
+      'assets/4.0x/image.png' => testByteData(4.0),
+      _ => throw ArgumentError('Unexpected key: $key'),
+    };
     return SynchronousFuture<ByteData>(data);
-  }
-
-  @override
-  Future<String> loadString(String key, { bool cache = true }) {
-    if (key == 'AssetManifest.json') {
-      return SynchronousFuture<String>(manifest);
-    }
-    return SynchronousFuture<String>('');
   }
 
   @override
@@ -78,16 +62,15 @@ class FakeImageStreamCompleter extends ImageStreamCompleter {
 }
 
 class TestAssetImage extends AssetImage {
-  const TestAssetImage(super.name, this.images);
+  const TestAssetImage(super.assetName, this.images);
 
   final Map<double, ui.Image> images;
 
   @override
-  ImageStreamCompleter loadBuffer(AssetBundleImageKey key, DecoderBufferCallback decode) {
+  ImageStreamCompleter loadImage(AssetBundleImageKey key, ImageDecoderCallback decode) {
     late ImageInfo imageInfo;
     key.bundle.load(key.name).then<void>((ByteData data) {
       final ui.Image image = images[scaleOf(data)]!;
-      assert(image != null, 'Expected ${scaleOf(data)} to have a key in $images');
       imageInfo = ImageInfo(image: image, scale: key.scale);
     });
     return FakeImageStreamCompleter(
@@ -106,7 +89,7 @@ Widget buildImageAtRatio(String imageName, Key key, double ratio, bool inferSize
       devicePixelRatio: ratio,
     ),
     child: DefaultAssetBundle(
-      bundle: bundle ?? TestAssetBundle(),
+      bundle: bundle ?? TestAssetBundle(manifest: testManifest),
       child: Center(
         child: inferSize ?
           Image(
@@ -156,19 +139,24 @@ RenderImage getRenderImage(WidgetTester tester, Key key) {
 }
 
 Future<void> pumpTreeToLayout(WidgetTester tester, Widget widget) {
-  const Duration pumpDuration = Duration.zero;
-  const EnginePhase pumpPhase = EnginePhase.layout;
-  return tester.pumpWidget(widget, pumpDuration, pumpPhase);
+  return tester.pumpWidget(widget, duration: Duration.zero, phase: EnginePhase.layout);
 }
 
 void main() {
   const String image = 'assets/image.png';
 
   final Map<double, ui.Image> images = <double, ui.Image>{};
+
   setUpAll(() async {
     for (final double scale in const <double>[0.5, 1.0, 1.5, 2.0, 4.0, 10.0]) {
       final int dimension = (48 * scale).floor();
       images[scale] = await createTestImage(width: dimension, height: dimension);
+    }
+  });
+
+  tearDownAll(() {
+    for (final ui.Image image in images.values) {
+      image.dispose();
     }
   });
 
@@ -259,46 +247,21 @@ void main() {
     expect(getRenderImage(tester, key).scale, 4.0);
   });
 
-  testWidgets('Image for device pixel ratio 1.0, with no main asset', (WidgetTester tester) async {
-    const String manifest = '''
-    {
-      "assets/image.png" : [
-        "assets/1.5x/image.png",
-        "assets/2.0x/image.png",
-        "assets/3.0x/image.png",
-        "assets/4.0x/image.png"
-      ]
-    }
-    ''';
-    final AssetBundle bundle = TestAssetBundle(manifest: manifest);
-
-    const double ratio = 1.0;
-    Key key = GlobalKey();
-    await pumpTreeToLayout(tester, buildImageAtRatio(image, key, ratio, false, images, bundle));
-    expect(getRenderImage(tester, key).size, const Size(200.0, 200.0));
-    expect(getRenderImage(tester, key).scale, 1.5);
-    key = GlobalKey();
-    await pumpTreeToLayout(tester, buildImageAtRatio(image, key, ratio, true, images, bundle));
-    expect(getRenderImage(tester, key).size, const Size(48.0, 48.0));
-    expect(getRenderImage(tester, key).scale, 1.5);
-  });
-
   testWidgets('Image for device pixel ratio 1.0, with a main asset and a 1.0x asset', (WidgetTester tester) async {
     // If both a main asset and a 1.0x asset are specified, then prefer
     // the 1.0x asset.
 
-    const String manifest = '''
+    final Map<Object?, Object?> manifest = json.decode('''
     {
       "assets/image.png" : [
-        "assets/image.png",
-        "assets/1.0x/image.png",
-        "assets/1.5x/image.png",
-        "assets/2.0x/image.png",
-        "assets/3.0x/image.png",
-        "assets/4.0x/image.png"
+        {"asset": "assets/1.0x/image.png", "dpr": 1.0},
+        {"asset": "assets/1.5x/image.png", "dpr": 1.5},
+        {"asset": "assets/2.0x/image.png", "dpr": 2.0},
+        {"asset": "assets/3.0x/image.png", "dpr": 3.0},
+        {"asset": "assets/4.0x/image.png", "dpr": 4.0}
       ]
     }
-    ''';
+    ''') as Map<Object?, Object?>;
     final AssetBundle bundle = TestAssetBundle(manifest: manifest);
 
     const double ratio = 1.0;
@@ -337,14 +300,13 @@ void main() {
   // if higher resolution assets are not available we will pick the best
   // available.
   testWidgets('Low-resolution assets', (WidgetTester tester) async {
-    final AssetBundle bundle = TestAssetBundle(manifest: '''
-      {
-        "assets/image.png" : [
-          "assets/image.png",
-          "assets/1.5x/image.png"
-        ]
-      }
-    ''');
+    const Map<Object?, Object?> manifest = <Object?, Object?>{
+      'assets/image.png': <Map<String, Object>>[
+        <String, Object>{'asset': 'assets/image.png'},
+        <String, Object>{'asset': 'assets/1.5x/image.png', 'dpr': 1.5},
+      ],
+    };
+    final AssetBundle bundle = TestAssetBundle(manifest: manifest);
 
     Future<void> testRatio({required double ratio, required double expectedScale}) async {
       Key key = GlobalKey();

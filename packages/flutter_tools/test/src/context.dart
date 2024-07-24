@@ -16,7 +16,9 @@ import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/base/template.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
+import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/base/version.dart';
+import 'package:flutter_tools/src/build_system/build_targets.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/context_runner.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
@@ -27,6 +29,7 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
+import 'package:flutter_tools/src/isolated/build_targets.dart';
 import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/persistent_tool_state.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -35,6 +38,7 @@ import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:meta/meta.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import 'common.dart';
 import 'fake_http_client.dart';
@@ -120,11 +124,21 @@ void testUsingContext(
           Pub: () => ThrowingPub(), // prevent accidentally using pub.
           CrashReporter: () => const NoopCrashReporter(),
           TemplateRenderer: () => const MustacheTemplateRenderer(),
+          BuildTargets: () => const BuildTargetsImpl(),
+          Analytics: () => const NoOpAnalytics(),
+          Stdio: () => FakeStdio(),
         },
         body: () {
-          return runZonedGuarded<Future<dynamic>>(() {
+          // To catch all errors thrown by the test, even uncaught async errors, we use a zone.
+          //
+          // Zones introduce their own event loop, so we do not await futures created inside
+          // the zone from outside the zone. Instead, we create a Completer outside the zone,
+          // and have the test complete it when the test ends (in success or failure), and we
+          // await that.
+          final Completer<void> completer = Completer<void>();
+          runZonedGuarded<Future<dynamic>>(() async {
             try {
-              return context.run<dynamic>(
+              return await context.run<dynamic>(
                 // Apply the overrides to the test context in the zone since their
                 // instantiation may reference items already stored on the context.
                 overrides: overrides,
@@ -138,18 +152,26 @@ void testUsingContext(
                   return await testMethod();
                 },
               );
-            // This catch rethrows, so doesn't need to catch only Exception.
-            } catch (error) { // ignore: avoid_catches_without_on_clauses
-              _printBufferedErrors(context);
-              rethrow;
+            } finally {
+              // We do not need a catch { ... } block because the error zone
+              // will catch all errors and send them to the completer below.
+              //
+              // See https://github.com/flutter/flutter/pull/141821/files#r1462288131.
+              if (!completer.isCompleted) {
+                completer.complete();
+              }
             }
           }, (Object error, StackTrace stackTrace) {
             // When things fail, it's ok to print to the console!
             print(error); // ignore: avoid_print
             print(stackTrace); // ignore: avoid_print
             _printBufferedErrors(context);
+            if (!completer.isCompleted) {
+              completer.completeError(error, stackTrace);
+            }
             throw error; //ignore: only_throw_errors
           });
+          return completer.future;
         },
       );
     }, overrides: <Type, Generator>{
@@ -181,7 +203,8 @@ void _printBufferedErrors(AppContext testContext) {
 }
 
 class FakeDeviceManager implements DeviceManager {
-  List<Device> devices = <Device>[];
+  List<Device> attachedDevices = <Device>[];
+  List<Device> wirelessDevices = <Device>[];
 
   String? _specifiedDeviceId;
 
@@ -207,24 +230,45 @@ class FakeDeviceManager implements DeviceManager {
   }
 
   @override
-  Future<List<Device>> getAllConnectedDevices() async => devices;
+  Future<List<Device>> getAllDevices({
+    DeviceDiscoveryFilter? filter,
+  }) async => filteredDevices(filter);
 
   @override
-  Future<List<Device>> refreshAllConnectedDevices({ Duration? timeout }) async => devices;
+  Future<List<Device>> refreshAllDevices({
+    Duration? timeout,
+    DeviceDiscoveryFilter? filter,
+  }) async => filteredDevices(filter);
 
   @override
-  Future<List<Device>> getDevicesById(String deviceId) async {
-    return devices.where((Device device) => device.id == deviceId).toList();
+  Future<List<Device>> refreshExtendedWirelessDeviceDiscoverers({
+    Duration? timeout,
+    DeviceDiscoveryFilter? filter,
+  }) async => filteredDevices(filter);
+
+  @override
+  Future<List<Device>> getDevicesById(
+    String deviceId, {
+    DeviceDiscoveryFilter? filter,
+    bool waitForDeviceToConnect = false,
+  }) async {
+    return filteredDevices(filter).where((Device device) {
+      return device.id == deviceId || device.id.startsWith(deviceId);
+    }).toList();
   }
 
   @override
-  Future<List<Device>> getDevices() {
+  Future<List<Device>> getDevices({
+    DeviceDiscoveryFilter? filter,
+    bool waitForDeviceToConnect = false,
+  }) {
     return hasSpecifiedDeviceId
-        ? getDevicesById(specifiedDeviceId!)
-        : getAllConnectedDevices();
+        ? getDevicesById(specifiedDeviceId!, filter: filter)
+        : getAllDevices(filter: filter);
   }
 
-  void addDevice(Device device) => devices.add(device);
+  void addAttachedDevice(Device device) => attachedDevices.add(device);
+  void addWirelessDevice(Device device) => wirelessDevices.add(device);
 
   @override
   bool get canListAnything => true;
@@ -236,14 +280,27 @@ class FakeDeviceManager implements DeviceManager {
   List<DeviceDiscovery> get deviceDiscoverers => <DeviceDiscovery>[];
 
   @override
-  bool isDeviceSupportedForProject(Device device, FlutterProject? flutterProject) {
-    return device.isSupportedForProject(flutterProject!);
+  DeviceDiscoverySupportFilter deviceSupportFilter({
+    bool includeDevicesUnsupportedByProject = false,
+    FlutterProject? flutterProject,
+  }) {
+    return TestDeviceDiscoverySupportFilter();
   }
 
   @override
-  Future<List<Device>> findTargetDevices(FlutterProject? flutterProject, { Duration? timeout }) async {
-    return devices;
+  Device? getSingleEphemeralDevice(List<Device> devices) => null;
+
+  List<Device> filteredDevices(DeviceDiscoveryFilter? filter) {
+    return switch (filter?.deviceConnectionInterface) {
+      DeviceConnectionInterface.attached => attachedDevices,
+      DeviceConnectionInterface.wireless => wirelessDevices,
+      null => attachedDevices + wirelessDevices,
+    };
   }
+}
+
+class TestDeviceDiscoverySupportFilter extends Fake implements DeviceDiscoverySupportFilter {
+  TestDeviceDiscoverySupportFilter();
 }
 
 class FakeAndroidLicenseValidator extends Fake implements AndroidLicenseValidator {
@@ -252,7 +309,8 @@ class FakeAndroidLicenseValidator extends Fake implements AndroidLicenseValidato
 }
 
 class FakeDoctor extends Doctor {
-  FakeDoctor(Logger logger) : super(logger: logger);
+  FakeDoctor(Logger logger, {super.clock = const SystemClock()})
+      : super(logger: logger);
 
   // True for testing.
   @override
@@ -282,6 +340,9 @@ class NoopIOSSimulatorUtils implements IOSSimulatorUtils {
 
   @override
   Future<List<IOSSimulator>> getAttachedDevices() async => <IOSSimulator>[];
+
+  @override
+  Future<List<IOSSimulatorRuntime>> getAvailableIOSRuntimes() async => <IOSSimulatorRuntime>[];
 }
 
 class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
@@ -289,13 +350,13 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
   bool get isInstalled => true;
 
   @override
-  String get versionText => 'Xcode 13';
+  String get versionText => 'Xcode 14';
 
   @override
-  Version get version => Version(13, null, null);
+  Version get version => Version(14, null, null);
 
   @override
-  String get build => '13C100';
+  String get build => '14A309';
 
   @override
   Future<Map<String, String>> getBuildSettings(
@@ -331,7 +392,7 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
   List<String> xcrunCommand() => <String>['xcrun'];
 }
 
-/// Prevent test crashest from being reported to the crash backend.
+/// Prevent test crashes from being reported to the crash backend.
 class NoopCrashReporter implements CrashReporter {
   const NoopCrashReporter();
 
@@ -340,9 +401,9 @@ class NoopCrashReporter implements CrashReporter {
 }
 
 class LocalFileSystemBlockingSetCurrentDirectory extends LocalFileSystem {
-  LocalFileSystemBlockingSetCurrentDirectory() : super.test(
-    signals: LocalSignals.instance,
-  );
+  // Use [FakeSignals] so developers running the test suite can kill the test
+  // runner.
+  LocalFileSystemBlockingSetCurrentDirectory() : super.test(signals: FakeSignals());
 
   @override
   set currentDirectory(dynamic value) {
@@ -356,7 +417,7 @@ class LocalFileSystemBlockingSetCurrentDirectory extends LocalFileSystem {
 class FakeSignals implements Signals {
   @override
   Object addHandler(ProcessSignal signal, SignalHandler handler) {
-    return Object();
+    return const Object();
   }
 
   @override

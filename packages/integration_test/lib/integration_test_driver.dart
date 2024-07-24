@@ -14,13 +14,7 @@ import 'package:path/path.dart' as path;
 
 import 'common.dart';
 
-/// Flutter Driver test output directory.
-///
-/// Tests should write any output files to this directory. Defaults to the path
-/// set in the FLUTTER_TEST_OUTPUTS_DIR environment variable, or `build` if
-/// unset.
-String testOutputsDirectory =
-    Platform.environment['FLUTTER_TEST_OUTPUTS_DIR'] ?? 'build';
+export 'package:flutter_driver/flutter_driver.dart' show testOutputsDirectory;
 
 /// The callback type to handle [Response.data] after the test
 /// succeeds.
@@ -35,7 +29,6 @@ Future<void> writeResponseData(
   String testOutputFilename = 'integration_response_data',
   String? destinationDirectory,
 }) async {
-  assert(testOutputFilename != null);
   destinationDirectory ??= testOutputsDirectory;
   await fs.directory(destinationDirectory).create(recursive: true);
   final File file = fs.file(path.join(
@@ -48,7 +41,7 @@ Future<void> writeResponseData(
 
 /// Adaptor to run an integration test using `flutter drive`.
 ///
-/// To an integration test `<test_name>.dart` using `flutter drive`, put a file named
+/// To run an integration test `<test_name>.dart` using `flutter drive`, put a file named
 /// `<test_name>_test.dart` in the app's `test_driver` directory:
 ///
 /// ```dart
@@ -68,9 +61,14 @@ Future<void> writeResponseData(
 ///
 /// `responseDataCallback` is the handler for processing [Response.data].
 /// The default value is `writeResponseData`.
+///
+/// `writeResponseOnFailure` determines whether the `responseDataCallback`
+/// function will be called to process the [Response.data] when a test fails.
+/// The default value is `false`.
 Future<void> integrationDriver({
   Duration timeout = const Duration(minutes: 20),
   ResponseDataCallback? responseDataCallback = writeResponseData,
+  bool writeResponseOnFailure = false,
 }) async {
   final FlutterDriver driver = await FlutterDriver.connect();
   final String jsonResult = await driver.requestData(null, timeout: timeout);
@@ -86,6 +84,9 @@ Future<void> integrationDriver({
     exit(0);
   } else {
     print('Failure Details:\n${response.formattedFailureDetails}');
+    if (responseDataCallback != null && writeResponseOnFailure) {
+      await responseDataCallback(response.data);
+    }
     exit(1);
   }
 }

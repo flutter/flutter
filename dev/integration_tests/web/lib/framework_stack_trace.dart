@@ -2,11 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:html' as html;
+import 'dart:js_interop';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:meta/dart2js.dart';
+import 'package:web/web.dart' as web;
 
 // Tests that the framework prints stack traces in all build modes.
 //
@@ -34,12 +35,14 @@ Future<void> main() async {
     output.writeln('--- TEST FAILED ---');
   }
 
+  await web.window.fetch(
+    '/test-result'.toJS,
+    web.RequestInit(
+      method: 'POST',
+      body: '$output'.toJS,
+    )
+  ).toDart;
   print(output);
-  html.HttpRequest.request(
-    '/test-result',
-    method: 'POST',
-    sendData: '$output',
-  );
 }
 
 bool _errorMessageFormattedCorrectly(String errorMessage) {

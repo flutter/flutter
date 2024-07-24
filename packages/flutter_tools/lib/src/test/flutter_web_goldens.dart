@@ -27,7 +27,7 @@ class TestGoldenComparator {
   TestGoldenComparator(this.shellPath, this.compilerFactory, {
     required Logger logger,
     required FileSystem fileSystem,
-    required ProcessManager? processManager,
+    required ProcessManager processManager,
     required this.webRenderer,
   }) : tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_web_platform.'),
        _logger = logger,
@@ -39,7 +39,7 @@ class TestGoldenComparator {
   final TestCompiler Function() compilerFactory;
   final Logger _logger;
   final FileSystem _fileSystem;
-  final ProcessManager? _processManager;
+  final ProcessManager _processManager;
   final WebRendererMode webRenderer;
 
   TestCompiler? _compiler;
@@ -84,7 +84,7 @@ class TestGoldenComparator {
     }
     final List<String> command = <String>[
       shellPath!,
-      '--disable-observatory',
+      '--disable-vm-service',
       '--non-interactive',
       '--packages=${_fileSystem.path.join('.dart_tool', 'package_config.json')}',
       output,
@@ -93,9 +93,9 @@ class TestGoldenComparator {
     final Map<String, String> environment = <String, String>{
       // Chrome is the only supported browser currently.
       'FLUTTER_TEST_BROWSER': 'chrome',
-      'FLUTTER_WEB_RENDERER': webRenderer == WebRendererMode.html ? 'html' : 'canvaskit',
+      'FLUTTER_WEB_RENDERER': webRenderer.name,
     };
-    return _processManager!.start(command, environment: environment);
+    return _processManager.start(command, environment: environment);
   }
 
   Future<String?> compareGoldens(Uri testUri, Uint8List bytes, Uri goldenKey, bool? updateGoldens) async {
@@ -108,12 +108,7 @@ class TestGoldenComparator {
     process.sendCommand(imageFile, goldenKey, updateGoldens);
 
     final Map<String, dynamic> result = await process.getResponse();
-
-    if (result == null) {
-      return 'unknown error';
-    } else {
-      return (result['success'] as bool) ? null : ((result['message'] as String?) ?? 'does not match');
-    }
+    return (result['success'] as bool) ? null : ((result['message'] as String?) ?? 'does not match');
   }
 }
 

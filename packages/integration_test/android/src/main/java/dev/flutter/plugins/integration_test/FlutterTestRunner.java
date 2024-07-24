@@ -7,6 +7,7 @@ package dev.flutter.plugins.integration_test;
 import android.util.Log;
 import androidx.test.rule.ActivityTestRule;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import org.junit.Rule;
@@ -20,7 +21,7 @@ public class FlutterTestRunner extends Runner {
 
   private static final String TAG = "FlutterTestRunner";
 
-  final Class testClass;
+  final Class<?> testClass;
   TestRule rule = null;
 
   public FlutterTestRunner(Class<?> testClass) {
@@ -32,11 +33,13 @@ public class FlutterTestRunner extends Runner {
     for (Field field : fields) {
       if (field.isAnnotationPresent(Rule.class)) {
         try {
-          Object instance = testClass.newInstance();
+          Object instance = testClass.getDeclaredConstructor().newInstance();
           if (field.get(instance) instanceof ActivityTestRule) {
             rule = (TestRule) field.get(instance);
             break;
           }
+        } catch (InvocationTargetException | NoSuchMethodException e) {
+          throw new RuntimeException("Unable to construct " + testClass.getName() + " object for testing");
         } catch (InstantiationException | IllegalAccessException e) {
           // This might occur if the developer did not make the rule public.
           // We could call field.setAccessible(true) but it seems better to throw.

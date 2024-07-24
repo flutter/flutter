@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'checkbox.dart';
+library;
+
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -61,10 +64,10 @@ class CheckboxThemeData with Diagnosticable {
   /// {@macro flutter.material.checkbox.checkColor}
   ///
   /// Resolves in the following states:
-  ///  * [MaterialState.selected].
-  ///  * [MaterialState.hovered].
-  ///  * [MaterialState.focused].
-  ///  * [MaterialState.disabled].
+  ///  * [WidgetState.selected].
+  ///  * [WidgetState.hovered].
+  ///  * [WidgetState.focused].
+  ///  * [WidgetState.disabled].
   ///
   /// If specified, overrides the default value of [Checkbox.checkColor].
   final MaterialStateProperty<Color?>? checkColor;
@@ -130,6 +133,9 @@ class CheckboxThemeData with Diagnosticable {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static CheckboxThemeData lerp(CheckboxThemeData? a, CheckboxThemeData? b, double t) {
+    if (identical(a, b) && a != null) {
+      return a;
+    }
     return CheckboxThemeData(
       mouseCursor: t < 0.5 ? a?.mouseCursor : b?.mouseCursor,
       fillColor: MaterialStateProperty.lerp<Color?>(a?.fillColor, b?.fillColor, t, Color.lerp),
@@ -192,8 +198,17 @@ class CheckboxThemeData with Diagnosticable {
 
   // Special case because BorderSide.lerp() doesn't support null arguments
   static BorderSide? _lerpSides(BorderSide? a, BorderSide? b, double t) {
-    if (a == null && b == null) {
+    if (a == null || b == null) {
       return null;
+    }
+    if (identical(a, b)) {
+      return a;
+    }
+    if (a is MaterialStateBorderSide) {
+      a = a.resolve(<WidgetState>{});
+    }
+    if (b is MaterialStateBorderSide) {
+      b = b.resolve(<WidgetState>{});
     }
     return BorderSide.lerp(a!, b!, t);
   }

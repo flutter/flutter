@@ -50,7 +50,7 @@ class StringCodec implements MessageCodec<String> {
     if (message == null) {
       return null;
     }
-    return utf8.decoder.convert(message.buffer.asUint8List(message.offsetInBytes, message.lengthInBytes));
+    return utf8.decode(Uint8List.sublistView(message));
   }
 
   @override
@@ -58,8 +58,7 @@ class StringCodec implements MessageCodec<String> {
     if (message == null) {
       return null;
     }
-    final Uint8List encoded = utf8.encoder.convert(message);
-    return encoded.buffer.asByteData();
+    return ByteData.sublistView(utf8.encode(message));
   }
 }
 
@@ -195,7 +194,6 @@ class JSONMethodCodec implements MethodCodec {
 
   @override
   ByteData encodeErrorEnvelope({ required String code, String? message, Object? details}) {
-    assert(code != null);
     return const JSONMessageCodec().encodeMessage(<Object?>[code, message, details])!;
   }
 }
@@ -416,7 +414,7 @@ class StandardMessageCodec implements MessageCodec<Object?> {
         if (char <= 0x7f) {
           asciiBytes[i] = char;
         } else {
-          utf8Bytes = utf8.encoder.convert(value.substring(i));
+          utf8Bytes = utf8.encode(value.substring(i));
           utf8Offset = i;
           break;
         }
@@ -559,14 +557,11 @@ class StandardMessageCodec implements MessageCodec<Object?> {
   /// [readValueOfType].
   int readSize(ReadBuffer buffer) {
     final int value = buffer.getUint8();
-    switch (value) {
-      case 254:
-        return buffer.getUint16();
-      case 255:
-        return buffer.getUint32();
-      default:
-        return value;
-    }
+    return switch (value) {
+      254 => buffer.getUint16(),
+      255 => buffer.getUint32(),
+      _ => value,
+    };
   }
 }
 

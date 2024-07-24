@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/widgets.dart';
+///
+/// @docImport 'material.dart';
+library;
+
 import 'package:flutter/painting.dart';
 
 // Based on https://material.io/design/environment/elevation.html
@@ -17,6 +22,15 @@ import 'package:flutter/painting.dart';
 ///
 /// This is useful when simulating a shadow with a [BoxDecoration] or other
 /// class that uses a list of [BoxShadow] objects.
+///
+/// Shadows defined by [kElevationToShadow] use [BlurStyle.normal]. To convert a
+/// shadow from [kElevationToShadow] to use a different [BlurStyle] (e.g. to use
+/// it in a [MagnifierDecoration]), consider an expression such as the
+/// following:
+///
+/// ```dart
+/// kElevationToShadow[12]!.map((BoxShadow shadow) => shadow.copyWith(blurStyle: BlurStyle.outer)).toList(),
+/// ```
 ///
 /// See also:
 ///

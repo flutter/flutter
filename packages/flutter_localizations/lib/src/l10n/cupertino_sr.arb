@@ -26,5 +26,11 @@
   "selectAllButtonLabel": "Изабери све",
   "tabSemanticsLabel": "$tabIndex. картица од $tabCount",
   "modalBarrierDismissLabel": "Одбаци",
-  "searchTextFieldPlaceholderLabel": "Претражите"
+  "searchTextFieldPlaceholderLabel": "Претражите",
+  "noSpellCheckReplacementsLabel": "Нису пронађене замене",
+  "menuDismissLabel": "Одбаците мени",
+  "lookUpButtonLabel": "Поглед нагоре",
+  "searchWebButtonLabel": "Претражи веб",
+  "shareButtonLabel": "Дели…",
+  "clearButtonLabel": "Clear"
 }

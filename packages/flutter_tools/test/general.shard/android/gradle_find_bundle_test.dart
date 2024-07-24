@@ -4,28 +4,58 @@
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/gradle.dart';
+import 'package:flutter_tools/src/android/gradle_utils.dart' as gradle_utils;
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/reporting/reporting.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
+import '../../src/fakes.dart';
 
 void main() {
-  late FileSystem fileSystem;
+  late MemoryFileSystem fileSystem;
+  late FakeAnalytics fakeAnalytics;
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
+    fakeAnalytics = getInitializedFakeAnalyticsInstance(
+      fs: fileSystem,
+      fakeFlutterVersion: FakeFlutterVersion(),
+    );
+  });
+
+  testWithoutContext('Finds app bundle when flavor contains multiple dimensions in release mode', () {
+    final FlutterProject project = generateFakeAppBundle('fooBarRelease', 'app-foo-bar-release.aab', fileSystem);
+    final File bundle = findBundleFile(
+      project,
+      const BuildInfo(
+        BuildMode.release,
+        'fooBar',
+        treeShakeIcons: false,
+        packageConfigPath: '.dart_tool/package_config.json',
+      ),
+      BufferLogger.test(),
+      fakeAnalytics,
+    );
+
+    expect(bundle, isNotNull);
+    expect(bundle.path, '/build/app/outputs/bundle/fooBarRelease/app-foo-bar-release.aab');
   });
 
   testWithoutContext('Finds app bundle when flavor contains underscores in release mode', () {
     final FlutterProject project = generateFakeAppBundle('foo_barRelease', 'app.aab', fileSystem);
     final File bundle = findBundleFile(
       project,
-      const BuildInfo(BuildMode.release, 'foo_bar', treeShakeIcons: false),
+      const BuildInfo(
+        BuildMode.release,
+        'foo_bar',
+        treeShakeIcons: false,
+        packageConfigPath: '.dart_tool/package_config.json',
+      ),
       BufferLogger.test(),
-      TestUsage(),
+      fakeAnalytics,
     );
 
     expect(bundle, isNotNull);
@@ -36,9 +66,14 @@ void main() {
     final FlutterProject project = generateFakeAppBundle('foo_barRelease', 'app.aab', fileSystem);
     final File bundle = findBundleFile(
       project,
-      const BuildInfo(BuildMode.release, 'foo_Bar', treeShakeIcons: false),
+      const BuildInfo(
+        BuildMode.release,
+        'foo_Bar',
+        treeShakeIcons: false,
+        packageConfigPath: '.dart_tool/package_config.json',
+      ),
       BufferLogger.test(),
-      TestUsage(),
+      fakeAnalytics,
     );
 
     expect(bundle, isNotNull);
@@ -49,9 +84,14 @@ void main() {
     final FlutterProject project = generateFakeAppBundle('fooRelease', 'app.aab', fileSystem);
     final File bundle = findBundleFile(
       project,
-      const BuildInfo(BuildMode.release, 'foo', treeShakeIcons: false),
+      const BuildInfo(
+        BuildMode.release,
+        'foo',
+        treeShakeIcons: false,
+        packageConfigPath: '.dart_tool/package_config.json',
+      ),
       BufferLogger.test(),
-      TestUsage(),
+      fakeAnalytics,
     );
 
     expect(bundle, isNotNull);
@@ -62,9 +102,14 @@ void main() {
     final FlutterProject project = generateFakeAppBundle('fooaRelease', 'app.aab', fileSystem);
     final File bundle = findBundleFile(
       project,
-      const BuildInfo(BuildMode.release, 'fooA', treeShakeIcons: false),
+      const BuildInfo(
+        BuildMode.release,
+        'fooA',
+        treeShakeIcons: false,
+        packageConfigPath: '.dart_tool/package_config.json',
+      ),
       BufferLogger.test(),
-      TestUsage(),
+      fakeAnalytics,
     );
 
     expect(bundle, isNotNull);
@@ -75,22 +120,50 @@ void main() {
     final FlutterProject project = generateFakeAppBundle('release', 'app.aab', fileSystem);
     final File bundle = findBundleFile(
       project,
-      const BuildInfo(BuildMode.release, null, treeShakeIcons: false),
+      const BuildInfo(
+        BuildMode.release,
+        null,
+        treeShakeIcons: false,
+        packageConfigPath: '.dart_tool/package_config.json',
+      ),
       BufferLogger.test(),
-      TestUsage(),
+      fakeAnalytics,
     );
 
     expect(bundle, isNotNull);
     expect(bundle.path, '/build/app/outputs/bundle/release/app.aab');
   });
 
+   testWithoutContext('Finds app bundle when flavor contains multiple dimensions in debug mode', () {
+    final FlutterProject project = generateFakeAppBundle('fooBarDebug', 'app-foo-bar-debug.aab', fileSystem);
+    final File bundle = findBundleFile(
+      project,
+      const BuildInfo(
+        BuildMode.debug,
+        'fooBar',
+        treeShakeIcons: false,
+        packageConfigPath: '.dart_tool/package_config.json',
+      ),
+      BufferLogger.test(),
+      fakeAnalytics,
+    );
+
+    expect(bundle, isNotNull);
+    expect(bundle.path, '/build/app/outputs/bundle/fooBarDebug/app-foo-bar-debug.aab');
+  });
+
   testWithoutContext('Finds app bundle when flavor contains underscores in debug mode', () {
     final FlutterProject project = generateFakeAppBundle('foo_barDebug', 'app.aab', fileSystem);
     final File bundle = findBundleFile(
       project,
-      const BuildInfo(BuildMode.debug, 'foo_bar', treeShakeIcons: false),
+      const BuildInfo(
+        BuildMode.debug,
+        'foo_bar',
+        treeShakeIcons: false,
+        packageConfigPath: '.dart_tool/package_config.json',
+      ),
       BufferLogger.test(),
-      TestUsage(),
+      fakeAnalytics,
     );
 
     expect(bundle, isNotNull);
@@ -101,9 +174,14 @@ void main() {
     final FlutterProject project = generateFakeAppBundle('foo_barDebug', 'app.aab', fileSystem);
     final File bundle = findBundleFile(
       project,
-      const BuildInfo(BuildMode.debug, 'foo_Bar', treeShakeIcons: false),
+      const BuildInfo(
+        BuildMode.debug,
+        'foo_Bar',
+        treeShakeIcons: false,
+        packageConfigPath: '.dart_tool/package_config.json',
+      ),
       BufferLogger.test(),
-      TestUsage(),
+      fakeAnalytics,
     );
 
     expect(bundle, isNotNull);
@@ -114,9 +192,14 @@ void main() {
     final FlutterProject project = generateFakeAppBundle('fooDebug', 'app.aab', fileSystem);
     final File bundle = findBundleFile(
       project,
-      const BuildInfo(BuildMode.debug, 'foo', treeShakeIcons: false),
+      const BuildInfo(
+        BuildMode.debug,
+        'foo',
+        treeShakeIcons: false,
+        packageConfigPath: '.dart_tool/package_config.json',
+      ),
       BufferLogger.test(),
-      TestUsage(),
+      fakeAnalytics,
     );
 
     expect(bundle, isNotNull);
@@ -127,9 +210,14 @@ void main() {
     final FlutterProject project = generateFakeAppBundle('fooaDebug', 'app.aab', fileSystem);
     final File bundle = findBundleFile(
       project,
-      const BuildInfo(BuildMode.debug, 'fooA', treeShakeIcons: false),
+      const BuildInfo(
+        BuildMode.debug,
+        'fooA',
+        treeShakeIcons: false,
+        packageConfigPath: '.dart_tool/package_config.json',
+      ),
       BufferLogger.test(),
-      TestUsage(),
+      fakeAnalytics,
     );
 
     expect(bundle, isNotNull);
@@ -142,20 +230,43 @@ void main() {
       project,
       BuildInfo.debug,
       BufferLogger.test(),
-      TestUsage(),
+      fakeAnalytics,
     );
 
     expect(bundle, isNotNull);
     expect(bundle.path, '/build/app/outputs/bundle/debug/app.aab');
   });
 
+  testWithoutContext('Finds app bundle when flavor contains multiple dimensions in profile mode', () {
+    final FlutterProject project = generateFakeAppBundle('fooBarProfile', 'app-foo-bar-profile.aab', fileSystem);
+    final File bundle = findBundleFile(
+      project,
+      const BuildInfo(
+        BuildMode.profile,
+        'fooBar',
+        treeShakeIcons: false,
+        packageConfigPath: '.dart_tool/package_config.json',
+      ),
+      BufferLogger.test(),
+      fakeAnalytics,
+    );
+
+    expect(bundle, isNotNull);
+    expect(bundle.path, '/build/app/outputs/bundle/fooBarProfile/app-foo-bar-profile.aab');
+  });
+
   testWithoutContext('Finds app bundle when flavor contains underscores in profile mode', () {
     final FlutterProject project = generateFakeAppBundle('foo_barProfile', 'app.aab', fileSystem);
     final File bundle = findBundleFile(
       project,
-      const BuildInfo(BuildMode.profile, 'foo_bar', treeShakeIcons: false),
+      const BuildInfo(
+        BuildMode.profile,
+        'foo_bar',
+        treeShakeIcons: false,
+        packageConfigPath: '.dart_tool/package_config.json',
+      ),
       BufferLogger.test(),
-      TestUsage(),
+      fakeAnalytics,
     );
 
     expect(bundle, isNotNull);
@@ -166,9 +277,14 @@ void main() {
     final FlutterProject project = generateFakeAppBundle('foo_barProfile', 'app.aab', fileSystem);
     final File bundle = findBundleFile(
       project,
-      const BuildInfo(BuildMode.profile, 'foo_Bar', treeShakeIcons: false),
+      const BuildInfo(
+        BuildMode.profile,
+        'foo_Bar',
+        treeShakeIcons: false,
+        packageConfigPath: '.dart_tool/package_config.json',
+      ),
       BufferLogger.test(),
-      TestUsage(),
+      fakeAnalytics,
     );
 
     expect(bundle, isNotNull);
@@ -179,9 +295,14 @@ void main() {
     final FlutterProject project = generateFakeAppBundle('fooProfile', 'app.aab', fileSystem);
     final File bundle = findBundleFile(
       project,
-      const BuildInfo(BuildMode.profile, 'foo', treeShakeIcons: false),
+      const BuildInfo(
+        BuildMode.profile,
+        'foo',
+        treeShakeIcons: false,
+        packageConfigPath: '.dart_tool/package_config.json',
+      ),
       BufferLogger.test(),
-      TestUsage(),
+      fakeAnalytics,
     );
 
     expect(bundle, isNotNull);
@@ -192,9 +313,14 @@ void main() {
     final FlutterProject project = generateFakeAppBundle('fooaProfile', 'app.aab', fileSystem);
     final File bundle = findBundleFile(
       project,
-      const BuildInfo(BuildMode.profile, 'fooA', treeShakeIcons: false),
+      const BuildInfo(
+        BuildMode.profile,
+        'fooA',
+        treeShakeIcons: false,
+        packageConfigPath: '.dart_tool/package_config.json',
+      ),
       BufferLogger.test(),
-      TestUsage(),
+      fakeAnalytics,
     );
 
     expect(bundle, isNotNull);
@@ -205,9 +331,14 @@ void main() {
     final FlutterProject project = generateFakeAppBundle('profile', 'app.aab', fileSystem);
     final File bundle = findBundleFile(
       project,
-      const BuildInfo(BuildMode.profile, null, treeShakeIcons: false),
+      const BuildInfo(
+        BuildMode.profile,
+        null,
+        treeShakeIcons: false,
+        packageConfigPath: '.dart_tool/package_config.json',
+      ),
       BufferLogger.test(),
-      TestUsage(),
+      fakeAnalytics,
     );
 
     expect(bundle, isNotNull);
@@ -218,9 +349,14 @@ void main() {
     final FlutterProject project = generateFakeAppBundle('release', 'app-release.aab', fileSystem);
     final File bundle = findBundleFile(
       project,
-      const BuildInfo(BuildMode.release, null, treeShakeIcons: false),
+      const BuildInfo(
+        BuildMode.release,
+        null,
+        treeShakeIcons: false,
+        packageConfigPath: '.dart_tool/package_config.json',
+      ),
       BufferLogger.test(),
-      TestUsage(),
+      fakeAnalytics,
     );
 
     expect(bundle, isNotNull);
@@ -231,9 +367,14 @@ void main() {
     final FlutterProject project = generateFakeAppBundle('profile', 'app-profile.aab', fileSystem);
     final File bundle = findBundleFile(
       project,
-      const BuildInfo(BuildMode.profile, null, treeShakeIcons: false),
+      const BuildInfo(
+        BuildMode.profile,
+        null,
+        treeShakeIcons: false,
+        packageConfigPath: '.dart_tool/package_config.json',
+      ),
       BufferLogger.test(),
-      TestUsage(),
+      fakeAnalytics,
     );
 
     expect(bundle, isNotNull);
@@ -246,7 +387,7 @@ void main() {
       project,
       BuildInfo.debug,
       BufferLogger.test(),
-      TestUsage(),
+      fakeAnalytics,
     );
 
     expect(bundle, isNotNull);
@@ -257,9 +398,14 @@ void main() {
     final FlutterProject project = generateFakeAppBundle('foo_barRelease', 'app-foo_bar-release.aab', fileSystem);
     final File bundle = findBundleFile(
       project,
-      const BuildInfo(BuildMode.release, 'foo_bar', treeShakeIcons: false),
+      const BuildInfo(
+        BuildMode.release,
+        'foo_bar',
+        treeShakeIcons: false,
+        packageConfigPath: '.dart_tool/package_config.json',
+      ),
       BufferLogger.test(),
-      TestUsage(),
+      fakeAnalytics,
     );
 
     expect(bundle, isNotNull);
@@ -270,9 +416,14 @@ void main() {
     final FlutterProject project = generateFakeAppBundle('foo_barRelease', 'app-foo_bar-release.aab', fileSystem);
     final File bundle = findBundleFile(
       project,
-      const BuildInfo(BuildMode.release, 'foo_Bar', treeShakeIcons: false),
+      const BuildInfo(
+        BuildMode.release,
+        'foo_Bar',
+        treeShakeIcons: false,
+        packageConfigPath: '.dart_tool/package_config.json',
+      ),
       BufferLogger.test(),
-      TestUsage(),
+      fakeAnalytics,
     );
 
     expect(bundle, isNotNull);
@@ -283,9 +434,14 @@ void main() {
     final FlutterProject project = generateFakeAppBundle('foo_barProfile', 'app-foo_bar-profile.aab', fileSystem);
     final File bundle = findBundleFile(
       project,
-      const BuildInfo(BuildMode.profile, 'foo_bar', treeShakeIcons: false),
+      const BuildInfo(
+        BuildMode.profile,
+        'foo_bar',
+        treeShakeIcons: false,
+        packageConfigPath: '.dart_tool/package_config.json',
+      ),
       BufferLogger.test(),
-    TestUsage(),
+      fakeAnalytics,
     );
 
     expect(bundle, isNotNull);
@@ -296,9 +452,14 @@ void main() {
     final FlutterProject project = generateFakeAppBundle('foo_barDebug', 'app-foo_bar-debug.aab', fileSystem);
     final File bundle = findBundleFile(
       project,
-      const BuildInfo(BuildMode.debug, 'foo_Bar', treeShakeIcons: false),
+      const BuildInfo(
+        BuildMode.debug,
+        'foo_Bar',
+        treeShakeIcons: false,
+        packageConfigPath: '.dart_tool/package_config.json',
+      ),
       BufferLogger.test(),
-      TestUsage(),
+      fakeAnalytics,
     );
 
     expect(bundle, isNotNull);
@@ -310,9 +471,14 @@ void main() {
     final FlutterProject project = generateFakeAppBundle('foo_BarRelease', 'app-foo_Bar-release.aab', fileSystem);
     final File bundle = findBundleFile(
       project,
-      const BuildInfo(BuildMode.release, 'Foo_Bar', treeShakeIcons: false),
+      const BuildInfo(
+        BuildMode.release,
+        'Foo_Bar',
+        treeShakeIcons: false,
+        packageConfigPath: '.dart_tool/package_config.json',
+      ),
       BufferLogger.test(),
-      TestUsage(),
+      fakeAnalytics,
     );
 
     expect(bundle, isNotNull);
@@ -324,9 +490,14 @@ void main() {
     final FlutterProject project = generateFakeAppBundle('foo_BarDebug', 'app-foo_Bar-debug.aab', fileSystem);
     final File bundle = findBundleFile(
       project,
-      const BuildInfo(BuildMode.debug, 'Foo_Bar', treeShakeIcons: false),
+      const BuildInfo(
+        BuildMode.debug,
+        'Foo_Bar',
+        treeShakeIcons: false,
+        packageConfigPath: '.dart_tool/package_config.json',
+      ),
       BufferLogger.test(),
-      TestUsage(),
+      fakeAnalytics,
     );
 
     expect(bundle, isNotNull);
@@ -335,32 +506,35 @@ void main() {
 
   testWithoutContext('AAB not found', () {
     final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
-    final TestUsage testUsage = TestUsage();
     expect(
       () {
         findBundleFile(
           project,
-          const BuildInfo(BuildMode.debug, 'foo_bar', treeShakeIcons: false),
+          const BuildInfo(
+            BuildMode.debug,
+            'foo_bar',
+            treeShakeIcons: false,
+            packageConfigPath: '.dart_tool/package_config.json',
+          ),
           BufferLogger.test(),
-          testUsage,
+          fakeAnalytics,
         );
       },
       throwsToolExit(
         message:
           "Gradle build failed to produce an .aab file. It's likely that this file "
-          "was generated under ${project.android.buildDirectory.path}, but the tool couldn't find it."
-      )
-    );
-    expect(testUsage.events, contains(
-      TestUsageEvent(
-        'build',
-        'gradle',
-        label: 'gradle-expected-file-not-found',
-        parameters: CustomDimensions.fromMap(<String, String> {
-          'cd37': 'androidGradlePluginVersion: 7.5, fileExtension: .aab',
-        }),
+          "was generated under ${project.android.buildDirectory.path}, but the tool couldn't find it."));
+    expect(fakeAnalytics.sentEvents, hasLength(1));
+    expect(
+      fakeAnalytics.sentEvents,
+      contains(
+        Event.flutterBuildInfo(
+          label: 'gradle-expected-file-not-found',
+          buildType: 'gradle',
+          settings: 'androidGradlePluginVersion: ${gradle_utils.templateDefaultGradleVersion}, fileExtension: .aab',
+        ),
       ),
-    ));
+    );
   });
 }
 

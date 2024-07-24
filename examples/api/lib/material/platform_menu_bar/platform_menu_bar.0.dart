@@ -2,41 +2,39 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for PlatformMenuBar
-
-////////////////////////////////////
 // THIS SAMPLE ONLY WORKS ON MACOS.
-////////////////////////////////////
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-void main() => runApp(const SampleApp());
+/// Flutter code sample for [PlatformMenuBar].
+
+void main() => runApp(const ExampleApp());
 
 enum MenuSelection {
   about,
   showMessage,
 }
 
-class SampleApp extends StatelessWidget {
-  const SampleApp({super.key});
+class ExampleApp extends StatelessWidget {
+  const ExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      home: Scaffold(body: MyMenuBarApp()),
+      home: Scaffold(body: PlatformMenuBarExample()),
     );
   }
 }
 
-class MyMenuBarApp extends StatefulWidget {
-  const MyMenuBarApp({super.key});
+class PlatformMenuBarExample extends StatefulWidget {
+  const PlatformMenuBarExample({super.key});
 
   @override
-  State<MyMenuBarApp> createState() => _MyMenuBarAppState();
+  State<PlatformMenuBarExample> createState() => _PlatformMenuBarExampleState();
 }
 
-class _MyMenuBarAppState extends State<MyMenuBarApp> {
+class _PlatformMenuBarExampleState extends State<PlatformMenuBarExample> {
   String _message = 'Hello';
   bool _showMessage = false;
 
@@ -48,12 +46,10 @@ class _MyMenuBarAppState extends State<MyMenuBarApp> {
           applicationName: 'MenuBar Sample',
           applicationVersion: '1.0.0',
         );
-        break;
       case MenuSelection.showMessage:
         setState(() {
           _showMessage = !_showMessage;
         });
-        break;
     }
   }
 
@@ -130,7 +126,7 @@ class _MyMenuBarAppState extends State<MyMenuBarApp> {
         child: Text(_showMessage
             ? _message
             : 'This space intentionally left blank.\n'
-              'Show a message here using the menu.'),
+                'Show a message here using the menu.'),
       ),
     );
   }

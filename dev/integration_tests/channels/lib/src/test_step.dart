@@ -37,19 +37,12 @@ class TestStepResult {
   });
 
   factory TestStepResult.fromSnapshot(AsyncSnapshot<TestStepResult> snapshot) {
-    switch (snapshot.connectionState) {
-      case ConnectionState.none:
-        return const TestStepResult('Not started', nothing, TestStatus.ok);
-      case ConnectionState.waiting:
-        return const TestStepResult('Executing', nothing, TestStatus.pending);
-      case ConnectionState.done:
-        if (snapshot.hasData) {
-          return snapshot.data!;
-        }
-        return snapshot.error! as TestStepResult;
-      case ConnectionState.active:
-        throw 'Unsupported state ${snapshot.connectionState}';
-    }
+    return switch (snapshot.connectionState) {
+      ConnectionState.none    => const TestStepResult('Not started', nothing, TestStatus.ok),
+      ConnectionState.waiting => const TestStepResult('Executing', nothing, TestStatus.pending),
+      ConnectionState.done    => snapshot.data ?? snapshot.error! as TestStepResult,
+      ConnectionState.active  => throw 'Unsupported state: ConnectionState.active',
+    };
   }
 
   final String name;
@@ -69,8 +62,7 @@ class TestStepResult {
   );
 
   Widget asWidget(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return ListView(
       children: <Widget>[
         Text('Step: $name', style: bold),
         Text(description),
@@ -82,13 +74,20 @@ class TestStepResult {
         Text('Error: ${_toString(error)}'),
         const Text(' '),
         Text(
-          status.toString().substring('TestStatus.'.length),
+          status.name,
           key: ValueKey<String>(
               status == TestStatus.pending ? 'nostatus' : 'status'),
           style: bold,
         ),
       ],
     );
+  }
+
+  static bool deepEquals(dynamic a, dynamic b) => _deepEquals(a, b);
+
+  @override
+  String toString() {
+    return 'TestStepResult($status)';
   }
 }
 

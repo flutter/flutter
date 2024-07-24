@@ -52,11 +52,15 @@ void main() {
       '90th_percentile_picture_cache_memory': 1,
       '99th_percentile_picture_cache_memory': 1,
       'worst_picture_cache_memory': 1,
+      'total_ui_gc_time': 1,
       'new_gen_gc_count': 1,
       'old_gen_gc_count': 1,
       'average_vsync_transitions_missed': 1,
       '90th_percentile_vsync_transitions_missed': 1,
       '99th_percentile_vsync_transitions_missed': 1,
+      'average_frame_request_pending_latency': 0.1,
+      '90th_percentile_frame_request_pending_latency': 0.1,
+      '99th_percentile_frame_request_pending_latency': 0.1,
     };
     const String resultFileName = 'fake_result';
     void driveCallback(List<String> arguments) {
@@ -95,6 +99,7 @@ void main() {
       '90th_percentile_picture_cache_memory': 1,
       '99th_percentile_picture_cache_memory': 1,
       'worst_picture_cache_memory': 1,
+      'total_ui_gc_time': 1,
       'new_gen_gc_count': 1,
       'old_gen_gc_count': 1,
       'average_vsync_transitions_missed': 1,
@@ -106,6 +111,9 @@ void main() {
       '90hz_frame_percentage': 0.4,
       '120hz_frame_percentage': 0.6,
       'illegal_refresh_rate_frame_count': 10,
+      'average_frame_request_pending_latency': 0.1,
+      '90th_percentile_frame_request_pending_latency': 0.1,
+      '99th_percentile_frame_request_pending_latency': 0.1,
     };
     const String resultFileName = 'fake_result';
     void driveCallback(List<String> arguments) {

@@ -47,11 +47,10 @@ void main() {
         child: platformViewRenderBox,
       );
       int semanticsUpdateCount = 0;
-      final SemanticsHandle semanticsHandle = TestRenderingFlutterBinding.instance.pipelineOwner.ensureSemantics(
-          listener: () {
-            ++semanticsUpdateCount;
-          },
-      );
+      final SemanticsHandle semanticsHandle = TestRenderingFlutterBinding.instance.ensureSemantics();
+      TestRenderingFlutterBinding.instance.pipelineOwner.semanticsOwner!.addListener(() {
+        ++semanticsUpdateCount;
+      });
       layout(tree, phase: EnginePhase.flushSemantics);
       // Initial semantics update
       expect(semanticsUpdateCount, 1);
@@ -260,6 +259,42 @@ void main() {
       expect(renderBox.debugLayer, isNull);
     });
   });
+
+  test('markNeedsPaint does not get called when setting the same viewController', () {
+    FakeAsync().run((FakeAsync async) {
+      final Completer<void> viewCreation = Completer<void>();
+      const MethodChannel channel = MethodChannel('flutter/platform_views');
+      binding.defaultBinaryMessenger.setMockMethodCallHandler(channel, (MethodCall methodCall) async {
+        assert(methodCall.method == 'create', 'Unexpected method call');
+        await viewCreation.future;
+        return /*textureId=*/ 0;
+      });
+
+      bool futureCallbackRan = false;
+
+      PlatformViewsService.initUiKitView(id: 0, viewType: 'webview', layoutDirection: TextDirection.ltr).then((UiKitViewController viewController) {
+        final RenderUiKitView renderBox = RenderUiKitView(
+          viewController: viewController,
+          hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+          gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{},
+        );
+
+        layout(renderBox);
+        pumpFrame(phase: EnginePhase.paint);
+        expect(renderBox.debugNeedsPaint, isFalse);
+
+        renderBox.viewController = viewController;
+
+        expect(renderBox.debugNeedsPaint, isFalse);
+
+        futureCallbackRan = true;
+      });
+
+      viewCreation.complete();
+      async.flushMicrotasks();
+      expect(futureCallbackRan, true);
+    });
+  });
 }
 
 ui.PointerData _pointerData(
@@ -269,12 +304,13 @@ ui.PointerData _pointerData(
   PointerDeviceKind kind = PointerDeviceKind.mouse,
   int pointer = 0,
 }) {
+  final double devicePixelRatio = RendererBinding.instance.platformDispatcher.implicitView!.devicePixelRatio;
   return ui.PointerData(
     pointerIdentifier: pointer,
     embedderId: pointer,
     change: change,
-    physicalX: logicalPosition.dx * RendererBinding.instance.window.devicePixelRatio,
-    physicalY: logicalPosition.dy * RendererBinding.instance.window.devicePixelRatio,
+    physicalX: logicalPosition.dx * devicePixelRatio,
+    physicalY: logicalPosition.dy * devicePixelRatio,
     kind: kind,
     device: device,
   );

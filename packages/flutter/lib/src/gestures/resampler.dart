@@ -54,6 +54,7 @@ class PointerEventResampler {
     int buttons,
   ) {
     return PointerHoverEvent(
+      viewId: event.viewId,
       timeStamp: timeStamp,
       kind: event.kind,
       device: event.device,
@@ -86,6 +87,7 @@ class PointerEventResampler {
     int buttons,
   ) {
     return PointerMoveEvent(
+      viewId: event.viewId,
       timeStamp: timeStamp,
       pointer: pointerIdentifier,
       kind: event.kind,
@@ -240,7 +242,8 @@ class PointerEventResampler {
       // generated when the position has changed.
       if (event is! PointerMoveEvent && event is! PointerHoverEvent) {
         // Add synthetics `move` or `hover` event if position has changed.
-        // Note: Devices without `hover` events are expected to always have
+        //
+        // Devices without `hover` events are expected to always have
         // `add` and `down` events with the same position and this logic will
         // therefore never produce `hover` events.
         if (position != _position) {

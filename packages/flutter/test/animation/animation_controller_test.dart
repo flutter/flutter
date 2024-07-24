@@ -8,6 +8,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../scheduler/scheduler_tester.dart';
 
@@ -18,6 +19,19 @@ void main() {
         ..resetEpoch()
         ..platformDispatcher.onBeginFrame = null
         ..platformDispatcher.onDrawFrame = null;
+  });
+
+  test('AnimationController dispatches memory events', () async {
+    await expectLater(
+      await memoryEvents(
+        () => AnimationController(
+          duration: const Duration(milliseconds: 100),
+          vsync: const TestVSync(),
+        ).dispose(),
+        AnimationController,
+      ),
+      areCreateAndDispose,
+    );
   });
 
   test('Can set value during status callback', () {
@@ -173,6 +187,8 @@ void main() {
     expect(controller.value, moreOrLessEquals(0.0));
     controller.stop();
 
+    controller.dispose();
+
     // Swap which duration is longer.
     controller = AnimationController(
       duration: const Duration(milliseconds: 50),
@@ -203,6 +219,98 @@ void main() {
     tick(const Duration(milliseconds: 310));
     expect(controller.value, moreOrLessEquals(0.0));
     controller.stop();
+    controller.dispose();
+  });
+
+  test('toggle() with different durations', () {
+    AnimationController controller = AnimationController(
+      duration: const Duration(milliseconds: 100),
+      reverseDuration: const Duration(milliseconds: 50),
+      vsync: const TestVSync(),
+    );
+
+    controller.toggle();
+    tick(const Duration(milliseconds: 10));
+    tick(const Duration(milliseconds: 30));
+    expect(controller.value, moreOrLessEquals(0.2));
+    tick(const Duration(milliseconds: 60));
+    expect(controller.value, moreOrLessEquals(0.5));
+    tick(const Duration(milliseconds: 90));
+    expect(controller.value, moreOrLessEquals(0.8));
+    tick(const Duration(milliseconds: 120));
+    expect(controller.value, moreOrLessEquals(1.0));
+    controller.stop();
+
+    controller.toggle();
+    tick(const Duration(milliseconds: 210));
+    tick(const Duration(milliseconds: 220));
+    expect(controller.value, moreOrLessEquals(0.8));
+    tick(const Duration(milliseconds: 230));
+    expect(controller.value, moreOrLessEquals(0.6));
+    tick(const Duration(milliseconds: 240));
+    expect(controller.value, moreOrLessEquals(0.4));
+    tick(const Duration(milliseconds: 260));
+    expect(controller.value, moreOrLessEquals(0.0));
+    controller.stop();
+
+    controller.dispose();
+
+    // Swap which duration is longer.
+    controller = AnimationController(
+      duration: const Duration(milliseconds: 50),
+      reverseDuration: const Duration(milliseconds: 100),
+      vsync: const TestVSync(),
+    );
+
+    controller.toggle();
+    tick(const Duration(milliseconds: 10));
+    tick(const Duration(milliseconds: 30));
+    expect(controller.value, moreOrLessEquals(0.4));
+    tick(const Duration(milliseconds: 60));
+    expect(controller.value, moreOrLessEquals(1.0));
+    tick(const Duration(milliseconds: 90));
+    expect(controller.value, moreOrLessEquals(1.0));
+    controller.stop();
+
+    controller.toggle();
+    tick(const Duration(milliseconds: 210));
+    tick(const Duration(milliseconds: 220));
+    expect(controller.value, moreOrLessEquals(0.9));
+    tick(const Duration(milliseconds: 230));
+    expect(controller.value, moreOrLessEquals(0.8));
+    tick(const Duration(milliseconds: 240));
+    expect(controller.value, moreOrLessEquals(0.7));
+    tick(const Duration(milliseconds: 260));
+    expect(controller.value, moreOrLessEquals(0.5));
+    tick(const Duration(milliseconds: 310));
+    expect(controller.value, moreOrLessEquals(0.0));
+    controller.stop();
+    controller.dispose();
+  });
+
+  test('toggle() acts correctly based on the animation state', () {
+    final AnimationController controller = AnimationController(
+      duration: const Duration(milliseconds: 100),
+      reverseDuration: const Duration(milliseconds: 100),
+      vsync: const TestVSync(),
+    );
+
+    controller.forward();
+    expect(controller.status, AnimationStatus.forward);
+    expect(controller.isForwardOrCompleted, true);
+    tick(const Duration(milliseconds: 10));
+    tick(const Duration(milliseconds: 60));
+    expect(controller.value, moreOrLessEquals(0.5));
+    expect(controller.isForwardOrCompleted, true);
+    controller.toggle();
+    tick(const Duration(milliseconds: 10));
+    expect(controller.status, AnimationStatus.reverse);
+    expect(controller.isForwardOrCompleted, false);
+    tick(const Duration(milliseconds: 110));
+    expect(controller.value, moreOrLessEquals(0));
+    expect(controller.status, AnimationStatus.dismissed);
+    expect(controller.isForwardOrCompleted, false);
+
     controller.dispose();
   });
 
@@ -749,8 +857,8 @@ void main() {
   );
 
   test(
-    'calling repeat with specified min and max values makes the animation '
-    'alternate between min and max values on each repeat',
+    'calling repeat with specified min and max values between 0 and 1 makes '
+    'the animation alternate between min and max values on each repeat',
     () {
       final AnimationController controller = AnimationController(
         duration: const Duration(milliseconds: 100),
@@ -785,6 +893,47 @@ void main() {
       tick(Duration.zero);
       tick(const Duration(milliseconds: 125));
       expect(controller.value, 1.0);
+
+      controller.reset();
+      controller.value = 0.2;
+      expect(controller.value, 0.2);
+
+      controller.repeat(reverse: true, min: 0.2, max: 0.6);
+      tick(Duration.zero);
+      tick(const Duration(milliseconds: 50));
+      expect(controller.value, 0.4);
+      controller.dispose();
+    },
+  );
+
+  test(
+    'calling repeat with negative min value and positive max value makes the '
+    'animation alternate between min and max values on each repeat',
+    () {
+      final AnimationController controller = AnimationController(
+        duration: const Duration(milliseconds: 100),
+        value: 1.0,
+        lowerBound: -1,
+        upperBound: 3,
+        vsync: const TestVSync(),
+      );
+
+      expect(controller.value, 1.0);
+
+      controller.repeat(min: 1, max: 3);
+      tick(Duration.zero);
+      expect(controller.value, 1);
+      tick(const Duration(milliseconds: 50));
+      expect(controller.value, 2);
+
+      controller.reset();
+      controller.value = 0.0;
+
+      controller.repeat(min: -1, max: 3);
+      tick(Duration.zero);
+      expect(controller.value, 0);
+      tick(const Duration(milliseconds: 25));
+      expect(controller.value, 1);
       controller.dispose();
     },
   );

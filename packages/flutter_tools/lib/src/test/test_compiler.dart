@@ -15,6 +15,7 @@ import '../bundle.dart';
 import '../compile.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
+import '../native_assets.dart';
 import '../project.dart';
 import 'test_time_recorder.dart';
 
@@ -45,9 +46,11 @@ class TestCompiler {
   /// If [testTimeRecorder] is passed, times will be recorded in it.
   TestCompiler(
     this.buildInfo,
-    this.flutterProject,
-    { String? precompiledDillPath, this.testTimeRecorder }
-  ) : testFilePath = precompiledDillPath ?? globals.fs.path.join(
+    this.flutterProject, {
+    String? precompiledDillPath,
+    this.testTimeRecorder,
+    TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
+  }) : testFilePath = precompiledDillPath ?? globals.fs.path.join(
         flutterProject!.directory.path,
         getBuildDirectory(),
         'test_cache',
@@ -56,7 +59,8 @@ class TestCompiler {
           dartDefines: buildInfo.dartDefines,
           extraFrontEndOptions: buildInfo.extraFrontEndOptions,
         )),
-       shouldCopyDillFile = precompiledDillPath == null {
+       shouldCopyDillFile = precompiledDillPath == null,
+       _nativeAssetsBuilder = nativeAssetsBuilder {
     // Compiler maintains and updates single incremental dill file.
     // Incremental compilation requests done for each test copy that file away
     // for independent execution.
@@ -77,6 +81,7 @@ class TestCompiler {
   final String testFilePath;
   final bool shouldCopyDillFile;
   final TestTimeRecorder? testTimeRecorder;
+  final TestCompilerNativeAssetsBuilder? _nativeAssetsBuilder;
 
 
   ResidentCompiler? compiler;
@@ -116,9 +121,9 @@ class TestCompiler {
       buildMode: buildInfo.mode,
       trackWidgetCreation: buildInfo.trackWidgetCreation,
       initializeFromDill: testFilePath,
-      unsafePackageSerialization: false,
       dartDefines: buildInfo.dartDefines,
-      packagesPath: buildInfo.packagesPath,
+      packagesPath: buildInfo.packageConfigPath,
+      frontendServerStarterPath: buildInfo.frontendServerStarterPath,
       extraFrontEndOptions: buildInfo.extraFrontEndOptions,
       platform: globals.platform,
       testCompilation: true,
@@ -164,6 +169,8 @@ class TestCompiler {
         invalidatedRegistrantFiles.add(flutterProject!.dartPluginRegistrant.absolute.uri);
       }
 
+      final Uri? nativeAssetsYaml = await _nativeAssetsBuilder?.build(buildInfo);
+
       final CompilerOutput? compilerOutput = await compiler!.recompile(
         request.mainUri,
         <Uri>[request.mainUri, ...invalidatedRegistrantFiles],
@@ -172,6 +179,7 @@ class TestCompiler {
         projectRootPath: flutterProject?.directory.absolute.path,
         checkDartPluginRegistry: true,
         fs: globals.fs,
+        nativeAssetsYaml: nativeAssetsYaml,
       );
       final String? outputPath = compilerOutput?.outputFilename;
 

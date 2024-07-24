@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'data_table.dart';
+/// @docImport 'divider.dart';
+/// @docImport 'list_tile.dart';
+library;
+
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -46,7 +51,7 @@ class DividerThemeData with Diagnosticable {
   /// used between [ListTile]s, between rows in [DataTable]s, and so forth.
   final Color? color;
 
-  /// The [Divider]'s width or the [VerticalDivider]'s height.
+  /// The [Divider]'s height or the [VerticalDivider]'s width.
   ///
   /// This represents the amount of horizontal or vertical space the divider
   /// takes up.
@@ -83,11 +88,11 @@ class DividerThemeData with Diagnosticable {
 
   /// Linearly interpolate between two Divider themes.
   ///
-  /// The argument `t` must not be null.
-  ///
   /// {@macro dart.ui.shadow.lerp}
   static DividerThemeData lerp(DividerThemeData? a, DividerThemeData? b, double t) {
-    assert(t != null);
+    if (identical(a, b) && a != null) {
+      return a;
+    }
     return DividerThemeData(
       color: Color.lerp(a?.color, b?.color, t),
       space: lerpDouble(a?.space, b?.space, t),
@@ -144,7 +149,7 @@ class DividerTheme extends InheritedTheme {
     super.key,
     required this.data,
     required super.child,
-  }) : assert(data != null);
+  });
 
   /// The properties for descendant [Divider]s, [VerticalDivider]s, dividers
   /// between [ListTile]s, and dividers between rows in [DataTable]s.

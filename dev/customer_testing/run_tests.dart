@@ -24,7 +24,7 @@ Future<bool> run(List<String> arguments) async {
     ..addOption(
       'repeat',
       defaultsTo: '1',
-      help: 'How many times to run each test. Set to a high value to look for flakes.',
+      help: 'How many times to run each test. Set to a high value to look for flakes. If a test specifies a number of iterations, the lower of the two values is used.',
       valueHelp: 'count',
     )
     ..addOption(
@@ -60,7 +60,7 @@ Future<bool> run(List<String> arguments) async {
   void printHelp() {
     print('run_tests.dart [options...] path/to/file1.test path/to/file2.test...');
     print('For details on the test registry format, see:');
-    print('  https://github.com/flutter/tests/blob/master/registry/template.test');
+    print('  https://github.com/flutter/tests/blob/main/registry/template.test');
     print('');
     print(argParser.usage);
     print('');

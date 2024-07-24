@@ -6,9 +6,12 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
 import 'framework.dart';
+import 'scroll_delegate.dart';
 import 'sliver.dart';
 
 /// A sliver that contains multiple box children that each fills the viewport.
+///
+/// _To learn more about slivers, see [CustomScrollView.slivers]._
 ///
 /// [SliverFillViewport] places its children in a linear array along the main
 /// axis. Each child is sized to fill the viewport, both in the main and cross
@@ -30,9 +33,7 @@ class SliverFillViewport extends StatelessWidget {
     required this.delegate,
     this.viewportFraction = 1.0,
     this.padEnds = true,
-  }) : assert(viewportFraction != null),
-       assert(viewportFraction > 0.0),
-       assert(padEnds != null);
+  }) : assert(viewportFraction > 0.0);
 
   /// The fraction of the viewport that each child should fill in the main axis.
   ///
@@ -44,14 +45,14 @@ class SliverFillViewport extends StatelessWidget {
   /// Whether to add padding to both ends of the list.
   ///
   /// If this is set to true and [viewportFraction] < 1.0, padding will be added
-  /// such that the first and last child slivers will be in the center of
-  /// the viewport when scrolled all the way to the start or end, respectively.
-  /// You may want to set this to false if this [SliverFillViewport] is not the only
+  /// such that the first and last child slivers will be in the center of the
+  /// viewport when scrolled all the way to the start or end, respectively. You
+  /// may want to set this to false if this [SliverFillViewport] is not the only
   /// widget along this main axis, such as in a [CustomScrollView] with multiple
   /// children.
   ///
-  /// This option cannot be null. If [viewportFraction] >= 1.0, this option has no
-  /// effect. Defaults to true.
+  /// If [viewportFraction] is greater than one, this option has no effect.
+  /// Defaults to true.
   final bool padEnds;
 
   /// {@macro flutter.widgets.SliverMultiBoxAdaptorWidget.delegate}
@@ -73,8 +74,7 @@ class _SliverFillViewportRenderObjectWidget extends SliverMultiBoxAdaptorWidget 
   const _SliverFillViewportRenderObjectWidget({
     required super.delegate,
     this.viewportFraction = 1.0,
-  }) : assert(viewportFraction != null),
-      assert(viewportFraction > 0.0);
+  }) : assert(viewportFraction > 0.0);
 
   final double viewportFraction;
 
@@ -94,8 +94,7 @@ class _SliverFractionalPadding extends SingleChildRenderObjectWidget {
   const _SliverFractionalPadding({
     this.viewportFraction = 0,
     Widget? sliver,
-  }) : assert(viewportFraction != null),
-      assert(viewportFraction >= 0),
+  }) : assert(viewportFraction >= 0),
       assert(viewportFraction <= 0.5),
       super(child: sliver);
 
@@ -113,8 +112,7 @@ class _SliverFractionalPadding extends SingleChildRenderObjectWidget {
 class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
   _RenderSliverFractionalPadding({
     double viewportFraction = 0,
-  }) : assert(viewportFraction != null),
-      assert(viewportFraction <= 0.5),
+  }) : assert(viewportFraction <= 0.5),
       assert(viewportFraction >= 0),
       _viewportFraction = viewportFraction;
 
@@ -123,7 +121,6 @@ class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
   double get viewportFraction => _viewportFraction;
   double _viewportFraction;
   set viewportFraction(double newValue) {
-    assert(newValue != null);
     if (_viewportFraction == newValue) {
       return;
     }
@@ -145,17 +142,12 @@ class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
       return;
     }
 
-    assert(constraints.axis != null);
     final double paddingValue = constraints.viewportMainAxisExtent * viewportFraction;
     _lastResolvedConstraints = constraints;
-    switch (constraints.axis) {
-      case Axis.horizontal:
-        _resolvedPadding = EdgeInsets.symmetric(horizontal: paddingValue);
-        break;
-      case Axis.vertical:
-        _resolvedPadding = EdgeInsets.symmetric(vertical: paddingValue);
-        break;
-    }
+    _resolvedPadding = switch (constraints.axis) {
+      Axis.horizontal => EdgeInsets.symmetric(horizontal: paddingValue),
+      Axis.vertical   => EdgeInsets.symmetric(vertical: paddingValue),
+    };
 
     return;
   }
@@ -169,6 +161,8 @@ class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
 
 /// A sliver that contains a single box child that fills the remaining space in
 /// the viewport.
+///
+/// _To learn more about slivers, see [CustomScrollView.slivers]._
 ///
 /// [SliverFillRemaining] will size its [child] to fill the viewport in the
 /// cross axis. The extent of the sliver and its child's size in the main axis
@@ -264,8 +258,7 @@ class SliverFillRemaining extends StatelessWidget {
     this.child,
     this.hasScrollBody = true,
     this.fillOverscroll = false,
-  }) : assert(hasScrollBody != null),
-       assert(fillOverscroll != null);
+  });
 
   /// Box child widget that fills the remaining space in the viewport.
   ///
@@ -287,10 +280,9 @@ class SliverFillRemaining extends StatelessWidget {
 
   /// Indicates whether the child should stretch to fill the overscroll area
   /// created by certain scroll physics, such as iOS' default scroll physics.
-  /// This value cannot be null. This flag is only relevant when the
-  /// [hasScrollBody] value is false.
+  /// This flag is only relevant when [hasScrollBody] is false.
   ///
-  /// Defaults to false, meaning the default behavior is for the child to
+  /// Defaults to false, meaning that the default behavior is for the child to
   /// maintain its size and not extend into the overscroll area.
   final bool fillOverscroll;
 

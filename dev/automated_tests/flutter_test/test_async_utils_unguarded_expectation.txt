@@ -27,6 +27,6 @@ TestAsyncUtils - handling unguarded async helper functions
 .*..:.. \+0 -1: TestAsyncUtils - handling unguarded async helper functions *
   Test failed\. See exception logs above\.
   The test description was: TestAsyncUtils - handling unguarded async helper functions
- *
-To run this test again: .*test_async_utils_unguarded_test\.dart -p vm --plain-name 'TestAsyncUtils - handling unguarded async helper functions'
+[ \n]*
+To run this test again: .*test_async_utils_unguarded_test\.dart -p vm --plain-name ['"]TestAsyncUtils - handling unguarded async helper functions['"]
 .*..:.. \+0 -1: Some tests failed\. *

@@ -15,13 +15,12 @@ import 'vmservice.dart';
 const String kFlutterTestOutputsDirEnvName = 'FLUTTER_TEST_OUTPUTS_DIR';
 class ColdRunner extends ResidentRunner {
   ColdRunner(
-    super.devices, {
+    super.flutterDevices, {
     required super.target,
     required super.debuggingOptions,
     this.traceStartup = false,
     this.awaitFirstFrameWhenTracing = true,
     this.applicationBinary,
-    this.multidexEnabled = false,
     bool super.ipv6 = false,
     super.stayResident,
     super.machine,
@@ -33,7 +32,6 @@ class ColdRunner extends ResidentRunner {
   final bool traceStartup;
   final bool awaitFirstFrameWhenTracing;
   final File? applicationBinary;
-  final bool multidexEnabled;
   bool _didAttach = false;
 
   @override
@@ -69,7 +67,7 @@ class ColdRunner extends ResidentRunner {
       return 1;
     }
 
-    // Connect to observatory.
+    // Connect to the VM Service.
     if (debuggingEnabled) {
       try {
         await connectToServiceProtocol(allowExistingDdsInstance: false);
@@ -80,15 +78,21 @@ class ColdRunner extends ResidentRunner {
       }
     }
 
-    if (enableDevTools && debuggingEnabled) {
-      // The method below is guaranteed never to return a failing future.
-      unawaited(residentDevtoolsHandler!.serveAndAnnounceDevTools(
-        devToolsServerAddress: debuggingOptions.devToolsServerAddress,
-        flutterDevices: flutterDevices,
-      ));
+    if (debuggingEnabled) {
+      if (enableDevTools) {
+        // The method below is guaranteed never to return a failing future.
+        unawaited(residentDevtoolsHandler!.serveAndAnnounceDevTools(
+          devToolsServerAddress: debuggingOptions.devToolsServerAddress,
+          flutterDevices: flutterDevices,
+          isStartPaused: debuggingOptions.startPaused,
+        ));
+      }
+      if (debuggingOptions.serveObservatory) {
+        await enableObservatory();
+      }
     }
 
-    if (flutterDevices.first.observatoryUris != null) {
+    if (flutterDevices.first.vmServiceUris != null) {
       // For now, only support one debugger connection.
       connectionInfoCompleter?.complete(DebugConnectionInfo(
         httpUri: flutterDevices.first.vmService!.httpAddress,
@@ -162,12 +166,18 @@ class ColdRunner extends ResidentRunner {
       }
     }
 
-    if (enableDevTools && debuggingEnabled) {
-      // The method below is guaranteed never to return a failing future.
-      unawaited(residentDevtoolsHandler!.serveAndAnnounceDevTools(
-        devToolsServerAddress: debuggingOptions.devToolsServerAddress,
-        flutterDevices: flutterDevices,
-      ));
+    if (debuggingEnabled) {
+      if (enableDevTools) {
+        // The method below is guaranteed never to return a failing future.
+        unawaited(residentDevtoolsHandler!.serveAndAnnounceDevTools(
+          devToolsServerAddress: debuggingOptions.devToolsServerAddress,
+          flutterDevices: flutterDevices,
+          isStartPaused: debuggingOptions.startPaused,
+        ));
+      }
+      if (debuggingOptions.serveObservatory) {
+        await enableObservatory();
+      }
     }
 
     appStartedCompleter?.complete();

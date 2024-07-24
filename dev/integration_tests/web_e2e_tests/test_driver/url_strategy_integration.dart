@@ -3,13 +3,16 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html' as html;
+import 'dart:js_interop';
 import 'dart:ui' as ui;
+import 'dart:ui_web';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 import 'package:integration_test/integration_test.dart';
+import 'package:web/helpers.dart';
+import 'package:web/web.dart' as web;
 import 'package:web_e2e_tests/url_strategy_main.dart' as app;
 
 void main() {
@@ -46,11 +49,6 @@ void main() {
 /// It keeps a list of history entries and event listeners in memory and
 /// manipulates them in order to achieve the desired functionality.
 class TestUrlStrategy extends UrlStrategy {
-  /// Creates a instance of [TestUrlStrategy] with an empty string as the
-  /// path.
-  factory TestUrlStrategy() =>
-      TestUrlStrategy.fromEntry(const TestHistoryEntry(null, null, ''));
-
   /// Creates an instance of [TestUrlStrategy] and populates it with a list
   /// that has [initialEntry] as the only item.
   TestUrlStrategy.fromEntry(TestHistoryEntry initialEntry)
@@ -61,11 +59,9 @@ class TestUrlStrategy extends UrlStrategy {
   String getPath() => currentEntry.url;
 
   @override
-  dynamic getState() => currentEntry.state;
+  Object? getState() => currentEntry.state;
 
   int _currentEntryIndex;
-  int get currentEntryIndex => _currentEntryIndex;
-
   final List<TestHistoryEntry> history;
 
   TestHistoryEntry get currentEntry {
@@ -99,20 +95,10 @@ class TestUrlStrategy extends UrlStrategy {
   @override
   void replaceState(dynamic state, String title, String url) {
     assert(withinAppHistory);
-    if (url == null || url == '') {
+    if (url == '') {
       url = currentEntry.url;
     }
     currentEntry = TestHistoryEntry(state, title, url);
-  }
-
-  /// This simulates the case where a user types in a url manually. It causes
-  /// a new state to be pushed, and all event listeners will be invoked.
-  Future<void> simulateUserTypingUrl(String url) {
-    assert(withinAppHistory);
-    return _nextEventLoop(() {
-      pushState(null, '', url);
-      _firePopStateEvent();
-    });
   }
 
   @override
@@ -128,10 +114,10 @@ class TestUrlStrategy extends UrlStrategy {
     });
   }
 
-  final List<html.EventListener> listeners = <html.EventListener>[];
+  final List<PopStateListener> listeners = <PopStateListener>[];
 
   @override
-  ui.VoidCallback addPopStateListener(html.EventListener fn) {
+  ui.VoidCallback addPopStateListener(PopStateListener fn) {
     listeners.add(fn);
     return () {
       // Schedule a micro task here to avoid removing the listener during
@@ -151,9 +137,9 @@ class TestUrlStrategy extends UrlStrategy {
   /// like a real browser.
   void _firePopStateEvent() {
     assert(withinAppHistory);
-    final html.PopStateEvent event = html.PopStateEvent(
+    final web.PopStateEvent event = web.PopStateEvent(
       'popstate',
-      <String, dynamic>{'state': currentEntry.state},
+      PopStateEventInit(state: currentEntry.state?.toJSBox),
     );
     for (int i = 0; i < listeners.length; i++) {
       listeners[i](event);
@@ -177,7 +163,7 @@ class TestUrlStrategy extends UrlStrategy {
 class TestHistoryEntry {
   const TestHistoryEntry(this.state, this.title, this.url);
 
-  final dynamic state;
+  final Object? state;
   final String? title;
   final String url;
 

@@ -1,0 +1,8 @@
+{
+  "reorderItemToStart": "Przenieś na początek",
+  "reorderItemToEnd": "Przenieś na koniec",
+  "reorderItemUp": "Przenieś w górę",
+  "reorderItemDown": "Przenieś w dół",
+  "reorderItemLeft": "Przenieś w lewo",
+  "reorderItemRight": "Przenieś w prawo"
+}

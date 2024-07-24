@@ -29,5 +29,6 @@
   "Shift": ["ShiftLeft", "ShiftLeft", "ShiftRight", null],
   "Control": ["ControlLeft", "ControlLeft", "ControlRight", null],
   "Alt": ["AltLeft", "AltLeft", "AltRight", null],
+  "AltGraph": ["AltGraph", null, "AltGraph", null],
   "Meta": ["MetaLeft", "MetaLeft", "MetaRight", null]
 }

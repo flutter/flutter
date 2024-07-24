@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'interface_level.dart';
+/// @docImport 'theme.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
@@ -14,7 +18,7 @@ import 'colors.dart';
 // Values derived from https://developer.apple.com/design/resources/.
 const TextStyle _kDefaultTextStyle = TextStyle(
   inherit: false,
-  fontFamily: '.SF Pro Text',
+  fontFamily: 'CupertinoSystemText',
   fontSize: 17.0,
   letterSpacing: -0.41,
   color: CupertinoColors.label,
@@ -28,7 +32,7 @@ const TextStyle _kDefaultTextStyle = TextStyle(
 // Values derived from https://developer.apple.com/design/resources/.
 const TextStyle _kDefaultActionTextStyle = TextStyle(
   inherit: false,
-  fontFamily: '.SF Pro Text',
+  fontFamily: 'CupertinoSystemText',
   fontSize: 17.0,
   letterSpacing: -0.41,
   color: CupertinoColors.activeBlue,
@@ -42,7 +46,7 @@ const TextStyle _kDefaultActionTextStyle = TextStyle(
 // Values derived from https://developer.apple.com/design/resources/.
 const TextStyle _kDefaultTabLabelTextStyle = TextStyle(
   inherit: false,
-  fontFamily: '.SF Pro Text',
+  fontFamily: 'CupertinoSystemText',
   fontSize: 10.0,
   fontWeight: FontWeight.w500,
   letterSpacing: -0.24,
@@ -51,7 +55,7 @@ const TextStyle _kDefaultTabLabelTextStyle = TextStyle(
 
 const TextStyle _kDefaultMiddleTitleTextStyle = TextStyle(
   inherit: false,
-  fontFamily: '.SF Pro Text',
+  fontFamily: 'CupertinoSystemText',
   fontSize: 17.0,
   fontWeight: FontWeight.w600,
   letterSpacing: -0.41,
@@ -60,10 +64,10 @@ const TextStyle _kDefaultMiddleTitleTextStyle = TextStyle(
 
 const TextStyle _kDefaultLargeTitleTextStyle = TextStyle(
   inherit: false,
-  fontFamily: '.SF Pro Display',
+  fontFamily: 'CupertinoSystemDisplay',
   fontSize: 34.0,
   fontWeight: FontWeight.w700,
-  letterSpacing: 0.41,
+  letterSpacing: 0.38,
   color: CupertinoColors.label,
 );
 
@@ -80,7 +84,7 @@ const TextStyle _kDefaultLargeTitleTextStyle = TextStyle(
 // * https://github.com/flutter/flutter/pull/65501#discussion_r486557093
 const TextStyle _kDefaultPickerTextStyle = TextStyle(
   inherit: false,
-  fontFamily: '.SF Pro Display',
+  fontFamily: 'CupertinoSystemDisplay',
   fontSize: 21.0,
   fontWeight: FontWeight.w400,
   letterSpacing: -0.6,
@@ -95,8 +99,9 @@ const TextStyle _kDefaultPickerTextStyle = TextStyle(
 // Value extracted from off-center labels. Centered labels have a font size of 25pt.
 const TextStyle _kDefaultDateTimePickerTextStyle = TextStyle(
   inherit: false,
-  fontFamily: '.SF Pro Display',
+  fontFamily: 'CupertinoSystemDisplay',
   fontSize: 21,
+  letterSpacing: 0.4,
   fontWeight: FontWeight.normal,
   color: CupertinoColors.label,
 );
@@ -116,7 +121,7 @@ class CupertinoTextThemeData with Diagnosticable {
   /// Create a [CupertinoTextThemeData].
   ///
   /// The [primaryColor] is used to derive TextStyle defaults of other attributes
-  /// such as [navActionTextStyle] and [actionTextStyle], it must not be null when
+  /// such as [navActionTextStyle] and [actionTextStyle]. It must not be null when
   /// either [navActionTextStyle] or [actionTextStyle] is null. Defaults to
   /// [CupertinoColors.systemBlue].
   ///
@@ -260,6 +265,41 @@ class CupertinoTextThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<TextStyle>('pickerTextStyle', pickerTextStyle, defaultValue: defaultData.pickerTextStyle));
     properties.add(DiagnosticsProperty<TextStyle>('dateTimePickerTextStyle', dateTimePickerTextStyle, defaultValue: defaultData.dateTimePickerTextStyle));
   }
+
+  @override
+  bool operator == (Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is CupertinoTextThemeData
+      && other._defaults == _defaults
+      && other._primaryColor == _primaryColor
+      && other._textStyle == _textStyle
+      && other._actionTextStyle == _actionTextStyle
+      && other._tabLabelTextStyle == _tabLabelTextStyle
+      && other._navTitleTextStyle == _navTitleTextStyle
+      && other._navLargeTitleTextStyle == _navLargeTitleTextStyle
+      && other._navActionTextStyle == _navActionTextStyle
+      && other._pickerTextStyle == _pickerTextStyle
+      && other._dateTimePickerTextStyle == _dateTimePickerTextStyle;
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    _defaults,
+    _primaryColor,
+    _textStyle,
+    _actionTextStyle,
+    _tabLabelTextStyle,
+    _navTitleTextStyle,
+    _navLargeTitleTextStyle,
+    _navActionTextStyle,
+    _pickerTextStyle,
+    _dateTimePickerTextStyle,
+  );
 }
 
 
@@ -268,8 +308,7 @@ class _TextThemeDefaultsBuilder {
   const _TextThemeDefaultsBuilder(
     this.labelColor,
     this.inactiveGrayColor,
-  ) : assert(labelColor != null),
-      assert(inactiveGrayColor != null);
+  );
 
   final Color labelColor;
   final Color inactiveGrayColor;
@@ -297,4 +336,20 @@ class _TextThemeDefaultsBuilder {
       ? this
       : _TextThemeDefaultsBuilder(resolvedLabelColor, resolvedInactiveGray);
   }
+
+  @override
+  bool operator == (Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is _TextThemeDefaultsBuilder
+      && other.labelColor == labelColor
+      && other.inactiveGrayColor == inactiveGrayColor;
+  }
+
+  @override
+  int get hashCode => Object.hash(labelColor, inactiveGrayColor);
 }

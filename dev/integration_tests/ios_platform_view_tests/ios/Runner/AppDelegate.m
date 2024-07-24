@@ -6,6 +6,7 @@
 #import "GeneratedPluginRegistrant.h"
 #import "ViewFactory.h"
 #import "TextFieldFactory.h"
+#import "ButtonFactory.h"
 
 @implementation AppDelegate
 
@@ -16,6 +17,7 @@
   id<FlutterPluginRegistrar> registrar = [self registrarForPlugin:@"flutter"];
   [registrar registerViewFactory:[[ViewFactory alloc] init] withId:@"platform_view"];
   [registrar registerViewFactory:[[TextFieldFactory alloc] init] withId:@"platform_text_field"];
+  [registrar registerViewFactory:[[ButtonFactory alloc] init] withId:@"platform_button"];
   return [super application:application didFinishLaunchingWithOptions:launchOptions];
 }
 

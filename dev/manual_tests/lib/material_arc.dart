@@ -160,12 +160,10 @@ class _PointDemoState extends State<_PointDemo> {
         setState(() {
           _begin = _begin! + details.delta;
         });
-        break;
       case _DragTarget.end:
         setState(() {
           _end = _end! + details.delta;
         });
-        break;
     }
   }
 
@@ -322,12 +320,10 @@ class _RectangleDemoState extends State<_RectangleDemo> {
         setState(() {
           _begin = _begin?.shift(details.delta);
         });
-        break;
       case _DragTarget.end:
         setState(() {
           _end = _end?.shift(details.delta);
         });
-        break;
     }
   }
 
@@ -451,7 +447,7 @@ class _AnimationDemoState extends State<AnimationDemo> with TickerProviderStateM
             return FloatingActionButton(
               child: const Icon(Icons.refresh),
               onPressed: () {
-                _play(_allDemos[DefaultTabController.of(context)!.index]);
+                _play(_allDemos[DefaultTabController.of(context).index]);
               },
             );
           },

@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'drawer.dart';
+/// @docImport 'material.dart';
+/// @docImport 'user_accounts_drawer_header.dart';
+library;
+
 import 'package:flutter/widgets.dart';
 
 import 'debug.dart';
@@ -76,7 +81,7 @@ class DrawerHeader extends StatelessWidget {
     assert(debugCheckHasMaterial(context));
     assert(debugCheckHasMediaQuery(context));
     final ThemeData theme = Theme.of(context);
-    final double statusBarHeight = MediaQuery.of(context).padding.top;
+    final double statusBarHeight = MediaQuery.paddingOf(context).top;
     return Container(
       height: statusBarHeight + _kDrawerHeaderHeight,
       margin: margin,

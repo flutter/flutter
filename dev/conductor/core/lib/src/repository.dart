@@ -10,7 +10,6 @@ import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
-import 'package:yaml/yaml.dart';
 
 import './git.dart';
 import './globals.dart';
@@ -24,37 +23,20 @@ enum RemoteName {
 }
 
 class Remote {
-  const Remote({
-    required RemoteName name,
-    required this.url,
-  })  : _name = name,
-        assert(url != null),
-        assert(url != '');
+  const Remote({required RemoteName name, required this.url})
+      : _name = name, assert(url != '');
 
-  factory Remote.mirror(String url) {
-    return Remote(
-      name: RemoteName.mirror,
-      url: url,
-    );
-  }
-
-  factory Remote.upstream(String url) {
-    return Remote(
-      name: RemoteName.upstream,
-      url: url,
-    );
-  }
+  const Remote.mirror(String url) : this(name: RemoteName.mirror, url: url);
+  const Remote.upstream(String url) : this(name: RemoteName.upstream, url: url);
 
   final RemoteName _name;
 
   /// The name of the remote.
   String get name {
-    switch (_name) {
-      case RemoteName.upstream:
-        return 'upstream';
-      case RemoteName.mirror:
-        return 'mirror';
-    }
+    return switch (_name) {
+      RemoteName.upstream => 'upstream',
+      RemoteName.mirror   => 'mirror',
+    };
   }
 
   /// The URL of the remote.
@@ -62,6 +44,39 @@ class Remote {
 }
 
 /// A source code repository.
+///
+/// This class is an abstraction over a git
+/// repository on the local disk. Ideally this abstraction would hide from
+/// the outside libraries what git calls were needed to either read or update
+/// data in the underlying repository. In practice, most of the bugs in the
+/// conductor codebase are related to the git calls made from this and its
+/// subclasses.
+///
+/// Two factors that make this code more complicated than it would otherwise
+/// need to be are:
+/// 1. That any particular invocation of the conductor may or may not already
+/// have the git checkout present on disk, depending on what commands were
+/// previously run; and
+/// 2. The need to provide overrides for integration tests (in particular
+/// the ability to mark a [Repository] instance as a [localUpstream] made
+/// integration tests more hermetic, at the cost of complexity in the
+/// implementation).
+///
+/// The only way to simplify the first factor would be to change the behavior of
+/// the conductor tool to be a long-lived dart process that keeps all of its
+/// state in memory and blocks on user input. This would add the constraint that
+/// the user would need to keep the process running for the duration of a
+/// release, which could potentially take multiple days and users could not
+/// manually change the state of the release process (via editing the JSON
+/// config file). However, these may be reasonable trade-offs to make the
+/// codebase simpler and easier to reason about.
+///
+/// The way to simplify the second factor would be to not put any special
+/// handling in this library for integration tests. This would make integration
+/// tests more difficult/less hermetic, but the production code more reliable.
+/// This is probably the right trade-off to make, as the integration tests were
+/// still not hermetic or reliable, and the main integration test was ultimately
+/// deleted in #84354.
 abstract class Repository {
   Repository({
     required this.name,
@@ -131,8 +146,7 @@ abstract class Repository {
           'Fetch ${upstreamRemote.name} to ensure we have latest refs',
           workingDirectory: _checkoutDirectory!.path,
         );
-        // Note: if [initialRef] is a remote ref the checkout will be left in a
-        // detached HEAD state.
+        // If [initialRef] is a remote ref, the checkout will be left in a detached HEAD state.
         await git.run(
           <String>['checkout', initialRef!],
           'Checking out initialRef $initialRef',
@@ -169,15 +183,11 @@ abstract class Repository {
       workingDirectory: (await checkoutDirectory).path,
     );
 
-    final List<String> remoteBranches = <String>[];
-    for (final String line in output.split('\n')) {
-      final RegExpMatch? match = _lsRemotePattern.firstMatch(line);
-      if (match != null) {
-        remoteBranches.add(match.group(1)!);
-      }
-    }
-
-    return remoteBranches;
+    return <String>[
+      for (final String line in output.split('\n'))
+        if (_lsRemotePattern.firstMatch(line) case final RegExpMatch match)
+          match.group(1)!,
+    ];
   }
 
   /// Ensure the repository is cloned to disk and initialized with proper state.
@@ -241,7 +251,6 @@ abstract class Repository {
 
   /// The URL of the remote named [remoteName].
   Future<String> remoteUrl(String remoteName) async {
-    assert(remoteName != null);
     return git.getOutput(
       <String>['remote', 'get-url', remoteName],
       'verify the URL of the $remoteName remote',
@@ -321,6 +330,27 @@ abstract class Repository {
     );
   }
 
+  /// Tag [commit] and push the tag to the remote.
+  Future<void> tag(String commit, String tagName, String remote) async {
+    assert(commit.isNotEmpty);
+    assert(tagName.isNotEmpty);
+    assert(remote.isNotEmpty);
+    stdio.printStatus('About to tag commit $commit as $tagName...');
+    await git.run(
+      <String>['tag', tagName, commit],
+      'tag the commit with the version label',
+      workingDirectory: (await checkoutDirectory).path,
+    );
+    stdio.printStatus('Tagging successful.');
+    stdio.printStatus('About to push $tagName to remote $remote...');
+    await git.run(
+      <String>['push', remote, tagName],
+      'publish the tag to the repo',
+      workingDirectory: (await checkoutDirectory).path,
+    );
+    stdio.printStatus('Tag push successful.');
+  }
+
   /// List commits in reverse chronological order.
   Future<List<String>> revList(List<String> args) async {
     return (await git.getOutput(<String>['rev-list', ...args],
@@ -366,50 +396,6 @@ abstract class Repository {
       workingDirectory: (await checkoutDirectory).path,
     );
     return exitcode == 0;
-  }
-
-  /// Determines if a commit will cherry-pick to current HEAD without conflict.
-  Future<bool> canCherryPick(String commit) async {
-    assert(
-      await gitCheckoutClean(),
-      'cannot cherry-pick because git checkout ${(await checkoutDirectory).path} is not clean',
-    );
-
-    final int exitcode = await git.run(
-      <String>['cherry-pick', '--no-commit', commit],
-      'attempt to cherry-pick $commit without committing',
-      allowNonZeroExitCode: true,
-      workingDirectory: (await checkoutDirectory).path,
-    );
-
-    final bool result = exitcode == 0;
-
-    if (result == false) {
-      stdio.printError(await git.getOutput(
-        <String>['diff'],
-        'get diff of failed cherry-pick',
-        workingDirectory: (await checkoutDirectory).path,
-      ));
-    }
-
-    await reset('HEAD');
-    return result;
-  }
-
-  /// Cherry-pick a [commit] to the current HEAD.
-  ///
-  /// This method will throw a [GitException] if the command fails.
-  Future<void> cherryPick(String commit) async {
-    assert(
-      await gitCheckoutClean(),
-      'cannot cherry-pick because git checkout ${(await checkoutDirectory).path} is not clean',
-    );
-
-    await git.run(
-      <String>['cherry-pick', commit],
-      'cherry-pick $commit',
-      workingDirectory: (await checkoutDirectory).path,
-    );
   }
 
   /// Resets repository HEAD to [ref].
@@ -534,8 +520,7 @@ class FrameworkRepository extends Repository {
   FrameworkRepository(
     this.checkouts, {
     super.name = 'framework',
-    super.upstreamRemote = const Remote(
-        name: RemoteName.upstream, url: FrameworkRepository.defaultUpstream),
+    super.upstreamRemote = const Remote.upstream(FrameworkRepository.defaultUpstream),
     super.localUpstream,
     super.previousCheckoutLocation,
     String super.initialRef = FrameworkRepository.defaultBranch,
@@ -567,10 +552,7 @@ class FrameworkRepository extends Repository {
     return FrameworkRepository(
       checkouts,
       name: name,
-      upstreamRemote: Remote(
-        name: RemoteName.upstream,
-        url: 'file://$upstreamPath/',
-      ),
+      upstreamRemote: Remote.upstream('file://$upstreamPath/'),
       previousCheckoutLocation: previousCheckoutLocation,
       initialRef: initialRef,
     );
@@ -580,39 +562,12 @@ class FrameworkRepository extends Repository {
   static const String defaultUpstream = 'git@github.com:flutter/flutter.git';
   static const String defaultBranch = 'master';
 
-  Future<CiYaml> get ciYaml async {
-    final CiYaml ciYaml =
-        CiYaml((await checkoutDirectory).childFile('.ci.yaml'));
-    return ciYaml;
-  }
-
   Future<String> get cacheDirectory async {
     return fileSystem.path.join(
       (await checkoutDirectory).path,
       'bin',
       'cache',
     );
-  }
-
-  /// Tag [commit] and push the tag to the remote.
-  Future<void> tag(String commit, String tagName, String remote) async {
-    assert(commit.isNotEmpty);
-    assert(tagName.isNotEmpty);
-    assert(remote.isNotEmpty);
-    stdio.printStatus('About to tag commit $commit as $tagName...');
-    await git.run(
-      <String>['tag', tagName, commit],
-      'tag the commit with the version label',
-      workingDirectory: (await checkoutDirectory).path,
-    );
-    stdio.printStatus('Tagging successful.');
-    stdio.printStatus('About to push $tagName to remote $remote...');
-    await git.run(
-      <String>['push', remote, tagName],
-      'publish the tag to the repo',
-      workingDirectory: (await checkoutDirectory).path,
-    );
-    stdio.printStatus('Tag push successful.');
   }
 
   @override
@@ -622,9 +577,7 @@ class FrameworkRepository extends Repository {
     return FrameworkRepository(
       checkouts,
       name: cloneName,
-      upstreamRemote: Remote(
-          name: RemoteName.upstream,
-          url: 'file://${(await checkoutDirectory).path}/'),
+      upstreamRemote: Remote.upstream('file://${(await checkoutDirectory).path}/'),
     );
   }
 
@@ -705,7 +658,7 @@ class FrameworkRepository extends Repository {
 
   /// Create a release candidate branch version file.
   ///
-  /// This file allows for easily traversing what candidadate branch was used
+  /// This file allows for easily traversing what candidate branch was used
   /// from a release channel.
   ///
   /// Returns [true] if the version file was updated and a commit is needed.
@@ -778,10 +731,7 @@ class HostFrameworkRepository extends FrameworkRepository {
   }) : super(
           checkouts,
           name: name,
-          upstreamRemote: Remote(
-            name: RemoteName.upstream,
-            url: 'file://$upstreamPath/',
-          ),
+          upstreamRemote: Remote.upstream('file://$upstreamPath/'),
           localUpstream: false,
         ) {
     _checkoutDirectory = checkouts.fileSystem.directory(upstreamPath);
@@ -800,12 +750,6 @@ class HostFrameworkRepository extends FrameworkRepository {
   Future<void> checkout(String ref) async {
     throw ConductorException(
         'checkout not implemented for the host repository');
-  }
-
-  @override
-  Future<String> cherryPick(String commit) async {
-    throw ConductorException(
-        'cherryPick not implemented for the host repository');
   }
 
   @override
@@ -842,8 +786,7 @@ class EngineRepository extends Repository {
     this.checkouts, {
     super.name = 'engine',
     String super.initialRef = EngineRepository.defaultBranch,
-    super.upstreamRemote = const Remote(
-        name: RemoteName.upstream, url: EngineRepository.defaultUpstream),
+    super.upstreamRemote = const Remote.upstream(EngineRepository.defaultUpstream),
     super.localUpstream,
     super.previousCheckoutLocation,
     super.mirrorRemote,
@@ -858,11 +801,6 @@ class EngineRepository extends Repository {
         );
 
   final Checkouts checkouts;
-
-  Future<CiYaml> get ciYaml async {
-    final CiYaml ciYaml = CiYaml((await checkoutDirectory).childFile('.ci.yaml'));
-    return ciYaml;
-  }
 
   static const String defaultUpstream = 'git@github.com:flutter/engine.git';
   static const String defaultBranch = 'main';
@@ -899,9 +837,7 @@ class EngineRepository extends Repository {
     return EngineRepository(
       checkouts,
       name: cloneName,
-      upstreamRemote: Remote(
-          name: RemoteName.upstream,
-          url: 'file://${(await checkoutDirectory).path}/'),
+      upstreamRemote: Remote.upstream('file://${(await checkoutDirectory).path}/'),
     );
   }
 }
@@ -931,27 +867,4 @@ class Checkouts {
   final Platform platform;
   final ProcessManager processManager;
   final Stdio stdio;
-}
-
-class CiYaml {
-  CiYaml(this.file) {
-    if (!file.existsSync()) {
-      throw ConductorException('Could not find the .ci.yaml file at ${file.path}');
-    }
-  }
-
-  /// Underlying [File] that this object wraps.
-  final File file;
-
-  /// Returns the raw string contents of this file.
-  ///
-  /// This is not cached as the contents can be written to while the conductor
-  /// is running.
-  String get stringContents => file.readAsStringSync();
-
-  /// Returns the parsed contents of the file as a [YamlMap].
-  ///
-  /// This is not cached as the contents can be written to while the conductor
-  /// is running.
-  YamlMap get contents => loadYaml(stringContents) as YamlMap;
 }

@@ -21,15 +21,17 @@ class FuchsiaKernelCompiler {
   Future<void> build({
     required FuchsiaProject fuchsiaProject,
     required String target, // E.g., lib/main.dart
-    BuildInfo buildInfo = BuildInfo.debug,
+    BuildInfo buildInfo = BuildInfo.dummy,
   }) async {
     // TODO(zanderso): Use filesystem root and scheme information from buildInfo.
     const String multiRootScheme = 'main-root';
-    final String packagesFile = fuchsiaProject.project.packagesFile.path;
     final String outDir = getFuchsiaBuildDirectory();
     final String appName = fuchsiaProject.project.manifest.appName;
     final String fsRoot = fuchsiaProject.project.directory.path;
-    final String relativePackagesFile = globals.fs.path.relative(packagesFile, from: fsRoot);
+    final String relativePackageConfigPath = globals.fs.path.relative(
+      buildInfo.packageConfigPath,
+      from: fsRoot,
+    );
     final String manifestPath = globals.fs.path.join(outDir, '$appName.dilpmanifest');
     final String? kernelCompiler = globals.artifacts?.getArtifactPath(
       Artifact.fuchsiaKernelCompiler,
@@ -58,7 +60,7 @@ class FuchsiaKernelCompiler {
       '--filesystem-root',
       fsRoot,
       '--packages',
-      '$multiRootScheme:///$relativePackagesFile',
+      '$multiRootScheme:///$relativePackageConfigPath',
       '--output',
       globals.fs.path.join(outDir, '$appName.dil'),
       '--component-name',
@@ -70,7 +72,7 @@ class FuchsiaKernelCompiler {
       '$multiRootScheme:///$target',
     ];
 
-    final String? engineDartBinaryPath = globals.artifacts?.getHostArtifact(HostArtifact.engineDartBinary).path;
+    final String? engineDartBinaryPath = globals.artifacts?.getArtifactPath(Artifact.engineDartBinary);
     if (engineDartBinaryPath == null) {
       throwToolExit('Engine dart binary not found at "$engineDartBinaryPath"');
     }

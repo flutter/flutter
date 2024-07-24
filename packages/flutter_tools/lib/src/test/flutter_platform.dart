@@ -15,12 +15,14 @@ import 'package:test_core/src/platform.dart'; // ignore: implementation_imports
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
+import '../build_info.dart';
 import '../cache.dart';
 import '../compile.dart';
 import '../convert.dart';
 import '../dart/language_version.dart';
 import '../device.dart';
 import '../globals.dart' as globals;
+import '../native_assets.dart';
 import '../project.dart';
 import '../test/test_wrapper.dart';
 
@@ -34,7 +36,7 @@ import 'test_time_recorder.dart';
 import 'watcher.dart';
 
 /// The address at which our WebSocket server resides and at which the sky_shell
-/// processes will host the Observatory server.
+/// processes will host the VmService server.
 final Map<InternetAddressType, InternetAddress> _kHosts = <InternetAddressType, InternetAddress>{
   InternetAddressType.IPv4: InternetAddress.loopbackIPv4,
   InternetAddressType.IPv6: InternetAddress.loopbackIPv6,
@@ -46,13 +48,15 @@ typedef PlatformPluginRegistration = void Function(FlutterPlatform platform);
 ///
 /// On systems where each [FlutterPlatform] is only used to run one test suite
 /// (that is, one Dart file with a `*_test.dart` file name and a single `void
-/// main()`), you can set an observatory port explicitly.
+/// main()`), you can set a VM Service port explicitly.
 FlutterPlatform installHook({
   TestWrapper testWrapper = const TestWrapper(),
   required String shellPath,
   required DebuggingOptions debuggingOptions,
   TestWatcher? watcher,
+  // TODO(bkonyi): remove after roll into google3.
   bool enableObservatory = false,
+  bool enableVmService = false,
   bool machine = false,
   String? precompiledDillPath,
   Map<String, String>? precompiledDillFiles,
@@ -67,9 +71,10 @@ FlutterPlatform installHook({
   String? integrationTestUserIdentifier,
   TestTimeRecorder? testTimeRecorder,
   UriConverter? uriConverter,
+  TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
+  BuildInfo? buildInfo,
 }) {
-  assert(testWrapper != null);
-  assert(enableObservatory || (!debuggingOptions.startPaused && debuggingOptions.hostVmServicePort == null));
+  assert(enableVmService || enableObservatory || (!debuggingOptions.startPaused && debuggingOptions.hostVmServicePort == null));
 
   // registerPlatformPlugin can be injected for testing since it's not very mock-friendly.
   platformPluginRegistration ??= (FlutterPlatform platform) {
@@ -85,7 +90,7 @@ FlutterPlatform installHook({
     debuggingOptions: debuggingOptions,
     watcher: watcher,
     machine: machine,
-    enableObservatory: enableObservatory,
+    enableVmService: enableVmService || enableObservatory,
     host: _kHosts[serverType],
     precompiledDillPath: precompiledDillPath,
     precompiledDillFiles: precompiledDillFiles,
@@ -98,6 +103,8 @@ FlutterPlatform installHook({
     integrationTestUserIdentifier: integrationTestUserIdentifier,
     testTimeRecorder: testTimeRecorder,
     uriConverter: uriConverter,
+    nativeAssetsBuilder: nativeAssetsBuilder,
+    buildInfo: buildInfo,
   );
   platformPluginRegistration(platform);
   return platform;
@@ -116,32 +123,32 @@ FlutterPlatform installHook({
 /// configuration files as outlined in the [flutter_test] library. By default,
 /// the test file will be launched directly.
 ///
+/// The [packageConfigUri] argument specifies the package config location for
+/// the test file being launched. This is expected to be a file URI.
+///
 /// The [updateGoldens] argument will set the [autoUpdateGoldens] global
 /// variable in the [flutter_test] package before invoking the test.
 ///
 /// The [integrationTest] argument can be specified to generate the bootstrap
 /// for integration tests.
 ///
-// NOTE: this API is used by the fuchsia source tree, do not add new
+// This API is used by the Fuchsia source tree, do not add new
 // required or position parameters.
 String generateTestBootstrap({
   required Uri testUrl,
   required InternetAddress host,
   File? testConfigFile,
+  Uri? packageConfigUri,
   bool updateGoldens = false,
   String languageVersionHeader = '',
   bool nullSafety = false,
   bool flutterTestDep = true,
   bool integrationTest = false,
 }) {
-  assert(testUrl != null);
-  assert(host != null);
-  assert(updateGoldens != null);
 
   final String websocketUrl = host.type == InternetAddressType.IPv4
       ? 'ws://${host.address}'
       : 'ws://[${host.address}]';
-  final String encodedWebsocketUrl = Uri.encodeComponent(websocketUrl);
 
   final StringBuffer buffer = StringBuffer();
   buffer.write('''
@@ -163,7 +170,7 @@ import 'dart:developer' as developer;
 ''');
   }
   buffer.write('''
-import 'package:test_api/src/remote_listener.dart';
+import 'package:test_api/backend.dart';
 import 'package:stream_channel/stream_channel.dart';
 import 'package:stack_trace/stack_trace.dart';
 
@@ -174,6 +181,15 @@ import '$testUrl' as test;
 import '${Uri.file(testConfigFile.path)}' as test_config;
 ''');
   }
+
+  // IMPORTANT: DO NOT RENAME, REMOVE, OR MODIFY THE
+  // 'const packageConfigLocation' VARIABLE.
+  // Dash tooling like Dart DevTools performs an evaluation on this variable at
+  // runtime to get the package config location for Flutter test targets.
+  buffer.write('''
+
+const packageConfigLocation = '$packageConfigUri';
+''');
   buffer.write('''
 
 /// Returns a serialized test suite.
@@ -214,8 +230,8 @@ void catchIsolateErrors() {
 }
 
 void main() {
-  String serverPort = Platform.environment['SERVER_PORT'] ?? '';
-  String server = Uri.decodeComponent('$encodedWebsocketUrl:\$serverPort');
+  final String serverPort = Platform.environment['SERVER_PORT'] ?? '';
+  final String server = '$websocketUrl:\$serverPort';
   StreamChannel<dynamic> testChannel = serializeSuite(() {
     catchIsolateErrors();
 ''');
@@ -280,7 +296,7 @@ class FlutterPlatform extends PlatformPlugin {
     required this.shellPath,
     required this.debuggingOptions,
     this.watcher,
-    this.enableObservatory,
+    this.enableVmService,
     this.machine,
     this.host,
     this.precompiledDillPath,
@@ -294,12 +310,14 @@ class FlutterPlatform extends PlatformPlugin {
     this.integrationTestUserIdentifier,
     this.testTimeRecorder,
     this.uriConverter,
-  }) : assert(shellPath != null);
+    this.nativeAssetsBuilder,
+    this.buildInfo,
+  });
 
   final String shellPath;
   final DebuggingOptions debuggingOptions;
   final TestWatcher? watcher;
-  final bool? enableObservatory;
+  final bool? enableVmService;
   final bool? machine;
   final InternetAddress? host;
   final String? precompiledDillPath;
@@ -310,6 +328,8 @@ class FlutterPlatform extends PlatformPlugin {
   final FlutterProject? flutterProject;
   final String? icudtlPath;
   final TestTimeRecorder? testTimeRecorder;
+  final TestCompilerNativeAssetsBuilder? nativeAssetsBuilder;
+  final BuildInfo? buildInfo;
 
   // This can be used by internal projects that require custom logic for converting package: URIs to local paths.
   final UriConverter? uriConverter;
@@ -361,7 +381,7 @@ class FlutterPlatform extends PlatformPlugin {
     if (_testCount > 0) {
       // Fail if there will be a port conflict.
       if (debuggingOptions.hostVmServicePort != null) {
-        throwToolExit('installHook() was called with an observatory port or debugger mode enabled, but then more than one test suite was run.');
+        throwToolExit('installHook() was called with a VM Service port or debugger mode enabled, but then more than one test suite was run.');
       }
       // Fail if we're passing in a precompiled entry-point.
       if (precompiledDillPath != null) {
@@ -394,9 +414,13 @@ class FlutterPlatform extends PlatformPlugin {
     String isolateId,
     String expression,
     List<String> definitions,
+    List<String> definitionTypes,
     List<String> typeDefinitions,
+    List<String> typeBounds,
+    List<String> typeDefaults,
     String libraryUri,
     String? klass,
+    String? method,
     bool isStatic,
   ) async {
     if (compiler == null || compiler!.compiler == null) {
@@ -404,7 +428,8 @@ class FlutterPlatform extends PlatformPlugin {
     }
     final CompilerOutput? compilerOutput =
       await compiler!.compiler!.compileExpression(expression, definitions,
-        typeDefinitions, libraryUri, klass, isStatic);
+        definitionTypes, typeDefinitions, typeBounds, typeDefaults, libraryUri,
+        klass, method, isStatic);
     if (compilerOutput != null && compilerOutput.expressionData != null) {
       return base64.encode(compilerOutput.expressionData!);
     }
@@ -418,6 +443,7 @@ class FlutterPlatform extends PlatformPlugin {
         debuggingOptions: debuggingOptions,
         device: integrationTestDevice!,
         userIdentifier: integrationTestUserIdentifier,
+        compileExpression: _compileExpressionService
       );
     }
     return FlutterTesterTestDevice(
@@ -427,7 +453,7 @@ class FlutterPlatform extends PlatformPlugin {
       processManager: globals.processManager,
       logger: globals.logger,
       shellPath: shellPath,
-      enableObservatory: enableObservatory!,
+      enableVmService: enableVmService!,
       machine: machine,
       debuggingOptions: debuggingOptions,
       host: host,
@@ -457,21 +483,31 @@ class FlutterPlatform extends PlatformPlugin {
         controllerSinkClosed = true;
       }));
 
+      void initializeExpressionCompiler(String path) {
+        // When start paused is specified, it means that the user is likely
+        // running this with a debugger attached. Initialize the resident
+        // compiler in this case.
+        if (debuggingOptions.startPaused) {
+          compiler ??= TestCompiler(
+            debuggingOptions.buildInfo,
+            flutterProject,
+            precompiledDillPath: precompiledDillPath,
+            testTimeRecorder: testTimeRecorder,
+            nativeAssetsBuilder: nativeAssetsBuilder,
+          );
+          final Uri uri = globals.fs.file(path).uri;
+          // Trigger a compilation to initialize the resident compiler.
+          unawaited(compiler!.compile(uri));
+        }
+      }
+
       // If a kernel file is given, then use that to launch the test.
       // If mapping is provided, look kernel file from mapping.
       // If all fails, create a "listener" dart that invokes actual test.
       String? mainDart;
       if (precompiledDillPath != null) {
         mainDart = precompiledDillPath;
-        // When start paused is specified, it means that the user is likely
-        // running this with a debugger attached. Initialize the resident
-        // compiler in this case.
-        if (debuggingOptions.startPaused) {
-          compiler ??= TestCompiler(debuggingOptions.buildInfo, flutterProject, precompiledDillPath: precompiledDillPath, testTimeRecorder: testTimeRecorder);
-          final Uri testUri = globals.fs.file(testPath).uri;
-          // Trigger a compilation to initialize the resident compiler.
-          unawaited(compiler!.compile(testUri));
-        }
+        initializeExpressionCompiler(testPath);
       } else if (precompiledDillFiles != null) {
         mainDart = precompiledDillFiles![testPath];
       } else {
@@ -480,13 +516,21 @@ class FlutterPlatform extends PlatformPlugin {
         // Integration test device takes care of the compilation.
         if (integrationTestDevice == null) {
           // Lazily instantiate compiler so it is built only if it is actually used.
-          compiler ??= TestCompiler(debuggingOptions.buildInfo, flutterProject, testTimeRecorder: testTimeRecorder);
+          compiler ??= TestCompiler(
+            debuggingOptions.buildInfo,
+            flutterProject,
+            testTimeRecorder: testTimeRecorder,
+            nativeAssetsBuilder: nativeAssetsBuilder,
+          );
           mainDart = await compiler!.compile(globals.fs.file(mainDart).uri);
 
           if (mainDart == null) {
             testHarnessChannel.sink.addError('Compilation failed for testPath=$testPath');
             return null;
           }
+        } else {
+          // For integration tests, we may still need to set up expression compilation service.
+          initializeExpressionCompiler(mainDart);
         }
       }
 
@@ -508,13 +552,13 @@ class FlutterPlatform extends PlatformPlugin {
       await Future.any<void>(<Future<void>>[
         testDevice.finished,
         () async {
-          final Uri? processObservatoryUri = await testDevice.observatoryUri;
-          if (processObservatoryUri != null) {
-            globals.printTrace('test $ourTestCount: Observatory uri is available at $processObservatoryUri');
+          final Uri? processVmServiceUri = await testDevice.vmServiceUri;
+          if (processVmServiceUri != null) {
+            globals.printTrace('test $ourTestCount: VM Service uri is available at $processVmServiceUri');
           } else {
-            globals.printTrace('test $ourTestCount: Observatory uri is not available');
+            globals.printTrace('test $ourTestCount: VM Service uri is not available');
           }
-          watcher?.handleStartedDevice(processObservatoryUri);
+          watcher?.handleStartedDevice(processVmServiceUri);
 
           final StreamChannel<String> remoteChannel = await remoteChannelFuture;
           globals.printTrace('test $ourTestCount: connected to test device, now awaiting test result');
@@ -615,6 +659,8 @@ class FlutterPlatform extends PlatformPlugin {
     return generateTestBootstrap(
       testUrl: testUrl,
       testConfigFile: findTestConfigFile(globals.fs.file(testUrl), globals.logger),
+      // This MUST be a file URI.
+      packageConfigUri: buildInfo != null ? globals.fs.path.toUri(buildInfo!.packageConfigPath) : null,
       host: host!,
       updateGoldens: updateGoldens!,
       flutterTestDep: packageConfig['flutter_test'] != null,

@@ -8,7 +8,6 @@ import 'package:flutter_tools/src/base/io.dart';
 
 import '../integration.shard/test_utils.dart';
 import '../src/common.dart';
-import '../src/darwin_common.dart';
 
 void main() {
   final String flutterBin = fileSystem.path.join(
@@ -23,6 +22,49 @@ void main() {
       'config',
       '--enable-macos-desktop',
     ]);
+  });
+
+  test('verify FlutterMacOS.xcframework artifact', () {
+    final String flutterRoot = getFlutterRoot();
+
+    final Directory xcframeworkArtifact = fileSystem.directory(
+      fileSystem.path.join(
+        flutterRoot,
+        'bin',
+        'cache',
+        'artifacts',
+        'engine',
+        'darwin-x64',
+        'FlutterMacOS.xcframework',
+      ),
+    );
+
+    final Directory tempDir = createResolvedTempDirectorySync('macos_content_validation.');
+
+    // Pre-cache macOS engine FlutterMacOS.xcframework artifacts.
+    final ProcessResult result = processManager.runSync(
+      <String>[
+        flutterBin,
+        ...getLocalEngineArguments(),
+        'precache',
+        '--macos',
+      ],
+      workingDirectory: tempDir.path,
+    );
+
+    expect(result, const ProcessResultMatcher());
+    expect(xcframeworkArtifact.existsSync(), isTrue);
+
+    final Directory frameworkArtifact = fileSystem.directory(
+      fileSystem.path.joinAll(<String>[
+        xcframeworkArtifact.path,
+        'macos-arm64_x86_64',
+        'FlutterMacOS.framework',
+      ]),
+    );
+    // Check read/write permissions are set correctly in the framework engine artifact.
+    final String artifactStat = frameworkArtifact.statSync().mode.toRadixString(8);
+    expect(artifactStat, '40755');
   });
 
   for (final String buildMode in <String>['Debug', 'Release']) {
@@ -78,7 +120,7 @@ void main() {
         buildMode,
       ));
 
-      final Directory outputApp = buildPath.childDirectory('flutter_gallery.app');
+      final Directory outputApp = buildPath.childDirectory('Flutter Gallery.app');
       final Directory outputAppFramework =
           fileSystem.directory(fileSystem.path.join(
         outputApp.path,
@@ -87,19 +129,27 @@ void main() {
         'App.framework',
       ));
 
-      _checkFatBinary(
-        outputAppFramework.childFile('App'),
-        buildModeLower,
-        'dynamically linked shared library',
-      );
+      final File libBinary = outputAppFramework.childFile('App');
+      final File libDsymBinary =
+        buildPath.childFile('App.framework.dSYM/Contents/Resources/DWARF/App');
 
-      // dSYM is not created for a debug build so nothing to check.
-      if (buildMode != 'Debug') {
-        _checkFatBinary(
-          buildPath.childFile('App.framework.dSYM/Contents/Resources/DWARF/App'),
-          buildModeLower,
-          'dSYM companion file',
-        );
+      _checkFatBinary(libBinary, buildModeLower, 'dynamically linked shared library');
+
+      final List<String> libSymbols = AppleTestUtils.getExportedSymbols(libBinary.path);
+
+      if (buildMode == 'Debug') {
+        // dSYM is not created for a debug build.
+        expect(libDsymBinary.existsSync(), isFalse);
+        expect(libSymbols, isEmpty);
+      } else {
+        _checkFatBinary(libDsymBinary, buildModeLower, 'dSYM companion file');
+        expect(libSymbols, equals(AppleTestUtils.requiredSymbols));
+        final List<String> dSymSymbols =
+            AppleTestUtils.getExportedSymbols(libDsymBinary.path);
+        expect(dSymSymbols, containsAll(AppleTestUtils.requiredSymbols));
+        // The actual number of symbols is going to vary but there should
+        // be "many" in the dSYM. At the time of writing, it was 19195.
+        expect(dSymSymbols.length, greaterThanOrEqualTo(15000));
       }
 
       expect(outputAppFramework.childLink('Resources'), exists);
@@ -125,6 +175,10 @@ void main() {
         ),
       );
 
+      // Check read/write permissions are being correctly set.
+      final String outputFrameworkStat = outputFlutterFramework.statSync().mode.toRadixString(8);
+      expect(outputFrameworkStat, '40755');
+
       // Check complicated macOS framework symlink structure.
       final Link current = outputFlutterFramework.childDirectory('Versions').childLink('Current');
 
@@ -141,18 +195,6 @@ void main() {
       expect(outputFlutterFramework.childDirectory('Headers'), isNot(exists));
       expect(outputFlutterFramework.childLink('Modules'), isNot(exists));
       expect(outputFlutterFramework.childDirectory('Modules'), isNot(exists));
-
-      // Archiving should contain a bitcode blob, but not building.
-      // This mimics Xcode behavior and prevents a developer from having to install a
-      // 300+MB app.
-      final File outputFlutterFrameworkBinary = outputFlutterFramework
-          .childDirectory('Versions')
-          .childDirectory('A')
-          .childFile('FlutterMacOS');
-      expect(
-        containsBitcode(outputFlutterFrameworkBinary.path, processManager),
-        isFalse,
-      );
 
       // Build again without cleaning.
       final ProcessResult secondBuild = processManager.runSync(buildCommand, workingDirectory: workingDirectory);

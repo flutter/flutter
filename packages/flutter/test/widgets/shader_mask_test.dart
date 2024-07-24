@@ -5,9 +5,12 @@
 // This file is run as part of a reduced test set in CI on Mac and Windows
 // machines.
 @Tags(<String>['reduced-test-set'])
+library;
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../impeller_test_helpers.dart';
 
 Shader createShader(Rect bounds) {
   return const LinearGradient(
@@ -107,5 +110,5 @@ void main() {
       find.byType(RepaintBoundary),
       matchesGoldenFile('shader_mask.bounds.matches_top_left.png'),
     );
-  });
+  }, skip: impellerEnabled); // https://github.com/flutter/flutter/issues/144555
 }

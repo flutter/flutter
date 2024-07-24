@@ -76,4 +76,22 @@ void main() {
     expect(() { MyNotification().dispatch(key.currentContext); }, isNot(throwsException));
     expect(log, <Type>[MyNotification]);
   });
+
+  testWidgets('Notification basics - listener null return value', (WidgetTester tester) async {
+    await tester.pumpWidget(const Placeholder());
+    final ScrollMetricsNotification n1 = ScrollMetricsNotification(
+      metrics: FixedScrollMetrics(
+        minScrollExtent: 1.0,
+        maxScrollExtent: 2.0,
+        pixels: 3.0,
+        viewportDimension: 4.0,
+        axisDirection: AxisDirection.down,
+        devicePixelRatio: 5.0,
+      ),
+      context: tester.allElements.first,
+    );
+    expect(n1.metrics.pixels, 3.0);
+    final ScrollUpdateNotification n2 = n1.asScrollUpdate();
+    expect(n2.metrics.pixels, 3.0);
+  });
 }

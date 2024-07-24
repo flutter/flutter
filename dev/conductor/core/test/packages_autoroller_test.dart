@@ -11,8 +11,8 @@ import 'package:conductor_core/packages_autoroller.dart';
 import 'package:file/memory.dart';
 import 'package:platform/platform.dart';
 
-import './common.dart';
 import '../bin/packages_autoroller.dart' show run;
+import 'common.dart';
 
 void main() {
   const String flutterRoot = '/flutter';
@@ -50,10 +50,7 @@ void main() {
     );
     framework = FrameworkRepository(
       checkouts,
-      mirrorRemote: const Remote(
-        name: RemoteName.mirror,
-        url: mirrorUrl,
-      ),
+      mirrorRemote: const Remote.mirror(mirrorUrl),
     );
 
     autoroller = PackageAutoroller(
@@ -63,6 +60,7 @@ void main() {
       orgName: orgName,
       processManager: processManager,
       stdio: stdio,
+      githubUsername: 'flutter-pub-roller-bot',
     );
   });
 
@@ -169,7 +167,7 @@ void main() {
     await expectLater(
       () async {
         final Future<void> rollFuture = autoroller.roll();
-        await controller.stream.drain();
+        await controller.stream.drain<Object?>();
         await rollFuture;
       },
       throwsA(isA<Exception>().having(
@@ -199,13 +197,13 @@ void main() {
         'pr',
         'list',
         '--author',
-        'fluttergithubbot',
+        'flutter-pub-roller-bot',
         '--repo',
         'flutter/flutter',
         '--state',
         'open',
-        '--label',
-        'tool',
+        '--search',
+        'Roll pub packages',
         '--json',
         'number',
       // Non empty array means there are open PRs by the bot with the tool label
@@ -213,10 +211,10 @@ void main() {
       ], stdout: '[{"number": 123}]'),
     ]);
     final Future<void> rollFuture = autoroller.roll();
-    await controller.stream.drain();
+    await controller.stream.drain<Object?>();
     await rollFuture;
     expect(processManager, hasNoRemainingExpectations);
-    expect(stdio.stdout, contains('fluttergithubbot already has open tool PRs'));
+    expect(stdio.stdout, contains('flutter-pub-roller-bot already has open tool PRs'));
     expect(stdio.stdout, contains(r'[{number: 123}]'));
   });
 
@@ -239,13 +237,13 @@ void main() {
         'pr',
         'list',
         '--author',
-        'fluttergithubbot',
+        'flutter-pub-roller-bot',
         '--repo',
         'flutter/flutter',
         '--state',
         'open',
-        '--label',
-        'tool',
+        '--search',
+        'Roll pub packages',
         '--json',
         'number',
       // Returns empty array, as there are no other open roll PRs from the bot
@@ -311,7 +309,7 @@ void main() {
       ]),
     ]);
     final Future<void> rollFuture = autoroller.roll();
-    await controller.stream.drain();
+    await controller.stream.drain<Object?>();
     await rollFuture;
     expect(processManager, hasNoRemainingExpectations);
   });
@@ -335,13 +333,13 @@ void main() {
         'pr',
         'list',
         '--author',
-        'fluttergithubbot',
+        'flutter-pub-roller-bot',
         '--repo',
         'flutter/flutter',
         '--state',
         'open',
-        '--label',
-        'tool',
+        '--search',
+        'Roll pub packages',
         '--json',
         'number',
       // Returns empty array, as there are no other open roll PRs from the bot
@@ -427,7 +425,7 @@ void main() {
         'commit',
         '--message',
         'roll packages',
-        '--author="fluttergithubbot <fluttergithubbot@gmail.com>"',
+        '--author="flutter-pub-roller-bot <flutter-pub-roller-bot@google.com>"',
       ]),
       const FakeCommand(command: <String>[
         'git',
@@ -475,12 +473,11 @@ void main() {
 
   group('command argument validations', () {
     const String tokenPath = '/path/to/token';
-    const String mirrorRemote = 'https://githost.com/org/project';
 
     test('validates that file exists at --token option', () async {
       await expectLater(
         () => run(
-          <String>['--token', tokenPath, '--mirror-remote', mirrorRemote],
+          <String>['--token', tokenPath],
           fs: fileSystem,
           processManager: processManager,
         ),
@@ -499,7 +496,7 @@ void main() {
         ..writeAsStringSync('');
       await expectLater(
         () => run(
-          <String>['--token', tokenPath, '--mirror-remote', mirrorRemote],
+          <String>['--token', tokenPath],
           fs: fileSystem,
           processManager: processManager,
         ),
@@ -512,4 +509,35 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     });
   });
+
+  test('VerboseStdio logger can filter out confidential pattern', () async {
+    const String token = 'secret';
+    const String replacement = 'replacement';
+    final VerboseStdio stdio = VerboseStdio(
+      stdin: _NoOpStdin(),
+      stderr: _NoOpStdout(),
+      stdout: _NoOpStdout(),
+      filter: (String msg) => msg.replaceAll(token, replacement),
+    );
+    stdio.printStatus('Hello');
+    expect(stdio.logs.last, '[status] Hello');
+
+    stdio.printStatus('Using $token');
+    expect(stdio.logs.last, '[status] Using $replacement');
+
+    stdio.printWarning('Using $token');
+    expect(stdio.logs.last, '[warning] Using $replacement');
+
+    stdio.printError('Using $token');
+    expect(stdio.logs.last, '[error] Using $replacement');
+
+    stdio.printTrace('Using $token');
+    expect(stdio.logs.last, '[trace] Using $replacement');
+  });
+}
+
+class _NoOpStdin extends Fake implements io.Stdin {}
+class _NoOpStdout extends Fake implements io.Stdout {
+  @override
+  void writeln([Object? object]) {}
 }

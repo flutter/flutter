@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+library;
+
 import 'dart:math' as math;
 import 'dart:ui' show Color, lerpDouble;
 
@@ -31,34 +34,14 @@ Color _colorFromHue(
   double secondary,
   double match,
 ) {
-  double red;
-  double green;
-  double blue;
-  if (hue < 60.0) {
-    red = chroma;
-    green = secondary;
-    blue = 0.0;
-  } else if (hue < 120.0) {
-    red = secondary;
-    green = chroma;
-    blue = 0.0;
-  } else if (hue < 180.0) {
-    red = 0.0;
-    green = chroma;
-    blue = secondary;
-  } else if (hue < 240.0) {
-    red = 0.0;
-    green = secondary;
-    blue = chroma;
-  } else if (hue < 300.0) {
-    red = secondary;
-    green = 0.0;
-    blue = chroma;
-  } else {
-    red = chroma;
-    green = 0.0;
-    blue = secondary;
-  }
+  final (double red, double green, double blue) = switch (hue) {
+    <  60.0 => (chroma, secondary, 0.0),
+    < 120.0 => (secondary, chroma, 0.0),
+    < 180.0 => (0.0, chroma, secondary),
+    < 240.0 => (0.0, secondary, chroma),
+    < 300.0 => (secondary, 0.0, chroma),
+    _       => (chroma, 0.0, secondary),
+  };
   return Color.fromARGB((alpha * 0xFF).round(), ((red + match) * 0xFF).round(), ((green + match) * 0xFF).round(), ((blue + match) * 0xFF).round());
 }
 
@@ -86,14 +69,10 @@ Color _colorFromHue(
 class HSVColor {
   /// Creates a color.
   ///
-  /// All the arguments must not be null and be in their respective ranges. See
-  /// the fields for each parameter for a description of their ranges.
+  /// All the arguments must be in their respective ranges. See the fields for
+  /// each parameter for a description of their ranges.
   const HSVColor.fromAHSV(this.alpha, this.hue, this.saturation, this.value)
-    : assert(alpha != null),
-      assert(hue != null),
-      assert(saturation != null),
-      assert(value != null),
-      assert(alpha >= 0.0),
+    : assert(alpha >= 0.0),
       assert(alpha <= 1.0),
       assert(hue >= 0.0),
       assert(hue <= 360.0),
@@ -198,9 +177,8 @@ class HSVColor {
   ///
   /// Values outside of the valid range for each channel will be clamped.
   static HSVColor? lerp(HSVColor? a, HSVColor? b, double t) {
-    assert(t != null);
-    if (a == null && b == null) {
-      return null;
+    if (identical(a, b)) {
+      return a;
     }
     if (a == null) {
       return b!._scaleAlpha(t);
@@ -259,14 +237,10 @@ class HSVColor {
 class HSLColor {
   /// Creates a color.
   ///
-  /// All the arguments must not be null and be in their respective ranges. See
-  /// the fields for each parameter for a description of their ranges.
+  /// All the arguments must be in their respective ranges. See the fields for
+  /// each parameter for a description of their ranges.
   const HSLColor.fromAHSL(this.alpha, this.hue, this.saturation, this.lightness)
-    : assert(alpha != null),
-      assert(hue != null),
-      assert(saturation != null),
-      assert(lightness != null),
-      assert(alpha >= 0.0),
+    : assert(alpha >= 0.0),
       assert(alpha <= 1.0),
       assert(hue >= 0.0),
       assert(hue <= 360.0),
@@ -386,9 +360,8 @@ class HSLColor {
   /// Values for `t` are usually obtained from an [Animation<double>], such as
   /// an [AnimationController].
   static HSLColor? lerp(HSLColor? a, HSLColor? b, double t) {
-    assert(t != null);
-    if (a == null && b == null) {
-      return null;
+    if (identical(a, b)) {
+      return a;
     }
     if (a == null) {
       return b!._scaleAlpha(t);
@@ -431,7 +404,7 @@ class HSLColor {
 ///
 ///  * [MaterialColor] and [MaterialAccentColor], which define Material Design
 ///    primary and accent color swatches.
-///  * [material.Colors], which defines all of the standard Material Design
+///  * [Colors], which defines all of the standard Material Design
 ///    colors.
 @immutable
 class ColorSwatch<T> extends Color {
@@ -489,13 +462,12 @@ class ColorSwatch<T> extends Color {
   /// Values for `t` are usually obtained from an [Animation<double>], such as
   /// an [AnimationController].
   static ColorSwatch<T>? lerp<T>(ColorSwatch<T>? a, ColorSwatch<T>? b, double t) {
+    if (identical(a, b)) {
+      return a;
+    }
     final Map<T, Color> swatch;
     if (b == null) {
-      if (a == null) {
-        return null;
-      } else {
-        swatch = a._swatch.map((T key, Color color) => MapEntry<T, Color>(key, Color.lerp(color, null, t)!));
-      }
+      swatch = a!._swatch.map((T key, Color color) => MapEntry<T, Color>(key, Color.lerp(color, null, t)!));
     } else {
       if (a == null) {
         swatch = b._swatch.map((T key, Color color) => MapEntry<T, Color>(key, Color.lerp(null, color, t)!));
@@ -510,8 +482,6 @@ class ColorSwatch<T> extends Color {
 /// [DiagnosticsProperty] that has an [Color] as value.
 class ColorProperty extends DiagnosticsProperty<Color> {
   /// Create a diagnostics property for [Color].
-  ///
-  /// The [showName], [style], and [level] arguments must not be null.
   ColorProperty(
     String super.name,
     super.value, {
@@ -519,9 +489,7 @@ class ColorProperty extends DiagnosticsProperty<Color> {
     super.defaultValue,
     super.style,
     super.level,
-  }) : assert(showName != null),
-       assert(style != null),
-       assert(level != null);
+  });
 
   @override
   Map<String, Object?> toJsonMap(DiagnosticsSerializationDelegate delegate) {

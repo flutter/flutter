@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 @Tags(<String>['reduced-test-set'])
+library;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -14,23 +15,22 @@ void main() {
   const Rect reasonableTextField = Rect.fromLTRB(0, 100, 200, 200);
   final MagnifierController magnifierController = MagnifierController();
 
-  // Make sure that your gesture in infoBearer is within the line in infoBearer,
+  // Make sure that your gesture in magnifierInfo is within the line in magnifierInfo,
   // or else the magnifier status will stay hidden and this will not complete.
   Future<void> showCupertinoMagnifier(
     BuildContext context,
     WidgetTester tester,
-    ValueNotifier<MagnifierOverlayInfoBearer> infoBearer,
+    ValueNotifier<MagnifierInfo> magnifierInfo,
   ) async {
     final Future<void> magnifierShown = magnifierController.show(
-        context: context,
-        builder: (_) => CupertinoTextMagnifier(
-              controller: magnifierController,
-              magnifierOverlayInfoBearer: infoBearer,
-            ));
-
-    WidgetsBinding.instance.scheduleFrame();
-    await tester.pumpAndSettle();
-
+      context: context,
+      builder: (BuildContext context) => CupertinoTextMagnifier(
+        controller: magnifierController,
+        magnifierInfo: magnifierInfo,
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 2));
     await magnifierShown;
   }
 
@@ -52,7 +52,7 @@ void main() {
         final Key outerKey = UniqueKey();
 
         await tester.pumpWidget(
-          Container(
+          ColoredBox(
             key: outerKey,
             color: const Color.fromARGB(255, 0, 255, 179),
             child: MaterialApp(
@@ -76,9 +76,9 @@ void main() {
         final Rect fakeTextFieldRect =
             tapPointRenderBox.localToGlobal(Offset.zero) & tapPointRenderBox.size;
 
-        final ValueNotifier<MagnifierOverlayInfoBearer> magnifier =
-            ValueNotifier<MagnifierOverlayInfoBearer>(
-          MagnifierOverlayInfoBearer(
+        final ValueNotifier<MagnifierInfo> magnifier =
+            ValueNotifier<MagnifierInfo>(
+          MagnifierInfo(
             currentLineBoundaries: fakeTextFieldRect,
             fieldBounds: fakeTextFieldRect,
             caretRect: fakeTextFieldRect,
@@ -86,6 +86,7 @@ void main() {
             globalGesturePosition: fakeTextFieldRect.center,
           ),
         );
+        addTearDown(magnifier.dispose);
 
         await showCupertinoMagnifier(context, tester, magnifier);
 
@@ -107,24 +108,26 @@ void main() {
 
         final BuildContext context = tester.firstElement(find.byType(Placeholder));
 
+        final ValueNotifier<MagnifierInfo> magnifierInfo = ValueNotifier<MagnifierInfo>(
+          MagnifierInfo(
+            currentLineBoundaries: reasonableTextField,
+            fieldBounds: reasonableTextField,
+            caretRect: reasonableTextField,
+            // The tap position is far out of the right side of the app.
+            globalGesturePosition:
+            Offset(MediaQuery.sizeOf(context).width + 100, 0),
+          ),
+        );
+        addTearDown(magnifierInfo.dispose);
         await showCupertinoMagnifier(
           context,
           tester,
-          ValueNotifier<MagnifierOverlayInfoBearer>(
-            MagnifierOverlayInfoBearer(
-              currentLineBoundaries: reasonableTextField,
-              fieldBounds: reasonableTextField,
-              caretRect: reasonableTextField,
-              // The tap position is far out of the right side of the app.
-              globalGesturePosition:
-                  Offset(MediaQuery.of(context).size.width + 100, 0),
-            ),
-          ),
+          magnifierInfo,
         );
 
         // Should be less than the right edge, since we have padding.
         expect(getMagnifierPosition(tester).dx,
-            lessThan(MediaQuery.of(context).size.width));
+            lessThan(MediaQuery.sizeOf(context).width));
       });
 
       testWidgets('should have some vertical drag', (WidgetTester tester) async {
@@ -140,20 +143,23 @@ void main() {
         final BuildContext context =
             tester.firstElement(find.byType(Placeholder));
 
+        final ValueNotifier<MagnifierInfo> magnifierInfo =
+            ValueNotifier<MagnifierInfo>(
+          MagnifierInfo(
+            currentLineBoundaries: reasonableTextField,
+            fieldBounds: reasonableTextField,
+            caretRect: reasonableTextField,
+            // The tap position is dragBelow units below the text field.
+            globalGesturePosition: Offset(
+                MediaQuery.sizeOf(context).width / 2,
+                dragPositionBelowTextField),
+          ),
+        );
+        addTearDown(magnifierInfo.dispose);
         await showCupertinoMagnifier(
           context,
           tester,
-          ValueNotifier<MagnifierOverlayInfoBearer>(
-            MagnifierOverlayInfoBearer(
-              currentLineBoundaries: reasonableTextField,
-              fieldBounds: reasonableTextField,
-              caretRect: reasonableTextField,
-              // The tap position is dragBelow units below the text field.
-              globalGesturePosition: Offset(
-                  MediaQuery.of(context).size.width / 2,
-                  dragPositionBelowTextField),
-            ),
-          ),
+          magnifierInfo,
         );
 
         // The magnifier Y should be greater than the text field, since we "dragged" it down.
@@ -176,27 +182,28 @@ void main() {
         final BuildContext context =
             tester.firstElement(find.byType(Placeholder));
 
-        final ValueNotifier<MagnifierOverlayInfoBearer> magnifierinfo =
-            ValueNotifier<MagnifierOverlayInfoBearer>(
-          MagnifierOverlayInfoBearer(
+        final ValueNotifier<MagnifierInfo> magnifierInfo =
+            ValueNotifier<MagnifierInfo>(
+          MagnifierInfo(
             currentLineBoundaries: reasonableTextField,
             fieldBounds: reasonableTextField,
             caretRect: reasonableTextField,
             // The tap position is dragBelow units below the text field.
             globalGesturePosition: Offset(
-                MediaQuery.of(context).size.width / 2, reasonableTextField.top),
+                MediaQuery.sizeOf(context).width / 2, reasonableTextField.top),
           ),
         );
+        addTearDown(magnifierInfo.dispose);
 
-        // Show the magnifier initally, so that we get it in a not hidden state.
-        await showCupertinoMagnifier(context, tester, magnifierinfo);
+        // Show the magnifier initially, so that we get it in a not hidden state.
+        await showCupertinoMagnifier(context, tester, magnifierInfo);
 
         // Move the gesture to one that should hide it.
-        magnifierinfo.value = MagnifierOverlayInfoBearer(
+        magnifierInfo.value = MagnifierInfo(
             currentLineBoundaries: reasonableTextField,
             fieldBounds: reasonableTextField,
             caretRect: reasonableTextField,
-            globalGesturePosition: magnifierinfo.value.globalGesturePosition + const Offset(0, 100),
+            globalGesturePosition: magnifierInfo.value.globalGesturePosition + const Offset(0, 100),
         );
         await tester.pumpAndSettle();
 
@@ -216,22 +223,23 @@ void main() {
         final BuildContext context =
             tester.firstElement(find.byType(Placeholder));
 
-        final ValueNotifier<MagnifierOverlayInfoBearer> magnifierInfo =
-            ValueNotifier<MagnifierOverlayInfoBearer>(
-          MagnifierOverlayInfoBearer(
+        final ValueNotifier<MagnifierInfo> magnifierInfo =
+            ValueNotifier<MagnifierInfo>(
+          MagnifierInfo(
             currentLineBoundaries: reasonableTextField,
             fieldBounds: reasonableTextField,
             caretRect: reasonableTextField,
             // The tap position is dragBelow units below the text field.
-            globalGesturePosition: Offset(MediaQuery.of(context).size.width / 2, reasonableTextField.top),
+            globalGesturePosition: Offset(MediaQuery.sizeOf(context).width / 2, reasonableTextField.top),
           ),
         );
+        addTearDown(magnifierInfo.dispose);
 
-        // Show the magnifier initally, so that we get it in a not hidden state.
+        // Show the magnifier initially, so that we get it in a not hidden state.
         await showCupertinoMagnifier(context, tester, magnifierInfo);
 
         // Move the gesture to one that should hide it.
-        magnifierInfo.value = MagnifierOverlayInfoBearer(
+        magnifierInfo.value = MagnifierInfo(
             currentLineBoundaries: reasonableTextField,
             fieldBounds: reasonableTextField,
             caretRect: reasonableTextField,
@@ -243,11 +251,11 @@ void main() {
         expect(magnifierController.overlayEntry, isNotNull);
 
         // Return the gesture to one that shows it.
-        magnifierInfo.value = MagnifierOverlayInfoBearer(
+        magnifierInfo.value = MagnifierInfo(
             currentLineBoundaries: reasonableTextField,
             fieldBounds: reasonableTextField,
             caretRect: reasonableTextField,
-            globalGesturePosition: Offset(MediaQuery.of(context).size.width / 2,
+            globalGesturePosition: Offset(MediaQuery.sizeOf(context).width / 2,
                 reasonableTextField.top));
         await tester.pumpAndSettle();
 

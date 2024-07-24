@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/widgets.dart';
+library;
+
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -71,6 +74,15 @@ class Ticker {
       _debugCreationStack = StackTrace.current;
       return true;
     }());
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
+        library: 'package:flutter/scheduler.dart',
+        className: '$Ticker',
+        object: this,
+      );
+    }
   }
 
   TickerFuture? _future;
@@ -319,6 +331,12 @@ class Ticker {
   ///    with a [TickerCanceled] error.
   @mustCallSuper
   void dispose() {
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
+
     if (_future != null) {
       final TickerFuture localFuture = _future!;
       _future = null;

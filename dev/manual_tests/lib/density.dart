@@ -30,15 +30,13 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       title: _title,
-      home: MyHomePage(title: _title),
+      home: MyHomePage(),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  final String title;
+  const MyHomePage({super.key});
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
@@ -92,12 +90,6 @@ class OptionModel extends ChangeNotifier {
 
   bool get longText => _longText;
   bool _longText = false;
-  set longText(bool longText) {
-    if (longText != _longText) {
-      _longText = longText;
-      notifyListeners();
-    }
-  }
 
   void reset() {
     final OptionModel defaultModel = OptionModel();
@@ -171,28 +163,21 @@ class _OptionsState extends State<Options> {
   double sliderValue = 0.0;
 
   String _densityToProfile(VisualDensity density) {
-    if (density == VisualDensity.standard) {
-      return 'standard';
-    } else if (density == VisualDensity.compact) {
-      return 'compact';
-    } else if (density == VisualDensity.comfortable) {
-      return 'comfortable';
-    }
-    return 'custom';
+    return switch (density) {
+      VisualDensity.standard    => 'standard',
+      VisualDensity.compact     => 'compact',
+      VisualDensity.comfortable => 'comfortable',
+      _ => 'custom',
+    };
   }
 
   VisualDensity _profileToDensity(String? profile) {
-    switch (profile) {
-      case 'standard':
-        return VisualDensity.standard;
-      case 'comfortable':
-        return VisualDensity.comfortable;
-      case 'compact':
-        return VisualDensity.compact;
-      case 'custom':
-      default:
-        return widget.model.density;
-    }
+    return switch (profile) {
+      'standard'    => VisualDensity.standard,
+      'comfortable' => VisualDensity.comfortable,
+      'compact'     => VisualDensity.compact,
+      'custom' || _ => widget.model.density,
+    };
   }
 
   @override
@@ -365,9 +350,7 @@ class _OptionsState extends State<Options> {
 }
 
 class _ControlTile extends StatelessWidget {
-  const _ControlTile({required this.label, required this.child})
-      : assert(label != null),
-        assert(child != null);
+  const _ControlTile({required this.label, required this.child});
 
   final String label;
   final Widget child;
@@ -631,14 +614,17 @@ class _MyHomePageState extends State<MyHomePage> {
               data: Theme.of(context).copyWith(visualDensity: _model.density),
               child: Directionality(
                 textDirection: _model.rtl ? TextDirection.rtl : TextDirection.ltr,
-                child: MediaQuery(
-                  data: MediaQuery.of(context).copyWith(textScaleFactor: _model.size),
-                  child: SizedBox.expand(
-                    child: ListView(
-                      children: tiles,
+                child: Builder(builder: (BuildContext context) {
+                  final MediaQueryData mediaQueryData = MediaQuery.of(context);
+                  return MediaQuery(
+                    data: mediaQueryData.copyWith(textScaler: TextScaler.linear(_model.size)),
+                    child: SizedBox.expand(
+                      child: ListView(
+                        children: tiles,
+                      ),
                     ),
-                  ),
-                ),
+                  );
+                }),
               ),
             ),
           ),

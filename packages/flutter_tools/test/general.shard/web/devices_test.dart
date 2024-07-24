@@ -112,6 +112,37 @@ void main() {
     expect(device.supportsRuntimeMode(BuildMode.jitRelease), false);
 });
 
+  testWithoutContext('ChromiumDevice accepts null package', () async {
+    final MemoryFileSystem fs = MemoryFileSystem.test();
+    final FakePlatform platform = FakePlatform();
+    final FakeProcessManager pm = FakeProcessManager.any();
+    final BufferLogger logger = BufferLogger.test();
+    final GoogleChromeDevice device = GoogleChromeDevice(
+      fileSystem: fs,
+      processManager: pm,
+      platform: platform,
+      chromiumLauncher: ChromiumLauncher(
+        fileSystem: fs,
+        platform: platform,
+        processManager: pm,
+        operatingSystemUtils: FakeOperatingSystemUtils(),
+        browserFinder: findChromeExecutable,
+        logger: logger,
+      ),
+      logger: logger,
+    );
+    await expectLater(
+      () => device.startApp(
+        null,
+        debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
+        platformArgs: <String, Object?>{'uri': 'localhost:1234'},
+      ),
+      // The tool exit here is irrelevant, this test simply ensures ChromiumDevice.startApp
+      // will accept a null value for a package.
+      throwsToolExit(message: 'Failed to launch browser'),
+    );
+  });
+
   testWithoutContext('Chrome device is listed when Chrome can be run', () async {
     final WebDevices webDevices = WebDevices(
       featureFlags: TestFeatureFlags(isWebEnabled: true),
@@ -363,12 +394,6 @@ void main() {
 class TestChromiumLauncher implements ChromiumLauncher {
   TestChromiumLauncher();
 
-  bool _hasInstance = false;
-  void setInstance(Chromium chromium) {
-    _hasInstance = true;
-    currentCompleter.complete(chromium);
-  }
-
   @override
   Completer<Chromium> currentCompleter = Completer<Chromium>();
 
@@ -386,7 +411,7 @@ class TestChromiumLauncher implements ChromiumLauncher {
   }
 
   @override
-  bool get hasChromeInstance => _hasInstance;
+  bool get hasChromeInstance => false;
 
   @override
   Future<Chromium> launch(

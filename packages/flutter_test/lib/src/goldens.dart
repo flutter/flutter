@@ -2,13 +2,21 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/widgets.dart';
+///
+/// @docImport '_goldens_io.dart';
+/// @docImport 'binding.dart';
+/// @docImport 'matchers.dart';
+/// @docImport 'widget_tester.dart';
+library;
+
 import 'dart:typed_data';
 import 'dart:ui';
 
+import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
-import 'package:test_api/test_api.dart'; // ignore: deprecated_member_use
 
-import '_goldens_io.dart' if (dart.library.html) '_goldens_web.dart' as goldens;
+import '_goldens_io.dart' if (dart.library.js_interop) '_goldens_web.dart' as goldens;
 
 /// Compares image pixels against a golden image file.
 ///
@@ -84,7 +92,7 @@ abstract class GoldenFileComparator {
   /// historical golden files.
   ///
   /// Version numbers are used in golden file tests for package:flutter. You can
-  /// learn more about these tests [here](https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package:flutter).
+  /// learn more about these tests [here](https://github.com/flutter/flutter/blob/main/docs/contributing/testing/Writing-a-golden-file-test-for-package-flutter.md).
   Uri getTestUri(Uri key, int? version) {
     if (version == null) {
       return key;
@@ -120,18 +128,73 @@ abstract class GoldenFileComparator {
 ///
 /// Callers may choose to override the default comparator by setting this to a
 /// custom comparator during test set-up (or using directory-level test
-/// configuration). For example, some projects may wish to install a comparator
-/// with tolerance levels for allowable differences.
+/// configuration).
+///
+/// {@tool snippet}
+/// For example, some projects may wish to install a comparator with tolerance
+/// levels for allowable differences:
+///
+/// ```dart
+/// void main() {
+///   testWidgets('matches golden file with a 0.01 tolerance', (WidgetTester tester) async {
+///     final GoldenFileComparator previousGoldenFileComparator = goldenFileComparator;
+///     goldenFileComparator = _TolerantGoldenFileComparator(
+///       Uri.parse('test/my_widget_test.dart'),
+///       precisionTolerance: 0.01,
+///     );
+///     addTearDown(() => goldenFileComparator = previousGoldenFileComparator);
+///
+///     await tester.pumpWidget(const ColoredBox(color: Color(0xff00ff00)));
+///
+///     await expectLater(
+///       find.byType(ColoredBox),
+///       matchesGoldenFile('my_golden.png'),
+///     );
+///   });
+/// }
+///
+/// class _TolerantGoldenFileComparator extends LocalFileComparator {
+///   _TolerantGoldenFileComparator(
+///     super.testFile, {
+///     required double precisionTolerance,
+///   })  : assert(
+///         0 <= precisionTolerance && precisionTolerance <= 1,
+///         'precisionTolerance must be between 0 and 1',
+///         ),
+///         _precisionTolerance = precisionTolerance;
+///
+///   /// How much the golden image can differ from the test image.
+///   ///
+///   /// It is expected to be between 0 and 1. Where 0 is no difference (the same image)
+///   /// and 1 is the maximum difference (completely different images).
+///   final double _precisionTolerance;
+///
+///   @override
+///   Future<bool> compare(Uint8List imageBytes, Uri golden) async {
+///     final ComparisonResult result = await GoldenFileComparator.compareLists(
+///       imageBytes,
+///       await getGoldenBytes(golden),
+///     );
+///
+///     final bool passed = result.passed || result.diffPercent <= _precisionTolerance;
+///     if (passed) {
+///       result.dispose();
+///       return true;
+///     }
+///
+///     final String error = await generateFailureOutput(result, golden, basedir);
+///     result.dispose();
+///     throw FlutterError(error);
+///   }
+/// }
+/// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
 ///  * [flutter_test] for more information about how to configure tests at the
 ///    directory-level.
-GoldenFileComparator get goldenFileComparator => _goldenFileComparator;
-GoldenFileComparator _goldenFileComparator = const TrivialComparator._();
-set goldenFileComparator(GoldenFileComparator value) {
-  _goldenFileComparator = value;
-}
+GoldenFileComparator goldenFileComparator = const TrivialComparator._();
 
 /// Compares image pixels against a golden image file.
 ///
@@ -145,7 +208,7 @@ set goldenFileComparator(GoldenFileComparator value) {
 /// fake async constraints that are normally imposed on widget tests (i.e. the
 /// need or the ability to call [WidgetTester.pump] to advance the microtask
 /// queue). Prior to the invocation, the test framework will render only the
-/// [widgets.Element] to be compared on the screen.
+/// [Element] to be compared on the screen.
 ///
 /// See also:
 ///
@@ -185,6 +248,34 @@ abstract class WebGoldenComparator {
   /// is left up to the implementation class.
   Future<void> update(double width, double height, Uri golden);
 
+  /// Compares the pixels of decoded png [bytes] against the golden file
+  /// identified by [golden].
+  ///
+  /// The returned future completes with a boolean value that indicates whether
+  /// the pixels rendered on screen match the golden file's pixels.
+  ///
+  /// In the case of comparison mismatch, the comparator may choose to throw a
+  /// [TestFailure] if it wants to control the failure message, often in the
+  /// form of a [ComparisonResult] that provides detailed information about the
+  /// mismatch.
+  ///
+  /// The method by which [golden] is located and by which its bytes are loaded
+  /// is left up to the implementation class. For instance, some implementations
+  /// may load files from the local file system, whereas others may load files
+  /// over the network or from a remote repository.
+  Future<bool> compareBytes(Uint8List bytes, Uri golden);
+
+  /// Compares the pixels of decoded png [bytes] against the golden file
+  /// identified by [golden].
+  ///
+  /// This will be invoked in lieu of [compareBytes] when [autoUpdateGoldenFiles]
+  /// is `true` (which gets set automatically by the test framework when the
+  /// user runs `flutter test --update-goldens --platform=chrome`).
+  ///
+  /// The method by which [golden] is located and by which its bytes are written
+  /// is left up to the implementation class.
+  Future<void> updateBytes(Uint8List bytes, Uri golden);
+
   /// Returns a new golden file [Uri] to incorporate any [version] number with
   /// the [key].
   ///
@@ -192,7 +283,7 @@ abstract class WebGoldenComparator {
   /// historical golden files.
   ///
   /// Version numbers are used in golden file tests for package:flutter. You can
-  /// learn more about these tests [here](https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package:flutter).
+  /// learn more about these tests [here](https://github.com/flutter/flutter/blob/main/docs/contributing/testing/Writing-a-golden-file-test-for-package-flutter.md).
   Uri getTestUri(Uri key, int? version) {
     if (version == null) {
       return key;
@@ -298,12 +389,7 @@ class _TrivialWebGoldenComparator implements WebGoldenComparator {
 
   @override
   Future<bool> compare(double width, double height, Uri golden) {
-    // Ideally we would use markTestSkipped here but in some situations,
-    // comparators are called outside of tests.
-    // See also: https://github.com/flutter/flutter/issues/91285
-    // ignore: avoid_print
-    print('Golden comparison requested for "$golden"; skipping...');
-    return Future<bool>.value(true);
+    return _warnAboutSkipping(golden);
   }
 
   @override
@@ -314,6 +400,25 @@ class _TrivialWebGoldenComparator implements WebGoldenComparator {
   @override
   Uri getTestUri(Uri key, int? version) {
     return key;
+  }
+
+  @override
+  Future<bool> compareBytes(Uint8List bytes, Uri golden) {
+    return _warnAboutSkipping(golden);
+  }
+
+  @override
+  Future<void> updateBytes(Uint8List bytes, Uri golden) {
+    throw StateError('webGoldenComparator has not been initialized');
+  }
+
+  Future<bool> _warnAboutSkipping(Uri golden) {
+    // Ideally we would use markTestSkipped here but in some situations,
+    // comparators are called outside of tests.
+    // See also: https://github.com/flutter/flutter/issues/91285
+    // ignore: avoid_print
+    print('Golden comparison requested for "$golden"; skipping...');
+    return Future<bool>.value(true);
   }
 }
 
@@ -332,8 +437,6 @@ class ComparisonResult {
   });
 
   /// Indicates whether or not a pixel comparison test has failed.
-  ///
-  /// This value cannot be null.
   final bool passed;
 
   /// Error message used to describe the cause of the pixel comparison failure.
@@ -345,4 +448,16 @@ class ComparisonResult {
 
   /// The calculated percentage of pixel difference between two images.
   final double diffPercent;
+
+  /// Disposes the images held by this [ComparisonResult].
+  @mustCallSuper
+  void dispose() {
+    if (diffs == null) {
+      return;
+    }
+
+    for (final MapEntry<String, Image> entry in diffs!.entries) {
+      entry.value.dispose();
+    }
+  }
 }

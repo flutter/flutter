@@ -18,19 +18,12 @@ abstract class PersistentToolState {
     required FileSystem fileSystem,
     required Logger logger,
     required Platform platform,
-  }) => _DefaultPersistentToolState(
-    fileSystem: fileSystem,
-    logger: logger,
-    platform: platform,
-  );
+  }) = _DefaultPersistentToolState;
 
   factory PersistentToolState.test({
     required Directory directory,
     required Logger logger,
-  }) => _DefaultPersistentToolState.test(
-    directory: directory,
-    logger: logger,
-  );
+  }) = _DefaultPersistentToolState.test;
 
   static PersistentToolState? get instance => context.get<PersistentToolState>();
 
@@ -83,6 +76,7 @@ class _DefaultPersistentToolState implements PersistentToolState {
   static const String _kRedisplayWelcomeMessage = 'redisplay-welcome-message';
   static const Map<Channel, String> _lastActiveVersionKeys = <Channel,String>{
     Channel.master: 'last-active-master-version',
+    Channel.main: 'last-active-main-version',
     Channel.beta: 'last-active-beta-version',
     Channel.stable: 'last-active-stable-version',
   };

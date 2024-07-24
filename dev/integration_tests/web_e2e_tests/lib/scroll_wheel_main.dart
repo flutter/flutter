@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:html' as html;
-
 import 'package:flutter/material.dart';
+
+import 'package:web/web.dart' as web;
 
 void main() => runApp(const MyApp());
 
@@ -74,36 +74,30 @@ class _MyHomePageState extends State<MyHomePage> {
 }
 
 abstract class DeltaMode {
-  static const int kPixel = 0x00;
   static const int kLine = 0x01;
-  static const int kPage = 0x02;
 }
 
 void dispatchMouseWheelEvent(int mouseX, int mouseY,
     int deltaMode, double deltaX, double deltaY) {
-  final html.EventTarget target = html.document.elementFromPoint(mouseX, mouseY)!;
+  final web.EventTarget target = web.document.elementFromPoint(mouseX, mouseY)!;
 
-  target.dispatchEvent(html.MouseEvent('mouseover',
+  target.dispatchEvent(web.MouseEvent('mouseover', web.MouseEventInit(
     screenX: mouseX,
     screenY: mouseY,
     clientX: mouseX,
     clientY: mouseY,
-  ));
+  )));
 
-  target.dispatchEvent(html.MouseEvent('mousemove',
+  target.dispatchEvent(web.MouseEvent('mousemove', web.MouseEventInit(
     screenX: mouseX,
     screenY: mouseY,
     clientX: mouseX,
     clientY: mouseY,
-  ));
+  )));
 
-  target.dispatchEvent(html.WheelEvent('wheel',
-    screenX: mouseX,
-    screenY: mouseY,
-    clientX: mouseX,
-    clientY: mouseY,
+  target.dispatchEvent(web.WheelEvent('wheel', web.WheelEventInit(
     deltaMode: deltaMode,
     deltaX : deltaX,
     deltaY : deltaY,
-  ));
+  )));
 }

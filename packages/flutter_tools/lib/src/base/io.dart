@@ -25,6 +25,7 @@
 /// about any additional exports that you add to this file, as doing so will
 /// increase the API surface that we have to test in Flutter tools, and the APIs
 /// in `dart:io` can sometimes be hard to use in tests.
+library;
 
 // We allow `print()` in this file as a fallback for writing to the terminal via
 // regular stdout/stderr/stdio paths. Everything else in the flutter_tools
@@ -92,6 +93,7 @@ export 'dart:io'
         // ProcessSignal     NO! Use [ProcessSignal] below.
         ProcessStartMode,
         // RandomAccessFile  NO! Use `file_system.dart`
+        SecurityContext,
         ServerSocket,
         SignalException,
         Socket,
@@ -190,13 +192,25 @@ class ProcessSignal {
   ///
   /// Returns true if the signal was delivered, false otherwise.
   ///
-  /// On Windows, this can only be used with [ProcessSignal.sigterm], which
-  /// terminates the process.
+  /// On Windows, this can only be used with [sigterm], which terminates the
+  /// process.
   ///
-  /// This is implemented by sending the signal using [Process.killPid].
+  /// This is implemented by sending the signal using [io.Process.killPid] and
+  /// therefore cannot be faked in tests. To fake sending signals in tests, use
+  /// [kill] instead.
   bool send(int pid) {
     assert(!_platform.isWindows || this == ProcessSignal.sigterm);
     return io.Process.killPid(pid, _delegate);
+  }
+
+  /// A more testable variant of [send].
+  ///
+  /// Sends this signal to the given `process` by invoking [io.Process.kill].
+  ///
+  /// In tests this method can be faked by passing a fake implementation of the
+  /// [io.Process] interface.
+  bool kill(io.Process process) {
+    return process.kill(_delegate);
   }
 
   @override
@@ -230,7 +244,7 @@ class PosixProcessSignal extends ProcessSignal {
 ///   * by throwing an exception asynchronously, and
 ///   * by completing the Future stdout.done with an error.
 ///
-/// This class enapsulates all three so that we don't have to worry about it
+/// This class encapsulates all three so that we don't have to worry about it
 /// anywhere else.
 class Stdio {
   Stdio();
@@ -267,7 +281,6 @@ class Stdio {
   }
   io.Stdout? _stdout;
 
-  @visibleForTesting
   io.IOSink get stderr {
     if (_stderr != null) {
       return _stderr!;
@@ -374,9 +387,9 @@ class Stdio {
 
 /// An overridable version of io.ProcessInfo.
 abstract class ProcessInfo {
-  factory ProcessInfo(FileSystem fs) => _DefaultProcessInfo(fs);
+  factory ProcessInfo(FileSystem fs) = _DefaultProcessInfo;
 
-  factory ProcessInfo.test(FileSystem fs) => _TestProcessInfo(fs);
+  factory ProcessInfo.test(FileSystem fs) = _TestProcessInfo;
 
   int get currentRss;
 
@@ -399,7 +412,6 @@ class _DefaultProcessInfo implements ProcessInfo {
 
   @override
   File writePidFile(String pidFile) {
-    assert(pidFile != null);
     return _fileSystem.file(pidFile)
       ..writeAsStringSync(io.pid.toString());
   }
@@ -419,7 +431,6 @@ class _TestProcessInfo implements ProcessInfo {
 
   @override
   File writePidFile(String pidFile) {
-    assert(pidFile != null);
     return _fileSystem.file(pidFile)
       ..writeAsStringSync('12345');
   }

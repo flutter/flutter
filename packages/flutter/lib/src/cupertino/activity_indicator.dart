@@ -28,7 +28,7 @@ const Color _kActiveTickColor = CupertinoDynamicColor.withBrightness(
 ///
 /// See also:
 ///
-///  * <https://developer.apple.com/ios/human-interface-guidelines/controls/progress-indicators/#activity-indicators>
+///  * <https://developer.apple.com/design/human-interface-guidelines/progress-indicators/>
 class CupertinoActivityIndicator extends StatefulWidget {
   /// Creates an iOS-style activity indicator that spins clockwise.
   const CupertinoActivityIndicator({
@@ -36,9 +36,7 @@ class CupertinoActivityIndicator extends StatefulWidget {
     this.color,
     this.animating = true,
     this.radius = _kDefaultIndicatorRadius,
-  })  : assert(animating != null),
-        assert(radius != null),
-        assert(radius > 0.0),
+  })  : assert(radius > 0.0),
         progress = 1.0;
 
   /// Creates a non-animated iOS-style activity indicator that displays
@@ -52,9 +50,7 @@ class CupertinoActivityIndicator extends StatefulWidget {
     this.color,
     this.radius = _kDefaultIndicatorRadius,
     this.progress = 1.0,
-  })  : assert(radius != null),
-        assert(radius > 0.0),
-        assert(progress != null),
+  })  : assert(radius > 0.0),
         assert(progress >= 0.0),
         assert(progress <= 1.0),
         animating = false;
@@ -71,7 +67,7 @@ class CupertinoActivityIndicator extends StatefulWidget {
 
   /// Radius of the spinner widget.
   ///
-  /// Defaults to 10px. Must be positive and cannot be null.
+  /// Defaults to 10 pixels. Must be positive.
   final double radius;
 
   /// Determines the percentage of spinner ticks that will be shown. Typical usage would
@@ -79,7 +75,7 @@ class CupertinoActivityIndicator extends StatefulWidget {
   /// during pull-to-refresh when the drag-down action shows one tick at a time as
   /// the user continues to drag down.
   ///
-  /// Defaults to 1.0. Must be between 0.0 and 1.0 inclusive, and cannot be null.
+  /// Defaults to one. Must be between zero and one, inclusive.
   final double progress;
 
   @override

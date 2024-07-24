@@ -5,6 +5,7 @@
 // This file is run as part of a reduced test set in CI on Mac and Windows
 // machines.
 @Tags(<String>['reduced-test-set'])
+library;
 
 import 'dart:async';
 import 'dart:ui' as ui;
@@ -49,6 +50,7 @@ Future<void> testImageQuality(WidgetTester tester, ui.FilterQuality? quality) as
     final ui.Codec codec = await ui.instantiateImageCodec(test3x3Image);
     return (await codec.getNextFrame()).image;
   }))!;
+  addTearDown(image.dispose);
   expect(image.width, 3);
   expect(image.height, 3);
   final _TestImageStreamCompleter streamCompleter = _TestImageStreamCompleter();
@@ -136,7 +138,7 @@ class _TestImageProvider extends ImageProvider<Object> {
   }
 
   @override
-  ImageStreamCompleter load(Object key, DecoderCallback decode) {
+  ImageStreamCompleter loadImage(Object key, ImageDecoderCallback decode) {
     _loadCallCount += 1;
     return _streamCompleter;
   }

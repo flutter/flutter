@@ -19,7 +19,12 @@ void main() {
 
   testWidgets('Last tab gets focus', (WidgetTester tester) async {
     // 2 nodes for 2 tabs
-    final List<FocusNode> focusNodes = <FocusNode>[FocusNode(), FocusNode()];
+    final List<FocusNode> focusNodes = <FocusNode>[];
+    for (int i = 0; i < 2; i++) {
+      final FocusNode focusNode = FocusNode();
+      focusNodes.add(focusNode);
+      addTearDown(focusNode.dispose);
+    }
 
     await tester.pumpWidget(
       MaterialApp(
@@ -53,9 +58,12 @@ void main() {
   });
 
   testWidgets('Do not affect focus order in the route', (WidgetTester tester) async {
-    final List<FocusNode> focusNodes = <FocusNode>[
-      FocusNode(), FocusNode(), FocusNode(), FocusNode(),
-    ];
+    final List<FocusNode> focusNodes = <FocusNode>[];
+    for (int i = 0; i < 4; i++) {
+      final FocusNode focusNode = FocusNode();
+      focusNodes.add(focusNode);
+      addTearDown(focusNode.dispose);
+    }
 
     await tester.pumpWidget(
       MaterialApp(
@@ -279,8 +287,9 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Builder(builder: (BuildContext context) {
-          return MediaQuery(
-            data: MediaQuery.of(context).copyWith(textScaleFactor: 99),
+          return MediaQuery.withClampedTextScaling(
+            minScaleFactor: 99,
+            maxScaleFactor: 99,
             child: CupertinoTabScaffold(
               tabBar: CupertinoTabBar(
                 items: List<BottomNavigationBarItem>.generate(
@@ -311,10 +320,11 @@ void main() {
     );
 
     expect(barItems.length, greaterThan(0));
-    expect(barItems.any((RichText t) => t.textScaleFactor != 1), isFalse);
+    expect(barItems, isNot(contains(predicate((RichText t) => t.textScaler != TextScaler.noScaling))));
 
     expect(contents.length, greaterThan(0));
-    expect(contents.any((RichText t) => t.textScaleFactor != 99), isFalse);
+    expect(contents, isNot(contains(predicate((RichText t) => t.textScaler != const TextScaler.linear(99.0)))));
+    imageCache.clear();
   });
 }
 

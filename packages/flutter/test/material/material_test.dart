@@ -5,12 +5,12 @@
 // This file is run as part of a reduced test set in CI on Mac and Windows
 // machines.
 @Tags(<String>['reduced-test-set'])
+library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../rendering/mock_canvas.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import '../widgets/test_border.dart' show TestBorder;
 
 class NotifyMaterial extends StatelessWidget {
@@ -189,6 +189,58 @@ void main() {
     expect(log, isEmpty);
   });
 
+  testWidgets('Shadow color defaults', (WidgetTester tester) async {
+    Widget buildWithShadow(Color? shadowColor) {
+      return Center(
+        child: SizedBox(
+          height: 100.0,
+          width: 100.0,
+          child: Material(
+            shadowColor: shadowColor,
+            elevation: 10,
+            shape: const CircleBorder(),
+          ),
+        )
+      );
+    }
+
+    // Default M2 shadow color
+    await tester.pumpWidget(
+        Theme(
+          data: ThemeData(
+            useMaterial3: false,
+          ),
+          child: buildWithShadow(null),
+        )
+    );
+    await tester.pumpAndSettle();
+    expect(getModel(tester).shadowColor, ThemeData().shadowColor);
+
+    // Default M3 shadow color
+    await tester.pumpWidget(
+        Theme(
+          data: ThemeData(
+            useMaterial3: true,
+          ),
+          child: buildWithShadow(null),
+        )
+    );
+    await tester.pumpAndSettle();
+    expect(getModel(tester).shadowColor, ThemeData().colorScheme.shadow);
+
+    // Drop shadow can be turned off with a transparent color.
+    await tester.pumpWidget(
+        Theme(
+          data: ThemeData(
+            useMaterial3: true,
+          ),
+          child: buildWithShadow(Colors.transparent),
+        )
+    );
+    await tester.pumpAndSettle();
+    expect(getModel(tester).shadowColor, Colors.transparent);
+  });
+
   testWidgets('Shadows animate smoothly', (WidgetTester tester) async {
     // This code verifies that the PhysicalModel's elevation animates over
     // a kThemeChangeDuration time interval.
@@ -303,6 +355,23 @@ void main() {
       await tester.pumpAndSettle();
       final RenderPhysicalShape noTintModel = getModel(tester);
       expect(noTintModel.color, equals(baseColor));
+
+      // With transparent surfaceTintColor, it should not apply an overlay
+      await tester.pumpWidget(
+        Theme(
+          data: ThemeData(
+            useMaterial3: true,
+          ),
+          child: buildMaterial(
+            color: baseColor,
+            surfaceTintColor: Colors.transparent,
+            elevation: 12.0,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final RenderPhysicalShape transparentTintModel = getModel(tester);
+      expect(transparentTintModel.color, equals(baseColor));
 
       // With surfaceTintColor specified, it should not apply an overlay based
       // on the elevation.
@@ -850,10 +919,11 @@ void main() {
       expect(box, isNot(paints..circle()));
     });
 
-    testWidgets('border is painted above child by default', (WidgetTester tester) async {
+    testWidgets('Material2 - border is painted above child by default', (WidgetTester tester) async {
       final Key painterKey = UniqueKey();
 
       await tester.pumpWidget(MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           body: RepaintBoundary(
             key: painterKey,
@@ -884,14 +954,54 @@ void main() {
 
       await expectLater(
         find.byKey(painterKey),
-        matchesGoldenFile('material.border_paint_above.png'),
+        matchesGoldenFile('m2_material.border_paint_above.png'),
       );
     });
 
-    testWidgets('border is painted below child when specified', (WidgetTester tester) async {
+    testWidgets('Material3 - border is painted above child by default', (WidgetTester tester) async {
       final Key painterKey = UniqueKey();
 
       await tester.pumpWidget(MaterialApp(
+        theme: ThemeData(useMaterial3: true),
+        home: Scaffold(
+          body: RepaintBoundary(
+            key: painterKey,
+            child: Card(
+              child: SizedBox(
+                width: 200,
+                height: 300,
+                child: Material(
+                  clipBehavior: Clip.hardEdge,
+                  shape: const RoundedRectangleBorder(
+                    side: BorderSide(color: Colors.grey, width: 6),
+                    borderRadius: BorderRadius.all(Radius.circular(8)),
+                  ),
+                  child: Column(
+                    children: <Widget>[
+                      Container(
+                        color: Colors.green,
+                        height: 150,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ));
+
+      await expectLater(
+        find.byKey(painterKey),
+        matchesGoldenFile('m3_material.border_paint_above.png'),
+      );
+    });
+
+    testWidgets('Material2 - border is painted below child when specified', (WidgetTester tester) async {
+      final Key painterKey = UniqueKey();
+
+      await tester.pumpWidget(MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           body: RepaintBoundary(
             key: painterKey,
@@ -923,7 +1033,47 @@ void main() {
 
       await expectLater(
         find.byKey(painterKey),
-        matchesGoldenFile('material.border_paint_below.png'),
+        matchesGoldenFile('m2_material.border_paint_below.png'),
+      );
+    });
+
+    testWidgets('Material3 - border is painted below child when specified', (WidgetTester tester) async {
+      final Key painterKey = UniqueKey();
+
+      await tester.pumpWidget(MaterialApp(
+        theme: ThemeData(useMaterial3: true),
+        home: Scaffold(
+          body: RepaintBoundary(
+            key: painterKey,
+            child: Card(
+              child: SizedBox(
+                width: 200,
+                height: 300,
+                child: Material(
+                  clipBehavior: Clip.hardEdge,
+                  shape: const RoundedRectangleBorder(
+                    side: BorderSide(color: Colors.grey, width: 6),
+                    borderRadius: BorderRadius.all(Radius.circular(8)),
+                  ),
+                  borderOnForeground: false,
+                  child: Column(
+                    children: <Widget>[
+                      Container(
+                        color: Colors.green,
+                        height: 150,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ));
+
+      await expectLater(
+        find.byKey(painterKey),
+        matchesGoldenFile('m3_material.border_paint_below.png'),
       );
     });
   });
@@ -937,7 +1087,7 @@ void main() {
         child: SizedBox(key: sizedBoxKey, width: 20, height: 20),
       ),
     ));
-    final MaterialInkController controller = Material.of(sizedBoxKey.currentContext!)!;
+    final MaterialInkController controller = Material.of(sizedBoxKey.currentContext!);
 
     final TrackPaintInkFeature tracker = TrackPaintInkFeature(
       controller: controller,
@@ -946,8 +1096,11 @@ void main() {
     controller.addInkFeature(tracker);
     expect(tracker.paintCount, 0);
 
-    // Force a repaint. Since it's offstage, the ink feture should not get painted.
-    materialKey.currentContext!.findRenderObject()!.paint(PaintingContext(ContainerLayer(), Rect.largest), Offset.zero);
+    final ContainerLayer layer1 = ContainerLayer();
+    addTearDown(layer1.dispose);
+
+    // Force a repaint. Since it's offstage, the ink feature should not get painted.
+    materialKey.currentContext!.findRenderObject()!.paint(PaintingContext(layer1, Rect.largest), Offset.zero);
     expect(tracker.paintCount, 0);
 
     await tester.pumpWidget(Material(
@@ -961,9 +1114,132 @@ void main() {
     // now onstage.
     expect(tracker.paintCount, 1);
 
+    final ContainerLayer layer2 = ContainerLayer();
+    addTearDown(layer2.dispose);
+
     // Force a repaint again. This time, it gets repainted because it is onstage.
-    materialKey.currentContext!.findRenderObject()!.paint(PaintingContext(ContainerLayer(), Rect.largest), Offset.zero);
+    materialKey.currentContext!.findRenderObject()!.paint(PaintingContext(layer2, Rect.largest), Offset.zero);
     expect(tracker.paintCount, 2);
+
+    tracker.dispose();
+  });
+
+  testWidgets('$InkFeature dispatches memory events', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Material(
+        child: SizedBox(width: 20, height: 20),
+      ),
+    );
+
+    final Element element = tester.element(find.byType(SizedBox));
+    final MaterialInkController controller = Material.of(element);
+    final RenderBox referenceBox = element.findRenderObject()! as RenderBox;
+
+    await expectLater(
+      await memoryEvents(
+        () => _InkFeature(
+          controller: controller,
+          referenceBox: referenceBox,
+        ).dispose(),
+        _InkFeature,
+      ),
+      areCreateAndDispose,
+    );
+  });
+
+  group('LookupBoundary', () {
+    testWidgets('hides Material from Material.maybeOf', (WidgetTester tester) async {
+      MaterialInkController? material;
+
+      await tester.pumpWidget(
+        Material(
+          child: LookupBoundary(
+            child: Builder(
+              builder: (BuildContext context) {
+                material = Material.maybeOf(context);
+                return Container();
+              },
+            ),
+          ),
+        ),
+      );
+
+      expect(material, isNull);
+    });
+
+    testWidgets('hides Material from Material.of', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Material(
+          child: LookupBoundary(
+            child: Builder(
+              builder: (BuildContext context) {
+                Material.of(context);
+                return Container();
+              },
+            ),
+          ),
+        ),
+      );
+      final Object? exception = tester.takeException();
+      expect(exception, isFlutterError);
+      final FlutterError error = exception! as FlutterError;
+
+      expect(
+        error.toStringDeep(),
+        'FlutterError\n'
+        '   Material.of() was called with a context that does not have access\n'
+        '   to a Material widget.\n'
+        '   The context provided to Material.of() does have a Material widget\n'
+        '   ancestor, but it is hidden by a LookupBoundary. This can happen\n'
+        '   because you are using a widget that looks for a Material\n'
+        '   ancestor, but no such ancestor exists within the closest\n'
+        '   LookupBoundary.\n'
+        '   The context used was:\n'
+        '     Builder(dirty)\n'
+      );
+    });
+
+    testWidgets('hides Material from debugCheckHasMaterial', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Material(
+          child: LookupBoundary(
+            child: Builder(
+              builder: (BuildContext context) {
+                debugCheckHasMaterial(context);
+                return Container();
+              },
+            ),
+          ),
+        ),
+      );
+      final Object? exception = tester.takeException();
+      expect(exception, isFlutterError);
+      final FlutterError error = exception! as FlutterError;
+
+      expect(
+        error.toStringDeep(), startsWith(
+          'FlutterError\n'
+          '   No Material widget found within the closest LookupBoundary.\n'
+          '   There is an ancestor Material widget, but it is hidden by a\n'
+          '   LookupBoundary.\n'
+          '   Builder widgets require a Material widget ancestor within the\n'
+          '   closest LookupBoundary.\n'
+          '   In Material Design, most widgets are conceptually "printed" on a\n'
+          "   sheet of material. In Flutter's material library, that material\n"
+          '   is represented by the Material widget. It is the Material widget\n'
+          '   that renders ink splashes, for instance. Because of this, many\n'
+          '   material library widgets require that there be a Material widget\n'
+          '   in the tree above them.\n'
+          '   To introduce a Material widget, you can either directly include\n'
+          '   one, or use a widget that contains Material itself, such as a\n'
+          '   Card, Dialog, Drawer, or Scaffold.\n'
+          '   The specific widget that could not find a Material ancestor was:\n'
+          '     Builder\n'
+          '   The ancestors of this widget were:\n'
+          '     LookupBoundary\n'
+        ),
+      );
+    });
   });
 }
 
@@ -975,4 +1251,16 @@ class TrackPaintInkFeature extends InkFeature {
   void paintFeature(Canvas canvas, Matrix4 transform) {
     paintCount += 1;
   }
+}
+
+class _InkFeature extends InkFeature {
+  _InkFeature({
+    required super.controller,
+    required super.referenceBox,
+  }) {
+    controller.addInkFeature(this);
+  }
+
+  @override
+  void paintFeature(Canvas canvas, Matrix4 transform) {}
 }

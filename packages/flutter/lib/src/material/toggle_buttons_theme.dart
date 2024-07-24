@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'ink_well.dart';
+/// @docImport 'toggle_buttons.dart';
+library;
+
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -150,9 +154,8 @@ class ToggleButtonsThemeData with Diagnosticable {
 
   /// Linearly interpolate between two toggle buttons themes.
   static ToggleButtonsThemeData? lerp(ToggleButtonsThemeData? a, ToggleButtonsThemeData? b, double t) {
-    assert (t != null);
-    if (a == null && b == null) {
-      return null;
+    if (identical(a, b)) {
+      return a;
     }
     return ToggleButtonsThemeData(
       textStyle: TextStyle.lerp(a?.textStyle, b?.textStyle, t),
@@ -247,13 +250,11 @@ class ToggleButtonsThemeData with Diagnosticable {
 class ToggleButtonsTheme extends InheritedTheme {
   /// Creates a toggle buttons theme that controls the color and border
   /// parameters for [ToggleButtons].
-  ///
-  /// The data argument must not be null.
   const ToggleButtonsTheme({
     super.key,
     required this.data,
     required super.child,
-  }) : assert(data != null);
+  });
 
   /// Specifies the color and border values for descendant [ToggleButtons] widgets.
   final ToggleButtonsThemeData data;

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:ui' show SemanticsUpdate;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -43,16 +44,51 @@ class TestRenderingFlutterBinding extends BindingBase with SchedulerBinding, Ser
   void initInstances() {
     super.initInstances();
     _instance = this;
+    // TODO(goderbauer): Create (fake) window if embedder doesn't provide an implicit view.
+    assert(platformDispatcher.implicitView != null);
+    _renderView = initRenderView(platformDispatcher.implicitView!);
+  }
+
+  @override
+  RenderView get renderView => _renderView;
+  late RenderView _renderView;
+
+  @override
+  PipelineOwner get pipelineOwner => rootPipelineOwner;
+
+  /// Creates a [RenderView] object to be the root of the
+  /// [RenderObject] rendering tree, and initializes it so that it
+  /// will be rendered when the next frame is requested.
+  ///
+  /// Called automatically when the binding is created.
+  RenderView initRenderView(FlutterView view) {
+    final RenderView renderView = RenderView(view: view);
+    rootPipelineOwner.rootNode = renderView;
+    addRenderView(renderView);
+    renderView.prepareInitialFrame();
+    return renderView;
+  }
+
+  @override
+  PipelineOwner createRootPipelineOwner() {
+    return PipelineOwner(
+      onSemanticsOwnerCreated: () {
+        renderView.scheduleInitialSemantics();
+      },
+      onSemanticsUpdate: (SemanticsUpdate update) {
+        renderView.updateSemantics(update);
+      },
+      onSemanticsOwnerDisposed: () {
+        renderView.clearSemantics();
+      },
+    );
   }
 
   /// Creates and initializes the binding. This function is
   /// idempotent; calling it a second time will just return the
   /// previously-created instance.
   static TestRenderingFlutterBinding ensureInitialized({ VoidCallback? onErrors }) {
-    if (_instance != null) {
-      return _instance!;
-    }
-    return TestRenderingFlutterBinding(onErrors: onErrors);
+    return _instance ?? TestRenderingFlutterBinding(onErrors: onErrors);
   }
 
   final List<FlutterErrorDetails> _errors = <FlutterErrorDetails>[];
@@ -112,9 +148,7 @@ class TestRenderingFlutterBinding extends BindingBase with SchedulerBinding, Ser
   /// to test [SchedulerPhase.postFrameCallbacks].
   void pumpCompleteFrame() {
     final FlutterExceptionHandler? oldErrorHandler = FlutterError.onError;
-    FlutterError.onError = (FlutterErrorDetails details) {
-      _errors.add(details);
-    };
+    FlutterError.onError = _errors.add;
     try {
       TestRenderingFlutterBinding.instance.handleBeginFrame(null);
       TestRenderingFlutterBinding.instance.handleDrawFrame();
@@ -139,27 +173,27 @@ class TestRenderingFlutterBinding extends BindingBase with SchedulerBinding, Ser
   void drawFrame() {
     assert(phase != EnginePhase.build, 'rendering_tester does not support testing the build phase; use flutter_test instead');
     final FlutterExceptionHandler? oldErrorHandler = FlutterError.onError;
-    FlutterError.onError = (FlutterErrorDetails details) {
-      _errors.add(details);
-    };
+    FlutterError.onError = _errors.add;
     try {
-      pipelineOwner.flushLayout();
+      rootPipelineOwner.flushLayout();
       if (phase == EnginePhase.layout) {
         return;
       }
-      pipelineOwner.flushCompositingBits();
+      rootPipelineOwner.flushCompositingBits();
       if (phase == EnginePhase.compositingBits) {
         return;
       }
-      pipelineOwner.flushPaint();
+      rootPipelineOwner.flushPaint();
       if (phase == EnginePhase.paint) {
         return;
       }
-      renderView.compositeFrame();
+      for (final RenderView renderView in renderViews) {
+        renderView.compositeFrame();
+      }
       if (phase == EnginePhase.composite) {
         return;
       }
-      pipelineOwner.flushSemantics();
+      rootPipelineOwner.flushSemantics();
       if (phase == EnginePhase.flushSemantics) {
         return;
       }
@@ -195,15 +229,15 @@ class TestRenderingFlutterBinding extends BindingBase with SchedulerBinding, Ser
 /// The EnginePhase must not be [EnginePhase.build], since the rendering layer
 /// has no build phase.
 ///
-/// If `onErrors` is not null, it is set as [TestRenderingFlutterBinding.onError].
+/// If `onErrors` is not null, it is set as
+/// [TestRenderingFlutterBinding.onErrors].
 void layout(
-  RenderBox box, {
+  RenderBox box, { // If you want to just repump the last box, call pumpFrame().
   BoxConstraints? constraints,
   Alignment alignment = Alignment.center,
   EnginePhase phase = EnginePhase.layout,
   VoidCallback? onErrors,
 }) {
-  assert(box != null); // If you want to just repump the last box, call pumpFrame().
   assert(box.parent == null); // We stick the box in another, so you can't reuse it easily, sorry.
 
   TestRenderingFlutterBinding.instance.renderView.child = null;
@@ -223,10 +257,9 @@ void layout(
 
 /// Pumps a single frame.
 ///
-/// If `onErrors` is not null, it is set as [TestRenderingFlutterBinding.onError].
+/// If `onErrors` is not null, it is set as
+/// [TestRenderingFlutterBinding.onErrors].
 void pumpFrame({ EnginePhase phase = EnginePhase.layout, VoidCallback? onErrors }) {
-  assert(TestRenderingFlutterBinding.instance != null);
-  assert(TestRenderingFlutterBinding.instance.renderView != null);
   assert(TestRenderingFlutterBinding.instance.renderView.child != null); // call layout() first!
 
   if (onErrors != null) {
@@ -347,7 +380,11 @@ class FakeTicker implements Ticker {
 }
 
 class TestClipPaintingContext extends PaintingContext {
-  TestClipPaintingContext() : super(ContainerLayer(), Rect.zero);
+  TestClipPaintingContext() : this._(ContainerLayer());
+
+  TestClipPaintingContext._(this._containerLayer) : super(_containerLayer, Rect.zero);
+
+  final ContainerLayer _containerLayer;
 
   @override
   ClipRectLayer? pushClipRect(
@@ -363,6 +400,11 @@ class TestClipPaintingContext extends PaintingContext {
   }
 
   Clip clipBehavior = Clip.none;
+
+  @mustCallSuper
+  void dispose() {
+    _containerLayer.dispose();
+  }
 }
 
 class TestPushLayerPaintingContext extends PaintingContext {

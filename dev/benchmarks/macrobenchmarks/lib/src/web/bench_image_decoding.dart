@@ -2,24 +2,26 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:html' as html;
+import 'dart:js_interop';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
+import 'package:web/web.dart' as web;
+
 import 'recorder.dart';
 
-/// Measures the performance of image decoding.
-///
-/// The benchmark measures the decoding latency and not impact on jank. It
-/// cannot distinguish between blocking and non-blocking decoding. It simply
-/// measures the total time it takes to decode image frames. For example, the
-/// WASM codecs execute on the main thread and block the UI, leading to jank,
-/// but the browser's WebCodecs API is asynchronous running on a separate thread
-/// and does not jank. However, the benchmark result may be the same.
-///
-/// This benchmark does not support the HTML renderer because the HTML renderer
-/// cannot decode image frames (it always returns 1 dummy frame, even for
-/// animated images).
+// Measures the performance of image decoding.
+//
+// The benchmark measures the decoding latency and not impact on jank. It
+// cannot distinguish between blocking and non-blocking decoding. It naively
+// measures the total time it takes to decode image frames. For example, the
+// WASM codecs execute on the main thread and block the UI, leading to jank,
+// but the browser's WebCodecs API is asynchronous running on a separate thread
+// and does not jank. However, the benchmark result may be the same.
+//
+// This benchmark does not support the HTML renderer because the HTML renderer
+// cannot decode image frames (it always returns 1 dummy frame, even for
+// animated images).
 class BenchImageDecoding extends RawRecorder {
   BenchImageDecoding() : super(
     name: benchmarkName,
@@ -43,8 +45,11 @@ class BenchImageDecoding extends RawRecorder {
       return;
     }
     for (final String imageUrl in _imageUrls) {
-      final html.Body image = await html.window.fetch(imageUrl) as html.Body;
-      _imageData.add((await image.arrayBuffer() as ByteBuffer).asUint8List());
+      final Future<JSAny?> fetchFuture = web.window.fetch(imageUrl.toJS).toDart;
+      final web.Response image = (await fetchFuture)! as web.Response;
+      final Future<JSAny?> imageFuture = image.arrayBuffer().toDart;
+      final JSArrayBuffer imageBuffer = (await imageFuture)! as JSArrayBuffer;
+      _imageData.add(imageBuffer.toDart.asUint8List());
     }
   }
 

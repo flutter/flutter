@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
@@ -10,12 +11,16 @@ import 'basic.dart';
 import 'debug.dart';
 import 'framework.dart';
 import 'inherited_theme.dart';
+import 'layout_builder.dart';
+import 'localizations.dart';
 import 'media_query.dart';
 import 'overlay.dart';
 import 'scroll_controller.dart';
+import 'scroll_delegate.dart';
 import 'scroll_physics.dart';
 import 'scroll_view.dart';
 import 'scrollable.dart';
+import 'scrollable_helpers.dart';
 import 'sliver.dart';
 import 'sliver_prototype_extent_list.dart';
 import 'ticker_provider.dart';
@@ -115,6 +120,7 @@ class ReorderableList extends StatefulWidget {
     this.onReorderStart,
     this.onReorderEnd,
     this.itemExtent,
+    this.itemExtentBuilder,
     this.prototypeItem,
     this.proxyDecorator,
     this.padding,
@@ -130,11 +136,14 @@ class ReorderableList extends StatefulWidget {
     this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
     this.restorationId,
     this.clipBehavior = Clip.hardEdge,
+    this.autoScrollerVelocityScalar,
   }) : assert(itemCount >= 0),
-       assert(
-         itemExtent == null || prototypeItem == null,
-         'You can only pass itemExtent or prototypeItem, not both',
-       );
+        assert(
+          (itemExtent == null && prototypeItem == null) ||
+          (itemExtent == null && itemExtentBuilder == null) ||
+          (prototypeItem == null && itemExtentBuilder == null),
+          'You can only pass one of itemExtent, prototypeItem and itemExtentBuilder.',
+        );
 
   /// {@template flutter.widgets.reorderable_list.itemBuilder}
   /// Called, as needed, to build list item widgets.
@@ -249,8 +258,16 @@ class ReorderableList extends StatefulWidget {
   /// {@macro flutter.widgets.list_view.itemExtent}
   final double? itemExtent;
 
+  /// {@macro flutter.widgets.list_view.itemExtentBuilder}
+  final ItemExtentBuilder? itemExtentBuilder;
+
   /// {@macro flutter.widgets.list_view.prototypeItem}
   final Widget? prototypeItem;
+
+  /// {@macro flutter.widgets.EdgeDraggingAutoScroller.velocityScalar}
+  ///
+  /// {@macro flutter.widgets.SliverReorderableList.autoScrollerVelocityScalar.default}
+  final double? autoScrollerVelocityScalar;
 
   /// The state from the closest instance of this class that encloses the given
   /// context.
@@ -268,7 +285,6 @@ class ReorderableList extends StatefulWidget {
   ///  * [maybeOf], a similar function that will return null if no
   ///    [ReorderableList] ancestor is found.
   static ReorderableListState of(BuildContext context) {
-    assert(context != null);
     final ReorderableListState? result = context.findAncestorStateOfType<ReorderableListState>();
     assert(() {
       if (result == null) {
@@ -307,7 +323,6 @@ class ReorderableList extends StatefulWidget {
   ///  * [of], a similar function that will throw if no [ReorderableList] ancestor
   ///    is found.
   static ReorderableListState? maybeOf(BuildContext context) {
-    assert(context != null);
     return context.findAncestorStateOfType<ReorderableListState>();
   }
 
@@ -344,7 +359,7 @@ class ReorderableListState extends State<ReorderableList> {
   /// the pointer down [event].
   ///
   /// The given [recognizer] will be used to recognize and start the drag
-  /// item tracking and lead to either an item reorder, or a cancelled drag.
+  /// item tracking and lead to either an item reorder, or a canceled drag.
   /// The list will take ownership of the returned recognizer and will dispose
   /// it when it is no longer needed.
   ///
@@ -399,6 +414,7 @@ class ReorderableListState extends State<ReorderableList> {
             onReorderStart: widget.onReorderStart,
             onReorderEnd: widget.onReorderEnd,
             proxyDecorator: widget.proxyDecorator,
+            autoScrollerVelocityScalar: widget.autoScrollerVelocityScalar,
           ),
         ),
       ],
@@ -442,13 +458,21 @@ class SliverReorderableList extends StatefulWidget {
     this.onReorderStart,
     this.onReorderEnd,
     this.itemExtent,
+    this.itemExtentBuilder,
     this.prototypeItem,
     this.proxyDecorator,
-  }) : assert(itemCount >= 0),
+    double? autoScrollerVelocityScalar,
+  }) : autoScrollerVelocityScalar = autoScrollerVelocityScalar ?? _kDefaultAutoScrollVelocityScalar,
+       assert(itemCount >= 0),
        assert(
-         itemExtent == null || prototypeItem == null,
-         'You can only pass itemExtent or prototypeItem, not both',
+         (itemExtent == null && prototypeItem == null) ||
+         (itemExtent == null && itemExtentBuilder == null) ||
+         (prototypeItem == null && itemExtentBuilder == null),
+         'You can only pass one of itemExtent, prototypeItem and itemExtentBuilder.',
        );
+
+  // An eyeballed value for a smooth scrolling experience.
+  static const double _kDefaultAutoScrollVelocityScalar = 50;
 
   /// {@macro flutter.widgets.reorderable_list.itemBuilder}
   final IndexedWidgetBuilder itemBuilder;
@@ -474,8 +498,18 @@ class SliverReorderableList extends StatefulWidget {
   /// {@macro flutter.widgets.list_view.itemExtent}
   final double? itemExtent;
 
+  /// {@macro flutter.widgets.list_view.itemExtentBuilder}
+  final ItemExtentBuilder? itemExtentBuilder;
+
   /// {@macro flutter.widgets.list_view.prototypeItem}
   final Widget? prototypeItem;
+
+  /// {@macro flutter.widgets.EdgeDraggingAutoScroller.velocityScalar}
+  ///
+  /// {@template flutter.widgets.SliverReorderableList.autoScrollerVelocityScalar.default}
+  /// Defaults to 50 if not set or set to null.
+  /// {@endtemplate}
+  final double autoScrollerVelocityScalar;
 
   @override
   SliverReorderableListState createState() => SliverReorderableListState();
@@ -496,7 +530,6 @@ class SliverReorderableList extends StatefulWidget {
   ///  * [maybeOf], a similar function that will return null if no
   ///    [SliverReorderableList] ancestor is found.
   static SliverReorderableListState of(BuildContext context) {
-    assert(context != null);
     final SliverReorderableListState? result = context.findAncestorStateOfType<SliverReorderableListState>();
     assert(() {
       if (result == null) {
@@ -537,7 +570,6 @@ class SliverReorderableList extends StatefulWidget {
   ///  * [of], a similar function that will throw if no [SliverReorderableList]
   ///    ancestor is found.
   static SliverReorderableListState? maybeOf(BuildContext context) {
-    assert(context != null);
     return context.findAncestorStateOfType<SliverReorderableListState>();
   }
 }
@@ -588,33 +620,23 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
   Offset? _finalDropPosition;
   MultiDragGestureRecognizer? _recognizer;
   int? _recognizerPointer;
-  // To implement the gap for the dragged item, we replace the dragged item
-  // with a zero sized box, and then translate all of the later items down
-  // by the size of the dragged item. This allows us to keep the order of the
-  // list, while still being able to animate the gap between the items. However
-  // for the first frame of the drag, the item has not yet been replaced, so
-  // the calculation for the gap is off by the size of the gap. This flag is
-  // used to determine if the transition to the zero sized box has completed,
-  // so the gap calculation can compensate for it.
-  bool _dragStartTransitionComplete = false;
 
   EdgeDraggingAutoScroller? _autoScroller;
 
   late ScrollableState _scrollable;
   Axis get _scrollDirection => axisDirectionToAxis(_scrollable.axisDirection);
-  bool get _reverse =>
-    _scrollable.axisDirection == AxisDirection.up ||
-    _scrollable.axisDirection == AxisDirection.left;
+  bool get _reverse => axisDirectionIsReversed(_scrollable.axisDirection);
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _scrollable = Scrollable.of(context)!;
+    _scrollable = Scrollable.of(context);
     if (_autoScroller?.scrollable != _scrollable) {
       _autoScroller?.stopAutoScroll();
       _autoScroller = EdgeDraggingAutoScroller(
         _scrollable,
-        onScrollViewScrolled: _handleScrollableAutoScrolled
+        onScrollViewScrolled: _handleScrollableAutoScrolled,
+        velocityScalar: widget.autoScrollerVelocityScalar,
       );
     }
   }
@@ -625,11 +647,21 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
     if (widget.itemCount != oldWidget.itemCount) {
       cancelReorder();
     }
+
+    if (widget.autoScrollerVelocityScalar != oldWidget.autoScrollerVelocityScalar) {
+      _autoScroller?.stopAutoScroll();
+      _autoScroller = EdgeDraggingAutoScroller(
+        _scrollable,
+        onScrollViewScrolled: _handleScrollableAutoScrolled,
+        velocityScalar: widget.autoScrollerVelocityScalar,
+      );
+    }
   }
 
   @override
   void dispose() {
     _dragReset();
+    _recognizer?.dispose();
     super.dispose();
   }
 
@@ -637,7 +669,7 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
   /// the pointer down [event].
   ///
   /// The given [recognizer] will be used to recognize and start the drag
-  /// item tracking and lead to either an item reorder, or a cancelled drag.
+  /// item tracking and lead to either an item reorder, or a canceled drag.
   ///
   /// Most applications will not use this directly, but will wrap the item
   /// (or part of the item, like a drag handle) in either a
@@ -689,6 +721,9 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
   }
 
   void _registerItem(_ReorderableItemState item) {
+    if (_dragInfo != null && _items[item.index] != item) {
+      item.updateForGap(_dragInfo!.index, _dragInfo!.index, _dragInfo!.itemExtent, false, _reverse);
+    }
     _items[item.index] = item;
     if (item.index == _dragInfo?.index) {
       item.dragging = true;
@@ -709,10 +744,6 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
     item.dragging = true;
     widget.onReorderStart?.call(_dragIndex!);
     item.rebuild();
-    _dragStartTransitionComplete = false;
-    SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
-      _dragStartTransitionComplete = true;
-    });
 
     _insertIndex = item.index;
     _dragInfo = _DragInfo(
@@ -737,7 +768,7 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
       if (childItem == item || !childItem.mounted) {
         continue;
       }
-      childItem.updateForGap(_insertIndex!, _dragInfo!.itemExtent, false, _reverse);
+      childItem.updateForGap(_insertIndex!, _insertIndex!, _dragInfo!.itemExtent, false, _reverse);
     }
     return _dragInfo;
   }
@@ -758,18 +789,24 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
 
   void _dragEnd(_DragInfo item) {
     setState(() {
-      if (_insertIndex! < widget.itemCount - 1) {
-        // Find the location of the item we want to insert before
-        _finalDropPosition = _itemOffsetAt(_insertIndex! + (_reverse ? 1 : 0));
-      } else {
-        // Inserting into the last spot on the list. If it's the only spot, put
-        // it back where it was. Otherwise, grab the second to last and move
-        // down by the gap.
-        final int itemIndex = _items.length > 1 ? _insertIndex! - 1 : _insertIndex!;
-        if (_reverse) {
-          _finalDropPosition = _itemOffsetAt(itemIndex) - _extentOffset(item.itemExtent, _scrollDirection);
+      if (_insertIndex == item.index) {
+        _finalDropPosition =  _itemOffsetAt(_insertIndex!);
+      } else if (_reverse) {
+        if (_insertIndex! >= _items.length) {
+          // Drop at the starting position of the last element and offset its own extent
+          _finalDropPosition = _itemOffsetAt(_items.length - 1) - _extentOffset(item.itemExtent, _scrollDirection);
         } else {
-          _finalDropPosition = _itemOffsetAt(itemIndex) + _extentOffset(item.itemExtent, _scrollDirection);
+          // Drop at the end of the current element occupying the insert position
+          _finalDropPosition = _itemOffsetAt(_insertIndex!) + _extentOffset(_itemExtentAt(_insertIndex!), _scrollDirection);
+        }
+      } else {
+        if (_insertIndex! == 0) {
+          // Drop at the starting position of the first element and offset its own extent
+          _finalDropPosition = _itemOffsetAt(0) - _extentOffset(item.itemExtent, _scrollDirection);
+        } else {
+          // Drop at the end of the previous element occupying the insert position
+          final int atIndex = _insertIndex! - 1;
+          _finalDropPosition = _itemOffsetAt(atIndex) + _extentOffset(_itemExtentAt(atIndex), _scrollDirection);
         }
       }
     });
@@ -802,6 +839,7 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
       _recognizer?.dispose();
       _recognizer = null;
       _overlayEntry?.remove();
+      _overlayEntry?.dispose();
       _overlayEntry = null;
       _finalDropPosition = null;
     }
@@ -835,14 +873,7 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
         continue;
       }
 
-      Rect geometry = item.targetGeometry();
-      if (!_dragStartTransitionComplete && _dragIndex! <= item.index) {
-        // Transition is not complete, so each item after the dragged item is still
-        // in its normal location and not moved up for the zero sized box that will
-        // replace the dragged item.
-        final Offset transitionOffset = _extentOffset(_reverse ? -gapExtent : gapExtent, _scrollDirection);
-        geometry = (geometry.topLeft - transitionOffset) & geometry.size;
-      }
+      final Rect geometry = item.targetGeometry();
       final double itemStart = _scrollDirection == Axis.vertical ? geometry.top : geometry.left;
       final double itemExtent = _scrollDirection == Axis.vertical ? geometry.height : geometry.width;
       final double itemEnd = itemStart + itemExtent;
@@ -897,7 +928,7 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
         if (item.index == _dragIndex! || !item.mounted) {
           continue;
         }
-        item.updateForGap(newIndex, gapExtent, true, _reverse);
+        item.updateForGap(_dragIndex!, newIndex, gapExtent, true, _reverse);
       }
     }
   }
@@ -908,18 +939,19 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
   }
 
   Offset _itemOffsetAt(int index) {
-    final RenderBox itemRenderBox =  _items[index]!.context.findRenderObject()! as RenderBox;
-    return itemRenderBox.localToGlobal(Offset.zero);
+    return _items[index]!.targetGeometry().topLeft;
+  }
+
+  double _itemExtentAt(int index) {
+    return _sizeExtent(_items[index]!.targetGeometry().size, _scrollDirection);
   }
 
   Widget _itemBuilder(BuildContext context, int index) {
     if (_dragInfo != null && index >= widget.itemCount) {
-      switch (_scrollDirection) {
-        case Axis.horizontal:
-          return SizedBox(width: _dragInfo!.itemExtent);
-        case Axis.vertical:
-          return SizedBox(height: _dragInfo!.itemExtent);
-      }
+      return switch (_scrollDirection) {
+        Axis.horizontal => SizedBox(width: _dragInfo!.itemExtent),
+        Axis.vertical   => SizedBox(height: _dragInfo!.itemExtent),
+      };
     }
     final Widget child = widget.itemBuilder(context, index);
     assert(child.key != null, 'All list items must have a key');
@@ -928,6 +960,63 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
       key: _ReorderableItemGlobalKey(child.key!, index, this),
       index: index,
       capturedThemes: InheritedTheme.capture(from: context, to: overlay.context),
+      child: _wrapWithSemantics(child, index),
+    );
+  }
+
+  Widget _wrapWithSemantics(Widget child, int index) {
+    void reorder(int startIndex, int endIndex) {
+      if (startIndex != endIndex) {
+        widget.onReorder(startIndex, endIndex);
+      }
+    }
+
+    // First, determine which semantics actions apply.
+    final Map<CustomSemanticsAction, VoidCallback> semanticsActions = <CustomSemanticsAction, VoidCallback>{};
+
+    // Create the appropriate semantics actions.
+    void moveToStart() => reorder(index, 0);
+    void moveToEnd() => reorder(index, widget.itemCount);
+    void moveBefore() => reorder(index, index - 1);
+    // To move after, go to index+2 because it is moved to the space
+    // before index+2, which is after the space at index+1.
+    void moveAfter() => reorder(index, index + 2);
+
+    final WidgetsLocalizations localizations = WidgetsLocalizations.of(context);
+    final bool isHorizontal = _scrollDirection == Axis.horizontal;
+    // If the item can move to before its current position in the list.
+    if (index > 0) {
+      semanticsActions[CustomSemanticsAction(label: localizations.reorderItemToStart)] = moveToStart;
+      String reorderItemBefore = localizations.reorderItemUp;
+      if (isHorizontal) {
+        reorderItemBefore = Directionality.of(context) == TextDirection.ltr
+            ? localizations.reorderItemLeft
+            : localizations.reorderItemRight;
+      }
+      semanticsActions[CustomSemanticsAction(label: reorderItemBefore)] = moveBefore;
+    }
+
+    // If the item can move to after its current position in the list.
+    if (index < widget.itemCount - 1) {
+      String reorderItemAfter = localizations.reorderItemDown;
+      if (isHorizontal) {
+        reorderItemAfter = Directionality.of(context) == TextDirection.ltr
+            ? localizations.reorderItemRight
+            : localizations.reorderItemLeft;
+      }
+      semanticsActions[CustomSemanticsAction(label: reorderItemAfter)] = moveAfter;
+      semanticsActions[CustomSemanticsAction(label: localizations.reorderItemToEnd)] = moveToEnd;
+    }
+
+    // Pass toWrap with a GlobalKey into the item so that when it
+    // gets dragged, the accessibility framework can preserve the selected
+    // state of the dragging item.
+    //
+    // Also apply the relevant custom accessibility actions for moving the item
+    // up, down, to the start, and to the end of the list.
+    return Semantics(
+      container: true,
+      customSemanticsActions: semanticsActions,
       child: child,
     );
   }
@@ -937,16 +1026,18 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
     assert(debugCheckHasOverlay(context));
     final SliverChildBuilderDelegate childrenDelegate = SliverChildBuilderDelegate(
       _itemBuilder,
-      // When dragging, the dragged item is still in the list but has been replaced
-      // by a zero height SizedBox, so that the gap can move around. To make the
-      // list extent stable we add a dummy entry to the end.
-      childCount: widget.itemCount + (_dragInfo != null ? 1 : 0),
+      childCount: widget.itemCount,
       findChildIndexCallback: widget.findChildIndexCallback,
     );
     if (widget.itemExtent != null) {
       return SliverFixedExtentList(
         delegate: childrenDelegate,
         itemExtent: widget.itemExtent!,
+      );
+    } else if (widget.itemExtentBuilder != null) {
+      return SliverVariedExtentList(
+        delegate: childrenDelegate,
+        itemExtentBuilder: widget.itemExtentBuilder!,
       );
     } else if (widget.prototypeItem != null) {
       return SliverPrototypeExtentList(
@@ -960,11 +1051,11 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
 
 class _ReorderableItem extends StatefulWidget {
   const _ReorderableItem({
-    required Key key,
+    required Key super.key,
     required this.index,
     required this.child,
     required this.capturedThemes,
-  }) : super(key: key);
+  });
 
   final int index;
   final Widget child;
@@ -993,6 +1084,8 @@ class _ReorderableItemState extends State<_ReorderableItem> {
     }
   }
   bool _dragging = false;
+  BoxConstraints? get childLayoutConstraints => _childLayoutConstraints;
+  BoxConstraints? _childLayoutConstraints;
 
   @override
   void initState() {
@@ -1020,13 +1113,17 @@ class _ReorderableItemState extends State<_ReorderableItem> {
   @override
   Widget build(BuildContext context) {
     if (_dragging) {
-      return const SizedBox();
+      final Size size = _extentSize(_listState._dragInfo!.itemExtent, _listState._scrollDirection);
+      return SizedBox.fromSize(size: size);
     }
     _listState._registerItem(this);
-    return Transform(
-      transform: Matrix4.translationValues(offset.dx, offset.dy, 0.0),
-      child: widget.child,
-    );
+    return LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+      _childLayoutConstraints = constraints;
+      return Transform(
+        transform: Matrix4.translationValues(offset.dx, offset.dy, 0.0),
+        child: widget.child,
+      );
+    });
   }
 
   @override
@@ -1043,10 +1140,18 @@ class _ReorderableItemState extends State<_ReorderableItem> {
     return _targetOffset;
   }
 
-  void updateForGap(int gapIndex, double gapExtent, bool animate, bool reverse) {
-    final Offset newTargetOffset = (gapIndex <= index)
-        ? _extentOffset(reverse ? -gapExtent : gapExtent, _listState._scrollDirection)
-        : Offset.zero;
+  void updateForGap(int dragIndex, int gapIndex, double gapExtent, bool animate, bool reverse) {
+    // An offset needs to be added to create a gap when we are between the
+    // moving element (dragIndex) and the current gap position (gapIndex).
+    // For how to update the gap position, refer to [_dragUpdateItems].
+    final Offset newTargetOffset;
+    if (gapIndex < dragIndex && index < dragIndex && index >= gapIndex) {
+      newTargetOffset = _extentOffset(reverse ? -gapExtent : gapExtent, _listState._scrollDirection);
+    } else if (gapIndex > dragIndex && index > dragIndex && index < gapIndex) {
+      newTargetOffset = _extentOffset(reverse ? gapExtent : -gapExtent, _listState._scrollDirection);
+    } else {
+      newTargetOffset = Offset.zero;
+    }
     if (newTargetOffset != _targetOffset) {
       _targetOffset = newTargetOffset;
       if (animate) {
@@ -1057,7 +1162,7 @@ class _ReorderableItemState extends State<_ReorderableItem> {
           )
             ..addListener(rebuild)
             ..addStatusListener((AnimationStatus status) {
-              if (status == AnimationStatus.completed) {
+              if (status.isCompleted) {
                 _startOffset = _targetOffset;
                 _offsetAnimation!.dispose();
                 _offsetAnimation = null;
@@ -1161,7 +1266,7 @@ class ReorderableDragStartListener extends StatelessWidget {
   }
 
   void _startDragging(BuildContext context, PointerDownEvent event) {
-    final DeviceGestureSettings? gestureSettings = MediaQuery.maybeOf(context)?.gestureSettings;
+    final DeviceGestureSettings? gestureSettings = MediaQuery.maybeGestureSettingsOf(context);
     final SliverReorderableListState? list = SliverReorderableList.maybeOf(context);
     list?.startItemDragReorder(
       index: index,
@@ -1220,6 +1325,15 @@ class _DragInfo extends Drag {
     this.proxyDecorator,
     required this.tickerProvider,
   }) {
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
+        library: 'package:flutter/widgets.dart',
+        className: '$_DragInfo',
+        object: this,
+      );
+    }
     final RenderBox itemRenderBox = item.context.findRenderObject()! as RenderBox;
     listState = item._listState;
     index = item.index;
@@ -1229,6 +1343,7 @@ class _DragInfo extends Drag {
     dragOffset = itemRenderBox.globalToLocal(initialPosition);
     itemSize = item.context.size!;
     itemExtent = _sizeExtent(itemSize, scrollDirection);
+    itemLayoutConstraints = item.childLayoutConstraints!;
     scrollable = Scrollable.of(item.context);
   }
 
@@ -1246,12 +1361,16 @@ class _DragInfo extends Drag {
   late Offset dragPosition;
   late Offset dragOffset;
   late Size itemSize;
+  late BoxConstraints itemLayoutConstraints;
   late double itemExtent;
   late CapturedThemes capturedThemes;
   ScrollableState? scrollable;
   AnimationController? _proxyAnimation;
 
   void dispose() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
     _proxyAnimation?.dispose();
   }
 
@@ -1261,7 +1380,7 @@ class _DragInfo extends Drag {
       duration: const Duration(milliseconds: 250),
     )
     ..addStatusListener((AnimationStatus status) {
-      if (status == AnimationStatus.dismissed) {
+      if (status.isDismissed) {
         _dropCompleted();
       }
     })
@@ -1300,6 +1419,7 @@ class _DragInfo extends Drag {
         listState: listState,
         index: index,
         size: itemSize,
+        constraints: itemLayoutConstraints,
         animation: _proxyAnimation!,
         position: dragPosition - dragOffset - _overlayOrigin(context),
         proxyDecorator: proxyDecorator,
@@ -1322,6 +1442,7 @@ class _DragItemProxy extends StatelessWidget {
     required this.child,
     required this.position,
     required this.size,
+    required this.constraints,
     required this.animation,
     required this.proxyDecorator,
   });
@@ -1331,6 +1452,7 @@ class _DragItemProxy extends StatelessWidget {
   final Widget child;
   final Offset position;
   final Size size;
+  final BoxConstraints constraints;
   final AnimationController animation;
   final ReorderItemProxyDecorator? proxyDecorator;
 
@@ -1357,7 +1479,14 @@ class _DragItemProxy extends StatelessWidget {
             child: SizedBox(
               width: size.width,
               height: size.height,
-              child: child,
+              child: OverflowBox(
+                minWidth: constraints.minWidth,
+                minHeight: constraints.minHeight,
+                maxWidth: constraints.maxWidth,
+                maxHeight: constraints.maxHeight,
+                alignment: listState._scrollDirection == Axis.horizontal ? Alignment.centerLeft : Alignment.topCenter,
+                child: child,
+              ),
             ),
           );
         },
@@ -1368,39 +1497,38 @@ class _DragItemProxy extends StatelessWidget {
 }
 
 double _sizeExtent(Size size, Axis scrollDirection) {
-  switch (scrollDirection) {
-    case Axis.horizontal:
-      return size.width;
-    case Axis.vertical:
-      return size.height;
-  }
+  return switch (scrollDirection) {
+    Axis.horizontal => size.width,
+    Axis.vertical   => size.height,
+  };
+}
+
+Size _extentSize(double extent, Axis scrollDirection) {
+  return switch (scrollDirection) {
+    Axis.horizontal => Size(extent, 0),
+    Axis.vertical => Size(0, extent),
+  };
 }
 
 double _offsetExtent(Offset offset, Axis scrollDirection) {
-  switch (scrollDirection) {
-    case Axis.horizontal:
-      return offset.dx;
-    case Axis.vertical:
-      return offset.dy;
-  }
+  return switch (scrollDirection) {
+    Axis.horizontal => offset.dx,
+    Axis.vertical   => offset.dy,
+  };
 }
 
 Offset _extentOffset(double extent, Axis scrollDirection) {
-  switch (scrollDirection) {
-    case Axis.horizontal:
-      return Offset(extent, 0.0);
-    case Axis.vertical:
-      return Offset(0.0, extent);
-  }
+  return switch (scrollDirection) {
+    Axis.horizontal => Offset(extent, 0.0),
+    Axis.vertical   => Offset(0.0, extent),
+  };
 }
 
 Offset _restrictAxis(Offset offset, Axis scrollDirection) {
-  switch (scrollDirection) {
-    case Axis.horizontal:
-      return Offset(offset.dx, 0.0);
-    case Axis.vertical:
-      return Offset(0.0, offset.dy);
-  }
+  return switch (scrollDirection) {
+    Axis.horizontal => Offset(offset.dx, 0.0),
+    Axis.vertical   => Offset(0.0, offset.dy),
+  };
 }
 
 // A global key that takes its identity from the object and uses a value of a

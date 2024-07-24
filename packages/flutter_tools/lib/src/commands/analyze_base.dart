@@ -20,7 +20,6 @@ import '../globals.dart' as globals;
 /// Common behavior for `flutter analyze` and `flutter analyze --watch`
 abstract class AnalyzeBase {
   AnalyzeBase(this.argResults, {
-    required this.repoRoots,
     required this.repoPackages,
     required this.fileSystem,
     required this.logger,
@@ -28,12 +27,11 @@ abstract class AnalyzeBase {
     required this.processManager,
     required this.terminal,
     required this.artifacts,
+    required this.suppressAnalytics,
   });
 
   /// The parsed argument results for execution.
   final ArgResults argResults;
-  @protected
-  final List<String> repoRoots;
   @protected
   final List<Directory> repoPackages;
   @protected
@@ -48,6 +46,11 @@ abstract class AnalyzeBase {
   final Terminal terminal;
   @protected
   final Artifacts artifacts;
+  @protected
+  final bool suppressAnalytics;
+
+  @protected
+  String get flutterRoot => globals.fs.path.absolute(Cache.flutterRoot!);
 
   /// Called by [AnalyzeCommand] to start the analysis process.
   Future<void> analyze();
@@ -81,13 +84,10 @@ abstract class AnalyzeBase {
   bool get isFlutterRepo => argResults['flutter-repo'] as bool;
   String get sdkPath {
     final String? dartSdk = argResults['dart-sdk'] as String?;
-    if (dartSdk != null) {
-      return dartSdk;
-    }
-    return artifacts.getHostArtifact(HostArtifact.engineDartSdkPath).path;
+    return dartSdk ?? artifacts.getArtifactPath(Artifact.engineDartSdkPath);
   }
   bool get isBenchmarking => argResults['benchmark'] as bool;
-  String get protocolTrafficLog => argResults['protocol-traffic-log'] as String;
+  String? get protocolTrafficLog => argResults['protocol-traffic-log'] as String?;
 
   /// Generate an analysis summary for both [AnalyzeOnce], [AnalyzeContinuously].
   static String generateErrorsMessage({
@@ -169,41 +169,12 @@ class PackageDependency {
 }
 
 class PackageDependencyTracker {
-  /// Packages whose source is defined in the vended SDK.
-  static const List<String> _vendedSdkPackages = <String>['analyzer', 'front_end', 'kernel'];
-
   // This is a map from package names to objects that track the paths
   // involved (sources and targets).
   Map<String, PackageDependency> packages = <String, PackageDependency>{};
 
   PackageDependency getPackageDependency(String packageName) {
     return packages.putIfAbsent(packageName, () => PackageDependency());
-  }
-
-  /// Read the .packages file in [directory] and add referenced packages to [dependencies].
-  void addDependenciesFromPackagesFileIn(Directory directory) {
-    final String dotPackagesPath = globals.fs.path.join(directory.path, '.packages');
-    final File dotPackages = globals.fs.file(dotPackagesPath);
-    if (dotPackages.existsSync()) {
-      // this directory has opinions about what we should be using
-      final Iterable<String> lines = dotPackages
-        .readAsStringSync()
-        .split('\n')
-        .where((String line) => !line.startsWith(RegExp(r'^ *#')));
-      for (final String line in lines) {
-        final int colon = line.indexOf(':');
-        if (colon > 0) {
-          final String packageName = line.substring(0, colon);
-          final String packagePath = globals.fs.path.fromUri(line.substring(colon+1));
-          // Ensure that we only add `analyzer` and dependent packages defined in the vended SDK (and referred to with a local
-          // globals.fs.path. directive). Analyzer package versions reached via transitive dependencies (e.g., via `test`) are ignored
-          // since they would produce spurious conflicts.
-          if (!_vendedSdkPackages.contains(packageName) || packagePath.startsWith('..')) {
-            add(packageName, globals.fs.path.normalize(globals.fs.path.absolute(directory.path, packagePath)), dotPackagesPath);
-          }
-        }
-      }
-    }
   }
 
   void addCanonicalCase(String packageName, String packagePath, String pubSpecYamlPath) {
@@ -235,10 +206,8 @@ class PackageDependencyTracker {
           throwToolExit('pubspec.yaml is malformed.');
         }
       }
-      dependencies.addDependenciesFromPackagesFileIn(directory);
     }
 
-    // prepare a union of all the .packages files
     if (dependencies.hasConflicts) {
       final StringBuffer message = StringBuffer();
       message.writeln(dependencies.generateConflictReport());

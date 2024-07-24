@@ -6,6 +6,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('FilledButtonThemeData lerp special cases', () {
+    expect(FilledButtonThemeData.lerp(null, null, 0), null);
+    const FilledButtonThemeData data = FilledButtonThemeData();
+    expect(identical(FilledButtonThemeData.lerp(data, data, 0.5), data), true);
+  });
+
   testWidgets('Passing no FilledButtonTheme returns defaults', (WidgetTester tester) async {
     const ColorScheme colorScheme = ColorScheme.light();
     await tester.pumpWidget(
@@ -136,8 +142,8 @@ void main() {
       expect(MaterialStateProperty.resolveAs<MouseCursor>(inkWell.mouseCursor!, enabled), enabledMouseCursor);
       expect(MaterialStateProperty.resolveAs<MouseCursor>(inkWell.mouseCursor!, disabled), disabledMouseCursor);
       expect(inkWell.overlayColor!.resolve(hovered), foregroundColor.withOpacity(0.08));
-      expect(inkWell.overlayColor!.resolve(focused), foregroundColor.withOpacity(0.12));
-      expect(inkWell.overlayColor!.resolve(pressed), foregroundColor.withOpacity(0.12));
+      expect(inkWell.overlayColor!.resolve(focused), foregroundColor.withOpacity(0.1));
+      expect(inkWell.overlayColor!.resolve(pressed), foregroundColor.withOpacity(0.1));
       expect(inkWell.enableFeedback, enableFeedback);
       expect(material.borderRadius, null);
       expect(material.shape, shape);

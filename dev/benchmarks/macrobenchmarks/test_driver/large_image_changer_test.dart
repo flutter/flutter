@@ -22,14 +22,12 @@ Future<void> main() async {
             await Future<void>.delayed(const Duration(seconds: 20));
           });
         }
-        break;
       case 'TargetPlatform.android':
         {
           // Just run for 20 seconds to collect memory usage. The widget itself
           // animates during this time.
           await Future<void>.delayed(const Duration(seconds: 20));
         }
-        break;
       default:
         throw UnsupportedError('Unsupported platform $targetPlatform');
     }

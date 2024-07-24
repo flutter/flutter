@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/widgets.dart';
+///
+/// @docImport 'box_border.dart';
+/// @docImport 'box_decoration.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 
 import 'basic_types.dart';
@@ -129,9 +135,8 @@ abstract class BorderRadiusGeometry {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static BorderRadiusGeometry? lerp(BorderRadiusGeometry? a, BorderRadiusGeometry? b, double t) {
-    assert(t != null);
-    if (a == null && b == null) {
-      return null;
+    if (identical(a, b)) {
+      return a;
     }
     a ??= BorderRadius.zero;
     b ??= BorderRadius.zero;
@@ -239,13 +244,7 @@ abstract class BorderRadiusGeometry {
     if (visual != null && logical != null) {
       return '$visual + $logical';
     }
-    if (visual != null) {
-      return visual;
-    }
-    if (logical != null) {
-      return logical;
-    }
-    return 'BorderRadius.zero';
+    return visual ?? logical ?? 'BorderRadius.zero';
   }
 
   @override
@@ -392,13 +391,19 @@ class BorderRadius extends BorderRadiusGeometry {
   Radius get _bottomEnd => Radius.zero;
 
   /// Creates an [RRect] from the current border radius and a [Rect].
+  ///
+  /// If any of the radii have negative values in x or y, those values will be
+  /// clamped to zero in order to produce a valid [RRect].
   RRect toRRect(Rect rect) {
+    // Because the current radii could be negative, we must clamp them before
+    // converting them to an RRect to be rendered, since negative radii on
+    // RRects don't make sense.
     return RRect.fromRectAndCorners(
       rect,
-      topLeft: topLeft,
-      topRight: topRight,
-      bottomLeft: bottomLeft,
-      bottomRight: bottomRight,
+      topLeft: topLeft.clamp(minimum: Radius.zero),
+      topRight: topRight.clamp(minimum: Radius.zero),
+      bottomLeft: bottomLeft.clamp(minimum: Radius.zero),
+      bottomRight: bottomRight.clamp(minimum: Radius.zero),
     );
   }
 
@@ -501,9 +506,8 @@ class BorderRadius extends BorderRadiusGeometry {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static BorderRadius? lerp(BorderRadius? a, BorderRadius? b, double t) {
-    assert(t != null);
-    if (a == null && b == null) {
-      return null;
+    if (identical(a, b)) {
+      return a;
     }
     if (a == null) {
       return b! * t;
@@ -584,7 +588,7 @@ class BorderRadiusDirectional extends BorderRadiusGeometry {
 
   /// A border radius with all zero radii.
   ///
-  /// Consider using [EdgeInsets.zero] instead, since that object has the same
+  /// Consider using [BorderRadius.zero] instead, since that object has the same
   /// effect, but will be cheaper to [resolve].
   static const BorderRadiusDirectional zero = BorderRadiusDirectional.all(Radius.zero);
 
@@ -723,9 +727,8 @@ class BorderRadiusDirectional extends BorderRadiusGeometry {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static BorderRadiusDirectional? lerp(BorderRadiusDirectional? a, BorderRadiusDirectional? b, double t) {
-    assert(t != null);
-    if (a == null && b == null) {
-      return null;
+    if (identical(a, b)) {
+      return a;
     }
     if (a == null) {
       return b! * t;

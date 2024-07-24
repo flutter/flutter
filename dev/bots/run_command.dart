@@ -89,11 +89,12 @@ Future<Command> startCommand(String executable, List<String> arguments, {
   bool Function(String)? removeLine,
   void Function(String, io.Process)? outputListener,
 }) async {
-  final String commandDescription = '${path.relative(executable, from: workingDirectory)} ${arguments.join(' ')}';
   final String relativeWorkingDir = path.relative(workingDirectory ?? io.Directory.current.path);
+  final String commandDescription = '${path.relative(executable, from: workingDirectory)} ${arguments.join(' ')}';
   print('RUNNING: cd $cyan$relativeWorkingDir$reset; $green$commandDescription$reset');
 
   final Stopwatch time = Stopwatch()..start();
+  print('workingDirectory: $workingDirectory, executable: $executable, arguments: $arguments');
   final io.Process process = await io.Process.start(executable, arguments,
     workingDirectory: workingDirectory,
     environment: environment,
@@ -113,7 +114,6 @@ Future<Command> startCommand(String executable, List<String> arguments, {
         switch (outputMode) {
           case OutputMode.print:
             print(line);
-            break;
           case OutputMode.capture:
             break;
         }
@@ -127,7 +127,6 @@ Future<Command> startCommand(String executable, List<String> arguments, {
         switch (outputMode) {
           case OutputMode.print:
             print(line);
-            break;
           case OutputMode.capture:
             break;
         }
@@ -162,7 +161,7 @@ Future<CommandResult> runCommand(String executable, List<String> arguments, {
   void Function(String, io.Process)? outputListener,
 }) async {
   final String commandDescription = '${path.relative(executable, from: workingDirectory)} ${arguments.join(' ')}';
-  final String relativeWorkingDir = path.relative(workingDirectory ?? io.Directory.current.path);
+  final String relativeWorkingDir = workingDirectory ?? path.relative(io.Directory.current.path);
 
   final Command command = await startCommand(executable, arguments,
     workingDirectory: workingDirectory,
@@ -188,15 +187,17 @@ Future<CommandResult> runCommand(String executable, List<String> arguments, {
       case OutputMode.capture:
         print(result.flattenedStdout);
         print(result.flattenedStderr);
-        break;
     }
+    final String allOutput = '${result.flattenedStdout}\n${result.flattenedStderr}';
     foundError(<String>[
       if (failureMessage != null)
-        failureMessage
-      else
-        '$bold${red}Command exited with exit code ${result.exitCode} but expected: ${expectNonZeroExit ? (expectedExitCode ?? 'non-zero') : 'zero'} exit code.$reset',
+        failureMessage,
       '${bold}Command: $green$commandDescription$reset',
-      '${bold}Relative working directory: $cyan$relativeWorkingDir$reset',
+      if (failureMessage == null)
+        '$bold${red}Command exited with exit code ${result.exitCode} but expected ${expectNonZeroExit ? (expectedExitCode ?? 'non-zero') : 'zero'} exit code.$reset',
+      '${bold}Working directory: $cyan${path.absolute(relativeWorkingDir)}$reset',
+      if (allOutput.isNotEmpty && allOutput.length < 512)
+        '${bold}stdout and stderr output:\n$allOutput',
     ]);
   } else {
     print('ELAPSED TIME: ${prettyPrintDuration(result.elapsedTime)} for $green$commandDescription$reset in $cyan$relativeWorkingDir$reset');

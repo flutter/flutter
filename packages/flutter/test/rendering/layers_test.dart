@@ -169,7 +169,8 @@ void main() {
   test('switching layer link of an attached leader layer should not crash', () {
     final LayerLink link = LayerLink();
     final LeaderLayer leaderLayer = LeaderLayer(link: link);
-    final RenderView view = RenderView(configuration: const ViewConfiguration(), window: RendererBinding.instance.window);
+    final FlutterView flutterView = RendererBinding.instance.platformDispatcher.views.single;
+    final RenderView view = RenderView(configuration: ViewConfiguration.fromView(flutterView), view: flutterView);
     leaderLayer.attach(view);
     final LayerLink link2 = LayerLink();
     leaderLayer.link = link2;
@@ -182,7 +183,8 @@ void main() {
     final LayerLink link = LayerLink();
     final LeaderLayer leaderLayer1 = LeaderLayer(link: link);
     final LeaderLayer leaderLayer2 = LeaderLayer(link: link);
-    final RenderView view = RenderView(configuration: const ViewConfiguration(), window: RendererBinding.instance.window);
+    final FlutterView flutterView = RendererBinding.instance.platformDispatcher.views.single;
+    final RenderView view = RenderView(configuration: ViewConfiguration.fromView(flutterView), view: flutterView);
     leaderLayer1.attach(view);
     leaderLayer2.attach(view);
     leaderLayer2.detach();
@@ -369,7 +371,11 @@ void main() {
     final ImageFilter filter = ImageFilter.blur(sigmaX: 1.0, sigmaY: 1.0, tileMode: TileMode.repeated);
     final BackdropFilterLayer layer = BackdropFilterLayer(filter: filter, blendMode: BlendMode.clear);
     final List<String> info = getDebugInfo(layer);
-    expect(info, contains(isBrowser ? 'filter: ImageFilter.blur(1, 1, TileMode.repeated)' : 'filter: ImageFilter.blur(1.0, 1.0, repeated)'));
+
+    expect(
+      info,
+      contains('filter: ImageFilter.blur(${1.0}, ${1.0}, repeated)'),
+    );
     expect(info, contains('blendMode: clear'));
   });
 
@@ -423,9 +429,6 @@ void main() {
     final PerformanceOverlayLayer layer = PerformanceOverlayLayer(
       overlayRect: Rect.zero,
       optionsMask: 0,
-      rasterizerThreshold: 0,
-      checkerboardRasterCacheImages: false,
-      checkerboardOffscreenLayers: false,
     );
     checkNeedsAddToScene(layer, () {
       layer.overlayRect = unitRect;
@@ -512,29 +515,6 @@ void main() {
     });
   });
 
-  test('mutating PhysicalModelLayer fields triggers needsAddToScene', () {
-    final PhysicalModelLayer layer = PhysicalModelLayer(
-      clipPath: Path(),
-      elevation: 0,
-      color: const Color(0x00000000),
-      shadowColor: const Color(0x00000000),
-    );
-    checkNeedsAddToScene(layer, () {
-      final Path newPath = Path();
-      newPath.addRect(unitRect);
-      layer.clipPath = newPath;
-    });
-    checkNeedsAddToScene(layer, () {
-      layer.elevation = 1;
-    });
-    checkNeedsAddToScene(layer, () {
-      layer.color = const Color(0x00000001);
-    });
-    checkNeedsAddToScene(layer, () {
-      layer.shadowColor = const Color(0x00000001);
-    });
-  });
-
   test('ContainerLayer.toImage can render interior layer', () {
     final OffsetLayer parent = OffsetLayer();
     final OffsetLayer child = OffsetLayer();
@@ -551,7 +531,7 @@ void main() {
     // Ensure we can render the same scene again after rendering an interior
     // layer.
     parent.buildScene(SceneBuilder());
-  }, skip: isBrowser); // TODO(yjbanov): `toImage` doesn't work on the Web: https://github.com/flutter/flutter/issues/49857
+  }, skip: isBrowser && !isSkiaWeb); // TODO(yjbanov): `toImage` doesn't work in HTML: https://github.com/flutter/flutter/issues/49857
 
   test('ContainerLayer.toImageSync can render interior layer', () {
     final OffsetLayer parent = OffsetLayer();
@@ -569,7 +549,7 @@ void main() {
     // Ensure we can render the same scene again after rendering an interior
     // layer.
     parent.buildScene(SceneBuilder());
-  }, skip: isBrowser); // TODO(yjbanov): `toImage` doesn't work on the Web: https://github.com/flutter/flutter/issues/49857
+  }, skip: isBrowser && !isSkiaWeb); // TODO(yjbanov): `toImage` doesn't work in HTML: https://github.com/flutter/flutter/issues/49857
 
   test('PictureLayer does not let you call dispose unless refcount is 0', () {
     PictureLayer layer = PictureLayer(Rect.zero);
@@ -922,8 +902,7 @@ void main() {
       expect(() => layer.markNeedsAddToScene(), throwsAssertionError);
       expect(() => layer.debugMarkClean(), throwsAssertionError);
       expect(() => layer.updateSubtreeNeedsAddToScene(), throwsAssertionError);
-      expect(() => layer.dropChild(ContainerLayer()), throwsAssertionError);
-      expect(() => layer.adoptChild(ContainerLayer()), throwsAssertionError);
+      expect(() => layer.remove(), throwsAssertionError);
       expect(() => (layer as ContainerLayer).append(ContainerLayer()), throwsAssertionError);
       expect(() => layer.engineLayer = null, throwsAssertionError);
       compositedB1 = true;
@@ -1007,7 +986,6 @@ void main() {
     final ClipRRectLayer clipRRectLayer = ClipRRectLayer();
     final ImageFilterLayer imageFilterLayer = ImageFilterLayer();
     final BackdropFilterLayer backdropFilterLayer = BackdropFilterLayer();
-    final PhysicalModelLayer physicalModelLayer = PhysicalModelLayer();
     final ColorFilterLayer colorFilterLayer = ColorFilterLayer();
     final ShaderMaskLayer shaderMaskLayer = ShaderMaskLayer();
     final TextureLayer textureLayer = TextureLayer(rect: Rect.zero, textureId: 1);
@@ -1017,7 +995,6 @@ void main() {
     expect(clipRRectLayer.supportsRasterization(), true);
     expect(imageFilterLayer.supportsRasterization(), true);
     expect(backdropFilterLayer.supportsRasterization(), true);
-    expect(physicalModelLayer.supportsRasterization(), true);
     expect(colorFilterLayer.supportsRasterization(), true);
     expect(shaderMaskLayer.supportsRasterization(), true);
     expect(textureLayer.supportsRasterization(), true);

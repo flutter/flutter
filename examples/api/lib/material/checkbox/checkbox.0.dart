@@ -2,48 +2,45 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for Checkbox
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [Checkbox].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const CheckboxExampleApp());
 
-  static const String _title = 'Flutter Code Sample';
+class CheckboxExampleApp extends StatelessWidget {
+  const CheckboxExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
+        appBar: AppBar(title: const Text('Checkbox Sample')),
         body: const Center(
-          child: MyStatefulWidget(),
+          child: CheckboxExample(),
         ),
       ),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class CheckboxExample extends StatefulWidget {
+  const CheckboxExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<CheckboxExample> createState() => _CheckboxExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _CheckboxExampleState extends State<CheckboxExample> {
   bool isChecked = false;
 
   @override
   Widget build(BuildContext context) {
-    Color getColor(Set<MaterialState> states) {
-      const Set<MaterialState> interactiveStates = <MaterialState>{
-        MaterialState.pressed,
-        MaterialState.hovered,
-        MaterialState.focused,
+    Color getColor(Set<WidgetState> states) {
+      const Set<WidgetState> interactiveStates = <WidgetState>{
+        WidgetState.pressed,
+        WidgetState.hovered,
+        WidgetState.focused,
       };
       if (states.any(interactiveStates.contains)) {
         return Colors.blue;
@@ -53,7 +50,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
 
     return Checkbox(
       checkColor: Colors.white,
-      fillColor: MaterialStateProperty.resolveWith(getColor),
+      fillColor: WidgetStateProperty.resolveWith(getColor),
       value: isChecked,
       onChanged: (bool? value) {
         setState(() {

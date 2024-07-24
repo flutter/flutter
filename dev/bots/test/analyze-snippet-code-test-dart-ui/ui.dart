@@ -4,15 +4,14 @@
 
 // @dart = 2.12
 
-// This is a dummy dart:ui package for the sample code analyzer tests to use.
-
+/// This is a dummy dart:ui package for the sample code analyzer tests to use.
 library dart.ui;
 
 /// Bla bla bla bla bla bla bla bla bla.
 ///
 /// ```dart
 /// class MyStringBuffer {
-///   error; // error (missing_const_final_var_or_type, always_specify_types)
+///   error; // error (prefer_typing_uninitialized_variables, inference_failure_on_uninitialized_variable, missing_const_final_var_or_type)
 ///
 ///   StringBuffer _buffer = StringBuffer(); // error (prefer_final_fields, unused_field)
 /// }

@@ -20,7 +20,7 @@ void main() {
       testConfig = Config.test();
       platform = FakePlatform(environment: <String, String>{});
 
-      for (final Feature feature in allFeatures) {
+      for (final Feature feature in allConfigurableFeatures) {
         testConfig.setValue(feature.configSetting!, false);
       }
 
@@ -33,7 +33,7 @@ void main() {
 
     FeatureFlags createFlags(String channel) {
       return FlutterFeatureFlags(
-        flutterVersion: FakeFlutterVersion(channel: channel),
+        flutterVersion: FakeFlutterVersion(branch: channel),
         config: testConfig,
         platform: platform,
       );
@@ -83,26 +83,22 @@ void main() {
 
     testWithoutContext('Flutter web help string', () {
       expect(flutterWebFeature.generateHelpMessage(),
-      'Enable or disable Flutter for web. '
-      'This setting will take effect on the master, beta, and stable channels.');
+      'Enable or disable Flutter for web.');
     });
 
     testWithoutContext('Flutter macOS desktop help string', () {
       expect(flutterMacOSDesktopFeature.generateHelpMessage(),
-      'Enable or disable support for desktop on macOS. '
-      'This setting will take effect on the master, beta, and stable channels.');
+      'Enable or disable support for desktop on macOS.');
     });
 
     testWithoutContext('Flutter Linux desktop help string', () {
       expect(flutterLinuxDesktopFeature.generateHelpMessage(),
-      'Enable or disable support for desktop on Linux. '
-      'This setting will take effect on the master, beta, and stable channels.');
+      'Enable or disable support for desktop on Linux.');
     });
 
     testWithoutContext('Flutter Windows desktop help string', () {
       expect(flutterWindowsDesktopFeature.generateHelpMessage(),
-      'Enable or disable support for desktop on Windows. '
-      'This setting will take effect on the master, beta, and stable channels.');
+      'Enable or disable support for desktop on Windows.');
     });
 
     testWithoutContext('help string on multiple channels', () {
@@ -114,8 +110,7 @@ void main() {
         configSetting: 'foo',
       );
 
-      expect(testWithoutContextFeature.generateHelpMessage(), 'Enable or disable example. '
-          'This setting will take effect on the master, beta, and stable channels.');
+      expect(testWithoutContextFeature.generateHelpMessage(), 'Enable or disable example.');
     });
 
     /// Flutter Web
@@ -399,5 +394,22 @@ void main() {
       });
     }
 
+    test('${nativeAssets.name} availability and default enabled', () {
+      expect(nativeAssets.master.enabledByDefault, false);
+      expect(nativeAssets.master.available, true);
+      expect(nativeAssets.beta.enabledByDefault, false);
+      expect(nativeAssets.beta.available, false);
+      expect(nativeAssets.stable.enabledByDefault, false);
+      expect(nativeAssets.stable.available, false);
+    });
+
+    test('${swiftPackageManager.name} availability and default enabled', () {
+      expect(swiftPackageManager.master.enabledByDefault, false);
+      expect(swiftPackageManager.master.available, true);
+      expect(swiftPackageManager.beta.enabledByDefault, false);
+      expect(swiftPackageManager.beta.available, false);
+      expect(swiftPackageManager.stable.enabledByDefault, false);
+      expect(swiftPackageManager.stable.available, false);
+    });
   });
 }

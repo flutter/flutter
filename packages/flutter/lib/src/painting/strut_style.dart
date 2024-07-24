@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show TextLeadingDistribution;
+/// @docImport 'text_span.dart';
+library;
 
 import 'package:flutter/foundation.dart';
 
@@ -318,8 +319,6 @@ class StrutStyle with Diagnosticable {
   /// Builds a StrutStyle that contains values of the equivalent properties in
   /// the provided [textStyle].
   ///
-  /// The [textStyle] parameter must not be null.
-  ///
   /// The named parameters override the [textStyle]'s argument's properties.
   /// Since TextStyle does not contain [leading] or [forceStrutHeight], these
   /// values will take on default values (null and false) unless otherwise
@@ -347,8 +346,7 @@ class StrutStyle with Diagnosticable {
     this.forceStrutHeight,
     String? debugLabel,
     String? package,
-  }) : assert(textStyle != null),
-       assert(fontSize == null || fontSize > 0),
+  }) : assert(fontSize == null || fontSize > 0),
        assert(leading == null || leading >= 0),
        assert(package == null || fontFamily != null || fontFamilyFallback != null),
        fontFamily = fontFamily != null ? (package == null ? fontFamily : 'packages/$package/$fontFamily') : textStyle.fontFamily,
@@ -406,7 +404,7 @@ class StrutStyle with Diagnosticable {
   /// constructor.
   List<String>? get fontFamilyFallback {
     if (_package != null && _fontFamilyFallback != null) {
-      return _fontFamilyFallback!.map((String family) => 'packages/$_package/$family').toList();
+      return _fontFamilyFallback.map((String family) => 'packages/$_package/$family').toList();
     }
     return _fontFamilyFallback;
   }
@@ -461,7 +459,7 @@ class StrutStyle with Diagnosticable {
   /// evenly over and under the strut, regardless of [leadingDistribution].
   ///
   /// Defaults to null, which defers to the paragraph's
-  /// `ParagraphStyle.textHeightBehavior`'s `leadingDistribution`.
+  /// `ParagraphStyle.textHeightBehavior`'s [leadingDistribution].
   final TextLeadingDistribution? leadingDistribution;
 
   /// The typeface thickness to use when calculating the strut (e.g., bold).

@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
 import '../rendering/rendering_tester.dart' show TestClipPaintingContext;
 
 class TestSliverChildListDelegate extends SliverChildListDelegate {
@@ -167,7 +167,7 @@ void main() {
         child: ListView(
           itemExtent: 200.0,
           children: List<Widget>.generate(20, (int i) {
-            return Container(
+            return ColoredBox(
               color: Colors.green,
               child: Text('$i'),
             );
@@ -176,7 +176,7 @@ void main() {
       ),
     );
 
-    final RenderBox box = tester.renderObject<RenderBox>(find.byType(Container).first);
+    final RenderBox box = tester.renderObject<RenderBox>(find.byType(ColoredBox).first);
     expect(box.size.height, equals(200.0));
 
     expect(find.text('0'), findsOneWidget);
@@ -347,9 +347,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: SizedBox(
-            width: 0.0,
-            height: 0.0,
+          child: SizedBox.shrink(
             child: ListView(
               padding: const EdgeInsets.all(8.0),
               children: const <Widget>[
@@ -502,7 +500,7 @@ void main() {
             children: <Widget>[
               const Text('top', textDirection: TextDirection.ltr),
               Builder(builder: (BuildContext context) {
-                innerMediaQueryPadding = MediaQuery.of(context).padding;
+                innerMediaQueryPadding = MediaQuery.paddingOf(context);
                 return Container();
               }),
             ],
@@ -545,6 +543,221 @@ void main() {
     );
 
     expect(find.byType(Viewport), paints..clipRect());
+  });
+
+  testWidgets('ListView allows touch on children when reaching an edge and over-scrolling / settling', (WidgetTester tester) async {
+    bool tapped = false;
+    final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
+
+    const Duration frame = Duration(milliseconds: 16);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: ListView.builder(
+          controller: controller,
+          physics: const BouncingScrollPhysics(),
+          itemCount: 15,
+          itemBuilder: (BuildContext context, int index) {
+            return GestureDetector(
+              onTap: () {
+                tapped = true;
+              },
+              child: SizedBox(
+                height: 100.0,
+                child: Text('Item $index'),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    // Tapping on an item in an idle scrollable should register the tap
+    await tester.tap(find.text('Item 0'));
+    expect(tapped, isTrue);
+    tapped = false;
+
+    await tester.fling(find.byType(ListView), const Offset(0.0, 80.0), 1000.0);
+    // Pump a few frames to ensure the scrollable is in an over-scrolled state
+    for (int i = 0; i < 5; i++) {
+      await tester.pump(frame);
+    }
+
+    expect(controller.offset, lessThan(0.0));
+
+    // Tapping on an item in an over-scrolled state should register the tap
+    await tester.tap(find.text('Item 1'));
+    expect(tapped, isTrue);
+    tapped = false;
+
+    await tester.pumpAndSettle();
+    expect(controller.offset, 0.0);
+
+    // Tapping on an item in an idle scrollable should register the tap
+    await tester.tap(find.text('Item 2'));
+    expect(tapped, isTrue);
+    tapped = false;
+
+    // Jump somewhere in the middle of the list
+    controller.jumpTo(101.0);
+    expect(controller.offset, equals(101.0));
+
+    await tester.tap(find.text('Item 3'));
+    expect(tapped, isTrue);
+    tapped = false;
+
+    await tester.pumpAndSettle();
+
+    // Strong fling down, to over-scroll the list at the top
+    await tester.fling(find.byType(ListView), const Offset(0.0, 500.0), 5000.0);
+
+    for (int i = 0; i < 5; i++) {
+      await tester.pump(frame);
+    }
+
+    // Ensure the scrollable is over-scrolled
+    expect(controller.offset, lessThan(0.0));
+
+    // Now we are settling, all taps should be registered
+    await tester.tap(find.text('Item 2'));
+    expect(tapped, isTrue);
+    tapped = false;
+
+    await tester.pump(frame);
+
+    await tester.tap(find.text('Item 2'));
+    expect(tapped, isTrue);
+    tapped = false;
+
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Item 2'));
+    expect(tapped, isTrue);
+    tapped = false;
+  });
+
+  testWidgets('ListView absorbs touch to stop scrolling when not at the edge', (WidgetTester tester) async {
+    bool tapped = false;
+    final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
+
+    const Duration frame = Duration(milliseconds: 16);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: ListView.builder(
+          controller: controller,
+          physics: const BouncingScrollPhysics(),
+          itemCount: 15,
+          itemBuilder: (BuildContext context, int index) {
+            return GestureDetector(
+              onTap: () {
+                tapped = true;
+              },
+              child: SizedBox(
+                height: 100.0,
+                child: Text('Item $index'),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    // Jump somewhere in the middle of the list
+    controller.jumpTo(101.0);
+    expect(controller.offset, equals(101.0));
+
+    // Tap on an item, it should register the tap
+    await tester.tap(find.text('Item 3'));
+    expect(tapped, isTrue);
+    tapped = false;
+
+    // Fling the list, it should start scrolling. Bot not to the edge
+    await tester.fling(find.byType(ListView), const Offset(0.0, 100.0), 1000.0);
+
+    await tester.pump(frame);
+
+    final double offset = controller.offset;
+
+    // Ensure we are somewhere between 0 and the starting offset
+    expect(controller.offset, lessThan(101.0));
+    expect(controller.offset, greaterThan(0.0));
+
+    await tester.tap(find.text('Item 2'), warnIfMissed: false); // The tap should be absorbed by the ListView. Therefore warnIfMissed is set to false
+    expect(tapped, isFalse);
+
+    // Ensure the scrollable stops in place and doesn't scroll further
+    await tester.pump(frame);
+    expect(offset, equals(controller.offset));
+    await tester.pumpAndSettle();
+    expect(offset, equals(controller.offset));
+
+    // Tapping on an item should register the tap normally, as the scrollable is idle
+    await tester.tap(find.text('Item 2'));
+    expect(tapped, isTrue);
+    tapped = false;
+  });
+
+  testWidgets('Horizontal ListView, when over-scrolled at the end allows touches on children', (WidgetTester tester) async {
+    bool tapped = false;
+    final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
+
+    const Duration frame = Duration(milliseconds: 16);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: ListView.builder(
+          itemExtent: 100.0,
+          controller: controller,
+          physics: const BouncingScrollPhysics(),
+          scrollDirection: Axis.horizontal,
+          itemCount: 15,
+          itemBuilder: (BuildContext context, int index) {
+            return GestureDetector(
+              onTap: () {
+                tapped = true;
+              },
+              child: SizedBox(
+                width: 100.0,
+                child: Text('Item $index'),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    // Tap on an item, it should register the tap
+    await tester.tap(find.text('Item 3'));
+    expect(tapped, isTrue);
+    tapped = false;
+
+    // Fling the list, it should start scrolling
+    await tester.fling(find.byType(ListView), const Offset(-500.0, 0.0), 10000.0);
+
+    for (int i = 0; i < 5; i++) {
+      await tester.pump(frame);
+    }
+
+    // Ensure the scrollable is over-scrolled at the end
+    expect(controller.offset, greaterThan(controller.position.maxScrollExtent));
+
+    // Tap on an item, it should register the tap
+    await tester.tap(find.text('Item 14'));
+    expect(tapped, isTrue);
+    tapped = false;
+
+    await tester.pumpAndSettle();
+
+    // Tap on an item, it should register the tap
+    await tester.tap(find.text('Item 14'));
+    expect(tapped, isTrue);
   });
 
   testWidgets('ListView does not clips if no overflow', (WidgetTester tester) async {
@@ -662,9 +875,9 @@ void main() {
   testWidgets('Updates viewport dimensions when scroll direction changes', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/43380.
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
 
     Widget buildListView({ required Axis scrollDirection }) {
-      assert(scrollDirection != null);
       return Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
@@ -731,6 +944,7 @@ void main() {
     // 4th, check that a non-default clip behavior can be sent to the painting context.
     renderObject.paint(context, Offset.zero);
     expect(context.clipBehavior, equals(Clip.antiAlias));
+    context.dispose();
   });
 
   testWidgets('ListView.builder respects clipBehavior', (WidgetTester tester) async {
@@ -779,5 +993,222 @@ void main() {
     );
     final RenderViewport renderObject = tester.allRenderObjects.whereType<RenderViewport>().first;
     expect(renderObject.clipBehavior, equals(Clip.antiAlias));
+  });
+
+  // Regression test for https://github.com/flutter/flutter/pull/138912
+  testWidgets('itemExtentBuilder should respect item count', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
+    final List<double> numbers = <double>[
+      10, 20, 30, 40, 50,
+    ];
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: ListView.builder(
+          controller: controller,
+          itemCount: numbers.length,
+          itemExtentBuilder: (int index, SliverLayoutDimensions dimensions) {
+            return numbers[index];
+          },
+          itemBuilder: (BuildContext context, int index) {
+            return SizedBox(
+              height: numbers[index],
+              child: Text('Item $index'),
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(find.text('Item 0'), findsOneWidget);
+    expect(find.text('Item 4'), findsOneWidget);
+    expect(find.text('Item 5'), findsNothing);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/pull/131393
+  testWidgets('itemExtentBuilder test', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
+    final List<int> buildLog = <int>[];
+    late SliverLayoutDimensions sliverLayoutDimensions;
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: ListView.builder(
+          controller: controller,
+          itemExtentBuilder: (int index, SliverLayoutDimensions dimensions) {
+            sliverLayoutDimensions = dimensions;
+            return 100.0;
+          },
+          itemBuilder: (BuildContext context, int index) {
+            buildLog.insert(0, index);
+            return Text('Item $index');
+          },
+        ),
+      ),
+    );
+
+    expect(find.text('Item 0'), findsOneWidget);
+    expect(find.text('Item 5'), findsOneWidget);
+    expect(find.text('Item 6'), findsNothing);
+    expect(
+      sliverLayoutDimensions,
+      const SliverLayoutDimensions(
+        scrollOffset: 0.0,
+        precedingScrollExtent: 0.0,
+        viewportMainAxisExtent: 600.0,
+        crossAxisExtent: 800.0,
+      )
+    );
+    // viewport(600.0) + cache extent after(250.0)
+    expect(buildLog.length, 9);
+    expect(buildLog.min, 0);
+    expect(buildLog.max, 8);
+
+    buildLog.clear();
+
+    // Scrolling drastically.
+    controller.jumpTo(10000.0);
+    await tester.pump();
+
+    expect(find.text('Item 99'), findsNothing);
+    expect(find.text('Item 100'), findsOneWidget);
+    expect(find.text('Item 105'), findsOneWidget);
+    expect(find.text('Item 106'), findsNothing);
+    expect(
+        sliverLayoutDimensions,
+        const SliverLayoutDimensions(
+          scrollOffset: 10000.0,
+          precedingScrollExtent: 0.0,
+          viewportMainAxisExtent: 600.0,
+          crossAxisExtent: 800.0,
+        )
+    );
+    // Scrolling drastically only loading the visible and cached area items.
+    // cache extent before(250.0) + viewport(600.0) + cache extent after(250.0)
+    expect(buildLog.length, 12);
+    expect(buildLog.min, 97);
+    expect(buildLog.max, 108);
+
+    buildLog.clear();
+    controller.jumpTo(5000.0);
+    await tester.pump();
+
+    expect(find.text('Item 49'), findsNothing);
+    expect(find.text('Item 50'), findsOneWidget);
+    expect(find.text('Item 55'), findsOneWidget);
+    expect(find.text('Item 56'), findsNothing);
+    expect(
+        sliverLayoutDimensions,
+        const SliverLayoutDimensions(
+          scrollOffset: 5000.0,
+          precedingScrollExtent: 0.0,
+          viewportMainAxisExtent: 600.0,
+          crossAxisExtent: 800.0,
+        )
+    );
+    // cache extent before(250.0) + viewport(600.0) + cache extent after(250.0)
+    expect(buildLog.length, 12);
+    expect(buildLog.min, 47);
+    expect(buildLog.max, 58);
+
+    buildLog.clear();
+    controller.jumpTo(4700.0);
+    await tester.pump();
+
+    expect(find.text('Item 46'), findsNothing);
+    expect(find.text('Item 47'), findsOneWidget);
+    expect(find.text('Item 52'), findsOneWidget);
+    expect(find.text('Item 53'), findsNothing);
+    expect(
+        sliverLayoutDimensions,
+        const SliverLayoutDimensions(
+          scrollOffset: 4700.0,
+          precedingScrollExtent: 0.0,
+          viewportMainAxisExtent: 600.0,
+          crossAxisExtent: 800.0,
+        )
+    );
+    // Only newly entered cached area items need to be loaded.
+    expect(buildLog.length, 3);
+    expect(buildLog.min, 44);
+    expect(buildLog.max, 46);
+
+    buildLog.clear();
+    controller.jumpTo(5300.0);
+    await tester.pump();
+
+    expect(find.text('Item 52'), findsNothing);
+    expect(find.text('Item 53'), findsOneWidget);
+    expect(find.text('Item 58'), findsOneWidget);
+    expect(find.text('Item 59'), findsNothing);
+    expect(
+        sliverLayoutDimensions,
+        const SliverLayoutDimensions(
+          scrollOffset: 5300.0,
+          precedingScrollExtent: 0.0,
+          viewportMainAxisExtent: 600.0,
+          crossAxisExtent: 800.0,
+        )
+    );
+    // Only newly entered cached area items need to be loaded.
+    expect(buildLog.length, 6);
+    expect(buildLog.min, 56);
+    expect(buildLog.max, 61);
+  });
+
+  testWidgets('itemExtent, prototypeItem and itemExtentBuilder conflicts test', (WidgetTester tester) async {
+    Object? error;
+    try {
+      await tester.pumpWidget(
+        ListView.builder(
+          itemExtentBuilder: (int index, SliverLayoutDimensions dimensions) {
+            return 100.0;
+          },
+          itemExtent: 100.0,
+          itemBuilder: (BuildContext context, int index) {
+            return Text('Item $index');
+          },
+        ),
+      );
+    } catch (e) {
+      error = e;
+    }
+    expect(error, isNotNull);
+
+    error = null;
+    try {
+      await tester.pumpWidget(
+        ListView.builder(
+          itemExtentBuilder: (int index, SliverLayoutDimensions dimensions) {
+            return 100.0;
+          },
+          prototypeItem: Container(),
+          itemBuilder: (BuildContext context, int index) {
+            return Text('Item $index');
+          },
+        ),
+      );
+    } catch (e) {
+      error = e;
+    }
+    expect(error, isNotNull);
+
+    error = null;
+    try {
+      await tester.pumpWidget(
+        ListView.builder(
+          itemExtent: 100.0,
+          prototypeItem: Container(),
+          itemBuilder: (BuildContext context, int index) {
+            return Text('Item $index');
+          },
+        ),
+      );
+    } catch (e) {
+      error = e;
+    }
+    expect(error, isNotNull);
   });
 }

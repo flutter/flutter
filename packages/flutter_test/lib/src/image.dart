@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:fake_async/fake_async.dart';
+///
+/// @docImport 'test_compat.dart';
+/// @docImport 'widget_tester.dart';
+library;
+
 import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
@@ -29,9 +35,8 @@ Future<ui.Image> createTestImage({
   int height = 1,
   bool cache = true,
 }) => TestAsyncUtils.guard(() async {
-  assert(width != null && width > 0);
-  assert(height != null && height > 0);
-  assert(cache != null);
+  assert(width > 0);
+  assert(height > 0);
 
   final int cacheKey = Object.hash(width, height);
   if (cache && _cache.containsKey(cacheKey)) {

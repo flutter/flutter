@@ -51,7 +51,7 @@ class DeferredComponentsPrebuildValidator extends DeferredComponentsValidator {
   /// valid, as there are many ways that they can be validly configured.
   Future<bool> checkAndroidDynamicFeature(List<DeferredComponent> components) async {
     inputs.add(projectDir.childFile('pubspec.yaml'));
-    if (components == null || components.isEmpty) {
+    if (components.isEmpty) {
       return false;
     }
     bool changesMade = false;
@@ -124,7 +124,7 @@ class DeferredComponentsPrebuildValidator extends DeferredComponentsValidator {
       .childDirectory('values')
       .childFile('strings.xml');
     ErrorHandlingFileSystem.deleteIfExists(stringResOutput);
-    if (components == null || components.isEmpty) {
+    if (components.isEmpty) {
       return true;
     }
     final Map<String, String> requiredEntriesMap  = <String, String>{};
@@ -148,7 +148,7 @@ class DeferredComponentsPrebuildValidator extends DeferredComponentsValidator {
         for (final XmlElement element in resources.findElements('string')) {
           final String? name = element.getAttribute('name');
           if (requiredEntriesMap.containsKey(name)) {
-            if (element.text != null && element.text != requiredEntriesMap[name]) {
+            if (element.innerText != requiredEntriesMap[name]) {
               element.innerText = requiredEntriesMap[name]!;
               modified = true;
             }
@@ -225,9 +225,15 @@ class _DeferredComponentAndroidFiles {
   Directory get componentDir => androidDir.childDirectory(name);
 
   File get androidManifestFile => componentDir.childDirectory('src').childDirectory('main').childFile('AndroidManifest.xml');
-  File get buildGradleFile => componentDir.childFile('build.gradle');
+  File get buildGradleFile {
+    if (componentDir.childFile('build.gradle').existsSync()) {
+      return componentDir.childFile('build.gradle');
+    }
+    return componentDir.childFile('build.gradle.kts');
+  }
 
-  // True when AndroidManifest.xml and build.gradle exist for the android dynamic feature.
+  // True when AndroidManifest.xml and build.gradle/build.gradle.kts exist for
+  // the android dynamic feature.
   bool verifyFilesExist() {
     return androidManifestFile.existsSync() && buildGradleFile.existsSync();
   }

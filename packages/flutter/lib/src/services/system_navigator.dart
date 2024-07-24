@@ -2,14 +2,46 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:io';
+library;
+
+import 'package:flutter/foundation.dart';
 
 import 'system_channels.dart';
 
 /// Controls specific aspects of the system navigation stack.
-class SystemNavigator {
-  // This class is not meant to be instantiated or extended; this constructor
-  // prevents instantiation and extension.
-  SystemNavigator._();
+abstract final class SystemNavigator {
+  /// Informs the platform of whether or not the Flutter framework will handle
+  /// back events.
+  ///
+  /// Currently, this is used only on Android to inform its use of the
+  /// predictive back gesture when exiting the app. When true, predictive back
+  /// is disabled.
+  ///
+  /// See also:
+  ///
+  ///  * The
+  ///    [migration guide](https://developer.android.com/guide/navigation/predictive-back-gesture)
+  ///    for predictive back in native Android apps.
+  static Future<void> setFrameworkHandlesBack(bool frameworkHandlesBack) async {
+    // Currently, this method call is only relevant on Android.
+    if (kIsWeb) {
+      return;
+    }
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        return;
+      case TargetPlatform.android:
+        return SystemChannels.platform.invokeMethod<void>(
+          'SystemNavigator.setFrameworkHandlesBack',
+          frameworkHandlesBack,
+        );
+    }
+  }
 
   /// Removes the topmost Flutter instance, presenting what was before
   /// it.
@@ -85,40 +117,23 @@ class SystemNavigator {
   ///
   /// The `replace` flag defaults to false.
   static Future<void> routeInformationUpdated({
-    required String location,
+    @Deprecated(
+      'Pass Uri.parse(location) to uri parameter instead. '
+      'This feature was deprecated after v3.8.0-3.0.pre.'
+    )
+    String? location,
+    Uri? uri,
     Object? state,
     bool replace = false,
   }) {
+    assert((location != null) != (uri != null), 'One of uri or location must be provided, but not both.');
+    uri ??= Uri.parse(location!);
     return SystemChannels.navigation.invokeMethod<void>(
       'routeInformationUpdated',
       <String, dynamic>{
-        'location': location,
+        'uri': uri.toString(),
         'state': state,
         'replace': replace,
-      },
-    );
-  }
-
-  /// Notifies the platform of a route change, and selects single-entry history
-  /// mode.
-  ///
-  /// This is equivalent to calling [selectSingleEntryHistory] and
-  /// [routeInformationUpdated] together.
-  ///
-  /// The `previousRouteName` argument is ignored.
-  @Deprecated(
-    'Use routeInformationUpdated instead. '
-    'This feature was deprecated after v2.3.0-1.0.pre.'
-  )
-  static Future<void> routeUpdated({
-    String? routeName,
-    String? previousRouteName,
-  }) {
-    return SystemChannels.navigation.invokeMethod<void>(
-      'routeUpdated',
-      <String, dynamic>{
-        'previousRouteName': previousRouteName,
-        'routeName': routeName,
       },
     );
   }

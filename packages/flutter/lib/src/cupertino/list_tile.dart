@@ -2,6 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'button.dart';
+/// @docImport 'list_section.dart';
+/// @docImport 'switch.dart';
+library;
+
 import 'dart:async';
 
 import 'package:flutter/widgets.dart';
@@ -45,7 +52,7 @@ enum _CupertinoListTileType { base, notched }
 /// take care of text wrapping.
 ///
 /// The size of [leading] is by default constrained to match the iOS size,
-/// depending of the type of list tile. This can however be overriden by
+/// depending of the type of list tile. This can however be overridden by
 /// providing [leadingSize]. The [trailing] widget is not constrained and is
 /// therefore a responsibility of the caller to ensure reasonable size of the
 /// [trailing] widget.
@@ -60,7 +67,7 @@ enum _CupertinoListTileType { base, notched }
 ///
 /// The [onTap] callback provides an option to react to taps anywhere inside the
 /// list tile. This can be used to navigate routes and according to iOS
-/// behaviour it should not be used for example to toggle the [CupertinoSwitch]
+/// behavior it should not be used for example to toggle the [CupertinoSwitch]
 /// in the trailing widget.
 ///
 /// See also:
@@ -91,9 +98,9 @@ class CupertinoListTile extends StatefulWidget {
   ///
   /// The [onTap] parameter is used to provide an action that is called when the
   /// tile is tapped. It is mainly used for navigating to a new route. It should
-  /// not be used to toggle a trailing [CupertinoSwitch] and similar usecases
+  /// not be used to toggle a trailing [CupertinoSwitch] and similar use cases
   /// because when tile is tapped, it switches the background color and remains
-  /// changed. This is according to iOS behaviour.
+  /// changed. This is according to iOS behavior.
   ///
   /// The [backgroundColor] provides a custom background color for the tile in
   /// a state before tapped. By default, it matches the theme's background color
@@ -154,9 +161,9 @@ class CupertinoListTile extends StatefulWidget {
   ///
   /// The [onTap] parameter is used to provide an action that is called when the
   /// tile is tapped. It is mainly used for navigating to a new route. It should
-  /// not be used to toggle a trailing [CupertinoSwitch] and similar usecases
+  /// not be used to toggle a trailing [CupertinoSwitch] and similar use cases
   /// because when tile is tapped, it switches the background color and remains
-  /// changed. This is according to iOS behaviour.
+  /// changed. This is according to iOS behavior.
   ///
   /// The [backgroundColor] provides a custom background color for the tile in
   /// a state before tapped. By default, it matches the theme's background color
@@ -218,7 +225,7 @@ class CupertinoListTile extends StatefulWidget {
   /// The [onTap] function is called when a user taps on [CupertinoListTile]. If
   /// left `null`, the [CupertinoListTile] will not react on taps. If this is a
   /// `Future<void> Function()`, then the [CupertinoListTile] remains activated
-  /// until the returned future is awaited. This is according to iOS behaviour.
+  /// until the returned future is awaited. This is according to iOS behavior.
   /// However, if this function is a `void Function()`, then the tile is active
   /// only for the duration of invocation.
   final FutureOr<void> Function()? onTap;
@@ -251,70 +258,31 @@ class _CupertinoListTileState extends State<CupertinoListTile> {
 
   @override
   Widget build(BuildContext context) {
-    final TextStyle titleTextStyle =
-        widget._type == _CupertinoListTileType.base || widget.subtitle == null
-            ? CupertinoTheme.of(context).textTheme.textStyle
-            : CupertinoTheme.of(context).textTheme.textStyle.merge(
-                  TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: widget.leading == null ? _kNotchedTitleWithSubtitleFontSize : null,
-                  ),
-                );
+    final TextStyle textStyle = CupertinoTheme.of(context).textTheme.textStyle;
+    final TextStyle coloredStyle = textStyle.copyWith(
+      color: CupertinoColors.secondaryLabel.resolveFrom(context),
+    );
 
-    final TextStyle subtitleTextStyle = widget._type == _CupertinoListTileType.base
-        ? CupertinoTheme.of(context).textTheme.textStyle.merge(
-              TextStyle(
-                fontSize: _kSubtitleFontSize,
-                color: CupertinoColors.secondaryLabel.resolveFrom(context),
-              ),
-            )
-        : CupertinoTheme.of(context).textTheme.textStyle.merge(
-              TextStyle(
-                fontSize: _kNotchedSubtitleFontSize,
-                color: CupertinoColors.secondaryLabel.resolveFrom(context),
-              ),
-            );
-
-    final TextStyle? additionalInfoTextStyle = widget.additionalInfo != null
-        ? CupertinoTheme.of(context).textTheme.textStyle.merge(
-            TextStyle(color: CupertinoColors.secondaryLabel.resolveFrom(context)))
-        : null;
-
+    final bool baseType = switch (widget._type) {
+      _CupertinoListTileType.base    => true,
+      _CupertinoListTileType.notched => false,
+    };
     final Widget title = DefaultTextStyle(
-      style: titleTextStyle,
+      style: baseType || widget.subtitle == null ? textStyle : textStyle.copyWith(
+        fontWeight: FontWeight.w600,
+        fontSize: widget.leading == null ? _kNotchedTitleWithSubtitleFontSize : null,
+      ),
       maxLines: 1,
+      overflow: TextOverflow.ellipsis,
       child: widget.title,
     );
 
-    EdgeInsetsGeometry? padding = widget.padding;
-    if (padding == null) {
-      switch (widget._type) {
-        case _CupertinoListTileType.base:
-          padding = widget.subtitle == null ? _kPadding : _kPaddingWithSubtitle;
-          break;
-        case _CupertinoListTileType.notched:
-          padding = widget.leading == null ? _kNotchedPaddingWithoutLeading : _kNotchedPadding;
-          break;
-      }
-    }
-
-    Widget? subtitle;
-    if (widget.subtitle != null) {
-      subtitle = DefaultTextStyle(
-        style: subtitleTextStyle,
-        maxLines: 1,
-        child: widget.subtitle!,
-      );
-    }
-
-    Widget? additionalInfo;
-    if (widget.additionalInfo != null) {
-      additionalInfo = DefaultTextStyle(
-        style: additionalInfoTextStyle!,
-        maxLines: 1,
-        child: widget.additionalInfo!,
-      );
-    }
+    final EdgeInsetsGeometry padding = widget.padding ?? switch (widget._type) {
+      _CupertinoListTileType.base when widget.subtitle != null => _kPaddingWithSubtitle,
+      _CupertinoListTileType.notched when widget.leading != null => _kNotchedPadding,
+      _CupertinoListTileType.base => _kPadding,
+      _CupertinoListTileType.notched => _kNotchedPaddingWithoutLeading,
+    };
 
     // The color for default state tile is set to either what user provided or
     // null and it will resolve to the correct color provided by context. But if
@@ -325,15 +293,12 @@ class _CupertinoListTileState extends State<CupertinoListTile> {
       backgroundColor = widget.backgroundColorActivated ?? CupertinoColors.systemGrey4.resolveFrom(context);
     }
 
-    double minHeight;
-    switch (widget._type) {
-      case _CupertinoListTileType.base:
-        minHeight = subtitle == null ? _kMinHeight : _kMinHeightWithSubtitle;
-        break;
-      case _CupertinoListTileType.notched:
-        minHeight = widget.leading == null ? _kNotchedMinHeightWithoutLeading : _kNotchedMinHeight;
-        break;
-    }
+    final double minHeight = switch (widget._type) {
+      _CupertinoListTileType.base when widget.subtitle != null => _kMinHeightWithSubtitle,
+      _CupertinoListTileType.notched when widget.leading != null => _kNotchedMinHeight,
+      _CupertinoListTileType.base => _kMinHeight,
+      _CupertinoListTileType.notched => _kNotchedMinHeightWithoutLeading,
+    };
 
     final Widget child = Container(
       constraints: BoxConstraints(minWidth: double.infinity, minHeight: minHeight),
@@ -342,31 +307,42 @@ class _CupertinoListTileState extends State<CupertinoListTile> {
         padding: padding,
         child: Row(
           children: <Widget>[
-            if (widget.leading != null) ...<Widget>[
-              SizedBox(
-                width: widget.leadingSize,
-                height: widget.leadingSize,
-                child: Center(
-                  child: widget.leading,
-                ),
+            if (widget.leading case final Widget leading) ...<Widget>[
+              SizedBox.square(
+                dimension: widget.leadingSize,
+                child: Center(child: leading),
               ),
               SizedBox(width: widget.leadingToTitle),
             ] else
               SizedBox(height: widget.leadingSize),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                title,
-                if (subtitle != null) ...<Widget>[
-                  const SizedBox(height: _kNotchedTitleToSubtitle),
-                  subtitle,
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  title,
+                  if (widget.subtitle case final Widget subtitle) ...<Widget>[
+                    const SizedBox(height: _kNotchedTitleToSubtitle),
+                    DefaultTextStyle(
+                      style: coloredStyle.copyWith(
+                        fontSize: baseType
+                            ? _kSubtitleFontSize
+                            : _kNotchedSubtitleFontSize,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      child: subtitle,
+                    ),
+                  ],
                 ],
-              ],
+              ),
             ),
-            const Spacer(),
-            if (additionalInfo != null) ...<Widget>[
-              additionalInfo,
+            if (widget.additionalInfo case final Widget additionalInfo) ...<Widget>[
+              DefaultTextStyle(
+                style: coloredStyle,
+                maxLines: 1,
+                child: additionalInfo,
+              ),
               if (widget.trailing != null)
                 const SizedBox(width: _kAdditionalInfoToTrailing),
             ],

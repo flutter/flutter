@@ -97,6 +97,12 @@ class CommandHelp {
     'Detach (terminate "flutter run" but leave application running).',
   );
 
+  late final CommandHelpOption f = _makeOption(
+    'f',
+    'Dump focus tree to the console.',
+    'debugDumpFocusTree',
+  );
+
   late final CommandHelpOption g = _makeOption(
     'g',
     'Run source code generators.'
@@ -220,7 +226,7 @@ class CommandHelpOption {
   /// Text shown in parenthesis to give the context.
   final String inParenthesis;
 
-  bool get _hasTextInParenthesis => inParenthesis != null && inParenthesis.isNotEmpty;
+  bool get _hasTextInParenthesis => inParenthesis.isNotEmpty;
 
   int get _rawMessageLength => key.length + description.length;
 
@@ -253,8 +259,12 @@ class CommandHelpOption {
     message.write(''.padLeft(width - parentheticalText.length));
     message.write(_terminal.color(parentheticalText, TerminalColor.grey));
 
-    // Terminals seem to require this because we have both bolded and colored
-    // a line. Otherwise the next line comes out bold until a reset bold.
+    // Some terminals seem to have a buggy implementation of the SGR ANSI escape
+    // codes and seem to require that we explicitly request "normal intensity"
+    // at the end of the line to prevent the next line comes out bold, despite
+    // the fact that the line already contains a "normal intensity" code.
+    // This doesn't make much sense but has been reproduced by multiple users.
+    // See: https://github.com/flutter/flutter/issues/52204
     if (_terminal.supportsColor) {
       message.write(AnsiTerminal.resetBold);
     }

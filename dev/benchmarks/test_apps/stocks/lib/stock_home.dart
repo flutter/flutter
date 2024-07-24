@@ -85,9 +85,7 @@ class StockHomeState extends State<StockHome> {
   }
 
   void _handleStockModeChange(StockMode? value) {
-    if (widget.updater != null) {
-      widget.updater(widget.configuration.copyWith(stockMode: value));
-    }
+    widget.updater(widget.configuration.copyWith(stockMode: value));
   }
 
   void _handleStockMenu(BuildContext context, _StockMenuItem value) {
@@ -96,19 +94,15 @@ class StockHomeState extends State<StockHome> {
         setState(() {
           _autorefresh = !_autorefresh;
         });
-        break;
       case _StockMenuItem.refresh:
         showDialog<void>(
           context: context,
           builder: (BuildContext context) => const _NotImplementedDialog(),
         );
-        break;
       case _StockMenuItem.speedUp:
         timeDilation /= 5.0;
-        break;
       case _StockMenuItem.speedDown:
         timeDilation *= 5.0;
-        break;
     }
   }
 
@@ -271,7 +265,7 @@ class StockHomeState extends State<StockHome> {
         Navigator.pushNamed(context, '/stock', arguments: stock.symbol);
       },
       onShow: (Stock stock) {
-        _scaffoldKey.currentState!.showBottomSheet<void>((BuildContext context) => StockSymbolBottomSheet(stock: stock));
+        _scaffoldKey.currentState!.showBottomSheet((BuildContext context) => StockSymbolBottomSheet(stock: stock));
       },
     );
   }
@@ -347,8 +341,8 @@ class _CreateCompanySheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: const <Widget>[
+    return const Column(
+      children: <Widget>[
         TextField(
           autofocus: true,
           decoration: InputDecoration(

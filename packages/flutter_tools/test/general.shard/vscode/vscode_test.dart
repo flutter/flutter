@@ -5,7 +5,6 @@
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/vscode/vscode.dart';
 
 import '../../src/common.dart';
@@ -38,7 +37,7 @@ void main() {
 
     final VsCode vsCode = VsCode.fromDirectory('', '', fileSystem: fileSystem);
 
-    expect(vsCode.version, Version.unknown);
+    expect(vsCode.version, null);
   });
 
   testWithoutContext('can locate VS Code installed via Snap', () {
@@ -46,12 +45,34 @@ void main() {
     const String home = '/home/me';
     final Platform platform = FakePlatform(environment: <String, String>{'HOME': home});
 
-    fileSystem.directory(fileSystem.path.join('/snap/code/current/', '.vscode')).createSync(recursive: true);
+    fileSystem.directory(fileSystem.path.join('/snap/code/current/usr/share/code', '.vscode')).createSync(recursive: true);
+    fileSystem.directory(fileSystem.path.join('/snap/code-insiders/current/usr/share/code-insiders', '.vscode-insiders')).createSync(recursive: true);
 
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[]);
 
     final List<VsCode> installed = VsCode.allInstalled(fileSystem, platform, processManager);
-    expect(installed.length, 1);
+    expect(installed.length, 2);
+  });
+
+  testWithoutContext('can locate VS Code installed via Flatpak', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    const String home = '/home/me';
+    final Platform platform = FakePlatform(environment: <String, String>{'HOME': home});
+
+    fileSystem.directory(fileSystem.path.join(
+      '/var/lib/flatpak/app/com.visualstudio.code/x86_64/stable/active/files/extra/vscode',
+      '.var/app/com.visualstudio.code/data/vscode',
+    )).createSync(recursive: true);
+
+    fileSystem.directory(fileSystem.path.join(
+      '/var/lib/flatpak/app/com.visualstudio.code.insiders/x86_64/beta/active/files/extra/vscode-insiders',
+      '.var/app/com.visualstudio.code.insiders/data/vscode-insiders',
+    )).createSync(recursive: true);
+
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[]);
+
+    final List<VsCode> installed = VsCode.allInstalled(fileSystem, platform, processManager);
+    expect(installed.length, 2);
   });
 
   testWithoutContext('can locate installations on macOS', () {

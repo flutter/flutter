@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/widgets.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 
 import 'simulation.dart';
@@ -70,11 +73,7 @@ class GravitySimulation extends Simulation {
     double distance,
     double endDistance,
     double velocity,
-  ) : assert(acceleration != null),
-      assert(distance != null),
-      assert(velocity != null),
-      assert(endDistance != null),
-      assert(endDistance >= 0),
+  ) : assert(endDistance >= 0),
       _a = acceleration,
       _x = distance,
       _v = velocity,

@@ -2,33 +2,30 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for Scaffold.of
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [Scaffold.of].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const OfExampleApp());
 
-  static const String _title = 'Flutter Code Sample';
+class OfExampleApp extends StatelessWidget {
+  const OfExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: _title,
-      home: MyStatelessWidget(),
+      home: OfExample(),
     );
   }
 }
 
-class MyStatelessWidget extends StatelessWidget {
-  const MyStatelessWidget({super.key});
+class OfExample extends StatelessWidget {
+  const OfExample({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Demo')),
+      appBar: AppBar(title: const Text('Scaffold.of Example')),
       body: Builder(
         // Create an inner BuildContext so that the onPressed methods
         // can refer to the Scaffold with Scaffold.of().
@@ -37,7 +34,7 @@ class MyStatelessWidget extends StatelessWidget {
             child: ElevatedButton(
               child: const Text('SHOW BOTTOM SHEET'),
               onPressed: () {
-                Scaffold.of(context).showBottomSheet<void>(
+                Scaffold.of(context).showBottomSheet(
                   (BuildContext context) {
                     return Container(
                       alignment: Alignment.center,

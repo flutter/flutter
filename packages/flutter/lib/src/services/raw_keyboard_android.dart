@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'hardware_keyboard.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 
 import 'keyboard_maps.g.dart';
@@ -10,7 +13,6 @@ import 'raw_keyboard.dart';
 export 'package:flutter/foundation.dart' show DiagnosticPropertiesBuilder;
 
 export 'keyboard_key.g.dart' show LogicalKeyboardKey, PhysicalKeyboardKey;
-export 'raw_keyboard.dart' show KeyboardSide, ModifierKey;
 
 // Android sets the 0x80000000 bit on a character to indicate that it is a
 // combining character, so we use this mask to remove that bit to make it a
@@ -19,17 +21,25 @@ const int _kCombiningCharacterMask = 0x7fffffff;
 
 /// Platform-specific key event data for Android.
 ///
+/// This class is deprecated and will be removed. Platform specific key event
+/// data will no longer be available. See [KeyEvent] for what is available.
+///
 /// This object contains information about key events obtained from Android's
 /// `KeyEvent` interface.
 ///
 /// See also:
 ///
-///  * [RawKeyboard], which uses this interface to expose key data.
+/// * [RawKeyboard], which uses this interface to expose key data.
+@Deprecated(
+  'Platform specific key event data is no longer available. See KeyEvent for what is available. '
+  'This feature was deprecated after v3.18.0-2.0.pre.',
+)
 class RawKeyEventDataAndroid extends RawKeyEventData {
   /// Creates a key event data structure specific for Android.
-  ///
-  /// The [flags], [codePoint], [keyCode], [scanCode], and [metaState] arguments
-  /// must not be null.
+  @Deprecated(
+    'Platform specific key event data is no longer available. See KeyEvent for what is available. '
+    'This feature was deprecated after v3.18.0-2.0.pre.',
+  )
   const RawKeyEventDataAndroid({
     this.flags = 0,
     this.codePoint = 0,
@@ -42,11 +52,7 @@ class RawKeyEventDataAndroid extends RawKeyEventData {
     this.productId = 0,
     this.deviceId = 0,
     this.repeatCount = 0,
-  }) : assert(flags != null),
-       assert(codePoint != null),
-       assert(keyCode != null),
-       assert(scanCode != null),
-       assert(metaState != null);
+  });
 
   /// The current set of additional flags for this event.
   ///
@@ -100,7 +106,7 @@ class RawKeyEventDataAndroid extends RawKeyEventData {
   /// The modifiers that were present when the key event occurred.
   ///
   /// See <https://developer.android.com/reference/android/view/KeyEvent.html#getMetaState()>
-  /// for the numerical values of the `metaState`. Many of these constants are
+  /// for the numerical values of the [metaState]. Many of these constants are
   /// also replicated as static constants in this class.
   ///
   /// See also:
@@ -124,13 +130,13 @@ class RawKeyEventDataAndroid extends RawKeyEventData {
   /// The vendor ID of the device that produced the event.
   ///
   /// See <https://developer.android.com/reference/android/view/InputDevice.html#getVendorId()>
-  /// for the numerical values of the `vendorId`.
+  /// for the numerical values of the [vendorId].
   final int vendorId;
 
   /// The product ID of the device that produced the event.
   ///
   /// See <https://developer.android.com/reference/android/view/InputDevice.html#getProductId()>
-  /// for the numerical values of the `productId`.
+  /// for the numerical values of the [productId].
   final int productId;
 
   /// The ID of the device that produced the event.
@@ -213,41 +219,27 @@ class RawKeyEventDataAndroid extends RawKeyEventData {
     if (metaState & anyMask == 0) {
       return false;
     }
-    switch (side) {
-      case KeyboardSide.any:
-        return true;
-      case KeyboardSide.all:
-        return metaState & leftMask != 0 && metaState & rightMask != 0;
-      case KeyboardSide.left:
-        return metaState & leftMask != 0;
-      case KeyboardSide.right:
-        return metaState & rightMask != 0;
-    }
+    return switch (side) {
+      KeyboardSide.any   => true,
+      KeyboardSide.all   => (metaState & leftMask != 0) && (metaState & rightMask != 0),
+      KeyboardSide.left  => metaState & leftMask != 0,
+      KeyboardSide.right => metaState & rightMask != 0,
+    };
   }
 
   @override
   bool isModifierPressed(ModifierKey key, { KeyboardSide side = KeyboardSide.any }) {
-    assert(side != null);
-    switch (key) {
-      case ModifierKey.controlModifier:
-        return _isLeftRightModifierPressed(side, modifierControl, modifierLeftControl, modifierRightControl);
-      case ModifierKey.shiftModifier:
-        return _isLeftRightModifierPressed(side, modifierShift, modifierLeftShift, modifierRightShift);
-      case ModifierKey.altModifier:
-        return _isLeftRightModifierPressed(side, modifierAlt, modifierLeftAlt, modifierRightAlt);
-      case ModifierKey.metaModifier:
-        return _isLeftRightModifierPressed(side, modifierMeta, modifierLeftMeta, modifierRightMeta);
-      case ModifierKey.capsLockModifier:
-        return metaState & modifierCapsLock != 0;
-      case ModifierKey.numLockModifier:
-        return metaState & modifierNumLock != 0;
-      case ModifierKey.scrollLockModifier:
-        return metaState & modifierScrollLock != 0;
-      case ModifierKey.functionModifier:
-        return metaState & modifierFunction != 0;
-      case ModifierKey.symbolModifier:
-        return metaState & modifierSym != 0;
-    }
+    return switch (key) {
+      ModifierKey.controlModifier    => _isLeftRightModifierPressed(side, modifierControl, modifierLeftControl, modifierRightControl),
+      ModifierKey.shiftModifier      => _isLeftRightModifierPressed(side, modifierShift, modifierLeftShift, modifierRightShift),
+      ModifierKey.altModifier        => _isLeftRightModifierPressed(side, modifierAlt, modifierLeftAlt, modifierRightAlt),
+      ModifierKey.metaModifier       => _isLeftRightModifierPressed(side, modifierMeta, modifierLeftMeta, modifierRightMeta),
+      ModifierKey.capsLockModifier   => metaState & modifierCapsLock != 0,
+      ModifierKey.numLockModifier    => metaState & modifierNumLock != 0,
+      ModifierKey.scrollLockModifier => metaState & modifierScrollLock != 0,
+      ModifierKey.functionModifier   => metaState & modifierFunction != 0,
+      ModifierKey.symbolModifier     => metaState & modifierSym != 0,
+    };
   }
 
   @override

@@ -36,7 +36,7 @@ abstract class Logger {
   /// If true, silences the logger output.
   bool quiet = false;
 
-  /// If true, this logger supports color output.
+  /// If true, this logger supports ANSI sequences and animations are enabled.
   bool get supportsColor;
 
   /// If true, this logger is connected to a terminal.
@@ -46,7 +46,8 @@ abstract class Logger {
   /// since the last time it was set to false.
   bool hadErrorOutput = false;
 
-  /// If true, then [printWarning] has been called at least once for this logger
+  /// If true, then [printWarning] has been called at least once with its
+  /// "fatal" argument true for this logger
   /// since the last time it was reset to false.
   bool hadWarningOutput = false;
 
@@ -124,6 +125,7 @@ abstract class Logger {
     int? indent,
     int? hangingIndent,
     bool? wrap,
+    bool fatal = true,
   });
 
   /// Display normal output of the command. This should be used for things like
@@ -216,6 +218,7 @@ abstract class Logger {
     VoidCallback? onFinish,
     Duration? timeout,
     SlowWarningCallback? slowWarningCallback,
+    TerminalColor? warningColor,
   });
 
   /// Send an event to be emitted.
@@ -313,6 +316,7 @@ class DelegatingLogger implements Logger {
     int? indent,
     int? hangingIndent,
     bool? wrap,
+    bool fatal = true,
   }) {
     _delegate.printWarning(
       message,
@@ -321,6 +325,7 @@ class DelegatingLogger implements Logger {
       indent: indent,
       hangingIndent: hangingIndent,
       wrap: wrap,
+      fatal: fatal,
     );
   }
 
@@ -376,11 +381,13 @@ class DelegatingLogger implements Logger {
     VoidCallback? onFinish,
     Duration? timeout,
     SlowWarningCallback? slowWarningCallback,
+    TerminalColor? warningColor,
   }) {
     return _delegate.startSpinner(
       onFinish: onFinish,
       timeout: timeout,
       slowWarningCallback: slowWarningCallback,
+      warningColor: warningColor,
     );
   }
 
@@ -436,7 +443,7 @@ class StdoutLogger extends Logger {
   bool get isVerbose => false;
 
   @override
-  bool get supportsColor => terminal.supportsColor;
+  bool get supportsColor => terminal.supportsColor && terminal.isCliAnimationEnabled;
 
   @override
   bool get hasTerminal => _stdio.stdinHasTerminal;
@@ -478,8 +485,9 @@ class StdoutLogger extends Logger {
     int? indent,
     int? hangingIndent,
     bool? wrap,
+    bool fatal = true,
   }) {
-    hadWarningOutput = true;
+    hadWarningOutput = hadWarningOutput || fatal;
     _status?.pause();
     message = wrapText(message,
       indent: indent,
@@ -587,6 +595,7 @@ class StdoutLogger extends Logger {
     VoidCallback? onFinish,
     Duration? timeout,
     SlowWarningCallback? slowWarningCallback,
+    TerminalColor? warningColor,
   }) {
     if (_status != null || !supportsColor) {
       return SilentStatus(
@@ -606,6 +615,7 @@ class StdoutLogger extends Logger {
       terminal: terminal,
       timeout: timeout,
       slowWarningCallback: slowWarningCallback,
+      warningColor: warningColor,
     )..start();
     return _status!;
   }
@@ -625,7 +635,7 @@ class StdoutLogger extends Logger {
   }
 }
 
-typedef _Writter = void Function(String message);
+typedef _Writer = void Function(String message);
 
 /// Wraps the message in a box, and writes the bytes by calling [write].
 ///
@@ -643,7 +653,7 @@ typedef _Writter = void Function(String message);
 void _generateBox({
   required String message,
   required int wrapColumn,
-  required _Writter write,
+  required _Writer write,
   required Terminal terminal,
   String? title,
 }) {
@@ -722,6 +732,7 @@ class WindowsStdoutLogger extends StdoutLogger {
                .replaceAll('✓', '√')
                .replaceAll('🔨', '')
                .replaceAll('💪', '')
+               .replaceAll('⚠️', '!')
                .replaceAll('✏️', '');
     _stdio.stdoutWrite(windowsMessage);
   }
@@ -761,7 +772,7 @@ class BufferLogger extends Logger {
   bool get isVerbose => _verbose;
 
   @override
-  bool get supportsColor => terminal.supportsColor;
+  bool get supportsColor => terminal.supportsColor && terminal.isCliAnimationEnabled;
 
   final StringBuffer _error = StringBuffer();
   final StringBuffer _warning = StringBuffer();
@@ -789,8 +800,14 @@ class BufferLogger extends Logger {
     bool? wrap,
   }) {
     hadErrorOutput = true;
+    final StringBuffer errorMessage = StringBuffer();
+    errorMessage.write(message);
+    if (stackTrace != null) {
+      errorMessage.writeln();
+      errorMessage.write(stackTrace);
+    }
     _error.writeln(terminal.color(
-      wrapText(message,
+      wrapText(errorMessage.toString(),
         indent: indent,
         hangingIndent: hangingIndent,
         shouldWrap: wrap ?? _outputPreferences.wrapText,
@@ -808,8 +825,9 @@ class BufferLogger extends Logger {
     int? indent,
     int? hangingIndent,
     bool? wrap,
+    bool fatal = true,
   }) {
-    hadWarningOutput = true;
+    hadWarningOutput = hadWarningOutput || fatal;
     _warning.writeln(terminal.color(
       wrapText(message,
         indent: indent,
@@ -870,7 +888,6 @@ class BufferLogger extends Logger {
     String? progressId,
     int progressIndicatorPadding = kDefaultStatusPadding,
   }) {
-    assert(progressIndicatorPadding != null);
     printStatus(message);
     return SilentStatus(
       stopwatch: _stopwatchFactory.createStopwatch(),
@@ -882,6 +899,7 @@ class BufferLogger extends Logger {
     VoidCallback? onFinish,
     Duration? timeout,
     SlowWarningCallback? slowWarningCallback,
+    TerminalColor? warningColor,
   }) {
     return SilentStatus(
       stopwatch: _stopwatchFactory.createStopwatch(),
@@ -953,6 +971,7 @@ class VerboseLogger extends DelegatingLogger {
         int? indent,
         int? hangingIndent,
         bool? wrap,
+        bool fatal = true,
       }) {
     hadWarningOutput = true;
     _emit(
@@ -1013,7 +1032,6 @@ class VerboseLogger extends DelegatingLogger {
     String? progressId,
     int progressIndicatorPadding = kDefaultStatusPadding,
   }) {
-    assert(progressIndicatorPadding != null);
     printStatus(message);
     final Stopwatch timer = _stopwatchFactory.createStopwatch()..start();
     return SilentStatus(
@@ -1060,19 +1078,15 @@ class VerboseLogger extends DelegatingLogger {
         if (stackTrace != null) {
           super.printError(indent + stackTrace.toString().replaceAll('\n', '\n$indent'));
         }
-        break;
       case _LogType.warning:
         super.printWarning(prefix + terminal.bolden(indentMessage));
-        break;
       case _LogType.status:
         super.printStatus(prefix + terminal.bolden(indentMessage));
-        break;
       case _LogType.trace:
         // This seems wrong, since there is a 'printTrace' to call on the
         // superclass, but it's actually the entire point of this logger: to
         // make things more verbose than they normally would be.
         super.printStatus(prefix + indentMessage);
-        break;
     }
   }
 
@@ -1094,7 +1108,7 @@ class PrefixedErrorLogger extends DelegatingLogger {
     bool? wrap,
   }) {
     hadErrorOutput = true;
-    if (message.trim().isNotEmpty == true) {
+    if (message.trim().isNotEmpty) {
       message = 'ERROR: $message';
     }
     super.printError(
@@ -1268,6 +1282,7 @@ class AnonymousSpinnerStatus extends Status {
     required Stdio stdio,
     required Terminal terminal,
     this.slowWarningCallback,
+    this.warningColor,
     super.timeout,
   }) : _stdio = stdio,
        _terminal = terminal,
@@ -1277,6 +1292,7 @@ class AnonymousSpinnerStatus extends Status {
   final Terminal _terminal;
   String _slowWarning = '';
   final SlowWarningCallback? slowWarningCallback;
+  final TerminalColor? warningColor;
 
   static const String _backspaceChar = '\b';
   static const String _clearChar = ' ';
@@ -1349,17 +1365,25 @@ class AnonymousSpinnerStatus extends Status {
 
   void _callback(Timer timer) {
     assert(this.timer == timer);
-    assert(timer != null);
     assert(timer.isActive);
     _writeToStdOut(_backspaceChar * _lastAnimationFrameLength);
     ticks += 1;
     if (seemsSlow) {
       if (!timedOut) {
         timedOut = true;
-        _clear(_currentLineLength);
+        if (_currentLineLength > _lastAnimationFrameLength) {
+          _clear(_currentLineLength - _lastAnimationFrameLength);
+        }
       }
-      if (_slowWarning == '' && slowWarningCallback != null) {
-        _slowWarning = slowWarningCallback!();
+      final SlowWarningCallback? callback = slowWarningCallback;
+      if (_slowWarning.isEmpty && callback != null) {
+        final TerminalColor? color = warningColor;
+        if (color != null) {
+          _slowWarning = _terminal.color(callback(), color);
+        } else {
+          _slowWarning = callback();
+        }
+
         _writeToStdOut(_slowWarning);
       }
     }
@@ -1394,7 +1418,8 @@ class AnonymousSpinnerStatus extends Status {
     assert(timer!.isActive);
     timer?.cancel();
     timer = null;
-    _clear(_lastAnimationFrameLength);
+    _clear(_lastAnimationFrameLength + _slowWarning.length);
+    _slowWarning = '';
     _lastAnimationFrameLength = 0;
     super.finish();
   }

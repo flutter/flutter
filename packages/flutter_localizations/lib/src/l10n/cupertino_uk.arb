@@ -31,5 +31,11 @@
   "selectAllButtonLabel": "Вибрати все",
   "tabSemanticsLabel": "Вкладка $tabIndex з $tabCount",
   "modalBarrierDismissLabel": "Закрити",
-  "searchTextFieldPlaceholderLabel": "Шукайте"
+  "searchTextFieldPlaceholderLabel": "Шукайте",
+  "noSpellCheckReplacementsLabel": "Замін не знайдено",
+  "menuDismissLabel": "Закрити меню",
+  "lookUpButtonLabel": "Шукати",
+  "searchWebButtonLabel": "Пошук в Інтернеті",
+  "shareButtonLabel": "Поділитися…",
+  "clearButtonLabel": "Clear"
 }

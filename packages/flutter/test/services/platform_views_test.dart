@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'fake_platform_views.dart';
 
 void main() {
-  TestWidgetsFlutterBinding.ensureInitialized();
+  final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
 
   group('Android', () {
     late FakeAndroidPlatformViewsController viewsController;
@@ -48,7 +48,7 @@ void main() {
       }
     });
 
-    test('create Android views', () async {
+    test('create VD-fallback Android views', () async {
       viewsController.registerViewType('webview');
       await PlatformViewsService.initAndroidView(id: 0, viewType: 'webview', layoutDirection: TextDirection.ltr)
           .create(size: const Size(100.0, 100.0));
@@ -57,10 +57,83 @@ void main() {
       expect(
         viewsController.views,
         unorderedEquals(<FakeAndroidPlatformView>[
-          const FakeAndroidPlatformView(0, 'webview', Size(100.0, 100.0), AndroidViewController.kAndroidLayoutDirectionLtr, null),
-          const FakeAndroidPlatformView(1, 'webview', Size(200.0, 300.0), AndroidViewController.kAndroidLayoutDirectionRtl, null),
+          const FakeAndroidPlatformView(0, 'webview', Size(100.0, 100.0), AndroidViewController.kAndroidLayoutDirectionLtr),
+          const FakeAndroidPlatformView(1, 'webview', Size(200.0, 300.0), AndroidViewController.kAndroidLayoutDirectionRtl),
         ]),
       );
+    });
+
+    test('create HC-fallback Android views', () async {
+      viewsController.registerViewType('webview');
+      await PlatformViewsService.initSurfaceAndroidView(id: 0, viewType: 'webview', layoutDirection: TextDirection.ltr)
+          .create(size: const Size(100.0, 100.0));
+      await PlatformViewsService.initSurfaceAndroidView( id: 1, viewType: 'webview', layoutDirection: TextDirection.rtl)
+          .create(size: const Size(200.0, 300.0));
+      expect(
+        viewsController.views,
+        unorderedEquals(<FakeAndroidPlatformView>[
+          const FakeAndroidPlatformView(0, 'webview', Size(100.0, 100.0), AndroidViewController.kAndroidLayoutDirectionLtr,
+            hybridFallback: true),
+          const FakeAndroidPlatformView(1, 'webview', Size(200.0, 300.0), AndroidViewController.kAndroidLayoutDirectionRtl,
+            hybridFallback: true),
+        ]),
+      );
+    });
+
+    test('create HC-only Android views', () async {
+      viewsController.registerViewType('webview');
+      await PlatformViewsService.initExpensiveAndroidView(id: 0, viewType: 'webview', layoutDirection: TextDirection.ltr)
+          .create(size: const Size(100.0, 100.0));
+      await PlatformViewsService.initExpensiveAndroidView( id: 1, viewType: 'webview', layoutDirection: TextDirection.rtl)
+          .create(size: const Size(200.0, 300.0));
+      expect(
+        viewsController.views,
+        unorderedEquals(<FakeAndroidPlatformView>[
+          const FakeAndroidPlatformView(0, 'webview', null, AndroidViewController.kAndroidLayoutDirectionLtr,
+            hybrid: true),
+          const FakeAndroidPlatformView(1, 'webview', null, AndroidViewController.kAndroidLayoutDirectionRtl,
+            hybrid: true),
+        ]),
+      );
+    });
+
+    test('default view does not use view composition by default', () async {
+      viewsController.registerViewType('webview');
+      final AndroidViewController controller = PlatformViewsService.initAndroidView(id: 0, viewType: 'webview', layoutDirection: TextDirection.ltr);
+      await controller.create(size: const Size(100.0, 100.0));
+      expect(controller.requiresViewComposition, false);
+    });
+
+    test('default view does not use view composition in fallback mode', () async {
+      viewsController.registerViewType('webview');
+      viewsController.allowTextureLayerMode = false;
+      final AndroidViewController controller = PlatformViewsService.initAndroidView(id: 0, viewType: 'webview', layoutDirection: TextDirection.ltr);
+      await controller.create(size: const Size(100.0, 100.0));
+      viewsController.allowTextureLayerMode = true;
+      expect(controller.requiresViewComposition, false);
+    });
+
+    test('surface view does not use view composition by default', () async {
+      viewsController.registerViewType('webview');
+      final AndroidViewController controller = PlatformViewsService.initSurfaceAndroidView(id: 0, viewType: 'webview', layoutDirection: TextDirection.ltr);
+      await controller.create(size: const Size(100.0, 100.0));
+      expect(controller.requiresViewComposition, false);
+    });
+
+    test('surface view does uses view composition in fallback mode', () async {
+      viewsController.registerViewType('webview');
+      viewsController.allowTextureLayerMode = false;
+      final AndroidViewController controller = PlatformViewsService.initSurfaceAndroidView(id: 0, viewType: 'webview', layoutDirection: TextDirection.ltr);
+      await controller.create(size: const Size(100.0, 100.0));
+      viewsController.allowTextureLayerMode = true;
+      expect(controller.requiresViewComposition, true);
+    });
+
+    test('expensive view uses view composition', () async {
+      viewsController.registerViewType('webview');
+      final AndroidViewController controller = PlatformViewsService.initExpensiveAndroidView(id: 0, viewType: 'webview', layoutDirection: TextDirection.ltr);
+      await controller.create(size: const Size(100.0, 100.0));
+      expect(controller.requiresViewComposition, true);
     });
 
     test('reuse Android view id', () async {
@@ -71,7 +144,7 @@ void main() {
         layoutDirection: TextDirection.ltr,
       );
       await controller.create(size: const Size(100.0, 100.0));
-      expectLater(
+      await expectLater(
         () {
           final AndroidViewController controller = PlatformViewsService.initAndroidView(
             id: 0,
@@ -111,7 +184,7 @@ void main() {
       expect(
         viewsController.views,
         unorderedEquals(<FakeAndroidPlatformView>[
-          const FakeAndroidPlatformView(0, 'webview', Size(100.0, 100.0), AndroidViewController.kAndroidLayoutDirectionLtr, null),
+          const FakeAndroidPlatformView(0, 'webview', Size(100.0, 100.0), AndroidViewController.kAndroidLayoutDirectionLtr),
         ]),
       );
     });
@@ -141,7 +214,7 @@ void main() {
       await viewController.dispose();
       final ByteData message =
           SystemChannels.platform_views.codec.encodeMethodCall(const MethodCall('viewFocused', 0));
-      await SystemChannels.platform_views.binaryMessenger.handlePlatformMessage(SystemChannels.platform_views.name, message, (_) { });
+      await binding.defaultBinaryMessenger.handlePlatformMessage(SystemChannels.platform_views.name, message, (_) { });
       expect(didFocus, isFalse);
     });
 
@@ -164,8 +237,8 @@ void main() {
       expect(
         viewsController.views,
         unorderedEquals(<FakeAndroidPlatformView>[
-          const FakeAndroidPlatformView(0, 'webview', Size(100.0, 100.0), AndroidViewController.kAndroidLayoutDirectionLtr, null),
-          const FakeAndroidPlatformView(1, 'webview', Size(500.0, 500.0), AndroidViewController.kAndroidLayoutDirectionLtr, null),
+          const FakeAndroidPlatformView(0, 'webview', Size(100.0, 100.0), AndroidViewController.kAndroidLayoutDirectionLtr),
+          const FakeAndroidPlatformView(1, 'webview', Size(500.0, 500.0), AndroidViewController.kAndroidLayoutDirectionLtr),
         ]),
       );
     });
@@ -195,6 +268,19 @@ void main() {
       await controller2.create(size: const Size(100.0, 200.0));
       expect(createdViews, orderedEquals(<int>[0, 5]));
 
+      final AndroidViewController controller3 = PlatformViewsService.initAndroidView(
+        id: 10,
+        viewType: 'webview',
+        layoutDirection: TextDirection.ltr,
+      )..addOnPlatformViewCreatedListener(callback);
+      expect(createdViews, orderedEquals(<int>[0, 5]));
+
+      await Future.wait(<Future<void>>[
+        controller3.create(size: const Size(100.0, 200.0)),
+        controller3.dispose(),
+      ]);
+
+      expect(createdViews, orderedEquals(<int>[0, 5]));
     });
 
     test("change Android view's directionality before creation", () async {
@@ -209,7 +295,7 @@ void main() {
       expect(
         viewsController.views,
         unorderedEquals(<FakeAndroidPlatformView>[
-          const FakeAndroidPlatformView(0, 'webview', Size(100.0, 100.0), AndroidViewController.kAndroidLayoutDirectionLtr, null),
+          const FakeAndroidPlatformView(0, 'webview', Size(100.0, 100.0), AndroidViewController.kAndroidLayoutDirectionLtr),
         ]),
       );
     });
@@ -226,7 +312,7 @@ void main() {
       expect(
         viewsController.views,
         unorderedEquals(<FakeAndroidPlatformView>[
-          const FakeAndroidPlatformView(0, 'webview', Size(100.0, 100.0), AndroidViewController.kAndroidLayoutDirectionRtl, null),
+          const FakeAndroidPlatformView(0, 'webview', Size(100.0, 100.0), AndroidViewController.kAndroidLayoutDirectionRtl),
         ]),
       );
     });

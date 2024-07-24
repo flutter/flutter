@@ -5,10 +5,82 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-
 import '../widgets/semantics_tester.dart';
 
 void main() {
+  testWidgets('Material3 - Card defaults (Elevated card)', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData();
+    final ColorScheme colors = theme.colorScheme;
+    await tester.pumpWidget(MaterialApp(
+      theme: theme,
+      home: const Scaffold(
+        body: Card(),
+      ),
+    ));
+
+    final Padding padding = _getCardPadding(tester);
+    final Material material = _getCardMaterial(tester);
+
+    expect(material.clipBehavior, Clip.none);
+    expect(material.elevation, 1.0);
+    expect(padding.padding, const EdgeInsets.all(4.0));
+    expect(material.color, colors.surfaceContainerLow);
+    expect(material.shadowColor, colors.shadow);
+    expect(material.surfaceTintColor, Colors.transparent); // Don't use surface tint. Toned surface container is used instead.
+    expect(material.shape, const RoundedRectangleBorder(
+      borderRadius: BorderRadius.all(Radius.circular(12.0)),
+    ));
+  });
+
+  testWidgets('Material3 - Card.filled defaults', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData();
+    final ColorScheme colors = theme.colorScheme;
+    await tester.pumpWidget(MaterialApp(
+      theme: theme,
+      home: const Scaffold(
+        body: Card.filled(),
+      ),
+    ));
+
+    final Padding padding = _getCardPadding(tester);
+    final Material material = _getCardMaterial(tester);
+
+    expect(material.clipBehavior, Clip.none);
+    expect(material.elevation, 0.0);
+    expect(padding.padding, const EdgeInsets.all(4.0));
+    expect(material.color, colors.surfaceContainerHighest);
+    expect(material.shadowColor, colors.shadow);
+    expect(material.surfaceTintColor, Colors.transparent);
+    expect(material.shape, const RoundedRectangleBorder(
+      borderRadius: BorderRadius.all(Radius.circular(12.0)),
+    ));
+  });
+
+  testWidgets('Material3 - Card.outlined defaults', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData();
+    final ColorScheme colors = theme.colorScheme;
+    await tester.pumpWidget(MaterialApp(
+      theme: theme,
+      home: const Scaffold(
+        body: Card.outlined(),
+      ),
+    ));
+
+    final Padding padding = _getCardPadding(tester);
+    final Material material = _getCardMaterial(tester);
+
+    expect(material.clipBehavior, Clip.none);
+    expect(material.elevation, 0.0);
+    expect(padding.padding, const EdgeInsets.all(4.0));
+    expect(material.color, colors.surface);
+    expect(material.shadowColor, colors.shadow);
+    expect(material.surfaceTintColor, Colors.transparent);
+    expect(material.shape, RoundedRectangleBorder(
+      side: BorderSide(color: colors.outlineVariant),
+      borderRadius: const BorderRadius.all(Radius.circular(12.0)),
+    ));
+  });
+
   testWidgets('Card can take semantic text from multiple children', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(
@@ -22,9 +94,9 @@ void main() {
                 children: <Widget>[
                   const Text('I am text!'),
                   const Text('Moar text!!1'),
-                  MaterialButton(
-                    child: const Text('Button'),
+                  ElevatedButton(
                     onPressed: () { },
+                    child: const Text('Button'),
                   ),
                 ],
               ),
@@ -58,6 +130,7 @@ void main() {
                 textDirection: TextDirection.ltr,
                 actions: <SemanticsAction>[
                   SemanticsAction.tap,
+                  SemanticsAction.focus,
                 ],
                 flags: <SemanticsFlag>[
                   SemanticsFlag.hasEnabledState,
@@ -82,13 +155,13 @@ void main() {
     debugResetSemanticsIdCounter();
 
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
         child: Material(
           child: Center(
             child: Card(
               child: Column(
-                children: const <Widget>[
+                children: <Widget>[
                   Text('First child'),
                   Text('Second child'),
                 ],
@@ -218,4 +291,22 @@ void main() {
     expect(getCardMaterial(tester).shadowColor, getCard(tester).shadowColor);
     expect(getCardMaterial(tester).shadowColor, Colors.red);
   });
+}
+
+Material _getCardMaterial(WidgetTester tester) {
+  return tester.widget<Material>(
+    find.descendant(
+      of: find.byType(Card),
+      matching: find.byType(Material),
+    ),
+  );
+}
+
+Padding _getCardPadding(WidgetTester tester) {
+  return tester.widget<Padding>(
+    find.descendant(
+      of: find.byType(Card),
+      matching: find.byType(Padding),
+    ),
+  );
 }

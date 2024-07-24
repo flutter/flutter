@@ -5,8 +5,10 @@
 import 'package:meta/meta.dart';
 import 'package:yaml/yaml.dart';
 
+import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
+import '../runner/flutter_command.dart';
 import 'gen_l10n_types.dart';
 import 'language_subtag_registry.dart';
 
@@ -51,7 +53,7 @@ class LocaleInfo implements Comparable<LocaleInfo> {
       scriptCode = codes[1].length > codes[2].length ? codes[1] : codes[2];
       countryCode = codes[1].length < codes[2].length ? codes[1] : codes[2];
     }
-    assert(codes[0] != null && codes[0].isNotEmpty);
+    assert(codes[0].isNotEmpty);
     assert(countryCode == null || countryCode.isNotEmpty);
     assert(scriptCode == null || scriptCode.isNotEmpty);
 
@@ -62,31 +64,12 @@ class LocaleInfo implements Comparable<LocaleInfo> {
     /// across various countries. For example, we know Taiwan uses traditional (Hant)
     /// script, so it is safe to apply (Hant) to Taiwanese languages.
     if (deriveScriptCode && scriptCode == null) {
-      switch (languageCode) {
-        case 'zh': {
-          if (countryCode == null) {
-            scriptCode = 'Hans';
-          }
-          switch (countryCode) {
-            case 'CN':
-            case 'SG':
-              scriptCode = 'Hans';
-              break;
-            case 'TW':
-            case 'HK':
-            case 'MO':
-              scriptCode = 'Hant';
-              break;
-          }
-          break;
-        }
-        case 'sr': {
-          if (countryCode == null) {
-            scriptCode = 'Cyrl';
-          }
-          break;
-        }
-      }
+      scriptCode = switch ((languageCode, countryCode)) {
+        ('zh', 'CN' || 'SG' || null) => 'Hans',
+        ('zh', 'TW' || 'HK' || 'MO') => 'Hant',
+        ('sr', null) => 'Cyrl',
+        _ => null,
+      };
       // Increment length if we were able to assume a scriptCode.
       if (scriptCode != null) {
         length += 1;
@@ -201,13 +184,10 @@ void precacheLanguageAndRegionTags() {
       switch (type) {
         case 'language':
           _languages[subtag] = description;
-          break;
         case 'region':
           _regions[subtag] = description;
-          break;
         case 'script':
           _scripts[subtag] = description;
-          break;
       }
     }
   }
@@ -248,7 +228,7 @@ String describeLocale(String tag) {
 
 /// Return the input string as a Dart-parsable string.
 ///
-/// ```
+/// ```none
 /// foo => 'foo'
 /// foo "bar" => 'foo "bar"'
 /// foo 'bar' => "foo 'bar'"
@@ -260,7 +240,7 @@ String describeLocale(String tag) {
 /// in JSON files are escaped. For example, the backspace character (\b)
 /// has to be properly escaped by this function so that the generated
 /// Dart code correctly represents this character:
-/// ```
+/// ```none
 /// foo\bar => 'foo\\bar'
 /// foo\nbar => 'foo\\nbar'
 /// foo\\nbar => 'foo\\\\nbar'
@@ -292,97 +272,194 @@ String generateString(String value) {
     // Reintroduce escaped backslashes into generated Dart string.
     .replaceAll(backslash, r'\\');
 
-  return "'$value'";
+  return value;
+}
+
+/// Given a list of normal strings or interpolated variables, concatenate them
+/// into a single dart string to be returned. An example of a normal string
+/// would be "'Hello world!'" and an example of a interpolated variable would be
+/// "'$placeholder'".
+///
+/// Each of the strings in [expressions] should be a raw string, which, if it
+/// were to be added to a dart file, would be a properly formatted dart string
+/// with escapes and/or interpolation. The purpose of this function is to
+/// concatenate these dart strings into a single dart string which can be
+/// returned in the generated localization files.
+///
+/// The following rules describe the kinds of string expressions that can be
+/// handled:
+/// 1. If [expressions] is empty, return the empty string "''".
+/// 2. If [expressions] has only one [String] which is an interpolated variable,
+///    it is converted to the variable itself e.g. ["'$expr'"] -> "expr".
+/// 3. If one string in [expressions] is an interpolation and the next begins
+///    with an alphanumeric character, then the former interpolation should be
+///    wrapped in braces e.g. ["'$expr1'", "'another'"] -> "'${expr1}another'".
+String generateReturnExpr(List<String> expressions, { bool isSingleStringVar = false }) {
+  if (expressions.isEmpty) {
+    return "''";
+  } else if (isSingleStringVar) {
+    // If our expression is "$varName" where varName is a String, this is equivalent to just varName.
+    return expressions[0].substring(1);
+  } else {
+    final String string = expressions.reversed.fold<String>('', (String string, String expression) {
+      if (expression[0] != r'$') {
+        return expression + string;
+      }
+      final RegExp alphanumeric = RegExp(r'^([0-9a-zA-Z]|_)+$');
+      if (alphanumeric.hasMatch(expression.substring(1)) && !(string.isNotEmpty && alphanumeric.hasMatch(string[0]))) {
+        return '$expression$string';
+      } else {
+        return '\${${expression.substring(1)}}$string';
+      }
+    });
+    return "'$string'";
+  }
 }
 
 /// Typed configuration from the localizations config file.
 class LocalizationOptions {
-  const LocalizationOptions({
-    this.arbDirectory,
-    this.templateArbFile,
-    this.outputLocalizationsFile,
+  LocalizationOptions({
+    required this.arbDir,
+    this.outputDir,
+    String? templateArbFile,
+    String? outputLocalizationFile,
     this.untranslatedMessagesFile,
-    this.header,
-    this.outputClass,
-    this.outputDirectory,
+    String? outputClass,
     this.preferredSupportedLocales,
+    this.header,
     this.headerFile,
-    this.deferredLoading,
-    this.useSyntheticPackage = true,
-    this.areResourceAttributesRequired = false,
-    this.usesNullableGetter = true,
-    this.format = false,
-  }) : assert(useSyntheticPackage != null);
+    bool? useDeferredLoading,
+    this.genInputsAndOutputsList,
+    bool? syntheticPackage,
+    this.projectDir,
+    bool? requiredResourceAttributes,
+    bool? nullableGetter,
+    bool? format,
+    bool? useEscaping,
+    bool? suppressWarnings,
+    bool? relaxSyntax,
+    bool? useNamedParameters,
+  }) : templateArbFile = templateArbFile ?? 'app_en.arb',
+       outputLocalizationFile = outputLocalizationFile ?? 'app_localizations.dart',
+       outputClass = outputClass ?? 'AppLocalizations',
+       useDeferredLoading = useDeferredLoading ?? false,
+       syntheticPackage = syntheticPackage ?? true,
+       requiredResourceAttributes = requiredResourceAttributes ?? false,
+       nullableGetter = nullableGetter ?? true,
+       format = format ?? false,
+       useEscaping = useEscaping ?? false,
+       suppressWarnings = suppressWarnings ?? false,
+       relaxSyntax = relaxSyntax ?? false,
+       useNamedParameters = useNamedParameters ?? false;
 
   /// The `--arb-dir` argument.
   ///
   /// The directory where all input localization files should reside.
-  final Uri? arbDirectory;
+  final String arbDir;
+
+  /// The `--output-dir` argument.
+  ///
+  /// The directory where all output localization files should be generated.
+  final String? outputDir;
+
 
   /// The `--template-arb-file` argument.
   ///
-  /// This URI is relative to [arbDirectory].
-  final Uri? templateArbFile;
+  /// This path is relative to [arbDirectory].
+  final String templateArbFile;
 
   /// The `--output-localization-file` argument.
   ///
-  /// This URI is relative to [arbDirectory].
-  final Uri? outputLocalizationsFile;
+  /// This path is relative to [arbDir].
+  final String outputLocalizationFile;
 
   /// The `--untranslated-messages-file` argument.
   ///
-  /// This URI is relative to [arbDirectory].
-  final Uri? untranslatedMessagesFile;
+  /// This path is relative to [arbDir].
+  final String? untranslatedMessagesFile;
+
+  /// The `--output-class` argument.
+  final String outputClass;
+
+  /// The `--preferred-supported-locales` argument.
+  final List<String>? preferredSupportedLocales;
 
   /// The `--header` argument.
   ///
   /// The header to prepend to the generated Dart localizations.
   final String? header;
 
-  /// The `--output-class` argument.
-  final String? outputClass;
-
-  /// The `--output-dir` argument.
-  ///
-  /// The directory where all output localization files should be generated.
-  final Uri? outputDirectory;
-
-  /// The `--preferred-supported-locales` argument.
-  final List<String>? preferredSupportedLocales;
-
   /// The `--header-file` argument.
   ///
   /// A file containing the header to prepend to the generated
   /// Dart localizations.
-  final Uri? headerFile;
+  final String? headerFile;
 
   /// The `--use-deferred-loading` argument.
   ///
   /// Whether to generate the Dart localization file with locales imported
   /// as deferred.
-  final bool? deferredLoading;
+  final bool useDeferredLoading;
+
+  /// The `--gen-inputs-and-outputs-list` argument.
+  ///
+  /// This path is relative to [arbDir].
+  final String? genInputsAndOutputsList;
 
   /// The `--synthetic-package` argument.
   ///
   /// Whether to generate the Dart localization files in a synthetic package
   /// or in a custom directory.
-  final bool useSyntheticPackage;
+  final bool syntheticPackage;
+
+  /// The `--project-dir` argument.
+  ///
+  /// This path is relative to [arbDir].
+  final String? projectDir;
 
   /// The `required-resource-attributes` argument.
   ///
   /// Whether to require all resource ids to contain a corresponding
   /// resource attribute.
-  final bool areResourceAttributesRequired;
+  final bool requiredResourceAttributes;
 
   /// The `nullable-getter` argument.
   ///
   /// Whether or not the localizations class getter is nullable.
-  final bool usesNullableGetter;
+  final bool nullableGetter;
 
   /// The `format` argument.
   ///
   /// Whether or not to format the generated files.
   final bool format;
+
+  /// The `use-escaping` argument.
+  ///
+  /// Whether or not the ICU escaping syntax is used.
+  final bool useEscaping;
+
+  /// The `suppress-warnings` argument.
+  ///
+  /// Whether or not to suppress warnings.
+  final bool suppressWarnings;
+
+  /// The `relax-syntax` argument.
+  ///
+  /// Whether or not to relax the syntax. When specified, the syntax will be
+  /// relaxed so that the special character "{" is treated as a string if it is
+  /// not followed by a valid placeholder and "}" is treated as a string if it
+  /// does not close any previous "{" that is treated as a special character.
+  /// This was added in for backward compatibility and is not recommended
+  /// as it may mask errors.
+  final bool relaxSyntax;
+
+  /// The `use-named-parameters` argument.
+  ///
+  /// Whether or not to use named parameters for the generated localization
+  /// methods.
+  ///
+  /// Defaults to `false`.
+  final bool useNamedParameters;
 }
 
 /// Parse the localizations configuration options from [file].
@@ -390,34 +467,71 @@ class LocalizationOptions {
 /// Throws [Exception] if any of the contents are invalid. Returns a
 /// [LocalizationOptions] with all fields as `null` if the config file exists
 /// but is empty.
-LocalizationOptions parseLocalizationsOptions({
+LocalizationOptions parseLocalizationsOptionsFromYAML({
   required File file,
   required Logger logger,
+  required String defaultArbDir,
 }) {
   final String contents = file.readAsStringSync();
   if (contents.trim().isEmpty) {
-    return const LocalizationOptions();
+    return LocalizationOptions(arbDir: defaultArbDir);
   }
-  final YamlNode yamlNode = loadYamlNode(file.readAsStringSync());
+  final YamlNode yamlNode;
+  try {
+    yamlNode = loadYamlNode(file.readAsStringSync());
+  } on YamlException catch (err) {
+    throwToolExit(err.message);
+  }
   if (yamlNode is! YamlMap) {
     logger.printError('Expected ${file.path} to contain a map, instead was $yamlNode');
     throw Exception();
   }
   return LocalizationOptions(
-    arbDirectory: _tryReadUri(yamlNode, 'arb-dir', logger),
-    templateArbFile: _tryReadUri(yamlNode, 'template-arb-file', logger),
-    outputLocalizationsFile: _tryReadUri(yamlNode, 'output-localization-file', logger),
-    untranslatedMessagesFile: _tryReadUri(yamlNode, 'untranslated-messages-file', logger),
-    header: _tryReadString(yamlNode, 'header', logger),
+    arbDir: _tryReadUri(yamlNode, 'arb-dir', logger)?.path ?? defaultArbDir,
+    outputDir: _tryReadUri(yamlNode, 'output-dir', logger)?.path,
+    templateArbFile: _tryReadUri(yamlNode, 'template-arb-file', logger)?.path,
+    outputLocalizationFile: _tryReadUri(yamlNode, 'output-localization-file', logger)?.path,
+    untranslatedMessagesFile: _tryReadUri(yamlNode, 'untranslated-messages-file', logger)?.path,
     outputClass: _tryReadString(yamlNode, 'output-class', logger),
-    outputDirectory: _tryReadUri(yamlNode, 'output-dir', logger),
+    header: _tryReadString(yamlNode, 'header', logger),
+    headerFile: _tryReadUri(yamlNode, 'header-file', logger)?.path,
+    useDeferredLoading: _tryReadBool(yamlNode, 'use-deferred-loading', logger),
     preferredSupportedLocales: _tryReadStringList(yamlNode, 'preferred-supported-locales', logger),
-    headerFile: _tryReadUri(yamlNode, 'header-file', logger),
-    deferredLoading: _tryReadBool(yamlNode, 'use-deferred-loading', logger),
-    useSyntheticPackage: _tryReadBool(yamlNode, 'synthetic-package', logger) ?? true,
-    areResourceAttributesRequired: _tryReadBool(yamlNode, 'required-resource-attributes', logger) ?? false,
-    usesNullableGetter: _tryReadBool(yamlNode, 'nullable-getter', logger) ?? true,
-    format: _tryReadBool(yamlNode, 'format', logger) ?? true,
+    syntheticPackage: _tryReadBool(yamlNode, 'synthetic-package', logger),
+    requiredResourceAttributes: _tryReadBool(yamlNode, 'required-resource-attributes', logger),
+    nullableGetter: _tryReadBool(yamlNode, 'nullable-getter', logger),
+    format: _tryReadBool(yamlNode, 'format', logger),
+    useEscaping: _tryReadBool(yamlNode, 'use-escaping', logger),
+    suppressWarnings: _tryReadBool(yamlNode, 'suppress-warnings', logger),
+    relaxSyntax: _tryReadBool(yamlNode, 'relax-syntax', logger),
+    useNamedParameters: _tryReadBool(yamlNode, 'use-named-parameters', logger),
+  );
+}
+
+/// Parse the localizations configuration from [FlutterCommand].
+LocalizationOptions parseLocalizationsOptionsFromCommand({
+  required FlutterCommand command,
+  required String defaultArbDir,
+}) {
+  return LocalizationOptions(
+    arbDir: command.stringArg('arb-dir') ?? defaultArbDir,
+    outputDir: command.stringArg('output-dir'),
+    outputLocalizationFile: command.stringArg('output-localization-file'),
+    templateArbFile: command.stringArg('template-arb-file'),
+    untranslatedMessagesFile: command.stringArg('untranslated-messages-file'),
+    outputClass: command.stringArg('output-class'),
+    header: command.stringArg('header'),
+    headerFile: command.stringArg('header-file'),
+    useDeferredLoading: command.boolArg('use-deferred-loading'),
+    genInputsAndOutputsList: command.stringArg('gen-inputs-and-outputs-list'),
+    syntheticPackage: command.boolArg('synthetic-package'),
+    projectDir: command.stringArg('project-dir'),
+    requiredResourceAttributes: command.boolArg('required-resource-attributes'),
+    nullableGetter: command.boolArg('nullable-getter'),
+    format: command.boolArg('format'),
+    useEscaping: command.boolArg('use-escaping'),
+    suppressWarnings: command.boolArg('suppress-warnings'),
+    useNamedParameters: command.boolArg('use-named-parameters'),
   );
 }
 

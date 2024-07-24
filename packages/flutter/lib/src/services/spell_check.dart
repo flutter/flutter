@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/widgets.dart';
+library;
+
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -15,9 +18,9 @@ import 'system_channels.dart';
 /// to "Hello, wrold!" may be:
 /// ```dart
 /// SuggestionSpan suggestionSpan =
-///   SuggestionSpan(
-///     const TextRange(start: 7, end: 12),
-///     List<String>.of(<String>['word', 'world', 'old']),
+///   const SuggestionSpan(
+///     TextRange(start: 7, end: 12),
+///     <String>['word', 'world', 'old'],
 /// );
 /// ```
 @immutable
@@ -27,9 +30,7 @@ class SuggestionSpan {
   ///
   /// The [range] and replacement [suggestions] must all not
   /// be null.
-  const SuggestionSpan(this.range, this.suggestions)
-      : assert(range != null),
-        assert(suggestions != null);
+  const SuggestionSpan(this.range, this.suggestions);
 
   /// The misspelled range of text.
   final TextRange range;
@@ -58,9 +59,7 @@ class SuggestionSpan {
 @immutable
 class SpellCheckResults {
   /// Creates results based off those received by spell checking some text input.
-  const SpellCheckResults(this.spellCheckedText, this.suggestionSpans)
-      : assert(spellCheckedText != null),
-        assert(suggestionSpans != null);
+  const SpellCheckResults(this.spellCheckedText, this.suggestionSpans);
 
   /// The text that the [suggestionSpans] correspond to.
   final String spellCheckedText;
@@ -103,15 +102,15 @@ abstract class SpellCheckService {
 ///
 /// Any widget may use this service to spell check text by calling
 /// `fetchSpellCheckSuggestions(locale, text)` with an instance of this class.
-/// This is currently only supported by Android.
+/// This is currently only supported by Android and iOS.
 ///
 /// See also:
 ///
 ///  * [SpellCheckService], the service that this implements that may be
-///    overriden for use by [EditableText].
+///    overridden for use by [EditableText].
 ///  * [EditableText], which may use this service to fetch results.
 class DefaultSpellCheckService implements SpellCheckService {
-  /// Creates service to spell check text input by default via communcication
+  /// Creates service to spell check text input by default via communication
   /// over the spell check [MethodChannel].
   DefaultSpellCheckService() {
     spellCheckChannel = SystemChannels.spellCheck;
@@ -170,8 +169,6 @@ class DefaultSpellCheckService implements SpellCheckService {
   @override
   Future<List<SuggestionSpan>?> fetchSpellCheckSuggestions(
       Locale locale, String text) async {
-    assert(locale != null);
-    assert(text != null);
 
     final List<dynamic> rawResults;
     final String languageTag = locale.toLanguageTag();
@@ -186,20 +183,13 @@ class DefaultSpellCheckService implements SpellCheckService {
       return null;
     }
 
-    List<SuggestionSpan> suggestionSpans = <SuggestionSpan>[];
-
-    for (final dynamic result in rawResults) {
-      final Map<String, dynamic> resultMap =
-        Map<String,dynamic>.from(result as Map<dynamic, dynamic>);
-      suggestionSpans.add(
+    List<SuggestionSpan> suggestionSpans = <SuggestionSpan>[
+      for (final Map<dynamic, dynamic> resultMap in rawResults.cast<Map<dynamic, dynamic>>())
         SuggestionSpan(
-          TextRange(
-            start: resultMap['startIndex'] as int,
-            end: resultMap['endIndex'] as int),
-          (resultMap['suggestions'] as List<dynamic>).cast<String>(),
-        )
-      );
-    }
+          TextRange(start: resultMap['startIndex'] as int, end: resultMap['endIndex'] as int),
+          (resultMap['suggestions'] as List<Object?>).cast<String>(),
+        ),
+    ];
 
     if (lastSavedResults != null) {
       // Merge current and previous spell check results if between requests,
@@ -211,9 +201,8 @@ class DefaultSpellCheckService implements SpellCheckService {
       if (textHasNotChanged && spansHaveChanged) {
         suggestionSpans = mergeResults(lastSavedResults!.suggestionSpans, suggestionSpans);
       }
-
-      lastSavedResults = SpellCheckResults(text, suggestionSpans);
     }
+    lastSavedResults = SpellCheckResults(text, suggestionSpans);
 
     return suggestionSpans;
   }
