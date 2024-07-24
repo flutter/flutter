@@ -20,6 +20,7 @@ import 'dart:ui' show ImageFilter, lerpDouble;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -60,7 +61,9 @@ const Color kCupertinoModalBarrierColor = CupertinoDynamicColor.withBrightness(
 );
 
 // The duration of the transition used when a modal popup is shown.
-const Duration _kModalPopupTransitionDuration = Duration(milliseconds: 335);
+//
+// Extracted from simulator runtime argument.
+const Duration _kModalPopupTransitionDuration = Duration(milliseconds: 404);
 
 // Offset from offscreen to the right to fully on screen.
 final Animatable<Offset> _kRightMiddleTween = Tween<Offset>(
@@ -79,6 +82,23 @@ final Animatable<Offset> _kBottomUpTween = Tween<Offset>(
   begin: const Offset(0.0, 1.0),
   end: Offset.zero,
 );
+
+class _SpringCurve extends Curve {
+  final SpringSimulation _simulation = _createSimulation();
+
+  @override
+  double transformInternal(double t) {
+    return _simulation.x(t * timeFactor) / _destinationFactor;
+  }
+
+  static SpringSimulation _createSimulation() => SpringSimulation(
+    SpringDescription.withDampingRatio(mass: 1, stiffness: 522.35),
+    /*start*/ 0, /* end */1, /* velocity */0
+  );
+  static const timeFactor = 0.41;
+  static late final double _destinationFactor =
+      _createSimulation().x(1.0 * timeFactor);
+}
 
 /// A mixin that replaces the entire screen with an iOS transition for a
 /// [PageRoute].
@@ -1121,11 +1141,8 @@ class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
     assert(_animation == null);
     _animation = CurvedAnimation(
       parent: super.createAnimation(),
-
-      // These curves were initially measured from native iOS horizontal page
-      // route animations and seemed to be a good match here as well.
-      curve: Curves.linearToEaseOut,
-      reverseCurve: Curves.linearToEaseOut.flipped,
+      curve: _SpringCurve(),
+      reverseCurve: _SpringCurve().flipped,
     );
     _offsetTween = Tween<Offset>(
       begin: const Offset(0.0, 1.0),
