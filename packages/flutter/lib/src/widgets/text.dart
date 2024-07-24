@@ -2,6 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/gestures.dart';
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'editable_text.dart';
+/// @docImport 'gesture_detector.dart';
+/// @docImport 'implicit_animations.dart';
+/// @docImport 'transitions.dart';
+/// @docImport 'widget_span.dart';
+library;
+
 import 'dart:math';
 import 'dart:ui' as ui show TextHeightBehavior;
 

@@ -713,7 +713,7 @@ class SelectionGeometry {
     return other is SelectionGeometry
         && other.startSelectionPoint == startSelectionPoint
         && other.endSelectionPoint == endSelectionPoint
-        && other.selectionRects == selectionRects
+        && listEquals(other.selectionRects, selectionRects)
         && other.status == status
         && other.hasContent == hasContent;
   }
