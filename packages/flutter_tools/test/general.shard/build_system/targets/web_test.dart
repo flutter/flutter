@@ -868,6 +868,52 @@ void main() {
     ProcessManager: () => processManager,
   }));
 
+  test('Dart2JSTarget calls dart2js with Dart defines in debug mode', () => testbed.run(() async {
+    environment.defines[kBuildMode] = 'debug';
+    environment.defines[kDartDefines] = encodeDartDefines(<String>['FOO=bar', 'BAZ=qux']);
+    processManager.addCommand(FakeCommand(
+      command: <String>[
+        ..._kDart2jsLinuxArgs,
+        '-DFOO=bar',
+        '-DBAZ=qux',
+        '-DFLUTTER_WEB_AUTO_DETECT=false',
+        '-DFLUTTER_WEB_USE_SKIA=true',
+        '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
+        '--no-source-maps',
+        '-o',
+        environment.buildDir.childFile('app.dill').absolute.path,
+        '--packages=.dart_tool/package_config.json',
+        '--cfe-only',
+        environment.buildDir.childFile('main.dart').absolute.path,
+      ]
+    ));
+    processManager.addCommand(FakeCommand(
+      command: <String>[
+        ..._kDart2jsLinuxArgs,
+        '-DFOO=bar',
+        '-DBAZ=qux',
+        '-DFLUTTER_WEB_AUTO_DETECT=false',
+        '-DFLUTTER_WEB_USE_SKIA=true',
+        '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
+        '--no-minify',
+        '--no-source-maps',
+        '-O4',
+        '-o',
+        environment.buildDir.childFile('main.dart.js').absolute.path,
+        environment.buildDir.childFile('app.dill').absolute.path,
+      ]
+    ));
+
+    await Dart2JSTarget(
+      const JsCompilerConfig(
+        sourceMaps: false,
+      )
+    ).build(environment);
+  }, overrides: <Type, Generator>{
+    ProcessManager: () => processManager,
+  }));
+
+
   test('Dart2JSTarget calls dart2js with expected args with dump-info', () => testbed.run(() async {
     environment.defines[kBuildMode] = 'profile';
     environment.defines[JsCompilerConfig.kDart2jsDumpInfo] = 'true';
@@ -962,7 +1008,7 @@ void main() {
     for (int level = 1; level <= 4; level++) {
       for (final bool strip in <bool>[true, false]) {
         for (final List<String> defines in const <List<String>>[<String>[], <String>['FOO=bar', 'BAZ=qux']]) {
-          for (final String buildMode in const <String>['profile', 'release']) {
+          for (final String buildMode in const <String>['profile', 'release', 'debug']) {
             for (final bool sourceMaps in const <bool>[true, false]) {
               test('Dart2WasmTarget invokes dart2wasm with renderer=$renderer, -O$level, stripping=$strip, defines=$defines, modeMode=$buildMode sourceMaps=$sourceMaps', () => testbed.run(() async {
                 environment.defines[kBuildMode] = buildMode;
@@ -978,7 +1024,8 @@ void main() {
                       '--extra-compiler-option=--import-shared-memory',
                       '--extra-compiler-option=--shared-memory-max-pages=32768',
                     ],
-                    '-Ddart.vm.${buildMode == 'release' ? 'product' : 'profile' }=true',
+                    if (buildMode != 'debug')
+                      '-Ddart.vm.${buildMode == 'release' ? 'product' : 'profile' }=true',
                     ...defines.map((String define) => '-D$define'),
                     if (renderer == WebRendererMode.skwasm) ...<String>[
                       '-DFLUTTER_WEB_AUTO_DETECT=false',

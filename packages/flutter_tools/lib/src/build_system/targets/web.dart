@@ -298,7 +298,6 @@ class Dart2WasmTarget extends Dart2WebTarget {
     final String platformBinariesPath = artifacts.getHostArtifact(HostArtifact.webPlatformKernelFolder).path;
     final String platformFilePath = environment.fileSystem.path.join(platformBinariesPath, 'dart2wasm_platform.dill');
 
-    assert(buildMode == BuildMode.release || buildMode == BuildMode.profile);
     final List<String> compilationArgs = <String>[
       artifacts.getArtifactPath(Artifact.engineDartBinary, platform: TargetPlatform.web_javascript),
       'compile',
