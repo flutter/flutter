@@ -1496,6 +1496,7 @@ class _OverscrollBackgroundState extends State<_OverscrollBackground> {
     final Widget overscroll = Column(
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
         DecoratedBox(
           decoration: BoxDecoration(color: widget.color),
