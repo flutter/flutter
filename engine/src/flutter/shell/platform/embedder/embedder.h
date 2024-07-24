@@ -1538,7 +1538,7 @@ typedef void (*FlutterUpdateSemanticsCallback2)(
 
 /// An update to whether a message channel has a listener set or not.
 typedef struct {
-  // The size of the struct. Must be sizeof(FlutterChannelUpdate).
+  /// The size of the struct. Must be sizeof(FlutterChannelUpdate).
   size_t struct_size;
   /// The name of the channel.
   const char* channel;
@@ -1640,6 +1640,7 @@ typedef struct {
 } FlutterSoftwareBackingStore;
 
 typedef struct {
+  /// The size of this struct. Must be sizeof(FlutterSoftwareBackingStore2).
   size_t struct_size;
   /// A pointer to the raw bytes of the allocation described by this software
   /// backing store.
@@ -1813,6 +1814,7 @@ typedef struct {
 /// Contains additional information about the backing store provided
 /// during presentation to the embedder.
 typedef struct {
+  /// The size of this struct. Must be sizeof(FlutterBackingStorePresentInfo).
   size_t struct_size;
 
   /// The area of the backing store that contains Flutter contents. Pixels
@@ -1974,7 +1976,7 @@ typedef const FlutterLocale* (*FlutterComputePlatformResolvedLocaleCallback)(
     size_t /* Number of locales*/);
 
 typedef struct {
-  /// This size of this struct. Must be sizeof(FlutterDisplay).
+  /// The size of this struct. Must be sizeof(FlutterEngineDisplay).
   size_t struct_size;
 
   FlutterEngineDisplayId display_id;
