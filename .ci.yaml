@@ -3929,7 +3929,6 @@ targets:
 
   - name: Mac_x64 plugin_lint_mac
     recipe: devicelab/devicelab_drone
-    bringup: true
     timeout: 60
     properties:
       dependencies: >-
