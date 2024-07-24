@@ -106,6 +106,10 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrameFromCAMetalLa
     last_texture_.reset([drawable.texture retain]);
   }
 
+#ifdef IMPELLER_DEBUG
+  impeller::ContextMTL::Cast(*impeller_renderer_->GetContext()).GetCaptureManager()->StartCapture();
+#endif  // IMPELLER_DEBUG
+
   id<MTLTexture> last_texture = static_cast<id<MTLTexture>>(last_texture_);
   SurfaceFrame::SubmitCallback submit_callback =
       fml::MakeCopyable([damage = damage_,
@@ -186,6 +190,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrameFromCAMetalLa
         display_list->Dispatch(impeller_dispatcher, sk_cull_rect);
         auto picture = impeller_dispatcher.EndRecordingAsPicture();
         const bool reset_host_buffer = surface_frame.submit_info().frame_boundary;
+        surface->SetFrameBoundary(surface_frame.submit_info().frame_boundary);
 
         return renderer->Render(
             std::move(surface),
@@ -232,6 +237,10 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrameFromMTLTextur
   if (Settings::kSurfaceDataAccessible) {
     last_texture_.reset([mtl_texture retain]);
   }
+
+#ifdef IMPELLER_DEBUG
+  impeller::ContextMTL::Cast(*impeller_renderer_->GetContext()).GetCaptureManager()->StartCapture();
+#endif  // IMPELLER_DEBUG
 
   SurfaceFrame::SubmitCallback submit_callback =
       fml::MakeCopyable([disable_partial_repaint = disable_partial_repaint_,  //
