@@ -445,6 +445,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
         // case we want to retain the selection so it remains when we return to
         // the Flutter application.
         clearSelection();
+        _selectable?.dispatchSelectionEvent(const SelectionFinalizedSelectionEvent());
       }
     }
     if (kIsWeb) {
@@ -618,6 +619,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
           case TargetPlatform.windows:
             hideToolbar();
             _collapseSelectionAt(offset: details.globalPosition);
+            _selectable?.dispatchSelectionEvent(const SelectionFinalizedSelectionEvent());
         }
       case 2:
         switch (defaultTargetPlatform) {
@@ -628,6 +630,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
               break;
             }
             _selectWordAt(offset: details.globalPosition);
+            _selectable?.dispatchSelectionEvent(const SelectionFinalizedSelectionEvent());
             if (details.kind != null && !_isPrecisePointerDevice(details.kind!)) {
               _showHandles();
             }
@@ -637,6 +640,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
           case TargetPlatform.linux:
           case TargetPlatform.windows:
             _selectWordAt(offset: details.globalPosition);
+            _selectable?.dispatchSelectionEvent(const SelectionFinalizedSelectionEvent());
         }
       case 3:
         switch (defaultTargetPlatform) {
@@ -647,11 +651,13 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
               // Triple tap on static text is only supported on mobile
               // platforms using a precise pointer device.
               _selectParagraphAt(offset: details.globalPosition);
+              _selectable?.dispatchSelectionEvent(const SelectionFinalizedSelectionEvent());
             }
           case TargetPlatform.macOS:
           case TargetPlatform.linux:
           case TargetPlatform.windows:
             _selectParagraphAt(offset: details.globalPosition);
+            _selectable?.dispatchSelectionEvent(const SelectionFinalizedSelectionEvent());
         }
     }
     _updateSelectedContentIfNeeded();
@@ -692,6 +698,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
               // until the drag has begun.
               _selectWordAt(offset: _doubleTapOffset!);
               _doubleTapOffset = null;
+              _selectable?.dispatchSelectionEvent(const SelectionFinalizedSelectionEvent());
             }
             _selectEndTo(offset: details.globalPosition, continuous: true, textGranularity: TextGranularity.word);
             if (details.kind != null && !_isPrecisePointerDevice(details.kind!)) {
@@ -769,6 +776,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
           case TargetPlatform.iOS:
             hideToolbar();
             _collapseSelectionAt(offset: details.globalPosition);
+            _selectable?.dispatchSelectionEvent(const SelectionFinalizedSelectionEvent());
           case TargetPlatform.macOS:
           case TargetPlatform.linux:
           case TargetPlatform.windows:
@@ -893,6 +901,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
         _showToolbar(location: _lastSecondaryTapDownPosition);
     }
     _updateSelectedContentIfNeeded();
+    _selectable?.dispatchSelectionEvent(const SelectionFinalizedSelectionEvent());
   }
 
   // Selection update helper methods.
@@ -1273,7 +1282,6 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     _finalizeSelection();
     _selectStartTo(offset: offset);
     _selectEndTo(offset: offset);
-    _selectable?.dispatchSelectionEvent(const SelectionFinalizedSelectionEvent());
   }
 
   /// Selects a whole word at the `offset` location.
@@ -1299,7 +1307,6 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     // There may be other selection ongoing.
     _finalizeSelection();
     _selectable?.dispatchSelectionEvent(SelectWordSelectionEvent(globalPosition: offset));
-    _selectable?.dispatchSelectionEvent(const SelectionFinalizedSelectionEvent());
   }
 
   /// Selects the entire paragraph at the `offset` location.
@@ -1324,7 +1331,6 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     // There may be other selection ongoing.
     _finalizeSelection();
     _selectable?.dispatchSelectionEvent(SelectParagraphSelectionEvent(globalPosition: offset));
-    _selectable?.dispatchSelectionEvent(const SelectionFinalizedSelectionEvent());
   }
 
   /// Stops any ongoing selection updates.
@@ -1348,7 +1354,6 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     _adjustingSelectionEnd = null;
     _selectable?.dispatchSelectionEvent(const ClearSelectionEvent());
     _updateSelectedContentIfNeeded();
-    _selectable?.dispatchSelectionEvent(const SelectionFinalizedSelectionEvent());
   }
 
   Future<void> _copy() async {
@@ -1405,7 +1410,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
       isReversed = false;
     } else {
       isReversed = start.localPosition.dx > end.localPosition.dx;
-    }
+    } 
     // Always move the selection edge that increases the selection range.
     return _adjustingSelectionEnd = forward != isReversed;
   }
@@ -1423,6 +1428,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
       ),
     );
     _updateSelectedContentIfNeeded();
+    _selectable?.dispatchSelectionEvent(const SelectionFinalizedSelectionEvent());
   }
 
   double? _directionalHorizontalBaseline;
@@ -1445,6 +1451,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
       ),
     );
     _updateSelectedContentIfNeeded();
+    _selectable?.dispatchSelectionEvent(const SelectionFinalizedSelectionEvent());
   }
 
   // [TextSelectionDelegate] overrides.
@@ -1476,6 +1483,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
           case TargetPlatform.android:
           case TargetPlatform.fuchsia:
             clearSelection();
+            _selectable?.dispatchSelectionEvent(const SelectionFinalizedSelectionEvent());
           case TargetPlatform.iOS:
             hideToolbar(false);
           case TargetPlatform.linux:
@@ -1505,6 +1513,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
           case TargetPlatform.android:
           case TargetPlatform.fuchsia:
             clearSelection();
+            _selectable?.dispatchSelectionEvent(const SelectionFinalizedSelectionEvent());
           case TargetPlatform.iOS:
             hideToolbar(false);
           case TargetPlatform.linux:
@@ -1605,6 +1614,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
       _showHandles();
     }
     _updateSelectedContentIfNeeded();
+    _selectable?.dispatchSelectionEvent(const SelectionFinalizedSelectionEvent());
   }
 
   @Deprecated(
@@ -1615,6 +1625,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   void copySelection(SelectionChangedCause cause) {
     _copy();
     clearSelection();
+    _selectable?.dispatchSelectionEvent(const SelectionFinalizedSelectionEvent());
   }
 
   @Deprecated(

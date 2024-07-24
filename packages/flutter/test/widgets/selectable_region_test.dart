@@ -104,8 +104,9 @@ void main() {
       await gesture.down(const Offset(200.0, 200.0));
       await tester.pump();
       await gesture.up();
-      expect(renderSelectionSpy.events.length, 1);
+      expect(renderSelectionSpy.events.length, 2);
       expect(renderSelectionSpy.events[0], isA<SelectWordSelectionEvent>());
+      expect(renderSelectionSpy.events[1], isA<SelectionFinalizedSelectionEvent>());
       final SelectWordSelectionEvent selectionEvent = renderSelectionSpy.events[0] as SelectWordSelectionEvent;
       expect(selectionEvent.globalPosition, const Offset(200.0, 200.0));
     });
@@ -135,8 +136,9 @@ void main() {
       await gesture.down(const Offset(200.0, 200.0));
       await tester.pump();
       await gesture.up();
-      expect(renderSelectionSpy.events.length, 1);
+      expect(renderSelectionSpy.events.length, 2);
       expect(renderSelectionSpy.events[0], isA<SelectWordSelectionEvent>());
+      expect(renderSelectionSpy.events[1], isA<SelectionFinalizedSelectionEvent>());
       final SelectWordSelectionEvent selectionEvent = renderSelectionSpy.events[0] as SelectWordSelectionEvent;
       expect(selectionEvent.globalPosition, const Offset(200.0, 200.0));
     });
@@ -229,7 +231,7 @@ void main() {
       await gesture.moveTo(const Offset(200.0, 100.0));
       await gesture.up();
       expect(
-        renderSelectionSpy.events.every((SelectionEvent element) => element is ClearSelectionEvent),
+        renderSelectionSpy.events.every((SelectionEvent element) => element is ClearSelectionEvent || element is SelectionFinalizedSelectionEvent),
         isTrue
       );
     });
@@ -472,11 +474,12 @@ void main() {
       await tester.pump();
       await gesture.up();
       await tester.pumpAndSettle();
-      expect(renderSelectionSpy.events.length, 2);
+      expect(renderSelectionSpy.events.length, 3);
       expect(renderSelectionSpy.events[0], isA<SelectionEdgeUpdateEvent>());
       expect((renderSelectionSpy.events[0] as SelectionEdgeUpdateEvent).type, SelectionEventType.startEdgeUpdate);
       expect(renderSelectionSpy.events[1], isA<SelectionEdgeUpdateEvent>());
       expect((renderSelectionSpy.events[1] as SelectionEdgeUpdateEvent).type, SelectionEventType.endEdgeUpdate);
+      expect(renderSelectionSpy.events[2], isA<SelectionFinalizedSelectionEvent>());
     }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/102410.
 
     testWidgets('touch long press sends select-word event', (WidgetTester tester) async {
@@ -501,8 +504,9 @@ void main() {
       addTearDown(gesture.removePointer);
       await tester.pump(const Duration(milliseconds: 500));
       await gesture.up();
-      expect(renderSelectionSpy.events.length, 1);
+      expect(renderSelectionSpy.events.length, 2);
       expect(renderSelectionSpy.events[0], isA<SelectWordSelectionEvent>());
+      expect(renderSelectionSpy.events[1], isA<SelectionFinalizedSelectionEvent>());
       final SelectWordSelectionEvent selectionEvent = renderSelectionSpy.events[0] as SelectWordSelectionEvent;
       expect(selectionEvent.globalPosition, const Offset(200.0, 200.0));
     });
@@ -536,8 +540,9 @@ void main() {
       renderSelectionSpy.events.clear();
       await gesture.moveTo(const Offset(200.0, 50.0));
       await gesture.up();
-      expect(renderSelectionSpy.events.length, 1);
+      expect(renderSelectionSpy.events.length, 2);
       expect(renderSelectionSpy.events[0].type, SelectionEventType.endEdgeUpdate);
+      expect(renderSelectionSpy.events[1].type, SelectionEventType.selectionFinalized);
       final SelectionEdgeUpdateEvent edgeEvent = renderSelectionSpy.events[0] as SelectionEdgeUpdateEvent;
       expect(edgeEvent.globalPosition, const Offset(200.0, 50.0));
       expect(edgeEvent.granularity, TextGranularity.word);
@@ -611,8 +616,9 @@ void main() {
         addTearDown(selectGesture.removePointer);
         await tester.pump(const Duration(milliseconds: 500));
         await selectGesture.up();
-        expect(renderSelectionSpy.events.length, 1);
+        expect(renderSelectionSpy.events.length, 2);
         expect(renderSelectionSpy.events[0], isA<SelectWordSelectionEvent>());
+        expect(renderSelectionSpy.events[1], isA<SelectionFinalizedSelectionEvent>());
 
         renderSelectionSpy.events.clear();
          final TestGesture scrollGesture =
@@ -648,7 +654,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 500));
       await gesture.up();
       expect(
-        renderSelectionSpy.events.every((SelectionEvent element) => element is SelectionEdgeUpdateEvent),
+        renderSelectionSpy.events.every((SelectionEvent element) => element is SelectionEdgeUpdateEvent || element is SelectionFinalizedSelectionEvent),
         isTrue,
       );
     });

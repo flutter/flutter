@@ -491,6 +491,11 @@ abstract class SelectionEvent {
 
 
 /// Indicates that the selection is finalized.
+///
+/// This event can be sent as the result of a mouse drag end, touch
+/// long press drag end, a single click to collapse the selection, a
+/// double click/tap to select a word, ctrl + A / cmd + A to select all,
+/// or a triple click/tap to select a paragraph.
 class SelectionFinalizedSelectionEvent extends SelectionEvent {
   /// Creates a selection finalized selection event.
   const SelectionFinalizedSelectionEvent(): super._(SelectionEventType.selectionFinalized);

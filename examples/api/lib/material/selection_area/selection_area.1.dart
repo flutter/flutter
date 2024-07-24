@@ -231,6 +231,9 @@ class _MyHomePageState extends State<MyHomePage> {
         key: selectionAreaKey,
         child: SelectionListener(
           onSelectionChanged: (SelectionDetails selectionDetails) {
+            if (_menuController.isShown) {
+              ContextMenuController.removeAny();
+            }
             if (selectionDetails.status == SelectionStatus.none
                || selectionDetails.status == SelectionStatus.collapsed
                || !selectionDetails.selectionFinalized) {
