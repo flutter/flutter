@@ -21,10 +21,7 @@ class BackdropFilterOperation implements LayerOperation {
   final ui.BlendMode mode;
 
   @override
-  ui.Rect cullRect(ui.Rect contentRect) => contentRect;
-
-  @override
-  ui.Rect inverseMapRect(ui.Rect rect) => rect;
+  ui.Rect mapRect(ui.Rect contentRect) => contentRect;
 
   @override
   void pre(SceneCanvas canvas, ui.Rect contentRect) {
@@ -50,10 +47,7 @@ class ClipPathOperation implements LayerOperation {
   final ui.Clip clip;
 
   @override
-  ui.Rect cullRect(ui.Rect contentRect) => contentRect.intersect(path.getBounds());
-
-  @override
-  ui.Rect inverseMapRect(ui.Rect rect) => rect;
+  ui.Rect mapRect(ui.Rect contentRect) => contentRect.intersect(path.getBounds());
 
   @override
   void pre(SceneCanvas canvas, ui.Rect contentRect) {
@@ -89,10 +83,7 @@ class ClipRectOperation implements LayerOperation {
   final ui.Clip clip;
 
   @override
-  ui.Rect cullRect(ui.Rect contentRect) => contentRect.intersect(rect);
-
-  @override
-  ui.Rect inverseMapRect(ui.Rect rect) => rect;
+  ui.Rect mapRect(ui.Rect contentRect) => contentRect.intersect(rect);
 
   @override
   void pre(SceneCanvas canvas, ui.Rect contentRect) {
@@ -128,10 +119,7 @@ class ClipRRectOperation implements LayerOperation {
   final ui.Clip clip;
 
   @override
-  ui.Rect cullRect(ui.Rect contentRect) => contentRect.intersect(rrect.outerRect);
-
-  @override
-  ui.Rect inverseMapRect(ui.Rect rect) => rect;
+  ui.Rect mapRect(ui.Rect contentRect) => contentRect.intersect(rrect.outerRect);
 
   @override
   void pre(SceneCanvas canvas, ui.Rect contentRect) {
@@ -166,10 +154,7 @@ class ColorFilterOperation implements LayerOperation {
   final ui.ColorFilter filter;
 
   @override
-  ui.Rect cullRect(ui.Rect contentRect) => contentRect;
-
-  @override
-  ui.Rect inverseMapRect(ui.Rect rect) => rect;
+  ui.Rect mapRect(ui.Rect contentRect) => contentRect;
 
   @override
   void pre(SceneCanvas canvas, ui.Rect contentRect) {
@@ -191,14 +176,11 @@ class ImageFilterLayer
 class ImageFilterOperation implements LayerOperation {
   ImageFilterOperation(this.filter, this.offset);
 
-  final ui.ImageFilter filter;
+  final SceneImageFilter filter;
   final ui.Offset offset;
 
   @override
-  ui.Rect cullRect(ui.Rect contentRect) => (filter as SceneImageFilter).filterBounds(contentRect);
-
-  @override
-  ui.Rect inverseMapRect(ui.Rect rect) => rect;
+  ui.Rect mapRect(ui.Rect contentRect) => filter.filterBounds(contentRect);
 
   @override
   void pre(SceneCanvas canvas, ui.Rect contentRect) {
@@ -206,8 +188,7 @@ class ImageFilterOperation implements LayerOperation {
       canvas.save();
       canvas.translate(offset.dx, offset.dy);
     }
-    final ui.Rect adjustedContentRect =
-      (filter as SceneImageFilter).filterBounds(contentRect);
+    final ui.Rect adjustedContentRect = filter.filterBounds(contentRect);
     canvas.saveLayer(adjustedContentRect, ui.Paint()..imageFilter = filter);
   }
 
@@ -241,10 +222,7 @@ class OffsetOperation implements LayerOperation {
   final double dy;
 
   @override
-  ui.Rect cullRect(ui.Rect contentRect) => contentRect.shift(ui.Offset(dx, dy));
-
-  @override
-  ui.Rect inverseMapRect(ui.Rect rect) => rect.shift(ui.Offset(-dx, -dy));
+  ui.Rect mapRect(ui.Rect contentRect) => contentRect.shift(ui.Offset(dx, dy));
 
   @override
   void pre(SceneCanvas canvas, ui.Rect cullRect) {
@@ -273,10 +251,7 @@ class OpacityOperation implements LayerOperation {
   final ui.Offset offset;
 
   @override
-  ui.Rect cullRect(ui.Rect contentRect) => contentRect.shift(offset);
-
-  @override
-  ui.Rect inverseMapRect(ui.Rect rect) => rect;
+  ui.Rect mapRect(ui.Rect contentRect) => contentRect.shift(offset);
 
   @override
   void pre(SceneCanvas canvas, ui.Rect cullRect) {
@@ -314,16 +289,11 @@ class TransformOperation implements LayerOperation {
 
   final Float64List transform;
 
-  Matrix4 getMatrix() => Matrix4.fromFloat32List(toMatrix32(transform));
+  Matrix4? _memoizedMatrix;
+  Matrix4 get matrix => _memoizedMatrix ?? (_memoizedMatrix = Matrix4.fromFloat32List(toMatrix32(transform)));
 
   @override
-  ui.Rect cullRect(ui.Rect contentRect) => getMatrix().transformRect(contentRect);
-
-  @override
-  ui.Rect inverseMapRect(ui.Rect rect) {
-    final Matrix4 matrix = getMatrix()..invert();
-    return matrix.transformRect(rect);
-  }
+  ui.Rect mapRect(ui.Rect contentRect) => matrix.transformRect(contentRect);
 
   @override
   void pre(SceneCanvas canvas, ui.Rect cullRect) {
@@ -338,7 +308,7 @@ class TransformOperation implements LayerOperation {
 
   @override
   PlatformViewStyling createPlatformViewStyling() => PlatformViewStyling(
-    position: PlatformViewPosition.transform(getMatrix()),
+    position: PlatformViewPosition.transform(matrix),
   );
 }
 
@@ -353,10 +323,7 @@ class ShaderMaskOperation implements LayerOperation {
   final ui.BlendMode blendMode;
 
   @override
-  ui.Rect cullRect(ui.Rect contentRect) => contentRect;
-
-  @override
-  ui.Rect inverseMapRect(ui.Rect rect) => rect;
+  ui.Rect mapRect(ui.Rect contentRect) => contentRect;
 
   @override
   void pre(SceneCanvas canvas, ui.Rect contentRect) {
@@ -444,11 +411,8 @@ abstract class LayerOperation {
   // Given an input content rectangle, this returns a conservative estimate of
   // the covering rectangle of the content after it has been processed by the
   // layer operation.
-  ui.Rect cullRect(ui.Rect contentRect);
+  ui.Rect mapRect(ui.Rect contentRect);
 
-  // Takes a rectangle in the layer's coordinate space and maps it to the parent
-  // coordinate space.
-  ui.Rect inverseMapRect(ui.Rect rect);
   void pre(SceneCanvas canvas, ui.Rect contentRect);
   void post(SceneCanvas canvas, ui.Rect contentRect);
 
@@ -625,7 +589,7 @@ class LayerBuilder {
       // Merge the existing draw commands into a single picture and add a slice
       // with that picture to the slice list.
       final ui.Rect drawnRect = picturesRect ?? ui.Rect.zero;
-      final ui.Rect rect = operation?.cullRect(drawnRect) ?? drawnRect;
+      final ui.Rect rect = operation?.mapRect(drawnRect) ?? drawnRect;
       final (ui.PictureRecorder recorder, SceneCanvas canvas) = _createRecorder(rect);
 
       operation?.pre(canvas, rect);
@@ -649,7 +613,7 @@ class LayerBuilder {
       // slice.
       ui.Rect? occlusionRect = platformViewRect;
       if (occlusionRect != null && operation != null) {
-        occlusionRect = operation!.inverseMapRect(occlusionRect);
+        occlusionRect = operation!.mapRect(occlusionRect);
       }
       layer.slices.add(PlatformViewSlice(pendingPlatformViews, occlusionRect));
     }

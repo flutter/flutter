@@ -185,7 +185,7 @@ class EngineSceneBuilder implements ui.SceneBuilder {
     ui.ImageFilterEngineLayer? oldLayer
   }) => pushLayer<ImageFilterLayer>(
       ImageFilterLayer(),
-      ImageFilterOperation(filter, offset),
+      ImageFilterOperation(filter as SceneImageFilter, offset),
     );
 
   @override
