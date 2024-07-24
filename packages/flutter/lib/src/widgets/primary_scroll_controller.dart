@@ -2,6 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+/// @docImport 'package:flutter/rendering.dart';
+///
+/// @docImport 'actions.dart';
+/// @docImport 'focus_manager.dart';
+/// @docImport 'scroll_view.dart';
+/// @docImport 'scrollable.dart';
+/// @docImport 'scrollable_helpers.dart';
+/// @docImport 'shortcuts.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
