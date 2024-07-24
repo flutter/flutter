@@ -554,7 +554,7 @@ void main() {
     expect(
       tester.getSemantics(find.text('AC')),
       matchesSemantics(
-        label: 'AC\nTab 1 of 2',
+        label: 'AC\nTab 1 of 2, selected',
         textDirection: TextDirection.ltr,
         isFocusable: true,
         isSelected: true,
@@ -565,7 +565,7 @@ void main() {
     expect(
       tester.getSemantics(find.text('Alarm')),
       matchesSemantics(
-        label: 'Alarm\nTab 2 of 2',
+        label: 'Alarm\nTab 2 of 2, unselected',
         textDirection: TextDirection.ltr,
         isFocusable: true,
         hasTapAction: true,
@@ -578,7 +578,7 @@ void main() {
     expect(
       tester.getSemantics(find.text('AC')),
       matchesSemantics(
-        label: 'AC\nTab 1 of 2',
+        label: 'AC\nTab 1 of 2, unselected',
         textDirection: TextDirection.ltr,
         isFocusable: true,
         hasTapAction: true,
@@ -588,7 +588,7 @@ void main() {
     expect(
       tester.getSemantics(find.text('Alarm')),
       matchesSemantics(
-        label: 'Alarm\nTab 2 of 2',
+        label: 'Alarm\nTab 2 of 2, selected',
         textDirection: TextDirection.ltr,
         isFocusable: true,
         isSelected: true,
@@ -623,7 +623,7 @@ void main() {
     expect(
       tester.getSemantics(find.text('AC')),
       matchesSemantics(
-        label: 'AC\nTab 1 of 2',
+        label: 'AC\nTab 1 of 2, selected',
         textDirection: TextDirection.ltr,
         isFocusable: true,
         isSelected: true,
@@ -634,7 +634,7 @@ void main() {
     expect(
       tester.getSemantics(find.text('Alarm')),
       matchesSemantics(
-        label: 'Alarm\nTab 2 of 2',
+        label: 'Alarm\nTab 2 of 2, unselected',
         textDirection: TextDirection.ltr,
         isFocusable: true,
         hasTapAction: true,
@@ -647,7 +647,7 @@ void main() {
     expect(
       tester.getSemantics(find.text('AC')),
       matchesSemantics(
-        label: 'AC\nTab 1 of 2',
+        label: 'AC\nTab 1 of 2, unselected',
         textDirection: TextDirection.ltr,
         isFocusable: true,
         hasTapAction: true,
@@ -657,7 +657,7 @@ void main() {
     expect(
       tester.getSemantics(find.text('Alarm')),
       matchesSemantics(
-        label: 'Alarm\nTab 2 of 2',
+        label: 'Alarm\nTab 2 of 2, selected',
         textDirection: TextDirection.ltr,
         isFocusable: true,
         isSelected: true,
