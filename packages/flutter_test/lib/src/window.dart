@@ -11,6 +11,7 @@ library;
 import 'dart:ui' hide window;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 
 /// Test version of [AccessibilityFeatures] in which specific features may
 /// be set to arbitrary values.
@@ -215,6 +216,17 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   /// Resets [focusedViewIdTestValue], [focusedViewStateTestValue], and
   /// [focusedViewDirectionTestValue] to null.
   void resetFocusedViewTestValues() {
+    if (_focusedViewIdTestValue != null) {
+      // If there is a value, then tell everyone who still cares that it's
+      // unfocusing.
+      _platformDispatcher.onViewFocusChange?.call(
+        ViewFocusEvent(
+          viewId: _focusedViewIdTestValue!,
+          state: ViewFocusState.unfocused,
+          direction: ViewFocusDirection.undefined,
+        ),
+      );
+    }
     _focusedViewIdTestValue = null;
     _focusedViewStateTestValue = null;
     _focusedViewDirectionTestValue = null;

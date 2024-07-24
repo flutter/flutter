@@ -769,8 +769,6 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     return TestAsyncUtils.guard<void>(() async {
       final RootWidget widget = binding.rootElement!.widget as RootWidget;
       final TestRestorationData restorationData = binding.restorationManager.restorationData;
-      // ignore: invalid_use_of_visible_for_testing_member
-      binding.focusManager.resetState();
       runApp(Container(key: UniqueKey()));
       await pump();
       binding.restorationManager.restoreFrom(restorationData);

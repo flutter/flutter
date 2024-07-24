@@ -261,6 +261,14 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       _testTextInput.register();
     }
     CustomSemanticsAction.resetForTests(); // ignore: invalid_use_of_visible_for_testing_member
+    _enableFocusManagerLifecycleAwarenessIfSupported();
+  }
+
+  void _enableFocusManagerLifecycleAwarenessIfSupported() {
+    if (buildOwner == null) {
+      return;
+    }
+    buildOwner!.focusManager.listenToApplicationLifecycleChangesIfSupported(); // ignore: invalid_use_of_visible_for_testing_member
   }
 
   @override
@@ -1028,8 +1036,6 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       // We only try to clean up and verify invariants if we didn't already
       // fail. If we got an exception already, then we instead leave everything
       // alone so that we don't cause more spurious errors.
-      // ignore: invalid_use_of_visible_for_testing_member
-      buildOwner!.focusManager.resetState();
       runApp(Container(key: UniqueKey(), child: _postTestMessage)); // Unmount any remaining widgets.
       await pump();
       if (registerTestTextInput) {
