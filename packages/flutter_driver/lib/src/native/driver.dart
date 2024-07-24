@@ -26,7 +26,6 @@ abstract interface class NativeDriver {
   /// After calling this method, the driver is no longer usable.
   Future<void> close();
 
-<<<<<<< HEAD
   /// Configures the device for screenshot testing.
   ///
   /// Where possible, this method should suppress system UI elements that are
@@ -37,19 +36,12 @@ abstract interface class NativeDriver {
   /// The exact details of what is configured are platform-specific.
   Future<void> configureForScreenshotTesting();
 
-=======
->>>>>>> upstream/main
   /// Take a screenshot using a platform-specific mechanism.
   ///
   /// The image is returned as an opaque handle that can be used to retrieve
   /// the screenshot data or to compare it with another screenshot, and may
   /// include platform-specific system UI elements, such as the status bar or
   /// navigation bar.
-<<<<<<< HEAD
-  ///
-  /// To suppress _some_ system UI elements, see [enterDemoMode].
-=======
->>>>>>> upstream/main
   Future<NativeScreenshot> screenshot();
 }
 
