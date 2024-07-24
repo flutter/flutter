@@ -539,7 +539,7 @@ void main() {
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     final MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(locale);
     expect(localizations, isA<MaterialLocalizationFi>());
-    expect(localizations.tabLabel(tabIndex: 1, tabCount: 2), 'Välilehti 1 kautta 2');
+    expect(localizations.tabLabel(tabIndex: 1, tabCount: 2, selected: false), 'Välilehti 1 kautta 2');
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/138728.

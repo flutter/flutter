@@ -622,7 +622,7 @@ class _NavigationDestinationInfo extends InheritedWidget {
   /// ```
   ///
   /// This is required for semantics, so that each destination can have a label
-  /// "Tab 1 of 3", for example.
+  /// "Tab 1 of 3, selected", for example.
   final int index;
 
   /// This is the index of the currently selected destination.
@@ -634,7 +634,7 @@ class _NavigationDestinationInfo extends InheritedWidget {
   /// How many total destinations are in this navigation bar.
   ///
   /// This is required for semantics, so that each destination can have a label
-  /// "Tab 1 of 4", for example.
+  /// "Tab 1 of 4, selected", for example.
   final int totalNumberOfDestinations;
 
   /// Indicates whether or not this destination is selected, from 0 (unselected)
@@ -920,7 +920,7 @@ class _DestinationLayoutAnimationBuilder extends StatelessWidget {
 /// [NavigationBar] by default).
 ///
 /// Provides localized semantic labels to the destination, for example, it will
-/// read "Home, Tab 1 of 3".
+/// read "Home, Tab 1 of 3, selected".
 ///
 /// Used by [_NavigationDestinationBuilder].
 class _NavigationBarDestinationSemantics extends StatelessWidget {

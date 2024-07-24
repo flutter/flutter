@@ -143,10 +143,10 @@
     "description": "The caption for the drop-down button on a paginated data table's footer that allows the user to control the number of rows of data per page of the table."
   },
 
-  "tabLabel": "Tab $tabIndex of $tabCount",
+  "tabLabel": "Tab $tabIndex of $tabCount, $selected",
   "@tabLabel": {
     "description": "The accessibility label used on a tab. This message describes the index of the selected tab and how many tabs there are, e.g. 'Tab 1 of 2'. All values are greater than or equal to one.",
-    "parameters": "tabIndex, tabCount"
+    "parameters": "tabIndex, tabCount, selected"
   },
 
   "selectedRowCountTitleZero": "No items selected",
