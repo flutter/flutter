@@ -2232,7 +2232,7 @@ class _RenderAlertDialogActionsLayout extends RenderFlex {
       }
       if (errorSummary != null) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
-          errorSummary!,
+          errorSummary,
           ErrorDescription('The incoming constraints are: $constraints'),
         ]);
       }
