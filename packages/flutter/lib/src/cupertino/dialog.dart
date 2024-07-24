@@ -2157,7 +2157,7 @@ class _RenderAlertDialogActionsLayout extends RenderFlex {
   @override
   double computeMaxIntrinsicHeight(double width) {
     if (!_useHorizontalLayout(width)) {
-      return super.computeMinIntrinsicHeight(width);
+      return super.computeMaxIntrinsicHeight(width);
     }
 
     final double slotWidth = horizontalSlotWidthFor(overallWidth: width);
@@ -2225,23 +2225,19 @@ class _RenderAlertDialogActionsLayout extends RenderFlex {
   }
 
   bool _debugHasValidConstraints(BoxConstraints constraints) {
-    FlutterError? constraintsError;
-    ErrorSummary? errorSummary;
     assert(() {
+      ErrorSummary? errorSummary;
       if (constraints.maxWidth == double.infinity) {
         errorSummary = ErrorSummary('The incoming width constraints are unbounded.');
       }
       if (errorSummary != null) {
-        constraintsError = FlutterError.fromParts(<DiagnosticsNode>[
+        throw FlutterError.fromParts(<DiagnosticsNode>[
           errorSummary!,
           ErrorDescription('The incoming constraints are: $constraints'),
         ]);
       }
       return true;
     }());
-    if (constraintsError != null) {
-      throw constraintsError!;
-    }
     return true;
   }
 
