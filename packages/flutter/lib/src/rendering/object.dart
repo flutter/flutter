@@ -1825,6 +1825,15 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   RenderObject? get parent => _parent;
   RenderObject? _parent;
 
+  /// The semantics parent of this render object in the semantics tree.
+  ///
+  /// This is typically the same as [parent].
+  ///
+  /// [OverlayPortal] overrides this field to change how it forms its
+  /// semantics sub-tree.
+  @visibleForOverriding
+  RenderObject? get semanticsParent => _parent;
+
   /// Called by subclasses when they decide a render object is a child.
   ///
   /// Only for use by subclasses when changing their child lists. Calling this
@@ -3576,6 +3585,15 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   /// object, for accessibility purposes.
   Rect get semanticBounds;
 
+  /// Whether the semantics of this render object is dirty and await the update.
+  ///
+  /// Always returns false in release mode.
+  bool get debugNeedsSemanticsUpdate {
+    if (kReleaseMode) {
+      return false;
+    }
+    return _needsSemanticsUpdate;
+  }
   bool _needsSemanticsUpdate = true;
   SemanticsNode? _semantics;
 
@@ -3641,10 +3659,11 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     // node, thus marking this semantics boundary dirty is not enough, it needs
     // to find the first parent semantics boundary that does not have any
     // possible sibling node.
-    while (node.parent != null && (mayProduceSiblingNodes || !isEffectiveSemanticsBoundary)) {
+    while (node.semanticsParent != null && (mayProduceSiblingNodes || !isEffectiveSemanticsBoundary)) {
       if (node != this && node._needsSemanticsUpdate) {
         break;
       }
+
       node._needsSemanticsUpdate = true;
       // Since this node is a semantics boundary, the produced sibling nodes will
       // be attached to the parent semantics boundary. Thus, these sibling nodes
@@ -3653,7 +3672,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
         mayProduceSiblingNodes = false;
       }
 
-      node = node.parent!;
+      node = node.semanticsParent!;
       isEffectiveSemanticsBoundary = node._semanticsConfiguration.isSemanticBoundary;
       if (isEffectiveSemanticsBoundary && node._semantics == null) {
         // We have reached a semantics boundary that doesn't own a semantics node.
@@ -3675,7 +3694,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     if (!node._needsSemanticsUpdate) {
       node._needsSemanticsUpdate = true;
       if (owner != null) {
-        assert(node._semanticsConfiguration.isSemanticBoundary || node.parent == null);
+        assert(node._semanticsConfiguration.isSemanticBoundary || node.semanticsParent == null);
         owner!._nodesNeedingSemantics.add(node);
         owner!.requestVisualUpdate();
       }
@@ -3684,7 +3703,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
 
   /// Updates the semantic information of the render object.
   void _updateSemantics() {
-    assert(_semanticsConfiguration.isSemanticBoundary || parent == null);
+    assert(_semanticsConfiguration.isSemanticBoundary || semanticsParent == null);
     if (_needsLayout) {
       // There's not enough information in this subtree to compute semantics.
       // The subtree is probably being kept alive by a viewport but not laid out.
@@ -3735,7 +3754,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     final bool blockChildInteractions = blockUserActions || config.isBlockingUserActions;
     final bool childrenMergeIntoParent = mergeIntoParent || config.isMergingSemanticsOfDescendants;
     final List<SemanticsConfiguration> childConfigurations = <SemanticsConfiguration>[];
-    final bool explicitChildNode = config.explicitChildNodes || parent == null;
+    final bool explicitChildNode = config.explicitChildNodes || semanticsParent == null;
     final ChildSemanticsConfigurationsDelegate? childConfigurationsDelegate = config.childConfigurationsDelegate;
     final Map<SemanticsConfiguration, _InterestingSemanticsFragment> configToFragment = <SemanticsConfiguration, _InterestingSemanticsFragment>{};
     final List<_InterestingSemanticsFragment> mergeUpFragments = <_InterestingSemanticsFragment>[];
@@ -3816,7 +3835,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     _needsSemanticsUpdate = false;
 
     final _SemanticsFragment result;
-    if (parent == null) {
+    if (semanticsParent == null) {
       assert(!config.hasBeenAnnotated);
       assert(!mergeIntoParent);
       assert(siblingMergeFragmentGroups.isEmpty);
