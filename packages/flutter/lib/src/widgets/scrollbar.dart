@@ -2,6 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/cupertino.dart';
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'editable_text.dart';
+/// @docImport 'list_wheel_scroll_view.dart';
+/// @docImport 'nested_scroll_view.dart';
+/// @docImport 'page_view.dart';
+/// @docImport 'scroll_view.dart';
+/// @docImport 'widget_state.dart';
+library;
+
 import 'dart:async';
 import 'dart:math' as math;
 

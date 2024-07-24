@@ -3,6 +3,13 @@
 // found in the LICENSE file.
 
 
+/// @docImport 'notification_listener.dart';
+/// @docImport 'scroll_view.dart';
+/// @docImport 'sliver_floating_header.dart';
+/// @docImport 'sliver_persistent_header.dart';
+/// @docImport 'sliver_resizing_header.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
