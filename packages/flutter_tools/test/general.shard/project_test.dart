@@ -1188,9 +1188,9 @@ plugins {
         mockXcodeProjectInterpreter = FakeXcodeProjectInterpreter();
       });
 
-      testUsingContext('app product name defaults to Runner.app', () async {
+      testUsingContext('app product name defaults to Runner', () async {
         final FlutterProject project = await someProject();
-        expect(await project.ios.hostAppBundleName(null), 'Runner.app');
+        expect(await project.ios.productName(null), 'Runner');
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -1202,11 +1202,11 @@ plugins {
         project.ios.xcodeProject.createSync();
         const XcodeProjectBuildContext buildContext = XcodeProjectBuildContext(scheme: 'Runner');
         mockXcodeProjectInterpreter.buildSettingsByBuildContext[buildContext] = <String, String>{
-          'FULL_PRODUCT_NAME': 'My App.app',
+          'PRODUCT_NAME': 'My App',
         };
         mockXcodeProjectInterpreter.xcodeProjectInfo = XcodeProjectInfo(<String>[], <String>[], <String>['Runner'], logger);
 
-        expect(await project.ios.hostAppBundleName(null), 'My App.app');
+        expect(await project.ios.productName(null), 'My App');
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),

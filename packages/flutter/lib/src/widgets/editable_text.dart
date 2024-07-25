@@ -2,6 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/cupertino.dart';
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'app.dart';
+/// @docImport 'context_menu_controller.dart';
+/// @docImport 'form.dart';
+/// @docImport 'restoration.dart';
+/// @docImport 'restoration_properties.dart';
+/// @docImport 'selectable_region.dart';
+/// @docImport 'text_selection_toolbar_layout_delegate.dart';
+library;
+
 import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui' as ui hide TextStyle;

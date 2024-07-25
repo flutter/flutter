@@ -240,6 +240,7 @@ void main() {
     expect(localizations.lookUpButtonLabel, '查询');
   });
 
+  // Regression test for https://github.com/flutter/flutter/pull/151364
   testWidgets('ko-KR translation for cut, copy, paste label in ButtonLabel', (WidgetTester tester) async {
     const Locale locale = Locale('ko');
     expect(GlobalCupertinoLocalizations.delegate.isSupported(locale), isTrue);

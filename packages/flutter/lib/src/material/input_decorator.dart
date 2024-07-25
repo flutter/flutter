@@ -2,6 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/widgets.dart';
+///
+/// @docImport 'dropdown.dart';
+/// @docImport 'ink_well.dart';
+/// @docImport 'text_field.dart';
+/// @docImport 'text_form_field.dart';
+library;
+
 import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
@@ -2837,9 +2845,9 @@ class InputDecoration {
   /// Text that suggests what sort of input the field accepts.
   ///
   /// Displayed on top of the [InputDecorator.child] (i.e., at the same location
-  /// on the screen where text may be entered in the [InputDecorator.child])
-  /// when the input [isEmpty] and either (a) [labelText] is null or (b) the
-  /// input has the focus.
+  /// on the screen where text may be entered in the [InputDecorator.child]),
+  /// when [InputDecorator.isEmpty] is true and either (a) [labelText] is null
+  /// or (b) the input has the focus.
   final String? hintText;
 
   /// The style to use for the [hintText].

@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'editable_text.dart';
+/// @docImport 'text.dart';
+library;
+
 import 'dart:async';
 import 'dart:math';
 
@@ -535,30 +541,60 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   }
 
   void _initMouseGestureRecognizer() {
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.iOS:
-      case TargetPlatform.linux:
-      case TargetPlatform.macOS:
-      case TargetPlatform.windows:
-        _gestureRecognizers[TapAndPanGestureRecognizer] = GestureRecognizerFactoryWithHandlers<TapAndPanGestureRecognizer>(
-              () => TapAndPanGestureRecognizer(debugOwner:this),
-              (TapAndPanGestureRecognizer instance) {
-            instance
-              ..onTapDown = _startNewMouseSelectionGesture
-              ..onTapUp = _handleMouseTapUp
-              ..onDragStart = _handleMouseDragStart
-              ..onDragUpdate = _handleMouseDragUpdate
-              ..onDragEnd = _handleMouseDragEnd
-              ..onCancel = _clearSelection
-              ..dragStartBehavior = DragStartBehavior.down;
-          },
-        );
-    }
+    _gestureRecognizers[TapAndPanGestureRecognizer] = GestureRecognizerFactoryWithHandlers<TapAndPanGestureRecognizer>(
+          () => TapAndPanGestureRecognizer(
+            debugOwner:this,
+            supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.mouse },
+          ),
+          (TapAndPanGestureRecognizer instance) {
+        instance
+          ..onTapDown = _startNewMouseSelectionGesture
+          ..onTapUp = _handleMouseTapUp
+          ..onDragStart = _handleMouseDragStart
+          ..onDragUpdate = _handleMouseDragUpdate
+          ..onDragEnd = _handleMouseDragEnd
+          ..onCancel = _clearSelection
+          ..dragStartBehavior = DragStartBehavior.down;
+      },
+    );
   }
 
   void _initTouchGestureRecognizer() {
+    // A [TapAndHorizontalDragGestureRecognizer] is used on non-precise pointer devices
+    // like PointerDeviceKind.touch so [SelectableRegion] gestures do not conflict with
+    // ancestor Scrollable gestures in common scenarios like a vertically scrolling list view.
+    _gestureRecognizers[TapAndHorizontalDragGestureRecognizer] = GestureRecognizerFactoryWithHandlers<TapAndHorizontalDragGestureRecognizer>(
+          () => TapAndHorizontalDragGestureRecognizer(
+            debugOwner:this,
+            supportedDevices: PointerDeviceKind.values.where((PointerDeviceKind device) {
+              return device != PointerDeviceKind.mouse;
+            }).toSet(),
+          ),
+          (TapAndHorizontalDragGestureRecognizer instance) {
+        instance
+          // iOS does not provide a device specific touch slop
+          // unlike Android (~8.0), so the touch slop for a [Scrollable]
+          // always default to kTouchSlop which is 18.0. When
+          // [SelectableRegion] is the child of a horizontal
+          // scrollable that means the [SelectableRegion] will
+          // always win the gesture arena when competing with
+          // the ancestor scrollable because they both have
+          // the same touch slop threshold and the child receives
+          // the [PointerEvent] first. To avoid this conflict
+          // and ensure a smooth scrolling experience, on
+          // iOS the [TapAndHorizontalDragGestureRecognizer]
+          // will wait for all other gestures to lose before
+          // declaring victory.
+          ..eagerVictoryOnDrag = defaultTargetPlatform != TargetPlatform.iOS
+          ..onTapDown = _startNewMouseSelectionGesture
+          ..onTapUp = _handleMouseTapUp
+          ..onDragStart = _handleMouseDragStart
+          ..onDragUpdate = _handleMouseDragUpdate
+          ..onDragEnd = _handleMouseDragEnd
+          ..onCancel = _clearSelection
+          ..dragStartBehavior = DragStartBehavior.down;
+      },
+    );
     _gestureRecognizers[LongPressGestureRecognizer] = GestureRecognizerFactoryWithHandlers<LongPressGestureRecognizer>(
           () => LongPressGestureRecognizer(debugOwner: this, supportedDevices: _kLongPressSelectionDevices),
           (LongPressGestureRecognizer instance) {
