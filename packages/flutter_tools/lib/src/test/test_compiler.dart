@@ -183,15 +183,16 @@ class TestCompiler {
       );
       final String? outputPath = compilerOutput?.outputFilename;
 
-      testTimeRecorder?.stop(TestTimePhases.Compile, testTimeRecorderStopwatch!);
       // In case compiler didn't produce output or reported compilation
       // errors, pass [null] upwards to the consumer and shutdown the
       // compiler to avoid reusing compiler that might have gotten into
       // a weird state.
       if (outputPath == null || compilerOutput!.errorCount > 0) {
-        request.result.complete();
         await _shutdown();
+        request.result.complete();
       } else {
+        await compiler!.accept();
+        await compiler!.reset();
         if (shouldCopyDillFile) {
           final String path = request.mainUri.toFilePath(windows: globals.platform.isWindows);
           final File outputFile = globals.fs.file(outputPath);
@@ -210,11 +211,9 @@ class TestCompiler {
         } else {
           request.result.complete(outputPath);
         }
-        await compiler!.accept();
-        await compiler!.reset();
       }
       globals.printTrace('Compiling ${request.mainUri} took ${compilerTime.elapsedMilliseconds}ms');
-
+      testTimeRecorder?.stop(TestTimePhases.Compile, testTimeRecorderStopwatch!);
       // Only remove now when we finished processing the element
       compilationQueue.removeAt(0);
     }
