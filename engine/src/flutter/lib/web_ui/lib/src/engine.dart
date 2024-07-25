@@ -108,6 +108,7 @@ export 'engine/html/surface_stats.dart';
 export 'engine/html/transform.dart';
 export 'engine/html_image_element_codec.dart';
 export 'engine/image_decoder.dart';
+export 'engine/image_format_detector.dart';
 export 'engine/initialization.dart';
 export 'engine/js_interop/js_app.dart';
 export 'engine/js_interop/js_loader.dart';
