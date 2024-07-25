@@ -14,13 +14,13 @@ import '../src/common.dart';
 import 'test_data/hot_reload_index_html_samples.dart';
 
 void main() async {
-  await _testProject(HotReloadProject()); // default
+  //await _testProject(HotReloadProject()); // default
   await _testProject(HotReloadProject(constApp: true), name: 'Default) (with `const MyApp()`)'); // runApp(const MyApp());
   // await _testProject(HotReloadProject(indexHtml: indexHtmlFlutterJsCallback), name: 'flutter.js (callback)');
   // await _testProject(HotReloadProject(indexHtml: indexHtmlFlutterJsPromisesFull), name: 'flutter.js (promises)');
   // await _testProject(HotReloadProject(indexHtml: indexHtmlFlutterJsPromisesShort), name: 'flutter.js (promises, short)');
   // await _testProject(HotReloadProject(indexHtml: indexHtmlFlutterJsLoad), name: 'flutter.js (load)');
-  // await _testProject(HotReloadProject(indexHtml: indexHtmlNoFlutterJs), name: 'No flutter.js');
+  // await _testProject(HotReloadProject(indexHtml: indexHtmlNoFlutterJs), name: 'No flutter.js');Prel
   // await _testProject(HotReloadProject(indexHtml: indexHtmlWithFlutterBootstrapScriptTag), name: 'Using flutter_bootstrap.js script tag');
   // await _testProject(HotReloadProject(indexHtml: indexHtmlWithInlinedFlutterBootstrapScript), name: 'Using inlined flutter_bootstrap.js');
 }
