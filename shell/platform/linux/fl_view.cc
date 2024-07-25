@@ -586,7 +586,7 @@ static void realize_cb(FlView* self) {
 
   init_keyboard(self);
 
-  fl_renderer_start(FL_RENDERER(self->renderer), self);
+  fl_renderer_add_view(FL_RENDERER(self->renderer), self->view_id, self);
 
   if (!fl_engine_start(self->engine, &error)) {
     g_warning("Failed to start Flutter engine: %s", error->message);

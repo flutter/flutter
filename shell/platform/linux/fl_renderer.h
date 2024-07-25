@@ -102,15 +102,16 @@ struct _FlRendererClass {
 void fl_renderer_set_engine(FlRenderer* renderer, FlEngine* engine);
 
 /**
- * fl_renderer_start:
+ * fl_renderer_add_view:
  * @renderer: an #FlRenderer.
+ * @view_id: the ID of the view.
  * @view: the view Flutter is renderering to.
  *
- * Start the renderer.
- *
- * Returns: %TRUE if successfully started.
+ * Add a view to render on.
  */
-gboolean fl_renderer_start(FlRenderer* renderer, FlView* view);
+void fl_renderer_add_view(FlRenderer* renderer,
+                          FlutterViewId view_id,
+                          FlView* view);
 
 /**
  * fl_renderer_get_proc_address:
@@ -189,6 +190,7 @@ gboolean fl_renderer_collect_backing_store(
 /**
  * fl_renderer_present_layers:
  * @renderer: an #FlRenderer.
+ * @view_id: view to present.
  * @layers: layers to be composited.
  * @layers_count: number of layers.
  *
@@ -198,6 +200,7 @@ gboolean fl_renderer_collect_backing_store(
  * Returns %TRUE if successful.
  */
 gboolean fl_renderer_present_layers(FlRenderer* renderer,
+                                    FlutterViewId view_id,
                                     const FlutterLayer** layers,
                                     size_t layers_count);
 
