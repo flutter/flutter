@@ -33,11 +33,7 @@ class MainWidgetState extends State<MainWidget> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Semantics(
-          header: true,
-          headingLevel: 1,
-          child: const Text('Slider demo'),
-        ),
+        title: const Text('Slider demo'),
       ),
       body: Center(
         child: Semantics(

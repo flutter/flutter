@@ -25,11 +25,7 @@ class _MainWidget extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Semantics(
-          header: true,
-          headingLevel: 1,
-          child: const Text('TextField demo'),
-        ),
+        title: const Text('TextField demo'),
       ),
       body: ListView(
         children: <Widget>[
