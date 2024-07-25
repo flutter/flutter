@@ -20,7 +20,6 @@ import 'focus_scope.dart';
 import 'focus_traversal.dart';
 import 'framework.dart';
 import 'heroes.dart';
-import 'navigator_pop_handler.dart';
 import 'notification_listener.dart';
 import 'overlay.dart';
 import 'pop_scope.dart';
@@ -3627,8 +3626,6 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       canHandlePop: navigatorCanPop || routeBlocksPop,
     );
     // Avoid dispatching a notification in the middle of a build.
-    final bool isNested = Navigator.maybeOf(context, rootNavigator: true) != this;
-    print('justin handlehistorychanged dispatching. ${notification.canHandlePop} with history ${_history.length}. isNested? $isNested');
     switch (SchedulerBinding.instance.schedulerPhase) {
       case SchedulerPhase.postFrameCallbacks:
         notification.dispatch(context);
@@ -5658,15 +5655,17 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       ),
     );
 
+    // If this is a nested Navigator, handle system backs here so that the root
+    // Navigator doesn't get all of them.
     if (Navigator.maybeOf(context, rootNavigator: true) != this) {
-      print('justin adding a PopScope. canPop? ${canPop()} with history ${_history.length}');
+      // TODO(justinmc): Investigate predictive back.
       return PopScope(
         canPop: !canPop(),
         onPopInvokedWithResult: (bool didPop, Object? result) {
-          print('justin PopScope onPopInvokedWithResult. $didPop');
           if (didPop) {
             return;
           }
+          // TODO(justinmc): Only pop if the Navigator's top route is active. For multiple nested Navigators.
           maybePop();
         },
         child: child,
@@ -6141,4 +6140,27 @@ class RestorableRouteFuture<T> extends RestorableProperty<String?> {
   }
 
   static NavigatorState _defaultNavigatorFinder(BuildContext context) => Navigator.of(context);
+}
+
+/// A notification that a change in navigation has taken place.
+///
+/// Specifically, this notification indicates that at least one of the following
+/// has occurred:
+///
+///  * That route stack of a [Navigator] has changed in any way.
+///  * The ability to pop has changed, such as controlled by [PopScope].
+class NavigationNotification extends Notification {
+  /// Creates a notification that some change in navigation has happened.
+  const NavigationNotification({
+    required this.canHandlePop,
+  });
+
+  /// Indicates that the originator of this [Notification] is capable of
+  /// handling a navigation pop.
+  final bool canHandlePop;
+
+  @override
+  String toString() {
+    return 'NavigationNotification canHandlePop: $canHandlePop';
+  }
 }
