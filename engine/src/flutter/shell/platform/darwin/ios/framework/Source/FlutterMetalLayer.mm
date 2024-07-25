@@ -50,6 +50,7 @@ extern CFTimeInterval display_link_target;
   BOOL _displayLinkForcedMaxRate;
 }
 
+- (void)onDisplayLink:(CADisplayLink*)link;
 - (void)presentTexture:(FlutterTexture*)texture;
 - (void)returnTexture:(FlutterTexture*)texture;
 
@@ -163,6 +164,26 @@ extern CFTimeInterval display_link_target;
 
 @end
 
+@interface FlutterMetalLayerDisplayLinkProxy : NSObject {
+  __weak FlutterMetalLayer* _layer;
+}
+
+@end
+
+@implementation FlutterMetalLayerDisplayLinkProxy
+- (instancetype)initWithLayer:(FlutterMetalLayer*)layer {
+  if (self = [super init]) {
+    _layer = layer;
+  }
+  return self;
+}
+
+- (void)onDisplayLink:(CADisplayLink*)link {
+  [_layer onDisplayLink:link];
+}
+
+@end
+
 @implementation FlutterMetalLayer
 
 @synthesize preferredDevice = _preferredDevice;
@@ -179,7 +200,9 @@ extern CFTimeInterval display_link_target;
     self.pixelFormat = MTLPixelFormatBGRA8Unorm;
     _availableTextures = [[NSMutableSet alloc] init];
 
-    _displayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(onDisplayLink:)];
+    FlutterMetalLayerDisplayLinkProxy* proxy =
+        [[FlutterMetalLayerDisplayLinkProxy alloc] initWithLayer:self];
+    _displayLink = [CADisplayLink displayLinkWithTarget:proxy selector:@selector(onDisplayLink:)];
     [self setMaxRefreshRate:DisplayLinkManager.displayRefreshRate forceMax:NO];
     [_displayLink addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSRunLoopCommonModes];
     [[NSNotificationCenter defaultCenter] addObserver:self
@@ -188,6 +211,11 @@ extern CFTimeInterval display_link_target;
                                                object:nil];
   }
   return self;
+}
+
+- (void)dealloc {
+  [_displayLink invalidate];
+  [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 - (void)setMaxRefreshRate:(double)refreshRate forceMax:(BOOL)forceMax {
