@@ -59,29 +59,6 @@ struct _FlRendererClass {
   void (*clear_current)(FlRenderer* renderer);
 
   /**
-   * Virtual method called when Flutter needs a backing store for a specific
-   * #FlutterLayer.
-   * @renderer: an #FlRenderer.
-   * @config: backing store config.
-   * @backing_store_out: saves created backing store.
-   *
-   * Returns %TRUE if successful.
-   */
-  gboolean (*create_backing_store)(FlRenderer* renderer,
-                                   const FlutterBackingStoreConfig* config,
-                                   FlutterBackingStore* backing_store_out);
-
-  /**
-   * Virtual method called when Flutter wants to release the backing store.
-   * @renderer: an #FlRenderer.
-   * @backing_store: backing store to be released.
-   *
-   * Returns %TRUE if successful.
-   */
-  gboolean (*collect_backing_store)(FlRenderer* renderer,
-                                    const FlutterBackingStore* backing_store);
-
-  /**
    * Virtual method called when Flutter wants to get the refresh rate of the
    * renderer.
    * @renderer: an #FlRenderer.
