@@ -2,6 +2,32 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/services.dart';
+///
+/// @docImport 'about.dart';
+/// @docImport 'action_buttons.dart';
+/// @docImport 'app.dart';
+/// @docImport 'app_bar.dart';
+/// @docImport 'bottom_sheet.dart';
+/// @docImport 'calendar_date_picker.dart';
+/// @docImport 'chip.dart';
+/// @docImport 'date_picker.dart';
+/// @docImport 'expand_icon.dart';
+/// @docImport 'expansion_tile.dart';
+/// @docImport 'input_date_picker_form_field.dart';
+/// @docImport 'paginated_data_table.dart';
+/// @docImport 'popup_menu.dart';
+/// @docImport 'refresh_indicator.dart';
+/// @docImport 'reorderable_list.dart';
+/// @docImport 'search_anchor.dart';
+/// @docImport 'tabs.dart';
+/// @docImport 'text_field.dart';
+/// @docImport 'text_theme.dart';
+/// @docImport 'theme_data.dart';
+/// @docImport 'time_picker.dart';
+/// @docImport 'user_accounts_drawer_header.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 

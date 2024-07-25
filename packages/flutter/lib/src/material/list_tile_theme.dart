@@ -2,6 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'checkbox_list_tile.dart';
+/// @docImport 'drawer.dart';
+/// @docImport 'expansion_tile.dart';
+/// @docImport 'radio_list_tile.dart';
+/// @docImport 'switch_list_tile.dart';
+library;
+
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';

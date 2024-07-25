@@ -2,6 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/cupertino.dart';
+/// @docImport 'package:flutter/material.dart';
+/// @docImport 'package:flutter/services.dart';
+///
+/// @docImport 'app.dart';
+/// @docImport 'display_feature_sub_screen.dart';
+/// @docImport 'overlay.dart';
+/// @docImport 'safe_area.dart';
+/// @docImport 'system_context_menu.dart';
+/// @docImport 'view.dart';
+library;
+
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 

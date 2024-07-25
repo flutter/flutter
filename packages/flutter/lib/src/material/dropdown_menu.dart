@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'text_theme.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/rendering.dart';
@@ -172,6 +175,7 @@ class DropdownMenu<T> extends StatefulWidget {
     this.expandedInsets,
     this.filterCallback,
     this.searchCallback,
+    this.alignmentOffset,
     required this.dropdownMenuEntries,
     this.inputFormatters,
   }) : assert(filterCallback == null || enableFilter);
@@ -471,6 +475,9 @@ class DropdownMenu<T> extends StatefulWidget {
   ///  * [TextEditingController], which implements the [Listenable] interface
   ///    and notifies its listeners on [TextEditingValue] changes.
   final List<TextInputFormatter>? inputFormatters;
+
+  /// {@macro flutter.material.MenuAnchor.alignmentOffset}
+  final Offset? alignmentOffset;
 
   @override
   State<DropdownMenu<T>> createState() => _DropdownMenuState<T>();
@@ -781,6 +788,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
 
     Widget menuAnchor = MenuAnchor(
       style: effectiveMenuStyle,
+      alignmentOffset: widget.alignmentOffset,
       controller: _controller,
       menuChildren: menu,
       crossAxisUnconstrained: false,

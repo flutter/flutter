@@ -2,6 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:ui';
+/// @docImport 'package:flutter/semantics.dart';
+/// @docImport 'package:flutter/services.dart';
+///
+/// @docImport 'app.dart';
+/// @docImport 'text_button.dart';
+library;
+
 import 'dart:ui' show clampDouble, lerpDouble;
 
 import 'package:flutter/cupertino.dart';

@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'adaptive_text_selection_toolbar.dart';
+/// @docImport 'spell_check_suggestions_toolbar.dart';
+/// @docImport 'text_selection_toolbar_text_button.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/cupertino.dart';

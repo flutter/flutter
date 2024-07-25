@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'range_slider.dart';
+library;
+
 import 'dart:math' as math;
 import 'dart:ui' show Path, lerpDouble;
 
@@ -2244,7 +2247,7 @@ class _EmptySliderTickMarkShape extends SliderTickMarkShape {
 ///
 /// This class is used to create a special instance of a [SliderComponentShape]
 /// that will not paint any component shape. A static reference is stored in
-/// [SliderTickMarkShape.noThumb] and [SliderTickMarkShape.noOverlay]. When this value
+/// [SliderComponentShape.noThumb] and [SliderComponentShape.noOverlay]. When this value
 /// is specified for [SliderThemeData.thumbShape], the thumb painting is
 /// skipped. When this value is specified for [SliderThemeData.overlayShape],
 /// the overlay painting is skipped.

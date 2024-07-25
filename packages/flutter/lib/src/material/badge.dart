@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'icon_button.dart';
+/// @docImport 'navigation_rail.dart';
+/// @docImport 'text_button.dart';
+/// @docImport 'text_theme.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/rendering.dart';

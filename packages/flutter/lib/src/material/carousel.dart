@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'color_scheme.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
@@ -810,7 +813,7 @@ class _RenderSliverWeightedCarousel extends RenderSliverFixedExtentBoxAdaptor {
       extent = extent + finalIncrease * progress * maxChildExtent;
     }
     // Calculate the extents of items located beyond the range defined by the
-    // weights array relative to the first visible item. During scrolling transiton,
+    // weights array relative to the first visible item. During scrolling transition,
     // it is possible that the number of visible items is larger than the length
     // of `weights`. The extra item extent should be calculated here to fill
     // the remaining space.
@@ -829,7 +832,7 @@ class _RenderSliverWeightedCarousel extends RenderSliverFixedExtentBoxAdaptor {
     return extent;
   }
 
-  // To ge the extent unit based on the viewport exten and the sum of weights.
+  // To ge the extent unit based on the viewport extent and the sum of weights.
   double get extentUnit => constraints.viewportMainAxisExtent / (weights.reduce((int total, int extent) => total + extent));
 
   double get firstChildExtent => weights.first * extentUnit;
@@ -1258,7 +1261,8 @@ class _CarouselMetrics extends FixedScrollMetrics {
 
   /// The fraction of the viewport that the first item occupies.
   ///
-  /// Used to compute [item] from the current [pixels].
+  /// Used to compute the extent of each carousel item from the current [pixels],
+  /// if [itemExtent] is null.
   final List<int>? flexWeights;
 
   /// Determine whether each child can be expanded to occupy the maximum weight while scrolling.
