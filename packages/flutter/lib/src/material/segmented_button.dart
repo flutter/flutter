@@ -443,7 +443,7 @@ class SegmentedButtonState<T> extends State<SegmentedButton<T>> {
   Widget build(BuildContext context) {
     final SegmentedButtonThemeData theme = SegmentedButtonTheme.of(context);
     final SegmentedButtonThemeData defaults = _SegmentedButtonDefaultsM3(context);
-    final TextDirection testDirection = Directionality.of(context);
+    final TextDirection textDirection = Directionality.of(context);
 
     const Set<MaterialState> enabledState = <MaterialState>{};
     const Set<MaterialState> disabledState = <MaterialState>{ MaterialState.disabled };
