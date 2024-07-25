@@ -621,14 +621,14 @@ void main() {
     );
   });
 
-  testWidgets('Radio is slightly darkened when pressed', (WidgetTester tester) async {
+  testWidgets('Radio is slightly darkened when pressed in light mode', (WidgetTester tester) async {
     const Color activeInnerColor = Color(0xffffffff);
     const Color activeOuterColor = Color(0xff007aff);
     const Color inactiveBorderColor = Color(0xffd1d1d6);
     const Color inactiveOuterColor = Color(0xffffffff);
     const double innerRadius = 2.975;
     const double outerRadius = 7.0;
-    const Color pressedDarkShadow = Color(0x26ffffff);
+    const Color pressedShadowColor = Color(0x26ffffff);
 
     await tester.pumpWidget(CupertinoApp(
       home: Center(
@@ -647,7 +647,7 @@ void main() {
       find.byType(CupertinoRadio<int>),
       paints
         ..circle(radius: outerRadius, style: PaintingStyle.fill, color: inactiveOuterColor)
-        ..circle(radius: outerRadius, style: PaintingStyle.fill, color: pressedDarkShadow)
+        ..circle(radius: outerRadius, style: PaintingStyle.fill, color: pressedShadowColor)
         ..circle(radius: outerRadius, style: PaintingStyle.stroke, color: inactiveBorderColor),
       reason: 'Unselected pressed radio button is slightly darkened',
     );
@@ -669,9 +669,68 @@ void main() {
       find.byType(CupertinoRadio<int>),
       paints
         ..circle(radius: outerRadius, style: PaintingStyle.fill, color: activeOuterColor)
-        ..circle(radius: outerRadius, style: PaintingStyle.fill, color: pressedDarkShadow)
+        ..circle(radius: outerRadius, style: PaintingStyle.fill, color: pressedShadowColor)
         ..circle(radius: innerRadius, style: PaintingStyle.fill, color: activeInnerColor),
       reason: 'Selected pressed radio button is slightly darkened',
+    );
+
+    // Finish gestures to release resources.
+    await gesture1.up();
+    await gesture2.up();
+    await tester.pump();
+  });
+
+  testWidgets('Radio is slightly lightened when pressed in dark mode', (WidgetTester tester) async {
+    const Color activeInnerColor = Color(0xffffffff);
+    const Color activeOuterColor = Color(0xff007aff);
+    const Color inactiveBorderColor = Color(0x80808080);
+    const double innerRadius = 2.975;
+    const double outerRadius = 7.0;
+    const Color pressedShadowColor = Color(0x26ffffff);
+
+    await tester.pumpWidget(CupertinoApp(
+      theme: const CupertinoThemeData(brightness: Brightness.dark),
+      home: Center(
+        child: CupertinoRadio<int>(
+          value: 1,
+          groupValue: 2,
+          onChanged: (int? i) { },
+        ),
+      ),
+    ));
+
+    final TestGesture gesture1 = await tester.startGesture(tester.getCenter(find.byType(CupertinoRadio<int>)));
+    await tester.pump();
+
+    expect(
+      find.byType(CupertinoRadio<int>),
+      paints
+        ..path()
+        ..circle(radius: outerRadius, style: PaintingStyle.fill, color: pressedShadowColor)
+        ..circle(radius: outerRadius, style: PaintingStyle.stroke, color: inactiveBorderColor),
+      reason: 'Unselected pressed radio button is slightly lightened',
+    );
+
+    await tester.pumpWidget(CupertinoApp(
+      home: Center(
+        child: CupertinoRadio<int>(
+          value: 2,
+          groupValue: 2,
+          onChanged: (int? i) { },
+        ),
+      ),
+    ));
+
+    final TestGesture gesture2 = await tester.startGesture(tester.getCenter(find.byType(CupertinoRadio<int>)));
+    await tester.pump();
+
+    expect(
+      find.byType(CupertinoRadio<int>),
+      paints
+        ..circle(radius: outerRadius, style: PaintingStyle.fill, color: activeOuterColor)
+        ..circle(radius: outerRadius, style: PaintingStyle.fill, color: pressedShadowColor)
+        ..circle(radius: innerRadius, style: PaintingStyle.fill, color: activeInnerColor),
+      reason: 'Selected pressed radio button is slightly lightened',
     );
 
     // Finish gestures to release resources.
