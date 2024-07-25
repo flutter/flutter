@@ -162,6 +162,7 @@ final class NaiveLocalFileComparator with GoldenFileComparator {
 // Examples can assume:
 // import 'package:flutter_driver/src/native/driver.dart';
 // import 'package:flutter_driver/src/native/goldens.dart';
+// import 'package:test/test.dart';
 // late NativeDriver nativeDriver;
 
 /// Asserts that a [NativeScreenshot], [Future<NativeScreenshot>], or
