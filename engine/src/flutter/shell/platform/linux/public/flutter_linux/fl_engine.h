@@ -28,6 +28,16 @@ G_DECLARE_FINAL_TYPE(FlEngine, fl_engine, FL, ENGINE, GObject)
  */
 
 /**
+ * fl_engine_new:
+ * @project: an #FlDartProject.
+ *
+ * Creates new Flutter engine.
+ *
+ * Returns: a new #FlEngine.
+ */
+FlEngine* fl_engine_new(FlDartProject* project);
+
+/**
  * fl_engine_new_headless:
  * @project: an #FlDartProject.
  *
