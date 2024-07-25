@@ -12,9 +12,9 @@ import 'semantics.dart';
 /// Supplies generic accessibility focus features to semantics nodes that have
 /// [ui.SemanticsFlag.isFocusable] set.
 ///
-/// Assumes that the element being focused on is [SemanticsObject.element]. Role
-/// managers with special needs can implement custom focus management and
-/// exclude this role manager.
+/// Assumes that the element being focused on is [SemanticsObject.element].
+/// Semantic roles with special needs can implement custom focus management and
+/// exclude this behavior.
 ///
 /// `"tab-index=0"` is used because `<flt-semantics>` is not intrinsically
 /// focusable. Examples of intrinsically focusable elements include:
@@ -27,10 +27,9 @@ import 'semantics.dart';
 /// See also:
 ///
 ///   * https://developer.mozilla.org/en-US/docs/Web/Accessibility/Keyboard-navigable_JavaScript_widgets
-class Focusable extends RoleManager {
-  Focusable(SemanticsObject semanticsObject, PrimaryRoleManager owner)
-      : _focusManager = AccessibilityFocusManager(semanticsObject.owner),
-        super(Role.focusable, semanticsObject, owner);
+class Focusable extends SemanticBehavior {
+  Focusable(super.semanticsObject, super.owner)
+      : _focusManager = AccessibilityFocusManager(semanticsObject.owner);
 
   final AccessibilityFocusManager _focusManager;
 
@@ -44,9 +43,9 @@ class Focusable extends RoleManager {
   /// programmatically, simulating the screen reader choosing a default element
   /// to focus on.
   ///
-  /// Returns `true` if the role manager took the focus. Returns `false` if
-  /// this role manager did not take the focus. The return value can be used to
-  /// decide whether to stop searching for a node that should take focus.
+  /// Returns `true` if the node took the focus. Returns `false` if the node did
+  /// not take the focus. The return value can be used to decide whether to stop
+  /// searching for a node that should take focus.
   bool focusAsRouteDefault() {
     _focusManager._lastEvent = AccessibilityFocusManagerEvent.requestedFocus;
     owner.element.focusWithoutScroll();
@@ -106,10 +105,10 @@ enum AccessibilityFocusManagerEvent {
 ///
 /// Unlike [Focusable], which implements focus features on [SemanticsObject]s
 /// whose [SemanticsObject.element] is directly focusable, this class can help
-/// implementing focus features on custom elements. For example, [Incrementable]
-/// uses a custom `<input>` tag internally while its root-level element is not
-/// focusable. However, it can still use this class to manage the focus of the
-/// internal element.
+/// implementing focus features on custom elements. For example,
+/// [SemanticIncrementable] uses a custom `<input>` tag internally while its
+/// root-level element is not focusable. However, it can still use this class to
+/// manage the focus of the internal element.
 class AccessibilityFocusManager {
   /// Creates a focus manager tied to a specific [EngineSemanticsOwner].
   AccessibilityFocusManager(this._owner);

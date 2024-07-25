@@ -6,9 +6,9 @@ import '../dom.dart';
 import '../semantics.dart';
 
 /// Provides accessibility for links.
-class Link extends PrimaryRoleManager {
-  Link(SemanticsObject semanticsObject) : super.withBasics(
-    PrimaryRole.link,
+class SemanticLink extends SemanticRole {
+  SemanticLink(SemanticsObject semanticsObject) : super.withBasics(
+    SemanticRoleKind.link,
     semanticsObject,
     preferredLabelRepresentation: LabelRepresentation.domText,
   ) {

@@ -10,11 +10,11 @@ import 'semantics.dart';
 /// Uses aria img role to convey this semantic information to the element.
 ///
 /// Screen-readers takes advantage of "aria-label" to describe the visual.
-class ImageRoleManager extends PrimaryRoleManager {
-  ImageRoleManager(SemanticsObject semanticsObject)
-      : super.blank(PrimaryRole.image, semanticsObject) {
-    // The following secondary roles can coexist with images. `LabelAndValue` is
-    // not used because this role manager uses special auxiliary elements to
+class SemanticImage extends SemanticRole {
+  SemanticImage(SemanticsObject semanticsObject)
+      : super.blank(SemanticRoleKind.image, semanticsObject) {
+    // The following behaviors can coexist with images. `LabelAndValue` is
+    // not used because this behavior uses special auxiliary elements to
     // supply ARIA labels.
     // TODO(yjbanov): reevaluate usage of aux elements, https://github.com/flutter/flutter/issues/129317
     addFocusManagement();
