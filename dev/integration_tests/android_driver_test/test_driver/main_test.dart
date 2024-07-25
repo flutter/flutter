@@ -4,8 +4,9 @@
 
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:flutter_driver/src/native_driver.dart';
-import 'package:flutter_goldens/flutter_goldens.dart';
 import 'package:test/test.dart';
+
+import '_flutter_goldens_fork.dart';
 
 // TODO(matanlurey): This is done automatically by 'flutter test' but not by
 // 'flutter drive'. If we get closer to shipping the native 'flutter drive'
