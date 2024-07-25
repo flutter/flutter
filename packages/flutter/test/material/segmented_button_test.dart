@@ -1140,15 +1140,15 @@ void main() {
                 ),
                 ButtonSegment<int>(
                   value: 2,
-                  label: Text('Option 3'),
+                  label: Text('Option 2'),
                 ),
                 ButtonSegment<int>(
                   value: 3,
-                  label: Text('Option 4'),
+                  label: Text('Option 3'),
                 ),
               ],
               onSelectionChanged: (Set<int> selected) {},
-              selected: const <int>{0},
+              selected: const <int>{-1}, // Prevent any of ButtonSegment to be selected
               direction: Axis.vertical,
             ),
           ),
@@ -1156,9 +1156,17 @@ void main() {
       ),
     );
 
-    final Finder button = find.byType(SegmentedButton<int>);
-    expect(tester.getSize(button).height,
-        greaterThan(tester.getSize(button).width));
+    Rect? previewsChildRect;
+    for( int i=0; i <= 3; i++) {
+      final Rect currentChildRect = tester.getRect(find.widgetWithText(TextButton, 'Option $i'));
+      if(previewsChildRect != null) {
+        expect(currentChildRect.left, previewsChildRect.left);
+        expect(currentChildRect.right, previewsChildRect.right);
+        expect(currentChildRect.top, previewsChildRect.top + previewsChildRect.height);
+      }
+      previewsChildRect = currentChildRect;
+    }
+
   });
 }
 
