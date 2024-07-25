@@ -212,9 +212,26 @@ class SelectedContentRange {
   final List<SelectedContentRange>? children;
 
   @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is SelectedContentRange
+        && other.selectableId == selectableId
+        && other.contentLength == contentLength
+        && other.startOffset == startOffset
+        && other.endOffset == endOffset
+        && listEquals(other.children, children);
+  }
+
+  @override
   String toString() {
     return 'SelectedContentRange(\n'
            '  selectableId: $selectableId,\n'
+           '  contentLength: $contentLength,\n'
            '  startOffset: $startOffset,\n'
            '  endOffset: $endOffset,\n'
            '  children: $children,\n'
@@ -946,6 +963,17 @@ class SelectionGeometry {
       status,
       hasContent,
     );
+  }
+
+  @override
+  String toString() {
+    return 'SelectionGeometry(\n'
+           '  startSelectionPoint: $startSelectionPoint,\n'
+           '  endSelectionPoint: $endSelectionPoint,\n'
+           '  selectionRects: $selectionRects,\n'
+           '  status: $status,\n'
+           '  hasContent: $hasContent,\n'
+           ')';
   }
 }
 

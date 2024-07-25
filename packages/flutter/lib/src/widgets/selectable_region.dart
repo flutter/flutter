@@ -3020,19 +3020,33 @@ class _SelectionListenerDelegate extends _SelectableRegionContainerDelegate {
 
   SelectionListenerSelectionChangedCallback onSelectionChanged;
 
+  SelectionDetails? _lastFinalizedDetails;
+
   @override
   SelectionResult dispatchSelectionEvent(SelectionEvent event) {
     final SelectionGeometry lastSelectionGeometry = value;
     final SelectionResult result = super.dispatchSelectionEvent(event);
     if (lastSelectionGeometry != value) {
-      onSelectionChanged(
-        SelectionDetails(
-          status: value.status,
-          selectionFinalized: selectionIsFinalized,
-          ranges: getSelections(),
-        ),
-      );
+      onSelectionChanged.call(_getDetails());
+    }
+    // A selection finalized selection event will not affect the selection
+    // geometry, so we compare the selection details at the last finalized event
+    // to determine if we should call our onSelectionChanged callback.
+    if (event is SelectionFinalizedSelectionEvent) {
+      final SelectionDetails currentFinalizedDetails = _getDetails();
+      if (_lastFinalizedDetails != currentFinalizedDetails) {
+        onSelectionChanged.call(currentFinalizedDetails);
+        _lastFinalizedDetails = currentFinalizedDetails;
+      }
     }
     return result;
+  }
+
+  SelectionDetails _getDetails() {
+    return SelectionDetails(
+      status: value.status,
+      selectionFinalized: selectionIsFinalized,
+      ranges: getSelections(),
+    );
   }
 }
