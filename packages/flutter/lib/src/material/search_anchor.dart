@@ -701,6 +701,7 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
                 viewHeaderTextStyle: viewHeaderTextStyle,
                 viewHeaderHintStyle: viewHeaderHintStyle,
                 dividerColor: dividerColor,
+                viewConstraints: viewConstraints,
                 viewPadding: viewPadding,
                 viewShrinkWrap: viewShrinkWrap,
                 showFullScreenView: showFullScreenView,
@@ -744,6 +745,7 @@ class _ViewContent extends StatefulWidget {
     this.viewHeaderTextStyle,
     this.viewHeaderHintStyle,
     this.dividerColor,
+    this.viewConstraints,
     this.viewPadding,
     this.viewShrinkWrap,
     this.textCapitalization,
@@ -774,6 +776,7 @@ class _ViewContent extends StatefulWidget {
   final TextStyle? viewHeaderTextStyle;
   final TextStyle? viewHeaderHintStyle;
   final Color? dividerColor;
+  final BoxConstraints? viewConstraints;
   final EdgeInsets? viewPadding;
   final bool? viewShrinkWrap;
   final TextCapitalization? textCapitalization;
@@ -967,6 +970,9 @@ class _ViewContentState extends State<_ViewContent> {
       ?? widget.viewHeaderTextStyle
       ?? viewTheme.headerTextStyle
       ?? viewDefaults.headerHintStyle;
+    final BoxConstraints effectiveConstraints = widget.viewConstraints
+      ?? viewTheme.constraints
+      ?? viewDefaults.constraints!;
     final EdgeInsets? effectivePadding = widget.viewPadding
       ?? viewTheme.padding
       ?? viewDefaults.padding;
@@ -985,7 +991,9 @@ class _ViewContentState extends State<_ViewContent> {
         offset: _viewRect.topLeft,
         child: ConstrainedBox(
           constraints: BoxConstraints(
+            minWidth: effectiveConstraints.minWidth,
             maxWidth: _viewRect.width,
+            minHeight: effectiveConstraints.minHeight,
             maxHeight: _viewRect.height,
           ),
           child: Padding(
