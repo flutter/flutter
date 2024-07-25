@@ -146,22 +146,24 @@ void main() {
       expect(caretOffset.dx, painter.width);
 
       void checkUnicodeZsCategory(String character, int expectLines) {
+        final String reason = 'character: ${character.codeUnitAt(0).toRadixString(16)}';
+
         text = 'A$character';
         checkCaretOffsetsLtr(text);
         painter.text = TextSpan(text: text);
         painter.layout();
         caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 0), ui.Rect.zero);
-        expect(caretOffset.dx, 0.0);
+        expect(caretOffset.dx, 0.0, reason: reason);
         caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 1), ui.Rect.zero);
-        expect(caretOffset.dx, 14.0);
+        expect(caretOffset.dx, 14.0, reason: reason);
         caretOffset = painter.getOffsetForCaret(ui.TextPosition(offset: text.length), ui.Rect.zero);
-        expect(caretOffset.dx, painter.width);
+        expect(caretOffset.dx, painter.width, reason: reason);
 
         painter.layout(maxWidth: 14.0);
         final List<ui.LineMetrics> lines = painter.computeLineMetrics();
         // If charactor is non-breaking space, the height should be 2 lines. Otherwise, it should be 1 line.
-        expect(lines.length, expectLines);
-        expect(lines.first.width, 14.0);
+        expect(lines.length, expectLines, reason: reason);
+        expect(lines.first.width, 14.0, reason: reason);
       }
 
       // Test with trailing space
