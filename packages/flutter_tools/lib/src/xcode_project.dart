@@ -160,15 +160,14 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform  {
   ///
   /// Returns null, if Xcode tooling is unavailable.
   Future<Map<String, String>?> buildSettingsForBuildInfo(
-      BuildInfo? buildInfo, {
-        String? scheme,
-        String? configuration,
-        String? target,
-        EnvironmentType environmentType = EnvironmentType.physical,
-        String? deviceId,
-        bool isMacOS = false,
-        bool isWatch = false,
-      }) async {
+    BuildInfo? buildInfo, {
+    String? scheme,
+    String? configuration,
+    String? target,
+    EnvironmentType environmentType = EnvironmentType.physical,
+    String? deviceId,
+    bool isWatch = false,
+  }) async {
     if (!existsSync()) {
       return null;
     }
@@ -193,7 +192,7 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform  {
         configuration: configuration,
         target: target,
         deviceId: deviceId,
-        isMacOS: isMacOS,
+        isMacOS: this is MacOSProject,
         isWatch: isWatch,
       ),
     );
