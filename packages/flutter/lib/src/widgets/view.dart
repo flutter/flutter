@@ -211,14 +211,14 @@ class _ViewState extends State<View> with WidgetsBindingObserver {
   }
 
   void _scopeFocusChangeListener() {
-    if (_viewHasFocus == _scopeNode.hasFocus) {
+    if (_viewHasFocus == _scopeNode.hasFocus || !_scopeNode.hasFocus) {
       return;
     }
-    // Scope focus changed, and it doesn't match the view focus, so inform the
-    // view so it knows to change its focus.
+    // Scope has gained focus, and it doesn't match the view focus, so inform
+    // the view so it knows to change its focus.
     WidgetsBinding.instance.platformDispatcher.requestViewFocusChange(
       direction: ViewFocusDirection.forward,
-      state: _scopeNode.hasFocus ? ViewFocusState.focused : ViewFocusState.unfocused,
+      state: ViewFocusState.focused,
       viewId: widget.view.viewId,
     );
   }
