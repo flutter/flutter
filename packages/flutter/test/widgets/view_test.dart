@@ -591,10 +591,11 @@ void main() {
 
     nodeA.requestFocus();
     await tester.pump();
-    expect(tester.binding.platformDispatcher.focusedViewIdTestValue, isNotNull);
-    expect(tester.binding.platformDispatcher.focusedViewIdTestValue, equals(view?.viewId));
-    expect(tester.binding.platformDispatcher.focusedViewDirectionTestValue, equals(ViewFocusDirection.forward));
-    expect(tester.binding.platformDispatcher.focusedViewStateTestValue, equals(ViewFocusState.focused));
+    final List<ViewFocusEvent> events = tester.binding.platformDispatcher.testFocusEvents;
+    expect(events.length, equals(1));
+    expect(events.last.viewId, equals(view?.viewId));
+    expect(events.last.direction, equals(ViewFocusDirection.forward));
+    expect(events.last.state, equals(ViewFocusState.focused));
     expect(nodeA.hasPrimaryFocus, isTrue);
     expect(notifyCount, equals(1));
     notifyCount = 0;
@@ -630,10 +631,11 @@ void main() {
     // Focus and make sure engine is notified.
     nodeA.requestFocus();
     await tester.pump();
-    expect(tester.binding.platformDispatcher.focusedViewIdTestValue, isNotNull);
-    expect(tester.binding.platformDispatcher.focusedViewIdTestValue, equals(view!.viewId));
-    expect(tester.binding.platformDispatcher.focusedViewDirectionTestValue, equals(ViewFocusDirection.forward));
-    expect(tester.binding.platformDispatcher.focusedViewStateTestValue, equals(ViewFocusState.focused));
+    List<ViewFocusEvent> events = tester.binding.platformDispatcher.testFocusEvents;
+    expect(events.length, equals(1));
+    expect(events.last.viewId, equals(view?.viewId));
+    expect(events.last.direction, equals(ViewFocusDirection.forward));
+    expect(events.last.state, equals(ViewFocusState.focused));
     expect(nodeA.hasPrimaryFocus, isTrue);
     expect(notifyCount, equals(1));
     notifyCount = 0;
@@ -649,9 +651,7 @@ void main() {
     );
     await tester.pump();
     expect(nodeA.hasFocus, isFalse);
-    expect(tester.binding.platformDispatcher.focusedViewIdTestValue, isNull);
-    expect(tester.binding.platformDispatcher.focusedViewDirectionTestValue, isNull);
-    expect(tester.binding.platformDispatcher.focusedViewStateTestValue, isNull);
+    expect(tester.binding.platformDispatcher.testFocusEvents, isEmpty);
     expect(notifyCount, equals(1));
     notifyCount = 0;
     tester.binding.platformDispatcher.resetFocusedViewTestValues();
@@ -669,9 +669,7 @@ void main() {
     // engine to unfocus.
     await tester.pump();
     expect(nodeA.hasFocus, isFalse);
-    expect(tester.binding.platformDispatcher.focusedViewIdTestValue, isNull);
-    expect(tester.binding.platformDispatcher.focusedViewDirectionTestValue, isNull);
-    expect(tester.binding.platformDispatcher.focusedViewStateTestValue, isNull);
+    expect(tester.binding.platformDispatcher.testFocusEvents, isEmpty);
     expect(notifyCount, equals(0));
     notifyCount = 0;
     tester.binding.platformDispatcher.resetFocusedViewTestValues();
@@ -680,10 +678,11 @@ void main() {
     nodeA.requestFocus();
     await tester.pump();
     expect(nodeA.hasPrimaryFocus, isTrue);
-    expect(tester.binding.platformDispatcher.focusedViewIdTestValue, isNotNull);
-    expect(tester.binding.platformDispatcher.focusedViewIdTestValue, equals(view?.viewId));
-    expect(tester.binding.platformDispatcher.focusedViewDirectionTestValue, equals(ViewFocusDirection.forward));
-    expect(tester.binding.platformDispatcher.focusedViewStateTestValue, equals(ViewFocusState.focused));
+    events = tester.binding.platformDispatcher.testFocusEvents;
+    expect(events.length, equals(1));
+    expect(events.last.viewId, equals(view?.viewId));
+    expect(events.last.direction, equals(ViewFocusDirection.forward));
+    expect(events.last.state, equals(ViewFocusState.focused));
     expect(notifyCount, equals(1));
     notifyCount = 0;
     tester.binding.platformDispatcher.resetFocusedViewTestValues();

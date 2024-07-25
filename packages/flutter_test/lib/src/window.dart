@@ -205,26 +205,24 @@ class TestPlatformDispatcher implements PlatformDispatcher {
     _onViewFocusChange?.call(event);
   }
 
-  /// Returns the last view ID given to [requestViewFocusChange], regardless of
-  /// whether it was focused or not.
-  int? get focusedViewIdTestValue => _focusedViewIdTestValue;
-  int? _focusedViewIdTestValue;
+  /// Returns the list of [ViewFocusEvent]s that have been received by
+  /// [requestViewFocusChange] since the last call to
+  /// [resetFocusedViewTestValues].
+  ///
+  /// Clearing or modifying the returned list will do nothing (it's a copy).
+  /// Call [resetFocusedViewTestValues] to clear.
+  List<ViewFocusEvent> get testFocusEvents => _testFocusEvents.toList();
+  final List<ViewFocusEvent> _testFocusEvents = <ViewFocusEvent>[];
 
-  /// Returns the last view ID to be focused by [requestViewFocusChange].
-  /// Returns null if the last view has been unfocused.
+  /// Returns the last view ID to be focused by [onViewFocusChange].
+  /// Returns null if no views are focused.
+  ///
+  /// Can be reset to null with [resetFocusedViewTestValues].
   int? get currentlyFocusedViewIdTestValue => _currentlyFocusedViewId;
   int? _currentlyFocusedViewId;
 
-  /// Returns the last focused view state given to [requestViewFocusChange].
-  ViewFocusState? get focusedViewStateTestValue => _focusedViewStateTestValue;
-  ViewFocusState? _focusedViewStateTestValue;
-
-  /// Returns the last focused view direction given to [requestViewFocusChange].
-  ViewFocusDirection? get focusedViewDirectionTestValue => _focusedViewDirectionTestValue;
-  ViewFocusDirection? _focusedViewDirectionTestValue;
-
-  /// Resets [focusedViewIdTestValue], [focusedViewStateTestValue], and
-  /// [focusedViewDirectionTestValue] to null.
+  /// Clears [testFocusEvents] and sets [currentlyFocusedViewIdTestValue] to
+  /// null.
   void resetFocusedViewTestValues() {
     if (_currentlyFocusedViewId != null) {
       // If there is a focused view, then tell everyone who still cares that
@@ -238,9 +236,7 @@ class TestPlatformDispatcher implements PlatformDispatcher {
       );
       _currentlyFocusedViewId = null;
     }
-    _focusedViewIdTestValue = null;
-    _focusedViewStateTestValue = null;
-    _focusedViewDirectionTestValue = null;
+    _testFocusEvents.clear();
   }
 
   @override
@@ -249,9 +245,13 @@ class TestPlatformDispatcher implements PlatformDispatcher {
     required ViewFocusState state,
     required ViewFocusDirection direction,
   }) {
-    _focusedViewIdTestValue = viewId;
-    _focusedViewStateTestValue = state;
-    _focusedViewDirectionTestValue = direction;
+    _testFocusEvents.add(
+      ViewFocusEvent(
+        viewId: viewId,
+        state: state,
+        direction: direction,
+      ),
+    );
     _platformDispatcher.requestViewFocusChange(viewId: viewId, state: state, direction: direction);
   }
 
