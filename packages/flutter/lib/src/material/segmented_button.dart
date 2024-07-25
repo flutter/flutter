@@ -571,7 +571,7 @@ class SegmentedButtonState<T> extends State<SegmentedButton<T>> {
             enabledBorder: _enabled ? enabledBorder : disabledBorder,
             disabledBorder: disabledBorder,
             direction: widget.direction,
-            textDirection: testDirection,
+            textDirection: textDirection,
             isExpanded: widget.expandedInsets != null,
             children: buttons,
           ),
