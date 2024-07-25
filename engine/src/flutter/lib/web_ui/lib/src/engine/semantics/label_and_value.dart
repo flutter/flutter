@@ -48,7 +48,7 @@ enum LabelRepresentation {
   sizedSpan;
 
   /// Creates the behavior for this label representation.
-  LabelRepresentationBehavior createBehavior(PrimaryRoleManager owner) {
+  LabelRepresentationBehavior createBehavior(SemanticRole owner) {
     return switch (this) {
       ariaLabel => AriaLabelRepresentation._(owner),
       domText => DomTextRepresentation._(owner),
@@ -63,8 +63,8 @@ abstract final class LabelRepresentationBehavior {
 
   final LabelRepresentation kind;
 
-  /// The role manager that this label representation is attached to.
-  final PrimaryRoleManager owner;
+  /// The role that this label representation is attached to.
+  final SemanticRole owner;
 
   /// Convenience getter for the corresponding semantics object.
   SemanticsObject get semanticsObject => owner.semanticsObject;
@@ -109,7 +109,7 @@ abstract final class LabelRepresentationBehavior {
 ///
 ///     <flt-semantics aria-label="Hello, World!"></flt-semantics>
 final class AriaLabelRepresentation extends LabelRepresentationBehavior {
-  AriaLabelRepresentation._(PrimaryRoleManager owner) : super(LabelRepresentation.ariaLabel, owner);
+  AriaLabelRepresentation._(SemanticRole owner) : super(LabelRepresentation.ariaLabel, owner);
 
   String? _previousLabel;
 
@@ -143,7 +143,7 @@ final class AriaLabelRepresentation extends LabelRepresentationBehavior {
 /// no ARIA role set, or the role does not size the element, then the
 /// [SizedSpanRepresentation] representation can be used.
 final class DomTextRepresentation extends LabelRepresentationBehavior {
-  DomTextRepresentation._(PrimaryRoleManager owner) : super(LabelRepresentation.domText, owner);
+  DomTextRepresentation._(SemanticRole owner) : super(LabelRepresentation.domText, owner);
 
   DomText? _domText;
   String? _previousLabel;
@@ -233,7 +233,7 @@ typedef _Measurement = ({
 /// * Use an existing non-text role, e.g. "heading". Sizes correctly, but breaks
 ///   the message (reads "heading").
 final class SizedSpanRepresentation extends LabelRepresentationBehavior {
-  SizedSpanRepresentation._(PrimaryRoleManager owner) : super(LabelRepresentation.sizedSpan, owner) {
+  SizedSpanRepresentation._(SemanticRole owner) : super(LabelRepresentation.sizedSpan, owner) {
     _domText.style
       // `inline-block` is needed for two reasons:
       // - It supports measuring the true size of the text. Pure `block` would
@@ -433,14 +433,13 @@ final class SizedSpanRepresentation extends LabelRepresentationBehavior {
   DomElement get focusTarget => _domText;
 }
 
-/// Renders [SemanticsObject.label] and/or [SemanticsObject.value] to the semantics DOM.
+/// Renders the label for a [SemanticsObject] that can be scanned by screen
+/// readers, web crawlers, and other automated agents.
 ///
-/// The value is not always rendered. Some semantics nodes correspond to
-/// interactive controls. In such case the value is reported via that element's
-/// `value` attribute rather than rendering it separately.
-class LabelAndValue extends RoleManager {
-  LabelAndValue(SemanticsObject semanticsObject, PrimaryRoleManager owner, { required this.preferredRepresentation })
-      : super(Role.labelAndValue, semanticsObject, owner);
+/// See [computeDomSemanticsLabel] for the exact logic that constructs the label
+/// of a semantic node.
+class LabelAndValue extends SemanticBehavior {
+  LabelAndValue(super.semanticsObject, super.owner, { required this.preferredRepresentation });
 
   /// The preferred representation of the label in the DOM.
   ///
@@ -471,7 +470,7 @@ class LabelAndValue extends RoleManager {
   /// If the node has children always use an `aria-label`. Using extra child
   /// nodes to represent the label will cause layout shifts and confuse the
   /// screen reader. If the are no children, use the representation preferred
-  /// by the primary role manager.
+  /// by the role.
   LabelRepresentationBehavior _getEffectiveRepresentation() {
     final LabelRepresentation effectiveRepresentation = semanticsObject.hasChildren
       ? LabelRepresentation.ariaLabel
@@ -491,7 +490,7 @@ class LabelAndValue extends RoleManager {
   /// combination is present.
   String? _computeLabel() {
     // If the node is incrementable the value is reported to the browser via
-    // the respective role manager. We do not need to also render it again here.
+    // the respective role. We do not need to also render it again here.
     final bool shouldDisplayValue = !semanticsObject.isIncrementable && semanticsObject.hasValue;
 
     return computeDomSemanticsLabel(
