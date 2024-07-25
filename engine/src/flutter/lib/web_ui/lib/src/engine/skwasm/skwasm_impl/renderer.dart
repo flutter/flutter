@@ -357,12 +357,12 @@ class SkwasmRenderer implements Renderer {
     int? targetHeight,
     bool allowUpscaling = true
   }) async {
-    final String? contentType = detectContentType(list);
+    final ImageType? contentType = detectImageType(list);
     if (contentType == null) {
       throw Exception('Could not determine content type of image from data');
     }
     final SkwasmImageDecoder baseDecoder = SkwasmImageDecoder(
-      contentType: contentType,
+      contentType: contentType.mimeType,
       dataSource: list.toJS,
       debugSource: 'encoded image bytes',
     );

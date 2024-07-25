@@ -17,20 +17,16 @@ Future<ui.Codec> skiaInstantiateImageCodec(Uint8List list,
   ui.Codec codec;
   // ImageDecoder does not detect image type automatically. It requires us to
   // tell it what the image type is.
-  final String contentType = tryDetectContentType(list, 'encoded image bytes');
+  final ImageType imageType = tryDetectImageType(list, 'encoded image bytes');
 
   if (browserSupportsImageDecoder) {
     codec = await CkBrowserImageDecoder.create(
       data: list,
-      contentType: contentType,
+      contentType: imageType.mimeType,
       debugSource: 'encoded image bytes',
     );
   } else {
-    // TODO(harryterkelsen): If the image is animated, then use Skia to decode.
-    // This is currently too conservative, assuming all GIF and WEBP images are
-    // animated. We should detect if they are actually animated by reading the
-    // image headers, https://github.com/flutter/flutter/issues/151911.
-    if (contentType == 'image/gif' || contentType == 'image/webp') {
+    if (imageType.isAnimated) {
       codec = CkAnimatedImage.decodeFromBytes(list, 'encoded image bytes',
           targetWidth: targetWidth, targetHeight: targetHeight);
     } else {
@@ -336,10 +332,10 @@ Future<ui.Codec> skiaInstantiateWebImageCodec(
   } on ImageCodecException {
     imageElementCodec.dispose();
     final Uint8List list = await fetchImage(url, chunkCallback);
-    final String contentType = tryDetectContentType(list, url);
+    final ImageType imageType = tryDetectImageType(list, url);
     if (browserSupportsImageDecoder) {
       return CkBrowserImageDecoder.create(
-          data: list, contentType: contentType, debugSource: url);
+          data: list, contentType: imageType.mimeType, debugSource: url);
     } else {
       final DomBlob blob = createDomBlob(<ByteBuffer>[list.buffer]);
       final CkImageBlobCodec codec = CkImageBlobCodec(blob);
@@ -623,13 +619,13 @@ class CkImage implements ui.Image, StackTraceDebugger {
   }
 }
 
-/// Detect the content type or throw an error if content type can't be detected.
-String tryDetectContentType(Uint8List data, String debugSource) {
+/// Detect the image type or throw an error if image type can't be detected.
+ImageType tryDetectImageType(Uint8List data, String debugSource) {
   // ImageDecoder does not detect image type automatically. It requires us to
   // tell it what the image type is.
-  final String? contentType = detectContentType(data);
+  final ImageType? imageType = detectImageType(data);
 
-  if (contentType == null) {
+  if (imageType == null) {
     final String fileHeader;
     if (data.isNotEmpty) {
       fileHeader =
@@ -642,7 +638,7 @@ String tryDetectContentType(Uint8List data, String debugSource) {
         'File header was $fileHeader.\n'
         'Image source: $debugSource');
   }
-  return contentType;
+  return imageType;
 }
 
 sealed class ImageSource {
