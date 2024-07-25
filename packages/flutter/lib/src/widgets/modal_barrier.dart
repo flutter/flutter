@@ -31,7 +31,7 @@ import 'transitions.dart';
 ///  * [ModalBarrier], which utilizes this widget to adjust the barrier focus
 /// size based on the size of the content layer rendered on top of it.
 class _SemanticsClipper extends SingleChildRenderObjectWidget{
-  /// creates a [SemanticsClipper] that updates the size of the
+  /// creates a [_SemanticsClipper] that updates the size of the
   /// [SemanticsNode.rect] of its child based on the value inside the provided
   /// [ValueNotifier], or a default value of [EdgeInsets.zero].
   const _SemanticsClipper({
