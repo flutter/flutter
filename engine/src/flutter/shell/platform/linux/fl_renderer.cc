@@ -38,7 +38,8 @@ typedef struct {
   // Engine we are rendering.
   GWeakRef engine;
 
-  FlView* view;
+  // Views being rendered.
+  GHashTable* views;
 
   // target dimension for resizing
   int target_width;
@@ -244,6 +245,7 @@ static void fl_renderer_dispose(GObject* object) {
   fl_renderer_unblock_main_thread(self);
 
   g_weak_ref_clear(&priv->engine);
+  g_clear_pointer(&priv->views, g_hash_table_unref);
   g_clear_pointer(&priv->framebuffers, g_ptr_array_unref);
 
   G_OBJECT_CLASS(fl_renderer_parent_class)->dispose(object);
@@ -256,6 +258,8 @@ static void fl_renderer_class_init(FlRendererClass* klass) {
 static void fl_renderer_init(FlRenderer* self) {
   FlRendererPrivate* priv = reinterpret_cast<FlRendererPrivate*>(
       fl_renderer_get_instance_private(self));
+  priv->views =
+      g_hash_table_new_full(g_direct_hash, g_direct_equal, nullptr, nullptr);
   priv->framebuffers = g_ptr_array_new_with_free_func(g_object_unref);
 }
 
@@ -268,14 +272,15 @@ void fl_renderer_set_engine(FlRenderer* self, FlEngine* engine) {
   g_weak_ref_init(&priv->engine, engine);
 }
 
-gboolean fl_renderer_start(FlRenderer* self, FlView* view) {
+void fl_renderer_add_view(FlRenderer* self,
+                          FlutterViewId view_id,
+                          FlView* view) {
   FlRendererPrivate* priv = reinterpret_cast<FlRendererPrivate*>(
       fl_renderer_get_instance_private(self));
 
-  g_return_val_if_fail(FL_IS_RENDERER(self), FALSE);
+  g_return_if_fail(FL_IS_RENDERER(self));
 
-  priv->view = view;
-  return TRUE;
+  g_hash_table_insert(priv->views, GINT_TO_POINTER(view_id), view);
 }
 
 void* fl_renderer_get_proc_address(FlRenderer* self, const char* name) {
@@ -370,6 +375,7 @@ void fl_renderer_wait_for_frame(FlRenderer* self,
 }
 
 gboolean fl_renderer_present_layers(FlRenderer* self,
+                                    FlutterViewId view_id,
                                     const FlutterLayer** layers,
                                     size_t layers_count) {
   FlRendererPrivate* priv = reinterpret_cast<FlRendererPrivate*>(
@@ -407,8 +413,10 @@ gboolean fl_renderer_present_layers(FlRenderer* self,
     }
   }
 
-  if (priv->view != nullptr) {
-    fl_view_redraw(priv->view);
+  FlView* view =
+      FL_VIEW(g_hash_table_lookup(priv->views, GINT_TO_POINTER(view_id)));
+  if (view != nullptr) {
+    fl_view_redraw(view);
   }
 
   return TRUE;
