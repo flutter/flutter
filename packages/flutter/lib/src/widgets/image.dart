@@ -2,6 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'app.dart';
+/// @docImport 'fade_in_image.dart';
+/// @docImport 'icon.dart';
+/// @docImport 'transitions.dart';
+library;
+
 import 'dart:async';
 import 'dart:io' show File;
 
