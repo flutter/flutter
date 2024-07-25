@@ -1671,6 +1671,7 @@ void main() {
         child: SearchAnchor(
           isFullScreen: false,
           viewShrinkWrap: true,
+          viewConstraints: const BoxConstraints(),
           builder: (BuildContext context, SearchController controller) {
             return IconButton(icon: const Icon(Icons.search), onPressed: () {
               controller.openView();

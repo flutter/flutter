@@ -970,9 +970,13 @@ class _ViewContentState extends State<_ViewContent> {
       ?? widget.viewHeaderTextStyle
       ?? viewTheme.headerTextStyle
       ?? viewDefaults.headerHintStyle;
+
     final BoxConstraints effectiveConstraints = widget.viewConstraints
       ?? viewTheme.constraints
       ?? viewDefaults.constraints!;
+    final double minWidth = math.min(effectiveConstraints.minWidth, _viewRect.width);
+    final double minHeight = math.min(effectiveConstraints.minHeight, _viewRect.height);
+
     final EdgeInsets? effectivePadding = widget.viewPadding
       ?? viewTheme.padding
       ?? viewDefaults.padding;
@@ -991,9 +995,9 @@ class _ViewContentState extends State<_ViewContent> {
         offset: _viewRect.topLeft,
         child: ConstrainedBox(
           constraints: BoxConstraints(
-            minWidth: effectiveConstraints.minWidth,
+            minWidth: minWidth,
             maxWidth: _viewRect.width,
-            minHeight: effectiveConstraints.minHeight,
+            minHeight: minHeight,
             maxHeight: _viewRect.height,
           ),
           child: Padding(
