@@ -148,8 +148,8 @@ class SegmentedButton<T> extends StatefulWidget {
   /// [ChoiceChip] widgets.
   final List<ButtonSegment<T>> segments;
 
-  /// How the [segments] get aligned, by default its [Axis.horizontal]
-  /// if [Axis.vertical] the segments buttons will aligned in the "y" axis
+  /// How the [segments] get aligned, by default its [Axis.horizontal].
+  /// If this is [Axis.vertical], the segments will be aligned vertically
   /// and the first item in [segments] will be on the top.
   final Axis direction;
 
