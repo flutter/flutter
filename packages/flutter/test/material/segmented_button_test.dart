@@ -1132,7 +1132,7 @@ void main() {
               segments: const <ButtonSegment<int>>[
                 ButtonSegment<int>(
                   value: 0,
-                  label: Text('Option 1'),
+                  label: Text('Option 0'),
                 ),
                 ButtonSegment<int>(
                   value: 1,
