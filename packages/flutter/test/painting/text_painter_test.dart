@@ -149,8 +149,8 @@ void main() {
       painter.text = TextSpan(text: text);
       painter.layout();
       final double textAWidth = painter.width;
-      void checkUnicodeZsCategory(String charset) {
-        text = 'A$charset';
+      void checkUnicodeZsCategory(String character) {
+        text = 'A$character';
         checkCaretOffsetsLtr(text);
         painter.text = TextSpan(text: text);
         painter.layout();
