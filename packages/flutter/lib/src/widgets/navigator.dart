@@ -5660,18 +5660,13 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
 
     if (Navigator.maybeOf(context, rootNavigator: true) != this) {
       print('justin adding a PopScope. canPop? ${canPop()} with history ${_history.length}');
-      // TODO(justinmc): This seems to do the right thing, but it doesn't solve the problem.
-      // 1. Stash the changes and confirm on master that NavigatorPopHandler works in the non-go-router case.
-      // 2. If so, check why the nested navigator is receiving the back and not the root navigator.
-      //    Is it because of the janky registration ordering of willHandlePop??
       return PopScope(
         canPop: !canPop(),
-        child: child,
-      );
-      print('justin adding a NavigatorPopHandler to Navigator. With history ${_history.length}');
-      return NavigatorPopHandler(
-        onPop: () {
-          print('justin NPH onPop.');
+        onPopInvokedWithResult: (bool didPop, Object? result) {
+          print('justin PopScope onPopInvokedWithResult. $didPop');
+          if (didPop) {
+            return;
+          }
           maybePop();
         },
         child: child,
