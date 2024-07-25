@@ -26,17 +26,12 @@ class MainWidget extends StatefulWidget {
 
 class MainWidgetState extends State<MainWidget> {
 
-  Widget semanticsH1 = Semantics(
-    header: true,
-    headingLevel: 1,
-    child: const Text('Badge Demo'));
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: semanticsH1,
+        title: const Text('Badge Demo'),
       ),
       body: const Center(
         child: Badge(
