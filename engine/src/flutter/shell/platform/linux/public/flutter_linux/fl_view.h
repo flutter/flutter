@@ -42,11 +42,22 @@ G_DECLARE_FINAL_TYPE(FlView, fl_view, FL, VIEW, GtkBox)
  * fl_view_new:
  * @project: The project to show.
  *
- * Creates a widget to show Flutter application.
+ * Creates a widget to show a Flutter application.
  *
  * Returns: a new #FlView.
  */
 FlView* fl_view_new(FlDartProject* project);
+
+/**
+ * fl_view_new_for_engine:
+ * @engine: an #FlEngine.
+ *
+ * Creates a widget to show a window in a Flutter application.
+ * The engine must be not be headless.
+ *
+ * Returns: a new #FlView.
+ */
+FlView* fl_view_new_for_engine(FlEngine* engine);
 
 /**
  * fl_view_get_engine:

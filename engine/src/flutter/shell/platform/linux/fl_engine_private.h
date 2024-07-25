@@ -71,7 +71,7 @@ typedef void (*FlEngineOnPreEngineRestartHandler)(FlEngine* engine,
                                                   gpointer user_data);
 
 /**
- * fl_engine_new:
+ * fl_engine_new_with_renderer:
  * @project: an #FlDartProject.
  * @renderer: an #FlRenderer.
  *
@@ -79,7 +79,18 @@ typedef void (*FlEngineOnPreEngineRestartHandler)(FlEngine* engine,
  *
  * Returns: a new #FlEngine.
  */
-FlEngine* fl_engine_new(FlDartProject* project, FlRenderer* renderer);
+FlEngine* fl_engine_new_with_renderer(FlDartProject* project,
+                                      FlRenderer* renderer);
+
+/**
+ * fl_engine_get_renderer:
+ * @engine: an #FlEngine.
+ *
+ * Gets the renderer used by this engine.
+ *
+ * Returns: an #FlRenderer.
+ */
+FlRenderer* fl_engine_get_renderer(FlEngine* engine);
 
 /**
  * fl_engine_start:

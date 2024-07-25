@@ -24,7 +24,8 @@ typedef struct {
 static FlEngine* make_mock_engine() {
   g_autoptr(FlDartProject) project = fl_dart_project_new();
   g_autoptr(FlMockRenderer) renderer = fl_mock_renderer_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project, FL_RENDERER(renderer));
+  g_autoptr(FlEngine) engine =
+      fl_engine_new_with_renderer(project, FL_RENDERER(renderer));
   g_autoptr(GError) engine_error = nullptr;
   EXPECT_TRUE(fl_engine_start(engine, &engine_error));
   EXPECT_EQ(engine_error, nullptr);

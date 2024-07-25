@@ -37,17 +37,14 @@ static constexpr int kMicrosecondsPerMillisecond = 1000;
 struct _FlView {
   GtkBox parent_instance;
 
-  // Project being run.
-  FlDartProject* project;
+  // Engine this view is showing.
+  FlEngine* engine;
 
   // ID for this view.
   FlutterViewId view_id;
 
   // Rendering output.
   FlRendererGdk* renderer;
-
-  // Engine running @project.
-  FlEngine* engine;
 
   // Pointer button state recorded for sending status updates.
   int64_t button_state;
@@ -633,50 +630,6 @@ static void size_allocate_cb(FlView* self) {
   handle_geometry_changed(self);
 }
 
-static void fl_view_constructed(GObject* object) {
-  FlView* self = FL_VIEW(object);
-
-  self->renderer = fl_renderer_gdk_new();
-  self->engine = fl_engine_new(self->project, FL_RENDERER(self->renderer));
-  fl_engine_set_update_semantics_handler(self->engine, update_semantics_cb,
-                                         self, nullptr);
-  fl_engine_set_on_pre_engine_restart_handler(
-      self->engine, on_pre_engine_restart_cb, self, nullptr);
-}
-
-static void fl_view_set_property(GObject* object,
-                                 guint prop_id,
-                                 const GValue* value,
-                                 GParamSpec* pspec) {
-  FlView* self = FL_VIEW(object);
-
-  switch (prop_id) {
-    case kPropFlutterProject:
-      g_set_object(&self->project,
-                   static_cast<FlDartProject*>(g_value_get_object(value)));
-      break;
-    default:
-      G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
-      break;
-  }
-}
-
-static void fl_view_get_property(GObject* object,
-                                 guint prop_id,
-                                 GValue* value,
-                                 GParamSpec* pspec) {
-  FlView* self = FL_VIEW(object);
-
-  switch (prop_id) {
-    case kPropFlutterProject:
-      g_value_set_object(value, self->project);
-      break;
-    default:
-      G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
-      break;
-  }
-}
-
 static void fl_view_notify(GObject* object, GParamSpec* pspec) {
   FlView* self = FL_VIEW(object);
 
@@ -699,9 +652,8 @@ static void fl_view_dispose(GObject* object) {
                                                 nullptr);
   }
 
-  g_clear_object(&self->project);
-  g_clear_object(&self->renderer);
   g_clear_object(&self->engine);
+  g_clear_object(&self->renderer);
   g_clear_object(&self->window_state_monitor);
   g_clear_object(&self->scrolling_manager);
   g_clear_object(&self->keyboard_handler);
@@ -736,23 +688,12 @@ static gboolean fl_view_key_release_event(GtkWidget* widget,
 
 static void fl_view_class_init(FlViewClass* klass) {
   GObjectClass* object_class = G_OBJECT_CLASS(klass);
-  object_class->constructed = fl_view_constructed;
-  object_class->set_property = fl_view_set_property;
-  object_class->get_property = fl_view_get_property;
   object_class->notify = fl_view_notify;
   object_class->dispose = fl_view_dispose;
 
   GtkWidgetClass* widget_class = GTK_WIDGET_CLASS(klass);
   widget_class->key_press_event = fl_view_key_press_event;
   widget_class->key_release_event = fl_view_key_release_event;
-
-  g_object_class_install_property(
-      G_OBJECT_CLASS(klass), kPropFlutterProject,
-      g_param_spec_object(
-          "flutter-project", "flutter-project", "Flutter project in use",
-          fl_dart_project_get_type(),
-          static_cast<GParamFlags>(G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY |
-                                   G_PARAM_STATIC_STRINGS)));
 
   gtk_widget_class_set_accessible_type(GTK_WIDGET_CLASS(klass),
                                        fl_socket_accessible_get_type());
@@ -819,8 +760,24 @@ static void fl_view_init(FlView* self) {
 }
 
 G_MODULE_EXPORT FlView* fl_view_new(FlDartProject* project) {
-  return static_cast<FlView*>(
-      g_object_new(fl_view_get_type(), "flutter-project", project, nullptr));
+  g_autoptr(FlEngine) engine = fl_engine_new(project);
+  return fl_view_new_for_engine(engine);
+}
+
+G_MODULE_EXPORT FlView* fl_view_new_for_engine(FlEngine* engine) {
+  FlView* self = FL_VIEW(g_object_new(fl_view_get_type(), nullptr));
+
+  self->engine = FL_ENGINE(g_object_ref(engine));
+  FlRenderer* renderer = fl_engine_get_renderer(engine);
+  g_assert(FL_IS_RENDERER_GDK(renderer));
+  self->renderer = FL_RENDERER_GDK(g_object_ref(renderer));
+
+  fl_engine_set_update_semantics_handler(self->engine, update_semantics_cb,
+                                         self, nullptr);
+  fl_engine_set_on_pre_engine_restart_handler(
+      self->engine, on_pre_engine_restart_cb, self, nullptr);
+
+  return self;
 }
 
 G_MODULE_EXPORT FlEngine* fl_view_get_engine(FlView* self) {
