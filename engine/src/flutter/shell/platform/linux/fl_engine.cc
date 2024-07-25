@@ -207,8 +207,8 @@ static bool compositor_collect_backing_store_callback(
 static bool compositor_present_view_callback(
     const FlutterPresentViewInfo* info) {
   g_return_val_if_fail(FL_IS_RENDERER(info->user_data), false);
-  return fl_renderer_present_layers(FL_RENDERER(info->user_data), info->layers,
-                                    info->layers_count);
+  return fl_renderer_present_layers(FL_RENDERER(info->user_data), info->view_id,
+                                    info->layers, info->layers_count);
 }
 
 // Flutter engine rendering callbacks.
