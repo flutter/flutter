@@ -149,7 +149,8 @@ void main() {
       painter.text = TextSpan(text: text);
       painter.layout();
       final double textAWidth = painter.width;
-      void checkUnicodeZsCategory(String character) {
+      final double textAHeight = painter.height;
+      void checkUnicodeZsCategory(String character, int expectLines) {
         text = 'A$character';
         checkCaretOffsetsLtr(text);
         painter.text = TextSpan(text: text);
@@ -160,58 +161,63 @@ void main() {
         expect(caretOffset.dx, textAWidth);
         caretOffset = painter.getOffsetForCaret(ui.TextPosition(offset: text.length), ui.Rect.zero);
         expect(caretOffset.dx, painter.width);
+
+        painter.layout(maxWidth: textAWidth);
+        expect(painter.width, textAWidth);
+        // If charactor is non-breaking space, the height should be 2 lines. Otherwise, it should be 1 line.
+        expect(painter.height, textAHeight * expectLines);
       }
 
       // Test with trailing space
-      checkUnicodeZsCategory('\u{0020}');
+      checkUnicodeZsCategory('\u{0020}', 1);
 
       // Test with trailing no-break space
-      checkUnicodeZsCategory('\u{00A0}');
+      checkUnicodeZsCategory('\u{00A0}', 2);
 
       // Test with trailing full-width space
-      checkUnicodeZsCategory('\u{3000}');
+      checkUnicodeZsCategory('\u{3000}', 1);
 
       // Test with trailing ogham space mark
-      checkUnicodeZsCategory('\u{1680}');
+      checkUnicodeZsCategory('\u{1680}', 1);
 
       // Test with trailing en quad
-      checkUnicodeZsCategory('\u{2000}');
+      checkUnicodeZsCategory('\u{2000}', 1);
 
       // Test with trailing em quad
-      checkUnicodeZsCategory('\u{2001}');
+      checkUnicodeZsCategory('\u{2001}', 1);
 
       // Test with trailing en space
-      checkUnicodeZsCategory('\u{2002}');
+      checkUnicodeZsCategory('\u{2002}', 1);
 
       // Test with trailing em space
-      checkUnicodeZsCategory('\u{2003}');
+      checkUnicodeZsCategory('\u{2003}', 1);
 
       // Test with trailing three-per-em space
-      checkUnicodeZsCategory('\u{2004}');
+      checkUnicodeZsCategory('\u{2004}', 1);
 
       // Test with trailing four-per-em space
-      checkUnicodeZsCategory('\u{2005}');
+      checkUnicodeZsCategory('\u{2005}', 1);
 
       // Test with trailing six-per-em space
-      checkUnicodeZsCategory('\u{2006}');
+      checkUnicodeZsCategory('\u{2006}', 1);
 
       // Test with trailing figure space
-      checkUnicodeZsCategory('\u{2007}');
+      checkUnicodeZsCategory('\u{2007}', 2);
 
       // Test with trailing punctuation space
-      checkUnicodeZsCategory('\u{2008}');
+      checkUnicodeZsCategory('\u{2008}', 1);
 
       // Test with trailing thin space
-      checkUnicodeZsCategory('\u{2009}');
+      checkUnicodeZsCategory('\u{2009}', 1);
 
       // Test with trailing hair space
-      checkUnicodeZsCategory('\u{200A}');
+      checkUnicodeZsCategory('\u{200A}', 1);
 
       // Test with trailing narrow no-break space(NNBSP)
-      checkUnicodeZsCategory('\u{202F}');
+      checkUnicodeZsCategory('\u{202F}', 2);
 
       // Test with trailing medium mathematical space(MMSP)
-      checkUnicodeZsCategory('\u{205F}');
+      checkUnicodeZsCategory('\u{205F}', 1);
 
       painter.dispose();
     });
