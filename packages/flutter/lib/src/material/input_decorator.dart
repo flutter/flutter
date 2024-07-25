@@ -2622,19 +2622,26 @@ class InputDecoration {
   ///
   /// This type of input decoration does not include a border by default.
   ///
+  /// A collapsed decoration cannot have [labelText], [errorText], [counter],
+  /// [icon], prefixes, and suffixes.
+  ///
   /// Sets the [isCollapsed] property to true.
+  /// Sets the [contentPadding] property to [EdgeInsets.zero].
   const InputDecoration.collapsed({
     required this.hintText,
     this.floatingLabelBehavior,
     this.floatingLabelAlignment,
     this.hintStyle,
     this.hintTextDirection,
+    this.hintMaxLines,
+    this.hintFadeDuration,
     this.filled = false,
     this.fillColor,
     this.focusColor,
     this.hoverColor,
     this.border = InputBorder.none,
     this.enabled = true,
+    this.constraints,
   }) : icon = null,
        iconColor = null,
        label = null,
@@ -2645,8 +2652,6 @@ class InputDecoration {
        helperText = null,
        helperStyle = null,
        helperMaxLines = null,
-       hintMaxLines = null,
-       hintFadeDuration = null,
        error = null,
        errorText = null,
        errorStyle = null,
@@ -2675,8 +2680,7 @@ class InputDecoration {
        disabledBorder = null,
        enabledBorder = null,
        semanticCounterText = null,
-       alignLabelWithHint = false,
-       constraints = null;
+       alignLabelWithHint = false;
 
   /// An icon to show before the input field and outside of the decoration's
   /// container.
@@ -3019,7 +3023,8 @@ class InputDecoration {
 
   /// Whether the decoration is the same size as the input field.
   ///
-  /// A collapsed decoration cannot have [labelText], [errorText], an [icon].
+  /// A collapsed decoration cannot have [labelText], [errorText], [counter],
+  /// [icon], prefixes, and suffixes.
   ///
   /// To create a collapsed input decoration, use [InputDecoration.collapsed].
   final bool? isCollapsed;
@@ -3881,7 +3886,7 @@ class InputDecoration {
 /// the current input decoration theme to initialize null [InputDecoration]
 /// properties.
 ///
-/// The [InputDecoration.applyDefaults] method is used to combine a input
+/// The [InputDecoration.applyDefaults] method is used to combine an input
 /// decoration theme with an [InputDecoration] object.
 @immutable
 class InputDecorationTheme with Diagnosticable {
