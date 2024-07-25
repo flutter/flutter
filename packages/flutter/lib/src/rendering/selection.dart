@@ -228,6 +228,17 @@ class SelectedContentRange {
   }
 
   @override
+  int get hashCode {
+    return Object.hash(
+      selectableId,
+      contentLength,
+      startOffset,
+      endOffset,
+      children,
+    );
+  }
+
+  @override
   String toString() {
     return 'SelectedContentRange(\n'
            '  selectableId: $selectableId,\n'
