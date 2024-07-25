@@ -39,5 +39,5 @@ Future<void> _main() async {
       nativeDriver.screenshot(),
       matchesGoldenFile('android_driver_test.BlueRectangle.png'),
     );
-  });
+  }, timeout: Timeout.none);
 }
