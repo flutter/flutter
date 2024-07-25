@@ -357,24 +357,8 @@ class _TextLayout {
     // https://unicode.org/reports/tr9/#L1, so we can anchor the caret to the
     // last logical trailing space.
     final bool hasTrailingSpaces = switch (rawString.codeUnitAt(rawString.length - 1)) {
-      0x9 ||        // horizontal tab
-      0x3000 ||     // ideographic space
-      0x1680 ||     // ogham space mark
-      0x2000 ||     // en quad
-      0x2001 ||     // em quad
-      0x2002 ||     // en space
-      0x2003 ||     // em space
-      0x2004 ||     // three-per-em space
-      0x2005 ||     // four-per-em space
-      0x2006 ||     // six-per-em space
-      0x2007 ||     // figure space
-      0x2008 ||     // punctuation space
-      0x2009 ||     // thin space
-      0x200A ||     // hair space
-      0x202F ||     // narrow no-break space(NNBSP)
-      0x205F ||     // medium mathematical space(MMSP)
-      0x20 => true, // space
-      _ => false,
+       0x9 => true, // horizontal tab
+        _ => RegExp(r'\p{Space_Separator}', unicode: true).hasMatch(rawString), // Unicode space separator
     };
 
     final double baseline = lineMetrics.baseline;
