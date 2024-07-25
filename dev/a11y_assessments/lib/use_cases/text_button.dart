@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-
+import '../utils.dart';
 import 'use_cases.dart';
 
 class TextButtonUseCase extends UseCase {
@@ -29,6 +29,7 @@ class MainWidgetState extends State<MainWidget> {
 
   @override
   Widget build(BuildContext context) {
+    setWebTitle('TextButton Demo', Theme.of(context).colorScheme.primary.value);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,

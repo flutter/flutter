@@ -77,7 +77,6 @@ class HomePageState extends State<HomePage> {
   }
 
   @override
-  @override
   Widget build(BuildContext context) {
     setWebTitle('Home Page', Theme.of(context).colorScheme.primary.value);
 

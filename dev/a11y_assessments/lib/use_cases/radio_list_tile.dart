@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-
+import '../utils.dart';
 import 'use_cases.dart';
 
 class RadioListTileUseCase extends UseCase {
@@ -35,6 +35,7 @@ class _MainWidgetState extends State<_MainWidget> {
 
   @override
   Widget build(BuildContext context) {
+    setWebTitle('NavigationBar Demo', Theme.of(context).colorScheme.primary.value);
     return Scaffold(
       appBar: AppBar(
         title: Semantics(headingLevel: 1, child: const Text('Radio button demo'))
