@@ -270,4 +270,24 @@
   [self removeMetalLayer:layer];
 }
 
+- (void)testDealloc {
+  __weak FlutterMetalLayer* weakLayer;
+  @autoreleasepool {
+    FlutterMetalLayer* layer = [self addMetalLayer];
+    weakLayer = layer;
+    TestCompositor* compositor = [[TestCompositor alloc] initWithLayer:layer];
+
+    id<CAMetalDrawable> drawable = [layer nextDrawable];
+    BAIL_IF_NO_DRAWABLE(drawable);
+    [drawable present];
+    [compositor commitTransaction];
+
+    [self removeMetalLayer:layer];
+    // Deallocating the layer after removing is not synchronous.
+    CFRunLoopRunInMode(kCFRunLoopDefaultMode, 1, YES);
+  }
+
+  XCTAssertNil(weakLayer);
+}
+
 @end
