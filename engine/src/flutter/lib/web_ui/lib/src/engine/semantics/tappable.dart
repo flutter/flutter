@@ -6,9 +6,9 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
 /// Sets the "button" ARIA role.
-class Button extends PrimaryRoleManager {
-  Button(SemanticsObject semanticsObject) : super.withBasics(
-    PrimaryRole.button,
+class SemanticButton extends SemanticRole {
+  SemanticButton(SemanticsObject semanticsObject) : super.withBasics(
+    SemanticRoleKind.button,
     semanticsObject,
     preferredLabelRepresentation: LabelRepresentation.domText,
   ) {
@@ -31,15 +31,18 @@ class Button extends PrimaryRoleManager {
   }
 }
 
-/// Listens to HTML "click" gestures detected by the browser.
+/// Implements clicking and tapping behavior for a semantics node.
 ///
-/// This gestures is different from the click and tap gestures detected by the
+/// Listens to HTML DOM "click" events detected by the browser.
+///
+/// A DOM "click" is different from the click and tap gestures detected by the
 /// framework from raw pointer events. When an assistive technology is enabled
 /// the browser may not send us pointer events. In that mode we forward HTML
 /// click as [ui.SemanticsAction.tap].
-class Tappable extends RoleManager {
-  Tappable(SemanticsObject semanticsObject, PrimaryRoleManager owner)
-      : super(Role.tappable, semanticsObject, owner) {
+///
+/// See also [ClickDebouncer].
+class Tappable extends SemanticBehavior {
+  Tappable(super.semanticsObject, super.owner) {
     _clickListener = createDomEventListener((DomEvent click) {
       PointerBinding.clickDebouncer.onClick(
         click,

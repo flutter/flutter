@@ -42,7 +42,7 @@ class SemanticsTextEditingStrategy extends DefaultTextEditingStrategy {
   /// The text field whose DOM element is currently used for editing.
   ///
   /// If this field is null, no editing takes place.
-  TextField? activeTextField;
+  SemanticTextField? activeTextField;
 
   /// Current input configuration supplied by the "flutter/textinput" channel.
   InputConfiguration? inputConfig;
@@ -66,7 +66,7 @@ class SemanticsTextEditingStrategy extends DefaultTextEditingStrategy {
   ///
   /// This method must be called after [enable] to name sure that [inputConfig],
   /// [onChange], and [onAction] are not null.
-  void activate(TextField textField) {
+  void activate(SemanticTextField textField) {
     assert(
       inputConfig != null && onChange != null && onAction != null,
       '"enable" should be called before "enableFromSemantics" and initialize input configuration',
@@ -91,7 +91,7 @@ class SemanticsTextEditingStrategy extends DefaultTextEditingStrategy {
   ///
   /// Typically at this point the element loses focus (blurs) and stops being
   /// used for editing.
-  void deactivate(TextField textField) {
+  void deactivate(SemanticTextField textField) {
     if (activeTextField == textField) {
       disable();
     }
@@ -167,7 +167,7 @@ class SemanticsTextEditingStrategy extends DefaultTextEditingStrategy {
 
   @override
   void initializeElementPlacement() {
-    // Element placement is done by [TextField].
+    // Element placement is done by [SemanticTextField].
   }
 
   @override
@@ -176,7 +176,7 @@ class SemanticsTextEditingStrategy extends DefaultTextEditingStrategy {
 
   @override
   void updateElementPlacement(EditableTextGeometry textGeometry) {
-    // Element placement is done by [TextField].
+    // Element placement is done by [SemanticTextField].
   }
 
   EditableTextStyle? _queuedStyle;
@@ -208,8 +208,8 @@ class SemanticsTextEditingStrategy extends DefaultTextEditingStrategy {
 /// browser gestures when in pointer mode. In Safari on iOS pointer events are
 /// used to detect text box invocation. This is because Safari issues touch
 /// events even when VoiceOver is enabled.
-class TextField extends PrimaryRoleManager {
-  TextField(SemanticsObject semanticsObject) : super.blank(PrimaryRole.textField, semanticsObject) {
+class SemanticTextField extends SemanticRole {
+  SemanticTextField(SemanticsObject semanticsObject) : super.blank(SemanticRoleKind.textField, semanticsObject) {
     _initializeEditableElement();
   }
 

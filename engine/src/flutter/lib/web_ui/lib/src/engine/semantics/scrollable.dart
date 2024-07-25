@@ -22,10 +22,10 @@ import 'package:ui/ui.dart' as ui;
 /// contents is less than the size of the viewport the browser snaps
 /// "scrollTop" back to zero. If there is more content than available in the
 /// viewport "scrollTop" may take positive values.
-class Scrollable extends PrimaryRoleManager {
-  Scrollable(SemanticsObject semanticsObject)
+class SemanticScrollable extends SemanticRole {
+  SemanticScrollable(SemanticsObject semanticsObject)
       : super.withBasics(
-          PrimaryRole.scrollable,
+          SemanticRoleKind.scrollable,
           semanticsObject,
           preferredLabelRepresentation: LabelRepresentation.ariaLabel,
         ) {

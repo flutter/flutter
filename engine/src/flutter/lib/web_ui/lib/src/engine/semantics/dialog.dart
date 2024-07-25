@@ -6,12 +6,10 @@ import '../dom.dart';
 import '../semantics.dart';
 import '../util.dart';
 
-/// Provides accessibility for dialogs.
-///
-/// See also [Role.dialog].
-class Dialog extends PrimaryRoleManager {
-  Dialog(SemanticsObject semanticsObject) : super.blank(PrimaryRole.dialog, semanticsObject) {
-    // The following secondary roles can coexist with dialog. Generic `RouteName`
+/// Provides accessibility for routes, including dialogs and pop-up menus.
+class SemanticDialog extends SemanticRole {
+  SemanticDialog(SemanticsObject semanticsObject) : super.blank(SemanticRoleKind.dialog, semanticsObject) {
+    // The following behaviors can coexist with dialog. Generic `RouteName`
     // and `LabelAndValue` are not used by this role because when the dialog
     // names its own route an `aria-label` is used instead of `aria-describedby`.
     addFocusManagement();
@@ -39,14 +37,14 @@ class Dialog extends PrimaryRoleManager {
 
   void _setDefaultFocus() {
     semanticsObject.visitDepthFirstInTraversalOrder((SemanticsObject node) {
-      final PrimaryRoleManager? roleManager = node.primaryRole;
-      if (roleManager == null) {
+      final SemanticRole? role = node.semanticRole;
+      if (role == null) {
         return true;
       }
 
       // If the node does not take focus (e.g. focusing on it does not make
       // sense at all). Despair not. Keep looking.
-      final bool didTakeFocus = roleManager.focusAsRouteDefault();
+      final bool didTakeFocus = role.focusAsRouteDefault();
       return !didTakeFocus;
     });
   }
@@ -99,14 +97,18 @@ class Dialog extends PrimaryRoleManager {
   }
 }
 
-/// Supplies a description for the nearest ancestor [Dialog].
-class RouteName extends RoleManager {
-  RouteName(
-    SemanticsObject semanticsObject,
-    PrimaryRoleManager owner,
-  ) : super(Role.routeName, semanticsObject, owner);
+/// Supplies a description for the nearest ancestor [SemanticDialog].
+///
+/// This role is assigned to nodes that have `namesRoute` set but not
+/// `scopesRoute`. When both flags are set the node only gets the [SemanticDialog] role.
+///
+/// If the ancestor dialog is missing, this role has no effect. It is up to the
+/// framework, widget, and app authors to make sure a route name is scoped under
+/// a route.
+class RouteName extends SemanticBehavior {
+  RouteName(super.semanticsObject, super.owner);
 
-  Dialog? _dialog;
+  SemanticDialog? _dialog;
 
   @override
   void update() {
@@ -124,7 +126,7 @@ class RouteName extends RoleManager {
     }
 
     if (semanticsObject.isLabelDirty) {
-      final Dialog? dialog = _dialog;
+      final SemanticDialog? dialog = _dialog;
       if (dialog != null) {
         // Already attached to a dialog, just update the description.
         dialog.describeBy(this);
@@ -143,11 +145,11 @@ class RouteName extends RoleManager {
 
   void _lookUpNearestAncestorDialog() {
     SemanticsObject? parent = semanticsObject.parent;
-    while (parent != null && parent.primaryRole?.role != PrimaryRole.dialog) {
+    while (parent != null && parent.semanticRole?.kind != SemanticRoleKind.dialog) {
       parent = parent.parent;
     }
-    if (parent != null && parent.primaryRole?.role == PrimaryRole.dialog) {
-      _dialog = parent.primaryRole! as Dialog;
+    if (parent != null && parent.semanticRole?.kind == SemanticRoleKind.dialog) {
+      _dialog = parent.semanticRole! as SemanticDialog;
     }
   }
 }
