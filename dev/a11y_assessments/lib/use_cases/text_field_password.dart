@@ -31,6 +31,7 @@ class _MainWidget extends StatelessWidget {
       body: ListView(
         children: <Widget>[
           Semantics(
+            key: const Key('enabled password semantics wrapper'),
             child: const TextField(
               key: Key('enabled password'),
               decoration: InputDecoration(
@@ -40,6 +41,7 @@ class _MainWidget extends StatelessWidget {
             ),
           ),
           Semantics(
+            key: const Key('disabled password semantics wrapper'),
             child: const TextField(
               key: Key('disabled password'),
               decoration: InputDecoration(

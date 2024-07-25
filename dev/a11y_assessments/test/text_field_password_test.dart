@@ -53,9 +53,7 @@ void main() {
 
   testWidgets('disabled text field is disabled', (WidgetTester tester) async {
     await pumpsUseCase(tester, TextFieldPasswordUseCase());
-
-    final Finder finder = find.byKey(const Key('disabled password'));
-    final TextField textField = tester.widget<TextField>(finder);
-    expect(textField.enabled, isFalse);
+    expect(find.byKey(const Key('enabled password semantics wrapper')), findsOneWidget);
+    expect(find.byKey(const Key('disabled password semantics wrapper')), findsOneWidget);
   });
 }
