@@ -204,7 +204,7 @@ class MockFlutterDebugAdapter extends FlutterDebugAdapter {
   }
 
   @override
-  void sendFlutterMessage(Map<String, Object?> message) {
+  Future<void> sendFlutterMessage(Map<String, Object?> message) async {
     dapToFlutterMessages.add(message);
     // Don't call super because it will try to write to the process that we
     // didn't actually spawn.
