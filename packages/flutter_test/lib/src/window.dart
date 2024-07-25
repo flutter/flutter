@@ -198,12 +198,22 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   }
   void _handleViewFocusChanged(ViewFocusEvent event) {
     _updateViewsAndDisplays();
+    _currentlyFocusedViewId = switch (event.state) {
+      ViewFocusState.focused => event.viewId,
+      ViewFocusState.unfocused => null,
+    };
     _onViewFocusChange?.call(event);
   }
 
-  /// Returns the last view ID given to [requestViewFocusChange].
+  /// Returns the last view ID given to [requestViewFocusChange], regardless of
+  /// whether it was focused or not.
   int? get focusedViewIdTestValue => _focusedViewIdTestValue;
   int? _focusedViewIdTestValue;
+
+  /// Returns the last view ID to be focused by [requestViewFocusChange].
+  /// Returns null if the last view has been unfocused.
+  int? get currentlyFocusedViewIdTestValue => _currentlyFocusedViewId;
+  int? _currentlyFocusedViewId;
 
   /// Returns the last focused view state given to [requestViewFocusChange].
   ViewFocusState? get focusedViewStateTestValue => _focusedViewStateTestValue;
@@ -216,16 +226,17 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   /// Resets [focusedViewIdTestValue], [focusedViewStateTestValue], and
   /// [focusedViewDirectionTestValue] to null.
   void resetFocusedViewTestValues() {
-    if (_focusedViewIdTestValue != null) {
-      // If there is a value, then tell everyone who still cares that it's
-      // unfocusing.
+    if (_currentlyFocusedViewId != null) {
+      // If there is a focused view, then tell everyone who still cares that
+      // it's unfocusing.
       _platformDispatcher.onViewFocusChange?.call(
         ViewFocusEvent(
-          viewId: _focusedViewIdTestValue!,
+          viewId: _currentlyFocusedViewId!,
           state: ViewFocusState.unfocused,
           direction: ViewFocusDirection.undefined,
         ),
       );
+      _currentlyFocusedViewId = null;
     }
     _focusedViewIdTestValue = null;
     _focusedViewStateTestValue = null;
