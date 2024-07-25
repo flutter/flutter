@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-
+import '../utils.dart';
 import 'use_cases.dart';
 
 class DatePickerUseCase extends UseCase {
@@ -27,6 +27,7 @@ class _MainWidget extends StatefulWidget {
 class _MainWidgetState extends State<_MainWidget> {
   @override
   Widget build(BuildContext context) {
+    setWebTitle('DatePicker Demo', Theme.of(context).colorScheme.primary.value);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,

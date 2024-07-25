@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-
+import '../utils.dart';
 import 'use_cases.dart';
 
 class MaterialBannerUseCase extends UseCase {
@@ -31,6 +31,7 @@ class MainWidgetState extends State<MainWidget> {
 
   @override
   Widget build(BuildContext context) {
+    setWebTitle('MaterialBanner Demo', Theme.of(context).colorScheme.primary.value);
     VoidCallback? onPress;
     if (controller == null) {
       onPress = () {
