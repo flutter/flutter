@@ -4,9 +4,18 @@
 
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:flutter_driver/src/native_driver.dart';
+import 'package:flutter_goldens/flutter_goldens.dart';
 import 'package:test/test.dart';
 
+// TODO(matanlurey): This is done automatically by 'flutter test' but not by
+// 'flutter drive'. If we get closer to shipping the native 'flutter drive'
+// command, we should look into if 'flutter_test_config.dart', or a similar
+// mechanism, can be used to configure this automatically.
 void main() async {
+  await testExecutable(_main);
+}
+
+Future<void> _main() async {
   // To generate golden files locally, uncomment the following line.
   // autoUpdateGoldenFiles = true;
 

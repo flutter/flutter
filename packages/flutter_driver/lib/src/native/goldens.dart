@@ -56,7 +56,7 @@ bool autoUpdateGoldenFiles = false;
 /// This comparator is used as the backend for [matchesGoldenFile].
 ///
 /// By default, an exact pixel match to a local golden file is used.
-GoldenFileComparator goldenFileComparator = const _NaiveLocalFileComparator();
+GoldenFileComparator goldenFileComparator = const NaiveLocalFileComparator._();
 
 /// Compares image pixels against a golden image file.
 ///
@@ -114,8 +114,8 @@ abstract mixin class GoldenFileComparator {
 /// returning true only if there's an exact match. In cases where the captured
 /// test image does not match the golden file, this comparator will provide a
 /// fairly unhelpful error message, which could be improved in the future.
-final class _NaiveLocalFileComparator with GoldenFileComparator {
-  const _NaiveLocalFileComparator();
+final class NaiveLocalFileComparator with GoldenFileComparator {
+  const NaiveLocalFileComparator._();
 
   @override
   Future<bool> compare(Uint8List imageBytes, Uri golden) async {
