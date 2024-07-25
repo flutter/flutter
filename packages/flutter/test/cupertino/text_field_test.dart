@@ -534,8 +534,11 @@ void main() {
                           SemanticsFlag.hasEnabledState,
                           SemanticsFlag.isEnabled,
                         ],
-                        actions: <SemanticsAction>[SemanticsAction.tap,
-                          SemanticsAction.didGainAccessibilityFocus,],
+                        actions: <SemanticsAction>[
+                          SemanticsAction.tap,
+                          SemanticsAction.focus,
+                          SemanticsAction.didGainAccessibilityFocus,
+                        ],
                         textDirection: TextDirection.ltr,
                       ),
                     ],
@@ -7971,6 +7974,7 @@ void main() {
         isEnabled: true,
         hasEnabledState: true,
         hasTapAction: true,
+        hasFocusAction: true,
       ),
     );
   });
@@ -10313,6 +10317,7 @@ void main() {
                         ],
                         actions: <SemanticsAction>[
                           SemanticsAction.tap,
+                          SemanticsAction.focus,
                           if (defaultTargetPlatform == TargetPlatform.windows || defaultTargetPlatform == TargetPlatform.macOS)
                             SemanticsAction.didGainAccessibilityFocus,
                           // TODO(gspencergoog): also test for the presence of SemanticsAction.focus when

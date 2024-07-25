@@ -569,7 +569,6 @@ class IOSSimulator extends Device {
         buildResult,
         analytics: globals.analytics,
         fileSystem: globals.fs,
-        flutterUsage: globals.flutterUsage,
         logger: globals.logger,
         platform: SupportedPlatform.ios,
         project: app.project.parent,

@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/widgets.dart';
+///
+/// @docImport 'editable.dart';
+library;
+
 import 'dart:collection';
 import 'dart:math' as math;
 import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle, Gradient, LineMetrics, PlaceholderAlignment, Shader, TextBox, TextHeightBehavior;
@@ -1037,7 +1042,7 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
   }
 
   /// Collected during [describeSemanticsConfiguration], used by
-  /// [assembleSemanticsNode] and [_combineSemanticsInfo].
+  /// [assembleSemanticsNode].
   List<InlineSpanSemanticsInformation>? _semanticsInfo;
 
   @override

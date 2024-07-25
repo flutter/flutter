@@ -913,10 +913,10 @@ A problem occurred evaluating project ':app'.
           '│ To fix this issue, replace the following content:                                │\n'
           '│ /android/build.gradle:                                                           │\n'
           "│     - classpath 'com.android.tools.build:gradle:<current-version>'               │\n"
-          "│     + classpath 'com.android.tools.build:gradle:7.3.0'                           │\n"
+          "│     + classpath 'com.android.tools.build:gradle:$templateAndroidGradlePluginVersion'                           │\n"
           '│ /android/gradle/wrapper/gradle-wrapper.properties:                               │\n'
           '│     - https://services.gradle.org/distributions/gradle-<current-version>-all.zip │\n'
-          '│     + https://services.gradle.org/distributions/gradle-7.6.3-all.zip             │\n'
+          '│     + https://services.gradle.org/distributions/gradle-$templateDefaultGradleVersion-all.zip               │\n'
           '└──────────────────────────────────────────────────────────────────────────────────┘\n'
         )
       );
@@ -1256,7 +1256,7 @@ Could not compile build file '…/example/android/build.gradle'.
       // Ensure the error notes the incompatible Gradle/AGP/Java versions, links to related resources,
       // and a portion of the path to where to change their gradle version.
       expect(testLogger.statusText, contains('Gradle version is incompatible with the Java version'));
-      expect(testLogger.statusText, contains('flutter.dev/to/to/java-gradle-incompatibility'));
+      expect(testLogger.statusText, contains('flutter.dev/to/java-gradle-incompatibility'));
       expect(testLogger.statusText, contains('gradle-wrapper.properties'));
       expect(testLogger.statusText, contains('https://docs.gradle.org/current/userguide/compatibility.html#java'));
     }, overrides: <Type, Generator>{

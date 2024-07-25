@@ -122,4 +122,41 @@ void main() {
       expect(flutterPlatform.uriConverter?.call('hello'), 'hello/test');
     });
   });
+
+  group('generateTestBootstrap', () {
+    group('writes a "const packageConfigLocation" string', () {
+      test('with null packageConfigUri', () {
+        final String contents = generateTestBootstrap(
+          testUrl:
+              Uri.parse('file:///Users/me/some_package/test/some_test.dart'),
+          host: InternetAddress('127.0.0.1', type: InternetAddressType.IPv4),
+        );
+        // IMPORTANT: DO NOT RENAME, REMOVE, OR MODIFY THE
+        // 'const packageConfigLocation' VARIABLE.
+        // Dash tooling like Dart DevTools performs an evaluation on this variable
+        // at runtime to get the package config location for Flutter test targets.
+        expect(contents, contains("const packageConfigLocation = 'null';"));
+      });
+
+      test('with non-null packageConfigUri', () {
+        final String contents = generateTestBootstrap(
+          testUrl:
+              Uri.parse('file:///Users/me/some_package/test/some_test.dart'),
+          host: InternetAddress('127.0.0.1', type: InternetAddressType.IPv4),
+          packageConfigUri: Uri.parse(
+              'file:///Users/me/some_package/.dart_tool/package_config.json'),
+        );
+        // IMPORTANT: DO NOT RENAME, REMOVE, OR MODIFY THE
+        // 'const packageConfigLocation' VARIABLE.
+        // Dash tooling like Dart DevTools performs an evaluation on this variable
+        // at runtime to get the package config location for Flutter test targets.
+        expect(
+          contents,
+          contains(
+            "const packageConfigLocation = 'file:///Users/me/some_package/.dart_tool/package_config.json';",
+          ),
+        );
+      });
+    });
+  });
 }

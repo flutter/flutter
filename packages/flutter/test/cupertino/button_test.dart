@@ -296,7 +296,7 @@ void main() {
       TestSemantics.root(
         children: <TestSemantics>[
           TestSemantics.rootChild(
-            actions: SemanticsAction.tap.index,
+            actions: SemanticsAction.tap.index | SemanticsAction.focus.index,
             label: 'ABC',
             flags: <SemanticsFlag>[
               SemanticsFlag.isButton,

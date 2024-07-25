@@ -437,6 +437,7 @@ void main() {
         BuildMode.debug, '', treeShakeIcons: false, extraFrontEndOptions: <String>[
         '--enable-experiment=non-nullable',
         ],
+        packageConfigPath: '.dart_tool/package_config.json'
       )),
       devtoolsHandler: createNoOpHandler,
       analytics: fakeAnalytics,
@@ -1592,6 +1593,7 @@ flutter:
           BuildMode.debug,
           null,
           treeShakeIcons: false,
+          packageConfigPath: '.dart_tool/package_config.json',
         )
       ),
       target: 'main.dart',
@@ -1622,6 +1624,7 @@ flutter:
           '',
           treeShakeIcons: false,
           dartDefines: <String>['a', 'b'],
+          packageConfigPath: '.dart_tool/package_config.json',
         )
       ),
       target: 'main.dart',
@@ -1652,7 +1655,8 @@ flutter:
           BuildMode.debug,
           '',
           treeShakeIcons: false,
-          extraFrontEndOptions: <String>['--enable-experiment=non-nullable']
+          extraFrontEndOptions: <String>['--enable-experiment=non-nullable'],
+          packageConfigPath: '.dart_tool/package_config.json',
         )
       ),
       target: 'main.dart',
@@ -1731,6 +1735,7 @@ flutter:
         '',
         treeShakeIcons: false,
         trackWidgetCreation: true,
+        packageConfigPath: '.dart_tool/package_config.json',
       )),
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
@@ -1820,6 +1825,7 @@ flutter:
         '',
         treeShakeIcons: false,
         nullSafetyMode: NullSafetyMode.unsound,
+        packageConfigPath: '.dart_tool/package_config.json',
       ),
       target: null,
       platform: FakePlatform(),
@@ -1851,6 +1857,7 @@ flutter:
         '',
         treeShakeIcons: false,
         extraFrontEndOptions: <String>['--enable-experiment=non-nullable'],
+        packageConfigPath: '.dart_tool/package_config.json',
       ),
       target: null,
       platform: FakePlatform(),
@@ -1883,6 +1890,7 @@ flutter:
         '',
         treeShakeIcons: false,
         extraFrontEndOptions: <String>[],
+        packageConfigPath: '.dart_tool/package_config.json',
       ),
       target: null, platform: FakePlatform(),
     )).generator as DefaultResidentCompiler?;
@@ -1907,6 +1915,7 @@ flutter:
         treeShakeIcons: false,
         extraFrontEndOptions: <String>[],
         initializeFromDill: '/foo/bar.dill',
+        packageConfigPath: '.dart_tool/package_config.json',
       ),
       target: null, platform: FakePlatform(),
     )).generator as DefaultResidentCompiler?;
@@ -1931,6 +1940,7 @@ flutter:
         treeShakeIcons: false,
         extraFrontEndOptions: <String>[],
         assumeInitializeFromDillUpToDate: true,
+        packageConfigPath: '.dart_tool/package_config.json'
       ),
       target: null, platform: FakePlatform(),
     )).generator as DefaultResidentCompiler?;
@@ -1953,6 +1963,7 @@ flutter:
         '',
         treeShakeIcons: false,
         frontendServerStarterPath: '/foo/bar/frontend_server_starter.dart',
+        packageConfigPath: '.dart_tool/package_config.json'
       ),
       target: null, platform: FakePlatform(),
     )).generator as DefaultResidentCompiler?;
@@ -2368,6 +2379,7 @@ flutter:
             '',
             treeShakeIcons: false,
             trackWidgetCreation: true,
+            packageConfigPath: '.dart_tool/package_config.json',
           )),
           target: 'main.dart',
           devtoolsHandler: createNoOpHandler,
