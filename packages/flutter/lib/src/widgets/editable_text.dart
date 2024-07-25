@@ -5096,7 +5096,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
 
-  /// The default behavior used if [onTapOutside] is null.
+  /// The default behavior used if [EditableText.onTapOutside] is null.
   ///
   /// The `event` argument is the [PointerDownEvent] that caused the notification.
   void _defaultOnTapOutside(PointerDownEvent event) {
@@ -5748,7 +5748,7 @@ class _ScribblePlaceholder extends WidgetSpan {
 /// See also:
 ///
 ///  * [String.runes], which deals with code points like this class.
-///  * [String.characters], which deals with graphemes.
+///  * [Characters], which deals with graphemes.
 ///  * [CharacterBoundary], which is a [TextBoundary] like this class, but whose
 ///    boundaries are graphemes instead of code points.
 class _CodePointBoundary extends TextBoundary {
