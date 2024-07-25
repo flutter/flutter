@@ -133,6 +133,7 @@ Future<void> buildMacOS({
     buildInfo,
     scheme: scheme,
     configuration: configuration,
+    isMacOS: true
   ) ?? <String, String>{};
 
   // Write configuration to an xconfig file in a standard location.

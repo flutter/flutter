@@ -195,6 +195,9 @@ class XcodeProjectInterpreter {
     final String? configuration = buildContext.configuration;
     final String? target = buildContext.target;
     final String? deviceId = buildContext.deviceId;
+    final String buildDir = buildContext.isMacOS
+     ? getMacOSBuildDirectory()
+     : getIosBuildDirectory();
     final List<String> showBuildSettingsCommand = <String>[
       ...xcrunCommand(),
       'xcodebuild',
@@ -209,7 +212,9 @@ class XcodeProjectInterpreter {
       if (buildContext.environmentType == EnvironmentType.simulator)
         ...<String>['-sdk', 'iphonesimulator'],
       '-destination',
-      if (buildContext.isWatch && buildContext.environmentType == EnvironmentType.physical)
+      if (buildContext.isMacOS)
+        'generic/platform=macOS'
+      else if (buildContext.isWatch && buildContext.environmentType == EnvironmentType.physical)
         'generic/platform=watchOS'
       else if (buildContext.isWatch)
         'generic/platform=watchOS Simulator'
@@ -220,7 +225,7 @@ class XcodeProjectInterpreter {
       else
         'generic/platform=iOS Simulator',
       '-showBuildSettings',
-      'BUILD_DIR=${_fileSystem.path.absolute(getIosBuildDirectory())}',
+      'BUILD_DIR=${_fileSystem.path.absolute(buildDir)}',
       ...environmentVariablesAsXcodeBuildSettings(_platform),
     ];
     try {
@@ -402,6 +407,7 @@ class XcodeProjectBuildContext {
     this.environmentType = EnvironmentType.physical,
     this.deviceId,
     this.target,
+    this.isMacOS = false,
     this.isWatch = false,
   });
 
@@ -410,6 +416,7 @@ class XcodeProjectBuildContext {
   final EnvironmentType environmentType;
   final String? deviceId;
   final String? target;
+  final bool isMacOS;
   final bool isWatch;
 
   @override
