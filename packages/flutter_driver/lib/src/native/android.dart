@@ -113,6 +113,8 @@ final class AndroidNativeDriver implements NativeDriver {
 
   @override
   Future<NativeScreenshot> screenshot() async {
+    // Similar pause to the one in `<FlutterDriver>.screenshot()`.
+    await Future<void>.delayed(const Duration(seconds: 2));
     final io.ProcessResult result = await _adb(
       <String>[
         ..._target._toAdbArgs(),

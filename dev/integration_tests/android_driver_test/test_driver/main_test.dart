@@ -25,7 +25,6 @@ void main() async {
 
   test('should screenshot and match a full-screen blue rectangle', () async {
     await flutterDriver.waitFor(find.byType('DecoratedBox'));
-    await Future<void>.delayed(const Duration(seconds: 2));
     await expectLater(
       nativeDriver.screenshot(),
       matchesGoldenFile('android_driver_test.BlueRectangle.png'),
