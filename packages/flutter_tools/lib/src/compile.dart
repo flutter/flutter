@@ -1068,18 +1068,6 @@ class DefaultResidentCompiler implements ResidentCompiler {
   @override
   Future<void> accept() async {
     if (_compileRequestNeedsConfirmation) {
-      if (activeSource != null) {
-        print('^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^');
-        print('^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^f');
-        print('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@');
-        print('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@');
-        print('source: $activeSource');
-        print('**********************');
-        print(activeStackTrace);
-        print('################');
-        print(StackTrace.current);
-        print('%%%%%%%%%%%%%%%%%%');
-      }
       await _writelnToServerStdin('accept', printTrace: true, source: 'accept');
     }
     _compileRequestNeedsConfirmation = false;
@@ -1123,9 +1111,6 @@ class DefaultResidentCompiler implements ResidentCompiler {
     return server.exitCode;
   }
 
-  String? activeSource;
-  StackTrace? activeStackTrace;
-
   Future<void> _writelnToServerStdin(
     String line, {
     bool printTrace = false,
@@ -1136,24 +1121,12 @@ class DefaultResidentCompiler implements ResidentCompiler {
     if (server == null) {
       return;
     }
-        final PoolResource request = await _writePool.request();
-
-    if (activeSource != null) {
-      throw Exception(
-          '@andrewkolos@ OP STILL PENDING: $activeSource. Tried start $source');
-    }
-    activeSource = source;
-    activeStackTrace = StackTrace.current;
-    await ProcessUtils.writelnToStdinUnsafe(stdin: server.stdin, line: line)
-        .then((_) {
-      assert(source == activeSource);
-      activeSource = null;
-      activeStackTrace = null;
-    });
+    final PoolResource request = await _writePool.request();
+    await ProcessUtils.writelnToStdinUnsafe(stdin: server.stdin, line: line);
+    request.release();
     if (printTrace) {
       _logger.printTrace('<- $line');
     }
-    request.release();
   }
 
   Future<void> _writelnAllToServerStdin(
@@ -1162,20 +1135,10 @@ class DefaultResidentCompiler implements ResidentCompiler {
     if (server == null) {
       return;
     }
-        final PoolResource request = await _writePool.request();
-
-    if (activeSource != null) {
-      throw Exception(
-          '@andrewkolos@ OP STILL PENDING: $activeSource. Tried start $source');
-    }
-    activeSource = source;
-    activeStackTrace = StackTrace.current;
+    final PoolResource request = await _writePool.request();
     for (final String line in lines) {
       await ProcessUtils.writelnToStdinUnsafe(stdin: server.stdin, line: line);
     }
-    assert(source == activeSource);
-    activeSource = null;
-    activeStackTrace = null;
     request.release();
   }
 }
