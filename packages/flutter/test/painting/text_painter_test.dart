@@ -215,7 +215,7 @@ void main() {
       verifyCharacterIsConsideredTrailingSpace('\u{205F}');
 
       painter.dispose();
-    }, skip: isBrowser && !isSkiaWeb); // https://github.com/flutter/flutter/pull/152215
+    }, skip: isBrowser && !isSkiaWeb); // https://github.com/flutter/flutter/issues/56308
 
     test('TextPainter caret test with WidgetSpan', () {
       // Regression test for https://github.com/flutter/flutter/issues/98458.
