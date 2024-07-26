@@ -420,7 +420,7 @@ class _CheckboxPainter extends ToggleablePainter {
 
   void _drawBox(Canvas canvas, Rect outer, Paint paint, BorderSide? side) {
     // Fill the unchecked checkbox with a gradient in dark mode.
-    if (value == false && brightness == Brightness.dark){
+    if (value == false && brightness == Brightness.dark) {
       final LinearGradient fillGradient = LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
@@ -434,7 +434,7 @@ class _CheckboxPainter extends ToggleablePainter {
         ..shader = fillGradient.createShader(outer);
       canvas.drawPath(shape.getOuterPath(outer), gradientPaint);
     }
-    else{
+    else {
       canvas.drawPath(shape.getOuterPath(outer), paint);
     }
     if (side != null) {
@@ -479,7 +479,7 @@ class _CheckboxPainter extends ToggleablePainter {
       case true:
         _drawBox(canvas, outer, paint, side);
         // The fill color of an active checkbox is slightly darker in dark mode.
-        if (brightness == Brightness.dark && isActive){
+        if (brightness == Brightness.dark && isActive) {
           final Paint overlayPaint = Paint()
             ..color =  CupertinoColors.black.withOpacity(_kBrightnessModeOverlayOpacity);
           canvas.drawPath(shape.getOuterPath(outer), overlayPaint);
