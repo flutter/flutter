@@ -64,7 +64,7 @@ shelf.Handler createDirectoryHandler(Directory directory, { required bool crossO
         if (needsCrossOriginIsolated)
           ...<String, String>{
             'Cross-Origin-Opener-Policy': 'same-origin',
-            'Cross-Origin-Embedder-Policy': 'require-corp',
+            'Cross-Origin-Embedder-Policy': 'credentialless',
           },
       },
     );
@@ -539,7 +539,7 @@ class FlutterWebPlatform extends PlatformPlugin {
         if (webRenderer == WebRendererMode.skwasm)
           ...<String, String>{
             'Cross-Origin-Opener-Policy': 'same-origin',
-            'Cross-Origin-Embedder-Policy': 'require-corp',
+            'Cross-Origin-Embedder-Policy': 'credentialless',
           }
       });
     }

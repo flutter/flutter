@@ -1194,7 +1194,7 @@ class ReleaseAssetServer {
         'Content-Type': mimeType,
         if (_needsCoopCoep && file.basename == 'index.html') ...<String, String>{
           'Cross-Origin-Opener-Policy': 'same-origin',
-          'Cross-Origin-Embedder-Policy': 'require-corp',
+          'Cross-Origin-Embedder-Policy': 'credentialless',
         }
       });
     }
@@ -1206,7 +1206,7 @@ class ReleaseAssetServer {
         'Content-Type': 'text/html',
         if (_needsCoopCoep) ...<String, String>{
           'Cross-Origin-Opener-Policy': 'same-origin',
-          'Cross-Origin-Embedder-Policy': 'require-corp',
+          'Cross-Origin-Embedder-Policy': 'credentialless',
         },
       });
   }
