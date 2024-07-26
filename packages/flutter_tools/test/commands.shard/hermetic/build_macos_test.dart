@@ -10,6 +10,7 @@ import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -71,6 +72,7 @@ void main() {
   late XcodeProjectInterpreter xcodeProjectInterpreter;
   late Artifacts artifacts;
   late FakeAnalytics fakeAnalytics;
+  late FakeOperatingSystemUtils fakeOperatingSystemUtils;
 
   setUpAll(() {
     Cache.disableLocking();
@@ -90,6 +92,7 @@ void main() {
       fs: fileSystem,
       fakeFlutterVersion: FakeFlutterVersion(),
     );
+    fakeOperatingSystemUtils = FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm64);
   });
 
   // Sets up the minimal mock project files necessary to look like a Flutter project.
@@ -124,7 +127,7 @@ void main() {
         '-configuration', configuration,
         '-scheme', 'Runner',
         '-derivedDataPath', flutterBuildDir.absolute.path,
-        '-destination', 'platform=macOS',
+        '-destination', 'platform=macOS, arch=arm64',
         'OBJROOT=${fileSystem.path.join(flutterBuildDir.absolute.path, 'Build', 'Intermediates.noindex')}',
         'SYMROOT=${fileSystem.path.join(flutterBuildDir.absolute.path, 'Build', 'Products')}',
         if (verbose)
@@ -171,7 +174,7 @@ STDERR STUFF
       fileSystem: fileSystem,
       logger: logger,
       processUtils: processUtils,
-      osUtils: FakeOperatingSystemUtils(),
+      osUtils: fakeOperatingSystemUtils,
     );
     createCoreMockProjectFiles();
 
@@ -195,7 +198,7 @@ STDERR STUFF
       fileSystem: fileSystem,
       logger: logger,
       processUtils: processUtils,
-      osUtils: FakeOperatingSystemUtils(),
+      osUtils: fakeOperatingSystemUtils,
     );
 
     fileSystem.directory(fileSystem.path.join('macos', 'RenamedProj.xcodeproj')).createSync(recursive: true);
@@ -230,7 +233,7 @@ STDERR STUFF
       fileSystem: fileSystem,
       logger: logger,
       processUtils: processUtils,
-      osUtils: FakeOperatingSystemUtils(),
+      osUtils: fakeOperatingSystemUtils,
     );
     fileSystem.file('pubspec.yaml').createSync();
     fileSystem.file(fileSystem.path.join('lib', 'main.dart'))
@@ -254,7 +257,7 @@ STDERR STUFF
       fileSystem: fileSystem,
       logger: logger,
       processUtils: processUtils,
-      osUtils: FakeOperatingSystemUtils(),
+      osUtils: fakeOperatingSystemUtils,
     );
     fileSystem.file('pubspec.yaml').createSync();
     fileSystem.file(fileSystem.path.join('lib', 'main.dart'))
@@ -278,7 +281,7 @@ STDERR STUFF
       fileSystem: fileSystem,
       logger: logger,
       processUtils: processUtils,
-      osUtils: FakeOperatingSystemUtils(),
+      osUtils: fakeOperatingSystemUtils,
     );
     createMinimalMockProjectFiles();
 
@@ -314,7 +317,7 @@ STDERR STUFF
       fileSystem: MemoryFileSystem.test(),
       processUtils: processUtils,
       logger: BufferLogger.test(),
-      osUtils: FakeOperatingSystemUtils(),
+      osUtils: fakeOperatingSystemUtils,
     );
     createMinimalMockProjectFiles();
 
@@ -339,7 +342,7 @@ STDERR STUFF
       fileSystem: fileSystem,
       logger: logger,
       processUtils: processUtils,
-      osUtils: FakeOperatingSystemUtils(),
+      osUtils: fakeOperatingSystemUtils,
     );
     createMinimalMockProjectFiles();
 
@@ -363,7 +366,7 @@ STDERR STUFF
       fileSystem: fileSystem,
       logger: logger,
       processUtils: processUtils,
-      osUtils: FakeOperatingSystemUtils(),
+      osUtils: fakeOperatingSystemUtils,
     );
     createMinimalMockProjectFiles();
 
@@ -388,7 +391,7 @@ STDERR STUFF
       fileSystem: fileSystem,
       logger: logger,
       processUtils: processUtils,
-      osUtils: FakeOperatingSystemUtils(),
+      osUtils: fakeOperatingSystemUtils,
     );
     createMinimalMockProjectFiles();
 
@@ -413,7 +416,7 @@ STDERR STUFF
       fileSystem: fileSystem,
       logger: logger,
       processUtils: processUtils,
-      osUtils: FakeOperatingSystemUtils(),
+      osUtils: fakeOperatingSystemUtils,
     );
     createMinimalMockProjectFiles();
 
@@ -437,7 +440,7 @@ STDERR STUFF
       fileSystem: fileSystem,
       logger: logger,
       processUtils: processUtils,
-      osUtils: FakeOperatingSystemUtils(),
+      osUtils: fakeOperatingSystemUtils,
     );
     createMinimalMockProjectFiles();
     fileSystem.file('lib/other.dart')
@@ -513,7 +516,7 @@ STDERR STUFF
           '-configuration', 'Debug',
           '-scheme', 'Runner',
           '-derivedDataPath', flutterBuildDir.absolute.path,
-          '-destination', 'platform=macOS',
+          '-destination', 'platform=macOS, arch=arm64',
           'OBJROOT=${fileSystem.path.join(flutterBuildDir.absolute.path, 'Build', 'Intermediates.noindex')}',
           'SYMROOT=${fileSystem.path.join(flutterBuildDir.absolute.path, 'Build', 'Products')}',
           '-quiet',
@@ -530,7 +533,7 @@ STDERR STUFF
       fileSystem: fileSystem,
       logger: logger,
       processUtils: processUtils,
-      osUtils: FakeOperatingSystemUtils(),
+      osUtils: fakeOperatingSystemUtils,
     );
 
     await createTestCommandRunner(command).run(
@@ -554,7 +557,7 @@ STDERR STUFF
       fileSystem: fileSystem,
       logger: logger,
       processUtils: processUtils,
-      osUtils: FakeOperatingSystemUtils(),
+      osUtils: fakeOperatingSystemUtils,
     );
     createMinimalMockProjectFiles();
 
@@ -591,7 +594,7 @@ STDERR STUFF
       fileSystem: fileSystem,
       logger: logger,
       processUtils: processUtils,
-      osUtils: FakeOperatingSystemUtils(),
+      osUtils: fakeOperatingSystemUtils,
     ));
 
     final bool supported = BuildMacosCommand(logger: BufferLogger.test(), verboseHelp: false).supported;
@@ -623,7 +626,7 @@ STDERR STUFF
       fileSystem: fileSystem,
       logger: logger,
       processUtils: processUtils,
-      osUtils: FakeOperatingSystemUtils(),
+      osUtils: fakeOperatingSystemUtils,
     );
     createMinimalMockProjectFiles();
 
@@ -664,7 +667,7 @@ STDERR STUFF
       fileSystem: fileSystem,
       logger: logger,
       processUtils: processUtils,
-      osUtils: FakeOperatingSystemUtils(),
+      osUtils: fakeOperatingSystemUtils,
     );
     createMinimalMockProjectFiles();
 
@@ -715,7 +718,7 @@ STDERR STUFF
       fileSystem: fileSystem,
       logger: logger,
       processUtils: processUtils,
-      osUtils: FakeOperatingSystemUtils(),
+      osUtils: fakeOperatingSystemUtils,
     );
     createMinimalMockProjectFiles();
 
@@ -779,7 +782,7 @@ STDERR STUFF
       fileSystem: fileSystem,
       logger: logger,
       processUtils: processUtils,
-      osUtils: FakeOperatingSystemUtils(),
+      osUtils: fakeOperatingSystemUtils,
     );
     createMinimalMockProjectFiles();
 
