@@ -71,6 +71,11 @@ bool DlPlayground::OpenPlaygroundHere(DisplayListPlaygroundCallback callback) {
       });
 }
 
+std::unique_ptr<testing::Screenshot> DlPlayground::MakeScreenshot(
+    const sk_sp<flutter::DisplayList>& list) {
+  return nullptr;
+}
+
 SkFont DlPlayground::CreateTestFontOfSize(SkScalar scalar) {
   static constexpr const char* kTestFontFixture = "Roboto-Regular.ttf";
   auto mapping = flutter::testing::OpenFixtureAsSkData(kTestFontFixture);

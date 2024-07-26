@@ -7,6 +7,7 @@
 
 #include "flutter/display_list/display_list.h"
 #include "flutter/display_list/dl_builder.h"
+#include "flutter/impeller/golden_tests/screenshot.h"
 #include "impeller/playground/playground_test.h"
 #include "third_party/skia/include/core/SkFont.h"
 
@@ -26,6 +27,9 @@ class DlPlayground : public PlaygroundTest {
   bool OpenPlaygroundHere(sk_sp<flutter::DisplayList> list);
 
   bool OpenPlaygroundHere(DisplayListPlaygroundCallback callback);
+
+  std::unique_ptr<testing::Screenshot> MakeScreenshot(
+      const sk_sp<flutter::DisplayList>& list);
 
   SkFont CreateTestFontOfSize(SkScalar scalar);
 
