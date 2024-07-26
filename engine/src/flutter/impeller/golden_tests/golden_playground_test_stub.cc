@@ -89,4 +89,9 @@ fml::Status GoldenPlaygroundTest::SetCapabilities(
       "GoldenPlaygroundTest-Stub doesn't support SetCapabilities.");
 }
 
+std::unique_ptr<testing::Screenshot> GoldenPlaygroundTest::MakeScreenshot(
+    const sk_sp<flutter::DisplayList>& list) {
+  return nullptr;
+}
+
 }  // namespace impeller
