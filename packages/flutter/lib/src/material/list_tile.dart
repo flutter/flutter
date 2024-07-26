@@ -910,6 +910,7 @@ class ListTile extends StatelessWidget {
       autofocus: autofocus,
       enableFeedback: enableFeedback ?? tileTheme.enableFeedback ?? true,
       child: Semantics(
+        button: onTap != null || onLongPress != null,
         selected: selected,
         enabled: enabled,
         child: Ink(

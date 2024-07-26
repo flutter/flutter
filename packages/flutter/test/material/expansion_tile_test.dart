@@ -727,6 +727,7 @@ void main() {
     expect(
       tester.getSemantics(find.byType(ListTile).first),
       matchesSemantics(
+        isButton: true,
         hasTapAction: true,
         hasFocusAction: true,
         hasEnabledState: true,
@@ -742,6 +743,7 @@ void main() {
     expect(
       tester.getSemantics(find.byType(ListTile).last),
       matchesSemantics(
+        isButton: true,
         hasTapAction: true,
         hasFocusAction: true,
         hasEnabledState: true,
