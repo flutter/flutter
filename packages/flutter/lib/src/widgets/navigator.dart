@@ -1541,6 +1541,7 @@ class Navigator extends StatefulWidget {
     this.restorationScopeId,
     this.routeTraversalEdgeBehavior = kDefaultRouteTraversalEdgeBehavior,
     this.onDidRemovePage,
+    this.handleBacksWhenNested = true,
   });
 
   /// The list of pages with which to populate the history.
@@ -1608,6 +1609,8 @@ class Navigator extends StatefulWidget {
   /// is updated, if the given [Page] is still present, it will be interpreted
   /// as a new page to display.
   final DidRemovePageCallback? onDidRemovePage;
+
+  final bool handleBacksWhenNested;
 
   /// The delegate used for deciding how routes transition in or off the screen
   /// during the [pages] updates.
@@ -5657,7 +5660,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
 
     // If this is a nested Navigator, handle system backs here so that the root
     // Navigator doesn't get all of them.
-    if (Navigator.maybeOf(context, rootNavigator: true) != this) {
+    if (widget.handleBacksWhenNested && Navigator.maybeOf(context, rootNavigator: true) != this) {
       // TODO(justinmc): Investigate predictive back.
       return PopScope(
         canPop: !canPop(),
@@ -5665,7 +5668,6 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
           if (didPop) {
             return;
           }
-          // TODO(justinmc): Only pop if the Navigator's top route is active. For multiple nested Navigators.
           maybePop();
         },
         child: child,
