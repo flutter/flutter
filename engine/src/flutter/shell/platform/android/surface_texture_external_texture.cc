@@ -67,7 +67,7 @@ void SurfaceTextureExternalTexture::DrawFrame(
     PaintContext& context,
     const SkRect& bounds,
     const DlImageSampling sampling) const {
-  auto transform = GetCurrentUVTransformation();
+  auto transform = GetCurrentUVTransformation().asM33();
 
   // Android's SurfaceTexture transform matrix works on texture coordinate
   // lookups in the range 0.0-1.0, while Skia's Shader transform matrix works on
@@ -136,12 +136,11 @@ bool SurfaceTextureExternalTexture::ShouldUpdate() {
 void SurfaceTextureExternalTexture::Update() {
   jni_facade_->SurfaceTextureUpdateTexImage(
       fml::jni::ScopedJavaLocalRef<jobject>(surface_texture_));
-  jni_facade_->SurfaceTextureGetTransformMatrix(
-      fml::jni::ScopedJavaLocalRef<jobject>(surface_texture_), transform_);
+  transform_ = jni_facade_->SurfaceTextureGetTransformMatrix(
+      fml::jni::ScopedJavaLocalRef<jobject>(surface_texture_));
 }
 
-const SkMatrix& SurfaceTextureExternalTexture::GetCurrentUVTransformation()
-    const {
+const SkM44& SurfaceTextureExternalTexture::GetCurrentUVTransformation() const {
   return transform_;
 }
 
