@@ -659,13 +659,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
       content = Stack(children: <Widget>[
         if (!_moveAnimation.isDismissed)
           Positioned.fill(
-            child: ClipRect(
-              clipper: _DismissibleClipper(
-                axis: _directionIsXAxis ? Axis.horizontal : Axis.vertical,
-                moveAnimation: _moveAnimation,
-              ),
-              child: background,
-            ),
+            child: background,
           ),
         content,
       ]);
