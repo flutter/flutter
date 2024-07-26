@@ -468,15 +468,7 @@ void main() {
   });
 
   testWidgets('Checkbox default colors, and size in light mode', (WidgetTester tester) async {
-    const Color enabledCheckColor = Color(0xffffffff);
-    const Color disabledCheckColor = Color(0xffacacac);
-    const Color inactiveFillColor = Color(0xffffffff);
-    const Color activeFillColor = Color(0xff007aff);
-    const Color disabledFillColor = Color(0x80ffffff);
-    const Color activeBorderColor = Color(0x00000000);
-    const Color inactiveBorderColor = Color(0xffd1d1d6);
-
-    Widget buildApp({bool value = true, bool enabled = true}) {
+    Widget buildCheckbox({bool value = true, bool enabled = true}) {
       return CupertinoApp(
         home: Center(
           child: CupertinoCheckbox(
@@ -486,61 +478,34 @@ void main() {
         ),
       );
     }
-    await tester.pumpWidget(buildApp(value: false));
-    expect(
+    await tester.pumpWidget(buildCheckbox(value: false));
+    await expectLater(
       find.byType(CupertinoCheckbox),
-      paints
-        ..path(color: inactiveFillColor)
-        ..drrect(color: inactiveBorderColor),
-      reason: 'Inactive enabled checkbox should have default colors',
+      matchesGoldenFile('cupertinoCheckbox.unselected.light-theme.png'),
     );
 
-    await tester.pumpWidget(buildApp());
-    await tester.pump();
-    expect(
+    await tester.pumpWidget(buildCheckbox());
+    await expectLater(
       find.byType(CupertinoCheckbox),
-      paints
-        ..path(color: activeFillColor)
-        ..rrect(color: activeBorderColor)
-        ..path(color: enabledCheckColor)
-        ..path(color: enabledCheckColor),
-      reason: 'Active enabled checkbox should have default colors',
+      matchesGoldenFile('cupertinoCheckbox.selected.light-theme.png'),
     );
 
     // Test disabled checkbox.
-    await tester.pumpWidget(buildApp(enabled: false, value: false));
-    await tester.pump();
-    expect(
+    await tester.pumpWidget(buildCheckbox(enabled: false, value: false));
+    await expectLater(
       find.byType(CupertinoCheckbox),
-      paints
-        ..path(color: disabledFillColor)
-        ..drrect(color: inactiveBorderColor),
-      reason: 'Inactive disabled checkbox should have default colors',
+      matchesGoldenFile('cupertinoCheckbox.disabled.unselected.light-theme.png'),
     );
 
-    await tester.pumpWidget(buildApp(enabled: false));
-    await tester.pump();
-    expect(
+    await tester.pumpWidget(buildCheckbox(enabled: false));
+    await expectLater(
       find.byType(CupertinoCheckbox),
-      paints
-        ..path(color: disabledFillColor)
-        ..drrect(color: inactiveBorderColor)
-        ..path(color: disabledCheckColor)
-        ..path(color: disabledCheckColor),
-      reason: 'Active disabled checkbox should have default colors',
+      matchesGoldenFile('cupertinoCheckbox.disabled.selected.light-theme.png'),
     );
   });
 
   testWidgets('Checkbox default colors, and size in dark mode', (WidgetTester tester) async {
-    const Color enabledCheckColor = Color(0xffffffff);
-    const Color disabledCheckColor = Color(0xffacacac);
-    const Color activeFillColor = Color(0xff0a84ff);
-    const Color activeFillColorOverlay = Color(0x26000000);
-    const Color disabledFillColor = Color(0x80ffffff);
-    const Color activeBorderColor = Color(0x00000000);
-    const Color inactiveBorderColor = Color(0x32808080);
-
-    Widget buildApp({bool value = true, bool enabled = true}) {
+    Widget buildCheckbox({bool value = true, bool enabled = true}) {
       return CupertinoApp(
         theme: const CupertinoThemeData(brightness: Brightness.dark),
         home: Center(
@@ -551,49 +516,29 @@ void main() {
         ),
       );
     }
-    await tester.pumpWidget(buildApp(value: false));
-    expect(
+    await tester.pumpWidget(buildCheckbox(value: false));
+    await expectLater(
       find.byType(CupertinoCheckbox),
-      paints
-        ..path()
-        ..drrect(color: inactiveBorderColor),
-      reason: 'Inactive enabled checkbox should have default colors',
+      matchesGoldenFile('cupertinoCheckbox.unselected.dark-theme.png'),
     );
 
-    await tester.pumpWidget(buildApp());
-    await tester.pump();
-    expect(
+    await tester.pumpWidget(buildCheckbox());
+    await expectLater(
       find.byType(CupertinoCheckbox),
-      paints
-        ..path(color: activeFillColor)
-        ..rrect(color: activeBorderColor)
-        ..path(color: activeFillColorOverlay)
-        ..path(color: enabledCheckColor)
-        ..path(color: enabledCheckColor),
-      reason: 'Active enabled checkbox should have default colors',
+      matchesGoldenFile('cupertinoCheckbox.selected.dark-theme.png'),
     );
 
     // Test disabled checkbox.
-    await tester.pumpWidget(buildApp(enabled: false, value: false));
-    await tester.pump();
-    expect(
+    await tester.pumpWidget(buildCheckbox(enabled: false, value: false));
+    await expectLater(
       find.byType(CupertinoCheckbox),
-      paints
-        ..path()
-        ..drrect(color: inactiveBorderColor),
-      reason: 'Inactive disabled checkbox should have default colors',
+      matchesGoldenFile('cupertinoCheckbox.disabled.unselected.dark-theme.png'),
     );
 
-    await tester.pumpWidget(buildApp(enabled: false));
-    await tester.pump();
-    expect(
+    await tester.pumpWidget(buildCheckbox(enabled: false));
+    await expectLater(
       find.byType(CupertinoCheckbox),
-      paints
-        ..path(color: disabledFillColor)
-        ..drrect(color: inactiveBorderColor)
-        ..path(color: disabledCheckColor)
-        ..path(color: disabledCheckColor),
-      reason: 'Active disabled checkbox should have default colors',
+      matchesGoldenFile('cupertinoCheckbox.disabled.selected.dark-theme.png'),
     );
   });
 
@@ -654,7 +599,7 @@ void main() {
     );
   });
 
-  testWidgets('Checkbox changes opacity when pressed in light mode', (WidgetTester tester) async {
+  testWidgets('Checkbox is darkened when pressed in light mode', (WidgetTester tester) async {
     const Color checkColor = Color(0xffffffff);
     const Color defaultActiveFillColor = Color(0xff007aff);
     const Color defaultInactiveFillColor = Color(0xffffffff);
@@ -680,7 +625,7 @@ void main() {
         ..path(color: defaultInactiveFillColor)
         ..drrect()
         ..path(color: pressedDarkShadow),
-      reason: 'Inactive pressed Checkbox is slightly darkened',
+      reason: 'Inactive pressed checkbox is slightly darkened',
     );
 
     await tester.pumpWidget(
@@ -705,7 +650,7 @@ void main() {
         ..path(color: checkColor)
         ..path(color: checkColor)
         ..path(color: pressedDarkShadow),
-      reason: 'Active pressed Checkbox is slightly darkened',
+      reason: 'Active pressed checkbox is slightly darkened',
     );
 
     // Finish gestures to release resources.
@@ -714,7 +659,7 @@ void main() {
     await tester.pump();
   });
 
-  testWidgets('Checkbox changes opacity when pressed in dark mode', (WidgetTester tester) async {
+  testWidgets('Checkbox is lightened when pressed in dark mode', (WidgetTester tester) async {
     const Color checkColor = Color(0xffffffff);
     const Color defaultActiveFillColor = Color(0xff0a84ff);
     const Color defaultInactiveFillColor = Color(0xff000000);
@@ -742,7 +687,7 @@ void main() {
         ..path(color: defaultInactiveFillColor)
         ..drrect()
         ..path(color: pressedLightShadow),
-      reason: 'Inactive pressed Checkbox is slightly lightened',
+      reason: 'Inactive pressed checkbox is slightly lightened',
     );
 
     await tester.pumpWidget(
@@ -769,7 +714,7 @@ void main() {
         ..path(color: checkColor)
         ..path(color: checkColor)
         ..path(color: pressedLightShadow),
-      reason: 'Active pressed Checkbox is slightly lightened',
+      reason: 'Active pressed checkbox is slightly lightened',
     );
 
     // Finish gestures to release resources.
