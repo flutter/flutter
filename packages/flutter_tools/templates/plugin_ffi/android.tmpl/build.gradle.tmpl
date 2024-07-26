@@ -26,6 +26,13 @@ rootProject.allprojects {
     }
 }
 
+// We recommend using:
+// - flutter.compileSdkVersion
+// - flutter.targetSdkVersion
+// - flutter.minSdkVersion
+// when configuring Android Gradle Plugin's corresponding values, as it will automatically
+// pick the Flutter SDK's preferred version number. You can override this if
+// necessary.
 android {
     if (project.android.hasProperty("namespace")) {
         namespace = "{{androidIdentifier}}"

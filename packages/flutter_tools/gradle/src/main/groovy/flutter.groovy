@@ -762,11 +762,11 @@ class FlutterPlugin implements Plugin<Project> {
     private void configurePluginProject(Map<String, Object> pluginObject) {
         assert(pluginObject.name instanceof String)
         Project pluginProject = project.rootProject.findProject(":${pluginObject.name}")
-        if (pluginProject.extensions.findByType(FlutterExtension) == null) {
-            pluginProject.extensions.create("flutter", FlutterExtension)
-        }
         if (pluginProject == null) {
             return
+        }
+        if (pluginProject.extensions.findByType(FlutterExtension) == null) {
+            pluginProject.extensions.create("flutter", FlutterExtension)
         }
         // Add plugin dependency to the app project.
         project.dependencies {

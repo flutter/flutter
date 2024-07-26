@@ -36,6 +36,8 @@ apply plugin: 'com.android.library'
 android {
     // Conditional for compatibility with AGP <4.2.
     namespace 'dev.flutter.integration_test'
+    // We recommend using flutter.compileSdkVersion as it will automatically
+    // pick the flutter sdk's preferred version number.
     compileSdk flutter.compileSdkVersion
 
     compileOptions {
@@ -44,6 +46,8 @@ android {
     }
 
     defaultConfig {
+        // We recommend using flutter.minSdkVersion as it will automatically
+        // pick the flutter sdk's preferred version number.
         minSdkVersion flutter.minSdkVersion
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles 'lib-proguard-rules.txt'
