@@ -395,7 +395,7 @@ class KernelCompiler {
         .listen(_stdoutHandler.handler);
     final int exitCode = await server.exitCode;
     if (exitCode == 0) {
-      return _stdoutHandler.compilerOutput?.future;
+      return await _stdoutHandler.compilerOutput?.future;
     }
     return null;
   }
@@ -793,7 +793,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
     await _writelnToServerStdin(inputKey,
         printTrace: true, source: '_recompile');
 
-    return _stdoutHandler.compilerOutput?.future;
+    return await _stdoutHandler.compilerOutput?.future;
   }
 
   final List<_CompilationRequest> _compilationQueue = <_CompilationRequest>[];
@@ -938,7 +938,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
     await _writelnToServerStdin('compile $scriptUri',
         printTrace: true, source: '_compile');
 
-    return _stdoutHandler.compilerOutput?.future;
+    return await _stdoutHandler.compilerOutput?.future;
   }
 
   @override
@@ -1007,7 +1007,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
       request.isStatic.toString(),
     ], '_compileExpression');
 
-    return _stdoutHandler.compilerOutput?.future;
+    return await _stdoutHandler.compilerOutput?.future;
   }
 
   @override
@@ -1059,7 +1059,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
       request.expression ?? ''
     ], '_compileExpressionToJs');
 
-    return _stdoutHandler.compilerOutput?.future;
+    return await _stdoutHandler.compilerOutput?.future;
   }
 
   @override
@@ -1097,7 +1097,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
     _stdoutHandler.reset(expectSources: false);
     await _writelnToServerStdin('reject', printTrace: true, source: '_reject');
     _compileRequestNeedsConfirmation = false;
-    return _stdoutHandler.compilerOutput?.future;
+    return await _stdoutHandler.compilerOutput?.future;
   }
 
   @override
