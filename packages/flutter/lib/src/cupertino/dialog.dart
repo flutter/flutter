@@ -977,29 +977,16 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
     );
     return ColoredBox(
       color: CupertinoDynamicColor.resolve(_kActionSheetBackgroundColor, context),
-      child: _CupertinoAlertContentSection(
+      child: _ActionSheetContentSection(
         title: widget.title,
         message: widget.message,
         scrollController: _effectiveMessageScrollController,
-        titlePadding: EdgeInsets.only(
-          left: _kActionSheetContentHorizontalPadding,
-          right: _kActionSheetContentHorizontalPadding,
-          bottom: widget.message == null ? _kActionSheetContentVerticalPadding : 0.0,
-          top: _kActionSheetContentVerticalPadding,
-        ),
-        messagePadding: EdgeInsets.only(
-          left: _kActionSheetContentHorizontalPadding,
-          right: _kActionSheetContentHorizontalPadding,
-          bottom: _kActionSheetContentVerticalPadding,
-          top: widget.title == null ? _kActionSheetContentVerticalPadding : 0.0,
-        ),
         titleTextStyle: widget.message == null
             ? textStyle
             : textStyle.copyWith(fontWeight: FontWeight.w600),
         messageTextStyle: widget.title == null
             ? textStyle.copyWith(fontWeight: FontWeight.w600)
             : textStyle,
-        additionalPaddingBetweenTitleAndMessage: const EdgeInsets.only(top: 4.0),
       ),
     );
   }
@@ -1675,6 +1662,179 @@ class _ActionSheetMainSheetState extends State<_ActionSheetMainSheet> {
   );
 }
 
+class _AlertDialogSizes {
+  const _AlertDialogSizes({
+    required this.size,
+    required this.contentHeight,
+    required this.dividerThickness,
+  });
+
+  final Size size;
+  final double contentHeight;
+  final double dividerThickness;
+}
+
+// Visual components of an alert dialog that need to be explicitly sized and
+// laid out at runtime.
+enum _AlertDialogSections {
+  contentSection,
+  actionsSection,
+}
+
+class _ContentStyle {
+  const _ContentStyle(
+    this.contextBodySize, {
+    required this.fontSize,
+    required this.verticalPadding,
+  });
+
+  final double contextBodySize;
+  final double fontSize;
+  final double verticalPadding;
+
+  _ContentStyle lerp(_ContentStyle other, double contextBodySize) {
+    final double ratio = (contextBodySize - this.contextBodySize)
+        / (other.contextBodySize - this.contextBodySize);
+    return _ContentStyle(contextBodySize,
+      fontSize: lerpDouble(fontSize, other.fontSize, ratio)!,
+      verticalPadding: lerpDouble(verticalPadding, other.verticalPadding, ratio)!,
+    );
+  }
+}
+
+// The "content section" of a CupertinoActionSheet.
+//
+// If title is missing, then only content is added. If content is
+// missing, then only title is added. If both are missing, then it returns
+// a SingleChildScrollView with a zero-sized Container.
+class _ActionSheetContentSection extends StatelessWidget {
+  const _ActionSheetContentSection({
+    this.title,
+    this.message,
+    required this.titleTextStyle,
+    required this.messageTextStyle,
+    this.scrollController,
+  });
+
+  // The (optional) title of the dialog is displayed in a large font at the top
+  // of the dialog.
+  //
+  // Typically a Text widget.
+  final Widget? title;
+
+  // The (optional) message of the dialog is displayed in the center of the
+  // dialog in a lighter font.
+  //
+  // Typically a Text widget.
+  final Widget? message;
+
+  // Text styles used for title and message.
+  final TextStyle titleTextStyle;
+  final TextStyle messageTextStyle;
+
+  // A scroll controller that can be used to control the scrolling of the
+  // content in the dialog.
+  //
+  // Defaults to null, and is typically not needed, since most alert contents
+  // are short.
+  final ScrollController? scrollController;
+
+  static const List<_ContentStyle> _kContentStyles = <_ContentStyle>[
+    // Smaller ones use the same style as "l".
+    /*  l*/_ContentStyle(17, fontSize: 13, verticalPadding: 6),
+    /* xl*/_ContentStyle(19, fontSize: 15, verticalPadding: 6.6),
+    /*xxl*/_ContentStyle(21, fontSize: 17, verticalPadding: 7.3),
+    /*3xl*/_ContentStyle(23, fontSize: 19, verticalPadding: 7.3),
+    /*ax1*/_ContentStyle(28, fontSize: 23, verticalPadding: 9),
+    /*ax2*/_ContentStyle(33, fontSize: 27, verticalPadding: 9.5),
+    /*ax3*/_ContentStyle(40, fontSize: 33, verticalPadding: 11),
+    /*ax4*/_ContentStyle(47, fontSize: 38, verticalPadding: 12.5),
+    /*ax5*/_ContentStyle(53, fontSize: 44, verticalPadding: 13),
+  ];
+
+  _ContentStyle _getContentStyle(BuildContext context) {
+    // The context scale factor is derived from the current body size and the
+    // standard body size in "large".
+    const double higLargeBodySize = 17.0;
+    final double contextBodySize = MediaQuery.textScalerOf(context).scale(higLargeBodySize);
+    if (contextBodySize <= _kContentStyles.first.contextBodySize) {
+      return _kContentStyles.first;
+    }
+    for (int larger = 1; larger < _kContentStyles.length; larger += 1) {
+      if (contextBodySize <= _kContentStyles[larger].contextBodySize) {
+        return _kContentStyles[larger - 1].lerp(_kContentStyles[larger], contextBodySize);
+      }
+    }
+    assert(contextBodySize >= _kContentStyles.last.contextBodySize);
+    return _kContentStyles.last;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (title == null && message == null) {
+      return SingleChildScrollView(
+        controller: scrollController,
+        child: const SizedBox.shrink(),
+      );
+    }
+
+    final _ContentStyle style = _getContentStyle(context);
+
+    // The context scale factor is derived from the current body size and the
+    // standard body size in "large".
+    const double higLargeBodySize = 17.0;
+    final double contextScaleFactor = MediaQuery.textScalerOf(context).scale(higLargeBodySize)
+        / higLargeBodySize;
+    // `Text` will scale the provided font size inside, so its parameter is
+    // unscaled first.
+    final double effectiveFontSize = style.fontSize / contextScaleFactor;
+
+    final List<Widget> titleContentGroup = <Widget>[
+      if (title != null)
+        DefaultTextStyle(
+          style: titleTextStyle.copyWith(fontSize: effectiveFontSize),
+          textAlign: TextAlign.center,
+          child: title!,
+        ),
+      if (message != null)
+        DefaultTextStyle(
+          style: messageTextStyle.copyWith(fontSize: effectiveFontSize),
+          textAlign: TextAlign.center,
+          child: message!,
+        ),
+    ];
+
+    final double topPadding;
+    final double bottomPadding;
+    if (title != null && message != null) {
+      topPadding = style.verticalPadding;
+      bottomPadding = style.verticalPadding * 2 + style.fontSize;
+    } else {
+      topPadding = style.verticalPadding + 0.55 * style.fontSize;
+      bottomPadding = topPadding;
+    }
+
+    return CupertinoScrollbar(
+      controller: scrollController,
+      child: SingleChildScrollView(
+        controller: scrollController,
+        child: Padding(
+          padding: EdgeInsets.only(
+            top: topPadding,
+            bottom: bottomPadding,
+            left: _kActionSheetButtonHorizontalPadding,
+            right: _kActionSheetButtonHorizontalPadding,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: titleContentGroup,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 // The "content section" of a CupertinoAlertDialog.
 //
 // If title is missing, then only content is added. If content is
@@ -1689,7 +1849,6 @@ class _CupertinoAlertContentSection extends StatelessWidget {
     this.messagePadding,
     this.titleTextStyle,
     this.messageTextStyle,
-    this.additionalPaddingBetweenTitleAndMessage,
   }) : assert(title == null || titlePadding != null && titleTextStyle != null),
        assert(message == null || messagePadding != null && messageTextStyle != null);
 
@@ -1716,10 +1875,6 @@ class _CupertinoAlertContentSection extends StatelessWidget {
   // CupertinoAlertDialog and CupertinoActionSheet have different paddings.
   final EdgeInsets? titlePadding;
   final EdgeInsets? messagePadding;
-
-  // Additional padding to be inserted between title and message.
-  // Only used for CupertinoActionSheet.
-  final EdgeInsets? additionalPaddingBetweenTitleAndMessage;
 
   // Text styles used for title and message.
   // CupertinoAlertDialog and CupertinoActionSheet have different text styles.
@@ -1755,11 +1910,6 @@ class _CupertinoAlertContentSection extends StatelessWidget {
           ),
         ),
     ];
-
-    // Add padding between the widgets if necessary.
-    if (additionalPaddingBetweenTitleAndMessage != null && titleContentGroup.length > 1) {
-      titleContentGroup.insert(1, Padding(padding: additionalPaddingBetweenTitleAndMessage!));
-    }
 
     return CupertinoScrollbar(
       controller: scrollController,
