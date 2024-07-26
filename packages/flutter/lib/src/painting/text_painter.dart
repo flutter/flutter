@@ -356,11 +356,15 @@ class _TextLayout {
     // Luckily they have the same bidi embedding level as the paragraph as per
     // https://unicode.org/reports/tr9/#L1, so we can anchor the caret to the
     // last logical trailing space.
-    final bool hasTrailingSpaces = switch (rawString.codeUnitAt(rawString.length - 1)) {
-      0x9 ||        // horizontal tab
-      0x3000 ||     // ideographic space
-      0x20 => true, // space
-      _ => false,
+    // Whitespace character definitions refer to Java/ICU, not Unicode-Zs.
+    // https://github.com/unicode-org/icu/blob/23d9628f88a2d0127c564ad98297061c36d3ce77/icu4c/source/common/unicode/uchar.h#L3388-L3425
+    final String lastCodeUnit = rawString[rawString.length - 1];
+    final bool hasTrailingSpaces = switch (lastCodeUnit.codeUnitAt(0)) {
+      0x0009 => true,   // horizontal tab
+      0x00A0 ||         // no-break space
+      0x2007 ||         // figure space
+      0x202F => false,  // narrow no-break space
+      _ => RegExp(r'\p{Space_Separator}', unicode: true).hasMatch(lastCodeUnit),
     };
 
     final double baseline = lineMetrics.baseline;
