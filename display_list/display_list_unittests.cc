@@ -4863,8 +4863,6 @@ TEST_F(DisplayListTest, ClipPathOvalNonCulling) {
   auto non_encompassing_oval = clip.makeOutset(2.071f, 2.071f);
   SkPath path;
   path.addOval(non_encompassing_oval);
-  SkRRect rrect;
-  rrect.setOval(non_encompassing_oval);
 
   DisplayListBuilder cull_builder;
   cull_builder.ClipRect(clip, ClipOp::kIntersect, false);
@@ -4873,9 +4871,8 @@ TEST_F(DisplayListTest, ClipPathOvalNonCulling) {
 
   CLIP_EXPECTOR(expector);
   expector.addExpectation(clip, ClipOp::kIntersect, false);
-  // Builder will not cull this clip, but it will turn it into a ClipRRect
-  // Eventually it should turn it into a ClipOval
-  expector.addExpectation(rrect, ClipOp::kIntersect, false);
+  // Builder will not cull this clip, but it will turn it into a ClipOval
+  expector.addOvalExpectation(non_encompassing_oval, ClipOp::kIntersect, false);
   cull_dl->Dispatch(expector);
 }
 
@@ -5088,9 +5085,7 @@ TEST_F(DisplayListTest, ClipOvalRRectPromoteToClipOval) {
   expected.DrawRect(draw_rect, DlPaint());
   auto expect_dl = expected.Build();
 
-  // Support for this will be re-added soon, until then verify that we
-  // do not promote.
-  ASSERT_TRUE(DisplayListsNE_Verbose(dl, expect_dl));
+  ASSERT_TRUE(DisplayListsEQ_Verbose(dl, expect_dl));
 }
 
 TEST_F(DisplayListTest, ClipRectPathPromoteToClipRect) {
@@ -5132,9 +5127,7 @@ TEST_F(DisplayListTest, ClipOvalPathPromoteToClipOval) {
   expected.DrawRect(draw_rect, DlPaint());
   auto expect_dl = expected.Build();
 
-  // Support for this will be re-added soon, until then verify that we
-  // do not promote.
-  ASSERT_TRUE(DisplayListsNE_Verbose(dl, expect_dl));
+  ASSERT_TRUE(DisplayListsEQ_Verbose(dl, expect_dl));
 }
 
 TEST_F(DisplayListTest, ClipRRectPathPromoteToClipRRect) {
@@ -5273,9 +5266,7 @@ TEST_F(DisplayListTest, ClipOvalRRectPathPromoteToClipOval) {
   expected.DrawRect(draw_rect, DlPaint());
   auto expect_dl = expected.Build();
 
-  // Support for this will be re-added soon, until then verify that we
-  // do not promote.
-  ASSERT_TRUE(DisplayListsNE_Verbose(dl, expect_dl));
+  ASSERT_TRUE(DisplayListsEQ_Verbose(dl, expect_dl));
 }
 
 TEST_F(DisplayListTest, BoundedRenderOpsDoNotReportUnbounded) {
