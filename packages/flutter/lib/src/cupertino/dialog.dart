@@ -1722,15 +1722,15 @@ class _ActionSheetContentSection extends StatelessWidget {
 
   static const List<_ContentStyle> _kContentStyles = <_ContentStyle>[
     // Smaller ones use the same style as "l".
-    /*  l*/_ContentStyle(17, fontSize: 13, lead: 52),
-    /* xl*/_ContentStyle(19, fontSize: 15, lead: 46),
-    /*xxl*/_ContentStyle(21, fontSize: 17, lead: 40),
-    /*3xl*/_ContentStyle(23, fontSize: 19, lead: 33),
+    /*  l*/_ContentStyle(17, fontSize: 13, lead: 18),
+    /* xl*/_ContentStyle(19, fontSize: 15, lead: 20),
+    /*xxl*/_ContentStyle(21, fontSize: 17, lead: 22),
+    /*3xl*/_ContentStyle(23, fontSize: 19, lead: 24),
     /*ax1*/_ContentStyle(28, fontSize: 23, lead: 29),
-    /*ax2*/_ContentStyle(33, fontSize: 27, lead: 24),
-    /*ax3*/_ContentStyle(40, fontSize: 33, lead: 22),
-    /*ax4*/_ContentStyle(47, fontSize: 38, lead: 20),
-    /*ax5*/_ContentStyle(53, fontSize: 44, lead: 18),
+    /*ax2*/_ContentStyle(33, fontSize: 27, lead: 33),
+    /*ax3*/_ContentStyle(40, fontSize: 33, lead: 40),
+    /*ax4*/_ContentStyle(47, fontSize: 38, lead: 46),
+    /*ax5*/_ContentStyle(53, fontSize: 44, lead: 52),
   ];
 
   _ContentStyle _getContentStyle(BuildContext context) {
@@ -1770,12 +1770,21 @@ class _ActionSheetContentSection extends StatelessWidget {
     // unscaled first.
     final double effectiveFontSize = style.fontSize / contextScaleFactor;
 
+    final double titleTopPadding = 0.44 * style.lead;
+    final double titleFullHeight = 1.5 * style.lead;
+    final double titleBottomPadding = titleFullHeight - titleTopPadding - style.fontSize;
     final List<Widget> titleContentGroup = <Widget>[
       if (title != null)
-        DefaultTextStyle(
-          style: titleTextStyle.copyWith(fontSize: effectiveFontSize),
-          textAlign: TextAlign.center,
-          child: title!,
+        Padding(
+          padding: EdgeInsets.only(
+            top: titleTopPadding,
+            bottom: titleBottomPadding,
+          ),
+          child: DefaultTextStyle(
+            style: titleTextStyle.copyWith(fontSize: effectiveFontSize),
+            textAlign: TextAlign.center,
+            child: title!,
+          ),
         ),
       if (message != null)
         DefaultTextStyle(
