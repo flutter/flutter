@@ -435,138 +435,81 @@ void main() {
   });
 
   testWidgets('Radio has correct default active/inactive/fill/border colors in light mode', (WidgetTester tester) async {
-    const Color activeInnerColor = Color(0xffffffff);
-    const Color activeOuterColor = Color(0xff007aff);
-    const Color inactiveBorderColor = Color(0xffd1d1d6);
-    const Color inactiveOuterColor = Color(0xffffffff);
-    const double innerRadius = 2.975;
-    const double outerRadius = 7.0;
-
-    await tester.pumpWidget(CupertinoApp(
-      home: Center(
-        child: CupertinoRadio<int>(
-          value: 1,
-          groupValue: 2,
-          onChanged: (int? i) { },
+    Widget buildRadio({required int value, required int groupValue, bool enabled = true}) {
+      return CupertinoApp(
+        home: Center(
+          child: CupertinoRadio<int>(
+            value: value,
+            groupValue: groupValue,
+            onChanged: enabled ? (int? i) { } : null,
+          ),
         ),
-      ),
-    ));
+      );
+    }
 
-    expect(
+    await tester.pumpWidget(buildRadio(value: 1, groupValue: 2));
+    await expectLater(
       find.byType(CupertinoRadio<int>),
-      paints
-        ..circle(radius: outerRadius, style: PaintingStyle.fill, color: inactiveOuterColor)
-        ..circle(radius: outerRadius, style: PaintingStyle.stroke, color: inactiveBorderColor),
-      reason: 'Unselected radio button should have default fill and border colors',
+      matchesGoldenFile('cupertinoRadio.unselected.light-theme.png'),
     );
 
-    await tester.pumpWidget(CupertinoApp(
-      home: Center(
-        child: CupertinoRadio<int>(
-          value: 1,
-          groupValue: 1,
-          onChanged: (int? i) { },
-        ),
-      ),
-    ));
-
-    expect(
+    await tester.pumpWidget(buildRadio(value: 1, groupValue: 1));
+    await expectLater(
       find.byType(CupertinoRadio<int>),
-      paints
-        ..circle(radius: outerRadius, style: PaintingStyle.fill, color: activeOuterColor)
-        ..circle(radius: innerRadius, style: PaintingStyle.fill, color: activeInnerColor),
-      reason: 'Selected radio button should have default fill and border colors',
+      matchesGoldenFile('cupertinoRadio.selected.light-theme.png'),
+    );
+
+    // Test disabled radio buttons.
+    await tester.pumpWidget(buildRadio(value: 1, groupValue: 2, enabled: false));
+    await expectLater(
+      find.byType(CupertinoRadio<int>),
+      matchesGoldenFile('cupertinoRadio.disabled.unselected.light-theme.png'),
+    );
+
+    await tester.pumpWidget(buildRadio(value: 1, groupValue: 1, enabled: false));
+    await expectLater(
+      find.byType(CupertinoRadio<int>),
+      matchesGoldenFile('cupertinoRadio.disabled.selected.light-theme.png'),
     );
   });
 
-  testWidgets('Radio has correct default active/inactive/fill/border colors in dark mode', (WidgetTester tester) async {
-    const Color activeInnerColor = Color(0xffdee8f8);
-    const Color activeOuterColor = Color(0xff3062d4);
-    const Color inactiveBorderColor = Color(0x80808080);
-    const double innerRadius = 2.975;
-    const double outerRadius = 7.0;
-
-    await tester.pumpWidget(CupertinoApp(
-      theme: const CupertinoThemeData(brightness: Brightness.dark),
-      home: Center(
-        child: CupertinoRadio<int>(
-          value: 1,
-          groupValue: 2,
-          onChanged: (int? i) { },
+  testWidgets('Radio has correct default active/inactive/fill/border colors in light mode', (WidgetTester tester) async {
+    Widget buildRadio({required int value, required int groupValue, bool enabled = true}) {
+      return CupertinoApp(
+        theme: const CupertinoThemeData(brightness: Brightness.dark),
+        home: Center(
+          child: CupertinoRadio<int>(
+            value: value,
+            groupValue: groupValue,
+            onChanged: enabled ? (int? i) { } : null,
+          ),
         ),
-      ),
-    ));
+      );
+    }
 
-    expect(
+    await tester.pumpWidget(buildRadio(value: 1, groupValue: 2));
+    await expectLater(
       find.byType(CupertinoRadio<int>),
-      paints
-        ..path()
-        ..circle(radius: outerRadius, style: PaintingStyle.stroke, color: inactiveBorderColor),
-      reason: 'Unselected radio button should have default fill and border colors',
+      matchesGoldenFile('cupertinoRadio.unselected.dark-theme.png'),
     );
 
-    await tester.pumpWidget(CupertinoApp(
-      theme: const CupertinoThemeData(brightness: Brightness.dark),
-      home: Center(
-        child: CupertinoRadio<int>(
-          value: 1,
-          groupValue: 1,
-          onChanged: (int? i) { },
-        ),
-      ),
-    ));
-
-    expect(
+    await tester.pumpWidget(buildRadio(value: 1, groupValue: 1));
+    await expectLater(
       find.byType(CupertinoRadio<int>),
-      paints
-        ..circle(radius: outerRadius, style: PaintingStyle.fill, color: activeOuterColor)
-        ..circle(radius: innerRadius, style: PaintingStyle.fill, color: activeInnerColor),
-      reason: 'Selected radio button should have default fill and border colors',
-    );
-  });
-
-  testWidgets('Disabled radio has correct default active/inactive/fill/border colors', (WidgetTester tester) async {
-    const Color activeDisabledInnerColor = Color(0x40000000);
-    const Color activeDisabledOuterColor = Color(0x80ffffff);
-    const Color inactiveBorderColor = Color(0xffd1d1d6);
-    const Color inactiveDisabledOuterColor = Color(0x80ffffff);
-    const double innerRadius = 2.975;
-    const double outerRadius = 7.0;
-
-    await tester.pumpWidget(const CupertinoApp(
-      home: Center(
-        child: CupertinoRadio<int>(
-          value: 1,
-          groupValue: 2,
-          onChanged: null,
-        ),
-      ),
-    ));
-
-    expect(
-      find.byType(CupertinoRadio<int>),
-      paints
-        ..circle(radius: outerRadius, style: PaintingStyle.fill, color: inactiveDisabledOuterColor)
-        ..circle(radius: outerRadius, style: PaintingStyle.stroke, color: inactiveBorderColor),
-      reason: 'Disabled unselected radio button should have default fill and border colors',
+      matchesGoldenFile('cupertinoRadio.selected.dark-theme.png'),
     );
 
-    await tester.pumpWidget(const CupertinoApp(
-      home: Center(
-        child: CupertinoRadio<int>(
-          value: 1,
-          groupValue: 1,
-          onChanged: null,
-        ),
-      ),
-    ));
-
-    expect(
+    // Test disabled radio buttons.
+    await tester.pumpWidget(buildRadio(value: 1, groupValue: 2, enabled: false));
+    await expectLater(
       find.byType(CupertinoRadio<int>),
-      paints
-        ..circle(radius: outerRadius, style: PaintingStyle.fill, color: activeDisabledOuterColor)
-        ..circle(radius: innerRadius, style: PaintingStyle.fill, color: activeDisabledInnerColor),
-      reason: 'Disabled selected radio button should have default fill and border colors',
+      matchesGoldenFile('cupertinoRadio.disabled.unselected.dark-theme.png'),
+    );
+
+    await tester.pumpWidget(buildRadio(value: 1, groupValue: 1, enabled: false));
+    await expectLater(
+      find.byType(CupertinoRadio<int>),
+      matchesGoldenFile('cupertinoRadio.disabled.selected.dark-theme.png'),
     );
   });
 
