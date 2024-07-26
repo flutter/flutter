@@ -1005,7 +1005,11 @@ void DisplayListBuilder::ClipRRect(const SkRRect& rrect,
                                    ClipOp clip_op,
                                    bool is_aa) {
   if (rrect.isRect()) {
-    clipRect(rrect.rect(), clip_op, is_aa);
+    ClipRect(rrect.rect(), clip_op, is_aa);
+    return;
+  }
+  if (rrect.isOval()) {
+    ClipOval(rrect.rect(), clip_op, is_aa);
     return;
   }
   if (current_info().is_nop) {
@@ -1043,17 +1047,16 @@ void DisplayListBuilder::ClipPath(const SkPath& path,
   if (!path.isInverseFillType()) {
     SkRect rect;
     if (path.isRect(&rect)) {
-      this->clipRect(rect, clip_op, is_aa);
+      ClipRect(rect, clip_op, is_aa);
+      return;
+    }
+    if (path.isOval(&rect)) {
+      ClipOval(rect, clip_op, is_aa);
       return;
     }
     SkRRect rrect;
-    if (path.isOval(&rect)) {
-      rrect.setOval(rect);
-      this->clipRRect(rrect, clip_op, is_aa);
-      return;
-    }
     if (path.isRRect(&rrect)) {
-      this->clipRRect(rrect, clip_op, is_aa);
+      ClipRRect(rrect, clip_op, is_aa);
       return;
     }
   }
