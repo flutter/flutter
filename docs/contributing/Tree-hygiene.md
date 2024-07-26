@@ -128,7 +128,7 @@ The following kinds of PRs are *not* automatically exempt and require an exempti
 A `@test-exemption-reviewer` member on Discord can exempt a PR by commenting
 `test-exempt: <reason>`.
 
-The reviewer of the PR (_not_ the test exemtpion reviewer) should first:
+The reviewer of the PR (_not_ the test exemption reviewer) should first:
 
 1. ensure that the PR meets the criteria for exemption
 1. LGTM the PR before requesting the exemption, _or_ clarify why an LGTM was
