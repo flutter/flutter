@@ -331,7 +331,11 @@ class SkiaGoldClient {
   ///
   /// The [testName] and [goldenFile] parameters reference the current
   /// comparison being evaluated by the [FlutterPreSubmitFileComparator].
-  Future<void> tryjobAdd(String testName, File goldenFile) async {
+  ///
+  /// If the tryjob fails due to pixel differences, the method will succeed
+  /// as the failure will be triaged in the 'Flutter Gold' dashboard, and the
+  /// `stdout` will contain the failure message; otherwise will return `null`.
+  Future<String?> tryjobAdd(String testName, File goldenFile) async {
     final List<String> imgtestCommand = <String>[
       _goldctl,
       'imgtest', 'add',
@@ -368,6 +372,7 @@ class SkiaGoldClient {
         ..writeln('result-state.json: ${resultContents ?? 'No result file found.'}');
       throw SkiaException(buf.toString());
     }
+    return result.exitCode == 0 ? null : resultStdout;
   }
 
   // Constructs arguments for `goldctl` for controlling how pixels are compared.
