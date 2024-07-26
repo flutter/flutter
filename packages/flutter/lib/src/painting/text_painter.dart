@@ -356,11 +356,10 @@ class _TextLayout {
     // Luckily they have the same bidi embedding level as the paragraph as per
     // https://unicode.org/reports/tr9/#L1, so we can anchor the caret to the
     // last logical trailing space.
-    final String lastCharactor = rawString[rawString.length - 1];
-    final bool hasTrailingSpaces = switch (lastCharactor.codeUnitAt(0)) {
-       0x9 => true, // horizontal tab
-        _ => RegExp(r'\p{Space_Separator}', unicode: true).hasMatch(lastCharactor), // Unicode space separator
-    };
+    final bool hasTrailingSpaces = RegExp(
+      r'.*[\t\p{Space_Separator}]$',
+      unicode: true,
+    ).hasMatch(rawString);
 
     final double baseline = lineMetrics.baseline;
     final double dx;
