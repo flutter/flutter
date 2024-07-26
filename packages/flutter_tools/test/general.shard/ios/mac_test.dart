@@ -797,7 +797,7 @@ class FakeIosProject extends Fake implements IosProject {
   File get xcodeProjectInfoFile => xcodeProject.childFile('project.pbxproj');
 
   @override
-  Future<String> hostAppBundleName(BuildInfo? buildInfo) async => 'UnitTestRunner.app';
+  Future<String> productName(BuildInfo? buildInfo) async => 'UnitTestRunner';
 
   @override
   Directory get xcodeProject => hostAppRoot.childDirectory('Runner.xcodeproj');

@@ -2,6 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:ui';
+/// @docImport 'package:flutter/cupertino.dart';
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'app.dart';
+/// @docImport 'form.dart';
+/// @docImport 'heroes.dart';
+/// @docImport 'pages.dart';
+/// @docImport 'pop_scope.dart';
+/// @docImport 'will_pop_scope.dart';
+library;
+
 import 'dart:async';
 import 'dart:math';
 import 'dart:ui' as ui;
@@ -1807,6 +1819,9 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   void addScopedWillPopCallback(WillPopCallback callback) {
     assert(_scopeKey.currentState != null, 'Tried to add a willPop callback to a route that is not currently in the tree.');
     _willPopCallbacks.add(callback);
+    if (_willPopCallbacks.length == 1) {
+      _maybeDispatchNavigationNotification();
+    }
   }
 
   /// Remove one of the callbacks run by [willPop].
@@ -1823,6 +1838,9 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   void removeScopedWillPopCallback(WillPopCallback callback) {
     assert(_scopeKey.currentState != null, 'Tried to remove a willPop callback from a route that is not currently in the tree.');
     _willPopCallbacks.remove(callback);
+    if (_willPopCallbacks.isEmpty) {
+      _maybeDispatchNavigationNotification();
+    }
   }
 
   /// Registers the existence of a [PopEntry] in the route.
@@ -1860,7 +1878,8 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
       // canPop indicates that the originator of the Notification can handle a
       // pop. In the case of PopScope, it handles pops when canPop is
       // false. Hence the seemingly backward logic here.
-      canHandlePop: popDisposition == RoutePopDisposition.doNotPop,
+      canHandlePop: popDisposition == RoutePopDisposition.doNotPop
+          || _willPopCallbacks.isNotEmpty,
     );
     // Avoid dispatching a notification in the middle of a build.
     switch (SchedulerBinding.instance.schedulerPhase) {

@@ -56,6 +56,12 @@ const Color _kDarkModeCheckColor = Color.fromARGB(255, 222, 232, 248);
 /// ([CupertinoSwitch] in Flutter) instead, or to find a creative custom
 /// solution.
 ///
+/// {@tool dartpad}
+/// This example shows a toggleable [CupertinoCheckbox].
+///
+/// ** See code in examples/api/lib/cupertino/checkbox/cupertino_checkbox.0.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [Checkbox], the Material Design equivalent.
@@ -90,6 +96,7 @@ class CupertinoCheckbox extends StatefulWidget {
     this.autofocus = false,
     this.side,
     this.shape,
+    this.semanticLabel,
   }) : assert(tristate || value != null);
 
   /// Whether this checkbox is checked.
@@ -197,6 +204,13 @@ class CupertinoCheckbox extends StatefulWidget {
   /// If this property is null then the shape defaults to a
   /// [RoundedRectangleBorder] with a circular corner radius of 4.0.
   final OutlinedBorder? shape;
+
+  /// The semantic label for the checkbox that will be announced by screen readers.
+  ///
+  /// This is announced by assistive technologies (e.g TalkBack/VoiceOver).
+  ///
+  /// This label does not show in the UI.
+  final String? semanticLabel;
 
   /// The width of a checkbox widget.
   static const double width = 14.0;
@@ -308,6 +322,7 @@ class _CupertinoCheckboxState extends State<CupertinoCheckbox> with TickerProvid
           .toColor();
 
     return Semantics(
+      label: widget.semanticLabel,
       checked: widget.value ?? false,
       mixed: widget.tristate ? widget.value == null : null,
       child: buildToggleable(
