@@ -5,6 +5,8 @@
 /// @docImport 'dart:ui';
 library;
 
+import 'dart:math' as math;
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -460,8 +462,8 @@ class _DragHandle extends StatelessWidget {
         container: true,
         onTap: onSemanticsTap,
         child: SizedBox(
-          height: kMinInteractiveDimension,
-          width: kMinInteractiveDimension,
+          width: math.max(handleSize.width, kMinInteractiveDimension),
+          height: math.max(handleSize.height, kMinInteractiveDimension),
           child: Center(
             child: Container(
               height: handleSize.height,
