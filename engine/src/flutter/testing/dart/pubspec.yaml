@@ -5,16 +5,12 @@
 name: engine_tests
 publish_to: none
 
-# Do not add any dependencies that require more than what is provided in
-# //third_party/dart/pkg or //third_party/dart/third_party/pkg.
-# In particular, package:test is not usable here.
-
-# If you do add packages here, make sure you can run `pub get --offline`, and
-# check the .packages and .package_config to make sure all the paths are
-# relative to this directory into //third_party/dart
-
+# Required for workspace support.
 environment:
-  sdk: '>=3.2.0-0 <4.0.0'
+  sdk: ^3.5.0-294.0.dev
+
+# This package is managed as part of the engine workspace.
+resolution: workspace
 
 dependencies:
   ffi: any
@@ -25,47 +21,3 @@ dependencies:
   vector_math: any
   vm_service: any
   vm_service_protos: any
-
-dependency_overrides:
-  async_helper:
-    path: ../../third_party/dart/pkg/async_helper
-  collection:
-    path: ../../third_party/dart/third_party/pkg/collection
-  crypto:
-    path: ../../third_party/dart/third_party/pkg/crypto
-  engine_repo_tools:
-    path: ../../tools/pkg/engine_repo_tools
-  expect:
-    path: ../../third_party/dart/pkg/expect
-  file:
-    path: ../../third_party/dart/third_party/pkg/file/packages/file
-  ffi:
-    path: ../../third_party/dart/third_party/pkg/native/pkgs/ffi
-  fixnum:
-    path: ../../third_party/dart/third_party/pkg/fixnum
-  litetest:
-    path: ../litetest
-  meta:
-    path: ../../third_party/dart/pkg/meta
-  path:
-    path: ../../third_party/dart/third_party/pkg/path
-  platform:
-    path: ../../third_party/pkg/platform
-  process:
-    path: ../../third_party/pkg/process
-  protobuf:
-    path: ../../third_party/dart/third_party/pkg/protobuf/protobuf
-  smith:
-    path: ../../third_party/dart/pkg/smith
-  skia_gold_client:
-    path: ../skia_gold_client
-  sky_engine:
-    path: ../../sky/packages/sky_engine
-  typed_data:
-    path: ../../third_party/dart/third_party/pkg/typed_data
-  vector_math:
-    path: ../../third_party/pkg/vector_math
-  vm_service:
-    path: ../../third_party/dart/pkg/vm_service
-  vm_service_protos:
-    path: ../../third_party/dart/pkg/vm_service_protos

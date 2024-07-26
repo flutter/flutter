@@ -30,4 +30,4 @@ embedded_libs:
   "dart:_js_annotations": "../../../../third_party/dart/sdk/lib/js/_js_annotations.dart"
   # The _js_types library is also needed for the same reasons as _internal.
   "dart:_js_types": "../../../../third_party/dart/sdk/lib/_internal/js_shared/lib/js_types.dart"
-  "dart:nativewrappers": "_empty.dart"
+  "dart:nativewrappers": "../../../../third_party/dart/sdk/lib/html/dartium/nativewrappers.dart"
