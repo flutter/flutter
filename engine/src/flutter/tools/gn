@@ -504,7 +504,7 @@ def to_gn_args(args):
 
   # TODO(cbracken):
   # https://github.com/flutter/flutter/issues/103386
-  if get_host_os() == 'mac' and not args.force_mac_arm64:
+  if gn_args['target_os'] == 'ios' and not args.force_mac_arm64:
     gn_args['host_cpu'] = 'x64'
 
   if gn_args['target_os'] == 'ios' or get_host_os() == 'mac':
