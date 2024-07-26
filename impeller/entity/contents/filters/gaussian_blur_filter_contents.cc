@@ -555,16 +555,16 @@ Entity ApplyBlurStyle(FilterContents::BlurStyle blur_style,
                   const ContentContext& renderer, const Entity& entity,
                   RenderPass& pass) mutable {
                 bool result = true;
+                blur_entity.SetClipDepth(entity.GetClipDepth());
+                blur_entity.SetTransform(entity.GetTransform() *
+                                         blurred_transform);
+                result = result && blur_entity.Render(renderer, pass);
                 snapshot_entity.SetTransform(
                     entity.GetTransform() *
                     Matrix::MakeScale(1.f / source_space_scalar) *
                     snapshot_transform);
                 snapshot_entity.SetClipDepth(entity.GetClipDepth());
                 result = result && snapshot_entity.Render(renderer, pass);
-                blur_entity.SetClipDepth(entity.GetClipDepth());
-                blur_entity.SetTransform(entity.GetTransform() *
-                                         blurred_transform);
-                result = result && blur_entity.Render(renderer, pass);
                 return result;
               }),
           fml::MakeCopyable([blur_entity = blur_entity.Clone(),

@@ -153,9 +153,6 @@ bool TextureContents::Render(const ContentContext& renderer,
   }
   pipeline_options.primitive_type = PrimitiveType::kTriangleStrip;
 
-  pipeline_options.depth_write_enabled =
-      stencil_enabled_ && pipeline_options.blend_mode == BlendMode::kSource;
-
   pass.SetPipeline(strict_source_rect_enabled_
                        ? renderer.GetTextureStrictSrcPipeline(pipeline_options)
                        : renderer.GetTexturePipeline(pipeline_options));
