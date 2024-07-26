@@ -148,9 +148,9 @@ void SurfaceTextureExternalTextureVKImpeller::ProcessFrame(
                    vk::ImageLayout::eColorAttachmentOptimal,
                    LayoutUpdateMode::kSync);
 
-  SkM44 transformation(GetCurrentUVTransformation());
   impeller::Matrix uv_transformation;
-  transformation.getColMajor(reinterpret_cast<SkScalar*>(&uv_transformation));
+  GetCurrentUVTransformation().getColMajor(
+      reinterpret_cast<SkScalar*>(&uv_transformation));
 
   glvk::Trampoline::GLTextureInfo src_texture;
   src_texture.texture = src_gl_texture;

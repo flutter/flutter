@@ -107,8 +107,8 @@ class PlatformViewAndroidJNI {
   ///             Then, it updates the `transform` matrix, so it fill the canvas
   ///             and preserve the aspect ratio.
   ///
-  virtual void SurfaceTextureGetTransformMatrix(JavaLocalRef surface_texture,
-                                                SkMatrix& transform) = 0;
+  virtual SkM44 SurfaceTextureGetTransformMatrix(
+      JavaLocalRef surface_texture) = 0;
 
   //----------------------------------------------------------------------------
   /// @brief      Detaches a SurfaceTexture from the OpenGL ES context.

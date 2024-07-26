@@ -9,6 +9,7 @@
 
 #include "flutter/common/graphics/texture.h"
 #include "flutter/shell/platform/android/platform_view_android_jni_impl.h"
+#include "flutter/third_party/skia/include/core/SkM44.h"
 
 namespace flutter {
 
@@ -64,7 +65,7 @@ class SurfaceTextureExternalTexture : public flutter::Texture {
   ///
   /// @return     The current uv transformation.
   ///
-  const SkMatrix& GetCurrentUVTransformation() const;
+  const SkM44& GetCurrentUVTransformation() const;
 
   //----------------------------------------------------------------------------
   /// @brief      Provides an opportunity for the subclasses to sever the
@@ -111,7 +112,7 @@ class SurfaceTextureExternalTexture : public flutter::Texture {
   sk_sp<flutter::DlImage> dl_image_;
 
  private:
-  SkMatrix transform_;
+  SkM44 transform_;
 
   // |Texture|
   void Paint(PaintContext& context,
