@@ -1744,10 +1744,6 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
 
   @override
   Future<void> updateReloadStatus(bool wasReloadSuccessful) async {}
-
-  // TODO(bkonyi): uncomment when ready to serve DevTools from DDS.
-  // @override
-  // Future<void> handleHotRestart() async {}
 }
 
 class FakeShaderCompiler implements DevelopmentShaderCompiler {

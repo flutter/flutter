@@ -50,13 +50,8 @@ Future<DartDevelopmentServiceInstance> defaultStartDartDevelopmentService(
         '--bind-port=${serviceUri.port}',
       ],
       if (!enableAuthCodes) '--disable-service-auth-codes',
-      // TODO(bkonyi): uncomment when ready to serve DevTools from DDS.
-      // if (enableDevTools) '--serve-devtools',
       if (google3WorkspaceRoot != null)
         '--google3-workspace-root=$google3WorkspaceRoot',
-      // TODO(bkonyi): uncomment when ready to serve DevTools from DDS.
-      // if (devToolsServerAddress != null)
-      //  '--devtools-server-address=$devToolsServerAddress',
       for (final String tag in cachedUserTags) '--cached-user-tags=$tag',
     ],
   );

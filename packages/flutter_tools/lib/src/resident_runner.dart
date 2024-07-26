@@ -345,22 +345,6 @@ class FlutterDevice {
       globals.printTrace('Successfully connected to service protocol: $vmServiceUri');
 
       vmService = service;
-      // TODO(bkonyi): uncomment when ready to serve DevTools from DDS.
-      /*
-      if (debuggingOptions.enableDds && !existingDds) {
-        // Don't await this as service extensions won't return if the target
-        // isolate is paused on start.
-        unawaited(device!.dds.invokeServiceExtensions(this));
-      }
-      if (existingDds && debuggingOptions.devToolsServerAddress != null) {
-        // Don't await this as service extensions won't return if the target
-        // isolate is paused on start.
-        unawaited(device!.dds.maybeCallDevToolsUriServiceExtension(
-          device: this,
-          uri: debuggingOptions.devToolsServerAddress,
-        ));
-      }
-      */
       (await device!.getLogReader(app: package)).connectedVMService = vmService;
       completer.complete();
       await subscription.cancel();
@@ -616,13 +600,6 @@ class FlutterDevice {
       await generator?.reject();
     }
   }
-
-  // TODO(bkonyi): uncomment when ready to serve DevTools from DDS.
-  /*
-  Future<void> handleHotRestart() async {
-    await device?.dds.handleHotRestart(this);
-  }
-  */
 }
 
 /// A subset of the [ResidentRunner] for delegating to attached flutter devices.
@@ -1825,13 +1802,6 @@ class TerminalHandler {
       case 'v':
       case 'V':
         return residentRunner.residentDevtoolsHandler!.launchDevToolsInBrowser(flutterDevices: residentRunner.flutterDevices);
-        // TODO(bkonyi): uncomment and replace above line when ready to serve DevTools from DDS.
-        /*
-        return residentRunner.flutterDevices.fold<bool>(
-          true,
-          (bool s, FlutterDevice? device) => s && device!.device!.dds.launchDevToolsInBrowser(device),
-        );
-        */
       case 'w':
       case 'W':
         return residentRunner.debugDumpApp();

@@ -473,13 +473,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
     final String elapsedMS = getElapsedAsMilliseconds(elapsed);
     _logger.printStatus('Restarted application in $elapsedMS.');
 
-    // TODO(bkonyi): replace with code below when ready to serve DevTools from DDS.
     unawaited(residentDevtoolsHandler!.hotRestart(flutterDevices));
-    /*
-    for (final FlutterDevice? device in flutterDevices) {
-      unawaited(device?.handleHotRestart());
-    }
-    */
 
     // Don't track restart times for dart2js builds or web-server devices.
     if (debuggingOptions.buildInfo.isDebug && deviceIsDebuggable) {

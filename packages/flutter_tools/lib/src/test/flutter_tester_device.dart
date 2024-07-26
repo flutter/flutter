@@ -169,8 +169,6 @@ class FlutterTesterTestDevice extends TestDevice {
             debuggingOptions.hostVmServicePort == detectedUri.port);
 
         Uri? forwardingUri;
-        // TODO(bkonyi): uncomment when ready to serve DevTools from DDS.
-        // Uri? devToolsUri;
 
         if (debuggingOptions.enableDds) {
           logger.printTrace('test $id: Starting Dart Development Service');
@@ -180,8 +178,6 @@ class FlutterTesterTestDevice extends TestDevice {
             debuggingOptions: debuggingOptions,
           );
           forwardingUri = _ddsLauncher.uri;
-          // TODO(bkonyi): uncomment when ready to serve DevTools from DDS.
-          // devToolsUri = _ddsLauncher.devToolsUri;
           logger.printTrace('test $id: Dart Development Service started at $forwardingUri, forwarding to VM service at $detectedUri.');
         } else {
           forwardingUri = detectedUri;
@@ -205,10 +201,6 @@ class FlutterTesterTestDevice extends TestDevice {
         if (debuggingOptions.startPaused && !machine!) {
           logger.printStatus('The Dart VM service is listening on $forwardingUri');
           await _startDevTools(forwardingUri, _ddsLauncher);
-          // TODO(bkonyi): uncomment when ready to serve DevTools from DDS.
-          // if (devToolsUri != null) {
-          //  logger.printStatus('The Flutter DevTools debugger and profiler is available at: $devToolsUri');
-          // }
           logger.printStatus('');
           logger.printStatus('The test process has been started. Set any relevant breakpoints and then resume the test in the debugger.');
         }

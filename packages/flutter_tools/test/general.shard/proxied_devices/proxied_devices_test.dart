@@ -656,8 +656,6 @@ void main() {
         'deviceId': 'test_id',
         'vmServiceUri': 'http://127.0.0.1:200/fake',
         'disableServiceAuthCodes': true,
-        // TODO(bkonyi): uncomment when ready to serve DevTools from DDS.
-        // 'enableDevTools': false,
       });
 
       serverDaemonConnection.sendResponse( startMessage.data['id']!, const <String, Object?>{
@@ -716,8 +714,6 @@ void main() {
         'deviceId': 'test_id',
         'vmServiceUri': 'http://127.0.0.1:200/fake',
         'disableServiceAuthCodes': true,
-        // TODO(bkonyi): uncomment when ready to serve DevTools from DDS.
-        // 'enableDevTools': false,
       });
 
       serverDaemonConnection.sendResponse(startMessage.data['id']!, <String, Object?>{
@@ -815,8 +811,6 @@ void main() {
         'deviceId': 'test_id',
         'vmServiceUri': 'http://127.0.0.1:200/fake',
         'disableServiceAuthCodes': true,
-        // TODO(bkonyi): uncomment when ready to serve DevTools from DDS.
-        // 'enableDevTools': false,
       });
 
       serverDaemonConnection.sendErrorResponse(startMessage.data['id']!, 'command not understood: device.startDartDevelopmentService', StackTrace.current);
@@ -1200,10 +1194,6 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
 
   @override
   Future<void> shutdown() async => shutdownCalled = true;
-
-  // TODO(bkonyi): uncomment when ready to serve DevTools from DDS.
-  // @override
-  // Future<void> invokeServiceExtensions(FlutterDevice? device) async {}
 }
 
 class FakePrebuiltApplicationPackage extends Fake implements PrebuiltApplicationPackage {

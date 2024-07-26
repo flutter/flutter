@@ -834,20 +834,8 @@ void main() {
       final FakeResidentDevtoolsHandler devtoolsHandler = runner.residentDevtoolsHandler as FakeResidentDevtoolsHandler;
 
       expect(devtoolsHandler.calledLaunchDevToolsInBrowser, isFalse);
-      // TODO(bkonyi): uncomment these checks and remove existing checks when ready to
-      // serve DevTools from DDS.
-      /*
-      for (final FlutterDevice? device in runner.flutterDevices) {
-        expect(device!.device!.dds.calledLaunchDevToolsInBrowser, isFalse);
-      }
-      */
       await terminalHandler.processTerminalInput('v');
       expect(devtoolsHandler.calledLaunchDevToolsInBrowser, isTrue);
-      /*
-      for (final FlutterDevice? device in runner.flutterDevices) {
-        expect(device!.device!.dds.calledLaunchDevToolsInBrowser, isTrue);
-      }
-      */
     });
 
     testWithoutContext('w,W - debugDumpApp without service protocol is skipped', () async {
