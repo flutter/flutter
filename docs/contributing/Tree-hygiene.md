@@ -134,6 +134,9 @@ The reviewer of the PR (_not_ the test exemtpion reviewer) should first:
 1. LGTM the PR before requesting the exemption, _or_ clarify why an LGTM was
    not given.
 
+Exemption reviewers are a **small volunteer group** - _all_ reviewers should
+feel empowered to ask for tests.
+
 ## Using git
 
 Assuming your environment has been configured according to the instructions in
