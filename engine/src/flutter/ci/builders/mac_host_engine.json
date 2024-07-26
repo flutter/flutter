@@ -1,5 +1,68 @@
 {
+    "_comment": [
+        "This file contains builds that produce artifacts for macOS hosts.",
+        "It also produces artifacts for the macOS desktop embedder.",
+        "Generally, each build should build only the targets needed to ",
+        "create a single artifact. This is to increase parallelism when ",
+        "building for releases, whose builds can't use RBE.",
+        "",
+        "The builds defined in this file should not contain tests.",
+        "Tests to run on mac hosts should go in one of the other mac_ build ",
+        "definition files."
+    ],
     "builds": [
+        {
+            "drone_dimensions": [
+                "device_type=none",
+                "os=Mac-13|Mac-14"
+            ],
+            "gclient_variables": {
+                "download_android_deps": false,
+                "use_rbe": true
+            },
+            "gn": [
+                "--target-dir",
+                "ci/host_debug_framework",
+                "--runtime-mode",
+                "debug",
+                "--no-lto",
+                "--prebuilt-dart-sdk",
+                "--build-embedder-examples",
+                "--use-glfw-swiftshader",
+                "--rbe",
+                "--no-goma",
+                "--xcode-symlinks"
+            ],
+            "name": "ci/host_debug_framework",
+            "description": "Produces the debug mode x64 macOS framework.",
+            "ninja": {
+                "config": "ci/host_debug_framework",
+                "targets": [
+                    "flutter/build/archives:flutter_embedder_framework",
+                    "flutter/shell/platform/darwin/macos:zip_macos_flutter_framework"
+                ]
+            },
+            "postsubmit_overrides": {
+                "gn": [
+                    "--target-dir",
+                    "ci/host_debug_framework",
+                    "--runtime-mode",
+                    "debug",
+                    "--no-lto",
+                    "--prebuilt-dart-sdk",
+                    "--build-embedder-examples",
+                    "--use-glfw-swiftshader",
+                    "--no-rbe",
+                    "--no-goma"
+                ]
+            },
+            "properties": {
+                "$flutter/osx_sdk": {
+                    "sdk_version": "15a240d"
+                }
+            },
+            "timeout": 90
+        },
         {
             "archives": [
                 {
@@ -15,9 +78,7 @@
             ],
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac-13|Mac-14",
-                "cpu=x86",
-                "mac_model=Macmini8,1"
+                "os=Mac-13|Mac-14"
             ],
             "gclient_variables": {
                 "download_android_deps": false,
@@ -38,18 +99,12 @@
 
             ],
             "name": "ci/host_debug",
-            "description": "Produces debug mode x64 macOS host-side tooling and builds host-side unit tests for x64 macOS.",
+            "description": "Produces debug mode x64 macOS host-side tooling.",
             "ninja": {
                 "config": "ci/host_debug",
                 "targets": [
                     "flutter/build/archives:artifacts",
-                    "flutter/build/archives:dart_sdk_archive",
-                    "flutter/build/archives:flutter_embedder_framework",
-                    "flutter/build/dart:copy_dart_sdk",
-                    "flutter/lib/snapshot:create_macos_gen_snapshots",
-                    "flutter/shell/platform/darwin/macos:zip_macos_flutter_framework",
-                    "flutter/tools/font_subset",
-                    "flutter:unittests"
+                    "flutter/build/archives:dart_sdk_archive"
                 ]
             },
             "postsubmit_overrides": {
@@ -71,20 +126,58 @@
                     "sdk_version": "15a240d"
                 }
             },
-            "tests": [
-                {
-                    "language": "python3",
-                    "name": "Host Tests for host_debug",
-                    "script": "flutter/testing/run_tests.py",
-                    "parameters": [
-                        "--variant",
-                        "ci/host_debug",
-                        "--type",
-                        "dart,dart-host,engine",
-                        "--engine-capture-core-dump"
-                    ]
-                }
+            "timeout": 90
+        },
+        {
+            "drone_dimensions": [
+                "device_type=none",
+                "os=Mac-13|Mac-14"
             ],
+            "gclient_variables": {
+                "download_android_deps": false,
+                "use_rbe": true
+            },
+            "gn": [
+                "--target-dir",
+                "ci/host_debug_gen_snapshot",
+                "--runtime-mode",
+                "debug",
+                "--no-lto",
+                "--prebuilt-dart-sdk",
+                "--build-embedder-examples",
+                "--use-glfw-swiftshader",
+                "--rbe",
+                "--no-goma",
+                "--xcode-symlinks"
+
+            ],
+            "name": "ci/host_debug_gen_snapshot",
+            "description": "Produces debug mode x64 macOS gen_snapshot.",
+            "ninja": {
+                "config": "ci/host_debug_gen_snapshot",
+                "targets": [
+                    "flutter/lib/snapshot:create_macos_gen_snapshots"
+                ]
+            },
+            "postsubmit_overrides": {
+                "gn": [
+                    "--target-dir",
+                    "ci/host_debug_gen_snapshot",
+                    "--runtime-mode",
+                    "debug",
+                    "--no-lto",
+                    "--prebuilt-dart-sdk",
+                    "--build-embedder-examples",
+                    "--use-glfw-swiftshader",
+                    "--no-rbe",
+                    "--no-goma"
+                ]
+            },
+            "properties": {
+                "$flutter/osx_sdk": {
+                    "sdk_version": "15a240d"
+                }
+            },
             "timeout": 90
         },
         {
@@ -101,9 +194,7 @@
             ],
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac-13|Mac-14",
-                "cpu=x86",
-                "mac_model=Macmini8,1"
+                "os=Mac-13|Mac-14"
             ],
             "gclient_variables": {
                 "download_android_deps": false,
@@ -122,15 +213,11 @@
                 "--xcode-symlinks"
             ],
             "name": "ci/host_profile",
-            "description": "Produces profile mode x64 macOS host-side tooling and builds host-side unit tests for x64 macOS.",
+            "description": "Produces profile mode x64 macOS host-side tooling.",
             "ninja": {
                 "config": "ci/host_profile",
                 "targets": [
-                    "flutter/build/dart:copy_dart_sdk",
-                    "flutter/build/archives:artifacts",
-                    "flutter/lib/snapshot:create_macos_gen_snapshots",
-                    "flutter/shell/platform/darwin/macos:zip_macos_flutter_framework",
-                    "flutter:unittests"
+                    "flutter/build/archives:artifacts"
                 ]
             },
             "postsubmit_overrides": {
@@ -151,20 +238,104 @@
                     "sdk_version": "15a240d"
                 }
             },
-            "tests": [
-                {
-                    "language": "python3",
-                    "name": "Host Tests for host_profile",
-                    "script": "flutter/testing/run_tests.py",
-                    "parameters": [
-                        "--variant",
-                        "ci/host_profile",
-                        "--type",
-                        "dart,dart-host,engine",
-                        "--engine-capture-core-dump"
-                    ]
-                }
+            "timeout": 90
+        },
+        {
+            "drone_dimensions": [
+                "device_type=none",
+                "os=Mac-13|Mac-14"
             ],
+            "gclient_variables": {
+                "download_android_deps": false,
+                "use_rbe": true
+            },
+            "gn": [
+                "--target-dir",
+                "ci/host_profile_framework",
+                "--runtime-mode",
+                "profile",
+                "--no-lto",
+                "--prebuilt-dart-sdk",
+                "--build-embedder-examples",
+                "--rbe",
+                "--no-goma",
+                "--xcode-symlinks"
+            ],
+            "name": "ci/host_profile_framework",
+            "description": "Produces the profile mode x64 macOS framework.",
+            "ninja": {
+                "config": "ci/host_profile_framework",
+                "targets": [
+                    "flutter/shell/platform/darwin/macos:zip_macos_flutter_framework"
+                ]
+            },
+            "postsubmit_overrides": {
+                "gn": [
+                    "--target-dir",
+                    "ci/host_profile_framework",
+                    "--runtime-mode",
+                    "profile",
+                    "--no-lto",
+                    "--prebuilt-dart-sdk",
+                    "--build-embedder-examples",
+                    "--no-rbe",
+                    "--no-goma"
+                ]
+            },
+            "properties": {
+                "$flutter/osx_sdk": {
+                    "sdk_version": "15a240d"
+                }
+            },
+            "timeout": 90
+        },
+        {
+            "drone_dimensions": [
+                "device_type=none",
+                "os=Mac-13|Mac-14"
+            ],
+            "gclient_variables": {
+                "download_android_deps": false,
+                "use_rbe": true
+            },
+            "gn": [
+                "--target-dir",
+                "ci/host_profile_gen_snapshot",
+                "--runtime-mode",
+                "profile",
+                "--no-lto",
+                "--prebuilt-dart-sdk",
+                "--build-embedder-examples",
+                "--rbe",
+                "--no-goma",
+                "--xcode-symlinks"
+            ],
+            "name": "ci/host_profile_gen_snapshot",
+            "description": "Produces profile mode x64 macOS gen_snapshot.",
+            "ninja": {
+                "config": "ci/host_profile_gen_snapshot",
+                "targets": [
+                    "flutter/lib/snapshot:create_macos_gen_snapshots"
+                ]
+            },
+            "postsubmit_overrides": {
+                "gn": [
+                    "--target-dir",
+                    "ci/host_profile_gen_snapshot",
+                    "--runtime-mode",
+                    "profile",
+                    "--no-lto",
+                    "--prebuilt-dart-sdk",
+                    "--build-embedder-examples",
+                    "--no-rbe",
+                    "--no-goma"
+                ]
+            },
+            "properties": {
+                "$flutter/osx_sdk": {
+                    "sdk_version": "15a240d"
+                }
+            },
             "timeout": 90
         },
         {
@@ -182,15 +353,7 @@
             ],
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac-13|Mac-14",
-                "cpu=x86",
-                "mac_model=Macmini8,1"
-            ],
-            "dependencies": [
-                {
-                    "dependency": "goldctl",
-                    "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"
-                }
+                "os=Mac-13|Mac-14"
             ],
             "gclient_variables": {
                 "download_android_deps": false,
@@ -210,16 +373,12 @@
                 "--xcode-symlinks"
             ],
             "name": "ci/host_release",
-            "description": "Produces release mode x64 macOS host-side tooling and builds host-side unit tests for x64 macOS.",
+            "description": "Produces release mode x64 macOS host-side tooling.",
             "ninja": {
                 "config": "ci/host_release",
                 "targets": [
                     "flutter/build/archives:artifacts",
-                    "flutter/build/dart:copy_dart_sdk",
-                    "flutter/lib/snapshot:create_macos_gen_snapshots",
-                    "flutter/shell/platform/darwin/macos:zip_macos_flutter_framework",
-                    "flutter/tools/font_subset",
-                    "flutter:unittests"
+                    "flutter/tools/font_subset"
                 ]
             },
             "postsubmit_overrides": {
@@ -241,19 +400,108 @@
                     "sdk_version": "15a240d"
                 }
             },
-            "tests": [
-                {
-                    "language": "python3",
-                    "name": "Impeller-golden, dart and engine tests for host_release",
-                    "script": "flutter/testing/run_tests.py",
-                    "parameters": [
-                        "--variant",
-                        "ci/host_release",
-                        "--type",
-                        "dart,dart-host,engine"
-                    ]
-                }
+            "timeout": 90
+        },
+        {
+            "drone_dimensions": [
+                "device_type=none",
+                "os=Mac-13|Mac-14"
             ],
+            "gclient_variables": {
+                "download_android_deps": false,
+                "use_rbe": true
+            },
+            "gn": [
+                "--target-dir",
+                "ci/host_release_framework",
+                "--runtime-mode",
+                "release",
+                "--no-lto",
+                "--prebuilt-dart-sdk",
+                "--build-embedder-examples",
+                "--use-glfw-swiftshader",
+                "--rbe",
+                "--no-goma",
+                "--xcode-symlinks"
+            ],
+            "name": "ci/host_release_framework",
+            "description": "Produces the release mode x64 macOS framework.",
+            "ninja": {
+                "config": "ci/host_release_framework",
+                "targets": [
+                    "flutter/shell/platform/darwin/macos:zip_macos_flutter_framework"
+                ]
+            },
+            "postsubmit_overrides": {
+                "gn": [
+                    "--target-dir",
+                    "ci/host_release_framework",
+                    "--runtime-mode",
+                    "release",
+                    "--no-lto",
+                    "--prebuilt-dart-sdk",
+                    "--build-embedder-examples",
+                    "--use-glfw-swiftshader",
+                    "--no-rbe",
+                    "--no-goma"
+                ]
+            },
+            "properties": {
+                "$flutter/osx_sdk": {
+                    "sdk_version": "15a240d"
+                }
+            },
+            "timeout": 90
+        },
+        {
+            "drone_dimensions": [
+                "device_type=none",
+                "os=Mac-13|Mac-14"
+            ],
+            "gclient_variables": {
+                "download_android_deps": false,
+                "use_rbe": true
+            },
+            "gn": [
+                "--target-dir",
+                "ci/host_release_gen_snapshot",
+                "--runtime-mode",
+                "release",
+                "--no-lto",
+                "--prebuilt-dart-sdk",
+                "--build-embedder-examples",
+                "--use-glfw-swiftshader",
+                "--rbe",
+                "--no-goma",
+                "--xcode-symlinks"
+            ],
+            "name": "ci/host_release_gen_snapshot",
+            "description": "Produces release mode x64 macOS gen_snapshot.",
+            "ninja": {
+                "config": "ci/host_release_gen_snapshot",
+                "targets": [
+                    "flutter/lib/snapshot:create_macos_gen_snapshots"
+                ]
+            },
+            "postsubmit_overrides": {
+                "gn": [
+                    "--target-dir",
+                    "ci/host_release_gen_snapshot",
+                    "--runtime-mode",
+                    "release",
+                    "--no-lto",
+                    "--prebuilt-dart-sdk",
+                    "--build-embedder-examples",
+                    "--use-glfw-swiftshader",
+                    "--no-rbe",
+                    "--no-goma"
+                ]
+            },
+            "properties": {
+                "$flutter/osx_sdk": {
+                    "sdk_version": "15a240d"
+                }
+            },
             "timeout": 90
         },
         {
@@ -271,8 +519,7 @@
             ],
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac-13|Mac-14",
-                "cpu=x86"
+                "os=Mac-13|Mac-14"
             ],
             "gclient_variables": {
                 "download_android_deps": false,
@@ -297,18 +544,121 @@
             "ninja": {
                 "config": "ci/mac_debug_arm64",
                 "targets": [
-                    "flutter/tools/font_subset",
                     "flutter/build/archives:artifacts",
-                    "flutter/build/archives:dart_sdk_archive",
-                    "flutter/build/archives:flutter_embedder_framework",
-                    "flutter/lib/snapshot:create_macos_gen_snapshots",
-                    "flutter/shell/platform/darwin/macos:zip_macos_flutter_framework"
+                    "flutter/build/archives:dart_sdk_archive"
                 ]
             },
             "postsubmit_overrides": {
                 "gn": [
                     "--target-dir",
                     "ci/mac_debug_arm64",
+                    "--mac",
+                    "--mac-cpu",
+                    "arm64",
+                    "--runtime-mode",
+                    "debug",
+                    "--no-lto",
+                    "--prebuilt-dart-sdk",
+                    "--no-rbe",
+                    "--no-goma"
+                ]
+            },
+            "properties": {
+                "$flutter/osx_sdk": {
+                    "sdk_version": "15a240d"
+                }
+            },
+            "timeout": 90
+        },
+        {
+            "drone_dimensions": [
+                "device_type=none",
+                "os=Mac-13|Mac-14"
+            ],
+            "gclient_variables": {
+                "download_android_deps": false,
+                "use_rbe": true
+            },
+            "gn": [
+                "--target-dir",
+                "ci/mac_debug_framework_arm64",
+                "--mac",
+                "--mac-cpu",
+                "arm64",
+                "--runtime-mode",
+                "debug",
+                "--no-lto",
+                "--prebuilt-dart-sdk",
+                "--rbe",
+                "--no-goma",
+                "--xcode-symlinks"
+            ],
+            "name": "ci/mac_debug_framework_arm64",
+            "description": "Produces the debug mode arm64 macOS framework.",
+            "ninja": {
+                "config": "ci/mac_debug_framework_arm64",
+                "targets": [
+                    "flutter/build/archives:flutter_embedder_framework",
+                    "flutter/shell/platform/darwin/macos:zip_macos_flutter_framework"
+                ]
+            },
+            "postsubmit_overrides": {
+                "gn": [
+                    "--target-dir",
+                    "ci/mac_debug_framework_arm64",
+                    "--mac",
+                    "--mac-cpu",
+                    "arm64",
+                    "--runtime-mode",
+                    "debug",
+                    "--no-lto",
+                    "--prebuilt-dart-sdk",
+                    "--no-rbe",
+                    "--no-goma"
+                ]
+            },
+            "properties": {
+                "$flutter/osx_sdk": {
+                    "sdk_version": "15a240d"
+                }
+            },
+            "timeout": 90
+        },
+        {
+            "drone_dimensions": [
+                "device_type=none",
+                "os=Mac-13|Mac-14"
+            ],
+            "gclient_variables": {
+                "download_android_deps": false,
+                "use_rbe": true
+            },
+            "gn": [
+                "--target-dir",
+                "ci/mac_debug_gen_snapshot_arm64",
+                "--mac",
+                "--mac-cpu",
+                "arm64",
+                "--runtime-mode",
+                "debug",
+                "--no-lto",
+                "--prebuilt-dart-sdk",
+                "--rbe",
+                "--no-goma",
+                "--xcode-symlinks"
+            ],
+            "name": "ci/mac_debug_gen_snapshot_arm64",
+            "description": "Produces the debug mode arm64 macOS gen_snapshot.",
+            "ninja": {
+                "config": "ci/mac_debug_gen_snapshot_arm64",
+                "targets": [
+                    "flutter/lib/snapshot:create_macos_gen_snapshots"
+                ]
+            },
+            "postsubmit_overrides": {
+                "gn": [
+                    "--target-dir",
+                    "ci/mac_debug_gen_snapshot_arm64",
                     "--mac",
                     "--mac-cpu",
                     "arm64",
@@ -341,8 +691,7 @@
             ],
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac-13|Mac-14",
-                "cpu=x86"
+                "os=Mac-13|Mac-14"
             ],
             "gclient_variables": {
                 "download_android_deps": false,
@@ -367,15 +716,119 @@
             "ninja": {
                 "config": "ci/mac_profile_arm64",
                 "targets": [
-                    "flutter/build/archives:artifacts",
-                    "flutter/lib/snapshot:create_macos_gen_snapshots",
-                    "flutter/shell/platform/darwin/macos:zip_macos_flutter_framework"
+                    "flutter/build/archives:artifacts"
                 ]
             },
            "postsubmit_overrides": {
                 "gn": [
                     "--target-dir",
                     "ci/mac_profile_arm64",
+                    "--mac",
+                    "--mac-cpu",
+                    "arm64",
+                    "--runtime-mode",
+                    "profile",
+                    "--no-lto",
+                    "--prebuilt-dart-sdk",
+                    "--no-rbe",
+                    "--no-goma"
+                ]
+            },
+            "properties": {
+                "$flutter/osx_sdk": {
+                    "sdk_version": "15a240d"
+                }
+            },
+            "timeout": 90
+        },
+        {
+            "drone_dimensions": [
+                "device_type=none",
+                "os=Mac-13|Mac-14"
+            ],
+            "gclient_variables": {
+                "download_android_deps": false,
+                "use_rbe": true
+            },
+            "gn": [
+                "--target-dir",
+                "ci/mac_profile_framework_arm64",
+                "--mac",
+                "--mac-cpu",
+                "arm64",
+                "--runtime-mode",
+                "profile",
+                "--no-lto",
+                "--prebuilt-dart-sdk",
+                "--rbe",
+                "--no-goma",
+                "--xcode-symlinks"
+            ],
+            "name": "ci/mac_profile_framework_arm64",
+            "description": "Produces the profile mode arm64 macOS framework.",
+            "ninja": {
+                "config": "ci/mac_profile_framework_arm64",
+                "targets": [
+                    "flutter/shell/platform/darwin/macos:zip_macos_flutter_framework"
+                ]
+            },
+           "postsubmit_overrides": {
+                "gn": [
+                    "--target-dir",
+                    "ci/mac_profile_framework_arm64",
+                    "--mac",
+                    "--mac-cpu",
+                    "arm64",
+                    "--runtime-mode",
+                    "profile",
+                    "--no-lto",
+                    "--prebuilt-dart-sdk",
+                    "--no-rbe",
+                    "--no-goma"
+                ]
+            },
+            "properties": {
+                "$flutter/osx_sdk": {
+                    "sdk_version": "15a240d"
+                }
+            },
+            "timeout": 90
+        },
+        {
+            "drone_dimensions": [
+                "device_type=none",
+                "os=Mac-13|Mac-14"
+            ],
+            "gclient_variables": {
+                "download_android_deps": false,
+                "use_rbe": true
+            },
+            "gn": [
+                "--target-dir",
+                "ci/mac_profile_gen_snapshot_arm64",
+                "--mac",
+                "--mac-cpu",
+                "arm64",
+                "--runtime-mode",
+                "profile",
+                "--no-lto",
+                "--prebuilt-dart-sdk",
+                "--rbe",
+                "--no-goma",
+                "--xcode-symlinks"
+            ],
+            "name": "ci/mac_profile_gen_snapshot_arm64",
+            "description": "Produces the profile mode arm64 macOS gen_snapshot.",
+            "ninja": {
+                "config": "ci/mac_profile_gen_snapshot_arm64",
+                "targets": [
+                    "flutter/lib/snapshot:create_macos_gen_snapshots"
+                ]
+            },
+           "postsubmit_overrides": {
+                "gn": [
+                    "--target-dir",
+                    "ci/mac_profile_gen_snapshot_arm64",
                     "--mac",
                     "--mac-cpu",
                     "arm64",
@@ -407,16 +860,9 @@
                     "realm": "production"
                 }
             ],
-            "dependencies": [
-                {
-                    "dependency": "goldctl",
-                    "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"
-                }
-            ],
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac-13|Mac-14",
-                "cpu=arm64"
+                "os=Mac-13|Mac-14"
             ],
             "gclient_variables": {
                 "download_android_deps": false,
@@ -442,12 +888,7 @@
             "ninja": {
                 "config": "ci/mac_release_arm64",
                 "targets": [
-                    "flutter:unittests",
                     "flutter/build/archives:artifacts",
-                    "flutter/build/dart:copy_dart_sdk",
-                    "flutter/impeller/golden_tests:impeller_golden_tests",
-                    "flutter/lib/snapshot:create_macos_gen_snapshots",
-                    "flutter/shell/platform/darwin/macos:zip_macos_flutter_framework",
                     "flutter/tools/font_subset"
                 ]
             },
@@ -472,19 +913,116 @@
                     "sdk_version": "15a240d"
                 }
             },
-            "tests": [
-                {
-                    "language": "python3",
-                    "name": "Impeller-golden for host_release",
-                    "script": "flutter/testing/run_tests.py",
-                    "parameters": [
-                        "--variant",
-                        "ci/mac_release_arm64",
-                        "--type",
-                        "impeller-golden"
-                    ]
-                }
+            "timeout": 90
+        },
+        {
+            "drone_dimensions": [
+                "device_type=none",
+                "os=Mac-13|Mac-14"
             ],
+            "gclient_variables": {
+                "download_android_deps": false,
+                "use_rbe": true
+            },
+            "gn": [
+                "--target-dir",
+                "ci/mac_release_framework_arm64",
+                "--mac",
+                "--mac-cpu",
+                "arm64",
+                "--runtime-mode",
+                "release",
+                "--no-lto",
+                "--prebuilt-dart-sdk",
+                "--rbe",
+                "--no-goma",
+                "--xcode-symlinks",
+                "--use-glfw-swiftshader"
+            ],
+            "name": "ci/mac_release_framework_arm64",
+            "description": "Produces the release mode arm64 macOS framework.",
+            "ninja": {
+                "config": "ci/mac_release_framework_arm64",
+                "targets": [
+                    "flutter/shell/platform/darwin/macos:zip_macos_flutter_framework"
+                ]
+            },
+           "postsubmit_overrides": {
+                "gn": [
+                    "--target-dir",
+                    "ci/mac_release_framework_arm64",
+                    "--mac",
+                    "--mac-cpu",
+                    "arm64",
+                    "--runtime-mode",
+                    "release",
+                    "--no-lto",
+                    "--prebuilt-dart-sdk",
+                    "--no-rbe",
+                    "--no-goma",
+                    "--use-glfw-swiftshader"
+                ]
+            },
+            "properties": {
+                "$flutter/osx_sdk": {
+                    "sdk_version": "15a240d"
+                }
+            },
+            "timeout": 90
+        },
+        {
+            "drone_dimensions": [
+                "device_type=none",
+                "os=Mac-13|Mac-14"
+            ],
+            "gclient_variables": {
+                "download_android_deps": false,
+                "use_rbe": true
+            },
+            "gn": [
+                "--target-dir",
+                "ci/mac_release_gen_snapshot_arm64",
+                "--mac",
+                "--mac-cpu",
+                "arm64",
+                "--runtime-mode",
+                "release",
+                "--no-lto",
+                "--prebuilt-dart-sdk",
+                "--rbe",
+                "--no-goma",
+                "--xcode-symlinks",
+                "--use-glfw-swiftshader"
+            ],
+            "name": "ci/mac_release_gen_snapshot_arm64",
+            "description": "Produces release mode arm64 macOS gen_snapshot.",
+            "ninja": {
+                "config": "ci/mac_release_gen_snapshot_arm64",
+                "targets": [
+                    "flutter/lib/snapshot:create_macos_gen_snapshots"
+                ]
+            },
+           "postsubmit_overrides": {
+                "gn": [
+                    "--target-dir",
+                    "ci/mac_release_gen_snapshot_arm64",
+                    "--mac",
+                    "--mac-cpu",
+                    "arm64",
+                    "--runtime-mode",
+                    "release",
+                    "--no-lto",
+                    "--prebuilt-dart-sdk",
+                    "--no-rbe",
+                    "--no-goma",
+                    "--use-glfw-swiftshader"
+                ]
+            },
+            "properties": {
+                "$flutter/osx_sdk": {
+                    "sdk_version": "15a240d"
+                }
+            },
             "timeout": 90
         }
     ],
@@ -496,9 +1034,9 @@
                     "--dst",
                     "out/debug/framework",
                     "--arm64-out-dir",
-                    "out/ci/mac_debug_arm64",
+                    "out/ci/mac_debug_framework_arm64",
                     "--x64-out-dir",
-                    "out/ci/host_debug",
+                    "out/ci/host_debug_framework",
                     "--zip"
                 ],
                 "script": "flutter/sky/tools/create_embedder_framework.py"
@@ -509,9 +1047,9 @@
                     "--dst",
                     "out/release/framework",
                     "--arm64-out-dir",
-                    "out/ci/mac_release_arm64",
+                    "out/ci/mac_release_framework_arm64",
                     "--x64-out-dir",
-                    "out/ci/host_release",
+                    "out/ci/host_release_framework",
                     "--dsym",
                     "--strip",
                     "--zip"
@@ -524,9 +1062,9 @@
                     "--dst",
                     "out/debug/framework",
                     "--arm64-out-dir",
-                    "out/ci/mac_debug_arm64",
+                    "out/ci/mac_debug_framework_arm64",
                     "--x64-out-dir",
-                    "out/ci/host_debug",
+                    "out/ci/host_debug_framework",
                     "--zip"
                 ],
                 "script": "flutter/sky/tools/create_macos_framework.py"
@@ -537,9 +1075,9 @@
                     "--dst",
                     "out/profile/framework",
                     "--arm64-out-dir",
-                    "out/ci/mac_profile_arm64",
+                    "out/ci/mac_profile_framework_arm64",
                     "--x64-out-dir",
-                    "out/ci/host_profile",
+                    "out/ci/host_profile_framework",
                     "--zip"
                 ],
                 "script": "flutter/sky/tools/create_macos_framework.py"
@@ -559,9 +1097,9 @@
                     "--dst",
                     "out/debug/snapshot",
                     "--arm64-path",
-                    "out/ci/mac_debug_arm64/gen_snapshot_arm64",
+                    "out/ci/mac_debug_gen_snapshot_arm64/gen_snapshot_arm64",
                     "--x64-path",
-                    "out/ci/host_debug/gen_snapshot_x64",
+                    "out/ci/host_debug_gen_snapshot/gen_snapshot_x64",
                     "--zip"
                 ],
                 "script": "flutter/sky/tools/create_macos_gen_snapshots.py"
@@ -572,9 +1110,9 @@
                     "--dst",
                     "out/profile/snapshot",
                     "--arm64-path",
-                    "out/ci/mac_profile_arm64/gen_snapshot_arm64",
+                    "out/ci/mac_profile_gen_snapshot_arm64/gen_snapshot_arm64",
                     "--x64-path",
-                    "out/ci/host_profile/gen_snapshot_x64",
+                    "out/ci/host_profile_gen_snapshot/gen_snapshot_x64",
                     "--zip"
                 ],
                 "script": "flutter/sky/tools/create_macos_gen_snapshots.py"
@@ -585,9 +1123,9 @@
                     "--dst",
                     "out/release/snapshot",
                     "--arm64-path",
-                    "out/ci/mac_release_arm64/gen_snapshot_arm64",
+                    "out/ci/mac_release_gen_snapshot_arm64/gen_snapshot_arm64",
                     "--x64-path",
-                    "out/ci/host_release/gen_snapshot_x64",
+                    "out/ci/host_release_gen_snapshot/gen_snapshot_x64",
                     "--zip"
                 ],
                 "script": "flutter/sky/tools/create_macos_gen_snapshots.py"
