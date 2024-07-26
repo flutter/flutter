@@ -1131,7 +1131,7 @@ void main() {
 
     // Open the menu
     await tester.tap(find.byType(DropdownMenu<TestMenu>));
-    await tester.pumpAndSettle();
+    await tester.pump();
 
     await tester.enterText(find
         .byType(TextField)
@@ -2433,6 +2433,28 @@ void main() {
     expect(textField.keyboardType, TextInputType.text);
   });
 
+  testWidgets('DropdownMenu passes an alignmentOffset to MenuAnchor', (WidgetTester tester) async {
+    const Offset alignmentOffset = Offset(0, 16);
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: DropdownMenu<String>(
+            alignmentOffset: alignmentOffset,
+            dropdownMenuEntries: <DropdownMenuEntry<String>>[
+              DropdownMenuEntry<String>(value: '1', label: 'One'),
+              DropdownMenuEntry<String>(value: '2', label: 'Two'),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final MenuAnchor menuAnchor = tester.widget<MenuAnchor>(find.byType(MenuAnchor));
+
+    expect(menuAnchor.alignmentOffset, alignmentOffset);
+  });
+  
   testWidgets('DropdownMenu filter is disabled until text input', (WidgetTester tester) async{
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
@@ -2467,7 +2489,7 @@ void main() {
       }
     }
 
-    // Select an item would disable filter again.
+    // Selecting an item would disable filter again.
     await tester.tap(find.widgetWithText(MenuItemButton, 'Menu 1').last);
     await tester.pumpAndSettle();
     await tester.tap(find.byType(DropdownMenu<TestMenu>));
