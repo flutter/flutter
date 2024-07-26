@@ -1662,42 +1662,23 @@ class _ActionSheetMainSheetState extends State<_ActionSheetMainSheet> {
   );
 }
 
-class _AlertDialogSizes {
-  const _AlertDialogSizes({
-    required this.size,
-    required this.contentHeight,
-    required this.dividerThickness,
-  });
-
-  final Size size;
-  final double contentHeight;
-  final double dividerThickness;
-}
-
-// Visual components of an alert dialog that need to be explicitly sized and
-// laid out at runtime.
-enum _AlertDialogSections {
-  contentSection,
-  actionsSection,
-}
-
 class _ContentStyle {
   const _ContentStyle(
     this.contextBodySize, {
     required this.fontSize,
-    required this.verticalPadding,
+    required this.lead,
   });
 
   final double contextBodySize;
   final double fontSize;
-  final double verticalPadding;
+  final double lead;
 
   _ContentStyle lerp(_ContentStyle other, double contextBodySize) {
     final double ratio = (contextBodySize - this.contextBodySize)
         / (other.contextBodySize - this.contextBodySize);
     return _ContentStyle(contextBodySize,
       fontSize: lerpDouble(fontSize, other.fontSize, ratio)!,
-      verticalPadding: lerpDouble(verticalPadding, other.verticalPadding, ratio)!,
+      lead: lerpDouble(lead, other.lead, ratio)!,
     );
   }
 }
@@ -1741,15 +1722,15 @@ class _ActionSheetContentSection extends StatelessWidget {
 
   static const List<_ContentStyle> _kContentStyles = <_ContentStyle>[
     // Smaller ones use the same style as "l".
-    /*  l*/_ContentStyle(17, fontSize: 13, verticalPadding: 6),
-    /* xl*/_ContentStyle(19, fontSize: 15, verticalPadding: 6.6),
-    /*xxl*/_ContentStyle(21, fontSize: 17, verticalPadding: 7.3),
-    /*3xl*/_ContentStyle(23, fontSize: 19, verticalPadding: 7.3),
-    /*ax1*/_ContentStyle(28, fontSize: 23, verticalPadding: 9),
-    /*ax2*/_ContentStyle(33, fontSize: 27, verticalPadding: 9.5),
-    /*ax3*/_ContentStyle(40, fontSize: 33, verticalPadding: 11),
-    /*ax4*/_ContentStyle(47, fontSize: 38, verticalPadding: 12.5),
-    /*ax5*/_ContentStyle(53, fontSize: 44, verticalPadding: 13),
+    /*  l*/_ContentStyle(17, fontSize: 13, lead: 52),
+    /* xl*/_ContentStyle(19, fontSize: 15, lead: 46),
+    /*xxl*/_ContentStyle(21, fontSize: 17, lead: 40),
+    /*3xl*/_ContentStyle(23, fontSize: 19, lead: 33),
+    /*ax1*/_ContentStyle(28, fontSize: 23, lead: 29),
+    /*ax2*/_ContentStyle(33, fontSize: 27, lead: 24),
+    /*ax3*/_ContentStyle(40, fontSize: 33, lead: 22),
+    /*ax4*/_ContentStyle(47, fontSize: 38, lead: 20),
+    /*ax5*/_ContentStyle(53, fontSize: 44, lead: 18),
   ];
 
   _ContentStyle _getContentStyle(BuildContext context) {
@@ -1806,11 +1787,12 @@ class _ActionSheetContentSection extends StatelessWidget {
 
     final double topPadding;
     final double bottomPadding;
+    final double verticalPadding = 1.1 * style.lead - style.fontSize;
     if (title != null && message != null) {
-      topPadding = style.verticalPadding;
-      bottomPadding = style.verticalPadding * 2 + style.fontSize;
+      topPadding = verticalPadding;
+      bottomPadding = verticalPadding * 2 + style.fontSize;
     } else {
-      topPadding = style.verticalPadding + 0.55 * style.fontSize;
+      topPadding = verticalPadding + 0.55 * style.fontSize;
       bottomPadding = topPadding;
     }
 
