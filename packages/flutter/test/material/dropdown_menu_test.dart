@@ -2454,7 +2454,7 @@ void main() {
 
     expect(menuAnchor.alignmentOffset, alignmentOffset);
   });
-  
+
   testWidgets('DropdownMenu filter is disabled until text input', (WidgetTester tester) async{
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
