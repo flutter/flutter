@@ -179,6 +179,7 @@ class DropdownMenu<T> extends StatefulWidget {
     required this.dropdownMenuEntries,
     this.inputFormatters,
   }) : assert(filterCallback == null || enableFilter);
+
   /// Determine if the [DropdownMenu] is enabled.
   ///
   /// Defaults to true.
@@ -190,24 +191,29 @@ class DropdownMenu<T> extends StatefulWidget {
   /// ** See code in examples/api/lib/material/dropdown_menu/dropdown_menu.2.dart **
   /// {@end-tool}
   final bool enabled;
+
   /// Determine the width of the [DropdownMenu].
   ///
   /// If this is null, the width of the [DropdownMenu] will be the same as the width of the widest
   /// menu item plus the width of the leading/trailing icon.
   final double? width;
+
   /// Determine the height of the menu.
   ///
   /// If this is null, the menu will display as many items as possible on the screen.
   final double? menuHeight;
+
   /// An optional Icon at the front of the text input field.
   ///
   /// Defaults to null. If this is not null, the menu items will have extra paddings to be aligned
   /// with the text in the text field.
   final Widget? leadingIcon;
+
   /// An optional icon at the end of the text field.
   ///
   /// Defaults to an [Icon] with [Icons.arrow_drop_down].
   final Widget? trailingIcon;
+
   /// Optional widget that describes the input field.
   ///
   /// When the input field is empty and unfocused, the label is displayed on
@@ -218,10 +224,12 @@ class DropdownMenu<T> extends StatefulWidget {
   ///
   /// Defaults to null.
   final Widget? label;
+
   /// Text that suggests what sort of input the field accepts.
   ///
   /// Defaults to null;
   final String? hintText;
+
   /// Text that provides context about the [DropdownMenu]'s value, such
   /// as how the value will be used.
   ///
@@ -235,6 +243,7 @@ class DropdownMenu<T> extends StatefulWidget {
   ///
   /// * [InputDecoration.helperText], which is the text that provides context about the [InputDecorator.child]'s value.
   final String? helperText;
+
   /// Text that appears below the input field and the border to show the error message.
   ///
   /// If non-null, the border's color animates to red and the [helperText] is not shown.
@@ -245,52 +254,64 @@ class DropdownMenu<T> extends StatefulWidget {
   ///
   /// * [InputDecoration.errorText], which is the text that appears below the [InputDecorator.child] and the border.
   final String? errorText;
+
   /// An optional icon at the end of the text field to indicate that the text
   /// field is pressed.
   ///
   /// Defaults to an [Icon] with [Icons.arrow_drop_up].
   final Widget? selectedTrailingIcon;
+
   /// Determine if the menu list can be filtered by the text input.
   ///
   /// Defaults to false.
   final bool enableFilter;
+
   /// Determine if the first item that matches the text input can be highlighted.
   ///
   /// Defaults to true as the search function could be commonly used.
   final bool enableSearch;
+
   /// The type of keyboard to use for editing the text.
   ///
   /// Defaults to [TextInputType.text].
   final TextInputType? keyboardType;
+
   /// The text style for the [TextField] of the [DropdownMenu];
   ///
   /// Defaults to the overall theme's [TextTheme.bodyLarge]
   /// if the dropdown menu theme's value is null.
   final TextStyle? textStyle;
+
   /// The text align for the [TextField] of the [DropdownMenu].
   ///
   /// Defaults to [TextAlign.start].
   final TextAlign textAlign;
+
   /// Defines the default appearance of [InputDecoration] to show around the text field.
   ///
   /// By default, shows a outlined text field.
   final InputDecorationTheme? inputDecorationTheme;
+
   /// The [MenuStyle] that defines the visual attributes of the menu.
   ///
   /// The default width of the menu is set to the width of the text field.
   final MenuStyle? menuStyle;
+
   /// Controls the text being edited or selected in the menu.
   ///
   /// If null, this widget will create its own [TextEditingController].
   final TextEditingController? controller;
+
   /// The value used to for an initial selection.
   ///
   /// Defaults to null.
   final T? initialSelection;
+
   /// The callback is called when a selection is made.
   ///
   /// Defaults to null. If null, only the text field is updated.
   final ValueChanged<T?>? onSelected;
+
   /// Defines the keyboard focus for this widget.
   ///
   /// The [focusNode] is a long-lived object that's typically managed by a
@@ -330,6 +351,7 @@ class DropdownMenu<T> extends StatefulWidget {
   /// If this is non-null, the behaviour of [requestFocusOnTap] is overridden
   /// by the [FocusNode.canRequestFocus] property.
   final FocusNode? focusNode;
+
   /// Determine if the dropdown button requests focus and the on-screen virtual
   /// keyboard is shown in response to a touch event.
   ///
@@ -354,12 +376,14 @@ class DropdownMenu<T> extends StatefulWidget {
   /// ** See code in examples/api/lib/material/dropdown_menu/dropdown_menu.2.dart **
   /// {@end-tool}
   final bool? requestFocusOnTap;
+
   /// Descriptions of the menu items in the [DropdownMenu].
   ///
   /// This is a required parameter. It is recommended that at least one [DropdownMenuEntry]
   /// is provided. If this is an empty list, the menu will be empty and only
   /// contain space for padding.
   final List<DropdownMenuEntry<T>> dropdownMenuEntries;
+
   /// Defines the menu text field's width to be equal to its parent's width
   /// plus the horizontal width of the specified insets.
   ///
@@ -374,6 +398,7 @@ class DropdownMenu<T> extends StatefulWidget {
   ///
   /// Defaults to null.
   final EdgeInsets? expandedInsets;
+
   /// When [DropdownMenu.enableFilter] is true, this callback is used to
   /// compute the list of filtered items.
   ///
@@ -408,6 +433,7 @@ class DropdownMenu<T> extends StatefulWidget {
   /// that match the text provided by the input field, with a case-insensitive
   /// comparison. When this is not null, `enableFilter` must be set to true.
   final FilterCallback<T>? filterCallback;
+
   /// When [DropdownMenu.enableSearch] is true, this callback is used to compute
   /// the index of the search result to be highlighted.
   ///
@@ -435,6 +461,7 @@ class DropdownMenu<T> extends StatefulWidget {
   /// the default function will return the index of the first matching result
   /// which contains the contents of the text input field.
   final SearchCallback<T>? searchCallback;
+
   /// Optional input validation and formatting overrides.
   ///
   /// Formatters are run in the provided order when the user changes the text
