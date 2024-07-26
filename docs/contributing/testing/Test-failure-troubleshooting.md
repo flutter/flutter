@@ -5,13 +5,13 @@
 It's kinda disappointing when you've already put a bunch of work into your PR,
 but then GitHub hits you with this:
 
-![some checks were not successful](./image_files/some_checks_were_not_successful.png)
+![some checks were not successful](https://github.com/user-attachments/assets/95fd56e9-4839-4944-b9ac-cc45404896a2)
 
 <br>
 
 ### tree-status
 
-![Tree is currently broken.](./image_files/tree_is_currently_broken.png)
+![Tree is currently broken.](https://github.com/user-attachments/assets/b611d540-c4cb-47dc-a27f-bef8709f24ce)
 
 If **tree-status** is failing, then there are problems on the main branch,
 and we'd like to fix those before merging in anything else.
@@ -24,7 +24,7 @@ label, and then sometime later a bot will take care of it.
 
 ### Google testing
 
-![Google testing](./image_files/google_testing.png)
+![Google testing](https://github.com/user-attachments/assets/7d1f9a66-b84a-4223-b57d-77b44f205d1c)
 
 Google runs some tests that contain sensitive data, which might include
 private keys and/or various evil corporate schemes.
@@ -47,11 +47,11 @@ there are changes that inadvertently break existing behavior.
 Click on **Details** for the failing test, and then click
 **View more details on flutter-dashboard**.
 
-![view more details](./image_files/view_more_details_button.png)
+![view more details](https://github.com/user-attachments/assets/df667176-205f-42b2-8997-885c50ab238d)
 
 The full test output is linked at the bottom of the page.
 
-![LUCI overview page](./image_files/luci_overview.png)
+![LUCI overview page](https://github.com/user-attachments/assets/9603c6ad-90ec-47e1-96e8-9e3430f2c1b8)
 
 > [!IMPORTANT]
 > Clicking on **[raw]** displays the output as plain text,\
@@ -91,7 +91,7 @@ The test description was:
 From there, you can find the failing test, run it locally,
 and figure out how to fix it!
 
-![Run test locally](./image_files/click_to_run_tests.png)
+![Run test locally](https://github.com/user-attachments/assets/06a81178-ab81-4e0e-a277-ba1a08a0f44c)
 
 > [!TIP]
 > The test framework also [analyzes documentation](https://ln.hixie.ch/?start=1660174115)!\
@@ -110,4 +110,4 @@ This can be as simple as pulling in the latest changes made to the main branch.\
 (The [Tree hygiene](../../Tree-hygiene.md#using-git) page recommends updating
 via rebase, rather than a merge commit.)
 
-![Update with rebase](./image_files/update_with_rebase.png)
+![Update with rebase](https://github.com/user-attachments/assets/8bacd87f-410a-4a9c-8ad0-075dd05f3eff)
