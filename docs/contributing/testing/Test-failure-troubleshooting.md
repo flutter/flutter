@@ -57,7 +57,7 @@ The full test output is linked at the bottom of the page.
 > Clicking on **[raw]** displays the output as plain text,\
 > whereas **stdout** also has this fun little guy at the bottom.
 >
-> [![LogDog](https://storage.googleapis.com/chrome-infra/logdog-small.png)](https://chromium.googlesource.com/infra/luci/luci-go/+/master/logdog/)
+> [![LogDog](https://storage.googleapis.com/chrome-infra/logdog-small.png)](https://chromium.googlesource.com/infra/luci/luci-go/+/main/logdog/)
 
 <br>
 
