@@ -7,6 +7,13 @@ import 'package:flutter_api_samples/material/chip/deletable_chip_attributes.on_d
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  Finder cancelIconFinder(String chipText) {
+    return find.descendant(
+      of: find.widgetWithText(Chip, chipText),
+      matching: find.byIcon(Icons.cancel),
+    );
+  }
+
   testWidgets('Chip.onDeleted can be used to delete chips', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.OnDeletedExampleApp(),
@@ -19,9 +26,8 @@ void main() {
     expect(find.widgetWithText(Chip, 'James Madison'), findsOne);
 
     // Delete Alexander Hamilton.
-    await tester.tap(
-      find.descendant(of: find.widgetWithText(Chip, 'Alexander Hamilton'), matching: find.byIcon(Icons.cancel)),
-    );
+
+    await tester.tap(cancelIconFinder('Alexander Hamilton'));
     await tester.pump();
 
     expect(find.widgetWithText(Chip, 'Aaron Burr'), findsOne);
@@ -30,9 +36,7 @@ void main() {
     expect(find.widgetWithText(Chip, 'James Madison'), findsOne);
 
     // Delete James Madison.
-    await tester.tap(
-      find.descendant(of: find.widgetWithText(Chip, 'James Madison'), matching: find.byIcon(Icons.cancel)),
-    );
+    await tester.tap(cancelIconFinder('James Madison'));
     await tester.pump();
 
     expect(find.widgetWithText(Chip, 'Aaron Burr'), findsOne);
@@ -41,9 +45,7 @@ void main() {
     expect(find.widgetWithText(Chip, 'James Madison'), findsNothing);
 
     // Delete Aaron Burr.
-    await tester.tap(
-      find.descendant(of: find.widgetWithText(Chip, 'Aaron Burr'), matching: find.byIcon(Icons.cancel)),
-    );
+    await tester.tap(cancelIconFinder('Aaron Burr'));
     await tester.pump();
 
     expect(find.widgetWithText(Chip, 'Aaron Burr'), findsNothing);
@@ -52,9 +54,7 @@ void main() {
     expect(find.widgetWithText(Chip, 'James Madison'), findsNothing);
 
     // Delete Eliza Hamilton.
-    await tester.tap(
-      find.descendant(of: find.widgetWithText(Chip, 'Eliza Hamilton'), matching: find.byIcon(Icons.cancel)),
-    );
+    await tester.tap(cancelIconFinder('Eliza Hamilton'));
     await tester.pump();
 
     expect(find.widgetWithText(Chip, 'Aaron Burr'), findsNothing);
