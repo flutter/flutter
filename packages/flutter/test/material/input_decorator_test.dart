@@ -6523,6 +6523,70 @@ void main() {
       expect(getBorderWeight(tester), 0.0);
     });
 
+    testWidgets('InputDecoration.collapsed accepts constraints', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        buildInputDecorator(
+          decoration: const InputDecoration.collapsed(
+            hintText: hintText,
+            constraints: BoxConstraints.tightFor(width: 200.0, height: 32.0),
+          ),
+        ),
+      );
+
+      expect(getDecoratorRect(tester).size, const Size(200.0, 32.0));
+    });
+
+    testWidgets('InputDecoration.collapsed accepts hintMaxLines', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        buildInputDecorator(
+          decoration: const InputDecoration.collapsed(
+            hintText: threeLines,
+            hintMaxLines: 2,
+          ),
+        ),
+      );
+
+      const double hintLineHeight = 24.0; // font size = 16 and font height = 1.5.
+      expect(getDecoratorRect(tester).size, const Size(800.0, 2 * hintLineHeight));
+    });
+
+    testWidgets('InputDecoration.collapsed accepts hintFadeDuration', (WidgetTester tester) async {
+      // Build once with empty content.
+      await tester.pumpWidget(
+        buildInputDecorator(
+          isEmpty: true,
+          decoration: const InputDecoration.collapsed(
+            hintText: hintText,
+            hintFadeDuration: Duration(milliseconds: 120),
+          ),
+        ),
+      );
+
+      // Hint is visible (opacity 1.0).
+      expect(getHintOpacity(tester), 1.0);
+
+      // Rebuild with non-empty content.
+      await tester.pumpWidget(
+        buildInputDecorator(
+          decoration: const InputDecoration.collapsed(
+            hintText: hintText,
+            hintFadeDuration: Duration(milliseconds: 120),
+          ),
+        ),
+      );
+
+      // The hint's opacity animates from 1.0 to 0.0.
+      // The animation's default duration is 20ms.
+      await tester.pump(const Duration(milliseconds: 50));
+      final double hintOpacity50ms = getHintOpacity(tester);
+      expect(hintOpacity50ms, inExclusiveRange(0.0, 1.0));
+      await tester.pump(const Duration(milliseconds: 50));
+      final double hintOpacity100ms = getHintOpacity(tester);
+      expect(hintOpacity100ms, inExclusiveRange(0.0, hintOpacity50ms));
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(getHintOpacity(tester), 0.0);
+    });
+
     test('InputDecorationTheme.isCollapsed is applied', () {
       final InputDecoration decoration = const InputDecoration(
         hintText: 'Hello, Flutter!',

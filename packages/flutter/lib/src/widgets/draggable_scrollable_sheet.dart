@@ -1071,7 +1071,7 @@ class _DraggableScrollableActuatorState extends State<DraggableScrollableActuato
   }
 }
 
-/// A [ChangeNotifier] to use with [InheritedResetNotifier] to notify
+/// A [ChangeNotifier] to use with [_InheritedResetNotifier] to notify
 /// descendants that they should reset to initial state.
 class _ResetNotifier extends ChangeNotifier {
   _ResetNotifier() {
