@@ -245,7 +245,7 @@ AndroidRenderingAPI FlutterMain::SelectedRenderingAPI(
   // Debug/Profile only functionality for testing a specific
   // backend configuration.
 #ifndef FLUTTER_RELEASE
-  if (settings.requested_rendering_backend == "opengles" &
+  if (settings.requested_rendering_backend == "opengles" &&
       settings.enable_impeller) {
     return AndroidRenderingAPI::kImpellerOpenGLES;
   }
