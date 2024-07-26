@@ -7,13 +7,6 @@ import 'package:flutter_api_samples/material/chip/deletable_chip_attributes.on_d
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  Finder cancelIconFinder(String chipText) {
-    return find.descendant(
-      of: find.widgetWithText(Chip, chipText),
-      matching: find.byIcon(Icons.cancel),
-    );
-  }
-
   testWidgets('Chip.onDeleted can be used to delete chips', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.OnDeletedExampleApp(),
@@ -25,8 +18,14 @@ void main() {
     expect(find.widgetWithText(Chip, 'Eliza Hamilton'), findsOne);
     expect(find.widgetWithText(Chip, 'James Madison'), findsOne);
 
-    // Delete Alexander Hamilton.
+    Finder cancelIconFinder(String chipText) {
+      return find.descendant(
+        of: find.widgetWithText(Chip, chipText),
+        matching: find.byIcon(Icons.cancel),
+      );
+    }
 
+    // Delete Alexander Hamilton.
     await tester.tap(cancelIconFinder('Alexander Hamilton'));
     await tester.pump();
 
