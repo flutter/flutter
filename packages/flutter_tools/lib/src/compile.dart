@@ -7,6 +7,7 @@ import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
+import 'package:pool/pool.dart';
 import 'package:process/process.dart';
 import 'package:usage/uuid/uuid.dart';
 
@@ -1063,24 +1064,26 @@ class DefaultResidentCompiler implements ResidentCompiler {
   Future<void> _writelnToServerStdin(String line, {
     bool printTrace = false,
   }) async {
-    final Process? server = _server;
-    if (server == null) {
-      return;
-    }
-    await ProcessUtils.writelnToStdinUnsafe(stdin: server.stdin, line: line);
-    if (printTrace) {
-      _logger.printTrace('<- $line');
-    }
+    await _writelnToServerStdinAll(<String>[line], printTrace: printTrace);
   }
 
-  Future<void> _writelnToServerStdinAll(List<String>? lines) async {
+  // TODO dont merge; explain why this is needed
+  final Pool _serverWritePool = Pool(1);
+  Future<void> _writelnToServerStdinAll(List<String> lines, {
+    bool printTrace = false,
+  }) async {
     final Process? server = _server;
     if (server == null) {
       return;
     }
-    for (final String line in lines ?? <String>[]) {
+    final PoolResource request = await _serverWritePool.request();
+    for (final String line in lines) {
       await ProcessUtils.writelnToStdinUnsafe(stdin: server.stdin, line: line);
+      if (printTrace) {
+        _logger.printTrace('<- $line');
+      }
     }
+    request.release();
   }
 }
 
