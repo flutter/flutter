@@ -91,6 +91,7 @@ template("display_list_unittests_component") {
     deps += [
       ":display_list",
       "../playground:playground_test",
+      "//flutter/impeller/golden_tests:screenshot",
       "//flutter/impeller/scene",
       "//flutter/impeller/typographer/backends/stb:typographer_stb_backend",
       "//flutter/third_party/txt",
