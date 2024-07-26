@@ -1799,9 +1799,8 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     _cachedController = null;
   }
 
-  /// Handler called when the track is tapped in order to scroll to the tapped
+  /// Handler called when the track is tapped in order to page in the tapped direction
   /// position.
-  ///
   @protected
   void handleTrackTapDown(TapDownDetails details) {
     // The Scrollbar should page towards the position of the tap on the track.
