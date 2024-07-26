@@ -219,6 +219,7 @@ class WordBoundary extends TextBoundary {
     };
   }
 
+  static final RegExp _regExpSpaceSeparatorOrPunctuaion = RegExp(r'[\p{Space_Separator}\p{Punctuation}]', unicode: true);
   bool _skipSpacesAndPunctuations(int offset, bool forward) {
     // Use code point since some punctuations are supplementary characters.
     // "inner" here refers to the code unit that's before the break in the
@@ -235,7 +236,7 @@ class WordBoundary extends TextBoundary {
     final bool hardBreakRulesApply = innerCodePoint == null || outerCodeUnit == null
     // WB3a & WB3b: always break before and after newlines.
                                   || _isNewline(innerCodePoint) || _isNewline(outerCodeUnit);
-    return hardBreakRulesApply || !RegExp(r'[\p{Space_Separator}\p{Punctuation}]', unicode: true).hasMatch(String.fromCharCode(innerCodePoint));
+    return hardBreakRulesApply || !_regExpSpaceSeparatorOrPunctuaion.hasMatch(String.fromCharCode(innerCodePoint));
   }
 
   /// Returns a [TextBoundary] suitable for handling keyboard navigation
@@ -332,6 +333,7 @@ class _TextLayout {
     };
   }
 
+  static final RegExp _regExpSpaceSeparators = RegExp(r'\p{Space_Separator}', unicode: true);
   /// The line caret metrics representing the end of text location.
   ///
   /// This is usually used when the caret is placed at the end of the text
@@ -356,11 +358,15 @@ class _TextLayout {
     // Luckily they have the same bidi embedding level as the paragraph as per
     // https://unicode.org/reports/tr9/#L1, so we can anchor the caret to the
     // last logical trailing space.
-    final bool hasTrailingSpaces = switch (rawString.codeUnitAt(rawString.length - 1)) {
-      0x9 ||        // horizontal tab
-      0x3000 ||     // ideographic space
-      0x20 => true, // space
-      _ => false,
+    // Whitespace character definitions refer to Java/ICU, not Unicode-Zs.
+    // https://github.com/unicode-org/icu/blob/23d9628f88a2d0127c564ad98297061c36d3ce77/icu4c/source/common/unicode/uchar.h#L3388-L3425
+    final String lastCodeUnit = rawString[rawString.length - 1];
+    final bool hasTrailingSpaces = switch (lastCodeUnit.codeUnitAt(0)) {
+      0x0009 => true,   // horizontal tab
+      0x00A0 ||         // no-break space
+      0x2007 ||         // figure space
+      0x202F => false,  // narrow no-break space
+      _ => _regExpSpaceSeparators.hasMatch(lastCodeUnit),
     };
 
     final double baseline = lineMetrics.baseline;
