@@ -1502,20 +1502,19 @@ void PlatformViewAndroidJNIImpl::SurfaceTextureUpdateTexImage(
   FML_CHECK(fml::jni::CheckException(env));
 }
 
-void PlatformViewAndroidJNIImpl::SurfaceTextureGetTransformMatrix(
-    JavaLocalRef surface_texture,
-    SkMatrix& transform) {
+SkM44 PlatformViewAndroidJNIImpl::SurfaceTextureGetTransformMatrix(
+    JavaLocalRef surface_texture) {
   JNIEnv* env = fml::jni::AttachCurrentThread();
 
   if (surface_texture.is_null()) {
-    return;
+    return {};
   }
 
   fml::jni::ScopedJavaLocalRef<jobject> surface_texture_local_ref(
       env, env->CallObjectMethod(surface_texture.obj(),
                                  g_java_weak_reference_get_method));
   if (surface_texture_local_ref.is_null()) {
-    return;
+    return {};
   }
 
   fml::jni::ScopedJavaLocalRef<jfloatArray> transformMatrix(
@@ -1527,36 +1526,12 @@ void PlatformViewAndroidJNIImpl::SurfaceTextureGetTransformMatrix(
 
   float* m = env->GetFloatArrayElements(transformMatrix.obj(), nullptr);
 
-  // SurfaceTexture 4x4 Column Major -> Skia 3x3 Row Major
+  static_assert(sizeof(SkScalar) == sizeof(float));
+  const auto transform = SkM44::ColMajor(m);
 
-  // SurfaceTexture 4x4 (Column Major):
-  // | m[0] m[4] m[ 8] m[12] |
-  // | m[1] m[5] m[ 9] m[13] |
-  // | m[2] m[6] m[10] m[14] |
-  // | m[3] m[7] m[11] m[15] |
-
-  // According to Android documentation, the 4x4 matrix returned should be used
-  // with texture coordinates in the form (s, t, 0, 1). Since the z component is
-  // always 0.0, we are free to ignore any element that multiplies with the z
-  // component. Converting this to a 3x3 matrix is easy:
-
-  // SurfaceTexture 3x3 (Column Major):
-  // | m[0] m[4] m[12] |
-  // | m[1] m[5] m[13] |
-  // | m[3] m[7] m[15] |
-
-  // Skia (Row Major):
-  // | m[0] m[1] m[2] |
-  // | m[3] m[4] m[5] |
-  // | m[6] m[7] m[8] |
-
-  SkScalar matrix3[] = {
-      m[0], m[4], m[12],  //
-      m[1], m[5], m[13],  //
-      m[3], m[7], m[15],  //
-  };
   env->ReleaseFloatArrayElements(transformMatrix.obj(), m, JNI_ABORT);
-  transform.set9(matrix3);
+
+  return transform;
 }
 
 void PlatformViewAndroidJNIImpl::SurfaceTextureDetachFromGLContext(
