@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'app.dart';
+/// @docImport 'page.dart';
+/// @docImport 'predictive_back_page_transitions_builder.dart';
+library;
+
 import 'dart:ui' as ui;
 
 import 'package:flutter/cupertino.dart';
@@ -918,7 +923,7 @@ void _drawImageScaledAndCentered(PaintingContext context, ui.Image image, double
     return;
   }
   final Paint paint = Paint()
-    ..filterQuality = ui.FilterQuality.low
+    ..filterQuality = ui.FilterQuality.medium
     ..color = Color.fromRGBO(0, 0, 0, opacity);
   final double logicalWidth = image.width / pixelRatio;
   final double logicalHeight = image.height / pixelRatio;
@@ -1267,7 +1272,7 @@ class _ZoomEnterTransitionNoCache extends StatelessWidget {
         opacity: fadeTransition,
         child: ScaleTransition(
           scale: scaleTransition,
-          filterQuality: FilterQuality.none,
+          filterQuality: FilterQuality.medium,
           child: child,
         ),
       ),
@@ -1300,7 +1305,7 @@ class _ZoomExitTransitionNoCache extends StatelessWidget {
       opacity: fadeTransition,
       child: ScaleTransition(
         scale: scaleTransition,
-        filterQuality: FilterQuality.none,
+        filterQuality: FilterQuality.medium,
         child: child,
       ),
     );

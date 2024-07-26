@@ -279,6 +279,67 @@ void main() {
     expect(observations[0].previous, 'Page 1');
   });
 
+  testWidgets('Can push, pop, and replace in sequence', (WidgetTester tester) async {
+    const MaterialPage<void> initial = MaterialPage<void>(key: ValueKey<String>('initial'), child: Text('initial'));
+    const MaterialPage<void> push = MaterialPage<void>(key: ValueKey<String>('push'), child: Text('push'));
+    const MaterialPage<void> replace = MaterialPage<void>(key: ValueKey<String>('replace'), child: Text('replace'));
+    List<Page<void>> pages = <Page<void>>[
+      initial
+    ];
+    bool popPageCallback(Route<dynamic> route, dynamic result) {
+      pages.removeLast();
+      return route.didPop(result);
+    }
+    final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(
+      TestDependencies(
+        child: Navigator(
+          key: navigator,
+          pages: pages,
+          onPopPage: popPageCallback,
+        ),
+      ),
+    );
+    expect(find.text('initial'), findsOneWidget);
+
+    // Push a new page
+    pages = <Page<void>>[
+      initial,
+      push
+    ];
+    await tester.pumpWidget(
+      TestDependencies(
+        child: Navigator(
+          key: navigator,
+          pages: pages,
+          onPopPage:popPageCallback,
+        ),
+      ),
+    );
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.text('push'), findsOneWidget);
+
+    // Pop before push finishes.
+    navigator.currentState!.pop();
+
+    // Replace the entire pages
+    // Push a new page
+    pages = <Page<void>>[
+      replace
+    ];
+    await tester.pumpWidget(
+      TestDependencies(
+        child: Navigator(
+          key: navigator,
+          pages: pages,
+          onPopPage:popPageCallback,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('replace'), findsOneWidget);
+  });
+
   testWidgets('Navigator.of rootNavigator finds root Navigator', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Material(
@@ -1431,7 +1492,7 @@ void main() {
                     settings: const RouteSettings(name: 'C'),
                     builder: (BuildContext context) {
                       log.add('building C');
-                      log.add('found ${ModalRoute.of(context)!.settings.name}');
+                      log.add('found ${ModalRoute.settingsOf(context)!.name}');
                       return TextButton(
                         child: const Text('C'),
                         onPressed: () {
@@ -1476,7 +1537,7 @@ void main() {
     final List<String> log = <String>[];
     Route<dynamic>? nextRoute = PageRouteBuilder<int>(
       pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-        log.add('building page 1 - ${ModalRoute.of(context)!.canPop}');
+        log.add('building page 1 - ${ModalRoute.canPopOf(context)}');
         return const Placeholder();
       },
     );
@@ -1493,29 +1554,80 @@ void main() {
     expect(log, expected);
     key.currentState!.pushReplacement(PageRouteBuilder<int>(
       pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-        log.add('building page 2 - ${ModalRoute.of(context)!.canPop}');
+        log.add('building page 2 - ${ModalRoute.canPopOf(context)}');
         return const Placeholder();
       },
     ));
     expect(log, expected);
     await tester.pump();
     expected.add('building page 2 - false');
-    expected.add('building page 1 - false'); // page 1 is rebuilt again because isCurrent changed.
     expect(log, expected);
     await tester.pump(const Duration(milliseconds: 150));
     expect(log, expected);
     key.currentState!.pushReplacement(PageRouteBuilder<int>(
       pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-        log.add('building page 3 - ${ModalRoute.of(context)!.canPop}');
+        log.add('building page 3 - ${ModalRoute.canPopOf(context)}');
         return const Placeholder();
       },
     ));
     expect(log, expected);
     await tester.pump();
     expected.add('building page 3 - false');
-    expected.add('building page 2 - false'); // page 2 is rebuilt again because isCurrent changed.
     expect(log, expected);
     await tester.pump(const Duration(milliseconds: 200));
+    expect(log, expected);
+  });
+
+  testWidgets('ModelRoute can be partially depended-on', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> key = GlobalKey<NavigatorState>();
+    final List<String> log = <String>[];
+    Route<dynamic>? nextRoute = PageRouteBuilder<int>(
+      settings: const RouteSettings(name: 'page 1'),
+      pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+        log.add('building ${ModalRoute.settingsOf(context)!.name} - canPop: ${ModalRoute.canPopOf(context)!}');
+        return const Placeholder();
+      },
+    );
+    await tester.pumpWidget(MaterialApp(
+      navigatorKey: key,
+      onGenerateRoute: (RouteSettings settings) {
+        assert(nextRoute != null);
+        final Route<dynamic> result = nextRoute!;
+        nextRoute = null;
+        return result;
+      },
+    ));
+    final List<String> expected = <String>['building page 1 - canPop: false'];
+    expect(log, expected);
+    key.currentState!.push(PageRouteBuilder<int>(
+      settings: const RouteSettings(name: 'page 2'),
+      pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+        log.add('building ${ModalRoute.settingsOf(context)!.name} - isCurrent: ${ModalRoute.isCurrentOf(context)!}');
+        return const Placeholder();
+      },
+    ));
+    expect(log, expected);
+    await tester.pump();
+    expected.add('building page 2 - isCurrent: true');
+    expect(log, expected);
+    key.currentState!.push(PageRouteBuilder<int>(
+      settings: const RouteSettings(name: 'page 3'),
+      pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+        log.add('building ${ModalRoute.settingsOf(context)!.name} - canPop: ${ModalRoute.canPopOf(context)!}');
+        return const Placeholder();
+      },
+    ));
+    expect(log, expected);
+    await tester.pump();
+    expected.add('building page 3 - canPop: true');
+    expected.add('building page 2 - isCurrent: false');
+    expect(log, expected);
+    key.currentState!.pop();
+    await tester.pump();
+    expected.add('building page 2 - isCurrent: true');
+    expect(log, expected);
+    key.currentState!.pop();
+    await tester.pump();
     expect(log, expected);
   });
 

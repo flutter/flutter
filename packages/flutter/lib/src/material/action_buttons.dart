@@ -2,6 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/services.dart';
+///
+/// @docImport 'app_bar.dart';
+/// @docImport 'drawer.dart';
+/// @docImport 'material.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
@@ -179,7 +186,7 @@ class BackButtonIcon extends StatelessWidget {
 /// will override [color] for states where [ButtonStyle.foregroundColor] resolves to non-null.
 ///
 /// When deciding to display a [BackButton], consider using
-/// `ModalRoute.of(context)?.canPop` to check whether the current route can be
+/// `ModalRoute.canPopOf(context)` to check whether the current route can be
 /// popped. If that value is false (e.g., because the current route is the
 /// initial route), the [BackButton] will not have any effect when pressed,
 /// which could frustrate the user.

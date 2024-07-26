@@ -167,7 +167,7 @@ void main() {
 
   testWithoutContext('setAssetDirectory forwards arguments correctly', () async {
     final MockVMService mockVMService = MockVMService();
-    final FlutterVmService flutterVmService = FlutterVmService(mockVMService, logger: BufferLogger.test());
+    final FlutterVmService flutterVmService = FlutterVmService(mockVMService);
 
     await flutterVmService.setAssetDirectory(
       assetsDirectory: Uri(path: 'abc', scheme: 'file'),
@@ -186,7 +186,7 @@ void main() {
 
   testWithoutContext('setAssetDirectory forwards arguments correctly - windows', () async {
     final MockVMService mockVMService = MockVMService();
-    final FlutterVmService flutterVmService = FlutterVmService(mockVMService, logger: BufferLogger.test());
+    final FlutterVmService flutterVmService = FlutterVmService(mockVMService);
 
     await flutterVmService.setAssetDirectory(
       assetsDirectory: Uri(path: 'C:/Users/Tester/AppData/Local/Temp/hello_worldb42a6da5/hello_world/build/flutter_assets', scheme: 'file'),
@@ -207,7 +207,7 @@ void main() {
 
   testWithoutContext('getSkSLs forwards arguments correctly', () async {
     final MockVMService mockVMService = MockVMService();
-    final FlutterVmService flutterVmService = FlutterVmService(mockVMService, logger: BufferLogger.test());
+    final FlutterVmService flutterVmService = FlutterVmService(mockVMService);
 
     await flutterVmService.getSkSLs(viewId: 'abc');
 
@@ -220,7 +220,7 @@ void main() {
 
   testWithoutContext('flushUIThreadTasks forwards arguments correctly', () async {
     final MockVMService mockVMService = MockVMService();
-    final FlutterVmService flutterVmService = FlutterVmService(mockVMService, logger: BufferLogger.test());
+    final FlutterVmService flutterVmService = FlutterVmService(mockVMService);
 
     await flutterVmService.flushUIThreadTasks(uiIsolateId: 'def');
 
@@ -783,6 +783,17 @@ void main() {
           error: FakeRPCError(code: RPCErrorCodes.kServiceDisappeared),
         ),
       ]);
+
+      expect(
+        () => fakeVmServiceHost.vmService.findExtensionIsolate(kExtensionName),
+        throwsA(isA<VmServiceDisappearedException>()),
+      );
+    });
+
+    testWithoutContext('throws when the service is disposed', () async {
+      final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
+
+      await fakeVmServiceHost.vmService.dispose();
 
       expect(
         () => fakeVmServiceHost.vmService.findExtensionIsolate(kExtensionName),

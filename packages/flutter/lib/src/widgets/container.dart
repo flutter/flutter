@@ -2,6 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'decorated_sliver.dart';
+/// @docImport 'implicit_animations.dart';
+/// @docImport 'transitions.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
@@ -232,8 +239,8 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
 ///  * [Border], which has a sample which uses [Container] heavily.
 ///  * [Ink], which paints a [Decoration] on a [Material], allowing
 ///    [InkResponse] and [InkWell] splashes to paint over them.
-///  * Cookbook: [Animate the properties of a container](https://flutter.dev/docs/cookbook/animation/animated-container)
-///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
+///  * Cookbook: [Animate the properties of a container](https://docs.flutter.dev/cookbook/animation/animated-container)
+///  * The [catalog of layout widgets](https://docs.flutter.dev/ui/widgets/layout).
 class Container extends StatelessWidget {
   /// Creates a widget that combines common painting, positioning, and sizing widgets.
   ///

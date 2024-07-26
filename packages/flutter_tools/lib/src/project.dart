@@ -544,7 +544,9 @@ class AndroidProject extends FlutterProjectPlatform {
         // pluginManagement block of the settings.gradle file.
         // See https://docs.gradle.org/current/userguide/composite_builds.html#included_plugin_builds,
         // as well as the settings.gradle and build.gradle templates.
-        final bool declarativeApply = line.contains('dev.flutter.flutter-gradle-plugin');
+        final bool declarativeApply = line.contains(
+          RegExp(r'dev\.flutter\.(?:(?:flutter-gradle-plugin)|(?:`flutter-gradle-plugin`))'),
+        );
 
         // This case allows for flutter run/build to work for modules. It does
         // not guarantee the Flutter Gradle Plugin is applied.
@@ -880,6 +882,41 @@ $javaGradleCompatUrl
       }
     }
     return AndroidEmbeddingVersionResult(AndroidEmbeddingVersion.v1, 'No `<meta-data android:name="flutterEmbedding" android:value="2"/>` in ${appManifestFile.absolute.path}');
+  }
+
+  // TODO(matanlurey): Flip to true when on by default, https://github.com/flutter/flutter/issues/132712.
+  static const bool _impellerEnabledByDefault = false;
+
+  /// Returns the `io.flutter.embedding.android.EnableImpeller` manifest value.
+  ///
+  /// If there is no manifest file, or the key is not present, returns `false`.
+  bool computeImpellerEnabled() {
+    if (!appManifestFile.existsSync()) {
+      return _impellerEnabledByDefault;
+    }
+    final XmlDocument document;
+    try {
+      document = XmlDocument.parse(appManifestFile.readAsStringSync());
+    } on XmlException {
+      throwToolExit('Error parsing $appManifestFile '
+                    'Please ensure that the android manifest is a valid XML document and try again.');
+    } on FileSystemException {
+      throwToolExit('Error reading $appManifestFile even though it exists. '
+                    'Please ensure that you have read permission to this file and try again.');
+    }
+    for (final XmlElement metaData in document.findAllElements('meta-data')) {
+      final String? name = metaData.getAttribute('android:name');
+      if (name == 'io.flutter.embedding.android.EnableImpeller') {
+        final String? value = metaData.getAttribute('android:value');
+        if (value == 'true') {
+          return true;
+        }
+        if (value == 'false') {
+          return false;
+        }
+      }
+    }
+    return _impellerEnabledByDefault;
   }
 }
 

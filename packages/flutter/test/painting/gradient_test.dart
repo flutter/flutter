@@ -191,6 +191,32 @@ void main() {
     ));
   });
 
+  test('LinearGradient lerp test with transforms', () {
+    const LinearGradient testGradient1 = LinearGradient(
+      transform: GradientRotation(math.pi/4),
+      colors: <Color>[
+        Color(0x33333333),
+        Color(0x66666666),
+      ],
+      stops: <double>[0, 1],
+    );
+    const LinearGradient testGradient2 = LinearGradient(
+      transform: GradientRotation(math.pi/2),
+      colors: <Color>[
+        Color(0x33333333),
+        Color(0x66666666),
+      ],
+      stops: <double>[0, 1],
+    );
+
+    final LinearGradient? actual0 = LinearGradient.lerp(testGradient1, testGradient2, 0.0);
+    final LinearGradient? actual1 = LinearGradient.lerp(testGradient1, testGradient2, 1.0);
+    final LinearGradient? actual2 = LinearGradient.lerp(testGradient1, testGradient2, 0.5);
+    expect(testGradient1, equals(actual0));
+    expect(testGradient2, equals(actual1));
+    expect(testGradient2, equals(actual2));
+  });
+
   test('LinearGradient toString', () {
     expect(
       const LinearGradient(
@@ -278,6 +304,29 @@ void main() {
       },
       returnsNormally,
     );
+  });
+
+  test('LinearGradient withOpacity test', () {
+    const LinearGradient testGradient = LinearGradient(
+      begin: Alignment.bottomRight,
+      end: Alignment.topCenter,
+      colors: <Color>[
+        Color(0xFFFFFFFF),
+        Color(0xAF777777),
+        Color(0x44444444),
+      ],
+    );
+    final LinearGradient actual = testGradient.withOpacity(0.5);
+
+    expect(actual, const LinearGradient(
+       begin: Alignment.bottomRight,
+      end: Alignment.topCenter,
+      colors: <Color>[
+        Color(0x80FFFFFF),
+        Color(0x80777777),
+        Color(0x80444444),
+      ],
+    ),);
   });
 
   test('RadialGradient with AlignmentDirectional', () {
@@ -481,6 +530,32 @@ void main() {
     ));
   });
 
+  test('RadialGradient lerp test with transforms', () {
+    const RadialGradient testGradient1 = RadialGradient(
+      transform: GradientRotation(math.pi/4),
+      colors: <Color>[
+        Color(0x33333333),
+        Color(0x66666666),
+      ],
+      stops: <double>[0, 1],
+    );
+    const RadialGradient testGradient2 = RadialGradient(
+      transform: GradientRotation(math.pi/2),
+      colors: <Color>[
+        Color(0x33333333),
+        Color(0x66666666),
+      ],
+      stops: <double>[0, 1],
+    );
+
+    final RadialGradient? actual0 = RadialGradient.lerp(testGradient1, testGradient2, 0.0);
+    final RadialGradient? actual1 = RadialGradient.lerp(testGradient1, testGradient2, 1.0);
+    final RadialGradient? actual2 = RadialGradient.lerp(testGradient1, testGradient2, 0.5);
+    expect(testGradient1, equals(actual0));
+    expect(testGradient2, equals(actual1));
+    expect(testGradient2, equals(actual2));
+  });
+
   test('RadialGradient lerp test with focal', () {
     const RadialGradient testGradient1 = RadialGradient(
       center: Alignment.topLeft,
@@ -544,6 +619,33 @@ void main() {
     ));
   });
 
+
+  test('RadialGradient withOpacity test', () {
+    const RadialGradient testGradient = RadialGradient(
+      center: Alignment.topLeft,
+      focal: Alignment.centerLeft,
+      radius: 20.0,
+      focalRadius: 10.0,
+      colors: <Color>[
+        Color(0xFFFFFFFF),
+        Color(0xAF777777),
+        Color(0x44444444),
+      ],
+    );
+    final RadialGradient actual = testGradient.withOpacity(0.5);
+
+    expect(actual, const RadialGradient(
+      center: Alignment.topLeft,
+      focal: Alignment.centerLeft,
+      radius: 20.0,
+      focalRadius: 10.0,
+      colors: <Color>[
+        Color(0x80FFFFFF),
+        Color(0x80777777),
+        Color(0x80444444),
+      ],
+    ));
+  });
   test('SweepGradient lerp test', () {
     const SweepGradient testGradient1 = SweepGradient(
       center: Alignment.topLeft,
@@ -706,6 +808,32 @@ void main() {
     ));
   });
 
+  test('SweepGradient lerp test with transforms', () {
+    const SweepGradient testGradient1 = SweepGradient(
+      transform: GradientRotation(math.pi/4),
+      colors: <Color>[
+        Color(0x33333333),
+        Color(0x66666666),
+      ],
+      stops: <double>[0, 1],
+    );
+    const SweepGradient testGradient2 = SweepGradient(
+      transform: GradientRotation(math.pi/2),
+      colors: <Color>[
+        Color(0x33333333),
+        Color(0x66666666),
+      ],
+      stops: <double>[0, 1],
+    );
+
+    final SweepGradient? actual0 = SweepGradient.lerp(testGradient1, testGradient2, 0.0);
+    final SweepGradient? actual1 = SweepGradient.lerp(testGradient1, testGradient2, 1.0);
+    final SweepGradient? actual2 = SweepGradient.lerp(testGradient1, testGradient2, 0.5);
+    expect(testGradient1, equals(actual0));
+    expect(testGradient2, equals(actual1));
+    expect(testGradient2, equals(actual2));
+  });
+
   test('SweepGradient scale test)', () {
     const SweepGradient testGradient = SweepGradient(
       center: Alignment.topLeft,
@@ -728,6 +856,28 @@ void main() {
     ));
   });
 
+  test('SweepGradient withOpacity test', () {
+    const SweepGradient testGradient = SweepGradient(
+      center: Alignment.topLeft,
+      endAngle: math.pi / 2,
+      colors: <Color>[
+        Color(0xFFFFFFFF),
+        Color(0xAF777777),
+        Color(0x44444444),
+      ],
+    );
+    final SweepGradient actual = testGradient.withOpacity(0.5);
+
+    expect(actual, const SweepGradient(
+      center: Alignment.topLeft,
+      endAngle: math.pi / 2,
+      colors: <Color>[
+        Color(0x80FFFFFF),
+        Color(0x80777777),
+        Color(0x80444444),
+      ],
+    ));
+  });
   test('Gradient lerp test (with RadialGradient)', () {
     const RadialGradient testGradient1 = RadialGradient(
       center: Alignment.topLeft,

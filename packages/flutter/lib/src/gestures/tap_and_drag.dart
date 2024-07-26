@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/widgets.dart';
+///
+/// @docImport 'arena.dart';
+library;
+
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -765,7 +770,7 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
   /// no difference in behavior between the two settings.
   ///
   /// For more information about the gesture arena:
-  /// https://flutter.dev/docs/development/ui/advanced/gestures#gesture-disambiguation
+  /// https://flutter.dev/to/gesture-disambiguation
   ///
   /// By default, the drag start behavior is [DragStartBehavior.start].
   ///
@@ -1060,6 +1065,7 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
     }
 
     _stopDeadlineTimer();
+    _start = null;
     _dragState = _DragState.ready;
     _pastSlopTolerance = false;
   }

@@ -2,6 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'data_table.dart';
+/// @docImport 'dropdown_menu.dart';
+/// @docImport 'elevated_button.dart';
+/// @docImport 'scaffold.dart';
+/// @docImport 'text_button.dart';
+/// @docImport 'text_theme.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -785,9 +793,12 @@ class _DropdownMenuItemContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ConstrainedBox(
-      constraints: const BoxConstraints(minHeight: _kMenuItemHeight),
-      child: Align(alignment: alignment, child: child),
+    return Semantics(
+      button: true,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: _kMenuItemHeight),
+        child: Align(alignment: alignment, child: child),
+      ),
     );
   }
 }
@@ -1583,9 +1594,9 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
         child: result,
       );
     }
-
+    final bool childHasButtonSemantic = hintIndex != null || (_selectedIndex != null && widget.selectedItemBuilder == null);
     return Semantics(
-      button: true,
+      button: !childHasButtonSemantic,
       child: Actions(
         actions: _actionMap,
         child: InkWell(

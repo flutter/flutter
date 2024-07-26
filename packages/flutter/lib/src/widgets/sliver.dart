@@ -2,6 +2,21 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'animated_scroll_view.dart';
+/// @docImport 'container.dart';
+/// @docImport 'implicit_animations.dart';
+/// @docImport 'scroll_view.dart';
+/// @docImport 'sliver_fill.dart';
+/// @docImport 'sliver_persistent_header.dart';
+/// @docImport 'sliver_prototype_extent_list.dart';
+/// @docImport 'text.dart';
+/// @docImport 'two_dimensional_viewport.dart';
+/// @docImport 'viewport.dart';
+/// @docImport 'visibility.dart';
+library;
+
 import 'dart:collection' show HashMap, SplayTreeMap;
 import 'dart:math' as math;
 
@@ -133,7 +148,7 @@ abstract class SliverMultiBoxAdaptorWidget extends SliverWithKeepAliveWidget {
 ///
 /// See also:
 ///
-///  * <https://flutter.dev/docs/development/ui/advanced/slivers>, a description
+///  * <https://docs.flutter.dev/ui/layout/scrolling/slivers>, a description
 ///    of what slivers are and how to use them.
 ///  * [SliverFixedExtentList], which is more efficient for children with
 ///    the same extent in the main axis.

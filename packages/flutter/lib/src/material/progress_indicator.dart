@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/semantics.dart';
+///
+/// @docImport 'refresh_indicator.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/cupertino.dart';
@@ -566,11 +571,11 @@ class CircularProgressIndicator extends ProgressIndicator {
   }) : _indicatorType = _ActivityIndicatorType.material;
 
   /// Creates an adaptive progress indicator that is a
-  /// [CupertinoActivityIndicator] in iOS and [CircularProgressIndicator] in
-  /// material theme/non-iOS.
+  /// [CupertinoActivityIndicator] in [TargetPlatform.iOS] & [TargetPlatform.macOS] and [CircularProgressIndicator] in
+  /// material theme/non-Apple platforms.
   ///
   /// The [value], [valueColor], [strokeWidth], [semanticsLabel], and
-  /// [semanticsValue] will be ignored in iOS.
+  /// [semanticsValue] will be ignored in iOS & macOS.
   ///
   /// {@macro flutter.material.ProgressIndicator.ProgressIndicator}
   const CircularProgressIndicator.adaptive({

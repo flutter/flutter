@@ -570,6 +570,11 @@ void main() {
       style.apply(leadingDistribution: TextLeadingDistribution.proportional).leadingDistribution,
       TextLeadingDistribution.proportional,
     );
+
+    expect(
+      const TextStyle(height: kTextHeightNone).apply(heightFactor: 1000, heightDelta: 1000).height,
+      kTextHeightNone,
+    );
   });
 
   test('TextStyle fontFamily and package', () {

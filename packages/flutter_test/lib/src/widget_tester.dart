@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:fake_async/fake_async.dart';
+/// @docImport 'package:flutter/material.dart';
+/// @docImport 'package:matcher/matcher.dart';
+/// @docImport 'package:test_api/hooks.dart';
+library;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -122,8 +128,8 @@ E? _lastWhereOrNull<E>(Iterable<E> list, bool Function(E) test) {
 /// When [experimentalLeakTesting] is set, it is used to leak track objects created
 /// during test execution.
 /// Otherwise [LeakTesting.settings] is used.
-/// Adjust [LeakTesting.settings] in flutter_test_config.dart
-/// (see https://api.flutter.dev/flutter/flutter_test/flutter_test-library.html)
+/// Adjust [LeakTesting.settings] in `flutter_test_config.dart`
+/// (see https://flutter.dev/to/flutter-test-docs)
 /// for the entire package or folder, or in the test's main for a test file
 /// (don't use [setUp] or [setUpAll]).
 /// To turn off leak tracking just for one test, set [experimentalLeakTesting] to

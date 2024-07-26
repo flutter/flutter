@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/widgets.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -935,8 +938,8 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
             ),
             ErrorDescription(
               'If this message did not help you determine the problem, consider using debugDumpRenderTree():\n'
-              '  https://flutter.dev/debugging/#rendering-layer\n'
-              '  http://api.flutter.dev/flutter/rendering/debugDumpRenderTree.html',
+              '  https://flutter.dev/to/debug-render-layer\n'
+              '  https://api.flutter.dev/flutter/rendering/debugDumpRenderTree.html',
             ),
             describeForError('The affected RenderFlex is', style: DiagnosticsTreeStyle.errorProperty),
             DiagnosticsProperty<dynamic>('The creator information is set to', debugCreator, style: DiagnosticsTreeStyle.errorProperty),

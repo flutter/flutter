@@ -4,7 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 
-/// Flutter code sample for [FontFeature.FontFeature.scientificInferiors].
+/// Flutter code sample for [FontFeature.scientificInferiors].
 
 void main() => runApp(const ExampleApp());
 

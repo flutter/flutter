@@ -3,12 +3,14 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:dds/dap.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/debug_adapters/error_formatter.dart';
 import 'package:flutter_tools/src/debug_adapters/flutter_adapter.dart';
 import 'package:flutter_tools/src/debug_adapters/flutter_adapter_args.dart';
 import 'package:flutter_tools/src/globals.dart' as globals show fs, platform;
@@ -288,6 +290,63 @@ void main() {
           <String>['progressUpdate', 'Please click the Dart Debug extension button in the spawned browser window'],
           // progressEnd isn't included because we used takeWhile to stop when it arrived above.
         ]));
+      });
+
+      test('handles app.stop errors during launch', () async {
+        final MockFlutterDebugAdapter adapter = MockFlutterDebugAdapter(
+          fileSystem: MemoryFileSystem.test(style: fsStyle),
+          platform: platform,
+          simulateAppStarted: false,
+          simulateAppStopError: true,
+
+        );
+        final Completer<void> responseCompleter = Completer<void>();
+
+        final FlutterLaunchRequestArguments args = FlutterLaunchRequestArguments(
+          cwd: '.',
+          program: 'foo.dart',
+        );
+
+        // Capture any progress events.
+        final List<List<Object?>> progressEvents = <List<Object?>>[];
+        final StreamSubscription<Map<String, Object?>> progressEventsSubscription =
+            adapter.dapToClientProgressEvents
+                .listen((Map<String, Object?> message) {
+                    progressEvents.add(<Object?>[message['event'], (message['body']! as Map<String, Object?>)['message']]);
+                });
+
+        // Capture any console output messages.
+        final List<String> consoleOutputMessages = <String>[];
+        final StreamSubscription<String> consoleOutputMessagesSubscription =
+            adapter.dapToClientMessages
+                .where((Map<String, Object?> message) => message['event'] == 'output')
+                .map((Map<String, Object?> message) => message['body']! as Map<String, Object?>)
+                .where((Map<String, Object?> body) => body['category'] == 'console' || body['category'] == null)
+                .map((Map<String, Object?> body) => body['output']! as String)
+                .listen(consoleOutputMessages.add);
+
+        // Initialize with progress support.
+        await adapter.initializeRequest(
+          MockRequest(),
+          DartInitializeRequestArguments(adapterID: 'test', supportsProgressReporting: true, ),
+          (_) {},
+        );
+        await adapter.configurationDoneRequest(MockRequest(), null, () {});
+        await adapter.launchRequest(MockRequest(), args, responseCompleter.complete);
+        await responseCompleter.future;
+        await pumpEventQueue(); // Allow async events to be processed.
+        await progressEventsSubscription.cancel();
+        await consoleOutputMessagesSubscription.cancel();
+
+        // Ensure we got both the start and end progress events.
+        expect(progressEvents, containsAllInOrder(<List<Object?>>[
+          <Object?>['progressStart', 'Launching…'],
+          <Object?>['progressEnd', null],
+          // progressEnd isn't included because we used takeWhile to stop when it arrived above.
+        ]));
+
+        // Also ensure we got console output with the error.
+        expect(consoleOutputMessages, contains('App stopped due to an error\n'));
       });
     });
 
@@ -678,7 +737,7 @@ void main() {
 
       test('dart:core URI to file path', () async {
         expect(
-          adapter.convertOrgDartlangSdkToPath(Uri.parse('org-dartlang-sdk:///third_party/dart/sdk/lib/core/core.dart')),
+          adapter.convertOrgDartlangSdkToPath(Uri.parse('org-dartlang-sdk:///flutter/third_party/dart/sdk/lib/core/core.dart')),
           Uri.file(fs.path.join(flutterRoot, 'bin', 'cache', 'pkg', 'sky_engine', 'lib', 'core', 'core.dart')),
         );
       });
@@ -686,7 +745,7 @@ void main() {
       test('dart:core file path to URI', () async {
         expect(
           adapter.convertUriToOrgDartlangSdk(Uri.file(fs.path.join(flutterRoot, 'bin', 'cache', 'pkg', 'sky_engine', 'lib', 'core', 'core.dart'))),
-          Uri.parse('org-dartlang-sdk:///third_party/dart/sdk/lib/core/core.dart'),
+          Uri.parse('org-dartlang-sdk:///flutter/third_party/dart/sdk/lib/core/core.dart'),
         );
       });
     });
@@ -738,6 +797,55 @@ void main() {
         // user-provided toolArgs are not.
         expect(adapter.processArgs, isNot(contains('--machine')));
         expect(adapter.processArgs, contains('tool_args'));
+      });
+    });
+
+    group('error formatter', () {
+      /// Helpers to build a string representation of the DAP OutputEvents for
+      /// the structured error [errorData].
+      String getFormattedError(Map<String, Object?> errorData) {
+        // Format the error and write into a buffer in a text format convenient
+        // for test expectations.
+        final StringBuffer buffer = StringBuffer();
+        FlutterErrorFormatter()
+          ..formatError(errorData)
+          ..sendOutput((String category, String message, {bool? parseStackFrames, int? variablesReference}) {
+            buffer.writeln('${category.padRight(6)} ${jsonEncode(message)}');
+          });
+        return buffer.toString();
+      }
+
+      test('includes children of DiagnosticsBlock when writing a summary', () {
+        // Format a simulated  error that nests the error-causing widget in a
+        // diagnostic block and will be displayed in summary mode (because it
+        // is not the first error since the last reload).
+        // https://github.com/Dart-Code/Dart-Code/issues/4743
+        final String error = getFormattedError(<String, Object?>{
+          'errorsSinceReload': 1, // Force summary mode
+          'description': 'Exception caught...',
+          'properties': <Map<String, Object?>>[
+            <String, Object>{
+            'description': 'The following assertion was thrown...',
+            },
+            <String, Object?>{
+              'description': '',
+              'type': 'DiagnosticsBlock',
+              'name': 'The relevant error-causing widget was',
+              'children': <Map<String, Object>>[
+                <String, Object>{
+                'description': 'MyWidget:file:///path/to/widget.dart:1:2',
+                }
+              ]
+            }
+          ],
+        });
+
+        expect(error, r'''
+stdout "\n"
+stderr "════════ Exception caught... ═══════════════════════════════════════════════════\n"
+stdout "The relevant error-causing widget was:\n    MyWidget:file:///path/to/widget.dart:1:2\n"
+stderr "════════════════════════════════════════════════════════════════════════════════\n"
+''');
       });
     });
   });

@@ -59,18 +59,8 @@ Future<Iterable<KernelAsset>> dryRunNativeAssetsMacOSInternal(
     includeParentEnvironment: true,
   );
   ensureNativeAssetsBuildDryRunSucceed(buildDryRunResult);
-  final LinkDryRunResult linkDryRunResult = await buildRunner.linkDryRun(
-    linkModePreference: LinkModePreferenceImpl.dynamic,
-    targetOS: targetOS,
-    workingDirectory: projectUri,
-    includeParentEnvironment: true,
-    buildDryRunResult: buildDryRunResult,
-  );
-  ensureNativeAssetsLinkDryRunSucceed(linkDryRunResult);
-  final List<AssetImpl> nativeAssets = <AssetImpl>[
-    ...buildDryRunResult.assets,
-    ...linkDryRunResult.assets,
-  ];
+  // No link hooks in JIT mode.
+  final List<AssetImpl> nativeAssets = buildDryRunResult.assets;
   ensureNoLinkModeStatic(nativeAssets);
   globals.logger.printTrace('Dry running native assets for $targetOS done.');
   final Uri? absolutePath = flutterTester ? buildUri : null;
@@ -115,6 +105,7 @@ Future<(Uri? nativeAssetsYaml, List<Uri> dependencies)> buildNativeAssetsMacOS({
       : <Target>[Target.current];
   final BuildModeImpl buildModeCli =
       nativeAssetsBuildMode(buildMode);
+  final bool linkingEnabled = buildModeCli == BuildModeImpl.release;
 
   globals.logger
       .printTrace('Building native assets for $targets $buildModeCli.');
@@ -128,22 +119,29 @@ Future<(Uri? nativeAssetsYaml, List<Uri> dependencies)> buildNativeAssetsMacOS({
       workingDirectory: projectUri,
       includeParentEnvironment: true,
       cCompilerConfig: await buildRunner.cCompilerConfig,
+      // TODO(dcharkes): Fetch minimum MacOS version from somewhere. https://github.com/flutter/flutter/issues/145104
+      targetMacOSVersion: 13,
+      linkingEnabled: linkingEnabled,
     );
     ensureNativeAssetsBuildSucceed(buildResult);
     nativeAssets.addAll(buildResult.assets);
     dependencies.addAll(buildResult.dependencies);
-    final LinkResult linkResult = await buildRunner.link(
-      linkModePreference: LinkModePreferenceImpl.dynamic,
-      target: target,
-      buildMode: buildModeCli,
-      workingDirectory: projectUri,
-      includeParentEnvironment: true,
-      cCompilerConfig: await buildRunner.cCompilerConfig,
-      buildResult: buildResult,
-    );
-    ensureNativeAssetsLinkSucceed(linkResult);
-    nativeAssets.addAll(linkResult.assets);
-    dependencies.addAll(linkResult.dependencies);
+    if (linkingEnabled) {
+      final LinkResult linkResult = await buildRunner.link(
+        linkModePreference: LinkModePreferenceImpl.dynamic,
+        target: target,
+        buildMode: buildModeCli,
+        workingDirectory: projectUri,
+        includeParentEnvironment: true,
+        cCompilerConfig: await buildRunner.cCompilerConfig,
+        buildResult: buildResult,
+        // TODO(dcharkes): Fetch minimum MacOS version from somewhere. https://github.com/flutter/flutter/issues/145104
+        targetMacOSVersion: 13,
+      );
+      ensureNativeAssetsLinkSucceed(linkResult);
+      nativeAssets.addAll(linkResult.assets);
+      dependencies.addAll(linkResult.dependencies);
+    }
   }
   ensureNoLinkModeStatic(nativeAssets);
   globals.logger.printTrace('Building native assets for $targets done.');
@@ -214,10 +212,19 @@ Map<AssetImpl, KernelAsset> _assetTargetLocations(
   Uri? absolutePath,
 ) {
   final Set<String> alreadyTakenNames = <String>{};
-  return <AssetImpl, KernelAsset>{
-    for (final AssetImpl asset in nativeAssets)
-      asset: _targetLocationMacOS(asset, absolutePath, alreadyTakenNames),
-  };
+  final Map<String, KernelAssetPath> idToPath = <String, KernelAssetPath>{};
+  final Map<AssetImpl, KernelAsset> result = <AssetImpl, KernelAsset>{};
+  for (final AssetImpl asset in nativeAssets) {
+    final KernelAssetPath path = idToPath[asset.id] ??
+        _targetLocationMacOS(asset, absolutePath, alreadyTakenNames).path;
+    idToPath[asset.id] = path;
+    result[asset] = KernelAsset(
+      id: (asset as NativeCodeAssetImpl).id,
+      target: Target.fromArchitectureAndOS(asset.architecture!, asset.os),
+      path: path,
+    );
+  }
+  return result;
 }
 
 KernelAsset _targetLocationMacOS(

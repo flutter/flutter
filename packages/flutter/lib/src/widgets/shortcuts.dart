@@ -2,6 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/cupertino.dart';
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'app.dart';
+/// @docImport 'basic.dart';
+library;
+
 import 'dart:collection';
 
 import 'package:flutter/foundation.dart';
@@ -940,8 +947,8 @@ class ShortcutManager with Diagnosticable, ChangeNotifier {
 /// deletion intent may be to delete a character in a text input, or to delete
 /// a file in a file menu.
 ///
-/// See the article on [Using Actions and
-/// Shortcuts](https://docs.flutter.dev/development/ui/advanced/actions_and_shortcuts)
+/// See the article on
+/// [Using Actions and Shortcuts](https://flutter.dev/to/actions-shortcuts)
 /// for a detailed explanation.
 ///
 /// {@tool dartpad}
@@ -997,6 +1004,7 @@ class Shortcuts extends StatefulWidget {
     required Map<ShortcutActivator, Intent> shortcuts,
     required this.child,
     this.debugLabel,
+    this.includeSemantics = true,
   }) : _shortcuts = shortcuts,
        manager = null;
 
@@ -1012,6 +1020,7 @@ class Shortcuts extends StatefulWidget {
     required ShortcutManager this.manager,
     required this.child,
     this.debugLabel,
+    this.includeSemantics = true,
   }) : _shortcuts = const <ShortcutActivator, Intent>{};
 
   /// The [ShortcutManager] that will manage the mapping between key
@@ -1046,6 +1055,9 @@ class Shortcuts extends StatefulWidget {
   /// This allows simplifying the diagnostic output to avoid cluttering it
   /// unnecessarily with large default shortcut maps.
   final String? debugLabel;
+
+  /// {@macro flutter.widgets.Focus.includeSemantics}
+  final bool includeSemantics;
 
   @override
   State<Shortcuts> createState() => _ShortcutsState();
@@ -1104,6 +1116,7 @@ class _ShortcutsState extends State<Shortcuts> {
       debugLabel: '$Shortcuts',
       canRequestFocus: false,
       onKeyEvent: _handleOnKeyEvent,
+      includeSemantics: widget.includeSemantics,
       child: widget.child,
     );
   }
@@ -1138,8 +1151,8 @@ class _ShortcutsState extends State<Shortcuts> {
 /// a descendant of this widget handles the key, then the key event will not
 /// reach this widget for handling.
 ///
-/// See the article on [Using Actions and
-/// Shortcuts](https://docs.flutter.dev/development/ui/advanced/actions_and_shortcuts)
+/// See the article on
+/// [Using Actions and Shortcuts](https://flutter.dev/to/actions-shortcuts)
 /// for a detailed explanation.
 ///
 /// See also:

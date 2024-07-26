@@ -55,7 +55,7 @@ Future<void> buildWindows(
   if (!windowsProject.cmakeFile.existsSync()) {
     throwToolExit(
       'No Windows desktop project configured. See '
-      'https://docs.flutter.dev/desktop#add-desktop-support-to-an-existing-flutter-app '
+      'https://flutter.dev/to/add-desktop-support '
       'to learn about adding Windows support to a project.');
   }
 

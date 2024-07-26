@@ -2,6 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/gestures.dart';
+/// @docImport 'package:flutter/semantics.dart';
+///
+/// @docImport 'about.dart';
+/// @docImport 'app_bar.dart';
+/// @docImport 'color_scheme.dart';
+/// @docImport 'drawer_header.dart';
+/// @docImport 'icon_button.dart';
+/// @docImport 'navigation_drawer.dart';
+/// @docImport 'scaffold.dart';
+library;
+
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/widgets.dart';
 

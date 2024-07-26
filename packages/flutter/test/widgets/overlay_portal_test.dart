@@ -29,7 +29,7 @@ class _ManyRelayoutBoundaries extends StatelessWidget {
   }
 }
 
-void rebuildLayoutBuilderSubtree(RenderBox descendant) {
+void rebuildLayoutBuilderSubtree(RenderBox descendant, WidgetTester tester) {
   assert(descendant is! RenderConstrainedLayoutBuilder<BoxConstraints, RenderBox>);
 
   RenderObject? node = descendant.parent;
@@ -37,7 +37,10 @@ void rebuildLayoutBuilderSubtree(RenderBox descendant) {
     if (node is! RenderConstrainedLayoutBuilder<BoxConstraints, RenderBox>) {
       node = node.parent;
     } else {
-      node.markNeedsBuild();
+      final Element layoutBuilderElement = tester.element(find.byElementPredicate(
+        (Element element) => element.widget is LayoutBuilder && element.renderObject == node,
+      ));
+      layoutBuilderElement.markNeedsBuild();
       return;
     }
   }
@@ -145,6 +148,57 @@ void main() {
     await tester.pump();
     expect(buildCount, 2);
     expect(directionSeenByOverlayChild, textDirection);
+  });
+
+  testWidgets('The overlay portal update semantics does not dirty overlay', (WidgetTester tester) async {
+    late StateSetter setState;
+    late final OverlayEntry overlayEntry;
+    final UniqueKey overlayKey = UniqueKey();
+    String msg = 'msg';
+    addTearDown(() => overlayEntry..remove()..dispose());
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Semantics(
+          container: true,
+          child: Overlay(
+            key: overlayKey,
+            initialEntries: <OverlayEntry>[
+              overlayEntry = OverlayEntry(
+                builder: (BuildContext context) {
+                  return Semantics(
+                    container: true,
+                    explicitChildNodes: true,
+                    child: StatefulBuilder(
+                        builder: (BuildContext context, StateSetter setter) {
+                          setState = setter;
+                          return OverlayPortal(
+                            controller: controller1,
+                            overlayChildBuilder: (BuildContext context) {
+                              return Semantics(label: msg, child: const SizedBox(width: 100, height: 100));
+                            },
+                            child: const Text('overlay child'),
+                          );
+                        }
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    final RenderObject renderObject = tester.renderObject(find.byKey(overlayKey));
+    expect(renderObject.debugNeedsSemanticsUpdate, isFalse);
+    expect(find.bySemanticsLabel(msg), findsOneWidget);
+    setState(() {
+      msg = 'msg2';
+    });
+    // stop before updating semantics.
+    await tester.pump(null, EnginePhase.composite);
+    expect(renderObject.debugNeedsSemanticsUpdate, isFalse);
   });
 
   testWidgets('Safe to deactivate and re-activate OverlayPortal', (WidgetTester tester) async {
@@ -711,7 +765,7 @@ void main() {
     renderChild1.markNeedsLayout();
     // Dirty both render subtree branches.
     childBox.markNeedsLayout();
-    rebuildLayoutBuilderSubtree(overlayChildBox);
+    rebuildLayoutBuilderSubtree(overlayChildBox, tester);
 
     // Make sure childBox's depth is greater than that of the overlay
     // child, and childBox's parent isn't dirty (childBox is a dirty relayout
@@ -1110,7 +1164,7 @@ void main() {
 
       widgetKey.currentContext!.findRenderObject()!.markNeedsLayout();
       childBox.markNeedsLayout();
-      rebuildLayoutBuilderSubtree(overlayChildBox);
+      rebuildLayoutBuilderSubtree(overlayChildBox, tester);
       // Make sure childBox's depth is greater than that of the overlay child.
       expect(
         widgetKey.currentContext!.findRenderObject()!.depth,
@@ -1190,7 +1244,7 @@ void main() {
 
       targetGlobalKey.currentContext!.findRenderObject()!.markNeedsLayout();
       childBox.markNeedsLayout();
-      rebuildLayoutBuilderSubtree(overlayChildBox);
+      rebuildLayoutBuilderSubtree(overlayChildBox, tester);
       setState1(() {});
       setState2(() {});
       targetMovedToOverlayEntry3 = true;

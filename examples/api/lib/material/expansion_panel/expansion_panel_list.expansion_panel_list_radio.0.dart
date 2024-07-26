@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-/// Flutter code sample for [ExpansionPanelList.ExpansionPanelList.radio].
+/// Flutter code sample for [ExpansionPanelList.radio].
 
 void main() => runApp(const ExpansionPanelListRadioExampleApp());
 

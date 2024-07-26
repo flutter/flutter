@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'text_theme.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/rendering.dart';
@@ -24,6 +27,12 @@ import 'theme_data.dart';
 // Examples can assume:
 // late BuildContext context;
 // late FocusNode myFocusNode;
+
+/// A callback function that returns the list of the items that matches the
+/// current applied filter.
+///
+/// Used by [DropdownMenu.filterCallback].
+typedef FilterCallback<T> = List<DropdownMenuEntry<T>> Function(List<DropdownMenuEntry<T>> entries, String filter);
 
 /// A callback function that returns the index of the item that matches the
 /// current contents of a text field.
@@ -153,7 +162,9 @@ class DropdownMenu<T> extends StatefulWidget {
     this.selectedTrailingIcon,
     this.enableFilter = false,
     this.enableSearch = true,
+    this.keyboardType,
     this.textStyle,
+    this.textAlign = TextAlign.start,
     this.inputDecorationTheme,
     this.menuStyle,
     this.controller,
@@ -162,10 +173,12 @@ class DropdownMenu<T> extends StatefulWidget {
     this.focusNode,
     this.requestFocusOnTap,
     this.expandedInsets,
+    this.filterCallback,
     this.searchCallback,
+    this.alignmentOffset,
     required this.dropdownMenuEntries,
     this.inputFormatters,
-  });
+  }) : assert(filterCallback == null || enableFilter);
 
   /// Determine if the [DropdownMenu] is enabled.
   ///
@@ -258,11 +271,21 @@ class DropdownMenu<T> extends StatefulWidget {
   /// Defaults to true as the search function could be commonly used.
   final bool enableSearch;
 
+  /// The type of keyboard to use for editing the text.
+  ///
+  /// Defaults to [TextInputType.text].
+  final TextInputType? keyboardType;
+
   /// The text style for the [TextField] of the [DropdownMenu];
   ///
   /// Defaults to the overall theme's [TextTheme.bodyLarge]
   /// if the dropdown menu theme's value is null.
   final TextStyle? textStyle;
+
+  /// The text align for the [TextField] of the [DropdownMenu].
+  ///
+  /// Defaults to [TextAlign.start].
+  final TextAlign textAlign;
 
   /// Defines the default appearance of [InputDecoration] to show around the text field.
   ///
@@ -376,6 +399,41 @@ class DropdownMenu<T> extends StatefulWidget {
   /// Defaults to null.
   final EdgeInsets? expandedInsets;
 
+  /// When [DropdownMenu.enableFilter] is true, this callback is used to
+  /// compute the list of filtered items.
+  ///
+  /// {@tool snippet}
+  ///
+  /// In this example the `filterCallback` returns the items that contains the
+  /// trimmed query.
+  ///
+  /// ```dart
+  /// DropdownMenu<Text>(
+  ///   enableFilter: true,
+  ///   filterCallback: (List<DropdownMenuEntry<Text>> entries, String filter) {
+  ///     final String trimmedFilter = filter.trim().toLowerCase();
+  ///       if (trimmedFilter.isEmpty) {
+  ///         return entries;
+  ///       }
+  ///
+  ///       return entries
+  ///         .where((DropdownMenuEntry<Text> entry) =>
+  ///           entry.label.toLowerCase().contains(trimmedFilter),
+  ///         )
+  ///         .toList();
+  ///   },
+  ///   dropdownMenuEntries: const <DropdownMenuEntry<Text>>[],
+  /// )
+  /// ```
+  /// {@end-tool}
+  ///
+  /// Defaults to null. If this parameter is null and the
+  /// [DropdownMenu.enableFilter] property is set to true, the default behavior
+  /// will return a filtered list. The filtered list will contain items
+  /// that match the text provided by the input field, with a case-insensitive
+  /// comparison. When this is not null, `enableFilter` must be set to true.
+  final FilterCallback<T>? filterCallback;
+
   /// When [DropdownMenu.enableSearch] is true, this callback is used to compute
   /// the index of the search result to be highlighted.
   ///
@@ -417,6 +475,9 @@ class DropdownMenu<T> extends StatefulWidget {
   ///  * [TextEditingController], which implements the [Listenable] interface
   ///    and notifies its listeners on [TextEditingValue] changes.
   final List<TextInputFormatter>? inputFormatters;
+
+  /// {@macro flutter.material.MenuAnchor.alignmentOffset}
+  final Offset? alignmentOffset;
 
   @override
   State<DropdownMenu<T>> createState() => _DropdownMenuState<T>();
@@ -607,7 +668,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
         style: effectiveStyle,
         leadingIcon: entry.leadingIcon,
         trailingIcon: entry.trailingIcon,
-        onPressed: entry.enabled
+        onPressed: entry.enabled && widget.enabled
           ? () {
               _localTextEditingController?.value = TextEditingValue(
                 text: entry.label,
@@ -628,7 +689,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
 
   void handleUpKeyInvoke(_) {
     setState(() {
-      if (!_menuHasEnabledItem || !_controller.isOpen) {
+      if (!widget.enabled || !_menuHasEnabledItem || !_controller.isOpen) {
         return;
       }
       _enableFilter = false;
@@ -647,7 +708,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
 
   void handleDownKeyInvoke(_) {
     setState(() {
-      if (!_menuHasEnabledItem || !_controller.isOpen) {
+      if (!widget.enabled || !_menuHasEnabledItem || !_controller.isOpen) {
         return;
       }
       _enableFilter = false;
@@ -685,7 +746,8 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
     final DropdownMenuThemeData defaults = _DropdownMenuDefaultsM3(context);
 
     if (_enableFilter) {
-      filteredEntries = filter(widget.dropdownMenuEntries, _localTextEditingController!);
+      filteredEntries = widget.filterCallback?.call(filteredEntries, _localTextEditingController!.text)
+        ?? filter(widget.dropdownMenuEntries, _localTextEditingController!);
     }
 
     if (widget.enableSearch) {
@@ -726,6 +788,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
 
     Widget menuAnchor = MenuAnchor(
       style: effectiveMenuStyle,
+      alignmentOffset: widget.alignmentOffset,
       controller: _controller,
       menuChildren: menu,
       crossAxisUnconstrained: false,
@@ -737,7 +800,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
             isSelected: controller.isOpen,
             icon: widget.trailingIcon ?? const Icon(Icons.arrow_drop_down),
             selectedIcon: widget.selectedTrailingIcon ?? const Icon(Icons.arrow_drop_up),
-            onPressed: () {
+            onPressed: !widget.enabled ? null : () {
               handlePressed(controller);
             },
           ),
@@ -750,10 +813,13 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
 
         final Widget textField = TextField(
           key: _anchorKey,
+          enabled: widget.enabled,
           mouseCursor: effectiveMouseCursor,
           focusNode: widget.focusNode,
           canRequestFocus: canRequestFocus(),
           enableInteractiveSelection: canRequestFocus(),
+          keyboardType: widget.keyboardType,
+          textAlign: widget.textAlign,
           textAlignVertical: TextAlignVertical.center,
           style: effectiveTextStyle,
           controller: _localTextEditingController,
@@ -775,7 +841,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
             }
             controller.close();
           },
-          onTap: () {
+          onTap: !widget.enabled ? null : () {
             handlePressed(controller);
           },
           onChanged: (String text) {
@@ -787,7 +853,6 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
           },
           inputFormatters: widget.inputFormatters,
           decoration: InputDecoration(
-            enabled: widget.enabled,
             label: widget.label,
             hintText: widget.hintText,
             helperText: widget.helperText,

@@ -17,7 +17,7 @@ export 'skia_client.dart';
 
 // If you are here trying to figure out how to use golden files in the Flutter
 // repo itself, consider reading this wiki page:
-// https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package%3Aflutter
+// https://github.com/flutter/flutter/blob/main/docs/contributing/testing/Writing-a-golden-file-test-for-package-flutter.md
 
 // If you are trying to debug this package, you may like to use the golden test
 // titled "Inconsequential golden test" in this file:
@@ -53,7 +53,7 @@ Future<void> testExecutable(FutureOr<void> Function() testMain, {String? namePre
     'bootstrap logic sets "goldenFileComparator" to a LocalFileComparator. It '
     'appears in this instance however that the "goldenFileComparator" is a '
     '${goldenFileComparator.runtimeType}.\n'
-    'See also: https://api.flutter.dev/flutter/flutter_test/flutter_test-library.html',
+    'See also: https://flutter.dev/to/flutter-test-docs',
   );
   const Platform platform = LocalPlatform();
   const FileSystem fs = LocalFileSystem();
@@ -190,7 +190,7 @@ abstract class FlutterGoldenFileComparator extends GoldenFileComparator {
   ///
   /// The optional [suffix] argument is used by the
   /// [FlutterPostSubmitFileComparator] and the [FlutterPreSubmitFileComparator].
-  /// These [FlutterGoldenFileComparators] randomize their base directories to
+  /// These [FlutterGoldenFileComparator]s randomize their base directories to
   /// maintain thread safety while using the `goldctl` tool.
   @protected
   @visibleForTesting
@@ -535,7 +535,7 @@ class FlutterSkippingFileComparator extends FlutterGoldenFileComparator {
 ///
 /// This comparator utilizes the [SkiaGoldClient] to request baseline images for
 /// the given device under test for comparison. This comparator is initialized
-/// when conditions for all other [FlutterGoldenFileComparators] have not been
+/// when conditions for all other [FlutterGoldenFileComparator]s have not been
 /// met, see the `isForEnvironment` method for each one listed below.
 ///
 /// The [FlutterLocalFileComparator] is intended to run on local machines and

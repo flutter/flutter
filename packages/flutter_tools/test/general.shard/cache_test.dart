@@ -304,7 +304,7 @@ void main() {
       expect(artifact2.didUpdate, false);
       expect(
         logger.errorText,
-        contains('https://flutter.dev/community/china'),
+        contains('https://flutter.dev/to/china-setup'),
       );
     });
 
@@ -391,6 +391,44 @@ void main() {
     expect(dir, isNotNull);
     expect(dir.path, artifactDir.childDirectory('bin_dir').path);
     expect(operatingSystemUtils.chmods, <List<String>>[<String>['/.tmp_rand0/flutter_cache_test_artifact.rand0/bin_dir', 'a+r,a+x']]);
+  });
+
+  testWithoutContext('EngineCachedArtifact downloads package zip from expected URL', () async {
+    final FakeOperatingSystemUtils operatingSystemUtils = FakeOperatingSystemUtils();
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final Directory artifactDir = fileSystem.systemTempDirectory.createTempSync('flutter_cache_test_artifact.');
+    final Directory downloadDir = fileSystem.systemTempDirectory.createTempSync('flutter_cache_test_download.');
+    final FakeSecondaryCache cache = FakeSecondaryCache()
+      ..artifactDirectory = artifactDir
+      ..downloadDir = downloadDir;
+    artifactDir.childDirectory('pkg').createSync();
+
+    final FakeCachedArtifact artifact = FakeCachedArtifact(
+      cache: cache,
+      binaryDirs: <List<String>>[],
+      packageDirs: <String>[
+        'package_dir',
+      ],
+      requiredArtifacts: DevelopmentArtifact.universal,
+    );
+
+    Uri? packageUrl;
+    final ArtifactUpdater artifactUpdater = FakeArtifactUpdater()
+      ..onDownloadZipArchive = (String message, Uri url, Directory location) {
+        location.childDirectory('package_dir').createSync();
+        packageUrl = url;
+      };
+
+    await artifact.updateInner(artifactUpdater, fileSystem, operatingSystemUtils);
+    expect(packageUrl, isNotNull);
+    expect(packageUrl.toString(), 'https://storage.googleapis.com/flutter_infra_release/flutter/null/package_dir.zip');
+
+    final Directory dir = fileSystem.systemTempDirectory
+        .listSync(recursive: true)
+        .whereType<Directory>()
+        .singleWhereOrNull((Directory directory) => directory.basename == 'pkg')!;
+    expect(dir.path, artifactDir.childDirectory('pkg').path);
+    expect(dir.childDirectory('package_dir').existsSync(), isTrue);
   });
 
   testWithoutContext('Try to remove without a parent', () async {
@@ -871,7 +909,7 @@ void main() {
     handler.addError(webCacheDirectory, FileSystemOp.delete, const FileSystemException('', '', OSError('', 2)));
 
     await expectLater(() => webSdk.updateInner(artifactUpdater, fileSystem, FakeOperatingSystemUtils()), throwsToolExit(
-      message: RegExp('The Flutter tool tried to delete the file or directory cache/bin/cache/flutter_web_sdk but was unable to'),
+      message: RegExp('Unable to delete file or directory at "cache/bin/cache/flutter_web_sdk"'),
     ));
   });
 
