@@ -561,6 +561,132 @@ void main() {
     expect(focusNode.hasPrimaryFocus, isTrue);
     expect(FocusManager.instance.rootScope.hasPrimaryFocus, isFalse);
   });
+
+  testWidgets('View notifies engine that a view should have focus when a widget focus change occurs.', (WidgetTester tester) async {
+    final FocusNode nodeA = FocusNode(debugLabel: 'a');
+    addTearDown(nodeA.dispose);
+
+    FlutterView? view;
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.rtl,
+        child: Column(
+          children: <Widget>[
+            Focus(focusNode: nodeA, child: const Text('a')),
+            Builder(builder: (BuildContext context) {
+              view = View.of(context);
+              return const SizedBox.shrink();
+            }),
+          ],
+        ),
+      ),
+    );
+    int notifyCount = 0;
+    void handleFocusChange() {
+      notifyCount++;
+    }
+    tester.binding.focusManager.addListener(handleFocusChange);
+    addTearDown(() => tester.binding.focusManager.removeListener(handleFocusChange));
+    tester.binding.platformDispatcher.resetFocusedViewTestValues();
+
+    nodeA.requestFocus();
+    await tester.pump();
+    final List<ViewFocusEvent> events = tester.binding.platformDispatcher.testFocusEvents;
+    expect(events.length, equals(1));
+    expect(events.last.viewId, equals(view?.viewId));
+    expect(events.last.direction, equals(ViewFocusDirection.forward));
+    expect(events.last.state, equals(ViewFocusState.focused));
+    expect(nodeA.hasPrimaryFocus, isTrue);
+    expect(notifyCount, equals(1));
+    notifyCount = 0;
+  });
+
+  testWidgets('Switching focus between views yields the correct events.', (WidgetTester tester) async {
+    final FocusNode nodeA = FocusNode(debugLabel: 'a');
+    addTearDown(nodeA.dispose);
+
+    FlutterView? view;
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.rtl,
+        child: Column(
+          children: <Widget>[
+            Focus(focusNode: nodeA, child: const Text('a')),
+            Builder(builder: (BuildContext context) {
+              view = View.of(context);
+              return const SizedBox.shrink();
+            }),
+          ],
+        ),
+      ),
+    );
+    int notifyCount = 0;
+    void handleFocusChange() {
+      notifyCount++;
+    }
+    tester.binding.focusManager.addListener(handleFocusChange);
+    addTearDown(() => tester.binding.focusManager.removeListener(handleFocusChange));
+    tester.binding.platformDispatcher.resetFocusedViewTestValues();
+
+    // Focus and make sure engine is notified.
+    nodeA.requestFocus();
+    await tester.pump();
+    List<ViewFocusEvent> events = tester.binding.platformDispatcher.testFocusEvents;
+    expect(events.length, equals(1));
+    expect(events.last.viewId, equals(view?.viewId));
+    expect(events.last.direction, equals(ViewFocusDirection.forward));
+    expect(events.last.state, equals(ViewFocusState.focused));
+    expect(nodeA.hasPrimaryFocus, isTrue);
+    expect(notifyCount, equals(1));
+    notifyCount = 0;
+    tester.binding.platformDispatcher.resetFocusedViewTestValues();
+
+    // Unfocus all views.
+    tester.binding.platformDispatcher.onViewFocusChange?.call(
+      ViewFocusEvent(
+        viewId: view!.viewId,
+        state: ViewFocusState.unfocused,
+        direction: ViewFocusDirection.forward,
+      ),
+    );
+    await tester.pump();
+    expect(nodeA.hasFocus, isFalse);
+    expect(tester.binding.platformDispatcher.testFocusEvents, isEmpty);
+    expect(notifyCount, equals(1));
+    notifyCount = 0;
+    tester.binding.platformDispatcher.resetFocusedViewTestValues();
+
+    // Focus another view.
+    tester.binding.platformDispatcher.onViewFocusChange?.call(
+      const ViewFocusEvent(
+        viewId: 100,
+        state: ViewFocusState.focused,
+        direction: ViewFocusDirection.forward,
+      ),
+    );
+
+    // Focusing another view should unfocus this node without notifying the
+    // engine to unfocus.
+    await tester.pump();
+    expect(nodeA.hasFocus, isFalse);
+    expect(tester.binding.platformDispatcher.testFocusEvents, isEmpty);
+    expect(notifyCount, equals(0));
+    notifyCount = 0;
+    tester.binding.platformDispatcher.resetFocusedViewTestValues();
+
+    // Re-focusing the node should notify the engine that this view is focused.
+    nodeA.requestFocus();
+    await tester.pump();
+    expect(nodeA.hasPrimaryFocus, isTrue);
+    events = tester.binding.platformDispatcher.testFocusEvents;
+    expect(events.length, equals(1));
+    expect(events.last.viewId, equals(view?.viewId));
+    expect(events.last.direction, equals(ViewFocusDirection.forward));
+    expect(events.last.state, equals(ViewFocusState.focused));
+    expect(notifyCount, equals(1));
+    notifyCount = 0;
+    tester.binding.platformDispatcher.resetFocusedViewTestValues();
+  });
 }
 
 class SpyRenderWidget extends SizedBox {
