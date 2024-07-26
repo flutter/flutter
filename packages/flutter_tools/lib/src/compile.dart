@@ -7,6 +7,7 @@ import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
+import 'package:pool/pool.dart';
 import 'package:process/process.dart';
 import 'package:usage/uuid/uuid.dart';
 
@@ -694,6 +695,8 @@ class DefaultResidentCompiler implements ResidentCompiler {
   /// This does not need to be provided for the normal Flutter workflow.
   final String? platformDill;
 
+  final Pool _writePool = Pool(1);
+
   Process? _server;
   final StdoutHandler _stdoutHandler;
   bool _compileRequestNeedsConfirmation = false;
@@ -1125,10 +1128,13 @@ class DefaultResidentCompiler implements ResidentCompiler {
     bool printTrace = false,
     required String source,
   }) async {
+
     final Process? server = _server;
     if (server == null) {
       return;
     }
+        final PoolResource request = await _writePool.request();
+
     if (activeSource != null) {
       throw Exception(
           '@andrewkolos@ OP STILL PENDING: $activeSource. Tried start $source');
@@ -1144,6 +1150,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
     if (printTrace) {
       _logger.printTrace('<- $line');
     }
+    request.release();
   }
 
   Future<void> _writelnAllToServerStdin(
@@ -1152,6 +1159,8 @@ class DefaultResidentCompiler implements ResidentCompiler {
     if (server == null) {
       return;
     }
+        final PoolResource request = await _writePool.request();
+
     if (activeSource != null) {
       throw Exception(
           '@andrewkolos@ OP STILL PENDING: $activeSource. Tried start $source');
@@ -1164,6 +1173,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
     assert(source == activeSource);
     activeSource = null;
     activeStackTrace = null;
+    request.release();
   }
 }
 
