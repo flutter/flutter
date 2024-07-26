@@ -89,17 +89,21 @@ final class _GoldenFileComparator extends GoldenFileComparator {
     }
 
     golden = _addPrefix(golden);
-    await update(golden, imageBytes);
-
-    final io.File goldenFile = _getGoldenFile(golden);
+    final io.File goldenFile = await update(golden, imageBytes);
     if (isPresubmit) {
       final String? result = await skiaClient.tryjobAdd(
         golden.path,
         _localFs.file(goldenFile.path),
       );
       if (result != null) {
-        io.stderr.writeln('Skia Gold detected an error: $result');
+        io.stderr.writeln(
+          'Skia Gold detected an error when comparing "$golden":\n\n$result',
+        );
         io.stderr.writeln('Still succeeding, will be triaged in Flutter Gold');
+      } else {
+        io.stderr.writeln(
+          'Skia Gold comparison succeeded comparing "$golden".',
+        );
       }
       return true;
     } else {
@@ -108,10 +112,14 @@ final class _GoldenFileComparator extends GoldenFileComparator {
   }
 
   @override
-  Future<void> update(Uri golden, Uint8List imageBytes) async {
+  Future<io.File> update(Uri golden, Uint8List imageBytes) async {
+    io.stderr.writeln(
+      'Updating golden file: $golden (${imageBytes.length} bytes)...',
+    );
     final io.File goldenFile = _getGoldenFile(golden);
     await goldenFile.parent.create(recursive: true);
     await goldenFile.writeAsBytes(imageBytes, flush: true);
+    return goldenFile;
   }
 
   io.File _getGoldenFile(Uri uri) {
