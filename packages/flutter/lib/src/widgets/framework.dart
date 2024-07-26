@@ -2651,8 +2651,8 @@ final class BuildScope {
   ///
   /// This is necessary to preserve the sort order defined by [Element._sort].
   ///
-  /// This field is set to null when [buildScope] is not actively rebuilding
-  /// the widget tree.
+  /// This field is set to null when [BuildOwner.buildScope] is not actively
+  /// rebuilding the widget tree.
   bool? _dirtyElementsNeedsResorting;
   final List<Element> _dirtyElements = <Element>[];
 
