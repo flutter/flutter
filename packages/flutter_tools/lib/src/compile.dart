@@ -1069,13 +1069,16 @@ class DefaultResidentCompiler implements ResidentCompiler {
   Future<void> accept() async {
     if (_compileRequestNeedsConfirmation) {
       if (activeSource != null) {
-        print('@@@@@@@@@@@@@@@@@Source@@@@@@@@@@@@@@@@@@@@@@@@@@@@');
+        print('^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^');
+        print('^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^f');
+        print('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@');
+        print('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@');
         print('source: $activeSource');
-        print('**********activeStackTrace************');
+        print('**********************');
         print(activeStackTrace);
-        print('######StackTrace.current######');
+        print('################');
         print(StackTrace.current);
-        print('#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@s');
+        print('%%%%%%%%%%%%%%%%%%');
       }
       await _writelnToServerStdin('accept', printTrace: true, source: 'accept');
     }
