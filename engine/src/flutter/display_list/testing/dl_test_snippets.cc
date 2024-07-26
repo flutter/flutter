@@ -503,8 +503,8 @@ std::vector<DisplayListInvocationGroup> CreateAllClipOps() {
             [](DlOpReceiver& r) {
               r.clipPath(kTestPathRect, DlCanvas::ClipOp::kIntersect, true);
             }},
-           // clipPath(oval) becomes clipRRect
-           {1, 64, 0,
+           // clipPath(oval) becomes clipOval
+           {1, 24, 0,
             [](DlOpReceiver& r) {
               r.clipPath(kTestPathOval, DlCanvas::ClipOp::kIntersect, true);
             }},
