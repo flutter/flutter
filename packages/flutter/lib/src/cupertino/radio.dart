@@ -436,8 +436,7 @@ class _RadioPainter extends ToggleablePainter {
             ? (isDefaultSelected && brightness == Brightness.dark ? _kDarkModeInnerColor : fillColor)
             : _kDisabledInnerColor;
         canvas.drawCircle(center, _kInnerRadius, innerPaint);
-      }
-      else {
+      } else {
         // In dark mode, fill the unselected radio button with a gradient.
         if (value == false && brightness == Brightness.dark) {
           final LinearGradient fillGradient = LinearGradient(
