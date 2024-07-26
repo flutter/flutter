@@ -765,9 +765,10 @@ class FlutterPlugin implements Plugin<Project> {
         if (pluginProject == null) {
             return
         }
-        if (pluginProject.extensions.findByType(FlutterExtension) == null) {
-            pluginProject.extensions.create("flutter", FlutterExtension)
-        }
+        // TODO(gmackall): Uncomment or remove before landing the PR.
+        //if (pluginProject.extensions.findByType(FlutterExtension) == null) {
+        pluginProject.extensions.create("flutter", FlutterExtension)
+        //}
         // Add plugin dependency to the app project.
         project.dependencies {
             api(pluginProject)
