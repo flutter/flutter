@@ -20,3 +20,5 @@ dependencies:
 dependency_overrides:
   engine_repo_tools:
     path: ../../tools/pkg/engine_repo_tools
+  git_repo_tools:
+    path: ../../tools/pkg/git_repo_tools

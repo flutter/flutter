@@ -65,7 +65,6 @@ foreach(test, tests) {
       "-DkFlutterBuildDirectory=$flutter_build_dir",
       "-DkSkiaGoldWorkDirectory=$skia_gold_work_dir",
     ]
-    package_config = ".dart_tool/package_config.json"
     deps = [ "//flutter/third_party/txt:txt_fixtures" ]
     testonly = true
   }
