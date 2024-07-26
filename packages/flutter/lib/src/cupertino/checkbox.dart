@@ -291,10 +291,14 @@ class _CupertinoCheckboxState extends State<CupertinoCheckbox> with TickerProvid
     final Set<WidgetState> activeStates = states..add(WidgetState.selected);
     final Set<WidgetState> inactiveStates = states..remove(WidgetState.selected);
 
+    // Since the states getter always makes a new set, make a copy to use
+    // throughout the lifecycle of this build method.
+    final Set<WidgetState> currentStates = states;
+
     final Color effectiveActiveColor = _defaultFillColor.resolve(activeStates);
 
-    final BorderSide effectiveBorderSide = _resolveSide(widget.side, states)
-      ?? _defaultSide.resolve(states);
+    final BorderSide effectiveBorderSide = _resolveSide(widget.side, currentStates)
+      ?? _defaultSide.resolve(currentStates);
 
     final Color effectiveFocusOverlayColor = widget.focusColor
       ?? HSLColor
@@ -315,11 +319,11 @@ class _CupertinoCheckboxState extends State<CupertinoCheckbox> with TickerProvid
           ..reaction = reaction
           ..focusColor = effectiveFocusOverlayColor
           ..downPosition = downPosition
-          ..isFocused = states.contains(WidgetState.focused)
-          ..isHovered = states.contains(WidgetState.hovered)
+          ..isFocused = currentStates.contains(WidgetState.focused)
+          ..isHovered = currentStates.contains(WidgetState.hovered)
           ..activeColor = effectiveActiveColor
           ..inactiveColor = _defaultFillColor.resolve(inactiveStates)
-          ..checkColor = _defaultCheckColor.resolve(states)
+          ..checkColor = _defaultCheckColor.resolve(currentStates)
           ..value = value
           ..previousValue = _previousValue
           ..isActive = widget.onChanged != null
