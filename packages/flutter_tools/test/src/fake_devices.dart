@@ -9,6 +9,8 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/project.dart';
 
+import 'fakes.dart';
+
 /// A list of fake devices to test JSON serialization
 /// (`Device.toJson()` and `--machine` flag for `devices` command)
 List<FakeDeviceJsonData> fakeDevices = <FakeDeviceJsonData>[
@@ -129,6 +131,7 @@ class FakeDevice extends Device {
         platformType: type,
         category: Category.mobile,
         ephemeral: ephemeral,
+        logger: FakeLogger(),
       );
 
   final bool _isSupported;
