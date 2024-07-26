@@ -405,6 +405,7 @@ void main() {
             TestSemantics(
               id: 1,
               flags: <SemanticsFlag>[
+                SemanticsFlag.isButton,
                 SemanticsFlag.hasCheckedState,
                 SemanticsFlag.hasEnabledState,
                 SemanticsFlag.isEnabled,
@@ -441,6 +442,7 @@ void main() {
             TestSemantics(
               id: 1,
               flags: <SemanticsFlag>[
+                SemanticsFlag.isButton,
                 SemanticsFlag.hasCheckedState,
                 SemanticsFlag.isChecked,
                 SemanticsFlag.hasEnabledState,
