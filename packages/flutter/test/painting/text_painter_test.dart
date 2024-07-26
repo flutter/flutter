@@ -145,7 +145,7 @@ void main() {
       caretOffset = painter.getOffsetForCaret(ui.TextPosition(offset: text.length), ui.Rect.zero);
       expect(caretOffset.dx, painter.width);
 
-      /// Verify the handling of spaces by SkParagraph and TextPainter
+      /// Verify the handling of spaces by SkParagraph and TextPainter.
       ///
       /// Test characters that are in the Unicode-Zs category but are not treated as whitespace characters by SkParagraph.
       /// The following character codes are intentionally excluded from the test target.
@@ -172,46 +172,46 @@ void main() {
         expect(lines.first.width, 14.0, reason: reason);
       }
 
-      // Test with trailing space
+      // Test with trailing space.
       verifyCharacterIsConsideredTrailingSpace('\u{0020}');
 
-      // Test with trailing full-width space
+      // Test with trailing full-width space.
       verifyCharacterIsConsideredTrailingSpace('\u{3000}');
 
-      // Test with trailing ogham space mark
+      // Test with trailing ogham space mark.
       verifyCharacterIsConsideredTrailingSpace('\u{1680}');
 
-      // Test with trailing en quad
+      // Test with trailing en quad.
       verifyCharacterIsConsideredTrailingSpace('\u{2000}');
 
-      // Test with trailing em quad
+      // Test with trailing em quad.
       verifyCharacterIsConsideredTrailingSpace('\u{2001}');
 
-      // Test with trailing en space
+      // Test with trailing en space.
       verifyCharacterIsConsideredTrailingSpace('\u{2002}');
 
-      // Test with trailing em space
+      // Test with trailing em space.
       verifyCharacterIsConsideredTrailingSpace('\u{2003}');
 
-      // Test with trailing three-per-em space
+      // Test with trailing three-per-em space.
       verifyCharacterIsConsideredTrailingSpace('\u{2004}');
 
-      // Test with trailing four-per-em space
+      // Test with trailing four-per-em space.
       verifyCharacterIsConsideredTrailingSpace('\u{2005}');
 
-      // Test with trailing six-per-em space
+      // Test with trailing six-per-em space.
       verifyCharacterIsConsideredTrailingSpace('\u{2006}');
 
-      // Test with trailing punctuation space
+      // Test with trailing punctuation space.
       verifyCharacterIsConsideredTrailingSpace('\u{2008}');
 
-      // Test with trailing thin space
+      // Test with trailing thin space.
       verifyCharacterIsConsideredTrailingSpace('\u{2009}');
 
-      // Test with trailing hair space
+      // Test with trailing hair space.
       verifyCharacterIsConsideredTrailingSpace('\u{200A}');
 
-      // Test with trailing medium mathematical space(MMSP)
+      // Test with trailing medium mathematical space(MMSP).
       verifyCharacterIsConsideredTrailingSpace('\u{205F}');
 
       painter.dispose();
