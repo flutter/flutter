@@ -536,6 +536,11 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
       }
       _localTextEditingController = widget.controller ?? TextEditingController();
     }
+    if (oldWidget.enableFilter != widget.enableFilter) {
+      if (!widget.enableFilter) {
+        _enableFilter = false;
+      }
+    }
     if (oldWidget.enableSearch != widget.enableSearch) {
       if (!widget.enableSearch) {
         currentHighlight = null;
