@@ -274,7 +274,6 @@ class DriveCommand extends RunCommandBase {
           buildInfo,
           device,
           debuggingOptions,
-          ipv6 ?? false,
           applicationBinary: applicationBinary,
           route: route,
           userIdentifier: userIdentifier,
@@ -295,7 +294,6 @@ class DriveCommand extends RunCommandBase {
           uri,
           device,
           debuggingOptions,
-          ipv6 ?? false,
         );
       }
 
