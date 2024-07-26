@@ -164,6 +164,7 @@
 ../../../flutter/impeller/entity/contents/host_buffer_unittests.cc
 ../../../flutter/impeller/entity/contents/test
 ../../../flutter/impeller/entity/contents/tiled_texture_contents_unittests.cc
+../../../flutter/impeller/entity/draw_order_resolver_unittests.cc
 ../../../flutter/impeller/entity/entity_pass_target_unittests.cc
 ../../../flutter/impeller/entity/entity_pass_unittests.cc
 ../../../flutter/impeller/entity/entity_unittests.cc
