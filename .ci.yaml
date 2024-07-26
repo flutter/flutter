@@ -1235,7 +1235,7 @@ targets:
   - name: Linux_android_emu flutter_driver_android_test
     recipe: flutter/flutter_drone
     timeout: 60
-    bringup: true
+    bringup: false
     properties:
       shard: flutter_driver_android
       tags: >
