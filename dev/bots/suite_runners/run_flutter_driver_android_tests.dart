@@ -3,15 +3,22 @@
 // found in the LICENSE file.
 
 import 'package:path/path.dart' as path;
+import '../run_command.dart';
 import '../utils.dart';
 
 Future<void> runFlutterDriverAndroidTests() async {
   print('Running Flutter Driver Android tests...');
 
-  await runDartTest(
-    path.join(flutterRoot, 'packages', 'flutter_driver'),
-    testPaths: <String>[
-      'test/src/native_tests/android',
+  // TODO(matanlurey): Should we be using another instrumentation method?
+  await runCommand(
+    'flutter',
+    <String>[
+      'drive',
     ],
+    workingDirectory: path.join(
+      'dev',
+      'integration_tests',
+      'android_driver_test',
+    ),
   );
 }
