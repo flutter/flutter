@@ -141,7 +141,7 @@ class DriveCommand extends RunCommandBase {
         help: 'Additional arguments to pass to the Dart VM running The test script.\n\n'
               'This can be used to opt-in to use `dart test` as a runner for the test script, '
               'which allows, among other things, changing the reporter. For example, to opt-in '
-              'to the `expanded` reporter:\n\n'
+              'to the "expanded" reporter:\n\n'
               '    flutter drive --test-arguments="test --reporter expanded"\n\n'
               'Please leave feedback at <https://github.com/flutter/flutter/issues/152409>.',
         )
