@@ -19,6 +19,7 @@ import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
 const LocalFileSystem _localFs = LocalFileSystem();
+const String _kGoldctlKey = 'GOLDCTL';
 
 // TODO(matanlurey): Refactor flutter_goldens to just re-use that code instead.
 Future<void> testExecutable(
@@ -31,7 +32,16 @@ Future<void> testExecutable(
     'where the "goldenFileComparator" has not yet been set. This is to ensure '
     'that the correct comparator is used for the current test environment.',
   );
-  final io.Directory tmpDir = io.Directory.systemTemp.createTempSync('android_driver_test');
+  if (!io.Platform.environment.containsKey(_kGoldctlKey)) {
+    io.stderr.writeln(
+      'Environment variable $_kGoldctlKey is not set. Assuming this is a local '
+      'test run and will not upload results to Skia Gold.',
+    );
+    return testMain();
+  }
+  final io.Directory tmpDir = io.Directory.systemTemp.createTempSync(
+    'android_driver_test',
+  );
   goldenFileComparator = _GoldenFileComparator(
     SkiaGoldClient(
       _localFs.directory(tmpDir.path),
