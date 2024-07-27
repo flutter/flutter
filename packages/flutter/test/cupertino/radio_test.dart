@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// reduced-test-set:
+//   This file is run as part of a reduced test set in CI on Mac and Windows
+//   machines.
+@Tags(<String>['reduced-test-set'])
+library;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -435,45 +441,30 @@ void main() {
   });
 
   testWidgets('Radio has correct default active/inactive/fill/border colors in light mode', (WidgetTester tester) async {
-    Widget buildRadio({required int value, required int groupValue, bool enabled = true}) {
+    Widget buildRadio({required int value, required int groupValue}) {
       return CupertinoApp(
         home: Center(
           child: CupertinoRadio<int>(
             value: value,
             groupValue: groupValue,
-            onChanged: enabled ? (int? i) { } : null,
+            onChanged: (int? i) { },
           ),
         ),
       );
     }
-
-    await tester.pumpWidget(buildRadio(value: 1, groupValue: 2));
-    await expectLater(
-      find.byType(CupertinoRadio<int>),
-      matchesGoldenFile('cupertinoRadio.unselected.light-theme.png'),
-    );
-
     await tester.pumpWidget(buildRadio(value: 1, groupValue: 1));
     await expectLater(
       find.byType(CupertinoRadio<int>),
-      matchesGoldenFile('cupertinoRadio.selected.light-theme.png'),
+      matchesGoldenFile('radio.light_theme.selected.png'),
     );
-
-    // Test disabled radio buttons.
-    await tester.pumpWidget(buildRadio(value: 1, groupValue: 2, enabled: false));
+    await tester.pumpWidget(buildRadio(value: 1, groupValue: 2));
     await expectLater(
       find.byType(CupertinoRadio<int>),
-      matchesGoldenFile('cupertinoRadio.disabled.unselected.light-theme.png'),
-    );
-
-    await tester.pumpWidget(buildRadio(value: 1, groupValue: 1, enabled: false));
-    await expectLater(
-      find.byType(CupertinoRadio<int>),
-      matchesGoldenFile('cupertinoRadio.disabled.selected.light-theme.png'),
+      matchesGoldenFile('radio.light_theme.unselected.png'),
     );
   });
 
-  testWidgets('Radio has correct default active/inactive/fill/border colors in light mode', (WidgetTester tester) async {
+  testWidgets('Radio has correct default active/inactive/fill/border colors in dark mode', (WidgetTester tester) async {
     Widget buildRadio({required int value, required int groupValue, bool enabled = true}) {
       return CupertinoApp(
         theme: const CupertinoThemeData(brightness: Brightness.dark),
@@ -486,30 +477,64 @@ void main() {
         ),
       );
     }
-
-    await tester.pumpWidget(buildRadio(value: 1, groupValue: 2));
-    await expectLater(
-      find.byType(CupertinoRadio<int>),
-      matchesGoldenFile('cupertinoRadio.unselected.dark-theme.png'),
-    );
-
     await tester.pumpWidget(buildRadio(value: 1, groupValue: 1));
     await expectLater(
       find.byType(CupertinoRadio<int>),
-      matchesGoldenFile('cupertinoRadio.selected.dark-theme.png'),
+      matchesGoldenFile('radio.dark_theme.selected.png'),
     );
-
-    // Test disabled radio buttons.
-    await tester.pumpWidget(buildRadio(value: 1, groupValue: 2, enabled: false));
+    await tester.pumpWidget(buildRadio(value: 1, groupValue: 2));
     await expectLater(
       find.byType(CupertinoRadio<int>),
-      matchesGoldenFile('cupertinoRadio.disabled.unselected.dark-theme.png'),
+      matchesGoldenFile('radio.dark_theme.unselected.png'),
     );
+  });
 
-    await tester.pumpWidget(buildRadio(value: 1, groupValue: 1, enabled: false));
+  testWidgets('Disabled radio has correct default active/inactive/fill/border colors in light mode', (WidgetTester tester) async {
+    Widget buildRadio({required int value, required int groupValue}) {
+      return CupertinoApp(
+        home: Center(
+          child: CupertinoRadio<int>(
+            value: value,
+            groupValue: groupValue,
+            onChanged: null,
+          ),
+        ),
+      );
+    }
+    await tester.pumpWidget(buildRadio(value: 1, groupValue: 1));
     await expectLater(
       find.byType(CupertinoRadio<int>),
-      matchesGoldenFile('cupertinoRadio.disabled.selected.dark-theme.png'),
+      matchesGoldenFile('radio.disabled_light_theme.selected.png'),
+    );
+    await tester.pumpWidget(buildRadio(value: 1, groupValue: 2));
+    await expectLater(
+      find.byType(CupertinoRadio<int>),
+      matchesGoldenFile('radio.disabled_light_theme.unselected.png'),
+    );
+  });
+
+  testWidgets('Disabled radio has correct default active/inactive/fill/border colors in dark mode', (WidgetTester tester) async {
+    Widget buildRadio({required int value, required int groupValue}) {
+      return CupertinoApp(
+        theme: const CupertinoThemeData(brightness: Brightness.dark),
+        home: Center(
+          child: CupertinoRadio<int>(
+            value: value,
+            groupValue: groupValue,
+            onChanged: null,
+          ),
+        ),
+      );
+    }
+    await tester.pumpWidget(buildRadio(value: 1, groupValue: 1));
+    await expectLater(
+      find.byType(CupertinoRadio<int>),
+      matchesGoldenFile('radio.disabled_dark_theme.selected.png'),
+    );
+    await tester.pumpWidget(buildRadio(value: 1, groupValue: 2));
+    await expectLater(
+      find.byType(CupertinoRadio<int>),
+      matchesGoldenFile('radio.disabled_dark_theme.unselected.png'),
     );
   });
 
