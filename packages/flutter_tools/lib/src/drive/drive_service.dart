@@ -262,7 +262,7 @@ class FlutterDriverService extends DriverService {
     try {
       final int result = await _processUtils.stream(<String>[
         _dartSdkPath,
-        ...arguments, 
+        ...arguments,
         testFile,
       ], environment: <String, String>{
         'VM_SERVICE_URL': _vmServiceUri,
