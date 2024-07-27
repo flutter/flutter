@@ -65,6 +65,7 @@ Future<void> testExecutable(
     namePrefix: namePrefix,
     isPresubmit: isPresubmit,
   );
+  return testMain();
 }
 
 final class _GoldenFileComparator extends GoldenFileComparator {
