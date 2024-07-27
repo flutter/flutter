@@ -195,7 +195,6 @@ class WebDriverService extends DriverService {
       _dartSdkPath,
       ...arguments,
       testFile,
-      '-rexpanded',
     ], environment: <String, String>{
       'VM_SERVICE_URL': _webUri.toString(),
       ..._additionalDriverEnvironment(webDriver, browserName, androidEmulator),
