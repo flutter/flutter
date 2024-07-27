@@ -141,7 +141,7 @@ class DriveCommand extends RunCommandBase {
         help: 'Additional arguments to pass to the Dart VM running The test script.\n\n'
               'This can be used to opt-in to use "dart test" as a runner for the test script, '
               'which allows, among other things, changing the reporter. For example, to opt-in '
-              'to the "expanded" reporter, pass "test -rexpanded".\n\n'
+              'to the "expanded" reporter, pass both "test" and "--reporter=expanded".\n\n'
               'Please leave feedback at <https://github.com/flutter/flutter/issues/152409>.',
         )
       ..addOption('profile-memory', help: 'Launch devtools and profile application memory, writing '
