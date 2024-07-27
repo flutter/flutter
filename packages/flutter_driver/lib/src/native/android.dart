@@ -86,6 +86,22 @@ final class AndroidNativeDriver implements NativeDriver {
 
   @override
   Future<void> configureForScreenshotTesting() async {
+    // Disable confirmation for immersive mode.
+    final io.ProcessResult immersive = await _adb(
+      <String>[
+        'shell',
+        'settings',
+        'put',
+        'global',
+        'policy_control',
+        'immersive.full=*',
+      ],
+    );
+
+    if (immersive.exitCode != 0) {
+      throw StateError('Failed to configure device: ${immersive.stderr}');
+    }
+
     const Map<String, String> settings = <String, String>{
       'show_surface_updates': '1',
       'transition_animation_scale': '0',
