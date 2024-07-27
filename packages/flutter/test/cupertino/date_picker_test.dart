@@ -2619,7 +2619,6 @@ Future<void> _loadFonts() async {
   final Directory flutterRoot =
       fs.directory(platform.environment['FLUTTER_ROOT']);
 
-  
    Future<void> loadFont(String fontName, String fontPath) async {
     final File fontFile = flutterRoot.childFile(fs.path.join('bin', 'cache', 'artifacts', 'material_fonts', fontPath));
     final ByteData fontData = fontFile.readAsBytesSync().buffer.asByteData();
