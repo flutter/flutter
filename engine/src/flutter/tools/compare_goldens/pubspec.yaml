@@ -1,3 +1,9 @@
 name: compare_goldens
+publish_to: none
+
+# Required for workspace support.
 environment:
-  sdk: '>=3.2.0-0 <4.0.0'
+  sdk: ^3.5.0-294.0.dev
+
+# This package is managed as part of the engine workspace.
+resolution: workspace

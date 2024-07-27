@@ -3189,7 +3189,6 @@
 ../../../flutter/tools/licenses/analysis_options.yaml
 ../../../flutter/tools/licenses/data
 ../../../flutter/tools/licenses/lib/README
-../../../flutter/tools/licenses/pubspec.lock
 ../../../flutter/tools/licenses/pubspec.yaml
 ../../../flutter/tools/licenses/test
 ../../../flutter/web_sdk

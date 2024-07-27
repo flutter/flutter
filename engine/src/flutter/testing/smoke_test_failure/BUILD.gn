@@ -10,7 +10,6 @@ foreach(test, tests) {
   flutter_frontend_server("compile_$test") {
     main_dart = test
     kernel_output = "$root_gen_dir/$test.dill"
-    package_config = ".dart_tool/package_config.json"
   }
 }
 
