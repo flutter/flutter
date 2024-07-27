@@ -53,15 +53,17 @@ Future<void> testExecutable(
     '  - namePrefix:  $namePrefix\n'
     '  - isPresubmit: $isPresubmit\n',
   );
+  final SkiaGoldClient skiaGoldClient = SkiaGoldClient(
+    _localFs.directory(tmpDir.path),
+    fs: _localFs,
+    process: const LocalProcessManager(),
+    platform: const LocalPlatform(),
+    httpClient: io.HttpClient(),
+    log: io.stderr.writeln,
+  );
+  await skiaGoldClient.auth();
   goldenFileComparator = _GoldenFileComparator(
-    SkiaGoldClient(
-      _localFs.directory(tmpDir.path),
-      fs: _localFs,
-      process: const LocalProcessManager(),
-      platform: const LocalPlatform(),
-      httpClient: io.HttpClient(),
-      log: io.stderr.writeln,
-    ),
+    skiaGoldClient,
     namePrefix: namePrefix,
     isPresubmit: isPresubmit,
   );
