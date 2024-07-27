@@ -744,7 +744,6 @@ void main() {
             return false;
           });
           expect(child, matchesSemantics(
-            isButton: true,
             hasToggledState: true,
             isToggled: true,
             isEnabled: true,

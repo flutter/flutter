@@ -1184,7 +1184,6 @@ void main() {
     ));
 
     expect(tester.getSemantics(find.byType(CheckboxListTile)), matchesSemantics(
-      isButton: true,
       hasCheckedState: true,
       isChecked: true,
       hasEnabledState: true,
