@@ -104,7 +104,7 @@ void main() {
     ]);
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
-        command: <String>['dart', '--enable-experiment=non-nullable', 'foo.test', '-rexpanded'],
+        command: <String>['dart', '--enable-experiment=non-nullable', 'foo.test'],
         exitCode: 23,
         environment: <String, String>{
           'FOO': 'BAR',
@@ -129,7 +129,7 @@ void main() {
     ]);
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
-        command: <String>['dart', '--enable-experiment=non-nullable', 'foo.test', '-rexpanded'],
+        command: <String>['dart', '--enable-experiment=non-nullable', 'foo.test'],
         exitCode: 23,
         environment: <String, String>{
           'FOO': 'BAR',
@@ -159,7 +159,7 @@ void main() {
     ]);
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
-        command: <String>['dart', '--enable-experiment=non-nullable', 'foo.test', '-rexpanded'],
+        command: <String>['dart', '--enable-experiment=non-nullable', 'foo.test'],
         exitCode: 23,
         environment: <String, String>{
           'FOO': 'BAR',
@@ -192,7 +192,7 @@ void main() {
     ]);
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
-        command: <String>['dart', '--enable-experiment=non-nullable', 'foo.test', '-rexpanded'],
+        command: <String>['dart', '--enable-experiment=non-nullable', 'foo.test'],
         exitCode: 23,
         environment: <String, String>{
           'FOO': 'BAR',
@@ -223,7 +223,7 @@ void main() {
     ]);
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
-        command: <String>['dart', 'foo.test', '-rexpanded'],
+        command: <String>['dart', 'foo.test'],
         exitCode: 11,
         environment: <String, String>{
           'VM_SERVICE_URL': 'http://127.0.0.1:63426/1UasC_ihpXY=/',
