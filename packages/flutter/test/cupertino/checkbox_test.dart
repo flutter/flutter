@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// reduced-test-set:
+//   This file is run as part of a reduced test set in CI on Mac and Windows
+//   machines.
+@Tags(<String>['reduced-test-set'])
+library;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -468,77 +474,96 @@ void main() {
   });
 
   testWidgets('Checkbox default colors, and size in light mode', (WidgetTester tester) async {
-    Widget buildCheckbox({bool value = true, bool enabled = true}) {
+    Widget buildCheckbox({bool value = true}) {
       return CupertinoApp(
         home: Center(
           child: CupertinoCheckbox(
             value: value,
-            onChanged: enabled ? (_) {} : null,
+            onChanged: (bool? newValue) {},
           ),
         ),
       );
     }
-    await tester.pumpWidget(buildCheckbox(value: false));
-    await expectLater(
-      find.byType(CupertinoCheckbox),
-      matchesGoldenFile('cupertinoCheckbox.unselected.light-theme.png'),
-    );
-
     await tester.pumpWidget(buildCheckbox());
     await expectLater(
       find.byType(CupertinoCheckbox),
-      matchesGoldenFile('cupertinoCheckbox.selected.light-theme.png'),
+      matchesGoldenFile('checkbox.light_theme.selected.png'),
     );
-
-    // Test disabled checkbox.
-    await tester.pumpWidget(buildCheckbox(enabled: false, value: false));
+    await tester.pumpWidget(buildCheckbox(value: false));
     await expectLater(
       find.byType(CupertinoCheckbox),
-      matchesGoldenFile('cupertinoCheckbox.disabled.unselected.light-theme.png'),
-    );
-
-    await tester.pumpWidget(buildCheckbox(enabled: false));
-    await expectLater(
-      find.byType(CupertinoCheckbox),
-      matchesGoldenFile('cupertinoCheckbox.disabled.selected.light-theme.png'),
+      matchesGoldenFile('checkbox.light_theme.unselected.png'),
     );
   });
 
   testWidgets('Checkbox default colors, and size in dark mode', (WidgetTester tester) async {
-    Widget buildCheckbox({bool value = true, bool enabled = true}) {
+    Widget buildCheckbox({bool value = true}) {
       return CupertinoApp(
         theme: const CupertinoThemeData(brightness: Brightness.dark),
         home: Center(
           child: CupertinoCheckbox(
             value: value,
-            onChanged: enabled ? (_) {} : null,
+            onChanged: (bool? newValue) {},
           ),
         ),
       );
     }
-    await tester.pumpWidget(buildCheckbox(value: false));
-    await expectLater(
-      find.byType(CupertinoCheckbox),
-      matchesGoldenFile('cupertinoCheckbox.unselected.dark-theme.png'),
-    );
-
     await tester.pumpWidget(buildCheckbox());
     await expectLater(
       find.byType(CupertinoCheckbox),
-      matchesGoldenFile('cupertinoCheckbox.selected.dark-theme.png'),
+      matchesGoldenFile('checkbox.dark_theme.selected.png'),
     );
-
-    // Test disabled checkbox.
-    await tester.pumpWidget(buildCheckbox(enabled: false, value: false));
+    await tester.pumpWidget(buildCheckbox(value: false));
     await expectLater(
       find.byType(CupertinoCheckbox),
-      matchesGoldenFile('cupertinoCheckbox.disabled.unselected.dark-theme.png'),
+      matchesGoldenFile('checkbox.dark_theme.unselected.png'),
     );
+  });
 
-    await tester.pumpWidget(buildCheckbox(enabled: false));
+  testWidgets('Disabled checkbox default colors, and size in light mode', (WidgetTester tester) async {
+    Widget buildCheckbox({bool value = true}) {
+      return CupertinoApp(
+        home: Center(
+          child: CupertinoCheckbox(
+            value: value,
+            onChanged: null,
+          ),
+        ),
+      );
+    }
+    await tester.pumpWidget(buildCheckbox());
     await expectLater(
       find.byType(CupertinoCheckbox),
-      matchesGoldenFile('cupertinoCheckbox.disabled.selected.dark-theme.png'),
+      matchesGoldenFile('checkbox.disabled_light_theme.selected.png'),
+    );
+    await tester.pumpWidget(buildCheckbox(value: false));
+    await expectLater(
+      find.byType(CupertinoCheckbox),
+      matchesGoldenFile('checkbox.disabled_light_theme.unselected.png'),
+    );
+  });
+
+  testWidgets('Disabled checkbox default colors, and size in dark mode', (WidgetTester tester) async {
+    Widget buildCheckbox({bool value = true}) {
+      return CupertinoApp(
+        theme: const CupertinoThemeData(brightness: Brightness.dark),
+        home: Center(
+          child: CupertinoCheckbox(
+            value: value,
+            onChanged: null,
+          ),
+        ),
+      );
+    }
+    await tester.pumpWidget(buildCheckbox());
+    await expectLater(
+      find.byType(CupertinoCheckbox),
+      matchesGoldenFile('checkbox.disabled_dark_theme.selected.png'),
+    );
+    await tester.pumpWidget(buildCheckbox(value: false));
+    await expectLater(
+      find.byType(CupertinoCheckbox),
+      matchesGoldenFile('checkbox.disabled_dark_theme.unselected.png'),
     );
   });
 
