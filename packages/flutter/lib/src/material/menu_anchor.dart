@@ -1212,9 +1212,7 @@ class _MenuItemButtonState extends State<MenuItemButton> {
     if (widget.focusNode == null) {
       _internalFocusNode = FocusNode();
       assert(() {
-        if (_internalFocusNode != null) {
-          _internalFocusNode!.debugLabel = '$MenuItemButton(${widget.child})';
-        }
+        _internalFocusNode?.debugLabel = '$MenuItemButton(${widget.child})';
         return true;
       }());
     }
@@ -1381,11 +1379,11 @@ class CheckboxMenuButton extends StatelessWidget {
       onPressed: onChanged == null ? null : () {
         switch (value) {
           case false:
-            onChanged!.call(true);
+            onChanged!(true);
           case true:
-            onChanged!.call(tristate ? null : false);
+            onChanged!(tristate ? null : false);
           case null:
-            onChanged!.call(false);
+            onChanged!(false);
         }
       },
       onHover: onHover,
@@ -1579,10 +1577,9 @@ class RadioMenuButton<T> extends StatelessWidget {
       key: key,
       onPressed: onChanged == null ? null : () {
         if (toggleable && groupValue == value) {
-          onChanged!.call(null);
-          return;
+          return onChanged!(null);
         }
-        onChanged!.call(value);
+        onChanged!(value);
       },
       onHover: onHover,
       onFocusChange: onFocusChange,
@@ -1880,9 +1877,7 @@ class _SubmenuButtonState extends State<SubmenuButton> {
     if (widget.focusNode == null) {
       _internalFocusNode = FocusNode();
       assert(() {
-        if (_internalFocusNode != null) {
-          _internalFocusNode!.debugLabel = '$SubmenuButton(${widget.child})';
-        }
+        _internalFocusNode?.debugLabel = '$SubmenuButton(${widget.child})';
         return true;
       }());
     }
@@ -1914,9 +1909,7 @@ class _SubmenuButtonState extends State<SubmenuButton> {
       if (widget.focusNode == null) {
         _internalFocusNode ??= FocusNode();
         assert(() {
-          if (_internalFocusNode != null) {
-            _internalFocusNode!.debugLabel = '$SubmenuButton(${widget.child})';
-          }
+          _internalFocusNode?.debugLabel = '$SubmenuButton(${widget.child})';
           return true;
         }());
       }

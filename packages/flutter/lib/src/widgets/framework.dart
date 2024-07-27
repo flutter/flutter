@@ -4036,13 +4036,11 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     assert(slots == null || newWidgets.length == slots.length);
 
     Element? replaceWithNullIfForgotten(Element child) {
-      return forgottenChildren != null && forgottenChildren.contains(child) ? null : child;
+      return (forgottenChildren?.contains(child) ?? false) ? null : child;
     }
 
     Object? slotFor(int newChildIndex, Element? previousChild) {
-      return slots != null
-          ? slots[newChildIndex]
-          : IndexedSlot<Element?>(newChildIndex, previousChild);
+      return slots?[newChildIndex] ?? IndexedSlot<Element?>(newChildIndex, previousChild);
     }
 
     // This attempts to diff the new child list (newWidgets) with
@@ -4222,7 +4220,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     _parent = parent;
     _slot = newSlot;
     _lifecycleState = _ElementLifecycle.active;
-    _depth = _parent != null ? _parent!.depth + 1 : 1;
+    _depth = 1 + (_parent?.depth ?? 0);
     if (parent != null) {
       // Only assign ownership if the parent is non-null. If parent is null
       // (the root node), the owner should have already been assigned.
@@ -4601,7 +4599,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   void activate() {
     assert(_lifecycleState == _ElementLifecycle.inactive);
     assert(owner != null);
-    final bool hadDependencies = (_dependencies != null && _dependencies!.isNotEmpty) || _hadUnsatisfiedDependencies;
+    final bool hadDependencies = (_dependencies?.isNotEmpty ?? false) || _hadUnsatisfiedDependencies;
     _lifecycleState = _ElementLifecycle.active;
     // We unregistered our dependencies in deactivate, but never cleared the list.
     // Since we're going to be reused, let's clear our list now.
@@ -4636,7 +4634,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   void deactivate() {
     assert(_lifecycleState == _ElementLifecycle.active);
     assert(_widget != null); // Use the private property to avoid a CastError during hot reload.
-    if (_dependencies != null && _dependencies!.isNotEmpty) {
+    if (_dependencies?.isNotEmpty ?? false) {
       for (final InheritedElement dependency in _dependencies!) {
         dependency.removeDependent(this);
       }
@@ -4896,8 +4894,9 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
 
   /// Returns `true` if [dependOnInheritedElement] was previously called with [ancestor].
   @protected
-  bool doesDependOnInheritedElement(InheritedElement ancestor) =>
-      _dependencies != null && _dependencies!.contains(ancestor);
+  bool doesDependOnInheritedElement(InheritedElement ancestor) {
+    return _dependencies?.contains(ancestor) ?? false;
+  }
 
   @override
   InheritedWidget dependOnInheritedElement(InheritedElement ancestor, { Object? aspect }) {
@@ -4910,7 +4909,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   @override
   T? dependOnInheritedWidgetOfExactType<T extends InheritedWidget>({Object? aspect}) {
     assert(_debugCheckStateIsActiveForAncestorLookup());
-    final InheritedElement? ancestor = _inheritedElements == null ? null : _inheritedElements![T];
+    final InheritedElement? ancestor = _inheritedElements?[T];
     if (ancestor != null) {
       return dependOnInheritedElement(ancestor, aspect: aspect) as T;
     }
@@ -4926,8 +4925,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   @override
   InheritedElement? getElementForInheritedWidgetOfExactType<T extends InheritedWidget>() {
     assert(_debugCheckStateIsActiveForAncestorLookup());
-    final InheritedElement? ancestor = _inheritedElements == null ? null : _inheritedElements![T];
-    return ancestor;
+    return _inheritedElements?[T];
   }
 
   /// Called in [Element.mount] and [Element.activate] to register this element in
