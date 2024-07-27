@@ -80,15 +80,33 @@ environment:
 
 # Declare all packages that are part of the workspace.
 workspace:
+  - ci
   - testing/benchmark
   - testing/dart
   - testing/litetest
   - testing/pkg_test_demo
   - testing/scenario_app
   - testing/skia_gold_client
+  - testing/smoke_test_failure
   - testing/symbols
+  - tools/android_lint
+  - tools/api_check
+  - tools/build_bucket_golden_scraper
+  - tools/clang_tidy
+  - tools/clangd_check
+  - tools/compare_goldens
+  - tools/const_finder
+  - tools/dir_contents_diff
   - tools/engine_tool
+  - tools/header_guard_check
+  - tools/gen_web_locale_keymap
+  - tools/githooks
+  - tools/licenses
+  - tools/path_ops/dart
   - tools/golden_tests_harvester
+  - tools/pkg/engine_build_configs
+  - tools/pkg/engine_repo_tools
+  - tools/pkg/git_repo_tools
   - tools/pkg/process_fakes
 
 # Declare all dependencies that are used by one or more packages.
@@ -154,6 +172,8 @@ dependency_overrides:
     path: ./third_party/dart/pkg/_macros
   analyzer:
     path: ./third_party/dart/pkg/analyzer
+  archive:
+    path: ./third_party/pkg/archive
   args:
     path: ./third_party/dart/third_party/pkg/args
   async:
@@ -170,12 +190,6 @@ dependency_overrides:
     path: ./third_party/pkg/coverage
   crypto:
     path: ./third_party/dart/third_party/pkg/crypto
-  dir_contents_diff:
-    path: ./tools/dir_contents_diff
-  engine_build_configs:
-    path: ./tools/pkg/engine_build_configs
-  engine_repo_tools:
-    path: ./tools/pkg/engine_repo_tools
   equatable:
     path: ./third_party/pkg/equatable
   expect:
@@ -190,8 +204,6 @@ dependency_overrides:
     path: ./third_party/dart/third_party/pkg/webdev/frontend_server_client
   gcloud:
     path: ./third_party/pkg/gcloud
-  git_repo_tools:
-    path: ./tools/pkg/git_repo_tools
   glob:
     path: ./third_party/dart/third_party/pkg/glob
   googleapis:
@@ -208,6 +220,8 @@ dependency_overrides:
     path: ./third_party/pkg/io
   js:
     path: ./third_party/dart/pkg/js
+  kernel:
+    path: ./third_party/dart/pkg/kernel
   logging:
     path: ./third_party/dart/third_party/pkg/logging
   macros:

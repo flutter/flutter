@@ -303,12 +303,21 @@ template("flutter_snapshot") {
 template("application_snapshot") {
   assert(defined(invoker.main_dart), "Must specify 'main_dart'")
   assert(defined(invoker.training_args), "Must specify 'training_args'")
-  assert(defined(invoker.package_config), "Must specify 'package_config'")
 
   main_dart = invoker.main_dart
   training_args = invoker.training_args
-  package_config = rebase_path(invoker.package_config)
   name = target_name
+
+  package_config = ""
+  if (defined(invoker.package_config)) {
+    package_config = rebase_path(invoker.package_config, root_build_dir)
+  } else {
+    # Use the root engine package config by default.
+    # As we move towards a single pub workspace for the engine, this will be
+    # the correct package config to use, as we will no longer have a per-package
+    # .dart_tool/package_config.json.
+    package_config = rebase_path("//flutter/.dart_tool/package_config.json")
+  }
 
   extra_deps = []
   if (defined(invoker.deps)) {

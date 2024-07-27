@@ -1,37 +1,16 @@
 name: gen_web_keyboard_keymap
 description: Generates keyboard layouts for Web from external sources.
+publish_to: none
 
+# Required for workspace support.
 environment:
-  sdk: '>=3.2.0-0 <4.0.0'
+  sdk: ^3.5.0-294.0.dev
+
+# This package is managed as part of the engine workspace.
+resolution: workspace
 
 dependencies:
   args: any
   http: any
   path: any
   meta: any
-
-dependency_overrides:
-  args:
-    path: ../../third_party/dart/third_party/pkg/args
-  async:
-    path: ../../third_party/dart/third_party/pkg/async
-  collection:
-    path: ../../third_party/dart/third_party/pkg/collection
-  http:
-    path: ../../third_party/dart/third_party/pkg/http/pkgs/http
-  http_parser:
-    path: ../../third_party/dart/third_party/pkg/http_parser
-  meta:
-    path: ../../third_party/dart/pkg/meta
-  path:
-    path: ../../third_party/dart/third_party/pkg/path
-  source_span:
-    path: ../../third_party/dart/third_party/pkg/source_span
-  string_scanner:
-    path: ../../third_party/dart/third_party/pkg/string_scanner
-  term_glyph:
-    path: ../../third_party/dart/third_party/pkg/term_glyph
-  typed_data:
-    path: ../../third_party/dart/third_party/pkg/typed_data
-  web:
-    path: ../../third_party/dart/third_party/pkg/web
