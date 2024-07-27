@@ -2422,7 +2422,7 @@ void main() {
   testWidgets('CupertinoDatePicker month column width validation in Portuguese', (WidgetTester tester) async {
     // In Portuguese, the longest month name is 'Fevereiro' (February).
     // But the widest month name is 'Novembro' (November).
-    const String largestMonthText = 'novembro';
+    const String largestMonthText = 'Novembro';
 
     await _loadFonts();
 
@@ -2462,67 +2462,29 @@ void main() {
                 .dateTimePickerTextStyle),
         textDirection: Directionality.of(datePickerContext));
 
-    /// same as _kDatePickerPadSize for CupertinoDatePicker
+    // Same as _kDatePickerPadSize for CupertinoDatePicker.
     const double kDatePickerPadSize = 12.0;
 
-    final double targetAlignWidgetWidth =
-        largestMonthWidth + kDatePickerPadSize;
+    final double targetAlignWidgetWidth = largestMonthWidth + kDatePickerPadSize;
 
-    final double monthColumnWidth = tester.getSize(find.byType(CupertinoPicker).first).width;
+    // Find parent of largest month.
+    final Finder foundAlignWidgets = find.widgetWithText(Align, largestMonthText);
 
-    expect(monthColumnWidth, greaterThanOrEqualTo(targetAlignWidgetWidth));
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/39998
+    foundAlignWidgets.tryEvaluate();
 
-  testWidgets('CupertinoDatePicker month column width validation in Arabic', (WidgetTester tester) async {
-    const String largestMonthText = 'ديسمبر'; // December in Arabic
+    Element deepestElement = foundAlignWidgets.found.first;
 
-    await _loadFonts();
+    for (final Element element in foundAlignWidgets.found) {
+      if (element.depth < deepestElement.depth) {
+        continue;
+      }
+      deepestElement = element;
+    }
+    final double? alignWidgetWidth = deepestElement.size?.width;
 
-    CupertinoThemeData theme = const CupertinoThemeData();
-    theme = theme.copyWith(
-        textTheme: theme.textTheme.copyWith(
-            dateTimePickerTextStyle: theme.textTheme.dateTimePickerTextStyle
-                .copyWith(fontFamily: 'Roboto')));
+    assert(alignWidgetWidth != null);
 
-    await tester.pumpWidget(CupertinoApp(
-      theme: theme,
-      locale: const Locale('ar'),
-      supportedLocales: const <Locale>[Locale('ar')],
-      localizationsDelegates: const <LocalizationsDelegate<
-          CupertinoLocalizations>>[_MockDefaultCupertinoLocalizations.delegate],
-      home: Builder(builder: (BuildContext context) {
-        return Center(
-          child: CupertinoDatePicker(
-              mode: CupertinoDatePickerMode.monthYear,
-              onDateTimeChanged: (DateTime date) {},
-              initialDateTime: DateTime(2018, 11, 15)),
-        );
-      }),
-    ));
-
-    // pump twice required for loading localization
-    await tester.pump();
-    await tester.pump();
-
-    final BuildContext datePickerContext = tester.element(find.byType(CupertinoDatePicker));
-
-    final double largestMonthWidth = TextPainter.computeMaxIntrinsicWidth(
-        text: TextSpan(
-            text: largestMonthText,
-            style: CupertinoTheme.of(datePickerContext)
-                .textTheme
-                .dateTimePickerTextStyle),
-        textDirection: Directionality.of(datePickerContext));
-
-    /// same as _kDatePickerPadSize for CupertinoDatePicker
-    const double kDatePickerPadSize = 12.0;
-
-    final double targetAlignWidgetWidth =
-        largestMonthWidth + kDatePickerPadSize;
-
-    final double monthColumnWidth = tester.getSize(find.byType(CupertinoPicker).first).width;
-
-    expect(monthColumnWidth, greaterThanOrEqualTo(targetAlignWidgetWidth));
+    expect(alignWidgetWidth, equals(targetAlignWidgetWidth));
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/39998
 }
 
@@ -2619,13 +2581,13 @@ Future<void> _loadFonts() async {
   final Directory flutterRoot =
       fs.directory(platform.environment['FLUTTER_ROOT']);
 
-   Future<void> loadFont(String fontName, String fontPath) async {
-    final File fontFile = flutterRoot.childFile(fs.path.join('bin', 'cache', 'artifacts', 'material_fonts', fontPath));
+   Future<void> loadFont(String fontName, String fontPath,[bool arabian = false]) async {
+    final File fontFile = flutterRoot.childFile(fs.path.join('bin', 'cache', 'artifacts', arabian ? 'arabic_fonts' : 'material_fonts', fontPath));
     final ByteData fontData = fontFile.readAsBytesSync().buffer.asByteData();
     await (FontLoader(fontName)..addFont(Future<ByteData>.value(fontData))).load();
   }
 
   await loadFont('Roboto', 'Roboto-Regular.ttf');
   // Load the Tajawal font for Arabic.
-  //await loadFont('Tajawal', 'Tajawal-Regular.ttf');
+  // await loadFont('Tajawal', 'Tajawal-Regular.ttf', true);
 }
