@@ -90,8 +90,7 @@ class RpcFormatError extends Error {
 
 /// Handles JSON RPC-2 communication with a Dart VM service.
 ///
-/// Either wraps existing RPC calls to the Dart VM service, or runs raw RPC
-/// function calls via [invokeRpc].
+/// Wraps existing RPC calls to the Dart VM service.
 class DartVm {
   DartVm._(this._vmService, this.uri);
 

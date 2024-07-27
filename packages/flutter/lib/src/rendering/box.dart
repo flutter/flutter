@@ -2,6 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/widgets.dart';
+///
+/// @docImport 'image.dart';
+/// @docImport 'paragraph.dart';
+/// @docImport 'proxy_box.dart';
+/// @docImport 'shifted_box.dart';
+/// @docImport 'sliver.dart';
+/// @docImport 'viewport.dart';
+library;
+
 import 'dart:math' as math;
 import 'dart:ui' as ui show ViewConstraints, lerpDouble;
 
@@ -322,10 +332,12 @@ class BoxConstraints extends Constraints {
       return result;
     }
 
+    if (size.isEmpty) {
+      return constrain(size);
+    }
+
     double width = size.width;
     double height = size.height;
-    assert(width > 0.0);
-    assert(height > 0.0);
     final double aspectRatio = width / height;
 
     if (width > maxWidth) {

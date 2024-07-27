@@ -148,7 +148,7 @@ void main() {
         ],
         actions: <SemanticsAction>[
           SemanticsAction.tap,
-          SemanticsAction.focus,
+          if (defaultTargetPlatform != TargetPlatform.iOS) SemanticsAction.focus,
         ],
       ),
     );

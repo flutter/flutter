@@ -1065,6 +1065,7 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
     }
 
     _stopDeadlineTimer();
+    _start = null;
     _dragState = _DragState.ready;
     _pastSlopTolerance = false;
   }

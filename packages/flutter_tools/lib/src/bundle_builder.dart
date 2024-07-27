@@ -213,7 +213,8 @@ Future<void> writeBundle(
             );
             doCopy = false;
             if (failure != null) {
-              throwToolExit(failure.message);
+              throwToolExit('User-defined transformation of asset "${entry.key}" failed.\n'
+                  '${failure.message}');
             }
             case AssetKind.font:
               break;
