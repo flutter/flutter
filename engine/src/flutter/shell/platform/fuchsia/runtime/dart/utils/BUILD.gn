@@ -101,7 +101,6 @@ executable("dart_utils_unittests") {
     ":utils",
     ":utils_fixtures",
     "$dart_src/runtime:libdart_jit",
-    "$dart_src/runtime/bin:concurrent_api",
     "$dart_src/runtime/bin:dart_io_api",
     "${fuchsia_sdk}/pkg/inspect_component_cpp",
     "${fuchsia_sdk}/pkg/sys_cpp",
