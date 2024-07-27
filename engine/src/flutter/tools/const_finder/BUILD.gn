@@ -6,15 +6,11 @@ import("//flutter/build/dart/rules.gni")
 
 application_snapshot("const_finder") {
   main_dart = "bin/main.dart"
-  package_config = ".dart_tool/package_config.json"
   snapshot_kind = "kernel"
 
   training_args = [ "--help" ]
 
-  inputs = [
-    "bin/main.dart",
-    ".dart_tool/package_config.json",
-  ]
+  inputs = [ "bin/main.dart" ]
 
   deps = [ "//flutter/flutter_frontend_server:frontend_server" ]
 }

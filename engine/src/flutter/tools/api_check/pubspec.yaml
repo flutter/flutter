@@ -5,25 +5,12 @@
 name: apicheck
 publish_to: none
 
-# Do not add any dependencies that require more than what is provided in
-# //third_party/dart/pkg or //third_party/dart/third_party/pkg.
-# In particular, package:test is not usable here.
-
-# If you do add packages here, make sure you can run `pub get --offline`, and
-# check the .packages and .package_config to make sure all the paths are
-# relative to this directory into //third_party/dart
-
+# Required for workspace support.
 environment:
-  sdk: '>=3.2.0-0 <4.0.0'
+  sdk: ^3.5.0-294.0.dev
 
-# Do not add any dependencies that require more than what is provided in
-# //third_party/pkg, //third_party/dart/pkg, or
-# //third_party/dart/third_party/pkg. In particular, package:test is not usable
-# here.
-
-# If you do add packages here, make sure you can run `pub get --offline`, and
-# check the .packages and .package_config to make sure all the paths are
-# relative to this directory into //third_party/dart
+# This package is managed as part of the engine workspace.
+resolution: workspace
 
 dependencies:
   analyzer: any
@@ -36,55 +23,3 @@ dev_dependencies:
   litetest: any
   path: any
   smith: any
-
-dependency_overrides:
-  _fe_analyzer_shared:
-    path: ../../third_party/dart/pkg/_fe_analyzer_shared
-  _macros:
-    path: ../../third_party/dart/pkg/_macros
-  analyzer:
-    path: ../../third_party/dart/pkg/analyzer
-  async:
-    path: ../../third_party/dart/third_party/pkg/async
-  async_helper:
-    path: ../../third_party/dart/pkg/async_helper
-  collection:
-    path: ../../third_party/dart/third_party/pkg/collection
-  convert:
-    path: ../../third_party/dart/third_party/pkg/convert
-  crypto:
-    path: ../../third_party/dart/third_party/pkg/crypto
-  dart_internal:
-    path: ../../third_party/dart/pkg/dart_internal
-  expect:
-    path: ../../third_party/dart/pkg/expect
-  file:
-    path: ../../third_party/dart/third_party/pkg/file/packages/file
-  glob:
-    path: ../../third_party/dart/third_party/pkg/glob
-  litetest:
-    path: ../../testing/litetest
-  meta:
-    path: ../../third_party/dart/pkg/meta
-  macros:
-    path: ../../third_party/dart/pkg/macros
-  package_config:
-    path: ../../third_party/dart/third_party/pkg/package_config
-  path:
-    path: ../../third_party/dart/third_party/pkg/path
-  pub_semver:
-    path: ../../third_party/dart/third_party/pkg/pub_semver
-  source_span:
-    path: ../../third_party/dart/third_party/pkg/source_span
-  string_scanner:
-    path: ../../third_party/dart/third_party/pkg/string_scanner
-  term_glyph:
-    path: ../../third_party/dart/third_party/pkg/term_glyph
-  typed_data:
-    path: ../../third_party/dart/third_party/pkg/typed_data
-  watcher:
-    path: ../../third_party/dart/third_party/pkg/watcher
-  yaml:
-    path: ../../third_party/dart/third_party/pkg/yaml
-  smith:
-    path: ../../third_party/dart/pkg/smith

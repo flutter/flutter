@@ -5,35 +5,17 @@
 name: const_finder
 publish_to: none
 
+# Required for workspace support.
 environment:
-  sdk: '>=3.2.0-0 <4.0.0'
+  sdk: ^3.5.0-294.0.dev
 
-# Do not add any dependencies that require more than what is provided in
-# //third_party/dart/pkg or //third_party/dart/third_party/pkg.
-# In particular, package:test is not usable here.
-
-# If you do add packages here, make sure you can run `pub get --offline`, and
-# check the .packages and .package_config to make sure all the paths are
-# relative to this directory into //third_party/dart
+# This package is managed as part of the engine workspace.
+resolution: workspace
 
 dependencies:
   args: any
-  collection: any
   kernel: any
 
 dev_dependencies:
+  collection: any
   path: any
-
-dependency_overrides:
-  _fe_analyzer_shared:
-    path: ../../third_party/dart/pkg/_fe_analyzer_shared
-  args:
-    path: ../../third_party/dart/third_party/pkg/args
-  collection:
-    path: ../../third_party/dart/third_party/pkg/collection
-  kernel:
-    path: ../../third_party/dart/pkg/kernel
-  meta:
-    path: ../../third_party/dart/pkg/meta
-  path:
-    path: ../../third_party/dart/third_party/pkg/path
