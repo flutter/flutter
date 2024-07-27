@@ -26,6 +26,7 @@ Future<void> runFlutterDriverAndroidTests() async {
     <String>[
       'drive',
       '--test-arguments=test',
+      '--test-arguments=--reporter=expanded',
     ],
     workingDirectory: path.join(
       'dev',
