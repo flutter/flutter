@@ -2471,7 +2471,7 @@ void main() {
     final double monthColumnWidth = tester.getSize(find.byType(CupertinoPicker).first).width;
 
     expect(monthColumnWidth, greaterThanOrEqualTo(targetAlignWidgetWidth));
-  });
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/39998
 
   testWidgets('CupertinoDatePicker month column width validation in Arabic', (WidgetTester tester) async {
     const String largestMonthText = 'ديسمبر'; // December in Arabic
@@ -2498,7 +2498,7 @@ void main() {
               initialDateTime: DateTime(2018, 11, 15)),
         );
       }),
-    ), skip: isBrowser); // https://github.com/flutter/flutter/issues/39998;
+    ));
 
     // pump twice required for loading localization
     await tester.pump();
@@ -2523,7 +2523,7 @@ void main() {
     final double monthColumnWidth = tester.getSize(find.byType(CupertinoPicker).first).width;
 
     expect(monthColumnWidth, greaterThanOrEqualTo(targetAlignWidgetWidth));
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/39998;
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/39998
 }
 
 Widget _buildPicker({
