@@ -58,10 +58,9 @@ Future<void> _kDefaultDartDevelopmentServiceStarter(
 ) async {
   await device.dds.startDartDevelopmentService(
     vmServiceUri,
-    hostPort: 0,
-    ipv6: true,
+    ddsPort: 0,
     disableServiceAuthCodes: disableServiceAuthCodes,
-    logger: globals.logger,
+    ipv6: true,
   );
 }
 
@@ -212,7 +211,7 @@ class FuchsiaDevices extends PollingDeviceDiscovery {
       _logger.printError('Failed to resolve host for Fuchsia device `$name`');
       return null;
     }
-    return FuchsiaDevice(resolvedHost, name: name);
+    return FuchsiaDevice(resolvedHost, name: name, logger: _logger);
   }
 
   @override
@@ -220,7 +219,7 @@ class FuchsiaDevices extends PollingDeviceDiscovery {
 }
 
 class FuchsiaDevice extends Device {
-  FuchsiaDevice(super.id, {required this.name})
+  FuchsiaDevice(super.id, {required this.name, required super.logger})
       : super(
           platformType: PlatformType.fuchsia,
           category: null,
@@ -295,7 +294,6 @@ class FuchsiaDevice extends Device {
     required DebuggingOptions debuggingOptions,
     Map<String, Object?> platformArgs = const <String, Object?>{},
     bool prebuiltApplication = false,
-    bool ipv6 = false,
     String? userIdentifier,
   }) async {
     if (await isSession) {

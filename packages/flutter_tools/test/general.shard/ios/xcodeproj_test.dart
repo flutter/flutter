@@ -325,7 +325,9 @@ void main() {
     expect(
       await xcodeProjectInterpreter.getBuildSettings(
         '',
-        buildContext: const XcodeProjectBuildContext(environmentType: EnvironmentType.simulator),
+        buildContext: const XcodeProjectBuildContext(
+          sdk: XcodeSdk.IPhoneSimulator,
+        ),
       ),
       const <String, String>{},
     );
@@ -398,7 +400,7 @@ void main() {
     ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testUsingContext('build settings uses watch destination if isWatch is true', () async {
+  testUsingContext('build settings uses watch destination', () async {
     platform.environment = const <String, String>{};
 
     fakeProcessManager.addCommands(<FakeCommand>[
@@ -422,7 +424,9 @@ void main() {
     expect(
       await xcodeProjectInterpreter.getBuildSettings(
         '',
-        buildContext: const XcodeProjectBuildContext(isWatch: true),
+        buildContext: const XcodeProjectBuildContext(
+          sdk: XcodeSdk.WatchOS,
+        ),
       ),
       const <String, String>{},
     );
@@ -432,7 +436,7 @@ void main() {
     ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testUsingContext('build settings uses watch simulator destination if isWatch is true and environment type is simulator', () async {
+  testUsingContext('build settings uses watch simulator destination', () async {
     platform.environment = const <String, String>{};
 
     fakeProcessManager.addCommands(<FakeCommand>[
@@ -458,7 +462,45 @@ void main() {
     expect(
       await xcodeProjectInterpreter.getBuildSettings(
         '',
-        buildContext: const XcodeProjectBuildContext(environmentType: EnvironmentType.simulator, isWatch: true),
+        buildContext: const XcodeProjectBuildContext(
+          sdk: XcodeSdk.WatchSimulator,
+        ),
+      ),
+      const <String, String>{},
+    );
+    expect(fakeProcessManager, hasNoRemainingExpectations);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
+
+  testUsingContext('build settings uses macosx destination', () async {
+    platform.environment = const <String, String>{};
+
+    fakeProcessManager.addCommands(<FakeCommand>[
+      kWhichSysctlCommand,
+      kx64CheckCommand,
+      FakeCommand(
+        command: <String>[
+          'xcrun',
+          'xcodebuild',
+          '-project',
+          '/',
+          '-destination',
+          'generic/platform=macOS',
+          '-showBuildSettings',
+          'BUILD_DIR=${fileSystem.path.absolute('build', 'macos')}',
+        ],
+        exitCode: 1,
+      ),
+    ]);
+
+    expect(
+      await xcodeProjectInterpreter.getBuildSettings(
+        '',
+        buildContext: const XcodeProjectBuildContext(
+          sdk: XcodeSdk.MacOSX,
+        ),
       ),
       const <String, String>{},
     );

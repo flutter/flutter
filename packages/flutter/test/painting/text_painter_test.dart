@@ -145,20 +145,77 @@ void main() {
       caretOffset = painter.getOffsetForCaret(ui.TextPosition(offset: text.length), ui.Rect.zero);
       expect(caretOffset.dx, painter.width);
 
-      // Test with trailing full-width space
-      const String textWithFullWidthSpace = 'A\u{3000}';
-      checkCaretOffsetsLtr(textWithFullWidthSpace);
-      painter.text = const TextSpan(text: textWithFullWidthSpace);
-      painter.layout();
-      caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 0), ui.Rect.zero);
-      expect(caretOffset.dx, 0);
-      caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 1), ui.Rect.zero);
-      expect(caretOffset.dx, painter.width / 2);
-      caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: textWithFullWidthSpace.length), ui.Rect.zero);
-      expect(caretOffset.dx, painter.width);
+      /// Verify the handling of spaces by SkParagraph and TextPainter.
+      ///
+      /// Test characters that are in the Unicode-Zs category but are not treated as whitespace characters by SkParagraph.
+      /// The following character codes are intentionally excluded from the test target.
+      ///   * '\u{00A0}' (no-break space)
+      ///   * '\u{2007}' (figure space)
+      ///   * '\u{202F}' (narrow no-break space)
+      void verifyCharacterIsConsideredTrailingSpace(String character) {
+        final String reason = 'character: ${character.codeUnitAt(0).toRadixString(16)}';
+
+        text = 'A$character';
+        checkCaretOffsetsLtr(text);
+        painter.text = TextSpan(text: text);
+        painter.layout();
+        caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 0), ui.Rect.zero);
+        expect(caretOffset.dx, 0.0, reason: reason);
+        caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 1), ui.Rect.zero);
+        expect(caretOffset.dx, 14.0, reason: reason);
+        caretOffset = painter.getOffsetForCaret(ui.TextPosition(offset: text.length), ui.Rect.zero);
+        expect(caretOffset.dx, painter.width, reason: reason);
+
+        painter.layout(maxWidth: 14.0);
+        final List<ui.LineMetrics> lines = painter.computeLineMetrics();
+        expect(lines.length, 1, reason: reason);
+        expect(lines.first.width, 14.0, reason: reason);
+      }
+
+      // Test with trailing space.
+      verifyCharacterIsConsideredTrailingSpace('\u{0020}');
+
+      // Test with trailing full-width space.
+      verifyCharacterIsConsideredTrailingSpace('\u{3000}');
+
+      // Test with trailing ogham space mark.
+      verifyCharacterIsConsideredTrailingSpace('\u{1680}');
+
+      // Test with trailing en quad.
+      verifyCharacterIsConsideredTrailingSpace('\u{2000}');
+
+      // Test with trailing em quad.
+      verifyCharacterIsConsideredTrailingSpace('\u{2001}');
+
+      // Test with trailing en space.
+      verifyCharacterIsConsideredTrailingSpace('\u{2002}');
+
+      // Test with trailing em space.
+      verifyCharacterIsConsideredTrailingSpace('\u{2003}');
+
+      // Test with trailing three-per-em space.
+      verifyCharacterIsConsideredTrailingSpace('\u{2004}');
+
+      // Test with trailing four-per-em space.
+      verifyCharacterIsConsideredTrailingSpace('\u{2005}');
+
+      // Test with trailing six-per-em space.
+      verifyCharacterIsConsideredTrailingSpace('\u{2006}');
+
+      // Test with trailing punctuation space.
+      verifyCharacterIsConsideredTrailingSpace('\u{2008}');
+
+      // Test with trailing thin space.
+      verifyCharacterIsConsideredTrailingSpace('\u{2009}');
+
+      // Test with trailing hair space.
+      verifyCharacterIsConsideredTrailingSpace('\u{200A}');
+
+      // Test with trailing medium mathematical space(MMSP).
+      verifyCharacterIsConsideredTrailingSpace('\u{205F}');
 
       painter.dispose();
-    });
+    }, skip: isBrowser && !isSkiaWeb); // https://github.com/flutter/flutter/issues/56308
 
     test('TextPainter caret test with WidgetSpan', () {
       // Regression test for https://github.com/flutter/flutter/issues/98458.

@@ -1544,16 +1544,13 @@ class CapturingAppDomain extends AppDomain {
     String? projectRootPath,
     String? packagesFilePath,
     String? dillOutputPath,
-    bool ipv6 = false,
     String? isolateFilter,
     bool machine = true,
     String? userIdentifier,
-    bool enableDevTools = true,
-    String? flavor,
-    HotRunnerNativeAssetsBuilder? nativeAssetsBuilder,
+    required HotRunnerNativeAssetsBuilder? nativeAssetsBuilder,
   }) async {
     this.userIdentifier = userIdentifier;
-    this.enableDevTools = enableDevTools;
+    enableDevTools = options.enableDevTools;
     throwToolExit('');
   }
 }

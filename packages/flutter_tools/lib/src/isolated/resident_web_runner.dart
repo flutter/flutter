@@ -50,7 +50,6 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
     String? target,
     required bool stayResident,
     required FlutterProject flutterProject,
-    required bool? ipv6,
     required DebuggingOptions debuggingOptions,
     UrlTunneller? urlTunneller,
     required Logger logger,
@@ -65,7 +64,6 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
       target: target,
       flutterProject: flutterProject,
       debuggingOptions: debuggingOptions,
-      ipv6: ipv6,
       stayResident: stayResident,
       urlTunneller: urlTunneller,
       machine: machine,
@@ -89,7 +87,6 @@ class ResidentWebRunner extends ResidentRunner {
     bool stayResident = true,
     bool machine = false,
     required this.flutterProject,
-    required bool? ipv6,
     required DebuggingOptions debuggingOptions,
     required FileSystem fileSystem,
     required Logger logger,
@@ -97,6 +94,7 @@ class ResidentWebRunner extends ResidentRunner {
     required Usage usage,
     required Analytics analytics,
     UrlTunneller? urlTunneller,
+    // TODO(bkonyi): remove when ready to serve DevTools from DDS.
     ResidentDevtoolsHandlerFactory devtoolsHandler = createDefaultHandler,
   }) : _fileSystem = fileSystem,
        _logger = logger,
@@ -108,7 +106,6 @@ class ResidentWebRunner extends ResidentRunner {
           <FlutterDevice>[device],
           target: target ?? fileSystem.path.join('lib', 'main.dart'),
           debuggingOptions: debuggingOptions,
-          ipv6: ipv6,
           stayResident: stayResident,
           machine: machine,
           devtoolsHandler: devtoolsHandler,
@@ -195,6 +192,7 @@ class ResidentWebRunner extends ResidentRunner {
     if (_exited) {
       return;
     }
+    // TODO(bkonyi): remove when ready to serve DevTools from DDS.
     await residentDevtoolsHandler!.shutdown();
     await _stdOutSub?.cancel();
     await _stdErrSub?.cancel();
@@ -247,7 +245,6 @@ class ResidentWebRunner extends ResidentRunner {
   Future<int> run({
     Completer<DebugConnectionInfo>? connectionInfoCompleter,
     Completer<void>? appStartedCompleter,
-    bool enableDevTools = false, // ignored, we don't yet support devtools for web
     String? route,
   }) async {
     final ApplicationPackage? package = await ApplicationPackageFactory.instance!.getPackageForPlatform(
@@ -368,7 +365,6 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
         return attach(
           connectionInfoCompleter: connectionInfoCompleter,
           appStartedCompleter: appStartedCompleter,
-          enableDevTools: enableDevTools,
         );
       });
     } on WebSocketException catch (error, stackTrace) {
@@ -476,6 +472,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
     final Duration elapsed = _systemClock.now().difference(start);
     final String elapsedMS = getElapsedAsMilliseconds(elapsed);
     _logger.printStatus('Restarted application in $elapsedMS.');
+
     unawaited(residentDevtoolsHandler!.hotRestart(flutterDevices));
 
     // Don't track restart times for dart2js builds or web-server devices.
@@ -603,7 +600,6 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
     Completer<DebugConnectionInfo>? connectionInfoCompleter,
     Completer<void>? appStartedCompleter,
     bool allowExistingDdsInstance = false,
-    bool enableDevTools = false, // ignored, we don't yet support devtools for web
     bool needsFullRestart = true,
   }) async {
     if (_chromiumLauncher != null) {
@@ -682,13 +678,14 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
           }
         });
       }
-      if (enableDevTools) {
-        // The method below is guaranteed never to return a failing future.
-        unawaited(residentDevtoolsHandler!.serveAndAnnounceDevTools(
-          devToolsServerAddress: debuggingOptions.devToolsServerAddress,
-          flutterDevices: flutterDevices,
-        ));
-      }
+    }
+    // TODO(bkonyi): remove when ready to serve DevTools from DDS.
+    if (debuggingOptions.enableDevTools) {
+      // The method below is guaranteed never to return a failing future.
+      unawaited(residentDevtoolsHandler!.serveAndAnnounceDevTools(
+        devToolsServerAddress: debuggingOptions.devToolsServerAddress,
+        flutterDevices: flutterDevices,
+      ));
     }
     if (websocketUri != null) {
       if (debuggingOptions.vmserviceOutFile != null) {

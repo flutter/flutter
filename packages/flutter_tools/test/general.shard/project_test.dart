@@ -1458,7 +1458,7 @@ plugins {
         const XcodeProjectBuildContext watchBuildContext = XcodeProjectBuildContext(
           scheme: 'WatchScheme',
           deviceId: '123',
-          isWatch: true,
+          sdk: XcodeSdk.WatchOS,
         );
         mockXcodeProjectInterpreter.buildSettingsByBuildContext[watchBuildContext] = <String, String>{
           'INFOPLIST_KEY_WKCompanionAppBundleIdentifier': 'io.flutter.someProject',
@@ -1498,7 +1498,7 @@ plugins {
         const XcodeProjectBuildContext watchBuildContext = XcodeProjectBuildContext(
           scheme: 'WatchScheme',
           deviceId: '123',
-          isWatch: true,
+          sdk: XcodeSdk.WatchOS,
         );
         mockXcodeProjectInterpreter.buildSettingsByBuildContext[watchBuildContext] = <String, String>{
           IosProject.kProductBundleIdKey: 'io.flutter.someProject',

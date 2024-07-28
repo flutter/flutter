@@ -469,12 +469,14 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
 
   @override
   Future<void> startDartDevelopmentService(
-    Uri observatoryUri, {
-    required Logger logger,
-    int? hostPort,
-    bool? ipv6,
+    Uri vmServiceUri, {
+    int? ddsPort,
     bool? disableServiceAuthCodes,
+    bool? ipv6,
+    bool enableDevTools = true,
     bool cacheStartupProfile = false,
+    String? google3WorkspaceRoot,
+    Uri? devToolsServerAddress,
   }) async {
     started = true;
   }
@@ -483,7 +485,4 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
   Future<void> shutdown() async {
     disposed = true;
   }
-
-  @override
-  void setExternalDevToolsUri(Uri uri) {}
 }

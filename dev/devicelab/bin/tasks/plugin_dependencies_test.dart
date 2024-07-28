@@ -6,6 +6,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_devicelab/framework/framework.dart';
+import 'package:flutter_devicelab/framework/ios.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:path/path.dart' as path;
@@ -209,6 +210,7 @@ public class DummyPluginAClass {
       final String flutterPluginsDependenciesFileContent = flutterPluginsDependenciesFile.readAsStringSync();
 
       final Map<String, dynamic> jsonContent = json.decode(flutterPluginsDependenciesFileContent) as Map<String, dynamic>;
+      final bool swiftPackageManagerEnabled = jsonContent['swift_package_manager_enabled'] as bool? ?? false;
 
       // Verify the dependencyGraph object is valid. The rest of the contents of this file are not relevant to the
       // dependency graph and are tested by unit tests.
@@ -302,28 +304,35 @@ public class DummyPluginAClass {
           return TaskResult.failure('Failed to build plugin A example iOS app');
         }
 
-        checkDirectoryExists(path.join(
-          appBundle.path,
-          'Frameworks',
-          'plugin_a.framework',
-        ));
-        checkDirectoryExists(path.join(
-          appBundle.path,
-          'Frameworks',
-          'plugin_b.framework',
-        ));
-        checkDirectoryExists(path.join(
-          appBundle.path,
-          'Frameworks',
-          'plugin_c.framework',
-        ));
+        if (swiftPackageManagerEnabled) {
+          // Check plugins are built statically if using SwiftPM.
+          final String executable = path.join(appBundle.path, 'Runner');
+          final String symbols = await dumpSymbolTable(executable);
 
-        // Plugin D is Android only and should not be embedded.
-        checkDirectoryNotExists(path.join(
-          appBundle.path,
-          'Frameworks',
-          'plugin_d.framework',
-        ));
+          final bool foundA = symbols.contains('plugin_a');
+          final bool foundB = symbols.contains('plugin_b');
+          final bool foundC = symbols.contains('plugin_c');
+          final bool foundD = symbols.contains('plugin_d');
+
+          if (!foundA || !foundB || !foundC) {
+            return TaskResult.failure(
+              'Failed to find plugins_a, plugin_b, or plugin_c symbols in the app'
+            );
+          }
+
+          if (foundD) {
+            return TaskResult.failure(
+              'Found Android plugin_d symbols in iOS app'
+            );
+          }
+        } else {
+          // Check plugins are built dynamically if using CocoaPods.
+          checkDirectoryExists(path.join(appBundle.path, 'Frameworks', 'plugin_a.framework'));
+          checkDirectoryExists(path.join(appBundle.path, 'Frameworks', 'plugin_b.framework'));
+          checkDirectoryExists(path.join(appBundle.path, 'Frameworks', 'plugin_c.framework'));
+
+          checkDirectoryNotExists(path.join(appBundle.path, 'Frameworks', 'plugin_d.framework'));
+        }
       }
 
       return TaskResult.success(null);

@@ -701,7 +701,8 @@ void main() {
       final DaemonMessage startResponse = await broadcastOutput.firstWhere(_notEvent);
       expect(startResponse.data['id'], 0);
       expect(startResponse.data['error'], isNull);
-      final String? ddsUri = startResponse.data['result'] as String?;
+      final Map<String, Object?>? result = startResponse.data['result'] as Map<String, Object?>?;
+      final String? ddsUri = result!['ddsUri'] as String?;
       expect(ddsUri, fakeDdsUri.toString());
       expect(device.dds.startCalled, true);
       expect(device.dds.startDisableServiceAuthCodes, false);
@@ -1246,11 +1247,14 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
   @override
   Future<void> startDartDevelopmentService(
     Uri vmServiceUri, {
-    required Logger logger,
-    int? hostPort,
+    int? ddsPort,
+    FlutterDevice? device,
     bool? ipv6,
     bool? disableServiceAuthCodes,
+    bool enableDevTools = false,
     bool cacheStartupProfile = false,
+    String? google3WorkspaceRoot,
+    Uri? devToolsServerAddress,
   }) async {
     startCalled = true;
     startVMServiceUri = vmServiceUri;

@@ -1192,7 +1192,9 @@ class ReleaseAssetServer {
               'application/octet-stream';
       return shelf.Response.ok(bytes, headers: <String, String>{
         'Content-Type': mimeType,
-        if (_needsCoopCoep && file.basename == 'index.html') ...<String, String>{
+        'Cross-Origin-Resource-Policy': 'cross-origin',
+        'Access-Control-Allow-Origin': '*',
+        if (_needsCoopCoep && _fileSystem.path.extension(file.path) == '.html') ...<String, String>{
           'Cross-Origin-Opener-Policy': 'same-origin',
           'Cross-Origin-Embedder-Policy': 'require-corp',
         }

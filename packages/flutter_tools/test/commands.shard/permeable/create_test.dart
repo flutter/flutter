@@ -693,7 +693,7 @@ void main() {
     ),
   });
 
-  testUsingContext('kotlin/swift plugin project', () async {
+  testUsingContext('kotlin/swift plugin project without Swift Package Manager', () async {
     return _createProject(
       projectDir,
       <String>['--no-pub', '--template=plugin', '-a', 'kotlin', '--ios-language', 'swift', '--platforms', 'ios,android'],
@@ -718,6 +718,9 @@ void main() {
         'ios/Classes/FlutterProjectPlugin.m',
       ],
     );
+  }, overrides: <Type, Generator>{
+    // Test flags disable Swift Package Manager.
+    FeatureFlags: () => TestFeatureFlags(),
   });
 
   testUsingContext('swift plugin project with Swift Package Manager', () async {
@@ -1944,7 +1947,7 @@ void main() {
     );
   });
 
-  testUsingContext('can re-gen plugin ios/ and example/ folders, reusing custom org', () async {
+  testUsingContext('can re-gen plugin ios/ and example/ folders, reusing custom org, without Swift Package Manager', () async {
     await _createProject(
       projectDir,
       <String>[
@@ -1969,6 +1972,7 @@ void main() {
       unexpectedPaths: <String>[
         'example/android/app/src/main/java/com/example/flutter_project_example/MainActivity.java',
         'android/src/main/java/com/example/flutter_project/FlutterProjectPlugin.java',
+        'ios/flutter_project/Sources/flutter_project/include/flutter_project/FlutterProjectPlugin.h',
       ],
     );
     final FlutterProject project = FlutterProject.fromDirectory(projectDir);
@@ -1976,6 +1980,48 @@ void main() {
       await project.example.ios.productBundleIdentifier(BuildInfo.debug),
       'com.bar.foo.flutterProjectExample',
     );
+  }, overrides: <Type, Generator>{
+    // Test flags disable Swift Package Manager.
+    FeatureFlags: () => TestFeatureFlags(),
+  });
+
+  testUsingContext('can re-gen plugin ios/ and example/ folders, reusing custom org, with Swift Package Manager', () async {
+    await _createProject(
+      projectDir,
+      <String>[
+        '--no-pub',
+        '--template=plugin',
+        '--org', 'com.bar.foo',
+        '-i', 'objc',
+        '-a', 'java',
+        '--platforms', 'ios,android',
+      ],
+      <String>[],
+    );
+    projectDir.childDirectory('example').deleteSync(recursive: true);
+    projectDir.childDirectory('ios').deleteSync(recursive: true);
+    await _createProject(
+      projectDir,
+      <String>['--no-pub', '--template=plugin', '-i', 'objc', '-a', 'java', '--platforms', 'ios,android'],
+      <String>[
+        'example/android/app/src/main/java/com/bar/foo/flutter_project_example/MainActivity.java',
+        'ios/flutter_project/Sources/flutter_project/include/flutter_project/FlutterProjectPlugin.h',
+      ],
+      unexpectedPaths: <String>[
+        'example/android/app/src/main/java/com/example/flutter_project_example/MainActivity.java',
+        'android/src/main/java/com/example/flutter_project/FlutterProjectPlugin.java',
+        'ios/Classes/FlutterProjectPlugin.h',
+      ],
+    );
+    final FlutterProject project = FlutterProject.fromDirectory(projectDir);
+    expect(
+      await project.example.ios.productBundleIdentifier(BuildInfo.debug),
+      'com.bar.foo.flutterProjectExample',
+    );
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(
+      isSwiftPackageManagerEnabled: true,
+    ),
   });
 
   testUsingContext('fails to re-gen without specified org when org is ambiguous', () async {
