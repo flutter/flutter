@@ -102,8 +102,8 @@ enum AnimationBehavior {
 ///
 /// For advice on obtaining a ticker provider, see [TickerProvider].
 /// Typically the relevant [State] serves as the ticker provider,
-/// after applying a suitable mixin to cause the [State] subclass to
-/// implement [TickerProvider].
+/// after applying a suitable mixin (like [SingleTickerProviderStateMixin])
+/// to cause the [State] subclass to implement [TickerProvider].
 ///
 /// ## Life cycle
 ///

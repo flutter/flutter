@@ -60,7 +60,7 @@ typedef AnimationStatusListener = void Function(AnimationStatus status);
 /// Signature for method used to transform values in [Animation.fromValueListenable].
 typedef ValueListenableTransformer<T> = T Function(T);
 
-/// A value which may change over time, moving forward or backward.
+/// A value which might change over time, moving forward or backward.
 ///
 /// An animation has a [value] (of type [T]) and a [status].
 /// The value conceptually lies on some path, and
@@ -76,17 +76,16 @@ typedef ValueListenableTransformer<T> = T Function(T);
 /// The listener callbacks are called during the "animation" phase of
 /// the pipeline, just prior to rebuilding widgets.
 ///
-/// An animation may move forward or backward on its own as time passes
+/// An animation might move forward or backward on its own as time passes
 /// (like the opacity of a button that fades over a fixed duration
 /// once the user touches it),
-/// or it may be driven by the user
+/// or it might be driven by the user
 /// (like the position of a slider that the user can drag back and forth),
-/// or it may do both
-/// (like a switch that snaps into place when releaseed,
+/// or it might do both
+/// (like a switch that snaps into place when released,
 /// or a [Dismissible] that responds to drag and fling gestures, etc.).
 /// The behavior is normally controlled by method calls on
-/// some underlying [AnimationController],
-/// for example by a [State] that created the [AnimationController].
+/// some underlying [AnimationController].
 /// When an animation is actively animating, it typically updates on
 /// each frame, driven by a [Ticker].
 ///
@@ -96,15 +95,14 @@ typedef ValueListenableTransformer<T> = T Function(T);
 /// [ImplicitlyAnimatedWidget] subclasses,
 /// like [AnimatedScale], [AnimatedOpacity], and many others.
 /// When an [ImplicitlyAnimatedWidget] suffices, there is
-/// no need to work with [Animation], [AnimationController], or [Tween],
-/// or even to have a [State] to manage the animation (though all of those are
-/// involved in the implementation of the [ImplicitlyAnimatedWidget] itself).
+/// no need to work with [Animation] or the rest of the classes
+/// discussed in this section.
 ///
 /// Otherwise, typically an animation originates with an [AnimationController]
 /// (which is itself an [Animation<double>])
-/// created by a [State] that implements [TickerProvider],
-/// and then further animations may be derived from it using
-/// e.g. [Tween] or [CurvedAnimation].
+/// created by a [State] that implements [TickerProvider].
+/// Further animations might be derived from that animation
+/// by using e.g. [Tween] or [CurvedAnimation].
 /// The animations might be used to configure an [AnimatedWidget]
 /// (using one of its many subclasses like [FadeTransition]),
 /// or their values might be used directly.
@@ -116,6 +114,8 @@ typedef ValueListenableTransformer<T> = T Function(T);
 /// to produce an [Animation<Size>] and an [Animation<Color>] that control
 /// a widget shrinking and changing color as the animation proceeds.
 ///
+/// ## Performance considerations
+///
 /// Because the [Animation] keeps the same identity as the animation proceeds,
 /// it provides a convenient way for a [StatefulWidget] that orchestrates
 /// a complex animation to communicate the animation's progress to its
@@ -125,7 +125,7 @@ typedef ValueListenableTransformer<T> = T Function(T);
 /// even while the animation is active.
 /// If the leaf widgets also ignore [value] and pass the whole
 /// [Animation] object to a render object (like [FadeTransition] does),
-/// they too may be able to avoid rebuild and even relayout, so that the
+/// they too might be able to avoid rebuild and even relayout, so that the
 /// only work needed on each frame of the animation is to repaint.
 ///
 /// See also:

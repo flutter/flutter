@@ -25,7 +25,7 @@ typedef TickerCallback = void Function(Duration elapsed);
 /// [TickerProviderStateMixin] (which always works)
 /// or [SingleTickerProviderStateMixin] (which is more efficient when it works)
 /// to make a [State] subclass implement [TickerProvider].
-/// You might then pass that [State] to lower-level widgets
+/// That [State] can then be passed to lower-level widgets
 /// or other related objects.
 /// This ensures the resulting [Ticker]s will only tick when that [State]'s
 /// subtree is enabled, as defined by [TickerMode].
@@ -65,8 +65,10 @@ abstract class TickerProvider {
 /// a [State] that uses [TickerProviderStateMixin] to silence the ticker when
 /// the state's subtree is disabled as defined by [TickerMode]).
 ///
-/// Tickers are driven by the [SchedulerBinding]. See
-/// [SchedulerBinding.scheduleFrameCallback].
+/// See also:
+///
+/// * [TickerProvider], for obtaining a ticker.
+/// * [SchedulerBinding.scheduleFrameCallback], which drives tickers.
 // TODO(jacobr): make Ticker use Diagnosticable to simplify reporting errors
 // related to a ticker.
 class Ticker {
