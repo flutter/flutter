@@ -206,7 +206,7 @@ class FlutterPlugin implements Plugin<Project> {
     /**
      * Flutter Docs Website URLs for help messages.
      */
-    private final String kWebsiteDeploymentAndroidBuildConfig = "https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration"
+    private final String kWebsiteDeploymentAndroidBuildConfig = "https://flutter.dev/to/review-gradle-config"
 
     @Override
     void apply(Project project) {
@@ -1369,6 +1369,11 @@ class FlutterPlugin implements Plugin<Project> {
             def bundleAarTask = project.tasks.findByName("bundle${variant.name.capitalize()}Aar")
             if (bundleAarTask) {
                 bundleAarTask.dependsOn(copyFlutterAssetsTask)
+            }
+
+            def bundleAarTaskWithLint = project.tasks.findByName("bundle${variant.name.capitalize()}LocalLintAar")
+            if (bundleAarTaskWithLint) {
+                bundleAarTaskWithLint.dependsOn(copyFlutterAssetsTask)
             }
 
             return copyFlutterAssetsTask

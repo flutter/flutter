@@ -121,13 +121,13 @@ class _SwitchThemeAdaptation extends Adaptation<SwitchThemeData> {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
         return SwitchThemeData(
-          thumbColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
-            if (states.contains(MaterialState.selected)) {
+          thumbColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+            if (states.contains(WidgetState.selected)) {
               return Colors.yellow;
             }
             return null; // Use the default.
           }),
-          trackColor: const MaterialStatePropertyAll<Color>(Colors.brown),
+          trackColor: const WidgetStatePropertyAll<Color>(Colors.brown),
         );
     }
   }

@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:ui';
+/// @docImport 'package:flutter/animation.dart';
+/// @docImport 'package:flutter/material.dart';
+/// @docImport 'package:flutter/widgets.dart';
+library;
+
 import 'dart:async';
 import 'dart:collection';
 
@@ -1878,7 +1884,7 @@ abstract class InheritedWidget extends ProxyWidget {
 /// object widgets subclass one of:
 ///
 ///  * [LeafRenderObjectWidget], if the widget has no children.
-///  * [SingleChildRenderObjectElement], if the widget has exactly one child.
+///  * [SingleChildRenderObjectWidget], if the widget has exactly one child.
 ///  * [MultiChildRenderObjectWidget], if the widget takes a list of children.
 ///  * [SlottedMultiChildRenderObjectWidget], if the widget organizes its
 ///    children in different named slots.
@@ -2645,8 +2651,8 @@ final class BuildScope {
   ///
   /// This is necessary to preserve the sort order defined by [Element._sort].
   ///
-  /// This field is set to null when [buildScope] is not actively rebuilding
-  /// the widget tree.
+  /// This field is set to null when [BuildOwner.buildScope] is not actively
+  /// rebuilding the widget tree.
   bool? _dirtyElementsNeedsResorting;
   final List<Element> _dirtyElements = <Element>[];
 

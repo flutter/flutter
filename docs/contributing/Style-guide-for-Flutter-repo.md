@@ -1,4 +1,4 @@
-### Style guide for Flutter repo
+# Style guide for Flutter repo
 
 ## Summary
 
@@ -30,8 +30,8 @@ understanding with new team members.
 The primary goal of these style guidelines is to improve code readability so
 that everyone, whether reading the code for the first time or
 maintaining it for years, can quickly determine what the code does.
-Secondary goals are to design systems that are simple, to increase the
-likelihood of catching bugs quickly, and avoiding arguments when there are
+Secondary goals are to design systems that are simple; to increase the
+likelihood of catching bugs quickly; and to avoid arguments when there are
 disagreements over subjective matters.
 
 For anything not covered by this document, check the
@@ -537,7 +537,7 @@ Example:
 abstract class Picture ...
 ```
 
-You can also use "See also" links, is in:
+You can also use "See also" links, as in:
 
 ```dart
 /// See also:
@@ -1525,7 +1525,7 @@ String capitalize(String s) {
 If your code is passing an inline closure that merely returns a list or
 map literal, or a switch expression, or is merely calling another function,
 then if the argument is on its own line, then rather than using braces and a
-return` statement, you can instead use the `=>` form. When doing this, the
+`return` statement, you can instead use the `=>` form. When doing this, the
 closing `]`, `}`, or `)` bracket will line up with the argument name, for
 named arguments, or the `(` of the argument list, for positional arguments.
 
@@ -1870,7 +1870,7 @@ the features.
 
 ### Import conventions
 
-Under lib/src, for in-folder import use relative import. For cross-folder import,
+Under `lib/src`, for in-folder import, use relative import. For cross-folder import,
 import the entire package with absolute import.
 
 When importing the `rendering.dart` library into higher level libraries,
@@ -1899,7 +1899,7 @@ The `dart:math` library is always imported `as math`.
 
 As a general rule, if a feature is entirely self-contained (not requiring low-level integration into the Flutter framework) and is not something with universal appeal, we would encourage that that feature be provided as a package.
 
-We try to be very conservative with what we put in the core framework, because there's a high cost to having anything there. We have to commit to supporting it for years to come, we have to document it, test it, create samples, we have to consider everyone's varied desires which they may have as they use the feature, we have to fix bugs. If there's design problems, we may not find out for a long time but then once we do we then have to figure out how to fix them without breaking people, or we have to migrate all our existing widgets to the new architecture, etc.
+We try to be very conservative with what we put in the core framework, because there's a high cost to having anything there. We have to commit to supporting it for years to come, we have to document it, test it, create samples, we have to consider everyone's varied desires which they may have as they use the feature, we have to fix bugs. If there are design problems, we may not find out for a long time but then once we do we then have to figure out how to fix them without breaking downstream code, or we have to migrate all our existing widgets to the new architecture, etc.
 
 Basically, code is expensive. So before we take it, if possible, we like to see if we can prove the code's value. By creating a package, we can see if people use the feature, how they like it, whether it would be useful for the framework, etc, without having to take on the costs.
 

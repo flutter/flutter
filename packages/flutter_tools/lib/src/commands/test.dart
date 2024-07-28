@@ -16,6 +16,7 @@ import '../globals.dart' as globals;
 import '../native_assets.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
+import '../runner/flutter_command_runner.dart';
 import '../test/coverage_collector.dart';
 import '../test/event_printer.dart';
 import '../test/runner.dart';
@@ -46,8 +47,8 @@ const String _kIntegrationTestDirectory = 'integration_test';
 /// the `*_test.dart` suffix, and run them in a single invocation.
 ///
 /// See:
-/// - https://flutter.dev/docs/cookbook/testing/unit/introduction
-/// - https://flutter.dev/docs/cookbook/testing/widget/introduction
+/// - https://flutter.dev/to/unit-testing
+/// - https://flutter.dev/to/widget-testing
 ///
 /// ## Integration Tests
 ///
@@ -59,7 +60,7 @@ const String _kIntegrationTestDirectory = 'integration_test';
 /// your package. To run these tests, use `flutter test integration_test`.
 ///
 /// See:
-/// - https://flutter.dev/docs/testing/integration-tests
+/// - https://flutter.dev/to/integration-testing
 class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
   TestCommand({
     bool verboseHelp = false,
@@ -411,7 +412,9 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       enableImpeller: ImpellerStatus.fromBool(argResults!['enable-impeller'] as bool?),
       debugLogsDirectoryPath: debugLogsDirectoryPath,
       webRenderer: webRenderer,
+      printDtd: boolArg(FlutterGlobalOptions.kPrintDtd, global: true),
       webUseWasm: useWasm,
+      webUseLocalCanvaskit: true,
     );
 
     String? testAssetDirectory;
@@ -504,8 +507,8 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       collector = CoverageCollector(
         verbose: !machine,
         libraryNames: packagesToInclude,
-        packagesPath: buildInfo.packagesPath,
-        resolver: await CoverageCollector.getResolver(buildInfo.packagesPath),
+        packagesPath: buildInfo.packageConfigPath,
+        resolver: await CoverageCollector.getResolver(buildInfo.packageConfigPath),
         testTimeRecorder: testTimeRecorder,
         branchCoverage: boolArg('branch-coverage'),
       );
@@ -598,7 +601,6 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         excludeTags: excludeTags,
         watcher: watcher,
         enableVmService: collector != null || startPaused || enableVmService,
-        ipv6: ipv6,
         machine: machine,
         updateGoldens: boolArg('update-goldens'),
         concurrency: jobs,
@@ -617,6 +619,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         integrationTestUserIdentifier: stringArg(FlutterOptions.kDeviceUser),
         testTimeRecorder: testTimeRecorder,
         nativeAssetsBuilder: nativeAssetsBuilder,
+        buildInfo: buildInfo,
       );
     }
     testTimeRecorder?.stop(TestTimePhases.TestRunner, testRunnerTimeRecorderStopwatch!);

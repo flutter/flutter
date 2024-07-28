@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'recognizer.dart';
+/// @docImport 'tap.dart';
+library;
+
 // Modeled after Android's ViewConfiguration:
 // https://github.com/android/platform_frameworks_base/blob/main/core/java/android/view/ViewConfiguration.java
 

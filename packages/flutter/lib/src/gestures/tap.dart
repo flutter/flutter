@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/widgets.dart';
+///
+/// @docImport 'multitap.dart';
+library;
 
 import 'package:flutter/foundation.dart';
 
@@ -354,7 +358,7 @@ abstract class BaseTapGestureRecognizer extends PrimaryPointerGestureRecognizer 
 /// no-op.
 ///
 /// {@template flutter.gestures.tap.TapGestureRecognizer.allowedButtonsFilter}
-/// The `allowedButtonsFilter` argument only gives this recognizer the
+/// The [allowedButtonsFilter] argument only gives this recognizer the
 /// ability to limit the buttons it accepts. It does not provide the
 /// ability to recognize any buttons beyond the ones it already accepts:
 /// kPrimaryButton, kSecondaryButton or kTertiaryButton. Therefore, a

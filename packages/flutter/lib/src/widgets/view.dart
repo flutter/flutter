@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'basic.dart';
+library;
+
 import 'dart:collection';
 import 'dart:ui' show FlutterView, SemanticsUpdate, ViewFocusDirection, ViewFocusEvent, ViewFocusState;
 
@@ -188,24 +193,43 @@ class _ViewState extends State<View> with WidgetsBindingObserver {
     debugLabel: kReleaseMode ? null : 'View Scope',
   );
   final FocusTraversalPolicy _policy = ReadingOrderTraversalPolicy();
+  bool _viewHasFocus = false;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _scopeNode.addListener(_scopeFocusChangeListener);
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _scopeNode.removeListener(_scopeFocusChangeListener);
     _scopeNode.dispose();
     super.dispose();
   }
 
+  void _scopeFocusChangeListener() {
+    if (_viewHasFocus == _scopeNode.hasFocus || !_scopeNode.hasFocus) {
+      return;
+    }
+    // Scope has gained focus, and it doesn't match the view focus, so inform
+    // the view so it knows to change its focus.
+    WidgetsBinding.instance.platformDispatcher.requestViewFocusChange(
+      direction: ViewFocusDirection.forward,
+      state: ViewFocusState.focused,
+      viewId: widget.view.viewId,
+    );
+  }
+
   @override
   void didChangeViewFocus(ViewFocusEvent event) {
+    _viewHasFocus = switch (event.state) {
+      ViewFocusState.focused => event.viewId == widget.view.viewId,
+      ViewFocusState.unfocused => false,
+    };
     if (event.viewId != widget.view.viewId) {
-      // The event is not pertinent to this view.
       return;
     }
     FocusNode nextFocus;

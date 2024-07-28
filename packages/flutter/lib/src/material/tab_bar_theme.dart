@@ -43,6 +43,7 @@ class TabBarTheme with Diagnosticable {
     this.mouseCursor,
     this.tabAlignment,
     this.textScaler,
+    this.indicatorAnimation,
   });
 
   /// Overrides the default value for [TabBar.indicator].
@@ -62,9 +63,9 @@ class TabBarTheme with Diagnosticable {
 
   /// Overrides the default value for [TabBar.labelColor].
   ///
-  /// If [labelColor] is a [MaterialStateColor], then the effective color will
-  /// depend on the [MaterialState.selected] state, i.e. if the [Tab] is
-  /// selected or not. In case of unselected state, this [MaterialStateColor]'s
+  /// If [labelColor] is a [WidgetStateColor], then the effective color will
+  /// depend on the [WidgetState.selected] state, i.e. if the [Tab] is
+  /// selected or not. In case of unselected state, this [WidgetStateColor]'s
   /// resolved color will be used even if [TabBar.unselectedLabelColor] or
   /// [unselectedLabelColor] is non-null.
   final Color? labelColor;
@@ -102,6 +103,9 @@ class TabBarTheme with Diagnosticable {
   /// Overrides the default value for [TabBar.textScaler].
   final TextScaler? textScaler;
 
+  /// Overrides the default value for [TabBar.indicatorAnimation].
+  final TabIndicatorAnimation? indicatorAnimation;
+
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   TabBarTheme copyWith({
@@ -120,6 +124,7 @@ class TabBarTheme with Diagnosticable {
     MaterialStateProperty<MouseCursor?>? mouseCursor,
     TabAlignment? tabAlignment,
     TextScaler? textScaler,
+    TabIndicatorAnimation? indicatorAnimation,
   }) {
     return TabBarTheme(
       indicator: indicator ?? this.indicator,
@@ -137,6 +142,7 @@ class TabBarTheme with Diagnosticable {
       mouseCursor: mouseCursor ?? this.mouseCursor,
       tabAlignment: tabAlignment ?? this.tabAlignment,
       textScaler: textScaler ?? this.textScaler,
+      indicatorAnimation: indicatorAnimation ?? this.indicatorAnimation,
     );
   }
 
@@ -168,6 +174,7 @@ class TabBarTheme with Diagnosticable {
       mouseCursor: t < 0.5 ? a.mouseCursor : b.mouseCursor,
       tabAlignment: t < 0.5 ? a.tabAlignment : b.tabAlignment,
       textScaler: t < 0.5 ? a.textScaler : b.textScaler,
+      indicatorAnimation: t < 0.5 ? a.indicatorAnimation : b.indicatorAnimation,
     );
   }
 
@@ -188,6 +195,7 @@ class TabBarTheme with Diagnosticable {
     mouseCursor,
     tabAlignment,
     textScaler,
+    indicatorAnimation,
   );
 
   @override
@@ -213,6 +221,7 @@ class TabBarTheme with Diagnosticable {
         && other.splashFactory == splashFactory
         && other.mouseCursor == mouseCursor
         && other.tabAlignment == tabAlignment
-        && other.textScaler == textScaler;
+        && other.textScaler == textScaler
+        && other.indicatorAnimation == indicatorAnimation;
   }
 }

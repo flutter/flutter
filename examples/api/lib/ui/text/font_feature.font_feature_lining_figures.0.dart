@@ -4,7 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 
-/// Flutter code sample for [FontFeature.FontFeature.liningFigures].
+/// Flutter code sample for [FontFeature.liningFigures].
 
 void main() => runApp(const ExampleApp());
 

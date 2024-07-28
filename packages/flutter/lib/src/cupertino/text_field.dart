@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+library;
+
 import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle;
 
 import 'package:flutter/foundation.dart' show defaultTargetPlatform;
@@ -1445,6 +1448,35 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
         _requestKeyboard();
       },
       onDidGainAccessibilityFocus: handleDidGainAccessibilityFocus,
+      onFocus: enabled
+        ? () {
+            assert(
+              _effectiveFocusNode.canRequestFocus,
+              'Received SemanticsAction.focus from the engine. However, the FocusNode '
+              'of this text field cannot gain focus. This likely indicates a bug. '
+              'If this text field cannot be focused (e.g. because it is not '
+              'enabled), then its corresponding semantics node must be configured '
+              'such that the assistive technology cannot request focus on it.'
+            );
+
+            if (_effectiveFocusNode.canRequestFocus && !_effectiveFocusNode.hasFocus) {
+              _effectiveFocusNode.requestFocus();
+            } else if (!widget.readOnly) {
+              // If the platform requested focus, that means that previously the
+              // platform believed that the text field did not have focus (even
+              // though Flutter's widget system believed otherwise). This likely
+              // means that the on-screen keyboard is hidden, or more generally,
+              // there is no current editing session in this field. To correct
+              // that, keyboard must be requested.
+              //
+              // A concrete scenario where this can happen is when the user
+              // dismisses the keyboard on the web. The editing session is
+              // closed by the engine, but the text field widget stays focused
+              // in the framework.
+              _requestKeyboard();
+            }
+          }
+        : null,
       child: TextFieldTapRegion(
         child: IgnorePointer(
           ignoring: !enabled,

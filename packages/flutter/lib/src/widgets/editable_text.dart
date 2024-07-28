@@ -2,6 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/cupertino.dart';
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'app.dart';
+/// @docImport 'context_menu_controller.dart';
+/// @docImport 'form.dart';
+/// @docImport 'restoration.dart';
+/// @docImport 'restoration_properties.dart';
+/// @docImport 'selectable_region.dart';
+/// @docImport 'text_selection_toolbar_layout_delegate.dart';
+library;
+
 import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui' as ui hide TextStyle;
@@ -3799,27 +3811,17 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
        && notification is! ScrollEndNotification) {
       return;
     }
-    if (notification is ScrollStartNotification
-       && _dataWhenToolbarShowScheduled != null) {
-      return;
+    switch (notification) {
+      case ScrollStartNotification() when _dataWhenToolbarShowScheduled != null:
+      case ScrollEndNotification() when _dataWhenToolbarShowScheduled == null:
+        break;
+      case ScrollEndNotification() when _dataWhenToolbarShowScheduled!.value != _value:
+        _dataWhenToolbarShowScheduled = null;
+        _disposeScrollNotificationObserver();
+      case ScrollNotification(:final BuildContext? context)
+      when !_isInternalScrollableNotification(context) && _scrollableNotificationIsFromSameSubtree(context):
+        _handleContextMenuOnScroll(notification);
     }
-    if (notification is ScrollEndNotification
-       && _dataWhenToolbarShowScheduled == null) {
-      return;
-    }
-    if (notification is ScrollEndNotification
-       && _dataWhenToolbarShowScheduled!.value != _value) {
-      _dataWhenToolbarShowScheduled = null;
-      _disposeScrollNotificationObserver();
-      return;
-    }
-    if (_isInternalScrollableNotification(notification.context)) {
-      return;
-    }
-    if (!_scrollableNotificationIsFromSameSubtree(notification.context)) {
-      return;
-    }
-    _handleContextMenuOnScroll(notification);
   }
 
   Rect _calculateDeviceRect() {
@@ -5094,7 +5096,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
 
-  /// The default behavior used if [onTapOutside] is null.
+  /// The default behavior used if [EditableText.onTapOutside] is null.
   ///
   /// The `event` argument is the [PointerDownEvent] that caused the notification.
   void _defaultOnTapOutside(PointerDownEvent event) {
@@ -5746,7 +5748,7 @@ class _ScribblePlaceholder extends WidgetSpan {
 /// See also:
 ///
 ///  * [String.runes], which deals with code points like this class.
-///  * [String.characters], which deals with graphemes.
+///  * [Characters], which deals with graphemes.
 ///  * [CharacterBoundary], which is a [TextBoundary] like this class, but whose
 ///    boundaries are graphemes instead of code points.
 class _CodePointBoundary extends TextBoundary {

@@ -21,7 +21,6 @@ import 'package:flutter_tools/src/migrations/cocoapods_toolchain_directory_migra
 import 'package:flutter_tools/src/migrations/xcode_project_object_version_migration.dart';
 import 'package:flutter_tools/src/migrations/xcode_script_build_phase_migration.dart';
 import 'package:flutter_tools/src/migrations/xcode_thin_binary_build_phase_input_paths_migration.dart';
-import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/xcode_project.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -32,15 +31,11 @@ import '../../src/fakes.dart';
 
 void main () {
   group('iOS migration', () {
-    late TestUsage testUsage;
     late FakeAnalytics fakeAnalytics;
 
     setUp(() {
-      testUsage = TestUsage();
-
-      final MemoryFileSystem fs = MemoryFileSystem.test();
       fakeAnalytics = getInitializedFakeAnalyticsInstance(
-        fs: fs,
+        fs: MemoryFileSystem.test(),
         fakeFlutterVersion: FakeFlutterVersion(),
       );
     });
@@ -69,11 +64,9 @@ void main () {
         final RemoveFrameworkLinkAndEmbeddingMigration iosProjectMigration = RemoveFrameworkLinkAndEmbeddingMigration(
           project,
           testLogger,
-          testUsage,
           fakeAnalytics,
         );
         await iosProjectMigration.migrate();
-        expect(testUsage.events, isEmpty);
         expect(fakeAnalytics.sentEvents, isEmpty);
 
         expect(xcodeProjectInfoFile.existsSync(), isFalse);
@@ -90,11 +83,9 @@ void main () {
         final RemoveFrameworkLinkAndEmbeddingMigration iosProjectMigration = RemoveFrameworkLinkAndEmbeddingMigration(
           project,
           testLogger,
-          testUsage,
           fakeAnalytics,
         );
         await iosProjectMigration.migrate();
-        expect(testUsage.events, isEmpty);
         expect(fakeAnalytics.sentEvents, isEmpty);
 
         expect(xcodeProjectInfoFile.lastModifiedSync(), projectLastModified);
@@ -112,7 +103,6 @@ shellScript = "/bin/sh \"$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.
         final RemoveFrameworkLinkAndEmbeddingMigration iosProjectMigration = RemoveFrameworkLinkAndEmbeddingMigration(
           project,
           testLogger,
-          testUsage,
           fakeAnalytics,
         );
         await iosProjectMigration.migrate();
@@ -140,11 +130,9 @@ keep this 2
         final RemoveFrameworkLinkAndEmbeddingMigration iosProjectMigration = RemoveFrameworkLinkAndEmbeddingMigration(
           project,
           testLogger,
-          testUsage,
           fakeAnalytics,
         );
         await iosProjectMigration.migrate();
-        expect(testUsage.events, isEmpty);
         expect(fakeAnalytics.sentEvents, isEmpty);
 
         expect(xcodeProjectInfoFile.readAsStringSync(), r'''
@@ -163,14 +151,11 @@ keep this 2
         final RemoveFrameworkLinkAndEmbeddingMigration iosProjectMigration = RemoveFrameworkLinkAndEmbeddingMigration(
           project,
           testLogger,
-          testUsage,
           fakeAnalytics,
         );
 
         expect(iosProjectMigration.migrate, throwsToolExit(message: 'Your Xcode project requires migration'));
-        expect(testUsage.events, contains(
-          const TestUsageEvent('ios-migration', 'remove-frameworks', label: 'failure'),
-        ));
+
         expect(fakeAnalytics.sentEvents, contains(
           Event.appleUsageEvent(
               workflow: 'ios-migration',
@@ -188,13 +173,9 @@ keep this 2
         final RemoveFrameworkLinkAndEmbeddingMigration iosProjectMigration = RemoveFrameworkLinkAndEmbeddingMigration(
           project,
           testLogger,
-          testUsage,
           fakeAnalytics,
         );
         expect(iosProjectMigration.migrate, throwsToolExit(message: 'Your Xcode project requires migration'));
-        expect(testUsage.events, contains(
-          const TestUsageEvent('ios-migration', 'remove-frameworks', label: 'failure'),
-        ));
         expect(fakeAnalytics.sentEvents, contains(
           Event.appleUsageEvent(
               workflow: 'ios-migration',
@@ -212,13 +193,10 @@ keep this 2
         final RemoveFrameworkLinkAndEmbeddingMigration iosProjectMigration = RemoveFrameworkLinkAndEmbeddingMigration(
           project,
           testLogger,
-          testUsage,
           fakeAnalytics,
         );
         expect(iosProjectMigration.migrate, throwsToolExit(message: 'Your Xcode project requires migration'));
-        expect(testUsage.events, contains(
-          const TestUsageEvent('ios-migration', 'remove-frameworks', label: 'failure'),
-        ));
+
         expect(fakeAnalytics.sentEvents, contains(
           Event.appleUsageEvent(
               workflow: 'ios-migration',

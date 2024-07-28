@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:collection';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -296,7 +299,7 @@ class _SegmentSeparatorState extends State<_SegmentSeparator> with TickerProvide
 /// See also:
 ///
 ///  * <https://developer.apple.com/design/human-interface-guidelines/ios/controls/segmented-controls/>
-class CupertinoSlidingSegmentedControl<T> extends StatefulWidget {
+class CupertinoSlidingSegmentedControl<T extends Object> extends StatefulWidget {
   /// Creates an iOS-style segmented control bar.
   ///
   /// The [children] argument must be an ordered [Map] such as a
@@ -408,7 +411,7 @@ class CupertinoSlidingSegmentedControl<T> extends StatefulWidget {
   State<CupertinoSlidingSegmentedControl<T>> createState() => _SegmentedControlState<T>();
 }
 
-class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T>>
+class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSegmentedControl<T>>
     with TickerProviderStateMixin<CupertinoSlidingSegmentedControl<T>> {
   late final AnimationController thumbController = AnimationController(duration: _kSpringAnimationDuration, value: 0, vsync: this);
   Animatable<Rect?>? thumbAnimatable;
@@ -706,7 +709,7 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
   }
 }
 
-class _SegmentedControlRenderWidget<T> extends MultiChildRenderObjectWidget {
+class _SegmentedControlRenderWidget<T extends Object> extends MultiChildRenderObjectWidget {
   const _SegmentedControlRenderWidget({
     super.key,
     super.children,
@@ -775,7 +778,7 @@ class _SegmentedControlContainerBoxParentData extends ContainerBoxParentData<Ren
 //    region (either outside of the segmented control's vicinity or to a
 //    different segment). The reverse animation has the same duration and timing
 //    function.
-class _RenderSegmentedControl<T> extends RenderBox
+class _RenderSegmentedControl<T extends Object> extends RenderBox
     with ContainerRenderObjectMixin<RenderBox, ContainerBoxParentData<RenderBox>>,
         RenderBoxContainerDefaultsMixin<RenderBox, ContainerBoxParentData<RenderBox>> {
   _RenderSegmentedControl({
