@@ -834,7 +834,7 @@ void main() {
             ..createSync(recursive: true);
       final io.File file =
           io.File(path.join(hostDebug.path, 'compile_commands.json'));
-      file.writeAsString(
+      file.writeAsStringSync(
         r'''
 [
   {
