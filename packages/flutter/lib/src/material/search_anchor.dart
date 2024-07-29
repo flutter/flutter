@@ -1035,7 +1035,7 @@ class _ViewContentState extends State<_ViewContent> {
                           child: viewDivider,
                         ),
                         Flexible(
-                          fit: widget.showFullScreenView ? FlexFit.tight : FlexFit.loose,
+                          fit: (minHeight == 0 && !widget.showFullScreenView) ? FlexFit.loose : FlexFit.tight,
                           child: FadeTransition(
                             opacity: viewListFadeOnIntervalCurve,
                             child: viewBuilder(result),
