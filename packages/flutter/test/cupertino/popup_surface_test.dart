@@ -56,7 +56,8 @@ class _FilterTest extends StatelessWidget {
 }
 
 void main() {
-  group('Color filter', () {
+    // Golden displays the color filter effect of the CupertinoPopupSurface
+    // when the ambient brightness is light.
     testWidgets('Brightness.light color filter', (WidgetTester tester) async {
       await tester.pumpWidget(
         const _FilterTest(
@@ -68,13 +69,14 @@ void main() {
         ),
       );
 
-      // Golden displays the color filter effect of the CupertinoPopupSurface
-      // when the ambient brightness is light.
       await expectLater(
         find.byType(CupertinoApp),
         matchesGoldenFile('cupertinoPopupSurface.color-filter.light.png'),
       );
     });
+
+    // Golden displays the color filter effect of the CupertinoPopupSurface
+    // when the ambient brightness is dark.
     testWidgets('Brightness.dark color filter', (WidgetTester tester) async {
       await tester.pumpWidget(
         const _FilterTest(
@@ -87,13 +89,14 @@ void main() {
         ),
       );
 
-      // Golden displays the color filter effect of the CupertinoPopupSurface
-      // when the ambient brightness is dark.
       await expectLater(
         find.byType(CupertinoApp),
         matchesGoldenFile('cupertinoPopupSurface.color-filter.dark.png'),
       );
     });
+
+    // Golden displays color tiles without CupertinoPopupSurface being
+    // displayed.
     testWidgets('Setting isVibrancePainted to false removes the color filter', (WidgetTester tester) async {
       await tester.pumpWidget(
         const _FilterTest(
@@ -116,15 +119,14 @@ void main() {
         findsNothing,
       );
 
-      // Golden should display color tiles without CupertinoPopupSurface being
-      // displayed.
       await expectLater(
         find.byType(CupertinoApp),
         matchesGoldenFile('cupertinoPopupSurface.color-filter.removed.png'),
       );
     });
-  });
-  group('Surface Color', () {
+
+    // Golden displays the surface color of the CupertinoPopupSurface
+    // in light mode.
     testWidgets('Brightness.light surface', (WidgetTester tester) async {
       await tester.pumpWidget(
         const CupertinoApp(
@@ -147,44 +149,47 @@ void main() {
         ),
       );
 
-      // Golden displays the surface color of the CupertinoPopupSurface
-      // in light mode.
       await expectLater(
         find.byType(CupertinoApp),
         matchesGoldenFile('cupertinoPopupSurface.surface-color.light.png'),
       );
     });
+
+    // Golden displays the surface color of the CupertinoPopupSurface
+    // in dark mode.
     testWidgets('Brightness.dark surface', (WidgetTester tester) async {
       await tester.pumpWidget(
         const CupertinoApp(
           home: ColoredBox(
             color: Color(0xffffffff),
             child: Padding(
-                padding: EdgeInsets.all(32),
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: <Widget>[
-                    CupertinoTheme(
-                      data: CupertinoThemeData(brightness: Brightness.dark),
-                      child: CupertinoPopupSurface(
-                        blurSigma: 0,
-                        isVibrancePainted: false,
-                        child: SizedBox(),
-                      ),
+              padding: EdgeInsets.all(32),
+              child: Stack(
+                fit: StackFit.expand,
+                children: <Widget>[
+                  CupertinoTheme(
+                    data: CupertinoThemeData(brightness: Brightness.dark),
+                    child: CupertinoPopupSurface(
+                      blurSigma: 0,
+                      isVibrancePainted: false,
+                      child: SizedBox(),
                     ),
-                  ],
-                )),
+                  ),
+                ],
+              )
+            ),
           ),
         ),
       );
 
-      // Golden displays the surface color of the CupertinoPopupSurface
-      // in dark mode.
       await expectLater(
         find.byType(CupertinoApp),
         matchesGoldenFile('cupertinoPopupSurface.surface-color.dark.png'),
       );
     });
+
+    // Golden displays a CupertinoPopupSurface with the color removed (should
+    // be empty).
     testWidgets('Setting isSurfacePainted to false removes the surface color', (WidgetTester tester) async {
       await tester.pumpWidget(const CupertinoApp(
         home: ColoredBox(
@@ -203,15 +208,14 @@ void main() {
         ),
       ));
 
-      // Golden displays a CupertinoPopupSurface with the color removed (should
-      // be empty).
       await expectLater(
         find.byType(CupertinoApp),
         matchesGoldenFile('cupertinoPopupSurface.surface-color.removed.png'),
       );
     });
-  });
-  group('Blur', () {
+
+    // Goldens display a CupertinoPopupSurface with no vibrance or surface
+    // color, with blur sigmas of 5 and 30 (default).
     testWidgets('Positive blurSigma applies blur', (WidgetTester tester) async {
       await tester.pumpWidget(
         const _FilterTest(
@@ -224,8 +228,6 @@ void main() {
         ),
       );
 
-      // Golden displays a CupertinoPopupSurface with no vibrance or surface
-      // color, and a blur sigma of 5
       await expectLater(
         find.byType(CupertinoApp),
         matchesGoldenFile('cupertinoPopupSurface.blur.5.png'),
@@ -241,14 +243,16 @@ void main() {
         ),
       );
 
-      // Golden displays a CupertinoPopupSurface with no vibrance or surface
-      // color, and a blur sigma of 30.
       await expectLater(
         find.byType(CupertinoApp),
         // 30 is the default blur sigma
         matchesGoldenFile('cupertinoPopupSurface.blur.30.png'),
       );
     });
+
+    // Golden displays a CupertinoPopupSurface with a blur sigma of 0. Because
+    // the blur sigma is 0 and vibrance and surface are not painted, no popup
+    // surface is displayed.
     testWidgets('Nonpositive blurSigma removes blur', (WidgetTester tester) async {
       await tester.pumpWidget(
         const _FilterTest(
@@ -271,9 +275,6 @@ void main() {
         findsNothing,
       );
 
-      // Golden displays a CupertinoPopupSurface with a blur sigma of 0. Because
-      // the blur sigma == 0 and vibrance and surface are not painted, no popup
-      // surface is displayed.
       await expectLater(
         find.byType(CupertinoApp),
         matchesGoldenFile('cupertinoPopupSurface.blur.0.png'),
@@ -284,39 +285,50 @@ void main() {
           CupertinoPopupSurface(
             isSurfacePainted: false,
             isVibrancePainted: false,
-            blurSigma: -100,
+            blurSigma: 0,
             child: SizedBox(),
           ),
         ),
       );
-
-      // Golden displays a CupertinoPopupSurface with a blur sigma of -100. Because
-      // the blur sigma < 0 and vibrance and surface are not painted, no popup
-      // surface is displayed.
-      expect(
-        find.descendant(
-          of: find.byType(CupertinoPopupSurface),
-          matching: find.byType(BackdropFilter),
-        ),
-        findsNothing,
-      );
-
-      await expectLater(
-        find.byType(CupertinoApp),
-        matchesGoldenFile('cupertinoPopupSurface.blur.0.png'),
-      );
-    });
   });
 
-  // Because ImageFilter.compose is used to apply multiple filters, the order
-  // of the filters matters. As such, test that the surface effects are stacked
-  // in the correct order.
-  testWidgets('Composition', (WidgetTester tester) async {
+  // Golden displays a CupertinoPopupSurface with all enabled features.
+  //
+  // CupertinoPopupSurface uses ImageFilter.compose, which applies an inner
+  // filter first, followed by an outer filter (e.g. result =
+  // outer(inner(source))).
+  //
+  // For CupertinoPopupSurface, this means that the pixels underlying the
+  // surface are first saturated with a ColorFilter, and the resulting saturated
+  // pixels are blurred with an ImageFilter.blur. This test verifies that this
+  // order does not change.
+  testWidgets('Saturation is applied before blur', (WidgetTester tester) async {
     await tester.pumpWidget(
       const _FilterTest(
         CupertinoPopupSurface(
           child: SizedBox(),
         ),
+      ),
+    );
+
+    await expectLater(
+      find.byType(CupertinoApp),
+      matchesGoldenFile('cupertinoPopupSurface.composition.png'),
+    );
+
+    await tester.pumpWidget(
+      const _FilterTest(
+        Stack(children: <Widget>[
+          CupertinoPopupSurface(
+            isSurfacePainted: false,
+            blurSigma: 0,
+            child: SizedBox(),
+          ),
+          CupertinoPopupSurface(
+            isVibrancePainted: false,
+            child: SizedBox(),
+          )
+        ]),
       ),
     );
 
