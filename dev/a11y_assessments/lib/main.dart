@@ -40,7 +40,7 @@ class App extends StatelessWidget {
           MapEntry<String, WidgetBuilder>(useCase.route, useCase.build)),
     );
     return MaterialApp(
-      title: 'Accessibility Assessments',
+      title: 'Accessibility Assessments Home Page',
       theme: lightTheme,
       darkTheme: darkTheme,
       routes: <String, WidgetBuilder>{'/': (_) => const HomePage(), ...routes},
@@ -80,7 +80,7 @@ class HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
 
     return Title(
-      color: Theme.of(context).colorScheme.inversePrimary,
+      color: Theme.of(context).colorScheme.primary,
       title: 'Accessibility Assessments Home Page',
       child: Scaffold(
         appBar: AppBar(
