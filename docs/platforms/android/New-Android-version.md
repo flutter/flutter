@@ -1,5 +1,5 @@
 Support a new Android API level Flutter
-go/flutter-Android-new-API-level
+go/flutter-android-new-api-level
 
 ## Objective
 Provide a list of areas to consider and examples of former work for how to update Flutter to support a new version of the Android API. This happens every fall and Flutter developers expect to build against the latest versions quickly after they are available.
