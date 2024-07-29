@@ -951,7 +951,7 @@ class _ViewContentState extends State<_ViewContent> {
     final EdgeInsets? effectivePadding = widget.viewPadding
       ?? viewTheme.padding
       ?? viewDefaults.padding;
-    final MaterialStateProperty<EdgeInsetsGeometry> effectiveBarPadding = widget.viewBarPadding
+    final WidgetStateProperty<EdgeInsetsGeometry?>? effectiveBarPadding = widget.viewBarPadding
       ?? viewTheme.barPadding
       ?? viewDefaults.barPadding;
 
@@ -994,7 +994,7 @@ class _ViewContentState extends State<_ViewContent> {
                             child: SearchBar(
                               autoFocus: true,
                               constraints: headerConstraints ?? (widget.showFullScreenView ? BoxConstraints(minHeight: _SearchViewDefaultsM3.fullScreenBarHeight) : null),
-                              padding: viewBarPadding,
+                              padding: effectiveBarPadding,
                               leading: widget.viewLeading ?? defaultLeading,
                               trailing: widget.viewTrailing ?? defaultTrailing,
                               hintText: widget.viewHintText,
