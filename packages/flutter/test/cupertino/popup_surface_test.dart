@@ -191,22 +191,24 @@ void main() {
     // Golden displays a CupertinoPopupSurface with the color removed (should
     // be empty).
     testWidgets('Setting isSurfacePainted to false removes the surface color', (WidgetTester tester) async {
-      await tester.pumpWidget(const CupertinoApp(
-        home: ColoredBox(
-          color: Color(0xff000000),
-          child: Stack(
-            fit: StackFit.expand,
-            children: <Widget>[
-              CupertinoPopupSurface(
-                blurSigma: 0,
-                isVibrancePainted: false,
-                isSurfacePainted: false,
-                child: SizedBox(),
-              ),
-            ],
+      await tester.pumpWidget(
+        const CupertinoApp(
+          home: ColoredBox(
+            color: Color(0xff000000),
+            child: Stack(
+              fit: StackFit.expand,
+              children: <Widget>[
+                CupertinoPopupSurface(
+                  blurSigma: 0,
+                  isVibrancePainted: false,
+                  isSurfacePainted: false,
+                  child: SizedBox(),
+                ),
+              ],
+            ),
           ),
         ),
-      ));
+      );
 
       await expectLater(
         find.byType(CupertinoApp),
