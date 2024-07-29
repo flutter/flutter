@@ -61,8 +61,6 @@ impeller_component("renderer") {
     "render_pass.h",
     "render_target.cc",
     "render_target.h",
-    "renderer.cc",
-    "renderer.h",
     "sampler_library.cc",
     "sampler_library.h",
     "shader_function.cc",

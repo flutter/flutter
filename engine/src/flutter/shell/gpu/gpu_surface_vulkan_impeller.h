@@ -12,7 +12,6 @@
 #include "flutter/impeller/aiks/aiks_context.h"
 #include "flutter/impeller/renderer/context.h"
 #include "flutter/shell/gpu/gpu_surface_vulkan_delegate.h"
-#include "impeller/renderer/renderer.h"
 
 namespace flutter {
 
@@ -28,7 +27,6 @@ class GPUSurfaceVulkanImpeller final : public Surface {
 
  private:
   std::shared_ptr<impeller::Context> impeller_context_;
-  std::shared_ptr<impeller::Renderer> impeller_renderer_;
   std::shared_ptr<impeller::AiksContext> aiks_context_;
   bool is_valid_ = false;
 

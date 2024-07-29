@@ -32,13 +32,13 @@
 #include "impeller/fixtures/texture.frag.h"
 #include "impeller/fixtures/texture.vert.h"
 #include "impeller/geometry/path_builder.h"
+#include "impeller/playground/playground.h"
 #include "impeller/playground/playground_test.h"
 #include "impeller/renderer/command_buffer.h"
 #include "impeller/renderer/pipeline_builder.h"
 #include "impeller/renderer/pipeline_library.h"
 #include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/render_target.h"
-#include "impeller/renderer/renderer.h"
 #include "impeller/renderer/vertex_buffer_builder.h"
 #include "third_party/imgui/imgui.h"
 
@@ -545,7 +545,7 @@ TEST_P(RendererTest, CanBlitTextureToTexture) {
   ASSERT_TRUE(vertex_buffer);
 
   auto host_buffer = HostBuffer::Create(context->GetResourceAllocator());
-  Renderer::RenderCallback callback = [&](RenderTarget& render_target) {
+  Playground::RenderCallback callback = [&](RenderTarget& render_target) {
     auto buffer = context->CreateCommandBuffer();
     if (!buffer) {
       return false;
@@ -665,7 +665,7 @@ TEST_P(RendererTest, CanBlitTextureToBuffer) {
   ASSERT_TRUE(vertex_buffer);
 
   auto host_buffer = HostBuffer::Create(context->GetResourceAllocator());
-  Renderer::RenderCallback callback = [&](RenderTarget& render_target) {
+  Playground::RenderCallback callback = [&](RenderTarget& render_target) {
     {
       auto buffer = context->CreateCommandBuffer();
       if (!buffer) {
@@ -782,7 +782,7 @@ TEST_P(RendererTest, CanGenerateMipmaps) {
 
   bool first_frame = true;
   auto host_buffer = HostBuffer::Create(context->GetResourceAllocator());
-  Renderer::RenderCallback callback = [&](RenderTarget& render_target) {
+  Playground::RenderCallback callback = [&](RenderTarget& render_target) {
     const char* mip_filter_names[] = {"Base", "Nearest", "Linear"};
     const MipFilter mip_filters[] = {MipFilter::kBase, MipFilter::kNearest,
                                      MipFilter::kLinear};
@@ -1231,7 +1231,7 @@ TEST_P(RendererTest, StencilMask) {
       CompareFunctionUI().IndexOf(CompareFunction::kLessEqual);
 
   auto host_buffer = HostBuffer::Create(context->GetResourceAllocator());
-  Renderer::RenderCallback callback = [&](RenderTarget& render_target) {
+  Playground::RenderCallback callback = [&](RenderTarget& render_target) {
     auto buffer = context->CreateCommandBuffer();
     if (!buffer) {
       return false;

@@ -12,6 +12,7 @@
 #include "impeller/playground/image/backends/skia/compressed_image_skia.h"
 #include "impeller/playground/image/decompressed_image.h"
 #include "impeller/renderer/command_buffer.h"
+#include "impeller/renderer/render_target.h"
 #include "impeller/runtime_stage/runtime_stage.h"
 
 #define GLFW_INCLUDE_NONE
@@ -28,7 +29,6 @@
 #include "impeller/playground/playground_impl.h"
 #include "impeller/renderer/context.h"
 #include "impeller/renderer/render_pass.h"
-#include "impeller/renderer/renderer.h"
 #include "third_party/imgui/backends/imgui_impl_glfw.h"
 #include "third_party/imgui/imgui.h"
 
@@ -140,12 +140,6 @@ void Playground::SetupWindow() {
                         "SetupContext first).";
     return;
   }
-  auto renderer = std::make_unique<Renderer>(context_);
-  if (!renderer->IsValid()) {
-    return;
-  }
-  renderer_ = std::move(renderer);
-
   start_time_ = fml::TimePoint::Now().ToEpochDelta();
 }
 
@@ -158,7 +152,6 @@ void Playground::TeardownWindow() {
     context_->Shutdown();
   }
   context_.reset();
-  renderer_.reset();
   impl_.reset();
 }
 
@@ -202,17 +195,13 @@ void Playground::SetCursorPosition(Point pos) {
 }
 
 bool Playground::OpenPlaygroundHere(
-    const Renderer::RenderCallback& render_callback) {
+    const Playground::RenderCallback& render_callback) {
   if (!switches_.enable_playground) {
     return true;
   }
 
   if (!render_callback) {
     return true;
-  }
-
-  if (!renderer_ || !renderer_->IsValid()) {
-    return false;
   }
 
   IMGUI_CHECKVERSION();
@@ -251,7 +240,7 @@ bool Playground::OpenPlaygroundHere(
   ImGui_ImplGlfw_InitForOther(window, true);
   fml::ScopedCleanupClosure shutdown_imgui([]() { ImGui_ImplGlfw_Shutdown(); });
 
-  ImGui_ImplImpeller_Init(renderer_->GetContext());
+  ImGui_ImplImpeller_Init(context_);
   fml::ScopedCleanupClosure shutdown_imgui_impeller(
       []() { ImGui_ImplImpeller_Shutdown(); });
 
@@ -273,59 +262,58 @@ bool Playground::OpenPlaygroundHere(
 
     ImGui_ImplGlfw_NewFrame();
 
-    Renderer::RenderCallback wrapped_callback =
-        [render_callback,
-         &renderer = renderer_](RenderTarget& render_target) -> bool {
-      ImGui::NewFrame();
-      ImGui::DockSpaceOverViewport(ImGui::GetMainViewport(),
-                                   ImGuiDockNodeFlags_PassthruCentralNode);
-      bool result = render_callback(render_target);
-      ImGui::Render();
+    auto surface = impl_->AcquireSurfaceFrame(context_);
+    RenderTarget render_target = surface->GetTargetRenderPassDescriptor();
 
-      // Render ImGui overlay.
-      {
-        auto buffer = renderer->GetContext()->CreateCommandBuffer();
-        if (!buffer) {
-          return false;
-        }
-        buffer->SetLabel("ImGui Command Buffer");
+    ImGui::NewFrame();
+    ImGui::DockSpaceOverViewport(ImGui::GetMainViewport(),
+                                 ImGuiDockNodeFlags_PassthruCentralNode);
+    bool result = render_callback(render_target);
+    ImGui::Render();
 
-        if (render_target.GetColorAttachments().empty()) {
-          return false;
-        }
+    // Render ImGui overlay.
+    {
+      auto buffer = context_->CreateCommandBuffer();
+      if (!buffer) {
+        VALIDATION_LOG << "Could not create command buffer.";
+        return false;
+      }
+      buffer->SetLabel("ImGui Command Buffer");
 
-        auto color0 = render_target.GetColorAttachments().find(0)->second;
-        color0.load_action = LoadAction::kLoad;
-        if (color0.resolve_texture) {
-          color0.texture = color0.resolve_texture;
-          color0.resolve_texture = nullptr;
-          color0.store_action = StoreAction::kStore;
-        }
-        render_target.SetColorAttachment(color0, 0);
-
-        render_target.SetStencilAttachment(std::nullopt);
-        render_target.SetDepthAttachment(std::nullopt);
-
-        auto pass = buffer->CreateRenderPass(render_target);
-        if (!pass) {
-          return false;
-        }
-        pass->SetLabel("ImGui Render Pass");
-
-        ImGui_ImplImpeller_RenderDrawData(ImGui::GetDrawData(), *pass);
-
-        pass->EncodeCommands();
-        if (!renderer->GetContext()->GetCommandQueue()->Submit({buffer}).ok()) {
-          return false;
-        }
+      if (render_target.GetColorAttachments().empty()) {
+        VALIDATION_LOG << "render target attachments are empty.";
+        return false;
       }
 
-      return result;
-    };
+      auto color0 = render_target.GetColorAttachments().find(0)->second;
+      color0.load_action = LoadAction::kLoad;
+      if (color0.resolve_texture) {
+        color0.texture = color0.resolve_texture;
+        color0.resolve_texture = nullptr;
+        color0.store_action = StoreAction::kStore;
+      }
+      render_target.SetColorAttachment(color0, 0);
 
-    if (!renderer_->Render(impl_->AcquireSurfaceFrame(renderer_->GetContext()),
-                           wrapped_callback)) {
-      VALIDATION_LOG << "Could not render into the surface.";
+      render_target.SetStencilAttachment(std::nullopt);
+      render_target.SetDepthAttachment(std::nullopt);
+
+      auto pass = buffer->CreateRenderPass(render_target);
+      if (!pass) {
+        VALIDATION_LOG << "Could not create render pass.";
+        return false;
+      }
+      pass->SetLabel("ImGui Render Pass");
+
+      ImGui_ImplImpeller_RenderDrawData(ImGui::GetDrawData(), *pass);
+
+      pass->EncodeCommands();
+
+      if (!context_->GetCommandQueue()->Submit({buffer}).ok()) {
+        return false;
+      }
+    }
+
+    if (!result || !surface->Present()) {
       return false;
     }
 
@@ -454,9 +442,8 @@ std::shared_ptr<Texture> Playground::CreateTextureForMapping(
 std::shared_ptr<Texture> Playground::CreateTextureForFixture(
     const char* fixture_name,
     bool enable_mipmapping) const {
-  auto texture = CreateTextureForMapping(renderer_->GetContext(),
-                                         OpenAssetAsMapping(fixture_name),
-                                         enable_mipmapping);
+  auto texture = CreateTextureForMapping(
+      context_, OpenAssetAsMapping(fixture_name), enable_mipmapping);
   if (texture == nullptr) {
     return nullptr;
   }
@@ -483,30 +470,25 @@ std::shared_ptr<Texture> Playground::CreateTextureCubeForFixture(
   texture_descriptor.size = images[0].GetSize();
   texture_descriptor.mip_count = 1u;
 
-  auto texture = renderer_->GetContext()->GetResourceAllocator()->CreateTexture(
-      texture_descriptor);
+  auto texture =
+      context_->GetResourceAllocator()->CreateTexture(texture_descriptor);
   if (!texture) {
     VALIDATION_LOG << "Could not allocate texture cube.";
     return nullptr;
   }
   texture->SetLabel("Texture cube");
 
-  auto cmd_buffer = renderer_->GetContext()->CreateCommandBuffer();
+  auto cmd_buffer = context_->CreateCommandBuffer();
   auto blit_pass = cmd_buffer->CreateBlitPass();
   for (size_t i = 0; i < fixture_names.size(); i++) {
-    auto device_buffer =
-        renderer_->GetContext()->GetResourceAllocator()->CreateBufferWithCopy(
-            *images[i].GetAllocation());
+    auto device_buffer = context_->GetResourceAllocator()->CreateBufferWithCopy(
+        *images[i].GetAllocation());
     blit_pass->AddCopy(DeviceBuffer::AsBufferView(device_buffer), texture, {},
                        "", /*slice=*/i);
   }
 
-  if (!blit_pass->EncodeCommands(
-          renderer_->GetContext()->GetResourceAllocator()) ||
-      !renderer_->GetContext()
-           ->GetCommandQueue()
-           ->Submit({std::move(cmd_buffer)})
-           .ok()) {
+  if (!blit_pass->EncodeCommands(context_->GetResourceAllocator()) ||
+      !context_->GetCommandQueue()->Submit({std::move(cmd_buffer)}).ok()) {
     VALIDATION_LOG << "Could not upload texture to device memory.";
     return nullptr;
   }

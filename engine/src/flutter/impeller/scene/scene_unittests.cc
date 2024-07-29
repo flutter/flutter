@@ -37,7 +37,7 @@ INSTANTIATE_PLAYGROUND_SUITE(SceneTest);
 TEST_P(SceneTest, CuboidUnlit) {
   auto scene_context = std::make_shared<SceneContext>(GetContext());
 
-  Renderer::RenderCallback callback = [&](RenderTarget& render_target) {
+  Playground::RenderCallback callback = [&](RenderTarget& render_target) {
     auto allocator = GetContext()->GetResourceAllocator();
     auto scene = Scene(scene_context);
 
@@ -91,7 +91,7 @@ TEST_P(SceneTest, FlutterLogo) {
   scene.GetRoot().AddChild(std::move(gltf_scene));
   scene.GetRoot().SetLocalTransform(Matrix::MakeScale({3, 3, 3}));
 
-  Renderer::RenderCallback callback = [&](RenderTarget& render_target) {
+  Playground::RenderCallback callback = [&](RenderTarget& render_target) {
     Quaternion rotation({0, 1, 0}, -GetSecondsElapsed() * 0.5);
     Vector3 start_position(-1, -1.5, -5);
 
@@ -136,7 +136,7 @@ TEST_P(SceneTest, TwoTriangles) {
   auto scene = Scene(scene_context);
   scene.GetRoot().AddChild(std::move(gltf_scene));
 
-  Renderer::RenderCallback callback = [&](RenderTarget& render_target) {
+  Playground::RenderCallback callback = [&](RenderTarget& render_target) {
     ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
     {
       static Scalar playback_time_scale = 1;
@@ -232,7 +232,7 @@ TEST_P(SceneTest, Dash) {
   auto scene = Scene(scene_context);
   scene.GetRoot().AddChild(std::move(gltf_scene));
 
-  Renderer::RenderCallback callback = [&](RenderTarget& render_target) {
+  Playground::RenderCallback callback = [&](RenderTarget& render_target) {
     ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
     {
       static Scalar playback_time_scale = 1;
